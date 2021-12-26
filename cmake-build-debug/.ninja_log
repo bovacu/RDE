@@ -44,3 +44,11 @@
 3	1410	1640520083135397908	CMakeFiles/Engine2_0.dir/core/render/Renderer.cpp.o	1ed0aa3c31adca12
 2	1475	1640520083199398307	CMakeFiles/Engine2_0.dir/core/Engine.cpp.o	a97defcfd370c5b8
 1475	1653	1640520083379399429	Engine2_0	6ccb45f2a8ae9e41
+3	565	1640522155120538997	CMakeFiles/Engine2_0.dir/core/render/elements/Texture.cpp.o	ceaaa04abb527866
+4	673	1640522155228540373	CMakeFiles/Engine2_0.dir/core/render/Renderer.cpp.o	1ed0aa3c31adca12
+2	691	1640522155244540577	CMakeFiles/Engine2_0.dir/main.cpp.o	9a5805da9ae0990c
+3	750	1640522155304541341	CMakeFiles/Engine2_0.dir/core/render/elements/SpriteBatch.cpp.o	e1f1104dccffb124
+2	783	1640522155336541749	CMakeFiles/Engine2_0.dir/core/Engine.cpp.o	a97defcfd370c5b8
+2	798	1640522155348541902	CMakeFiles/Engine2_0.dir/core/render/window/Window.cpp.o	2577110463fe0656
+3	962	1640522155512543992	CMakeFiles/Engine2_0.dir/core/render/window/input/Input.cpp.o	5411309c6149eb56
+962	1080	1640522155632545521	Engine2_0	6ccb45f2a8ae9e41
