@@ -2,19 +2,21 @@
 
 #include <iostream>
 #include <GL/glew.h>
+#include "core/util/Util.h"
 
 namespace engine {
-    class Texture
-    {
+    class Texture {
         private:
-        GLuint texture;
-        unsigned int m_refCount = 0;
+            GLuint texture{};
+            unsigned int refCount = 0;
+            int width, height;
 
         public:
-        explicit Texture(char* filePath);
-        ~Texture();
-        void IncRefCount();
-        void DecRefCount();
-        GLuint GetGLTexture() const;
+            explicit Texture(char* filePath);
+            ~Texture();
+            void incRefCount();
+            void decRefCount();
+            [[nodiscard]] GLuint getGLTexture() const;
+            Vec2I getSize() const;
     };
 }

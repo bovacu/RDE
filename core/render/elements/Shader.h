@@ -6,15 +6,15 @@ namespace engine {
     class Shader {
 
         private:
-        GLuint m_shader;
-        GLenum m_type;
+            GLuint shader;
+            GLenum type;
 
         public:
-        Shader();
-        ~Shader();
+            Shader();
+            ~Shader();
 
-        bool InitFromFile(std::string filePath, GLenum shaderType);
-        bool InitFromString(std::string shaderCode, GLenum shaderType);
-        void AttachTo(GLuint program);
+            bool initFromFile(const std::string& _filePath, GLenum _shaderType);
+            bool initFromString(const std::string& _shaderCode, GLenum _shaderType);
+            void attachTo(GLuint _program) const;
     };
 }

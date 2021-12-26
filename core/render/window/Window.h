@@ -5,7 +5,7 @@
 
 #include "core/util/Util.h"
 #include "core/render/window/event/Event.h"
-#include "core/render/elements/GraphicsContext.h"
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 namespace engine {
@@ -44,12 +44,12 @@ namespace engine {
         private:
             GLFWwindow* window;
             GLFWmonitor* monitor;
-            GraphicsContextPtr context;
 
             struct WindowData {
                 std::string title;
                 int width, height;
                 bool vSync;
+                bool fullscreen;
                 Vec2I position;
 
                 EventCallbackFn eventCallback;
@@ -67,11 +67,11 @@ namespace engine {
 
             /// Returns the width of the window.
             /// @return width of the window.
-            int getWidth() const;
+            [[nodiscard]] int getWidth() const;
 
             /// Returns the height of the window.
             /// @return height of the window.
-            int getHeight() const;
+            [[nodiscard]] int getHeight() const;
 
             /// Returns the title of the window.
             /// @return the title of the window as a string.
@@ -88,7 +88,7 @@ namespace engine {
 
             /// Returns the size of the window.
             /// @return Vec2i with the [width,height] of the window.
-            Vec2F getWindowSize() const;
+            [[nodiscard]] Vec2I getWindowSize() const;
 
             /// Enables or disables fullscreen mode.
             /// @param _fullscreen true or false to enable/disable.
@@ -96,7 +96,7 @@ namespace engine {
 
             /// Returns if screen is fullscreen or not.
             /// @return true if is fullscreen, false otherwise.
-            bool isFullscreen() const;
+            [[nodiscard]] bool isFullscreen() const;
 
             /// Sets the method that will be executed when a polled event triggers.
             /// @param _callback a void method with an Event& as parameter.
@@ -108,15 +108,15 @@ namespace engine {
 
             /// Returns if the VSync is enabled.
             /// @return true if is enabled, otherwise false.
-            bool isVSyncActive() const;
+            [[nodiscard]] bool isVSyncActive() const;
 
             /// Returns a raw pointer to one of the Window subclasses.
             /// @return raw pointer to WindowsWindow, LinuxWindow or MacWindow.
-            GLFWwindow* getNativeWindow() const;
+            [[nodiscard]] GLFWwindow* getNativeWindow() const;
 
             /// Returns the position of the window.
             /// @return Vec2i with the [x,y] of the window.
-            Vec2I getPosition() const;
+            [[nodiscard]] Vec2I getPosition() const;
 
             /// Sets the new position of the window.
             /// @param _position Vec2i with the new [x,y].
@@ -134,8 +134,8 @@ namespace engine {
             static std::unique_ptr<Window> createWindow(const WindowProperties& _windowProperties = WindowProperties());
 
         private:
-            virtual void init(const WindowProperties& _props);
-            virtual void shutdown();
+            void init(const WindowProperties& _props);
+            void shutdown();
 
             /// Method to transform from engine data to GLFW data. Will be only used if using GLFW.
             long windowOptionsToGLFW(WindowOptions _options, bool _allow);

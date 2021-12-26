@@ -2,59 +2,50 @@
 #include <vector>
 #include "glm/gtc/matrix_transform.hpp"
 #include "Shader.h"
-#include "texture.h"
+#include "Texture.h"
 
 namespace engine {
-    struct Vertex2dUVColor
-    {
+    struct Vertex2dUVColor {
 
-        glm::vec2 m_position;
-        glm::vec2 m_texCoord;
-        glm::vec4 m_color;
+        glm::vec2 position;
+        glm::vec2 texCoord;
+        glm::vec4 color;
 
-        // Makes a 2d vertex with uc and color data.
-        Vertex2dUVColor(glm::vec2 position, glm::vec2 texCoord, glm::vec4 color)
-        {
-            m_position = position;
-            m_texCoord = texCoord;
-            m_color = color;
-        }
+        Vertex2dUVColor(const glm::vec2& _position, const glm::vec2& _texCoord, const glm::vec4& _color) : position(_position),
+                        texCoord(_texCoord), color(_color) {  }
     };
 
 
-
-    class SpriteBatcher
-    {
+    class SpriteBatch {
 
         public:
-        SpriteBatcher(glm::vec2 screenSize);
-        ~SpriteBatcher();
+            SpriteBatch() = default;
+            ~SpriteBatch();
 
-        void Draw(glm::vec4 destRect, glm::vec4 sourceRect, glm::vec4 color, Texture* engineTexture);
-        void Flush();
+            void init();
+            void draw(const glm::vec4& _destRect, const glm::vec4& _sourceRect, const glm::vec4& _color, Texture* _texture);
+            void flush();
 
-        // Call this to tell the spritebatcher how many pixels wide/tall the window is. Setting to 1 will make the entire screen render 1 pixel
-        void SetScreenSize(glm::vec2 screenSize);
+            // Call this to tell the spritebatcher how many pixels wide/tall the window is. Setting to 1 will make the entire screen render 1 pixel
+            void setScreenSize(const glm::vec2& _screenSize);
 
         private:
+            std::vector<Vertex2dUVColor> vertexBuffer;
+            GLuint vbo;
 
-        // Collection of vertices
-        std::vector<Vertex2dUVColor> m_vertexBuffer;
-        GLuint m_vbo;
+            // Shaders.
+            Shader vertexShader;
+            Shader fragmentShader;
 
-        // Shaders.
-        Shader m_vertexShader;
-        Shader m_fragmentShader;
+            // GL index for the shader program
+            GLuint shaderProgram;
 
-        // GL index for the shader program
-        GLuint m_shaderProgram;
+            // Texture and uniform location
+            Texture* texture;
+            GLint textureUniform;
 
-        // Texture and uniform location
-        Texture* texture;
-        GLint m_textureUniform;
-
-        // stuff to send word matrices
-        glm::mat3 m_screenTransform;
-        GLint m_screenTransformUniform;
+            // stuff to send word matrices
+            glm::mat3 screenTransform;
+            GLint screenTransformUniform;
     };
 }

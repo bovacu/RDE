@@ -10,10 +10,10 @@ namespace engine {
     static uint8_t GLFWWindowCount = 0;
 
     static void GLFWErrorCallback(int _error, const char* _description) {
-//        LOG_ERROR_CORE("GLFW Error ({0}): {1}", _error, _description);
+        LOG_E("GLFW Error (", _error,"): ", _description);
     }
 
-    Window::Window(const WindowProperties& _props) : window(nullptr) {
+    Window::Window(const WindowProperties& _props) : window(nullptr), monitor(nullptr) {
         this->init(_props);
     }
 
@@ -22,7 +22,6 @@ namespace engine {
     }
 
     void Window::init(const WindowProperties& _props) {
-
         this->data.title = _props.title;
         this->data.width = (int)_props.width;
         this->data.height = (int)_props.height;
@@ -41,6 +40,8 @@ namespace engine {
             glfwSetErrorCallback(GLFWErrorCallback);
         }
 
+        LOG_I("GLEW and GLFW initiated correctly");
+
 #if defined(ENGINE_DEBUG)
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
@@ -48,14 +49,21 @@ namespace engine {
         /// Creating the main window.
         this->window = glfwCreateWindow((int)_props.width, (int)_props.height, this->data.title.c_str(), nullptr, nullptr);
         ++GLFWWindowCount;
+        glfwMakeContextCurrent(window);
 
         /// Initializing the graphics context to be able to draw.
-        this->context = GraphicsContext::create(this->window);
-        this->context->init();
+//        this->context = GraphicsContext::create(this->window);
+//        this->context->init();
 
         /// Setting the basic data of the window to the UserPointer.
         glfwSetWindowUserPointer(this->window, &this->data);
-        this->setVSync(false);
+        this->setVSync(true);
+
+        auto _glewInit = glewInit();
+        if(_glewInit < 0) {
+            LOG_E("Error initing glew")
+            return;
+        }
 
 #pragma endregion Initializing
 
@@ -182,6 +190,7 @@ namespace engine {
 
 #pragma endregion GLFWCallbacksSetup
 
+        LOG_I("Finished setting up the window")
     }
 
     void Window::setWindowSize(int _width, int _height) {
@@ -200,8 +209,8 @@ namespace engine {
     }
 
     void Window::update() {
+        glfwSwapBuffers(window);
         glfwPollEvents();
-        this->context->swapBuffers();
     }
 
     void Window::setVSync(bool _enabled) {
@@ -218,6 +227,7 @@ namespace engine {
     }
 
     void Window::setFullscreen(bool _fullscreen) {
+        data.fullscreen = _fullscreen;
         if ( _fullscreen ) {
             // backup window position and window size
             int _x, _y;
@@ -241,8 +251,7 @@ namespace engine {
     }
 
     bool Window::isFullscreen() const {
-//        LOG_CRITICAL_CORE("isFullscreen from WindowsWindow not implemented yet");
-        return false;
+        return data.fullscreen;
     }
 
     void Window::setIcon(const char* _path) {
@@ -333,8 +342,8 @@ namespace engine {
         data.eventCallback = _callback;
     }
 
-    Vec2F Window::getWindowSize() const {
-        return  Vec2F((float)this->getWidth(), (float)this->getHeight());;
+    Vec2I Window::getWindowSize() const {
+        return  {this->getWidth(), this->getHeight()};
     }
 
     void Window::setTitle(const std::string& _title) {

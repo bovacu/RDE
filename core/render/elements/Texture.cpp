@@ -1,7 +1,9 @@
-#include "texture.h"
+#include "Texture.h"
 #include "stb_image.h"
+#include "core/util/Logger.h"
 
 namespace engine {
+
     Texture::Texture(char* _path) {
         int _width, _height, _channels;
         // Load the file.
@@ -10,6 +12,9 @@ namespace engine {
 
         /// Then we load the image pixels.
         _data = stbi_load(_path, &_width, &_height, &_channels, 0);
+
+        width = _width;
+        height = _height;
 
         /// We set the basic information.
 
@@ -21,7 +26,7 @@ namespace engine {
             _internalFormat = GL_RGB8;
             _dataFormat = GL_RGB;
         } else {
-
+            LOG_E("Not supported format image")
         }
 
         GLenum internalFormat = _internalFormat;
@@ -52,20 +57,22 @@ namespace engine {
         glDeleteTextures(1, &texture);
     }
 
-    void Texture::IncRefCount() {
-        m_refCount++;
+    void Texture::incRefCount() {
+        refCount++;
     }
 
-    void Texture::DecRefCount() {
-        m_refCount--;
-        if (m_refCount == 0)
-        {
+    void Texture::decRefCount() {
+        refCount--;
+        if (refCount == 0)
             delete this;
-        }
     }
 
-    GLuint Texture::GetGLTexture() const {
+    GLuint Texture::getGLTexture() const {
         return texture;
+    }
+
+    Vec2I Texture::getSize() const {
+        return {width, height};
     }
 }
 

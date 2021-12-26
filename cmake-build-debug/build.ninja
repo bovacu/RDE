@@ -52,300 +52,6 @@ build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
 
 build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 
-# =============================================================================
-# Object build statements for STATIC_LIBRARY target glad
-
-
-#############################################
-# Order-only phony target for glad
-
-build cmake_object_order_depends_target_glad: phony || CMakeFiles/glad.dir
-
-build CMakeFiles/glad.dir/external/glad/src/glad.c.o: C_COMPILER__glad_Debug /home/borja/Documents/C++/Engine2.0/external/glad/src/glad.c || cmake_object_order_depends_target_glad
-  DEP_FILE = CMakeFiles/glad.dir/external/glad/src/glad.c.o.d
-  FLAGS = -g
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include
-  OBJECT_DIR = CMakeFiles/glad.dir
-  OBJECT_FILE_DIR = CMakeFiles/glad.dir/external/glad/src
-
-
-# =============================================================================
-# Link build statements for STATIC_LIBRARY target glad
-
-
-#############################################
-# Link the static library libglad.a
-
-build libglad.a: C_STATIC_LIBRARY_LINKER__glad_Debug CMakeFiles/glad.dir/external/glad/src/glad.c.o
-  LANGUAGE_COMPILE_FLAGS = -g
-  OBJECT_DIR = CMakeFiles/glad.dir
-  POST_BUILD = :
-  PRE_LINK = :
-  TARGET_FILE = libglad.a
-  TARGET_PDB = glad.a.dbg
-
-# =============================================================================
-# Object build statements for STATIC_LIBRARY target ImGui
-
-
-#############################################
-# Order-only phony target for ImGui
-
-build cmake_object_order_depends_target_ImGui: phony || CMakeFiles/ImGui.dir
-
-build CMakeFiles/ImGui.dir/external/imgui/imgui.cpp.o: CXX_COMPILER__ImGui_Debug /home/borja/Documents/C++/Engine2.0/external/imgui/imgui.cpp || cmake_object_order_depends_target_ImGui
-  DEP_FILE = CMakeFiles/ImGui.dir/external/imgui/imgui.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/imgui -I/home/borja/Documents/C++/Engine2.0/external/stb
-  OBJECT_DIR = CMakeFiles/ImGui.dir
-  OBJECT_FILE_DIR = CMakeFiles/ImGui.dir/external/imgui
-
-build CMakeFiles/ImGui.dir/external/imgui/imgui_demo.cpp.o: CXX_COMPILER__ImGui_Debug /home/borja/Documents/C++/Engine2.0/external/imgui/imgui_demo.cpp || cmake_object_order_depends_target_ImGui
-  DEP_FILE = CMakeFiles/ImGui.dir/external/imgui/imgui_demo.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/imgui -I/home/borja/Documents/C++/Engine2.0/external/stb
-  OBJECT_DIR = CMakeFiles/ImGui.dir
-  OBJECT_FILE_DIR = CMakeFiles/ImGui.dir/external/imgui
-
-build CMakeFiles/ImGui.dir/external/imgui/imgui_draw.cpp.o: CXX_COMPILER__ImGui_Debug /home/borja/Documents/C++/Engine2.0/external/imgui/imgui_draw.cpp || cmake_object_order_depends_target_ImGui
-  DEP_FILE = CMakeFiles/ImGui.dir/external/imgui/imgui_draw.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/imgui -I/home/borja/Documents/C++/Engine2.0/external/stb
-  OBJECT_DIR = CMakeFiles/ImGui.dir
-  OBJECT_FILE_DIR = CMakeFiles/ImGui.dir/external/imgui
-
-build CMakeFiles/ImGui.dir/external/imgui/imgui_tables.cpp.o: CXX_COMPILER__ImGui_Debug /home/borja/Documents/C++/Engine2.0/external/imgui/imgui_tables.cpp || cmake_object_order_depends_target_ImGui
-  DEP_FILE = CMakeFiles/ImGui.dir/external/imgui/imgui_tables.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/imgui -I/home/borja/Documents/C++/Engine2.0/external/stb
-  OBJECT_DIR = CMakeFiles/ImGui.dir
-  OBJECT_FILE_DIR = CMakeFiles/ImGui.dir/external/imgui
-
-build CMakeFiles/ImGui.dir/external/imgui/imgui_widgets.cpp.o: CXX_COMPILER__ImGui_Debug /home/borja/Documents/C++/Engine2.0/external/imgui/imgui_widgets.cpp || cmake_object_order_depends_target_ImGui
-  DEP_FILE = CMakeFiles/ImGui.dir/external/imgui/imgui_widgets.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/imgui -I/home/borja/Documents/C++/Engine2.0/external/stb
-  OBJECT_DIR = CMakeFiles/ImGui.dir
-  OBJECT_FILE_DIR = CMakeFiles/ImGui.dir/external/imgui
-
-
-# =============================================================================
-# Link build statements for STATIC_LIBRARY target ImGui
-
-
-#############################################
-# Link the static library libImGui.a
-
-build libImGui.a: CXX_STATIC_LIBRARY_LINKER__ImGui_Debug CMakeFiles/ImGui.dir/external/imgui/imgui.cpp.o CMakeFiles/ImGui.dir/external/imgui/imgui_demo.cpp.o CMakeFiles/ImGui.dir/external/imgui/imgui_draw.cpp.o CMakeFiles/ImGui.dir/external/imgui/imgui_tables.cpp.o CMakeFiles/ImGui.dir/external/imgui/imgui_widgets.cpp.o
-  LANGUAGE_COMPILE_FLAGS = -g
-  OBJECT_DIR = CMakeFiles/ImGui.dir
-  POST_BUILD = :
-  PRE_LINK = :
-  TARGET_FILE = libImGui.a
-  TARGET_PDB = ImGui.a.dbg
-
-# =============================================================================
-# Object build statements for EXECUTABLE target Engine2_0
-
-
-#############################################
-# Order-only phony target for Engine2_0
-
-build cmake_object_order_depends_target_Engine2_0: phony || cmake_object_order_depends_target_ImGui cmake_object_order_depends_target_glad
-
-build CMakeFiles/Engine2_0.dir/main.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/main.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/main.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir
-
-build CMakeFiles/Engine2_0.dir/core/render/elements/Texture.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/elements/Texture.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/elements/Texture.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/elements
-
-build CMakeFiles/Engine2_0.dir/core/render/elements/VertexArray.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/elements/VertexArray.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/elements/VertexArray.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/elements
-
-build CMakeFiles/Engine2_0.dir/core/render/elements/TextureRegion.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/elements/TextureRegion.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/elements/TextureRegion.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/elements
-
-build CMakeFiles/Engine2_0.dir/core/render/elements/Shader.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/elements/Shader.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/elements/Shader.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/elements
-
-build CMakeFiles/Engine2_0.dir/core/render/elements/GraphicsContext.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/elements/GraphicsContext.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/elements/GraphicsContext.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/elements
-
-build CMakeFiles/Engine2_0.dir/core/render/elements/FrameBuffer.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/elements/FrameBuffer.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/elements/FrameBuffer.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/elements
-
-build CMakeFiles/Engine2_0.dir/core/render/elements/Buffer.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/elements/Buffer.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/elements/Buffer.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/elements
-
-build CMakeFiles/Engine2_0.dir/core/util/Color.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/util/Color.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/util/Color.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/util
-
-build CMakeFiles/Engine2_0.dir/core/util/Clock.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/util/Clock.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/util/Clock.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/util
-
-build CMakeFiles/Engine2_0.dir/core/render/window/Window.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/window/Window.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/window/Window.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/window
-
-build CMakeFiles/Engine2_0.dir/core/render/layer/LayerStack.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/layer/LayerStack.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/layer/LayerStack.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/layer
-
-build CMakeFiles/Engine2_0.dir/core/render/layer/ImGuiLayer.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/layer/ImGuiLayer.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/layer/ImGuiLayer.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/layer
-
-build CMakeFiles/Engine2_0.dir/core/render/window/input/Input.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/window/input/Input.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/window/input/Input.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/window/input
-
-build CMakeFiles/Engine2_0.dir/core/render/camera/OrthographicCamera.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/camera/OrthographicCamera.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/camera/OrthographicCamera.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/camera
-
-build CMakeFiles/Engine2_0.dir/core/render/shapes/Shape.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/shapes/Shape.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/shapes/Shape.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/shapes
-
-build CMakeFiles/Engine2_0.dir/core/Engine.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/Engine.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/Engine.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core
-
-build CMakeFiles/Engine2_0.dir/external/stb/stb_image.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/external/stb/stb_image.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/external/stb/stb_image.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/external/stb
-
-build CMakeFiles/Engine2_0.dir/external/imgui/imgui.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/external/imgui/imgui.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/external/imgui/imgui.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/external/imgui
-
-build CMakeFiles/Engine2_0.dir/external/imgui/imgui_tables.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/external/imgui/imgui_tables.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/external/imgui/imgui_tables.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/external/imgui
-
-build CMakeFiles/Engine2_0.dir/external/imgui/imgui_draw.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/external/imgui/imgui_draw.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/external/imgui/imgui_draw.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/external/imgui
-
-build CMakeFiles/Engine2_0.dir/external/imgui/backends/imgui_impl_glfw.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/external/imgui/backends/imgui_impl_glfw.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/external/imgui/backends/imgui_impl_glfw.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/external/imgui/backends
-
-build CMakeFiles/Engine2_0.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/external/imgui/backends/imgui_impl_opengl3.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/external/imgui/backends
-
-build CMakeFiles/Engine2_0.dir/core/render/Renderer.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/Renderer.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/Renderer.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render
-
-build CMakeFiles/Engine2_0.dir/core/render/camera/SceneCamera.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/camera/SceneCamera.cpp || cmake_object_order_depends_target_Engine2_0
-  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/camera/SceneCamera.cpp.o.d
-  FLAGS = -g -std=gnu++17
-  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb -I/home/borja/Documents/C++/Engine2.0/external/glad/include -I/home/borja/Documents/C++/Engine2.0/external/imgui
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/camera
-
-
-# =============================================================================
-# Link build statements for EXECUTABLE target Engine2_0
-
-
-#############################################
-# Link the executable Engine2_0
-
-build Engine2_0: CXX_EXECUTABLE_LINKER__Engine2_0_Debug CMakeFiles/Engine2_0.dir/main.cpp.o CMakeFiles/Engine2_0.dir/core/render/elements/Texture.cpp.o CMakeFiles/Engine2_0.dir/core/render/elements/VertexArray.cpp.o CMakeFiles/Engine2_0.dir/core/render/elements/TextureRegion.cpp.o CMakeFiles/Engine2_0.dir/core/render/elements/Shader.cpp.o CMakeFiles/Engine2_0.dir/core/render/elements/GraphicsContext.cpp.o CMakeFiles/Engine2_0.dir/core/render/elements/FrameBuffer.cpp.o CMakeFiles/Engine2_0.dir/core/render/elements/Buffer.cpp.o CMakeFiles/Engine2_0.dir/core/util/Color.cpp.o CMakeFiles/Engine2_0.dir/core/util/Clock.cpp.o CMakeFiles/Engine2_0.dir/core/render/window/Window.cpp.o CMakeFiles/Engine2_0.dir/core/render/layer/LayerStack.cpp.o CMakeFiles/Engine2_0.dir/core/render/layer/ImGuiLayer.cpp.o CMakeFiles/Engine2_0.dir/core/render/window/input/Input.cpp.o CMakeFiles/Engine2_0.dir/core/render/camera/OrthographicCamera.cpp.o CMakeFiles/Engine2_0.dir/core/render/shapes/Shape.cpp.o CMakeFiles/Engine2_0.dir/core/Engine.cpp.o CMakeFiles/Engine2_0.dir/external/stb/stb_image.cpp.o CMakeFiles/Engine2_0.dir/external/imgui/imgui.cpp.o CMakeFiles/Engine2_0.dir/external/imgui/imgui_tables.cpp.o CMakeFiles/Engine2_0.dir/external/imgui/imgui_draw.cpp.o CMakeFiles/Engine2_0.dir/external/imgui/backends/imgui_impl_glfw.cpp.o CMakeFiles/Engine2_0.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o CMakeFiles/Engine2_0.dir/core/render/Renderer.cpp.o CMakeFiles/Engine2_0.dir/core/render/camera/SceneCamera.cpp.o | libImGui.a libglad.a || libImGui.a libglad.a
-  FLAGS = -g
-  LINK_LIBRARIES = -Wl,-rpath,/home/borja/Documents/C++/Engine2.0/external/stb  -lflecs  -lglfw3  libImGui.a  libglad.a  -ldl  -lpthread
-  LINK_PATH = -L/home/borja/Documents/C++/Engine2.0/external/stb
-  OBJECT_DIR = CMakeFiles/Engine2_0.dir
-  POST_BUILD = :
-  PRE_LINK = :
-  TARGET_FILE = Engine2_0
-  TARGET_PDB = Engine2_0.dbg
-
 
 #############################################
 # Utility command for edit_cache
@@ -358,11 +64,111 @@ build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
 build edit_cache: phony CMakeFiles/edit_cache.util
 
 # =============================================================================
+# Object build statements for EXECUTABLE target Engine2_0
+
+
+#############################################
+# Order-only phony target for Engine2_0
+
+build cmake_object_order_depends_target_Engine2_0: phony || CMakeFiles/Engine2_0.dir
+
+build CMakeFiles/Engine2_0.dir/main.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/main.cpp || cmake_object_order_depends_target_Engine2_0
+  DEP_FILE = CMakeFiles/Engine2_0.dir/main.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir
+
+build CMakeFiles/Engine2_0.dir/core/util/Color.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/util/Color.cpp || cmake_object_order_depends_target_Engine2_0
+  DEP_FILE = CMakeFiles/Engine2_0.dir/core/util/Color.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/util
+
+build CMakeFiles/Engine2_0.dir/core/util/Clock.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/util/Clock.cpp || cmake_object_order_depends_target_Engine2_0
+  DEP_FILE = CMakeFiles/Engine2_0.dir/core/util/Clock.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/util
+
+build CMakeFiles/Engine2_0.dir/core/render/window/Window.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/window/Window.cpp || cmake_object_order_depends_target_Engine2_0
+  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/window/Window.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/window
+
+build CMakeFiles/Engine2_0.dir/core/render/window/input/Input.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/window/input/Input.cpp || cmake_object_order_depends_target_Engine2_0
+  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/window/input/Input.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/window/input
+
+build CMakeFiles/Engine2_0.dir/core/render/elements/Texture.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/elements/Texture.cpp || cmake_object_order_depends_target_Engine2_0
+  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/elements/Texture.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/elements
+
+build CMakeFiles/Engine2_0.dir/core/render/elements/SpriteBatch.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/elements/SpriteBatch.cpp || cmake_object_order_depends_target_Engine2_0
+  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/elements/SpriteBatch.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/elements
+
+build CMakeFiles/Engine2_0.dir/core/render/elements/Shader.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/elements/Shader.cpp || cmake_object_order_depends_target_Engine2_0
+  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/elements/Shader.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render/elements
+
+build CMakeFiles/Engine2_0.dir/core/Engine.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/Engine.cpp || cmake_object_order_depends_target_Engine2_0
+  DEP_FILE = CMakeFiles/Engine2_0.dir/core/Engine.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core
+
+build CMakeFiles/Engine2_0.dir/external/stb/stb_image.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/external/stb/stb_image.cpp || cmake_object_order_depends_target_Engine2_0
+  DEP_FILE = CMakeFiles/Engine2_0.dir/external/stb/stb_image.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/external/stb
+
+build CMakeFiles/Engine2_0.dir/core/render/Renderer.cpp.o: CXX_COMPILER__Engine2_0_Debug /home/borja/Documents/C++/Engine2.0/core/render/Renderer.cpp || cmake_object_order_depends_target_Engine2_0
+  DEP_FILE = CMakeFiles/Engine2_0.dir/core/render/Renderer.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/borja/Documents/C++/Engine2.0/. -I/home/borja/Documents/C++/Engine2.0/external} -I/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  OBJECT_FILE_DIR = CMakeFiles/Engine2_0.dir/core/render
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target Engine2_0
+
+
+#############################################
+# Link the executable Engine2_0
+
+build Engine2_0: CXX_EXECUTABLE_LINKER__Engine2_0_Debug CMakeFiles/Engine2_0.dir/main.cpp.o CMakeFiles/Engine2_0.dir/core/util/Color.cpp.o CMakeFiles/Engine2_0.dir/core/util/Clock.cpp.o CMakeFiles/Engine2_0.dir/core/render/window/Window.cpp.o CMakeFiles/Engine2_0.dir/core/render/window/input/Input.cpp.o CMakeFiles/Engine2_0.dir/core/render/elements/Texture.cpp.o CMakeFiles/Engine2_0.dir/core/render/elements/SpriteBatch.cpp.o CMakeFiles/Engine2_0.dir/core/render/elements/Shader.cpp.o CMakeFiles/Engine2_0.dir/core/Engine.cpp.o CMakeFiles/Engine2_0.dir/external/stb/stb_image.cpp.o CMakeFiles/Engine2_0.dir/core/render/Renderer.cpp.o | /usr/local/lib/libglfw3.a /usr/lib/x86_64-linux-gnu/librt.so /usr/lib/x86_64-linux-gnu/libm.so
+  FLAGS = -g
+  LINK_LIBRARIES = -Wl,-rpath,/home/borja/Documents/C++/Engine2.0/external/stb  -lOpenGL  -lGLEW  /usr/local/lib/libglfw3.a  -lflecs  -lpthread  /usr/lib/x86_64-linux-gnu/librt.so  -lm  -ldl
+  LINK_PATH = -L/home/borja/Documents/C++/Engine2.0/external/stb
+  OBJECT_DIR = CMakeFiles/Engine2_0.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = Engine2_0
+  TARGET_PDB = Engine2_0.dbg
+
+# =============================================================================
 # Target aliases.
-
-build ImGui: phony libImGui.a
-
-build glad: phony libglad.a
 
 # =============================================================================
 # Folder targets.
@@ -372,7 +178,7 @@ build glad: phony libglad.a
 #############################################
 # Folder: /home/borja/Documents/C++/Engine2.0/cmake-build-debug
 
-build all: phony libglad.a libImGui.a Engine2_0
+build all: phony Engine2_0
 
 # =============================================================================
 # Built-in targets
@@ -381,14 +187,14 @@ build all: phony libglad.a libImGui.a Engine2_0
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | ../CMakeLists.txt /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCXXInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCommonLanguageInclude.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeFindDependencyMacro.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeGenericSystem.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeInitializeConfigs.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeLanguageInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInitialize.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckCSourceCompiles.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckIncludeFile.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckLibraryExists.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageHandleStandardArgs.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageMessage.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindThreads.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Internal/CheckSourceCompiles.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-Clang-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-Clang-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/UnixPaths.cmake /usr/local/lib/cmake/flecs/flecs-config-noconfig.cmake /usr/local/lib/cmake/flecs/flecs-config.cmake /usr/local/lib/cmake/glfw3/glfw3Config.cmake /usr/local/lib/cmake/glfw3/glfw3ConfigVersion.cmake /usr/local/lib/cmake/glfw3/glfw3Targets-noconfig.cmake /usr/local/lib/cmake/glfw3/glfw3Targets.cmake CMakeCache.txt CMakeFiles/3.21.1/CMakeCCompiler.cmake CMakeFiles/3.21.1/CMakeCXXCompiler.cmake CMakeFiles/3.21.1/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | ../CMakeLists.txt /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCXXInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCommonLanguageInclude.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeFindDependencyMacro.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeGenericSystem.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeInitializeConfigs.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeLanguageInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInitialize.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckCSourceCompiles.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckIncludeFile.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckLibraryExists.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindGLEW.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindOpenGL.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageHandleStandardArgs.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageMessage.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindThreads.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Internal/CheckSourceCompiles.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-Clang-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-Clang-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/UnixPaths.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/SelectLibraryConfigurations.cmake /usr/local/lib/cmake/flecs/flecs-config-noconfig.cmake /usr/local/lib/cmake/flecs/flecs-config.cmake /usr/local/lib/cmake/glfw3/glfw3Config.cmake /usr/local/lib/cmake/glfw3/glfw3ConfigVersion.cmake /usr/local/lib/cmake/glfw3/glfw3Targets-noconfig.cmake /usr/local/lib/cmake/glfw3/glfw3Targets.cmake CMakeCache.txt CMakeFiles/3.21.1/CMakeCCompiler.cmake CMakeFiles/3.21.1/CMakeCXXCompiler.cmake CMakeFiles/3.21.1/CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build ../CMakeLists.txt /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCXXInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCommonLanguageInclude.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeFindDependencyMacro.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeGenericSystem.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeInitializeConfigs.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeLanguageInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInitialize.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckCSourceCompiles.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckIncludeFile.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckLibraryExists.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageHandleStandardArgs.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageMessage.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindThreads.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Internal/CheckSourceCompiles.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-Clang-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-Clang-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/UnixPaths.cmake /usr/local/lib/cmake/flecs/flecs-config-noconfig.cmake /usr/local/lib/cmake/flecs/flecs-config.cmake /usr/local/lib/cmake/glfw3/glfw3Config.cmake /usr/local/lib/cmake/glfw3/glfw3ConfigVersion.cmake /usr/local/lib/cmake/glfw3/glfw3Targets-noconfig.cmake /usr/local/lib/cmake/glfw3/glfw3Targets.cmake CMakeCache.txt CMakeFiles/3.21.1/CMakeCCompiler.cmake CMakeFiles/3.21.1/CMakeCXXCompiler.cmake CMakeFiles/3.21.1/CMakeSystem.cmake: phony
+build ../CMakeLists.txt /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCXXInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCommonLanguageInclude.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeFindDependencyMacro.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeGenericSystem.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeInitializeConfigs.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeLanguageInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInformation.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInitialize.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckCSourceCompiles.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckIncludeFile.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/CheckLibraryExists.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/Clang.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindGLEW.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindOpenGL.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageHandleStandardArgs.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageMessage.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/FindThreads.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Internal/CheckSourceCompiles.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-Clang-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-Clang-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-C.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-CXX.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/Platform/UnixPaths.cmake /snap/clion/177/bin/cmake/linux/share/cmake-3.21/Modules/SelectLibraryConfigurations.cmake /usr/local/lib/cmake/flecs/flecs-config-noconfig.cmake /usr/local/lib/cmake/flecs/flecs-config.cmake /usr/local/lib/cmake/glfw3/glfw3Config.cmake /usr/local/lib/cmake/glfw3/glfw3ConfigVersion.cmake /usr/local/lib/cmake/glfw3/glfw3Targets-noconfig.cmake /usr/local/lib/cmake/glfw3/glfw3Targets.cmake CMakeCache.txt CMakeFiles/3.21.1/CMakeCCompiler.cmake CMakeFiles/3.21.1/CMakeCXXCompiler.cmake CMakeFiles/3.21.1/CMakeSystem.cmake: phony
 
 
 #############################################

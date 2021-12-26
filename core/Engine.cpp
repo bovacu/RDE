@@ -13,19 +13,22 @@ namespace engine {
         this->window->setEventCallback(ENGINE_BIND_EVENT_FN(Engine::onEvent));
         this->lastFrame = 0;
 
-        Renderer::init();
-
-        this->imGuiLayer = new ImGuiLayer();
-        pushOverlay(this->imGuiLayer);
+//        this->imGuiLayer = new ImGuiLayer();
+//        pushOverlay(this->imGuiLayer);
 
         if(this->timePerFrame < 0)
             this->timePerFrame = 1.0f / 60.f;
 
-        this->window->setVSync(true);
+        this->window->setVSync(false);
+
+        texture = new Texture((char*)"assets/test.png");
+        texture->incRefCount();
+
+        Renderer::init(window->getWindowSize());
     }
 
     Engine::~Engine() {
-        Renderer::shutdown();
+
     }
 
     void Engine::onRun() {
@@ -55,6 +58,8 @@ namespace engine {
 
             this->window->update();
         }
+
+        delete texture;
     }
 
     void Engine::onEvent(Event &_e) {
@@ -62,41 +67,39 @@ namespace engine {
         dispatcher.dispatchEvent<WindowClosedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowClosed));
         dispatcher.dispatchEvent<WindowResizedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowResized));
 
-        for (auto _it = this->layerStack.rbegin(); _it != this->layerStack.rend(); ++_it) {
-            (*_it)->onEvent(_e);
-            if (_e.handled)
-                break;
-        }
+//        for (auto _it = this->layerStack.rbegin(); _it != this->layerStack.rend(); ++_it) {
+//            (*_it)->onEvent(_e);
+//            if (_e.handled)
+//                break;
+//        }
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
-        for (Layer* _layer : this->layerStack)
-            _layer->onFixedUpdate(_fixedDt);
+//        for (Layer* _layer : this->layerStack)
+//            _layer->onFixedUpdate(_fixedDt);
     }
 
     void Engine::onUpdate(Delta _dt) {
-        for (Layer* _layer : this->layerStack)
-            _layer->onUpdate(_dt);
+//        for (Layer* _layer : this->layerStack)
+//            _layer->onUpdate(_dt);
 
-        if(Input::isKeyJustPressed(KeyCode::A))
-            LOG_I("Works at least?")
+        if(Input::isKeyJustPressed(KeyCode::F))
+            setFullscreen(!isFullscreen());
     }
 
     void Engine::onRender(Delta _dt) {
-        for (Layer* _layer : this->layerStack)
-            _layer->onRender(_dt);
+//        for (Layer* _layer : this->layerStack)
+//            _layer->onRender(_dt);
+//
+//        this->imGuiLayer->begin();
+//        for (Layer* _layer : this->layerStack)
+//            _layer->onImGuiRender(_dt);
+//        this->imGuiLayer->end();
 
-        this->imGuiLayer->begin();
-        for (Layer* _layer : this->layerStack)
-            _layer->onImGuiRender(_dt);
-        this->imGuiLayer->end();
+        Renderer::beginDraw(Color::Red);
+        Renderer::draw(texture, {100, 100}, texture->getSize());
+        Renderer::endDraw();
 
-        engine::Renderer::setClearColor(Color(25, 25, 25, 255));
-        engine::Renderer::clear();
-
-        Renderer::beginDrawCall(camera, camera.getTransform().transform);
-        Renderer::drawLine({0, 0}, {100, 100}, Color::Green);
-        Renderer::endDrawCall();
     }
 
     bool Engine::onWindowClosed(WindowClosedEvent &_e) {
@@ -111,7 +114,6 @@ namespace engine {
         }
 
         this->minimized = false;
-        Renderer::onWindowResize(_e.getWidth(), _e.getHeight());
 
         return false;
     }
@@ -133,7 +135,6 @@ namespace engine {
     }
 
     void Engine::setFullscreen(bool _fullscreen) {
-        LOG_E_TIME("Fullscreen not working properly yet, don't use it");
         this->window->setFullscreen(_fullscreen);
     }
 
@@ -147,28 +148,27 @@ namespace engine {
 
     void Engine::setWindowSize(int _width, int _height) {
         this->window->setWindowSize(_width, _height);
-        Renderer::onWindowResize(_width, _height);
     }
 
-    void Engine::pushLayer(Layer* _layer) {
-        this->layerStack.pushLayer(_layer);
-        _layer->onInit();
-    }
-
-    void Engine::pushOverlay(Layer* _layer) {
-        this->layerStack.pushOverlay(_layer);
-        _layer->onInit();
-    }
-
-    void Engine::popLayer(Layer* _layer) {
-        this->layerStack.popLayer(_layer);
-        _layer->onEnd();
-    }
-
-    void Engine::popOverlay(Layer* _layer) {
-        this->layerStack.popOverlay(_layer);
-        _layer->onEnd();
-    }
+//    void Engine::pushLayer(Layer* _layer) {
+//        this->layerStack.pushLayer(_layer);
+//        _layer->onInit();
+//    }
+//
+//    void Engine::pushOverlay(Layer* _layer) {
+//        this->layerStack.pushOverlay(_layer);
+//        _layer->onInit();
+//    }
+//
+//    void Engine::popLayer(Layer* _layer) {
+//        this->layerStack.popLayer(_layer);
+//        _layer->onEnd();
+//    }
+//
+//    void Engine::popOverlay(Layer* _layer) {
+//        this->layerStack.popOverlay(_layer);
+//        _layer->onEnd();
+//    }
 
     void Engine::closeApplication() {
         this->running = false;

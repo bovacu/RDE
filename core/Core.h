@@ -30,4 +30,18 @@
 
 #define ENGINE_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
 
+// This is for the EventBus
+#define PLACEHOLDERS_1 std::placeholders::_1
+#define PLACEHOLDERS_2 std::placeholders::_1, std::placeholders::_2
+#define PLACEHOLDERS_3 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3
+#define PLACEHOLDERS_4 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4
+#define PLACEHOLDERS_5 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5
+
+#define BIND_FUNC_0(_method) std::bind(&_method, this)
+#define BIND_FUNC_1(_method) std::bind(&_method, this, PLACEHOLDERS_1)
+#define BIND_FUNC_2(_method) std::bind(&_method, this, PLACEHOLDERS_2)
+#define BIND_FUNC_3(_method) std::bind(&_method, this, PLACEHOLDERS_3)
+#define BIND_FUNC_4(_method) std::bind(&_method, this, PLACEHOLDERS_4)
+#define BIND_FUNC_5(_method) std::bind(&_method, this, PLACEHOLDERS_5)
+
 #endif //ENGINE2_0_CORE_H
