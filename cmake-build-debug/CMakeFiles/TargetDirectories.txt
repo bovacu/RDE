@@ -1,3 +1,0 @@
-/home/borja/Documents/C++/Engine2.0/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/borja/Documents/C++/Engine2.0/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/borja/Documents/C++/Engine2.0/cmake-build-debug/CMakeFiles/Engine2_0.dir

@@ -254,10 +254,8 @@ namespace engine {
         if(!vertexDebugBufferLines.empty()) {
 
             glBindBuffer(GL_ARRAY_BUFFER, debugVbo);
-            glBufferData(GL_ARRAY_BUFFER, (long) (sizeof(VertexColorDebug) * vertexDebugBufferLines.size()),
-                         &vertexDebugBufferLines[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, (long) (sizeof(VertexColorDebug) * vertexDebugBufferLines.size()), &vertexDebugBufferLines[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 
             glEnableVertexAttribArray(4);
             glEnableVertexAttribArray(5);
