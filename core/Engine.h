@@ -12,7 +12,8 @@
 #include "core/render/Renderer.h"
 #include "core/render/Camera.h"
 //#include "core/render/layer/LayerStack.h"
-//#include "core/render/layer/ImGuiLayer.h"
+#include "core/render/layers/ImGuiLayer.h"
+#include "core/render/layers/LayerStack.h"
 
 namespace engine {
 
@@ -35,8 +36,8 @@ namespace engine {
         private:
             WindowPtr window;
             static Engine* gameInstance;
-//            LayerStack layerStack;
-//            ImGuiLayer* imGuiLayer;
+            LayerStack layerStack;
+            ImGuiLayer* imGuiLayer;
             Clock clock;
 
         private:
@@ -148,22 +149,22 @@ namespace engine {
             /// This method allows us to add a renderization layer to the stack.
             /// @param _layer Layer to add to the stack.
             /// @sa Layer, LayerStack
-//            void pushLayer(Layer* _layer);
+            void pushLayer(Layer* _layer);
 
             /// This method allows us to add a renderization overlay that renders on top of everything to the stack.
             /// @param _layer Layer to add to the stack.
             /// @sa Layer, LayerStack
-//            void pushOverlay(Layer* _layer);
+            void pushOverlay(Layer* _layer);
 
             /// This method removes a Layer from the stack.
             /// @param _layer Layer to be removed.
             /// @sa Layer, LayerStack
-//            void popLayer(Layer* _layer);
+            void popLayer(Layer* _layer);
 
             /// This method removes an overlay from the stack.
             /// @param _layer Overlay to remove from the stack.
             /// @sa Layer, LayerStack
-//            void popOverlay(Layer* _layer);
+            void popOverlay(Layer* _layer);
 
         public:
             /// Returns the Window instance.

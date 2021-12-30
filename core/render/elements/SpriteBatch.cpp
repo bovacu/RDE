@@ -276,6 +276,6 @@ namespace engine {
     }
 
     Vec2F SpriteBatch::worldToScreenCoords(Vec2F _position) {
-        return {_position.x / (float)window->getWindowSize().x, _position.y / (float)window->getWindowSize().y};
+        return {_position.x / ((float)window->getWindowSize().x / 2), _position.y / ((float)window->getWindowSize().y / 2)};
     }
 }

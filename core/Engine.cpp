@@ -13,8 +13,8 @@ namespace engine {
         this->window->setEventCallback(ENGINE_BIND_EVENT_FN(Engine::onEvent));
         this->lastFrame = 0;
 
-//        this->imGuiLayer = new ImGuiLayer();
-//        pushOverlay(this->imGuiLayer);
+        this->imGuiLayer = new ImGuiLayer();
+        pushOverlay(this->imGuiLayer);
 
         if(this->timePerFrame < 0)
             this->timePerFrame = 1.0f / 60.f;
@@ -25,7 +25,7 @@ namespace engine {
         texture->incRefCount();
 
         sprite.setTexture(texture);
-        sprite.setPosition({1280, 0});
+        sprite.setPosition({0, 0});
 
         Renderer::init(window.get());
 
@@ -81,36 +81,37 @@ namespace engine {
         dispatcher.dispatchEvent<WindowClosedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowClosed));
         dispatcher.dispatchEvent<WindowResizedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowResized));
 
-//        for (auto _it = this->layerStack.rbegin(); _it != this->layerStack.rend(); ++_it) {
-//            (*_it)->onEvent(_e);
-//            if (_e.handled)
-//                break;
-//        }
+        for (auto _it = this->layerStack.rbegin(); _it != this->layerStack.rend(); ++_it) {
+            (*_it)->onEvent(_e);
+            if (_e.handled)
+                break;
+        }
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
-//        for (Layer* _layer : this->layerStack)
-//            _layer->onFixedUpdate(_fixedDt);
+        for (Layer* _layer : this->layerStack)
+            _layer->onFixedUpdate(_fixedDt);
     }
 
     void Engine::onUpdate(Delta _dt) {
-//        for (Layer* _layer : this->layerStack)
-//            _layer->onUpdate(_dt);
+        for (Layer* _layer : this->layerStack)
+            _layer->onUpdate(_dt);
 
         if(Input::isKeyJustPressed(KeyCode::F))
             setFullscreen(!isFullscreen());
     }
 
     void Engine::onRender(Delta _dt) {
-//        for (Layer* _layer : this->layerStack)
-//            _layer->onRender(_dt);
-//
-//        this->imGuiLayer->begin();
-//        for (Layer* _layer : this->layerStack)
-//            _layer->onImGuiRender(_dt);
-//        this->imGuiLayer->end();
+        for (Layer* _layer : this->layerStack)
+            _layer->onRender(_dt);
 
         Renderer::clear(Color::Red);
+
+        this->imGuiLayer->begin();
+        for (Layer* _layer : this->layerStack)
+            _layer->onImGuiRender(_dt);
+            engine::ImGuiLayer::drawDebugInfo();
+        this->imGuiLayer->end();
 
         Renderer::beginDraw(camera);
         Renderer::draw(sprite);
@@ -169,25 +170,25 @@ namespace engine {
         this->window->setWindowSize(_width, _height);
     }
 
-//    void Engine::pushLayer(Layer* _layer) {
-//        this->layerStack.pushLayer(_layer);
-//        _layer->onInit();
-//    }
-//
-//    void Engine::pushOverlay(Layer* _layer) {
-//        this->layerStack.pushOverlay(_layer);
-//        _layer->onInit();
-//    }
-//
-//    void Engine::popLayer(Layer* _layer) {
-//        this->layerStack.popLayer(_layer);
-//        _layer->onEnd();
-//    }
-//
-//    void Engine::popOverlay(Layer* _layer) {
-//        this->layerStack.popOverlay(_layer);
-//        _layer->onEnd();
-//    }
+    void Engine::pushLayer(Layer* _layer) {
+        this->layerStack.pushLayer(_layer);
+        _layer->onInit();
+    }
+
+    void Engine::pushOverlay(Layer* _layer) {
+        this->layerStack.pushOverlay(_layer);
+        _layer->onInit();
+    }
+
+    void Engine::popLayer(Layer* _layer) {
+        this->layerStack.popLayer(_layer);
+        _layer->onEnd();
+    }
+
+    void Engine::popOverlay(Layer* _layer) {
+        this->layerStack.popOverlay(_layer);
+        _layer->onEnd();
+    }
 
     void Engine::closeApplication() {
         this->running = false;

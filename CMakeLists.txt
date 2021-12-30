@@ -47,8 +47,8 @@ add_executable( Engine2_0 main.cpp
         core/render/window/event/Event.h core/render/window/event/KeyEvent.h core/render/window/event/MouseEvent.h
         core/render/window/event/WindowEvent.h core/render/window/Window.h core/render/window/Window.cpp
 
-#        core/render/layer/Layer.h core/render/layer/LayerStack.h core/render/layer/LayerStack.cpp
-#        core/render/layer/ImGuiLayer.h core/render/layer/ImGuiLayer.cpp
+        core/render/layers/Layer.h core/render/layers/LayerStack.h core/render/layers/LayerStack.cpp
+        core/render/layers/ImGuiLayer.h core/render/layers/ImGuiLayer.cpp
 
         core/render/window/input/GamePadKeys.h core/render/window/input/Input.cpp core/render/window/input/Input.h
         core/render/window/input/KeyboardKeys.h core/render/window/input/MouseKeys.h
@@ -62,13 +62,14 @@ add_executable( Engine2_0 main.cpp
 
         core/render/Renderer.cpp core/render/Renderer.h core/systems/eventSystem/EventBus.h
 
-#        external/imgui/imgui.h external/imgui/imgui.cpp external/imgui/imstb_truetype.h external/imgui/imstb_rectpack.h
-#        external/imgui/imstb_textedit.h external/imgui/imgui_internal.h external/imgui/imgui_tables.cpp
-#        external/imgui/imgui_draw.cpp external/imgui/imconfig.h external/imgui/backends/imgui_impl_glfw.h
-#        external/imgui/backends/imgui_impl_glfw.cpp external/imgui/backends/imgui_impl_opengl3.h
-#        external/imgui/backends/imgui_impl_opengl3.cpp
+        core/systems/Components.h core/render/elements/Sprite.cpp core/render/elements/Sprite.h core/render/Camera.cpp core/render/Camera.h core/render/shapes/Shape.h
 
-        core/systems/Components.h core/render/elements/Sprite.cpp core/render/elements/Sprite.h core/render/Camera.cpp core/render/Camera.h core/render/shapes/Shape.h)
+        external/imgui/imgui.h external/imgui/imgui.cpp external/imgui/imstb_truetype.h external/imgui/imstb_rectpack.h
+        external/imgui/imstb_textedit.h external/imgui/imgui_internal.h external/imgui/imgui_tables.cpp
+        external/imgui/imgui_draw.cpp external/imgui/imconfig.h external/imgui/backends/imgui_impl_glfw.h external/imgui/imgui_widgets.cpp
+        external/imgui/backends/imgui_impl_glfw.cpp external/imgui/backends/imgui_impl_opengl3.h
+        external/imgui/backends/imgui_impl_opengl3.cpp
+        )
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 
