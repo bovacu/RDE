@@ -65,6 +65,9 @@ namespace engine {
             return;
         }
 
+        glEnable(GL_LINE_SMOOTH);
+        glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
+
 #pragma endregion Initializing
 
 #pragma region CenteringAndEnablingFullscreen
@@ -360,6 +363,10 @@ namespace engine {
 
     int Window::getWidth() const {
         return data.width;
+    }
+
+    void Window::swapBuffers() const {
+        glfwSwapBuffers(window);
     }
 
 }

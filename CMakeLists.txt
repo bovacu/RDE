@@ -58,7 +58,7 @@ add_executable( Engine2_0 main.cpp
 
         core/Engine.cpp core/Engine.h core/Core.h
 
-        external/stb/stb_image.h external/stb/stb_image.cpp
+        external/stb/stb_image.h external/stb/stb_image.cpp external/json.h
 
         core/render/Renderer.cpp core/render/Renderer.h core/systems/eventSystem/EventBus.h
 
@@ -68,7 +68,7 @@ add_executable( Engine2_0 main.cpp
 #        external/imgui/backends/imgui_impl_glfw.cpp external/imgui/backends/imgui_impl_opengl3.h
 #        external/imgui/backends/imgui_impl_opengl3.cpp
 
-        )
+        core/systems/Components.h core/render/elements/Sprite.cpp core/render/elements/Sprite.h core/render/Camera.cpp core/render/Camera.h core/render/shapes/Shape.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 

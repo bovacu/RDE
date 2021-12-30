@@ -131,13 +131,15 @@ namespace engine {
             /// @param _allow true/false to enable/disable.
             void setWindowOptions(WindowOptions _op, bool _allow);
 
+            void swapBuffers() const;
+
             static std::unique_ptr<Window> createWindow(const WindowProperties& _windowProperties = WindowProperties());
 
         private:
             void init(const WindowProperties& _props);
             void shutdown();
 
-            /// Method to transform from engine data to GLFW data. Will be only used if using GLFW.
+            /// Method to transformMatrix from engine data to GLFW data. Will be only used if using GLFW.
             long windowOptionsToGLFW(WindowOptions _options, bool _allow);
     };
 

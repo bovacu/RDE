@@ -10,6 +10,7 @@
 #include "core/render/window/event/WindowEvent.h"
 #include "core/render/window/input/Input.h"
 #include "core/render/Renderer.h"
+#include "core/render/Camera.h"
 //#include "core/render/layer/LayerStack.h"
 //#include "core/render/layer/ImGuiLayer.h"
 
@@ -23,6 +24,9 @@ namespace engine {
             int fps;
             unsigned int fpsCounter = 0, frameCounter = 0;
             Texture* texture;
+            Sprite sprite;
+            Camera camera;
+            Shape shape;
 
         private:
             bool running = true;

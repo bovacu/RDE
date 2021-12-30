@@ -3071,7 +3071,7 @@ static int stbi__process_marker(stbi__jpeg *z, int m)
             stbi__get8(z->s); // version
             stbi__get16be(z->s); // flags0
             stbi__get16be(z->s); // flags1
-            z->app14_color_transform = stbi__get8(z->s); // color transform
+            z->app14_color_transform = stbi__get8(z->s); // color transformMatrix
             L -= 6;
          }
       }
@@ -3570,7 +3570,7 @@ static void stbi__YCbCr_to_RGB_simd(stbi_uc *out, stbi_uc const *y, stbi_uc cons
          __m128i crw = _mm_unpacklo_epi8(_mm_setzero_si128(), cr_biased);
          __m128i cbw = _mm_unpacklo_epi8(_mm_setzero_si128(), cb_biased);
 
-         // color transform
+         // color transformMatrix
          __m128i yws = _mm_srli_epi16(yw, 4);
          __m128i cr0 = _mm_mulhi_epi16(cr_const0, crw);
          __m128i cb0 = _mm_mulhi_epi16(cb_const0, cbw);
@@ -3627,7 +3627,7 @@ static void stbi__YCbCr_to_RGB_simd(stbi_uc *out, stbi_uc const *y, stbi_uc cons
          int16x8_t crw = vshll_n_s8(cr_biased, 7);
          int16x8_t cbw = vshll_n_s8(cb_biased, 7);
 
-         // color transform
+         // color transformMatrix
          int16x8_t cr0 = vqdmulhq_s16(crw, cr_const0);
          int16x8_t cb0 = vqdmulhq_s16(cbw, cb_const0);
          int16x8_t cr1 = vqdmulhq_s16(crw, cr_const1);

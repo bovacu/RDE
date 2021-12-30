@@ -19,22 +19,38 @@ namespace engine {
         if(this->timePerFrame < 0)
             this->timePerFrame = 1.0f / 60.f;
 
-        this->window->setVSync(false);
+        this->window->setVSync(true);
 
         texture = new Texture((char*)"assets/test.png");
         texture->incRefCount();
 
-        Renderer::init(window->getWindowSize());
+        sprite.setTexture(texture);
+        sprite.setPosition({1280, 0});
+
+        Renderer::init(window.get());
+
+//        shape.addPoint({0.2, 0});
+//        shape.addPoint({0.25, 0.1});
+//        shape.addPoint({0, 0.2});
+//        shape.addPoint({-0.25, 0.1});
+//        shape.addPoint({-0.2, 0});
+//
+        shape.setOutlineColor(Color::Blue);
+//        shape.showOutsideColor(false);
+
+        shape.makeCircle({0, 0}, 0.1);
     }
 
     Engine::~Engine() {
-
+        delete texture;
     }
 
     void Engine::onRun() {
         float _accumulator = 0;
 
         while (this->running) {
+
+            camera.update(window.get());
 
             auto _time = (float) glfwGetTime();
             Delta _dt = _time - this->lastFrame;
@@ -58,8 +74,6 @@ namespace engine {
 
             this->window->update();
         }
-
-        delete texture;
     }
 
     void Engine::onEvent(Event &_e) {
@@ -96,10 +110,15 @@ namespace engine {
 //            _layer->onImGuiRender(_dt);
 //        this->imGuiLayer->end();
 
-        Renderer::beginDraw(Color::Red);
-        Renderer::draw(texture, {100, 100}, texture->getSize());
+        Renderer::clear(Color::Red);
+
+        Renderer::beginDraw(camera);
+        Renderer::draw(sprite);
         Renderer::endDraw();
 
+        Renderer::beginDebugDraw(camera);
+        Renderer::drawShape(shape);
+        Renderer::endDebugDraw();
     }
 
     bool Engine::onWindowClosed(WindowClosedEvent &_e) {

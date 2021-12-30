@@ -1,4 +1,4 @@
-/snap/clion/177/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/177/bin/ninja/linux/ninja -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -G Ninja /home/borja/Documents/C++/Engine2.0
+/snap/clion/178/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/178/bin/ninja/linux/ninja -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -G Ninja /home/borja/Documents/C++/Engine2.0
 -- Found Flecs
 -- Configuring done
 -- Generating done
