@@ -3,8 +3,12 @@
 #ifndef IMGUI_LAYER_H
 #define IMGUI_LAYER_H
 
+#include <chrono>
 #include "Layer.h"
 #include "core/render/window/event/MouseEvent.h"
+#include "external/imgui/backends/imgui_impl_opengl3.h"
+#include "external/imgui/backends/imgui_impl_glfw.h"
+#include "core/systems/Profiler.h"
 
 namespace engine {
 
@@ -31,6 +35,9 @@ namespace engine {
 
         private:
             static void charToIntSize(const std::string& _size, int* _resolution);
+            static void metrics();
+
+            static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
     };
 
 }

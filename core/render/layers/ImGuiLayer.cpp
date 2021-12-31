@@ -2,11 +2,9 @@
 
 #include "core/Engine.h"
 #include "core/render/window/event/MouseEvent.h"
-//#include "external/imgui/imgui.h"
-#include "external/imgui/backends/imgui_impl_opengl3.h"
-#include "external/imgui/backends/imgui_impl_glfw.h"
 
 namespace engine {
+    std::unordered_map<ProfilerState, RollingBuffer> ImGuiLayer::plotBuffers;
 
     ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {  }
 
@@ -14,6 +12,7 @@ namespace engine {
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -39,6 +38,10 @@ namespace engine {
         // Setup Platform/Renderer bindings
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init("#version 410");
+
+        for(auto& _state : State::stateToNameDict) {
+            plotBuffers[_state.first] = {};
+        }
     }
 
     void ImGuiLayer::onEvent(Event& _e) {
@@ -46,11 +49,6 @@ namespace engine {
         dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(ImGuiLayer::onMouseScrolled));
         dispatcher.dispatchEvent<MouseButtonPressedEvent>(ENGINE_BIND_EVENT_FN(ImGuiLayer::onMouseClicked));
         dispatcher.dispatchEvent<MouseMovedEvent>(ENGINE_BIND_EVENT_FN(ImGuiLayer::onMouseMovedEvent));
-    }
-
-    bool ImGuiLayer::onMouseScrolled(MouseScrolledEvent& _e) {
-        return false;
-        return ImGui::IsWindowHovered();
     }
 
     void ImGuiLayer::onEnd() {
@@ -87,9 +85,10 @@ namespace engine {
         static int _fps = 60;
         static int _windowRes[2] = {(int) engine::Engine::get().getWindowSize().x,(int) engine::Engine::get().getWindowSize().y};
 
-        static const char* _resSelected = "800x480";
+        std::string _windowResolution = std::to_string(Engine::get().getWindowSize().x) + "x" + std::to_string(Engine::get().getWindowSize().y);
+        static const char* _resSelected = _windowResolution.c_str();
 
-        ImGui::Begin("Debugging");
+        ImGui::Begin("Debugging", nullptr);
 
         if(ImGui::Checkbox("VSync Active", &_vsync)) {
             engine::Engine::get().getWindow().setVSync(_vsync);
@@ -106,31 +105,65 @@ namespace engine {
         ImGui::Text("Resolution"); ImGui::SameLine();
         if (ImGui::BeginCombo("##combo", _resSelected)){ // The second parameter is the label previewed before opening the combo. {
             for (auto & _resolution : _resolutions) {
-                bool is_selected = (_resSelected == _resolution); // You can store your selection however you want, outside or inside your objects
+                bool is_selected = (_resSelected == _resolution);
                 if (ImGui::Selectable(_resolution, is_selected)) {
                     _resSelected = _resolution;
                     charToIntSize(std::string(_resolution), _windowRes);
                     engine::Engine::get().setWindowSize(_windowRes[0], _windowRes[1]);
                 }
                 if (is_selected)
-                    ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                    ImGui::SetItemDefaultFocus();
             }
             ImGui::EndCombo();
         }
 
         ImGui::Text("FPS: %d", engine::Engine::get().getFps()); ImGui::SameLine();
-//        if(ImGui::SliderInt("", &_fps, 30, 300)) {
-//            engine::Application::get().setTimePerFrame(1.f / _fps);
-//        }
-
         ImGui::Separator();
-
-//        ImGui::Text("Render2D Stats:");
-//        ImGui::Text("Draw Calls: %d", stats.drawCalls);
-//        ImGui::Text("Quads: %d", stats.quadCount);
-//        ImGui::Text("Vertices: %d", stats.getTotalVertexCount());
-//        ImGui::Text("Indices: %d", stats.getTotalIndexCount());
         ImGui::End();
+
+        ImGui::Begin("Metrics", nullptr);
+        metrics();
+        ImGui::End();
+    }
+
+    void ImGuiLayer::metrics() {
+        static bool _capture = true;
+        static float t = 0;
+        t += ImGui::GetIO().DeltaTime;
+
+        static float history = 20.0f;
+        if(_capture) {
+            for(auto& _state : State::stateToNameDict) {
+                auto _s = Profiler::getStates()[_state.first];
+                auto _diff = std::chrono::duration_cast<std::chrono::milliseconds>(_s.end - _s.init);
+                plotBuffers[_state.first].AddPoint(t, (float)_diff.count());
+                plotBuffers[_state.first].Span = history;
+            }
+        }
+
+        if (ImPlot::BeginPlot("##Rolling", ImVec2(-1,300))) {
+            ImPlot::SetupAxes(nullptr, "ms", ImPlotAxisFlags_NoTickLabels);
+            ImPlot::SetupAxisLimits(ImAxis_X1,0,history, ImGuiCond_Always);
+            ImPlot::SetupAxisLimits(ImAxis_Y1,0,50);
+
+            for(auto& _state : State::stateToNameDict) {
+                auto _s = plotBuffers[_state.first];
+                ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),
+                                 &_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
+            }
+
+            ImPlot::EndPlot();
+        }
+
+        if(ImGui::Button("Stop")) {
+            _capture = false;
+        }
+
+        ImGui::SameLine();
+
+        if(ImGui::Button("Resume")) {
+            _capture = true;
+        }
     }
 
     void ImGuiLayer::charToIntSize(const std::string& _size, int* _resolution) {
@@ -151,6 +184,11 @@ namespace engine {
     }
 
     bool ImGuiLayer::onMouseMovedEvent(MouseMovedEvent& _e) {
+        return false;
+        return ImGui::IsWindowHovered();
+    }
+
+    bool ImGuiLayer::onMouseScrolled(MouseScrolledEvent& _e) {
         return false;
         return ImGui::IsWindowHovered();
     }

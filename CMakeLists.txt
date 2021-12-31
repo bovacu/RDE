@@ -68,8 +68,20 @@ add_executable( Engine2_0 main.cpp
         external/imgui/imstb_textedit.h external/imgui/imgui_internal.h external/imgui/imgui_tables.cpp
         external/imgui/imgui_draw.cpp external/imgui/imconfig.h external/imgui/backends/imgui_impl_glfw.h external/imgui/imgui_widgets.cpp
         external/imgui/backends/imgui_impl_glfw.cpp external/imgui/backends/imgui_impl_opengl3.h
-        external/imgui/backends/imgui_impl_opengl3.cpp
-        )
+        external/imgui/backends/imgui_impl_opengl3.cpp external/imgui/imgui_demo.cpp
+
+        # https://github.com/bwrsandman/imgui-flame-graph
+        # external/imgui/flame/imgui_widget_flamegraph.h external/imgui/flame/imgui_widget_flamegraph.cpp
+
+        # https://github.com/epezent/implot
+        external/imgui/implot/implot.h external/imgui/implot/implot.cpp external/imgui/implot/implot_internal.h external/imgui/implot/implot_items.cpp
+
+        # https://github.com/thedmd/imgui-node-editor
+        external/imgui/nodeEditor/crude_json.h external/imgui/nodeEditor/crude_json.cpp external/imgui/nodeEditor/imgui_bezier_math.h
+        external/imgui/nodeEditor/imgui_canvas.h external/imgui/nodeEditor/imgui_canvas.cpp external/imgui/nodeEditor/imgui_extra_math.h
+        external/imgui/nodeEditor/imgui_node_editor.h external/imgui/nodeEditor/imgui_node_editor.cpp external/imgui/nodeEditor/imgui_node_editor_api.cpp
+        external/imgui/nodeEditor/imgui_node_editor_internal.h
+        core/systems/Profiler.h core/systems/Profiler.cpp core/render/layers/ImGuiCore.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 

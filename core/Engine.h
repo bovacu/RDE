@@ -11,7 +11,7 @@
 #include "core/render/window/input/Input.h"
 #include "core/render/Renderer.h"
 #include "core/render/Camera.h"
-//#include "core/render/layer/LayerStack.h"
+#include "core/systems/Profiler.h"
 #include "core/render/layers/ImGuiLayer.h"
 #include "core/render/layers/LayerStack.h"
 
@@ -22,7 +22,7 @@ namespace engine {
             float timePerFrame = -1;
             float lastFrame = 0.0f;
             Delta dt;
-            int fps;
+            int fps{};
             unsigned int fpsCounter = 0, frameCounter = 0;
             Texture* texture;
             Sprite sprite;
@@ -176,8 +176,8 @@ namespace engine {
             static Engine& get() { return *Engine::gameInstance; }
 
         private:
-        bool onWindowClosed(WindowClosedEvent& _e);
-        bool onWindowResized(WindowResizedEvent& _e);
+            bool onWindowClosed(WindowClosedEvent& _e);
+            bool onWindowResized(WindowResizedEvent& _e);
 
     };
 

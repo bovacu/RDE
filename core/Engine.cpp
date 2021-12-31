@@ -28,16 +28,7 @@ namespace engine {
         sprite.setPosition({0, 0});
 
         Renderer::init(window.get());
-
-//        shape.addPoint({0.2, 0});
-//        shape.addPoint({0.25, 0.1});
-//        shape.addPoint({0, 0.2});
-//        shape.addPoint({-0.25, 0.1});
-//        shape.addPoint({-0.2, 0});
-//
         shape.setOutlineColor(Color::Blue);
-//        shape.showOutsideColor(false);
-
         shape.makeCircle({0, 0}, 0.1);
     }
 
@@ -49,6 +40,7 @@ namespace engine {
         float _accumulator = 0;
 
         while (this->running) {
+            engine::Profiler::beginFrame();
 
             camera.update(window.get());
 
@@ -72,7 +64,11 @@ namespace engine {
                 #endif
             }
 
+            engine::Profiler::begin(ProfilerState::SWAP_BUFFERS);
             this->window->update();
+            engine::Profiler::end(ProfilerState::SWAP_BUFFERS);
+
+            engine::Profiler::endFrame();
         }
     }
 
@@ -102,16 +98,12 @@ namespace engine {
     }
 
     void Engine::onRender(Delta _dt) {
-        for (Layer* _layer : this->layerStack)
-            _layer->onRender(_dt);
 
         Renderer::clear(Color::Red);
 
-        this->imGuiLayer->begin();
+        engine::Profiler::begin(ProfilerState::RENDERING);
         for (Layer* _layer : this->layerStack)
-            _layer->onImGuiRender(_dt);
-            engine::ImGuiLayer::drawDebugInfo();
-        this->imGuiLayer->end();
+            _layer->onRender(_dt);
 
         Renderer::beginDraw(camera);
         Renderer::draw(sprite);
@@ -120,6 +112,15 @@ namespace engine {
         Renderer::beginDebugDraw(camera);
         Renderer::drawShape(shape);
         Renderer::endDebugDraw();
+        engine::Profiler::end(ProfilerState::RENDERING);
+
+        engine::Profiler::begin(ProfilerState::IMGUI);
+        this->imGuiLayer->begin();
+        for (Layer* _layer : this->layerStack)
+            _layer->onImGuiRender(_dt);
+            engine::ImGuiLayer::drawDebugInfo();
+        this->imGuiLayer->end();
+        engine::Profiler::end(ProfilerState::IMGUI);
     }
 
     bool Engine::onWindowClosed(WindowClosedEvent &_e) {
