@@ -64,9 +64,9 @@ namespace engine {
                 #endif
             }
 
-            engine::Profiler::begin(ProfilerState::SWAP_BUFFERS);
+            engine::Profiler::begin(ProfilerState::INPUT);
             this->window->update();
-            engine::Profiler::end(ProfilerState::SWAP_BUFFERS);
+            engine::Profiler::end(ProfilerState::INPUT);
 
             engine::Profiler::endFrame();
         }
@@ -85,23 +85,24 @@ namespace engine {
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
+        Profiler::begin(ProfilerState::FIXED_UPDATE);
         for (Layer* _layer : this->layerStack)
             _layer->onFixedUpdate(_fixedDt);
+        Profiler::end(ProfilerState::FIXED_UPDATE);
     }
 
     void Engine::onUpdate(Delta _dt) {
+        Profiler::begin(ProfilerState::UPDATE);
         for (Layer* _layer : this->layerStack)
             _layer->onUpdate(_dt);
-
-        if(Input::isKeyJustPressed(KeyCode::F))
-            setFullscreen(!isFullscreen());
+        Profiler::end(ProfilerState::UPDATE);
     }
 
     void Engine::onRender(Delta _dt) {
 
         Renderer::clear(Color::Red);
 
-        engine::Profiler::begin(ProfilerState::RENDERING);
+        Profiler::begin(ProfilerState::RENDERING);
         for (Layer* _layer : this->layerStack)
             _layer->onRender(_dt);
 
@@ -112,15 +113,15 @@ namespace engine {
         Renderer::beginDebugDraw(camera);
         Renderer::drawShape(shape);
         Renderer::endDebugDraw();
-        engine::Profiler::end(ProfilerState::RENDERING);
+        Profiler::end(ProfilerState::RENDERING);
 
-        engine::Profiler::begin(ProfilerState::IMGUI);
+        Profiler::begin(ProfilerState::IMGUI);
         this->imGuiLayer->begin();
         for (Layer* _layer : this->layerStack)
             _layer->onImGuiRender(_dt);
             engine::ImGuiLayer::drawDebugInfo();
         this->imGuiLayer->end();
-        engine::Profiler::end(ProfilerState::IMGUI);
+        Profiler::end(ProfilerState::IMGUI);
     }
 
     bool Engine::onWindowClosed(WindowClosedEvent &_e) {

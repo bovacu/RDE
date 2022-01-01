@@ -17,7 +17,7 @@ namespace engine {
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+//        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
         //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
         //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
@@ -81,6 +81,12 @@ namespace engine {
     }
 
     void ImGuiLayer::drawDebugInfo() {
+        ImGui::SetNextWindowSize({(float)Engine::get().getWindowSize().x, (float)Engine::get().getWindowSize().y}, ImGuiCond_Always);
+//        ImGui::SetNextWindowPos({0, 0}, ImGuiCond_Always);
+
+        ImGui::Begin("Master", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground);
+        ImGui::End();
+
         static bool _vsync = Engine::get().isVSync(), _fullscreen = false;
         static int _fps = 60;
         static int _windowRes[2] = {(int) engine::Engine::get().getWindowSize().x,(int) engine::Engine::get().getWindowSize().y};
@@ -88,7 +94,7 @@ namespace engine {
         std::string _windowResolution = std::to_string(Engine::get().getWindowSize().x) + "x" + std::to_string(Engine::get().getWindowSize().y);
         static const char* _resSelected = _windowResolution.c_str();
 
-        ImGui::Begin("Debugging", nullptr);
+        ImGui::Begin("Debugging", nullptr, ImGuiWindowFlags_NoMove);
 
         if(ImGui::Checkbox("VSync Active", &_vsync)) {
             engine::Engine::get().getWindow().setVSync(_vsync);
@@ -103,6 +109,7 @@ namespace engine {
         };
 
         ImGui::Text("Resolution"); ImGui::SameLine();
+        ImGui::SetNextItemWidth(90);
         if (ImGui::BeginCombo("##combo", _resSelected)){ // The second parameter is the label previewed before opening the combo. {
             for (auto & _resolution : _resolutions) {
                 bool is_selected = (_resSelected == _resolution);
@@ -117,11 +124,14 @@ namespace engine {
             ImGui::EndCombo();
         }
 
-        ImGui::Text("FPS: %d", engine::Engine::get().getFps()); ImGui::SameLine();
         ImGui::Separator();
+        ImGui::Text("FPS: %d", engine::Engine::get().getFps());
+        ImGui::Separator();
+        ImGui::Text("X: %d, Y: %d", Input::getMousePosition().x, Input::getMousePosition().y);
+
         ImGui::End();
 
-        ImGui::Begin("Metrics", nullptr);
+        ImGui::Begin("Metrics", nullptr, ImGuiWindowFlags_NoMove);
         metrics();
         ImGui::End();
     }
@@ -141,28 +151,17 @@ namespace engine {
             }
         }
 
-        if (ImPlot::BeginPlot("##Rolling", ImVec2(-1,300))) {
+        if (ImPlot::BeginPlot("##Rolling", ImVec2(-1,125))) {
             ImPlot::SetupAxes(nullptr, "ms", ImPlotAxisFlags_NoTickLabels);
             ImPlot::SetupAxisLimits(ImAxis_X1,0,history, ImGuiCond_Always);
             ImPlot::SetupAxisLimits(ImAxis_Y1,0,50);
 
             for(auto& _state : State::stateToNameDict) {
                 auto _s = plotBuffers[_state.first];
-                ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),
-                                 &_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
+                ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),&_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
             }
 
             ImPlot::EndPlot();
-        }
-
-        if(ImGui::Button("Stop")) {
-            _capture = false;
-        }
-
-        ImGui::SameLine();
-
-        if(ImGui::Button("Resume")) {
-            _capture = true;
         }
     }
 
@@ -179,17 +178,26 @@ namespace engine {
     }
 
     bool ImGuiLayer::onMouseClicked(MouseButtonPressedEvent& _e) {
+//        return ImGui::IsAnyItemHovered();
         return false;
-        return ImGui::IsWindowHovered();
     }
 
     bool ImGuiLayer::onMouseMovedEvent(MouseMovedEvent& _e) {
+//        return ImGui::IsAnyItemHovered();
         return false;
-        return ImGui::IsWindowHovered();
     }
 
     bool ImGuiLayer::onMouseScrolled(MouseScrolledEvent& _e) {
+//        return ImGui::IsAnyItemHovered();
         return false;
-        return ImGui::IsWindowHovered();
+    }
+
+    void ImGuiLayer::mouseInfo() {
+        ImGui::SetNextWindowSize({150, -1}, ImGuiCond_Once);
+        ImGui::GetStyle().Alpha = 0.65;
+        ImGui::Begin("MouseInfo", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+        ImGui::GetStyle().Alpha = 1;
+        ImGui::Text("X: %d, Y: %d", Input::getMousePosition().x, Input::getMousePosition().y);
+        ImGui::End();
     }
 }

@@ -46,6 +46,8 @@ namespace engine {
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
         /// Creating the main window.
         this->window = glfwCreateWindow((int)_props.width, (int)_props.height, this->data.title.c_str(), nullptr, nullptr);
         ++GLFWWindowCount;
@@ -64,9 +66,6 @@ namespace engine {
             LOG_E("Error initing glew")
             return;
         }
-
-        glEnable(GL_LINE_SMOOTH);
-        glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
 
 #pragma endregion Initializing
 

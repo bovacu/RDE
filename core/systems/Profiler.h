@@ -13,11 +13,10 @@
 namespace engine {
 
     enum ProfilerState {
-        FRAME,
         INPUT,
-        SWAP_BUFFERS,
         RENDERING,
         UPDATE,
+        FIXED_UPDATE,
         IMGUI
     };
 

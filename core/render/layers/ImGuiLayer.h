@@ -36,6 +36,7 @@ namespace engine {
         private:
             static void charToIntSize(const std::string& _size, int* _resolution);
             static void metrics();
+            static void mouseInfo();
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
     };

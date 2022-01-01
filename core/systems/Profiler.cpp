@@ -11,8 +11,7 @@ namespace engine {
             {ProfilerState::UPDATE, "Update"},
             {ProfilerState::IMGUI, "ImGui"},
             {ProfilerState::RENDERING, "Rendering"},
-            {ProfilerState::SWAP_BUFFERS, "SwapBuffers"},
-            {ProfilerState::FRAME, "Frame"},
+            {ProfilerState::FIXED_UPDATE, "FixedUpdate"},
             {ProfilerState::INPUT, "Input"},
     };
 
