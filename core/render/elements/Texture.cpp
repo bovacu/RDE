@@ -1,59 +1,14 @@
 #include "Texture.h"
-#include "stb_image.h"
 #include "core/util/Logger.h"
 
 namespace engine {
 
     Texture::Texture(char* _path) {
-        int _width, _height, _channels;
-        // Load the file.
-        stbi_set_flip_vertically_on_load(1);
-        stbi_uc* _data;
-
-        /// Then we load the image pixels.
-        _data = stbi_load(_path, &_width, &_height, &_channels, 0);
-
-        width = _width;
-        height = _height;
-
-        /// We set the basic information.
-
-        GLenum _internalFormat = 0, _dataFormat = 0;
-        if (_channels == 4) {
-            _internalFormat = GL_RGBA8;
-            _dataFormat = GL_RGBA;
-        } else if (_channels == 3) {
-            _internalFormat = GL_RGB8;
-            _dataFormat = GL_RGB;
-        } else {
-            LOG_E("Not supported format image")
-        }
-
-        GLenum internalFormat = _internalFormat;
-        GLenum dataFormat = _dataFormat;
-
-
-        glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-
-        /// Then we tell OpenGL that on this buffer we are storing a 2D texture.
-        glTextureStorage2D(texture, 1, internalFormat, _width, _height);
-
-        /// We set the up/down resizing algorithms
-        glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        /// And the up/down wrapping algorithms
-        glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
-        /// glTextureStorage2D could also be used for this task, but is slower.
-        glTextureSubImage2D(texture, 0, 0, 0, _width, _height, _dataFormat, GL_UNSIGNED_BYTE, _data);
-        // We can unload the images now that the texture data has been buffered with opengl
-        stbi_image_free(_data);
+        loadFromFile(_path);
     }
 
     Texture::~Texture() {
+        cleanJunk();
         glDeleteTextures(1, &texture);
     }
 
@@ -73,6 +28,113 @@ namespace engine {
 
     Vec2I Texture::getSize() const {
         return {width, height};
+    }
+
+    bool Texture::loadFromFile(const char* _path, bool _deleteJunkImmediately) {
+        // Load the file.
+        stbi_set_flip_vertically_on_load(1);
+
+        /// Then we load the image pixels.
+        texturePixels = stbi_load(_path, &width, &height, &channels, 0);
+
+        /// We set the basic information.
+
+        GLenum _internalFormat = 0, _dataFormat = 0;
+        if (channels == 4) {
+            _internalFormat = GL_RGBA8;
+            _dataFormat = GL_RGBA;
+        } else if (channels == 3) {
+            _internalFormat = GL_RGB8;
+            _dataFormat = GL_RGB;
+        } else {
+            LOG_E("Not supported format image")
+        }
+
+        internalFormat = _internalFormat;
+        dataFormat = _dataFormat;
+
+
+        glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+
+        /// Then we tell OpenGL that on this buffer we are storing a 2D texture.
+        glTextureStorage2D(texture, 1, internalFormat, width, height);
+
+        /// We set the up/down resizing algorithms
+        glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        /// And the up/down wrapping algorithms
+        glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
+        /// glTextureStorage2D could also be used for this task, but is slower.
+        glTextureSubImage2D(texture, 0, 0, 0, width, height, _dataFormat, GL_UNSIGNED_BYTE, texturePixels);
+        // We can unload the images now that the texture data has been buffered with opengl
+
+        if(_deleteJunkImmediately) {
+            stbi_image_free(texturePixels);
+            texturePixels = nullptr;
+            LOG_I("Deleted junk")
+        }
+
+        region = {{0, 0}, {width, height}};
+
+        return true;
+    }
+
+    void Texture::cleanJunk() {
+        if(!texturePixels)
+            stbi_image_free(texturePixels);
+        texturePixels = nullptr;
+    }
+
+    Color Texture::getPixel(uint _x, uint _y) {
+        if(!texturePixels) {
+            LOG_E("Tried to access the data from a texture that already deleted it!!")
+            return Color::Transparent;
+        }
+
+        unsigned bytePerPixel = channels;
+        unsigned char* pixelOffset = texturePixels + (_x + height * _y) * bytePerPixel;
+        unsigned char _r = texturePixels[channels * (_y * width + _x) + 0];
+        unsigned char _g = texturePixels[channels * (_y * width + _x) + 1];
+        unsigned char _b = texturePixels[channels * (_y * width + _x) + 2];
+        unsigned char _a = channels >= 4 ? texturePixels[4 * (_y * width + _x) + 3] : 0xff;
+
+        return Color { _r, _g, _b, _a };
+    }
+
+    Texture::Texture(Texture* _spriteSheet, const IntRect& _region) {
+        texture = _spriteSheet->texture;
+        region = _region;
+//        glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+//
+//        /// Then we tell OpenGL that on this buffer we are storing a 2D texture.
+//        glTextureStorage2D(texture, 1, _spriteSheet->internalFormat, _region.size.x, _region.size.y);
+//
+//        /// We set the up/down resizing algorithms
+//        glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//        glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//
+//        /// And the up/down wrapping algorithms
+//        glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//        glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//
+//        texturePixels = new unsigned char[_spriteSheet->channels * _region.size.x, _region.size.y];
+//        for(int _y = _region.bottomLeftCorner.y; _y < _region.bottomLeftCorner.y + _region.size.y; _y++) {
+//            for(int _x = _region.bottomLeftCorner.x; _x < _region.bottomLeftCorner.x + _region.size.x; _x++) {
+//                auto _color = _spriteSheet->getPixel(_x, _y);
+//
+//            }
+//        }
+//
+//        /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
+//        /// glTextureStorage2D could also be used for this task, but is slower.
+//        glTextureSubImage2D(texture, 0, 0, 0, _region.size.x, _region.size.y, _spriteSheet->dataFormat, GL_UNSIGNED_BYTE, texturePixels);
+//
+//        delete [] texturePixels;
+//        texturePixels = nullptr;
     }
 }
 

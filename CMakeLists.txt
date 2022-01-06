@@ -40,7 +40,7 @@ endif()
 
 add_executable( Engine2_0 main.cpp
 
-        core/util/Time.h core/util/Easing.h core/util/Functions.h core/util/Logger.h core/util/PerlinNoise.h
+        core/util/Easing.h core/util/Functions.h core/util/Logger.h core/util/PerlinNoise.h
         core/util/Random.h core/util/Util.h core/util/Vec.h core/util/Color.cpp core/util/Color.h core/util/Delta.h
         core/util/Clock.h core/util/Clock.cpp
 
@@ -81,7 +81,7 @@ add_executable( Engine2_0 main.cpp
         external/imgui/nodeEditor/imgui_canvas.h external/imgui/nodeEditor/imgui_canvas.cpp external/imgui/nodeEditor/imgui_extra_math.h
         external/imgui/nodeEditor/imgui_node_editor.h external/imgui/nodeEditor/imgui_node_editor.cpp external/imgui/nodeEditor/imgui_node_editor_api.cpp
         external/imgui/nodeEditor/imgui_node_editor_internal.h
-        core/systems/Profiler.h core/systems/Profiler.cpp core/render/layers/ImGuiCore.h)
+        core/systems/Profiler.h core/systems/Profiler.cpp core/render/layers/ImGuiCore.h core/render/elements/TextureAtlasManager.cpp core/render/elements/TextureAtlasManager.h core/util/Rect.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 

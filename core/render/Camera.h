@@ -9,6 +9,7 @@
 #include "core/util/Util.h"
 #include "core/render/window/Window.h"
 #include "core/systems/Components.h"
+#include "core/render/window/event/MouseEvent.h"
 
 namespace engine {
 
@@ -18,17 +19,35 @@ namespace engine {
             int width, height;
             int vpSize[2]{0, 0};
             float aspectRatio;
-            glm::mat4 projection;
+            glm::mat4 projectionMatrix;
+            glm::mat4 viewMatrix {1.f};
+            glm::mat4 viewProjectionMatrix;
             Transform transform;
 
         public:
             void update(Window* _window);
+            void onEvent(Event& _event);
+            bool onMouseScrolled(MouseScrolledEvent& _event);
+
             glm::mat4& getProjectionMatrix();
+            glm::mat4& getViewMatrix();
+            glm::mat4& getViewProjectionMatrix();
             Transform& getTransform();
 
+            void setPosition(const Vec2F& _position);
+            Vec2F getPosition();
+
+            void setRotation(float _rotation);
+            float getRotation();
+
+            float getAspectRatio() const;
+
             glm::mat4& operator() (const Camera& _camera) {
-                return projection;
+                return projectionMatrix;
             }
+
+        private:
+            void recalculateViewMatrix();
     };
 
 }

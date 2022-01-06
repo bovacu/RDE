@@ -13,6 +13,7 @@ namespace engine {
             {ProfilerState::RENDERING, "Rendering"},
             {ProfilerState::FIXED_UPDATE, "FixedUpdate"},
             {ProfilerState::INPUT, "Input"},
+            {ProfilerState::BOTTLE_NECK, "BottleNeck"}
     };
 
     void Profiler::beginFrame() {
@@ -23,6 +24,7 @@ namespace engine {
         State _s;
         _s.init = std::chrono::system_clock::now();
         _s.state = _state;
+        _s.active = true;
         states[_state] = _s;
     }
 

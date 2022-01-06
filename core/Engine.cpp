@@ -21,7 +21,9 @@ namespace engine {
 
         this->window->setVSync(true);
 
-        texture = new Texture((char*)"assets/test.png");
+        texture = new Texture();
+        texture->loadFromFile((char*)"assets/test.png", false);
+        texture->cleanJunk();
         texture->incRefCount();
 
         sprite.setTexture(texture);
@@ -95,6 +97,10 @@ namespace engine {
         Profiler::begin(ProfilerState::UPDATE);
         for (Layer* _layer : this->layerStack)
             _layer->onUpdate(_dt);
+
+        if(Input::isKeyJustPressed(KeyCode::F9))
+            showImGuiDebugWindow = !showImGuiDebugWindow;
+
         Profiler::end(ProfilerState::UPDATE);
     }
 
@@ -112,6 +118,9 @@ namespace engine {
 
         Renderer::beginDebugDraw(camera);
         Renderer::drawShape(shape);
+//        Renderer::drawSquare({-200, 0}, {400, 400});
+//        Renderer::drawSquare({200, 0}, {400, 400}, Color::Green);
+//        Renderer::drawLine({0, 0}, {400, 0}, Color::Blue);
         Renderer::endDebugDraw();
         Profiler::end(ProfilerState::RENDERING);
 
@@ -119,7 +128,8 @@ namespace engine {
         this->imGuiLayer->begin();
         for (Layer* _layer : this->layerStack)
             _layer->onImGuiRender(_dt);
-            engine::ImGuiLayer::drawDebugInfo();
+            if(showImGuiDebugWindow)
+                engine::ImGuiLayer::drawDebugInfo();
         this->imGuiLayer->end();
         Profiler::end(ProfilerState::IMGUI);
     }

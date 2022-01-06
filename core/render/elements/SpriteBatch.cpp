@@ -69,6 +69,7 @@ namespace engine {
         GLint _location = glGetUniformLocation(_shaderID, "viewProjectionMatrix");
         auto _viewProjection = _camera.getProjectionMatrix() * glm::inverse(_camera.getTransform().transformMatrix);
         glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(_viewProjection)));
+        aspectRatio = _camera.getAspectRatio();
     }
 
     void SpriteBatch::draw(const glm::vec4& destRect, const glm::vec4& sourceRect, const glm::vec4& color, Texture* _texture, float _rotation) {
@@ -129,10 +130,11 @@ namespace engine {
 
 
         Vec2F _textureSize = {(float)_sprite.getTexture().getSize().x, (float)_sprite.getTexture().getSize().y};
-        glm::vec4 _bottomLeftTextureCorner = { -0.5, -0.5, 0.0f, 1.0f };
-        glm::vec4 _bottomRightTextureCorner = {0.5, -0.5, 0.0f, 1.0f };
-        glm::vec4 _topRightTextureCorner = {0.5, 0.5, 0.0f, 1.0f };
-        glm::vec4 _topLeftTextureCorner = {-0.5, 0.5, 0.0f, 1.0f };
+        auto _screenSize = worldToScreenSize(_textureSize);
+        glm::vec4 _bottomLeftTextureCorner = { -_screenSize.x, -_screenSize.y, 0.0f, 1.0f };
+        glm::vec4 _bottomRightTextureCorner = {_screenSize.x, -_screenSize.y, 0.0f, 1.0f };
+        glm::vec4 _topRightTextureCorner = {_screenSize.x, _screenSize.y, 0.0f, 1.0f };
+        glm::vec4 _topLeftTextureCorner = {-_screenSize.x, _screenSize.y, 0.0f, 1.0f };
 
         glm::vec4 _color = {(float)_sprite.getColor().r / 255.f, (float)_sprite.getColor().g/ 255.f,
                             (float)_sprite.getColor().b/ 255.f, (float)_sprite.getColor().a/ 255.f};
@@ -141,17 +143,20 @@ namespace engine {
         vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(0, _textureSize.y), _color);
         vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(_textureSize.x, 0), _color);
         vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(0, _textureSize.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(_textureSize.x, _textureSize.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(_textureSize.x , _textureSize.y), _color);
     }
 
     void SpriteBatch::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
-        vertexDebugBufferLines.emplace_back(glm::vec3 {_p0.x, _p0.y, 1.0f}, _colorVec4);
-        vertexDebugBufferLines.emplace_back(glm::vec3 {_p1.x, _p1.y, 1.0f}, _colorVec4);
+        auto _screenPos0 = worldToScreenCoords(_p0);
+        auto _screenPos1 = worldToScreenCoords(_p1);
+        vertexDebugBufferLines.emplace_back(glm::vec3 {_screenPos0.x, _screenPos0.y, 1.0f}, _colorVec4);
+        vertexDebugBufferLines.emplace_back(glm::vec3 {_screenPos1.x, _screenPos1.y, 1.0f}, _colorVec4);
     }
 
     void SpriteBatch::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
-        auto _translationMat = glm::translate(glm::mat4(1.f),glm::vec3 (_position.x,_position.y, 1.f));
+        auto _screenPos = worldToScreenCoords(_position);
+        auto _translationMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x,_screenPos.y, 1.f));
         auto _rotationMat = glm::rotate(glm::mat4(1.0f), glm::radians(_rotation), { 0.0f, 0.0f, 1.0f });
         auto _scaleMat = glm::scale(glm::mat4(1.0f), { 1, 1, 1.0f });
         glm::mat4 _transformMat = _translationMat;
@@ -163,15 +168,16 @@ namespace engine {
 
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
 
+        auto _screenSize = worldToScreenSize(_size);
         // First triangle
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size.x, _size.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_size.x, _size.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_size.x, -_size.y, 0.0f, 1.f}, _colorVec4);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _colorVec4);
 
         // Second triangle
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_size.x, -_size.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size.x, -_size.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size.x, _size.y, 0.0f, 1.f}, _colorVec4);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _colorVec4);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _colorVec4);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
     }
 
     void SpriteBatch::drawShape(Shape& _shape) {
@@ -276,6 +282,10 @@ namespace engine {
     }
 
     Vec2F SpriteBatch::worldToScreenCoords(Vec2F _position) {
-        return {_position.x / ((float)window->getWindowSize().x / 2), _position.y / ((float)window->getWindowSize().y / 2)};
+        return {_position.x * aspectRatio / ((float)window->getWindowSize().x / 2), _position.y / ((float)window->getWindowSize().y / 2)};
+    }
+
+    Vec2F SpriteBatch::worldToScreenSize(Vec2F _size) {
+        return {_size.x * aspectRatio / ((float)window->getWindowSize().x), _size.y / ((float)window->getWindowSize().y)};
     }
 }

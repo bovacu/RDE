@@ -81,14 +81,11 @@ namespace engine {
     }
 
     void ImGuiLayer::drawDebugInfo() {
-        ImGui::SetNextWindowSize({(float)Engine::get().getWindowSize().x, (float)Engine::get().getWindowSize().y}, ImGuiCond_Always);
-//        ImGui::SetNextWindowPos({0, 0}, ImGuiCond_Always);
-
+        ImGui::SetNextWindowSize({(float)Engine::get().getWindowSize().x, (float)Engine::get().getWindowSize().y});
         ImGui::Begin("Master", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground);
         ImGui::End();
 
         static bool _vsync = Engine::get().isVSync(), _fullscreen = false;
-        static int _fps = 60;
         static int _windowRes[2] = {(int) engine::Engine::get().getWindowSize().x,(int) engine::Engine::get().getWindowSize().y};
 
         std::string _windowResolution = std::to_string(Engine::get().getWindowSize().x) + "x" + std::to_string(Engine::get().getWindowSize().y);
@@ -96,13 +93,11 @@ namespace engine {
 
         ImGui::Begin("Debugging", nullptr, ImGuiWindowFlags_NoMove);
 
-        if(ImGui::Checkbox("VSync Active", &_vsync)) {
+        if(ImGui::Checkbox("VSync Active", &_vsync))
             engine::Engine::get().getWindow().setVSync(_vsync);
-        }
 
-        if(ImGui::Checkbox("Fullscreen", &_fullscreen)) {
+        if(ImGui::Checkbox("Fullscreen", &_fullscreen))
             engine::Engine::get().getWindow().setFullscreen(_fullscreen);
-        }
 
         const char* _resolutions[] = { "2560x1440", "1920x1080", "1366x768", "1280x720", "1920x1200", "1680x1050",
                                        "1440x900" ,"1280x800" ,"1024x768" ,"800x600", "800x480","640x480", "320x240"
@@ -157,8 +152,10 @@ namespace engine {
             ImPlot::SetupAxisLimits(ImAxis_Y1,0,50);
 
             for(auto& _state : State::stateToNameDict) {
-                auto _s = plotBuffers[_state.first];
-                ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),&_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
+                if(Profiler::getStates()[_state.first].active) {
+                    auto _s = plotBuffers[_state.first];
+                    ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),&_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
+                }
             }
 
             ImPlot::EndPlot();

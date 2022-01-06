@@ -17,7 +17,8 @@ namespace engine {
         RENDERING,
         UPDATE,
         FIXED_UPDATE,
-        IMGUI
+        IMGUI,
+        BOTTLE_NECK
     };
 
     struct State {
@@ -25,6 +26,7 @@ namespace engine {
         std::chrono::system_clock::time_point init;
         std::chrono::system_clock::time_point end;
         ProfilerState state;
+        bool active = false;
 
         [[nodiscard]] std::string toString() const {
             auto _diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - init);

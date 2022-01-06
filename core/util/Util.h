@@ -6,12 +6,12 @@
 
 #include "Easing.h"
 #include "Logger.h"
-#include "Time.h"
 #include "Vec.h"
 #include "Functions.h"
 #include "Color.h"
 #include "Delta.h"
 #include "Clock.h"
+#include "Rect.h"
 #include "core/Core.h"
 
 #include <memory>

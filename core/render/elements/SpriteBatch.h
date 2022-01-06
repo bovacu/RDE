@@ -52,6 +52,8 @@ namespace engine {
             std::unordered_map<RenderShader, GLuint> shadersDict;
             Window* window;
 
+            float aspectRatio = 1;
+
         public:
             SpriteBatch() = default;
             ~SpriteBatch();
@@ -77,5 +79,6 @@ namespace engine {
             void initDebugVbo();
 
             Vec2F worldToScreenCoords(Vec2F _position);
+            Vec2F worldToScreenSize(Vec2F _size);
     };
 }

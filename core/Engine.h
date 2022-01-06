@@ -32,6 +32,7 @@ namespace engine {
         private:
             bool running = true;
             bool minimized = false;
+            bool showImGuiDebugWindow = false;
 
         private:
             WindowPtr window;
