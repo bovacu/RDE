@@ -669,7 +669,7 @@ STBTT_DEF int  stbtt_PackFontRangesRenderIntoRects(stbtt_pack_context *spc, cons
 // fonts, or if you want to pack custom data into a font texture, take a look
 // at the source to of stbtt_PackFontRanges() and create a custom version
 // using these functions, e.g. call GatherRects multiple times,
-// building up a single array of rects, then call PackRects once,
+// building up a single array of subTextures, then call PackRects once,
 // then call RenderIntoRects repeatedly. This may result in a
 // better packing than calling PackFontRanges multiple times
 // (or it may not).
@@ -3765,25 +3765,25 @@ static void stbrp_init_target(stbrp_context *con, int pw, int ph, stbrp_node *no
    STBTT__NOTUSED(num_nodes);
 }
 
-static void stbrp_pack_rects(stbrp_context *con, stbrp_rect *rects, int num_rects)
+static void stbrp_pack_rects(stbrp_context *con, stbrp_rect *subTextures, int num_rects)
 {
    int i;
    for (i=0; i < num_rects; ++i) {
-      if (con->x + rects[i].w > con->width) {
+      if (con->x + subTextures[i].w > con->width) {
          con->x = 0;
          con->y = con->bottom_y;
       }
-      if (con->y + rects[i].h > con->height)
+      if (con->y + subTextures[i].h > con->height)
          break;
-      rects[i].x = con->x;
-      rects[i].y = con->y;
-      rects[i].was_packed = 1;
-      con->x += rects[i].w;
-      if (con->y + rects[i].h > con->bottom_y)
-         con->bottom_y = con->y + rects[i].h;
+      subTextures[i].x = con->x;
+      subTextures[i].y = con->y;
+      subTextures[i].was_packed = 1;
+      con->x += subTextures[i].w;
+      if (con->y + subTextures[i].h > con->bottom_y)
+         con->bottom_y = con->y + subTextures[i].h;
    }
    for (   ; i < num_rects; ++i)
-      rects[i].was_packed = 0;
+      subTextures[i].was_packed = 0;
 }
 #endif
 
@@ -3985,7 +3985,7 @@ static float stbtt__oversample_shift(int oversample)
    return (float)-(oversample - 1) / (2.0f * (float)oversample);
 }
 
-// rects array must be big enough to accommodate all characters in the given ranges
+// subTextures array must be big enough to accommodate all characters in the given ranges
 STBTT_DEF int stbtt_PackFontRangesGatherRects(stbtt_pack_context *spc, const stbtt_fontinfo *info, stbtt_pack_range *ranges, int num_ranges, stbrp_rect *rects)
 {
    int i,j,k;
@@ -4041,7 +4041,7 @@ STBTT_DEF void stbtt_MakeGlyphBitmapSubpixelPrefilter(const stbtt_fontinfo *info
    *sub_y = stbtt__oversample_shift(prefilter_y);
 }
 
-// rects array must be big enough to accommodate all characters in the given ranges
+// subTextures array must be big enough to accommodate all characters in the given ranges
 STBTT_DEF int stbtt_PackFontRangesRenderIntoRects(stbtt_pack_context *spc, const stbtt_fontinfo *info, stbtt_pack_range *ranges, int num_ranges, stbrp_rect *rects)
 {
    int i,j,k, return_value = 1;

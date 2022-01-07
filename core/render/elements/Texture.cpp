@@ -7,8 +7,18 @@ namespace engine {
         loadFromFile(_path);
     }
 
+    Texture::Texture(Texture* _spriteSheet, const IntRect& _region) {
+        texture = _spriteSheet->texture;
+        region = _region;
+        refCount = _spriteSheet->refCount;
+        width = _spriteSheet->width;
+        height = _spriteSheet->height;
+        channels = _spriteSheet->channels;
+        internalFormat = _spriteSheet->internalFormat;
+        dataFormat = _spriteSheet->dataFormat;
+    }
+
     Texture::~Texture() {
-        cleanJunk();
         glDeleteTextures(1, &texture);
     }
 
@@ -69,13 +79,12 @@ namespace engine {
 
         /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
         /// glTextureStorage2D could also be used for this task, but is slower.
-        glTextureSubImage2D(texture, 0, 0, 0, width, height, _dataFormat, GL_UNSIGNED_BYTE, texturePixels);
+        glTextureSubImage2D(texture, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, texturePixels);
         // We can unload the images now that the texture data has been buffered with opengl
 
         if(_deleteJunkImmediately) {
             stbi_image_free(texturePixels);
             texturePixels = nullptr;
-            LOG_I("Deleted junk")
         }
 
         region = {{0, 0}, {width, height}};
@@ -105,36 +114,8 @@ namespace engine {
         return Color { _r, _g, _b, _a };
     }
 
-    Texture::Texture(Texture* _spriteSheet, const IntRect& _region) {
-        texture = _spriteSheet->texture;
-        region = _region;
-//        glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-//
-//        /// Then we tell OpenGL that on this buffer we are storing a 2D texture.
-//        glTextureStorage2D(texture, 1, _spriteSheet->internalFormat, _region.size.x, _region.size.y);
-//
-//        /// We set the up/down resizing algorithms
-//        glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//        glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//
-//        /// And the up/down wrapping algorithms
-//        glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//        glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//
-//        texturePixels = new unsigned char[_spriteSheet->channels * _region.size.x, _region.size.y];
-//        for(int _y = _region.bottomLeftCorner.y; _y < _region.bottomLeftCorner.y + _region.size.y; _y++) {
-//            for(int _x = _region.bottomLeftCorner.x; _x < _region.bottomLeftCorner.x + _region.size.x; _x++) {
-//                auto _color = _spriteSheet->getPixel(_x, _y);
-//
-//            }
-//        }
-//
-//        /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
-//        /// glTextureStorage2D could also be used for this task, but is slower.
-//        glTextureSubImage2D(texture, 0, 0, 0, _region.size.x, _region.size.y, _spriteSheet->dataFormat, GL_UNSIGNED_BYTE, texturePixels);
-//
-//        delete [] texturePixels;
-//        texturePixels = nullptr;
+    IntRect& Texture::getRegion() {
+        return region;
     }
 }
 

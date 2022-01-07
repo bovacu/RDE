@@ -2631,7 +2631,7 @@ void ImFontAtlasBuildPackCustomRects(ImFontAtlas* atlas, void* stbrp_context_opa
     IM_ASSERT(pack_context != NULL);
 
     ImVector<ImFontAtlasCustomRect>& user_rects = atlas->CustomRects;
-    IM_ASSERT(user_rects.Size >= 1); // We expect at least the default custom rects to be registered, else something went wrong.
+    IM_ASSERT(user_rects.Size >= 1); // We expect at least the default custom subTextures to be registered, else something went wrong.
 
     ImVector<stbrp_rect> pack_rects;
     pack_rects.resize(user_rects.Size);

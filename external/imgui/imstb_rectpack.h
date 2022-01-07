@@ -46,8 +46,8 @@
 //     0.11  (2017-03-03)  return packing success/fail result
 //     0.10  (2016-10-25)  remove cast-away-const to avoid warnings
 //     0.09  (2016-08-27)  fix compiler warnings
-//     0.08  (2015-09-13)  really fix bug with empty rects (w=0 or h=0)
-//     0.07  (2015-09-13)  fix bug with empty rects (w=0 or h=0)
+//     0.08  (2015-09-13)  really fix bug with empty subTextures (w=0 or h=0)
+//     0.07  (2015-09-13)  fix bug with empty subTextures (w=0 or h=0)
 //     0.06  (2015-04-15)  added STBRP_SORT to allow replacing qsort
 //     0.05:  added STBRP_ASSERT to allow replacing assert
 //     0.04:  fixed minor bug in STBRP_LARGE_RECTS support
@@ -89,7 +89,7 @@ typedef unsigned short stbrp_coord;
 
 STBRP_DEF int stbrp_pack_rects (stbrp_context *context, stbrp_rect *rects, int num_rects);
 // Assign packed locations to rectangles. The rectangles are of type
-// 'stbrp_rect' defined below, stored in the array 'rects', and there
+// 'stbrp_rect' defined below, stored in the array 'subTextures', and there
 // are 'num_rects' many of them.
 //
 // Rectangles which are successfully packed have the 'was_packed' flag
@@ -98,7 +98,7 @@ STBRP_DEF int stbrp_pack_rects (stbrp_context *context, stbrp_rect *rects, int n
 // if you imagine y increasing downwards). Rectangles which do not fit
 // have the 'was_packed' flag set to 0.
 //
-// You should not try to access the 'rects' array from another thread
+// You should not try to access the 'subTextures' array from another thread
 // while this function is running, as the function temporarily reorders
 // the array while it executes.
 //

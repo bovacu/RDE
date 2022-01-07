@@ -2238,7 +2238,7 @@ void ImGui::TablePopBackgroundChannel()
 // Allocate draw channels. Called by TableUpdateLayout()
 // - We allocate them following storage order instead of display order so reordering columns won't needlessly
 //   increase overall dormant memory cost.
-// - We isolate headers draw commands in their own channels instead of just altering clip rects.
+// - We isolate headers draw commands in their own channels instead of just altering clip subTextures.
 //   This is in order to facilitate merging of draw commands.
 // - After crossing FreezeRowsCount, all columns see their current draw channel changed to a second set of channels.
 // - We only use the dummy draw channel so we can push a null clipping rectangle into it without affecting other

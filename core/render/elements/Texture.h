@@ -10,10 +10,10 @@ namespace engine {
         private:
             GLuint texture{};
             unsigned int refCount = 0;
-            int width, height, channels;
-            GLenum internalFormat, dataFormat;
-            stbi_uc* texturePixels;
-            IntRect region;
+            int width = -1, height = -1, channels = -1;
+            GLenum internalFormat = -1, dataFormat = -1;
+            stbi_uc* texturePixels = nullptr;
+            IntRect region {};
 
         public:
             Texture() = default;
@@ -29,5 +29,7 @@ namespace engine {
 
             void cleanJunk();
             Color getPixel(uint _x, uint _y);
+
+            IntRect& getRegion();
     };
 }

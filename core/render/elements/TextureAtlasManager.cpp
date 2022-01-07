@@ -12,40 +12,36 @@ namespace engine {
             return false;
         }
 
-        Atlas _atlas;
-        if(!_atlas.texture->loadFromFile(_pathToTexture.c_str(), false)) {
+        auto* _atlas = new Atlas;
+        if(!_atlas->texture->loadFromFile(_pathToTexture.c_str())) {
             LOG_E_TIME("Atlas '", _pathToTexture, "' could not be loaded");
             return false;
         }
 
-        _atlas.name = _name;
-        _atlas.tileWidth = _tileWidth;
-        _atlas.tileHeight = _tileHeight;
-        _atlas.textureWidth = _atlas.texture->getSize().x;
-        _atlas.textureHeight = _atlas.texture->getSize().y;
+        _atlas->name = _name;
+        _atlas->tileWidth = _tileWidth;
+        _atlas->tileHeight = _tileHeight;
+        _atlas->textureWidth = _atlas->texture->getSize().x;
+        _atlas->textureHeight = _atlas->texture->getSize().y;
 
-        cropTextures(_atlas);
+        cropTextures(*_atlas);
         atlases[_name] = _atlas;
-        _atlas.texture->cleanJunk();
         LOG_S_TIME("Load successful!")
         return true;
     }
 
-    Texture TextureAtlasManager::getTexture(const std::string& _atlasName, const std::string& _textureName) {
-        return {nullptr, IntRect()};
-//        if(atlases.find(_atlasName) == atlases.end()) {
-//            LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
-//            return {nullptr, IntRect()};
-//        }
-//
-//        Atlas& _atlas = atlases[_atlasName];
-//
-//        if(_atlas.rects.find(_textureName) == _atlas.rects.end()) {
-//            LOG_E_TIME("Texture '", _textureName, "' in '",_atlasName ,"' was not found! But tried to be accessed")
-//            return {nullptr, IntRect()};
-//        }
-//
-//        return Texture(&_atlas.texture, _atlas.rects[_textureName]);
+    Texture* TextureAtlasManager::getTexture(const std::string& _atlasName, const std::string& _textureName) {
+        if(atlases.find(_atlasName) == atlases.end()) {
+            LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
+            return nullptr;
+        }
+
+        if(atlases[_atlasName]->subTextures.find(_textureName) == atlases[_atlasName]->subTextures.end()) {
+            LOG_E_TIME("Texture '", _textureName, "' in '",_atlasName ,"' was not found! But tried to be accessed")
+            return nullptr;
+        }
+
+        return atlases[_atlasName]->subTextures[_textureName];
     }
 
 
@@ -55,18 +51,17 @@ namespace engine {
         uint _numOfImagesVertical = _atlas.textureHeight / _atlas.tileHeight;
         uint _currentTexture = 0;
 
-        for(uint _x = 0; _x < _numOfImagesHorizontal; _x++) {
-            for(uint _y = 0; _y < _numOfImagesVertical; _y++) {
-                if(isTextureEmpty(_atlas, _x * _atlas.tileWidth, _y * _atlas.tileHeight)) continue;
-
+        for(uint _y = 0; _y < _numOfImagesVertical; _y++) {
+            for(uint _x = 0; _x < _numOfImagesHorizontal; _x++) {
+//                if(isTextureEmpty(_atlas, _x * _atlas.tileWidth, _y * _atlas.tileHeight)) continue;
                 IntRect _rect;
                 _rect.bottomLeftCorner.x = (int)(_x * _atlas.tileWidth);
-                _rect.bottomLeftCorner.y = (int)(_y * _atlas.tileHeight);
+                _rect.bottomLeftCorner.y = (int)_atlas.textureHeight - (int)((_y + 1) * _atlas.tileHeight);
                 _rect.size.x = (int)_atlas.tileWidth;
                 _rect.size.y = (int)_atlas.tileHeight;
 
-                _atlas.rects[(_atlas.name + "_" + std::to_string(_currentTexture))] = _rect;
-                LOG_I("    Loaded sub-texture: ", _atlas.name + "_" + std::to_string(_currentTexture))
+                _atlas.subTextures[(_atlas.name + "_" + std::to_string(_currentTexture))] = new Texture{_atlas.texture, _rect};
+                LOG_I("    Loaded sub-texture: ", _atlas.name + "_" + std::to_string(_currentTexture), " -> ", _rect)
                 _currentTexture++;
             }
         }
@@ -80,9 +75,9 @@ namespace engine {
 
     bool TextureAtlasManager::isTextureEmpty(const Atlas& _atlas, uint _x, uint _y) const {
         int _transparentPixels = 0;
-        for(auto _h = _x; _h < _x + _atlas.tileWidth; _h++)
-            for(auto _v = _y; _v < _y + _atlas.tileHeight; _v++)
-                if(_atlas.texture->getPixel(_h, _v) == Color::Transparent) _transparentPixels++;
+//        for(auto _h = _x; _h < _x + _atlas.tileWidth; _h++)
+//            for(auto _v = _y; _v < _y + _atlas.tileHeight; _v++)
+//                if(_atlas.texture.getPixel(_h, _v) == Color::Transparent) _transparentPixels++;
 
         return _transparentPixels == _atlas.tileWidth * _atlas.tileHeight;
     }
@@ -93,7 +88,14 @@ namespace engine {
             return nullptr;
         }
 
-        return &atlases[_atlasName];
+        return atlases[_atlasName];
+    }
+
+    TextureAtlasManager::~TextureAtlasManager() {
+        for(auto& _atlas : atlases)
+            delete _atlas.second;
+
+        LOG_S("Cleaning up TextureAtlasManager")
     }
 
 }

@@ -104,7 +104,7 @@ You can read releases logs https://github.com/epezent/implot/releases for more d
                      - SetNextPlotRange  -> SetNextPlotLimits
                      - SetNextPlotRangeX -> SetNextPlotLimitsX
                      - SetNextPlotRangeY -> SetNextPlotLimitsY
-- 2020/05/10 (0.2)  - Plot queries are pixel based by default. Query rects that maintain relative plot position have been removed. This was done to support multi-y-axis.
+- 2020/05/10 (0.2)  - Plot queries are pixel based by default. Query subTextures that maintain relative plot position have been removed. This was done to support multi-y-axis.
 
 */
 
@@ -4964,7 +4964,7 @@ void ShowMetricsWindow(bool* p_popen) {
     }
     const int n_plots = gp.Plots.GetBufSize();
     const int n_subplots = gp.Subplots.GetBufSize();
-    // render rects
+    // render subTextures
     for (int p = 0; p < n_plots; ++p) {
         ImPlotPlot* plot = gp.Plots.GetByIndex(p);
         if (show_frame_rects)

@@ -103,12 +103,13 @@ namespace engine {
     }
 
     void SpriteBatch::draw(const Sprite& _sprite) {
+        if(texture == nullptr) {
+            texture = &_sprite.getTexture();
+        }
 
-        if (texture != &_sprite.getTexture()) {
+        if (texture->getGLTexture() != _sprite.getTexture().getGLTexture()) {
             flush();
 
-
-            // Make sure the _texture exists so long as we are holding on to it.
             _sprite.getTexture().incRefCount();
             if (texture != nullptr)
                 texture->decRefCount();
@@ -129,7 +130,11 @@ namespace engine {
             _transformMat *= _scaleMat;
 
 
-        Vec2F _textureSize = {(float)_sprite.getTexture().getSize().x, (float)_sprite.getTexture().getSize().y};
+        Vec2F _worldPos = {(float)_sprite.getTexture().getRegion().bottomLeftCorner.x, (float)_sprite.getTexture().getRegion().bottomLeftCorner.y};
+        auto _screenSubTexturePos = worldToScreenCoords({(float)_sprite.getTexture().getRegion().bottomLeftCorner.x,
+                                                         (float)_sprite.getTexture().getRegion().bottomLeftCorner.y});
+
+        Vec2F _textureSize = {(float)_sprite.getTexture().getRegion().size.x, (float)_sprite.getTexture().getRegion().size.y};
         auto _screenSize = worldToScreenSize(_textureSize);
         glm::vec4 _bottomLeftTextureCorner = { -_screenSize.x, -_screenSize.y, 0.0f, 1.0f };
         glm::vec4 _bottomRightTextureCorner = {_screenSize.x, -_screenSize.y, 0.0f, 1.0f };
@@ -138,12 +143,12 @@ namespace engine {
 
         glm::vec4 _color = {(float)_sprite.getColor().r / 255.f, (float)_sprite.getColor().g/ 255.f,
                             (float)_sprite.getColor().b/ 255.f, (float)_sprite.getColor().a/ 255.f};
-        vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner, glm::vec2(0, 0), _color);
-        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(_textureSize.x, 0), _color);
-        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(0, _textureSize.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(_textureSize.x, 0), _color);
-        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(0, _textureSize.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(_textureSize.x , _textureSize.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner,glm::vec2(_worldPos.x, _worldPos.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,glm::vec2(_worldPos.x + _textureSize.x, _worldPos.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,glm::vec2(_worldPos.x, _worldPos.y + _textureSize.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,glm::vec2(_worldPos.x + _textureSize.x, _worldPos.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,glm::vec2(_worldPos.x, _worldPos.y + _textureSize.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,glm::vec2(_worldPos.x + _textureSize.x ,_worldPos.y + _textureSize.y), _color);
     }
 
     void SpriteBatch::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {

@@ -13036,7 +13036,7 @@ struct ImGuiDockPreviewData
     ImGuiDockNode*  SplitNode;
     ImGuiDir        SplitDir;
     float           SplitRatio;
-    ImRect          DropRectsDraw[ImGuiDir_COUNT + 1];  // May be slightly different from hit-testing drop rects used in DockNodeCalcDropRects()
+    ImRect          DropRectsDraw[ImGuiDir_COUNT + 1];  // May be slightly different from hit-testing drop subTextures used in DockNodeCalcDropRects()
 
     ImGuiDockPreviewData() : FutureNode(0) { IsDropAllowed = IsCenterAvailable = IsSidesAvailable = IsSplitDirExplicit = false; SplitNode = NULL; SplitDir = ImGuiDir_None; SplitRatio = 0.f; for (int n = 0; n < IM_ARRAYSIZE(DropRectsDraw); n++) DropRectsDraw[n] = ImRect(+FLT_MAX, +FLT_MAX, -FLT_MAX, -FLT_MAX); }
 };
@@ -13753,7 +13753,7 @@ void ImGui::DockContextProcessUndockNode(ImGuiContext* ctx, ImGuiDockNode* node)
 // This is mostly used for automation.
 bool ImGui::DockContextCalcDropPosForDocking(ImGuiWindow* target, ImGuiDockNode* target_node, ImGuiWindow* payload, ImGuiDir split_dir, bool split_outer, ImVec2* out_pos)
 {
-    // In DockNodePreviewDockSetup() for a root central node instead of showing both "inner" and "outer" drop rects
+    // In DockNodePreviewDockSetup() for a root central node instead of showing both "inner" and "outer" drop subTextures
     // (which would be functionally identical) we only show the outer one. Reflect this here.
     if (target_node && target_node->ParentNode == NULL && target_node->IsCentralNode() && split_dir != ImGuiDir_None)
         split_outer = true;

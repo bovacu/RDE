@@ -24,14 +24,26 @@ namespace engine {
     struct Atlas {
         Texture* texture;
         std::string name;
-        std::unordered_map<std::string, IntRect> rects;
+        std::unordered_map<std::string, Texture*> subTextures;
         uint tileWidth, tileHeight;
         uint textureWidth, textureHeight;
+
+        Atlas() {
+            texture = new Texture;
+        }
+
+        ~Atlas() {
+            for(auto& _texture : subTextures)
+                delete _texture.second;
+
+            delete texture;
+            LOG_S("Cleaning up Atlas")
+        }
 
         void debugInfo() {
             LOG_I("Atlas: ", name)
             LOG_I("   - Texture: ", &texture)
-            LOG_I("   - rects size: ", rects.size())
+            LOG_I("   - subTextures size: ", subTextures.size())
             LOG_I("   - tileWidth: ", tileWidth)
             LOG_I("   - tileHeight: ", tileHeight)
             LOG_I("   - textureWidth: ", textureWidth)
@@ -42,12 +54,14 @@ namespace engine {
 
     class TextureAtlasManager {
         private:
-            std::unordered_map<std::string, Atlas> atlases;
+            std::unordered_map<std::string, Atlas*> atlases;
 
         public:
             bool addAtlas(int _tileWidth, int _tileHeight, const std::string& _pathToTexture);
-            Texture getTexture(const std::string& _atlasName, const std::string& _textureName);
+            Texture* getTexture(const std::string& _atlasName, const std::string& _textureName);
             Atlas* getAtlas(const std::string& _atlasName);
+
+            ~TextureAtlasManager();
 
         private:
             void cropTextures(Atlas& _atlas);

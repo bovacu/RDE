@@ -21,13 +21,24 @@ namespace engine {
 
         this->window->setVSync(true);
 
-        texture = new Texture();
-        texture->loadFromFile((char*)"assets/test.png", false);
-        texture->cleanJunk();
-        texture->incRefCount();
+        atlasManager.addAtlas(50, 50, "assets/test.png");
 
-        sprite.setTexture(texture);
-        sprite.setPosition({0, 0});
+        int _line = 0;
+        int _row = 0;
+        for(int _i = 0; _i < 36 ; _i++) {
+            if(_i != 0 && _i % 6 == 0) {
+                _line++;
+                _row = 0;
+            }
+
+            Sprite _s;
+            int _index = _i > 35 ? 35 : _i;
+            _s.setTexture(atlasManager.getTexture("test", "test_" + std::to_string(_index)));
+            _s.setPosition({60.f + (float)52 * _row, (float)(200 - _line * 52)});
+            sprites.push_back(_s);
+
+            _row++;
+        }
 
         Renderer::init(window.get());
         shape.setOutlineColor(Color::Blue);
@@ -35,7 +46,7 @@ namespace engine {
     }
 
     Engine::~Engine() {
-        delete texture;
+
     }
 
     void Engine::onRun() {
@@ -113,7 +124,10 @@ namespace engine {
             _layer->onRender(_dt);
 
         Renderer::beginDraw(camera);
-        Renderer::draw(sprite);
+//        Renderer::draw(sprite);
+//        Renderer::draw(subSprite);
+        for(auto& _sprite : sprites)
+            Renderer::draw(_sprite);
         Renderer::endDraw();
 
         Renderer::beginDebugDraw(camera);
