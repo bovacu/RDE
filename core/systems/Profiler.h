@@ -64,7 +64,7 @@ namespace engine {
             static std::unordered_map<ProfilerState, State> lastStates;
 
         public:
-            static void beginFrame();
+            static void beginFrame(float _dt);
             static void begin(ProfilerState _state);
             static void end(ProfilerState _state);
             static void endFrame();

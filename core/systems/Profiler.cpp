@@ -1,5 +1,6 @@
 // Created by borja on 31/12/21.
 
+#include <GL/glew.h>
 #include "Profiler.h"
 
 namespace engine {
@@ -16,7 +17,7 @@ namespace engine {
             {ProfilerState::BOTTLE_NECK, "BottleNeck"}
     };
 
-    void Profiler::beginFrame() {
+    void Profiler::beginFrame(float _dt) {
         states.clear();
     }
 

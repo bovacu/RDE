@@ -30,6 +30,12 @@ namespace engine {
             Color getColor() const;
             Color getColor();
             Texture& getTexture() const;
+
+            void flipX(bool _flip);
+            void flipY(bool _flip);
+
+            bool isXFlipped() const;
+            bool isYFlipped() const;
     };
 
 }

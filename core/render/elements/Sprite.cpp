@@ -48,4 +48,20 @@ namespace engine {
     Color Sprite::getColor() {
         return renderer.color;
     }
+
+    void Sprite::flipX(bool _flip) {
+        setScale({getScale().x * (_flip ? -1.f : 1.f), getScale().y});
+    }
+
+    void Sprite::flipY(bool _flip) {
+        setScale({getScale().x, getScale().y * (_flip ? -1.f : 1.f)});
+    }
+
+    bool Sprite::isXFlipped() const {
+        return getScale().x < 0;
+    }
+
+    bool Sprite::isYFlipped() const {
+        return getScale().y < 0;
+    }
 }

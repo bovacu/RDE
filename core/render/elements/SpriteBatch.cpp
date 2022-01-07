@@ -118,23 +118,18 @@ namespace engine {
         }
 
         auto _pos = worldToScreenCoords(_sprite.getPosition());
-        auto _translationMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
-        auto _rotationMat = glm::rotate(glm::mat4(1.0f), glm::radians(_sprite.getRotation()), { 0.0f, 0.0f, 1.0f });
-        auto _scaleMat = glm::scale(glm::mat4(1.0f), { _sprite.getScale().x, _sprite.getScale().y, 1.0f });
-        glm::mat4 _transformMat = _translationMat;
+        auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
 
         if(_sprite.getRotation() != 0)
-            _transformMat *= _rotationMat;
+            _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_sprite.getRotation()), { 0.0f, 0.0f, 1.0f });
 
-        if(_sprite.getScale().x != 0 || _sprite.getScale().y != 0)
-            _transformMat *= _scaleMat;
+        if(_sprite.getScale() != 1)
+            _transformMat *= glm::scale(glm::mat4(1.0f), { _sprite.getScale().x, _sprite.getScale().y, 1.0f });
 
 
         Vec2F _worldPos = {(float)_sprite.getTexture().getRegion().bottomLeftCorner.x, (float)_sprite.getTexture().getRegion().bottomLeftCorner.y};
-        auto _screenSubTexturePos = worldToScreenCoords({(float)_sprite.getTexture().getRegion().bottomLeftCorner.x,
-                                                         (float)_sprite.getTexture().getRegion().bottomLeftCorner.y});
-
         Vec2F _textureSize = {(float)_sprite.getTexture().getRegion().size.x, (float)_sprite.getTexture().getRegion().size.y};
+
         auto _screenSize = worldToScreenSize(_textureSize);
         glm::vec4 _bottomLeftTextureCorner = { -_screenSize.x, -_screenSize.y, 0.0f, 1.0f };
         glm::vec4 _bottomRightTextureCorner = {_screenSize.x, -_screenSize.y, 0.0f, 1.0f };
@@ -161,15 +156,10 @@ namespace engine {
 
     void SpriteBatch::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
         auto _screenPos = worldToScreenCoords(_position);
-        auto _translationMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x,_screenPos.y, 1.f));
-        auto _rotationMat = glm::rotate(glm::mat4(1.0f), glm::radians(_rotation), { 0.0f, 0.0f, 1.0f });
-        auto _scaleMat = glm::scale(glm::mat4(1.0f), { 1, 1, 1.0f });
-        glm::mat4 _transformMat = _translationMat;
+        auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x,_screenPos.y, 1.f));
 
         if(_rotation != 0)
-            _transformMat *= _rotationMat;
-
-        _transformMat *= _scaleMat;
+            _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_rotation), { 0.0f, 0.0f, 1.0f });
 
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
 
@@ -186,12 +176,10 @@ namespace engine {
     }
 
     void SpriteBatch::drawShape(Shape& _shape) {
-        auto _translationMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x, _shape.getPosition().y, 1.f));
-        auto _rotationMat = glm::rotate(glm::mat4(1.0f), glm::radians(_shape.getRotation()), { 0.0f, 0.0f, 1.0f });
-        glm::mat4 _transformMat = _translationMat;
+        auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x, _shape.getPosition().y, 1.f));
 
         if(_shape.getRotation() != 0)
-            _transformMat *= _rotationMat;
+            _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_shape.getRotation()), { 0.0f, 0.0f, 1.0f });
 
         glm::vec4 _innerColor = {(float)_shape.getInnerColor().r / 255.f, (float)_shape.getInnerColor().g / 255.f,
                             (float)_shape.getInnerColor().b/ 255.f, (float)_shape.getInnerColor().a/ 255.f};

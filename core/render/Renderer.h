@@ -12,6 +12,11 @@ namespace engine {
 
     class Renderer {
 
+        // Debug
+        public:
+            static int drawCalls;
+            static void resetDebugInfo();
+
         private:
             static SpriteBatch batch;
 

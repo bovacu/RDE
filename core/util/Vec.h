@@ -89,4 +89,37 @@ inline std::ostream& operator<<(std::ostream& _os, const Vec2F& _vec){
     return _os;
 }
 
+inline bool operator==(const Vec2F & _v0, int _num) {
+    return _v0.x == (float)_num && _v0.y == (float)_num;
+}
+
+inline bool operator==(const Vec2F & _v0, float _num) {
+    return _v0.x == _num && _v0.y == _num;
+}
+
+inline bool operator==(const Vec2I & _v0, int _num) {
+    return _v0.x == _num && _v0.y == _num;
+}
+
+inline bool operator==(const Vec2I & _v0, float _num) {
+    return _v0.x == _num && _v0.y == _num;
+}
+
+
+inline bool operator!=(const Vec2F & _v0, int _num) {
+    return !(_v0 == (float)_num);
+}
+
+inline bool operator!=(const Vec2F & _v0, float _num) {
+    return !(_v0 == _num);
+}
+
+inline bool operator!=(const Vec2I & _v0, int _num) {
+    return !(_v0 == _num);
+}
+
+inline bool operator!=(const Vec2I & _v0, float _num) {
+    return !(_v0 == _num);
+}
+
 #endif //RESOURCES_GAME_VEC_H

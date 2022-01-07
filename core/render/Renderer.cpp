@@ -5,6 +5,7 @@
 namespace engine {
 
     SpriteBatch Renderer::batch;
+    int Renderer::drawCalls = 0;
 
     void Renderer::init(Window* _window) {
         batch.init(_window);
@@ -40,6 +41,7 @@ namespace engine {
 
     void Renderer::endDraw() {
         batch.flush();
+        drawCalls++;
     }
 
     void Renderer::draw(const Sprite& _sprite) {
@@ -61,5 +63,9 @@ namespace engine {
 
     void Renderer::drawShape(Shape& _shape) {
         batch.drawShape(_shape);
+    }
+
+    void Renderer::resetDebugInfo() {
+        drawCalls = 0;
     }
 }

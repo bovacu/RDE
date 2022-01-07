@@ -30,6 +30,7 @@ namespace engine {
             Shape shape;
             TextureAtlasManager atlasManager;
             std::vector<Sprite> sprites;
+            Texture texture;
 
         private:
             bool running = true;

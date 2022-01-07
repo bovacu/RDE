@@ -123,6 +123,12 @@ namespace engine {
         ImGui::Text("FPS: %d", engine::Engine::get().getFps());
         ImGui::Separator();
         ImGui::Text("X: %d, Y: %d", Input::getMousePosition().x, Input::getMousePosition().y);
+        ImGui::Separator();
+        int _freeGpuMb = 0;
+        glGetIntegerv( GL_TEXTURE_FREE_MEMORY_ATI,&_freeGpuMb);
+        ImGui::Text("GPU free MBs: %.2f", (float)_freeGpuMb / 1000.f);
+        ImGui::Separator();
+        ImGui::Text("Draw Calls: %d", Renderer::drawCalls);
 
         ImGui::End();
 

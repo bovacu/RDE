@@ -21,6 +21,7 @@ namespace engine {
 
         this->window->setVSync(true);
 
+        texture.loadFromFile("assets/test.png");
         atlasManager.addAtlas(50, 50, "assets/test.png");
 
         int _line = 0;
@@ -40,6 +41,7 @@ namespace engine {
             _row++;
         }
 
+        sprites[0].setTexture(&texture);
         Renderer::init(window.get());
         shape.setOutlineColor(Color::Blue);
         shape.makeCircle({0, 0}, 0.1);
@@ -53,14 +55,14 @@ namespace engine {
         float _accumulator = 0;
 
         while (this->running) {
-            engine::Profiler::beginFrame();
-
-            camera.update(window.get());
-
             auto _time = (float) glfwGetTime();
             Delta _dt = _time - this->lastFrame;
             this->lastFrame = _time;
             _accumulator += _dt;
+
+            engine::Profiler::beginFrame(_dt);
+
+            camera.update(window.get());
 
             if (!this->minimized) {
 
@@ -82,6 +84,7 @@ namespace engine {
             engine::Profiler::end(ProfilerState::INPUT);
 
             engine::Profiler::endFrame();
+            Renderer::resetDebugInfo();
         }
     }
 
@@ -124,17 +127,16 @@ namespace engine {
             _layer->onRender(_dt);
 
         Renderer::beginDraw(camera);
-//        Renderer::draw(sprite);
-//        Renderer::draw(subSprite);
-        for(auto& _sprite : sprites)
-            Renderer::draw(_sprite);
+//        for(int _i = 0; _i < 400; _i++) {
+//            for(int _j = 0; _j < 10; _j++) {
+//                sprites[0].setPosition({(float)(-400 + _j * 10), (float)(-400 + _i * 10)});
+//                Renderer::draw(sprites[0]);
+//            }
+//        }
+        Renderer::draw(sprites[0]);
         Renderer::endDraw();
 
         Renderer::beginDebugDraw(camera);
-        Renderer::drawShape(shape);
-//        Renderer::drawSquare({-200, 0}, {400, 400});
-//        Renderer::drawSquare({200, 0}, {400, 400}, Color::Green);
-//        Renderer::drawLine({0, 0}, {400, 0}, Color::Blue);
         Renderer::endDebugDraw();
         Profiler::end(ProfilerState::RENDERING);
 
