@@ -65,15 +65,14 @@ namespace engine {
         return getScale().y < 0;
     }
 
-    void Sprite::addAnimation(Animation* _animation) {
+    void Sprite::addAnimation(AnimationSystem* _animation) {
         animation = _animation;
-        setTexture(animation->getCurrentFrame());
-        animation->play();
+        setTexture(animation->getCurrentAnimation()->animation.getCurrentFrame());
     }
 
     void Sprite::update(float _dt) {
         animation->update(_dt);
-        if(renderer.texture != animation->getCurrentFrame())
-            setTexture(animation->getCurrentFrame());
+        if(renderer.texture != animation->getCurrentAnimation()->animation.getCurrentFrame())
+            setTexture(animation->getCurrentAnimation()->animation.getCurrentFrame());
     }
 }

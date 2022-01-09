@@ -11,11 +11,11 @@
 #include "core/render/window/input/Input.h"
 #include "core/render/Renderer.h"
 #include "core/render/Camera.h"
-#include "core/systems/Profiler.h"
+#include "core/systems/profiling/Profiler.h"
 #include "core/render/layers/ImGuiLayer.h"
 #include "core/render/layers/LayerStack.h"
 #include "core/render/elements/TextureAtlasManager.h"
-#include "core/render/Animation.h"
+#include "core/systems/animationSystem/AnimationSystem.h"
 
 namespace engine {
 
@@ -30,7 +30,8 @@ namespace engine {
             Shape shape;
             std::vector<Sprite> sprites;
             Sprite player;
-            Animation animation;
+            AnimationSystem animationSystem;
+            TransitionParams params;
 
         private:
             bool running = true;
@@ -183,6 +184,9 @@ namespace engine {
             bool onWindowClosed(WindowClosedEvent& _e);
             bool onWindowResized(WindowResizedEvent& _e);
             bool onMouseScrolled(MouseScrolledEvent& _e);
+
+            bool fromRunToRoll(const TransitionParams& _foo);
+            bool fromRollToRun(const TransitionParams& _foo);
 
     };
 

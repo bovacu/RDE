@@ -24,10 +24,19 @@ namespace engine {
         TextureAtlasManager::get().addAtlas(50, 50, "assets/test.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
-        for(int _i = 0; _i < 10; _i++)
-            animation.addFrame(TextureAtlasManager::get().getTexture("run", "run_" + std::to_string(_i)));
+        animationSystem.createAnimation("run", "run", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+        animationSystem.setInitialAnimation("run");
 
-        player.addAnimation(&animation);
+        // 12-23
+        animationSystem.createAnimation("roll", "run", {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23});
+        animationSystem.createTransition("run", "roll", BIND_FUNC_1(Engine::fromRunToRoll));
+        animationSystem.createTransition("roll", "run", BIND_FUNC_1(Engine::fromRollToRun));
+
+        animationSystem.setInitialAnimation("run");
+
+        player.addAnimation(&animationSystem);
+
+        animationSystem.start();
 
         int _line = 0;
         int _row = 0;
@@ -127,6 +136,12 @@ namespace engine {
 
         if(Input::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
+
+        if(Input::isKeyJustPressed(KeyCode::Up))
+            animationSystem.setAnimationTimeBetweenFrames("run", animationSystem.getAnimationTimeBetweenFrames("run") - 0.01f);
+
+        if(Input::isKeyJustPressed(KeyCode::Down))
+            animationSystem.setAnimationTimeBetweenFrames("run", animationSystem.getAnimationTimeBetweenFrames("run") + 0.01f);
 
         player.update(_dt);
     }
@@ -237,6 +252,14 @@ namespace engine {
 
     void Engine::closeApplication() {
         this->running = false;
+    }
+
+    bool Engine::fromRunToRoll(const TransitionParams& _foo) {
+        return Input::isKeyJustPressed(KeyCode::A);
+    }
+
+    bool Engine::fromRollToRun(const TransitionParams& _foo) {
+        return Input::isKeyJustPressed(KeyCode::S);
     }
 
 }

@@ -8,7 +8,7 @@
 #include "core/render/window/event/MouseEvent.h"
 #include "external/imgui/backends/imgui_impl_opengl3.h"
 #include "external/imgui/backends/imgui_impl_glfw.h"
-#include "core/systems/Profiler.h"
+#include "core/systems/profiling/Profiler.h"
 
 namespace engine {
 

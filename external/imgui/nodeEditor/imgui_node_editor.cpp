@@ -2798,7 +2798,7 @@ void ed::FlowAnimationController::Draw(ImDrawList* drawList)
 
 ed::FlowAnimation* ed::FlowAnimationController::GetOrCreate(Link* link)
 {
-    // Return live animation which match target link
+    // Return live animationSystem which match target link
     {
         auto animationIt = std::find_if(m_Animations.begin(), m_Animations.end(), [link](FlowAnimation* animation) { return animation->m_Link == link; });
         if (animationIt != m_Animations.end())

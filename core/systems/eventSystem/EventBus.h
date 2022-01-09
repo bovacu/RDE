@@ -10,9 +10,9 @@
 
 template <typename Type, typename... Args>
 class EventBus {
-    static_assert(std::is_enum<Type>::value, "Must be an enum type");
+//    static_assert(std::is_enum<Type>::value, "Must be an enum type");
     public:
-        typedef std::function<void(Args...)> HandlerFunc;
+        typedef std::function<bool(Args...)> HandlerFunc;
 
     private:
         std::map<Type, std::vector<HandlerFunc>> handlers;
@@ -48,15 +48,18 @@ class EventBus {
                 LOG_W_TIME("Tried to unsubscribe an event", typeid(_type).name()," that wasn't subscribed yet!")
         }
 
-        void dispatch(const Type& _type, Args... _args) {
+        bool dispatch(const Type& _type, Args... _args) {
             if(!hasType(_type)) {
-                LOG_W_TIME("Tried to dispatch Type ", typeid(_type).name(), "[", (int)_type, "] but it wasn't subscribed!")
-                return;
+//                LOG_W_TIME("Tried to dispatch Type ", typeid(_type).name(), "[", _type, "] but it wasn't subscribed!")
+                return false;
             }
 
+            bool _success = false;
             for (auto& _cb : handlers[_type]) {
-                _cb(_args...);
+                _success |= _cb(_args...);
             }
+
+            return _success;
         }
 
         bool isSubscribed(const Type& _type) {

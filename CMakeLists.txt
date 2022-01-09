@@ -81,7 +81,7 @@ add_executable( Engine2_0 main.cpp
         external/imgui/nodeEditor/imgui_canvas.h external/imgui/nodeEditor/imgui_canvas.cpp external/imgui/nodeEditor/imgui_extra_math.h
         external/imgui/nodeEditor/imgui_node_editor.h external/imgui/nodeEditor/imgui_node_editor.cpp external/imgui/nodeEditor/imgui_node_editor_api.cpp
         external/imgui/nodeEditor/imgui_node_editor_internal.h
-        core/systems/Profiler.h core/systems/Profiler.cpp core/render/layers/ImGuiCore.h core/render/elements/TextureAtlasManager.cpp core/render/elements/TextureAtlasManager.h core/util/Rect.h core/render/Animation.cpp core/render/Animation.h)
+        core/systems/profiling/Profiler.h core/systems/profiling/Profiler.cpp core/render/layers/ImGuiCore.h core/render/elements/TextureAtlasManager.cpp core/render/elements/TextureAtlasManager.h core/util/Rect.h core/systems/animationSystem/Animation.cpp core/systems/animationSystem/Animation.h core/systems/animationSystem/AnimationSystem.cpp core/systems/animationSystem/AnimationSystem.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 

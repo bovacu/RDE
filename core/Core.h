@@ -23,7 +23,7 @@
 #endif
 
 #ifdef ENGINE_ENABLE_ASSERTS
-    #define ENGINE_ASSERT(x, ...) { if(!(x)) { LOG_E("Assertion Failed: {0}", __VA_ARGS__); ENGINE_DEBUG_BREAK(); } }
+    #define ENGINE_ASSERT(x, ...) { if(!(x)) { LOG_E("Assertion Failed: ", __VA_ARGS__); ENGINE_DEBUG_BREAK(); } }
 #else
     #define ENGINE_ASSERT(x, ...)
 #endif

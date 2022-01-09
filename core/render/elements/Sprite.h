@@ -8,7 +8,7 @@
 #include "core/util/Util.h"
 #include "Texture.h"
 #include "core/systems/Components.h"
-#include "core/render/Animation.h"
+#include "core/systems/animationSystem/AnimationSystem.h"
 
 namespace engine {
 
@@ -17,7 +17,7 @@ namespace engine {
         private:
             Transform transform;
             SpriteRenderer renderer;
-            Animation* animation;
+            AnimationSystem* animation;
 
         public:
             void setPosition(const Vec2F& _position);
@@ -39,7 +39,7 @@ namespace engine {
             bool isXFlipped() const;
             bool isYFlipped() const;
 
-            void addAnimation(Animation* _animation);
+            void addAnimation(AnimationSystem* _animation);
 
             void update(float _dt);
     };

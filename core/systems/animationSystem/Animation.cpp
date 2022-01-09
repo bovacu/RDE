@@ -33,6 +33,22 @@ namespace engine {
         canPlay = true;
     }
 
+    void Animation::pause() {
+        canPlay = false;
+    }
+
+    void Animation::stop() {
+        canPlay = false;
+        currentFrame = 0;
+        currentTime = 0;
+    }
+
+    void Animation::restart() {
+        canPlay = true;
+        currentFrame = 0;
+        currentTime = 0;
+    }
+
     void Animation::update(float _dt) {
         if(!canPlay) return;
 
@@ -44,17 +60,15 @@ namespace engine {
         }
     }
 
-    void Animation::stop() {
-        canPlay = false;
-    }
-
-    void Animation::restart() {
-        canPlay = true;
-        currentFrame = 0;
-        currentTime = 0;
-    }
-
     Texture* Animation::getCurrentFrame() {
         return frameTextures[currentFrame];
+    }
+
+    void Animation::setTimeBetweenFrames(float _timeBetweenFrames) {
+        timeBetweenFrames = _timeBetweenFrames;
+    }
+
+    float Animation::getTimeBetweenFrames() const {
+        return timeBetweenFrames;
     }
 }

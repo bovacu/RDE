@@ -1720,7 +1720,7 @@ void ShowDemo_OffsetAndStride() {
         ImPlot::EndPlot();
         ImPlot::PopColormap();
     }
-    // offset++; uncomment for animation!
+    // offset++; uncomment for animationSystem!
 }
 
 void ShowDemo_CustomDataAndGetters() {
