@@ -14,6 +14,7 @@ namespace engine {
             GLenum internalFormat = -1, dataFormat = -1;
             stbi_uc* texturePixels = nullptr;
             IntRect region {};
+            float fileSizeKb = -1;
 
         public:
             Texture() = default;
@@ -24,6 +25,7 @@ namespace engine {
             void decRefCount();
             [[nodiscard]] GLuint getGLTexture() const;
             [[nodiscard]] Vec2I getSize() const;
+            float getKb() const;
 
             bool loadFromFile(const char* _path, bool _deleteJunkImmediately = true);
 

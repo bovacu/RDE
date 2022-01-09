@@ -4,10 +4,12 @@
 
 namespace engine {
 
+    TextureAtlasManager TextureAtlasManager::instance;
+
     bool TextureAtlasManager::addAtlas(int _tileWidth, int _tileHeight, const std::string& _pathToTexture) {
         auto _name = getTextureName(_pathToTexture);
         LOG_I_TIME("Trying to load '", _pathToTexture, "'...")
-        if(atlases.find(_name) != atlases.end()) {
+        if(instance.atlases.find(_name) != instance.atlases.end()) {
             LOG_E_TIME("Atlas '", _name, "' was already loaded");
             return false;
         }
@@ -25,23 +27,23 @@ namespace engine {
         _atlas->textureHeight = _atlas->texture->getSize().y;
 
         cropTextures(*_atlas);
-        atlases[_name] = _atlas;
+        instance.atlases[_name] = _atlas;
         LOG_S_TIME("Load successful!")
         return true;
     }
 
     Texture* TextureAtlasManager::getTexture(const std::string& _atlasName, const std::string& _textureName) {
-        if(atlases.find(_atlasName) == atlases.end()) {
+        if(instance.atlases.find(_atlasName) == instance.atlases.end()) {
             LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
             return nullptr;
         }
 
-        if(atlases[_atlasName]->subTextures.find(_textureName) == atlases[_atlasName]->subTextures.end()) {
+        if(instance.atlases[_atlasName]->subTextures.find(_textureName) == instance.atlases[_atlasName]->subTextures.end()) {
             LOG_E_TIME("Texture '", _textureName, "' in '",_atlasName ,"' was not found! But tried to be accessed")
             return nullptr;
         }
 
-        return atlases[_atlasName]->subTextures[_textureName];
+        return instance.atlases[_atlasName]->subTextures[_textureName];
     }
 
 
@@ -61,7 +63,7 @@ namespace engine {
                 _rect.size.y = (int)_atlas.tileHeight;
 
                 _atlas.subTextures[(_atlas.name + "_" + std::to_string(_currentTexture))] = new Texture{_atlas.texture, _rect};
-                LOG_I("    Loaded sub-texture: ", _atlas.name + "_" + std::to_string(_currentTexture), " -> ", _rect)
+//                LOG_I("    Loaded sub-texture: ", _atlas.name + "_" + std::to_string(_currentTexture), " -> ", _rect)
                 _currentTexture++;
             }
         }
@@ -83,19 +85,41 @@ namespace engine {
     }
 
     Atlas* TextureAtlasManager::getAtlas(const std::string& _atlasName) {
-        if(atlases.find(_atlasName) == atlases.end()) {
+        if(instance.atlases.find(_atlasName) == instance.atlases.end()) {
             LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
             return nullptr;
         }
 
-        return atlases[_atlasName];
+        return instance.atlases[_atlasName];
     }
 
     TextureAtlasManager::~TextureAtlasManager() {
-        for(auto& _atlas : atlases)
+        for(auto& _atlas : instance.atlases)
             delete _atlas.second;
 
         LOG_S("Cleaning up TextureAtlasManager")
+    }
+
+    TextureAtlasManager& TextureAtlasManager::get() {
+        return instance;
+    }
+
+    std::vector<TextureInfo> TextureAtlasManager::getTexturesInfo() {
+        std::vector<TextureInfo> _textures;
+
+        for(auto& _atlas : instance.atlases) {
+            _textures.emplace_back(TextureInfo {
+                _atlas.second->texture->getKb(),
+                (uint)_atlas.second->subTextures.size(),
+                _atlas.second->textureWidth,
+                _atlas.second->textureHeight,
+                _atlas.second->tileWidth,
+                _atlas.second->tileHeight,
+                _atlas.first.c_str()
+            });
+        }
+
+        return _textures;
     }
 
 }

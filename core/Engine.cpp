@@ -19,10 +19,10 @@ namespace engine {
         if(this->timePerFrame < 0)
             this->timePerFrame = 1.0f / 60.f;
 
-        this->window->setVSync(true);
+        this->window->setVSync(false);
 
         texture.loadFromFile("assets/test.png");
-        atlasManager.addAtlas(50, 50, "assets/test.png");
+        TextureAtlasManager::get().addAtlas(50, 50, "assets/test.png");
 
         int _line = 0;
         int _row = 0;
@@ -34,14 +34,13 @@ namespace engine {
 
             Sprite _s;
             int _index = _i > 35 ? 35 : _i;
-            _s.setTexture(atlasManager.getTexture("test", "test_" + std::to_string(_index)));
+            _s.setTexture(TextureAtlasManager::get().getTexture("test", "test_" + std::to_string(_index)));
             _s.setPosition({60.f + (float)52 * _row, (float)(200 - _line * 52)});
             sprites.push_back(_s);
 
             _row++;
         }
 
-        sprites[0].setTexture(&texture);
         Renderer::init(window.get());
         shape.setOutlineColor(Color::Blue);
         shape.makeCircle({0, 0}, 0.1);
@@ -66,13 +65,20 @@ namespace engine {
 
             if (!this->minimized) {
 
+                Profiler::begin(ProfilerState::FIXED_UPDATE);
                 while (_accumulator >= this->timePerFrame) {
                     _accumulator -= this->timePerFrame;
                     this->onFixedUpdate(this->timePerFrame);
                 }
+                Profiler::end(ProfilerState::FIXED_UPDATE);
 
+                Profiler::begin(ProfilerState::UPDATE);
                 this->onUpdate(_dt);
+                Profiler::end(ProfilerState::UPDATE);
+
+                Profiler::begin(ProfilerState::RENDERING);
                 this->onRender(_dt);
+                Profiler::end(ProfilerState::RENDERING);
 
                 #ifdef ENGINE_DEBUG
                 this->updateFps();
@@ -93,6 +99,11 @@ namespace engine {
         dispatcher.dispatchEvent<WindowClosedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowClosed));
         dispatcher.dispatchEvent<WindowResizedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowResized));
 
+        // TODO this must be in another layer, this is why the scroll is called event when on ImGui windows
+        dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Engine::onMouseScrolled));
+
+        camera.onEvent(_e);
+
         for (auto _it = this->layerStack.rbegin(); _it != this->layerStack.rend(); ++_it) {
             (*_it)->onEvent(_e);
             if (_e.handled)
@@ -101,44 +112,32 @@ namespace engine {
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
-        Profiler::begin(ProfilerState::FIXED_UPDATE);
         for (Layer* _layer : this->layerStack)
             _layer->onFixedUpdate(_fixedDt);
-        Profiler::end(ProfilerState::FIXED_UPDATE);
     }
 
     void Engine::onUpdate(Delta _dt) {
-        Profiler::begin(ProfilerState::UPDATE);
         for (Layer* _layer : this->layerStack)
             _layer->onUpdate(_dt);
 
         if(Input::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
-
-        Profiler::end(ProfilerState::UPDATE);
     }
 
     void Engine::onRender(Delta _dt) {
 
         Renderer::clear(Color::Red);
 
-        Profiler::begin(ProfilerState::RENDERING);
         for (Layer* _layer : this->layerStack)
             _layer->onRender(_dt);
 
         Renderer::beginDraw(camera);
-//        for(int _i = 0; _i < 400; _i++) {
-//            for(int _j = 0; _j < 10; _j++) {
-//                sprites[0].setPosition({(float)(-400 + _j * 10), (float)(-400 + _i * 10)});
-//                Renderer::draw(sprites[0]);
-//            }
-//        }
-        Renderer::draw(sprites[0]);
+        for(auto& _sprite : sprites)
+            Renderer::draw(_sprite);
         Renderer::endDraw();
 
         Renderer::beginDebugDraw(camera);
         Renderer::endDebugDraw();
-        Profiler::end(ProfilerState::RENDERING);
 
         Profiler::begin(ProfilerState::IMGUI);
         this->imGuiLayer->begin();
@@ -148,6 +147,16 @@ namespace engine {
                 engine::ImGuiLayer::drawDebugInfo();
         this->imGuiLayer->end();
         Profiler::end(ProfilerState::IMGUI);
+    }
+
+    bool Engine::onMouseScrolled(MouseScrolledEvent& _e) {
+        LOG_I("engine")
+        float _zoom = camera.getCurrentZoomLevel();
+        _zoom -= _e.getScrollY() * camera.getZoomSpeed();
+        _zoom = std::max(_zoom, 0.25f);
+        camera.setCurrentZoomLevel(_zoom);
+
+        return false;
     }
 
     bool Engine::onWindowClosed(WindowClosedEvent &_e) {

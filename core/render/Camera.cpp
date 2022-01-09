@@ -16,7 +16,7 @@ namespace engine {
             glViewport(0, 0, vpSize[0], vpSize[1]);
             aspectRatio = (float)width/(float)height;
             LOG_I("Aspect Ratio: ", aspectRatio)
-            projectionMatrix = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+            projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
             viewProjectionMatrix = projectionMatrix * viewMatrix;
         }
     }
@@ -63,15 +63,35 @@ namespace engine {
     }
 
     void Camera::onEvent(Event& _event) {
-        EventDispatcher dispatcher(_event);
-        dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Camera::onMouseScrolled));
+//        EventDispatcher dispatcher(_event);
+//        dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Camera::onMouseScrolled));
     }
 
     bool Camera::onMouseScrolled(MouseScrolledEvent& _event) {
+        zoom -= _event.getScrollY() * 0.25f;
+        zoom = std::max(zoom, 0.25f);
+        projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
         return false;
     }
 
     float Camera::getAspectRatio() const {
         return aspectRatio;
+    }
+
+    float Camera::getCurrentZoomLevel() const {
+        return zoom;
+    }
+
+    void Camera::setCurrentZoomLevel(float _zoomLevel) {
+        zoom = _zoomLevel;
+        projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
+    }
+
+    float Camera::getZoomSpeed() const {
+        return zoomSpeed;
+    }
+
+    void Camera::setZoomSpeed(float _zoomSpeed) {
+        zoomSpeed = _zoomSpeed;
     }
 }

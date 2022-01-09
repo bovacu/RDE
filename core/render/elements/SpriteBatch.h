@@ -32,6 +32,9 @@ namespace engine {
 
     class SpriteBatch {
 
+        public:
+            int totalTriangles;
+
         private:
             std::vector<Vertex2dUVColor> vertexBuffer;
             std::vector<VertexColorDebug> vertexDebugBufferGeometrics;

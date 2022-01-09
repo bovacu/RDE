@@ -18,7 +18,7 @@ namespace engine {
         private:
             int width, height;
             int vpSize[2]{0, 0};
-            float aspectRatio;
+            float aspectRatio, zoom = 1, zoomSpeed = 0.25f;
             glm::mat4 projectionMatrix;
             glm::mat4 viewMatrix {1.f};
             glm::mat4 viewProjectionMatrix;
@@ -40,7 +40,13 @@ namespace engine {
             void setRotation(float _rotation);
             float getRotation();
 
-            float getAspectRatio() const;
+            [[nodiscard]] float getAspectRatio() const;
+
+            float getCurrentZoomLevel() const;
+            void setCurrentZoomLevel(float _zoomLevel);
+
+            float getZoomSpeed() const;
+            void setZoomSpeed(float _zoomSpeed);
 
             glm::mat4& operator() (const Camera& _camera) {
                 return projectionMatrix;

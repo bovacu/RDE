@@ -230,6 +230,7 @@ namespace engine {
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(2);
 
+        totalTriangles += (int)vertexBuffer.size() / 3;
         vertexBuffer.clear();
         glUseProgram(0);
     }

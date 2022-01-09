@@ -85,59 +85,19 @@ namespace engine {
         ImGui::Begin("Master", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground);
         ImGui::End();
 
-        static bool _vsync = Engine::get().isVSync(), _fullscreen = false;
-        static int _windowRes[2] = {(int) engine::Engine::get().getWindowSize().x,(int) engine::Engine::get().getWindowSize().y};
-
-        std::string _windowResolution = std::to_string(Engine::get().getWindowSize().x) + "x" + std::to_string(Engine::get().getWindowSize().y);
-        static const char* _resSelected = _windowResolution.c_str();
-
         ImGui::Begin("Debugging", nullptr, ImGuiWindowFlags_NoMove);
-
-        if(ImGui::Checkbox("VSync Active", &_vsync))
-            engine::Engine::get().getWindow().setVSync(_vsync);
-
-        if(ImGui::Checkbox("Fullscreen", &_fullscreen))
-            engine::Engine::get().getWindow().setFullscreen(_fullscreen);
-
-        const char* _resolutions[] = { "2560x1440", "1920x1080", "1366x768", "1280x720", "1920x1200", "1680x1050",
-                                       "1440x900" ,"1280x800" ,"1024x768" ,"800x600", "800x480","640x480", "320x240"
-        };
-
-        ImGui::Text("Resolution"); ImGui::SameLine();
-        ImGui::SetNextItemWidth(90);
-        if (ImGui::BeginCombo("##combo", _resSelected)){ // The second parameter is the label previewed before opening the combo. {
-            for (auto & _resolution : _resolutions) {
-                bool is_selected = (_resSelected == _resolution);
-                if (ImGui::Selectable(_resolution, is_selected)) {
-                    _resSelected = _resolution;
-                    charToIntSize(std::string(_resolution), _windowRes);
-                    engine::Engine::get().setWindowSize(_windowRes[0], _windowRes[1]);
-                }
-                if (is_selected)
-                    ImGui::SetItemDefaultFocus();
-            }
-            ImGui::EndCombo();
-        }
-
+        printResolutionFullscreenAndVSync();
         ImGui::Separator();
-        ImGui::Text("FPS: %d", engine::Engine::get().getFps());
+        printFPSDrawCallsAndRAM();
         ImGui::Separator();
-        ImGui::Text("X: %d, Y: %d", Input::getMousePosition().x, Input::getMousePosition().y);
-        ImGui::Separator();
-        int _freeGpuMb = 0;
-        glGetIntegerv( GL_TEXTURE_FREE_MEMORY_ATI,&_freeGpuMb);
-        ImGui::Text("GPU free MBs: %.2f", (float)_freeGpuMb / 1000.f);
-        ImGui::Separator();
-        ImGui::Text("Draw Calls: %d", Renderer::drawCalls);
-
+        printAtlases();
         ImGui::End();
-
-        ImGui::Begin("Metrics", nullptr, ImGuiWindowFlags_NoMove);
         metrics();
-        ImGui::End();
+
     }
 
     void ImGuiLayer::metrics() {
+        ImGui::Begin("Metrics", nullptr, ImGuiWindowFlags_NoMove);
         static bool _capture = true;
         static float t = 0;
         t += ImGui::GetIO().DeltaTime;
@@ -166,6 +126,7 @@ namespace engine {
 
             ImPlot::EndPlot();
         }
+        ImGui::End();
     }
 
     void ImGuiLayer::charToIntSize(const std::string& _size, int* _resolution) {
@@ -181,18 +142,16 @@ namespace engine {
     }
 
     bool ImGuiLayer::onMouseClicked(MouseButtonPressedEvent& _e) {
-//        return ImGui::IsAnyItemHovered();
-        return false;
+        return ImGui::IsAnyItemHovered();
     }
 
     bool ImGuiLayer::onMouseMovedEvent(MouseMovedEvent& _e) {
-//        return ImGui::IsAnyItemHovered();
-        return false;
+        return ImGui::IsAnyItemHovered();
     }
 
     bool ImGuiLayer::onMouseScrolled(MouseScrolledEvent& _e) {
-//        return ImGui::IsAnyItemHovered();
-        return false;
+        LOG_I("imgui")
+        return ImGui::IsAnyItemHovered();
     }
 
     void ImGuiLayer::mouseInfo() {
@@ -202,5 +161,76 @@ namespace engine {
         ImGui::GetStyle().Alpha = 1;
         ImGui::Text("X: %d, Y: %d", Input::getMousePosition().x, Input::getMousePosition().y);
         ImGui::End();
+    }
+
+    void ImGuiLayer::printFPSDrawCallsAndRAM() {
+        ImGui::Text("FPS: %d", engine::Engine::get().getFps());
+        ImGui::Separator();
+        ImGui::Text("X: %d, Y: %d", Input::getMousePosition().x, Input::getMousePosition().y);
+        ImGui::Separator();
+        int _freeGpuMb = 0;
+        glGetIntegerv( GL_TEXTURE_FREE_MEMORY_ATI,&_freeGpuMb);
+        ImGui::Text("GPU free Memory: %.2f MBs", (float)_freeGpuMb / 1000.f);
+        auto* _memData = Profiler::getTotalVirtualMemory();
+        ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
+        ImGui::Separator();
+        ImGui::Text("Draw Calls: %d", Renderer::drawCalls);
+        ImGui::Text("Total Triangles: %d", Renderer::getTotalTriangles());
+    }
+
+    void ImGuiLayer::printAtlases() {
+        float _totalAtlasesSize = 0;
+        for(auto& _ti : TextureAtlasManager::get().getTexturesInfo())
+            _totalAtlasesSize += _ti.kb;
+
+        if(ImGui::TreeNode((void*)(intptr_t)0, "Atlases -> %.2f KBs", _totalAtlasesSize)) {
+            int _child = 1;
+            for(auto& _ti : TextureAtlasManager::get().getTexturesInfo()) {
+                if(ImGui::TreeNode((void*)(intptr_t)_child, "%s", _ti.name)) {
+                    ImGui::Text("Kb: %.2f", _ti.kb);
+                    ImGui::Text("Texture size: %dx%d", _ti.textureWidth, _ti.textureHeight);
+                    ImGui::Text("Number of tiles: %d", _ti.numberOfTiles);
+                    ImGui::Text("Tile size: %dx%d", _ti.tileWidth, _ti.tileHeight);
+                    _child++;
+                    ImGui::TreePop();
+                }
+            }
+
+            ImGui::TreePop();
+        }
+    }
+
+    void ImGuiLayer::printResolutionFullscreenAndVSync() {
+        static bool _vsync = Engine::get().isVSync(), _fullscreen = false;
+        static int _windowRes[2] = {(int) engine::Engine::get().getWindowSize().x,(int) engine::Engine::get().getWindowSize().y};
+
+        std::string _windowResolution = std::to_string(Engine::get().getWindowSize().x) + "x" + std::to_string(Engine::get().getWindowSize().y);
+        static const char* _resSelected = _windowResolution.c_str();
+
+        if(ImGui::Checkbox("VSync Active", &_vsync))
+            engine::Engine::get().getWindow().setVSync(_vsync);
+
+        if(ImGui::Checkbox("Fullscreen", &_fullscreen))
+            engine::Engine::get().getWindow().setFullscreen(_fullscreen);
+
+        const char* _resolutions[] = { "2560x1440", "1920x1080", "1366x768", "1280x720", "1920x1200", "1680x1050",
+                                       "1440x900" ,"1280x800" ,"1024x768" ,"800x600", "800x480","640x480", "320x240"
+        };
+
+        ImGui::Text("Resolution"); ImGui::SameLine();
+        ImGui::SetNextItemWidth(90);
+        if (ImGui::BeginCombo("##combo", _resSelected)){ // The second parameter is the label previewed before opening the combo. {
+            for (auto & _resolution : _resolutions) {
+                bool is_selected = (_resSelected == _resolution);
+                if (ImGui::Selectable(_resolution, is_selected)) {
+                    _resSelected = _resolution;
+                    charToIntSize(std::string(_resolution), _windowRes);
+                    engine::Engine::get().setWindowSize(_windowRes[0], _windowRes[1]);
+                }
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
     }
 }

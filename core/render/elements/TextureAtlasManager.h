@@ -51,19 +51,32 @@ namespace engine {
         }
     };
 
+    struct TextureInfo {
+        float kb;
+        uint numberOfTiles;
+        uint textureWidth, textureHeight, tileWidth, tileHeight;
+        const char* name;
+    };
+
 
     class TextureAtlasManager {
         private:
             std::unordered_map<std::string, Atlas*> atlases;
+            static TextureAtlasManager instance;
 
         public:
             bool addAtlas(int _tileWidth, int _tileHeight, const std::string& _pathToTexture);
             Texture* getTexture(const std::string& _atlasName, const std::string& _textureName);
             Atlas* getAtlas(const std::string& _atlasName);
+            static TextureAtlasManager& get();
+
+            // Debug
+            std::vector<TextureInfo> getTexturesInfo();
 
             ~TextureAtlasManager();
 
         private:
+            TextureAtlasManager() = default;
             void cropTextures(Atlas& _atlas);
             std::string getTextureName(const std::string& _path) const;
             bool isTextureEmpty(const Atlas& _atlas, uint _x, uint _y) const;

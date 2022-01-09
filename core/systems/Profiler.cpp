@@ -7,6 +7,7 @@ namespace engine {
 
     std::unordered_map<ProfilerState, State> Profiler::states;
     std::unordered_map<ProfilerState, State> Profiler::lastStates;
+    struct sysinfo Profiler::systemInfo;
 
     std::unordered_map<ProfilerState, std::string> State::stateToNameDict {
             {ProfilerState::UPDATE, "Update"},
@@ -39,6 +40,45 @@ namespace engine {
 
     std::unordered_map<ProfilerState, State>& Profiler::getStates() {
         return lastStates;
+    }
+
+    int Profiler::parseLine(char* line){
+        // This assumes that a digit will be found and the line ends in " Kb".
+        int i = strlen(line);
+        const char* p = line;
+        while (*p <'0' || *p > '9') p++;
+        line[i-3] = '\0';
+        i = atoi(p);
+        return i;
+    }
+
+    int Profiler::getValue(){ //Note: this value is in KB!
+        FILE* file = fopen("/proc/self/status", "r");
+        int result = -1;
+        char line[128];
+
+        while (fgets(line, 128, file) != NULL){
+            if (strncmp(line, "VmRSS:", 6) == 0){
+                result = parseLine(line);
+                break;
+            }
+        }
+        fclose(file);
+        return result;
+    }
+
+    ulong* Profiler::getTotalVirtualMemory() {
+        static ulong _data[2];
+
+        sysinfo (&systemInfo);
+
+        ulong totalPhysMem = systemInfo.totalram;
+        totalPhysMem *= systemInfo.mem_unit;
+
+        _data[0] = totalPhysMem;
+        _data[1] = getValue();
+
+        return _data;
     }
 
 

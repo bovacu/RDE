@@ -59,7 +59,7 @@ namespace engine {
 
         /// Setting the basic data of the window to the UserPointer.
         glfwSetWindowUserPointer(this->window, &this->data);
-        this->setVSync(true);
+//        this->setVSync(true);
 
         auto _glewInit = glewInit();
         if(_glewInit < 0) {

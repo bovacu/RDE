@@ -67,5 +67,10 @@ namespace engine {
 
     void Renderer::resetDebugInfo() {
         drawCalls = 0;
+        batch.totalTriangles = 0;
+    }
+
+    int Renderer::getTotalTriangles() {
+        return batch.totalTriangles;
     }
 }

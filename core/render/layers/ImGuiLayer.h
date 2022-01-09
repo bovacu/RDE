@@ -39,6 +39,11 @@ namespace engine {
             static void mouseInfo();
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
+
+            // Debug
+            static void printFPSDrawCallsAndRAM();
+            static void printAtlases();
+            static void printResolutionFullscreenAndVSync();
     };
 
 }

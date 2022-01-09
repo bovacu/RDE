@@ -1,5 +1,6 @@
 #include "Texture.h"
 #include "core/util/Logger.h"
+#include <filesystem>
 
 namespace engine {
 
@@ -16,6 +17,7 @@ namespace engine {
         channels = _spriteSheet->channels;
         internalFormat = _spriteSheet->internalFormat;
         dataFormat = _spriteSheet->dataFormat;
+        fileSizeKb = _spriteSheet->fileSizeKb;
     }
 
     Texture::~Texture() {
@@ -63,7 +65,6 @@ namespace engine {
         internalFormat = _internalFormat;
         dataFormat = _dataFormat;
 
-
         glCreateTextures(GL_TEXTURE_2D, 1, &texture);
 
         /// Then we tell OpenGL that on this buffer we are storing a 2D texture.
@@ -88,6 +89,7 @@ namespace engine {
         }
 
         region = {{0, 0}, {width, height}};
+        fileSizeKb = (float)std::filesystem::file_size(_path) / 1000.f;
 
         return true;
     }
@@ -116,6 +118,10 @@ namespace engine {
 
     IntRect& Texture::getRegion() {
         return region;
+    }
+
+    float Texture::getKb() const {
+        return fileSizeKb;
     }
 }
 

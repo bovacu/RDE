@@ -28,7 +28,6 @@ namespace engine {
             Sprite sprite, subSprite;
             Camera camera;
             Shape shape;
-            TextureAtlasManager atlasManager;
             std::vector<Sprite> sprites;
             Texture texture;
 
@@ -182,6 +181,7 @@ namespace engine {
         private:
             bool onWindowClosed(WindowClosedEvent& _e);
             bool onWindowResized(WindowResizedEvent& _e);
+            bool onMouseScrolled(MouseScrolledEvent& _e);
 
     };
 

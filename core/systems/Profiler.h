@@ -10,6 +10,9 @@
 #include <cmath>
 #include "core/render/layers/ImGuiCore.h"
 
+#include "sys/types.h"
+#include "sys/sysinfo.h"
+
 namespace engine {
 
     enum ProfilerState {
@@ -62,6 +65,10 @@ namespace engine {
         private:
             static std::unordered_map<ProfilerState, State> states;
             static std::unordered_map<ProfilerState, State> lastStates;
+            static struct sysinfo systemInfo;
+
+            static int parseLine(char* line);
+            static int getValue();
 
         public:
             static void beginFrame(float _dt);
@@ -69,6 +76,8 @@ namespace engine {
             static void end(ProfilerState _state);
             static void endFrame();
             static std::unordered_map<ProfilerState, State>& getStates();
+
+            static ulong* getTotalVirtualMemory();
     };
 
 }
