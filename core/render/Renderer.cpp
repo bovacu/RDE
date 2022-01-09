@@ -5,7 +5,6 @@
 namespace engine {
 
     SpriteBatch Renderer::batch;
-    int Renderer::drawCalls = 0;
 
     void Renderer::init(Window* _window) {
         batch.init(_window);
@@ -41,7 +40,6 @@ namespace engine {
 
     void Renderer::endDraw() {
         batch.flush();
-        drawCalls++;
     }
 
     void Renderer::draw(const Sprite& _sprite) {
@@ -66,11 +64,15 @@ namespace engine {
     }
 
     void Renderer::resetDebugInfo() {
-        drawCalls = 0;
+        batch.drawCalls = 0;
         batch.totalTriangles = 0;
     }
 
     int Renderer::getTotalTriangles() {
         return batch.totalTriangles;
+    }
+
+    int Renderer::getDrawCalls() {
+        return batch.drawCalls;
     }
 }

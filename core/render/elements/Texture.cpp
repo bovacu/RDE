@@ -90,7 +90,6 @@ namespace engine {
 
         region = {{0, 0}, {width, height}};
         fileSizeKb = (float)std::filesystem::file_size(_path) / 1000.f;
-
         return true;
     }
 

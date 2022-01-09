@@ -174,7 +174,7 @@ namespace engine {
         auto* _memData = Profiler::getTotalVirtualMemory();
         ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
         ImGui::Separator();
-        ImGui::Text("Draw Calls: %d", Renderer::drawCalls);
+        ImGui::Text("Draw Calls: %d", Renderer::getDrawCalls());
         ImGui::Text("Total Triangles: %d", Renderer::getTotalTriangles());
     }
 

@@ -15,6 +15,7 @@
 #include "core/render/layers/ImGuiLayer.h"
 #include "core/render/layers/LayerStack.h"
 #include "core/render/elements/TextureAtlasManager.h"
+#include "core/render/Animation.h"
 
 namespace engine {
 
@@ -25,11 +26,11 @@ namespace engine {
             Delta dt;
             int fps{};
             unsigned int fpsCounter = 0, frameCounter = 0;
-            Sprite sprite, subSprite;
             Camera camera;
             Shape shape;
             std::vector<Sprite> sprites;
-            Texture texture;
+            Sprite player;
+            Animation animation;
 
         private:
             bool running = true;

@@ -110,9 +110,9 @@ namespace engine {
         if (texture->getGLTexture() != _sprite.getTexture().getGLTexture()) {
             flush();
 
-            _sprite.getTexture().incRefCount();
-            if (texture != nullptr)
-                texture->decRefCount();
+//            _sprite.getTexture().incRefCount();
+//            if (texture != nullptr)
+//                texture->decRefCount();
 
             texture = &_sprite.getTexture();
         }
@@ -232,7 +232,8 @@ namespace engine {
 
         totalTriangles += (int)vertexBuffer.size() / 3;
         vertexBuffer.clear();
-        glUseProgram(0);
+
+        drawCalls++;
     }
 
     void SpriteBatch::flushDebug() {

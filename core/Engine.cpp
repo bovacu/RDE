@@ -21,8 +21,13 @@ namespace engine {
 
         this->window->setVSync(false);
 
-        texture.loadFromFile("assets/test.png");
         TextureAtlasManager::get().addAtlas(50, 50, "assets/test.png");
+        TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
+
+        for(int _i = 0; _i < 10; _i++)
+            animation.addFrame(TextureAtlasManager::get().getTexture("run", "run_" + std::to_string(_i)));
+
+        player.addAnimation(&animation);
 
         int _line = 0;
         int _row = 0;
@@ -122,6 +127,8 @@ namespace engine {
 
         if(Input::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
+
+        player.update(_dt);
     }
 
     void Engine::onRender(Delta _dt) {
@@ -132,8 +139,9 @@ namespace engine {
             _layer->onRender(_dt);
 
         Renderer::beginDraw(camera);
-        for(auto& _sprite : sprites)
-            Renderer::draw(_sprite);
+        Renderer::draw(sprites[0]);
+        Renderer::draw(player);
+
         Renderer::endDraw();
 
         Renderer::beginDebugDraw(camera);

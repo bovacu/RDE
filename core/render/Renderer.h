@@ -14,9 +14,9 @@ namespace engine {
 
         // Debug
         public:
-            static int drawCalls;
             static void resetDebugInfo();
             static int getTotalTriangles();
+            static int getDrawCalls();
 
         private:
             static SpriteBatch batch;

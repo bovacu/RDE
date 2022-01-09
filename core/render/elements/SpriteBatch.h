@@ -34,6 +34,7 @@ namespace engine {
 
         public:
             int totalTriangles;
+            int drawCalls;
 
         private:
             std::vector<Vertex2dUVColor> vertexBuffer;
