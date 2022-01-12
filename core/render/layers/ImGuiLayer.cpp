@@ -83,19 +83,12 @@ namespace engine {
     }
 
     void ImGuiLayer::drawDebugInfo() {
-//        ImGui::SetNextWindowSize({(float)Engine::get().getWindowSize().x, (float)Engine::get().getWindowSize().y});
-//        ImGui::Begin("Master", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground);
-//        ImGui::End();
-
         ImGui::Begin("Debugging");
         printResolutionFullscreenAndVSync();
         ImGui::Separator();
-        printFPSDrawCallsAndRAM();
-        ImGui::Separator();
         printAtlases();
+        printFPSDrawCallsAndRAM();
         ImGui::End();
-        metrics();
-        ImGui::ShowDemoWindow();
         console();
     }
 
@@ -166,6 +159,8 @@ namespace engine {
     }
 
     void ImGuiLayer::printFPSDrawCallsAndRAM() {
+        static bool _showMetrics = false;
+
         ImGui::Text("FPS: %d", engine::Engine::get().getFps());
         ImGui::Separator();
         ImGui::Text("X: %d, Y: %d", Input::getMousePosition().x, Input::getMousePosition().y);
@@ -178,6 +173,12 @@ namespace engine {
         ImGui::Separator();
         ImGui::Text("Draw Calls: %d", Renderer::getDrawCalls());
         ImGui::Text("Total Triangles: %d", Renderer::getTotalTriangles());
+        ImGui::Separator();
+        if(ImGui::Button("Show Metrics")) {
+            _showMetrics = !_showMetrics;
+        }
+
+        if(_showMetrics) metrics();
     }
 
     void ImGuiLayer::printAtlases() {
@@ -242,11 +243,22 @@ namespace engine {
     }
 
     int ImGuiLayer::consoleIntro(ImGuiInputTextCallbackData* _data) {
+        switch (_data->EventFlag){
+            case ImGuiInputTextFlags_CallbackHistory:{
+                if (_data->EventKey == ImGuiKey_UpArrow){
+                    _data->DeleteChars(0, _data->BufTextLen);
+                    _data->InsertChars(0, Console::get().getUpCommand().c_str());
+                }
+                else if (_data->EventKey == ImGuiKey_DownArrow) {
+                    _data->DeleteChars(0, _data->BufTextLen);
+                    _data->InsertChars(0, Console::get().getDownCommand().c_str());
+                }
+            }
+        }
         return 0;
     }
 
     void ImGuiLayer::console() {
-        static std::vector<std::string> logs;
         static bool autoscroll = true;
         static bool scrollToBottom = false;
 
@@ -254,30 +266,28 @@ namespace engine {
 
         static char _input[256];
         bool reclaim_focus = false;
-        ImGuiInputTextFlags _inputTextFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
+        ImGuiInputTextFlags _inputTextFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackHistory;
 
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Command").x * 1.5f);
         if(ImGui::InputText("Command", _input, IM_ARRAYSIZE(_input), _inputTextFlags, &consoleStub, (void*)this)) {
-            if(Input::isKeyJustPressed(KeyCode::Enter)) {
-                std::stringstream _ss(_input);
-                std::vector<std::string> _splits;
+            std::stringstream _ss(_input);
+            std::vector<std::string> _splits;
 
-                std::string _s;
-                while (std::getline(_ss, _s, ' '))
-                    _splits.push_back(_s);
+            std::string _s;
+            while (std::getline(_ss, _s, ' '))
+                _splits.push_back(_s);
 
-                if(_splits.empty()) return;
+            if(_splits.empty()) return;
 
-                Command _command;
-                _command.name = _splits[0];
-                _command.arguments = std::vector<std::string>(_splits.begin() + 1, _splits.end());
-                auto _result = Console::get().call(_command);
-                for(auto& _r : _result)
-                    logs.push_back(_r);
+            Command _command;
+            _command.name = _splits[0];
+            _command.arguments = std::vector<std::string>(_splits.begin() + 1, _splits.end());
+            auto _result = Console::get().call(_command);
+            for(auto& _r : _result)
+                Console::get().logs.push_back(_r);
 
-                reclaim_focus = true;
-                strcpy(_input, "");
-            }
+            reclaim_focus = true;
+            strcpy(_input, "");
         }
 
         if (reclaim_focus)
@@ -294,8 +304,8 @@ namespace engine {
 
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-        for (int i = 0; i < logs.size(); i++) {
-            const char* item = logs[i].c_str();
+        for (int i = 0; i < Console::get().logs.size(); i++) {
+            const char* item = Console::get().logs[i].c_str();
 
             ImVec4 color;
             bool has_color = false;
@@ -317,4 +327,5 @@ namespace engine {
         ImGui::EndChild();
         ImGui::End();
     }
+
 }
