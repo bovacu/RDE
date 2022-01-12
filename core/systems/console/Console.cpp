@@ -58,6 +58,7 @@ namespace engine {
         _logs.emplace_back("> help: shows all available commands");
         _logs.emplace_back("> clear: clears the screen");
         _logs.emplace_back("> history: shows all the commands used in the session");
+        _logs.emplace_back("> background_color r g b a: Changes background color 0 <= r,b,g,a <= 255");
 
         return _logs;
     }

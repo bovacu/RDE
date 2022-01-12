@@ -18,6 +18,7 @@
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/systems/soundSystem/SoundDevice.h"
 #include "core/systems/soundSystem/SoundSource.h"
+#include "core/systems/console/Console.h"
 
 namespace engine {
 
@@ -34,6 +35,7 @@ namespace engine {
             Sprite player;
             AnimationSystem animationSystem;
             TransitionParams params;
+            Color backgroundColor = Color::Red;
 
         private:
             bool running = true;
@@ -189,6 +191,8 @@ namespace engine {
 
             bool fromRunToRoll(const TransitionParams& _foo);
             bool fromRollToRun(const TransitionParams& _foo);
+
+            Logs changeColorConsoleCommand(const std::vector<std::string>& _args);
 
     };
 

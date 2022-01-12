@@ -3,7 +3,6 @@
 #include "Engine.h"
 #include "core/systems/soundSystem/SoundSystem.h"
 #include "core/systems/soundSystem/SoundBuffer.h"
-#include "core/systems/console/Console.h"
 
 namespace engine {
 
@@ -46,6 +45,7 @@ namespace engine {
 //        SoundSystem::get().play("getout");
 
         Console::get().init();
+        Console::get().addCommand("background_color", BIND_FUNC_1(Engine::changeColorConsoleCommand));
 
         int _line = 0;
         int _row = 0;
@@ -157,7 +157,7 @@ namespace engine {
 
     void Engine::onRender(Delta _dt) {
 
-        Renderer::clear(Color::Red);
+        Renderer::clear(backgroundColor);
 
         for (Layer* _layer : this->layerStack)
             _layer->onRender(_dt);
@@ -268,6 +268,12 @@ namespace engine {
 
     bool Engine::fromRollToRun(const TransitionParams& _foo) {
         return Input::isKeyJustPressed(KeyCode::S);
+    }
+
+    Logs Engine::changeColorConsoleCommand(const std::vector<std::string>& _args) {
+        backgroundColor = {(unsigned char)std::stoi(_args[0]), (unsigned char)std::stoi(_args[1]),
+                           (unsigned char)std::stoi(_args[2]), (unsigned char)std::stoi(_args[3])};
+        return {"Changed color"};
     }
 
 }
