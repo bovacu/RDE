@@ -78,7 +78,6 @@ namespace engine {
         private:
             TextureAtlasManager() = default;
             void cropTextures(Atlas& _atlas);
-            std::string getTextureName(const std::string& _path) const;
             bool isTextureEmpty(const Atlas& _atlas, uint _x, uint _y) const;
     };
 

@@ -16,6 +16,8 @@
 #include "core/render/layers/LayerStack.h"
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
+#include "core/systems/soundSystem/SoundDevice.h"
+#include "core/systems/soundSystem/SoundSource.h"
 
 namespace engine {
 

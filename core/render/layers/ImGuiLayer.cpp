@@ -1,7 +1,9 @@
+#include <imgui_internal.h>
 #include "ImGuiLayer.h"
 
 #include "core/Engine.h"
 #include "core/render/window/event/MouseEvent.h"
+#include "core/systems/console/Console.h"
 
 namespace engine {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiLayer::plotBuffers;
@@ -81,11 +83,11 @@ namespace engine {
     }
 
     void ImGuiLayer::drawDebugInfo() {
-        ImGui::SetNextWindowSize({(float)Engine::get().getWindowSize().x, (float)Engine::get().getWindowSize().y});
-        ImGui::Begin("Master", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground);
-        ImGui::End();
+//        ImGui::SetNextWindowSize({(float)Engine::get().getWindowSize().x, (float)Engine::get().getWindowSize().y});
+//        ImGui::Begin("Master", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground);
+//        ImGui::End();
 
-        ImGui::Begin("Debugging", nullptr, ImGuiWindowFlags_NoMove);
+        ImGui::Begin("Debugging");
         printResolutionFullscreenAndVSync();
         ImGui::Separator();
         printFPSDrawCallsAndRAM();
@@ -93,11 +95,12 @@ namespace engine {
         printAtlases();
         ImGui::End();
         metrics();
-
+        ImGui::ShowDemoWindow();
+        console();
     }
 
     void ImGuiLayer::metrics() {
-        ImGui::Begin("Metrics", nullptr, ImGuiWindowFlags_NoMove);
+        ImGui::Begin("Metrics");
         static bool _capture = true;
         static float t = 0;
         t += ImGui::GetIO().DeltaTime;
@@ -150,7 +153,6 @@ namespace engine {
     }
 
     bool ImGuiLayer::onMouseScrolled(MouseScrolledEvent& _e) {
-        LOG_I("imgui")
         return ImGui::IsAnyItemHovered();
     }
 
@@ -232,5 +234,87 @@ namespace engine {
             }
             ImGui::EndCombo();
         }
+    }
+
+    int ImGuiLayer::consoleStub(ImGuiInputTextCallbackData* _data) {
+        auto* console = (ImGuiLayer*)_data->UserData;
+        return console->consoleIntro(_data);
+    }
+
+    int ImGuiLayer::consoleIntro(ImGuiInputTextCallbackData* _data) {
+        return 0;
+    }
+
+    void ImGuiLayer::console() {
+        static std::vector<std::string> logs;
+        static bool autoscroll = true;
+        static bool scrollToBottom = false;
+
+        ImGui::Begin("Console");
+
+        static char _input[256];
+        bool reclaim_focus = false;
+        ImGuiInputTextFlags _inputTextFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
+
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Command").x * 1.5f);
+        if(ImGui::InputText("Command", _input, IM_ARRAYSIZE(_input), _inputTextFlags, &consoleStub, (void*)this)) {
+            if(Input::isKeyJustPressed(KeyCode::Enter)) {
+                std::stringstream _ss(_input);
+                std::vector<std::string> _splits;
+
+                std::string _s;
+                while (std::getline(_ss, _s, ' '))
+                    _splits.push_back(_s);
+
+                if(_splits.empty()) return;
+
+                Command _command;
+                _command.name = _splits[0];
+                _command.arguments = std::vector<std::string>(_splits.begin() + 1, _splits.end());
+                auto _result = Console::get().call(_command);
+                for(auto& _r : _result)
+                    logs.push_back(_r);
+
+                reclaim_focus = true;
+                strcpy(_input, "");
+            }
+        }
+
+        if (reclaim_focus)
+            ImGui::SetKeyboardFocusHere(-1);
+
+        ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+
+        auto wPos = ImGui::GetWindowPos();
+        auto wSize = ImGui::GetWindowSize();
+        ImGui::GetWindowDrawList()->AddRect(wPos, { wPos.x + wSize.x, wPos.y + wSize.y }, ImColor(1.f, 1.f, 1.f, 1.f));
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
+        ImGui::Indent(2.5f);
+
+        ImGui::Dummy(ImVec2(0.0f, 5.0f));
+
+        for (int i = 0; i < logs.size(); i++) {
+            const char* item = logs[i].c_str();
+
+            ImVec4 color;
+            bool has_color = false;
+            if (strstr(item, "[error]"))          { color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); has_color = true; }
+            else if (strstr(item, "#")) { color = ImVec4(1.0f, 0.8f, 0.6f, 1.0f); has_color = true; }
+            if (has_color)
+                ImGui::PushStyleColor(ImGuiCol_Text, color);
+            ImGui::TextUnformatted(item);
+            if (has_color)
+                ImGui::PopStyleColor();
+        }
+        ImGui::Unindent(2.5f);
+        if (scrollToBottom || (autoscroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()))
+            ImGui::SetScrollHereY(1.0f);
+        scrollToBottom = false;
+
+        ImGui::PopStyleVar();
+
+        ImGui::EndChild();
+        ImGui::End();
     }
 }

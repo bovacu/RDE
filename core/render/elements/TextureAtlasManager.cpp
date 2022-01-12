@@ -7,7 +7,7 @@ namespace engine {
     TextureAtlasManager TextureAtlasManager::instance;
 
     bool TextureAtlasManager::addAtlas(int _tileWidth, int _tileHeight, const std::string& _pathToTexture) {
-        auto _name = getTextureName(_pathToTexture);
+        auto _name = util::getFileNameFromPath(_pathToTexture);
         LOG_I_TIME("Trying to load '", _pathToTexture, "'...")
         if(instance.atlases.find(_name) != instance.atlases.end()) {
             LOG_E_TIME("Atlas '", _name, "' was already loaded");
@@ -67,12 +67,6 @@ namespace engine {
                 _currentTexture++;
             }
         }
-    }
-
-    std::string TextureAtlasManager::getTextureName(const std::string& _path) const {
-        std::string base_filename = _path.substr(_path.find_last_of("/\\") + 1);
-        std::string::size_type const p(base_filename.find_last_of('.'));
-        return base_filename.substr(0, p);
     }
 
     bool TextureAtlasManager::isTextureEmpty(const Atlas& _atlas, uint _x, uint _y) const {

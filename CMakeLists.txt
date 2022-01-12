@@ -4,7 +4,9 @@ project(Engine2_0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
-SET(TARGET_LINKS OpenGL GLEW glfw Threads::Threads flecs)
+SET(TARGET_LINKS OpenGL GLEW glfw Threads::Threads flecs IrrKlang
+#        sndfile openal
+        )
 
 include_directories(.)
 include_directories(${CMAKE_SOURCE_DIR}/external})
@@ -28,6 +30,33 @@ find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Threads REQUIRED)
+find_package(OpenAL REQUIRED)
+#find_package(IrrKlang REQUIRED)
+
+
+#---------------- SNDFILE
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(LIBSNDFILE_PKGCONF sndfile)
+endif(PKG_CONFIG_FOUND)
+
+# Include dir
+find_path(LIBSNDFILE_INCLUDE_DIR
+        NAMES sndfile.h
+        PATHS ${LIBSNDFILE_PKGCONF_INCLUDE_DIRS}
+        )
+
+# Library
+find_library(LIBSNDFILE_LIBRARY
+        NAMES sndfile libsndfile-1
+        PATHS ${LIBSNDFILE_PKGCONF_LIBRARY_DIRS}
+        )
+
+#--------------- IRRKLANG
+
+set(IRRKLANG_DIR "external/irrKlang")
+include_directories(${IRRKLANG_DIR}/include)
+link_directories(${IRRKLANG_DIR}/bin/linux-gcc-64)
 
 #-------------- FLECS
 
@@ -81,7 +110,24 @@ add_executable( Engine2_0 main.cpp
         external/imgui/nodeEditor/imgui_canvas.h external/imgui/nodeEditor/imgui_canvas.cpp external/imgui/nodeEditor/imgui_extra_math.h
         external/imgui/nodeEditor/imgui_node_editor.h external/imgui/nodeEditor/imgui_node_editor.cpp external/imgui/nodeEditor/imgui_node_editor_api.cpp
         external/imgui/nodeEditor/imgui_node_editor_internal.h
-        core/systems/profiling/Profiler.h core/systems/profiling/Profiler.cpp core/render/layers/ImGuiCore.h core/render/elements/TextureAtlasManager.cpp core/render/elements/TextureAtlasManager.h core/util/Rect.h core/systems/animationSystem/Animation.cpp core/systems/animationSystem/Animation.h core/systems/animationSystem/AnimationSystem.cpp core/systems/animationSystem/AnimationSystem.h)
+
+        core/systems/profiling/Profiler.h core/systems/profiling/Profiler.cpp core/render/layers/ImGuiCore.h
+        core/render/elements/TextureAtlasManager.cpp core/render/elements/TextureAtlasManager.h core/util/Rect.h
+        core/systems/animationSystem/Animation.cpp core/systems/animationSystem/Animation.h core/systems/animationSystem/AnimationSystem.cpp
+        core/systems/animationSystem/AnimationSystem.h core/systems/soundSystem/SoundSystem.cpp core/systems/soundSystem/SoundSystem.h
+
+        external/irrKlang/include/irrKlang.h external/irrKlang/include/ik_ESoundEngineOptions.h external/irrKlang/include/ik_ESoundOutputDrivers.h
+        external/irrKlang/include/ik_EStreamModes.h external/irrKlang/include/ik_IAudioRecorder.h external/irrKlang/include/ik_IAudioStream.h
+        external/irrKlang/include/ik_IAudioStreamLoader.h external/irrKlang/include/ik_IFileFactory.h external/irrKlang/include/ik_IFileReader.h
+        external/irrKlang/include/ik_IRefCounted.h external/irrKlang/include/ik_irrKlangTypes.h external/irrKlang/include/ik_ISound.h
+        external/irrKlang/include/ik_ISoundDeviceList.h external/irrKlang/include/ik_ISoundEffectControl.h external/irrKlang/include/ik_ISoundEngine.h
+        external/irrKlang/include/ik_ISoundMixedOutputReceiver.h external/irrKlang/include/ik_ISoundSource.h external/irrKlang/include/ik_ISoundStopEventReceiver.h
+        external/irrKlang/include/ik_IVirtualRefCounted.h external/irrKlang/include/ik_SAudioStreamFormat.h external/irrKlang/include/ik_vec3d.h
+
+#        core/systems/soundSystem/SoundBuffer.cpp core/systems/soundSystem/SoundBuffer.h core/systems/soundSystem/SoundDevice.cpp
+#        core/systems/soundSystem/SoundDevice.h core/systems/soundSystem/SoundSource.cpp core/systems/soundSystem/SoundSource.h
+
+        core/systems/console/Console.cpp core/systems/console/Console.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 

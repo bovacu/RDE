@@ -1,6 +1,9 @@
 // Created by borja on 24/12/21.
 
 #include "Engine.h"
+#include "core/systems/soundSystem/SoundSystem.h"
+#include "core/systems/soundSystem/SoundBuffer.h"
+#include "core/systems/console/Console.h"
 
 namespace engine {
 
@@ -38,6 +41,12 @@ namespace engine {
 
         animationSystem.start();
 
+//        SoundSystem::get().init();
+//        SoundSystem::get().loadSound("assets/getout.ogg");
+//        SoundSystem::get().play("getout");
+
+        Console::get().init();
+
         int _line = 0;
         int _row = 0;
         for(int _i = 0; _i < 36 ; _i++) {
@@ -61,7 +70,7 @@ namespace engine {
     }
 
     Engine::~Engine() {
-
+        SoundSystem::get().clean();
     }
 
     void Engine::onRun() {
@@ -167,13 +176,12 @@ namespace engine {
         for (Layer* _layer : this->layerStack)
             _layer->onImGuiRender(_dt);
             if(showImGuiDebugWindow)
-                engine::ImGuiLayer::drawDebugInfo();
+                imGuiLayer->drawDebugInfo();
         this->imGuiLayer->end();
         Profiler::end(ProfilerState::IMGUI);
     }
 
     bool Engine::onMouseScrolled(MouseScrolledEvent& _e) {
-        LOG_I("engine")
         float _zoom = camera.getCurrentZoomLevel();
         _zoom -= _e.getScrollY() * camera.getZoomSpeed();
         _zoom = std::max(_zoom, 0.25f);

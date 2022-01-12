@@ -31,19 +31,23 @@ namespace engine {
             bool onMouseClicked(MouseButtonPressedEvent& _e);
             bool onMouseMovedEvent(MouseMovedEvent& _e);
 
-            static void drawDebugInfo();
+            void drawDebugInfo();
 
         private:
-            static void charToIntSize(const std::string& _size, int* _resolution);
-            static void metrics();
-            static void mouseInfo();
+            void console();
+            static int consoleStub(ImGuiInputTextCallbackData* _data);
+            int consoleIntro(ImGuiInputTextCallbackData* _data);
+
+            void charToIntSize(const std::string& _size, int* _resolution);
+            void metrics();
+            void mouseInfo();
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
 
             // Debug
-            static void printFPSDrawCallsAndRAM();
-            static void printAtlases();
-            static void printResolutionFullscreenAndVSync();
+            void printFPSDrawCallsAndRAM();
+            void printAtlases();
+            void printResolutionFullscreenAndVSync();
     };
 
 }
