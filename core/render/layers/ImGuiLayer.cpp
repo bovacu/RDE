@@ -186,8 +186,8 @@ namespace engine {
         for(auto& _ti : TextureAtlasManager::get().getTexturesInfo())
             _totalAtlasesSize += _ti.kb;
 
+        int _child = 1;
         if(ImGui::TreeNode((void*)(intptr_t)0, "Atlases -> %.2f KBs", _totalAtlasesSize)) {
-            int _child = 1;
             for(auto& _ti : TextureAtlasManager::get().getTexturesInfo()) {
                 if(ImGui::TreeNode((void*)(intptr_t)_child, "%s", _ti.name)) {
                     ImGui::Text("Kb: %.2f", _ti.kb);
@@ -201,6 +201,28 @@ namespace engine {
 
             ImGui::TreePop();
         }
+
+        float _totalFontsSize = 0;
+        for(auto& _font : FontManager::get().getAllFonts())
+            _totalFontsSize += _font->getTexture()->getKb();
+
+        ImGui::Separator();
+        _child++;
+
+        if(ImGui::TreeNode((void*)(intptr_t)_child, "Fonts -> %.2f KBs", _totalFontsSize)) {
+            for(auto& _font : FontManager::get().getAllFonts()) {
+                if(ImGui::TreeNode((void*)(intptr_t)_child, "%s", _font->getFontName().c_str())) {
+                    ImGui::Text("Kb: %.2f", _font->getTexture()->getKb());
+                    ImGui::Text("Texture size: %dx%d", _font->getTexture()->getSize().x, _font->getTexture()->getSize().y);
+                    _child++;
+                    ImGui::TreePop();
+                }
+            }
+
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
     }
 
     void ImGuiLayer::printResolutionFullscreenAndVSync() {

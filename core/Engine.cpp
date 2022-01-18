@@ -3,6 +3,7 @@
 #include "Engine.h"
 #include "core/systems/soundSystem/SoundSystem.h"
 #include "core/systems/soundSystem/SoundBuffer.h"
+#include "core/systems/uiSystem/FontManager.h"
 
 namespace engine {
 
@@ -25,6 +26,9 @@ namespace engine {
 
         TextureAtlasManager::get().addAtlas(50, 50, "assets/test.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
+        TextureAtlasManager::get().addAtlas(1280, 523, "assets/wedding.png");
+
+        backgrounds.setTexture(TextureAtlasManager::get().getTexture("wedding", "wedding_0"));
 
         animationSystem.createAnimation("run", "run", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
         animationSystem.setInitialAnimation("run");
@@ -46,6 +50,13 @@ namespace engine {
 
         Console::get().init();
         Console::get().addCommand("background_color", BIND_FUNC_1(Engine::changeColorConsoleCommand));
+
+        FontManager::get().init();
+        FontManager::get().loadFont("assets/fonts/arial.ttf", 120);
+
+        text.init(FontManager::get().getFont("arial"), lines[linesIndex]);
+        text.setPosition({0, 0});
+        text.setTextColor(Color::Black);
 
         int _line = 0;
         int _row = 0;
@@ -152,6 +163,11 @@ namespace engine {
         if(Input::isKeyJustPressed(KeyCode::Down))
             animationSystem.setAnimationTimeBetweenFrames("run", animationSystem.getAnimationTimeBetweenFrames("run") + 0.01f);
 
+        if(Input::isKeyJustPressed(KeyCode::Enter)) {
+            linesIndex++;
+            text.init(FontManager::get().getFont("arial"), lines[linesIndex]);
+        }
+
         player.update(_dt);
     }
 
@@ -163,12 +179,14 @@ namespace engine {
             _layer->onRender(_dt);
 
         Renderer::beginDraw(camera);
-        Renderer::draw(sprites[0]);
-        Renderer::draw(player);
-
+        Renderer::draw(backgrounds);
+        Renderer::draw(text);
+//        Renderer::draw(sprites[0]);
+//        Renderer::draw(player);
         Renderer::endDraw();
 
         Renderer::beginDebugDraw(camera);
+        Renderer::drawSquare({0, 0}, {2, 2}, Color::Blue);
         Renderer::endDebugDraw();
 
         Profiler::begin(ProfilerState::IMGUI);
@@ -184,7 +202,7 @@ namespace engine {
     bool Engine::onMouseScrolled(MouseScrolledEvent& _e) {
         float _zoom = camera.getCurrentZoomLevel();
         _zoom -= _e.getScrollY() * camera.getZoomSpeed();
-        _zoom = std::max(_zoom, 0.25f);
+        _zoom = std::max(_zoom, 0.1f);
         camera.setCurrentZoomLevel(_zoom);
 
         return false;

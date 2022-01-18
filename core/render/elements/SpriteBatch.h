@@ -6,6 +6,7 @@
 #include "Sprite.h"
 #include "core/render/Camera.h"
 #include "core/render/shapes/Shape.h"
+#include "core/systems/uiSystem/Text.h"
 
 namespace engine {
     struct Vertex2dUVColor {
@@ -66,6 +67,7 @@ namespace engine {
             void beginDraw(Camera& _camera, RenderShader _renderShader = BASIC);
             void draw(const glm::vec4& _destRect, const glm::vec4& _sourceRect, const glm::vec4& _color, Texture* _texture, float _rotation = 0);
             void draw(const Sprite& _sprite);
+            void draw(Text& _text);
             void flush();
 
             void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Green);

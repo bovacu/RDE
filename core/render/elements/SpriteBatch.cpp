@@ -109,11 +109,6 @@ namespace engine {
 
         if (texture->getGLTexture() != _sprite.getTexture().getGLTexture()) {
             flush();
-
-//            _sprite.getTexture().incRefCount();
-//            if (texture != nullptr)
-//                texture->decRefCount();
-
             texture = &_sprite.getTexture();
         }
 
@@ -144,6 +139,68 @@ namespace engine {
         vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,glm::vec2(_worldPos.x + _textureSize.x, _worldPos.y), _color);
         vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,glm::vec2(_worldPos.x, _worldPos.y + _textureSize.y), _color);
         vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,glm::vec2(_worldPos.x + _textureSize.x ,_worldPos.y + _textureSize.y), _color);
+    }
+
+    void SpriteBatch::draw(Text& _text) {
+        if(texture == nullptr) {
+            texture = _text.getFont()->getTexture();
+        }
+
+        if (texture->getGLTexture() != _text.getFont()->getTexture()->getGLTexture()) {
+            flush();
+            texture = _text.getFont()->getTexture();
+        }
+
+        auto* _font = _text.getFont();
+        auto _scale = (float)_text.getFontSize() / _font->getFontSize();
+
+        std::string::const_iterator _charIt;
+        float _offsetX = 0;
+        Vec2F _textPos = _text.getPosition();
+
+        for(_charIt = _text.getText().begin(); _charIt != _text.getText().end(); _charIt++) {
+            auto _fontChar = _font->getFontChar((char)*_charIt);
+
+            if((char)*_charIt == ' ') {
+                _offsetX += _text.getSpaceWidth() * _scale;
+                continue;
+            }
+
+            _textPos.x = _text.getPosition().x - _text.getTextSize().x / 2.f + _offsetX;
+            _textPos.x += _fontChar.size.x / 2.f * _scale;
+            _offsetX += _fontChar.size.x / 2.f * _scale + _text.getSpacesBetweenChars();
+
+            _textPos.y = _text.getPosition().y - _text.getTextSize().y / 2.f + (_fontChar.size.y * _scale - _font->getShortestCharHeight()) / 2.f;
+
+            auto _pos = worldToScreenCoords(_textPos);
+            auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3(_pos.x,_pos.y, 1.f));
+
+            if(_text.getRotation() != 0)
+                _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_text.getRotation()), { 0.0f, 0.0f, 1.0f });
+
+//            if(_text.getScale() != 1)
+            _transformMat *= glm::scale(glm::mat4(1.0f), { _scale, -_scale, 1.0f });
+
+            Vec2F _worldPos = _fontChar.position;
+            Vec2F _textureSizeInWorldCoords = {_fontChar.size.x, _fontChar.size.y};
+
+            auto _textureSizeInScreenCoords = worldToScreenSize(_textureSizeInWorldCoords);
+            glm::vec4 _bottomLeftTextureCorner = {-_textureSizeInScreenCoords.x, -_textureSizeInScreenCoords.y, 0.0f, 1.0f };
+            glm::vec4 _bottomRightTextureCorner = {_textureSizeInScreenCoords.x, -_textureSizeInScreenCoords.y, 0.0f, 1.0f };
+            glm::vec4 _topRightTextureCorner = {_textureSizeInScreenCoords.x, _textureSizeInScreenCoords.y, 0.0f, 1.0f };
+            glm::vec4 _topLeftTextureCorner = {-_textureSizeInScreenCoords.x, _textureSizeInScreenCoords.y, 0.0f, 1.0f };
+
+            glm::vec4 _color = {(float)_text.getColor().r / 255.f, (float)_text.getColor().g/ 255.f,
+                                (float)_text.getColor().b/ 255.f, (float)_text.getColor().a/ 255.f};
+            vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner,glm::vec2(_worldPos.x, _worldPos.y), _color);
+            vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(_worldPos.x + _textureSizeInWorldCoords.x, _worldPos.y), _color);
+            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(_worldPos.x, _worldPos.y + _textureSizeInWorldCoords.y), _color);
+            vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(_worldPos.x + _textureSizeInWorldCoords.x, _worldPos.y), _color);
+            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(_worldPos.x, _worldPos.y + _textureSizeInWorldCoords.y), _color);
+            vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(_worldPos.x + _textureSizeInWorldCoords.x , _worldPos.y + _textureSizeInWorldCoords.y), _color);
+
+            _offsetX += (float)_fontChar.size.x * 0.5f * _scale;
+        }
     }
 
     void SpriteBatch::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {

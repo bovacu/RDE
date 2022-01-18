@@ -4,12 +4,13 @@ project(Engine2_0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
-SET(TARGET_LINKS OpenGL GLEW glfw Threads::Threads flecs IrrKlang
+SET(TARGET_LINKS OpenGL GLEW glfw Threads::Threads flecs IrrKlang freetype glut
 #        sndfile openal
         )
 
 include_directories(.)
 include_directories(${CMAKE_SOURCE_DIR}/external})
+include_directories (/usr/include/freetype2)
 
 #-------------- IMGUI
 
@@ -31,6 +32,8 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Threads REQUIRED)
 find_package(OpenAL REQUIRED)
+find_package(Freetype REQUIRED)
+find_package(GLUT REQUIRED)
 #find_package(IrrKlang REQUIRED)
 
 
@@ -87,7 +90,7 @@ add_executable( Engine2_0 main.cpp
 
         core/Engine.cpp core/Engine.h core/Core.h
 
-        external/stb/stb_image.h external/stb/stb_image.cpp external/json.h
+        external/stb/stb_image.h external/stb/stb_image.cpp external/stb/stb_image_writer.h external/json.h
 
         core/render/Renderer.cpp core/render/Renderer.h core/systems/eventSystem/EventBus.h
 
@@ -127,7 +130,7 @@ add_executable( Engine2_0 main.cpp
 #        core/systems/soundSystem/SoundBuffer.cpp core/systems/soundSystem/SoundBuffer.h core/systems/soundSystem/SoundDevice.cpp
 #        core/systems/soundSystem/SoundDevice.h core/systems/soundSystem/SoundSource.cpp core/systems/soundSystem/SoundSource.h
 
-        core/systems/console/Console.cpp core/systems/console/Console.h)
+        core/systems/console/Console.cpp core/systems/console/Console.h core/systems/uiSystem/Text.cpp core/systems/uiSystem/Text.h core/systems/uiSystem/FontManager.cpp core/systems/uiSystem/FontManager.h external/stb/stb_image_writer.h core/systems/shader_utils.cpp core/systems/shader_utils.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 

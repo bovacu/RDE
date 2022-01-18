@@ -46,6 +46,10 @@ namespace engine {
         batch.draw(_sprite);
     }
 
+    void Renderer::draw(Text& _text) {
+        batch.draw(_text);
+    }
+
     void Renderer::beginDebugDraw(Camera& _camera, float _thickness, RenderShader _renderShader) {
         batch.setDebugLinesThickness(_thickness);
         batch.beginDraw(_camera, _renderShader);

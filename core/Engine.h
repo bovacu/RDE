@@ -36,6 +36,15 @@ namespace engine {
             AnimationSystem animationSystem;
             TransitionParams params;
             Color backgroundColor = Color::Red;
+            Text text;
+            Sprite backgrounds;
+
+            int linesIndex = 0;
+            std::vector<std::string> lines {
+                "Xuxucito...",
+                "Voce quer...",
+                "Casar comigo...?"
+            };
 
         private:
             bool running = true;

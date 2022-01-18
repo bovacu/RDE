@@ -68,8 +68,8 @@ namespace engine {
     }
 
     bool Camera::onMouseScrolled(MouseScrolledEvent& _event) {
-        zoom -= _event.getScrollY() * 0.25f;
-        zoom = std::max(zoom, 0.25f);
+        zoom -= _event.getScrollY() * 0.1f;
+        zoom = std::max(zoom, 0.5f);
         projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
         return false;
     }

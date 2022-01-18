@@ -53,6 +53,8 @@ namespace engine {
         uint _numOfImagesVertical = _atlas.textureHeight / _atlas.tileHeight;
         uint _currentTexture = 0;
 
+        LOG_I(_numOfImagesHorizontal, ", ", _numOfImagesVertical)
+
         for(uint _y = 0; _y < _numOfImagesVertical; _y++) {
             for(uint _x = 0; _x < _numOfImagesHorizontal; _x++) {
 //                if(isTextureEmpty(_atlas, _x * _atlas.tileWidth, _y * _atlas.tileHeight)) continue;
@@ -63,9 +65,19 @@ namespace engine {
                 _rect.size.y = (int)_atlas.tileHeight;
 
                 _atlas.subTextures[(_atlas.name + "_" + std::to_string(_currentTexture))] = new Texture{_atlas.texture, _rect};
-//                LOG_I("    Loaded sub-texture: ", _atlas.name + "_" + std::to_string(_currentTexture), " -> ", _rect)
+                LOG_I("    Loaded sub-texture: ", _atlas.name + "_" + std::to_string(_currentTexture), " -> ", _rect)
                 _currentTexture++;
             }
+        }
+
+        if(_numOfImagesHorizontal == 0 && _numOfImagesVertical == 1) {
+            IntRect _rect;
+            _rect.bottomLeftCorner.x = 0;
+            _rect.bottomLeftCorner.y = 0;
+            _rect.size.x = (int)_atlas.tileWidth;
+            _rect.size.y = (int)_atlas.tileHeight;
+
+            _atlas.subTextures[(_atlas.name + "_" + std::to_string(_currentTexture))] = new Texture{_atlas.texture, _rect};
         }
     }
 

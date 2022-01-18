@@ -28,6 +28,7 @@ namespace engine {
             float getKb() const;
 
             bool loadFromFile(const char* _path, bool _deleteJunkImmediately = true);
+            bool loadFromMemory(unsigned char* _data, int _size);
 
             void cleanJunk();
             Color getPixel(uint _x, uint _y);

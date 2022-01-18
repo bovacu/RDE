@@ -7,6 +7,7 @@
 #include "core/util/Util.h"
 #include "core/render/elements/SpriteBatch.h"
 #include "core/render/elements/Sprite.h"
+#include "core/systems/uiSystem/Text.h"
 
 namespace engine {
 
@@ -63,6 +64,8 @@ namespace engine {
              * @param _sprite The sprite to be drawn.
              */
             static void draw(const Sprite& _sprite);
+
+            static void draw(Text& _text);
 
             /**
              * Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
