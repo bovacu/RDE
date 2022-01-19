@@ -4,13 +4,13 @@
 
 namespace engine {
 
-    void Text::init(Font* _font, const std::string& _text) {
+    void Text::init(FontAtlas* _font, const std::string& _text) {
         font = _font;
         innerText = _text;
-        fontSize = (int)font->getFontSize();
-        spaceWidth = font->getSpaceWidth();
-        enterHeight = font->getEnterHeight();
-        spaceBetweenChars = font->getSpacesBetweenChars();
+//        fontSize = (int)font->getFontSize();
+//        spaceWidth = font->getSpaceWidth();
+//        enterHeight = font->getEnterHeight();
+//        spaceBetweenChars = font->getSpacesBetweenChars();
         recalcTextDimensions(_text);
     }
 
@@ -19,11 +19,11 @@ namespace engine {
         recalcTextDimensions(_text);
     }
 
-    void Text::setFont(Font* _font) {
+    void Text::setFont(FontAtlas* _font) {
         font = _font;
     }
 
-    Font* Text::getFont() {
+    FontAtlas* Text::getFont() {
         return font;
     }
 
@@ -56,21 +56,21 @@ namespace engine {
     }
 
     void Text::recalcTextDimensions(const std::string& _text) {
-        size.y = -1;
-        size.x = 0;
-        auto _scale = (float)fontSize / font->getFontSize();
-
-        for(auto _c : _text) {
-            auto _char = font->getFontChar(_c);
-
-            if(_c == ' ') {
-                size.x += spaceWidth * _scale;
-                continue;
-            }
-
-            size.x += _char.size.x * _scale + spaceBetweenChars * _scale;
-            size.y = std::max(size.y, _char.size.y * _scale);
-        }
+//        size.y = -1;
+//        size.x = 0;
+//        auto _scale = (float)fontSize / font->getFontSize();
+//
+//        for(auto _c : _text) {
+//            auto _char = font->getFontChar(_c);
+//
+//            if(_c == ' ') {
+//                size.x += spaceWidth * _scale;
+//                continue;
+//            }
+//
+//            size.x += _char.size.x * _scale + spaceBetweenChars * _scale;
+//            size.y = std::max(size.y, _char.size.y * _scale);
+//        }
     }
 
     Vec2F Text::getTextSize() {

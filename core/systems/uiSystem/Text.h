@@ -11,7 +11,7 @@ namespace engine {
 
     class Text {
         private:
-            Font* font;
+            FontAtlas* font;
             Transform transform;
             std::string innerText;
             Vec2F size;
@@ -25,12 +25,12 @@ namespace engine {
             void recalcTextDimensions(const std::string& _text);
 
         public:
-            void init(Font* _font, const std::string& _text);
+            void init(FontAtlas* _font, const std::string& _text);
 
             void setText(const std::string& _text);
-            void setFont(Font* _font);
+            void setFont(FontAtlas* _font);
 
-            Font* getFont();
+            FontAtlas* getFont();
             std::string& getText();
             Vec2F getTextSize();
 

@@ -125,19 +125,29 @@ namespace engine {
         LOG_S("FontManager loaded")
     }
 
-    Font* FontManager::loadFont(const std::string& _pathToFont, int _fontSize) {
-        auto* _font = new Font;
-        _font->fontSize = _fontSize;
-        _font->init(_pathToFont, ftLibrary);
+    FontAtlas* FontManager::loadFont(const std::string& _pathToFont, int _fontSize) {
+        if (FT_Init_FreeType(&ftLibrary)) {
+            fprintf(stderr, "Could not init freetype library\n");
+            return nullptr;
+        }
+
+        /* Load a font */
+        if (FT_New_Face(ftLibrary, _pathToFont.c_str(), 0, &ftFace)) {
+            fprintf(stderr, "Could not open font %s\n", _pathToFont.c_str());
+            return nullptr;
+        }
+
+        auto* _font = new FontAtlas(ftFace, _fontSize);
 
         std::string _name = util::getFileNameFromPath(_pathToFont);
-        _font->fontName = _name;
         fonts[_name] = _font;
+
+        LOG_S("Load font successfully!!!!");
 
         return fonts[_name];
     }
 
-    Font* FontManager::getFont(const std::string& _fontName) {
+    FontAtlas* FontManager::getFont(const std::string& _fontName) {
         return fonts[_fontName];
     }
 
@@ -147,8 +157,8 @@ namespace engine {
         FT_Done_FreeType(ftLibrary);
     }
 
-    std::vector<Font*> FontManager::getAllFonts() {
-        std::vector<Font*> _fonts;
+    std::vector<FontAtlas*> FontManager::getAllFonts() {
+        std::vector<FontAtlas*> _fonts;
         for(auto& _font : fonts)
             _fonts.push_back(_font.second);
 

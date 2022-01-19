@@ -26,9 +26,6 @@ namespace engine {
 
         TextureAtlasManager::get().addAtlas(50, 50, "assets/test.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
-        TextureAtlasManager::get().addAtlas(1280, 523, "assets/wedding.png");
-
-        backgrounds.setTexture(TextureAtlasManager::get().getTexture("wedding", "wedding_0"));
 
         animationSystem.createAnimation("run", "run", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
         animationSystem.setInitialAnimation("run");
@@ -52,10 +49,10 @@ namespace engine {
         Console::get().addCommand("background_color", BIND_FUNC_1(Engine::changeColorConsoleCommand));
 
         FontManager::get().init();
-        FontManager::get().loadFont("assets/fonts/arial.ttf", 120);
+        FontManager::get().loadFont("assets/fonts/arial.ttf", 48);
 
         text.init(FontManager::get().getFont("arial"), lines[linesIndex]);
-        text.setPosition({0, 0});
+        text.setPosition({-100, 0});
         text.setTextColor(Color::Black);
 
         int _line = 0;
@@ -163,11 +160,6 @@ namespace engine {
         if(Input::isKeyJustPressed(KeyCode::Down))
             animationSystem.setAnimationTimeBetweenFrames("run", animationSystem.getAnimationTimeBetweenFrames("run") + 0.01f);
 
-        if(Input::isKeyJustPressed(KeyCode::Enter)) {
-            linesIndex++;
-            text.init(FontManager::get().getFont("arial"), lines[linesIndex]);
-        }
-
         player.update(_dt);
     }
 
@@ -179,10 +171,10 @@ namespace engine {
             _layer->onRender(_dt);
 
         Renderer::beginDraw(camera);
-        Renderer::draw(backgrounds);
+        for(auto& _sprite : sprites)
+            Renderer::draw(_sprite);
+        Renderer::draw(player);
         Renderer::draw(text);
-//        Renderer::draw(sprites[0]);
-//        Renderer::draw(player);
         Renderer::endDraw();
 
         Renderer::beginDebugDraw(camera);

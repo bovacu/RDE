@@ -8,13 +8,15 @@
 namespace engine {
     class Texture {
         private:
-            GLuint texture{};
             unsigned int refCount = 0;
             int width = -1, height = -1, channels = -1;
             GLenum internalFormat = -1, dataFormat = -1;
             stbi_uc* texturePixels = nullptr;
             IntRect region {};
             float fileSizeKb = -1;
+
+        public:
+            GLuint texture{};
 
         public:
             Texture() = default;
