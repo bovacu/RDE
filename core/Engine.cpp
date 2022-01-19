@@ -65,7 +65,7 @@ namespace engine {
 
             Sprite _s;
             int _index = _i > 35 ? 35 : _i;
-            _s.setTexture(TextureAtlasManager::get().getTexture("test", "test_" + std::to_string(_index)));
+            _s.setTexture(TextureAtlasManager::get().getTile("test", "test_" + std::to_string(_index)));
             _s.setPosition({60.f + (float)52 * _row, (float)(200 - _line * 52)});
             sprites.push_back(_s);
 

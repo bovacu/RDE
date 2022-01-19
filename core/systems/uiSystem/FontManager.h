@@ -66,8 +66,8 @@ namespace engine {
 
             /* Create a texture that will be used to hold all ASCII glyphs */
             glActiveTexture(GL_TEXTURE0);
-            glGenTextures(1, &texture->texture);
-            glBindTexture(GL_TEXTURE_2D, texture->texture);
+            glGenTextures(1, &texture->openGLTextureID);
+            glBindTexture(GL_TEXTURE_2D, texture->openGLTextureID);
 //            glUniform1i(uniform_tex, 0);
 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, 0);
@@ -117,12 +117,13 @@ namespace engine {
                 rowh = rowh > g->bitmap.rows ? rowh : g->bitmap.rows;
                 ox += g->bitmap.width + 1;
             }
-
+            
             fprintf(stderr, "Generated a %d x %d (%d kb) texture atlas\n", width, height, width * height / 1024);
         }
 
         ~FontAtlas() {
-            glDeleteTextures(1, &texture->texture);
+            glDeleteTextures(1, &texture->openGLTextureID);
+            delete texture;
         }
     };
 
@@ -166,7 +167,6 @@ namespace engine {
     class FontManager {
         private:
             FT_Library ftLibrary;
-            FT_Face ftFace;
             std::unordered_map<std::string, FontAtlas*> fonts;
 
         private:

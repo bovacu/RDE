@@ -150,7 +150,7 @@ namespace engine {
             texture = _text.getFont()->texture;
         }
 
-        if (texture->getGLTexture() != _text.getFont()->texture->texture) {
+        if (texture->getGLTexture() != _text.getFont()->texture->openGLTextureID) {
             flush();
             texture = _text.getFont()->texture;
         }

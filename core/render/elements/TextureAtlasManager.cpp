@@ -32,7 +32,21 @@ namespace engine {
         return true;
     }
 
-    Texture* TextureAtlasManager::getTexture(const std::string& _atlasName, const std::string& _textureName) {
+    Texture* TextureAtlasManager::getTexture(const std::string& _textureName) {
+        if(instance.atlases.find(_textureName) == instance.atlases.end()) {
+            LOG_E_TIME("Atlas '", _textureName, "' was not loaded! But tried to be accessed")
+            return nullptr;
+        }
+
+        if(instance.atlases[_textureName]->subTextures.find(_textureName) == instance.atlases[_textureName]->subTextures.end()) {
+            LOG_E_TIME("Texture '", _textureName, "' in '",_textureName ,"' was not found! But tried to be accessed")
+            return nullptr;
+        }
+
+        return instance.atlases[_textureName]->subTextures[_textureName];
+    }
+
+    Texture* TextureAtlasManager::getTile(const std::string& _atlasName, const std::string& _textureName) {
         if(instance.atlases.find(_atlasName) == instance.atlases.end()) {
             LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
             return nullptr;
@@ -45,7 +59,6 @@ namespace engine {
 
         return instance.atlases[_atlasName]->subTextures[_textureName];
     }
-
 
     void TextureAtlasManager::cropTextures(Atlas& _atlas) {
 
@@ -77,7 +90,7 @@ namespace engine {
             _rect.size.x = (int)_atlas.tileWidth;
             _rect.size.y = (int)_atlas.tileHeight;
 
-            _atlas.subTextures[(_atlas.name + "_" + std::to_string(_currentTexture))] = new Texture{_atlas.texture, _rect};
+            _atlas.subTextures[_atlas.name] = new Texture{_atlas.texture, _rect};
         }
     }
 

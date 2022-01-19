@@ -9,7 +9,7 @@ namespace engine {
     }
 
     Texture::Texture(Texture* _spriteSheet, const IntRect& _region) {
-        texture = _spriteSheet->texture;
+        openGLTextureID = _spriteSheet->openGLTextureID;
         region = _region;
         refCount = _spriteSheet->refCount;
         width = _spriteSheet->width;
@@ -21,7 +21,7 @@ namespace engine {
     }
 
     Texture::~Texture() {
-        glDeleteTextures(1, &texture);
+        glDeleteTextures(1, &openGLTextureID);
     }
 
     void Texture::incRefCount() {
@@ -35,7 +35,7 @@ namespace engine {
     }
 
     GLuint Texture::getGLTexture() const {
-        return texture;
+        return openGLTextureID;
     }
 
     Vec2I Texture::getSize() const {
@@ -65,22 +65,22 @@ namespace engine {
         internalFormat = _internalFormat;
         dataFormat = _dataFormat;
 
-        glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+        glCreateTextures(GL_TEXTURE_2D, 1, &openGLTextureID);
 
         /// Then we tell OpenGL that on this buffer we are storing a 2D texture.
-        glTextureStorage2D(texture, 1, internalFormat, width, height);
+        glTextureStorage2D(openGLTextureID, 1, internalFormat, width, height);
 
         /// We set the up/down resizing algorithms
-        glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTextureParameteri(openGLTextureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(openGLTextureID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         /// And the up/down wrapping algorithms
-        glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTextureParameteri(openGLTextureID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(openGLTextureID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
         /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
         /// glTextureStorage2D could also be used for this task, but is slower.
-        glTextureSubImage2D(texture, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, texturePixels);
+        glTextureSubImage2D(openGLTextureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, texturePixels);
         // We can unload the images now that the texture data has been buffered with opengl
 
         if(_deleteJunkImmediately) {
@@ -115,22 +115,22 @@ namespace engine {
         internalFormat = _internalFormat;
         dataFormat = _dataFormat;
 
-        glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+        glCreateTextures(GL_TEXTURE_2D, 1, &openGLTextureID);
 
         /// Then we tell OpenGL that on this buffer we are storing a 2D texture.
-        glTextureStorage2D(texture, 1, internalFormat, width, height);
+        glTextureStorage2D(openGLTextureID, 1, internalFormat, width, height);
 
         /// We set the up/down resizing algorithms
-        glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTextureParameteri(openGLTextureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(openGLTextureID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         /// And the up/down wrapping algorithms
-        glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTextureParameteri(openGLTextureID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(openGLTextureID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
         /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
         /// glTextureStorage2D could also be used for this task, but is slower.
-        glTextureSubImage2D(texture, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, texturePixels);
+        glTextureSubImage2D(openGLTextureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, texturePixels);
         // We can unload the images now that the texture data has been buffered with opengl
 
         region = {{0, 0}, {width, height}};

@@ -126,24 +126,19 @@ namespace engine {
     }
 
     FontAtlas* FontManager::loadFont(const std::string& _pathToFont, int _fontSize) {
-        if (FT_Init_FreeType(&ftLibrary)) {
-            fprintf(stderr, "Could not init freetype library\n");
-            return nullptr;
-        }
+        FT_Face _face;
 
-        /* Load a font */
-        if (FT_New_Face(ftLibrary, _pathToFont.c_str(), 0, &ftFace)) {
+        if (FT_New_Face(ftLibrary, _pathToFont.c_str(), 0, &_face)) {
             fprintf(stderr, "Could not open font %s\n", _pathToFont.c_str());
             return nullptr;
         }
 
-        auto* _font = new FontAtlas(ftFace, _fontSize);
+        auto* _font = new FontAtlas(_face, _fontSize);
 
         std::string _name = util::getFileNameFromPath(_pathToFont);
         fonts[_name] = _font;
 
-        LOG_S("Load font successfully!!!!");
-
+        FT_Done_Face(_face);
         return fonts[_name];
     }
 

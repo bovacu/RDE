@@ -16,7 +16,7 @@ namespace engine {
             float fileSizeKb = -1;
 
         public:
-            GLuint texture{};
+            GLuint openGLTextureID{};
 
         public:
             Texture() = default;

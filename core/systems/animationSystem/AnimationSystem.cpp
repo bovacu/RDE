@@ -12,7 +12,7 @@ namespace engine {
         Animation _animation;
 
         for(auto& _index : _indices) {
-            _animation.addFrame(TextureAtlasManager::get().getTexture(_atlas, _atlas + "_" + std::to_string(_index)));
+            _animation.addFrame(TextureAtlasManager::get().getTile(_atlas, _atlas + "_" + std::to_string(_index)));
         }
 
         animations[_animName] = AnimationNode { _animation, {  } };

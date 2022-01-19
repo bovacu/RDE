@@ -66,7 +66,8 @@ namespace engine {
 
         public:
             bool addAtlas(int _tileWidth, int _tileHeight, const std::string& _pathToTexture);
-            Texture* getTexture(const std::string& _atlasName, const std::string& _textureName);
+            Texture* getTexture(const std::string& _textureName);
+            Texture* getTile(const std::string& _atlasName, const std::string& _textureName);
             Atlas* getAtlas(const std::string& _atlasName);
             static TextureAtlasManager& get();
 
