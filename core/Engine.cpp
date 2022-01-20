@@ -51,9 +51,9 @@ namespace engine {
         FontManager::get().init();
         FontManager::get().loadFont("assets/fonts/arial.ttf", 48);
 
-        text.init(FontManager::get().getFont("arial"), lines[linesIndex]);
+        text.init(FontManager::get().getDefaultFont("arial"), lines[linesIndex]);
         text.setPosition({-100, 0});
-        text.setTextColor(Color::Black);
+        text.setTextColor(Color::Green);
 
         int _line = 0;
         int _row = 0;
@@ -159,6 +159,9 @@ namespace engine {
 
         if(Input::isKeyJustPressed(KeyCode::Down))
             animationSystem.setAnimationTimeBetweenFrames("run", animationSystem.getAnimationTimeBetweenFrames("run") + 0.01f);
+
+        if(Input::isKeyJustPressed(KeyCode::Enter))
+            text.setFontSize(120);
 
         player.update(_dt);
     }

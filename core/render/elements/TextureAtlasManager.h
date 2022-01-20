@@ -25,19 +25,19 @@ namespace engine {
         Texture* texture;
         std::string name;
         std::unordered_map<std::string, Texture*> subTextures;
-        uint tileWidth, tileHeight;
-        uint textureWidth, textureHeight;
+        uint tileWidth = 0, tileHeight = 0;
+        uint textureWidth = 0, textureHeight = 0;
 
         Atlas() {
             texture = new Texture;
         }
 
         ~Atlas() {
+            LOG_S("Cleaning up Atlas '", name, "'")
             for(auto& _texture : subTextures)
                 delete _texture.second;
 
             delete texture;
-            LOG_S("Cleaning up Atlas")
         }
 
         void debugInfo() {

@@ -167,5 +167,35 @@ namespace engine {
     float Texture::getKb() const {
         return fileSizeKb;
     }
+
+    bool Texture::loadTextTexture(int _width, int _height) {
+        width = _width;
+        height = _height;
+        fileSizeKb = (float)(_width * _height) / 1024.f;
+
+        glActiveTexture(GL_TEXTURE0);
+        glGenTextures(1, &openGLTextureID);
+        glBindTexture(GL_TEXTURE_2D, openGLTextureID);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, 0);
+
+        /* We require 1 byte alignment when uploading texture data */
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        /* Clamping to edges is important to prevent artifacts when scaling */
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        /* Linear filtering usually looks best for text */
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        return true;
+    }
+
+    bool Texture::loadTextSubTextures(Vec2I _offset, Vec2I _size, const unsigned char* _data) {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, _offset.x, _offset.y, _size.x, _size.y, GL_ALPHA, GL_UNSIGNED_BYTE, _data);
+        return true;
+    }
 }
 

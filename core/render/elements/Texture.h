@@ -9,14 +9,12 @@ namespace engine {
     class Texture {
         private:
             unsigned int refCount = 0;
+            GLuint openGLTextureID{};
             int width = -1, height = -1, channels = -1;
             GLenum internalFormat = -1, dataFormat = -1;
-            stbi_uc* texturePixels = nullptr;
             IntRect region {};
             float fileSizeKb = -1;
-
-        public:
-            GLuint openGLTextureID{};
+            stbi_uc* texturePixels = nullptr;
 
         public:
             Texture() = default;
@@ -27,10 +25,12 @@ namespace engine {
             void decRefCount();
             [[nodiscard]] GLuint getGLTexture() const;
             [[nodiscard]] Vec2I getSize() const;
-            float getKb() const;
+            [[nodiscard]] float getKb() const;
 
             bool loadFromFile(const char* _path, bool _deleteJunkImmediately = true);
             bool loadFromMemory(unsigned char* _data, int _size);
+            bool loadTextTexture(int _width, int _height);
+            bool loadTextSubTextures(Vec2I _offset, Vec2I _size, const unsigned char* _data);
 
             void cleanJunk();
             Color getPixel(uint _x, uint _y);

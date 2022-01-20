@@ -4,7 +4,7 @@
 
 namespace engine {
 
-    void Text::init(FontAtlas* _font, const std::string& _text) {
+    void Text::init(Font* _font, const std::string& _text) {
         font = _font;
         innerText = _text;
 //        fontSize = (int)font->getFontSize();
@@ -19,11 +19,11 @@ namespace engine {
         recalcTextDimensions(_text);
     }
 
-    void Text::setFont(FontAtlas* _font) {
+    void Text::setFont(Font* _font) {
         font = _font;
     }
 
-    FontAtlas* Text::getFont() {
+    Font* Text::getFont() {
         return font;
     }
 
@@ -80,6 +80,7 @@ namespace engine {
     void Text::setFontSize(int _fontSize) {
         fontSize = _fontSize;
         recalcTextDimensions(innerText);
+        font = FontManager::get().getSpecificFont(font->getFontName(), _fontSize);
     }
 
     int Text::getFontSize() {

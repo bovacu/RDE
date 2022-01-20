@@ -5,109 +5,100 @@
 
 namespace engine {
 
-    void Font::init(const std::string& _pathToFont, FT_Library& _ftLibrary) {
-        ftLibrary = &_ftLibrary;
-        auto _result = FT_New_Face(*ftLibrary, _pathToFont.c_str(), 0, &ftFont);
-        if(_result == FT_Err_Unknown_File_Format) {
-            LOG_E("Failed to load font at '", _pathToFont, "'!!")
-            return;
+    void Font::init(FT_Face face, int _fontSize)  {
+        FT_Set_Pixel_Sizes(face, 0, _fontSize);
+        FT_GlyphSlot g = face->glyph;
+
+        int _rowWidth = 0;
+        int _rowHeight = 0;
+        width = 0;
+        height = 0;
+        fontSize = _fontSize;
+
+        memset(characters, 0, sizeof(characters));
+
+        /* Find minimum size for a texture holding all visible ASCII characters */
+        for (int _i = 32; _i < 128; _i++) {
+            if (FT_Load_Char(face, _i, FT_LOAD_RENDER)) {
+                LOG_E("Loading character", _i, " failed!")
+                continue;
+            }
+            if (_rowWidth + g->bitmap.width + 1 >= MAX_WIDTH) {
+                width = std::max(width, _rowWidth);
+                height += _rowHeight;
+                _rowWidth = 0;
+                _rowHeight = 0;
+            }
+            _rowWidth += (int)g->bitmap.width + 1;
+            _rowHeight = _rowHeight > g->bitmap.rows ? _rowHeight : (int)g->bitmap.rows;
         }
 
-        FT_Set_Char_Size(ftFont, 0, fontSize << 6, 96, 96);
+        width = std::max(width, _rowWidth);
+        height += _rowHeight;
 
-        int max_dim = (1 + (ftFont->size->metrics.height >> 6)) * ceilf(sqrtf(DEFAULT_NUMBER_OF_CHARS_IN_FONT));
-        int tex_width = 1;
-        while(tex_width < max_dim) tex_width <<= 1;
-        int tex_height = tex_width;
+        /* Create a texture that will be used to hold all ASCII glyphs */
+        texture.loadTextTexture(width, height);
 
-        unsigned char pixels[tex_width * tex_height];
-        int pen_x = 0, pen_y = 0;
+        /* Paste all glyph bitmaps into the texture, remembering the offset */
+        int _ox = 0;
+        int _oy = 0;
 
-        for(int i = 32; i < 128; ++i){
-            FT_Load_Char(ftFont, i, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT);
-            FT_Bitmap* bmp = &ftFont->glyph->bitmap;
-            FT_Render_Glyph(ftFont->glyph, FT_RENDER_MODE_NORMAL);
+        _rowHeight = 0;
 
-            if(pen_x + bmp->width >= tex_width){
-                pen_x = 0;
-                pen_y += ((ftFont->size->metrics.height >> 6) + 1);
+        for (int _i = 32; _i < 128; _i++) {
+            if (FT_Load_Char(face, _i, FT_LOAD_RENDER)) {
+                LOG_E("Loading character", _i, " failed!")
+                continue;
             }
 
-            for(int row = 0; row < bmp->rows; ++row){
-                for(int col = 0; col < bmp->width; ++col){
-                    int x = pen_x + col;
-                    int y = pen_y + row;
-                    pixels[y * tex_width + x] = bmp->buffer[row * bmp->pitch + col];
-                }
+            if (_ox + g->bitmap.width + 1 >= MAX_WIDTH) {
+                _oy += _rowHeight;
+                _rowHeight = 0;
+                _ox = 0;
             }
 
-            // this is stuff you'd need when rendering individual glyphs out of the atlas
-            char _char = (char)i;
-            chars[_char].position = {(float)pen_x, (float)pen_y};
-            chars[_char].size = {(float)(ftFont->glyph->metrics.width >> 6), (float)(ftFont->glyph->metrics.height >> 6)};
-            chars[_char].bearing = {(float)(ftFont->glyph->bitmap_left), (float)(ftFont->glyph->bitmap_top)};
-            chars[_char].advance = (int)(ftFont->glyph->advance.x >> 6);
+            texture.loadTextSubTextures({_ox, _oy}, {(int)g->bitmap.width, (int)g->bitmap.rows}, g->bitmap.buffer);
+            characters[_i].advance.x = (float)(g->advance.x >> 6);
+            characters[_i].advance.y = (float)(g->advance.y >> 6);
 
-            if((char)i == 'l') spaceWidth = chars[_char].size.x * 1.5f;
+            characters[_i].bitmapSize.x = (float)g->bitmap.width;
+            characters[_i].bitmapSize.y = (float)g->bitmap.rows;
 
-            pen_x += chars[_char].size.x;
-            shortestCharHeight = std::min(shortestCharHeight, chars[_char].size.y);
+            characters[_i].bitmapPos.x = (float)g->bitmap_left;
+            characters[_i].bitmapPos.y = (float)g->bitmap_top;
+
+            characters[_i].offset.x = (float)_ox / (float)width;
+            characters[_i].offset.y = (float)_oy / (float)height;
+
+            _rowHeight = _rowHeight > g->bitmap.rows ? (int)_rowHeight : (int)g->bitmap.rows;
+            _ox += (int)g->bitmap.width + 1;
         }
-
-        auto* png_data = new unsigned char[tex_width * tex_height * 4];
-        for(int _row = 0; _row < tex_height; _row++) {
-            for(int _col = 0; _col < tex_width; _col++) {
-                int i = (_row * tex_width + _col);
-                png_data[i * 4 + 0] = pixels[i];
-                png_data[i * 4 + 1] = pixels[i];
-                png_data[i * 4 + 2] = pixels[i];
-                png_data[i * 4 + 3] = (int)pixels[i] < 100 ? 0 : 255;
-            }
-        }
-
-        texture = new Texture;
-//        stbi_write_png("font_output.png", tex_width, tex_height, 4, png_data, tex_width * 4);
-        texture->loadFromMemory(png_data, tex_width * tex_height * 4);
-        delete [] png_data;
     }
 
-    Texture* Font::getTexture() {
+    Texture& Font::getTexture() {
         return texture;
     }
 
-    Font::~Font() {
-        delete texture;
-        LOG_S("Cleaning up Font ", fontName)
-        FT_Done_Face(ftFont);
+    CharInfo* Font::getChars() {
+        return characters;
     }
 
-    FontChar& Font::getFontChar(char _c) {
-        return chars[_c];
+    Vec2F Font::getSize() const {
+        return {(float)width, (float)height};
     }
 
-    float Font::getShortestCharHeight() const {
-        return shortestCharHeight;
-    }
-
-    float Font::getFontSize() const {
+    int Font::getFontSize() const {
         return fontSize;
     }
 
-    float Font::getSpaceWidth() const {
-        return spaceWidth;
-    }
-
-    float Font::getEnterHeight() const {
-        return enterHeight;
-    }
-
-    const std::string& Font::getFontName() {
+    std::string& Font::getFontName() {
         return fontName;
     }
 
-    float Font::getSpacesBetweenChars() const {
-        return spacesBetweenChars;
+    std::string& Font::getPath() {
+        return originalPath;
     }
+
 
     //----------------------------- FONT MANAGER -----------------
 
@@ -125,38 +116,65 @@ namespace engine {
         LOG_S("FontManager loaded")
     }
 
-    FontAtlas* FontManager::loadFont(const std::string& _pathToFont, int _fontSize) {
+    Font* FontManager::loadFont(const std::string& _pathToFont, int _fontSize) {
         FT_Face _face;
 
         if (FT_New_Face(ftLibrary, _pathToFont.c_str(), 0, &_face)) {
-            fprintf(stderr, "Could not open font %s\n", _pathToFont.c_str());
+            LOG_E("Could not open font", _pathToFont.c_str())
             return nullptr;
         }
 
-        auto* _font = new FontAtlas(_face, _fontSize);
+        auto* _font = new Font();
+        _font->init(_face, _fontSize);
 
         std::string _name = util::getFileNameFromPath(_pathToFont);
-        fonts[_name] = _font;
+        _font->fontName = _name;
+        _font->originalPath = _pathToFont;
+        fonts[_name].emplace_back(FontHandler{ _font, _fontSize });
 
         FT_Done_Face(_face);
-        return fonts[_name];
+
+        LOG_S("Successfully loaded Font ", _name, " with font size ", _fontSize)
+
+        return fonts[_name].back().font;
     }
 
-    FontAtlas* FontManager::getFont(const std::string& _fontName) {
-        return fonts[_fontName];
+    Font* FontManager::getDefaultFont(const std::string& _fontName) {
+        return fonts[_fontName].front().font;
     }
 
     FontManager::~FontManager() {
-        for(auto& _font : fonts)
-            delete _font.second;
+        LOG_S("Cleaning up FontManager")
+        for(auto& _fontHandler : fonts)
+            for(auto& _font : _fontHandler.second) {
+                LOG_S("     Cleaning Font ", _font.font->fontName, " of size ", _font.font->fontSize)
+                delete _font.font;
+            }
         FT_Done_FreeType(ftLibrary);
     }
 
-    std::vector<FontAtlas*> FontManager::getAllFonts() {
-        std::vector<FontAtlas*> _fonts;
-        for(auto& _font : fonts)
-            _fonts.push_back(_font.second);
+    std::vector<Font*> FontManager::getAllFonts() {
+        std::vector<Font*> _fonts;
+        for(auto& _fontHandler : fonts)
+            for(auto& _font : _fontHandler.second)
+                _fonts.push_back(_font.font);
 
         return _fonts;
+    }
+
+    Font* FontManager::getSpecificFont(const std::string& _fontName, int _fontSize) {
+        if(fonts.find(_fontName) == fonts.end()) {
+            LOG_E("Font ", _fontName, " is not loaded")
+            return nullptr;
+        }
+
+        for(auto& _fontHandler : fonts[_fontName]) {
+            if(_fontHandler.fontSize == _fontSize)
+                return _fontHandler.font;
+        }
+
+        loadFont(fonts[_fontName].front().font->originalPath, _fontSize);
+        LOG_W("Couldn't find Font ", _fontName, " in size ", _fontSize, " so a new Font in that size was created")
+        return fonts[_fontName].back().font;
     }
 }

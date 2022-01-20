@@ -147,26 +147,31 @@ namespace engine {
 
     void SpriteBatch::draw(Text& _text) {
         if(texture == nullptr) {
-            texture = _text.getFont()->texture;
+            texture = &_text.getFont()->getTexture();
         }
 
-        if (texture->getGLTexture() != _text.getFont()->texture->openGLTextureID) {
+        if (texture->getGLTexture() != _text.getFont()->getTexture().getGLTexture()) {
             flush();
-            texture = _text.getFont()->texture;
+            texture = &_text.getFont()->getTexture();
         }
 
         auto* _atlas = _text.getFont();
-        float _x = _text.getPosition().x, _y = _text.getPosition().y;
+        auto _atlasSize = _atlas->getSize();
+
+        float _x = _text.getPosition().x;
+        float _y = _text.getPosition().y;
+
+        auto* _chars = _atlas->getChars();
+
         for(char _char : _text.getText()) {
-            float x2 = _x + _atlas->characters[_char].bitmapPos.x * 1;
-            float y2 = -_y - _atlas->characters[_char].bitmapPos.y * 1;
-            float w = _atlas->characters[_char].bitmapSize.x * 1;
-            float h = _atlas->characters[_char].bitmapSize.y * 1;
+            float x2 = _x + _chars[_char].bitmapPos.x * 1;
+            float y2 = -_y - _chars[_char].bitmapPos.y * 1;
+            float w = _chars[_char].bitmapSize.x * 1;
+            float h = _chars[_char].bitmapSize.y * 1;
 
-            _x += _atlas->characters[_char].advance.x * 1;
-            _y += _atlas->characters[_char].advance.y * 1;
+            _x += _chars[_char].advance.x * 1;
+            _y += _chars[_char].advance.y * 1;
 
-            /* Skip glyphs that have no pixels */
             if (w == 0 || h == 0) continue;
 
             auto _pos = worldToScreenCoords({_x, _y});
@@ -178,46 +183,29 @@ namespace engine {
             if(_text.getScale() != 1)
                 _transformMat *= glm::scale(glm::mat4(1.0f), { _text.getScale().x, _text.getScale().y, 1.0f });
 
-            glm::vec4 _color = {(float)Color::White.r / 255.f, (float)Color::White.g/ 255.f,
-                                (float)Color::White.b/ 255.f, (float)Color::White.a/ 255.f};
+            auto _textColor = _text.getColor();
+            glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
 
-            auto _coords = worldToScreenSize({x2, -y2});
-            Vec2F _textCoords ={_atlas->characters[_char].offset.x, _atlas->characters[_char].offset.y};
-            vertexBuffer.emplace_back(_transformMat * glm::vec4{_coords.x, _coords.y, 0.f, 1.f},
-                  glm::vec2(_textCoords.x, _textCoords.y), _color);
+            auto _positionInScreen = worldToScreenSize({x2, y2});
+            auto _sizeInScreen = worldToScreenSize({w, h});
 
+            glm::vec4 _bottomLeftTextureCorner = { _positionInScreen.x, -_positionInScreen.y, 0.0f, 1.0f };
+            glm::vec4 _bottomRightTextureCorner = {_positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y, 0.0f, 1.0f };
+            glm::vec4 _topLeftTextureCorner = {_positionInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
+            glm::vec4 _topRightTextureCorner = {_positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
 
-            _coords = worldToScreenSize({x2 + w, -y2});
-            _textCoords = {_atlas->characters[_char].offset.x + _atlas->characters[_char].bitmapSize.x / (float)_atlas->width, _atlas->characters[_char].offset.y};
-            vertexBuffer.emplace_back(_transformMat * glm::vec4{_coords.x, _coords.y, 0.f, 1.f},
-                  glm::vec2(_textCoords.x, _textCoords.y), _color);
+            glm::vec2 _bottomLeftTextureCoord = {_chars[_char].offset.x, _chars[_char].offset.y};
+            glm::vec2 _bottomRightTextureCoord = {_chars[_char].offset.x + _chars[_char].bitmapSize.x / _atlasSize.x, _chars[_char].offset.y};
+            glm::vec2 _topLeftTextureCoord = {_chars[_char].offset.x, _chars[_char].offset.y + _chars[_char].bitmapSize.y / _atlasSize.y};
+            glm::vec2 _topRightTextureCoord = {_chars[_char].offset.x + _chars[_char].bitmapSize.x / _atlasSize.x,_chars[_char].offset.y + _chars[_char].bitmapSize.y / _atlasSize.y};
 
-
-            _coords = worldToScreenSize({x2, -y2 - h});
-            _textCoords = {_atlas->characters[_char].offset.x, _atlas->characters[_char].offset.y + _atlas->characters[_char].bitmapSize.y / (float)_atlas->height};
-            vertexBuffer.emplace_back(_transformMat * glm::vec4{_coords.x, _coords.y, 0.f, 1.f},
-                  glm::vec2(_textCoords.x, _textCoords.y), _color);
-
-
-            _coords = worldToScreenSize({x2 + w, -y2});
-            _textCoords = {_atlas->characters[_char].offset.x + _atlas->characters[_char].bitmapSize.x / (float)_atlas->width, _atlas->characters[_char].offset.y};
-            vertexBuffer.emplace_back(_transformMat * glm::vec4{_coords.x, _coords.y, 0.f, 1.f},
-                  glm::vec2(_textCoords.x, _textCoords.y), _color);
-
-
-            _coords = worldToScreenSize({x2, -y2 - h});
-            _textCoords ={_atlas->characters[_char].offset.x, _atlas->characters[_char].offset.y + _atlas->characters[_char].bitmapSize.y / (float)_atlas->height};
-            vertexBuffer.emplace_back(_transformMat * glm::vec4{_coords.x, _coords.y, 0.f, 1.f},
-                  glm::vec2(_textCoords.x, _textCoords.y), _color);
-
-
-            _coords = worldToScreenSize({x2 + w, -y2 - h});
-            _textCoords = {_atlas->characters[_char].offset.x + _atlas->characters[_char].bitmapSize.x / (float)_atlas->width,_atlas->characters[_char].offset.y + _atlas->characters[_char].bitmapSize.y / (float)_atlas->height};
-            vertexBuffer.emplace_back(_transformMat * glm::vec4{_coords.x, _coords.y, 0.f, 1.f},
-                          glm::vec2(_textCoords.x, _textCoords.y), _color);
+            vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner,_bottomLeftTextureCoord, _color);
+            vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,_bottomRightTextureCoord, _color);
+            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
+            vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,_bottomRightTextureCoord, _color);
+            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
+            vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,_topRightTextureCoord, _color);
         }
-
-
     }
 
     void SpriteBatch::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {

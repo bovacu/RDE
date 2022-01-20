@@ -37,7 +37,7 @@ int main() {
 //FT_Face face;
 //
 //// Maximum texture width
-//#define MAXWIDTH 1024
+//#define MAX_WIDTH 1024
 //
 //const char *fontfilename;
 //
@@ -86,7 +86,7 @@ int main() {
 //                fprintf(stderr, "Loading character %c failed!\n", i);
 //                continue;
 //            }
-//            if (roww + g->bitmap.width + 1 >= MAXWIDTH) {
+//            if (roww + g->bitmap.width + 1 >= MAX_WIDTH) {
 //                w = std::max(w, roww);
 //                h += rowh;
 //                roww = 0;
@@ -130,7 +130,7 @@ int main() {
 //                continue;
 //            }
 //
-//            if (ox + g->bitmap.width + 1 >= MAXWIDTH) {
+//            if (ox + g->bitmap.width + 1 >= MAX_WIDTH) {
 //                oy += rowh;
 //                rowh = 0;
 //                ox = 0;
