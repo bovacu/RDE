@@ -130,7 +130,7 @@ add_executable( Engine2_0 main.cpp
 #        core/systems/soundSystem/SoundBuffer.cpp core/systems/soundSystem/SoundBuffer.h core/systems/soundSystem/SoundDevice.cpp
 #        core/systems/soundSystem/SoundDevice.h core/systems/soundSystem/SoundSource.cpp core/systems/soundSystem/SoundSource.h
 
-        core/systems/console/Console.cpp core/systems/console/Console.h core/systems/uiSystem/Text.cpp core/systems/uiSystem/Text.h core/systems/uiSystem/FontManager.cpp core/systems/uiSystem/FontManager.h external/stb/stb_image_writer.h core/systems/shader_utils.cpp core/systems/shader_utils.h)
+        core/systems/console/Console.cpp core/systems/console/Console.h core/systems/uiSystem/Text.cpp core/systems/uiSystem/Text.h core/systems/uiSystem/FontManager.cpp core/systems/uiSystem/FontManager.h external/stb/stb_image_writer.h core/render/elements/FrameBuffer.cpp core/render/elements/FrameBuffer.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 

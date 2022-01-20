@@ -4,8 +4,11 @@
 #ifndef ENGINE2_0_CORE_H
 #define ENGINE2_0_CORE_H
 
-#define DEFAULT_SHADER_PATH "assets/shaders/Texture.glsl"
-#define PIXEL_SHADER "assets/shaders/FlatColor.glsl"
+#define TEXTURE_VERTEX_SHADER "assets/shaders/texture/vertex.glsl"
+#define TEXTURE_FRAGMENT_SHADER "assets/shaders/texture/fragment.glsl"
+
+#define DEBUG_VERTEX_SHADER "assets/shaders/texture/vertex.glsl"
+#define DEBUG_FRAGMENT_SHADER "assets/shaders/texture/fragment.glsl"
 
 #define ENGINE_DEBUG
 #define ENGINE_ENABLE_ASSERTS

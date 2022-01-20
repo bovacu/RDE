@@ -9,16 +9,23 @@ namespace engine {
 
 
 
-    void Camera::update(Window* _window) {
-        glfwGetFramebufferSize(_window->getNativeWindow(), &width, &height);
-        if (width != vpSize[0] ||  height != vpSize[1]) {
-            vpSize[0] = width; vpSize[1] = height;
-            glViewport(0, 0, vpSize[0], vpSize[1]);
-            aspectRatio = (float)width/(float)height;
-            LOG_I("Aspect Ratio: ", aspectRatio)
-            projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
-            viewProjectionMatrix = projectionMatrix * viewMatrix;
-        }
+//    void Camera::update(Window* _window) {
+//        glfwGetFramebufferSize(_window->getNativeWindow(), &width, &height);
+//        if (width != vpSize[0] ||  height != vpSize[1]) {
+//            vpSize[0] = width; vpSize[1] = height;
+//            glViewport(0, 0, vpSize[0], vpSize[1]);
+//            aspectRatio = (float)width/(float)height;
+//            LOG_I("Aspect Ratio: ", aspectRatio)
+//            projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
+//            viewProjectionMatrix = projectionMatrix * viewMatrix;
+//        }
+//    }
+
+    void Camera::onResize(int _width, int _height) {
+        aspectRatio = (float)_width/(float)_height;
+        LOG_I("Aspect Ratio: ", aspectRatio)
+        projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
+        viewProjectionMatrix = projectionMatrix * viewMatrix;
     }
 
     glm::mat4& Camera::getProjectionMatrix() {
@@ -94,4 +101,5 @@ namespace engine {
     void Camera::setZoomSpeed(float _zoomSpeed) {
         zoomSpeed = _zoomSpeed;
     }
+
 }

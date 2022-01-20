@@ -15,12 +15,12 @@ namespace engine {
     }
 
     void SpriteBatch::initShader() {
-        basicShaderID = basicShader.loadFromFiles("assets/vertex.glsl", "assets/fragment.glsl");
+        basicShaderID = basicShader.loadFromFiles(TEXTURE_VERTEX_SHADER, TEXTURE_FRAGMENT_SHADER);
         shadersDict[RenderShader::BASIC] = basicShaderID;
     }
 
     void SpriteBatch::initDebugShader() {
-        debugShaderID = debugShader.loadFromFiles("assets/debugVertex.glsl", "assets/debugFragment.glsl");
+        debugShaderID = debugShader.loadFromFiles(DEBUG_VERTEX_SHADER, DEBUG_FRAGMENT_SHADER);
         shadersDict[RenderShader::DEBUG] = debugShaderID;
     }
 
@@ -169,9 +169,6 @@ namespace engine {
             float w = _chars[_char].bitmapSize.x * 1;
             float h = _chars[_char].bitmapSize.y * 1;
 
-            _x += _chars[_char].advance.x * 1;
-            _y += _chars[_char].advance.y * 1;
-
             if (w == 0 || h == 0) continue;
 
             auto _pos = worldToScreenCoords({_x, _y});
@@ -205,6 +202,9 @@ namespace engine {
             vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,_bottomRightTextureCoord, _color);
             vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
             vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,_topRightTextureCoord, _color);
+
+            _x += _chars[_char].advance.x * 1;
+            _y += _chars[_char].advance.y * 1;
         }
     }
 

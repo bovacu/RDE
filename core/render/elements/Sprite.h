@@ -8,7 +8,6 @@
 #include "core/util/Util.h"
 #include "Texture.h"
 #include "core/systems/Components.h"
-#include "core/systems/animationSystem/AnimationSystem.h"
 
 namespace engine {
 
@@ -17,7 +16,6 @@ namespace engine {
         private:
             Transform transform;
             SpriteRenderer renderer;
-            AnimationSystem* animation;
 
         public:
             void setPosition(const Vec2F& _position);
@@ -26,22 +24,18 @@ namespace engine {
             void setColor(const Color& _color);
             void setTexture(Texture* _texture);
 
-            Vec2F getPosition() const;
-            Vec2F getScale() const;
-            float getRotation() const;
-            Color getColor() const;
-            Color getColor();
-            Texture& getTexture() const;
+            [[nodiscard]] Vec2F getPosition() const;
+            [[nodiscard]] Vec2F getScale() const;
+            [[nodiscard]] float getRotation() const;
+            [[nodiscard]] Color getColor() const;
+            [[nodiscard]] Color getColor();
+            [[nodiscard]] Texture& getTexture() const;
 
             void flipX(bool _flip);
             void flipY(bool _flip);
 
-            bool isXFlipped() const;
-            bool isYFlipped() const;
-
-            void addAnimation(AnimationSystem* _animation);
-
-            void update(float _dt);
+            [[nodiscard]] bool isXFlipped() const;
+            [[nodiscard]] bool isYFlipped() const;
     };
 
 }

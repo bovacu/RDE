@@ -25,9 +25,10 @@ namespace engine {
             Transform transform;
 
         public:
-            void update(Window* _window);
+//            void update(Window* _window);
             void onEvent(Event& _event);
             bool onMouseScrolled(MouseScrolledEvent& _event);
+            void onResize(int _width, int _height);
 
             glm::mat4& getProjectionMatrix();
             glm::mat4& getViewMatrix();

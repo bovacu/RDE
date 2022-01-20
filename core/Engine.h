@@ -19,6 +19,7 @@
 #include "core/systems/soundSystem/SoundDevice.h"
 #include "core/systems/soundSystem/SoundSource.h"
 #include "core/systems/console/Console.h"
+#include "core/render/elements/FrameBuffer.h"
 
 namespace engine {
 
@@ -38,6 +39,7 @@ namespace engine {
             Color backgroundColor = Color::Red;
             Text text;
             Sprite backgrounds;
+            FrameBuffer* frameBuffer;
 
             int linesIndex = 0;
             std::vector<std::string> lines {

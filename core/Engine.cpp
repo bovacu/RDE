@@ -24,6 +24,13 @@ namespace engine {
 
         this->window->setVSync(false);
 
+        FrameBufferSpecification _specs = {
+                (uint32_t)window->getWindowSize().x,
+                (uint32_t)window->getWindowSize().y
+        };
+        frameBuffer = new FrameBuffer(_specs);
+        this->camera.onResize(window->getWindowSize().x, window->getWindowSize().y);
+
         TextureAtlasManager::get().addAtlas(50, 50, "assets/test.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
@@ -37,7 +44,7 @@ namespace engine {
 
         animationSystem.setInitialAnimation("run");
 
-        player.addAnimation(&animationSystem);
+//        player.addAnimation(&animationSystem);
 
         animationSystem.start();
 
@@ -49,9 +56,9 @@ namespace engine {
         Console::get().addCommand("background_color", BIND_FUNC_1(Engine::changeColorConsoleCommand));
 
         FontManager::get().init();
-        FontManager::get().loadFont("assets/fonts/arial.ttf", 48);
+        auto* _font = FontManager::get().loadFont("assets/fonts/arial.ttf", 48);
 
-        text.init(FontManager::get().getDefaultFont("arial"), lines[linesIndex]);
+        text.init(_font, lines[linesIndex]);
         text.setPosition({-100, 0});
         text.setTextColor(Color::Green);
 
@@ -79,6 +86,7 @@ namespace engine {
 
     Engine::~Engine() {
         SoundSystem::get().clean();
+        delete frameBuffer;
     }
 
     void Engine::onRun() {
@@ -92,7 +100,7 @@ namespace engine {
 
             engine::Profiler::beginFrame(_dt);
 
-            camera.update(window.get());
+//            camera.update(window.get());
 
             if (!this->minimized) {
 
@@ -148,26 +156,23 @@ namespace engine {
     }
 
     void Engine::onUpdate(Delta _dt) {
+
+        auto _fbSpec = frameBuffer->getSpecification();
+        if(window->getWindowSize().x > 0 && window->getWindowSize().y > 0 && (_fbSpec.width != window->getWindowSize().x || _fbSpec.height != window->getWindowSize().y)) {
+            frameBuffer->resize(window->getWindowSize().x, window->getWindowSize().y);
+            this->camera.onResize(window->getWindowSize().x, window->getWindowSize().y);
+        }
+
         for (Layer* _layer : this->layerStack)
             _layer->onUpdate(_dt);
 
         if(Input::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
-
-        if(Input::isKeyJustPressed(KeyCode::Up))
-            animationSystem.setAnimationTimeBetweenFrames("run", animationSystem.getAnimationTimeBetweenFrames("run") - 0.01f);
-
-        if(Input::isKeyJustPressed(KeyCode::Down))
-            animationSystem.setAnimationTimeBetweenFrames("run", animationSystem.getAnimationTimeBetweenFrames("run") + 0.01f);
-
-        if(Input::isKeyJustPressed(KeyCode::Enter))
-            text.setFontSize(120);
-
-        player.update(_dt);
+        
+        animationSystem.update(_dt, player);
     }
 
     void Engine::onRender(Delta _dt) {
-
         Renderer::clear(backgroundColor);
 
         for (Layer* _layer : this->layerStack)

@@ -8,6 +8,7 @@
 #include "core/util/Util.h"
 #include "Animation.h"
 #include "core/systems/eventSystem/EventBus.h"
+#include "core/render/elements/Sprite.h"
 #include <functional>
 
 namespace engine {
@@ -65,7 +66,7 @@ namespace engine {
             void stop();
             void restart();
 
-            void update(float _dt, TransitionParams _params = {});
+            void update(float _dt, Sprite& _sprite, TransitionParams _params = {});
     };
 
 }

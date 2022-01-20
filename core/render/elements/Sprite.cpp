@@ -64,15 +64,4 @@ namespace engine {
     bool Sprite::isYFlipped() const {
         return getScale().y < 0;
     }
-
-    void Sprite::addAnimation(AnimationSystem* _animation) {
-        animation = _animation;
-        setTexture(animation->getCurrentAnimation()->animation.getCurrentFrame());
-    }
-
-    void Sprite::update(float _dt) {
-        animation->update(_dt);
-        if(renderer.texture != animation->getCurrentAnimation()->animation.getCurrentFrame())
-            setTexture(animation->getCurrentAnimation()->animation.getCurrentFrame());
-    }
 }

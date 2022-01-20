@@ -55,7 +55,7 @@ namespace engine {
         currentNode->animation.restart();
     }
 
-    void AnimationSystem::update(float _dt, TransitionParams _params) {
+    void AnimationSystem::update(float _dt, Sprite& _sprite, TransitionParams _params) {
         AnimationNode* _nextAnimation = nullptr;
         for(auto& _transition : currentNode->transitions) {
             if(bus.dispatch(_transition.transitionCode, _params)) {
@@ -66,8 +66,10 @@ namespace engine {
         }
 
         if(_nextAnimation != nullptr) currentNode = _nextAnimation;
-
         currentNode->animation.update(_dt);
+
+        if(&_sprite.getTexture() != getCurrentAnimation()->animation.getCurrentFrame())
+            _sprite.setTexture(getCurrentAnimation()->animation.getCurrentFrame());
     }
 
     AnimationNode* AnimationSystem::getCurrentAnimation() {
