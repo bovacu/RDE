@@ -151,7 +151,7 @@ namespace engine {
         LOG_S("Cleaning up FontManager")
         for(auto& _fontHandler : fonts)
             for(auto& _font : _fontHandler.second) {
-                LOG_S("     Cleaning Font ", _font.font->fontName, " of size ", _font.font->fontSize)
+                LOG_I("     Cleaning Font ", _font.font->fontName, " of size ", _font.font->fontSize)
                 delete _font.font;
             }
         FT_Done_FreeType(ftLibrary);

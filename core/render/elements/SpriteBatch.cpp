@@ -47,14 +47,14 @@ namespace engine {
     SpriteBatch::~SpriteBatch() {
         LOG_S("Cleaning up SpriteBatch")
 
-        for(auto* _batch : batches)
-            delete _batch;
+//        for(auto* _batch : batches)
+//            delete _batch;
     }
 
     void SpriteBatch::beginDraw(Camera& _camera) {
         viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_camera.getTransform().transformMatrix);
         aspectRatio = _camera.getAspectRatio();
-        for(auto* _batch : batches) _batch->aspectRatio = aspectRatio;
+        for(auto& _batch : batches) _batch.aspectRatio = aspectRatio;
     }
 
     void SpriteBatch::draw(const glm::vec4& destRect, const glm::vec4& sourceRect, const glm::vec4& color, Texture* _texture, float _rotation) {
@@ -88,11 +88,11 @@ namespace engine {
     }
 
     void SpriteBatch::draw(Sprite& _sprite) {
-        getBatch(_sprite, _sprite.getLayer(), BatchPriority::SpritePriority)->addSprite(_sprite);
+        getBatch(_sprite, _sprite.getLayer(), BatchPriority::SpritePriority).addSprite(_sprite);
     }
 
     void SpriteBatch::draw(Text& _text) {
-        getBatch(_text, 0, BatchPriority::TextPriority)->addText(_text);
+        getBatch(_text, 0, BatchPriority::TextPriority).addText(_text);
     }
 
     void SpriteBatch::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
@@ -159,20 +159,20 @@ namespace engine {
     void SpriteBatch::flush() {
         orderBatches();
 
-        for(auto* _batch : batches) {
-            if (_batch->vertexBuffer.empty() || _batch->texture == nullptr || _batch->shaderID < 0)
+        for(auto& _batch : batches) {
+            if (_batch.vertexBuffer.empty() || _batch.texture == nullptr || _batch.shaderID < 0)
                 continue;
 
-            glUseProgram(_batch->shaderID);
-            GLint _location = glGetUniformLocation(_batch->shaderID, "viewProjectionMatrix");
+            glUseProgram(_batch.shaderID);
+            GLint _location = glGetUniformLocation(_batch.shaderID, "viewProjectionMatrix");
             glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, _batch->texture->getGLTexture());
+            glBindTexture(GL_TEXTURE_2D, _batch.texture->getGLTexture());
             glUniform1i(textureUniform, 0);
 
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * _batch->vertexBuffer.size()), &_batch->vertexBuffer[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
@@ -180,14 +180,14 @@ namespace engine {
             glEnableVertexAttribArray(1); // color
             glEnableVertexAttribArray(2); // textureCoords
 
-            glDrawArrays(GL_TRIANGLES, 0, (int)_batch->vertexBuffer.size());
+            glDrawArrays(GL_TRIANGLES, 0, (int)_batch.vertexBuffer.size());
 
             glDisableVertexAttribArray(0);
             glDisableVertexAttribArray(1);
             glDisableVertexAttribArray(2);
 
-            totalTriangles += (int)_batch->vertexBuffer.size() / 3;
-            _batch->vertexBuffer.clear();
+            totalTriangles += (int)_batch.vertexBuffer.size() / 3;
+            _batch.vertexBuffer.clear();
 
             drawCalls++;
         }
@@ -239,36 +239,35 @@ namespace engine {
         glLineWidth(_thickness);
     }
 
-    SpriteBatch::Batch* SpriteBatch::getBatch(IRenderizable& _renderizable, int _layer, BatchPriority _priority) {
-        for(auto* _batch : batches)
-            if(_renderizable.getTexture()->getGLTexture() == _batch->texture->getGLTexture() && _layer == _batch->layer && _batch->shaderID == _renderizable.getShaderID())
+    SpriteBatch::Batch& SpriteBatch::getBatch(IRenderizable& _renderizable, int _layer, BatchPriority _priority) {
+        for(auto& _batch : batches)
+            if(_renderizable.getTexture()->getGLTexture() == _batch.texture->getGLTexture() && _layer == _batch.layer && _batch.shaderID == _renderizable.getShaderID())
                 return _batch;
 
         LOG_W("Created a new batch")
 
-        auto* _batch = new Batch;
-        _batch->window = window;
-        _batch->aspectRatio = aspectRatio;
-        _batch->layer = _layer;
-        _batch->texture = _renderizable.getTexture();
-        _batch->priority = _priority;
-        _batch->shaderID = _renderizable.getShaderID();
+        Batch _batch;
+        _batch.window = window;
+        _batch.aspectRatio = aspectRatio;
+        _batch.layer = _layer;
+        _batch.texture = _renderizable.getTexture();
+        _batch.priority = _priority;
+        _batch.shaderID = _renderizable.getShaderID();
         batches.push_back(_batch);
         return batches[batches.size() - 1];
     }
 
     void SpriteBatch::orderBatches() {
-        std::sort(batches.begin(), batches.end(), [&](const Batch* a_batch, const Batch* b_batch)
-        {
-            if(a_batch->priority == b_batch->priority) {
-                if (a_batch->layer == b_batch->layer) {
-                    return a_batch->texture < b_batch->texture;
+        std::sort(batches.begin(), batches.end(), [&](const Batch& a_batch, const Batch& b_batch) {
+            if(a_batch.priority == b_batch.priority) {
+                if (a_batch.layer == b_batch.layer) {
+                    return a_batch.texture < b_batch.texture;
                 }
 
-                return a_batch->layer < b_batch->layer;
+                return a_batch.layer < b_batch.layer;
             }
 
-            return a_batch->priority < b_batch->priority;
+            return a_batch.priority < b_batch.priority;
         });
     }
 

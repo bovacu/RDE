@@ -60,10 +60,10 @@ namespace engine {
             Texture* texture = nullptr;
             Window* window = nullptr;
 
-            std::vector<Batch*> batches;
+            std::vector<Batch> batches;
 
         private:
-            Batch* getBatch(IRenderizable& _renderizable, int _layer, BatchPriority _priority);
+            Batch& getBatch(IRenderizable& _renderizable, int _layer, BatchPriority _priority);
             void orderBatches();
 
         public:

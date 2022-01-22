@@ -200,7 +200,7 @@ namespace engine {
         // Debug rendering
         Renderer::beginDebugDraw(camera);
         Renderer::drawShape(text.getDebugShape());
-        Renderer::drawSquare(text.getPosition(), {2, 2}, Color::Blue);
+        Renderer::drawSquare({0, 0}, {2, 2}, Color::Blue);
         Renderer::endDebugDraw();
 
         // Imgui rendering
