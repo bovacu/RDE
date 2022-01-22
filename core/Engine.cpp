@@ -63,10 +63,10 @@ namespace engine {
 
         Console::get().addCommand("background_color", BIND_FUNC_1(Engine::changeColorConsoleCommand));
 
-        auto* _font = FontManager::get().loadFont("assets/fonts/arial.ttf", 48);
+        auto* _font = FontManager::get().loadFont("assets/fonts/arial.ttf", 54);
 
-        text.init(_font, "Hello world");
-        text.setPosition({-100, 0});
+        text.init(_font, "Me cago en la puta");
+        text.setPosition({0, 0});
         text.setTextColor(Color::Green);
 
         int _line = 0;
@@ -165,7 +165,6 @@ namespace engine {
     }
 
     void Engine::onUpdate(Delta _dt) {
-
         auto _fbSpec = frameBuffer->getSpecification();
         if(window->getWindowSize().x > 0 && window->getWindowSize().y > 0 && (_fbSpec.width != window->getWindowSize().x || _fbSpec.height != window->getWindowSize().y)) {
             frameBuffer->resize(window->getWindowSize().x, window->getWindowSize().y);
@@ -187,20 +186,29 @@ namespace engine {
     void Engine::onRender(Delta _dt) {
         Renderer::clear(backgroundColor);
 
+        // Normal rendering
+        Renderer::beginDraw(camera);
         for (Layer* _layer : this->layerStack)
             _layer->onRender(_dt);
 
-        Renderer::beginDraw(camera);
         for(auto& _sprite : sprites)
             Renderer::draw(_sprite);
         Renderer::draw(text);
         Renderer::draw(player);
         Renderer::endDraw();
 
+        // Debug rendering
         Renderer::beginDebugDraw(camera);
-        Renderer::drawSquare({0, 0}, {2, 2}, Color::Blue);
+        Shape _s;
+        _s.showOutsideColor(true);
+        _s.showInnerColor(false);
+        _s.setInnerColor(Color::Yellow);
+        _s.makeSquare(text.getPosition(), text.getTextSize());
+        Renderer::drawShape(_s);
+        Renderer::drawSquare(text.getPosition(), {2, 2}, Color::Blue);
         Renderer::endDebugDraw();
 
+        // Imgui rendering
         Profiler::begin(ProfilerState::IMGUI);
         this->imGuiLayer->begin();
         for (Layer* _layer : this->layerStack)

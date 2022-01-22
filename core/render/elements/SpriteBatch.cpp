@@ -131,7 +131,7 @@ namespace engine {
             _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_shape.getRotation()), { 0.0f, 0.0f, 1.0f });
 
         glm::vec4 _innerColor = {(float)_shape.getInnerColor().r / 255.f, (float)_shape.getInnerColor().g / 255.f,
-                            (float)_shape.getInnerColor().b/ 255.f, (float)_shape.getInnerColor().a/ 255.f};
+                                 (float)_shape.getInnerColor().b/ 255.f, (float)_shape.getInnerColor().a/ 255.f};
 
         if(_shape.getPoints().size() == 2) {
             drawLine(_shape.getPoints()[0], _shape.getPoints()[1], _shape.getOuterColor());
@@ -317,8 +317,8 @@ namespace engine {
         auto* _atlas = _text.getFont();
         auto _atlasSize = _atlas->getSize();
 
-        float _x = _text.getPosition().x;
-        float _y = _text.getPosition().y;
+        float _x = _text.getPosition().x - _text.getTextSize().x / 2.f;
+        float _y = _text.getPosition().y - _text.getTextSize().y / 4.f;
 
         auto* _chars = _atlas->getChars();
 
@@ -333,7 +333,7 @@ namespace engine {
                 continue;
             }
 
-            auto _pos = Util::worldToScreenCoords({_x, _y}, window, aspectRatio);
+            auto _pos = Util::worldToScreenSize({_x, _y}, window, aspectRatio);
             auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
 
             if(_text.getRotation() != 0)
@@ -365,8 +365,8 @@ namespace engine {
             vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
             vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,_topRightTextureCoord, _color);
 
-            _x += _chars[_char].advance.x / 3.f * 1;
-            _y += _chars[_char].advance.y * 1;
+            _x += _chars[_char].advance.x / 2.f;
+            _y += _chars[_char].advance.y;
         }
     }
 }

@@ -91,6 +91,13 @@ namespace engine {
 
                 center = _center;
             }
+
+            void makeSquare(const Vec2F& _position, const Vec2F& _size) {
+                points.emplace_back(Vec2F{_position.x - _size.x / 2.f, _position.y - _size.y / 2.f});
+                points.emplace_back(Vec2F{_position.x + _size.x / 2.f, _position.y - _size.y / 2.f});
+                points.emplace_back(Vec2F{_position.x + _size.x / 2.f, _position.y + _size.y / 2.f});
+                points.emplace_back(Vec2F{_position.x - _size.x / 2.f, _position.y + _size.y / 2.f});
+            }
     };
 }
 
