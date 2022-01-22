@@ -65,7 +65,7 @@ namespace engine {
 
         auto* _font = FontManager::get().loadFont("assets/fonts/arial.ttf", 54);
 
-        text.init(_font, "Me cago en la puta");
+        text.init(_font, "Hello World");
         text.setPosition({0, 0});
         text.setTextColor(Color::Green);
 
@@ -199,12 +199,7 @@ namespace engine {
 
         // Debug rendering
         Renderer::beginDebugDraw(camera);
-        Shape _s;
-        _s.showOutsideColor(true);
-        _s.showInnerColor(false);
-        _s.setInnerColor(Color::Yellow);
-        _s.makeSquare(text.getPosition(), text.getTextSize());
-        Renderer::drawShape(_s);
+        Renderer::drawShape(text.getDebugShape());
         Renderer::drawSquare(text.getPosition(), {2, 2}, Color::Blue);
         Renderer::endDebugDraw();
 

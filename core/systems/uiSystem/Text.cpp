@@ -9,6 +9,8 @@ namespace engine {
         innerText = _text;
         recalcTextDimensions(_text);
         shaderID = ShaderManager::get().getShader("basicText");
+        debugShape.setOutlineColor(Color::Green);
+        debugShape.showInnerColor(false);
     }
 
     void Text::setText(const std::string& _text) {
@@ -64,9 +66,15 @@ namespace engine {
                 continue;
             }
 
+            if(_c == '\n') {
+                continue;
+            }
+
             size.x += _char.advance.x / 2.f;
-            size.y = std::max(size.y, _char.bitmapSize.y);
+            size.y = std::max(size.y, _char.bitmapSize.y - _char.bearing.y);
         }
+
+        debugShape.makeSquare(getPosition(), size);
     }
 
     Vec2F Text::getTextSize() {
@@ -122,4 +130,8 @@ namespace engine {
     }
 
     void Text::setTexture(Texture* _texture) {  }
+
+    Shape& Text::getDebugShape() {
+        return debugShape;
+    }
 }

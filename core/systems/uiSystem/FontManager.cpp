@@ -71,6 +71,9 @@ namespace engine {
             characters[_i].offset.x = (float)_ox / (float)width;
             characters[_i].offset.y = (float)_oy / (float)height;
 
+            characters[_i].bearing.x = (float)(g->metrics.width - g->metrics.horiBearingX);
+            characters[_i].bearing.y = (float)(g->metrics.height - g->metrics.horiBearingY);
+
             _rowHeight = _rowHeight > g->bitmap.rows ? (int)_rowHeight : (int)g->bitmap.rows;
             _ox += (int)g->bitmap.width + 1;
         }

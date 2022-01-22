@@ -328,6 +328,12 @@ namespace engine {
             float w = _chars[_char].bitmapSize.x * 1;
             float h = _chars[_char].bitmapSize.y * 1;
 
+            if(_char == '\n') {
+                _y -= _chars[_text.getText()[0]].bitmapSize.y * 0.8f;
+                _x = _text.getPosition().x - _text.getTextSize().x / 2.f;
+                continue;
+            }
+
             if (w == 0 || h == 0) {
                 _x += _chars[_char].advance.x / 2.f;
                 continue;

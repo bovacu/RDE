@@ -7,6 +7,7 @@
 #include "FontManager.h"
 #include "core/systems/Components.h"
 #include "core/render/elements/IRenderizable.h"
+#include "core/render/shapes/Shape.h"
 
 namespace engine {
 
@@ -22,6 +23,7 @@ namespace engine {
             int fontSize;
             ShaderID shaderID;
             Color textColor = Color::White;
+            Shape debugShape;
 
         private:
             void recalcTextDimensions(const std::string& _text);
@@ -62,6 +64,8 @@ namespace engine {
 
             void setTextColor(const Color& _color);
             Color& getColor();
+
+            Shape& getDebugShape();
     };
 
 }

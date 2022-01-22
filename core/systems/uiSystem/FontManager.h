@@ -19,6 +19,7 @@ namespace engine {
         Vec2F bitmapSize;
         Vec2F bitmapPos;
         Vec2F offset;
+        Vec2F bearing;
     };
 
     class FontManager;
