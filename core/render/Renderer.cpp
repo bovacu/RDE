@@ -21,8 +21,8 @@ namespace engine {
         glClearColor((float)_color.r / 255.f, (float)_color.g / 255.f, (float)_color.b / 255.f, (float)_color.a / 255.f);
     }
 
-    void Renderer::beginDraw(Camera& _camera, RenderShader _renderShader) {
-        batch.beginDraw(_camera, _renderShader);
+    void Renderer::beginDraw(Camera& _camera) {
+        batch.beginDraw(_camera);
     }
 
     void Renderer::draw(Texture* _texture, const Vec2F& _position, const Vec2F& _size, const Color& _tintColor, float _rotation) {
@@ -42,7 +42,7 @@ namespace engine {
         batch.flush();
     }
 
-    void Renderer::draw(const Sprite& _sprite) {
+    void Renderer::draw(Sprite& _sprite) {
         batch.draw(_sprite);
     }
 
@@ -50,9 +50,9 @@ namespace engine {
         batch.draw(_text);
     }
 
-    void Renderer::beginDebugDraw(Camera& _camera, float _thickness, RenderShader _renderShader) {
+    void Renderer::beginDebugDraw(Camera& _camera, float _thickness) {
         batch.setDebugLinesThickness(_thickness);
-        batch.beginDraw(_camera, _renderShader);
+        batch.beginDraw(_camera);
     }
 
     void Renderer::endDebugDraw() {

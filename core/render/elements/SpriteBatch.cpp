@@ -1,32 +1,19 @@
 #include "SpriteBatch.h"
 #include "core/util/Logger.h"
 #include "GL/glew.h"
+#include "core/util/Functions.h"
 #include <glm/gtc/type_ptr.hpp>
 
 namespace engine {
     void SpriteBatch::init(Window* _window) {
-        initDebugShader();
         initDebugVbo();
-
-        initShader();
         initVbo();
-
         window = _window;
-    }
-
-    void SpriteBatch::initShader() {
-        basicShaderID = basicShader.loadFromFiles(TEXTURE_VERTEX_SHADER, TEXTURE_FRAGMENT_SHADER);
-        shadersDict[RenderShader::BASIC] = basicShaderID;
-    }
-
-    void SpriteBatch::initDebugShader() {
-        debugShaderID = debugShader.loadFromFiles(DEBUG_VERTEX_SHADER, DEBUG_FRAGMENT_SHADER);
-        shadersDict[RenderShader::DEBUG] = debugShaderID;
     }
 
     void SpriteBatch::initVbo() {
         // Get the texture uniform from the shader program.
-        textureUniform = glGetUniformLocation(basicShaderID, "tex");
+        textureUniform = glGetUniformLocation(ShaderManager::get().getShader("basic"), "tex");
         texture = nullptr;
 
         // Setup vertex buffer
@@ -59,165 +46,65 @@ namespace engine {
 
     SpriteBatch::~SpriteBatch() {
         LOG_S("Cleaning up SpriteBatch")
-        glDeleteProgram(basicShaderID);
-        glDeleteProgram(debugShaderID);
+
+        for(auto* _batch : batches)
+            delete _batch;
     }
 
-    void SpriteBatch::beginDraw(Camera& _camera, RenderShader _renderShader) {
-        GLuint _shaderID = shadersDict[_renderShader];
-        glUseProgram(_shaderID);
-        GLint _location = glGetUniformLocation(_shaderID, "viewProjectionMatrix");
-        auto _viewProjection = _camera.getProjectionMatrix() * glm::inverse(_camera.getTransform().transformMatrix);
-        glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(_viewProjection)));
+    void SpriteBatch::beginDraw(Camera& _camera) {
+        viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_camera.getTransform().transformMatrix);
         aspectRatio = _camera.getAspectRatio();
+        for(auto* _batch : batches) _batch->aspectRatio = aspectRatio;
     }
 
     void SpriteBatch::draw(const glm::vec4& destRect, const glm::vec4& sourceRect, const glm::vec4& color, Texture* _texture, float _rotation) {
-        if (texture != _texture) {
-            flush();
-
-            _texture->incRefCount();
-            if (texture != nullptr)
-                texture->decRefCount();
-
-            texture = _texture;
-        }
-
-        auto _translationMat = glm::translate(glm::mat4(1.f), glm::vec3 (destRect.x, destRect.y, 1.f));
-        auto _rotationMat = glm::rotate(glm::mat4(1.0f), glm::radians(_rotation), { 0.0f, 0.0f, 1.0f });
-        auto _scaleMat = glm::scale(glm::mat4(1.0f), { 1, 1, 1.0f });
-        glm::mat4 _transformMat = _translationMat * _rotationMat * _scaleMat;
-
-
-        glm::vec4 _bottomLeftTextureCorner = { -sourceRect.z / 2.f, -sourceRect.w / 2.f, 0.0f, 1.0f };
-        glm::vec4 _bottomRightTextureCorner = {sourceRect.z / 2.f, -sourceRect.w / 2.f, 0.0f, 1.0f };
-        glm::vec4 _topRightTextureCorner = {sourceRect.z / 2.f, sourceRect.w / 2.f, 0.0f, 1.0f };
-        glm::vec4 _topLeftTextureCorner = {-sourceRect.z / 2.f, sourceRect.w / 2.f, 0.0f, 1.0f };
-
-        vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner, glm::vec2(0, 0), color);
-        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(sourceRect.z, sourceRect.y), color);
-        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(sourceRect.x, sourceRect.w), color);
-        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(sourceRect.z, sourceRect.y), color);
-        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(sourceRect.x, sourceRect.w), color);
-        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(sourceRect.z, sourceRect.w), color);
+//        if (texture != _texture) {
+//            flush();
+//
+//            _texture->incRefCount();
+//            if (texture != nullptr)
+//                texture->decRefCount();
+//
+//            texture = _texture;
+//        }
+//
+//        auto _translationMat = glm::translate(glm::mat4(1.f), glm::vec3 (destRect.x, destRect.y, 1.f));
+//        auto _rotationMat = glm::rotate(glm::mat4(1.0f), glm::radians(_rotation), { 0.0f, 0.0f, 1.0f });
+//        auto _scaleMat = glm::scale(glm::mat4(1.0f), { 1, 1, 1.0f });
+//        glm::mat4 _transformMat = _translationMat * _rotationMat * _scaleMat;
+//
+//
+//        glm::vec4 _bottomLeftTextureCorner = { -sourceRect.z / 2.f, -sourceRect.w / 2.f, 0.0f, 1.0f };
+//        glm::vec4 _bottomRightTextureCorner = {sourceRect.z / 2.f, -sourceRect.w / 2.f, 0.0f, 1.0f };
+//        glm::vec4 _topRightTextureCorner = {sourceRect.z / 2.f, sourceRect.w / 2.f, 0.0f, 1.0f };
+//        glm::vec4 _topLeftTextureCorner = {-sourceRect.z / 2.f, sourceRect.w / 2.f, 0.0f, 1.0f };
+//
+//        vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner, glm::vec2(0, 0), color);
+//        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(sourceRect.z, sourceRect.y), color);
+//        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(sourceRect.x, sourceRect.w), color);
+//        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(sourceRect.z, sourceRect.y), color);
+//        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(sourceRect.x, sourceRect.w), color);
+//        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(sourceRect.z, sourceRect.w), color);
     }
 
-    void SpriteBatch::draw(const Sprite& _sprite) {
-        if(texture == nullptr) {
-            texture = &_sprite.getTexture();
-        }
-
-        if (texture->getGLTexture() != _sprite.getTexture().getGLTexture()) {
-            flush();
-            texture = &_sprite.getTexture();
-        }
-
-        auto _pos = worldToScreenCoords(_sprite.getPosition());
-        auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
-
-        if(_sprite.getRotation() != 0)
-            _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_sprite.getRotation()), { 0.0f, 0.0f, 1.0f });
-
-        if(_sprite.getScale() != 1)
-            _transformMat *= glm::scale(glm::mat4(1.0f), { _sprite.getScale().x, _sprite.getScale().y, 1.0f });
-
-
-        Vec2F _textureOrigin = {(float)_sprite.getTexture().getRegion().bottomLeftCorner.x, (float)_sprite.getTexture().getRegion().bottomLeftCorner.y};
-        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_sprite.getTexture().getSize().x, _textureOrigin.y / (float)_sprite.getTexture().getSize().y};
-
-        Vec2F _textureTileSize = {(float)_sprite.getTexture().getRegion().size.x, (float)_sprite.getTexture().getRegion().size.y};
-        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_sprite.getTexture().getSize().x, _textureTileSize.y / (float)_sprite.getTexture().getSize().y};
-        auto _textureTileSizeOnScreen = worldToScreenSize(_textureTileSize);
-
-        glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
-        glm::vec4 _bottomRightTextureCorner = {_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
-        glm::vec4 _topRightTextureCorner = {_textureTileSizeOnScreen.x, _textureTileSizeOnScreen.y, 0.0f, 1.0f };
-        glm::vec4 _topLeftTextureCorner = {-_textureTileSizeOnScreen.x, _textureTileSizeOnScreen.y, 0.0f, 1.0f };
-
-        glm::vec4 _color = {(float)_sprite.getColor().r / 255.f, (float)_sprite.getColor().g/ 255.f,
-                            (float)_sprite.getColor().b/ 255.f, (float)_sprite.getColor().a/ 255.f};
-
-        vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner,glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,glm::vec2( _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+    void SpriteBatch::draw(Sprite& _sprite) {
+        getBatch(_sprite, _sprite.getLayer(), BatchPriority::SpritePriority)->addSprite(_sprite);
     }
 
     void SpriteBatch::draw(Text& _text) {
-        if(texture == nullptr) {
-            texture = &_text.getFont()->getTexture();
-        }
-
-        if (texture->getGLTexture() != _text.getFont()->getTexture().getGLTexture()) {
-            flush();
-            texture = &_text.getFont()->getTexture();
-        }
-
-        auto* _atlas = _text.getFont();
-        auto _atlasSize = _atlas->getSize();
-
-        float _x = _text.getPosition().x;
-        float _y = _text.getPosition().y;
-
-        auto* _chars = _atlas->getChars();
-
-        for(char _char : _text.getText()) {
-            float x2 = _x + _chars[_char].bitmapPos.x * 1;
-            float y2 = -_y - _chars[_char].bitmapPos.y * 1;
-            float w = _chars[_char].bitmapSize.x * 1;
-            float h = _chars[_char].bitmapSize.y * 1;
-
-            if (w == 0 || h == 0) continue;
-
-            auto _pos = worldToScreenCoords({_x, _y});
-            auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
-
-            if(_text.getRotation() != 0)
-                _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_text.getRotation()), { 0.0f, 0.0f, 1.0f });
-
-            if(_text.getScale() != 1)
-                _transformMat *= glm::scale(glm::mat4(1.0f), { _text.getScale().x, _text.getScale().y, 1.0f });
-
-            auto _textColor = _text.getColor();
-            glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
-
-            auto _positionInScreen = worldToScreenSize({x2, y2});
-            auto _sizeInScreen = worldToScreenSize({w, h});
-
-            glm::vec4 _bottomLeftTextureCorner = { _positionInScreen.x, -_positionInScreen.y, 0.0f, 1.0f };
-            glm::vec4 _bottomRightTextureCorner = {_positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y, 0.0f, 1.0f };
-            glm::vec4 _topLeftTextureCorner = {_positionInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
-            glm::vec4 _topRightTextureCorner = {_positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
-
-            glm::vec2 _bottomLeftTextureCoord = {_chars[_char].offset.x, _chars[_char].offset.y};
-            glm::vec2 _bottomRightTextureCoord = {_chars[_char].offset.x + _chars[_char].bitmapSize.x / _atlasSize.x, _chars[_char].offset.y};
-            glm::vec2 _topLeftTextureCoord = {_chars[_char].offset.x, _chars[_char].offset.y + _chars[_char].bitmapSize.y / _atlasSize.y};
-            glm::vec2 _topRightTextureCoord = {_chars[_char].offset.x + _chars[_char].bitmapSize.x / _atlasSize.x,_chars[_char].offset.y + _chars[_char].bitmapSize.y / _atlasSize.y};
-
-            vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner,_bottomLeftTextureCoord, _color);
-            vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,_bottomRightTextureCoord, _color);
-            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
-            vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,_bottomRightTextureCoord, _color);
-            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
-            vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,_topRightTextureCoord, _color);
-
-            _x += _chars[_char].advance.x * 1;
-            _y += _chars[_char].advance.y * 1;
-        }
+        getBatch(_text, 0, BatchPriority::TextPriority)->addText(_text);
     }
 
     void SpriteBatch::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
-        auto _screenPos0 = worldToScreenCoords(_p0);
-        auto _screenPos1 = worldToScreenCoords(_p1);
+        auto _screenPos0 = Util::worldToScreenCoords(_p0, window, aspectRatio);
+        auto _screenPos1 = Util::worldToScreenCoords(_p1, window, aspectRatio);
         vertexDebugBufferLines.emplace_back(glm::vec3 {_screenPos0.x, _screenPos0.y, 1.0f}, _colorVec4);
         vertexDebugBufferLines.emplace_back(glm::vec3 {_screenPos1.x, _screenPos1.y, 1.0f}, _colorVec4);
     }
 
     void SpriteBatch::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
-        auto _screenPos = worldToScreenCoords(_position);
+        auto _screenPos = Util::worldToScreenCoords(_position, window, aspectRatio);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x,_screenPos.y, 1.f));
 
         if(_rotation != 0)
@@ -225,7 +112,7 @@ namespace engine {
 
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
 
-        auto _screenSize = worldToScreenSize(_size);
+        auto _screenSize = Util::worldToScreenSize(_size, window, aspectRatio);
         // First triangle
         vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
         vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
@@ -270,36 +157,48 @@ namespace engine {
     }
 
     void SpriteBatch::flush() {
-        if (vertexBuffer.empty() || texture == nullptr)
-            return;
+        orderBatches();
 
-        glUseProgram(basicShaderID);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture->getGLTexture());
-        glUniform1i(textureUniform, 0);
+        for(auto* _batch : batches) {
+            if (_batch->vertexBuffer.empty() || _batch->texture == nullptr || _batch->shaderID < 0)
+                continue;
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * vertexBuffer.size()), &vertexBuffer[0], GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glUseProgram(_batch->shaderID);
+            GLint _location = glGetUniformLocation(_batch->shaderID, "viewProjectionMatrix");
+            glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _batch->texture->getGLTexture());
+            glUniform1i(textureUniform, 0);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * _batch->vertexBuffer.size()), &_batch->vertexBuffer[0], GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
-        glEnableVertexAttribArray(0); // position
-        glEnableVertexAttribArray(1); // color
-        glEnableVertexAttribArray(2); // textureCoords
+            glEnableVertexAttribArray(0); // position
+            glEnableVertexAttribArray(1); // color
+            glEnableVertexAttribArray(2); // textureCoords
 
-        glDrawArrays(GL_TRIANGLES, 0, (int)vertexBuffer.size());
+            glDrawArrays(GL_TRIANGLES, 0, (int)_batch->vertexBuffer.size());
 
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-        glDisableVertexAttribArray(2);
+            glDisableVertexAttribArray(0);
+            glDisableVertexAttribArray(1);
+            glDisableVertexAttribArray(2);
 
-        totalTriangles += (int)vertexBuffer.size() / 3;
-        vertexBuffer.clear();
+            totalTriangles += (int)_batch->vertexBuffer.size() / 3;
+            _batch->vertexBuffer.clear();
 
-        drawCalls++;
+            drawCalls++;
+        }
     }
 
     void SpriteBatch::flushDebug() {
+        ShaderID _id = ShaderManager::get().getShader("debug");
+        glUseProgram(_id);
+        GLint _location = glGetUniformLocation(_id, "viewProjectionMatrix");
+        glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
+
         if(!vertexDebugBufferGeometrics.empty()) {
             glBindBuffer(GL_ARRAY_BUFFER, debugVbo);
             glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(VertexColorDebug) * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
@@ -313,6 +212,8 @@ namespace engine {
 
             glDisableVertexAttribArray(4);
             glDisableVertexAttribArray(5);
+        } else {
+            LOG_I("Empty 0")
         }
 
         if(!vertexDebugBufferLines.empty()) {
@@ -332,18 +233,140 @@ namespace engine {
 
         vertexDebugBufferGeometrics.clear();
         vertexDebugBufferLines.clear();
-        glUseProgram(0);
     }
 
     void SpriteBatch::setDebugLinesThickness(float _thickness) {
         glLineWidth(_thickness);
     }
 
-    Vec2F SpriteBatch::worldToScreenCoords(Vec2F _position) {
-        return {_position.x * aspectRatio / ((float)window->getWindowSize().x / 2), _position.y / ((float)window->getWindowSize().y / 2)};
+    SpriteBatch::Batch* SpriteBatch::getBatch(IRenderizable& _renderizable, int _layer, BatchPriority _priority) {
+        for(auto* _batch : batches)
+            if(_renderizable.getTexture()->getGLTexture() == _batch->texture->getGLTexture() && _layer == _batch->layer && _batch->shaderID == _renderizable.getShaderID())
+                return _batch;
+
+        LOG_W("Created a new batch")
+
+        auto* _batch = new Batch;
+        _batch->window = window;
+        _batch->aspectRatio = aspectRatio;
+        _batch->layer = _layer;
+        _batch->texture = _renderizable.getTexture();
+        _batch->priority = _priority;
+        _batch->shaderID = _renderizable.getShaderID();
+        batches.push_back(_batch);
+        return batches[batches.size() - 1];
     }
 
-    Vec2F SpriteBatch::worldToScreenSize(Vec2F _size) {
-        return {_size.x * aspectRatio / ((float)window->getWindowSize().x), _size.y / ((float)window->getWindowSize().y)};
+    void SpriteBatch::orderBatches() {
+        std::sort(batches.begin(), batches.end(), [&](const Batch* a_batch, const Batch* b_batch)
+        {
+            if(a_batch->priority == b_batch->priority) {
+                if (a_batch->layer == b_batch->layer) {
+                    return a_batch->texture < b_batch->texture;
+                }
+
+                return a_batch->layer < b_batch->layer;
+            }
+
+            return a_batch->priority < b_batch->priority;
+        });
+    }
+
+    void SpriteBatch::Batch::addSprite(Sprite& _sprite) {
+        if(texture == nullptr)
+            texture = _sprite.getTexture();
+
+        auto _pos = Util::worldToScreenCoords(_sprite.getPosition(), window, aspectRatio);
+        auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
+
+        if(_sprite.getRotation() != 0)
+            _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_sprite.getRotation()), { 0.0f, 0.0f, 1.0f });
+
+        if(_sprite.getScale() != 1)
+            _transformMat *= glm::scale(glm::mat4(1.0f), { _sprite.getScale().x, _sprite.getScale().y, 1.0f });
+
+
+        Vec2F _textureOrigin = {(float)_sprite.getTexture()->getRegion().bottomLeftCorner.x, (float)_sprite.getTexture()->getRegion().bottomLeftCorner.y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_sprite.getTexture()->getSize().x, _textureOrigin.y / (float)_sprite.getTexture()->getSize().y};
+
+        Vec2F _textureTileSize = {(float)_sprite.getTexture()->getRegion().size.x, (float)_sprite.getTexture()->getRegion().size.y};
+        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_sprite.getTexture()->getSize().x, _textureTileSize.y / (float)_sprite.getTexture()->getSize().y};
+        auto _textureTileSizeOnScreen = Util::worldToScreenSize(_textureTileSize, window, aspectRatio);
+
+        glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
+        glm::vec4 _bottomRightTextureCorner = {_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
+        glm::vec4 _topRightTextureCorner = {_textureTileSizeOnScreen.x, _textureTileSizeOnScreen.y, 0.0f, 1.0f };
+        glm::vec4 _topLeftTextureCorner = {-_textureTileSizeOnScreen.x, _textureTileSizeOnScreen.y, 0.0f, 1.0f };
+
+        glm::vec4 _color = {(float)_sprite.getColor().r / 255.f, (float)_sprite.getColor().g/ 255.f,
+                            (float)_sprite.getColor().b/ 255.f, (float)_sprite.getColor().a/ 255.f};
+
+        vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner,glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,glm::vec2( _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+    }
+
+    void SpriteBatch::Batch::addText(Text& _text) {
+        if(texture == nullptr) {
+            texture = &_text.getFont()->getTexture();
+        }
+
+        auto* _atlas = _text.getFont();
+        auto _atlasSize = _atlas->getSize();
+
+        float _x = _text.getPosition().x;
+        float _y = _text.getPosition().y;
+
+        auto* _chars = _atlas->getChars();
+
+        for(char _char : _text.getText()) {
+            float x2 = _x + _chars[_char].bitmapPos.x * 1;
+            float y2 = -_y - _chars[_char].bitmapPos.y * 1;
+            float w = _chars[_char].bitmapSize.x * 1;
+            float h = _chars[_char].bitmapSize.y * 1;
+
+            if (w == 0 || h == 0) {
+                _x += _chars[_char].advance.x / 2.f;
+                continue;
+            }
+
+            auto _pos = Util::worldToScreenCoords({_x, _y}, window, aspectRatio);
+            auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
+
+            if(_text.getRotation() != 0)
+                _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_text.getRotation()), { 0.0f, 0.0f, 1.0f });
+
+            if(_text.getScale() != 1)
+                _transformMat *= glm::scale(glm::mat4(1.0f), { _text.getScale().x, _text.getScale().y, 1.0f });
+
+            auto _textColor = _text.getColor();
+            glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
+
+            auto _positionInScreen = Util::worldToScreenSize({x2, y2}, window, aspectRatio);
+            auto _sizeInScreen = Util::worldToScreenSize({w, h}, window, aspectRatio);
+
+            glm::vec4 _bottomLeftTextureCorner = { _positionInScreen.x, -_positionInScreen.y, 0.0f, 1.0f };
+            glm::vec4 _bottomRightTextureCorner = {_positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y, 0.0f, 1.0f };
+            glm::vec4 _topLeftTextureCorner = {_positionInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
+            glm::vec4 _topRightTextureCorner = {_positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
+
+            glm::vec2 _bottomLeftTextureCoord = {_chars[_char].offset.x, _chars[_char].offset.y};
+            glm::vec2 _bottomRightTextureCoord = {_chars[_char].offset.x + _chars[_char].bitmapSize.x / _atlasSize.x, _chars[_char].offset.y};
+            glm::vec2 _topLeftTextureCoord = {_chars[_char].offset.x, _chars[_char].offset.y + _chars[_char].bitmapSize.y / _atlasSize.y};
+            glm::vec2 _topRightTextureCoord = {_chars[_char].offset.x + _chars[_char].bitmapSize.x / _atlasSize.x,_chars[_char].offset.y + _chars[_char].bitmapSize.y / _atlasSize.y};
+
+            vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner,_bottomLeftTextureCoord, _color);
+            vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,_bottomRightTextureCoord, _color);
+            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
+            vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,_bottomRightTextureCoord, _color);
+            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
+            vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,_topRightTextureCoord, _color);
+
+            _x += _chars[_char].advance.x / 3.f * 1;
+            _y += _chars[_char].advance.y * 1;
+        }
     }
 }

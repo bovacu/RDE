@@ -83,7 +83,13 @@ namespace engine {
 
         glLinkProgram(_shaderID);
 
+        shaderID = _shaderID;
+
         return _shaderID;
+    }
+
+    GLuint Shader::getShaderID() const {
+        return shaderID;
     }
 
 }

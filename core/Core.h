@@ -5,10 +5,15 @@
 #define ENGINE2_0_CORE_H
 
 #define TEXTURE_VERTEX_SHADER "assets/shaders/texture/vertex.glsl"
-#define TEXTURE_FRAGMENT_SHADER "assets/shaders/texture/fragment.glsl"
+#define DEBUG_VERTEX_SHADER "assets/shaders/debug/debugVertex.glsl"
 
-#define DEBUG_VERTEX_SHADER "assets/shaders/texture/vertex.glsl"
-#define DEBUG_FRAGMENT_SHADER "assets/shaders/texture/fragment.glsl"
+#define TEXTURE_FRAGMENT_SHADER "assets/shaders/texture/fragment.glsl"
+#define TEXT_FRAGMENT_SHADER "assets/shaders/texture/textFragment.glsl"
+#define OUTLINE_FRAGMENT_SHADER "assets/shaders/texture/outlineFragment.glsl"
+#define NEON_FRAGMENT_SHADER "assets/shaders/texture/glowFragment.glsl"
+#define BLOOM_FRAGMENT_SHADER "assets/shaders/texture/bloomFragment.glsl"
+#define BLUR_FRAGMENT_SHADER "assets/shaders/texture/blurFragment.glsl"
+#define DEBUG_FRAGMENT_SHADER "assets/shaders/debug/debugFragment.glsl"
 
 #define ENGINE_DEBUG
 #define ENGINE_ENABLE_ASSERTS

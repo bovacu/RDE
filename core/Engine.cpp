@@ -4,9 +4,9 @@
 #include "core/systems/soundSystem/SoundSystem.h"
 #include "core/systems/soundSystem/SoundBuffer.h"
 #include "core/systems/uiSystem/FontManager.h"
+#include "core/render/elements/ShaderManager.h"
 
 namespace engine {
-
     Engine *Engine::gameInstance = nullptr;
 
     Engine::Engine() {
@@ -23,6 +23,12 @@ namespace engine {
             this->timePerFrame = 1.0f / 60.f;
 
         this->window->setVSync(false);
+
+        Console::get().init();
+        ShaderManager::get().init();
+        FontManager::get().init();
+//        SoundSystem::get().init();
+        Renderer::init(window.get());
 
         FrameBufferSpecification _specs = {
                 (uint32_t)window->getWindowSize().x,
@@ -44,7 +50,9 @@ namespace engine {
 
         animationSystem.setInitialAnimation("run");
 
-//        player.addAnimation(&animationSystem);
+        player.init();
+        player.setPosition({95, 0});
+        player.setLayer(10);
 
         animationSystem.start();
 
@@ -52,13 +60,12 @@ namespace engine {
 //        SoundSystem::get().loadSound("assets/getout.ogg");
 //        SoundSystem::get().play("getout");
 
-        Console::get().init();
+
         Console::get().addCommand("background_color", BIND_FUNC_1(Engine::changeColorConsoleCommand));
 
-        FontManager::get().init();
         auto* _font = FontManager::get().loadFont("assets/fonts/arial.ttf", 48);
 
-        text.init(_font, lines[linesIndex]);
+        text.init(_font, "Hello world");
         text.setPosition({-100, 0});
         text.setTextColor(Color::Green);
 
@@ -71,15 +78,17 @@ namespace engine {
             }
 
             Sprite _s;
+            _s.init();
             int _index = _i > 35 ? 35 : _i;
             _s.setTexture(TextureAtlasManager::get().getTile("test", "test_" + std::to_string(_index)));
             _s.setPosition({60.f + (float)52 * _row, (float)(200 - _line * 52)});
+            _s.setLayer(1);
             sprites.push_back(_s);
 
             _row++;
         }
 
-        Renderer::init(window.get());
+
         shape.setOutlineColor(Color::Blue);
         shape.makeCircle({0, 0}, 0.1);
     }
@@ -168,7 +177,10 @@ namespace engine {
 
         if(Input::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
-        
+
+        if(Input::isKeyJustPressed(KeyCode::Enter))
+            player.setShader(ShaderManager::get().getShader("outline"));
+
         animationSystem.update(_dt, player);
     }
 
@@ -181,8 +193,8 @@ namespace engine {
         Renderer::beginDraw(camera);
         for(auto& _sprite : sprites)
             Renderer::draw(_sprite);
-        Renderer::draw(player);
         Renderer::draw(text);
+        Renderer::draw(player);
         Renderer::endDraw();
 
         Renderer::beginDebugDraw(camera);

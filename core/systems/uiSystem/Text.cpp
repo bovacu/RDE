@@ -7,11 +7,8 @@ namespace engine {
     void Text::init(Font* _font, const std::string& _text) {
         font = _font;
         innerText = _text;
-//        fontSize = (int)font->getFontSize();
-//        spaceWidth = font->getSpaceWidth();
-//        enterHeight = font->getEnterHeight();
-//        spaceBetweenChars = font->getSpacesBetweenChars();
         recalcTextDimensions(_text);
+        shaderID = ShaderManager::get().getShader("basicText");
     }
 
     void Text::setText(const std::string& _text) {
@@ -112,4 +109,18 @@ namespace engine {
     Color& Text::getColor() {
         return textColor;
     }
+
+    ShaderID Text::getShaderID() {
+        return shaderID;
+    }
+
+    Texture* Text::getTexture() {
+        return &font->getTexture();
+    }
+
+    void Text::setShader(ShaderID _shaderID) {
+        shaderID = _shaderID;
+    }
+
+    void Text::setTexture(Texture* _texture) {  }
 }

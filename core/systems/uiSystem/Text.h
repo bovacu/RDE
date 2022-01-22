@@ -6,23 +6,32 @@
 #include "core/util/Util.h"
 #include "FontManager.h"
 #include "core/systems/Components.h"
+#include "core/render/elements/IRenderizable.h"
 
 namespace engine {
 
-    class Text {
+    class Text : public IRenderizable {
         private:
             Font* font;
-            Transform transform;
             std::string innerText;
+            Transform transform;
             Vec2F size;
             float spaceBetweenChars;
             float spaceWidth;
             float enterHeight;
             int fontSize;
+            ShaderID shaderID;
             Color textColor = Color::White;
 
         private:
             void recalcTextDimensions(const std::string& _text);
+
+        public:
+            ShaderID getShaderID() override;
+            void setShader(ShaderID _shaderID) override;
+
+            Texture* getTexture() override;
+            void setTexture(Texture* _texture) override;
 
         public:
             void init(Font* _font, const std::string& _text);

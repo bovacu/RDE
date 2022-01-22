@@ -5,6 +5,10 @@
 
 namespace engine {
 
+    void Sprite::init() {
+        renderer.shaderID = ShaderManager::get().getShader("basic");
+    }
+
     void Sprite::setPosition(const Vec2F& _position) {
         transform.setPosition(_position);
     }
@@ -33,10 +37,6 @@ namespace engine {
         return renderer.color;
     }
 
-    Texture& Sprite::getTexture() const {
-        return *renderer.texture;
-    }
-
     void Sprite::setColor(const Color& _color) {
         renderer.color = _color;
     }
@@ -63,5 +63,25 @@ namespace engine {
 
     bool Sprite::isYFlipped() const {
         return getScale().y < 0;
+    }
+
+    void Sprite::setLayer(int _layer) {
+        renderer.layer = _layer;
+    }
+
+    int Sprite::getLayer() const {
+        return renderer.layer;
+    }
+
+    ShaderID Sprite::getShaderID() {
+        return renderer.shaderID;
+    }
+
+    Texture* Sprite::getTexture() {
+        return renderer.texture;
+    }
+
+    void Sprite::setShader(ShaderID _shaderID) {
+        renderer.shaderID = _shaderID;
     }
 }

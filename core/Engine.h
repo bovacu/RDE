@@ -41,13 +41,6 @@ namespace engine {
             Sprite backgrounds;
             FrameBuffer* frameBuffer;
 
-            int linesIndex = 0;
-            std::vector<std::string> lines {
-                "Xuxucito...",
-                "Voce quer...",
-                "Casar comigo...?"
-            };
-
         private:
             bool running = true;
             bool minimized = false;

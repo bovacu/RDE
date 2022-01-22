@@ -2,6 +2,7 @@
 
 #include "FontManager.h"
 #include "stb_image_writer.h"
+#include "core/util/Functions.h"
 
 namespace engine {
 
@@ -127,7 +128,7 @@ namespace engine {
         auto* _font = new Font();
         _font->init(_face, _fontSize);
 
-        std::string _name = util::getFileNameFromPath(_pathToFont);
+        std::string _name = Util::getFileNameFromPath(_pathToFont);
         _font->fontName = _name;
         _font->originalPath = _pathToFont;
         fonts[_name].emplace_back(FontHandler{ _font, _fontSize });

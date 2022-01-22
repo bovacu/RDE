@@ -63,6 +63,8 @@ namespace engine {
     struct SpriteRenderer {
         Color color = Color::White;
         Texture* texture = nullptr;
+        GLuint shaderID = -1;
+        int layer = 0;
 
         SpriteRenderer() = default;
         SpriteRenderer(const SpriteRenderer&) = default;

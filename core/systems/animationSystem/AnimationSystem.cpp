@@ -68,7 +68,7 @@ namespace engine {
         if(_nextAnimation != nullptr) currentNode = _nextAnimation;
         currentNode->animation.update(_dt);
 
-        if(&_sprite.getTexture() != getCurrentAnimation()->animation.getCurrentFrame())
+        if(_sprite.getTexture() != getCurrentAnimation()->animation.getCurrentFrame())
             _sprite.setTexture(getCurrentAnimation()->animation.getCurrentFrame());
     }
 

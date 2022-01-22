@@ -7,7 +7,6 @@
 #include "Easing.h"
 #include "Logger.h"
 #include "Vec.h"
-#include "Functions.h"
 #include "Color.h"
 #include "Delta.h"
 #include "Clock.h"

@@ -2,6 +2,7 @@
 
 
 #include "SoundSystem.h"
+#include "core/util/Functions.h"
 
 namespace engine {
 
@@ -21,7 +22,7 @@ namespace engine {
 
     void SoundSystem::loadSound(const std::string& _soundPath, bool _preload) {
         auto* _ss = device->addSoundSourceFromFile(_soundPath.c_str(), irrklang::ESM_AUTO_DETECT, _preload);
-        sounds[util::getFileNameFromPath(_soundPath)] = _ss;
+        sounds[Util::getFileNameFromPath(_soundPath)] = _ss;
     }
 
     irrklang::ISound* SoundSystem::play(const std::string& _sound, bool _loop) {

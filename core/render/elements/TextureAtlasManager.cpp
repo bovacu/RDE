@@ -1,13 +1,14 @@
 // Created by borja on 6/1/22.
 
 #include "TextureAtlasManager.h"
+#include "core/util/Functions.h"
 
 namespace engine {
 
     TextureAtlasManager TextureAtlasManager::instance;
 
     bool TextureAtlasManager::addAtlas(int _tileWidth, int _tileHeight, const std::string& _pathToTexture) {
-        auto _name = util::getFileNameFromPath(_pathToTexture);
+        auto _name = Util::getFileNameFromPath(_pathToTexture);
         LOG_I_TIME("Trying to load '", _pathToTexture, "'...")
         if(instance.atlases.find(_name) != instance.atlases.end()) {
             LOG_E_TIME("Atlas '", _name, "' was already loaded");

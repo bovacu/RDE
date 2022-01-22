@@ -40,14 +40,14 @@ namespace engine {
              * @param _camera It is the main camera of the scene (or other camera if a special drawing is needed).
              * @param _renderShader The shader we want to use to render, by default the basic one.
              **/
-            static void beginDraw(Camera& _camera, RenderShader _renderShader = RenderShader::BASIC);
+            static void beginDraw(Camera& _camera);
 
             /**
              * Renders geometry for debugging. It also includes batching.
              * @param _camera It is the main camera of the scene (or other camera if a special drawing is needed).
              * @param _renderShader The shader we want to use to render, by default the debugging one.
              */
-            static void beginDebugDraw(Camera& _camera, float _thickness = 1.f, RenderShader _renderShader = RenderShader::DEBUG);
+            static void beginDebugDraw(Camera& _camera, float _thickness = 1.f);
 
             /**
              * Renders a texture. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
@@ -63,7 +63,7 @@ namespace engine {
              * Renders a sprite. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
              * @param _sprite The sprite to be drawn.
              */
-            static void draw(const Sprite& _sprite);
+            static void draw(Sprite& _sprite);
 
             static void draw(Text& _text);
 
