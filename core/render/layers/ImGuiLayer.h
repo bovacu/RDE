@@ -7,7 +7,7 @@
 #include "Layer.h"
 #include "core/render/window/event/MouseEvent.h"
 #include "external/imgui/backends/imgui_impl_opengl3.h"
-#include "external/imgui/backends/imgui_impl_glfw.h"
+#include "external/imgui/backends/imgui_impl_sdl.h"
 #include "core/systems/profiling/Profiler.h"
 
 namespace engine {

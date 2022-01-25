@@ -35,10 +35,10 @@ namespace engine {
         }
 
         Engine& _game = Engine::get();
-        GLFWwindow* window = static_cast<GLFWwindow*>(_game.getWindow().getNativeWindow());
+        SDL_Window* window = static_cast<SDL_Window*>(_game.getWindow().getNativeWindow());
 
         // Setup Platform/Renderer bindings
-        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplSDL2_InitForOpenGL(window, _game.getWindow().getContext());
         ImGui_ImplOpenGL3_Init("#version 410");
 
         for(auto& _state : State::stateToNameDict) {
@@ -55,13 +55,13 @@ namespace engine {
 
     void ImGuiLayer::onEnd() {
         ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
+        ImGui_ImplSDL2_Shutdown();
         ImGui::DestroyContext();
     }
 
     void ImGuiLayer::begin() {
         ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
     }
 
@@ -75,10 +75,10 @@ namespace engine {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            GLFWwindow* backup_current_context = glfwGetCurrentContext();
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
+//            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+//            ImGui::UpdatePlatformWindows();
+//            ImGui::RenderPlatformWindowsDefault();
+//            glfwMakeContextCurrent(backup_current_context);
         }
     }
 
@@ -154,7 +154,7 @@ namespace engine {
         ImGui::GetStyle().Alpha = 0.65;
         ImGui::Begin("MouseInfo", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
         ImGui::GetStyle().Alpha = 1;
-        ImGui::Text("X: %d, Y: %d", Input::getMousePosition().x, Input::getMousePosition().y);
+        ImGui::Text("X: %d, Y: %d", InputManager::getMousePosition().x, InputManager::getMousePosition().y);
         ImGui::End();
     }
 
@@ -163,7 +163,7 @@ namespace engine {
 
         ImGui::Text("FPS: %d", engine::Engine::get().getFps());
         ImGui::Separator();
-        ImGui::Text("X: %d, Y: %d", Input::getMousePosition().x, Input::getMousePosition().y);
+        ImGui::Text("X: %d, Y: %d", InputManager::getMousePosition().x, InputManager::getMousePosition().y);
         ImGui::Separator();
         int _freeGpuMb = 0;
         glGetIntegerv( GL_TEXTURE_FREE_MEMORY_ATI,&_freeGpuMb);

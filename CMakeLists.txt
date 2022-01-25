@@ -4,7 +4,7 @@ project(Engine2_0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
-SET(TARGET_LINKS OpenGL GLEW glfw Threads::Threads flecs IrrKlang freetype glut SDL2
+SET(TARGET_LINKS OpenGL glfw Threads::Threads flecs IrrKlang freetype glut SDL2 glad
 #        sndfile openal
         )
 
@@ -29,7 +29,6 @@ link_directories(${STB_DIR})
 
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
 find_package(Threads REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Freetype REQUIRED)
@@ -37,6 +36,8 @@ find_package(GLUT REQUIRED)
 find_package(SDL2 REQUIRED)
 #find_package(IrrKlang REQUIRED)
 
+add_library(glad external/glad/include/glad/glad.h external/glad/src/glad.c)
+target_include_directories(glad PUBLIC external/glad/include/)
 
 #---------------- SNDFILE
 find_package(PkgConfig QUIET)
@@ -99,8 +100,8 @@ add_executable( Engine2_0 main.cpp
 
         external/imgui/imgui.h external/imgui/imgui.cpp external/imgui/imstb_truetype.h external/imgui/imstb_rectpack.h
         external/imgui/imstb_textedit.h external/imgui/imgui_internal.h external/imgui/imgui_tables.cpp
-        external/imgui/imgui_draw.cpp external/imgui/imconfig.h external/imgui/backends/imgui_impl_glfw.h external/imgui/imgui_widgets.cpp
-        external/imgui/backends/imgui_impl_glfw.cpp external/imgui/backends/imgui_impl_opengl3.h
+        external/imgui/imgui_draw.cpp external/imgui/imconfig.h external/imgui/backends/imgui_impl_sdl.h external/imgui/imgui_widgets.cpp
+        external/imgui/backends/imgui_impl_sdl.cpp external/imgui/backends/imgui_impl_opengl3.h
         external/imgui/backends/imgui_impl_opengl3.cpp external/imgui/imgui_demo.cpp
 
         # https://github.com/bwrsandman/imgui-flame-graph

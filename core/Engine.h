@@ -45,6 +45,7 @@ namespace engine {
             ImGuiLayer* imGuiLayer;
             Layer* sandbox;
             Clock clock;
+            float timer = 0;
 
         private:
             void updateFps();
@@ -94,8 +95,8 @@ namespace engine {
 
             /// Returns in a Vec2i the current position of the mouse on the screen.
             /// @return Vec2i with the [x,y] coordinates.
-            [[nodiscard]] Vec2I getMousePos() const                 { return Vec2I( (int)(-this->getWindowSize().x / 2.f + Input::getMouseX()),
-                                                                                    (int)(this->getWindowSize().y / 2.f - Input::getMouseY())); }
+            [[nodiscard]] Vec2I getMousePos() const                 { return Vec2I( (int)(-this->getWindowSize().x / 2.f + InputManager::getMouseX()),
+                                                                                    (int)(this->getWindowSize().y / 2.f - InputManager::getMouseY())); }
             /// Enables or disables the fullscreen mode.
             /// @param _fullscreen Enables(true) or disables(false) the fullscreen.
             void setFullscreen(bool _fullscreen);
@@ -127,6 +128,8 @@ namespace engine {
             /// @param _allow true/false depending if disables or enables
             /// @sa WindowOptions_ in Window.h
             void setWindowOptions(WindowOptions _op, bool _allow)   { this->window->setWindowOptions(_op, _allow); }
+
+            void setRunning(bool _running) { running = _running; }
 
         public:
             /// This method is the main loop of the game, runs until the window is closed or running attribute is set

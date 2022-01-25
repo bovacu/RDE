@@ -3,179 +3,228 @@
 #include <GLFW/glfw3.h>
 
 namespace engine {
-    std::unordered_map<KeyCode, bool> Input::pressedKeyboardKeys = {
-            {KeyCode::LeftControl,  false},
-            {KeyCode::LeftSuper,    false},
-            {KeyCode::LeftAlt, false},
-            {KeyCode::Space,        false},
-            {KeyCode::RightAlt,     false},
-            {KeyCode::RightControl, false},
-            {KeyCode::LeftShift,    false},
-            {KeyCode::Z,            false},
-            {KeyCode::X,            false},
-            {KeyCode::C,            false},
-            {KeyCode::V,            false},
-            {KeyCode::B,            false},
-            {KeyCode::N,            false},
-            {KeyCode::M,            false},
-            {KeyCode::Comma,        false},
-            {KeyCode::Period,       false},
-            {KeyCode::Slash,        false},
-            {KeyCode::RightShift,   false},
-            {KeyCode::CapsLock,     false},
-            {KeyCode::A,            false},
-            {KeyCode::S,            false},
-            {KeyCode::D,            false},
-            {KeyCode::F,            false},
-            {KeyCode::G,            false},
-            {KeyCode::H,            false},
-            {KeyCode::J,            false},
-            {KeyCode::K,            false},
-            {KeyCode::L,            false},
-            {KeyCode::Semicolon,    false},
-            {KeyCode::Apostrophe,   false},
-            {KeyCode::Enter,        false},
-            {KeyCode::Tab,          false},
-            {KeyCode::Q,            false},
-            {KeyCode::W,            false},
-            {KeyCode::E,            false},
-            {KeyCode::R,            false},
-            {KeyCode::T,            false},
-            {KeyCode::Y,            false},
-            {KeyCode::U,            false},
-            {KeyCode::I,            false},
-            {KeyCode::O,            false},
-            {KeyCode::P,            false},
-            {KeyCode::LeftBracket,  false},
-            {KeyCode::RightBracket, false},
-            {KeyCode::RightSuper,   false},
-            {KeyCode::Backslash,    false},
-            {KeyCode::GraveAccent,  false},
-            {KeyCode::D0,           false},
-            {KeyCode::D1,           false},
-            {KeyCode::D2,           false},
-            {KeyCode::D3,           false},
-            {KeyCode::D4,           false},
-            {KeyCode::D5,           false},
-            {KeyCode::D6,           false},
-            {KeyCode::D7,           false},
-            {KeyCode::D8,           false},
-            {KeyCode::D9,           false},
-            {KeyCode::Minus,        false},
-            {KeyCode::Equal,        false},
-            {KeyCode::Backspace,    false},
-            {KeyCode::Escape,       false},
-            {KeyCode::F1,           false},
-            {KeyCode::F2,           false},
-            {KeyCode::F3,           false},
-            {KeyCode::F4,           false},
-            {KeyCode::F5,           false},
-            {KeyCode::F6,           false},
-            {KeyCode::F7,           false},
-            {KeyCode::F8,           false},
-            {KeyCode::F9,           false},
-            {KeyCode::F10,          false},
-            {KeyCode::F11,          false},
-            {KeyCode::F12,          false},
-            {KeyCode::PrintScreen,  false},
-            {KeyCode::ScrollLock,   false},
-            {KeyCode::Insert,       false},
-            {KeyCode::Delete,       false},
-            {KeyCode::Home,         false},
-            {KeyCode::End,          false},
-            {KeyCode::PageUp,       false},
-            {KeyCode::PageDown,     false},
-            {KeyCode::Right,        false},
-            {KeyCode::Left,         false},
-            {KeyCode::Up,           false},
-            {KeyCode::Down,         false},
 
-    };
+    InputSystem* InputSystem::get() {
+        static InputSystem _input;
+        return &_input;
+    }
 
-    std::unordered_map<MouseCode, bool> Input::pressedMouseButtons = {
-            {MouseCode::Button0,        false},
-            {MouseCode::Button1,        false},
-            {MouseCode::Button2,        false},
-            {MouseCode::Button3,        false},
-            {MouseCode::Button4,        false},
-            {MouseCode::Button5,        false},
-            {MouseCode::Button6,        false},
-            {MouseCode::Button7,        false},
-            {MouseCode::ButtonLast,     false},
-            {MouseCode::ButtonLeft,     false},
-            {MouseCode::ButtonMiddle,   false},
-            {MouseCode::ButtonRight,    false},
-    };
+    void InputSystem::init(Window* _window) {
 
-    bool Input::isKeyJustPressed(KeyCode _keyCode) {
-        if(!Input::pressedKeyboardKeys[_keyCode]) {
-            auto _window = static_cast<GLFWwindow*>(Engine::get().getWindow().getNativeWindow());
-            auto _state = glfwGetKey(_window, static_cast<int32_t>(_keyCode));
-            bool _result = _state == GLFW_PRESS;
+        window = _window;
 
-            if(_result)
-                Input::pressedKeyboardKeys[_keyCode] = true;
+        events[SystemEventEnum::KEY_DOWN_E] = BIND_FUNC_1(InputSystem::onKeyDown);
+        events[SystemEventEnum::KEY_UP_E] = BIND_FUNC_1(InputSystem::onKeyUp);
+        events[SystemEventEnum::WINDOW_RESIZE_E] = BIND_FUNC_1(InputSystem::onWindowResize);
+        events[SystemEventEnum::QUIT_E] = BIND_FUNC_1(InputSystem::onQuit);
+        events[SystemEventEnum::MOUSE_MOVED_E] = BIND_FUNC_1(InputSystem::onMouseMoved);
+        events[SystemEventEnum::MOUSE_DOWN_E] = BIND_FUNC_1(InputSystem::onMouseDown);
+        events[SystemEventEnum::MOUSE_UP_E] = BIND_FUNC_1(InputSystem::onMouseUp);
+        events[SystemEventEnum::MOUSE_SCROLLED_E] = BIND_FUNC_1(InputSystem::onMouseScroll);
+        events[SystemEventEnum::WINDOW_ENTER_E] = [this](SDL_Event&) { insideWindow = true; };
+        events[SystemEventEnum::WINDOW_EXIT_E] = [this](SDL_Event&) { insideWindow = false; };
 
-            return _result;
+        pressedMouseButtons = {
+                {MouseCode::Button0,        0},
+                {MouseCode::Button1,        0},
+                {MouseCode::Button2,        0},
+                {MouseCode::Button3,        0},
+                {MouseCode::Button4,        0},
+                {MouseCode::Button5,        0},
+                {MouseCode::Button6,        0},
+                {MouseCode::Button7,        0},
+                {MouseCode::ButtonLast,     0},
+                {MouseCode::ButtonLeft,     0},
+                {MouseCode::ButtonMiddle,   0},
+                {MouseCode::ButtonRight,    0},
+        };
+
+        pressedKeyboardKeys = {
+                {KeyCode::LeftControl,  0},
+//            {KeyCode::LeftSuper,    0},
+                {KeyCode::LeftAlt, 0},
+                {KeyCode::Space,        0},
+                {KeyCode::RightAlt,     0},
+                {KeyCode::RightControl, 0},
+                {KeyCode::LeftShift,    0},
+                {KeyCode::Z,            0},
+                {KeyCode::X,            0},
+                {KeyCode::C,            0},
+                {KeyCode::V,            0},
+                {KeyCode::B,            0},
+                {KeyCode::N,            0},
+                {KeyCode::M,            0},
+                {KeyCode::Comma,        0},
+                {KeyCode::Period,       0},
+                {KeyCode::Slash,        0},
+                {KeyCode::RightShift,   0},
+                {KeyCode::CapsLock,     0},
+                {KeyCode::A,            0},
+                {KeyCode::S,            0},
+                {KeyCode::D,            0},
+                {KeyCode::F,            0},
+                {KeyCode::G,            0},
+                {KeyCode::H,            0},
+                {KeyCode::J,            0},
+                {KeyCode::K,            0},
+                {KeyCode::L,            0},
+                {KeyCode::Semicolon,    0},
+                {KeyCode::Apostrophe,   0},
+                {KeyCode::Enter,        0},
+                {KeyCode::Tab,          0},
+                {KeyCode::Q,            0},
+                {KeyCode::W,            0},
+                {KeyCode::E,            0},
+                {KeyCode::R,            0},
+                {KeyCode::T,            0},
+                {KeyCode::Y,            0},
+                {KeyCode::U,            0},
+                {KeyCode::I,            0},
+                {KeyCode::O,            0},
+                {KeyCode::P,            0},
+                {KeyCode::LeftBracket,  0},
+                {KeyCode::RightBracket, 0},
+//            {KeyCode::RightSuper,   0},
+                {KeyCode::Backslash,    0},
+                {KeyCode::GraveAccent,  0},
+                {KeyCode::D0,           0},
+                {KeyCode::D1,           0},
+                {KeyCode::D2,           0},
+                {KeyCode::D3,           0},
+                {KeyCode::D4,           0},
+                {KeyCode::D5,           0},
+                {KeyCode::D6,           0},
+                {KeyCode::D7,           0},
+                {KeyCode::D8,           0},
+                {KeyCode::D9,           0},
+                {KeyCode::Minus,        0},
+                {KeyCode::Equal,        0},
+                {KeyCode::Backspace,    0},
+                {KeyCode::Escape,       0},
+                {KeyCode::F1,           0},
+                {KeyCode::F2,           0},
+                {KeyCode::F3,           0},
+                {KeyCode::F4,           0},
+                {KeyCode::F5,           0},
+                {KeyCode::F6,           0},
+                {KeyCode::F7,           0},
+                {KeyCode::F8,           0},
+                {KeyCode::F9,           0},
+                {KeyCode::F10,          0},
+                {KeyCode::F11,          0},
+                {KeyCode::F12,          0},
+                {KeyCode::PrintScreen,  0},
+                {KeyCode::ScrollLock,   0},
+                {KeyCode::Insert,       0},
+                {KeyCode::Delete,       0},
+                {KeyCode::Home,         0},
+                {KeyCode::End,          0},
+                {KeyCode::PageUp,       0},
+                {KeyCode::PageDown,     0},
+                {KeyCode::Right,        0},
+                {KeyCode::Left,         0},
+                {KeyCode::Up,           0},
+                {KeyCode::Down,         0},
+
+        };
+    }
+
+    void InputSystem::pollEvents() {
+        SDL_Event _event;
+        while (SDL_PollEvent(&_event)) {
+            if(events.find((SystemEventEnum)_event.type) == events.end()) {
+                LOG_W("System event ", _event.type, " not implemented!!")
+                continue;
+            }
+
+            events[(SystemEventEnum)_event.type](_event);
+        }
+    }
+
+    void InputSystem::onKeyDown(SDL_Event& _event) {
+        auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
+        pressedKeyboardKeys[_key] = 1;
+    }
+
+    void InputSystem::onKeyUp(SDL_Event& _event) {
+        auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
+        pressedKeyboardKeys[_key] = 0;
+    }
+
+    void InputSystem::onWindowResize(SDL_Event& _event) {
+        window->setWindowSize(_event.window.data1, _event.window.data2);
+    }
+
+    void InputSystem::onQuit(SDL_Event& _event) {
+        Engine::get().setRunning(false);
+    }
+
+    void InputSystem::onMouseMoved(SDL_Event& _event) {
+        mousePos = {_event.motion.x, _event.motion.y};
+    }
+
+    void InputSystem::onMouseDown(SDL_Event& _event) {
+        auto _key = static_cast<MouseCode>(_event.button.button);
+        pressedMouseButtons[_key] = 1;
+    }
+
+    void InputSystem::onMouseUp(SDL_Event& _event) {
+        auto _key = static_cast<MouseCode>(_event.button.button);
+        pressedMouseButtons[_key] = 0;
+    }
+
+    void InputSystem::onMouseScroll(SDL_Event& _event) {
+
+    }
+
+
+    InputSystem* InputManager::inputSystem = InputSystem::get();
+
+    bool InputManager::isKeyJustPressed(KeyCode _keyCode) {
+        if(inputSystem->pressedKeyboardKeys[_keyCode] == 1) {
+            inputSystem->pressedKeyboardKeys[_keyCode] = 2;
+            return true;
         }
 
         return false;
     }
 
-    bool Input::isKeyPressed(KeyCode _key) {
-        auto _window = static_cast<GLFWwindow*>(Engine::get().getWindow().getNativeWindow());
-        auto _state = glfwGetKey(_window, static_cast<int32_t>(_key));
-        return _state == GLFW_PRESS;
+    bool InputManager::isKeyPressed(KeyCode _key) {
+        return inputSystem->pressedKeyboardKeys[_key] == 1;
     }
 
-    bool Input::isKeyReleased(KeyCode _key) {
-        auto _window = static_cast<GLFWwindow*>(Engine::get().getWindow().getNativeWindow());
-        auto _state = glfwGetKey(_window, static_cast<int32_t>(_key));
-        return _state == GLFW_RELEASE;
+    bool InputManager::isKeyReleased(KeyCode _key) {
+        return inputSystem->pressedKeyboardKeys[_key] == 0;
     }
 
-    bool Input::isMouseJustPressed(MouseCode _mouseButton) {
-        if(!Input::pressedMouseButtons[_mouseButton]) {
-            auto _window = static_cast<GLFWwindow*>(Engine::get().getWindow().getNativeWindow());
-            auto _state = glfwGetMouseButton(_window, static_cast<int32_t>(_mouseButton));
-            bool _result = _state == GLFW_PRESS;
-
-            if(_result)
-                Input::pressedMouseButtons[_mouseButton] = true;
-
-            return _result;
+    bool InputManager::isMouseJustPressed(MouseCode _mouseButton) {
+        if(inputSystem->pressedMouseButtons[_mouseButton] == 1) {
+            inputSystem->pressedMouseButtons[_mouseButton] = 2;
+            return true;
         }
 
         return false;
     }
 
-    bool Input::isMousePressed(MouseCode _button) {
-        auto _window = static_cast<GLFWwindow*>(Engine::get().getWindow().getNativeWindow());
-        auto _state = glfwGetMouseButton(_window, static_cast<int32_t>(_button));
-        return _state == GLFW_PRESS;
+    bool InputManager::isMousePressed(MouseCode _button) {
+        inputSystem->pressedMouseButtons[_button] = 1;
+        return false;
     }
 
-    bool Input::isMouseReleased(MouseCode _button) {
-        auto _window = static_cast<GLFWwindow*>(Engine::get().getWindow().getNativeWindow());
-        auto _state = glfwGetMouseButton(_window, static_cast<int32_t>(_button));
-        return _state == GLFW_RELEASE;
+    bool InputManager::isMouseReleased(MouseCode _button) {
+        inputSystem->pressedMouseButtons[_button] = 0;
+        return false;
     }
 
-    Vec2I Input::getMousePosition() {
-        auto _window = static_cast<GLFWwindow*>(Engine::get().getWindow().getNativeWindow());
-        int _height, _width;
-        glfwGetWindowSize(_window, &_width, &_height);
-
-        double _xPos, _yPos;
-        glfwGetCursorPos(_window, &_xPos, &_yPos);
-        return { (int)_xPos, (int)(_height - _yPos) };
+    Vec2I InputManager::getMousePosition() {
+        return inputSystem->mousePos;
     }
 
-    int Input::getMouseX() {
+    int InputManager::getMouseX() {
         return getMousePosition().x;
     }
 
-    int Input::getMouseY() {
+    int InputManager::getMouseY() {
         return getMousePosition().y;
     }
 }

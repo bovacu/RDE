@@ -4,6 +4,7 @@
 #define MOUSE_KEYS_H
 
 #include <ostream>
+#include <SDL2/SDL_mouse.h>
 
 namespace engine {
 
@@ -15,10 +16,10 @@ namespace engine {
     /// -----------------------------------------------------------------
 
     typedef enum class MouseCode : uint16_t {
-        // From glfw3.h
-        Button0 = 0,
-        Button1 = 1,
-        Button2 = 2,
+        // From SDL2
+        Button0 = SDL_BUTTON_LEFT,
+        Button1 = SDL_BUTTON_MIDDLE,
+        Button2 = SDL_BUTTON_RIGHT,
         Button3 = 3,
         Button4 = 4,
         Button5 = 5,

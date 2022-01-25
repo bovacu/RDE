@@ -9,6 +9,7 @@ namespace engine {
     Shader::~Shader() {
         for(auto& _attachedShader : shadersAttached)
             glDeleteShader(_attachedShader.second);
+        glDeleteProgram(shaderID);
     }
 
     bool Shader::initFromString(const std::string& _shaderCode, GLenum _shaderType) {
@@ -79,9 +80,7 @@ namespace engine {
             glAttachShader(_shaderID, _shaderAttached.second);
 
         glLinkProgram(_shaderID);
-
         shaderID = _shaderID;
-
         return _shaderID;
     }
 

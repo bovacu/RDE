@@ -5,8 +5,7 @@
 
 #include "core/util/Util.h"
 #include "core/render/window/event/Event.h"
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <SDL2/SDL.h>
 
 namespace engine {
 
@@ -42,8 +41,8 @@ namespace engine {
     /// This class represents the window of the application and has methods to modify its components and get its data.
     class Window {
         private:
-            GLFWwindow* window;
-            GLFWmonitor* monitor;
+            SDL_Window* window;
+            SDL_GLContext context;
 
             struct WindowData {
                 std::string title;
@@ -112,7 +111,9 @@ namespace engine {
 
             /// Returns a raw pointer to one of the Window subclasses.
             /// @return raw pointer to WindowsWindow, LinuxWindow or MacWindow.
-            [[nodiscard]] GLFWwindow* getNativeWindow() const;
+            [[nodiscard]] SDL_Window* getNativeWindow() const;
+
+            [[nodiscard]] SDL_GLContext& getContext();
 
             /// Returns the position of the window.
             /// @return Vec2i with the [x,y] of the window.

@@ -17,10 +17,10 @@ namespace engine {
         window->setEventCallback(ENGINE_BIND_EVENT_FN(Engine::onEvent));
         lastFrame = 0;
 
+        InputSystem::get()->init(window.get());
         Console::get().init();
         ShaderManager::get().init();
         FontManager::get().init();
-//        SoundSystem::get().init();
         Renderer::init(window.get());
 
         imGuiLayer = new ImGuiLayer();
@@ -53,13 +53,14 @@ namespace engine {
     void Engine::onRun() {
         float _accumulator = 0;
 
+        Delta _dt = 0;
         while (this->running) {
-            auto _time = (float) glfwGetTime();
-            Delta _dt = _time - this->lastFrame;
-            this->lastFrame = _time;
+            Uint64 _start = SDL_GetPerformanceCounter();
             _accumulator += _dt;
 
             engine::Profiler::beginFrame(_dt);
+
+            InputSystem::get()->pollEvents();
 
             if (!this->minimized) {
 
@@ -89,6 +90,14 @@ namespace engine {
 
             engine::Profiler::endFrame();
             Renderer::resetDebugInfo();
+
+            Uint64 _end = SDL_GetPerformanceCounter();
+            float _elapsedMS = (float)(_end - _start) / (float)SDL_GetPerformanceFrequency();
+            _dt = _elapsedMS;
+            timer += _dt;
+
+//            // Cap to 60 FPS
+//            SDL_Delay(floor(16.666f - elapsedMS));
         }
     }
 
@@ -122,7 +131,7 @@ namespace engine {
         for (Layer* _layer : this->layerStack)
             _layer->onUpdate(_dt);
 
-        if(Input::isKeyJustPressed(KeyCode::F9))
+        if(InputManager::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
 
         camera.setRotation(camera.getRotation() + 5 * _dt);
@@ -182,11 +191,11 @@ namespace engine {
     int Engine::getFps() const { return (int)this->fpsCounter; }
 
     void Engine::updateFps() {
-        if (this->clock.getElapsedTimeSc() >= 1.f) {
+        if (timer >= 1.f) {
             fpsCounter = frameCounter;
             setTitle("Engine: " + std::to_string(fpsCounter));
             frameCounter = 0;
-            this->clock.restart();
+            timer = 0;
         }
         ++frameCounter;
     }
@@ -236,11 +245,11 @@ namespace engine {
     }
 
     bool Engine::fromRunToRoll(const TransitionParams& _foo) {
-        return Input::isKeyJustPressed(KeyCode::A);
+        return InputManager::isKeyJustPressed(KeyCode::A);
     }
 
     bool Engine::fromRollToRun(const TransitionParams& _foo) {
-        return Input::isKeyJustPressed(KeyCode::S);
+        return InputManager::isKeyJustPressed(KeyCode::S);
     }
 
     Logs Engine::changeColorConsoleCommand(const std::vector<std::string>& _args) {
