@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include "core/util/Logger.h"
 #include <filesystem>
+#include "stb_image.h"
 
 namespace engine {
 
@@ -24,16 +25,6 @@ namespace engine {
         glDeleteTextures(1, &openGLTextureID);
     }
 
-    void Texture::incRefCount() {
-        refCount++;
-    }
-
-    void Texture::decRefCount() {
-        refCount--;
-        if (refCount == 0)
-            delete this;
-    }
-
     GLuint Texture::getGLTexture() const {
         return openGLTextureID;
     }
@@ -42,12 +33,12 @@ namespace engine {
         return {width, height};
     }
 
-    bool Texture::loadFromFile(const char* _path, bool _deleteJunkImmediately) {
+    bool Texture::loadFromFile(const char* _path) {
         // Load the file.
         stbi_set_flip_vertically_on_load(1);
 
         /// Then we load the image pixels.
-        texturePixels = stbi_load(_path, &width, &height, &channels, 0);
+        auto _texturePixels = stbi_load(_path, &width, &height, &channels, 0);
 
         /// We set the basic information.
 
@@ -80,13 +71,10 @@ namespace engine {
 
         /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
         /// glTextureStorage2D could also be used for this task, but is slower.
-        glTextureSubImage2D(openGLTextureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, texturePixels);
+        glTextureSubImage2D(openGLTextureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
         // We can unload the images now that the texture data has been buffered with opengl
 
-        if(_deleteJunkImmediately) {
-            stbi_image_free(texturePixels);
-            texturePixels = nullptr;
-        }
+        stbi_image_free(_texturePixels);
 
         region = {{0, 0}, {width, height}};
         fileSizeKb = (float)std::filesystem::file_size(_path) / 1000.f;
@@ -95,7 +83,7 @@ namespace engine {
 
     bool Texture::loadFromMemory(unsigned char* _data, int _size) {
         /// Then we load the image pixels.
-        texturePixels = _data;
+        auto _texturePixels = _data;
         channels = 4;
         width = height = (int)std::sqrt(_size / 4);
 
@@ -130,34 +118,14 @@ namespace engine {
 
         /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
         /// glTextureStorage2D could also be used for this task, but is slower.
-        glTextureSubImage2D(openGLTextureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, texturePixels);
+        glTextureSubImage2D(openGLTextureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
         // We can unload the images now that the texture data has been buffered with opengl
+
+        stbi_image_free(_texturePixels);
 
         region = {{0, 0}, {width, height}};
         fileSizeKb = (float)_size / 1024.f;
         return true;
-    }
-
-    void Texture::cleanJunk() {
-        if(!texturePixels)
-            stbi_image_free(texturePixels);
-        texturePixels = nullptr;
-    }
-
-    Color Texture::getPixel(uint _x, uint _y) {
-        if(!texturePixels) {
-            LOG_E("Tried to access the data from a texture that already deleted it!!")
-            return Color::Transparent;
-        }
-
-        unsigned bytePerPixel = channels;
-        unsigned char* pixelOffset = texturePixels + (_x + height * _y) * bytePerPixel;
-        unsigned char _r = texturePixels[channels * (_y * width + _x) + 0];
-        unsigned char _g = texturePixels[channels * (_y * width + _x) + 1];
-        unsigned char _b = texturePixels[channels * (_y * width + _x) + 2];
-        unsigned char _a = channels >= 4 ? texturePixels[4 * (_y * width + _x) + 3] : 0xff;
-
-        return Color { _r, _g, _b, _a };
     }
 
     IntRect& Texture::getRegion() {

@@ -1,0 +1,137 @@
+//#include <stdio.h>
+//#include <stdint.h>
+//#include <assert.h>
+//#include <GL/glew.h>
+//#include <SDL2/SDL.h>
+//#include <SDL2/SDL_opengl.h>
+//#include <glm/glm.hpp>
+//#include "core/render/Renderer.h"
+//
+//typedef int32_t i32;
+//typedef uint32_t u32;
+//typedef int32_t b32;
+//
+//#define WinWidth 1000
+//#define WinHeight 1000
+//
+//struct Vertex {
+//    glm::vec3 pos;
+//    glm::vec4 color;
+//} _vertices[6] = {
+//                {{-0.5f, -0.5f, 0}, {1.f, 0.f, 0.f, 1} },
+//                {{0.5f, -0.5f, 0}, {1.f, 0.f, 0.f, 1} },
+//                {{0.5f, 0.5f, 0}, {1.f, 0.f, 0.f, 1} },
+//
+//                {{-0.5f, -0.5f, 0}, {1.f, 0.f, 0.f, 1} },
+//                {{0.5f, 0.5f, 0}, {1.f, 0.f, 0.f, 1} },
+//                {{-0.5f, 0.5f, 0}, {1.f, 0.f, 0.f, 1} }
+//        };
+//
+//static const char* _vertexShaderSrc =
+//        "#version 400\n"
+//        "uniform mat4 MVP;\n"
+//        "layout (location = 0) in vec3 vPos;\n"
+//        "layout (location = 1) in vec4 vCol;\n"
+//        "out vec4 color;\n"
+//        "void main()\n"
+//        "{\n"
+//        "    gl_Position = vec4(vPos, 1.0);\n"
+//        "    color = vCol;\n"
+//        "}\n";
+//
+//static const char* _fragmentShaderSrc =
+//        "#version 400\n"
+//        "in vec4 color;\n"
+//        "void main()\n"
+//        "{\n"
+//        "    gl_FragColor = color;\n"
+//        "}\n";
+//
+//int main (int ArgCount, char **Args)
+//{
+//
+//    u32 WindowFlags = SDL_WINDOW_OPENGL;
+//    SDL_Window *Window = SDL_CreateWindow("OpenGL Test", 0, 0, WinWidth, WinHeight, WindowFlags);
+//    assert(Window);
+//    SDL_GLContext Context = SDL_GL_CreateContext(Window);
+//
+//    b32 Running = 1;
+//    b32 FullScreen = 0;
+//
+//    glewInit();
+//
+//    GLuint _vertexBuffer;
+//    glGenBuffers(1, &_vertexBuffer);
+//    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), _vertices, GL_STATIC_DRAW);
+//
+//    GLuint _vertexShader;
+//    _vertexShader = glCreateShader(GL_VERTEX_SHADER);
+//    glShaderSource(_vertexShader, 1, &_vertexShaderSrc, NULL);
+//    glCompileShader(_vertexShader);
+//
+//    GLuint _fragmentShader;
+//    _fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+//    glShaderSource(_fragmentShader, 1, &_fragmentShaderSrc, NULL);
+//    glCompileShader(_fragmentShader);
+//
+//    GLuint _program;
+//    _program = glCreateProgram();
+//    glAttachShader(_program, _vertexShader);
+//    glAttachShader(_program, _fragmentShader);
+//    glLinkProgram(_program);
+//
+//    glDeleteShader(_vertexShader);
+//    glDeleteShader(_fragmentShader);
+//
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(_vertices[0]), (void*) 0);
+//    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(_vertices[0]), (void*) (sizeof(float) * 3));
+//
+//    glEnableVertexAttribArray(0);
+//    glEnableVertexAttribArray(1);
+//    glUseProgram(_program);
+//
+//    while (Running)
+//    {
+//        SDL_Event Event;
+//        while (SDL_PollEvent(&Event))
+//        {
+//            if (Event.type == SDL_KEYDOWN)
+//            {
+//                switch (Event.key.keysym.sym)
+//                {
+//                    case SDLK_ESCAPE:
+//                        Running = 0;
+//                        break;
+//                    case 'f':
+//                        FullScreen = !FullScreen;
+//                        if (FullScreen)
+//                        {
+//                            SDL_SetWindowFullscreen(Window, WindowFlags | SDL_WINDOW_FULLSCREEN_DESKTOP);
+//                        }
+//                        else
+//                        {
+//                            SDL_SetWindowFullscreen(Window, WindowFlags);
+//                        }
+//                        break;
+//                    default:
+//                        break;
+//                }
+//            }
+//            else if (Event.type == SDL_QUIT)
+//            {
+//                Running = 0;
+//            }
+//        }
+//
+//        glViewport(0, 0, WinWidth, WinHeight);
+//        glClearColor(1.f, 0.f, 1.f, 0.f);
+//        glClear(GL_COLOR_BUFFER_BIT);
+////
+//        // Este si es importante
+//        glDrawArrays(GL_TRIANGLES, 0, 6);
+//
+//        SDL_GL_SwapWindow(Window);
+//    }
+//    return 0;
+//}

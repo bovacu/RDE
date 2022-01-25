@@ -112,10 +112,9 @@ namespace engine {
     }
 
     TextureAtlasManager::~TextureAtlasManager() {
+        LOG_S("Cleaning up TextureAtlasManager")
         for(auto& _atlas : instance.atlases)
             delete _atlas.second;
-
-        LOG_S("Cleaning up TextureAtlasManager")
     }
 
     TextureAtlasManager& TextureAtlasManager::get() {

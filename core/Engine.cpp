@@ -5,6 +5,7 @@
 #include "core/systems/soundSystem/SoundBuffer.h"
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/render/elements/ShaderManager.h"
+#include "sandbox/Sandbox.h"
 
 namespace engine {
     Engine *Engine::gameInstance = nullptr;
@@ -12,17 +13,9 @@ namespace engine {
     Engine::Engine() {
         ENGINE_ASSERT(!Engine::gameInstance, "Application already exists!");
         Engine::gameInstance = this;
-        this->window = Window::createWindow();
-        this->window->setEventCallback(ENGINE_BIND_EVENT_FN(Engine::onEvent));
-        this->lastFrame = 0;
-
-        this->imGuiLayer = new ImGuiLayer();
-        pushOverlay(this->imGuiLayer);
-
-        if(this->timePerFrame < 0)
-            this->timePerFrame = 1.0f / 60.f;
-
-        this->window->setVSync(false);
+        window = Window::createWindow();
+        window->setEventCallback(ENGINE_BIND_EVENT_FN(Engine::onEvent));
+        lastFrame = 0;
 
         Console::get().init();
         ShaderManager::get().init();
@@ -30,67 +23,26 @@ namespace engine {
 //        SoundSystem::get().init();
         Renderer::init(window.get());
 
+        imGuiLayer = new ImGuiLayer();
+        pushOverlay(imGuiLayer);
+
+        sandbox = new Sandbox;
+        pushLayer(sandbox);
+
+        if(timePerFrame < 0)
+            timePerFrame = 1.0f / 60.f;
+
+        window->setVSync(false);
+
+        camera.onResize(window->getWindowSize().x, window->getWindowSize().y);
+
         FrameBufferSpecification _specs = {
                 (uint32_t)window->getWindowSize().x,
                 (uint32_t)window->getWindowSize().y
         };
         frameBuffer = new FrameBuffer(_specs);
-        this->camera.onResize(window->getWindowSize().x, window->getWindowSize().y);
-
-        TextureAtlasManager::get().addAtlas(50, 50, "assets/test.png");
-        TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
-
-        animationSystem.createAnimation("run", "run", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
-        animationSystem.setInitialAnimation("run");
-
-        // 12-23
-        animationSystem.createAnimation("roll", "run", {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23});
-        animationSystem.createTransition("run", "roll", BIND_FUNC_1(Engine::fromRunToRoll));
-        animationSystem.createTransition("roll", "run", BIND_FUNC_1(Engine::fromRollToRun));
-
-        animationSystem.setInitialAnimation("run");
-
-        player.init();
-        player.setPosition({95, 0});
-        player.setLayer(10);
-
-        animationSystem.start();
-
-//        SoundSystem::get().init();
-//        SoundSystem::get().loadSound("assets/getout.ogg");
-//        SoundSystem::get().play("getout");
-
 
         Console::get().addCommand("background_color", BIND_FUNC_1(Engine::changeColorConsoleCommand));
-
-        auto* _font = FontManager::get().loadFont("assets/fonts/arial.ttf", 54);
-
-        text.init(_font, "Hello World");
-        text.setPosition({0, 0});
-        text.setTextColor(Color::Green);
-
-        int _line = 0;
-        int _row = 0;
-        for(int _i = 0; _i < 36 ; _i++) {
-            if(_i != 0 && _i % 6 == 0) {
-                _line++;
-                _row = 0;
-            }
-
-            Sprite _s;
-            _s.init();
-            int _index = _i > 35 ? 35 : _i;
-            _s.setTexture(TextureAtlasManager::get().getTile("test", "test_" + std::to_string(_index)));
-            _s.setPosition({60.f + (float)52 * _row, (float)(200 - _line * 52)});
-            _s.setLayer(1);
-            sprites.push_back(_s);
-
-            _row++;
-        }
-
-
-        shape.setOutlineColor(Color::Blue);
-        shape.makeCircle({0, 0}, 0.1);
     }
 
     Engine::~Engine() {
@@ -108,8 +60,6 @@ namespace engine {
             _accumulator += _dt;
 
             engine::Profiler::beginFrame(_dt);
-
-//            camera.update(window.get());
 
             if (!this->minimized) {
 
@@ -150,8 +100,6 @@ namespace engine {
         // TODO this must be in another layer, this is why the scroll is called event when on ImGui windows
         dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Engine::onMouseScrolled));
 
-        camera.onEvent(_e);
-
         for (auto _it = this->layerStack.rbegin(); _it != this->layerStack.rend(); ++_it) {
             (*_it)->onEvent(_e);
             if (_e.handled)
@@ -177,10 +125,8 @@ namespace engine {
         if(Input::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
 
-        if(Input::isKeyJustPressed(KeyCode::Enter))
-            player.setShader(ShaderManager::get().getShader("outline"));
+        camera.setRotation(camera.getRotation() + 5 * _dt);
 
-        animationSystem.update(_dt, player);
     }
 
     void Engine::onRender(Delta _dt) {
@@ -190,16 +136,10 @@ namespace engine {
         Renderer::beginDraw(camera);
         for (Layer* _layer : this->layerStack)
             _layer->onRender(_dt);
-
-        for(auto& _sprite : sprites)
-            Renderer::draw(_sprite);
-        Renderer::draw(text);
-        Renderer::draw(player);
         Renderer::endDraw();
 
         // Debug rendering
         Renderer::beginDebugDraw(camera);
-        Renderer::drawShape(text.getDebugShape());
         Renderer::drawSquare({0, 0}, {2, 2}, Color::Blue);
         Renderer::endDebugDraw();
 

@@ -13,7 +13,6 @@ namespace engine {
 
     void SpriteBatch::initVbo() {
         // Get the texture uniform from the shader program.
-        textureUniform = glGetUniformLocation(ShaderManager::get().getShader("basic"), "tex");
         texture = nullptr;
 
         // Setup vertex buffer
@@ -44,12 +43,7 @@ namespace engine {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    SpriteBatch::~SpriteBatch() {
-        LOG_S("Cleaning up SpriteBatch")
-
-//        for(auto* _batch : batches)
-//            delete _batch;
-    }
+    SpriteBatch::~SpriteBatch() = default;
 
     void SpriteBatch::beginDraw(Camera& _camera) {
         viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_camera.getTransform().transformMatrix);
@@ -157,8 +151,6 @@ namespace engine {
     }
 
     void SpriteBatch::flush() {
-        orderBatches();
-
         for(auto& _batch : batches) {
             if (_batch.vertexBuffer.empty() || _batch.texture == nullptr || _batch.shaderID < 0)
                 continue;
@@ -169,7 +161,6 @@ namespace engine {
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, _batch.texture->getGLTexture());
-            glUniform1i(textureUniform, 0);
 
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
             glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0], GL_STATIC_DRAW);
@@ -254,7 +245,10 @@ namespace engine {
         _batch.priority = _priority;
         _batch.shaderID = _renderizable.getShaderID();
         batches.push_back(_batch);
-        return batches[batches.size() - 1];
+
+        orderBatches();
+
+        return batches.back();
     }
 
     void SpriteBatch::orderBatches() {

@@ -52,7 +52,6 @@ namespace engine {
             std::vector<VertexColorDebug> vertexDebugBufferGeometrics;
             std::vector<VertexColorDebug> vertexDebugBufferLines;
             GLuint vbo = -1, debugVbo = -1;
-            GLint textureUniform = -1;
 
             glm::mat4 viewProjectionMatrix;
             float aspectRatio = 1;

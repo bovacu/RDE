@@ -33,7 +33,7 @@ namespace engine {
         }
 
         ~Atlas() {
-            LOG_S("Cleaning up Atlas '", name, "'")
+            LOG_I("     Cleaning up Atlas ", name)
             for(auto& _texture : subTextures)
                 delete _texture.second;
 

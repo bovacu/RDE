@@ -15,7 +15,7 @@ namespace engine {
         GLuint _shaderID = glCreateShader(_shaderType);
 
         // Get the char* and length
-        const char* _shaderCodePointer = _shaderCode.data();
+        const char* _shaderCodePointer = _shaderCode.c_str();
         int _shaderCodeLength = (int)_shaderCode.size();
 
         // Set the source code and compile.
@@ -23,9 +23,6 @@ namespace engine {
         glCompileShader(_shaderID);
 
         GLint _isCompiled;
-
-        // Check if the fragmentShader compiles:
-        // If it failed, print an error and delete it.
         glGetShaderiv(_shaderID, GL_COMPILE_STATUS, &_isCompiled);
 
         if (!_isCompiled) {

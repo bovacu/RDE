@@ -28,17 +28,9 @@ namespace engine {
             float timePerFrame = -1;
             float lastFrame = 0.0f;
             Delta dt;
-            int fps{};
             unsigned int fpsCounter = 0, frameCounter = 0;
             Camera camera;
-            Shape shape;
-            std::vector<Sprite> sprites;
-            Sprite player;
-            AnimationSystem animationSystem;
-            TransitionParams params;
             Color backgroundColor = Color::Red;
-            Text text;
-            Sprite backgrounds;
             FrameBuffer* frameBuffer;
 
         private:
@@ -51,6 +43,7 @@ namespace engine {
             static Engine* gameInstance;
             LayerStack layerStack;
             ImGuiLayer* imGuiLayer;
+            Layer* sandbox;
             Clock clock;
 
         private:

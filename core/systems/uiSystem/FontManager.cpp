@@ -124,7 +124,7 @@ namespace engine {
         FT_Face _face;
 
         if (FT_New_Face(ftLibrary, _pathToFont.c_str(), 0, &_face)) {
-            LOG_E("Could not open font", _pathToFont.c_str())
+            LOG_E("Could not open font ", _pathToFont.c_str())
             return nullptr;
         }
 
