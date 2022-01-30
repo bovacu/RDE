@@ -90,20 +90,12 @@ add_executable( Engine2_0 main.cpp
         external/imgui/nodeEditor/crude_json.h external/imgui/nodeEditor/crude_json.cpp external/imgui/nodeEditor/imgui_bezier_math.h
         external/imgui/nodeEditor/imgui_canvas.h external/imgui/nodeEditor/imgui_canvas.cpp external/imgui/nodeEditor/imgui_extra_math.h
         external/imgui/nodeEditor/imgui_node_editor.h external/imgui/nodeEditor/imgui_node_editor.cpp external/imgui/nodeEditor/imgui_node_editor_api.cpp
-        external/imgui/nodeEditor/imgui_node_editor_internal.h
+        external/imgui/nodeEditor/imgui_node_editor_internal.h external/imgui/textEditor/TextEditor.h external/imgui/textEditor/TextEditor.cpp
 
         core/systems/profiling/Profiler.h core/systems/profiling/Profiler.cpp core/render/layers/ImGuiCore.h
         core/render/elements/TextureAtlasManager.cpp core/render/elements/TextureAtlasManager.h core/util/Rect.h
         core/systems/animationSystem/Animation.cpp core/systems/animationSystem/Animation.h core/systems/animationSystem/AnimationSystem.cpp
         core/systems/animationSystem/AnimationSystem.h
-
-        external/irrKlang/include/irrKlang.h external/irrKlang/include/ik_ESoundEngineOptions.h external/irrKlang/include/ik_ESoundOutputDrivers.h
-        external/irrKlang/include/ik_EStreamModes.h external/irrKlang/include/ik_IAudioRecorder.h external/irrKlang/include/ik_IAudioStream.h
-        external/irrKlang/include/ik_IAudioStreamLoader.h external/irrKlang/include/ik_IFileFactory.h external/irrKlang/include/ik_IFileReader.h
-        external/irrKlang/include/ik_IRefCounted.h external/irrKlang/include/ik_irrKlangTypes.h external/irrKlang/include/ik_ISound.h
-        external/irrKlang/include/ik_ISoundDeviceList.h external/irrKlang/include/ik_ISoundEffectControl.h external/irrKlang/include/ik_ISoundEngine.h
-        external/irrKlang/include/ik_ISoundMixedOutputReceiver.h external/irrKlang/include/ik_ISoundSource.h external/irrKlang/include/ik_ISoundStopEventReceiver.h
-        external/irrKlang/include/ik_IVirtualRefCounted.h external/irrKlang/include/ik_SAudioStreamFormat.h external/irrKlang/include/ik_vec3d.h
 
 #        core/systems/soundSystem/SoundBuffer.cpp core/systems/soundSystem/SoundBuffer.h core/systems/soundSystem/SoundDevice.cpp
 #        core/systems/soundSystem/SoundDevice.h core/systems/soundSystem/SoundSource.cpp core/systems/soundSystem/SoundSource.h
