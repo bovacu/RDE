@@ -50,7 +50,7 @@ namespace engine {
             void init(Window* _window);
             void pollEvents();
 
-            static InputSystem* get();
+            static InputSystem& get();
     };
 
     class InputManager {

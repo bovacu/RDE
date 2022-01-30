@@ -71,7 +71,7 @@ namespace engine {
     void SoundManager::playSfx(const std::string& _sfxName) {
         Sfx _sfx = sfxs[_sfxName];
         // -1 on the channel for the first free channel
-        Mix_PlayChannel(-1, _sfx.sfxID, _sfx.repeat);
+        sfxs[_sfxName].channel = Mix_PlayChannel(-1, _sfx.sfxID, _sfx.repeat);
     }
 
     void SoundManager::resumeMusic(const std::string& _musicName) {
@@ -79,7 +79,7 @@ namespace engine {
     }
 
     void SoundManager::resumeSfx(const std::string& _sfxName) {
-
+        Mix_Resume(sfxs[_sfxName].channel);
     }
 
     void SoundManager::pauseMusic(const std::string& _musicName) {
@@ -87,7 +87,7 @@ namespace engine {
     }
 
     void SoundManager::pauseSfx(const std::string& _sfxName) {
-
+        Mix_Pause(sfxs[_sfxName].channel);
     }
 
     void SoundManager::stopMusic(const std::string& _musicName) {
@@ -95,25 +95,28 @@ namespace engine {
     }
 
     void SoundManager::stopSfx(const std::string& _sfxName) {
-
+        Mix_HaltChannel(sfxs[_sfxName].channel);
     }
 
     void SoundManager::pauseAll() {
-
+        Mix_PauseMusic();
+        Mix_Pause(-1);
     }
 
     void SoundManager::stopAll() {
-
+        Mix_HaltChannel(-1);
+        Mix_HaltMusic();
     }
 
     void SoundManager::resumeAll() {
-
+        Mix_Resume(-1);
+        Mix_ResumeMusic();
     }
 
     SoundManager::~SoundManager() {
 
         LOG_S("Cleaning up Sound Manager")
-        Mix_PauseMusic();
+        stopAll();
 
         for(auto& _music : musics) {
             LOG_S("     Deleting music: ", _music.first)

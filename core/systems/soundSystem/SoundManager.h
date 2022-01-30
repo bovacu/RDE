@@ -25,6 +25,7 @@ namespace engine {
     };
 
     struct Sfx : Sound {
+        int channel;
         private:
             friend class SoundManager;
             Mix_Chunk* sfxID = nullptr;

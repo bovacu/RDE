@@ -16,7 +16,7 @@ namespace engine {
         window->setEventCallback(ENGINE_BIND_EVENT_FN(Engine::onEvent));
         lastFrame = 0;
 
-        InputSystem::get()->init(window.get());
+        InputSystem::get().init(window.get());
         Console::get().init();
         ShaderManager::get().init();
         FontManager::get().init();
@@ -63,7 +63,7 @@ namespace engine {
 
             engine::Profiler::beginFrame(_dt);
 
-            InputSystem::get()->pollEvents();
+            InputSystem::get().pollEvents();
 
             if (!minimized) {
 

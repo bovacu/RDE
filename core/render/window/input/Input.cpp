@@ -4,9 +4,9 @@
 
 namespace engine {
 
-    InputSystem* InputSystem::get() {
+    InputSystem& InputSystem::get() {
         static InputSystem _input;
-        return &_input;
+        return _input;
     }
 
     void InputSystem::init(Window* _window) {
@@ -183,7 +183,7 @@ namespace engine {
     }
 
 
-    InputSystem* InputManager::inputSystem = InputSystem::get();
+    InputSystem* InputManager::inputSystem = &InputSystem::get();
 
     bool InputManager::isKeyJustPressed(KeyCode _keyCode) {
         if(inputSystem->pressedKeyboardKeys[_keyCode] == 1) {
