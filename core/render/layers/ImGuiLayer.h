@@ -13,6 +13,9 @@
 namespace engine {
 
     class ImGuiLayer : public Layer {
+        private:
+            bool anyWindowHovered = false;
+
         public:
             ImGuiLayer();
             ~ImGuiLayer()                       override = default;

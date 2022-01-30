@@ -52,6 +52,8 @@ namespace engine {
             Engine();
             virtual ~Engine();
 
+            Camera& getMainCamera() { return camera; }
+
             void closeApplication();
 
             /// This method provides the number of FPS in any given moment.
@@ -185,7 +187,6 @@ namespace engine {
         private:
             bool onWindowClosed(WindowClosedEvent& _e);
             bool onWindowResized(WindowResizedEvent& _e);
-            bool onMouseScrolled(MouseScrolledEvent& _e);
 
             bool fromRunToRoll(const TransitionParams& _foo);
             bool fromRollToRun(const TransitionParams& _foo);

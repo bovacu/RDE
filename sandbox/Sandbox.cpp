@@ -53,7 +53,8 @@ namespace engine {
     }
 
     void Sandbox::onEvent(Event& _event) {
-
+        EventDispatcher _dispatcher(_event);
+        _dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Sandbox::onMouseScrolled));
     }
 
     void Sandbox::onUpdate(Delta _dt) {
@@ -69,8 +70,8 @@ namespace engine {
 
     void Sandbox::onRender(Delta _dt) {
         Renderer::draw(player);
-//        for(auto& _sprite : sprites)
-//            Renderer::draw(_sprite);
+        for(auto& _sprite : sprites)
+            Renderer::draw(_sprite);
         Renderer::draw(text);
     }
 
@@ -80,5 +81,14 @@ namespace engine {
 
     void Sandbox::onEnd() {
         Layer::onEnd();
+    }
+
+    bool Sandbox::onMouseScrolled(MouseScrolledEvent& _event) {
+        Camera& _camera = Engine::get().getMainCamera();
+        float _zoom = _camera.getCurrentZoomLevel();
+        _zoom -= _event.getScrollY() * _camera.getZoomSpeed();
+        _zoom = std::max(_zoom, 0.1f);
+        _camera.setCurrentZoomLevel(_zoom);
+        return true;
     }
 }

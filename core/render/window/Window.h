@@ -64,6 +64,8 @@ namespace engine {
             /// swap the buffers.
             void update();
 
+            void consumeEvent(Event& _e) const { data.eventCallback(_e); }
+
             /// Returns the width of the window.
             /// @return width of the window.
             [[nodiscard]] int getWidth() const;
@@ -84,6 +86,8 @@ namespace engine {
             /// @param _width new width of the window.
             /// @param _height new height of the window.
             void setWindowSize(int _width, int _height) ;
+
+            void setWindowSizeAndUpdateNativeWindow(int _width, int _height);
 
             /// Returns the size of the window.
             /// @return Vec2i with the [width,height] of the window.

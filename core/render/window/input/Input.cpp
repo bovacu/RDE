@@ -2,6 +2,8 @@
 #include "core/Engine.h"
 #include <GLFW/glfw3.h>
 
+#include <utility>
+
 namespace engine {
 
     InputSystem& InputSystem::get() {
@@ -11,20 +13,20 @@ namespace engine {
 
     void InputSystem::init(Window* _window) {
 
+        LOG_I(SDL_KEYMAPCHANGED)
         window = _window;
 
+        events[SystemEventEnum::WINDOW_EVENT] = BIND_FUNC_1(InputSystem::onWindowEvent);
         events[SystemEventEnum::KEY_DOWN_E] = BIND_FUNC_1(InputSystem::onKeyDown);
         events[SystemEventEnum::KEY_UP_E] = BIND_FUNC_1(InputSystem::onKeyUp);
-        events[SystemEventEnum::WINDOW_RESIZE_E] = BIND_FUNC_1(InputSystem::onWindowResize);
         events[SystemEventEnum::QUIT_E] = BIND_FUNC_1(InputSystem::onQuit);
         events[SystemEventEnum::MOUSE_MOVED_E] = BIND_FUNC_1(InputSystem::onMouseMoved);
         events[SystemEventEnum::MOUSE_DOWN_E] = BIND_FUNC_1(InputSystem::onMouseDown);
         events[SystemEventEnum::MOUSE_UP_E] = BIND_FUNC_1(InputSystem::onMouseUp);
         events[SystemEventEnum::MOUSE_SCROLLED_E] = BIND_FUNC_1(InputSystem::onMouseScroll);
-        events[SystemEventEnum::WINDOW_ENTER_E] = [this](SDL_Event&) { insideWindow = true; };
-        events[SystemEventEnum::WINDOW_EXIT_E] = [this](SDL_Event&) { insideWindow = false; };
-        events[SystemEventEnum::WINDOW_FOCUS_E] = [this](SDL_Event&) { LOG_I("Gained Focus") };
-        events[SystemEventEnum::WINDOW_LOST_FOCUS_E] = [this](SDL_Event&) { LOG_I("Lost Focus") };
+        events[SystemEventEnum::INPUT_TEXT_E] = [](SDL_Event&) {  };
+        events[SystemEventEnum::FOO_1] = [](SDL_Event&) {  }; // 772
+        events[SystemEventEnum::FOO_3] = [](SDL_Event&) {  }; // 4352
 
         pressedMouseButtons = {
                 {MouseCode::Button0,        0},
@@ -134,13 +136,16 @@ namespace engine {
     void InputSystem::pollEvents() {
         SDL_Event _event;
         while (SDL_PollEvent(&_event)) {
+
             ImGui_ImplSDL2_ProcessEvent(&_event);
+
             if(events.find((SystemEventEnum)_event.type) == events.end()) {
                 LOG_W("System event ", _event.type, " not implemented!!")
                 continue;
             }
 
             events[(SystemEventEnum)_event.type](_event);
+
         }
     }
 
@@ -157,6 +162,8 @@ namespace engine {
 
     void InputSystem::onWindowResize(SDL_Event& _event) {
         window->setWindowSize(_event.window.data1, _event.window.data2);
+        WindowResizedEvent _rwEvent(_event.window.data1, _event.window.data2);
+        window->consumeEvent(_rwEvent);
     }
 
     void InputSystem::onQuit(SDL_Event& _event) {
@@ -179,7 +186,62 @@ namespace engine {
     }
 
     void InputSystem::onMouseScroll(SDL_Event& _event) {
+        MouseScrolledEvent _e(_event.wheel.preciseX, _event.wheel.preciseY);
+        window->consumeEvent(_e);
+    }
 
+    void InputSystem::setEventCallback(std::function<void(Event&)> _eventCallback) {
+        eventCallback = std::move(_eventCallback);
+    }
+
+    void InputSystem::onWindowEvent(SDL_Event& _event) {
+        switch (_event.window.event) {
+            case SDL_WINDOWEVENT_RESIZED: onWindowResize(_event); break;
+            case SDL_WINDOWEVENT_FOCUS_GAINED: onWindowGainFocus(_event); break;
+            case SDL_WINDOWEVENT_FOCUS_LOST: onWindowLostFocus(_event); break;
+            case SDL_WINDOWEVENT_ENTER: onWindowEnter(_event); break;
+            case SDL_WINDOWEVENT_LEAVE: onWindowExit(_event); break;
+            case SDL_WINDOWEVENT_MOVED: onWindowMoved(_event); break;
+            case SDL_WINDOWEVENT_MINIMIZED: onWindowMinimized(_event); break;
+            case SDL_WINDOWEVENT_MAXIMIZED: onWindowMaximized(_event); break;
+            case SDL_WINDOWEVENT_CLOSE: onQuit(_event); break;
+        }
+    }
+
+    // TODO implement onWindowEnter and create its associated event
+    void InputSystem::onWindowEnter(SDL_Event& _event) {
+
+    }
+
+    // TODO implement onWindowExit and create its associated event
+    void InputSystem::onWindowExit(SDL_Event& _event) {
+
+    }
+
+    // TODO implement onWindowGainFocus and create its associated event
+    void InputSystem::onWindowGainFocus(SDL_Event& _event) {
+
+    }
+
+    // TODO implement onWindowLostFocus and create its associated event
+    void InputSystem::onWindowLostFocus(SDL_Event& _event) {
+
+    }
+
+    void InputSystem::onWindowMoved(SDL_Event& _event) {
+        WindowMovedEvent _wmEvent(_event.window.data1, _event.window.data2);
+        window->setPosition({_event.window.data1, _event.window.data2});
+        window->consumeEvent(_wmEvent);
+    }
+
+    void InputSystem::onWindowMinimized(SDL_Event& _event) {
+        WindowMinimizedEvent _e(1);
+        window->consumeEvent(_e);
+    }
+
+    void InputSystem::onWindowMaximized(SDL_Event& _event) {
+        WindowMinimizedEvent _e(0);
+        window->consumeEvent(_e);
     }
 
 

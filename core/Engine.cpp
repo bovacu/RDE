@@ -17,6 +17,7 @@ namespace engine {
         lastFrame = 0;
 
         InputSystem::get().init(window.get());
+        InputSystem::get().setEventCallback(BIND_FUNC_1(Engine::onEvent));
         Console::get().init();
         ShaderManager::get().init();
         FontManager::get().init();
@@ -108,13 +109,6 @@ namespace engine {
     }
 
     void Engine::onEvent(Event &_e) {
-        EventDispatcher dispatcher(_e);
-        dispatcher.dispatchEvent<WindowClosedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowClosed));
-        dispatcher.dispatchEvent<WindowResizedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowResized));
-
-        // TODO this must be in another layer, this is why the scroll is called event when on ImGui windows
-        dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Engine::onMouseScrolled));
-
         for (auto _it = layerStack.rbegin(); _it != layerStack.rend(); ++_it) {
             (*_it)->onEvent(_e);
             if (_e.handled)
@@ -170,15 +164,6 @@ namespace engine {
         Profiler::end(ProfilerState::IMGUI);
     }
 
-    bool Engine::onMouseScrolled(MouseScrolledEvent& _e) {
-        float _zoom = camera.getCurrentZoomLevel();
-        _zoom -= _e.getScrollY() * camera.getZoomSpeed();
-        _zoom = std::max(_zoom, 0.1f);
-        camera.setCurrentZoomLevel(_zoom);
-
-        return false;
-    }
-
     bool Engine::onWindowClosed(WindowClosedEvent &_e) {
         running = false;
         return true;
@@ -189,9 +174,7 @@ namespace engine {
             minimized = true;
             return false;
         }
-
         minimized = false;
-
         return false;
     }
 

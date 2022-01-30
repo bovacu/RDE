@@ -15,10 +15,12 @@
 namespace engine {
 
     enum SystemEventEnum {
-        WINDOW_RESIZE_E = SDL_WINDOWEVENT_RESIZED, KEY_DOWN_E = SDL_KEYDOWN, KEY_UP_E = SDL_KEYUP, QUIT_E = SDL_QUIT,
+        WINDOW_EVENT = SDL_WINDOWEVENT, KEY_DOWN_E = SDL_KEYDOWN, KEY_UP_E = SDL_KEYUP, QUIT_E = SDL_QUIT,
         MOUSE_MOVED_E = SDL_MOUSEMOTION, MOUSE_DOWN_E = SDL_MOUSEBUTTONDOWN, MOUSE_UP_E = SDL_MOUSEBUTTONUP,
-        MOUSE_SCROLLED_E = SDL_MOUSEWHEEL, WINDOW_ENTER_E = SDL_WINDOWEVENT_ENTER, WINDOW_EXIT_E = SDL_WINDOWEVENT_LEAVE,
-        WINDOW_FOCUS_E = SDL_WINDOWEVENT_FOCUS_GAINED, WINDOW_LOST_FOCUS_E = SDL_WINDOWEVENT_FOCUS_LOST
+        MOUSE_SCROLLED_E = SDL_MOUSEWHEEL, WINDOW_EXIT_E = SDL_WINDOWEVENT_LEAVE, WINDOW_RESIZED_E = SDL_WINDOWEVENT_RESIZED,
+        WINDOW_FOCUS_E = SDL_WINDOWEVENT_FOCUS_GAINED, WINDOW_LOST_FOCUS_E = SDL_WINDOWEVENT_FOCUS_LOST,
+        INPUT_TEXT_E = SDL_TEXTINPUT,
+        FOO_1 = SDL_KEYMAPCHANGED, FOO_3 = SDL_AUDIODEVICEADDED
     };
 
     class InputManager;
@@ -33,22 +35,33 @@ namespace engine {
             std::unordered_map<SystemEventEnum, std::function<void(SDL_Event&)>> events;
             Window* window = nullptr;
             Vec2I mousePos;
-            bool insideWindow;
+
+            std::function<void(Event&)> eventCallback;
 
         private:
             InputSystem() = default;
             void onKeyDown(SDL_Event& _event);
             void onKeyUp(SDL_Event& _event);
-            void onWindowResize(SDL_Event& _event);
-            void onQuit(SDL_Event& _event);
             void onMouseMoved(SDL_Event& _event);
             void onMouseDown(SDL_Event& _event);
             void onMouseUp(SDL_Event& _event);
             void onMouseScroll(SDL_Event& _event);
 
+            void onWindowEvent(SDL_Event& _event);
+            void onWindowEnter(SDL_Event& _event);
+            void onWindowExit(SDL_Event& _event);
+            void onWindowGainFocus(SDL_Event& _event);
+            void onWindowLostFocus(SDL_Event& _event);
+            void onWindowResize(SDL_Event& _event);
+            void onWindowMoved(SDL_Event& _event);
+            void onWindowMinimized(SDL_Event& _event);
+            void onWindowMaximized(SDL_Event& _event);
+            void onQuit(SDL_Event& _event);
+
         public:
             void init(Window* _window);
             void pollEvents();
+            void setEventCallback(std::function<void(Event&)> _eventCallback);
 
             static InputSystem& get();
     };

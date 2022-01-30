@@ -7,23 +7,9 @@
 
 namespace engine {
 
-
-
-//    void Camera::update(Window* _window) {
-//        glfwGetFramebufferSize(_window->getNativeWindow(), &width, &height);
-//        if (width != vpSize[0] ||  height != vpSize[1]) {
-//            vpSize[0] = width; vpSize[1] = height;
-//            glViewport(0, 0, vpSize[0], vpSize[1]);
-//            aspectRatio = (float)width/(float)height;
-//            LOG_I("Aspect Ratio: ", aspectRatio)
-//            projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
-//            viewProjectionMatrix = projectionMatrix * viewMatrix;
-//        }
-//    }
-
     void Camera::onResize(int _width, int _height) {
         aspectRatio = (float)_width/(float)_height;
-        LOG_I("Aspect Ratio: ", aspectRatio)
+        glViewport(0, 0, _width, _height);
         projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
     }
@@ -40,7 +26,6 @@ namespace engine {
         glm::mat4 _transform = glm::translate(glm::mat4(1.0f), {transform.getPosition().x, transform.getPosition().y, 0.0f}) *
                               glm::rotate(glm::mat4(1.0f), glm::radians(transform.getRotation()), glm::vec3(0, 0, 1));
         viewMatrix = glm::inverse(_transform);
-//        viewMatrix = _transform;
         viewProjectionMatrix = projectionMatrix * viewMatrix;
     }
 

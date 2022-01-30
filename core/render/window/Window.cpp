@@ -57,6 +57,11 @@ namespace engine {
     void Window::setWindowSize(int _width, int _height) {
         data.width = _width;
         data.height = _height;
+    }
+
+    void Window::setWindowSizeAndUpdateNativeWindow(int _width, int _height) {
+        data.width = _width;
+        data.height = _height;
         SDL_SetWindowSize(window, _width, _height);
     }
 

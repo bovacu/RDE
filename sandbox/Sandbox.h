@@ -32,6 +32,9 @@ namespace engine {
             void onRender(Delta _dt) override;
             void onImGuiRender(Delta _dt) override;
             void onEnd() override;
+
+        private:
+            bool onMouseScrolled(MouseScrolledEvent& _event);
     };
 
 }

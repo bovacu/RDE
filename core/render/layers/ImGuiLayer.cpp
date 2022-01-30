@@ -89,6 +89,7 @@ namespace engine {
         ImGui::Separator();
         printAtlases();
         printFPSDrawCallsAndRAM();
+        anyWindowHovered = ImGui::IsWindowHovered();
         ImGui::End();
         console();
     }
@@ -139,7 +140,7 @@ namespace engine {
     }
 
     bool ImGuiLayer::onMouseClicked(MouseButtonPressedEvent& _e) {
-        return ImGui::IsAnyItemHovered();
+        return anyWindowHovered;
     }
 
     bool ImGuiLayer::onMouseMovedEvent(MouseMovedEvent& _e) {
@@ -147,7 +148,7 @@ namespace engine {
     }
 
     bool ImGuiLayer::onMouseScrolled(MouseScrolledEvent& _e) {
-        return ImGui::IsAnyItemHovered();
+        return anyWindowHovered;
     }
 
     void ImGuiLayer::mouseInfo() {
