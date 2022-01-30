@@ -1,6 +1,6 @@
 // Created by borja on 31/12/21.
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include "Profiler.h"
 
 namespace engine {

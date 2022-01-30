@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include "core/util/Util.h"
 
 namespace engine {

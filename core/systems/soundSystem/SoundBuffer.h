@@ -1,31 +1,31 @@
-// Created by borja on 10/1/22.
+// // Created by borja on 10/1/22.
 
 
-#ifndef ENGINE2_0_SOUND_BUFFER_H
-#define ENGINE2_0_SOUND_BUFFER_H
+// #ifndef ENGINE2_0_SOUND_BUFFER_H
+// #define ENGINE2_0_SOUND_BUFFER_H
 
 
-#include "core/util/Util.h"
-#include <AL/al.h>
+// #include "core/util/Util.h"
+// #include <AL/al.h>
 
-namespace engine {
+// namespace engine {
 
-    class SoundBuffer {
-        private:
-            std::vector<ALuint> soundEffectBuffers;
+//     class SoundBuffer {
+//         private:
+//             std::vector<ALuint> soundEffectBuffers;
 
-        public:
-            static SoundBuffer* get();
+//         public:
+//             static SoundBuffer* get();
 
-            ALuint addSoundEffect(const char* _filename);
-            bool removeSoundEffect(const ALuint& _buffer);
+//             ALuint addSoundEffect(const char* _filename);
+//             bool removeSoundEffect(const ALuint& _buffer);
 
-        private:
-            SoundBuffer();
-            ~SoundBuffer();
-    };
+//         private:
+//             SoundBuffer();
+//             ~SoundBuffer();
+//     };
 
-}
+// }
 
 
-#endif //ENGINE2_0_SOUND_BUFFER_H
+// #endif //ENGINE2_0_SOUND_BUFFER_H

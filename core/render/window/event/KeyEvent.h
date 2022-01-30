@@ -20,7 +20,7 @@ namespace engine {
         public:
             /// Returns the code of the key that has been pressed, typed or released.
             /// @return The code of the key that made the event happened.
-            [[nodiscard]] inline KeyCode getKeyCode() const { return this->keyCode; }
+            [[nodiscard]] inline KeyCode getKeyCode() const { return keyCode; }
 
             /// Returns the flag with all the categories that the event fills in.
             /// @return The flag with the categories.
@@ -37,11 +37,11 @@ namespace engine {
 
             /// Returns the number of times in a sequence that the key has been pressed.
             /// @return The number of pressing times.
-            [[nodiscard]] inline int getRepeatedTimes() const { return this->repeatedTimes; }
+            [[nodiscard]] inline int getRepeatedTimes() const { return repeatedTimes; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << ": Key = " << (char)this->keyCode << " (" << this->keyCode << ") (down " << this->repeatedTimes << " times)";
+                _sst << getName() << ": Key = " << (char)keyCode << " (" << keyCode << ") (down " << repeatedTimes << " times)";
                 return _sst.str();
             }
 
@@ -60,15 +60,15 @@ namespace engine {
             char typedChar;
 
         public:
-            explicit KeyTypedEvent(KeyCode _keyCode) : KeyEvent(_keyCode), typedChar((char)this->keyCode) {  }
+            explicit KeyTypedEvent(KeyCode _keyCode) : KeyEvent(_keyCode), typedChar((char)keyCode) {  }
 
             /// Returns the number of times in a sequence that the key has been pressed.
             /// @return The char typed.
-            [[nodiscard]] inline char getCharTyped() const { return (char)this->typedChar; }
+            [[nodiscard]] inline char getCharTyped() const { return (char)typedChar; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << ": Key = " << (char)this->keyCode;
+                _sst << getName() << ": Key = " << (char)keyCode;
                 return _sst.str();
             }
 
@@ -88,7 +88,7 @@ namespace engine {
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << ": Key = " << (char)this->keyCode << " (" << this->keyCode << ")";
+                _sst << getName() << ": Key = " << (char)keyCode << " (" << this->keyCode << ")";
                 return _sst.str();
             }
 

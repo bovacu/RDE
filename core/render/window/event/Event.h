@@ -60,7 +60,7 @@ namespace engine {
             /// Checks if an event fits in a specific category.
             /// @param _category Category to check.
             /// @return true if belongs, false otherwise.
-            [[nodiscard]] inline bool isInCategory(EventCategory _category) const { return (unsigned)this->getCategoryFlags() & _category; }
+            [[nodiscard]] inline bool isInCategory(EventCategory _category) const { return (unsigned)getCategoryFlags() & _category; }
     };
 
     class EventDispatcher {
@@ -83,10 +83,10 @@ namespace engine {
         template<typename T>
         bool dispatchEvent(EventFn<T> _func) {
             /// This is why we needed the static version of getType.
-            if (this->event.getEventType() == T::getStaticType()) {
+            if (event.getEventType() == T::getStaticType()) {
                 /// Using *(T*)& was the only way I could find to make this work, fucking pointers.
                 /// Update: it can be done via static_cast<T&>.
-                this->event.handled = _func(static_cast<T&>(this->event));
+                event.handled = _func(static_cast<T&>(event));
                 return true;
             }
 

@@ -17,7 +17,8 @@ namespace engine {
 
     class FrameBuffer {
         private:
-        uint32_t rendererID = 0;
+        uint32_t fboID = 0, rboID = -1, vboID = -1;
+        uint32_t framebufferShader = -1;
         uint32_t colorAttachment = 0, depthAttachment = 0;
         FrameBufferSpecification specs;
 

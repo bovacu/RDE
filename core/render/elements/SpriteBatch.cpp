@@ -1,6 +1,6 @@
 #include "SpriteBatch.h"
 #include "core/util/Logger.h"
-#include "GL/glew.h"
+#include <glad/glad.h>
 #include "core/util/Functions.h"
 #include <glm/gtc/type_ptr.hpp>
 

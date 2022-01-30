@@ -18,28 +18,28 @@ class Vec2 {
     }
 
     Vec2(T _x, T _y) {
-        this->x = _x;
-        this->y = _y;
+        x = _x;
+        y = _y;
     }
 
     Vec2<T> operator +(const Vec2<T> _vec) {
-        return {this->x + _vec.x, this->y + _vec.y};
+        return {x + _vec.x, y + _vec.y};
     }
 
     Vec2<T> operator -(const Vec2<T> _vec) {
-        return {this->x - _vec.x, this->y - _vec.y};
+        return {x - _vec.x, y - _vec.y};
     }
 
     float operator *(const Vec2<T> _vec) {
-        return this->x * _vec.x + this->y * _vec.y;
+        return x * _vec.x + y * _vec.y;
     }
 
     float dotProduct(const Vec2<T>& _p) const {
-        return this->x * _p.x + this->y * _p.y;
+        return x * _p.x + y * _p.y;
     }
 
     float distance(const Vec2<T>& _p) const {
-        return std::sqrt((_p.x - this->x) * (_p.x - this->x) + (_p.y - this->y) * (_p.y - this->y));
+        return std::sqrt((_p.x - x) * (_p.x - this->x) + (_p.y - this->y) * (_p.y - this->y));
     }
 
     float magnitude() const {

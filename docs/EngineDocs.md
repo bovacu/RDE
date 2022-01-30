@@ -791,17 +791,11 @@ Como nuestro modelo de motor es solo 2D y solo voy a usar la ortografica, no ver
 
 Finalmente, la matriz resultante de multiplicar todas las explicadas se denomina ModelViewProjection matrix, o MVP matrix, que ironicamente al calcularlo es custo al reves MVP = P * V * M.
 
-
-
 #### Nuestro primer rectangulo con matriz MVP y camara
 
 Bueno, hemos avanzado bastante y por fin vamos a poder renderizar nuestro cuadrado como un cuadrado de verdad y no como un rectangulo, vamos a aplicar todo lo que hemos aprendido.
 
-
-
 > Nota: He sustituido el array de Vertex por un std::vector<Vertex>, para que sea mas sencilla la manipulacion, ademas de que cuando veamos el Sprite Batch tendra mas sentido tenerlo asi
-
-
 
 ```cpp
 #include <GL/glew.h>
@@ -1002,8 +996,6 @@ while (!glfwWindowShouldClose(window)) {
 
 Como ya podreis ver, el problema es que al cambiar la altura o anchura de la ventana, la nueva dimension no se corresponde con el viejo aspect ratio, por lo que la camara esta mal calculada, asi que solo hay que volver a recalcularlo.
 
-
-
 ## Sprite
 
 Bueno hasta ahora solo hemos pintado un cuadrado, cada vez un poquito mas preciso y mejor, pero un simple cuadrado. Esto ya empieza a ser aburrido, vamos a pintar imagenes por pantalla, no?
@@ -1020,23 +1012,11 @@ La clase Sprite esta en core/render/elements/Sprite.h y su cpp. Ya hemos explica
 
 ## Texture Atlas
 
-
-
 ## Sprite Batch
-
-
-
-
 
 ## Texto
 
-
-
-
-
 ## Frame Buffer
-
-
 
 # Glosario
 

@@ -1,9 +1,8 @@
+#include <glad/glad.h>
 #include "Window.h"
 #include "core/render/window/event/WindowEvent.h"
 #include "stb_image.h"
-#include "core/render/window/event/KeyEvent.h"
 #include "core/render/window/input/Input.h"
-#include "core/render/window/event/MouseEvent.h"
 
 namespace engine {
 
@@ -13,243 +12,76 @@ namespace engine {
         LOG_E("GLFW Error (", _error,"): ", _description);
     }
 
-    Window::Window(const WindowProperties& _props) : window(nullptr), monitor(nullptr) {
-        this->init(_props);
+    Window::Window(const WindowProperties& _props) : window(nullptr) {
+        init(_props);
     }
 
     Window::~Window() {
-        this->shutdown();
+        shutdown();
     }
 
     void Window::init(const WindowProperties& _props) {
-        this->data.title = _props.title;
-        this->data.width = (int)_props.width;
-        this->data.height = (int)_props.height;
+        data.title = _props.title;
+        data.width = (int)_props.width;
+        data.height = (int)_props.height;
 
 #ifdef ENGINE_DEBUG
         LOG_W("Running in debug mode");
         LOG_I("Creating window ", _props.title, " (", _props.width, _props.height, ")");
 #endif
 
-#pragma region Initializing
+        if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+            return;
+        }
+
+        SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
         /// Initialize GLFW, just for the first window.
-        if (GLFWWindowCount == 0) {
-            int success = glfwInit();
-            ENGINE_ASSERT(success, "Could not initialize GLFW!")
-            glfwSetErrorCallback(GLFWErrorCallback);
-        }
+        window = SDL_CreateWindow(_props.title.c_str(), 0, 0, (int)_props.width, (int)_props.height, SDL_WINDOW_OPENGL| SDL_WINDOW_ALLOW_HIGHDPI);
+        context = SDL_GL_CreateContext(window);
 
-        LOG_I("GLEW and GLFW initiated correctly");
+        SDL_GL_MakeCurrent(window, context);
 
-#if defined(ENGINE_DEBUG)
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-#endif
+        SDL_GL_SetSwapInterval(1);
 
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        gladLoadGLLoader(SDL_GL_GetProcAddress);
 
-        /// Creating the main window.
-        this->window = glfwCreateWindow((int)_props.width, (int)_props.height, this->data.title.c_str(), nullptr, nullptr);
-        ++GLFWWindowCount;
-        glfwMakeContextCurrent(window);
+        LOG_S("GLEW and SDL2 initiated correctly");
 
-        /// Initializing the graphics context to be able to draw.
-//        this->context = GraphicsContext::create(this->window);
-//        this->context->init();
-
-        /// Setting the basic data of the window to the UserPointer.
-        glfwSetWindowUserPointer(this->window, &this->data);
-//        this->setVSync(true);
-
-        auto _glewInit = glewInit();
-        if(_glewInit < 0) {
-            LOG_E("Error initing glew")
-            return;
-        }
-
-#pragma endregion Initializing
-
-#pragma region CenteringAndEnablingFullscreen
-        /// This region is to center the window on the screen and to enable fullscreen.
-        this->monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode* _mode = glfwGetVideoMode(this->monitor);
-        if (!_mode)
-            return;
-
-        int _monitorX, _monitorY;
-        glfwGetMonitorPos(this->monitor, &_monitorX, &_monitorY);
-        int _windowWidth, _windowHeight;
-        glfwGetWindowSize(this->window, &_windowWidth, &_windowHeight);
-
-        this->data.position.x = _monitorX + (_mode->width - _windowWidth) / 2;
-        this->data.position.y = _monitorY + (_mode->height - _windowHeight) / 2;
-
-        glfwSetWindowPos(this->window, this->data.position.x, this->data.position.y);
-
-#pragma endregion CenteringAndEnablingFullscreen
-
-#pragma region GLFWCallbacksSetup
-
-        /// Setting GLFW callbacks for polled events
-        glfwSetWindowSizeCallback(this->window, [](GLFWwindow* _window, int _width, int _height) {
-            WindowData& _data = *(WindowData*)glfwGetWindowUserPointer(_window);
-            _data.width = _width;
-            _data.height = _height;
-
-            WindowResizedEvent _event(_width, _height);
-            _data.eventCallback(_event);
-        });
-
-        glfwSetWindowPosCallback(this->window, [](GLFWwindow* _window, int _x, int _y) {
-            WindowData& _data = *(WindowData*)glfwGetWindowUserPointer(_window);
-            _data.position.x = _x;
-            _data.position.y = _y;
-
-            WindowMovedEvent _event(_x, _y);
-            _data.eventCallback(_event);
-        });
-
-        glfwSetWindowCloseCallback(this->window, [](GLFWwindow* _window) {
-            WindowData& _data = *(WindowData*)glfwGetWindowUserPointer(_window);
-            WindowClosedEvent _event;
-            _data.eventCallback(_event);
-        });
-
-        glfwSetKeyCallback(this->window, [](GLFWwindow* _window, int _key, int _scanCode, int _action, int _mods) {
-            WindowData& _data = *(WindowData*)glfwGetWindowUserPointer(_window);
-
-            switch (_action) {
-                case GLFW_PRESS: {
-                    KeyPressedEvent _event(static_cast<KeyCode>(_key), 0);
-                    _data.eventCallback(_event);
-                    break;
-                }
-
-                case GLFW_RELEASE: {
-                    KeyReleasedEvent _event(static_cast<KeyCode>(_key));
-                    _data.eventCallback(_event);
-                    Input::pressedKeyboardKeys[static_cast<KeyCode>(_key)] = false;
-                    break;
-                }
-
-                case GLFW_REPEAT: {
-                    KeyPressedEvent _event(static_cast<KeyCode>(_key), 1);
-                    _data.eventCallback(_event);
-                    break;
-                }
-
-                default: {  };
-            }
-        });
-
-        glfwSetCharCallback(this->window, [](GLFWwindow* _window, unsigned int _key) {
-            WindowData& _data = *(WindowData*)glfwGetWindowUserPointer(_window);
-
-            KeyTypedEvent _event(static_cast<KeyCode>(_key));
-            _data.eventCallback(_event);
-        });
-
-        glfwSetMouseButtonCallback(this->window, [](GLFWwindow* _window, int _button, int _action, int _mods) {
-            WindowData& _data = *(WindowData*)glfwGetWindowUserPointer(_window);
-
-            switch (_action) {
-                case GLFW_PRESS : {
-                    MouseButtonPressedEvent _event(static_cast<MouseCode>(_button));
-                    _data.eventCallback(_event);
-                    break;
-                }
-                case GLFW_RELEASE : {
-                    MouseButtonReleasedEvent _event(static_cast<MouseCode>(_button));
-                    _data.eventCallback(_event);
-                    Input::pressedMouseButtons[static_cast<MouseCode>(_button)] = false;
-                    break;
-                }
-
-                default: {  };
-            }
-        });
-
-        glfwSetScrollCallback(this->window, [](GLFWwindow* _window, double _xOffset, double _yOffset) {
-            WindowData& _data = *(WindowData*)glfwGetWindowUserPointer(_window);
-
-            MouseScrolledEvent _event((float)_xOffset, (float)_yOffset);
-            _data.eventCallback(_event);
-        });
-
-        glfwSetCursorPosCallback(this->window, [](GLFWwindow* _window, double _xPos, double _yPos) {
-            WindowData& _data = *(WindowData*)glfwGetWindowUserPointer(_window);
-
-            MouseMovedEvent _event((float)_xPos, (float)_yPos);
-            _data.eventCallback(_event);
-        });
-
-        glfwSetWindowIconifyCallback(this->window, [](GLFWwindow* _window, int _iconified) {
-            WindowData& _data = *(WindowData*)glfwGetWindowUserPointer(_window);
-
-            WindowMinimizedEvent _event(_iconified);
-            _data.eventCallback(_event);
-        });
-
-#pragma endregion GLFWCallbacksSetup
-
-        LOG_I("Finished setting up the window")
     }
 
     void Window::setWindowSize(int _width, int _height) {
-        this->data.width = _width;
-        this->data.height = _height;
-        glfwSetWindowSize(this->window, _width, _height);
+        data.width = _width;
+        data.height = _height;
+        SDL_SetWindowSize(window, _width, _height);
     }
 
     void Window::shutdown() {
-        glfwDestroyWindow(this->window);
-        --GLFWWindowCount;
-
-        if (GLFWWindowCount == 0) {
-            glfwTerminate();
-        }
+        SDL_GL_DeleteContext(context);
+        SDL_DestroyWindow(window);
+        SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
+        SDL_Quit();
     }
 
     void Window::update() {
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        SDL_GL_SwapWindow(window);
     }
 
     void Window::setVSync(bool _enabled) {
-        if (_enabled)
-            glfwSwapInterval(1);
-        else
-            glfwSwapInterval(0);
-
-        this->data.vSync = _enabled;
+        data.vSync = _enabled;
     }
 
     bool Window::isVSyncActive() const {
-        return this->data.vSync;
+        return data.vSync;
     }
 
     void Window::setFullscreen(bool _fullscreen) {
-        data.fullscreen = _fullscreen;
-        if ( _fullscreen ) {
-            // backup window position and window size
-            int _x, _y;
-            glfwGetWindowPos( this->window, &_x, &_y );
-            this->data.position = {_x, _y};
-            glfwGetWindowSize( this->window, &this->data.width, &this->data.height );
 
-            // get resolution of monitor
-            const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-            // switch to full screen
-            glfwSetWindowMonitor( this->window, this->monitor, 0, 0, mode->width, mode->height, 0 );
-            this->setWindowSize(mode->width, mode->height);
-        }
-        else {
-            // restore last window size and position
-            glfwSetWindowMonitor( this->window, nullptr, this->data.position.x, this->data.position.y
-                    , this->data.width, this->data.height, 0 );
-            this->setWindowSize(this->data.width, this->data.height);
-        }
     }
 
     bool Window::isFullscreen() const {
@@ -257,30 +89,7 @@ namespace engine {
     }
 
     void Window::setIcon(const char* _path) {
-        int _w = 0, _h = 0;
 
-        /// First getting the pixels.
-        unsigned char* _pixels = stbi_load(_path, &_w, &_h, nullptr, 4);
-
-        /// Checking pixels could be got.
-        if (_pixels == nullptr) {
-            ENGINE_ASSERT(false, "Couldn't load ImGui Texture")
-        }
-
-        /// Removing the previous icon.
-        glfwSetWindowIcon(this->window, 0, nullptr);
-
-        /// Loading the new icon.
-        GLFWimage _image[1];
-        _image[0].width = _w;
-        _image[0].height = _h;
-        _image[0].pixels = _pixels;
-
-        /// Setting the new icon to the window.
-        glfwSetWindowIcon(this->window, 1, _image);
-
-        /// Freeing space.
-        stbi_image_free(_pixels);
     }
 
     void Window::setWindowOptions(WindowOptions _op, bool _allow) {
@@ -336,7 +145,7 @@ namespace engine {
         return data.position;
     }
 
-    GLFWwindow* Window::getNativeWindow() const {
+    SDL_Window* Window::getNativeWindow() const {
         return window;
     }
 
@@ -349,7 +158,8 @@ namespace engine {
     }
 
     void Window::setTitle(const std::string& _title) {
-        data.title = _title; glfwSetWindowTitle(this->window, _title.c_str());
+        data.title = _title;
+        SDL_SetWindowTitle(window, _title.c_str());
     }
 
     std::string& Window::getTitle() {
@@ -365,7 +175,11 @@ namespace engine {
     }
 
     void Window::swapBuffers() const {
-        glfwSwapBuffers(window);
+        SDL_GL_SwapWindow(window);
+    }
+
+    SDL_GLContext& Window::getContext() {
+        return context;
     }
 
 }

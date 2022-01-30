@@ -19,11 +19,11 @@ namespace engine {
 
             /// Returns the x position of the mouse.
             /// @return x position of the mouse.
-            [[nodiscard]] inline float getX() const { return this->xPos; }
+            [[nodiscard]] inline float getX() const { return xPos; }
 
             /// Returns the y position of the mouse.
             /// @return y position of the mouse.
-            [[nodiscard]] inline float getY() const { return this->yPos; }
+            [[nodiscard]] inline float getY() const { return yPos; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;

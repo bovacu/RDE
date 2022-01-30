@@ -9,18 +9,18 @@ namespace engine {
 
     float Clock::getElapsedTimeSc() const {
         Delta _now = (float)glfwGetTime();
-        return _now - this->startTime;
+        return _now - startTime;
     }
 
     float Clock::getElapsedTimeMs() const {
         Delta _now = (float)glfwGetTime();
-        return (_now - this->startTime) * 1000;
+        return (_now - startTime) * 1000;
     }
 
     float Clock::restart() {
         Delta _now = (float)glfwGetTime();
-        float _elapsed = _now - this->startTime;
-        this->startTime = _now;
+        float _elapsed = _now - startTime;
+        startTime = _now;
         return _elapsed;
     }
 }
