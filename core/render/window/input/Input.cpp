@@ -134,6 +134,7 @@ namespace engine {
     void InputSystem::pollEvents() {
         SDL_Event _event;
         while (SDL_PollEvent(&_event)) {
+            ImGui_ImplSDL2_ProcessEvent(&_event);
             if(events.find((SystemEventEnum)_event.type) == events.end()) {
                 LOG_W("System event ", _event.type, " not implemented!!")
                 continue;
