@@ -1,12 +1,10 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.15)
 project(Engine2_0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
-SET(TARGET_LINKS OpenGL glfw Threads::Threads flecs IrrKlang freetype glut SDL2 glad
-#        sndfile openal
-        )
+SET(TARGET_LINKS OpenGL glfw flecs freetype SDL2 glad)
 
 include_directories(.)
 include_directories(${CMAKE_SOURCE_DIR}/external})
@@ -29,10 +27,7 @@ link_directories(${STB_DIR})
 
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(Threads REQUIRED)
-find_package(OpenAL REQUIRED)
 find_package(Freetype REQUIRED)
-find_package(GLUT REQUIRED)
 find_package(SDL2 REQUIRED)
 #find_package(IrrKlang REQUIRED)
 

@@ -24,7 +24,7 @@ namespace engine {
             virtual void onImGuiRender(Delta _dt)    {  }
             virtual void onEnd()                        {  }
 
-            [[nodiscard]] const std::string& getName() const { return this->debugName; }
+            [[nodiscard]] const std::string& getName() const { return debugName; }
     };
 
 }

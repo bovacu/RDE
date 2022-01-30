@@ -10,7 +10,7 @@ namespace engine {
         engine = &Engine::get();
 
         auto* _font = FontManager::get().loadFont("assets/fonts/arial.ttf", 54);
-
+        
         TextureAtlasManager::get().addAtlas(50, 50, "assets/test.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 

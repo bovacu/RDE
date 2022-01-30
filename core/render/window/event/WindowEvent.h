@@ -17,15 +17,15 @@ namespace engine {
 
             /// Returns the new width that resizing event is setting.
             /// @return New width of the window.
-            [[nodiscard]] inline unsigned int getWidth() const { return this->width; };
+            [[nodiscard]] inline unsigned int getWidth() const { return width; };
 
             /// Returns the new height that resizing event is setting.
             /// @return New height of the window.
-            [[nodiscard]] inline unsigned int getHeight() const { return this->height; }
+            [[nodiscard]] inline unsigned int getHeight() const { return height; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << " -> (width = " << this->width << ", height = " << this->height << ")";
+                _sst << getName() << " -> (width = " << width << ", height = " << height << ")";
                 return _sst.str();
             }
 
@@ -46,15 +46,15 @@ namespace engine {
 
             /// Returns the new position on x that moving event is setting.
             /// @return New x of the window.
-            [[nodiscard]] inline unsigned int getX() const { return this->x; };
+            [[nodiscard]] inline unsigned int getX() const { return x; };
 
             /// Returns the new position on y that moving event is setting.
             /// @return New y of the window.
-            [[nodiscard]] inline unsigned int getY() const { return this->y; }
+            [[nodiscard]] inline unsigned int getY() const { return y; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << " -> (x = " << this->x << ", y = " << this->y << ")";
+                _sst << getName() << " -> (x = " << x << ", y = " << y << ")";
                 return _sst.str();
             }
 
@@ -72,11 +72,11 @@ namespace engine {
 
         public:
             explicit WindowMinimizedEvent(int _minimized) : minimized(_minimized) {  }
-            [[nodiscard]] int getMinimized() const { return this->minimized; }
+            [[nodiscard]] int getMinimized() const { return minimized; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << " -> (minimized = " << this->minimized;
+                _sst << getName() << " -> (minimized = " << minimized;
                 return _sst.str();
             }
 

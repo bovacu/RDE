@@ -13,53 +13,51 @@ namespace engine {
     }
 
     Window::Window(const WindowProperties& _props) : window(nullptr) {
-        this->init(_props);
+        init(_props);
     }
 
     Window::~Window() {
-        this->shutdown();
+        shutdown();
     }
 
     void Window::init(const WindowProperties& _props) {
-        this->data.title = _props.title;
-        this->data.width = (int)_props.width;
-        this->data.height = (int)_props.height;
+        data.title = _props.title;
+        data.width = (int)_props.width;
+        data.height = (int)_props.height;
 
 #ifdef ENGINE_DEBUG
         LOG_W("Running in debug mode");
         LOG_I("Creating window ", _props.title, " (", _props.width, _props.height, ")");
 #endif
 
-#pragma region Initializing
-
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
             return;
         }
 
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
         /// Initialize GLFW, just for the first window.
-        window = SDL_CreateWindow(_props.title.c_str(), 0, 0, (int)_props.width, (int)_props.height, SDL_WINDOW_OPENGL);
+        window = SDL_CreateWindow(_props.title.c_str(), 0, 0, (int)_props.width, (int)_props.height, SDL_WINDOW_OPENGL| SDL_WINDOW_ALLOW_HIGHDPI);
         context = SDL_GL_CreateContext(window);
 
-        SDL_GL_SetSwapInterval(0);
+        SDL_GL_MakeCurrent(window, context);
+
+        SDL_GL_SetSwapInterval(1);
 
         gladLoadGLLoader(SDL_GL_GetProcAddress);
 
         LOG_S("GLEW and SDL2 initiated correctly");
-#pragma endregion Initializing
 
-#pragma region CenteringAndEnablingFullscreen
-#pragma endregion CenteringAndEnablingFullscreen
     }
 
     void Window::setWindowSize(int _width, int _height) {
-        this->data.width = _width;
-        this->data.height = _height;
+        data.width = _width;
+        data.height = _height;
         SDL_SetWindowSize(window, _width, _height);
     }
 
@@ -75,11 +73,11 @@ namespace engine {
     }
 
     void Window::setVSync(bool _enabled) {
-        this->data.vSync = _enabled;
+        data.vSync = _enabled;
     }
 
     bool Window::isVSyncActive() const {
-        return this->data.vSync;
+        return data.vSync;
     }
 
     void Window::setFullscreen(bool _fullscreen) {

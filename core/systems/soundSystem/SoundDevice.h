@@ -1,28 +1,28 @@
-// Created by borja on 10/1/22.
+// // Created by borja on 10/1/22.
 
 
-#ifndef ENGINE2_0_SOUND_DEVICE_H
-#define ENGINE2_0_SOUND_DEVICE_H
+// #ifndef ENGINE2_0_SOUND_DEVICE_H
+// #define ENGINE2_0_SOUND_DEVICE_H
 
 
-#include <AL/alc.h>
-#include "core/util/Util.h"
+// #include <AL/alc.h>
+// #include "core/util/Util.h"
 
-namespace engine {
+// namespace engine {
 
-    class SoundDevice {
-        public:
-            static SoundDevice* get();
+//     class SoundDevice {
+//         public:
+//             static SoundDevice* get();
 
-        private:
-            SoundDevice();
-            ~SoundDevice();
+//         private:
+//             SoundDevice();
+//             ~SoundDevice();
 
-            ALCdevice* p_ALCDevice;
-            ALCcontext* p_ALCContext;
-    };
+//             ALCdevice* p_ALCDevice;
+//             ALCcontext* p_ALCContext;
+//     };
 
-}
+// }
 
 
-#endif //ENGINE2_0_SOUND_DEVICE_H
+// #endif //ENGINE2_0_SOUND_DEVICE_H

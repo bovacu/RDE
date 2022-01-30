@@ -36,7 +36,7 @@
     #define ENGINE_ASSERT(x, ...)
 #endif
 
-#define ENGINE_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
+#define ENGINE_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return fn(std::forward<decltype(args)>(args)...); }
 
 // This is for the EventBus
 #define PLACEHOLDERS_1 std::placeholders::_1

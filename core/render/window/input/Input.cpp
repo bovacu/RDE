@@ -23,6 +23,8 @@ namespace engine {
         events[SystemEventEnum::MOUSE_SCROLLED_E] = BIND_FUNC_1(InputSystem::onMouseScroll);
         events[SystemEventEnum::WINDOW_ENTER_E] = [this](SDL_Event&) { insideWindow = true; };
         events[SystemEventEnum::WINDOW_EXIT_E] = [this](SDL_Event&) { insideWindow = false; };
+        events[SystemEventEnum::WINDOW_FOCUS_E] = [this](SDL_Event&) { LOG_I("Gained Focus") };
+        events[SystemEventEnum::WINDOW_LOST_FOCUS_E] = [this](SDL_Event&) { LOG_I("Lost Focus") };
 
         pressedMouseButtons = {
                 {MouseCode::Button0,        0},
@@ -143,6 +145,7 @@ namespace engine {
 
     void InputSystem::onKeyDown(SDL_Event& _event) {
         auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
+        if(pressedKeyboardKeys[_key] == 2) return;
         pressedKeyboardKeys[_key] = 1;
     }
 
@@ -165,6 +168,7 @@ namespace engine {
 
     void InputSystem::onMouseDown(SDL_Event& _event) {
         auto _key = static_cast<MouseCode>(_event.button.button);
+        if(pressedMouseButtons[_key] == 2) return;
         pressedMouseButtons[_key] = 1;
     }
 
@@ -207,13 +211,11 @@ namespace engine {
     }
 
     bool InputManager::isMousePressed(MouseCode _button) {
-        inputSystem->pressedMouseButtons[_button] = 1;
-        return false;
+        return inputSystem->pressedMouseButtons[_button] == 1;
     }
 
     bool InputManager::isMouseReleased(MouseCode _button) {
-        inputSystem->pressedMouseButtons[_button] = 0;
-        return false;
+        return  inputSystem->pressedMouseButtons[_button] == 0;;
     }
 
     Vec2I InputManager::getMousePosition() {

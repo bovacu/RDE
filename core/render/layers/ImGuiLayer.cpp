@@ -35,7 +35,7 @@ namespace engine {
         }
 
         Engine& _game = Engine::get();
-        SDL_Window* window = static_cast<SDL_Window*>(_game.getWindow().getNativeWindow());
+        auto* window = static_cast<SDL_Window*>(_game.getWindow().getNativeWindow());
 
         // Setup Platform/Renderer bindings
         ImGui_ImplSDL2_InitForOpenGL(window, _game.getWindow().getContext());
@@ -75,10 +75,11 @@ namespace engine {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-//            GLFWwindow* backup_current_context = glfwGetCurrentContext();
-//            ImGui::UpdatePlatformWindows();
-//            ImGui::RenderPlatformWindowsDefault();
-//            glfwMakeContextCurrent(backup_current_context);
+            SDL_Window* backup_current_window = _game.getWindow().getNativeWindow();
+            SDL_GLContext backup_current_context = _game.getWindow().getContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
         }
     }
 

@@ -3,24 +3,24 @@
 namespace engine {
 
     LayerStack::~LayerStack() {
-        for (Layer* _layer : this->layers) {
+        for (Layer* _layer : layers) {
             _layer->onEnd();
             delete _layer;
         }
     }
 
     void LayerStack::pushLayer(Layer* _layer) {
-        this->layers.emplace(this->layers.begin() + this->layerInsertIndex, _layer);
-        this->layerInsertIndex++;
+        layers.emplace(layers.begin() + layerInsertIndex, _layer);
+        layerInsertIndex++;
     }
 
     void LayerStack::pushOverlay(Layer* _overlay) {
-        this->layers.emplace_back(_overlay);
+        layers.emplace_back(_overlay);
     }
 
     void LayerStack::popLayer(Layer* _layer) {
-        auto it = std::find(this->layers.begin(), this->layers.begin() + this->layerInsertIndex, _layer);
-        if (it != this->layers.begin() + this->layerInsertIndex) {
+        auto it = std::find(layers.begin(), layers.begin() + layerInsertIndex, _layer);
+        if (it != layers.begin() + layerInsertIndex) {
             _layer->onEnd();
             this->layers.erase(it);
             this->layerInsertIndex--;

@@ -66,7 +66,7 @@ namespace engine {
 
             /// Gives the title of the window.
             /// @return the title of the window.
-            [[nodiscard]] const std::string& getTitle() const       { return this->window->getTitle(); }
+            [[nodiscard]] const std::string& getTitle() const       { return window->getTitle(); }
 
             /// Sets the size of the window.
             /// @param _width Width of the window.
@@ -75,11 +75,11 @@ namespace engine {
 
             /// Returns the size of the window as a Vec2i.
             ///@return Vec2i with the size of the window.
-            [[nodiscard]] Vec2I getWindowSize() const               { return Vec2I(this->window->getWidth(), this->window->getHeight()); }
+            [[nodiscard]] Vec2I getWindowSize() const               { return Vec2I(window->getWidth(), window->getHeight()); }
 
             /// Returns 1 / FPS
             /// @return The FPS as milliseconds.
-            [[nodiscard]] float getTimePerFrame() const             { return this->timePerFrame; }
+            [[nodiscard]] float getTimePerFrame() const             { return timePerFrame; }
 
             /// Enables or disables the VSync
             /// @param true or false depending if you want to enable(true) or disable(false).
@@ -91,23 +91,23 @@ namespace engine {
 
             /// Returns the delta (time passed between the actual frame and the previous one) on any moment.
             /// @return The current delta.
-            [[nodiscard]] Delta getDelta() const                 { return this->dt; }
+            [[nodiscard]] Delta getDelta() const                 { return dt; }
 
             /// Returns in a Vec2i the current position of the mouse on the screen.
             /// @return Vec2i with the [x,y] coordinates.
-            [[nodiscard]] Vec2I getMousePos() const                 { return Vec2I( (int)(-this->getWindowSize().x / 2.f + InputManager::getMouseX()),
-                                                                                    (int)(this->getWindowSize().y / 2.f - InputManager::getMouseY())); }
+            [[nodiscard]] Vec2I getMousePos() const                 { return Vec2I( (int)(-getWindowSize().x / 2.f + InputManager::getMouseX()),
+                                                                                    (int)(getWindowSize().y / 2.f - InputManager::getMouseY())); }
             /// Enables or disables the fullscreen mode.
             /// @param _fullscreen Enables(true) or disables(false) the fullscreen.
             void setFullscreen(bool _fullscreen);
 
             /// Returns if fullscreen is active.
             /// @return If fullscreen is active.
-            [[nodiscard]] bool isFullscreen() const                 {  return this->window->isFullscreen(); }
+            [[nodiscard]] bool isFullscreen() const                 {  return window->isFullscreen(); }
 
             /// Sets the position of the window on the screen.
             /// @param _position Vec2i with [x,y] coordinates to move the window.
-            void setPosition(const Vec2I& _position)                { this->window->setPosition(_position); }
+            void setPosition(const Vec2I& _position)                { window->setPosition(_position); }
 
             /// Returns a Vec2i with the current position of the window.
             /// @return Vec2i with the position of the window.

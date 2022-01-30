@@ -40,13 +40,14 @@ namespace engine {
                 (uint32_t)window->getWindowSize().x,
                 (uint32_t)window->getWindowSize().y
         };
+
         frameBuffer = new FrameBuffer(_specs);
 
         Console::get().addCommand("background_color", BIND_FUNC_1(Engine::changeColorConsoleCommand));
     }
 
     Engine::~Engine() {
-        SoundSystem::get().clean();
+        // SoundSystem::get().clean();
         delete frameBuffer;
     }
 
@@ -54,7 +55,7 @@ namespace engine {
         float _accumulator = 0;
 
         Delta _dt = 0;
-        while (this->running) {
+        while (running) {
             Uint64 _start = SDL_GetPerformanceCounter();
             _accumulator += _dt;
 
@@ -62,25 +63,25 @@ namespace engine {
 
             InputSystem::get()->pollEvents();
 
-            if (!this->minimized) {
+            if (!minimized) {
 
                 Profiler::begin(ProfilerState::FIXED_UPDATE);
-                while (_accumulator >= this->timePerFrame) {
-                    _accumulator -= this->timePerFrame;
-                    this->onFixedUpdate(this->timePerFrame);
+                while (_accumulator >= timePerFrame) {
+                    _accumulator -= timePerFrame;
+                    onFixedUpdate(timePerFrame);
                 }
                 Profiler::end(ProfilerState::FIXED_UPDATE);
 
                 Profiler::begin(ProfilerState::UPDATE);
-                this->onUpdate(_dt);
+                onUpdate(_dt);
                 Profiler::end(ProfilerState::UPDATE);
 
                 Profiler::begin(ProfilerState::RENDERING);
-                this->onRender(_dt);
+                onRender(_dt);
                 Profiler::end(ProfilerState::RENDERING);
 
                 #ifdef ENGINE_DEBUG
-                this->updateFps();
+                updateFps();
                 #endif
             }
 
@@ -96,24 +97,27 @@ namespace engine {
             _dt = _elapsedMS;
             timer += _dt;
 
-//            // Cap to 60 FPS
-//            SDL_Delay(floor(16.666f - elapsedMS));
+            // Cap to 60 FPS
+//            int _toWait = 16.666f - _dt * 1000;
+//            LOG_I(_toWait)
+//            if(_toWait > 0)
+//                SDL_Delay(_toWait);
         }
     }
 
     void Engine::onEvent(Event &_e) {
-        EventDispatcher dispatcher(_e);
-        dispatcher.dispatchEvent<WindowClosedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowClosed));
-        dispatcher.dispatchEvent<WindowResizedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowResized));
-
-        // TODO this must be in another layer, this is why the scroll is called event when on ImGui windows
-        dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Engine::onMouseScrolled));
-
-        for (auto _it = this->layerStack.rbegin(); _it != this->layerStack.rend(); ++_it) {
-            (*_it)->onEvent(_e);
-            if (_e.handled)
-                break;
-        }
+//        EventDispatcher dispatcher(_e);
+//        dispatcher.dispatchEvent<WindowClosedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowClosed));
+//        dispatcher.dispatchEvent<WindowResizedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowResized));
+//
+//        // TODO this must be in another layer, this is why the scroll is called event when on ImGui windows
+//        dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Engine::onMouseScrolled));
+//
+//        for (auto _it = this->layerStack.rbegin(); _it != this->layerStack.rend(); ++_it) {
+//            (*_it)->onEvent(_e);
+//            if (_e.handled)
+//                break;
+//        }
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
@@ -134,13 +138,12 @@ namespace engine {
         if(InputManager::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
 
-        camera.setRotation(camera.getRotation() + 5 * _dt);
-
     }
 
     void Engine::onRender(Delta _dt) {
         Renderer::clear(backgroundColor);
 
+        frameBuffer->bind();
         // Normal rendering
         Renderer::beginDraw(camera);
         for (Layer* _layer : this->layerStack)
@@ -151,6 +154,10 @@ namespace engine {
         Renderer::beginDebugDraw(camera);
         Renderer::drawSquare({0, 0}, {2, 2}, Color::Blue);
         Renderer::endDebugDraw();
+
+        frameBuffer->unbind();
+
+        
 
         // Imgui rendering
         Profiler::begin(ProfilerState::IMGUI);

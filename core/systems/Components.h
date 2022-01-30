@@ -19,21 +19,21 @@ namespace engine {
         Transform(const glm::mat3& _transform) : transformMatrix(_transform) {  }
 
         [[nodiscard]] Vec2F getPosition() const { return {transformMatrix[3][0], transformMatrix[3][1]}; }
-        [[nodiscard]] float getX() const { return this->getPosition().x; }
-        [[nodiscard]] float getY() const { return this->getPosition().y; }
+        [[nodiscard]] float getX() const { return getPosition().x; }
+        [[nodiscard]] float getY() const { return getPosition().y; }
 
         Vec2F getScale() const { return {transformMatrix[0][0], transformMatrix[1][1]}; }
-        [[nodiscard]] float getScaleX() const { return this->getScale().x; }
-        [[nodiscard]] float getScaleY() const { return this->getScale().y; }
+        [[nodiscard]] float getScaleX() const { return getScale().x; }
+        [[nodiscard]] float getScaleY() const { return getScale().y; }
 
         [[nodiscard]] float getRotation() const { return rotation; }
 
-        void setPosition(const Vec2F& _position) { this->transformMatrix[3][0] = _position.x; this->transformMatrix[3][1] = _position.y;}
-        void setX(float _x) { this->transformMatrix[3][0] = _x; }
-        void setY(float _y) { this->transformMatrix[3][1] = _y; }
+        void setPosition(const Vec2F& _position) { transformMatrix[3][0] = _position.x; transformMatrix[3][1] = _position.y;}
+        void setX(float _x) { transformMatrix[3][0] = _x; }
+        void setY(float _y) { transformMatrix[3][1] = _y; }
 
-        void setScale(const Vec2F& _scale) { this->transformMatrix[0][0] = _scale.x; this->transformMatrix[1][1] = _scale.y;}
-        void setScaleX(float _x) { this->transformMatrix[0][0] = _x; }
+        void setScale(const Vec2F& _scale) { transformMatrix[0][0] = _scale.x; transformMatrix[1][1] = _scale.y;}
+        void setScaleX(float _x) { transformMatrix[0][0] = _x; }
         void setScaleY(float _y) { this->transformMatrix[1][1] = _y; }
 
         void setRotation(float _rotation) { rotation = _rotation; }
