@@ -46,13 +46,12 @@ namespace engine {
         context = SDL_GL_CreateContext(window);
 
         SDL_GL_MakeCurrent(window, context);
-
         SDL_GL_SetSwapInterval(1);
+        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
         gladLoadGLLoader(SDL_GL_GetProcAddress);
 
         LOG_S("GLEW and SDL2 initiated correctly");
-
     }
 
     void Window::setWindowSize(int _width, int _height) {

@@ -11,7 +11,7 @@ namespace engine {
 
         auto* _font = FontManager::get().loadFont("assets/fonts/arial.ttf", 54);
         
-        TextureAtlasManager::get().addAtlas(50, 50, "assets/test.png");
+        TextureAtlasManager::get().addAtlas(50, 50, "assets/test/test.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
         animationSystem.createAnimation("run", "run", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
@@ -69,8 +69,8 @@ namespace engine {
 
     void Sandbox::onRender(Delta _dt) {
         Renderer::draw(player);
-        for(auto& _sprite : sprites)
-            Renderer::draw(_sprite);
+//        for(auto& _sprite : sprites)
+//            Renderer::draw(_sprite);
         Renderer::draw(text);
     }
 

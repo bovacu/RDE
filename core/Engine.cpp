@@ -143,9 +143,9 @@ namespace engine {
     }
 
     void Engine::onRender(Delta _dt) {
-        Renderer::clear(backgroundColor);
-
         frameBuffer->bind();
+
+        Renderer::clear(backgroundColor);
 
         Renderer::beginDraw(camera);
         for (Layer* _layer : layerStack)
@@ -158,8 +158,6 @@ namespace engine {
         Renderer::endDebugDraw();
 
         frameBuffer->unbind();
-
-        
 
         // Imgui rendering
         Profiler::begin(ProfilerState::IMGUI);
