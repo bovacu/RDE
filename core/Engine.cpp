@@ -1,11 +1,10 @@
 // Created by borja on 24/12/21.
 
 #include "Engine.h"
-#include "core/systems/soundSystem/SoundSystem.h"
-#include "core/systems/soundSystem/SoundBuffer.h"
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/render/elements/ShaderManager.h"
 #include "sandbox/Sandbox.h"
+#include "core/systems/soundSystem/SoundManager.h"
 
 namespace engine {
     Engine *Engine::gameInstance = nullptr;
@@ -22,6 +21,7 @@ namespace engine {
         ShaderManager::get().init();
         FontManager::get().init();
         Renderer::init(window.get());
+        SoundManager::get().init();
 
         imGuiLayer = new ImGuiLayer();
         pushOverlay(imGuiLayer);
@@ -43,11 +43,13 @@ namespace engine {
 
         frameBuffer = new FrameBuffer(_specs);
 
-        Console::get().addCommand("background_color", BIND_FUNC_1(Engine::changeColorConsoleCommand));
+        Console::get().addCommand("background_color",
+                                     "Changes background color 0 <= r,b,g,a <= 255",
+                                     BIND_FUNC_1(Engine::changeColorConsoleCommand),
+                                     "r g b a");
     }
 
     Engine::~Engine() {
-        // SoundSystem::get().clean();
         delete frameBuffer;
     }
 
@@ -86,7 +88,7 @@ namespace engine {
             }
 
             engine::Profiler::begin(ProfilerState::INPUT);
-            this->window->update();
+            window->update();
             engine::Profiler::end(ProfilerState::INPUT);
 
             engine::Profiler::endFrame();
@@ -106,22 +108,22 @@ namespace engine {
     }
 
     void Engine::onEvent(Event &_e) {
-//        EventDispatcher dispatcher(_e);
-//        dispatcher.dispatchEvent<WindowClosedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowClosed));
-//        dispatcher.dispatchEvent<WindowResizedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowResized));
-//
-//        // TODO this must be in another layer, this is why the scroll is called event when on ImGui windows
-//        dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Engine::onMouseScrolled));
-//
-//        for (auto _it = this->layerStack.rbegin(); _it != this->layerStack.rend(); ++_it) {
-//            (*_it)->onEvent(_e);
-//            if (_e.handled)
-//                break;
-//        }
+        EventDispatcher dispatcher(_e);
+        dispatcher.dispatchEvent<WindowClosedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowClosed));
+        dispatcher.dispatchEvent<WindowResizedEvent>(ENGINE_BIND_EVENT_FN(Engine::onWindowResized));
+
+        // TODO this must be in another layer, this is why the scroll is called event when on ImGui windows
+        dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Engine::onMouseScrolled));
+
+        for (auto _it = layerStack.rbegin(); _it != layerStack.rend(); ++_it) {
+            (*_it)->onEvent(_e);
+            if (_e.handled)
+                break;
+        }
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
-        for (Layer* _layer : this->layerStack)
+        for (Layer* _layer : layerStack)
             _layer->onFixedUpdate(_fixedDt);
     }
 
@@ -129,10 +131,10 @@ namespace engine {
         auto _fbSpec = frameBuffer->getSpecification();
         if(window->getWindowSize().x > 0 && window->getWindowSize().y > 0 && (_fbSpec.width != window->getWindowSize().x || _fbSpec.height != window->getWindowSize().y)) {
             frameBuffer->resize(window->getWindowSize().x, window->getWindowSize().y);
-            this->camera.onResize(window->getWindowSize().x, window->getWindowSize().y);
+            camera.onResize(window->getWindowSize().x, window->getWindowSize().y);
         }
 
-        for (Layer* _layer : this->layerStack)
+        for (Layer* _layer : layerStack)
             _layer->onUpdate(_dt);
 
         if(InputManager::isKeyJustPressed(KeyCode::F9))
@@ -144,9 +146,9 @@ namespace engine {
         Renderer::clear(backgroundColor);
 
         frameBuffer->bind();
-        // Normal rendering
+
         Renderer::beginDraw(camera);
-        for (Layer* _layer : this->layerStack)
+        for (Layer* _layer : layerStack)
             _layer->onRender(_dt);
         Renderer::endDraw();
 
@@ -161,12 +163,12 @@ namespace engine {
 
         // Imgui rendering
         Profiler::begin(ProfilerState::IMGUI);
-        this->imGuiLayer->begin();
-        for (Layer* _layer : this->layerStack)
+        imGuiLayer->begin();
+        for (Layer* _layer : layerStack)
             _layer->onImGuiRender(_dt);
             if(showImGuiDebugWindow)
                 imGuiLayer->drawDebugInfo();
-        this->imGuiLayer->end();
+        imGuiLayer->end();
         Profiler::end(ProfilerState::IMGUI);
     }
 
@@ -180,22 +182,22 @@ namespace engine {
     }
 
     bool Engine::onWindowClosed(WindowClosedEvent &_e) {
-        this->running = false;
+        running = false;
         return true;
     }
 
     bool Engine::onWindowResized(WindowResizedEvent &_e) {
         if (_e.getWidth() == 0 || _e.getHeight() == 0) {
-            this->minimized = true;
+            minimized = true;
             return false;
         }
 
-        this->minimized = false;
+        minimized = false;
 
         return false;
     }
 
-    int Engine::getFps() const { return (int)this->fpsCounter; }
+    int Engine::getFps() const { return (int)fpsCounter; }
 
     void Engine::updateFps() {
         if (timer >= 1.f) {
@@ -208,47 +210,47 @@ namespace engine {
     }
 
     void Engine::setTitle(const std::string& _title) {
-        this->window->setTitle(_title);
+        window->setTitle(_title);
     }
 
     void Engine::setFullscreen(bool _fullscreen) {
-        this->window->setFullscreen(_fullscreen);
+        window->setFullscreen(_fullscreen);
     }
 
     void Engine::setVSync(bool _vsync) {
-        this->window->setVSync(_vsync);
+        window->setVSync(_vsync);
     }
 
     bool Engine::isVSync() {
-        return this->window->isVSyncActive();
+        return window->isVSyncActive();
     }
 
     void Engine::setWindowSize(int _width, int _height) {
-        this->window->setWindowSize(_width, _height);
+        window->setWindowSize(_width, _height);
     }
 
     void Engine::pushLayer(Layer* _layer) {
-        this->layerStack.pushLayer(_layer);
+        layerStack.pushLayer(_layer);
         _layer->onInit();
     }
 
     void Engine::pushOverlay(Layer* _layer) {
-        this->layerStack.pushOverlay(_layer);
+        layerStack.pushOverlay(_layer);
         _layer->onInit();
     }
 
     void Engine::popLayer(Layer* _layer) {
-        this->layerStack.popLayer(_layer);
+        layerStack.popLayer(_layer);
         _layer->onEnd();
     }
 
     void Engine::popOverlay(Layer* _layer) {
-        this->layerStack.popOverlay(_layer);
+        layerStack.popOverlay(_layer);
         _layer->onEnd();
     }
 
     void Engine::closeApplication() {
-        this->running = false;
+        running = false;
     }
 
     bool Engine::fromRunToRoll(const TransitionParams& _foo) {

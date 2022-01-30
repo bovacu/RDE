@@ -21,15 +21,15 @@ namespace engine {
             void popLayer(Layer* _layer);
             void popOverlay(Layer* _overlay);
 
-            std::vector<Layer*>::iterator begin() { return this->layers.begin(); }
-            std::vector<Layer*>::iterator end() { return this->layers.end(); }
-            std::vector<Layer*>::reverse_iterator rbegin() { return this->layers.rbegin(); }
-            std::vector<Layer*>::reverse_iterator rend() { return this->layers.rend(); }
+            std::vector<Layer*>::iterator begin() { return layers.begin(); }
+            std::vector<Layer*>::iterator end() { return layers.end(); }
+            std::vector<Layer*>::reverse_iterator rbegin() { return layers.rbegin(); }
+            std::vector<Layer*>::reverse_iterator rend() { return layers.rend(); }
 
-            std::vector<Layer*>::const_iterator begin() const { return this->layers.begin(); }
-            std::vector<Layer*>::const_iterator end()	const { return this->layers.end(); }
-            std::vector<Layer*>::const_reverse_iterator rbegin() const { return this->layers.rbegin(); }
-            std::vector<Layer*>::const_reverse_iterator rend() const { return this->layers.rend(); }
+            std::vector<Layer*>::const_iterator begin() const { return layers.begin(); }
+            std::vector<Layer*>::const_iterator end()	const { return layers.end(); }
+            std::vector<Layer*>::const_reverse_iterator rbegin() const { return layers.rbegin(); }
+            std::vector<Layer*>::const_reverse_iterator rend() const { return layers.rend(); }
     };
 
 }

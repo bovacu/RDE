@@ -19,7 +19,8 @@ namespace engine {
         private:
         uint32_t fboID = 0, rboID = -1, vboID = -1;
         uint32_t framebufferShader = -1;
-        uint32_t colorAttachment = 0, depthAttachment = 0;
+        uint32_t colorAttachment = -1;
+        float aspectRatio = -1;
         FrameBufferSpecification specs;
 
         public:
@@ -35,8 +36,8 @@ namespace engine {
 
         void resize(uint32_t _width, uint32_t _height);
 
-        [[nodiscard]] uint32_t getColorAttachmentRendererID() const { return this->colorAttachment; }
-        [[nodiscard]] const FrameBufferSpecification& getSpecification() const { return this->specs; }
+        [[nodiscard]] uint32_t getColorAttachmentRendererID() const { return colorAttachment; }
+        [[nodiscard]] const FrameBufferSpecification& getSpecification() const { return specs; }
     };
 
 }

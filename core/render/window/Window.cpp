@@ -99,7 +99,7 @@ namespace engine {
 //        auto _style = GetWindowLongPtr(_windowHandle, GWL_STYLE);
 //
 //        /// The style in GLFW works as an int, so to enable or disable a function we add or subtract the desired amount.
-//        _style += this->windowOptionsToGLFW(_op, _allow);
+//        _style += windowOptionsToGLFW(_op, _allow);
 //
 //        SetWindowLongPtr(_windowHandle, GWL_STYLE, _style);
     }
@@ -154,7 +154,7 @@ namespace engine {
     }
 
     Vec2I Window::getWindowSize() const {
-        return  {this->getWidth(), this->getHeight()};
+        return  {getWidth(), getHeight()};
     }
 
     void Window::setTitle(const std::string& _title) {

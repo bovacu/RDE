@@ -30,6 +30,7 @@ namespace engine {
     class Console {
         private:
             std::map<std::string, CommandFunc> commands;
+            std::map<std::string, std::string> commandsAndDescriptions;
             Logs help(const std::vector<std::string>& _arguments = {});
             Logs clear(const std::vector<std::string>& _arguments = {});
             Logs printHistory(const std::vector<std::string>& _arguments = {});
@@ -43,7 +44,7 @@ namespace engine {
             static Console& get();
 
             void init();
-            void addCommand(const std::string& _commandName, CommandFunc _commandFunc);
+            void addCommand(const std::string& _commandName, const std::string& _description, CommandFunc _commandFunc, const std::string& _argumentsDescription = "");
             void deleteCommand(const std::string& _commandName);
 
             Logs call(const Command& _command);

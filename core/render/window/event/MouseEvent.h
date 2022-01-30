@@ -27,7 +27,7 @@ namespace engine {
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << ": moved (x = " << this->xPos << ", y = " << this->yPos << ")";
+                _sst << getName() << ": moved (x = " << xPos << ", y = " << yPos << ")";
                 return _sst.str();
             }
 
@@ -51,15 +51,15 @@ namespace engine {
 
             /// Returns the scrolled value on x.
             /// @return x scrolling value.
-            [[nodiscard]] inline float getScrollX() const { return this->xScrolled; }
+            [[nodiscard]] inline float getScrollX() const { return xScrolled; }
 
             /// Returns the scrolled value on y.
             /// @return y scrolling value.
-            [[nodiscard]] inline float getScrollY() const { return this->yScrolled; }
+            [[nodiscard]] inline float getScrollY() const { return yScrolled; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << ": scrolled (x = " << this->xScrolled << ", y = " << this->yScrolled << ")";
+                _sst << getName() << ": scrolled (x = " << xScrolled << ", y = " << yScrolled << ")";
                 return _sst.str();
             }
 
@@ -84,7 +84,7 @@ namespace engine {
         public:
             /// Returns the button that made the event happen.
             /// @return The code of the button that triggered the event.
-            [[nodiscard]] inline MouseCode getMouseButton() const           { return this->mouseButton; }
+            [[nodiscard]] inline MouseCode getMouseButton() const           { return mouseButton; }
             [[nodiscard]] int getCategoryFlags()            const override  { return EventCategoryMouseButton | EventCategoryInput; }
     };
 
@@ -98,11 +98,11 @@ namespace engine {
 
         public:
             explicit MouseButtonPressedEvent(MouseCode _mouseButton) : MouseButtonEvent(_mouseButton) {  }
-            [[nodiscard]] inline int getRepeatedTimes() const { return this->repeatedTimes; }
+            [[nodiscard]] inline int getRepeatedTimes() const { return repeatedTimes; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << ": button = " << this->mouseButton << " (repeated " << this->repeatedTimes << " times)";
+                _sst << getName() << ": button = " << mouseButton << " (repeated " << repeatedTimes << " times)";
                 return _sst.str();
             }
 
@@ -122,7 +122,7 @@ namespace engine {
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << ": button = " << this->mouseButton;
+                _sst << getName() << ": button = " << mouseButton;
                 return _sst.str();
             }
 

@@ -12,13 +12,14 @@ namespace engine {
     }
 
     void Console::init() {
-        addCommand("help", BIND_FUNC_1(Console::help));
-        addCommand("clear", BIND_FUNC_1(Console::clear));
-        addCommand("history", BIND_FUNC_1(Console::printHistory));
+        addCommand("help", "Gives all available commands information", BIND_FUNC_1(Console::help));
+        addCommand("clear", "clears the screen", BIND_FUNC_1(Console::clear));
+        addCommand("history", "shows all the commands used in the session", BIND_FUNC_1(Console::printHistory));
     }
 
-    void Console::addCommand(const std::string& _commandName, CommandFunc _commandFunc) {
+    void Console::addCommand(const std::string& _commandName, const std::string& _description, CommandFunc _commandFunc, const std::string& _argumentsDescription) {
         commands[_commandName] = std::move(_commandFunc);
+        commandsAndDescriptions[_commandName] = _argumentsDescription + ": " + _description;
     }
 
     void Console::deleteCommand(const std::string& _commandName) {
@@ -54,11 +55,8 @@ namespace engine {
     Logs Console::help(const std::vector<std::string>& _arguments) {
         Logs _logs;
 
-        _logs.emplace_back("This is the command line of the game engine, here we will list all the available commands:");
-        _logs.emplace_back("> help: shows all available commands");
-        _logs.emplace_back("> clear: clears the screen");
-        _logs.emplace_back("> history: shows all the commands used in the session");
-        _logs.emplace_back("> background_color r g b a: Changes background color 0 <= r,b,g,a <= 255");
+        for(auto& _command : commandsAndDescriptions)
+            _logs.emplace_back("> " + _command.first + " " +  _command.second);
 
         return _logs;
     }

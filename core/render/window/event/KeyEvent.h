@@ -88,7 +88,7 @@ namespace engine {
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << ": Key = " << (char)keyCode << " (" << this->keyCode << ")";
+                _sst << getName() << ": Key = " << (char)keyCode << " (" << keyCode << ")";
                 return _sst.str();
             }
 

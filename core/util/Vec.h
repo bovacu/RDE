@@ -39,11 +39,11 @@ class Vec2 {
     }
 
     float distance(const Vec2<T>& _p) const {
-        return std::sqrt((_p.x - x) * (_p.x - this->x) + (_p.y - this->y) * (_p.y - this->y));
+        return std::sqrt((_p.x - x) * (_p.x - x) + (_p.y - y) * (_p.y - y));
     }
 
     float magnitude() const {
-        return std::sqrt(this->x * this->x + this->y * this->y);
+        return std::sqrt(x * x + y * y);
     }
 
     static Vec2<float> normalize(Vec2<T>& _p) {

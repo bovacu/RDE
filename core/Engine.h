@@ -16,8 +16,6 @@
 #include "core/render/layers/LayerStack.h"
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
-#include "core/systems/soundSystem/SoundDevice.h"
-#include "core/systems/soundSystem/SoundSource.h"
 #include "core/systems/console/Console.h"
 #include "core/render/elements/FrameBuffer.h"
 
@@ -111,11 +109,11 @@ namespace engine {
 
             /// Returns a Vec2i with the current position of the window.
             /// @return Vec2i with the position of the window.
-            [[nodiscard]] Vec2I getPosition() const                 { return this->window->getPosition(); }
+            [[nodiscard]] Vec2I getPosition() const                 { return window->getPosition(); }
 
             /// Allows you to set the icon of the window.
             /// @param _path Path to the image to be used as icon, can be in png, jpg, jpeg, ico...
-            void setAppIcon(const char* _path)                      { this->window->setIcon(_path); }
+            void setAppIcon(const char* _path)                      { window->setIcon(_path); }
 
             /// Allows to enable or disable some window features, such as:
             ///     - Minimize/Maximize button.
@@ -127,7 +125,7 @@ namespace engine {
             /// @param _op The options to set to true or false
             /// @param _allow true/false depending if disables or enables
             /// @sa WindowOptions_ in Window.h
-            void setWindowOptions(WindowOptions _op, bool _allow)   { this->window->setWindowOptions(_op, _allow); }
+            void setWindowOptions(WindowOptions _op, bool _allow)   { window->setWindowOptions(_op, _allow); }
 
             void setRunning(bool _running) { running = _running; }
 
@@ -178,7 +176,7 @@ namespace engine {
         public:
             /// Returns the Window instance.
             /// @return The main window.
-            Window& getWindow() { return *this->window; }
+            Window& getWindow() { return *window; }
 
             /// Returns a reference to the application, as it is created as a Singleton.
             /// @return A reference to the application.

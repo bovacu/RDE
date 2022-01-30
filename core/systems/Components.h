@@ -34,12 +34,12 @@ namespace engine {
 
         void setScale(const Vec2F& _scale) { transformMatrix[0][0] = _scale.x; transformMatrix[1][1] = _scale.y;}
         void setScaleX(float _x) { transformMatrix[0][0] = _x; }
-        void setScaleY(float _y) { this->transformMatrix[1][1] = _y; }
+        void setScaleY(float _y) { transformMatrix[1][1] = _y; }
 
         void setRotation(float _rotation) { rotation = _rotation; }
 
-        explicit operator glm::mat4& () { return this->transformMatrix; }
-        explicit operator const glm::mat4& () const { return this->transformMatrix; }
+        explicit operator glm::mat4& () { return transformMatrix; }
+        explicit operator const glm::mat4& () const { return transformMatrix; }
     };
 
     struct Tag {
@@ -49,7 +49,7 @@ namespace engine {
         Tag(const Tag& _tag) = default;
         explicit Tag(const std::string& _tag) : tag(_tag) {  }
 
-        explicit operator std::string& () { return this->tag; }
+        explicit operator std::string& () { return tag; }
     };
 
     struct Active {

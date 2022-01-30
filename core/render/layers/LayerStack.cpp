@@ -22,16 +22,16 @@ namespace engine {
         auto it = std::find(layers.begin(), layers.begin() + layerInsertIndex, _layer);
         if (it != layers.begin() + layerInsertIndex) {
             _layer->onEnd();
-            this->layers.erase(it);
-            this->layerInsertIndex--;
+            layers.erase(it);
+            layerInsertIndex--;
         }
     }
 
     void LayerStack::popOverlay(Layer* _overlay) {
-        auto it = std::find(this->layers.begin() + this->layerInsertIndex, this->layers.end(), _overlay);
-        if (it != this->layers.end()) {
+        auto it = std::find(layers.begin() + layerInsertIndex, layers.end(), _overlay);
+        if (it != layers.end()) {
             _overlay->onEnd();
-            this->layers.erase(it);
+            layers.erase(it);
         }
     }
 

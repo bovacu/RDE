@@ -8,30 +8,24 @@
 namespace engine {
 
     FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs) : specs(_specs) {
-        this->invalidate();
+        aspectRatio = (float)_specs.width / (float)_specs.height;
+        invalidate();
     }
 
     FrameBuffer::~FrameBuffer() {
-        /// First, we delete the frame buffer from memory.
-        glDeleteFramebuffers(1, &this->fboID);
-
-        /// Second, we delete the color associated texture.
-        glDeleteTextures(1, &this->colorAttachment);
-
-        /// Second, we delete the depth associated texture.
-//        glDeleteTextures(1, &this->depthAttachment);
-
+        glDeleteFramebuffers(1, &fboID);
+        glDeleteTextures(1, &colorAttachment);
         glDeleteRenderbuffers(1, &rboID);
+        glDeleteBuffers(1, &vboID);
     }
 
     void FrameBuffer::invalidate() {
 
         /// In case there's a current frame buffer, delete it.
-        if (this->fboID) {
-            glDeleteFramebuffers(1, &this->fboID);
-            glDeleteTextures(1, &this->colorAttachment);
-//            glDeleteBuffers(1, &vboID);
-//            glDeleteTextures(1, &this->depthAttachment);
+        if (fboID) {
+            glDeleteFramebuffers(1, &fboID);
+            glDeleteTextures(1, &colorAttachment);
+            glDeleteBuffers(1, &vboID);
         }
 
         glGenBuffers(1, &vboID);
@@ -85,7 +79,7 @@ namespace engine {
     }
 
     void FrameBuffer::bind() {
-        glBindFramebuffer(GL_FRAMEBUFFER, this->fboID);
+        glBindFramebuffer(GL_FRAMEBUFFER, fboID);
     }
 
     void FrameBuffer::unbind() {
@@ -97,7 +91,7 @@ namespace engine {
         glEnableVertexAttribArray(10);
         glEnableVertexAttribArray(11);
 
-        glBindTexture(GL_TEXTURE_2D, colorAttachment);	// use the color attachment texture as the texture of the quad plane
+        glBindTexture(GL_TEXTURE_2D, colorAttachment);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glDisableVertexAttribArray(10);
@@ -105,9 +99,10 @@ namespace engine {
     }
 
     void FrameBuffer::resize(uint32_t _width, uint32_t _height) {
-        this->specs.width = _width;
-        this->specs.height = _height;
-        this->invalidate();
+        specs.width = _width;
+        specs.height = _height;
+        aspectRatio = (float)specs.width / (float)specs.height;
+        invalidate();
     }
 
 }
