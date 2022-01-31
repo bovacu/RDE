@@ -100,7 +100,7 @@ add_executable( Engine2_0 main.cpp
 #        core/systems/soundSystem/SoundBuffer.cpp core/systems/soundSystem/SoundBuffer.h core/systems/soundSystem/SoundDevice.cpp
 #        core/systems/soundSystem/SoundDevice.h core/systems/soundSystem/SoundSource.cpp core/systems/soundSystem/SoundSource.h
 
-        core/systems/console/Console.cpp core/systems/console/Console.h core/systems/uiSystem/Text.cpp core/systems/uiSystem/Text.h core/systems/uiSystem/FontManager.cpp core/systems/uiSystem/FontManager.h external/stb/stb_image_writer.h core/render/elements/FrameBuffer.cpp core/render/elements/FrameBuffer.h core/render/elements/ShaderManager.cpp core/render/elements/ShaderManager.h core/render/elements/IRenderizable.h sandbox/Sandbox.cpp sandbox/Sandbox.h core/systems/soundSystem/SoundManager.cpp core/systems/soundSystem/SoundManager.h)
+        core/systems/console/Console.cpp core/systems/console/Console.h core/systems/uiSystem/Text.cpp core/systems/uiSystem/Text.h core/systems/uiSystem/FontManager.cpp core/systems/uiSystem/FontManager.h external/stb/stb_image_writer.h core/render/elements/FrameBuffer.cpp core/render/elements/FrameBuffer.h core/render/elements/ShaderManager.cpp core/render/elements/ShaderManager.h core/render/elements/IRenderizable.h sandbox/Sandbox.cpp sandbox/Sandbox.h core/systems/soundSystem/SoundManager.cpp core/systems/soundSystem/SoundManager.h core/render/window/event/JoystickEvent.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 

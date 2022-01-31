@@ -30,11 +30,16 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                                 { return EventType::WindowMoved; }
-            [[nodiscard]] EventType getEventType()  const                           override { return getStaticType(); }
-            [[nodiscard]] const char* getName()     const                           override { return "WindowMoved"; }
-            [[nodiscard]] int getCategoryFlags()    const                           override { return EventCategoryGame; }
+            static EventType getStaticType() { return EventType::WindowMoved; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "WindowMoved"; }
+            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
     };
+
+
+
+
+
 
     /// This class represents all of the events that involves moving the window.
     class WindowMovedEvent    : public Event {
@@ -59,11 +64,16 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                                 { return EventType::WindowResized; }
-            [[nodiscard]] EventType getEventType()  const                           override { return getStaticType(); }
-            [[nodiscard]] const char* getName()     const                           override { return "WindowResized"; }
-            [[nodiscard]] int getCategoryFlags()    const                           override { return EventCategoryGame; }
+            static EventType getStaticType() { return EventType::WindowResized; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "WindowResized"; }
+            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
     };
+
+
+
+
+
 
     /// This class represents all of the events that involves minimizing the window.
     class WindowMinimizedEvent  : public Event {
@@ -81,11 +91,15 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                                 { return EventType::WindowMinimized; }
-            [[nodiscard]] EventType getEventType()  const                           override { return getStaticType(); }
-            [[nodiscard]] const char* getName()     const                           override { return "WindowMinimized"; }
-            [[nodiscard]] int getCategoryFlags()    const                           override { return EventCategoryGame; }
+            static EventType getStaticType() { return EventType::WindowMinimized; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "WindowMinimized"; }
+            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
     };
+
+
+
+
 
     /// This class represents all of the events that involves closing the window.
     class WindowClosedEvent     : public Event {
@@ -98,11 +112,14 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                                 { return EventType::WindowClosed; }
-            [[nodiscard]] EventType getEventType()  const                           override { return getStaticType(); }
-            [[nodiscard]] const char* getName()     const                           override { return "WindowClosed"; }
-            [[nodiscard]] int getCategoryFlags()    const                           override { return EventCategoryGame; }
+            static EventType getStaticType() { return EventType::WindowClosed; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "WindowClosed"; }
+            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
     };
+
+
+
 
     /// This class represents all of the events that involves framing the window.
     class WindowFrameEvent      : public Event {
@@ -114,11 +131,15 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                                 { return EventType::GameFrame; }
-            [[nodiscard]] EventType getEventType()  const                           override { return getStaticType(); }
-            [[nodiscard]] const char* getName()     const                           override { return "GameFrame"; }
-            [[nodiscard]] int getCategoryFlags()    const                           override { return EventCategoryGame; }
+            static EventType getStaticType() { return EventType::GameFrame; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "GameFrame"; }
+            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
     };
+
+
+
+
 
     /// This class represents all of the events that involves updating the window.
     class WindowUpdateEvent     : public Event {
@@ -130,11 +151,15 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                                 { return EventType::GameUpdate; }
-            [[nodiscard]] EventType getEventType()  const                           override { return getStaticType(); }
-            [[nodiscard]] const char* getName()     const                           override { return "GameUpdate"; }
-            [[nodiscard]] int getCategoryFlags()    const                           override { return EventCategoryGame; }
+            static EventType getStaticType() { return EventType::GameUpdate; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "GameUpdate"; }
+            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
     };
+
+
+
+
 
     /// This class represents all of the events that involves rendering the window.
     class WindowRenderEvent     : public Event {
@@ -146,10 +171,10 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                                 { return EventType::GameRender; }
-            [[nodiscard]] EventType getEventType()  const                           override { return getStaticType(); }
-            [[nodiscard]] const char* getName()     const                           override { return "GameRender"; }
-            [[nodiscard]] int getCategoryFlags()    const                           override { return EventCategoryGame; }
+            static EventType getStaticType() { return EventType::GameRender; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "GameRender"; }
+            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
     };
 }
 

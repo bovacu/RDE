@@ -20,7 +20,8 @@ namespace engine {
         MOUSE_SCROLLED_E = SDL_MOUSEWHEEL, WINDOW_EXIT_E = SDL_WINDOWEVENT_LEAVE, WINDOW_RESIZED_E = SDL_WINDOWEVENT_RESIZED,
         WINDOW_FOCUS_E = SDL_WINDOWEVENT_FOCUS_GAINED, WINDOW_LOST_FOCUS_E = SDL_WINDOWEVENT_FOCUS_LOST,
         INPUT_TEXT_E = SDL_TEXTINPUT,
-        FOO_1 = SDL_KEYMAPCHANGED, FOO_3 = SDL_AUDIODEVICEADDED
+        FOO_1 = SDL_KEYMAPCHANGED, FOO_2 = SDL_JOYAXISMOTION, FOO_3 = SDL_AUDIODEVICEADDED,
+        GAMEPAD_JOYSTICK = SDL_CONTROLLERAXISMOTION, GAMEPAD_BUTTON_DOWN = SDL_CONTROLLERBUTTONDOWN, GAMEPAD_BUTTON_UP = SDL_CONTROLLERBUTTONUP
     };
 
     class InputManager;
@@ -29,9 +30,10 @@ namespace engine {
         friend class InputManager;
 
         private:
-            std::unordered_map<KeyCode,   int>  pressedKeyboardKeys;
+            std::unordered_map<KeyCode, int>  pressedKeyboardKeys;
             std::unordered_map<MouseCode, int>  pressedMouseButtons;
-            std::unordered_map<KeyCode,   bool>  pressedGamepadKeys;
+            std::unordered_map<GamePadKeys, int>  pressedGamepadKeys;
+            std::vector<SDL_Joystick*> joysticks;
             std::unordered_map<SystemEventEnum, std::function<void(SDL_Event&)>> events;
             Window* window = nullptr;
             Vec2I mousePos;
@@ -58,12 +60,18 @@ namespace engine {
             void onWindowMaximized(SDL_Event& _event);
             void onQuit(SDL_Event& _event);
 
+            void initGamepads();
+            void onGamepadsMoved(SDL_Event& _event);
+            void onGamepadsButtonDown(SDL_Event& _event);
+            void onGamepadsButtonUp(SDL_Event& _event);
+
         public:
             void init(Window* _window);
             void pollEvents();
             void setEventCallback(std::function<void(Event&)> _eventCallback);
 
             static InputSystem& get();
+            ~InputSystem();
     };
 
     class InputManager {
@@ -113,6 +121,10 @@ namespace engine {
             /// Returns getMousePosition().y
             /// @return getMousePosition().y
             static int getMouseY();
+
+            static bool isGamepadButtonJustPressed(GamePadKeys _button);
+            static bool isGamepadButtonPressed(GamePadKeys _button);
+            static bool isGamepadButtonReleased(GamePadKeys _button);
     };
 }
 

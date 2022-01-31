@@ -55,6 +55,8 @@ namespace engine {
     void Sandbox::onEvent(Event& _event) {
         EventDispatcher _dispatcher(_event);
         _dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Sandbox::onMouseScrolled));
+        _dispatcher.dispatchEvent<JoystickButtonDownEvent>(ENGINE_BIND_EVENT_FN(Sandbox::onControllerButtonDown));
+        _dispatcher.dispatchEvent<JoystickButtonUpEvent>(ENGINE_BIND_EVENT_FN(Sandbox::onControllerButtonUp));
     }
 
     void Sandbox::onUpdate(Delta _dt) {
@@ -62,6 +64,11 @@ namespace engine {
             player.setShader(ShaderManager::get().getShader("outline"));
 
         animationSystem.update(_dt, player);
+
+//        for(int _i = 0; _i < 14; _i++)
+//            if(InputManager::isGamepadButtonJustPressed((GamePadKeys)_i)) {
+//                LOG_I((int)(GamePadKeys)_i)
+//            }
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {
@@ -89,6 +96,16 @@ namespace engine {
         _zoom -= _event.getScrollY() * _camera.getZoomSpeed();
         _zoom = std::max(_zoom, 0.1f);
         _camera.setCurrentZoomLevel(_zoom);
+        return true;
+    }
+
+    bool Sandbox::onControllerButtonDown(JoystickButtonDownEvent& _event) {
+        LOG_W(_event.toString())
+        return true;
+    }
+
+    bool Sandbox::onControllerButtonUp(JoystickButtonUpEvent& _event) {
+        LOG_W(_event.toString())
         return true;
     }
 }

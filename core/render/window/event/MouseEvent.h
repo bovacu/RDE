@@ -32,10 +32,10 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                                 { return EventType::MouseMoved; }
-            [[nodiscard]] EventType getEventType()  const                           override { return getStaticType(); }
-            [[nodiscard]] const char* getName()     const                           override { return "MouseMoved"; }
-            [[nodiscard]] int getCategoryFlags()    const                           override { return EventCategoryInput | EventCategoryMouse; }
+            static EventType getStaticType() { return EventType::MouseMoved; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "MouseMoved"; }
+            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryInput | EventCategoryMouse; }
     };
 
 
@@ -64,10 +64,10 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                                 { return EventType::MouseScrolled; }
-            [[nodiscard]] EventType getEventType()  const                           override { return getStaticType(); }
-            [[nodiscard]] const char* getName()     const                           override { return "MouseScrolled"; }
-            [[nodiscard]] int getCategoryFlags()    const                           override { return EventCategoryInput | EventCategoryMouse; }
+            static EventType getStaticType() { return EventType::MouseScrolled; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "MouseScrolled"; }
+            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryInput | EventCategoryMouse; }
     };
 
 
@@ -84,8 +84,8 @@ namespace engine {
         public:
             /// Returns the button that made the event happen.
             /// @return The code of the button that triggered the event.
-            [[nodiscard]] inline MouseCode getMouseButton() const           { return mouseButton; }
-            [[nodiscard]] int getCategoryFlags()            const override  { return EventCategoryMouseButton | EventCategoryInput; }
+            [[nodiscard]] inline MouseCode getMouseButton() const { return mouseButton; }
+            [[nodiscard]] int getCategoryFlags() const override  { return EventCategoryMouseButton | EventCategoryInput; }
     };
 
 
@@ -107,9 +107,9 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                                 { return EventType::MouseButtonPressed; }
-            [[nodiscard]] EventType getEventType()  const                           override { return getStaticType(); }
-            [[nodiscard]] const char* getName()     const                           override { return "MouseButtonPressed"; }
+            static EventType getStaticType() { return EventType::MouseButtonPressed; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "MouseButtonPressed"; }
     };
 
 
@@ -127,9 +127,9 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                                 { return EventType::MouseButtonReleased; }
-            [[nodiscard]] EventType getEventType()  const                           override { return getStaticType(); }
-            [[nodiscard]] const char* getName()     const                           override { return "MouseButtonReleased"; }
+            static EventType getStaticType() { return EventType::MouseButtonReleased; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "MouseButtonReleased"; }
     };
 
 }

@@ -27,6 +27,9 @@ namespace engine {
             [[nodiscard]] int getCategoryFlags() const override { return EventCategory::EventCategoryKeyboard | EventCategory::EventCategoryInput; }
     };
 
+
+
+
     /// This class represents all of the events that involves pressing a key.
     class KeyPressedEvent   : public KeyEvent {
         private:
@@ -46,9 +49,9 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                             { return EventType::KeyPressed; }
-            [[nodiscard]] EventType getEventType() const                        override { return getStaticType(); }
-            [[nodiscard]] const char* getName() const                           override { return "KeyPressed"; }
+            static EventType getStaticType() { return EventType::KeyPressed; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "KeyPressed"; }
     };
 
 
@@ -73,9 +76,9 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                             { return EventType::KeyTyped; }
-            [[nodiscard]] EventType getEventType() const                        override { return getStaticType(); }
-            [[nodiscard]] const char* getName() const                           override { return "KeyTyped"; }
+            static EventType getStaticType() { return EventType::KeyTyped; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "KeyTyped"; }
     };
 
 
@@ -93,9 +96,9 @@ namespace engine {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()                                             { return EventType::KeyReleased; }
-            [[nodiscard]] EventType getEventType() const                        override { return getStaticType(); }
-            [[nodiscard]] const char* getName() const                           override { return "KeyReleased"; }
+            static EventType getStaticType()  { return EventType::KeyReleased; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "KeyReleased"; }
     };
 
 }

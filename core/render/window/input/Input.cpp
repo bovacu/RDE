@@ -1,6 +1,6 @@
 #include "Input.h"
 #include "core/Engine.h"
-#include <GLFW/glfw3.h>
+#include "core/render/window/event/JoystickEvent.h"
 
 #include <utility>
 
@@ -12,8 +12,6 @@ namespace engine {
     }
 
     void InputSystem::init(Window* _window) {
-
-        LOG_I(SDL_KEYMAPCHANGED)
         window = _window;
 
         events[SystemEventEnum::WINDOW_EVENT] = BIND_FUNC_1(InputSystem::onWindowEvent);
@@ -27,6 +25,10 @@ namespace engine {
         events[SystemEventEnum::INPUT_TEXT_E] = [](SDL_Event&) {  };
         events[SystemEventEnum::FOO_1] = [](SDL_Event&) {  }; // 772
         events[SystemEventEnum::FOO_3] = [](SDL_Event&) {  }; // 4352
+        events[SystemEventEnum::FOO_2] = [](SDL_Event&) {  };
+        events[SystemEventEnum::GAMEPAD_JOYSTICK] = BIND_FUNC_1(InputSystem::onGamepadsMoved);
+        events[SystemEventEnum::GAMEPAD_BUTTON_DOWN] = BIND_FUNC_1(InputSystem::onGamepadsButtonDown);
+        events[SystemEventEnum::GAMEPAD_BUTTON_UP] = BIND_FUNC_1(InputSystem::onGamepadsButtonUp);
 
         pressedMouseButtons = {
                 {MouseCode::Button0,        0},
@@ -41,6 +43,24 @@ namespace engine {
                 {MouseCode::ButtonLeft,     0},
                 {MouseCode::ButtonMiddle,   0},
                 {MouseCode::ButtonRight,    0},
+        };
+
+        pressedGamepadKeys = {
+                {GamePadKeys::ButtonA,      0},
+                {GamePadKeys::ButtonB,      0},
+                {GamePadKeys::ButtonX,      0},
+                {GamePadKeys::ButtonY,      0},
+                {GamePadKeys::DPadDown,     0},
+                {GamePadKeys::DPadLeft,     0},
+                {GamePadKeys::DPadRight,    0},
+                {GamePadKeys::DPadUp,       0},
+                {GamePadKeys::Guide,        0},
+                {GamePadKeys::LB,           0},
+                {GamePadKeys::RB,           0},
+                {GamePadKeys::LeftJoystick, 0},
+                {GamePadKeys::RightJoystick,0},
+                {GamePadKeys::Select,       0},
+                {GamePadKeys::Start,        0},
         };
 
         pressedKeyboardKeys = {
@@ -131,6 +151,8 @@ namespace engine {
                 {KeyCode::Down,         0},
 
         };
+
+        initGamepads();
     }
 
     void InputSystem::pollEvents() {
@@ -149,6 +171,10 @@ namespace engine {
         }
     }
 
+    void InputSystem::setEventCallback(std::function<void(Event&)> _eventCallback) {
+        eventCallback = std::move(_eventCallback);
+    }
+
     void InputSystem::onKeyDown(SDL_Event& _event) {
         auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
         if(pressedKeyboardKeys[_key] == 2) return;
@@ -158,16 +184,6 @@ namespace engine {
     void InputSystem::onKeyUp(SDL_Event& _event) {
         auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
         pressedKeyboardKeys[_key] = 0;
-    }
-
-    void InputSystem::onWindowResize(SDL_Event& _event) {
-        window->setWindowSize(_event.window.data1, _event.window.data2);
-        WindowResizedEvent _rwEvent(_event.window.data1, _event.window.data2);
-        window->consumeEvent(_rwEvent);
-    }
-
-    void InputSystem::onQuit(SDL_Event& _event) {
-        Engine::get().setRunning(false);
     }
 
     void InputSystem::onMouseMoved(SDL_Event& _event) {
@@ -190,9 +206,9 @@ namespace engine {
         window->consumeEvent(_e);
     }
 
-    void InputSystem::setEventCallback(std::function<void(Event&)> _eventCallback) {
-        eventCallback = std::move(_eventCallback);
-    }
+
+    // ----------------------------------------------------------------------
+
 
     void InputSystem::onWindowEvent(SDL_Event& _event) {
         switch (_event.window.event) {
@@ -206,6 +222,16 @@ namespace engine {
             case SDL_WINDOWEVENT_MAXIMIZED: onWindowMaximized(_event); break;
             case SDL_WINDOWEVENT_CLOSE: onQuit(_event); break;
         }
+    }
+
+    void InputSystem::onWindowResize(SDL_Event& _event) {
+        window->setWindowSize(_event.window.data1, _event.window.data2);
+        WindowResizedEvent _rwEvent(_event.window.data1, _event.window.data2);
+        window->consumeEvent(_rwEvent);
+    }
+
+    void InputSystem::onQuit(SDL_Event& _event) {
+        Engine::get().setRunning(false);
     }
 
     // TODO implement onWindowEnter and create its associated event
@@ -243,6 +269,76 @@ namespace engine {
         WindowMinimizedEvent _e(0);
         window->consumeEvent(_e);
     }
+
+
+    // -----------------------------------------------
+
+
+    void InputSystem::initGamepads() {
+        int _numJoysticks = SDL_NumJoysticks();
+        if(_numJoysticks < 1) {
+            LOG_I("No joysticks connected")
+            return;
+        }
+        for(int _i = 0; _i < _numJoysticks; _i++) {
+            SDL_Joystick* _currentJoystick = SDL_JoystickOpen(_i);
+            if(_currentJoystick == nullptr) {
+                LOG_E("Error with joystick ", _i)
+                continue;
+            }
+
+            joysticks.push_back(_currentJoystick);
+        }
+
+        LOG_I(_numJoysticks, " connected and ", joysticks.size(), " loaded")
+    }
+
+    void InputSystem::onGamepadsMoved(SDL_Event& _event) {
+        Vec2F _left;
+        if(_event.caxis.axis == 0) _left.x = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
+        if(_event.caxis.axis == 1) _left.y = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
+
+        Vec2F _back;
+        if(_event.caxis.axis == 2) _back.x = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
+        if(_event.caxis.axis == 3) _back.y = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
+
+        Vec2F _right;
+        if(_event.caxis.axis == 4) _right.x = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
+        if(_event.caxis.axis == 5) _right.y = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
+
+        JoystickAxisMovedEvent _e(_left, _right, _back);
+        window->consumeEvent(_e);
+    }
+
+    void InputSystem::onGamepadsButtonDown(SDL_Event& _event) {
+        auto _key = static_cast<GamePadKeys>(_event.cbutton.button);
+
+        JoystickButtonDownEvent _e(_key);
+        window->consumeEvent(_e);
+
+        if(pressedGamepadKeys[_key] == 2) return;
+        pressedGamepadKeys[_key] = 1;
+    }
+
+    void InputSystem::onGamepadsButtonUp(SDL_Event& _event) {
+        auto _key = static_cast<GamePadKeys>(_event.cbutton.button);
+        pressedGamepadKeys[_key] = 0;
+
+        JoystickButtonUpEvent _e(_key);
+        window->consumeEvent(_e);
+    }
+
+    InputSystem::~InputSystem() {
+        LOG_S("Cleaning up Input System")
+//        for(auto* _joystick : joysticks)
+//            SDL_JoystickClose(_joystick);
+    }
+
+
+
+
+    /// ----------------------- INPUT MANAGER
+
 
 
     InputSystem* InputManager::inputSystem = &InputSystem::get();
@@ -291,5 +387,22 @@ namespace engine {
 
     int InputManager::getMouseY() {
         return getMousePosition().y;
+    }
+
+    bool InputManager::isGamepadButtonJustPressed(GamePadKeys _button) {
+        if(inputSystem->pressedGamepadKeys[_button] == 1) {
+            inputSystem->pressedGamepadKeys[_button] = 2;
+            return true;
+        }
+
+        return false;
+    }
+
+    bool InputManager::isGamepadButtonPressed(GamePadKeys _button) {
+        return inputSystem->pressedGamepadKeys[_button] == 1;
+    }
+
+    bool InputManager::isGamepadButtonReleased(GamePadKeys _button) {
+        return inputSystem->pressedGamepadKeys[_button] == 0;
     }
 }

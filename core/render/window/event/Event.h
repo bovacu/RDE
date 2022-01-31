@@ -12,7 +12,8 @@ namespace engine {
     enum class EventType : unsigned {
         None, WindowClosed, WindowResized, WindowMoved, WindowFocused, WindowLostFocus, GameFrame, GameUpdate,
         GameRender, KeyPressed, KeyDown, KeyReleased, KeyTyped, MouseButtonPressed, MouseButtonDown, MouseButtonReleased,
-        MouseScrolled, MouseMoved, WindowMinimized
+        MouseScrolled, MouseMoved, WindowMinimized,
+        ControllerAxisMoved, ControllerButtonDown, ControllerButtonUp
     };
 
     /// Masking the different categories of the events. This makes really easy to get which event type is each event.
@@ -27,7 +28,8 @@ namespace engine {
         EventCategoryInput          = 1u << 1u, /// 00000010
         EventCategoryKeyboard       = 1u << 2u, /// 00000100
         EventCategoryMouse          = 1u << 3u, /// 00001000
-        EventCategoryMouseButton    = 1u << 4u  /// 00010000
+        EventCategoryMouseButton    = 1u << 4u, /// 00010000
+        EventCategoryControllerButton    = 1u << 5u  /// 00100000
     };
 
     /// This class is the base for any event and contains the information and methods necessary to capture and control

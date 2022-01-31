@@ -11,6 +11,7 @@
 #include "core/render/elements/Sprite.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/systems/uiSystem/Text.h"
+#include "core/render/window/event/JoystickEvent.h"
 
 namespace engine {
 
@@ -35,6 +36,8 @@ namespace engine {
 
         private:
             bool onMouseScrolled(MouseScrolledEvent& _event);
+            bool onControllerButtonDown(JoystickButtonDownEvent& _event);
+            bool onControllerButtonUp(JoystickButtonUpEvent& _event);
     };
 
 }
