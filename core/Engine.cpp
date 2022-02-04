@@ -51,6 +51,10 @@ namespace engine {
     }
 
     Engine::~Engine() {
+        TextureAtlasManager::get().destroy();
+        ShaderManager::get().destroy();
+        FontManager::get().destroy();
+        SoundManager::get().destroy();
         delete frameBuffer;
     }
 

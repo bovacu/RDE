@@ -92,6 +92,15 @@
 }
 
 {
+   radeonsi_leak_definite
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/dri/radeonsi_dri.so
+   ...
+}
+
+{
    x11_leak_definite
    Memcheck:Leak
    match-leak-kinds: definite

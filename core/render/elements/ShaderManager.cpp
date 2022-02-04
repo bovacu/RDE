@@ -19,14 +19,6 @@ namespace engine {
         addShader("framebuffer", "assets/shaders/framebuffer/FrameBufferVertex.glsl", "assets/shaders/framebuffer/FrameBufferFragment.glsl");
     }
 
-    ShaderManager::~ShaderManager() {
-        LOG_S("Cleaning up Shader Manager")
-        for(auto& _shader : shaders) {
-            LOG_I("     Cleaning ", _shader.first)
-            delete _shader.second;
-        }
-    }
-
     ShaderID ShaderManager::addShader(const std::string& _shaderName, const std::string& _vertex, const std::string& _fragment) {
         auto* _shader = new Shader;
         _shader->loadFromFiles(_vertex, _fragment);
@@ -42,5 +34,13 @@ namespace engine {
 
     ShaderID ShaderManager::getShader(const std::string& _name) {
         return shaders[_name]->getShaderID();
+    }
+
+    void ShaderManager::destroy() {
+        LOG_S("Cleaning up Shader Manager")
+        for(auto& _shader : shaders) {
+            LOG_I("     Cleaning ", _shader.first)
+            delete _shader.second;
+        }
     }
 }

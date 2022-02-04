@@ -44,11 +44,11 @@ namespace engine {
         public:
             SoundManager(SoundManager const&) = delete;
             void operator=(SoundManager const&)  = delete;
-            ~SoundManager();
 
             static SoundManager& get();
 
             void init();
+            void destroy();
 
             Music& loadMusic(const std::string& _musicPath);
             Sfx& loadSfx(const std::string& _sfxPath);
