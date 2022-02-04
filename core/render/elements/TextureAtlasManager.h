@@ -74,7 +74,7 @@ namespace engine {
             // Debug
             std::vector<TextureInfo> getTexturesInfo();
 
-            ~TextureAtlasManager();
+            void destroy();
 
         private:
             TextureAtlasManager() = default;

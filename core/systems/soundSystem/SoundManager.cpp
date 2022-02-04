@@ -113,8 +113,15 @@ namespace engine {
         Mix_ResumeMusic();
     }
 
-    SoundManager::~SoundManager() {
+    void SoundManager::setMusicVolume(int _volume) {
+        Mix_VolumeMusic(_volume);
+    }
 
+    void SoundManager::setSfxVolume(int _volume) {
+        Mix_Volume(-1, _volume);
+    }
+
+    void SoundManager::destroy() {
         LOG_S("Cleaning up Sound Manager")
         stopAll();
 
@@ -130,13 +137,5 @@ namespace engine {
 
         Mix_CloseAudio();
         Mix_Quit();
-    }
-
-    void SoundManager::setMusicVolume(int _volume) {
-        Mix_VolumeMusic(_volume);
-    }
-
-    void SoundManager::setSfxVolume(int _volume) {
-        Mix_Volume(-1, _volume);
     }
 }

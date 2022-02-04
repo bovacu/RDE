@@ -147,16 +147,6 @@ namespace engine {
         return fonts[_fontName].front().font;
     }
 
-    FontManager::~FontManager() {
-        LOG_S("Cleaning up FontManager")
-        for(auto& _fontHandler : fonts)
-            for(auto& _font : _fontHandler.second) {
-                LOG_I("     Cleaning Font ", _font.font->fontName, " of size ", _font.font->fontSize)
-                delete _font.font;
-            }
-        FT_Done_FreeType(ftLibrary);
-    }
-
     std::vector<Font*> FontManager::getAllFonts() {
         std::vector<Font*> _fonts;
         for(auto& _fontHandler : fonts)
@@ -180,5 +170,15 @@ namespace engine {
         loadFont(fonts[_fontName].front().font->originalPath, _fontSize);
         LOG_W("Couldn't find Font ", _fontName, " in size ", _fontSize, " so a new Font in that size was created")
         return fonts[_fontName].back().font;
+    }
+
+    void FontManager::destroy() {
+        LOG_S("Cleaning up FontManager")
+        for(auto& _fontHandler : fonts)
+            for(auto& _font : _fontHandler.second) {
+                LOG_I("     Cleaning Font ", _font.font->fontName, " of size ", _font.font->fontSize)
+                delete _font.font;
+            }
+        FT_Done_FreeType(ftLibrary);
     }
 }

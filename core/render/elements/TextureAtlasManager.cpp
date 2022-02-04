@@ -111,12 +111,6 @@ namespace engine {
         return instance.atlases[_atlasName];
     }
 
-    TextureAtlasManager::~TextureAtlasManager() {
-        LOG_S("Cleaning up TextureAtlasManager")
-        for(auto& _atlas : instance.atlases)
-            delete _atlas.second;
-    }
-
     TextureAtlasManager& TextureAtlasManager::get() {
         return instance;
     }
@@ -137,6 +131,12 @@ namespace engine {
         }
 
         return _textures;
+    }
+
+    void TextureAtlasManager::destroy() {
+        LOG_S("Cleaning up TextureAtlasManager")
+        for(auto& _atlas : instance.atlases)
+            delete _atlas.second;
     }
 
 }

@@ -19,12 +19,11 @@ namespace engine {
         public:
             static ShaderManager& get();
             void init();
+            void destroy();
 
             ShaderID addShader(const std::string& _shaderName, const std::string& _vertex, const std::string& _fragment);
             void removeShader(const std::string& _name);
             ShaderID getShader(const std::string& _name);
-
-            ~ShaderManager();
     };
 
 }

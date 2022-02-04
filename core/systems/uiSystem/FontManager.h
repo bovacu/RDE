@@ -65,13 +65,12 @@ namespace engine {
             static FontManager& get();
 
             void init();
+            void destroy();
             Font* loadFont(const std::string& _pathToFont, int _fontSize = 24);
             Font* getDefaultFont(const std::string& _fontName);
             Font* getSpecificFont(const std::string& _fontName, int _fontSize);
 
             std::vector<Font*> getAllFonts();
-
-            ~FontManager();
     };
 
 }
