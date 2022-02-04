@@ -4,7 +4,9 @@ project(Engine2_0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
-SET(TARGET_LINKS OpenGL glad glfw freetype SDL2::Main SDL2::Mixer SDL2::Net
+
+#${CMAKE_DL_LIBS} is needed as some part of opengl uses it
+SET(TARGET_LINKS glad freetype SDL2::Main SDL2::Mixer SDL2::Net ${CMAKE_DL_LIBS}
         # flecs
         )
 
@@ -29,8 +31,6 @@ link_directories(${STB_DIR})
 
 #-------------- GLFW3 AND Threads
 
-find_package(glfw3 REQUIRED)
-find_package(OpenGL REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_net REQUIRED)
@@ -80,9 +80,6 @@ add_executable( Engine2_0 main.cpp
         external/imgui/backends/imgui_impl_sdl.cpp external/imgui/backends/imgui_impl_opengl3.h
         external/imgui/backends/imgui_impl_opengl3.cpp external/imgui/imgui_demo.cpp
 
-        # https://github.com/bwrsandman/imgui-flame-graph
-        # external/imgui/flame/imgui_widget_flamegraph.h external/imgui/flame/imgui_widget_flamegraph.cpp
-
         # https://github.com/epezent/implot
         external/imgui/implot/implot.h external/imgui/implot/implot.cpp external/imgui/implot/implot_internal.h external/imgui/implot/implot_items.cpp
 
@@ -97,10 +94,12 @@ add_executable( Engine2_0 main.cpp
         core/systems/animationSystem/Animation.cpp core/systems/animationSystem/Animation.h core/systems/animationSystem/AnimationSystem.cpp
         core/systems/animationSystem/AnimationSystem.h
 
-#        core/systems/soundSystem/SoundBuffer.cpp core/systems/soundSystem/SoundBuffer.h core/systems/soundSystem/SoundDevice.cpp
-#        core/systems/soundSystem/SoundDevice.h core/systems/soundSystem/SoundSource.cpp core/systems/soundSystem/SoundSource.h
 
-        core/systems/console/Console.cpp core/systems/console/Console.h core/systems/uiSystem/Text.cpp core/systems/uiSystem/Text.h core/systems/uiSystem/FontManager.cpp core/systems/uiSystem/FontManager.h external/stb/stb_image_writer.h core/render/elements/FrameBuffer.cpp core/render/elements/FrameBuffer.h core/render/elements/ShaderManager.cpp core/render/elements/ShaderManager.h core/render/elements/IRenderizable.h sandbox/Sandbox.cpp sandbox/Sandbox.h core/systems/soundSystem/SoundManager.cpp core/systems/soundSystem/SoundManager.h core/render/window/event/JoystickEvent.h)
+        core/systems/console/Console.cpp core/systems/console/Console.h core/systems/uiSystem/Text.cpp core/systems/uiSystem/Text.h
+        core/systems/uiSystem/FontManager.cpp core/systems/uiSystem/FontManager.h external/stb/stb_image_writer.h core/render/elements/FrameBuffer.cpp
+        core/render/elements/FrameBuffer.h core/render/elements/ShaderManager.cpp core/render/elements/ShaderManager.h core/render/elements/IRenderizable.h
+        sandbox/Sandbox.cpp sandbox/Sandbox.h core/systems/soundSystem/SoundManager.cpp core/systems/soundSystem/SoundManager.h
+        core/render/window/event/JoystickEvent.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 
