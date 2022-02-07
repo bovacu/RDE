@@ -89,7 +89,7 @@ namespace engine {
         ImGui::Separator();
         printAtlases();
         printFPSDrawCallsAndRAM();
-        anyWindowHovered = ImGui::IsWindowHovered();
+        anyWindowHovered = ImGui::IsWindowHovered() || ImGui::IsAnyItemActive() || ImGui::IsAnyItemHovered() || ImGui::IsAnyItemFocused();
         ImGui::End();
         console();
     }
@@ -156,7 +156,7 @@ namespace engine {
         ImGui::GetStyle().Alpha = 0.65;
         ImGui::Begin("MouseInfo", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
         ImGui::GetStyle().Alpha = 1;
-        ImGui::Text("X: %d, Y: %d", InputManager::getMousePosition().x, InputManager::getMousePosition().y);
+        ImGui::Text("X: %f, Y: %f", InputManager::getMousePosition().x, InputManager::getMousePosition().y);
         ImGui::End();
     }
 
@@ -165,7 +165,7 @@ namespace engine {
 
         ImGui::Text("FPS: %d", engine::Engine::get().getFps());
         ImGui::Separator();
-        ImGui::Text("X: %d, Y: %d", InputManager::getMousePosition().x, InputManager::getMousePosition().y);
+        ImGui::Text("X: %f, Y: %f", InputManager::getMousePosition().x, InputManager::getMousePosition().y);
         ImGui::Separator();
         int _freeGpuMb = 0;
         glGetIntegerv( GL_TEXTURE_FREE_MEMORY_ATI,&_freeGpuMb);
@@ -253,6 +253,8 @@ namespace engine {
                     _resSelected = _resolution;
                     charToIntSize(std::string(_resolution), _windowRes);
                     engine::Engine::get().setWindowSize(_windowRes[0], _windowRes[1]);
+                    WindowResizedEvent _e(_windowRes[0], _windowRes[1]);
+                    engine::Engine::get().onEvent(_e);
                 }
                 if (is_selected)
                     ImGui::SetItemDefaultFocus();

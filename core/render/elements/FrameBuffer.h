@@ -31,8 +31,8 @@ namespace engine {
         /// creates a new one with a custom FrameBufferSpecification.
         void invalidate();
 
-        void bind();
-        void unbind();
+        void bind() const;
+        void unbind() const;
 
         void resize(uint32_t _width, uint32_t _height);
 

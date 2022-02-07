@@ -7,6 +7,10 @@
 
 namespace engine {
 
+    Camera::Camera() {
+        recalculateViewMatrix();
+    }
+
     void Camera::onResize(int _width, int _height) {
         aspectRatio = (float)_width/(float)_height;
         glViewport(0, 0, _width, _height);
