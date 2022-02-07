@@ -4,7 +4,7 @@
 #define ENGINE2_0_KEY_EVENT_H
 
 #include "core/render/window/event/Event.h"
-#include "core/render/window/input/KeyboardKeys.h"
+#include "core/render/window/keysAndButtons/KeyboardKeys.h"
 
 
 namespace engine {

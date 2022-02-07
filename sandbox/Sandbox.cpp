@@ -69,6 +69,10 @@ namespace engine {
 //            if(InputManager::isGamepadButtonJustPressed((GamePadKeys)_i)) {
 //                LOG_I((int)(GamePadKeys)_i)
 //            }
+
+        if(InputManager::isGamepadAxisPressed(GamePadAxis::Right))
+            LOG_I("hellooo")
+
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {

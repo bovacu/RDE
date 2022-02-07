@@ -4,13 +4,19 @@
 #define ENGINE2_0_INPUT_H
 
 #include <SDL2/SDL_events.h>
-#include "KeyboardKeys.h"
-#include "MouseKeys.h"
-#include "GamePadKeys.h"
+#include "core/render/window/keysAndButtons/KeyboardKeys.h"
+#include "core/render/window/keysAndButtons/MouseKeys.h"
+#include "core/render/window/keysAndButtons/GamePadKeys.h"
 #include <functional>
 
 #include "core/util/Util.h"
 #include "core/render/window/Window.h"
+#include "WindowInput.h"
+#include "KeyboardInput.h"
+#include "MouseInput.h"
+#include "ControllerInput.h"
+
+#define SDL_JOYSTICK_DISABLED
 
 namespace engine {
 
@@ -21,110 +27,47 @@ namespace engine {
         WINDOW_FOCUS_E = SDL_WINDOWEVENT_FOCUS_GAINED, WINDOW_LOST_FOCUS_E = SDL_WINDOWEVENT_FOCUS_LOST,
         INPUT_TEXT_E = SDL_TEXTINPUT,
         FOO_1 = SDL_KEYMAPCHANGED, FOO_2 = SDL_JOYAXISMOTION, FOO_3 = SDL_AUDIODEVICEADDED,
-        GAMEPAD_JOYSTICK = SDL_CONTROLLERAXISMOTION, GAMEPAD_BUTTON_DOWN = SDL_CONTROLLERBUTTONDOWN, GAMEPAD_BUTTON_UP = SDL_CONTROLLERBUTTONUP
-    };
-
-    class InputManager;
-    class InputSystem {
-
-        friend class InputManager;
-
-        private:
-            std::unordered_map<KeyCode, int>  pressedKeyboardKeys;
-            std::unordered_map<MouseCode, int>  pressedMouseButtons;
-            std::unordered_map<GamePadKeys, int>  pressedGamepadKeys;
-            std::vector<SDL_Joystick*> joysticks;
-            std::unordered_map<SystemEventEnum, std::function<void(SDL_Event&)>> events;
-            Window* window = nullptr;
-            Vec2I mousePos;
-
-            std::function<void(Event&)> eventCallback;
-
-        private:
-            InputSystem() = default;
-            void onKeyDown(SDL_Event& _event);
-            void onKeyUp(SDL_Event& _event);
-            void onMouseMoved(SDL_Event& _event);
-            void onMouseDown(SDL_Event& _event);
-            void onMouseUp(SDL_Event& _event);
-            void onMouseScroll(SDL_Event& _event);
-
-            void onWindowEvent(SDL_Event& _event);
-            void onWindowEnter(SDL_Event& _event);
-            void onWindowExit(SDL_Event& _event);
-            void onWindowGainFocus(SDL_Event& _event);
-            void onWindowLostFocus(SDL_Event& _event);
-            void onWindowResize(SDL_Event& _event);
-            void onWindowMoved(SDL_Event& _event);
-            void onWindowMinimized(SDL_Event& _event);
-            void onWindowMaximized(SDL_Event& _event);
-            void onQuit(SDL_Event& _event);
-
-            void initGamepads();
-            void onGamepadsMoved(SDL_Event& _event);
-            void onGamepadsButtonDown(SDL_Event& _event);
-            void onGamepadsButtonUp(SDL_Event& _event);
-
-        public:
-            void init(Window* _window);
-            void pollEvents();
-            void setEventCallback(std::function<void(Event&)> _eventCallback);
-
-            static InputSystem& get();
-            ~InputSystem();
+        GAMEPAD_JOYSTICK = SDL_CONTROLLERAXISMOTION, GAMEPAD_BUTTON_DOWN = SDL_CONTROLLERBUTTONDOWN, GAMEPAD_BUTTON_UP = SDL_CONTROLLERBUTTONUP,
+        GAMEPAD_CONNECTED_E = SDL_CONTROLLERDEVICEADDED, GAMEPAD_DISCONNECTED_E = SDL_CONTROLLERDEVICEREMOVED
     };
 
     class InputManager {
 
         private:
-            static InputSystem* inputSystem;
+            WindowInput windowInput;
+            KeyboardInput keyboardInput;
+            MouseInput mouseInput;
+            ControllerInput controllerInput;
+            std::function<void(Event&)> eventCallback;
 
         public:
-            /// Checks if a key has just been pressed, only the first pressed, if continuous pressing it doesn't detect.
-            /// @param _keyCode The code of the key.
-            /// @return true if it is just pressed.
-            static bool isKeyJustPressed(KeyCode _keyCode);
+            static InputManager& get();
+            void init(Window* _window);
+            void pollEvents();
+            void setEventCallback(std::function<void(Event&)> _eventCallback);
 
-            /// Checks if a key is being pressed.
-            /// @param _keyCode The code of the key.
-            /// @return true if it is being pressed.
-            static bool isKeyPressed(KeyCode _keyCode);
+        public:
+            static bool isKeyJustPressed(KeyCode _key);
+            static bool isKeyPressed(KeyCode _key);
+            static bool isKeyReleased(KeyCode _key);
 
-            /// Checks if a key has been released.
-            /// @param _keyCode The code of the key.
-            /// @return true if it is been released.
-            static bool isKeyReleased(KeyCode _keyCode);
 
-            /// Checks if a mouse button has just been pressed, only the first pressed, if continuous pressing it doesn't detect.
-            /// @param _mouseButton The code of the button.
-            /// @return true if it is just pressed.
-            static bool isMouseJustPressed(MouseCode _mouseButton);
-
-            /// Checks if a mouse button is being pressed.
-            /// @param _mouseButton The code of the button.
-            /// @return true if it is being pressed.
-            static bool isMousePressed(MouseCode _mouseButton);
-
-            /// Checks if a mouse button has been released.
-            /// @param _mouseButton The code of the button.
-            /// @return true if it is been released.
-            static bool isMouseReleased(MouseCode _mouseButton);
-
-            /// Returns the position of the mouse on the screen.
-            /// @return Vec2i with [x,y] of the mouse.
-            static Vec2I getMousePosition();
-
-            /// Returns getMousePosition().x
-            /// @return getMousePosition().x
+            static bool isMouseJustPressed(MouseCode _button);
+            static bool isMousePressed(MouseCode _button);
+            static bool isMouseReleased(MouseCode _button);
+            static Vec2F getMousePosition();
             static int getMouseX();
-
-            /// Returns getMousePosition().y
-            /// @return getMousePosition().y
             static int getMouseY();
+
 
             static bool isGamepadButtonJustPressed(GamePadKeys _button);
             static bool isGamepadButtonPressed(GamePadKeys _button);
             static bool isGamepadButtonReleased(GamePadKeys _button);
+
+
+            static bool isGamepadAxisJustPressed(GamePadAxis _axis);
+            static bool isGamepadAxisPressed(GamePadAxis _axis);
+            static bool isGamepadAxisReleased(GamePadAxis _axis);
     };
 }
 

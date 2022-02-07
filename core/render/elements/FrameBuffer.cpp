@@ -26,6 +26,7 @@ namespace engine {
             glDeleteFramebuffers(1, &fboID);
             glDeleteTextures(1, &colorAttachment);
             glDeleteBuffers(1, &vboID);
+            glDeleteRenderbuffers(1, &rboID);
         }
 
         glGenBuffers(1, &vboID);
@@ -60,7 +61,7 @@ namespace engine {
         // create a color attachment texture
         glGenTextures(1, &colorAttachment);
         glBindTexture(GL_TEXTURE_2D, colorAttachment);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, specs.width, specs.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, (int)specs.width, (int)specs.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorAttachment, 0);
@@ -68,7 +69,7 @@ namespace engine {
 
         glGenRenderbuffers(1, &rboID);
         glBindRenderbuffer(GL_RENDERBUFFER, rboID);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, specs.width, specs.height); // use a single renderbuffer object for both a depth AND stencil buffer.
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, (int)specs.width, (int)specs.height); // use a single renderbuffer object for both a depth AND stencil buffer.
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboID); // now actually attach it
 
         ENGINE_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!")

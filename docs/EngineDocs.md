@@ -1008,8 +1008,6 @@ La clase Texture se puede encontrar en core/render/elements/Texture.h y su corre
 
 La clase Sprite esta en core/render/elements/Sprite.h y su cpp. Ya hemos explicado lo que es un Sprite, y basicamente los metodos que contiene son o bien para inicializarlo o bien para obetener o modificar sus propiedades.
 
-
-
 ## Texture Atlas
 
 ## Sprite Batch

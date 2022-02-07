@@ -4,6 +4,7 @@
 #define GAMEPAD_KEYS_H
 
 #include <cstdint>
+#include <SDL_gamecontroller.h>
 
 namespace engine {
 
@@ -31,6 +32,13 @@ namespace engine {
         DPadDown        = SDL_CONTROLLER_BUTTON_DPAD_DOWN,      // 12
         DPadLeft        = SDL_CONTROLLER_BUTTON_DPAD_LEFT       // 13
     } GamePad;
+
+    typedef enum class GamePadAxis {
+        Left,
+        Right,
+        LT,
+        RT
+    } GamePadA;
 
     static const char* GamePadKeysStr[] = {
             "A", "B", "X", "Y", "Select", "Guide", "Start", "L3", "R3", "LB", "RB",

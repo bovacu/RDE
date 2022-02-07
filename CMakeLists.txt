@@ -60,8 +60,8 @@ add_executable( Engine2_0 main.cpp
         core/render/layers/Layer.h core/render/layers/LayerStack.h core/render/layers/LayerStack.cpp
         core/render/layers/ImGuiLayer.h core/render/layers/ImGuiLayer.cpp
 
-        core/render/window/input/GamePadKeys.h core/render/window/input/Input.cpp core/render/window/input/Input.h
-        core/render/window/input/KeyboardKeys.h core/render/window/input/MouseKeys.h
+        core/render/window/keysAndButtons/GamePadKeys.h core/render/window/input/Input.cpp core/render/window/input/Input.h
+        core/render/window/keysAndButtons/KeyboardKeys.h core/render/window/keysAndButtons/MouseKeys.h
 
         core/render/elements/Texture.h core/render/elements/Texture.cpp core/render/elements/SpriteBatch.h
         core/render/elements/SpriteBatch.cpp core/render/elements/Shader.h core/render/elements/Shader.cpp
@@ -99,7 +99,7 @@ add_executable( Engine2_0 main.cpp
         core/systems/uiSystem/FontManager.cpp core/systems/uiSystem/FontManager.h external/stb/stb_image_writer.h core/render/elements/FrameBuffer.cpp
         core/render/elements/FrameBuffer.h core/render/elements/ShaderManager.cpp core/render/elements/ShaderManager.h core/render/elements/IRenderizable.h
         sandbox/Sandbox.cpp sandbox/Sandbox.h core/systems/soundSystem/SoundManager.cpp core/systems/soundSystem/SoundManager.h
-        core/render/window/event/JoystickEvent.h)
+        core/render/window/event/JoystickEvent.h core/render/window/input/WindowInput.cpp core/render/window/input/WindowInput.h core/render/window/input/KeyboardInput.cpp core/render/window/input/KeyboardInput.h core/render/window/input/MouseInput.cpp core/render/window/input/MouseInput.h core/render/window/input/ControllerInput.cpp core/render/window/input/ControllerInput.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 

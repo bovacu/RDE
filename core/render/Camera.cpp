@@ -56,8 +56,7 @@ namespace engine {
     }
 
     void Camera::onEvent(Event& _event) {
-//        EventDispatcher dispatcher(_event);
-//        dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Camera::onMouseScrolled));
+
     }
 
     bool Camera::onMouseScrolled(MouseScrolledEvent& _event) {

@@ -4,8 +4,8 @@
 #define ENGINE2_0_MOUSE_EVENT_H
 
 #include "core/render/window/event/Event.h"
-#include "core/render/window/input/KeyboardKeys.h"
-#include "core/render/window/input/MouseKeys.h"
+#include "core/render/window/keysAndButtons/KeyboardKeys.h"
+#include "core/render/window/keysAndButtons/MouseKeys.h"
 
 namespace engine {
 

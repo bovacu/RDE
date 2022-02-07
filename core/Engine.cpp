@@ -16,8 +16,8 @@ namespace engine {
         window->setEventCallback(ENGINE_BIND_EVENT_FN(Engine::onEvent));
         lastFrame = 0;
 
-        InputSystem::get().init(window.get());
-        InputSystem::get().setEventCallback(BIND_FUNC_1(Engine::onEvent));
+        InputManager::get().init(window.get());
+        InputManager::get().setEventCallback(BIND_FUNC_1(Engine::onEvent));
         Console::get().init();
         ShaderManager::get().init();
         FontManager::get().init();
@@ -35,7 +35,9 @@ namespace engine {
 
         window->setVSync(false);
 
-        camera.onResize(window->getWindowSize().x, window->getWindowSize().y);
+        int _width, _height;
+        SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
+        camera.onResize(_width, _height);
 
         FrameBufferSpecification _specs = {
                 (uint32_t)window->getWindowSize().x,
@@ -68,7 +70,7 @@ namespace engine {
 
             engine::Profiler::beginFrame(_dt);
 
-            InputSystem::get().pollEvents();
+            InputManager::get().pollEvents();
 
             if (!minimized) {
 
@@ -103,12 +105,6 @@ namespace engine {
             float _elapsedMS = (float)(_end - _start) / (float)SDL_GetPerformanceFrequency();
             _dt = _elapsedMS;
             timer += _dt;
-
-            // Cap to 60 FPS
-//            int _toWait = 16.666f - _dt * 1000;
-//            LOG_I(_toWait)
-//            if(_toWait > 0)
-//                SDL_Delay(_toWait);
         }
     }
 
@@ -128,8 +124,10 @@ namespace engine {
     void Engine::onUpdate(Delta _dt) {
         auto _fbSpec = frameBuffer->getSpecification();
         if(window->getWindowSize().x > 0 && window->getWindowSize().y > 0 && (_fbSpec.width != window->getWindowSize().x || _fbSpec.height != window->getWindowSize().y)) {
-            frameBuffer->resize(window->getWindowSize().x, window->getWindowSize().y);
-            camera.onResize(window->getWindowSize().x, window->getWindowSize().y);
+            int _width, _height;
+            SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
+            frameBuffer->resize(_width, _height);
+            camera.onResize(_width, _height);
         }
 
         for (Layer* _layer : layerStack)
@@ -153,6 +151,7 @@ namespace engine {
         // Debug rendering
         Renderer::beginDebugDraw(camera);
         Renderer::drawSquare({0, 0}, {2, 2}, Color::Blue);
+        Renderer::drawSquare({-100, 0}, {50, 50}, Color::Blue);
         Renderer::endDebugDraw();
 
         frameBuffer->unbind();
@@ -211,7 +210,7 @@ namespace engine {
     }
 
     void Engine::setWindowSize(int _width, int _height) {
-        window->setWindowSize(_width, _height);
+        window->setWindowSizeAndUpdateNativeWindow(_width, _height);
     }
 
     void Engine::pushLayer(Layer* _layer) {

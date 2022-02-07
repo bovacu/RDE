@@ -35,7 +35,7 @@ namespace engine {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
         /// Initialize SDL
-        window = SDL_CreateWindow(_props.title.c_str(), 0, 0, (int)_props.width, (int)_props.height, SDL_WINDOW_OPENGL| SDL_WINDOW_ALLOW_HIGHDPI);
+        window = SDL_CreateWindow(_props.title.c_str(), 0, 0, (int)_props.width, (int)_props.height, SDL_WINDOW_OPENGL| SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
         context = SDL_GL_CreateContext(window);
 
         SDL_GL_MakeCurrent(window, context);
@@ -78,7 +78,8 @@ namespace engine {
     }
 
     void Window::setFullscreen(bool _fullscreen) {
-
+        data.fullscreen = _fullscreen;
+        SDL_SetWindowFullscreen(window, _fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
     }
 
     bool Window::isFullscreen() const {
