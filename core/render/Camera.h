@@ -18,14 +18,14 @@ namespace engine {
         private:
             int width, height;
             int vpSize[2]{0, 0};
-            float aspectRatio, zoom = 1, zoomSpeed = 0.25f;
+            float aspectRatio = -1, zoom = 1, zoomSpeed = 0.25f;
             glm::mat4 projectionMatrix;
             glm::mat4 viewMatrix {1.f};
             glm::mat4 viewProjectionMatrix;
             Transform transform;
 
         public:
-//            void update(Window* _window);
+            Camera();
             void onEvent(Event& _event);
             bool onMouseScrolled(MouseScrolledEvent& _event);
             void onResize(int _width, int _height);

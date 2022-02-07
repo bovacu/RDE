@@ -109,6 +109,10 @@ namespace engine {
     }
 
     void Engine::onEvent(Event &_e) {
+
+        EventDispatcher _ed(_e);
+        _ed.dispatchEvent<WindowResizedEvent>(BIND_FUNC_1(Engine::onWindowResized));
+
         for (auto _it = layerStack.rbegin(); _it != layerStack.rend(); ++_it) {
             (*_it)->onEvent(_e);
             if (_e.handled)
@@ -122,14 +126,6 @@ namespace engine {
     }
 
     void Engine::onUpdate(Delta _dt) {
-        auto _fbSpec = frameBuffer->getSpecification();
-        if(window->getWindowSize().x > 0 && window->getWindowSize().y > 0 && (_fbSpec.width != window->getWindowSize().x || _fbSpec.height != window->getWindowSize().y)) {
-            int _width, _height;
-            SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
-            frameBuffer->resize(_width, _height);
-            camera.onResize(_width, _height);
-        }
-
         for (Layer* _layer : layerStack)
             _layer->onUpdate(_dt);
 
@@ -151,7 +147,7 @@ namespace engine {
         // Debug rendering
         Renderer::beginDebugDraw(camera);
         Renderer::drawSquare({0, 0}, {2, 2}, Color::Blue);
-        Renderer::drawSquare({-100, 0}, {50, 50}, Color::Blue);
+        Renderer::drawSquare({-100, 0}, {50, 50}, Color::Green);
         Renderer::endDebugDraw();
 
         frameBuffer->unbind();
@@ -173,12 +169,11 @@ namespace engine {
     }
 
     bool Engine::onWindowResized(WindowResizedEvent &_e) {
-        if (_e.getWidth() == 0 || _e.getHeight() == 0) {
-            minimized = true;
-            return false;
-        }
-        minimized = false;
-        return false;
+        int _width, _height;
+        SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
+        frameBuffer->resize(_width, _height);
+        camera.onResize(_width, _height);
+        return true;
     }
 
     int Engine::getFps() const { return (int)fpsCounter; }

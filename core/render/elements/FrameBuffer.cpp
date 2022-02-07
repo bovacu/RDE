@@ -79,11 +79,11 @@ namespace engine {
         framebufferShader = ShaderManager::get().getShader("framebuffer");
     }
 
-    void FrameBuffer::bind() {
+    void FrameBuffer::bind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, fboID);
     }
 
-    void FrameBuffer::unbind() {
+    void FrameBuffer::unbind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glUseProgram(framebufferShader);
