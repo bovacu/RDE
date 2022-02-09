@@ -1,17 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
-    buildToolsVersion ast.buildToolsVersion
-    compileSdkVersion ast.compileSdkVersion
-    ndkVersion ast.ndkVersion
+    buildToolsVersion engine.buildToolsVersion
+    compileSdkVersion engine.compileSdkVersion
+    ndkVersion engine.ndkVersion
 
     defaultConfig {
         applicationId "com.example.engineAndroid"
         
-        minSdkVersion ast.minSdkVersion
-        targetSdkVersion ast.targetSdkVersion
-        versionCode ast.versionCode
-        versionName ast.versionName
+        minSdkVersion engine.minSdkVersion
+        targetSdkVersion engine.targetSdkVersion
+        versionCode engine.versionCode
+        versionName engine.versionName
 
         externalNativeBuild {
             cmake {

@@ -1,15 +1,16 @@
 #include "platform.hpp"
 
-ast::Platform ast::getCurrentPlatform()
-{
-#if defined(__APPLE__)
-#include "TargetConditionals.h"
-#if TARGET_OS_IPHONE
-    return ast::Platform::ios;
-#else
-    return ast::Platform::mac;
-#endif
-#elif __ANDROID__
-    return ast::Platform::android;
-#endif
+namespace engine {
+    Platform getCurrentPlatform() {
+    #if defined(__APPLE__)
+    #include "TargetConditionals.h"
+    #if TARGET_OS_IPHONE
+        return engine::Platform::ios;
+    #else
+        return engine::Platform::mac;
+    #endif
+    #elif __ANDROID__
+        return engine::Platform::android;
+    #endif
+    }
 }

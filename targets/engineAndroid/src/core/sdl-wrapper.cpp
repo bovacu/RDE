@@ -5,10 +5,10 @@ namespace
 {
     bool shouldDisplayFullScreen()
     {
-        switch (ast::getCurrentPlatform())
+        switch (engine::getCurrentPlatform())
         {
-            case ast::Platform::ios:
-            case ast::Platform::android:
+            case engine::Platform::ios:
+            case engine::Platform::android:
                 return true;
 
             default:
@@ -17,15 +17,15 @@ namespace
     }
 } // namespace
 
-std::pair<uint32_t, uint32_t> ast::sdl::getDisplaySize()
+std::pair<uint32_t, uint32_t> engine::sdl::getDisplaySize()
 {
     uint32_t displayWidth{0};
     uint32_t displayHeight{0};
 
-    switch (ast::getCurrentPlatform())
+    switch (engine::getCurrentPlatform())
     {
-        case ast::Platform::ios:
-        case ast::Platform::android:
+        case engine::Platform::ios:
+        case engine::Platform::android:
         {
             // For mobile platforms we will fetch the full screen size.
             SDL_DisplayMode displayMode;
@@ -47,9 +47,9 @@ std::pair<uint32_t, uint32_t> ast::sdl::getDisplaySize()
     return std::make_pair(displayWidth, displayHeight);
 }
 
-SDL_Window* ast::sdl::createWindow(const uint32_t& windowFlags)
+SDL_Window* engine::sdl::createWindow(const uint32_t& windowFlags)
 {
-    std::pair<uint32_t, uint32_t> displaySize{ast::sdl::getDisplaySize()};
+    std::pair<uint32_t, uint32_t> displaySize{engine::sdl::getDisplaySize()};
 
     SDL_Window* window{SDL_CreateWindow(
         "A Simple Triangle",

@@ -6,7 +6,7 @@ void render(SDL_Window* window, const SDL_GLContext& context)
 {
     SDL_GL_MakeCurrent(window, context);
 
-    glClearColor(0.3f, 0.7f, 0.0f, 1.0f);
+    glClearColor(1.f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     SDL_GL_SwapWindow(window);
@@ -15,7 +15,6 @@ void render(SDL_Window* window, const SDL_GLContext& context)
 bool runMainLoop(SDL_Window* window, const SDL_GLContext& context)
 {
     SDL_Event event;
-
     // Each loop we will process any events that are waiting for us.
     while (SDL_PollEvent(&event))
     {
@@ -43,12 +42,12 @@ bool runMainLoop(SDL_Window* window, const SDL_GLContext& context)
 
 void runApplication()
 {
-    std::pair<uint32_t, uint32_t> displaySize{ast::sdl::getDisplaySize()};
+    std::pair<uint32_t, uint32_t> displaySize{engine::sdl::getDisplaySize()};
 
     std::cout << "Display size is: " << displaySize.first << " x " << displaySize.second << std::endl;
 
     // Create a new SDL window based on OpenGL.
-    SDL_Window* window{ast::sdl::createWindow(SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI)};
+    SDL_Window* window{engine::sdl::createWindow(SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI)};
 
     // Obtain an OpenGL context based on our window.
     SDL_GLContext context{SDL_GL_CreateContext(window)};

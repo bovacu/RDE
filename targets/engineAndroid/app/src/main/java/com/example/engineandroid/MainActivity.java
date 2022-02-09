@@ -8,6 +8,8 @@ public class MainActivity extends SDLActivity {
         return new String[]{
                 "hidapi",
                 "SDL2",
+                "SDL2_mixer",
+                "SDL2_net",
                 "engineAndroid"
         };
     }

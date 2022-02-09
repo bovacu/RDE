@@ -12,10 +12,10 @@
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/systems/uiSystem/Text.h"
 #include "core/render/window/event/JoystickEvent.h"
+#include "core/Engine.h"
 
 namespace engine {
 
-    class Engine;
     class Sandbox : public Layer {
         private:
             std::vector<Sprite> sprites;
@@ -33,6 +33,7 @@ namespace engine {
             void onRender(Delta _dt) override;
             void onImGuiRender(Delta _dt) override;
             void onEnd() override;
+            ~Sandbox() override {  };
 
         private:
             bool onMouseScrolled(MouseScrolledEvent& _event);
