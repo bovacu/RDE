@@ -5,7 +5,7 @@
 
 #include <cstdint>
 #include <ostream>
-#include "engine/include/core/platform/PlatformHeaderSDL.h"
+#include "core/platform/PlatformHeaderSDL.h"
 
 namespace engine {
 

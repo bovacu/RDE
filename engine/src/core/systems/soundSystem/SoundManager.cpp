@@ -1,9 +1,9 @@
 // Created by borja on 30/1/22.
 
 
-#include "engine/include/core/platform/PlatformHeaderSDL.h"
-#include "engine/include/core/systems/soundSystem/SoundManager.h"
-#include "engine/include/core/util/Functions.h"
+#include "core/platform/PlatformHeaderSDL.h"
+#include "core/systems/soundSystem/SoundManager.h"
+#include "core/util/Functions.h"
 
 namespace engine {
 

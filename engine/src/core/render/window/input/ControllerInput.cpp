@@ -1,9 +1,9 @@
 // Created by borja on 6/2/22.
 
 
-#include "engine/include/core/render/window/input/ControllerInput.h"
-#include "engine/include/core/render/window/input/Input.h"
-#include "engine/include/core/render/window/event/JoystickEvent.h"
+#include "core/render/window/input/ControllerInput.h"
+#include "core/render/window/input/Input.h"
+#include "core/render/window/event/JoystickEvent.h"
 
 namespace engine {
 

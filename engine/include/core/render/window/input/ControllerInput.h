@@ -5,9 +5,9 @@
 #define ENGINE2_0_CONTROLLER_INPUT_H
 
 
-#include "engine/include/core/util/Util.h"
-#include "engine/include/core/render/window/keysAndButtons/GamePadKeys.h"
-#include "engine/include/core/render/window/Window.h"
+#include "core/util/Util.h"
+#include "core/render/window/keysAndButtons/GamePadKeys.h"
+#include "core/render/window/Window.h"
 
 namespace engine {
 

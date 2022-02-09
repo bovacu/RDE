@@ -1,7 +1,7 @@
 // Created by borja on 15/1/22.
 
 #include "core/systems/uiSystem/FontManager.h"
-#include "engine/include/stb/stb_image_writer.h"
+#include "stb/stb_image_writer.h"
 #include "core/util/Functions.h"
 
 namespace engine {

@@ -1,9 +1,9 @@
 // Created by borja on 6/2/22.
 
 
-#include "engine/include/core/render/window/input/MouseInput.h"
-#include "engine/include/core/render/window/input/Input.h"
-#include "engine/include/core/render/window/event/MouseEvent.h"
+#include "core/render/window/input/MouseInput.h"
+#include "core/render/window/input/Input.h"
+#include "core/render/window/event/MouseEvent.h"
 
 namespace engine {
 

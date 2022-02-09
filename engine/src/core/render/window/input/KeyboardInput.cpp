@@ -1,9 +1,9 @@
 // Created by borja on 6/2/22.
 
 
-#include "engine/include/core/render/window/input/KeyboardInput.h"
-#include "engine/include/core/render/window/input/Input.h"
-#include "engine/include/core/render/window/event/KeyEvent.h"
+#include "core/render/window/input/KeyboardInput.h"
+#include "core/render/window/input/Input.h"
+#include "core/render/window/event/KeyEvent.h"
 
 namespace engine {
 

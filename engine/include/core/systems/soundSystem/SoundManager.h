@@ -5,8 +5,8 @@
 #define ENGINE2_0_SOUND_MANAGER_H
 
 
-#include "engine/include/core/util/Util.h"
-#include "engine/include/core/platform/PlatformHeaderSDLMixer.h"
+#include "core/util/Util.h"
+#include "core/platform/PlatformHeaderSDLMixer.h"
 
 namespace engine {
 

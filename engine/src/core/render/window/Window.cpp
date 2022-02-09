@@ -6,7 +6,7 @@
 
 #include "core/render/window/Window.h"
 #include "core/render/window/event/WindowEvent.h"
-#include "engine/include/stb/stb_image.h"
+#include "stb/stb_image.h"
 
 namespace engine {
 

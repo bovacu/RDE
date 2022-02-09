@@ -92,7 +92,7 @@ namespace engine {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glUseProgram(framebufferShader);
-        glBindVertexArray(vboID);
+        glBindBuffer(GL_ARRAY_BUFFER, vboID);
 
         glEnableVertexAttribArray(10);
         glEnableVertexAttribArray(11);

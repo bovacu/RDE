@@ -5,9 +5,9 @@
 #define ENGINE2_0_KEYBOARD_INPUT_H
 
 
-#include "engine/include/core/util/Util.h"
-#include "engine/include/core/render/window/keysAndButtons/KeyboardKeys.h"
-#include "engine/include/core/render/window/Window.h"
+#include "core/util/Util.h"
+#include "core/render/window/keysAndButtons/KeyboardKeys.h"
+#include "core/render/window/Window.h"
 
 namespace engine {
 

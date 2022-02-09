@@ -5,9 +5,9 @@
 #define ENGINE2_0_MOUSE_INPUT_H
 
 
-#include "engine/include/core/util/Util.h"
-#include "engine/include/core/render/window/Window.h"
-#include "engine/include/core/render/window/keysAndButtons/MouseKeys.h"
+#include "core/util/Util.h"
+#include "core/render/window/Window.h"
+#include "core/render/window/keysAndButtons/MouseKeys.h"
 
 namespace engine {
 

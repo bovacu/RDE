@@ -235,7 +235,7 @@ if (UNIX)
   string(REPLACE "/undef " "#undef "
     FTCONFIG_H "${FTCONFIG_H}")
 else()
-  file(READ "../../../engine/include/freetype/config/ftconfig.h"
+  file(READ "${PROJECT_SOURCE_DIR}/include/freetype/config/ftconfig.h"
     FTCONFIG_H)
 endif ()
 file(WRITE "${PROJECT_BINARY_DIR}/include/freetype/config/ftconfig.h"
@@ -243,7 +243,7 @@ file(WRITE "${PROJECT_BINARY_DIR}/include/freetype/config/ftconfig.h"
 
 
 # Create the options file
-file(READ "../../../engine/include/freetype/config/ftoption.h"
+file(READ "${PROJECT_SOURCE_DIR}/include/freetype/config/ftoption.h"
   FTOPTION_H)
 if (ZLIB_FOUND)
   string(REGEX REPLACE
@@ -421,7 +421,7 @@ include(GNUInstallDirs)
 if (NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL)
   install(
     # Note the trailing slash in the argument to `DIRECTORY'!
-    DIRECTORY ../../../engine/include/
+    DIRECTORY ${PROJECT_SOURCE_DIR}/include/
       DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/freetype2
       COMPONENT headers
       PATTERN "internal" EXCLUDE

@@ -8,7 +8,7 @@
 #include "core/util/Util.h"
 #include <ft2build.h>
 #include "freetype/freetype.h"
-#include "engine/include/core/render/elements/Texture.h"
+#include "core/render/elements/Texture.h"
 
 #define MAX_WIDTH 1024
 

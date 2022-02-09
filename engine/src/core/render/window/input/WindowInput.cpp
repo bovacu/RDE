@@ -3,8 +3,8 @@
 
 #include "core/render/window/input/WindowInput.h"
 #include "core/render/window/input/Input.h"
-#include "engine/include/core/render/window/event/WindowEvent.h"
-#include "engine/include/core/Engine.h"
+#include "core/render/window/event/WindowEvent.h"
+#include "core/Engine.h"
 
 namespace engine {
 

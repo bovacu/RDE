@@ -4,7 +4,7 @@
 #define MOUSE_KEYS_H
 
 #include <ostream>
-#include "engine/include/core/platform/PlatformHeaderSDL.h"
+#include "core/platform/PlatformHeaderSDL.h"
 
 namespace engine {
 

@@ -1,7 +1,7 @@
 // Created by borja on 8/2/22.
 
 
-#include "engine/include/core/platform/Platform.h"
+#include "core/platform/Platform.h"
 
 namespace engine {
 

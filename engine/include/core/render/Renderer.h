@@ -6,8 +6,8 @@
 
 #include "core/util/Util.h"
 #include "core/render/elements/SpriteBatch.h"
-#include "engine/include/core/render/elements/Sprite.h"
-#include "engine/include/core/systems/uiSystem/Text.h"
+#include "core/render/elements/Sprite.h"
+#include "core/systems/uiSystem/Text.h"
 
 namespace engine {
 

@@ -5,8 +5,8 @@
 #define ENGINE2_0_WINDOW_INPUT_H
 
 
-#include "engine/include/core/util/Util.h"
-#include "engine/include/core/render/window/Window.h"
+#include "core/util/Util.h"
+#include "core/render/window/Window.h"
 
 namespace engine {
 
