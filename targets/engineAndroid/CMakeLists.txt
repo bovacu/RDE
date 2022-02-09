@@ -10,12 +10,14 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_VARIANT_DIR)
 set(SDL_DIR "${CMAKE_SOURCE_DIRECTORY}/SDL")
 set(SDL_MIXER_DIR "${CMAKE_SOURCE_DIRECTORY}/SDL_mixer")
 set(SDL_NET_DIR "${CMAKE_SOURCE_DIRECTORY}/SDL_net")
+set(SDL_IMAGE_DIR "${CMAKE_SOURCE_DIRECTORY}/SDL_image")
 set(FREETYPE_DIR "${CMAKE_SOURCE_DIRECTORY}/freetype")
 set(GLM_DIR "${CMAKE_SOURCE_DIRECTORY}/glm")
 
 # Location of our own shared C++ code base.
 #set(MAIN_SOURCE_DIR "src")
 set(MAIN_SOURCE_DIR "../../engine")
+set(SANDBOX_SOURCE_DIR "../../sandbox")
 
 set(EXTERNAL_STB "../../engine/include/stb")
 set(EXTERNAL_IMGUI "../../external/imgui")
@@ -45,6 +47,12 @@ add_library(
 
 add_library(
         sdl2_net
+        SHARED
+        IMPORTED
+)
+
+add_library(
+        sdl2_image
         SHARED
         IMPORTED
 )
@@ -91,6 +99,13 @@ set_target_properties(
 )
 
 set_target_properties(
+        sdl2_image
+        PROPERTIES
+        IMPORTED_LOCATION
+        ${SDL_SO_DIR}/libSDL2_image.so
+)
+
+set_target_properties(
         mpg123
         PROPERTIES
         IMPORTED_LOCATION
@@ -101,14 +116,16 @@ set_target_properties(
 include_directories(${SDL_DIR}/include)
 include_directories(${SDL_MIXER_DIR}/include)
 include_directories(${SDL_NET_DIR}/include)
+include_directories(${SDL_IMAGE_DIR})
 include_directories(${FREETYPE_DIR}/include ${FREETYPE_DIR}/freetype/include)
 include_directories(${GLM_DIR}/glm)
 include_directories(${MAIN_SOURCE_DIR}/include)
+include_directories(${SANDBOX_SOURCE_DIR})
 include_directories(${EXTERNAL_STB})
 
 # We will recursively collate all .hpp header and .cpp source files under the main source directory as the input for the compilation.
-file(GLOB_RECURSE CPP_HEADERS ${MAIN_SOURCE_DIR}/include/*.h*)
-file(GLOB_RECURSE CPP_SOURCES ${MAIN_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE CPP_HEADERS ${MAIN_SOURCE_DIR}/include/*.h*  ${SANDBOX_SOURCE_DIR}/*.h*)
+file(GLOB_RECURSE CPP_SOURCES ${MAIN_SOURCE_DIR}/src/*.cpp   ${SANDBOX_SOURCE_DIR}/*.cpp)
 
 # The 'a-simple-triangle' library target is actually our own C++ code from the shared 'main' source code folder.
 add_library(
@@ -125,6 +142,7 @@ target_link_libraries(
         sdl2
         sdl2_mixer
         sdl2_net
+        sdl2_image
         mpg123
         freetype
         glm

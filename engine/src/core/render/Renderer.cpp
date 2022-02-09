@@ -1,5 +1,6 @@
 // Created by borja on 26/12/21.
 
+#include "core/platform/PlatformHeaderSDLImage.h"
 #include "core/render/Renderer.h"
 
 namespace engine {
@@ -16,6 +17,13 @@ namespace engine {
         glEnable(GL_LINE_SMOOTH);
         glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
 #endif
+        int _flags = IMG_INIT_PNG | IMG_INIT_JPG;
+        if(IMG_Init(_flags) != _flags) {
+            LOG_E("SDL Image loader couldn't initialize all png and jpg")
+            return;
+        }
+
+        LOG_S("SDL Image loader loaded successfully")
     }
 
     void Renderer::clear(const Color& _color) {

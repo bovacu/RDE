@@ -79,7 +79,7 @@ LOCAL_CFLAGS += \
 LOCAL_CFLAGS += -Wno-unused-parameter -Wno-sign-compare
  
 
-LOCAL_LDLIBS := -ldl -lGLESv1_CM -lGLESv2 -lOpenSLES -llog -landroid
+LOCAL_LDLIBS := -ldl -lGLESv1_CM -lGLESv3 -lOpenSLES -llog -landroid
 
 ifeq ($(NDK_DEBUG),1)
     cmd-strip :=
@@ -100,7 +100,7 @@ LOCAL_MODULE := SDL2_static
 LOCAL_MODULE_FILENAME := libSDL2
 
 LOCAL_LDLIBS := 
-LOCAL_EXPORT_LDLIBS := -ldl -lGLESv1_CM -lGLESv2 -llog -landroid
+LOCAL_EXPORT_LDLIBS := -ldl -lGLESv1_CM -lGLESv3 -llog -landroid
 
 include $(BUILD_STATIC_LIBRARY)
 

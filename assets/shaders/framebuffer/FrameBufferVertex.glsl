@@ -1,4 +1,4 @@
-#version 330 core
+#version 300 es
 layout (location = 10) in vec2 aPos;
 layout (location = 11) in vec2 aTexCoords;
 

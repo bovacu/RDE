@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
 
 #${CMAKE_DL_LIBS} is needed as some part of opengl uses it
-SET(TARGET_LINKS glad freetype SDL2::Main SDL2::Mixer SDL2::Net ${CMAKE_DL_LIBS} OpenGL
+SET(TARGET_LINKS glad freetype SDL2::Main SDL2::Mixer SDL2::Net SDL2::Image ${CMAKE_DL_LIBS} OpenGL
         # flecs
         )
 
@@ -14,6 +14,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 include_directories(.)
 include_directories(engine/include)
+include_directories(sandbox)
 include_directories(${CMAKE_SOURCE_DIR}/external})
 include_directories (/usr/include/freetype2)
 
@@ -35,6 +36,7 @@ find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_net REQUIRED)
 find_package(SDL2_mixer REQUIRED)
+find_package(SDL2_image REQUIRED)
 
 add_library(glad external/glad/include/glad/glad.h external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include/)
@@ -102,7 +104,7 @@ add_executable( Engine2_0 engine/src/main.cpp
         engine/include/core/render/window/event/JoystickEvent.h engine/src/core/render/window/input/WindowInput.cpp engine/include/core/render/window/input/WindowInput.h
         engine/src/core/render/window/input/KeyboardInput.cpp engine/include/core/render/window/input/KeyboardInput.h engine/src/core/render/window/input/MouseInput.cpp
         engine/include/core/render/window/input/MouseInput.h engine/src/core/render/window/input/ControllerInput.cpp engine/include/core/render/window/input/ControllerInput.h
-        engine/src/core/platform/Platform.cpp engine/include/core/platform/Platform.h engine/include/core/platform/PlatformHeaderSDL.h engine/include/core/platform/PlatformHeaderSDLMixer.h)
+        engine/src/core/platform/Platform.cpp engine/include/core/platform/Platform.h engine/include/core/platform/PlatformHeaderSDL.h engine/include/core/platform/PlatformHeaderSDLMixer.h engine/include/core/platform/PlatformHeaderSDLImage.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 

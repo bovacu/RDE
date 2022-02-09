@@ -2,6 +2,7 @@
 
 #include "Sandbox.h"
 #include "core/Engine.h"
+#include "core/systems/soundSystem/SoundManager.h"
 
 namespace engine {
 

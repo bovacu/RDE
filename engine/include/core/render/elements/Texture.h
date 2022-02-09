@@ -3,7 +3,7 @@
 #include <iostream>
 
 #ifdef __ANDROID__
-    #include <GLES3/gl3.h>
+    #include <GLES3/gl32.h>
 #elif __linux__
     #include "external/glad/include/glad/glad.h"
 #endif
@@ -35,5 +35,8 @@ namespace engine {
             bool loadTextSubTextures(Vec2I _offset, Vec2I _size, const unsigned char* _data);
 
             IntRect& getRegion();
+
+        private:
+            int invertSDLSurface(SDL_Surface *surface);
     };
 }

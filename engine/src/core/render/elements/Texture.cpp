@@ -5,9 +5,13 @@
 #include <filesystem>
 #endif
 
+#include "core/platform/PlatformHeaderSDLImage.h"
 #include "stb/stb_image.h"
 
 namespace engine {
+
+    #define SDL_LOCKIFMUST(s) (SDL_MUSTLOCK(s) ? SDL_LockSurface(s) : 0)
+    #define SDL_UNLOCKIFMUST(s) { if(SDL_MUSTLOCK(s)) SDL_UnlockSurface(s); }
 
     Texture::Texture(char* _path) {
         loadFromFile(_path);
@@ -38,13 +42,22 @@ namespace engine {
     }
 
     bool Texture::loadFromFile(const char* _path) {
-        // Load the file.
-        stbi_set_flip_vertically_on_load(1);
+        SDL_RWops* _imageFile = SDL_RWFromFile(_path, "rb");
 
-        /// Then we load the image pixels.
-        auto _texturePixels = stbi_load(_path, &width, &height, &channels, 0);
+        if(_imageFile == nullptr) {
+            LOG_E("Couldn't load ", _path)
+            return false;
+        }
 
+        auto* _image = IMG_LoadPNG_RW(_imageFile);
+        invertSDLSurface(_image);
+        width = _image->w;
+        height = _image->h;
+        channels = _image->format->BytesPerPixel;
+        auto* _texturePixels = _image->pixels;
         /// We set the basic information.
+
+        LOG_W("Loaded image -> Channels = ", channels, ", Width = ", width, ", Height = ", height, ", Path = ", _path)
 
         GLenum _internalFormat = 0, _dataFormat = 0;
         if (channels == 4) {
@@ -54,51 +67,24 @@ namespace engine {
             _internalFormat = GL_RGB8;
             _dataFormat = GL_RGB;
         } else {
-            LOG_E("Not supported format image")
+            LOG_E("Not supported format image. Channels = ", channels, ", Width = ", width, ", Height = ", height, ", Path = ", _path)
         }
 
         internalFormat = _internalFormat;
         dataFormat = _dataFormat;
 
-        #ifdef __ANDROID__
         glGenTextures(1, &openGLTextureID);
+        glBindTexture(GL_TEXTURE_2D, openGLTextureID);
 
-        /// Then we tell OpenGL that on this buffer we are storing a 2D texture.
-        glTexStorage2D(openGLTextureID, 1, internalFormat, width, height);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-        /// We set the up/down resizing algorithms
-        glTexParameteri(openGLTextureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(openGLTextureID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
 
-        /// And the up/down wrapping algorithms
-        glTexParameteri(openGLTextureID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(openGLTextureID, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
-        /// glTextureStorage2D could also be used for this task, but is slower.
-        glTexSubImage2D(openGLTextureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
-        // We can unload the images now that the texture data has been buffered with opengl
-        #elif __linux__
-        glCreateTextures(GL_TEXTURE_2D, 1, &openGLTextureID);
-
-        /// Then we tell OpenGL that on this buffer we are storing a 2D texture.
-        glTextureStorage2D(openGLTextureID, 1, internalFormat, width, height);
-
-        /// We set the up/down resizing algorithms
-        glTextureParameteri(openGLTextureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(openGLTextureID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        /// And the up/down wrapping algorithms
-        glTextureParameteri(openGLTextureID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTextureParameteri(openGLTextureID, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
-        /// glTextureStorage2D could also be used for this task, but is slower.
-        glTextureSubImage2D(openGLTextureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
-        // We can unload the images now that the texture data has been buffered with opengl
-        #endif
-
-        stbi_image_free(_texturePixels);
+        SDL_FreeSurface(_image);
+        SDL_RWclose(_imageFile);
 
         region = {{0, 0}, {width, height}};
 
@@ -131,44 +117,15 @@ namespace engine {
         internalFormat = _internalFormat;
         dataFormat = _dataFormat;
 
-        #ifdef __ANDROID__
         glGenTextures(1, &openGLTextureID);
+        glBindTexture(GL_TEXTURE_2D, openGLTextureID);
 
-        /// Then we tell OpenGL that on this buffer we are storing a 2D texture.
-        glTexStorage2D(openGLTextureID, 1, internalFormat, width, height);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-        /// We set the up/down resizing algorithms
-        glTexParameteri(openGLTextureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(openGLTextureID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        /// And the up/down wrapping algorithms
-        glTexParameteri(openGLTextureID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(openGLTextureID, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
-        /// glTextureStorage2D could also be used for this task, but is slower.
-        glTexSubImage2D(openGLTextureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
-        // We can unload the images now that the texture data has been buffered with opengl
-        #elif __linux__
-        glCreateTextures(GL_TEXTURE_2D, 1, &openGLTextureID);
-
-        /// Then we tell OpenGL that on this buffer we are storing a 2D texture.
-        glTextureStorage2D(openGLTextureID, 1, internalFormat, width, height);
-
-        /// We set the up/down resizing algorithms
-        glTextureParameteri(openGLTextureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(openGLTextureID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        /// And the up/down wrapping algorithms
-        glTextureParameteri(openGLTextureID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTextureParameteri(openGLTextureID, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        /// Then we specify the data of the texture with SubImage2D, as we already set the basic information on glTextureStorage2D.
-        /// glTextureStorage2D could also be used for this task, but is slower.
-        glTextureSubImage2D(openGLTextureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
-        // We can unload the images now that the texture data has been buffered with opengl
-        stbi_image_free(_texturePixels);
-        #endif
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
 
         region = {{0, 0}, {width, height}};
         fileSizeKb = (float)_size / 1024.f;
@@ -211,6 +168,58 @@ namespace engine {
     bool Texture::loadTextSubTextures(Vec2I _offset, Vec2I _size, const unsigned char* _data) {
         glTexSubImage2D(GL_TEXTURE_2D, 0, _offset.x, _offset.y, _size.x, _size.y, GL_ALPHA, GL_UNSIGNED_BYTE, _data);
         return true;
+    }
+
+    int Texture::invertSDLSurface(SDL_Surface *surface) {
+        Uint8 *t;
+        Uint8 *a, *b;
+        Uint8 *last;
+        Uint16 pitch;
+
+        if( SDL_LOCKIFMUST(surface) < 0 )
+            return -2;
+
+        /* do nothing unless at least two lines */
+        if(surface->h < 2) {
+            SDL_UNLOCKIFMUST(surface);
+            return 0;
+        }
+
+        /* get a place to store a line */
+        pitch = surface->pitch;
+        t = (Uint8*)malloc(pitch);
+
+        if(t == nullptr) {
+            SDL_UNLOCKIFMUST(surface);
+            return -2;
+        }
+
+        /* get first line; it's about to be trampled */
+        memcpy(t,surface->pixels,pitch);
+
+        /* now, shuffle the rest so it's almost correct */
+        a = (Uint8*)surface->pixels;
+        last = a + pitch * (surface->h - 1);
+        b = last;
+
+        while(a < b) {
+            memcpy(a,b,pitch);
+            a += pitch;
+            memcpy(b,a,pitch);
+            b -= pitch;
+        }
+
+        /* in this shuffled state, the bottom slice is too far down */
+        memmove( b, b+pitch, last-b );
+
+        /* now we can put back that first row--in the last place */
+        memcpy(last,t,pitch);
+
+        /* everything is in the right place; close up. */
+        free(t);
+        SDL_UNLOCKIFMUST(surface);
+
+        return 0;
     }
 }
 

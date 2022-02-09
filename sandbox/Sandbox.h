@@ -26,6 +26,7 @@ namespace engine {
             Engine* engine;
 
         public:
+            Sandbox() : Layer("Sandbox") {  }
             void onInit() override;
             void onEvent(Event& _event) override;
             void onUpdate(Delta _dt) override;

@@ -3,7 +3,7 @@
 #include "core/Engine.h"
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/render/elements/ShaderManager.h"
-#include "../../sandbox/Sandbox.h"
+//#include "../../sandbox/Sandbox.h"
 #include "core/systems/soundSystem/SoundManager.h"
 
 namespace engine {
@@ -137,7 +137,7 @@ namespace engine {
     }
 
     void Engine::onRender(Delta _dt) {
-        frameBuffer->bind();
+//        frameBuffer->bind();
 
         Renderer::clear(backgroundColor);
 
@@ -152,7 +152,7 @@ namespace engine {
         Renderer::drawSquare({-100, 0}, {50, 50}, Color::Green);
         Renderer::endDebugDraw();
 
-        frameBuffer->unbind();
+//        frameBuffer->unbind();
 
         // Imgui rendering
         Profiler::begin(ProfilerState::IMGUI);

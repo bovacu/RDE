@@ -15,7 +15,7 @@ namespace engine {
         addShader("basic", TEXTURE_VERTEX_SHADER, TEXTURE_FRAGMENT_SHADER);
         addShader("debug", DEBUG_VERTEX_SHADER, DEBUG_FRAGMENT_SHADER);
         addShader("basicText", TEXTURE_VERTEX_SHADER, TEXT_FRAGMENT_SHADER);
-        addShader("outline", TEXTURE_VERTEX_SHADER, OUTLINE_FRAGMENT_SHADER);
+//        addShader("outline", TEXTURE_VERTEX_SHADER, OUTLINE_FRAGMENT_SHADER);
         addShader("framebuffer", "assets/shaders/framebuffer/FrameBufferVertex.glsl", "assets/shaders/framebuffer/FrameBufferFragment.glsl");
     }
 

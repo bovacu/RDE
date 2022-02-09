@@ -42,31 +42,32 @@ namespace engine {
     }
 
     GLuint Shader::loadFromFiles(const std::string& _vertex, const std::string& _fragment) {
-        std::ifstream _vertexFile(_vertex);
-        if (!_vertexFile.good()) {
+        std::string _vertexCode;
+        std::string _fragmentCode;
+
+        SDL_RWops* _vertexFile = SDL_RWFromFile(_vertex.c_str(), "rb");
+        if (_vertexFile == nullptr) {
             LOG_E("Can't read file: ", _vertex)
             return false;
         }
 
-        _vertexFile.seekg(0, std::ios::end);
-        std::string _vertexCode;
-        _vertexCode.resize((size_t)_vertexFile.tellg());
-        _vertexFile.seekg(0, std::ios::beg);
-        _vertexFile.read(&_vertexCode[0], (int)_vertexCode.size());
-        _vertexFile.close();
+        SDL_RWseek(_vertexFile, 0, RW_SEEK_END);
+        _vertexCode.resize((size_t)SDL_RWtell(_vertexFile));
+        SDL_RWseek(_vertexFile, 0, RW_SEEK_SET);
+        SDL_RWread(_vertexFile, &_vertexCode[0], (int)_vertexCode.size(), (int)_vertexCode.size());
+        SDL_RWclose(_vertexFile);
 
-        std::ifstream _fragmentFile(_fragment);
-        if (!_fragmentFile.good()) {
+        SDL_RWops* _fragmentFile = SDL_RWFromFile(_fragment.c_str(), "rb");
+        if (_fragmentFile == nullptr) {
             LOG_E("Can't read file: ", _fragment)
             return false;
         }
 
-        _fragmentFile.seekg(0, std::ios::end);
-        std::string _fragmentCode;
-        _fragmentCode.resize((size_t)_fragmentFile.tellg());
-        _fragmentFile.seekg(0, std::ios::beg);
-        _fragmentFile.read(&_fragmentCode[0], (int)_fragmentCode.size());
-        _fragmentFile.close();
+        SDL_RWseek(_fragmentFile, 0, RW_SEEK_END);
+        _fragmentCode.resize((size_t)SDL_RWtell(_fragmentFile));
+        SDL_RWseek(_fragmentFile, 0, RW_SEEK_SET);
+        SDL_RWread(_fragmentFile, &_fragmentCode[0], (int)_fragmentCode.size(), (int)_fragmentCode.size());
+        SDL_RWclose(_fragmentFile);
 
         return loadFromStrings(_vertexCode, _fragmentCode);
     }
