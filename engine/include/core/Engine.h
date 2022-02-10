@@ -45,7 +45,6 @@ namespace engine {
             ImGuiLayer* imGuiLayer;
             #endif
 
-//            Layer* sandbox;
             Clock clock;
             float timer = 0;
 

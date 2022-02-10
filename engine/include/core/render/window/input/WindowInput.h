@@ -12,7 +12,6 @@
 namespace engine {
 
     class WindowInput : public Input {
-
         public:
             void init(Window* _window);
 

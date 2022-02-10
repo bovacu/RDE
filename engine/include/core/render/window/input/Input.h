@@ -17,23 +17,40 @@
 namespace engine {
 
     enum SystemEventEnum {
-        WINDOW_EVENT = SDL_WINDOWEVENT, KEY_DOWN_E = SDL_KEYDOWN, KEY_UP_E = SDL_KEYUP, QUIT_E = SDL_QUIT,
+        WINDOW_EVENT = SDL_WINDOWEVENT, QUIT_E = SDL_QUIT, WINDOW_EXIT_E = SDL_WINDOWEVENT_LEAVE, WINDOW_RESIZED_E = SDL_WINDOWEVENT_RESIZED,
+        WINDOW_FOCUS_E = SDL_WINDOWEVENT_FOCUS_GAINED, WINDOW_LOST_FOCUS_E = SDL_WINDOWEVENT_FOCUS_LOST, WINDOW_AUDIO_DEVICE_CONNECTED_E = SDL_AUDIODEVICEADDED,
+        WINDOW_AUDIO_DEVICE_DISCONNECTED_E = SDL_AUDIODEVICEREMOVED,
+
+        KEY_DOWN_E = SDL_KEYDOWN, KEY_UP_E = SDL_KEYUP, KEY_MAP_CHANGED_E = SDL_KEYMAPCHANGED, KEY_TEXT_INPUT_E = SDL_TEXTINPUT,
+        KEY_TEXT_EDITING_E = SDL_TEXTEDITING,
+
         MOUSE_MOVED_E = SDL_MOUSEMOTION, MOUSE_DOWN_E = SDL_MOUSEBUTTONDOWN, MOUSE_UP_E = SDL_MOUSEBUTTONUP,
-        MOUSE_SCROLLED_E = SDL_MOUSEWHEEL, WINDOW_EXIT_E = SDL_WINDOWEVENT_LEAVE, WINDOW_RESIZED_E = SDL_WINDOWEVENT_RESIZED,
-        WINDOW_FOCUS_E = SDL_WINDOWEVENT_FOCUS_GAINED, WINDOW_LOST_FOCUS_E = SDL_WINDOWEVENT_FOCUS_LOST,
-        INPUT_TEXT_E = SDL_TEXTINPUT,
+        MOUSE_SCROLLED_E = SDL_MOUSEWHEEL,
 
         GAMEPAD_JOYSTICK = SDL_CONTROLLERAXISMOTION, GAMEPAD_BUTTON_DOWN = SDL_CONTROLLERBUTTONDOWN, GAMEPAD_BUTTON_UP = SDL_CONTROLLERBUTTONUP,
         GAMEPAD_CONNECTED_E = SDL_CONTROLLERDEVICEADDED, GAMEPAD_DISCONNECTED_E = SDL_CONTROLLERDEVICEREMOVED,
 
+        JOYSTICK_HAT_MOTION_E = SDL_JOYHATMOTION, JOYSTICK_BALL_MOTION_E = SDL_JOYBALLMOTION, JOYSTICK_BUTTON_DOWN_E = SDL_JOYBUTTONDOWN,
+        JOYSTICK_BUTTON_UP_E = SDL_JOYBUTTONUP, JOYSTICK_CONNECTED_E = SDL_JOYDEVICEADDED, JOYSTICK_DISCONNECTED_E = SDL_JOYDEVICEREMOVED,
+        JOYSTICK_AXIS_MOTION_E = SDL_JOYAXISMOTION,
+
         MOBILE_TOUCH_DOWN_E = SDL_FINGERDOWN, MOBILE_TOUCH_UP_E = SDL_FINGERUP, MOBILE_TOUCH_MOVED = SDL_FINGERMOTION
     };
 
+    enum InputType {
+        WINDOW,
+        MOUSE,
+        KEYBOARD,
+        CONTROLLER,
+        MOBILE
+    };
+
     class Input {
+        friend class InputManager;
         protected:
             Window* window = nullptr;
             std::unordered_map<int, std::function<void(SDL_Event&)>> events;
-            std::vector<SDL_EventType> ignoredEvents;
+            std::vector<SystemEventEnum> ignoredEvents;
 
         public:
             bool pollEvent(SDL_Event& _event);
@@ -49,14 +66,12 @@ namespace engine {
             MouseInput* mouseInput;
             ControllerInput* controllerInput;
             MobileInput* mobileInput;
-            std::function<void(Event&)> eventCallback;
 
         public:
             static InputManager& get();
             void init(Window* _window);
             void destroy();
             void pollEvents();
-            void setEventCallback(std::function<void(Event&)> _eventCallback);
 
         public:
             static bool isKeyJustPressed(KeyCode _key);
@@ -84,6 +99,10 @@ namespace engine {
             static bool isMobileScreenJustPressed(int _fingerID);
             static bool isMobileScreenPressed(int _fingerID);
             static bool isMobileScreenUp(int _fingerID);
+
+            static std::vector<SystemEventEnum> getEventsIgnored(const InputType& _inputType);
+            static void addEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event);
+            static void removeEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event);
     };
 }
 

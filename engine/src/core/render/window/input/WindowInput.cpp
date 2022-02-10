@@ -11,7 +11,7 @@ namespace engine {
         window = _window;
         events[(int)SystemEventEnum::WINDOW_EVENT] = BIND_FUNC_1(WindowInput::onWindowEvent);
 
-        ignoredEvents = { SDL_AUDIODEVICEADDED };
+        ignoredEvents = { WINDOW_AUDIO_DEVICE_CONNECTED_E, WINDOW_AUDIO_DEVICE_DISCONNECTED_E };
     }
 
     void WindowInput::onWindowEvent(SDL_Event& _event) {

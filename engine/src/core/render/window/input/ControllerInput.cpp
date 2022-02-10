@@ -38,8 +38,8 @@ namespace engine {
         initGamepads();
         #endif
 
-        ignoredEvents = {SDL_JOYAXISMOTION, SDL_JOYBALLMOTION, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP, SDL_JOYDEVICEADDED,
-                        SDL_JOYDEVICEREMOVED, SDL_JOYHATMOTION};
+        ignoredEvents = { JOYSTICK_HAT_MOTION_E, JOYSTICK_BALL_MOTION_E, JOYSTICK_BUTTON_DOWN_E, JOYSTICK_BUTTON_UP_E, JOYSTICK_CONNECTED_E,
+                        JOYSTICK_DISCONNECTED_E, JOYSTICK_AXIS_MOTION_E };
     }
 
     void ControllerInput::initGamepads() {

@@ -100,7 +100,7 @@ namespace engine {
 
         };
 
-        ignoredEvents = { SDL_KEYMAPCHANGED };
+        ignoredEvents = { KEY_MAP_CHANGED_E, KEY_TEXT_INPUT_E, KEY_TEXT_EDITING_E };
     }
 
     void KeyboardInput::onKeyDown(SDL_Event& _event) {

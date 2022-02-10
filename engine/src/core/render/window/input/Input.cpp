@@ -74,10 +74,6 @@ namespace engine {
         }
     }
 
-    void InputManager::setEventCallback(std::function<void(Event&)> _eventCallback) {
-        eventCallback = std::move(_eventCallback);
-    }
-
     bool InputManager::isKeyJustPressed(KeyCode _key) {
         if(get().keyboardInput->getState((int)_key) == 1) {
             get().keyboardInput->setState((int)_key, 2);
@@ -119,11 +115,11 @@ namespace engine {
     }
 
     int InputManager::getMouseX() {
-        return getMousePosition().x;
+        return (int)getMousePosition().x;
     }
 
     int InputManager::getMouseY() {
-        return getMousePosition().y;
+        return (int)getMousePosition().y;
     }
 
     bool InputManager::isGamepadButtonJustPressed(GamePadKeys _button) {
@@ -189,6 +185,71 @@ namespace engine {
 
     bool InputManager::isMobileScreenUp(int _fingerID) {
         return get().mobileInput->getState(_fingerID) == 0;
+    }
+
+    std::vector<SystemEventEnum> InputManager::getEventsIgnored(const InputType& _inputType) {
+        switch (_inputType) {
+            case WINDOW: return get().windowInput->ignoredEvents;
+            case MOUSE: return get().mouseInput->ignoredEvents;
+            case KEYBOARD: return get().keyboardInput->ignoredEvents;
+            case CONTROLLER: return get().controllerInput->ignoredEvents;
+            case MOBILE: return get().mobileInput->ignoredEvents;
+        }
+    }
+
+    void InputManager::addEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event) {
+        switch (_inputType) {
+            case WINDOW: {
+                auto& _v = get().windowInput->ignoredEvents;
+                if(std::find(_v.begin(), _v.end(), _event) == _v.end())
+                    get().windowInput->ignoredEvents.push_back(_event);
+            }
+            case MOUSE: {
+                auto& _v = get().mouseInput->ignoredEvents;
+                if(std::find(_v.begin(), _v.end(), _event) == _v.end())
+                get().mouseInput->ignoredEvents.push_back(_event);
+            }
+            case KEYBOARD: {
+                auto& _v = get().keyboardInput->ignoredEvents;
+                if(std::find(_v.begin(), _v.end(), _event) == _v.end())
+                    get().keyboardInput->ignoredEvents.push_back(_event);
+            }
+            case CONTROLLER: {
+                auto& _v = get().controllerInput->ignoredEvents;
+                if(std::find(_v.begin(), _v.end(), _event) == _v.end())
+                    get().controllerInput->ignoredEvents.push_back(_event);
+            }
+            case MOBILE: {
+                auto& _v = get().mobileInput->ignoredEvents;
+                if(std::find(_v.begin(), _v.end(), _event) == _v.end())
+                    get().mobileInput->ignoredEvents.push_back(_event);
+            }
+        }
+    }
+
+    void InputManager::removeEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event) {
+        switch (_inputType) {
+            case WINDOW: {
+                auto& _v = get().windowInput->ignoredEvents;
+                _v.erase(std::remove(_v.begin(), _v.end(), _event), _v.end());
+            }
+            case MOUSE: {
+                auto& _v = get().mouseInput->ignoredEvents;
+                _v.erase(std::remove(_v.begin(), _v.end(), _event), _v.end());
+            }
+            case KEYBOARD: {
+                auto& _v = get().keyboardInput->ignoredEvents;
+                _v.erase(std::remove(_v.begin(), _v.end(), _event), _v.end());
+            }
+            case CONTROLLER: {
+                auto& _v = get().controllerInput->ignoredEvents;
+                _v.erase(std::remove(_v.begin(), _v.end(), _event), _v.end());
+            }
+            case MOBILE: {
+                auto& _v = get().mobileInput->ignoredEvents;
+                _v.erase(std::remove(_v.begin(), _v.end(), _event), _v.end());
+            }
+        }
     }
 
     void InputManager::destroy() {

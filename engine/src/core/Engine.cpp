@@ -17,7 +17,6 @@ namespace engine {
         lastFrame = 0;
 
         InputManager::get().init(window.get());
-        InputManager::get().setEventCallback(BIND_FUNC_1(Engine::onEvent));
         Console::get().init();
         ShaderManager::get().init();
         FontManager::get().init();
@@ -28,9 +27,6 @@ namespace engine {
         imGuiLayer = new ImGuiLayer();
         pushOverlay(imGuiLayer);
         #endif
-
-//        sandbox = new Sandbox;
-//        pushLayer(sandbox);
 
         if(timePerFrame < 0)
             timePerFrame = 1.0f / 60.f;
