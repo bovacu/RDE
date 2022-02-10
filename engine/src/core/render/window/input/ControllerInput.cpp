@@ -35,7 +35,12 @@ namespace engine {
                 {GamePadKeys::Start,        0},
         };
 
+        #if !defined(__ANDROID__)
         initGamepads();
+        #endif
+
+        ignoreEvents = {SDL_JOYAXISMOTION, SDL_JOYBALLMOTION, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP, SDL_JOYDEVICEADDED,
+                        SDL_JOYDEVICEREMOVED, SDL_JOYHATMOTION};
     }
 
     bool ControllerInput::pollEvent(SDL_Event& _event) {

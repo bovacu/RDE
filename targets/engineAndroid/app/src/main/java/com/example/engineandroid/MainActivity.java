@@ -10,6 +10,7 @@ public class MainActivity extends SDLActivity {
                 "SDL2",
                 "SDL2_mixer",
                 "SDL2_net",
+                "SDL2_image",
                 "engineAndroid"
         };
     }

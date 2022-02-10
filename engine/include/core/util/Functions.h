@@ -26,6 +26,11 @@ namespace engine {
                 return base_filename.substr(0, p);
             }
 
+            static std::string getFileExtension(const std::string& _path) {
+                std::string base_filename = _path.substr(_path.find_last_of("/\\") + 1);
+                return base_filename.substr(base_filename.find_last_of('.') + 1, base_filename.size());
+            }
+
             static Vec2F worldToScreenCoords(const Vec2F& _position, Window* _window, float _aspectRatio) {
                 return {_position.x * _aspectRatio / ((float)_window->getWindowSize().x / 2), _position.y / ((float)_window->getWindowSize().y / 2)};
             }

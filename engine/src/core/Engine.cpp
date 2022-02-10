@@ -59,6 +59,7 @@ namespace engine {
         ShaderManager::get().destroy();
         FontManager::get().destroy();
         SoundManager::get().destroy();
+        Renderer::destroy();
         delete frameBuffer;
     }
 

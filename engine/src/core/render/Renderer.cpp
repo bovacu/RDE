@@ -89,4 +89,8 @@ namespace engine {
     int Renderer::getDrawCalls() {
         return batch.drawCalls;
     }
+
+    void Renderer::destroy() {
+        IMG_Quit();
+    }
 }

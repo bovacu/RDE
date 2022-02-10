@@ -9,7 +9,6 @@ namespace engine {
 
     void Sandbox::onInit() {
         engine = &Engine::get();
-
         auto* _font = FontManager::get().loadFont("assets/fonts/arial.ttf", 54);
         
         TextureAtlasManager::get().addAtlas(50, 50, "assets/test/test.png");
@@ -66,13 +65,8 @@ namespace engine {
 
         animationSystem.update(_dt, player);
 
-//        for(int _i = 0; _i < 14; _i++)
-//            if(InputManager::isGamepadButtonJustPressed((GamePadKeys)_i)) {
-//                LOG_I((int)(GamePadKeys)_i)
-//            }
-
-        if(InputManager::isGamepadAxisPressed(GamePadAxis::Right))
-            LOG_I("hellooo")
+        if(InputManager::isMouseJustPressed(MouseCode::ButtonLeft))
+            LOG_I(InputManager::getMousePosition())
 
     }
 

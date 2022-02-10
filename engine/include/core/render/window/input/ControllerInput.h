@@ -18,6 +18,7 @@ namespace engine {
             Vec2F leftJoystickValue, rightJoystickValue, backButtonsValue;
             Window* window = nullptr;
             std::unordered_map<int, std::function<void(SDL_Event&)>> events;
+            std::vector<SDL_EventType> ignoreEvents;
 
         public:
             void init(Window* _window);

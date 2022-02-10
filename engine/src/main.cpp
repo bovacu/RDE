@@ -3,8 +3,8 @@
 
 int main(int, char* []) {
     engine::Engine _e;
-    engine::Sandbox _sandbox;
-    _e.pushLayer(&_sandbox);
+    auto* _sandbox = new engine::Sandbox;
+    _e.pushLayer(_sandbox);
     _e.onRun();
 
     return EXIT_SUCCESS;

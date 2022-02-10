@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
 
 #${CMAKE_DL_LIBS} is needed as some part of opengl uses it
-SET(TARGET_LINKS glad freetype SDL2::Main SDL2::Mixer SDL2::Net SDL2::Image ${CMAKE_DL_LIBS} OpenGL
+SET(TARGET_LINKS glad freetype SDL2::Main SDL2::Mixer SDL2::Net SDL2::Image SDL2::TTF ${CMAKE_DL_LIBS} OpenGL
         # flecs
         )
 
@@ -37,6 +37,7 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_net REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(SDL2_image REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 
 add_library(glad external/glad/include/glad/glad.h external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include/)

@@ -38,22 +38,29 @@ namespace engine {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+        #ifdef __ANDROID__
+        SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
+        #endif
 
         /// Initialize SDL
-        window = SDL_CreateWindow(_props.title.c_str(), 0, 0, (int)_props.width, (int)_props.height, SDL_WINDOW_OPENGL| SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
+        window = SDL_CreateWindow(_props.title.c_str(), 0, 0, (int)_props.width, (int)_props.height, SDL_WINDOW_OPENGL| SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
         context = SDL_GL_CreateContext(window);
 
         SDL_GL_MakeCurrent(window, context);
         SDL_GL_SetSwapInterval(1);
+
+        #if defined(__linux__) && !defined(__ANDROID__)
         SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-
-        #ifdef __ANDROID__
-
-        #elif __linux__
-            gladLoadGLLoader(SDL_GL_GetProcAddress);
+        SDL_SetWindowResizable(window, SDL_TRUE);
+        gladLoadGLLoader(SDL_GL_GetProcAddress);
+        LOG_S("GLAD and SDL2 initiated correctly");
         #endif
 
-        LOG_S("GLAD and SDL2 initiated correctly");
+        #ifdef __ANDROID__
+        SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE, "1");
+        SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, "1");
+        SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
+        #endif
     }
 
     void Window::setWindowSize(int _width, int _height) {

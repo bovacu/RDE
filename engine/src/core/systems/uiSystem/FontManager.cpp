@@ -123,8 +123,22 @@ namespace engine {
     Font* FontManager::loadFont(const std::string& _pathToFont, int _fontSize) {
         FT_Face _face;
 
-        if (FT_New_Face(ftLibrary, _pathToFont.c_str(), 0, &_face)) {
-            LOG_E("Could not open font ", _pathToFont.c_str())
+        SDL_RWops* _fontFile = SDL_RWFromFile(_pathToFont.c_str(), "rb");
+
+        if(_fontFile == nullptr) {
+            LOG_E("Couldn't open font file ", _pathToFont)
+        }
+
+        off_t fontDataSize = SDL_RWsize(_fontFile);
+
+        auto* fontData = new FT_Byte[fontDataSize];
+        SDL_RWseek(_fontFile, 0, RW_SEEK_END);
+        SDL_RWseek(_fontFile, 0, RW_SEEK_SET);
+        SDL_RWread(_fontFile, &fontData[0], fontDataSize, fontDataSize);
+        SDL_RWclose(_fontFile);
+
+        if (FT_New_Memory_Face(ftLibrary, (const FT_Byte*)fontData, (FT_Long)fontDataSize, 0, &_face)) {
+            LOG_E("Load memory failed");
             return nullptr;
         }
 
@@ -137,6 +151,7 @@ namespace engine {
         fonts[_name].emplace_back(FontHandler{ _font, _fontSize });
 
         FT_Done_Face(_face);
+        delete [] fontData;
 
         LOG_S("Successfully loaded Font ", _name, " with font size ", _fontSize)
 

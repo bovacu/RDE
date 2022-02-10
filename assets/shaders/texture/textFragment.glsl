@@ -10,5 +10,5 @@ uniform sampler2D tex;
 out vec4 outColor;
 
 void main(void) {
-    outColor = vec4(1, 1, 1, texture2D(tex, uv).a) * color;
+    outColor = vec4(1, 1, 1, texture(tex, uv).a) * color;
 }

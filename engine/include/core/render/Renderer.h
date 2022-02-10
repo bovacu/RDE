@@ -27,6 +27,7 @@ namespace engine {
              * Must be called ONCE before rendering anything, BUT after creating the window.
              **/
             static void init(Window* _window);
+            static void destroy();
 
             /**
              * This must be called before any draw call on every frame (in main loop).

@@ -32,11 +32,13 @@ namespace engine {
             bool loadFromFile(const char* _path);
             bool loadFromMemory(unsigned char* _data, int _size);
             bool loadTextTexture(int _width, int _height);
-            bool loadTextSubTextures(Vec2I _offset, Vec2I _size, const unsigned char* _data);
+            bool loadTextSubTextures(Vec2I _offset, Vec2I _size, const void* _data);
 
             IntRect& getRegion();
 
         private:
             int invertSDLSurface(SDL_Surface *surface);
+            SDL_Surface* getSDLSurface(SDL_RWops* _imageFile, const std::string& _pathToFile);
+            void checkGLError();
     };
 }
