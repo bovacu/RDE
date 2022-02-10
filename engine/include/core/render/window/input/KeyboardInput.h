@@ -8,18 +8,16 @@
 #include "core/util/Util.h"
 #include "core/render/window/keysAndButtons/KeyboardKeys.h"
 #include "core/render/window/Window.h"
+#include "core/render/window/input/Input.h"
 
 namespace engine {
 
-    class KeyboardInput {
+    class KeyboardInput : public Input {
         private:
             std::unordered_map<KeyCode, int>  pressedKeyboardKeys;
-            Window* window = nullptr;
-            std::unordered_map<int, std::function<void(SDL_Event&)>> events;
 
         public:
             void init(Window* _window);
-            bool pollEvent(SDL_Event& _event);
             int getState(int _keyOrButton);
             void setState(int _keyOrButton, int _state);
 

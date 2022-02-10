@@ -1,13 +1,14 @@
 #pragma once
 
-#ifdef __ANDROID__
-    #include <GLES3/gl32.h>
-#elif __linux__
-    #include "external/glad/include/glad/glad.h"
-#endif
-
 #include <string>
 #include <unordered_map>
+
+#include "core/Core.h"
+#if IS_MOBILE()
+    #include <GLES3/gl32.h>
+#elif IS_DESKTOP()
+    #include "external/glad/include/glad/glad.h"
+#endif
 
 namespace engine {
     class Shader {

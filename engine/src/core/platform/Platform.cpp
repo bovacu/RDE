@@ -2,24 +2,25 @@
 
 
 #include "core/platform/Platform.h"
+#include "core/Core.h"
 
 namespace engine {
 
     PlatformType Platform::getPlatform() {
 
-        #ifdef __ANDROID__
+        #if IS_ANDROID()
             return PlatformType::ANDROID_;
         #endif
 
-        #ifdef IOS_PLATFORM
+        #if IS_IOS()
             return Platform::IOS:
         #endif
 
-        #ifdef __linux__
+        #if IS_LINUX()
             return PlatformType::LINUX;
-        #elif _WIN32
+        #elif IS_WINDOWS()
             return PlatformType::WINDOWS;
-        #else defined(__APPLE__)
+        #elif IIS_MAC
             return Platform::MAC;
         #endif
     }

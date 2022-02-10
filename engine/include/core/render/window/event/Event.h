@@ -13,7 +13,10 @@ namespace engine {
         None, WindowClosed, WindowResized, WindowMoved, WindowFocused, WindowLostFocus, GameFrame, GameUpdate,
         GameRender, KeyPressed, KeyDown, KeyReleased, KeyTyped, MouseButtonPressed, MouseButtonDown, MouseButtonReleased,
         MouseScrolled, MouseMoved, WindowMinimized,
-        ControllerAxisMoved, ControllerButtonDown, ControllerButtonUp
+
+        ControllerAxisMoved, ControllerButtonDown, ControllerButtonUp,
+
+        MobileTouchDown, MobileTouchUp, MobileTouchMoved
     };
 
     /// Masking the different categories of the events. This makes really easy to get which event type is each event.
@@ -29,7 +32,8 @@ namespace engine {
         EventCategoryKeyboard       = 1u << 2u, /// 00000100
         EventCategoryMouse          = 1u << 3u, /// 00001000
         EventCategoryMouseButton    = 1u << 4u, /// 00010000
-        EventCategoryControllerButton    = 1u << 5u  /// 00100000
+        EventCategoryControllerButton    = 1u << 5u,  /// 00100000
+        EventCategoryMobileInput    = 1u << 6u  /// 00100000
     };
 
     /// This class is the base for any event and contains the information and methods necessary to capture and control

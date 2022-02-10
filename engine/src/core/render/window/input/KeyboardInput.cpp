@@ -2,7 +2,6 @@
 
 
 #include "core/render/window/input/KeyboardInput.h"
-#include "core/render/window/input/Input.h"
 #include "core/render/window/event/KeyEvent.h"
 
 namespace engine {
@@ -100,15 +99,8 @@ namespace engine {
                 {KeyCode::Down,         0},
 
         };
-    }
 
-    bool KeyboardInput::pollEvent(SDL_Event& _event) {
-        if(events.find((SystemEventEnum)_event.type) == events.end()) {
-            return false;
-        }
-
-        events[(int)_event.type](_event);
-        return true;
+        ignoredEvents = { SDL_KEYMAPCHANGED };
     }
 
     void KeyboardInput::onKeyDown(SDL_Event& _event) {

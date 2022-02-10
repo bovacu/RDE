@@ -24,7 +24,7 @@ namespace engine {
         Renderer::init(window.get());
         SoundManager::get().init();
 
-        #ifndef __ANDROID__
+        #if !IS_MOBILE()
         imGuiLayer = new ImGuiLayer();
         pushOverlay(imGuiLayer);
         #endif
@@ -60,6 +60,7 @@ namespace engine {
         FontManager::get().destroy();
         SoundManager::get().destroy();
         Renderer::destroy();
+        InputManager::get().destroy();
         delete frameBuffer;
     }
 
@@ -157,7 +158,7 @@ namespace engine {
 
         // Imgui rendering
         Profiler::begin(ProfilerState::IMGUI);
-        #ifndef __ANDROID__
+        #if !IS_MOBILE()
         imGuiLayer->begin();
         for (Layer* _layer : layerStack)
             _layer->onImGuiRender(_dt);

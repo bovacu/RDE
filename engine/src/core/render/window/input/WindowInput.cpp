@@ -2,7 +2,6 @@
 
 
 #include "core/render/window/input/WindowInput.h"
-#include "core/render/window/input/Input.h"
 #include "core/render/window/event/WindowEvent.h"
 #include "core/Engine.h"
 
@@ -11,15 +10,8 @@ namespace engine {
     void WindowInput::init(Window* _window) {
         window = _window;
         events[(int)SystemEventEnum::WINDOW_EVENT] = BIND_FUNC_1(WindowInput::onWindowEvent);
-    }
 
-    bool WindowInput::pollEvent(SDL_Event& _event) {
-        if(events.find((SystemEventEnum)_event.type) == events.end()) {
-            return false;
-        }
-
-        events[(int)_event.type](_event);
-        return true;
+        ignoredEvents = { SDL_AUDIODEVICEADDED };
     }
 
     void WindowInput::onWindowEvent(SDL_Event& _event) {

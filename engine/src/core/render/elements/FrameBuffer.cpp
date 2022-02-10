@@ -4,9 +4,9 @@
 #include "core/render/elements/FrameBuffer.h"
 #include "core/render/elements/ShaderManager.h"
 
-#ifdef __ANDROID__
+#if IS_MOBILE()
     #include <GLES3/gl32.h>
-#elif __linux__
+#elif IS_DESKTOP()
     #include "external/glad/include/glad/glad.h"
 #endif
 

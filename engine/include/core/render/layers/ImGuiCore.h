@@ -4,7 +4,7 @@
 #ifndef ENGINE2_0_IMGUI_CORE_H
 #define ENGINE2_0_IMGUI_CORE_H
 
-#ifndef __ANDROID__
+#if !IS_MOBILE()
 #include <imgui.h>
 #include "external/imgui/implot/implot.h"
 #include "external/imgui/nodeEditor/imgui_node_editor.h"

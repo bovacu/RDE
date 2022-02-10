@@ -4,9 +4,11 @@
 #ifndef ENGINE2_0_PLATFORM_HEADER_SDL_MIXER_H
 #define ENGINE2_0_PLATFORM_HEADER_SDL_MIXER_H
 
-#ifdef __ANDROID__
-    #include "../../targets/engineAndroid/SDL_mixer/include/SDL_mixer.h"
-#elif __linux__
+#include "core/Core.h"
+
+#if IS_MOBILE()
+    #include "../SDL_mixer/include/SDL_mixer.h"
+#elif IS_DESKTOP()
     #include <SDL2/SDL_mixer.h>
 #endif
 

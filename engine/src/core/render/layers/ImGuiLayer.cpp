@@ -1,4 +1,5 @@
-#ifndef __ANDROID__
+#include "core/Core.h"
+#if !IS_MOBILE()
 
 #include <imgui_internal.h>
 #include "core/render/layers/ImGuiLayer.h"
@@ -170,7 +171,7 @@ namespace engine {
         ImGui::Text("X: %f, Y: %f", InputManager::getMousePosition().x, InputManager::getMousePosition().y);
         ImGui::Separator();
         int _freeGpuMb = 0;
-        #ifndef __ANDROID__
+        #if !IS_MOBILE()
         glGetIntegerv( GL_TEXTURE_FREE_MEMORY_ATI,&_freeGpuMb);
         #endif
         ImGui::Text("GPU free Memory: %.2f MBs", (float)_freeGpuMb / 1000.f);

@@ -13,6 +13,7 @@
 #include "core/systems/uiSystem/Text.h"
 #include "core/render/window/event/JoystickEvent.h"
 #include "core/Engine.h"
+#include "core/render/window/event/MobileEvent.h"
 
 namespace engine {
 
@@ -38,8 +39,6 @@ namespace engine {
 
         private:
             bool onMouseScrolled(MouseScrolledEvent& _event);
-            bool onControllerButtonDown(JoystickButtonDownEvent& _event);
-            bool onControllerButtonUp(JoystickButtonUpEvent& _event);
     };
 
 }

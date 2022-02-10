@@ -7,17 +7,14 @@
 
 #include "core/util/Util.h"
 #include "core/render/window/Window.h"
+#include "core/render/window/input/Input.h"
 
 namespace engine {
 
-    class WindowInput {
-        private:
-            Window* window = nullptr;
-            std::unordered_map<int, std::function<void(SDL_Event&)>> events;
+    class WindowInput : public Input {
 
         public:
             void init(Window* _window);
-            bool pollEvent(SDL_Event& _event);
 
         private:
             void onWindowEvent(SDL_Event& _event);

@@ -25,17 +25,15 @@ inline void printTime(const char* _init, const char* _end) {
     std::time_t t = std::time(nullptr);   // get time now
     std::tm* now = std::localtime(&t);
 
-    #ifdef __ANDROID__
-
-    #elif __linux__
-        std::cout << _init << "[" << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << "] " << _end;
+    #if IS_DESKTOP()
+    std::cout << _init << "[" << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << "] " << _end;
     #endif
 }
 
 template <typename Arg1>
 inline void printer(const char* _init, const char* _end, Arg1&& arg1)
 {
-#ifdef __ANDROID__
+#if IS_MOBILE()
     std::stringstream _stream;
     _stream << arg1;
 
@@ -48,7 +46,7 @@ inline void printer(const char* _init, const char* _end, Arg1&& arg1)
     } else if (strcmp("\033[1;32m", _init) == 0) {
         SDL_Log("%s", _stream.str().c_str());
     }
-#elif __linux__
+#elif IS_DESKTOP()
     std::cout << _init << arg1 << _end << std::endl;
 #endif
 }
@@ -56,7 +54,7 @@ inline void printer(const char* _init, const char* _end, Arg1&& arg1)
 template <typename Arg1, typename... Args>
 inline void printer(const char* _init, const char* _end, Arg1&& arg1, Args&&... args)
 {
-#ifdef __ANDROID__
+#if IS_MOBILE()
     std::stringstream _stream;
     _stream << arg1;
 
@@ -72,7 +70,7 @@ inline void printer(const char* _init, const char* _end, Arg1&& arg1, Args&&... 
     } else if (strcmp("\033[1;32m", _init) == 0) {
         SDL_Log("%s", _stream.str().c_str());
     }
-#elif __linux__
+#elif IS_DESKTOP()
     std::cout << _init << arg1;
     printer(_init, _end, args...);
 #endif

@@ -2,9 +2,29 @@
 #include "core/Engine.h"
 #include "core/render/window/event/JoystickEvent.h"
 
+#include "core/render/window/input/WindowInput.h"
+#include "core/render/window/input/KeyboardInput.h"
+#include "core/render/window/input/MouseInput.h"
+#include "core/render/window/input/ControllerInput.h"
+#include "core/render/window/input/MobileInput.h"
+
 #include <utility>
 
 namespace engine {
+
+    bool Input::pollEvent(SDL_Event& _event) {
+        if(events.find((SystemEventEnum)_event.type) == events.end()) {
+            return false;
+        }
+
+        events[(int)_event.type](_event);
+        return true;
+    }
+
+    bool Input::ignoreEvent(const SDL_EventType& _eventType) {
+        return std::find(ignoredEvents.begin(), ignoredEvents.end(), _eventType) != ignoredEvents.end();
+    }
+
 
     InputManager& InputManager::get() {
         static InputManager _inputManager;
@@ -12,10 +32,17 @@ namespace engine {
     }
 
     void InputManager::init(Window* _window) {
-        windowInput.init(_window);
-        keyboardInput.init(_window);
-        mouseInput.init(_window);
-        controllerInput.init(_window);
+        windowInput = new WindowInput;
+        keyboardInput = new KeyboardInput;
+        mouseInput = new MouseInput;
+        controllerInput = new ControllerInput;
+        mobileInput = new MobileInput;
+
+        windowInput->init(_window);
+        keyboardInput->init(_window);
+        mouseInput->init(_window);
+        controllerInput->init(_window);
+        mobileInput->init(_window);
     }
 
     void InputManager::pollEvents() {
@@ -24,14 +51,21 @@ namespace engine {
 
             bool _eventImplemented = false;
 
-#ifndef __ANDROID__
+#if !IS_MOBILE()
             ImGui_ImplSDL2_ProcessEvent(&_event);
 #endif
 
-            _eventImplemented |= windowInput.pollEvent(_event);
-            _eventImplemented |= keyboardInput.pollEvent(_event);
-            _eventImplemented |= mouseInput.pollEvent(_event);
-            _eventImplemented |= controllerInput.pollEvent(_event);
+            _eventImplemented |= windowInput->pollEvent(_event);
+            _eventImplemented |= keyboardInput->pollEvent(_event);
+            _eventImplemented |= mouseInput->pollEvent(_event);
+            _eventImplemented |= controllerInput->pollEvent(_event);
+            _eventImplemented |= mobileInput->pollEvent(_event);
+
+            _eventImplemented |= windowInput->ignoreEvent((SDL_EventType)_event.type);
+            _eventImplemented |= keyboardInput->ignoreEvent((SDL_EventType)_event.type);
+            _eventImplemented |= controllerInput->ignoreEvent((SDL_EventType)_event.type);
+            _eventImplemented |= mouseInput->ignoreEvent((SDL_EventType)_event.type);
+            _eventImplemented |= mobileInput->ignoreEvent((SDL_EventType)_event.type);
 
             if(!_eventImplemented) {
                 LOG_W("System event ", _event.type, " not implemented!!")
@@ -45,8 +79,8 @@ namespace engine {
     }
 
     bool InputManager::isKeyJustPressed(KeyCode _key) {
-        if(get().keyboardInput.getState((int)_key) == 1) {
-            get().keyboardInput.setState((int)_key, 2);
+        if(get().keyboardInput->getState((int)_key) == 1) {
+            get().keyboardInput->setState((int)_key, 2);
             return true;
         }
 
@@ -54,18 +88,18 @@ namespace engine {
     }
 
     bool InputManager::isKeyPressed(KeyCode _key) {
-        return get().keyboardInput.getState((int)_key) == 1;
+        return get().keyboardInput->getState((int)_key) == 1;
     }
 
     bool InputManager::isKeyReleased(KeyCode _key) {
-        return get().keyboardInput.getState((int)_key) == 0;
+        return get().keyboardInput->getState((int)_key) == 0;
     }
 
 
 
     bool InputManager::isMouseJustPressed(MouseCode _mouseButton) {
-        if(get().mouseInput.getState((int)_mouseButton) == 1) {
-            get().mouseInput.setState((int)_mouseButton, 2);
+        if(get().mouseInput->getState((int)_mouseButton) == 1) {
+            get().mouseInput->setState((int)_mouseButton, 2);
             return true;
         }
 
@@ -73,15 +107,15 @@ namespace engine {
     }
 
     bool InputManager::isMousePressed(MouseCode _button) {
-        return get().mouseInput.getState((int)_button) == 1;
+        return get().mouseInput->getState((int)_button) == 1;
     }
 
     bool InputManager::isMouseReleased(MouseCode _button) {
-        return  get().mouseInput.getState((int)_button) == 0;
+        return  get().mouseInput->getState((int)_button) == 0;
     }
 
     Vec2F InputManager::getMousePosition() {
-        return get().mouseInput.getMousePosition();
+        return get().mouseInput->getMousePosition();
     }
 
     int InputManager::getMouseX() {
@@ -93,31 +127,41 @@ namespace engine {
     }
 
     bool InputManager::isGamepadButtonJustPressed(GamePadKeys _button) {
-//        if(inputSystem->pressedGamepadKeys[_button] == 1) {
-//            inputSystem->pressedGamepadKeys[_button] = 2;
-//            return true;
-//        }
+        if(get().controllerInput->getState((int)_button) == 1) {
+            get().controllerInput->setState((int)_button, 2);
+            return true;
+        }
 
         return false;
     }
 
     bool InputManager::isGamepadButtonPressed(GamePadKeys _button) {
-//        return inputSystem->pressedGamepadKeys[_button] == 1;
-        return false;
+        return get().controllerInput->getState((int)_button) == 1;
     }
 
     bool InputManager::isGamepadButtonReleased(GamePadKeys _button) {
-//        return inputSystem->pressedGamepadKeys[_button] == 0;
-        return false;
+        return get().controllerInput->getState((int)_button) == 0;
     }
 
     bool InputManager::isGamepadAxisPressed(GamePadAxis _axis) {
-//        switch (_axis) {
-//            case GamePadAxis::Left: return inputSystem->leftJoystickValue.x != 0 || inputSystem->leftJoystickValue.y != 0;
-//            case GamePadAxis::Right: return inputSystem->rightJoystickValue.x != 0 || inputSystem->rightJoystickValue.y != 0;
-//            case GamePadAxis::LT: return inputSystem->backButtonsValue.x != 0;
-//            case GamePadAxis::RT: return inputSystem->backButtonsValue.y != 0;
-//        }
+        switch (_axis) {
+            case GamePadAxis::Left: {
+                auto _val = get().controllerInput->getAxisValue(GamePadAxis::Left);
+                return _val.x != 0 ||_val.y != 0;
+            }
+            case GamePadAxis::Right: {
+                auto _val = get().controllerInput->getAxisValue(GamePadAxis::Right);
+                return _val.x != 0 ||_val.y != 0;
+            }
+            case GamePadAxis::LT: {
+                auto _val = get().controllerInput->getAxisValue(GamePadAxis::LT);
+                return _val.x != 0;
+            }
+            case GamePadAxis::RT:  {
+                auto _val = get().controllerInput->getAxisValue(GamePadAxis::RT);
+                return _val.x != 0;
+            }
+        }
 
         return false;
     }
@@ -128,5 +172,30 @@ namespace engine {
 
     bool InputManager::isGamepadAxisReleased(GamePadAxis _axis) {
         return false;
+    }
+
+    bool InputManager::isMobileScreenJustPressed(int _fingerID) {
+        if(get().mobileInput->getState(_fingerID) == 1) {
+            get().mobileInput->setState(_fingerID, 2);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool InputManager::isMobileScreenPressed(int _fingerID) {
+        return get().mobileInput->getState(_fingerID) == 1;
+    }
+
+    bool InputManager::isMobileScreenUp(int _fingerID) {
+        return get().mobileInput->getState(_fingerID) == 0;
+    }
+
+    void InputManager::destroy() {
+        delete windowInput;
+        delete mouseInput;
+        delete keyboardInput;
+        delete controllerInput;
+        delete mobileInput;
     }
 }

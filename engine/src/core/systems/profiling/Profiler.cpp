@@ -81,7 +81,7 @@ namespace engine {
     }
 
 
-#ifndef __ANDROID__
+#if !IS_MOBILE()
 ScrollingBuffer::ScrollingBuffer(int max_size) {
         MaxSize = max_size;
         Offset  = 0;

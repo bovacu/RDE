@@ -2,7 +2,6 @@
 
 
 #include "core/render/window/input/MouseInput.h"
-#include "core/render/window/input/Input.h"
 #include "core/render/window/event/MouseEvent.h"
 
 namespace engine {
@@ -17,28 +16,19 @@ namespace engine {
         events[SystemEventEnum::MOUSE_SCROLLED_E] = BIND_FUNC_1(MouseInput::onMouseScroll);
 
         pressedMouseButtons = {
-                {MouseCode::Button0,        0},
-                {MouseCode::Button1,        0},
-                {MouseCode::Button2,        0},
-                {MouseCode::Button3,        0},
-                {MouseCode::Button4,        0},
-                {MouseCode::Button5,        0},
-                {MouseCode::Button6,        0},
-                {MouseCode::Button7,        0},
-                {MouseCode::ButtonLast,     0},
-                {MouseCode::ButtonLeft,     0},
-                {MouseCode::ButtonMiddle,   0},
-                {MouseCode::ButtonRight,    0},
+                {MouseCode::Button0,        -1},
+                {MouseCode::Button1,        -1},
+                {MouseCode::Button2,        -1},
+                {MouseCode::Button3,        -1},
+                {MouseCode::Button4,        -1},
+                {MouseCode::Button5,        -1},
+                {MouseCode::Button6,        -1},
+                {MouseCode::Button7,        -1},
+                {MouseCode::ButtonLast,     -1},
+                {MouseCode::ButtonLeft,     -1},
+                {MouseCode::ButtonMiddle,   -1},
+                {MouseCode::ButtonRight,    -1},
         };
-    }
-
-    bool MouseInput::pollEvent(SDL_Event& _event) {
-        if(events.find((SystemEventEnum)_event.type) == events.end()) {
-            return false;
-        }
-
-        events[(int)_event.type](_event);
-        return true;
     }
 
     void MouseInput::onMouseMoved(SDL_Event& _event) {

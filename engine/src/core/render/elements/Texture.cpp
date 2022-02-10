@@ -1,7 +1,7 @@
 #include "core/render/elements/Texture.h"
 #include "core/util/Logger.h"
 
-#ifndef __ANDROID__
+#if !IS_MOBILE()
 #include <filesystem>
 #endif
 
@@ -91,7 +91,7 @@ namespace engine {
 
         region = {{0, 0}, {width, height}};
 
-        #ifndef __ANDROID__
+        #if !IS_MOBILE()
         fileSizeKb = (float)std::filesystem::file_size(_path) / 1000.f;
         #endif
 

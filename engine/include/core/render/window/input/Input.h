@@ -11,10 +11,6 @@
 
 #include "core/util/Util.h"
 #include "core/render/window/Window.h"
-#include "WindowInput.h"
-#include "KeyboardInput.h"
-#include "MouseInput.h"
-#include "ControllerInput.h"
 
 #define SDL_JOYSTICK_DISABLED
 
@@ -26,23 +22,39 @@ namespace engine {
         MOUSE_SCROLLED_E = SDL_MOUSEWHEEL, WINDOW_EXIT_E = SDL_WINDOWEVENT_LEAVE, WINDOW_RESIZED_E = SDL_WINDOWEVENT_RESIZED,
         WINDOW_FOCUS_E = SDL_WINDOWEVENT_FOCUS_GAINED, WINDOW_LOST_FOCUS_E = SDL_WINDOWEVENT_FOCUS_LOST,
         INPUT_TEXT_E = SDL_TEXTINPUT,
-        FOO_1 = SDL_KEYMAPCHANGED, FOO_2 = SDL_JOYAXISMOTION, FOO_3 = SDL_AUDIODEVICEADDED,
+
         GAMEPAD_JOYSTICK = SDL_CONTROLLERAXISMOTION, GAMEPAD_BUTTON_DOWN = SDL_CONTROLLERBUTTONDOWN, GAMEPAD_BUTTON_UP = SDL_CONTROLLERBUTTONUP,
-        GAMEPAD_CONNECTED_E = SDL_CONTROLLERDEVICEADDED, GAMEPAD_DISCONNECTED_E = SDL_CONTROLLERDEVICEREMOVED
+        GAMEPAD_CONNECTED_E = SDL_CONTROLLERDEVICEADDED, GAMEPAD_DISCONNECTED_E = SDL_CONTROLLERDEVICEREMOVED,
+
+        MOBILE_TOUCH_DOWN_E = SDL_FINGERDOWN, MOBILE_TOUCH_UP_E = SDL_FINGERUP, MOBILE_TOUCH_MOVED = SDL_FINGERMOTION
     };
 
+    class Input {
+        protected:
+            Window* window = nullptr;
+            std::unordered_map<int, std::function<void(SDL_Event&)>> events;
+            std::vector<SDL_EventType> ignoredEvents;
+
+        public:
+            bool pollEvent(SDL_Event& _event);
+            bool ignoreEvent(const SDL_EventType& _eventType);
+    };
+
+    class WindowInput; class KeyboardInput; class MouseInput; class ControllerInput; class MobileInput;
     class InputManager {
 
         private:
-            WindowInput windowInput;
-            KeyboardInput keyboardInput;
-            MouseInput mouseInput;
-            ControllerInput controllerInput;
+            WindowInput* windowInput;
+            KeyboardInput* keyboardInput;
+            MouseInput* mouseInput;
+            ControllerInput* controllerInput;
+            MobileInput* mobileInput;
             std::function<void(Event&)> eventCallback;
 
         public:
             static InputManager& get();
             void init(Window* _window);
+            void destroy();
             void pollEvents();
             void setEventCallback(std::function<void(Event&)> _eventCallback);
 
@@ -68,6 +80,10 @@ namespace engine {
             static bool isGamepadAxisJustPressed(GamePadAxis _axis);
             static bool isGamepadAxisPressed(GamePadAxis _axis);
             static bool isGamepadAxisReleased(GamePadAxis _axis);
+
+            static bool isMobileScreenJustPressed(int _fingerID);
+            static bool isMobileScreenPressed(int _fingerID);
+            static bool isMobileScreenUp(int _fingerID);
     };
 }
 

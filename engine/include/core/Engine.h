@@ -41,7 +41,7 @@ namespace engine {
             static Engine* gameInstance;
             LayerStack layerStack;
 
-            #ifndef __ANDROID__
+            #if !IS_MOBILE()
             ImGuiLayer* imGuiLayer;
             #endif
 

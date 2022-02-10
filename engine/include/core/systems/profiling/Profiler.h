@@ -4,6 +4,8 @@
 #ifndef ENGINE2_0_PROFILER_H
 #define ENGINE2_0_PROFILER_H
 
+#include "core/Core.h"
+
 #include <chrono>
 #include <unordered_map>
 #include <ostream>
@@ -44,7 +46,7 @@ namespace engine {
         return _ostream;
     }
 
-#ifndef __ANDROID__
+#if !IS_MOBILE()
     struct ScrollingBuffer {
         int MaxSize;
         int Offset;

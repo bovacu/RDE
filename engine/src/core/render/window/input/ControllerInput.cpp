@@ -2,7 +2,6 @@
 
 
 #include "core/render/window/input/ControllerInput.h"
-#include "core/render/window/input/Input.h"
 #include "core/render/window/event/JoystickEvent.h"
 
 namespace engine {
@@ -35,16 +34,12 @@ namespace engine {
                 {GamePadKeys::Start,        0},
         };
 
-        #if !defined(__ANDROID__)
+        #if !IS_MOBILE()
         initGamepads();
         #endif
 
-        ignoreEvents = {SDL_JOYAXISMOTION, SDL_JOYBALLMOTION, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP, SDL_JOYDEVICEADDED,
+        ignoredEvents = {SDL_JOYAXISMOTION, SDL_JOYBALLMOTION, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP, SDL_JOYDEVICEADDED,
                         SDL_JOYDEVICEREMOVED, SDL_JOYHATMOTION};
-    }
-
-    bool ControllerInput::pollEvent(SDL_Event& _event) {
-        return false;
     }
 
     void ControllerInput::initGamepads() {
@@ -111,5 +106,22 @@ namespace engine {
 
     void ControllerInput::onGamepadDisconnected(SDL_Event& _event) {
         LOG_W("Removed controller: ", _event.cdevice.which)
+    }
+
+    int ControllerInput::getState(int _keyOrButton) {
+        return pressedGamepadKeys[(GamePadKeys)_keyOrButton];
+    }
+
+    void ControllerInput::setState(int _keyOrButton, int _state) {
+        pressedGamepadKeys[(GamePadKeys)_keyOrButton] = _state;
+    }
+
+    Vec2F ControllerInput::getAxisValue(const GamePadAxis& _axis) {
+        switch (_axis) {
+            case GamePadAxis::Left: return leftJoystickValue;
+            case GamePadAxis::Right: return rightJoystickValue;
+            case GamePadAxis::LT: return {backButtonsValue.x, 0.f};
+            case GamePadAxis::RT: return {backButtonsValue.y, 0.f};
+        }
     }
 }

@@ -18,6 +18,15 @@
 #define ENGINE_DEBUG
 #define ENGINE_ENABLE_ASSERTS
 
+#define IS_MAC() (defined(__APPLE__) && defined(TARGET_OS_MAC))
+#define IS_WINDOWS() (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
+#define IS_LINUX() (defined(__linux__))
+#define IS_DESKTOP() (IS_LINUX() || IS_MAC() || IS_WINDOWS())
+
+#define IS_IOS() (defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR)))
+#define IS_ANDROID() (defined(__ANDROID__))
+#define IS_MOBILE() (IS_ANDROID() || IS_IOS())
+
 #ifdef ENGINE_DEBUG
     #if defined(_WIN32)
 		#define ENGINE_DEBUGBREAK() __debugbreak()
