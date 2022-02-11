@@ -12,11 +12,19 @@ namespace engine {
     }
 
     void ShaderManager::init() {
-        addShader("basic", TEXTURE_VERTEX_SHADER, TEXTURE_FRAGMENT_SHADER);
-        addShader("debug", DEBUG_VERTEX_SHADER, DEBUG_FRAGMENT_SHADER);
-        addShader("basicText", TEXTURE_VERTEX_SHADER, TEXT_FRAGMENT_SHADER);
-//        addShader("outline", TEXTURE_VERTEX_SHADER, OUTLINE_FRAGMENT_SHADER);
-        addShader("framebuffer", "assets/shaders/framebuffer/FrameBufferVertex.glsl", "assets/shaders/framebuffer/FrameBufferFragment.glsl");
+    #if IS_MOBILE()
+        addShader("basic", TEXTURE_VERTEX_SHADER_ES, TEXTURE_FRAGMENT_SHADER_ES);
+        addShader("debug", DEBUG_VERTEX_SHADER_ES, DEBUG_FRAGMENT_SHADER_ES);
+        addShader("basicText", TEXTURE_VERTEX_SHADER_ES, TEXT_FRAGMENT_SHADER_ES);
+        addShader("outline", TEXTURE_VERTEX_SHADER_ES, OUTLINE_FRAGMENT_SHADER_ES);
+        addShader("framebuffer", "assets/shaders/es/framebuffer/FrameBufferVertex.glsl", "assets/shaders/es/framebuffer/FrameBufferFragment.glsl");
+    #else
+        addShader("basic", TEXTURE_VERTEX_SHADER_CORE, TEXTURE_FRAGMENT_SHADER_CORE);
+        addShader("debug", DEBUG_VERTEX_SHADER_CORE, DEBUG_FRAGMENT_SHADER_CORE);
+        addShader("basicText", TEXTURE_VERTEX_SHADER_CORE, TEXT_FRAGMENT_SHADER_CORE);
+        addShader("outline", TEXTURE_VERTEX_SHADER_CORE, OUTLINE_FRAGMENT_SHADER_CORE);
+        addShader("framebuffer", "assets/shaders/core/framebuffer/FrameBufferVertex.glsl", "assets/shaders/core/framebuffer/FrameBufferFragment.glsl");
+    #endif
     }
 
     ShaderID ShaderManager::addShader(const std::string& _shaderName, const std::string& _vertex, const std::string& _fragment) {

@@ -128,6 +128,8 @@ include_directories(${CMAKE_SOURCE_DIRECTORY})
 file(GLOB_RECURSE CPP_HEADERS ${MAIN_SOURCE_DIR}/include/*.h*  ${SANDBOX_SOURCE_DIR}/*.h*)
 file(GLOB_RECURSE CPP_SOURCES ${MAIN_SOURCE_DIR}/src/*.cpp   ${SANDBOX_SOURCE_DIR}/*.cpp)
 
+set(GL_PROFILES "GL_PROFILE_GLES2" "GL_PROFILE_GLES3")
+
 add_library(
         engineAndroid
         SHARED
@@ -149,3 +151,5 @@ target_link_libraries(
         ${log-lib}
         GLESv3
 )
+
+target_compile_definitions(engineAndroid PRIVATE ${GL_PROFILES})

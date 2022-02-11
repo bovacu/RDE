@@ -71,7 +71,7 @@ namespace engine {
         GraveAccent = SDL_SCANCODE_GRAVE,               /* ` */
 
         Escape = SDL_SCANCODE_ESCAPE,
-        Enter = SDL_SCANCODE_KP_ENTER,
+        Enter = SDL_SCANCODE_RETURN,
         Tab = SDL_SCANCODE_TAB,
         Backspace = SDL_SCANCODE_BACKSPACE,
         Insert = SDL_SCANCODE_INSERT,

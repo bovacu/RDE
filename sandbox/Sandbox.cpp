@@ -58,8 +58,9 @@ namespace engine {
     }
 
     void Sandbox::onUpdate(Delta _dt) {
-        if(InputManager::isKeyJustPressed(KeyCode::Enter))
+        if(InputManager::isKeyJustPressed(KeyCode::Enter)) {
             player.setShader(ShaderManager::get().getShader("outline"));
+        }
 
         animationSystem.update(_dt, player);
 

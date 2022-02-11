@@ -28,8 +28,8 @@ namespace engine {
 
         ButtonLast = Button7,
         ButtonLeft = Button0,
-        ButtonRight = Button1,
-        ButtonMiddle = Button2
+        ButtonRight = Button2,
+        ButtonMiddle = Button1
     } Mouse;
 
     inline std::ostream &operator<<(std::ostream &os, MouseCode mouseCode) {

@@ -4,16 +4,27 @@
 #ifndef ENGINE2_0_CORE_H
 #define ENGINE2_0_CORE_H
 
-#define TEXTURE_VERTEX_SHADER "assets/shaders/texture/vertex.glsl"
-#define DEBUG_VERTEX_SHADER "assets/shaders/debug/debugVertex.glsl"
+#define TEXTURE_VERTEX_SHADER_ES "assets/shaders/es/texture/vertex.glsl"
+#define DEBUG_VERTEX_SHADER_ES "assets/shaders/es/debug/debugVertex.glsl"
 
-#define TEXTURE_FRAGMENT_SHADER "assets/shaders/texture/fragment.glsl"
-#define TEXT_FRAGMENT_SHADER "assets/shaders/texture/textFragment.glsl"
-#define OUTLINE_FRAGMENT_SHADER "assets/shaders/texture/outlineFragment.glsl"
-#define NEON_FRAGMENT_SHADER "assets/shaders/texture/glowFragment.glsl"
-#define BLOOM_FRAGMENT_SHADER "assets/shaders/texture/bloomFragment.glsl"
-#define BLUR_FRAGMENT_SHADER "assets/shaders/texture/blurFragment.glsl"
-#define DEBUG_FRAGMENT_SHADER "assets/shaders/debug/debugFragment.glsl"
+#define TEXTURE_VERTEX_SHADER_CORE "assets/shaders/core/texture/vertex.glsl"
+#define DEBUG_VERTEX_SHADER_CORE "assets/shaders/core/debug/debugVertex.glsl"
+
+#define TEXTURE_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/fragment.glsl"
+#define TEXT_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/textFragment.glsl"
+#define OUTLINE_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/outlineFragment.glsl"
+#define NEON_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/glowFragment.glsl"
+#define BLOOM_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/bloomFragment.glsl"
+#define BLUR_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/blurFragment.glsl"
+#define DEBUG_FRAGMENT_SHADER_CORE "assets/shaders/core/debug/debugFragment.glsl"
+
+#define TEXTURE_FRAGMENT_SHADER_ES "assets/shaders/es/texture/fragment.glsl"
+#define TEXT_FRAGMENT_SHADER_ES "assets/shaders/es/texture/textFragment.glsl"
+#define OUTLINE_FRAGMENT_SHADER_ES "assets/shaders/es/texture/outlineFragment.glsl"
+#define NEON_FRAGMENT_SHADER_ES "assets/shaders/es/texture/glowFragment.glsl"
+#define BLOOM_FRAGMENT_SHADER_ES "assets/shaders/es/texture/bloomFragment.glsl"
+#define BLUR_FRAGMENT_SHADER_ES "assets/shaders/es/texture/blurFragment.glsl"
+#define DEBUG_FRAGMENT_SHADER_ES "assets/shaders/es/debug/debugFragment.glsl"
 
 #define ENGINE_DEBUG
 #define ENGINE_ENABLE_ASSERTS

@@ -42,6 +42,8 @@ find_package(SDL2_ttf REQUIRED)
 add_library(glad external/glad/include/glad/glad.h external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include/)
 
+set(GL_PROFILES "GL_PROFILE_GL3")
+
 #-------------- FLECS
 
 #find_package(flecs REQUIRED)
@@ -110,4 +112,5 @@ add_executable( Engine2_0 engine/src/main.cpp
         engine/include/core/render/window/input/MobileInput.h engine/src/core/render/window/input/MobileInput.cpp engine/include/core/render/window/event/MobileEvent.h)
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
+target_compile_definitions(Engine2_0 PRIVATE ${GL_PROFILES})
 

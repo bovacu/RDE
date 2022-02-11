@@ -60,6 +60,9 @@ namespace engine {
             auto* _currentGameController = SDL_GameControllerOpen(_i);
             if(_currentGameController == nullptr) {
                 LOG_E("Error with controller ", _i)
+                auto _controller = new Controller(-100);
+                _controller->sdlGameController = _currentGameController;
+                controllers[SDL_JoystickGetDeviceInstanceID(_i)] = _controller;
                 continue;
             }
 
@@ -145,7 +148,8 @@ namespace engine {
 
     void ControllerInput::onGamepadDisconnected(SDL_Event& _event) {
         LOG_W("Removed controller: ", controllers[_event.cdevice.which]->ID)
-        SDL_GameControllerClose(controllers[_event.cdevice.which]->sdlGameController);
+        if(controllers[_event.cdevice.which]->ID >= 0)
+            SDL_GameControllerClose(controllers[_event.cdevice.which]->sdlGameController);
         int _removedID = controllers[_event.cdevice.which]->ID;
         delete controllers[_event.cdevice.which];
         controllers.erase(_event.cdevice.which);
@@ -194,7 +198,8 @@ namespace engine {
         LOG_S("Cleaning up controllers")
         for(auto& _controller : controllers) {
             LOG_S("     Controller: ", _controller.second->ID)
-            SDL_GameControllerClose(_controller.second->sdlGameController);
+            if(_controller.second->ID >= 0)
+                SDL_GameControllerClose(_controller.second->sdlGameController);
             delete _controller.second;
         }
     }
@@ -206,7 +211,7 @@ namespace engine {
     }
 
     bool ControllerInput::reassignController(int _controllerID, int _as) {
-        if(!(hasController(_controllerID) || hasController(_as))) {
+        if(!(hasController(_controllerID) || hasController(_as) || _controllerID < 0 || _as < 0)) {
             LOG_E("Tried to reassigned controller ", _controllerID, " to ", _as, " but at least one of them didn't exist")
             return false;
         }
