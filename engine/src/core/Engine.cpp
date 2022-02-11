@@ -50,16 +50,6 @@ namespace engine {
                                      "r g b a");
     }
 
-    Engine::~Engine() {
-        TextureAtlasManager::get().destroy();
-        ShaderManager::get().destroy();
-        FontManager::get().destroy();
-        SoundManager::get().destroy();
-        Renderer::destroy();
-        InputManager::get().destroy();
-        delete frameBuffer;
-    }
-
     void Engine::onRun() {
         float _accumulator = 0;
 
@@ -230,10 +220,6 @@ namespace engine {
         _layer->onEnd();
     }
 
-    void Engine::closeApplication() {
-        running = false;
-    }
-
     bool Engine::fromRunToRoll(const TransitionParams& _foo) {
         return InputManager::isKeyJustPressed(KeyCode::A);
     }
@@ -246,6 +232,16 @@ namespace engine {
         backgroundColor = {(unsigned char)std::stoi(_args[0]), (unsigned char)std::stoi(_args[1]),
                            (unsigned char)std::stoi(_args[2]), (unsigned char)std::stoi(_args[3])};
         return {"Changed color"};
+    }
+
+    void Engine::destroy() {
+        TextureAtlasManager::get().destroy();
+        ShaderManager::get().destroy();
+        FontManager::get().destroy();
+        SoundManager::get().destroy();
+        Renderer::destroy();
+        InputManager::get().destroy();
+        delete frameBuffer;
     }
 
 }

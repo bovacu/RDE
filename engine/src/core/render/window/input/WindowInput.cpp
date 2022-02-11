@@ -10,8 +10,15 @@ namespace engine {
     void WindowInput::init(Window* _window) {
         window = _window;
         events[(int)SystemEventEnum::WINDOW_EVENT] = BIND_FUNC_1(WindowInput::onWindowEvent);
+        events[(int)SystemEventEnum::APP_ON_DESTROY_E] = BIND_FUNC_1(WindowInput::onDestroyApp);
+        events[(int)SystemEventEnum::APP_DID_ENTER_BACK_E] = BIND_FUNC_1(WindowInput::onDidEnterBackground);
+        events[(int)SystemEventEnum::APP_DID_ENTER_FOREG_E] = BIND_FUNC_1(WindowInput::onDidEnterForegroundApp);
+        events[(int)SystemEventEnum::APP_WILL_ENTER_BACK_E] = BIND_FUNC_1(WindowInput::onWillEnterBackground);
+        events[(int)SystemEventEnum::APP_WILL_ENTER_FOREG] = BIND_FUNC_1(WindowInput::onWillEnterForegroundApp);
 
         ignoredEvents = { WINDOW_AUDIO_DEVICE_CONNECTED_E, WINDOW_AUDIO_DEVICE_DISCONNECTED_E };
+
+        LOG_I(SDL_APP_TERMINATING, ", ", SDL_APP_DIDENTERBACKGROUND,", ", SDL_APP_DIDENTERFOREGROUND)
     }
 
     void WindowInput::onWindowEvent(SDL_Event& _event) {
@@ -68,5 +75,28 @@ namespace engine {
 
     void WindowInput::onQuit(SDL_Event& _event) {
         Engine::get().setRunning(false);
+    }
+
+    void WindowInput::onDidEnterForegroundApp(SDL_Event& _event) {
+        LOG_W("DID ENTER FOREGROUND")
+    }
+
+    void WindowInput::onDidEnterBackground(SDL_Event& _event) {
+        LOG_W("DID ENTER BACKGROUND")
+    }
+
+    void WindowInput::onDestroyApp(SDL_Event& _event) {
+        LOG_I("AUTO TERMINATING!!!!!")
+        Engine::get().setRunning(false);
+    }
+
+    void WindowInput::onWillEnterForegroundApp(SDL_Event& _event) {
+        LOG_W("WILL ENTER FOREGROUND")
+        Engine::get().setMinimized(false);
+    }
+
+    void WindowInput::onWillEnterBackground(SDL_Event& _event) {
+        LOG_W("WILL ENTER BACKGROUND")
+        Engine::get().setMinimized(true);
     }
 }

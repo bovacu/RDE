@@ -34,6 +34,7 @@ namespace engine {
         _m.musicID = Mix_LoadMUS(_musicPath.c_str());
         _m.name = Util::getFileNameFromPath(_musicPath);
         musics[_m.name] = _m;
+        LOG_S("Successfully loaded ", _m.name)
         return musics[_m.name];
     }
 

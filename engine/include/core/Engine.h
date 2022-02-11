@@ -53,11 +53,11 @@ namespace engine {
 
         public:
             Engine();
-            virtual ~Engine();
 
             Camera& getMainCamera() { return camera; }
 
-            void closeApplication();
+            void setMinimized(bool _isMinimized) { minimized = _isMinimized; }
+            bool isMinimized() const { return minimized; }
 
             /// This method provides the number of FPS in any given moment.
             /// @return the number of FPS
@@ -178,6 +178,8 @@ namespace engine {
             /// @sa Layer, LayerStack
             void popOverlay(Layer* _layer);
 
+            void destroy();
+
         public:
             /// Returns the Window instance.
             /// @return The main window.
@@ -197,10 +199,6 @@ namespace engine {
             Logs changeColorConsoleCommand(const std::vector<std::string>& _args);
 
     };
-
-    /// Method that MUST be implemented once a class extends Application class. It must return an instance of that
-    /// child class.
-    Engine* createApplication();
 }
 
 

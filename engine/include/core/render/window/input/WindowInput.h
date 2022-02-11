@@ -26,6 +26,12 @@ namespace engine {
             void onWindowMinimized(SDL_Event& _event);
             void onWindowMaximized(SDL_Event& _event);
             void onQuit(SDL_Event& _event);
+
+            void onDestroyApp(SDL_Event& _event);
+            void onDidEnterForegroundApp(SDL_Event& _event);
+            void onDidEnterBackground(SDL_Event& _event);
+            void onWillEnterForegroundApp(SDL_Event& _event);
+            void onWillEnterBackground(SDL_Event& _event);
     };
 
 }
