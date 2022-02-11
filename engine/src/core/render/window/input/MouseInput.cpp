@@ -44,15 +44,16 @@ namespace engine {
         window->consumeEvent(_e);
 
         if(pressedMouseButtons[_key] == 2) return;
-            pressedMouseButtons[_key] = 1;
+        pressedMouseButtons[_key] = 1;
     }
 
     void MouseInput::onMouseUp(SDL_Event& _event) {
         auto _key = static_cast<MouseCode>(_event.button.button);
-        pressedMouseButtons[_key] = 0;
 
         MouseButtonReleasedEvent _e(_key);
         window->consumeEvent(_e);
+
+        pressedMouseButtons[_key] = 0;
     }
 
     void MouseInput::onMouseScroll(SDL_Event& _event) {

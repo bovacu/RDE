@@ -15,7 +15,7 @@ namespace engine {
     /// |			ON GLFW												|
     /// -----------------------------------------------------------------
 
-    typedef enum class GamePadKeys : uint16_t {
+    typedef enum class GamePadButtons : uint16_t {
         ButtonA         = SDL_CONTROLLER_BUTTON_A,              // 0
         ButtonB         = SDL_CONTROLLER_BUTTON_B,              // 1
         ButtonX         = SDL_CONTROLLER_BUTTON_X,              // 2

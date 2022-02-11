@@ -63,7 +63,7 @@ add_executable( Engine2_0 engine/src/main.cpp
         engine/include/core/render/layers/Layer.h engine/include/core/render/layers/LayerStack.h engine/src/core/render/layers/LayerStack.cpp
         engine/include/core/render/layers/ImGuiLayer.h engine/src/core/render/layers/ImGuiLayer.cpp
 
-        engine/include/core/render/window/keysAndButtons/GamePadKeys.h engine/src/core/render/window/input/Input.cpp engine/include/core/render/window/input/Input.h
+        engine/include/core/render/window/keysAndButtons/GamePadButtons.h engine/src/core/render/window/input/Input.cpp engine/include/core/render/window/input/Input.h
         engine/include/core/render/window/keysAndButtons/KeyboardKeys.h engine/include/core/render/window/keysAndButtons/MouseKeys.h
 
         engine/include/core/render/elements/Texture.h engine/src/core/render/elements/Texture.cpp engine/include/core/render/elements/SpriteBatch.h

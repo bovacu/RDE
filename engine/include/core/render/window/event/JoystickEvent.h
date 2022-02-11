@@ -7,7 +7,7 @@
 #include "Event.h"
 #include "core/render/window/keysAndButtons/KeyboardKeys.h"
 #include "core/render/window/keysAndButtons/MouseKeys.h"
-#include "core/render/window/keysAndButtons/GamePadKeys.h"
+#include "core/render/window/keysAndButtons/GamePadButtons.h"
 #include "core/util/Vec.h"
 
 namespace engine {
@@ -40,12 +40,12 @@ namespace engine {
 
     class JoystickButtonDownEvent : public Event {
         private:
-            GamePadKeys button;
+            GamePadButtons button;
 
         public:
-            explicit JoystickButtonDownEvent(GamePadKeys _button) : button(_button) {  }
+            explicit JoystickButtonDownEvent(GamePadButtons _button) : button(_button) {  }
 
-            [[nodiscard]] inline GamePadKeys getButton() const { return button; }
+            [[nodiscard]] inline GamePadButtons getButton() const { return button; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
@@ -61,12 +61,12 @@ namespace engine {
 
     class JoystickButtonUpEvent : public Event {
         private:
-        GamePadKeys button;
+        GamePadButtons button;
 
         public:
-            explicit JoystickButtonUpEvent(GamePadKeys _button) : button(_button) {  }
+            explicit JoystickButtonUpEvent(GamePadButtons _button) : button(_button) {  }
 
-            [[nodiscard]] inline GamePadKeys getButton() const { return button; }
+            [[nodiscard]] inline GamePadButtons getButton() const { return button; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;

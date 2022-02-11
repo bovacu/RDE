@@ -63,13 +63,14 @@ namespace engine {
 
         animationSystem.update(_dt, player);
 
-        for(int _i = 0; _i < 20; _i++)
-            if(InputManager::isMobileScreenJustPressed(_i))
-                LOG_I("Finger ", _i, " just pressed!")
+        if(InputManager::isGamepadButtonJustPressed(GamePadButtons::RightJoystick))
+            InputManager::reassignController(0, 1);
 
-//        for(int _i = 0; _i < 20; _i++)
-//            if(InputManager::isMobileScreenUp(_i))
-//                LOG_I("Finger ", _i, " up!")
+        if(InputManager::isGamepadButtonJustPressed(GamePadButtons::ButtonA))
+            LOG_I("Just pressed A!")
+
+        if(InputManager::isGamepadButtonJustPressed(GamePadButtons::ButtonB, 1))
+            LOG_I("Just pressed B!")
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {

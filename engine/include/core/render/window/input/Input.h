@@ -6,7 +6,7 @@
 #include "core/platform/PlatformHeaderSDL.h"
 #include "core/render/window/keysAndButtons/KeyboardKeys.h"
 #include "core/render/window/keysAndButtons/MouseKeys.h"
-#include "core/render/window/keysAndButtons/GamePadKeys.h"
+#include "core/render/window/keysAndButtons/GamePadButtons.h"
 #include <functional>
 
 #include "core/util/Util.h"
@@ -75,11 +75,13 @@ namespace engine {
 
         public:
             static bool isKeyJustPressed(KeyCode _key);
+            static bool isKeyJustReleased(KeyCode _key);
             static bool isKeyPressed(KeyCode _key);
             static bool isKeyReleased(KeyCode _key);
 
 
             static bool isMouseJustPressed(MouseCode _button);
+            static bool isMouseJustReleased(MouseCode _button);
             static bool isMousePressed(MouseCode _button);
             static bool isMouseReleased(MouseCode _button);
             static Vec2F getMousePosition();
@@ -87,16 +89,19 @@ namespace engine {
             static int getMouseY();
 
 
-            static bool isGamepadButtonJustPressed(GamePadKeys _button);
-            static bool isGamepadButtonPressed(GamePadKeys _button);
-            static bool isGamepadButtonReleased(GamePadKeys _button);
+            static bool reassignController(int _controllerID, int _as);
+            static bool isGamepadButtonJustPressed(GamePadButtons _button, int _controllerID = 0);
+            static bool isGamepadButtonJustReleased(GamePadButtons _button, int _controllerID = 0);
+            static bool isGamepadButtonPressed(GamePadButtons _button, int _controllerID = 0);
+            static bool isGamepadButtonReleased(GamePadButtons _button, int _controllerID = 0);
 
 
-            static bool isGamepadAxisJustPressed(GamePadAxis _axis);
-            static bool isGamepadAxisPressed(GamePadAxis _axis);
-            static bool isGamepadAxisReleased(GamePadAxis _axis);
+            static bool isGamepadAxisJustPressed(GamePadAxis _axis, int _controllerID = 0);
+            static bool isGamepadAxisPressed(GamePadAxis _axis, int _controllerID = 0);
+            static bool isGamepadAxisReleased(GamePadAxis _axis, int _controllerID = 0);
 
             static bool isMobileScreenJustPressed(int _fingerID);
+            static bool isMobileScreenJustReleased(int _fingerID);
             static bool isMobileScreenPressed(int _fingerID);
             static bool isMobileScreenUp(int _fingerID);
 
