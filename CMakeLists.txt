@@ -6,24 +6,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
 
 #${CMAKE_DL_LIBS} is needed as some part of opengl uses it
-SET(TARGET_LINKS glad freetype SDL2::Main SDL2::Mixer SDL2::Net SDL2::Image SDL2::TTF ${CMAKE_DL_LIBS} OpenGL
+SET(TARGET_LINKS glad freetype SDL2::Main SDL2::Mixer SDL2::Net SDL2::Image ${CMAKE_DL_LIBS} OpenGL
         # flecs
         )
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-
-include_directories(.)
-include_directories(engine/include)
-include_directories(sandbox)
-include_directories(${CMAKE_SOURCE_DIR}/external})
-include_directories (/usr/include/freetype2)
-
-#-------------- IMGUI
-
-#set(IMGUI_DIR "external/imgui")
-#file(GLOB IMGUI_SOURCES ${IMGUI_DIR}/*.cpp)
-#add_library("ImGui" STATIC ${IMGUI_SOURCES})
-#target_include_directories("ImGui" PUBLIC ${IMGUI_DIR})
 
 #-------------- STB
 
@@ -31,13 +18,17 @@ set(STB_DIR "engine/src/stb")
 include_directories(${STB_DIR})
 link_directories(${STB_DIR})
 
-find_package(Freetype REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_net REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(SDL2_image REQUIRED)
-find_package(SDL2_ttf REQUIRED)
+find_package(Freetype REQUIRED)
+
+include_directories(.)
+include_directories(engine/include)
+include_directories(sandbox)
+include_directories(${FREETYPE_INCLUDE_DIRS})
 
 add_library(glad external/glad/include/glad/glad.h external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include/)
@@ -53,8 +44,7 @@ set(GL_PROFILES "GL_PROFILE_GL3")
 #    message("-- To make flecs work download source code, cmake ., make, sudo make install")
 #endif()
 
-add_executable( Engine2_0 engine/src/main.cpp
-
+set(SOURCES
         engine/include/core/util/Easing.h engine/include/core/util/Functions.h engine/include/core/util/Logger.h engine/include/core/util/PerlinNoise.h
         engine/include/core/util/Random.h engine/include/core/util/Util.h engine/include/core/util/Vec.h engine/src/core/util/Color.cpp engine/include/core/util/Color.h engine/include/core/util/Delta.h
         engine/include/core/util/Clock.h engine/src/core/util/Clock.cpp
@@ -73,7 +63,9 @@ add_executable( Engine2_0 engine/src/main.cpp
 
         engine/src/core/Engine.cpp engine/include/core/Engine.h engine/include/core/Core.h
 
-        engine/include/stb/stb_image.h engine/src/stb/stb_image.cpp engine/include/stb/stb_image_writer.h external/json.h
+        engine/include/stb/stb_image.h engine/src/stb/stb_image.cpp engine/include/stb/stb_image_writer.h
+
+        external/json.h
 
         engine/src/core/render/Renderer.cpp engine/include/core/render/Renderer.h engine/include/core/systems/eventSystem/EventBus.h
 
@@ -109,7 +101,14 @@ add_executable( Engine2_0 engine/src/main.cpp
         engine/include/core/render/window/input/MouseInput.h engine/src/core/render/window/input/ControllerInput.cpp engine/include/core/render/window/input/ControllerInput.h
         engine/src/core/platform/Platform.cpp engine/include/core/platform/Platform.h engine/include/core/platform/PlatformHeaderSDL.h
         engine/include/core/platform/PlatformHeaderSDLMixer.h engine/include/core/platform/PlatformHeaderSDLImage.h
-        engine/include/core/render/window/input/MobileInput.h engine/src/core/render/window/input/MobileInput.cpp engine/include/core/render/window/event/MobileEvent.h)
+        engine/include/core/render/window/input/MobileInput.h engine/src/core/render/window/input/MobileInput.cpp engine/include/core/render/window/event/MobileEvent.h
+        )
+
+file(GLOB_RECURSE CPP_HEADERS_FOR_LIBRARY )
+file(GLOB_RECURSE CPP_SOURCES_FOR_LIBRARY )
+
+#add_library(Engine2_0 ${SOURCES} ${CPP_HEADERS_FOR_LIBRARY} ${CPP_SOURCES_FOR_LIBRARY})
+add_executable(Engine2_0 engine/src/main.cpp ${SOURCES})
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 target_compile_definitions(Engine2_0 PRIVATE ${GL_PROFILES})

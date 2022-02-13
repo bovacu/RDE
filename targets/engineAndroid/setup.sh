@@ -25,3 +25,7 @@ $ANDROID_SDK/tools/bin/sdkmanager \
     "platforms;android-28" \
     "cmake;3.18.1" \
     "ndk;$NDK_VERSION"
+
+echo "Building libraries..."
+ANDROID_NDK/ndk-build APP_PLATFORM=android-21 NDK_DEBUG=1 NDK_OUT=/home/borja/Documents/C++/Engine2.0/targets/engineAndroid/sdl/build/intermediates/ndkBuild/debug/object NDK_LIBS_OUT=/home/borja/Documents/C++/Engine2.0/targets/engineAndroid/sdl/build/intermediates/ndkBuild/debug/lib
+

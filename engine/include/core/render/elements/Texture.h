@@ -6,12 +6,12 @@
 #if IS_MOBILE()
     #include <GLES3/gl32.h>
 #elif IS_DESKTOP()
-    #include "external/glad/include/glad/glad.h"
+    #include <glad/glad.h>
 #endif
 
 namespace engine {
     class Texture {
-        private:
+        protected:
             unsigned int refCount = 0;
             GLuint openGLTextureID{};
             int width = -1, height = -1, channels = -1;
@@ -29,7 +29,6 @@ namespace engine {
             [[nodiscard]] float getKb() const;
 
             bool loadFromFile(const char* _path);
-            bool loadFromMemory(unsigned char* _data, int _size);
             bool loadTextTexture(int _width, int _height);
             bool loadTextSubTextures(Vec2I _offset, Vec2I _size, const void* _data);
 
@@ -39,5 +38,30 @@ namespace engine {
             int invertSDLSurface(SDL_Surface *surface);
             SDL_Surface* getSDLSurface(SDL_RWops* _imageFile, const std::string& _pathToFile);
             void checkGLError();
+    };
+
+    enum ImageType {
+        PNG,
+        JPG,
+        BMP
+    };
+
+    class Image : public Texture {
+        private:
+            unsigned char* pixels = nullptr;
+            ImageType imageType;
+
+        private:
+            int getChannels(const ImageType& _imageType);
+
+        public:
+            Image() = default;
+            void init(int _width, int _height, unsigned char* _pixels, const ImageType& _imageType);
+            void init(int _width, int _height, const ImageType& _imageType);
+            void uploadToGPU();
+            void saveAs(const std::string& _pathToSave);
+            void setPixel(int _x, int _y, const Color& _color);
+            Color getPixel(int _x, int _y);
+            ~Image();
     };
 }

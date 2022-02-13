@@ -17,7 +17,7 @@ namespace engine {
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImPlot::CreateContext();
+//        ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -113,20 +113,20 @@ namespace engine {
             }
         }
 
-        if (ImPlot::BeginPlot("##Rolling", ImVec2(-1,125))) {
-            ImPlot::SetupAxes(nullptr, "ms", ImPlotAxisFlags_NoTickLabels);
-            ImPlot::SetupAxisLimits(ImAxis_X1,0,history, ImGuiCond_Always);
-            ImPlot::SetupAxisLimits(ImAxis_Y1,0,50);
-
-            for(auto& _state : State::stateToNameDict) {
-                if(Profiler::getStates()[_state.first].active) {
-                    auto _s = plotBuffers[_state.first];
-                    ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),&_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
-                }
-            }
-
-            ImPlot::EndPlot();
-        }
+//        if (ImPlot::BeginPlot("##Rolling", ImVec2(-1,125))) {
+//            ImPlot::SetupAxes(nullptr, "ms", ImPlotAxisFlags_NoTickLabels);
+//            ImPlot::SetupAxisLimits(ImAxis_X1,0,history, ImGuiCond_Always);
+//            ImPlot::SetupAxisLimits(ImAxis_Y1,0,50);
+//
+//            for(auto& _state : State::stateToNameDict) {
+//                if(Profiler::getStates()[_state.first].active) {
+//                    auto _s = plotBuffers[_state.first];
+//                    ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),&_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
+//                }
+//            }
+//
+//            ImPlot::EndPlot();
+//        }
         ImGui::End();
     }
 

@@ -7,7 +7,7 @@
 #include "core/Core.h"
 
 #if IS_MOBILE()
-    #include "../SDL/include/SDL.h"
+    #include "SDL/include/SDL.h"
 #elif IS_DESKTOP()
     #include <SDL2/SDL.h>
 #endif

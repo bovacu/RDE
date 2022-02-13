@@ -122,7 +122,7 @@ include_directories(${GLM_DIR}/glm)
 include_directories(${MAIN_SOURCE_DIR}/include)
 include_directories(${SANDBOX_SOURCE_DIR})
 include_directories(${EXTERNAL_STB})
-include_directories(${CMAKE_SOURCE_DIRECTORY})
+include_directories(.)
 
 # We will recursively collate all .hpp header and .cpp source files under the main source directory as the input for the compilation.
 file(GLOB_RECURSE CPP_HEADERS ${MAIN_SOURCE_DIR}/include/*.h*  ${SANDBOX_SOURCE_DIR}/*.h*)

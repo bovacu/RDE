@@ -6,7 +6,7 @@
 #endif
 
 #include "core/platform/PlatformHeaderSDLImage.h"
-#include "stb/stb_image.h"
+#include "stb/stb_image_writer.h"
 #include "core/util/Functions.h"
 
 namespace engine {
@@ -95,43 +95,6 @@ namespace engine {
         fileSizeKb = (float)std::filesystem::file_size(_path) / 1000.f;
         #endif
 
-        return true;
-    }
-
-    bool Texture::loadFromMemory(unsigned char* _data, int _size) {
-        /// Then we load the image pixels.
-        auto _texturePixels = _data;
-        channels = 4;
-        width = height = (int)std::sqrt(_size / 4);
-
-        /// We set the basic information.
-
-        GLenum _internalFormat = 0, _dataFormat = 0;
-        if (channels == 4) {
-            _internalFormat = GL_RGBA8;
-            _dataFormat = GL_RGBA;
-        } else if (channels == 3) {
-            _internalFormat = GL_RGB8;
-            _dataFormat = GL_RGB;
-        } else {
-            LOG_E("Not supported format image, channels: ", channels)
-        }
-
-        internalFormat = _internalFormat;
-        dataFormat = _dataFormat;
-
-        glGenTextures(1, &openGLTextureID);
-        glBindTexture(GL_TEXTURE_2D, openGLTextureID);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, (int)internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
-
-        region = {{0, 0}, {width, height}};
-        fileSizeKb = (float)_size / 1024.f;
         return true;
     }
 
@@ -248,5 +211,96 @@ namespace engine {
             LOG_E("GL_ERROR: ", err)
         }
     }
+
+
+    // ------------------------------ IMAGE --------------------------
+
+
+    void Image::init(int _width, int _height, unsigned char* _pixels, const ImageType& _imageType) {
+        width = _width;
+        height = _height;
+        pixels = _pixels;
+        channels = getChannels(_imageType);
+        imageType = _imageType;
+    }
+
+    void Image::init(int _width, int _height, const ImageType& _imageType) {
+        width = _width;
+        height = _height;
+        channels = getChannels(_imageType);
+        pixels = new unsigned char[_width * _height * channels];
+        imageType = _imageType;
+    }
+
+    void Image::uploadToGPU() {
+        if(openGLTextureID == -1) {
+            GLenum _internalFormat = 0, _dataFormat = 0;
+            if (channels == 4) {
+                _internalFormat = GL_RGBA8;
+                _dataFormat = GL_RGBA;
+            } else if (channels == 3) {
+                _internalFormat = GL_RGB8;
+                _dataFormat = GL_RGB;
+            } else
+                LOG_E("Not supported format image. Channels = ", channels, ", Width = ", width, ", Height = ", height)
+
+            internalFormat = _internalFormat;
+            dataFormat = _dataFormat;
+
+            glGenTextures(1, &openGLTextureID);
+            glBindTexture(GL_TEXTURE_2D, openGLTextureID);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, (int)internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, pixels);
+        } else {
+            // TODO re-upload to GPU of image
+            LOG_E("Re-upload to GPU not implemented!!")
+        }
+    }
+
+    void Image::saveAs(const std::string& _pathToSave) {
+        stbi_flip_vertically_on_write(1);
+        switch (imageType) {
+            case PNG: stbi_write_png(_pathToSave.c_str(), width, height, channels, pixels, width * channels);
+                break;
+            case JPG: stbi_write_jpg(_pathToSave.c_str(), width, height, channels, pixels, width * channels);
+                break;
+            case BMP: stbi_write_bmp(_pathToSave.c_str(), width, height, channels, pixels);
+        }
+    }
+
+    void Image::setPixel(int _x, int _y, const Color& _color) {
+        pixels[_x * channels + _y * width * channels + 0] = _color.r;
+        pixels[_x * channels + _y * width * channels + 1] = _color.g;
+        pixels[_x * channels + _y * width * channels + 2] = _color.b;
+        pixels[_x * channels + _y * width * channels + 3] = _color.a;
+    }
+
+    Color Image::getPixel(int _x, int _y) {
+        int _base = pixels[_x * channels + _y * width * channels];
+        return {pixels[_base], pixels[_base + 1], pixels[_base + 2], pixels[_base + 3]};
+    }
+
+    Image::~Image() {
+        delete [] pixels;
+        if(openGLTextureID != -1)
+            glDeleteTextures(1, &openGLTextureID);
+    }
+
+    int Image::getChannels(const ImageType& _imageType) {
+        switch (_imageType) {
+            case PNG:
+            case BMP: return 4;
+            case JPG: return 3;
+        }
+
+        return -1;
+    }
+
+
 }
 

@@ -7,7 +7,7 @@
 #if IS_MOBILE()
     #include <GLES3/gl32.h>
 #elif IS_DESKTOP()
-    #include "external/glad/include/glad/glad.h"
+    #include <glad/glad.h>
 #endif
 
 namespace engine {

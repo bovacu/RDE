@@ -7,7 +7,7 @@
 #include "core/Core.h"
 
 #if IS_MOBILE()
-    #include "../SDL_mixer/include/SDL_mixer.h"
+    #include "SDL_mixer/include/SDL_mixer.h"
 #elif IS_DESKTOP()
     #include <SDL2/SDL_mixer.h>
 #endif
