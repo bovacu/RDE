@@ -49,9 +49,9 @@ namespace engine {
 
             bool _eventImplemented = false;
 
-#if !IS_MOBILE()
+            #if !IS_MOBILE()
             ImGui_ImplSDL2_ProcessEvent(&_event);
-#endif
+            #endif
 
             _eventImplemented |= windowInput->pollEvent(_event);
             _eventImplemented |= keyboardInput->pollEvent(_event);
@@ -73,8 +73,9 @@ namespace engine {
     }
 
     bool InputManager::isKeyJustPressed(KeyCode _key) {
-        if(get().keyboardInput->getState((int)_key) == 1) {
-            get().keyboardInput->setState((int)_key, 2);
+        auto* _keyboardInput = get().keyboardInput;
+        if(_keyboardInput->getState((int)_key) == 1) {
+            _keyboardInput->setState((int)_key, 2);
             return true;
         }
 
@@ -82,8 +83,9 @@ namespace engine {
     }
 
     bool InputManager::isKeyJustReleased(KeyCode _key) {
-        if(get().keyboardInput->getState((int)_key) == 0) {
-            get().keyboardInput->setState((int)_key, 3);
+        auto* _keyboardInput = get().keyboardInput;
+        if(_keyboardInput->getState((int)_key) == 0) {
+            _keyboardInput->setState((int)_key, 3);
             return true;
         }
 
@@ -101,8 +103,9 @@ namespace engine {
 
 
     bool InputManager::isMouseJustPressed(MouseCode _mouseButton) {
-        if(get().mouseInput->getState((int)_mouseButton) == 1) {
-            get().mouseInput->setState((int)_mouseButton, 2);
+        auto* _mouseInput = get().mouseInput;
+        if(_mouseInput->getState((int)_mouseButton) == 1) {
+            _mouseInput->setState((int)_mouseButton, 2);
             return true;
         }
 
@@ -110,8 +113,9 @@ namespace engine {
     }
 
     bool InputManager::isMouseJustReleased(MouseCode _button) {
-        if(get().mouseInput->getState((int)_button) == 0) {
-            get().mouseInput->setState((int)_button, 3);
+        auto* _mouseInput = get().mouseInput;
+        if(_mouseInput->getState((int)_button) == 0) {
+            _mouseInput->setState((int)_button, 3);
             return true;
         }
 
@@ -126,8 +130,13 @@ namespace engine {
         return  get().mouseInput->getState((int)_button) == 0;
     }
 
-    Vec2F InputManager::getMousePosition() {
-        return get().mouseInput->getMousePosition();
+    Vec2F InputManager::getMousePosition(bool _centeredMiddleScreen) {
+        auto _mousePos = get().mouseInput->getMousePosition();
+        auto& _wi = get().windowInput;
+        float _x = _mousePos.x - (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().x / 2.f : 0.f);
+        float _y = _mousePos.y - (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().y / 2.f : 0.f);
+        float _zoom = Engine::get().getMainCamera().getCurrentZoomLevel();
+        return {_x * _zoom, _y * _zoom};
     }
 
     int InputManager::getMouseX() {
@@ -143,10 +152,11 @@ namespace engine {
     }
 
     bool InputManager::isGamepadButtonJustPressed(GamePadButtons _button, int _controllerID) {
-        if(!get().controllerInput->hasController(_controllerID)) return false;
+        auto* _controllerInput = get().controllerInput;
+        if(!_controllerInput->hasController(_controllerID)) return false;
 
-        if(get().controllerInput->getButtonState((int)_button, get().controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1) {
-            get().controllerInput->setButtonState((int)_button, 2, get().controllerInput->playerIndexToInnerControllerID(_controllerID));
+        if(_controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1) {
+            _controllerInput->setButtonState((int)_button, 2, _controllerInput->playerIndexToInnerControllerID(_controllerID));
             return true;
         }
 
@@ -154,13 +164,14 @@ namespace engine {
     }
 
     bool InputManager::isGamepadButtonJustReleased(GamePadButtons _button, int _controllerID) {
-        if(!get().controllerInput->hasController(_controllerID)) {
+        auto* _controllerInput = get().controllerInput;
+        if(!_controllerInput->hasController(_controllerID)) {
             LOG_W("IS FALSE FOR ", _controllerID)
             return false;
         }
 
-        if(get().controllerInput->getButtonState((int)_button, get().controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0) {
-            get().controllerInput->setButtonState((int)_button, 3, get().controllerInput->playerIndexToInnerControllerID(_controllerID));
+        if(_controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0) {
+            _controllerInput->setButtonState((int)_button, 3, _controllerInput->playerIndexToInnerControllerID(_controllerID));
             return true;
         }
 
@@ -168,28 +179,28 @@ namespace engine {
     }
 
     bool InputManager::isGamepadButtonPressed(GamePadButtons _button, int _controllerID) {
-        if(!get().controllerInput->hasController(_controllerID)) return false;
-
-        return get().controllerInput->getButtonState((int)_button, get().controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1;
+        auto* _controllerInput = get().controllerInput;
+        if(!_controllerInput->hasController(_controllerID)) return false;
+        return _controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1;
     }
 
     bool InputManager::isGamepadButtonReleased(GamePadButtons _button, int _controllerID) {
-        if(!get().controllerInput->hasController(_controllerID)) return false;
-
-        return get().controllerInput->getButtonState((int)_button, get().controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
+        auto* _controllerInput = get().controllerInput;
+        if(!_controllerInput->hasController(_controllerID)) return false;
+        return _controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
     }
 
     bool InputManager::isGamepadAxisPressed(GamePadAxis _axis, int _controllerID) {
-        if(!get().controllerInput->hasController(_controllerID)) return false;
-
-        return get().controllerInput->getAxisState((int)_axis, get().controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
+        auto* _controllerInput = get().controllerInput;
+        if(!_controllerInput->hasController(_controllerID)) return false;
+        return _controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
     }
 
     bool InputManager::isGamepadAxisJustPressed(GamePadAxis _axis, int _controllerID) {
-        if(!get().controllerInput->hasController(_controllerID)) return false;
-
-        if(get().controllerInput->getAxisState((int)_axis, get().controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1) {
-            get().controllerInput->setAxisState((int)_axis, 2, get().controllerInput->playerIndexToInnerControllerID(_controllerID));
+        auto* _controllerInput = get().controllerInput;
+        if(!_controllerInput->hasController(_controllerID)) return false;
+        if(_controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1) {
+            _controllerInput->setAxisState((int)_axis, 2, _controllerInput->playerIndexToInnerControllerID(_controllerID));
             return true;
         }
 
@@ -197,14 +208,15 @@ namespace engine {
     }
 
     bool InputManager::isGamepadAxisReleased(GamePadAxis _axis, int _controllerID) {
-        if(!get().controllerInput->hasController(_controllerID)) return false;
-
-        return get().controllerInput->getAxisState((int)_axis, get().controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
+        auto* _controllerInput = get().controllerInput;
+        if(!_controllerInput->hasController(_controllerID)) return false;
+        return _controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
     }
 
     bool InputManager::isMobileScreenJustPressed(int _fingerID) {
-        if(get().mobileInput->getState(_fingerID) == 1) {
-            get().mobileInput->setState(_fingerID, 2);
+        auto* _mobileInput = get().mobileInput;
+        if(_mobileInput->getState(_fingerID) == 1) {
+            _mobileInput->setState(_fingerID, 2);
             return true;
         }
 
@@ -212,8 +224,9 @@ namespace engine {
     }
 
     bool InputManager::isMobileScreenJustReleased(int _fingerID) {
-        if(get().mobileInput->getState(_fingerID) == 0) {
-            get().mobileInput->setState(_fingerID, 3);
+        auto* _mobileInput = get().mobileInput;
+        if(_mobileInput->getState(_fingerID) == 0) {
+            _mobileInput->setState(_fingerID, 3);
             return true;
         }
         return false;

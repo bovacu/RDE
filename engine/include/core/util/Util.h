@@ -11,6 +11,7 @@
 #include "Delta.h"
 #include "Clock.h"
 #include "Rect.h"
+#include "Random.h"
 #include "core/Core.h"
 
 #include <memory>

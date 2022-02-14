@@ -1,1 +1,0 @@
-sudo apt-get install libsdl2-dev libsdl2-mixer-dev   libfreetype6-dev libfreetype-dev vorbis-tools build-essential cmake clang libglfw3-dev libsdl2-net-dev

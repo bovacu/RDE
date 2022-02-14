@@ -3,6 +3,7 @@
 #include "Sandbox.h"
 #include "core/Engine.h"
 #include "core/systems/soundSystem/SoundManager.h"
+#include "core/procedural/CellularAutomataMapGenerator.h"
 
 namespace engine {
 
@@ -29,7 +30,7 @@ namespace engine {
         animationSystem.start();
 
         text.init(_font, "Hello World");
-        text.setPosition({0, 0});
+        text.setPosition({-350, 250});
         text.setTextColor(Color::Green);
 
         int _line = 0;
@@ -53,6 +54,9 @@ namespace engine {
 
 //        auto& _music = SoundManager::get().loadMusic("assets/sounds/getout.ogg");
 //        SoundManager::get().playMusic(_music.name);
+
+//        CellularAutomata _a;
+//        _a.init({{128, 128}, 0.5f, 4, 30, 10});
     }
 
     void Sandbox::onEvent(Event& _event) {
@@ -66,15 +70,6 @@ namespace engine {
         }
 
         animationSystem.update(_dt, player);
-
-        if(InputManager::isGamepadButtonJustPressed(GamePadButtons::RightJoystick))
-            InputManager::reassignController(0, 1);
-
-        if(InputManager::isGamepadButtonJustPressed(GamePadButtons::ButtonA))
-            LOG_I("Just pressed A!")
-
-        if(InputManager::isGamepadButtonJustPressed(GamePadButtons::ButtonB, 1))
-            LOG_I("Just pressed B!")
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {
@@ -86,6 +81,8 @@ namespace engine {
         for(auto& _sprite : sprites)
             Renderer::draw(_sprite);
         Renderer::draw(text);
+
+        Renderer::drawSquare(player.getPosition(), {64, 96}, {255, 255, 0, 125});
     }
 
     void Sandbox::onImGuiRender(Delta _dt) {

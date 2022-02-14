@@ -18,10 +18,14 @@ class Random {
     std::mt19937 mt;
 
     public:
+    explicit Random(long _seed = -1) : mt(rd()) {
+        seedRandom(_seed);
+    };
 
-
-    public:
-    explicit Random() : mt(rd()) {  };
+    void seedRandom(long _seed) {
+        if(_seed == -1) mt.seed(rd());
+        else mt.seed(_seed);
+    }
 
     int randomi(int _min, int _max) {
         if(_min > _max) {
