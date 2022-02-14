@@ -6,11 +6,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
 
 #${CMAKE_DL_LIBS} is needed as some part of opengl uses it
-SET(TARGET_LINKS glad freetype SDL2::Main SDL2::Mixer SDL2::Net SDL2::Image ${CMAKE_DL_LIBS} OpenGL
+SET(TARGET_LINKS glad freetype SDL2 SDL2_mixer SDL2_net SDL2_image ${CMAKE_DL_LIBS}
         # flecs
         )
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH libs/SDL libs/SDL_image libs/SDL_mixer libs/SDL_net libs/freetype)
 
 #-------------- STB
 
@@ -18,20 +18,19 @@ set(STB_DIR "engine/src/stb")
 include_directories(${STB_DIR})
 link_directories(${STB_DIR})
 
-find_package(OpenGL REQUIRED)
-find_package(SDL2 REQUIRED)
-find_package(SDL2_net REQUIRED)
-find_package(SDL2_mixer REQUIRED)
-find_package(SDL2_image REQUIRED)
-find_package(Freetype REQUIRED)
 
 include_directories(.)
 include_directories(engine/include)
 include_directories(sandbox)
-include_directories(${FREETYPE_INCLUDE_DIRS})
+include_directories(libs/freetype/include)
+include_directories(libs/SDL/include)
+include_directories(libs/SDL_net)
+include_directories(libs/SDL_mixer/include)
+include_directories(libs/SDL_image)
+include_directories(libs/glm)
 
-add_library(glad external/glad/include/glad/glad.h external/glad/src/glad.c)
-target_include_directories(glad PUBLIC external/glad/include/)
+add_library(glad libs/glad/include/glad/glad.h libs/glad/src/glad.c)
+target_include_directories(glad PUBLIC libs/glad/include/)
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 
@@ -65,26 +64,26 @@ set(SOURCES
 
         engine/include/stb/stb_image.h engine/src/stb/stb_image.cpp engine/include/stb/stb_image_writer.h
 
-        external/json.h
+        libs/json.h
 
         engine/src/core/render/Renderer.cpp engine/include/core/render/Renderer.h engine/include/core/systems/eventSystem/EventBus.h
 
         engine/include/core/systems/Components.h engine/src/core/render/elements/Sprite.cpp engine/include/core/render/elements/Sprite.h engine/src/core/render/Camera.cpp engine/include/core/render/Camera.h engine/include/core/render/shapes/Shape.h
 
-        external/imgui/imgui.h external/imgui/imgui.cpp external/imgui/imstb_truetype.h external/imgui/imstb_rectpack.h
-        external/imgui/imstb_textedit.h external/imgui/imgui_internal.h external/imgui/imgui_tables.cpp
-        external/imgui/imgui_draw.cpp external/imgui/imconfig.h external/imgui/backends/imgui_impl_sdl.h external/imgui/imgui_widgets.cpp
-        external/imgui/backends/imgui_impl_sdl.cpp external/imgui/backends/imgui_impl_opengl3.h
-        external/imgui/backends/imgui_impl_opengl3.cpp external/imgui/imgui_demo.cpp
+        libs/imgui/imgui.h libs/imgui/imgui.cpp libs/imgui/imstb_truetype.h libs/imgui/imstb_rectpack.h
+        libs/imgui/imstb_textedit.h libs/imgui/imgui_internal.h libs/imgui/imgui_tables.cpp
+        libs/imgui/imgui_draw.cpp libs/imgui/imconfig.h libs/imgui/backends/imgui_impl_sdl.h libs/imgui/imgui_widgets.cpp
+        libs/imgui/backends/imgui_impl_sdl.cpp libs/imgui/backends/imgui_impl_opengl3.h
+        libs/imgui/backends/imgui_impl_opengl3.cpp libs/imgui/imgui_demo.cpp
 
         # https://github.com/epezent/implot
-        external/imgui/implot/implot.h external/imgui/implot/implot.cpp external/imgui/implot/implot_internal.h external/imgui/implot/implot_items.cpp
+        libs/imgui/implot/implot.h libs/imgui/implot/implot.cpp libs/imgui/implot/implot_internal.h libs/imgui/implot/implot_items.cpp
 
         # https://github.com/thedmd/imgui-node-editor
-        external/imgui/nodeEditor/crude_json.h external/imgui/nodeEditor/crude_json.cpp external/imgui/nodeEditor/imgui_bezier_math.h
-        external/imgui/nodeEditor/imgui_canvas.h external/imgui/nodeEditor/imgui_canvas.cpp external/imgui/nodeEditor/imgui_extra_math.h
-        external/imgui/nodeEditor/imgui_node_editor.h external/imgui/nodeEditor/imgui_node_editor.cpp external/imgui/nodeEditor/imgui_node_editor_api.cpp
-        external/imgui/nodeEditor/imgui_node_editor_internal.h external/imgui/textEditor/TextEditor.h external/imgui/textEditor/TextEditor.cpp
+        libs/imgui/nodeEditor/crude_json.h libs/imgui/nodeEditor/crude_json.cpp libs/imgui/nodeEditor/imgui_bezier_math.h
+        libs/imgui/nodeEditor/imgui_canvas.h libs/imgui/nodeEditor/imgui_canvas.cpp libs/imgui/nodeEditor/imgui_extra_math.h
+        libs/imgui/nodeEditor/imgui_node_editor.h libs/imgui/nodeEditor/imgui_node_editor.cpp libs/imgui/nodeEditor/imgui_node_editor_api.cpp
+        libs/imgui/nodeEditor/imgui_node_editor_internal.h libs/imgui/textEditor/TextEditor.h libs/imgui/textEditor/TextEditor.cpp
 
         engine/include/core/systems/profiling/Profiler.h engine/src/core/systems/profiling/Profiler.cpp engine/include/core/render/layers/ImGuiCore.h
         engine/src/core/render/elements/TextureAtlasManager.cpp engine/include/core/render/elements/TextureAtlasManager.h engine/include/core/util/Rect.h

@@ -12,7 +12,9 @@
 #include "core/util/Util.h"
 #include "core/render/window/Window.h"
 
+#ifndef SDL_JOYSTICK_DISABLED
 #define SDL_JOYSTICK_DISABLED
+#endif
 
 namespace engine {
 

@@ -9,8 +9,8 @@
 #include <chrono>
 #include "Layer.h"
 #include "core/render/window/event/MouseEvent.h"
-#include "external/imgui/backends/imgui_impl_opengl3.h"
-#include "external/imgui/backends/imgui_impl_sdl.h"
+#include "libs/imgui/backends/imgui_impl_opengl3.h"
+#include "libs/imgui/backends/imgui_impl_sdl.h"
 #include "core/systems/profiling/Profiler.h"
 
 namespace engine {
@@ -21,14 +21,14 @@ namespace engine {
 
         public:
             ImGuiLayer();
-            ~ImGuiLayer()                       override = default;
+            ~ImGuiLayer() override = default;
 
-            void onInit()                       override;
-            void onEvent(Event& _e)             override;
-            void onUpdate(Delta _dt)         override {  }
-            void onRender(Delta _dt)         override {  }
-            void onImGuiRender(Delta _dt)    override {  }
-            void onEnd()                        override;
+            void onInit() override;
+            void onEvent(Event& _e) override;
+            void onUpdate(Delta _dt) override {  }
+            void onRender(Delta _dt) override {  }
+            void onImGuiRender(Delta _dt) override {  }
+            void onEnd() override;
 
             void begin();
             void end();

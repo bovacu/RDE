@@ -5,11 +5,6 @@
 #define ENGINE2_0_PLATFORM_HEADER_SDL_IMAGE_H
 
 #include "core/Core.h"
-
-#if IS_MOBILE()
-    #include "SDL_image/SDL_image.h"
-#elif IS_DESKTOP()
-    #include <SDL2/SDL_image.h>
-#endif
+#include "SDL_image.h"
 
 #endif //ENGINE2_0_PLATFORM_HEADER_SDL_IMAGE_H

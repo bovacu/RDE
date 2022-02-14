@@ -5,11 +5,6 @@
 #define ENGINE2_0_PLATFORM_HEADER_SDL_H
 
 #include "core/Core.h"
-
-#if IS_MOBILE()
-    #include "SDL/include/SDL.h"
-#elif IS_DESKTOP()
-    #include <SDL2/SDL.h>
-#endif
+#include "SDL.h"
 
 #endif //ENGINE2_0_PLATFORM_HEADER_SDL_H
