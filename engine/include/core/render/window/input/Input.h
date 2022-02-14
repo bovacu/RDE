@@ -89,9 +89,8 @@ namespace engine {
             static bool isMouseJustReleased(MouseCode _button);
             static bool isMousePressed(MouseCode _button);
             static bool isMouseReleased(MouseCode _button);
-            static Vec2F getMousePosition(bool _centeredMiddleScreen = true);
-            static int getMouseX();
-            static int getMouseY();
+            static Vec2F getMousePosScreenCoords(bool _centeredMiddleScreen = true);
+            static Vec2F getMousePosWorldPos();
 
 
             static bool reassignController(int _controllerID, int _as);

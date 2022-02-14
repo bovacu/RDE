@@ -159,7 +159,7 @@ namespace engine {
         ImGui::GetStyle().Alpha = 0.65;
         ImGui::Begin("MouseInfo", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
         ImGui::GetStyle().Alpha = 1;
-        ImGui::Text("X: %f, Y: %f", InputManager::getMousePosition().x, InputManager::getMousePosition().y);
+        ImGui::Text("X: %f, Y: %f", InputManager::getMousePosScreenCoords().x, InputManager::getMousePosScreenCoords().y);
         ImGui::End();
     }
 
@@ -168,7 +168,7 @@ namespace engine {
 
         ImGui::Text("FPS: %d", engine::Engine::get().getFps());
         ImGui::Separator();
-        ImGui::Text("X: %f, Y: %f", InputManager::getMousePosition().x, InputManager::getMousePosition().y);
+        ImGui::Text("X: %f, Y: %f", InputManager::getMousePosScreenCoords().x, InputManager::getMousePosScreenCoords().y);
         ImGui::Separator();
         int _freeGpuMb = 0;
         #if !IS_MOBILE()

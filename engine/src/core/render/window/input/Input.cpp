@@ -130,22 +130,26 @@ namespace engine {
         return  get().mouseInput->getState((int)_button) == 0;
     }
 
-    Vec2F InputManager::getMousePosition(bool _centeredMiddleScreen) {
+    Vec2F InputManager::getMousePosScreenCoords(bool _centeredMiddleScreen) {
         auto _mousePos = get().mouseInput->getMousePosition();
         auto& _wi = get().windowInput;
         float _x = _mousePos.x - (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().x / 2.f : 0.f);
-        float _y = _mousePos.y - (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().y / 2.f : 0.f);
+        float _y = (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().y / 2.f : 0.f) - _mousePos.y;
         float _zoom = Engine::get().getMainCamera().getCurrentZoomLevel();
         return {_x * _zoom, _y * _zoom};
     }
 
-    int InputManager::getMouseX() {
-        return (int)getMousePosition().x;
+    Vec2F InputManager::getMousePosWorldPos() {
+        auto _mousePos = get().mouseInput->getMousePosition();
+        auto& _wi = get().windowInput;
+        auto& _camera =Engine::get().getMainCamera();
+        float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.getPosition().x;
+        float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.getPosition().y;
+        float _zoom = _camera.getCurrentZoomLevel();
+        return {_x * _zoom, _y * _zoom};
     }
 
-    int InputManager::getMouseY() {
-        return (int)getMousePosition().y;
-    }
+
 
     bool InputManager::reassignController(int _controllerID, int _as) {
         return get().controllerInput->reassignController(_controllerID, _as);

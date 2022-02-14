@@ -96,10 +96,6 @@ namespace engine {
             /// @return The current delta.
             [[nodiscard]] Delta getDelta() const                 { return dt; }
 
-            /// Returns in a Vec2i the current position of the mouse on the screen.
-            /// @return Vec2i with the [x,y] coordinates.
-            [[nodiscard]] Vec2I getMousePos() const                 { return Vec2I( (int)(-getWindowSize().x / 2.f + InputManager::getMouseX()),
-                                                                                    (int)(getWindowSize().y / 2.f - InputManager::getMouseY())); }
             /// Enables or disables the fullscreen mode.
             /// @param _fullscreen Enables(true) or disables(false) the fullscreen.
             void setFullscreen(bool _fullscreen);
