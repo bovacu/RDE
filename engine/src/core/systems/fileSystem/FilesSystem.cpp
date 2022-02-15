@@ -132,15 +132,26 @@ namespace engine {
 
 
 
-    void FilesSystem::writeChunkToFile(const std::string& _filePath, void* _content) {
+    void FilesSystem::writeChunkToFile(const std::string& _filePath, const char* _content, int _size) {
+        auto* _file = SDL_RWFromFile(_filePath.c_str(), "w");
+        if(_file == nullptr) {
+            LOG_E("Can't read file (writeChunkToFile): ", _filePath)
+            return;
+        }
+
+        SDL_RWwrite(_file, _content, 1, _size);
+        SDL_RWclose(_file);
+    }
+
+    void FilesSystem::writeChunkToFile(const std::string& _filePath, const std::string& _content) {
+        writeChunkToFile(_filePath, _content.c_str(), SDL_strlen(_content.c_str()));
+    }
+
+    void FilesSystem::appendChunkToFile(const std::string& _filePath, void* _content, int _size, int _where) {
 
     }
 
-    void FilesSystem::appendChunkToFile(const std::string& _filePath, void* _content, int _where) {
-
-    }
-
-    void FilesSystem::appendChunkInLineToFile(const std::string& _filePath, void* _content, int _line) {
+    void FilesSystem::appendChunkInLineToFile(const std::string& _filePath, void* _content, int _size, int _line) {
 
     }
 

@@ -6,6 +6,7 @@
 
 #include "Easing.h"
 #include "Logger.h"
+#include "Appender.h"
 #include "Vec.h"
 #include "Color.h"
 #include "Delta.h"

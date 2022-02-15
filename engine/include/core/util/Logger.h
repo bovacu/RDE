@@ -31,8 +31,7 @@ inline void printTime(const char* _init, const char* _end) {
 }
 
 template <typename Arg1>
-inline void printer(const char* _init, const char* _end, Arg1&& arg1)
-{
+inline void printer(const char* _init, const char* _end, Arg1&& arg1) {
 #if IS_MOBILE()
     std::stringstream _stream;
     _stream << arg1;
@@ -52,8 +51,7 @@ inline void printer(const char* _init, const char* _end, Arg1&& arg1)
 }
 
 template <typename Arg1, typename... Args>
-inline void printer(const char* _init, const char* _end, Arg1&& arg1, Args&&... args)
-{
+inline void printer(const char* _init, const char* _end, Arg1&& arg1, Args&&... args) {
 #if IS_MOBILE()
     std::stringstream _stream;
     _stream << arg1;

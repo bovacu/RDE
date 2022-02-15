@@ -32,9 +32,11 @@ namespace engine {
             static FileLines readLinesInFile(const std::string& _filePath, std::vector<int>& _lines);
 
 
-            static void writeChunkToFile(const std::string& _filePath, void* _content);
-            static void appendChunkToFile(const std::string& _filePath, void* _content, int _where);
-            static void appendChunkInLineToFile(const std::string& _filePath, void* _content, int _line);
+            static void writeChunkToFile(const std::string& _filePath, const char* _content, int _size);
+            static void writeChunkToFile(const std::string& _filePath, const std::string& _content);
+
+            static void appendChunkToFile(const std::string& _filePath, void* _content, int _size, int _where);
+            static void appendChunkInLineToFile(const std::string& _filePath, void* _content, int _size, int _line);
             static void replaceChunkInFile(const std::string& _old, const std::string& _new);
 
 

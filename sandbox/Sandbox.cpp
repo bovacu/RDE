@@ -58,22 +58,7 @@ namespace engine {
 
 //        CellularAutomata _a;
 //        _a.init({{128, 128}, 0.5f, 4, 30, 10});
-//        SDL_RWops *rw = SDL_RWFromFile("assets/foo.txt", "w");
-//        if(rw != nullptr) {
-//            const char *str = "Hello World";
-//            size_t len = SDL_strlen(str);
-//            if (SDL_RWwrite(rw, str, 1, len) != len) {
-//                printf("Couldn't fully write string\n");
-//            } else {
-//                printf("Wrote %d 1-byte blocks\n", len);
-//            }
-//            SDL_RWclose(rw);
-//        } else
-//            LOG_E("Fuck, nullptr")
 
-        std::vector<int> _lines = {1, 3, 5};
-        for(auto& _l : FilesSystem::readLinesInFile("assets/foo.txt", _lines).content)
-            LOG_I(_l)
     }
 
     void Sandbox::onEvent(Event& _event) {
