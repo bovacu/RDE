@@ -42,6 +42,7 @@ namespace engine {
 
         #if IS_MOBILE()
         SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
+        SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
         #else
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         #endif

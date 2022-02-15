@@ -1,5 +1,8 @@
 package com.example.engineandroid;
 
+import android.content.pm.ActivityInfo;
+import android.os.Bundle;
+
 import org.libsdl.app.SDLActivity;
 
 public class MainActivity extends SDLActivity {
@@ -13,5 +16,11 @@ public class MainActivity extends SDLActivity {
                 "SDL2_image",
                 "engineAndroid"
         };
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 }
