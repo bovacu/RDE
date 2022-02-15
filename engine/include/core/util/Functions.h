@@ -26,6 +26,10 @@ namespace engine {
                 return base_filename.substr(0, p);
             }
 
+            static std::string getPathFromFilePath(const std::string& _path) {
+                return _path.substr(0, _path.find_last_of("/\\") + 1);
+            }
+
             static std::string getFileExtension(const std::string& _path) {
                 std::string base_filename = _path.substr(_path.find_last_of("/\\") + 1);
                 return base_filename.substr(base_filename.find_last_of('.') + 1, base_filename.size());

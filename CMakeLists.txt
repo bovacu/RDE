@@ -90,7 +90,11 @@ set(SOURCES
         engine/src/core/platform/Platform.cpp engine/include/core/platform/Platform.h engine/include/core/platform/PlatformHeaderSDL.h
         engine/include/core/platform/PlatformHeaderSDLMixer.h engine/include/core/platform/PlatformHeaderSDLImage.h
         engine/include/core/render/window/input/MobileInput.h engine/src/core/render/window/input/MobileInput.cpp engine/include/core/render/window/event/MobileEvent.h
-        engine/include/core/procedural/CellularAutomataMapGenerator.h engine/src/core/procedural/CelularAutomataMapGenerator.cpp engine/include/core/systems/fileSystem/FilesSystem.h engine/src/core/systems/fileSystem/FilesSystem.cpp engine/include/core/util/Appender.h)
+        engine/include/core/procedural/CellularAutomataMapGenerator.h engine/src/core/procedural/CellularAutomataMapGenerator.cpp
+        engine/include/core/systems/fileSystem/FilesSystem.h engine/src/core/systems/fileSystem/FilesSystem.cpp engine/include/core/util/StringUtils.h
+
+
+        )
 
 add_executable(Engine2_0 engine/src/main.cpp ${SOURCES})
 

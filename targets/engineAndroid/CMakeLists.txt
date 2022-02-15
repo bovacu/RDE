@@ -129,8 +129,6 @@ include_directories(.)
 file(GLOB_RECURSE CPP_HEADERS ${MAIN_SOURCE_DIR}/include/*.h*  ${SANDBOX_SOURCE_DIR}/*.h*)
 file(GLOB_RECURSE CPP_SOURCES ${MAIN_SOURCE_DIR}/src/*.cpp   ${SANDBOX_SOURCE_DIR}/*.cpp)
 
-#add_definitions(-DFT2_BUILD_LIBRARY)
-
 set(GL_PROFILES "GL_PROFILE_GLES2" "GL_PROFILE_GLES3")
 
 add_library(

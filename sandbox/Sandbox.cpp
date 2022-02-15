@@ -53,11 +53,9 @@ namespace engine {
             _row++;
         }
 
-//        auto& _music = SoundManager::get().loadMusic("assets/sounds/getout.ogg");
-//        SoundManager::get().playMusic(_music.name);
-
-//        CellularAutomata _a;
-//        _a.init({{128, 128}, 0.5f, 4, 30, 10});
+        auto* _handler = FilesSystem::open("assets/foo.txt", FileMode::READ);
+        FilesSystem::removeChunk(_handler, 5, 10);
+        FilesSystem::close(_handler);
 
     }
 

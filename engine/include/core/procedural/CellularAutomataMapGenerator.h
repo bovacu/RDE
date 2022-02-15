@@ -9,10 +9,10 @@
 namespace engine {
 
     struct GenerationSettings {
-        Vec2I size;
-        float fillAmount;
-        int numberOfNeighbours;
-        int steps;
+        Vec2I size = {128, 128};
+        float fillAmount = 0.5f;
+        int numberOfNeighbours = 4;
+        int steps = 30;
         long seed = -1;
     };
 
