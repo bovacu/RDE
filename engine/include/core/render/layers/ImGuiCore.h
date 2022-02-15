@@ -5,9 +5,7 @@
 #define ENGINE2_0_IMGUI_CORE_H
 
 #if !IS_MOBILE()
-#include <imgui.h>
-//#include "external/imgui/implot/implot.h"
-//#include "external/imgui/nodeEditor/imgui_node_editor.h"
+#include "imgui.h"
 #endif
 
 #endif //ENGINE2_0_IMGUI_CORE_H

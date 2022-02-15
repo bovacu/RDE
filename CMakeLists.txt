@@ -26,6 +26,7 @@ include_directories(libs/SDL_net)
 include_directories(libs/SDL_mixer/include)
 include_directories(libs/SDL_image)
 include_directories(libs/glm)
+include_directories(libs/imgui)
 
 add_library(glad libs/glad/include/glad/glad.h libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC libs/glad/include/)
