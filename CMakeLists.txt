@@ -6,8 +6,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
 
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
-SET(TARGET_LINKS glad freetype SDL2 SDL2_mixer SDL2_net SDL2_image ${CMAKE_DL_LIBS})
-list(APPEND CMAKE_MODULE_PATH libs/SDL libs/SDL_image libs/SDL_mixer libs/SDL_net libs/freetype)
+SET(TARGET_LINKS glad freetype SDL2 SDL2_mixer SDL2_image ${CMAKE_DL_LIBS})
+list(APPEND CMAKE_MODULE_PATH libs/SDL libs/SDL_image libs/SDL_mixer libs/freetype)
 
 #-------------- STB
 
@@ -97,7 +97,10 @@ set(SOURCES
 
         )
 
-add_executable(Engine2_0 engine/src/main.cpp ${SOURCES})
+file(GLOB_RECURSE SDL_NET_SOURCE libs/SDL_net/.*c*)
+file(GLOB_RECURSE SDL_NET_HEADER libs/SDL_net/.*h*)
+
+add_executable(Engine2_0 engine/src/main.cpp ${SOURCES} ${SDL_NET_SOURCE} ${SDL_NET_HEADER})
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 target_compile_definitions(Engine2_0 PRIVATE ${GL_PROFILES})

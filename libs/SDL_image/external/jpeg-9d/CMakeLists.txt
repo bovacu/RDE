@@ -20,7 +20,7 @@ endif()
 
 
 target_sources(jpeg PRIVATE jidctint.c jidctfst.c)
-
+target_compile_options(jpeg PUBLIC -fPIC)
 # FIXME : include asm for ARM
 # target_sources(jpeg PRIVATE jidctint.c jidctfst.S)
 
