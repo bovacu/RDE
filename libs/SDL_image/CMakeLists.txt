@@ -21,9 +21,7 @@ if (APPLE)
 endif()
 
 # FIXME: ????
-if (NOT BUILD_SHARED_LIBS)
-	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-endif()
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(SDL2_image)
 
@@ -67,11 +65,7 @@ if (SUPPORT_PNG)
 		get_target_property(ZLIB_INCLUDE_DIR zlib INCLUDE_DIRECTORIES)
 
 		# libpng find_package(zlib) requires ZLIB_LIBRARY
-		if (BUILD_SHARED_LIBS)
-			set(ZLIB_LIBRARY zlib)
-		else()
-			set(ZLIB_LIBRARY zlibstatic)
-		endif()
+		set(ZLIB_LIBRARY zlibstatic)
 
 		# SDL_image doesn't support installing currently
 		set(SKIP_INSTALL_ALL ON)
@@ -79,11 +73,7 @@ if (SUPPORT_PNG)
 
 	add_subdirectory(external/libpng-1.6.37)
 	include_directories(external/libpng-1.6.37)
-	if(BUILD_SHARED_LIBS)
-		target_link_libraries(SDL2_image PRIVATE png)
-	else()
-		target_link_libraries(SDL2_image PRIVATE png_static)
-	endif()
+	target_link_libraries(SDL2_image PRIVATE png_static)
 endif()
 
 if (SUPPORT_WEBP)
@@ -111,6 +101,6 @@ if(BUILD_SHOWIMAGE)
 	add_executable(showimage showimage.c)
 	target_link_libraries(showimage PRIVATE SDL2::image)
 	if (WIN32)
-		target_link_libraries(showimage PRIVATE SDL2::SDL2main)
+		target_link_libraries(showimage PRIVATE SDL2::SDL2)
 	endif()
 endif()

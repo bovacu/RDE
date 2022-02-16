@@ -100,7 +100,10 @@ set(SOURCES
 file(GLOB_RECURSE SDL_NET_SOURCE libs/SDL_net/.*c*)
 file(GLOB_RECURSE SDL_NET_HEADER libs/SDL_net/.*h*)
 
-add_executable(Engine2_0 engine/src/main.cpp ${SOURCES} ${SDL_NET_SOURCE} ${SDL_NET_HEADER})
+add_executable(Engine2_0 engine/src/main.cpp
+        ${SOURCES}
+        ${SDL_NET_SOURCE} ${SDL_NET_HEADER}
+        )
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
 target_compile_definitions(Engine2_0 PRIVATE ${GL_PROFILES})
