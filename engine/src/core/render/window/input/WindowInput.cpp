@@ -17,8 +17,6 @@ namespace engine {
         events[(int)SystemEventEnum::APP_WILL_ENTER_FOREG] = BIND_FUNC_1(WindowInput::onWillEnterForegroundApp);
 
         ignoredEvents = { WINDOW_AUDIO_DEVICE_CONNECTED_E, WINDOW_AUDIO_DEVICE_DISCONNECTED_E };
-
-        LOG_I(SDL_APP_TERMINATING, ", ", SDL_APP_DIDENTERBACKGROUND,", ", SDL_APP_DIDENTERFOREGROUND)
     }
 
     void WindowInput::onWindowEvent(SDL_Event& _event) {
