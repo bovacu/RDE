@@ -7,7 +7,7 @@ set(PROJECT_NAME Engine2_0)
 
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
 SET(TARGET_LINKS glad freetype SDL2 SDL2_mixer SDL2_image ${CMAKE_DL_LIBS})
-list(APPEND CMAKE_MODULE_PATH libs/SDL libs/SDL_image libs/SDL_mixer libs/freetype)
+list(APPEND CMAKE_MODULE_PATH submodules/SDL submodules/SDL_image submodules/SDL_mixer submodules/freetype)
 
 #-------------- STB
 
@@ -20,13 +20,13 @@ include_directories(.)
 include_directories(engine/include)
 include_directories(sandbox)
 
-include_directories(libs/freetype/include)
-include_directories(libs/SDL/include)
-include_directories(libs/SDL_net)
-include_directories(libs/SDL_mixer/include)
-include_directories(libs/SDL_image)
-include_directories(libs/glm)
-include_directories(libs/imgui)
+include_directories(submodules/freetype/include)
+include_directories(submodules/SDL/include)
+include_directories(submodules/SDL_net)
+include_directories(submodules/SDL_mixer/include)
+include_directories(submodules/SDL_image)
+include_directories(submodules/glm)
+include_directories(submodules/imgui)
 
 add_library(glad libs/glad/include/glad/glad.h libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC libs/glad/include/)
@@ -60,20 +60,20 @@ set(SOURCES
 
         engine/include/core/systems/Components.h engine/src/core/render/elements/Sprite.cpp engine/include/core/render/elements/Sprite.h engine/src/core/render/Camera.cpp engine/include/core/render/Camera.h engine/include/core/render/shapes/Shape.h
 
-        libs/imgui/imgui.h libs/imgui/imgui.cpp libs/imgui/imstb_truetype.h libs/imgui/imstb_rectpack.h
-        libs/imgui/imstb_textedit.h libs/imgui/imgui_internal.h libs/imgui/imgui_tables.cpp
-        libs/imgui/imgui_draw.cpp libs/imgui/imconfig.h libs/imgui/backends/imgui_impl_sdl.h libs/imgui/imgui_widgets.cpp
-        libs/imgui/backends/imgui_impl_sdl.cpp libs/imgui/backends/imgui_impl_opengl3.h
-        libs/imgui/backends/imgui_impl_opengl3.cpp libs/imgui/imgui_demo.cpp
+        submodules/imgui/imgui.h submodules/imgui/imgui.cpp submodules/imgui/imstb_truetype.h submodules/imgui/imstb_rectpack.h
+        submodules/imgui/imstb_textedit.h submodules/imgui/imgui_internal.h submodules/imgui/imgui_tables.cpp
+        submodules/imgui/imgui_draw.cpp submodules/imgui/imconfig.h submodules/imgui/backends/imgui_impl_sdl.h submodules/imgui/imgui_widgets.cpp
+        submodules/imgui/backends/imgui_impl_sdl.cpp submodules/imgui/backends/imgui_impl_opengl3.h
+        submodules/imgui/backends/imgui_impl_opengl3.cpp submodules/imgui/imgui_demo.cpp
 
-        # https://github.com/epezent/implot
-        libs/imgui/implot/implot.h libs/imgui/implot/implot.cpp libs/imgui/implot/implot_internal.h libs/imgui/implot/implot_items.cpp
-
-        # https://github.com/thedmd/imgui-node-editor
-        libs/imgui/nodeEditor/crude_json.h libs/imgui/nodeEditor/crude_json.cpp libs/imgui/nodeEditor/imgui_bezier_math.h
-        libs/imgui/nodeEditor/imgui_canvas.h libs/imgui/nodeEditor/imgui_canvas.cpp libs/imgui/nodeEditor/imgui_extra_math.h
-        libs/imgui/nodeEditor/imgui_node_editor.h libs/imgui/nodeEditor/imgui_node_editor.cpp libs/imgui/nodeEditor/imgui_node_editor_api.cpp
-        libs/imgui/nodeEditor/imgui_node_editor_internal.h libs/imgui/textEditor/TextEditor.h libs/imgui/textEditor/TextEditor.cpp
+#        # https://github.com/epezent/implot
+#        libs/imgui/implot/implot.h libs/imgui/implot/implot.cpp libs/imgui/implot/implot_internal.h libs/imgui/implot/implot_items.cpp
+#
+#        # https://github.com/thedmd/imgui-node-editor
+#        libs/imgui/nodeEditor/crude_json.h libs/imgui/nodeEditor/crude_json.cpp libs/imgui/nodeEditor/imgui_bezier_math.h
+#        libs/imgui/nodeEditor/imgui_canvas.h libs/imgui/nodeEditor/imgui_canvas.cpp libs/imgui/nodeEditor/imgui_extra_math.h
+#        libs/imgui/nodeEditor/imgui_node_editor.h libs/imgui/nodeEditor/imgui_node_editor.cpp libs/imgui/nodeEditor/imgui_node_editor_api.cpp
+#        libs/imgui/nodeEditor/imgui_node_editor_internal.h libs/imgui/textEditor/TextEditor.h libs/imgui/textEditor/TextEditor.cpp
 
         engine/include/core/systems/profiling/Profiler.h engine/src/core/systems/profiling/Profiler.cpp engine/include/core/render/layers/ImGuiCore.h
         engine/src/core/render/elements/TextureAtlasManager.cpp engine/include/core/render/elements/TextureAtlasManager.h engine/include/core/util/Rect.h

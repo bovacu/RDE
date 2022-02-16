@@ -10,8 +10,8 @@
 #include "Layer.h"
 #include "core/render/window/event/MouseEvent.h"
 #include "core/systems/profiling/Profiler.h"
-#include "libs/imgui/backends/imgui_impl_opengl3.h"
-#include "libs/imgui/backends/imgui_impl_sdl.h"
+#include "submodules//imgui/backends/imgui_impl_opengl3.h"
+#include "submodules/imgui/backends/imgui_impl_sdl.h"
 
 namespace engine {
 
