@@ -1,4 +1,4 @@
-sudo apt-get install build-essential cmake clang git autoconf libtool m4 automake
+sudo apt-get install build-essential cmake clang git autoconf libtool m4 automake xorg-dev
 git submodule init
 git submodule update
 cd submodules/imgui && git checkout docking
