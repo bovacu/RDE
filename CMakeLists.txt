@@ -6,9 +6,46 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
 
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
-SET(TARGET_LINKS glad freetype SDL2 SDL2_mixer SDL2_image ${CMAKE_DL_LIBS})
-list(APPEND CMAKE_MODULE_PATH submodules/SDL submodules/SDL_image submodules/SDL_mixer submodules/freetype)
+SET(TARGET_LINKS glad freetype sdl2 SDL2_mixer sdl2_image ${CMAKE_DL_LIBS})
+list(APPEND CMAKE_MODULE_PATH submodules/SDL_image submodules/SDL_mixer submodules/freetype)
 
+add_library(
+        sdl2
+        SHARED
+        IMPORTED
+)
+set_target_properties(
+        sdl2
+        PROPERTIES
+        IMPORTED_LOCATION
+        /usr/local/lib/libSDL2.so
+)
+
+
+add_library(
+        sdl2_image
+        SHARED
+        IMPORTED
+)
+set_target_properties(
+        sdl2_image
+        PROPERTIES
+        IMPORTED_LOCATION
+        /usr/local/lib/libSDL2_image.so
+)
+
+
+add_library(
+        sdl2_mixer
+        SHARED
+        IMPORTED
+)
+set_target_properties(
+        sdl2_mixer
+        PROPERTIES
+        IMPORTED_LOCATION
+        /usr/local/lib/libSDL2_mixer.so
+)
 #-------------- STB
 
 set(STB_DIR "engine/src/stb")
