@@ -7,17 +7,25 @@
 #include "core/Engine.h"
 #include "core/render/window/event/MouseEvent.h"
 #include "core/systems/console/Console.h"
+#include "implot.h"
+#include "imgui_node_editor.h"
+#include "FileBrowser/ImGuiFileBrowser.h"
 
 namespace engine {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiLayer::plotBuffers;
+    namespace ed = ax::NodeEditor;
+    static ed::EditorContext* g_Context = nullptr;
+    static ImGuiContext* i_Context = nullptr;
+    static ImPlotContext* p_Context = nullptr;
+    imgui_addons::ImGuiFileBrowser file_dialog;
 
     ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {  }
 
     void ImGuiLayer::onInit() {
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-//        ImPlot::CreateContext();
+        i_Context = ImGui::CreateContext();
+        p_Context = ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -28,7 +36,6 @@ namespace engine {
 
         // Setup Dear ImGui style
         ImGui::StyleColorsDark();
-        //ImGui::StyleColorsClassic();
 
         // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
         ImGuiStyle& style = ImGui::GetStyle();
@@ -47,6 +54,11 @@ namespace engine {
         for(auto& _state : State::stateToNameDict) {
             plotBuffers[_state.first] = {};
         }
+
+        ed::Config config;
+        config.SettingsFile = "Simple.json";
+        g_Context = ed::CreateEditor(&config);
+        ed::SetCurrentEditor(g_Context);
     }
 
     void ImGuiLayer::onEvent(Event& _e) {
@@ -57,9 +69,11 @@ namespace engine {
     }
 
     void ImGuiLayer::onEnd() {
+        ed::DestroyEditor(g_Context);
+        ImPlot::DestroyContext(p_Context);
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();
-        ImGui::DestroyContext();
+        ImGui::DestroyContext(i_Context);
     }
 
     void ImGuiLayer::begin() {
@@ -92,6 +106,7 @@ namespace engine {
         ImGui::Separator();
         printAtlases();
         printFPSDrawCallsAndRAM();
+        showFileExplorer();
         anyWindowHovered = ImGui::IsWindowHovered() || ImGui::IsAnyItemActive() || ImGui::IsAnyItemHovered() || ImGui::IsAnyItemFocused();
         ImGui::End();
         console();
@@ -113,20 +128,20 @@ namespace engine {
             }
         }
 
-//        if (ImPlot::BeginPlot("##Rolling", ImVec2(-1,125))) {
-//            ImPlot::SetupAxes(nullptr, "ms", ImPlotAxisFlags_NoTickLabels);
-//            ImPlot::SetupAxisLimits(ImAxis_X1,0,history, ImGuiCond_Always);
-//            ImPlot::SetupAxisLimits(ImAxis_Y1,0,50);
-//
-//            for(auto& _state : State::stateToNameDict) {
-//                if(Profiler::getStates()[_state.first].active) {
-//                    auto _s = plotBuffers[_state.first];
-//                    ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),&_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
-//                }
-//            }
-//
-//            ImPlot::EndPlot();
-//        }
+        if (ImPlot::BeginPlot("##Rolling", ImVec2(-1,125))) {
+            ImPlot::SetupAxes(nullptr, "ms", ImPlotAxisFlags_NoTickLabels);
+            ImPlot::SetupAxisLimits(ImAxis_X1,0,history, ImGuiCond_Always);
+            ImPlot::SetupAxisLimits(ImAxis_Y1,0,50);
+
+            for(auto& _state : State::stateToNameDict) {
+                if(Profiler::getStates()[_state.first].active) {
+                    auto _s = plotBuffers[_state.first];
+                    ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),&_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
+                }
+            }
+
+            ImPlot::EndPlot();
+        }
         ImGui::End();
     }
 
@@ -357,6 +372,24 @@ namespace engine {
 
         ImGui::EndChild();
         ImGui::End();
+    }
+
+    void ImGuiLayer::showFileExplorer() {
+        bool open = false, save = false;
+        if(ImGui::Button("Open File Manager"))
+            open = true;
+
+        //Remember the name to ImGui::OpenPopup() and showFileDialog() must be same...
+        if(open)
+            ImGui::OpenPopup("Open File");
+
+        /* Optional third parameter. Support opening only compressed rar/zip files.
+         * Opening any other file will show error, return false and won't close the dialog.
+         */
+        if(file_dialog.showFileDialog("Open File", imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".rar,.zip,.7z")) {
+            std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
+            std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
+        }
     }
 
 }

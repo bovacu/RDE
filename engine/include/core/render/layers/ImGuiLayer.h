@@ -47,6 +47,7 @@ namespace engine {
             void charToIntSize(const std::string& _size, int* _resolution);
             void metrics();
             void mouseInfo();
+            void showFileExplorer();
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
 

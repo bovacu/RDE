@@ -6,7 +6,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
 
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
-SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer sdl2_image sdl2_net ${CMAKE_DL_LIBS})
+SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer sdl2_image sdl2_net ${CMAKE_DL_LIBS}
+        ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
+        )
 
 find_package(Threads REQUIRED)
 
@@ -67,7 +69,6 @@ set(STB_DIR "engine/src/stb")
 include_directories(${STB_DIR})
 link_directories(${STB_DIR})
 
-
 include_directories(.)
 include_directories(engine/include)
 include_directories(sandbox)
@@ -82,6 +83,31 @@ include_directories(submodules/imgui)
 
 add_library(glad libs/glad/include/glad/glad.h libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC libs/glad/include/)
+
+set(IMGUI_PATH  "submodules/imgui")
+file(GLOB IMGUI_SOURCES ${IMGUI_PATH}/*.cpp ${IMGUI_PATH}/backends/imgui_impl_sdl.cpp ${IMGUI_PATH}/backends/imgui_impl_opengl3.cpp ${IMGUI_PATH}/imgui_demo.cpp)
+add_library("ImGui" STATIC ${IMGUI_SOURCES})
+target_include_directories("ImGui" PUBLIC ${IMGUI_PATH})
+
+set(IMGUI_PLOT_PATH  "submodules/implot")
+file(GLOB IMGUI_PLOT_SOURCES ${IMGUI_PLOT_PATH}/*.cpp)
+add_library("ImGuiPlot" STATIC ${IMGUI_PLOT_SOURCES})
+target_include_directories("ImGuiPlot" PUBLIC ${IMGUI_PLOT_PATH})
+
+set(IMGUI_ADDONS_PATH  "submodules/imguiAddons")
+file(GLOB IMGUI_ADDONS_SOURCES ${IMGUI_ADDONS_PATH}/FileBrowser/*.cpp)
+add_library("ImGuiAddons" STATIC ${IMGUI_ADDONS_SOURCES})
+target_include_directories("ImGuiAddons" PUBLIC ${IMGUI_ADDONS_PATH})
+
+set(IMGUI_TEXT_EDITOR_PATH  "submodules/imguiTextEditor")
+file(GLOB IMGUI_TEXT_EDITOR_SOURCES ${IMGUI_TEXT_EDITOR_PATH}/*.cpp)
+add_library("ImGuiTextEditor" STATIC ${IMGUI_TEXT_EDITOR_SOURCES})
+target_include_directories("ImGuiTextEditor" PUBLIC ${IMGUI_TEXT_EDITOR_PATH})
+
+set(IMGUI_NODE_EDITOR_PATH  "submodules/imguiNodeEditor")
+file(GLOB IMGUI_NODE_EDITOR_SOURCES ${IMGUI_NODE_EDITOR_PATH}/*.cpp)
+add_library("ImGuiNodeEditor" STATIC ${IMGUI_NODE_EDITOR_SOURCES})
+target_include_directories("ImGuiNodeEditor" PUBLIC ${IMGUI_NODE_EDITOR_PATH})
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 
@@ -112,21 +138,6 @@ set(SOURCES
 
         engine/include/core/systems/Components.h engine/src/core/render/elements/Sprite.cpp engine/include/core/render/elements/Sprite.h engine/src/core/render/Camera.cpp engine/include/core/render/Camera.h engine/include/core/render/shapes/Shape.h
 
-        submodules/imgui/imgui.h submodules/imgui/imgui.cpp submodules/imgui/imstb_truetype.h submodules/imgui/imstb_rectpack.h
-        submodules/imgui/imstb_textedit.h submodules/imgui/imgui_internal.h submodules/imgui/imgui_tables.cpp
-        submodules/imgui/imgui_draw.cpp submodules/imgui/imconfig.h submodules/imgui/backends/imgui_impl_sdl.h submodules/imgui/imgui_widgets.cpp
-        submodules/imgui/backends/imgui_impl_sdl.cpp submodules/imgui/backends/imgui_impl_opengl3.h
-        submodules/imgui/backends/imgui_impl_opengl3.cpp submodules/imgui/imgui_demo.cpp
-
-#        # https://github.com/epezent/implot
-#        libs/imgui/implot/implot.h libs/imgui/implot/implot.cpp libs/imgui/implot/implot_internal.h libs/imgui/implot/implot_items.cpp
-#
-#        # https://github.com/thedmd/imgui-node-editor
-#        libs/imgui/nodeEditor/crude_json.h libs/imgui/nodeEditor/crude_json.cpp libs/imgui/nodeEditor/imgui_bezier_math.h
-#        libs/imgui/nodeEditor/imgui_canvas.h libs/imgui/nodeEditor/imgui_canvas.cpp libs/imgui/nodeEditor/imgui_extra_math.h
-#        libs/imgui/nodeEditor/imgui_node_editor.h libs/imgui/nodeEditor/imgui_node_editor.cpp libs/imgui/nodeEditor/imgui_node_editor_api.cpp
-#        libs/imgui/nodeEditor/imgui_node_editor_internal.h libs/imgui/textEditor/TextEditor.h libs/imgui/textEditor/TextEditor.cpp
-
         engine/include/core/systems/profiling/Profiler.h engine/src/core/systems/profiling/Profiler.cpp engine/include/core/render/layers/ImGuiCore.h
         engine/src/core/render/elements/TextureAtlasManager.cpp engine/include/core/render/elements/TextureAtlasManager.h engine/include/core/util/Rect.h
         engine/src/core/systems/animationSystem/Animation.cpp engine/include/core/systems/animationSystem/Animation.h engine/src/core/systems/animationSystem/AnimationSystem.cpp
@@ -149,12 +160,9 @@ set(SOURCES
 
         )
 
-file(GLOB_RECURSE SDL_NET_SOURCE libs/SDL_net/.*c*)
-file(GLOB_RECURSE SDL_NET_HEADER libs/SDL_net/.*h*)
 
 add_executable(Engine2_0 engine/src/main.cpp
         ${SOURCES}
-        ${SDL_NET_SOURCE} ${SDL_NET_HEADER}
         )
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
