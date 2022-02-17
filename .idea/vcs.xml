@@ -2,6 +2,21 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/submodules/SDL" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/submodules/SDL_image" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/submodules/SDL_mixer" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/submodules/SDL_net" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/submodules/freetype" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/submodules/freetype/subprojects/dlg" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/submodules/glm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/submodules/imgui" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/targets/engineAndroid/app/jni/Engine2.0" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/targets/engineAndroid/sdl/jni/SDL" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/targets/engineAndroid/sdl/jni/SDL_image" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/targets/engineAndroid/sdl/jni/SDL_mixer" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/targets/engineAndroid/sdl/jni/SDL_net" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/targets/engineAndroid/sdl/jni/freetype" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/targets/engineAndroid/sdl/jni/glm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/targets/engineAndroid/sdl/jni/imgui" vcs="Git" />
   </component>
 </project>

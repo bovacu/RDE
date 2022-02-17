@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -fexceptions")
 string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_VARIANT_DIR)
 
 # Location of our third party libraries.
-set(LIBS "../../libs")
+set(LIBS "../../submodules")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 
 set(SDL_DIR "${LIBS}/SDL")

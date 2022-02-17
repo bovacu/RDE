@@ -6,46 +6,61 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine2_0)
 
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
-SET(TARGET_LINKS glad freetype sdl2 SDL2_mixer sdl2_image ${CMAKE_DL_LIBS})
-list(APPEND CMAKE_MODULE_PATH submodules/SDL_image submodules/SDL_mixer submodules/freetype)
+SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer sdl2_image sdl2_net ${CMAKE_DL_LIBS})
+
+find_package(Threads REQUIRED)
 
 add_library(
         sdl2
-        SHARED
+        STATIC
         IMPORTED
 )
 set_target_properties(
         sdl2
         PROPERTIES
         IMPORTED_LOCATION
-        /usr/local/lib/libSDL2.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL/lib/libSDL2.a
 )
 
 
 add_library(
         sdl2_image
-        SHARED
+        STATIC
         IMPORTED
 )
 set_target_properties(
         sdl2_image
         PROPERTIES
         IMPORTED_LOCATION
-        /usr/local/lib/libSDL2_image.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_image/lib/libSDL2_image.a
 )
 
 
 add_library(
         sdl2_mixer
-        SHARED
+        STATIC
         IMPORTED
 )
 set_target_properties(
         sdl2_mixer
         PROPERTIES
         IMPORTED_LOCATION
-        /usr/local/lib/libSDL2_mixer.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_mixer/lib/libSDL2_mixer.a
 )
+
+
+add_library(
+        sdl2_net
+        STATIC
+        IMPORTED
+)
+set_target_properties(
+        sdl2_net
+        PROPERTIES
+        IMPORTED_LOCATION
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_net/lib/libSDL2_net.a
+)
+
 #-------------- STB
 
 set(STB_DIR "engine/src/stb")
