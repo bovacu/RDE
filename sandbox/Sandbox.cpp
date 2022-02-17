@@ -53,10 +53,8 @@ namespace engine {
             _row++;
         }
 
-        auto* _handler = FilesSystem::open("assets/foo.txt", FileMode::READ);
-        FilesSystem::removeChunk(_handler, 5, 10);
-        FilesSystem::close(_handler);
-
+        auto& _music = SoundManager::get().loadMusic("assets/sounds/getout.ogg");
+        SoundManager::get().playMusic(_music.name);
     }
 
     void Sandbox::onEvent(Event& _event) {
