@@ -158,7 +158,7 @@ set(SOURCES
         engine/include/core/systems/fileSystem/FilesSystem.h engine/src/core/systems/fileSystem/FilesSystem.cpp engine/include/core/util/StringUtils.h
 
 
-        )
+        engine/include/core/native/android/NativeAds.h engine/src/core/native/android/NativeAds.cpp)
 
 
 add_executable(Engine2_0 engine/src/main.cpp
