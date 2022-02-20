@@ -143,7 +143,9 @@ namespace engine {
     }
 
     void ControllerInput::onGamepadConnected(SDL_Event& _event) {
+        #if !IS_MOBILE()
         initGamepads();
+        #endif
     }
 
     void ControllerInput::onGamepadDisconnected(SDL_Event& _event) {
