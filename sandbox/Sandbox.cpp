@@ -5,8 +5,7 @@
 #include "core/systems/soundSystem/SoundManager.h"
 #include "core/procedural/CellularAutomataMapGenerator.h"
 #include "core/systems/fileSystem/FilesSystem.h"
-
-#include "core/native/android/AndroidNative.h"
+#include <nativeCode/include/NativeAds.h>
 
 namespace engine {
 
@@ -54,7 +53,6 @@ namespace engine {
 
             _row++;
         }
-
 //        auto& _music = SoundManager::get().loadMusic("assets/sounds/getout.ogg");
 //        SoundManager::get().playMusic(_music.name);
         #if IS_ANDROID()

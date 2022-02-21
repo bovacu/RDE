@@ -156,13 +156,17 @@ set(SOURCES
         engine/include/core/render/window/input/MobileInput.h engine/src/core/render/window/input/MobileInput.cpp engine/include/core/render/window/event/MobileEvent.h
         engine/include/core/procedural/CellularAutomataMapGenerator.h engine/src/core/procedural/CellularAutomataMapGenerator.cpp
         engine/include/core/systems/fileSystem/FilesSystem.h engine/src/core/systems/fileSystem/FilesSystem.cpp engine/include/core/util/StringUtils.h
+        )
 
+set(CPP_HEADERS)
+set(CPP_SOURCES)
 
-        engine/include/core/native/android/AndroidNative.h engine/src/core/native/android/AndroidNative.cpp)
-
+include(targets/GDEFirebase/CMakeLists.txt)
 
 add_executable(Engine2_0 engine/src/main.cpp
         ${SOURCES}
+        ${CPP_SOURCES}
+        ${CPP_HEADERS}
         )
 
 target_link_libraries(Engine2_0 ${TARGET_LINKS})
