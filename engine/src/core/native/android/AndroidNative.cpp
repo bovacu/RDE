@@ -79,26 +79,39 @@ namespace engine {
         switch (_adType) {
 
             case BANNER: {
-                if(bannerView->InitializeLastResult().status() == firebase::kFutureStatusComplete) {
-                    syslog(LOG_INFO, "-------------------------------> Showing banner");
-                    bannerView->Show();
+                auto _future = bannerView->LoadAdLastResult();
+                if(_future.status() == firebase::kFutureStatusComplete) {
+                    if(_future.error() == firebase::admob::kAdMobErrorNone) {
+                        syslog(LOG_INFO, "-------------------------------> Showing banner");
+                        bannerView->Show();
+                    } else
+                        checkLoading("Banner", _future);
                 } else
-                    syslog(LOG_INFO, "BANNER NOR LOADED YET");
+                    syslog(LOG_WARNING, "-------------------------------> Banner not loaded yet!!");
                 break;
             }
             case INTERSTITIAL: {
-                if(interstitialAd->InitializeLastResult().status() == firebase::kFutureStatusComplete) {
-                    syslog(LOG_INFO, "-------------------------------> Showing interstitial");
-                    interstitialAd->Show();
+                auto _future = interstitialAd->LoadAdLastResult();
+                if(_future.status() == firebase::kFutureStatusComplete) {
+                    if(_future.error() == firebase::admob::kAdMobErrorNone) {
+                        syslog(LOG_INFO, "-------------------------------> Showing interstitial");
+                        interstitialAd->Show();
+                    } else
+                        checkLoading("Interstitial", _future);
                 } else
-                    syslog(LOG_INFO, "INTERSTITIAL NOR LOADED YET");
+                    syslog(LOG_WARNING, "-------------------------------> Interstitial not loaded yet!!");
                 break;
             }
             case REWARD: {
-                if (firebase::admob::rewarded_video::InitializeLastResult().status() == firebase::kFutureStatusComplete) {
-                    syslog(LOG_INFO, "-------------------------------> Showing rewarded");
-                    firebase::admob::rewarded_video::Show(androidEngine->context);
-                }
+                auto _future = firebase::admob::rewarded_video::LoadAdLastResult();
+                if (_future.status() == firebase::kFutureStatusComplete) {
+                    if(_future.error() == firebase::admob::kAdMobErrorNone) {
+                        syslog(LOG_INFO, "-------------------------------> Showing rewarded");
+                        firebase::admob::rewarded_video::Show(androidEngine->context);
+                    } else
+                        checkLoading("Rewarded", _future);
+                } else
+                    syslog(LOG_WARNING, "-------------------------------> Rewarded not loaded yet!!");
                 break;
             }
         }
@@ -126,30 +139,6 @@ namespace engine {
                 sizeof(kTestDeviceIDs) / sizeof(kTestDeviceIDs[0]);
         _request.test_device_ids = kTestDeviceIDs;
         return _request;
-    }
-
-
-
-    void NativeAds::loadBanner() {
-        syslog(LOG_INFO, "-------------------------------> Started to load banner");
-        bannerView->MoveTo(firebase::admob::BannerView::kPositionBottom);
-        bannerView->LoadAd(createRequest()).OnCompletion([](const firebase::Future<void>& future, void* user_data) {
-            syslog(LOG_INFO, "-------------------------------> Loaded banner");
-        }, bannerView);
-    }
-
-    void NativeAds::loadInterstitial() {
-        syslog(LOG_INFO, "-------------------------------> Started to load interstitial");
-        interstitialAd->LoadAd(createRequest()).OnCompletion([](const firebase::Future<void>& future, void* user_data) {
-            syslog(LOG_INFO, "-------------------------------> Loaded interstitial");
-        }, interstitialAd);
-    }
-
-    void NativeAds::loadRewarded() {
-        syslog(LOG_INFO, "-------------------------------> Started to load rewarded");
-        firebase::admob::rewarded_video::LoadAd("REWARDED_ID", createRequest()).OnCompletion([](const firebase::Future<void>& future) {
-            syslog(LOG_INFO, "-------------------------------> Loaded rewarded");
-        });
     }
 
     void NativeAds::initBanner(jobject _context) {
@@ -185,6 +174,51 @@ namespace engine {
         });
     }
 
+    void NativeAds::loadBanner() {
+        syslog(LOG_INFO, "-------------------------------> Started to load banner");
+        bannerView->MoveTo(firebase::admob::BannerView::kPositionBottom);
+        bannerView->LoadAd(createRequest()).OnCompletion([](const firebase::Future<void>& future, void* user_data) {
+            NativeAds::checkLoading("Banner", future);
+        }, bannerView);
+    }
+
+    void NativeAds::loadInterstitial() {
+        syslog(LOG_INFO, "-------------------------------> Started to load interstitial");
+        interstitialAd->LoadAd(createRequest()).OnCompletion([](const firebase::Future<void>& future, void* user_data) {
+            NativeAds::checkLoading("Interstitial", future);
+        }, interstitialAd);
+    }
+
+    void NativeAds::loadRewarded() {
+        syslog(LOG_INFO, "-------------------------------> Started to load rewarded");
+        firebase::admob::rewarded_video::LoadAd("REWARDED_ID", createRequest()).OnCompletion([](const firebase::Future<void>& future) {
+            NativeAds::checkLoading("Rewarded", future);
+        });
+    }
+
+    void NativeAds::checkLoading(const char *_adType, const firebase::Future<void>& _future) {
+        switch (_future.error()) {
+            case firebase::admob::kAdMobErrorAlreadyInitialized :
+                syslog(LOG_CRIT, "-------------------------------> %s already initialized", _adType); break;
+            case firebase::admob::kAdMobErrorNone :
+                syslog(LOG_INFO, "-------------------------------> %s initialized correctly", _adType); break;
+            case firebase::admob::kAdMobErrorInternalError :
+                syslog(LOG_CRIT, "-------------------------------> %s internal error, error %i, status %i, result %s", _adType, _future.error(), _future.status(), _future.result()); break;
+            case firebase::admob::kAdMobErrorInvalidRequest :
+                syslog(LOG_CRIT, "-------------------------------> %s invalid request", _adType); break;
+            case firebase::admob::kAdMobErrorLoadInProgress :
+                syslog(LOG_WARNING, "-------------------------------> %s is already loading", _adType); break;
+            case firebase::admob::kAdMobErrorNetworkError :
+                syslog(LOG_CRIT, "-------------------------------> %s network error while loading", _adType); break;
+            case firebase::admob::kAdMobErrorNoFill :
+                syslog(LOG_WARNING, "-------------------------------> %s loaded but not ad stock available!", _adType); break;
+            case firebase::admob::kAdMobErrorUninitialized :
+                syslog(LOG_CRIT, "-------------------------------> %s is uninitialized!", _adType); break;
+            case firebase::admob::kAdMobErrorUnknown :
+                syslog(LOG_CRIT, "-------------------------------> %s unknown error, error %i, status %i, result %s", _adType, _future.error(), _future.status(), _future.result()); break;
+        }
+    }
+
 }
 
 extern "C"
@@ -193,10 +227,11 @@ Java_com_example_android_MainActivity_initFireBaseAdds(JNIEnv *env, jobject thiz
     engine::AndroidNative::get().init(env, thiz);
     engine::NativeAds::get().init(engine::AndroidNative::get().getAndroidEngine(), thiz);
 }
-#endif
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_android_MainActivity_destroy(JNIEnv *env, jobject thiz) {
     engine::AndroidNative::get().destroy();
 }
+
+#endif

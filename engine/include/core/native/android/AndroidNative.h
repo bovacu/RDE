@@ -48,6 +48,8 @@ namespace engine {
             firebase::App* app;
 
         private:
+            static firebase::admob::AdRequest createRequest();
+            static void checkLoading(const char* _adType, const firebase::Future<void>& _future);
             void initInterstitial(jobject _context);
             void initBanner(jobject _context);
             void initRewarded(jobject _context);
@@ -56,12 +58,10 @@ namespace engine {
             void loadRewarded();
 
         public:
-        static firebase::admob::AdRequest createRequest();
             static NativeAds& get();
             void init(AndroidEngine* _androidEngine, jobject _context);
             void loadAd(const AdType& _adType);
             void showAd(const AdType& _adType);
-
     };
 
 }
