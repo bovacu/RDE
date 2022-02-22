@@ -5,7 +5,10 @@
 #include "core/systems/soundSystem/SoundManager.h"
 #include "core/procedural/CellularAutomataMapGenerator.h"
 #include "core/systems/fileSystem/FilesSystem.h"
+
+#if IS_ANDROID()
 #include <nativeCode/include/NativeAds.h>
+#endif
 
 namespace engine {
 

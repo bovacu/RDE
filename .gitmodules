@@ -31,6 +31,3 @@
 [submodule "submodules/imguiAddons"]
 	path = submodules/imguiAddons
 	url = https://github.com/gallickgunner/ImGui-Addons
-[submodule "targets/GDEFirebase"]
-	path = targets/GDEFirebase
-	url = https://github.com/bovacu/GDEFirebase
