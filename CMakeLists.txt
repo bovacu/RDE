@@ -165,7 +165,7 @@ set(SOURCES
 set(CPP_HEADERS)
 set(CPP_SOURCES)
 
-include(targets/GDEFirebase/CMakeLists.txt)
+#GDEFirebase
 
 add_executable(Engine2_0 engine/src/main.cpp
         ${SOURCES}

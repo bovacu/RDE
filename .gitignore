@@ -8,3 +8,7 @@ build/
 targets/engineAndroid/.idea/
 
 targets/Android2/
+
+libs/
+
+submodules/
