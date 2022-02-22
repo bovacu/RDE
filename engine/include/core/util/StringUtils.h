@@ -9,9 +9,34 @@
 #include <chrono>
 #include <sstream>
 #include "core/platform/PlatformHeaderSDL.h"
+#include <string>
+#include <vector>
+#include <sstream>
 
+#define SPLIT_S(str, delimiter) split(str, delimiter);
+#define SPLIT_S_I(str, delimiter, index) splitGetIndex(str, delimiter, index);
 #define APPEND_S(...) caller(__VA_ARGS__);
 #define REPLACE_S(_str, _old, _new) replaceAll(_str, _old, _new);
+
+inline std::vector<std::string> split(const std::string& _str, const std::string& _delimiter) {
+    size_t pos = 0;
+    std::string token;
+    std::string _cpyStr = _str;
+    std::vector<std::string> _splits;
+
+    while ((pos = _cpyStr.find(_delimiter)) != std::string::npos) {
+        token = _cpyStr.substr(0, pos);
+        _splits.push_back(token);
+        _cpyStr.erase(0, pos + _delimiter.length());
+    }
+
+    _splits.push_back(_cpyStr);
+    return _splits;
+}
+
+inline std::string splitGetIndex(const std::string& _str, const std::string& _delimiter, int _index) {
+    return split(_str, _delimiter)[_index];
+}
 
 inline void replaceAll( std::string& _str, const std::string& _search, const std::string& _replace) {
     for( size_t pos = 0; ; pos += _replace.length() ) {

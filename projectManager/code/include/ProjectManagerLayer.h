@@ -13,6 +13,7 @@ namespace engine {
             float mainMenuHeight = 0;
             bool showInstallationWindow = false;
             bool showGDEModules = false;
+            std::vector<std::string> modulesInstalled;
 
         public:
             ProjectManagerLayer() : Layer("ProjectManagerLayer") {  }

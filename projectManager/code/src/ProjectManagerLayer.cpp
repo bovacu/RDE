@@ -18,20 +18,19 @@ namespace engine {
             return;
         }
 
-        auto _pathToGDE = FilesSystem::readLineInFile(_handler, 0).content;
+        auto _pathToGDE = SPLIT_S_I(FilesSystem::readLineInFile(_handler, 0).content, "=", 1);
 
-//        if(_if.good()) modulesInstalled.emplace_back("ANDROID");
-//        _if.close();
-//
-//        _if.open("");
-//        if(_if.good()) modulesInstalled.emplace_back("IOS");
-//        _if.close();
-//
-//        _if.open("");
-//        if(_if.good()) modulesInstalled.emplace_back("ADMOB");
-//        _if.close();
+        auto _path = APPEND_S(_pathToGDE, "/GDEAndroid/CMakeLists.txt");
+        if(FilesSystem::fileExists(_path))
+            modulesInstalled.emplace_back("ANDROID");
+
+        _path = APPEND_S(_pathToGDE, "/GDEFirebase/CMakeLists.txt");
+        if(FilesSystem::fileExists(_path))
+            modulesInstalled.emplace_back("FIREBASE");
 
         FilesSystem::close(_handler);
+
+        ImGui::GetIO().ConfigFlags ^= ImGuiConfigFlags_DockingEnable;
     }
 
     void ProjectManagerLayer::onEvent(Event& _event) {
@@ -47,7 +46,7 @@ namespace engine {
     }
 
     void ProjectManagerLayer::onRender(Delta _dt) {
-
+        Renderer::clear(Color::White);
     }
 
     void ProjectManagerLayer::onImGuiRender(Delta _dt) {
@@ -109,20 +108,53 @@ namespace engine {
         }
 
         ImGui::Begin("Background", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoCollapse);
+        if(ImGui::BeginChild("LeftPanel", {ImGui::GetWindowSize().x * 0.25f, -1}, true)) {
+            ImGui::EndChild();
+        }
+
+        ImGui::SameLine();
+
+        if(ImGui::BeginChild("RightPanel", {-1, -1}, true)) {
+            ImGui::EndChild();
+        }
         ImGui::End();
     }
 
     void ProjectManagerLayer::GDEModules() {
-        static bool _selected[3];
+        static bool _selected[3] {
+            std::find(modulesInstalled.begin(), modulesInstalled.end(), "ANDROID") != modulesInstalled.end(),
+            std::find(modulesInstalled.begin(), modulesInstalled.end(), "FIREBASE") != modulesInstalled.end(),
+            std::find(modulesInstalled.begin(), modulesInstalled.end(), "IOS") != modulesInstalled.end(),
+        };
         ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
+        ImGui::SetNextWindowSize({Engine::get().getWindowSize().x * 0.25f, Engine::get().getWindowSize().y * 0.5f}, ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
         ImGui::Begin("Modules", &showGDEModules, ImGuiWindowFlags_NoCollapse);
-
-        if(ImGui::TreeNode("Available modules")) {
-            ImGui::Checkbox("Android", &_selected[0]);
-            ImGui::Checkbox("IOs", &_selected[1]);
-            ImGui::Checkbox("Admob", &_selected[2]);
-            ImGui::TreePop();
+        if(ImGui::BeginChild("ModulesTree", {0, -ImGui::GetFrameHeightWithSpacing()}, false, ImGuiWindowFlags_NoMove)) {
+            if(ImGui::TreeNode("Available modules")) {
+                ImGui::Checkbox("Android", &_selected[0]);
+                ImGui::Checkbox("Firebase", &_selected[1]);
+                ImGui::Checkbox("IOs", &_selected[2]);
+                ImGui::TreePop();
+            }
+            ImGui::EndChild();
         }
+
+        static float _size = 0;
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() - _size);
+        if(ImGui::Button("Install Selected")) {
+
+        }
+
+        _size = ImGui::GetItemRectSize().x;
+
+        ImGui::SameLine();
+
+        if(ImGui::Button("Remove Selected")) {
+
+        }
+
+        _size += ImGui::GetItemRectSize().x + ImGui::GetFrameHeightWithSpacing();
 
         ImGui::End();
         ImGui::PopStyleVar();
@@ -148,9 +180,9 @@ namespace engine {
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - (_installWidth + _cancelWidth));
             if(ImGui::Button("Install")) {
                 auto* _handler = FilesSystem::createFile("assets/data.config");
-                auto _line = APPEND_S("GDE_path=", std::string (_location));
+                auto _line = APPEND_S("GDE_path=", std::string (_location))
                 FilesSystem::appendChunkToFileAtEnd(_handler, _line);
-                auto _command = APPEND_S("./installer.sh ", _location);
+                auto _command = APPEND_S("./installer.sh ", _location)
                 std::system(_command.c_str());
                 FilesSystem::close(_handler);
             }

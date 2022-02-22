@@ -95,11 +95,9 @@ namespace engine {
             SDL_RWread(_handler->file, &_content[_i], sizeof(char), 1);
             if(_currentLine == _line) {
                 _lineFound = true;
-                if(_content[_i] == std::char_traits<char>::eof() || _content[_i] == '\n' || (_content[_i] == '\r' && _content[_i + 1] == '\n')) break;
+                if(_content[_i] == '\n' || (_content[_i] == '\r' && _content[_i + 1] == '\n')) break;
                 _f.content.insert(_f.content.begin() + _finalLinePtr, _content[_i]);
                 _finalLinePtr++;
-
-                _currentLine++;
                 continue;
             }
 
@@ -309,6 +307,13 @@ namespace engine {
         SDL_RWclose(_handler->file);
         _handler->file = SDL_RWFromFile(_handler->originalPath.c_str(), FileHandler::modeToChar(_expected));
         _handler->mode = _expected;
+    }
+
+    bool FilesSystem::fileExists(const std::string& _pathToFile) {
+        auto* _file = open(_pathToFile, FileMode::READ);
+        if(_file == nullptr) return false;
+        close(_file);
+        return true;
     }
 
 }

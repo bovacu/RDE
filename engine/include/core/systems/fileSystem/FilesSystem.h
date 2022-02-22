@@ -103,6 +103,8 @@ namespace engine {
 
             static FileHandler* createFile(const std::string& _filePath);
             static void moveOrRenameFile(const std::string& _filePath, const std::string& _newName);
+
+            static bool fileExists(const std::string& _pathToFile);
     };
 
 }
