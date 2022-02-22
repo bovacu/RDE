@@ -125,7 +125,7 @@ namespace engine {
     }
 
     void Engine::onRender(Delta _dt) {
-        frameBuffer->bind();
+//        frameBuffer->bind();
 
         Renderer::clear(backgroundColor);
 
@@ -134,13 +134,13 @@ namespace engine {
             _layer->onRender(_dt);
         Renderer::endDraw();
 
-//        // Debug rendering
-//        Renderer::beginDebugDraw(camera);
-//        Renderer::drawSquare({0, 0}, {2, 2}, Color::Blue);
-//        Renderer::drawSquare({-100, 0}, {50, 50}, Color::Green);
-//        Renderer::endDebugDraw();
+        // Debug rendering
+        Renderer::beginDebugDraw(camera);
+        Renderer::drawSquare({0, 0}, {2, 2}, Color::Blue);
+        Renderer::drawSquare({-100, 0}, {50, 50}, Color::Green);
+        Renderer::endDebugDraw();
 
-        frameBuffer->unbind();
+//        frameBuffer->unbind();
 
         // Imgui rendering
         Profiler::begin(ProfilerState::IMGUI);
