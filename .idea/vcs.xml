@@ -14,6 +14,7 @@
     <mapping directory="$PROJECT_DIR$/submodules/imguiNodeEditor" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/submodules/imguiTextEditor" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/submodules/implot" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/targets/GDEFirebase" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/targets/android" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/targets/android/GameEngineAndroid" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/targets/android/app/jni/Engine2.0" vcs="Git" />

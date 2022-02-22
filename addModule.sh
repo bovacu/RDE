@@ -14,6 +14,7 @@ function android() {
     fi
     cd targets && git clone https://github.com/bovacu/GameEngineAndroid && mv GameEngineAndroid android
     cd android/sdl/jni && ./buildAndroidLibs.sh
+    cd "$BASE_DIR"
 }
 
 function firebase() {
@@ -24,11 +25,9 @@ function firebase() {
             exit 0
         fi
 
-    cd targets
-    git submodule add https://github.com/bovacu/GDEFirebase
-    git submodule init
-    git submodule update
+    cd targets && git submodule add https://github.com/bovacu/GDEFirebase
     cd GDEFirebase && ./setup.sh
+    cd "$BASE_DIR"
 }
 
 if [ "ANDROID" == "$MODULE" ]

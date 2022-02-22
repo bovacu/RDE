@@ -72,6 +72,7 @@ link_directories(${STB_DIR})
 include_directories(.)
 include_directories(engine/include)
 include_directories(sandbox)
+include_directories(projectManager)
 
 include_directories(submodules/freetype/include)
 include_directories(submodules/SDL/include)

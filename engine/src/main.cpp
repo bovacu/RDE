@@ -1,10 +1,11 @@
 #include "core/Engine.h"
 #include "Sandbox.h"
+#include "code/include/ProjectManagerLayer.h"
 
 int main(int, char* []) {
     engine::Engine _e;
-    auto* _sandbox = new engine::Sandbox;
-    _e.pushLayer(_sandbox);
+    auto* _projectManager = new engine::ProjectManagerLayer;
+    _e.pushLayer(_projectManager);
     _e.onRun();
     _e.destroy();
 
