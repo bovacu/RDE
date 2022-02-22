@@ -6,6 +6,7 @@
 namespace engine {
 
     SpriteBatch Renderer::batch;
+    Color Renderer::clearColor = Color::Red;
 
     void Renderer::init(Window* _window) {
         batch.init(_window);
@@ -26,9 +27,9 @@ namespace engine {
         LOG_S("SDL Image loader loaded successfully")
     }
 
-    void Renderer::clear(const Color& _color) {
+    void Renderer::clear() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor((float)_color.r / 255.f, (float)_color.g / 255.f, (float)_color.b / 255.f, (float)_color.a / 255.f);
+        glClearColor((float)clearColor.r / 255.f, (float)clearColor.g / 255.f, (float)clearColor.b / 255.f, (float)clearColor.a / 255.f);
     }
 
     void Renderer::beginDraw(Camera& _camera) {
@@ -92,5 +93,9 @@ namespace engine {
 
     void Renderer::destroy() {
         IMG_Quit();
+    }
+
+    void Renderer::setClearColor(const Color& _color) {
+        clearColor = _color;
     }
 }

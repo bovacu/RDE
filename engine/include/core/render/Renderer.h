@@ -21,6 +21,7 @@ namespace engine {
 
         private:
             static SpriteBatch batch;
+            static Color clearColor;
 
         public:
             /**
@@ -33,7 +34,8 @@ namespace engine {
              * This must be called before any draw call on every frame (in main loop).
              * @param _color The color of the background
              **/
-            static void clear(const Color& _color);
+            static void clear();
+            static void setClearColor(const Color& _color);
 
             /**
              * Renders textures, sprites... It includes 2D batching for

@@ -31,6 +31,8 @@ namespace engine {
         FilesSystem::close(_handler);
 
         ImGui::GetIO().ConfigFlags ^= ImGuiConfigFlags_DockingEnable;
+
+        Renderer::setClearColor(Color::Black);
     }
 
     void ProjectManagerLayer::onEvent(Event& _event) {
@@ -46,7 +48,7 @@ namespace engine {
     }
 
     void ProjectManagerLayer::onRender(Delta _dt) {
-        Renderer::clear(Color::White);
+
     }
 
     void ProjectManagerLayer::onImGuiRender(Delta _dt) {
