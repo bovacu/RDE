@@ -6,7 +6,3 @@ cmake-build-release/
 build/
 
 targets/engineAndroid/.idea/
-
-targets/Android2/
-
-libs/
