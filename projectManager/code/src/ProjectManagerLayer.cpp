@@ -342,7 +342,7 @@ namespace engine {
             ImGui::SameLine();
 
             if(ImGui::Button("Open")) {
-
+                ImGui::OpenPopup("FileBrowser");
             }
 
             _offset = _projectPathWidth - _projectNameWidth;
@@ -354,7 +354,8 @@ namespace engine {
             if(ImGui::Button("Create")) {
                 auto _command = APPEND_S("./projectCreator.sh ", location, " ", _projectName, " ", _location)
                 std::system(_command.c_str());
-                auto _newProject = APPEND_S(_projectName, "=", _location)
+                auto _newLine = projectList.content.empty() ? "" : "\n";
+                auto _newProject = APPEND_S(_newLine, _projectName, "=", _location)
                 FilesSystem::appendChunkToFileAtEnd(projectList.projectsHandler, _newProject);
                 reloadProjects();
                 showCreateNewProject = false;
@@ -365,6 +366,11 @@ namespace engine {
 
             if(ImGui::Button("Cancel")) {
                 showCreateNewProject = false;
+            }
+
+            if(fileBrowser.showFileDialog("FileBrowser", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,
+                                          ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*")) {
+                strcpy(_location, fileBrowser.selected_path.c_str());
             }
 
             ImGui::EndPopup();
