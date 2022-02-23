@@ -58,6 +58,7 @@ namespace engine {
         private:
             void mainImGuiWindow();
             void reloadProjects();
+            void loadModules();
     };
 
 }

@@ -19,7 +19,7 @@ namespace engine {
         static float _projectNameWidth = 0, _projectPathWidth = 0, _offset = 0;
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
-        ImGui::SetNextWindowSize({Engine::get().getWindowSize().x * 0.35f, Engine::get().getWindowSize().y * (error == ProjectCreatorError::NONE ? 0.17f : 0.2f)}, ImGuiCond_Always);
+        ImGui::SetNextWindowSize({Engine::get().getWindowSize().x * 0.35f, Engine::get().getWindowSize().y * (error == ProjectError::NONE ? 0.17f : 0.2f)}, ImGuiCond_Always);
         ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
         ImGui::OpenPopup("CreateNewProject");
         if(ImGui::BeginPopupModal("CreateNewProject", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -48,7 +48,7 @@ namespace engine {
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _createWidth);
             if(ImGui::Button("Create")) {
                 checkErrors();
-                if(error == ProjectCreatorError::NONE) createProject();
+                if(error == ProjectError::NONE) createProject();
             }
             _createWidth = ImGui::GetItemRectSize().x;
 
@@ -75,33 +75,33 @@ namespace engine {
     }
 
     void ProjectCreator::showErrors() {
-        if((error & ProjectCreatorError::NAME_NOT_SET) == ProjectCreatorError::NAME_NOT_SET)
+        if((error & ProjectError::NAME_NOT_SET) == ProjectError::NAME_NOT_SET)
             ImGui::TextColored({255, 0, 0, 255}, "Name cannot be empty");
 
-        if((error & ProjectCreatorError::PATH_NOT_SET) == ProjectCreatorError::PATH_NOT_SET)
+        if((error & ProjectError::PATH_NOT_SET) == ProjectError::PATH_NOT_SET)
             ImGui::TextColored({255, 0, 0, 255}, "Path cannot be empty");
 
-        if((error & ProjectCreatorError::WRONG_PATH) == ProjectCreatorError::WRONG_PATH)
+        if((error & ProjectError::WRONG_PATH) == ProjectError::WRONG_PATH)
             ImGui::TextColored({255, 0, 0, 255}, "Selected path is not valid");
 
-        if((error & ProjectCreatorError::NAME_ALREADY_IN_USE) == ProjectCreatorError::NAME_ALREADY_IN_USE)
+        if((error & ProjectError::NAME_ALREADY_IN_USE) == ProjectError::NAME_ALREADY_IN_USE)
             ImGui::TextColored({255, 0, 0, 255}, "Name is already in list");
     }
 
     void ProjectCreator::checkErrors() {
-        error = ProjectCreatorError::NONE;
+        error = ProjectError::NONE;
 
         std::ifstream _stream(projectPath);
         _stream.close();
-        if(!_stream.good()) error |= ProjectCreatorError::WRONG_PATH;
+        if(!_stream.good()) error |= ProjectError::WRONG_PATH;
 
-        if(strlen(projectName) == 0) error |= ProjectCreatorError::NAME_NOT_SET;
-        if(strlen(projectPath) == 0) error |= ProjectCreatorError::PATH_NOT_SET;
+        if(strlen(projectName) == 0) error |= ProjectError::NAME_NOT_SET;
+        if(strlen(projectPath) == 0) error |= ProjectError::PATH_NOT_SET;
 
         for(auto& _project : projectList->content) {
             auto _projectName = SPLIT_S_I(_project.project, "=", 0)
             if (strcmp(_projectName.c_str(), projectName) == 0) {
-                error |= ProjectCreatorError::NAME_ALREADY_IN_USE;
+                error |= ProjectError::NAME_ALREADY_IN_USE;
                 break;
             }
         }

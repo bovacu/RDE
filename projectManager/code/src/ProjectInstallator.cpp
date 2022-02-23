@@ -11,8 +11,10 @@
 namespace engine {
 
 
-    void ProjectInstallator::init(imgui_addons::ImGuiFileBrowser* _fileBrowser) {
+    void ProjectInstallator::init(imgui_addons::ImGuiFileBrowser* _fileBrowser, ProjectList* _projectList, ProjectManagerLayer* _projectManagerLayer) {
         fileBrowser = _fileBrowser;
+        projectList = _projectList;
+        projectManagerLayer = _projectManagerLayer;
     }
 
     static void asyncInstaller(std::string* installStep, float* installPercentage, const std::string& _path) {
@@ -74,18 +76,23 @@ namespace engine {
                     ImGui::OpenPopup("FileBrowser");
                 }
 
+                showError();
+
                 ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - (_installWidth + _cancelWidth));
                 if(ImGui::Button("Install")) {
-                    auto* _handler = FilesSystem::createFile("assets/data.config");
-                    auto _gdePath = APPEND_S(pathToInstallGDE, "/GDE")
-                    auto _line = APPEND_S("GDE_path=", _gdePath)
-                    FilesSystem::appendChunkToFileAtEnd(_handler, _line);
-                    std::thread _asyncInstallation(asyncInstaller, &installationStep, &installationPercentage, pathToInstallGDE);
-                    _asyncInstallation.detach();
-                    showLoading = true;
-                    FilesSystem::close(_handler);
+                    checkError();
+                    if(error == ProjectError::NONE) {
+                        auto* _handler = FilesSystem::createFile("assets/data.config");
+                        auto _gdePath = APPEND_S(pathToInstallGDE, "/GDE")
+                        auto _line = APPEND_S("GDE_path=", _gdePath)
+                        FilesSystem::appendChunkToFileAtEnd(_handler, _line);
+                        std::thread _asyncInstallation(asyncInstaller, &installationStep, &installationPercentage, pathToInstallGDE);
+                        _asyncInstallation.detach();
+                        showLoading = true;
+                        FilesSystem::close(_handler);
 
-                    projectList->projectsHandler = FilesSystem::createFile("assets/projects.config");
+                        projectList->projectsHandler = FilesSystem::createFile("assets/projects.config");
+                    }
                 }
                 _installWidth = ImGui::GetItemRectSize().x / 2.f;
 
@@ -127,6 +134,7 @@ namespace engine {
             if(installationPercentage == 1.f) {
                 showLoading = false;
                 show = false;
+                projectManagerLayer->onInit();
             }
         }
     }
@@ -221,5 +229,22 @@ namespace engine {
 
     bool ProjectInstallator::isShown() const {
         return show;
+    }
+
+    void ProjectInstallator::checkError() {
+        error = ProjectError::NONE;
+
+        std::ifstream _stream(pathToInstallGDE);
+        _stream.close();
+        if(!_stream.good()) error |= ProjectError::WRONG_PATH;
+        if(strlen(pathToInstallGDE) == 0) error |= ProjectError::PATH_NOT_SET;
+    }
+
+    void ProjectInstallator::showError() {
+        if((error & ProjectError::PATH_NOT_SET) == ProjectError::PATH_NOT_SET)
+            ImGui::TextColored({255, 0, 0, 255}, "Path cannot be empty");
+
+        if((error & ProjectError::WRONG_PATH) == ProjectError::WRONG_PATH)
+            ImGui::TextColored({255, 0, 0, 255}, "Selected path is not valid");
     }
 }

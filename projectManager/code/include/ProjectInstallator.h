@@ -6,9 +6,11 @@
 
 #include <string>
 #include "FileBrowser/ImGuiFileBrowser.h"
+#include "ProjectCreator.h"
 
 namespace engine {
 
+    class ProjectManagerLayer;
     class ProjectList;
     class ProjectInstallator {
         private:
@@ -19,14 +21,20 @@ namespace engine {
             ProjectList* projectList = nullptr;
             std::string installationStep;
             char pathToInstallGDE[256] {};
+            ProjectError error = ProjectError::NONE;
+            ProjectManagerLayer* projectManagerLayer;
 
         public:
-            void init(imgui_addons::ImGuiFileBrowser* _fileBrowser);
+            void init(imgui_addons::ImGuiFileBrowser* _fileBrowser, ProjectList* _projectList, ProjectManagerLayer* _projectManagerLayer);
             void render();
             void setShow(bool _show);
-            bool isShown() const;
+            [[nodiscard]] bool isShown() const;
+
+        private:
             bool BufferingBar(const char* label, float value,  const ImVec2& size_arg, const ImU32& bg_col, const ImU32& fg_col);
             bool Spinner(const char* label, float radius, int thickness, const ImU32& color);
+            void checkError();
+            void showError();
     };
 
 }

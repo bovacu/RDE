@@ -16,7 +16,7 @@ namespace engine {
     template<class T> inline T& operator&= (T& a, T b) { return (T&)((int&)a &= (int)b); }
     template<class T> inline T& operator^= (T& a, T b) { return (T&)((int&)a ^= (int)b); }
 
-    enum ProjectCreatorError {
+    enum ProjectError {
         NONE =                  0,
         WRONG_PATH =            1 << 0,
         PATH_NOT_SET =          1 << 1,
@@ -30,7 +30,7 @@ namespace engine {
             char projectPath[256] {};
             char projectName[256] {};
             bool showProjectCreator = false;
-            ProjectCreatorError error = ProjectCreatorError::NONE;
+            ProjectError error = ProjectError::NONE;
 
             ProjectList* projectList = nullptr;
             imgui_addons::ImGuiFileBrowser* fileBrowser = nullptr;

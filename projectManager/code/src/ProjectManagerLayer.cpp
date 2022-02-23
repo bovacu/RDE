@@ -15,12 +15,8 @@ namespace engine {
 
         projectList.projectsHandler = FilesSystem::open("assets/data.config", FileMode::READ);
 
-        projectInstallator.init(&fileBrowser);
-        projectModules.init(location);
-        projectCreator.init(&projectList, &fileBrowser);
-        projectSelector.init(&projectList, &projectCreator);
-        projectViewer.init(&projectSelector);
-        projectMenuBar.init(&projectModules);
+        projectInstallator.init(&fileBrowser, &projectList, this);
+        loadModules();
 
         if(projectList.projectsHandler == nullptr) {
             projectInstallator.setShow(true);
@@ -38,12 +34,7 @@ namespace engine {
             projectList.projectsHandler = FilesSystem::open("assets/projects.config", FileMode::READ);
 
         reloadProjects();
-
-        projectModules.init(location);
-        projectCreator.init(&projectList, &fileBrowser);
-        projectSelector.init(&projectList, &projectCreator);
-        projectViewer.init(&projectSelector);
-        projectMenuBar.init(&projectModules);
+        loadModules();
     }
 
     void ProjectManagerLayer::onEvent(Event& _event) {  }
@@ -87,5 +78,13 @@ namespace engine {
         auto _projects = FilesSystem::readAllLinesFile(projectList.projectsHandler).content;
         projectList.content.clear();
         for(auto _project : _projects) projectList.content.emplace_back(Project{_project, false});
+    }
+
+    void ProjectManagerLayer::loadModules() {
+        projectModules.init(location);
+        projectCreator.init(&projectList, &fileBrowser);
+        projectSelector.init(&projectList, &projectCreator);
+        projectViewer.init(&projectSelector);
+        projectMenuBar.init(&projectModules);
     }
 }
