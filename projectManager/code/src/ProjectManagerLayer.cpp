@@ -12,10 +12,6 @@ namespace engine {
     imgui_addons::ImGuiFileBrowser fileBrowser;
 
     void ProjectManagerLayer::onInit() {
-        showInstallationWindow = true;
-        return;
-
-
         auto* _handler = FilesSystem::open("assets/data.config", FileMode::READ);
 
         if(_handler == nullptr) {
@@ -279,6 +275,7 @@ namespace engine {
 
             if(installPercentage == 1.f) {
                 showInstallingLoadingBarModal = false;
+                showInstallationWindow = false;
             }
         }
     }
