@@ -6,3 +6,11 @@ cmake-build-release/
 build/
 
 targets/engineAndroid/.idea/
+
+libs/SDL/
+
+libs/SDL_image/
+
+libs/SDL_mixer/
+
+libs/SDL_net/
