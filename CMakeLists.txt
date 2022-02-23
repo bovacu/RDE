@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
-project(Engine2_0)
+project(Engine)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
-set(PROJECT_NAME Engine2_0)
+set(PROJECT_NAME Engine)
 
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
 SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer sdl2_image sdl2_net ${CMAKE_DL_LIBS}
@@ -167,12 +167,18 @@ set(CPP_SOURCES)
 
 #GDEFirebase
 
-add_executable(Engine2_0 engine/src/main.cpp
+#add_library(Engine STATIC
+#        ${SOURCES}
+#        ${CPP_SOURCES}
+#        ${CPP_HEADERS}
+#        )
+
+add_executable(Engine engine/src/main.cpp
         ${SOURCES}
         ${CPP_SOURCES}
         ${CPP_HEADERS}
         )
 
-target_link_libraries(Engine2_0 ${TARGET_LINKS})
-target_compile_definitions(Engine2_0 PRIVATE ${GL_PROFILES})
+target_link_libraries(Engine ${TARGET_LINKS})
+target_compile_definitions(Engine PRIVATE ${GL_PROFILES})
 

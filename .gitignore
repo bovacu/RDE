@@ -14,3 +14,19 @@ libs/SDL_image/
 libs/SDL_mixer/
 
 libs/SDL_net/
+
+cmake-build-debug_lib/
+
+libs_out/.cmake/
+
+libs_out/CMakeFiles/
+
+libs_out/Testing/
+
+libs_out/cmake_install.cmake
+
+libs_out/CMakeCache.txt
+
+libs_out/Engine.cbp
+
+libs_out/Makefile

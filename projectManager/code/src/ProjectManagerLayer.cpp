@@ -12,6 +12,8 @@ namespace engine {
     imgui_addons::ImGuiFileBrowser fileBrowser;
 
     void ProjectManagerLayer::onInit() {
+        Renderer::setClearColor(Color::Black);
+
         auto* _handler = FilesSystem::open("assets/data.config", FileMode::READ);
 
         if(_handler == nullptr) {
@@ -32,8 +34,6 @@ namespace engine {
         FilesSystem::close(_handler);
 
         ImGui::GetIO().ConfigFlags ^= ImGuiConfigFlags_DockingEnable;
-
-        Renderer::setClearColor(Color::Black);
     }
 
     void ProjectManagerLayer::onEvent(Event& _event) {
@@ -56,9 +56,8 @@ namespace engine {
         Layer::onImGuiRender(_dt);
         if(!showInstallationWindow) menuBar();
         mainImGuiWindow();
-//        ImGui::ShowDemoWindow();
+        ImGui::ShowDemoWindow();
         if(showInstallationWindow) installationWindow();
-
         if(showGDEModules) GDEModules();
     }
 
@@ -112,6 +111,33 @@ namespace engine {
 
         ImGui::Begin("Background", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoCollapse);
         if(ImGui::BeginChild("LeftPanel", {ImGui::GetWindowSize().x * 0.25f, -1}, true)) {
+            if(ImGui::BeginChild("YourProjects", {-1, 30})) {
+                ImGui::Text("Your projects");
+
+                ImGui::SameLine();
+
+                static float _addNewWidth = 0;
+                ImGui::SetCursorPosX(ImGui::GetWindowWidth() - _addNewWidth - ImGui::GetFrameHeightWithSpacing() / 2.f);
+                if(ImGui::Button("Add new")) {
+
+                }
+                _addNewWidth = ImGui::GetItemRectSize().x;
+
+                ImGui::EndChild();
+            }
+
+            static bool _test;
+            if(ImGui::BeginChild("ProjectList", {-1, -1}, true)) {
+                if(ImGui::BeginChild("ModulesTree", {0, -ImGui::GetFrameHeightWithSpacing()}, false, ImGuiWindowFlags_NoMove)) {
+                    ImGui::Selectable("Project 0", &_test);
+                    ImGui::Selectable("Project 1", &_test);
+                    ImGui::Selectable("Project 2", &_test);
+                    ImGui::Selectable("Project 3", &_test);
+                    ImGui::EndChild();
+                }
+                ImGui::EndChild();
+            }
+
             ImGui::EndChild();
         }
 
