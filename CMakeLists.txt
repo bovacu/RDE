@@ -159,7 +159,12 @@ set(SOURCES
         engine/include/core/systems/fileSystem/FilesSystem.h engine/src/core/systems/fileSystem/FilesSystem.cpp engine/include/core/util/StringUtils.h
 
         projectManager/code/include/ProjectManagerLayer.h projectManager/code/src/ProjectManagerLayer.cpp
-
+        projectManager/code/include/ProjectCreator.h projectManager/code/src/ProjectCreator.cpp
+        projectManager/code/include/ProjectViewer.h projectManager/code/src/ProjectViewer.cpp
+        projectManager/code/include/ProjectSelector.h projectManager/code/src/ProjectSelector.cpp
+        projectManager/code/include/ProjectMenuBar.h projectManager/code/src/ProjectMenuBar.cpp
+        projectManager/code/include/ProjectInstallator.h projectManager/code/src/ProjectInstallator.cpp
+        projectManager/code/include/ProjectModules.h projectManager/code/src/ProjectModules.cpp
         )
 
 set(CPP_HEADERS)
