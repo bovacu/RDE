@@ -27,6 +27,7 @@ namespace engine {
 
     FileStr FilesSystem::readFullFile(FileHandler* _handler) {
         FileStr _f;
+        checkFileMode(_handler, FileMode::READ);
         SDL_RWseek(_handler->file, 0, RW_SEEK_END);
         _f.content.resize((size_t)SDL_RWtell(_handler->file));
         SDL_RWseek(_handler->file, 0, RW_SEEK_SET);
@@ -42,6 +43,7 @@ namespace engine {
         std::string _foundLine;
         FileLines _f;
 
+        checkFileMode(_handler, FileMode::READ);
         SDL_RWseek(_handler->file, 0, RW_SEEK_END);
         long _contentSize = SDL_RWtell(_handler->file);
         _content.resize(_contentSize);
@@ -70,6 +72,7 @@ namespace engine {
 
     FileStr FilesSystem::readChunkFile(FileHandler* _handler, int _initByte, int _endByte) {
         FileStr _f;
+        checkFileMode(_handler, FileMode::READ);
         SDL_RWseek(_handler->file, 0, RW_SEEK_END);
         _f.content.resize((_endByte + 1) - _initByte);
         SDL_RWseek(_handler->file, _initByte, RW_SEEK_SET);
@@ -86,6 +89,7 @@ namespace engine {
         FileStr _f;
         bool _lineFound;
 
+        checkFileMode(_handler, FileMode::READ);
         SDL_RWseek(_handler->file, 0, RW_SEEK_END);
         long _contentSize = SDL_RWtell(_handler->file);
         _content.resize(_contentSize);
@@ -114,6 +118,8 @@ namespace engine {
         std::string _content;
         std::string _foundLine;
         FileLines _f;
+
+        checkFileMode(_handler, FileMode::READ);
 
         SDL_RWseek(_handler->file, 0, RW_SEEK_END);
         long _contentSize = SDL_RWtell(_handler->file);
@@ -152,6 +158,7 @@ namespace engine {
 
 
     void FilesSystem::writeChunkToFile(FileHandler* _handler, const char* _content, size_t _size) {
+        checkFileMode(_handler, FileMode::WRITE);
         SDL_RWwrite(_handler->file, _content, 1, _size);
     }
 

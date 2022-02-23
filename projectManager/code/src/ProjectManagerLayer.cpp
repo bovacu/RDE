@@ -3,7 +3,6 @@
 #include <future>
 #include "projectManager/code//include/ProjectManagerLayer.h"
 #include "core/Engine.h"
-#include "core/systems/fileSystem/FilesSystem.h"
 #include "FileBrowser/ImGuiFileBrowser.h"
 #include "imgui_internal.h"
 
@@ -21,19 +20,26 @@ namespace engine {
             return;
         }
 
-        auto _pathToGDE = SPLIT_S_I(FilesSystem::readLineInFile(_handler, 0).content, "=", 1);
+        location = SPLIT_S_I(FilesSystem::readLineInFile(_handler, 0).content, "=", 1);
 
-        auto _path = APPEND_S(_pathToGDE, "/GDEAndroid/CMakeLists.txt");
+        auto _path = APPEND_S(location, "/GDEAndroid/CMakeLists.txt");
         if(FilesSystem::fileExists(_path))
             modulesInstalled.emplace_back("ANDROID");
 
-        _path = APPEND_S(_pathToGDE, "/GDEFirebase/CMakeLists.txt");
+        _path = APPEND_S(location, "/GDEFirebase/CMakeLists.txt");
         if(FilesSystem::fileExists(_path))
             modulesInstalled.emplace_back("FIREBASE");
 
         FilesSystem::close(_handler);
 
         ImGui::GetIO().ConfigFlags ^= ImGuiConfigFlags_DockingEnable;
+
+        if(!FilesSystem::fileExists("assets/projects.config")) {
+            projectList.projectsHandler = FilesSystem::createFile("assets/projects.config");
+        } else
+            projectList.projectsHandler = FilesSystem::open("assets/projects.config", FileMode::READ);
+
+        reloadProjects();
     }
 
     void ProjectManagerLayer::onEvent(Event& _event) {
@@ -56,13 +62,15 @@ namespace engine {
         Layer::onImGuiRender(_dt);
         if(!showInstallationWindow) menuBar();
         mainImGuiWindow();
-        ImGui::ShowDemoWindow();
+//        ImGui::ShowDemoWindow();
         if(showInstallationWindow) installationWindow();
         if(showGDEModules) GDEModules();
+        if(showCreateNewProject) createNewProject();
     }
 
     void ProjectManagerLayer::onEnd() {
         Layer::onEnd();
+        FilesSystem::close(projectList.projectsHandler);
     }
 
     void ProjectManagerLayer::menuBar() {
@@ -119,20 +127,19 @@ namespace engine {
                 static float _addNewWidth = 0;
                 ImGui::SetCursorPosX(ImGui::GetWindowWidth() - _addNewWidth - ImGui::GetFrameHeightWithSpacing() / 2.f);
                 if(ImGui::Button("Add new")) {
-
+                    showCreateNewProject = true;
                 }
                 _addNewWidth = ImGui::GetItemRectSize().x;
 
                 ImGui::EndChild();
             }
 
-            static bool _test;
             if(ImGui::BeginChild("ProjectList", {-1, -1}, true)) {
-                if(ImGui::BeginChild("ModulesTree", {0, -ImGui::GetFrameHeightWithSpacing()}, false, ImGuiWindowFlags_NoMove)) {
-                    ImGui::Selectable("Project 0", &_test);
-                    ImGui::Selectable("Project 1", &_test);
-                    ImGui::Selectable("Project 2", &_test);
-                    ImGui::Selectable("Project 3", &_test);
+                if(ImGui::BeginChild("ProjectList", {0, -ImGui::GetFrameHeightWithSpacing()}, false, ImGuiWindowFlags_NoMove)) {
+                    for(auto& _project : projectList.content) {
+                        std::string _projectName = SPLIT_S_I(_project.project, "=", 0)
+                        ImGui::Selectable(_projectName.c_str(), _project.selected);
+                    }
                     ImGui::EndChild();
                 }
                 ImGui::EndChild();
@@ -160,7 +167,6 @@ namespace engine {
         ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
         ImGui::OpenPopup("Modules");
         if(ImGui::BeginPopupModal("Modules", &showGDEModules)) {
-//            ImGui::Begin("Modules", &showGDEModules, ImGuiWindowFlags_NoCollapse);
             if(ImGui::BeginChild("ModulesTree", {0, -ImGui::GetFrameHeightWithSpacing()}, false, ImGuiWindowFlags_NoMove)) {
                 if(ImGui::TreeNode("Available modules")) {
                     ImGui::Checkbox("Android", &_selected[0]);
@@ -254,13 +260,17 @@ namespace engine {
 
                 ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - (_installWidth + _cancelWidth));
                 if(ImGui::Button("Install")) {
+                    location = _location;
                     auto* _handler = FilesSystem::createFile("assets/data.config");
-                    auto _line = APPEND_S("GDE_path=", std::string (_location))
+                    auto _gdePath = APPEND_S(_location, "/GDE")
+                    auto _line = APPEND_S("GDE_path=", _gdePath)
                     FilesSystem::appendChunkToFileAtEnd(_handler, _line);
                     std::thread _asyncInstallation(asyncInstaller, &installStep, &installPercentage, _location);
                     _asyncInstallation.detach();
                     showInstallingLoadingBarModal = true;
                     FilesSystem::close(_handler);
+
+                    projectList.projectsHandler = FilesSystem::createFile("assets/projects.config");
                 }
                 _installWidth = ImGui::GetItemRectSize().x / 2.f;
 
@@ -305,6 +315,63 @@ namespace engine {
             }
         }
     }
+
+
+
+    void ProjectManagerLayer::createNewProject() {
+        static char _projectName[256];
+        static char _location[512];
+        static float _projectNameWidth = 0, _projectPathWidth = 0, _offset = 0;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
+        ImGui::SetNextWindowSize({Engine::get().getWindowSize().x * 0.35f, Engine::get().getWindowSize().y * 0.17f}, ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
+        ImGui::OpenPopup("CreateNewProject");
+        if(ImGui::BeginPopupModal("CreateNewProject", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_HorizontalScrollbar)) {
+
+            ImGui::Text("Project Name"); ImGui::SameLine();
+            _projectNameWidth = ImGui::GetItemRectSize().x;
+            ImGui::SetCursorPosX(_projectNameWidth + _offset + ImGui::GetFrameHeightWithSpacing() * 0.7f);
+            ImGui::SetNextItemWidth(240);
+            ImGui::InputText("###ProjectName", _projectName, IM_ARRAYSIZE(_projectName));
+
+            ImGui::Text("Project Destination"); ImGui::SameLine();
+            _projectPathWidth = ImGui::GetItemRectSize().x;
+            ImGui::SetNextItemWidth(240);
+            ImGui::InputText("###ProjectDestination", _location, IM_ARRAYSIZE(_location));
+            ImGui::SameLine();
+
+            if(ImGui::Button("Open")) {
+
+            }
+
+            _offset = _projectPathWidth - _projectNameWidth;
+
+            ImGui::NewLine();
+
+            static float _createWidth = 0;
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _createWidth);
+            if(ImGui::Button("Create")) {
+                auto _command = APPEND_S("./projectCreator.sh ", location, " ", _projectName, " ", _location)
+                std::system(_command.c_str());
+                auto _newProject = APPEND_S(_projectName, "=", _location)
+                FilesSystem::appendChunkToFileAtEnd(projectList.projectsHandler, _newProject);
+                reloadProjects();
+                showCreateNewProject = false;
+            }
+            _createWidth = ImGui::GetItemRectSize().x;
+
+            ImGui::SameLine();
+
+            if(ImGui::Button("Cancel")) {
+                showCreateNewProject = false;
+            }
+
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleVar();
+    }
+
 
 
     bool ProjectManagerLayer::BufferingBar(const char* label, float value,  const ImVec2& size_arg, const ImU32& bg_col, const ImU32& fg_col) {
@@ -389,5 +456,14 @@ namespace engine {
         window->DrawList->PathStroke(color, false, thickness);
 
         return true;
+    }
+
+    void ProjectManagerLayer::reloadProjects() {
+        auto _projects = FilesSystem::readAllLinesFile(projectList.projectsHandler).content;
+        projectList.content.clear();
+        for(auto _project : _projects) {
+            LOG_I("EMPLACING ", _project)
+            projectList.content.emplace_back(ProjectList::Project{_project, false});
+        }
     }
 }

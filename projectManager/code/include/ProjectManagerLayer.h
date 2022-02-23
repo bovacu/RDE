@@ -6,18 +6,34 @@
 
 #include "core/render/layers/Layer.h"
 #include "imgui.h"
+#include "core/systems/fileSystem/FilesSystem.h"
 
 namespace engine {
 
     class ProjectManagerLayer : public Layer {
+
+        struct ProjectList {
+
+            struct Project {
+                std::string project;
+                bool selected;
+            };
+
+            FileHandler* projectsHandler;
+            std::vector<Project> content;
+        };
+
         private:
             float mainMenuHeight = 0;
             bool showInstallationWindow = false;
             bool showGDEModules = false;
+            bool showCreateNewProject = false;
             std::vector<std::string> modulesInstalled;
             std::string installStep = "Downloading GDE...";
             float installPercentage = 0;
             bool showInstallingLoadingBarModal = false;
+            ProjectList projectList;
+            std::string location;
 
         public:
             ProjectManagerLayer() : Layer("ProjectManagerLayer") {  }
@@ -35,6 +51,10 @@ namespace engine {
             void mainImGuiWindow();
             void installationWindow();
             void GDEModules();
+
+            void createNewProject();
+            void reloadProjects();
+
             bool BufferingBar(const char* label, float value,  const ImVec2& size_arg, const ImU32& bg_col, const ImU32& fg_col);
             bool Spinner(const char* label, float radius, int thickness, const ImU32& color);
     };

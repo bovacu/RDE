@@ -30,3 +30,7 @@ libs_out/CMakeCache.txt
 libs_out/Engine.cbp
 
 libs_out/Makefile
+
+libs_out/imgui.ini
+
+libs_out/Engine
