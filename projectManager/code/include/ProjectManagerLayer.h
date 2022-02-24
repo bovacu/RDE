@@ -16,26 +16,40 @@
 
 namespace engine {
 
+    struct GlobalConfig {
+        std::string GDEPath;
+        std::vector<std::string> IDEs;
+    };
+
+    struct ProjectConfig {
+        std::string IDE;
+    };
+
     struct Project {
         std::string project;
+        std::string projectName;
+        std::string projectPath;
         bool selected;
+        bool stillExists;
+        ProjectConfig config;
     };
 
     struct ProjectList {
-        FileHandler* projectsHandler;
-        std::vector<Project> content;
+        FileHandler* projectsHandler = nullptr;
+        std::vector<Project> content {};
     };
 
     class ProjectManagerLayer : public Layer {
 
         private:
+            GlobalConfig globalConfig;
+
             bool showInstallationWindow = false;
             std::vector<std::string> modulesInstalled;
             std::string installStep = "Downloading GDE...";
             float installPercentage = 0;
             bool showInstallingLoadingBarModal = false;
             ProjectList projectList;
-            std::string location;
 
             ProjectInstallator projectInstallator;
             ProjectCreator projectCreator;
@@ -57,7 +71,6 @@ namespace engine {
 
         private:
             void mainImGuiWindow();
-            void reloadProjects();
             void loadModules();
     };
 

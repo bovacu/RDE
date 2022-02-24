@@ -5,6 +5,7 @@
 #include "core/Engine.h"
 #include "core/systems/fileSystem/FilesSystem.h"
 #include "projectManager/code/include/ProjectManagerLayer.h"
+#include "projectManager/code/include/ProjectSelector.h"
 
 namespace engine {
 
@@ -65,13 +66,17 @@ namespace engine {
     }
 
     void ProjectCreator::createProject() {
-        auto _command = APPEND_S("./projectCreator.sh ", projectPath, " ", projectName, " ", projectPath)
+        auto _command = APPEND_S("./projectCreator.sh ", projectPath, " ", projectName, " ", projectPath);
         std::system(_command.c_str());
         auto _newLine = projectList->content.empty() ? "" : "\n";
-        auto _newProject = APPEND_S(_newLine, projectName, "=", projectPath)
+        auto _newProject = APPEND_S(_newLine, projectName, "=", projectPath);
         FilesSystem::appendChunkToFileAtEnd(projectList->projectsHandler, _newProject);
-        reloadProjects();
         showProjectCreator = false;
+        auto _configFile = APPEND_S(projectPath, "/", projectName, "/.config");
+        FilesSystem::close(FilesSystem::createFile(_configFile));
+
+        projectSelector->loadProjects();
+        projectSelector->selectProject(projectName);
     }
 
     void ProjectCreator::showErrors() {
@@ -99,7 +104,7 @@ namespace engine {
         if(strlen(projectPath) == 0) error |= ProjectError::PATH_NOT_SET;
 
         for(auto& _project : projectList->content) {
-            auto _projectName = SPLIT_S_I(_project.project, "=", 0)
+            auto _projectName = SPLIT_S_I(_project.project, "=", 0);
             if (strcmp(_projectName.c_str(), projectName) == 0) {
                 error |= ProjectError::NAME_ALREADY_IN_USE;
                 break;
@@ -107,16 +112,11 @@ namespace engine {
         }
     }
 
-    void ProjectCreator::reloadProjects() {
-        auto _projects = FilesSystem::readAllLinesFile(projectList->projectsHandler).content;
-        projectList->content.clear();
-        for(auto _project : _projects) {
-            LOG_I("EMPLACING ", _project)
-            projectList->content.emplace_back(Project{_project, false});
-        }
-    }
-
     void ProjectCreator::setShow(bool _show) {
         showProjectCreator = _show;
+    }
+
+    void ProjectCreator::setProjectSelector(ProjectSelector* _projectSelector) {
+        projectSelector = _projectSelector;
     }
 }

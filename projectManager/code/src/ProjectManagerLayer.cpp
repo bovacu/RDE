@@ -16,14 +16,18 @@ namespace engine {
         projectList.projectsHandler = FilesSystem::open("assets/data.config", FileMode::READ);
 
         projectInstallator.init(&fileBrowser, &projectList, this);
-        loadModules();
 
         if(projectList.projectsHandler == nullptr) {
+            loadModules();
             projectInstallator.setShow(true);
             return;
         }
 
-        location = SPLIT_S_I(FilesSystem::readLineInFile(projectList.projectsHandler, 0).content, "=", 1);
+        auto _configFile = FilesSystem::readAllLinesFile(projectList.projectsHandler);
+        globalConfig.GDEPath = SPLIT_S_I(_configFile.content[0], "=", 1);
+        auto _ides = SPLIT_S_I(_configFile.content[1], "=", 1);
+        globalConfig.IDEs = SPLIT_S(_ides, ",");
+        globalConfig.IDEs.emplace_back("Other...");
         FilesSystem::close(projectList.projectsHandler);
 
         ImGui::GetIO().ConfigFlags ^= ImGuiConfigFlags_DockingEnable;
@@ -33,8 +37,8 @@ namespace engine {
         } else
             projectList.projectsHandler = FilesSystem::open("assets/projects.config", FileMode::READ);
 
-        reloadProjects();
         loadModules();
+        projectSelector.loadProjects();
     }
 
     void ProjectManagerLayer::onEvent(Event& _event) {  }
@@ -46,6 +50,7 @@ namespace engine {
         Layer::onImGuiRender(_dt);
         projectMenuBar.render();
         mainImGuiWindow();
+//        ImGui::ShowDemoWindow();
         projectInstallator.render();
         projectModules.render();
         projectCreator.render();
@@ -74,17 +79,12 @@ namespace engine {
         ImGui::End();
     }
 
-    void ProjectManagerLayer::reloadProjects() {
-        auto _projects = FilesSystem::readAllLinesFile(projectList.projectsHandler).content;
-        projectList.content.clear();
-        for(auto _project : _projects) projectList.content.emplace_back(Project{_project, false});
-    }
-
     void ProjectManagerLayer::loadModules() {
-        projectModules.init(location);
+        projectModules.init(globalConfig.GDEPath);
         projectCreator.init(&projectList, &fileBrowser);
         projectSelector.init(&projectList, &projectCreator);
-        projectViewer.init(&projectSelector);
+        projectCreator.setProjectSelector(&projectSelector);
+        projectViewer.init(&projectSelector, &fileBrowser, &projectList, &globalConfig);
         projectMenuBar.init(&projectModules);
     }
 }

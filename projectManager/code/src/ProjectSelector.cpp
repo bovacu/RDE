@@ -1,6 +1,7 @@
 // Created by borja on 23/2/22.
 
 #include <string>
+#include <fstream>
 #include "projectManager/code/include/ProjectSelector.h"
 #include "imgui.h"
 #include "projectManager/code/include/ProjectManagerLayer.h"
@@ -31,11 +32,14 @@ namespace engine {
             if(ImGui::BeginChild("ProjectList", {-1, -1}, true)) {
                 if(ImGui::BeginChild("ProjectList", {0, -ImGui::GetFrameHeightWithSpacing()}, false, ImGuiWindowFlags_NoMove)) {
                     for(auto& _project : projectList->content) {
-                        std::string _projectName = SPLIT_S_I(_project.project, "=", 0)
+                        std::string _projectName = SPLIT_S_I(_project.project, "=", 0);
+
+                        if(!_project.stillExists) ImGui::PushStyleColor(ImGuiCol_Text, {255, 0, 0, 255});
                         if(ImGui::Selectable(_projectName.c_str(), _project.selected)) {
                             project = &_project;
                             LOG_I("Selected project is: ", _projectName)
                         }
+                        if(!_project.stillExists) ImGui::PopStyleColor();
                     }
                     ImGui::EndChild();
                 }
@@ -47,5 +51,34 @@ namespace engine {
 
     Project* ProjectSelector::getCurrentProject() {
         return project;
+    }
+
+    void ProjectSelector::selectProject(const std::string& _projectName) {
+        if(_projectName.empty()) {
+            project = nullptr;
+            LOG_I("No project selected")
+            return;
+        }
+
+        for(auto& _project : projectList->content) {
+            std::string _pName = SPLIT_S_I(_project.project, "=", 0);
+            if(strcmp(_projectName.c_str(), _pName.c_str()) == 0) {
+                project = &_project;
+                LOG_I("Selected project is: ", _projectName)
+                break;
+            }
+        }
+    }
+
+    void ProjectSelector::loadProjects() {
+        auto _projects = FilesSystem::readAllLinesFile(projectList->projectsHandler).content;
+        projectList->content.clear();
+        for(auto& _project : _projects) {
+            auto _path = SPLIT_S(_project, "=");
+            auto _fullPath = APPEND_S(_path[1], "/", _path[0]);
+            std::ifstream _stream(_fullPath + "/.config");
+            projectList->content.emplace_back(Project{_project, _path[0], _fullPath, false, _stream.good()});
+            _stream.close();
+        }
     }
 }

@@ -243,7 +243,11 @@ namespace engine {
         checkFileMode(_handler, FileMode::APPEND);
         int _currentLine = 0;
         for(auto& _l : _f.content) {
-            if(_currentLine == _line) continue;
+            if(_currentLine == _line) {
+                _currentLine++;
+                continue;
+            }
+            LOG_W("Writing ", _l)
             appendChunkToFileAtEnd(_handler, _l);
             appendChunkToFileAtEnd(_handler, "\n", SDL_strlen("\n"));
             _currentLine++;
@@ -263,6 +267,7 @@ namespace engine {
         for(auto& _l : _f.content) {
             if(std::find(_lines.begin(), _lines.end(), _currentLine) != _lines.end()) {
                 _lines.erase(_lines.begin());
+                _currentLine++;
                 continue;
             }
             appendChunkToFileAtEnd(_handler, _l);

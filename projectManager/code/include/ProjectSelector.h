@@ -12,13 +12,15 @@ namespace engine {
     class ProjectSelector {
         private:
             Project* project = nullptr;
-            ProjectList* projectList;
-            ProjectCreator* projectCreator;
+            ProjectList* projectList = nullptr;
+            ProjectCreator* projectCreator = nullptr;
 
         public:
             void init(ProjectList* _projectList, ProjectCreator* _projectCreator);
             void render();
             Project* getCurrentProject();
+            void selectProject(const std::string& _projectName);
+            void loadProjects();
     };
 
 }

@@ -24,6 +24,7 @@ namespace engine {
         NAME_ALREADY_IN_USE =   1 << 3
     };
 
+    class ProjectSelector;
     class ProjectList;
     class ProjectCreator {
         private:
@@ -34,17 +35,18 @@ namespace engine {
 
             ProjectList* projectList = nullptr;
             imgui_addons::ImGuiFileBrowser* fileBrowser = nullptr;
+            ProjectSelector* projectSelector;
 
         public:
             void init(ProjectList* _projectList, imgui_addons::ImGuiFileBrowser* _fileBrowser);
             void render();
             void setShow(bool _show);
+            void setProjectSelector(ProjectSelector* _projectSelector);
 
         private:
             void createProject();
             void checkErrors();
             void showErrors();
-            void reloadProjects();
     };
 
 }

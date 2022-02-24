@@ -13,10 +13,10 @@
 #include <vector>
 #include <sstream>
 
-#define SPLIT_S(str, delimiter) split(str, delimiter);
-#define SPLIT_S_I(str, delimiter, index) splitGetIndex(str, delimiter, index);
-#define APPEND_S(...) caller(__VA_ARGS__);
-#define REPLACE_S(_str, _old, _new) replaceAll(_str, _old, _new);
+#define SPLIT_S(str, delimiter) split(str, delimiter)
+#define SPLIT_S_I(str, delimiter, index) splitGetIndex(str, delimiter, index)
+#define APPEND_S(...) caller(__VA_ARGS__)
+#define REPLACE_S(_str, _old, _new) replaceAll(_str, _old, _new)
 
 inline std::vector<std::string> split(const std::string& _str, const std::string& _delimiter) {
     size_t pos = 0;
