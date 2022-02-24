@@ -247,7 +247,6 @@ namespace engine {
                 _currentLine++;
                 continue;
             }
-            LOG_W("Writing ", _l)
             appendChunkToFileAtEnd(_handler, _l);
             appendChunkToFileAtEnd(_handler, "\n", SDL_strlen("\n"));
             _currentLine++;

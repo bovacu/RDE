@@ -30,6 +30,7 @@ namespace engine {
 #endif
 
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+            LOG_E("At least one module of SDL couldn't be initialized, so can't start the engine")
             return;
         }
 

@@ -1,5 +1,4 @@
 #include "core/Engine.h"
-#include "Sandbox.h"
 #include "code/include/ProjectManagerLayer.h"
 
 int main(int, char* []) {
