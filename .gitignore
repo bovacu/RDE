@@ -7,14 +7,6 @@ build/
 
 targets/engineAndroid/.idea/
 
-libs/SDL/
-
-libs/SDL_image/
-
-libs/SDL_mixer/
-
-libs/SDL_net/
-
 cmake-build-debug_lib/
 
 libs_out/.cmake/
