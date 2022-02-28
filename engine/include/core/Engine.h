@@ -27,8 +27,8 @@ namespace engine {
             float lastFrame = 0.0f;
             Delta dt;
             unsigned int fpsCounter = 0, frameCounter = 0;
-            Camera camera;
             Color backgroundColor = Color::Red;
+            Camera camera;
             FrameBuffer* frameBuffer;
 
         private:

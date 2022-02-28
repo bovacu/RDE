@@ -157,6 +157,7 @@ set(SOURCES
         engine/include/core/render/window/input/MobileInput.h engine/src/core/render/window/input/MobileInput.cpp engine/include/core/render/window/event/MobileEvent.h
         engine/include/core/procedural/CellularAutomataMapGenerator.h engine/src/core/procedural/CellularAutomataMapGenerator.cpp
         engine/include/core/systems/fileSystem/FilesSystem.h engine/src/core/systems/fileSystem/FilesSystem.cpp engine/include/core/util/StringUtils.h
+        engine/src/core/render/ViewPort.cpp engine/include/core/render/elements/ViewPort.h
 
         projectManager/code/include/ProjectManagerLayer.h projectManager/code/src/ProjectManagerLayer.cpp
         projectManager/code/include/ProjectCreator.h projectManager/code/src/ProjectCreator.cpp
@@ -168,7 +169,7 @@ set(SOURCES
         )
 
 set(CPP_HEADERS)
-set(CPP_SOURCES)
+set(CPP_SOURCES )
 
 #GDEFirebase
 

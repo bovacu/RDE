@@ -11,10 +11,15 @@ namespace engine {
         recalculateViewMatrix();
     }
 
+    void Camera::init(const Window* _window) {
+        viewport = new FreeViewPort(_window);
+    }
+
     void Camera::onResize(int _width, int _height) {
-        aspectRatio = (float)_width/(float)_height;
+        viewport->update({_width, _height});
+        float _aspectRatio = viewport->getAspectRatio();
         glViewport(0, 0, _width, _height);
-        projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
+        projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
     }
 
@@ -66,12 +71,13 @@ namespace engine {
     bool Camera::onMouseScrolled(MouseScrolledEvent& _event) {
         zoom -= _event.getScrollY() * 0.1f;
         zoom = std::max(zoom, 0.5f);
-        projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
+        float _aspectRatio = viewport->getAspectRatio();
+        projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
         return false;
     }
 
     float Camera::getAspectRatio() const {
-        return aspectRatio;
+        return viewport->getAspectRatio();
     }
 
     float Camera::getCurrentZoomLevel() const {
@@ -80,7 +86,8 @@ namespace engine {
 
     void Camera::setCurrentZoomLevel(float _zoomLevel) {
         zoom = _zoomLevel;
-        projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
+        float _aspectRatio = viewport->getAspectRatio();
+        projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
     }
 
     float Camera::getZoomSpeed() const {
@@ -89,6 +96,24 @@ namespace engine {
 
     void Camera::setZoomSpeed(float _zoomSpeed) {
         zoomSpeed = _zoomSpeed;
+    }
+
+    Camera::~Camera() {
+        delete viewport;
+    }
+
+    IViewPort* Camera::getViewport() const {
+        return viewport;
+    }
+
+    void Camera::setFreeViewport(const Window* _window) {
+        delete viewport;
+        viewport = new FreeViewPort(_window);
+    }
+
+    void Camera::setAdaptiveViewport(const Vec2I& _virtualDesiredSize) {
+        delete viewport;
+        viewport = new AdaptiveViewPort(_virtualDesiredSize);
     }
 
 }

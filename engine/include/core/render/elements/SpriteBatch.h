@@ -36,6 +36,7 @@ namespace engine {
                 int layer;
                 ShaderID shaderID = -1;
                 float aspectRatio;
+                Vec2F scalingFactor = {1, 1};
                 std::vector<Vertex2dUVColor> vertexBuffer;
                 Texture* texture;
                 Window* window = nullptr;
@@ -52,10 +53,10 @@ namespace engine {
             std::vector<VertexColorDebug> vertexDebugBufferGeometrics;
             std::vector<VertexColorDebug> vertexDebugBufferLines;
             GLuint vbo = -1, debugVbo = -1;
-            int maxVerticesPerDrawCall = 10000 * 4;
 
             glm::mat4 viewProjectionMatrix;
             float aspectRatio = 1;
+            Vec2F scalingFactor = {1, 1};
 
             Texture* texture = nullptr;
             Window* window = nullptr;

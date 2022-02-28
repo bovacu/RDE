@@ -3,7 +3,6 @@
 #include "core/Engine.h"
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/render/elements/ShaderManager.h"
-//#include "../../sandbox/Sandbox.h"
 #include "core/systems/soundSystem/SoundManager.h"
 
 namespace engine {
@@ -15,6 +14,8 @@ namespace engine {
         window = Window::createWindow();
         window->setEventCallback(ENGINE_BIND_EVENT_FN(Engine::onEvent));
         lastFrame = 0;
+
+        camera.init(window.get());
 
         InputManager::get().init(window.get());
         Console::get().init();

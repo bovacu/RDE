@@ -54,7 +54,11 @@ namespace engine {
     void SpriteBatch::beginDraw(Camera& _camera) {
         viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_camera.getTransform().transformMatrix);
         aspectRatio = _camera.getAspectRatio();
-        for(auto& _batch : batches) _batch.aspectRatio = aspectRatio;
+        scalingFactor = _camera.getViewport()->getScalingFactor();
+        for(auto& _batch : batches) {
+            _batch.aspectRatio = aspectRatio;
+            _batch.scalingFactor = _camera.getViewport()->getScalingFactor();
+        }
     }
 
     void SpriteBatch::draw(const glm::vec4& destRect, const glm::vec4& sourceRect, const glm::vec4& color, Texture* _texture, float _rotation) {
@@ -99,8 +103,17 @@ namespace engine {
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
         auto _screenPos0 = Util::worldToScreenCoords(_p0, window, aspectRatio);
         auto _screenPos1 = Util::worldToScreenCoords(_p1, window, aspectRatio);
-        vertexDebugBufferLines.emplace_back(glm::vec3 {_screenPos0.x, _screenPos0.y, 1.0f}, _colorVec4);
-        vertexDebugBufferLines.emplace_back(glm::vec3 {_screenPos1.x, _screenPos1.y, 1.0f}, _colorVec4);
+
+        auto _transformMat0 = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos0.x, _screenPos0.y, 1.f));
+        auto _transformMat1 = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos1.x, _screenPos1.y, 1.f));
+
+        if(scalingFactor != 1) {
+            _transformMat0 *= glm::scale(glm::mat4(1.0f), {scalingFactor.x, scalingFactor.x, 1.f});
+            _transformMat1 *= glm::scale(glm::mat4(1.0f), {scalingFactor.x, scalingFactor.x, 1.f});
+        }
+
+        vertexDebugBufferLines.emplace_back(_transformMat0 * glm::vec4 {_screenPos0.x, _screenPos0.y, 1.0f, 1.0f}, _colorVec4);
+        vertexDebugBufferLines.emplace_back(_transformMat0 * glm::vec4 {_screenPos1.x, _screenPos1.y, 1.0f, 1.0f}, _colorVec4);
     }
 
     void SpriteBatch::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
@@ -109,6 +122,9 @@ namespace engine {
 
         if(_rotation != 0)
             _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_rotation), { 0.0f, 0.0f, 1.0f });
+
+        if(scalingFactor != 1)
+            _transformMat *= glm::scale(glm::mat4(1.0f), {scalingFactor.x, scalingFactor.x, 1.f});
 
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
 
@@ -125,10 +141,13 @@ namespace engine {
     }
 
     void SpriteBatch::drawShape(Shape& _shape) {
-        auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x, _shape.getPosition().y, 1.f));
+        auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x * scalingFactor.x, _shape.getPosition().y * scalingFactor.y, 1.f));
 
         if(_shape.getRotation() != 0)
             _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_shape.getRotation()), { 0.0f, 0.0f, 1.0f });
+
+        if(scalingFactor != 1)
+            _transformMat *= glm::scale(glm::mat4(1.0f), {scalingFactor.x, scalingFactor.x, 1.f});
 
         glm::vec4 _innerColor = {(float)_shape.getInnerColor().r / 255.f, (float)_shape.getInnerColor().g / 255.f,
                                  (float)_shape.getInnerColor().b/ 255.f, (float)_shape.getInnerColor().a/ 255.f};
@@ -275,14 +294,14 @@ namespace engine {
         if(texture == nullptr)
             texture = _sprite.getTexture();
 
-        auto _pos = Util::worldToScreenCoords(_sprite.getPosition(), window, aspectRatio);
+        auto _pos = Util::worldToScreenCoords({_sprite.getPosition().x * scalingFactor.x, _sprite.getPosition().y * scalingFactor.y}, window, aspectRatio);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
 
         if(_sprite.getRotation() != 0)
-            _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_sprite.getRotation()), { 0.0f, 0.0f, 1.0f });
+            _transformMat = glm::rotate(_transformMat, glm::radians(_sprite.getRotation()), { 0.0f, 0.0f, 1.0f });
 
-        if(_sprite.getScale() != 1)
-            _transformMat *= glm::scale(glm::mat4(1.0f), { _sprite.getScale().x, _sprite.getScale().y, 1.0f });
+        if(_sprite.getScale() != 1 || scalingFactor != 1)
+            _transformMat = glm::scale(_transformMat, {scalingFactor.x * _sprite.getScale().x, scalingFactor.y * _sprite.getScale().y , 1.0f });
 
 
         Vec2F _textureOrigin = {(float)_sprite.getTexture()->getRegion().bottomLeftCorner.x, (float)_sprite.getTexture()->getRegion().bottomLeftCorner.y};
@@ -338,14 +357,14 @@ namespace engine {
                 continue;
             }
 
-            auto _pos = Util::worldToScreenSize({_x, _y}, window, aspectRatio);
+            auto _pos = Util::worldToScreenSize({_x * scalingFactor.x, _y * scalingFactor.y}, window, aspectRatio);
             auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
 
             if(_text.getRotation() != 0)
-                _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_text.getRotation()), { 0.0f, 0.0f, 1.0f });
+                _transformMat = glm::rotate(_transformMat, glm::radians(_text.getRotation()), { 0.0f, 0.0f, 1.0f });
 
-            if(_text.getScale() != 1)
-                _transformMat *= glm::scale(glm::mat4(1.0f), { _text.getScale().x, _text.getScale().y, 1.0f });
+            if(_text.getScale() != 1 || scalingFactor != 1)
+                _transformMat = glm::scale(_transformMat, { scalingFactor.x * _text.getScale().x, scalingFactor.y *  _text.getScale().y, 1.0f });
 
             auto _textColor = _text.getColor();
             glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
