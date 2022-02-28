@@ -20,42 +20,43 @@ namespace engine {
     static void asyncInstaller(std::string* installStep, float* installPercentage, const std::string& _path) {
         auto _command = APPEND_S("./installer.sh ", _path);
         std::system(_command.c_str());
-        *installPercentage = 0.2f;
+        *installPercentage = 0.3f;
 
         _command = APPEND_S("./installationSteps/0.sh ", _path);
         *installStep = "Installing dependencies...";
         std::system(_command.c_str());
-        *installPercentage = 0.3f;
+        *installPercentage = 0.6f;
 
         _command = APPEND_S("./installationSteps/1.sh ", _path);
         *installStep = "Installing submodules...";
         std::system(_command.c_str());
-        *installPercentage = 0.5f;
-
-        _command = APPEND_S("./installationSteps/2.sh ", _path);
-        *installStep = "Installing and building SDL...";
-        std::system(_command.c_str());
-        *installPercentage = 0.6f;
-
-        _command = APPEND_S("./installationSteps/3.sh ", _path);
-        *installStep = "Installing and building SDL_image...";
-        std::system(_command.c_str());
-        *installPercentage = 0.7f;
-
-        _command = APPEND_S("./installationSteps/4.sh ", _path);
-        *installStep = "Installing and building SDL_mixer...";
-        std::system(_command.c_str());
         *installPercentage = 0.8f;
-
-        _command = APPEND_S("./installationSteps/5.sh ", _path);
-        *installStep = "Installing and building SDL_net...";
-        std::system(_command.c_str());
-        *installPercentage = 0.9f;
 
         _command = APPEND_S("./installationSteps/6.sh ", _path);
         *installStep = "Installing and building freetype...";
         std::system(_command.c_str());
         *installPercentage = 1.f;
+
+//        _command = APPEND_S("./installationSteps/2.sh ", _path);
+//        *installStep = "Installing and building SDL...";
+//        std::system(_command.c_str());
+//        *installPercentage = 0.6f;
+//
+//        _command = APPEND_S("./installationSteps/3.sh ", _path);
+//        *installStep = "Installing and building SDL_image...";
+//        std::system(_command.c_str());
+//        *installPercentage = 0.7f;
+//
+//        _command = APPEND_S("./installationSteps/4.sh ", _path);
+//        *installStep = "Installing and building SDL_mixer...";
+//        std::system(_command.c_str());
+//        *installPercentage = 0.8f;
+//
+//        _command = APPEND_S("./installationSteps/5.sh ", _path);
+//        *installStep = "Installing and building SDL_net...";
+//        std::system(_command.c_str());
+//        *installPercentage = 0.9f;
+//
     }
 
     void ProjectInstallator::render() {
