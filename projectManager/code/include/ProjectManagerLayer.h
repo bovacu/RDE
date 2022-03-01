@@ -16,9 +16,17 @@
 
 namespace engine {
 
+    struct Android {
+        std::string sdk;
+        std::string ndk;
+        std::string androidStudio;
+        std::string jdk;
+    };
+
     struct GlobalConfig {
         std::string GDEPath;
         std::vector<std::string> IDEs;
+        Android android;
     };
 
     struct ProjectConfig {

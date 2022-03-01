@@ -6,11 +6,11 @@
 
 namespace engine {
 
-    FileHandler* FilesSystem::open(const std::string& _filePath, const FileMode& _fileMode) {
+    FileHandler* FilesSystem::open(const std::string& _filePath, const FileMode& _fileMode, bool _silentNotFound) {
         const char* _fm = FileHandler::modeToChar(_fileMode);
         auto* _file = SDL_RWFromFile(_filePath.c_str(), _fm);
         if(_file == nullptr) {
-            LOG_E("Couldn't open file: ", _filePath)
+            if(!_silentNotFound) LOG_E("Couldn't open file: ", _filePath)
             return nullptr;
         }
 
@@ -321,7 +321,7 @@ namespace engine {
     }
 
     bool FilesSystem::fileExists(const std::string& _pathToFile) {
-        auto* _file = open(_pathToFile, FileMode::READ);
+        auto* _file = open(_pathToFile, FileMode::READ, true);
         if(_file == nullptr) return false;
         close(_file);
         return true;

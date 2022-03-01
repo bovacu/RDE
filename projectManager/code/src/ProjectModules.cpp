@@ -6,15 +6,16 @@
 #include "core/Engine.h"
 #include "core/systems/fileSystem/FilesSystem.h"
 #include "imgui_internal.h"
+#include "projectManager/code/include/ProjectManagerLayer.h"
 
 namespace engine {
 
 
-    void ProjectModules::init(const std::string& _gdePath, imgui_addons::ImGuiFileBrowser* _fileBrowser) {
+    void ProjectModules::init(GlobalConfig* _globalConfig, imgui_addons::ImGuiFileBrowser* _fileBrowser) {
         fileBrowser = _fileBrowser;
         show = false;
-
-        GDEPath = _gdePath;
+        globalConfig = _globalConfig;
+        GDEPath = globalConfig->GDEPath;
 
         auto* _dataHandler = FilesSystem::open("assets/data.config", FileMode::READ);
         auto _lines = FilesSystem::readAllLinesFile(_dataHandler).content;
@@ -26,6 +27,15 @@ namespace engine {
         availableModules.emplace_back(Module{"Android", _foundAndroid, false, false, false, BIND_FUNC_0(ProjectModules::installAndroidModule)});
         availableModules.emplace_back(Module{"Firebase", _foundFirebase, false, false, false, BIND_FUNC_0(ProjectModules::installFirebaseModule)});
         availableModules.emplace_back(Module{"IOs", _foundIOS, false, false, false, BIND_FUNC_0(ProjectModules::installIOSModule)});
+
+        if(_foundAndroid) {
+            globalConfig->android.sdk = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("ANDROID_SDK_PATH") != std::string::npos; }).base(), "=", 1);
+            globalConfig->android.ndk = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("ANDROID_NDK_PATH") != std::string::npos; }).base(), "=", 1);
+            globalConfig->android.androidStudio = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("ANDROID_STUDIO_PATH") != std::string::npos; }).base(), "=", 1);
+            globalConfig->android.jdk = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("JDK_8_PATH") != std::string::npos; }).base(), "=", 1);
+
+            LOG_W("Found Android -> SDK[", globalConfig->android.sdk, "], NDK[", globalConfig->android.ndk, "], AS[", globalConfig->android.androidStudio, "], JDK[", globalConfig->android.jdk, "]")
+        }
     }
 
     void ProjectModules::render() {

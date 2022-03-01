@@ -70,7 +70,7 @@ namespace engine {
             static void checkFileMode(FileHandler* _handler, const FileMode& _expected);
 
         public:
-            static FileHandler* open(const std::string& _filePath, const FileMode& _fileMode);
+            static FileHandler* open(const std::string& _filePath, const FileMode& _fileMode, bool _silentNotFound = false);
             static void close(FileHandler* _file);
 
             static FileStr readFullFile(FileHandler* _handler);

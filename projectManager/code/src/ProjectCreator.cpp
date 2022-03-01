@@ -9,8 +9,9 @@
 
 namespace engine {
 
-    void ProjectCreator::init(ProjectList* _projectList, imgui_addons::ImGuiFileBrowser* _fileBrowser) {
+    void ProjectCreator::init(GlobalConfig* _globalConfig, ProjectList* _projectList, imgui_addons::ImGuiFileBrowser* _fileBrowser) {
         projectList = _projectList;
+        globalConfig = _globalConfig;
         fileBrowser = _fileBrowser;
     }
 
@@ -66,7 +67,7 @@ namespace engine {
     }
 
     void ProjectCreator::createProject() {
-        auto _command = APPEND_S("./projectCreator.sh ", projectPath, " ", projectName, " ", projectPath);
+        auto _command = APPEND_S("./projectCreator.sh ", globalConfig->GDEPath, " ", projectName, " ", projectPath);
         std::system(_command.c_str());
         auto _newLine = projectList->content.empty() ? "" : "\n";
         auto _newProject = APPEND_S(_newLine, projectName, "=", projectPath);

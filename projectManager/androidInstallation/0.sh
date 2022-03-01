@@ -77,7 +77,7 @@ echo "All licenses agreed installed"
     echo ""
     echo "ANDROID_SDK_PATH=$ANDROID_SDK_PATH"
     echo "ANDROID_NDK_PATH=$ANDROID_NDK_PATH"
-    echo "ANDROID_STUDIO_PATH=$ANDROID_ANDROID_STUDIO_PATH"
+    echo "ANDROID_STUDIO_PATH=$ANDROID_STUDIO_PATH"
     echo "JDK_8_PATH=$JDK_8_PATH"
 } >> "$DIR"/assets/data.config
 

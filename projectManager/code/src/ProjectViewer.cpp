@@ -1,14 +1,17 @@
 // Created by borja on 23/2/22.
 
+#include <thread>
 #include "projectManager/code/include/ProjectViewer.h"
 #include "projectManager/code/include/ProjectManagerLayer.h"
 #include "core/Engine.h"
+#include "imgui_internal.h"
 
 namespace engine {
 
 
-    void ProjectViewer::init(ProjectSelector* _projectSelector, imgui_addons::ImGuiFileBrowser* _fileBrowser, ProjectList* _projectList, GlobalConfig* _globalConfig) {
+    void ProjectViewer::init(ProjectSelector* _projectSelector, ProjectModules* _projectModules, imgui_addons::ImGuiFileBrowser* _fileBrowser, ProjectList* _projectList, GlobalConfig* _globalConfig) {
         projectSelector = _projectSelector;
+        projectModules = _projectModules;
         fileBrowser = _fileBrowser;
         projectList = _projectList;
         globalConfig = _globalConfig;
@@ -119,8 +122,15 @@ namespace engine {
         ImGui::SameLine(0, 20);
 
         if(ImGui::Button("Delete project")) {
-
+            showActionDeleteProject = true;
+            ImGui::OpenPopup("Delete project");
         }
+
+        ImGui::Separator();
+
+        androidActions();
+
+        actionsDeleteProject();
     }
 
     void ProjectViewer::projectError() {
@@ -175,21 +185,7 @@ namespace engine {
 
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - (_yesWidth + _noWidth) / 2.f);
             if(ImGui::Button("Yes")) {
-                int _line = -1;
-                for(int _i = 0; _i < projectList->content.size(); _i++) {
-                    if(strcmp(projectList->content[_i].projectName.c_str(), projectSelector->getCurrentProject()->projectName.c_str()) == 0) {
-                        _line = _i;
-                        break;
-                    }
-                }
-
-                if(_line >= 0) {
-                    FilesSystem::removeChunkLineInFile(projectList->projectsHandler, _line);
-                    projectSelector->loadProjects();
-                    showDelete = false;
-                    projectSelector->selectProject("");
-                } else
-                    LOG_E("Ups, couldn't find the project ", projectSelector->getCurrentProject()->projectName, " in the data.config file")
+                deleteCurrentProjectFromManager();
             }
             _yesWidth = ImGui::GetItemRectSize().x;
 
@@ -276,5 +272,180 @@ namespace engine {
 
         if((error & ProjectError::WRONG_PATH) == ProjectError::WRONG_PATH)
             ImGui::TextColored({255, 0, 0, 255}, "Selected path is not valid");
+    }
+
+    void ProjectViewer::deleteCurrentProjectFromManager() {
+        int _line = -1;
+        for(int _i = 0; _i < projectList->content.size(); _i++) {
+            if(strcmp(projectList->content[_i].projectName.c_str(), projectSelector->getCurrentProject()->projectName.c_str()) == 0) {
+                _line = _i;
+                break;
+            }
+        }
+
+        if(_line >= 0) {
+            FilesSystem::removeChunkLineInFile(projectList->projectsHandler, _line);
+            projectSelector->loadProjects();
+            showDelete = false;
+            projectSelector->selectProject("");
+        }
+    }
+
+    void ProjectViewer::actionsDeleteProject() {
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
+        ImGui::SetNextWindowSize({-1, -1}, ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
+        if(ImGui::BeginPopupModal("Delete project", &showActionDeleteProject, ImGuiWindowFlags_NoResize)) {
+            static float _width = ImGui::CalcTextSize("Choose what kind of deletion:").x;
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _width / 2.f);
+            ImGui::Text("Choose what kind of deletion:");
+
+            static float _buttonsSize = 0;
+
+            ImGui::NewLine();
+
+            if(ImGui::Button("Delete from manager")) {
+                deleteCurrentProjectFromManager();
+            }
+
+            _buttonsSize = ImGui::GetItemRectSize().x;
+
+            ImGui::SameLine();
+
+            if(ImGui::Button("Delete from disk")) {
+                auto _pathToProject = projectSelector->getCurrentProject()->projectPath;
+                auto _command = APPEND_S("rm -rf ", _pathToProject);
+                std::system(_command.c_str());
+                deleteCurrentProjectFromManager();
+            }
+
+            _buttonsSize += ImGui::GetItemRectSize().x;
+
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleVar();
+    }
+
+    void ProjectViewer::androidActions() {
+        if(std::find_if(projectModules->getModules().begin(), projectModules->getModules().end(),
+                        [](const Module& _module) { return std::equal(_module.name.begin(), _module.name.end(), "Android") && _module.installed; })
+           != projectModules->getModules().end()) {
+            ImGui::NewLine();
+            ImGui::NewLine();
+
+            ImGui::PushFont(h2);
+            ImGui::Text("Android");
+            ImGui::PopFont();
+
+            ImGui::Separator();
+
+            if(!FilesSystem::fileExists(projectSelector->getCurrentProject()->projectPath + "/targets/GDEAndroid/CMakeLists.txt")) {
+                if(ImGui::Button("Add Android Target")) {
+                    showAndroidInstallTarget = true;
+                    ImGui::OpenPopup("Android target installation");
+                    std::thread _installAndroidTarget([&]() {
+                        auto _command = APPEND_S("./androidInstallation/1.sh ", projectSelector->getCurrentProject()->projectPath, " ", globalConfig->android.ndk, " ", globalConfig->GDEPath);
+                        std::system(_command.c_str());
+                        showAndroidInstallTarget = false;
+                    });
+                    _installAndroidTarget.detach();
+                }
+            } else {
+                static char _androidPackage[256];
+                static char _apkName[256];
+                static bool _split = false;
+
+                if(blockOpenAndroidStudio) {
+                    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                    ImGui::Button("Open With Android Studio");
+                    ImGui::PopItemFlag();
+                } else {
+                    if(ImGui::Button("Open With Android Studio")) {
+                        blockOpenAndroidStudio = true;
+                        std::thread _openAndroidStudio([&]{
+                            auto _command = APPEND_S("sh ", globalConfig->android.androidStudio, "/bin/studio.sh ", projectSelector->getCurrentProject()->projectPath, "/targets/GDEAndroid");
+                            std::system(_command.c_str());
+                            blockOpenAndroidStudio = false;
+                        });
+                        _openAndroidStudio.detach();
+                    }
+                }
+
+                ImGui::Text("Package"); ImGui::SameLine();
+                ImGui::SetNextItemWidth(150);
+                ImGui::InputText("###androidPackage", _androidPackage, IM_ARRAYSIZE(_androidPackage));
+
+                ImGui::Text("APK Name"); ImGui::SameLine();
+                ImGui::SetNextItemWidth(150);
+                ImGui::InputText("###apkName", _apkName, IM_ARRAYSIZE(_apkName));
+
+                ImGui::Checkbox("Split build", &_split);
+
+                if(ImGui::Button("Sign APK")) {
+
+                }
+
+                ImGui::SameLine();
+
+                if(ImGui::Button("Build APK")) {
+
+                }
+            }
+
+            if(showAndroidInstallTarget) {
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
+                ImGui::SetNextWindowSize({-1, -1}, ImGuiCond_Always);
+                ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
+                if(ImGui::BeginPopupModal("Android target installation")) {
+                    const float _textWidth = ImGui::CalcTextSize("Downloading and installing android target, might take some time...").x;
+                    const ImU32 _col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - 7.5f);
+                    Spinner("Installing Android Components", 15.f, 6, _col);
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _textWidth / 2.f);
+                    ImGui::Text("Downloading and installing android target, might take some time...");
+                    ImGui::EndPopup();
+                }
+                ImGui::PopStyleVar();
+            }
+        }
+    }
+
+    bool ProjectViewer::Spinner(const char* label, float radius, int thickness, const ImU32& color) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
+
+        ImGuiContext& g = *GImGui;
+        const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(label);
+
+        ImVec2 pos = window->DC.CursorPos;
+        ImVec2 size((radius )*2, (radius + style.FramePadding.y)*2);
+
+        const ImRect bb(pos, ImVec2(pos.x + size.x, pos.y + size.y));
+        ImGui::ItemSize(bb, style.FramePadding.y);
+        if (!ImGui::ItemAdd(bb, id))
+            return false;
+
+        // Render
+        window->DrawList->PathClear();
+
+        int num_segments = 30;
+        int start = abs(ImSin(g.Time*1.8f)*(num_segments-5));
+
+        const float a_min = IM_PI*2.0f * ((float)start) / (float)num_segments;
+        const float a_max = IM_PI*2.0f * ((float)num_segments-3) / (float)num_segments;
+
+        const ImVec2 centre = ImVec2(pos.x+radius, pos.y+radius+style.FramePadding.y);
+
+        for (int i = 0; i < num_segments; i++) {
+            const float a = a_min + ((float)i / (float)num_segments) * (a_max - a_min);
+            window->DrawList->PathLineTo(ImVec2(centre.x + ImCos(a+g.Time*8) * radius,
+                                                centre.y + ImSin(a+g.Time*8) * radius));
+        }
+
+        window->DrawList->PathStroke(color, false, thickness);
+
+        return true;
     }
 }

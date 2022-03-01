@@ -41,10 +41,12 @@ namespace engine {
         PAE_UNKNOWN_FAILED = 1 << 13,
     };
 
+    class GlobalConfig;
     class ProjectModules {
         private:
             bool show;
             imgui_addons::ImGuiFileBrowser* fileBrowser = nullptr;
+            GlobalConfig* globalConfig;
 
             std::vector<Module> availableModules;
             std::queue<Module> modulesToInstall;
@@ -59,7 +61,7 @@ namespace engine {
             bool showAndroidInstallationWait = false;
 
         public:
-            void init(const std::string& _gdePath, imgui_addons::ImGuiFileBrowser* _fileBrowser);
+            void init(GlobalConfig* _globalConfig, imgui_addons::ImGuiFileBrowser* _fileBrowser);
             void render();
             void setShow(bool _show);
             const std::vector<Module>& getModules();

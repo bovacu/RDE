@@ -9,10 +9,13 @@
 namespace engine {
 
     class GlobalConfig;
+    class ProjectModules;
     class ProjectViewer {
         private:
-            bool show, showRelocate, showDelete;
+            bool show, showRelocate, showDelete, showActionDeleteProject, showAndroidInstallTarget;
+            bool blockOpenAndroidStudio;
             ProjectSelector* projectSelector;
+            ProjectModules* projectModules = nullptr;
             imgui_addons::ImGuiFileBrowser* fileBrowser;
             ProjectList* projectList;
 
@@ -29,7 +32,7 @@ namespace engine {
             ProjectError error = ProjectError::NONE;
 
         public:
-            void init(ProjectSelector* _projectSelector, imgui_addons::ImGuiFileBrowser* _fileBrowser, ProjectList* _projectList, GlobalConfig* _globalConfig);
+            void init(ProjectSelector* _projectSelector, ProjectModules* _projectModules, imgui_addons::ImGuiFileBrowser* _fileBrowser, ProjectList* _projectList, GlobalConfig* _globalConfig);
             void render();
             void setShow(bool _show);
 
@@ -39,8 +42,15 @@ namespace engine {
             void relocateProject();
             void destroyProject();
 
+            void actionsDeleteProject();
+            void deleteCurrentProjectFromManager();
+
+            void androidActions();
+
             void checkErrors(const char* _newPath);
             void showErrors();
+
+            bool Spinner(const char* label, float radius, int thickness, const ImU32& color);
     };
 
 }

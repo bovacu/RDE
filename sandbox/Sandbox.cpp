@@ -6,9 +6,9 @@
 #include "core/procedural/CellularAutomataMapGenerator.h"
 #include "core/systems/fileSystem/FilesSystem.h"
 
-#if IS_ANDROID()
-#include <nativeCode/include/NativeAds.h>
-#endif
+//#if IS_ANDROID()
+//#include <nativeCode/include/NativeAds.h>
+//#endif
 
 namespace engine {
 
@@ -58,9 +58,9 @@ namespace engine {
         }
 //        auto& _music = SoundManager::get().loadMusic("assets/sounds/getout.ogg");
 //        SoundManager::get().playMusic(_music.name);
-        #if IS_ANDROID()
-            NativeAds::get().loadAd(AdType::BANNER);
-        #endif
+//        #if IS_ANDROID()
+//            NativeAds::get().loadAd(AdType::BANNER);
+//        #endif
     }
 
     void Sandbox::onEvent(Event& _event) {
@@ -76,9 +76,9 @@ namespace engine {
         animationSystem.update(_dt, player);
 
         if(InputManager::isMobileScreenJustPressed(0)) {
-            #if IS_ANDROID()
-                NativeAds::get().showAd(AdType::BANNER);
-            #endif
+//            #if IS_ANDROID()
+//                NativeAds::get().showAd(AdType::BANNER);
+//            #endif
         }
     }
 
