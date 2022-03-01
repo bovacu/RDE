@@ -236,8 +236,8 @@ namespace engine {
         error = ProjectError::NONE;
 
         std::ifstream _stream(pathToInstallGDE);
-        _stream.close();
         if(!_stream.good()) error |= ProjectError::WRONG_PATH;
+        _stream.close();
         if(strlen(pathToInstallGDE) == 0) error |= ProjectError::PATH_NOT_SET;
     }
 

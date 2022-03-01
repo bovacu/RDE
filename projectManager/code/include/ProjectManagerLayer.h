@@ -43,12 +43,6 @@ namespace engine {
 
         private:
             GlobalConfig globalConfig;
-
-            bool showInstallationWindow = false;
-            std::vector<std::string> modulesInstalled;
-            std::string installStep = "Downloading GDE...";
-            float installPercentage = 0;
-            bool showInstallingLoadingBarModal = false;
             ProjectList projectList;
 
             ProjectInstallator projectInstallator;

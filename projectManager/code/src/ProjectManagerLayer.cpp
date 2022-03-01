@@ -80,7 +80,7 @@ namespace engine {
     }
 
     void ProjectManagerLayer::loadModules() {
-        projectModules.init(globalConfig.GDEPath);
+        projectModules.init(globalConfig.GDEPath, &fileBrowser);
         projectCreator.init(&projectList, &fileBrowser);
         projectSelector.init(&projectList, &projectCreator);
         projectCreator.setProjectSelector(&projectSelector);

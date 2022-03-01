@@ -97,8 +97,8 @@ namespace engine {
         error = ProjectError::NONE;
 
         std::ifstream _stream(projectPath);
-        _stream.close();
         if(!_stream.good()) error |= ProjectError::WRONG_PATH;
+        _stream.close();
 
         if(strlen(projectName) == 0) error |= ProjectError::NAME_NOT_SET;
         if(strlen(projectPath) == 0) error |= ProjectError::PATH_NOT_SET;

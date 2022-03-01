@@ -1,60 +1,74 @@
 // Created by borja on 23/2/22.
 
+#include <thread>
 #include "projectManager/code/include/ProjectModules.h"
 #include "imgui.h"
 #include "core/Engine.h"
 #include "core/systems/fileSystem/FilesSystem.h"
+#include "imgui_internal.h"
 
 namespace engine {
 
 
-    void ProjectModules::init(const std::string& _gdePath) {
+    void ProjectModules::init(const std::string& _gdePath, imgui_addons::ImGuiFileBrowser* _fileBrowser) {
+        fileBrowser = _fileBrowser;
         show = false;
 
         GDEPath = _gdePath;
-        auto _path = APPEND_S(GDEPath, "/GDEAndroid/CMakeLists.txt");
-        availableModules.emplace_back(Module{"Android", FilesSystem::fileExists(_path)});
 
-        _path = APPEND_S(GDEPath, "/GDEFirebase/CMakeLists.txt");
-        availableModules.emplace_back(Module{"Firebase", FilesSystem::fileExists(_path)});
+        auto* _dataHandler = FilesSystem::open("assets/data.config", FileMode::READ);
+        auto _lines = FilesSystem::readAllLinesFile(_dataHandler).content;
 
-        _path = APPEND_S(GDEPath, "/GDEIOS/CMakeLists.txt");
-        availableModules.emplace_back(Module{"IOs", FilesSystem::fileExists(_path)});
+        bool _foundAndroid = std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("ANDROID_SDK_PATH") != std::string::npos; }) != _lines.end();
+        bool _foundFirebase = std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("FIREBASE_SDK_PATH") != std::string::npos; }) != _lines.end();
+        bool _foundIOS = std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("IOS_SDK_PATH") != std::string::npos; }) != _lines.end();
+
+        availableModules.emplace_back(Module{"Android", _foundAndroid, false, false, false, BIND_FUNC_0(ProjectModules::installAndroidModule)});
+        availableModules.emplace_back(Module{"Firebase", _foundFirebase, false, false, false, BIND_FUNC_0(ProjectModules::installFirebaseModule)});
+        availableModules.emplace_back(Module{"IOs", _foundIOS, false, false, false, BIND_FUNC_0(ProjectModules::installIOSModule)});
     }
 
     void ProjectModules::render() {
-        if(!show) return;
+        if(show) {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
+            ImGui::SetNextWindowSize({Engine::get().getWindowSize().x * 0.25f, Engine::get().getWindowSize().y * 0.5f}, ImGuiCond_Always);
+            ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
+            ImGui::OpenPopup("Modules");
+            if(ImGui::BeginPopupModal("Modules", &show, ImGuiWindowFlags_NoResize)) {
+                if(ImGui::BeginChild("ModulesTree", {0, -ImGui::GetFrameHeightWithSpacing()}, false, ImGuiWindowFlags_NoMove)) {
+                    for(auto& _module : availableModules) {
+                        if(_module.installed) {
+                            ImGui::PushStyleColor(ImGuiCol_Text, {0, 255, 0, 255});
+                            ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                            ImGui::Checkbox(_module.name.c_str(), &_module.installed);
+                            ImGui::PopStyleColor();
+                            ImGui::PopItemFlag();
+                        } else
+                            ImGui::Checkbox(_module.name.c_str(), &_module.setToBeInstalled);
+                    }
+                    ImGui::EndChild();
+                }
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
-        ImGui::SetNextWindowSize({Engine::get().getWindowSize().x * 0.25f, Engine::get().getWindowSize().y * 0.5f}, ImGuiCond_Always);
-        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
-        ImGui::OpenPopup("Modules");
-        if(ImGui::BeginPopupModal("Modules", &show)) {
-            if(ImGui::BeginChild("ModulesTree", {0, -ImGui::GetFrameHeightWithSpacing()}, false, ImGuiWindowFlags_NoMove)) {
-                for(auto& _module : availableModules)
-                    ImGui::Checkbox(_module.name.c_str(), &_module.installed);
-                ImGui::EndChild();
+                static float _size = 0;
+                ImGui::SetCursorPosX(ImGui::GetWindowWidth() - _size);
+                if(ImGui::Button("Install Selected")) {
+                    for(auto& _module : availableModules)
+                        if(_module.setToBeInstalled && !_module.installed) modulesToInstall.push(_module);
+
+                    if(!modulesToInstall.empty()) {
+                        show = false;
+                        currentModule = &modulesToInstall.front();
+                        currentModule->needToBeInstalled = true;
+                    }
+                }
+                _size = ImGui::GetItemRectSize().x + ImGui::GetStyle().WindowPadding.x;
+
+                ImGui::EndPopup();
             }
-
-            static float _size = 0;
-            ImGui::SetCursorPosX(ImGui::GetWindowWidth() - _size);
-            if(ImGui::Button("Install Selected")) {
-
-            }
-
-            _size = ImGui::GetItemRectSize().x;
-
-            ImGui::SameLine();
-
-            if(ImGui::Button("Remove Selected")) {
-
-            }
-
-            _size += ImGui::GetItemRectSize().x + ImGui::GetFrameHeightWithSpacing();
-
-            ImGui::EndPopup();
+            ImGui::PopStyleVar();
         }
-        ImGui::PopStyleVar();
+
+        installAndroidModule();
     }
 
     void ProjectModules::setShow(bool _show) {
@@ -63,5 +77,232 @@ namespace engine {
 
     const std::vector<Module>& ProjectModules::getModules() {
         return availableModules;
+    }
+
+    void ProjectModules::installAndroidModule() {
+        if(currentModule == nullptr) return;
+
+        if(std::equal(currentModule->name.begin(), currentModule->name.end(), "Android") && currentModule->needToBeInstalled)
+            ImGui::OpenPopup("Android Installation");
+        else
+            return;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
+        ImGui::SetNextWindowSize({-1, -1}, ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
+        if(ImGui::BeginPopupModal("Android Installation")) {
+            static float _leftAlign = ImGui::CalcTextSize("Android Studio").x + ImGui::GetFrameHeightWithSpacing();
+
+            ImGui::Text("If you need to install any of the above, follow the steps, otherwise specify the path:");
+            ImGui::Separator();
+            ImGui::Text("Android Studio: "); ImGui::Indent();
+            ImGui::Text("https://developer.android.com/studio"); ImGui::Unindent();
+            ImGui::Text("Note*: This will also install the SDK");
+            ImGui::Text("Android Studio"); ImGui::SameLine(_leftAlign);
+            ImGui::InputText("###androidStudioPath", androidStudioPath, IM_ARRAYSIZE(androidStudioPath)); ImGui::SameLine();
+            if(ImGui::Button("Open##AS")) ImGui::OpenPopup("File Browser Android Studio");
+
+            ImGui::NewLine();
+            ImGui::Text("Android SDK: ");
+            ImGui::Text("Note*:It is inside the Android Studio directory");
+            ImGui::Text("Android SDK"); ImGui::SameLine(_leftAlign);
+            ImGui::InputText("###androidSDKPath", androidSDKPath, IM_ARRAYSIZE(androidSDKPath)); ImGui::SameLine();
+            if(ImGui::Button("Open##SDK")) ImGui::OpenPopup("File Browser Android SDK");
+
+            ImGui::NewLine();
+            ImGui::Text("Android NDK: "); ImGui::Indent();
+            ImGui::Text("https://androidsdkoffline.blogspot.com/p/android-ndk-side-by-side-direct-download.html"); ImGui::Unindent();
+            ImGui::Text("Note*: Get the version 20.1.5948944, this is VERY IMPORTANT");
+            ImGui::Text("Android NDK"); ImGui::SameLine(_leftAlign);
+            ImGui::InputText("###androidNDKPath", androidNDKPath, IM_ARRAYSIZE(androidNDKPath)); ImGui::SameLine();
+            if(ImGui::Button("Open##NDK")) ImGui::OpenPopup("File Browser Android NDK");
+
+            ImGui::NewLine();
+            ImGui::Text("JDK 8: "); ImGui::Indent();
+            ImGui::Text("https://www.oracle.com/br/java/technologies/javase/javase8-archive-downloads.html"); ImGui::Unindent();
+            ImGui::Text("Note*: This version is needed for the NDK to work properly (8u202)");
+            ImGui::Text("Java JDK (8)"); ImGui::SameLine(_leftAlign);
+            ImGui::InputText("###jdk8Path", jdk8Path, IM_ARRAYSIZE(jdk8Path)); ImGui::SameLine();
+            if(ImGui::Button("Open##JDK")) ImGui::OpenPopup("File Browser JDK 8");
+
+            ImGui::NewLine();
+
+            showErrors();
+
+            showAndroidWait();
+
+            if(!showAndroidInstallationWait) {
+                static float _buttonsSize = 0;
+
+                ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _buttonsSize / 2.f);
+                if(ImGui::Button("Install")) {
+                    checkErrors();
+                    if(error == ProjectAndroidErrors::PAE_NONE) {
+                        showAndroidInstallationWait = true;
+                        std::thread _installAndroid([&] {
+                            auto _command = APPEND_S("./androidInstallation/0.sh ", androidStudioPath, " ", androidSDKPath, " ", androidNDKPath, " ", jdk8Path);
+                            auto _result = std::system(_command.c_str()) / 256;
+                            switch(_result) {
+                                case 0: {
+                                    modulesToInstall.pop();
+                                    currentModule = modulesToInstall.empty() ? nullptr : &modulesToInstall.front();
+                                    if(currentModule != nullptr) currentModule->needToBeInstalled = true;
+                                    break;
+                                }
+                                case 1 : error |= ProjectAndroidErrors::PAE_PLATFORM_TOOLS_FAILED; break;
+                                case 2 : error |= ProjectAndroidErrors::PAE_BUILD_TOOLS_FAILED; break;
+                                case 3 : error |= ProjectAndroidErrors::PAE_CMAKE_TOOLS_FAILED; break;
+                                case 4 : error |= ProjectAndroidErrors::PAE_CMDLINE_TOOLS_FAILED; break;
+                                case 5 : error |= ProjectAndroidErrors::PAE_LICENSES_FAILED; break;
+                                default: error |= ProjectAndroidErrors::PAE_UNKNOWN_FAILED; break;
+                            }
+
+                            showAndroidInstallationWait = false;
+                        });
+                        _installAndroid.detach();
+                    }
+                }
+
+                _buttonsSize = ImGui::GetItemRectSize().x;
+
+                ImGui::SameLine();
+
+                if(ImGui::Button("Cancel")) {
+                    modulesToInstall.pop();
+                    currentModule = modulesToInstall.empty() ? nullptr : &modulesToInstall.front();
+                    show = currentModule == nullptr;
+                }
+
+                _buttonsSize += ImGui::GetItemRectSize().x;
+            }
+
+            if(fileBrowser->showFileDialog("File Browser Android Studio", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*"))
+                strcpy(androidStudioPath, fileBrowser->selected_path.c_str());
+
+            if(fileBrowser->showFileDialog("File Browser Android SDK", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*"))
+                strcpy(androidSDKPath, fileBrowser->selected_path.c_str());
+
+            if(fileBrowser->showFileDialog("File Browser Android NDK", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*"))
+                strcpy(androidNDKPath, fileBrowser->selected_path.c_str());
+
+            if(fileBrowser->showFileDialog("File Browser JDK 8", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*"))
+                strcpy(jdk8Path, fileBrowser->selected_path.c_str());
+
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleVar();
+    }
+
+    void engine::ProjectModules::installFirebaseModule() {
+
+    }
+
+    void engine::ProjectModules::installIOSModule() {
+
+    }
+
+    void ProjectModules::checkErrors() {
+        error = ProjectAndroidErrors::PAE_NONE;
+
+        std::ifstream _stream(androidStudioPath);
+        if(!_stream.good()) error |= ProjectAndroidErrors::PAE_ANDROID_STUDIO_WRONG_PATH;
+        _stream.close();
+        if(strlen(androidStudioPath) == 0) error |= ProjectAndroidErrors::PAE_ANDROID_STUDIO_PATH_NOT_SET;
+
+        _stream.open(androidSDKPath);
+        if(!_stream.good()) error |= ProjectAndroidErrors::PAE_ANDROID_SDK_WRONG_PATH;
+        _stream.close();
+        if(strlen(androidSDKPath) == 0) error |= ProjectAndroidErrors::PAE_ANDROID_SDK_PATH_NOT_SET;
+
+        _stream.open(androidNDKPath);
+        if(!_stream.good()) error |= ProjectAndroidErrors::PAE_ANDROID_NDK_WRONG_PATH;
+        _stream.close();
+        if(strlen(androidNDKPath) == 0) error |= ProjectAndroidErrors::PAE_ANDROID_NDK_PATH_NOT_SET;
+
+        _stream.open(jdk8Path);
+        if(!_stream.good()) error |= ProjectAndroidErrors::PAE_JDK_WRONG_PATH;
+        _stream.close();
+        if(strlen(jdk8Path) == 0) error |= ProjectAndroidErrors::PAE_JDK_PATH_NOT_SET;
+    }
+
+    void ProjectModules::showErrors() {
+        if((error & ProjectAndroidErrors::PAE_ANDROID_STUDIO_PATH_NOT_SET) == ProjectAndroidErrors::PAE_ANDROID_STUDIO_PATH_NOT_SET)
+            ImGui::TextColored({255, 0, 0, 255}, "Android Studio path cannot be empty");
+        if((error & ProjectAndroidErrors::PAE_ANDROID_STUDIO_WRONG_PATH) == ProjectAndroidErrors::PAE_ANDROID_STUDIO_WRONG_PATH)
+            ImGui::TextColored({255, 0, 0, 255}, "Android Studio path is not valid");
+
+        if((error & ProjectAndroidErrors::PAE_ANDROID_SDK_PATH_NOT_SET) == ProjectAndroidErrors::PAE_ANDROID_SDK_PATH_NOT_SET)
+            ImGui::TextColored({255, 0, 0, 255}, "Android SDK path cannot be empty");
+        if((error & ProjectAndroidErrors::PAE_ANDROID_SDK_WRONG_PATH) == ProjectAndroidErrors::PAE_ANDROID_SDK_WRONG_PATH)
+            ImGui::TextColored({255, 0, 0, 255}, "Android SDK path is not valid");
+
+        if((error & ProjectAndroidErrors::PAE_ANDROID_NDK_PATH_NOT_SET) == ProjectAndroidErrors::PAE_ANDROID_NDK_PATH_NOT_SET)
+            ImGui::TextColored({255, 0, 0, 255}, "Android NDK path cannot be empty");
+        if((error & ProjectAndroidErrors::PAE_ANDROID_NDK_WRONG_PATH) == ProjectAndroidErrors::PAE_ANDROID_NDK_WRONG_PATH)
+            ImGui::TextColored({255, 0, 0, 255}, "Android NDK path is not valid");
+
+        if((error & ProjectAndroidErrors::PAE_JDK_PATH_NOT_SET) == ProjectAndroidErrors::PAE_JDK_PATH_NOT_SET)
+            ImGui::TextColored({255, 0, 0, 255}, "JDK 8 path cannot be empty");
+        if((error & ProjectAndroidErrors::PAE_JDK_WRONG_PATH) == ProjectAndroidErrors::PAE_JDK_WRONG_PATH)
+            ImGui::TextColored({255, 0, 0, 255}, "JDK 8 path is not valid");
+
+        if((error & ProjectAndroidErrors::PAE_PLATFORM_TOOLS_FAILED) == ProjectAndroidErrors::PAE_PLATFORM_TOOLS_FAILED)
+            ImGui::TextColored({255, 0, 0, 255}, "The platforms tools couldn't be installed, check the assets/androidInstallationLogs.txt to view the error");
+        if((error & ProjectAndroidErrors::PAE_BUILD_TOOLS_FAILED) == ProjectAndroidErrors::PAE_BUILD_TOOLS_FAILED)
+            ImGui::TextColored({255, 0, 0, 255}, "The build tools couldn't be installed, check the assets/androidInstallationLogs.txt to view the error");
+        if((error & ProjectAndroidErrors::PAE_CMDLINE_TOOLS_FAILED) == ProjectAndroidErrors::PAE_CMDLINE_TOOLS_FAILED)
+            ImGui::TextColored({255, 0, 0, 255}, "The cmdline tools couldn't be installed, check the assets/androidInstallationLogs.txt to view the error");
+        if((error & ProjectAndroidErrors::PAE_CMAKE_TOOLS_FAILED) == ProjectAndroidErrors::PAE_CMAKE_TOOLS_FAILED)
+            ImGui::TextColored({255, 0, 0, 255}, "The cmake tools couldn't be installed, check the assets/androidInstallationLogs.txt to view the error");
+        if((error & ProjectAndroidErrors::PAE_LICENSES_FAILED) == ProjectAndroidErrors::PAE_LICENSES_FAILED)
+            ImGui::TextColored({255, 0, 0, 255}, "The licenses couldn't be accepted, check the assets/androidInstallationLogs.txt to view the error");
+        if((error & ProjectAndroidErrors::PAE_UNKNOWN_FAILED) == ProjectAndroidErrors::PAE_UNKNOWN_FAILED)
+            ImGui::TextColored({255, 0, 0, 255}, "Unknown error, check the assets/androidInstallationLogs.txt to view the error");
+    }
+
+    void ProjectModules::showAndroidWait() {
+        if(!showAndroidInstallationWait) return;
+        const ImU32 _col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - 7.5f);
+        Spinner("Installing Android Components", 15.f, 6, _col);
+    }
+
+    bool ProjectModules::Spinner(const char* label, float radius, int thickness, const ImU32& color) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
+
+        ImGuiContext& g = *GImGui;
+        const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(label);
+
+        ImVec2 pos = window->DC.CursorPos;
+        ImVec2 size((radius )*2, (radius + style.FramePadding.y)*2);
+
+        const ImRect bb(pos, ImVec2(pos.x + size.x, pos.y + size.y));
+        ImGui::ItemSize(bb, style.FramePadding.y);
+        if (!ImGui::ItemAdd(bb, id))
+            return false;
+
+        // Render
+        window->DrawList->PathClear();
+
+        int num_segments = 30;
+        int start = abs(ImSin(g.Time*1.8f)*(num_segments-5));
+
+        const float a_min = IM_PI*2.0f * ((float)start) / (float)num_segments;
+        const float a_max = IM_PI*2.0f * ((float)num_segments-3) / (float)num_segments;
+
+        const ImVec2 centre = ImVec2(pos.x+radius, pos.y+radius+style.FramePadding.y);
+
+        for (int i = 0; i < num_segments; i++) {
+            const float a = a_min + ((float)i / (float)num_segments) * (a_max - a_min);
+            window->DrawList->PathLineTo(ImVec2(centre.x + ImCos(a+g.Time*8) * radius,
+                                                centre.y + ImSin(a+g.Time*8) * radius));
+        }
+
+        window->DrawList->PathStroke(color, false, thickness);
+
+        return true;
     }
 }
