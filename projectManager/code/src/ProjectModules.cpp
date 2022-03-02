@@ -92,7 +92,7 @@ namespace engine {
         if(currentModule == nullptr) return;
 
         if(std::equal(currentModule->name.begin(), currentModule->name.end(), "Android") && currentModule->needToBeInstalled)
-            ImGui::OpenPopup("Android Installation");
+            INIT_MODAL("Android Installation")
         else
             return;
 

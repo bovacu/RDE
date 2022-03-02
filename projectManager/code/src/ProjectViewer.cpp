@@ -124,7 +124,7 @@ namespace engine {
 
         if(ImGui::Button("Delete project")) {
             showActionDeleteProject = true;
-            ImGui::OpenPopup("Delete project");
+            INIT_MODAL("Delete project");
         }
 
         ImGui::Separator();
@@ -154,7 +154,7 @@ namespace engine {
         ImGui::Text("The suggested actions are:");
         ImGui::BulletText("Delete the project -> "); ImGui::SameLine();
         if(ImGui::Button("Delete")) {
-            ImGui::OpenPopup("Delete");
+            INIT_MODAL("Delete");
             showDelete = true;
         }
         static float _deleteSize = ImGui::GetItemRectSize().x;
@@ -162,7 +162,7 @@ namespace engine {
         ImGui::BulletText("Reset the directory ->"); ImGui::SameLine();
         ImGui::SetNextItemWidth(_deleteSize);
         if(ImGui::Button("Open")) {
-            ImGui::OpenPopup("Relocate");
+            INIT_MODAL("Relocate");
             showRelocate = true;
         }
 
@@ -296,7 +296,7 @@ namespace engine {
             if(!FilesSystem::fileExists(projectSelector->getCurrentProject()->projectPath + "/targets/GDEAndroid/CMakeLists.txt")) {
                 if(ImGui::Button("Add Android Target")) {
                     showAndroidInstallTarget = true;
-                    ImGui::OpenPopup("Android target installation");
+                    INIT_MODAL("Android target installation");
                     std::thread _installAndroidTarget([&]() {
                         auto _command = APPEND_S("./androidInstallation/1.sh ", projectSelector->getCurrentProject()->projectPath, " ", globalConfig->android.ndk, " ", globalConfig->GDEPath);
                         std::system(_command.c_str());
