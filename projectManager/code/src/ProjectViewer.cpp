@@ -413,6 +413,35 @@ namespace engine {
                     }
                     ImGui::PopItemFlag();
                     ImGui::PopStyleColor();
+
+                    ImGui::SameLine();
+
+                    if(FilesSystem::fileExists(projectSelector->getCurrentProject()->projectPath + "/targets/GDEAndroid/app/google-services.json")) {
+                        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(145.f/255.f, 133.f/255.f, 132.f/255.f));
+                        ImGui::Button("Add google-services.json");
+                        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                            ImGui::BeginTooltip();
+                            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                            ImGui::TextUnformatted("Json already added!");
+                            ImGui::PopTextWrapPos();
+                            ImGui::EndTooltip();
+                        }
+                        ImGui::PopItemFlag();
+                        ImGui::PopStyleColor();
+                    } else {
+                        if(ImGui::Button("Add google-services.json")) {
+                            ImGui::OpenPopup("File Browser google-services.json");
+                        }
+
+                        if(fileBrowser->showFileDialog("File Browser google-services.json", imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*")) {
+                            if(std::equal(fileBrowser->selected_fn.begin(), fileBrowser->selected_fn.end(), "google-services.json")) {
+                                auto _command = APPEND_S("cp ", fileBrowser->selected_path, " ", projectSelector->getCurrentProject()->projectPath, "/targets/GDEAndroid/app");
+                                std::system(_command.c_str());
+                            }
+                        }
+                    }
+
                 } else {
                     if(ImGui::Button("Install to Android")) {
                         INIT_MODAL("Installing Firebase")
