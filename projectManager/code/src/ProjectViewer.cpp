@@ -5,6 +5,7 @@
 #include "projectManager/code/include/ProjectManagerLayer.h"
 #include "core/Engine.h"
 #include "imgui_internal.h"
+#include "code/include/Macros.h"
 
 namespace engine {
 
@@ -170,41 +171,18 @@ namespace engine {
     }
 
     void ProjectViewer::destroyProject() {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
-        ImGui::SetNextWindowSize({Engine::get().getWindowSize().x * 0.35f, Engine::get().getWindowSize().y * 0.15f}, ImGuiCond_Always);
-        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
-        if(ImGui::BeginPopupModal("Delete", &showDelete, ImGuiWindowFlags_NoResize)) {
-            static const char* _text = "Are you sure?";
-            static float _yesWidth = 0, _noWidth = 0;
-            auto _textSize = ImGui::CalcTextSize(_text);
+        static auto _no = [&]() {
+            showDelete = false;
+        };
+        static float _width = ImGui::GetWindowWidth() * 0.2f;
+        static float _height = ImGui::GetWindowHeight() * 0.15f;
 
-            ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _textSize.x / 2.f);
-            ImGui::Text("%s", _text);
-
-            ImGui::NewLine();
-
-            ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - (_yesWidth + _noWidth) / 2.f);
-            if(ImGui::Button("Yes")) {
-                deleteCurrentProjectFromManager();
-            }
-            _yesWidth = ImGui::GetItemRectSize().x;
-
-            ImGui::SameLine();
-
-            if(ImGui::Button("No")) {
-                showDelete = false;
-            }
-            _noWidth = ImGui::GetItemRectSize().x;
-            ImGui::EndPopup();
-        }
-        ImGui::PopStyleVar();
+        YES_NO_MACRO_WITH_SIZE("Delete", &showDelete, _width, _height, "Are you sure?", "Yes", "No", deleteCurrentProjectFromManager, _no);
     }
 
     void ProjectViewer::relocateProject() {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
         float _height = error == ProjectError::NONE ? 0.14f : 0.19f;
-        ImGui::SetNextWindowSize({Engine::get().getWindowSize().x * 0.35f, Engine::get().getWindowSize().y * _height}, ImGuiCond_Always);
-        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
+        INIT_CENTERED_WINDOW_WITH_SIZE(Engine::get().getWindowSize().x * 0.35f, Engine::get().getWindowSize().y * _height)
         if(ImGui::BeginPopupModal("Relocate", &showRelocate, ImGuiWindowFlags_NoResize)) {
             static char _newPath[256];
             ImGui::Text("New Path: "); ImGui::SameLine();
@@ -253,7 +231,7 @@ namespace engine {
 
             ImGui::EndPopup();
         }
-        ImGui::PopStyleVar();
+        END_CENTERED_WINDOW
     }
 
     void ProjectViewer::checkErrors(const char* _newPath) {
@@ -292,38 +270,14 @@ namespace engine {
     }
 
     void ProjectViewer::actionsDeleteProject() {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
-        ImGui::SetNextWindowSize({-1, -1}, ImGuiCond_Always);
-        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
-        if(ImGui::BeginPopupModal("Delete project", &showActionDeleteProject, ImGuiWindowFlags_NoResize)) {
-            static float _width = ImGui::CalcTextSize("Choose what kind of deletion:").x;
-            ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _width / 2.f);
-            ImGui::Text("Choose what kind of deletion:");
+        static auto _fromDisk = [&]() {
+            auto _pathToProject = projectSelector->getCurrentProject()->projectPath;
+            auto _command = APPEND_S("rm -rf ", _pathToProject);
+            std::system(_command.c_str());
+            deleteCurrentProjectFromManager();
+        };
 
-            static float _buttonsSize = 0;
-
-            ImGui::NewLine();
-
-            if(ImGui::Button("Delete from manager")) {
-                deleteCurrentProjectFromManager();
-            }
-
-            _buttonsSize = ImGui::GetItemRectSize().x;
-
-            ImGui::SameLine();
-
-            if(ImGui::Button("Delete from disk")) {
-                auto _pathToProject = projectSelector->getCurrentProject()->projectPath;
-                auto _command = APPEND_S("rm -rf ", _pathToProject);
-                std::system(_command.c_str());
-                deleteCurrentProjectFromManager();
-            }
-
-            _buttonsSize += ImGui::GetItemRectSize().x;
-
-            ImGui::EndPopup();
-        }
-        ImGui::PopStyleVar();
+        YES_NO_MACRO("Delete project", &showActionDeleteProject, "Choose what kind of deletion:", "Delete from manager", "Delete from disk",  deleteCurrentProjectFromManager, _fromDisk)
     }
 
     void ProjectViewer::androidActions() {
@@ -371,6 +325,26 @@ namespace engine {
                     }
                 }
 
+                ImGui::SameLine();
+                static float _deleteAndroidModuleSize = 0;
+                ImGui::SetCursorPosX(ImGui::GetWindowWidth() - _deleteAndroidModuleSize - ImGui::GetStyle().WindowPadding.x);
+
+                static bool _sureDeleteAndroidModule = true;
+                if(ImGui::Button("Delete Android Module")) {
+                    INIT_MODAL("Delete Android Module")
+                }
+
+                static auto _yes = [&]() {
+                    auto _command = APPEND_S("rm -rf ", projectSelector->getCurrentProject()->projectPath, "/targets/GDEAndroid");
+                    std::system(_command.c_str());
+                };
+                static auto _no = [](){
+                    _sureDeleteAndroidModule = false;
+                };
+                YES_NO_MACRO("Delete Android Module", &_sureDeleteAndroidModule, "Are you sure you want to delete it?", "Yes", "No", _yes, _no)
+
+                _deleteAndroidModuleSize = ImGui::GetItemRectSize().x;
+
                 ImGui::Text("Package"); ImGui::SameLine();
                 ImGui::SetNextItemWidth(150);
                 ImGui::InputText("###androidPackage", _androidPackage, IM_ARRAYSIZE(_androidPackage));
@@ -392,10 +366,10 @@ namespace engine {
                 }
             }
 
+            ImGui::Separator();
+
             if(showAndroidInstallTarget) {
-                ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
-                ImGui::SetNextWindowSize({-1, -1}, ImGuiCond_Always);
-                ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
+                INIT_CENTERED_WINDOW
                 if(ImGui::BeginPopupModal("Android target installation")) {
                     const float _textWidth = ImGui::CalcTextSize("Downloading and installing android target, might take some time...").x;
                     const ImU32 _col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
@@ -405,7 +379,7 @@ namespace engine {
                     ImGui::Text("Downloading and installing android target, might take some time...");
                     ImGui::EndPopup();
                 }
-                ImGui::PopStyleVar();
+                END_CENTERED_WINDOW
             }
         }
     }

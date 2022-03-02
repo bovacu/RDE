@@ -6,6 +6,7 @@
 #include "core/systems/fileSystem/FilesSystem.h"
 #include "projectManager/code/include/ProjectManagerLayer.h"
 #include "projectManager/code/include/ProjectSelector.h"
+#include "code/include/Macros.h"
 
 namespace engine {
 
@@ -20,10 +21,8 @@ namespace engine {
 
         static float _projectNameWidth = 0, _projectPathWidth = 0, _offset = 0;
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
-        ImGui::SetNextWindowSize({Engine::get().getWindowSize().x * 0.35f, Engine::get().getWindowSize().y * (error == ProjectError::NONE ? 0.17f : 0.2f)}, ImGuiCond_Always);
-        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
-        ImGui::OpenPopup("CreateNewProject");
+        INIT_CENTERED_WINDOW_WITH_SIZE(Engine::get().getWindowSize().x * 0.35f, Engine::get().getWindowSize().y * (error == ProjectError::NONE ? 0.17f : 0.2f))
+        INIT_MODAL("CreateNewProject")
         if(ImGui::BeginPopupModal("CreateNewProject", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_HorizontalScrollbar)) {
 
             ImGui::Text("Project Name"); ImGui::SameLine();
@@ -63,7 +62,7 @@ namespace engine {
 
             ImGui::EndPopup();
         }
-        ImGui::PopStyleVar();
+        END_CENTERED_WINDOW
     }
 
     void ProjectCreator::createProject() {

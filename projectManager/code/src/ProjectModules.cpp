@@ -7,6 +7,7 @@
 #include "core/systems/fileSystem/FilesSystem.h"
 #include "imgui_internal.h"
 #include "projectManager/code/include/ProjectManagerLayer.h"
+#include "code/include/Macros.h"
 
 namespace engine {
 
@@ -40,10 +41,8 @@ namespace engine {
 
     void ProjectModules::render() {
         if(show) {
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
-            ImGui::SetNextWindowSize({Engine::get().getWindowSize().x * 0.25f, Engine::get().getWindowSize().y * 0.5f}, ImGuiCond_Always);
-            ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
-            ImGui::OpenPopup("Modules");
+            INIT_CENTERED_WINDOW_WITH_SIZE(Engine::get().getWindowSize().x * 0.25f, Engine::get().getWindowSize().y * 0.5f)
+            INIT_MODAL("Modules");
             if(ImGui::BeginPopupModal("Modules", &show, ImGuiWindowFlags_NoResize)) {
                 if(ImGui::BeginChild("ModulesTree", {0, -ImGui::GetFrameHeightWithSpacing()}, false, ImGuiWindowFlags_NoMove)) {
                     for(auto& _module : availableModules) {
@@ -75,7 +74,7 @@ namespace engine {
 
                 ImGui::EndPopup();
             }
-            ImGui::PopStyleVar();
+            END_CENTERED_WINDOW
         }
 
         installAndroidModule();
@@ -97,9 +96,7 @@ namespace engine {
         else
             return;
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
-        ImGui::SetNextWindowSize({-1, -1}, ImGuiCond_Always);
-        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
+        INIT_CENTERED_WINDOW
         if(ImGui::BeginPopupModal("Android Installation")) {
             static float _leftAlign = ImGui::CalcTextSize("Android Studio").x + ImGui::GetFrameHeightWithSpacing();
 
@@ -200,7 +197,7 @@ namespace engine {
 
             ImGui::EndPopup();
         }
-        ImGui::PopStyleVar();
+        END_CENTERED_WINDOW
     }
 
     void engine::ProjectModules::installFirebaseModule() {

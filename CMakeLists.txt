@@ -166,10 +166,11 @@ set(SOURCES
         projectManager/code/include/ProjectMenuBar.h projectManager/code/src/ProjectMenuBar.cpp
         projectManager/code/include/ProjectInstallator.h projectManager/code/src/ProjectInstallator.cpp
         projectManager/code/include/ProjectModules.h projectManager/code/src/ProjectModules.cpp
+        projectManager/code/include/Macros.h
         )
 
 set(CPP_HEADERS)
-set(CPP_SOURCES )
+set(CPP_SOURCES)
 
 #GDEFirebase
 

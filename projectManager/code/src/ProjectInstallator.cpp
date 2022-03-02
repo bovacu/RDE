@@ -7,6 +7,7 @@
 #include "core/systems/fileSystem/FilesSystem.h"
 #include "projectManager/code/include/ProjectManagerLayer.h"
 #include "imgui_internal.h"
+#include "code/include/Macros.h"
 
 namespace engine {
 
@@ -63,12 +64,10 @@ namespace engine {
         if(!show) return;
         static float _installWidth = 0, _cancelWidth = 0;
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
-        ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
-        ImGui::SetNextWindowSize({-1, -1});
+        INIT_CENTERED_WINDOW_WITH_SIZE(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f)
 
         if(!showLoading) {
-            ImGui::OpenPopup("Installation");
+            INIT_MODAL("Installation")
             if(ImGui::BeginPopupModal("Installation", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
                 ImGui::Text("Path to install"); ImGui::SameLine();
                 ImGui::InputText("###path", pathToInstallGDE, IM_ARRAYSIZE(pathToInstallGDE)); ImGui::SameLine();
@@ -114,13 +113,11 @@ namespace engine {
             }
         }
 
-        ImGui::PopStyleVar();
+        END_CENTERED_WINDOW
 
         if(showLoading) {
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, {0.5f, 0.5f});
-            ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
-            ImGui::SetNextWindowSize({-1, -1});
-            ImGui::OpenPopup("ProgressInstallation");
+            INIT_CENTERED_WINDOW_WITH_SIZE(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f)
+            INIT_MODAL("ProgressInstallation")
             if(ImGui::BeginPopupModal("ProgressInstallation")) {
                 ImGui::Text("%s", installationStep.c_str());
                 const ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
@@ -130,7 +127,7 @@ namespace engine {
                 ImGui::EndPopup();
             }
 
-            ImGui::PopStyleVar();
+            END_CENTERED_WINDOW
 
             if(installationPercentage == 1.f) {
                 showLoading = false;
