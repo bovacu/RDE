@@ -4,7 +4,7 @@
 
 using namespace engine;
 
-int main() {
+int main(int, char* []) {
     Engine _e;
     auto* _testLayer = new TestLayer;
     _e.pushLayer(_testLayer);

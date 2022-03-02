@@ -179,7 +179,7 @@ set(CPP_SOURCES )
 #        ${CPP_HEADERS}
 #        )
 
-add_executable(Engine engine/src/main.cpp
+add_executable(Engine engine/main.cpp
         ${SOURCES}
         ${CPP_SOURCES}
         ${CPP_HEADERS}

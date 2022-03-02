@@ -49,9 +49,7 @@ include_directories(${GDE_PATH})
 include_directories(${GDE_PATH}/engine/include)
 include_directories(${GDE_PATH}/submodules/SDL/include)
 include_directories(${GDE_PATH}/submodules/freetype/include)
-
-
-include_directories(.)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/code/include)
 
 add_executable(PLACEHOLDER main.cpp code/include/TestLayer.h code/src/TestLayer.cpp)
 
