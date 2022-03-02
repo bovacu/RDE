@@ -130,6 +130,7 @@ namespace engine {
         ImGui::Separator();
 
         androidActions();
+        firebaseActions();
 
         actionsDeleteProject();
     }
@@ -298,7 +299,7 @@ namespace engine {
                     showAndroidInstallTarget = true;
                     INIT_MODAL("Android target installation");
                     std::thread _installAndroidTarget([&]() {
-                        auto _command = APPEND_S("./androidInstallation/1.sh ", projectSelector->getCurrentProject()->projectPath, " ", globalConfig->android.ndk, " ", globalConfig->GDEPath);
+                        auto _command = APPEND_S("./androidInstallation/setupAndroidProject.sh ", projectSelector->getCurrentProject()->projectPath, " ", globalConfig->android.ndk, " ", globalConfig->GDEPath);
                         std::system(_command.c_str());
                         showAndroidInstallTarget = false;
                     });
@@ -381,6 +382,82 @@ namespace engine {
                 }
                 END_CENTERED_WINDOW
             }
+        }
+    }
+
+    void ProjectViewer::firebaseActions() {
+        if(std::find_if(projectModules->getModules().begin(), projectModules->getModules().end(),
+                        [](const Module& _module) { return std::equal(_module.name.begin(), _module.name.end(), "Firebase") && _module.installed; })
+           != projectModules->getModules().end()) {
+            ImGui::NewLine();
+            ImGui::NewLine();
+
+            ImGui::PushFont(h2);
+            ImGui::Text("Firebase");
+            ImGui::PopFont();
+
+            ImGui::Separator();
+
+            static bool _openPopup = false;
+            if(FilesSystem::fileExists(projectSelector->getCurrentProject()->projectPath + "/targets/GDEAndroid/CMakeLists.txt")) {
+                if(FilesSystem::fileExists(projectSelector->getCurrentProject()->projectPath + "/targets/GDEAndroid/firebase_cpp_sdk")) {
+                    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(145.f/255.f, 133.f/255.f, 132.f/255.f));
+                    ImGui::Button("Install to Android");
+                    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                        ImGui::BeginTooltip();
+                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                        ImGui::TextUnformatted("Module already installed!");
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
+                    ImGui::PopItemFlag();
+                    ImGui::PopStyleColor();
+                } else {
+                    if(ImGui::Button("Install to Android")) {
+                        INIT_MODAL("Installing Firebase")
+                        _openPopup = true;
+                    }
+                }
+            } else {
+                ImGui::Text("You need the Android, IOS or both modules to be able to use Firebase");
+            }
+
+            static bool _showLoad = false;
+            static auto _yes = [&]() {
+                _openPopup = false;
+                _showLoad = true;
+                std::thread _firebaseToAndroid([&]() {
+                    auto _command = APPEND_S("./firebaseInstallation/setupAndroid.sh ", projectSelector->getCurrentProject()->projectPath, " ",
+                                             globalConfig->firebase.path, " ", "com.example.android ", globalConfig->GDEPath);
+                    std::system(_command.c_str());
+                    _showLoad = false;
+                });
+                _firebaseToAndroid.detach();
+                INIT_MODAL("Begin Firebase Installation")
+            };
+
+            static auto _no = [&]() {
+                _openPopup = false;
+            };
+
+            YES_NO_MACRO("Installing Firebase", &_openPopup, "Do you want to add the Firebase module to the project?", "Yes", "No", _yes, _no);
+
+            if(_showLoad) {
+                INIT_CENTERED_WINDOW
+                if(ImGui::BeginPopupModal("Begin Firebase Installation")) {
+                    const float _textWidth = ImGui::CalcTextSize("Modifying android data...").x;
+                    const ImU32 _col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - 7.5f);
+                    Spinner("Installing Firebase Components", 15.f, 6, _col);
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _textWidth / 2.f);
+                    ImGui::Text("Modifying android data...");
+                    ImGui::EndPopup();
+                }
+                END_CENTERED_WINDOW
+            }
+
+            ImGui::Separator();
         }
     }
 

@@ -47,6 +47,8 @@ namespace engine {
 
             void androidActions();
 
+            void firebaseActions();
+
             void checkErrors(const char* _newPath);
             void showErrors();
 

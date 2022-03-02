@@ -28,3 +28,5 @@ libs_out/imgui.ini
 libs_out/Engine
 
 assets/androidInstallationLogs.txt
+
+modules/

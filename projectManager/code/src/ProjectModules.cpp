@@ -25,8 +25,8 @@ namespace engine {
         bool _foundFirebase = std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("FIREBASE_SDK_PATH") != std::string::npos; }) != _lines.end();
         bool _foundIOS = std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("IOS_SDK_PATH") != std::string::npos; }) != _lines.end();
 
-        availableModules.emplace_back(Module{"Android", _foundAndroid, false, false, false, BIND_FUNC_0(ProjectModules::installAndroidModule)});
-        availableModules.emplace_back(Module{"Firebase", _foundFirebase, false, false, false, BIND_FUNC_0(ProjectModules::installFirebaseModule)});
+        availableModules.emplace_back(Module{"Android", _foundAndroid, false, false, false, BIND_FUNC_0(ProjectModules::installAndroid)});
+        availableModules.emplace_back(Module{"Firebase", _foundFirebase, false, false, false, BIND_FUNC_0(ProjectModules::installFirebase)});
         availableModules.emplace_back(Module{"IOs", _foundIOS, false, false, false, BIND_FUNC_0(ProjectModules::installIOSModule)});
 
         if(_foundAndroid) {
@@ -36,6 +36,11 @@ namespace engine {
             globalConfig->android.jdk = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("JDK_8_PATH") != std::string::npos; }).base(), "=", 1);
 
             LOG_W("Found Android -> SDK[", globalConfig->android.sdk, "], NDK[", globalConfig->android.ndk, "], AS[", globalConfig->android.androidStudio, "], JDK[", globalConfig->android.jdk, "]")
+        }
+
+        if(_foundFirebase) {
+            globalConfig->firebase.path = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("FIREBASE_SDK_PATH") != std::string::npos; }).base(), "=", 1);
+            LOG_W("Found Firebase -> Path[", globalConfig->android.sdk)
         }
     }
 
@@ -77,7 +82,8 @@ namespace engine {
             END_CENTERED_WINDOW
         }
 
-        installAndroidModule();
+        showAndroidInstallation();
+        showFirebaseInstallation();
     }
 
     void ProjectModules::setShow(bool _show) {
@@ -88,7 +94,7 @@ namespace engine {
         return availableModules;
     }
 
-    void ProjectModules::installAndroidModule() {
+    void ProjectModules::showAndroidInstallation() {
         if(currentModule == nullptr) return;
 
         if(std::equal(currentModule->name.begin(), currentModule->name.end(), "Android") && currentModule->needToBeInstalled)
@@ -145,28 +151,7 @@ namespace engine {
                 if(ImGui::Button("Install")) {
                     checkErrors();
                     if(error == ProjectAndroidErrors::PAE_NONE) {
-                        showAndroidInstallationWait = true;
-                        std::thread _installAndroid([&] {
-                            auto _command = APPEND_S("./androidInstallation/0.sh ", androidStudioPath, " ", androidSDKPath, " ", androidNDKPath, " ", jdk8Path);
-                            auto _result = std::system(_command.c_str()) / 256;
-                            switch(_result) {
-                                case 0: {
-                                    modulesToInstall.pop();
-                                    currentModule = modulesToInstall.empty() ? nullptr : &modulesToInstall.front();
-                                    if(currentModule != nullptr) currentModule->needToBeInstalled = true;
-                                    break;
-                                }
-                                case 1 : error |= ProjectAndroidErrors::PAE_PLATFORM_TOOLS_FAILED; break;
-                                case 2 : error |= ProjectAndroidErrors::PAE_BUILD_TOOLS_FAILED; break;
-                                case 3 : error |= ProjectAndroidErrors::PAE_CMAKE_TOOLS_FAILED; break;
-                                case 4 : error |= ProjectAndroidErrors::PAE_CMDLINE_TOOLS_FAILED; break;
-                                case 5 : error |= ProjectAndroidErrors::PAE_LICENSES_FAILED; break;
-                                default: error |= ProjectAndroidErrors::PAE_UNKNOWN_FAILED; break;
-                            }
-
-                            showAndroidInstallationWait = false;
-                        });
-                        _installAndroid.detach();
+                        currentModule->installationFunc();
                     }
                 }
 
@@ -200,9 +185,91 @@ namespace engine {
         END_CENTERED_WINDOW
     }
 
-    void engine::ProjectModules::installFirebaseModule() {
+    void ProjectModules::installAndroid() {
+        showAndroidInstallationWait = true;
+        std::thread _installAndroid([&] {
+            auto _command = APPEND_S("./androidInstallation/install.sh ", androidStudioPath, " ", androidSDKPath, " ", androidNDKPath, " ", jdk8Path);
+            auto _result = std::system(_command.c_str()) / 256;
+            switch(_result) {
+                case 0: {
+                    modulesToInstall.pop();
+                    currentModule = modulesToInstall.empty() ? nullptr : &modulesToInstall.front();
+                    if(currentModule != nullptr) currentModule->needToBeInstalled = true;
+                    break;
+                }
+                case 1 : error |= ProjectAndroidErrors::PAE_PLATFORM_TOOLS_FAILED; break;
+                case 2 : error |= ProjectAndroidErrors::PAE_BUILD_TOOLS_FAILED; break;
+                case 3 : error |= ProjectAndroidErrors::PAE_CMAKE_TOOLS_FAILED; break;
+                case 4 : error |= ProjectAndroidErrors::PAE_CMDLINE_TOOLS_FAILED; break;
+                case 5 : error |= ProjectAndroidErrors::PAE_LICENSES_FAILED; break;
+                default: error |= ProjectAndroidErrors::PAE_UNKNOWN_FAILED; break;
+            }
 
+            showAndroidInstallationWait = false;
+        });
+        _installAndroid.detach();
     }
+
+    void engine::ProjectModules::installFirebase() {
+        showFirebaseInstall = true;
+        std::thread _installFirebase([&]() {
+            auto _command = APPEND_S("./firebaseInstallation/install.sh ", globalConfig->GDEPath);
+            int _result = std::system(_command.c_str()) / 256;
+            showFirebaseInstall = false;
+
+            if(_result == 0) {
+                modulesToInstall.pop();
+                currentModule = modulesToInstall.empty() ? nullptr : &modulesToInstall.front();
+                if(currentModule != nullptr) currentModule->needToBeInstalled = true;
+            }
+        });
+        _installFirebase.detach();
+    }
+
+    void ProjectModules::showFirebaseInstallation() {
+        if(currentModule == nullptr) return;
+
+        if(std::equal(currentModule->name.begin(), currentModule->name.end(), "Firebase") && currentModule->needToBeInstalled)
+            INIT_MODAL("Firebase Installation")
+        else
+            return;
+
+        INIT_CENTERED_WINDOW
+        if(ImGui::BeginPopupModal("Firebase Installation", nullptr, ImGuiWindowFlags_NoResize)) {
+            static float _yesWidth = 0, _noWidth = 0;
+            auto _textSize = ImGui::CalcTextSize("Install Firebase Module?");
+
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _textSize.x / 2.f);
+            ImGui::Text("%s", "Install Firebase Module?");
+
+            ImGui::NewLine();
+
+            if(!showFirebaseInstall) {
+                ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - (_yesWidth + _noWidth) / 2.f);
+                if(ImGui::Button("Install")) {
+                    currentModule->installationFunc();
+                }
+                _yesWidth = ImGui::GetItemRectSize().x;
+
+                ImGui::SameLine();
+
+                if(ImGui::Button("Cancel")) {
+                    modulesToInstall.pop();
+                    currentModule = modulesToInstall.empty() ? nullptr : &modulesToInstall.front();
+                    if(currentModule != nullptr) currentModule->needToBeInstalled = true;
+                }
+                _noWidth = ImGui::GetItemRectSize().x;
+            } else {
+                const ImU32 _col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+                ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - 7.5f);
+                Spinner("Installing Firebase Components", 15.f, 6, _col);
+                ImGui::Text("Installing firebase, this might take a while...");
+            }
+            END_CENTERED_WINDOW
+            ImGui::EndPopup();
+        }
+    }
+
 
     void engine::ProjectModules::installIOSModule() {
 

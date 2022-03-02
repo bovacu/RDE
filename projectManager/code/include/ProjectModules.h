@@ -60,6 +60,8 @@ namespace engine {
             char jdk8Path[256] = {0};
             bool showAndroidInstallationWait = false;
 
+            bool showFirebaseInstall = false;
+
         public:
             void init(GlobalConfig* _globalConfig, imgui_addons::ImGuiFileBrowser* _fileBrowser);
             void render();
@@ -67,12 +69,15 @@ namespace engine {
             const std::vector<Module>& getModules();
 
         private:
-            void installAndroidModule();
+            void showAndroidInstallation();
+            void installAndroid();
             void checkErrors();
             void showErrors();
             void showAndroidWait();
 
-            void installFirebaseModule();
+            void showFirebaseInstallation();
+            void installFirebase();
+
             void installIOSModule();
 
             bool Spinner(const char* label, float radius, int thickness, const ImU32& color);

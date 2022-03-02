@@ -23,10 +23,15 @@ namespace engine {
         std::string jdk;
     };
 
+    struct Firebase {
+        std::string path;
+    };
+
     struct GlobalConfig {
         std::string GDEPath;
         std::vector<std::string> IDEs;
         Android android;
+        Firebase firebase;
     };
 
     struct ProjectConfig {

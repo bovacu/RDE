@@ -23,12 +23,12 @@ namespace engine {
         std::system(_command.c_str());
         *installPercentage = 0.3f;
 
-        _command = APPEND_S("./installationSteps/0.sh ", _path);
+        _command = APPEND_S("./installationSteps/install.sh ", _path);
         *installStep = "Installing dependencies...";
         std::system(_command.c_str());
         *installPercentage = 0.6f;
 
-        _command = APPEND_S("./installationSteps/1.sh ", _path);
+        _command = APPEND_S("./installationSteps/setupAndroid.sh ", _path);
         *installStep = "Installing submodules...";
         std::system(_command.c_str());
         *installPercentage = 0.8f;
