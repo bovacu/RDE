@@ -42,7 +42,7 @@ namespace engine {
     }
 
     void WindowInput::onWindowGainFocus(SDL_Event& _event) {
-
+        Engine::get().setMinimized(false);
     }
 
     void WindowInput::onWindowLostFocus(SDL_Event& _event) {
@@ -64,11 +64,13 @@ namespace engine {
     void WindowInput::onWindowMinimized(SDL_Event& _event) {
         WindowMinimizedEvent _e(1);
         window->consumeEvent(_e);
+        Engine::get().setMinimized(true);
     }
 
     void WindowInput::onWindowMaximized(SDL_Event& _event) {
         WindowMinimizedEvent _e(0);
         window->consumeEvent(_e);
+        Engine::get().setMinimized(false);
     }
 
     void WindowInput::onQuit(SDL_Event& _event) {
