@@ -57,8 +57,9 @@ namespace engine {
 
             if(ImGui::Button("Cancel")) showProjectCreator = false;
 
-            if(fileBrowser->showFileDialog("FileBrowser", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*"))
+            BROWSER_SELECT(fileBrowser, "FileBrowser", {
                 strcpy(projectPath, fileBrowser->selected_path.c_str());
+            })
 
             ImGui::EndPopup();
         }

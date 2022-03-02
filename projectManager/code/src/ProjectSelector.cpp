@@ -37,7 +37,6 @@ namespace engine {
                         if(!_project.stillExists) ImGui::PushStyleColor(ImGuiCol_Text, {255, 0, 0, 255});
                         if(ImGui::Selectable(_projectName.c_str(), _project.selected)) {
                             project = &_project;
-                            LOG_I("Selected project is: ", _projectName)
                         }
                         if(!_project.stillExists) ImGui::PopStyleColor();
                     }
@@ -64,7 +63,6 @@ namespace engine {
             std::string _pName = SPLIT_S_I(_project.project, "=", 0);
             if(strcmp(_projectName.c_str(), _pName.c_str()) == 0) {
                 project = &_project;
-                LOG_I("Selected project is: ", _projectName)
                 break;
             }
         }

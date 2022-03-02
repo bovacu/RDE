@@ -193,9 +193,9 @@ namespace engine {
                 ImGui::OpenPopup("FileBrowser");
             }
 
-            if(fileBrowser->showFileDialog("FileBrowser", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*")) {
+            BROWSER_SELECT(fileBrowser, "FileBrowser", {
                 strcpy(_newPath, fileBrowser->selected_path.c_str());
-            }
+            })
 
             showErrors();
 
@@ -348,6 +348,7 @@ namespace engine {
                 ImGui::SetNextItemWidth(150);
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                 ImGui::InputText("###androidPackage", androidPackage, IM_ARRAYSIZE(androidPackage));
+                TOOLTIP("If you change this, the google-services.json might break!");
                 ImGui::PopItemFlag();
 
                 ImGui::Text("APK Name"); ImGui::SameLine();
@@ -387,11 +388,11 @@ namespace engine {
                 END_CENTERED_WINDOW
             } else if(_buildingResult == 0) {
                 ImGui::OpenPopup("File Browser APK");
-                if(fileBrowser->showFileDialog("File Browser APK", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*")) {
+                BROWSER_SELECT(fileBrowser, "File Browser APK", {
                     auto _command = APPEND_S("cp ", projectSelector->getCurrentProject()->projectPath, "/targets/GDEAndroid/app/build/outputs/apk/debug/", androidApkName, ".apk ", fileBrowser->selected_path);
                     std::system(_command.c_str());
                     _buildingResult = -1;
-                }
+                })
             } else {
                 INIT_MODAL("Build failed")
                 INIT_CENTERED_WINDOW
@@ -452,13 +453,7 @@ namespace engine {
                     ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(145.f/255.f, 133.f/255.f, 132.f/255.f));
                     ImGui::Button("Install to Android");
-                    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
-                        ImGui::BeginTooltip();
-                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-                        ImGui::TextUnformatted("Module already installed!");
-                        ImGui::PopTextWrapPos();
-                        ImGui::EndTooltip();
-                    }
+                    TOOLTIP("Module already installed!")
                     ImGui::PopItemFlag();
                     ImGui::PopStyleColor();
 
@@ -468,13 +463,7 @@ namespace engine {
                         ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(145.f/255.f, 133.f/255.f, 132.f/255.f));
                         ImGui::Button("Add google-services.json");
-                        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
-                            ImGui::BeginTooltip();
-                            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-                            ImGui::TextUnformatted("Json already added!");
-                            ImGui::PopTextWrapPos();
-                            ImGui::EndTooltip();
-                        }
+                        TOOLTIP("Json already added!")
                         ImGui::PopItemFlag();
                         ImGui::PopStyleColor();
                     } else {
@@ -482,12 +471,12 @@ namespace engine {
                             ImGui::OpenPopup("File Browser google-services.json");
                         }
 
-                        if(fileBrowser->showFileDialog("File Browser google-services.json", imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*")) {
+                        BROWSER_OPEN(fileBrowser, "File Browser google-services.json", {
                             if(std::equal(fileBrowser->selected_fn.begin(), fileBrowser->selected_fn.end(), "google-services.json")) {
                                 auto _command = APPEND_S("cp ", fileBrowser->selected_path, " ", projectSelector->getCurrentProject()->projectPath, "/targets/GDEAndroid/app");
                                 std::system(_command.c_str());
                             }
-                        }
+                        })
                     }
 
                 } else {

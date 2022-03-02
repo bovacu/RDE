@@ -40,7 +40,7 @@ namespace engine {
 
         if(_foundFirebase) {
             globalConfig->firebase.path = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("FIREBASE_SDK_PATH") != std::string::npos; }).base(), "=", 1);
-            LOG_W("Found Firebase -> Path[", globalConfig->android.sdk)
+            LOG_W("Found Firebase -> Path[", globalConfig->android.sdk, "]")
         }
     }
 
@@ -168,18 +168,22 @@ namespace engine {
                 _buttonsSize += ImGui::GetItemRectSize().x;
             }
 
-            if(fileBrowser->showFileDialog("File Browser Android Studio", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*"))
+            BROWSER_SELECT(fileBrowser, "Browser Android Studio", {
                 strcpy(androidStudioPath, fileBrowser->selected_path.c_str());
+            })
 
-            if(fileBrowser->showFileDialog("File Browser Android SDK", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*"))
+            BROWSER_SELECT(fileBrowser, "File Browser Android SDK", {
                 strcpy(androidSDKPath, fileBrowser->selected_path.c_str());
+            })
 
-            if(fileBrowser->showFileDialog("File Browser Android NDK", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*"))
+            BROWSER_SELECT(fileBrowser, "File Browser Android NDK", {
                 strcpy(androidNDKPath, fileBrowser->selected_path.c_str());
+            })
 
-            if(fileBrowser->showFileDialog("File Browser JDK 8", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*"))
+            BROWSER_SELECT(fileBrowser, "File Browser JDK 8", {
                 strcpy(jdk8Path, fileBrowser->selected_path.c_str());
-
+            })
+            
             ImGui::EndPopup();
         }
         END_CENTERED_WINDOW

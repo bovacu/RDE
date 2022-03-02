@@ -105,9 +105,9 @@ namespace engine {
                 _cancelWidth = ImGui::GetItemRectSize().x / 2.f;
 
                 Vec2F _size = {(float)Engine::get().getWindowSize().x, (float)Engine::get().getWindowSize().y};
-                if(fileBrowser->showFileDialog("FileBrowser", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(_size.x * 0.75f, _size.y * 0.35f), "*.*")) {
+                BROWSER_SELECT(fileBrowser, "FileBrowser", {
                     strcpy(pathToInstallGDE, fileBrowser->selected_path.c_str());
-                }
+                })
 
                 ImGui::EndPopup();
             }

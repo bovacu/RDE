@@ -46,4 +46,23 @@
 
 #define YES_NO_MACRO(_modalID, _close, _text, _yesText, _noText, _onYesAction, _onNoAction) YES_NO_MACRO_WITH_SIZE(_modalID, _close, -1, -1, _text, _yesText, _noText, _onYesAction, _onNoAction)
 
+#define TOOLTIP(_text)                                                                          \
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {                            \
+        ImGui::BeginTooltip();                                                                  \
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);                                   \
+        ImGui::TextUnformatted(_text);                                                          \
+        ImGui::PopTextWrapPos();                                                                \
+        ImGui::EndTooltip();                                                                    \
+    }                                                                                           \
+
+#define BROWSER_SELECT(_fileBrowser, _id, _codeBlock)                                                                                                                                               \
+    if(_fileBrowser->showFileDialog(_id, imgui_addons::ImGuiFileBrowser::DialogMode::SELECT, ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*")) {    \
+        _codeBlock                                                                                                                                                                               \
+    }
+
+#define BROWSER_OPEN(_fileBrowser, _id, _codeBlock)                                                                                                                                               \
+    if(_fileBrowser->showFileDialog(_id, imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*")) {    \
+        _codeBlock;                                                                                                                                                                               \
+    }
+
 #endif //ENGINE_MACROS_H
