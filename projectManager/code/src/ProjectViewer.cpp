@@ -294,6 +294,8 @@ namespace engine {
 
             ImGui::Separator();
 
+            static int _buildingResult = -1;
+
             if(!FilesSystem::fileExists(projectSelector->getCurrentProject()->projectPath + "/targets/GDEAndroid/CMakeLists.txt")) {
                 if(ImGui::Button("Add Android Target")) {
                     showAndroidInstallTarget = true;
@@ -306,10 +308,6 @@ namespace engine {
                     _installAndroidTarget.detach();
                 }
             } else {
-                static char _androidPackage[256];
-                static char _apkName[256];
-                static bool _split = false;
-
                 if(blockOpenAndroidStudio) {
                     ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
                     ImGui::Button("Open With Android Studio");
@@ -348,13 +346,15 @@ namespace engine {
 
                 ImGui::Text("Package"); ImGui::SameLine();
                 ImGui::SetNextItemWidth(150);
-                ImGui::InputText("###androidPackage", _androidPackage, IM_ARRAYSIZE(_androidPackage));
+                ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                ImGui::InputText("###androidPackage", androidPackage, IM_ARRAYSIZE(androidPackage));
+                ImGui::PopItemFlag();
 
                 ImGui::Text("APK Name"); ImGui::SameLine();
                 ImGui::SetNextItemWidth(150);
-                ImGui::InputText("###apkName", _apkName, IM_ARRAYSIZE(_apkName));
+                ImGui::InputText("###apkName", androidApkName, IM_ARRAYSIZE(androidApkName));
 
-                ImGui::Checkbox("Split build", &_split);
+                ImGui::Checkbox("Split build", &androidSplitBuild);
 
                 if(ImGui::Button("Sign APK")) {
 
@@ -362,10 +362,58 @@ namespace engine {
 
                 ImGui::SameLine();
 
-                if(ImGui::Button("Build APK")) {
-
+                if(ImGui::Button("Building APK")) {
+                    INIT_MODAL("Building APK")
+                    std::thread _buildApk([&]() {
+                        auto _command = APPEND_S("./androidInstallation/buildApk.sh ", projectSelector->getCurrentProject()->projectPath, " ", androidApkName);
+                        _buildingResult = std::system(_command.c_str());
+                    });
+                    _buildApk.detach();
                 }
             }
+
+            static bool _buildingOpened = true;
+            if(_buildingResult == -1) {
+                INIT_CENTERED_WINDOW
+                if(ImGui::BeginPopupModal("Building APK")) {
+                    const float _textWidth = ImGui::CalcTextSize("Building the APK, this might take a while...").x;
+                    const ImU32 _col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - 7.5f);
+                    Spinner("Installing Android Components", 15.f, 6, _col);
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _textWidth / 2.f);
+                    ImGui::Text("Building the APK, this might take a while...");
+                    ImGui::EndPopup();
+                }
+                END_CENTERED_WINDOW
+            } else if(_buildingResult == 0) {
+                ImGui::OpenPopup("File Browser APK");
+                if(fileBrowser->showFileDialog("File Browser APK", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT,ImVec2(Engine::get().getWindowSize().x * 0.75f, Engine::get().getWindowSize().y * 0.35f), "*.*")) {
+                    auto _command = APPEND_S("cp ", projectSelector->getCurrentProject()->projectPath, "/targets/GDEAndroid/app/build/outputs/apk/debug/", androidApkName, ".apk ", fileBrowser->selected_path);
+                    std::system(_command.c_str());
+                    _buildingResult = -1;
+                }
+            } else {
+                INIT_MODAL("Build failed")
+                INIT_CENTERED_WINDOW
+                if(ImGui::BeginPopupModal("Build failed")) {
+                    const float _textWidth = ImGui::CalcTextSize("Building failed... check the logs in GDEAndroid/build.logs").x;
+                    const ImU32 _col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _textWidth / 2.f);
+                    ImGui::Text("Building failed... check the logs in GDEAndroid/build.logs");
+
+                    static float _closeWidth = 0;
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _closeWidth / 2.f);
+                    if(ImGui::Button("Close")) {
+                        _buildingResult = -1;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    _closeWidth = ImGui::GetItemRectSize().x;
+
+                    ImGui::EndPopup();
+                }
+                END_CENTERED_WINDOW
+            }
+
 
             ImGui::Separator();
 

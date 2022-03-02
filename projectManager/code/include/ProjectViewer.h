@@ -31,6 +31,10 @@ namespace engine {
 
             ProjectError error = ProjectError::NONE;
 
+            char androidPackage[256] = "com.example.android";
+            char androidApkName[256] = "app-debug";
+            bool androidSplitBuild = false;
+
         public:
             void init(ProjectSelector* _projectSelector, ProjectModules* _projectModules, imgui_addons::ImGuiFileBrowser* _fileBrowser, ProjectList* _projectList, GlobalConfig* _globalConfig);
             void render();
