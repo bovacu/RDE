@@ -4,8 +4,8 @@
 #ifndef TESTPROJECTENGINE_TESTLAYER_H
 #define TESTPROJECTENGINE_TESTLAYER_H
 
-#include "engine/include/core/render/layers/Layer.h"
-#include "engine/include/core/render/elements/Sprite.h"
+#include "core/render/layers/Layer.h"
+#include "core/render/elements/Sprite.h"
 
 using namespace engine;
 
