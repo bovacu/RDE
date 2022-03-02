@@ -1,7 +1,7 @@
 // Created by borja on 23/2/22.
 
-#include "core/render/elements/TextureAtlasManager.h"
-#include "core/render/Renderer.h"
+#include <core/render/elements/TextureAtlasManager.h>
+#include <core/render/Renderer.h>
 #include "TestLayer.h"
 
 void TestLayer::onInit() {
