@@ -24,7 +24,6 @@ namespace engine {
 
 
 
-
     FileStr FilesSystem::readFullFile(FileHandler* _handler) {
         FileStr _f;
         checkFileMode(_handler, FileMode::READ);
@@ -32,7 +31,6 @@ namespace engine {
         _f.content.resize((size_t)SDL_RWtell(_handler->file));
         SDL_RWseek(_handler->file, 0, RW_SEEK_SET);
         SDL_RWread(_handler->file, &_f.content[0], (int)_f.content.size(), (int)_f.content.size());
-
         return _f;
     }
 
@@ -77,7 +75,6 @@ namespace engine {
         _f.content.resize((_endByte + 1) - _initByte);
         SDL_RWseek(_handler->file, _initByte, RW_SEEK_SET);
         SDL_RWread(_handler->file, &_f.content[0], _f.content.size(), _f.content.size());
-        SDL_RWclose(_handler->file);
 
         return _f;
     }
@@ -325,6 +322,26 @@ namespace engine {
         if(_file == nullptr) return false;
         close(_file);
         return true;
+    }
+
+    void FilesSystem::appendChunkAtEndOfLine(FileHandler* _handler, const char* _content, size_t _size, int _line) {
+        checkFileMode(_handler, FileMode::READ);
+        auto _f = readAllLinesFile(_handler);
+
+        clearFile(_handler);
+
+        checkFileMode(_handler, FileMode::APPEND);
+        int _currentLine = 0;
+        for(auto& _l : _f.content) {
+            if(_currentLine == _line) _l.append(_content);
+            appendChunkToFileAtEnd(_handler, _l);
+            appendChunkToFileAtEnd(_handler, "\n", SDL_strlen("\n"));
+            _currentLine++;
+        }
+    }
+
+    void FilesSystem::appendChunkAtEndOfLine(FileHandler* _handler, const std::string& _content, int _line) {
+        appendChunkAtEndOfLine(_handler, _content.c_str(), SDL_strlen(_content.c_str()), _line);
     }
 
 }

@@ -17,8 +17,6 @@ namespace engine {
             ProjectSelector* projectSelector;
             ProjectModules* projectModules = nullptr;
             imgui_addons::ImGuiFileBrowser* fileBrowser;
-            ProjectList* projectList;
-
             GlobalConfig* globalConfig;
 
             ImFont* defaultFont;
@@ -36,12 +34,14 @@ namespace engine {
             bool androidSplitBuild = false;
 
         public:
-            void init(ProjectSelector* _projectSelector, ProjectModules* _projectModules, imgui_addons::ImGuiFileBrowser* _fileBrowser, ProjectList* _projectList, GlobalConfig* _globalConfig);
+            void init(ProjectSelector* _projectSelector, ProjectModules* _projectModules, imgui_addons::ImGuiFileBrowser* _fileBrowser, GlobalConfig* _globalConfig);
             void render();
             void setShow(bool _show);
 
         private:
             void projectOk();
+            void addNewIDE();
+
             void projectError();
             void relocateProject();
             void destroyProject();

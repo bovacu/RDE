@@ -27,11 +27,33 @@ namespace engine {
         std::string path;
     };
 
+    struct IDE {
+        std::string name;
+        std::string path;
+    };
+
     struct GlobalConfig {
+        FileHandler* handler;
+
+        std::vector<Project> projects {};
+
         std::string GDEPath;
-        std::vector<std::string> IDEs;
+        std::vector<IDE> IDEs;
         Android android;
         Firebase firebase;
+
+        GlobalConfig& operator= (const GlobalConfig& _globalConfig) {
+
+            if(this == &_globalConfig) return *this;
+
+            projects = _globalConfig.projects;
+            GDEPath = _globalConfig.GDEPath;
+            IDEs = _globalConfig.IDEs;
+            android = _globalConfig.android;
+            firebase = _globalConfig.firebase;
+
+            return *this;
+        }
     };
 
     struct ProjectConfig {
@@ -42,21 +64,25 @@ namespace engine {
         std::string project;
         std::string projectName;
         std::string projectPath;
+        ProjectConfig config;
         bool selected;
         bool stillExists;
-        ProjectConfig config;
-    };
 
-    struct ProjectList {
-        FileHandler* projectsHandler = nullptr;
-        std::vector<Project> content {};
+        Project& operator= (const Project& _project) {
+
+            if(this == &_project) return *this;
+
+            project = _project.project;
+            projectName = _project.projectName;
+            projectPath = _project.projectPath;
+            return *this;
+        }
     };
 
     class ProjectManagerLayer : public Layer {
 
         private:
             GlobalConfig globalConfig;
-            ProjectList projectList;
 
             ProjectInstallator projectInstallator;
             ProjectCreator projectCreator;

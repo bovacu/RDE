@@ -18,30 +18,18 @@ namespace engine {
         globalConfig = _globalConfig;
         GDEPath = globalConfig->GDEPath;
 
-        auto* _dataHandler = FilesSystem::open("assets/data.config", FileMode::READ);
-        auto _lines = FilesSystem::readAllLinesFile(_dataHandler).content;
-
-        bool _foundAndroid = std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("ANDROID_SDK_PATH") != std::string::npos; }) != _lines.end();
-        bool _foundFirebase = std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("FIREBASE_SDK_PATH") != std::string::npos; }) != _lines.end();
-        bool _foundIOS = std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("IOS_SDK_PATH") != std::string::npos; }) != _lines.end();
+        bool _foundAndroid = !globalConfig->android.sdk.empty();
+        bool _foundFirebase = !globalConfig->firebase.path.empty();
 
         availableModules.emplace_back(Module{"Android", _foundAndroid, false, false, false, BIND_FUNC_0(ProjectModules::installAndroid)});
         availableModules.emplace_back(Module{"Firebase", _foundFirebase, false, false, false, BIND_FUNC_0(ProjectModules::installFirebase)});
-        availableModules.emplace_back(Module{"IOs", _foundIOS, false, false, false, BIND_FUNC_0(ProjectModules::installIOSModule)});
+        availableModules.emplace_back(Module{"IOs", false, false, false, false, BIND_FUNC_0(ProjectModules::installIOSModule)});
 
-        if(_foundAndroid) {
-            globalConfig->android.sdk = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("ANDROID_SDK_PATH") != std::string::npos; }).base(), "=", 1);
-            globalConfig->android.ndk = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("ANDROID_NDK_PATH") != std::string::npos; }).base(), "=", 1);
-            globalConfig->android.androidStudio = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("ANDROID_STUDIO_PATH") != std::string::npos; }).base(), "=", 1);
-            globalConfig->android.jdk = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("JDK_8_PATH") != std::string::npos; }).base(), "=", 1);
-
+        if(_foundAndroid)
             LOG_W("Found Android -> SDK[", globalConfig->android.sdk, "], NDK[", globalConfig->android.ndk, "], AS[", globalConfig->android.androidStudio, "], JDK[", globalConfig->android.jdk, "]")
-        }
 
-        if(_foundFirebase) {
-            globalConfig->firebase.path = SPLIT_S_I(*std::find_if(_lines.begin(), _lines.end(), [](const std::string& str) { return str.find("FIREBASE_SDK_PATH") != std::string::npos; }).base(), "=", 1);
+        if(_foundFirebase)
             LOG_W("Found Firebase -> Path[", globalConfig->android.sdk, "]")
-        }
     }
 
     void ProjectModules::render() {
@@ -183,7 +171,7 @@ namespace engine {
             BROWSER_SELECT(fileBrowser, "File Browser JDK 8", {
                 strcpy(jdk8Path, fileBrowser->selected_path.c_str());
             })
-            
+
             ImGui::EndPopup();
         }
         END_CENTERED_WINDOW

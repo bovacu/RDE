@@ -18,14 +18,14 @@ namespace engine {
             bool showLoading = false;
             float installationPercentage = 0.f;
             imgui_addons::ImGuiFileBrowser* fileBrowser = nullptr;
-            ProjectList* projectList = nullptr;
+            GlobalConfig* globalConfig = nullptr;
             std::string installationStep;
             char pathToInstallGDE[256] {};
             ProjectError error = ProjectError::NONE;
             ProjectManagerLayer* projectManagerLayer;
 
         public:
-            void init(imgui_addons::ImGuiFileBrowser* _fileBrowser, ProjectList* _projectList, ProjectManagerLayer* _projectManagerLayer);
+            void init(imgui_addons::ImGuiFileBrowser* _fileBrowser, GlobalConfig* _globalConfig, ProjectManagerLayer* _projectManagerLayer);
             void render();
             void setShow(bool _show);
             [[nodiscard]] bool isShown() const;

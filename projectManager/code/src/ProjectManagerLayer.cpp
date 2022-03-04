@@ -5,6 +5,8 @@
 #include "core/Engine.h"
 #include "FileBrowser/ImGuiFileBrowser.h"
 #include "imgui_internal.h"
+#include "code/include/Macros.h"
+
 
 namespace engine {
 
@@ -13,32 +15,19 @@ namespace engine {
     void ProjectManagerLayer::onInit() {
         Renderer::setClearColor(Color::Black);
 
-        projectList.projectsHandler = FilesSystem::open("assets/data.config", FileMode::READ);
+        globalConfig.handler = FilesSystem::open("assets/data.json", FileMode::READ);
+        LOAD_CONFIG(&globalConfig)
 
-        projectInstallator.init(&fileBrowser, &projectList, this);
-
-        if(projectList.projectsHandler == nullptr) {
+        if(globalConfig.GDEPath.empty()) {
+            projectInstallator.init(&fileBrowser, &globalConfig, this);
             loadModules();
             projectInstallator.setShow(true);
             return;
         }
 
-        auto _configFile = FilesSystem::readAllLinesFile(projectList.projectsHandler);
-        globalConfig.GDEPath = SPLIT_S_I(_configFile.content[0], "=", 1);
-        auto _ides = SPLIT_S_I(_configFile.content[1], "=", 1);
-        globalConfig.IDEs = SPLIT_S(_ides, ",");
-        globalConfig.IDEs.emplace_back("Other...");
-        FilesSystem::close(projectList.projectsHandler);
-
         ImGui::GetIO().ConfigFlags ^= ImGuiConfigFlags_DockingEnable;
 
-        if(!FilesSystem::fileExists("assets/projects.config")) {
-            projectList.projectsHandler = FilesSystem::createFile("assets/projects.config");
-        } else
-            projectList.projectsHandler = FilesSystem::open("assets/projects.config", FileMode::READ);
-
         loadModules();
-        projectSelector.loadProjects();
     }
 
     void ProjectManagerLayer::onEvent(Event& _event) {  }
@@ -58,8 +47,8 @@ namespace engine {
 
     void ProjectManagerLayer::onEnd() {
         Layer::onEnd();
-        if(projectList.projectsHandler != nullptr)
-            FilesSystem::close(projectList.projectsHandler);
+        if(globalConfig.handler != nullptr)
+            FilesSystem::close(globalConfig.handler);
     }
 
     void ProjectManagerLayer::mainImGuiWindow() {
@@ -81,10 +70,10 @@ namespace engine {
 
     void ProjectManagerLayer::loadModules() {
         projectModules.init(&globalConfig, &fileBrowser);
-        projectCreator.init(&globalConfig, &projectList, &fileBrowser);
-        projectSelector.init(&projectList, &projectCreator);
+        projectCreator.init(&globalConfig, &fileBrowser);
+        projectSelector.init(&globalConfig, &projectCreator);
         projectCreator.setProjectSelector(&projectSelector);
-        projectViewer.init(&projectSelector, &projectModules, &fileBrowser, &projectList, &globalConfig);
+        projectViewer.init(&projectSelector, &projectModules, &fileBrowser, &globalConfig);
         projectMenuBar.init(&projectModules);
     }
 }

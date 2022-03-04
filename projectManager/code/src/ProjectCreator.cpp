@@ -4,14 +4,12 @@
 #include "imgui.h"
 #include "core/Engine.h"
 #include "core/systems/fileSystem/FilesSystem.h"
-#include "projectManager/code/include/ProjectManagerLayer.h"
 #include "projectManager/code/include/ProjectSelector.h"
 #include "code/include/Macros.h"
 
 namespace engine {
 
-    void ProjectCreator::init(GlobalConfig* _globalConfig, ProjectList* _projectList, imgui_addons::ImGuiFileBrowser* _fileBrowser) {
-        projectList = _projectList;
+    void ProjectCreator::init(GlobalConfig* _globalConfig, imgui_addons::ImGuiFileBrowser* _fileBrowser) {
         globalConfig = _globalConfig;
         fileBrowser = _fileBrowser;
     }
@@ -69,9 +67,9 @@ namespace engine {
     void ProjectCreator::createProject() {
         auto _command = APPEND_S("./projectCreator.sh ", globalConfig->GDEPath, " ", projectName, " ", projectPath);
         std::system(_command.c_str());
-        auto _newLine = projectList->content.empty() ? "" : "\n";
-        auto _newProject = APPEND_S(_newLine, projectName, "=", projectPath);
-        FilesSystem::appendChunkToFileAtEnd(projectList->projectsHandler, _newProject);
+        globalConfig->projects.emplace_back(Project{std::string(projectName) + "=" + std::string(projectPath), projectName, std::string(projectPath) + "/" + std::string(projectName), {}, false, true});
+        SAVE_CONFIG(globalConfig)
+
         showProjectCreator = false;
         auto _configFile = APPEND_S(projectPath, "/", projectName, "/.config");
         FilesSystem::close(FilesSystem::createFile(_configFile));
@@ -104,9 +102,8 @@ namespace engine {
         if(strlen(projectName) == 0) error |= ProjectError::NAME_NOT_SET;
         if(strlen(projectPath) == 0) error |= ProjectError::PATH_NOT_SET;
 
-        for(auto& _project : projectList->content) {
-            auto _projectName = SPLIT_S_I(_project.project, "=", 0);
-            if (strcmp(_projectName.c_str(), projectName) == 0) {
+        for(auto& _project : globalConfig->projects) {
+            if (strcmp(_project.projectName.c_str(), projectName) == 0) {
                 error |= ProjectError::NAME_ALREADY_IN_USE;
                 break;
             }

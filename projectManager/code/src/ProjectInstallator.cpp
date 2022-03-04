@@ -12,9 +12,9 @@
 namespace engine {
 
 
-    void ProjectInstallator::init(imgui_addons::ImGuiFileBrowser* _fileBrowser, ProjectList* _projectList, ProjectManagerLayer* _projectManagerLayer) {
+    void ProjectInstallator::init(imgui_addons::ImGuiFileBrowser* _fileBrowser, GlobalConfig* _globalConfig, ProjectManagerLayer* _projectManagerLayer) {
         fileBrowser = _fileBrowser;
-        projectList = _projectList;
+        globalConfig = _globalConfig;
         projectManagerLayer = _projectManagerLayer;
     }
 
@@ -82,7 +82,7 @@ namespace engine {
                 if(ImGui::Button("Install")) {
                     checkError();
                     if(error == ProjectError::NONE) {
-                        auto* _handler = FilesSystem::createFile("assets/data.config");
+                        auto* _handler = FilesSystem::createFile("assets/data.json");
                         auto _gdePath = APPEND_S(pathToInstallGDE, "/GDE");
                         auto _line = APPEND_S("GDE_path=", _gdePath);
                         FilesSystem::appendChunkToFileAtEnd(_handler, _line);
@@ -90,8 +90,6 @@ namespace engine {
                         _asyncInstallation.detach();
                         showLoading = true;
                         FilesSystem::close(_handler);
-
-                        projectList->projectsHandler = FilesSystem::createFile("assets/projects.config");
                     }
                 }
                 _installWidth = ImGui::GetItemRectSize().x / 2.f;

@@ -35,12 +35,11 @@ namespace engine {
             ProjectError error = ProjectError::NONE;
             GlobalConfig* globalConfig;
 
-            ProjectList* projectList = nullptr;
             imgui_addons::ImGuiFileBrowser* fileBrowser = nullptr;
             ProjectSelector* projectSelector;
 
         public:
-            void init(GlobalConfig* _globalConfig, ProjectList* _projectList, imgui_addons::ImGuiFileBrowser* _fileBrowser);
+            void init(GlobalConfig* _globalConfig, imgui_addons::ImGuiFileBrowser* _fileBrowser);
             void render();
             void setShow(bool _show);
             void setProjectSelector(ProjectSelector* _projectSelector);

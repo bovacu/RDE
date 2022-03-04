@@ -1,8 +1,8 @@
-#ANDROID_SDK_VAR=$(sed -n -e '/^ANDROID_SDK=/p' assets/data.config)
+#ANDROID_SDK_VAR=$(sed -n -e '/^ANDROID_SDK=/p' assets/data.json)
 #
 #if [ -z "$ANDROID_SDK_VAR" ]
 #then
-#    echo "ANDROID_SDK_VAR=$1" >> assets/data.config
+#    echo "ANDROID_SDK_VAR=$1" >> assets/data.json
 #fi
 #
 #ANDROID_SDK_ARR=$(${ANDROID_SDK_VAR//=/ })
@@ -20,7 +20,7 @@ echo "SDK -> $ANDROID_SDK_PATH"
 echo "NDK -> $ANDROID_NDK_PATH"
 echo "JDK -> $JDK_8_PATH"
 
-#JDK_8_VAR=$(sed -n -e '/^JDK_8=/p' data.config)
+#JDK_8_VAR=$(sed -n -e '/^JDK_8=/p' data.json)
 #JDK_8_ARR=$(${JDK_8_VAR//=/ })
 #JDK_8_PATH=${JDK_8_ARR[1]}
 

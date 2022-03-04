@@ -10,11 +10,10 @@
 namespace engine {
 
 
-    void ProjectViewer::init(ProjectSelector* _projectSelector, ProjectModules* _projectModules, imgui_addons::ImGuiFileBrowser* _fileBrowser, ProjectList* _projectList, GlobalConfig* _globalConfig) {
+    void ProjectViewer::init(ProjectSelector* _projectSelector, ProjectModules* _projectModules, imgui_addons::ImGuiFileBrowser* _fileBrowser, GlobalConfig* _globalConfig) {
         projectSelector = _projectSelector;
         projectModules = _projectModules;
         fileBrowser = _fileBrowser;
-        projectList = _projectList;
         globalConfig = _globalConfig;
 
         defaultFont = ImGui::GetIO().Fonts->AddFontDefault();
@@ -71,18 +70,27 @@ namespace engine {
         ImGui::NewLine();
 
         ImGui::Text("IDE to open the project"); ImGui::SameLine();
-        static const char* item_current = globalConfig->IDEs[0].c_str();            // Here our selection is a single pointer stored outside the object.
+        static const char* item_current = globalConfig->IDEs[0].name.c_str();            // Here our selection is a single pointer stored outside the object.
         ImGui::SetNextItemWidth(150);
         if (ImGui::BeginCombo("###combo 1", item_current)) {
             for (int n = 0; n < globalConfig->IDEs.size(); n++){
-                bool is_selected = (item_current == globalConfig->IDEs[n]);
-                if (ImGui::Selectable(globalConfig->IDEs[n].c_str(), is_selected))
-                    item_current = globalConfig->IDEs[n].c_str();
+                bool is_selected = (item_current == globalConfig->IDEs[n].name);
+                if (ImGui::Selectable(globalConfig->IDEs[n].name.c_str(), is_selected)) {
+                    item_current = globalConfig->IDEs[n].name.c_str();
+                    if(std::equal(globalConfig->IDEs[n].name.begin(), globalConfig->IDEs[n].name.end(), "Other...")) {
+                        ImGui::OpenPopup("File Browser IDE");
+                    }
+                }
                 if (is_selected)
                     ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
             }
             ImGui::EndCombo();
         }
+
+        ImGui::SameLine();
+
+        if(ImGui::Button("Add..."))
+            INIT_MODAL("Add new IDE")
 
         ImGui::Text("Path "); ImGui::SameLine(); ImGui::TextDisabled("%s", projectSelector->getCurrentProject()->projectPath.c_str()); ImGui::SameLine();
         if(ImGui::Button("Modify")) {
@@ -129,10 +137,66 @@ namespace engine {
 
         ImGui::Separator();
 
+        addNewIDE();
+
         androidActions();
         firebaseActions();
 
         actionsDeleteProject();
+
+    }
+
+    void ProjectViewer::addNewIDE() {
+        INIT_CENTERED_WINDOW
+
+        if(ImGui::BeginPopupModal("Add new IDE")) {
+            static ProjectError _error = ProjectError::NONE;
+            static char _ideName[256];
+            static char _idePath[256];
+
+            ImGui::Text("IDE name: "); ImGui::SameLine();
+            ImGui::InputText("###ideName", _ideName, IM_ARRAYSIZE(_ideName));
+
+            ImGui::Text("IDE path: "); ImGui::SameLine();
+            ImGui::InputText("###idePath", _idePath, IM_ARRAYSIZE(_idePath)); ImGui::SameLine();
+            if(ImGui::Button("Open")) {
+                INIT_MODAL("File Browser IDE")
+            }
+
+            if((_error & ProjectError::NAME_NOT_SET) == ProjectError::NAME_NOT_SET)
+                ImGui::TextColored({255, 0, 0, 255}, "Name cannot be empty");
+
+            if((_error & ProjectError::NAME_NOT_SET) == ProjectError::PATH_NOT_SET)
+                ImGui::TextColored({255, 0, 0, 255}, "Path cannot be empty");
+
+            if((_error & ProjectError::WRONG_PATH) == ProjectError::WRONG_PATH)
+                ImGui::TextColored({255, 0, 0, 255}, "Path cannot be empty");
+
+            static float _addSize = 0;
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2.f - _addSize / 2.f);
+            if(ImGui::Button("Add")) {
+                _error = ProjectError::NONE;
+                if(strlen(_ideName) == 0) _error |= ProjectError::NAME_NOT_SET;
+                if(strlen(_idePath) == 0) _error |= ProjectError::PATH_NOT_SET;
+                if(_error == ProjectError::NONE) {
+                    auto _newIDE = APPEND_S(",{", _ideName, ":", _idePath, "}");
+                    auto _handler = FilesSystem::open("assets/data.json", FileMode::APPEND);
+                    FilesSystem::appendChunkAtEndOfLine(_handler, _newIDE, 1);
+                    FilesSystem::close(_handler);
+                    globalConfig->IDEs.emplace_back(IDE{_ideName, _idePath});
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            _addSize = ImGui::GetItemRectSize().x;
+
+            BROWSER_OPEN(fileBrowser, "File Browser IDE", {
+                strcpy(_idePath, fileBrowser->selected_path.c_str());
+            })
+
+            ImGui::EndPopup();
+        }
+
+        END_CENTERED_WINDOW
     }
 
     void ProjectViewer::projectError() {
@@ -254,20 +318,25 @@ namespace engine {
     }
 
     void ProjectViewer::deleteCurrentProjectFromManager() {
-        int _line = -1;
-        for(int _i = 0; _i < projectList->content.size(); _i++) {
-            if(strcmp(projectList->content[_i].projectName.c_str(), projectSelector->getCurrentProject()->projectName.c_str()) == 0) {
-                _line = _i;
-                break;
-            }
-        }
-
-        if(_line >= 0) {
-            FilesSystem::removeChunkLineInFile(projectList->projectsHandler, _line);
-            projectSelector->loadProjects();
-            showDelete = false;
-            projectSelector->selectProject("");
-        }
+        globalConfig->projects.erase(std::remove_if(globalConfig->projects.begin(), globalConfig->projects.end(), [&](const Project& _project) -> bool {
+            return std::equal(_project.projectName.begin(), _project.projectName.end(), projectSelector->getCurrentProject()->projectName.c_str());
+        }), globalConfig->projects.end());
+        SAVE_CONFIG(globalConfig)
+        showDelete = false;
+        projectSelector->selectProject("");
+//        int _line = -1;
+//        for(int _i = 0; _i < globalConfig->projects.size(); _i++) {
+//            if(strcmp(globalConfig->projects[_i].projectName.c_str(), projectSelector->getCurrentProject()->projectName.c_str()) == 0) {
+//                _line = _i;
+//                break;
+//            }
+//        }
+//
+//        if(_line >= 0) {
+//            FilesSystem::removeChunkLineInFile(projectList->projectsHandler, _line);
+//            projectSelector->loadProjects();
+//
+//        }
     }
 
     void ProjectViewer::actionsDeleteProject() {

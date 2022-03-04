@@ -92,6 +92,9 @@ namespace engine {
             static void appendChunkInLineToFile(FileHandler* _handler, const char* _content, size_t _size, int _line);
             static void appendChunkInLineToFile(FileHandler* _handler, const std::string& _content, int _line);
 
+            static void appendChunkAtEndOfLine(FileHandler* _handler, const char* _content, size_t _size, int _line);
+            static void appendChunkAtEndOfLine(FileHandler* _handler, const std::string& _content, int _line);
+
             static void replaceChunkInFile(FileHandler* _handler, const std::string& _old, const std::string& _new);
 
             static void clearFile(FileHandler* _handler);
