@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e6fc190..245e1e2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -163,7 +163,7 @@ set(SOURCES
+ set(CPP_HEADERS)
+ set(CPP_SOURCES)
+ 
+-#GDEFirebase
++include(modules/GDEFirebase/CMakeLists.txt)
+ 
+ #add_library(Engine STATIC
+ #        ${SOURCES}
