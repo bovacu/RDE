@@ -1,2 +1,0 @@
-export SUDO_ASKPASS=/usr/bin/ssh-askpass
-sudo --askpass apt-get -y install build-essential cmake clang git autoconf libtool m4 automake xorg-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev mesa-utils libsamplerate-dev libudev-dev libdbus-1-dev libibus-1.0-dev fcitx-libs-dev zlib1g bzip2 libpng-dev

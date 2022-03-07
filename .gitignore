@@ -30,3 +30,5 @@ libs_out/Engine
 assets/androidInstallationLogs.txt
 
 modules/
+
+libs_out/build.ninja
