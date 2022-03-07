@@ -39,7 +39,9 @@ namespace engine {
     }
 
     void VibrationManager::removeVibrationEffect(const std::string& _effectName) {
-
+        for(auto _controllerID : effects[_effectName].controllerIDs)
+            SDL_HapticDestroyEffect( controllers->at(_controllerID)->vibration, effects[_effectName].vibrationEffectID);
+        effects.erase(_effectName);
     }
 
     void VibrationManager::assignVibrationEffectToController(const std::string& _effectName, int _controllerID) {

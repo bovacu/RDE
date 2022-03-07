@@ -34,3 +34,5 @@ modules/
 libs_out/build.ninja
 
 libs_out/.ninja_deps
+
+libs_out/.ninja_log
