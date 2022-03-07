@@ -163,7 +163,7 @@ set(SOURCES
 set(CPP_HEADERS)
 set(CPP_SOURCES)
 
-include(modules/GDEFirebase/CMakeLists.txt)
+#GDEFirebase
 
 #add_library(Engine STATIC
 #        ${SOURCES}
