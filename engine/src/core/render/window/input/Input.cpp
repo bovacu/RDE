@@ -227,6 +227,16 @@ namespace engine {
         return false;
     }
 
+    bool InputManager::gamepadVibrate(int _controllerID, const std::string& _vibrationEffectName) {
+        auto* _controllerInput = get().controllerInput;
+        if(!_controllerInput->hasController(_controllerID)) return false;
+        _controllerInput->vibrate(_vibrationEffectName, _controllerID);
+        return true;
+    }
+
+
+
+
     bool InputManager::isMobileScreenJustReleased(int _fingerID) {
         auto* _mobileInput = get().mobileInput;
         if(_mobileInput->getState(_fingerID) == 0) {

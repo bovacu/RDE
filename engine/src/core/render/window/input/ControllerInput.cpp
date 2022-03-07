@@ -7,6 +7,53 @@
 
 namespace engine {
 
+    VibrationManager& VibrationManager::get() {
+        static VibrationManager _vibrationManager;
+        return _vibrationManager;
+    }
+
+    void VibrationManager::init(std::unordered_map<int, Controller*>* _controllers) {
+        controllers = _controllers;
+        addVibrationEffect("default", {
+            500,
+            0,
+            0,
+            15000,
+            1000
+        });
+    }
+
+    void VibrationManager::addVibrationEffect(const std::string& _effectName, const VibrationConfig& _config) {
+        SDL_HapticEffect _effect;
+
+        SDL_memset( &_effect, 0, sizeof(SDL_HapticEffect) );
+        _effect.type = SDL_HAPTIC_SINE;
+        _effect.periodic.direction.type = SDL_HAPTIC_CARTESIAN; // Polar coordinates
+        _effect.periodic.direction.dir[0] = 18000; // Force comes from south
+        _effect.periodic.period = _config.period; // 1000 ms
+        _effect.periodic.magnitude = (short)_config.force; // 15000/32767 strength
+        _effect.periodic.length = _config.durationInSeconds; // 1 seconds long
+        _effect.periodic.attack_length = _config.delayToGetToMaxForce; // Takes 0 second to get max strength
+        _effect.periodic.fade_length = _config.delayToGetToMinForce; // Takes 0 second to fade away
+        effects[_effectName] = { _effect };
+    }
+
+    void VibrationManager::removeVibrationEffect(const std::string& _effectName) {
+
+    }
+
+    void VibrationManager::assignVibrationEffectToController(const std::string& _effectName, int _controllerID) {
+        effects[_effectName].vibrationEffectID = SDL_HapticNewEffect(controllers->at(_controllerID)->vibration, &effects[_effectName].vibrationEffect);
+        effects[_effectName].controllerIDs.emplace_back(_controllerID);
+    }
+
+    void VibrationManager::destroy() {
+        for(auto& _effect : effects) {
+            for(auto _controllerID : _effect.second.controllerIDs)
+                SDL_HapticDestroyEffect( controllers->at(_controllerID)->vibration, _effect.second.vibrationEffectID);
+        }
+    }
+
 
     Controller::Controller(int _controllerID) : ID(_controllerID) {
 
@@ -47,6 +94,8 @@ namespace engine {
 
         ignoredEvents = { JOYSTICK_HAT_MOTION_E, JOYSTICK_BALL_MOTION_E, JOYSTICK_BUTTON_DOWN_E, JOYSTICK_BUTTON_UP_E, JOYSTICK_CONNECTED_E,
                         JOYSTICK_DISCONNECTED_E, JOYSTICK_AXIS_MOTION_E };
+
+        VibrationManager::get().init(&controllers);
     }
 
     void ControllerInput::initGamepads() {
@@ -71,7 +120,10 @@ namespace engine {
             LOG_I("Connected Controller ", _i, ", Device Instance: ", SDL_JoystickGetDeviceInstanceID(_i))
             auto _controller = new Controller(_i);
             _controller->sdlGameController = _currentGameController;
+            _controller->vibration = SDL_HapticOpenFromJoystick(SDL_GameControllerGetJoystick(_currentGameController));
             controllers[SDL_JoystickGetDeviceInstanceID(_i)] = _controller;
+
+            VibrationManager::get().assignVibrationEffectToController("default", _controller->ID);
         }
 
         LOG_I(_numJoysticks, " connected and ", controllers.size(), " loaded")
@@ -192,16 +244,25 @@ namespace engine {
         }
     }
 
+    void ControllerInput::vibrate(const std::string& _vibrateEffect, int _controllerID) {
+        SDL_HapticRunEffect( controllers.at(_controllerID)->vibration, VibrationManager::get().effects[_vibrateEffect].vibrationEffectID, 1 );
+    }
+
     bool ControllerInput::hasController(int _id) {
         return controllers.find(playerIndexToInnerControllerID(_id)) != controllers.end();
     }
 
     void ControllerInput::destroy() {
+        LOG_S("Cleaning up vibrations effects")
+        VibrationManager::get().destroy();
+
         LOG_S("Cleaning up controllers")
         for(auto& _controller : controllers) {
             LOG_S("     Controller: ", _controller.second->ID)
-            if(_controller.second->ID >= 0)
+            if(_controller.second->ID >= 0) {
+                SDL_HapticClose(_controller.second->vibration);
                 SDL_GameControllerClose(_controller.second->sdlGameController);
+            }
             delete _controller.second;
         }
     }

@@ -12,6 +12,38 @@
 
 namespace engine {
 
+    struct VibrationConfig {
+        int durationInSeconds;
+        int delayToGetToMaxForce;
+        int delayToGetToMinForce;
+        int force; // 0-32767
+        int period;
+    };
+
+    struct Effect_Controllers {
+        SDL_HapticEffect vibrationEffect;
+        int vibrationEffectID = -1;
+        std::vector<int> controllerIDs = {  };
+    };
+
+    class ControllerInput; class Controller;
+    class VibrationManager {
+        friend class ControllerInput;
+        private:
+            std::unordered_map<std::string, Effect_Controllers> effects;
+            std::unordered_map<int, Controller*>* controllers = nullptr;
+            VibrationManager() = default;
+            void init(std::unordered_map<int, Controller*>* _controllers);
+            void destroy();
+
+        public:
+            static VibrationManager& get();
+
+            void assignVibrationEffectToController(const std::string& _effectName, int _controllerID);
+            void addVibrationEffect(const std::string& _effectName, const VibrationConfig& _config);
+            void removeVibrationEffect(const std::string& _effectName);
+    };
+
     struct Controller {
 
         explicit Controller(int _controllerID);
@@ -21,6 +53,7 @@ namespace engine {
         std::unordered_map<GamePadAxis, int>  pressedGamepadAxis;
         Vec2F leftJoystickValue, rightJoystickValue, backButtonsValue;
         SDL_GameController* sdlGameController = nullptr;
+        SDL_Haptic* vibration = nullptr;
     };
 
     class ControllerInput : public Input {
@@ -34,6 +67,7 @@ namespace engine {
             void setButtonState(int _keyOrButton, int _state, int _controllerID = 0);
             int getAxisState(int _keyOrButton, int _controllerID = 0);
             void setAxisState(int _keyOrButton, int _state, int _controllerID = 0);
+            void vibrate(const std::string& _vibrateEffect, int _controllerID = 0);
             void initGamepads();
             Vec2F getAxisValue(const GamePadAxis& _axis, int _controllerID = 0);
             bool reassignController(int _controllerID, int _as);

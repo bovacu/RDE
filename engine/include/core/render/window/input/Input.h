@@ -98,6 +98,7 @@ namespace engine {
             static bool isGamepadButtonJustReleased(GamePadButtons _button, int _controllerID = 0);
             static bool isGamepadButtonPressed(GamePadButtons _button, int _controllerID = 0);
             static bool isGamepadButtonReleased(GamePadButtons _button, int _controllerID = 0);
+            static bool gamepadVibrate(int _controllerID = 0, const std::string& _vibrationEffectName = "default");
 
 
             static bool isGamepadAxisJustPressed(GamePadAxis _axis, int _controllerID = 0);
