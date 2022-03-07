@@ -14,8 +14,6 @@ namespace engine {
 
     void ProjectManagerLayer::onInit() {
         Renderer::setClearColor(Color::Black);
-
-        globalConfig.handler = FilesSystem::open("assets/data.json", FileMode::READ);
         LOAD_CONFIG(&globalConfig)
 
         if(globalConfig.GDEPath.empty()) {
@@ -47,8 +45,6 @@ namespace engine {
 
     void ProjectManagerLayer::onEnd() {
         Layer::onEnd();
-        if(globalConfig.handler != nullptr)
-            FilesSystem::close(globalConfig.handler);
     }
 
     void ProjectManagerLayer::mainImGuiWindow() {

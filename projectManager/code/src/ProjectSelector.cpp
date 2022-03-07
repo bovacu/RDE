@@ -1,7 +1,7 @@
 // Created by borja on 23/2/22.
 
 #include <string>
-#include <fstream>
+#include <utility>
 #include "projectManager/code/include/ProjectSelector.h"
 #include "imgui.h"
 #include "code/include/Macros.h"
@@ -35,6 +35,7 @@ namespace engine {
                         if(!_project.stillExists) ImGui::PushStyleColor(ImGuiCol_Text, {255, 0, 0, 255});
                         if(ImGui::Selectable(_project.projectName.c_str(), _project.selected)) {
                             project = &_project;
+                            onChangeProjectCallback(project);
                         }
                         if(!_project.stillExists) ImGui::PopStyleColor();
                     }
@@ -63,9 +64,15 @@ namespace engine {
                 break;
             }
         }
+
+        onChangeProjectCallback(project);
     }
 
     void ProjectSelector::loadProjects() {
         LOAD_CONFIG(globalConfig)
+    }
+
+    void ProjectSelector::setOnChangeProjectCallback(std::function<void(const Project*)> _callback) {
+        onChangeProjectCallback = std::move(_callback);
     }
 }

@@ -16,6 +16,12 @@ namespace engine {
         fileBrowser = _fileBrowser;
         globalConfig = _globalConfig;
 
+        projectSelector->setOnChangeProjectCallback([&](const Project* _project) {
+            defaultIDE = std::find_if(globalConfig->projects.begin(), globalConfig->projects.end(), [&](const Project& _project) {
+                return std::equal(_project.projectName.begin(), _project.projectName.end(), projectSelector->getCurrentProject()->projectName.c_str());
+            })->config.IDE;
+        });
+
         defaultFont = ImGui::GetIO().Fonts->AddFontDefault();
 
         h1Conf.SizePixels = 25;
@@ -70,13 +76,13 @@ namespace engine {
         ImGui::NewLine();
 
         ImGui::Text("IDE to open the project"); ImGui::SameLine();
-        static const char* item_current = globalConfig->IDEs[0].name.c_str();            // Here our selection is a single pointer stored outside the object.
+
         ImGui::SetNextItemWidth(150);
-        if (ImGui::BeginCombo("###combo 1", item_current)) {
+        if (ImGui::BeginCombo("###combo 1", defaultIDE.c_str())) {
             for (int n = 0; n < globalConfig->IDEs.size(); n++){
-                bool is_selected = (item_current == globalConfig->IDEs[n].name);
+                bool is_selected = (defaultIDE == globalConfig->IDEs[n].name);
                 if (ImGui::Selectable(globalConfig->IDEs[n].name.c_str(), is_selected)) {
-                    item_current = globalConfig->IDEs[n].name.c_str();
+                    defaultIDE = globalConfig->IDEs[n].name;
                     if(std::equal(globalConfig->IDEs[n].name.begin(), globalConfig->IDEs[n].name.end(), "Other...")) {
                         ImGui::OpenPopup("File Browser IDE");
                     }
@@ -92,10 +98,18 @@ namespace engine {
         if(ImGui::Button("Add..."))
             INIT_MODAL("Add new IDE")
 
-        ImGui::Text("Path "); ImGui::SameLine(); ImGui::TextDisabled("%s", projectSelector->getCurrentProject()->projectPath.c_str()); ImGui::SameLine();
+        static char _newProjectPath[256];
+        ImGui::Text("Path "); ImGui::SameLine();
+        ImGui::SetNextItemWidth(275);
+        ImGui::InputTextWithHint("###newPath", projectSelector->getCurrentProject()->projectPath.c_str(), _newProjectPath,
+                                 IM_ARRAYSIZE(_newProjectPath)); ImGui::SameLine();
         if(ImGui::Button("Modify")) {
-
+            ImGui::OpenPopup("File Browser Move To");
         }
+
+        BROWSER_SELECT(fileBrowser, "File Browser Move To", {
+            strcpy(_newProjectPath, fileBrowser->selected_path.c_str());
+        })
 
         static char _projectName[256];
         ImGui::Text("Project Name: "); ImGui::SameLine(); ImGui::TextDisabled("%s", projectSelector->getCurrentProject()->projectName.c_str());
@@ -106,7 +120,37 @@ namespace engine {
         static float _buttonSize = 0;
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() - _buttonSize - ImGui::GetFrameHeightWithSpacing());
         if(ImGui::Button("Update")) {
+            bool _changes = false;
+            if(!std::equal(defaultIDE.begin(), defaultIDE.end(), projectSelector->getCurrentProject()->config.IDE.c_str()))
+                std::find_if(globalConfig->projects.begin(), globalConfig->projects.end(), [&](const Project& _project) {
+                    return std::equal(_project.projectName.begin(), _project.projectName.end(), projectSelector->getCurrentProject()->projectName.c_str());
+                })->config.IDE = defaultIDE;
 
+            if(strcmp(_projectName, projectSelector->getCurrentProject()->projectName.c_str()) != 0 && strcmp(_projectName, "") != 0) {
+                auto _pathWithoutProjectName = projectSelector->getCurrentProject()->projectPath.substr(0, projectSelector->getCurrentProject()->projectPath.find_last_of("/\\"));
+                auto _path = APPEND_S(_pathWithoutProjectName, "/", _projectName);
+                auto _command = APPEND_S("mv ", projectSelector->getCurrentProject()->projectPath, " ", _path);
+                LOG_W(_command, " | ", _path, " | ", _projectName)
+                projectSelector->getCurrentProject()->projectPath = _path;
+                projectSelector->getCurrentProject()->projectName = _projectName;
+                auto _project = APPEND_S(_projectName, "=", _path);
+                projectSelector->getCurrentProject()->project = _project;
+                strcpy(_projectName, "");
+                std::system(_command.c_str());
+            }
+
+            if(strcmp(_newProjectPath, projectSelector->getCurrentProject()->projectPath.c_str()) != 0 && strcmp(_newProjectPath, "") != 0) {
+                auto _path = APPEND_S(_newProjectPath, projectSelector->getCurrentProject()->projectName);
+                auto _command = APPEND_S("mv ", projectSelector->getCurrentProject()->projectPath, " ", _path);
+                LOG_E(_command)
+                if(FilesSystem::fileExists(_newProjectPath)) {
+                    std::system(_command.c_str());
+                    strcpy(_newProjectPath, "");
+                    projectSelector->getCurrentProject()->projectPath = _path;
+                }
+            }
+
+            SAVE_CONFIG(globalConfig)
         }
         _buttonSize = ImGui::GetItemRectSize().x;
 
@@ -125,7 +169,14 @@ namespace engine {
         ImGui::NewLine();
 
         if(ImGui::Button("Open project")) {
-
+            if(defaultIDE.empty()) return;
+            std::thread _openIDE([&]() {
+                auto _command = APPEND_S(std::find_if(globalConfig->IDEs.begin(), globalConfig->IDEs.end(), [&](const IDE& _ide) {
+                    return std::equal(_ide.name.begin(), _ide.name.end(), defaultIDE.c_str());
+                })->path, " ", projectSelector->getCurrentProject()->projectPath);
+                std::system(_command.c_str());
+            });
+            _openIDE.detach();
         }
 
         ImGui::SameLine(0, 20);
@@ -179,11 +230,8 @@ namespace engine {
                 if(strlen(_ideName) == 0) _error |= ProjectError::NAME_NOT_SET;
                 if(strlen(_idePath) == 0) _error |= ProjectError::PATH_NOT_SET;
                 if(_error == ProjectError::NONE) {
-                    auto _newIDE = APPEND_S(",{", _ideName, ":", _idePath, "}");
-                    auto _handler = FilesSystem::open("assets/data.json", FileMode::APPEND);
-                    FilesSystem::appendChunkAtEndOfLine(_handler, _newIDE, 1);
-                    FilesSystem::close(_handler);
                     globalConfig->IDEs.emplace_back(IDE{_ideName, _idePath});
+                    SAVE_CONFIG(globalConfig)
                     ImGui::CloseCurrentPopup();
                 }
             }
@@ -270,26 +318,12 @@ namespace engine {
             if(ImGui::Button("Update")) {
                 checkErrors(_newPath);
                 if(error == ProjectError::NONE) {
-                    auto _projectsFileHandler = FilesSystem::open("assets/projects.config", FileMode::READ);
-                    auto _lines = FilesSystem::readAllLinesFile(_projectsFileHandler);
+                    auto _it = std::find_if(globalConfig->projects.begin(), globalConfig->projects.end(), [&](const Project& _p) {
+                        return std::equal(_p.projectName.begin(), _p.projectName.end(), projectSelector->getCurrentProject()->projectName.c_str());
+                    });
 
-                    int _line = -1;
-                    int _i = 0;
-                    for(auto& _l : _lines.content) {
-                        auto _projectName = SPLIT_S_I(_l, "=", 0);
-                        if(strcmp(_projectName.c_str(), projectSelector->getCurrentProject()->projectName.c_str()) == 0) {
-                            _line = _i;
-                            break;
-                        }
-                        _i++;
-                    }
-
-                    FilesSystem::removeChunkLineInFile(_projectsFileHandler, _line);
-                    auto _newLine = APPEND_S(projectSelector->getCurrentProject()->projectName, "=", _newPath);
-                    FilesSystem::appendChunkInLineToFile(_projectsFileHandler, _newLine, _line);
-
-                    FilesSystem::close(_projectsFileHandler);
-
+                    _it->projectPath = _newPath;
+                    SAVE_CONFIG(globalConfig)
                     projectSelector->loadProjects();
                 }
             }
@@ -324,19 +358,6 @@ namespace engine {
         SAVE_CONFIG(globalConfig)
         showDelete = false;
         projectSelector->selectProject("");
-//        int _line = -1;
-//        for(int _i = 0; _i < globalConfig->projects.size(); _i++) {
-//            if(strcmp(globalConfig->projects[_i].projectName.c_str(), projectSelector->getCurrentProject()->projectName.c_str()) == 0) {
-//                _line = _i;
-//                break;
-//            }
-//        }
-//
-//        if(_line >= 0) {
-//            FilesSystem::removeChunkLineInFile(projectList->projectsHandler, _line);
-//            projectSelector->loadProjects();
-//
-//        }
     }
 
     void ProjectViewer::actionsDeleteProject() {

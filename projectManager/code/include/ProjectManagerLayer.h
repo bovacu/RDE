@@ -33,8 +33,6 @@ namespace engine {
     };
 
     struct GlobalConfig {
-        FileHandler* handler;
-
         std::vector<Project> projects {};
 
         std::string GDEPath;

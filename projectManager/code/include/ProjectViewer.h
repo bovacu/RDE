@@ -18,6 +18,7 @@ namespace engine {
             ProjectModules* projectModules = nullptr;
             imgui_addons::ImGuiFileBrowser* fileBrowser;
             GlobalConfig* globalConfig;
+            std::string defaultIDE;
 
             ImFont* defaultFont;
             ImFont* h1;

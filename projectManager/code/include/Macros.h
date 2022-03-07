@@ -11,19 +11,26 @@ using namespace nlohmann;
 
 namespace engine {
 
-    #define SAVE_CONFIG(_globalConfig) {                                     \
-        json _j = *(_globalConfig);                                          \
-        FilesSystem::writeChunkToFile((_globalConfig)->handler, _j.dump(4)); \
+    #define SAVE_CONFIG(_globalConfig) {                                        \
+        json _j = *(_globalConfig);                                             \
+        LOG_W(_j.dump(4));                                                      \
+        auto _handler = FilesSystem::open("assets/data.json", FileMode::READ); \
+        FilesSystem::clearFile(_handler);                                       \
+        FilesSystem::readFullFile(_handler);                                    \
+        FilesSystem::writeChunkToFile(_handler, _j.dump(4));                    \
+        FilesSystem::close(_handler);                                           \
     }
 
     #define LOAD_CONFIG(_globalConfig) {                                                        \
-        auto _config = FilesSystem::readFullFile((_globalConfig)->handler).content;             \
+        auto _handler = FilesSystem::open("assets/data.json", FileMode::READ);                 \
+        auto _config = FilesSystem::readFullFile(_handler).content;                             \
         json _configJson = json::parse(_config);                                                \
         LOG_W(_configJson.dump(4))                                                              \
         auto _c = _configJson.get<GlobalConfig>();                                              \
         *(_globalConfig) = _c;                                                                  \
         for(auto& _project : (_globalConfig)->projects)                                         \
             _project.stillExists = FilesSystem::fileExists(_project.projectPath + "/.config");  \
+        FilesSystem::close(_handler);                                                           \
     }
 
     inline void to_json(json& _j, const engine::GlobalConfig& _gc) {
@@ -53,7 +60,7 @@ namespace engine {
             _j["projects"] += json {
                     {"project_name", _project.projectName},
                     {"project_path", _project.projectPath},
-                    {"default_ide", "CLion"}
+                    {"default_ide", _project.config.IDE}
             };
         }
     }

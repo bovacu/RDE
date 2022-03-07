@@ -4,6 +4,7 @@
 #ifndef ENGINE_PROJECT_SELECTOR_H
 #define ENGINE_PROJECT_SELECTOR_H
 
+#include <functional>
 #include "ProjectCreator.h"
 
 namespace engine {
@@ -14,6 +15,7 @@ namespace engine {
             Project* project = nullptr;
             GlobalConfig* globalConfig;
             ProjectCreator* projectCreator = nullptr;
+            std::function<void(const Project*)> onChangeProjectCallback = {};
 
         public:
             void init(GlobalConfig* _globalConfig, ProjectCreator* _projectCreator);
@@ -21,6 +23,7 @@ namespace engine {
             Project* getCurrentProject();
             void selectProject(const std::string& _projectName);
             void loadProjects();
+            void setOnChangeProjectCallback(std::function<void(const Project*)> _callback);
     };
 
 }
