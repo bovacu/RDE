@@ -8,20 +8,70 @@
 #include "core/util/Logger.h"
 #include <type_traits>
 
-template <typename Type, typename... Args>
+/*
+ * The Event bus works in the following way:
+ *
+ *  1 - We need to specify the type of Event that our EventBus is going to use to store each of the observable events.
+ *      This Event can be anything, like a string, an int, bool, classes, structs, enums... Then we specify the
+ *      AssociatedFunctionArgs which are a set of types.
+ *
+ *  2 - Once we have decided what type of Event we need for this EventBus, we start defining them and attaching the functions
+ *      that will be called when the particular Event happens.
+ *
+ *  3 - Once an Event is subscribed, each time you repeat a specific Event, the function will be linked to that Event.
+ *
+ *  4 - The associated functions must always return bool.
+ *
+ *  Example:
+ *      Let's imagine we have the EventBus<std::string, char> that will be observing the events that happen when a key is pressed
+ *      or released.
+ *
+ *          EventBus<std::string, char> keyEventBus;
+ *
+ *      Then we define (somewhere) two functions:
+ *
+ *          bool MyClass::keyUp(char _char) {
+ *              // Do whatever...
+ *              return true;
+ *          }
+ *
+ *          bool MyClass::keyDown(char _char) {
+ *              // Do whatever...
+ *              return true;
+ *          }
+ *
+ *
+ *      Now let's link events with functions:
+ *
+ *          keyEventBus.subscribe<&MyClass::keyDown>("keyDown", this);
+ *          keyEventBus.subscribe<&MyClass::keyUp>("keyUp", this);
+ *
+ *          *Notes: if the associated function is a free function -> keyEventBus.subscribe<&keyDown>("keyDown", nullptr);
+ *
+ *
+ *      Then, in any part of the code that the event needs to be dispatched, we do:
+ *
+ *          keyEventBus.dispatch("keyUp", _theCharPressed);
+ *                          or/and
+ *          keyEventBus.dispatch("keyDown", _theCharReleased);
+ *
+ *      And with this, all of the linked functions will know about this change and will react as the function specifies
+ */
+
+template <typename Event, typename... AssociatedFunctionArgs>
 class EventBus {
 //    static_assert(std::is_enum<Type>::value, "Must be an enum type");
     public:
-        typedef std::function<bool(Args...)> HandlerFunc;
+        typedef std::function<bool(AssociatedFunctionArgs...)> HandlerFunc;
 
     private:
-        std::map<Type, engine::MDelegate<bool(Args...)>> handlers;
+        std::map<Event, engine::MDelegate<bool(AssociatedFunctionArgs...)>> handlers;
 
     public:
         class HandlerId {
             public:
                 HandlerId() : valid(false) {  }
-                friend class EventBus<Args...>;
+                friend class EventBus<AssociatedFunctionArgs...>;
                 size_t id{};
                 explicit HandlerId(size_t _id) : id(_id), valid(true) {  }
                 bool valid;
@@ -29,7 +79,7 @@ class EventBus {
 
         // register to be notified
         template<auto Func, typename Class>
-        HandlerId subscribe(const Type& _key, Class* _class) {
+        HandlerId subscribe(const Event& _key, Class* _class) {
             if (Func) {
                 handlers[_key].template bind<Func>(_class);
                 return HandlerId(handlers[_key].getEnd());
@@ -37,7 +87,7 @@ class EventBus {
             return HandlerId();
         }
 
-        void unsubscribe(const Type& _type, HandlerId& _handlerId) {
+        void unsubscribe(const Event& _type, HandlerId& _handlerId) {
             if(!hasType(_type)) {
                 LOG_W_TIME("Tried to unsubscribe Type ", typeid(_type).name(), " but it wasn't subscribed!")
                 return;
@@ -49,7 +99,7 @@ class EventBus {
                 LOG_W_TIME("Tried to unsubscribe an event", typeid(_type).name()," that wasn't subscribed yet!")
         }
 
-        bool dispatch(const Type& _type, Args... _args) {
+        bool dispatch(const Event& _type, AssociatedFunctionArgs... _args) {
             if(!hasType(_type)) {
                 return false;
             }
@@ -59,12 +109,12 @@ class EventBus {
             return std::all_of(_results.begin(), _results.end(), [](bool v) { return v; });
         }
 
-        bool isSubscribed(const Type& _type) {
+        bool isSubscribed(const Event& _type) {
             return hasType(_type);
         }
 
     private:
-        bool hasType(const Type& _type) {
+        bool hasType(const Event& _type) {
             return handlers.find(_type) != handlers.end();
         }
 };

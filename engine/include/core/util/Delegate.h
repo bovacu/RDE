@@ -1,6 +1,48 @@
 // Created by borja on 8/3/22.
 
+/* EXAMPLE USAGE
+    struct A {
+        bool myFunc(int _a, const std::string& _b) {
+            LOG_I("Called from A")
+            return false;
+        }
+    };
 
+    struct B {
+        bool myFunc(int _a, const std::string& _b) {
+            LOG_I("Called from B")
+            return false;
+        }
+    };
+
+    struct C {
+        bool myFunc(int _a, const std::string& _b) {
+            LOG_I("Called from C")
+            return false;
+        }
+    };
+
+    bool myFunc(int _a, const std::string& _b) {
+        LOG_I("Called from free")
+        return false;
+    }
+
+
+    engine::MDelegate<bool(int, const std::string&)> _myMDelegate;
+    engine::UDelegate<bool(int, const std::string&)> _myUDelegate;
+    A _a;
+    C _c;
+
+    _myUDelegate.bind<&myFunc>();
+    _myUDelegate.bind<&A::myFunc>(&_a);
+
+    _myMDelegate.bind<&myFunc>();
+    _myMDelegate.bind<&A::myFunc>(&_a);
+    _myMDelegate.bind<&A::myFunc>(&_a);
+    _myMDelegate.bind<&C::myFunc>(&_c);
+    _myMDelegate(0, "");
+    _myMDelegate.clear();
+*/
 #ifndef ENGINE_DELEGATE_H
 #define ENGINE_DELEGATE_H
 
@@ -169,47 +211,3 @@ namespace engine {
 }
 
 #endif //ENGINE_DELEGATE_H
-
-
-// EXAMPLE USAGE
-//struct A {
-//    bool myFunc(int _a, const std::string& _b) {
-//        LOG_I("Called from A")
-//        return false;
-//    }
-//};
-//
-//struct B {
-//    bool myFunc(int _a, const std::string& _b) {
-//        LOG_I("Called from B")
-//        return false;
-//    }
-//};
-//
-//struct C {
-//    bool myFunc(int _a, const std::string& _b) {
-//        LOG_I("Called from C")
-//        return false;
-//    }
-//};
-//
-//bool myFunc(int _a, const std::string& _b) {
-//    LOG_I("Called from free")
-//    return false;
-//}
-//
-//
-//engine::MDelegate<bool(int, const std::string&)> _myMDelegate;
-//engine::UDelegate<bool(int, const std::string&)> _myUDelegate;
-//A _a;
-//C _c;
-//
-//_myUDelegate.bind<&myFunc>();
-//_myUDelegate.bind<&A::myFunc>(&_a);
-//
-//_myMDelegate.bind<&myFunc>();
-//_myMDelegate.bind<&A::myFunc>(&_a);
-//_myMDelegate.bind<&A::myFunc>(&_a);
-//_myMDelegate.bind<&C::myFunc>(&_c);
-//_myMDelegate(0, "");
-//_myMDelegate.clear();
