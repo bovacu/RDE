@@ -18,6 +18,9 @@ namespace engine {
     class ImGuiLayer : public Layer {
         private:
             bool anyWindowHovered = false;
+            UDelegate<bool(MouseScrolledEvent&)> mseDel;
+            UDelegate<bool(MouseButtonPressedEvent&)> mbpeDel;
+            UDelegate<bool(MouseMovedEvent&)> mmeDel;
 
         public:
             ImGuiLayer();

@@ -59,13 +59,17 @@ namespace engine {
         config.SettingsFile = "Simple.json";
         g_Context = ed::CreateEditor(&config);
         ed::SetCurrentEditor(g_Context);
+
+        mseDel.bind<&ImGuiLayer::onMouseScrolled>(this);
+        mbpeDel.bind<&ImGuiLayer::onMouseClicked>(this);
+        mmeDel.bind<&ImGuiLayer::onMouseMovedEvent>(this);
     }
 
     void ImGuiLayer::onEvent(Event& _e) {
         EventDispatcher dispatcher(_e);
-        dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(ImGuiLayer::onMouseScrolled));
-        dispatcher.dispatchEvent<MouseButtonPressedEvent>(ENGINE_BIND_EVENT_FN(ImGuiLayer::onMouseClicked));
-        dispatcher.dispatchEvent<MouseMovedEvent>(ENGINE_BIND_EVENT_FN(ImGuiLayer::onMouseMovedEvent));
+        dispatcher.dispatchEvent<MouseScrolledEvent>(mseDel);
+        dispatcher.dispatchEvent<MouseButtonPressedEvent>(mbpeDel);
+        dispatcher.dispatchEvent<MouseMovedEvent>(mmeDel);
     }
 
     void ImGuiLayer::onEnd() {

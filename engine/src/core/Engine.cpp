@@ -12,8 +12,10 @@ namespace engine {
         ENGINE_ASSERT(!Engine::gameInstance, "Application already exists!");
         Engine::gameInstance = this;
         window = Window::createWindow();
-        window->setEventCallback(ENGINE_BIND_EVENT_FN(Engine::onEvent));
+        window->setEventCallback(BIND_FUNC_1(Engine::onEvent));
         lastFrame = 0;
+
+        wreDel.bind<&Engine::onWindowResized>(this);
 
         camera.init(window.get());
 
@@ -104,7 +106,7 @@ namespace engine {
     void Engine::onEvent(Event &_e) {
 
         EventDispatcher _ed(_e);
-        _ed.dispatchEvent<WindowResizedEvent>(BIND_FUNC_1(Engine::onWindowResized));
+        _ed.dispatchEvent<WindowResizedEvent>(wreDel);
 
         for (auto _it = layerStack.rbegin(); _it != layerStack.rend(); ++_it) {
             (*_it)->onEvent(_e);
@@ -136,12 +138,6 @@ namespace engine {
         for (Layer* _layer : layerStack)
             _layer->onRender(_dt);
         Renderer::endDraw();
-
-        // Debug rendering
-//        Renderer::beginDebugDraw(camera);
-//        Renderer::drawSquare({0, 0}, {2, 2}, Color::Blue);
-//        Renderer::drawSquare({-100, 0}, {50, 50}, Color::Green);
-//        Renderer::endDebugDraw();
 
         frameBuffer->unbind();
 

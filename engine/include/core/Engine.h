@@ -48,6 +48,8 @@ namespace engine {
             Clock clock;
             float timer = 0;
 
+            UDelegate<bool(WindowResizedEvent&)> wreDel;
+
         private:
             void updateFps();
 

@@ -5,6 +5,7 @@
 
 #include <sstream>
 #include <functional>
+#include "core/util/Delegate.h"
 
 namespace engine {
 
@@ -87,12 +88,12 @@ namespace engine {
         /// @param _func The callback associated to the specific event.
         /// @return true if the event could me managed (not if it was handled), false otherwise.
         template<typename T>
-        bool dispatchEvent(EventFn<T> _func) {
+        bool dispatchEvent(const UDelegate<bool(T&)>& _delegate) {
             /// This is why we needed the static version of getType.
             if (event.getEventType() == T::getStaticType()) {
                 /// Using *(T*)& was the only way I could find to make this work, fucking pointers.
                 /// Update: it can be done via static_cast<T&>.
-                event.handled = _func(static_cast<T&>(event));
+                event.handled = _delegate(reinterpret_cast<T&>(event));
                 return true;
             }
 
