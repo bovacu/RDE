@@ -13,6 +13,7 @@
 #include "Clock.h"
 #include "Rect.h"
 #include "Random.h"
+#include "Delegate.h"
 #include "core/Core.h"
 
 #include <memory>

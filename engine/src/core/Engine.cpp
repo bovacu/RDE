@@ -12,7 +12,11 @@ namespace engine {
         ENGINE_ASSERT(!Engine::gameInstance, "Application already exists!");
         Engine::gameInstance = this;
         window = Window::createWindow();
-        window->setEventCallback(BIND_FUNC_1(Engine::onEvent));
+
+        UDelegate<void(Event&)> onEventDelegate;
+        onEventDelegate.bind<&Engine::onEvent>(this);
+        window->setEventCallback(onEventDelegate);
+
         lastFrame = 0;
 
         wreDel.bind<&Engine::onWindowResized>(this);

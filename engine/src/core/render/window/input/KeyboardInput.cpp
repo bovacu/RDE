@@ -10,8 +10,12 @@ namespace engine {
     void KeyboardInput::init(Window* _window) {
         window = _window;
 
-        events[SystemEventEnum::KEY_DOWN_E] = BIND_FUNC_1(KeyboardInput::onKeyDown);
-        events[SystemEventEnum::KEY_UP_E] = BIND_FUNC_1(KeyboardInput::onKeyUp);
+        UDelegate<void(SDL_Event&)> kdeDel, kueDel;
+        kdeDel.bind<&KeyboardInput::onKeyDown>(this);
+        kueDel.bind<&KeyboardInput::onKeyUp>(this);
+
+        events[SystemEventEnum::KEY_DOWN_E] = kdeDel;
+        events[SystemEventEnum::KEY_UP_E] = kueDel;
 
         pressedKeyboardKeys = {
                 {KeyCode::LeftControl,  0},

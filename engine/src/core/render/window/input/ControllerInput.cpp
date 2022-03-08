@@ -88,11 +88,18 @@ namespace engine {
     void ControllerInput::init(Window* _window) {
         window = _window;
 
-        events[SystemEventEnum::GAMEPAD_JOYSTICK] = BIND_FUNC_1(ControllerInput::onGamepadsMoved);
-        events[SystemEventEnum::GAMEPAD_BUTTON_DOWN] = BIND_FUNC_1(ControllerInput::onGamepadsButtonDown);
-        events[SystemEventEnum::GAMEPAD_BUTTON_UP] = BIND_FUNC_1(ControllerInput::onGamepadsButtonUp);
-        events[SystemEventEnum::GAMEPAD_CONNECTED_E] = BIND_FUNC_1(ControllerInput::onGamepadConnected);
-        events[SystemEventEnum::GAMEPAD_DISCONNECTED_E] = BIND_FUNC_1(ControllerInput::onGamepadDisconnected);
+        UDelegate<void(SDL_Event&)> _gpJ, _gpBD, _gpBU, _gpD, _gpC;
+        _gpJ.bind<&ControllerInput::onGamepadsMoved>(this);
+        _gpBD.bind<&ControllerInput::onGamepadsButtonDown>(this);
+        _gpBU.bind<&ControllerInput::onGamepadsButtonUp>(this);
+        _gpC.bind<&ControllerInput::onGamepadConnected>(this);
+        _gpD.bind<&ControllerInput::onGamepadDisconnected>(this);
+
+        events[SystemEventEnum::GAMEPAD_JOYSTICK] = _gpJ;
+        events[SystemEventEnum::GAMEPAD_BUTTON_DOWN] = _gpBD;
+        events[SystemEventEnum::GAMEPAD_BUTTON_UP] = _gpBU;
+        events[SystemEventEnum::GAMEPAD_CONNECTED_E] = _gpC;
+        events[SystemEventEnum::GAMEPAD_DISCONNECTED_E] = _gpD;
 
         ignoredEvents = { JOYSTICK_HAT_MOTION_E, JOYSTICK_BALL_MOTION_E, JOYSTICK_BUTTON_DOWN_E, JOYSTICK_BUTTON_UP_E, JOYSTICK_CONNECTED_E,
                         JOYSTICK_DISCONNECTED_E, JOYSTICK_AXIS_MOTION_E };

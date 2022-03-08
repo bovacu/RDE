@@ -10,10 +10,16 @@ namespace engine {
     void MouseInput::init(Window* _window) {
         window = _window;
 
-        events[SystemEventEnum::MOUSE_MOVED_E] = BIND_FUNC_1(MouseInput::onMouseMoved);
-        events[SystemEventEnum::MOUSE_DOWN_E] = BIND_FUNC_1(MouseInput::onMouseDown);
-        events[SystemEventEnum::MOUSE_UP_E] = BIND_FUNC_1(MouseInput::onMouseUp);
-        events[SystemEventEnum::MOUSE_SCROLLED_E] = BIND_FUNC_1(MouseInput::onMouseScroll);
+        UDelegate<void(SDL_Event&)> mmeDel, mdeDel, mueDel, mseDel;
+        mmeDel.bind<&MouseInput::onMouseMoved>(this);
+        mdeDel.bind<&MouseInput::onMouseDown>(this);
+        mueDel.bind<&MouseInput::onMouseUp>(this);
+        mseDel.bind<&MouseInput::onMouseScroll>(this);
+
+        events[SystemEventEnum::MOUSE_MOVED_E] = mmeDel;
+        events[SystemEventEnum::MOUSE_DOWN_E] = mdeDel;
+        events[SystemEventEnum::MOUSE_UP_E] = mueDel;
+        events[SystemEventEnum::MOUSE_SCROLLED_E] = mseDel;
 
         pressedMouseButtons = {
                 {MouseCode::Button0,        -1},

@@ -22,7 +22,8 @@ namespace engine {
     class BadDelegateCall : public std::exception {
         public:
             [[nodiscard]] auto what() const noexcept -> const char* override {
-                return "Bad delegate call";
+//                auto _error = APPEND_S("Delegate had no attached function, in line ", __LINE__, " in file ", __FILE_NAME__);
+                return "Delegate had no attached function";
             }
     };
 
@@ -93,6 +94,7 @@ namespace engine {
         using stub_function = R(*)(const void*, Args...);
         private:
             std::vector<Stub<R(Args...)>> stubs;
+            size_t counter = 0;
 
         public:
             // Creates an unbound delegate
@@ -102,11 +104,24 @@ namespace engine {
             MDelegate(const MDelegate& other) = default;
             auto operator=(const MDelegate& other) -> MDelegate& = default;
 
-            // Call the underlying bound function
-            auto operator()(Args... args) const -> R {
-                R _r;
-                for(auto& _stub : stubs) _r = std::invoke(_stub.stub, _stub.instance, args...);
-                return _r;
+            size_t getEnd() {
+                return counter;
+            }
+
+            void remove(size_t _position) {
+                stubs.erase(stubs.begin() + _position);
+            }
+
+            /**
+             * WARNING calling this won't return any value, just will run the functions, it the return value is needed
+             * then call exec(std::vector<R>&, Args...), this will return each result for each executed method
+             */
+            auto operator()(Args... args) {
+                for(auto& _stub : stubs) std::invoke(_stub.stub, _stub.instance, args...);
+            }
+
+            void exec(std::vector<R>& _results, Args... args) {
+                for(auto& _stub : stubs) _results.template emplace_back(std::invoke(_stub.stub, _stub.instance, args...));
             }
 
             template <auto Function, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(Function),Args...>>>
@@ -118,6 +133,7 @@ namespace engine {
                     })
                 };
                 stubs.push_back(_s);
+                counter = stubs.size();
             }
 
             template <auto MemberFunction, typename Class, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(MemberFunction),const Class*, Args...>>>
@@ -130,6 +146,7 @@ namespace engine {
                         })
                 };
                 stubs.push_back(_s);
+                counter = stubs.size();
             }
 
             template <auto MemberFunction, typename Class, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(MemberFunction),Class*, Args...>>>
@@ -142,6 +159,7 @@ namespace engine {
                         })
                 };
                 stubs.push_back(_s);
+                counter = stubs.size();
             }
 
             void clear() {

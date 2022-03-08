@@ -42,7 +42,7 @@ namespace engine {
             }
     };
 
-    typedef std::function<bool(const TransitionParams&)> transitionFunc;
+    typedef MDelegate<bool(const TransitionParams&)> transitionFunc;
 
     class AnimationSystem {
         private:
@@ -57,7 +57,9 @@ namespace engine {
             float getAnimationTimeBetweenFrames(const std::string& _animation);
 
             void setInitialAnimation(const std::string& _animationName);
-            void createTransition(const std::string& _initialAnimation, const std::string& _finalAnimation, transitionFunc _condition);
+
+            template<auto TransitionFunc, typename Class>
+            void createTransition(const std::string& _initialAnimation, const std::string& _finalAnimation, Class* _class);
 
             AnimationNode* getCurrentAnimation();
 
@@ -69,6 +71,13 @@ namespace engine {
             void update(float _dt, Sprite& _sprite, TransitionParams _params = {});
     };
 
+    template<auto TransitionFunc, typename Class>
+    void AnimationSystem::createTransition(const std::string& _initialAnimation, const std::string& _finalAnimation, Class* _class) {
+        std::string _transitionCode = _initialAnimation + "_" + _finalAnimation;
+        bus.subscribe<TransitionFunc>(_transitionCode, _class);
+        AnimationTransition _transition { _transitionCode, &animations[_finalAnimation] };
+        animations[_initialAnimation].transitions.push_back(_transition);
+    }
 }
 
 

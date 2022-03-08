@@ -26,6 +26,8 @@ namespace engine {
             Text text;
             Engine* engine;
 
+            UDelegate<bool(MouseScrolledEvent&)> mseDelegate;
+
         public:
             Sandbox() : Layer("Sandbox") {  }
             void onInit() override;
@@ -39,6 +41,8 @@ namespace engine {
 
         private:
             bool onMouseScrolled(MouseScrolledEvent& _event);
+            bool run_roll(const TransitionParams& _params);
+            bool roll_run(const TransitionParams& _params);
     };
 
 }

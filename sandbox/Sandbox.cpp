@@ -23,8 +23,9 @@ namespace engine {
         animationSystem.createAnimation("run", "run", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
         animationSystem.setInitialAnimation("run");
 
-        // 12-23
         animationSystem.createAnimation("roll", "run", {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23});
+        animationSystem.createTransition<&Sandbox::run_roll>("run", "roll", this);
+        animationSystem.createTransition<&Sandbox::roll_run>("roll", "run", this);
 
         animationSystem.setInitialAnimation("run");
 
@@ -61,11 +62,14 @@ namespace engine {
 //        #if IS_ANDROID()
 //            NativeAds::get().loadAd(AdType::BANNER);
 //        #endif
+
+        mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
+
     }
 
     void Sandbox::onEvent(Event& _event) {
         EventDispatcher _dispatcher(_event);
-        _dispatcher.dispatchEvent<MouseScrolledEvent>(ENGINE_BIND_EVENT_FN(Sandbox::onMouseScrolled));
+        _dispatcher.dispatchEvent<MouseScrolledEvent>(mseDelegate);
     }
 
     void Sandbox::onUpdate(Delta _dt) {
@@ -73,7 +77,14 @@ namespace engine {
             player.setShader(ShaderManager::get().getShader("outline"));
         }
 
+        if(InputManager::isKeyJustPressed(KeyCode::Escape)) {
+            player.setShader(ShaderManager::get().getShader("basic"));
+        }
+
         animationSystem.update(_dt, player);
+
+        if(InputManager::isGamepadButtonJustPressed(GamePadButtons::ButtonA))
+            InputManager::gamepadVibrate();
 
         if(InputManager::isMobileScreenJustPressed(0)) {
 //            #if IS_ANDROID()
@@ -110,5 +121,13 @@ namespace engine {
         _zoom = std::max(_zoom, 0.1f);
         _camera.setCurrentZoomLevel(_zoom);
         return true;
+    }
+
+    bool Sandbox::run_roll(const TransitionParams& _params) {
+        return InputManager::isKeyJustPressed(Key::Space);
+    }
+
+    bool Sandbox::roll_run(const TransitionParams& _params) {
+        return InputManager::isKeyJustPressed(Key::Backspace);
     }
 }

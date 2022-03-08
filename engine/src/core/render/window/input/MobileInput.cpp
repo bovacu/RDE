@@ -9,9 +9,14 @@ namespace engine {
     void MobileInput::init(Window* _window) {
         window = _window;
 
-        events[SystemEventEnum::MOBILE_TOUCH_DOWN_E] = BIND_FUNC_1(MobileInput::onTouchDown);
-        events[SystemEventEnum::MOBILE_TOUCH_UP_E] = BIND_FUNC_1(MobileInput::onTouchUp);
-        events[SystemEventEnum::MOBILE_TOUCH_MOVED] = BIND_FUNC_1(MobileInput::onTouchMoved);
+        UDelegate<void(SDL_Event&)> otdDel, otuDel, otmDel;
+        otdDel.bind<&MobileInput::onTouchDown>(this);
+        otuDel.bind<&MobileInput::onTouchUp>(this);
+        otmDel.bind<&MobileInput::onTouchMoved>(this);
+
+        events[SystemEventEnum::MOBILE_TOUCH_DOWN_E] = otdDel;
+        events[SystemEventEnum::MOBILE_TOUCH_UP_E] = otuDel;
+        events[SystemEventEnum::MOBILE_TOUCH_MOVED] = otmDel;
 
         for(int _i = 0; _i < 20; _i++)
             pressedFingers[_i] = -1;

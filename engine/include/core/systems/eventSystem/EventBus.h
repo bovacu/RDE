@@ -15,23 +15,24 @@ class EventBus {
         typedef std::function<bool(Args...)> HandlerFunc;
 
     private:
-        std::map<Type, std::vector<HandlerFunc>> handlers;
+        std::map<Type, engine::MDelegate<bool(Args...)>> handlers;
 
     public:
         class HandlerId {
             public:
                 HandlerId() : valid(false) {  }
                 friend class EventBus<Args...>;
-                typename std::vector<HandlerFunc>::iterator iter;
-                explicit HandlerId(typename std::vector<HandlerFunc>::iterator i) : iter(i), valid(true) {  }
+                size_t id{};
+                explicit HandlerId(size_t _id) : id(_id), valid(true) {  }
                 bool valid;
         };
 
         // register to be notified
-        HandlerId subscribe(const Type& _key, HandlerFunc _func) {
-            if (_func) {
-                handlers[_key].push_back(_func);
-                return HandlerId(--handlers[_key].end());
+        template<auto Func, typename Class>
+        HandlerId subscribe(const Type& _key, Class* _class) {
+            if (Func) {
+                handlers[_key].template bind<Func>(_class);
+                return HandlerId(handlers[_key].getEnd());
             }
             return HandlerId();
         }
@@ -43,23 +44,19 @@ class EventBus {
             }
 
             if (_handlerId.valid) {
-                handlers[_type].erase(_handlerId.iter);
+                handlers[_type].remove(_handlerId.id);
             } else
                 LOG_W_TIME("Tried to unsubscribe an event", typeid(_type).name()," that wasn't subscribed yet!")
         }
 
         bool dispatch(const Type& _type, Args... _args) {
             if(!hasType(_type)) {
-//                LOG_W_TIME("Tried to dispatch Type ", typeid(_type).name(), "[", _type, "] but it wasn't subscribed!")
                 return false;
             }
 
-            bool _success = false;
-            for (auto& _cb : handlers[_type]) {
-                _success |= _cb(_args...);
-            }
-
-            return _success;
+            std::vector<bool> _results;
+            handlers[_type].exec(_results, _args...);
+            return std::all_of(_results.begin(), _results.end(), [](bool v) { return v; });
         }
 
         bool isSubscribed(const Type& _type) {

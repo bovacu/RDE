@@ -54,7 +54,7 @@ namespace engine {
         friend class InputManager;
         protected:
             Window* window = nullptr;
-            std::unordered_map<int, std::function<void(SDL_Event&)>> events;
+            std::unordered_map<int, UDelegate<void(SDL_Event&)>> events;
             std::vector<SystemEventEnum> ignoredEvents;
 
         public:

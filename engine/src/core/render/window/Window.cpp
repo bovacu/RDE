@@ -135,7 +135,7 @@ namespace engine {
         return window;
     }
 
-    void Window::setEventCallback(const EventCallbackFn& _callback) {
+    void Window::setEventCallback(const UDelegate<void(Event&)>& _callback) {
         data.eventCallback = _callback;
     }
 

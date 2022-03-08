@@ -23,13 +23,6 @@ namespace engine {
         currentNode = &animations[_animationName];
     }
 
-    void AnimationSystem::createTransition(const std::string& _initialAnimation, const std::string& _finalAnimation, transitionFunc _condition) {
-        std::string _transitionCode = _initialAnimation + "_" + _finalAnimation;
-        bus.subscribe(_transitionCode, std::move(_condition));
-        AnimationTransition _transition { _transitionCode, &animations[_finalAnimation] };
-        animations[_initialAnimation].transitions.push_back(_transition);
-    }
-
     void AnimationSystem::setAnimationTimeBetweenFrames(const std::string& _animation, float _timeBetweenFrames) {
         if(_timeBetweenFrames <= 0) return;
         animations[_animation].animation.setTimeBetweenFrames(_timeBetweenFrames);

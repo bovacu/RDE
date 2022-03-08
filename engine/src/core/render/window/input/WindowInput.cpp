@@ -9,12 +9,21 @@ namespace engine {
 
     void WindowInput::init(Window* _window) {
         window = _window;
-        events[(int)SystemEventEnum::WINDOW_EVENT] = BIND_FUNC_1(WindowInput::onWindowEvent);
-        events[(int)SystemEventEnum::APP_ON_DESTROY_E] = BIND_FUNC_1(WindowInput::onDestroyApp);
-        events[(int)SystemEventEnum::APP_DID_ENTER_BACK_E] = BIND_FUNC_1(WindowInput::onDidEnterBackground);
-        events[(int)SystemEventEnum::APP_DID_ENTER_FOREG_E] = BIND_FUNC_1(WindowInput::onDidEnterForegroundApp);
-        events[(int)SystemEventEnum::APP_WILL_ENTER_BACK_E] = BIND_FUNC_1(WindowInput::onWillEnterBackground);
-        events[(int)SystemEventEnum::APP_WILL_ENTER_FOREG] = BIND_FUNC_1(WindowInput::onWillEnterForegroundApp);
+
+        UDelegate<void(SDL_Event&)> weDel, wdeDel, wdebeDel, wdefeDel, wwebeDel, wwefeDel;
+        weDel.bind<&WindowInput::onWindowEvent>(this);
+        wdeDel.bind<&WindowInput::onDestroyApp>(this);
+        wdebeDel.bind<&WindowInput::onDidEnterBackground>(this);
+        wdefeDel.bind<&WindowInput::onDidEnterForegroundApp>(this);
+        wwebeDel.bind<&WindowInput::onWillEnterBackground>(this);
+        wwefeDel.bind<&WindowInput::onWillEnterForegroundApp>(this);
+
+        events[(int)SystemEventEnum::WINDOW_EVENT] = weDel;
+        events[(int)SystemEventEnum::APP_ON_DESTROY_E] = wdeDel;
+        events[(int)SystemEventEnum::APP_DID_ENTER_BACK_E] = wdebeDel;
+        events[(int)SystemEventEnum::APP_DID_ENTER_FOREG_E] = wdefeDel;
+        events[(int)SystemEventEnum::APP_WILL_ENTER_BACK_E] = wwebeDel;
+        events[(int)SystemEventEnum::APP_WILL_ENTER_FOREG] = wwefeDel;
 
         ignoredEvents = { WINDOW_AUDIO_DEVICE_CONNECTED_E, WINDOW_AUDIO_DEVICE_DISCONNECTED_E };
     }

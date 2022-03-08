@@ -51,7 +51,7 @@ namespace engine {
                 bool fullscreen;
                 Vec2I position;
 
-                EventCallbackFn eventCallback;
+                UDelegate<void(Event&)> eventCallback;
             };
 
             WindowData data;
@@ -103,7 +103,7 @@ namespace engine {
 
             /// Sets the method that will be executed when a polled event triggers.
             /// @param _callback a void method with an Event& as parameter.
-            void setEventCallback(const EventCallbackFn& _callback);
+            void setEventCallback(const UDelegate<void(Event&)>& _callback);
 
             /// Enables or disables VSync.
             /// @param _enable true/false to enable/disable.
