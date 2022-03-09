@@ -3,8 +3,6 @@
 #include "Sandbox.h"
 #include "core/Engine.h"
 #include "core/procedural/CellularAutomataMapGenerator.h"
-#include "core/scene/Scene.h"
-#include "core/scene/Nodes.h"
 
 //#if IS_ANDROID()
 //#include <nativeCode/include/NativeAds.h>
@@ -20,24 +18,28 @@ namespace engine {
         TextureAtlasManager::get().addAtlas(50, 50, "assets/test/test.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
-        animationSystem.createAnimation("run", "run", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
-        animationSystem.setInitialAnimation("run");
+        mainScene = new Scene("MainScene");
+        auto _player = mainScene->createNode("player");
+        auto _sprite = mainScene->addComponent<SpriteRenderer>(_player->id);
+        _sprite->layer = 10;
+        _sprite->texture = TextureAtlasManager::get().getTile("run", "run_0");
+        mainScene->getComponent<Transform>(_player->id)->setPosition({95, 0});
 
-        animationSystem.createAnimation("roll", "run", {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23});
-        animationSystem.createTransition<&Sandbox::run_roll>("run", "roll", this);
-        animationSystem.createTransition<&Sandbox::roll_run>("roll", "run", this);
+        auto _animationSystem = mainScene->addComponent<AnimationSystem>(_player->id);
 
-        animationSystem.setInitialAnimation("run");
+        _animationSystem->createAnimation("run", "run", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+        _animationSystem->setInitialAnimation("run");
+        _animationSystem->createAnimation("roll", "run", {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23});
+        _animationSystem->createTransition<&Sandbox::run_roll>("run", "roll", this);
+        _animationSystem->createTransition<&Sandbox::roll_run>("roll", "run", this);
+        _animationSystem->setInitialAnimation("run");
+        _animationSystem->start();
 
-        player.init();
-        player.setPosition({95, 0});
-        player.setLayer(10);
-
-        animationSystem.start();
-
-        text.init(_font, "Hello World");
-        text.setPosition({-350, 250});
-        text.setTextColor(Color::Green);
+        auto _text = mainScene->createNode("text");
+        auto* _textComp = mainScene->addComponent<Text>(_text->id);
+        _textComp->init(_font, "Hello World");
+        mainScene->getComponent<Transform>(_text->id)->setPosition({-350, 250});
+        _textComp->getRenderer().color = Color::Green;
 
         int _line = 0;
         int _row = 0;
@@ -47,34 +49,18 @@ namespace engine {
                 _row = 0;
             }
 
-            Sprite _s;
-            _s.init();
             int _index = _i > 35 ? 35 : _i;
-            _s.setTexture(TextureAtlasManager::get().getTile("test", "test_" + std::to_string(_index)));
-            _s.setPosition({60.f + (float)52 * _row, (float)(200 - _line * 52)});
-            _s.setLayer(1);
-            sprites.push_back(_s);
+            auto _s = mainScene->createNode("test_" + std::to_string(_index));
+            auto _spriteRenderer = mainScene->addComponent<SpriteRenderer>(_s->id);
+            _spriteRenderer->texture = TextureAtlasManager::get().getTile("test", "test_" + std::to_string(_index));
+            _spriteRenderer->layer = 1;
+
+            mainScene->getComponent<Transform>(_s->id)->setPosition({60.f + (float)52 * _row, (float)(200 - _line * 52)});
 
             _row++;
         }
-//        auto& _music = SoundManager::get().loadMusic("assets/sounds/getout.ogg");
-//        SoundManager::get().playMusic(_music.name);
-//        #if IS_ANDROID()
-//            NativeAds::get().loadAd(AdType::BANNER);
-//        #endif
 
         mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
-
-        Scene _scene("A");
-        auto _b = _scene.createNode("B");
-        auto _c = _scene.createNode("C");
-        auto _d = _scene.createNode("D");
-        auto _e = _scene.createNode("E", &_c);
-        auto _f = _scene.createNode("F", &_c);
-        auto _g = _scene.createNode("G", &_d);
-        auto _h = _scene.createNode("H", &_f);
-
-        LOG_W(_scene.toString())
     }
 
     void Sandbox::onEvent(Event& _event) {
@@ -84,14 +70,12 @@ namespace engine {
 
     void Sandbox::onUpdate(Delta _dt) {
         if(InputManager::isKeyJustPressed(KeyCode::Enter)) {
-            player.setShader(ShaderManager::get().getShader("outline"));
+            mainScene->getComponent<SpriteRenderer>(mainScene->getNode("player")->id)->shaderID = ShaderManager::get().getShader("outline");
         }
 
         if(InputManager::isKeyJustPressed(KeyCode::Escape)) {
-            player.setShader(ShaderManager::get().getShader("basic"));
+            mainScene->getComponent<SpriteRenderer>(mainScene->getNode("player")->id)->shaderID = ShaderManager::get().getShader("basic");
         }
-
-        animationSystem.update(_dt, player);
 
         if(InputManager::isGamepadButtonJustPressed(GamePadButtons::ButtonA))
             InputManager::gamepadVibrate();
@@ -101,6 +85,8 @@ namespace engine {
 //                NativeAds::get().showAd(AdType::BANNER);
 //            #endif
         }
+
+        mainScene->onUpdate(_dt);
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {
@@ -108,12 +94,7 @@ namespace engine {
     }
 
     void Sandbox::onRender(Delta _dt) {
-        Renderer::draw(player);
-        for(auto& _sprite : sprites)
-            Renderer::draw(_sprite);
-        Renderer::draw(text);
-
-        Renderer::drawSquare(player.getPosition(), {64, 96}, {255, 255, 0, 125});
+        mainScene->onRender();
     }
 
     void Sandbox::onImGuiRender(Delta _dt) {
@@ -122,6 +103,7 @@ namespace engine {
 
     void Sandbox::onEnd() {
         Layer::onEnd();
+        delete mainScene;
     }
 
     bool Sandbox::onMouseScrolled(MouseScrolledEvent& _event) {

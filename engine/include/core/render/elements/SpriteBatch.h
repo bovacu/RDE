@@ -1,12 +1,11 @@
 #pragma once
 #include <vector>
 #include "glm/gtc/matrix_transform.hpp"
-#include "Texture.h"
-#include "Sprite.h"
+#include "core/render/elements/Texture.h"
 #include "core/render/Camera.h"
 #include "core/render/shapes/Shape.h"
 #include "core/systems/uiSystem/Text.h"
-#include "ShaderManager.h"
+#include "core/render/elements/ShaderManager.h"
 
 namespace engine {
     struct Vertex2dUVColor {
@@ -41,8 +40,8 @@ namespace engine {
                 Texture* texture;
                 Window* window = nullptr;
                 friend class SpriteBatch;
-                void addSprite(Sprite& _sprite);
-                void addText(Text& _text);
+                void addSprite(SpriteRenderer& _spriteRenderer, Transform& _transform);
+                void addText(Text& _text, SpriteRenderer& _spriteRenderer, Transform& _transform);
         };
 
         public:
@@ -64,7 +63,7 @@ namespace engine {
             std::vector<Batch> batches;
 
         private:
-            Batch& getBatch(IRenderizable& _renderizable, int _layer, BatchPriority _priority);
+            Batch& getBatch(SpriteRenderer& _spriteRenderer, int _layer, BatchPriority _priority);
             void orderBatches();
 
         public:
@@ -74,8 +73,8 @@ namespace engine {
             void init(Window* _window);
             void beginDraw(Camera& _camera);
             void draw(const glm::vec4& _destRect, const glm::vec4& _sourceRect, const glm::vec4& _color, Texture* _texture, float _rotation = 0);
-            void draw(Sprite& _sprite);
-            void draw(Text& _text);
+            void draw(SpriteRenderer& _spriteRenderer, Transform& _transform);
+            void draw(Text& _text, Transform& _transform);
             void flush();
 
             void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Green);

@@ -53,12 +53,12 @@ namespace engine {
         batch.flush();
     }
 
-    void Renderer::draw(Sprite& _sprite) {
-        batch.draw(_sprite);
+    void Renderer::draw(SpriteRenderer& _spriteRenderer, Transform& _transform) {
+        batch.draw(_spriteRenderer, _transform);
     }
 
-    void Renderer::draw(Text& _text) {
-        batch.draw(_text);
+    void Renderer::draw(Text& _text, Transform& _transform) {
+        batch.draw(_text, _transform);
     }
 
     void Renderer::beginDebugDraw(Camera& _camera, float _thickness) {

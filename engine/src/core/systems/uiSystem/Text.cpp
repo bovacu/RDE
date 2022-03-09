@@ -8,9 +8,10 @@ namespace engine {
         font = _font;
         innerText = _text;
         recalcTextDimensions(_text);
-        shaderID = ShaderManager::get().getShader("basicText");
+        spriteRenderer.shaderID = ShaderManager::get().getShader("basicText");
         debugShape.setOutlineColor(Color::Green);
         debugShape.showInnerColor(false);
+        spriteRenderer.texture = &font->getTexture();
     }
 
     void Text::setText(const std::string& _text) {
@@ -28,30 +29,6 @@ namespace engine {
 
     std::string& Text::getText() {
         return innerText;
-    }
-
-    void Text::setPosition(const Vec2F& _position) {
-        transform.setPosition(_position);
-    }
-
-    void Text::setRotation(float _rotation) {
-        transform.setRotation(_rotation);
-    }
-
-    void Text::setScale(const Vec2F& _scale) {
-        transform.setScale(_scale);
-    }
-
-    Vec2F Text::getPosition() {
-        return transform.getPosition();
-    }
-
-    float Text::getRotation() {
-        return transform.getRotation();
-    }
-
-    Vec2F Text::getScale() {
-        return transform.getScale();
     }
 
     void Text::recalcTextDimensions(const std::string& _text) {
@@ -74,7 +51,7 @@ namespace engine {
             size.y = std::max(size.y, _char.bitmapSize.y - _char.bearing.y);
         }
 
-        debugShape.makeSquare(getPosition(), size);
+//        debugShape.makeSquare(getPosition(), size);
     }
 
     Vec2F Text::getTextSize() {
@@ -109,29 +86,11 @@ namespace engine {
         recalcTextDimensions(innerText);
     }
 
-    void Text::setTextColor(const Color& _color) {
-        textColor = _color;
-    }
-
-    Color& Text::getColor() {
-        return textColor;
-    }
-
-    ShaderID Text::getShaderID() {
-        return shaderID;
-    }
-
-    Texture* Text::getTexture() {
-        return &font->getTexture();
-    }
-
-    void Text::setShader(ShaderID _shaderID) {
-        shaderID = _shaderID;
-    }
-
-    void Text::setTexture(Texture* _texture) {  }
-
     Shape& Text::getDebugShape() {
         return debugShape;
+    }
+
+    SpriteRenderer& Text::getRenderer() {
+        return spriteRenderer;
     }
 }

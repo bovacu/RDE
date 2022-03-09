@@ -91,12 +91,12 @@ namespace engine {
 //        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(sourceRect.z, sourceRect.w), color);
     }
 
-    void SpriteBatch::draw(Sprite& _sprite) {
-        getBatch(_sprite, _sprite.getLayer(), BatchPriority::SpritePriority).addSprite(_sprite);
+    void SpriteBatch::draw(SpriteRenderer& _spriteRenderer, Transform& _transform) {
+        getBatch(_spriteRenderer, _spriteRenderer.layer, BatchPriority::SpritePriority).addSprite(_spriteRenderer, _transform);
     }
 
-    void SpriteBatch::draw(Text& _text) {
-        getBatch(_text, 0, BatchPriority::TextPriority).addText(_text);
+    void SpriteBatch::draw(Text& _text, Transform& _transform) {
+        getBatch(_text.getRenderer(), 0, BatchPriority::TextPriority).addText(_text, _text.getRenderer(), _transform);
     }
 
     void SpriteBatch::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
@@ -255,9 +255,9 @@ namespace engine {
         glLineWidth(_thickness);
     }
 
-    SpriteBatch::Batch& SpriteBatch::getBatch(IRenderizable& _renderizable, int _layer, BatchPriority _priority) {
+    SpriteBatch::Batch& SpriteBatch::getBatch(SpriteRenderer& _spriteRenderer, int _layer, BatchPriority _priority) {
         for(auto& _batch : batches)
-            if(_renderizable.getTexture()->getGLTexture() == _batch.texture->getGLTexture() && _layer == _batch.layer && _batch.shaderID == _renderizable.getShaderID())
+            if(_spriteRenderer.texture->getGLTexture() == _batch.texture->getGLTexture() && _layer == _batch.layer && _batch.shaderID == _spriteRenderer.shaderID)
                 return _batch;
 
         LOG_W("Created a new batch")
@@ -266,9 +266,9 @@ namespace engine {
         _batch.window = window;
         _batch.aspectRatio = aspectRatio;
         _batch.layer = _layer;
-        _batch.texture = _renderizable.getTexture();
+        _batch.texture = _spriteRenderer.texture;
         _batch.priority = _priority;
-        _batch.shaderID = _renderizable.getShaderID();
+        _batch.shaderID = _spriteRenderer.shaderID;
         batches.push_back(_batch);
 
         orderBatches();
@@ -290,25 +290,24 @@ namespace engine {
         });
     }
 
-    void SpriteBatch::Batch::addSprite(Sprite& _sprite) {
+    void SpriteBatch::Batch::addSprite(SpriteRenderer& _spriteRenderer, Transform& _transform) {
         if(texture == nullptr)
-            texture = _sprite.getTexture();
+            texture = _spriteRenderer.texture;
 
-        auto _pos = Util::worldToScreenCoords({_sprite.getPosition().x * scalingFactor.x, _sprite.getPosition().y * scalingFactor.y}, window, aspectRatio);
+        auto _pos = Util::worldToScreenCoords({_transform.getPosition().x * scalingFactor.x, _transform.getPosition().y * scalingFactor.y}, window, aspectRatio);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
 
-        if(_sprite.getRotation() != 0)
-            _transformMat = glm::rotate(_transformMat, glm::radians(_sprite.getRotation()), { 0.0f, 0.0f, 1.0f });
+        if(_transform.getRotation() != 0)
+            _transformMat = glm::rotate(_transformMat, glm::radians(_transform.getRotation()), { 0.0f, 0.0f, 1.0f });
 
-        if(_sprite.getScale() != 1 || scalingFactor != 1)
-            _transformMat = glm::scale(_transformMat, {scalingFactor.x * _sprite.getScale().x, scalingFactor.y * _sprite.getScale().y , 1.0f });
+        if(_transform.getScale() != 1 || scalingFactor != 1)
+            _transformMat = glm::scale(_transformMat, {scalingFactor.x * _transform.getScale().x, scalingFactor.y * _transform.getScale().y , 1.0f });
 
+        Vec2F _textureOrigin = {(float)_spriteRenderer.texture->getRegion().bottomLeftCorner.x, (float)_spriteRenderer.texture->getRegion().bottomLeftCorner.y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_spriteRenderer.texture->getSize().x, _textureOrigin.y / (float)_spriteRenderer.texture->getSize().y};
 
-        Vec2F _textureOrigin = {(float)_sprite.getTexture()->getRegion().bottomLeftCorner.x, (float)_sprite.getTexture()->getRegion().bottomLeftCorner.y};
-        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_sprite.getTexture()->getSize().x, _textureOrigin.y / (float)_sprite.getTexture()->getSize().y};
-
-        Vec2F _textureTileSize = {(float)_sprite.getTexture()->getRegion().size.x, (float)_sprite.getTexture()->getRegion().size.y};
-        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_sprite.getTexture()->getSize().x, _textureTileSize.y / (float)_sprite.getTexture()->getSize().y};
+        Vec2F _textureTileSize = {(float)_spriteRenderer.texture->getRegion().size.x, (float)_spriteRenderer.texture->getRegion().size.y};
+        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_spriteRenderer.texture->getSize().x, _textureTileSize.y / (float)_spriteRenderer.texture->getSize().y};
         auto _textureTileSizeOnScreen = Util::worldToScreenSize(_textureTileSize, window, aspectRatio);
 
         glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -316,8 +315,8 @@ namespace engine {
         glm::vec4 _topRightTextureCorner = {_textureTileSizeOnScreen.x, _textureTileSizeOnScreen.y, 0.0f, 1.0f };
         glm::vec4 _topLeftTextureCorner = {-_textureTileSizeOnScreen.x, _textureTileSizeOnScreen.y, 0.0f, 1.0f };
 
-        glm::vec4 _color = {(float)_sprite.getColor().r / 255.f, (float)_sprite.getColor().g/ 255.f,
-                            (float)_sprite.getColor().b/ 255.f, (float)_sprite.getColor().a/ 255.f};
+        glm::vec4 _color = {(float)_spriteRenderer.color.r / 255.f, (float)_spriteRenderer.color.g/ 255.f,
+                            (float)_spriteRenderer.color.b/ 255.f, (float)_spriteRenderer.color.a/ 255.f};
 
         vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner,glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color);
         vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
@@ -327,7 +326,7 @@ namespace engine {
         vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
     }
 
-    void SpriteBatch::Batch::addText(Text& _text) {
+    void SpriteBatch::Batch::addText(Text& _text, SpriteRenderer& _spriteRenderer, Transform& _transform) {
         if(texture == nullptr) {
             texture = &_text.getFont()->getTexture();
         }
@@ -335,8 +334,8 @@ namespace engine {
         auto* _atlas = _text.getFont();
         auto _atlasSize = _atlas->getSize();
 
-        float _x = _text.getPosition().x - _text.getTextSize().x / 2.f;
-        float _y = _text.getPosition().y - _text.getTextSize().y / 4.f;
+        float _x = _transform.getPosition().x - _text.getTextSize().x / 2.f;
+        float _y = _transform.getPosition().y - _text.getTextSize().y / 4.f;
 
         auto* _chars = _atlas->getChars();
 
@@ -348,7 +347,7 @@ namespace engine {
 
             if(_char == '\n') {
                 _y -= _chars[_text.getText()[0]].bitmapSize.y * 0.8f;
-                _x = _text.getPosition().x - _text.getTextSize().x / 2.f;
+                _x = _transform.getPosition().x - _text.getTextSize().x / 2.f;
                 continue;
             }
 
@@ -360,13 +359,13 @@ namespace engine {
             auto _pos = Util::worldToScreenSize({_x * scalingFactor.x, _y * scalingFactor.y}, window, aspectRatio);
             auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
 
-            if(_text.getRotation() != 0)
-                _transformMat = glm::rotate(_transformMat, glm::radians(_text.getRotation()), { 0.0f, 0.0f, 1.0f });
+            if(_transform.getRotation() != 0)
+                _transformMat = glm::rotate(_transformMat, glm::radians(_transform.getRotation()), { 0.0f, 0.0f, 1.0f });
 
-            if(_text.getScale() != 1 || scalingFactor != 1)
-                _transformMat = glm::scale(_transformMat, { scalingFactor.x * _text.getScale().x, scalingFactor.y *  _text.getScale().y, 1.0f });
+            if(_transform.getScale() != 1 || scalingFactor != 1)
+                _transformMat = glm::scale(_transformMat, { scalingFactor.x * _transform.getScale().x, scalingFactor.y *  _transform.getScale().y, 1.0f });
 
-            auto _textColor = _text.getColor();
+            auto _textColor = _spriteRenderer.color;
             glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
 
             auto _positionInScreen = Util::worldToScreenSize({x2, y2}, window, aspectRatio);

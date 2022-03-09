@@ -11,29 +11,20 @@
 
 namespace engine {
 
-    class Text : public IRenderizable {
+    class Text {
         private:
             Font* font;
             std::string innerText;
-            Transform transform;
             Vec2F size;
             float spaceBetweenChars;
             float spaceWidth;
             float enterHeight;
             int fontSize;
-            ShaderID shaderID;
-            Color textColor = Color::White;
+            SpriteRenderer spriteRenderer;
             Shape debugShape;
 
         private:
             void recalcTextDimensions(const std::string& _text);
-
-        public:
-            ShaderID getShaderID() override;
-            void setShader(ShaderID _shaderID) override;
-
-            Texture* getTexture() override;
-            void setTexture(Texture* _texture) override;
 
         public:
             void init(Font* _font, const std::string& _text);
@@ -41,17 +32,11 @@ namespace engine {
             void setText(const std::string& _text);
             void setFont(Font* _font);
 
+            SpriteRenderer& getRenderer();
+
             Font* getFont();
             std::string& getText();
             Vec2F getTextSize();
-
-            void setPosition(const Vec2F& _position);
-            void setRotation(float _rotation);
-            void setScale(const Vec2F& _scale);
-
-            Vec2F getPosition();
-            float getRotation();
-            Vec2F getScale();
 
             void setFontSize(int _fontSize);
             int getFontSize();
@@ -61,9 +46,6 @@ namespace engine {
 
             float getSpacesBetweenChars() const;
             void setSpacesBetweenChars(float _spaceBetweenChars);
-
-            void setTextColor(const Color& _color);
-            Color& getColor();
 
             Shape& getDebugShape();
     };

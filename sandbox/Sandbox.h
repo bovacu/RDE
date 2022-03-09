@@ -8,24 +8,23 @@
 #include "core/util/Util.h"
 #include "core/render/layers/Layer.h"
 #include "core/render/Camera.h"
-#include "core/render/elements/Sprite.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/systems/uiSystem/Text.h"
 #include "core/render/window/event/JoystickEvent.h"
 #include "core/Engine.h"
 #include "core/render/window/event/MobileEvent.h"
+#include "core/scene/Scene.h"
 
 namespace engine {
 
     class Sandbox : public Layer {
         private:
-            std::vector<Sprite> sprites;
-            Sprite player;
             AnimationSystem animationSystem;
             TransitionParams params;
             Text text;
             Engine* engine;
             UDelegate<bool(MouseScrolledEvent&)> mseDelegate;
+            Scene* mainScene;
 
         public:
             Sandbox() : Layer("Sandbox") {  }

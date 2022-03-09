@@ -8,7 +8,7 @@
 #include "core/util/Util.h"
 #include "Animation.h"
 #include "core/systems/eventSystem/EventBus.h"
-#include "core/render/elements/Sprite.h"
+#include "core/scene/Components.h"
 #include <functional>
 
 namespace engine {
@@ -68,7 +68,7 @@ namespace engine {
             void stop();
             void restart();
 
-            void update(float _dt, Sprite& _sprite, TransitionParams _params = {});
+            void update(float _dt, SpriteRenderer& _spriteRenderer, TransitionParams _params = {});
     };
 
     template<auto TransitionFunc, typename Class>

@@ -7,6 +7,8 @@
 #include "submodules/glm/glm/ext/matrix_float4x4.hpp"
 #include "core/util/Util.h"
 #include "core/render/elements/Texture.h"
+#include "core/render/elements/ShaderManager.h"
+#include "core/scene/Scene.h"
 
 namespace engine {
 
@@ -42,15 +44,6 @@ namespace engine {
         explicit operator const glm::mat4& () const { return transformMatrix; }
     };
 
-    struct Node;
-    struct Parent {
-        Node* node;
-
-        Parent() = default;
-        Parent(const Parent& _parent) = default;
-        explicit Parent(Node* _node) : node(_node) {  }
-    };
-
     struct Tag {
         std::string tag;
 
@@ -72,12 +65,20 @@ namespace engine {
     struct SpriteRenderer {
         Color color = Color::White;
         Texture* texture = nullptr;
-        GLuint shaderID = -1;
+        GLuint shaderID = ShaderManager::get().getShader("basic");
         int layer = 0;
 
         SpriteRenderer() = default;
         SpriteRenderer(const SpriteRenderer&) = default;
         SpriteRenderer(Texture* _texture, const Color& _color) : texture(_texture), color(_color) {  }
+    };
+
+    struct Node {
+        Scene* scene = nullptr;
+        Node* parent = nullptr;
+        NodeID id {};
+
+        Node(Scene* _scene, Node* _parent, const NodeID& _id) : scene(_scene), parent(_parent), id(_id) {  }
     };
 
 }
