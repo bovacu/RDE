@@ -25,11 +25,9 @@ namespace engine {
 
     typedef std::vector<std::string> Logs;
 
-    typedef std::function<Logs (const std::vector<std::string>&)> CommandFunc;
-
     class Console {
         private:
-            std::map<std::string, CommandFunc> commands;
+            std::map<std::string, MDelegate<Logs (const std::vector<std::string>&)>> commands;
             std::map<std::string, std::string> commandsAndDescriptions;
             Logs help(const std::vector<std::string>& _arguments = {});
             Logs clear(const std::vector<std::string>& _arguments = {});
@@ -44,10 +42,16 @@ namespace engine {
             static Console& get();
 
             void init();
-            void addCommand(const std::string& _commandName, const std::string& _description, CommandFunc _commandFunc, const std::string& _argumentsDescription = "");
+
+            template<auto Func, typename Class>
+            void addCommand(const std::string& _commandName, const std::string& _description, Class* _class = nullptr, const std::string& _argumentsDescription = "") {
+                commands[_commandName].template bind<Func>(_class);
+                commandsAndDescriptions[_commandName] = _argumentsDescription + ": " + _description;
+            }
             void deleteCommand(const std::string& _commandName);
 
             Logs call(const Command& _command);
+            void collectLogs(const Logs& _log);
 
             std::string getUpCommand();
             std::string getDownCommand();

@@ -12,18 +12,17 @@ namespace engine {
     }
 
     void Console::init() {
-        addCommand("help", "Gives all available commands information", BIND_FUNC_1(Console::help));
-        addCommand("clear", "clears the screen", BIND_FUNC_1(Console::clear));
-        addCommand("history", "shows all the commands used in the session", BIND_FUNC_1(Console::printHistory));
-    }
-
-    void Console::addCommand(const std::string& _commandName, const std::string& _description, CommandFunc _commandFunc, const std::string& _argumentsDescription) {
-        commands[_commandName] = std::move(_commandFunc);
-        commandsAndDescriptions[_commandName] = _argumentsDescription + ": " + _description;
+        addCommand<&Console::help>("help", "Gives all available commands information", this);
+        addCommand<&Console::clear>("clear", "clears the screen", this);
+        addCommand<&Console::printHistory>("history", "shows all the commands used in the session", this);
     }
 
     void Console::deleteCommand(const std::string& _commandName) {
         commands.erase(_commandName);
+    }
+
+    void Console::collectLogs(const Logs& _logs) {
+
     }
 
     Logs Console::call(const Command& _command) {
@@ -43,8 +42,11 @@ namespace engine {
             _logs.push_back(_commandUsed);
         }
 
-        auto _commandResult = commands[_command.name](_command.arguments);
-        _logs.insert(_logs.end(), _commandResult.begin(), _commandResult.end());
+        std::vector<Logs> _commandResult {};
+        commands[_command.name].exec(_commandResult, _command.arguments);
+        for(auto& _c : _commandResult)
+            for(auto& _log : _c)
+                _logs.push_back(_log);
 
         if(_command.name != "clear")
             _logs.emplace_back("\n");

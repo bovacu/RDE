@@ -25,7 +25,6 @@ namespace engine {
             TransitionParams params;
             Text text;
             Engine* engine;
-
             UDelegate<bool(MouseScrolledEvent&)> mseDelegate;
 
         public:

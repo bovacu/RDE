@@ -53,9 +53,9 @@ namespace engine {
 
         frameBuffer = new FrameBuffer(_specs);
 
-        Console::get().addCommand("background_color",
+        Console::get().addCommand<&Engine::changeColorConsoleCommand>("background_color",
                                      "Changes background color 0 <= r,b,g,a <= 255",
-                                     BIND_FUNC_1(Engine::changeColorConsoleCommand),
+                                     this,
                                      "r g b a");
     }
 
@@ -234,6 +234,7 @@ namespace engine {
     Logs Engine::changeColorConsoleCommand(const std::vector<std::string>& _args) {
         backgroundColor = {(unsigned char)std::stoi(_args[0]), (unsigned char)std::stoi(_args[1]),
                            (unsigned char)std::stoi(_args[2]), (unsigned char)std::stoi(_args[3])};
+        Renderer::setClearColor(backgroundColor);
         return {"Changed color"};
     }
 
