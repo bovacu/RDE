@@ -5,9 +5,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine)
 
+add_definitions("-DGDE_EXPORT")
+
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
 SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer sdl2_image sdl2_net ${CMAKE_DL_LIBS}
         ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
+        EnTT::EnTT
         )
 
 find_package(Threads REQUIRED)
@@ -81,6 +84,7 @@ include_directories(submodules/SDL_mixer/include)
 include_directories(submodules/SDL_image)
 include_directories(submodules/glm)
 include_directories(submodules/imgui)
+include_directories(submodules/entt/src)
 
 add_library(glad libs/glad/include/glad/glad.h libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC libs/glad/include/)
@@ -110,6 +114,8 @@ file(GLOB IMGUI_NODE_EDITOR_SOURCES ${IMGUI_NODE_EDITOR_PATH}/*.cpp)
 add_library("ImGuiNodeEditor" STATIC ${IMGUI_NODE_EDITOR_SOURCES})
 target_include_directories("ImGuiNodeEditor" PUBLIC ${IMGUI_NODE_EDITOR_PATH})
 
+add_subdirectory(submodules/entt)
+
 set(GL_PROFILES "GL_PROFILE_GL3")
 
 set(SOURCES
@@ -137,7 +143,7 @@ set(SOURCES
 
         engine/src/core/render/Renderer.cpp engine/include/core/render/Renderer.h engine/include/core/systems/eventSystem/EventBus.h
 
-        engine/include/core/systems/Components.h engine/src/core/render/elements/Sprite.cpp engine/include/core/render/elements/Sprite.h engine/src/core/render/Camera.cpp engine/include/core/render/Camera.h engine/include/core/render/shapes/Shape.h
+        engine/include/core/scene/Components.h engine/src/core/render/elements/Sprite.cpp engine/include/core/render/elements/Sprite.h engine/src/core/render/Camera.cpp engine/include/core/render/Camera.h engine/include/core/render/shapes/Shape.h
 
         engine/include/core/systems/profiling/Profiler.h engine/src/core/systems/profiling/Profiler.cpp engine/include/core/render/layers/ImGuiCore.h
         engine/src/core/render/elements/TextureAtlasManager.cpp engine/include/core/render/elements/TextureAtlasManager.h engine/include/core/util/Rect.h
@@ -158,11 +164,12 @@ set(SOURCES
         engine/include/core/procedural/CellularAutomataMapGenerator.h engine/src/core/procedural/CellularAutomataMapGenerator.cpp
         engine/include/core/systems/fileSystem/FilesSystem.h engine/src/core/systems/fileSystem/FilesSystem.cpp engine/include/core/util/StringUtils.h
         engine/src/core/render/ViewPort.cpp engine/include/core/render/elements/ViewPort.h
-        engine/include/core/util/Delegate.h
+        engine/include/core/util/Delegate.h engine/include/core/scene/Nodes.h
+        engine/include/core/scene/Scene.h engine/src/core/scene/Scene.cpp
         )
 
 set(CPP_HEADERS)
-set(CPP_SOURCES)
+set(CPP_SOURCES )
 
 #GDEFirebase
 

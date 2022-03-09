@@ -4,7 +4,7 @@
 #ifndef ENGINE2_0_COMPONENTS_H
 #define ENGINE2_0_COMPONENTS_H
 
-#include <glm/ext/matrix_float4x4.hpp>
+#include "submodules/glm/glm/ext/matrix_float4x4.hpp"
 #include "core/util/Util.h"
 #include "core/render/elements/Texture.h"
 
@@ -40,6 +40,15 @@ namespace engine {
 
         explicit operator glm::mat4& () { return transformMatrix; }
         explicit operator const glm::mat4& () const { return transformMatrix; }
+    };
+
+    struct Node;
+    struct Parent {
+        Node* node;
+
+        Parent() = default;
+        Parent(const Parent& _parent) = default;
+        explicit Parent(Node* _node) : node(_node) {  }
     };
 
     struct Tag {

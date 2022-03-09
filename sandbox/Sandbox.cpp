@@ -2,9 +2,9 @@
 
 #include "Sandbox.h"
 #include "core/Engine.h"
-#include "core/systems/soundSystem/SoundManager.h"
 #include "core/procedural/CellularAutomataMapGenerator.h"
-#include "core/systems/fileSystem/FilesSystem.h"
+#include "core/scene/Scene.h"
+#include "core/scene/Nodes.h"
 
 //#if IS_ANDROID()
 //#include <nativeCode/include/NativeAds.h>
@@ -65,6 +65,16 @@ namespace engine {
 
         mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
 
+        Scene _scene("A");
+        auto _b = _scene.createNode("B");
+        auto _c = _scene.createNode("C");
+        auto _d = _scene.createNode("D");
+        auto _e = _scene.createNode("E", &_c);
+        auto _f = _scene.createNode("F", &_c);
+        auto _g = _scene.createNode("G", &_d);
+        auto _h = _scene.createNode("H", &_f);
+
+        LOG_W(_scene.toString())
     }
 
     void Sandbox::onEvent(Event& _event) {

@@ -5,7 +5,7 @@
 #define ENGINE2_0_SHAPE_H
 
 #include "core/util/Util.h"
-#include "core/systems/Components.h"
+#include "engine/include/core/scene/Components.h"
 
 namespace engine {
     class Shape {

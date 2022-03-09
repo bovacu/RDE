@@ -1,28 +1,25 @@
 #include "core/util/Clock.h"
-
 #include "core/util/Delta.h"
+#include "SDL_timer.h"
 
 namespace engine {
 
     Clock::Clock() : startTime(0) {  }
 
-    float Clock::getElapsedTimeSc() const {
-//        Delta _now = (float)glfwGetTime();
-//        return _now - startTime;
-        return 0;
+    uint64_t Clock::getElapsedTimeSc() const {
+        uint64_t _now = SDL_GetTicks64();
+        return (_now - startTime) / 1000;
     }
 
-    float Clock::getElapsedTimeMs() const {
-//        Delta _now = (float)glfwGetTime();
-//        return (_now - startTime) * 1000;
-        return 0;
+    uint64_t Clock::getElapsedTimeMs() const {
+        uint64_t _now = SDL_GetTicks64();
+        return _now - startTime;
     }
 
-    float Clock::restart() {
-//        Delta _now = (float)glfwGetTime();
-//        float _elapsed = _now - startTime;
-//        startTime = _now;
-//        return _elapsed;
-        return 0;
+    uint64_t Clock::restart() {
+        uint64_t _now = SDL_GetTicks64();
+        auto _elapsed = _now - startTime;
+        startTime = _now;
+        return _elapsed;
     }
 }

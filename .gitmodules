@@ -31,3 +31,6 @@
 [submodule "submodules/imguiAddons"]
 	path = submodules/imguiAddons
 	url = https://github.com/gallickgunner/ImGui-Addons
+[submodule "submodules/entt"]
+	path = submodules/entt
+	url = https://github.com/skypjack/entt

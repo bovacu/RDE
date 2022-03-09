@@ -7,7 +7,7 @@
 
 #include "core/util/Util.h"
 #include "Texture.h"
-#include "core/systems/Components.h"
+#include "engine/include/core/scene/Components.h"
 #include "IRenderizable.h"
 
 namespace engine {

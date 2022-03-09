@@ -56,6 +56,13 @@
     #define ENGINE_ASSERT(x, ...)
 #endif
 
+#ifdef GDE_EXPORT
+    #define GDE_API [[gnu::visibility("default")]]
+    #define GDE_HIDDEN [[gnu::visibility("hidden")]]
+    #define GDE_INTERNAL [[gnu::visibility("internal")]]
+    #define GDE_DEPRECATED(_explanation) [[gnu::deprecated(_explanation)]]
+#endif
+
 #define ENGINE_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return fn(std::forward<decltype(args)>(args)...); }
 
 // This is for the EventBus
