@@ -91,12 +91,12 @@ namespace engine {
 //        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(sourceRect.z, sourceRect.w), color);
     }
 
-    void SpriteBatch::draw(SpriteRenderer& _spriteRenderer, Transform& _transform) {
+    void SpriteBatch::draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform) {
         getBatch(_spriteRenderer, _spriteRenderer.layer, BatchPriority::SpritePriority).addSprite(_spriteRenderer, _transform);
     }
 
-    void SpriteBatch::draw(Text& _text, Transform& _transform) {
-        getBatch(_text.getRenderer(), 0, BatchPriority::TextPriority).addText(_text, _text.getRenderer(), _transform);
+    void SpriteBatch::draw(const Text& _text, const Transform& _transform) {
+        getBatch(_text.spriteRenderer, 0, BatchPriority::TextPriority).addText(_text, _text.spriteRenderer, _transform);
     }
 
     void SpriteBatch::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
@@ -255,7 +255,7 @@ namespace engine {
         glLineWidth(_thickness);
     }
 
-    SpriteBatch::Batch& SpriteBatch::getBatch(SpriteRenderer& _spriteRenderer, int _layer, BatchPriority _priority) {
+    SpriteBatch::Batch& SpriteBatch::getBatch(const SpriteRenderer& _spriteRenderer, int _layer, BatchPriority _priority) {
         for(auto& _batch : batches)
             if(_spriteRenderer.texture->getGLTexture() == _batch.texture->getGLTexture() && _layer == _batch.layer && _batch.shaderID == _spriteRenderer.shaderID)
                 return _batch;
@@ -290,7 +290,7 @@ namespace engine {
         });
     }
 
-    void SpriteBatch::Batch::addSprite(SpriteRenderer& _spriteRenderer, Transform& _transform) {
+    void SpriteBatch::Batch::addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform) {
         if(texture == nullptr)
             texture = _spriteRenderer.texture;
 
@@ -326,7 +326,7 @@ namespace engine {
         vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
     }
 
-    void SpriteBatch::Batch::addText(Text& _text, SpriteRenderer& _spriteRenderer, Transform& _transform) {
+    void SpriteBatch::Batch::addText(const Text& _text, const SpriteRenderer& _spriteRenderer, const Transform& _transform) {
         if(texture == nullptr) {
             texture = &_text.getFont()->getTexture();
         }

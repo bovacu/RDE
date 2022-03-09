@@ -23,11 +23,11 @@ namespace engine {
         font = _font;
     }
 
-    Font* Text::getFont() {
+    Font* Text::getFont() const {
         return font;
     }
 
-    std::string& Text::getText() {
+    const std::string& Text::getText() const {
         return innerText;
     }
 
@@ -54,7 +54,7 @@ namespace engine {
 //        debugShape.makeSquare(getPosition(), size);
     }
 
-    Vec2F Text::getTextSize() {
+    Vec2F Text::getTextSize() const {
         return size;
     }
 
@@ -88,9 +88,5 @@ namespace engine {
 
     Shape& Text::getDebugShape() {
         return debugShape;
-    }
-
-    SpriteRenderer& Text::getRenderer() {
-        return spriteRenderer;
     }
 }

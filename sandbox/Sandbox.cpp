@@ -39,7 +39,7 @@ namespace engine {
         auto* _textComp = mainScene->addComponent<Text>(_text->id);
         _textComp->init(_font, "Hello World");
         mainScene->getComponent<Transform>(_text->id)->setPosition({-350, 250});
-        _textComp->getRenderer().color = Color::Green;
+        _textComp->spriteRenderer.color = Color::Green;
 
         int _line = 0;
         int _row = 0;
@@ -66,6 +66,8 @@ namespace engine {
     void Sandbox::onEvent(Event& _event) {
         EventDispatcher _dispatcher(_event);
         _dispatcher.dispatchEvent<MouseScrolledEvent>(mseDelegate);
+
+        mainScene->onEvent(_event);
     }
 
     void Sandbox::onUpdate(Delta _dt) {
@@ -80,17 +82,12 @@ namespace engine {
         if(InputManager::isGamepadButtonJustPressed(GamePadButtons::ButtonA))
             InputManager::gamepadVibrate();
 
-        if(InputManager::isMobileScreenJustPressed(0)) {
-//            #if IS_ANDROID()
-//                NativeAds::get().showAd(AdType::BANNER);
-//            #endif
-        }
-
         mainScene->onUpdate(_dt);
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {
         Layer::onFixedUpdate(_dt);
+        mainScene->onFixedUpdate(_dt);
     }
 
     void Sandbox::onRender(Delta _dt) {

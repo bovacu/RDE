@@ -20,11 +20,13 @@ namespace engine {
             float spaceWidth;
             float enterHeight;
             int fontSize;
-            SpriteRenderer spriteRenderer;
             Shape debugShape;
 
         private:
             void recalcTextDimensions(const std::string& _text);
+
+        public:
+            SpriteRenderer spriteRenderer;
 
         public:
             void init(Font* _font, const std::string& _text);
@@ -32,11 +34,9 @@ namespace engine {
             void setText(const std::string& _text);
             void setFont(Font* _font);
 
-            SpriteRenderer& getRenderer();
-
-            Font* getFont();
-            std::string& getText();
-            Vec2F getTextSize();
+            [[nodiscard]] Font* getFont() const;
+            [[nodiscard]] const std::string& getText() const;
+            [[nodiscard]] Vec2F getTextSize() const;
 
             void setFontSize(int _fontSize);
             int getFontSize();

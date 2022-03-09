@@ -65,9 +65,9 @@ namespace engine {
              * Renders a sprite. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
              * @param _sprite The sprite to be drawn.
              */
-            static void draw(SpriteRenderer& _spriteRenderer, Transform& _transform);
+            static void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
 
-            static void draw(Text& _text, Transform& _transform);
+            static void draw(const Text& _text, const Transform& _transform);
 
             /**
              * Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.

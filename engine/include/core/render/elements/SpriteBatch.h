@@ -40,8 +40,8 @@ namespace engine {
                 Texture* texture;
                 Window* window = nullptr;
                 friend class SpriteBatch;
-                void addSprite(SpriteRenderer& _spriteRenderer, Transform& _transform);
-                void addText(Text& _text, SpriteRenderer& _spriteRenderer, Transform& _transform);
+                void addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
+                void addText(const Text& _text, const SpriteRenderer& _spriteRenderer, const Transform& _transform);
         };
 
         public:
@@ -63,7 +63,7 @@ namespace engine {
             std::vector<Batch> batches;
 
         private:
-            Batch& getBatch(SpriteRenderer& _spriteRenderer, int _layer, BatchPriority _priority);
+            Batch& getBatch(const SpriteRenderer& _spriteRenderer, int _layer, BatchPriority _priority);
             void orderBatches();
 
         public:
@@ -73,8 +73,8 @@ namespace engine {
             void init(Window* _window);
             void beginDraw(Camera& _camera);
             void draw(const glm::vec4& _destRect, const glm::vec4& _sourceRect, const glm::vec4& _color, Texture* _texture, float _rotation = 0);
-            void draw(SpriteRenderer& _spriteRenderer, Transform& _transform);
-            void draw(Text& _text, Transform& _transform);
+            void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
+            void draw(const Text& _text, const Transform& _transform);
             void flush();
 
             void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Green);

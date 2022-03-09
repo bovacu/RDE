@@ -53,11 +53,11 @@ namespace engine {
         batch.flush();
     }
 
-    void Renderer::draw(SpriteRenderer& _spriteRenderer, Transform& _transform) {
+    void Renderer::draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform) {
         batch.draw(_spriteRenderer, _transform);
     }
 
-    void Renderer::draw(Text& _text, Transform& _transform) {
+    void Renderer::draw(const Text& _text, const Transform& _transform) {
         batch.draw(_text, _transform);
     }
 
