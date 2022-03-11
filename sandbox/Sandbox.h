@@ -28,6 +28,7 @@ namespace engine {
 
             NodeID square, squareChild;
             Transform* squareTransform;
+            Transform* childTransform;
 
         public:
             Sandbox() : Layer("Sandbox") {  }

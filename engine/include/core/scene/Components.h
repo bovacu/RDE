@@ -70,7 +70,7 @@ namespace engine {
 
         SpriteRenderer() = default;
         SpriteRenderer(const SpriteRenderer&) = default;
-        SpriteRenderer(Texture* _texture, const Color& _color) : texture(_texture), color(_color) {  }
+        explicit SpriteRenderer(Texture* _texture) : texture(_texture) {  }
     };
 
     struct Hierarchy {

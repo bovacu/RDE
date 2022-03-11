@@ -10,6 +10,7 @@
 #include "entt/entt.hpp"
 #include "core/util/Delta.h"
 #include "core/render/window/event/Event.h"
+#include "core/render/elements/Texture.h"
 
 namespace engine {
 
@@ -26,7 +27,9 @@ namespace engine {
             entt::registry registry;
 
         private:
-            void printScene(const entt::entity&, std::ostream& _os, int& _indent);
+            void printScene(const NodeID&, std::ostream& _os, int& _indent);
+            void insert(const NodeID& _node, NodeID& _parent);
+            void remove(const NodeID& _node, bool _delete);
 
         public:
             explicit Scene(const std::string& _sceneName);
@@ -38,7 +41,7 @@ namespace engine {
             void onRender();
 
             NodeID createNode(const std::string& _tag = "", const NodeID& _parent = NODE_ID_NULL);
-            NodeID* createSpriteNode(const std::string& _tag, Node* _parent = nullptr);
+            NodeID createSpriteNode(Texture* _texture, const std::string& _tag = "", const NodeID& _parent = NODE_ID_NULL);
 
             void removeNode(const NodeID& _node);
             void removeNode(const std::string& _nodeTagName);
@@ -48,7 +51,6 @@ namespace engine {
             bool nodeIsLeaf(const NodeID& _nodeID);
 
             void setParent(const NodeID& _node, NodeID& _parent);
-
 
             template<typename Component, typename... Args>
             Component* addComponent(const NodeID& _id, Args... _args);
