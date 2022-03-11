@@ -15,6 +15,8 @@ namespace engine {
 
     typedef entt::entity NodeID;
 
+    #define NODE_ID_NULL entt::null
+
     class Node;
     class Scene {
         friend class Node;
@@ -23,6 +25,7 @@ namespace engine {
             std::string name;
             entt::registry registry;
 
+        private:
             void printScene(const entt::entity&, std::ostream& _os, int& _indent);
 
         public:
@@ -34,16 +37,17 @@ namespace engine {
             void onFixedUpdate(Delta _dt);
             void onRender();
 
-            Node* createNode(const std::string& _tag = "", Node* _parent = nullptr);
-            Node* createSpriteNode(const std::string& _tag, Node* _parent = nullptr);
+            NodeID createNode(const std::string& _tag = "", const NodeID& _parent = NODE_ID_NULL);
+            NodeID* createSpriteNode(const std::string& _tag, Node* _parent = nullptr);
 
-            void removeNode(const Node& _node);
+            void removeNode(const NodeID& _node);
             void removeNode(const std::string& _nodeTagName);
 
-            Node* getNode(const std::string& _tagName);
-            Node* getNode(const NodeID& _nodeID);
+            NodeID getNode(const std::string& _tagName);
 
-            void setParent(const Node& _node, Node& _parent);
+            bool nodeIsLeaf(const NodeID& _nodeID);
+
+            void setParent(const NodeID& _node, NodeID& _parent);
 
 
             template<typename Component, typename... Args>

@@ -73,12 +73,17 @@ namespace engine {
         SpriteRenderer(Texture* _texture, const Color& _color) : texture(_texture), color(_color) {  }
     };
 
-    struct Node {
-        Scene* scene = nullptr;
-        Node* parent = nullptr;
-        NodeID id {};
+    struct Hierarchy {
+        std::size_t children{};
+        NodeID parent       { NODE_ID_NULL };
+        NodeID prevBrother  { NODE_ID_NULL };
+        NodeID nextBrother  { NODE_ID_NULL };
+        NodeID firstChild   { NODE_ID_NULL };
 
-        Node(Scene* _scene, Node* _parent, const NodeID& _id) : scene(_scene), parent(_parent), id(_id) {  }
+        Hierarchy() = default;
+        Hierarchy(const Hierarchy&) = default;
+        Hierarchy(const NodeID& _firstChild, const NodeID& _prevBrother, const NodeID& _nextBrother, const NodeID& _parent)
+        : firstChild(_firstChild), prevBrother(_prevBrother), nextBrother(_nextBrother), parent(_parent) {  }
     };
 
 }

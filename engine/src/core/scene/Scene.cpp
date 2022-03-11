@@ -14,7 +14,7 @@ namespace engine {
         registry.emplace<Tag>(sceneRoot, _sceneName);
         registry.emplace<Transform>(sceneRoot);
         registry.emplace<Active>(sceneRoot, true);
-        registry.emplace<Node>(sceneRoot, this, nullptr, sceneRoot);
+        registry.emplace<Hierarchy>(sceneRoot);
     }
 
 
@@ -23,6 +23,8 @@ namespace engine {
     }
 
     void Scene::onUpdate(Delta _dt) {
+
+
         registry.view<SpriteRenderer, AnimationSystem>().each([&](const auto _entity, SpriteRenderer& _spriteRenderer, AnimationSystem& _animationSystem) {
             _animationSystem.update(_dt, _spriteRenderer);
         });
@@ -43,78 +45,123 @@ namespace engine {
     }
 
 
-    Node* Scene::createNode(const std::string& _tag, Node* _parent) {
-        auto _n = registry.create();
+    NodeID Scene::createNode(const std::string& _tag, const NodeID& _parent) {
+        auto _newNode = registry.create();
 
-        registry.emplace<Tag>(_n, _tag);
-        registry.emplace<Transform>(_n);
-        registry.emplace<Active>(_n, true);
+        auto _parentRef = _parent == NODE_ID_NULL ? sceneRoot : _parent;
+        auto* _newNodeHierarchy = &registry.emplace<Hierarchy>(_newNode);
+        _newNodeHierarchy->parent = _parentRef;
 
-        return &registry.emplace<Node>(_n, this, _parent == nullptr ? &registry.get<Node>(sceneRoot) : _parent, _n);
-    }
+        auto* _parentHierarchy = getComponent<Hierarchy>(_parentRef);
+        auto _firstChild = _parentHierarchy->firstChild;
+        _parentHierarchy->children++;
 
-    Node* Scene::createSpriteNode(const std::string& _tag, Node* _parent) {
-        auto* _node = createNode(_tag, _parent);
-        addComponent<SpriteRenderer>(_node->id);
-        return _node;
-    }
+        if(_firstChild == NODE_ID_NULL) {
+            _parentHierarchy->firstChild = _newNode;
+        } else {
+            auto _currentNode = _firstChild;
+            auto _nBRef = registry.get<Hierarchy>(_firstChild).nextBrother;
 
-    Node* Scene::getNode(const std::string& _tagName) {
-        for(auto [_entity, _tag, _node] : registry.view<Tag, Node>().each()) {
-            if(strcmp(_tag.tag.c_str(), _tagName.c_str()) == 0) return &_node;
+            while(_nBRef != NODE_ID_NULL) {
+                _currentNode = _nBRef;
+                _nBRef = registry.get<Hierarchy>(_nBRef).nextBrother;
+            }
+
+            _newNodeHierarchy->prevBrother = _currentNode;
+            registry.get<Hierarchy>(_currentNode).nextBrother = _newNode;
         }
 
+        registry.emplace<Tag>(_newNode, _tag);
+        registry.emplace<Transform>(_newNode);
+        registry.emplace<Active>(_newNode, true);
+
+        return _newNode;
+    }
+
+    NodeID* Scene::createSpriteNode(const std::string& _tag, Node* _parent) {
+//        auto* _node = createNode(_tag, _parent);
+//        addComponent<SpriteRenderer>(_node->id);
+//        return _node;
         return nullptr;
     }
 
-    Node* Scene::getNode(const NodeID& _nodeID) {
-        return &registry.get<Node>(_nodeID);
+    NodeID Scene::getNode(const std::string& _tagName) {
+        for(auto [_entity, _tag] : registry.view<Tag>().each()) {
+            if(strcmp(_tag.tag.c_str(), _tagName.c_str()) == 0) return _entity;
+        }
+
+        return NODE_ID_NULL;
     }
 
-    void Scene::removeNode(const Node& _node) {
-//        registry.view<Parent>().each([&](Parent& _parent) {
-//            if(_parent.node->id == _node.id) {
-//                removeNode(_node);
-//                delete *nodeTracker.erase(_node.iter).base();
-//            }
-//        });
+    void Scene::removeNode(const NodeID& _node) {
+        if(_node == NODE_ID_NULL) return;
+        auto* _nodeHierarchy = &registry.get<Hierarchy>(_node);
+
+        size_t _childrenCount = _nodeHierarchy->children;
+        for(size_t _child = 0; _child < _childrenCount; _child++) {
+            removeNode(_nodeHierarchy->firstChild);
+        }
+
+        auto* _parentHierarchy = &registry.get<Hierarchy>(_nodeHierarchy->parent);
+        auto _nextBrother = _nodeHierarchy->nextBrother;
+        auto _previousBrother = _nodeHierarchy->prevBrother;
+
+        registry.destroy(_node);
+
+        if(_nextBrother != NODE_ID_NULL)
+            (&registry.get<Hierarchy>(_nextBrother))->prevBrother = _previousBrother;
+
+        if(_previousBrother != NODE_ID_NULL)
+            (&registry.get<Hierarchy>(_previousBrother))->nextBrother = _nextBrother;
+
+        _parentHierarchy->firstChild = _previousBrother != NODE_ID_NULL ? _previousBrother : _nextBrother;
+        _parentHierarchy->children--;
     }
 
     void Scene::removeNode(const std::string& _nodeTagName) {
-//        auto _nodeToRemove = *std::find(nodeTracker.begin(), nodeTracker.end(),
-//           [&](Node* _n) {
-//               return std::equal(registry.get<Tag>(_n->id).tag.begin(), registry.get<Tag>(_n->id).tag.end(), _nodeTagName.c_str());
-//            }).base();
-//
-//        removeNode(*_nodeToRemove);
+        removeNode(getNode(_nodeTagName));
     }
 
     void Scene::printScene(const entt::entity& _id, std::ostream& _os, int& _indent) {
+        if(_id == NODE_ID_NULL) return;
+
         auto _tag = registry.get<Tag>(_id);
         _os << "* " << _tag.tag;
-        auto _view = registry.view<Node>();
 
-        for(auto _i = _view.rbegin(); _i != _view.rend(); _i++) {
-            auto _node = _view.get<Node>((*_i));
-            if(_node.parent != nullptr && _node.id == _id) {
-                _os << "\n";
-                for(int _in = 0; _in < _indent; _in++) _os << "\t";
-                _os << "|__ ";
-                _indent++;
-                printScene((*_i), _os, _indent);
-                _indent--;
-            }
+        auto _hierarchy = registry.get<Hierarchy>(_id);
+
+        if(_hierarchy.firstChild != NODE_ID_NULL) {
+            _indent++;
+            _os << "\n";
+            for(int _in = 0; _in < _indent; _in++) _os << "\t";
+            _os << "|__ ";
+            printScene(_hierarchy.firstChild, _os, _indent);
+            _indent--;
+        }
+
+        if(_hierarchy.nextBrother != NODE_ID_NULL) {
+            _os << "\n";
+            for(int _in = 0; _in < _indent; _in++) _os << "\t";
+            _os << "|__ ";
+
+            printScene(_hierarchy.nextBrother, _os, _indent);
         }
     }
 
     std::string Scene::toString() {
         std::stringstream _ss;
-        int _indent = 0;
+        int _indent = -1;
         printScene(sceneRoot, _ss, _indent);
         return _ss.str();
     }
 
-    void Scene::setParent(const Node& _node, Node& _parent) {
-        registry.get<Node>(_node.id).parent = &_parent;
+    void Scene::setParent(const NodeID& _node, NodeID& _parent) {
+        // REMOVE THE CHILD FROM ITS CURRENT HIERARCHY
+        // UPDATE THE NEW HIERARCHY FOR THE NEW CHILD
+    }
+
+    bool Scene::nodeIsLeaf(const NodeID& _nodeID) {
+        auto _nodeHierarchy = registry.get<Hierarchy>(_nodeID);
+        return _nodeHierarchy.nextBrother == NODE_ID_NULL && _nodeHierarchy.firstChild == NODE_ID_NULL;
     }
 }

@@ -26,6 +26,9 @@ namespace engine {
             UDelegate<bool(MouseScrolledEvent&)> mseDelegate;
             Scene* mainScene;
 
+            NodeID square, squareChild;
+            Transform* squareTransform;
+
         public:
             Sandbox() : Layer("Sandbox") {  }
             void onInit() override;
