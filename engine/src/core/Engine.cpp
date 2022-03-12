@@ -16,12 +16,15 @@ namespace engine {
         UDelegate<void(Event&)> onEventDelegate;
         onEventDelegate.bind<&Engine::onEvent>(this);
         window->setEventCallback(onEventDelegate);
+    }
 
+    void Engine::onInit() {
         lastFrame = 0;
 
         wreDel.bind<&Engine::onWindowResized>(this);
 
-        camera.init(window.get());
+        camera = new Camera;
+        camera->init(window.get());
 
         InputManager::get().init(window.get());
         Console::get().init();
@@ -32,10 +35,10 @@ namespace engine {
 
         Renderer::setClearColor(backgroundColor);
 
-        #if !IS_MOBILE()
+#if !IS_MOBILE()
         imGuiLayer = new ImGuiLayer();
         pushOverlay(imGuiLayer);
-        #endif
+#endif
 
         if(timePerFrame < 0)
             timePerFrame = 1.0f / 60.f;
@@ -44,7 +47,7 @@ namespace engine {
 
         int _width, _height;
         SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
-        camera.onResize(_width, _height);
+        camera->onResize(_width, _height);
 
         FrameBufferSpecification _specs = {
                 (uint32_t)window->getWindowSize().x,
@@ -54,9 +57,9 @@ namespace engine {
         frameBuffer = new FrameBuffer(_specs);
 
         Console::get().addCommand<&Engine::changeColorConsoleCommand>("background_color",
-                                     "Changes background color 0 <= r,b,g,a <= 255",
-                                     this,
-                                     "r g b a");
+                                                                      "Changes background color 0 <= r,b,g,a <= 255",
+                                                                      this,
+                                                                      "r g b a");
     }
 
     void Engine::onRun() {
@@ -138,7 +141,7 @@ namespace engine {
 
         Renderer::clear();
 
-        Renderer::beginDraw(camera);
+        Renderer::beginDraw(*camera);
         for (Layer* _layer : layerStack)
             _layer->onRender(_dt);
         Renderer::endDraw();
@@ -167,7 +170,7 @@ namespace engine {
         int _width, _height;
         SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
         frameBuffer->resize(_width, _height);
-        camera.onResize(_width, _height);
+        camera->onResize(_width, _height);
         return true;
     }
 
@@ -246,6 +249,7 @@ namespace engine {
         Renderer::destroy();
         InputManager::get().destroy();
         delete frameBuffer;
+        delete camera;
     }
 
 }

@@ -12,7 +12,7 @@ namespace engine {
         sceneRoot = registry.create();
 
         registry.emplace<Tag>(sceneRoot, _sceneName);
-        registry.emplace<Transform>(sceneRoot);
+        registry.emplace<Transform>(sceneRoot, this, sceneRoot);
         registry.emplace<Active>(sceneRoot, true);
         registry.emplace<Hierarchy>(sceneRoot);
     }
@@ -53,11 +53,7 @@ namespace engine {
         insert(_newNode, _parentRef);
 
         registry.emplace<Tag>(_newNode, _tag);
-        registry.emplace<Transform>(_newNode);
-
-        auto* _transform = &registry.get<Transform>(_newNode);
-        _transform->parentTransform = &registry.get<Transform>(_parentRef);
-
+        registry.emplace<Transform>(_newNode, this, _newNode);
         registry.emplace<Active>(_newNode, true);
 
         return _newNode;

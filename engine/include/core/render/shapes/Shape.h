@@ -5,7 +5,6 @@
 #define ENGINE2_0_SHAPE_H
 
 #include "core/util/Util.h"
-#include "engine/include/core/scene/Components.h"
 
 namespace engine {
     class Shape {
@@ -14,7 +13,6 @@ namespace engine {
             bool showInner = true, showOuter = true;
             std::vector<Vec2F> points {};
             Vec2F center {};
-            Transform transform;
 
         public:
             Color& getInnerColor() {
@@ -53,24 +51,21 @@ namespace engine {
                 showInner = _show;
             }
 
-            Transform& getTransform() {
-                return transform;
-            }
 
             void setPosition(const Vec2F& _position) {
-                transform.setPosition(_position);
+//                transform.setPosition(_position);
             }
 
             Vec2F getPosition() {
-                return transform.getPosition();
+//                return transform.getPosition();
             }
 
             void setRotation(float _rotation) {
-                transform.setRotation(_rotation);
+//                transform.setRotation(_rotation);
             }
 
             float getRotation() {
-                return transform.getRotation();
+//                return transform.getRotation();
             }
 
             bool isInnerShown() {

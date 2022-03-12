@@ -9,40 +9,11 @@
 #include "core/render/elements/Texture.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/scene/Scene.h"
+#include "core/util/Functions.h"
+#include "glm/ext/matrix_transform.hpp"
+//#include "core/Engine.h"
 
 namespace engine {
-
-    struct Transform {
-        glm::mat4 transformMatrix {1.0f };
-        float rotation = 0.f;
-
-        Transform() = default;
-        Transform(const Transform& _transform) = default;
-        Transform(const glm::mat3& _transform) : transformMatrix(_transform) {  }
-
-        [[nodiscard]] Vec2F getPosition() const { return {transformMatrix[3][0], transformMatrix[3][1]}; }
-        [[nodiscard]] float getX() const { return getPosition().x; }
-        [[nodiscard]] float getY() const { return getPosition().y; }
-
-        Vec2F getScale() const { return {transformMatrix[0][0], transformMatrix[1][1]}; }
-        [[nodiscard]] float getScaleX() const { return getScale().x; }
-        [[nodiscard]] float getScaleY() const { return getScale().y; }
-
-        [[nodiscard]] float getRotation() const { return rotation; }
-
-        void setPosition(const Vec2F& _position) { transformMatrix[3][0] = _position.x; transformMatrix[3][1] = _position.y;}
-        void setX(float _x) { transformMatrix[3][0] = _x; }
-        void setY(float _y) { transformMatrix[3][1] = _y; }
-
-        void setScale(const Vec2F& _scale) { transformMatrix[0][0] = _scale.x; transformMatrix[1][1] = _scale.y;}
-        void setScaleX(float _x) { transformMatrix[0][0] = _x; }
-        void setScaleY(float _y) { transformMatrix[1][1] = _y; }
-
-        void setRotation(float _rotation) { rotation = _rotation; }
-
-        explicit operator glm::mat4& () { return transformMatrix; }
-        explicit operator const glm::mat4& () const { return transformMatrix; }
-    };
 
     struct Tag {
         std::string tag;
@@ -84,6 +55,46 @@ namespace engine {
         Hierarchy(const Hierarchy&) = default;
         Hierarchy(const NodeID& _firstChild, const NodeID& _prevBrother, const NodeID& _nextBrother, const NodeID& _parent)
         : firstChild(_firstChild), prevBrother(_prevBrother), nextBrother(_nextBrother), parent(_parent) {  }
+    };
+
+    struct Transform {
+        Scene* scene = nullptr;
+        NodeID id;
+        glm::mat4 transformMatrix { 1.0f };
+        float rotation = 0.f;
+
+        Transform() = default;
+        ~Transform() = default;
+        Transform(const Transform& _transform) = default;
+        Transform(Scene* _scene, const NodeID& _nodeID) : scene(_scene), id(_nodeID) {  }
+
+        [[nodiscard]] Vec2F getPosition() const;
+        [[nodiscard]] float getX() const { return getPosition().x; }
+        [[nodiscard]] float getY() const { return getPosition().y; }
+
+        [[nodiscard]] Vec2F getScale() const { return { transformMatrix[0][0], transformMatrix[1][1] }; }
+        [[nodiscard]] float getScaleX() const { return getScale().x; }
+        [[nodiscard]] float getScaleY() const { return getScale().y; }
+
+        [[nodiscard]] float getRotation() const { return rotation; }
+
+        void setPosition(const Vec2F& _position);
+        void setX(float _x);
+        void setY(float _y);
+
+        void setScale(const Vec2F& _scale) { transformMatrix[0][0] = _scale.x; transformMatrix[1][1] = _scale.y;}
+        void setScaleX(float _x) { transformMatrix[0][0] = _x; }
+        void setScaleY(float _y) { transformMatrix[1][1] = _y; }
+
+        void setRotation(float _rotation);
+
+        explicit operator glm::mat4& () { return transformMatrix; }
+        explicit operator const glm::mat4& () const { return transformMatrix; }
+
+        private:
+            glm::vec4 transformPosition(const Vec2F& _position);
+            void traverseChildrenPosition(const Vec2F& _distance, const NodeID& _node);
+            void traverseChildrenRotation(float _difference, const NodeID& _node, const NodeID& _parent);
     };
 
 }

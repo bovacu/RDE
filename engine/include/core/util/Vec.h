@@ -30,6 +30,10 @@ class Vec2 {
         return {x - _vec.x, y - _vec.y};
     }
 
+    Vec2<T> operator -(const Vec2<T> _vec) const {
+        return {x - _vec.x, y - _vec.y};
+    }
+
     float operator *(const Vec2<T> _vec) {
         return x * _vec.x + y * _vec.y;
     }

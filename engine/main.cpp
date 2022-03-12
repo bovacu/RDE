@@ -4,6 +4,7 @@
 
     int main(int, char* []) {
         engine::Engine _e;
+        _e.onInit();
         auto* _projectManager = new engine::Sandbox;
         _e.pushLayer(_projectManager);
         _e.onRun();

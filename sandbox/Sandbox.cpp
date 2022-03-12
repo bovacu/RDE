@@ -25,21 +25,22 @@ namespace engine {
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
         mainScene = new Scene("MainScene");
-        auto _player = mainScene->createNode("player");
-        auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
-        _sprite->layer = 10;
-        _sprite->texture = TextureAtlasManager::get().getTile("run", "run_0");
-        mainScene->getComponent<Transform>(_player)->setPosition({95, 0});
-
-        auto _animationSystem = mainScene->addComponent<AnimationSystem>(_player);
-
-        _animationSystem->createAnimation("run", "run", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
-        _animationSystem->setInitialAnimation("run");
-        _animationSystem->createAnimation("roll", "run", {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23});
-        _animationSystem->createTransition<&Sandbox::run_roll>("run", "roll", this);
-        _animationSystem->createTransition<&Sandbox::roll_run>("roll", "run", this);
-        _animationSystem->setInitialAnimation("run");
-        _animationSystem->start();
+//        auto _player = mainScene->createNode("player");
+//        auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
+//        _sprite->layer = 10;
+//        _sprite->texture = TextureAtlasManager::get().getTile("run", "run_0");
+//        mainScene->getComponent<Transform>(_player)->setPosition({95, 0});
+//        LOG_W(mainScene->getComponent<Transform>(_player)->getScale())
+//
+//        auto _animationSystem = mainScene->addComponent<AnimationSystem>(_player);
+//
+//        _animationSystem->createAnimation("run", "run", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+//        _animationSystem->setInitialAnimation("run");
+//        _animationSystem->createAnimation("roll", "run", {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23});
+//        _animationSystem->createTransition<&Sandbox::run_roll>("run", "roll", this);
+//        _animationSystem->createTransition<&Sandbox::roll_run>("roll", "run", this);
+//        _animationSystem->setInitialAnimation("run");
+//        _animationSystem->start();
 
 //        auto _text = mainScene->createNode("text");
 //        auto* _textComp = mainScene->addComponent<Text>(_text);
@@ -80,7 +81,19 @@ namespace engine {
         _squareChildSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
         _squareChildSpriteRenderer->color = Color::Green;
         _squareChildSpriteRenderer->layer = 30;
-        mainScene->getComponent<Transform>(squareChild)->setPosition({50, 50});
+        mainScene->getComponent<Transform>(squareChild)->setPosition({0, 75});
+
+        auto _childChild = mainScene->createNode("childChild", squareChild);
+        mainScene->addComponent<SpriteRenderer>(_childChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Yellow;
+        mainScene->getComponent<Transform>(_childChild)->setPosition({-100, 0});
+
+        auto _childChildChild = mainScene->createNode("childChildChild", _childChild);
+        mainScene->addComponent<SpriteRenderer>(_childChildChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Orange;
+        mainScene->getComponent<Transform>(_childChildChild)->setPosition({100, 50});
+
+//        printNode(mainScene, square);
+//        printNode(mainScene, squareChild);
+//        printNode(mainScene, _childChild);
     }
 
     void Sandbox::onEvent(Event& _event) {
@@ -123,6 +136,12 @@ namespace engine {
             childTransform->setPosition({childTransform->getPosition().x, childTransform->getPosition().y + 50 * _dt});
         else if(InputManager::isKeyPressed(KeyCode::Down))
             childTransform->setPosition({childTransform->getPosition().x, childTransform->getPosition().y - 50 * _dt});
+
+        if(InputManager::isKeyPressed(KeyCode::R))
+            squareTransform->setRotation(squareTransform->getRotation() + 50 * _dt);
+
+        if(InputManager::isKeyPressed(KeyCode::E))
+            childTransform->setRotation(childTransform->getRotation() + 50 * _dt);
 
         mainScene->onUpdate(_dt);
     }

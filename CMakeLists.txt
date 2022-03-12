@@ -166,6 +166,7 @@ set(SOURCES
         engine/include/core/systems/fileSystem/FilesSystem.h engine/src/core/systems/fileSystem/FilesSystem.cpp engine/include/core/util/StringUtils.h
         engine/src/core/render/ViewPort.cpp engine/include/core/render/elements/ViewPort.h
         engine/include/core/util/Delegate.h engine/include/core/scene/Scene.h engine/src/core/scene/Scene.cpp
+        engine/src/core/scene/Components.cpp
 
         unitTesting/HierarchyTest.cpp unitTesting/doctest.h
         )

@@ -7,12 +7,12 @@
 
 #include <glm/ext/matrix_float4x4.hpp>
 #include "core/util/Util.h"
-#include "engine/include/core/scene/Components.h"
 #include "core/render/window/event/MouseEvent.h"
 #include "core/render/elements/ViewPort.h"
 
 namespace engine {
 
+    class Transform;
     class Camera {
 
         private:
@@ -21,7 +21,7 @@ namespace engine {
             glm::mat4 projectionMatrix;
             glm::mat4 viewMatrix {1.f};
             glm::mat4 viewProjectionMatrix;
-            Transform transform;
+            Transform* transform;
             IViewPort* viewport;
 
         public:

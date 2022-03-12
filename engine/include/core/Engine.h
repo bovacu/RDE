@@ -28,7 +28,7 @@ namespace engine {
             Delta dt;
             unsigned int fpsCounter = 0, frameCounter = 0;
             Color backgroundColor = Color::Red;
-            Camera camera;
+            Camera* camera;
             FrameBuffer* frameBuffer;
 
         private:
@@ -56,7 +56,7 @@ namespace engine {
         public:
             Engine();
 
-            Camera& getMainCamera() { return camera; }
+            Camera& getMainCamera() { return *camera; }
 
             void setMinimized(bool _isMinimized) { minimized = _isMinimized; }
             bool isMinimized() const { return minimized; }
@@ -133,6 +133,7 @@ namespace engine {
             void setRunning(bool _running) { running = _running; }
 
         public:
+            void onInit();
             /// This method is the main loop of the game, runs until the window is closed or running attribute is set
             /// to false. Runs with an independent frame rate loop.
             void onRun();

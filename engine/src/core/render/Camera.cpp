@@ -4,15 +4,18 @@
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "core/render/Camera.h"
+#include "engine/include/core/scene/Components.h"
 
 namespace engine {
 
     Camera::Camera() {
-        recalculateViewMatrix();
+
     }
 
     void Camera::init(const Window* _window) {
+        transform = new Transform;
         viewport = new FreeViewPort(_window);
+        recalculateViewMatrix();
     }
 
     void Camera::onResize(int _width, int _height) {
@@ -28,32 +31,32 @@ namespace engine {
     }
 
     Transform& Camera::getTransform() {
-        return transform;
+        return *transform;
     }
 
     void Camera::recalculateViewMatrix() {
-        glm::mat4 _transform = glm::translate(glm::mat4(1.0f), {transform.getPosition().x, transform.getPosition().y, 0.0f}) *
-                              glm::rotate(glm::mat4(1.0f), glm::radians(transform.getRotation()), glm::vec3(0, 0, 1));
+        glm::mat4 _transform = glm::translate(glm::mat4(1.0f), {transform->getPosition().x, transform->getPosition().y, 0.0f}) *
+                              glm::rotate(glm::mat4(1.0f), glm::radians(transform->getRotation()), glm::vec3(0, 0, 1));
         viewMatrix = glm::inverse(_transform);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
     }
 
     void Camera::setPosition(const Vec2F& _position) {
-        transform.setPosition(_position);
+        transform->setPosition(_position);
         recalculateViewMatrix();
     }
 
     Vec2F Camera::getPosition() {
-        return transform.getPosition();
+        return transform->getPosition();
     }
 
     void Camera::setRotation(float _rotation) {
-        transform.setRotation(_rotation);
+        transform->setRotation(_rotation);
         recalculateViewMatrix();
     }
 
     float Camera::getRotation() {
-        return transform.getRotation();
+        return transform->getRotation();
     }
 
     glm::mat4& Camera::getViewMatrix() {
@@ -99,6 +102,7 @@ namespace engine {
     }
 
     Camera::~Camera() {
+        delete transform;
         delete viewport;
     }
 
