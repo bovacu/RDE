@@ -78,20 +78,14 @@ namespace engine {
         _t->rotation += _difference;
         auto _parentHierarchy = scene->getComponent<Transform>(_parent);
 
-//        glm::vec4 _direction = glm::vec4{_t->getPosition().x, _t->getPosition().y, 1.f, 1.f}; - glm::vec4{_parentHierarchy->getPosition().x, _parentHierarchy->getPosition().y, 0.f, 0.f};
-//        _t->setPosition(_t->getPosition() + Vec2F{_direction.x, _direction.y});
-//        auto _quat = glm::quat(glm::radians(_difference / 2.f), glm::vec3{0, 0, 1});
-//        auto _newDir = _direction * glm::inverse(_quat);
-//        _t->setPosition(_t->getPosition() + Vec2F{_newDir.x, _newDir.y});
+        auto _cos = std::cos(glm::radians(_difference));
+        auto _sin = std::sin(glm::radians(_difference));
 
-        float cs = std::cos(glm::radians(_difference));
-        float sn = std::sin(glm::radians(_difference));
+        auto _translatedX = _t->getX() - _parentHierarchy->getX();
+        auto _translatedY = _t->getY() - _parentHierarchy->getY();
 
-        float translated_x = _t->getX() - _parentHierarchy->getX();
-        float translated_y = _t->getY() - _parentHierarchy->getY();
-
-        float result_x = translated_x * cs - translated_y * sn;
-        float result_y = translated_x * sn + translated_y * cs;
+        auto result_x = _translatedX * _cos - _translatedY * _sin;
+        auto result_y = _translatedX * _sin + _translatedY * _cos;
 
         result_x += _parentHierarchy->getX();
         result_y += _parentHierarchy->getY();
@@ -101,4 +95,31 @@ namespace engine {
         if(_nodeHierarchy->nextBrother != NODE_ID_NULL)
             traverseChildrenRotation(_difference, _nodeHierarchy->nextBrother, _parent);
     }
+
+
+
+    void Transform::setScale(const Vec2F& _scale) {
+        transformMatrix = glm::scale(transformMatrix, glm::vec3 {getScale().x / _scale.x, getScale().y / _scale.y, 1.f});
+
+        auto _curr = scene->getComponent<Hierarchy>(id);
+        if(_curr->children == 0) return;
+        traverseChildrenScale(_scale, _curr->firstChild);
+    }
+
+    void Transform::traverseChildrenScale(const Vec2F& _scale, const NodeID& _node) {
+        if(_node == NODE_ID_NULL) return;
+        auto* _nodeHierarchy = scene->getComponent<Hierarchy>(_node);
+
+        size_t _childrenCount = _nodeHierarchy->children;
+        for(size_t _child = 0; _child < _childrenCount; _child++) {
+            traverseChildrenScale(_scale, _nodeHierarchy->firstChild);
+        }
+
+        auto* _t = scene->getComponent<Transform>(_node);
+        _t->transformMatrix = glm::scale(_t->transformMatrix, glm::vec3 { _t->getScale().x / _scale.x, _t->getScale().y / _scale.y, 1.f });
+
+        if(_nodeHierarchy->nextBrother != NODE_ID_NULL)
+            traverseChildrenScale(_scale, _nodeHierarchy->nextBrother);
+    }
+
 }

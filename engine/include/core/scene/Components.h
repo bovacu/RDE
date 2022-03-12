@@ -82,7 +82,7 @@ namespace engine {
         void setX(float _x);
         void setY(float _y);
 
-        void setScale(const Vec2F& _scale) { transformMatrix[0][0] = _scale.x; transformMatrix[1][1] = _scale.y;}
+        void setScale(const Vec2F& _scale);
         void setScaleX(float _x) { transformMatrix[0][0] = _x; }
         void setScaleY(float _y) { transformMatrix[1][1] = _y; }
 
@@ -93,8 +93,10 @@ namespace engine {
 
         private:
             glm::vec4 transformPosition(const Vec2F& _position);
+
             void traverseChildrenPosition(const Vec2F& _distance, const NodeID& _node);
             void traverseChildrenRotation(float _difference, const NodeID& _node, const NodeID& _parent);
+            void traverseChildrenScale(const Vec2F& _scale, const NodeID& _node);
     };
 
 }

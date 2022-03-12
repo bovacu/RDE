@@ -143,6 +143,12 @@ namespace engine {
         if(InputManager::isKeyPressed(KeyCode::E))
             childTransform->setRotation(childTransform->getRotation() + 50 * _dt);
 
+        if(InputManager::isKeyPressed(KeyCode::K))
+            squareTransform->setScale({squareTransform->getScale().x + 2 * _dt, squareTransform->getScale().y + 2 * _dt});
+
+        if(InputManager::isKeyPressed(KeyCode::L))
+            squareTransform->setScale({squareTransform->getScale().x - 2 * _dt, squareTransform->getScale().y - 2 * _dt});
+
         mainScene->onUpdate(_dt);
     }
 
