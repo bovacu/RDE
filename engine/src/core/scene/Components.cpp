@@ -15,7 +15,6 @@ namespace engine {
         auto _curr = scene->getComponent<Hierarchy>(id);
         if(_curr->children == 0) return;
         traverseChildrenPosition(_distance, _curr->firstChild);
-
     }
 
     void Transform::setX(float _x) {
@@ -100,7 +99,6 @@ namespace engine {
 
     void Transform::setScale(const Vec2F& _scale) {
         transformMatrix = glm::scale(transformMatrix, glm::vec3 {getScale().x / _scale.x, getScale().y / _scale.y, 1.f});
-
         auto _curr = scene->getComponent<Hierarchy>(id);
         if(_curr->children == 0) return;
         traverseChildrenScale(_scale, _curr->firstChild);

@@ -18,7 +18,6 @@ namespace engine {
 
     #define NODE_ID_NULL entt::null
 
-    class Node;
     class Scene {
         friend class Node;
         private:
@@ -30,6 +29,7 @@ namespace engine {
             void printScene(const NodeID&, std::ostream& _os, int& _indent);
             void insert(const NodeID& _node, NodeID& _parent);
             void remove(const NodeID& _node, bool _delete);
+            void sortHierarchyInMemory();
 
         public:
             explicit Scene(const std::string& _sceneName);

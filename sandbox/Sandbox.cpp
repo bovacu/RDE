@@ -69,31 +69,54 @@ namespace engine {
 
         mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
 
-        square = mainScene->createNode("square");
-        squareTransform = mainScene->getComponent<Transform>(square);
-        auto _squareSpriteRenderer = mainScene->addComponent<SpriteRenderer>(square);
-        _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
-        _squareSpriteRenderer->layer = 30;
+//        square = mainScene->createNode("square");
+//        squareTransform = mainScene->getComponent<Transform>(square);
+//        squareTransform->setPosition({75, -40});
+//        auto _squareSpriteRenderer = mainScene->addComponent<SpriteRenderer>(square);
+//        _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
+//        _squareSpriteRenderer->layer = 30;
+//
+//        squareChild = mainScene->createNode("squareChild", square);
+//        childTransform = mainScene->getComponent<Transform>(squareChild);
+//        auto _squareChildSpriteRenderer = mainScene->addComponent<SpriteRenderer>(squareChild);
+//        _squareChildSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
+//        _squareChildSpriteRenderer->color = Color::Green;
+//        _squareChildSpriteRenderer->layer = 30;
+//        mainScene->getComponent<Transform>(squareChild)->setPosition({0, 75});
 
-        squareChild = mainScene->createNode("squareChild", square);
-        childTransform = mainScene->getComponent<Transform>(squareChild);
-        auto _squareChildSpriteRenderer = mainScene->addComponent<SpriteRenderer>(squareChild);
-        _squareChildSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
-        _squareChildSpriteRenderer->color = Color::Green;
-        _squareChildSpriteRenderer->layer = 30;
-        mainScene->getComponent<Transform>(squareChild)->setPosition({0, 75});
-
-        auto _childChild = mainScene->createNode("childChild", squareChild);
-        mainScene->addComponent<SpriteRenderer>(_childChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Yellow;
-        mainScene->getComponent<Transform>(_childChild)->setPosition({-100, 0});
-
-        auto _childChildChild = mainScene->createNode("childChildChild", _childChild);
-        mainScene->addComponent<SpriteRenderer>(_childChildChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Orange;
-        mainScene->getComponent<Transform>(_childChildChild)->setPosition({100, 50});
+//        auto _childChild = mainScene->createNode("childChild", squareChild);
+//        mainScene->addComponent<SpriteRenderer>(_childChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Yellow;
+//        mainScene->getComponent<Transform>(_childChild)->setPosition({-100, 0});
+//
+//        auto _childChildChild = mainScene->createNode("childChildChild", _childChild);
+//        mainScene->addComponent<SpriteRenderer>(_childChildChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Orange;
+//        mainScene->getComponent<Transform>(_childChildChild)->setPosition({100, 50});
 
 //        printNode(mainScene, square);
 //        printNode(mainScene, squareChild);
 //        printNode(mainScene, _childChild);
+
+
+        Random _r;
+        for(int _i = 0; _i < 10000; _i++) {
+            auto _node = mainScene->createNode(std::to_string(_i));
+            mainScene->addComponent<SpriteRenderer>(_node, TextureAtlasManager::get().getTile("square", "square_0"));
+            mainScene->getComponent<Transform>(_node)->setPosition({_r.randomf(-1280, 1280), _r.randomf(-1280, 1280)});
+        }
+
+//        mainScene->createNode("A");
+//        mainScene->createNode("B");
+//        mainScene->createNode("C");
+//        mainScene->createNode("D");
+//        mainScene->createNode("E");
+//        mainScene->createNode("F", mainScene->getNode("B"));
+//        mainScene->createNode("G", mainScene->getNode("D"));
+//        mainScene->createNode("H", mainScene->getNode("B"));
+//        mainScene->createNode("I", mainScene->getNode("F"));
+//        mainScene->createNode("J", mainScene->getNode("E"));
+//        mainScene->createNode("K", mainScene->getNode("E"));
+//        mainScene->createNode("L", mainScene->getNode("K"));
+//        LOG_W(mainScene->toString())
     }
 
     void Sandbox::onEvent(Event& _event) {

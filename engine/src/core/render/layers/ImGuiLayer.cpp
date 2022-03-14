@@ -199,6 +199,7 @@ namespace engine {
         ImGui::Separator();
         ImGui::Text("Draw Calls: %d", Renderer::getDrawCalls());
         ImGui::Text("Total Triangles: %d", Renderer::getTotalTriangles());
+        ImGui::Text("Total Images: %d", Renderer::getTotalTriangles() / 2);
         ImGui::Separator();
         if(ImGui::Button("Show Metrics")) {
             _showMetrics = !_showMetrics;

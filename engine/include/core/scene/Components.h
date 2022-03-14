@@ -50,6 +50,7 @@ namespace engine {
         NodeID prevBrother  { NODE_ID_NULL };
         NodeID nextBrother  { NODE_ID_NULL };
         NodeID firstChild   { NODE_ID_NULL };
+        NodeID lastChild    { NODE_ID_NULL };
 
         Hierarchy() = default;
         Hierarchy(const Hierarchy&) = default;
@@ -93,7 +94,6 @@ namespace engine {
 
         private:
             glm::vec4 transformPosition(const Vec2F& _position);
-
             void traverseChildrenPosition(const Vec2F& _distance, const NodeID& _node);
             void traverseChildrenRotation(float _difference, const NodeID& _node, const NodeID& _parent);
             void traverseChildrenScale(const Vec2F& _scale, const NodeID& _node);
