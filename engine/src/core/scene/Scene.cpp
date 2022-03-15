@@ -150,25 +150,20 @@ namespace engine {
         auto* _nodeHierarchy = &registry.get<Hierarchy>(_node);
 
         size_t _childrenCount = _nodeHierarchy->children;
-        for(size_t _child = 0; _child < _childrenCount; _child++) {
+        for(size_t _child = 0; _child < _childrenCount; _child++)
             removeNode(_nodeHierarchy->firstChild);
-        }
 
         auto* _parentHierarchy = &registry.get<Hierarchy>(_nodeHierarchy->parent);
         auto _nextBrother = _nodeHierarchy->nextBrother;
         auto _previousBrother = _nodeHierarchy->prevBrother;
 
         if(_delete) registry.destroy(_node);
+        if(_previousBrother != NODE_ID_NULL)        (&registry.get<Hierarchy>(_previousBrother))->nextBrother = _nextBrother;
+        if(_nextBrother != NODE_ID_NULL)            (&registry.get<Hierarchy>(_nextBrother))->prevBrother = _previousBrother;
+        if(_parentHierarchy->firstChild == _node)   _parentHierarchy->firstChild = _nextBrother;
+        if(_parentHierarchy->lastChild == _node)    _parentHierarchy->lastChild = _previousBrother;
 
-        if(_nextBrother != NODE_ID_NULL)
-            (&registry.get<Hierarchy>(_nextBrother))->prevBrother = _previousBrother;
 
-        _parentHierarchy->lastChild = _previousBrother;
-
-        if(_previousBrother != NODE_ID_NULL)
-            (&registry.get<Hierarchy>(_previousBrother))->nextBrother = _nextBrother;
-
-        _parentHierarchy->firstChild = _previousBrother != NODE_ID_NULL ? _previousBrother : _nextBrother;
         _parentHierarchy->children--;
     }
 

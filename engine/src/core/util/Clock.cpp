@@ -4,7 +4,7 @@
 
 namespace engine {
 
-    Clock::Clock() : startTime(0) {  }
+    Clock::Clock() : startTime(SDL_GetTicks64()) {  }
 
     uint64_t Clock::getElapsedTimeSc() const {
         uint64_t _now = SDL_GetTicks64();

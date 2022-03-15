@@ -97,12 +97,27 @@ namespace engine {
 //        printNode(mainScene, _childChild);
 
 
-        Random _r;
-        for(int _i = 0; _i < 10000; _i++) {
-            auto _node = mainScene->createNode(std::to_string(_i));
-            mainScene->addComponent<SpriteRenderer>(_node, TextureAtlasManager::get().getTile("square", "square_0"));
-            mainScene->getComponent<Transform>(_node)->setPosition({_r.randomf(-1280, 1280), _r.randomf(-1280, 1280)});
-        }
+//        Random _r;
+//        for(int _i = 0; _i < 10000; _i++) {
+//            auto _node = mainScene->createNode(std::to_string(_i));
+//            mainScene->addComponent<SpriteRenderer>(_node, TextureAtlasManager::get().getTile("square", "square_0"));
+//            mainScene->getComponent<Transform>(_node)->setPosition({_r.randomf(-1280, 1280), _r.randomf(-1280, 1280)});
+//        }
+
+        Scene scene("SceneTest0");
+        scene.createNode("A");
+        scene.createNode("B");
+        scene.createNode("C");
+        scene.createNode("D");
+        scene.removeNode(scene.getNode("C"));
+        LOG_W(scene.toString())
+
+        scene.removeNode(scene.getNode("D"));
+        LOG_W(scene.toString())
+        scene.removeNode(scene.getNode("A"));
+        LOG_W(scene.toString())
+        scene.removeNode(scene.getNode("B"));
+        LOG_W(scene.toString())
 
 //        mainScene->createNode("A");
 //        mainScene->createNode("B");
