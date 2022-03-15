@@ -27,7 +27,7 @@ namespace engine {
 
         private:
             void printScene(const NodeID&, std::ostream& _os, int& _indent);
-            void insert(const NodeID& _node, NodeID& _parent);
+            void insert(const NodeID& _node, const NodeID& _parent);
             void remove(const NodeID& _node, bool _delete);
             void sortHierarchyInMemory();
 
@@ -50,7 +50,7 @@ namespace engine {
 
             bool nodeIsLeaf(const NodeID& _nodeID);
 
-            void setParent(const NodeID& _node, NodeID& _parent);
+            void setParent(const NodeID& _node, const NodeID& _parent);
 
             template<typename Component, typename... Args>
             Component* addComponent(const NodeID& _id, Args... _args);

@@ -11,7 +11,6 @@
 #include "core/scene/Scene.h"
 #include "core/util/Functions.h"
 #include "glm/ext/matrix_transform.hpp"
-//#include "core/Engine.h"
 
 namespace engine {
 
@@ -60,6 +59,7 @@ namespace engine {
 
     struct Transform {
         Scene* scene = nullptr;
+        Transform* parent = nullptr;
         NodeID id;
         glm::mat4 transformMatrix { 1.0f };
         float rotation = 0.f;

@@ -27,7 +27,7 @@ namespace engine {
 
     glm::vec4 Transform::transformPosition(const Vec2F& _position) {
         auto _scalingFactor = Engine::get().getMainCamera().getViewport()->getScalingFactor();
-        auto _pos = Util::worldToScreenCoords({_position.x * _scalingFactor.x, _position.y * _scalingFactor.y}, &Engine::get().getWindow(), Engine::get().getMainCamera().getAspectRatio());
+        auto _pos = Util::worldToScreenCoords({(parent->getX() + _position.x) * _scalingFactor.x, (_position.y + parent->getY()) * _scalingFactor.y}, &Engine::get().getWindow(), Engine::get().getMainCamera().getAspectRatio());
         auto _translationMat = glm::translate(glm::mat4(1.f), glm::vec3 {1, 1, 1.f});
         return _translationMat[3] * glm::vec4 {_pos.x, _pos.y, 1.f, 1.f};
     }

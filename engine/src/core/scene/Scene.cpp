@@ -56,7 +56,7 @@ namespace engine {
         insert(_newNode, _parentRef);
 //
         registry.emplace<Tag>(_newNode, _tag);
-        registry.emplace<Transform>(_newNode, this, _newNode);
+        registry.emplace<Transform>(_newNode, this, _newNode).parent = &registry.get<Transform>(_parentRef);
         registry.emplace<Active>(_newNode, true);
 
         return _newNode;
@@ -116,7 +116,7 @@ namespace engine {
         return _ss.str();
     }
 
-    void Scene::setParent(const NodeID& _node, NodeID& _parent) {
+    void Scene::setParent(const NodeID& _node, const NodeID& _parent) {
         remove(_node, false);
         insert(_node, _parent);
     }
@@ -126,7 +126,7 @@ namespace engine {
         return _nodeHierarchy.nextBrother == NODE_ID_NULL && _nodeHierarchy.firstChild == NODE_ID_NULL;
     }
 
-    void Scene::insert(const NodeID& _node, NodeID& _parent) {
+    void Scene::insert(const NodeID& _node, const NodeID& _parent) {
         auto* _newNodeHierarchy = &registry.get<Hierarchy>(_node);
         _newNodeHierarchy->parent = _parent;
 
