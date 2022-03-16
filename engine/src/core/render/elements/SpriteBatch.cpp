@@ -295,6 +295,10 @@ namespace engine {
             texture = _spriteRenderer.texture;
 
         auto _transformMat = _transform.transformMatrix;
+        _transformMat[3] = glm::vec4 {_transform.transformMatrix[3][0] * _transform.parent->getScale().x + _transform.parent->transformMatrix[3][0],
+                                      _transform.transformMatrix[3][1] * _transform.parent->getScale().y + _transform.parent->transformMatrix[3][1],
+                                      1.f,
+                                      1.f};
 
         Vec2F _textureOrigin = {(float)_spriteRenderer.texture->getRegion().bottomLeftCorner.x, (float)_spriteRenderer.texture->getRegion().bottomLeftCorner.y};
         Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_spriteRenderer.texture->getSize().x, _textureOrigin.y / (float)_spriteRenderer.texture->getSize().y};
@@ -311,12 +315,12 @@ namespace engine {
         glm::vec4 _color = {(float)_spriteRenderer.color.r / 255.f, (float)_spriteRenderer.color.g/ 255.f,
                             (float)_spriteRenderer.color.b/ 255.f, (float)_spriteRenderer.color.a/ 255.f};
 
-        vertexBuffer.emplace_back(_transform.transformMatrix * _bottomLeftTextureCorner,glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transform.transformMatrix * _bottomRightTextureCorner,glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transform.transformMatrix * _topLeftTextureCorner,glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
-        vertexBuffer.emplace_back(_transform.transformMatrix * _bottomRightTextureCorner,glm::vec2( _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transform.transformMatrix * _topLeftTextureCorner,glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
-        vertexBuffer.emplace_back(_transform.transformMatrix * _topRightTextureCorner,glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner,glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,glm::vec2( _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
     }
 
     void SpriteBatch::Batch::addText(const Text& _text, const SpriteRenderer& _spriteRenderer, const Transform& _transform) {

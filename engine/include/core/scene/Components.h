@@ -93,7 +93,7 @@ namespace engine {
         explicit operator const glm::mat4& () const { return transformMatrix; }
 
         private:
-            glm::vec4 transformPosition(const Vec2F& _position);
+            void transformPosition(const Vec2F& _position, Transform* _node);
             void traverseChildrenPosition(const Vec2F& _distance, const NodeID& _node);
             void traverseChildrenRotation(float _difference, const NodeID& _node, const NodeID& _parent);
             void traverseChildrenScale(const Vec2F& _scale, const NodeID& _node);

@@ -9,8 +9,9 @@ namespace engine {
 
     void Transform::setPosition(const Vec2F& _position) {
         Vec2F _distance = _position - getPosition();
+        transformPosition(_distance, this);
 
-        transformMatrix[3] = transformPosition(_position);
+        LOG_E(getPosition())
 
         auto _curr = scene->getComponent<Hierarchy>(id);
         if(_curr->children == 0) return;
@@ -25,11 +26,13 @@ namespace engine {
         setPosition({getX(), _y});
     }
 
-    glm::vec4 Transform::transformPosition(const Vec2F& _position) {
+    void Transform::transformPosition(const Vec2F& _distance, Transform* _node) {
         auto _scalingFactor = Engine::get().getMainCamera().getViewport()->getScalingFactor();
-        auto _pos = Util::worldToScreenCoords({(parent->getX() + _position.x) * _scalingFactor.x, (_position.y + parent->getY()) * _scalingFactor.y}, &Engine::get().getWindow(), Engine::get().getMainCamera().getAspectRatio());
+        auto _pos = Util::worldToScreenCoords({(_node->getPosition().x + _distance.x) * _scalingFactor.x,
+                                               (_node->getPosition().y + _distance.y) * _scalingFactor.y},
+                                              &Engine::get().getWindow(), Engine::get().getMainCamera().getAspectRatio());
         auto _translationMat = glm::translate(glm::mat4(1.f), glm::vec3 {1, 1, 1.f});
-        return _translationMat[3] * glm::vec4 {_pos.x, _pos.y, 1.f, 1.f};
+        _node->transformMatrix[3] = glm::vec4{_pos.x, _pos.y, 1.f, 1.f};
     }
 
     void Transform::traverseChildrenPosition(const Vec2F& _distance, const NodeID& _node) {
@@ -42,8 +45,8 @@ namespace engine {
         }
 
         auto* _t = scene->getComponent<Transform>(_node);
-        auto _position = _t->getPosition() + _distance;
-        _t->transformMatrix[3] = transformPosition(_position);
+        // It's {0, 0} because the parent already moved!
+        transformPosition({0, 0}, _t);
 
         if(_nodeHierarchy->nextBrother != NODE_ID_NULL)
             traverseChildrenPosition(_distance, _nodeHierarchy->nextBrother);
@@ -80,15 +83,17 @@ namespace engine {
         auto _cos = std::cos(glm::radians(_difference));
         auto _sin = std::sin(glm::radians(_difference));
 
-        auto _translatedX = _t->getX() - _parentHierarchy->getX();
-        auto _translatedY = _t->getY() - _parentHierarchy->getY();
+        auto _translatedX = _t->getX();
+        auto _translatedY = _t->getY();
 
         auto result_x = _translatedX * _cos - _translatedY * _sin;
         auto result_y = _translatedX * _sin + _translatedY * _cos;
 
-        result_x += _parentHierarchy->getX();
-        result_y += _parentHierarchy->getY();
-        _t->transformMatrix[3] = transformPosition({result_x, result_y});
+        LOG_W("Rot: ", _difference, " | Trans: ", Vec2F{_translatedX, _translatedY}, " | R: ", Vec2F{result_x, result_y}, " | Pos: ", _t->getPosition(), " | D: ", Vec2F{result_x - _t->getX(), result_y - _t->getY()})
+
+//        result_x += _parentHierarchy->getX();
+//        result_y += _parentHierarchy->getY();
+        transformPosition({result_x - _t->getX(), result_y - _t->getY()}, _t);
         _t->transformMatrix = glm::rotate(_t->transformMatrix, glm::radians(_difference), { 0.0f, 0.0f, 1.0f });
 
         if(_nodeHierarchy->nextBrother != NODE_ID_NULL)
