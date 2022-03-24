@@ -35,10 +35,10 @@ namespace engine {
     }
 
     void Camera::recalculateViewMatrix() {
-//        glm::mat4 _transform = glm::translate(glm::mat4(1.0f), {transform->getPosition().x, transform->getPosition().y, 0.0f}) *
-//                              glm::rotate(glm::mat4(1.0f), glm::radians(transform->getRotation()), glm::vec3(0, 0, 1));
+//        glm::mat4 _transform = glm::translate(glm::mat4(1.0f), {transform->getPosition().x, transform->getPositionLocal().y, 0.0f}) *
+//                              glm::rotate(glm::mat4(1.0f), glm::radians(transform->getRotationLocal()), glm::vec3(0, 0, 1));
         glm::mat4 _transform = glm::translate(glm::mat4(1.0f), {0, 0, 0.0f}) *
-                               glm::rotate(glm::mat4(1.0f), glm::radians(transform->getRotation()), glm::vec3(0, 0, 1));
+                               glm::rotate(glm::mat4(1.0f), glm::radians(transform->getRotationLocal()), glm::vec3(0, 0, 1));
         viewMatrix = glm::inverse(_transform);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
     }
@@ -49,7 +49,7 @@ namespace engine {
     }
 
     Vec2F Camera::getPosition() {
-        return transform->getPosition();
+        return transform->getPositionLocal();
     }
 
     void Camera::setRotation(float _rotation) {
@@ -58,7 +58,7 @@ namespace engine {
     }
 
     float Camera::getRotation() {
-        return transform->getRotation();
+        return transform->getRotationLocal();
     }
 
     glm::mat4& Camera::getViewMatrix() {

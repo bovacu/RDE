@@ -11,12 +11,6 @@
 
 namespace engine {
 
-    static void printNode(Graph* _scene, const NodeID& _nodeID) {
-        auto _hierarchy = _scene->getComponent<Hierarchy>(_nodeID);
-        auto _tag = _scene->getComponent<Tag>(_nodeID);
-        LOG_W("Tag: ", _tag->tag, ", Value: ", (int)_nodeID, ", Parent: ", (int)_hierarchy->parent, ", Previous Brother: ", (int)_hierarchy->prevBrother, ", Next Brother: ", (int)_hierarchy->nextBrother, ", First Child: ", (int)_hierarchy->firstChild, " Number of Children: ", _hierarchy->children)
-    }
-
     void Sandbox::onInit() {
         engine = &Engine::get();
         auto* _font = FontManager::get().loadFont("assets/fonts/arial.ttf", 54);
@@ -25,14 +19,14 @@ namespace engine {
         TextureAtlasManager::get().addAtlas(32, 32, "assets/test/square.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
-        engine->setVSync(false);
+        engine->setVSync(true);
 
         mainScene = new Graph("MainScene");
 //        auto _player = mainScene->createNode("player");
 //        auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
 //        _sprite->layer = 10;
 //        _sprite->texture = TextureAtlasManager::get().getTile("run", "run_0");
-//        LOG_W(mainScene->getComponent<Transform>(_player)->getScale())
+//        LOG_W(mainScene->getComponent<Transform>(_player)->getScaleLocal())
 //
 //        auto _animationSystem = mainScene->addComponent<AnimationSystem>(_player);
 //
@@ -67,7 +61,8 @@ namespace engine {
         auto _squareChildSpriteRenderer = mainScene->addComponent<SpriteRenderer>(squareChild);
         _squareChildSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
         _squareChildSpriteRenderer->layer = 30;
-        childTransform->setPosition({0, 0.5});
+        _squareChildSpriteRenderer->color = Color::Yellow;
+        childTransform->setPosition({0, 128});
 //
 //        auto _childChild = mainScene->createNode("childChild", squareChild);
 //        mainScene->addComponent<SpriteRenderer>(_childChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Yellow;
@@ -89,6 +84,7 @@ namespace engine {
 //            mainScene->getComponent<Transform>(_node)->setPosition({_r.randomf(-1.7, 1.7), _r.randomf(-1, 1)});
 //        }
 
+        LOG_W(mainScene->toString())
     }
 
     void Sandbox::onEvent(Event& _event) {
@@ -100,23 +96,57 @@ namespace engine {
 
     void Sandbox::onUpdate(Delta _dt) {
 
+
+        auto _t = mainScene->getComponent<Transform>(square);
         if(InputManager::isKeyPressed(KeyCode::A))
-            childTransform->translate(-_dt, 0);
+            _t->translate(-_dt * 150, 0);
         else if(InputManager::isKeyPressed(KeyCode::D))
-            childTransform->translate(_dt, 0);
+            _t->translate(_dt * 150, 0);
 
         if(InputManager::isKeyPressed(KeyCode::W))
-            childTransform->translate(0, _dt);
+            _t->translate(0, _dt * 150);
         else if(InputManager::isKeyPressed(KeyCode::S))
-            childTransform->translate(0, -_dt);
+            _t->translate(0, -_dt * 150);
 
         if(InputManager::isKeyPressed(KeyCode::R))
-            childTransform->rotate(_dt * 10);
+            _t->rotate(_dt * 150);
+
+        if(InputManager::isKeyPressed(KeyCode::Z))
+            _t->scale(_dt, _dt);
+        else if (InputManager::isKeyPressed(KeyCode::X))
+            _t->scale(-_dt, -_dt);
+
+
+
+        auto _t2 = mainScene->getComponent<Transform>(squareChild);
+        if(InputManager::isKeyPressed(KeyCode::Left))
+            _t2->translate(-_dt * 150, 0);
+        else if(InputManager::isKeyPressed(KeyCode::Right))
+            _t2->translate(_dt * 150, 0);
 
         if(InputManager::isKeyPressed(KeyCode::Up))
-            childTransform->scale(_dt, _dt);
-        else if (InputManager::isKeyPressed(KeyCode::Down))
-            childTransform->scale(-_dt, -_dt);
+            _t2->translate(0, _dt * 150);
+        else if(InputManager::isKeyPressed(KeyCode::Down))
+            _t2->translate(0, -_dt * 150);
+
+        if(InputManager::isKeyPressed(KeyCode::E))
+            _t2->rotate(_dt * 150);
+
+        if(InputManager::isKeyPressed(KeyCode::N))
+            _t2->scale(_dt, _dt);
+        else if (InputManager::isKeyPressed(KeyCode::M))
+            _t2->scale(-_dt, -_dt);
+
+
+        if(InputManager::isKeyJustPressed(KeyCode::Enter)) {
+            mainScene->orphan(squareChild);
+            LOG_W(mainScene->toString())
+        }
+
+        if(InputManager::isKeyJustPressed(KeyCode::Backspace)) {
+            mainScene->setParent(squareChild, square);
+            LOG_W(mainScene->toString())
+        }
 
         mainScene->onUpdate(_dt);
     }

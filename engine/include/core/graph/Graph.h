@@ -25,9 +25,7 @@ namespace engine {
 
         private:
             void printScene(const NodeID&, std::ostream& _os, int& _indent);
-            void insert(const NodeID& _node, const NodeID& _parent);
             void remove(const NodeID& _node, bool _delete);
-            void sortHierarchyInMemory();
 
         public:
             explicit Graph(const std::string& _sceneName);
@@ -43,10 +41,10 @@ namespace engine {
 
             void removeNode(const NodeID& _node);
             void removeNode(const std::string& _nodeTagName);
+            void orphan(const NodeID& _node);
+            void orphan(const std::string& _nodeTagName);
 
             NodeID getNode(const std::string& _tagName);
-
-            bool nodeIsLeaf(const NodeID& _nodeID);
 
             void setParent(const NodeID& _node, const NodeID& _parent);
 

@@ -9,7 +9,6 @@
 #include "core/render/elements/Texture.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/graph/Graph.h"
-#include "core/util/Functions.h"
 #include "glm/ext/matrix_transform.hpp"
 
 namespace engine {
@@ -43,27 +42,13 @@ namespace engine {
         explicit SpriteRenderer(Texture* _texture) : texture(_texture) {  }
     };
 
-    struct Hierarchy {
-        std::size_t children{};
-        NodeID parent       { NODE_ID_NULL };
-        NodeID prevBrother  { NODE_ID_NULL };
-        NodeID nextBrother  { NODE_ID_NULL };
-        NodeID firstChild   { NODE_ID_NULL };
-        NodeID lastChild    { NODE_ID_NULL };
-
-        Hierarchy() = default;
-        Hierarchy(const Hierarchy&) = default;
-        Hierarchy(const NodeID& _firstChild, const NodeID& _prevBrother, const NodeID& _nextBrother, const NodeID& _parent)
-        : firstChild(_firstChild), prevBrother(_prevBrother), nextBrother(_nextBrother), parent(_parent) {  }
-    };
-
     struct Transform {
         // Local Space
         private:
             glm::vec3 localPosition {0.0f, 0.0f, 0.0f};
             glm::vec3 localScale {1.0f, 1.0f, 1.0f};
             float localRotation = 0.0f;
-            bool dirty = true;
+            bool dirty = false;
 
         public:
             NodeID parent;
@@ -76,16 +61,21 @@ namespace engine {
             void update(Graph* _graph);
 
             void setPosition(const Vec2F& _position);
-            [[nodiscard]] Vec2F getPosition() const;
+            void setPosition(float _x, float _y);
+            [[nodiscard]] Vec2F getPositionLocal() const;
+            [[nodiscard]] Vec2F getPositionWorld() const;
             void translate(const Vec2F& _direction);
             void translate(float _x, float _y);
 
             void setRotation(float _rotation);
-            [[nodiscard]] float getRotation() const;
+            [[nodiscard]] float getRotationLocal() const;
+            [[nodiscard]] float getRotationWorld() const;
             void rotate(float _amount);
 
             void setScale(const Vec2F& _scale);
-            [[nodiscard]] Vec2F getScale() const;
+            void setScale(float _x, float _y);
+            [[nodiscard]] Vec2F getScaleLocal() const;
+            [[nodiscard]] Vec2F getScaleLWorld() const;
             void scale(const Vec2F& _scale);
             void scale(float _x, float _y);
 

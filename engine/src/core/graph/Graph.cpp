@@ -14,7 +14,6 @@ namespace engine {
         registry.emplace<Tag>(sceneRoot, _sceneName);
         registry.emplace<Transform>(sceneRoot).parent = NODE_ID_NULL;
         registry.emplace<Active>(sceneRoot, true);
-        registry.emplace<Hierarchy>(sceneRoot);
     }
 
 
@@ -24,7 +23,6 @@ namespace engine {
 
     void Graph::onUpdate(Delta _dt) {
         registry.group<Transform>(entt::get<Active>).each([&](const auto _entity, Transform& _transform, const Active& _active) {
-            LOG_I("Dirty ", _transform.isDirty(), " for ", (int)_entity)
             if(!_transform.isDirty() || !_active.active) return;
             _transform.update(this);
         });
@@ -54,12 +52,10 @@ namespace engine {
         auto _newNode = registry.create();
 
         auto _parentRef = _parent == NODE_ID_NULL ? sceneRoot : _parent;
-        registry.emplace<Hierarchy>(_newNode);
-        insert(_newNode, _parentRef);
 
         registry.emplace<Tag>(_newNode, _tag);
         registry.emplace<Transform>(_newNode).parent = _parentRef;
-        registry.get<Transform>(_parentRef).children.push_back(_newNode);
+        (&registry.get<Transform>(_parentRef))->children.push_back(_newNode);
 
         registry.emplace<Active>(_newNode, true);
 
@@ -80,7 +76,7 @@ namespace engine {
     }
 
     void Graph::removeNode(const NodeID& _node) {
-        remove(_node, true);
+        remove(_node, false);
     }
 
     void Graph::removeNode(const std::string& _nodeTagName) {
@@ -93,23 +89,15 @@ namespace engine {
         auto _tag = registry.get<Tag>(_id);
         _os << "* " << _tag.tag;
 
-        auto _hierarchy = registry.get<Hierarchy>(_id);
+        auto _transform = registry.get<Transform>(_id);
 
-        if(_hierarchy.firstChild != NODE_ID_NULL) {
+        for(auto _child : _transform.children) {
             _indent++;
             _os << "\n";
             for(int _in = 0; _in < _indent; _in++) _os << "\t";
             _os << "|__ ";
-            printScene(_hierarchy.firstChild, _os, _indent);
+            printScene(_child, _os, _indent);
             _indent--;
-        }
-
-        if(_hierarchy.nextBrother != NODE_ID_NULL) {
-            _os << "\n";
-            for(int _in = 0; _in < _indent; _in++) _os << "\t";
-            _os << "|__ ";
-
-            printScene(_hierarchy.nextBrother, _os, _indent);
         }
     }
 
@@ -121,61 +109,51 @@ namespace engine {
     }
 
     void Graph::setParent(const NodeID& _node, const NodeID& _parent) {
-        remove(_node, false);
-        insert(_node, _parent);
-    }
+        auto* _nodeTransform = &registry.get<Transform>(_node);
 
-    bool Graph::nodeIsLeaf(const NodeID& _nodeID) {
-        auto _nodeHierarchy = registry.get<Hierarchy>(_nodeID);
-        return _nodeHierarchy.nextBrother == NODE_ID_NULL && _nodeHierarchy.firstChild == NODE_ID_NULL;
-    }
-
-    void Graph::insert(const NodeID& _node, const NodeID& _parent) {
-        auto* _newNodeHierarchy = &registry.get<Hierarchy>(_node);
-        _newNodeHierarchy->parent = _parent;
-
-        auto* _parentHierarchy = getComponent<Hierarchy>(_parent);
-        auto _firstChild = _parentHierarchy->firstChild;
-        _parentHierarchy->children++;
-
-        if(_firstChild == NODE_ID_NULL) {
-            _parentHierarchy->firstChild = _node;
-        } else {
-            auto* _lastNodeHierarchy = &registry.get<Hierarchy>(_parentHierarchy->lastChild);
-            _newNodeHierarchy->prevBrother = _parentHierarchy->lastChild;
-            _lastNodeHierarchy->nextBrother = _node;
+        if(_nodeTransform->parent == _parent) {
+            LOG_W("Parent of ", (int)_node, " is already ", (int)_parent, "!!")
+            return;
         }
 
-        _parentHierarchy->lastChild = _node;
+        if(std::find(_nodeTransform->children.begin(), _nodeTransform->children.end(), _parent) != _nodeTransform->children.end()) {
+            LOG_E("Cannot set ", (int)_parent, " as the parent of ", (int)_node, " because ", (int)_node, " is the father of ", (int)_parent, "!!!!")
+        }
+
+        remove(_node, false);
+        _nodeTransform->parent = _parent;
+        auto* _parentTransform = &registry.get<Transform>(_parent);
+        _parentTransform->children.push_back(_node);
     }
 
     void Graph::remove(const NodeID& _node, bool _delete) {
-        if(_node == NODE_ID_NULL) return;
-        auto* _nodeHierarchy = &registry.get<Hierarchy>(_node);
+        auto* _nodeTransform = &registry.get<Transform>(_node);
 
-        size_t _childrenCount = _nodeHierarchy->children;
-        for(size_t _child = 0; _child < _childrenCount; _child++)
-            removeNode(_nodeHierarchy->firstChild);
+        if(_nodeTransform->parent != NODE_ID_NULL) {
+            auto* _parentTransform = &registry.get<Transform>(_nodeTransform->parent);
+            auto _toRemove = std::remove_if(_parentTransform->children.begin(), _parentTransform->children.end(), [&](const NodeID& _nodeID) {
+                return _nodeID == _node;
+            });
+            _parentTransform->children.erase(_toRemove);
+        }
 
-        auto* _parentHierarchy = &registry.get<Hierarchy>(_nodeHierarchy->parent);
-        auto _nextBrother = _nodeHierarchy->nextBrother;
-        auto _previousBrother = _nodeHierarchy->prevBrother;
+        if(_delete) {
+            for(auto _child : _nodeTransform->children) {
+                remove(_child, _delete);
+            }
 
-        if(_delete) registry.destroy(_node);
-        if(_previousBrother != NODE_ID_NULL)        (&registry.get<Hierarchy>(_previousBrother))->nextBrother = _nextBrother;
-        if(_nextBrother != NODE_ID_NULL)            (&registry.get<Hierarchy>(_nextBrother))->prevBrother = _previousBrother;
-        if(_parentHierarchy->firstChild == _node)   _parentHierarchy->firstChild = _nextBrother;
-        if(_parentHierarchy->lastChild == _node)    _parentHierarchy->lastChild = _previousBrother;
+            registry.destroy(_node);
+        }
 
-
-        _parentHierarchy->children--;
     }
 
-    void Graph::sortHierarchyInMemory() {
-        registry.sort<Hierarchy>([&](const entt::entity lhs, const entt::entity rhs) {
-            const auto &clhs = registry.get<Hierarchy>(lhs);
-            const auto &crhs = registry.get<Hierarchy>(rhs);
-            return crhs.parent == lhs || clhs.nextBrother == rhs || (!(clhs.parent == rhs || crhs.nextBrother == lhs) && (clhs.parent < crhs.parent || (clhs.parent == crhs.parent && &clhs < &crhs)));
-        });
+    void Graph::orphan(const NodeID& _node) {
+        remove(_node, false);
+        (&registry.get<Transform>(_node))->parent = sceneRoot;
+        (&registry.get<Transform>(sceneRoot))->children.push_back(_node);
+    }
+
+    void Graph::orphan(const std::string& _nodeTagName) {
+        orphan(getNode(_nodeTagName));
     }
 }

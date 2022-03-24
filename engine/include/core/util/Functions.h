@@ -5,6 +5,7 @@
 #define RESOURCES_GAME_FUNCTIONS_H
 
 #include "core/render/window/Window.h"
+#include "core/Engine.h"
 
 namespace engine {
 
@@ -39,12 +40,19 @@ namespace engine {
                 return {_position.x * _aspectRatio / ((float)_window->getWindowSize().x / 2), _position.y / ((float)_window->getWindowSize().y / 2)};
             }
 
-        static Vec2F screenToWorldCoords(const Vec2F& _position, Window* _window, float _aspectRatio) {
-            return {_position.x / _aspectRatio * ((float)_window->getWindowSize().x / 2), _position.y * ((float)_window->getWindowSize().y / 2)};
-        }
+            static Vec2F screenToWorldCoords(const Vec2F& _position, Window* _window, float _aspectRatio) {
+                return {_position.x / _aspectRatio * ((float)_window->getWindowSize().x / 2), _position.y * ((float)_window->getWindowSize().y / 2)};
+            }
 
             static Vec2F worldToScreenSize(const Vec2F& _size, Window* _window, float _aspectRatio) {
                 return {_size.x * _aspectRatio / ((float)_window->getWindowSize().x), _size.y / ((float)_window->getWindowSize().y)};
+            }
+
+            static void worldToScreenSize(float& _x, float& _y) {
+                auto _window = Engine::get().getWindowSize();
+                auto _aspectRatio = Engine::get().getMainCamera().getViewport()->getAspectRatio();
+                _x = _x * _aspectRatio / ((float)_window.x);
+                _y = _y / ((float)_window.y);
             }
     };
 

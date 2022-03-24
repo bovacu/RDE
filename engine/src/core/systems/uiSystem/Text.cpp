@@ -51,7 +51,7 @@ namespace engine {
             size.y = std::max(size.y, _char.bitmapSize.y - _char.bearing.y);
         }
 
-//        debugShape.makeSquare(getPosition(), size);
+//        debugShape.makeSquare(getPositionLocal(), size);
     }
 
     Vec2F Text::getTextSize() const {

@@ -57,7 +57,7 @@ namespace engine {
             }
 
             Vec2F getPosition() {
-//                return transform.getPosition();
+//                return transform.getPositionLocal();
             }
 
             void setRotation(float _rotation) {
@@ -65,7 +65,7 @@ namespace engine {
             }
 
             float getRotation() {
-//                return transform.getRotation();
+//                return transform.getRotationLocal();
             }
 
             bool isInnerShown() {

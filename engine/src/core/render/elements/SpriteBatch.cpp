@@ -298,8 +298,8 @@ namespace engine {
             texture = _spriteRenderer.texture;
 
         auto _transformMat = _transform.modelMatrix;
-//        _transformMat[3] = glm::vec4 {_transform.transformMatrix[3][0] * _transform.parent->getScale().x + _transform.parent->transformMatrix[3][0],
-//                                      _transform.transformMatrix[3][1] * _transform.parent->getScale().y + _transform.parent->transformMatrix[3][1],
+//        _transformMat[3] = glm::vec4 {_transform.transformMatrix[3][0] * _transform.parent->getScaleLocal().x + _transform.parent->transformMatrix[3][0],
+//                                      _transform.transformMatrix[3][1] * _transform.parent->getScaleLocal().y + _transform.parent->transformMatrix[3][1],
 //                                      1.f,
 //                                      1.f};
 
@@ -334,8 +334,8 @@ namespace engine {
         auto* _atlas = _text.getFont();
         auto _atlasSize = _atlas->getSize();
 
-        float _x = _transform.getPosition().x - _text.getTextSize().x / 2.f;
-        float _y = _transform.getPosition().y - _text.getTextSize().y / 4.f;
+        float _x = _transform.getPositionLocal().x - _text.getTextSize().x / 2.f;
+        float _y = _transform.getPositionLocal().y - _text.getTextSize().y / 4.f;
 
         auto* _chars = _atlas->getChars();
 
@@ -347,7 +347,7 @@ namespace engine {
 
             if(_char == '\n') {
                 _y -= _chars[_text.getText()[0]].bitmapSize.y * 0.8f;
-                _x = _transform.getPosition().x - _text.getTextSize().x / 2.f;
+                _x = _transform.getPositionLocal().x - _text.getTextSize().x / 2.f;
                 continue;
             }
 
@@ -359,11 +359,12 @@ namespace engine {
             auto _pos = Util::worldToScreenSize({_x * scalingFactor.x, _y * scalingFactor.y}, window, aspectRatio);
             auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_pos.x,_pos.y, 1.f));
 
-            if(_transform.getRotation() != 0)
-                _transformMat = glm::rotate(_transformMat, glm::radians(_transform.getRotation()), { 0.0f, 0.0f, 1.0f });
+            if(_transform.getRotationLocal() != 0)
+                _transformMat = glm::rotate(_transformMat, glm::radians(_transform.getRotationLocal()), {0.0f, 0.0f, 1.0f });
 
-            if(_transform.getScale() != 1 || scalingFactor != 1)
-                _transformMat = glm::scale(_transformMat, { scalingFactor.x * _transform.getScale().x, scalingFactor.y *  _transform.getScale().y, 1.0f });
+            if(_transform.getScaleLocal() != 1 || scalingFactor != 1)
+                _transformMat = glm::scale(_transformMat, { scalingFactor.x * _transform.getScaleLocal().x, scalingFactor.y *
+                                                                                                            _transform.getScaleLocal().y, 1.0f });
 
             auto _textColor = _spriteRenderer.color;
             glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};

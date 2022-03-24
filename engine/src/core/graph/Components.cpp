@@ -3,6 +3,7 @@
 #include "core/graph/Components.h"
 #include "core/graph/Graph.h"
 #include "core/graph/Node.h"
+#include "core/util/Functions.h"
 
 namespace engine {
 
@@ -17,18 +18,24 @@ namespace engine {
         else
             modelMatrix = getLocalModelMatrix();
 
-        for (auto& _child : children)
+        for (auto& _child : children) {
             _graph->getComponent<Transform>(_child)->update(_graph);
+        }
 
         dirty = false;
     }
 
     void Transform::setPosition(const Vec2F& _position) {
-        localPosition = glm::vec3 {_position.x, _position.y, 0.0f};
+        setPosition(_position.x, _position.y);
+    }
+
+    void Transform::setPosition(float _x, float _y) {
+        Util::worldToScreenSize(_x, _y);
+        localPosition = glm::vec3 {_x, _y, 0.0f};
         dirty = true;
     }
 
-    Vec2F Transform::getPosition() const {
+    Vec2F Transform::getPositionLocal() const {
         return {localPosition.x, localPosition.y};
     }
 
@@ -37,16 +44,20 @@ namespace engine {
         dirty = true;
     }
 
-    float Transform::getRotation() const {
+    float Transform::getRotationLocal() const {
         return localRotation;
     }
 
     void Transform::setScale(const Vec2F& _scale) {
-        localScale = {_scale.x, _scale.y, 1.0f};
+        setScale(_scale.x, _scale.y);
+    }
+
+    void Transform::setScale(float _x, float _y) {
+        localScale = {_x, _y, 1.0f};
         dirty = true;
     }
 
-    Vec2F Transform::getScale() const {
+    Vec2F Transform::getScaleLocal() const {
         return {localScale.x, localScale.y};
     }
 
@@ -55,6 +66,7 @@ namespace engine {
     }
 
     void Transform::translate(float _x, float _y) {
+        Util::worldToScreenSize(_x, _y);
         localPosition.x += _x;
         localPosition.y += _y;
         dirty = true;
@@ -78,4 +90,17 @@ namespace engine {
     bool Transform::isDirty() const {
         return dirty;
     }
+
+    Vec2F Transform::getPositionWorld() const {
+        return { modelMatrix[3][0], modelMatrix[3][1] };
+    }
+
+    float Transform::getRotationWorld() const {
+        return -1;
+    }
+
+    Vec2F Transform::getScaleLWorld() const {
+        return { modelMatrix[0][0], modelMatrix[1][1] };
+    }
+
 }
