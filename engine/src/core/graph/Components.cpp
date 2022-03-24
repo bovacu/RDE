@@ -36,7 +36,9 @@ namespace engine {
     }
 
     Vec2F Transform::getPositionLocal() const {
-        return {localPosition.x, localPosition.y};
+        float _x = localPosition.x, _y = localPosition.y;
+        Util::screenToWorldCoords(_x, _y);
+        return {_x, _y};
     }
 
     void Transform::setRotation(float _rotation) {
@@ -92,7 +94,9 @@ namespace engine {
     }
 
     Vec2F Transform::getPositionWorld() const {
-        return { modelMatrix[3][0], modelMatrix[3][1] };
+        float _x = modelMatrix[3][0], _y =  modelMatrix[3][1];
+        Util::screenToWorldCoords(_x, _y);
+        return {_x, _y};
     }
 
     float Transform::getRotationWorld() const {

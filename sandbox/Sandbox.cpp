@@ -21,7 +21,6 @@ namespace engine {
 
         engine->setVSync(true);
 
-        mainScene = new Graph("MainScene");
 //        auto _player = mainScene->createNode("player");
 //        auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
 //        _sprite->layer = 10;
@@ -50,15 +49,15 @@ namespace engine {
 
         mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
 
-        square = mainScene->createNode("square");
-        squareTransform = mainScene->getComponent<Transform>(square);
-        auto _squareSpriteRenderer = mainScene->addComponent<SpriteRenderer>(square);
+        square = getMainGraph()->createNode("square");
+        squareTransform = getMainGraph()->getComponent<Transform>(square);
+        auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(square);
         _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
         _squareSpriteRenderer->layer = 30;
 
-        squareChild = mainScene->createNode("squareChild", square);
-        childTransform = mainScene->getComponent<Transform>(squareChild);
-        auto _squareChildSpriteRenderer = mainScene->addComponent<SpriteRenderer>(squareChild);
+        squareChild = getMainGraph()->createNode("squareChild", square);
+        childTransform = getMainGraph()->getComponent<Transform>(squareChild);
+        auto _squareChildSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(squareChild);
         _squareChildSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
         _squareChildSpriteRenderer->layer = 30;
         _squareChildSpriteRenderer->color = Color::Yellow;
@@ -84,20 +83,19 @@ namespace engine {
 //            mainScene->getComponent<Transform>(_node)->setPosition({_r.randomf(-1.7, 1.7), _r.randomf(-1, 1)});
 //        }
 
-        LOG_W(mainScene->toString())
+        LOG_W(getMainGraph()->toString())
     }
 
     void Sandbox::onEvent(Event& _event) {
         EventDispatcher _dispatcher(_event);
         _dispatcher.dispatchEvent<MouseScrolledEvent>(mseDelegate);
 
-        mainScene->onEvent(_event);
+        getMainGraph()->onEvent(_event);
     }
 
     void Sandbox::onUpdate(Delta _dt) {
 
-
-        auto _t = mainScene->getComponent<Transform>(square);
+        auto _t = getMainGraph()->getComponent<Transform>(square);
         if(InputManager::isKeyPressed(KeyCode::A))
             _t->translate(-_dt * 150, 0);
         else if(InputManager::isKeyPressed(KeyCode::D))
@@ -118,7 +116,7 @@ namespace engine {
 
 
 
-        auto _t2 = mainScene->getComponent<Transform>(squareChild);
+        auto _t2 = getMainGraph()->getComponent<Transform>(squareChild);
         if(InputManager::isKeyPressed(KeyCode::Left))
             _t2->translate(-_dt * 150, 0);
         else if(InputManager::isKeyPressed(KeyCode::Right))
@@ -137,28 +135,17 @@ namespace engine {
         else if (InputManager::isKeyPressed(KeyCode::M))
             _t2->scale(-_dt, -_dt);
 
-
-        if(InputManager::isKeyJustPressed(KeyCode::Enter)) {
-            mainScene->orphan(squareChild);
-            LOG_W(mainScene->toString())
-        }
-
-        if(InputManager::isKeyJustPressed(KeyCode::Backspace)) {
-            mainScene->setParent(squareChild, square);
-            LOG_W(mainScene->toString())
-        }
-
-        mainScene->onUpdate(_dt);
+        getMainGraph()->onUpdate(_dt);
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {
         Layer::onFixedUpdate(_dt);
-        mainScene->onFixedUpdate(_dt);
+        getMainGraph()->onFixedUpdate(_dt);
     }
 
     void Sandbox::onRender(Delta _dt) {
 //        Renderer::drawGrid();
-        mainScene->onRender();
+        getMainGraph()->onRender();
     }
 
     void Sandbox::onImGuiRender(Delta _dt) {
@@ -167,7 +154,6 @@ namespace engine {
 
     void Sandbox::onEnd() {
         Layer::onEnd();
-        delete mainScene;
     }
 
     bool Sandbox::onMouseScrolled(MouseScrolledEvent& _event) {

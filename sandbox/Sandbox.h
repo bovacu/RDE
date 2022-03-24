@@ -24,7 +24,6 @@ namespace engine {
             Text text;
             Engine* engine;
             UDelegate<bool(MouseScrolledEvent&)> mseDelegate;
-            Graph* mainScene;
 
             NodeID square, squareChild;
             Transform* squareTransform;

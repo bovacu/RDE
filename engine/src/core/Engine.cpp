@@ -152,10 +152,13 @@ namespace engine {
         Profiler::begin(ProfilerState::IMGUI);
         #if !IS_MOBILE()
         imGuiLayer->begin();
-        for (Layer* _layer : layerStack)
+        for (Layer* _layer : layerStack) {
             _layer->onImGuiRender(_dt);
-            if(showImGuiDebugWindow)
-                imGuiLayer->drawDebugInfo();
+        }
+
+        if (showImGuiDebugWindow)
+            imGuiLayer->drawDebugInfo(layerStack.getLayer(0)->getMainGraph());
+
         imGuiLayer->end();
         #endif
         Profiler::end(ProfilerState::IMGUI);

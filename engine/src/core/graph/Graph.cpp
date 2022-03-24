@@ -156,4 +156,8 @@ namespace engine {
     void Graph::orphan(const std::string& _nodeTagName) {
         orphan(getNode(_nodeTagName));
     }
+
+    NodeID Graph::getID() {
+        return sceneRoot;
+    }
 }

@@ -57,8 +57,8 @@ namespace engine {
             template<typename Component>
             Component* getComponent(const NodeID& _id);
 
-
             std::string toString();
+            NodeID getID();
     };
 
     template<typename Component, typename... Args>

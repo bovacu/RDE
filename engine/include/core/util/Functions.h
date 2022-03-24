@@ -54,6 +54,13 @@ namespace engine {
                 _x = _x * _aspectRatio / ((float)_window.x);
                 _y = _y / ((float)_window.y);
             }
+
+            static void screenToWorldCoords(float& _x, float& _y) {
+                auto _window = Engine::get().getWindowSize();
+                auto _aspectRatio = Engine::get().getMainCamera().getViewport()->getAspectRatio();
+                _x = _x / _aspectRatio * ((float)_window.x / 2);
+                _y = _y * ((float)_window.y / 2);
+            }
     };
 
 

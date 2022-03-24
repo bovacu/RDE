@@ -15,12 +15,14 @@
 
 namespace engine {
 
+    class Graph;
     class ImGuiLayer : public Layer {
         private:
             bool anyWindowHovered = false;
             UDelegate<bool(MouseScrolledEvent&)> mseDel;
             UDelegate<bool(MouseButtonPressedEvent&)> mbpeDel;
             UDelegate<bool(MouseMovedEvent&)> mmeDel;
+            NodeID selectedNode = NODE_ID_NULL;
 
         public:
             ImGuiLayer();
@@ -40,7 +42,7 @@ namespace engine {
             bool onMouseClicked(MouseButtonPressedEvent& _e);
             bool onMouseMovedEvent(MouseMovedEvent& _e);
 
-            void drawDebugInfo();
+            void drawDebugInfo(Graph* _mainGraph);
 
         private:
             void console();
@@ -51,6 +53,10 @@ namespace engine {
             void metrics();
             void mouseInfo();
             void showFileExplorer();
+
+            void hierarchy(Graph* _graph);
+            void hierarchyRecursionStub(Graph* _graph, NodeID _node, int& _childCount);
+            void nodeComponents(Graph* _graph);
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
 

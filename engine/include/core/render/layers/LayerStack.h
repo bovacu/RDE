@@ -22,6 +22,8 @@ namespace engine {
             void popLayer(Layer* _layer);
             void popOverlay(Layer* _overlay);
 
+            Layer* getLayer(int _index) { return layers[_index]; }
+
             std::vector<Layer*>::iterator begin() { return layers.begin(); }
             std::vector<Layer*>::iterator end() { return layers.end(); }
             std::vector<Layer*>::reverse_iterator rbegin() { return layers.rbegin(); }

@@ -10,6 +10,7 @@
 #include "implot.h"
 #include "imgui_node_editor.h"
 #include "FileBrowser/ImGuiFileBrowser.h"
+#include "core/graph/Graph.h"
 
 namespace engine {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiLayer::plotBuffers;
@@ -104,7 +105,7 @@ namespace engine {
         }
     }
 
-    void ImGuiLayer::drawDebugInfo() {
+    void ImGuiLayer::drawDebugInfo(Graph* _mainGraph) {
         ImGui::Begin("Debugging");
         printResolutionFullscreenAndVSync();
         ImGui::Separator();
@@ -114,6 +115,8 @@ namespace engine {
         anyWindowHovered = ImGui::IsWindowHovered() || ImGui::IsAnyItemActive() || ImGui::IsAnyItemHovered() || ImGui::IsAnyItemFocused();
         ImGui::End();
         console();
+        hierarchy(_mainGraph);
+        nodeComponents(_mainGraph);
     }
 
     void ImGuiLayer::metrics() {
@@ -395,6 +398,87 @@ namespace engine {
             std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
             std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
         }
+    }
+
+
+
+    void ImGuiLayer::hierarchyRecursionStub(Graph* _graph, NodeID _node, int& _childCount) {
+        auto* _transform = _graph->getComponent<Transform>(_node);
+        auto* _tag = _graph->getComponent<Tag>(_node);
+
+        if(ImGui::IsItemDeactivated() || ImGui::IsItemActivated()) {
+            selectedNode = _transform->parent;
+        }
+
+        if(!_transform->children.empty()) {
+            auto _flags = _node == selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
+            if (ImGui::TreeNodeEx(_tag->tag.c_str(), ImGuiTreeNodeFlags_DefaultOpen | _flags)) {
+                for(auto _child : _transform->children) {
+                    hierarchyRecursionStub(_graph, _child, _childCount);
+                }
+
+                ImGui::TreePop();
+            }
+        } else {
+            if (ImGui::Selectable(_tag->tag.c_str(), selectedNode == _node)) {
+                selectedNode = _node;
+            }
+        }
+    }
+
+    void ImGuiLayer::hierarchy(Graph* _graph) {
+        ImGui::Begin("Hierarchy");
+        int _childCount = -1;
+        auto* _rootTransform = _graph->getComponent<Transform>(_graph->getID());
+        if(!_rootTransform->children.empty())
+            hierarchyRecursionStub(_graph, _rootTransform->children.front(), _childCount);
+        ImGui::End();
+    }
+
+    void ImGuiLayer::nodeComponents(Graph* _graph) {
+        if(selectedNode == NODE_ID_NULL) return;
+
+        ImGui::Begin("Components");
+
+        auto _transform = _graph->getComponent<Transform>(selectedNode);
+
+        if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::Text("Position ");
+
+            float _pos[2] = {0, 0};
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(1);
+            if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
+                _transform->translate(_pos[0], _pos[1]);
+            }
+            ImGui::PopID();
+
+
+            ImGui::Text("Rotation ");
+
+            float _angle = _transform->getRotationLocal();
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(50);
+            ImGui::PushID(2);
+            if(ImGui::DragFloat("##myInput", &_angle, 0.1f))
+                _transform->setRotation(_angle);
+            ImGui::PopID();
+
+
+            ImGui::Text("Scale ");
+
+            float _scale[2] = {_transform->getScaleLocal().x, _transform->getScaleLocal().y};
+            ImGui::SameLine(0, 30);
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(3);
+            if(ImGui::DragFloat2("##myInput", _scale, 0.05))
+                _transform->setScale(_scale[0], _scale[1]);
+            ImGui::PopID();
+
+        }
+
+        ImGui::End();
     }
 
 }
