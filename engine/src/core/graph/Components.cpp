@@ -1,6 +1,6 @@
 // Created by borja on 11/3/22.
 
-#include "core/scene/Components.h"
+#include "core/graph/Components.h"
 #include "core/Engine.h"
 #include "glm/ext/quaternion_float.hpp"
 

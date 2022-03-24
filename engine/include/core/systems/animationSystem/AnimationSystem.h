@@ -8,7 +8,7 @@
 #include "core/util/Util.h"
 #include "Animation.h"
 #include "core/systems/eventSystem/EventBus.h"
-#include "core/scene/Components.h"
+#include "core/graph/Components.h"
 #include <functional>
 
 namespace engine {

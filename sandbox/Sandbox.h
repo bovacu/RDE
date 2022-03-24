@@ -13,7 +13,7 @@
 #include "core/render/window/event/JoystickEvent.h"
 #include "core/Engine.h"
 #include "core/render/window/event/MobileEvent.h"
-#include "core/scene/Scene.h"
+#include "core/graph/Graph.h"
 
 namespace engine {
 
@@ -24,7 +24,7 @@ namespace engine {
             Text text;
             Engine* engine;
             UDelegate<bool(MouseScrolledEvent&)> mseDelegate;
-            Scene* mainScene;
+            Graph* mainScene;
 
             NodeID square, squareChild;
             Transform* squareTransform;

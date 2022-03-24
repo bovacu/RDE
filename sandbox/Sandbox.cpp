@@ -10,7 +10,7 @@
 
 namespace engine {
 
-    static void printNode(Scene* _scene, const NodeID& _nodeID) {
+    static void printNode(Graph* _scene, const NodeID& _nodeID) {
         auto _hierarchy = _scene->getComponent<Hierarchy>(_nodeID);
         auto _tag = _scene->getComponent<Tag>(_nodeID);
         LOG_W("Tag: ", _tag->tag, ", Value: ", (int)_nodeID, ", Parent: ", (int)_hierarchy->parent, ", Previous Brother: ", (int)_hierarchy->prevBrother, ", Next Brother: ", (int)_hierarchy->nextBrother, ", First Child: ", (int)_hierarchy->firstChild, " Number of Children: ", _hierarchy->children)
@@ -24,7 +24,7 @@ namespace engine {
         TextureAtlasManager::get().addAtlas(32, 32, "assets/test/square.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
-        mainScene = new Scene("MainScene");
+        mainScene = new Graph("MainScene");
 //        auto _player = mainScene->createNode("player");
 //        auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
 //        _sprite->layer = 10;

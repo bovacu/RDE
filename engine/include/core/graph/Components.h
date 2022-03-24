@@ -8,7 +8,7 @@
 #include "core/util/Util.h"
 #include "core/render/elements/Texture.h"
 #include "core/render/elements/ShaderManager.h"
-#include "core/scene/Scene.h"
+#include "core/graph/Graph.h"
 #include "core/util/Functions.h"
 #include "glm/ext/matrix_transform.hpp"
 
@@ -58,7 +58,7 @@ namespace engine {
     };
 
     struct Transform {
-        Scene* scene = nullptr;
+        Graph* scene = nullptr;
         Transform* parent = nullptr;
         NodeID id;
         glm::mat4 transformMatrix { 1.0f };
@@ -67,7 +67,7 @@ namespace engine {
         Transform() = default;
         ~Transform() = default;
         Transform(const Transform& _transform) = default;
-        Transform(Scene* _scene, const NodeID& _nodeID) : scene(_scene), id(_nodeID) {  }
+        Transform(Graph* _scene, const NodeID& _nodeID) : scene(_scene), id(_nodeID) {  }
 
         [[nodiscard]] Vec2F getPosition() const;
         [[nodiscard]] float getX() const { return getPosition().x; }
@@ -99,6 +99,19 @@ namespace engine {
             void traverseChildrenScale(const Vec2F& _scale, const NodeID& _node);
     };
 
+
+
+
+    struct Transform2 {
+        // Local Space
+        Vec2F localPosition {0.0f, 0.0f};
+        Vec2F localScale {1.0f, 1.0f};
+        float localRotation = 0.0f;
+
+        private:
+            // World Space
+            glm::mat4 modelMatrix = glm::mat4(1.0f);
+    };
 }
 
 #endif //ENGINE2_0_COMPONENTS_H

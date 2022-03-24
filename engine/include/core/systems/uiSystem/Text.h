@@ -5,7 +5,7 @@
 
 #include "core/util/Util.h"
 #include "FontManager.h"
-#include "engine/include/core/scene/Components.h"
+#include "engine/include/core/graph/Components.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/render/shapes/Shape.h"
 

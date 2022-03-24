@@ -1,8 +1,8 @@
 // Created by borja on 9/3/22.
 
 
-#ifndef ENGINE_SCENE_H
-#define ENGINE_SCENE_H
+#ifndef ENGINE_GRAPH_H
+#define ENGINE_GRAPH_H
 
 #include <vector>
 #include <string>
@@ -18,8 +18,7 @@ namespace engine {
 
     #define NODE_ID_NULL entt::null
 
-    class Scene {
-        friend class Node;
+    class Graph {
         private:
             NodeID sceneRoot;
             std::string name;
@@ -32,8 +31,8 @@ namespace engine {
             void sortHierarchyInMemory();
 
         public:
-            explicit Scene(const std::string& _sceneName);
-            ~Scene() = default;
+            explicit Graph(const std::string& _sceneName);
+            ~Graph() = default;
 
             void onEvent(Event& _event);
             void onUpdate(Delta _dt);
@@ -66,19 +65,19 @@ namespace engine {
     };
 
     template<typename Component, typename... Args>
-    Component* Scene::addComponent(const NodeID& _id, Args... _args) {
+    Component* Graph::addComponent(const NodeID& _id, Args... _args) {
         return &registry.template emplace<Component>(_id, _args...);
     }
 
     template<typename Component>
-    void Scene::removeComponent(const NodeID& _id) {
+    void Graph::removeComponent(const NodeID& _id) {
         registry.template remove<Component>(_id);
     }
 
     template<typename Component>
-    Component* Scene::getComponent(const NodeID& _id) {
+    Component* Graph::getComponent(const NodeID& _id) {
         return &registry.template get<Component>(_id);
     }
 }
 
-#endif //ENGINE_SCENE_H
+#endif //ENGINE_GRAPH_H

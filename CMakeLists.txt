@@ -144,7 +144,7 @@ set(SOURCES
 
         engine/src/core/render/Renderer.cpp engine/include/core/render/Renderer.h engine/include/core/systems/eventSystem/EventBus.h
 
-        engine/include/core/scene/Components.h engine/src/core/render/Camera.cpp engine/include/core/render/Camera.h engine/include/core/render/shapes/Shape.h
+        engine/include/core/graph/Components.h engine/src/core/render/Camera.cpp engine/include/core/render/Camera.h engine/include/core/render/shapes/Shape.h
 
         engine/include/core/systems/profiling/Profiler.h engine/src/core/systems/profiling/Profiler.cpp engine/include/core/render/layers/ImGuiCore.h
         engine/src/core/render/elements/TextureAtlasManager.cpp engine/include/core/render/elements/TextureAtlasManager.h engine/include/core/util/Rect.h
@@ -165,8 +165,8 @@ set(SOURCES
         engine/include/core/procedural/CellularAutomataMapGenerator.h engine/src/core/procedural/CellularAutomataMapGenerator.cpp
         engine/include/core/systems/fileSystem/FilesSystem.h engine/src/core/systems/fileSystem/FilesSystem.cpp engine/include/core/util/StringUtils.h
         engine/src/core/render/ViewPort.cpp engine/include/core/render/elements/ViewPort.h
-        engine/include/core/util/Delegate.h engine/include/core/scene/Scene.h engine/src/core/scene/Scene.cpp
-        engine/src/core/scene/Components.cpp
+        engine/include/core/util/Delegate.h engine/include/core/graph/Graph.h engine/src/core/graph/Graph.cpp
+        engine/src/core/graph/Components.cpp engine/include/core/graph/Components.h
 
         unitTesting/HierarchyTest.cpp unitTesting/doctest.h
         )
