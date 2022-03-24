@@ -23,7 +23,9 @@ namespace engine {
         addShader("debug", DEBUG_VERTEX_SHADER_CORE, DEBUG_FRAGMENT_SHADER_CORE);
         addShader("basicText", TEXTURE_VERTEX_SHADER_CORE, TEXT_FRAGMENT_SHADER_CORE);
         addShader("outline", TEXTURE_VERTEX_SHADER_CORE, OUTLINE_FRAGMENT_SHADER_CORE);
-        addShader("framebuffer", "assets/shaders/core/framebuffer/FrameBufferVertex.glsl", "assets/shaders/core/framebuffer/FrameBufferFragment.glsl");
+        addShader("grid", DEBUG_GRID_VERTEX_SHADER_CORE, DEBUG_GRID_FRAGMENT_SHADER_CORE);
+//        addShader("mirror", MIRROR_VERTEX_SHADER_CORE, MIRROR_FRAGMENT_SHADER_CORE);
+        addShader("framebuffer", FRAMEBUFFER_VERTEX_SHADER_CORE, FRAMEBUFFER_FRAGMENT_SHADER_CORE);
     #endif
     }
 

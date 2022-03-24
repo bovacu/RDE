@@ -48,6 +48,16 @@ namespace engine {
             int totalTriangles = 0;
             int drawCalls = 0;
 
+        class Debug {
+
+            private:
+                static SpriteBatch* batch;
+
+            public:
+                static void init(SpriteBatch* _batch);
+                static void drawGrid(const Color& _color);
+        };
+
         private:
             std::vector<VertexColorDebug> vertexDebugBufferGeometrics;
             std::vector<VertexColorDebug> vertexDebugBufferLines;

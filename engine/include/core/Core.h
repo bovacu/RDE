@@ -4,13 +4,22 @@
 #ifndef ENGINE2_0_CORE_H
 #define ENGINE2_0_CORE_H
 
+#define FRAMEBUFFER_VERTEX_SHADER_ES "assets/shaders/es/framebuffer/FrameBufferVertex.glsl"
+#define FRAMEBUFFER_FRAGMENT_SHADER_ES "assets/shaders/es/framebuffer/FrameBufferFragment.glsl"
+#define FRAMEBUFFER_VERTEX_SHADER_CORE "assets/shaders/core/framebuffer/FrameBufferVertex.glsl"
+#define FRAMEBUFFER_FRAGMENT_SHADER_CORE "assets/shaders/core/framebuffer/FrameBufferFragment.glsl"
+
 #define TEXTURE_VERTEX_SHADER_ES "assets/shaders/es/texture/vertex.glsl"
 #define DEBUG_VERTEX_SHADER_ES "assets/shaders/es/debug/debugVertex.glsl"
 
 #define TEXTURE_VERTEX_SHADER_CORE "assets/shaders/core/texture/vertex.glsl"
 #define DEBUG_VERTEX_SHADER_CORE "assets/shaders/core/debug/debugVertex.glsl"
+#define DEBUG_GRID_VERTEX_SHADER_CORE "assets/shaders/core/debug/gridVertex.glsl"
+#define DEBUG_GRID_FRAGMENT_SHADER_CORE "assets/shaders/core/debug/gridFragment.glsl"
 
 #define TEXTURE_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/fragment.glsl"
+#define MIRROR_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/mirrorFragment.glsl"
+#define MIRROR_VERTEX_SHADER_CORE "assets/shaders/core/texture/mirrorVertex.glsl"
 #define TEXT_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/textFragment.glsl"
 #define OUTLINE_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/outlineFragment.glsl"
 #define NEON_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/glowFragment.glsl"
@@ -25,6 +34,8 @@
 #define BLOOM_FRAGMENT_SHADER_ES "assets/shaders/es/texture/bloomFragment.glsl"
 #define BLUR_FRAGMENT_SHADER_ES "assets/shaders/es/texture/blurFragment.glsl"
 #define DEBUG_FRAGMENT_SHADER_ES "assets/shaders/es/debug/debugFragment.glsl"
+
+
 
 #define ENGINE_DEBUG
 #define ENGINE_ENABLE_ASSERTS

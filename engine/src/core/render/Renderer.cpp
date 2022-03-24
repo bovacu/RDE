@@ -25,6 +25,8 @@ namespace engine {
         }
 
         LOG_S("SDL Image loader loaded successfully")
+
+        SpriteBatch::Debug::init(&batch);
     }
 
     void Renderer::clear() {
@@ -97,5 +99,9 @@ namespace engine {
 
     void Renderer::setClearColor(const Color& _color) {
         clearColor = _color;
+    }
+
+    void Renderer::drawGrid(const Color& _color) {
+        SpriteBatch::Debug::drawGrid(_color);
     }
 }

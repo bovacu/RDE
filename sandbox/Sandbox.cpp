@@ -29,7 +29,6 @@ namespace engine {
 //        auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
 //        _sprite->layer = 10;
 //        _sprite->texture = TextureAtlasManager::get().getTile("run", "run_0");
-//        mainScene->getComponent<Transform>(_player)->setPosition({95, 0});
 //        LOG_W(mainScene->getComponent<Transform>(_player)->getScale())
 //
 //        auto _animationSystem = mainScene->addComponent<AnimationSystem>(_player);
@@ -48,42 +47,26 @@ namespace engine {
 //        mainScene->getComponent<Transform>(_text)->setPosition({-350, 250});
 //        _textComp->spriteRenderer.color = Color::Green;
 
-//        int _line = 0;
-//        int _row = 0;
-//        for(int _i = 0; _i < 36 ; _i++) {
-//            if(_i != 0 && _i % 6 == 0) {
-//                _line++;
-//                _row = 0;
-//            }
-//
-//            int _index = _i > 35 ? 35 : _i;
-//            auto _s = mainScene->createNode("test_" + std::to_string(_index));
-//            auto _spriteRenderer = mainScene->addComponent<SpriteRenderer>(_s);
-//            _spriteRenderer->texture = TextureAtlasManager::get().getTile("test", "test_" + std::to_string(_index));
-//            _spriteRenderer->layer = 1;
-//
-//            mainScene->getComponent<Transform>(_s)->setPosition({60.f + (float)52 * _row, (float)(200 - _line * 52)});
-//
-//            _row++;
-//        }
+
+
+
 
         mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
 
-//        square = mainScene->createNode("square");
-//        squareTransform = mainScene->getComponent<Transform>(square);
-//        squareTransform->setPosition({75, -40});
-//        auto _squareSpriteRenderer = mainScene->addComponent<SpriteRenderer>(square);
-//        _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
-//        _squareSpriteRenderer->layer = 30;
+        square = mainScene->createNode("square");
+        squareTransform = mainScene->getComponent<Transform>(square);
+        auto _squareSpriteRenderer = mainScene->addComponent<SpriteRenderer>(square);
+        _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
+        _squareSpriteRenderer->layer = 30;
 //
 //        squareChild = mainScene->createNode("squareChild", square);
 //        childTransform = mainScene->getComponent<Transform>(squareChild);
 //        auto _squareChildSpriteRenderer = mainScene->addComponent<SpriteRenderer>(squareChild);
 //        _squareChildSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
-//        _squareChildSpriteRenderer->color = Color::Green;
 //        _squareChildSpriteRenderer->layer = 30;
-//        mainScene->getComponent<Transform>(squareChild)->setPosition({0, 75});
-
+//        _squareChildSpriteRenderer->shaderID = ShaderManager::get().getShader("mirror");
+//        mainScene->getComponent<Transform>(squareChild)->setPosition({0, -32});
+//
 //        auto _childChild = mainScene->createNode("childChild", squareChild);
 //        mainScene->addComponent<SpriteRenderer>(_childChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Yellow;
 //        mainScene->getComponent<Transform>(_childChild)->setPosition({-100, 0});
@@ -104,34 +87,6 @@ namespace engine {
 //            mainScene->getComponent<Transform>(_node)->setPosition({_r.randomf(-1280, 1280), _r.randomf(-1280, 1280)});
 //        }
 
-        Scene scene("SceneTest0");
-        scene.createNode("A");
-        scene.createNode("B");
-        scene.createNode("C");
-        scene.createNode("D");
-        scene.removeNode(scene.getNode("C"));
-        LOG_W(scene.toString())
-
-        scene.removeNode(scene.getNode("D"));
-        LOG_W(scene.toString())
-        scene.removeNode(scene.getNode("A"));
-        LOG_W(scene.toString())
-        scene.removeNode(scene.getNode("B"));
-        LOG_W(scene.toString())
-
-//        mainScene->createNode("A");
-//        mainScene->createNode("B");
-//        mainScene->createNode("C");
-//        mainScene->createNode("D");
-//        mainScene->createNode("E");
-//        mainScene->createNode("F", mainScene->getNode("B"));
-//        mainScene->createNode("G", mainScene->getNode("D"));
-//        mainScene->createNode("H", mainScene->getNode("B"));
-//        mainScene->createNode("I", mainScene->getNode("F"));
-//        mainScene->createNode("J", mainScene->getNode("E"));
-//        mainScene->createNode("K", mainScene->getNode("E"));
-//        mainScene->createNode("L", mainScene->getNode("K"));
-//        LOG_W(mainScene->toString())
     }
 
     void Sandbox::onEvent(Event& _event) {
@@ -154,38 +109,39 @@ namespace engine {
             InputManager::gamepadVibrate();
 
 
+        auto _playerTransform = mainScene->getComponent<Transform>((NodeID)1);
         if(InputManager::isKeyPressed(KeyCode::A))
-            squareTransform->setPosition({squareTransform->getPosition().x - 50 * _dt, squareTransform->getPosition().y});
+            _playerTransform->setPosition({_playerTransform->getPosition().x - 50 * _dt, _playerTransform->getPosition().y});
         else if(InputManager::isKeyPressed(KeyCode::D))
-            squareTransform->setPosition({squareTransform->getPosition().x + 50 * _dt, squareTransform->getPosition().y});
+            _playerTransform->setPosition({_playerTransform->getPosition().x + 50 * _dt, _playerTransform->getPosition().y});
 
         if(InputManager::isKeyPressed(KeyCode::W))
-            squareTransform->setPosition({squareTransform->getPosition().x, squareTransform->getPosition().y + 50 * _dt});
+            _playerTransform->setPosition({_playerTransform->getPosition().x, _playerTransform->getPosition().y + 50 * _dt});
         else if(InputManager::isKeyPressed(KeyCode::S))
-            squareTransform->setPosition({squareTransform->getPosition().x, squareTransform->getPosition().y - 50 * _dt});
+            _playerTransform->setPosition({_playerTransform->getPosition().x, _playerTransform->getPosition().y - 50 * _dt});
 
 
-        if(InputManager::isKeyPressed(KeyCode::Left))
-            childTransform->setPosition({childTransform->getPosition().x - 50 * _dt, childTransform->getPosition().y});
-        else if(InputManager::isKeyPressed(KeyCode::Right))
-            childTransform->setPosition({childTransform->getPosition().x + 50 * _dt, childTransform->getPosition().y});
-
-        if(InputManager::isKeyPressed(KeyCode::Up))
-            childTransform->setPosition({childTransform->getPosition().x, childTransform->getPosition().y + 50 * _dt});
-        else if(InputManager::isKeyPressed(KeyCode::Down))
-            childTransform->setPosition({childTransform->getPosition().x, childTransform->getPosition().y - 50 * _dt});
-
-        if(InputManager::isKeyPressed(KeyCode::R))
-            squareTransform->setRotation(squareTransform->getRotation() + 50 * _dt);
-
-        if(InputManager::isKeyPressed(KeyCode::E))
-            childTransform->setRotation(childTransform->getRotation() + 50 * _dt);
-
-        if(InputManager::isKeyPressed(KeyCode::K))
-            squareTransform->setScale({squareTransform->getScale().x + 2 * _dt, squareTransform->getScale().y + 2 * _dt});
-
-        if(InputManager::isKeyPressed(KeyCode::L))
-            squareTransform->setScale({squareTransform->getScale().x - 2 * _dt, squareTransform->getScale().y - 2 * _dt});
+//        if(InputManager::isKeyPressed(KeyCode::Left))
+//            childTransform->setPosition({childTransform->getPosition().x - 50 * _dt, childTransform->getPosition().y});
+//        else if(InputManager::isKeyPressed(KeyCode::Right))
+//            childTransform->setPosition({childTransform->getPosition().x + 50 * _dt, childTransform->getPosition().y});
+//
+//        if(InputManager::isKeyPressed(KeyCode::Up))
+//            childTransform->setPosition({childTransform->getPosition().x, childTransform->getPosition().y + 50 * _dt});
+//        else if(InputManager::isKeyPressed(KeyCode::Down))
+//            childTransform->setPosition({childTransform->getPosition().x, childTransform->getPosition().y - 50 * _dt});
+//
+//        if(InputManager::isKeyPressed(KeyCode::R))
+//            squareTransform->setRotation(squareTransform->getRotation() + 50 * _dt);
+//
+//        if(InputManager::isKeyPressed(KeyCode::E))
+//            childTransform->setRotation(childTransform->getRotation() + 50 * _dt);
+//
+//        if(InputManager::isKeyPressed(KeyCode::K))
+//            squareTransform->setScale({squareTransform->getScale().x + 2 * _dt, squareTransform->getScale().y + 2 * _dt});
+//
+//        if(InputManager::isKeyPressed(KeyCode::L))
+//            squareTransform->setScale({squareTransform->getScale().x - 2 * _dt, squareTransform->getScale().y - 2 * _dt});
 
         mainScene->onUpdate(_dt);
     }
@@ -196,6 +152,7 @@ namespace engine {
     }
 
     void Sandbox::onRender(Delta _dt) {
+//        Renderer::drawGrid();
         mainScene->onRender();
     }
 

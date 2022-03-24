@@ -8,6 +8,7 @@
 #endif
 
 #include "core/util/Functions.h"
+#include "core/Engine.h"
 #include <glm/gtc/type_ptr.hpp>
 
 namespace engine {
@@ -388,5 +389,30 @@ namespace engine {
             _x += _chars[_char].advance.x / 2.f;
             _y += _chars[_char].advance.y;
         }
+    }
+
+    SpriteBatch* SpriteBatch::Debug::batch;
+
+    void SpriteBatch::Debug::drawGrid(const Color& _color) {
+        auto _shader = ShaderManager::get().getShader("grid");
+        glUseProgram(_shader);
+
+        float _zoom = Engine::get().getMainCamera().getCurrentZoomLevel();
+        float _params[4] = {(float)Engine::get().getWindowSize().x, (float)Engine::get().getWindowSize().y, 32.f * (1.f / _zoom), 32.f * (1.f / _zoom)};
+
+        GLint _location = glGetUniformLocation(_shader, "params");
+        glUniform4f(_location, _params[0], _params[1], _params[2], _params[3]);
+
+        _location = glGetUniformLocation(_shader, "color");
+        glUniform4f(_location, _color.r, _color.g, _color.b, _color.a);
+
+        _location = glGetUniformLocation(_shader, "viewProjectionMatrix");
+        glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(batch->viewProjectionMatrix)));
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+
+    void SpriteBatch::Debug::init(SpriteBatch* _batch) {
+        batch = _batch;
     }
 }

@@ -89,6 +89,8 @@ namespace engine {
 
             static void drawShape(Shape& _shape);
 
+            static void drawGrid(const Color& _color = Color::White);
+
             /**
              * Sends the data batched to the GPU, must be called after beginDraw and what we want to render.
              */
