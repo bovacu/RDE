@@ -4,7 +4,6 @@
 #include "engine/include/core/graph/Components.h"
 #include "core/render/Renderer.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
-#include "core/Engine.h"
 
 namespace engine {
 
@@ -13,7 +12,7 @@ namespace engine {
         sceneRoot = registry.create();
 
         registry.emplace<Tag>(sceneRoot, _sceneName);
-        registry.emplace<Transform>(sceneRoot, this, sceneRoot);
+        registry.emplace<Transform>(sceneRoot).parent = NODE_ID_NULL;
         registry.emplace<Active>(sceneRoot, true);
         registry.emplace<Hierarchy>(sceneRoot);
     }
@@ -24,9 +23,14 @@ namespace engine {
     }
 
     void Graph::onUpdate(Delta _dt) {
+        registry.group<Transform>(entt::get<Active>).each([&](const auto _entity, Transform& _transform, const Active& _active) {
+            LOG_I("Dirty ", _transform.isDirty(), " for ", (int)_entity)
+            if(!_transform.isDirty() || !_active.active) return;
+            _transform.update(this);
+        });
 
-
-        registry.view<SpriteRenderer, AnimationSystem>().each([&](const auto _entity, SpriteRenderer& _spriteRenderer, AnimationSystem& _animationSystem) {
+        registry.group<SpriteRenderer>(entt::get<AnimationSystem, Active>).each([&](const auto _entity, SpriteRenderer& _spriteRenderer, AnimationSystem& _animationSystem, const Active& _active) {
+            if(!_active.active) return;
             _animationSystem.update(_dt, _spriteRenderer);
         });
     }
@@ -36,7 +40,8 @@ namespace engine {
     }
 
     void Graph::onRender() {
-        registry.view<Transform, SpriteRenderer>().each([&](const auto _entity, Transform& _transform, SpriteRenderer& _spriteRenderer) {
+        registry.group<Transform>(entt::get<SpriteRenderer, Active>).each([&](const auto _entity, Transform& _transform, SpriteRenderer& _spriteRenderer, const Active& _active) {
+            if(!_active.active) return;
             Renderer::draw(_spriteRenderer, _transform);
         });
 
@@ -45,18 +50,17 @@ namespace engine {
         });
     }
 
-
-    struct dirty {};
-
     NodeID Graph::createNode(const std::string& _tag, const NodeID& _parent) {
         auto _newNode = registry.create();
 
         auto _parentRef = _parent == NODE_ID_NULL ? sceneRoot : _parent;
         registry.emplace<Hierarchy>(_newNode);
         insert(_newNode, _parentRef);
-//
+
         registry.emplace<Tag>(_newNode, _tag);
-        registry.emplace<Transform>(_newNode, this, _newNode).parent = &registry.get<Transform>(_parentRef);
+        registry.emplace<Transform>(_newNode).parent = _parentRef;
+        registry.get<Transform>(_parentRef).children.push_back(_newNode);
+
         registry.emplace<Active>(_newNode, true);
 
         return _newNode;

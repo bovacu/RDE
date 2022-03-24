@@ -15,7 +15,6 @@
 namespace engine {
 
     typedef entt::entity NodeID;
-
     #define NODE_ID_NULL entt::null
 
     class Graph {

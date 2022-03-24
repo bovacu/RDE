@@ -90,6 +90,7 @@ namespace engine {
 
     void Window::setVSync(bool _enabled) {
         data.vSync = _enabled;
+        SDL_GL_SetSwapInterval(_enabled);
     }
 
     bool Window::isVSyncActive() const {

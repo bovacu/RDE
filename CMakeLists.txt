@@ -172,7 +172,7 @@ set(SOURCES
         )
 
 set(CPP_HEADERS)
-set(CPP_SOURCES)
+set(CPP_SOURCES engine/include/core/graph/Node.h engine/src/core/graph/Node.cpp)
 
 #GDEFirebase
 

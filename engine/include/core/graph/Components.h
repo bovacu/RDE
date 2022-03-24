@@ -58,59 +58,38 @@ namespace engine {
     };
 
     struct Transform {
-        Graph* scene = nullptr;
-        Transform* parent = nullptr;
-        NodeID id;
-        glm::mat4 transformMatrix { 1.0f };
-        float rotation = 0.f;
-
-        Transform() = default;
-        ~Transform() = default;
-        Transform(const Transform& _transform) = default;
-        Transform(Graph* _scene, const NodeID& _nodeID) : scene(_scene), id(_nodeID) {  }
-
-        [[nodiscard]] Vec2F getPosition() const;
-        [[nodiscard]] float getX() const { return getPosition().x; }
-        [[nodiscard]] float getY() const { return getPosition().y; }
-
-        [[nodiscard]] Vec2F getScale() const { return { transformMatrix[0][0], transformMatrix[1][1] }; }
-        [[nodiscard]] float getScaleX() const { return getScale().x; }
-        [[nodiscard]] float getScaleY() const { return getScale().y; }
-
-        [[nodiscard]] float getRotation() const { return rotation; }
-
-        void setPosition(const Vec2F& _position);
-        void setX(float _x);
-        void setY(float _y);
-
-        void setScale(const Vec2F& _scale);
-        void setScaleX(float _x) { transformMatrix[0][0] = _x; }
-        void setScaleY(float _y) { transformMatrix[1][1] = _y; }
-
-        void setRotation(float _rotation);
-
-        explicit operator glm::mat4& () { return transformMatrix; }
-        explicit operator const glm::mat4& () const { return transformMatrix; }
-
-        private:
-            void transformPosition(const Vec2F& _position, Transform* _node);
-            void traverseChildrenPosition(const Vec2F& _distance, const NodeID& _node);
-            void traverseChildrenRotation(float _difference, const NodeID& _node, const NodeID& _parent);
-            void traverseChildrenScale(const Vec2F& _scale, const NodeID& _node);
-    };
-
-
-
-
-    struct Transform2 {
         // Local Space
-        Vec2F localPosition {0.0f, 0.0f};
-        Vec2F localScale {1.0f, 1.0f};
-        float localRotation = 0.0f;
-
         private:
+            glm::vec3 localPosition {0.0f, 0.0f, 0.0f};
+            glm::vec3 localScale {1.0f, 1.0f, 1.0f};
+            float localRotation = 0.0f;
+            bool dirty = true;
+
+        public:
+            NodeID parent;
+            std::vector<NodeID> children;
+
             // World Space
             glm::mat4 modelMatrix = glm::mat4(1.0f);
+
+            glm::mat4 getLocalModelMatrix();
+            void update(Graph* _graph);
+
+            void setPosition(const Vec2F& _position);
+            [[nodiscard]] Vec2F getPosition() const;
+            void translate(const Vec2F& _direction);
+            void translate(float _x, float _y);
+
+            void setRotation(float _rotation);
+            [[nodiscard]] float getRotation() const;
+            void rotate(float _amount);
+
+            void setScale(const Vec2F& _scale);
+            [[nodiscard]] Vec2F getScale() const;
+            void scale(const Vec2F& _scale);
+            void scale(float _x, float _y);
+
+            [[nodiscard]] bool isDirty() const;
     };
 }
 

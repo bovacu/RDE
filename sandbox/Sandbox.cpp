@@ -3,6 +3,7 @@
 #include "Sandbox.h"
 #include "core/Engine.h"
 #include "core/procedural/CellularAutomataMapGenerator.h"
+#include <glm/gtx/string_cast.hpp>
 
 //#if IS_ANDROID()
 //#include <nativeCode/include/NativeAds.h>
@@ -23,6 +24,8 @@ namespace engine {
         TextureAtlasManager::get().addAtlas(50, 50, "assets/test/test.png");
         TextureAtlasManager::get().addAtlas(32, 32, "assets/test/square.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
+
+        engine->setVSync(false);
 
         mainScene = new Graph("MainScene");
 //        auto _player = mainScene->createNode("player");
@@ -58,14 +61,13 @@ namespace engine {
         auto _squareSpriteRenderer = mainScene->addComponent<SpriteRenderer>(square);
         _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
         _squareSpriteRenderer->layer = 30;
-//
-//        squareChild = mainScene->createNode("squareChild", square);
-//        childTransform = mainScene->getComponent<Transform>(squareChild);
-//        auto _squareChildSpriteRenderer = mainScene->addComponent<SpriteRenderer>(squareChild);
-//        _squareChildSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
-//        _squareChildSpriteRenderer->layer = 30;
-//        _squareChildSpriteRenderer->shaderID = ShaderManager::get().getShader("mirror");
-//        mainScene->getComponent<Transform>(squareChild)->setPosition({0, -32});
+
+        squareChild = mainScene->createNode("squareChild", square);
+        childTransform = mainScene->getComponent<Transform>(squareChild);
+        auto _squareChildSpriteRenderer = mainScene->addComponent<SpriteRenderer>(squareChild);
+        _squareChildSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
+        _squareChildSpriteRenderer->layer = 30;
+        childTransform->setPosition({0, 0.5});
 //
 //        auto _childChild = mainScene->createNode("childChild", squareChild);
 //        mainScene->addComponent<SpriteRenderer>(_childChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Yellow;
@@ -81,10 +83,10 @@ namespace engine {
 
 
 //        Random _r;
-//        for(int _i = 0; _i < 10000; _i++) {
-//            auto _node = mainScene->createNode(std::to_string(_i));
+//        for(int _i = 0; _i < 1000; _i++) {
+//            auto _node = mainScene->createNode(std::to_string(_i), square);
 //            mainScene->addComponent<SpriteRenderer>(_node, TextureAtlasManager::get().getTile("square", "square_0"));
-//            mainScene->getComponent<Transform>(_node)->setPosition({_r.randomf(-1280, 1280), _r.randomf(-1280, 1280)});
+//            mainScene->getComponent<Transform>(_node)->setPosition({_r.randomf(-1.7, 1.7), _r.randomf(-1, 1)});
 //        }
 
     }
@@ -97,51 +99,24 @@ namespace engine {
     }
 
     void Sandbox::onUpdate(Delta _dt) {
-        if(InputManager::isKeyJustPressed(KeyCode::Enter)) {
-            mainScene->getComponent<SpriteRenderer>(mainScene->getNode("player"))->shaderID = ShaderManager::get().getShader("outline");
-        }
 
-        if(InputManager::isKeyJustPressed(KeyCode::Escape)) {
-            mainScene->getComponent<SpriteRenderer>(mainScene->getNode("player"))->shaderID = ShaderManager::get().getShader("basic");
-        }
-
-        if(InputManager::isGamepadButtonJustPressed(GamePadButtons::ButtonA))
-            InputManager::gamepadVibrate();
-
-
-        auto _playerTransform = mainScene->getComponent<Transform>((NodeID)1);
         if(InputManager::isKeyPressed(KeyCode::A))
-            _playerTransform->setPosition({_playerTransform->getPosition().x - 50 * _dt, _playerTransform->getPosition().y});
+            childTransform->translate(-_dt, 0);
         else if(InputManager::isKeyPressed(KeyCode::D))
-            _playerTransform->setPosition({_playerTransform->getPosition().x + 50 * _dt, _playerTransform->getPosition().y});
+            childTransform->translate(_dt, 0);
 
         if(InputManager::isKeyPressed(KeyCode::W))
-            _playerTransform->setPosition({_playerTransform->getPosition().x, _playerTransform->getPosition().y + 50 * _dt});
+            childTransform->translate(0, _dt);
         else if(InputManager::isKeyPressed(KeyCode::S))
-            _playerTransform->setPosition({_playerTransform->getPosition().x, _playerTransform->getPosition().y - 50 * _dt});
+            childTransform->translate(0, -_dt);
 
+        if(InputManager::isKeyPressed(KeyCode::R))
+            childTransform->rotate(_dt * 10);
 
-//        if(InputManager::isKeyPressed(KeyCode::Left))
-//            childTransform->setPosition({childTransform->getPosition().x - 50 * _dt, childTransform->getPosition().y});
-//        else if(InputManager::isKeyPressed(KeyCode::Right))
-//            childTransform->setPosition({childTransform->getPosition().x + 50 * _dt, childTransform->getPosition().y});
-//
-//        if(InputManager::isKeyPressed(KeyCode::Up))
-//            childTransform->setPosition({childTransform->getPosition().x, childTransform->getPosition().y + 50 * _dt});
-//        else if(InputManager::isKeyPressed(KeyCode::Down))
-//            childTransform->setPosition({childTransform->getPosition().x, childTransform->getPosition().y - 50 * _dt});
-//
-//        if(InputManager::isKeyPressed(KeyCode::R))
-//            squareTransform->setRotation(squareTransform->getRotation() + 50 * _dt);
-//
-//        if(InputManager::isKeyPressed(KeyCode::E))
-//            childTransform->setRotation(childTransform->getRotation() + 50 * _dt);
-//
-//        if(InputManager::isKeyPressed(KeyCode::K))
-//            squareTransform->setScale({squareTransform->getScale().x + 2 * _dt, squareTransform->getScale().y + 2 * _dt});
-//
-//        if(InputManager::isKeyPressed(KeyCode::L))
-//            squareTransform->setScale({squareTransform->getScale().x - 2 * _dt, squareTransform->getScale().y - 2 * _dt});
+        if(InputManager::isKeyPressed(KeyCode::Up))
+            childTransform->scale(_dt, _dt);
+        else if (InputManager::isKeyPressed(KeyCode::Down))
+            childTransform->scale(-_dt, -_dt);
 
         mainScene->onUpdate(_dt);
     }

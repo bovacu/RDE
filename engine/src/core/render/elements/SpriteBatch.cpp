@@ -1,5 +1,6 @@
 #include "core/render/elements/SpriteBatch.h"
 #include "core/util/Logger.h"
+#include "core/graph/Components.h"
 
 #if IS_MOBILE()
     #include <GLES3/gl32.h>
@@ -9,6 +10,7 @@
 
 #include "core/util/Functions.h"
 #include "core/Engine.h"
+#include "glm/gtx/string_cast.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
 namespace engine {
@@ -53,7 +55,7 @@ namespace engine {
     SpriteBatch::~SpriteBatch() = default;
 
     void SpriteBatch::beginDraw(Camera& _camera) {
-        viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_camera.getTransform().transformMatrix);
+        viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_camera.getTransform().modelMatrix);
         aspectRatio = _camera.getAspectRatio();
         scalingFactor = _camera.getViewport()->getScalingFactor();
         for(auto& _batch : batches) {
@@ -295,11 +297,11 @@ namespace engine {
         if(texture == nullptr)
             texture = _spriteRenderer.texture;
 
-        auto _transformMat = _transform.transformMatrix;
-        _transformMat[3] = glm::vec4 {_transform.transformMatrix[3][0] * _transform.parent->getScale().x + _transform.parent->transformMatrix[3][0],
-                                      _transform.transformMatrix[3][1] * _transform.parent->getScale().y + _transform.parent->transformMatrix[3][1],
-                                      1.f,
-                                      1.f};
+        auto _transformMat = _transform.modelMatrix;
+//        _transformMat[3] = glm::vec4 {_transform.transformMatrix[3][0] * _transform.parent->getScale().x + _transform.parent->transformMatrix[3][0],
+//                                      _transform.transformMatrix[3][1] * _transform.parent->getScale().y + _transform.parent->transformMatrix[3][1],
+//                                      1.f,
+//                                      1.f};
 
         Vec2F _textureOrigin = {(float)_spriteRenderer.texture->getRegion().bottomLeftCorner.x, (float)_spriteRenderer.texture->getRegion().bottomLeftCorner.y};
         Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_spriteRenderer.texture->getSize().x, _textureOrigin.y / (float)_spriteRenderer.texture->getSize().y};
