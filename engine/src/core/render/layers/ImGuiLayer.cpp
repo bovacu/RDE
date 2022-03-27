@@ -407,12 +407,14 @@ namespace engine {
         auto* _tag = _graph->getComponent<Tag>(_node);
 
         if(ImGui::IsItemDeactivated() || ImGui::IsItemActivated()) {
-            selectedNode = _transform->parent;
+            if(_transform->parent != _graph->getID())
+                selectedNode = _transform->parent;
         }
 
         if(!_transform->children.empty()) {
+
             auto _flags = _node == selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
-            if (ImGui::TreeNodeEx(_tag->tag.c_str(), ImGuiTreeNodeFlags_DefaultOpen | _flags)) {
+            if (ImGui::TreeNodeEx(_tag->tag.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | _flags)) {
                 for(auto _child : _transform->children) {
                     hierarchyRecursionStub(_graph, _child, _childCount);
                 }
@@ -429,9 +431,7 @@ namespace engine {
     void ImGuiLayer::hierarchy(Graph* _graph) {
         ImGui::Begin("Hierarchy");
         int _childCount = -1;
-        auto* _rootTransform = _graph->getComponent<Transform>(_graph->getID());
-        if(!_rootTransform->children.empty())
-            hierarchyRecursionStub(_graph, _rootTransform->children.front(), _childCount);
+        hierarchyRecursionStub(_graph, _graph->getID(), _childCount);
         ImGui::End();
     }
 
@@ -442,15 +442,19 @@ namespace engine {
 
         auto _transform = _graph->getComponent<Transform>(selectedNode);
 
+        ImGui::Text("%s", _graph->getComponent<Tag>(selectedNode)->tag.c_str());
+        ImGui::Separator();
+
         if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if(selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
             ImGui::Text("Position ");
 
-            float _pos[2] = {0, 0};
+            float _pos[2] = {_transform->getPositionLocal().x, _transform->getPositionLocal().y};
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(1);
             if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
-                _transform->translate(_pos[0], _pos[1]);
+                _transform->setPosition(_transform->getPositionLocal().x + _pos[0], _transform->getPositionLocal().y + _pos[1]);
             }
             ImGui::PopID();
 
@@ -475,6 +479,7 @@ namespace engine {
             if(ImGui::DragFloat2("##myInput", _scale, 0.05))
                 _transform->setScale(_scale[0], _scale[1]);
             ImGui::PopID();
+            if(selectedNode == _graph->getID()) ImGui::EndDisabled();
 
         }
 

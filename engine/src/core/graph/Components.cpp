@@ -9,20 +9,13 @@ namespace engine {
 
     glm::mat4 Transform::getLocalModelMatrix() {
         const glm::mat4 _rot = glm::rotate(glm::mat4(1.0f), glm::radians(localRotation), glm::vec3(0.0f, 0.0f, 1.0f));
-        return glm::translate(glm::mat4(1.0f), localPosition) * _rot * glm::scale(glm::mat4(1.0f), localScale);
+        localModelMatrix = glm::translate(glm::mat4(1.0f), localPosition) * _rot * glm::scale(glm::mat4(1.0f), localScale);
+        return localModelMatrix;
     }
 
     void Transform::update(Graph* _graph) {
-        if (parent != NODE_ID_NULL)
-            modelMatrix = _graph->getComponent<Transform>(parent)->modelMatrix * getLocalModelMatrix();
-        else
-            modelMatrix = getLocalModelMatrix();
-
-        for (auto& _child : children) {
-            _graph->getComponent<Transform>(_child)->update(_graph);
-        }
-
-        dirty = false;
+        if (parent != NODE_ID_NULL) modelMatrix = _graph->getComponent<Transform>(parent)->modelMatrix * localModelMatrix;
+        else modelMatrix = getLocalModelMatrix();
     }
 
     void Transform::setPosition(const Vec2F& _position) {
@@ -32,7 +25,7 @@ namespace engine {
     void Transform::setPosition(float _x, float _y) {
         Util::worldToScreenSize(_x, _y);
         localPosition = glm::vec3 {_x, _y, 0.0f};
-        dirty = true;
+        getLocalModelMatrix();
     }
 
     Vec2F Transform::getPositionLocal() const {
@@ -43,7 +36,7 @@ namespace engine {
 
     void Transform::setRotation(float _rotation) {
         localRotation = _rotation;
-        dirty = true;
+        getLocalModelMatrix();
     }
 
     float Transform::getRotationLocal() const {
@@ -56,7 +49,7 @@ namespace engine {
 
     void Transform::setScale(float _x, float _y) {
         localScale = {_x, _y, 1.0f};
-        dirty = true;
+        getLocalModelMatrix();
     }
 
     Vec2F Transform::getScaleLocal() const {
@@ -71,12 +64,12 @@ namespace engine {
         Util::worldToScreenSize(_x, _y);
         localPosition.x += _x;
         localPosition.y += _y;
-        dirty = true;
+        getLocalModelMatrix();
     }
 
     void Transform::rotate(float _amount) {
         localRotation += _amount;
-        dirty = true;
+        getLocalModelMatrix();
     }
 
     void Transform::scale(const Vec2F& _scale) {
@@ -86,11 +79,7 @@ namespace engine {
     void Transform::scale(float _x, float _y) {
         localScale.x += _x;
         localScale.y += _y;
-        dirty = true;
-    }
-
-    bool Transform::isDirty() const {
-        return dirty;
+        getLocalModelMatrix();
     }
 
     Vec2F Transform::getPositionWorld() const {

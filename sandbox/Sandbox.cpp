@@ -19,7 +19,7 @@ namespace engine {
         TextureAtlasManager::get().addAtlas(32, 32, "assets/test/square.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
-        engine->setVSync(true);
+//        engine->setVSync(true);
 
 //        auto _player = mainScene->createNode("player");
 //        auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
@@ -54,36 +54,50 @@ namespace engine {
         auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(square);
         _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
         _squareSpriteRenderer->layer = 30;
+//
+//        squareChild = getMainGraph()->createNode("squareChild", square);
+//        childTransform = getMainGraph()->getComponent<Transform>(squareChild);
+//        auto _squareChildSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(squareChild);
+//        _squareChildSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
+//        _squareChildSpriteRenderer->layer = 30;
+//        _squareChildSpriteRenderer->color = Color::Yellow;
+//        childTransform->setPosition({0, 128});
+//
+//        auto _childChild = getMainGraph()->createNode("childChild", squareChild);
+//        getMainGraph()->addComponent<SpriteRenderer>(_childChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Yellow;
+//        getMainGraph()->getComponent<Transform>(_childChild)->setPosition({-100, 0});
+//
+//        auto _childChildChild = getMainGraph()->createNode("childChildChild", _childChild);
+//        getMainGraph()->addComponent<SpriteRenderer>(_childChildChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Orange;
+//        getMainGraph()->getComponent<Transform>(_childChildChild)->setPosition({190, 75});
+//
+//        auto _anotherSquare = getMainGraph()->createSpriteNode(TextureAtlasManager::get().getTile("square", "square_0"), "Another Square");
+//        auto _anotherSquareSR = getMainGraph()->getComponent<SpriteRenderer>(_anotherSquare);
+//        _anotherSquareSR->color = Color::Blue;
+//        getMainGraph()->getComponent<Transform>(_anotherSquare)->setPosition(-100, -100);
+//
+//        auto _anotherSquare2 = getMainGraph()->createSpriteNode(TextureAtlasManager::get().getTile("square", "square_0"), "Another Square2");
+//        auto _anotherSquareSR2 = getMainGraph()->getComponent<SpriteRenderer>(_anotherSquare2);
+//        _anotherSquareSR2->color = Color::Green;
+//        getMainGraph()->getComponent<Transform>(_anotherSquare2)->setPosition(100, 100);
+//
+//        auto _anotherSquare3 = getMainGraph()->createSpriteNode(TextureAtlasManager::get().getTile("square", "square_0"), "Another Square3", _anotherSquare2);
+//        auto _anotherSquareSR3 = getMainGraph()->getComponent<SpriteRenderer>(_anotherSquare3);
+//        _anotherSquareSR3->color = Color::Brown;
+//        getMainGraph()->getComponent<Transform>(_anotherSquare3)->setPosition(-100, 100);
 
-        squareChild = getMainGraph()->createNode("squareChild", square);
-        childTransform = getMainGraph()->getComponent<Transform>(squareChild);
-        auto _squareChildSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(squareChild);
-        _squareChildSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
-        _squareChildSpriteRenderer->layer = 30;
-        _squareChildSpriteRenderer->color = Color::Yellow;
-        childTransform->setPosition({0, 128});
-//
-//        auto _childChild = mainScene->createNode("childChild", squareChild);
-//        mainScene->addComponent<SpriteRenderer>(_childChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Yellow;
-//        mainScene->getComponent<Transform>(_childChild)->setPosition({-100, 0});
-//
-//        auto _childChildChild = mainScene->createNode("childChildChild", _childChild);
-//        mainScene->addComponent<SpriteRenderer>(_childChildChild, TextureAtlasManager::get().getTile("square", "square_0"))->color = Color::Orange;
-//        mainScene->getComponent<Transform>(_childChildChild)->setPosition({100, 50});
 
 //        printNode(mainScene, square);
 //        printNode(mainScene, squareChild);
 //        printNode(mainScene, _childChild);
 
 
-//        Random _r;
-//        for(int _i = 0; _i < 1000; _i++) {
-//            auto _node = mainScene->createNode(std::to_string(_i), square);
-//            mainScene->addComponent<SpriteRenderer>(_node, TextureAtlasManager::get().getTile("square", "square_0"));
-//            mainScene->getComponent<Transform>(_node)->setPosition({_r.randomf(-1.7, 1.7), _r.randomf(-1, 1)});
-//        }
-
-        LOG_W(getMainGraph()->toString())
+        Random _r;
+        for(int _i = 0; _i < 125000; _i++) {
+            auto _node = getMainGraph()->createNode(std::to_string(_i), square);
+            getMainGraph()->addComponent<SpriteRenderer>(_node, TextureAtlasManager::get().getTile("square", "square_0"));
+            getMainGraph()->getComponent<Transform>(_node)->setPosition({_r.randomf(-1280, 1280), _r.randomf(-720, 720)});
+        }
     }
 
     void Sandbox::onEvent(Event& _event) {
@@ -116,24 +130,24 @@ namespace engine {
 
 
 
-        auto _t2 = getMainGraph()->getComponent<Transform>(squareChild);
-        if(InputManager::isKeyPressed(KeyCode::Left))
-            _t2->translate(-_dt * 150, 0);
-        else if(InputManager::isKeyPressed(KeyCode::Right))
-            _t2->translate(_dt * 150, 0);
-
-        if(InputManager::isKeyPressed(KeyCode::Up))
-            _t2->translate(0, _dt * 150);
-        else if(InputManager::isKeyPressed(KeyCode::Down))
-            _t2->translate(0, -_dt * 150);
-
-        if(InputManager::isKeyPressed(KeyCode::E))
-            _t2->rotate(_dt * 150);
-
-        if(InputManager::isKeyPressed(KeyCode::N))
-            _t2->scale(_dt, _dt);
-        else if (InputManager::isKeyPressed(KeyCode::M))
-            _t2->scale(-_dt, -_dt);
+//        auto _t2 = getMainGraph()->getComponent<Transform>(squareChild);
+//        if(InputManager::isKeyPressed(KeyCode::Left))
+//            _t2->translate(-_dt * 150, 0);
+//        else if(InputManager::isKeyPressed(KeyCode::Right))
+//            _t2->translate(_dt * 150, 0);
+//
+//        if(InputManager::isKeyPressed(KeyCode::Up))
+//            _t2->translate(0, _dt * 150);
+//        else if(InputManager::isKeyPressed(KeyCode::Down))
+//            _t2->translate(0, -_dt * 150);
+//
+//        if(InputManager::isKeyPressed(KeyCode::E))
+//            _t2->rotate(_dt * 150);
+//
+//        if(InputManager::isKeyPressed(KeyCode::N))
+//            _t2->scale(_dt, _dt);
+//        else if (InputManager::isKeyPressed(KeyCode::M))
+//            _t2->scale(-_dt, -_dt);
 
         getMainGraph()->onUpdate(_dt);
     }

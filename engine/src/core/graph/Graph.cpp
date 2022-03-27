@@ -23,7 +23,7 @@ namespace engine {
 
     void Graph::onUpdate(Delta _dt) {
         registry.group<Transform>(entt::get<Active>).each([&](const auto _entity, Transform& _transform, const Active& _active) {
-            if(!_transform.isDirty() || !_active.active) return;
+            if(!_active.active) return;
             _transform.update(this);
         });
 

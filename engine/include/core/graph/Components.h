@@ -48,7 +48,6 @@ namespace engine {
             glm::vec3 localPosition {0.0f, 0.0f, 0.0f};
             glm::vec3 localScale {1.0f, 1.0f, 1.0f};
             float localRotation = 0.0f;
-            bool dirty = false;
 
         public:
             NodeID parent;
@@ -56,6 +55,7 @@ namespace engine {
 
             // World Space
             glm::mat4 modelMatrix = glm::mat4(1.0f);
+            glm::mat4 localModelMatrix = glm::mat4(1.0f);
 
             glm::mat4 getLocalModelMatrix();
             void update(Graph* _graph);
@@ -78,8 +78,6 @@ namespace engine {
             [[nodiscard]] Vec2F getScaleLWorld() const;
             void scale(const Vec2F& _scale);
             void scale(float _x, float _y);
-
-            [[nodiscard]] bool isDirty() const;
     };
 }
 
