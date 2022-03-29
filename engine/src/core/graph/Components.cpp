@@ -14,8 +14,10 @@ namespace engine {
     }
 
     void Transform::update(Graph* _graph) {
-        if (parent != NODE_ID_NULL) modelMatrix = _graph->getComponent<Transform>(parent)->modelMatrix * localModelMatrix;
-        else modelMatrix = getLocalModelMatrix();
+        if (parent != NODE_ID_NULL && !constant) {
+            modelMatrix = _graph->getComponent<Transform>(parent)->modelMatrix * localModelMatrix;
+        } else
+            modelMatrix = getLocalModelMatrix();
     }
 
     void Transform::setPosition(const Vec2F& _position) {
@@ -95,5 +97,106 @@ namespace engine {
     Vec2F Transform::getScaleLWorld() const {
         return { modelMatrix[0][0], modelMatrix[1][1] };
     }
+
+    void Transform::setConstant(bool _constant) {
+        constant = _constant;
+    }
+
+    bool Transform::isConstant() {
+        return constant;
+    }
+
+
+    /// -------------------------------------------
+
+    TextRenderer::TextRenderer(Font* _font, const std::string& _text) {
+        font = _font;
+        innerText = _text;
+        recalcTextDimensions(_text);
+        spriteRenderer.shaderID = ShaderManager::get().getShader("basicText");
+        spriteRenderer.texture = &font->getTexture();
+    }
+
+    TextRenderer::TextRenderer(Font* _font) {
+        font = _font;
+        spriteRenderer.shaderID = ShaderManager::get().getShader("basicText");
+        spriteRenderer.texture = &font->getTexture();
+    }
+
+    void TextRenderer::setText(const std::string& _text) {
+        innerText = _text;
+        recalcTextDimensions(_text);
+    }
+
+    void TextRenderer::setFont(Font* _font) {
+        font = _font;
+    }
+
+    Font* TextRenderer::getFont() const {
+        return font;
+    }
+
+    const std::string& TextRenderer::getText() const {
+        return innerText;
+    }
+
+    void TextRenderer::recalcTextDimensions(const std::string& _text) {
+        size.y = -1;
+        size.x = 0;
+
+        for(auto _c : _text) {
+            auto _char = font->getChars()[_c];
+
+            if(_c == ' ') {
+                size.x += _char.advance.x / 2.f;
+                continue;
+            }
+
+            if(_c == '\n') {
+                continue;
+            }
+
+            size.x += _char.advance.x / 2.f;
+            size.y = std::max(size.y, _char.bitmapSize.y - _char.bearing.y);
+        }
+
+//        debugShape.makeSquare(getPositionLocal(), size);
+    }
+
+    Vec2F TextRenderer::getTextSize() const {
+        return size;
+    }
+
+    void TextRenderer::setFontSize(int _fontSize) {
+        fontSize = _fontSize;
+        recalcTextDimensions(innerText);
+        font = FontManager::get().getSpecificFont(font->getFontName(), _fontSize);
+    }
+
+    int TextRenderer::getFontSize() {
+        return fontSize;
+    }
+
+    void TextRenderer::setSpaceWidth(float _spaceWidth) {
+        spaceWidth = _spaceWidth;
+        recalcTextDimensions(innerText);
+    }
+
+    float TextRenderer::getSpaceWidth() const {
+        return spaceWidth;
+    }
+
+    float TextRenderer::getSpacesBetweenChars() const {
+        return spaceBetweenChars;
+    }
+
+    void TextRenderer::setSpacesBetweenChars(float _spaceBetweenChars) {
+        spaceBetweenChars = _spaceBetweenChars;
+        recalcTextDimensions(innerText);
+    }
+
+//    Shape& TextRenderer::getDebugShape() {
+//        return debugShape;
+//    }
 
 }

@@ -59,7 +59,7 @@ namespace engine {
         batch.draw(_spriteRenderer, _transform);
     }
 
-    void Renderer::draw(const Text& _text, const Transform& _transform) {
+    void Renderer::draw(const TextRenderer& _text, const Transform& _transform) {
         batch.draw(_text, _transform);
     }
 

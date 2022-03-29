@@ -4,8 +4,8 @@
 #include "core/render/elements/Texture.h"
 #include "core/render/Camera.h"
 #include "core/render/shapes/Shape.h"
-#include "core/systems/uiSystem/Text.h"
 #include "core/render/elements/ShaderManager.h"
+#include "core/graph/Components.h"
 
 namespace engine {
     struct Vertex2dUVColor {
@@ -41,7 +41,7 @@ namespace engine {
                 Window* window = nullptr;
                 friend class SpriteBatch;
                 void addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
-                void addText(const Text& _text, const SpriteRenderer& _spriteRenderer, const Transform& _transform);
+                void addText(const TextRenderer& _text, const SpriteRenderer& _spriteRenderer, const Transform& _transform);
         };
 
         public:
@@ -84,7 +84,7 @@ namespace engine {
             void beginDraw(Camera& _camera);
             void draw(const glm::vec4& _destRect, const glm::vec4& _sourceRect, const glm::vec4& _color, Texture* _texture, float _rotation = 0);
             void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
-            void draw(const Text& _text, const Transform& _transform);
+            void draw(const TextRenderer& _text, const Transform& _transform);
             void flush();
 
             void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Green);

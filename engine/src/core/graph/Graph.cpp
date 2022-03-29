@@ -27,7 +27,7 @@ namespace engine {
             _transform.update(this);
         });
 
-        registry.group<SpriteRenderer>(entt::get<AnimationSystem, Active>).each([&](const auto _entity, SpriteRenderer& _spriteRenderer, AnimationSystem& _animationSystem, const Active& _active) {
+        registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _active) {
             if(!_active.active) return;
             _animationSystem.update(_dt, _spriteRenderer);
         });
@@ -43,7 +43,7 @@ namespace engine {
             Renderer::draw(_spriteRenderer, _transform);
         });
 
-        registry.view<Transform, Text>().each([&](const auto _entity, Transform& _transform, Text& _text) {
+        registry.view<Transform, TextRenderer>().each([&](const auto _entity, Transform& _transform, TextRenderer& _text) {
             Renderer::draw(_text, _transform);
         });
     }

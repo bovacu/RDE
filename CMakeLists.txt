@@ -152,7 +152,7 @@ set(SOURCES
         engine/include/core/systems/animationSystem/AnimationSystem.h
 
 
-        engine/src/core/systems/console/Console.cpp engine/include/core/systems/console/Console.h engine/src/core/systems/uiSystem/Text.cpp engine/include/core/systems/uiSystem/Text.h
+        engine/src/core/systems/console/Console.cpp engine/include/core/systems/console/Console.h
         engine/src/core/systems/uiSystem/FontManager.cpp engine/include/core/systems/uiSystem/FontManager.h engine/include/stb/stb_image_writer.h engine/src/core/render/elements/FrameBuffer.cpp
         engine/include/core/render/elements/FrameBuffer.h engine/src/core/render/elements/ShaderManager.cpp engine/include/core/render/elements/ShaderManager.h engine/include/core/render/elements/IRenderizable.h
         sandbox/Sandbox.cpp sandbox/Sandbox.h engine/src/core/systems/soundSystem/SoundManager.cpp engine/include/core/systems/soundSystem/SoundManager.h
@@ -167,12 +167,13 @@ set(SOURCES
         engine/src/core/render/ViewPort.cpp engine/include/core/render/elements/ViewPort.h
         engine/include/core/util/Delegate.h engine/include/core/graph/Graph.h engine/src/core/graph/Graph.cpp
         engine/src/core/graph/Components.cpp engine/include/core/graph/Components.h
+        engine/include/core/graph/Node.h engine/src/core/graph/Node.cpp
 
         unitTesting/HierarchyTest.cpp unitTesting/doctest.h
         )
 
 set(CPP_HEADERS)
-set(CPP_SOURCES engine/include/core/graph/Node.h engine/src/core/graph/Node.cpp)
+set(CPP_SOURCES )
 
 #GDEFirebase
 

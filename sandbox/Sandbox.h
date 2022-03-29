@@ -9,7 +9,6 @@
 #include "core/render/layers/Layer.h"
 #include "core/render/Camera.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
-#include "core/systems/uiSystem/Text.h"
 #include "core/render/window/event/JoystickEvent.h"
 #include "core/Engine.h"
 #include "core/render/window/event/MobileEvent.h"
@@ -21,7 +20,6 @@ namespace engine {
         private:
             AnimationSystem animationSystem;
             TransitionParams params;
-            Text text;
             Engine* engine;
             UDelegate<bool(MouseScrolledEvent&)> mseDelegate;
 

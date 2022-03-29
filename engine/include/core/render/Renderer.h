@@ -6,7 +6,7 @@
 
 #include "core/util/Util.h"
 #include "core/render/elements/SpriteBatch.h"
-#include "core/systems/uiSystem/Text.h"
+#include "core/graph/Components.h"
 
 namespace engine {
 
@@ -67,7 +67,7 @@ namespace engine {
              */
             static void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
 
-            static void draw(const Text& _text, const Transform& _transform);
+            static void draw(const TextRenderer& _text, const Transform& _transform);
 
             /**
              * Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.

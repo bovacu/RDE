@@ -37,12 +37,6 @@ namespace engine {
 //        _animationSystem->setInitialAnimation("run");
 //        _animationSystem->start();
 
-//        auto _text = mainScene->createNode("text");
-//        auto* _textComp = mainScene->addComponent<Text>(_text);
-//        _textComp->init(_font, "Hello World");
-//        mainScene->getComponent<Transform>(_text)->setPosition({-350, 250});
-//        _textComp->spriteRenderer.color = Color::Green;
-
 
 
 
@@ -54,6 +48,10 @@ namespace engine {
         auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(square);
         _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
         _squareSpriteRenderer->layer = 30;
+
+        auto _text = getMainGraph()->createNode("Text", square);
+        getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World");
+        getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
 //
 //        squareChild = getMainGraph()->createNode("squareChild", square);
 //        childTransform = getMainGraph()->getComponent<Transform>(squareChild);
@@ -92,12 +90,12 @@ namespace engine {
 //        printNode(mainScene, _childChild);
 
 
-        Random _r;
-        for(int _i = 0; _i < 125000; _i++) {
-            auto _node = getMainGraph()->createNode(std::to_string(_i), square);
-            getMainGraph()->addComponent<SpriteRenderer>(_node, TextureAtlasManager::get().getTile("square", "square_0"));
-            getMainGraph()->getComponent<Transform>(_node)->setPosition({_r.randomf(-1280, 1280), _r.randomf(-720, 720)});
-        }
+//        Random _r;
+//        for(int _i = 0; _i < 10; _i++) {
+//            auto _node = getMainGraph()->createNode(std::to_string(_i), square);
+//            getMainGraph()->addComponent<SpriteRenderer>(_node, TextureAtlasManager::get().getTile("square", "square_0"));
+//            getMainGraph()->getComponent<Transform>(_node)->setPosition({_r.randomf(-1280, 1280), _r.randomf(-720, 720)});
+//        }
     }
 
     void Sandbox::onEvent(Event& _event) {

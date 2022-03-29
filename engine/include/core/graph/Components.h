@@ -4,12 +4,12 @@
 #ifndef ENGINE2_0_COMPONENTS_H
 #define ENGINE2_0_COMPONENTS_H
 
-#include "submodules/glm/glm/ext/matrix_float4x4.hpp"
 #include "core/util/Util.h"
 #include "core/render/elements/Texture.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/graph/Graph.h"
 #include "glm/ext/matrix_transform.hpp"
+#include "core/systems/uiSystem/FontManager.h"
 
 namespace engine {
 
@@ -42,12 +42,52 @@ namespace engine {
         explicit SpriteRenderer(Texture* _texture) : texture(_texture) {  }
     };
 
+    class TextRenderer {
+        private:
+            Font* font;
+            std::string innerText;
+            Vec2F size;
+            float spaceBetweenChars;
+            float spaceWidth;
+            float enterHeight;
+            int fontSize;
+
+        private:
+            void recalcTextDimensions(const std::string& _text);
+
+        public:
+            SpriteRenderer spriteRenderer;
+
+        public:
+            TextRenderer(Font* _font, const std::string& _text);
+            explicit TextRenderer(Font* _font);
+
+            void setText(const std::string& _text);
+            void setFont(Font* _font);
+
+            [[nodiscard]] Font* getFont() const;
+            [[nodiscard]] const std::string& getText() const;
+            [[nodiscard]] Vec2F getTextSize() const;
+
+            void setFontSize(int _fontSize);
+            int getFontSize();
+
+            void setSpaceWidth(float _spaceWidth);
+            [[nodiscard]] float getSpaceWidth() const;
+
+            [[nodiscard]] float getSpacesBetweenChars() const;
+            void setSpacesBetweenChars(float _spaceBetweenChars);
+
+    //        Shape& getDebugShape();
+    };
+
     struct Transform {
         // Local Space
         private:
             glm::vec3 localPosition {0.0f, 0.0f, 0.0f};
             glm::vec3 localScale {1.0f, 1.0f, 1.0f};
             float localRotation = 0.0f;
+            bool constant = false;
 
         public:
             NodeID parent;
@@ -78,6 +118,9 @@ namespace engine {
             [[nodiscard]] Vec2F getScaleLWorld() const;
             void scale(const Vec2F& _scale);
             void scale(float _x, float _y);
+
+            void setConstant(bool _constant);
+            bool isConstant();
     };
 }
 
