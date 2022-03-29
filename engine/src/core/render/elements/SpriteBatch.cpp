@@ -223,7 +223,6 @@ namespace engine {
             glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(VertexColorDebug) * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-
             glEnableVertexAttribArray(4);
             glEnableVertexAttribArray(5);
 
@@ -231,8 +230,6 @@ namespace engine {
 
             glDisableVertexAttribArray(4);
             glDisableVertexAttribArray(5);
-        } else {
-            LOG_I("Empty 0")
         }
 
         if(!vertexDebugBufferLines.empty()) {

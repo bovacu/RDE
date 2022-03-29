@@ -28,6 +28,12 @@ namespace engine {
             void remove(const NodeID& _node, bool _delete);
 
         public:
+            UDelegate<void(Event&)> onEventDel;
+            UDelegate<void(Delta)> onUpdateDel;
+            UDelegate<void(Delta)> onFixedUpdateDel;
+            UDelegate<void()> onRenderDel;
+
+        public:
             explicit Graph(const std::string& _sceneName);
             ~Graph() = default;
 

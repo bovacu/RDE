@@ -146,6 +146,8 @@ namespace engine {
             _layer->onRender(_dt);
         Renderer::endDraw();
 
+
+
         frameBuffer->unbind();
 
         // Imgui rendering

@@ -7,6 +7,11 @@
 
 namespace engine {
 
+    static void onEventDelFoo(Event& _event) {  }
+    static void onUpdateDelFoo(Delta _dt) {  }
+    static void onFixedUpdateDelFoo(Delta _dt) {  }
+    static void onRenderDelFoo() {  }
+
     Graph::Graph(const std::string& _sceneName) {
         name = _sceneName;
         sceneRoot = registry.create();
@@ -14,11 +19,16 @@ namespace engine {
         registry.emplace<Tag>(sceneRoot, _sceneName);
         registry.emplace<Transform>(sceneRoot).parent = NODE_ID_NULL;
         registry.emplace<Active>(sceneRoot, true);
+
+        onEventDel.bind<&onEventDelFoo>();
+        onUpdateDel.bind<&onUpdateDelFoo>();
+        onFixedUpdateDel.bind<&onFixedUpdateDelFoo>();
+        onRenderDel.bind<&onRenderDelFoo>();
     }
 
 
     void Graph::onEvent(Event& _event) {
-
+        onEventDel(_event);
     }
 
     void Graph::onUpdate(Delta _dt) {
@@ -31,10 +41,12 @@ namespace engine {
             if(!_active.active) return;
             _animationSystem.update(_dt, _spriteRenderer);
         });
+
+        onUpdateDel(_dt);
     }
 
     void Graph::onFixedUpdate(Delta _dt) {
-
+        onFixedUpdateDel(_dt);
     }
 
     void Graph::onRender() {
@@ -46,6 +58,8 @@ namespace engine {
         registry.view<Transform, TextRenderer>().each([&](const auto _entity, Transform& _transform, TextRenderer& _text) {
             Renderer::draw(_text, _transform);
         });
+
+        onRenderDel();
     }
 
     NodeID Graph::createNode(const std::string& _tag, const NodeID& _parent) {
