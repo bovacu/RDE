@@ -13,7 +13,6 @@
 #include "core/render/Camera.h"
 #include "core/systems/profiling/Profiler.h"
 #include "engine/include/core/graph/ImGuiScene.h"
-#include "core/render/layers/LayerStack.h"
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/systems/console/Console.h"

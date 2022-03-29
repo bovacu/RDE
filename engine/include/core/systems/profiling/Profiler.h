@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <ostream>
 #include <cmath>
-#include "core/render/layers/ImGuiCore.h"
+#include "engine/include/core/graph/ImGuiCore.h"
 
 #include "sys/types.h"
 #include "sys/sysinfo.h"

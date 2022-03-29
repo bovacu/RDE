@@ -123,6 +123,7 @@ namespace engine {
     }
 
     void Engine::onUpdate(Delta _dt) {
+        camera->getViewport()->update(getWindowSize());
         scene->onUpdate(_dt);
 
         if(InputManager::isKeyJustPressed(KeyCode::F9))

@@ -37,6 +37,8 @@ namespace engine {
 //        _animationSystem->setInitialAnimation("run");
 //        _animationSystem->start();
 
+        Engine::get().getMainCamera().setAdaptiveViewport(Engine::get().getWindowSize());
+
         mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
 
         square = getMainGraph()->createNode("square");
