@@ -4,35 +4,35 @@
 #define LAYER_STACK_H
 
 #include <vector>
-#include "Layer.h"
+#include "engine/include/core/graph/Scene.h"
 
 namespace engine {
 
     class LayerStack {
         private:
-            std::vector<Layer*> layers;
+            std::vector<Scene*> layers;
             unsigned int layerInsertIndex = 0;
 
         public:
             LayerStack() = default;
             ~LayerStack();
 
-            void pushLayer(Layer* _layer);
-            void pushOverlay(Layer* _overlay);
-            void popLayer(Layer* _layer);
-            void popOverlay(Layer* _overlay);
+            void pushLayer(Scene* _layer);
+            void pushOverlay(Scene* _overlay);
+            void popLayer(Scene* _layer);
+            void popOverlay(Scene* _overlay);
 
-            Layer* getLayer(int _index) { return layers[_index]; }
+            Scene* getLayer(int _index) { return layers[_index]; }
 
-            std::vector<Layer*>::iterator begin() { return layers.begin(); }
-            std::vector<Layer*>::iterator end() { return layers.end(); }
-            std::vector<Layer*>::reverse_iterator rbegin() { return layers.rbegin(); }
-            std::vector<Layer*>::reverse_iterator rend() { return layers.rend(); }
+            std::vector<Scene*>::iterator begin() { return layers.begin(); }
+            std::vector<Scene*>::iterator end() { return layers.end(); }
+            std::vector<Scene*>::reverse_iterator rbegin() { return layers.rbegin(); }
+            std::vector<Scene*>::reverse_iterator rend() { return layers.rend(); }
 
-            std::vector<Layer*>::const_iterator begin() const { return layers.begin(); }
-            std::vector<Layer*>::const_iterator end()	const { return layers.end(); }
-            std::vector<Layer*>::const_reverse_iterator rbegin() const { return layers.rbegin(); }
-            std::vector<Layer*>::const_reverse_iterator rend() const { return layers.rend(); }
+            std::vector<Scene*>::const_iterator begin() const { return layers.begin(); }
+            std::vector<Scene*>::const_iterator end()	const { return layers.end(); }
+            std::vector<Scene*>::const_reverse_iterator rbegin() const { return layers.rbegin(); }
+            std::vector<Scene*>::const_reverse_iterator rend() const { return layers.rend(); }
     };
 
 }

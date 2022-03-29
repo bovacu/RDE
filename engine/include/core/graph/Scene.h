@@ -9,7 +9,7 @@
 
 namespace engine {
 
-    class Layer {
+    class Scene {
         private:
             Graph mainGraph;
 
@@ -17,8 +17,8 @@ namespace engine {
             std::string debugName;
 
         public:
-            explicit Layer(const std::string& _debugName = "Layer")  : debugName(_debugName), mainGraph(_debugName) {  }
-            virtual ~Layer() {  };
+            explicit Scene(const std::string& _debugName = "Scene")  : debugName(_debugName), mainGraph(_debugName) {  }
+            virtual ~Scene() {  };
 
             virtual void onInit() = 0;
             virtual void onEvent(Event& _event) = 0;
@@ -26,6 +26,7 @@ namespace engine {
             virtual void onFixedUpdate(Delta _dt) {  }
             virtual void onRender(Delta _dt) = 0;
             virtual void onImGuiRender(Delta _dt) {  }
+            virtual void onDebugRender(Delta _dt) {  }
             virtual void onEnd() {  }
 
             Graph* getMainGraph() { return &mainGraph; }

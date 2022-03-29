@@ -36,8 +36,8 @@ namespace engine {
         Renderer::setClearColor(backgroundColor);
 
 #if !IS_MOBILE()
-        imGuiLayer = new ImGuiLayer();
-        pushOverlay(imGuiLayer);
+        imGuiLayer = new ImGuiScene();
+        imGuiLayer->onInit();
 #endif
 
         if(timePerFrame < 0)
@@ -91,6 +91,8 @@ namespace engine {
                 onRender(_dt);
                 Profiler::end(ProfilerState::RENDERING);
 
+                onDebugRender(_dt);
+
                 #ifdef ENGINE_DEBUG
                 updateFps();
                 #endif
@@ -110,30 +112,21 @@ namespace engine {
         }
     }
 
-    void Engine::onEvent(Event &_e) {
-
+    void Engine::onEvent(Event& _e) {
         EventDispatcher _ed(_e);
         _ed.dispatchEvent<WindowResizedEvent>(wreDel);
-
-        for (auto _it = layerStack.rbegin(); _it != layerStack.rend(); ++_it) {
-            (*_it)->onEvent(_e);
-            if (_e.handled)
-                break;
-        }
+        scene->onEvent(_e);
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
-        for (Layer* _layer : layerStack)
-            _layer->onFixedUpdate(_fixedDt);
+        scene->onFixedUpdate(_fixedDt);
     }
 
     void Engine::onUpdate(Delta _dt) {
-        for (Layer* _layer : layerStack)
-            _layer->onUpdate(_dt);
+        scene->onUpdate(_dt);
 
         if(InputManager::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
-
     }
 
     void Engine::onRender(Delta _dt) {
@@ -142,8 +135,7 @@ namespace engine {
         Renderer::clear();
 
         Renderer::beginDraw(*camera);
-        for (Layer* _layer : layerStack)
-            _layer->onRender(_dt);
+        scene->onRender(_dt);
         Renderer::endDraw();
 
 
@@ -154,16 +146,20 @@ namespace engine {
         Profiler::begin(ProfilerState::IMGUI);
         #if !IS_MOBILE()
         imGuiLayer->begin();
-        for (Layer* _layer : layerStack) {
-            _layer->onImGuiRender(_dt);
-        }
+        scene->onImGuiRender(_dt);
 
         if (showImGuiDebugWindow)
-            imGuiLayer->drawDebugInfo(layerStack.getLayer(0)->getMainGraph());
+            imGuiLayer->drawDebugInfo(scene->getMainGraph());
 
         imGuiLayer->end();
         #endif
         Profiler::end(ProfilerState::IMGUI);
+    }
+
+    void Engine::onDebugRender(Delta _dt) {
+        Renderer::beginDebugDraw(*camera);
+        scene->onDebugRender(_dt);
+        Renderer::endDebugDraw();
     }
 
     bool Engine::onWindowClosed(WindowClosedEvent &_e) {
@@ -211,25 +207,6 @@ namespace engine {
         window->setWindowSizeAndUpdateNativeWindow(_width, _height);
     }
 
-    void Engine::pushLayer(Layer* _layer) {
-        layerStack.pushLayer(_layer);
-        _layer->onInit();
-    }
-
-    void Engine::pushOverlay(Layer* _layer) {
-        layerStack.pushOverlay(_layer);
-        _layer->onInit();
-    }
-
-    void Engine::popLayer(Layer* _layer) {
-        layerStack.popLayer(_layer);
-        _layer->onEnd();
-    }
-
-    void Engine::popOverlay(Layer* _layer) {
-        layerStack.popOverlay(_layer);
-        _layer->onEnd();
-    }
 
     bool Engine::fromRunToRoll(const TransitionParams& _foo) {
         return InputManager::isKeyJustPressed(KeyCode::A);
@@ -255,6 +232,14 @@ namespace engine {
         InputManager::get().destroy();
         delete frameBuffer;
         delete camera;
+        delete scene;
+        delete imGuiLayer;
+    }
+
+    void Engine::setScene(Scene* _scene) {
+        if(scene != nullptr) scene->onEnd();
+        scene = _scene;
+        if(scene != nullptr) scene->onInit();
     }
 
 }

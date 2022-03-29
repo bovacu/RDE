@@ -12,7 +12,7 @@
 #include "core/render/Renderer.h"
 #include "core/render/Camera.h"
 #include "core/systems/profiling/Profiler.h"
-#include "core/render/layers/ImGuiLayer.h"
+#include "engine/include/core/graph/ImGuiScene.h"
 #include "core/render/layers/LayerStack.h"
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
@@ -39,10 +39,10 @@ namespace engine {
         private:
             WindowPtr window;
             static Engine* gameInstance;
-            LayerStack layerStack;
+            Scene* scene = nullptr;
 
             #if !IS_MOBILE()
-            ImGuiLayer* imGuiLayer;
+            ImGuiScene* imGuiLayer;
             #endif
 
             Clock clock;
@@ -59,11 +59,11 @@ namespace engine {
             Camera& getMainCamera() { return *camera; }
 
             void setMinimized(bool _isMinimized) { minimized = _isMinimized; }
-            bool isMinimized() const { return minimized; }
+            [[nodiscard]] bool isMinimized() const { return minimized; }
 
             /// This method provides the number of FPS in any given moment.
             /// @return the number of FPS
-            int getFps() const;
+            [[nodiscard]] int getFps() const;
 
             /// Sets the title of the game's window.
             /// @param [in] _title The title of the window
@@ -80,11 +80,11 @@ namespace engine {
 
             /// Returns the size of the window as a Vec2i.
             ///@return Vec2i with the size of the window.
-            [[nodiscard]] Vec2I getWindowSize() const               { return Vec2I(window->getWidth(), window->getHeight()); }
+            [[nodiscard]] Vec2I getWindowSize() const { return Vec2I(window->getWidth(), window->getHeight()); }
 
             /// Returns 1 / FPS
             /// @return The FPS as milliseconds.
-            [[nodiscard]] float getTimePerFrame() const             { return timePerFrame; }
+            [[nodiscard]] float getTimePerFrame() const { return timePerFrame; }
 
             /// Enables or disables the VSync
             /// @param true or false depending if you want to enable(true) or disable(false).
@@ -96,7 +96,7 @@ namespace engine {
 
             /// Returns the delta (time passed between the actual frame and the previous one) on any moment.
             /// @return The current delta.
-            [[nodiscard]] Delta getDelta() const                 { return dt; }
+            [[nodiscard]] Delta getDelta() const { return dt; }
 
             /// Enables or disables the fullscreen mode.
             /// @param _fullscreen Enables(true) or disables(false) the fullscreen.
@@ -104,19 +104,19 @@ namespace engine {
 
             /// Returns if fullscreen is active.
             /// @return If fullscreen is active.
-            [[nodiscard]] bool isFullscreen() const                 {  return window->isFullscreen(); }
+            [[nodiscard]] bool isFullscreen() const {  return window->isFullscreen(); }
 
             /// Sets the position of the window on the screen.
             /// @param _position Vec2i with [x,y] coordinates to move the window.
-            void setPosition(const Vec2I& _position)                { window->setPosition(_position); }
+            void setPosition(const Vec2I& _position) { window->setPosition(_position); }
 
             /// Returns a Vec2i with the current position of the window.
             /// @return Vec2i with the position of the window.
-            [[nodiscard]] Vec2I getPosition() const                 { return window->getPosition(); }
+            [[nodiscard]] Vec2I getPosition() const { return window->getPosition(); }
 
             /// Allows you to set the icon of the window.
             /// @param _path Path to the image to be used as icon, can be in png, jpg, jpeg, ico...
-            void setAppIcon(const char* _path)                      { window->setIcon(_path); }
+            void setAppIcon(const char* _path) { window->setIcon(_path); }
 
             /// Allows to enable or disable some window features, such as:
             ///     - Minimize/Maximize button.
@@ -128,7 +128,7 @@ namespace engine {
             /// @param _op The options to set to true or false
             /// @param _allow true/false depending if disables or enables
             /// @sa WindowOptions_ in Window.h
-            void setWindowOptions(WindowOptions _op, bool _allow)   { window->setWindowOptions(_op, _allow); }
+            void setWindowOptions(WindowOptions _op, bool _allow) { window->setWindowOptions(_op, _allow); }
 
             void setRunning(bool _running) { running = _running; }
 
@@ -156,30 +156,14 @@ namespace engine {
             /// @param _dt The amount of time passed from the previous frame to this current one.
             void onRender(Delta _dt);
 
-        public:
-            /// This method allows us to add a renderization layer to the stack.
-            /// @param _layer Layer to add to the stack.
-            /// @sa Layer, LayerStack
-            void pushLayer(Layer* _layer);
+            void onDebugRender(Delta _dt);
 
-            /// This method allows us to add a renderization overlay that renders on top of everything to the stack.
-            /// @param _layer Layer to add to the stack.
-            /// @sa Layer, LayerStack
-            void pushOverlay(Layer* _layer);
+            void setScene(Scene* _scene);
 
-            /// This method removes a Layer from the stack.
-            /// @param _layer Layer to be removed.
-            /// @sa Layer, LayerStack
-            void popLayer(Layer* _layer);
-
-            /// This method removes an overlay from the stack.
-            /// @param _layer Overlay to remove from the stack.
-            /// @sa Layer, LayerStack
-            void popOverlay(Layer* _layer);
+            [[nodiscard]] Scene* getScene() const { return scene; }
 
             void destroy();
 
-        public:
             /// Returns the Window instance.
             /// @return The main window.
             Window& getWindow() { return *window; }
@@ -196,7 +180,6 @@ namespace engine {
             bool fromRollToRun(const TransitionParams& _foo);
 
             Logs changeColorConsoleCommand(const std::vector<std::string>& _args);
-
     };
 }
 

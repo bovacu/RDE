@@ -6,7 +6,7 @@
         engine::Engine _e;
         _e.onInit();
         auto* _projectManager = new engine::Sandbox;
-        _e.pushLayer(_projectManager);
+        _e.setScene(_projectManager);
         _e.onRun();
         _e.destroy();
 

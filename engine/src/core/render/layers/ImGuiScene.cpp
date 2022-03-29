@@ -2,7 +2,7 @@
 #if !IS_MOBILE()
 
 #include "imgui.h"
-#include "core/render/layers/ImGuiLayer.h"
+#include "engine/include/core/graph/ImGuiScene.h"
 
 #include "core/Engine.h"
 #include "core/render/window/event/MouseEvent.h"
@@ -13,16 +13,16 @@
 #include "core/graph/Graph.h"
 
 namespace engine {
-    std::unordered_map<ProfilerState, RollingBuffer> ImGuiLayer::plotBuffers;
+    std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
     namespace ed = ax::NodeEditor;
     static ed::EditorContext* g_Context = nullptr;
     static ImGuiContext* i_Context = nullptr;
     static ImPlotContext* p_Context = nullptr;
     imgui_addons::ImGuiFileBrowser file_dialog;
 
-    ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {  }
+    ImGuiScene::ImGuiScene() : Scene("ImGuiScene") {  }
 
-    void ImGuiLayer::onInit() {
+    void ImGuiScene::onInit() {
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         i_Context = ImGui::CreateContext();
@@ -61,19 +61,19 @@ namespace engine {
         g_Context = ed::CreateEditor(&config);
         ed::SetCurrentEditor(g_Context);
 
-        mseDel.bind<&ImGuiLayer::onMouseScrolled>(this);
-        mbpeDel.bind<&ImGuiLayer::onMouseClicked>(this);
-        mmeDel.bind<&ImGuiLayer::onMouseMovedEvent>(this);
+        mseDel.bind<&ImGuiScene::onMouseScrolled>(this);
+        mbpeDel.bind<&ImGuiScene::onMouseClicked>(this);
+        mmeDel.bind<&ImGuiScene::onMouseMovedEvent>(this);
     }
 
-    void ImGuiLayer::onEvent(Event& _e) {
+    void ImGuiScene::onEvent(Event& _e) {
         EventDispatcher dispatcher(_e);
         dispatcher.dispatchEvent<MouseScrolledEvent>(mseDel);
         dispatcher.dispatchEvent<MouseButtonPressedEvent>(mbpeDel);
         dispatcher.dispatchEvent<MouseMovedEvent>(mmeDel);
     }
 
-    void ImGuiLayer::onEnd() {
+    void ImGuiScene::onEnd() {
         ed::DestroyEditor(g_Context);
         ImPlot::DestroyContext(p_Context);
         ImGui_ImplOpenGL3_Shutdown();
@@ -81,13 +81,13 @@ namespace engine {
         ImGui::DestroyContext(i_Context);
     }
 
-    void ImGuiLayer::begin() {
+    void ImGuiScene::begin() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
     }
 
-    void ImGuiLayer::end() {
+    void ImGuiScene::end() {
         ImGuiIO& io = ImGui::GetIO();
         Engine& _game = Engine::get();
         io.DisplaySize = ImVec2((float)_game.getWindow().getWidth(), (float)_game.getWindow().getHeight());
@@ -105,7 +105,7 @@ namespace engine {
         }
     }
 
-    void ImGuiLayer::drawDebugInfo(Graph* _mainGraph) {
+    void ImGuiScene::drawDebugInfo(Graph* _mainGraph) {
         ImGui::Begin("Debugging");
         printResolutionFullscreenAndVSync();
         ImGui::Separator();
@@ -119,7 +119,7 @@ namespace engine {
         nodeComponents(_mainGraph);
     }
 
-    void ImGuiLayer::metrics() {
+    void ImGuiScene::metrics() {
         ImGui::Begin("Metrics");
         static bool _capture = true;
         static float t = 0;
@@ -152,7 +152,7 @@ namespace engine {
         ImGui::End();
     }
 
-    void ImGuiLayer::charToIntSize(const std::string& _size, int* _resolution) {
+    void ImGuiScene::charToIntSize(const std::string& _size, int* _resolution) {
         size_t pos;
         std::string _token;
         std::string _delimiter = "x";
@@ -164,19 +164,19 @@ namespace engine {
         _resolution[1] = _height;
     }
 
-    bool ImGuiLayer::onMouseClicked(MouseButtonPressedEvent& _e) {
+    bool ImGuiScene::onMouseClicked(MouseButtonPressedEvent& _e) {
         return anyWindowHovered;
     }
 
-    bool ImGuiLayer::onMouseMovedEvent(MouseMovedEvent& _e) {
+    bool ImGuiScene::onMouseMovedEvent(MouseMovedEvent& _e) {
         return ImGui::IsAnyItemHovered();
     }
 
-    bool ImGuiLayer::onMouseScrolled(MouseScrolledEvent& _e) {
+    bool ImGuiScene::onMouseScrolled(MouseScrolledEvent& _e) {
         return anyWindowHovered;
     }
 
-    void ImGuiLayer::mouseInfo() {
+    void ImGuiScene::mouseInfo() {
         ImGui::SetNextWindowSize({150, -1}, ImGuiCond_Once);
         ImGui::GetStyle().Alpha = 0.65;
         ImGui::Begin("MouseInfo", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
@@ -185,7 +185,7 @@ namespace engine {
         ImGui::End();
     }
 
-    void ImGuiLayer::printFPSDrawCallsAndRAM() {
+    void ImGuiScene::printFPSDrawCallsAndRAM() {
         static bool _showMetrics = false;
 
         ImGui::Text("FPS: %d", engine::Engine::get().getFps());
@@ -211,7 +211,7 @@ namespace engine {
         if(_showMetrics) metrics();
     }
 
-    void ImGuiLayer::printAtlases() {
+    void ImGuiScene::printAtlases() {
         float _totalAtlasesSize = 0;
         for(auto& _ti : TextureAtlasManager::get().getTexturesInfo())
             _totalAtlasesSize += _ti.kb;
@@ -255,7 +255,7 @@ namespace engine {
         ImGui::Separator();
     }
 
-    void ImGuiLayer::printResolutionFullscreenAndVSync() {
+    void ImGuiScene::printResolutionFullscreenAndVSync() {
         static bool _vsync = Engine::get().isVSync(), _fullscreen = false;
         static int _windowRes[2] = {(int) engine::Engine::get().getWindowSize().x,(int) engine::Engine::get().getWindowSize().y};
 
@@ -291,12 +291,12 @@ namespace engine {
         }
     }
 
-    int ImGuiLayer::consoleStub(ImGuiInputTextCallbackData* _data) {
-        auto* console = (ImGuiLayer*)_data->UserData;
+    int ImGuiScene::consoleStub(ImGuiInputTextCallbackData* _data) {
+        auto* console = (ImGuiScene*)_data->UserData;
         return console->consoleIntro(_data);
     }
 
-    int ImGuiLayer::consoleIntro(ImGuiInputTextCallbackData* _data) {
+    int ImGuiScene::consoleIntro(ImGuiInputTextCallbackData* _data) {
         switch (_data->EventFlag){
             case ImGuiInputTextFlags_CallbackHistory:{
                 if (_data->EventKey == ImGuiKey_UpArrow){
@@ -312,7 +312,7 @@ namespace engine {
         return 0;
     }
 
-    void ImGuiLayer::console() {
+    void ImGuiScene::console() {
         static bool autoscroll = true;
         static bool scrollToBottom = false;
 
@@ -382,7 +382,7 @@ namespace engine {
         ImGui::End();
     }
 
-    void ImGuiLayer::showFileExplorer() {
+    void ImGuiScene::showFileExplorer() {
         bool open = false, save = false;
         if(ImGui::Button("Open File Manager"))
             open = true;
@@ -402,7 +402,7 @@ namespace engine {
 
 
 
-    void ImGuiLayer::hierarchyRecursionStub(Graph* _graph, NodeID _node, int& _childCount) {
+    void ImGuiScene::hierarchyRecursionStub(Graph* _graph, NodeID _node, int& _childCount) {
         auto* _transform = _graph->getComponent<Transform>(_node);
         auto* _tag = _graph->getComponent<Tag>(_node);
 
@@ -428,14 +428,14 @@ namespace engine {
         }
     }
 
-    void ImGuiLayer::hierarchy(Graph* _graph) {
+    void ImGuiScene::hierarchy(Graph* _graph) {
         ImGui::Begin("Hierarchy");
         int _childCount = -1;
         hierarchyRecursionStub(_graph, _graph->getID(), _childCount);
         ImGui::End();
     }
 
-    void ImGuiLayer::nodeComponents(Graph* _graph) {
+    void ImGuiScene::nodeComponents(Graph* _graph) {
         if(selectedNode == NODE_ID_NULL) return;
 
         ImGui::Begin("Components");
