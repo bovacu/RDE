@@ -168,6 +168,8 @@ namespace engine {
             bool onWindowResized(WindowResizedEvent& _e);
 
             Logs changeColorConsoleCommand(const std::vector<std::string>& _args);
+            Logs setParentCommand(const std::vector<std::string>& _args);
+            Logs componentsCommands(const std::vector<std::string>& _args);
     };
 }
 

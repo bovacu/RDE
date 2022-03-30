@@ -56,6 +56,11 @@ namespace engine {
                                                                       "Changes background color 0 <= r,b,g,a <= 255",
                                                                       this,
                                                                       "r g b a");
+
+        Console::get().addCommand<&Engine::setParentCommand>( "parent_set",
+                                                              "Sets the parent of A as B",
+                                                              this,
+                                                              "A B");
     }
 
     void Engine::onRun() {
@@ -233,6 +238,28 @@ namespace engine {
         if(scene != nullptr) scene->onEnd();
         scene = _scene;
         if(scene != nullptr) scene->onInit();
+    }
+
+    Logs Engine::componentsCommands(const std::vector<std::string>& _args) {
+        backgroundColor = {(unsigned char)std::stoi(_args[0]), (unsigned char)std::stoi(_args[1]),
+                           (unsigned char)std::stoi(_args[2]), (unsigned char)std::stoi(_args[3])};
+        Renderer::setClearColor(backgroundColor);
+        return {"Changed color"};
+    }
+
+    Logs Engine::setParentCommand(const std::vector<std::string>& _args) {
+
+        if(_args.size() != 2) return {"[error] expected 2 parameters A, the child, and B, the father"};
+
+        auto _a = _args[0];
+        auto _b = _args[1];
+
+        try {
+            scene->getMainGraph()->setParent(scene->getMainGraph()->getNode(_a), scene->getMainGraph()->getNode(_b));
+            return {APPEND_S("Set ", _b, " as parent of ", _a) };
+        } catch (const std::runtime_error& _e) {
+            return {APPEND_S("[error] '", _a, "' or '", _b, "' or both don't exist on the scene!") };
+        }
     }
 
 }

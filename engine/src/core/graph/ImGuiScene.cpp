@@ -409,15 +409,15 @@ namespace engine {
         auto* _transform = _graph->getComponent<Transform>(_node);
         auto* _tag = _graph->getComponent<Tag>(_node);
 
-        if(ImGui::IsItemDeactivated() || ImGui::IsItemActivated()) {
-            if(_transform->parent != _graph->getID())
-                selectedNode = _transform->parent;
-        }
-
         if(!_transform->children.empty()) {
 
             auto _flags = _node == selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
             if (ImGui::TreeNodeEx(_tag->tag.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | _flags)) {
+
+                if(ImGui::IsItemClicked()) {
+                    selectedNode = _node;
+                }
+
                 for(auto _child : _transform->children) {
                     hierarchyRecursionStub(_graph, _child, _childCount);
                 }
