@@ -1,5 +1,5 @@
 #ifndef RUN_TESTS
-    #include "core/Engine.h"
+    #include "GDE.h"
     #include "Sandbox.h"
 
     int main(int, char* []) {

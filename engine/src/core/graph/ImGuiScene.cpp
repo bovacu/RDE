@@ -2,7 +2,7 @@
 #if !IS_MOBILE()
 
 #include "imgui.h"
-#include "engine/include/core/graph/ImGuiScene.h"
+#include "core/graph/ImGuiScene.h"
 
 #include "core/Engine.h"
 #include "core/render/window/event/MouseEvent.h"
@@ -11,6 +11,9 @@
 #include "imgui_node_editor.h"
 #include "FileBrowser/ImGuiFileBrowser.h"
 #include "core/graph/Graph.h"
+#include "core/render/window/input/Input.h"
+#include "core/render/Renderer.h"
+#include "core/render/elements/TextureAtlasManager.h"
 
 namespace engine {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
@@ -120,36 +123,36 @@ namespace engine {
     }
 
     void ImGuiScene::metrics() {
-        ImGui::Begin("Metrics");
-        static bool _capture = true;
-        static float t = 0;
-        t += ImGui::GetIO().DeltaTime;
-
-        static float history = 20.0f;
-        if(_capture) {
-            for(auto& _state : State::stateToNameDict) {
-                auto _s = Profiler::getStates()[_state.first];
-                auto _diff = std::chrono::duration_cast<std::chrono::milliseconds>(_s.end - _s.init);
-                plotBuffers[_state.first].AddPoint(t, (float)_diff.count());
-                plotBuffers[_state.first].Span = history;
-            }
-        }
-
-        if (ImPlot::BeginPlot("##Rolling", ImVec2(-1,125))) {
-            ImPlot::SetupAxes(nullptr, "ms", ImPlotAxisFlags_NoTickLabels);
-            ImPlot::SetupAxisLimits(ImAxis_X1,0,history, ImGuiCond_Always);
-            ImPlot::SetupAxisLimits(ImAxis_Y1,0,50);
-
-            for(auto& _state : State::stateToNameDict) {
-                if(Profiler::getStates()[_state.first].active) {
-                    auto _s = plotBuffers[_state.first];
-                    ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),&_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
-                }
-            }
-
-            ImPlot::EndPlot();
-        }
-        ImGui::End();
+//        ImGui::Begin("Metrics");
+//        static bool _capture = true;
+//        static float t = 0;
+//        t += ImGui::GetIO().DeltaTime;
+//
+//        static float history = 20.0f;
+//        if(_capture) {
+//            for(auto& _state : State::stateToNameDict) {
+//                auto _s = Profiler::getStates()[_state.first];
+//                auto _diff = std::chrono::duration_cast<std::chrono::milliseconds>(_s.end - _s.init);
+//                plotBuffers[_state.first].AddPoint(t, (float)_diff.count());
+//                plotBuffers[_state.first].Span = history;
+//            }
+//        }
+//
+//        if (ImPlot::BeginPlot("##Rolling", ImVec2(-1,125))) {
+//            ImPlot::SetupAxes(nullptr, "ms", ImPlotAxisFlags_NoTickLabels);
+//            ImPlot::SetupAxisLimits(ImAxis_X1,0,history, ImGuiCond_Always);
+//            ImPlot::SetupAxisLimits(ImAxis_Y1,0,50);
+//
+//            for(auto& _state : State::stateToNameDict) {
+//                if(Profiler::getStates()[_state.first].active) {
+//                    auto _s = plotBuffers[_state.first];
+//                    ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),&_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
+//                }
+//            }
+//
+//            ImPlot::EndPlot();
+//        }
+//        ImGui::End();
     }
 
     void ImGuiScene::charToIntSize(const std::string& _size, int* _resolution) {
@@ -454,7 +457,7 @@ namespace engine {
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(1);
             if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
-                _transform->setPosition(_transform->getPositionLocal().x + _pos[0], _transform->getPositionLocal().y + _pos[1]);
+                _transform->setPosition(_pos[0], _pos[1]);
             }
             ImGui::PopID();
 

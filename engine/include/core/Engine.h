@@ -5,18 +5,13 @@
 #define ENGINE2_0_ENGINE_H
 
 
-#include "core/util/Util.h"
 #include "core/render/window/Window.h"
 #include "core/render/window/event/WindowEvent.h"
-#include "core/render/window/input/Input.h"
-#include "core/render/Renderer.h"
-#include "core/render/Camera.h"
 #include "core/systems/profiling/Profiler.h"
-#include "engine/include/core/graph/ImGuiScene.h"
-#include "core/render/elements/TextureAtlasManager.h"
-#include "core/systems/animationSystem/AnimationSystem.h"
+#include "core/graph/ImGuiScene.h"
 #include "core/systems/console/Console.h"
 #include "core/render/elements/FrameBuffer.h"
+#include "core/graph/Scene.h"
 
 namespace engine {
 
@@ -171,9 +166,6 @@ namespace engine {
         private:
             bool onWindowClosed(WindowClosedEvent& _e);
             bool onWindowResized(WindowResizedEvent& _e);
-
-            bool fromRunToRoll(const TransitionParams& _foo);
-            bool fromRollToRun(const TransitionParams& _foo);
 
             Logs changeColorConsoleCommand(const std::vector<std::string>& _args);
     };

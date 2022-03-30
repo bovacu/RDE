@@ -7,7 +7,7 @@
 #if !IS_MOBILE()
 
 #include <chrono>
-#include "engine/include/core/graph/Scene.h"
+#include "core/graph/Scene.h"
 #include "core/render/window/event/MouseEvent.h"
 #include "core/systems/profiling/Profiler.h"
 #include "submodules/imgui/backends/imgui_impl_opengl3.h"

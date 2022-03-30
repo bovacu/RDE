@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <ostream>
 #include <cmath>
-#include "engine/include/core/graph/ImGuiCore.h"
+#include "core/graph/ImGuiCore.h"
 
 #include "sys/types.h"
 #include "sys/sysinfo.h"
@@ -52,16 +52,16 @@ namespace engine {
         int Offset;
         ImVector<ImVec2> Data;
 
-        ScrollingBuffer(int max_size = 2000);
-        void AddPoint(float x, float y);
-        void Erase();
+//        ScrollingBuffer(int max_size = 2000);
+//        void AddPoint(float x, float y);
+//        void Erase();
     };
 
     struct RollingBuffer {
         float Span;
         ImVector<ImVec2> Data;
-        RollingBuffer();
-        void AddPoint(float x, float y);
+//        RollingBuffer();
+//        void AddPoint(float x, float y);
     };
 #endif
 

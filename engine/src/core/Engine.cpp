@@ -4,6 +4,9 @@
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/systems/soundSystem/SoundManager.h"
+#include "core/render/window/input/Input.h"
+#include "core/render/Renderer.h"
+#include "core/render/elements/TextureAtlasManager.h"
 
 namespace engine {
     Engine *Engine::gameInstance = nullptr;
@@ -205,15 +208,6 @@ namespace engine {
         window->setWindowSizeAndUpdateNativeWindow(_width, _height);
     }
 
-
-    bool Engine::fromRunToRoll(const TransitionParams& _foo) {
-        return InputManager::isKeyJustPressed(KeyCode::A);
-    }
-
-    bool Engine::fromRollToRun(const TransitionParams& _foo) {
-        return InputManager::isKeyJustPressed(KeyCode::S);
-    }
-
     Logs Engine::changeColorConsoleCommand(const std::vector<std::string>& _args) {
         backgroundColor = {(unsigned char)std::stoi(_args[0]), (unsigned char)std::stoi(_args[1]),
                            (unsigned char)std::stoi(_args[2]), (unsigned char)std::stoi(_args[3])};
@@ -230,7 +224,9 @@ namespace engine {
         InputManager::get().destroy();
         delete frameBuffer;
         delete scene;
+        #if !IS_MOBILE()
         delete imGuiLayer;
+        #endif
     }
 
     void Engine::setScene(Scene* _scene) {

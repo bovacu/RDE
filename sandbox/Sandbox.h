@@ -5,14 +5,7 @@
 #define ENGINE2_0_SANDBOX_H
 
 
-#include "core/util/Util.h"
-#include "engine/include/core/graph/Scene.h"
-#include "core/render/Camera.h"
-#include "core/systems/animationSystem/AnimationSystem.h"
-#include "core/render/window/event/JoystickEvent.h"
-#include "core/Engine.h"
-#include "core/render/window/event/MobileEvent.h"
-#include "core/graph/Graph.h"
+#include "GDE.h"
 
 namespace engine {
 

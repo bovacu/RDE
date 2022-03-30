@@ -1,7 +1,7 @@
 // Created by borja on 9/3/22.
 
 #include "core/graph/Graph.h"
-#include "engine/include/core/graph/Components.h"
+#include "core/graph/Components.h"
 #include "core/render/Renderer.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
 

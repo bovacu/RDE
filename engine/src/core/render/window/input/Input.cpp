@@ -8,6 +8,8 @@
 #include "core/render/window/input/ControllerInput.h"
 #include "core/render/window/input/MobileInput.h"
 
+#include "core/render/Camera.h"
+
 namespace engine {
 
     bool Input::pollEvent(SDL_Event& _event) {

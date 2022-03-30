@@ -6,6 +6,7 @@
 
 #include "core/render/window/Window.h"
 #include "core/Engine.h"
+#include "core/render/Camera.h"
 
 namespace engine {
 

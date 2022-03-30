@@ -120,6 +120,8 @@ add_subdirectory(submodules/entt)
 set(GL_PROFILES "GL_PROFILE_GL3")
 
 set(SOURCES
+        engine/include/GDE.h
+
         engine/include/core/util/Easing.h engine/include/core/util/Functions.h engine/include/core/util/Logger.h engine/include/core/util/PerlinNoise.h
         engine/include/core/util/Random.h engine/include/core/util/Util.h engine/include/core/util/Vec.h engine/src/core/util/Color.cpp engine/include/core/util/Color.h engine/include/core/util/Delta.h
         engine/include/core/util/Clock.h engine/src/core/util/Clock.cpp

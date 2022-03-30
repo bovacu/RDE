@@ -4,7 +4,7 @@
 #ifndef ENGINE2_0_I_RENDERIZABLE_H
 #define ENGINE2_0_I_RENDERIZABLE_H
 
-#include "engine/include/core/graph/Components.h"
+#include "core/graph/Components.h"
 #include "ShaderManager.h"
 
 namespace engine {

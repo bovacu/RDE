@@ -1,9 +1,6 @@
 // Created by borja on 22/1/22.
 
 #include "Sandbox.h"
-#include "core/Engine.h"
-#include "core/procedural/CellularAutomataMapGenerator.h"
-#include <glm/gtx/string_cast.hpp>
 
 //#if IS_ANDROID()
 //#include <nativeCode/include/NativeAds.h>
