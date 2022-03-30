@@ -104,6 +104,7 @@ namespace engine {
     void Sandbox::onDebugRender(Delta _dt) {
         Scene::onDebugRender(_dt);
 //        Renderer::drawSquare({100, 100}, {100, 100}, Color::Green);
+//        Renderer::drawLine({0, 0}, {100, 100}, Color::Blue);
     }
 
     void Sandbox::onImGuiRender(Delta _dt) {

@@ -52,16 +52,6 @@ namespace engine {
             static void beginDebugDraw(Camera& _camera, float _thickness = 1.f);
 
             /**
-             * Renders a texture. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
-             * @param _texture Pointer to the texture to draw.
-             * @param _position 2D position where to draw it.
-             * @param _size Size of the texture {width, height}.
-             * @param _tintColor Color to draw over the texture (White by default, which means the texture's color).
-             * @param _rotation In degrees, 0 by default.
-             */
-            static void draw(Texture* _texture, const Vec2F& _position, const Vec2F& _size, const Color& _tintColor = Color::White, float _rotation = 0);
-
-            /**
              * Renders a sprite. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
              * @param _sprite The sprite to be drawn.
              */

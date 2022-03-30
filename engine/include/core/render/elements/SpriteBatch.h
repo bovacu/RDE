@@ -82,7 +82,6 @@ namespace engine {
 
             void init(Window* _window);
             void beginDraw(Camera& _camera);
-            void draw(const glm::vec4& _destRect, const glm::vec4& _sourceRect, const glm::vec4& _color, Texture* _texture, float _rotation = 0);
             void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
             void draw(const TextRenderer& _text, const Transform& _transform);
             void flush();

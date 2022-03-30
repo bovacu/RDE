@@ -38,15 +38,6 @@ namespace engine {
         batch.beginDraw(_camera);
     }
 
-    void Renderer::draw(Texture* _texture, const Vec2F& _position, const Vec2F& _size, const Color& _tintColor, float _rotation) {
-        batch.draw(
-                glm::vec4(_position.x, _position.y, _texture->getSize().x, _texture->getSize().y),
-                glm::vec4(0, 0, _size.x, _size.y),
-                glm::vec4((float)_tintColor.r / 255.f, (float)_tintColor.g / 255.f, (float)_tintColor.b / 255.f, (float)_tintColor.a / 255.f),
-                _texture, _rotation
-                );
-    }
-
     void Renderer::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
         batch.drawLine(_p0, _p1, _color);
     }
