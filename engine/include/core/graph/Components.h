@@ -85,7 +85,7 @@ namespace engine {
         // Local Space
         private:
             glm::vec3 localPosition {0.0f, 0.0f, 0.0f};
-            glm::vec3 localScale {1.0f, 1.0f, 1.0f};
+            glm::vec3 localScale { 1.0f, 1.0f, 1.0f };
             float localRotation = 0.0f;
             bool constant = false;
 

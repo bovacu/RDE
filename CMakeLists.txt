@@ -127,8 +127,8 @@ set(SOURCES
         engine/include/core/render/window/event/Event.h engine/include/core/render/window/event/KeyEvent.h engine/include/core/render/window/event/MouseEvent.h
         engine/include/core/render/window/event/WindowEvent.h engine/include/core/render/window/Window.h engine/src/core/render/window/Window.cpp
 
-        engine/include/core/render/layers/Layer.h engine/include/core/render/layers/LayerStack.h engine/src/core/render/layers/LayerStack.cpp
-        engine/include/core/render/layers/ImGuiLayer.h engine/src/core/render/layers/ImGuiLayer.cpp
+        engine/include/core/graph/Scene.h
+        engine/include/core/graph/ImGuiScene.h engine/src/core/graph/ImGuiScene.cpp
 
         engine/include/core/render/window/keysAndButtons/GamePadButtons.h engine/src/core/render/window/input/Input.cpp engine/include/core/render/window/input/Input.h
         engine/include/core/render/window/keysAndButtons/KeyboardKeys.h engine/include/core/render/window/keysAndButtons/MouseKeys.h
@@ -146,7 +146,7 @@ set(SOURCES
 
         engine/include/core/graph/Components.h engine/src/core/render/Camera.cpp engine/include/core/render/Camera.h engine/include/core/render/shapes/Shape.h
 
-        engine/include/core/systems/profiling/Profiler.h engine/src/core/systems/profiling/Profiler.cpp engine/include/core/render/layers/ImGuiCore.h
+        engine/include/core/systems/profiling/Profiler.h engine/src/core/systems/profiling/Profiler.cpp engine/include/core/graph/ImGuiCore.h
         engine/src/core/render/elements/TextureAtlasManager.cpp engine/include/core/render/elements/TextureAtlasManager.h engine/include/core/util/Rect.h
         engine/src/core/systems/animationSystem/Animation.cpp engine/include/core/systems/animationSystem/Animation.h engine/src/core/systems/animationSystem/AnimationSystem.cpp
         engine/include/core/systems/animationSystem/AnimationSystem.h

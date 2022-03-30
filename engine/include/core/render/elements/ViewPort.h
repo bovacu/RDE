@@ -12,7 +12,7 @@ namespace engine {
     class IViewPort {
         protected:
             Vec2I virtualResolution = {};
-            Vec2F scalingFactor = {};
+            Vec2F scalingFactor = {1, 1};
             float aspectRatio = -1;
 
         public:

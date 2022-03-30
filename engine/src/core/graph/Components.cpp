@@ -4,20 +4,22 @@
 #include "core/graph/Graph.h"
 #include "core/graph/Node.h"
 #include "core/util/Functions.h"
+#include "glm/gtx/string_cast.hpp"
 
 namespace engine {
 
     glm::mat4 Transform::getLocalModelMatrix() {
         const glm::mat4 _rot = glm::rotate(glm::mat4(1.0f), glm::radians(localRotation), glm::vec3(0.0f, 0.0f, 1.0f));
         auto _scalingFactor = Engine::get().getMainCamera().getViewport()->getScalingFactor();
-        glm::vec3 _scale = {localScale.x * _scalingFactor.x, localScale.y * _scalingFactor.y, localScale.z};
+        glm::vec3 _scale = {localScale.x * _scalingFactor.x, localScale.y * _scalingFactor.y, 0};
         localModelMatrix = glm::translate(glm::mat4(1.0f), localPosition) * _rot * glm::scale(glm::mat4(1.0f), _scale);
         return localModelMatrix;
     }
 
     void Transform::update(Graph* _graph) {
         if (parent != NODE_ID_NULL && !constant) {
-            modelMatrix = _graph->getComponent<Transform>(parent)->modelMatrix * localModelMatrix;
+            auto* _parentT = _graph->getComponent<Transform>(parent);
+            modelMatrix = _parentT->modelMatrix * localModelMatrix;
         } else
             modelMatrix = getLocalModelMatrix();
     }
