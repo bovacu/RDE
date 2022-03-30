@@ -9,25 +9,25 @@
 #include "core/util/Util.h"
 #include "core/render/window/event/MouseEvent.h"
 #include "core/render/elements/ViewPort.h"
+#include "core/graph/Graph.h"
 
 namespace engine {
 
     class Transform;
     class Camera {
-
+        friend class Scene;
         private:
             int width, height;
             float zoom = 1, zoomSpeed = 0.25f;
             glm::mat4 projectionMatrix;
             glm::mat4 viewMatrix {1.f};
             glm::mat4 viewProjectionMatrix;
-            Transform* transform;
             IViewPort* viewport;
 
         public:
-            Camera();
+            NodeID ID;
+            explicit Camera(const Window* _window, const NodeID& _mainCameraID);
             ~Camera();
-            void init(const Window* _window);
             void onEvent(Event& _event);
             bool onMouseScrolled(MouseScrolledEvent& _event);
             void onResize(int _width, int _height);
@@ -57,7 +57,7 @@ namespace engine {
 
             [[nodiscard]] IViewPort* getViewport() const;
             void setFreeViewport(const Window* _window);
-            void setAdaptiveViewport(const Vec2I& _virtualDesiredSize);
+            void setAdaptiveViewport(const Vec2I& _virtualDesiredSize, const Vec2I& _currentDeviceSize);
 
         private:
             void recalculateViewMatrix();

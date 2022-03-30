@@ -10,8 +10,8 @@ namespace engine {
 
     glm::mat4 Transform::getLocalModelMatrix() {
         const glm::mat4 _rot = glm::rotate(glm::mat4(1.0f), glm::radians(localRotation), glm::vec3(0.0f, 0.0f, 1.0f));
-        auto _scalingFactor = Engine::get().getMainCamera().getViewport()->getScalingFactor();
-        glm::vec3 _scale = {localScale.x * _scalingFactor.x, localScale.y * _scalingFactor.y, 0};
+        auto _scalingFactor = Engine::get().getScene()->getMainCamera()->getViewport()->getScalingFactor();
+        glm::vec3 _scale = {localScale.x * _scalingFactor.x, localScale.y * _scalingFactor.y, 1};
         localModelMatrix = glm::translate(glm::mat4(1.0f), localPosition) * _rot * glm::scale(glm::mat4(1.0f), _scale);
         return localModelMatrix;
     }

@@ -9,15 +9,17 @@
 
 namespace engine {
 
+    class Camera;
     class Scene {
         private:
             Graph mainGraph;
+            NodeID mainCameraID;
 
         protected:
             std::string debugName;
 
         public:
-            explicit Scene(const std::string& _debugName = "Scene")  : debugName(_debugName), mainGraph(_debugName) {  }
+            explicit Scene(const std::string& _debugName = "Scene");
             virtual ~Scene() {  };
 
             virtual void onInit() = 0;
@@ -29,7 +31,8 @@ namespace engine {
             virtual void onDebugRender(Delta _dt) {  }
             virtual void onEnd() {  }
 
-            Graph* getMainGraph() { return &mainGraph; }
+            Graph* getMainGraph();
+            Camera* getMainCamera();
 
             [[nodiscard]] const std::string& getName() const { return debugName; }
     };

@@ -23,9 +23,6 @@ namespace engine {
 
         wreDel.bind<&Engine::onWindowResized>(this);
 
-        camera = new Camera;
-        camera->init(window.get());
-
         InputManager::get().init(window.get());
         Console::get().init();
         ShaderManager::get().init();
@@ -45,10 +42,6 @@ namespace engine {
 
         window->setVSync(false);
 
-        int _width, _height;
-        SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
-        camera->onResize(_width, _height);
-
         FrameBufferSpecification _specs = {
                 (uint32_t)window->getWindowSize().x,
                 (uint32_t)window->getWindowSize().y
@@ -63,6 +56,10 @@ namespace engine {
     }
 
     void Engine::onRun() {
+        int _width, _height;
+        SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
+        scene->getMainCamera()->onResize(_width, _height);
+
         float _accumulator = 0;
 
         Delta _dt = 0;
@@ -123,7 +120,7 @@ namespace engine {
     }
 
     void Engine::onUpdate(Delta _dt) {
-        camera->getViewport()->update(getWindowSize());
+        scene->getMainCamera()->getViewport()->update(getWindowSize());
         scene->onUpdate(_dt);
 
         if(InputManager::isKeyJustPressed(KeyCode::F9))
@@ -135,7 +132,7 @@ namespace engine {
 
         Renderer::clear();
 
-        Renderer::beginDraw(*camera);
+        Renderer::beginDraw(*scene->getMainCamera());
         scene->onRender(_dt);
         Renderer::endDraw();
 
@@ -158,7 +155,7 @@ namespace engine {
     }
 
     void Engine::onDebugRender(Delta _dt) {
-        Renderer::beginDebugDraw(*camera);
+        Renderer::beginDebugDraw(*scene->getMainCamera());
         scene->onDebugRender(_dt);
         Renderer::endDebugDraw();
     }
@@ -172,7 +169,7 @@ namespace engine {
         int _width, _height;
         SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
         frameBuffer->resize(_width, _height);
-        camera->onResize(_width, _height);
+        scene->getMainCamera()->onResize(_width, _height);
         return true;
     }
 
@@ -232,7 +229,6 @@ namespace engine {
         Renderer::destroy();
         InputManager::get().destroy();
         delete frameBuffer;
-        delete camera;
         delete scene;
         delete imGuiLayer;
     }

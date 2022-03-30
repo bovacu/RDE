@@ -37,26 +37,27 @@ namespace engine {
 //        _animationSystem->setInitialAnimation("run");
 //        _animationSystem->start();
 
-        Engine::get().getMainCamera().setAdaptiveViewport(Engine::get().getWindowSize());
+        getMainCamera()->setAdaptiveViewport(Engine::get().getWindowSize(), Engine::get().getWindowSize());
 
         mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
 
         square = getMainGraph()->createNode("square");
         squareTransform = getMainGraph()->getComponent<Transform>(square);
+        squareTransform->setPosition(0, 0);
         auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(square);
         _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
         _squareSpriteRenderer->layer = 30;
 
-        auto _text = getMainGraph()->createNode("Text", square);
-        getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World");
-        getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
+//        auto _text = getMainGraph()->createNode("Text", square);
+//        getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World");
+//        getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
 
-//        Random _r;
-//        for(int _i = 0; _i < 10; _i++) {
-//            auto _node = getMainGraph()->createNode(std::to_string(_i), square);
-//            getMainGraph()->addComponent<SpriteRenderer>(_node, TextureAtlasManager::get().getTile("square", "square_0"));
-//            getMainGraph()->getComponent<Transform>(_node)->setPosition({_r.randomf(-1280, 1280), _r.randomf(-720, 720)});
-//        }
+        Random _r;
+        for(int _i = 0; _i < 10; _i++) {
+            auto _node = getMainGraph()->createNode(std::to_string(_i), square);
+            getMainGraph()->addComponent<SpriteRenderer>(_node, TextureAtlasManager::get().getTile("square", "square_0"));
+            getMainGraph()->getComponent<Transform>(_node)->setPosition({_r.randomf(-640, 640), _r.randomf(-360, 360)});
+        }
     }
 
     void Sandbox::onEvent(Event& _event) {
@@ -114,7 +115,7 @@ namespace engine {
     }
 
     bool Sandbox::onMouseScrolled(MouseScrolledEvent& _event) {
-        Camera& _camera = Engine::get().getMainCamera();
+        Camera& _camera = *getMainCamera();
         float _zoom = _camera.getCurrentZoomLevel();
         _zoom -= _event.getScrollY() * _camera.getZoomSpeed();
         _zoom = std::max(_zoom, 0.1f);

@@ -135,14 +135,14 @@ namespace engine {
         auto& _wi = get().windowInput;
         float _x = _mousePos.x - (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().x / 2.f : 0.f);
         float _y = (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().y / 2.f : 0.f) - _mousePos.y;
-        float _zoom = Engine::get().getMainCamera().getCurrentZoomLevel();
+        float _zoom = Engine::get().getScene()->getMainCamera()->getCurrentZoomLevel();
         return {_x * _zoom, _y * _zoom};
     }
 
     Vec2F InputManager::getMousePosWorldPos() {
         auto _mousePos = get().mouseInput->getMousePosition();
         auto& _wi = get().windowInput;
-        auto& _camera =Engine::get().getMainCamera();
+        auto& _camera = *Engine::get().getScene()->getMainCamera();
         float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.getPosition().x;
         float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.getPosition().y;
         float _zoom = _camera.getCurrentZoomLevel();

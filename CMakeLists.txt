@@ -127,7 +127,7 @@ set(SOURCES
         engine/include/core/render/window/event/Event.h engine/include/core/render/window/event/KeyEvent.h engine/include/core/render/window/event/MouseEvent.h
         engine/include/core/render/window/event/WindowEvent.h engine/include/core/render/window/Window.h engine/src/core/render/window/Window.cpp
 
-        engine/include/core/graph/Scene.h
+        engine/include/core/graph/Scene.h engine/src/core/graph/Scene.cpp
         engine/include/core/graph/ImGuiScene.h engine/src/core/graph/ImGuiScene.cpp
 
         engine/include/core/render/window/keysAndButtons/GamePadButtons.h engine/src/core/render/window/input/Input.cpp engine/include/core/render/window/input/Input.h
@@ -173,7 +173,7 @@ set(SOURCES
         )
 
 set(CPP_HEADERS)
-set(CPP_SOURCES )
+set(CPP_SOURCES)
 
 #GDEFirebase
 

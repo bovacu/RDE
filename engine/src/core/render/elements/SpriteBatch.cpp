@@ -55,7 +55,7 @@ namespace engine {
     SpriteBatch::~SpriteBatch() = default;
 
     void SpriteBatch::beginDraw(Camera& _camera) {
-        viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_camera.getTransform().modelMatrix);
+        viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(Engine::get().getScene()->getMainGraph()->getComponent<Transform>(Engine::get().getScene()->getMainCamera()->ID)->modelMatrix);
         aspectRatio = _camera.getAspectRatio();
         scalingFactor = _camera.getViewport()->getScalingFactor();
         for(auto& _batch : batches) {
@@ -385,7 +385,7 @@ namespace engine {
         auto _shader = ShaderManager::get().getShader("grid");
         glUseProgram(_shader);
 
-        float _zoom = Engine::get().getMainCamera().getCurrentZoomLevel();
+        float _zoom = Engine::get().getScene()->getMainCamera()->getCurrentZoomLevel();
         float _params[4] = {(float)Engine::get().getWindowSize().x, (float)Engine::get().getWindowSize().y, 32.f * (1.f / _zoom), 32.f * (1.f / _zoom)};
 
         GLint _location = glGetUniformLocation(_shader, "params");

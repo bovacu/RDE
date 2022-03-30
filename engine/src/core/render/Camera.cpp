@@ -5,17 +5,13 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "core/render/Camera.h"
 #include "engine/include/core/graph/Components.h"
+#include "core/Engine.h"
 
 namespace engine {
 
-    Camera::Camera() {
-
-    }
-
-    void Camera::init(const Window* _window) {
-        transform = new Transform;
+    Camera::Camera(const Window* _window, const NodeID& _mainCameraID) {
+        ID = _mainCameraID;
         viewport = new FreeViewPort(_window);
-        recalculateViewMatrix();
     }
 
     void Camera::onResize(int _width, int _height) {
@@ -31,34 +27,33 @@ namespace engine {
     }
 
     Transform& Camera::getTransform() {
-        return *transform;
+        return *Engine::get().getScene()->getMainGraph()->getComponent<Transform>(ID);
     }
 
     void Camera::recalculateViewMatrix() {
-//        glm::mat4 _transform = glm::translate(glm::mat4(1.0f), {transform->getPosition().x, transform->getPositionLocal().y, 0.0f}) *
-//                              glm::rotate(glm::mat4(1.0f), glm::radians(transform->getRotationLocal()), glm::vec3(0, 0, 1));
         glm::mat4 _transform = glm::translate(glm::mat4(1.0f), {0, 0, 0.0f}) *
-                               glm::rotate(glm::mat4(1.0f), glm::radians(transform->getRotationLocal()), glm::vec3(0, 0, 1));
+                               glm::rotate(glm::mat4(1.0f),
+                               glm::radians(Engine::get().getScene()->getMainGraph()->getComponent<Transform>(ID)->getRotationLocal()), glm::vec3(0, 0, 1));
         viewMatrix = glm::inverse(_transform);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
     }
 
     void Camera::setPosition(const Vec2F& _position) {
-        transform->setPosition(_position);
+        Engine::get().getScene()->getMainGraph()->getComponent<Transform>(ID)->setPosition(_position);
         recalculateViewMatrix();
     }
 
     Vec2F Camera::getPosition() {
-        return transform->getPositionLocal();
+        return Engine::get().getScene()->getMainGraph()->getComponent<Transform>(ID)->getPositionLocal();
     }
 
     void Camera::setRotation(float _rotation) {
-        transform->setRotation(_rotation);
+        Engine::get().getScene()->getMainGraph()->getComponent<Transform>(ID)->setRotation(_rotation);
         recalculateViewMatrix();
     }
 
     float Camera::getRotation() {
-        return transform->getRotationLocal();
+        return Engine::get().getScene()->getMainGraph()->getComponent<Transform>(ID)->getRotationLocal();
     }
 
     glm::mat4& Camera::getViewMatrix() {
@@ -104,7 +99,6 @@ namespace engine {
     }
 
     Camera::~Camera() {
-        delete transform;
         delete viewport;
     }
 
@@ -117,9 +111,10 @@ namespace engine {
         viewport = new FreeViewPort(_window);
     }
 
-    void Camera::setAdaptiveViewport(const Vec2I& _virtualDesiredSize) {
+    void Camera::setAdaptiveViewport(const Vec2I& _virtualDesiredSize, const Vec2I& _currentDeviceSize) {
         delete viewport;
         viewport = new AdaptiveViewPort(_virtualDesiredSize);
+        viewport->update(_currentDeviceSize);
     }
 
 }

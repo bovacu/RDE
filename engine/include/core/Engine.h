@@ -27,7 +27,6 @@ namespace engine {
             Delta dt;
             unsigned int fpsCounter = 0, frameCounter = 0;
             Color backgroundColor = Color::Red;
-            Camera* camera;
             FrameBuffer* frameBuffer;
 
         private:
@@ -54,8 +53,6 @@ namespace engine {
 
         public:
             Engine();
-
-            Camera& getMainCamera() { return *camera; }
 
             void setMinimized(bool _isMinimized) { minimized = _isMinimized; }
             [[nodiscard]] bool isMinimized() const { return minimized; }
