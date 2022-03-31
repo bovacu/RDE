@@ -11,7 +11,7 @@ add_definitions("-DGDE_EXPORT")
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
 SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer sdl2_image sdl2_net ${CMAKE_DL_LIBS}
         ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
-        EnTT::EnTT
+        EnTT::EnTT box2d
         )
 
 find_package(Threads REQUIRED)
@@ -67,6 +67,20 @@ set_target_properties(
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_net/lib/libSDL2_net.a
 )
 
+
+add_library(
+        box2d
+        STATIC
+        IMPORTED
+)
+set_target_properties(
+        box2d
+        PROPERTIES
+        IMPORTED_LOCATION
+        ${CMAKE_CURRENT_SOURCE_DIR}/submodules/box2d/build/bin/libbox2d.a
+)
+
+
 #-------------- STB
 
 set(STB_DIR "engine/src/stb")
@@ -86,6 +100,9 @@ include_directories(submodules/SDL_image)
 include_directories(submodules/glm)
 include_directories(submodules/imgui)
 include_directories(submodules/entt/src)
+include_directories(submodules/box2d/include)
+
+add_subdirectory(submodules/entt)
 
 add_library(glad libs/glad/include/glad/glad.h libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC libs/glad/include/)
@@ -114,8 +131,6 @@ set(IMGUI_NODE_EDITOR_PATH  "submodules/imguiNodeEditor")
 file(GLOB IMGUI_NODE_EDITOR_SOURCES ${IMGUI_NODE_EDITOR_PATH}/*.cpp)
 add_library("ImGuiNodeEditor" STATIC ${IMGUI_NODE_EDITOR_SOURCES})
 target_include_directories("ImGuiNodeEditor" PUBLIC ${IMGUI_NODE_EDITOR_PATH})
-
-add_subdirectory(submodules/entt)
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 

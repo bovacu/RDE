@@ -34,3 +34,6 @@
 [submodule "submodules/entt"]
 	path = submodules/entt
 	url = https://github.com/skypjack/entt
+[submodule "submodules/box2d"]
+	path = submodules/box2d
+	url = https://github.com/erincatto/box2d
