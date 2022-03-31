@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 #include "core/Core.h"
-#include "entt/entt.hpp"
+#include <entt/entt.hpp>
 #include "core/util/Delta.h"
 #include "core/render/window/event/Event.h"
 #include "core/render/elements/Texture.h"
