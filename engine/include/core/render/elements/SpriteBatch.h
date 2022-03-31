@@ -6,6 +6,7 @@
 #include "core/render/shapes/Shape.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/graph/Components.h"
+#include "core/systems/particleSystem/ParticleSystem.h"
 
 namespace engine {
     struct Vertex2dUVColor {
@@ -84,6 +85,7 @@ namespace engine {
             void beginDraw(Camera& _camera);
             void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
             void draw(const TextRenderer& _text, const Transform& _transform);
+            void draw(const ParticleSystem& _particleSystem, const Transform& _transform);
             void flush();
 
             void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Green);

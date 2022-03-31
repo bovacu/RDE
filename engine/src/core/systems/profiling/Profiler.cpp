@@ -6,7 +6,10 @@ namespace engine {
 
     std::unordered_map<ProfilerState, State> Profiler::states;
     std::unordered_map<ProfilerState, State> Profiler::lastStates;
+
+#if IS_LINUX()
     struct sysinfo Profiler::systemInfo;
+#endif
 
     std::unordered_map<ProfilerState, std::string> State::stateToNameDict {
             {ProfilerState::UPDATE, "Update"},
@@ -67,6 +70,7 @@ namespace engine {
     }
 
     u_long* Profiler::getTotalVirtualMemory() {
+#if IS_LINUX()
         static u_long _data[2];
 
         sysinfo (&systemInfo);
@@ -78,6 +82,9 @@ namespace engine {
         _data[1] = getValue();
 
         return _data;
+#else
+        return 0;
+#endif
     }
 
 

@@ -259,6 +259,10 @@ namespace engine {
         });
     }
 
+    void SpriteBatch::draw(const ParticleSystem& _particleSystem, const Transform& _transform) {
+
+    }
+
     void SpriteBatch::Batch::addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform) {
         if(texture == nullptr)
             texture = _spriteRenderer.texture;

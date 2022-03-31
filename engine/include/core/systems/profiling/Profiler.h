@@ -12,8 +12,10 @@
 #include <cmath>
 #include "core/graph/ImGuiCore.h"
 
+#if IS_LINUX()
 #include "sys/types.h"
 #include "sys/sysinfo.h"
+#endif
 
 namespace engine {
 
