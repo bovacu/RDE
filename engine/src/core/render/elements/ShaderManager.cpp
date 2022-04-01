@@ -1,6 +1,5 @@
 // Created by borja on 20/1/22.
 
-
 #include "core/render/elements/ShaderManager.h"
 
 namespace engine {

@@ -1,8 +1,6 @@
 // Created by borja on 14/2/22.
 
-#include <functional>
 #include "core/systems/fileSystem/FilesSystem.h"
-#include "core/util/Functions.h"
 
 namespace engine {
 

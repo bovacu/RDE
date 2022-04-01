@@ -90,7 +90,6 @@ link_directories(${STB_DIR})
 include_directories(.)
 include_directories(engine/include)
 include_directories(sandbox)
-include_directories(projectManager)
 
 include_directories(submodules/freetype/include)
 include_directories(submodules/SDL/include)
@@ -171,7 +170,7 @@ set(SOURCES
 
         engine/src/core/systems/console/Console.cpp engine/include/core/systems/console/Console.h
         engine/src/core/systems/uiSystem/FontManager.cpp engine/include/core/systems/uiSystem/FontManager.h engine/include/stb/stb_image_writer.h engine/src/core/render/elements/FrameBuffer.cpp
-        engine/include/core/render/elements/FrameBuffer.h engine/src/core/render/elements/ShaderManager.cpp engine/include/core/render/elements/ShaderManager.h engine/include/core/render/elements/IRenderizable.h
+        engine/include/core/render/elements/FrameBuffer.h engine/src/core/render/elements/ShaderManager.cpp engine/include/core/render/elements/ShaderManager.h
         sandbox/Sandbox.cpp sandbox/Sandbox.h engine/src/core/systems/soundSystem/SoundManager.cpp engine/include/core/systems/soundSystem/SoundManager.h
         engine/include/core/render/window/event/JoystickEvent.h engine/src/core/render/window/input/WindowInput.cpp engine/include/core/render/window/input/WindowInput.h
         engine/src/core/render/window/input/KeyboardInput.cpp engine/include/core/render/window/input/KeyboardInput.h engine/src/core/render/window/input/MouseInput.cpp

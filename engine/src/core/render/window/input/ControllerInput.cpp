@@ -3,7 +3,6 @@
 
 #include "core/render/window/input/ControllerInput.h"
 #include "core/render/window/event/JoystickEvent.h"
-#include "core/util/Functions.h"
 
 namespace engine {
 

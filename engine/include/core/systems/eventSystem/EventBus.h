@@ -3,10 +3,7 @@
 #ifndef RESOURCES_GAME_EVENT_BUS
 #define RESOURCES_GAME_EVENT_BUS
 
-#include <functional>
-#include <map>
 #include "core/util/Logger.h"
-#include <type_traits>
 
 /*
  * The Event bus works in the following way:

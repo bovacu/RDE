@@ -1,7 +1,7 @@
 #pragma once
+
 #include <vector>
-#include "glm/gtc/matrix_transform.hpp"
-#include "core/render/elements/Texture.h"
+
 #include "core/render/Camera.h"
 #include "core/render/shapes/Shape.h"
 #include "core/render/elements/ShaderManager.h"

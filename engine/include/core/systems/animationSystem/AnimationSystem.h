@@ -9,7 +9,6 @@
 #include "Animation.h"
 #include "core/systems/eventSystem/EventBus.h"
 #include "core/graph/Components.h"
-#include <functional>
 
 namespace engine {
 

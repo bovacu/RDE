@@ -9,8 +9,6 @@
 #endif
 
 #include "core/util/Functions.h"
-#include "core/Engine.h"
-#include "glm/gtx/string_cast.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
 namespace engine {

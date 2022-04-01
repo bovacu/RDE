@@ -7,7 +7,6 @@
 #include "core/render/window/keysAndButtons/KeyboardKeys.h"
 #include "core/render/window/keysAndButtons/MouseKeys.h"
 #include "core/render/window/keysAndButtons/GamePadButtons.h"
-#include <functional>
 
 #include "core/util/Util.h"
 #include "core/render/window/Window.h"

@@ -6,7 +6,6 @@
 
 
 #include "core/util/Util.h"
-#include <functional>
 
 namespace engine {
 

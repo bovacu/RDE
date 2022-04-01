@@ -4,9 +4,6 @@
 #ifndef ENGINE_GRAPH_H
 #define ENGINE_GRAPH_H
 
-#include <vector>
-#include <string>
-#include "core/Core.h"
 #include <entt/entt.hpp>
 #include "core/util/Delta.h"
 #include "core/render/window/event/Event.h"

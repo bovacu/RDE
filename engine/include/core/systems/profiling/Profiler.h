@@ -9,7 +9,6 @@
 #include <chrono>
 #include <unordered_map>
 #include <ostream>
-#include <cmath>
 #include "core/graph/ImGuiCore.h"
 
 #if IS_LINUX()

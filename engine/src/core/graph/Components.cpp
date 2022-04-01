@@ -1,10 +1,7 @@
 // Created by borja on 11/3/22.
 
 #include "core/graph/Components.h"
-#include "core/graph/Graph.h"
-#include "core/graph/Node.h"
 #include "core/util/Functions.h"
-#include "glm/gtx/string_cast.hpp"
 
 namespace engine {
 

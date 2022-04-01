@@ -2,7 +2,6 @@
 
 
 #include "glm/ext/matrix_clip_space.hpp"
-#include "glm/ext/matrix_transform.hpp"
 #include "core/render/Camera.h"
 #include "core/graph/Components.h"
 #include "core/Engine.h"
@@ -11,7 +10,7 @@ namespace engine {
 
     Camera::Camera(const Window* _window, const NodeID& _mainCameraID) {
         ID = _mainCameraID;
-        viewport = new FreeViewPort(_window);
+        viewport = new FreeViewPort(_window->getWindowSize());
     }
 
     void Camera::onResize(int _width, int _height) {
@@ -108,7 +107,7 @@ namespace engine {
 
     void Camera::setFreeViewport(const Window* _window) {
         delete viewport;
-        viewport = new FreeViewPort(_window);
+        viewport = new FreeViewPort(_window->getWindowSize());
     }
 
     void Camera::setAdaptiveViewport(const Vec2I& _virtualDesiredSize, const Vec2I& _currentDeviceSize) {

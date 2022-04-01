@@ -5,7 +5,6 @@
 #define ENGINE2_0_COMPONENTS_H
 
 #include "core/util/Util.h"
-#include "core/render/elements/Texture.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/graph/Graph.h"
 #include "glm/ext/matrix_transform.hpp"

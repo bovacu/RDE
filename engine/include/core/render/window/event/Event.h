@@ -3,8 +3,6 @@
 #ifndef ENGINE2_0_EVENT_H
 #define ENGINE2_0_EVENT_H
 
-#include <sstream>
-#include <functional>
 #include "core/util/Delegate.h"
 
 namespace engine {

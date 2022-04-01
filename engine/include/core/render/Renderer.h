@@ -6,7 +6,6 @@
 
 #include "core/util/Util.h"
 #include "core/render/elements/SpriteBatch.h"
-#include "core/graph/Components.h"
 
 namespace engine {
 

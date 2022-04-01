@@ -1,7 +1,6 @@
 // Created by borja on 27/2/22.
 
 #include "core/render/elements/ViewPort.h"
-#include "core/render/window/Window.h"
 
 namespace engine {
 
@@ -21,8 +20,8 @@ namespace engine {
     // ---------------- FREE VIEWPORT
 
 
-    FreeViewPort::FreeViewPort(const Window* _window) {
-        virtualResolution = _window->getWindowSize();
+    FreeViewPort::FreeViewPort(const Vec2I& _windowSize) {
+        virtualResolution = _windowSize;
     }
 
     void FreeViewPort::update(const Vec2I& _deviceSize) {

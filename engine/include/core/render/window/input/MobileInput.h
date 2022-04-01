@@ -4,7 +4,6 @@
 #ifndef ENGINE2_0_MOBILE_INPUT_H
 #define ENGINE2_0_MOBILE_INPUT_H
 
-#include "core/render/window/Window.h"
 #include "core/render/window/input/Input.h"
 
 namespace engine {

@@ -34,7 +34,7 @@ namespace engine {
     // The bigger the device screen, the more you show, the smaller, the less
     class FreeViewPort : public IViewPort {
         public:
-            explicit FreeViewPort(const Window* _window);
+            explicit FreeViewPort(const Vec2I & _windowSize);
             void update(const Vec2I& _deviceSize) override;
             ~FreeViewPort() override {  };
     };

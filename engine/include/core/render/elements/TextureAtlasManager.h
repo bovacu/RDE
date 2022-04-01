@@ -6,12 +6,6 @@
 
 
 #include "core/util/Util.h"
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-#include <unordered_map>
-#include <memory>
 
 #ifdef USE_ZLIB
 #include <zlib.h>

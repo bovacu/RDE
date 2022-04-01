@@ -20,7 +20,6 @@ namespace engine {
         uint32_t fboID = 0, rboID = -1, vboID = -1;
         uint32_t framebufferShader = -1;
         uint32_t colorAttachment = -1;
-        float aspectRatio = -1;
         FrameBufferSpecification specs;
 
         public:

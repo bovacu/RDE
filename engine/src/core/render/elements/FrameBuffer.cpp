@@ -13,7 +13,6 @@
 namespace engine {
 
     FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs) : specs(_specs) {
-        aspectRatio = (float)_specs.width / (float)_specs.height;
         invalidate();
     }
 
@@ -107,7 +106,6 @@ namespace engine {
     void FrameBuffer::resize(uint32_t _width, uint32_t _height) {
         specs.width = _width;
         specs.height = _height;
-        aspectRatio = (float)specs.width / (float)specs.height;
         invalidate();
     }
 

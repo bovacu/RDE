@@ -4,7 +4,6 @@
 #ifndef RESOURCES_GAME_FUNCTIONS_H
 #define RESOURCES_GAME_FUNCTIONS_H
 
-#include "core/render/window/Window.h"
 #include "core/Engine.h"
 #include "core/render/Camera.h"
 

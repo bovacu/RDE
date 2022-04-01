@@ -1,9 +1,6 @@
 // Created by borja on 9/1/22.
 
-
 #include "core/systems/animationSystem/AnimationSystem.h"
-
-#include <utility>
 #include "core/render/elements/TextureAtlasManager.h"
 
 namespace engine {

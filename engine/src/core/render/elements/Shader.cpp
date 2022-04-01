@@ -1,7 +1,6 @@
 #include "core/render/elements/Shader.h"
 #include "core/util/Logger.h"
 #include <iostream>
-#include <fstream>
 
 namespace engine {
     Shader::Shader() {  }

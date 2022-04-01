@@ -3,7 +3,6 @@
 #ifndef IMGUI_LAYER_H
 #define IMGUI_LAYER_H
 
-#include "core/Core.h"
 #if !IS_MOBILE()
 
 #include <chrono>

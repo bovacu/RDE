@@ -3,7 +3,6 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-#include "core/render/window/event/Event.h"
 #include "core/util/Delta.h"
 #include "core/graph/Graph.h"
 
