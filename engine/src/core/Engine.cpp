@@ -30,7 +30,7 @@ namespace engine {
         Console::get().init();
         ShaderManager::get().init();
         FontManager::get().init();
-        Renderer::init(window.get());
+        Renderer::init();
         SoundManager::get().init();
 
         Renderer::setClearColor(backgroundColor);

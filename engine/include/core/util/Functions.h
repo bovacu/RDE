@@ -11,6 +11,7 @@
 namespace engine {
 
     class Util {
+
         public:
             template<typename T>
             static T clamp(T _value, T _minValue, T _maxValue) {
@@ -37,16 +38,22 @@ namespace engine {
                 return base_filename.substr(base_filename.find_last_of('.') + 1, base_filename.size());
             }
 
-            static Vec2F worldToScreenCoords(const Vec2F& _position, Window* _window, float _aspectRatio) {
-                return {_position.x * _aspectRatio / ((float)_window->getWindowSize().x / 2), _position.y / ((float)_window->getWindowSize().y / 2)};
+            static Vec2F worldToScreenCoords(const Vec2F& _position) {
+                auto _window = Engine::get().getWindowSize();
+                auto _aspectRatio = Engine::get().getScene()->getMainCamera()->getViewport()->getAspectRatio();
+                return {_position.x * _aspectRatio / ((float)_window.x / 2), _position.y / ((float)_window.y / 2)};
             }
 
-            static Vec2F screenToWorldCoords(const Vec2F& _position, Window* _window, float _aspectRatio) {
-                return {_position.x / _aspectRatio * ((float)_window->getWindowSize().x / 2), _position.y * ((float)_window->getWindowSize().y / 2)};
+            static Vec2F screenToWorldCoords(const Vec2F& _position) {
+                auto _window = Engine::get().getWindowSize();
+                auto _aspectRatio = Engine::get().getScene()->getMainCamera()->getViewport()->getAspectRatio();
+                return {_position.x / _aspectRatio * ((float)_window.x / 2), _position.y * ((float)_window.y / 2)};
             }
 
-            static Vec2F worldToScreenSize(const Vec2F& _size, Window* _window, float _aspectRatio) {
-                return {_size.x * _aspectRatio / ((float)_window->getWindowSize().x), _size.y / ((float)_window->getWindowSize().y)};
+            static Vec2F worldToScreenSize(const Vec2F& _size) {
+                auto _window = Engine::get().getWindowSize();
+                auto _aspectRatio = Engine::get().getScene()->getMainCamera()->getViewport()->getAspectRatio();
+                return {_size.x * _aspectRatio / ((float)_window.x), _size.y / ((float)_window.y)};
             }
 
             static void worldToScreenSize(float& _x, float& _y) {

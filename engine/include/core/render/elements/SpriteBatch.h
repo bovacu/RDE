@@ -32,45 +32,50 @@ namespace engine {
 
         class Batch {
             private:
+                SpriteBatch* spriteBatch = nullptr;
                 BatchPriority priority;
                 int layer;
                 ShaderID shaderID = -1;
-                float aspectRatio;
-                Vec2F scalingFactor = {1, 1};
                 std::vector<Vertex2dUVColor> vertexBuffer;
                 Texture* texture;
-                Window* window = nullptr;
                 friend class SpriteBatch;
                 void addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
                 void addText(const TextRenderer& _text, const SpriteRenderer& _spriteRenderer, const Transform& _transform);
         };
 
+        class Debug {
+            friend class SpriteBatch;
+            private:
+                static SpriteBatch* batch;
+                std::vector<VertexColorDebug> vertexDebugBufferGeometrics;
+                std::vector<VertexColorDebug> vertexDebugBufferLines;
+                GLuint debugVbo = -1;
+                Vec2F scalingFactor = {1, 1};
+
+            private:
+                void initDebugVbo();
+
+            public:
+                void init(SpriteBatch* _batch);
+                void drawGrid(const Color& _color);
+
+                void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Green);
+                void drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color = Color::Green, float _rotation = 0.f);
+                void drawShape(Shape& _shape);
+                void flushDebug();
+
+                void setDebugLinesThickness(float _thickness);
+        };
+
         public:
             int totalTriangles = 0;
             int drawCalls = 0;
-
-        class Debug {
-
-            private:
-                static SpriteBatch* batch;
-
-            public:
-                static void init(SpriteBatch* _batch);
-                static void drawGrid(const Color& _color);
-        };
+            Debug debug;
 
         private:
-            std::vector<VertexColorDebug> vertexDebugBufferGeometrics;
-            std::vector<VertexColorDebug> vertexDebugBufferLines;
-            GLuint vbo = -1, debugVbo = -1;
-
+            GLuint vbo = -1;
+            int vertices = 0;
             glm::mat4 viewProjectionMatrix;
-            float aspectRatio = 1;
-            Vec2F scalingFactor = {1, 1};
-
-            Texture* texture = nullptr;
-            Window* window = nullptr;
-
             std::vector<Batch> batches;
 
         private:
@@ -81,22 +86,14 @@ namespace engine {
             SpriteBatch() = default;
             ~SpriteBatch();
 
-            void init(Window* _window);
+            void init();
             void beginDraw(Camera& _camera);
             void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
             void draw(const TextRenderer& _text, const Transform& _transform);
             void draw(const ParticleSystem& _particleSystem, const Transform& _transform);
             void flush();
 
-            void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Green);
-            void drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color = Color::Green, float _rotation = 0.f);
-            void drawShape(Shape& _shape);
-            void flushDebug();
-
-            void setDebugLinesThickness(float _thickness);
-
         private:
             void initVbo();
-            void initDebugVbo();
     };
 }

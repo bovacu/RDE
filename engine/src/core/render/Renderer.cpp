@@ -8,8 +8,8 @@ namespace engine {
     SpriteBatch Renderer::batch;
     Color Renderer::clearColor = Color::Red;
 
-    void Renderer::init(Window* _window) {
-        batch.init(_window);
+    void Renderer::init() {
+        batch.init();
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
@@ -26,7 +26,7 @@ namespace engine {
 
         LOG_S("SDL Image loader loaded successfully")
 
-        SpriteBatch::Debug::init(&batch);
+        batch.debug.init(&batch);
     }
 
     void Renderer::clear() {
@@ -39,7 +39,7 @@ namespace engine {
     }
 
     void Renderer::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
-        batch.drawLine(_p0, _p1, _color);
+        batch.debug.drawLine(_p0, _p1, _color);
     }
 
     void Renderer::endDraw() {
@@ -55,20 +55,20 @@ namespace engine {
     }
 
     void Renderer::beginDebugDraw(Camera& _camera, float _thickness) {
-        batch.setDebugLinesThickness(_thickness);
+        batch.debug.setDebugLinesThickness(_thickness);
         batch.beginDraw(_camera);
     }
 
     void Renderer::endDebugDraw() {
-        batch.flushDebug();
+        batch.debug.flushDebug();
     }
 
     void Renderer::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
-        batch.drawSquare(_position, _size, _color, _rotation);
+        batch.debug.drawSquare(_position, _size, _color, _rotation);
     }
 
     void Renderer::drawShape(Shape& _shape) {
-        batch.drawShape(_shape);
+        batch.debug.drawShape(_shape);
     }
 
     void Renderer::resetDebugInfo() {
@@ -93,6 +93,6 @@ namespace engine {
     }
 
     void Renderer::drawGrid(const Color& _color) {
-        SpriteBatch::Debug::drawGrid(_color);
+        batch.debug.drawGrid(_color);
     }
 }

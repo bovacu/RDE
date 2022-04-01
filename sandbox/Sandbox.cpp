@@ -16,7 +16,7 @@ namespace engine {
         TextureAtlasManager::get().addAtlas(32, 32, "assets/test/square.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
-        engine->setVSync(true);
+//        engine->setVSync(true);
 
 //        auto _player = mainScene->createNode("player");
 //        auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
@@ -43,14 +43,13 @@ namespace engine {
         squareTransform->setPosition(0, 0);
         auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(square);
         _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
-        _squareSpriteRenderer->layer = 30;
 
 //        auto _text = getMainGraph()->createNode("Text", square);
 //        getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World");
 //        getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
 
         Random _r;
-        for(int _i = 0; _i < 10; _i++) {
+        for(int _i = 0; _i < 100; _i++) {
             auto _node = getMainGraph()->createNode(std::to_string(_i), square);
             getMainGraph()->addComponent<SpriteRenderer>(_node, TextureAtlasManager::get().getTile("square", "square_0"));
             getMainGraph()->getComponent<Transform>(_node)->setPosition({_r.randomf(-640, 640), _r.randomf(-360, 360)});

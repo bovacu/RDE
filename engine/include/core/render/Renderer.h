@@ -26,7 +26,7 @@ namespace engine {
             /**
              * Must be called ONCE before rendering anything, BUT after creating the window.
              **/
-            static void init(Window* _window);
+            static void init();
             static void destroy();
 
             /**
