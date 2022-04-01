@@ -52,6 +52,17 @@
 #ifdef ENGINE_DEBUG
     #if defined(_WIN32)
 		#define ENGINE_DEBUGBREAK() __debugbreak()
+    #elif defined(__APPLE__)
+        #include "TargetConditionals.h"
+        #if TARGET_OS_IPHONE && TARGET_IPHONE_SIMULATOR
+            printf("iPhone stimulator\n");
+        #elif TARGET_OS_IPHONE
+            printf("iPhone\n");
+        #elif TARGET_OS_MAC
+            printf("MacOS\n");
+        #else
+            printf("Other Apple OS\n");
+        #endif
 	#elif defined(__linux__)
 		#include <csignal>
 		#define ENGINE_DEBUG_BREAK() raise(SIGTRAP)
