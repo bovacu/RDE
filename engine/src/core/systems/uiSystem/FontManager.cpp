@@ -137,8 +137,9 @@ namespace engine {
         SDL_RWread(_fontFile, &fontData[0], fontDataSize, fontDataSize);
         SDL_RWclose(_fontFile);
 
-        if (FT_New_Memory_Face(ftLibrary, (const FT_Byte*)fontData, (FT_Long)fontDataSize, 0, &_face)) {
-            LOG_E("Load memory failed");
+        FT_Error _error = FT_New_Memory_Face(ftLibrary, (const FT_Byte*)fontData, (FT_Long)fontDataSize, 0, &_face);
+        if (_error != FT_Err_Ok) {
+            LOG_E("Load memory failed with code -> ", _error);
             return nullptr;
         }
 

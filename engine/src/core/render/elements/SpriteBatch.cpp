@@ -20,6 +20,8 @@ namespace engine {
 
     void SpriteBatch::initVbo() {
         // Setup vertex buffer
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         GLsizei _structSize = sizeof(Vertex2dUVColor);
@@ -33,10 +35,16 @@ namespace engine {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, _structSize, (void*) nullptr);
         glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, _structSize, (void*)(4 * 3));
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, _structSize, (void*)(4 * 3 + 4 * 4));
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
 
     void SpriteBatch::Debug::initDebugVbo() {
+        glGenVertexArrays(1, &debugVao);
+        glBindVertexArray(debugVao);
         glGenBuffers(1, &debugVbo);
         glBindBuffer(GL_ARRAY_BUFFER, debugVbo);
         int _size = 3 * sizeof(float) + 4 * sizeof(float);
@@ -44,7 +52,10 @@ namespace engine {
         glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, _size, (void*)nullptr);
         // Color
         glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, _size, (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(4);
+        glEnableVertexAttribArray(5);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
 
     SpriteBatch::~SpriteBatch() = default;
@@ -143,6 +154,7 @@ namespace engine {
             if (_batch.vertexBuffer.empty() || _batch.texture == nullptr || _batch.shaderID < 0)
                 continue;
 
+            glBindVertexArray(vao);
             glUseProgram(_batch.shaderID);
             GLint _location = glGetUniformLocation(_batch.shaderID, "viewProjectionMatrix");
             glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
@@ -154,27 +166,21 @@ namespace engine {
             glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-
-            glEnableVertexAttribArray(0); // position
-            glEnableVertexAttribArray(1); // color
-            glEnableVertexAttribArray(2); // textureCoords
-
             glDrawArrays(GL_TRIANGLES, 0, (int)_batch.vertexBuffer.size());
-
-            glDisableVertexAttribArray(0);
-            glDisableVertexAttribArray(1);
-            glDisableVertexAttribArray(2);
 
             totalTriangles += (int)_batch.vertexBuffer.size() / 3;
             _batch.vertexBuffer.clear();
 
             drawCalls++;
             vertices = 0;
+            glBindVertexArray(0);
         }
     }
 
     void SpriteBatch::Debug::flushDebug() {
         ShaderID _id = ShaderManager::get().getShader("debug");
+
+        glBindVertexArray(debugVao);
         glUseProgram(_id);
         GLint _location = glGetUniformLocation(_id, "viewProjectionMatrix");
         glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(batch->viewProjectionMatrix)));
@@ -209,6 +215,8 @@ namespace engine {
 
         vertexDebugBufferGeometrics.clear();
         vertexDebugBufferLines.clear();
+
+        glBindVertexArray(debugVao);
     }
 
     void SpriteBatch::Debug::setDebugLinesThickness(float _thickness) {

@@ -264,6 +264,8 @@ namespace engine {
             case CONTROLLER: return get().controllerInput->ignoredEvents;
             case MOBILE: return get().mobileInput->ignoredEvents;
         }
+
+        return {  };
     }
 
     void InputManager::addEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event) {

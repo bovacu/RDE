@@ -57,6 +57,8 @@ namespace engine {
                     case READ_AND_WRITE: return "r+";
                     case READ_AND_APPEND: return "a+";
                 }
+
+                return "rb";
             }
 
         friend class FilesSystem;

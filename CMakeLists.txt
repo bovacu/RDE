@@ -9,12 +9,13 @@ add_definitions("-DGDE_EXPORT")
 #add_definitions("-DRUN_TESTS")
 
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
-SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer sdl2_image sdl2_net ${CMAKE_DL_LIBS}
+SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer SDL2_image sdl2_net ${CMAKE_DL_LIBS}
         ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
         EnTT::EnTT box2d
         )
 
 find_package(Threads REQUIRED)
+find_package(Freetype REQUIRED)
 
 add_library(
         sdl2

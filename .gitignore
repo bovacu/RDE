@@ -3,9 +3,13 @@ cmake-build-debug/
 
 cmake-build-release/
 
+.cache/
+
 build/
 
 targets/engineAndroid/.idea/
+
+libs/
 
 cmake-build-debug_lib/
 
@@ -40,3 +44,11 @@ libs_out/.ninja_log
 .idea/
 
 cmake-build-testing/
+
+libs/SDL_mixer
+
+libs/SDL
+
+libs/SDL_net
+
+libs/SDL_image

@@ -250,6 +250,8 @@ namespace engine {
             case GamePadAxis::LT: return {controllers[_controllerID]->backButtonsValue.x, 0.f};
             case GamePadAxis::RT: return {controllers[_controllerID]->backButtonsValue.y, 0.f};
         }
+
+        return { -1, -1 };
     }
 
     void ControllerInput::vibrate(const std::string& _vibrateEffect, int _controllerID) {
