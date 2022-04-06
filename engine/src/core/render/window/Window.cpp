@@ -25,7 +25,7 @@ namespace engine {
         data.height = (int)_props.height;
 
 #ifdef ENGINE_DEBUG
-        LOG_W("Running in debug mode");
+        SDL_version _compiled, _linked;
         LOG_I("Creating window ", _props.title, " (", _props.width, _props.height, ")");
 #endif
 
@@ -33,6 +33,14 @@ namespace engine {
             LOG_E("At least one module of SDL couldn't be initialized, so can't start the engine")
             return;
         }
+
+        SDL_version compiled;
+        SDL_version linked;
+
+        SDL_VERSION(&compiled);
+        SDL_GetVersion(&linked);
+        SDL_Log("We compiled against SDL version %u.%u.%u ...\n", compiled.major, compiled.minor, compiled.patch);
+        SDL_Log("But we are linking against SDL version %u.%u.%u.\n", linked.major, linked.minor, linked.patch);
 
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);

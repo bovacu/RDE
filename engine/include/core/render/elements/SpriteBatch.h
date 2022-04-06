@@ -49,7 +49,7 @@ namespace engine {
                 static SpriteBatch* batch;
                 std::vector<VertexColorDebug> vertexDebugBufferGeometrics;
                 std::vector<VertexColorDebug> vertexDebugBufferLines;
-                GLuint debugVbo = -1;
+                GLuint debugVbo = -1, debugVao = -1;
                 Vec2F scalingFactor = {1, 1};
 
             private:
@@ -73,7 +73,7 @@ namespace engine {
             Debug debug;
 
         private:
-            GLuint vbo = -1;
+            GLuint vbo = -1, vao = -1;
             int vertices = 0;
             glm::mat4 viewProjectionMatrix;
             std::vector<Batch> batches;
