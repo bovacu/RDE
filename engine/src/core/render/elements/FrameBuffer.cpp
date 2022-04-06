@@ -14,6 +14,8 @@ namespace engine {
 
     FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs) : specs(_specs) {
         invalidate();
+        glGenVertexArrays(1, &vao);
+        LOG_I(vao);
     }
 
     FrameBuffer::~FrameBuffer() {
@@ -33,6 +35,7 @@ namespace engine {
             glDeleteRenderbuffers(1, &rboID);
         }
 
+        glBindVertexArray(vao);
         glGenBuffers(1, &vboID);
         glBindBuffer(GL_ARRAY_BUFFER, vboID);
 
@@ -48,17 +51,14 @@ namespace engine {
         };
         glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
 
-        glEnableVertexAttribArray(10);
-        glVertexAttribPointer(10, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
-        glEnableVertexAttribArray(11);
+        glVertexAttribPointer(10, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
         glVertexAttribPointer(11, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-        glDisableVertexAttribArray(10);
-        glDisableVertexAttribArray(11);
+        glEnableVertexAttribArray(10);
+        glEnableVertexAttribArray(11);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 
         glGenFramebuffers(1, &fboID);
         glBindFramebuffer(GL_FRAMEBUFFER, fboID);
@@ -81,13 +81,17 @@ namespace engine {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         framebufferShader = ShaderManager::get().getShader("framebuffer");
+        glBindVertexArray(0);
     }
 
     void FrameBuffer::bind() const {
+        #if !IS_MAC() && !IS_IOS()
         glBindFramebuffer(GL_FRAMEBUFFER, fboID);
+        #endif
     }
 
     void FrameBuffer::unbind() const {
+        #if !IS_MAC()&& !IS_IOS()
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glUseProgram(framebufferShader);
@@ -101,6 +105,7 @@ namespace engine {
 
         glDisableVertexAttribArray(10);
         glDisableVertexAttribArray(11);
+        #endif
     }
 
     void FrameBuffer::resize(uint32_t _width, uint32_t _height) {
