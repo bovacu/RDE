@@ -1,6 +1,6 @@
 # sdl pkg-config source file
 
-prefix=/home/borja/Documents/C++/GDE/libs/SDL
+prefix=/Users/borja.vazquez/Documents/GDE/libs/SDL
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
@@ -10,6 +10,6 @@ Description: Simple DirectMedia Layer is a cross-platform multimedia library des
 Version: 2.0.21
 Requires:
 Conflicts:
-Libs: -L${libdir} -Wl,-rpath,${libdir} -Wl,--enable-new-dtags -lSDL2 
-Libs.private:  -lm -ldl -lpthread -lrt
-Cflags: -I${includedir}/SDL2   -D_REENTRANT
+Libs: -L${libdir}  -lSDL2 
+Libs.private:  -lm -liconv  -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal
+Cflags: -I${includedir}/SDL2   -D_THREAD_SAFE

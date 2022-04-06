@@ -18,3 +18,4 @@ mkdir libs/SDL_net
 cd submodules/SDL_net && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL_net && make && make install && cd ../..
 cd submodules/freetype && ./autogen.sh && ./configure && make && sudo make install && cd ../..
 
+# for mac install automake, autoconf and other that will show error. Install xquartx, sdl2, sdl2_image, sdl2_net, sdl2_mixer. Execute this setup

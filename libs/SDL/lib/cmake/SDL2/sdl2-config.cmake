@@ -1,6 +1,6 @@
 # sdl2 cmake project-config input for ./configure scripts
 
-set(prefix "/home/borja/Documents/C++/GDE/libs/SDL") 
+set(prefix "/Users/borja.vazquez/Documents/GDE/libs/SDL") 
 set(exec_prefix "${prefix}")
 set(libdir "${exec_prefix}/lib")
 set(includedir "${prefix}/include")
@@ -8,7 +8,7 @@ set(SDL2_PREFIX "${prefix}")
 set(SDL2_EXEC_PREFIX "${exec_prefix}")
 set(SDL2_LIBDIR "${libdir}")
 set(SDL2_INCLUDE_DIRS "${includedir}/SDL2")
-set(SDL2_LIBRARIES "-L${SDL2_LIBDIR} -Wl,-rpath,${libdir} -Wl,--enable-new-dtags -lSDL2")
+set(SDL2_LIBRARIES "-L${SDL2_LIBDIR}  -lSDL2")
 string(STRIP "${SDL2_LIBRARIES}" SDL2_LIBRARIES)
 
 if(NOT TARGET SDL2::SDL2)
@@ -16,12 +16,12 @@ if(NOT TARGET SDL2::SDL2)
 
   # Remove -lSDL2 as that is handled by CMake, note the space at the end so it does not replace e.g. -lSDL2main
   # This may require "libdir" beeing set (from above)
-  string(REPLACE "-lSDL2 " "" SDL2_EXTRA_LINK_FLAGS "-Wl,-rpath,${libdir} -Wl,--enable-new-dtags -lSDL2 ")
+  string(REPLACE "-lSDL2 " "" SDL2_EXTRA_LINK_FLAGS " -lSDL2 ")
   # also get rid of -lSDL2main, if you want to link against that use both SDL2::SDL2main and SDL2::SDL2 (in that order)
   # (SDL2Config.cmake has the same behavior)
   string(REPLACE "-lSDL2main" "" SDL2_EXTRA_LINK_FLAGS ${SDL2_EXTRA_LINK_FLAGS})
   string(STRIP "${SDL2_EXTRA_LINK_FLAGS}" SDL2_EXTRA_LINK_FLAGS)
-  string(REPLACE "-lSDL2 " "" SDL2_EXTRA_LINK_FLAGS_STATIC " -lm -ldl -lpthread -lrt ")
+  string(REPLACE "-lSDL2 " "" SDL2_EXTRA_LINK_FLAGS_STATIC " -lm -liconv  -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal ")
   string(STRIP "${SDL2_EXTRA_LINK_FLAGS_STATIC}" SDL2_EXTRA_LINK_FLAGS_STATIC)
 
 if(WIN32 AND NOT MSVC)

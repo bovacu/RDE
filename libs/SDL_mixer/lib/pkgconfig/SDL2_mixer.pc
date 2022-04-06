@@ -1,4 +1,4 @@
-prefix=/home/borja/Documents/C++/GDE/libs/SDL_mixer
+prefix=/Users/borja.vazquez/Documents/GDE/libs/SDL_mixer
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
@@ -10,4 +10,4 @@ Requires: sdl2 >= 2.0.7
 Libs: -L${libdir} -lSDL2_mixer
 Cflags: -I${includedir}/SDL2
 Requires.private: 
-Libs.private: 
+Libs.private:  -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit -Wl,-framework,CoreServices

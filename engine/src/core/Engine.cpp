@@ -131,7 +131,7 @@ namespace engine {
         scene->getMainCamera()->getViewport()->update(getWindowSize());
         scene->onUpdate(_dt);
 
-        if(InputManager::isKeyJustPressed(KeyCode::F9))
+        if(InputManager::isKeyJustPressed(KeyCode::Tab))
             showImGuiDebugWindow = !showImGuiDebugWindow;
     }
 
@@ -143,8 +143,6 @@ namespace engine {
         Renderer::beginDraw(*scene->getMainCamera());
         scene->onRender(_dt);
         Renderer::endDraw();
-
-
 
         frameBuffer->unbind();
 

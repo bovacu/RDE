@@ -1,6 +1,5 @@
 // Created by borja on 24/12/21.
 
-
 #ifndef ENGINE2_0_CORE_H
 #define ENGINE2_0_CORE_H
 
@@ -38,7 +37,6 @@
 
 
 #define ENGINE_DEBUG
-#define ENGINE_ENABLE_ASSERTS
 
 #define IS_MAC() (defined(__APPLE__) && defined(TARGET_OS_MAC))
 #define IS_WINDOWS() (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
@@ -47,7 +45,7 @@
 
 #define IS_IOS() (defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR)))
 #define IS_ANDROID() (defined(__ANDROID__))
-#define IS_MOBILE() (IS_ANDROID() || IS_IOS())
+#define IS_MOBILE() (IS_ANDROID())
 
 #ifdef ENGINE_DEBUG
     #if defined(_WIN32)
@@ -56,18 +54,18 @@
         #include "TargetConditionals.h"
         #if TARGET_OS_IPHONE && TARGET_IPHONE_SIMULATOR
             printf("iPhone stimulator\n");
-        #elif TARGET_OS_IPHONE
-            printf("iPhone\n");
-        #elif TARGET_OS_MAC
-            printf("MacOS\n");
+        #elif defined(TARGET_OS_IPHONE)
+            #define IOS_PLATFORM
+        #elif defined(TARGET_OS_MAC)
+            #define MAC_PLATFORM
         #else
-            printf("Other Apple OS\n");
+            #define MAC_OTHER_PLATFORM
         #endif
 	#elif defined(__linux__)
 		#include <csignal>
 		#define ENGINE_DEBUG_BREAK() raise(SIGTRAP)
+        #define ENGINE_ENABLE_ASSERTS
 	#endif
-	#define ENGINE_ENABLE_ASSERTS
 #else
 #define ENGINE_DEBUGBREAK()
 #endif

@@ -8,11 +8,9 @@ set(PROJECT_NAME Engine)
 add_definitions("-DGDE_EXPORT")
 #add_definitions("-DRUN_TESTS")
 
+
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
-SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer sdl2_image sdl2_net ${CMAKE_DL_LIBS}
-        ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
-        EnTT::EnTT box2d
-        )
+
 
 find_package(Threads REQUIRED)
 
@@ -25,7 +23,7 @@ set_target_properties(
         sdl2
         PROPERTIES
         IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL/lib/libSDL2.a
+        /usr/local/Cellar/sdl2/2.0.20/lib/libSDL2-2.0.0.dylib
 )
 
 
@@ -38,7 +36,7 @@ set_target_properties(
         sdl2_image
         PROPERTIES
         IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_image/lib/libSDL2_image.a
+        /usr/local/Cellar/sdl2_image/2.0.5/lib/libSDL2_image-2.0.0.dylib
 )
 
 
@@ -51,7 +49,7 @@ set_target_properties(
         sdl2_mixer
         PROPERTIES
         IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_mixer/lib/libSDL2_mixer.a
+        /usr/local/Cellar/sdl2_mixer/2.0.4_3/lib/libSDL2_mixer-2.0.0.dylib
 )
 
 
@@ -64,7 +62,7 @@ set_target_properties(
         sdl2_net
         PROPERTIES
         IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_net/lib/libSDL2_net.a
+        /usr/local/Cellar/sdl2_net/2.0.1/lib/libSDL2_net-2.0.0.dylib
 )
 
 
@@ -190,6 +188,25 @@ set(SOURCES
 
 set(CPP_HEADERS)
 set(CPP_SOURCES)
+
+if(APPLE)
+   include_directories("/opt/X11/include")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
+
+   find_package(Freetype REQUIRED)
+
+   SET(TARGET_LINKS Threads::Threads glad ${FREETYPE_LIBRARIES} sdl2 sdl2_mixer sdl2_image sdl2_net ${CMAKE_DL_LIBS}
+        ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
+        EnTT::EnTT box2d
+        )
+else()
+        SET(TARGET_LINKS Threads::Threads glad freetype sdl2 sdl2_mixer sdl2_image sdl2_net ${CMAKE_DL_LIBS}
+        ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
+        EnTT::EnTT box2d
+        )
+endif()
+
+
 
 #GDEFirebase
 

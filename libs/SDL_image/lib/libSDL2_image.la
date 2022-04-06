@@ -5,19 +5,19 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libSDL2_image-2.0.so.0'
+dlname='libSDL2_image-2.0.0.dylib'
 
 # Names of this library.
-library_names='libSDL2_image-2.0.so.0.6.0 libSDL2_image-2.0.so.0 libSDL2_image.so'
+library_names='libSDL2_image-2.0.0.dylib libSDL2_image.dylib'
 
 # The name of the static archive.
 old_library='libSDL2_image.a'
 
 # Linker flags that can not go in dependency_libs.
-inherited_linker_flags=' -pthread'
+inherited_linker_flags=' '
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/usr/local/lib /usr/local/lib/libSDL2.la -lm -ldl -lpthread -lrt'
+dependency_libs=' -lobjc -L/usr/local/lib -lSDL2'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/borja/Documents/C++/GDE/libs/SDL_image/lib'
+libdir='/Users/borja.vazquez/Documents/GDE/libs/SDL_image/lib'

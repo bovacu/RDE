@@ -4,22 +4,24 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "clang++ build active file",
+            "command": "/usr/bin/clang++",
             "type": "shell",
-            "command": "msbuild",
             "args": [
-                // Ask msbuild to generate full paths for file names.
-                "/property:GenerateFullPaths=true",
-                "/t:build",
-                // Do not generate summary otherwise it leads to duplicate errors in Problems panel
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "group": "build",
+                "-std=c++17",
+                "-stdlib=libc++",
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+              ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "presentation": {
-                // Reveal the output only if unrecognized errors occur.
                 "reveal": "silent"
             },
-            // Use the standard MS compiler pattern to detect errors, warnings and infos
             "problemMatcher": "$msCompile"
         }
     ]

@@ -1,4 +1,4 @@
-prefix=/home/borja/Documents/C++/GDE/libs/SDL_net
+prefix=/Users/borja.vazquez/Documents/GDE/libs/SDL_net
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include

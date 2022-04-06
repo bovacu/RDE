@@ -9,6 +9,9 @@ namespace engine {
     Color Renderer::clearColor = Color::Red;
 
     void Renderer::init() {
+
+        LOG_I("OpenGL Version: ", glGetString(GL_VERSION));
+
         batch.init();
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

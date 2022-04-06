@@ -3,6 +3,8 @@
 uniform vec4 params;
 uniform vec4 color;
 
+out vec4 fragColor;
+
 void main (void) {
     vec2 position = ( gl_FragCoord.xy / params.xy );
     int _isLine = int(ceil(params.z));
@@ -13,13 +15,13 @@ void main (void) {
     int _y = int(floor(position.y * params.y));
 
     if(_x % int(params.x / 2) == 0 || _y % int(params.y / 2) == 0) {
-        gl_FragColor = vec4(0, 0, 1, 1);
+        fragColor = vec4(0, 0, 1, 1);
     }
 
 //    else if(int(position.x * params.x) % _isLine == 0 || int(position.y * params.y + _yOffset * params.y / 2.0) % _isLine == 0) {
-//        gl_FragColor = color;
+//        fragColor = color;
 //    }
 
     else
-        gl_FragColor = vec4(0, 0, 0, 0);
+        fragColor = vec4(0, 0, 0, 0);
 }

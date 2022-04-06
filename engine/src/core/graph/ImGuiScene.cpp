@@ -200,8 +200,12 @@ namespace engine {
         glGetIntegerv( GL_TEXTURE_FREE_MEMORY_ATI,&_freeGpuMb);
         #endif
         ImGui::Text("GPU Used Memory: %.2f MBs", (float)_freeGpuMb / 1000.f);
+        
+        #if IS_LINUX()
         auto* _memData = Profiler::getTotalVirtualMemory();
         ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
+        #endif
+
         ImGui::Separator();
         ImGui::Text("Draw Calls: %d", Renderer::getDrawCalls());
         ImGui::Text("Total Triangles: %d", Renderer::getTotalTriangles());
