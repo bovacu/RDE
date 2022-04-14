@@ -196,6 +196,14 @@ namespace engine {
         recalcTextDimensions(innerText);
     }
 
+    void TextRenderer::setColor(const Color &_color) {
+        spriteRenderer.color = _color;
+    }
+
+    Color TextRenderer::getColor() const {
+        return spriteRenderer.color;
+    }
+
 //    Shape& TextRenderer::getDebugShape() {
 //        return debugShape;
 //    }

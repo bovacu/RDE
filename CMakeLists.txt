@@ -11,7 +11,7 @@ add_definitions("-DGDE_EXPORT")
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
 SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer SDL2_image sdl2_net ${CMAKE_DL_LIBS}
         ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
-        EnTT::EnTT box2d
+        EnTT::EnTT chipmunk
         )
 
 find_package(Threads REQUIRED)
@@ -70,17 +70,16 @@ set_target_properties(
 
 
 add_library(
-        box2d
+        chipmunk
         STATIC
         IMPORTED
 )
 set_target_properties(
-        box2d
+        chipmunk
         PROPERTIES
         IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/submodules/box2d/build/bin/libbox2d.a
+        /usr/local/lib/libchipmunk.a
 )
-
 
 #-------------- STB
 
@@ -100,7 +99,7 @@ include_directories(submodules/SDL_image)
 include_directories(submodules/glm)
 include_directories(submodules/imgui)
 include_directories(submodules/entt/src)
-include_directories(submodules/box2d/include)
+include_directories(submodules/Chipmunk2D/include)
 
 add_subdirectory(submodules/entt)
 

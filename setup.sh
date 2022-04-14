@@ -19,4 +19,4 @@ cd submodules/SDL_mixer && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/S
 mkdir libs/SDL_net
 cd submodules/SDL_net && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL_net && make && make install && cd ../..
 cd submodules/freetype && ./autogen.sh && ./configure && make && sudo make install && cd ../..
-
+cd submodules/Chipmunk2D && cmake . && sudo make install && cd ../..

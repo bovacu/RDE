@@ -37,3 +37,6 @@
 [submodule "submodules/box2d"]
 	path = submodules/box2d
 	url = https://github.com/erincatto/box2d
+[submodule "submodules/Chipmunk2D"]
+	path = submodules/Chipmunk2D
+	url = https://github.com/slembcke/Chipmunk2D.git

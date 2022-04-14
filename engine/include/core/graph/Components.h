@@ -42,6 +42,8 @@ namespace engine {
     };
 
     class TextRenderer {
+
+        friend class SpriteBatch;
         private:
             Font* font;
             std::string innerText;
@@ -50,12 +52,10 @@ namespace engine {
             float spaceWidth;
             float enterHeight;
             int fontSize;
+            SpriteRenderer spriteRenderer;
 
         private:
             void recalcTextDimensions(const std::string& _text);
-
-        public:
-            SpriteRenderer spriteRenderer;
 
         public:
             TextRenderer(Font* _font, const std::string& _text);
@@ -76,6 +76,9 @@ namespace engine {
 
             [[nodiscard]] float getSpacesBetweenChars() const;
             void setSpacesBetweenChars(float _spaceBetweenChars);
+
+            void setColor(const Color& _color);
+            Color getColor() const;
 
     //        Shape& getDebugShape();
     };
