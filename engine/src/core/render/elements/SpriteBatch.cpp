@@ -70,7 +70,7 @@ namespace engine {
     }
 
     void SpriteBatch::draw(const TextRenderer& _text, const Transform& _transform) {
-        getBatch(_text.spriteRenderer, 0, BatchPriority::TextPriority).addText(_text, _text.spriteRenderer, _transform);
+        getBatch(_text, 0, BatchPriority::TextPriority).addText(_text, _transform);
     }
 
     void SpriteBatch::Debug::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
@@ -223,18 +223,18 @@ namespace engine {
         glLineWidth(_thickness);
     }
 
-    SpriteBatch::Batch& SpriteBatch::getBatch(const SpriteRenderer& _spriteRenderer, int _layer, BatchPriority _priority) {
+    SpriteBatch::Batch& SpriteBatch::getBatch(const IRenderizable& _renderer, int _layer, BatchPriority _priority) {
         for(auto& _batch : batches)
-            if(_spriteRenderer.texture->getGLTexture() == _batch.texture->getGLTexture() && _layer == _batch.layer && _batch.shaderID == _spriteRenderer.shaderID)
+            if(_renderer.getTexture()->getGLTexture() == _batch.texture->getGLTexture() && _layer == _batch.layer && _batch.shaderID == _renderer.getShaderID())
                 return _batch;
 
         LOG_W("Created a new batch")
 
         Batch _batch;
         _batch.layer = _layer;
-        _batch.texture = _spriteRenderer.texture;
+        _batch.texture = _renderer.getTexture();
         _batch.priority = _priority;
-        _batch.shaderID = _spriteRenderer.shaderID;
+        _batch.shaderID = _renderer.getShaderID();
         _batch.spriteBatch = this;
         batches.push_back(_batch);
 
@@ -296,7 +296,7 @@ namespace engine {
         spriteBatch->vertices += 6;
     }
 
-    void SpriteBatch::Batch::addText(const TextRenderer& _text, const SpriteRenderer& _spriteRenderer, const Transform& _transform) {
+    void SpriteBatch::Batch::addText(const TextRenderer& _text, const Transform& _transform) {
         if(texture == nullptr) {
             texture = &_text.getFont()->getTexture();
         }
@@ -328,7 +328,7 @@ namespace engine {
 
             auto _transformMat = _transform.modelMatrix;
 
-            auto _textColor = _spriteRenderer.color;
+            auto _textColor = _text.color;
             glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
 
             auto _positionInScreen = Util::worldToScreenSize({x2 + _x, y2 + _y});

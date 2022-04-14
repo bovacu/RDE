@@ -114,14 +114,14 @@ namespace engine {
         font = _font;
         innerText = _text;
         recalcTextDimensions(_text);
-        spriteRenderer.shaderID = ShaderManager::get().getShader("basicText");
-        spriteRenderer.texture = &font->getTexture();
+        shaderID = ShaderManager::get().getShader("basicText");
+        texture = &font->getTexture();
     }
 
     TextRenderer::TextRenderer(Font* _font) {
         font = _font;
-        spriteRenderer.shaderID = ShaderManager::get().getShader("basicText");
-        spriteRenderer.texture = &font->getTexture();
+        shaderID = ShaderManager::get().getShader("basicText");
+        texture = &font->getTexture();
     }
 
     void TextRenderer::setText(const std::string& _text) {
@@ -197,11 +197,7 @@ namespace engine {
     }
 
     void TextRenderer::setColor(const Color &_color) {
-        spriteRenderer.color = _color;
-    }
-
-    Color TextRenderer::getColor() const {
-        return spriteRenderer.color;
+        color = _color;
     }
 
 //    Shape& TextRenderer::getDebugShape() {

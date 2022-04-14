@@ -9,6 +9,7 @@
 #include "core/graph/Graph.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "core/systems/uiSystem/FontManager.h"
+#include "core/render/elements/IRenderizable.h"
 
 namespace engine {
 
@@ -30,7 +31,7 @@ namespace engine {
         explicit Active(bool _active) : active(_active) {  }
     };
 
-    struct SpriteRenderer {
+    struct SpriteRenderer : public IRenderizable {
         Color color = Color::White;
         Texture* texture = nullptr;
         GLuint shaderID = ShaderManager::get().getShader("basic");
@@ -39,9 +40,14 @@ namespace engine {
         SpriteRenderer() = default;
         SpriteRenderer(const SpriteRenderer&) = default;
         explicit SpriteRenderer(Texture* _texture) : texture(_texture) {  }
+
+        [[nodiscard]] Texture* getTexture() const override { return texture; }
+        [[nodiscard]] int getLayer() const override { return layer; }
+        [[nodiscard]] Color getColor() const override { return color; }
+        [[nodiscard]] ShaderID getShaderID() const override { return shaderID; }
     };
 
-    class TextRenderer {
+    class TextRenderer : public IRenderizable {
 
         friend class SpriteBatch;
         private:
@@ -52,7 +58,16 @@ namespace engine {
             float spaceWidth;
             float enterHeight;
             int fontSize;
-            SpriteRenderer spriteRenderer;
+
+            Color color = Color::White;
+            Texture* texture = nullptr;
+            GLuint shaderID = ShaderManager::get().getShader("basic");
+            int layer = 0;
+
+        [[nodiscard]] Texture* getTexture() const override { return texture; }
+        [[nodiscard]] int getLayer() const override { return layer; }
+        [[nodiscard]] Color getColor() const override { return color; }
+        [[nodiscard]] ShaderID getShaderID() const override { return shaderID; }
 
         private:
             void recalcTextDimensions(const std::string& _text);
@@ -78,7 +93,6 @@ namespace engine {
             void setSpacesBetweenChars(float _spaceBetweenChars);
 
             void setColor(const Color& _color);
-            Color getColor() const;
 
     //        Shape& getDebugShape();
     };

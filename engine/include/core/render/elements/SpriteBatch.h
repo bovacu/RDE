@@ -40,7 +40,7 @@ namespace engine {
                 Texture* texture;
                 friend class SpriteBatch;
                 void addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
-                void addText(const TextRenderer& _text, const SpriteRenderer& _spriteRenderer, const Transform& _transform);
+                void addText(const TextRenderer& _text, const Transform& _transform);
         };
 
         class Debug {
@@ -79,7 +79,7 @@ namespace engine {
             std::vector<Batch> batches;
 
         private:
-            Batch& getBatch(const SpriteRenderer& _spriteRenderer, int _layer, BatchPriority _priority);
+            Batch& getBatch(const IRenderizable& _renderer, int _layer, BatchPriority _priority);
             void orderBatches();
 
         public:
