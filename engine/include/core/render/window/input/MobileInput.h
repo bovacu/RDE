@@ -6,7 +6,7 @@
 
 #include "core/render/window/input/Input.h"
 
-namespace engine {
+namespace GDE {
 
     typedef uint32_t TimeStamp;
     class MobileInput : public Input {

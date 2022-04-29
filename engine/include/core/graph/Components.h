@@ -10,8 +10,9 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/render/elements/IRenderizable.h"
+#include "chipmunk/chipmunk.h"
 
-namespace engine {
+namespace GDE {
 
     struct Tag {
         std::string tag;
@@ -97,6 +98,10 @@ namespace engine {
     //        Shape& getDebugShape();
     };
 
+    struct StaticTransform {
+        bool foo;
+    };
+
     struct Transform {
         // Local Space
         private:
@@ -137,6 +142,65 @@ namespace engine {
 
             void setConstant(bool _constant);
             bool isConstant();
+    };
+
+
+    enum BodyShapeType {
+        BOX,
+        CIRCLE,
+        POLYGON
+    };
+
+    enum BodyType {
+        DYNAMIC,
+        STATIC,
+        KINEMATIC
+    };
+
+    struct BodyConfig {
+        float mass = 1;
+        Vec2F size = { 64, 64 };
+        float friction = 0;
+        float restitution = 0;
+
+        BodyType bodyType = BodyType::DYNAMIC;
+        BodyShapeType bodyShapeType = BodyShapeType::BOX;
+    };
+
+
+    typedef unsigned int CollisionMask;
+    struct Body {
+        friend class Physics;
+        friend class Graph;
+
+        private:
+            cpBody* body = nullptr;
+            cpShape* shape = nullptr;
+            BodyConfig bodyConfig;
+            CollisionMask mask;
+
+        public:
+            explicit Body(const BodyConfig& _bodyConfig, const Transform& _transform);
+            Body(const Body& _body) = default;
+            ~Body();
+
+            [[nodiscard]] Vec2F getPosition() const;
+            [[nodiscard]] float getRotation() const;
+
+            void updateBodyConfig(const BodyConfig& _bodyConfig);
+            void addCollider();
+
+            void setCollisionMask(const std::string& _maskName);
+            [[nodiscard]] CollisionMask getCollisionMask() const;
+
+            explicit operator cpShape*() {
+                return shape;
+            }
+
+            explicit operator cpBody*() {
+                return body;
+            }
+
     };
 }
 

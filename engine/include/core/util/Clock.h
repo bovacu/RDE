@@ -5,7 +5,7 @@
 
 #include <cstdint>
 
-namespace engine {
+namespace GDE {
 
     /// This is a class that tracks the time passed since a specific moment.
     class Clock {

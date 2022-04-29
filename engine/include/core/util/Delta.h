@@ -3,7 +3,7 @@
 #ifndef TIMESTEP_H
 #define TIMESTEP_H
 
-namespace engine {
+namespace GDE {
 
     class Delta {
         private:

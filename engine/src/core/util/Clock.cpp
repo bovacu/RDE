@@ -2,7 +2,7 @@
 #include "core/util/Delta.h"
 #include "SDL_timer.h"
 
-namespace engine {
+namespace GDE {
 
     Clock::Clock() : startTime(SDL_GetTicks64()) {  }
 

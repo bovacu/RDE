@@ -12,7 +12,7 @@
 #include "submodules/imgui/backends/imgui_impl_opengl3.h"
 #include "submodules/imgui/backends/imgui_impl_sdl.h"
 
-namespace engine {
+namespace GDE {
 
     class Graph;
     class ImGuiScene : public Scene {

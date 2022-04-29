@@ -3,9 +3,9 @@
     #include "Sandbox.h"
 
     int main(int, char* []) {
-        engine::Engine _e;
+        GDE::Engine _e;
         _e.onInit();
-        auto* _projectManager = new engine::Sandbox;
+        auto* _projectManager = new GDE::Sandbox;
         _e.setScene(_projectManager);
         _e.onRun();
         _e.destroy();

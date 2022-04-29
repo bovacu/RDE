@@ -7,7 +7,7 @@
 #include <ostream>
 #include "core/platform/PlatformHeaderSDL.h"
 
-namespace engine {
+namespace GDE {
 
     /// -----------------------------------------------------------------
     /// |			CODES FOR KEY BUTTONS, THEY ARE						|

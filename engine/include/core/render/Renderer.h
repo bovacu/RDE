@@ -7,7 +7,7 @@
 #include "core/util/Util.h"
 #include "core/render/elements/SpriteBatch.h"
 
-namespace engine {
+namespace GDE {
 
     class Renderer {
 

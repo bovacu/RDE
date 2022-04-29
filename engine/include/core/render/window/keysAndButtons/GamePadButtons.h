@@ -6,7 +6,7 @@
 #include <cstdint>
 #include "core/platform/PlatformHeaderSDL.h"
 
-namespace engine {
+namespace GDE {
 
     /// -----------------------------------------------------------------
     /// |			CODES FOR GAMEPAD BUTTONS, THEY ARE 				|

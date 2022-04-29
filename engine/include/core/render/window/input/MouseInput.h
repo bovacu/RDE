@@ -9,7 +9,7 @@
 #include "core/render/window/keysAndButtons/MouseKeys.h"
 #include "core/render/window/input/Input.h"
 
-namespace engine {
+namespace GDE {
 
     class MouseInput : public Input {
         private:

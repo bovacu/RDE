@@ -3,7 +3,7 @@
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/util/Functions.h"
 
-namespace engine {
+namespace GDE {
 
     TextureAtlasManager TextureAtlasManager::instance;
 

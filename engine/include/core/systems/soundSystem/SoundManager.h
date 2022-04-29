@@ -8,7 +8,7 @@
 #include "core/util/Util.h"
 #include "core/platform/PlatformHeaderSDLMixer.h"
 
-namespace engine {
+namespace GDE {
 
     class SoundManager;
 

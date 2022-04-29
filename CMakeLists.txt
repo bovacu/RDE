@@ -186,7 +186,10 @@ set(SOURCES
         engine/include/core/graph/Node.h engine/src/core/graph/Node.cpp
 
         unitTesting/HierarchyTest.cpp unitTesting/doctest.h
-        engine/include/core/systems/particleSystem/ParticleSystem.h engine/src/core/systems/particleSystem/ParticleSystem.cpp engine/include/core/render/elements/IRenderizable.h)
+        engine/include/core/systems/particleSystem/ParticleSystem.h engine/src/core/systems/particleSystem/ParticleSystem.cpp
+        engine/include/core/render/elements/IRenderizable.h engine/include/core/systems/physicsSystem/Physics.h
+        engine/src/core/systems/physicsSystem/Physics.cpp
+        engine/include/core/systems/ecsSystem/GDESystem.h engine/include/core/systems/ecsSystem/GDESystemManager.h engine/src/core/systems/ecsSystem/GDESystemManager.cpp)
 
 set(CPP_HEADERS)
 set(CPP_SOURCES)

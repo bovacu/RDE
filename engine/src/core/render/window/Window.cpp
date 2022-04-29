@@ -9,7 +9,7 @@
     #include <glad/glad.h>
 #endif
 
-namespace engine {
+namespace GDE {
 
     Window::Window(const WindowProperties& _props) : window(nullptr) {
         init(_props);

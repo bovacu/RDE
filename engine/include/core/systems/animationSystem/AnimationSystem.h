@@ -10,7 +10,7 @@
 #include "core/systems/eventSystem/EventBus.h"
 #include "core/graph/Components.h"
 
-namespace engine {
+namespace GDE {
 
     struct AnimationNode;
     struct AnimationTransition {

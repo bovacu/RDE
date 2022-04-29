@@ -6,7 +6,7 @@
 #include "core/util/Delegate.h"
 #include <string>
 
-namespace engine {
+namespace GDE {
 
     /// All the different types of events that the engine can manage.
     enum class EventType : unsigned {

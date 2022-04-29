@@ -12,7 +12,7 @@
 
 #define MAX_WIDTH 1024
 
-namespace engine {
+namespace GDE {
 
     struct CharInfo {
         Vec2F advance;

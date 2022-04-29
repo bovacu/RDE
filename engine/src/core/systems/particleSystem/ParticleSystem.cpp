@@ -3,7 +3,7 @@
 #include "core/systems/particleSystem/ParticleSystem.h"
 #include "core/graph/Components.h"
 
-namespace engine {
+namespace GDE {
 
     void ParticleSystem::update(Delta dt) {
 //        for (auto it = particles.begin(); it != particles.end(); ++it) {

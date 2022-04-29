@@ -5,7 +5,7 @@
 #include "core/render/window/event/WindowEvent.h"
 #include "core/Engine.h"
 
-namespace engine {
+namespace GDE {
 
     void WindowInput::init(Window* _window) {
         window = _window;

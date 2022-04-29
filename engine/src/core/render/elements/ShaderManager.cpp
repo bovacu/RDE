@@ -2,7 +2,7 @@
 
 #include "core/render/elements/ShaderManager.h"
 
-namespace engine {
+namespace GDE {
 
 
     ShaderManager& ShaderManager::get() {

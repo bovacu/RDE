@@ -6,7 +6,7 @@
 
 #include "core/util/Util.h"
 
-namespace engine {
+namespace GDE {
 
     struct GenerationSettings {
         Vec2I size = {128, 128};

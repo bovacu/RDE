@@ -49,7 +49,7 @@
 #include <exception>
 #include <functional>
 
-namespace engine {
+namespace GDE {
 
     // Primary template intentionally left empty
     template <typename Signature>

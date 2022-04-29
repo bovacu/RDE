@@ -6,7 +6,7 @@
 
 #include "Vec.h"
 
-namespace engine {
+namespace GDE {
 
     template<typename T>
     struct Rect {

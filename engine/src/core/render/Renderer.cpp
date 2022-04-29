@@ -3,7 +3,7 @@
 #include "core/platform/PlatformHeaderSDLImage.h"
 #include "core/render/Renderer.h"
 
-namespace engine {
+namespace GDE {
 
     SpriteBatch Renderer::batch;
     Color Renderer::clearColor = Color::Red;

@@ -16,7 +16,7 @@
 #include "sys/sysinfo.h"
 #endif
 
-namespace engine {
+namespace GDE {
 
     enum ProfilerState {
         INPUT,

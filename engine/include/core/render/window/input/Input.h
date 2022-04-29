@@ -15,7 +15,7 @@
 #define SDL_JOYSTICK_DISABLED
 #endif
 
-namespace engine {
+namespace GDE {
 
     enum SystemEventEnum {
         WINDOW_EVENT = SDL_WINDOWEVENT, QUIT_E = SDL_QUIT, WINDOW_EXIT_E = SDL_WINDOWEVENT_LEAVE, WINDOW_RESIZED_E = SDL_WINDOWEVENT_RESIZED,

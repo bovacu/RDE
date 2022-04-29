@@ -7,7 +7,7 @@
 #include "core/Engine.h"
 #include "core/render/Camera.h"
 
-namespace engine {
+namespace GDE {
 
     class Util {
 

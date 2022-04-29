@@ -7,7 +7,7 @@
 
 #include "core/util/Util.h"
 
-namespace engine {
+namespace GDE {
 
     struct FrameBufferSpecification {
         uint32_t    width = -1, height = -1;

@@ -12,8 +12,9 @@
 #include "core/systems/console/Console.h"
 #include "core/render/elements/FrameBuffer.h"
 #include "core/graph/Scene.h"
+#include "chipmunk/chipmunk.h"
 
-namespace engine {
+namespace GDE {
 
     class Engine {
         private:

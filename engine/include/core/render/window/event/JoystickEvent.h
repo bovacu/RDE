@@ -10,7 +10,7 @@
 #include "core/render/window/keysAndButtons/GamePadButtons.h"
 #include "core/util/Vec.h"
 
-namespace engine {
+namespace GDE {
 
     class JoystickAxisMovedEvent : public Event {
         private:

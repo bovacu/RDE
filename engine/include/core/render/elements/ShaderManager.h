@@ -8,7 +8,7 @@
 #include "core/util/Util.h"
 #include "Shader.h"
 
-namespace engine {
+namespace GDE {
 
     typedef GLuint ShaderID;
 

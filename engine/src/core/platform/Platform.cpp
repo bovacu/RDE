@@ -4,7 +4,7 @@
 #include "core/platform/Platform.h"
 #include "core/Core.h"
 
-namespace engine {
+namespace GDE {
 
 //    PlatformType Platform::getPlatform() {
 //

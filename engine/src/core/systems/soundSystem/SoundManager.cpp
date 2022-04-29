@@ -5,7 +5,7 @@
 #include "core/systems/soundSystem/SoundManager.h"
 #include "core/util/Functions.h"
 
-namespace engine {
+namespace GDE {
 
     SoundManager& SoundManager::get() {
         static SoundManager _soundManager;

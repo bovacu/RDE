@@ -6,7 +6,7 @@
 
 #include "core/util/Util.h"
 
-namespace engine {
+namespace GDE {
     class Shape {
         protected:
             Color innerColor = Color::Green, outerColor = Color::Green;

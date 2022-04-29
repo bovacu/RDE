@@ -4,7 +4,7 @@
 #include "core/render/window/input/KeyboardInput.h"
 #include "core/render/window/event/KeyEvent.h"
 
-namespace engine {
+namespace GDE {
 
 
     void KeyboardInput::init(Window* _window) {

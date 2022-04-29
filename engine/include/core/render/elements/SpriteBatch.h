@@ -8,7 +8,7 @@
 #include "core/graph/Components.h"
 #include "core/systems/particleSystem/ParticleSystem.h"
 
-namespace engine {
+namespace GDE {
     struct Vertex2dUVColor {
         glm::vec3 position;
         glm::vec4 color;

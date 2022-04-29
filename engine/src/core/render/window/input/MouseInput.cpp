@@ -4,7 +4,7 @@
 #include "core/render/window/input/MouseInput.h"
 #include "core/render/window/event/MouseEvent.h"
 
-namespace engine {
+namespace GDE {
 
 
     void MouseInput::init(Window* _window) {

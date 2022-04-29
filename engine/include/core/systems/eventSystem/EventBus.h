@@ -62,7 +62,7 @@ class EventBus {
         typedef std::function<bool(AssociatedFunctionArgs...)> HandlerFunc;
 
     private:
-        std::map<Event, engine::MDelegate<bool(AssociatedFunctionArgs...)>> handlers;
+        std::map<Event, GDE::MDelegate<bool(AssociatedFunctionArgs...)>> handlers;
 
     public:
         class HandlerId {

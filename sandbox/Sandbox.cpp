@@ -1,12 +1,13 @@
 // Created by borja on 22/1/22.
 
 #include "Sandbox.h"
+#include "core/systems/physicsSystem/Physics.h"
 
 //#if IS_ANDROID()
 //#include <nativeCode/include/NativeAds.h>
 //#endif
 
-namespace engine {
+namespace GDE {
 
     void Sandbox::onInit() {
         engine = &Engine::get();
@@ -18,27 +19,31 @@ namespace engine {
 
         //        engine->setVSync(true);
 
-        //        auto _player = mainScene->createNode("player");
-        //        auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
-        //        _sprite->layer = 10;
-        //        _sprite->texture = TextureAtlasManager::get().getTile("run",
-        //        "run_0");
-        //        LOG_W(mainScene->getComponent<Transform>(_player)->getScaleLocal())
-        //
-        //        auto _animationSystem =
-        //        mainScene->addComponent<AnimationSystem>(_player);
-        //
-        //        _animationSystem->createAnimation("run", "run", {0, 1, 2, 3, 4, 5,
-        //        6, 7, 8, 9}); _animationSystem->setInitialAnimation("run");
-        //        _animationSystem->createAnimation("roll", "run", {12, 13, 14, 15,
-        //        16, 17, 18, 19, 20, 21, 22, 23});
-        //        _animationSystem->createTransition<&Sandbox::run_roll>("run",
-        //        "roll", this);
-        //        _animationSystem->createTransition<&Sandbox::roll_run>("roll",
-        //        "run", this); _animationSystem->setInitialAnimation("run");
-        //        _animationSystem->start();
+        /*        auto _player = mainScene->createNode("player");
+                auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
+                _sprite->layer = 10;
+                _sprite->texture = TextureAtlasManager::get().getTile("run",
+                "run_0");
+                LOG_W(mainScene->getComponent<Transform>(_player)->getScaleLocal())
 
-        getMainCamera()->setAdaptiveViewport(Engine::get().getWindowSize(), Engine::get().getWindowSize());
+                auto _animationSystem =
+                mainScene->addComponent<AnimationSystem>(_player);
+
+                _animationSystem->createAnimation("run", "run", {0, 1, 2, 3, 4, 5,
+                6, 7, 8, 9}); _animationSystem->setInitialAnimation("run");
+                _animationSystem->createAnimation("roll", "run", {12, 13, 14, 15,
+                16, 17, 18, 19, 20, 21, 22, 23});
+                _animationSystem->createTransition<&Sandbox::run_roll>("run",
+                "roll", this);
+                _animationSystem->createTransition<&Sandbox::roll_run>("roll",
+                "run", this); _animationSystem->setInitialAnimation("run");
+                _animationSystem->start();
+        */
+
+        getMainCamera()->setAdaptiveViewport(engine->getWindowSize(), engine->getWindowSize());
+
+        Physics::get().registerCollisionMask("A");
+        Physics::get().registerCollisionMask("B");
 
         mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
 
@@ -48,18 +53,44 @@ namespace engine {
         auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(square);
         _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
 
-        auto _text = getMainGraph()->createNode("Text", square);
+        BodyConfig _bodyConf {
+            1,
+            {32, 32},
+            0,
+            0.25f
+        };
+        auto* _bodySquare = getMainGraph()->addComponent<Body>(square, _bodyConf, *squareTransform);
+        _bodySquare->addCollider();
+        _bodySquare->setCollisionMask("A");
+
+        auto _floor = getMainGraph()->createNode("floor");
+        auto* _floorTransform = getMainGraph()->getComponent<Transform>(_floor);
+        _floorTransform->setPosition(0, -128);
+        auto _floorSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(_floor);
+        _floorSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
+        _floorSpriteRenderer->color = Color::Blue;
+
+        BodyConfig _bodyConf2 {
+                1,
+                {32, 32},
+                0,
+                1.0f,
+                BodyType::STATIC
+        };
+        auto* _floorBody = getMainGraph()->addComponent<Body>(_floor, _bodyConf2, *_floorTransform);
+        _floorBody->addCollider();
+        _floorBody->setCollisionMask("B");
+
+        auto _text = getMainGraph()->createNode("Text");
         getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World")->setColor(Color::Green);
         getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
 
-        Random _r;
-        for (int _i = 0; _i < 100; _i++) {
-            auto _node = getMainGraph()->createNode(std::to_string(_i), square);
-            getMainGraph()->addComponent<SpriteRenderer>(
-                    _node, TextureAtlasManager::get().getTile("square", "square_0"));
-            getMainGraph()->getComponent<Transform>(_node)->setPosition(
-                    {_r.randomf(-640, 640), _r.randomf(-360, 360)});
-        }
+        Physics::get().registerOnCollisionStartCallback("A", "B", [](cpArbiter *arb, cpSpace *space, void *data) {
+            LOG_I("Hello!!!")
+            CP_ARBITER_GET_SHAPES(arb, a, b);
+
+            return true;
+        });
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -91,6 +122,9 @@ namespace engine {
             _t->scale(_dt, _dt);
         else if (InputManager::isKeyPressed(KeyCode::X))
             _t->scale(-_dt, -_dt);
+
+        if (InputManager::isKeyPressed(KeyCode::Space))
+            _t->setPosition(-150, _t->getPositionLocal().y);
 
         getMainGraph()->onUpdate(_dt);
     }

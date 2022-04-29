@@ -4,7 +4,7 @@
 #ifndef ENGINE2_0_PLATFORM_H
 #define ENGINE2_0_PLATFORM_H
 
-namespace engine {
+namespace GDE {
 
     enum PlatformType {
         LINUX,

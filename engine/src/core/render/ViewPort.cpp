@@ -2,7 +2,7 @@
 
 #include "core/render/elements/ViewPort.h"
 
-namespace engine {
+namespace GDE {
 
     Vec2I IViewPort::getVirtualResolution() {
         return virtualResolution;

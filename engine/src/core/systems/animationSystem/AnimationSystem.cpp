@@ -3,7 +3,7 @@
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/render/elements/TextureAtlasManager.h"
 
-namespace engine {
+namespace GDE {
 
     Animation* AnimationSystem::createAnimation(const std::string& _animName, const std::string& _atlas, const std::vector<int>& _indices) {
         Animation _animation;

@@ -2,8 +2,9 @@
 
 #include "core/graph/Components.h"
 #include "core/util/Functions.h"
+#include "core/systems/physicsSystem/Physics.h"
 
-namespace engine {
+namespace GDE {
 
     glm::mat4 Transform::getLocalModelMatrix() {
         const glm::mat4 _rot = glm::rotate(glm::mat4(1.0f), glm::radians(localRotation), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -14,7 +15,7 @@ namespace engine {
     }
 
     void Transform::update(Graph* _graph) {
-        if (parent != NODE_ID_NULL && !constant) {
+        if (parent != NODE_ID_NULL) {
             auto* _parentT = _graph->getComponent<Transform>(parent);
             modelMatrix = _parentT->modelMatrix * localModelMatrix;
         } else
@@ -203,5 +204,68 @@ namespace engine {
 //    Shape& TextRenderer::getDebugShape() {
 //        return debugShape;
 //    }
+
+
+    ///-------------------------------- BODY ---------------------------
+
+
+    Body::Body(const BodyConfig& _bodyConfig, const Transform& _transform) {
+        updateBodyConfig(_bodyConfig);
+        cpBodySetPosition(body, {_transform.getPositionLocal().x, _transform.getPositionLocal().y});
+        bodyConfig = _bodyConfig;
+    }
+
+    Body::~Body() {
+        if(shape != nullptr) cpShapeFree(shape);
+        cpBodyDestroy(body);
+    }
+
+    Vec2F Body::getPosition() const {
+        auto _pos = cpBodyGetPosition(body);
+        return {static_cast<float>(_pos.x), static_cast<float>(_pos.y)};
+    }
+
+    void Body::updateBodyConfig(const BodyConfig& _bodyConfig) {
+        if(body != nullptr) cpBodyFree(body);
+
+        switch (_bodyConfig.bodyType) {
+            case DYNAMIC: body = cpSpaceAddBody(Physics::get().getSpace(),
+                                                cpBodyNew(0, 0));
+                break;
+            case STATIC: body = cpSpaceAddBody(Physics::get().getSpace(), cpBodyNewStatic());
+                break;
+            case KINEMATIC: body = cpSpaceAddBody(Physics::get().getSpace(), cpBodyNewKinematic());
+                break;
+        }
+    }
+
+    void Body::addCollider() {
+        switch (bodyConfig.bodyShapeType) {
+            case BOX: shape = cpBoxShapeNew(body, bodyConfig.size.x, bodyConfig.size.y, 0);
+                break;
+            case CIRCLE: shape = cpCircleShapeNew(body, bodyConfig.size.x, {0, 0});
+                break;
+            default:
+                LOG_W("Physics for polygons not yet implemented")
+        }
+
+        cpSpaceAddShape(Physics::get().getSpace(), shape);
+        cpShapeSetElasticity(shape, bodyConfig.restitution);
+        cpShapeSetFriction(shape, bodyConfig.friction);
+        cpShapeSetMass(shape, bodyConfig.mass);
+    }
+
+    float Body::getRotation() const {
+        return (float)(cpBodyGetRotation(body).y * 180.f / M_PI);
+    }
+
+    void Body::setCollisionMask(const std::string& _maskName) {
+        mask = Physics::get().getCollisionMask(_maskName);
+        cpShapeSetCollisionType(shape, mask);
+    }
+
+    CollisionMask Body::getCollisionMask() const {
+        return mask;
+    }
 
 }

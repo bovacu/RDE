@@ -11,7 +11,7 @@
 #include "core/util/Functions.h"
 #include <glm/gtc/type_ptr.hpp>
 
-namespace engine {
+namespace GDE {
 
     void SpriteBatch::init() {
         debug.initDebugVbo();

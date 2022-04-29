@@ -9,7 +9,7 @@
 #include "stb/stb_image_writer.h"
 #include "core/util/Functions.h"
 
-namespace engine {
+namespace GDE {
 
     #define SDL_LOCKIFMUST(s) (SDL_MUSTLOCK(s) ? SDL_LockSurface(s) : 0)
     #define SDL_UNLOCKIFMUST(s) { if(SDL_MUSTLOCK(s)) SDL_UnlockSurface(s); }

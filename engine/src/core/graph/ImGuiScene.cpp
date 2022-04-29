@@ -15,7 +15,7 @@
 #include "core/render/Renderer.h"
 #include "core/render/elements/TextureAtlasManager.h"
 
-namespace engine {
+namespace GDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
     namespace ed = ax::NodeEditor;
     static ed::EditorContext* g_Context = nullptr;
@@ -191,7 +191,7 @@ namespace engine {
     void ImGuiScene::printFPSDrawCallsAndRAM() {
         static bool _showMetrics = false;
 
-        ImGui::Text("FPS: %d", engine::Engine::get().getFps());
+        ImGui::Text("FPS: %d", GDE::Engine::get().getFps());
         ImGui::Separator();
         ImGui::Text("X: %f, Y: %f", InputManager::getMousePosScreenCoords().x, InputManager::getMousePosScreenCoords().y);
         ImGui::Separator();
@@ -260,16 +260,16 @@ namespace engine {
 
     void ImGuiScene::printResolutionFullscreenAndVSync() {
         static bool _vsync = Engine::get().isVSync(), _fullscreen = false;
-        static int _windowRes[2] = {(int) engine::Engine::get().getWindowSize().x,(int) engine::Engine::get().getWindowSize().y};
+        static int _windowRes[2] = {(int) GDE::Engine::get().getWindowSize().x, (int) GDE::Engine::get().getWindowSize().y};
 
         std::string _windowResolution = std::to_string(Engine::get().getWindowSize().x) + "x" + std::to_string(Engine::get().getWindowSize().y);
         static const char* _resSelected = _windowResolution.c_str();
 
         if(ImGui::Checkbox("VSync Active", &_vsync))
-            engine::Engine::get().getWindow().setVSync(_vsync);
+            GDE::Engine::get().getWindow().setVSync(_vsync);
 
         if(ImGui::Checkbox("Fullscreen", &_fullscreen))
-            engine::Engine::get().getWindow().setFullscreen(_fullscreen);
+            GDE::Engine::get().getWindow().setFullscreen(_fullscreen);
 
         const char* _resolutions[] = { "2560x1440", "1920x1080", "1366x768", "1280x720", "1920x1200", "1680x1050",
                                        "1440x900" ,"1280x800" ,"1024x768" ,"800x600", "800x480","640x480", "320x240"
@@ -283,9 +283,9 @@ namespace engine {
                 if (ImGui::Selectable(_resolution, is_selected)) {
                     _resSelected = _resolution;
                     charToIntSize(std::string(_resolution), _windowRes);
-                    engine::Engine::get().setWindowSize(_windowRes[0], _windowRes[1]);
+                    GDE::Engine::get().setWindowSize(_windowRes[0], _windowRes[1]);
                     WindowResizedEvent _e(_windowRes[0], _windowRes[1]);
-                    engine::Engine::get().onEvent(_e);
+                    GDE::Engine::get().onEvent(_e);
                 }
                 if (is_selected)
                     ImGui::SetItemDefaultFocus();

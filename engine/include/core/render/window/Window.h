@@ -7,7 +7,7 @@
 #include "core/render/window/event/Event.h"
 #include "core/platform/PlatformHeaderSDL.h"
 
-namespace engine {
+namespace GDE {
 
     /// Method that will be invoked when polling the events.
     using EventCallbackFn = std::function<void (Event&)>;

@@ -10,7 +10,7 @@
     #include <glad/glad.h>
 #endif
 
-namespace engine {
+namespace GDE {
 
     FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs) : specs(_specs) {
         invalidate();

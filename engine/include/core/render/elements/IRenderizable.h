@@ -8,7 +8,7 @@
 #include "Texture.h"
 #include "ShaderManager.h"
 
-namespace engine {
+namespace GDE {
 
     class IRenderizable {
         public:

@@ -6,7 +6,7 @@
 #include "core/util/Delta.h"
 #include "core/graph/Graph.h"
 
-namespace engine {
+namespace GDE {
 
     class Camera;
     class Scene {

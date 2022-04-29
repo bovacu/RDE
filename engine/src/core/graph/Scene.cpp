@@ -4,7 +4,7 @@
 #include "core/render/Camera.h"
 #include "core/Engine.h"
 
-namespace engine {
+namespace GDE {
 
     Scene::Scene(const std::string& _debugName)  : debugName(_debugName), mainGraph(_debugName) {
         mainCameraID = mainGraph.createNode("MainCamera");

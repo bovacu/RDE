@@ -5,7 +5,7 @@
 #include "core/render/Renderer.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
 
-namespace engine {
+namespace GDE {
 
     static void onEventDelFoo(Event& _event) {  }
     static void onUpdateDelFoo(Delta _dt) {  }
@@ -32,13 +32,11 @@ namespace engine {
     }
 
     void Graph::onUpdate(Delta _dt) {
-        registry.group<Transform>(entt::get<Active>).each([&](const auto _entity, Transform& _transform, const Active& _active) {
-            if(!_active.active) return;
+        registry.view<Transform, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Active& _active) {
             _transform.update(this);
         });
 
         registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _active) {
-            if(!_active.active) return;
             _animationSystem.update(_dt, _spriteRenderer);
         });
 
@@ -46,16 +44,23 @@ namespace engine {
     }
 
     void Graph::onFixedUpdate(Delta _dt) {
+
+        registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Body& _body, const Active& _active) {
+            _transform.setPosition(_body.getPosition());
+            _transform.setRotation(_body.getRotation());
+        });
+
         onFixedUpdateDel(_dt);
     }
 
     void Graph::onRender() {
-        registry.group<Transform>(entt::get<SpriteRenderer, Active>).each([&](const auto _entity, Transform& _transform, SpriteRenderer& _spriteRenderer, const Active& _active) {
-            if(!_active.active) return;
+        registry.group<Transform>(entt::get<SpriteRenderer, Active>).each([&](const auto _entity, const Transform& _transform, const SpriteRenderer& _spriteRenderer, const Active& _active) {
             Renderer::draw(_spriteRenderer, _transform);
         });
 
-        registry.view<Transform, TextRenderer>().each([&](const auto _entity, Transform& _transform, TextRenderer& _text) {
+        auto _a = registry.view<int>();
+
+        registry.view<Transform, TextRenderer>().each([&](const auto _entity, const Transform& _transform, const TextRenderer& _text) {
             Renderer::draw(_text, _transform);
         });
 
@@ -174,5 +179,33 @@ namespace engine {
 
     NodeID Graph::getID() {
         return sceneRoot;
+    }
+
+    void Graph::setNodeStatic(NodeID _node, bool _static) {
+        if(_static && !registry.any_of<StaticTransform>(_node)) {
+            registry.emplace<StaticTransform>(_node);
+            return;
+        }
+
+        if(!_static && registry.any_of<StaticTransform>(_node))
+            registry.remove<StaticTransform>(_node);
+    }
+
+    bool Graph::isNodeStatic(NodeID _node) {
+        return registry.any_of<StaticTransform>(_node);
+    }
+
+    void Graph::setNodeActive(NodeID _node, bool _active) {
+        if(_active && !registry.any_of<Active>(_node)) {
+            registry.emplace<Active>(_node);
+            return;
+        }
+
+        if(!_active && registry.any_of<Active>(_node))
+            registry.remove<Active>(_node);
+    }
+
+    bool Graph::isNodeActive(NodeID _node) {
+        return registry.any_of<Active>(_node);
     }
 }

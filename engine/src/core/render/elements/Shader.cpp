@@ -2,7 +2,7 @@
 #include "core/util/Logger.h"
 #include <iostream>
 
-namespace engine {
+namespace GDE {
     Shader::Shader() {  }
 
     Shader::~Shader() {

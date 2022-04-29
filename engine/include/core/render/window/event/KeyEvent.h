@@ -7,7 +7,7 @@
 #include "core/render/window/keysAndButtons/KeyboardKeys.h"
 
 
-namespace engine {
+namespace GDE {
 
     /// Base class for all the key events
     class KeyEvent          : public Event {

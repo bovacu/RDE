@@ -4,7 +4,7 @@
 #include "core/render/window/input/ControllerInput.h"
 #include "core/render/window/event/JoystickEvent.h"
 
-namespace engine {
+namespace GDE {
 
     VibrationManager& VibrationManager::get() {
         static VibrationManager _vibrationManager;

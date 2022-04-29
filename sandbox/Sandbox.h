@@ -7,7 +7,7 @@
 
 #include "GDE.h"
 
-namespace engine {
+namespace GDE {
 
     class Sandbox : public Scene {
         private:

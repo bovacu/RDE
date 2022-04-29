@@ -9,7 +9,7 @@
     #include <glad/glad.h>
 #endif
 
-namespace engine {
+namespace GDE {
     class Texture {
         protected:
             unsigned int refCount = 0;

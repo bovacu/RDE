@@ -7,7 +7,7 @@
 #include "core/render/window/event/Event.h"
 #include "core/util/Vec.h"
 
-namespace engine {
+namespace GDE {
 
     typedef uint32_t TimeStamp;
     class MobileTouchDownEvent : public Event {

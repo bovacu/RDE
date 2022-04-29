@@ -7,7 +7,7 @@
 
 #include "core/util/Util.h"
 
-namespace engine {
+namespace GDE {
 
     struct Command {
         std::string name;

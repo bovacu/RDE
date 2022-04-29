@@ -13,7 +13,7 @@
 
 #include "Texture.h"
 
-namespace engine {
+namespace GDE {
 
     struct Atlas {
         Texture* texture;

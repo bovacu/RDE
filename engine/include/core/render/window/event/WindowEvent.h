@@ -5,7 +5,7 @@
 
 #include "Event.h"
 
-namespace engine {
+namespace GDE {
 
     /// This class represents all of the events that involves resizing the window.
     class WindowResizedEvent    : public Event {

@@ -10,7 +10,7 @@
     #include <glad/glad.h>
 #endif
 
-namespace engine {
+namespace GDE {
     class Shader {
 
         private:

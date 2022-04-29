@@ -3,7 +3,7 @@
 
 #include "core/systems/animationSystem/Animation.h"
 
-namespace engine {
+namespace GDE {
 
 
     bool Animation::addFrame(Texture* _texture) {

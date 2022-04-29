@@ -6,7 +6,7 @@
 
 #include "entt/entity/entity.hpp"
 
-namespace engine {
+namespace GDE {
 
     typedef entt::entity NodeID;
 

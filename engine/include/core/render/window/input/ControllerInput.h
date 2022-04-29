@@ -9,7 +9,7 @@
 #include "core/render/window/keysAndButtons/GamePadButtons.h"
 #include "core/render/window/input/Input.h"
 
-namespace engine {
+namespace GDE {
 
     struct VibrationConfig {
         int durationInSeconds;

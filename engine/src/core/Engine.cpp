@@ -7,8 +7,10 @@
 #include "core/render/window/input/Input.h"
 #include "core/render/Renderer.h"
 #include "core/render/elements/TextureAtlasManager.h"
+#include "core/systems/physicsSystem/Physics.h"
+#include "core/systems/ecsSystem/GDESystemManager.h"
 
-namespace engine {
+namespace GDE {
     Engine *Engine::gameInstance = nullptr;
 
     Engine::Engine() {
@@ -26,12 +28,13 @@ namespace engine {
 
         wreDel.bind<&Engine::onWindowResized>(this);
 
+        FontManager::get().init();
         InputManager::get().init(window.get());
         Console::get().init();
         ShaderManager::get().init();
-        FontManager::get().init();
         Renderer::init();
         SoundManager::get().init();
+        Physics::get().init();
 
         Renderer::setClearColor(backgroundColor);
 
@@ -75,11 +78,15 @@ namespace engine {
             Uint64 _start = SDL_GetPerformanceCounter();
             _accumulator += _dt;
 
-            engine::Profiler::beginFrame(_dt);
+            GDE::Profiler::beginFrame(_dt);
 
             InputManager::get().pollEvents();
 
             if (!minimized) {
+
+                Profiler::begin(ProfilerState::UPDATE);
+                onUpdate(_dt);
+                Profiler::end(ProfilerState::UPDATE);
 
                 Profiler::begin(ProfilerState::FIXED_UPDATE);
                 while (_accumulator >= timePerFrame) {
@@ -87,10 +94,6 @@ namespace engine {
                     onFixedUpdate(timePerFrame);
                 }
                 Profiler::end(ProfilerState::FIXED_UPDATE);
-
-                Profiler::begin(ProfilerState::UPDATE);
-                onUpdate(_dt);
-                Profiler::end(ProfilerState::UPDATE);
 
                 Profiler::begin(ProfilerState::RENDERING);
                 onRender(_dt);
@@ -103,11 +106,11 @@ namespace engine {
                 #endif
             }
 
-            engine::Profiler::begin(ProfilerState::INPUT);
+            GDE::Profiler::begin(ProfilerState::INPUT);
             window->update();
-            engine::Profiler::end(ProfilerState::INPUT);
+            GDE::Profiler::end(ProfilerState::INPUT);
 
-            engine::Profiler::endFrame();
+            GDE::Profiler::endFrame();
             Renderer::resetDebugInfo();
 
             Uint64 _end = SDL_GetPerformanceCounter();
@@ -125,6 +128,7 @@ namespace engine {
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
         scene->onFixedUpdate(_fixedDt);
+        Physics::get().step(_fixedDt);
     }
 
     void Engine::onUpdate(Delta _dt) {
@@ -137,15 +141,12 @@ namespace engine {
 
     void Engine::onRender(Delta _dt) {
         frameBuffer->bind();
-
-        Renderer::clear();
-
-        Renderer::beginDraw(*scene->getMainCamera());
-        scene->onRender(_dt);
-        Renderer::endDraw();
-
-
-
+        {
+            Renderer::clear();
+            Renderer::beginDraw(*scene->getMainCamera());
+            scene->onRender(_dt);
+            Renderer::endDraw();
+        }
         frameBuffer->unbind();
 
         // Imgui rendering
@@ -227,6 +228,9 @@ namespace engine {
         SoundManager::get().destroy();
         Renderer::destroy();
         InputManager::get().destroy();
+        Physics::get().destroy();
+        GDESystemManager::get().destroy();
+
         delete frameBuffer;
         delete scene;
         #if !IS_MOBILE()

@@ -9,7 +9,7 @@
 #include "core/render/window/event/Event.h"
 #include "core/render/elements/Texture.h"
 
-namespace engine {
+namespace GDE {
 
     typedef entt::entity NodeID;
     #define NODE_ID_NULL entt::null
@@ -62,6 +62,15 @@ namespace engine {
 
             std::string toString();
             NodeID getID();
+
+            void setNodeStatic(NodeID _node, bool _static);
+            bool isNodeStatic(NodeID _node);
+
+            void setNodeActive(NodeID _node, bool _active);
+            bool isNodeActive(NodeID _node);
+
+            template<typename... Archetype>
+            auto query();
     };
 
     template<typename Component, typename... Args>
@@ -77,6 +86,11 @@ namespace engine {
     template<typename Component>
     Component* Graph::getComponent(const NodeID& _id) {
         return &registry.template get<Component>(_id);
+    }
+
+    template<typename... Archetype>
+    auto Graph::query() {
+        return registry.template view<Archetype...>().each();
     }
 }
 

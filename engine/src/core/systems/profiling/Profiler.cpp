@@ -2,7 +2,7 @@
 
 #include "core/systems/profiling/Profiler.h"
 
-namespace engine {
+namespace GDE {
 
     std::unordered_map<ProfilerState, State> Profiler::states;
     std::unordered_map<ProfilerState, State> Profiler::lastStates;

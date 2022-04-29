@@ -10,7 +10,7 @@
 #include "core/util/Color.h"
 #include "core/graph/Graph.h"
 
-namespace engine {
+namespace GDE {
 
     struct ParticleData {
         Vec2F pos, speed;

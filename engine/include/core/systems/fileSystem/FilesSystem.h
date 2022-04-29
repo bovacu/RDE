@@ -6,7 +6,7 @@
 
 #include "core/util/Util.h"
 
-namespace engine {
+namespace GDE {
 
     enum FileResult {
         FILE_OK,

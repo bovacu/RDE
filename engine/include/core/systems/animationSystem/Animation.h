@@ -8,7 +8,7 @@
 #include "core/util/Util.h"
 #include "core/render/elements/Texture.h"
 
-namespace engine {
+namespace GDE {
 
     class Animation {
         private:

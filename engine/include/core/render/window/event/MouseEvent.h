@@ -7,7 +7,7 @@
 #include "core/render/window/keysAndButtons/KeyboardKeys.h"
 #include "core/render/window/keysAndButtons/MouseKeys.h"
 
-namespace engine {
+namespace GDE {
 
     /// This class represents all of the events that involves moving the mouse.
     class MouseMovedEvent           : public Event {

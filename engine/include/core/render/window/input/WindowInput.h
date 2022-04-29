@@ -8,7 +8,7 @@
 #include "core/util/Util.h"
 #include "core/render/window/input/Input.h"
 
-namespace engine {
+namespace GDE {
 
     class WindowInput : public Input {
         public:

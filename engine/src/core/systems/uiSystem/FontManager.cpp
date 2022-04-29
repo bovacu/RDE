@@ -4,7 +4,7 @@
 #include "stb/stb_image_writer.h"
 #include "core/util/Functions.h"
 
-namespace engine {
+namespace GDE {
 
     void Font::init(FT_Face face, int _fontSize)  {
         FT_Set_Pixel_Sizes(face, 0, _fontSize);
@@ -139,7 +139,7 @@ namespace engine {
 
         FT_Error _error = FT_New_Memory_Face(ftLibrary, (const FT_Byte*)fontData, (FT_Long)fontDataSize, 0, &_face);
         if (_error != FT_Err_Ok) {
-            LOG_E("Load memory failed with code -> ", _error);
+            LOG_E("Load memory failed with code -> ", _error, " font file", fontData == nullptr, ", font data size: ", fontDataSize);
             return nullptr;
         }
 

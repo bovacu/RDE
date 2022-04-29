@@ -6,7 +6,7 @@
 #include "core/graph/Components.h"
 #include "core/Engine.h"
 
-namespace engine {
+namespace GDE {
 
     Camera::Camera(const Window* _window, const NodeID& _mainCameraID) {
         ID = _mainCameraID;

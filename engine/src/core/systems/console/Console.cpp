@@ -3,7 +3,7 @@
 
 #include "core/systems/console/Console.h"
 
-namespace engine {
+namespace GDE {
 
     Console& Console::get() {
         static Console console;

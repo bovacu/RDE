@@ -11,7 +11,7 @@
 #include "core/render/elements/ViewPort.h"
 #include "core/graph/Graph.h"
 
-namespace engine {
+namespace GDE {
 
     class Transform;
     class Camera {
