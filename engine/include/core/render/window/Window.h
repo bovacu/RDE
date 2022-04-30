@@ -42,7 +42,7 @@ namespace GDE {
     class Window {
         private:
             SDL_Window* window;
-            SDL_GLContext context;
+            SDL_GLContext context {};
 
             struct WindowData {
                 std::string title;

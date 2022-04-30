@@ -113,7 +113,7 @@ namespace GDE {
 
     void FontManager::init() {
         if(FT_Init_FreeType(&ftLibrary)) {
-            LOG_E("Error initiating FreeType");
+            LOG_E("Error initiating FreeType")
             return;
         }
 
@@ -123,23 +123,9 @@ namespace GDE {
     Font* FontManager::loadFont(const std::string& _pathToFont, int _fontSize) {
         FT_Face _face;
 
-        SDL_RWops* _fontFile = SDL_RWFromFile(_pathToFont.c_str(), "rb");
-
-        if(_fontFile == nullptr) {
-            LOG_E("Couldn't open font file ", _pathToFont)
-        }
-
-        off_t fontDataSize = SDL_RWsize(_fontFile);
-
-        auto* fontData = new FT_Byte[fontDataSize];
-        SDL_RWseek(_fontFile, 0, RW_SEEK_END);
-        SDL_RWseek(_fontFile, 0, RW_SEEK_SET);
-        SDL_RWread(_fontFile, &fontData[0], fontDataSize, fontDataSize);
-        SDL_RWclose(_fontFile);
-
-        FT_Error _error = FT_New_Memory_Face(ftLibrary, (const FT_Byte*)fontData, (FT_Long)fontDataSize, 0, &_face);
+        FT_Error _error = FT_New_Face(ftLibrary, _pathToFont.c_str(), 0, &_face);
         if (_error != FT_Err_Ok) {
-            LOG_E("Load memory failed with code -> ", _error, " font file", fontData == nullptr, ", font data size: ", fontDataSize);
+            LOG_E("Load memory failed with code -> ", _error)
             return nullptr;
         }
 
@@ -152,7 +138,6 @@ namespace GDE {
         fonts[_name].emplace_back(FontHandler{ _font, _fontSize });
 
         FT_Done_Face(_face);
-        delete [] fontData;
 
         LOG_S("Successfully loaded Font ", _name, " with font size ", _fontSize)
 

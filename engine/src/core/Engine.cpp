@@ -190,6 +190,7 @@ namespace GDE {
             setTitle("Engine: " + std::to_string(fpsCounter));
             frameCounter = 0;
             timer = 0;
+            LOG_I("FPS: ", fpsCounter)
         }
         ++frameCounter;
     }

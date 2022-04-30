@@ -54,11 +54,11 @@ namespace GDE {
         private:
             Font* font;
             std::string innerText;
-            Vec2F size;
-            float spaceBetweenChars;
-            float spaceWidth;
-            float enterHeight;
-            int fontSize;
+            Vec2F size {};
+            float spaceBetweenChars {};
+            float spaceWidth {};
+            float enterHeight {};
+            int fontSize {};
 
             Color color = Color::White;
             Texture* texture = nullptr;
@@ -85,7 +85,7 @@ namespace GDE {
             [[nodiscard]] Vec2F getTextSize() const;
 
             void setFontSize(int _fontSize);
-            int getFontSize();
+            int getFontSize() const;
 
             void setSpaceWidth(float _spaceWidth);
             [[nodiscard]] float getSpaceWidth() const;
@@ -141,7 +141,7 @@ namespace GDE {
             void scale(float _x, float _y);
 
             void setConstant(bool _constant);
-            bool isConstant();
+            bool isConstant() const;
     };
 
 
@@ -177,7 +177,7 @@ namespace GDE {
             cpBody* body = nullptr;
             cpShape* shape = nullptr;
             BodyConfig bodyConfig;
-            CollisionMask mask;
+            CollisionMask mask{};
 
         public:
             explicit Body(const BodyConfig& _bodyConfig, const Transform& _transform);

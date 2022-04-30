@@ -104,7 +104,7 @@ namespace GDE {
         constant = _constant;
     }
 
-    bool Transform::isConstant() {
+    bool Transform::isConstant() const {
         return constant;
     }
 
@@ -175,7 +175,7 @@ namespace GDE {
         font = FontManager::get().getSpecificFont(font->getFontName(), _fontSize);
     }
 
-    int TextRenderer::getFontSize() {
+    int TextRenderer::getFontSize() const {
         return fontSize;
     }
 
