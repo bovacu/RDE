@@ -217,7 +217,7 @@ namespace GDE {
 
     Body::~Body() {
         if(shape != nullptr) cpShapeFree(shape);
-        cpBodyDestroy(body);
+        cpBodyFree(body);
     }
 
     Vec2F Body::getPosition() const {
