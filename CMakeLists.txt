@@ -11,11 +11,15 @@ add_definitions("-DGDE_EXPORT")
 #${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
 SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer SDL2_image sdl2_net ${CMAKE_DL_LIBS}
         ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
-        EnTT::EnTT chipmunk
+        EnTT::EnTT chipmunk libdecor
         )
 
 find_package(Threads REQUIRED)
 find_package(Freetype REQUIRED)
+
+include_directories(/home/borja/Programs/libdecor/src)
+add_library(libdecor SHARED IMPORTED )
+set_target_properties(libdecor PROPERTIES IMPORTED_LOCATION /home/borja/Programs/libdecor/build/src/libdecor-0.so)
 
 add_library(
         sdl2
@@ -26,7 +30,7 @@ set_target_properties(
         sdl2
         PROPERTIES
         IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL/lib/libSDL2.a
+        /usr/local/lib/libSDL2.a
 )
 
 

@@ -268,4 +268,8 @@ namespace GDE {
         return mask;
     }
 
+    BodyConfig& Body::getConfig() {
+        return bodyConfig;
+    }
+
 }

@@ -188,6 +188,7 @@ namespace GDE {
             [[nodiscard]] float getRotation() const;
 
             void updateBodyConfig(const BodyConfig& _bodyConfig);
+            BodyConfig& getConfig();
             void addCollider();
 
             void setCollisionMask(const std::string& _maskName);

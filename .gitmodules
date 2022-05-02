@@ -40,3 +40,6 @@
 [submodule "submodules/Chipmunk2D"]
 	path = submodules/Chipmunk2D
 	url = https://github.com/slembcke/Chipmunk2D.git
+[submodule "submodules/libdecor"]
+	path = submodules/libdecor
+	url = https://gitlab.gnome.org/jadahl/libdecor.git
