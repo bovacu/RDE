@@ -4,7 +4,7 @@ git submodule update
 cd submodules/imgui && git checkout docking
 cd ../..
 
-cd submodules/libdecor &&meson build --buildtype release && meson install -C build
+cd submodules/libdecor && git checkout -b 'christian-rauch/libdecor-gtk_cairo_single' && meson build --buildtype release && meson install -C build
 cd ../..
 
 # cd ../.. && sed -i -e 's/add_library(jpeg STATIC)/add_library(jpeg SHARED)/g' submodules/SDL_image/external/jpeg-9d/CMakeLists.txt

@@ -17,9 +17,8 @@ SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer SDL2_image sdl2_
 find_package(Threads REQUIRED)
 find_package(Freetype REQUIRED)
 
-include_directories(/home/borja/Programs/libdecor/src)
 add_library(libdecor SHARED IMPORTED )
-set_target_properties(libdecor PROPERTIES IMPORTED_LOCATION /home/borja/Programs/libdecor/build/src/libdecor-0.so)
+set_target_properties(libdecor PROPERTIES IMPORTED_LOCATION /usr/local/lib/x86_64-linux-gnu/libdecor-0.so)
 
 add_library(
         sdl2
