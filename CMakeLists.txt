@@ -8,14 +8,14 @@ set(PROJECT_NAME Engine)
 add_definitions("-DGDE_EXPORT")
 #add_definitions("-DRUN_TESTS")
 
-#${CMAKE_DL_LIBS} is needed as some part of opengl in ImGui uses it
 SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer SDL2_image sdl2_net ${CMAKE_DL_LIBS}
         ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
-        EnTT::EnTT chipmunk libdecor
+        EnTT::EnTT chipmunk libdecor yaml-cpp
         )
 
 find_package(Threads REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 add_library(libdecor SHARED IMPORTED )
 set_target_properties(libdecor PROPERTIES IMPORTED_LOCATION /usr/local/lib/x86_64-linux-gnu/libdecor-0.so)
