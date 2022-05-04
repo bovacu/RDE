@@ -208,4 +208,8 @@ namespace GDE {
     bool Graph::isNodeActive(NodeID _node) {
         return registry.any_of<Active>(_node);
     }
+
+    NodeContainer& Graph::getNodeContainer() {
+        return registry;
+    }
 }

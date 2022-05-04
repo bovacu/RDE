@@ -12,13 +12,14 @@
 namespace GDE {
 
     typedef entt::entity NodeID;
+    typedef entt::registry NodeContainer;
     #define NODE_ID_NULL entt::null
 
     class Graph {
         private:
             NodeID sceneRoot;
             std::string name;
-            entt::registry registry;
+            NodeContainer registry;
 
         private:
             void printScene(const NodeID&, std::ostream& _os, int& _indent);
@@ -71,6 +72,8 @@ namespace GDE {
 
             template<typename... Archetype>
             auto query();
+
+            NodeContainer& getNodeContainer();
     };
 
     template<typename Component, typename... Args>
