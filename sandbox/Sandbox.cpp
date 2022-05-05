@@ -42,9 +42,6 @@ namespace GDE {
 
         getMainCamera()->setAdaptiveViewport(engine->getWindowSize(), engine->getWindowSize());
 
-        Physics::get().registerCollisionMask("A");
-        Physics::get().registerCollisionMask("B");
-
         mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
 
         square = getMainGraph()->createNode("square");
@@ -53,15 +50,13 @@ namespace GDE {
         auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(square);
         _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
 
-        BodyConfig _bodyConf {
+        Body::BodyConfig _bodyConf {
             1,
             {32, 32},
             0,
             0.25f
         };
-        auto* _bodySquare = getMainGraph()->addComponent<Body>(square, _bodyConf, *squareTransform);
-        _bodySquare->addCollider();
-        _bodySquare->setCollisionMask("A");
+        auto* _bodySquare = getMainGraph()->addComponent<Body>(square, _bodyConf, squareTransform);
 
         auto _floor = getMainGraph()->createNode("floor");
         auto* _floorTransform = getMainGraph()->getComponent<Transform>(_floor);
@@ -70,27 +65,25 @@ namespace GDE {
         _floorSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
         _floorSpriteRenderer->color = Color::Blue;
 
-        BodyConfig _bodyConf2 {
+        Body::BodyConfig _bodyConf2 {
                 1,
                 {32, 32},
                 0,
                 1.0f,
-                BodyType::STATIC
+                Body::BodyType::STATIC
         };
-        auto* _floorBody = getMainGraph()->addComponent<Body>(_floor, _bodyConf2, *_floorTransform);
-        _floorBody->addCollider();
-        _floorBody->setCollisionMask("B");
+        auto* _floorBody = getMainGraph()->addComponent<Body>(_floor, _bodyConf2, _floorTransform);
 
         auto _text = getMainGraph()->createNode("Text");
         getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World")->setColor(Color::Green);
         getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
 
-        Physics::get().registerOnCollisionStartCallback("A", "B", [](cpArbiter *arb, cpSpace *space, void *data) {
-            LOG_I("Hello!!!")
-            CP_ARBITER_GET_SHAPES(arb, a, b);
-
-            return true;
-        });
+//        Physics::get().registerOnCollisionStartCallback("A", "B", [](cpArbiter *arb, cpSpace *space, void *data) {
+//            LOG_I("Hello!!!")
+//            CP_ARBITER_GET_SHAPES(arb, a, b);
+//
+//            return true;
+//        });
     }
 
     void Sandbox::onEvent(Event &_event) {

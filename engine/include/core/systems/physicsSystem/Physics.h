@@ -6,22 +6,15 @@
 #define ENGINE_PHYSICS_H
 
 #include "core/util/Util.h"
-#include "chipmunk/chipmunk.h"
+#include "box2d/box2d.h"
 
 namespace GDE {
 
-    typedef cpSpace* PhysicsSpace;
-
-    struct Body;
     class Physics {
-        private:
-            int maskCount = 0;
-
+        public:
             Vec2F gravity { 0, -90.8f };
             bool active = true;
-
-            PhysicsSpace physicsSpace = nullptr;
-            std::unordered_map<std::string, int> registeredMasks;
+            b2World* world = nullptr;
 
         private:
             Physics() = default;
@@ -32,28 +25,11 @@ namespace GDE {
             void init();
             void step(Delta _delta);
 
-            PhysicsSpace getSpace();
-
             void setGravity(const Vec2F& _gravity);
             Vec2F getGravity();
 
-            void setPhysicsActive(float _active);
-            bool isPhysicsActive();
-
-            void registerCollisionMask(const std::string& _maskName);
-            void removeCollisionMask(const std::string& _maskName);
-            int getCollisionMask(const std::string& _maskName);
-
-            void createCollisionFilter(Body&, const std::vector<std::string>& _otherMasks);
-
-            void registerOnCollisionStartCallback(const std::string& _mask0, const std::string& _mask1, bool (*_onCollisionStarCallback)(cpArbiter *arb, cpSpace *space, void *data));
-            void removeOnCollisionStartCallback(const std::string& _mask0, const std::string& _mask1);
-
-            void registerOnCollisionEndCallback(const std::string& _mask0, const std::string& _mask1, UDelegate<void()> _onCollisionEndCallback);
-            void removeOnCollisionEndCallback(const std::string& _mask0, const std::string& _mask1);
-
-            void registerOnCollidingCallback(const std::string& _mask0, const std::string& _mask1, UDelegate<void()> _onCollidingCallback);
-            void removeOnCollidingCallback(const std::string& _mask0, const std::string& _mask1);
+            void setPhysicsActive(bool _active);
+            [[nodiscard]] bool isPhysicsActive() const;
 
             void destroy();
     };

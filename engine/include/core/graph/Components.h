@@ -10,7 +10,7 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/render/elements/IRenderizable.h"
-#include "chipmunk/chipmunk.h"
+#include "box2d/box2d.h"
 
 namespace GDE {
 
@@ -151,57 +151,54 @@ namespace GDE {
         POLYGON
     };
 
-    enum BodyType {
-        DYNAMIC,
-        STATIC,
-        KINEMATIC
-    };
-
-    struct BodyConfig {
-        float mass = 1;
-        Vec2F size = { 64, 64 };
-        float friction = 0;
-        float restitution = 0;
-
-        BodyType bodyType = BodyType::DYNAMIC;
-        BodyShapeType bodyShapeType = BodyShapeType::BOX;
-    };
-
 
     typedef unsigned int CollisionMask;
     struct Body {
+        public:
+            enum BodyType {
+                DYNAMIC,
+                STATIC,
+                KINEMATIC
+            };
+
+            struct BodyConfig {
+                float mass = 1;
+                Vec2F size = { 64, 64 };
+                float friction = 0;
+                float restitution = 0;
+
+                BodyType bodyType = BodyType::DYNAMIC;
+                BodyShapeType bodyShapeType = BodyShapeType::BOX;
+            };
+
+            struct B2DConfig {
+                b2BodyDef bodyDefinition;
+                b2PolygonShape polygonShape;
+                b2CircleShape circleShape;
+                b2FixtureDef fixtureDef;
+                b2Body* body;
+            };
+
         friend class Physics;
         friend class Graph;
 
         private:
-            cpBody* body = nullptr;
-            cpShape* shape = nullptr;
+            B2DConfig b2dConfig;
             BodyConfig bodyConfig;
-            CollisionMask mask{};
 
         public:
-            explicit Body(const BodyConfig& _bodyConfig, const Transform& _transform);
+            explicit Body(const BodyConfig& _config, Transform* _transform);
             Body(const Body& _body) = default;
             ~Body();
 
             [[nodiscard]] Vec2F getPosition() const;
             [[nodiscard]] float getRotation() const;
 
-            void updateBodyConfig(const BodyConfig& _bodyConfig);
-            BodyConfig& getConfig();
-            void addCollider();
+            void updateBodyConfig(const BodyConfig& _bodyConfig, Transform* _transform = nullptr);
+            [[nodiscard]] BodyConfig getConfig() const;
 
-            void setCollisionMask(const std::string& _maskName);
-            [[nodiscard]] CollisionMask getCollisionMask() const;
-
-            explicit operator cpShape*() {
-                return shape;
-            }
-
-            explicit operator cpBody*() {
-                return body;
-            }
-
+        private:
+            b2BodyType gdeBodyTypeToB2dBodyType(const BodyType& _bodyType);
     };
 }
 

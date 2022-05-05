@@ -209,67 +209,59 @@ namespace GDE {
     ///-------------------------------- BODY ---------------------------
 
 
-    Body::Body(const BodyConfig& _bodyConfig, const Transform& _transform) {
-        updateBodyConfig(_bodyConfig);
-        cpBodySetPosition(body, {_transform.getPositionLocal().x, _transform.getPositionLocal().y});
-        bodyConfig = _bodyConfig;
+    Body::Body(const BodyConfig& _config, Transform* _transform) {
+        bodyConfig = _config;
+
+        b2dConfig.bodyDefinition.position.Set(_transform->getPositionLocal().x, _transform->getPositionLocal().y);
+        b2dConfig.bodyDefinition.angle = _transform->getRotationLocal();
+        b2dConfig.bodyDefinition.type = gdeBodyTypeToB2dBodyType(_config.bodyType);
+        b2dConfig.body = Physics::get().world->CreateBody(&b2dConfig.bodyDefinition);
+
+        switch (_config.bodyShapeType) {
+            case BOX: b2dConfig.polygonShape.SetAsBox(_config.size.x / 2.f, _config.size.y / 2.f); break;
+            case CIRCLE: b2dConfig.circleShape.m_p = {_transform->getPositionLocal().x, _transform->getPositionLocal().y};
+                b2dConfig.circleShape.m_radius = _config.size.x;
+                break;
+            case POLYGON: LOG_W("Polygon shape not yet supported") break;
+        }
+
+        b2dConfig.fixtureDef.friction = _config.friction;
+        b2dConfig.fixtureDef.density = _config.mass;
+        b2dConfig.fixtureDef.restitution = _config.restitution;
+        b2dConfig.fixtureDef.shape = &b2dConfig.polygonShape;
+        b2dConfig.body->CreateFixture(&b2dConfig.fixtureDef);
+        b2dConfig.body->GetUserData().pointer = reinterpret_cast<std::uintptr_t>(_transform);
     }
 
     Body::~Body() {
-        if(shape != nullptr) cpShapeFree(shape);
-        cpBodyFree(body);
+        Physics::get().world->DestroyBody(b2dConfig.body);
     }
 
     Vec2F Body::getPosition() const {
-        auto _pos = cpBodyGetPosition(body);
-        return {static_cast<float>(_pos.x), static_cast<float>(_pos.y)};
+        auto _pos = b2dConfig.body->GetPosition();
+        return {_pos.x, _pos.y};
     }
 
-    void Body::updateBodyConfig(const BodyConfig& _bodyConfig) {
-        if(body != nullptr) cpBodyFree(body);
+    void Body::updateBodyConfig(const BodyConfig& _config, Transform* _transform) {
 
-        switch (_bodyConfig.bodyType) {
-            case DYNAMIC: body = cpSpaceAddBody(Physics::get().getSpace(),
-                                                cpBodyNew(0, 0));
-                break;
-            case STATIC: body = cpSpaceAddBody(Physics::get().getSpace(), cpBodyNewStatic());
-                break;
-            case KINEMATIC: body = cpSpaceAddBody(Physics::get().getSpace(), cpBodyNewKinematic());
-                break;
-        }
-    }
-
-    void Body::addCollider() {
-        switch (bodyConfig.bodyShapeType) {
-            case BOX: shape = cpBoxShapeNew(body, bodyConfig.size.x, bodyConfig.size.y, 0);
-                break;
-            case CIRCLE: shape = cpCircleShapeNew(body, bodyConfig.size.x, {0, 0});
-                break;
-            default:
-                LOG_W("Physics for polygons not yet implemented")
-        }
-
-        cpSpaceAddShape(Physics::get().getSpace(), shape);
-        cpShapeSetElasticity(shape, bodyConfig.restitution);
-        cpShapeSetFriction(shape, bodyConfig.friction);
-        cpShapeSetMass(shape, bodyConfig.mass);
     }
 
     float Body::getRotation() const {
-        return (float)(cpBodyGetRotation(body).y * 180.f / M_PI);
+        return b2dConfig.body->GetAngle();
     }
 
-    void Body::setCollisionMask(const std::string& _maskName) {
-        mask = Physics::get().getCollisionMask(_maskName);
-        cpShapeSetCollisionType(shape, mask);
-    }
-
-    CollisionMask Body::getCollisionMask() const {
-        return mask;
-    }
-
-    BodyConfig& Body::getConfig() {
+    Body::BodyConfig Body::getConfig() const {
         return bodyConfig;
+    }
+
+    b2BodyType Body::gdeBodyTypeToB2dBodyType(const Body::BodyType& _bodyType) {
+        switch (_bodyType) {
+            case DYNAMIC: return b2BodyType::b2_dynamicBody;
+            case STATIC: return b2BodyType::b2_staticBody;
+            case KINEMATIC: return b2BodyType::b2_kinematicBody;
+        }
+
+        return b2BodyType::b2_dynamicBody;
     }
 
 }

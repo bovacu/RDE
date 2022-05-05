@@ -10,12 +10,13 @@ add_definitions("-DGDE_EXPORT")
 
 SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer SDL2_image sdl2_net ${CMAKE_DL_LIBS}
         ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
-        EnTT::EnTT chipmunk libdecor yaml-cpp
+        EnTT::EnTT box2d libdecor yaml-cpp
         )
 
 find_package(Threads REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(box2d REQUIRED)
 
 add_library(libdecor SHARED IMPORTED )
 set_target_properties(libdecor PROPERTIES IMPORTED_LOCATION /usr/local/lib/x86_64-linux-gnu/libdecor-0.so)
@@ -71,19 +72,6 @@ set_target_properties(
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_net/lib/libSDL2_net.a
 )
 
-
-add_library(
-        chipmunk
-        STATIC
-        IMPORTED
-)
-set_target_properties(
-        chipmunk
-        PROPERTIES
-        IMPORTED_LOCATION
-        /usr/local/lib/libchipmunk.a
-)
-
 #-------------- STB
 
 set(STB_DIR "engine/src/stb")
@@ -102,7 +90,7 @@ include_directories(submodules/SDL_image)
 include_directories(submodules/glm)
 include_directories(submodules/imgui)
 include_directories(submodules/entt/src)
-include_directories(submodules/Chipmunk2D/include)
+include_directories(submodules/box2d/include)
 
 add_subdirectory(submodules/entt)
 
@@ -192,7 +180,8 @@ set(SOURCES
         engine/include/core/systems/particleSystem/ParticleSystem.h engine/src/core/systems/particleSystem/ParticleSystem.cpp
         engine/include/core/render/elements/IRenderizable.h engine/include/core/systems/physicsSystem/Physics.h
         engine/src/core/systems/physicsSystem/Physics.cpp
-        engine/include/core/systems/ecsSystem/GDESystem.h engine/include/core/systems/ecsSystem/GDESystemManager.h engine/src/core/systems/ecsSystem/GDESystemManager.cpp)
+        engine/include/core/systems/ecsSystem/GDESystem.h engine/include/core/systems/ecsSystem/GDESystemManager.h
+        engine/src/core/systems/ecsSystem/GDESystemManager.cpp)
 
 set(CPP_HEADERS)
 set(CPP_SOURCES)
