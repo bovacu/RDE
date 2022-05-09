@@ -80,8 +80,8 @@ namespace GDE {
     }
 
     void Transform::scale(float _x, float _y) {
-        localScale.x = _x;
-        localScale.y = _y;
+        localScale.x += _x;
+        localScale.y += _y;
         getLocalModelMatrix();
     }
 

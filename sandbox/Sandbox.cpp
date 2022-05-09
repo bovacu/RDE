@@ -86,7 +86,7 @@ namespace GDE {
 
 //        Physics::get().setCallbackForCollisionBetweenMasks(1 << 2, 1 << 1).bind<&test>();
 
-        box2DStressTest();
+//        box2DStressTest();
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -218,12 +218,12 @@ namespace GDE {
 
         Random _r;
         // 1075 is the maximum I could get with 60fps of average performance
-        for(int _i = 0; _i < 1075; _i++) {
+        for(int _i = 0; _i < 100; _i++) {
             auto _square = getMainGraph()->createNode("Square" + std::to_string(_i));
             auto* _squareTransform = getMainGraph()->getComponent<Transform>(_square);
             _squareTransform->setPosition(_r.randomf(-(float)engine->getWindowSize().x / 2.f + 64, (float)engine->getWindowSize().x / 2.f - 64),
                                           _r.randomf(-(float)engine->getWindowSize().y / 2.f + 64, (float)engine->getWindowSize().y / 2.f - 64));
-            _squareTransform->scale(0.25f, 0.25f);
+            _squareTransform->setScale(0.25f, 0.25f);
             BodyConfig _squareWallConfig {
                     .mass = 1,
                     .size = {8, 8},
