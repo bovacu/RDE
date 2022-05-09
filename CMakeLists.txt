@@ -10,7 +10,7 @@ add_definitions("-DGDE_EXPORT")
 
 SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer SDL2_image sdl2_net ${CMAKE_DL_LIBS}
         ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
-        EnTT::EnTT box2d libdecor yaml-cpp
+        EnTT::EnTT box2d yaml-cpp
         )
 
 find_package(Threads REQUIRED)
@@ -23,6 +23,7 @@ if (NOT ${resulting_display_server} STREQUAL "x11")
     message("Wayland detected, linking to LibDecor")
     add_library(libdecor SHARED IMPORTED )
     set_target_properties(libdecor PROPERTIES IMPORTED_LOCATION /usr/local/lib/x86_64-linux-gnu/libdecor-0.so)
+    LIST(APPEND TARGET_LINKS libdecor)
 else()
     message("x11 detected, skipping link to LibDecor")
 endif()
