@@ -10,7 +10,8 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/render/elements/IRenderizable.h"
-#include "chipmunk/chipmunk.h"
+#include "box2d/box2d.h"
+#include "core/systems/physicsSystem/Physics.h"
 
 namespace GDE {
 
@@ -85,7 +86,7 @@ namespace GDE {
             [[nodiscard]] Vec2F getTextSize() const;
 
             void setFontSize(int _fontSize);
-            int getFontSize() const;
+            [[nodiscard]] int getFontSize() const;
 
             void setSpaceWidth(float _spaceWidth);
             [[nodiscard]] float getSpaceWidth() const;
@@ -94,8 +95,6 @@ namespace GDE {
             void setSpacesBetweenChars(float _spaceBetweenChars);
 
             void setColor(const Color& _color);
-
-    //        Shape& getDebugShape();
     };
 
     struct StaticTransform {
@@ -141,67 +140,36 @@ namespace GDE {
             void scale(float _x, float _y);
 
             void setConstant(bool _constant);
-            bool isConstant() const;
+            [[nodiscard]] bool isConstant() const;
     };
 
 
-    enum BodyShapeType {
-        BOX,
-        CIRCLE,
-        POLYGON
-    };
-
-    enum BodyType {
-        DYNAMIC,
-        STATIC,
-        KINEMATIC
-    };
-
-    struct BodyConfig {
-        float mass = 1;
-        Vec2F size = { 64, 64 };
-        float friction = 0;
-        float restitution = 0;
-
-        BodyType bodyType = BodyType::DYNAMIC;
-        BodyShapeType bodyShapeType = BodyShapeType::BOX;
-    };
-
-
-    typedef unsigned int CollisionMask;
     struct Body {
-        friend class Physics;
-        friend class Graph;
-
-        private:
-            cpBody* body = nullptr;
-            cpShape* shape = nullptr;
+        public:
+            B2DConfig b2dConfig;
             BodyConfig bodyConfig;
-            CollisionMask mask{};
 
         public:
-            explicit Body(const BodyConfig& _bodyConfig, const Transform& _transform);
+            explicit Body(const BodyConfig& _config, Transform* _transform);
             Body(const Body& _body) = default;
             ~Body();
 
             [[nodiscard]] Vec2F getPosition() const;
             [[nodiscard]] float getRotation() const;
 
-            void updateBodyConfig(const BodyConfig& _bodyConfig);
-            BodyConfig& getConfig();
-            void addCollider();
+            void setApplyGravity(bool applyGravity) const;
+            [[nodiscard]] bool isApplyingGravity() const;
 
-            void setCollisionMask(const std::string& _maskName);
-            [[nodiscard]] CollisionMask getCollisionMask() const;
+            void setGravityMultiplier(float _gravityMultiplier) const;
+            [[nodiscard]] float getGravityMultiplayer() const;
 
-            explicit operator cpShape*() {
-                return shape;
-            }
+            void setSensor(bool _sensor) const;
+            [[nodiscard]] bool isSensor() const;
 
-            explicit operator cpBody*() {
-                return body;
-            }
+            void setSelfCollisionMask(CollisionMask _mask) const;
 
+        private:
+            b2BodyType gdeBodyTypeToB2dBodyType(const BodyType& _bodyType);
     };
 }
 

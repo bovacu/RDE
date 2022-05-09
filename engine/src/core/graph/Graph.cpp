@@ -45,9 +45,18 @@ namespace GDE {
 
     void Graph::onFixedUpdate(Delta _dt) {
 
-        registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Body& _body, const Active& _active) {
+        registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, Body& _body, const Active& _active) {
+            auto _lastStoredPosition = _body.b2dConfig.lastPosition;
+            auto _diff = _transform.getPositionLocal() - _lastStoredPosition;
+
+            if(_diff != 0) {
+                auto _bodyTransform = _body.b2dConfig.body->GetTransform();
+                _body.b2dConfig.body->SetTransform({_bodyTransform.p.x + _diff.x, _bodyTransform.p.y + _diff.y}, _bodyTransform.q.GetAngle());
+            }
+
             _transform.setPosition(_body.getPosition());
             _transform.setRotation(_body.getRotation());
+            _body.b2dConfig.lastPosition = _transform.getPositionLocal();
         });
 
         onFixedUpdateDel(_dt);
@@ -62,6 +71,10 @@ namespace GDE {
 
         registry.view<Transform, TextRenderer>().each([&](const auto _entity, const Transform& _transform, const TextRenderer& _text) {
             Renderer::draw(_text, _transform);
+        });
+
+        registry.view<Body>().each([&](const auto _entity, const Body& _body) {
+            Renderer::drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
         });
 
         onRenderDel();

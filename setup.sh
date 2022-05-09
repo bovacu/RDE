@@ -7,6 +7,9 @@ cd ../..
 cd submodules/libdecor && git checkout -b 'christian-rauch/libdecor-gtk_cairo_single' && meson build --buildtype release && meson install -C build
 cd ../..
 
+cd submodules/box2d && ./build.sh && cd build && make && sudo make install
+cd ../..
+
 # cd ../.. && sed -i -e 's/add_library(jpeg STATIC)/add_library(jpeg SHARED)/g' submodules/SDL_image/external/jpeg-9d/CMakeLists.txt
 sed -i -e 's/if (ImGui::IsClippedEx(m_WidgetRect, id, false))/if (ImGui::IsClippedEx(m_WidgetRect, id))/g' submodules/imguiNodeEditor/imgui_canvas.cpp
 
