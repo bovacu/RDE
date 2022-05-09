@@ -53,12 +53,10 @@ namespace GDE {
                 auto _bodyTransform = _body.b2dConfig.body->GetTransform();
                 _body.b2dConfig.body->SetTransform({_bodyTransform.p.x + _diff.x, _bodyTransform.p.y + _diff.y}, _bodyTransform.q.GetAngle());
             }
-            LOG_I(_body.getPosition())
+
             _transform.setPosition(_body.getPosition());
             _transform.setRotation(_body.getRotation());
             _body.b2dConfig.lastPosition = _transform.getPositionLocal();
-
-            LOG_I(_body.b2dConfig.body->GetType())
         });
 
         onFixedUpdateDel(_dt);
@@ -76,7 +74,7 @@ namespace GDE {
         });
 
         registry.view<Body>().each([&](const auto _entity, const Body& _body) {
-            Renderer::drawSquare(_body.getPosition(), _body.getConfig().size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
+            Renderer::drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
         });
 
         onRenderDel();

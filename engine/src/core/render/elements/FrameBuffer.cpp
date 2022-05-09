@@ -15,7 +15,6 @@ namespace GDE {
     FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs) : specs(_specs) {
         invalidate();
         glGenVertexArrays(1, &vao);
-        LOG_I(vao);
     }
 
     FrameBuffer::~FrameBuffer() {

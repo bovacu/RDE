@@ -9,6 +9,10 @@
 
 namespace GDE {
 
+    static void test(b2Contact* _contact) {
+        LOG_I("Hello world!!")
+    }
+
     void Sandbox::onInit() {
         engine = &Engine::get();
         auto *_font = FontManager::get().loadFont("assets/fonts/arial.ttf", 54);
@@ -17,7 +21,7 @@ namespace GDE {
         TextureAtlasManager::get().addAtlas(32, 32, "assets/test/square.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
-//        engine->setVSync(true);
+        engine->setVSync(true);
 
         /*        auto _player = mainScene->createNode("player");
                 auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
@@ -50,11 +54,12 @@ namespace GDE {
         auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(square);
         _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
 
-        Body::BodyConfig _bodyConf {
+        BodyConfig _bodyConf {
             1,
             {32, 32},
             0,
-            0
+            0,
+            1 << 1
         };
         getMainGraph()->addComponent<Body>(square, _bodyConf, squareTransform);
 
@@ -65,12 +70,13 @@ namespace GDE {
         _floorSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
         _floorSpriteRenderer->color = Color::Blue;
 
-        Body::BodyConfig _bodyConf2 {
-                1,
-                {32, 32},
-                0,
-                0,
-                Body::BodyType::STATIC
+        BodyConfig _bodyConf2 {
+                .mass = 1,
+                .size = {32, 32},
+                .friction = 0,
+                .restitution = 0,
+                .mask = 1 << 2,
+                .bodyType = BodyType::STATIC
         };
         getMainGraph()->addComponent<Body>(_floor, _bodyConf2, _floorTransform);
 
@@ -78,12 +84,7 @@ namespace GDE {
         getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World")->setColor(Color::Green);
         getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
 
-//        Physics::get().registerOnCollisionStartCallback("A", "B", [](cpArbiter *arb, cpSpace *space, void *data) {
-//            LOG_I("Hello!!!")
-//            CP_ARBITER_GET_SHAPES(arb, a, b);
-//
-//            return true;
-//        });
+        Physics::get().setCallbackForCollision(1 << 1, 1 << 2).bind<&test>();
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -134,8 +135,6 @@ namespace GDE {
 
     void Sandbox::onDebugRender(Delta _dt) {
         Scene::onDebugRender(_dt);
-        //        Renderer::drawSquare({100, 100}, {100, 100}, Color::Green);
-        //        Renderer::drawLine({0, 0}, {100, 100}, Color::Blue);
     }
 
     void Sandbox::onImGuiRender(Delta _dt) { Scene::onImGuiRender(_dt); }

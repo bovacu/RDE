@@ -11,6 +11,7 @@
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/render/elements/IRenderizable.h"
 #include "box2d/box2d.h"
+#include "core/systems/physicsSystem/Physics.h"
 
 namespace GDE {
 
@@ -145,45 +146,8 @@ namespace GDE {
     };
 
 
-    enum BodyShapeType {
-        BOX,
-        CIRCLE,
-        POLYGON
-    };
-
-
-    typedef unsigned int CollisionMask;
     struct Body {
         public:
-            enum BodyType {
-                DYNAMIC,
-                STATIC,
-                KINEMATIC
-            };
-
-            struct BodyConfig {
-                float mass = 1;
-                Vec2F size = { 64, 64 };
-                float friction = 0;
-                float restitution = 0;
-
-                BodyType bodyType = BodyType::DYNAMIC;
-                BodyShapeType bodyShapeType = BodyShapeType::BOX;
-            };
-
-            struct B2DConfig {
-                b2BodyDef bodyDefinition;
-                b2PolygonShape polygonShape;
-                b2CircleShape circleShape;
-                b2FixtureDef fixtureDef;
-                b2Body* body;
-                Vec2F lastPosition;
-            };
-
-        friend class Physics;
-        friend class Graph;
-
-        private:
             B2DConfig b2dConfig;
             BodyConfig bodyConfig;
 
@@ -195,8 +159,16 @@ namespace GDE {
             [[nodiscard]] Vec2F getPosition() const;
             [[nodiscard]] float getRotation() const;
 
-            void updateBodyConfig(const BodyConfig& _bodyConfig, Transform* _transform = nullptr);
-            [[nodiscard]] BodyConfig getConfig() const;
+            void setApplyGravity(bool applyGravity) const;
+            [[nodiscard]] bool isApplyingGravity() const;
+
+            void setGravityMultiplier(float _gravityMultiplier) const;
+            [[nodiscard]] float getGravityMultiplayer() const;
+
+            void setGhost(bool _ghost) const;
+            [[nodiscard]] bool isGhost() const;
+
+            void setMask(CollisionMask _mask) const;
 
         private:
             b2BodyType gdeBodyTypeToB2dBodyType(const BodyType& _bodyType);

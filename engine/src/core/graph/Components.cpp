@@ -2,7 +2,6 @@
 
 #include "core/graph/Components.h"
 #include "core/util/Functions.h"
-#include "core/systems/physicsSystem/Physics.h"
 
 namespace GDE {
 
@@ -215,7 +214,7 @@ namespace GDE {
         b2dConfig.bodyDefinition.position.Set(_transform->getPositionLocal().x, _transform->getPositionLocal().y);
         b2dConfig.bodyDefinition.angle = _transform->getRotationLocal();
         b2dConfig.bodyDefinition.type = gdeBodyTypeToB2dBodyType(_config.bodyType);
-        b2dConfig.body = Physics::get().world->CreateBody(&b2dConfig.bodyDefinition);
+        b2dConfig.body = Physics::get().createBody(b2dConfig.bodyDefinition);
 
         switch (_config.bodyShapeType) {
             case BOX: b2dConfig.polygonShape.SetAsBox(_config.size.x / 2.f, _config.size.y / 2.f); break;
@@ -229,33 +228,26 @@ namespace GDE {
         b2dConfig.fixtureDef.density = _config.mass;
         b2dConfig.fixtureDef.restitution = _config.restitution;
         b2dConfig.fixtureDef.shape = &b2dConfig.polygonShape;
-        b2dConfig.body->CreateFixture(&b2dConfig.fixtureDef);
-        LOG_I(_transform->getPositionLocal())
+
+        b2dConfig.fixtureDef.filter.categoryBits = _config.mask;
+
+        b2dConfig.fixture = b2dConfig.body->CreateFixture(&b2dConfig.fixtureDef);
         b2dConfig.lastPosition = _transform->getPositionLocal();
+        b2dConfig.body->GetUserData().pointer = reinterpret_cast<uintptr_t>(this);
     }
 
-    Body::~Body() {
-        Physics::get().world->DestroyBody(b2dConfig.body);
-    }
+    Body::~Body() {  }
 
     Vec2F Body::getPosition() const {
         auto _pos = b2dConfig.body->GetTransform().p;
         return {_pos.x, _pos.y};
     }
 
-    void Body::updateBodyConfig(const BodyConfig& _config, Transform* _transform) {
-        
-    }
-
     float Body::getRotation() const {
-        return b2dConfig.body->GetTransform().q.GetAngle() * 180.f / M_PI;
+        return b2dConfig.body->GetTransform().q.GetAngle() * 180.f / (float)M_PI;
     }
 
-    Body::BodyConfig Body::getConfig() const {
-        return bodyConfig;
-    }
-
-    b2BodyType Body::gdeBodyTypeToB2dBodyType(const Body::BodyType& _bodyType) {
+    b2BodyType Body::gdeBodyTypeToB2dBodyType(const BodyType& _bodyType) {
         switch (_bodyType) {
             case DYNAMIC: return b2BodyType::b2_dynamicBody;
             case STATIC: return b2BodyType::b2_staticBody;
@@ -265,4 +257,32 @@ namespace GDE {
         return b2BodyType::b2_dynamicBody;
     }
 
+    void Body::setApplyGravity(bool applyGravity) const {
+        b2dConfig.body->SetGravityScale(applyGravity ? b2dConfig.body->GetGravityScale() : 0);
+    }
+
+    bool Body::isApplyingGravity() const {
+        return b2dConfig.body->GetGravityScale() != 0;
+    }
+
+    void Body::setGravityMultiplier(float _gravityMultiplier) const {
+        b2dConfig.body->SetGravityScale(_gravityMultiplier);
+    }
+
+    float Body::getGravityMultiplayer() const {
+        return b2dConfig.body->GetGravityScale();
+    }
+
+    void Body::setGhost(bool _ghost) const {
+        b2dConfig.fixture->SetSensor(_ghost);
+    }
+
+    bool Body::isGhost() const {
+        return b2dConfig.fixture->IsSensor();
+    }
+
+    void Body::setMask(CollisionMask _mask) const {
+        auto _filter = reinterpret_cast<b2Filter*>(b2dConfig.body->GetUserData().pointer);
+        _filter->categoryBits = _mask;
+    }
 }
