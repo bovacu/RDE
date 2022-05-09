@@ -52,3 +52,4 @@ libs/SDL
 libs/SDL_net
 
 libs/SDL_image
+/cmake-build-release_lib/

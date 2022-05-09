@@ -124,27 +124,36 @@ target_include_directories("ImGuiNodeEditor" PUBLIC ${IMGUI_NODE_EDITOR_PATH})
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 
-file(GLOB_RECURSE GDE_CPP_HEADERS engine/include/*.h* sandbox/*.h*)
-file(GLOB_RECURSE GDE_CPP_SOURCES engine/src/*.cpp sandbox/*.cpp)
+file(GLOB_RECURSE GDE_CPP_HEADERS engine/include/*.h*)
+file(GLOB_RECURSE GDE_CPP_SOURCES engine/src/*.cpp)
 
 set(CPP_HEADERS)
 set(CPP_SOURCES)
 
 #GDEFirebase
 
-#add_library(Engine STATIC
-#        ${SOURCES}
-#        ${CPP_SOURCES}
-#        ${CPP_HEADERS}
-#        )
+option(GDE_LIBRARY "Build library instead of executable" OFF)
+if(GDE_LIBRARY)
+    message("Building lib")
+    add_library(Engine STATIC
+        ${GDE_CPP_HEADERS}
+        ${GDE_CPP_SOURCES}
 
-add_executable(Engine engine/main.cpp
-    ${GDE_CPP_HEADERS}
-    ${GDE_CPP_SOURCES}
-    
-    ${CPP_SOURCES}
-    ${CPP_HEADERS}
-)
+        ${CPP_SOURCES}
+        ${CPP_HEADERS}
+    )
+else()
+    message("Building executable")
+    add_executable(Engine engine/main.cpp sandbox/Sandbox.h sandbox/Sandbox.cpp
+
+        ${GDE_CPP_HEADERS}
+        ${GDE_CPP_SOURCES}
+
+        ${CPP_SOURCES}
+        ${CPP_HEADERS}
+    )
+endif()
+unset(GDE_LIBRARY CACHE)
 
 target_link_libraries(Engine ${TARGET_LINKS})
 target_compile_definitions(Engine PRIVATE ${GL_PROFILES})
