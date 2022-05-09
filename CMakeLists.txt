@@ -18,8 +18,16 @@ find_package(Freetype REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(box2d REQUIRED)
 
-add_library(libdecor SHARED IMPORTED )
-set_target_properties(libdecor PROPERTIES IMPORTED_LOCATION /usr/local/lib/x86_64-linux-gnu/libdecor-0.so)
+execute_process(COMMAND "echo $XDG_SESSION_TYPE" OUTPUT_VARIABLE result_display_server)
+if (NOT ${resulting_display_server} STREQUAL "x11")
+    message("Wayland detected, linking to LibDecor")
+    add_library(libdecor SHARED IMPORTED )
+    set_target_properties(libdecor PROPERTIES IMPORTED_LOCATION /usr/local/lib/x86_64-linux-gnu/libdecor-0.so)
+else()
+    message("x11 detected, skipping link to LibDecor")
+endif()
+
+
 
 add_library(
         sdl2
