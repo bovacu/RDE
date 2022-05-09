@@ -84,7 +84,7 @@ namespace GDE {
         getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World")->setColor(Color::Green);
         getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
 
-        Physics::get().setCallbackForCollision(1 << 1, 1 << 2).bind<&test>();
+        Physics::get().setCallbackForCollisionBetweenMasks(1 << 2, 1 << 1).bind<&test>();
     }
 
     void Sandbox::onEvent(Event &_event) {

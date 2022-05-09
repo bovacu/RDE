@@ -273,15 +273,15 @@ namespace GDE {
         return b2dConfig.body->GetGravityScale();
     }
 
-    void Body::setGhost(bool _ghost) const {
-        b2dConfig.fixture->SetSensor(_ghost);
+    void Body::setSensor(bool _sensor) const {
+        b2dConfig.fixture->SetSensor(_sensor);
     }
 
-    bool Body::isGhost() const {
+    bool Body::isSensor() const {
         return b2dConfig.fixture->IsSensor();
     }
 
-    void Body::setMask(CollisionMask _mask) const {
+    void Body::setSelfCollisionMask(CollisionMask _mask) const {
         auto _filter = reinterpret_cast<b2Filter*>(b2dConfig.body->GetUserData().pointer);
         _filter->categoryBits = _mask;
     }

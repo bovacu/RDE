@@ -86,7 +86,7 @@ namespace GDE {
             [[nodiscard]] Vec2F getTextSize() const;
 
             void setFontSize(int _fontSize);
-            int getFontSize() const;
+            [[nodiscard]] int getFontSize() const;
 
             void setSpaceWidth(float _spaceWidth);
             [[nodiscard]] float getSpaceWidth() const;
@@ -95,8 +95,6 @@ namespace GDE {
             void setSpacesBetweenChars(float _spaceBetweenChars);
 
             void setColor(const Color& _color);
-
-    //        Shape& getDebugShape();
     };
 
     struct StaticTransform {
@@ -142,7 +140,7 @@ namespace GDE {
             void scale(float _x, float _y);
 
             void setConstant(bool _constant);
-            bool isConstant() const;
+            [[nodiscard]] bool isConstant() const;
     };
 
 
@@ -165,10 +163,10 @@ namespace GDE {
             void setGravityMultiplier(float _gravityMultiplier) const;
             [[nodiscard]] float getGravityMultiplayer() const;
 
-            void setGhost(bool _ghost) const;
-            [[nodiscard]] bool isGhost() const;
+            void setSensor(bool _sensor) const;
+            [[nodiscard]] bool isSensor() const;
 
-            void setMask(CollisionMask _mask) const;
+            void setSelfCollisionMask(CollisionMask _mask) const;
 
         private:
             b2BodyType gdeBodyTypeToB2dBodyType(const BodyType& _bodyType);

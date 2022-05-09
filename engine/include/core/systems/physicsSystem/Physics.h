@@ -10,7 +10,7 @@
 
 namespace GDE {
 
-    typedef uint16 CollisionMask;
+    typedef ulong CollisionMask;
 
     enum BodyType {
         DYNAMIC,
@@ -40,18 +40,9 @@ namespace GDE {
         b2PolygonShape polygonShape;
         b2CircleShape circleShape;
         b2FixtureDef fixtureDef;
-        b2Body* body{};
-        b2Fixture* fixture;
+        b2Body* body = nullptr;
+        b2Fixture* fixture = nullptr;
         Vec2F lastPosition;
-    };
-
-    typedef std::tuple<CollisionMask, CollisionMask> MaskToMask;
-    typedef std::tuple<CollisionMask, CollisionMask> key_t;
-    struct key_hash : public std::unary_function<key_t, std::size_t> {
-        std::size_t operator()(const key_t& k) const
-        {
-            return std::get<0>(k) ^ std::get<1>(k);
-        }
     };
 
     class Body;
@@ -66,7 +57,7 @@ namespace GDE {
                 friend class Physics;
 
                 private:
-                    std::unordered_map<MaskToMask, Collision_CallbackFunction, key_hash> masks;
+                    std::unordered_map<CollisionMask , Collision_CallbackFunction> masks;
 
                 private:
                     void BeginContact(b2Contact* contact) override;
@@ -98,8 +89,10 @@ namespace GDE {
             void setPhysicsActive(bool _active);
             [[nodiscard]] bool isPhysicsActive() const;
 
-            void setCollisionMasks(Body* _body, CollisionMask _bodyCollideWith);
-            UDelegate<void(b2Contact*)>& setCallbackForCollision(CollisionMask _colliderA, CollisionMask _colliderB);
+            void setWhatBodyCollidesWith(Body* _body, CollisionMask _bodyCollideWith);
+            UDelegate<void(b2Contact*)>& setCallbackForCollisionBetweenMasks(CollisionMask _colliderA, CollisionMask _colliderB);
+            void removeCollisionCallbackBetween(CollisionMask _colliderA, CollisionMask _colliderB);
+            void removeAllCollisionCallbacksFrom(CollisionMask _collider);
 
             void destroy();
     };

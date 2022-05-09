@@ -59,14 +59,27 @@ namespace GDE {
             bodies.erase(_bodyToDestroy);
     }
 
-    void Physics::setCollisionMasks(Body* _body, CollisionMask _bodyCollideWith) {
+    void Physics::setWhatBodyCollidesWith(Body* _body, CollisionMask _bodyCollideWith) {
         auto* _filter = reinterpret_cast<b2Filter*>(_body->b2dConfig.body->GetUserData().pointer);
         _filter->maskBits = _bodyCollideWith;
         _body->b2dConfig.body->GetUserData().pointer = reinterpret_cast<uintptr_t>(_body);
     }
 
-    UDelegate<void(b2Contact*)>& Physics::setCallbackForCollision(CollisionMask _colliderA, CollisionMask _colliderB) {
-        return callback.masks[{_colliderA, _colliderB}].callback;
+    UDelegate<void(b2Contact*)>& Physics::setCallbackForCollisionBetweenMasks(CollisionMask _colliderA, CollisionMask _colliderB) {
+        return callback.masks[_colliderA | _colliderB].callback;
+    }
+
+    void Physics::removeCollisionCallbackBetween(CollisionMask _colliderA, CollisionMask _colliderB) {
+        callback.masks.erase(_colliderA | _colliderB);
+    }
+
+    void Physics::removeAllCollisionCallbacksFrom(CollisionMask _collider) {
+        std::vector<CollisionMask> _masksToDelete;
+        for(auto& _mask : callback.masks)
+            if((_mask.first & _collider) != 0) _masksToDelete.push_back(_mask.first);
+
+        for(auto& _mask : _masksToDelete)
+            callback.masks.erase(_mask);
     }
 
     void Physics::CollisionCallback::BeginContact(b2Contact* contact) {
@@ -80,16 +93,12 @@ namespace GDE {
 
         if(_aMask == nullptr || _bMask == nullptr) return;
 
-        std::tuple<CollisionMask, CollisionMask> _tupleA = {_aMask->b2dConfig.fixtureDef.filter.categoryBits, _bMask->b2dConfig.fixtureDef.filter.categoryBits};
-        std::tuple<CollisionMask, CollisionMask> _tupleB = {_bMask->b2dConfig.fixtureDef.filter.categoryBits, _aMask->b2dConfig.fixtureDef.filter.categoryBits};
+        auto _aCategory = _aMask->b2dConfig.fixtureDef.filter.categoryBits;
+        auto _bCategory = _bMask->b2dConfig.fixtureDef.filter.categoryBits;
 
-        if(masks.find(_tupleA) != masks.end()) {
-            masks[_tupleA].callback(contact);
+        if(masks.find(_aCategory | _bCategory) != masks.end()) {
+            masks[_aCategory | _bCategory].callback(contact);
             return;
-        }
-
-        if(masks.find(_tupleB) != masks.end()) {
-            masks[_tupleB].callback(contact);
         }
     }
 
@@ -99,21 +108,17 @@ namespace GDE {
         auto _a = contact->GetFixtureA();
         auto _b = contact->GetFixtureB();
 
-        auto _aMask = reinterpret_cast<b2Filter*>(_a->GetUserData().pointer);
-        auto _bMask = reinterpret_cast<b2Filter*>(_b->GetUserData().pointer);
+        auto _aMask = reinterpret_cast<Body*>(_a->GetUserData().pointer);
+        auto _bMask = reinterpret_cast<Body*>(_b->GetUserData().pointer);
 
         if(_aMask == nullptr || _bMask == nullptr) return;
 
-        std::tuple<CollisionMask, CollisionMask> _tupleA = {_aMask->categoryBits, _bMask->categoryBits};
-        std::tuple<CollisionMask, CollisionMask> _tupleB = {_bMask->categoryBits, _aMask->categoryBits};
+        auto _aCategory = _aMask->b2dConfig.fixtureDef.filter.categoryBits;
+        auto _bCategory = _bMask->b2dConfig.fixtureDef.filter.categoryBits;
 
-        if(masks.find(_tupleA) != masks.end()) {
-            masks[_tupleA].callback(contact);
+        if(masks.find(_aCategory | _bCategory) != masks.end()) {
+            masks[_aCategory | _bCategory].callback(contact);
             return;
-        }
-
-        if(masks.find(_tupleB) != masks.end()) {
-            masks[_tupleB].callback(contact);
         }
     }
 }
