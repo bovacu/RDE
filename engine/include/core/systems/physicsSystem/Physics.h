@@ -11,6 +11,7 @@
 namespace GDE {
 
     typedef ulong CollisionMask;
+    typedef UDelegate<void(b2Contact*)> CollisionMaskCallback;
 
     enum BodyType {
         DYNAMIC,
@@ -90,7 +91,7 @@ namespace GDE {
             [[nodiscard]] bool isPhysicsActive() const;
 
             void setWhatBodyCollidesWith(Body* _body, CollisionMask _bodyCollideWith);
-            UDelegate<void(b2Contact*)>& setCallbackForCollisionBetweenMasks(CollisionMask _colliderA, CollisionMask _colliderB);
+            CollisionMaskCallback& setCallbackForCollisionBetweenMasks(CollisionMask _colliderA, CollisionMask _colliderB);
             void removeCollisionCallbackBetween(CollisionMask _colliderA, CollisionMask _colliderB);
             void removeAllCollisionCallbacksFrom(CollisionMask _collider);
 

@@ -124,64 +124,8 @@ target_include_directories("ImGuiNodeEditor" PUBLIC ${IMGUI_NODE_EDITOR_PATH})
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 
-set(SOURCES
-        engine/include/GDE.h
-
-        engine/include/core/util/Easing.h engine/include/core/util/Functions.h engine/include/core/util/Logger.h engine/include/core/util/PerlinNoise.h
-        engine/include/core/util/Random.h engine/include/core/util/Util.h engine/include/core/util/Vec.h engine/src/core/util/Color.cpp engine/include/core/util/Color.h engine/include/core/util/Delta.h
-        engine/include/core/util/Clock.h engine/src/core/util/Clock.cpp
-
-        engine/include/core/render/window/event/Event.h engine/include/core/render/window/event/KeyEvent.h engine/include/core/render/window/event/MouseEvent.h
-        engine/include/core/render/window/event/WindowEvent.h engine/include/core/render/window/Window.h engine/src/core/render/window/Window.cpp
-
-        engine/include/core/graph/Scene.h engine/src/core/graph/Scene.cpp
-        engine/include/core/graph/ImGuiScene.h engine/src/core/graph/ImGuiScene.cpp
-
-        engine/include/core/render/window/keysAndButtons/GamePadButtons.h engine/src/core/render/window/input/Input.cpp engine/include/core/render/window/input/Input.h
-        engine/include/core/render/window/keysAndButtons/KeyboardKeys.h engine/include/core/render/window/keysAndButtons/MouseKeys.h
-
-        engine/include/core/render/elements/Texture.h engine/src/core/render/elements/Texture.cpp engine/include/core/render/elements/SpriteBatch.h
-        engine/src/core/render/elements/SpriteBatch.cpp engine/include/core/render/elements/Shader.h engine/src/core/render/elements/Shader.cpp
-
-        engine/src/core/Engine.cpp engine/include/core/Engine.h engine/include/core/Core.h
-
-        engine/include/stb/stb_image.h engine/src/stb/stb_image.cpp engine/include/stb/stb_image_writer.h
-
-        libs/json.h
-
-        engine/src/core/render/Renderer.cpp engine/include/core/render/Renderer.h engine/include/core/systems/eventSystem/EventBus.h
-
-        engine/include/core/graph/Components.h engine/src/core/render/Camera.cpp engine/include/core/render/Camera.h engine/include/core/render/shapes/Shape.h
-
-        engine/include/core/systems/profiling/Profiler.h engine/src/core/systems/profiling/Profiler.cpp engine/include/core/graph/ImGuiCore.h
-        engine/src/core/render/elements/TextureAtlasManager.cpp engine/include/core/render/elements/TextureAtlasManager.h engine/include/core/util/Rect.h
-        engine/src/core/systems/animationSystem/Animation.cpp engine/include/core/systems/animationSystem/Animation.h engine/src/core/systems/animationSystem/AnimationSystem.cpp
-        engine/include/core/systems/animationSystem/AnimationSystem.h
-
-
-        engine/src/core/systems/console/Console.cpp engine/include/core/systems/console/Console.h
-        engine/src/core/systems/uiSystem/FontManager.cpp engine/include/core/systems/uiSystem/FontManager.h engine/include/stb/stb_image_writer.h engine/src/core/render/elements/FrameBuffer.cpp
-        engine/include/core/render/elements/FrameBuffer.h engine/src/core/render/elements/ShaderManager.cpp engine/include/core/render/elements/ShaderManager.h
-        sandbox/Sandbox.cpp sandbox/Sandbox.h engine/src/core/systems/soundSystem/SoundManager.cpp engine/include/core/systems/soundSystem/SoundManager.h
-        engine/include/core/render/window/event/JoystickEvent.h engine/src/core/render/window/input/WindowInput.cpp engine/include/core/render/window/input/WindowInput.h
-        engine/src/core/render/window/input/KeyboardInput.cpp engine/include/core/render/window/input/KeyboardInput.h engine/src/core/render/window/input/MouseInput.cpp
-        engine/include/core/render/window/input/MouseInput.h engine/src/core/render/window/input/ControllerInput.cpp engine/include/core/render/window/input/ControllerInput.h
-        engine/src/core/platform/Platform.cpp engine/include/core/platform/Platform.h engine/include/core/platform/PlatformHeaderSDL.h
-        engine/include/core/platform/PlatformHeaderSDLMixer.h engine/include/core/platform/PlatformHeaderSDLImage.h
-        engine/include/core/render/window/input/MobileInput.h engine/src/core/render/window/input/MobileInput.cpp engine/include/core/render/window/event/MobileEvent.h
-        engine/include/core/procedural/CellularAutomataMapGenerator.h engine/src/core/procedural/CellularAutomataMapGenerator.cpp
-        engine/include/core/systems/fileSystem/FilesSystem.h engine/src/core/systems/fileSystem/FilesSystem.cpp engine/include/core/util/StringUtils.h
-        engine/src/core/render/ViewPort.cpp engine/include/core/render/elements/ViewPort.h
-        engine/include/core/util/Delegate.h engine/include/core/graph/Graph.h engine/src/core/graph/Graph.cpp
-        engine/src/core/graph/Components.cpp engine/include/core/graph/Components.h
-        engine/include/core/graph/Node.h engine/src/core/graph/Node.cpp
-
-        unitTesting/HierarchyTest.cpp unitTesting/doctest.h
-        engine/include/core/systems/particleSystem/ParticleSystem.h engine/src/core/systems/particleSystem/ParticleSystem.cpp
-        engine/include/core/render/elements/IRenderizable.h engine/include/core/systems/physicsSystem/Physics.h
-        engine/src/core/systems/physicsSystem/Physics.cpp
-        engine/include/core/systems/ecsSystem/GDESystem.h engine/include/core/systems/ecsSystem/GDESystemManager.h
-        engine/src/core/systems/ecsSystem/GDESystemManager.cpp)
+file(GLOB_RECURSE GDE_CPP_HEADERS engine/include/*.h* sandbox/*.h*)
+file(GLOB_RECURSE GDE_CPP_SOURCES engine/src/*.cpp sandbox/*.cpp)
 
 set(CPP_HEADERS)
 set(CPP_SOURCES)
@@ -195,10 +139,12 @@ set(CPP_SOURCES)
 #        )
 
 add_executable(Engine engine/main.cpp
-        ${SOURCES}
-        ${CPP_SOURCES}
-        ${CPP_HEADERS}
-        )
+    ${GDE_CPP_HEADERS}
+    ${GDE_CPP_SOURCES}
+    
+    ${CPP_SOURCES}
+    ${CPP_HEADERS}
+)
 
 target_link_libraries(Engine ${TARGET_LINKS})
 target_compile_definitions(Engine PRIVATE ${GL_PROFILES})
