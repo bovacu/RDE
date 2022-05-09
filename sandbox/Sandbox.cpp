@@ -21,7 +21,7 @@ namespace GDE {
         TextureAtlasManager::get().addAtlas(32, 32, "assets/test/square.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
-        engine->setVSync(true);
+//        engine->setVSync(true);
 
         /*        auto _player = mainScene->createNode("player");
                 auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
@@ -84,7 +84,9 @@ namespace GDE {
         getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World")->setColor(Color::Green);
         getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
 
-        Physics::get().setCallbackForCollisionBetweenMasks(1 << 2, 1 << 1).bind<&test>();
+//        Physics::get().setCallbackForCollisionBetweenMasks(1 << 2, 1 << 1).bind<&test>();
+
+        box2DStressTest();
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -156,5 +158,83 @@ namespace GDE {
 
     bool Sandbox::roll_run(const TransitionParams &_params) {
         return InputManager::isKeyJustPressed(Key::Backspace);
+    }
+
+    void Sandbox::box2DStressTest() {
+        auto _leftWall = getMainGraph()->createNode("LeftWall");
+        auto* _leftWallTransform = getMainGraph()->getComponent<Transform>(_leftWall);
+        _leftWallTransform->setPosition(-(float)engine->getWindowSize().x / 2.f, 0);
+        BodyConfig _leftWallConfig {
+            .mass = 1,
+            .size = {64, (float)engine->getWindowSize().y},
+            .restitution = 1.f,
+            .mask = 1 << 2,
+            .bodyType = BodyType::STATIC,
+            .bodyShapeType = BodyShapeType::BOX,
+        };
+        getMainGraph()->addComponent<Body>(_leftWall, _leftWallConfig, _leftWallTransform);
+
+
+        auto _rightWall = getMainGraph()->createNode("RightWall");
+        auto* _rightWallTransform = getMainGraph()->getComponent<Transform>(_rightWall);
+        _rightWallTransform->setPosition((float)engine->getWindowSize().x / 2.f, 0);
+        BodyConfig _rightWallConfig {
+                .mass = 1,
+                .size = {64, (float)engine->getWindowSize().y},
+                .restitution = 1.f,
+                .mask = 1 << 2,
+                .bodyType = BodyType::STATIC,
+                .bodyShapeType = BodyShapeType::BOX,
+        };
+        getMainGraph()->addComponent<Body>(_rightWall, _rightWallConfig, _rightWallTransform);
+
+
+        auto _bottomWall = getMainGraph()->createNode("BottomWall");
+        auto* _bottomWallTransform = getMainGraph()->getComponent<Transform>(_bottomWall);
+        _bottomWallTransform->setPosition(0, -(float)engine->getWindowSize().y / 2.f);
+        BodyConfig _bottomWallConfig {
+                .mass = 1,
+                .size = {(float)engine->getWindowSize().x, 64},
+                .restitution = 1.f,
+                .mask = 1 << 2,
+                .bodyType = BodyType::STATIC,
+                .bodyShapeType = BodyShapeType::BOX,
+        };
+        getMainGraph()->addComponent<Body>(_bottomWall, _bottomWallConfig, _bottomWallTransform);
+
+
+        auto _topWall = getMainGraph()->createNode("TopWall");
+        auto* _topWallTransform = getMainGraph()->getComponent<Transform>(_topWall);
+        _topWallTransform->setPosition(0, (float)engine->getWindowSize().y / 2.f);
+        BodyConfig _topWallConfig {
+                .mass = 1,
+                .size = {(float)engine->getWindowSize().x, 64},
+                .restitution = 1.f,
+                .mask = 1 << 2,
+                .bodyType = BodyType::STATIC,
+                .bodyShapeType = BodyShapeType::BOX,
+        };
+        getMainGraph()->addComponent<Body>(_topWall, _topWallConfig, _topWallTransform);
+
+        Random _r;
+        // 1075 is the maximum I could get with 60fps of average performance
+        for(int _i = 0; _i < 1075; _i++) {
+            auto _square = getMainGraph()->createNode("Square" + std::to_string(_i));
+            auto* _squareTransform = getMainGraph()->getComponent<Transform>(_square);
+            _squareTransform->setPosition(_r.randomf(-(float)engine->getWindowSize().x / 2.f + 64, (float)engine->getWindowSize().x / 2.f - 64),
+                                          _r.randomf(-(float)engine->getWindowSize().y / 2.f + 64, (float)engine->getWindowSize().y / 2.f - 64));
+            _squareTransform->scale(0.25f, 0.25f);
+            BodyConfig _squareWallConfig {
+                    .mass = 1,
+                    .size = {8, 8},
+                    .restitution = 1.f,
+                    .mask = 1 << 1,
+                    .bodyType = BodyType::DYNAMIC,
+                    .bodyShapeType = BodyShapeType::BOX,
+            };
+            getMainGraph()->addComponent<Body>(_square, _squareWallConfig, _squareTransform);
+            auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(_square);
+            _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
+        }
     }
 } // namespace engine

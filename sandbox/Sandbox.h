@@ -36,6 +36,8 @@ namespace GDE {
             bool onMouseScrolled(MouseScrolledEvent& _event);
             bool run_roll(const TransitionParams& _params);
             bool roll_run(const TransitionParams& _params);
+
+            void box2DStressTest();
     };
 
 }

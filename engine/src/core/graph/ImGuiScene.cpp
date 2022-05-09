@@ -195,11 +195,11 @@ namespace GDE {
         ImGui::Separator();
         ImGui::Text("X: %f, Y: %f", InputManager::getMousePosScreenCoords().x, InputManager::getMousePosScreenCoords().y);
         ImGui::Separator();
-        int _freeGpuMb = 0;
-        #if !IS_MOBILE()
-        glGetIntegerv( GL_TEXTURE_FREE_MEMORY_ATI,&_freeGpuMb);
-        #endif
-        ImGui::Text("GPU Used Memory: %.2f MBs", (float)_freeGpuMb / 1000.f);
+//        int _freeGpuMb = 0;
+//        #if !IS_MOBILE()
+//        glGetIntegerv( GL_TEXTURE_FREE_MEMORY_ATI,&_freeGpuMb);
+//        #endif
+//        ImGui::Text("GPU Used Memory: %.2f MBs", (float)_freeGpuMb / 1000.f);
         auto* _memData = Profiler::getTotalVirtualMemory();
         ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
         ImGui::Separator();
