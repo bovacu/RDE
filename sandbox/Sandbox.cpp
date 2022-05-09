@@ -17,7 +17,7 @@ namespace GDE {
         TextureAtlasManager::get().addAtlas(32, 32, "assets/test/square.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
-        //        engine->setVSync(true);
+//        engine->setVSync(true);
 
         /*        auto _player = mainScene->createNode("player");
                 auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
@@ -46,7 +46,7 @@ namespace GDE {
 
         square = getMainGraph()->createNode("square");
         squareTransform = getMainGraph()->getComponent<Transform>(square);
-        squareTransform->setPosition(0, 0);
+        squareTransform->setPosition(-25, 0);
         auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(square);
         _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
 
@@ -54,9 +54,9 @@ namespace GDE {
             1,
             {32, 32},
             0,
-            0.25f
+            0
         };
-        auto* _bodySquare = getMainGraph()->addComponent<Body>(square, _bodyConf, squareTransform);
+        getMainGraph()->addComponent<Body>(square, _bodyConf, squareTransform);
 
         auto _floor = getMainGraph()->createNode("floor");
         auto* _floorTransform = getMainGraph()->getComponent<Transform>(_floor);
@@ -69,10 +69,10 @@ namespace GDE {
                 1,
                 {32, 32},
                 0,
-                1.0f,
+                0,
                 Body::BodyType::STATIC
         };
-        auto* _floorBody = getMainGraph()->addComponent<Body>(_floor, _bodyConf2, _floorTransform);
+        getMainGraph()->addComponent<Body>(_floor, _bodyConf2, _floorTransform);
 
         auto _text = getMainGraph()->createNode("Text");
         getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World")->setColor(Color::Green);

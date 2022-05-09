@@ -127,8 +127,8 @@ namespace GDE {
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
-        scene->onFixedUpdate(_fixedDt);
         Physics::get().step(_fixedDt);
+        scene->onFixedUpdate(_fixedDt);
     }
 
     void Engine::onUpdate(Delta _dt) {

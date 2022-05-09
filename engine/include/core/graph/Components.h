@@ -177,6 +177,7 @@ namespace GDE {
                 b2CircleShape circleShape;
                 b2FixtureDef fixtureDef;
                 b2Body* body;
+                Vec2F lastPosition;
             };
 
         friend class Physics;

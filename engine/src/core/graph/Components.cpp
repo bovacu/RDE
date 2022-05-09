@@ -230,7 +230,8 @@ namespace GDE {
         b2dConfig.fixtureDef.restitution = _config.restitution;
         b2dConfig.fixtureDef.shape = &b2dConfig.polygonShape;
         b2dConfig.body->CreateFixture(&b2dConfig.fixtureDef);
-        b2dConfig.body->GetUserData().pointer = reinterpret_cast<std::uintptr_t>(_transform);
+        LOG_I(_transform->getPositionLocal())
+        b2dConfig.lastPosition = _transform->getPositionLocal();
     }
 
     Body::~Body() {
@@ -238,16 +239,16 @@ namespace GDE {
     }
 
     Vec2F Body::getPosition() const {
-        auto _pos = b2dConfig.body->GetPosition();
+        auto _pos = b2dConfig.body->GetTransform().p;
         return {_pos.x, _pos.y};
     }
 
     void Body::updateBodyConfig(const BodyConfig& _config, Transform* _transform) {
-
+        
     }
 
     float Body::getRotation() const {
-        return b2dConfig.body->GetAngle();
+        return b2dConfig.body->GetTransform().q.GetAngle() * 180.f / M_PI;
     }
 
     Body::BodyConfig Body::getConfig() const {

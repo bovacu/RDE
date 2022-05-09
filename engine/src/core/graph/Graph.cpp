@@ -45,9 +45,20 @@ namespace GDE {
 
     void Graph::onFixedUpdate(Delta _dt) {
 
-        registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Body& _body, const Active& _active) {
+        registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, Body& _body, const Active& _active) {
+            auto _lastStoredPosition = _body.b2dConfig.lastPosition;
+            auto _diff = _transform.getPositionLocal() - _lastStoredPosition;
+
+            if(_diff != 0) {
+                auto _bodyTransform = _body.b2dConfig.body->GetTransform();
+                _body.b2dConfig.body->SetTransform({_bodyTransform.p.x + _diff.x, _bodyTransform.p.y + _diff.y}, _bodyTransform.q.GetAngle());
+            }
+            LOG_I(_body.getPosition())
             _transform.setPosition(_body.getPosition());
             _transform.setRotation(_body.getRotation());
+            _body.b2dConfig.lastPosition = _transform.getPositionLocal();
+
+            LOG_I(_body.b2dConfig.body->GetType())
         });
 
         onFixedUpdateDel(_dt);
