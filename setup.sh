@@ -10,6 +10,9 @@ cd ../..
 cd submodules/box2d && ./build.sh && cd build && make && sudo make install
 cd ../..
 
+#cd submodules/RmlUi && mkdir build && cmake -S. -Bbuild  make && cmake --build build && cd build && sudo make install
+#cd ../..
+
 # cd ../.. && sed -i -e 's/add_library(jpeg STATIC)/add_library(jpeg SHARED)/g' submodules/SDL_image/external/jpeg-9d/CMakeLists.txt
 sed -i -e 's/if (ImGui::IsClippedEx(m_WidgetRect, id, false))/if (ImGui::IsClippedEx(m_WidgetRect, id))/g' submodules/imguiNodeEditor/imgui_canvas.cpp
 

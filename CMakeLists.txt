@@ -28,7 +28,15 @@ else()
     message("x11 detected, skipping link to LibDecor")
 endif()
 
-
+#add_library(RmlCore SHARED IMPORTED )
+#set_target_properties(RmlCore PROPERTIES IMPORTED_LOCATION /usr/local/lib/libRmlCore.so)
+#
+#add_library(RmlDebugger SHARED IMPORTED )
+#set_target_properties(RmlDebugger PROPERTIES IMPORTED_LOCATION /usr/local/lib/libRmlDebugger.so)
+#
+#LIST(APPEND TARGET_LINKS RmlDebugger RmlCore)
+#include_directories(submodules/RmlUi/Include)
+#include_directories(submodules/RmlUi/Samples)
 
 add_library(
         sdl2
@@ -86,6 +94,8 @@ set_target_properties(
 set(STB_DIR "engine/src/stb")
 include_directories(${STB_DIR})
 link_directories(${STB_DIR})
+
+add_compile_options("-Werror")
 
 include_directories(.)
 include_directories(engine/include)
