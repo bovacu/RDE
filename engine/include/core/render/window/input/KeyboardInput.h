@@ -21,8 +21,8 @@ namespace GDE {
             void setState(int _keyOrButton, int _state);
 
         private:
-            void onKeyDown(SDL_Event& _event);
-            void onKeyUp(SDL_Event& _event);
+            void onKeyDown(SDL_Event& _event, RmlData* _rmlData);
+            void onKeyUp(SDL_Event& _event, RmlData* _rmlData);
     };
 
 }

@@ -21,7 +21,7 @@ namespace GDE {
         TextureAtlasManager::get().addAtlas(32, 32, "assets/test/square.png");
         TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
 
-        engine->setVSync(true);
+//        engine->setVSync(true);
 
         /*        auto _player = mainScene->createNode("player");
                 auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);

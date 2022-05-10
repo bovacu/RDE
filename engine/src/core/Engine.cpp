@@ -9,6 +9,7 @@
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/systems/physicsSystem/Physics.h"
 #include "core/systems/ecsSystem/GDESystemManager.h"
+#include <RmlUi/Core.h>
 
 namespace GDE {
     Engine *Engine::gameInstance = nullptr;
@@ -79,8 +80,12 @@ namespace GDE {
             _accumulator += _dt;
 
             GDE::Profiler::beginFrame(_dt);
+            window->rmlData.rmlRenderer->BeginFrame();
 
-            InputManager::get().pollEvents();
+            InputManager::get().pollEvents(&window->rmlData);
+
+            auto _viewport = scene->getMainCamera()->getViewport()->getVirtualResolution();
+            window->rmlData.rmlRenderer->SetViewport(_viewport.x, _viewport.y);
 
             if (!minimized) {
 
@@ -137,6 +142,8 @@ namespace GDE {
 
         if(InputManager::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
+
+        window->rmlData.rmlContext->Update();
     }
 
     void Engine::onRender(Delta _dt) {
@@ -148,6 +155,8 @@ namespace GDE {
             Renderer::endDraw();
         }
         frameBuffer->unbind();
+
+        window->rmlData.rmlContext->Render();
 
         // Imgui rendering
         Profiler::begin(ProfilerState::IMGUI);

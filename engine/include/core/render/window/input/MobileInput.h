@@ -22,9 +22,9 @@ namespace GDE {
             void setState(int _keyOrButton, int _state);
 
         private:
-            void onTouchDown(SDL_Event& _event);
-            void onTouchUp(SDL_Event& _event);
-            void onTouchMoved(SDL_Event& _event);
+            void onTouchDown(SDL_Event& _event, RmlData* _rmlData);
+            void onTouchUp(SDL_Event& _event, RmlData* _rmlData);
+            void onTouchMoved(SDL_Event& _event, RmlData* _rmlData);
     };
 
 }

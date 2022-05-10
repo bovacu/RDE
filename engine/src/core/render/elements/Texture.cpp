@@ -57,6 +57,8 @@ namespace GDE {
             return false;
         }
 
+        glDeleteTextures(1, &openGLTextureID);
+
         invertSDLSurface(_image);
         width = _image->w;
         height = _image->h;
@@ -120,11 +122,8 @@ namespace GDE {
         /* We require 1 byte alignment when uploading texture data */
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        /* Clamping to edges is important to prevent artifacts when scaling */
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-        /* Linear filtering usually looks best for text */
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -210,6 +209,42 @@ namespace GDE {
         while((err = glGetError()) != GL_NO_ERROR){
             LOG_E("GL_ERROR: ", err)
         }
+    }
+
+    bool Texture::loadTextureFromMemory(int _width, int _height, const unsigned char* _data) {
+        glDeleteTextures(1, &openGLTextureID);
+
+        width = _width;
+        height = _height;
+        channels = 4;
+        auto* _texturePixels = _data;
+
+        GLenum _internalFormat = 0, _dataFormat = 0;
+        if (channels == 4) {
+            _internalFormat = GL_RGBA8;
+            _dataFormat = GL_RGBA;
+        } else if (channels == 3) {
+            _internalFormat = GL_RGB8;
+            _dataFormat = GL_RGB;
+        } else
+            LOG_E("Not supported format image. Channels = ", channels, ", Width = ", width, ", Height = ", height)
+
+        internalFormat = _internalFormat;
+        dataFormat = _dataFormat;
+
+        glGenTextures(1, &openGLTextureID);
+        glBindTexture(GL_TEXTURE_2D, openGLTextureID);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, (int)internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
+
+        region = {{0, 0}, {width, height}};
+
+        return true;
     }
 
 

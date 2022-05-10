@@ -55,11 +55,11 @@ namespace GDE {
         friend class InputManager;
         protected:
             Window* window = nullptr;
-            std::unordered_map<int, UDelegate<void(SDL_Event&)>> events;
+            std::unordered_map<int, UDelegate<void(SDL_Event&, RmlData*)>> events;
             std::vector<SystemEventEnum> ignoredEvents;
 
         public:
-            bool pollEvent(SDL_Event& _event);
+            bool pollEvent(SDL_Event& _event, RmlData* _rmlData);
             bool ignoreEvent(const SDL_EventType& _eventType);
     };
 
@@ -77,7 +77,7 @@ namespace GDE {
             static InputManager& get();
             void init(Window* _window);
             void destroy();
-            void pollEvents();
+            void pollEvents(RmlData* _rmlData);
 
         public:
             static bool isKeyJustPressed(KeyCode _key);

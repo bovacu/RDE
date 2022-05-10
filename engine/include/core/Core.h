@@ -8,6 +8,9 @@
 #define FRAMEBUFFER_FRAGMENT_SHADER_ES "assets/shaders/es/framebuffer/FrameBufferFragment.glsl"
 #define FRAMEBUFFER_VERTEX_SHADER_CORE "assets/shaders/core/framebuffer/FrameBufferVertex.glsl"
 #define FRAMEBUFFER_FRAGMENT_SHADER_CORE "assets/shaders/core/framebuffer/FrameBufferFragment.glsl"
+#define RML_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/rmlFragment.glsl"
+#define RML_FRAGMENT_COLOR_ONLY_SHADER_CORE "assets/shaders/core/texture/rmlFragmentColorOnly.glsl"
+#define RML_VERTEX_SHADER_CORE "assets/shaders/core/texture/rmlVertex.glsl"
 
 #define TEXTURE_VERTEX_SHADER_ES "assets/shaders/es/texture/vertex.glsl"
 #define DEBUG_VERTEX_SHADER_ES "assets/shaders/es/debug/debugVertex.glsl"
