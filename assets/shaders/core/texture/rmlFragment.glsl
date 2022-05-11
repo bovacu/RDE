@@ -1,10 +1,13 @@
 #version 400 core
 
-in vec2 uv;
-in vec4 color;
+in vec2 fragTexCoord;
+in vec4 fragColor;
 
-uniform sampler2D tex;
+uniform sampler2D _tex;
 
-void main(void) {
-	gl_FragColor = texture(tex, uv) * color;
+out vec4 finalColor;
+
+void main() {
+	vec4 texColor = texture(_tex, fragTexCoord);
+	finalColor = fragColor * texColor;
 }

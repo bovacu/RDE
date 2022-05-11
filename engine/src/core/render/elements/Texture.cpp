@@ -216,33 +216,19 @@ namespace GDE {
 
         width = _width;
         height = _height;
-        channels = 4;
-        auto* _texturePixels = _data;
-
-        GLenum _internalFormat = 0, _dataFormat = 0;
-        if (channels == 4) {
-            _internalFormat = GL_RGBA8;
-            _dataFormat = GL_RGBA;
-        } else if (channels == 3) {
-            _internalFormat = GL_RGB8;
-            _dataFormat = GL_RGB;
-        } else
-            LOG_E("Not supported format image. Channels = ", channels, ", Width = ", width, ", Height = ", height)
-
-        internalFormat = _internalFormat;
-        dataFormat = _dataFormat;
 
         glGenTextures(1, &openGLTextureID);
         glBindTexture(GL_TEXTURE_2D, openGLTextureID);
 
+        GLint internal_format = GL_RGBA8;
+        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, (int)internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        region = {{0, 0}, {width, height}};
+        region = {{0, 0}, {_width, _height}};
 
         return true;
     }

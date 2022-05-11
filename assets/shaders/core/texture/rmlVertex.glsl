@@ -1,16 +1,19 @@
 #version 400 core
 
-layout(location = 15) in vec2 in_position;
-layout(location = 16) in vec4 in_color;
-layout(location = 17) in vec2 in_uv;
+layout(location = 12) in vec2 inPosition;
+layout(location = 13) in vec4 inColor0;
+layout(location = 14) in vec2 inTexCoord0;
 
+uniform vec2 position;
 uniform mat4 viewProjectionMatrix;
 
-out vec2 uv;
-out vec4 color;
+out vec2 fragTexCoord;
+out vec4 fragColor;
 
-void main(void) {
-	uv = in_uv;
-	color = in_color;
-	gl_Position = viewProjectionMatrix * vec4(in_position, 0, 1);
+void main() {
+	fragTexCoord = inTexCoord0;
+	fragColor = inColor0;
+	vec2 translatedPos = inPosition + position.xy;
+	vec4 outPos = viewProjectionMatrix * vec4(translatedPos, 0, 1);
+	gl_Position = outPos;
 }

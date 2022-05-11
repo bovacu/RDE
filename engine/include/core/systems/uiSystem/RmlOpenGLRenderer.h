@@ -15,36 +15,25 @@
 
 namespace GDE {
 
-    struct CompiledGeometryData {
-        GLuint texture;
-        GLuint vao;
-        GLuint vbo;
-        GLuint ibo;
-        GLsizei draw_count;
-    };
-
     class RmlOpenGLRenderer : public Rml::RenderInterface {
         private:
-            SDL_Window* sdlWindow;
-            ShaderID shaderTextureId, shaderColorId;
-            glm::mat4* viewProjectionMatrix;
-            CompiledGeometryData compiledGeometryData;
-
-        public:
-            void init(SDL_Window* _window);
-            void update(glm::mat4* _viewProjectionMatrix);
+            Rml::Matrix4f transform;
 
         private:
             void RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture, const Rml::Vector2f& translation) override;
+            Rml::CompiledGeometryHandle CompileGeometry(Rml::Vertex* _vertices, int _numVertices, int* _indices, int _numIndices, Rml::TextureHandle _texture) override;
+            void RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry, const Rml::Vector2f& translation) override;
+            void ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry) override;
             void EnableScissorRegion(bool enable) override;
             void SetScissorRegion(int x, int y, int width, int height) override;
-            bool LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions, const Rml::String& source) override;
-            bool GenerateTexture(Rml::TextureHandle& texture_handle, const Rml::byte* source, const Rml::Vector2i& source_dimensions) override;
-            void ReleaseTexture(Rml::TextureHandle texture) override;
+            bool LoadTexture(Rml::TextureHandle& _textureHandle, Rml::Vector2i& _textureDimension, const Rml::String& _source) override;
+            bool GenerateTexture(Rml::TextureHandle& _textureHandle, const Rml::byte* _source, const Rml::Vector2i& _sourceDimensions) override;
+            void ReleaseTexture(Rml::TextureHandle texture_handle) override;
             void SetTransform(const Rml::Matrix4f* transform) override;
-            Rml::CompiledGeometryHandle CompileGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture) override;
-            void ReleaseCompiledGeometry(Rml::CompiledGeometryHandle handle) override;
-            void RenderCompiledGeometry(Rml::CompiledGeometryHandle handle, const Rml::Vector2f& translation) override;
+
+        public:
+            void SetViewport(int width, int height);
+            void BeginFrame();
     };
 
 }

@@ -6,9 +6,6 @@
 #include "core/util/Util.h"
 #include "core/render/window/event/Event.h"
 #include "core/platform/PlatformHeaderSDL.h"
-#include "core/systems/uiSystem/RmlOpenGLRenderer.h"
-#include "core/systems/uiSystem/SystemInterfaceSDL2.h"
-#include "core/systems/uiSystem/RenderInterfaceGL3.h"
 
 namespace GDE {
 
@@ -41,12 +38,6 @@ namespace GDE {
                 title(std::move(_title)), width(_width), height(_height) {  }
     };
 
-    struct RmlData {
-        RenderInterface_GL3* rmlRenderer;
-        RmlUiSDL2SystemInterface* rmlSystemInterface;
-        Rml::Context* rmlContext;
-    };
-
     /// This class represents the window of the application and has methods to modify its components and get its data.
     class Window {
         private:
@@ -64,9 +55,6 @@ namespace GDE {
             };
 
             WindowData data;
-
-        public:
-            RmlData rmlData;
 
         public:
             explicit Window(const WindowProperties& _props);

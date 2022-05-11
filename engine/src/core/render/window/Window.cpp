@@ -2,7 +2,6 @@
 #include "core/render/window/event/WindowEvent.h"
 #include "stb/stb_image.h"
 #include "core/platform/PlatformHeaderSDL.h"
-#include <RmlUi/Debugger.h>
 
 #if IS_MOBILE()
     #include <GLES3/gl32.h>
@@ -73,22 +72,6 @@ namespace GDE {
         SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, "1");
         SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
         #endif
-
-        rmlData.rmlRenderer = new RenderInterface_GL3;
-        rmlData.rmlSystemInterface = new RmlUiSDL2SystemInterface;
-        Rml::SetRenderInterface(rmlData.rmlRenderer);
-        Rml::SetSystemInterface(rmlData.rmlSystemInterface);
-
-        if (!Rml::Initialise()) {
-            LOG_E("Rml couldn't initialize")
-            return;
-        }
-
-        rmlData.rmlContext = Rml::CreateContext("default", Rml::Vector2i(getWidth(), getHeight()));
-        Rml::Debugger::Initialise(rmlData.rmlContext);
-        Rml::Debugger::SetVisible(true);
-
-        LOG_S("Rml successfully initialized")
     }
 
     void Window::setWindowSize(int _width, int _height) {
@@ -103,10 +86,6 @@ namespace GDE {
     }
 
     void Window::shutdown() {
-        Rml::Shutdown();
-        delete rmlData.rmlRenderer;
-        delete rmlData.rmlSystemInterface;
-
         SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
         SDL_QuitSubSystem(SDL_INIT_EVERYTHING);

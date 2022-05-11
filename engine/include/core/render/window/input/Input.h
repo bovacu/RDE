@@ -10,6 +10,7 @@
 
 #include "core/util/Util.h"
 #include "core/render/window/Window.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 #ifndef SDL_JOYSTICK_DISABLED
 #define SDL_JOYSTICK_DISABLED
