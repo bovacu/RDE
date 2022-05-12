@@ -57,6 +57,8 @@ namespace GDE {
             return false;
         }
 
+        glDeleteTextures(1, &openGLTextureID);
+
         invertSDLSurface(_image);
         width = _image->w;
         height = _image->h;
@@ -120,11 +122,8 @@ namespace GDE {
         /* We require 1 byte alignment when uploading texture data */
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        /* Clamping to edges is important to prevent artifacts when scaling */
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-        /* Linear filtering usually looks best for text */
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -210,6 +209,28 @@ namespace GDE {
         while((err = glGetError()) != GL_NO_ERROR){
             LOG_E("GL_ERROR: ", err)
         }
+    }
+
+    bool Texture::loadTextureFromMemory(int _width, int _height, const unsigned char* _data) {
+        glDeleteTextures(1, &openGLTextureID);
+
+        width = _width;
+        height = _height;
+
+        glGenTextures(1, &openGLTextureID);
+        glBindTexture(GL_TEXTURE_2D, openGLTextureID);
+
+        GLint internal_format = GL_RGBA8;
+        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        region = {{0, 0}, {_width, _height}};
+
+        return true;
     }
 
 

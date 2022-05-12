@@ -30,6 +30,7 @@ namespace GDE {
 
             bool loadFromFile(const char* _path);
             bool loadTextTexture(int _width, int _height);
+            bool loadTextureFromMemory(int _width, int _height, const unsigned char* _data);
             bool loadTextSubTextures(Vec2I _offset, Vec2I _size, const void* _data);
 
             IntRect& getRegion();

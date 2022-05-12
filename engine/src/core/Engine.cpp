@@ -9,6 +9,8 @@
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/systems/physicsSystem/Physics.h"
 #include "core/systems/ecsSystem/GDESystemManager.h"
+#include "core/systems/uiSystem/Canvas.h"
+#include <RmlUi/Core.h>
 
 namespace GDE {
     Engine *Engine::gameInstance = nullptr;
@@ -33,6 +35,7 @@ namespace GDE {
         Console::get().init();
         ShaderManager::get().init();
         Renderer::init();
+        Canvas::init(window->getWidth(), window->getHeight());
         SoundManager::get().init();
         Physics::get().init();
 
@@ -79,8 +82,8 @@ namespace GDE {
             _accumulator += _dt;
 
             GDE::Profiler::beginFrame(_dt);
-
-            InputManager::get().pollEvents();
+            Canvas::beginFrame(scene->getMainCamera()->getViewport()->getVirtualResolution());
+            InputManager::get().pollEvents(&Canvas::getData());
 
             if (!minimized) {
 
@@ -137,6 +140,8 @@ namespace GDE {
 
         if(InputManager::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
+
+        Canvas::update(_dt);
     }
 
     void Engine::onRender(Delta _dt) {
@@ -148,6 +153,8 @@ namespace GDE {
             Renderer::endDraw();
         }
         frameBuffer->unbind();
+
+        Canvas::render();
 
         // Imgui rendering
         Profiler::begin(ProfilerState::IMGUI);
@@ -231,6 +238,7 @@ namespace GDE {
         InputManager::get().destroy();
         Physics::get().destroy();
         GDESystemManager::get().destroy();
+        Canvas::destroy();
 
         delete frameBuffer;
         delete scene;

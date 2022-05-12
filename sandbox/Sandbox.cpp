@@ -97,9 +97,6 @@ namespace GDE {
     }
 
     void Sandbox::onUpdate(Delta _dt) {
-
-        static float second = 0;
-
         auto _t = getMainGraph()->getComponent<Transform>(square);
         if (InputManager::isKeyPressed(KeyCode::A))
             _t->translate(-_dt * 150, 0);
