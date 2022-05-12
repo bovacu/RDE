@@ -87,6 +87,7 @@ namespace GDE {
 //        Physics::get().setCallbackForCollisionBetweenMasks(1 << 2, 1 << 1).bind<&test>();
 
 //        box2DStressTest();
+//        textStressTest();
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -232,6 +233,18 @@ namespace GDE {
             getMainGraph()->addComponent<Body>(_square, _squareWallConfig, _squareTransform);
             auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(_square);
             _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
+        }
+    }
+
+    void Sandbox::textStressTest() {
+        Random _r;
+        // 25000 is the maximum I could get with 60fps of average performance, with texts -> "Text[0-25000]"
+        for(int _i = 0; _i < 25000; _i++) {
+            auto _text = getMainGraph()->createNode("Text" + std::to_string(_i));
+            auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
+            _textTransform->setPosition(_r.randomf(-(float)engine->getWindowSize().x / 2.f + 64, (float)engine->getWindowSize().x / 2.f - 64),
+                                        _r.randomf(-(float)engine->getWindowSize().y / 2.f + 64, (float)engine->getWindowSize().y / 2.f - 64));
+            getMainGraph()->addComponent<TextRenderer>(_text, FontManager::get().getDefaultFont("arial"), "Text" + std::to_string(_i));
         }
     }
 } // namespace engine

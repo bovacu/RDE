@@ -19,6 +19,28 @@ namespace GDE {
         }
 
         get().rmlData.rmlContext = Rml::CreateContext("default", Rml::Vector2i(_width, _height));
+
+        if (!get().rmlData.rmlContext) {
+            LOG_E("Rml context couldn't initialize")
+            return;
+        }
+
+        struct FontFace {
+            Rml::String filename;
+            bool fallback_face;
+        };
+        FontFace _fontFaces[] = {
+                { "LatoLatin-Regular.ttf",    false },
+                { "LatoLatin-Italic.ttf",     false },
+                { "LatoLatin-Bold.ttf",       false },
+                { "LatoLatin-BoldItalic.ttf", false },
+                { "NotoEmoji-Regular.ttf",    true  },
+        };
+
+        for (const FontFace& _fontFace : _fontFaces) {
+            Rml::LoadFontFace("assets/" + _fontFace.filename, _fontFace.fallback_face);
+        }
+
         Rml::Debugger::Initialise(get().rmlData.rmlContext);
         Rml::Debugger::SetVisible(true);
 
@@ -56,7 +78,6 @@ namespace GDE {
         Rml::Shutdown();
         delete get().rmlData.rmlRenderer;
         delete get().rmlData.rmlSystemInterface;
-        delete get().rmlData.rmlDocument;
     }
 
     RmlData& Canvas::getData() {

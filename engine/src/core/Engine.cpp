@@ -81,8 +81,8 @@ namespace GDE {
             Uint64 _start = SDL_GetPerformanceCounter();
             _accumulator += _dt;
 
-            GDE::Profiler::beginFrame(_dt);
-            Canvas::beginFrame(scene->getMainCamera()->getViewport()->getVirtualResolution());
+//            GDE::Profiler::beginFrame(_dt);
+//            Canvas::beginFrame(scene->getMainCamera()->getViewport()->getVirtualResolution());
             InputManager::get().pollEvents(&Canvas::getData());
 
             if (!minimized) {
@@ -141,7 +141,7 @@ namespace GDE {
         if(InputManager::isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
 
-        Canvas::update(_dt);
+//        Canvas::update(_dt);
     }
 
     void Engine::onRender(Delta _dt) {
@@ -154,7 +154,7 @@ namespace GDE {
         }
         frameBuffer->unbind();
 
-        Canvas::render();
+//        Canvas::render();
 
         // Imgui rendering
         Profiler::begin(ProfilerState::IMGUI);

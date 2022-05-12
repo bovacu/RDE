@@ -38,6 +38,7 @@ namespace GDE {
             bool roll_run(const TransitionParams& _params);
 
             void box2DStressTest();
+            void textStressTest();
     };
 
 }

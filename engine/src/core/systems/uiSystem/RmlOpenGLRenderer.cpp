@@ -43,19 +43,16 @@ namespace GDE {
         (void)_operationName;
     }
 
-    void RmlOpenGLRenderer::RenderGeometry(Rml::Vertex* _vertices, int _numVertices, int* _indices, int _numIndices, const Rml::TextureHandle _texture, const Rml::Vector2f& _translation)
-    {
-        Rml::CompiledGeometryHandle geometry = CompileGeometry(_vertices, _numVertices, _indices, _numIndices, _texture);
+    void RmlOpenGLRenderer::RenderGeometry(Rml::Vertex* _vertices, int _numVertices, int* _indices, int _numIndices, const Rml::TextureHandle _texture, const Rml::Vector2f& _translation) {
+        Rml::CompiledGeometryHandle _geometry = CompileGeometry(_vertices, _numVertices, _indices, _numIndices, _texture);
 
-        if (geometry)
-        {
-            RenderCompiledGeometry(geometry, _translation);
-            ReleaseCompiledGeometry(geometry);
+        if (_geometry) {
+            RenderCompiledGeometry(_geometry, _translation);
+            ReleaseCompiledGeometry(_geometry);
         }
     }
 
-    Rml::CompiledGeometryHandle RmlOpenGLRenderer::CompileGeometry(Rml::Vertex* _vertices, int _numVertices, int* _indices, int _numIndices, Rml::TextureHandle _texture)
-    {
+    Rml::CompiledGeometryHandle RmlOpenGLRenderer::CompileGeometry(Rml::Vertex* _vertices, int _numVertices, int* _indices, int _numIndices, Rml::TextureHandle _texture) {
         constexpr GLenum _drawUsages = GL_STATIC_DRAW;
 
         GLuint _vao = 0;
