@@ -21,12 +21,14 @@ namespace GDE {
     class Canvas {
         private:
             RmlData rmlData;
+            bool enabled = true;
 
         private:
             static Canvas& get();
 
         public:
             static void init(int _width, int _height);
+            static void enable(bool _enable);
             static void beginFrame(const Vec2I _viewport);
             static void update(Delta _dt);
             static void render();

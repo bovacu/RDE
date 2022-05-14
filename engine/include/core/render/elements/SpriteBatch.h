@@ -37,6 +37,8 @@ namespace GDE {
                 int layer;
                 ShaderID shaderID = -1;
                 std::vector<Vertex2dUVColor> vertexBuffer;
+                std::vector<uint32_t> indexBuffer;
+                int vertexCount = 0;
                 Texture* texture;
                 friend class SpriteBatch;
                 void addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
@@ -73,7 +75,7 @@ namespace GDE {
             Debug debug;
 
         private:
-            GLuint vbo = -1, vao = -1;
+            GLuint vbo = -1, vao = -1, ibo = -1;
             int vertices = 0;
             glm::mat4 viewProjectionMatrix;
             std::vector<Batch> batches;

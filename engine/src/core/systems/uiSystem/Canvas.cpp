@@ -62,15 +62,18 @@ namespace GDE {
     }
 
     void Canvas::beginFrame(const Vec2I _viewport) {
+        if(!get().enabled) return;
         get().rmlData.rmlRenderer->BeginFrame();
         get().rmlData.rmlRenderer->SetViewport(_viewport.x, _viewport.y);
     }
 
     void Canvas::update(Delta _dt) {
+        if(!get().enabled) return;
         get().rmlData.rmlContext->Update();
     }
 
     void Canvas::render() {
+        if(!get().enabled) return;
         get().rmlData.rmlContext->Render();
     }
 
@@ -82,5 +85,9 @@ namespace GDE {
 
     RmlData& Canvas::getData() {
         return get().rmlData;
+    }
+
+    void Canvas::enable(bool _enable) {
+        get().enabled = _enable;
     }
 }
