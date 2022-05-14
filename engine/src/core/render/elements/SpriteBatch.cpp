@@ -23,6 +23,7 @@ namespace GDE {
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
         glGenBuffers(1, &vbo);
+        glGenBuffers(1, &ibo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         GLsizei _structSize = sizeof(Vertex2dUVColor);
 
@@ -166,10 +167,17 @@ namespace GDE {
             glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            glDrawArrays(GL_TRIANGLES, 0, (int)_batch.vertexBuffer.size());
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * _batch.indexBuffer.size()), &_batch.indexBuffer[0], GL_STATIC_DRAW);
 
-            totalTriangles += (int)_batch.vertexBuffer.size() / 3;
+            glDrawElements(GL_TRIANGLES, (int)_batch.indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+            totalTriangles += (int)_batch.vertexBuffer.size() / 2;
             _batch.vertexBuffer.clear();
+            _batch.indexBuffer.clear();
+            _batch.vertexCount = 0;
 
             drawCalls++;
             vertices = 0;
@@ -288,12 +296,18 @@ namespace GDE {
 
         vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color);
         vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2( _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
         vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
 
-        spriteBatch->vertices += 6;
+        indexBuffer.emplace_back(vertexCount + 0);
+        indexBuffer.emplace_back(vertexCount + 1);
+        indexBuffer.emplace_back(vertexCount + 2);
+
+        indexBuffer.emplace_back(vertexCount + 2);
+        indexBuffer.emplace_back(vertexCount + 3);
+        indexBuffer.emplace_back(vertexCount + 0);
+
+        vertexCount += 4;
     }
 
     void SpriteBatch::Batch::addText(const TextRenderer& _text, const Transform& _transform) {
@@ -346,13 +360,21 @@ namespace GDE {
 
             vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner,_bottomLeftTextureCoord, _color);
             vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,_bottomRightTextureCoord, _color);
-            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
-            vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,_bottomRightTextureCoord, _color);
-            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
             vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,_topRightTextureCoord, _color);
+            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
 
             _x += _chars[_char].advance.x / 2.f;
             _y += _chars[_char].advance.y;
+
+            indexBuffer.emplace_back(vertexCount + 0);
+            indexBuffer.emplace_back(vertexCount + 1);
+            indexBuffer.emplace_back(vertexCount + 2);
+
+            indexBuffer.emplace_back(vertexCount + 2);
+            indexBuffer.emplace_back(vertexCount + 3);
+            indexBuffer.emplace_back(vertexCount + 0);
+
+            vertexCount += 4;
         }
     }
 
