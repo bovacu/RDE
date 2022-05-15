@@ -62,7 +62,7 @@ namespace GDE {
     SpriteBatch::~SpriteBatch() = default;
 
     void SpriteBatch::beginDraw(Camera& _camera) {
-        viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(Engine::get().getScene()->getMainGraph()->getComponent<Transform>(Engine::get().getScene()->getMainCamera()->ID)->modelMatrix);
+        viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(Engine::get().getScene()->getMainGraph()->getComponent<Transform>(_camera.ID)->modelMatrix);
         debug.scalingFactor = _camera.getViewport()->getScalingFactor();
     }
 

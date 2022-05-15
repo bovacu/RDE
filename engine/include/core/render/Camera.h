@@ -38,6 +38,8 @@ namespace GDE {
             Transform& getTransform();
 
             void setPosition(const Vec2F& _position);
+            void translate(const Vec2F _translation);
+            void translate(float _x, float _y);
             Vec2F getPosition();
 
             void setRotation(float _rotation);

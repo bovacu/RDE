@@ -148,8 +148,6 @@ namespace GDE {
             /// @param _dt The amount of time passed from the previous frame to this current one.
             void onRender(Delta _dt);
 
-            void onDebugRender(Delta _dt);
-
             void setScene(Scene* _scene);
 
             [[nodiscard]] Scene* getScene() const { return scene; }

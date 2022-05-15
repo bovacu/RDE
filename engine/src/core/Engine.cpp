@@ -102,8 +102,6 @@ namespace GDE {
                 onRender(_dt);
                 Profiler::end(ProfilerState::RENDERING);
 
-                onDebugRender(_dt);
-
                 #ifdef ENGINE_DEBUG
                 updateFps();
                 #endif
@@ -154,26 +152,19 @@ namespace GDE {
         }
         frameBuffer->unbind();
 
-        Canvas::render();
+        scene->onDebugRender(_dt);
 
-        // Imgui rendering
         Profiler::begin(ProfilerState::IMGUI);
         #if !IS_MOBILE()
-        imGuiLayer->begin();
-        scene->onImGuiRender(_dt);
+            imGuiLayer->begin();
+            scene->onImGuiRender(_dt);
 
-        if (showImGuiDebugWindow)
-            imGuiLayer->drawDebugInfo(scene->getMainGraph());
+            if (showImGuiDebugWindow)
+                imGuiLayer->drawDebugInfo(scene->getMainGraph());
 
-        imGuiLayer->end();
+            imGuiLayer->end();
         #endif
         Profiler::end(ProfilerState::IMGUI);
-    }
-
-    void Engine::onDebugRender(Delta _dt) {
-        Renderer::beginDebugDraw(*scene->getMainCamera());
-        scene->onDebugRender(_dt);
-        Renderer::endDebugDraw();
     }
 
     bool Engine::onWindowClosed(WindowClosedEvent &_e) {

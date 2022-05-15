@@ -4,6 +4,7 @@
 #include "core/graph/Components.h"
 #include "core/render/Renderer.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
+#include "core/graph/Scene.h"
 
 namespace GDE {
 
@@ -36,7 +37,7 @@ namespace GDE {
             _transform.update(this);
         });
 
-        registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _active) {
+        registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _active) {
             _animationSystem.update(_dt, _spriteRenderer);
         });
 
@@ -45,7 +46,7 @@ namespace GDE {
 
     void Graph::onFixedUpdate(Delta _dt) {
 
-        registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, Body& _body, const Active& _active) {
+        registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([](const auto _entity, Transform& _transform, Body& _body, const Active& _active) {
             auto _lastStoredPosition = _body.b2dConfig.lastPosition;
             auto _diff = _transform.getPositionLocal() - _lastStoredPosition;
 
@@ -62,22 +63,35 @@ namespace GDE {
         onFixedUpdateDel(_dt);
     }
 
-    void Graph::onRender() {
-        registry.group<Transform>(entt::get<SpriteRenderer, Active>).each([&](const auto _entity, const Transform& _transform, const SpriteRenderer& _spriteRenderer, const Active& _active) {
-            Renderer::draw(_spriteRenderer, _transform);
-        });
+    void Graph::onRender(Scene* scene) {
+        Renderer::clear();
 
-        auto _a = registry.view<int>();
+        auto _spriteRendererGroup = registry.group<SpriteRenderer>(entt::get<Transform, Active>);
+        auto _textRendererGroup = registry.group<TextRenderer>(entt::get<Transform, Active>);
 
-        registry.view<Transform, TextRenderer>().each([&](const auto _entity, const Transform& _transform, const TextRenderer& _text) {
-            Renderer::draw(_text, _transform);
-        });
+        for(auto* _camera : scene->cameras) {
+            Renderer::beginDraw(*_camera);
+            {
+                _spriteRendererGroup.each([](const auto _entity, const SpriteRenderer& _spriteRenderer, const Transform& _transform, const Active& _active) {
+                    Renderer::draw(_spriteRenderer, _transform);
+                });
 
-        registry.view<Body>().each([&](const auto _entity, const Body& _body) {
-            Renderer::drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
-        });
+                _textRendererGroup.each([](const auto _entity, const TextRenderer& _text, const Transform& _transform, const Active& _active) {
+                    Renderer::draw(_text, _transform);
+                });
+            }
+            Renderer::endDraw();
+        }
 
         onRenderDel();
+    }
+
+    void Graph::onDebugRender(Scene* scene) {
+        Renderer::beginDebugDraw(*scene->mainCamera);
+        registry.view<Body>().each([](const auto _entity, const Body& _body) {
+            Renderer::drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
+        });
+        Renderer::endDebugDraw();
     }
 
     NodeID Graph::createNode(const std::string& _tag, const NodeID& _parent) {

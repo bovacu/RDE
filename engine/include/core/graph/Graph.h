@@ -15,7 +15,11 @@ namespace GDE {
     typedef entt::registry NodeContainer;
     #define NODE_ID_NULL entt::null
 
+    class Scene;
     class Graph {
+
+        friend class Scene;
+
         private:
             NodeID sceneRoot;
             std::string name;
@@ -24,6 +28,11 @@ namespace GDE {
         private:
             void printScene(const NodeID&, std::ostream& _os, int& _indent);
             void remove(const NodeID& _node, bool _delete);
+            void onEvent(Event& _event);
+            void onUpdate(Delta _dt);
+            void onFixedUpdate(Delta _dt);
+            void onRender(Scene* scene);
+            void onDebugRender(Scene* scene);
 
         public:
             UDelegate<void(Event&)> onEventDel;
@@ -34,11 +43,6 @@ namespace GDE {
         public:
             explicit Graph(const std::string& _sceneName);
             ~Graph() = default;
-
-            void onEvent(Event& _event);
-            void onUpdate(Delta _dt);
-            void onFixedUpdate(Delta _dt);
-            void onRender();
 
             NodeID createNode(const std::string& _tag = "", const NodeID& _parent = NODE_ID_NULL);
             NodeID createSpriteNode(Texture* _texture, const std::string& _tag = "", const NodeID& _parent = NODE_ID_NULL);

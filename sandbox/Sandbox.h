@@ -16,7 +16,7 @@ namespace GDE {
             Engine* engine;
             UDelegate<bool(MouseScrolledEvent&)> mseDelegate;
 
-            NodeID square, squareChild;
+            NodeID square, squareChild, secondaryCamera;
             Transform* squareTransform;
             Transform* childTransform;
 

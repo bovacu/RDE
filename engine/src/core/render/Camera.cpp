@@ -11,6 +11,7 @@ namespace GDE {
     Camera::Camera(const Window* _window, const NodeID& _mainCameraID) {
         ID = _mainCameraID;
         viewport = new FreeViewPort(_window->getWindowSize());
+        onResize(_window->getWidth(), _window->getHeight());
     }
 
     void Camera::onResize(int _width, int _height) {
@@ -114,6 +115,15 @@ namespace GDE {
         delete viewport;
         viewport = new AdaptiveViewPort(_virtualDesiredSize);
         viewport->update(_currentDeviceSize);
+    }
+
+    void Camera::translate(const Vec2F _translation) {
+        translate(_translation.x, _translation.y);
+    }
+
+    void Camera::translate(float _x, float _y) {
+        auto _position = getPosition();
+        setPosition({_position.x + _x, _position.y + _y});
     }
 
 }

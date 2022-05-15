@@ -85,6 +85,8 @@ namespace GDE {
         getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World")->setColor(Color::Green);
         getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
 
+        addCamera(&engine->getWindow())->setPosition({250, 0});
+
 //        Physics::get().setCallbackForCollisionBetweenMasks(1 << 2, 1 << 1).bind<&test>();
 
 //        box2DStressTest();
@@ -92,46 +94,25 @@ namespace GDE {
     }
 
     void Sandbox::onEvent(Event &_event) {
+        Scene::onEvent(_event);
+
         EventDispatcher _dispatcher(_event);
         _dispatcher.dispatchEvent<MouseScrolledEvent>(mseDelegate);
-
-        getMainGraph()->onEvent(_event);
     }
 
     void Sandbox::onUpdate(Delta _dt) {
-        auto _t = getMainGraph()->getComponent<Transform>(square);
-        if (InputManager::isKeyPressed(KeyCode::A))
-            _t->translate(-_dt * 150, 0);
-        else if (InputManager::isKeyPressed(KeyCode::D))
-            _t->translate(_dt * 150, 0);
+        Scene::onUpdate(_dt);
 
-        if (InputManager::isKeyPressed(KeyCode::W))
-            _t->translate(0, _dt * 150);
-        else if (InputManager::isKeyPressed(KeyCode::S))
-            _t->translate(0, -_dt * 150);
-
-        if (InputManager::isKeyPressed(KeyCode::R))
-            _t->rotate(_dt * 150);
-
-        if (InputManager::isKeyPressed(KeyCode::Z))
-            _t->scale(_dt, _dt);
-        else if (InputManager::isKeyPressed(KeyCode::X))
-            _t->scale(-_dt, -_dt);
-
-        if (InputManager::isKeyPressed(KeyCode::Space))
-            _t->setPosition(-150, _t->getPositionLocal().y);
-
-        getMainGraph()->onUpdate(_dt);
+//        getCameras()[0]->translate(_dt * 50, 0);
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {
         Scene::onFixedUpdate(_dt);
-        getMainGraph()->onFixedUpdate(_dt);
+
     }
 
     void Sandbox::onRender(Delta _dt) {
-        //        Renderer::drawGrid();
-        getMainGraph()->onRender();
+        Scene::onRender(_dt);
     }
 
     void Sandbox::onDebugRender(Delta _dt) {
