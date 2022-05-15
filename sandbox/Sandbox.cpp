@@ -85,8 +85,6 @@ namespace GDE {
         getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World")->setColor(Color::Green);
         getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
 
-        addCamera(&engine->getWindow())->setPosition({250, 0});
-
 //        Physics::get().setCallbackForCollisionBetweenMasks(1 << 2, 1 << 1).bind<&test>();
 
 //        box2DStressTest();
@@ -102,17 +100,11 @@ namespace GDE {
 
     void Sandbox::onUpdate(Delta _dt) {
         Scene::onUpdate(_dt);
-
-//        getCameras()[0]->translate(_dt * 50, 0);
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {
         Scene::onFixedUpdate(_dt);
 
-    }
-
-    void Sandbox::onRender(Delta _dt) {
-        Scene::onRender(_dt);
     }
 
     void Sandbox::onDebugRender(Delta _dt) {
@@ -221,6 +213,7 @@ namespace GDE {
     void Sandbox::textStressTest() {
         Random _r;
         // 25000 is the maximum I could get with 60fps of average performance, with texts -> "Text[0-25000]"
+        // 15000 is the maximum I could get with 60fps of average performance, with texts -> "Text[0-15000]" for 2 cameras
         for(int _i = 0; _i < 25000; _i++) {
             auto _text = getMainGraph()->createNode("Text" + std::to_string(_i));
             auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);

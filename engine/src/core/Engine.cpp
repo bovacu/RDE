@@ -70,16 +70,14 @@ namespace GDE {
     }
 
     void Engine::onRun() {
-        int _width, _height;
-        SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
-        scene->getMainCamera()->onResize(_width, _height);
-
         float _accumulator = 0;
 
         Delta _dt = 0;
         while (running) {
             Uint64 _start = SDL_GetPerformanceCounter();
             _accumulator += _dt;
+
+            if(scene == nullptr) continue;
 
             GDE::Profiler::beginFrame(_dt);
             Canvas::beginFrame(scene->getMainCamera()->getViewport()->getVirtualResolution());
@@ -241,7 +239,12 @@ namespace GDE {
     void Engine::setScene(Scene* _scene) {
         if(scene != nullptr) scene->onEnd();
         scene = _scene;
-        if(scene != nullptr) scene->onInit();
+        if(scene != nullptr) {
+            int _width, _height;
+            SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
+            scene->getMainCamera()->onResize(_width, _height);
+            scene->onInit();
+        }
     }
 
     Logs Engine::componentsCommands(const std::vector<std::string>& _args) {

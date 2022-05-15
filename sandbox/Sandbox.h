@@ -26,7 +26,6 @@ namespace GDE {
             void onEvent(Event& _event) override;
             void onUpdate(Delta _dt) override;
             void onFixedUpdate(Delta _dt) override;
-            void onRender(Delta _dt) override;
             void onImGuiRender(Delta _dt) override;
             void onDebugRender(Delta _dt) override;
             void onEnd() override;

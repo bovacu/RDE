@@ -20,6 +20,7 @@ namespace GDE {
         glViewport(0, 0, _width, _height);
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
+        size = {_width, _height};
     }
 
     glm::mat4& Camera::getProjectionMatrix() {
@@ -117,13 +118,25 @@ namespace GDE {
         viewport->update(_currentDeviceSize);
     }
 
-    void Camera::translate(const Vec2F _translation) {
+    void Camera::translate(const Vec2F& _translation) {
         translate(_translation.x, _translation.y);
     }
 
     void Camera::translate(float _x, float _y) {
         auto _position = getPosition();
         setPosition({_position.x + _x, _position.y + _y});
+    }
+
+    void Camera::setCameraSize(const Vec2I& _cameraSize) {
+        setCameraSize(_cameraSize.x, _cameraSize.y);
+    }
+
+    void Camera::setCameraSize(int _width, int _height) {
+        onResize(_width, _height);
+    }
+
+    Vec2I Camera::getCameraSize() {
+        return size;
     }
 
 }

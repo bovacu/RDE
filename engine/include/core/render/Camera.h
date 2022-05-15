@@ -17,7 +17,7 @@ namespace GDE {
     class Camera {
         friend class Scene;
         private:
-            int width, height;
+            Vec2I size;
             float zoom = 1, zoomSpeed = 0.25f;
             glm::mat4 projectionMatrix;
             glm::mat4 viewMatrix {1.f};
@@ -38,19 +38,23 @@ namespace GDE {
             Transform& getTransform();
 
             void setPosition(const Vec2F& _position);
-            void translate(const Vec2F _translation);
+            void translate(const Vec2F& _translation);
             void translate(float _x, float _y);
             Vec2F getPosition();
+
+            void setCameraSize(const Vec2I& _cameraSize);
+            void setCameraSize(int _width, int _height);
+            Vec2I getCameraSize();
 
             void setRotation(float _rotation);
             float getRotation();
 
             [[nodiscard]] float getAspectRatio() const;
 
-            float getCurrentZoomLevel() const;
+            [[nodiscard]] float getCurrentZoomLevel() const;
             void setCurrentZoomLevel(float _zoomLevel);
 
-            float getZoomSpeed() const;
+            [[nodiscard]] float getZoomSpeed() const;
             void setZoomSpeed(float _zoomSpeed);
 
             glm::mat4& operator() (const Camera& _camera) {

@@ -71,6 +71,7 @@ namespace GDE {
 
         for(auto* _camera : scene->cameras) {
             Renderer::beginDraw(*_camera);
+            _camera->setCameraSize(_camera->getCameraSize());
             {
                 _spriteRendererGroup.each([](const auto _entity, const SpriteRenderer& _spriteRenderer, const Transform& _transform, const Active& _active) {
                     Renderer::draw(_spriteRenderer, _transform);

@@ -31,7 +31,7 @@ namespace GDE {
             virtual void onEvent(Event& _event);
             virtual void onUpdate(Delta _dt);
             virtual void onFixedUpdate(Delta _dt);
-            virtual void onRender(Delta _dt);
+            void onRender(Delta _dt);
             virtual void onImGuiRender(Delta _dt) {  }
             virtual void onDebugRender(Delta _dt);
             virtual void onEnd() {  }

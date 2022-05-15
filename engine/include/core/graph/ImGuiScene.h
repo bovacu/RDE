@@ -30,7 +30,6 @@ namespace GDE {
             void onInit() override;
             void onEvent(Event& _e) override;
             void onUpdate(Delta _dt) override {  }
-            void onRender(Delta _dt) override {  }
             void onImGuiRender(Delta _dt) override {  }
             void onEnd() override;
 
