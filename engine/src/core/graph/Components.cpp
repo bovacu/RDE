@@ -7,8 +7,8 @@ namespace GDE {
 
     glm::mat4 Transform::getLocalModelMatrix() {
         const glm::mat4 _rot = glm::rotate(glm::mat4(1.0f), glm::radians(localRotation), glm::vec3(0.0f, 0.0f, 1.0f));
-        auto _scalingFactor = Engine::get().getScene()->getMainCamera()->getViewport()->getScalingFactor();
-        glm::vec3 _scale = {localScale.x * _scalingFactor.x, localScale.y * _scalingFactor.y, 1};
+        glm::vec3 _scale = {localScale.x, localScale.y, 1};
+
         localModelMatrix = glm::translate(glm::mat4(1.0f), localPosition) * _rot * glm::scale(glm::mat4(1.0f), _scale);
         return localModelMatrix;
     }
@@ -26,14 +26,16 @@ namespace GDE {
     }
 
     void Transform::setPosition(float _x, float _y) {
-        Util::worldToScreenSize(_x, _y);
+        auto _windowSize = Engine::get().getWindowSize();
+        Util::worldToScreenSize(_x, _y, (float)_windowSize.x / (float) _windowSize.y);
         localPosition = glm::vec3 {_x, _y, 0.0f};
         getLocalModelMatrix();
     }
 
     Vec2F Transform::getPositionLocal() const {
         float _x = localPosition.x, _y = localPosition.y;
-        Util::screenToWorldCoords(_x, _y);
+        auto _windowSize = Engine::get().getWindowSize();
+        Util::screenToWorldCoords(_x, _y, (float)_windowSize.x / (float) _windowSize.y);
         return {_x, _y};
     }
 
@@ -64,7 +66,8 @@ namespace GDE {
     }
 
     void Transform::translate(float _x, float _y) {
-        Util::worldToScreenSize(_x, _y);
+        auto _windowSize = Engine::get().getWindowSize();
+        Util::worldToScreenSize(_x, _y, (float)_windowSize.x / (float) _windowSize.y);
         localPosition.x += _x;
         localPosition.y += _y;
         getLocalModelMatrix();
@@ -87,7 +90,8 @@ namespace GDE {
 
     Vec2F Transform::getPositionWorld() const {
         float _x = modelMatrix[3][0], _y =  modelMatrix[3][1];
-        Util::screenToWorldCoords(_x, _y);
+        auto _windowSize = Engine::get().getWindowSize();
+        Util::screenToWorldCoords(_x, _y, (float)_windowSize.x / (float) _windowSize.y);
         return {_x, _y};
     }
 
@@ -110,17 +114,17 @@ namespace GDE {
 
     /// -------------------------------------------
 
-    TextRenderer::TextRenderer(Font* _font, const std::string& _text) {
+    TextRenderer::TextRenderer(Manager* _manager, Font* _font, const std::string& _text) {
         font = _font;
         innerText = _text;
         recalcTextDimensions(_text);
-        shaderID = ShaderManager::get().getShader("basicText");
+        shaderID = _manager->shaderManager.getShader("basicText");
         texture = &font->getTexture();
     }
 
-    TextRenderer::TextRenderer(Font* _font) {
+    TextRenderer::TextRenderer(Manager* _manager, Font* _font) {
         font = _font;
-        shaderID = ShaderManager::get().getShader("basicText");
+        shaderID = _manager->shaderManager.getShader("basicText");
         texture = &font->getTexture();
     }
 
@@ -169,9 +173,10 @@ namespace GDE {
     }
 
     void TextRenderer::setFontSize(int _fontSize) {
-        fontSize = _fontSize;
-        recalcTextDimensions(innerText);
-        font = FontManager::get().getSpecificFont(font->getFontName(), _fontSize);
+        LOG_W("Set font size not working!!")
+//        fontSize = _fontSize;
+//        recalcTextDimensions(innerText);
+//        font = FontManager::get().getSpecificFont(font->getFontName(), _fontSize);
     }
 
     int TextRenderer::getFontSize() const {
@@ -194,10 +199,6 @@ namespace GDE {
     void TextRenderer::setSpacesBetweenChars(float _spaceBetweenChars) {
         spaceBetweenChars = _spaceBetweenChars;
         recalcTextDimensions(innerText);
-    }
-
-    void TextRenderer::setColor(const Color &_color) {
-        color = _color;
     }
 
 //    Shape& TextRenderer::getDebugShape() {
@@ -284,5 +285,17 @@ namespace GDE {
     void Body::setSelfCollisionMask(CollisionMask _mask) const {
         auto _filter = reinterpret_cast<b2Filter*>(b2dConfig.body->GetUserData().pointer);
         _filter->categoryBits = _mask;
+    }
+
+
+    // -------------------------------- SPRITE RENDERER
+
+
+    SpriteRenderer::SpriteRenderer(Manager* _manager, Texture* _texture) : texture(_texture) {
+        shaderID = _manager->shaderManager.getShader("basic");
+    }
+
+    SpriteRenderer::SpriteRenderer(Manager* _manager) {
+        shaderID = _manager->shaderManager.getShader("basic");
     }
 }

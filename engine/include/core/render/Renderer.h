@@ -25,7 +25,7 @@ namespace GDE {
             /**
              * Must be called ONCE before rendering anything, BUT after creating the window.
              **/
-            static void init();
+            static void init(Manager* _manager);
             static void destroy();
 
             /**
@@ -41,14 +41,14 @@ namespace GDE {
              * @param _camera It is the main camera of the scene (or other camera if a special drawing is needed).
              * @param _renderShader The shader we want to use to render, by default the basic one.
              **/
-            static void beginDraw(Camera& _camera);
+            static void beginDraw(Camera& _camera, Transform* _cameraTransform);
 
             /**
              * Renders geometry for debugging. It also includes batching.
              * @param _camera It is the main camera of the scene (or other camera if a special drawing is needed).
              * @param _renderShader The shader we want to use to render, by default the debugging one.
              */
-            static void beginDebugDraw(Camera& _camera, float _thickness = 1.f);
+            static void beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness = 1.f);
 
             /**
              * Renders a sprite. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.

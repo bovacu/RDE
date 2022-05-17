@@ -1,0 +1,97 @@
+Scene:
+  Name: "Sandbox Scene"
+  Assets:
+    Textures:
+      - Path: "assets/test/test.png"
+        TileWidth: 50
+        TileHeight: 50
+      - Path: "assets/test/square.png"
+        TileWidth: 32
+        TileHeight: 32
+      - Path: "assets/player/run.png"
+        TileWidth: 120
+        TileHeight: 80
+    Fonts:
+      - Path: "assets/fonts/arial.ttf"
+        Sizes: [54]
+  Entities:
+    - Tag: "Main Camera"
+      Ref: 0
+      Active: true
+      Transform:
+        Position: [0, 0]
+        Scale: [1, 1]
+        Rotation: 0
+    - Tag: "White cube"
+      Ref: 1
+      Active: true
+      Transform:
+        Position: [-25, 0]
+        Scale: [1, 1]
+        Rotation: 0
+    - Tag: "Blue Cube"
+      Ref: 2
+      Active: true
+      Transform:
+        Position: [0, -128]
+        Scale: [1, 1]
+        Rotation: 0
+    - Tag: "Text"
+      Ref: 3
+      Active: true
+      Transform:
+        Position: [0, 100]
+        Scale: [1, 1]
+        Rotation: 0
+  Cameras:
+    - Name: "MainCamera"
+      Zoom: 1
+      ZoomSpeed: 0.25
+      SetAsMain: true
+      ViewPortType: 0 # 0 is Adaptative, 1 is Free
+      Owner: 0
+  SpriteRenderers:
+    - Texture:
+        Atlas: "square"
+        Tile: "square_0"
+      Color: [255, 255, 255, 255]
+      Layer: 0
+      Shader: "basic"
+      Owner: 1
+    - Texture:
+        Atlas: "square"
+        Tile: "square_0"
+      Color: [0, 0, 255, 255]
+      Layer: 0
+      Shader: "basic"
+      Owner: 2
+  TextRenderers:
+    - Text: "Hello World"
+      Color: [0, 255, 0, 255]
+      Layer: 0
+      Shader: "basicText"
+      Font:
+        Name: "arial"
+        Size: 54
+      Owner: 3
+  Bodies:
+    - BodyType: 0   # 0 -> static, 1 -> dynamic, 2 -> kinematic
+      BodyShape: 0  # 0 -> square, 1 -> circle, 2 -> polygon
+      Mass: 1.0
+      Size:
+        Width: 32
+        Height: 32
+      Friction: 0.0
+      Restitution: 0.0
+      Mask: 2
+      Owner: 2
+    - BodyType: 1
+      BodyShape: 0
+      Mass: 1.0
+      Size:
+        Width: 32
+        Height: 32
+      Friction: 0.0
+      Restitution: 0.0
+      Mask: 1
+      Owner: 1

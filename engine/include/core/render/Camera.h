@@ -14,6 +14,7 @@
 namespace GDE {
 
     class Transform;
+    class SceneManager;
     class Camera {
         friend class Scene;
         private:
@@ -23,6 +24,7 @@ namespace GDE {
             glm::mat4 viewMatrix {1.f};
             glm::mat4 viewProjectionMatrix;
             IViewPort* viewport;
+            SceneManager* sceneManager;
 
         public:
             NodeID ID;

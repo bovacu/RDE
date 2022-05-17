@@ -59,7 +59,6 @@ namespace GDE {
     }
 
     void WindowInput::onWindowResize(SDL_Event& _event, RmlData* _rmlData) {
-        window->setWindowSize(_event.window.data1, _event.window.data2);
         WindowResizedEvent _rwEvent(_event.window.data1, _event.window.data2);
         window->consumeEvent(_rwEvent);
     }

@@ -81,40 +81,40 @@ namespace GDE {
             void pollEvents(RmlData* _rmlData);
 
         public:
-            static bool isKeyJustPressed(KeyCode _key);
-            static bool isKeyJustReleased(KeyCode _key);
-            static bool isKeyPressed(KeyCode _key);
-            static bool isKeyReleased(KeyCode _key);
+            bool isKeyJustPressed(KeyCode _key);
+            bool isKeyJustReleased(KeyCode _key);
+            bool isKeyPressed(KeyCode _key);
+            bool isKeyReleased(KeyCode _key);
 
 
-            static bool isMouseJustPressed(MouseCode _button);
-            static bool isMouseJustReleased(MouseCode _button);
-            static bool isMousePressed(MouseCode _button);
-            static bool isMouseReleased(MouseCode _button);
-            static Vec2F getMousePosScreenCoords(bool _centeredMiddleScreen = true);
-            static Vec2F getMousePosWorldPos();
+            bool isMouseJustPressed(MouseCode _button);
+            bool isMouseJustReleased(MouseCode _button);
+            bool isMousePressed(MouseCode _button);
+            bool isMouseReleased(MouseCode _button);
+            Vec2F getMousePosScreenCoords(bool _centeredMiddleScreen = true);
+            Vec2F getMousePosWorldPos();
 
 
-            static bool reassignController(int _controllerID, int _as);
-            static bool isGamepadButtonJustPressed(GamePadButtons _button, int _controllerID = 0);
-            static bool isGamepadButtonJustReleased(GamePadButtons _button, int _controllerID = 0);
-            static bool isGamepadButtonPressed(GamePadButtons _button, int _controllerID = 0);
-            static bool isGamepadButtonReleased(GamePadButtons _button, int _controllerID = 0);
-            static bool gamepadVibrate(int _controllerID = 0, const std::string& _vibrationEffectName = "default");
+            bool reassignController(int _controllerID, int _as);
+            bool isGamepadButtonJustPressed(GamePadButtons _button, int _controllerID = 0);
+            bool isGamepadButtonJustReleased(GamePadButtons _button, int _controllerID = 0);
+            bool isGamepadButtonPressed(GamePadButtons _button, int _controllerID = 0);
+            bool isGamepadButtonReleased(GamePadButtons _button, int _controllerID = 0);
+            bool gamepadVibrate(int _controllerID = 0, const std::string& _vibrationEffectName = "default");
 
 
-            static bool isGamepadAxisJustPressed(GamePadAxis _axis, int _controllerID = 0);
-            static bool isGamepadAxisPressed(GamePadAxis _axis, int _controllerID = 0);
-            static bool isGamepadAxisReleased(GamePadAxis _axis, int _controllerID = 0);
+            bool isGamepadAxisJustPressed(GamePadAxis _axis, int _controllerID = 0);
+            bool isGamepadAxisPressed(GamePadAxis _axis, int _controllerID = 0);
+            bool isGamepadAxisReleased(GamePadAxis _axis, int _controllerID = 0);
 
-            static bool isMobileScreenJustPressed(int _fingerID);
-            static bool isMobileScreenJustReleased(int _fingerID);
-            static bool isMobileScreenPressed(int _fingerID);
-            static bool isMobileScreenUp(int _fingerID);
+            bool isMobileScreenJustPressed(int _fingerID);
+            bool isMobileScreenJustReleased(int _fingerID);
+            bool isMobileScreenPressed(int _fingerID);
+            bool isMobileScreenUp(int _fingerID);
 
-            static std::vector<SystemEventEnum> getEventsIgnored(const InputType& _inputType);
-            static void addEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event);
-            static void removeEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event);
+            std::vector<SystemEventEnum> getEventsIgnored(const InputType& _inputType);
+            void addEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event);
+            void removeEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event);
     };
 }
 

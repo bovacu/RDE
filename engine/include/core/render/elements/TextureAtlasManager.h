@@ -56,22 +56,21 @@ namespace GDE {
     class TextureAtlasManager {
         private:
             std::unordered_map<std::string, Atlas*> atlases;
-            static TextureAtlasManager instance;
 
         public:
             bool addAtlas(int _tileWidth, int _tileHeight, const std::string& _pathToTexture);
             Texture* getTexture(const std::string& _textureName);
             Texture* getTile(const std::string& _atlasName, const std::string& _textureName);
             Atlas* getAtlas(const std::string& _atlasName);
-            static TextureAtlasManager& get();
 
             // Debug
             std::vector<TextureInfo> getTexturesInfo();
 
             void destroy();
 
-        private:
             TextureAtlasManager() = default;
+
+        private:
             void cropTextures(Atlas& _atlas);
             bool isTextureEmpty(const Atlas& _atlas, uint _x, uint _y) const;
     };

@@ -24,7 +24,7 @@ namespace GDE {
             NodeID selectedNode = NODE_ID_NULL;
 
         public:
-            ImGuiScene();
+            ImGuiScene(Engine* _engine);
             ~ImGuiScene() override = default;
 
             void onInit() override;

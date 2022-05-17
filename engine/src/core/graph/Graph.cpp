@@ -70,7 +70,7 @@ namespace GDE {
         auto _textRendererGroup = registry.group<TextRenderer>(entt::get<Transform, Active>);
 
         for(auto* _camera : scene->cameras) {
-            Renderer::beginDraw(*_camera);
+            Renderer::beginDraw(*_camera, getComponent<Transform>(_camera->ID));
             _camera->setCameraSize(_camera->getCameraSize());
             {
                 _spriteRendererGroup.each([](const auto _entity, const SpriteRenderer& _spriteRenderer, const Transform& _transform, const Active& _active) {
@@ -88,7 +88,7 @@ namespace GDE {
     }
 
     void Graph::onDebugRender(Scene* scene) {
-        Renderer::beginDebugDraw(*scene->mainCamera);
+        Renderer::beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->ID));
         registry.view<Body>().each([](const auto _entity, const Body& _body) {
             Renderer::drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
         });
@@ -107,12 +107,6 @@ namespace GDE {
         registry.emplace<Active>(_newNode, true);
 
         return _newNode;
-    }
-
-    NodeID Graph::createSpriteNode(Texture* _texture, const std::string& _tag, const NodeID& _parent) {
-        auto _node = createNode(_tag, _parent);
-        registry.emplace<SpriteRenderer>(_node, _texture);
-        return _node;
     }
 
     NodeID Graph::getNode(const std::string& _tagName) {

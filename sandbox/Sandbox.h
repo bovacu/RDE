@@ -21,7 +21,7 @@ namespace GDE {
             Transform* childTransform;
 
         public:
-            Sandbox() : Scene("Sandbox") {  }
+            Sandbox(Engine* _engine, const std::string& _debugName = "Sandbox") : Scene(_engine, _debugName) {  }
             void onInit() override;
             void onEvent(Event& _event) override;
             void onUpdate(Delta _dt) override;

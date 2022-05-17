@@ -17,7 +17,6 @@ namespace GDE {
             std::unordered_map<std::string, Shader*> shaders;
 
         public:
-            static ShaderManager& get();
             void init();
             void destroy();
 

@@ -38,9 +38,6 @@ namespace GDE {
             Sfx* currentSfx = nullptr;
             Music* currentMusic = nullptr;
 
-        private:
-            SoundManager() = default;
-
         public:
             SoundManager(SoundManager const&) = delete;
             void operator=(SoundManager const&)  = delete;
@@ -77,6 +74,8 @@ namespace GDE {
             void pauseAll();
             void stopAll();
             void resumeAll();
+
+            SoundManager() = default;
     };
 
 }

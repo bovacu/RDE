@@ -15,15 +15,17 @@ namespace GDE {
         bool        swapChainTarget = false;
     };
 
+    class Manager;
     class FrameBuffer {
         private:
         uint32_t fboID = 0, rboID = -1, vboID = -1, vao = -1;
         uint32_t framebufferShader = -1;
         uint32_t colorAttachment = -1;
         FrameBufferSpecification specs;
+        Manager* manager;
 
         public:
-        explicit FrameBuffer(const FrameBufferSpecification& _specs);
+        explicit FrameBuffer(const FrameBufferSpecification& _specs, Manager* _manager);
         ~FrameBuffer();
 
         /// This method checks if there's a valid FrameBuffer already in memory, in that case it removes it and

@@ -9,38 +9,55 @@
 #include "core/render/window/event/WindowEvent.h"
 #include "core/systems/profiling/Profiler.h"
 #include "core/graph/ImGuiScene.h"
-#include "core/systems/console/Console.h"
 #include "core/render/elements/FrameBuffer.h"
-#include "core/graph/Scene.h"
-#include "chipmunk/chipmunk.h"
+#include "core/Manager.h"
+
 
 namespace GDE {
 
+    class Scene;
+    struct GDEConfig {
+        struct WindowProperties {
+            std::string title = "Default";
+            Vec2<unsigned int> size { 1280, 720 };
+            bool fullScreen = false;
+            bool vsync = true;
+        };
+
+        struct ProjectProperties {
+            std::string iconPath;
+            std::string mainSceneToLoad;
+        };
+
+        WindowProperties windowData;
+        ProjectProperties projectData;
+        std::unordered_map<std::string, Scene*> registeredScenes;
+    };
+
     class Engine {
+        public:
+            Manager manager;
+
         private:
-            float timePerFrame = -1;
-            float lastFrame = 0.0f;
+            GDEConfig gdeConfig;
+
+            float fixedDelta = -1;
+            float timer = 0;
             Delta dt;
             unsigned int fpsCounter = 0, frameCounter = 0;
             Color backgroundColor = Color::Red;
             FrameBuffer* frameBuffer;
 
-        private:
             bool running = true;
             bool minimized = false;
             bool showImGuiDebugWindow = false;
 
-        private:
-            WindowPtr window;
+            Window* window;
             static Engine* gameInstance;
-            Scene* scene = nullptr;
 
             #if !IS_MOBILE()
             ImGuiScene* imGuiLayer;
             #endif
-
-            Clock clock;
-            float timer = 0;
 
             UDelegate<bool(WindowResizedEvent&)> wreDel;
 
@@ -76,7 +93,8 @@ namespace GDE {
 
             /// Returns 1 / FPS
             /// @return The FPS as milliseconds.
-            [[nodiscard]] float getTimePerFrame() const { return timePerFrame; }
+            [[nodiscard]] float geFixedDelta() const { return fixedDelta; }
+            void setFixedDelta(float _fixedDelta) { fixedDelta = _fixedDelta; }
 
             /// Enables or disables the VSync
             /// @param true or false depending if you want to enable(true) or disable(false).
@@ -110,22 +128,10 @@ namespace GDE {
             /// @param _path Path to the image to be used as icon, can be in png, jpg, jpeg, ico...
             void setAppIcon(const char* _path) { window->setIcon(_path); }
 
-            /// Allows to enable or disable some window features, such as:
-            ///     - Minimize/Maximize button.
-            ///     - Resizing.
-            ///     - Enabling the window.
-            ///     - Visibility of the window.
-            ///     - V/H Scroll of the window.
-            /// Multiple options can be concatenated by | operator, but all must be set to same value of _allow
-            /// @param _op The options to set to true or false
-            /// @param _allow true/false depending if disables or enables
-            /// @sa WindowOptions_ in Window.h
-            void setWindowOptions(WindowOptions _op, bool _allow) { window->setWindowOptions(_op, _allow); }
-
             void setRunning(bool _running) { running = _running; }
 
         public:
-            void onInit();
+            void onInit(Scene* _scene);
             /// This method is the main loop of the game, runs until the window is closed or running attribute is set
             /// to false. Runs with an independent frame rate loop.
             void onRun();
@@ -147,10 +153,6 @@ namespace GDE {
             /// This method is used to render everything in our game, renderization shouldn't be done other method.
             /// @param _dt The amount of time passed from the previous frame to this current one.
             void onRender(Delta _dt);
-
-            void setScene(Scene* _scene);
-
-            [[nodiscard]] Scene* getScene() const { return scene; }
 
             void destroy();
 

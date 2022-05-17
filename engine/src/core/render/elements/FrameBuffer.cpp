@@ -2,7 +2,7 @@
 
 
 #include "core/render/elements/FrameBuffer.h"
-#include "core/render/elements/ShaderManager.h"
+#include "core/Manager.h"
 
 #if IS_MOBILE()
     #include <GLES3/gl32.h>
@@ -12,7 +12,7 @@
 
 namespace GDE {
 
-    FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs) : specs(_specs) {
+    FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs, Manager* _manager) : specs(_specs), manager(_manager) {
         invalidate();
         glGenVertexArrays(1, &vao);
     }
@@ -79,7 +79,7 @@ namespace GDE {
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        framebufferShader = ShaderManager::get().getShader("framebuffer");
+        framebufferShader = manager->shaderManager.getShader("framebuffer");
         glBindVertexArray(0);
     }
 

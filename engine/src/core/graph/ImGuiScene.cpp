@@ -23,7 +23,7 @@ namespace GDE {
     static ImPlotContext* p_Context = nullptr;
     imgui_addons::ImGuiFileBrowser file_dialog;
 
-    ImGuiScene::ImGuiScene() : Scene("ImGuiScene") {  }
+    ImGuiScene::ImGuiScene(Engine* _engine) : Scene(_engine, "ImGuiScene") {  }
 
     void ImGuiScene::onInit() {
         // Setup Dear ImGui context
@@ -184,16 +184,16 @@ namespace GDE {
         ImGui::GetStyle().Alpha = 0.65;
         ImGui::Begin("MouseInfo", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
         ImGui::GetStyle().Alpha = 1;
-        ImGui::Text("X: %f, Y: %f", InputManager::getMousePosScreenCoords().x, InputManager::getMousePosScreenCoords().y);
+        ImGui::Text("X: %f, Y: %f", engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
         ImGui::End();
     }
 
     void ImGuiScene::printFPSDrawCallsAndRAM() {
         static bool _showMetrics = false;
 
-        ImGui::Text("FPS: %d", GDE::Engine::get().getFps());
+        ImGui::Text("FPS: %d", engine->getFps());
         ImGui::Separator();
-        ImGui::Text("X: %f, Y: %f", InputManager::getMousePosScreenCoords().x, InputManager::getMousePosScreenCoords().y);
+        ImGui::Text("X: %f, Y: %f", engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
         ImGui::Separator();
 //        int _freeGpuMb = 0;
 //        #if !IS_MOBILE()
@@ -216,12 +216,12 @@ namespace GDE {
 
     void ImGuiScene::printAtlases() {
         float _totalAtlasesSize = 0;
-        for(auto& _ti : TextureAtlasManager::get().getTexturesInfo())
+        for(auto& _ti : engine->manager.textureManager.getTexturesInfo())
             _totalAtlasesSize += _ti.kb;
 
         int _child = 1;
         if(ImGui::TreeNode((void*)(intptr_t)0, "Atlases -> %.2f KBs", _totalAtlasesSize)) {
-            for(auto& _ti : TextureAtlasManager::get().getTexturesInfo()) {
+            for(auto& _ti : engine->manager.textureManager.getTexturesInfo()) {
                 if(ImGui::TreeNode((void*)(intptr_t)_child, "%s", _ti.name)) {
                     ImGui::Text("Kb: %.2f", _ti.kb);
                     ImGui::Text("Texture size: %dx%d", _ti.textureWidth, _ti.textureHeight);
@@ -236,14 +236,14 @@ namespace GDE {
         }
 
         float _totalFontsSize = 0;
-        for(auto& _font : FontManager::get().getAllFonts())
+        for(auto& _font : engine->manager.fontManager.getAllFonts())
             _totalFontsSize += _font->getTexture().getKb();
 
         ImGui::Separator();
         _child++;
 
         if(ImGui::TreeNode((void*)(intptr_t)_child, "Fonts -> %.2f KBs", _totalFontsSize)) {
-            for(auto& _font : FontManager::get().getAllFonts()) {
+            for(auto& _font : engine->manager.fontManager.getAllFonts()) {
                 if(ImGui::TreeNode((void*)(intptr_t)_child, "%s(font size %d)", _font->getFontName().c_str(), _font->getFontSize())) {
                     ImGui::Text("Kb: %.2f", _font->getTexture().getKb());
                     ImGui::Text("Texture size: %dx%d", _font->getTexture().getSize().x, _font->getTexture().getSize().y);
@@ -259,17 +259,17 @@ namespace GDE {
     }
 
     void ImGuiScene::printResolutionFullscreenAndVSync() {
-        static bool _vsync = Engine::get().isVSync(), _fullscreen = false;
-        static int _windowRes[2] = {(int) GDE::Engine::get().getWindowSize().x, (int) GDE::Engine::get().getWindowSize().y};
+        static bool _vsync = engine->isVSync(), _fullscreen = false;
+        static int _windowRes[2] = {(int) engine->getWindowSize().x, (int) engine->getWindowSize().y};
 
-        std::string _windowResolution = std::to_string(Engine::get().getWindowSize().x) + "x" + std::to_string(Engine::get().getWindowSize().y);
+        std::string _windowResolution = std::to_string(engine->getWindowSize().x) + "x" + std::to_string(engine->getWindowSize().y);
         static const char* _resSelected = _windowResolution.c_str();
 
         if(ImGui::Checkbox("VSync Active", &_vsync))
-            GDE::Engine::get().getWindow().setVSync(_vsync);
+            engine->getWindow().setVSync(_vsync);
 
         if(ImGui::Checkbox("Fullscreen", &_fullscreen))
-            GDE::Engine::get().getWindow().setFullscreen(_fullscreen);
+            engine->getWindow().setFullscreen(_fullscreen);
 
         const char* _resolutions[] = { "2560x1440", "1920x1080", "1366x768", "1280x720", "1920x1200", "1680x1050",
                                        "1440x900" ,"1280x800" ,"1024x768" ,"800x600", "800x480","640x480", "320x240"
@@ -283,9 +283,9 @@ namespace GDE {
                 if (ImGui::Selectable(_resolution, is_selected)) {
                     _resSelected = _resolution;
                     charToIntSize(std::string(_resolution), _windowRes);
-                    GDE::Engine::get().setWindowSize(_windowRes[0], _windowRes[1]);
+                    engine->setWindowSize(_windowRes[0], _windowRes[1]);
                     WindowResizedEvent _e(_windowRes[0], _windowRes[1]);
-                    GDE::Engine::get().onEvent(_e);
+                    engine->onEvent(_e);
                 }
                 if (is_selected)
                     ImGui::SetItemDefaultFocus();

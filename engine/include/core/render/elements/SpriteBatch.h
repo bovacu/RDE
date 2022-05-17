@@ -53,6 +53,7 @@ namespace GDE {
                 std::vector<VertexColorDebug> vertexDebugBufferLines;
                 GLuint debugVbo = -1, debugVao = -1;
                 Vec2F scalingFactor = {1, 1};
+                float aspectRatio = 1.7777f;
 
             private:
                 void initDebugVbo();
@@ -75,10 +76,13 @@ namespace GDE {
             Debug debug;
 
         private:
+            Manager* manager;
             GLuint vbo = -1, vao = -1, ibo = -1;
             int vertices = 0;
             glm::mat4 viewProjectionMatrix;
             std::vector<Batch> batches;
+            Vec2F scalingFactor {1, 1};
+            float aspectRatio = 1.77777f;
 
         private:
             Batch& getBatch(const IRenderizable& _renderer, int _layer, BatchPriority _priority);
@@ -88,8 +92,8 @@ namespace GDE {
             SpriteBatch() = default;
             ~SpriteBatch();
 
-            void init();
-            void beginDraw(Camera& _camera);
+            void init(Manager* _manager);
+            void beginDraw(Camera& _camera, Transform* _cameraTransform);
             void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
             void draw(const TextRenderer& _text, const Transform& _transform);
             void draw(const ParticleSystem& _particleSystem, const Transform& _transform);
