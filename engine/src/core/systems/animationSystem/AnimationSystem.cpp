@@ -1,7 +1,7 @@
 // Created by borja on 9/1/22.
 
 #include "core/systems/animationSystem/AnimationSystem.h"
-#include "core/render/elements/TextureAtlasManager.h"
+#include "core/Engine.h"
 
 namespace GDE {
 
@@ -9,7 +9,7 @@ namespace GDE {
         Animation _animation;
 
         for(auto& _index : _indices) {
-            _animation.addFrame(TextureAtlasManager::get().getTile(_atlas, _atlas + "_" + std::to_string(_index)));
+            _animation.addFrame(Engine::get().manager.textureManager.getTile(_atlas, _atlas + "_" + std::to_string(_index)));
         }
 
         animations[_animName] = AnimationNode { _animation, {  } };

@@ -2,6 +2,7 @@
 #include "core/render/window/event/WindowEvent.h"
 #include "stb/stb_image.h"
 #include "core/platform/PlatformHeaderSDL.h"
+#include "core/Engine.h"
 
 #if IS_MOBILE()
     #include <GLES3/gl32.h>
@@ -11,23 +12,13 @@
 
 namespace GDE {
 
-    Window::Window(const WindowProperties& _props) : window(nullptr) {
-        init(_props);
-    }
+    Window::Window(GDEConfig* _config) : window(nullptr) {
+        properties = _config;
 
-    Window::~Window() {
-        shutdown();
-    }
-
-    void Window::init(const WindowProperties& _props) {
-        data.title = _props.title;
-        data.width = (int)_props.width;
-        data.height = (int)_props.height;
-
-#ifdef ENGINE_DEBUG
+        #ifdef ENGINE_DEBUG
         SDL_version _compiled, _linked;
-        LOG_I("Creating window ", _props.title, " (", _props.width, _props.height, ")");
-#endif
+        LOG_I("Creating window ", _config->windowData.title, " (", _config->windowData.size.x, _config->windowData.size.y, ")");
+        #endif
 
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
             LOG_E("At least one module of SDL couldn't be initialized, so can't start the engine")
@@ -56,7 +47,9 @@ namespace GDE {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         #endif
 
-        window = SDL_CreateWindow(_props.title.c_str(), 0, 0, (int)_props.width, (int)_props.height, SDL_WINDOW_OPENGL| SDL_WINDOW_ALLOW_HIGHDPI);
+        window = SDL_CreateWindow(_config->windowData.title.c_str(), 0, 0,
+                                  (int)_config->windowData.size.x, (int)_config->windowData.size.y,
+                                  SDL_WINDOW_OPENGL| SDL_WINDOW_ALLOW_HIGHDPI);
         context = SDL_GL_CreateContext(window);
 
         SDL_GL_MakeCurrent(window, context);
@@ -72,24 +65,19 @@ namespace GDE {
         SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, "1");
         SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
         #endif
+
+        if(!properties->projectData.iconPath.empty()) setIcon(properties->projectData.iconPath);
     }
 
-    void Window::setWindowSize(int _width, int _height) {
-        data.width = _width;
-        data.height = _height;
-    }
-
-    void Window::setWindowSizeAndUpdateNativeWindow(int _width, int _height) {
-        data.width = _width;
-        data.height = _height;
-        SDL_SetWindowSize(window, _width, _height);
-    }
-
-    void Window::shutdown() {
+    Window::~Window() {
         SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
         SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
         SDL_Quit();
+    }
+
+    void Window::setWindowSize(int _width, int _height) {
+        SDL_SetWindowSize(window, _width, _height);
     }
 
     void Window::update() {
@@ -97,47 +85,36 @@ namespace GDE {
     }
 
     void Window::setVSync(bool _enabled) {
-        data.vSync = _enabled;
         SDL_GL_SetSwapInterval(_enabled);
     }
 
     bool Window::isVSyncActive() const {
-        return data.vSync;
+        return properties->windowData.vsync;
     }
 
     void Window::setFullscreen(bool _fullscreen) {
-        data.fullscreen = _fullscreen;
+        properties->windowData.fullScreen = _fullscreen;
         SDL_SetWindowFullscreen(window, _fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
     }
 
     bool Window::isFullscreen() const {
-        return data.fullscreen;
+        return properties->windowData.fullScreen;
     }
 
-    void Window::setIcon(const char* _path) {
-
-    }
-
-    void Window::setWindowOptions(WindowOptions _op, bool _allow) {
-
-    }
-
-    long Window::windowOptionsToGLFW(WindowOptions _options, bool _allow) {
-        long _newStyle = 0L;
-        int _toAdd = _allow ? 1 : -1;
-        return _newStyle;
-    }
-
-    std::unique_ptr<Window> Window::createWindow(const WindowProperties& _props) {
-        return std::make_unique<Window>(_props);
+    void Window::setIcon(const std::string& _path) {
+        properties->projectData.iconPath = _path;
+        LOG_W("Setting icon is not supported yet!!!!")
+        SDL_SetWindowIcon(window, nullptr);
     }
 
     void Window::setPosition(const Vec2I& _position) {
-        data.position = Vec2I(_position.x, _position.y);
+        SDL_SetWindowPosition(window, _position.x, _position.y);
     }
 
     Vec2I Window::getPosition() const {
-        return data.position;
+        int _x, _y;
+        SDL_GetWindowPosition(window, &_x, &_y);
+        return {_x, _y};
     }
 
     SDL_Window* Window::getNativeWindow() const {
@@ -145,28 +122,30 @@ namespace GDE {
     }
 
     void Window::setEventCallback(const UDelegate<void(Event&)>& _callback) {
-        data.eventCallback = _callback;
+        eventCallback = _callback;
     }
 
     Vec2I Window::getWindowSize() const {
-        return  {getWidth(), getHeight()};
+        int _width, _height;
+        SDL_GL_GetDrawableSize(window, &_width, &_height);
+        return  {_width, _height};
     }
 
     void Window::setTitle(const std::string& _title) {
-        data.title = _title;
+        properties->windowData.title= _title;
         SDL_SetWindowTitle(window, _title.c_str());
     }
 
     std::string& Window::getTitle() {
-        return data.title;
+        return properties->windowData.title;
     }
 
     int Window::getHeight() const {
-        return data.height;
+        return getWindowSize().y;
     }
 
     int Window::getWidth() const {
-        return data.width;
+        return getWindowSize().x;
     }
 
     void Window::swapBuffers() const {

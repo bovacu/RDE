@@ -7,13 +7,7 @@
 
 namespace GDE {
 
-    Scene::Scene(const std::string& _debugName)  : debugName(_debugName), mainGraph(_debugName) {
-        mainCameraID = mainGraph.createNode("MainCamera");
-        auto* _camera = mainGraph.addComponent<Camera>(mainCameraID, &Engine::get().getWindow(), mainCameraID);
-        _camera->getViewport()->update(Engine::get().getWindowSize());
-        mainCamera = _camera;
-        cameras.push_back(_camera);
-    }
+    Scene::Scene(Engine* _engine, const std::string& _debugName)  : debugName(_debugName), mainGraph(_debugName), engine(_engine) {  }
 
     void Scene::onEvent(Event& _event) {
         mainGraph.onEvent(_event);

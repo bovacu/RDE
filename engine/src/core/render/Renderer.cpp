@@ -8,8 +8,8 @@ namespace GDE {
     SpriteBatch Renderer::batch;
     Color Renderer::clearColor = Color::Red;
 
-    void Renderer::init() {
-        batch.init();
+    void Renderer::init(Manager* _manager) {
+        batch.init(_manager);
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
@@ -35,8 +35,8 @@ namespace GDE {
         glClearColor((float)clearColor.r / 255.f, (float)clearColor.g / 255.f, (float)clearColor.b / 255.f, (float)clearColor.a / 255.f);
     }
 
-    void Renderer::beginDraw(Camera& _camera) {
-        batch.beginDraw(_camera);
+    void Renderer::beginDraw(Camera& _camera, Transform* _cameraTransform) {
+        batch.beginDraw(_camera, _cameraTransform);
     }
 
     void Renderer::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
@@ -55,9 +55,9 @@ namespace GDE {
         batch.draw(_text, _transform);
     }
 
-    void Renderer::beginDebugDraw(Camera& _camera, float _thickness) {
+    void Renderer::beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness) {
         batch.debug.setDebugLinesThickness(_thickness);
-        batch.beginDraw(_camera);
+        batch.beginDraw(_camera, _cameraTransform);
     }
 
     void Renderer::endDebugDraw() {

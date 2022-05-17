@@ -1,15 +1,11 @@
 // Created by borja on 24/12/21.
 
 #include "core/Engine.h"
-#include "core/systems/uiSystem/FontManager.h"
-#include "core/render/elements/ShaderManager.h"
-#include "core/systems/soundSystem/SoundManager.h"
-#include "core/render/window/input/Input.h"
 #include "core/render/Renderer.h"
-#include "core/render/elements/TextureAtlasManager.h"
 #include "core/systems/physicsSystem/Physics.h"
 #include "core/systems/ecsSystem/GDESystemManager.h"
 #include "core/systems/uiSystem/Canvas.h"
+#include "core/systems/configSystem/ConfigManager.h"
 #include <RmlUi/Core.h>
 
 namespace GDE {
@@ -18,55 +14,38 @@ namespace GDE {
     Engine::Engine() {
         ENGINE_ASSERT(!Engine::gameInstance, "Application already exists!");
         Engine::gameInstance = this;
-        window = Window::createWindow();
+
+        ConfigManager::loadGDEConfig(&gdeConfig);
+        window = new Window(&gdeConfig);
 
         UDelegate<void(Event&)> onEventDelegate;
         onEventDelegate.bind<&Engine::onEvent>(this);
         window->setEventCallback(onEventDelegate);
     }
 
-    void Engine::onInit() {
-        lastFrame = 0;
-
+    void Engine::onInit(Scene* _scene) {
         wreDel.bind<&Engine::onWindowResized>(this);
 
-        FontManager::get().init();
-        InputManager::get().init(window.get());
-        Console::get().init();
-        ShaderManager::get().init();
-        Renderer::init();
+        manager.init(window);
         Canvas::init(window->getWidth(), window->getHeight());
-        SoundManager::get().init();
-        Physics::get().init();
 
+        #if !IS_MOBILE()
+        imGuiLayer = new ImGuiScene(this);
+        imGuiLayer->onInit();
+        #endif
+
+        fixedDelta = 1.0f / 60.f;
+        window->setVSync(true);
         Renderer::setClearColor(backgroundColor);
 
-#if !IS_MOBILE()
-        imGuiLayer = new ImGuiScene();
-        imGuiLayer->onInit();
-#endif
+        FrameBufferSpecification _specs = {(uint32_t)window->getWindowSize().x,(uint32_t)window->getWindowSize().y};
+        frameBuffer = new FrameBuffer(_specs, &manager);
 
-        if(timePerFrame < 0)
-            timePerFrame = 1.0f / 60.f;
+        Console::get().addCommand<&Engine::changeColorConsoleCommand>("background_color","Changes background color 0 <= r,b,g,a <= 255",this,"r g b a");
+        Console::get().addCommand<&Engine::setParentCommand>( "parent_set","Sets the parent of A as B",this,"A B");
 
-        window->setVSync(false);
-
-        FrameBufferSpecification _specs = {
-                (uint32_t)window->getWindowSize().x,
-                (uint32_t)window->getWindowSize().y
-        };
-
-        frameBuffer = new FrameBuffer(_specs);
-
-        Console::get().addCommand<&Engine::changeColorConsoleCommand>("background_color",
-                                                                      "Changes background color 0 <= r,b,g,a <= 255",
-                                                                      this,
-                                                                      "r g b a");
-
-        Console::get().addCommand<&Engine::setParentCommand>( "parent_set",
-                                                              "Sets the parent of A as B",
-                                                              this,
-                                                              "A B");
+        manager.sceneManager.addScene(_scene, _scene->getName());
+        manager.sceneManager.displayScene(_scene->getName());
     }
 
     void Engine::onRun() {
@@ -77,11 +56,11 @@ namespace GDE {
             Uint64 _start = SDL_GetPerformanceCounter();
             _accumulator += _dt;
 
-            if(scene == nullptr) continue;
+            if(manager.sceneManager.getDisplayedScene() == nullptr) return;
 
             GDE::Profiler::beginFrame(_dt);
-            Canvas::beginFrame(scene->getMainCamera()->getViewport()->getVirtualResolution());
-            InputManager::get().pollEvents(&Canvas::getData());
+//            Canvas::beginFrame(scene->getMainCamera()->getViewport()->getVirtualResolution());
+            manager.inputManager.pollEvents(&Canvas::getData());
 
             if (!minimized) {
 
@@ -90,9 +69,9 @@ namespace GDE {
                 Profiler::end(ProfilerState::UPDATE);
 
                 Profiler::begin(ProfilerState::FIXED_UPDATE);
-                while (_accumulator >= timePerFrame) {
-                    _accumulator -= timePerFrame;
-                    onFixedUpdate(timePerFrame);
+                while (_accumulator >= fixedDelta) {
+                    _accumulator -= fixedDelta;
+                    onFixedUpdate(fixedDelta);
                 }
                 Profiler::end(ProfilerState::FIXED_UPDATE);
 
@@ -122,43 +101,38 @@ namespace GDE {
     void Engine::onEvent(Event& _e) {
         EventDispatcher _ed(_e);
         _ed.dispatchEvent<WindowResizedEvent>(wreDel);
-        scene->onEvent(_e);
+        manager.sceneManager.getDisplayedScene()->onEvent(_e);
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
         Physics::get().step(_fixedDt);
-        scene->onFixedUpdate(_fixedDt);
+        manager.sceneManager.getDisplayedScene()->onFixedUpdate(_fixedDt);
     }
 
     void Engine::onUpdate(Delta _dt) {
-        scene->getMainCamera()->getViewport()->update(getWindowSize());
-        scene->onUpdate(_dt);
+        manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->update(getWindowSize());
+        manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
 
-        if(InputManager::isKeyJustPressed(KeyCode::F9))
+        if(manager.inputManager.isKeyJustPressed(KeyCode::F9))
             showImGuiDebugWindow = !showImGuiDebugWindow;
 
         Canvas::update(_dt);
     }
 
     void Engine::onRender(Delta _dt) {
-        frameBuffer->bind();
-        {
-            Renderer::clear();
-            Renderer::beginDraw(*scene->getMainCamera());
-            scene->onRender(_dt);
-            Renderer::endDraw();
-        }
-        frameBuffer->unbind();
+//        frameBuffer->bind();
+        manager.sceneManager.getDisplayedScene()->onRender(_dt);
+//        frameBuffer->unbind();
 
-        scene->onDebugRender(_dt);
+        manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
 
         Profiler::begin(ProfilerState::IMGUI);
         #if !IS_MOBILE()
             imGuiLayer->begin();
-            scene->onImGuiRender(_dt);
+        manager.sceneManager.getDisplayedScene()->onImGuiRender(_dt);
 
             if (showImGuiDebugWindow)
-                imGuiLayer->drawDebugInfo(scene->getMainGraph());
+                imGuiLayer->drawDebugInfo(manager.sceneManager.getDisplayedScene()->getMainGraph());
 
             imGuiLayer->end();
         #endif
@@ -173,8 +147,9 @@ namespace GDE {
     bool Engine::onWindowResized(WindowResizedEvent &_e) {
         int _width, _height;
         SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
+
         frameBuffer->resize(_width, _height);
-        scene->getMainCamera()->onResize(_width, _height);
+        manager.sceneManager.getDisplayedScene()->getMainCamera()->onResize(_width, _height);
         return true;
     }
 
@@ -208,7 +183,7 @@ namespace GDE {
     }
 
     void Engine::setWindowSize(int _width, int _height) {
-        window->setWindowSizeAndUpdateNativeWindow(_width, _height);
+        window->setWindowSize(_width, _height);
     }
 
     Logs Engine::changeColorConsoleCommand(const std::vector<std::string>& _args) {
@@ -219,33 +194,29 @@ namespace GDE {
     }
 
     void Engine::destroy() {
-        TextureAtlasManager::get().destroy();
-        ShaderManager::get().destroy();
-        FontManager::get().destroy();
-        SoundManager::get().destroy();
-        Renderer::destroy();
-        InputManager::get().destroy();
-        Physics::get().destroy();
         GDESystemManager::get().destroy();
         Canvas::destroy();
+        manager.destroy();
 
         delete frameBuffer;
-        delete scene;
         #if !IS_MOBILE()
         delete imGuiLayer;
+        delete window;
         #endif
     }
 
-    void Engine::setScene(Scene* _scene) {
-        if(scene != nullptr) scene->onEnd();
-        scene = _scene;
-        if(scene != nullptr) {
-            int _width, _height;
-            SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
-            scene->getMainCamera()->onResize(_width, _height);
-            scene->onInit();
-        }
-    }
+//    void Engine::setScene(Scene* _scene) {
+//        if(scene != nullptr) {
+//            scene->onEnd();
+//            delete scene;
+//        }
+//        scene = _scene;
+//        if(scene != nullptr) {
+//            ConfigManager::loadScene(scene, window, "assets/scenes/Sandbox.yaml");
+//            scene->getMainCamera()->onResize(getWindowSize().x, getWindowSize().y);
+//            scene->onInit();
+//        }
+//    }
 
     Logs Engine::componentsCommands(const std::vector<std::string>& _args) {
         backgroundColor = {(unsigned char)std::stoi(_args[0]), (unsigned char)std::stoi(_args[1]),
@@ -262,7 +233,8 @@ namespace GDE {
         auto _b = _args[1];
 
         try {
-            scene->getMainGraph()->setParent(scene->getMainGraph()->getNode(_a), scene->getMainGraph()->getNode(_b));
+            auto _scene = manager.sceneManager.getDisplayedScene();
+            _scene->getMainGraph()->setParent(_scene->getMainGraph()->getNode(_a), _scene->getMainGraph()->getNode(_b));
             return {APPEND_S("Set ", _b, " as parent of ", _a) };
         } catch (const std::runtime_error& _e) {
             return {APPEND_S("[error] '", _a, "' or '", _b, "' or both don't exist on the scene!") };

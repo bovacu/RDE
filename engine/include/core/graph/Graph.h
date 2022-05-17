@@ -45,7 +45,6 @@ namespace GDE {
             ~Graph() = default;
 
             NodeID createNode(const std::string& _tag = "", const NodeID& _parent = NODE_ID_NULL);
-            NodeID createSpriteNode(Texture* _texture, const std::string& _tag = "", const NodeID& _parent = NODE_ID_NULL);
 
             void removeNode(const NodeID& _node);
             void removeNode(const std::string& _nodeTagName);

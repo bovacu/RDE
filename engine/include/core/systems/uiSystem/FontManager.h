@@ -58,12 +58,7 @@ namespace GDE {
             FT_Library ftLibrary{};
             std::unordered_map<std::string, std::vector<FontHandler>> fonts;
 
-        private:
-            FontManager() = default;
-
         public:
-            static FontManager& get();
-
             void init();
             void destroy();
             Font* loadFont(const std::string& _pathToFont, int _fontSize = 24);
@@ -71,6 +66,8 @@ namespace GDE {
             Font* getSpecificFont(const std::string& _fontName, int _fontSize);
 
             std::vector<Font*> getAllFonts();
+
+            FontManager() = default;
     };
 
 }

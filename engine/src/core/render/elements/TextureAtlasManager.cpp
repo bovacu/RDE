@@ -5,12 +5,10 @@
 
 namespace GDE {
 
-    TextureAtlasManager TextureAtlasManager::instance;
-
     bool TextureAtlasManager::addAtlas(int _tileWidth, int _tileHeight, const std::string& _pathToTexture) {
         auto _name = Util::getFileNameFromPath(_pathToTexture);
         LOG_I_TIME("Trying to load '", _pathToTexture, "'...")
-        if(instance.atlases.find(_name) != instance.atlases.end()) {
+        if(atlases.find(_name) != atlases.end()) {
             LOG_E_TIME("Atlas '", _name, "' was already loaded");
             return false;
         }
@@ -28,37 +26,37 @@ namespace GDE {
         _atlas->textureHeight = _atlas->texture->getSize().y;
 
         cropTextures(*_atlas);
-        instance.atlases[_name] = _atlas;
+        atlases[_name] = _atlas;
         LOG_S_TIME("    Load successful!")
         return true;
     }
 
     Texture* TextureAtlasManager::getTexture(const std::string& _textureName) {
-        if(instance.atlases.find(_textureName) == instance.atlases.end()) {
+        if(atlases.find(_textureName) == atlases.end()) {
             LOG_E_TIME("Atlas '", _textureName, "' was not loaded! But tried to be accessed")
             return nullptr;
         }
 
-        if(instance.atlases[_textureName]->subTextures.find(_textureName) == instance.atlases[_textureName]->subTextures.end()) {
+        if(atlases[_textureName]->subTextures.find(_textureName) == atlases[_textureName]->subTextures.end()) {
             LOG_E_TIME("Texture '", _textureName, "' in '",_textureName ,"' was not found! But tried to be accessed")
             return nullptr;
         }
 
-        return instance.atlases[_textureName]->subTextures[_textureName];
+        return atlases[_textureName]->subTextures[_textureName];
     }
 
     Texture* TextureAtlasManager::getTile(const std::string& _atlasName, const std::string& _textureName) {
-        if(instance.atlases.find(_atlasName) == instance.atlases.end()) {
+        if(atlases.find(_atlasName) == atlases.end()) {
             LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
             return nullptr;
         }
 
-        if(instance.atlases[_atlasName]->subTextures.find(_textureName) == instance.atlases[_atlasName]->subTextures.end()) {
+        if(atlases[_atlasName]->subTextures.find(_textureName) == atlases[_atlasName]->subTextures.end()) {
             LOG_E_TIME("Texture '", _textureName, "' in '",_atlasName ,"' was not found! But tried to be accessed")
             return nullptr;
         }
 
-        return instance.atlases[_atlasName]->subTextures[_textureName];
+        return atlases[_atlasName]->subTextures[_textureName];
     }
 
     void TextureAtlasManager::cropTextures(Atlas& _atlas) {
@@ -103,22 +101,18 @@ namespace GDE {
     }
 
     Atlas* TextureAtlasManager::getAtlas(const std::string& _atlasName) {
-        if(instance.atlases.find(_atlasName) == instance.atlases.end()) {
+        if(atlases.find(_atlasName) == atlases.end()) {
             LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
             return nullptr;
         }
 
-        return instance.atlases[_atlasName];
-    }
-
-    TextureAtlasManager& TextureAtlasManager::get() {
-        return instance;
+        return atlases[_atlasName];
     }
 
     std::vector<TextureInfo> TextureAtlasManager::getTexturesInfo() {
         std::vector<TextureInfo> _textures;
 
-        for(auto& _atlas : instance.atlases) {
+        for(auto& _atlas : atlases) {
             _textures.emplace_back(TextureInfo {
                 _atlas.second->texture->getKb(),
                 (uint)_atlas.second->subTextures.size(),
@@ -135,7 +129,7 @@ namespace GDE {
 
     void TextureAtlasManager::destroy() {
         LOG_S("Cleaning up TextureAtlasManager")
-        for(auto& _atlas : instance.atlases)
+        for(auto& _atlas : atlases)
             delete _atlas.second;
     }
 

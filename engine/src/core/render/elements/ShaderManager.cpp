@@ -4,12 +4,6 @@
 
 namespace GDE {
 
-
-    ShaderManager& ShaderManager::get() {
-        static ShaderManager _shaderManager;
-        return _shaderManager;
-    }
-
     void ShaderManager::init() {
     #if IS_MOBILE()
         addShader("basic", TEXTURE_VERTEX_SHADER_ES, TEXTURE_FRAGMENT_SHADER_ES);

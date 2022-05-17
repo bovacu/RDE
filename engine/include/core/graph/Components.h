@@ -15,6 +15,8 @@
 
 namespace GDE {
 
+    class Manager;
+
     struct Tag {
         std::string tag;
 
@@ -36,12 +38,11 @@ namespace GDE {
     struct SpriteRenderer : public IRenderizable {
         Color color = Color::White;
         Texture* texture = nullptr;
-        GLuint shaderID = ShaderManager::get().getShader("basic");
+        GLuint shaderID = -1;
         int layer = 0;
 
-        SpriteRenderer() = default;
-        SpriteRenderer(const SpriteRenderer&) = default;
-        explicit SpriteRenderer(Texture* _texture) : texture(_texture) {  }
+        explicit SpriteRenderer(Manager* _manager);
+        SpriteRenderer(Manager* _manager, Texture* _texture);
 
         [[nodiscard]] Texture* getTexture() const override { return texture; }
         [[nodiscard]] int getLayer() const override { return layer; }
@@ -52,6 +53,11 @@ namespace GDE {
     class TextRenderer : public IRenderizable {
 
         friend class SpriteBatch;
+        public:
+            Color color = Color::White;
+            GLuint shaderID = -1;
+            int layer = 0;
+
         private:
             Font* font;
             std::string innerText;
@@ -60,11 +66,7 @@ namespace GDE {
             float spaceWidth {};
             float enterHeight {};
             int fontSize {};
-
-            Color color = Color::White;
             Texture* texture = nullptr;
-            GLuint shaderID = ShaderManager::get().getShader("basic");
-            int layer = 0;
 
         [[nodiscard]] Texture* getTexture() const override { return texture; }
         [[nodiscard]] int getLayer() const override { return layer; }
@@ -75,8 +77,8 @@ namespace GDE {
             void recalcTextDimensions(const std::string& _text);
 
         public:
-            TextRenderer(Font* _font, const std::string& _text);
-            explicit TextRenderer(Font* _font);
+            TextRenderer(Manager* _manager, Font* _font, const std::string& _text);
+            TextRenderer(Manager* _manager, Font* _font);
 
             void setText(const std::string& _text);
             void setFont(Font* _font);
@@ -93,8 +95,6 @@ namespace GDE {
 
             [[nodiscard]] float getSpacesBetweenChars() const;
             void setSpacesBetweenChars(float _spaceBetweenChars);
-
-            void setColor(const Color& _color);
     };
 
     struct StaticTransform {

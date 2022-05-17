@@ -106,11 +106,6 @@ namespace GDE {
 
     //----------------------------- FONT MANAGER -----------------
 
-    FontManager& FontManager::get() {
-        static FontManager _fontManager;
-        return _fontManager;
-    }
-
     void FontManager::init() {
         if(FT_Init_FreeType(&ftLibrary)) {
             LOG_E("Error initiating FreeType")

@@ -15,12 +15,6 @@ namespace GDE {
 
     void Sandbox::onInit() {
         engine = &Engine::get();
-        auto *_font = FontManager::get().loadFont("assets/fonts/arial.ttf", 54);
-
-        TextureAtlasManager::get().addAtlas(50, 50, "assets/test/test.png");
-        TextureAtlasManager::get().addAtlas(32, 32, "assets/test/square.png");
-        TextureAtlasManager::get().addAtlas(120, 80, "assets/player/run.png");
-
         engine->setVSync(true);
         Canvas::enable(false);
 
@@ -45,50 +39,35 @@ namespace GDE {
                 _animationSystem->start();
         */
 
-        getMainCamera()->setAdaptiveViewport(engine->getWindowSize(), engine->getWindowSize());
-
         mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
+//        getMainCamera()->setAdaptiveViewport(engine->getWindowSize(), engine->getWindowSize());
 
-        square = getMainGraph()->createNode("square");
-        squareTransform = getMainGraph()->getComponent<Transform>(square);
-        squareTransform->setPosition(-25, 0);
-        auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(square);
-        _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
-
-        BodyConfig _bodyConf {
-            1,
-            {32, 32},
-            0,
-            0,
-            1 << 1
-        };
-        getMainGraph()->addComponent<Body>(square, _bodyConf, squareTransform);
-
-        auto _floor = getMainGraph()->createNode("floor");
-        auto* _floorTransform = getMainGraph()->getComponent<Transform>(_floor);
-        _floorTransform->setPosition(0, -128);
-        auto _floorSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(_floor);
-        _floorSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
-        _floorSpriteRenderer->color = Color::Blue;
-
-        BodyConfig _bodyConf2 {
-                .mass = 1,
-                .size = {32, 32},
-                .friction = 0,
-                .restitution = 0,
-                .mask = 1 << 2,
-                .bodyType = BodyType::STATIC
-        };
-        getMainGraph()->addComponent<Body>(_floor, _bodyConf2, _floorTransform);
-
-        auto _text = getMainGraph()->createNode("Text");
-        getMainGraph()->addComponent<TextRenderer>(_text, _font, "Hello World")->setColor(Color::Green);
-        getMainGraph()->getComponent<Transform>(_text)->setPosition(0, 100);
+//        BodyConfig _bodyConf {
+//            1,
+//            {32, 32},
+//            0,
+//            0,
+//            1 << 1
+//        };
+//        auto _playerID = getMainGraph()->getNode("Sprite0");
+//        getMainGraph()->addComponent<Body>(_playerID, _bodyConf, getMainGraph()->getComponent<Transform>(_playerID));
+//
+//        BodyConfig _bodyConf2 {
+//                .mass = 1,
+//                .size = {32, 32},
+//                .friction = 0,
+//                .restitution = 0,
+//                .mask = 1 << 2,
+//                .bodyType = BodyType::STATIC
+//        };
+//        auto _floorID = getMainGraph()->getNode("Sprite1");
+//        getMainGraph()->addComponent<Body>(_floorID, _bodyConf2,  getMainGraph()->getComponent<Transform>(_floorID));
 
 //        Physics::get().setCallbackForCollisionBetweenMasks(1 << 2, 1 << 1).bind<&test>();
 
 //        box2DStressTest();
 //        textStressTest();
+
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -125,11 +104,11 @@ namespace GDE {
     }
 
     bool Sandbox::run_roll(const TransitionParams &_params) {
-        return InputManager::isKeyJustPressed(Key::Space);
+        return engine->manager.inputManager.isKeyJustPressed(Key::Space);
     }
 
     bool Sandbox::roll_run(const TransitionParams &_params) {
-        return InputManager::isKeyJustPressed(Key::Backspace);
+        return engine->manager.inputManager.isKeyJustPressed(Key::Backspace);
     }
 
     void Sandbox::box2DStressTest() {
@@ -205,8 +184,8 @@ namespace GDE {
                     .bodyShapeType = BodyShapeType::BOX,
             };
             getMainGraph()->addComponent<Body>(_square, _squareWallConfig, _squareTransform);
-            auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(_square);
-            _squareSpriteRenderer->texture = TextureAtlasManager::get().getTile("square", "square_0");
+            auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(_square, &engine->manager);
+            _squareSpriteRenderer->texture = engine->manager.textureManager.getTile("square", "square_0");
         }
     }
 
@@ -219,7 +198,7 @@ namespace GDE {
             auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
             _textTransform->setPosition(_r.randomf(-(float)engine->getWindowSize().x / 2.f + 64, (float)engine->getWindowSize().x / 2.f - 64),
                                         _r.randomf(-(float)engine->getWindowSize().y / 2.f + 64, (float)engine->getWindowSize().y / 2.f - 64));
-            getMainGraph()->addComponent<TextRenderer>(_text, FontManager::get().getDefaultFont("arial"), "Text" + std::to_string(_i));
+            getMainGraph()->addComponent<TextRenderer>(_text, &engine->manager, engine->manager.fontManager.getDefaultFont("arial"), "Text" + std::to_string(_i));
         }
     }
 } // namespace engine

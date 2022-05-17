@@ -95,25 +95,25 @@ namespace GDE {
     void RmlOpenGLRenderer::RenderCompiledGeometry(Rml::CompiledGeometryHandle _handle, const Rml::Vector2f& _translation) {
         auto* _geometry = (CompiledGeometryData*)_handle;
 
-        if (_geometry->texture) {
-            glUseProgram(ShaderManager::get().getShader("rml"));
-            glBindTexture(GL_TEXTURE_2D, _geometry->texture);
-
-            GLint _location = glGetUniformLocation(ShaderManager::get().getShader("rml"), "viewProjectionMatrix");
-            glUniformMatrix4fv(_location, 1, GL_FALSE, transform.data());
-
-            _location = glGetUniformLocation(ShaderManager::get().getShader("rml"), "position");
-            glUniform2fv(_location, 1, &_translation.x);
-        } else {
-            glUseProgram(ShaderManager::get().getShader("rmlColor"));
-            glBindTexture(GL_TEXTURE_2D, 0);
-
-            GLint _location = glGetUniformLocation(ShaderManager::get().getShader("rmlColor"), "viewProjectionMatrix");
-            glUniformMatrix4fv(_location, 1, GL_FALSE, transform.data());
-
-            _location = glGetUniformLocation(ShaderManager::get().getShader("rmlColor"), "position");
-            glUniform2fv(_location, 1, &_translation.x);
-        }
+//        if (_geometry->texture) {
+//            glUseProgram(ShaderManager::get().getShader("rml"));
+//            glBindTexture(GL_TEXTURE_2D, _geometry->texture);
+//
+//            GLint _location = glGetUniformLocation(ShaderManager::get().getShader("rml"), "viewProjectionMatrix");
+//            glUniformMatrix4fv(_location, 1, GL_FALSE, transform.data());
+//
+//            _location = glGetUniformLocation(ShaderManager::get().getShader("rml"), "position");
+//            glUniform2fv(_location, 1, &_translation.x);
+//        } else {
+//            glUseProgram(ShaderManager::get().getShader("rmlColor"));
+//            glBindTexture(GL_TEXTURE_2D, 0);
+//
+//            GLint _location = glGetUniformLocation(ShaderManager::get().getShader("rmlColor"), "viewProjectionMatrix");
+//            glUniformMatrix4fv(_location, 1, GL_FALSE, transform.data());
+//
+//            _location = glGetUniformLocation(ShaderManager::get().getShader("rmlColor"), "position");
+//            glUniform2fv(_location, 1, &_translation.x);
+//        }
 
         glBindVertexArray(_geometry->vao);
         glDrawElements(GL_TRIANGLES, _geometry->draw_count, GL_UNSIGNED_INT, nullptr);

@@ -5,26 +5,27 @@
 
 #include "core/util/Delta.h"
 #include "core/graph/Graph.h"
+#include "core/graph/Components.h"
 
 namespace GDE {
 
     class Camera;
     class Window;
+    class Engine;
     class Scene {
-
         friend class Graph;
 
         private:
             Graph mainGraph;
-            NodeID mainCameraID;
             std::vector<Camera*> cameras;
             Camera* mainCamera = nullptr;
 
         protected:
             std::string debugName;
+            Engine* engine = nullptr;
 
         public:
-            explicit Scene(const std::string& _debugName = "Scene");
+            explicit Scene(Engine* _engine, const std::string& _debugName = "Scene");
             virtual ~Scene() {  };
 
             virtual void onInit() {  }
