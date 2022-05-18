@@ -6,7 +6,8 @@
 namespace GDE {
 
 
-    void MobileInput::init(Window* _window) {
+    void MobileInput::init(Engine* _engine, Window* _window) {
+        engine = _engine;
         window = _window;
 
         UDelegate<void(SDL_Event&, RmlData*)> otdDel, otuDel, otmDel;

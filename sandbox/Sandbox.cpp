@@ -14,7 +14,6 @@ namespace GDE {
     }
 
     void Sandbox::onInit() {
-        engine = &Engine::get();
         engine->setVSync(true);
         Canvas::enable(false);
 

@@ -16,6 +16,7 @@
 namespace GDE {
 
     class Manager;
+    class Window;
 
     struct Tag {
         std::string tag;
@@ -108,8 +109,10 @@ namespace GDE {
             glm::vec3 localScale { 1.0f, 1.0f, 1.0f };
             float localRotation = 0.0f;
             bool constant = false;
+            Window* window;
 
         public:
+            explicit Transform(Window* _window);
             NodeID parent;
             std::vector<NodeID> children;
 

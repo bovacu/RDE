@@ -56,7 +56,8 @@ namespace GDE {
 
         for (const auto& _sceneCamera : _sceneCameras) {
             auto _ownerEntityID = _map.at(_sceneCamera["Owner"].as<int>());
-            auto* _camera = _scene->getMainGraph()->addComponent<Camera>(_ownerEntityID, _window, _ownerEntityID);
+            auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
+            auto* _camera = _scene->getMainGraph()->addComponent<Camera>(_ownerEntityID, _window, _ownerTransform, _ownerEntityID);
 
             // Set the zoom properties
             _camera->setCurrentZoomLevel(_sceneCamera["Zoom"].as<float>());

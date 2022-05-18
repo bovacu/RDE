@@ -84,7 +84,8 @@ namespace GDE {
         };
     }
 
-    void ControllerInput::init(Window* _window) {
+    void ControllerInput::init(Engine* _engine, Window* _window) {
+        engine = _engine;
         window = _window;
 
         UDelegate<void(SDL_Event&, RmlData*)> _gpJ, _gpBD, _gpBU, _gpD, _gpC;

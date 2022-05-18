@@ -7,8 +7,9 @@
 
 namespace GDE {
 
-    void WindowInput::init(Window* _window) {
+    void WindowInput::init(Engine* _engine, Window* _window) {
         window = _window;
+        engine = _engine;
 
         UDelegate<void(SDL_Event&, RmlData*)> weDel, wdeDel, wdebeDel, wdefeDel, wwebeDel, wwefeDel;
         weDel.bind<&WindowInput::onWindowEvent>(this);
@@ -51,7 +52,7 @@ namespace GDE {
     }
 
     void WindowInput::onWindowGainFocus(SDL_Event& _event, RmlData* _rmlData) {
-        Engine::get().setMinimized(false);
+        engine->setMinimized(false);
     }
 
     void WindowInput::onWindowLostFocus(SDL_Event& _event, RmlData* _rmlData) {
@@ -72,17 +73,17 @@ namespace GDE {
     void WindowInput::onWindowMinimized(SDL_Event& _event, RmlData* _rmlData) {
         WindowMinimizedEvent _e(1);
         window->consumeEvent(_e);
-        Engine::get().setMinimized(true);
+        engine->setMinimized(true);
     }
 
     void WindowInput::onWindowMaximized(SDL_Event& _event, RmlData* _rmlData) {
         WindowMinimizedEvent _e(0);
         window->consumeEvent(_e);
-        Engine::get().setMinimized(false);
+        engine->setMinimized(false);
     }
 
     void WindowInput::onQuit(SDL_Event& _event, RmlData* _rmlData) {
-        Engine::get().setRunning(false);
+        engine->setRunning(false);
     }
 
     void WindowInput::onDidEnterForegroundApp(SDL_Event& _event, RmlData* _rmlData) {
@@ -95,16 +96,16 @@ namespace GDE {
 
     void WindowInput::onDestroyApp(SDL_Event& _event, RmlData* _rmlData) {
         LOG_I("AUTO TERMINATING!!!!!")
-        Engine::get().setRunning(false);
+        engine->setRunning(false);
     }
 
     void WindowInput::onWillEnterForegroundApp(SDL_Event& _event, RmlData* _rmlData) {
         LOG_W("WILL ENTER FOREGROUND")
-        Engine::get().setMinimized(false);
+        engine->setMinimized(false);
     }
 
     void WindowInput::onWillEnterBackground(SDL_Event& _event, RmlData* _rmlData) {
         LOG_W("WILL ENTER BACKGROUND")
-        Engine::get().setMinimized(true);
+        engine->setMinimized(true);
     }
 }

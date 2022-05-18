@@ -26,23 +26,20 @@ namespace GDE {
     }
 
 
-    InputManager& InputManager::get() {
-        static InputManager _inputManager;
-        return _inputManager;
-    }
 
-    void InputManager::init(Window* _window) {
+
+    void InputManager::init(Engine* _engine, Window* _window) {
         windowInput = new WindowInput;
         keyboardInput = new KeyboardInput;
         mouseInput = new MouseInput;
         controllerInput = new ControllerInput;
         mobileInput = new MobileInput;
 
-        windowInput->init(_window);
-        keyboardInput->init(_window);
-        mouseInput->init(_window);
-        controllerInput->init(_window);
-        mobileInput->init(_window);
+        windowInput->init(_engine, _window);
+        keyboardInput->init(_engine, _window);
+        mouseInput->init(_engine, _window);
+        controllerInput->init(_engine, _window);
+        mobileInput->init(_engine, _window);
     }
 
     void InputManager::pollEvents(RmlData* rmlData) {
@@ -137,14 +134,14 @@ namespace GDE {
         auto& _wi = windowInput;
         float _x = _mousePos.x - (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().x / 2.f : 0.f);
         float _y = (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().y / 2.f : 0.f) - _mousePos.y;
-        float _zoom = Engine::get().manager.sceneManager.getDisplayedScene()->getMainCamera()->getCurrentZoomLevel();
+        float _zoom = mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getCurrentZoomLevel();
         return {_x * _zoom, _y * _zoom};
     }
 
     Vec2F InputManager::getMousePosWorldPos() {
         auto _mousePos = mouseInput->getMousePosition();
         auto& _wi = windowInput;
-        auto& _camera = *Engine::get().manager.sceneManager.getDisplayedScene()->getMainCamera();
+        auto& _camera = *mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera();
         float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.getPosition().x;
         float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.getPosition().y;
         float _zoom = _camera.getCurrentZoomLevel();

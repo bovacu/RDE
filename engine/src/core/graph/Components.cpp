@@ -5,11 +5,17 @@
 
 namespace GDE {
 
+    Transform::Transform(Window* _window) {
+        window = _window;
+    }
+
     glm::mat4 Transform::getLocalModelMatrix() {
         const glm::mat4 _rot = glm::rotate(glm::mat4(1.0f), glm::radians(localRotation), glm::vec3(0.0f, 0.0f, 1.0f));
         glm::vec3 _scale = {localScale.x, localScale.y, 1};
 
-        localModelMatrix = glm::translate(glm::mat4(1.0f), localPosition) * _rot * glm::scale(glm::mat4(1.0f), _scale);
+        auto _windowSize = window->getWindowSize();
+        Vec2F _localPos = Util::worldToScreenCoords(window, {localPosition.x, localPosition.y}, (float)_windowSize.x / (float) _windowSize.y);
+        localModelMatrix = glm::translate(glm::mat4(1.0f), {_localPos.x, _localPos.y, 0.0f}) * _rot * glm::scale(glm::mat4(1.0f), _scale);
         return localModelMatrix;
     }
 
@@ -26,17 +32,12 @@ namespace GDE {
     }
 
     void Transform::setPosition(float _x, float _y) {
-        auto _windowSize = Engine::get().getWindowSize();
-        Util::worldToScreenSize(_x, _y, (float)_windowSize.x / (float) _windowSize.y);
         localPosition = glm::vec3 {_x, _y, 0.0f};
         getLocalModelMatrix();
     }
 
     Vec2F Transform::getPositionLocal() const {
-        float _x = localPosition.x, _y = localPosition.y;
-        auto _windowSize = Engine::get().getWindowSize();
-        Util::screenToWorldCoords(_x, _y, (float)_windowSize.x / (float) _windowSize.y);
-        return {_x, _y};
+        return {localPosition.x, localPosition.y};
     }
 
     void Transform::setRotation(float _rotation) {
@@ -66,8 +67,6 @@ namespace GDE {
     }
 
     void Transform::translate(float _x, float _y) {
-        auto _windowSize = Engine::get().getWindowSize();
-        Util::worldToScreenSize(_x, _y, (float)_windowSize.x / (float) _windowSize.y);
         localPosition.x += _x;
         localPosition.y += _y;
         getLocalModelMatrix();
@@ -90,8 +89,6 @@ namespace GDE {
 
     Vec2F Transform::getPositionWorld() const {
         float _x = modelMatrix[3][0], _y =  modelMatrix[3][1];
-        auto _windowSize = Engine::get().getWindowSize();
-        Util::screenToWorldCoords(_x, _y, (float)_windowSize.x / (float) _windowSize.y);
         return {_x, _y};
     }
 

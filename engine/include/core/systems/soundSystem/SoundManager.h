@@ -42,8 +42,6 @@ namespace GDE {
             SoundManager(SoundManager const&) = delete;
             void operator=(SoundManager const&)  = delete;
 
-            static SoundManager& get();
-
             void init();
             void destroy();
 

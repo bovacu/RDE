@@ -24,11 +24,11 @@ namespace GDE {
             glm::mat4 viewMatrix {1.f};
             glm::mat4 viewProjectionMatrix;
             IViewPort* viewport;
-            SceneManager* sceneManager;
+            Transform* transform;
 
         public:
             NodeID ID;
-            explicit Camera(const Window* _window, const NodeID& _mainCameraID);
+            Camera(const Window* _window, Transform* _entityTransform, const NodeID& _mainCameraID);
             ~Camera();
             void onEvent(Event& _event);
             bool onMouseScrolled(MouseScrolledEvent& _event);

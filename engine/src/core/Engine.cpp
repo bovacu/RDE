@@ -9,12 +9,9 @@
 #include <RmlUi/Core.h>
 
 namespace GDE {
-    Engine *Engine::gameInstance = nullptr;
+
 
     Engine::Engine() {
-        ENGINE_ASSERT(!Engine::gameInstance, "Application already exists!");
-        Engine::gameInstance = this;
-
         ConfigManager::loadGDEConfig(&gdeConfig);
         window = new Window(&gdeConfig);
 
@@ -26,7 +23,7 @@ namespace GDE {
     void Engine::onInit(Scene* _scene) {
         wreDel.bind<&Engine::onWindowResized>(this);
 
-        manager.init(window);
+        manager.init(this);
         Canvas::init(window->getWidth(), window->getHeight());
 
         #if !IS_MOBILE()

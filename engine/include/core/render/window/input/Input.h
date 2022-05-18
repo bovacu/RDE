@@ -52,12 +52,15 @@ namespace GDE {
         MOBILE
     };
 
+    class Engine;
+    class Manager;
     class Input {
         friend class InputManager;
         protected:
             Window* window = nullptr;
             std::unordered_map<int, UDelegate<void(SDL_Event&, RmlData*)>> events;
             std::vector<SystemEventEnum> ignoredEvents;
+            Engine* engine;
 
         public:
             bool pollEvent(SDL_Event& _event, RmlData* _rmlData);
@@ -75,8 +78,7 @@ namespace GDE {
             MobileInput* mobileInput;
 
         public:
-            static InputManager& get();
-            void init(Window* _window);
+            void init(Engine* _engine, Window* _window);
             void destroy();
             void pollEvents(RmlData* _rmlData);
 

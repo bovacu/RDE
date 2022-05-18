@@ -7,7 +7,8 @@
 namespace GDE {
 
 
-    void KeyboardInput::init(Window* _window) {
+    void KeyboardInput::init(Engine* _engine, Window* _window) {
+        engine = _engine;
         window = _window;
 
         UDelegate<void(SDL_Event&, RmlData*)> kdeDel, kueDel;

@@ -5,6 +5,7 @@
 #include "core/render/Renderer.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/graph/Scene.h"
+#include "core/Engine.h"
 
 namespace GDE {
 
@@ -13,12 +14,13 @@ namespace GDE {
     static void onFixedUpdateDelFoo(Delta _dt) {  }
     static void onRenderDelFoo() {  }
 
-    Graph::Graph(const std::string& _sceneName) {
+    Graph::Graph(Engine* _engine, const std::string& _sceneName) {
+        engine = _engine;
         name = _sceneName;
         sceneRoot = registry.create();
 
         registry.emplace<Tag>(sceneRoot, _sceneName);
-        registry.emplace<Transform>(sceneRoot).parent = NODE_ID_NULL;
+        registry.emplace<Transform>(sceneRoot, &engine->getWindow()).parent = NODE_ID_NULL;
         registry.emplace<Active>(sceneRoot, true);
 
         onEventDel.bind<&onEventDelFoo>();
@@ -101,7 +103,7 @@ namespace GDE {
         auto _parentRef = _parent == NODE_ID_NULL ? sceneRoot : _parent;
 
         registry.emplace<Tag>(_newNode, _tag);
-        registry.emplace<Transform>(_newNode).parent = _parentRef;
+        registry.emplace<Transform>(_newNode, &engine->getWindow()).parent = _parentRef;
         (&registry.get<Transform>(_parentRef))->children.push_back(_newNode);
 
         registry.emplace<Active>(_newNode, true);

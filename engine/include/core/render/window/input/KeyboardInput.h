@@ -16,7 +16,7 @@ namespace GDE {
             std::unordered_map<KeyCode, int>  pressedKeyboardKeys;
 
         public:
-            void init(Window* _window);
+            void init(Engine* _engine, Window* _window);
             int getState(int _keyOrButton);
             void setState(int _keyOrButton, int _state);
 

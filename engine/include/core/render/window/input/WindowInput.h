@@ -12,7 +12,7 @@ namespace GDE {
 
     class WindowInput : public Input {
         public:
-            void init(Window* _window);
+            void init(Engine* _engine, Window* _window);
 
         private:
             void onWindowEvent(SDL_Event& _event, RmlData* _rmlData);

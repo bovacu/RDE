@@ -7,11 +7,6 @@
 
 namespace GDE {
 
-    SoundManager& SoundManager::get() {
-        static SoundManager _soundManager;
-        return _soundManager;
-    }
-
     void SoundManager::init() {
         if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
             LOG_E("Mix_OpenAudio Error: ", Mix_GetError())

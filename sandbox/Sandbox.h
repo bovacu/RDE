@@ -11,14 +11,7 @@ namespace GDE {
 
     class Sandbox : public Scene {
         private:
-            AnimationSystem animationSystem;
-            TransitionParams params;
-            Engine* engine;
             UDelegate<bool(MouseScrolledEvent&)> mseDelegate;
-
-            NodeID square, squareChild, secondaryCamera;
-            Transform* squareTransform;
-            Transform* childTransform;
 
         public:
             Sandbox(Engine* _engine, const std::string& _debugName = "Sandbox") : Scene(_engine, _debugName) {  }

@@ -8,7 +8,8 @@
 namespace GDE {
 
 
-    void MouseInput::init(Window* _window) {
+    void MouseInput::init(Engine* _engine, Window* _window) {
+        engine = _engine;
         window = _window;
 
         UDelegate<void(SDL_Event&, RmlData*)> mmeDel, mdeDel, mueDel, mseDel;

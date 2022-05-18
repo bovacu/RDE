@@ -160,10 +160,6 @@ namespace GDE {
             /// @return The main window.
             Window& getWindow() { return *window; }
 
-            /// Returns a reference to the application, as it is created as a Singleton.
-            /// @return A reference to the application.
-            static Engine& get() { return *Engine::gameInstance; }
-
         private:
             bool onWindowClosed(WindowClosedEvent& _e);
             bool onWindowResized(WindowResizedEvent& _e);

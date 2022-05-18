@@ -27,7 +27,7 @@ namespace GDE {
             SceneManager sceneManager;
 
         public:
-            void init(Window* _window);
+            void init(Engine* _engine);
             void destroy();
     };
 

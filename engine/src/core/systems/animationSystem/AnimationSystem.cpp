@@ -5,11 +5,15 @@
 
 namespace GDE {
 
+    AnimationSystem::AnimationSystem(Manager* _manager) {
+        manager = _manager;
+    }
+
     Animation* AnimationSystem::createAnimation(const std::string& _animName, const std::string& _atlas, const std::vector<int>& _indices) {
         Animation _animation;
 
         for(auto& _index : _indices) {
-            _animation.addFrame(Engine::get().manager.textureManager.getTile(_atlas, _atlas + "_" + std::to_string(_index)));
+            _animation.addFrame(manager->textureManager.getTile(_atlas, _atlas + "_" + std::to_string(_index)));
         }
 
         animations[_animName] = AnimationNode { _animation, {  } };

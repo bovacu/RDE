@@ -76,7 +76,7 @@ namespace GDE {
             Debug debug;
 
         private:
-            Manager* manager;
+            Engine* engine;
             GLuint vbo = -1, vao = -1, ibo = -1;
             int vertices = 0;
             glm::mat4 viewProjectionMatrix;
@@ -92,7 +92,7 @@ namespace GDE {
             SpriteBatch() = default;
             ~SpriteBatch();
 
-            void init(Manager* _manager);
+            void init(Engine* _engine);
             void beginDraw(Camera& _camera, Transform* _cameraTransform);
             void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
             void draw(const TextRenderer& _text, const Transform& _transform);

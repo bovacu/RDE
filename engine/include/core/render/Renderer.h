@@ -25,7 +25,7 @@ namespace GDE {
             /**
              * Must be called ONCE before rendering anything, BUT after creating the window.
              **/
-            static void init(Manager* _manager);
+            static void init(Engine* _engine);
             static void destroy();
 
             /**

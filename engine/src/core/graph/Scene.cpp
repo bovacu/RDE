@@ -7,7 +7,7 @@
 
 namespace GDE {
 
-    Scene::Scene(Engine* _engine, const std::string& _debugName)  : debugName(_debugName), mainGraph(_debugName), engine(_engine) {  }
+    Scene::Scene(Engine* _engine, const std::string& _debugName)  : debugName(_debugName), mainGraph(_engine, _debugName), engine(_engine) {  }
 
     void Scene::onEvent(Event& _event) {
         mainGraph.onEvent(_event);
@@ -43,7 +43,8 @@ namespace GDE {
 
     Camera* Scene::addCamera(Window* window) {
         auto _newCameraID = mainGraph.createNode(APPEND_S("Camera", cameras.size()));
-        auto* _camera = mainGraph.addComponent<Camera>(_newCameraID, window, _newCameraID);
+        auto* _entityTransform = getMainGraph()->getComponent<Transform>(_newCameraID);
+        auto* _camera = mainGraph.addComponent<Camera>(_newCameraID, window, _entityTransform, _newCameraID);
         cameras.push_back(_camera);
         return cameras.back();
     }

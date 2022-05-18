@@ -10,8 +10,9 @@ namespace GDE {
 
     const std::string SCENES_PATH = "assets/scenes/";
 
-    void SceneManager::init(Manager* _manager) {
+    void SceneManager::init(Manager* _manager, Window* _window) {
         manager = _manager;
+        window = _window;
     }
 
     Scene* SceneManager::getDisplayedScene() {
@@ -20,7 +21,7 @@ namespace GDE {
 
     void SceneManager::addScene(Scene* _scene, const std::string& _sceneName) {
         scenes[_sceneName] = _scene;
-        ConfigManager::loadScene(manager, _scene, &Engine::get().getWindow(), APPEND_S(SCENES_PATH, _sceneName, ".yaml"));
+        ConfigManager::loadScene(manager, _scene, window, APPEND_S(SCENES_PATH, _sceneName, ".yaml"));
     }
 
     void SceneManager::displayScene(const std::string& _sceneName) {

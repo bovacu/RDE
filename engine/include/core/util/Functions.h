@@ -37,31 +37,31 @@ namespace GDE {
                 return base_filename.substr(base_filename.find_last_of('.') + 1, base_filename.size());
             }
 
-            static Vec2F worldToScreenCoords(const Vec2F& _position, float _aspectRatio) {
-                auto _window = Engine::get().getWindowSize();
-                return {_position.x * _aspectRatio / ((float)_window.x / 2), _position.y / ((float)_window.y / 2)};
+            static Vec2F worldToScreenCoords(Window* _window, const Vec2F& _position, float _aspectRatio) {
+                auto _windowSize = _window->getWindowSize();
+                return {_position.x * _aspectRatio / ((float)_windowSize.x / 2), _position.y / ((float)_windowSize.y / 2)};
             }
 
-            static Vec2F screenToWorldCoords(const Vec2F& _position, float _aspectRatio) {
-                auto _window = Engine::get().getWindowSize();
-                return {_position.x / _aspectRatio * ((float)_window.x / 2), _position.y * ((float)_window.y / 2)};
+            static Vec2F screenToWorldCoords(Window* _window, const Vec2F& _position, float _aspectRatio) {
+                auto _windowSize = _window->getWindowSize();
+                return {_position.x / _aspectRatio * ((float)_windowSize.x / 2), _position.y * ((float)_windowSize.y / 2)};
             }
 
-            static Vec2F worldToScreenSize(const Vec2F& _size, float _aspectRatio) {
-                auto _window = Engine::get().getWindowSize();
-                return {_size.x * _aspectRatio / ((float)_window.x), _size.y / ((float)_window.y)};
+            static Vec2F worldToScreenSize(Window* _window, const Vec2F& _size, float _aspectRatio) {
+                auto _windowSize = _window->getWindowSize();
+                return {_size.x * _aspectRatio / ((float)_windowSize.x), _size.y / ((float)_windowSize.y)};
             }
 
-            static void worldToScreenSize(float& _x, float& _y, float _aspectRatio) {
-                auto _window = Engine::get().getWindowSize();
-                _x = _x * _aspectRatio / ((float)_window.x / 2);
-                _y = _y / ((float)_window.y / 2);
+            static void worldToScreenSize(Window* _window, float& _x, float& _y, float _aspectRatio) {
+                auto _windowSize = _window->getWindowSize();
+                _x = _x * _aspectRatio / ((float)_windowSize.x / 2);
+                _y = _y / ((float)_windowSize.y / 2);
             }
 
-            static void screenToWorldCoords(float& _x, float& _y, float _aspectRatio) {
-                auto _window = Engine::get().getWindowSize();
-                _x = _x / _aspectRatio * ((float)_window.x / 2);
-                _y = _y * ((float)_window.y / 2);
+            static void screenToWorldCoords(Window* _window, float& _x, float& _y, float _aspectRatio) {
+                auto _windowSize = _window->getWindowSize();
+                _x = _x / _aspectRatio * ((float)_windowSize.x / 2);
+                _y = _y * ((float)_windowSize.y / 2);
             }
     };
 

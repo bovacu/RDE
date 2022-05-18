@@ -17,7 +17,7 @@ namespace GDE {
             Vec2I mousePos;
 
         public:
-            void init(Window* _window);
+            void init(Engine* _engine, Window* _window);
             int getState(int _keyOrButton);
             void setState(int _keyOrButton, int _state);
             Vec2F getMousePosition() const;

@@ -61,7 +61,7 @@ namespace GDE {
             int controllerCounter = 0;
 
         public:
-            void init(Window* _window);
+            void init(Engine* _engine, Window* _window);
             int getButtonState(int _keyOrButton, int _controllerID = 0);
             void setButtonState(int _keyOrButton, int _state, int _controllerID = 0);
             int getAxisState(int _keyOrButton, int _controllerID = 0);

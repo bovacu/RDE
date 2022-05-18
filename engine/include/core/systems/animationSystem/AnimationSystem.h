@@ -48,8 +48,10 @@ namespace GDE {
             std::unordered_map<std::string, AnimationNode> animations;
             AnimationNode* currentNode;
             EventBus<std::string, TransitionParams> bus;
+            Manager* manager;
 
         public:
+            explicit AnimationSystem(Manager* _manager);
             Animation* createAnimation(const std::string& _animName, const std::string& _atlas, const std::vector<int>& _indices);
 
             void setAnimationTimeBetweenFrames(const std::string& _animation, float _timeBetweenFrames);

@@ -15,6 +15,7 @@ namespace GDE {
     typedef entt::registry NodeContainer;
     #define NODE_ID_NULL entt::null
 
+    class Engine;
     class Scene;
     class Graph {
 
@@ -24,6 +25,7 @@ namespace GDE {
             NodeID sceneRoot;
             std::string name;
             NodeContainer registry;
+            Engine* engine;
 
         private:
             void printScene(const NodeID&, std::ostream& _os, int& _indent);
@@ -41,7 +43,7 @@ namespace GDE {
             UDelegate<void()> onRenderDel;
 
         public:
-            explicit Graph(const std::string& _sceneName);
+            explicit Graph(Engine* _engine, const std::string& _sceneName);
             ~Graph() = default;
 
             NodeID createNode(const std::string& _tag = "", const NodeID& _parent = NODE_ID_NULL);

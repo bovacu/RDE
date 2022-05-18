@@ -48,11 +48,10 @@ namespace GDE {
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
-        Engine& _game = Engine::get();
-        auto* window = static_cast<SDL_Window*>(_game.getWindow().getNativeWindow());
+        auto* window = static_cast<SDL_Window*>(engine->getWindow().getNativeWindow());
 
         // Setup Platform/Renderer bindings
-        ImGui_ImplSDL2_InitForOpenGL(window, _game.getWindow().getContext());
+        ImGui_ImplSDL2_InitForOpenGL(window, engine->getWindow().getContext());
         ImGui_ImplOpenGL3_Init("#version 410");
 
         for(auto& _state : State::stateToNameDict) {
@@ -92,16 +91,15 @@ namespace GDE {
 
     void ImGuiScene::end() {
         ImGuiIO& io = ImGui::GetIO();
-        Engine& _game = Engine::get();
-        io.DisplaySize = ImVec2((float)_game.getWindow().getWidth(), (float)_game.getWindow().getHeight());
+        io.DisplaySize = ImVec2((float)engine->getWindow().getWidth(), (float)engine->getWindow().getHeight());
 
         // Rendering
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            SDL_Window* backup_current_window = _game.getWindow().getNativeWindow();
-            SDL_GLContext backup_current_context = _game.getWindow().getContext();
+            SDL_Window* backup_current_window = engine->getWindow().getNativeWindow();
+            SDL_GLContext backup_current_context = engine->getWindow().getContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
             SDL_GL_MakeCurrent(backup_current_window, backup_current_context);

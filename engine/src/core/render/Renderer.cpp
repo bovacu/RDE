@@ -8,8 +8,8 @@ namespace GDE {
     SpriteBatch Renderer::batch;
     Color Renderer::clearColor = Color::Red;
 
-    void Renderer::init(Manager* _manager) {
-        batch.init(_manager);
+    void Renderer::init(Engine* _engine) {
+        batch.init(_engine);
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);

@@ -8,11 +8,11 @@
 
 namespace GDE {
 
-    Camera::Camera(const Window* _window, const NodeID& _mainCameraID) {
+    Camera::Camera(const Window* _window, Transform* _entityTransform, const NodeID& _mainCameraID) {
         ID = _mainCameraID;
         viewport = new FreeViewPort(_window->getWindowSize());
         onResize(_window->getWidth(), _window->getHeight());
-        sceneManager = &Engine::get().manager.sceneManager;
+        transform = _entityTransform;
     }
 
     void Camera::onResize(int _width, int _height) {
@@ -29,33 +29,33 @@ namespace GDE {
     }
 
     Transform& Camera::getTransform() {
-        return *sceneManager->getDisplayedScene()->getMainGraph()->getComponent<Transform>(ID);
+        return *transform;
     }
 
     void Camera::recalculateViewMatrix() {
         glm::mat4 _transform = glm::translate(glm::mat4(1.0f), {0, 0, 0.0f}) *
                                glm::rotate(glm::mat4(1.0f),
-                               glm::radians(sceneManager->getDisplayedScene()->getMainGraph()->getComponent<Transform>(ID)->getRotationLocal()), glm::vec3(0, 0, 1));
+                               glm::radians(transform->getRotationLocal()), glm::vec3(0, 0, 1));
         viewMatrix = glm::inverse(_transform);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
     }
 
     void Camera::setPosition(const Vec2F& _position) {
-        sceneManager->getDisplayedScene()->getMainGraph()->getComponent<Transform>(ID)->setPosition(_position);
+        transform->setPosition(_position);
         recalculateViewMatrix();
     }
 
     Vec2F Camera::getPosition() {
-        return sceneManager->getDisplayedScene()->getMainGraph()->getComponent<Transform>(ID)->getPositionLocal();
+        return transform->getPositionLocal();
     }
 
     void Camera::setRotation(float _rotation) {
-        sceneManager->getDisplayedScene()->getMainGraph()->getComponent<Transform>(ID)->setRotation(_rotation);
+        transform->setRotation(_rotation);
         recalculateViewMatrix();
     }
 
     float Camera::getRotation() {
-        return sceneManager->getDisplayedScene()->getMainGraph()->getComponent<Transform>(ID)->getRotationLocal();
+        return transform->getRotationLocal();
     }
 
     glm::mat4& Camera::getViewMatrix() {
