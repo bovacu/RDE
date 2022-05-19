@@ -52,7 +52,7 @@ namespace GDE {
     }
 
     void WindowInput::onWindowGainFocus(SDL_Event& _event, RmlData* _rmlData) {
-        engine->setMinimized(false);
+        window->minimized = false;
     }
 
     void WindowInput::onWindowLostFocus(SDL_Event& _event, RmlData* _rmlData) {
@@ -73,17 +73,17 @@ namespace GDE {
     void WindowInput::onWindowMinimized(SDL_Event& _event, RmlData* _rmlData) {
         WindowMinimizedEvent _e(1);
         window->consumeEvent(_e);
-        engine->setMinimized(true);
+        window->minimized = true;
     }
 
     void WindowInput::onWindowMaximized(SDL_Event& _event, RmlData* _rmlData) {
         WindowMinimizedEvent _e(0);
         window->consumeEvent(_e);
-        engine->setMinimized(false);
+        window->minimized = false;
     }
 
     void WindowInput::onQuit(SDL_Event& _event, RmlData* _rmlData) {
-        engine->setRunning(false);
+        engine->getWindow().stop();
     }
 
     void WindowInput::onDidEnterForegroundApp(SDL_Event& _event, RmlData* _rmlData) {
@@ -96,16 +96,16 @@ namespace GDE {
 
     void WindowInput::onDestroyApp(SDL_Event& _event, RmlData* _rmlData) {
         LOG_I("AUTO TERMINATING!!!!!")
-        engine->setRunning(false);
+        engine->getWindow().stop();
     }
 
     void WindowInput::onWillEnterForegroundApp(SDL_Event& _event, RmlData* _rmlData) {
         LOG_W("WILL ENTER FOREGROUND")
-        engine->setMinimized(false);
+        window->minimized = false;
     }
 
     void WindowInput::onWillEnterBackground(SDL_Event& _event, RmlData* _rmlData) {
         LOG_W("WILL ENTER BACKGROUND")
-        engine->setMinimized(true);
+        window->minimized = true;
     }
 }

@@ -156,4 +156,16 @@ namespace GDE {
         return context;
     }
 
+    bool Window::isMinimized() {
+        return minimized;
+    }
+
+    bool Window::isRunning() {
+        return running;
+    }
+
+    void Window::stop() {
+        running = false;
+    }
+
 }

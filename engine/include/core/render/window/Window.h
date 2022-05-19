@@ -12,11 +12,15 @@ namespace GDE {
     /// This class represents the window of the application and has methods to modify its components and get its data.
     struct GDEConfig;
     class Window {
+        friend class WindowInput;
+
         private:
             SDL_Window* window;
             SDL_GLContext context {};
             UDelegate<void(Event&)> eventCallback;
             GDEConfig* properties;
+            bool minimized = false;
+            bool running = true;
 
         public:
             explicit Window(GDEConfig* _props);
@@ -90,6 +94,15 @@ namespace GDE {
             /// Sets the icon of the window.
             /// @param _path path to the icon, it can be png, jpg, jpeg, ico...
             void setIcon(const std::string& _path);
+
+            /// @return if the window is minimized or not, on mobile it also triggers being on second plane
+            bool isMinimized();
+
+            /// @return if the application is still running
+            bool isRunning();
+
+            /// Makes the window to close and the application to exit
+            void stop();
 
             void swapBuffers() const;
     };

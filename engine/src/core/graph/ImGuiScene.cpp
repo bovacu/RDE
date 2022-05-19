@@ -107,6 +107,7 @@ namespace GDE {
     }
 
     void ImGuiScene::drawDebugInfo(Graph* _mainGraph) {
+        if(!show) return;
         ImGui::Begin("Debugging");
         printResolutionFullscreenAndVSync();
         ImGui::Separator();
@@ -121,36 +122,7 @@ namespace GDE {
     }
 
     void ImGuiScene::metrics() {
-//        ImGui::Begin("Metrics");
-//        static bool _capture = true;
-//        static float t = 0;
-//        t += ImGui::GetIO().DeltaTime;
-//
-//        static float history = 20.0f;
-//        if(_capture) {
-//            for(auto& _state : State::stateToNameDict) {
-//                auto _s = Profiler::getStates()[_state.first];
-//                auto _diff = std::chrono::duration_cast<std::chrono::milliseconds>(_s.end - _s.init);
-//                plotBuffers[_state.first].AddPoint(t, (float)_diff.count());
-//                plotBuffers[_state.first].Span = history;
-//            }
-//        }
-//
-//        if (ImPlot::BeginPlot("##Rolling", ImVec2(-1,125))) {
-//            ImPlot::SetupAxes(nullptr, "ms", ImPlotAxisFlags_NoTickLabels);
-//            ImPlot::SetupAxisLimits(ImAxis_X1,0,history, ImGuiCond_Always);
-//            ImPlot::SetupAxisLimits(ImAxis_Y1,0,50);
-//
-//            for(auto& _state : State::stateToNameDict) {
-//                if(Profiler::getStates()[_state.first].active) {
-//                    auto _s = plotBuffers[_state.first];
-//                    ImPlot::PlotLine(State::stateToNameDict[_state.first].c_str(),&_s.Data[0].x, &_s.Data[0].y, _s.Data.size(), 0, 2 * sizeof(float));
-//                }
-//            }
-//
-//            ImPlot::EndPlot();
-//        }
-//        ImGui::End();
+
     }
 
     void ImGuiScene::charToIntSize(const std::string& _size, int* _resolution) {
@@ -257,10 +229,10 @@ namespace GDE {
     }
 
     void ImGuiScene::printResolutionFullscreenAndVSync() {
-        static bool _vsync = engine->isVSync(), _fullscreen = false;
-        static int _windowRes[2] = {(int) engine->getWindowSize().x, (int) engine->getWindowSize().y};
+        static bool _vsync = engine->getWindow().isVSyncActive(), _fullscreen = false;
+        static int _windowRes[2] = {(int) engine->getWindow().getWindowSize().x, (int) engine->getWindow().getWindowSize().y};
 
-        std::string _windowResolution = std::to_string(engine->getWindowSize().x) + "x" + std::to_string(engine->getWindowSize().y);
+        std::string _windowResolution = std::to_string(engine->getWindow().getWindowSize().x) + "x" + std::to_string(engine->getWindow().getWindowSize().y);
         static const char* _resSelected = _windowResolution.c_str();
 
         if(ImGui::Checkbox("VSync Active", &_vsync))
@@ -281,7 +253,7 @@ namespace GDE {
                 if (ImGui::Selectable(_resolution, is_selected)) {
                     _resSelected = _resolution;
                     charToIntSize(std::string(_resolution), _windowRes);
-                    engine->setWindowSize(_windowRes[0], _windowRes[1]);
+                    engine->getWindow().setWindowSize(_windowRes[0], _windowRes[1]);
                     WindowResizedEvent _e(_windowRes[0], _windowRes[1]);
                     engine->onEvent(_e);
                 }
@@ -486,7 +458,6 @@ namespace GDE {
 
         ImGui::End();
     }
-
 }
 
 #endif

@@ -14,7 +14,7 @@ namespace GDE {
     }
 
     void Sandbox::onInit() {
-        engine->setVSync(true);
+        engine->getWindow().setVSync(true);
         Canvas::enable(false);
 
         /*        auto _player = mainScene->createNode("player");
@@ -113,10 +113,10 @@ namespace GDE {
     void Sandbox::box2DStressTest() {
         auto _leftWall = getMainGraph()->createNode("LeftWall");
         auto* _leftWallTransform = getMainGraph()->getComponent<Transform>(_leftWall);
-        _leftWallTransform->setPosition(-(float)engine->getWindowSize().x / 2.f, 0);
+        _leftWallTransform->setPosition(-(float)engine->getWindow().getWindowSize().x / 2.f, 0);
         BodyConfig _leftWallConfig {
             .mass = 1,
-            .size = {64, (float)engine->getWindowSize().y},
+            .size = {64, (float)engine->getWindow().getWindowSize().y},
             .restitution = 1.f,
             .mask = 1 << 2,
             .bodyType = BodyType::STATIC,
@@ -127,10 +127,10 @@ namespace GDE {
 
         auto _rightWall = getMainGraph()->createNode("RightWall");
         auto* _rightWallTransform = getMainGraph()->getComponent<Transform>(_rightWall);
-        _rightWallTransform->setPosition((float)engine->getWindowSize().x / 2.f, 0);
+        _rightWallTransform->setPosition((float)engine->getWindow().getWindowSize().x / 2.f, 0);
         BodyConfig _rightWallConfig {
                 .mass = 1,
-                .size = {64, (float)engine->getWindowSize().y},
+                .size = {64, (float)engine->getWindow().getWindowSize().y},
                 .restitution = 1.f,
                 .mask = 1 << 2,
                 .bodyType = BodyType::STATIC,
@@ -141,10 +141,10 @@ namespace GDE {
 
         auto _bottomWall = getMainGraph()->createNode("BottomWall");
         auto* _bottomWallTransform = getMainGraph()->getComponent<Transform>(_bottomWall);
-        _bottomWallTransform->setPosition(0, -(float)engine->getWindowSize().y / 2.f);
+        _bottomWallTransform->setPosition(0, -(float)engine->getWindow().getWindowSize().y / 2.f);
         BodyConfig _bottomWallConfig {
                 .mass = 1,
-                .size = {(float)engine->getWindowSize().x, 64},
+                .size = {(float)engine->getWindow().getWindowSize().x, 64},
                 .restitution = 1.f,
                 .mask = 1 << 2,
                 .bodyType = BodyType::STATIC,
@@ -155,10 +155,10 @@ namespace GDE {
 
         auto _topWall = getMainGraph()->createNode("TopWall");
         auto* _topWallTransform = getMainGraph()->getComponent<Transform>(_topWall);
-        _topWallTransform->setPosition(0, (float)engine->getWindowSize().y / 2.f);
+        _topWallTransform->setPosition(0, (float)engine->getWindow().getWindowSize().y / 2.f);
         BodyConfig _topWallConfig {
                 .mass = 1,
-                .size = {(float)engine->getWindowSize().x, 64},
+                .size = {(float)engine->getWindow().getWindowSize().x, 64},
                 .restitution = 1.f,
                 .mask = 1 << 2,
                 .bodyType = BodyType::STATIC,
@@ -171,8 +171,8 @@ namespace GDE {
         for(int _i = 0; _i < 100; _i++) {
             auto _square = getMainGraph()->createNode("Square" + std::to_string(_i));
             auto* _squareTransform = getMainGraph()->getComponent<Transform>(_square);
-            _squareTransform->setPosition(_r.randomf(-(float)engine->getWindowSize().x / 2.f + 64, (float)engine->getWindowSize().x / 2.f - 64),
-                                          _r.randomf(-(float)engine->getWindowSize().y / 2.f + 64, (float)engine->getWindowSize().y / 2.f - 64));
+            _squareTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f + 64, (float)engine->getWindow().getWindowSize().x / 2.f - 64),
+                                          _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f + 64, (float)engine->getWindow().getWindowSize().y / 2.f - 64));
             _squareTransform->setScale(0.25f, 0.25f);
             BodyConfig _squareWallConfig {
                     .mass = 1,
@@ -195,8 +195,8 @@ namespace GDE {
         for(int _i = 0; _i < 25000; _i++) {
             auto _text = getMainGraph()->createNode("Text" + std::to_string(_i));
             auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
-            _textTransform->setPosition(_r.randomf(-(float)engine->getWindowSize().x / 2.f + 64, (float)engine->getWindowSize().x / 2.f - 64),
-                                        _r.randomf(-(float)engine->getWindowSize().y / 2.f + 64, (float)engine->getWindowSize().y / 2.f - 64));
+            _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f + 64, (float)engine->getWindow().getWindowSize().x / 2.f - 64),
+                                        _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f + 64, (float)engine->getWindow().getWindowSize().y / 2.f - 64));
             getMainGraph()->addComponent<TextRenderer>(_text, &engine->manager, engine->manager.fontManager.getDefaultFont("arial"), "Text" + std::to_string(_i));
         }
     }

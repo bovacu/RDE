@@ -6,6 +6,7 @@
 #include "core/systems/ecsSystem/GDESystemManager.h"
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/systems/configSystem/ConfigManager.h"
+#include "core/systems/profiling/Profiler.h"
 #include <RmlUi/Core.h>
 
 namespace GDE {
@@ -49,7 +50,7 @@ namespace GDE {
         float _accumulator = 0;
 
         Delta _dt = 0;
-        while (running) {
+        while (window->isRunning()) {
             Uint64 _start = SDL_GetPerformanceCounter();
             _accumulator += _dt;
 
@@ -59,7 +60,7 @@ namespace GDE {
 //            Canvas::beginFrame(scene->getMainCamera()->getViewport()->getVirtualResolution());
             manager.inputManager.pollEvents(&Canvas::getData());
 
-            if (!minimized) {
+            if (!window->isMinimized()) {
 
                 Profiler::begin(ProfilerState::UPDATE);
                 onUpdate(_dt);
@@ -107,11 +108,10 @@ namespace GDE {
     }
 
     void Engine::onUpdate(Delta _dt) {
-        manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->update(getWindowSize());
+        manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->update(window->getWindowSize());
         manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
 
-        if(manager.inputManager.isKeyJustPressed(KeyCode::F9))
-            showImGuiDebugWindow = !showImGuiDebugWindow;
+        if(manager.inputManager.isKeyJustPressed(KeyCode::F9)) imGuiLayer->show = !imGuiLayer->show;
 
         Canvas::update(_dt);
     }
@@ -125,20 +125,12 @@ namespace GDE {
 
         Profiler::begin(ProfilerState::IMGUI);
         #if !IS_MOBILE()
-            imGuiLayer->begin();
+        imGuiLayer->begin();
         manager.sceneManager.getDisplayedScene()->onImGuiRender(_dt);
-
-            if (showImGuiDebugWindow)
-                imGuiLayer->drawDebugInfo(manager.sceneManager.getDisplayedScene()->getMainGraph());
-
-            imGuiLayer->end();
+        imGuiLayer->drawDebugInfo(manager.sceneManager.getDisplayedScene()->getMainGraph());
+        imGuiLayer->end();
         #endif
         Profiler::end(ProfilerState::IMGUI);
-    }
-
-    bool Engine::onWindowClosed(WindowClosedEvent &_e) {
-        running = false;
-        return true;
     }
 
     bool Engine::onWindowResized(WindowResizedEvent &_e) {
@@ -155,32 +147,12 @@ namespace GDE {
     void Engine::updateFps() {
         if (timer >= 1.f) {
             fpsCounter = frameCounter;
-            setTitle("Engine: " + std::to_string(fpsCounter));
+            window->setTitle("Engine: " + std::to_string(fpsCounter));
             frameCounter = 0;
             timer = 0;
             LOG_I("FPS: ", fpsCounter)
         }
         ++frameCounter;
-    }
-
-    void Engine::setTitle(const std::string& _title) {
-        window->setTitle(_title);
-    }
-
-    void Engine::setFullscreen(bool _fullscreen) {
-        window->setFullscreen(_fullscreen);
-    }
-
-    void Engine::setVSync(bool _vsync) {
-        window->setVSync(_vsync);
-    }
-
-    bool Engine::isVSync() {
-        return window->isVSyncActive();
-    }
-
-    void Engine::setWindowSize(int _width, int _height) {
-        window->setWindowSize(_width, _height);
     }
 
     Logs Engine::changeColorConsoleCommand(const std::vector<std::string>& _args) {
@@ -201,19 +173,6 @@ namespace GDE {
         delete window;
         #endif
     }
-
-//    void Engine::setScene(Scene* _scene) {
-//        if(scene != nullptr) {
-//            scene->onEnd();
-//            delete scene;
-//        }
-//        scene = _scene;
-//        if(scene != nullptr) {
-//            ConfigManager::loadScene(scene, window, "assets/scenes/Sandbox.yaml");
-//            scene->getMainCamera()->onResize(getWindowSize().x, getWindowSize().y);
-//            scene->onInit();
-//        }
-//    }
 
     Logs Engine::componentsCommands(const std::vector<std::string>& _args) {
         backgroundColor = {(unsigned char)std::stoi(_args[0]), (unsigned char)std::stoi(_args[1]),
@@ -236,6 +195,14 @@ namespace GDE {
         } catch (const std::runtime_error& _e) {
             return {APPEND_S("[error] '", _a, "' or '", _b, "' or both don't exist on the scene!") };
         }
+    }
+
+    float Engine::geFixedDelta() const {
+        return fixedDelta;
+    }
+
+    void Engine::setFixedDelta(float _fixedDelta) {
+        fixedDelta = _fixedDelta;
     }
 
 }
