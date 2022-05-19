@@ -23,10 +23,10 @@ namespace GDE {
             Vec2F getMousePosition() const;
 
         private:
-            void onMouseMoved(SDL_Event& _event, RmlData* _rmlData);
-            void onMouseDown(SDL_Event& _event, RmlData* _rmlData);
-            void onMouseUp(SDL_Event& _event, RmlData* _rmlData);
-            void onMouseScroll(SDL_Event& _event, RmlData* _rmlData);
+            void onMouseMoved(SDL_Event& _event);
+            void onMouseDown(SDL_Event& _event);
+            void onMouseUp(SDL_Event& _event);
+            void onMouseScroll(SDL_Event& _event);
     };
 
 }

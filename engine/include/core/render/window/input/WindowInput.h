@@ -15,22 +15,22 @@ namespace GDE {
             void init(Engine* _engine, Window* _window);
 
         private:
-            void onWindowEvent(SDL_Event& _event, RmlData* _rmlData);
-            void onWindowEnter(SDL_Event& _event, RmlData* _rmlData);
-            void onWindowExit(SDL_Event& _event, RmlData* _rmlData);
-            void onWindowGainFocus(SDL_Event& _event, RmlData* _rmlData);
-            void onWindowLostFocus(SDL_Event& _event, RmlData* _rmlData);
-            void onWindowResize(SDL_Event& _event, RmlData* _rmlData);
-            void onWindowMoved(SDL_Event& _event, RmlData* _rmlData);
-            void onWindowMinimized(SDL_Event& _event, RmlData* _rmlData);
-            void onWindowMaximized(SDL_Event& _event, RmlData* _rmlData);
-            void onQuit(SDL_Event& _event, RmlData* _rmlData);
+            void onWindowEvent(SDL_Event& _event);
+            void onWindowEnter(SDL_Event& _event);
+            void onWindowExit(SDL_Event& _event);
+            void onWindowGainFocus(SDL_Event& _event);
+            void onWindowLostFocus(SDL_Event& _event);
+            void onWindowResize(SDL_Event& _event);
+            void onWindowMoved(SDL_Event& _event);
+            void onWindowMinimized(SDL_Event& _event);
+            void onWindowMaximized(SDL_Event& _event);
+            void onQuit(SDL_Event& _event);
 
-            void onDestroyApp(SDL_Event& _event, RmlData* _rmlData);
-            void onDidEnterForegroundApp(SDL_Event& _event, RmlData* _rmlData);
-            void onDidEnterBackground(SDL_Event& _event, RmlData* _rmlData);
-            void onWillEnterForegroundApp(SDL_Event& _event, RmlData* _rmlData);
-            void onWillEnterBackground(SDL_Event& _event, RmlData* _rmlData);
+            void onDestroyApp(SDL_Event& _event);
+            void onDidEnterForegroundApp(SDL_Event& _event);
+            void onDidEnterBackground(SDL_Event& _event);
+            void onWillEnterForegroundApp(SDL_Event& _event);
+            void onWillEnterBackground(SDL_Event& _event);
     };
 
 }

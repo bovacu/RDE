@@ -12,12 +12,12 @@
 
 namespace GDE {
 
-    bool Input::pollEvent(SDL_Event& _event, RmlData* _rmlData) {
+    bool Input::pollEvent(SDL_Event& _event) {
         if(events.find((SystemEventEnum)_event.type) == events.end()) {
             return false;
         }
 
-        events[(int)_event.type](_event, _rmlData);
+        events[(int)_event.type](_event);
         return true;
     }
 
@@ -42,7 +42,7 @@ namespace GDE {
         mobileInput->init(_engine, _window);
     }
 
-    void InputManager::pollEvents(RmlData* rmlData) {
+    void InputManager::pollEvents() {
         SDL_Event _event;
         while (SDL_PollEvent(&_event)) {
 
@@ -52,11 +52,11 @@ namespace GDE {
             ImGui_ImplSDL2_ProcessEvent(&_event);
             #endif
 
-            _eventImplemented |= windowInput->pollEvent(_event, rmlData);
-            _eventImplemented |= keyboardInput->pollEvent(_event, rmlData);
-            _eventImplemented |= mouseInput->pollEvent(_event, rmlData);
-            _eventImplemented |= controllerInput->pollEvent(_event, rmlData);
-            _eventImplemented |= mobileInput->pollEvent(_event, rmlData);
+            _eventImplemented |= windowInput->pollEvent(_event);
+            _eventImplemented |= keyboardInput->pollEvent(_event);
+            _eventImplemented |= mouseInput->pollEvent(_event);
+            _eventImplemented |= controllerInput->pollEvent(_event);
+            _eventImplemented |= mobileInput->pollEvent(_event);
 
             _eventImplemented |= windowInput->ignoreEvent((SDL_EventType)_event.type);
             _eventImplemented |= keyboardInput->ignoreEvent((SDL_EventType)_event.type);

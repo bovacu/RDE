@@ -4,10 +4,8 @@
 #include "core/render/Renderer.h"
 #include "core/systems/physicsSystem/Physics.h"
 #include "core/systems/ecsSystem/GDESystemManager.h"
-#include "core/systems/uiSystem/Canvas.h"
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/systems/profiling/Profiler.h"
-#include <RmlUi/Core.h>
 
 namespace GDE {
 
@@ -25,7 +23,6 @@ namespace GDE {
         wreDel.bind<&Engine::onWindowResized>(this);
 
         manager.init(this);
-        Canvas::init(window->getWidth(), window->getHeight());
 
         #if !IS_MOBILE()
         imGuiLayer = new ImGuiScene(this);
@@ -57,8 +54,7 @@ namespace GDE {
             if(manager.sceneManager.getDisplayedScene() == nullptr) return;
 
             GDE::Profiler::beginFrame(_dt);
-//            Canvas::beginFrame(scene->getMainCamera()->getViewport()->getVirtualResolution());
-            manager.inputManager.pollEvents(&Canvas::getData());
+            manager.inputManager.pollEvents();
 
             if (!window->isMinimized()) {
 
@@ -112,8 +108,6 @@ namespace GDE {
         manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
 
         if(manager.inputManager.isKeyJustPressed(KeyCode::F9)) imGuiLayer->show = !imGuiLayer->show;
-
-        Canvas::update(_dt);
     }
 
     void Engine::onRender(Delta _dt) {
@@ -164,7 +158,6 @@ namespace GDE {
 
     void Engine::destroy() {
         GDESystemManager::get().destroy();
-        Canvas::destroy();
         manager.destroy();
 
         delete frameBuffer;

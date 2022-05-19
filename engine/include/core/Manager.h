@@ -11,6 +11,7 @@
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/systems/soundSystem/SoundManager.h"
 #include "core/systems/uiSystem/SceneManager.h"
+#include "core/render/elements/ShaderManager.h"
 
 namespace GDE {
 

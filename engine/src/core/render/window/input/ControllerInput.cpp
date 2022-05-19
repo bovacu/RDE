@@ -88,7 +88,7 @@ namespace GDE {
         engine = _engine;
         window = _window;
 
-        UDelegate<void(SDL_Event&, RmlData*)> _gpJ, _gpBD, _gpBU, _gpD, _gpC;
+        UDelegate<void(SDL_Event&)> _gpJ, _gpBD, _gpBU, _gpD, _gpC;
         _gpJ.bind<&ControllerInput::onGamepadsMoved>(this);
         _gpBD.bind<&ControllerInput::onGamepadsButtonDown>(this);
         _gpBU.bind<&ControllerInput::onGamepadsButtonUp>(this);
@@ -138,7 +138,7 @@ namespace GDE {
         LOG_I(_numJoysticks, " connected and ", controllers.size(), " loaded")
     }
 
-    void ControllerInput::onGamepadsMoved(SDL_Event& _event, RmlData* _rmlData) {
+    void ControllerInput::onGamepadsMoved(SDL_Event& _event) {
         Vec2F _left;
         if(_event.caxis.axis == 0) _left.x = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
         if(_event.caxis.axis == 1) _left.y = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
@@ -183,7 +183,7 @@ namespace GDE {
             controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::RT] = 1;
     }
 
-    void ControllerInput::onGamepadsButtonDown(SDL_Event& _event, RmlData* _rmlData) {
+    void ControllerInput::onGamepadsButtonDown(SDL_Event& _event) {
         auto _key = static_cast<GamePadButtons>(_event.cbutton.button);
 
         JoystickButtonDownEvent _e(_key);
@@ -194,7 +194,7 @@ namespace GDE {
         controllers[_controllerID]->pressedGamepadButtons[_key] = 1;
     }
 
-    void ControllerInput::onGamepadsButtonUp(SDL_Event& _event, RmlData* _rmlData) {
+    void ControllerInput::onGamepadsButtonUp(SDL_Event& _event) {
         auto _key = static_cast<GamePadButtons>(_event.cbutton.button);
         int _controllerID = _event.cdevice.which;
         controllers[_controllerID]->pressedGamepadButtons[_key] = 0;
@@ -203,13 +203,13 @@ namespace GDE {
         window->consumeEvent(_e);
     }
 
-    void ControllerInput::onGamepadConnected(SDL_Event& _event, RmlData* _rmlData) {
+    void ControllerInput::onGamepadConnected(SDL_Event& _event) {
         #if !IS_MOBILE()
         initGamepads();
         #endif
     }
 
-    void ControllerInput::onGamepadDisconnected(SDL_Event& _event, RmlData* _rmlData) {
+    void ControllerInput::onGamepadDisconnected(SDL_Event& _event) {
         LOG_W("Removed controller: ", controllers[_event.cdevice.which]->ID)
         if(controllers[_event.cdevice.which]->ID >= 0)
             SDL_GameControllerClose(controllers[_event.cdevice.which]->sdlGameController);

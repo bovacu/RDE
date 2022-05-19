@@ -75,11 +75,11 @@ namespace GDE {
             void destroy();
 
         private:
-            void onGamepadsMoved(SDL_Event& _event, RmlData* _rmlData);
-            void onGamepadsButtonDown(SDL_Event& _event, RmlData* _rmlData);
-            void onGamepadsButtonUp(SDL_Event& _event, RmlData* _rmlData);
-            void onGamepadConnected(SDL_Event& _event, RmlData* _rmlData);
-            void onGamepadDisconnected(SDL_Event& _event, RmlData* _rmlData);
+            void onGamepadsMoved(SDL_Event& _event);
+            void onGamepadsButtonDown(SDL_Event& _event);
+            void onGamepadsButtonUp(SDL_Event& _event);
+            void onGamepadConnected(SDL_Event& _event);
+            void onGamepadDisconnected(SDL_Event& _event);
     };
 
 }

@@ -11,7 +11,7 @@ namespace GDE {
         engine = _engine;
         window = _window;
 
-        UDelegate<void(SDL_Event&, RmlData*)> kdeDel, kueDel;
+        UDelegate<void(SDL_Event&)> kdeDel, kueDel;
         kdeDel.bind<&KeyboardInput::onKeyDown>(this);
         kueDel.bind<&KeyboardInput::onKeyUp>(this);
 
@@ -108,7 +108,7 @@ namespace GDE {
         ignoredEvents = { KEY_MAP_CHANGED_E, KEY_TEXT_INPUT_E, KEY_TEXT_EDITING_E };
     }
 
-    void KeyboardInput::onKeyDown(SDL_Event& _event, RmlData* _rmlData) {
+    void KeyboardInput::onKeyDown(SDL_Event& _event) {
         auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
 
         KeyPressedEvent _e(_key, 1);
@@ -118,7 +118,7 @@ namespace GDE {
             pressedKeyboardKeys[_key] = 1;
     }
 
-    void KeyboardInput::onKeyUp(SDL_Event& _event, RmlData* _rmlData) {
+    void KeyboardInput::onKeyUp(SDL_Event& _event) {
         auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
         pressedKeyboardKeys[_key] = 0;
 

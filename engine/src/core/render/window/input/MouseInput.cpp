@@ -3,7 +3,6 @@
 
 #include "core/render/window/input/MouseInput.h"
 #include "core/render/window/event/MouseEvent.h"
-#include <RmlUi/Core.h>
 
 namespace GDE {
 
@@ -12,7 +11,7 @@ namespace GDE {
         engine = _engine;
         window = _window;
 
-        UDelegate<void(SDL_Event&, RmlData*)> mmeDel, mdeDel, mueDel, mseDel;
+        UDelegate<void(SDL_Event&)> mmeDel, mdeDel, mueDel, mseDel;
         mmeDel.bind<&MouseInput::onMouseMoved>(this);
         mdeDel.bind<&MouseInput::onMouseDown>(this);
         mueDel.bind<&MouseInput::onMouseUp>(this);
@@ -39,15 +38,13 @@ namespace GDE {
         };
     }
 
-    void MouseInput::onMouseMoved(SDL_Event& _event, RmlData* _rmlData) {
+    void MouseInput::onMouseMoved(SDL_Event& _event) {
         mousePos = {_event.motion.x, _event.motion.y};
         MouseMovedEvent _e((float)_event.motion.x, (float)_event.motion.y);
         window->consumeEvent(_e);
-        _rmlData->rmlContext->ProcessMouseMove(_event.motion.x, _event.motion.y, _rmlData->rmlSystemInterface->GetKeyModifiers());
-
     }
 
-    void MouseInput::onMouseDown(SDL_Event& _event, RmlData* _rmlData) {
+    void MouseInput::onMouseDown(SDL_Event& _event) {
         auto _key = static_cast<MouseCode>(_event.button.button);
 
         MouseButtonPressedEvent _e(_key);
@@ -55,26 +52,20 @@ namespace GDE {
 
         if(pressedMouseButtons[_key] == 2) return;
         pressedMouseButtons[_key] = 1;
-
-        _rmlData->rmlContext->ProcessMouseButtonDown(_rmlData->rmlSystemInterface->TranslateMouseButton(_event.button.button), _rmlData->rmlSystemInterface->GetKeyModifiers());
     }
 
-    void MouseInput::onMouseUp(SDL_Event& _event, RmlData* _rmlData) {
+    void MouseInput::onMouseUp(SDL_Event& _event) {
         auto _key = static_cast<MouseCode>(_event.button.button);
 
         MouseButtonReleasedEvent _e(_key);
         window->consumeEvent(_e);
 
         pressedMouseButtons[_key] = 0;
-
-        _rmlData->rmlContext->ProcessMouseButtonUp(_rmlData->rmlSystemInterface->TranslateMouseButton(_event.button.button), _rmlData->rmlSystemInterface->GetKeyModifiers());
     }
 
-    void MouseInput::onMouseScroll(SDL_Event& _event, RmlData* _rmlData) {
+    void MouseInput::onMouseScroll(SDL_Event& _event) {
         MouseScrolledEvent _e((float)_event.wheel.x, (float)_event.wheel.y);
         window->consumeEvent(_e);
-
-        _rmlData->rmlContext->ProcessMouseWheel(float(_event.wheel.y), _rmlData->rmlSystemInterface->GetKeyModifiers());
     }
 
     int MouseInput::getState(int _keyOrButton) {

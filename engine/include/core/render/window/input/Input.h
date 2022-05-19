@@ -10,7 +10,6 @@
 
 #include "core/util/Util.h"
 #include "core/render/window/Window.h"
-#include "core/systems/uiSystem/Canvas.h"
 
 #ifndef SDL_JOYSTICK_DISABLED
 #define SDL_JOYSTICK_DISABLED
@@ -58,12 +57,12 @@ namespace GDE {
         friend class InputManager;
         protected:
             Window* window = nullptr;
-            std::unordered_map<int, UDelegate<void(SDL_Event&, RmlData*)>> events;
+            std::unordered_map<int, UDelegate<void(SDL_Event&)>> events;
             std::vector<SystemEventEnum> ignoredEvents;
             Engine* engine;
 
         public:
-            bool pollEvent(SDL_Event& _event, RmlData* _rmlData);
+            bool pollEvent(SDL_Event& _event);
             bool ignoreEvent(const SDL_EventType& _eventType);
     };
 
@@ -80,7 +79,7 @@ namespace GDE {
         public:
             void init(Engine* _engine, Window* _window);
             void destroy();
-            void pollEvents(RmlData* _rmlData);
+            void pollEvents();
 
         public:
             bool isKeyJustPressed(KeyCode _key);

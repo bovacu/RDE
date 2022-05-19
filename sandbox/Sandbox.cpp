@@ -15,7 +15,6 @@ namespace GDE {
 
     void Sandbox::onInit() {
         engine->getWindow().setVSync(true);
-        Canvas::enable(false);
 
         /*        auto _player = mainScene->createNode("player");
                 auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
