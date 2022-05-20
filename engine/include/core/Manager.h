@@ -12,9 +12,11 @@
 #include "core/systems/soundSystem/SoundManager.h"
 #include "core/systems/uiSystem/SceneManager.h"
 #include "core/render/elements/ShaderManager.h"
+#include "core/systems/ecsSystem/ECSManager.h"
 
 namespace GDE {
 
+    /// This class contains all of the managers of the engine, so end users can access all of them from one single place.
     class Manager {
         public:
             Manager();
@@ -26,9 +28,12 @@ namespace GDE {
             InputManager inputManager;
             Console consoleManager;
             SceneManager sceneManager;
+            ECSManager ecsManager;
 
         public:
+            /// This function should not be called by end users.
             void init(Engine* _engine);
+            /// This function should not be called by end users.
             void destroy();
     };
 

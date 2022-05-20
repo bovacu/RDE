@@ -249,7 +249,7 @@ namespace GDE {
         return mobileInput->getState(_fingerID) == 1;
     }
 
-    bool InputManager::isMobileScreenUp(int _fingerID) {
+    bool InputManager::isMobileScreenRelease(int _fingerID) {
         return mobileInput->getState(_fingerID) == 0;
     }
 

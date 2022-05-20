@@ -2,27 +2,22 @@
 // Created by borja on 29/04/22.
 //
 
-#include "core/systems/ecsSystem/GDESystemManager.h"
+#include "core/systems/ecsSystem/ECSManager.h"
 #include "entt/entity/registry.hpp"
 
 namespace GDE {
 
-    GDESystemManager &GDESystemManager::get() {
-        static GDESystemManager _gdeSystemManager;
-        return _gdeSystemManager;
-    }
-
-    SystemRef GDESystemManager::addSystem(GDESystem *_system) {
+    SystemRef ECSManager::addSystem(ECSSystem *_system) {
         _system->systemRef = systemRefCounter++;
         _system->updateOrder = _system->systemRef;
         systems.emplace_back(_system);
         return systemRefCounter;
     }
 
-    void GDESystemManager::removeSystem(SystemRef _systemRef) {
+    void ECSManager::removeSystem(SystemRef _systemRef) {
         uint _order = 0;
 
-        auto _found = std::find_if(systems.begin(), systems.end(), [&](const GDESystem* _system) {
+        auto _found = std::find_if(systems.begin(), systems.end(), [&](const ECSSystem* _system) {
             if(_system->systemRef == _systemRef) {
                 _order = _system->updateOrder;
                 return true;
@@ -37,25 +32,25 @@ namespace GDE {
         }
     }
 
-    void GDESystemManager::update(Delta _dt, Graph* _graph) {
+    void ECSManager::update(Delta _dt, Graph* _graph) {
         for(auto& system : systems)
             system->onUpdate(_dt, _graph);
     }
 
-    void GDESystemManager::destroy() {
+    void ECSManager::destroy() {
         for(auto* system : systems)
             delete system;
     }
 
 
-    void GDESystemManager::swapOrderOfUpdate(SystemRef _systemRef0, SystemRef _systemRef1) {
-        GDESystem* _system0 = nullptr, *_system1 = nullptr;
-        auto _found0 = std::find_if(systems.begin(), systems.end(), [&](GDESystem* _system) {
+    void ECSManager::swapOrderOfUpdate(SystemRef _systemRef0, SystemRef _systemRef1) {
+        ECSSystem* _system0 = nullptr, *_system1 = nullptr;
+        auto _found0 = std::find_if(systems.begin(), systems.end(), [&](ECSSystem* _system) {
             _system0 = _system;
             return _system->systemRef == _systemRef0;
         });
 
-        auto _found1 = std::find_if(systems.begin(), systems.end(), [&](GDESystem* _system) {
+        auto _found1 = std::find_if(systems.begin(), systems.end(), [&](ECSSystem* _system) {
             _system1 = _system;
             return _system->systemRef == _systemRef1;
         });
@@ -66,7 +61,7 @@ namespace GDE {
         _system0->updateOrder = _system1->updateOrder;
         _system1->updateOrder = _system0UpdateOrder;
 
-        std::sort(systems.begin(), systems.end(), [](const GDESystem* _systemA, const GDESystem* _systemB) {
+        std::sort(systems.begin(), systems.end(), [](const ECSSystem* _systemA, const ECSSystem* _systemB) {
             return _systemA->updateOrder > _systemB->updateOrder;
         });
     }

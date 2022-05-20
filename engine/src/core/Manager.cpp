@@ -16,7 +16,7 @@ namespace GDE {
         fontManager.init();
         consoleManager.init();
         soundManager.init();
-        sceneManager.init(this, &_engine->getWindow());
+        sceneManager.init(_engine);
         Renderer::init(_engine);
         Physics::get().init();
     }
@@ -30,5 +30,6 @@ namespace GDE {
         sceneManager.destroy();
         Renderer::destroy();
         Physics::get().destroy();
+        ecsManager.destroy();
     }
 }

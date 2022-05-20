@@ -77,6 +77,9 @@ namespace GDE {
 
     void Sandbox::onUpdate(Delta _dt) {
         Scene::onUpdate(_dt);
+
+        if(engine->manager.inputManager.isKeyJustPressed(KeyCode::Enter))
+            engine->manager.sceneManager.unloadScene("Sandbox");
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {

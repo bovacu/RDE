@@ -274,11 +274,11 @@ namespace GDE {
             case ImGuiInputTextFlags_CallbackHistory:{
                 if (_data->EventKey == ImGuiKey_UpArrow){
                     _data->DeleteChars(0, _data->BufTextLen);
-                    _data->InsertChars(0, Console::get().getUpCommand().c_str());
+                    _data->InsertChars(0, engine->manager.consoleManager.getUpCommand().c_str());
                 }
                 else if (_data->EventKey == ImGuiKey_DownArrow) {
                     _data->DeleteChars(0, _data->BufTextLen);
-                    _data->InsertChars(0, Console::get().getDownCommand().c_str());
+                    _data->InsertChars(0, engine->manager.consoleManager.getDownCommand().c_str());
                 }
             }
         }
@@ -309,9 +309,9 @@ namespace GDE {
             Command _command;
             _command.name = _splits[0];
             _command.arguments = std::vector<std::string>(_splits.begin() + 1, _splits.end());
-            auto _result = Console::get().call(_command);
+            auto _result = engine->manager.consoleManager.call(_command);
             for(auto& _r : _result)
-                Console::get().logs.push_back(_r);
+                engine->manager.consoleManager.logs.push_back(_r);
 
             reclaim_focus = true;
             strcpy(_input, "");
@@ -331,8 +331,8 @@ namespace GDE {
 
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-        for (int i = 0; i < Console::get().logs.size(); i++) {
-            const char* item = Console::get().logs[i].c_str();
+        for (int i = 0; i < engine->manager.consoleManager.logs.size(); i++) {
+            const char* item = engine->manager.consoleManager.logs[i].c_str();
 
             ImVec4 color;
             bool has_color = false;

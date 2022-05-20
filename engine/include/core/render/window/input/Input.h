@@ -53,6 +53,8 @@ namespace GDE {
 
     class Engine;
     class Manager;
+
+    /// This class is the base for any input specific class that the engine wants to implement.
     class Input {
         friend class InputManager;
         protected:
@@ -67,6 +69,8 @@ namespace GDE {
     };
 
     class WindowInput; class KeyboardInput; class MouseInput; class ControllerInput; class MobileInput;
+    /// This class allows the user to ask for any user input in a easy and accessible way.
+    /// All managers destroy all the resources before closing the application, it is not needed to be done by the end user.
     class InputManager {
 
         private:
@@ -77,41 +81,70 @@ namespace GDE {
             MobileInput* mobileInput;
 
         public:
+            /// This functions should not be called by end users.
             void init(Engine* _engine, Window* _window);
+
+            /// This functions should not be called by end users.
             void destroy();
+
+            /// This functions should not be called by end users.
             void pollEvents();
 
         public:
+            /// Returns true if the key is pressed and won't return true until the key is released and pressed again.
             bool isKeyJustPressed(KeyCode _key);
+            /// Returns true if the key is released and won't return true until the key is pressed and released again.
             bool isKeyJustReleased(KeyCode _key);
+            /// Returns true while the key is being pressed.
             bool isKeyPressed(KeyCode _key);
+            /// Returns true while the key is not being pressed.
             bool isKeyReleased(KeyCode _key);
 
 
+            /// Returns true if the button is pressed and won't return true until the button is released and pressed again.
             bool isMouseJustPressed(MouseCode _button);
+            /// Returns true if the button is released and won't return true until the button is pressed and released again.
             bool isMouseJustReleased(MouseCode _button);
+            /// Returns true while the button is being pressed.
             bool isMousePressed(MouseCode _button);
+            /// Returns true while the button is not being pressed.
             bool isMouseReleased(MouseCode _button);
+            /// Returns the mouse position in screen coordinates, so x: [0, WindowWidth], y: [0, WindowHeight].
             Vec2F getMousePosScreenCoords(bool _centeredMiddleScreen = true);
+            /// Returns the mouse position inside the world coordinates system.
             Vec2F getMousePosWorldPos();
 
 
+            /// This function changes the order of the controllers (use to set who is player1, for example).
             bool reassignController(int _controllerID, int _as);
+            /// Returns true if the button is pressed and won't return true until the button is released and pressed again.
             bool isGamepadButtonJustPressed(GamePadButtons _button, int _controllerID = 0);
+            /// Returns true if the button is released and won't return true until the button is pressed and released again.
             bool isGamepadButtonJustReleased(GamePadButtons _button, int _controllerID = 0);
+            /// Returns true while the button is being pressed.
             bool isGamepadButtonPressed(GamePadButtons _button, int _controllerID = 0);
+            /// Returns true while the button is not being pressed.
             bool isGamepadButtonReleased(GamePadButtons _button, int _controllerID = 0);
+            /// Makes the controller vibrate at a specific vibration effect.
             bool gamepadVibrate(int _controllerID = 0, const std::string& _vibrationEffectName = "default");
 
 
+            /// Returns true if the axis button is pressed and won't return true until the axis button is released and pressed again.
             bool isGamepadAxisJustPressed(GamePadAxis _axis, int _controllerID = 0);
+            /// Returns true while the axis button is being pressed.
             bool isGamepadAxisPressed(GamePadAxis _axis, int _controllerID = 0);
+            /// Returns true while the axis button is not being pressed.
             bool isGamepadAxisReleased(GamePadAxis _axis, int _controllerID = 0);
 
+
+            /// Returns true if the screen is pressed and won't return true until the screen is released and pressed again.
             bool isMobileScreenJustPressed(int _fingerID);
+            /// Returns true if the screen is released and won't return true until the button is screen and released again.
             bool isMobileScreenJustReleased(int _fingerID);
+            /// Returns true while the screen is being pressed.
             bool isMobileScreenPressed(int _fingerID);
-            bool isMobileScreenUp(int _fingerID);
+            /// Returns true while the screen is not being pressed.
+            bool isMobileScreenRelease(int _fingerID);
 
             std::vector<SystemEventEnum> getEventsIgnored(const InputType& _inputType);
             void addEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event);

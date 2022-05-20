@@ -3,7 +3,7 @@
 #include "core/Engine.h"
 #include "core/render/Renderer.h"
 #include "core/systems/physicsSystem/Physics.h"
-#include "core/systems/ecsSystem/GDESystemManager.h"
+#include "core/systems/ecsSystem/ECSManager.h"
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/systems/profiling/Profiler.h"
 
@@ -36,10 +36,10 @@ namespace GDE {
         FrameBufferSpecification _specs = {(uint32_t)window->getWindowSize().x,(uint32_t)window->getWindowSize().y};
         frameBuffer = new FrameBuffer(_specs, &manager);
 
-        Console::get().addCommand<&Engine::changeColorConsoleCommand>("background_color","Changes background color 0 <= r,b,g,a <= 255",this,"r g b a");
-        Console::get().addCommand<&Engine::setParentCommand>( "parent_set","Sets the parent of A as B",this,"A B");
+        manager.consoleManager.addCommand<&Engine::changeColorConsoleCommand>("background_color"," Changes background color 0 <= r,b,g,a <= 255", this, "r g b a");
+        manager.consoleManager.addCommand<&Engine::setParentCommand>( "parent_set", "Sets the parent of A as B", this, "A B");
 
-        manager.sceneManager.addScene(_scene, _scene->getName());
+        manager.sceneManager.loadScene(_scene, _scene->getName());
         manager.sceneManager.displayScene(_scene->getName());
     }
 
@@ -157,7 +157,6 @@ namespace GDE {
     }
 
     void Engine::destroy() {
-        GDESystemManager::get().destroy();
         manager.destroy();
 
         delete frameBuffer;

@@ -8,20 +8,26 @@
 
 namespace GDE {
 
+    struct DefaultScene : public Scene {
+
+        public:
+            DefaultScene(Engine* _engine, const std::string& _name) : Scene(_engine, _name) { }
+    };
+
     const std::string SCENES_PATH = "assets/scenes/";
 
-    void SceneManager::init(Manager* _manager, Window* _window) {
-        manager = _manager;
-        window = _window;
+    void SceneManager::init(Engine* _engine) {
+        engine = _engine;
+        defaultScene = new DefaultScene(_engine, "__default__");
     }
 
     Scene* SceneManager::getDisplayedScene() {
         return sceneDisplayed;
     }
 
-    void SceneManager::addScene(Scene* _scene, const std::string& _sceneName) {
+    void SceneManager::loadScene(Scene* _scene, const std::string& _sceneName) {
         scenes[_sceneName] = _scene;
-        ConfigManager::loadScene(manager, _scene, window, APPEND_S(SCENES_PATH, _sceneName, ".yaml"));
+        ConfigManager::loadScene(&engine->manager, _scene, &engine->getWindow(), APPEND_S(SCENES_PATH, _sceneName, ".yaml"));
     }
 
     void SceneManager::displayScene(const std::string& _sceneName) {
@@ -34,10 +40,16 @@ namespace GDE {
     }
 
     void SceneManager::unloadScene(const std::string& _sceneName) {
+        if(sceneDisplayed == defaultScene) return;
+
+        bool _deletingDefaultScene = false;
         auto* _scene = scenes[_sceneName];
         _scene->onEnd();
+        if(_scene == sceneDisplayed) _deletingDefaultScene = true;
         delete _scene;
         scenes.erase(_sceneName);
+
+        if(_deletingDefaultScene) sceneDisplayed = defaultScene;
     }
 
     void SceneManager::destroy() {
@@ -47,5 +59,6 @@ namespace GDE {
         };
 
         scenes.clear();
+        delete defaultScene;
     }
 }

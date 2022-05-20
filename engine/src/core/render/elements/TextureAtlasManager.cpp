@@ -5,7 +5,7 @@
 
 namespace GDE {
 
-    bool TextureAtlasManager::addAtlas(int _tileWidth, int _tileHeight, const std::string& _pathToTexture) {
+    bool TextureAtlasManager::loadAtlas(int _tileWidth, int _tileHeight, const std::string& _pathToTexture) {
         auto _name = Util::getFileNameFromPath(_pathToTexture);
         LOG_I_TIME("Trying to load '", _pathToTexture, "'...")
         if(atlases.find(_name) != atlases.end()) {
@@ -31,18 +31,18 @@ namespace GDE {
         return true;
     }
 
-    Texture* TextureAtlasManager::getTexture(const std::string& _textureName) {
-        if(atlases.find(_textureName) == atlases.end()) {
-            LOG_E_TIME("Atlas '", _textureName, "' was not loaded! But tried to be accessed")
+    Texture* TextureAtlasManager::getTile(const std::string& _atlasName) {
+        if(atlases.find(_atlasName) == atlases.end()) {
+            LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
             return nullptr;
         }
 
-        if(atlases[_textureName]->subTextures.find(_textureName) == atlases[_textureName]->subTextures.end()) {
-            LOG_E_TIME("Texture '", _textureName, "' in '",_textureName ,"' was not found! But tried to be accessed")
+        if(atlases[_atlasName]->subTextures.find(_atlasName) == atlases[_atlasName]->subTextures.end()) {
+            LOG_E_TIME("Texture '", _atlasName, "' in '", _atlasName , "' was not found! But tried to be accessed")
             return nullptr;
         }
 
-        return atlases[_textureName]->subTextures[_textureName];
+        return atlases[_atlasName]->subTextures[_atlasName];
     }
 
     Texture* TextureAtlasManager::getTile(const std::string& _atlasName, const std::string& _textureName) {
@@ -125,6 +125,12 @@ namespace GDE {
         }
 
         return _textures;
+    }
+
+    void TextureAtlasManager::unloadAtlas(const std::string& _atlasName) {
+        delete atlases[_atlasName]->texture;
+        delete atlases[_atlasName];
+        atlases.erase(_atlasName);
     }
 
     void TextureAtlasManager::destroy() {

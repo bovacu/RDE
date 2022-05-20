@@ -34,6 +34,7 @@ namespace GDE {
         loadSprites(_manager, _entityMap, _scene, _yaml);
         loadTextRenderers(_manager, _entityMap, _scene, _yaml);
         loadBodies(_entityMap, _scene, _yaml);
+        _scene->preInit(_manager, _window, _yaml);
     }
 
     ConfigManager::EntityMap ConfigManager::createEntities(Scene* _scene, const YAML::Node& _yaml) {
@@ -55,27 +56,39 @@ namespace GDE {
         auto& _sceneCameras = _sceneNode["Cameras"];
 
         for (const auto& _sceneCamera : _sceneCameras) {
-            auto _ownerEntityID = _map.at(_sceneCamera["Owner"].as<int>());
-            auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
-            auto* _camera = _scene->getMainGraph()->addComponent<Camera>(_ownerEntityID, _window, _ownerTransform, _ownerEntityID);
+            auto _isMain = _sceneCamera["IsMain"].as<bool>();
+            if(_isMain) {
+                _scene->getMainCamera()->setCurrentZoomLevel(_sceneCamera["Zoom"].as<float>());
+                _scene->getMainCamera()->setZoomSpeed(_sceneCamera["ZoomSpeed"].as<float>());
 
-            // Set the zoom properties
-            _camera->setCurrentZoomLevel(_sceneCamera["Zoom"].as<float>());
-            _camera->setZoomSpeed(_sceneCamera["ZoomSpeed"].as<float>());
+                int _viewPortType = _sceneCamera["ViewPortType"].as<int>();
+                switch (_viewPortType) {
+                    case 0 : _scene->getMainCamera()->setAdaptiveViewport(_window->getWindowSize(), _window->getWindowSize()); break;
+                    case 1 : _scene->getMainCamera()->setFreeViewport(_window); break;
+                    default: _scene->getMainCamera()->setFreeViewport(_window);
+                }
 
-            // Set as main if needed
-            if(_sceneCamera["SetAsMain"].as<bool>()) _scene->switchMainCamera(_ownerEntityID);
+                _scene->getMainCamera()->getViewport()->update(_window->getWindowSize());
+            } else {
+                auto _ownerEntityID = _map.at(_sceneCamera["Owner"].as<int>());
+                auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
+                auto* _camera = _scene->getMainGraph()->addComponent<Camera>(_ownerEntityID, _window, _ownerTransform, _ownerEntityID);
 
-            // Set the proper viewport
-            int _viewPortType = _sceneCamera["ViewPortType"].as<int>();
-            switch (_viewPortType) {
-                case 0 : _camera->setAdaptiveViewport(_window->getWindowSize(), _window->getWindowSize()); break;
-                case 1 : _camera->setFreeViewport(_window); break;
-                default: _camera->setFreeViewport(_window);
+                // Set the zoom properties
+                _camera->setCurrentZoomLevel(_sceneCamera["Zoom"].as<float>());
+                _camera->setZoomSpeed(_sceneCamera["ZoomSpeed"].as<float>());
+
+                // Set the proper viewport
+                int _viewPortType = _sceneCamera["ViewPortType"].as<int>();
+                switch (_viewPortType) {
+                    case 0 : _camera->setAdaptiveViewport(_window->getWindowSize(), _window->getWindowSize()); break;
+                    case 1 : _camera->setFreeViewport(_window); break;
+                    default: _camera->setFreeViewport(_window);
+                }
+
+                _camera->getViewport()->update(_window->getWindowSize());
+                _scene->getCameras().push_back(_camera);
             }
-
-            _camera->getViewport()->update(_window->getWindowSize());
-            _scene->getCameras().push_back(_camera);
         }
     }
 
@@ -156,7 +169,8 @@ namespace GDE {
 
         auto& _texturesNode = _sceneNode["Assets"]["Textures"];
         for (const auto& _texture : _texturesNode) {
-            _manager->textureManager.addAtlas(_texture["TileWidth"].as<int>(), _texture["TileHeight"].as<int>(), _texture["Path"].as<std::string>());
+            _manager->textureManager.loadAtlas(_texture["TileWidth"].as<int>(), _texture["TileHeight"].as<int>(),
+                                               _texture["Path"].as<std::string>());
         }
 
         auto& _fontsNodes = _sceneNode["Assets"]["Fonts"];

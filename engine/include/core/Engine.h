@@ -10,7 +10,7 @@
 #include "core/graph/ImGuiScene.h"
 #include "core/render/elements/FrameBuffer.h"
 #include "core/Manager.h"
-
+#include "core/systems/configSystem/ConfigManager.h"
 
 namespace GDE {
 

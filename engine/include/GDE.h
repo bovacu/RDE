@@ -21,6 +21,6 @@
 
 #include "core/procedural/CellularAutomataMapGenerator.h"
 
-#include "core/systems/ecsSystem/GDESystemManager.h"
+#include "core/systems/ecsSystem/ECSManager.h"
 
 #endif //ENGINE_GDE_H

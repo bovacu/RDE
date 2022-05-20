@@ -5,11 +5,6 @@
 
 namespace GDE {
 
-    Console& Console::get() {
-        static Console console;
-        return console;
-    }
-
     void Console::init() {
         addCommand<&Console::help>("help", "Gives all available commands information", this);
         addCommand<&Console::clear>("clear", "clears the screen", this);

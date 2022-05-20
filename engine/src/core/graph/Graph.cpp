@@ -9,6 +9,7 @@
 
 namespace GDE {
 
+    /// All of these are foo functions as Delegates need to have something assigned to be called.
     static void onEventDelFoo(Event& _event) {  }
     static void onUpdateDelFoo(Delta _dt) {  }
     static void onFixedUpdateDelFoo(Delta _dt) {  }

@@ -159,7 +159,7 @@ namespace GDE {
         }
 
         for(auto& _fontHandler : fonts[_fontName]) {
-            if(_fontHandler.fontSize == _fontSize)
+            if(_fontHandler.fontSize == _fontSize || _fontHandler.fontSize - _fontSize <= maxDifferenceBetweenFontSizesBeforeCreatingANewOne)
                 return _fontHandler.font;
         }
 
@@ -176,5 +176,21 @@ namespace GDE {
                 delete _font.font;
             }
         FT_Done_FreeType(ftLibrary);
+    }
+
+    void FontManager::unloadFullFont(const std::string& _fontName) {
+        for(auto& _font : fonts[_fontName]) {
+            delete _font.font;
+        }
+
+        fonts.erase(_fontName);
+    }
+
+    void FontManager::unloadSpecificFont(const std::string& _fontName, int _fontSize) {
+        for(auto& _font : fonts[_fontName]) {
+            if(_font.fontSize == _fontSize) delete _font.font;
+        }
+
+        if(fonts[_fontName].empty()) fonts.erase(_fontName);
     }
 }

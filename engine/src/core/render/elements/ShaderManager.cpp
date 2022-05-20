@@ -10,21 +10,21 @@ namespace GDE {
         addShader("debug", DEBUG_VERTEX_SHADER_ES, DEBUG_FRAGMENT_SHADER_ES);
         addShader("basicText", TEXTURE_VERTEX_SHADER_ES, TEXT_FRAGMENT_SHADER_ES);
 //        addShader("outline", TEXTURE_VERTEX_SHADER_ES, OUTLINE_FRAGMENT_SHADER_ES);
-        addShader("framebuffer", "assets/shaders/es/framebuffer/FrameBufferVertex.glsl", "assets/shaders/es/framebuffer/FrameBufferFragment.glsl");
+        loadShader("framebuffer", "assets/shaders/es/framebuffer/FrameBufferVertex.glsl", "assets/shaders/es/framebuffer/FrameBufferFragment.glsl");
     #else
-        addShader("basic", TEXTURE_VERTEX_SHADER_CORE, TEXTURE_FRAGMENT_SHADER_CORE);
-        addShader("debug", DEBUG_VERTEX_SHADER_CORE, DEBUG_FRAGMENT_SHADER_CORE);
-        addShader("basicText", TEXTURE_VERTEX_SHADER_CORE, TEXT_FRAGMENT_SHADER_CORE);
-        addShader("outline", TEXTURE_VERTEX_SHADER_CORE, OUTLINE_FRAGMENT_SHADER_CORE);
-        addShader("grid", DEBUG_GRID_VERTEX_SHADER_CORE, DEBUG_GRID_FRAGMENT_SHADER_CORE);
-//        addShader("mirror", MIRROR_VERTEX_SHADER_CORE, MIRROR_FRAGMENT_SHADER_CORE);
-        addShader("framebuffer", FRAMEBUFFER_VERTEX_SHADER_CORE, FRAMEBUFFER_FRAGMENT_SHADER_CORE);
-        addShader("rml", RML_VERTEX_SHADER_CORE, RML_FRAGMENT_SHADER_CORE);
-        addShader("rmlColor", RML_VERTEX_SHADER_CORE, RML_FRAGMENT_COLOR_ONLY_SHADER_CORE);
+        loadShader("basic", TEXTURE_VERTEX_SHADER_CORE, TEXTURE_FRAGMENT_SHADER_CORE);
+        loadShader("debug", DEBUG_VERTEX_SHADER_CORE, DEBUG_FRAGMENT_SHADER_CORE);
+        loadShader("basicText", TEXTURE_VERTEX_SHADER_CORE, TEXT_FRAGMENT_SHADER_CORE);
+        loadShader("outline", TEXTURE_VERTEX_SHADER_CORE, OUTLINE_FRAGMENT_SHADER_CORE);
+        loadShader("grid", DEBUG_GRID_VERTEX_SHADER_CORE, DEBUG_GRID_FRAGMENT_SHADER_CORE);
+//        loadShader("mirror", MIRROR_VERTEX_SHADER_CORE, MIRROR_FRAGMENT_SHADER_CORE);
+        loadShader("framebuffer", FRAMEBUFFER_VERTEX_SHADER_CORE, FRAMEBUFFER_FRAGMENT_SHADER_CORE);
+        loadShader("rml", RML_VERTEX_SHADER_CORE, RML_FRAGMENT_SHADER_CORE);
+        loadShader("rmlColor", RML_VERTEX_SHADER_CORE, RML_FRAGMENT_COLOR_ONLY_SHADER_CORE);
     #endif
     }
 
-    ShaderID ShaderManager::addShader(const std::string& _shaderName, const std::string& _vertex, const std::string& _fragment) {
+    ShaderID ShaderManager::loadShader(const std::string& _shaderName, const std::string& _vertex, const std::string& _fragment) {
         auto* _shader = new Shader;
         _shader->loadFromFiles(_vertex, _fragment);
         shaders[_shaderName] = _shader;
@@ -32,7 +32,7 @@ namespace GDE {
         return shaders[_shaderName]->getShaderID();
     }
 
-    void ShaderManager::removeShader(const std::string& _name) {
+    void ShaderManager::unloadShader(const std::string& _name) {
         delete shaders[_name];
         shaders.erase(_name);
     }

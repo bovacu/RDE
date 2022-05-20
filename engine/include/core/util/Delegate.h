@@ -131,6 +131,7 @@ namespace GDE {
         }
     };
 
+    typedef uint32_t DelegateRef;
     template <typename R, typename...Args>
     class MDelegate<R(Args...)> {
         using stub_function = R(*)(const void*, Args...);
@@ -167,7 +168,7 @@ namespace GDE {
             }
 
             template <auto Function, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(Function),Args...>>>
-            auto bind() -> void {
+            auto bind() -> DelegateRef {
                 Stub<R(Args...)> _s {
                     nullptr,
                     static_cast<stub_function>([](const void*, Args... _args) -> R {
@@ -176,10 +177,11 @@ namespace GDE {
                 };
                 stubs.push_back(_s);
                 counter = stubs.size();
+                return counter;
             }
 
             template <auto MemberFunction, typename Class, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(MemberFunction),const Class*, Args...>>>
-            auto bind(const Class* _cls) -> void {
+            auto bind(const Class* _cls) -> DelegateRef {
                 Stub<R(Args...)> _s {
                         _cls,
                         static_cast<stub_function>([](const void* _p, Args... _args) -> R {
@@ -189,10 +191,11 @@ namespace GDE {
                 };
                 stubs.push_back(_s);
                 counter = stubs.size();
+                return counter;
             }
 
             template <auto MemberFunction, typename Class, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(MemberFunction),Class*, Args...>>>
-            auto bind(Class* _cls) -> void {
+            auto bind(Class* _cls) -> DelegateRef {
                 Stub<R(Args...)> _s {
                         _cls,
                         static_cast<stub_function>([](const void* _p, Args... _args) -> R {
@@ -202,6 +205,7 @@ namespace GDE {
                 };
                 stubs.push_back(_s);
                 counter = stubs.size();
+                return counter;
             }
 
             void clear() {
