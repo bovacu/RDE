@@ -10,12 +10,14 @@
 
 namespace GDE {
 
+    class IViewPort;
     class IRenderizable {
         public:
-            [[nodiscard]] virtual Texture* getTexture() const = 0;
+            [[nodiscard]] virtual GLuint getTexture() const = 0;
             [[nodiscard]] virtual int getLayer() const = 0;
             [[nodiscard]] virtual Color getColor() const = 0;
             [[nodiscard]] virtual ShaderID getShaderID() const = 0;
+            virtual void updateViewport(IViewPort* _viewport) = 0;
     };
 
 }

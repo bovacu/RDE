@@ -98,10 +98,10 @@ namespace GDE {
 
         for (const auto& _spriteRendererNode : _spriteRenderersNode) {
             auto _ownerEntityID = _map.at(_spriteRendererNode["Owner"].as<int>());
-            auto* _spriteRenderer = _scene->getMainGraph()->addComponent<SpriteRenderer>(_ownerEntityID, _manager);
+            auto* _spriteRenderer = _scene->getMainGraph()->addComponent<SpriteRenderer>(_ownerEntityID, _scene);
 
-            _spriteRenderer->texture = _manager->textureManager.getTile(_spriteRendererNode["Texture"]["Atlas"].as<std::string>(),
-                                                                          _spriteRendererNode["Texture"]["Tile"].as<std::string>());
+            _spriteRenderer->setTexture(_manager->textureManager.getTile(_spriteRendererNode["Texture"]["Atlas"].as<std::string>(),
+                                                                          _spriteRendererNode["Texture"]["Tile"].as<std::string>()));
             _spriteRenderer->color = Color { _spriteRendererNode["Color"][0].as<unsigned char>(), _spriteRendererNode["Color"][1].as<unsigned char>(),
                                              _spriteRendererNode["Color"][2].as<unsigned char>(), _spriteRendererNode["Color"][3].as<unsigned char>()};
             _spriteRenderer->layer = _spriteRendererNode["Layer"].as<int>();

@@ -21,7 +21,7 @@ namespace GDE {
             std::vector<Camera*> cameras;
             Camera* mainCamera = nullptr;
 
-        protected:
+        public:
             std::string debugName;
             Engine* engine = nullptr;
 

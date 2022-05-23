@@ -15,13 +15,13 @@ namespace GDE {
     static void onFixedUpdateDelFoo(Delta _dt) {  }
     static void onRenderDelFoo() {  }
 
-    Graph::Graph(Engine* _engine, const std::string& _sceneName) {
-        engine = _engine;
+    Graph::Graph(Scene* _scene, const std::string& _sceneName) {
+        scene = _scene;
         name = _sceneName;
         sceneRoot = registry.create();
 
         registry.emplace<Tag>(sceneRoot, _sceneName);
-        registry.emplace<Transform>(sceneRoot, &engine->getWindow()).parent = NODE_ID_NULL;
+        registry.emplace<Transform>(sceneRoot).parent = NODE_ID_NULL;
         registry.emplace<Active>(sceneRoot, true);
 
         onEventDel.bind<&onEventDelFoo>();
@@ -29,7 +29,6 @@ namespace GDE {
         onFixedUpdateDel.bind<&onFixedUpdateDelFoo>();
         onRenderDel.bind<&onRenderDelFoo>();
     }
-
 
     void Graph::onEvent(Event& _event) {
         onEventDel(_event);
@@ -66,7 +65,7 @@ namespace GDE {
         onFixedUpdateDel(_dt);
     }
 
-    void Graph::onRender(Scene* scene) {
+    void Graph::onRender() {
         Renderer::clear();
 
         auto _spriteRendererGroup = registry.group<SpriteRenderer>(entt::get<Transform, Active>);
@@ -76,11 +75,13 @@ namespace GDE {
             Renderer::beginDraw(*_camera, getComponent<Transform>(_camera->ID));
             _camera->setCameraSize(_camera->getCameraSize());
             {
-                _spriteRendererGroup.each([](const auto _entity, const SpriteRenderer& _spriteRenderer, const Transform& _transform, const Active& _active) {
+                _spriteRendererGroup.each([&_camera](const auto _entity, SpriteRenderer& _spriteRenderer, const Transform& _transform, const Active& _active) {
+                    _spriteRenderer.updateViewport(_camera->getViewport());
                     Renderer::draw(_spriteRenderer, _transform);
                 });
 
-                _textRendererGroup.each([](const auto _entity, const TextRenderer& _text, const Transform& _transform, const Active& _active) {
+                _textRendererGroup.each([&_camera](const auto _entity, TextRenderer& _text, const Transform& _transform, const Active& _active) {
+                    _text.updateViewport(_camera->getViewport());
                     Renderer::draw(_text, _transform);
                 });
             }
@@ -90,7 +91,7 @@ namespace GDE {
         onRenderDel();
     }
 
-    void Graph::onDebugRender(Scene* scene) {
+    void Graph::onDebugRender() {
         Renderer::beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->ID));
         registry.view<Body>().each([](const auto _entity, const Body& _body) {
             Renderer::drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
@@ -104,7 +105,7 @@ namespace GDE {
         auto _parentRef = _parent == NODE_ID_NULL ? sceneRoot : _parent;
 
         registry.emplace<Tag>(_newNode, _tag);
-        registry.emplace<Transform>(_newNode, &engine->getWindow()).parent = _parentRef;
+        registry.emplace<Transform>(_newNode).parent = _parentRef;
         (&registry.get<Transform>(_parentRef))->children.push_back(_newNode);
 
         registry.emplace<Active>(_newNode, true);

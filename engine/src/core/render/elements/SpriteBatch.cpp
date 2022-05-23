@@ -14,7 +14,7 @@
 namespace GDE {
 
     void SpriteBatch::init(Engine* _engine) {
-        engine = _engine;
+        shaderManager = &_engine->manager.shaderManager;
         debug.initDebugVbo();
         initVbo();
     }
@@ -64,12 +64,7 @@ namespace GDE {
 
     void SpriteBatch::beginDraw(Camera& _camera, Transform* _cameraTransform) {
         viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_cameraTransform->modelMatrix);
-
-        debug.scalingFactor = _camera.getViewport()->getScalingFactor();
-        debug.aspectRatio = _camera.getViewport()->getAspectRatio();
-
-        scalingFactor = debug.scalingFactor;
-        aspectRatio = debug.aspectRatio;
+        viewport = _camera.getViewport();
     }
 
     void SpriteBatch::draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform) {
@@ -82,15 +77,16 @@ namespace GDE {
 
     void SpriteBatch::Debug::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
-        auto _screenPos0 = Util::worldToScreenCoords(&batch->engine->getWindow(), _p0, aspectRatio);
-        auto _screenPos1 = Util::worldToScreenCoords(&batch->engine->getWindow(), _p1, aspectRatio);
+        auto _screenPos0 = Util::worldToScreenCoords(batch->viewport, _p0);
+        auto _screenPos1 = Util::worldToScreenCoords(batch->viewport, _p1);
 
         auto _transformMat0 = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos0.x, _screenPos0.y, 1.f));
         auto _transformMat1 = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos1.x, _screenPos1.y, 1.f));
 
-        if(scalingFactor != 1) {
-            _transformMat0 *= glm::scale(glm::mat4(1.0f), {scalingFactor.x, scalingFactor.x, 1.f});
-            _transformMat1 *= glm::scale(glm::mat4(1.0f), {scalingFactor.x, scalingFactor.x, 1.f});
+        auto _scalingFactor = batch->viewport->getScalingFactor();
+        if(_scalingFactor != 1) {
+            _transformMat0 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
+            _transformMat1 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
         }
 
         vertexDebugBufferLines.emplace_back(_transformMat0 * glm::vec4 {_screenPos0.x, _screenPos0.y, 0.0f, 1.0f}, _colorVec4);
@@ -98,18 +94,15 @@ namespace GDE {
     }
 
     void SpriteBatch::Debug::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
-        auto _screenPos = Util::worldToScreenCoords(&batch->engine->getWindow(), _position, aspectRatio);
+        auto _screenPos = Util::worldToScreenCoords(batch->viewport, _position);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x,_screenPos.y, 1.f));
 
         if(_rotation != 0)
             _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_rotation), { 0.0f, 0.0f, 1.0f });
 
-        if(scalingFactor != 1)
-            _transformMat *= glm::scale(glm::mat4(1.0f), {scalingFactor.x, scalingFactor.x, 1.f});
-
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
 
-        auto _screenSize = Util::worldToScreenSize(&batch->engine->getWindow(), _size, aspectRatio);
+        auto _screenSize = Util::worldToScreenSize(batch->viewport, _size);
         // First triangle
         vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
         vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
@@ -122,13 +115,14 @@ namespace GDE {
     }
 
     void SpriteBatch::Debug::drawShape(Shape& _shape) {
-        auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x * scalingFactor.x, _shape.getPosition().y * scalingFactor.y, 1.f));
+        auto _scalingFactor = batch->viewport->getScalingFactor();
+        auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x * _scalingFactor.x, _shape.getPosition().y * _scalingFactor.y, 1.f));
 
         if(_shape.getRotation() != 0)
             _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_shape.getRotation()), { 0.0f, 0.0f, 1.0f });
 
-        if(scalingFactor != 1)
-            _transformMat *= glm::scale(glm::mat4(1.0f), {scalingFactor.x, scalingFactor.x, 1.f});
+        if(_scalingFactor != 1)
+            _transformMat *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
 
         glm::vec4 _innerColor = {(float)_shape.getInnerColor().r / 255.f, (float)_shape.getInnerColor().g / 255.f,
                                  (float)_shape.getInnerColor().b/ 255.f, (float)_shape.getInnerColor().a/ 255.f};
@@ -158,7 +152,7 @@ namespace GDE {
 
     void SpriteBatch::flush() {
         for(auto& _batch : batches) {
-            if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.texture == nullptr || _batch.shaderID < 0)
+            if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.textureID < 0 || _batch.shaderID < 0)
                 continue;
 
             glBindVertexArray(vao);
@@ -167,7 +161,7 @@ namespace GDE {
             glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, _batch.texture->getGLTexture());
+            glBindTexture(GL_TEXTURE_2D, _batch.textureID);
 
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
             glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0], GL_STATIC_DRAW);
@@ -192,7 +186,7 @@ namespace GDE {
     }
 
     void SpriteBatch::Debug::flushDebug() {
-        ShaderID _id = batch->engine->manager.shaderManager.getShader("debug");
+        ShaderID _id = batch->shaderManager->getShader("debug");
 
         glBindVertexArray(debugVao);
         glUseProgram(_id);
@@ -239,14 +233,14 @@ namespace GDE {
 
     SpriteBatch::Batch& SpriteBatch::getBatch(const IRenderizable& _renderer, int _layer, BatchPriority _priority) {
         for(auto& _batch : batches)
-            if(_renderer.getTexture()->getGLTexture() == _batch.texture->getGLTexture() && _layer == _batch.layer && _batch.shaderID == _renderer.getShaderID())
+            if(_renderer.getTexture() == _batch.textureID && _layer == _batch.layer && _batch.shaderID == _renderer.getShaderID())
                 return _batch;
 
         LOG_W("Created a new batch")
 
         Batch _batch;
         _batch.layer = _layer;
-        _batch.texture = _renderer.getTexture();
+        _batch.textureID = _renderer.getTexture();
         _batch.priority = _priority;
         _batch.shaderID = _renderer.getShaderID();
         _batch.spriteBatch = this;
@@ -261,7 +255,7 @@ namespace GDE {
         std::sort(batches.begin(), batches.end(), [&](const Batch& a_batch, const Batch& b_batch) {
             if(a_batch.priority == b_batch.priority) {
                 if (a_batch.layer == b_batch.layer) {
-                    return a_batch.texture < b_batch.texture;
+                    return a_batch.textureID < b_batch.textureID;
                 }
 
                 return a_batch.layer < b_batch.layer;
@@ -277,20 +271,23 @@ namespace GDE {
 
     void SpriteBatch::Batch::addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform) {
 
-        if(spriteBatch->vertices > 10000)
+        if(vertexCount > spriteBatch->maxVerticesPerDrawCall)
             spriteBatch->flush();
 
-        if(texture == nullptr)
-            texture = _spriteRenderer.texture;
+        if(textureID < 0)
+            textureID = _spriteRenderer.texture->getGLTexture();
 
-        auto _transformMat = _transform.modelMatrix * glm::scale(glm::mat4(1.0f), {spriteBatch->scalingFactor.x, spriteBatch->scalingFactor.y, 1.0f});
+        auto _transformMat = _transform.modelMatrix;
+        auto _screenPos = Util::worldToScreenCoords(spriteBatch->viewport, {_transform.modelMatrix[3][0], _transform.modelMatrix[3][1]});
+        _transformMat[3][0] = _screenPos.x;
+        _transformMat[3][1] = _screenPos.y;
 
         Vec2F _textureOrigin = {(float)_spriteRenderer.texture->getRegion().bottomLeftCorner.x, (float)_spriteRenderer.texture->getRegion().bottomLeftCorner.y};
         Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_spriteRenderer.texture->getSize().x, _textureOrigin.y / (float)_spriteRenderer.texture->getSize().y};
 
         Vec2F _textureTileSize = {(float)_spriteRenderer.texture->getRegion().size.x, (float)_spriteRenderer.texture->getRegion().size.y};
         Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_spriteRenderer.texture->getSize().x, _textureTileSize.y / (float)_spriteRenderer.texture->getSize().y};
-        auto _textureTileSizeOnScreen = Util::worldToScreenSize(&spriteBatch->engine->getWindow(), _textureTileSize, spriteBatch->aspectRatio);
+        auto _textureTileSizeOnScreen = Util::worldToScreenSize(spriteBatch->viewport, _textureTileSize);
 
         glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
         glm::vec4 _bottomRightTextureCorner = {_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -317,8 +314,12 @@ namespace GDE {
     }
 
     void SpriteBatch::Batch::addText(const TextRenderer& _text, const Transform& _transform) {
-        if(texture == nullptr) {
-            texture = &_text.getFont()->getTexture();
+
+        if(vertexCount > spriteBatch->maxVerticesPerDrawCall)
+            spriteBatch->flush();
+
+        if(textureID < 0) {
+            textureID = _text.getFont()->getTexture().getGLTexture();
         }
 
         auto* _atlas = _text.getFont();
@@ -346,13 +347,16 @@ namespace GDE {
                 continue;
             }
 
-            auto _transformMat = _transform.modelMatrix * glm::scale(glm::mat4(1.0f), {spriteBatch->scalingFactor.x, spriteBatch->scalingFactor.y, 1.0f});
+            auto _transformMat = _transform.modelMatrix;
+            auto _screenPos = Util::worldToScreenCoords(spriteBatch->viewport, {_transform.modelMatrix[3][0], _transform.modelMatrix[3][1]});
+            _transformMat[3][0] = _screenPos.x;
+            _transformMat[3][1] = _screenPos.y;
 
             auto _textColor = _text.color;
             glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
 
-            auto _positionInScreen = Util::worldToScreenSize(&spriteBatch->engine->getWindow(), {x2 + _x, y2 + _y}, spriteBatch->aspectRatio);
-            auto _sizeInScreen = Util::worldToScreenSize(&spriteBatch->engine->getWindow(), {w, h}, spriteBatch->aspectRatio);
+            auto _positionInScreen = Util::worldToScreenSize(spriteBatch->viewport, {x2 + _x, y2 + _y});
+            auto _sizeInScreen = Util::worldToScreenSize(spriteBatch->viewport, {w, h});
 
             glm::vec4 _bottomLeftTextureCorner = { _positionInScreen.x, -_positionInScreen.y, 0.0f, 1.0f };
             glm::vec4 _bottomRightTextureCorner = {_positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y, 0.0f, 1.0f };

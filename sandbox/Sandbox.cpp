@@ -78,8 +78,14 @@ namespace GDE {
     void Sandbox::onUpdate(Delta _dt) {
         Scene::onUpdate(_dt);
 
-        if(engine->manager.inputManager.isKeyJustPressed(KeyCode::Enter))
-            engine->manager.sceneManager.unloadScene("Sandbox");
+//        auto _mousePos = engine->manager.inputManager.getMousePosScreenCoords();
+//        auto _blueRectID = getMainGraph()->getNode("Blue Cube");
+//        auto* _transform = getMainGraph()->getComponent<Transform>(_blueRectID);
+//        auto _size = getMainGraph()->getComponent<SpriteRenderer>(_blueRectID)->getSize();
+//
+//        if(_mousePos.isInside(_transform->getPositionLocal(), {(float)_size.x, (float)_size.y})) {
+//            LOG_I("Inside!")
+//        }
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {
@@ -89,6 +95,7 @@ namespace GDE {
 
     void Sandbox::onDebugRender(Delta _dt) {
         Scene::onDebugRender(_dt);
+        Renderer::drawSquare({100, 100}, {32, 32});
     }
 
     void Sandbox::onImGuiRender(Delta _dt) { Scene::onImGuiRender(_dt); }
@@ -185,8 +192,8 @@ namespace GDE {
                     .bodyShapeType = BodyShapeType::BOX,
             };
             getMainGraph()->addComponent<Body>(_square, _squareWallConfig, _squareTransform);
-            auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(_square, &engine->manager);
-            _squareSpriteRenderer->texture = engine->manager.textureManager.getTile("square", "square_0");
+            auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(_square, this);
+            _squareSpriteRenderer->setTexture(engine->manager.textureManager.getTile("square", "square_0"));
         }
     }
 

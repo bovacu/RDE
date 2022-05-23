@@ -5,26 +5,22 @@
 
 namespace GDE {
 
-    Transform::Transform(Window* _window) {
-        window = _window;
-    }
-
     glm::mat4 Transform::getLocalModelMatrix() {
         const glm::mat4 _rot = glm::rotate(glm::mat4(1.0f), glm::radians(localRotation), glm::vec3(0.0f, 0.0f, 1.0f));
         glm::vec3 _scale = {localScale.x, localScale.y, 1};
 
-        auto _windowSize = window->getWindowSize();
-        Vec2F _localPos = Util::worldToScreenCoords(window, {localPosition.x, localPosition.y}, (float)_windowSize.x / (float) _windowSize.y);
-        localModelMatrix = glm::translate(glm::mat4(1.0f), {_localPos.x, _localPos.y, 0.0f}) * _rot * glm::scale(glm::mat4(1.0f), _scale);
+        localModelMatrix = glm::translate(glm::mat4(1.0f), {localPosition.x, localPosition.y, 0.0f}) * _rot * glm::scale(glm::mat4(1.0f), _scale);
         return localModelMatrix;
     }
 
     void Transform::update(Graph* _graph) {
+        auto _lmm = getLocalModelMatrix();
+
         if (parent != NODE_ID_NULL) {
             auto* _parentT = _graph->getComponent<Transform>(parent);
             modelMatrix = _parentT->modelMatrix * localModelMatrix;
         } else
-            modelMatrix = getLocalModelMatrix();
+            modelMatrix = _lmm;
     }
 
     void Transform::setPosition(const Vec2F& _position) {
@@ -33,7 +29,6 @@ namespace GDE {
 
     void Transform::setPosition(float _x, float _y) {
         localPosition = glm::vec3 {_x, _y, 0.0f};
-        getLocalModelMatrix();
     }
 
     Vec2F Transform::getPositionLocal() const {
@@ -42,7 +37,6 @@ namespace GDE {
 
     void Transform::setRotation(float _rotation) {
         localRotation = _rotation;
-        getLocalModelMatrix();
     }
 
     float Transform::getRotationLocal() const {
@@ -55,7 +49,6 @@ namespace GDE {
 
     void Transform::setScale(float _x, float _y) {
         localScale = {_x, _y, 1.0f};
-        getLocalModelMatrix();
     }
 
     Vec2F Transform::getScaleLocal() const {
@@ -69,12 +62,10 @@ namespace GDE {
     void Transform::translate(float _x, float _y) {
         localPosition.x += _x;
         localPosition.y += _y;
-        getLocalModelMatrix();
     }
 
     void Transform::rotate(float _amount) {
         localRotation += _amount;
-        getLocalModelMatrix();
     }
 
     void Transform::scale(const Vec2F& _scale) {
@@ -84,7 +75,6 @@ namespace GDE {
     void Transform::scale(float _x, float _y) {
         localScale.x += _x;
         localScale.y += _y;
-        getLocalModelMatrix();
     }
 
     Vec2F Transform::getPositionWorld() const {
@@ -288,11 +278,21 @@ namespace GDE {
     // -------------------------------- SPRITE RENDERER
 
 
-    SpriteRenderer::SpriteRenderer(Manager* _manager, Texture* _texture) : texture(_texture) {
-        shaderID = _manager->shaderManager.getShader("basic");
+    SpriteRenderer::SpriteRenderer(Scene* _scene, Texture* _texture) : texture(_texture) {
+        shaderID = _scene->engine->manager.shaderManager.getShader("basic");
+        viewport = _scene->getMainCamera()->getViewport();
     }
 
-    SpriteRenderer::SpriteRenderer(Manager* _manager) {
-        shaderID = _manager->shaderManager.getShader("basic");
+    SpriteRenderer::SpriteRenderer(Scene* _scene) {
+        shaderID = _scene->engine->manager.shaderManager.getShader("basic");
+        viewport = _scene->getMainCamera()->getViewport();
+    }
+
+    Vec2F SpriteRenderer::getSize() const {
+        return { (float)texture->getSize().x * viewport->getScalingFactor().x, (float)texture->getSize().y * viewport->getScalingFactor().y };
+    }
+
+    void SpriteRenderer::updateViewport(IViewPort* _viewport) {
+        viewport = _viewport;
     }
 }

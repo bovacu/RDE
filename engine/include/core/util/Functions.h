@@ -37,31 +37,34 @@ namespace GDE {
                 return base_filename.substr(base_filename.find_last_of('.') + 1, base_filename.size());
             }
 
-            static Vec2F worldToScreenCoords(Window* _window, const Vec2F& _position, float _aspectRatio) {
-                auto _windowSize = _window->getWindowSize();
-                return {_position.x * _aspectRatio / ((float)_windowSize.x / 2), _position.y / ((float)_windowSize.y / 2)};
+            static Vec2F worldToScreenCoords(IViewPort* _viewport, const Vec2F& _position) {
+                auto _windowSize = _viewport->getDeviceResolution();
+                return {_position.x * _viewport->getAspectRatio() * _viewport->getScalingFactor().x / ((float)_windowSize.x / 2),
+                        _position.y * _viewport->getScalingFactor().y / ((float)_windowSize.y / 2)};
             }
 
-            static Vec2F screenToWorldCoords(Window* _window, const Vec2F& _position, float _aspectRatio) {
-                auto _windowSize = _window->getWindowSize();
-                return {_position.x / _aspectRatio * ((float)_windowSize.x / 2), _position.y * ((float)_windowSize.y / 2)};
+            [[gnu::warning("Probably broken some versions ago, check it out again")]]
+            static Vec2F screenToWorldCoords(IViewPort* _viewport, const Vec2F& _position) {
+                auto _windowSize = _viewport->getDeviceResolution();
+                return {_position.x / _viewport->getAspectRatio() * ((float)_windowSize.x / 2), _position.y * ((float)_windowSize.y / 2)};
             }
 
-            static Vec2F worldToScreenSize(Window* _window, const Vec2F& _size, float _aspectRatio) {
-                auto _windowSize = _window->getWindowSize();
-                return {_size.x * _aspectRatio / ((float)_windowSize.x), _size.y / ((float)_windowSize.y)};
+            static Vec2F worldToScreenSize(IViewPort* _viewport, const Vec2F& _size) {
+                auto _windowSize = _viewport->getDeviceResolution();
+                return {_size.x * _viewport->getAspectRatio() * _viewport->getScalingFactor().x / ((float)_windowSize.x),
+                        _size.y * _viewport->getScalingFactor().y / ((float)_windowSize.y)};
             }
 
-            static void worldToScreenSize(Window* _window, float& _x, float& _y, float _aspectRatio) {
-                auto _windowSize = _window->getWindowSize();
-                _x = _x * _aspectRatio / ((float)_windowSize.x / 2);
-                _y = _y / ((float)_windowSize.y / 2);
+            static void worldToScreenSize(IViewPort* _viewport, float& _x, float& _y) {
+                auto _new = worldToScreenCoords(_viewport, {_x, _y});
+                _x = _new.x;
+                _y = _new.y;
             }
 
-            static void screenToWorldCoords(Window* _window, float& _x, float& _y, float _aspectRatio) {
-                auto _windowSize = _window->getWindowSize();
-                _x = _x / _aspectRatio * ((float)_windowSize.x / 2);
-                _y = _y * ((float)_windowSize.y / 2);
+            static void screenToWorldCoords(IViewPort* _viewport, float& _x, float& _y) {
+                auto _new = screenToWorldCoords(_viewport, {_x, _y});
+                _x = _new.x;
+                _y = _new.y;
             }
     };
 

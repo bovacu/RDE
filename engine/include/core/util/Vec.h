@@ -38,16 +38,21 @@ class Vec2 {
         return x * _vec.x + y * _vec.y;
     }
 
-    float dotProduct(const Vec2<T>& _p) const {
+    [[nodiscard]] float dotProduct(const Vec2<T>& _p) const {
         return x * _p.x + y * _p.y;
     }
 
-    float distance(const Vec2<T>& _p) const {
+    [[nodiscard]] float distance(const Vec2<T>& _p) const {
         return std::sqrt((_p.x - x) * (_p.x - x) + (_p.y - y) * (_p.y - y));
     }
 
-    float magnitude() const {
+    [[nodiscard]] float magnitude() const {
         return std::sqrt(x * x + y * y);
+    }
+
+    bool isInside(const Vec2<T>& _rectCenter, const Vec2<T>& _rectSize) {
+        return x >= _rectCenter.x - _rectSize.x / 2.f && x <= _rectCenter.x + _rectSize.x / 2.f &&
+               y >= _rectCenter.y - _rectSize.x / 2.f && y <= _rectCenter.y + _rectSize.y / 2.f;
     }
 
     static Vec2<float> normalize(Vec2<T>& _p) {

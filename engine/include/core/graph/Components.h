@@ -17,6 +17,7 @@ namespace GDE {
 
     class Manager;
     class Window;
+    class Camera;
 
     struct Tag {
         std::string tag;
@@ -36,19 +37,31 @@ namespace GDE {
         explicit Active(bool _active) : active(_active) {  }
     };
 
+    class IViewPort;
     struct SpriteRenderer : public IRenderizable {
+
+        friend class SpriteBatch;
+
         Color color = Color::White;
-        Texture* texture = nullptr;
         GLuint shaderID = -1;
         int layer = 0;
 
-        explicit SpriteRenderer(Manager* _manager);
-        SpriteRenderer(Manager* _manager, Texture* _texture);
+        private:
+            Texture* texture = nullptr;
+            IViewPort* viewport = nullptr;
 
-        [[nodiscard]] Texture* getTexture() const override { return texture; }
-        [[nodiscard]] int getLayer() const override { return layer; }
-        [[nodiscard]] Color getColor() const override { return color; }
-        [[nodiscard]] ShaderID getShaderID() const override { return shaderID; }
+        public:
+            explicit SpriteRenderer(Scene* _scene);
+            SpriteRenderer(Scene* _scene, Texture* _texture);
+
+            [[nodiscard]] Vec2F getSize() const;
+
+            void setTexture(Texture* _texture) { texture = _texture; }
+            [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
+            [[nodiscard]] int getLayer() const override { return layer; }
+            [[nodiscard]] Color getColor() const override { return color; }
+            [[nodiscard]] ShaderID getShaderID() const override { return shaderID; }
+            void updateViewport(IViewPort* _viewport) override;
     };
 
     class TextRenderer : public IRenderizable {
@@ -68,11 +81,14 @@ namespace GDE {
             float enterHeight {};
             int fontSize {};
             Texture* texture = nullptr;
+            IViewPort* viewport = nullptr;
 
-        [[nodiscard]] Texture* getTexture() const override { return texture; }
-        [[nodiscard]] int getLayer() const override { return layer; }
-        [[nodiscard]] Color getColor() const override { return color; }
-        [[nodiscard]] ShaderID getShaderID() const override { return shaderID; }
+        public:
+            [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
+            [[nodiscard]] int getLayer() const override { return layer; }
+            [[nodiscard]] Color getColor() const override { return color; }
+            [[nodiscard]] ShaderID getShaderID() const override { return shaderID; }
+            void updateViewport(IViewPort* _viewport) override { viewport = _viewport; }
 
         private:
             void recalcTextDimensions(const std::string& _text);
@@ -109,10 +125,8 @@ namespace GDE {
             glm::vec3 localScale { 1.0f, 1.0f, 1.0f };
             float localRotation = 0.0f;
             bool constant = false;
-            Window* window;
 
         public:
-            explicit Transform(Window* _window);
             NodeID parent;
             std::vector<NodeID> children;
 

@@ -39,7 +39,7 @@ namespace GDE {
                 std::vector<Vertex2dUVColor> vertexBuffer;
                 std::vector<uint32_t> indexBuffer;
                 int vertexCount = 0;
-                Texture* texture;
+                GLuint textureID = -1;
                 friend class SpriteBatch;
                 void addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
                 void addText(const TextRenderer& _text, const Transform& _transform);
@@ -52,8 +52,6 @@ namespace GDE {
                 std::vector<VertexColorDebug> vertexDebugBufferGeometrics;
                 std::vector<VertexColorDebug> vertexDebugBufferLines;
                 GLuint debugVbo = -1, debugVao = -1;
-                Vec2F scalingFactor = {1, 1};
-                float aspectRatio = 1.7777f;
 
             private:
                 void initDebugVbo();
@@ -74,15 +72,15 @@ namespace GDE {
             int totalTriangles = 0;
             int drawCalls = 0;
             Debug debug;
+            const int maxVerticesPerDrawCall = 35000; // Between 25.000 and 45.000 should be a good range
 
         private:
-            Engine* engine;
+            ShaderManager* shaderManager = nullptr;
+            IViewPort* viewport = nullptr;
             GLuint vbo = -1, vao = -1, ibo = -1;
             int vertices = 0;
             glm::mat4 viewProjectionMatrix;
             std::vector<Batch> batches;
-            Vec2F scalingFactor {1, 1};
-            float aspectRatio = 1.77777f;
 
         private:
             Batch& getBatch(const IRenderizable& _renderer, int _layer, BatchPriority _priority);

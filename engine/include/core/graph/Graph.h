@@ -49,7 +49,7 @@ namespace GDE {
             NodeID sceneRoot;
             std::string name;
             NodeContainer registry;
-            Engine* engine;
+            Scene* scene = nullptr;
 
         private:
             void printScene(const NodeID&, std::ostream& _os, int& _indent);
@@ -57,8 +57,8 @@ namespace GDE {
             void onEvent(Event& _event);
             void onUpdate(Delta _dt);
             void onFixedUpdate(Delta _dt);
-            void onRender(Scene* scene);
-            void onDebugRender(Scene* scene);
+            void onRender();
+            void onDebugRender();
 
         public:
             /// A callback if we want our graph to make any specific task during its internal event polling.
@@ -71,7 +71,7 @@ namespace GDE {
             UDelegate<void()> onRenderDel;
 
         public:
-            explicit Graph(Engine* _engine, const std::string& _sceneName);
+            explicit Graph(Scene* _scene, const std::string& _sceneName);
             ~Graph() = default;
 
             /// This function creates and adds a new Node to the world. It is really recommended to add a tag value,

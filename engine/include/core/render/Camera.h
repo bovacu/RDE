@@ -15,6 +15,7 @@ namespace GDE {
 
     class Transform;
     class SceneManager;
+    class Window;
     class Camera {
         friend class Scene;
         private:

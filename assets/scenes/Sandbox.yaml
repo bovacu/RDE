@@ -19,7 +19,7 @@ Scene:
       Ref: 1
       Active: true
       Transform:
-        Position: [-25, 0]
+        Position: [0, 0]
         Scale: [1, 1]
         Rotation: 0
     - Tag: "Blue Cube"
@@ -68,23 +68,23 @@ Scene:
         Size: 54
       Owner: 3
   Bodies:
-    # - BodyType: 0   # 0 -> static, 1 -> dynamic, 2 -> kinematic
-    #   BodyShape: 0  # 0 -> square, 1 -> circle, 2 -> polygon
-    #   Mass: 1.0
-    #   Size:
-    #     Width: 32
-    #     Height: 32
-    #   Friction: 0.0
-    #   Restitution: 0.0
-    #   Mask: 2
-    #   Owner: 2
-    # - BodyType: 1
-    #   BodyShape: 0
-    #   Mass: 1.0
-    #   Size:
-    #     Width: 32
-    #     Height: 32
-    #   Friction: 0.0
-    #   Restitution: 0.0
-    #   Mask: 1
-    #   Owner: 1
+    - BodyType: 0   # 0 -> static, 1 -> dynamic, 2 -> kinematic
+      BodyShape: 0  # 0 -> square, 1 -> circle, 2 -> polygon
+      Mass: 1.0
+      Size:
+        Width: 32
+        Height: 32
+      Friction: 0.0
+      Restitution: 0.0
+      Mask: 2
+      Owner: 2
+    - BodyType: 1
+      BodyShape: 0
+      Mass: 1.0
+      Size:
+        Width: 32
+        Height: 32
+      Friction: 0.0
+      Restitution: 0.0
+      Mask: 1
+      Owner: 1

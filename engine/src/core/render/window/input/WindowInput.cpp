@@ -66,7 +66,6 @@ namespace GDE {
 
     void WindowInput::onWindowMoved(SDL_Event& _event) {
         WindowMovedEvent _wmEvent(_event.window.data1, _event.window.data2);
-        window->setPosition({_event.window.data1, _event.window.data2});
         window->consumeEvent(_wmEvent);
     }
 

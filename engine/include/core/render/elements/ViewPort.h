@@ -8,10 +8,10 @@
 
 namespace GDE {
 
-    class Window;
     class IViewPort {
         protected:
             Vec2I virtualResolution = {};
+            Vec2I deviceResolution = {};
             Vec2F scalingFactor = {1, 1};
             float aspectRatio = -1;
 
@@ -19,6 +19,7 @@ namespace GDE {
             [[nodiscard]] Vec2I getVirtualResolution();
             [[nodiscard]] float getAspectRatio() const;
             [[nodiscard]] Vec2F getScalingFactor();
+            [[nodiscard]] Vec2I getDeviceResolution();
             virtual void update(const Vec2I& _deviceSize) = 0;
             virtual ~IViewPort() = default;
     };

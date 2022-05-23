@@ -62,8 +62,8 @@ namespace GDE {
         if(_nextAnimation != nullptr) currentNode = _nextAnimation;
         currentNode->animation.update(_dt);
 
-        if(_spriteRenderer.texture != getCurrentAnimation()->animation.getCurrentFrame())
-            _spriteRenderer.texture = getCurrentAnimation()->animation.getCurrentFrame();
+        if(_spriteRenderer.getTexture() != getCurrentAnimation()->animation.getCurrentFrame()->getGLTexture())
+            _spriteRenderer.setTexture(getCurrentAnimation()->animation.getCurrentFrame());
     }
 
     AnimationNode* AnimationSystem::getCurrentAnimation() {
