@@ -66,6 +66,9 @@ namespace GDE {
 //        box2DStressTest();
 //        textStressTest();
 
+        auto _canvas = getMainGraph()->createNode("Canvas");
+        getMainGraph()->addComponent<Canvas>(_canvas, this, &engine->getWindow(), _canvas);
+
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -78,14 +81,14 @@ namespace GDE {
     void Sandbox::onUpdate(Delta _dt) {
         Scene::onUpdate(_dt);
 
-//        auto _mousePos = engine->manager.inputManager.getMousePosScreenCoords();
-//        auto _blueRectID = getMainGraph()->getNode("Blue Cube");
-//        auto* _transform = getMainGraph()->getComponent<Transform>(_blueRectID);
-//        auto _size = getMainGraph()->getComponent<SpriteRenderer>(_blueRectID)->getSize();
-//
-//        if(_mousePos.isInside(_transform->getPositionLocal(), {(float)_size.x, (float)_size.y})) {
-//            LOG_I("Inside!")
-//        }
+        auto _mousePos = engine->manager.inputManager.getMousePosWorldPos();
+        auto _blueRectID = getMainGraph()->getNode("Blue Cube");
+        auto* _transform = getMainGraph()->getComponent<Transform>(_blueRectID);
+        auto _size = getMainGraph()->getComponent<SpriteRenderer>(_blueRectID)->getSize();
+
+        if(_mousePos.isInside(_transform->getPositionWorld(), {(float)_size.x, (float)_size.y})) {
+            LOG_I("Inside!")
+        }
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {

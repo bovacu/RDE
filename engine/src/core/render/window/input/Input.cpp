@@ -29,6 +29,8 @@ namespace GDE {
 
 
     void InputManager::init(Engine* _engine, Window* _window) {
+        engine = _engine;
+
         windowInput = new WindowInput;
         keyboardInput = new KeyboardInput;
         mouseInput = new MouseInput;
@@ -135,7 +137,8 @@ namespace GDE {
         float _x = _mousePos.x - (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().x / 2.f : 0.f);
         float _y = (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().y / 2.f : 0.f) - _mousePos.y;
         float _zoom = mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getCurrentZoomLevel();
-        return {_x * _zoom, _y * _zoom};
+        Vec2F _scalingFactor = engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->getScalingFactor();
+        return {_x * _zoom / _scalingFactor.x, _y * _zoom / _scalingFactor.y};
     }
 
     Vec2F InputManager::getMousePosWorldPos() {
@@ -145,7 +148,8 @@ namespace GDE {
         float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.getPosition().x;
         float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.getPosition().y;
         float _zoom = _camera.getCurrentZoomLevel();
-        return {_x * _zoom, _y * _zoom};
+        Vec2F _scalingFactor = engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->getScalingFactor();
+        return {_x * _zoom / _scalingFactor.x, -_y * _zoom / _scalingFactor.y};
     }
 
 

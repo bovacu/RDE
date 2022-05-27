@@ -413,10 +413,43 @@ namespace GDE {
 
         ImGui::Begin("Components");
 
-        auto _transform = _graph->getComponent<Transform>(selectedNode);
+        activeComponent(_graph);
+        tagComponent(_graph);
+        transformComponent(_graph);
+        cameraComponent(_graph);
+        spriteComponent(_graph);
+        bodyComponent(_graph);
+        textComponent(_graph);
 
-        ImGui::Text("%s", _graph->getComponent<Tag>(selectedNode)->tag.c_str());
+        ImGui::End();
+    }
+
+    void ImGuiScene::activeComponent(Graph* _graph) {
+        bool _active = _graph->hasComponent<Active>(selectedNode);
+        auto _tag = _graph->getComponent<Tag>(selectedNode)->tag.c_str();
+        ImGui::Text("%s", _tag);
+        ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 30);
+        ImGui::PushID(1);
+        if(ImGui::Checkbox("###Active", &_active)) {
+            if(_active) _graph->addComponent<Active>(selectedNode);
+            else _graph->removeComponent<Active>(selectedNode);
+        }
+        ImGui::PopID();
+    }
+
+    void ImGuiScene::tagComponent(Graph* _graph) {
+        ImGui::Text("Tag"); ImGui::SameLine();
+        char _buffer[256] = { 0 };
+        auto& _tag = _graph->getComponent<Tag>(selectedNode)->tag;
+        strcpy(_buffer, _tag.c_str());
+        if(ImGui::InputText("###tagName", _buffer, 256)) {
+            _tag = std::string(_buffer);
+        }
         ImGui::Separator();
+    }
+
+    void ImGuiScene::transformComponent(Graph* _graph) {
+        auto _transform = _graph->getComponent<Transform>(selectedNode);
 
         if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
             if(selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
@@ -455,8 +488,100 @@ namespace GDE {
             if(selectedNode == _graph->getID()) ImGui::EndDisabled();
 
         }
+    }
 
-        ImGui::End();
+    void ImGuiScene::cameraComponent(Graph* _graph) {
+        if(!_graph->hasComponent<Camera>(selectedNode) || _graph->hasComponent<Canvas>(selectedNode)) return;
+
+        auto _camera = _graph->getComponent<Camera>(selectedNode);
+
+        if(ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if(selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+
+            const char* _viewports[] = { "Free Aspect", "Adaptative Aspect"};
+
+            std::string _viewPortSelected;
+            auto* _mainCamera = engine->manager.sceneManager.getDisplayedScene()->getMainCamera();
+
+            if(dynamic_cast< FreeViewPort* >(_mainCamera->getViewport())) _viewPortSelected = "Free Aspect";
+            else _viewPortSelected = "Adaptative Aspect";
+
+            ImGui::Text("ViewPort"); ImGui::SameLine();
+            ImGui::SetNextItemWidth(175);
+            if (ImGui::BeginCombo("##combo", _viewPortSelected.c_str())){ // The second parameter is the label previewed before opening the combo. {
+                for (auto & _resolution : _viewports) {
+                    bool is_selected = (_viewPortSelected == _resolution);
+                    if (ImGui::Selectable(_resolution, is_selected)) {
+                        _viewPortSelected = _resolution;
+                        if(_viewPortSelected == "Free Aspect") _mainCamera->setFreeViewport(&engine->getWindow());
+                        else _mainCamera->setAdaptiveViewport({1920, 1080}, engine->getWindow().getWindowSize());
+                    }
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+
+            if(_viewPortSelected == "Adaptative Aspect") {
+                ImGui::Text("Virtual Resolution");
+                int _pos[2] = {_mainCamera->getViewport()->getVirtualResolution().x, _mainCamera->getViewport()->getVirtualResolution().y};
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(100);
+                ImGui::PushID(2);
+                if(ImGui::InputInt2("##myInput", _pos)) {
+                    _mainCamera->getViewport()->updateVirtualResolution({_pos[0], _pos[1]});
+                }
+                ImGui::PopID();
+            }
+
+            ImGui::Text("Zoom Level");
+            float _zoomLevel[1] = {_camera->getCurrentZoomLevel()};
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(1);
+            if(ImGui::DragFloat("##myInput", _zoomLevel, 0.5f)) {
+                _mainCamera->setCurrentZoomLevel(_zoomLevel[0]);
+            }
+            ImGui::PopID();
+
+            if(selectedNode == _graph->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::bodyComponent(Graph* _graph) {
+        if(!_graph->hasComponent<Body>(selectedNode)) return;
+
+        auto _body = _graph->getComponent<Body>(selectedNode);
+
+        if(ImGui::CollapsingHeader("Body", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if(selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+
+            if(selectedNode == _graph->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::spriteComponent(Graph* _graph) {
+        if(!_graph->hasComponent<SpriteRenderer>(selectedNode)) return;
+
+        auto _body = _graph->getComponent<SpriteRenderer>(selectedNode);
+
+        if(ImGui::CollapsingHeader("Sprite Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if(selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+
+            if(selectedNode == _graph->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::textComponent(Graph* _graph) {
+        if(!_graph->hasComponent<TextRenderer>(selectedNode)) return;
+
+        auto _body = _graph->getComponent<TextRenderer>(selectedNode);
+
+        if(ImGui::CollapsingHeader("Text Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if(selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+
+            if(selectedNode == _graph->getID()) ImGui::EndDisabled();
+        }
     }
 }
 

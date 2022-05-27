@@ -79,6 +79,7 @@ namespace GDE {
             MouseInput* mouseInput;
             ControllerInput* controllerInput;
             MobileInput* mobileInput;
+            Engine* engine;
 
         public:
             /// This functions should not be called by end users.

@@ -109,6 +109,9 @@ namespace GDE {
             template<typename Component>
             Component* getComponent(const NodeID& _id);
 
+            template<typename Component>
+            bool hasComponent(const NodeID& _id);
+
             /// This function returns the graph tree as a string.
             std::string toString();
             /// Returns the ID of the root Node.
@@ -147,6 +150,11 @@ namespace GDE {
     template<typename... Archetype>
     auto Graph::query() {
         return registry.template view<Archetype...>().each();
+    }
+
+    template<typename Component>
+    bool Graph::hasComponent(const NodeID& _id) {
+        return registry.template any_of<Component>(_id);
     }
 }
 

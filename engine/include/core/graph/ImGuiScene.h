@@ -58,6 +58,13 @@ namespace GDE {
             void hierarchy(Graph* _graph);
             void hierarchyRecursionStub(Graph* _graph, NodeID _node, int& _childCount);
             void nodeComponents(Graph* _graph);
+            void activeComponent(Graph* _graph);
+            void transformComponent(Graph* _graph);
+            void tagComponent(Graph* _graph);
+            void cameraComponent(Graph* _graph);
+            void bodyComponent(Graph* _graph);
+            void spriteComponent(Graph* _graph);
+            void textComponent(Graph* _graph);
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
 

@@ -21,6 +21,7 @@ namespace GDE {
             [[nodiscard]] Vec2F getScalingFactor();
             [[nodiscard]] Vec2I getDeviceResolution();
             virtual void update(const Vec2I& _deviceSize) = 0;
+            virtual void updateVirtualResolution(const Vec2I& _virtualResolution) = 0;
             virtual ~IViewPort() = default;
     };
 
@@ -29,6 +30,7 @@ namespace GDE {
         public:
             explicit AdaptiveViewPort(const Vec2I& _virtualDesiredResolution);
             void update(const Vec2I& _deviceSize) override;
+            void updateVirtualResolution(const Vec2I& _virtualResolution) override;
             ~AdaptiveViewPort() override {  };
     };
 
@@ -37,6 +39,7 @@ namespace GDE {
         public:
             explicit FreeViewPort(const Vec2I & _windowSize);
             void update(const Vec2I& _deviceSize) override;
+            void updateVirtualResolution(const Vec2I& _virtualResolution) override;
             ~FreeViewPort() override {  };
     };
 

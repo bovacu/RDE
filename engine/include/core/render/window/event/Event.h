@@ -88,6 +88,7 @@ namespace GDE {
         /// @return true if the event could me managed (not if it was handled), false otherwise.
         template<typename T>
         bool dispatchEvent(const UDelegate<bool(T&)>& _delegate) {
+            if(event.handled) return true;
             /// This is why we needed the static version of getType.
             if (event.getEventType() == T::getStaticType()) {
                 /// Using *(T*)& was the only way I could find to make this work, fucking pointers.

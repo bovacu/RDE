@@ -72,6 +72,8 @@ namespace GDE {
         auto _textRendererGroup = registry.group<TextRenderer>(entt::get<Transform, Active>);
 
         for(auto* _camera : scene->cameras) {
+            if(!hasComponent<Active>(_camera->ID)) continue;
+
             Renderer::beginDraw(*_camera, getComponent<Transform>(_camera->ID));
             _camera->setCameraSize(_camera->getCameraSize());
             {

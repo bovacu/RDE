@@ -95,6 +95,7 @@ namespace GDE {
     void Engine::onEvent(Event& _e) {
         EventDispatcher _ed(_e);
         _ed.dispatchEvent<WindowResizedEvent>(wreDel);
+        imGuiLayer->onEvent(_e);
         manager.sceneManager.getDisplayedScene()->onEvent(_e);
     }
 

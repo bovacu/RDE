@@ -188,6 +188,18 @@ namespace GDE {
         private:
             b2BodyType gdeBodyTypeToB2dBodyType(const BodyType& _bodyType);
     };
+
+
+
+    struct Canvas {
+        private:
+            Camera* camera;
+            int layer;
+            NodeID ID;
+
+        public:
+            Canvas(Scene* _scene, const Window* _window, NodeID _nodeID);
+    };
 }
 
 #endif //ENGINE2_0_COMPONENTS_H

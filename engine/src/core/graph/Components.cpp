@@ -289,10 +289,21 @@ namespace GDE {
     }
 
     Vec2F SpriteRenderer::getSize() const {
-        return { (float)texture->getSize().x * viewport->getScalingFactor().x, (float)texture->getSize().y * viewport->getScalingFactor().y };
+        return { (float)texture->getSize().x, (float)texture->getSize().y };
     }
 
     void SpriteRenderer::updateViewport(IViewPort* _viewport) {
         viewport = _viewport;
+    }
+
+
+
+    // -------------------------------------- CANVAS --------------------------------------------
+
+
+
+    Canvas::Canvas(Scene* _scene, const Window* _window, NodeID _nodeID) {
+        auto* _canvasTransform = _scene->getMainGraph()->getComponent<Transform>(_nodeID);
+        camera = _scene->getMainGraph()->addComponent<Camera>(_nodeID, _window, _canvasTransform, _nodeID);
     }
 }

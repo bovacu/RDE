@@ -36,6 +36,8 @@ namespace GDE {
         deviceResolution = _deviceSize;
     }
 
+    void FreeViewPort::updateVirtualResolution(const Vec2I& _virtualResolution) {  }
+
 
     // --------------- ADAPTIVE VIEWPORT
 
@@ -48,5 +50,9 @@ namespace GDE {
         scalingFactor = {(float)_deviceSize.x / (float)virtualResolution.x, (float)_deviceSize.y / (float)virtualResolution.y};
         aspectRatio = (float)_deviceSize.x / (float)_deviceSize.y;
         deviceResolution = _deviceSize;
+    }
+
+    void AdaptiveViewPort::updateVirtualResolution(const Vec2I& _virtualResolution) {
+        virtualResolution = _virtualResolution;
     }
 }
