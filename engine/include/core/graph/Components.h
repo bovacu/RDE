@@ -61,6 +61,9 @@ namespace GDE {
             [[nodiscard]] int getLayer() const override { return layer; }
             [[nodiscard]] Color getColor() const override { return color; }
             [[nodiscard]] ShaderID getShaderID() const override { return shaderID; }
+            [[nodiscard]] std::string getTexturePath();
+            [[nodiscard]] std::string getTextureName();
+            [[nodiscard]] std::string getTextureExtension();
             void updateViewport(IViewPort* _viewport) override;
     };
 
@@ -189,16 +192,34 @@ namespace GDE {
             b2BodyType gdeBodyTypeToB2dBodyType(const BodyType& _bodyType);
     };
 
-
-
-    struct Canvas {
+    struct UI : public IRenderizable {
         private:
-            Camera* camera;
-            int layer;
-            NodeID ID;
+            Texture* texture = nullptr;
 
         public:
-            Canvas(Scene* _scene, const Window* _window, NodeID _nodeID);
+            friend class SpriteBatch;
+
+            Color color = Color::White;
+            GLuint shaderID = -1;
+            int layer = 0;
+
+            [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
+            [[nodiscard]] int getLayer() const override { return layer; }
+            [[nodiscard]] Color getColor() const override { return color; }
+            [[nodiscard]] ShaderID getShaderID() const override { return shaderID; }
+            void updateViewport(IViewPort* _viewport) override {  }
+
+            ~UI() {  }
+    };
+
+    struct UIText : public UI {
+        ~UIText() {  }
+    };
+
+    struct UIButton : public UI {
+        UIText* text;
+
+        ~UIButton() {  }
     };
 }
 

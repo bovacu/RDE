@@ -18,6 +18,7 @@ namespace GDE {
             GLenum internalFormat = -1, dataFormat = -1;
             IntRect region {};
             float fileSizeKb = -1;
+            std::string path;
 
         public:
             Texture() = default;
@@ -34,6 +35,7 @@ namespace GDE {
             bool loadTextSubTextures(Vec2I _offset, Vec2I _size, const void* _data);
 
             IntRect& getRegion();
+            [[nodiscard]]std::string getPath();
 
         private:
             int invertSDLSurface(SDL_Surface *surface);

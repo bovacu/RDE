@@ -11,9 +11,8 @@
 #include "imgui_node_editor.h"
 #include "FileBrowser/ImGuiFileBrowser.h"
 #include "core/graph/Graph.h"
-#include "core/render/window/input/Input.h"
 #include "core/render/Renderer.h"
-#include "core/render/elements/TextureAtlasManager.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 namespace GDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
@@ -106,19 +105,32 @@ namespace GDE {
         }
     }
 
-    void ImGuiScene::drawDebugInfo(Graph* _mainGraph) {
+    void ImGuiScene::drawDebugInfo(Scene* _scene) {
         if(!show) return;
         ImGui::Begin("Debugging");
+        windowsHovered[0] = checkForFocus();
         printResolutionFullscreenAndVSync();
         ImGui::Separator();
         printAtlases();
         printFPSDrawCallsAndRAM();
         showFileExplorer();
-        anyWindowHovered = ImGui::IsWindowHovered() || ImGui::IsAnyItemActive() || ImGui::IsAnyItemHovered() || ImGui::IsAnyItemFocused();
         ImGui::End();
         console();
-        hierarchy(_mainGraph);
-        nodeComponents(_mainGraph);
+
+        // This part is a bit messy for the moment. Scene elements and canvas are separated in two different EnTT registries,
+        // so I need to split how both are selected and shown and switch between one registry and the other, so that's why there
+        // is selectedNode and selectedNodeCanvas, if one is used, the other is set as null, this way just one of the registries
+        // is shown and everything works fine, and we reuse all the code just by using 2 switching variables.
+        auto* _mainGraph = _scene->getMainGraph();
+        hierarchy(_scene);
+
+        if(selectedNode != NODE_ID_NULL) nodeComponents(_mainGraph, selectedNode);
+
+        if(selectedNodeCanvas != NODE_ID_NULL)
+            for(auto* _canvas : _scene->getCanvases()) {
+                auto* _graph = _canvas->getGraph();
+                nodeComponents(_graph, selectedNodeCanvas);
+            }
     }
 
     void ImGuiScene::metrics() {
@@ -146,7 +158,10 @@ namespace GDE {
     }
 
     bool ImGuiScene::onMouseScrolled(MouseScrolledEvent& _e) {
-        return anyWindowHovered;
+        auto _blockInput = false;
+        for(auto _windowHovered : windowsHovered)
+            _blockInput |= _windowHovered;
+        return _blockInput;
     }
 
     void ImGuiScene::mouseInfo() {
@@ -290,7 +305,7 @@ namespace GDE {
         static bool scrollToBottom = false;
 
         ImGui::Begin("Console");
-
+        windowsHovered[2] = checkForFocus();
         static char _input[256];
         bool reclaim_focus = false;
         ImGuiInputTextFlags _inputTextFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackHistory;
@@ -321,7 +336,7 @@ namespace GDE {
             ImGui::SetKeyboardFocusHere(-1);
 
         ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
-
+        windowsHovered[3] = checkForFocus();
         auto wPos = ImGui::GetWindowPos();
         auto wSize = ImGui::GetWindowSize();
         ImGui::GetWindowDrawList()->AddRect(wPos, { wPos.x + wSize.x, wPos.y + wSize.y }, ImColor(1.f, 1.f, 1.f, 1.f));
@@ -375,72 +390,81 @@ namespace GDE {
 
 
 
-    void ImGuiScene::hierarchyRecursionStub(Graph* _graph, NodeID _node, int& _childCount) {
+    void ImGuiScene::hierarchyRecursionStub(Graph* _graph, NodeID _node, NodeID& _selectedNode) {
         auto* _transform = _graph->getComponent<Transform>(_node);
         auto* _tag = _graph->getComponent<Tag>(_node);
 
         if(!_transform->children.empty()) {
 
-            auto _flags = _node == selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
+            auto _flags = _node == _selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
             if (ImGui::TreeNodeEx(_tag->tag.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | _flags)) {
 
                 if(ImGui::IsItemClicked()) {
-                    selectedNode = _node;
+                    _selectedNode = _node;
+                    if(&selectedNode == &_selectedNode) selectedNodeCanvas = NODE_ID_NULL;
+                    else selectedNode = NODE_ID_NULL;
                 }
 
                 for(auto _child : _transform->children) {
-                    hierarchyRecursionStub(_graph, _child, _childCount);
+                    hierarchyRecursionStub(_graph, _child, _selectedNode);
                 }
 
                 ImGui::TreePop();
             }
         } else {
-            if (ImGui::Selectable(_tag->tag.c_str(), selectedNode == _node)) {
-                selectedNode = _node;
+            if (ImGui::Selectable(_tag->tag.c_str(), _selectedNode == _node)) {
+                _selectedNode = _node;
+                if(&selectedNode == &_selectedNode) selectedNodeCanvas = NODE_ID_NULL;
+                else selectedNode = NODE_ID_NULL;
             }
         }
     }
 
-    void ImGuiScene::hierarchy(Graph* _graph) {
+    void ImGuiScene::hierarchy(Scene* _scene) {
         ImGui::Begin("Hierarchy");
-        int _childCount = -1;
-        hierarchyRecursionStub(_graph, _graph->getID(), _childCount);
+        windowsHovered[1] = checkForFocus();
+        auto* _graph = _scene->getMainGraph();
+        hierarchyRecursionStub(_graph, _graph->getID(), selectedNode);
+        for(auto* _canvas : _scene->getCanvases()) {
+            _graph = _canvas->getGraph();
+            hierarchyRecursionStub(_graph, _graph->getID(), selectedNodeCanvas);
+        }
         ImGui::End();
     }
 
-    void ImGuiScene::nodeComponents(Graph* _graph) {
-        if(selectedNode == NODE_ID_NULL) return;
+    void ImGuiScene::nodeComponents(Graph* _graph, const NodeID _selectedNode) {
+        if(_selectedNode == NODE_ID_NULL) return;
 
         ImGui::Begin("Components");
 
-        activeComponent(_graph);
-        tagComponent(_graph);
-        transformComponent(_graph);
-        cameraComponent(_graph);
-        spriteComponent(_graph);
-        bodyComponent(_graph);
-        textComponent(_graph);
+        activeComponent(_graph, _selectedNode);
+        tagComponent(_graph, _selectedNode);
+        transformComponent(_graph, _selectedNode);
+        cameraComponent(_graph, _selectedNode);
+        spriteComponent(_graph, _selectedNode);
+        bodyComponent(_graph, _selectedNode);
+        textComponent(_graph, _selectedNode);
 
         ImGui::End();
     }
 
-    void ImGuiScene::activeComponent(Graph* _graph) {
-        bool _active = _graph->hasComponent<Active>(selectedNode);
-        auto _tag = _graph->getComponent<Tag>(selectedNode)->tag.c_str();
+    void ImGuiScene::activeComponent(Graph* _graph, const NodeID _selectedNode) {
+        bool _active = _graph->hasComponent<Active>(_selectedNode);
+        auto _tag = _graph->getComponent<Tag>(_selectedNode)->tag.c_str();
         ImGui::Text("%s", _tag);
         ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 30);
         ImGui::PushID(1);
         if(ImGui::Checkbox("###Active", &_active)) {
-            if(_active) _graph->addComponent<Active>(selectedNode);
-            else _graph->removeComponent<Active>(selectedNode);
+            if(_active) _graph->addComponent<Active>(_selectedNode);
+            else _graph->removeComponent<Active>(_selectedNode);
         }
         ImGui::PopID();
     }
 
-    void ImGuiScene::tagComponent(Graph* _graph) {
+    void ImGuiScene::tagComponent(Graph* _graph, const NodeID _selectedNode) {
         ImGui::Text("Tag"); ImGui::SameLine();
         char _buffer[256] = { 0 };
-        auto& _tag = _graph->getComponent<Tag>(selectedNode)->tag;
+        auto& _tag = _graph->getComponent<Tag>(_selectedNode)->tag;
         strcpy(_buffer, _tag.c_str());
         if(ImGui::InputText("###tagName", _buffer, 256)) {
             _tag = std::string(_buffer);
@@ -448,11 +472,11 @@ namespace GDE {
         ImGui::Separator();
     }
 
-    void ImGuiScene::transformComponent(Graph* _graph) {
-        auto _transform = _graph->getComponent<Transform>(selectedNode);
+    void ImGuiScene::transformComponent(Graph* _graph, const NodeID _selectedNode) {
+        auto _transform = _graph->getComponent<Transform>(_selectedNode);
 
         if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
             ImGui::Text("Position ");
 
             float _pos[2] = {_transform->getPositionLocal().x, _transform->getPositionLocal().y};
@@ -485,18 +509,18 @@ namespace GDE {
             if(ImGui::DragFloat2("##myInput", _scale, 0.05))
                 _transform->setScale(_scale[0], _scale[1]);
             ImGui::PopID();
-            if(selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
 
         }
     }
 
-    void ImGuiScene::cameraComponent(Graph* _graph) {
-        if(!_graph->hasComponent<Camera>(selectedNode) || _graph->hasComponent<Canvas>(selectedNode)) return;
+    void ImGuiScene::cameraComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<Camera>(_selectedNode)) return;
 
-        auto _camera = _graph->getComponent<Camera>(selectedNode);
+        auto _camera = _graph->getComponent<Camera>(_selectedNode);
 
         if(ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
 
             const char* _viewports[] = { "Free Aspect", "Adaptative Aspect"};
 
@@ -544,44 +568,53 @@ namespace GDE {
             }
             ImGui::PopID();
 
-            if(selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
         }
     }
 
-    void ImGuiScene::bodyComponent(Graph* _graph) {
-        if(!_graph->hasComponent<Body>(selectedNode)) return;
+    void ImGuiScene::bodyComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<Body>(_selectedNode)) return;
 
-        auto _body = _graph->getComponent<Body>(selectedNode);
+        auto _body = _graph->getComponent<Body>(_selectedNode);
 
         if(ImGui::CollapsingHeader("Body", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
 
-            if(selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
         }
     }
 
-    void ImGuiScene::spriteComponent(Graph* _graph) {
-        if(!_graph->hasComponent<SpriteRenderer>(selectedNode)) return;
+    void ImGuiScene::spriteComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<SpriteRenderer>(_selectedNode)) return;
 
-        auto _body = _graph->getComponent<SpriteRenderer>(selectedNode);
+        auto _spriteRenderer = _graph->getComponent<SpriteRenderer>(_selectedNode);
 
         if(ImGui::CollapsingHeader("Sprite Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            ImGui::Text("Texture"); ImGui::SameLine();
+            auto _texturePath = _spriteRenderer->getTexturePath();
+            ImGui::BeginDisabled(true);
+            ImGui::InputText("###texture", const_cast<char*>(_texturePath.c_str()), _texturePath.size());
+            ImGui::EndDisabled();
 
-            if(selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
         }
     }
 
-    void ImGuiScene::textComponent(Graph* _graph) {
-        if(!_graph->hasComponent<TextRenderer>(selectedNode)) return;
+    void ImGuiScene::textComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<TextRenderer>(_selectedNode)) return;
 
-        auto _body = _graph->getComponent<TextRenderer>(selectedNode);
+        auto _body = _graph->getComponent<TextRenderer>(_selectedNode);
 
         if(ImGui::CollapsingHeader("Text Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
 
-            if(selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
         }
+    }
+
+    bool ImGuiScene::checkForFocus() {
+        return ImGui::IsWindowHovered() | ImGui::IsAnyItemActive() | ImGui::IsAnyItemHovered() | ImGui::IsAnyItemFocused();
     }
 }
 

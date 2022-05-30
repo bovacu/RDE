@@ -122,7 +122,7 @@ namespace GDE {
         #if !IS_MOBILE()
         imGuiLayer->begin();
         manager.sceneManager.getDisplayedScene()->onImGuiRender(_dt);
-        imGuiLayer->drawDebugInfo(manager.sceneManager.getDisplayedScene()->getMainGraph());
+        imGuiLayer->drawDebugInfo(manager.sceneManager.getDisplayedScene());
         imGuiLayer->end();
         #endif
         Profiler::end(ProfilerState::IMGUI);

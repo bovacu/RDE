@@ -296,14 +296,16 @@ namespace GDE {
         viewport = _viewport;
     }
 
-
-
-    // -------------------------------------- CANVAS --------------------------------------------
-
-
-
-    Canvas::Canvas(Scene* _scene, const Window* _window, NodeID _nodeID) {
-        auto* _canvasTransform = _scene->getMainGraph()->getComponent<Transform>(_nodeID);
-        camera = _scene->getMainGraph()->addComponent<Camera>(_nodeID, _window, _canvasTransform, _nodeID);
+    std::string SpriteRenderer::getTexturePath() {
+        return texture->getPath();
     }
+
+    std::string SpriteRenderer::getTextureName() {
+        return Util::getFileNameFromPath(texture->getPath());
+    }
+
+    std::string SpriteRenderer::getTextureExtension() {
+        return Util::getFileExtension(texture->getPath());
+    }
+
 }

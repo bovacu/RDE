@@ -42,6 +42,8 @@ Scene:
       ZoomSpeed: 0.25
       IsMain: true
       ViewPortType: 0 # 0 is Adaptative, 1 is Free
+      ViewPortVirtualResolution: [1280, 720]
+      ViewPortDeviceResolution: [1280, 720]
       Owner: 0
   SpriteRenderers:
     - Texture:

@@ -63,7 +63,18 @@ namespace GDE {
 
                 int _viewPortType = _sceneCamera["ViewPortType"].as<int>();
                 switch (_viewPortType) {
-                    case 0 : _scene->getMainCamera()->setAdaptiveViewport(_window->getWindowSize(), _window->getWindowSize()); break;
+                    case 0 : {
+                        auto _virtualRes = _sceneCamera["ViewPortVirtualResolution"].IsDefined() && _sceneCamera["ViewPortVirtualResolution"].size() > 0 ?
+                                Vec2I{_sceneCamera["ViewPortVirtualResolution"][0].as<int>(), _sceneCamera["ViewPortVirtualResolution"][1].as<int>()} :
+                                           _window->getWindowSize();
+
+                        auto _deviceRes = _sceneCamera["ViewPortDeviceResolution"].IsDefined() && _sceneCamera["ViewPortDeviceResolution"].size() > 0 ?
+                                           Vec2I{_sceneCamera["ViewPortDeviceResolution"][0].as<int>(), _sceneCamera["ViewPortDeviceResolution"][1].as<int>()} :
+                                           _window->getWindowSize();
+
+                        _scene->getMainCamera()->setAdaptiveViewport(_virtualRes, _deviceRes);
+                        break;
+                    }
                     case 1 : _scene->getMainCamera()->setFreeViewport(_window); break;
                     default: _scene->getMainCamera()->setFreeViewport(_window);
                 }

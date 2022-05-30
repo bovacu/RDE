@@ -4,6 +4,7 @@
 #include "core/render/Camera.h"
 #include "core/Engine.h"
 #include "core/graph/Components.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 namespace GDE {
 
@@ -13,6 +14,9 @@ namespace GDE {
         auto* _camera = mainGraph.addComponent<Camera>(_mainCameraID, &_engine->getWindow(), _cameraTransform, _mainCameraID);
         cameras.push_back(_camera);
         mainCamera = _camera;
+
+        auto* _canvas = new Canvas(this, &engine->getWindow(), "MainCanvas");
+        canvases.push_back(_canvas);
     }
 
     void Scene::onEvent(Event& _event) {
@@ -65,5 +69,14 @@ namespace GDE {
 
     std::vector<Camera*>& Scene::getCameras() {
         return cameras;
+    }
+
+    std::vector<Canvas*>& Scene::getCanvases() {
+        return canvases;
+    }
+
+    Scene::~Scene() {
+        for(auto* _canvas : canvases)
+            delete _canvas;
     }
 }

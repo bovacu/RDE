@@ -6,6 +6,7 @@
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 namespace GDE {
 
@@ -35,11 +36,11 @@ namespace GDE {
     }
 
     void Graph::onUpdate(Delta _dt) {
-        registry.view<Transform, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Active& _active) {
+        registry.view<Transform, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Active& _) {
             _transform.update(this);
         });
 
-        registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _active) {
+        registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
             _animationSystem.update(_dt, _spriteRenderer);
         });
 
@@ -48,7 +49,7 @@ namespace GDE {
 
     void Graph::onFixedUpdate(Delta _dt) {
 
-        registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([](const auto _entity, Transform& _transform, Body& _body, const Active& _active) {
+        registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([](const auto _entity, Transform& _transform, Body& _body, const Active& _) {
             auto _lastStoredPosition = _body.b2dConfig.lastPosition;
             auto _diff = _transform.getPositionLocal() - _lastStoredPosition;
 
@@ -77,12 +78,12 @@ namespace GDE {
             Renderer::beginDraw(*_camera, getComponent<Transform>(_camera->ID));
             _camera->setCameraSize(_camera->getCameraSize());
             {
-                _spriteRendererGroup.each([&_camera](const auto _entity, SpriteRenderer& _spriteRenderer, const Transform& _transform, const Active& _active) {
+                _spriteRendererGroup.each([&_camera](const auto _entity, SpriteRenderer& _spriteRenderer, const Transform& _transform, const Active& _) {
                     _spriteRenderer.updateViewport(_camera->getViewport());
                     Renderer::draw(_spriteRenderer, _transform);
                 });
 
-                _textRendererGroup.each([&_camera](const auto _entity, TextRenderer& _text, const Transform& _transform, const Active& _active) {
+                _textRendererGroup.each([&_camera](const auto _entity, TextRenderer& _text, const Transform& _transform, const Active& _) {
                     _text.updateViewport(_camera->getViewport());
                     Renderer::draw(_text, _transform);
                 });
@@ -91,6 +92,10 @@ namespace GDE {
         }
 
         onRenderDel();
+
+        for(auto* _canvas : scene->canvases) {
+            _canvas->onRender();
+        }
     }
 
     void Graph::onDebugRender() {

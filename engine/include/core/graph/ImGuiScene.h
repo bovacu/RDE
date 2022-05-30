@@ -18,10 +18,12 @@ namespace GDE {
     class ImGuiScene : public Scene {
         private:
             bool anyWindowHovered = false;
+            bool windowsHovered[4] {false, false, false, false};
             UDelegate<bool(MouseScrolledEvent&)> mseDel;
             UDelegate<bool(MouseButtonPressedEvent&)> mbpeDel;
             UDelegate<bool(MouseMovedEvent&)> mmeDel;
             NodeID selectedNode = NODE_ID_NULL;
+            NodeID selectedNodeCanvas = NODE_ID_NULL;
 
         public:
             bool show = false;
@@ -43,7 +45,7 @@ namespace GDE {
             bool onMouseClicked(MouseButtonPressedEvent& _e);
             bool onMouseMovedEvent(MouseMovedEvent& _e);
 
-            void drawDebugInfo(Graph* _mainGraph);
+            void drawDebugInfo(Scene* _scene);
 
         private:
             void console();
@@ -55,16 +57,16 @@ namespace GDE {
             void mouseInfo();
             void showFileExplorer();
 
-            void hierarchy(Graph* _graph);
-            void hierarchyRecursionStub(Graph* _graph, NodeID _node, int& _childCount);
-            void nodeComponents(Graph* _graph);
-            void activeComponent(Graph* _graph);
-            void transformComponent(Graph* _graph);
-            void tagComponent(Graph* _graph);
-            void cameraComponent(Graph* _graph);
-            void bodyComponent(Graph* _graph);
-            void spriteComponent(Graph* _graph);
-            void textComponent(Graph* _graph);
+            void hierarchy(Scene* _scene);
+            void hierarchyRecursionStub(Graph* _graph, NodeID _node, NodeID& _selectedNode);
+            void nodeComponents(Graph* _graph, const NodeID _selectedNode);
+            void activeComponent(Graph* _graph, const NodeID _selectedNode);
+            void transformComponent(Graph* _graph, const NodeID _selectedNode);
+            void tagComponent(Graph* _graph, const NodeID _selectedNode);
+            void cameraComponent(Graph* _graph, const NodeID _selectedNode);
+            void bodyComponent(Graph* _graph, const NodeID _selectedNode);
+            void spriteComponent(Graph* _graph, const NodeID _selectedNode);
+            void textComponent(Graph* _graph, const NodeID _selectedNode);
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
 
@@ -72,6 +74,8 @@ namespace GDE {
             void printFPSDrawCallsAndRAM();
             void printAtlases();
             void printResolutionFullscreenAndVSync();
+
+            bool checkForFocus();
     };
 
 }

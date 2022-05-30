@@ -13,12 +13,15 @@ namespace GDE {
     class Camera;
     class Window;
     class Engine;
+    class Canvas;
+
     class Scene {
         friend class Graph;
 
         private:
             Graph mainGraph;
             std::vector<Camera*> cameras;
+            std::vector<Canvas*> canvases;
             Camera* mainCamera = nullptr;
 
         public:
@@ -27,7 +30,7 @@ namespace GDE {
 
         public:
             explicit Scene(Engine* _engine, const std::string& _debugName = "Scene");
-            virtual ~Scene() {  };
+            virtual ~Scene();
 
             /// This function is called when loading the scene from the configuration, it is used to make a custom loading
             /// of your custom components for the internal ECS system.
@@ -100,6 +103,9 @@ namespace GDE {
 
             /// Returns the name of the scene.
             [[nodiscard]] const std::string& getName() const { return debugName; }
+
+            /// Returns all the canvases of the Scene
+            std::vector<Canvas*>& getCanvases();
     };
 
 }

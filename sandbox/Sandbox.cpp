@@ -65,10 +65,6 @@ namespace GDE {
 
 //        box2DStressTest();
 //        textStressTest();
-
-        auto _canvas = getMainGraph()->createNode("Canvas");
-        getMainGraph()->addComponent<Canvas>(_canvas, this, &engine->getWindow(), _canvas);
-
     }
 
     void Sandbox::onEvent(Event &_event) {

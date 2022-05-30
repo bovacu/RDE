@@ -39,8 +39,7 @@ namespace GDE {
     typedef entt::registry NodeContainer;
     #define NODE_ID_NULL entt::null
 
-    class Engine;
-    class Scene;
+    class Engine; class Scene;
     class Graph {
 
         friend class Scene;
@@ -71,7 +70,7 @@ namespace GDE {
             UDelegate<void()> onRenderDel;
 
         public:
-            explicit Graph(Scene* _scene, const std::string& _sceneName);
+            Graph(Scene* _scene, const std::string& _sceneName);
             ~Graph() = default;
 
             /// This function creates and adds a new Node to the world. It is really recommended to add a tag value,

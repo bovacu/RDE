@@ -15,6 +15,7 @@ namespace GDE {
     #define SDL_UNLOCKIFMUST(s) { if(SDL_MUSTLOCK(s)) SDL_UnlockSurface(s); }
 
     Texture::Texture(char* _path) {
+        path = std::string(_path);
         loadFromFile(_path);
     }
 
@@ -231,6 +232,10 @@ namespace GDE {
         region = {{0, 0}, {_width, _height}};
 
         return true;
+    }
+
+    std::string Texture::getPath() {
+        return path;
     }
 
 
