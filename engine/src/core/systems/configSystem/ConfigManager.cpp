@@ -75,8 +75,8 @@ namespace GDE {
                         _scene->getMainCamera()->setAdaptiveViewport(_virtualRes, _deviceRes);
                         break;
                     }
-                    case 1 : _scene->getMainCamera()->setFreeViewport(_window); break;
-                    default: _scene->getMainCamera()->setFreeViewport(_window);
+                    case 1 : _scene->getMainCamera()->setFreeViewport(_window->getWindowSize()); break;
+                    default: _scene->getMainCamera()->setFreeViewport(_window->getWindowSize());
                 }
 
                 _scene->getMainCamera()->getViewport()->update(_window->getWindowSize());
@@ -93,8 +93,8 @@ namespace GDE {
                 int _viewPortType = _sceneCamera["ViewPortType"].as<int>();
                 switch (_viewPortType) {
                     case 0 : _camera->setAdaptiveViewport(_window->getWindowSize(), _window->getWindowSize()); break;
-                    case 1 : _camera->setFreeViewport(_window); break;
-                    default: _camera->setFreeViewport(_window);
+                    case 1 : _camera->setFreeViewport(_window->getWindowSize()); break;
+                    default: _camera->setFreeViewport(_window->getWindowSize());
                 }
 
                 _camera->getViewport()->update(_window->getWindowSize());
@@ -108,7 +108,7 @@ namespace GDE {
         auto& _spriteRenderersNode = _sceneNode["SpriteRenderers"];
 
         for (const auto& _spriteRendererNode : _spriteRenderersNode) {
-            auto _ownerEntityID = _map.at(_spriteRendererNode["Owner"].as<int>());
+            auto _ownerEntityID = _map.at(_spriteRendererNode["Ref"].as<int>());
             auto* _spriteRenderer = _scene->getMainGraph()->addComponent<SpriteRenderer>(_ownerEntityID, _scene);
 
             _spriteRenderer->setTexture(_manager->textureManager.getTile(_spriteRendererNode["Texture"]["Atlas"].as<std::string>(),
@@ -125,7 +125,7 @@ namespace GDE {
         auto& _textsRendererNodes = _sceneNode["TextRenderers"];
 
         for (const auto& _textRendererNode : _textsRendererNodes) {
-            auto _ownerEntityID = _map.at(_textRendererNode["Owner"].as<int>());
+            auto _ownerEntityID = _map.at(_textRendererNode["Ref"].as<int>());
             auto* _textRenderer = _scene->getMainGraph()->addComponent<TextRenderer>(_ownerEntityID,
                          _manager, _manager->fontManager.getDefaultFont(_textRendererNode["Font"]["Name"].as<std::string>()),
                          _textRendererNode["Text"].as<std::string>());
@@ -142,7 +142,7 @@ namespace GDE {
         auto& _bodiesNodes = _sceneNode["Bodies"];
 
         for (const auto& _bodyNode : _bodiesNodes) {
-            auto _ownerEntityID = _map.at(_bodyNode["Owner"].as<int>());
+            auto _ownerEntityID = _map.at(_bodyNode["Ref"].as<int>());
 
             BodyType _bodyType;
             switch (_bodyNode["BodyType"].as<int>()) {

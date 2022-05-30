@@ -42,9 +42,9 @@ Scene:
       ZoomSpeed: 0.25
       IsMain: true
       ViewPortType: 0 # 0 is Adaptative, 1 is Free
-      ViewPortVirtualResolution: [1280, 720]
-      ViewPortDeviceResolution: [1280, 720]
-      Owner: 0
+      ViewPortVirtualResolution: [1125, 2346]
+      ViewPortDeviceResolution: [375, 812]
+      Ref: 0
   SpriteRenderers:
     - Texture:
         Atlas: "square"
@@ -52,14 +52,14 @@ Scene:
       Color: [255, 255, 255, 255]
       Layer: 0
       Shader: "basic"
-      Owner: 1
+      Ref: 1
     - Texture:
         Atlas: "square"
         Tile: "square_0"
       Color: [0, 0, 255, 255]
       Layer: 0
       Shader: "basic"
-      Owner: 2
+      Ref: 2
   TextRenderers:
     - Text: "Hello World"
       Color: [0, 255, 0, 255]
@@ -68,7 +68,7 @@ Scene:
       Font:
         Name: "arial"
         Size: 54
-      Owner: 3
+      Ref: 3
   Bodies:
     - BodyType: 0   # 0 -> static, 1 -> dynamic, 2 -> kinematic
       BodyShape: 0  # 0 -> square, 1 -> circle, 2 -> polygon
@@ -79,7 +79,7 @@ Scene:
       Friction: 0.0
       Restitution: 0.0
       Mask: 2
-      Owner: 2
+      Ref: 2
     - BodyType: 1
       BodyShape: 0
       Mass: 1.0
@@ -89,4 +89,4 @@ Scene:
       Friction: 0.0
       Restitution: 0.0
       Mask: 1
-      Owner: 1
+      Ref: 1

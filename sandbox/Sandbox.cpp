@@ -2,6 +2,7 @@
 
 #include "Sandbox.h"
 #include "core/systems/physicsSystem/Physics.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 //#if IS_ANDROID()
 //#include <nativeCode/include/NativeAds.h>
@@ -65,6 +66,11 @@ namespace GDE {
 
 //        box2DStressTest();
 //        textStressTest();
+
+        auto _uiTest = getCanvases()[0]->getGraph()->createNode("TestUINode");
+        auto* _transform = getCanvases()[0]->getGraph()->getComponent<Transform>(_uiTest);
+        _transform->setPosition(-250, 130);
+        auto* _uiRenderer = getCanvases()[0]->getGraph()->addComponent<SpriteRenderer>(_uiTest, this, engine->manager.textureManager.getTile("square", "square_0"));
     }
 
     void Sandbox::onEvent(Event &_event) {

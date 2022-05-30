@@ -108,9 +108,9 @@ namespace GDE {
         return viewport;
     }
 
-    void Camera::setFreeViewport(const Window* _window) {
+    void Camera::setFreeViewport(const Vec2I& _windowSize) {
         delete viewport;
-        viewport = new FreeViewPort(_window->getWindowSize());
+        viewport = new FreeViewPort(_windowSize);
     }
 
     void Camera::setAdaptiveViewport(const Vec2I& _virtualDesiredSize, const Vec2I& _currentDeviceSize) {

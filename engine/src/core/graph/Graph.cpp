@@ -45,6 +45,10 @@ namespace GDE {
         });
 
         onUpdateDel(_dt);
+
+        for(auto* _canvas : scene->canvases) {
+            _canvas->onUpdate(_dt);
+        }
     }
 
     void Graph::onFixedUpdate(Delta _dt) {

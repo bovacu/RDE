@@ -65,7 +65,7 @@ namespace GDE {
             }
 
             [[nodiscard]] IViewPort* getViewport() const;
-            void setFreeViewport(const Window* _window);
+            void setFreeViewport(const Vec2I& _windowSize);
             void setAdaptiveViewport(const Vec2I& _virtualDesiredSize, const Vec2I& _currentDeviceSize);
 
         private:

@@ -1,7 +1,7 @@
 Configuration:
   Resolution:
-    Width: 1280
-    Height: 720
+    Width: 375
+    Height: 812
   VSync: true
   MainScene: "assets/scenes/Sandbox.yaml"
   Fullscreen: false

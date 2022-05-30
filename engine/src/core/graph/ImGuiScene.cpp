@@ -537,7 +537,7 @@ namespace GDE {
                     bool is_selected = (_viewPortSelected == _resolution);
                     if (ImGui::Selectable(_resolution, is_selected)) {
                         _viewPortSelected = _resolution;
-                        if(_viewPortSelected == "Free Aspect") _mainCamera->setFreeViewport(&engine->getWindow());
+                        if(_viewPortSelected == "Free Aspect") _mainCamera->setFreeViewport(engine->getWindow().getWindowSize());
                         else _mainCamera->setAdaptiveViewport({1920, 1080}, engine->getWindow().getWindowSize());
                     }
                     if (is_selected)

@@ -15,7 +15,7 @@ namespace GDE {
         cameras.push_back(_camera);
         mainCamera = _camera;
 
-        auto* _canvas = new Canvas(this, &engine->getWindow(), "MainCanvas");
+        auto* _canvas = new Canvas(this, &engine->getWindow(), "Canvas");
         canvases.push_back(_canvas);
     }
 

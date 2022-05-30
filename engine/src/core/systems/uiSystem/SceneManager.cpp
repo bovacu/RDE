@@ -5,6 +5,7 @@
 #include "core/systems/uiSystem/SceneManager.h"
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/Engine.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 namespace GDE {
 
@@ -28,6 +29,7 @@ namespace GDE {
     void SceneManager::loadScene(Scene* _scene, const std::string& _sceneName) {
         scenes[_sceneName] = _scene;
         ConfigManager::loadScene(&engine->manager, _scene, &engine->getWindow(), APPEND_S(SCENES_PATH, _sceneName, ".yaml"));
+        for(auto* _canvas : _scene->getCanvases()) _canvas->matchMainCameraViewPort();
     }
 
     void SceneManager::displayScene(const std::string& _sceneName) {
