@@ -73,8 +73,10 @@ namespace GDE {
         } else if (channels == 3) {
             _internalFormat = GL_RGB8;
             _dataFormat = GL_RGB;
-        } else
+        } else {
             LOG_E("Not supported format image. Channels = ", channels, ", Width = ", width, ", Height = ", height, ", Path = ", _path)
+            LOG_W("If the sprite sheet is exported from TexturePacker remember to set in advanced options PngOpt Level to 0!!")
+        }
 
         internalFormat = _internalFormat;
         dataFormat = _dataFormat;

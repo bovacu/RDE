@@ -1,0 +1,62 @@
+<exporter version="1.0">
+    <!-- identifier of the exporter -->
+    <name>GDE</name>
+	
+    <!-- display name of the exporter for the combo box -->
+    <displayName>GDE</displayName>
+             
+    <!-- description of the exporter -->
+    <description>GDE format</description>
+
+    <!-- exporter version -->
+    <version>1.0</version>
+	
+    <files>
+        <file>
+            <!-- name of this file variable -->
+            <name>datafile</name>
+
+            <!-- human readable name (for GUI) -->
+            <displayName>Data file</displayName>
+
+            <!-- file extension for the file -->
+            <fileExtension>yaml</fileExtension>
+
+            <!-- description what the file contains, used in tooltips in the GUI -->
+            <description>Sprite sheet data</description>
+
+            <!-- name of the template file -->
+            <template>template.yaml</template>
+        </file>
+    </files>
+
+    <!-- target framework supports trimming -->
+    <supportsTrimming>false</supportsTrimming>
+
+    <!-- target framework supports rotated sprites -->
+    <supportsRotation>false</supportsRotation>
+
+    <supportsPivotPoint>true</supportsPivotPoint>
+
+    <spriteOrigin>TopLeft</spriteOrigin>
+
+    <supportsNPOT>true</supportsNPOT>
+    
+    <textureSizeFactor>4</textureSizeFactor>
+
+    <defaults>
+        <extrude>0</extrude>
+        <pngOptLevel>0</pngOptLevel>
+    </defaults>
+
+    <supportsMultiPack>false</supportsMultiPack>
+
+    <!-- supports file name stripping (remove .png etc) -->
+    <supportsTrimSpriteNames>yes</supportsTrimSpriteNames>
+
+    <!-- supports texure subpath -->
+    <supportsTextureSubPath>no</supportsTextureSubPath>
+
+    <supportsScale9>true</supportsScale9>
+
+</exporter>

@@ -2,15 +2,7 @@ Scene:
   Name: "Sandbox Scene"
   Assets:
     Textures:
-      - Path: "assets/test/test.png"
-        TileWidth: 50
-        TileHeight: 50
-      - Path: "assets/test/square.png"
-        TileWidth: 32
-        TileHeight: 32
-      - Path: "assets/player/run.png"
-        TileWidth: 120
-        TileHeight: 80
+      - Path: "assets/spriteSheets/test/square.yaml"
     Fonts:
       - Path: "assets/fonts/arial.ttf"
         Sizes: [54]
@@ -42,20 +34,20 @@ Scene:
       ZoomSpeed: 0.25
       IsMain: true
       ViewPortType: 0 # 0 is Adaptative, 1 is Free
-      ViewPortVirtualResolution: [1125, 2346]
-      ViewPortDeviceResolution: [375, 812]
+      ViewPortVirtualResolution: [1280, 720]
+      ViewPortDeviceResolution: [1280, 720]
       Ref: 0
   SpriteRenderers:
     - Texture:
         Atlas: "square"
-        Tile: "square_0"
+        Tile: "square"
       Color: [255, 255, 255, 255]
       Layer: 0
       Shader: "basic"
       Ref: 1
     - Texture:
         Atlas: "square"
-        Tile: "square_0"
+        Tile: "square"
       Color: [0, 0, 255, 255]
       Layer: 0
       Shader: "basic"

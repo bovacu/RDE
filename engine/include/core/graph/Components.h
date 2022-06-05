@@ -212,12 +212,20 @@ namespace GDE {
             ~UI() {  }
     };
 
+    struct NinePatchSprite : public UI {
+        Vec2F size;
+
+    };
+
     struct UIText : public UI {
+        TextRenderer* text;
+
         ~UIText() {  }
     };
 
     struct UIButton : public UI {
         UIText* text;
+
 
         ~UIButton() {  }
     };

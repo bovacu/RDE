@@ -111,8 +111,9 @@ namespace GDE {
             auto _ownerEntityID = _map.at(_spriteRendererNode["Ref"].as<int>());
             auto* _spriteRenderer = _scene->getMainGraph()->addComponent<SpriteRenderer>(_ownerEntityID, _scene);
 
-            _spriteRenderer->setTexture(_manager->textureManager.getTile(_spriteRendererNode["Texture"]["Atlas"].as<std::string>(),
-                                                                          _spriteRendererNode["Texture"]["Tile"].as<std::string>()));
+            _spriteRenderer->setTexture(
+                    _manager->textureManager.getSubTexture(_spriteRendererNode["Texture"]["Atlas"].as<std::string>(),
+                                                           _spriteRendererNode["Texture"]["Tile"].as<std::string>()));
             _spriteRenderer->color = Color { _spriteRendererNode["Color"][0].as<unsigned char>(), _spriteRendererNode["Color"][1].as<unsigned char>(),
                                              _spriteRendererNode["Color"][2].as<unsigned char>(), _spriteRendererNode["Color"][3].as<unsigned char>()};
             _spriteRenderer->layer = _spriteRendererNode["Layer"].as<int>();
@@ -179,10 +180,8 @@ namespace GDE {
         auto& _sceneNode = _yaml["Scene"];
 
         auto& _texturesNode = _sceneNode["Assets"]["Textures"];
-        for (const auto& _texture : _texturesNode) {
-            _manager->textureManager.loadAtlas(_texture["TileWidth"].as<int>(), _texture["TileHeight"].as<int>(),
-                                               _texture["Path"].as<std::string>());
-        }
+        for (const auto& _texture : _texturesNode)
+            _manager->textureManager.loadSpriteSheet(YAML::LoadFile(_texture["Path"].as<std::string>()));
 
         auto& _fontsNodes = _sceneNode["Assets"]["Fonts"];
         for (const auto& _font : _fontsNodes) {

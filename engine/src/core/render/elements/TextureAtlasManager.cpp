@@ -5,7 +5,8 @@
 
 namespace GDE {
 
-    bool TextureAtlasManager::loadAtlas(int _tileWidth, int _tileHeight, const std::string& _pathToTexture) {
+    bool TextureAtlasManager::loadSpriteSheet(const YAML::Node& _node) {
+        auto _pathToTexture = _node["SpriteSheetSettings"]["Path"].as<std::string>();
         auto _name = Util::getFileNameFromPath(_pathToTexture);
         LOG_I_TIME("Trying to load '", _pathToTexture, "'...")
         if(atlases.find(_name) != atlases.end()) {
@@ -20,32 +21,16 @@ namespace GDE {
         }
 
         _atlas->name = _name;
-        _atlas->tileWidth = _tileWidth;
-        _atlas->tileHeight = _tileHeight;
         _atlas->textureWidth = _atlas->texture->getSize().x;
         _atlas->textureHeight = _atlas->texture->getSize().y;
 
-        cropTextures(*_atlas);
+        cropTextures(*_atlas, _node["Sprites"]);
         atlases[_name] = _atlas;
         LOG_S_TIME("    Load successful!")
         return true;
     }
 
-    Texture* TextureAtlasManager::getTile(const std::string& _atlasName) {
-        if(atlases.find(_atlasName) == atlases.end()) {
-            LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
-            return nullptr;
-        }
-
-        if(atlases[_atlasName]->subTextures.find(_atlasName) == atlases[_atlasName]->subTextures.end()) {
-            LOG_E_TIME("Texture '", _atlasName, "' in '", _atlasName , "' was not found! But tried to be accessed")
-            return nullptr;
-        }
-
-        return atlases[_atlasName]->subTextures[_atlasName];
-    }
-
-    Texture* TextureAtlasManager::getTile(const std::string& _atlasName, const std::string& _textureName) {
+    Texture* TextureAtlasManager::getSubTexture(const std::string& _atlasName, const std::string& _textureName) {
         if(atlases.find(_atlasName) == atlases.end()) {
             LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
             return nullptr;
@@ -59,44 +44,32 @@ namespace GDE {
         return atlases[_atlasName]->subTextures[_textureName];
     }
 
-    void TextureAtlasManager::cropTextures(Atlas& _atlas) {
+    void TextureAtlasManager::cropTextures(Atlas& _atlas, const YAML::Node& _spritesNode) {
 
-        uint _numOfImagesHorizontal = _atlas.textureWidth / _atlas.tileWidth;
-        uint _numOfImagesVertical = _atlas.textureHeight / _atlas.tileHeight;
-        uint _currentTexture = 0;
-
-        for(uint _y = 0; _y < _numOfImagesVertical; _y++) {
-            for(uint _x = 0; _x < _numOfImagesHorizontal; _x++) {
-//                if(isTextureEmpty(_atlas, _x * _atlas.tileWidth, _y * _atlas.tileHeight)) continue;
-                IntRect _rect;
-                _rect.bottomLeftCorner.x = (int)(_x * _atlas.tileWidth);
-                _rect.bottomLeftCorner.y = (int)_atlas.textureHeight - (int)((_y + 1) * _atlas.tileHeight);
-                _rect.size.x = (int)_atlas.tileWidth;
-                _rect.size.y = (int)_atlas.tileHeight;
-
-                _atlas.subTextures[(_atlas.name + "_" + std::to_string(_currentTexture))] = new Texture{_atlas.texture, _rect};
-//                LOG_I("    Loaded sub-texture: ", _atlas.name + "_" + std::to_string(_currentTexture), " -> ", _rect)
-                _currentTexture++;
-            }
-        }
-
-        if(_numOfImagesHorizontal == 0 && _numOfImagesVertical == 1) {
+        for(auto& _spriteNode : _spritesNode) {
             IntRect _rect;
-            _rect.bottomLeftCorner.x = 0;
-            _rect.bottomLeftCorner.y = 0;
-            _rect.size.x = (int)_atlas.tileWidth;
-            _rect.size.y = (int)_atlas.tileHeight;
+            _rect.size.x = _spriteNode["Size"][0].as<int>();
+            _rect.size.y = _spriteNode["Size"][1].as<int>();
 
-            _atlas.subTextures[_atlas.name] = new Texture{_atlas.texture, _rect};
+            _rect.bottomLeftCorner.x = _spriteNode["Origin"][0].as<int>();
+            _rect.bottomLeftCorner.y = _spriteNode["Origin"][1].as<int>() + _rect.size.y;
+
+            auto* _texture = new Texture { _atlas.texture, _rect };
+            if(_spriteNode["NinePatch"].IsDefined()) {
+                _texture->ninePatch.left = _spriteNode["NinePatch"]["Left"].as<int>();
+                _texture->ninePatch.top = _spriteNode["NinePatch"]["Top"].as<int>();
+                _texture->ninePatch.right = _spriteNode["NinePatch"]["Right"].as<int>();
+                _texture->ninePatch.bottom = _spriteNode["NinePatch"]["Bottom"].as<int>();
+
+                cropNinePatchSubTextures(_texture, _spriteNode);
+            }
+
+            _atlas.subTextures[_spriteNode["Name"].as<std::string>()] = _texture;
         }
     }
 
     bool TextureAtlasManager::isTextureEmpty(const Atlas& _atlas, uint _x, uint _y) const {
         int _transparentPixels = 0;
-//        for(auto _h = _x; _h < _x + _atlas.tileWidth; _h++)
-//            for(auto _v = _y; _v < _y + _atlas.tileHeight; _v++)
-//                if(_atlas.texture.getPixel(_h, _v) == Color::Transparent) _transparentPixels++;
-
         return _transparentPixels == _atlas.tileWidth * _atlas.tileHeight;
     }
 
@@ -137,6 +110,62 @@ namespace GDE {
         LOG_S("Cleaning up TextureAtlasManager")
         for(auto& _atlas : atlases)
             delete _atlas.second;
+    }
+
+    void TextureAtlasManager::cropNinePatchSubTextures(Texture* _texture, const YAML::Node& _spriteNode) {
+        auto _origin = Vec2I {_spriteNode["Origin"][0].as<int>(), _spriteNode["Origin"][1].as<int>() + _texture->getRegion().size.y};
+
+        // Bottom row
+        _texture->ninePatch.subRects[0] = {
+            .bottomLeftCorner = _origin,
+            .size = {_texture->ninePatch.left, _texture->getSize().y - (_texture->ninePatch.top + _texture->ninePatch.bottom)}
+        };
+
+        _texture->ninePatch.subRects[1] = {
+                .bottomLeftCorner = {_texture->ninePatch.left, _origin.y},
+                .size = {_texture->ninePatch.right, _texture->getSize().y - (_texture->ninePatch.top + _texture->ninePatch.bottom)}
+        };
+
+        _texture->ninePatch.subRects[2] = {
+                .bottomLeftCorner = {_texture->ninePatch.left + _texture->ninePatch.right, _origin.y},
+                .size = {_texture->getSize().x - (_texture->ninePatch.left + _texture->ninePatch.right), _texture->getSize().y - (_texture->ninePatch.top + _texture->ninePatch.bottom)}
+        };
+
+
+
+        // Middle row
+        _texture->ninePatch.subRects[3] = {
+                .bottomLeftCorner = {_texture->ninePatch.subRects[0].bottomLeftCorner.x, _texture->ninePatch.subRects[0].size.y},
+                .size = {_texture->ninePatch.subRects[0].size.x, _texture->ninePatch.bottom}
+        };
+
+        _texture->ninePatch.subRects[4] = {
+                .bottomLeftCorner = {_texture->ninePatch.subRects[1].bottomLeftCorner.x, _texture->ninePatch.subRects[1].size.y},
+                .size = {_texture->ninePatch.subRects[1].size.x, _texture->ninePatch.subRects[3].size.y}
+        };
+
+        _texture->ninePatch.subRects[5] = {
+                .bottomLeftCorner = {_texture->ninePatch.subRects[2].bottomLeftCorner.x, _texture->ninePatch.subRects[2].size.y},
+                .size = {_texture->ninePatch.subRects[2].size.x, _texture->ninePatch.subRects[3].size.y}
+        };
+
+
+
+        // Top row
+        _texture->ninePatch.subRects[6] = {
+                .bottomLeftCorner = {_texture->ninePatch.subRects[0].bottomLeftCorner.x, _texture->ninePatch.subRects[0].size.y + _texture->ninePatch.subRects[3].size.y},
+                .size = {_texture->ninePatch.left, _texture->ninePatch.top}
+        };
+
+        _texture->ninePatch.subRects[7] = {
+                .bottomLeftCorner = {_texture->ninePatch.subRects[1].bottomLeftCorner.x, _texture->ninePatch.subRects[1].size.y + _texture->ninePatch.subRects[4].size.y},
+                .size = {_texture->ninePatch.subRects[4].size.x, _texture->ninePatch.top}
+        };
+
+        _texture->ninePatch.subRects[8] = {
+                .bottomLeftCorner = {_texture->ninePatch.subRects[2].bottomLeftCorner.x, _texture->ninePatch.subRects[2].size.y + _texture->ninePatch.subRects[5].size.y},
+                .size = {_texture->ninePatch.subRects[5].size.x, _texture->ninePatch.top}
+        };
     }
 
 }

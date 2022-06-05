@@ -1,0 +1,24 @@
+SpriteSheetName: square.png
+SpriteSheetSize: [96, 32]
+SpriteSheetSettings: 
+  Format: png
+  Path: /home/borja/Documents/GDE/assets/spriteSheets/test/square.png
+Sprites: 
+  - Name: square
+    Size: [32, 32]
+    Origin: [0, 0]
+    OriginOffset: [0, 0]
+    CenterPivot: [16, 16]
+    ScalingFactor: 1  
+  - Name: test2
+    Size: [32, 32]
+    Origin: [32, 0]
+    OriginOffset: [0, 0]
+    CenterPivot: [16, 16]
+    ScalingFactor: 1  
+  - Name: test3
+    Size: [32, 32]
+    Origin: [64, 0]
+    OriginOffset: [0, 0]
+    CenterPivot: [16, 16]
+    ScalingFactor: 1  

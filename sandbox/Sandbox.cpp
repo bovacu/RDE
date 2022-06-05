@@ -20,7 +20,7 @@ namespace GDE {
         /*        auto _player = mainScene->createNode("player");
                 auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
                 _sprite->layer = 10;
-                _sprite->texture = TextureAtlasManager::get().getTile("run",
+                _sprite->texture = TextureAtlasManager::get().getSubTexture("run",
                 "run_0");
                 LOG_W(mainScene->getComponent<Transform>(_player)->getScaleLocal())
 
@@ -70,7 +70,9 @@ namespace GDE {
         auto _uiTest = getCanvases()[0]->getGraph()->createNode("TestUINode");
         auto* _transform = getCanvases()[0]->getGraph()->getComponent<Transform>(_uiTest);
         _transform->setPosition(-250, 130);
-        auto* _uiRenderer = getCanvases()[0]->getGraph()->addComponent<SpriteRenderer>(_uiTest, this, engine->manager.textureManager.getTile("square", "square_0"));
+        auto* _uiRenderer = getCanvases()[0]->getGraph()->addComponent<SpriteRenderer>(_uiTest, this,
+                                                                                       engine->manager.textureManager.getSubTexture(
+                                                                                               "square", "square"));
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -100,7 +102,6 @@ namespace GDE {
 
     void Sandbox::onDebugRender(Delta _dt) {
         Scene::onDebugRender(_dt);
-        Renderer::drawSquare({100, 100}, {32, 32});
     }
 
     void Sandbox::onImGuiRender(Delta _dt) { Scene::onImGuiRender(_dt); }
@@ -198,7 +199,7 @@ namespace GDE {
             };
             getMainGraph()->addComponent<Body>(_square, _squareWallConfig, _squareTransform);
             auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(_square, this);
-            _squareSpriteRenderer->setTexture(engine->manager.textureManager.getTile("square", "square_0"));
+            _squareSpriteRenderer->setTexture(engine->manager.textureManager.getSubTexture("square", "square_0"));
         }
     }
 

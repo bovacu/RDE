@@ -10,6 +10,21 @@
 #endif
 
 namespace GDE {
+
+    class Texture;
+    struct NinePatch {
+        int left = -1;
+        int top = -1;
+        int right = -1;
+        int bottom = -1;
+
+        [[nodiscard]] bool isEnabled() const {
+            return left != -1 && top != -1 && right != -1 && bottom != -1;
+        }
+
+        IntRect subRects[9];
+    };
+
     class Texture {
         protected:
             unsigned int refCount = 0;
@@ -19,6 +34,9 @@ namespace GDE {
             IntRect region {};
             float fileSizeKb = -1;
             std::string path;
+
+        public:
+            NinePatch ninePatch;
 
         public:
             Texture() = default;

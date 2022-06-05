@@ -104,6 +104,8 @@ namespace GDE {
 
     void Graph::onDebugRender() {
         Renderer::beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->ID));
+
+
         registry.view<Body>().each([](const auto _entity, const Body& _body) {
             Renderer::drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
         });

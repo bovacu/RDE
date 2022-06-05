@@ -13,7 +13,7 @@ namespace GDE {
         Animation _animation;
 
         for(auto& _index : _indices) {
-            _animation.addFrame(manager->textureManager.getTile(_atlas, _atlas + "_" + std::to_string(_index)));
+            _animation.addFrame(manager->textureManager.getSubTexture(_atlas, _atlas + "_" + std::to_string(_index)));
         }
 
         animations[_animName] = AnimationNode { _animation, {  } };
