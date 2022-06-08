@@ -5,8 +5,10 @@ SpriteSheetSettings:
   Path: {{ texture.absoluteFileName }}
 Sprites: {% for sprite in allSprites %}
   - Name: {{ sprite.trimmedName }}
-    Size: [{{ sprite.size.width }}, {{ sprite.size.width }}]
+    Size: [{{ sprite.size.width }}, {{ sprite.size.height }}]
+    SizeInUV: [{{ sprite.frameRectRel.width }}, {{ sprite.frameRectRel.height }}]
     Origin: [{{ sprite.frameRect.x }}, {{ sprite.frameRect.y }}]
+    OriginInUV: [{{ sprite.frameRectRel.x }}, {{ sprite.frameRectRel.y }}]
     OriginOffset: [{{ sprite.cornerOffset.x }}, {{ sprite.cornerOffset.y }}]
     CenterPivot: [{{ sprite.pivotPoint.x }}, {{ sprite.pivotPoint.y }}]
     ScalingFactor: {{ sprite.scale }} {% if sprite.scale9Enabled %}

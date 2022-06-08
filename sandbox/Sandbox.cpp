@@ -69,10 +69,11 @@ namespace GDE {
 
         auto _uiTest = getCanvases()[0]->getGraph()->createNode("TestUINode");
         auto* _transform = getCanvases()[0]->getGraph()->getComponent<Transform>(_uiTest);
-        _transform->setPosition(-250, 130);
-        auto* _uiRenderer = getCanvases()[0]->getGraph()->addComponent<SpriteRenderer>(_uiTest, this,
+        _transform->setPosition(-250, 0);
+        ui = getCanvases()[0]->getGraph()->addComponent<NinePatchSprite>(_uiTest, this,
                                                                                        engine->manager.textureManager.getSubTexture(
-                                                                                               "square", "square"));
+                                                                                               "ui", "panel0"));
+        ui->size = {128, 128};
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -102,6 +103,7 @@ namespace GDE {
 
     void Sandbox::onDebugRender(Delta _dt) {
         Scene::onDebugRender(_dt);
+//        Renderer::drawSquare({-250, 0}, {437, 128});
     }
 
     void Sandbox::onImGuiRender(Delta _dt) { Scene::onImGuiRender(_dt); }

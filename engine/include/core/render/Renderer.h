@@ -58,6 +58,8 @@ namespace GDE {
 
             static void draw(const TextRenderer& _text, const Transform& _transform);
 
+            static void draw(const NinePatchSprite& _ninePatch, const Transform& _transform);
+
             /**
              * Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
              * @param _p0 Starting point of the line.

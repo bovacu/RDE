@@ -6,19 +6,40 @@ SpriteSheetSettings:
 Sprites: 
   - Name: square
     Size: [32, 32]
+    SizeInUV: [0.3333333333333333, 1]
     Origin: [0, 0]
+    OriginInUV: [0, 0]
     OriginOffset: [0, 0]
     CenterPivot: [16, 16]
-    ScalingFactor: 1  
+    ScalingFactor: 1 
+    NinePatch:		# Right and Left represent the vertical lines, both starting from left side, Top and Bottom represent the horizontal lines, starting from Top
+      Top: 8
+      Left: 8
+      Right: 16
+      Bottom: 16  
   - Name: test2
     Size: [32, 32]
+    SizeInUV: [0.3333333333333333, 1]
     Origin: [32, 0]
+    OriginInUV: [0.3333333333333333, 0]
     OriginOffset: [0, 0]
     CenterPivot: [16, 16]
-    ScalingFactor: 1  
+    ScalingFactor: 1 
+    NinePatch:		# Right and Left represent the vertical lines, both starting from left side, Top and Bottom represent the horizontal lines, starting from Top
+      Top: 8
+      Left: 8
+      Right: 16
+      Bottom: 16  
   - Name: test3
     Size: [32, 32]
+    SizeInUV: [0.3333333333333333, 1]
     Origin: [64, 0]
+    OriginInUV: [0.6666666666666666, 0]
     OriginOffset: [0, 0]
     CenterPivot: [16, 16]
-    ScalingFactor: 1  
+    ScalingFactor: 1 
+    NinePatch:		# Right and Left represent the vertical lines, both starting from left side, Top and Bottom represent the horizontal lines, starting from Top
+      Top: 8
+      Left: 8
+      Right: 16
+      Bottom: 16  

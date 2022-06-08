@@ -30,6 +30,7 @@ namespace GDE {
 
             void onUpdate(Delta _dt);
             void onRender();
+            void onDebugRender();
     };
 
 }

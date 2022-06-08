@@ -75,6 +75,14 @@ namespace GDE {
         getBatch(_text, 0, BatchPriority::TextPriority).addText(_text, _transform);
     }
 
+    void SpriteBatch::draw(const ParticleSystem& _particleSystem, const Transform& _transform) {
+
+    }
+
+    void SpriteBatch::draw(const NinePatchSprite& _ninePatch, const Transform& _transform) {
+        getBatch(_ninePatch, _ninePatch.layer, BatchPriority::SpritePriority).addNinePatchSprite(_ninePatch, _transform);
+    }
+
     void SpriteBatch::Debug::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
         auto _screenPos0 = Util::worldToScreenCoords(batch->viewport, _p0);
@@ -265,10 +273,6 @@ namespace GDE {
         });
     }
 
-    void SpriteBatch::draw(const ParticleSystem& _particleSystem, const Transform& _transform) {
-
-    }
-
     void SpriteBatch::Batch::addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform) {
 
         if(vertexCount > spriteBatch->maxVerticesPerDrawCall)
@@ -387,6 +391,91 @@ namespace GDE {
             vertexCount += 4;
         }
     }
+
+    void SpriteBatch::Batch::addNinePatchSprite(const NinePatchSprite& _ninePatch, const Transform& _transform) {
+        if(vertexCount > spriteBatch->maxVerticesPerDrawCall)
+            spriteBatch->flush();
+
+        if(textureID < 0)
+            textureID = _ninePatch.texture->getGLTexture();
+
+        auto _rectsAmount = *(&_ninePatch.getNinePatch().subRects + 1) - _ninePatch.getNinePatch().subRects;
+        for(auto _i = 0; _i < _rectsAmount; _i++) {
+            auto& _subTextureRegion = _ninePatch.getNinePatch().subRects[_i];
+            auto _transformMat = _transform.modelMatrix;
+
+            float _distortX = 1.f, _distortY = 1.f;
+            auto _uiSize = _ninePatch.getSize();
+            auto _spriteSize = _ninePatch.getRegion().size;
+            Vec2F _position = {_transform.getPositionLocal().x - (float)_spriteSize.x / 2.f + (float)_subTextureRegion.bottomLeftCorner.x + (float)_subTextureRegion.size.x / 2.f, _transform.getPositionLocal().y + (float)(_subTextureRegion.bottomLeftCorner.y - _ninePatch.getRegion().size.y) - (float)_ninePatch.getRegion().size.y / 2.f + (float)_subTextureRegion.size.y / 2.f};
+
+            if((float)_uiSize.x - (float)_spriteSize.x != 0) {
+                auto _widthOfCorners = (float)_ninePatch.getNinePatch().subRects[0].size.x + (float)_ninePatch.getNinePatch().subRects[2].size.x;
+                auto _totalDiffX = (float)_uiSize.x - _widthOfCorners;
+                _distortX = _totalDiffX / ((float)_spriteSize.x - _widthOfCorners);
+
+                auto _halfWidthOfDistortedMiddleRect = _distortX * _transformMat[0][0] * (float)_ninePatch.getNinePatch().subRects[1].size.x / 2.f;
+                auto _halfWidthOfOriginalMiddleRect = (float)_ninePatch.getNinePatch().subRects[1].size.x / 2.f;
+                if(_i == 0 || _i == 3 || _i == 6) _position.x -= _halfWidthOfDistortedMiddleRect - _halfWidthOfOriginalMiddleRect;
+                if(_i == 2 || _i == 5 || _i == 8) _position.x += _halfWidthOfDistortedMiddleRect - _halfWidthOfOriginalMiddleRect;
+            }
+
+            if((float)_uiSize.y - (float)_spriteSize.y != 0) {
+                auto _heightOfCorners = (float)_ninePatch.getNinePatch().subRects[0].size.y + (float)_ninePatch.getNinePatch().subRects[6].size.y;
+                auto _totalDiffY = (float)_uiSize.y - _heightOfCorners;
+                _distortY = _totalDiffY / ((float)_spriteSize.y - _heightOfCorners);
+
+                auto _halfHeightOfDistortedMiddleRect = _distortY * _transformMat[1][1] * (float)_ninePatch.getNinePatch().subRects[3].size.y / 2.f;
+                auto _halfHeightOfOriginalMiddleRect = (float)_ninePatch.getNinePatch().subRects[3].size.y / 2.f;
+                if(_i == 0 || _i == 1 || _i == 2) _position.y -= _halfHeightOfDistortedMiddleRect - _halfHeightOfOriginalMiddleRect;
+                if(_i == 6 || _i == 7 || _i == 8) _position.y += _halfHeightOfDistortedMiddleRect - _halfHeightOfOriginalMiddleRect;
+            }
+
+            auto _screenPos = Util::worldToScreenCoords(spriteBatch->viewport, {_position.x, _position.y});
+            _transformMat[3][0] = _screenPos.x;
+            _transformMat[3][1] = _screenPos.y;
+            if(_i == 1 || _i == 4 || _i == 7) _transformMat[0][0] *= _distortX;
+            if(_i == 3 || _i == 4 || _i == 5) _transformMat[1][1] *= _distortY;
+
+
+            uploadVertices(_transformMat, _ninePatch, _subTextureRegion);
+        }
+
+    }
+
+    void SpriteBatch::Batch::uploadVertices(const glm::mat4& _transformMat, const NinePatchSprite& _ninePatch, const IntRect& _subTextureRegion) {
+        Vec2F _textureOrigin = {(float)_subTextureRegion.bottomLeftCorner.x, (float)_subTextureRegion.bottomLeftCorner.y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_ninePatch.texture->getSize().x, _textureOrigin.y / (float)_ninePatch.texture->getSize().y};
+
+        Vec2F _textureTileSize = {(float)_subTextureRegion.size.x, (float)_subTextureRegion.size.y};
+        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_ninePatch.texture->getSize().x, _textureTileSize.y / (float)_ninePatch.texture->getSize().y};
+        auto _textureTileSizeOnScreen = Util::worldToScreenSize(spriteBatch->viewport, _textureTileSize);
+
+        glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
+        glm::vec4 _bottomRightTextureCorner = {_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
+        glm::vec4 _topRightTextureCorner = {_textureTileSizeOnScreen.x, _textureTileSizeOnScreen.y, 0.0f, 1.0f };
+        glm::vec4 _topLeftTextureCorner = {-_textureTileSizeOnScreen.x, _textureTileSizeOnScreen.y, 0.0f, 1.0f };
+
+        glm::vec4 _color = {(float)_ninePatch.color.r / 255.f, (float)_ninePatch.color.g/ 255.f,
+                            (float)_ninePatch.color.b/ 255.f, (float)_ninePatch.color.a/ 255.f};
+
+        vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+
+        indexBuffer.emplace_back(vertexCount + 0);
+        indexBuffer.emplace_back(vertexCount + 1);
+        indexBuffer.emplace_back(vertexCount + 2);
+
+        indexBuffer.emplace_back(vertexCount + 2);
+        indexBuffer.emplace_back(vertexCount + 3);
+        indexBuffer.emplace_back(vertexCount + 0);
+
+        vertexCount += 4;
+    }
+
+
 
     SpriteBatch* SpriteBatch::Debug::batch;
 
