@@ -12,6 +12,7 @@ namespace GDE {
     class Sandbox : public Scene {
         private:
             UDelegate<bool(MouseScrolledEvent&)> mseDelegate;
+            NinePatchSprite* ui;
 
         public:
             Sandbox(Engine* _engine, const std::string& _debugName = "Sandbox") : Scene(_engine, _debugName) {  }

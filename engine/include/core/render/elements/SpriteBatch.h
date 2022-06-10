@@ -43,6 +43,8 @@ namespace GDE {
                 friend class SpriteBatch;
                 void addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
                 void addText(const TextRenderer& _text, const Transform& _transform);
+                void addNinePatchSprite(const NinePatchSprite& _ninePatch, const Transform& _transform);
+                void uploadVertices(const glm::mat4& _transform, const NinePatchSprite& _ninePatch, const IntRect& _subTexture);
         };
 
         class Debug {
@@ -95,6 +97,7 @@ namespace GDE {
             void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
             void draw(const TextRenderer& _text, const Transform& _transform);
             void draw(const ParticleSystem& _particleSystem, const Transform& _transform);
+            void draw(const NinePatchSprite& _ninePatch, const Transform& _transform);
             void flush();
 
         private:

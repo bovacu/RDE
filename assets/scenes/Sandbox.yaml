@@ -3,6 +3,7 @@ Scene:
   Assets:
     Textures:
       - Path: "assets/spriteSheets/test/square.yaml"
+      - Path: "assets/spriteSheets/test/ui.yaml"
     Fonts:
       - Path: "assets/fonts/arial.ttf"
         Sizes: [54]
@@ -39,8 +40,8 @@ Scene:
       Ref: 0
   SpriteRenderers:
     - Texture:
-        Atlas: "square"
-        Tile: "square"
+        Atlas: "ui"
+        Tile: "button"
       Color: [255, 255, 255, 255]
       Layer: 0
       Shader: "basic"

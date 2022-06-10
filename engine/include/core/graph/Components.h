@@ -48,7 +48,7 @@ namespace GDE {
 
         private:
             Texture* texture = nullptr;
-            IViewPort* viewport = nullptr;
+            IViewPort* viewport = nullptr; // TODO remove this, is not used anymore
 
         public:
             explicit SpriteRenderer(Scene* _scene);
@@ -65,6 +65,8 @@ namespace GDE {
             [[nodiscard]] std::string getTextureName();
             [[nodiscard]] std::string getTextureExtension();
             void updateViewport(IViewPort* _viewport) override;
+            [[nodiscard]] Vec2I getTextureSize() const override { return texture->getSize(); }
+            [[nodiscard]] IntRect getRegion() const override { return texture->getRegion(); }
     };
 
     class TextRenderer : public IRenderizable {
@@ -92,6 +94,8 @@ namespace GDE {
             [[nodiscard]] Color getColor() const override { return color; }
             [[nodiscard]] ShaderID getShaderID() const override { return shaderID; }
             void updateViewport(IViewPort* _viewport) override { viewport = _viewport; }
+            [[nodiscard]] Vec2I getTextureSize() const override { return texture->getSize(); }
+            [[nodiscard]] IntRect getRegion() const override { return texture->getRegion(); }
 
         private:
             void recalcTextDimensions(const std::string& _text);
@@ -193,7 +197,7 @@ namespace GDE {
     };
 
     struct UI : public IRenderizable {
-        private:
+        protected:
             Texture* texture = nullptr;
 
         public:
@@ -207,14 +211,23 @@ namespace GDE {
             [[nodiscard]] int getLayer() const override { return layer; }
             [[nodiscard]] Color getColor() const override { return color; }
             [[nodiscard]] ShaderID getShaderID() const override { return shaderID; }
+            [[nodiscard]] Vec2I getTextureSize() const override { return texture->getSize(); }
+            [[nodiscard]] IntRect getRegion() const override { return texture->getRegion(); }
             void updateViewport(IViewPort* _viewport) override {  }
 
             ~UI() {  }
     };
 
     struct NinePatchSprite : public UI {
-        Vec2F size;
 
+        /// This is the size we want the UI to be rendered
+        Vec2I size;
+
+        explicit NinePatchSprite(Scene* _scene);
+        NinePatchSprite(Scene* _scene, Texture* _texture);
+
+        [[nodiscard]] Vec2I getSize() const;
+        [[nodiscard]] NinePatch& getNinePatch() const;
     };
 
     struct UIText : public UI {

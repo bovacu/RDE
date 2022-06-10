@@ -17,6 +17,8 @@ namespace GDE {
             [[nodiscard]] virtual int getLayer() const = 0;
             [[nodiscard]] virtual Color getColor() const = 0;
             [[nodiscard]] virtual ShaderID getShaderID() const = 0;
+            [[nodiscard]] virtual Vec2I getTextureSize() const = 0;
+            [[nodiscard]] virtual IntRect getRegion() const = 0;
             virtual void updateViewport(IViewPort* _viewport) = 0;
     };
 

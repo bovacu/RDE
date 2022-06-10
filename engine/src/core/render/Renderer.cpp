@@ -55,6 +55,10 @@ namespace GDE {
         batch.draw(_text, _transform);
     }
 
+    void Renderer::draw(const NinePatchSprite& _ninePatch, const Transform& _transform) {
+        batch.draw(_ninePatch, _transform);
+    }
+
     void Renderer::beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness) {
         batch.debug.setDebugLinesThickness(_thickness);
         batch.beginDraw(_camera, _cameraTransform);

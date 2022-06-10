@@ -308,4 +308,27 @@ namespace GDE {
         return Util::getFileExtension(texture->getPath());
     }
 
+
+
+    // -------------------------------------- NinePatchSprite --------------------------------------
+
+
+
+    NinePatchSprite::NinePatchSprite(Scene* _scene) {
+        shaderID = _scene->engine->manager.shaderManager.getShader("basic");
+    }
+
+    NinePatchSprite::NinePatchSprite(Scene* _scene, Texture* _texture) {
+        shaderID = _scene->engine->manager.shaderManager.getShader("basic");
+        texture = _texture;
+        size = _texture->getRegion().size;
+    }
+
+    NinePatch& NinePatchSprite::getNinePatch() const {
+        return texture->ninePatch;
+    }
+
+    Vec2I NinePatchSprite::getSize() const {
+        return size;
+    }
 }
