@@ -27,7 +27,7 @@ namespace GDE {
         glGenBuffers(1, &ibo);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * maxVerticesPerDrawCall), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * maxVerticesPerDrawCall * 6), nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -254,6 +254,8 @@ namespace GDE {
 
         Batch _batch;
         _batch.layer = _layer;
+        _batch.indexBuffer.reserve(maxVerticesPerDrawCall * 6);
+        _batch.vertexBuffer.reserve(maxVerticesPerDrawCall * 6);
         _batch.textureID = _renderer.getTexture();
         _batch.priority = _priority;
         _batch.shaderID = _renderer.getShaderID();
@@ -293,10 +295,10 @@ namespace GDE {
         _transformMat[3][1] = _screenPos.y;
 
         Vec2F _textureOrigin = {(float)_spriteRenderer.texture->getRegion().bottomLeftCorner.x, (float)_spriteRenderer.texture->getRegion().bottomLeftCorner.y};
-        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_spriteRenderer.texture->getSize().x, _textureOrigin.y / (float)_spriteRenderer.texture->getSize().y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_spriteRenderer.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)_spriteRenderer.texture->getSpriteSheetSize().y};
 
         Vec2F _textureTileSize = {(float)_spriteRenderer.texture->getRegion().size.x, (float)_spriteRenderer.texture->getRegion().size.y};
-        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_spriteRenderer.texture->getSize().x, _textureTileSize.y / (float)_spriteRenderer.texture->getSize().y};
+        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_spriteRenderer.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)_spriteRenderer.texture->getSpriteSheetSize().y};
         auto _textureTileSizeOnScreen = Util::worldToScreenSize(spriteBatch->viewport, _textureTileSize);
 
         glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -451,10 +453,10 @@ namespace GDE {
 
     void SpriteBatch::Batch::uploadVertices(const glm::mat4& _transformMat, const NinePatchSprite& _ninePatch, const IntRect& _subTextureRegion) {
         Vec2F _textureOrigin = {(float)_subTextureRegion.bottomLeftCorner.x, (float)_subTextureRegion.bottomLeftCorner.y};
-        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_ninePatch.texture->getSize().x, _textureOrigin.y / (float)_ninePatch.texture->getSize().y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_ninePatch.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)_ninePatch.texture->getSpriteSheetSize().y};
 
         Vec2F _textureTileSize = {(float)_subTextureRegion.size.x, (float)_subTextureRegion.size.y};
-        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_ninePatch.texture->getSize().x, _textureTileSize.y / (float)_ninePatch.texture->getSize().y};
+        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_ninePatch.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)_ninePatch.texture->getSpriteSheetSize().y};
         auto _textureTileSizeOnScreen = Util::worldToScreenSize(spriteBatch->viewport, _textureTileSize);
 
         glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };

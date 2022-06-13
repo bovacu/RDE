@@ -19,16 +19,16 @@ namespace GDE {
         loadFromFile(_path);
     }
 
-    Texture::Texture(Texture* _spriteSheet, const IntRect& _region) {
-        openGLTextureID = _spriteSheet->openGLTextureID;
+    Texture::Texture(Atlas* _spriteSheet, const IntRect& _region) {
+        openGLTextureID = _spriteSheet->texture->openGLTextureID;
         region = _region;
-        refCount = _spriteSheet->refCount;
-        width = _spriteSheet->width;
-        height = _spriteSheet->height;
-        channels = _spriteSheet->channels;
-        internalFormat = _spriteSheet->internalFormat;
-        dataFormat = _spriteSheet->dataFormat;
-        fileSizeKb = _spriteSheet->fileSizeKb;
+        refCount = _spriteSheet->texture->refCount;
+        textureSize = _region.size;
+        spriteSheetSize = { (int)_spriteSheet->textureWidth, (int)_spriteSheet->textureHeight };
+        channels = _spriteSheet->texture->channels;
+        internalFormat = _spriteSheet->texture->internalFormat;
+        dataFormat = _spriteSheet->texture->dataFormat;
+        fileSizeKb = _spriteSheet->texture->fileSizeKb;
     }
 
     Texture::~Texture() {
@@ -40,7 +40,11 @@ namespace GDE {
     }
 
     Vec2I Texture::getSize() const {
-        return {width, height};
+        return textureSize;
+    }
+
+    Vec2I Texture::getSpriteSheetSize() const {
+        return spriteSheetSize;
     }
 
     bool Texture::loadFromFile(const char* _path) {
@@ -61,8 +65,8 @@ namespace GDE {
         glDeleteTextures(1, &openGLTextureID);
 
         invertSDLSurface(_image);
-        width = _image->w;
-        height = _image->h;
+        textureSize.x = _image->w;
+        textureSize.y = _image->h;
         channels = _image->format->BytesPerPixel;
         auto* _texturePixels = _image->pixels;
 
@@ -74,7 +78,7 @@ namespace GDE {
             _internalFormat = GL_RGB8;
             _dataFormat = GL_RGB;
         } else {
-            LOG_E("Not supported format image. Channels = ", channels, ", Width = ", width, ", Height = ", height, ", Path = ", _path)
+            LOG_E("Not supported format image. Channels = ", channels, ", Width = ", textureSize.x, ", Height = ", textureSize.y, ", Path = ", _path)
             LOG_W("If the sprite sheet is exported from TexturePacker remember to set in advanced options PngOpt Level to 0!!")
         }
 
@@ -89,12 +93,12 @@ namespace GDE {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, (int)internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
+        glTexImage2D(GL_TEXTURE_2D, 0, (int)internalFormat, textureSize.x, textureSize.y, 0, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
 
         SDL_FreeSurface(_image);
         SDL_RWclose(_imageFile);
 
-        region = {{0, 0}, {width, height}};
+        region = { { 0, 0 }, { textureSize.x , textureSize.y} };
 
         #if !IS_MOBILE()
         fileSizeKb = (float)std::filesystem::file_size(_path) / 1000.f;
@@ -112,15 +116,15 @@ namespace GDE {
     }
 
     bool Texture::loadTextTexture(int _width, int _height) {
-        width = _width;
-        height = _height;
+        textureSize.x = _width;
+        textureSize.y = _height;
         fileSizeKb = (float)(_width * _height) / 1024.f;
 
         glActiveTexture(GL_TEXTURE0);
         glGenTextures(1, &openGLTextureID);
         glBindTexture(GL_TEXTURE_2D, openGLTextureID);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, textureSize.x, textureSize.y, 0, GL_ALPHA, GL_UNSIGNED_BYTE, nullptr);
 
         /* We require 1 byte alignment when uploading texture data */
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -217,8 +221,8 @@ namespace GDE {
     bool Texture::loadTextureFromMemory(int _width, int _height, const unsigned char* _data) {
         glDeleteTextures(1, &openGLTextureID);
 
-        width = _width;
-        height = _height;
+        textureSize.x = _width;
+        textureSize.y = _height;
 
         glGenTextures(1, &openGLTextureID);
         glBindTexture(GL_TEXTURE_2D, openGLTextureID);
@@ -245,16 +249,16 @@ namespace GDE {
 
 
     void Image::init(int _width, int _height, unsigned char* _pixels, const ImageType& _imageType) {
-        width = _width;
-        height = _height;
+        textureSize.x = _width;
+        textureSize.y = _height;
         pixels = _pixels;
         channels = getChannels(_imageType);
         imageType = _imageType;
     }
 
     void Image::init(int _width, int _height, const ImageType& _imageType) {
-        width = _width;
-        height = _height;
+        textureSize.x = _width;
+        textureSize.y = _height;
         channels = getChannels(_imageType);
         pixels = new unsigned char[_width * _height * channels];
         imageType = _imageType;
@@ -270,7 +274,7 @@ namespace GDE {
                 _internalFormat = GL_RGB8;
                 _dataFormat = GL_RGB;
             } else
-                LOG_E("Not supported format image. Channels = ", channels, ", Width = ", width, ", Height = ", height)
+                LOG_E("Not supported format image. Channels = ", channels, ", Width = ", textureSize.x, ", Height = ", textureSize.y)
 
             internalFormat = _internalFormat;
             dataFormat = _dataFormat;
@@ -283,7 +287,7 @@ namespace GDE {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-            glTexImage2D(GL_TEXTURE_2D, 0, (int)internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, pixels);
+            glTexImage2D(GL_TEXTURE_2D, 0, (int)internalFormat, textureSize.x, textureSize.y, 0, dataFormat, GL_UNSIGNED_BYTE, pixels);
         } else {
             // TODO re-upload to GPU of image
             LOG_E("Re-upload to GPU not implemented!!")
@@ -293,23 +297,23 @@ namespace GDE {
     void Image::saveAs(const std::string& _pathToSave) {
         stbi_flip_vertically_on_write(1);
         switch (imageType) {
-            case PNG: stbi_write_png(_pathToSave.c_str(), width, height, channels, pixels, width * channels);
+            case PNG: stbi_write_png(_pathToSave.c_str(), textureSize.x, textureSize.y, channels, pixels, textureSize.x * channels);
                 break;
-            case JPG: stbi_write_jpg(_pathToSave.c_str(), width, height, channels, pixels, width * channels);
+            case JPG: stbi_write_jpg(_pathToSave.c_str(), textureSize.x, textureSize.y, channels, pixels, textureSize.x * channels);
                 break;
-            case BMP: stbi_write_bmp(_pathToSave.c_str(), width, height, channels, pixels);
+            case BMP: stbi_write_bmp(_pathToSave.c_str(), textureSize.x, textureSize.y, channels, pixels);
         }
     }
 
     void Image::setPixel(int _x, int _y, const Color& _color) {
-        pixels[_x * channels + _y * width * channels + 0] = _color.r;
-        pixels[_x * channels + _y * width * channels + 1] = _color.g;
-        pixels[_x * channels + _y * width * channels + 2] = _color.b;
-        pixels[_x * channels + _y * width * channels + 3] = _color.a;
+        pixels[_x * channels + _y * textureSize.x * channels + 0] = _color.r;
+        pixels[_x * channels + _y * textureSize.x * channels + 1] = _color.g;
+        pixels[_x * channels + _y * textureSize.x * channels + 2] = _color.b;
+        pixels[_x * channels + _y * textureSize.x * channels + 3] = _color.a;
     }
 
     Color Image::getPixel(int _x, int _y) {
-        int _base = pixels[_x * channels + _y * width * channels];
+        int _base = pixels[_x * channels + _y * textureSize.x * channels];
         return {pixels[_base], pixels[_base + 1], pixels[_base + 2], pixels[_base + 3]};
     }
 

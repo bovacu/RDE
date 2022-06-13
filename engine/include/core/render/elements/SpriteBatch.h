@@ -74,7 +74,7 @@ namespace GDE {
             int totalTriangles = 0;
             int drawCalls = 0;
             Debug debug;
-            const int maxVerticesPerDrawCall = 35000; // Between 25.000 and 45.000 should be a good range
+            const int maxVerticesPerDrawCall = 50000; // Between 25.000 and 45.000 should be a good range
 
         private:
             ShaderManager* shaderManager = nullptr;

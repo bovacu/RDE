@@ -75,7 +75,7 @@ namespace GDE {
                                                                                                "ui", "panel0"));
         ui->size = {128, 128};
 
-        textStressTest();
+//        textStressTest();
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -211,7 +211,7 @@ namespace GDE {
         Random _r;
         // 25000 is the maximum I could get with 60fps of average performance, with texts -> "Text[0-25000]"
         // 15000 is the maximum I could get with 60fps of average performance, with texts -> "Text[0-15000]" for 2 cameras
-        for(int _i = 0; _i < 25000; _i++) {
+        for(int _i = 0; _i < 1000; _i++) {
             auto _text = getMainGraph()->createNode("Text" + std::to_string(_i));
             auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
             _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f + 64, (float)engine->getWindow().getWindowSize().x / 2.f - 64),

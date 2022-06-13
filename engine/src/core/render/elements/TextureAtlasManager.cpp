@@ -53,7 +53,7 @@ namespace GDE {
             _rect.bottomLeftCorner.x = _spriteNode["Origin"][0].as<int>();
             _rect.bottomLeftCorner.y = (int)_atlas.textureHeight - (_spriteNode["Origin"][1].as<int>() + _rect.size.y);
 
-            auto* _texture = new Texture { _atlas.texture, _rect };
+            auto* _texture = new Texture { &_atlas, _rect };
             if(_spriteNode["NinePatch"].IsDefined()) {
                 _texture->ninePatch.left = _spriteNode["NinePatch"]["Left"].as<int>();
                 _texture->ninePatch.top = _spriteNode["NinePatch"]["Top"].as<int>();
@@ -112,7 +112,7 @@ namespace GDE {
     }
 
     void TextureAtlasManager::cropNinePatchSubTextures(Texture* _texture, const YAML::Node& _spriteNode) {
-        auto _origin = Vec2I {_spriteNode["Origin"][0].as<int>(), _texture->getSize().y - (_spriteNode["Origin"][1].as<int>() + _texture->getRegion().size.y)};
+        auto _origin = Vec2I {_spriteNode["Origin"][0].as<int>(), _texture->getSpriteSheetSize().y - (_spriteNode["Origin"][1].as<int>() + _texture->getRegion().size.y)};
         auto _size = Vec2I {_spriteNode["Size"][0].as<int>(), _spriteNode["Size"][1].as<int>()};
         // Bottom row
         _texture->ninePatch.subRects[0] = {

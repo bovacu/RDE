@@ -25,11 +25,13 @@ namespace GDE {
         IntRect subRects[9];
     };
 
+    class Atlas;
     class Texture {
         protected:
             unsigned int refCount = 0;
             GLuint openGLTextureID{};
-            int width = -1, height = -1, channels = -1;
+            int channels = -1;
+            Vec2I textureSize, spriteSheetSize;
             GLenum internalFormat = -1, dataFormat = -1;
             IntRect region {};
             float fileSizeKb = -1;
@@ -41,10 +43,11 @@ namespace GDE {
         public:
             Texture() = default;
             explicit Texture(char* filePath);
-            Texture(Texture* _spriteSheet, const IntRect& _region);
+            Texture(Atlas* _spriteSheet, const IntRect& _region);
             ~Texture();
             [[nodiscard]] GLuint getGLTexture() const;
             [[nodiscard]] Vec2I getSize() const;
+            [[nodiscard]] Vec2I getSpriteSheetSize() const;
             [[nodiscard]] float getKb() const;
 
             bool loadFromFile(const char* _path);
