@@ -60,7 +60,14 @@ namespace GDE {
     }
 
     void Scene::enableCamera(const NodeID& _cameraID, bool _enable) {
-        mainGraph.getComponent<Active>(_cameraID)->active = _enable;
+        if(_enable) {
+            if(mainGraph.hasComponent<Active>(_cameraID)) return;
+            mainGraph.addComponent<Active>(_cameraID);
+            return;
+        }
+
+        if(mainGraph.hasComponent<Active>(_cameraID)) return;
+            mainGraph.removeComponent<Active>(_cameraID);
     }
 
     void Scene::removeCamera(const NodeID& _cameraID) {

@@ -455,7 +455,7 @@ namespace GDE {
         ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 30);
         ImGui::PushID(1);
         if(ImGui::Checkbox("###Active", &_active)) {
-            if(_active) _graph->addComponent<Active>(_selectedNode, true);
+            if(_active) _graph->addComponent<Active>(_selectedNode);
             else _graph->removeComponent<Active>(_selectedNode);
         }
         ImGui::PopID();

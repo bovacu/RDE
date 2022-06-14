@@ -401,4 +401,5 @@ namespace GDE {
 
     UIInteractable::UIInteractable(const NodeID& _nodeId) {  }
     CanvasEventStopper::CanvasEventStopper(const NodeID& _nodeId) {  }
+    StaticTransform::StaticTransform(const NodeID& _nodeId) {  }
 }

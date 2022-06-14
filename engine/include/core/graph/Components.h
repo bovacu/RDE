@@ -18,9 +18,7 @@
 
 namespace GDE {
 
-    class Manager;
-    class Window;
-    class Camera;
+    class Manager; class Window; class Camera; class Canvas; class IViewPort;
 
     struct Tag {
         std::string tag;
@@ -33,14 +31,12 @@ namespace GDE {
     };
 
     struct Active {
-        bool active;
+        explicit Active(const NodeID& _nodeId) {  }
 
-        Active() = default;
-        Active(const Active& _active) = default;
-        explicit Active(const NodeID& _nodeId, bool _active) : active(_active) {  }
+        private:
+            short foo;
     };
 
-    class IViewPort;
     struct SpriteRenderer : public IRenderizable {
 
         friend class SpriteBatch;
@@ -125,7 +121,9 @@ namespace GDE {
     };
 
     struct StaticTransform {
-        bool foo;
+        explicit StaticTransform(const NodeID& _nodeId);
+        private:
+            short foo;
     };
 
     struct Transform {
@@ -137,7 +135,7 @@ namespace GDE {
             bool constant = false;
 
         public:
-            Transform(const NodeID& _nodeId);
+            explicit Transform(const NodeID& _nodeId);
 
             NodeID parent;
             std::vector<NodeID> children;
@@ -219,10 +217,9 @@ namespace GDE {
             [[nodiscard]] IntRect getRegion() const override { return texture->getRegion(); }
             void updateViewport(IViewPort* _viewport) override {  }
 
-            ~UI() {  }
+            ~UI() = default;
     };
 
-    class Canvas;
     struct UIInteractable {
 
         friend class Canvas;
@@ -236,7 +233,7 @@ namespace GDE {
         bool enabled = true;
         int priority = 0;
 
-        UIInteractable(const NodeID& _nodeId);
+        explicit UIInteractable(const NodeID& _nodeId);
 
         private:
             void onEvent(const NodeID& _nodeID, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas);
@@ -260,7 +257,7 @@ namespace GDE {
         UIInteractable* interaction = nullptr;
 
         UIText(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const std::string& _text);
-        ~UIText() {  }
+        ~UIText() = default;
     };
 
     struct UIButton : public UI {
@@ -270,15 +267,13 @@ namespace GDE {
 
         public:
             UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _buttonTexture, const std::string& _text);
-            ~UIButton() {  }
+            ~UIButton() = default;
     };
 
     struct CanvasEventStopper {
-
-        CanvasEventStopper(const NodeID& _nodeId);
-
+        explicit CanvasEventStopper(const NodeID& _nodeId);
         private:
-            bool foo;
+            short foo;
     };
 }
 

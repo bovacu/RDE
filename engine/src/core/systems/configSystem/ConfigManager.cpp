@@ -200,7 +200,8 @@ namespace GDE {
         _nodeTransform->setScale(_scaleNode[0].as<float>(), _scaleNode[1].as<float>());
         _nodeTransform->setRotation(_rotationNode.as<float>());
 
-        _scene->getMainGraph()->getComponent<Active>(_nodeID)->active = _yamlNode["Active"].as<bool>();
+        if(!_yamlNode["Active"].as<bool>())
+            _scene->getMainGraph()->removeComponent<Active>(_nodeID);
     }
 
 }

@@ -23,7 +23,7 @@ namespace GDE {
 
         registry.emplace<Tag>(sceneRoot, sceneRoot, _sceneName);
         registry.emplace<Transform>(sceneRoot, sceneRoot).parent = NODE_ID_NULL;
-        registry.emplace<Active>(sceneRoot, sceneRoot, true);
+        registry.emplace<Active>(sceneRoot, sceneRoot);
 
         onEventDel.bind<&onEventDelFoo>();
         onUpdateDel.bind<&onUpdateDelFoo>();
@@ -128,7 +128,7 @@ namespace GDE {
         registry.emplace<Transform>(_newNode, _newNode).parent = _parentRef;
         (&registry.get<Transform>(_parentRef))->children.push_back(_newNode);
 
-        registry.emplace<Active>(_newNode, _newNode, true);
+        registry.emplace<Active>(_newNode, _newNode);
 
         return _newNode;
     }
@@ -229,7 +229,7 @@ namespace GDE {
 
     void Graph::setNodeStatic(NodeID _node, bool _static) {
         if(_static && !registry.any_of<StaticTransform>(_node)) {
-            registry.emplace<StaticTransform>(_node);
+            registry.emplace<StaticTransform>(_node, _node);
             return;
         }
 
@@ -243,7 +243,7 @@ namespace GDE {
 
     void Graph::setNodeActive(NodeID _node, bool _active) {
         if(_active && !registry.any_of<Active>(_node)) {
-            registry.emplace<Active>(_node);
+            registry.emplace<Active>(_node, _node);
             return;
         }
 
