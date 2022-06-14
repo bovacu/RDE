@@ -76,6 +76,8 @@ namespace GDE {
         ui->size = {200, 128};
         ui->interaction->interactionTrigger.bind<&Sandbox::uiButtonTrigger>(this);
         ui->interaction->onClick.bind<&Sandbox::onMouseClick>(this);
+
+        textStressTest();
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -200,10 +202,10 @@ namespace GDE {
 
     void Sandbox::textStressTest() {
         Random _r;
-        // 25000 is the maximum I could get with 60fps of average performance, with texts -> "Text[0-25000]"
-        // 15000 is the maximum I could get with 60fps of average performance, with texts -> "Text[0-15000]" for 2 cameras
-        for(int _i = 0; _i < 1000; _i++) {
-            auto _text = getMainGraph()->createNode("Text" + std::to_string(_i));
+        // 40000 is the maximum I could get with 55fps of average performance, with texts -> "Text[0-40000]" ~350000 images
+        auto _parent = getMainGraph()->createNode("TextParent");
+        for(int _i = 0; _i < 40000; _i++) {
+            auto _text = getMainGraph()->createNode("Text" + std::to_string(_i), _parent);
             auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
             _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f + 64, (float)engine->getWindow().getWindowSize().x / 2.f - 64),
                                         _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f + 64, (float)engine->getWindow().getWindowSize().y / 2.f - 64));
