@@ -8,7 +8,7 @@
 
 namespace GDE {
 
-    Camera::Camera(const Window* _window, Transform* _entityTransform, const NodeID& _mainCameraID) {
+    Camera::Camera(const NodeID& _mainCameraID, const Window* _window, Transform* _entityTransform) {
         ID = _mainCameraID;
         viewport = new FreeViewPort(_window->getWindowSize());
         onResize(_window->getWidth(), _window->getHeight());

@@ -52,7 +52,7 @@ class Vec2 {
 
     bool isInside(const Vec2<T>& _rectCenter, const Vec2<T>& _rectSize) {
         return x >= _rectCenter.x - _rectSize.x / 2.f && x <= _rectCenter.x + _rectSize.x / 2.f &&
-               y >= _rectCenter.y - _rectSize.x / 2.f && y <= _rectCenter.y + _rectSize.y / 2.f;
+               y >= _rectCenter.y - _rectSize.y / 2.f && y <= _rectCenter.y + _rectSize.y / 2.f;
     }
 
     static Vec2<float> normalize(Vec2<T>& _p) {

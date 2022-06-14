@@ -99,6 +99,12 @@ namespace GDE {
 
             return false;
         }
+
+        template<typename T>
+        bool dispatchEvent() {
+            if(event.handled) return true;
+            return event.getEventType() == T::getStaticType();
+        }
     };
 
 

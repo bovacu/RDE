@@ -12,6 +12,9 @@
 #include "core/render/elements/IRenderizable.h"
 #include "box2d/box2d.h"
 #include "core/systems/physicsSystem/Physics.h"
+#include "core/render/window/keysAndButtons/KeyboardKeys.h"
+#include "core/render/window/keysAndButtons/MouseKeys.h"
+#include "core/render/window/keysAndButtons/GamePadButtons.h"
 
 namespace GDE {
 
@@ -24,7 +27,7 @@ namespace GDE {
 
         Tag() = default;
         Tag(const Tag& _tag) = default;
-        explicit Tag(const std::string& _tag) : tag(_tag) {  }
+        Tag(const NodeID& _nodeId, const std::string& _tag) : tag(_tag) {  }
 
         explicit operator std::string& () { return tag; }
     };
@@ -34,7 +37,7 @@ namespace GDE {
 
         Active() = default;
         Active(const Active& _active) = default;
-        explicit Active(bool _active) : active(_active) {  }
+        explicit Active(const NodeID& _nodeId, bool _active) : active(_active) {  }
     };
 
     class IViewPort;
@@ -51,8 +54,8 @@ namespace GDE {
             IViewPort* viewport = nullptr; // TODO remove this, is not used anymore
 
         public:
-            explicit SpriteRenderer(Scene* _scene);
-            SpriteRenderer(Scene* _scene, Texture* _texture);
+            explicit SpriteRenderer(const NodeID& _nodeId, Scene* _scene);
+            SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture);
 
             [[nodiscard]] Vec2F getSize() const;
 
@@ -101,8 +104,8 @@ namespace GDE {
             void recalcTextDimensions(const std::string& _text);
 
         public:
-            TextRenderer(Manager* _manager, Font* _font, const std::string& _text);
-            TextRenderer(Manager* _manager, Font* _font);
+            TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text);
+            TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font);
 
             void setText(const std::string& _text);
             void setFont(Font* _font);
@@ -134,6 +137,8 @@ namespace GDE {
             bool constant = false;
 
         public:
+            Transform(const NodeID& _nodeId);
+
             NodeID parent;
             std::vector<NodeID> children;
 
@@ -167,14 +172,13 @@ namespace GDE {
             [[nodiscard]] bool isConstant() const;
     };
 
-
     struct Body {
         public:
             B2DConfig b2dConfig;
             BodyConfig bodyConfig;
 
         public:
-            explicit Body(const BodyConfig& _config, Transform* _transform);
+            explicit Body(const NodeID& _nodeId, const BodyConfig& _config, Transform* _transform);
             Body(const Body& _body) = default;
             ~Body();
 
@@ -218,13 +222,34 @@ namespace GDE {
             ~UI() {  }
     };
 
+    class Canvas;
+    struct UIInteractable {
+
+        friend class Canvas;
+
+        UDelegate<bool(NodeID, Canvas*)> interactionTrigger;
+        MDelegate<void(MouseCode)> onClick;
+        MDelegate<void(Vec2F)> onScroll;
+        MDelegate<void(KeyCode)> onKeyPressed;
+        MDelegate<void(GamePadButtons)> onGamepadButtonPressed;
+        MDelegate<void(int)> onMobileClick;
+        bool enabled = true;
+        int priority = 0;
+
+        UIInteractable(const NodeID& _nodeId);
+
+        private:
+            void onEvent(const NodeID& _nodeID, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas);
+    };
+
     struct NinePatchSprite : public UI {
 
         /// This is the size we want the UI to be rendered
         Vec2I size;
+        UIInteractable* interaction = nullptr;
 
-        explicit NinePatchSprite(Scene* _scene);
-        NinePatchSprite(Scene* _scene, Texture* _texture);
+        NinePatchSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas);
+        NinePatchSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture);
 
         [[nodiscard]] Vec2I getSize() const;
         [[nodiscard]] NinePatch& getNinePatch() const;
@@ -232,15 +257,28 @@ namespace GDE {
 
     struct UIText : public UI {
         TextRenderer* text;
+        UIInteractable* interaction = nullptr;
 
+        UIText(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const std::string& _text);
         ~UIText() {  }
     };
 
     struct UIButton : public UI {
-        UIText* text;
+        UIText* text = nullptr;
+        NinePatchSprite* background = nullptr;
+        UIInteractable* interaction = nullptr;
 
+        public:
+            UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _buttonTexture, const std::string& _text);
+            ~UIButton() {  }
+    };
 
-        ~UIButton() {  }
+    struct CanvasEventStopper {
+
+        CanvasEventStopper(const NodeID& _nodeId);
+
+        private:
+            bool foo;
     };
 }
 

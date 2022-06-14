@@ -97,7 +97,7 @@ namespace GDE {
             /// Adds a new component to the Node. A Node cannot have duplicated components.
             /// @param _args all of the arguments needed by the component constructor.
             template<typename Component, typename... Args>
-            Component* addComponent(const NodeID& _id, Args... _args);
+            Component* addComponent(Args... _args);
 
             /// Removes a component from the Node.
             template<typename Component>
@@ -131,9 +131,16 @@ namespace GDE {
             NodeContainer& getNodeContainer();
     };
 
+    template <int I, class... Ts>
+    decltype(auto) get(Ts&&... ts) {
+        return std::get<I>(std::forward_as_tuple(ts...));
+    }
+
+
     template<typename Component, typename... Args>
-    Component* Graph::addComponent(const NodeID& _id, Args... _args) {
-        return &registry.template emplace<Component>(_id, _args...);
+    Component* Graph::addComponent(Args... _args) {
+        auto& first = get<0>(std::forward<Args>(_args)...);
+        return &registry.template emplace<Component>(first, _args...);
     }
 
     template<typename Component>

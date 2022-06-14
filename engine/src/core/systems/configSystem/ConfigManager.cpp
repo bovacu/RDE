@@ -83,7 +83,7 @@ namespace GDE {
             } else {
                 auto _ownerEntityID = _map.at(_sceneCamera["Owner"].as<int>());
                 auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
-                auto* _camera = _scene->getMainGraph()->addComponent<Camera>(_ownerEntityID, _window, _ownerTransform, _ownerEntityID);
+                auto* _camera = _scene->getMainGraph()->addComponent<Camera>(_ownerEntityID, _window, _ownerTransform);
 
                 // Set the zoom properties
                 _camera->setCurrentZoomLevel(_sceneCamera["Zoom"].as<float>());
@@ -128,7 +128,7 @@ namespace GDE {
         for (const auto& _textRendererNode : _textsRendererNodes) {
             auto _ownerEntityID = _map.at(_textRendererNode["Ref"].as<int>());
             auto* _textRenderer = _scene->getMainGraph()->addComponent<TextRenderer>(_ownerEntityID,
-                         _manager, _manager->fontManager.getDefaultFont(_textRendererNode["Font"]["Name"].as<std::string>()),
+                                  _scene, _manager->fontManager.getDefaultFont(_textRendererNode["Font"]["Name"].as<std::string>()),
                          _textRendererNode["Text"].as<std::string>());
 
             _textRenderer->color = Color {_textRendererNode["Color"][0].as<unsigned char>(), _textRendererNode["Color"][1].as<unsigned char>(),

@@ -2,6 +2,10 @@
 
 #include "core/graph/Components.h"
 #include "core/util/Functions.h"
+#include "core/systems/uiSystem/Canvas.h"
+#include "core/render/window/event/KeyEvent.h"
+#include "core/render/window/event/JoystickEvent.h"
+#include "core/render/window/event/MobileEvent.h"
 
 namespace GDE {
 
@@ -98,20 +102,24 @@ namespace GDE {
         return constant;
     }
 
+    Transform::Transform(const NodeID& _nodeId) {
+
+    }
+
 
     /// -------------------------------------------
 
-    TextRenderer::TextRenderer(Manager* _manager, Font* _font, const std::string& _text) {
+    TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text) {
         font = _font;
         innerText = _text;
         recalcTextDimensions(_text);
-        shaderID = _manager->shaderManager.getShader("basicText");
+        shaderID = _scene->engine->manager.shaderManager.getShader("basicText");
         texture = &font->getTexture();
     }
 
-    TextRenderer::TextRenderer(Manager* _manager, Font* _font) {
+    TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font) {
         font = _font;
-        shaderID = _manager->shaderManager.getShader("basicText");
+        shaderID = _scene->engine->manager.shaderManager.getShader("basicText");
         texture = &font->getTexture();
     }
 
@@ -196,7 +204,7 @@ namespace GDE {
     ///-------------------------------- BODY ---------------------------
 
 
-    Body::Body(const BodyConfig& _config, Transform* _transform) {
+    Body::Body(const NodeID& _nodeId, const BodyConfig& _config, Transform* _transform) {
         bodyConfig = _config;
 
         b2dConfig.bodyDefinition.position.Set(_transform->getPositionLocal().x, _transform->getPositionLocal().y);
@@ -278,12 +286,12 @@ namespace GDE {
     // -------------------------------- SPRITE RENDERER
 
 
-    SpriteRenderer::SpriteRenderer(Scene* _scene, Texture* _texture) : texture(_texture) {
+    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture) : texture(_texture) {
         shaderID = _scene->engine->manager.shaderManager.getShader("basic");
         viewport = _scene->getMainCamera()->getViewport();
     }
 
-    SpriteRenderer::SpriteRenderer(Scene* _scene) {
+    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene) {
         shaderID = _scene->engine->manager.shaderManager.getShader("basic");
         viewport = _scene->getMainCamera()->getViewport();
     }
@@ -313,15 +321,16 @@ namespace GDE {
     // -------------------------------------- NinePatchSprite --------------------------------------
 
 
-
-    NinePatchSprite::NinePatchSprite(Scene* _scene) {
+    NinePatchSprite::NinePatchSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas) {
         shaderID = _scene->engine->manager.shaderManager.getShader("basic");
+        interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);
     }
 
-    NinePatchSprite::NinePatchSprite(Scene* _scene, Texture* _texture) {
+    NinePatchSprite::NinePatchSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture) {
         shaderID = _scene->engine->manager.shaderManager.getShader("basic");
         texture = _texture;
         size = _texture->getRegion().size;
+        interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);
     }
 
     NinePatch& NinePatchSprite::getNinePatch() const {
@@ -331,4 +340,65 @@ namespace GDE {
     Vec2I NinePatchSprite::getSize() const {
         return size;
     }
+
+
+
+    static bool isSelectedFoo() { return false; }
+
+    void UIInteractable::onEvent(const NodeID& _nodeID, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas) {
+        if(interactionTrigger(_nodeID, _canvas)) {
+            if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onClick.isEmpty()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                auto* _mre = (MouseButtonReleasedEvent*)&_event;
+                onClick(_mre->getMouseButton());
+                return;
+            }
+
+            if(_eventDispatcher.dispatchEvent<MouseScrolledEvent>() && !onScroll.isEmpty()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                auto* _mse = (MouseScrolledEvent*)&_event;
+                onScroll({_mse->getScrollX(), _mse->getScrollY()});
+                return;
+            }
+
+            if(_eventDispatcher.dispatchEvent<KeyReleasedEvent>() && !onKeyPressed.isEmpty()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                auto* _kre = (KeyReleasedEvent*)&_event;
+                onKeyPressed(_kre->getKeyCode());
+                return;
+            }
+
+            if(_eventDispatcher.dispatchEvent<JoystickButtonUpEvent>() && !onGamepadButtonPressed.isEmpty()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                auto* _jbue = (JoystickButtonUpEvent*)&_event;
+                onGamepadButtonPressed(_jbue->getButton());
+                return;
+            }
+
+            if(_eventDispatcher.dispatchEvent<MobileTouchUpEvent>() && !onMobileClick.isEmpty()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                auto* _mtue = (MobileTouchUpEvent*)&_event;
+                onMobileClick(_mtue->getFingerID());
+                return;
+            }
+        }
+    }
+
+
+
+    UIButton::UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _buttonTexture, const std::string& _text) {
+
+    }
+
+
+
+
+    UIText::UIText(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const std::string& _text) {
+
+    }
+
+
+
+    UIInteractable::UIInteractable(const NodeID& _nodeId) {  }
+    CanvasEventStopper::CanvasEventStopper(const NodeID& _nodeId) {  }
 }

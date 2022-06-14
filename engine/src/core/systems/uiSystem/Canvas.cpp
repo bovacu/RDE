@@ -12,11 +12,22 @@ namespace GDE {
         scene = _scene;
         auto _cameraID = graph.createNode("CanvasCamera");
         auto* _canvasTransform = graph.getComponent<Transform>(_cameraID);
-        camera = graph.addComponent<Camera>(_cameraID, _window, _canvasTransform, _cameraID);
+        camera = graph.addComponent<Camera>(_cameraID, _window, _canvasTransform);
     }
 
     Graph* Canvas::getGraph() {
         return &graph;
+    }
+
+    void Canvas::onEvent(EventDispatcher& _eventDispatcher, Event& _event) {
+        auto& _registry = graph.getNodeContainer();
+        auto _interacables = _registry.group<UIInteractable>(entt::get<Active>);
+
+        _interacables.each([&_eventDispatcher, &_event, this](const auto _entity, UIInteractable& _interacable, const Active& _) {
+            _interacable.onEvent(_entity, _eventDispatcher, _event, this);
+        });
+
+        graph.onEventDel(_event);
     }
 
     void Canvas::onUpdate(Delta _dt) {
@@ -28,12 +39,24 @@ namespace GDE {
 
     void Canvas::onRender() {
         auto& _registry = graph.getNodeContainer();
-        auto _sprites = _registry.group<NinePatchSprite>(entt::get<Transform, Active>);
+        auto _sprites = _registry.group<NinePatchSprite>(entt::get<Transform, Active>, entt::exclude<UIButton>);
+        auto _buttons = _registry.group<UIButton>(entt::get<Transform, Active>);
+        auto _texts = _registry.group<UIText>(entt::get<Transform, Active>, entt::exclude<UIButton>);
 
         Renderer::beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
-        _sprites.each([](const auto _entity, NinePatchSprite& _spriteRenderer, const Transform& _transform, const Active& _) {
-            Renderer::draw(_spriteRenderer, _transform);
-        });
+            _sprites.each([](const auto _entity, NinePatchSprite& _spriteRenderer, const Transform& _transform, const Active& _) {
+                Renderer::draw(_spriteRenderer, _transform);
+            });
+
+            // TODO add rendering for text in UI
+            _buttons.each([](const auto _entity, UIButton& _button, const Transform& _transform, const Active& _) {
+                Renderer::draw(*_button.background, _transform);
+    //            Renderer::draw(*_button.text, _transform);
+            });
+
+            _texts.each([](const auto _entity, UIText& _text, const Transform& _transform, const Active& _) {
+    //            Renderer::draw(_text, _transform);
+            });
         Renderer::endDraw();
 
         graph.onRenderDel();

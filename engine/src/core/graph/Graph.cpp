@@ -21,9 +21,9 @@ namespace GDE {
         name = _sceneName;
         sceneRoot = registry.create();
 
-        registry.emplace<Tag>(sceneRoot, _sceneName);
-        registry.emplace<Transform>(sceneRoot).parent = NODE_ID_NULL;
-        registry.emplace<Active>(sceneRoot, true);
+        registry.emplace<Tag>(sceneRoot, sceneRoot, _sceneName);
+        registry.emplace<Transform>(sceneRoot, sceneRoot).parent = NODE_ID_NULL;
+        registry.emplace<Active>(sceneRoot, sceneRoot, true);
 
         onEventDel.bind<&onEventDelFoo>();
         onUpdateDel.bind<&onUpdateDelFoo>();
@@ -32,6 +32,12 @@ namespace GDE {
     }
 
     void Graph::onEvent(Event& _event) {
+        EventDispatcher _eventDispatcher(_event);
+
+        for(auto* _canvas : scene->canvases) {
+            _canvas->onEvent(_eventDispatcher, _event);
+        }
+
         onEventDel(_event);
     }
 
@@ -110,10 +116,6 @@ namespace GDE {
             Renderer::drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
         });
 
-//        for(auto* _canvas : scene->canvases) {
-//            _canvas->onDebugRender();
-//        }
-
         Renderer::endDebugDraw();
     }
 
@@ -122,11 +124,11 @@ namespace GDE {
 
         auto _parentRef = _parent == NODE_ID_NULL ? sceneRoot : _parent;
 
-        registry.emplace<Tag>(_newNode, _tag);
-        registry.emplace<Transform>(_newNode).parent = _parentRef;
+        registry.emplace<Tag>(_newNode, _newNode, _tag);
+        registry.emplace<Transform>(_newNode, _newNode).parent = _parentRef;
         (&registry.get<Transform>(_parentRef))->children.push_back(_newNode);
 
-        registry.emplace<Active>(_newNode, true);
+        registry.emplace<Active>(_newNode, _newNode, true);
 
         return _newNode;
     }

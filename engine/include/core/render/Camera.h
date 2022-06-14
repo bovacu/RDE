@@ -29,7 +29,7 @@ namespace GDE {
 
         public:
             NodeID ID;
-            Camera(const Window* _window, Transform* _entityTransform, const NodeID& _mainCameraID);
+            Camera(const NodeID& _mainCameraID, const Window* _window, Transform* _entityTransform);
             ~Camera();
             void onEvent(Event& _event);
             bool onMouseScrolled(MouseScrolledEvent& _event);

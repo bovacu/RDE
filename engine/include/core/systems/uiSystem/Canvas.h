@@ -6,6 +6,8 @@
 #define ENGINE_CANVAS_H
 
 #include "core/graph/Scene.h"
+#include "core/graph/Components.h"
+
 
 namespace GDE {
 
@@ -28,6 +30,7 @@ namespace GDE {
 
             void matchMainCameraViewPort();
 
+            void onEvent(EventDispatcher& _eventDispatcher, Event& _event);
             void onUpdate(Delta _dt);
             void onRender();
             void onDebugRender();

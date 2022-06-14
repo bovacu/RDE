@@ -409,13 +409,16 @@ namespace GDE {
 
         auto _rectsAmount = *(&_ninePatch.getNinePatch().subRects + 1) - _ninePatch.getNinePatch().subRects;
         for(auto _i = 0; _i < _rectsAmount; _i++) {
+//            if(_i == 3 || _i == 4 || _i == 5) continue;
             auto& _subTextureRegion = _ninePatch.getNinePatch().subRects[_i];
             auto _transformMat = _transform.modelMatrix;
 
             float _distortX = 1.f, _distortY = 1.f;
             auto _uiSize = _ninePatch.getSize();
             auto _spriteSize = _ninePatch.getRegion().size;
-            Vec2F _position = {_transform.getPositionLocal().x - (float)_spriteSize.x / 2.f + (float)_subTextureRegion.bottomLeftCorner.x + (float)_subTextureRegion.size.x / 2.f, _transform.getPositionLocal().y + (float)(_subTextureRegion.bottomLeftCorner.y - _ninePatch.getRegion().size.y) - (float)_ninePatch.getRegion().size.y / 2.f + (float)_subTextureRegion.size.y / 2.f};
+
+            auto _bottomLeftCornerLocal = Vec2F { (float)_subTextureRegion.bottomLeftCorner.x, (float)(_subTextureRegion.bottomLeftCorner.y - _ninePatch.getNinePatch().subRects[0].bottomLeftCorner.y) };
+            Vec2F _position = {_transform.getPositionWorld().x - (float)_spriteSize.x / 2.f + (float)_subTextureRegion.bottomLeftCorner.x + (float)_subTextureRegion.size.x / 2.f, _transform.getPositionWorld().y - (float)((float)_spriteSize.y / 2.f - _bottomLeftCornerLocal.y) + (float)_subTextureRegion.size.y / 2.f};
 
             if((float)_uiSize.x - (float)_spriteSize.x != 0) {
                 auto _widthOfCorners = (float)_ninePatch.getNinePatch().subRects[0].size.x + (float)_ninePatch.getNinePatch().subRects[2].size.x;

@@ -30,6 +30,9 @@ namespace GDE {
             bool run_roll(const TransitionParams& _params);
             bool roll_run(const TransitionParams& _params);
 
+            bool uiButtonTrigger(NodeID _nodeId, Canvas* _canvas);
+            void onMouseClick(MouseCode _mouseCode);
+
             void box2DStressTest();
             void textStressTest();
     };

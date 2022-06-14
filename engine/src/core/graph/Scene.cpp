@@ -11,7 +11,7 @@ namespace GDE {
     Scene::Scene(Engine* _engine, const std::string& _debugName)  : debugName(_debugName), mainGraph(this, _debugName), engine(_engine) {
         auto _mainCameraID = mainGraph.createNode("MainCamera");
         auto* _cameraTransform = mainGraph.getComponent<Transform>(_mainCameraID);
-        auto* _camera = mainGraph.addComponent<Camera>(_mainCameraID, &_engine->getWindow(), _cameraTransform, _mainCameraID);
+        auto* _camera = mainGraph.addComponent<Camera>(_mainCameraID, &_engine->getWindow(), _cameraTransform);
         cameras.push_back(_camera);
         mainCamera = _camera;
 
@@ -54,7 +54,7 @@ namespace GDE {
     Camera* Scene::addCamera(Window* window) {
         auto _newCameraID = mainGraph.createNode(APPEND_S("Camera", cameras.size()));
         auto* _entityTransform = getMainGraph()->getComponent<Transform>(_newCameraID);
-        auto* _camera = mainGraph.addComponent<Camera>(_newCameraID, window, _entityTransform, _newCameraID);
+        auto* _camera = mainGraph.addComponent<Camera>(_newCameraID, window, _entityTransform);
         cameras.push_back(_camera);
         return cameras.back();
     }

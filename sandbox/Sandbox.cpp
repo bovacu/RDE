@@ -70,12 +70,12 @@ namespace GDE {
         auto _uiTest = getCanvases()[0]->getGraph()->createNode("TestUINode");
         auto* _transform = getCanvases()[0]->getGraph()->getComponent<Transform>(_uiTest);
         _transform->setPosition(-250, 0);
-        ui = getCanvases()[0]->getGraph()->addComponent<NinePatchSprite>(_uiTest, this,
+        ui = getCanvases()[0]->getGraph()->addComponent<NinePatchSprite>(_uiTest, this, getCanvases()[0],
                                                                                        engine->manager.textureManager.getSubTexture(
                                                                                                "ui", "panel0"));
-        ui->size = {128, 128};
-
-//        textStressTest();
+        ui->size = {200, 128};
+        ui->interaction->interactionTrigger.bind<&Sandbox::uiButtonTrigger>(this);
+        ui->interaction->onClick.bind<&Sandbox::onMouseClick>(this);
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -87,15 +87,6 @@ namespace GDE {
 
     void Sandbox::onUpdate(Delta _dt) {
         Scene::onUpdate(_dt);
-
-        auto _mousePos = engine->manager.inputManager.getMousePosWorldPos();
-        auto _blueRectID = getMainGraph()->getNode("Blue Cube");
-        auto* _transform = getMainGraph()->getComponent<Transform>(_blueRectID);
-        auto _size = getMainGraph()->getComponent<SpriteRenderer>(_blueRectID)->getSize();
-
-        if(_mousePos.isInside(_transform->getPositionWorld(), {(float)_size.x, (float)_size.y})) {
-            LOG_I("Inside!")
-        }
     }
 
     void Sandbox::onFixedUpdate(Delta _dt) {
@@ -216,7 +207,19 @@ namespace GDE {
             auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
             _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f + 64, (float)engine->getWindow().getWindowSize().x / 2.f - 64),
                                         _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f + 64, (float)engine->getWindow().getWindowSize().y / 2.f - 64));
-            getMainGraph()->addComponent<TextRenderer>(_text, &engine->manager, engine->manager.fontManager.getDefaultFont("arial"), "Text" + std::to_string(_i));
+            getMainGraph()->addComponent<TextRenderer>(_text, this, engine->manager.fontManager.getDefaultFont("arial"), "Text" + std::to_string(_i));
         }
+    }
+
+    bool Sandbox::uiButtonTrigger(NodeID _nodeId, Canvas* _canvas) {
+        auto* _ninePatch = _canvas->getGraph()->getComponent<NinePatchSprite>(_nodeId);
+        auto* _transform = _canvas->getGraph()->getComponent<Transform>(_nodeId);
+        auto _mousePos = engine->manager.inputManager.getMousePosWorldPos();
+
+        return _mousePos.isInside(_transform->getPositionWorld(), Vec2F {(float)_ninePatch->size.x, (float)_ninePatch->size.y});
+    }
+
+    void Sandbox::onMouseClick(MouseCode _mouseCode) {
+        LOG_I("I'm inside the UI sprite!!")
     }
 } // namespace engine

@@ -211,6 +211,10 @@ namespace GDE {
             void clear() {
                 stubs.clear();
             }
+
+            bool isEmpty() {
+                return stubs.empty();
+            }
     };
 }
 
