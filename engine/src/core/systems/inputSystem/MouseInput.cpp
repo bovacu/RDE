@@ -1,8 +1,8 @@
 // Created by borja on 6/2/22.
 
 
-#include "core/render/window/input/MouseInput.h"
-#include "core/render/window/event/MouseEvent.h"
+#include "core/systems/inputSystem/input/MouseInput.h"
+#include "engine/include/core/systems/eventSystem/MouseEvent.h"
 
 namespace GDE {
 

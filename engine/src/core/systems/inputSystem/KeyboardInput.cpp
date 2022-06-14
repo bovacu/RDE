@@ -1,8 +1,8 @@
 // Created by borja on 6/2/22.
 
 
-#include "core/render/window/input/KeyboardInput.h"
-#include "core/render/window/event/KeyEvent.h"
+#include "core/systems/inputSystem/input/KeyboardInput.h"
+#include "engine/include/core/systems/eventSystem/KeyEvent.h"
 
 namespace GDE {
 

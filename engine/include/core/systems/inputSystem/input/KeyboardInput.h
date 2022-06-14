@@ -6,8 +6,8 @@
 
 
 #include "core/util/Util.h"
-#include "core/render/window/keysAndButtons/KeyboardKeys.h"
-#include "core/render/window/input/Input.h"
+#include "engine/include/core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
+#include "Input.h"
 
 namespace GDE {
 

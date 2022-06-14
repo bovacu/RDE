@@ -4,7 +4,7 @@
 #ifndef ENGINE2_0_MOBILE_EVENT_H
 #define ENGINE2_0_MOBILE_EVENT_H
 
-#include "core/render/window/event/Event.h"
+#include "Event.h"
 #include "core/util/Vec.h"
 
 namespace GDE {

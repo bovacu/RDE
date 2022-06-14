@@ -12,9 +12,9 @@
 #include "core/render/elements/IRenderizable.h"
 #include "box2d/box2d.h"
 #include "core/systems/physicsSystem/Physics.h"
-#include "core/render/window/keysAndButtons/KeyboardKeys.h"
-#include "core/render/window/keysAndButtons/MouseKeys.h"
-#include "core/render/window/keysAndButtons/GamePadButtons.h"
+#include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
+#include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
+#include "core/systems/inputSystem/keysAndButtons/GamePadButtons.h"
 
 namespace GDE {
 

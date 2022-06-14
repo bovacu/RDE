@@ -6,7 +6,7 @@
 
 
 #include "core/util/Util.h"
-#include "core/render/window/input/Input.h"
+#include "Input.h"
 
 namespace GDE {
 

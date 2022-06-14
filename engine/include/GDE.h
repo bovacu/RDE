@@ -11,7 +11,7 @@
 #include "core/render/Renderer.h"
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/render/elements/ShaderManager.h"
-#include "core/render/window/input/Input.h"
+#include "core/systems/inputSystem/input/Input.h"
 
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/systems/fileSystem/FilesSystem.h"

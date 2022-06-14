@@ -6,7 +6,7 @@
 #define ENGINE_MANAGER_H
 
 #include "core/render/elements/TextureAtlasManager.h"
-#include "core/render/window/input/Input.h"
+#include "core/systems/inputSystem/input/Input.h"
 #include "core/systems/console/Console.h"
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/systems/soundSystem/SoundManager.h"

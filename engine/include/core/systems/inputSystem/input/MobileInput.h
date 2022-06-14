@@ -4,7 +4,7 @@
 #ifndef ENGINE2_0_MOBILE_INPUT_H
 #define ENGINE2_0_MOBILE_INPUT_H
 
-#include "core/render/window/input/Input.h"
+#include "Input.h"
 
 namespace GDE {
 

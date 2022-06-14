@@ -1,8 +1,8 @@
 // Created by borja on 6/2/22.
 
 
-#include "core/render/window/input/WindowInput.h"
-#include "core/render/window/event/WindowEvent.h"
+#include "core/systems/inputSystem/input/WindowInput.h"
+#include "engine/include/core/systems/eventSystem/WindowEvent.h"
 #include "core/Engine.h"
 
 namespace GDE {

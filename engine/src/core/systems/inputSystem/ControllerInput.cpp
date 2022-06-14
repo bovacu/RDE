@@ -1,8 +1,8 @@
 // Created by borja on 6/2/22.
 
 
-#include "core/render/window/input/ControllerInput.h"
-#include "core/render/window/event/JoystickEvent.h"
+#include "core/systems/inputSystem/input/ControllerInput.h"
+#include "engine/include/core/systems/eventSystem/JoystickEvent.h"
 
 namespace GDE {
 

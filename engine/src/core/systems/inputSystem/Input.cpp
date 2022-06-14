@@ -1,12 +1,12 @@
-#include "core/render/window/input/Input.h"
+#include "core/systems/inputSystem/input/Input.h"
 #include "core/Engine.h"
-#include "core/render/window/event/JoystickEvent.h"
+#include "engine/include/core/systems/eventSystem/JoystickEvent.h"
 
-#include "core/render/window/input/WindowInput.h"
-#include "core/render/window/input/KeyboardInput.h"
-#include "core/render/window/input/MouseInput.h"
-#include "core/render/window/input/ControllerInput.h"
-#include "core/render/window/input/MobileInput.h"
+#include "core/systems/inputSystem/input/WindowInput.h"
+#include "core/systems/inputSystem/input/KeyboardInput.h"
+#include "core/systems/inputSystem/input/MouseInput.h"
+#include "core/systems/inputSystem/input/ControllerInput.h"
+#include "core/systems/inputSystem/input/MobileInput.h"
 
 #include "core/render/Camera.h"
 

@@ -6,8 +6,8 @@
 
 
 #include "core/util/Util.h"
-#include "core/render/window/keysAndButtons/GamePadButtons.h"
-#include "core/render/window/input/Input.h"
+#include "engine/include/core/systems/inputSystem/keysAndButtons/GamePadButtons.h"
+#include "Input.h"
 
 namespace GDE {
 

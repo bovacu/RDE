@@ -6,7 +6,7 @@
 
 
 #include "core/render/window/Window.h"
-#include "core/render/window/event/WindowEvent.h"
+#include "engine/include/core/systems/eventSystem/WindowEvent.h"
 #include "core/graph/ImGuiScene.h"
 #include "core/render/elements/FrameBuffer.h"
 #include "core/Manager.h"

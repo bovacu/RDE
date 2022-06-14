@@ -4,7 +4,7 @@
 #define ENGINE2_0_KEY_EVENT_H
 
 #include "Event.h"
-#include "core/render/window/keysAndButtons/KeyboardKeys.h"
+#include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 
 
 namespace GDE {

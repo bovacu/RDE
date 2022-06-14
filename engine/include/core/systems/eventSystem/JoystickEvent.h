@@ -5,9 +5,9 @@
 #define ENGINE2_0_JOYSTICK_EVENT_H
 
 #include "Event.h"
-#include "core/render/window/keysAndButtons/KeyboardKeys.h"
-#include "core/render/window/keysAndButtons/MouseKeys.h"
-#include "core/render/window/keysAndButtons/GamePadButtons.h"
+#include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
+#include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
+#include "core/systems/inputSystem/keysAndButtons/GamePadButtons.h"
 #include "core/util/Vec.h"
 
 namespace GDE {
