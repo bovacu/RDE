@@ -6,7 +6,6 @@
 #endif
 
 #include "core/platform/PlatformHeaderSDLImage.h"
-#include "stb/stb_image_writer.h"
 #include "core/util/Functions.h"
 
 namespace GDE {
@@ -295,14 +294,7 @@ namespace GDE {
     }
 
     void Image::saveAs(const std::string& _pathToSave) {
-        stbi_flip_vertically_on_write(1);
-        switch (imageType) {
-            case PNG: stbi_write_png(_pathToSave.c_str(), textureSize.x, textureSize.y, channels, pixels, textureSize.x * channels);
-                break;
-            case JPG: stbi_write_jpg(_pathToSave.c_str(), textureSize.x, textureSize.y, channels, pixels, textureSize.x * channels);
-                break;
-            case BMP: stbi_write_bmp(_pathToSave.c_str(), textureSize.x, textureSize.y, channels, pixels);
-        }
+        // TODO implement
     }
 
     void Image::setPixel(int _x, int _y, const Color& _color) {

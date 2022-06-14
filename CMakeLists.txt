@@ -89,12 +89,6 @@ set_target_properties(
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_net/lib/libSDL2_net.a
 )
 
-#-------------- STB
-
-set(STB_DIR "engine/src/stb")
-include_directories(${STB_DIR})
-link_directories(${STB_DIR})
-
 add_compile_options("-Werror")
 
 include_directories(.)
