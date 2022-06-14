@@ -32,6 +32,8 @@ namespace GDE {
 
             bool uiButtonTrigger(NodeID _nodeId, Canvas* _canvas);
             void onMouseClick(MouseCode _mouseCode);
+            void onMouseEntered();
+            void onMouseExited();
 
             void box2DStressTest();
             void textStressTest();

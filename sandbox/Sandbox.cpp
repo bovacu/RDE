@@ -76,8 +76,8 @@ namespace GDE {
         ui->size = {200, 128};
         ui->interaction->interactionTrigger.bind<&Sandbox::uiButtonTrigger>(this);
         ui->interaction->onClick.bind<&Sandbox::onMouseClick>(this);
-
-        textStressTest();
+        ui->interaction->onMouseEntered.bind<&Sandbox::onMouseEntered>(this);
+        ui->interaction->onMouseExited.bind<&Sandbox::onMouseExited>(this);
     }
 
     void Sandbox::onEvent(Event &_event) {
@@ -204,7 +204,7 @@ namespace GDE {
         Random _r;
         // 40000 is the maximum I could get with 55fps of average performance, with texts -> "Text[0-40000]" ~350000 images
         auto _parent = getMainGraph()->createNode("TextParent");
-        for(int _i = 0; _i < 40000; _i++) {
+        for(int _i = 0; _i < 1000; _i++) {
             auto _text = getMainGraph()->createNode("Text" + std::to_string(_i), _parent);
             auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
             _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f + 64, (float)engine->getWindow().getWindowSize().x / 2.f - 64),
@@ -223,5 +223,13 @@ namespace GDE {
 
     void Sandbox::onMouseClick(MouseCode _mouseCode) {
         LOG_I("I'm inside the UI sprite!!")
+    }
+
+    void Sandbox::onMouseEntered() {
+        LOG_I("Entered!")
+    }
+
+    void Sandbox::onMouseExited() {
+        LOG_I("Exited!")
     }
 } // namespace engine

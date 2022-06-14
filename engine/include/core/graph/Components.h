@@ -227,6 +227,8 @@ namespace GDE {
 
         UDelegate<bool(NodeID, Canvas*)> interactionTrigger;
         MDelegate<void(MouseCode)> onClick;
+        MDelegate<void()> onMouseEntered;
+        MDelegate<void()> onMouseExited;
         MDelegate<void(Vec2F)> onScroll;
         MDelegate<void(KeyCode)> onKeyPressed;
         MDelegate<void(GamePadButtons)> onGamepadButtonPressed;
@@ -237,6 +239,11 @@ namespace GDE {
         explicit UIInteractable(const NodeID& _nodeId);
 
         private:
+            enum MouseStatus {
+                MouseEntered,
+                MouseExited
+            };
+            MouseStatus mouseStatus = MouseStatus::MouseExited;
             void onEvent(const NodeID& _nodeID, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas);
     };
 

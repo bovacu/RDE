@@ -363,6 +363,23 @@ namespace GDE {
                 return;
             }
 
+            if(_eventDispatcher.dispatchEvent<MouseMovedEvent>()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                if(mouseStatus == MouseStatus::MouseExited) {
+                    mouseStatus = MouseStatus::MouseEntered;
+                    if(onMouseEntered.isEmpty()) return;
+                    onMouseEntered();
+                }
+                return;
+            }
+
+            if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() && !onMouseExited.isEmpty()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                auto* _mre = (MouseButtonReleasedEvent*)&_event;
+                onClick(_mre->getMouseButton());
+                return;
+            }
+
             if(_eventDispatcher.dispatchEvent<MouseScrolledEvent>() && !onScroll.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
                 auto* _mse = (MouseScrolledEvent*)&_event;
@@ -389,6 +406,17 @@ namespace GDE {
                 auto* _mtue = (MobileTouchUpEvent*)&_event;
                 onMobileClick(_mtue->getFingerID());
                 return;
+            }
+
+            return;
+        }
+
+        if(_eventDispatcher.dispatchEvent<MouseMovedEvent>()) {
+            _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+            if(mouseStatus == MouseStatus::MouseEntered) {
+                mouseStatus = MouseStatus::MouseExited;
+                if(onMouseExited.isEmpty()) return;
+                onMouseExited();
             }
         }
     }
