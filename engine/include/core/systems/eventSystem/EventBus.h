@@ -5,7 +5,7 @@
 
 #include "core/util/Logger.h"
 
-/*
+/**
  * The Event bus works in the following way:
  *
  *  1 - We need to specify the type of Event that our EventBus is going to use to store each of the observable events.
@@ -55,66 +55,70 @@
  *      And with this, all of the linked functions will know about this change and will react as the function specifies
  */
 
-template <typename Event, typename... AssociatedFunctionArgs>
-class EventBus {
+namespace GDE {
+
+    template <typename Event, typename... AssociatedFunctionArgs>
+    class EventBus {
 //    static_assert(std::is_enum<Type>::value, "Must be an enum type");
-    public:
-        typedef std::function<bool(AssociatedFunctionArgs...)> HandlerFunc;
+        public:
+            typedef std::function<bool(AssociatedFunctionArgs...)> HandlerFunc;
 
-    private:
-        std::map<Event, GDE::MDelegate<bool(AssociatedFunctionArgs...)>> handlers;
+        private:
+            std::map<Event, GDE::MDelegate<bool(AssociatedFunctionArgs...)>> handlers;
 
-    public:
-        class HandlerId {
-            public:
-                HandlerId() : valid(false) {  }
-                friend class EventBus<AssociatedFunctionArgs...>;
-                size_t id{};
-                explicit HandlerId(size_t _id) : id(_id), valid(true) {  }
-                bool valid;
-        };
+        public:
+            class HandlerId {
+                public:
+                    HandlerId() : valid(false) {  }
+                    friend class EventBus<AssociatedFunctionArgs...>;
+                    size_t id{};
+                    explicit HandlerId(size_t _id) : id(_id), valid(true) {  }
+                    bool valid;
+            };
 
-        // register to be notified
-        template<auto Func, typename Class>
-        HandlerId subscribe(const Event& _key, Class* _class) {
-            if (Func) {
-                handlers[_key].template bind<Func>(_class);
-                return HandlerId(handlers[_key].getEnd());
-            }
-            return HandlerId();
-        }
-
-        void unsubscribe(const Event& _type, HandlerId& _handlerId) {
-            if(!hasType(_type)) {
-                LOG_W_TIME("Tried to unsubscribe Type ", typeid(_type).name(), " but it wasn't subscribed!")
-                return;
+            // register to be notified
+            template<auto Func, typename Class>
+            HandlerId subscribe(const Event& _key, Class* _class) {
+                if (Func) {
+                    handlers[_key].template bind<Func>(_class);
+                    return HandlerId(handlers[_key].getEnd());
+                }
+                return HandlerId();
             }
 
-            if (_handlerId.valid) {
-                handlers[_type].remove(_handlerId.id);
-            } else
+            void unsubscribe(const Event& _type, HandlerId& _handlerId) {
+                if(!hasType(_type)) {
+                    LOG_W_TIME("Tried to unsubscribe Type ", typeid(_type).name(), " but it wasn't subscribed!")
+                    return;
+                }
+
+                if (_handlerId.valid) {
+                    handlers[_type].remove(_handlerId.id);
+                } else
                 LOG_W_TIME("Tried to unsubscribe an event", typeid(_type).name()," that wasn't subscribed yet!")
-        }
-
-        bool dispatch(const Event& _type, AssociatedFunctionArgs... _args) {
-            if(!hasType(_type)) {
-                return false;
             }
 
-            std::vector<bool> _results;
-            handlers[_type].exec(_results, _args...);
-            return std::all_of(_results.begin(), _results.end(), [](bool v) { return v; });
-        }
+            bool dispatch(const Event& _type, AssociatedFunctionArgs... _args) {
+                if(!hasType(_type)) {
+                    return false;
+                }
 
-        bool isSubscribed(const Event& _type) {
-            return hasType(_type);
-        }
+                std::vector<bool> _results;
+                handlers[_type].exec(_results, _args...);
+                return std::all_of(_results.begin(), _results.end(), [](bool v) { return v; });
+            }
 
-    private:
-        bool hasType(const Event& _type) {
-            return handlers.find(_type) != handlers.end();
-        }
-};
+            bool isSubscribed(const Event& _type) {
+                return hasType(_type);
+            }
+
+        private:
+            bool hasType(const Event& _type) {
+                return handlers.find(_type) != handlers.end();
+            }
+    };
+
+}
 
 
 #endif // RESOURCES_GAME_EVENT_BUS

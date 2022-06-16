@@ -86,7 +86,7 @@
 # endif
 
 
-namespace siv {
+namespace GDE {
     template <class Float>
     class BasicPerlinNoise
     {
@@ -656,71 +656,74 @@ namespace siv {
     {
         return perlin_detail::Remap_01(normalizedOctave3D(x, y, z, octaves, persistence));
     }
-}
 
-typedef uint32_t PerlinSeed;
-struct NoiseMap {
-    float** map;
-    int width, height, octaves;
-    float frequency;
-    PerlinSeed seed;
-};
-class PerlinNoiseManager {
-    private:
-        std::unordered_map<PerlinSeed, NoiseMap> maps;
-        int counter;
-        siv::PerlinNoise perlin{ 0 };
-    public:
-        NoiseMap& generate2DMap(int _width, int _height, float _frequency, int _octaves, PerlinSeed _seed) {
-            perlin.reseed(_seed);
-            NoiseMap _noiseMap {nullptr, _width, _height, _octaves, _frequency, _seed};
 
-            double _fx = (_frequency / (float)_width);
-            double _fy = (_frequency / (float)_height);
 
-            auto _map = new float*[_height];
+    typedef uint32_t PerlinSeed;
+    struct NoiseMap {
+        float** map;
+        int width, height, octaves;
+        float frequency;
+        PerlinSeed seed;
+    };
+    class PerlinNoiseManager {
+        private:
+            std::unordered_map<PerlinSeed, NoiseMap> maps;
+            int counter;
+            GDE::PerlinNoise perlin{ 0 };
+        public:
+            NoiseMap& generate2DMap(int _width, int _height, float _frequency, int _octaves, PerlinSeed _seed) {
+                perlin.reseed(_seed);
+                NoiseMap _noiseMap {nullptr, _width, _height, _octaves, _frequency, _seed};
 
-            for (auto _y = 0; _y < _height; ++_y) {
-                _map[_y] = new float[_width];
-                for (auto _x = 0; _x < _width; ++_x) {
-                    _map[_y][_x] = (float)perlin.octave2D_11((_x * _fx), (_y * _fy), _octaves);
+                double _fx = (_frequency / (float)_width);
+                double _fy = (_frequency / (float)_height);
+
+                auto _map = new float*[_height];
+
+                for (auto _y = 0; _y < _height; ++_y) {
+                    _map[_y] = new float[_width];
+                    for (auto _x = 0; _x < _width; ++_x) {
+                        _map[_y][_x] = (float)perlin.octave2D_11((_x * _fx), (_y * _fy), _octaves);
+                    }
+                }
+
+                _noiseMap.map = _map;
+                maps[_seed] = _noiseMap;
+
+                return maps[_seed];
+            }
+
+            float getPerlinNoise2DPointValue(int _x, int _y, int _width, int _height, float _frequency, int _octaves, PerlinSeed _seed) {
+                perlin.reseed(_seed);
+                double _fx = (_frequency / (float)_width);
+                double _fy = (_frequency / (float)_height);
+                return (float)perlin.octave2D_11((_x * _fx), (_y * _fy), _octaves);
+            }
+
+            void clean() {
+                for(auto& _map : maps) {
+                    for (auto _y = 0; _y < _map.second.height; _y++)
+                        delete[] _map.second.map[_y];
+                    delete [] _map.second.map;
                 }
             }
 
-            _noiseMap.map = _map;
-            maps[_seed] = _noiseMap;
-
-            return maps[_seed];
-        }
-
-        float getPerlinNoise2DPointValue(int _x, int _y, int _width, int _height, float _frequency, int _octaves, PerlinSeed _seed) {
-            perlin.reseed(_seed);
-            double _fx = (_frequency / (float)_width);
-            double _fy = (_frequency / (float)_height);
-            return (float)perlin.octave2D_11((_x * _fx), (_y * _fy), _octaves);
-        }
-
-        void clean() {
-            for(auto& _map : maps) {
-                for (auto _y = 0; _y < _map.second.height; _y++)
-                    delete[] _map.second.map[_y];
-                delete [] _map.second.map;
+            NoiseMap& getNoiseMap(PerlinSeed _seed) {
+                return maps[_seed];
             }
-        }
 
-        NoiseMap& getNoiseMap(PerlinSeed _seed) {
-            return maps[_seed];
-        }
+            void removeNoiseMap(PerlinSeed _seed) {
+                auto* _map = &maps[_seed];
+                for (auto _y = 0; _y < _map->height; _y++)
+                    delete[] _map->map[_y];
+                delete [] _map->map;
 
-        void removeNoiseMap(PerlinSeed _seed) {
-            auto* _map = &maps[_seed];
-            for (auto _y = 0; _y < _map->height; _y++)
-                delete[] _map->map[_y];
-            delete [] _map->map;
+                maps.erase(_seed);
+            }
+    };
 
-            maps.erase(_seed);
-        }
-};
+}
 
 # undef SIVPERLIN_NODISCARD_CXX20
 # undef SIVPERLIN_CONCEPT_URBG
