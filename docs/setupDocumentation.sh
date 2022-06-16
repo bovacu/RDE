@@ -1,3 +1,9 @@
+pip install sphinx
+pip install exhale
+
+cd $PWD && sphinx-quickstart
+
+cat >conf.py <<EOL
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -28,32 +34,32 @@ author = 'Borja Vazquez Cuesta'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
- # there may be others here already, e.g. 'sphinx.ext.mathjax'
- 'breathe',
- 'exhale',
- 'sphinx_rtd_theme'
+   # there may be others here already, e.g. 'sphinx.ext.mathjax'
+   'breathe',
+   'exhale',
+   'sphinx_rtd_theme'
 ]
 
 # Setup the breathe extension
 breathe_projects = {
- "My Project": "./_doxygen/xml"
+   "My Project": "./_doxygen/xml"
 }
 breathe_default_project = "My Project"
 
 # Setup the exhale extension
 exhale_args = {
- # These arguments are required
- "containmentFolder":     "./api",
- "rootFileName":          "library_root.rst",
- "doxygenStripFromPath":  "..",
- # Heavily encouraged optional argument (see docs)
- "rootFileTitle":         "Library API",
- # Suggested optional arguments
- "createTreeView":        True,
- # TIP: if using the sphinx-bootstrap-theme, you need
- # "treeViewIsBootstrap": True,
- "exhaleExecutesDoxygen": True,
- "exhaleDoxygenStdin":    "INPUT = ../engine/include"
+   # These arguments are required
+   "containmentFolder":     "./api",
+   "rootFileName":          "library_root.rst",
+   "doxygenStripFromPath":  "..",
+   # Heavily encouraged optional argument (see docs)
+   "rootFileTitle":         "Library API",
+   # Suggested optional arguments
+   "createTreeView":        True,
+   # TIP: if using the sphinx-bootstrap-theme, you need
+   # "treeViewIsBootstrap": True,
+   "exhaleExecutesDoxygen": True,
+   "exhaleDoxygenStdin":    "INPUT = ../engine/include"
 }
 
 # Tell sphinx what the primary language being documented is.
@@ -82,3 +88,28 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+EOL
+
+cat >index.rst <<EOL
+.. GDE documentation master file, created by
+   sphinx-quickstart on Thu Jun 16 11:55:40 2022.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to GDE's documentation!
+===============================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   api/library_root
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+EOL
