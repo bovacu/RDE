@@ -247,7 +247,7 @@ namespace GDE {
 
     SpriteBatch::Batch& SpriteBatch::getBatch(const IRenderizable& _renderer, int _layer, BatchPriority _priority) {
         for(auto& _batch : batches)
-            if(_renderer.getTexture() == _batch.textureID && _layer == _batch.layer && _batch.shaderID == _renderer.getShaderID())
+            if(_renderer.getTexture() == _batch.textureID && _layer == _batch.layer && _batch.shaderID == _renderer.shaderID)
                 return _batch;
 
         LOG_W("Created a new batch")
@@ -258,7 +258,7 @@ namespace GDE {
         _batch.vertexBuffer.reserve(maxVerticesPerDrawCall * 6);
         _batch.textureID = _renderer.getTexture();
         _batch.priority = _priority;
-        _batch.shaderID = _renderer.getShaderID();
+        _batch.shaderID = _renderer.shaderID;
         _batch.spriteBatch = this;
         batches.push_back(_batch);
 

@@ -172,7 +172,7 @@ namespace GDE {
             };
 
             auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
-            _scene->getMainGraph()->addComponent<Body>(_ownerEntityID, _bodyConfig, _ownerTransform);
+            _scene->getMainGraph()->addComponent<Body>(_ownerEntityID, _scene, _bodyConfig, _ownerTransform);
         }
     }
 

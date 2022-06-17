@@ -13,6 +13,7 @@
 #include "core/systems/uiSystem/SceneManager.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/systems/ecsSystem/ECSManager.h"
+#include "core/systems/physicsSystem/PhysicsManager.h"
 
 namespace GDE {
 
@@ -29,6 +30,7 @@ namespace GDE {
             Console consoleManager;
             SceneManager sceneManager;
             ECSManager ecsManager;
+            PhysicsManager physics;
 
         public:
             /// This function should not be called by end users.

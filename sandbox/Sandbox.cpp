@@ -1,7 +1,7 @@
 // Created by borja on 22/1/22.
 
 #include "Sandbox.h"
-#include "core/systems/physicsSystem/Physics.h"
+#include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/systems/uiSystem/Canvas.h"
 
 //#if IS_ANDROID()
@@ -73,7 +73,7 @@ namespace GDE {
         ui = getCanvases()[0]->getGraph()->addComponent<NinePatchSprite>(_uiTest, this, getCanvases()[0],
                                                                                        engine->manager.textureManager.getSubTexture(
                                                                                                "ui", "panel0"));
-        ui->size = {200, 128};
+        ui->ninePatchSize = {200, 128};
         ui->interaction->interactionTrigger.bind<&Sandbox::uiButtonTrigger>(this);
         ui->interaction->onClick.bind<&Sandbox::onMouseClick>(this);
         ui->interaction->onMouseEntered.bind<&Sandbox::onMouseEntered>(this);
@@ -134,7 +134,7 @@ namespace GDE {
             .bodyType = BodyType::STATIC,
             .bodyShapeType = BodyShapeType::BOX,
         };
-        getMainGraph()->addComponent<Body>(_leftWall, _leftWallConfig, _leftWallTransform);
+        getMainGraph()->addComponent<Body>(_leftWall, this, _leftWallConfig, _leftWallTransform);
 
 
         auto _rightWall = getMainGraph()->createNode("RightWall");
@@ -148,7 +148,7 @@ namespace GDE {
                 .bodyType = BodyType::STATIC,
                 .bodyShapeType = BodyShapeType::BOX,
         };
-        getMainGraph()->addComponent<Body>(_rightWall, _rightWallConfig, _rightWallTransform);
+        getMainGraph()->addComponent<Body>(_rightWall, this, _rightWallConfig, _rightWallTransform);
 
 
         auto _bottomWall = getMainGraph()->createNode("BottomWall");
@@ -162,7 +162,7 @@ namespace GDE {
                 .bodyType = BodyType::STATIC,
                 .bodyShapeType = BodyShapeType::BOX,
         };
-        getMainGraph()->addComponent<Body>(_bottomWall, _bottomWallConfig, _bottomWallTransform);
+        getMainGraph()->addComponent<Body>(_bottomWall, this, _bottomWallConfig, _bottomWallTransform);
 
 
         auto _topWall = getMainGraph()->createNode("TopWall");
@@ -176,7 +176,7 @@ namespace GDE {
                 .bodyType = BodyType::STATIC,
                 .bodyShapeType = BodyShapeType::BOX,
         };
-        getMainGraph()->addComponent<Body>(_topWall, _topWallConfig, _topWallTransform);
+        getMainGraph()->addComponent<Body>(_topWall, this, _topWallConfig, _topWallTransform);
 
         Random _r;
         // 1075 is the maximum I could get with 60fps of average performance
@@ -194,7 +194,7 @@ namespace GDE {
                     .bodyType = BodyType::DYNAMIC,
                     .bodyShapeType = BodyShapeType::BOX,
             };
-            getMainGraph()->addComponent<Body>(_square, _squareWallConfig, _squareTransform);
+            getMainGraph()->addComponent<Body>(_square, this, _squareWallConfig, _squareTransform);
             auto _squareSpriteRenderer = getMainGraph()->addComponent<SpriteRenderer>(_square, this);
             _squareSpriteRenderer->setTexture(engine->manager.textureManager.getSubTexture("square", "square_0"));
         }
@@ -218,7 +218,7 @@ namespace GDE {
         auto* _transform = _canvas->getGraph()->getComponent<Transform>(_nodeId);
         auto _mousePos = engine->manager.inputManager.getMousePosWorldPos();
 
-        return _mousePos.isInside(_transform->getPositionWorld(), Vec2F {(float)_ninePatch->size.x, (float)_ninePatch->size.y});
+        return _mousePos.isInside(_transform->getPositionWorld(), Vec2F {(float)_ninePatch->ninePatchSize.x, (float)_ninePatch->ninePatchSize.y});
     }
 
     void Sandbox::onMouseClick(MouseCode _mouseCode) {

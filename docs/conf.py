@@ -28,32 +28,32 @@ author = 'Borja Vazquez Cuesta'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
- # there may be others here already, e.g. 'sphinx.ext.mathjax'
- 'breathe',
- 'exhale',
- 'sphinx_rtd_theme'
+   # there may be others here already, e.g. 'sphinx.ext.mathjax'
+   'breathe',
+   'exhale',
+   'sphinx_rtd_theme'
 ]
 
 # Setup the breathe extension
 breathe_projects = {
- "My Project": "./_doxygen/xml"
+   "My Project": "./_doxygen/xml"
 }
 breathe_default_project = "My Project"
 
 # Setup the exhale extension
 exhale_args = {
- # These arguments are required
- "containmentFolder":     "./api",
- "rootFileName":          "library_root.rst",
- "doxygenStripFromPath":  "..",
- # Heavily encouraged optional argument (see docs)
- "rootFileTitle":         "Library API",
- # Suggested optional arguments
- "createTreeView":        True,
- # TIP: if using the sphinx-bootstrap-theme, you need
- # "treeViewIsBootstrap": True,
- "exhaleExecutesDoxygen": True,
- "exhaleDoxygenStdin":    "INPUT = ../engine/include"
+   # These arguments are required
+   "containmentFolder":     "./api",
+   "rootFileName":          "library_root.rst",
+   "doxygenStripFromPath":  "..",
+   # Heavily encouraged optional argument (see docs)
+   "rootFileTitle":         "Library API",
+   # Suggested optional arguments
+   "createTreeView":        True,
+   # TIP: if using the sphinx-bootstrap-theme, you need
+   # "treeViewIsBootstrap": True,
+   "exhaleExecutesDoxygen": True,
+   "exhaleDoxygenStdin":    "INPUT = ../engine/include"
 }
 
 # Tell sphinx what the primary language being documented is.

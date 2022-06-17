@@ -18,7 +18,7 @@ namespace GDE {
         soundManager.init();
         sceneManager.init(_engine);
         Renderer::init(_engine);
-        Physics::get().init();
+        physics.init();
     }
 
     void Manager::destroy() {
@@ -29,7 +29,7 @@ namespace GDE {
         textureManager.destroy();
         sceneManager.destroy();
         Renderer::destroy();
-        Physics::get().destroy();
+        physics.destroy();
         ecsManager.destroy();
     }
 }

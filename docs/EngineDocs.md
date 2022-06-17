@@ -1015,7 +1015,3 @@ La clase Sprite esta en core/render/elements/Sprite.h y su cpp. Ya hemos explica
 ## Texto
 
 ## Frame Buffer
-
-# Glosario
-
-1. Draw Call: Cada vez que se envian datos de la CPU a la GPU para renderizar algun elemento en pantalla.

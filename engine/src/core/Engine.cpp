@@ -2,7 +2,7 @@
 
 #include "core/Engine.h"
 #include "core/render/Renderer.h"
-#include "core/systems/physicsSystem/Physics.h"
+#include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/systems/ecsSystem/ECSManager.h"
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/systems/profiling/Profiler.h"
@@ -100,7 +100,7 @@ namespace GDE {
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
-        Physics::get().step(_fixedDt);
+        manager.physics.step(_fixedDt);
         manager.sceneManager.getDisplayedScene()->onFixedUpdate(_fixedDt);
     }
 

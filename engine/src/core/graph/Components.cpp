@@ -9,6 +9,10 @@
 
 namespace GDE {
 
+    Transform::Transform(const NodeID& _nodeId) {
+
+    }
+
     glm::mat4 Transform::getLocalModelMatrix() {
         const glm::mat4 _rot = glm::rotate(glm::mat4(1.0f), glm::radians(localRotation), glm::vec3(0.0f, 0.0f, 1.0f));
         glm::vec3 _scale = {localScale.x, localScale.y, 1};
@@ -101,18 +105,6 @@ namespace GDE {
 
     Vec2F Transform::getScaleLWorld() const {
         return { modelMatrix[0][0], modelMatrix[1][1] };
-    }
-
-    void Transform::setConstant(bool _constant) {
-        constant = _constant;
-    }
-
-    bool Transform::isConstant() const {
-        return constant;
-    }
-
-    Transform::Transform(const NodeID& _nodeId) {
-
     }
 
 
@@ -213,13 +205,13 @@ namespace GDE {
     ///-------------------------------- BODY ---------------------------
 
 
-    Body::Body(const NodeID& _nodeId, const BodyConfig& _config, Transform* _transform) {
+    Body::Body(const NodeID& _nodeId, Scene* _scene, const BodyConfig& _config, Transform* _transform) {
         bodyConfig = _config;
 
         b2dConfig.bodyDefinition.position.Set(_transform->getPositionLocal().x, _transform->getPositionLocal().y);
         b2dConfig.bodyDefinition.angle = _transform->getRotationLocal();
         b2dConfig.bodyDefinition.type = gdeBodyTypeToB2dBodyType(_config.bodyType);
-        b2dConfig.body = Physics::get().createBody(b2dConfig.bodyDefinition);
+        b2dConfig.body = _scene->engine->manager.physics.createBody(b2dConfig.bodyDefinition);
 
         switch (_config.bodyShapeType) {
             case BOX: b2dConfig.polygonShape.SetAsBox(_config.size.x / 2.f, _config.size.y / 2.f); break;
@@ -305,10 +297,6 @@ namespace GDE {
         viewport = _scene->getMainCamera()->getViewport();
     }
 
-    Vec2F SpriteRenderer::getSize() const {
-        return { (float)texture->getSize().x, (float)texture->getSize().y };
-    }
-
     void SpriteRenderer::updateViewport(IViewPort* _viewport) {
         viewport = _viewport;
     }
@@ -338,16 +326,12 @@ namespace GDE {
     NinePatchSprite::NinePatchSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture) {
         shaderID = _scene->engine->manager.shaderManager.getShader("basic");
         texture = _texture;
-        size = _texture->getRegion().size;
+        ninePatchSize = _texture->getRegion().size;
         interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);
     }
 
     NinePatch& NinePatchSprite::getNinePatch() const {
         return texture->ninePatch;
-    }
-
-    Vec2I NinePatchSprite::getSize() const {
-        return size;
     }
 
 

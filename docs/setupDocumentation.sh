@@ -1,7 +1,14 @@
 pip install sphinx
 pip install exhale
+pip install myst_parser
 
-cd $PWD && sphinx-quickstart
+cd $PWD && sphinx-quickstart << EOF
+n
+GDE
+Borja Vazquez Cuesta
+0.5.0
+en
+EOF
 
 cat >conf.py <<EOL
 # Configuration file for the Sphinx documentation builder.
@@ -110,6 +117,5 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 EOL
