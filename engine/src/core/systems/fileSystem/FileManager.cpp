@@ -1,10 +1,10 @@
 // Created by borja on 14/2/22.
 
-#include "core/systems/fileSystem/FilesSystem.h"
+#include "core/systems/fileSystem/FileManager.h"
 
 namespace GDE {
 
-    FileHandler* FilesSystem::open(const std::string& _filePath, const FileMode& _fileMode, bool _silentNotFound) {
+    FileHandler* FileManager::open(const std::string& _filePath, const FileMode& _fileMode, bool _silentNotFound) {
         const char* _fm = FileHandler::modeToChar(_fileMode);
         auto* _file = SDL_RWFromFile(_filePath.c_str(), _fm);
         if(_file == nullptr) {
@@ -15,14 +15,14 @@ namespace GDE {
         return new FileHandler(_file, _fileMode, _filePath);
     }
 
-    void FilesSystem::close(FileHandler* _file) {
+    void FileManager::close(FileHandler* _file) {
         SDL_RWclose(_file->file);
         delete _file;
     }
 
 
 
-    FileStr FilesSystem::readFullFile(FileHandler* _handler) {
+    FileStr FileManager::readFullFile(FileHandler* _handler) {
         FileStr _f;
         checkFileMode(_handler, FileMode::READ);
         SDL_RWseek(_handler->file, 0, RW_SEEK_END);
@@ -32,7 +32,7 @@ namespace GDE {
         return _f;
     }
 
-    FileLines FilesSystem::readAllLinesFile(FileHandler* _handler) {
+    FileLines FileManager::readAllLinesFile(FileHandler* _handler) {
         int _currentLine = 0;
         int _finalLinePtr = 0;
         std::string _content;
@@ -66,7 +66,7 @@ namespace GDE {
         return _f;
     }
 
-    FileStr FilesSystem::readChunkFile(FileHandler* _handler, int _initByte, int _endByte) {
+    FileStr FileManager::readChunkFile(FileHandler* _handler, int _initByte, int _endByte) {
         FileStr _f;
         checkFileMode(_handler, FileMode::READ);
         SDL_RWseek(_handler->file, 0, RW_SEEK_END);
@@ -77,7 +77,7 @@ namespace GDE {
         return _f;
     }
 
-    FileStr FilesSystem::readLineInFile(FileHandler* _handler, int _line) {
+    FileStr FileManager::readLineInFile(FileHandler* _handler, int _line) {
         int _currentLine = 0;
         int _finalLinePtr = 0;
         std::string _content;
@@ -107,7 +107,7 @@ namespace GDE {
         return _f;
     }
 
-    FileLines FilesSystem::readLinesInFile(FileHandler* _handler, std::vector<int>& _lines) {
+    FileLines FileManager::readLinesInFile(FileHandler* _handler, std::vector<int>& _lines) {
         int _currentLine = 0;
         int _finalLinePtr = 0;
         std::string _content;
@@ -152,26 +152,26 @@ namespace GDE {
 
 
 
-    void FilesSystem::writeChunkToFile(FileHandler* _handler, const char* _content, size_t _size) {
+    void FileManager::writeChunkToFile(FileHandler* _handler, const char* _content, size_t _size) {
         checkFileMode(_handler, FileMode::WRITE);
         SDL_RWwrite(_handler->file, _content, 1, _size);
     }
 
-    void FilesSystem::writeChunkToFile(FileHandler* _handler, const std::string& _content) {
+    void FileManager::writeChunkToFile(FileHandler* _handler, const std::string& _content) {
         checkFileMode(_handler, FileMode::WRITE);
         writeChunkToFile(_handler, _content.c_str(), SDL_strlen(_content.c_str()));
     }
 
-    void FilesSystem::appendChunkToFileAtEnd(FileHandler* _handler, const char* _content, size_t _size) {
+    void FileManager::appendChunkToFileAtEnd(FileHandler* _handler, const char* _content, size_t _size) {
         checkFileMode(_handler, FileMode::APPEND);
         SDL_RWwrite(_handler->file, _content, 1, _size);
     }
 
-    void FilesSystem::appendChunkToFileAtEnd(FileHandler* _handler, const std::string& _content) {
+    void FileManager::appendChunkToFileAtEnd(FileHandler* _handler, const std::string& _content) {
         appendChunkToFileAtEnd(_handler, _content.c_str(), SDL_strlen(_content.c_str()));
     }
 
-    void FilesSystem::appendChunkToFile(FileHandler* _handler, const char* _content, size_t _size, int _where) {
+    void FileManager::appendChunkToFile(FileHandler* _handler, const char* _content, size_t _size, int _where) {
         checkFileMode(_handler, READ_AND_WRITE);
         auto _f = readFullFile(_handler);
 
@@ -184,11 +184,11 @@ namespace GDE {
         appendChunkToFileAtEnd(_handler, _end.c_str(), SDL_strlen(_end.c_str()));
     }
 
-    void FilesSystem::appendChunkToFile(FileHandler* _handler, const std::string& _content, int _where) {
+    void FileManager::appendChunkToFile(FileHandler* _handler, const std::string& _content, int _where) {
         appendChunkToFile(_handler, _content.c_str(), SDL_strlen(_content.c_str()), _where);
     }
 
-    void FilesSystem::appendChunkInLineToFile(FileHandler* _handler, const char* _content, size_t _size, int _line) {
+    void FileManager::appendChunkInLineToFile(FileHandler* _handler, const char* _content, size_t _size, int _line) {
         checkFileMode(_handler, FileMode::READ);
         auto _f = readAllLinesFile(_handler);
 
@@ -207,13 +207,13 @@ namespace GDE {
         }
     }
 
-    void FilesSystem::appendChunkInLineToFile(FileHandler* _handler, const std::string& _content, int _line) {
+    void FileManager::appendChunkInLineToFile(FileHandler* _handler, const std::string& _content, int _line) {
         appendChunkInLineToFile(_handler, _content.c_str(), SDL_strlen(_content.c_str()), _line);
     }
 
 
 
-    void FilesSystem::replaceChunkInFile(FileHandler* _handler, const std::string& _old, const std::string& _new) {
+    void FileManager::replaceChunkInFile(FileHandler* _handler, const std::string& _old, const std::string& _new) {
         checkFileMode(_handler, FileMode::READ_AND_WRITE);
         auto _f = readFullFile(_handler);
         LOG_I(_f.content);
@@ -221,7 +221,7 @@ namespace GDE {
         writeChunkToFile(_handler, _f.content);
     }
 
-    void FilesSystem::removeFile(std::string& _filePath) {
+    void FileManager::removeFile(std::string& _filePath) {
         #if !IS_MOBILE()
         std::remove(_filePath.c_str());
         #else
@@ -229,7 +229,7 @@ namespace GDE {
         #endif
     }
 
-    void FilesSystem::removeChunkLineInFile(FileHandler* _handler, int _line) {
+    void FileManager::removeChunkLineInFile(FileHandler* _handler, int _line) {
         checkFileMode(_handler, FileMode::READ);
         auto _f = readAllLinesFile(_handler);
 
@@ -248,7 +248,7 @@ namespace GDE {
         }
     }
 
-    void FilesSystem::removeChunkLinesInFile(FileHandler* _handler, std::vector<int>& _lines) {
+    void FileManager::removeChunkLinesInFile(FileHandler* _handler, std::vector<int>& _lines) {
         checkFileMode(_handler, FileMode::READ);
         auto _f = readAllLinesFile(_handler);
 
@@ -270,7 +270,7 @@ namespace GDE {
         }
     }
 
-    void FilesSystem::removeChunk(FileHandler* _handler, int _initByte, int _endByte) {
+    void FileManager::removeChunk(FileHandler* _handler, int _initByte, int _endByte) {
         checkFileMode(_handler, READ_AND_WRITE);
         auto _f = readFullFile(_handler);
 
@@ -291,11 +291,11 @@ namespace GDE {
 
 
 
-    FileHandler* FilesSystem::createFile(const std::string& _filePath) {
+    FileHandler* FileManager::createFile(const std::string& _filePath) {
         return new FileHandler(SDL_RWFromFile(_filePath.c_str(), "w"), FileMode::WRITE, _filePath);
     }
 
-    void FilesSystem::moveOrRenameFile(const std::string& _filePath, const std::string& _newPath) {
+    void FileManager::moveOrRenameFile(const std::string& _filePath, const std::string& _newPath) {
         #if !IS_MOBILE()
         std::rename(_filePath.c_str(), _newPath.c_str());
         #else
@@ -303,26 +303,26 @@ namespace GDE {
         #endif
     }
 
-    void FilesSystem::clearFile(FileHandler* _handler) {
+    void FileManager::clearFile(FileHandler* _handler) {
         checkFileMode(_handler, FileMode::WRITE);
         writeChunkToFile(_handler, "");
     }
 
-    void FilesSystem::checkFileMode(FileHandler* _handler, const FileMode& _expected) {
+    void FileManager::checkFileMode(FileHandler* _handler, const FileMode& _expected) {
         if(_handler->mode == _expected) return;
         SDL_RWclose(_handler->file);
         _handler->file = SDL_RWFromFile(_handler->originalPath.c_str(), FileHandler::modeToChar(_expected));
         _handler->mode = _expected;
     }
 
-    bool FilesSystem::fileExists(const std::string& _pathToFile) {
+    bool FileManager::fileExists(const std::string& _pathToFile) {
         auto* _file = open(_pathToFile, FileMode::READ, true);
         if(_file == nullptr) return false;
         close(_file);
         return true;
     }
 
-    void FilesSystem::appendChunkAtEndOfLine(FileHandler* _handler, const char* _content, size_t _size, int _line) {
+    void FileManager::appendChunkAtEndOfLine(FileHandler* _handler, const char* _content, size_t _size, int _line) {
         checkFileMode(_handler, FileMode::READ);
         auto _f = readAllLinesFile(_handler);
 
@@ -338,7 +338,7 @@ namespace GDE {
         }
     }
 
-    void FilesSystem::appendChunkAtEndOfLine(FileHandler* _handler, const std::string& _content, int _line) {
+    void FileManager::appendChunkAtEndOfLine(FileHandler* _handler, const std::string& _content, int _line) {
         appendChunkAtEndOfLine(_handler, _content.c_str(), SDL_strlen(_content.c_str()), _line);
     }
 

@@ -15,6 +15,7 @@
 #include "core/systems/ecsSystem/ECSManager.h"
 #include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/systems/configSystem/ConfigManager.h"
+#include "core/systems/fileSystem/FileManager.h"
 
 namespace GDE {
 
@@ -35,6 +36,7 @@ namespace GDE {
             SceneManager sceneManager;
             ECSManager ecsManager;
             PhysicsManager physics;
+            FileManager fileManager;
 
         public:
             /**
