@@ -15,7 +15,7 @@ namespace GDE {
     /// |			ON GLFW												|
     /// -----------------------------------------------------------------
 
-    typedef enum class GamePadButtons : uint16_t {
+    typedef enum class ControllerButtons : uint16_t {
         ButtonA         = SDL_CONTROLLER_BUTTON_A,              // 0
         ButtonB         = SDL_CONTROLLER_BUTTON_B,              // 1
         ButtonX         = SDL_CONTROLLER_BUTTON_X,              // 2
@@ -33,14 +33,14 @@ namespace GDE {
         DPadLeft        = SDL_CONTROLLER_BUTTON_DPAD_LEFT       // 13
     } GamePad;
 
-    typedef enum class GamePadAxis {
+    typedef enum class ControllerAxis {
         Left,
         Right,
         LT,
         RT
     } GamePadA;
 
-    static const char* GamePadKeysStr[] = {
+    static const char* ControllerKeysStr[] = {
             "A", "B", "X", "Y", "Select", "Guide", "Start", "L3", "R3", "LB", "RB",
             "DUp", "DDown", "DLeft", "DRight", "", "LB", "", "RB"
     };

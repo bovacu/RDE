@@ -6,7 +6,7 @@
 
 
 #include "core/util/Util.h"
-#include "core/systems/inputSystem/keysAndButtons/GamePadButtons.h"
+#include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
 #include "Input.h"
 
 namespace GDE {
@@ -126,12 +126,12 @@ namespace GDE {
             /**
              * @brief Map ControllerButton -> State.
              */
-            std::unordered_map<GamePadButtons, int>  pressedGamepadButtons;
+            std::unordered_map<ControllerButtons, int>  pressedGamepadButtons;
 
             /**
              * @brief Map ControllerAxis -> State.
              */
-            std::unordered_map<GamePadAxis, int>  pressedGamepadAxis;
+            std::unordered_map<ControllerAxis, int>  pressedGamepadAxis;
 
             /**
              * @brief Left joystick value
@@ -159,6 +159,9 @@ namespace GDE {
             SDL_Haptic* vibration = nullptr;
     };
 
+    /**
+     * @brief This class handles all of the Controller iputs.
+     */
     class ControllerInput : public Input {
         private:
             /**
@@ -229,7 +232,7 @@ namespace GDE {
              * @param _controllerID Controller ID
              * @return VecF
              */
-            Vec2F getAxisValue(const GamePadAxis& _axis, int _controllerID = 0);
+            Vec2F getAxisValue(const ControllerAxis& _axis, int _controllerID = 0);
 
             /**
              * @brief Reassigns a controller to another one. (Change order)

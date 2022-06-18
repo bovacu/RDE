@@ -55,28 +55,28 @@ namespace GDE {
     Controller::Controller(int _controllerID) : ID(_controllerID) {
 
         pressedGamepadButtons = {
-                {GamePadButtons::ButtonA,       -1},
-                {GamePadButtons::ButtonB,       -1},
-                {GamePadButtons::ButtonX,       -1},
-                {GamePadButtons::ButtonY,       -1},
-                {GamePadButtons::DPadDown,      -1},
-                {GamePadButtons::DPadLeft,      -1},
-                {GamePadButtons::DPadRight,     -1},
-                {GamePadButtons::DPadUp,        -1},
-                {GamePadButtons::Guide,         -1},
-                {GamePadButtons::LB,            -1},
-                {GamePadButtons::RB,            -1},
-                {GamePadButtons::LeftJoystick,  -1},
-                {GamePadButtons::RightJoystick, -1},
-                {GamePadButtons::Select,        -1},
-                {GamePadButtons::Start,         -1},
+                {ControllerButtons::ButtonA,       -1},
+                {ControllerButtons::ButtonB,       -1},
+                {ControllerButtons::ButtonX,       -1},
+                {ControllerButtons::ButtonY,       -1},
+                {ControllerButtons::DPadDown,      -1},
+                {ControllerButtons::DPadLeft,      -1},
+                {ControllerButtons::DPadRight,     -1},
+                {ControllerButtons::DPadUp,        -1},
+                {ControllerButtons::Guide,         -1},
+                {ControllerButtons::LB,            -1},
+                {ControllerButtons::RB,            -1},
+                {ControllerButtons::LeftJoystick,  -1},
+                {ControllerButtons::RightJoystick, -1},
+                {ControllerButtons::Select,        -1},
+                {ControllerButtons::Start,         -1},
         };
 
         pressedGamepadAxis = {
-                {GamePadAxis::Right,-1},
-                {GamePadAxis::Left, -1},
-                {GamePadAxis::RT,   -1},
-                {GamePadAxis::LT,   -1},
+                {ControllerAxis::Right, -1},
+                {ControllerAxis::Left,  -1},
+                {ControllerAxis::RT,    -1},
+                {ControllerAxis::LT,    -1},
         };
     }
 
@@ -159,28 +159,28 @@ namespace GDE {
         float _epsilon = 0.001f;
 
         if(std::abs(_left.x) <= _epsilon && std::abs(_left.y) <= _epsilon)
-            controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::Left] = 0;
-        else if(controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::Left] != 2)
-            controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::Left] = 1;
+            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Left] = 0;
+        else if(controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Left] != 2)
+            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Left] = 1;
 
         if(std::abs(_right.x) <= _epsilon && std::abs(_right.y) <= _epsilon)
-            controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::Right] = 0;
-        else if(controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::Right] != 2)
-            controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::Right] = 1;
+            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Right] = 0;
+        else if(controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Right] != 2)
+            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Right] = 1;
 
         if(std::abs(_back.x) <= _epsilon)
-            controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::LT] = 0;
-        else if(controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::LT] != 2)
-            controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::LT] = 1;
+            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::LT] = 0;
+        else if(controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::LT] != 2)
+            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::LT] = 1;
 
         if(std::abs(_back.y) <= _epsilon)
-            controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::RT] = 0;
-        else if(controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::RT] != 2)
-            controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::RT] = 1;
+            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::RT] = 0;
+        else if(controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::RT] != 2)
+            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::RT] = 1;
     }
 
     void ControllerInput::onControllerButtonDown(SDL_Event& _event) {
-        auto _key = static_cast<GamePadButtons>(_event.cbutton.button);
+        auto _key = static_cast<ControllerButtons>(_event.cbutton.button);
 
         ControllerButtonDownEvent _e(_key);
         window->consumeEvent(_e);
@@ -191,7 +191,7 @@ namespace GDE {
     }
 
     void ControllerInput::onControllerButtonUp(SDL_Event& _event) {
-        auto _key = static_cast<GamePadButtons>(_event.cbutton.button);
+        auto _key = static_cast<ControllerButtons>(_event.cbutton.button);
         int _controllerID = _event.cdevice.which;
         controllers[_controllerID]->pressedGamepadButtons[_key] = 0;
 
@@ -222,30 +222,30 @@ namespace GDE {
 
     int ControllerInput::getButtonState(int _keyOrButton, int _controllerID) {
         if(_controllerID == -1) return -1;
-        return controllers[_controllerID]->pressedGamepadButtons[(GamePadButtons)_keyOrButton];
+        return controllers[_controllerID]->pressedGamepadButtons[(ControllerButtons)_keyOrButton];
     }
 
     void ControllerInput::setButtonState(int _keyOrButton, int _state, int _controllerID) {
         if(_controllerID == -1) return;
-        controllers[_controllerID]->pressedGamepadButtons[(GamePadButtons)_keyOrButton] = _state;
+        controllers[_controllerID]->pressedGamepadButtons[(ControllerButtons)_keyOrButton] = _state;
     }
 
     int ControllerInput::getAxisState(int _keyOrButton, int _controllerID) {
         if(_controllerID == -1) return -1;
-        return controllers[_controllerID]->pressedGamepadAxis[(GamePadAxis)_keyOrButton];
+        return controllers[_controllerID]->pressedGamepadAxis[(ControllerAxis)_keyOrButton];
     }
 
     void ControllerInput::setAxisState(int _keyOrButton, int _state, int _controllerID) {
         if(_controllerID == -1) return;
-        controllers[_controllerID]->pressedGamepadAxis[(GamePadAxis)_keyOrButton] = _state;
+        controllers[_controllerID]->pressedGamepadAxis[(ControllerAxis)_keyOrButton] = _state;
     }
 
-    Vec2F ControllerInput::getAxisValue(const GamePadAxis& _axis, int _controllerID) {
+    Vec2F ControllerInput::getAxisValue(const ControllerAxis& _axis, int _controllerID) {
         switch (_axis) {
-            case GamePadAxis::Left: return controllers[_controllerID]->leftJoystickValue;
-            case GamePadAxis::Right: return controllers[_controllerID]->rightJoystickValue;
-            case GamePadAxis::LT: return {controllers[_controllerID]->backButtonsValue.x, 0.f};
-            case GamePadAxis::RT: return {controllers[_controllerID]->backButtonsValue.y, 0.f};
+            case ControllerAxis::Left: return controllers[_controllerID]->leftJoystickValue;
+            case ControllerAxis::Right: return controllers[_controllerID]->rightJoystickValue;
+            case ControllerAxis::LT: return {controllers[_controllerID]->backButtonsValue.x, 0.f};
+            case ControllerAxis::RT: return {controllers[_controllerID]->backButtonsValue.y, 0.f};
         }
 
         return { -1, -1 };

@@ -7,7 +7,7 @@
 #include "Event.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
-#include "core/systems/inputSystem/keysAndButtons/GamePadButtons.h"
+#include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
 #include "core/util/Vec.h"
 
 namespace GDE {
@@ -53,20 +53,20 @@ namespace GDE {
 
     class ControllerButtonDownEvent : public Event {
         private:
-            GamePadButtons button;
+            ControllerButtons button;
 
         public:
-            explicit ControllerButtonDownEvent(GamePadButtons _button) : button(_button) {  }
+            explicit ControllerButtonDownEvent(ControllerButtons _button) : button(_button) {  }
 
             /**
              * @brief Returns the pressed button.
              * @return GamePadButtons
              */
-            [[nodiscard]] inline GamePadButtons getButton() const { return button; }
+            [[nodiscard]] inline ControllerButtons getButton() const { return button; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << ": Button " + std::string(GamePadKeysStr[(int)button]);
+                _sst << getName() << ": Button " + std::string(ControllerKeysStr[(int)button]);
                 return _sst.str();
             }
 
@@ -78,20 +78,20 @@ namespace GDE {
 
     class ControllerButtonUpEvent : public Event {
         private:
-        GamePadButtons button;
+        ControllerButtons button;
 
         public:
-            explicit ControllerButtonUpEvent(GamePadButtons _button) : button(_button) {  }
+            explicit ControllerButtonUpEvent(ControllerButtons _button) : button(_button) {  }
 
             /**
              * @brief Returns the freed button.
              * @return GamePadButtons
              */
-            [[nodiscard]] inline GamePadButtons getButton() const { return button; }
+            [[nodiscard]] inline ControllerButtons getButton() const { return button; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
-                _sst << getName() << ": Button " + std::string(GamePadKeysStr[(int)button]);
+                _sst << getName() << ": Button " + std::string(ControllerKeysStr[(int)button]);
                 return _sst.str();
             }
 

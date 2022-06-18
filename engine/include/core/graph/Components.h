@@ -14,7 +14,7 @@
 #include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
-#include "core/systems/inputSystem/keysAndButtons/GamePadButtons.h"
+#include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
 
 namespace GDE {
 
@@ -678,7 +678,7 @@ namespace GDE {
          * @brief Callback triggered when a gamepad button is pressed.
          * 
          */
-        MDelegate<void(GamePadButtons)> onGamepadButtonPressed;
+        MDelegate<void(ControllerButtons)> onGamepadButtonPressed;
 
         /**
          * @brief Callback triggered when the mobile screen is touched.

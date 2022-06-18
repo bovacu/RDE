@@ -158,7 +158,7 @@ namespace GDE {
         return controllerInput->reassignController(_controllerID, _as);
     }
 
-    bool InputManager::isGamepadButtonJustPressed(GamePadButtons _button, int _controllerID) {
+    bool InputManager::isGamepadButtonJustPressed(ControllerButtons _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
 
@@ -170,7 +170,7 @@ namespace GDE {
         return false;
     }
 
-    bool InputManager::isGamepadButtonJustReleased(GamePadButtons _button, int _controllerID) {
+    bool InputManager::isGamepadButtonJustReleased(ControllerButtons _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) {
             LOG_W("IS FALSE FOR ", _controllerID)
@@ -185,25 +185,25 @@ namespace GDE {
         return false;
     }
 
-    bool InputManager::isGamepadButtonPressed(GamePadButtons _button, int _controllerID) {
+    bool InputManager::isGamepadButtonPressed(ControllerButtons _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
         return _controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1;
     }
 
-    bool InputManager::isGamepadButtonReleased(GamePadButtons _button, int _controllerID) {
+    bool InputManager::isGamepadButtonReleased(ControllerButtons _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
         return _controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
     }
 
-    bool InputManager::isGamepadAxisPressed(GamePadAxis _axis, int _controllerID) {
+    bool InputManager::isGamepadAxisPressed(ControllerAxis _axis, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
         return _controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
     }
 
-    bool InputManager::isGamepadAxisJustPressed(GamePadAxis _axis, int _controllerID) {
+    bool InputManager::isGamepadAxisJustPressed(ControllerAxis _axis, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
         if(_controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1) {
@@ -214,7 +214,7 @@ namespace GDE {
         return false;
     }
 
-    bool InputManager::isGamepadAxisReleased(GamePadAxis _axis, int _controllerID) {
+    bool InputManager::isGamepadAxisReleased(ControllerAxis _axis, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
         return _controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;

@@ -6,7 +6,7 @@
 #include "core/platform/PlatformHeaderSDL.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
-#include "core/systems/inputSystem/keysAndButtons/GamePadButtons.h"
+#include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
 
 #include "core/util/Util.h"
 #include "core/render/window/Window.h"
@@ -247,7 +247,7 @@ namespace GDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadButtonJustPressed(GamePadButtons _button, int _controllerID = 0);
+            bool isGamepadButtonJustPressed(ControllerButtons _button, int _controllerID = 0);
 
             /**
              * @brief Returns true if the button is released and won't return true until the button is pressed and released again.
@@ -255,7 +255,7 @@ namespace GDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadButtonJustReleased(GamePadButtons _button, int _controllerID = 0);
+            bool isGamepadButtonJustReleased(ControllerButtons _button, int _controllerID = 0);
 
             /**
              * @brief Returns true while the button is being pressed.
@@ -263,7 +263,7 @@ namespace GDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadButtonPressed(GamePadButtons _button, int _controllerID = 0);
+            bool isGamepadButtonPressed(ControllerButtons _button, int _controllerID = 0);
 
             /**
              * @brief Returns true while the button is not being pressed.
@@ -271,7 +271,7 @@ namespace GDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadButtonReleased(GamePadButtons _button, int _controllerID = 0);
+            bool isGamepadButtonReleased(ControllerButtons _button, int _controllerID = 0);
 
             /**
              * @brief Makes the controller vibrate at a specific vibration effect.
@@ -288,7 +288,7 @@ namespace GDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadAxisJustPressed(GamePadAxis _axis, int _controllerID = 0);
+            bool isGamepadAxisJustPressed(ControllerAxis _axis, int _controllerID = 0);
 
             /**
              * @brief Returns true while the axis button is being pressed.
@@ -296,7 +296,7 @@ namespace GDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadAxisPressed(GamePadAxis _axis, int _controllerID = 0);
+            bool isGamepadAxisPressed(ControllerAxis _axis, int _controllerID = 0);
 
             /**
              * @brief Returns true while the axis button is not being pressed.
@@ -304,7 +304,7 @@ namespace GDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadAxisReleased(GamePadAxis _axis, int _controllerID = 0);
+            bool isGamepadAxisReleased(ControllerAxis _axis, int _controllerID = 0);
 
 
             /**
