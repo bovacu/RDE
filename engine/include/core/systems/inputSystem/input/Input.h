@@ -17,6 +17,9 @@
 
 namespace GDE {
 
+    /**
+     * @brief All of the events that the input system handles.
+     */
     enum SystemEventEnum {
         WINDOW_EVENT = SDL_WINDOWEVENT, QUIT_E = SDL_QUIT, WINDOW_EXIT_E = SDL_WINDOWEVENT_LEAVE, WINDOW_RESIZED_E = SDL_WINDOWEVENT_RESIZED,
         WINDOW_FOCUS_E = SDL_WINDOWEVENT_FOCUS_GAINED, WINDOW_LOST_FOCUS_E = SDL_WINDOWEVENT_FOCUS_LOST, WINDOW_AUDIO_DEVICE_CONNECTED_E = SDL_AUDIODEVICEADDED,
@@ -43,6 +46,9 @@ namespace GDE {
         UNKNOWN
     };
 
+    /**
+     * @brief Different type of inputs depending on the platform.
+     */
     enum InputType {
         WINDOW,
         MOUSE,
@@ -54,101 +60,300 @@ namespace GDE {
     class Engine;
     class Manager;
 
-    /// This class is the base for any input specific class that the engine wants to implement.
+    /**
+     * @brief This class is the base for any input specific class that the engine wants to implement.
+     */
     class Input {
         friend class InputManager;
         protected:
+            /**
+             * @see Window
+             */
             Window* window = nullptr;
+
+            /**
+             * @brief Map EventID -> Callback for event.
+             */
             std::unordered_map<int, UDelegate<void(SDL_Event&)>> events;
+
+            /**
+             * @brief Events that the system doesn't handle on purpose.
+             */
             std::vector<SystemEventEnum> ignoredEvents;
+
+            /**
+             * @see Engine
+             */
             Engine* engine;
 
         public:
+            /**
+             * @brief This method takes a raw SDL event and transforms it to a Engine event and starts the handling process.
+             * @param _event SDL event
+             * @return bool
+             */
             bool pollEvent(SDL_Event& _event);
+
+            /**
+             * @brief Checks if an specific event must or not be ignored.
+             * @param _eventType Event type
+             * @return bool
+             */
             bool ignoreEvent(const SDL_EventType& _eventType);
     };
 
     class WindowInput; class KeyboardInput; class MouseInput; class ControllerInput; class MobileInput;
-    /// This class allows the user to ask for any user input in a easy and accessible way.
-    /// All managers destroy all the resources before closing the application, it is not needed to be done by the end user.
+    /**
+     * @attention All managers destroy all the resources before closing the application, it is not needed to be done by the end user.
+     * @brief This class allows the user to ask for any user input in a easy and accessible way.
+     */
     class InputManager {
 
         private:
+            /**
+             * @see WindowInput
+             */
             WindowInput* windowInput;
+
+            /**
+             * @see KeyboardInput
+             */
             KeyboardInput* keyboardInput;
+
+            /**
+             * @see MouseInput
+             */
             MouseInput* mouseInput;
+
+            /**
+             * @see ControllerInput
+             */
             ControllerInput* controllerInput;
+
+            /**
+             * @see MobileInput
+             */
             MobileInput* mobileInput;
+
+            /**
+             * @see Engine
+             */
             Engine* engine;
 
         public:
-            /// This functions should not be called by end users.
+            /**
+             * @attention This is not meant to be called by end-users.
+             * @brief This initiates all of the crucial elements of the input system.
+             * @param _engine Engine
+             * @param _window Window
+             */
             void init(Engine* _engine, Window* _window);
 
-            /// This functions should not be called by end users.
+            /**
+             * @attention This is not meant to be called by end-users.
+             * @brief Destroys all input system elements.
+             */
             void destroy();
 
-            /// This functions should not be called by end users.
+            /**
+             * @attention This is not meant to be called by end-users.
+             * @brief Loops over all the captured events by SDL on a frame and handles them.
+             */
             void pollEvents();
 
         public:
-            /// Returns true if the key is pressed and won't return true until the key is released and pressed again.
+            /**
+             * @brief Returns true if the key is pressed and won't return true until the key is released and pressed again.
+             * @param _key Key pressed
+             * @return bool
+             */
             bool isKeyJustPressed(KeyCode _key);
-            /// Returns true if the key is released and won't return true until the key is pressed and released again.
+
+            /**
+             * @brief Returns true if the key is released and won't return true until the key is pressed and released again.
+             * @param _key Key released
+             * @return bool
+             */
             bool isKeyJustReleased(KeyCode _key);
-            /// Returns true while the key is being pressed.
+
+            /**
+             * @brief Returns true while the key is being pressed.
+             * @param _key Key pressed
+             * @return bool
+             */
             bool isKeyPressed(KeyCode _key);
-            /// Returns true while the key is not being pressed.
+
+            /**
+             * @brief Returns true while the key is not being pressed.
+             * @param _key Key released
+             * @return bool
+             */
             bool isKeyReleased(KeyCode _key);
 
 
-            /// Returns true if the button is pressed and won't return true until the button is released and pressed again.
+            /**
+             * @brief Returns true if the button is pressed and won't return true until the button is released and pressed again.
+             * @param _button Mouse button pressed
+             * @return bool
+             */
             bool isMouseJustPressed(MouseCode _button);
-            /// Returns true if the button is released and won't return true until the button is pressed and released again.
+
+            /**
+             * @brief Returns true if the button is released and won't return true until the button is pressed and released again.
+             * @param _button Mouse button released
+             * @return bool
+             */
             bool isMouseJustReleased(MouseCode _button);
-            /// Returns true while the button is being pressed.
+
+            /**
+             * @brief Returns true while the button is being pressed.
+             * @param _button Mouse button pressed
+             * @return bool
+             */
             bool isMousePressed(MouseCode _button);
-            /// Returns true while the button is not being pressed.
+
+            /**
+             * @brief Returns true while the button is not being pressed.
+             * @param _button Mouse button released
+             * @return bool
+             */
             bool isMouseReleased(MouseCode _button);
-            /// Returns the mouse position in screen coordinates, so x: [0, WindowWidth], y: [0, WindowHeight].
+
+            /**
+             * @brief Returns the mouse position in screen coordinates, so x: [0, WindowWidth], y: [0, WindowHeight].
+             * @param _centeredMiddleScreen Centered on screen center or left-bottom corner
+             * @return Vec2F
+             */
             Vec2F getMousePosScreenCoords(bool _centeredMiddleScreen = true);
-            /// Returns the mouse position inside the world coordinates system.
+
+            /**
+             * @brief Returns the mouse position inside the world coordinates system.
+             * @return Vec2F
+             */
             Vec2F getMousePosWorldPos();
 
 
-            /// This function changes the order of the controllers (use to set who is player1, for example).
+            /**
+             * @brief This function changes the order of the controllers (use to set who is player1, for example).
+             * @param _controllerID Current ID
+             * @param _as New ID
+             * @return bool
+             */
             bool reassignController(int _controllerID, int _as);
-            /// Returns true if the button is pressed and won't return true until the button is released and pressed again.
+
+            /**
+             * @brief Returns true if the button is pressed and won't return true until the button is released and pressed again.
+             * @param _button Button pressed
+             * @param _controllerID Controller ID
+             * @return bool
+             */
             bool isGamepadButtonJustPressed(GamePadButtons _button, int _controllerID = 0);
-            /// Returns true if the button is released and won't return true until the button is pressed and released again.
+
+            /**
+             * @brief Returns true if the button is released and won't return true until the button is pressed and released again.
+             * @param _button Button released
+             * @param _controllerID Controller ID
+             * @return bool
+             */
             bool isGamepadButtonJustReleased(GamePadButtons _button, int _controllerID = 0);
-            /// Returns true while the button is being pressed.
+
+            /**
+             * @brief Returns true while the button is being pressed.
+             * @param _button Button pressed
+             * @param _controllerID Controller ID
+             * @return bool
+             */
             bool isGamepadButtonPressed(GamePadButtons _button, int _controllerID = 0);
-            /// Returns true while the button is not being pressed.
+
+            /**
+             * @brief Returns true while the button is not being pressed.
+             * @param _button Button released
+             * @param _controllerID Controller ID
+             * @return bool
+             */
             bool isGamepadButtonReleased(GamePadButtons _button, int _controllerID = 0);
-            /// Makes the controller vibrate at a specific vibration effect.
+
+            /**
+             * @brief Makes the controller vibrate at a specific vibration effect.
+             * @param _controllerID Controller ID
+             * @param _vibrationEffectName Vibration effect
+             * @return bool
+             */
             bool gamepadVibrate(int _controllerID = 0, const std::string& _vibrationEffectName = "default");
 
 
-            /// Returns true if the axis button is pressed and won't return true until the axis button is released and pressed again.
+            /**
+             * @brief Returns true if the axis button is pressed and won't return true until the axis button is released and pressed again.
+             * @param _axis Controller Axis
+             * @param _controllerID Controller ID
+             * @return bool
+             */
             bool isGamepadAxisJustPressed(GamePadAxis _axis, int _controllerID = 0);
-            /// Returns true while the axis button is being pressed.
+
+            /**
+             * @brief Returns true while the axis button is being pressed.
+             * @param _axis Controller Axis
+             * @param _controllerID Controller ID
+             * @return bool
+             */
             bool isGamepadAxisPressed(GamePadAxis _axis, int _controllerID = 0);
-            /// Returns true while the axis button is not being pressed.
+
+            /**
+             * @brief Returns true while the axis button is not being pressed.
+             * @param _axis Controller axis
+             * @param _controllerID Controller ID
+             * @return bool
+             */
             bool isGamepadAxisReleased(GamePadAxis _axis, int _controllerID = 0);
 
 
-            /// Returns true if the screen is pressed and won't return true until the screen is released and pressed again.
+            /**
+             * @brief Returns true if the screen is pressed and won't return true until the screen is released and pressed again.
+             * @param _fingerID Finger ID
+             * @return bool
+             */
             bool isMobileScreenJustPressed(int _fingerID);
-            /// Returns true if the screen is released and won't return true until the button is screen and released again.
+
+            /**
+             * @brief Returns true if the screen is released and won't return true until the button is screen and released again.
+             * @param _fingerID Finger ID
+             * @return bool
+             */
             bool isMobileScreenJustReleased(int _fingerID);
-            /// Returns true while the screen is being pressed.
+
+            /**
+             * @brief Returns true while the screen is being pressed.
+             * @param _fingerID Finger ID
+             * @returnbool
+             */
             bool isMobileScreenPressed(int _fingerID);
-            /// Returns true while the screen is not being pressed.
+
+            /**
+             * @brief Returns true while the screen is not being pressed.
+             * @param _fingerID Finger ID
+             * @return bool
+             */
             bool isMobileScreenRelease(int _fingerID);
 
+            /**
+             * @brief Returns the list of ignored events for a platform.
+             * @param _inputType Type of input.
+             * @return std::vector<SystemEventEnum>
+             */
             std::vector<SystemEventEnum> getEventsIgnored(const InputType& _inputType);
+
+            /**
+             * @brief Adds an event as ignored.
+             * @param _inputType Input type
+             * @param _event Event type
+             */
             void addEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event);
+
+            /**
+             * @brief Removes and event as ignored.
+             * @param _inputType Input type
+             * @param _event Event type
+             */
             void removeEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event);
     };
 }
