@@ -1,5 +1,5 @@
 #include "core/render/window/Window.h"
-#include "engine/include/core/systems/eventSystem/WindowEvent.h"
+#include "core/systems/eventSystem/WindowEvent.h"
 #include "core/platform/PlatformHeaderSDL.h"
 #include "core/Engine.h"
 

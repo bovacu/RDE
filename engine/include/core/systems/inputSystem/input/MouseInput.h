@@ -6,7 +6,7 @@
 
 
 #include "core/util/Util.h"
-#include "engine/include/core/systems/inputSystem/keysAndButtons/MouseKeys.h"
+#include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
 #include "Input.h"
 
 namespace GDE {

@@ -2,7 +2,7 @@
 
 
 #include "core/systems/inputSystem/input/WindowInput.h"
-#include "engine/include/core/systems/eventSystem/WindowEvent.h"
+#include "core/systems/eventSystem/WindowEvent.h"
 #include "core/Engine.h"
 
 namespace GDE {

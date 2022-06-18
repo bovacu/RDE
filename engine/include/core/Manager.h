@@ -16,6 +16,7 @@
 #include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/systems/fileSystem/FileManager.h"
+#include "core/systems/inputSystem/input/ControllerInput.h"
 
 namespace GDE {
 
@@ -26,17 +27,65 @@ namespace GDE {
         public:
             Manager();
 
+            /**
+             * @see ConfigManager
+             */
             ConfigManager configManager;
+
+            /**
+            * @see TextureAtlasManager
+            */
             TextureAtlasManager textureManager;
+
+            /**
+            * @see ShaderManager
+            */
             ShaderManager shaderManager;
+
+            /**
+            * @see FontManager
+            */
             FontManager fontManager;
+
+            /**
+            * @see SoundManager
+            */
             SoundManager soundManager;
+
+            /**
+            * @see InputManager
+            */
             InputManager inputManager;
+
+            /**
+            * @see Console
+            */
             Console consoleManager;
+
+            /**
+            * @see SceneManager
+            */
             SceneManager sceneManager;
+
+            /**
+            * @see ECSManager
+            */
             ECSManager ecsManager;
+
+            /**
+            * @see PhysicsManager
+            */
             PhysicsManager physics;
+
+            /**
+            * @see FileManager
+            */
             FileManager fileManager;
+
+            /**
+            * @see ControllerVibrationManager
+            */
+            ControllerVibrationManager controllerVibrationManager;
 
         public:
             /**

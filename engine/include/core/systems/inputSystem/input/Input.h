@@ -4,9 +4,9 @@
 #define ENGINE2_0_INPUT_H
 
 #include "core/platform/PlatformHeaderSDL.h"
-#include "engine/include/core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
-#include "engine/include/core/systems/inputSystem/keysAndButtons/MouseKeys.h"
-#include "engine/include/core/systems/inputSystem/keysAndButtons/GamePadButtons.h"
+#include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
+#include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
+#include "core/systems/inputSystem/keysAndButtons/GamePadButtons.h"
 
 #include "core/util/Util.h"
 #include "core/render/window/Window.h"

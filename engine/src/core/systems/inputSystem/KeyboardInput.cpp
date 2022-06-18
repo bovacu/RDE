@@ -2,7 +2,7 @@
 
 
 #include "core/systems/inputSystem/input/KeyboardInput.h"
-#include "engine/include/core/systems/eventSystem/KeyEvent.h"
+#include "core/systems/eventSystem/KeyEvent.h"
 
 namespace GDE {
 

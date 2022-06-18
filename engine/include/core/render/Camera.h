@@ -7,7 +7,7 @@
 
 #include <glm/ext/matrix_float4x4.hpp>
 #include "core/util/Util.h"
-#include "engine/include/core/systems/eventSystem/MouseEvent.h"
+#include "core/systems/eventSystem/MouseEvent.h"
 #include "core/render/elements/ViewPort.h"
 #include "core/graph/Graph.h"
 

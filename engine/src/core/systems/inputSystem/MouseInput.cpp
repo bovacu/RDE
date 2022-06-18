@@ -2,7 +2,7 @@
 
 
 #include "core/systems/inputSystem/input/MouseInput.h"
-#include "engine/include/core/systems/eventSystem/MouseEvent.h"
+#include "core/systems/eventSystem/MouseEvent.h"
 
 namespace GDE {
 

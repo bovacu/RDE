@@ -1,7 +1,7 @@
 // Created by borja on 10/2/22.
 
 #include "core/systems/inputSystem/input/MobileInput.h"
-#include "engine/include/core/systems/eventSystem/MobileEvent.h"
+#include "core/systems/eventSystem/MobileEvent.h"
 
 namespace GDE {
 

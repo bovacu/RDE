@@ -6,7 +6,7 @@
 
 #include <entt/entt.hpp>
 #include "core/util/Delta.h"
-#include "engine/include/core/systems/eventSystem/Event.h"
+#include "core/systems/eventSystem/Event.h"
 #include "core/render/elements/Texture.h"
 
 namespace GDE {

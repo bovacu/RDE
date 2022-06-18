@@ -3,9 +3,9 @@
 #include "core/graph/Components.h"
 #include "core/util/Functions.h"
 #include "core/systems/uiSystem/Canvas.h"
-#include "engine/include/core/systems/eventSystem/KeyEvent.h"
-#include "engine/include/core/systems/eventSystem/ControllerEvent.h"
-#include "engine/include/core/systems/eventSystem/MobileEvent.h"
+#include "core/systems/eventSystem/KeyEvent.h"
+#include "core/systems/eventSystem/ControllerEvent.h"
+#include "core/systems/eventSystem/MobileEvent.h"
 
 namespace GDE {
 

@@ -2,16 +2,12 @@
 
 
 #include "core/systems/inputSystem/input/ControllerInput.h"
-#include "engine/include/core/systems/eventSystem/ControllerEvent.h"
+#include "core/systems/eventSystem/ControllerEvent.h"
+#include "core/Engine.h"
 
 namespace GDE {
 
-    VibrationManager& VibrationManager::get() {
-        static VibrationManager _vibrationManager;
-        return _vibrationManager;
-    }
-
-    void VibrationManager::init(std::unordered_map<int, Controller*>* _controllers) {
+    void ControllerVibrationManager::init(std::unordered_map<int, Controller*>* _controllers) {
         controllers = _controllers;
         addVibrationEffect("default", {
             500,
@@ -22,7 +18,7 @@ namespace GDE {
         });
     }
 
-    void VibrationManager::addVibrationEffect(const std::string& _effectName, const VibrationConfig& _config) {
+    void ControllerVibrationManager::addVibrationEffect(const std::string& _effectName, const VibrationConfig& _config) {
         SDL_HapticEffect _effect;
 
         SDL_memset( &_effect, 0, sizeof(SDL_HapticEffect) );
@@ -37,18 +33,18 @@ namespace GDE {
         effects[_effectName] = { _effect };
     }
 
-    void VibrationManager::removeVibrationEffect(const std::string& _effectName) {
+    void ControllerVibrationManager::removeVibrationEffect(const std::string& _effectName) {
         for(auto _controllerID : effects[_effectName].controllerIDs)
             SDL_HapticDestroyEffect( controllers->at(_controllerID)->vibration, effects[_effectName].vibrationEffectID);
         effects.erase(_effectName);
     }
 
-    void VibrationManager::assignVibrationEffectToController(const std::string& _effectName, int _controllerID) {
+    void ControllerVibrationManager::assignVibrationEffectToController(const std::string& _effectName, int _controllerID) {
         effects[_effectName].vibrationEffectID = SDL_HapticNewEffect(controllers->at(_controllerID)->vibration, &effects[_effectName].vibrationEffect);
         effects[_effectName].controllerIDs.emplace_back(_controllerID);
     }
 
-    void VibrationManager::destroy() {
+    void ControllerVibrationManager::destroy() {
         for(auto& _effect : effects) {
             for(auto _controllerID : _effect.second.controllerIDs)
                 SDL_HapticDestroyEffect( controllers->at(_controllerID)->vibration, _effect.second.vibrationEffectID);
@@ -89,11 +85,11 @@ namespace GDE {
         window = _window;
 
         UDelegate<void(SDL_Event&)> _gpJ, _gpBD, _gpBU, _gpD, _gpC;
-        _gpJ.bind<&ControllerInput::onGamepadsMoved>(this);
-        _gpBD.bind<&ControllerInput::onGamepadsButtonDown>(this);
-        _gpBU.bind<&ControllerInput::onGamepadsButtonUp>(this);
-        _gpC.bind<&ControllerInput::onGamepadConnected>(this);
-        _gpD.bind<&ControllerInput::onGamepadDisconnected>(this);
+        _gpJ.bind<&ControllerInput::onControllerMoved>(this);
+        _gpBD.bind<&ControllerInput::onControllerButtonDown>(this);
+        _gpBU.bind<&ControllerInput::onControllerButtonUp>(this);
+        _gpC.bind<&ControllerInput::onControllerConnected>(this);
+        _gpD.bind<&ControllerInput::onControllerDisconnected>(this);
 
         events[SystemEventEnum::GAMEPAD_JOYSTICK] = _gpJ;
         events[SystemEventEnum::GAMEPAD_BUTTON_DOWN] = _gpBD;
@@ -104,10 +100,10 @@ namespace GDE {
         ignoredEvents = { JOYSTICK_HAT_MOTION_E, JOYSTICK_BALL_MOTION_E, JOYSTICK_BUTTON_DOWN_E, JOYSTICK_BUTTON_UP_E, JOYSTICK_CONNECTED_E,
                         JOYSTICK_DISCONNECTED_E, JOYSTICK_AXIS_MOTION_E };
 
-        VibrationManager::get().init(&controllers);
+        engine->manager.controllerVibrationManager.init(&controllers);
     }
 
-    void ControllerInput::initGamepads() {
+    void ControllerInput::initControllers() {
         int _numJoysticks = SDL_NumJoysticks();
         LOG_I("Num of Joysticks: ", _numJoysticks)
         if(_numJoysticks < 1) {
@@ -132,13 +128,13 @@ namespace GDE {
             _controller->vibration = SDL_HapticOpenFromJoystick(SDL_GameControllerGetJoystick(_currentGameController));
             controllers[SDL_JoystickGetDeviceInstanceID(_i)] = _controller;
 
-            VibrationManager::get().assignVibrationEffectToController("default", _controller->ID);
+            engine->manager.controllerVibrationManager.assignVibrationEffectToController("default", _controller->ID);
         }
 
         LOG_I(_numJoysticks, " connected and ", controllers.size(), " loaded")
     }
 
-    void ControllerInput::onGamepadsMoved(SDL_Event& _event) {
+    void ControllerInput::onControllerMoved(SDL_Event& _event) {
         Vec2F _left;
         if(_event.caxis.axis == 0) _left.x = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
         if(_event.caxis.axis == 1) _left.y = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
@@ -183,7 +179,7 @@ namespace GDE {
             controllers[_controllerID]->pressedGamepadAxis[GamePadAxis::RT] = 1;
     }
 
-    void ControllerInput::onGamepadsButtonDown(SDL_Event& _event) {
+    void ControllerInput::onControllerButtonDown(SDL_Event& _event) {
         auto _key = static_cast<GamePadButtons>(_event.cbutton.button);
 
         ControllerButtonDownEvent _e(_key);
@@ -194,7 +190,7 @@ namespace GDE {
         controllers[_controllerID]->pressedGamepadButtons[_key] = 1;
     }
 
-    void ControllerInput::onGamepadsButtonUp(SDL_Event& _event) {
+    void ControllerInput::onControllerButtonUp(SDL_Event& _event) {
         auto _key = static_cast<GamePadButtons>(_event.cbutton.button);
         int _controllerID = _event.cdevice.which;
         controllers[_controllerID]->pressedGamepadButtons[_key] = 0;
@@ -203,13 +199,13 @@ namespace GDE {
         window->consumeEvent(_e);
     }
 
-    void ControllerInput::onGamepadConnected(SDL_Event& _event) {
+    void ControllerInput::onControllerConnected(SDL_Event& _event) {
         #if !IS_MOBILE()
-        initGamepads();
+        initControllers();
         #endif
     }
 
-    void ControllerInput::onGamepadDisconnected(SDL_Event& _event) {
+    void ControllerInput::onControllerDisconnected(SDL_Event& _event) {
         LOG_W("Removed controller: ", controllers[_event.cdevice.which]->ID)
         if(controllers[_event.cdevice.which]->ID >= 0)
             SDL_GameControllerClose(controllers[_event.cdevice.which]->sdlGameController);
@@ -256,7 +252,7 @@ namespace GDE {
     }
 
     void ControllerInput::vibrate(const std::string& _vibrateEffect, int _controllerID) {
-        SDL_HapticRunEffect( controllers.at(_controllerID)->vibration, VibrationManager::get().effects[_vibrateEffect].vibrationEffectID, 1 );
+        SDL_HapticRunEffect(controllers.at(_controllerID)->vibration, engine->manager.controllerVibrationManager.effects[_vibrateEffect].vibrationEffectID, 1 );
     }
 
     bool ControllerInput::hasController(int _id) {
@@ -265,7 +261,7 @@ namespace GDE {
 
     void ControllerInput::destroy() {
         LOG_S("Cleaning up vibrations effects")
-        VibrationManager::get().destroy();
+        engine->manager.controllerVibrationManager.destroy();
 
         LOG_S("Cleaning up controllers")
         for(auto& _controller : controllers) {

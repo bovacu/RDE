@@ -4,7 +4,7 @@
 #define WINDOW_H
 
 #include "core/util/Util.h"
-#include "engine/include/core/systems/eventSystem/Event.h"
+#include "core/systems/eventSystem/Event.h"
 #include "core/platform/PlatformHeaderSDL.h"
 
 namespace GDE {

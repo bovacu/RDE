@@ -7,7 +7,7 @@
 
 #include <chrono>
 #include "core/graph/Scene.h"
-#include "engine/include/core/systems/eventSystem/MouseEvent.h"
+#include "core/systems/eventSystem/MouseEvent.h"
 #include "core/systems/profiling/Profiler.h"
 #include "submodules/imgui/backends/imgui_impl_opengl3.h"
 #include "submodules/imgui/backends/imgui_impl_sdl.h"
