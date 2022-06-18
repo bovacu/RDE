@@ -12,16 +12,29 @@
 
 namespace GDE {
 
-    class JoystickAxisMovedEvent : public Event {
+    class ControllerAxisMovedEvent : public Event {
         private:
             Vec2F leftJoy, rightJoy, backButtons;
 
         public:
-            JoystickAxisMovedEvent(const Vec2F& _leftJoy, const Vec2F& _rightJoy, const Vec2F& _backButtons) : leftJoy(_leftJoy), rightJoy(_rightJoy),
-                                                                                                          backButtons(_backButtons) {  }
-
+            ControllerAxisMovedEvent(const Vec2F& _leftJoy, const Vec2F& _rightJoy, const Vec2F& _backButtons) : leftJoy(_leftJoy), rightJoy(_rightJoy),
+                                                                                                                 backButtons(_backButtons) {  }
+            /**
+             * @brief Returns how much the left joystick of the controller was moved, normalized.
+             * @return Vec2F
+             */
             [[nodiscard]] inline Vec2F getLeftJoy() const { return leftJoy; }
+
+            /**
+             * @brief Returns how much the right joystick of the controller was moved, normalized.
+             * @return Vec2F
+             */
             [[nodiscard]] inline Vec2F getRightJoy() const { return rightJoy; }
+
+            /**
+             * @brief Returns how much the back buttons of the controller were moved, normalized. X = left, Y = right.
+             * @return Vec2F
+             */
             [[nodiscard]] inline Vec2F getBackButtons() const { return backButtons; }
 
             [[nodiscard]] std::string toString() const override {
@@ -38,13 +51,17 @@ namespace GDE {
 
 
 
-    class JoystickButtonDownEvent : public Event {
+    class ControllerButtonDownEvent : public Event {
         private:
             GamePadButtons button;
 
         public:
-            explicit JoystickButtonDownEvent(GamePadButtons _button) : button(_button) {  }
+            explicit ControllerButtonDownEvent(GamePadButtons _button) : button(_button) {  }
 
+            /**
+             * @brief Returns the pressed button.
+             * @return GamePadButtons
+             */
             [[nodiscard]] inline GamePadButtons getButton() const { return button; }
 
             [[nodiscard]] std::string toString() const override {
@@ -59,13 +76,17 @@ namespace GDE {
             [[nodiscard]] int getCategoryFlags() const override { return EventCategoryInput | EventCategoryControllerButton; }
     };
 
-    class JoystickButtonUpEvent : public Event {
+    class ControllerButtonUpEvent : public Event {
         private:
         GamePadButtons button;
 
         public:
-            explicit JoystickButtonUpEvent(GamePadButtons _button) : button(_button) {  }
+            explicit ControllerButtonUpEvent(GamePadButtons _button) : button(_button) {  }
 
+            /**
+             * @brief Returns the freed button.
+             * @return GamePadButtons
+             */
             [[nodiscard]] inline GamePadButtons getButton() const { return button; }
 
             [[nodiscard]] std::string toString() const override {

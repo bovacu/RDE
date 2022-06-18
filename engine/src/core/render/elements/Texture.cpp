@@ -21,7 +21,6 @@ namespace GDE {
     Texture::Texture(Atlas* _spriteSheet, const IntRect& _region) {
         openGLTextureID = _spriteSheet->texture->openGLTextureID;
         region = _region;
-        refCount = _spriteSheet->texture->refCount;
         textureSize = _region.size;
         spriteSheetSize = { (int)_spriteSheet->textureWidth, (int)_spriteSheet->textureHeight };
         channels = _spriteSheet->texture->channels;

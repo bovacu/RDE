@@ -67,11 +67,6 @@ namespace GDE {
         }
     }
 
-    bool TextureAtlasManager::isTextureEmpty(const Atlas& _atlas, uint _x, uint _y) const {
-        int _transparentPixels = 0;
-        return _transparentPixels == _atlas.tileWidth * _atlas.tileHeight;
-    }
-
     Atlas* TextureAtlasManager::getAtlas(const std::string& _atlasName) {
         if(atlases.find(_atlasName) == atlases.end()) {
             LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
@@ -90,8 +85,6 @@ namespace GDE {
                 (uint)_atlas.second->subTextures.size(),
                 _atlas.second->textureWidth,
                 _atlas.second->textureHeight,
-                _atlas.second->tileWidth,
-                _atlas.second->tileHeight,
                 _atlas.first.c_str()
             });
         }

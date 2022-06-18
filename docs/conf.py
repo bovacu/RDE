@@ -31,7 +31,8 @@ extensions = [
    # there may be others here already, e.g. 'sphinx.ext.mathjax'
    'breathe',
    'exhale',
-   'sphinx_rtd_theme'
+   'sphinx_rtd_theme',
+   'myst_parser'
 ]
 
 # Setup the breathe extension
@@ -55,6 +56,21 @@ exhale_args = {
    "exhaleExecutesDoxygen": True,
    "exhaleDoxygenStdin":    "INPUT = ../engine/include"
 }
+
+myst_enable_extensions = [
+   "amsmath",
+   "colon_fence",
+   "deflist",
+   "dollarmath",
+   "fieldlist",
+   "html_admonition",
+   "html_image",
+   "replacements",
+   "smartquotes",
+   "strikethrough",
+   "substitution",
+   "tasklist",
+]
 
 # Tell sphinx what the primary language being documented is.
 primary_domain = 'cpp'

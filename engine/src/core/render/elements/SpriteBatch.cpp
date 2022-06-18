@@ -27,11 +27,11 @@ namespace GDE {
         glGenBuffers(1, &ibo);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * maxVerticesPerDrawCall * 6), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * maxIndicesPerDrawCall * 6), nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * maxVerticesPerDrawCall), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * maxIndicesPerDrawCall), nullptr, GL_DYNAMIC_DRAW);
         GLsizei _structSize = sizeof(Vertex2dUVColor);
 
         /* Attributes must be in the same order as in Vertex2dUVColor. Parameters are:
@@ -254,8 +254,8 @@ namespace GDE {
 
         Batch _batch;
         _batch.layer = _layer;
-        _batch.indexBuffer.reserve(maxVerticesPerDrawCall * 6);
-        _batch.vertexBuffer.reserve(maxVerticesPerDrawCall * 6);
+        _batch.indexBuffer.reserve(maxIndicesPerDrawCall * 6);
+        _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 6);
         _batch.textureID = _renderer.getTexture();
         _batch.priority = _priority;
         _batch.shaderID = _renderer.shaderID;
@@ -283,7 +283,7 @@ namespace GDE {
 
     void SpriteBatch::Batch::addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform) {
 
-        if(indexBuffer.size() + 6 >= spriteBatch->maxVerticesPerDrawCall)
+        if(indexBuffer.size() + 6 >= spriteBatch->maxIndicesPerDrawCall)
             spriteBatch->flush();
 
         if(textureID < 0)
@@ -327,7 +327,7 @@ namespace GDE {
 
     void SpriteBatch::Batch::addText(const TextRenderer& _text, const Transform& _transform) {
 
-        if(indexBuffer.size() + _text.getText().size() * 6 >= spriteBatch->maxVerticesPerDrawCall)
+        if(indexBuffer.size() + _text.getText().size() * 6 >= spriteBatch->maxIndicesPerDrawCall)
             spriteBatch->flush();
 
         if(textureID < 0) {
@@ -401,7 +401,7 @@ namespace GDE {
     }
 
     void SpriteBatch::Batch::addNinePatchSprite(const NinePatchSprite& _ninePatch, const Transform& _transform) {
-        if(vertexCount + 9 * 6 >= spriteBatch->maxVerticesPerDrawCall)
+        if(vertexCount + 9 * 6 >= spriteBatch->maxIndicesPerDrawCall)
             spriteBatch->flush();
 
         if(textureID < 0)

@@ -8,42 +8,117 @@
 
 namespace GDE {
 
+    /**
+     * @brief This class represents the way the scene is going to be rendered and how much of the screen is going to be
+     * used to draw. This interface is the base of ant custom-viewport provided by the engine and must be followed
+     * for any user-defined viewport.
+     */
     class IViewPort {
         protected:
+            /**
+             * @brief Resolution that we want to render at.
+             */
             Vec2I virtualResolution = {};
+
+            /**
+             * @brief Actual resolution of the Window or the device.
+             */
             Vec2I deviceResolution = {};
+
+            /**
+             * @brief Scalar that scales up or down the scene to be rendered according to the IViewPort implementation.
+             */
             Vec2F scalingFactor = {1, 1};
+
+            /**
+             * @brief Aspect ratio of the Window or device screen.
+             */
             float aspectRatio = -1;
 
         public:
+            /**
+             * @brief Returns the virtual resolution.
+             * @return Vec2I
+             */
             [[nodiscard]] Vec2I getVirtualResolution();
+
+            /**
+             * @brief Returns the aspect ration.
+             * @return float
+             */
             [[nodiscard]] float getAspectRatio() const;
+
+            /**
+             * @brief Returns the scaling factor.
+             * @return Vec2F
+             */
             [[nodiscard]] Vec2F getScalingFactor();
+
+            /**
+             * @brief Returns the device resolution.
+             * @return Vec2I
+             */
             [[nodiscard]] Vec2I getDeviceResolution();
+
+            /**
+             * @brief Updates the device resolution.
+             * @param _deviceSize Device resolution
+             */
             virtual void update(const Vec2I& _deviceSize) = 0;
+
+            /**
+             * @brief Updates the virtual resolution.
+             * @param _virtualResolution Virtual resolution
+             */
             virtual void updateVirtualResolution(const Vec2I& _virtualResolution) = 0;
+
             virtual ~IViewPort() = default;
     };
 
-    // Make everything scale with the aspect-ratio of the device size and virtual device
+    /**
+     * @brief Make everything scale with the aspect-ratio of the device size and virtual device
+     */
     class AdaptiveViewPort : public IViewPort {
         public:
             explicit AdaptiveViewPort(const Vec2I& _virtualDesiredResolution);
+
+            /**
+             * @see IViewPort
+             */
             void update(const Vec2I& _deviceSize) override;
+
+            /**
+             * @see IViewPort
+             */
             void updateVirtualResolution(const Vec2I& _virtualResolution) override;
-            ~AdaptiveViewPort() override {  };
+
+            ~AdaptiveViewPort() override = default;;
     };
 
-    // The bigger the device screen, the more you show, the smaller, the less
+    /**
+     * @brief The bigger the device screen, the more you show, the smaller, the less
+     */
     class FreeViewPort : public IViewPort {
         public:
             explicit FreeViewPort(const Vec2I & _windowSize);
+
+            /**
+             * @see IViewPort
+             */
             void update(const Vec2I& _deviceSize) override;
+
+            /**
+             * @see IViewPort
+             */
             void updateVirtualResolution(const Vec2I& _virtualResolution) override;
-            ~FreeViewPort() override {  };
+
+            ~FreeViewPort() override = default;;
     };
 
-    // This one is the one that sets the black lines
+    /**
+     * @brief This one is the one that sets the black lines
+     * @warning Not implemented yet
+     */
     class FixedViewPort : public IViewPort {
 
     };

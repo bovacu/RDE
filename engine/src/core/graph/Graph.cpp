@@ -88,13 +88,11 @@ namespace GDE {
             Renderer::beginDraw(*_camera, getComponent<Transform>(_camera->ID));
             _camera->setCameraSize(_camera->getCameraSize());
             {
-                _spriteRendererGroup.each([&_camera](const auto _entity, SpriteRenderer& _spriteRenderer, const Transform& _transform, const Active& _) {
-                    _spriteRenderer.updateViewport(_camera->getViewport());
+                _spriteRendererGroup.each([](const auto _entity, SpriteRenderer& _spriteRenderer, const Transform& _transform, const Active& _) {
                     Renderer::draw(_spriteRenderer, _transform);
                 });
 
-                _textRendererGroup.each([&_camera](const auto _entity, TextRenderer& _text, const Transform& _transform, const Active& _) {
-                    _text.updateViewport(_camera->getViewport());
+                _textRendererGroup.each([](const auto _entity, TextRenderer& _text, const Transform& _transform, const Active& _) {
                     Renderer::draw(_text, _transform);
                 });
             }

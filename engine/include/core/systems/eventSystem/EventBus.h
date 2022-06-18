@@ -6,7 +6,7 @@
 #include "core/util/Logger.h"
 
 /**
- * The Event bus works in the following way:
+ * @brief The Event bus works in the following way:
  *
  *  1 - We need to specify the type of Event that our EventBus is going to use to store each of the observable events.
  *      This Event can be anything, like a string, an int, bool, classes, structs, enums... Then we specify the
@@ -58,6 +58,11 @@
 namespace GDE {
 
     template <typename Event, typename... AssociatedFunctionArgs>
+    /**
+     * @warning Deprecated
+     * @tparam Event
+     * @tparam AssociatedFunctionArgs
+     */
     class EventBus {
 //    static_assert(std::is_enum<Type>::value, "Must be an enum type");
         public:

@@ -44,7 +44,8 @@ extensions = [
    # there may be others here already, e.g. 'sphinx.ext.mathjax'
    'breathe',
    'exhale',
-   'sphinx_rtd_theme'
+   'sphinx_rtd_theme',
+   'myst_parser'
 ]
 
 # Setup the breathe extension
@@ -68,6 +69,21 @@ exhale_args = {
    "exhaleExecutesDoxygen": True,
    "exhaleDoxygenStdin":    "INPUT = ../engine/include"
 }
+
+myst_enable_extensions = [
+   "amsmath",
+   "colon_fence",
+   "deflist",
+   "dollarmath",
+   "fieldlist",
+   "html_admonition",
+   "html_image",
+   "replacements",
+   "smartquotes",
+   "strikethrough",
+   "substitution",
+   "tasklist",
+]
 
 # Tell sphinx what the primary language being documented is.
 primary_domain = 'cpp'
@@ -101,21 +117,32 @@ cat >index.rst <<EOL
 .. GDE documentation master file, created by
    sphinx-quickstart on Thu Jun 16 11:55:40 2022.
    You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+   contain the root  directive.
 
 Welcome to GDE's documentation!
 ===============================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    api/library_root
+   internalDocs/internalDocs
+
 
 
 Indices and tables
 ==================
 
-* :ref:`genindex`
-* :ref:`search`
+* :ref:\`genindex\`
+* :ref:\`search\`
 EOL
+
+mkdir internalDocs
+touch internalDocs/internalDocs.md
+
+cat >internalDocs/internalDocs.md <<EOL
+\`\`\`{include} ../EngineDocs.md
+\`\`\`
+EOL
+

@@ -51,11 +51,6 @@ namespace GDE {
              * @return IntRect 
              */
             [[nodiscard]] virtual IntRect getRegion() const = 0;
-
-            /**
-             * @deprecated This needs to go
-             */
-            virtual void updateViewport(IViewPort* _viewport) = 0;
     };
 
 }

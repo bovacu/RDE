@@ -14,14 +14,18 @@
 #include "core/render/elements/ShaderManager.h"
 #include "core/systems/ecsSystem/ECSManager.h"
 #include "core/systems/physicsSystem/PhysicsManager.h"
+#include "core/systems/configSystem/ConfigManager.h"
 
 namespace GDE {
 
-    /// This class contains all of the managers of the engine, so end users can access all of them from one single place.
+    /**
+     * @brief This class contains all of the managers of the engine, so end users can access all of them from one single place.
+     */
     class Manager {
         public:
             Manager();
 
+            ConfigManager configManager;
             TextureAtlasManager textureManager;
             ShaderManager shaderManager;
             FontManager fontManager;
@@ -33,9 +37,17 @@ namespace GDE {
             PhysicsManager physics;
 
         public:
-            /// This function should not be called by end users.
+            /**
+             * @attention This function should not be called by end users.
+             * @brief Initiates all of the managers.
+             * @param _engine Reference to the engine.
+             */
             void init(Engine* _engine);
-            /// This function should not be called by end users.
+
+            /**
+             * @attention This function should not be called by end users.
+             * @brief Destroys all of the managers.
+             */
             void destroy();
     };
 

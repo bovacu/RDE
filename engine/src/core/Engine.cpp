@@ -11,7 +11,7 @@ namespace GDE {
 
 
     Engine::Engine() {
-        ConfigManager::loadGDEConfig(&gdeConfig);
+        manager.configManager.loadGDEConfig(&gdeConfig);
         window = new Window(&gdeConfig);
 
         UDelegate<void(Event&)> onEventDelegate;

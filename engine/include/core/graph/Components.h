@@ -113,11 +113,6 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            void updateViewport(IViewPort* _viewport) override;
-
-            /**
-             * @see IRenderizable
-             */
             [[nodiscard]] Vec2I getSize() const override { return texture->getSize(); }
 
             /**
@@ -276,11 +271,6 @@ namespace GDE {
              * @see IRenderizable
              */
             [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
-
-            /**
-             * @see IRenderizable
-             */
-            void updateViewport(IViewPort* _viewport) override { viewport = _viewport; }
 
             /**
              * @see IRenderizable
@@ -631,11 +621,6 @@ namespace GDE {
              * @see IRenderizable
              */
             [[nodiscard]] IntRect getRegion() const override { return texture->getRegion(); }
-
-            /**
-             * @see IRenderizable
-             */
-            void updateViewport(IViewPort* _viewport) override {  }
 
             ~UI() = default;
     };

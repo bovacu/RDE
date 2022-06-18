@@ -7,14 +7,15 @@ Welcome to GDE's documentation!
 ===============================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    api/library_root
+   internalDocs/internalDocs
 
 
 Indices and tables
 ==================
 
-* :ref:
-* :ref:
+* :ref:`genindex`
+* :ref:`search`

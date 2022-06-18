@@ -2,7 +2,7 @@
 
 
 #include "core/systems/inputSystem/input/ControllerInput.h"
-#include "engine/include/core/systems/eventSystem/JoystickEvent.h"
+#include "engine/include/core/systems/eventSystem/ControllerEvent.h"
 
 namespace GDE {
 
@@ -151,7 +151,7 @@ namespace GDE {
         if(_event.caxis.axis == 4) _back.x = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
         if(_event.caxis.axis == 5) _back.y = (float)_event.caxis.value / (float)SDL_JOYSTICK_AXIS_MAX;
 
-        JoystickAxisMovedEvent _e(_left, _right, _back);
+        ControllerAxisMovedEvent _e(_left, _right, _back);
         window->consumeEvent(_e);
 
         int _controllerID = _event.cdevice.which;
@@ -186,7 +186,7 @@ namespace GDE {
     void ControllerInput::onGamepadsButtonDown(SDL_Event& _event) {
         auto _key = static_cast<GamePadButtons>(_event.cbutton.button);
 
-        JoystickButtonDownEvent _e(_key);
+        ControllerButtonDownEvent _e(_key);
         window->consumeEvent(_e);
 
         int _controllerID = _event.jdevice.which;
@@ -199,7 +199,7 @@ namespace GDE {
         int _controllerID = _event.cdevice.which;
         controllers[_controllerID]->pressedGamepadButtons[_key] = 0;
 
-        JoystickButtonUpEvent _e(_key);
+        ControllerButtonUpEvent _e(_key);
         window->consumeEvent(_e);
     }
 

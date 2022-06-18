@@ -28,7 +28,7 @@ namespace GDE {
 
     void SceneManager::loadScene(Scene* _scene, const std::string& _sceneName) {
         scenes[_sceneName] = _scene;
-        ConfigManager::loadScene(&engine->manager, _scene, &engine->getWindow(), APPEND_S(SCENES_PATH, _sceneName, ".yaml"));
+        engine->manager.configManager.loadScene(&engine->manager, _scene, &engine->getWindow(), APPEND_S(SCENES_PATH, _sceneName, ".yaml"));
         for(auto* _canvas : _scene->getCanvases()) _canvas->matchMainCameraViewPort();
     }
 

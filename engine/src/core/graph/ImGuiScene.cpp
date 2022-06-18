@@ -211,7 +211,6 @@ namespace GDE {
                     ImGui::Text("Kb: %.2f", _ti.kb);
                     ImGui::Text("Texture size: %dx%d", _ti.textureWidth, _ti.textureHeight);
                     ImGui::Text("Number of tiles: %d", _ti.numberOfTiles);
-                    ImGui::Text("Tile size: %dx%d", _ti.tileWidth, _ti.tileHeight);
                     _child++;
                     ImGui::TreePop();
                 }

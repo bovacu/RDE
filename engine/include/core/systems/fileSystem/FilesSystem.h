@@ -8,6 +8,9 @@
 
 namespace GDE {
 
+    /**
+     * @brief Result of a file operation.
+     */
     enum FileResult {
         FILE_OK,
         FILE_NOT_FOUND,
@@ -15,9 +18,9 @@ namespace GDE {
         FILE_NOT_ALL_LINES_IN_SCOPE
     };
 
-
-
-
+    /**
+     * @brief Different types of file operations.
+     */
     enum FileMode {
         READ,
         WRITE,
@@ -26,25 +29,45 @@ namespace GDE {
         READ_AND_APPEND,
     };
 
-
-
-
+    /**
+     * @brief This represents the content of a file.
+     * @tparam T Type of content
+     */
     template<typename T>
     struct File {
+        /**
+         * @brief Type of content, usually a simple string or a std::vector<string>
+         */
         T content;
+
+        /**
+         * @brief Result of the operation.
+         */
         FileResult result = FileResult::FILE_OK;
     };
     typedef File<std::string> FileStr;
     typedef File<std::vector<std::string>> FileLines;
 
 
-
-
     class FilesSystem;
+    /**
+     * @brief This class representes a loaded file.
+     */
     class FileHandler {
         private:
+            /**
+             * @brief Raw data of the file.
+             */
             SDL_RWops* file;
+
+            /**
+             * @brief Operations that it will work with.
+             */
             FileMode mode;
+
+            /**
+             * @brief Path to the file.
+             */
             std::string originalPath;
 
         private:

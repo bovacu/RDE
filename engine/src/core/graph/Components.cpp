@@ -4,7 +4,7 @@
 #include "core/util/Functions.h"
 #include "core/systems/uiSystem/Canvas.h"
 #include "engine/include/core/systems/eventSystem/KeyEvent.h"
-#include "engine/include/core/systems/eventSystem/JoystickEvent.h"
+#include "engine/include/core/systems/eventSystem/ControllerEvent.h"
 #include "engine/include/core/systems/eventSystem/MobileEvent.h"
 
 namespace GDE {
@@ -297,10 +297,6 @@ namespace GDE {
         viewport = _scene->getMainCamera()->getViewport();
     }
 
-    void SpriteRenderer::updateViewport(IViewPort* _viewport) {
-        viewport = _viewport;
-    }
-
     std::string SpriteRenderer::getTexturePath() {
         return texture->getPath();
     }
@@ -378,9 +374,9 @@ namespace GDE {
                 return;
             }
 
-            if(_eventDispatcher.dispatchEvent<JoystickButtonUpEvent>() && !onGamepadButtonPressed.isEmpty()) {
+            if(_eventDispatcher.dispatchEvent<ControllerButtonUpEvent>() && !onGamepadButtonPressed.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
-                auto* _jbue = (JoystickButtonUpEvent*)&_event;
+                auto* _jbue = (ControllerButtonUpEvent*)&_event;
                 onGamepadButtonPressed(_jbue->getButton());
                 return;
             }
