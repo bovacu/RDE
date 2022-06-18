@@ -15,6 +15,9 @@ namespace GDE {
     class Engine;
     class Canvas;
 
+    /**
+     * @brief This class represents what is rendered in the window and all its related systems.
+     */
     class Scene {
         friend class Graph;
 
