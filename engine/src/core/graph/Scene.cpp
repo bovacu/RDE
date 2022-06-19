@@ -85,5 +85,41 @@ namespace GDE {
     Scene::~Scene() {
         for(auto* _canvas : canvases)
             delete _canvas;
+
+        prefabs.clear();
+    }
+
+    Canvas* Scene::addNewCanvas(const std::string& _canvasTag) {
+        auto* _canvas = new Canvas(this, &engine->getWindow(), _canvasTag);
+        canvases.push_back(_canvas);
+        return canvases.back();
+    }
+
+    void Scene::removeCanvas(const std::string& _canvasTag) {
+        auto _found = std::find_if(canvases.begin(), canvases.end(), [&_canvasTag](Canvas* _c) {
+            return _c->graph.name == _canvasTag;
+        });
+        if(_found == canvases.end()) return;
+
+        canvases.erase(_found);
+    }
+
+    void Scene::removeCanvas(Canvas* _canvas) {
+        auto _found = std::find(canvases.begin(), canvases.end(), _canvas);
+        if(_found == canvases.end()) return;
+
+        canvases.erase(_found);
+    }
+
+    std::vector<NodeID> Scene::getPrefabs() {
+        std::vector<NodeID> _prefabs;
+
+        for(auto& _pair : prefabs) _prefabs.push_back(_pair.second);
+
+        return _prefabs;
+    }
+
+    NodeID Scene::getPrefab(const std::string& _prefabKey) {
+        return prefabs[_prefabKey];
     }
 }

@@ -232,6 +232,11 @@ namespace GDE {
              */
             Vec2F getMousePosWorldPos();
 
+            /**
+             * @brief Returns mouse position with Canvas camera zoom.
+             * @return Vec2f
+             */
+            Vec2F getMousePosCanvas();
 
             /**
              * @brief This function changes the order of the controllers (use to set who is player1, for example).

@@ -142,6 +142,13 @@ namespace GDE {
             NodeID createNode(const std::string& _tag = "", const NodeID& _parent = NODE_ID_NULL);
 
             /**
+             * @brief Creates an independent copy of a loaded prefab.
+             * @param _prefab Prefab NodeID
+             * @return NodeID
+             */
+            NodeID instantiatePrefab(const NodeID& _prefab, const Vec2F& _position, const NodeID& _parent = NODE_ID_NULL);
+
+            /**
              * @brief Removes a node and all of it's children.
              * @param _node Id of the node to remove
              */

@@ -1,0 +1,16 @@
+Prefab:
+  Name: "SquarePrefab"
+  Base:
+    Tag: "White cube Prefab"
+    Active: true
+    Transform:
+      Position: [0, 0]
+      Scale: [1, 1]
+      Rotation: 0
+  SpriteRenderer:
+    Texture:
+      Atlas: "square"
+      Tile: "square"
+    Color: [0, 255, 0, 255]
+    Layer: 0
+    Shader: "basic"

@@ -156,7 +156,7 @@ namespace GDE {
             }
 
             /**
-             * WARNING calling this won't return any value, just will run the functions, it the return value is needed
+             * WARNING calling this won't return any value, just will run the functions, if the return value is needed
              * then call exec(std::vector<R>&, Args...), this will return each result for each executed method
              */
             auto operator()(Args... args) {

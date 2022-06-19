@@ -149,10 +149,18 @@ namespace GDE {
         float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.getPosition().y;
         float _zoom = _camera.getCurrentZoomLevel();
         Vec2F _scalingFactor = engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->getScalingFactor();
-        return {_x * _zoom / _scalingFactor.x, -_y * _zoom / _scalingFactor.y};
+        return {_x * _zoom / _scalingFactor.x, - _y * _zoom / _scalingFactor.y};
     }
 
-
+    Vec2F InputManager::getMousePosCanvas() {
+        auto _mousePos = mouseInput->getMousePosition();
+        auto& _wi = windowInput;
+        auto& _camera = *mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera();
+        float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.getPosition().x;
+        float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.getPosition().y;
+        Vec2F _scalingFactor = engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->getScalingFactor();
+        return {_x / _scalingFactor.x, - _y / _scalingFactor.y};
+    }
 
     bool InputManager::reassignController(int _controllerID, int _as) {
         return controllerInput->reassignController(_controllerID, _as);

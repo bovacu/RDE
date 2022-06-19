@@ -71,7 +71,7 @@ namespace GDE {
         EventDispatcher dispatcher(_e);
         dispatcher.dispatchEvent<MouseScrolledEvent>(mseDel);
         dispatcher.dispatchEvent<MouseButtonPressedEvent>(mbpeDel);
-        dispatcher.dispatchEvent<MouseMovedEvent>(mmeDel);
+//        dispatcher.dispatchEvent<MouseMovedEvent>(mmeDel);
     }
 
     void ImGuiScene::onEnd() {
@@ -389,7 +389,10 @@ namespace GDE {
 
 
 
-    void ImGuiScene::hierarchyRecursionStub(Graph* _graph, NodeID _node, NodeID& _selectedNode) {
+    void ImGuiScene::hierarchyRecursionStub(Scene* _scene, Graph* _graph, NodeID _node, NodeID& _selectedNode) {
+        auto _prefabs = _scene->getPrefabs();
+        if(std::find(_prefabs.begin(), _prefabs.end(), _node) != _prefabs.end()) return;
+
         auto* _transform = _graph->getComponent<Transform>(_node);
         auto* _tag = _graph->getComponent<Tag>(_node);
 
@@ -405,7 +408,7 @@ namespace GDE {
                 }
 
                 for(auto _child : _transform->children) {
-                    hierarchyRecursionStub(_graph, _child, _selectedNode);
+                    hierarchyRecursionStub(_scene, _graph, _child, _selectedNode);
                 }
 
                 ImGui::TreePop();
@@ -423,12 +426,27 @@ namespace GDE {
         ImGui::Begin("Hierarchy");
         windowsHovered[1] = checkForFocus();
         auto* _graph = _scene->getMainGraph();
-        hierarchyRecursionStub(_graph, _graph->getID(), selectedNode);
+        hierarchyRecursionStub(_scene, _graph, _graph->getID(), selectedNode);
         for(auto* _canvas : _scene->getCanvases()) {
             _graph = _canvas->getGraph();
-            hierarchyRecursionStub(_graph, _graph->getID(), selectedNodeCanvas);
+            hierarchyRecursionStub(_scene, _graph, _graph->getID(), selectedNodeCanvas);
         }
+        showLoadedPrefabs(_scene, _scene->getMainGraph(), _graph->getID(), selectedNode);
         ImGui::End();
+    }
+
+    void ImGuiScene::showLoadedPrefabs(Scene* _scene, Graph* _graph, NodeID _node, NodeID& _selectedNode) {
+        auto _flags = _node == _selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
+        if (ImGui::TreeNodeEx("Prefabs loaded in memory", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | _flags)) {
+
+            auto _prefabs = _scene->getPrefabs();
+            for(auto& _nodeID : _prefabs) {
+                auto _tag = _graph->getComponent<Tag>(_nodeID);
+                ImGui::TextColored(ImVec4(0, 1, 0, 1), "%s", _tag->tag.c_str());
+            }
+
+            ImGui::TreePop();
+        }
     }
 
     void ImGuiScene::nodeComponents(Graph* _graph, const NodeID _selectedNode) {

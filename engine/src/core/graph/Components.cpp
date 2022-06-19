@@ -43,6 +43,15 @@ namespace GDE {
         dirty = true;
     }
 
+    void Transform::setPositionWorld(const Vec2F& _position) {
+        setPositionWorld(_position.x, _position.y);
+    }
+
+    void Transform::setPositionWorld(float _x, float _y) {
+        modelMatrix[3][0] = _x;
+        modelMatrix[3][1] = _y;
+    }
+
     Vec2F Transform::getPositionLocal() const {
         return {localPosition.x, localPosition.y};
     }
@@ -208,7 +217,11 @@ namespace GDE {
     Body::Body(const NodeID& _nodeId, Scene* _scene, const BodyConfig& _config, Transform* _transform) {
         bodyConfig = _config;
 
-        b2dConfig.bodyDefinition.position.Set(_transform->getPositionLocal().x, _transform->getPositionLocal().y);
+        // This needs to be WorldPosition, because we need to situate the body in world space
+        // The update is because before the first Graph::onUpdate, modelMatrix is the identity matrix, we need
+        // to advance one update step, which doesn't affect at all the simulation.
+        _transform->update(_scene->getMainGraph());
+        b2dConfig.bodyDefinition.position.Set(_transform->getPositionWorld().x, _transform->getPositionWorld().y);
         b2dConfig.bodyDefinition.angle = _transform->getRotationLocal();
         b2dConfig.bodyDefinition.type = gdeBodyTypeToB2dBodyType(_config.bodyType);
         b2dConfig.body = _scene->engine->manager.physics.createBody(b2dConfig.bodyDefinition);
@@ -353,13 +366,6 @@ namespace GDE {
                 return;
             }
 
-            if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() && !onMouseExited.isEmpty()) {
-                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
-                auto* _mre = (MouseButtonReleasedEvent*)&_event;
-                onClick(_mre->getMouseButton());
-                return;
-            }
-
             if(_eventDispatcher.dispatchEvent<MouseScrolledEvent>() && !onScroll.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
                 auto* _mse = (MouseScrolledEvent*)&_event;
@@ -392,8 +398,8 @@ namespace GDE {
         }
 
         if(_eventDispatcher.dispatchEvent<MouseMovedEvent>()) {
-            _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
             if(mouseStatus == MouseStatus::MouseEntered) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
                 mouseStatus = MouseStatus::MouseExited;
                 if(onMouseExited.isEmpty()) return;
                 onMouseExited();

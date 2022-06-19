@@ -20,6 +20,7 @@
 project = 'GDE'
 copyright = '2022, Borja Vazquez Cuesta'
 author = 'Borja Vazquez Cuesta'
+version = '0.5.1'
 
 
 # -- General configuration ---------------------------------------------------

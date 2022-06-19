@@ -10,6 +10,40 @@
 
 namespace GDE {
 
+    template<typename... Type>
+    entt::type_list<Type...> as_type_list(const entt::type_list<Type...> &);
+
+    template<typename Entity>
+    struct PolyStorage: entt::type_list_cat_t<
+            decltype(as_type_list(std::declval<entt::storage<Entity>>())),
+            entt::type_list<void(entt::basic_registry<Entity> &, const Entity, const Entity)>
+    > {
+        template<typename Base>
+        struct type: entt::storage<Entity>::template type<Base> {
+            static constexpr auto base = decltype(as_type_list(std::declval<entt::storage<Entity>>()))::size;
+
+            void copy_to(entt::basic_registry<Entity> &reg, const Entity from, const Entity to) {
+                entt::poly_call<base + 0>(*this, reg, from, to);
+            }
+        };
+
+        template<typename Type>
+        static void copy_to(Type &pool, entt::basic_registry<Entity> &reg, const Entity from, const Entity to) {
+            pool.emplace(reg, to, pool.get(from));
+        }
+
+        template<typename Type>
+        using impl = entt::value_list_cat_t<
+                typename entt::storage<Entity>::template impl<Type>,
+                entt::value_list<&copy_to<Type>>
+        >;
+    };
+
+//    template<typename Entity>
+//    struct entt::poly_storage_traits<Entity> {
+//        using storage_type = entt::poly<PolyStorage<Entity>>;
+//    };
+
     /// All of these are foo functions as Delegates need to have something assigned to be called.
     static void onEventDelFoo(Event& _event) {  }
     static void onUpdateDelFoo(Delta _dt) {  }
@@ -50,15 +84,6 @@ namespace GDE {
             _animationSystem.update(_dt, _spriteRenderer);
         });
 
-        onUpdateDel(_dt);
-
-        for(auto* _canvas : scene->canvases) {
-            _canvas->onUpdate(_dt);
-        }
-    }
-
-    void Graph::onFixedUpdate(Delta _dt) {
-
         registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([](const auto _entity, Transform& _transform, Body& _body, const Active& _) {
             auto _lastStoredPosition = _body.b2dConfig.lastPosition;
             auto _diff = _transform.getPositionLocal() - _lastStoredPosition;
@@ -68,10 +93,19 @@ namespace GDE {
                 _body.b2dConfig.body->SetTransform({_bodyTransform.p.x + _diff.x, _bodyTransform.p.y + _diff.y}, _bodyTransform.q.GetAngle());
             }
 
-            _transform.setPosition(_body.getPosition());
+            _transform.setPositionWorld(_body.getPosition());
             _transform.setRotation(_body.getRotation());
             _body.b2dConfig.lastPosition = _transform.getPositionLocal();
         });
+
+        onUpdateDel(_dt);
+
+        for(auto* _canvas : scene->canvases) {
+            _canvas->onUpdate(_dt);
+        }
+    }
+
+    void Graph::onFixedUpdate(Delta _dt) {
 
         onFixedUpdateDel(_dt);
     }
@@ -129,6 +163,26 @@ namespace GDE {
         registry.emplace<Active>(_newNode, _newNode);
 
         return _newNode;
+    }
+
+    NodeID Graph::instantiatePrefab(const NodeID& _prefab, const Vec2F& _position, const NodeID& _parent) {
+        auto _copy = registry.create();
+
+        for(auto&& _curr: registry.storage()) {
+            auto& _storage = _curr.second;
+            if(_storage.contains(_prefab)) {
+                _storage.emplace(_copy, _storage.get(_prefab));
+            }
+        }
+
+        auto* _transform = getComponent<Transform>(_copy);
+        (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent))->children.push_back(_copy);
+        _transform->setPosition(_position);
+        _transform->update(this);
+        if(_parent != NODE_ID_NULL) setParent(_copy, _parent);
+        setNodeActive(_copy, true);
+
+        return _copy;
     }
 
     NodeID Graph::getNode(const std::string& _tagName) {

@@ -20,6 +20,7 @@ namespace GDE {
      */
     class Scene {
         friend class Graph;
+        friend class ConfigManager;
 
         private:
             /**
@@ -41,6 +42,11 @@ namespace GDE {
              * @brief Main camera renderer.
              */
             Camera* mainCamera = nullptr;
+
+            /**
+             * @brief Map PrefabKey -> NodeID.
+             */
+            std::unordered_map<std::string, NodeID> prefabs;
 
         public:
             /**
@@ -173,10 +179,42 @@ namespace GDE {
             [[nodiscard]] const std::string& getName() const { return debugName; }
 
             /**
+             * @brief Adds a new Canvas to the scene.
+             * @param _canvasTag Name of the Canvas
+             * @return Canvas*
+             */
+            Canvas* addNewCanvas(const std::string& _canvasTag);
+
+            /**
+             * @brief Removes a Canvas by its name.
+             * @param _canvasTag Canvas name
+             */
+            void removeCanvas(const std::string& _canvasTag);
+
+            /**
+             * @brief Removes a Canvas by its reference.
+             * @param _canvas Canvas reference
+             */
+            void removeCanvas(Canvas* _canvas);
+
+            /**
              * @brief Returns all the canvases of the Scene
              * @return std::vector<Canvas*>&
              */
             std::vector<Canvas*>& getCanvases();
+
+            /**
+             * @brief Returns all of the prefabs IDs
+             * @return std::vector<NodeID>
+             */
+            std::vector<NodeID> getPrefabs();
+
+            /**
+             * @brief Returns a prefab by its key.
+             * @param _prefabKey Prefab key
+             * @return NodeID
+             */
+            NodeID getPrefab(const std::string& _prefabKey);
     };
 
 }

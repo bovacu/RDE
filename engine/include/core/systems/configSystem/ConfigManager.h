@@ -46,6 +46,28 @@ namespace GDE {
             EntityMap createEntities(Scene* _scene, const YAML::Node& _yaml);
 
             /**
+             * @brief Loads a prefab in memory.
+             * @param _scene Scene
+             * @param _yaml Yaml file
+             */
+            void loadPrefab(Scene* _scene, Window* _window, YAML::Node& _yaml);
+
+            /**
+             * @brief Instantiates a previously loaded prefab.
+             * @param _scene Scene
+             * @param _yaml Yaml file
+             */
+            void instantiatePrefab(Scene* _scene, const YAML::Node& _yaml);
+
+            /**
+             * @brief Sets the parents for each entity if needed.
+             * @param _map Entity map
+             * @param _scene Scene
+             * @param _yaml Yaml file
+             */
+            void parentingEntities(const EntityMap& _map, Scene* _scene, const YAML::Node& _yaml);
+
+            /**
              * @brief Loads all the cameras defined in the .yaml for the Scene.
              * @param _map Entity Map
              * @param _scene Scene
@@ -82,10 +104,12 @@ namespace GDE {
 
             /**
              * @brief Loads all the assets defined in the .yaml for the Scene.
+             * @param _scene Scene
              * @param _manager Engine Manager
              * @param _yaml Yaml file
+             * @return EntityMap
              */
-            void loadAssets(Manager* _manager, const YAML::Node& _yaml);
+            void loadAssets(Scene* _scene, Window* _window, const YAML::Node& _yaml);
 
             /**
              * @brief Sets the Tag, Transform and Active components.
@@ -94,6 +118,15 @@ namespace GDE {
              * @param _yamlNode Yaml file
              */
             void setBaseComponents(Scene* _scene, const NodeID& _nodeID, const YAML::Node& _yamlNode);
+
+            void loadCamera(const NodeID& _nodeID, Scene* _scene, Window* _window, const YAML::Node& _yaml);
+
+            void loadSpriteRenderer(const NodeID& _nodeID, Scene* _scene, const YAML::Node& _yaml);
+
+            void loadTextRenderer(const NodeID& _nodeID, Scene* _scene, const YAML::Node& _yaml);
+
+            void loadBody(const NodeID& _nodeID, Scene* _scene, const YAML::Node& _yaml);
+
     };
 
 }

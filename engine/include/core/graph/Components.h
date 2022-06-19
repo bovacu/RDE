@@ -376,14 +376,25 @@ namespace GDE {
 
             /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
-             * 
              * @param _position Vector with position.
              */
             void setPosition(const Vec2F& _position);
 
             /**
+              * @brief Sets the position of the object in World Coordintes, so relative to the World.
+              * @param _position Vector with position.
+              */
+            void setPositionWorld(const Vec2F& _position);
+
+            /**
+             * @brief Sets the position of the object in World Coordintes, so relative to the World.
+             * @param _x Position x
+             * @param _y Position y
+             */
+            void setPositionWorld(float _x, float _y);
+
+            /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
-             * 
              * @param _x Position x
              * @param _y Position y
              */

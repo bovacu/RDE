@@ -7,6 +7,8 @@ Scene:
     Fonts:
       - Path: "assets/fonts/arial.ttf"
         Sizes: [54]
+    Prefabs:
+      - Key: "square"
   Entities:
     - Tag: "White cube"
       Ref: 1
@@ -29,6 +31,14 @@ Scene:
         Position: [0, 100]
         Scale: [1, 1]
         Rotation: 0
+    - Prefab: "square"
+      Ref: 1001
+      Active: true
+      Modifications:
+        - Transform:
+            Position: [0, 128]
+            Scale: [1, 1]
+            Rotation: 0
   Cameras:
     - Name: "Second"
       Zoom: 1
@@ -37,7 +47,6 @@ Scene:
       ViewPortType: 0 # 0 is Adaptative, 1 is Free
       ViewPortVirtualResolution: [1280, 720]
       ViewPortDeviceResolution: [1280, 720]
-      Ref: 0
   SpriteRenderers:
     - Texture:
         Atlas: "ui"
