@@ -61,3 +61,5 @@ libs/SDL_image
 /cmake-build-release_lib/
 
 submodules/RmlUi
+
+submodules/
