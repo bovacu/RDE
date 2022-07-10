@@ -84,6 +84,20 @@ namespace GDE {
             UDelegate() {}
             UDelegate(const UDelegate& other) = default;
             auto operator=(const UDelegate& other) -> UDelegate& = default;
+            auto operator==(UDelegate* _other) {
+                if (_other == nullptr) {
+                    return instance == nullptr;
+                }
+                return _other->instance == instance;
+            }
+            auto operator!=(UDelegate* _other) {
+                if (_other == nullptr) {
+                    return instance != nullptr;
+                }
+                return _other->instance != instance;
+            }
+            auto operator==(const UDelegate& _other) { return _other->instance == instance; }
+            auto operator!=(const UDelegate& _other) { return _other->instance != instance; }
             auto operator()(Args... _args) const -> R {
                 return std::invoke(stub, instance, _args...);
             }

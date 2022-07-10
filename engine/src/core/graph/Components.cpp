@@ -348,6 +348,8 @@ namespace GDE {
     static bool isSelectedFoo() { return false; }
 
     void UIInteractable::onEvent(const NodeID& _nodeID, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas) {
+        if (interactionTrigger == nullptr) return;
+
         if(interactionTrigger(_nodeID, _canvas)) {
             if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onClick.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);

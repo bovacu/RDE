@@ -5,8 +5,8 @@ Scene:
       - Path: "assets/spriteSheets/test/square.yaml"
       - Path: "assets/spriteSheets/test/ui.yaml"
     Fonts:
-    #      - Path: "assets/fonts/arial.ttf"
-    #        Sizes: [54]
+      - Path: "assets/fonts/arial.ttf"
+        Sizes: [54]
     Prefabs:
       - Key: "square"
   Entities:
@@ -24,13 +24,13 @@ Scene:
         Position: [0, -128]
         Scale: [1, 1]
         Rotation: 0
-    #    - Tag: "Text"
-    #      Ref: 3
-    #      Active: true
-    #      Transform:
-    #        Position: [0, 100]
-    #        Scale: [1, 1]
-    #        Rotation: 0
+    - Tag: "Text"
+      Ref: 3
+      Active: true
+      Transform:
+        Position: [0, 100]
+        Scale: [1, 1]
+        Rotation: 0
     - Prefab: "square"
       Ref: 1001
       Active: true
@@ -63,14 +63,14 @@ Scene:
       Shader: "basic"
       Ref: 2
   TextRenderers:
-  #    - Text: "Hello World"
-  #      Color: [0, 255, 0, 255]
-  #      Layer: 0
-  #      Shader: "basicText"
-  #      Font:
-  #        Name: "arial"
-  #        Size: 54
-  #      Ref: 3
+    - Text: "Hello World"
+      Color: [0, 255, 0, 255]
+      Layer: 0
+      Shader: "basicText"
+      Font:
+        Name: "arial"
+        Size: 54
+      Ref: 3
   Bodies:
     - BodyType: 0   # 0 -> static, 1 -> dynamic, 2 -> kinematic
       BodyShape: 0  # 0 -> square, 1 -> circle, 2 -> polygon
