@@ -9,6 +9,7 @@
 #include <ft2build.h>
 #include "freetype/freetype.h"
 #include "core/render/elements/Texture.h"
+#include "core/systems/fileSystem/FileManager.h"
 
 #define MAX_WIDTH 1024
 
@@ -141,7 +142,7 @@ namespace GDE {
              * @param _fontSize Font size
              * @return Font*
              */
-            Font* loadFont(const std::string& _pathToFont, int _fontSize = 24);
+            Font* loadFont(FileManager& _fileManager, const std::string& _pathToFont, int _fontSize = 24);
 
             /**
              * @brief Returns the font with the initialized font size
@@ -158,7 +159,7 @@ namespace GDE {
              * @param _fontSize font size
              * @return Font*
              */
-            Font* getSpecificFont(const std::string& _fontName, int _fontSize);
+            Font* getSpecificFont(FileManager& _fileManager, const std::string& _fontName, int _fontSize);
 
             /**
              * @brief This function unloads a font with all the sub-fonts created by size.

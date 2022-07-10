@@ -58,7 +58,7 @@ namespace GDE {
         auto& _fontsNodes = _sceneNode["Assets"]["Fonts"];
         for (const auto& _font : _fontsNodes) {
             for(auto _i = 0; _i < _font["Sizes"].size(); _i++)
-                _scene->engine->manager.fontManager.loadFont(_font["Path"].as<std::string>(), _font["Sizes"][_i].as<int>());
+                _scene->engine->manager.fontManager.loadFont(_scene->engine->manager.fileManager, _font["Path"].as<std::string>(), _font["Sizes"][_i].as<int>());
         }
 
         auto& _prefabsNodes = _sceneNode["Assets"]["Prefabs"];

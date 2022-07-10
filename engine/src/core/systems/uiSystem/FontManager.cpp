@@ -114,10 +114,12 @@ namespace GDE {
         LOG_S("FontManager loaded")
     }
 
-    Font* FontManager::loadFont(const std::string& _pathToFont, int _fontSize) {
+    Font* FontManager::loadFont(FileManager& _fileManager, const std::string& _pathToFont, int _fontSize) {
         FT_Face _face;
-
-        FT_Error _error = FT_New_Face(ftLibrary, _pathToFont.c_str(), 0, &_face);
+        auto _fileHandler = _fileManager.open(_pathToFont, FileMode::READ);
+        auto _data = _fileManager.readFullFile(_fileHandler).content;
+        FT_Error _error = FT_New_Memory_Face(ftLibrary, reinterpret_cast<const FT_Byte*>(_data.c_str()), _data.size(), 0, &_face);
+        _fileManager.close(_fileHandler);
         if (_error != FT_Err_Ok) {
             LOG_E("Load memory failed with code -> ", _error)
             return nullptr;
@@ -151,7 +153,7 @@ namespace GDE {
         return _fonts;
     }
 
-    Font* FontManager::getSpecificFont(const std::string& _fontName, int _fontSize) {
+    Font* FontManager::getSpecificFont(FileManager& _fileManager, const std::string& _fontName, int _fontSize) {
         if(fonts.find(_fontName) == fonts.end()) {
             LOG_E("Font ", _fontName, " is not loaded")
             return nullptr;
@@ -162,7 +164,7 @@ namespace GDE {
                 return _fontHandler.font;
         }
 
-        loadFont(fonts[_fontName].front().font->originalPath, _fontSize);
+        loadFont(_fileManager, fonts[_fontName].front().font->originalPath, _fontSize);
         LOG_W("Couldn't find Font ", _fontName, " in size ", _fontSize, " so a new Font in that size was created")
         return fonts[_fontName].back().font;
     }
