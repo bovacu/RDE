@@ -2,7 +2,7 @@ SpriteSheetName: ui.png
 SpriteSheetSize: [128, 304]
 SpriteSheetSettings: 
   Format: png
-  Path: /home/borja/Documents/GDE/assets/spriteSheets/test/ui.png
+  Path: assets/spriteSheets/test/ui.png
 Sprites: 
   - Name: button
     Size: [120, 48]

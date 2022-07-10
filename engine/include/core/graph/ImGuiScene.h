@@ -32,7 +32,7 @@ namespace GDE {
 
         public:
             ImGuiScene(Engine* _engine);
-            ~ImGuiScene() override = default;
+            ~ImGuiScene() override {};
 
             void onInit() override;
             void onEvent(Event& _e) override;

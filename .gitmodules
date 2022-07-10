@@ -40,3 +40,6 @@
 [submodule "submodules/libdecor"]
 	path = submodules/libdecor
 	url = https://gitlab.gnome.org/jadahl/libdecor.git
+[submodule "submodules/yaml-cpp"]
+	path = submodules/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp

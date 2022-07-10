@@ -10,10 +10,15 @@
 
 namespace GDE {
 
-    const std::string GDE_CONFIG_PATH = "config/project.yaml";
+    void ConfigManager::loadGDEConfig(GDEConfig* _config, FileManager& _manager) {
 
-    void ConfigManager::loadGDEConfig(GDEConfig* _config) {
-        auto _yaml = YAML::LoadFile(GDE_CONFIG_PATH);
+        auto _configPath = "assets/config/desktop.yaml";
+        #if ANDROID
+        _configPath = "assets/config/android.yaml";
+        #endif
+        auto _fileHandler = _manager.open(_configPath, FileMode::READ);
+        auto _yaml = YAML::Load(_manager.readFullFile(_fileHandler).content);
+        _manager.close(_fileHandler);
         auto _configurationNode = _yaml["Configuration"];
 
         _config->windowData.title = _configurationNode["Title"].as<std::string>(),
@@ -27,7 +32,9 @@ namespace GDE {
     }
 
     void ConfigManager::loadScene(Manager* _manager, Scene* _scene, Window* _window, const std::string& _configFilePath) {
-        auto _yaml = YAML::LoadFile(_configFilePath);
+        auto _fileHandler = _manager->fileManager.open(_configFilePath, FileMode::READ);
+        auto _yaml = YAML::Load(_manager->fileManager.readFullFile(_fileHandler).content);
+        _manager->fileManager.close(_fileHandler);
         loadAssets(_scene, _window, _yaml);
         auto _entityMap = createEntities(_scene, _yaml);
         parentingEntities(_entityMap, _scene, _yaml);
@@ -42,8 +49,11 @@ namespace GDE {
         auto& _sceneNode = _yaml["Scene"];
 
         auto& _texturesNode = _sceneNode["Assets"]["Textures"];
-        for (const auto& _texture : _texturesNode)
-            _scene->engine->manager.textureManager.loadSpriteSheet(YAML::LoadFile(_texture["Path"].as<std::string>()));
+        for (const auto& _texture : _texturesNode) {
+            auto _fileHandler = _scene->engine->manager.fileManager.open(_texture["Path"].as<std::string>(), FileMode::READ);
+            _scene->engine->manager.textureManager.loadSpriteSheet(YAML::Load(_scene->engine->manager.fileManager.readFullFile(_fileHandler).content));
+            _scene->engine->manager.fileManager.close(_fileHandler);
+        }
 
         auto& _fontsNodes = _sceneNode["Assets"]["Fonts"];
         for (const auto& _font : _fontsNodes) {
@@ -53,8 +63,10 @@ namespace GDE {
 
         auto& _prefabsNodes = _sceneNode["Assets"]["Prefabs"];
         for (const auto& _prefab : _prefabsNodes) {
-            auto _p = YAML::LoadFile(APPEND_S("assets/prefabs/", _prefab["Key"].as<std::string>(), ".yaml"))["Prefab"];
+            auto _fileHandler = _scene->engine->manager.fileManager.open(APPEND_S("assets/prefabs/", _prefab["Key"].as<std::string>(), ".yaml"), FileMode::READ);
+            auto _p = YAML::Load(_scene->engine->manager.fileManager.readFullFile(_fileHandler).content)["Prefab"];
             loadPrefab(_scene, _window, _p);
+            _scene->engine->manager.fileManager.close(_fileHandler);
         }
     }
 

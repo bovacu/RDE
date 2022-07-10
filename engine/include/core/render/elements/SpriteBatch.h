@@ -313,7 +313,7 @@ namespace GDE {
             void orderBatches();
 
         public:
-            SpriteBatch() = default;
+            SpriteBatch() {};
             ~SpriteBatch();
 
             /**

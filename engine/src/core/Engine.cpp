@@ -11,7 +11,7 @@ namespace GDE {
 
 
     Engine::Engine() {
-        manager.configManager.loadGDEConfig(&gdeConfig);
+        manager.configManager.loadGDEConfig(&gdeConfig, manager.fileManager);
         window = new Window(&gdeConfig);
 
         UDelegate<void(Event&)> onEventDelegate;
@@ -95,7 +95,9 @@ namespace GDE {
     void Engine::onEvent(Event& _e) {
         EventDispatcher _ed(_e);
         _ed.dispatchEvent<WindowResizedEvent>(wreDel);
+        #if !ANDROID
         imGuiLayer->onEvent(_e);
+        #endif
         manager.sceneManager.getDisplayedScene()->onEvent(_e);
     }
 
@@ -108,7 +110,9 @@ namespace GDE {
         manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->update(window->getWindowSize());
         manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
 
+        #if !ANDROID
         if(manager.inputManager.isKeyJustPressed(KeyCode::F9)) imGuiLayer->show = !imGuiLayer->show;
+        #endif
     }
 
     void Engine::onRender(Delta _dt) {

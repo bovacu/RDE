@@ -5,6 +5,6 @@
 #define ENGINE2_0_PLATFORM_HEADER_SDL_IMAGE_H
 
 #include "core/Core.h"
-#include <SDL2/SDL_image.h>
+#include "SDL_image.h"
 
 #endif //ENGINE2_0_PLATFORM_HEADER_SDL_IMAGE_H

@@ -2,7 +2,7 @@ SpriteSheetName: square.png
 SpriteSheetSize: [96, 32]
 SpriteSheetSettings: 
   Format: png
-  Path: /home/borja/Documents/GDE/assets/spriteSheets/test/square.png
+  Path: assets/spriteSheets/test/square.png
 Sprites: 
   - Name: square
     Size: [32, 32]

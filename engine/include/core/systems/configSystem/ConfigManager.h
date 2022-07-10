@@ -5,8 +5,9 @@
 #ifndef ENGINE_CONFIG_LOADER_H
 #define ENGINE_CONFIG_LOADER_H
 
-#include <yaml-cpp/yaml.h>
+#include "yaml-cpp/yaml.h"
 #include "core/graph/Scene.h"
+#include "core/systems/fileSystem/FileManager.h"
 
 namespace GDE {
 
@@ -34,7 +35,7 @@ namespace GDE {
              * @brief This method allows to load a custom configuration for the engine.
              * @param _config New Configuration for the engine
              */
-            void loadGDEConfig(GDEConfig* _config);
+            void loadGDEConfig(GDEConfig* _config, FileManager& _manager);
 
         private:
             /**

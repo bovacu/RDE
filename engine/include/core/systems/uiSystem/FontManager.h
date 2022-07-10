@@ -42,7 +42,7 @@ namespace GDE {
 
         private:
             friend class FontManager;
-            Font() = default;
+            Font() {}
 
         public:
             /**
@@ -121,7 +121,7 @@ namespace GDE {
             int maxDifferenceBetweenFontSizesBeforeCreatingANewOne = 5;
 
         public:
-            FontManager() = default;
+            FontManager() {}
 
             /**
              * @attention This function should not be called by the end users.

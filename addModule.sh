@@ -1,3 +1,5 @@
+#!/bin/bash
+
 MODULE="$1"
 BASE_DIR="$PWD"
 if [ -z "$MODULE" ]
@@ -6,7 +8,7 @@ then
     exit 0
 fi
 
-function android() {
+function android {
     if [[ -d "targets/GDEAndroid" ]]
         then
           echo "Module already configured"
@@ -14,11 +16,11 @@ function android() {
     fi
     mkdir targets
     cd targets && git clone https://github.com/bovacu/GDEAndroid
-    cd android/sdl/jni && ./buildAndroidLibs.sh
+    cd GDEAndroid/sdl/jni && ./buildAndroidLibs.sh
     cd "$BASE_DIR"
 }
 
-function firebase() {
+function firebase {
     cd "$BASE_DIR"
     if [[ -d "targets/GDEFirebase" ]]
         then

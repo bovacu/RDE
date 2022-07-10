@@ -23,4 +23,6 @@
 
 #include "core/systems/ecsSystem/ECSManager.h"
 
+#include "core/systems/uiSystem/Canvas.h"
+
 #endif //ENGINE_GDE_H

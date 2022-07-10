@@ -18,7 +18,7 @@ namespace GDE {
             bool canPlay = false;
 
         public:
-            Animation() = default;
+            Animation() {}
             bool addFrame(Texture* _texture);
             bool removeFrame(Texture* _texture);
             bool removeFrame(int _index);

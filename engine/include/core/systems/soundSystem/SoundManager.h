@@ -224,7 +224,7 @@ namespace GDE {
              */
             void resumeAll();
 
-            SoundManager() = default;
+            SoundManager() {}
     };
 
 }

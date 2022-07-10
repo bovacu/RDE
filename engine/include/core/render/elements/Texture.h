@@ -137,10 +137,10 @@ namespace GDE {
             NinePatch ninePatch;
 
         public:
-            Texture() = default;
+            Texture() {};
             explicit Texture(char* filePath);
             Texture(Atlas* _spriteSheet, const IntRect& _region);
-            ~Texture();
+            virtual ~Texture();
 
             /**
              * @brief Returns the ID of the texture in the GPU. This is probably of no-use for end-users.
@@ -272,7 +272,7 @@ namespace GDE {
             int getChannels(const ImageType& _imageType);
 
         public:
-            Image() = default;
+            Image() {};
 
             /**
              * @brief Inits a CPU texture given a width, height, data of the texture and type of texture.

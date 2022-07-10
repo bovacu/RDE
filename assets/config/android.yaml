@@ -1,0 +1,9 @@
+Configuration:
+  Resolution:
+    Width: 1080
+    Height: 1920
+  VSync: true
+  MainScene: "assets/scenes/Sandbox.yaml"
+  Fullscreen: false
+  Icon: ~
+  Title: "Engine"

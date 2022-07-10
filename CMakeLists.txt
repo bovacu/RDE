@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.18.1)
 project(Engine)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -8,14 +8,13 @@ set(PROJECT_NAME Engine)
 add_definitions("-DGDE_EXPORT")
 #add_definitions("-DRUN_TESTS")
 
-SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer SDL2_image sdl2_net ${CMAKE_DL_LIBS}
+SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer SDL2_image ${CMAKE_DL_LIBS}
         ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
         EnTT::EnTT box2d yaml-cpp
         )
 
 find_package(Threads REQUIRED)
 find_package(Freetype REQUIRED)
-find_package(yaml-cpp REQUIRED)
 find_package(box2d REQUIRED)
 
 execute_process(COMMAND "echo $XDG_SESSION_TYPE" OUTPUT_VARIABLE result_display_server)
@@ -27,16 +26,6 @@ if (NOT ${resulting_display_server} STREQUAL "x11")
 else()
     message("x11 detected, skipping link to LibDecor")
 endif()
-
-#add_library(RmlCore SHARED IMPORTED )
-#set_target_properties(RmlCore PROPERTIES IMPORTED_LOCATION /usr/local/lib/libRmlCore.so)
-#
-#add_library(RmlDebugger SHARED IMPORTED )
-#set_target_properties(RmlDebugger PROPERTIES IMPORTED_LOCATION /usr/local/lib/libRmlDebugger.so)
-#
-#LIST(APPEND TARGET_LINKS RmlDebugger RmlCore)
-#include_directories(submodules/RmlUi/Include)
-#include_directories(submodules/RmlUi/Samples)
 
 add_library(
         sdl2
@@ -76,19 +65,6 @@ set_target_properties(
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_mixer/lib/libSDL2_mixer.a
 )
 
-
-add_library(
-        sdl2_net
-        STATIC
-        IMPORTED
-)
-set_target_properties(
-        sdl2_net
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_net/lib/libSDL2_net.a
-)
-
 add_compile_options("-Werror")
 
 include_directories(.)
@@ -104,7 +80,7 @@ include_directories(submodules/glm)
 include_directories(submodules/imgui)
 include_directories(submodules/entt/src)
 include_directories(submodules/box2d/include)
-
+include_directories(submodules/yaml-cpp/include)
 add_subdirectory(submodules/entt)
 
 add_library(glad libs/glad/include/glad/glad.h libs/glad/src/glad.c)

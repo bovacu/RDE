@@ -81,7 +81,7 @@ namespace GDE {
             stub_function stub = &stub_null; ///< A pointer to the function to invoke
 
         public:
-            UDelegate() = default;
+            UDelegate() {}
             UDelegate(const UDelegate& other) = default;
             auto operator=(const UDelegate& other) -> UDelegate& = default;
             auto operator()(Args... _args) const -> R {
@@ -141,7 +141,7 @@ namespace GDE {
 
         public:
             // Creates an unbound delegate
-            MDelegate() = default;
+            MDelegate() {}
 
             // We want the Delegate to be copyable, since its lightweight
             MDelegate(const MDelegate& other) = default;

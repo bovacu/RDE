@@ -72,7 +72,7 @@ namespace GDE {
              */
             virtual void updateVirtualResolution(const Vec2I& _virtualResolution) = 0;
 
-            virtual ~IViewPort() = default;
+            virtual ~IViewPort() {};
     };
 
     /**
@@ -92,7 +92,7 @@ namespace GDE {
              */
             void updateVirtualResolution(const Vec2I& _virtualResolution) override;
 
-            ~AdaptiveViewPort() override = default;;
+            ~AdaptiveViewPort() override {}
     };
 
     /**
@@ -112,7 +112,7 @@ namespace GDE {
              */
             void updateVirtualResolution(const Vec2I& _virtualResolution) override;
 
-            ~FreeViewPort() override = default;;
+            ~FreeViewPort() override {}
     };
 
     /**

@@ -51,6 +51,8 @@ namespace GDE {
              * @return IntRect 
              */
             [[nodiscard]] virtual IntRect getRegion() const = 0;
+
+            virtual ~IRenderizable() {  }
     };
 
 }

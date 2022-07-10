@@ -66,7 +66,7 @@ namespace GDE {
         glBindVertexArray(0);
     }
 
-    SpriteBatch::~SpriteBatch() = default;
+    SpriteBatch::~SpriteBatch() {};
 
     void SpriteBatch::beginDraw(Camera& _camera, Transform* _cameraTransform) {
         viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_cameraTransform->modelMatrix);

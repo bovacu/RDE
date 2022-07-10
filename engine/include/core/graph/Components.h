@@ -31,7 +31,7 @@ namespace GDE {
             */
             std::string tag;
 
-            Tag() = default;
+            Tag() {};
             Tag(const Tag& _tag) = default;
             Tag(const NodeID& _nodeId, const std::string& _tag) : tag(_tag) {  }
 
@@ -78,6 +78,7 @@ namespace GDE {
         public:
             explicit SpriteRenderer(const NodeID& _nodeId, Scene* _scene);
             SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture);
+            ~SpriteRenderer() override {  }
 
             /**
              * @brief Sets the texture. This should be taken from the TextureAtlasManager.
@@ -189,6 +190,7 @@ namespace GDE {
         public:
             TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text);
             TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font);
+            ~TextRenderer() override {  }
 
             /**
              * @brief Sets the text to be rendered.
@@ -633,7 +635,7 @@ namespace GDE {
              */
             [[nodiscard]] IntRect getRegion() const override { return texture->getRegion(); }
 
-            ~UI() = default;
+            virtual ~UI() override {};
     };
 
 
@@ -762,6 +764,8 @@ namespace GDE {
          * @return NinePatch& 
          */
         [[nodiscard]] NinePatch& getNinePatch() const;
+
+        ~NinePatchSprite() override {  }
     };
 
 
@@ -775,7 +779,7 @@ namespace GDE {
         UIInteractable* interaction = nullptr;
 
         UIText(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const std::string& _text);
-        ~UIText() = default;
+        ~UIText() override {};
     };
 
 
@@ -791,7 +795,7 @@ namespace GDE {
 
         public:
             UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _buttonTexture, const std::string& _text);
-            ~UIButton() = default;
+            ~UIButton() override {};
     };
 
 

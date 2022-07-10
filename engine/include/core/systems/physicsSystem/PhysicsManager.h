@@ -2,11 +2,15 @@
 // Created by borja on 22/04/22.
 //
 
-#ifndef ENGINE_PHYSICSMANAGER_H
-#define ENGINE_PHYSICSMANAGER_H
+#ifndef ENGINE_PHYSICS_MANAGER_H
+#define ENGINE_PHYSICS_MANAGER_H
 
 #include "core/util/Util.h"
 #include "box2d/box2d.h"
+
+#if ANDROID
+    typedef unsigned long ulong;
+#endif
 
 namespace GDE {
 
@@ -300,4 +304,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE_PHYSICSMANAGER_H
+#endif //ENGINE_PHYSICS_MANAGER_H

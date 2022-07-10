@@ -5,7 +5,7 @@
 #define ENGINE2_0_TEXTURE_ATLAS_H
 
 
-#include <yaml-cpp/node/node.h>
+#include "yaml-cpp/yaml.h"
 #include "core/util/Util.h"
 
 #ifdef USE_ZLIB
@@ -144,7 +144,7 @@ namespace GDE {
              */
             void destroy();
 
-            TextureAtlasManager() = default;
+            TextureAtlasManager() {};
 
         private:
             /**

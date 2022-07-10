@@ -4,7 +4,7 @@
 #ifndef ENGINE_GRAPH_H
 #define ENGINE_GRAPH_H
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 #include "core/util/Delta.h"
 #include "core/systems/eventSystem/Event.h"
 #include "core/render/elements/Texture.h"
@@ -132,7 +132,7 @@ namespace GDE {
 
         public:
             Graph(Scene* _scene, const std::string& _sceneName);
-            ~Graph() = default;
+            ~Graph() {};
 
             /** This function creates and adds a new Node to the world. It is really recommended to add a tag value,
              * as there is a way to retrieve a Node by it's tag name.

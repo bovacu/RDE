@@ -28,7 +28,7 @@ namespace GDE {
             virtual void init(const GenerationSettings& _settings) = 0;
             virtual ProceduralMap& getMap() = 0;
             virtual void reset(const GenerationSettings& _settings) = 0;
-            virtual ~MapGenerator() = default;
+            virtual ~MapGenerator() {};
     };
 
     class CellularAutomata : public MapGenerator {

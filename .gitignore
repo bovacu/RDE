@@ -63,3 +63,5 @@ libs/SDL_image
 submodules/RmlUi
 
 submodules/
+
+targets/
