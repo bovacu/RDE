@@ -67,6 +67,7 @@ namespace GDE {
 //        box2DStressTest();
 //        textStressTest();
 
+
         auto _uiTest = getCanvases()[0]->getGraph()->createNode("TestUINode");
         auto* _transform = getCanvases()[0]->getGraph()->getComponent<Transform>(_uiTest);
         _transform->setPosition(-250, 0);
