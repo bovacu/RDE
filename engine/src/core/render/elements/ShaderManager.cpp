@@ -9,7 +9,6 @@ namespace GDE {
         loadShader("basic", TEXTURE_VERTEX_SHADER_ES, TEXTURE_FRAGMENT_SHADER_ES);
         loadShader("debug", DEBUG_VERTEX_SHADER_ES, DEBUG_FRAGMENT_SHADER_ES);
         loadShader("basicText", TEXTURE_VERTEX_SHADER_ES, TEXT_FRAGMENT_SHADER_ES);
-//        loadShader("outline", TEXTURE_VERTEX_SHADER_ES, OUTLINE_FRAGMENT_SHADER_ES);
         loadShader("framebuffer", "assets/shaders/es/framebuffer/FrameBufferVertex.glsl", "assets/shaders/es/framebuffer/FrameBufferFragment.glsl");
     #else
         loadShader("basic", TEXTURE_VERTEX_SHADER_CORE, TEXTURE_FRAGMENT_SHADER_CORE);
@@ -17,10 +16,7 @@ namespace GDE {
         loadShader("basicText", TEXTURE_VERTEX_SHADER_CORE, TEXT_FRAGMENT_SHADER_CORE);
         loadShader("outline", TEXTURE_VERTEX_SHADER_CORE, OUTLINE_FRAGMENT_SHADER_CORE);
         loadShader("grid", DEBUG_GRID_VERTEX_SHADER_CORE, DEBUG_GRID_FRAGMENT_SHADER_CORE);
-//        loadShader("mirror", MIRROR_VERTEX_SHADER_CORE, MIRROR_FRAGMENT_SHADER_CORE);
         loadShader("framebuffer", FRAMEBUFFER_VERTEX_SHADER_CORE, FRAMEBUFFER_FRAGMENT_SHADER_CORE);
-        loadShader("rml", RML_VERTEX_SHADER_CORE, RML_FRAGMENT_SHADER_CORE);
-        loadShader("rmlColor", RML_VERTEX_SHADER_CORE, RML_FRAGMENT_COLOR_ONLY_SHADER_CORE);
     #endif
     }
 

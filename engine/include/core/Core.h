@@ -42,27 +42,18 @@
 
 #define ENGINE_DEBUG
 
-#define IS_MAC() (defined(__APPLE__) && defined(TARGET_OS_MAC))
-#define IS_WINDOWS() (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
-#define IS_LINUX() (defined(__linux__))
-#define IS_DESKTOP() (IS_LINUX() || IS_MAC() || IS_WINDOWS())
-
-#define IS_IOS() (defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR)))
-#define IS_ANDROID() (defined(__ANDROID__))
-#define IS_MOBILE() (IS_ANDROID() || IS_IOS())
-
 #ifdef ENGINE_DEBUG
     #if defined(_WIN32)
 		#define ENGINE_DEBUGBREAK() __debugbreak()
         #define ENGINE_ENABLE_ASSERTS
     #elif defined(__APPLE__)
         #include "TargetConditionals.h"
-        #if TARGET_OS_IPHONE && TARGET_IPHONE_SIMULATOR
+        #if defined(TARGET_OS_MAC)
+            #define MAC_PLATFORM
+        #elif defined(TARGET_OS_IPHONE) && defined(TARGET_IPHONE_SIMULATOR)
             #define IOS_SIMULATOR
         #elif defined(TARGET_OS_IPHONE)
             #define IOS_PLATFORM
-        #elif defined(TARGET_OS_MAC)
-            #define MAC_PLATFORM
         #else
             #define MAC_OTHER_PLATFORM;
         #endif
@@ -74,6 +65,15 @@
 #else
 #define ENGINE_DEBUGBREAK()
 #endif
+
+#define IS_MAC() (defined(__APPLE__) && defined(TARGET_OS_MAC))
+#define IS_WINDOWS() (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
+#define IS_LINUX() (defined(__linux__))
+#define IS_DESKTOP() (IS_LINUX() || IS_MAC() || IS_WINDOWS())
+
+#define IS_IOS() (defined(__APPLE__) && defined(IOS_PLATFORM))
+#define IS_ANDROID() (defined(__ANDROID__))
+#define IS_MOBILE() (IS_ANDROID() || IS_IOS())
 
 #ifdef ENGINE_ENABLE_ASSERTS
     #define ENGINE_ASSERT(x, ...) { if(!(x)) { LOG_E("Assertion Failed: ", __VA_ARGS__); ENGINE_DEBUG_BREAK(); } }

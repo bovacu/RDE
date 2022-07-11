@@ -8,19 +8,20 @@ set(PROJECT_NAME Engine)
 add_definitions("-DGDE_EXPORT")
 #add_definitions("-DRUN_TESTS")
 
-
-include_directories("/opt/X11/include")
+# THIS IS NEEDED FOR OpenGL ES!!!!!!!!!!!!!!
+# include_directories("/opt/X11/include")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
 
 find_package(Freetype REQUIRED)
 
-SET(TARGET_LINKS Threads::Threads glad ${FREETYPE_LIBRARIES} sdl2 sdl2_mixer sdl2_image ${CMAKE_DL_LIBS}
+SET(TARGET_LINKS Threads::Threads glad OpenGL::GL ${FREETYPE_LIBRARIES} sdl2 sdl2_mixer sdl2_image ${CMAKE_DL_LIBS}
     ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
     EnTT::EnTT box2d yaml-cpp
     )
 
 find_package(Threads REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(OpenGL REQUIRED)
 
 add_library(
         box2d

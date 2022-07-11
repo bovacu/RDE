@@ -20,8 +20,8 @@ namespace GDE {
             return PlatformType::LINUX;
         #elif IS_WINDOWS()
             return PlatformType::WINDOWS;
-        #elif IIS_MAC
-            return Platform::MAC;
+        #elif IS_MAC()
+            return PlatformType::MAC;
         #endif
     }
 }

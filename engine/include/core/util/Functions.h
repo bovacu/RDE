@@ -43,7 +43,7 @@ namespace GDE {
                         _position.y * _viewport->getScalingFactor().y / ((float)_windowSize.y / 2)};
             }
 
-            #if !defined(IOS_PLATFORM)
+            #if !IS_MAC()
             [[gnu::warning("Probably broken some versions ago, check it out again")]]
             #endif
             static Vec2F screenToWorldCoords(IViewPort* _viewport, const Vec2F& _position) {

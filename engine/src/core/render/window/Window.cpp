@@ -39,11 +39,11 @@ namespace GDE {
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-        #if IS_MOBILE()
+        #if IS_DESKTOP()
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        #else
         SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
         SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
-        #else
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         #endif
 
         window = SDL_CreateWindow(_config->windowData.title.c_str(), 0, 0,
@@ -54,12 +54,12 @@ namespace GDE {
         SDL_GL_MakeCurrent(window, context);
         SDL_GL_SetSwapInterval(1);
 
-        #if IS_DESKTOP() && !IS_MOBILE()
+        #if IS_DESKTOP()
         SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         SDL_SetWindowResizable(window, SDL_TRUE);
         gladLoadGLLoader(SDL_GL_GetProcAddress);
         LOG_S("GLAD and SDL2 initiated correctly");
-        #elif IS_MOBILE()
+        #elif ANDROID
         SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE, "1");
         SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, "1");
         SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
