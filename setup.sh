@@ -1,25 +1,18 @@
 #!/bin/bash
 
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+if [[ "$OSTYPE" == "linux-gnu"* ]]
+then
     sudo apt-get install build-essential cmake clang git autoconf libtool m4 automake xorg-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev mesa-utils libsamplerate-dev libudev-dev libdbus-1-dev libibus-1.0-dev fcitx-libs-dev zlib1g bzip2 libpng-dev libdbus-1-dev libegl-dev libopengl-dev
 
     IS_WAYLAND=$(echo $XDG_SESSION_TYPE)
     if [[ "$IS_WAYLAND" != "x11" ]]; then
         sudo apt-get install meson libwayland-dev wayland-protocols libpango1.0-dev libxkbcommon-dev
     fi
-    
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # Mac OSX
-elif [[ "$OSTYPE" == "cygwin" ]]; then
-        # POSIX compatibility layer and Linux environment emulation for Windows
-elif [[ "$OSTYPE" == "msys" ]]; then
-        # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
-elif [[ "$OSTYPE" == "win32" ]]; then
-        # I'm not sure this can happen.
-elif [[ "$OSTYPE" == "freebsd"* ]]; then
-        # ...
+elif [[ "$OSTYPE" == "darwin"* ]]
+then
+    echo "MacOs"
 else
-        # Unknown.
+    echo "Other system"
 fi
 
 
