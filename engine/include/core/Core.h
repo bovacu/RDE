@@ -64,7 +64,7 @@
         #elif defined(TARGET_OS_MAC)
             #define MAC_PLATFORM
         #else
-            #define MAC_OTHER_PLATFORM Apple OS\n");
+            #define MAC_OTHER_PLATFORM;
         #endif
 	#elif defined(__linux__)
 		#include <csignal>
