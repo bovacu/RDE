@@ -2,6 +2,7 @@
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]
 then
+    echo "Linux (for now only supported linux debian based systems)"
     sudo apt-get install build-essential cmake clang git autoconf libtool m4 automake xorg-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev mesa-utils libsamplerate-dev libudev-dev libdbus-1-dev libibus-1.0-dev fcitx-libs-dev zlib1g bzip2 libpng-dev libdbus-1-dev libegl-dev libopengl-dev
 
     IS_WAYLAND=$(echo $XDG_SESSION_TYPE)
@@ -11,8 +12,9 @@ then
 elif [[ "$OSTYPE" == "darwin"* ]]
 then
     echo "MacOs"
+    brew install sdl2 sdl2_image sdl2_mixer sdl2_net freetype freeglut
 else
-    echo "Other system"
+    echo "Other system, specify which is your system in a GitHub issue so it's support is included in next releases"
 fi
 
 
