@@ -13,7 +13,7 @@ namespace GDE {
         #endif
 
         #if IS_IOS()
-            return Platform::IOS:
+            return PlatformType::IOS;
         #endif
 
         #if IS_LINUX()

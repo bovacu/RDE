@@ -41,7 +41,6 @@
 
 
 #define ENGINE_DEBUG
-#define ENGINE_ENABLE_ASSERTS
 
 #define IS_MAC() (defined(__APPLE__) && defined(TARGET_OS_MAC))
 #define IS_WINDOWS() (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
@@ -55,22 +54,23 @@
 #ifdef ENGINE_DEBUG
     #if defined(_WIN32)
 		#define ENGINE_DEBUGBREAK() __debugbreak()
+        #define ENGINE_ENABLE_ASSERTS
     #elif defined(__APPLE__)
         #include "TargetConditionals.h"
         #if TARGET_OS_IPHONE && TARGET_IPHONE_SIMULATOR
-            printf("iPhone stimulator\n");
-        #elif TARGET_OS_IPHONE
-            printf("iPhone\n");
-        #elif TARGET_OS_MAC
-            printf("MacOS\n");
+            #define IOS_SIMULATOR
+        #elif defined(TARGET_OS_IPHONE)
+            #define IOS_PLATFORM
+        #elif defined(TARGET_OS_MAC)
+            #define MAC_PLATFORM
         #else
-            printf("Other Apple OS\n");
+            #define MAC_OTHER_PLATFORM Apple OS\n");
         #endif
 	#elif defined(__linux__)
 		#include <csignal>
 		#define ENGINE_DEBUG_BREAK() raise(SIGTRAP)
+        #define ENGINE_ENABLE_ASSERTS
 	#endif
-	#define ENGINE_ENABLE_ASSERTS
 #else
 #define ENGINE_DEBUGBREAK()
 #endif
