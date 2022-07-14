@@ -95,7 +95,7 @@ namespace GDE {
     void Engine::onEvent(Event& _e) {
         EventDispatcher _ed(_e);
         _ed.dispatchEvent<WindowResizedEvent>(wreDel);
-        #if !ANDROID
+        #if !IS_MOBILE()
         imGuiLayer->onEvent(_e);
         #endif
         manager.sceneManager.getDisplayedScene()->onEvent(_e);
@@ -110,15 +110,15 @@ namespace GDE {
         manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->update(window->getWindowSize());
         manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
 
-        #if !ANDROID
+        #if !IS_MOBILE()
         if(manager.inputManager.isKeyJustPressed(KeyCode::F9)) imGuiLayer->show = !imGuiLayer->show;
         #endif
     }
 
     void Engine::onRender(Delta _dt) {
-//        frameBuffer->bind();
+       frameBuffer->bind();
         manager.sceneManager.getDisplayedScene()->onRender(_dt);
-//        frameBuffer->unbind();
+       frameBuffer->unbind();
 
         manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
 

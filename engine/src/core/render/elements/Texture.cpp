@@ -53,6 +53,7 @@ namespace GDE {
             return false;
         }
 
+        LOG_I("getSDLSurface of image of size: ", _imageFile->size)
         auto* _image = getSDLSurface(_imageFile, _path);
 
         if(_image == nullptr) {
@@ -93,7 +94,9 @@ namespace GDE {
 
         glTexImage2D(GL_TEXTURE_2D, 0, (int)internalFormat, textureSize.x, textureSize.y, 0, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
 
+        #if !IS_MAC()
         SDL_FreeSurface(_image);
+        #endif
         SDL_RWclose(_imageFile);
 
         region = { { 0, 0 }, { textureSize.x , textureSize.y} };

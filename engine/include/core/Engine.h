@@ -121,7 +121,7 @@ namespace GDE {
              */
             Window* window;
 
-            #if !ANDROID
+            #if !IS_MOBILE()
             /**
              * @brief ImGui Scene to show and do debugging operations.
              * @see ImGuiScene

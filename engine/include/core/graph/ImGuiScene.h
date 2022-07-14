@@ -3,7 +3,7 @@
 #ifndef IMGUI_LAYER_H
 #define IMGUI_LAYER_H
 
-#if !ANDROID
+#if !IS_MOBILE()
 
 #include <chrono>
 #include "core/graph/Scene.h"
