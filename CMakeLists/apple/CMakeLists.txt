@@ -14,7 +14,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
 
 find_package(Freetype REQUIRED)
 
-SET(TARGET_LINKS Threads::Threads glad OpenGL::GL ${FREETYPE_LIBRARIES} sdl2 sdl2_mixer sdl2_image ${CMAKE_DL_LIBS}
+SET(TARGET_LINKS Threads::Threads OpenGL::GL ${FREETYPE_LIBRARIES} sdl2 sdl2_mixer sdl2_image ${CMAKE_DL_LIBS}
     ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
     EnTT::EnTT box2d yaml-cpp
     )
@@ -100,9 +100,6 @@ include_directories(submodules/entt/src)
 include_directories(submodules/box2d/include)
 include_directories(submodules/yaml-cpp/include)
 add_subdirectory(submodules/entt)
-
-add_library(glad libs/glad/include/glad/glad.h libs/glad/src/glad.c)
-target_include_directories(glad PUBLIC libs/glad/include/)
 
 set(IMGUI_PATH  "submodules/imgui")
 file(GLOB IMGUI_SOURCES ${IMGUI_PATH}/*.cpp ${IMGUI_PATH}/backends/imgui_impl_sdl.cpp ${IMGUI_PATH}/backends/imgui_impl_opengl3.cpp ${IMGUI_PATH}/imgui_demo.cpp)
