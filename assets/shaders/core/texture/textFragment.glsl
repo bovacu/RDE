@@ -1,4 +1,4 @@
-#version 110
+#version 330
 
 in vec2 uv;
 in vec4 color;
