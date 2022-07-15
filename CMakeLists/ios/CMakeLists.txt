@@ -101,6 +101,9 @@ include_directories(submodules/box2d/include)
 include_directories(submodules/yaml-cpp/include)
 add_subdirectory(submodules/entt)
 
+# add_library(glad libs/glad/include/glad/glad.h libs/glad/src/glad.c)
+# target_include_directories(glad PUBLIC libs/glad/include/)
+
 set(IMGUI_PATH  "submodules/imgui")
 file(GLOB IMGUI_SOURCES ${IMGUI_PATH}/*.cpp ${IMGUI_PATH}/backends/imgui_impl_sdl.cpp ${IMGUI_PATH}/backends/imgui_impl_opengl3.cpp ${IMGUI_PATH}/imgui_demo.cpp)
 add_library("ImGui" STATIC ${IMGUI_SOURCES})

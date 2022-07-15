@@ -8,7 +8,7 @@
 #include "core/util/Util.h"
 #include "box2d/box2d.h"
 
-#if defined(ANDROID) || IS_MAC()
+#if IS_MOBILE() || IS_MAC()
     typedef unsigned long ulong;
 #endif
 

@@ -47,7 +47,7 @@ namespace GDE {
         return _ostream;
     }
 
-#if !ANDROID
+#if !IS_MOBILE()
     struct ScrollingBuffer {
         int MaxSize;
         int Offset;

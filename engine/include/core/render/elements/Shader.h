@@ -4,8 +4,13 @@
 #include <unordered_map>
 
 #include "core/Core.h"
-#if IS_MOBILE()
+#if IS_ANDROID()
     #include <GLES3/gl32.h>
+#elif IS_IOS()
+    #include <OpenGLES/ES3/gl.h>
+#elif IS_MAC()
+    #define GL_SILENCE_DEPRECATION
+    #include <OpenGL/gl3.h>
 #elif IS_DESKTOP()
     #include <glad/glad.h>
 #endif

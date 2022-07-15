@@ -11,6 +11,8 @@ namespace GDE {
     void Renderer::init(Engine* _engine) {
         batch.init(_engine);
 
+        LOG_I("OpenGL Version: ", glGetString(GL_VERSION));
+
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
 

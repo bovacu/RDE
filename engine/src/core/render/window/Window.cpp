@@ -3,8 +3,13 @@
 #include "core/platform/PlatformHeaderSDL.h"
 #include "core/Engine.h"
 
-#if IS_MOBILE()
+#if IS_ANDROID()
     #include <GLES3/gl32.h>
+#elif IS_IOS()
+    #include <OpenGLES/ES3/gl.h>
+#elif IS_MAC()
+    #define GL_SILENCE_DEPRECATION
+    #include <OpenGL/gl3.h>
 #elif IS_DESKTOP()
     #include <glad/glad.h>
 #endif
@@ -21,6 +26,7 @@ namespace GDE {
 
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
             LOG_E("At least one module of SDL couldn't be initialized, so can't start the engine")
+            printf("SDL_Init failed: %s\n", SDL_GetError());
             return;
         }
 
@@ -40,15 +46,32 @@ namespace GDE {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
         #if IS_DESKTOP()
-         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         #else
         SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
         SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
         #endif
+        
+        
+        #if IS_IOS()
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+        SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 
+        SDL_DisplayMode displayMode;
+        SDL_GetDesktopDisplayMode(0, &displayMode);
+        window = SDL_CreateWindow(NULL, 0, 0, displayMode.w, displayMode.h,  SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
+        #else
         window = SDL_CreateWindow(_config->windowData.title.c_str(), 0, 0,
                                   (int)_config->windowData.size.x, (int)_config->windowData.size.y,
-                                  SDL_WINDOW_OPENGL| SDL_WINDOW_ALLOW_HIGHDPI);
+                                  SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
+        #endif
+        if(window == nullptr) {
+            printf("SDL_Init failed: %s\n", SDL_GetError());
+            return;
+        }
         context = SDL_GL_CreateContext(window);
 
         SDL_GL_MakeCurrent(window, context);
@@ -57,14 +80,20 @@ namespace GDE {
         #if IS_DESKTOP()
         SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         SDL_SetWindowResizable(window, SDL_TRUE);
+        
+        #if !IS_MAC()
         gladLoadGLLoader(SDL_GL_GetProcAddress);
+        #endif
+
         LOG_S("GLAD and SDL2 initiated correctly");
-        #elif ANDROID
+        #elif IS_MOBILE()
+        #if IS_ANDROID()
         SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE, "1");
         SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, "1");
         SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
         #endif
-
+        #endif
+    
         if(!properties->projectData.iconPath.empty()) setIcon(properties->projectData.iconPath);
     }
 
@@ -145,10 +174,6 @@ namespace GDE {
 
     int Window::getWidth() const {
         return getWindowSize().x;
-    }
-
-    void Window::swapBuffers() const {
-        SDL_GL_SwapWindow(window);
     }
 
     SDL_GLContext& Window::getContext() {

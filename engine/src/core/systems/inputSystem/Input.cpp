@@ -46,6 +46,8 @@ namespace GDE {
 
     void InputManager::pollEvents() {
         SDL_Event _event;
+        
+        SDL_PumpEvents();
         while (SDL_PollEvent(&_event)) {
 
             bool _eventImplemented = false;

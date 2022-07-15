@@ -4,7 +4,7 @@
 #ifndef ENGINE2_0_IMGUI_CORE_H
 #define ENGINE2_0_IMGUI_CORE_H
 
-#if !ANDROID
+#if !IS_MOBILE()
 #include "imgui.h"
 #endif
 

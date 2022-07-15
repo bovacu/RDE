@@ -1,4 +1,4 @@
-#version 400 core
+#version 110
 
 in vec2 uv;
 in vec4 color;

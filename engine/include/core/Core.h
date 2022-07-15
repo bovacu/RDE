@@ -48,14 +48,10 @@
         #define ENGINE_ENABLE_ASSERTS
     #elif defined(__APPLE__)
         #include "TargetConditionals.h"
-        #if defined(TARGET_OS_MAC)
-            #define MAC_PLATFORM
-        #elif defined(TARGET_OS_IPHONE) && defined(TARGET_IPHONE_SIMULATOR)
-            #define IOS_SIMULATOR
-        #elif defined(TARGET_OS_IPHONE)
+        #if TARGET_OS_IPHONE
             #define IOS_PLATFORM
-        #else
-            #define MAC_OTHER_PLATFORM;
+        #elif TARGET_OS_MAC
+            #define MAC_PLATFORM
         #endif
 	#elif defined(__linux__)
 		#include <csignal>
@@ -66,7 +62,7 @@
 #define ENGINE_DEBUGBREAK()
 #endif
 
-#define IS_MAC() (defined(__APPLE__) && defined(TARGET_OS_MAC))
+#define IS_MAC() (defined(__APPLE__) && defined(MAC_PLATFORM))
 #define IS_WINDOWS() (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
 #define IS_LINUX() (defined(__linux__))
 #define IS_DESKTOP() (IS_LINUX() || IS_MAC() || IS_WINDOWS())

@@ -177,11 +177,6 @@ namespace GDE {
              * @brief Makes the window to close and the application to exit.
              */
             void stop();
-
-            /**
-             * @brief Swaps the buffers of the window to render.
-             */
-            void swapBuffers() const;
     };
 
 }

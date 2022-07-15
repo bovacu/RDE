@@ -1,5 +1,5 @@
 #include "core/Core.h"
-#if !ANDROID
+#if !IS_MOBILE()
 
 #include "imgui.h"
 #include "core/graph/ImGuiScene.h"

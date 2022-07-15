@@ -33,8 +33,10 @@ namespace GDE {
         window->setVSync(true);
         Renderer::setClearColor(backgroundColor);
 
+        #if !IS_IOS()
         FrameBufferSpecification _specs = {(uint32_t)window->getWindowSize().x,(uint32_t)window->getWindowSize().y};
         frameBuffer = new FrameBuffer(_specs, &manager);
+        #endif
 
         manager.consoleManager.addCommand<&Engine::changeColorConsoleCommand>("background_color"," Changes background color 0 <= r,b,g,a <= 255", this, "r g b a");
         manager.consoleManager.addCommand<&Engine::setParentCommand>( "parent_set", "Sets the parent of A as B", this, "A B");
@@ -95,7 +97,7 @@ namespace GDE {
     void Engine::onEvent(Event& _e) {
         EventDispatcher _ed(_e);
         _ed.dispatchEvent<WindowResizedEvent>(wreDel);
-        #if !ANDROID
+        #if !IS_MOBILE()
         imGuiLayer->onEvent(_e);
         #endif
         manager.sceneManager.getDisplayedScene()->onEvent(_e);
@@ -110,15 +112,21 @@ namespace GDE {
         manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->update(window->getWindowSize());
         manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
 
-        #if !ANDROID
+        #if !IS_MOBILE()
         if(manager.inputManager.isKeyJustPressed(KeyCode::F9)) imGuiLayer->show = !imGuiLayer->show;
         #endif
     }
 
     void Engine::onRender(Delta _dt) {
-//        frameBuffer->bind();
+        #if !IS_IOS()
+            frameBuffer->bind();
+        #endif
+        
         manager.sceneManager.getDisplayedScene()->onRender(_dt);
-//        frameBuffer->unbind();
+
+        #if !IS_IOS()
+            frameBuffer->unbind();
+        #endif
 
         manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
 
