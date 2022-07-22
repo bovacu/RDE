@@ -33,7 +33,7 @@ namespace GDE {
         window->setVSync(true);
         Renderer::setClearColor(backgroundColor);
 
-        #if !IS_IOS()
+        #if !IS_IOS() && !IS_MAC()
         FrameBufferSpecification _specs = {(uint32_t)window->getWindowSize().x,(uint32_t)window->getWindowSize().y};
         frameBuffer = new FrameBuffer(_specs, &manager);
         #endif
@@ -118,13 +118,13 @@ namespace GDE {
     }
 
     void Engine::onRender(Delta _dt) {
-        #if !IS_IOS()
+        #if !IS_IOS() && !IS_MAC()
             frameBuffer->bind();
         #endif
         
         manager.sceneManager.getDisplayedScene()->onRender(_dt);
 
-        #if !IS_IOS()
+        #if !IS_IOS() && !IS_MAC()
             frameBuffer->unbind();
         #endif
 
