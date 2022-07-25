@@ -62,11 +62,11 @@ namespace GDE {
         glBindBuffer(GL_ARRAY_BUFFER, debugVbo);
         int _size = 3 * sizeof(float) + 4 * sizeof(float);
         // Position
-        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, _size, (void*)nullptr);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, _size, (void*)nullptr);
         // Color
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, _size, (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(4);
-        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, _size, (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
@@ -217,13 +217,7 @@ namespace GDE {
             glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(VertexColorDebug) * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            glEnableVertexAttribArray(4);
-            glEnableVertexAttribArray(5);
-
             glDrawArrays(GL_TRIANGLES, 0, (int)vertexDebugBufferGeometrics.size());
-
-            glDisableVertexAttribArray(4);
-            glDisableVertexAttribArray(5);
         }
 
         if(!vertexDebugBufferLines.empty()) {
@@ -231,13 +225,7 @@ namespace GDE {
             glBufferData(GL_ARRAY_BUFFER, (long) (sizeof(VertexColorDebug) * vertexDebugBufferLines.size()), &vertexDebugBufferLines[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            glEnableVertexAttribArray(4);
-            glEnableVertexAttribArray(5);
-
             glDrawArrays(GL_LINES, 0, (int) vertexDebugBufferLines.size());
-
-            glDisableVertexAttribArray(4);
-            glDisableVertexAttribArray(5);
         }
 
         vertexDebugBufferGeometrics.clear();

@@ -39,11 +39,6 @@ namespace GDE {
         >;
     };
 
-//    template<typename Entity>
-//    struct entt::poly_storage_traits<Entity> {
-//        using storage_type = entt::poly<PolyStorage<Entity>>;
-//    };
-
     /// All of these are foo functions as Delegates need to have something assigned to be called.
     static void onEventDelFoo(Event& _event) {  }
     static void onUpdateDelFoo(Delta _dt) {  }

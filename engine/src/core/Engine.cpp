@@ -135,9 +135,18 @@ namespace GDE {
         imGuiLayer->begin();
         manager.sceneManager.getDisplayedScene()->onImGuiRender(_dt);
         imGuiLayer->drawDebugInfo(manager.sceneManager.getDisplayedScene());
+
+        if (imGuiRedirectionFunc != nullptr) {
+            imGuiRedirectionFunc(frameBuffer);
+        }
+
         imGuiLayer->end();
         #endif
         Profiler::end(ProfilerState::IMGUI);
+
+        if (redirectionFunc != nullptr) {
+            redirectionFunc(frameBuffer);
+        }
     }
 
     bool Engine::onWindowResized(WindowResizedEvent &_e) {
@@ -210,4 +219,11 @@ namespace GDE {
         fixedDelta = _fixedDelta;
     }
 
+    void Engine::setRenderingRedirection(UDelegate<void(FrameBuffer*)>& _redirectionFunc) {
+        redirectionFunc = _redirectionFunc;
+    }
+
+    void Engine::setRenderingRedirectionToImGui(UDelegate<void(FrameBuffer*)>& _redirectionFunc) {
+        imGuiRedirectionFunc = _redirectionFunc;
+    }
 }

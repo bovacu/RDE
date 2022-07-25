@@ -117,6 +117,16 @@ namespace GDE {
             FrameBuffer* frameBuffer;
 
             /**
+             * @brief Function to render in a custom way.
+             */
+            UDelegate<void(FrameBuffer*)> redirectionFunc;
+
+            /**
+            * @brief Function to render to ImGui.
+            */
+            UDelegate<void(FrameBuffer*)> imGuiRedirectionFunc;
+
+            /**
              * @see Window
              */
             Window* window;
@@ -209,6 +219,18 @@ namespace GDE {
              * @return The main window.
              */
             Window& getWindow() { return *window; }
+
+            /**
+             * @brief Allows the end-user to render to something different than the default window.
+             * @param _redirectionFunc FrameBuffer
+             */
+            void setRenderingRedirection(UDelegate<void(FrameBuffer*)>& _redirectionFunc);
+
+            /**
+             * @brief Allows the end-user to render to ImGui specifically.
+             * @param _redirectionFunc FrameBuffer
+             */
+            void setRenderingRedirectionToImGui(UDelegate<void(FrameBuffer*)>& _redirectionFunc);
 
         private:
             /**
