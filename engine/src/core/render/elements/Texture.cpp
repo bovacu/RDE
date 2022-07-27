@@ -53,7 +53,6 @@ namespace GDE {
             return false;
         }
 
-        LOG_I("getSDLSurface of image of size: ", _imageFile->size)
         auto* _image = getSDLSurface(_imageFile, _path);
 
         if(_image == nullptr) {

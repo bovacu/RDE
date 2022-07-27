@@ -109,7 +109,6 @@ namespace GDE {
     }
 
     void Engine::onUpdate(Delta _dt) {
-        manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->update(window->getWindowSize());
         manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
 
         #if !IS_MOBILE()
