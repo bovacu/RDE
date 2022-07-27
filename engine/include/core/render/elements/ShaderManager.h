@@ -7,6 +7,10 @@
 
 #include "core/util/Util.h"
 #include "Shader.h"
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
+#include "glm/ext/matrix_float4x4.hpp"
 
 namespace GDE {
 
@@ -56,6 +60,94 @@ namespace GDE {
              * @return ShaderID
              */
             ShaderID getShader(const std::string& _name);
+
+            /**
+             * @brief Sets an 'int' uniform for a specific shader
+             * @param _shaderID Shader that this value is uploaded to.
+             * @param _uniformName Name of the uniform to upload the value.
+             * @param _value Value to upload
+             */
+            void setInt(ShaderID _shaderID, const std::string& _uniformName, int _value) const;
+
+            /**
+             * @brief Sets an 'int2' uniform for a specific shader
+             * @param _shaderID Shader that this value is uploaded to.
+             * @param _uniformName Name of the uniform to upload the value.
+             * @param _value Value to upload
+             */
+            void setInt2(ShaderID _shaderID, const std::string& _uniformName, const glm::ivec2& _value) const;
+
+            /**
+             * @brief Sets an 'int3' uniform for a specific shader
+             * @param _shaderID Shader that this value is uploaded to.
+             * @param _uniformName Name of the uniform to upload the value.
+             * @param _value Value to upload
+             */
+            void setInt3(ShaderID _shaderID, const std::string& _uniformName, const glm::ivec3& _value) const;
+
+            /**
+             * @brief Sets an 'int4' uniform for a specific shader
+             * @param _shaderID Shader that this value is uploaded to.
+             * @param _uniformName Name of the uniform to upload the value.
+             * @param _value Value to upload
+             */
+            void setInt4(ShaderID _shaderID, const std::string& _uniformName, const glm::ivec4& _value) const;
+
+            /**
+             * @brief Sets a 'float' uniform for a specific shader
+             * @param _shaderID Shader that this value is uploaded to.
+             * @param _uniformName Name of the uniform to upload the value.
+             * @param _value Value to upload
+             */
+            void setFloat(ShaderID _shaderID, const std::string& _uniformName, float _value) const;
+
+            /**
+             * @brief Sets a 'float2' uniform for a specific shader
+             * @param _shaderID Shader that this value is uploaded to.
+             * @param _uniformName Name of the uniform to upload the value.
+             * @param _value Value to upload
+             */
+            void setFloat2(ShaderID _shaderID, const std::string& _uniformName, const glm::vec2& _value) const;
+
+            /**
+             * @brief Sets a 'float3' uniform for a specific shader
+             * @param _shaderID Shader that this value is uploaded to.
+             * @param _uniformName Name of the uniform to upload the value.
+             * @param _value Value to upload
+             */
+            void setFloat3(ShaderID _shaderID, const std::string& _uniformName, const glm::vec3& _value) const;
+
+            /**
+             * @brief Sets a 'float4' uniform for a specific shader
+             * @param _shaderID Shader that this value is uploaded to.
+             * @param _uniformName Name of the uniform to upload the value.
+             * @param _value Value to upload
+             */
+            void setFloat4(ShaderID _shaderID, const std::string& _uniformName, const glm::vec4& _value) const;
+
+            /**
+             * @brief Sets a 'mat2' uniform for a specific shader
+             * @param _shaderID Shader that this value is uploaded to.
+             * @param _uniformName Name of the uniform to upload the value.
+             * @param _value Value to upload
+             */
+            void setMat2(ShaderID _shaderID, const std::string& _uniformName, const glm::mat2& _value) const;
+
+            /**
+             * @brief Sets a 'mat3' uniform for a specific shader
+             * @param _shaderID Shader that this value is uploaded to.
+             * @param _uniformName Name of the uniform to upload the value.
+             * @param _value Value to upload
+             */
+            void setMat3(ShaderID _shaderID, const std::string& _uniformName, const glm::mat3& _value) const;
+
+            /**
+             * @brief Sets a 'mat4' uniform for a specific shader
+             * @param _shaderID Shader that this value is uploaded to.
+             * @param _uniformName Name of the uniform to upload the value.
+             * @param _value Value to upload
+             */
+            void setMat4(ShaderID _shaderID, const std::string& _uniformName, const glm::mat4& _value) const;
     };
 
 }
