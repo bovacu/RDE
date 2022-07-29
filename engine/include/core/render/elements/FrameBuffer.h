@@ -64,7 +64,7 @@ namespace GDE {
             /**
              * @brief ColorAttachment buffer ID on the GPU
              */
-            uint32_t colorAttachment = -1;
+            uint32_t frameBufferTexureForColorAttachment = -1;
 
             /**
              * @see FrameBufferSpecification
@@ -108,7 +108,7 @@ namespace GDE {
              * @brief Returns the ID of the Color Attachment Buffer.
              * @return uint32_t
              */
-            [[nodiscard]] uint32_t getColorAttachmentRendererID() const { return colorAttachment; }
+            [[nodiscard]] uint32_t getColorAttachmentRendererID() const { return frameBufferTexureForColorAttachment; }
 
             /**
              * @see FrameBufferSpecification

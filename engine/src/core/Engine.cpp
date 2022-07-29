@@ -125,12 +125,11 @@ namespace GDE {
         Renderer::clear();
 
         manager.sceneManager.getDisplayedScene()->onRender(_dt);
+        manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
 
         #if !IS_IOS() && !IS_MAC()
             frameBuffer->unbind();
         #endif
-
-        manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
 
         Profiler::begin(ProfilerState::IMGUI);
         #if !IS_MOBILE()
