@@ -28,6 +28,11 @@ namespace GDE {
          * @brief Number of samples.
          */
         uint32_t samples = 1;
+
+        /**
+         * @brief Render to window
+         */
+        bool renderToWindow = true;
     };
 
     class Manager;

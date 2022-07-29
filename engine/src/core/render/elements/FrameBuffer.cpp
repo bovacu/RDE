@@ -3,6 +3,7 @@
 
 #include "core/render/elements/FrameBuffer.h"
 #include "core/Manager.h"
+#include "core/render/Renderer.h"
 
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
@@ -91,27 +92,26 @@ namespace GDE {
     }
 
     void FrameBuffer::bind() const {
-        #if !IS_MAC() && !IS_IOS()
         glBindFramebuffer(GL_FRAMEBUFFER, fboID);
-//        glEnable(GL_DEPTH_TEST);
-        #endif
+        glEnable(GL_DEPTH_TEST);
     }
 
     void FrameBuffer::unbind() const {
-        #if !IS_MAC()&& !IS_IOS()
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        if(specs.renderToWindow) {
+            glBindVertexArray(vao);
+            {
+                glDisable(GL_DEPTH_TEST);
+                glUseProgram(framebufferShader);
+                glBindBuffer(GL_ARRAY_BUFFER, vboID);
 
-        glBindVertexArray(vao);
-        {
-            glDisable(GL_DEPTH_TEST);
-            glUseProgram(framebufferShader);
-            glBindBuffer(GL_ARRAY_BUFFER, vboID);
-
-            glBindTexture(GL_TEXTURE_2D, frameBufferTexureForColorAttachment);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+                glBindTexture(GL_TEXTURE_2D, frameBufferTexureForColorAttachment);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            glBindVertexArray(0);
+        } else{
+            Renderer::clear();
         }
-        glBindVertexArray(0);
-        #endif
     }
 
     void FrameBuffer::resize(uint32_t _width, uint32_t _height) {

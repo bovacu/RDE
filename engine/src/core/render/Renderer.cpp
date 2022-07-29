@@ -102,7 +102,13 @@ namespace GDE {
         clearColor = _color;
     }
 
+    Color Renderer::getClearColor() {
+        return clearColor;
+    }
+
     void Renderer::drawGrid(const Color& _color) {
         batch.debug.drawGrid(_color);
     }
+
+
 }

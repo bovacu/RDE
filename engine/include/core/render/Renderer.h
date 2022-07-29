@@ -56,6 +56,12 @@ namespace GDE {
             static void setClearColor(const Color& _color);
 
             /**
+             * @brief Returns the current clear color.
+             * @return Color
+             */
+            static Color getClearColor();
+
+            /**
              * @brief Renders textures, sprites... It includes 2D batching for
              * a much more performant drawing.
              * @param _camera It is the main camera of the scene (or other camera if a special drawing is needed).
