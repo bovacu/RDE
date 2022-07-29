@@ -47,6 +47,8 @@ namespace GDE {
              */
             static void clear();
 
+            static void resetBuffers();
+
             /**
              * @brief Sets the color to paint the background.
              * @param _color Color to paint the background

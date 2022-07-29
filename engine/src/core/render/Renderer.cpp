@@ -32,9 +32,13 @@ namespace GDE {
     }
 
     void Renderer::clear() {
+        resetBuffers();
+        glClearColor((float)clearColor.r / 255.f, (float)clearColor.g / 255.f, (float)clearColor.b / 255.f, (float)clearColor.a / 255.f);
+    }
+
+    void Renderer::resetBuffers() {
         glClearStencil(0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        glClearColor((float)clearColor.r / 255.f, (float)clearColor.g / 255.f, (float)clearColor.b / 255.f, (float)clearColor.a / 255.f);
     }
 
     void Renderer::beginDraw(Camera& _camera, Transform* _cameraTransform) {

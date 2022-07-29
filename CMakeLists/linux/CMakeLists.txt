@@ -69,7 +69,7 @@ add_compile_options("-Werror")
 
 include_directories(.)
 include_directories(engine/include)
-include_directories(sandbox)
+include_directories(editor)
 
 include_directories(submodules/freetype/include)
 include_directories(submodules/SDL/include)
@@ -133,7 +133,7 @@ if(GDE_LIBRARY)
             )
 else()
     message("Building executable")
-    add_executable(Engine engine/main.cpp sandbox/Sandbox.h sandbox/Sandbox.cpp
+    add_executable(Engine engine/main.cpp editor/Editor.cpp
 
             ${GDE_CPP_HEADERS}
             ${GDE_CPP_SOURCES}

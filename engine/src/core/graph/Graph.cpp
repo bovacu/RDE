@@ -106,8 +106,6 @@ namespace GDE {
     }
 
     void Graph::onRender() {
-        Renderer::clear();
-
         auto _spriteRendererGroup = registry.group<SpriteRenderer>(entt::get<Transform, Active>);
         auto _textRendererGroup = registry.group<TextRenderer>(entt::get<Transform, Active>);
 
@@ -136,10 +134,12 @@ namespace GDE {
     }
 
     void Graph::onDebugRender() {
+        auto _debug = registry.view<Body>();
+        if(_debug.empty()) return;
+
         Renderer::beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->ID));
 
-
-        registry.view<Body>().each([](const auto _entity, const Body& _body) {
+        _debug.each([](const auto _entity, const Body& _body) {
             Renderer::drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
         });
 

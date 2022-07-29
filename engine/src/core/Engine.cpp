@@ -49,6 +49,7 @@ namespace GDE {
         float _accumulator = 0;
 
         Delta _dt = 0;
+
         while (window->isRunning()) {
             Uint64 _start = SDL_GetPerformanceCounter();
             _accumulator += _dt;
@@ -120,7 +121,9 @@ namespace GDE {
         #if !IS_IOS() && !IS_MAC()
             frameBuffer->bind();
         #endif
-        
+
+        Renderer::clear();
+
         manager.sceneManager.getDisplayedScene()->onRender(_dt);
 
         #if !IS_IOS() && !IS_MAC()
@@ -132,14 +135,16 @@ namespace GDE {
         Profiler::begin(ProfilerState::IMGUI);
         #if !IS_MOBILE()
         imGuiLayer->begin();
-        manager.sceneManager.getDisplayedScene()->onImGuiRender(_dt);
-        imGuiLayer->drawDebugInfo(manager.sceneManager.getDisplayedScene());
 
         if (imGuiRedirectionFunc != nullptr) {
             imGuiRedirectionFunc(frameBuffer);
         }
 
+        manager.sceneManager.getDisplayedScene()->onImGuiRender(_dt);
+        imGuiLayer->drawDebugInfo(manager.sceneManager.getDisplayedScene());
+
         imGuiLayer->end();
+
         #endif
         Profiler::end(ProfilerState::IMGUI);
 

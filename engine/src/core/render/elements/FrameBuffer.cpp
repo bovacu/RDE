@@ -19,7 +19,6 @@ namespace GDE {
 
     FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs, Manager* _manager) : specs(_specs), manager(_manager) {
         invalidate();
-        glGenVertexArrays(1, &vao);
     }
 
     FrameBuffer::~FrameBuffer() {
@@ -39,7 +38,6 @@ namespace GDE {
             glDeleteRenderbuffers(1, &rboID);
         }
 
-        glBindVertexArray(vao);
         glGenBuffers(1, &vboID);
         glBindBuffer(GL_ARRAY_BUFFER, vboID);
 
@@ -85,7 +83,6 @@ namespace GDE {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         framebufferShader = manager->shaderManager.getShader("framebuffer");
-        glBindVertexArray(0);
     }
 
     void FrameBuffer::bind() const {

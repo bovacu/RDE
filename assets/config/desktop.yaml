@@ -3,7 +3,7 @@ Configuration:
     Width: 1280
     Height: 720
   VSync: true
-  MainScene: "assets/scenes/Sandbox.yaml"
+  MainScene: "assets/scenes/Editor.yaml"
   Fullscreen: false
   Icon: ~
   Title: "Engine"

@@ -187,6 +187,7 @@ namespace GDE {
         if(_isMain) {
             _scene->getMainCamera()->setCurrentZoomLevel(_yaml["Zoom"].as<float>());
             _scene->getMainCamera()->setZoomSpeed(_yaml["ZoomSpeed"].as<float>());
+            _scene->getMainGraph()->getComponent<Tag>(_scene->getMainCamera()->ID)->tag = _yaml["Name"].as<std::string>();
 
             int _viewPortType = _yaml["ViewPortType"].as<int>();
             switch (_viewPortType) {

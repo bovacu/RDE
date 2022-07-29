@@ -37,6 +37,8 @@ namespace GDE {
 
             void box2DStressTest();
             void textStressTest();
+
+            void redirectRendering(FrameBuffer* _frameBuffer);
     };
 
 }
