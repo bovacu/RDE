@@ -7,20 +7,13 @@
 #include "core/Engine.h"
 #include "core/systems/eventSystem/MouseEvent.h"
 #include "core/systems/console/Console.h"
-#include "implot.h"
-#include "imgui_node_editor.h"
-#include "FileBrowser/ImGuiFileBrowser.h"
 #include "core/graph/Graph.h"
 #include "core/render/Renderer.h"
 #include "core/systems/uiSystem/Canvas.h"
 
 namespace GDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
-    namespace ed = ax::NodeEditor;
-    static ed::EditorContext* g_Context = nullptr;
     static ImGuiContext* i_Context = nullptr;
-    static ImPlotContext* p_Context = nullptr;
-    imgui_addons::ImGuiFileBrowser file_dialog;
 
     ImGuiScene::ImGuiScene(Engine* _engine) : Scene(_engine, "ImGuiScene") {  }
 
@@ -28,7 +21,7 @@ namespace GDE {
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         i_Context = ImGui::CreateContext();
-        p_Context = ImPlot::CreateContext();
+//        p_Context = ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -57,11 +50,6 @@ namespace GDE {
             plotBuffers[_state.first] = {};
         }
 
-        ed::Config config;
-        config.SettingsFile = "Simple.json";
-        g_Context = ed::CreateEditor(&config);
-        ed::SetCurrentEditor(g_Context);
-
         mseDel.bind<&ImGuiScene::onMouseScrolled>(this);
         mbpeDel.bind<&ImGuiScene::onMouseClicked>(this);
         mmeDel.bind<&ImGuiScene::onMouseMovedEvent>(this);
@@ -75,8 +63,6 @@ namespace GDE {
     }
 
     void ImGuiScene::onEnd() {
-        ed::DestroyEditor(g_Context);
-        ImPlot::DestroyContext(p_Context);
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();
         ImGui::DestroyContext(i_Context);
@@ -180,11 +166,6 @@ namespace GDE {
         ImGui::Separator();
         ImGui::Text("X: %f, Y: %f", engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
         ImGui::Separator();
-//        int _freeGpuMb = 0;
-//        #if !IS_MOBILE()
-//        glGetIntegerv( GL_TEXTURE_FREE_MEMORY_ATI,&_freeGpuMb);
-//        #endif
-//        ImGui::Text("GPU Used Memory: %.2f MBs", (float)_freeGpuMb / 1000.f);
         auto* _memData = Profiler::getTotalVirtualMemory();
         ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
         ImGui::Separator();
@@ -370,21 +351,7 @@ namespace GDE {
     }
 
     void ImGuiScene::showFileExplorer() {
-        bool open = false, save = false;
-        if(ImGui::Button("Open File Manager"))
-            open = true;
 
-        //Remember the name to ImGui::OpenPopup() and showFileDialog() must be same...
-        if(open)
-            ImGui::OpenPopup("Open File");
-
-        /* Optional third parameter. Support opening only compressed rar/zip files.
-         * Opening any other file will show error, return false and won't close the dialog.
-         */
-        if(file_dialog.showFileDialog("Open File", imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".rar,.zip,.7z")) {
-            std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
-            std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
-        }
     }
 
 

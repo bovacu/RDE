@@ -9,7 +9,8 @@ add_definitions("-DGDE_EXPORT")
 #add_definitions("-DRUN_TESTS")
 
 SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer SDL2_image ${CMAKE_DL_LIBS}
-        ImGui ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
+        ImGui
+#        ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
         EnTT::EnTT box2d yaml-cpp
         )
 
@@ -91,25 +92,25 @@ file(GLOB IMGUI_SOURCES ${IMGUI_PATH}/*.cpp ${IMGUI_PATH}/backends/imgui_impl_sd
 add_library("ImGui" STATIC ${IMGUI_SOURCES})
 target_include_directories("ImGui" PUBLIC ${IMGUI_PATH})
 
-set(IMGUI_PLOT_PATH  "submodules/implot")
-file(GLOB IMGUI_PLOT_SOURCES ${IMGUI_PLOT_PATH}/*.cpp)
-add_library("ImGuiPlot" STATIC ${IMGUI_PLOT_SOURCES})
-target_include_directories("ImGuiPlot" PUBLIC ${IMGUI_PLOT_PATH})
-
-set(IMGUI_ADDONS_PATH  "submodules/imguiAddons")
-file(GLOB IMGUI_ADDONS_SOURCES ${IMGUI_ADDONS_PATH}/FileBrowser/*.cpp)
-add_library("ImGuiAddons" STATIC ${IMGUI_ADDONS_SOURCES})
-target_include_directories("ImGuiAddons" PUBLIC ${IMGUI_ADDONS_PATH})
-
-set(IMGUI_TEXT_EDITOR_PATH  "submodules/imguiTextEditor")
-file(GLOB IMGUI_TEXT_EDITOR_SOURCES ${IMGUI_TEXT_EDITOR_PATH}/*.cpp)
-add_library("ImGuiTextEditor" STATIC ${IMGUI_TEXT_EDITOR_SOURCES})
-target_include_directories("ImGuiTextEditor" PUBLIC ${IMGUI_TEXT_EDITOR_PATH})
-
-set(IMGUI_NODE_EDITOR_PATH  "submodules/imguiNodeEditor")
-file(GLOB IMGUI_NODE_EDITOR_SOURCES ${IMGUI_NODE_EDITOR_PATH}/*.cpp)
-add_library("ImGuiNodeEditor" STATIC ${IMGUI_NODE_EDITOR_SOURCES})
-target_include_directories("ImGuiNodeEditor" PUBLIC ${IMGUI_NODE_EDITOR_PATH})
+#set(IMGUI_PLOT_PATH  "submodules/implot")
+#file(GLOB IMGUI_PLOT_SOURCES ${IMGUI_PLOT_PATH}/*.cpp)
+#add_library("ImGuiPlot" STATIC ${IMGUI_PLOT_SOURCES})
+#target_include_directories("ImGuiPlot" PUBLIC ${IMGUI_PLOT_PATH})
+#
+#set(IMGUI_ADDONS_PATH  "submodules/imguiAddons")
+#file(GLOB IMGUI_ADDONS_SOURCES ${IMGUI_ADDONS_PATH}/FileBrowser/*.cpp)
+#add_library("ImGuiAddons" STATIC ${IMGUI_ADDONS_SOURCES})
+#target_include_directories("ImGuiAddons" PUBLIC ${IMGUI_ADDONS_PATH})
+#
+#set(IMGUI_TEXT_EDITOR_PATH  "submodules/imguiTextEditor")
+#file(GLOB IMGUI_TEXT_EDITOR_SOURCES ${IMGUI_TEXT_EDITOR_PATH}/*.cpp)
+#add_library("ImGuiTextEditor" STATIC ${IMGUI_TEXT_EDITOR_SOURCES})
+#target_include_directories("ImGuiTextEditor" PUBLIC ${IMGUI_TEXT_EDITOR_PATH})
+#
+#set(IMGUI_NODE_EDITOR_PATH  "submodules/imguiNodeEditor")
+#file(GLOB IMGUI_NODE_EDITOR_SOURCES ${IMGUI_NODE_EDITOR_PATH}/*.cpp)
+#add_library("ImGuiNodeEditor" STATIC ${IMGUI_NODE_EDITOR_SOURCES})
+#target_include_directories("ImGuiNodeEditor" PUBLIC ${IMGUI_NODE_EDITOR_PATH})
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 
