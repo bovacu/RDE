@@ -40,5 +40,3 @@ mkdir libs/SDL_net
 cd submodules/SDL_net && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL_net && make && make install && cd ../..
 mkdir libs/freetype
 cd submodules/freetype && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/freetype && make && make install && cd ../..
-mkdir libs/libpng
-cd submodules/libpng && ./configure --prefix="$FOLDER"/libs/libpng && make && make install && cd ../..

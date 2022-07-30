@@ -85,39 +85,16 @@ set_target_properties(
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/freetype/lib/libfreetype.a
 )
 
-add_library(
-        png
-        STATIC
-        IMPORTED
-)
-set_target_properties(
-        png
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/libpng/lib/libpng.a
-)
-
-SET(TARGET_LINKS sdl2 sdl2_image sdl2_mixer png freetype)
-
-find_package(Freetype REQUIRED)
-message("${FREETYPE_LIBRARIES}")
+SET(TARGET_LINKS sdl2 sdl2_image sdl2_mixer freetype)
 
 include_directories(.)
 include_directories(engine/include)
-include_directories(editor)
-
-include_directories(libs/freetype/include/freetype2)
 include_directories(libs/SDL/include/SDL2)
-include_directories(libs/SDL_mixer/include/SDL2)
 include_directories(libs/SDL_image/include/SDL2)
-
-include_directories(submodules)
-include_directories(submodules/glm)
-include_directories(submodules/entt/single_include)
-include_directories(submodules/box2d/include)
-include_directories(submodules/yaml-cpp/include)
-include_directories(submodules/glad/include)
-include_directories(submodules/imgui)
+include_directories(libs/SDL_mixer/include/SDL2)
+include_directories(libs/freetype/include/freetype2)
+include_directories(libs/glad/include)
+include_directories(editor)
 
 #GDEFirebase
 
@@ -133,6 +110,7 @@ if(GDE_LIBRARY)
             )
     target_link_libraries(GDE ${TARGET_LINKS})
     target_compile_definitions(GDE PRIVATE ${GL_PROFILES})
+
 
     execute_process(COMMAND bash -c "cd ${CMAKE_CURRENT_SOURCE_DIR}/output/lib && ar -x ../../libs/SDL/lib/libSDL2.a && ar -x ../../libs/SDL_image/lib/libSDL2_image.a && ar -x ../../libs/SDL_mixer/lib/libSDL2_mixer.a && ar -x libGDE.a && rm libGDE.a && ar -qc libGDE.a *.o && rm *.o" OUTPUT_VARIABLE merge_libs)
 

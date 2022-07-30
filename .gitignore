@@ -15,29 +15,22 @@ docs/api
 
 targets/engineAndroid/.idea/
 
-libs/
-
 cmake-build-debug_lib/
 
 assets/androidInstallationLogs.txt
-
-libs_out/build.ninja
-
-libs_out/.ninja_deps
-
-libs_out/.ninja_log
 
 .idea/
 
 cmake-build-testing/
 
 libs/SDL_mixer
-
 libs/SDL
-
 libs/SDL_net
-
+libs/box2d
 libs/SDL_image
+libs/freetype/
+libs/libpng
+
 /cmake-build-release_lib/
 
 submodules/RmlUi
@@ -48,7 +41,6 @@ submodules/box2d
 submodules/glm
 submodules/entt
 submodules/freetype
-submodules/glm
 submodules/libdecor
 submodules/libpng
 submodules/SDL
