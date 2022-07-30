@@ -49,8 +49,8 @@ set_target_properties(sdl2_mixer PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SO
 add_library(Freetype STATIC IMPORTED)
 set_target_properties(Freetype PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/freetype/lib/libfreetype.a)
 
-add_library(yaml-cpp STATIC IMPORTED)
-set_target_properties(yaml-cpp PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/yaml-cpp/libyaml-cpp.a)
+add_library(yamlcpp STATIC IMPORTED)
+set_target_properties(yamlcpp PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/yamlcpp/libyamlcpp.a)
 
 add_library(box2d STATIC IMPORTED)
 set_target_properties(box2d PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/box2d/build/bin/libbox2d.a)
@@ -80,8 +80,7 @@ if(GDE_LIBRARY)
     target_link_libraries(GDE ${TARGET_LINKS})
     target_compile_definitions(GDE PRIVATE ${GL_PROFILES})
 
-
-    execute_process(COMMAND bash -c "cd ${CMAKE_CURRENT_SOURCE_DIR}/output/lib && ar -x ../../libs/SDL/lib/libSDL2.a && ar -x ../../libs/SDL_image/lib/libSDL2_image.a && ar -x ../../libs/SDL_mixer/lib/libSDL2_mixer.a && ar -x ../../libs/yaml-cpp/libyaml-cpp.a && ar -x ../../libs/box2d/build/bin/libbox2d.a && ar -x libGDE.a && ar -x libGLAD.a && ar -x libImGui.a && rm libGDE.a && rm libGLAD.a && rm libImGui.a  && ar -qc libGDE.a *.o && rm *.o" OUTPUT_VARIABLE merge_libs)
+    add_custom_command(TARGET GDE POST_BUILD COMMAND bash -c "./postLibraryBuildingProcess.sh" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 else()
     message("Building executable")
