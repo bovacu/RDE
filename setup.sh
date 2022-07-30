@@ -12,7 +12,7 @@ then
 elif [[ "$OSTYPE" == "darwin"* ]]
 then
     echo "MacOs"
-    brew install sdl2 sdl2_image sdl2_mixer sdl2_net freetype freeglut
+    brew install freetype freeglut
 else
     echo "Other system, specify which is your system in a GitHub issue so it's support is included in next releases"
 fi
@@ -22,8 +22,6 @@ git submodule init
 git submodule update
 cd submodules/imgui && git checkout docking
 cd ../..
-cd submodules/imguiNodeEditor && git checkout develop
-cd ../..
 
 cd submodules/libdecor && git checkout -b 'christian-rauch/libdecor-gtk_cairo_single' && meson build --buildtype release && meson install -C build
 cd ../..
@@ -31,15 +29,16 @@ cd ../..
 # cd ../.. && sed -i -e 's/add_library(jpeg STATIC)/add_library(jpeg SHARED)/g' submodules/SDL_image/external/jpeg-9d/CMakeLists.txt
 
 FOLDER=$PWD
-
+mkdir libs
 mkdir libs/SDL
-cd submodules/SDL && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL && make && make && cd ../..
+cd submodules/SDL && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL && make && make install && cd ../..
 mkdir libs/SDL_image
-cd submodules/SDL_image && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL_image && make && make && cd ../..
+cd submodules/SDL_image && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL_image && make && make install && cd ../..
 mkdir libs/SDL_mixer
-cd submodules/SDL_mixer && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL_mixer && make && make && cd ../..
+cd submodules/SDL_mixer && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL_mixer && make && make install && cd ../..
 mkdir libs/SDL_net
-cd submodules/SDL_net && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL_net && make && make && cd ../..
-cd submodules/freetype && ./autogen.sh && ./configure && make && sudo make install && cd ../..
-cd submodules/box2d && cmake . && sudo make && cd ../..
-cd submodules/yaml-cpp && cmake . && sudo make && cd ../..
+cd submodules/SDL_net && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL_net && make && make install && cd ../..
+mkdir libs/freetype
+cd submodules/freetype && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/freetype && make && make install && cd ../..
+mkdir libs/libpng
+cd submodules/libpng && ./configure --prefix="$FOLDER"/libs/libpng && make && make install && cd ../..

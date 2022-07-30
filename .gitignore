@@ -19,27 +19,7 @@ libs/
 
 cmake-build-debug_lib/
 
-libs_out/.cmake/
-
-libs_out/CMakeFiles/
-
-libs_out/Testing/
-
-libs_out/cmake_install.cmake
-
-libs_out/CMakeCache.txt
-
-libs_out/Engine.cbp
-
-libs_out/Makefile
-
-libs_out/imgui.ini
-
-libs_out/Engine
-
 assets/androidInstallationLogs.txt
-
-modules/
 
 libs_out/build.ninja
 
@@ -61,8 +41,20 @@ libs/SDL_image
 /cmake-build-release_lib/
 
 submodules/RmlUi
+CMakeFiles
+cmake-build-debug
 
-submodules/
+submodules/box2d
+submodules/glm
+submodules/entt
+submodules/freetype
+submodules/glm
+submodules/libdecor
+submodules/libpng
+submodules/SDL
+submodules/SDL_image
+submodules/SDL_mixer
+submodules/SDL_net
 
 targets/
 
