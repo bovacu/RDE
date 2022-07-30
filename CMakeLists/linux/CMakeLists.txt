@@ -8,7 +8,7 @@ set(PROJECT_NAME Engine)
 add_definitions("-DGDE_EXPORT")
 #add_definitions("-DRUN_TESTS")
 
-SET(TARGET_LINKS Threads::Threads glad freetype sdl2 SDL2_mixer SDL2_image ${CMAKE_DL_LIBS}
+SET(TARGET_LINKS Threads::Threads glad freetype SDL2 SDL2_mixer SDL2_image ${CMAKE_DL_LIBS}
         ImGui
 #        ImGuiPlot ImGuiTextEditor ImGuiNodeEditor ImGuiAddons
         EnTT::EnTT box2d yaml-cpp
@@ -28,64 +28,27 @@ else()
     message("x11 detected, skipping link to LibDecor")
 endif()
 
-add_library(
-        sdl2
-        STATIC
-        IMPORTED
-)
-set_target_properties(
-        sdl2
-        PROPERTIES
-        IMPORTED_LOCATION
-        /usr/local/lib/libSDL2.a
-)
-
-
-add_library(
-        sdl2_image
-        STATIC
-        IMPORTED
-)
-set_target_properties(
-        sdl2_image
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_image/lib/libSDL2_image.a
-)
-
-
-add_library(
-        sdl2_mixer
-        STATIC
-        IMPORTED
-)
-set_target_properties(
-        sdl2_mixer
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_mixer/lib/libSDL2_mixer.a
-)
-
 add_compile_options("-Werror")
 
 include_directories(.)
 include_directories(engine/include)
 include_directories(editor)
 
+include_directories(submodules)
 include_directories(submodules/freetype/include)
 include_directories(submodules/SDL/include)
 include_directories(submodules/SDL_net)
 include_directories(submodules/SDL_mixer/include)
 include_directories(submodules/SDL_image)
 include_directories(submodules/glm)
-include_directories(submodules/imgui)
 include_directories(submodules/entt/src)
 include_directories(submodules/box2d/include)
 include_directories(submodules/yaml-cpp/include)
+include_directories(submodules/glad/include)
 add_subdirectory(submodules/entt)
 
-add_library(glad libs/glad/include/glad/glad.h libs/glad/src/glad.c)
-target_include_directories(glad PUBLIC libs/glad/include/)
+add_library(glad submodules/glad/include/glad/glad.h submodules/glad/src/glad.c)
+target_include_directories(glad PUBLIC submodules/glad/include/)
 
 set(IMGUI_PATH  "submodules/imgui")
 file(GLOB IMGUI_SOURCES ${IMGUI_PATH}/*.cpp ${IMGUI_PATH}/backends/imgui_impl_sdl.cpp ${IMGUI_PATH}/backends/imgui_impl_opengl3.cpp ${IMGUI_PATH}/imgui_demo.cpp)

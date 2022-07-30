@@ -19,18 +19,6 @@
 [submodule "submodules/imgui"]
 	path = submodules/imgui
 	url = https://github.com/ocornut/imgui
-[submodule "submodules/implot"]
-	path = submodules/implot
-	url = https://github.com/epezent/implot
-[submodule "submodules/imguiTextEditor"]
-	path = submodules/imguiTextEditor
-	url = https://github.com/BalazsJako/ImGuiColorTextEdit
-[submodule "submodules/imguiNodeEditor"]
-	path = submodules/imguiNodeEditor
-	url = https://github.com/thedmd/imgui-node-editor
-[submodule "submodules/imguiAddons"]
-	path = submodules/imguiAddons
-	url = https://github.com/gallickgunner/ImGui-Addons
 [submodule "submodules/entt"]
 	path = submodules/entt
 	url = https://github.com/skypjack/entt
