@@ -29,7 +29,6 @@ cd ../..
 # cd ../.. && sed -i -e 's/add_library(jpeg STATIC)/add_library(jpeg SHARED)/g' submodules/SDL_image/external/jpeg-9d/CMakeLists.txt
 
 FOLDER=$PWD
-mkdir libs
 mkdir libs/SDL
 cd submodules/SDL && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL && make && make install && cd ../..
 mkdir libs/SDL_image
