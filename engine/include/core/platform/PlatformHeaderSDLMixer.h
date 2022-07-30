@@ -5,6 +5,6 @@
 #define ENGINE2_0_PLATFORM_HEADER_SDL_MIXER_H
 
 #include "core/Core.h"
-#include "SDL_mixer.h"
+#include "SDL_mixer/include/SDL2/SDL_mixer.h"
 
 #endif //ENGINE2_0_PLATFORM_HEADER_SDL_MIXER_H

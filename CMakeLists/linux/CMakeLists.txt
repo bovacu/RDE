@@ -22,78 +22,47 @@ endif()
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 
-set(IMGUI_PATH  "submodules/imgui")
+set(IMGUI_PATH  "libs/imgui")
 file(GLOB IMGUI_SOURCES ${IMGUI_PATH}/*.cpp ${IMGUI_PATH}/backends/imgui_impl_sdl.cpp ${IMGUI_PATH}/backends/imgui_impl_opengl3.cpp ${IMGUI_PATH}/imgui_demo.cpp)
+add_library("ImGui" STATIC ${IMGUI_SOURCES})
 
-set(BOX2D_PATH  "submodules/box2d")
-file(GLOB BOX2D_SOURCES ${BOX2D_PATH}/src/*/*.cpp)
+set(GLAD_PATH  "libs/glad")
+file(GLOB GLAD_SOURCES ${GLAD_PATH}/src/*.c)
+add_library("GLAD" STATIC ${GLAD_SOURCES})
+target_include_directories("GLAD" PUBLIC ${GLAD_PATH}/include)
 
-set(YAMLCPP_PATH  "submodules/yaml-cpp")
-file(GLOB YAMLCPP_SOURCES ${YAMLCPP_PATH}/src/*/*.cpp ${YAMLCPP_PATH}/src/*.cpp)
-
-file(GLOB_RECURSE GDE_CPP_HEADERS engine/include/*.h* submodules/glad/include/glad/glad.h)
-file(GLOB_RECURSE GDE_CPP_SOURCES engine/src/*.cpp submodules/glad/src/glad.c ${IMGUI_SOURCES} ${BOX2D_SOURCES} ${YAMLCPP_SOURCES})
+file(GLOB_RECURSE GDE_CPP_HEADERS engine/include/*.h*)
+file(GLOB_RECURSE GDE_CPP_SOURCES engine/src/*.cpp )
 
 set(CPP_HEADERS)
 set(CPP_SOURCES)
 
-add_library(
-        sdl2
-        STATIC
-        IMPORTED
-)
-set_target_properties(
-        sdl2
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL/lib/libSDL2.a
-)
+add_library(sdl2 STATIC IMPORTED)
+set_target_properties(sdl2 PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL/lib/libSDL2.a)
 
-add_library(
-        sdl2_image
-        STATIC
-        IMPORTED
-)
-set_target_properties(
-        sdl2_image
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_image/lib/libSDL2_image.a
-)
+add_library(sdl2_image STATIC IMPORTED)
+set_target_properties(sdl2_image PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_image/lib/libSDL2_image.a)
 
-add_library(
-        sdl2_mixer
-        STATIC
-        IMPORTED
-)
-set_target_properties(
-        sdl2_mixer
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_mixer/lib/libSDL2_mixer.a
-)
+add_library(sdl2_mixer STATIC IMPORTED)
+set_target_properties(sdl2_mixer PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_mixer/lib/libSDL2_mixer.a)
 
-add_library(
-        Freetype
-        STATIC
-        IMPORTED
-)
-set_target_properties(
-        Freetype
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/freetype/lib/libfreetype.a
-)
+add_library(Freetype STATIC IMPORTED)
+set_target_properties(Freetype PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/freetype/lib/libfreetype.a)
 
-SET(TARGET_LINKS sdl2 sdl2_image sdl2_mixer freetype)
+add_library(yaml-cpp STATIC IMPORTED)
+set_target_properties(yaml-cpp PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/yaml-cpp/libyaml-cpp.a)
+
+add_library(box2d STATIC IMPORTED)
+set_target_properties(box2d PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/box2d/build/bin/libbox2d.a)
+
+SET(TARGET_LINKS sdl2 sdl2_image sdl2_mixer yaml-cpp box2d freetype ImGui GLAD)
 
 include_directories(.)
 include_directories(engine/include)
+include_directories(libs)
 include_directories(libs/SDL/include/SDL2)
-include_directories(libs/SDL_image/include/SDL2)
-include_directories(libs/SDL_mixer/include/SDL2)
 include_directories(libs/freetype/include/freetype2)
-include_directories(libs/glad/include)
+include_directories(libs/imgui)
 include_directories(editor)
 
 #GDEFirebase
@@ -112,7 +81,7 @@ if(GDE_LIBRARY)
     target_compile_definitions(GDE PRIVATE ${GL_PROFILES})
 
 
-    execute_process(COMMAND bash -c "cd ${CMAKE_CURRENT_SOURCE_DIR}/output/lib && ar -x ../../libs/SDL/lib/libSDL2.a && ar -x ../../libs/SDL_image/lib/libSDL2_image.a && ar -x ../../libs/SDL_mixer/lib/libSDL2_mixer.a && ar -x libGDE.a && rm libGDE.a && ar -qc libGDE.a *.o && rm *.o" OUTPUT_VARIABLE merge_libs)
+    execute_process(COMMAND bash -c "cd ${CMAKE_CURRENT_SOURCE_DIR}/output/lib && ar -x ../../libs/SDL/lib/libSDL2.a && ar -x ../../libs/SDL_image/lib/libSDL2_image.a && ar -x ../../libs/SDL_mixer/lib/libSDL2_mixer.a && ar -x ../../libs/yaml-cpp/libyaml-cpp.a && ar -x ../../libs/box2d/build/bin/libbox2d.a && ar -x libGDE.a && ar -x libGLAD.a && ar -x libImGui.a && rm libGDE.a && rm libGLAD.a && rm libImGui.a  && ar -qc libGDE.a *.o && rm *.o" OUTPUT_VARIABLE merge_libs)
 
 else()
     message("Building executable")
