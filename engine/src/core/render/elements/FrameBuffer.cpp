@@ -19,7 +19,7 @@
 namespace GDE {
 
     FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs, Manager* _manager) : specs(_specs), manager(_manager) {
-        glCreateVertexArrays(1, &vao);
+        glGenVertexArrays(1, &vao);
         invalidate();
     }
 
