@@ -23,10 +23,8 @@ assets/androidInstallationLogs.txt
 
 cmake-build-testing/
 
-libs/SDL_mixer
 libs/SDL
 libs/SDL_net
-libs/box2d
 libs/SDL_image
 libs/libpng
 
