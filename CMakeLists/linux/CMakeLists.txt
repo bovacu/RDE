@@ -55,7 +55,7 @@ set_target_properties(yamlcpp PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURC
 add_library(box2d STATIC IMPORTED)
 set_target_properties(box2d PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/box2d/build/bin/libbox2d.a)
 
-SET(TARGET_LINKS sdl2 sdl2_image sdl2_mixer yaml-cpp box2d freetype ImGui GLAD)
+SET(TARGET_LINKS sdl2 sdl2_image sdl2_mixer yamlcpp box2d Freetype ImGui GLAD)
 
 include_directories(.)
 include_directories(engine/include)

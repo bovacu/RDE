@@ -3,7 +3,15 @@
 if [[ "$OSTYPE" == "linux-gnu"* ]]
 then
     echo "Linux (for now only supported linux debian based systems)"
-    sudo apt-get install build-essential cmake clang git autoconf libtool m4 automake xorg-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev mesa-utils libsamplerate-dev libudev-dev libdbus-1-dev libibus-1.0-dev fcitx-libs-dev zlib1g bzip2 libpng-dev libdbus-1-dev libegl-dev libopengl-dev
+
+    # Those are needed to compile the project and also to compile SDL2 properly statically linked
+    sudo apt-get install build-essential cmake clang git autoconf libtool m4 automake xorg-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev mesa-utils libsamplerate-dev libudev-dev libdbus-1-dev libibus-1.0-dev fcitx-libs-dev zlib1g bzip2 libdbus-1-dev libegl-dev libopengl-dev
+
+    # Those are needed to make SDL_image to work properly statically linked
+    sudo apt-get install libpng-dev libjpeg-dev libwebp-dev libtiff-dev
+
+    # Those are needed to make SDL_mixer to work properly statically linked
+    sudo apt-get install libflac-dev libmodplug-dev libogg-dev libvorbis-dev libvorbisidec-dev libmpg123-dev libopus-dev libopusfile-dev
 
     IS_WAYLAND=$(echo $XDG_SESSION_TYPE)
     if [[ "$IS_WAYLAND" != "x11" ]]; then
@@ -20,11 +28,14 @@ fi
 
 git submodule init
 git submodule update
-cd submodules/imgui && git checkout docking
+cd libs/imgui && git checkout docking
 cd ../..
 
-cd submodules/libdecor && git checkout -b 'christian-rauch/libdecor-gtk_cairo_single' && meson build --buildtype release && meson install -C build
-cd ../..
+IS_WAYLAND=$(echo $XDG_SESSION_TYPE)
+if [[ "$IS_WAYLAND" != "x11" ]]; then
+    cd libs/libdecor && git checkout -b 'christian-rauch/libdecor-gtk_cairo_single' && meson build --buildtype release && meson install -C build
+    cd ../..
+fi
 
 # cd ../.. && sed -i -e 's/add_library(jpeg STATIC)/add_library(jpeg SHARED)/g' submodules/SDL_image/external/jpeg-9d/CMakeLists.txt
 
@@ -38,4 +49,4 @@ cd submodules/SDL_mixer && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/S
 mkdir libs/SDL_net
 cd submodules/SDL_net && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL_net && make && make install && cd ../..
 mkdir libs/freetype
-cd submodules/freetype && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/freetype && make && make install && cd ../..
+cd submodules/freetype && ./autogen.sh && ./configure --without-zlib --without-png --without-bzip2 --without-harfbuzz --without-brotli --prefix="$FOLDER"/libs/freetype && make && make install && cd ../..
