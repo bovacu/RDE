@@ -28,7 +28,6 @@ libs/SDL
 libs/SDL_net
 libs/box2d
 libs/SDL_image
-libs/freetype/
 libs/libpng
 
 /cmake-build-release_lib/

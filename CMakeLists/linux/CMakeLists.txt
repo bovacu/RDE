@@ -47,7 +47,7 @@ add_library(sdl2_mixer STATIC IMPORTED)
 set_target_properties(sdl2_mixer PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL_mixer/lib/libSDL2_mixer.a)
 
 add_library(Freetype STATIC IMPORTED)
-set_target_properties(Freetype PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/freetype/lib/libfreetype.a)
+set_target_properties(Freetype PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/freetype/build/lib/libfreetype.a)
 
 add_library(yamlcpp STATIC IMPORTED)
 set_target_properties(yamlcpp PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/yamlcpp/libyamlcpp.a)
@@ -61,7 +61,7 @@ include_directories(.)
 include_directories(engine/include)
 include_directories(libs)
 include_directories(libs/SDL/include/SDL2)
-include_directories(libs/freetype/include/freetype2)
+include_directories(libs/freetype/build/include/freetype2)
 include_directories(libs/imgui)
 include_directories(editor)
 

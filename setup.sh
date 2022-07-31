@@ -49,4 +49,5 @@ cd submodules/SDL_mixer && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/S
 mkdir libs/SDL_net
 cd submodules/SDL_net && ./autogen.sh && ./configure --prefix="$FOLDER"/libs/SDL_net && make && make install && cd ../..
 mkdir libs/freetype
-cd submodules/freetype && ./autogen.sh && ./configure --without-zlib --without-png --without-bzip2 --without-harfbuzz --without-brotli --prefix="$FOLDER"/libs/freetype && make && make install && cd ../..
+mkdir libs/freetype/build
+cd libs/freetype && ./autogen.sh && ./configure --without-zlib --without-png --without-bzip2 --without-harfbuzz --without-brotli --prefix="$FOLDER"/libs/freetype/build && make && make install && cd ../..
