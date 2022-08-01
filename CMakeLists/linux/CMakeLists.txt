@@ -62,6 +62,7 @@ include_directories(engine/include)
 include_directories(libs)
 include_directories(libs/SDL/include/SDL2)
 include_directories(libs/freetype/build/include/freetype2)
+include_directories(libs/yamlcpp/include)
 include_directories(libs/imgui)
 include_directories(editor)
 

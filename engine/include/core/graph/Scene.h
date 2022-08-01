@@ -3,7 +3,7 @@
 #ifndef ENGINE_SCENE_H
 #define ENGINE_SCENE_H
 
-#include "yaml-cpp/yaml.h"
+#include "yamlcpp/include/yaml-cpp/yaml.h"
 #include "core/util/Delta.h"
 #include "core/graph/Graph.h"
 #include "core/graph/Components.h"
