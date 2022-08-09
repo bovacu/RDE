@@ -1,7 +1,7 @@
 #include "core/Core.h"
 #if !IS_MOBILE()
 
-#include "imgui/imgui.h"
+#include "imgui.h"
 #include "core/graph/ImGuiScene.h"
 
 #include "core/Engine.h"

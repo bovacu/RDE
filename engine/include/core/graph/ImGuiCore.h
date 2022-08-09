@@ -5,7 +5,7 @@
 #define ENGINE2_0_IMGUI_CORE_H
 
 #if !IS_MOBILE()
-#include "imgui/imgui.h"
+#include "imgui.h"
 #endif
 
 #endif //ENGINE2_0_IMGUI_CORE_H

@@ -4,7 +4,7 @@
 #ifndef ENGINE_GRAPH_H
 #define ENGINE_GRAPH_H
 
-#include "entt/single_include/entt/entt.hpp"
+#include "entt/entt.hpp"
 #include "core/util/Delta.h"
 #include "core/systems/eventSystem/Event.h"
 #include "core/render/elements/Texture.h"

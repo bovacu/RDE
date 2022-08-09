@@ -5,7 +5,7 @@
 #define ENGINE2_0_TEXTURE_ATLAS_H
 
 
-#include "yamlcpp/include/yaml-cpp/yaml.h"
+#include "yaml-cpp/yaml.h"
 #include "core/util/Util.h"
 
 #ifdef USE_ZLIB

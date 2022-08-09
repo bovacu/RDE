@@ -9,8 +9,8 @@
 #include "core/graph/Scene.h"
 #include "core/systems/eventSystem/MouseEvent.h"
 #include "core/systems/profiling/Profiler.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
-#include "imgui/backends/imgui_impl_sdl.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl.h"
 
 namespace GDE {
 

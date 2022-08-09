@@ -12,7 +12,7 @@
     #define GL_SILENCE_DEPRECATION
     #include <OpenGL/gl3.h>
 #elif IS_DESKTOP()
-    #include "glad/include/glad/glad.h"
+    #include "glad/glad.h"
 #endif
 
 namespace GDE {

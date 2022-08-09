@@ -5,7 +5,7 @@
 #ifndef ENGINE_CONFIG_LOADER_H
 #define ENGINE_CONFIG_LOADER_H
 
-#include "yamlcpp/include/yaml-cpp/yaml.h"
+#include "yaml-cpp/yaml.h"
 #include "core/graph/Scene.h"
 #include "core/systems/fileSystem/FileManager.h"
 

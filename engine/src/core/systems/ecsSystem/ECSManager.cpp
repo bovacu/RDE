@@ -3,7 +3,7 @@
 //
 
 #include "core/systems/ecsSystem/ECSManager.h"
-#include "entt/src/entt/entt.hpp"
+#include "entt/entt.hpp"
 
 namespace GDE {
 
