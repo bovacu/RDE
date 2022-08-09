@@ -1,0 +1,115 @@
+{
+    "scene_name" : "Test Scene",
+
+    "assets" : {
+        "textures" : [
+            "assets/spriteSheets/test/square.yaml",
+            "assets/spriteSheets/test/ui.yaml"
+        ],
+        "fonts" : [
+            {
+                "path" : "assets/fonts/arial.ttf",
+                "sizes" : [54]
+            }
+        ],
+        "sfx" : [
+
+        ],
+        "music" : [
+            
+        ]
+    },
+
+    "nodes" : [
+        {
+            "tag" : "Main Camera",
+            "components" : {
+                "active" : {},
+                "transform" : {
+                    "position" : [0, 0],
+                    "scale" : [1, 1],
+                    "rotation" : 0
+                },
+                "camera" : {
+                    "tag" : "Main Camera",
+                    "zoom" : 1.0,
+                    "zoom_speed" : 0.25,
+                    "viewport" : "ADAPTIVE",
+                    "view_port_virtual_resolution" : [1280, 720],
+                    "view_port_device_resolution" : [1280, 720],
+                    "is_main" : true
+                }
+            }
+        },
+        {
+            "tag" : "button",
+            "is_prefab" : true,
+            "active" : true,
+            "components" : {
+                "active" : {},
+                "transform" : {
+                    "position" : [0, 128],
+                    "scale" : [1, 1],
+                    "rotation" : 0
+                },
+                "sprite_renderer" : {
+                    "texture" : {
+                        "atlas" : "ui",
+                        "tile" : "button"
+                    },
+                    "color" : [255, 255, 255, 255],
+                    "layer" : 0,
+                    "shader" : "basic"
+                },
+                "body" : {
+                    "type" : "DYNAMIC",
+                    "shape" : "BOX",
+                    "mass" : 1.0,
+                    "size" : [32, 32],
+                    "friction" : 0.0,
+                    "restitution" : 0.0,
+                    "mask" : 2
+                }
+            }
+        },
+        {
+            "tag" : "White Cube",
+            "is_prefab" : false,
+            "components" : {
+                "active" : {},
+                "transform" : {
+                    "position" : [0, 0],
+                    "scale" : [1, 1],
+                    "rotation" : 0
+                },
+                "sprite_renderer" : {
+                    "texture" : {
+                        "atlas" : "square",
+                        "tile" : "square"
+                    },
+                    "color" : [255, 255, 255, 255],
+                    "layer" : 0,
+                    "shader" : "basic"
+                },
+                "body" : {
+                    "type" : "STATIC",
+                    "shape" : "BOX",
+                    "mass" : 1.0,
+                    "size" : [32, 32],
+                    "friction" : 0.0,
+                    "restitution" : 0.0,
+                    "mask" : 2
+                }
+            }
+        }
+    ],
+
+    "canvases" : [
+        {
+            "tag" : "Main Canvas",
+            "nodes" : {
+
+            }
+        }
+    ]
+}

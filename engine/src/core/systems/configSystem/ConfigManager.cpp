@@ -1,6 +1,7 @@
 //
 // Created by borja on 15/05/22.
 //
+#include <fstream>
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/graph/Scene.h"
 #include "core/render/Camera.h"
@@ -12,113 +13,336 @@ namespace GDE {
 
     void ConfigManager::loadGDEConfig(GDEConfig* _config, FileManager& _manager) {
 
-        auto _configPath = "assets/config/desktop.yaml";
+        auto _configPath = "assets/config/desktop.json";
         #if ANDROID
-        _configPath = "assets/config/android.yaml";
+        _configPath = "assets/config/android.json";
         #endif
         auto _fileHandler = _manager.open(_configPath, FileMode::READ);
-        auto _yaml = YAML::Load(_manager.readFullFile(_fileHandler).content);
+        nlohmann::json data = nlohmann::json::parse(_manager.readFullFile(_fileHandler).content);
         _manager.close(_fileHandler);
-        auto _configurationNode = _yaml["Configuration"];
-
-        _config->windowData.title = _configurationNode["Title"].as<std::string>(),
-        _config->windowData.fullScreen = _configurationNode["Fullscreen"].as<bool>(),
-        _config->windowData.vsync = _configurationNode["VSync"].as<bool>(),
-        _config->windowData.size = Vec2<unsigned int>{_configurationNode["Resolution"]["Width"].as<unsigned int>(),
-                                                      _configurationNode["Resolution"]["Height"].as<unsigned int>()};
-
-        _config->projectData.iconPath = _configurationNode["Icon"].as<std::string>();
-        _config->projectData.mainSceneToLoad = _configurationNode["MainScene"].as<std::string>();
+        _config->windowData.title = data["title"].get<std::string>(),
+        _config->windowData.fullScreen = data["fullscreen"].get<bool>(),
+        _config->windowData.vsync = data["vsync"].get<bool>(),
+        _config->windowData.size = Vec2<unsigned int>{data["resolution"][0].get<unsigned int>(),data["resolution"][1].get<unsigned int>()};
+        _config->projectData.iconPath = data["icon"].get<std::string>();
+        _config->projectData.mainSceneToLoad = data["main_scene"].get<std::string>();
     }
 
     void ConfigManager::loadScene(Manager* _manager, Scene* _scene, Window* _window, const std::string& _configFilePath) {
         auto _fileHandler = _manager->fileManager.open(_configFilePath, FileMode::READ);
         auto _yaml = YAML::Load(_manager->fileManager.readFullFile(_fileHandler).content);
         _manager->fileManager.close(_fileHandler);
-        loadAssets(_scene, _window, _yaml);
-        auto _entityMap = createEntities(_scene, _yaml);
-        parentingEntities(_entityMap, _scene, _yaml);
-        loadCameras(_entityMap, _scene, _window, _yaml["Scene"]);
-        loadSprites(_manager, _entityMap, _scene, _yaml["Scene"]);
-        loadTextRenderers(_manager, _entityMap, _scene, _yaml["Scene"]);
-        loadBodies(_entityMap, _scene, _yaml["Scene"]);
-        _scene->preInit(_manager, _window, _yaml);
+
+        _fileHandler = _manager->fileManager.open("assets/scenes/Editor.json", FileMode::READ);
+        nlohmann::json _data = nlohmann::json::parse(_manager->fileManager.readFullFile(_fileHandler).content);
+        _manager->fileManager.close(_fileHandler);
+
+        loadAssets(_scene, _window, _data);
+        loadNodes(_scene, _window, _data);
+//        _scene->preInit(_manager, _window, _yaml);
     }
 
-    void ConfigManager::loadAssets(Scene* _scene, Window* _window, const YAML::Node& _yaml) {
-        auto& _sceneNode = _yaml["Scene"];
+    void ConfigManager::loadAssets(Scene* _scene, Window* _window, const nlohmann::json& _json) {
 
-        auto& _texturesNode = _sceneNode["Assets"]["Textures"];
-        for (const auto& _texture : _texturesNode) {
-            auto _fileHandler = _scene->engine->manager.fileManager.open(_texture["Path"].as<std::string>(), FileMode::READ);
-            _scene->engine->manager.textureManager.loadSpriteSheet(YAML::Load(_scene->engine->manager.fileManager.readFullFile(_fileHandler).content));
-            _scene->engine->manager.fileManager.close(_fileHandler);
+        ENGINE_ASSERT(_json.contains("assets"), "Scene MUST have the 'assets' section.")
+        auto& _assets = _json["assets"];
+
+        if(_assets.contains("textures")) {
+            auto& _texturesNode = _assets["textures"];
+            for (const auto& _texture : _texturesNode) {
+                auto _fileHandler = _scene->engine->manager.fileManager.open(_texture.get<std::string>(), FileMode::READ);
+                _scene->engine->manager.textureManager.loadSpriteSheet(YAML::Load(_scene->engine->manager.fileManager.readFullFile(_fileHandler).content));
+                _scene->engine->manager.fileManager.close(_fileHandler);
+            }
         }
 
-        auto& _fontsNodes = _sceneNode["Assets"]["Fonts"];
-        for (const auto& _font : _fontsNodes) {
-            for(auto _i = 0; _i < _font["Sizes"].size(); _i++)
-                _scene->engine->manager.fontManager.loadFont(_scene->engine->manager.fileManager, _font["Path"].as<std::string>(), _font["Sizes"][_i].as<int>());
+        if(_assets.contains("fonts")) {
+            auto& _fontsNodes = _assets["fonts"];
+            for (const auto& _font : _fontsNodes) {
+                for(auto _i = 0; _i < _font["sizes"].size(); _i++)
+                    _scene->engine->manager.fontManager.loadFont(_scene->engine->manager.fileManager, _font["path"].get<std::string>(), _font["sizes"][_i].get<int>());
+            }
         }
 
-        auto& _prefabsNodes = _sceneNode["Assets"]["Prefabs"];
-        for (const auto& _prefab : _prefabsNodes) {
-            auto _fileHandler = _scene->engine->manager.fileManager.open(APPEND_S("assets/prefabs/", _prefab["Key"].as<std::string>(), ".yaml"), FileMode::READ);
-            auto _p = YAML::Load(_scene->engine->manager.fileManager.readFullFile(_fileHandler).content)["Prefab"];
-            loadPrefab(_scene, _window, _p);
-            _scene->engine->manager.fileManager.close(_fileHandler);
-        }
-    }
+        if(_assets.contains("sfx")) {
 
-    void ConfigManager::loadPrefab(Scene* _scene, Window* _window, YAML::Node& _yaml) {
-        auto _entityID = _scene->getMainGraph()->createNode(_yaml["Base"]["Tag"].as<std::string>());
-        _scene->getMainGraph()->setNodeActive(_entityID, false);
-        _scene->prefabs[_yaml["Name"].as<std::string>()] = _entityID;
-
-        EntityMap _entitiesMap;
-        _entitiesMap[0] = _entityID;
-
-        setBaseComponents(_scene, _entityID, _yaml["Base"]);
-
-        if(_yaml["Camera"].IsDefined()) {
-            _yaml["Camera"]["Ref"] = 0;
-            loadCamera(_entityID, _scene, _window, _yaml["Camera"]);
         }
 
-        if(_yaml["SpriteRenderer"].IsDefined()) {
-            _yaml["SpriteRenderer"]["Ref"] = 0;
-            loadSpriteRenderer(_entityID, _scene, _yaml["SpriteRenderer"]);
-        }
+        if(_assets.contains("music")) {
 
-        if(_yaml["TextRenderer"].IsDefined()) {
-            _yaml["TextRenderer"]["Ref"] = 0;
-            loadTextRenderer(_entityID, _scene, _yaml["TextRenderer"]);
-        }
-
-        if(_yaml["Body"].IsDefined()) {
-            _yaml["Body"]["Ref"] = 0;
-            loadBody(_entityID, _scene, _yaml["Body"]);
         }
     }
 
-    ConfigManager::EntityMap ConfigManager::createEntities(Scene* _scene, const YAML::Node& _yaml) {
-        std::unordered_map<int, NodeID> entitiesMap;
-        auto& _sceneNode = _yaml["Scene"];
-        auto& _entitiesNodes = _sceneNode["Entities"];
+    void ConfigManager::loadNodes(Scene* _scene, Window* _window, const nlohmann::json& _json) {
+        if(_json.contains("nodes")) {
+            auto& _nodes = _json["nodes"];
+            int _entityCount = 0;
+            for(auto& _node : _nodes) {
+                auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : APPEND_S("Entity_", _entityCount);
+                auto _entityID = _scene->getMainGraph()->createNode(_tag);
+                _entityCount++;
 
-        for (const auto& _entity : _entitiesNodes) {
-            if(_entity["Prefab"].IsDefined()) {
-                // TODO this _yaml is probably not what we want to send
-                instantiatePrefab(_scene, _yaml);
-                continue;
+                if(_node.contains("components")) {
+                    auto& _components = _node["components"];
+
+                    if(!_components.contains("active")) {
+                        _scene->getMainGraph()->removeComponent<Active>(_entityID);
+                    }
+
+                    ENGINE_ASSERT(_components.contains("transform"), "Every node MUST contain a transform.");
+                    loadTransformComponent(_scene, _entityID, _components["transform"]);
+
+                    if(_components.contains("sprite_renderer")) {
+                        loadSpriteRendererComponent(_entityID, _scene, _components["sprite_renderer"]);
+                    }
+
+                    if(_components.contains("body")) {
+                        loadBodyComponent(_entityID, _scene, _components["body"]);
+                    }
+
+                    if(_components.contains("text_renderer")) {
+                        loadTextRendererComponent(_entityID, _scene, _components["text_renderer"]);
+                    }
+
+                    if(_components.contains("camera")) {
+                        loadCameraComponent(_entityID, _scene, _window, _components["camera"]);
+                    }
+                }
+            }
+        }
+    }
+
+    void ConfigManager::loadTransformComponent(Scene* _scene, const NodeID& _nodeID, const nlohmann::json& _transformJson) {
+        auto* _nodeTransform = _scene->getMainGraph()->getComponent<Transform>(_nodeID);
+        if(_transformJson.contains("position")) {
+            _nodeTransform->setPosition(_transformJson["position"][0].get<float>(), _transformJson["position"][1].get<float>());
+        }
+
+        if(_transformJson.contains("scale")) {
+            _nodeTransform->setScale(_transformJson["scale"][0].get<float>(), _transformJson["scale"][1].get<float>());
+        }
+
+        if(_transformJson.contains("rotation")) {
+            _nodeTransform->setRotation(_transformJson["rotation"].get<float>());
+        }
+    }
+
+    void ConfigManager::loadSpriteRendererComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _spriteRendererJson) {
+        auto _ownerEntityID = _nodeID;
+        auto* _spriteRenderer = _scene->getMainGraph()->addComponent<SpriteRenderer>(_ownerEntityID, _scene);
+
+        ENGINE_ASSERT(_spriteRendererJson.contains("texture"), "SpriteRenderer component MUST have section 'texture'.")
+        ENGINE_ASSERT(_spriteRendererJson["texture"].contains("atlas"), "SpriteRenderer component MUST have section 'atlas' in section 'texture'.")
+        ENGINE_ASSERT(_spriteRendererJson["texture"].contains("tile"), "SpriteRenderer component MUST have section 'tile' in 'texture'.")
+
+        _spriteRenderer->setTexture(
+                _scene->engine->manager.textureManager.getSubTexture(_spriteRendererJson["texture"]["atlas"].get<std::string>(),
+                                                                     _spriteRendererJson["texture"]["tile"].get<std::string>()));
+        if(_spriteRendererJson.contains("color")) {
+            auto& _color = _spriteRendererJson["color"];
+            _spriteRenderer->color = Color { _color[0].get<unsigned char>(), _color[1].get<unsigned char>(), _color[2].get<unsigned char>(), _color[3].get<unsigned char>()};
+        }
+
+        if(_spriteRendererJson.contains("layer")) {
+            _spriteRenderer->layer = _spriteRendererJson["layer"].get<int>();
+        }
+
+        if(_spriteRendererJson.contains("shader")) {
+            _spriteRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(_spriteRendererJson["shader"].get<std::string>());
+        }
+    }
+
+    void ConfigManager::loadBodyComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _bodyJson) {
+        auto _ownerEntityID = _nodeID;
+
+        BodyType _bodyType;
+        if(_bodyJson.contains("type")) {
+            auto _type = _bodyJson["type"].get<std::string>();
+            if(std::equal(_type.begin(), _type.end(), "STATIC")) {
+                _bodyType = BodyType::STATIC;
+            } else if(std::equal(_type.begin(), _type.end(), "DYNAMIC")) {
+                _bodyType = BodyType::DYNAMIC;
+            } else if(std::equal(_type.begin(), _type.end(), "KINEMATIC")) {
+                _bodyType = BodyType::KINEMATIC;
+            } else {
+                _bodyType = BodyType::STATIC;
+                LOG_W("Tried to load a body with a body type not registered: ", _type)
+            }
+        } else {
+            _bodyType = BodyType::STATIC;
+        }
+
+        BodyShapeType _bodyShapeType;
+        if(_bodyJson.contains("shape")) {
+            auto _shape = _bodyJson["shape"].get<std::string>();
+            if(std::equal(_shape.begin(), _shape.end(), "BOX")) {
+                _bodyShapeType = BodyShapeType::BOX;
+            } else if(std::equal(_shape.begin(), _shape.end(), "CIRCLE")) {
+                _bodyShapeType = BodyShapeType::CIRCLE;
+            } else if(std::equal(_shape.begin(), _shape.end(), "POLYGON")) {
+                _bodyShapeType = BodyShapeType::POLYGON;
+            } else {
+                _bodyShapeType = BodyShapeType::BOX;
+                LOG_W("Tried to load a body with a body shape not registered: ", _shape)
+            }
+        } else {
+            _bodyShapeType = BodyShapeType::BOX;
+        }
+
+        ENGINE_ASSERT(_bodyJson.contains("size"), "Body MUST have section 'size'.")
+        ENGINE_ASSERT(_bodyJson["size"].size() == 2, "Body MUST have section 'size' with exactly 2 elements.")
+        ENGINE_ASSERT(_bodyJson.contains("mask"), "Body MUST have section 'mask'.")
+
+        BodyConfig _bodyConfig {
+                .size = {_bodyJson["size"][0].get<float>(), _bodyJson["size"][1].get<float>()},
+                .mask = static_cast<CollisionMask>(_bodyJson["mask"].get<int>()),
+                .bodyType = _bodyType,
+                .bodyShapeType = _bodyShapeType,
+        };
+
+        if(_bodyJson.contains("restitution")) {
+            _bodyConfig.restitution = _bodyJson["restitution"].get<float>();
+        }
+
+        if(_bodyJson.contains("friction")) {
+            _bodyConfig.friction = _bodyJson["friction"].get<float>();
+        }
+
+        if(_bodyJson.contains("mass")) {
+            _bodyConfig.mass = _bodyJson["mass"].get<float>();
+        }
+
+        auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
+        _scene->getMainGraph()->addComponent<Body>(_ownerEntityID, _scene, _bodyConfig, _ownerTransform);
+    }
+
+    void ConfigManager::loadCameraComponent(const NodeID& _nodeID, Scene* _scene, Window* _window, const nlohmann::json& _cameraJson) {
+        if(_cameraJson.contains("is_main") && _cameraJson["is_main"].get<bool>()) {
+
+            if(_cameraJson.contains("zoom")) {
+                _scene->getMainCamera()->setCurrentZoomLevel(_cameraJson["zoom"].get<float>());
             }
 
-            auto _entityID = _scene->getMainGraph()->createNode(_entity["Tag"].as<std::string>());
-            setBaseComponents(_scene, _entityID, _entity);
-            entitiesMap[_entity["Ref"].as<int>()] = _entityID;
+            if(_cameraJson.contains("zoom_speed")) {
+                _scene->getMainCamera()->setZoomSpeed(_cameraJson["zoom_speed"].get<float>());
+            }
+
+            auto _viewPortType = _cameraJson["viewport"].get<std::string>();
+            if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
+
+                auto _virtualRes = _cameraJson.contains("view_port_virtual_resolution") && _cameraJson["view_port_virtual_resolution"].size() == 2 ?
+                                   Vec2I{_cameraJson["view_port_virtual_resolution"][0].get<int>(), _cameraJson["view_port_virtual_resolution"][1].get<int>()} :
+                                   _window->getWindowSize();
+
+                auto _deviceRes = _cameraJson.contains("view_port_device_resolution") && _cameraJson["view_port_device_resolution"].size() == 2 ?
+                                  Vec2I{_cameraJson["view_port_device_resolution"][0].get<int>(), _cameraJson["view_port_device_resolution"][1].get<int>()} :
+                                  _window->getWindowSize();
+
+                _scene->getMainCamera()->setAdaptiveViewport(_virtualRes, _deviceRes);
+            } else if(std::equal(_viewPortType.begin(), _viewPortType.end(), "FREE")) {
+                _scene->getMainCamera()->setFreeViewport(_window->getWindowSize());
+            } else {
+                _scene->getMainCamera()->setFreeViewport(_window->getWindowSize());
+                LOG_W("Tried to load a camera viewport with a type not registered: ", _viewPortType)
+            }
+
+            _scene->getMainCamera()->getViewport()->update(_window->getWindowSize());
+        } else {
+            auto _ownerEntityID = _nodeID;
+            auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
+            auto* _camera = _scene->getMainGraph()->addComponent<Camera>(_ownerEntityID, _window, _ownerTransform);
+
+            if(_cameraJson.contains("zoom")) {
+                _camera->setCurrentZoomLevel(_cameraJson["zoom"].get<float>());
+            }
+
+            if(_cameraJson.contains("zoom_speed")) {
+                _camera->setZoomSpeed(_cameraJson["zoom_speed"].get<float>());
+            }
+
+            auto _viewPortType = _cameraJson["viewport"].get<std::string>();
+            if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
+
+                auto _virtualRes = _cameraJson.contains("view_port_virtual_resolution") && _cameraJson["view_port_virtual_resolution"].size() == 2 ?
+                                   Vec2I{_cameraJson["view_port_virtual_resolution"][0].get<int>(), _cameraJson["view_port_virtual_resolution"][1].get<int>()} :
+                                   _window->getWindowSize();
+
+                auto _deviceRes = _cameraJson.contains("view_port_device_resolution") && _cameraJson["view_port_device_resolution"].size() == 2 ?
+                                  Vec2I{_cameraJson["view_port_device_resolution"][0].get<int>(), _cameraJson["view_port_device_resolution"][1].get<int>()} :
+                                  _window->getWindowSize();
+
+                _camera->setAdaptiveViewport(_virtualRes, _deviceRes);
+            } else if(std::equal(_viewPortType.begin(), _viewPortType.end(), "FREE")) {
+                _camera->setFreeViewport(_window->getWindowSize());
+            } else {
+                _camera->setFreeViewport(_window->getWindowSize());
+                LOG_W("Tried to load a camera viewport with a type not registered: ", _viewPortType)
+            }
+
+            _camera->getViewport()->update(_window->getWindowSize());
+            _scene->getCameras().push_back(_camera);
+        }
+    }
+
+    void ConfigManager::loadTextRendererComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _textRendererJson) {
+        auto _ownerEntityID = _nodeID;
+
+        ENGINE_ASSERT(_textRendererJson.contains("font"), "TextRenderer MUST have section 'font'.")
+        ENGINE_ASSERT(_textRendererJson.contains("text"), "TextRenderer MUST have section 'text'.")
+
+        auto* _textRenderer = _scene->getMainGraph()->addComponent<TextRenderer>(_ownerEntityID,
+                                                                                 _scene, _scene->engine->manager.fontManager.getDefaultFont(_textRendererJson["font"].get<std::string>()),
+                                                                                 _textRendererJson["text"].get<std::string>());
+
+        if(_textRendererJson.contains("color")) {
+            auto& _color = _textRendererJson["color"];
+            _textRenderer->color = Color {_color[0].get<unsigned char>(), _color[1].get<unsigned char>(),
+                                          _color[2].get<unsigned char>(), _color[3].get<unsigned char>()};
         }
 
-        return entitiesMap;
+        if(_textRendererJson.contains("layer")) {
+            _textRenderer->layer = _textRendererJson["layer"].get<int>();
+        }
+
+        if(_textRendererJson.contains("shader")){
+            _textRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(_textRendererJson["shader"].get<std::string>());
+
+        }
+    }
+
+
+
+
+
+    void ConfigManager::loadPrefab(Scene* _scene, Window* _window, YAML::Node& _yaml) {
+//        auto _entityID = _scene->getMainGraph()->createNode(_yaml["Base"]["Tag"].as<std::string>());
+//        _scene->getMainGraph()->setNodeActive(_entityID, false);
+//        _scene->prefabs[_yaml["Name"].as<std::string>()] = _entityID;
+//
+//        EntityMap _entitiesMap;
+//        _entitiesMap[0] = _entityID;
+//
+//        setBaseComponents(_scene, _entityID, _yaml["Base"]);
+//
+//        if(_yaml["Camera"].IsDefined()) {
+//            _yaml["Camera"]["Ref"] = 0;
+//            loadCameraComponent(_entityID, _scene, _window, _yaml["Camera"]);
+//        }
+//
+//        if(_yaml["SpriteRenderer"].IsDefined()) {
+//            _yaml["SpriteRenderer"]["Ref"] = 0;
+//            loadSpriteRendererComponent(_entityID, _scene, _yaml["SpriteRenderer"]);
+//        }
+//
+//        if(_yaml["TextRenderer"].IsDefined()) {
+//            _yaml["TextRenderer"]["Ref"] = 0;
+//            loadTextRendererComponent(_entityID, _scene, _yaml["TextRenderer"]);
+//        }
+//
+//        if(_yaml["Body"].IsDefined()) {
+//            _yaml["Body"]["Ref"] = 0;
+//            loadBodyComponent(_entityID, _scene, _yaml["Body"]);
+//        }
     }
 
     void ConfigManager::instantiatePrefab(Scene* _scene, const YAML::Node& _yaml) {
@@ -135,158 +359,8 @@ namespace GDE {
         }
     }
 
-    void ConfigManager::loadCameras(const EntityMap& _map, Scene* _scene, Window* _window, const YAML::Node& _yaml) {
-        auto& _sceneCameras = _yaml["Cameras"];
+    //DONE
 
-        for (const auto& _sceneCamera : _sceneCameras) {
-            auto _nodeID = !_sceneCamera["Ref"].IsDefined() ? (NodeID)0 : _map.at(_sceneCamera["Ref"].as<int>());
-            loadCamera(_nodeID, _scene, _window, _sceneCamera);
-        }
-    }
-
-    void ConfigManager::loadSprites(Manager* _manager, const EntityMap& _map, Scene* _scene, const YAML::Node& _yaml) {
-        auto& _spriteRenderersNode = _yaml["SpriteRenderers"];
-
-        for (const auto& _spriteRendererNode : _spriteRenderersNode) {
-            loadSpriteRenderer(_map.at(_spriteRendererNode["Ref"].as<int>()), _scene, _spriteRendererNode);
-        }
-    }
-
-    void ConfigManager::loadTextRenderers(Manager* _manager, const EntityMap& _map, Scene* _scene, const YAML::Node& _yaml) {
-        auto& _textsRendererNodes = _yaml["TextRenderers"];
-
-        for (const auto& _textRendererNode : _textsRendererNodes) {
-            loadTextRenderer(_map.at(_textRendererNode["Ref"].as<int>()), _scene, _textRendererNode);
-        }
-    }
-
-    void ConfigManager::loadBodies(const EntityMap& _map, Scene* _scene, const YAML::Node& _yaml) {
-        auto& _bodiesNodes = _yaml["Bodies"];
-
-        for (const auto& _bodyNode : _bodiesNodes) {
-            loadBody(_map.at(_bodyNode["Ref"].as<int>()), _scene, _bodyNode);
-        }
-    }
-
-    void ConfigManager::setBaseComponents(Scene* _scene, const NodeID& _nodeID, const YAML::Node& _yamlNode) {
-        auto* _nodeTransform = _scene->getMainGraph()->getComponent<Transform>(_nodeID);
-        auto& _positionNode = _yamlNode["Transform"]["Position"];
-        auto& _scaleNode = _yamlNode["Transform"]["Scale"];
-        auto& _rotationNode = _yamlNode["Transform"]["Rotation"];
-
-        _nodeTransform->setPosition(_positionNode[0].as<float>(), _positionNode[1].as<float>());
-        _nodeTransform->setScale(_scaleNode[0].as<float>(), _scaleNode[1].as<float>());
-        _nodeTransform->setRotation(_rotationNode.as<float>());
-
-        if(!_yamlNode["Active"].as<bool>())
-            _scene->getMainGraph()->removeComponent<Active>(_nodeID);
-    }
-
-    void ConfigManager::loadCamera(const NodeID& _nodeID, Scene* _scene, Window* _window, const YAML::Node& _yaml) {
-        auto _isMain = _yaml["IsMain"].as<bool>();
-        if(_isMain) {
-            _scene->getMainCamera()->setCurrentZoomLevel(_yaml["Zoom"].as<float>());
-            _scene->getMainCamera()->setZoomSpeed(_yaml["ZoomSpeed"].as<float>());
-            _scene->getMainGraph()->getComponent<Tag>(_scene->getMainCamera()->ID)->tag = _yaml["Name"].as<std::string>();
-
-            int _viewPortType = _yaml["ViewPortType"].as<int>();
-            switch (_viewPortType) {
-                case 0 : {
-                    auto _virtualRes = _yaml["ViewPortVirtualResolution"].IsDefined() && _yaml["ViewPortVirtualResolution"].size() > 0 ?
-                                       Vec2I{_yaml["ViewPortVirtualResolution"][0].as<int>(), _yaml["ViewPortVirtualResolution"][1].as<int>()} :
-                                       _window->getWindowSize();
-
-                    auto _deviceRes = _yaml["ViewPortDeviceResolution"].IsDefined() && _yaml["ViewPortDeviceResolution"].size() > 0 ?
-                                      Vec2I{_yaml["ViewPortDeviceResolution"][0].as<int>(), _yaml["ViewPortDeviceResolution"][1].as<int>()} :
-                                      _window->getWindowSize();
-
-                    _scene->getMainCamera()->setAdaptiveViewport(_virtualRes, _deviceRes);
-                    break;
-                }
-                case 1 : _scene->getMainCamera()->setFreeViewport(_window->getWindowSize()); break;
-                default: _scene->getMainCamera()->setFreeViewport(_window->getWindowSize());
-            }
-
-            _scene->getMainCamera()->getViewport()->update(_window->getWindowSize());
-        } else {
-            auto _ownerEntityID = _nodeID;
-            auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
-            auto* _camera = _scene->getMainGraph()->addComponent<Camera>(_ownerEntityID, _window, _ownerTransform);
-
-            // Set the zoom properties
-            _camera->setCurrentZoomLevel(_yaml["Zoom"].as<float>());
-            _camera->setZoomSpeed(_yaml["ZoomSpeed"].as<float>());
-
-            // Set the proper viewport
-            int _viewPortType = _yaml["ViewPortType"].as<int>();
-            switch (_viewPortType) {
-                case 0 : _camera->setAdaptiveViewport(_window->getWindowSize(), _window->getWindowSize()); break;
-                case 1 : _camera->setFreeViewport(_window->getWindowSize()); break;
-                default: _camera->setFreeViewport(_window->getWindowSize());
-            }
-
-            _camera->getViewport()->update(_window->getWindowSize());
-            _scene->getCameras().push_back(_camera);
-        }
-    }
-
-    void ConfigManager::loadSpriteRenderer(const NodeID& _nodeID, Scene* _scene, const YAML::Node& _yaml) {
-        auto _ownerEntityID = _nodeID;
-        auto* _spriteRenderer = _scene->getMainGraph()->addComponent<SpriteRenderer>(_ownerEntityID, _scene);
-
-        _spriteRenderer->setTexture(
-                _scene->engine->manager.textureManager.getSubTexture(_yaml["Texture"]["Atlas"].as<std::string>(),
-                                                       _yaml["Texture"]["Tile"].as<std::string>()));
-        _spriteRenderer->color = Color { _yaml["Color"][0].as<unsigned char>(), _yaml["Color"][1].as<unsigned char>(),
-                                         _yaml["Color"][2].as<unsigned char>(), _yaml["Color"][3].as<unsigned char>()};
-        _spriteRenderer->layer = _yaml["Layer"].as<int>();
-        _spriteRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(_yaml["Shader"].as<std::string>());
-    }
-
-    void ConfigManager::loadTextRenderer(const NodeID& _nodeID, Scene* _scene, const YAML::Node& _yaml) {
-        auto _ownerEntityID = _nodeID;
-        auto* _textRenderer = _scene->getMainGraph()->addComponent<TextRenderer>(_ownerEntityID,
-                                                                                 _scene, _scene->engine->manager.fontManager.getDefaultFont(_yaml["Font"]["Name"].as<std::string>()),
-                                                                                 _yaml["Text"].as<std::string>());
-
-        _textRenderer->color = Color {_yaml["Color"][0].as<unsigned char>(), _yaml["Color"][1].as<unsigned char>(),
-                                      _yaml["Color"][2].as<unsigned char>(), _yaml["Color"][3].as<unsigned char>()};
-        _textRenderer->layer = _yaml["Layer"].as<int>();
-        _textRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(_yaml["Shader"].as<std::string>());
-    }
-
-    void ConfigManager::loadBody(const NodeID& _nodeID, Scene* _scene, const YAML::Node& _yaml) {
-        auto _ownerEntityID = _nodeID;
-
-        BodyType _bodyType;
-        switch (_yaml["BodyType"].as<int>()) {
-            case 0: _bodyType = BodyType::STATIC; break;
-            case 1: _bodyType = BodyType::DYNAMIC; break;
-            case 2: _bodyType = BodyType::KINEMATIC; break;
-            default: _bodyType = BodyType::STATIC;
-        }
-
-        BodyShapeType _bodyShapeType;
-        switch (_yaml["BodyShape"].as<int>()) {
-            case 0: _bodyShapeType = BodyShapeType::BOX; break;
-            case 1: _bodyShapeType = BodyShapeType::CIRCLE; break;
-            case 2: _bodyShapeType = BodyShapeType::POLYGON; break;
-            default: _bodyShapeType = BodyShapeType::BOX;
-        }
-
-        BodyConfig _bodyConfig {
-                .mass = _yaml["Mass"].as<float>(),
-                .size = {_yaml["Size"]["Width"].as<float>(), _yaml["Size"]["Height"].as<float>()},
-                .friction = _yaml["Friction"].as<float>(),
-                .restitution = _yaml["Restitution"].as<float>(),
-                .mask = _yaml["Mask"].as<unsigned long>(),
-                .bodyType = _bodyType,
-                .bodyShapeType = _bodyShapeType
-        };
-
-        auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
-        _scene->getMainGraph()->addComponent<Body>(_ownerEntityID, _scene, _bodyConfig, _ownerTransform);
-    }
 
 }
 

@@ -25,9 +25,9 @@ find_package(SDL2_mixer CONFIG REQUIRED)
 find_package(freetype CONFIG REQUIRED)
 find_package(box2d CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
-find_package(toml11 CONFIG REQUIRED)
-find_package(yaml-cpp CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/packages/nlohmann-json_x64-linux/share/nlohmann_json)
 find_package(imgui CONFIG REQUIRED)
+find_package(yaml-cpp CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
 include_directories(engine/include)
@@ -73,7 +73,7 @@ target_link_libraries(${PROJECT_NAME}
                         box2d::box2d
                         glad::glad
                         EnTT::EnTT
-                        toml11::toml11
+                        nlohmann_json::nlohmann_json
                         yaml-cpp
                         imgui::imgui
                         glm::glm
