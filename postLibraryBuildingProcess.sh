@@ -1,3 +1,16 @@
 echo "Starting post processing..."
-cd output/lib && ar -x ../../libs/SDL/lib/libSDL2.a && ar -x ../../libs/SDL_image/lib/libSDL2_image.a && ar -x ../../libs/SDL_mixer/lib/libSDL2_mixer.a && ar -x ../../libs/yamlcpp/libyamlcpp.a && ar -x ../../libs/box2d/build/bin/libbox2d.a && ar -x ../../libs/freetype/build/lib/libfreetype.a && ar -x libGDE.a && ar -x libGLAD.a && ar -x libImGui.a && rm libGDE.a && rm libGLAD.a && rm libImGui.a && ar -qc libGDE.a *.o && rm *.o
+cd build
+ar -x ../vcpkg/installed/x64-linux/lib/libSDL2.a 
+ar -x ../vcpkg/installed/x64-linux/lib/libSDL2main.a 
+ar -x ../vcpkg/installed/x64-linux/lib/libSDL2_image.a 
+ar -x ../vcpkg/installed/x64-linux/lib/libSDL2_mixer.a 
+ar -x ../vcpkg/installed/x64-linux/lib/libbox2d.a 
+ar -x ../vcpkg/installed/x64-linux/lib/libfreetype.a 
+ar -x ../vcpkg/installed/x64-linux/lib/libglad.a 
+ar -x ../vcpkg/installed/x64-linux/lib/libimgui.a 
+ar -x ../vcpkg/installed/x64-linux/lib/libyaml-cpp.a 
+ar -x libGDE.a 
+rm libGDE.a
+ar -qc libGDE.a *.o
+rm *.o
 echo "Post processing finished!"
