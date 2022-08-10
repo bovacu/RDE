@@ -30,16 +30,12 @@ namespace GDE {
 
     void ConfigManager::loadScene(Manager* _manager, Scene* _scene, Window* _window, const std::string& _configFilePath) {
         auto _fileHandler = _manager->fileManager.open(_configFilePath, FileMode::READ);
-        auto _yaml = YAML::Load(_manager->fileManager.readFullFile(_fileHandler).content);
+        nlohmann::json _sceneJson = nlohmann::json::parse(_manager->fileManager.readFullFile(_fileHandler).content);
         _manager->fileManager.close(_fileHandler);
 
-        _fileHandler = _manager->fileManager.open("assets/scenes/Editor.json", FileMode::READ);
-        nlohmann::json _data = nlohmann::json::parse(_manager->fileManager.readFullFile(_fileHandler).content);
-        _manager->fileManager.close(_fileHandler);
-
-        loadAssets(_scene, _window, _data);
-        loadNodes(_scene, _window, _data);
-//        _scene->preInit(_manager, _window, _yaml);
+        loadAssets(_scene, _window, _sceneJson);
+        loadNodes(_scene, _window, _sceneJson, createNodes(_scene, _sceneJson));
+        _scene->preInit(_manager, _window, _sceneJson);
     }
 
     void ConfigManager::loadAssets(Scene* _scene, Window* _window, const nlohmann::json& _json) {
@@ -73,17 +69,49 @@ namespace GDE {
         }
     }
 
-    void ConfigManager::loadNodes(Scene* _scene, Window* _window, const nlohmann::json& _json) {
-        if(_json.contains("nodes")) {
-            auto& _nodes = _json["nodes"];
+    std::unordered_map<std::string, NodeID_JsonPair> ConfigManager::createNodes(Scene* _scene, const nlohmann::json& _sceneJson) {
+        std::unordered_map<std::string, NodeID_JsonPair> _nodes;
+
+        std::unordered_map<NodeID, std::string> _parentingMap;
+        if(_sceneJson.contains("nodes")) {
+            auto& _nodesJson = _sceneJson["nodes"];
             int _entityCount = 0;
-            for(auto& _node : _nodes) {
+            for(auto& _node : _nodesJson) {
+                if(_node.contains("components") && _node["components"].contains("camera") && _node["components"]["camera"].contains("is_main") && _node["components"]["camera"]["is_main"].get<bool>()) {
+                    auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : APPEND_S("Entity_", _entityCount);
+                    _nodes[_tag] = { _scene->getMainCamera()->ID, _node };
+                    _scene->getMainGraph()->getComponent<Tag>(_scene->getMainCamera()->ID)->tag = _tag;
+                    _entityCount++;
+                    continue;
+                }
+
                 auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : APPEND_S("Entity_", _entityCount);
+                ENGINE_ASSERT(_nodes.find(_tag) == _nodes.end(), "Scene CANNOT have repeated 'tag' for different nodes, it is a unique identifier. Another '", _tag, "' prefab key was already defined.")
                 auto _entityID = _scene->getMainGraph()->createNode(_tag);
+                _nodes[_tag] = {_entityID, _node };
                 _entityCount++;
 
-                if(_node.contains("components")) {
-                    auto& _components = _node["components"];
+                if(_node.contains("parent") && !_node["parent"].is_null()) {
+                    _parentingMap[_entityID] = _node["parent"];
+                }
+            }
+
+            for(auto& _child : _parentingMap) {
+                _scene->getMainGraph()->setParent(_child.first, _nodes[_child.second].nodeId);
+            }
+        }
+
+        return _nodes;
+    }
+
+    void ConfigManager::loadNodes(Scene* _scene, Window* _window, const nlohmann::json& _sceneJson, const std::unordered_map<std::string, NodeID_JsonPair>& _nodes) {
+        if(_sceneJson.contains("nodes")) {
+            for(auto& _node : _nodes) {
+                auto _entityID = _node.second.nodeId;
+                auto& _nodeJson = _node.second.json;
+
+                if(_nodeJson.contains("components")) {
+                    auto& _components = _nodeJson["components"];
 
                     if(!_components.contains("active")) {
                         _scene->getMainGraph()->removeComponent<Active>(_entityID);
@@ -106,6 +134,12 @@ namespace GDE {
 
                     if(_components.contains("camera")) {
                         loadCameraComponent(_entityID, _scene, _window, _components["camera"]);
+                    }
+
+                    if(_components.contains("is_prefab") && _components["is_prefab"].get<bool>()) {
+                        _scene->getMainGraph()->setNodeActive(_entityID, false);
+                        ENGINE_ASSERT(_scene->prefabs.find(_node.first) == _scene->prefabs.end(), "Scene CANNOT have repeated 'tag' for different prefabs. Another '", _node.first, "' prefab key was already defined.")
+                        _scene->prefabs[_node.first] = _entityID;
                     }
                 }
             }
@@ -310,57 +344,9 @@ namespace GDE {
         }
     }
 
-
-
-
-
-    void ConfigManager::loadPrefab(Scene* _scene, Window* _window, YAML::Node& _yaml) {
-//        auto _entityID = _scene->getMainGraph()->createNode(_yaml["Base"]["Tag"].as<std::string>());
-//        _scene->getMainGraph()->setNodeActive(_entityID, false);
-//        _scene->prefabs[_yaml["Name"].as<std::string>()] = _entityID;
-//
-//        EntityMap _entitiesMap;
-//        _entitiesMap[0] = _entityID;
-//
-//        setBaseComponents(_scene, _entityID, _yaml["Base"]);
-//
-//        if(_yaml["Camera"].IsDefined()) {
-//            _yaml["Camera"]["Ref"] = 0;
-//            loadCameraComponent(_entityID, _scene, _window, _yaml["Camera"]);
-//        }
-//
-//        if(_yaml["SpriteRenderer"].IsDefined()) {
-//            _yaml["SpriteRenderer"]["Ref"] = 0;
-//            loadSpriteRendererComponent(_entityID, _scene, _yaml["SpriteRenderer"]);
-//        }
-//
-//        if(_yaml["TextRenderer"].IsDefined()) {
-//            _yaml["TextRenderer"]["Ref"] = 0;
-//            loadTextRendererComponent(_entityID, _scene, _yaml["TextRenderer"]);
-//        }
-//
-//        if(_yaml["Body"].IsDefined()) {
-//            _yaml["Body"]["Ref"] = 0;
-//            loadBodyComponent(_entityID, _scene, _yaml["Body"]);
-//        }
-    }
-
     void ConfigManager::instantiatePrefab(Scene* _scene, const YAML::Node& _yaml) {
 
     }
-
-    void ConfigManager::parentingEntities(const ConfigManager::EntityMap& _map, Scene* _scene, const YAML::Node& _yaml) {
-        auto& _sceneNode = _yaml["Scene"];
-        auto& _entitiesNodes = _sceneNode["Entities"];
-
-        for (const auto& _entity : _entitiesNodes) {
-            if(!_entity["Parent"].IsDefined()) continue;
-            _scene->getMainGraph()->setParent(_map.at(_entity["Ref"].as<int>()), _map.at(_entity["Parent"].as<int>()));
-        }
-    }
-
-    //DONE
-
 
 }
 

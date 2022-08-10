@@ -112,9 +112,9 @@ namespace GDE {
     void Engine::onUpdate(Delta _dt) {
         manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
 
-//        #if !IS_MOBILE()
-//        if(manager.inputManager.isKeyJustPressed(KeyCode::F9)) imGuiLayer->show = !imGuiLayer->show;
-//        #endif
+        #if !IS_MOBILE()
+        if(manager.inputManager.isKeyJustPressed(KeyCode::Space)) imGuiLayer->show = !imGuiLayer->show;
+        #endif
     }
 
     void Engine::onRender(Delta _dt) {
@@ -139,7 +139,7 @@ namespace GDE {
         }
 
         manager.sceneManager.getDisplayedScene()->onImGuiRender(_dt);
-//        imGuiLayer->drawDebugInfo(manager.sceneManager.getDisplayedScene());
+        imGuiLayer->drawDebugInfo(manager.sceneManager.getDisplayedScene());
 
         imGuiLayer->end();
 

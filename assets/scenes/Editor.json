@@ -101,6 +101,28 @@
                     "mask" : 2
                 }
             }
+        },
+        {
+            "tag" : "Blue Cube",
+            "is_prefab" : false,
+            "parent" : "button",
+            "components" : {
+                "active" : {},
+                "transform" : {
+                    "position" : [64, 64],
+                    "scale" : [1, 1],
+                    "rotation" : 0
+                },
+                "sprite_renderer" : {
+                    "texture" : {
+                        "atlas" : "square",
+                        "tile" : "square"
+                    },
+                    "color" : [0, 0, 255, 255],
+                    "layer" : 0,
+                    "shader" : "basic"
+                }
+            }
         }
     ],
 
