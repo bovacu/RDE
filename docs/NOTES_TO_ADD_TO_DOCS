@@ -1,0 +1,1 @@
+- When exporting from Texture Packer ALWAYS make sure to set Png Opt Level to 0, in advanced options!! Otherwise OpenGL cannot read the file properly
