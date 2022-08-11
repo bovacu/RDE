@@ -27,7 +27,6 @@ find_package(box2d CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/packages/nlohmann-json_x64-linux/share/nlohmann_json)
 find_package(imgui CONFIG REQUIRED)
-find_package(yaml-cpp CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
 include_directories(engine/include)
@@ -74,7 +73,6 @@ target_link_libraries(${PROJECT_NAME}
                         glad::glad
                         EnTT::EnTT
                         nlohmann_json::nlohmann_json
-                        yaml-cpp
                         imgui::imgui
                         glm::glm
                     )

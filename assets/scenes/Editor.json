@@ -3,8 +3,8 @@
 
     "assets" : {
         "textures" : [
-            "assets/spriteSheets/test/square.yaml",
-            "assets/spriteSheets/test/ui.yaml"
+            "assets/spriteSheets/test/square.json",
+            "assets/spriteSheets/test/ui.json"
         ],
         "fonts" : [
             {
@@ -85,7 +85,7 @@
                 "sprite_renderer" : {
                     "texture" : {
                         "atlas" : "square",
-                        "tile" : "square"
+                        "tile" : "whiteSquare"
                     },
                     "color" : [255, 255, 255, 255],
                     "layer" : 0,
@@ -116,7 +116,7 @@
                 "sprite_renderer" : {
                     "texture" : {
                         "atlas" : "square",
-                        "tile" : "square"
+                        "tile" : "whiteSquare"
                     },
                     "color" : [0, 0, 255, 255],
                     "layer" : 0,

@@ -5,8 +5,8 @@
 
 namespace GDE {
 
-    bool TextureAtlasManager::loadSpriteSheet(const YAML::Node& _node) {
-        auto _pathToTexture = _node["SpriteSheetSettings"]["Path"].as<std::string>();
+    bool TextureAtlasManager::loadSpriteSheet(const nlohmann::json& _spriteSheetNode) {
+        auto _pathToTexture = _spriteSheetNode["sprite_sheet_settings"]["path"].get<std::string>();
         auto _name = Util::getFileNameFromPath(_pathToTexture);
         LOG_I_TIME("Trying to load '", _pathToTexture, "'...")
         if(atlases.find(_name) != atlases.end()) {
@@ -24,7 +24,7 @@ namespace GDE {
         _atlas->textureWidth = _atlas->texture->getSize().x;
         _atlas->textureHeight = _atlas->texture->getSize().y;
 
-        cropTextures(*_atlas, _node["Sprites"]);
+        cropTextures(*_atlas, _spriteSheetNode["sprites"]);
         atlases[_name] = _atlas;
         LOG_S_TIME("    Load successful!")
         return true;
@@ -44,26 +44,26 @@ namespace GDE {
         return atlases[_atlasName]->subTextures[_textureName];
     }
 
-    void TextureAtlasManager::cropTextures(Atlas& _atlas, const YAML::Node& _spritesNode) {
+    void TextureAtlasManager::cropTextures(Atlas& _atlas, const nlohmann::json& _spritesNode) {
 
         for(auto& _spriteNode : _spritesNode) {
             IntRect _rect;
-            _rect.size.x = _spriteNode["Size"][0].as<int>();
-            _rect.size.y = _spriteNode["Size"][1].as<int>();
-            _rect.bottomLeftCorner.x = _spriteNode["Origin"][0].as<int>();
-            _rect.bottomLeftCorner.y = (int)_atlas.textureHeight - (_spriteNode["Origin"][1].as<int>() + _rect.size.y);
+            _rect.size.x = _spriteNode["size"][0].get<int>();
+            _rect.size.y = _spriteNode["size"][1].get<int>();
+            _rect.bottomLeftCorner.x = _spriteNode["origin"][0].get<int>();
+            _rect.bottomLeftCorner.y = (int)_atlas.textureHeight - (_spriteNode["origin"][1].get<int>() + _rect.size.y);
 
             auto* _texture = new Texture { &_atlas, _rect };
-            if(_spriteNode["NinePatch"].IsDefined()) {
-                _texture->ninePatch.left = _spriteNode["NinePatch"]["Left"].as<int>();
-                _texture->ninePatch.top = _spriteNode["NinePatch"]["Top"].as<int>();
-                _texture->ninePatch.right = _spriteNode["NinePatch"]["Right"].as<int>();
-                _texture->ninePatch.bottom = _spriteNode["NinePatch"]["Bottom"].as<int>();
+            if(_spriteNode.contains("nine_patch")) {
+                _texture->ninePatch.left = _spriteNode["nine_patch"]["left"].get<int>();
+                _texture->ninePatch.top = _spriteNode["nine_patch"]["top"].get<int>();
+                _texture->ninePatch.right = _spriteNode["nine_patch"]["right"].get<int>();
+                _texture->ninePatch.bottom = _spriteNode["nine_patch"]["bottom"].get<int>();
 
                 cropNinePatchSubTextures(_texture, _spriteNode);
             }
 
-            _atlas.subTextures[_spriteNode["Name"].as<std::string>()] = _texture;
+            _atlas.subTextures[_spriteNode["name"].get<std::string>()] = _texture;
         }
     }
 
@@ -104,9 +104,9 @@ namespace GDE {
             delete _atlas.second;
     }
 
-    void TextureAtlasManager::cropNinePatchSubTextures(Texture* _texture, const YAML::Node& _spriteNode) {
-        auto _origin = Vec2I {_spriteNode["Origin"][0].as<int>(), _texture->getSpriteSheetSize().y - (_spriteNode["Origin"][1].as<int>() + _texture->getRegion().size.y)};
-        auto _size = Vec2I {_spriteNode["Size"][0].as<int>(), _spriteNode["Size"][1].as<int>()};
+    void TextureAtlasManager::cropNinePatchSubTextures(Texture* _texture, const nlohmann::json& _spriteNode) {
+        auto _origin = Vec2I {_spriteNode["origin"][0].get<int>(), _texture->getSpriteSheetSize().y - (_spriteNode["origin"][1].get<int>() + _texture->getRegion().size.y)};
+        auto _size = Vec2I {_spriteNode["size"][0].get<int>(), _spriteNode["size"][1].get<int>()};
         // Bottom row
         _texture->ninePatch.subRects[0] = {
             .bottomLeftCorner = _origin,

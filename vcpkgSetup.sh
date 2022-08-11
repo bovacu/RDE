@@ -1,3 +1,5 @@
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg && ./bootstrap-vcpkg.sh && cd ..
 vcpkg/vcpkg install zlib:x64-linux
 vcpkg/vcpkg install libpng:x64-linux
 vcpkg/vcpkg install libjpeg-turbo:x64-linux

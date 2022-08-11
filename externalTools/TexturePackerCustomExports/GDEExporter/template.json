@@ -1,0 +1,27 @@
+{
+    "sprite_sheet_name": "{{ texture.fullName }}",
+    "sprite_sheet_size": [{{ texture.size.width }}, {{ texture.size.height }}],
+    "sprite_sheet_settings": {
+        "format": "{{ settings.textureFormat }}",
+        "path": "{{ texture.absoluteFileName }}"
+    },
+    "sprites" : [{% for sprite in allSprites %}
+        {
+            "name": "{{ sprite.trimmedName }}",
+            "size": [{{ sprite.size.width }}, {{ sprite.size.height }}],
+            "size_in_uv": [{{ sprite.frameRectRel.width }}, {{ sprite.frameRectRel.height }}],
+            "origin": [{{ sprite.frameRect.x }}, {{ sprite.frameRect.y }}],
+            "origin_in_uv": [{{ sprite.frameRectRel.x }}, {{ sprite.frameRectRel.y }}],
+            "origin_offset": [{{ sprite.cornerOffset.x }}, {{ sprite.cornerOffset.y }}],
+            "center_pivot": [{{ sprite.pivotPoint.x }}, {{ sprite.pivotPoint.y }}],
+            "scaling_factor": {{ sprite.scale }}{% if sprite.scale9Enabled %},
+            "nine_patch" : {
+                "top": {{ sprite.scale9Borders.y }},
+                "left": {{ sprite.scale9Borders.x }},
+                "right": {{ sprite.scale9Borders.width }},
+                "bottom": {{ sprite.scale9Borders.height }}
+            }{% endif %}
+        }{% if not forloop.last %}, {% endif %}{% endfor %}
+    ]
+
+}

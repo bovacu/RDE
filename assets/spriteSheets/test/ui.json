@@ -1,0 +1,59 @@
+{
+    "sprite_sheet_name": "ui.png",
+    "sprite_sheet_size": [128, 304],
+    "sprite_sheet_settings": {
+        "format": "png",
+        "path": "/home/borja/Documents/GDE/assets/spriteSheets/test/ui.png"
+    },
+    "sprites" : [
+        {
+            "name": "block1",
+            "size": [128, 128],
+            "size_in_uv": [1, 0.42105263157894735],
+            "origin": [0, 0],
+            "origin_in_uv": [0, 0],
+            "origin_offset": [0, 0],
+            "center_pivot": [64, 64],
+            "scaling_factor": 1,
+            "nine_patch" : {
+                "top": 32,
+                "left": 32,
+                "right": 64,
+                "bottom": 64
+            }
+        }, 
+        {
+            "name": "block2",
+            "size": [128, 128],
+            "size_in_uv": [1, 0.42105263157894735],
+            "origin": [0, 128],
+            "origin_in_uv": [0, 0.42105263157894735],
+            "origin_offset": [0, 0],
+            "center_pivot": [64, 64],
+            "scaling_factor": 1,
+            "nine_patch" : {
+                "top": 32,
+                "left": 32,
+                "right": 64,
+                "bottom": 64
+            }
+        }, 
+        {
+            "name": "button",
+            "size": [120, 48],
+            "size_in_uv": [0.9375, 0.15789473684210525],
+            "origin": [0, 256],
+            "origin_in_uv": [0, 0.8421052631578947],
+            "origin_offset": [0, 0],
+            "center_pivot": [60, 24],
+            "scaling_factor": 1,
+            "nine_patch" : {
+                "top": 16,
+                "left": 18,
+                "right": 84,
+                "bottom": 11
+            }
+        }
+    ]
+
+}

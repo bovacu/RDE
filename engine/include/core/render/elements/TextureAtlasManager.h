@@ -5,7 +5,7 @@
 #define ENGINE2_0_TEXTURE_ATLAS_H
 
 
-#include "yaml-cpp/yaml.h"
+#include "nlohmann/json.hpp"
 #include "core/util/Util.h"
 
 #ifdef USE_ZLIB
@@ -109,7 +109,7 @@ namespace GDE {
             std::unordered_map<std::string, Atlas*> atlases;
 
         public:
-            bool loadSpriteSheet(const YAML::Node& _node);
+            bool loadSpriteSheet(const nlohmann::json& _spriteSheetNode);
 
             /**
              * @brief This function returns a sub-texture inside the Sprite Sheet.
@@ -152,14 +152,14 @@ namespace GDE {
              * @param _atlas Atlas to be divided.
              * @param _spritesNode TexturePacker information about how it is sub-divided
              */
-            void cropTextures(Atlas& _atlas, const YAML::Node& _spritesNode);
+            void cropTextures(Atlas& _atlas, const nlohmann::json& _spritesNode);
 
             /**
              * @brief Divides a Sprite into 9 sub-sprites to render the NinePatch.
              * @param _texture Texture to sub-divide
              * @param _spriteNode TexturePacker information about how it is sub-divided
              */
-            void cropNinePatchSubTextures(Texture* _texture, const YAML::Node& _spriteNode);
+            void cropNinePatchSubTextures(Texture* _texture, const nlohmann::json& _spriteNode);
     };
 
 }
