@@ -4,6 +4,7 @@
 #define ENGINE_SCENE_H
 
 #include "yaml-cpp/yaml.h"
+#include "nlohmann/json.hpp"
 #include "core/util/Delta.h"
 #include "core/graph/Graph.h"
 #include "core/graph/Components.h"
@@ -68,9 +69,9 @@ namespace GDE {
              * of your custom components for the internal ECS system.
              * @param _manager gives access to all of the managers of the engine to load anything needed.
              * @param _window the window of the application
-             * @param _node the configuration of the .yaml file used to load the scene
+             * @param _sceneJson the configuration of the .yaml file used to load the scene
              */
-            virtual void preInit(Manager* _manager, Window* _window, YAML::Node& _node) {  }
+            virtual void preInit(Manager* _manager, Window* _window, const nlohmann::json& _sceneJson) {  }
 
             /**
              * @brief This function is called only once and when the SceneManager/displayScene is invoked. It is used to

@@ -20,13 +20,13 @@
             <displayName>Data file</displayName>
 
             <!-- file extension for the file -->
-            <fileExtension>yaml</fileExtension>
+            <fileExtension>json</fileExtension>
 
             <!-- description what the file contains, used in tooltips in the GUI -->
             <description>Sprite sheet data</description>
 
             <!-- name of the template file -->
-            <template>template.yaml</template>
+            <template>template.json</template>
         </file>
     </files>
 
