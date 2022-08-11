@@ -1,2 +1,0 @@
-subdir('cairo')
-subdir('dummy')
