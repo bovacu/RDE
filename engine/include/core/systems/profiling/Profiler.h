@@ -9,6 +9,7 @@
 #include <chrono>
 #include <unordered_map>
 #include <ostream>
+#include <string>
 #include "core/graph/ImGuiCore.h"
 
 #if IS_MOBILE() || IS_MAC() || IS_WINDOWS()

@@ -25,10 +25,16 @@ namespace GDE {
     FileStr FileManager::readFullFile(FileHandler* _handler) {
         FileStr _f;
         checkFileMode(_handler, FileMode::READ);
-        SDL_RWseek(_handler->file, 0, RW_SEEK_END);
-        _f.content.resize((size_t)SDL_RWtell(_handler->file));
-        SDL_RWseek(_handler->file, 0, RW_SEEK_SET);
-        SDL_RWread(_handler->file, &_f.content[0], (int)_f.content.size(), (int)_f.content.size());
+        auto _totalSize = SDL_RWsize(_handler->file);
+        long _totalBytesRead = 0;
+        long _bytesToReadPerTime = 1;
+        _f.content.resize(_totalSize + 1);
+
+        while (_totalBytesRead < _totalSize && _bytesToReadPerTime != 0) {
+            _bytesToReadPerTime = SDL_RWread(_handler->file, &_f.content[_totalBytesRead], 1, 1);
+            _totalBytesRead += _bytesToReadPerTime;
+        }
+
         return _f;
     }
 

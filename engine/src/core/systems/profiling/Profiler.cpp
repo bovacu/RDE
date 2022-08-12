@@ -55,7 +55,13 @@ namespace GDE {
     }
 
     int Profiler::getValue(){ //Note: this value is in KB!
+        #if IS_WINDOWS()
+        FILE* file;
+        fopen_s(&file, "/proc/self/status", "r");
+        #else
         FILE* file = fopen("/proc/self/status", "r");
+        #endif
+
         int result = -1;
         char line[128];
 

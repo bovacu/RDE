@@ -3,7 +3,7 @@
     "sprite_sheet_size": [96, 32],
     "sprite_sheet_settings": {
         "format": "png",
-        "path": "/home/borja/Documents/GDE/assets/spriteSheets/test/square.png"
+        "path": "assets/spriteSheets/test/square.png"
     },
     "sprites" : [
         {

@@ -309,7 +309,11 @@ namespace GDE {
                 engine->manager.consoleManager.logs.push_back(_r);
 
             reclaim_focus = true;
+            #if IS_WINDOWS()
+            strcpy_s(_input, "");
+            #else
             strcpy(_input, "");
+            #endif
         }
 
         if (reclaim_focus)
@@ -449,7 +453,12 @@ namespace GDE {
         ImGui::Text("Tag"); ImGui::SameLine();
         char _buffer[256] = { 0 };
         auto& _tag = _graph->getComponent<Tag>(_selectedNode)->tag;
+        #if IS_WINDOWS()
+        strcpy_s(_buffer, _tag.c_str());
+        #else
         strcpy(_buffer, _tag.c_str());
+        #endif
+
         if(ImGui::InputText("###tagName", _buffer, 256)) {
             _tag = std::string(_buffer);
         }

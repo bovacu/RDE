@@ -11,6 +11,10 @@
 #include <sstream>
 #include "core/platform/PlatformHeaderSDL.h"
 
+#if IS_WINDOWS()
+#include <ctime>
+#endif
+
 #define LOG_I(...) printer("\033[1;m", "\033[0m", __VA_ARGS__);
 #define LOG_W(...) printer("\033[1;33m", "\033[0m", __VA_ARGS__);
 #define LOG_E(...) printer("\033[1;31m", "\033[0m", __VA_ARGS__);
@@ -23,7 +27,14 @@
 
 inline void printTime(const char* _init, const char* _end) {
     std::time_t t = std::time(nullptr);   // get time now
+
+    #if IS_WINDOWS()
+    std::tm _now {};
+    localtime_s(&_now, &t);
+    std::tm* now = &_now;
+    #else
     std::tm* now = std::localtime(&t);
+    #endif
 
     #if IS_DESKTOP()
     std::cout << _init << "[" << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << "] " << _end;

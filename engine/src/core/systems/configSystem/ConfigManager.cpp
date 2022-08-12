@@ -30,6 +30,7 @@ namespace GDE {
 
     void ConfigManager::loadScene(Manager* _manager, Scene* _scene, Window* _window, const std::string& _configFilePath) {
         auto _fileHandler = _manager->fileManager.open(_configFilePath, FileMode::READ);
+    
         nlohmann::json _sceneJson = nlohmann::json::parse(_manager->fileManager.readFullFile(_fileHandler).content);
         _manager->fileManager.close(_fileHandler);
 

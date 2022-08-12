@@ -6,6 +6,11 @@
 #define RESOURCES_GAME_EASING_H
 
 #include <cmath>
+#include "core/Core.h"
+
+#if IS_WINDOWS()
+    #define M_PI 3.14159265359
+#endif
 
 namespace GDE {
 

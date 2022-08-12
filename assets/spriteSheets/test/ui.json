@@ -3,7 +3,7 @@
     "sprite_sheet_size": [128, 304],
     "sprite_sheet_settings": {
         "format": "png",
-        "path": "/home/borja/Documents/GDE/assets/spriteSheets/test/ui.png"
+        "path": "assets/spriteSheets/test/ui.png"
     },
     "sprites" : [
         {
