@@ -166,8 +166,8 @@ namespace GDE {
         ImGui::Separator();
         ImGui::Text("X: %f, Y: %f", engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
         ImGui::Separator();
-        auto* _memData = Profiler::getTotalVirtualMemory();
-        ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
+        // auto* _memData = Profiler::getTotalVirtualMemory();
+        // ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
         ImGui::Separator();
         ImGui::Text("Draw Calls: %d", Renderer::getDrawCalls());
         ImGui::Text("Total Triangles: %d", Renderer::getTotalTriangles());

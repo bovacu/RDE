@@ -80,11 +80,10 @@ namespace GDE {
         #if IS_DESKTOP()
         SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         SDL_SetWindowResizable(window, SDL_TRUE);
-        
-        #if !IS_MAC()
-        gladLoadGLLoader(SDL_GL_GetProcAddress);
         #endif
 
+        #if !IS_MAC()
+        LOG_I("GLAD Loader: ", gladLoadGLLoader(SDL_GL_GetProcAddress))
         LOG_S("GLAD and SDL2 initiated correctly");
         #elif IS_MOBILE()
         #if IS_ANDROID()

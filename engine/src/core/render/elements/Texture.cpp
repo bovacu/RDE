@@ -54,6 +54,7 @@ namespace GDE {
         }
 
         auto* _image = getSDLSurface(_imageFile, _path);
+        SDL_RWclose(_imageFile);
 
         if(_image == nullptr) {
             LOG_E("Format of image '", Util::getFileExtension(_path), "' not supported for file ", _path)
@@ -93,10 +94,9 @@ namespace GDE {
 
         glTexImage2D(GL_TEXTURE_2D, 0, (int)internalFormat, textureSize.x, textureSize.y, 0, dataFormat, GL_UNSIGNED_BYTE, _texturePixels);
 
-        #if !IS_MAC()
+        #if !IS_MAC() && !IS_WINDOWS()
         SDL_FreeSurface(_image);
         #endif
-        SDL_RWclose(_imageFile);
 
         region = { { 0, 0 }, { textureSize.x , textureSize.y} };
 
