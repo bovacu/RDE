@@ -46,7 +46,7 @@ namespace GDE {
              * @param _scene Scene
              * @param _yaml Yaml file
              */
-            void instantiatePrefab(Scene* _scene, const YAML::Node& _yaml);
+            void instantiatePrefab(Scene* _scene, const nlohmann::json& _json);
 
             std::unordered_map<std::string, NodeID_JsonPair> createNodes(Scene* _scene, const nlohmann::json& _sceneJson);
 

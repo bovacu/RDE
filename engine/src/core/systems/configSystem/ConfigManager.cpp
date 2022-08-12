@@ -344,7 +344,7 @@ namespace GDE {
         }
     }
 
-    void ConfigManager::instantiatePrefab(Scene* _scene, const YAML::Node& _yaml) {
+    void ConfigManager::instantiatePrefab(Scene* _scene, const nlohmann::json& _json) {
 
     }
 

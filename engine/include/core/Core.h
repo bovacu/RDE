@@ -44,7 +44,7 @@
 
 #ifdef ENGINE_DEBUG
     #if defined(_WIN32)
-		#define ENGINE_DEBUGBREAK() __debugbreak()
+		#define ENGINE_DEBUG_BREAK() __debugbreak()
         #define ENGINE_ENABLE_ASSERTS
     #elif defined(__APPLE__)
         #include "TargetConditionals.h"

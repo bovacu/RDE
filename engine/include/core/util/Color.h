@@ -5,6 +5,11 @@
 #define ENGINE2_0_COLOR_H
 
 #include <ostream>
+#include "core/Core.h"
+
+#if IS_WINDOWS()
+    typedef unsigned int uint;
+#endif
 
 namespace GDE {
 

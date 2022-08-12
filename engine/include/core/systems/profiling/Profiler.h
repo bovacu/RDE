@@ -11,6 +11,10 @@
 #include <ostream>
 #include "core/graph/ImGuiCore.h"
 
+#if IS_MOBILE() || IS_MAC() || IS_WINDOWS()
+    typedef unsigned long u_long;
+#endif
+
 #if IS_LINUX()
 #include "sys/types.h"
 #include "sys/sysinfo.h"
