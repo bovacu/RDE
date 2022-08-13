@@ -7,9 +7,6 @@
     #include <GLES3/gl32.h>
 #elif IS_IOS()
     #include <OpenGLES/ES3/gl.h>
-#elif IS_MAC()
-    #define GL_SILENCE_DEPRECATION
-    #include <OpenGL/gl3.h>
 #elif IS_DESKTOP()
     #include "glad/glad.h"
 #endif
@@ -81,13 +78,13 @@ namespace GDE {
 
         SDL_GL_MakeCurrent(window, context);
 
-        #if !IS_MAC()
-            if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-                LOG_E("Failed to initialize GLAD")
-                return;
-            }
-            LOG_S("GLAD and SDL2 initiated correctly");
-        #elif IS_MOBILE()
+        if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+            LOG_E("Failed to initialize GLAD")
+            return;
+        }
+        LOG_S("GLAD and SDL2 initiated correctly");
+        
+        #if IS_MOBILE()
             #if IS_ANDROID()
             SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE, "1");
             SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, "1");
