@@ -71,10 +71,10 @@ namespace GDE {
 
         GLenum _internalFormat = 0, _dataFormat = 0;
         if (channels == 4) {
-            _internalFormat = GL_RGBA8;
+            _internalFormat = GL_RGBA;
             _dataFormat = GL_RGBA;
         } else if (channels == 3) {
-            _internalFormat = GL_RGB8;
+            _internalFormat = GL_RGB;
             _dataFormat = GL_RGB;
         } else {
             LOG_E("Not supported format image. Channels = ", channels, ", Width = ", textureSize.x, ", Height = ", textureSize.y, ", Path = ", _path)

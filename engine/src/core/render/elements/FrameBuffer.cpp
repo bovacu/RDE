@@ -85,8 +85,9 @@ namespace GDE {
 
         ENGINE_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!")
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindVertexArray(0);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         framebufferShader = manager->shaderManager.getShader("framebuffer");
     }

@@ -39,9 +39,9 @@ namespace GDE {
         SDL_Log("But we are linking against SDL version %u.%u.%u.\n", linked.major, linked.minor, linked.patch);
 
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
@@ -66,7 +66,7 @@ namespace GDE {
         #else
         window = SDL_CreateWindow(_config->windowData.title.c_str(), 0, 0,
                                   (int)_config->windowData.size.x, (int)_config->windowData.size.y,
-                                  SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
+                                  SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
         #endif
         if(window == nullptr) {
             printf("SDL_Init failed: %s\n", SDL_GetError());
@@ -74,23 +74,32 @@ namespace GDE {
         }
         context = SDL_GL_CreateContext(window);
 
+        if(context == nullptr) {
+            LOG_E("OpenGL context couldn't initialize")
+            return;
+        }
+
         SDL_GL_MakeCurrent(window, context);
+
+        #if !IS_MAC()
+            if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+                LOG_E("Failed to initialize GLAD")
+                return;
+            }
+            LOG_S("GLAD and SDL2 initiated correctly");
+        #elif IS_MOBILE()
+            #if IS_ANDROID()
+            SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE, "1");
+            SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, "1");
+            SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
+            #endif
+        #endif
+
         SDL_GL_SetSwapInterval(1);
 
         #if IS_DESKTOP()
         SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         SDL_SetWindowResizable(window, SDL_TRUE);
-        #endif
-
-        #if !IS_MAC()
-        LOG_I("GLAD Loader: ", gladLoadGLLoader(SDL_GL_GetProcAddress))
-        LOG_S("GLAD and SDL2 initiated correctly");
-        #elif IS_MOBILE()
-        #if IS_ANDROID()
-        SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE, "1");
-        SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, "1");
-        SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
-        #endif
         #endif
     
         if(!properties->projectData.iconPath.empty()) setIcon(properties->projectData.iconPath);

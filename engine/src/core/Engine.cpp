@@ -124,7 +124,7 @@ namespace GDE {
 
         Renderer::clear();
         manager.sceneManager.getDisplayedScene()->onRender(_dt);
-        manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
+        // manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
 
         #if !IS_IOS()
             frameBuffer->unbind();
