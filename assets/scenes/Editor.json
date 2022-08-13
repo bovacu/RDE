@@ -123,6 +123,25 @@
                     "shader" : "basic"
                 }
             }
+        },
+        {
+            "tag" : "Text",
+            "components" : {
+                "active" : {},
+                "transform" : {
+                    "position" : [64, 64],
+                    "scale" : [1, 1],
+                    "rotation" : 0
+                },
+                "text_renderer" : {
+                    "text" : "Hello World!!",
+                    "font" : "arial",
+                    "sizeSize" : 54,
+                    "color" : [255, 255, 255, 255],
+                    "layer" : 0,
+                    "shader" : "basicText"
+                }
+            }
         }
     ],
 

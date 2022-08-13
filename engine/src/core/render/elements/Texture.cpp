@@ -71,10 +71,10 @@ namespace GDE {
 
         GLenum _internalFormat = 0, _dataFormat = 0;
         if (channels == 4) {
-            _internalFormat = GL_RGBA;
+            _internalFormat = GL_RGBA8;
             _dataFormat = GL_RGBA;
         } else if (channels == 3) {
-            _internalFormat = GL_RGB;
+            _internalFormat = GL_RGB8;
             _dataFormat = GL_RGB;
         } else {
             LOG_E("Not supported format image. Channels = ", channels, ", Width = ", textureSize.x, ", Height = ", textureSize.y, ", Path = ", _path)
@@ -124,7 +124,7 @@ namespace GDE {
         glGenTextures(1, &openGLTextureID);
         glBindTexture(GL_TEXTURE_2D, openGLTextureID);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, textureSize.x, textureSize.y, 0, GL_ALPHA, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, textureSize.x, textureSize.y, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
         /* We require 1 byte alignment when uploading texture data */
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -138,7 +138,7 @@ namespace GDE {
     }
 
     bool Texture::loadTextSubTextures(Vec2I _offset, Vec2I _size, const void* _data) {
-        glTexSubImage2D(GL_TEXTURE_2D, 0, _offset.x, _offset.y, _size.x, _size.y, GL_ALPHA, GL_UNSIGNED_BYTE, _data);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, _offset.x, _offset.y, _size.x, _size.y, GL_RED, GL_UNSIGNED_BYTE, _data);
         return true;
     }
 

@@ -178,12 +178,14 @@ namespace GDE {
             if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.textureID < 0 || _batch.shaderID < 0)
                 continue;
 
-            glBindVertexArray(vao);
             glUseProgram(_batch.shaderID);
             GLint _location = glGetUniformLocation(_batch.shaderID, "viewProjectionMatrix");
             glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
 
             glActiveTexture(GL_TEXTURE0);
+
+            glBindVertexArray(vao);
+
             glBindTexture(GL_TEXTURE_2D, _batch.textureID);
 
             glBindBuffer(GL_ARRAY_BUFFER, vbo);

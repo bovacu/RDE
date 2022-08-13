@@ -13,8 +13,8 @@ namespace GDE {
 
         LOG_I("OpenGL Version: ", glGetString(GL_VERSION));
 
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 #if !IS_MOBILE()
         glEnable(GL_LINE_SMOOTH);
@@ -32,12 +32,12 @@ namespace GDE {
     }
 
     void Renderer::clear() {
-        resetBuffers();
         glClearColor((float)clearColor.r / 255.f, (float)clearColor.g / 255.f, (float)clearColor.b / 255.f, (float)clearColor.a / 255.f);
+        resetBuffers();
     }
 
     void Renderer::resetBuffers() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     void Renderer::beginDraw(Camera& _camera, Transform* _cameraTransform) {
