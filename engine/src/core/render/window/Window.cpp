@@ -43,7 +43,11 @@ namespace GDE {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
         #if IS_DESKTOP()
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+            #if IS_MAC()
+                SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+            #else
+                SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+            #endif
         #else
         SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
         SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
@@ -72,7 +76,7 @@ namespace GDE {
         context = SDL_GL_CreateContext(window);
 
         if(context == nullptr) {
-            LOG_E("OpenGL context couldn't initialize")
+            LOG_E("OpenGL context couldn't initialize -> ", SDL_GetError())
             return;
         }
 
