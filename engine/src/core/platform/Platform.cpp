@@ -18,7 +18,7 @@ namespace GDE {
 
         #if IS_LINUX()
             return PlatformType::LINUX;
-        #elif IS_WINDOWS()
+        #elif defined(_WIN32)
             return PlatformType::WINDOWS;
         #elif IS_MAC()
             return PlatformType::MAC;

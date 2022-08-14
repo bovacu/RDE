@@ -1,12 +1,13 @@
 #include "core/render/elements/SpriteBatch.h"
 #include "core/util/Logger.h"
 #include "core/graph/Components.h"
+#include "core/util/GLUtil.h"
 
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
 #elif IS_IOS()
     #include <OpenGLES/ES3/gl.h>
-#elif IS_DESKTOP()
+#else
     #include "glad/glad.h"
 #endif
 
@@ -17,8 +18,8 @@ namespace GDE {
 
     void SpriteBatch::init(Engine* _engine) {
         shaderManager = &_engine->manager.shaderManager;
-        debug.initDebugVbo();
         initVbo();
+        debug.initDebugVbo();
     }
 
     void SpriteBatch::initVbo() {
@@ -28,13 +29,12 @@ namespace GDE {
         glGenBuffers(1, &vbo);
         glGenBuffers(1, &ibo);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * maxIndicesPerDrawCall * 6), nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * maxIndicesPerDrawCall), nullptr, GL_DYNAMIC_DRAW);
         GLsizei _structSize = sizeof(Vertex2dUVColor);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * maxIndicesPerDrawCall * 6), nullptr, GL_DYNAMIC_DRAW);
 
         /* Attributes must be in the same order as in Vertex2dUVColor. Parameters are:
          *      layout, numberOfElements(1-4), GLType, normalized(bool), stride(sizeof(Vertex2dUVColor)), offset
@@ -49,9 +49,9 @@ namespace GDE {
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
 
-        glBindVertexArray(0);
-
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        glBindVertexArray(0);
     }
 
     void SpriteBatch::Debug::initDebugVbo() {
@@ -67,9 +67,10 @@ namespace GDE {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
-        glBindVertexArray(0);
+         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+        CHECK_GL_ERROR("SpriteBatch InitVBODebug")
     }
 
     SpriteBatch::~SpriteBatch() {};
@@ -174,7 +175,7 @@ namespace GDE {
         for(auto& _batch : batches) {
             if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.textureID < 0 || _batch.shaderID < 0)
                 continue;
-
+            
             glUseProgram(_batch.shaderID);
             GLint _location = glGetUniformLocation(_batch.shaderID, "viewProjectionMatrix");
             glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
@@ -193,9 +194,10 @@ namespace GDE {
 
             glDrawElements(GL_TRIANGLES, (int)_batch.indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
 
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+
             glBindVertexArray(0);
 
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
             totalTriangles += (int)_batch.vertexBuffer.size() / 2;
@@ -232,10 +234,10 @@ namespace GDE {
             glDrawArrays(GL_LINES, 0, (int) vertexDebugBufferLines.size());
         }
 
+        glBindVertexArray(0);
+
         vertexDebugBufferGeometrics.clear();
         vertexDebugBufferLines.clear();
-
-        glBindVertexArray(debugVao);
     }
 
     void SpriteBatch::Debug::setDebugLinesThickness(float _thickness) {
@@ -251,8 +253,8 @@ namespace GDE {
 
         Batch _batch;
         _batch.layer = _layer;
-        _batch.indexBuffer.reserve(maxIndicesPerDrawCall * 6);
-        _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 6);
+       _batch.indexBuffer.reserve(maxIndicesPerDrawCall * 6);
+       _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 6);
         _batch.textureID = _renderer.getTexture();
         _batch.priority = _priority;
         _batch.shaderID = _renderer.shaderID;

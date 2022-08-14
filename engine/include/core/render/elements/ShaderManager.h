@@ -11,6 +11,7 @@
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 #include "glm/ext/matrix_float4x4.hpp"
+#include "core/systems/fileSystem/FileManager.h"
 
 namespace GDE {
 
@@ -26,13 +27,14 @@ namespace GDE {
              * @brief Map with all of the loaded Shaders on the GPU.
              */
             std::unordered_map<std::string, Shader*> shaders;
+            FileManager* fileManager = nullptr;
 
         public:
             /**
              * @attention This is not meant to be called by end-users.
              * @brief Initializes all the crucial elements of the Shader Manager.
              */
-            void init();
+            void init(FileManager* _fileManager);
 
             /**
              * @attention This is not meant to be called by end-users.

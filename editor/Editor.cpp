@@ -22,7 +22,7 @@ namespace Editor {
     void Editor::onInit() {
         UDelegate<void(FrameBuffer*)> _delegate;
         _delegate.bind<&Editor::redirectRendering>(this);
-//        engine->setRenderingRedirectionToImGui(_delegate);
+        // engine->setRenderingRedirectionToImGui(_delegate);
     }
 
 

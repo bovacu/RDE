@@ -4,12 +4,13 @@
 #include "core/render/elements/FrameBuffer.h"
 #include "core/Manager.h"
 #include "core/render/Renderer.h"
+#include "core/util/GLUtil.h"
 
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
 #elif IS_IOS()
     #include <OpenGLES/ES3/gl.h>
-#elif IS_DESKTOP()
+#else
     #include "glad/glad.h"
 #endif
 
@@ -18,6 +19,7 @@ namespace GDE {
     FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs, Manager* _manager) : specs(_specs), manager(_manager) {
         glGenVertexArrays(1, &vao);
         invalidate();
+        CHECK_GL_ERROR("FrameBuffer constructor")
     }
 
     FrameBuffer::~FrameBuffer() {
@@ -92,10 +94,12 @@ namespace GDE {
     void FrameBuffer::bind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, fboID);
         glEnable(GL_DEPTH_TEST);
+        CHECK_GL_ERROR("FrameBuffer bind")
     }
 
     void FrameBuffer::unbind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
         if(specs.renderToWindow) {
             glBindVertexArray(vao);
             {
@@ -110,6 +114,7 @@ namespace GDE {
         } else{
             Renderer::clear();
         }
+        CHECK_GL_ERROR("FrameBuffer unbind")
     }
 
     void FrameBuffer::resize(uint32_t _width, uint32_t _height) {

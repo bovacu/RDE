@@ -40,33 +40,28 @@ namespace GDE {
         return true;
     }
 
-    GLuint Shader::loadFromFiles(const std::string& _vertex, const std::string& _fragment) {
+    GLuint Shader::loadFromFiles(const std::string& _vertex, const std::string& _fragment, FileManager* _fileManager) {
         std::string _vertexCode;
         std::string _fragmentCode;
 
-        SDL_RWops* _vertexFile = SDL_RWFromFile(_vertex.c_str(), "rb");
+
+
+        auto* _vertexFile = _fileManager->open(_vertex, FileMode::READ);
         if (_vertexFile == nullptr) {
             LOG_E("Can't read file: ", _vertex)
             return false;
         }
+        _vertexCode = _fileManager->readFullFile(_vertexFile).content;
+        _fileManager->close(_vertexFile);
 
-        SDL_RWseek(_vertexFile, 0, RW_SEEK_END);
-        _vertexCode.resize((size_t)SDL_RWtell(_vertexFile));
-        SDL_RWseek(_vertexFile, 0, RW_SEEK_SET);
-        SDL_RWread(_vertexFile, &_vertexCode[0], (int)_vertexCode.size(), (int)_vertexCode.size());
-        SDL_RWclose(_vertexFile);
-
-        SDL_RWops* _fragmentFile = SDL_RWFromFile(_fragment.c_str(), "rb");
+        auto* _fragmentFile = _fileManager->open(_fragment, FileMode::READ);
         if (_fragmentFile == nullptr) {
             LOG_E("Can't read file: ", _fragment)
             return false;
         }
 
-        SDL_RWseek(_fragmentFile, 0, RW_SEEK_END);
-        _fragmentCode.resize((size_t)SDL_RWtell(_fragmentFile));
-        SDL_RWseek(_fragmentFile, 0, RW_SEEK_SET);
-        SDL_RWread(_fragmentFile, &_fragmentCode[0], (int)_fragmentCode.size(), (int)_fragmentCode.size());
-        SDL_RWclose(_fragmentFile);
+        _fragmentCode = _fileManager->readFullFile(_fragmentFile).content;
+        _fileManager->close(_fragmentFile);
 
         return loadFromStrings(_vertexCode, _fragmentCode);
     }

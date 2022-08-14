@@ -7,7 +7,7 @@
     #include <GLES3/gl32.h>
 #elif IS_IOS()
     #include <OpenGLES/ES3/gl.h>
-#elif IS_DESKTOP()
+#else
     #include "glad/glad.h"
 #endif
 
@@ -43,7 +43,7 @@ namespace GDE {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
         #if IS_DESKTOP()
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
         #else
         SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
         SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
@@ -66,7 +66,7 @@ namespace GDE {
                                   SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
         #endif
         if(window == nullptr) {
-            printf("SDL_Init failed: %s\n", SDL_GetError());
+            printf("SDL window creation failed: %s\n", SDL_GetError());
             return;
         }
         context = SDL_GL_CreateContext(window);

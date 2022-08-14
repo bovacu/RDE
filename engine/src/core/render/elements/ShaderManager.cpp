@@ -2,10 +2,12 @@
 
 #include "core/render/elements/ShaderManager.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "core/util/GLUtil.h"
 
 namespace GDE {
 
-    void ShaderManager::init() {
+    void ShaderManager::init(FileManager* _fileManager) {
+        fileManager = _fileManager;
     #if IS_MOBILE()
         loadShader("basic", TEXTURE_VERTEX_SHADER_ES, TEXTURE_FRAGMENT_SHADER_ES);
         loadShader("debug", DEBUG_VERTEX_SHADER_ES, DEBUG_FRAGMENT_SHADER_ES);
@@ -19,11 +21,12 @@ namespace GDE {
         loadShader("grid", DEBUG_GRID_VERTEX_SHADER_CORE, DEBUG_GRID_FRAGMENT_SHADER_CORE);
         loadShader("framebuffer", FRAMEBUFFER_VERTEX_SHADER_CORE, FRAMEBUFFER_FRAGMENT_SHADER_CORE);
     #endif
+    CHECK_GL_ERROR("Shader Initializaation")
     }
 
     ShaderID ShaderManager::loadShader(const std::string& _shaderName, const std::string& _vertex, const std::string& _fragment) {
         auto* _shader = new Shader;
-        _shader->loadFromFiles(_vertex, _fragment);
+        _shader->loadFromFiles(_vertex, _fragment, fileManager);
         shaders[_shaderName] = _shader;
         LOG_S("Created Shader ", _shaderName, " with value ", shaders[_shaderName]->getShaderID())
         return shaders[_shaderName]->getShaderID();

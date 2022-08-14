@@ -12,7 +12,7 @@
 #include <string>
 #include "core/graph/ImGuiCore.h"
 
-#if IS_MOBILE() || IS_MAC() || IS_WINDOWS()
+#if IS_MOBILE() || IS_MAC() || defined(_WIN32)
     typedef unsigned long u_long;
 #endif
 

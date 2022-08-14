@@ -7,6 +7,7 @@
 
 #include "core/platform/PlatformHeaderSDLImage.h"
 #include "core/util/Functions.h"
+#include "core/util/GLUtil.h"
 
 namespace GDE {
 
@@ -104,6 +105,8 @@ namespace GDE {
         fileSizeKb = (float)std::filesystem::file_size(_path) / 1000.f;
         #endif
 
+        CHECK_GL_ERROR("Texture loadFromFile")
+
         return true;
     }
 
@@ -128,17 +131,23 @@ namespace GDE {
 
         /* We require 1 byte alignment when uploading texture data */
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        CHECK_GL_ERROR("Texture loadTextTexture UNPACK")
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        CHECK_GL_ERROR("Texture loadTextTexture GL_TEXTURE_WRAP_S")
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        CHECK_GL_ERROR("Texture loadTextTexture GL_TEXTURE_WRAP_T")
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        CHECK_GL_ERROR("Texture loadTextTexture GL_TEXTURE_MIN_FILTER")
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        CHECK_GL_ERROR("Texture loadTextTexture GL_TEXTURE_MAG_FILTER")
 
         return true;
     }
 
     bool Texture::loadTextSubTextures(Vec2I _offset, Vec2I _size, const void* _data) {
         glTexSubImage2D(GL_TEXTURE_2D, 0, _offset.x, _offset.y, _size.x, _size.y, GL_RED, GL_UNSIGNED_BYTE, _data);
+        CHECK_GL_ERROR("Texture loadTextSubTextures")
         return true;
     }
 

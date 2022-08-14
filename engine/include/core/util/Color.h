@@ -7,7 +7,7 @@
 #include <ostream>
 #include "core/Core.h"
 
-#if IS_WINDOWS()
+#if defined(_WIN32)
     typedef unsigned int uint;
 #endif
 

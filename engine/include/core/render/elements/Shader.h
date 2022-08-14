@@ -8,9 +8,11 @@
     #include <GLES3/gl32.h>
 #elif IS_IOS()
     #include <OpenGLES/ES3/gl.h>
-#elif IS_DESKTOP()
+#else
     #include "glad/glad.h"
 #endif
+
+#include "core/systems/fileSystem/FileManager.h"
 
 namespace GDE {
 
@@ -40,7 +42,7 @@ namespace GDE {
              * @param _fragment Fragment Shader
              * @return ID of the Shader on the GPU
              */
-            GLuint loadFromFiles(const std::string& _vertex, const std::string& _fragment);
+            GLuint loadFromFiles(const std::string& _vertex, const std::string& _fragment, FileManager* _fileManager);
 
             /**
              * @brief Loads a Shader from a string.

@@ -2,6 +2,7 @@
 
 #include "core/platform/PlatformHeaderSDLImage.h"
 #include "core/render/Renderer.h"
+#include "core/util/GLUtil.h"
 
 namespace GDE {
 
@@ -9,17 +10,17 @@ namespace GDE {
     Color Renderer::clearColor = Color::Red;
 
     void Renderer::init(Engine* _engine) {
-        batch.init(_engine);
-
+    
         LOG_I("OpenGL Version: ", glGetString(GL_VERSION));
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-#if !IS_MOBILE()
+        #if !IS_MOBILE()
         glEnable(GL_LINE_SMOOTH);
         glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
-#endif
+        #endif
+
         int _flags = IMG_INIT_PNG | IMG_INIT_JPG;
         if(IMG_Init(_flags) != _flags) {
             LOG_E("SDL Image loader couldn't initialize all png and jpg")
@@ -28,16 +29,19 @@ namespace GDE {
 
         LOG_S("SDL Image loader loaded successfully")
 
+        batch.init(_engine);
         batch.debug.init(&batch);
+        CHECK_GL_ERROR("Renderer Initialization")
     }
 
     void Renderer::clear() {
         glClearColor((float)clearColor.r / 255.f, (float)clearColor.g / 255.f, (float)clearColor.b / 255.f, (float)clearColor.a / 255.f);
+        CHECK_GL_ERROR("Renderer Clear")
         resetBuffers();
     }
 
     void Renderer::resetBuffers() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
     void Renderer::beginDraw(Camera& _camera, Transform* _cameraTransform) {

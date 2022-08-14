@@ -6,8 +6,6 @@ project(${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-# set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
 
 add_compile_options("-Werror")
 
@@ -65,7 +63,7 @@ if(GDE_LIBRARY)
 
 else()
     message("Building executable")
-    add_executable(${PROJECT_NAME} engine/main.cpp
+    add_executable(${PROJECT_NAME} WIN32 engine/main.cpp
             editor/Editor.cpp
 
             ${GDE_CPP_HEADERS}
@@ -80,7 +78,7 @@ unset(GDE_LIBRARY CACHE)
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
-        SDL2::SDL2 ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/installed/x64-windows/lib/manual-link/SDL2main.lib
+        SDL2::SDL2main SDL2::SDL2
         SDL2::SDL2_image
         $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
         freetype

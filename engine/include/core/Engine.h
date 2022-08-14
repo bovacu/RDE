@@ -49,28 +49,28 @@ namespace GDE {
             /**
              * @brief Icon to be shown in the task bar and in the window's icon.
              */
-            std::string iconPath;
+            std::string iconPath = "";
 
             /**
              * @brief Name of the main scene to load.
              */
-            std::string mainSceneToLoad;
+            std::string mainSceneToLoad = "";
         };
 
         /**
          * @see WindowProperties
          */
-        WindowProperties windowData;
+        WindowProperties windowData {};
 
         /**
          * @see ProjectProperties
          */
-        ProjectProperties projectData;
+        ProjectProperties projectData {};
 
         /**
          * @brief All the scenes that are registered by the engine. Might or might not be loaded in memory.
          */
-        std::unordered_map<std::string, Scene*> registeredScenes;
+        std::unordered_map<std::string, Scene*> registeredScenes = {};
     };
 
     class Engine {
@@ -78,12 +78,12 @@ namespace GDE {
             /**
              * @see Manager
              */
-            Manager manager;
+            Manager manager {};
 
             /**
              * @see GDEConfig
              */
-            GDEConfig gdeConfig;
+            GDEConfig gdeConfig {};
 
         private:
             /**
@@ -114,7 +114,7 @@ namespace GDE {
             /**
              * @see FrameBuffer
              */
-            FrameBuffer* frameBuffer;
+            FrameBuffer* frameBuffer = nullptr;
 
             /**
              * @brief Function to render in a custom way.
@@ -129,14 +129,14 @@ namespace GDE {
             /**
              * @see Window
              */
-            Window* window;
+            Window* window = nullptr;
 
             #if !IS_MOBILE()
             /**
              * @brief ImGui Scene to show and do debugging operations.
              * @see ImGuiScene
              */
-            ImGuiScene* imGuiLayer;
+            ImGuiScene* imGuiLayer = nullptr;
             #endif
 
             /**

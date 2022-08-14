@@ -7,7 +7,7 @@
     #include <GLES3/gl32.h>
 #elif IS_IOS()
     #include <OpenGLES/ES3/gl.h>
-#elif IS_DESKTOP()
+#else
     #include "glad/glad.h"
 #endif
 

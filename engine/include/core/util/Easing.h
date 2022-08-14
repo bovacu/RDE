@@ -8,8 +8,10 @@
 #include <cmath>
 #include "core/Core.h"
 
-#if IS_WINDOWS()
-    #define M_PI 3.14159265359
+#if defined(_WIN32)
+    #ifndef M_PI
+        #define M_PI 3.14159265359
+    #endif
 #endif
 
 namespace GDE {

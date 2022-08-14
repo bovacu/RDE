@@ -20,7 +20,7 @@ namespace GDE {
             /**
              * @brief SDL_Window used as a base of the engine Window.
              */
-            SDL_Window* window;
+            SDL_Window* window = nullptr;
 
             /**
              * @brief Context used by SDL and OpenGL to render.
@@ -36,7 +36,7 @@ namespace GDE {
             /**
              * @see GDEConfig
              */
-            GDEConfig* properties;
+            GDEConfig* properties = nullptr;
 
             /**
              * @brief If the Window is minimized or not.

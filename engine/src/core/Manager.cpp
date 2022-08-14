@@ -11,8 +11,8 @@ namespace GDE {
     Manager::Manager() {  }
 
     void Manager::init(Engine* _engine) {
+        shaderManager.init(&fileManager);
         Renderer::init(_engine);
-        shaderManager.init();
         inputManager.init(_engine, &_engine->getWindow());
         fontManager.init();
         consoleManager.init();

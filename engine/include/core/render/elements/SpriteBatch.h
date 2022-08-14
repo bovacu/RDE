@@ -18,17 +18,17 @@ namespace GDE {
         /**
          * @brief Position in screen coordinates where the vertex should be placed.
          */
-        glm::vec3 position;
+        glm::vec3 position {0, 0, 0};
 
         /**
          * @brief Color of the vertex.
          */
-        glm::vec4 color;
+        glm::vec4 color { 1, 1, 1, 1 };
 
         /**
          * @brief Coordinate of the texture that this vertex has attached to it.
          */
-        glm::vec2 texCoord;
+        glm::vec2 texCoord {0, 0};
 
         Vertex2dUVColor(const glm::vec3& _position, const glm::vec2& _texCoord, const glm::vec4& _color) : position(_position), texCoord(_texCoord), color(_color) {  }
     };
@@ -41,12 +41,12 @@ namespace GDE {
         /**
          * @brief Position in screen coordinates where the vertex should be placed.
          */
-        glm::vec3 position;
+        glm::vec3 position {0, 0, 0};
 
         /**
          * @brief Color of the vertex.
          */
-        glm::vec4 color;
+        glm::vec4 color {1, 1, 1, 1};
 
         VertexColorDebug(const glm::vec3& _position, const glm::vec4& _color) : position(_position), color(_color) {  }
     };
@@ -82,12 +82,12 @@ namespace GDE {
                 /**
                  * @see BatchPriority
                  */
-                BatchPriority priority;
+                BatchPriority priority = BatchPriority::SpritePriority;
 
                 /**
                  * @brief How far or near it should be rendered on the Z-Axis.
                  */
-                int layer;
+                int layer = 0;
 
                 /**
                  * @brief Shader that is going to be used to render the whole batch.
@@ -97,13 +97,13 @@ namespace GDE {
                 /**
                  * @brief Data struct that contains all of the info of the vertices to be sent to the GPU.
                  */
-                std::vector<Vertex2dUVColor> vertexBuffer;
+                std::vector<Vertex2dUVColor> vertexBuffer {};
 
                 /**
                  * @brief Indices of the vertices to be sent to the GPU. We use indices as it is cheaper to send individual
                  * uint32_t values that repeated Vertex2dUVColor.
                  */
-                std::vector<uint32_t> indexBuffer;
+                std::vector<uint32_t> indexBuffer {};
 
                 /**
                  * @brief Amount of vertices to be sent to the GPU.
@@ -160,12 +160,12 @@ namespace GDE {
                 /**
                  * @brief vertices to draw geometry more complex than a line.
                  */
-                std::vector<VertexColorDebug> vertexDebugBufferGeometrics;
+                std::vector<VertexColorDebug> vertexDebugBufferGeometrics {};
 
                 /**
                  * @brief vertices to draw simple lines.
                  */
-                std::vector<VertexColorDebug> vertexDebugBufferLines;
+                std::vector<VertexColorDebug> vertexDebugBufferLines {};
 
                 /**
                  * @brief Debug VertexBuffer ID on the GPU.
@@ -247,7 +247,7 @@ namespace GDE {
             /**
              * @see Debug
              */
-            Debug debug;
+            Debug debug {};
 
             /**
              * @brief Maximum number of indices that can be accumulated in a single Draw Call, if it is exceeded, an
@@ -289,12 +289,12 @@ namespace GDE {
             /**
              * @brief View Projection Matrix, this is the matrix that tells the GPU how to render the geometry.
              */
-            glm::mat4 viewProjectionMatrix;
+            glm::mat4 viewProjectionMatrix {1.0f};
 
             /**
              * @brief All the batches to be drawn.
              */
-            std::vector<Batch> batches;
+            std::vector<Batch> batches {};
 
         private:
             /**
