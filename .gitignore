@@ -268,3 +268,5 @@ cmake-build-release-mingw_clang/SDL2.dll
 cmake-build-release-mingw_clang/Testing/Temporary/LastTest.log
 
 cmake-build-release-mingw_clang/zlib1.dll
+
+Debug/CMakeCache.txt
