@@ -93,7 +93,6 @@ namespace GDE {
 
     void FrameBuffer::bind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, fboID);
-        glEnable(GL_DEPTH_TEST);
         CHECK_GL_ERROR("FrameBuffer bind")
     }
 
@@ -103,7 +102,6 @@ namespace GDE {
         if(specs.renderToWindow) {
             glBindVertexArray(vao);
             {
-                glDisable(GL_DEPTH_TEST);
                 glUseProgram(framebufferShader);
                 glBindBuffer(GL_ARRAY_BUFFER, vboID);
 
