@@ -38,7 +38,7 @@ namespace GDE {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
@@ -81,12 +81,6 @@ namespace GDE {
         }
 
         SDL_GL_MakeCurrent(window, context);
-
-        if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-            LOG_E("Failed to initialize GLAD")
-            return;
-        }
-        LOG_S("GLAD and SDL2 initiated correctly");
         
         #if IS_MOBILE()
             #if IS_ANDROID()
@@ -94,6 +88,12 @@ namespace GDE {
             SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, "1");
             SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
             #endif
+        #else
+        if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+            LOG_E("Failed to initialize GLAD")
+            return;
+        }
+        LOG_S("GLAD and SDL2 initiated correctly");
         #endif
 
         SDL_GL_SetSwapInterval(1);

@@ -11,7 +11,9 @@ namespace GDE {
 
     void Renderer::init(Engine* _engine) {
     
+        #if !IS_MOBILE()
         LOG_I("OpenGL Version: ", glGetString(GL_VERSION));
+        #endif
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

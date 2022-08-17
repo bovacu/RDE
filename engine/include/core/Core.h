@@ -49,7 +49,9 @@
     #elif defined(__APPLE__)
         #include "TargetConditionals.h"
         #if TARGET_OS_IPHONE
-            #define IOS_PLATFORM
+            #ifndef IOS_PLATFORM
+                #define IOS_PLATFORM
+            #endif
         #elif TARGET_OS_MAC
             #define MAC_PLATFORM
         #endif
