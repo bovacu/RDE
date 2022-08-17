@@ -13,7 +13,12 @@ namespace GDE {
             return;
         }
 
-        int _flags = MIX_INIT_OGG | MIX_INIT_MP3;
+        int _flags = MIX_INIT_OGG;
+        
+        #if !IS_IOS()
+        _flags |= MIX_INIT_MP3;
+        #endif
+        
         int _initiated = Mix_Init(_flags);
 
         if((_initiated & _flags) != _flags) {
