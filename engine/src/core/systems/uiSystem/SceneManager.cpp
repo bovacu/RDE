@@ -10,9 +10,9 @@
 namespace GDE {
 
     struct DefaultScene : public Scene {
-
         public:
             DefaultScene(Engine* _engine, const std::string& _name) : Scene(_engine, _name) { }
+            ~DefaultScene() {  }
     };
 
     const std::string SCENES_PATH = "assets/scenes/";

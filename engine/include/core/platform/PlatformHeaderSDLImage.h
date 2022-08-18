@@ -6,7 +6,7 @@
 
 #include "core/Core.h"
 
-#if IS_IOS()
+#if IS_MOBILE()
 #include "SDL_image.h"
 #else
 #include "SDL2/SDL_image.h"

@@ -33,7 +33,7 @@ namespace GDE {
         window->setVSync(true);
         Renderer::setClearColor(backgroundColor);
 
-        #if !IS_IOS()
+        #if !IS_MOBILE()
         FrameBufferSpecification _specs = {(uint32_t)window->getWindowSize().x,(uint32_t)window->getWindowSize().y};
         frameBuffer = new FrameBuffer(_specs, &manager);
         #endif
@@ -118,7 +118,7 @@ namespace GDE {
     }
 
     void Engine::onRender(Delta _dt) {
-        #if !IS_IOS()
+        #if !IS_MOBILE()
             frameBuffer->bind();
         #endif
 
@@ -126,7 +126,7 @@ namespace GDE {
         manager.sceneManager.getDisplayedScene()->onRender(_dt);
         manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
 
-        #if !IS_IOS()
+        #if !IS_MOBILE()
             frameBuffer->unbind();
         #endif
 
@@ -155,7 +155,9 @@ namespace GDE {
         int _width, _height;
         SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
 
+        #if !IS_MOBILE()
         frameBuffer->resize(_width, _height);
+        #endif
         manager.sceneManager.getDisplayedScene()->getMainCamera()->onResize(_width, _height);
         return true;
     }
@@ -182,8 +184,8 @@ namespace GDE {
     void Engine::destroy() {
         manager.destroy();
 
-        delete frameBuffer;
         #if !IS_MOBILE()
+        delete frameBuffer;
         delete imGuiLayer;
         delete window;
         #endif

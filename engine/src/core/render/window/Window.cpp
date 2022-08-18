@@ -35,22 +35,35 @@ namespace GDE {
         SDL_Log("We compiled against SDL version %u.%u.%u ...\n", compiled.major, compiled.minor, compiled.patch);
         SDL_Log("But we are linking against SDL version %u.%u.%u.\n", linked.major, linked.minor, linked.patch);
 
-        SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
-        #if IS_DESKTOP()
+        #if IS_ANDROID()
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
+            SDL_DisplayMode mode;
+            SDL_GetDisplayMode(0,0,&mode);
+            int width = mode.w;
+            int height = mode.h;
+            SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL,1);
+            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
+            SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,24);
+            window = SDL_CreateWindow(nullptr,0,0,width,height,SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE);
+            SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
+            SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
+        #elif IS_DESKTOP()
+            SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+            SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
             #if IS_MAC()
                 SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
             #else
                 SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
             #endif
-        #else
-        SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
-        SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
+            window = SDL_CreateWindow(_config->windowData.title.c_str(), 0, 0,
+                              (int)_config->windowData.size.x, (int)_config->windowData.size.y,
+                              SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
         #endif
         
         
@@ -64,13 +77,10 @@ namespace GDE {
         SDL_DisplayMode displayMode;
         SDL_GetDesktopDisplayMode(0, &displayMode);
         window = SDL_CreateWindow(NULL, 0, 0, displayMode.w, displayMode.h,  SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
-        #else
-        window = SDL_CreateWindow(_config->windowData.title.c_str(), 0, 0,
-                                  (int)_config->windowData.size.x, (int)_config->windowData.size.y,
-                                  SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
         #endif
+
         if(window == nullptr) {
-            printf("SDL window creation failed: %s\n", SDL_GetError());
+            LOG_E("SDL window creation failed: ", SDL_GetError());
             return;
         }
         context = SDL_GL_CreateContext(window);
