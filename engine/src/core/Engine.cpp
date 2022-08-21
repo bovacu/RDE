@@ -12,7 +12,7 @@ namespace GDE {
 
     Engine::Engine() {
         manager.configManager.loadGDEConfig(&gdeConfig, manager.fileManager);
-        window = new Window(&gdeConfig);
+        window = platform.createWindow(&gdeConfig);
 
         UDelegate<void(Event&)> onEventDelegate;
         onEventDelegate.bind<&Engine::onEvent>(this);

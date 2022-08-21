@@ -14,9 +14,7 @@ namespace GDE {
      */
     struct GDEConfig;
     class Window {
-        friend class WindowInput;
-
-        private:
+        protected:
             /**
              * @brief SDL_Window used as a base of the engine Window.
              */
@@ -48,10 +46,13 @@ namespace GDE {
              */
             bool running = true;
 
-        public:
+        protected:
             explicit Window(GDEConfig* _props);
+
+        public:
             ~Window() ;
 
+        public:
             /**
              * @brief This method is used to update the window, poll the events and
              * swap the buffers.
@@ -112,6 +113,12 @@ namespace GDE {
              * @return bool
              */
             [[nodiscard]] bool isFullscreen() const;
+
+            /*
+             * @brief Sets the window to minimized.
+             * @param _minimized Sets the window to minimized or not.
+             */
+            void setMinimized(bool _minimized);
 
             /**
              * @brief Sets the method that will be executed when a polled event triggers.

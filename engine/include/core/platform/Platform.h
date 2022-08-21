@@ -4,6 +4,7 @@
 #ifndef ENGINE2_0_PLATFORM_H
 #define ENGINE2_0_PLATFORM_H
 
+#include "core/systems/inputSystem/input/Input.h"
 namespace GDE {
 
     enum PlatformType {
@@ -11,14 +12,16 @@ namespace GDE {
         WINDOWS,
         MAC,
         ANDROID_,
-        IOS
+        IOS,
+        UNSUPPORTED
     };
 
     class Platform {
-
         public:
-            static PlatformType getPlatform();
+            Window* createWindow(GDEConfig* _config);
 
+        private:
+            PlatformType getPlatform();
     };
 
 }
