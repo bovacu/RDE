@@ -3,6 +3,9 @@
 //
 
 #include "core/render/window/MacWindow.h"
+
+#if IS_MAC()
+
 #include "core/Engine.h"
 
 namespace GDE {
@@ -45,3 +48,5 @@ namespace GDE {
         SDL_SetWindowResizable(window, SDL_TRUE);
     }
 }
+
+#endif

@@ -5,6 +5,10 @@
 #ifndef GDE_IOS_WINDOW_H
 #define GDE_IOS_WINDOW_H
 
+#include "core/Core.h"
+
+#if IS_IOS()
+
 #include "Window.h"
 
 namespace GDE {
@@ -13,7 +17,8 @@ namespace GDE {
         public:
             explicit IOSWindow(GDEConfig* _config);
     };
-
-
 }
+
+#endif
+
 #endif //GDE_IOS_WINDOW_H

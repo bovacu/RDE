@@ -3,6 +3,8 @@
 //
 
 #include "core/render/window/WindowsWindow.h"
+
+#if IS_WINDOWS() && !IS_ANDROID()
 #include "core/Engine.h"
 
 namespace GDE {
@@ -47,3 +49,5 @@ namespace GDE {
         if(!properties->projectData.iconPath.empty()) setIcon(properties->projectData.iconPath);
     }
 }
+
+#endif

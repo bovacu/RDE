@@ -3,6 +3,8 @@
 //
 
 #include "core/render/window/LinuxWindow.h"
+
+#if IS_LINUX() && !IS_ANDROID()
 #include "core/Engine.h"
 
 namespace GDE {
@@ -48,3 +50,5 @@ namespace GDE {
         if(!properties->projectData.iconPath.empty()) setIcon(properties->projectData.iconPath);
     }
 }
+
+#endif

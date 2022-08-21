@@ -3,11 +3,26 @@
 
 #include "core/platform/Platform.h"
 #include "core/Core.h"
+
+#if IS_LINUX() && !IS_ANDROID()
 #include "core/render/window/LinuxWindow.h"
+#endif
+
+#if IS_WINDOWS() && !IS_ANDROID()
 #include "core/render/window/WindowsWindow.h"
+#endif
+
+#if IS_MAC() && !IS_ANDROID()
 #include "core/render/window/MacWindow.h"
+#endif
+
+#if IS_ANDROID()
 #include "core/render/window/AndroidWindow.h"
+#endif
+
+#if IS_IOS()
 #include "core/render/window/IOSWindow.h"
+#endif
 
 namespace GDE {
 
@@ -37,17 +52,24 @@ namespace GDE {
     }
 
     Window* Platform::createWindow(GDEConfig* _config) {
-        switch(getPlatform()) {
-            case WINDOWS: return new WindowsWindow(_config);
-            case LINUX: return new LinuxWindow(_config);
-            case MAC: return new MacWindow(_config);
-            case ANDROID_: return new AndroidWindow(_config);
-            case IOS: return new IOSWindow(_config);
-            case UNSUPPORTED: {
-                LOG_E("Trying to create a window for an unsupported platform!!")
-                return nullptr;
-            }
-        }
-        return nullptr;
+        #if IS_ANDROID()
+            return new AndroidWindow(_config);
+        #endif
+
+        #if IS_IOS()
+            return new IOSWindow(_config);
+        #endif
+
+        #if IS_LINUX() && !IS_ANDROID()
+            return new LinuxWindow(_config);
+        #endif
+
+        #if IS_WINDOWS() && !IS_ANDROID()
+            return new WindowsWindow(_config);
+        #endif
+
+        #if IS_MAC() && !IS_ANDROID()
+            return new MacWindow(_config);
+        #endif
     }
 }

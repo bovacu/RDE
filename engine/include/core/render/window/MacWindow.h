@@ -5,6 +5,8 @@
 #ifndef GDE_MAC_WINDOW_H
 #define GDE_MAC_WINDOW_H
 
+#include "core/Core.h"
+#if IS_MAC()
 
 #include "core/Engine.h"
 
@@ -15,5 +17,7 @@ namespace GDE {
     };
 
 }
+
+#endif
 
 #endif //GDE_MAC_WINDOW_H

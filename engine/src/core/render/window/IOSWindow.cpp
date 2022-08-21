@@ -3,6 +3,9 @@
 //
 
 #include "core/render/window/IOSWindow.h"
+
+#if IS_IOS()
+
 #include "core/Engine.h"
 
 namespace GDE {
@@ -37,3 +40,5 @@ namespace GDE {
         SDL_GL_SetSwapInterval(1);
     }
 }
+
+#endif
