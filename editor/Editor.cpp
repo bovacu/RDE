@@ -3,6 +3,8 @@
 //
 
 #include "Editor.h"
+#include "core/graph/Components.h"
+#include "core/graph/Scene.h"
 #include "imgui.h"
 
 namespace Editor {
@@ -25,5 +27,24 @@ namespace Editor {
         // engine->setRenderingRedirectionToImGui(_delegate);
     }
 
+    void Editor::onUpdate(Delta _dt) {
+        Scene::onUpdate(_dt);
+        
+    }
 
-}
+    void Editor::textStressTest() {
+            Random _r;
+            auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
+            // 40000 is the maximum I could get with 55fps of average performance, with texts -> "Text[0-40000]" ~350000 images
+
+            for(int _i = 0; _i < 300000; _i++) {
+                auto _text = getMainGraph()->createNode("Block" + std::to_string(_i));
+                nodes.push_back(_text);
+                auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
+                _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f, (float)engine->getWindow().getWindowSize().x / 2.f),
+                                            _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f, (float)engine->getWindow().getWindowSize().y / 2.f));
+                getMainGraph()->addComponent<SpriteRenderer>(_text, this, _texture);
+            }
+        }
+
+    }

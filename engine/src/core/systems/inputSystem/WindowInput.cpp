@@ -52,7 +52,7 @@ namespace GDE {
     }
 
     void WindowInput::onWindowGainFocus(SDL_Event& _event) {
-        window->minimized = false;
+        window->setMinimized(false);
     }
 
     void WindowInput::onWindowLostFocus(SDL_Event& _event) {
@@ -72,13 +72,13 @@ namespace GDE {
     void WindowInput::onWindowMinimized(SDL_Event& _event) {
         WindowMinimizedEvent _e(1);
         window->consumeEvent(_e);
-        window->minimized = true;
+        window->setMinimized(true);
     }
 
     void WindowInput::onWindowMaximized(SDL_Event& _event) {
         WindowMinimizedEvent _e(0);
         window->consumeEvent(_e);
-        window->minimized = false;
+        window->setMinimized(false);
     }
 
     void WindowInput::onQuit(SDL_Event& _event) {
@@ -100,11 +100,11 @@ namespace GDE {
 
     void WindowInput::onWillEnterForegroundApp(SDL_Event& _event) {
         LOG_W("WILL ENTER FOREGROUND")
-        window->minimized = false;
+        window->setMinimized(false);
     }
 
     void WindowInput::onWillEnterBackground(SDL_Event& _event) {
         LOG_W("WILL ENTER BACKGROUND")
-        window->minimized = true;
+        window->setMinimized(true);
     }
 }

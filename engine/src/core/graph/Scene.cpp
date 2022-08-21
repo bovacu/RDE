@@ -8,7 +8,7 @@
 
 namespace GDE {
 
-    Scene::Scene(Engine* _engine, const std::string& _debugName)  : debugName(_debugName), mainGraph(this, _debugName), engine(_engine) {
+    Scene::Scene(Engine* _engine, const std::string& _debugName)  : mainGraph(this, _debugName), debugName(_debugName), engine(_engine) {
         auto _mainCameraID = mainGraph.createNode("MainCamera");
         auto* _cameraTransform = mainGraph.getComponent<Transform>(_mainCameraID);
         auto* _camera = mainGraph.addComponent<Camera>(_mainCameraID, &_engine->getWindow(), _cameraTransform);
