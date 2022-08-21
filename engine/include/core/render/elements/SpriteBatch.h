@@ -30,7 +30,7 @@ namespace GDE {
          */
         glm::vec2 texCoord {0, 0};
 
-        Vertex2dUVColor(const glm::vec3& _position, const glm::vec2& _texCoord, const glm::vec4& _color) : position(_position), texCoord(_texCoord), color(_color) {  }
+        Vertex2dUVColor(const glm::vec3& _position, const glm::vec2& _texCoord, const glm::vec4& _color) : position(_position), color(_color), texCoord(_texCoord) {  }
     };
 
     /**

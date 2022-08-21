@@ -33,7 +33,7 @@ namespace GDE {
                 if(_min > _max) {
                     int _aux = _min;
                     _min = _max;
-                    _max = _min;
+                    _max = _aux;
                 }
                 std::uniform_int_distribution<int> _dist(_min, _max);
                 return _dist(mt);
@@ -43,7 +43,7 @@ namespace GDE {
                 if(_min > _max) {
                     float _aux = _min;
                     _min = _max;
-                    _max = _min;
+                    _max = _aux;
                 }
                 std::uniform_real_distribution<float> _dist(_min, _max);
                 return _dist(mt);

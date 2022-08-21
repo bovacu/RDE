@@ -61,7 +61,7 @@ namespace GDE {
         std::vector<int> controllerIDs = {  };
     };
 
-    class ControllerInput; class Controller;
+    class ControllerInput; struct Controller;
     /**
      * @brief This class controls which controller is bind to which effects and how they play.
      */
