@@ -151,7 +151,7 @@ if(GDE_LIBRARY)
     )
 else()
     message("Building executable")
-    add_executable(Engine engine/main.cpp sandbox/Sandbox.h sandbox/Sandbox.cpp
+    add_executable(Engine sandbox/Sandbox.h sandbox/Sandbox.cpp
 
         ${GDE_CPP_HEADERS}
         ${GDE_CPP_SOURCES}

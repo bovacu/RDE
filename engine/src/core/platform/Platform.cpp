@@ -4,6 +4,26 @@
 #include "core/platform/Platform.h"
 #include "core/Core.h"
 
+#if IS_LINUX() && !IS_ANDROID()
+#include "core/render/window/LinuxWindow.h"
+#endif
+
+#if IS_WINDOWS() && !IS_ANDROID()
+#include "core/render/window/WindowsWindow.h"
+#endif
+
+#if IS_MAC() && !IS_ANDROID()
+#include "core/render/window/MacWindow.h"
+#endif
+
+#if IS_ANDROID()
+#include "core/render/window/AndroidWindow.h"
+#endif
+
+#if IS_IOS()
+#include "core/render/window/IOSWindow.h"
+#endif
+
 namespace GDE {
 
     PlatformType Platform::getPlatform() {
@@ -18,10 +38,38 @@ namespace GDE {
 
         #if IS_LINUX()
             return PlatformType::LINUX;
-        #elif defined(_WIN32)
+        #endif
+
+        #if IS_WINDOWS()
             return PlatformType::WINDOWS;
-        #elif IS_MAC()
+        #endif
+
+        #if IS_MAC()
             return PlatformType::MAC;
+        #endif
+
+        return PlatformType::UNSUPPORTED;
+    }
+
+    Window* Platform::createWindow(GDEConfig* _config) {
+        #if IS_ANDROID()
+            return new AndroidWindow(_config);
+        #endif
+
+        #if IS_IOS()
+            return new IOSWindow(_config);
+        #endif
+
+        #if IS_LINUX() && !IS_ANDROID()
+            return new LinuxWindow(_config);
+        #endif
+
+        #if IS_WINDOWS() && !IS_ANDROID()
+            return new WindowsWindow(_config);
+        #endif
+
+        #if IS_MAC() && !IS_ANDROID()
+            return new MacWindow(_config);
         #endif
     }
 }

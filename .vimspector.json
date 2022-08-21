@@ -1,0 +1,23 @@
+{
+  "configurations": {
+    "C - Launch": {
+      "adapter": "vscode-cpptools",
+      "configuration": {
+        "name": "Cpp: Launch current file",
+        "type": "cppdbg",
+        "request": "launch",
+        "externalConsole": true,
+        "logging": {
+          "engineLogging": true
+        },
+        "stopOnEntry": true,
+        "stopAtEntry": true,
+        "debugOptions": [],
+        "MIMode": "gdb",
+        "cwd": "${cwd}",
+        "program": "${workspaceRoot}/build/GDE"
+      }
+    }
+  }
+}
+

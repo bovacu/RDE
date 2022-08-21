@@ -330,7 +330,7 @@ namespace GDE {
 
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-        for (int i = 0; i < engine->manager.consoleManager.logs.size(); i++) {
+        for (size_t i = 0; i < engine->manager.consoleManager.logs.size(); i++) {
             const char* item = engine->manager.consoleManager.logs[i].c_str();
 
             ImVec4 color;

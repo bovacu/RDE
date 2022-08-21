@@ -78,7 +78,7 @@ namespace GDE {
         IntRect subRects[9];
     };
 
-    class Atlas;
+    struct Atlas;
 
     /**
      * @brief This class represents a SpriteSheet or a simple Sprite that will be uploaded to the GPU.

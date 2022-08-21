@@ -17,7 +17,6 @@ namespace GDE {
         properties = _config;
 
         #ifdef ENGINE_DEBUG
-        SDL_version _compiled, _linked;
         LOG_I("Creating window ", _config->windowData.title, " (", _config->windowData.size.x, _config->windowData.size.y, ")");
         #endif
 
@@ -29,93 +28,11 @@ namespace GDE {
 
         SDL_version compiled;
         SDL_version linked;
-
+    
         SDL_VERSION(&compiled);
         SDL_GetVersion(&linked);
         SDL_Log("We compiled against SDL version %u.%u.%u ...\n", compiled.major, compiled.minor, compiled.patch);
         SDL_Log("But we are linking against SDL version %u.%u.%u.\n", linked.major, linked.minor, linked.patch);
-
-        #if IS_ANDROID()
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
-            SDL_DisplayMode mode;
-            SDL_GetDisplayMode(0,0,&mode);
-            int width = mode.w;
-            int height = mode.h;
-            SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL,1);
-            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
-            SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,24);
-            window = SDL_CreateWindow(nullptr,0,0,width,height,SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE);
-            SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
-            SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
-        #elif IS_DESKTOP()
-            SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-            SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-            #if IS_MAC()
-                SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-            #else
-                SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-            #endif
-            window = SDL_CreateWindow(_config->windowData.title.c_str(), 0, 0,
-                              (int)_config->windowData.size.x, (int)_config->windowData.size.y,
-                              SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
-        #endif
-        
-        
-        #if IS_IOS()
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
-        SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-        SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-
-        SDL_DisplayMode displayMode;
-        SDL_GetDesktopDisplayMode(0, &displayMode);
-        window = SDL_CreateWindow(NULL, 0, 0, displayMode.w, displayMode.h,  SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
-        #endif
-
-        if(window == nullptr) {
-            LOG_E("SDL window creation failed: ", SDL_GetError());
-            return;
-        }
-        context = SDL_GL_CreateContext(window);
-
-        if(context == nullptr) {
-            LOG_E("OpenGL context couldn't initialize -> ", SDL_GetError())
-            return;
-        }
-
-        SDL_GL_MakeCurrent(window, context);
-        
-        #if IS_MOBILE()
-            #if IS_ANDROID()
-            SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE, "1");
-            SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, "1");
-            SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
-            #endif
-        #else
-        if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-            LOG_E("Failed to initialize GLAD")
-            return;
-        }
-        LOG_S("GLAD and SDL2 initiated correctly");
-        #endif
-
-        SDL_GL_SetSwapInterval(1);
-
-        #if IS_DESKTOP()
-        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-        SDL_SetWindowResizable(window, SDL_TRUE);
-        #endif
-    
-        if(!properties->projectData.iconPath.empty()) setIcon(properties->projectData.iconPath);
     }
 
     Window::~Window() {
@@ -148,6 +65,10 @@ namespace GDE {
 
     bool Window::isFullscreen() const {
         return properties->windowData.fullScreen;
+    }
+
+    void Window::setMinimized(bool _minimized) {
+        minimized = _minimized;
     }
 
     void Window::setIcon(const std::string& _path) {

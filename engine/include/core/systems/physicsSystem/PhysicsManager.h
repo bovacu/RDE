@@ -127,7 +127,7 @@ namespace GDE {
         Vec2F lastPosition;
     };
 
-    class Body;
+    struct Body;
 
     /**
      * @brief This is the class that allocates and deallocats all the physic objects, sets the physics configuration 

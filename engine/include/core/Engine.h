@@ -11,6 +11,9 @@
 #include "core/render/elements/FrameBuffer.h"
 #include "core/Manager.h"
 #include "core/systems/configSystem/ConfigManager.h"
+#include "core/platform/Platform.h"
+
+int main(int argc, char** argv);
 
 namespace GDE {
 
@@ -144,6 +147,8 @@ namespace GDE {
              */
             UDelegate<bool(WindowResizedEvent&)> wreDel;
 
+            Platform platform;
+
         private:
             /**
              * @brief Updates the FPS on the window title.
@@ -262,6 +267,8 @@ namespace GDE {
              */
             Logs componentsCommands(const std::vector<std::string>& _args);
     };
+
+    Engine* createEngine();
 }
 
 
