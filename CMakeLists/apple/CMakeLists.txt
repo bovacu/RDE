@@ -51,7 +51,7 @@ if(GDE_LIBRARY)
 
 else()
     message("Building executable")
-    add_executable(${PROJECT_NAME} engine/main.cpp 
+    add_executable(${PROJECT_NAME}
             editor/Editor.cpp
 
             ${GDE_CPP_HEADERS}

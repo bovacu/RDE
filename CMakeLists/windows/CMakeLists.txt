@@ -63,7 +63,7 @@ if(GDE_LIBRARY)
 
 else()
     message("Building executable")
-    add_executable(${PROJECT_NAME} WIN32 engine/main.cpp
+    add_executable(${PROJECT_NAME} WIN32
             editor/Editor.cpp
 
             ${GDE_CPP_HEADERS}
