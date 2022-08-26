@@ -113,7 +113,7 @@ namespace GDE {
     GLuint Shader::getShaderID() const {
         #if DEBUG
         if(shaderID == -1) {
-            throw std::exception();
+            throw LoadVertexConfigNotInvoked();
         }
         #endif
         return shaderID;
