@@ -349,5 +349,10 @@ namespace GDE {
 
     }
 
+    void
+    ConfigManager::loadStaticTransformComponent(const NodeID& _node, Scene* _scene, const nlohmann::json& _bodyJson) {
+
+    }
+
 }
 

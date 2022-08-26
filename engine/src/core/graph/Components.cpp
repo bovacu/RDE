@@ -21,12 +21,10 @@ namespace GDE {
         return localModelMatrix;
     }
 
-    void Transform::update(Graph* _graph) {
+    void Transform::update() {
         if (parent != NODE_ID_NULL) {
-            auto* _parentT = _graph->getComponent<Transform>(parent);
-            if(!dirty && !_parentT->dirty) return;
-
-            modelMatrix = _parentT->modelMatrix * getLocalModelMatrix();
+            if(!dirty && !parentTransform->dirty) return;
+            modelMatrix = parentTransform->modelMatrix * getLocalModelMatrix();
         } else {
             modelMatrix = getLocalModelMatrix();
         }
@@ -220,7 +218,7 @@ namespace GDE {
         // This needs to be WorldPosition, because we need to situate the body in world space
         // The update is because before the first Graph::onUpdate, modelMatrix is the identity matrix, we need
         // to advance one update step, which doesn't affect at all the simulation.
-        _transform->update(_scene->getMainGraph());
+        _transform->update();
         b2dConfig.bodyDefinition.position.Set(_transform->getPositionWorld().x, _transform->getPositionWorld().y);
         b2dConfig.bodyDefinition.angle = _transform->getRotationLocal();
         b2dConfig.bodyDefinition.type = gdeBodyTypeToB2dBodyType(_config.bodyType);

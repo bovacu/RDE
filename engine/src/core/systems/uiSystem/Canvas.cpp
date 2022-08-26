@@ -21,9 +21,9 @@ namespace GDE {
 
     void Canvas::onEvent(EventDispatcher& _eventDispatcher, Event& _event) {
         auto& _registry = graph.getNodeContainer();
-        auto _interacables = _registry.group<UIInteractable>(entt::get<Active>);
+        auto _interactables = _registry.group<UIInteractable>(entt::get<Active>);
 
-        _interacables.each([&_eventDispatcher, &_event, this](const auto _entity, UIInteractable& _interacable, const Active& _) {
+        _interactables.each([&_eventDispatcher, &_event, this](const auto _entity, UIInteractable& _interacable, const Active& _) {
             _interacable.onEvent(_entity, _eventDispatcher, _event, this);
         });
 
@@ -33,7 +33,7 @@ namespace GDE {
     void Canvas::onUpdate(Delta _dt) {
         auto& _registry = graph.getNodeContainer();
         _registry.view<Transform, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Active& _) {
-            _transform.update(&graph);
+            _transform.update();
         });
     }
 

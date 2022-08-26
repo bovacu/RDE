@@ -52,6 +52,7 @@ namespace GDE {
 
         registry.emplace<Tag>(sceneRoot, sceneRoot, _sceneName);
         registry.emplace<Transform>(sceneRoot, sceneRoot).parent = NODE_ID_NULL;
+        registry.get<Transform>(sceneRoot).parentTransform = nullptr;
         registry.emplace<Active>(sceneRoot, sceneRoot);
 
         onEventDel.bind<&onEventDelFoo>();
@@ -72,7 +73,10 @@ namespace GDE {
 
     void Graph::onUpdate(Delta _dt) {
         registry.view<Transform, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Active& _) {
-            _transform.update(this);
+            _transform.update();
+            if(_transform.staticTransform) {
+                addComponent<StaticTransform>(_entity);
+            }
         });
 
         registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
@@ -154,6 +158,7 @@ namespace GDE {
         registry.emplace<Tag>(_newNode, _newNode, _tag);
         registry.emplace<Transform>(_newNode, _newNode).parent = _parentRef;
         (&registry.get<Transform>(_parentRef))->children.push_back(_newNode);
+        (&registry.get<Transform>(_newNode))->parentTransform = (&registry.get<Transform>(_parentRef));
 
         registry.emplace<Active>(_newNode, _newNode);
 
@@ -173,7 +178,7 @@ namespace GDE {
         auto* _transform = getComponent<Transform>(_copy);
         (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent))->children.push_back(_copy);
         _transform->setPosition(_position);
-        _transform->update(this);
+        _transform->update();
         if(_parent != NODE_ID_NULL) setParent(_copy, _parent);
         setNodeActive(_copy, true);
 

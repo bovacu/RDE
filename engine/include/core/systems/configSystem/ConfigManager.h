@@ -71,6 +71,7 @@ namespace GDE {
 
             void loadBodyComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _bodyJson);
 
+            void loadStaticTransformComponent(const NodeID& _node, Scene* _scene, const nlohmann::json& _bodyJson);
     };
 
 }

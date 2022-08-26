@@ -290,7 +290,7 @@ namespace GDE {
     /**
      * @brief Component that helps the internal system work quickier. This component should be added to entities that won't move at all during
      * the scene rendering and life cycle.
-     * 
+     *
      */
     struct StaticTransform {
         explicit StaticTransform(const NodeID& _nodeId);
@@ -336,6 +336,9 @@ namespace GDE {
             bool dirty = false;
 
         public:
+            bool staticTransform = false;
+
+        public:
             explicit Transform(const NodeID& _nodeId);
 
             /**
@@ -343,6 +346,11 @@ namespace GDE {
              * 
              */
             NodeID parent;
+
+            /**
+             * @brief Parent Transform
+             */
+            Transform* parentTransform;
 
             /**
              * @brief All the children that an entity has.
@@ -371,10 +379,8 @@ namespace GDE {
 
             /**
              * @brief This method updates the position, rotation and scale of the entity, modifying its local and model matrices.
-             * 
-             * @param _graph The main Graph of the scene.
              */
-            void update(Graph* _graph);
+            void update();
 
             /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
