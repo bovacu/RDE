@@ -3,43 +3,12 @@
 #include <iostream>
 
 namespace GDE {
-
     Shader::Shader() {  }
 
     Shader::~Shader() {
         for(auto& _attachedShader : shadersAttached)
             glDeleteShader(_attachedShader.second);
         glDeleteProgram(shaderID);
-
-        glDeleteBuffers(1, &vbo);
-        glDeleteBuffers(1, &ibo);
-        glDeleteVertexArrays(1, &vao);
-    }
-
-    void Shader::loadVertexConfig(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall) {
-        ENGINE_ASSERT(!_verticesConfig.empty(), "Cannot have a Shader with 0 vertices configs")
-        const int NUMBER_OF_INDICES = 6;
-
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-        glGenBuffers(1, &vbo);
-        glGenBuffers(1, &ibo);
-
-        auto _structSize = _verticesConfig[0].structSize;
-        vertexDataSize = _structSize;
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, _structSize * _maxIndicesPerDrawCall, nullptr, GL_DYNAMIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * _maxIndicesPerDrawCall * NUMBER_OF_INDICES), nullptr, GL_DYNAMIC_DRAW);
-
-        for(auto& _vertexConfig : _verticesConfig) {
-            glVertexAttribPointer(_vertexConfig.pointerIndex, _vertexConfig.numberOfElements, _vertexConfig.openglDataType, GL_FALSE, _structSize, reinterpret_cast<const void*>(_vertexConfig.stride));
-            glEnableVertexAttribArray(_vertexConfig.pointerIndex);
-        }
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
     }
 
     bool Shader::initFromString(const std::string& _shaderCode, GLenum _shaderType) {
@@ -111,28 +80,7 @@ namespace GDE {
     }
 
     GLuint Shader::getShaderID() const {
-        #if DEBUG
-        if(shaderID == -1) {
-            throw std::exception();
-        }
-        #endif
         return shaderID;
-    }
-
-    GLuint Shader::getShaderVAO() const {
-        return vao;
-    }
-
-    GLuint Shader::getShaderIBO() const {
-        return ibo;
-    }
-
-    GLuint Shader::getShaderVBO() const {
-        return vbo;
-    }
-
-    long Shader::getShaderVertexDataSize() const {
-        return vertexDataSize;
     }
 
 }
