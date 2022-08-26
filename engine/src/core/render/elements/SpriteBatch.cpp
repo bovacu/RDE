@@ -18,59 +18,56 @@ namespace GDE {
 
     void SpriteBatch::init(Engine* _engine) {
         shaderManager = &_engine->manager.shaderManager;
-        initVbo();
-        debug.initDebugVbo();
+        configBasicShader();
     }
 
-    void SpriteBatch::initVbo() {
-        // Setup vertex buffer
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-        glGenBuffers(1, &vbo);
-        glGenBuffers(1, &ibo);
+    void SpriteBatch::Debug::init(SpriteBatch* _batch) {
+        batch = _batch;
+        configDebugShader();
+    }
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * maxIndicesPerDrawCall), nullptr, GL_DYNAMIC_DRAW);
+    void SpriteBatch::configBasicShader() {
         GLsizei _structSize = sizeof(Vertex2dUVColor);
+        shaderManager->loadShaderVertexConfig("basic", {
+            VertexConfig {
+                0, 3, GL_FLOAT, 0, _structSize
+            },
+            VertexConfig {
+                1, 4, GL_FLOAT, 4 * 3, _structSize
+            },
+            VertexConfig {
+                2, 2, GL_FLOAT, 4 * 3 + 4 * 4, _structSize
+            }
+        },
+        maxIndicesPerDrawCall);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * maxIndicesPerDrawCall * 6), nullptr, GL_DYNAMIC_DRAW);
-
-        /* Attributes must be in the same order as in Vertex2dUVColor. Parameters are:
-         *      layout, numberOfElements(1-4), GLType, normalized(bool), stride(sizeof(Vertex2dUVColor)), offset
-         *
-         *      The tricky one is offset, element 0 is always 0 bytes, element 1 is element 0 size, element 2 is
-         *      element 0 + element 1 size, element 3 is element 0, + element 1 + element 2 size...
-        */
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, _structSize, (void*) nullptr);
-        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, _structSize, (void*)(4 * 3));
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, _structSize, (void*)(4 * 3 + 4 * 4));
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glEnableVertexAttribArray(2);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glBindVertexArray(0);
+        shaderManager->loadShaderVertexConfig("basicText", {
+            VertexConfig {
+                  0, 3, GL_FLOAT, 0, _structSize
+            },
+            VertexConfig {
+                  1, 4, GL_FLOAT, 4 * 3, _structSize
+            },
+            VertexConfig {
+                  2, 2, GL_FLOAT, 4 * 3 + 4 * 4, _structSize
+            }
+        },
+        maxIndicesPerDrawCall);
+        CHECK_GL_ERROR("SpriteBatch configBasicShader")
     }
 
-    void SpriteBatch::Debug::initDebugVbo() {
-        glGenVertexArrays(1, &debugVao);
-        glBindVertexArray(debugVao);
-        glGenBuffers(1, &debugVbo);
-        glBindBuffer(GL_ARRAY_BUFFER, debugVbo);
-        int _size = 3 * sizeof(float) + 4 * sizeof(float);
-        // Position
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, _size, (void*)nullptr);
-        // Color
-        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, _size, (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-
-         glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glBindVertexArray(0);
-        CHECK_GL_ERROR("SpriteBatch InitVBODebug")
+    void SpriteBatch::Debug::configDebugShader() {
+        GLsizei _structSize = 3 * sizeof(float) + 4 * sizeof(float);
+        Debug::batch->shaderManager->loadShaderVertexConfig("debug", {
+            VertexConfig {
+                  0, 3, GL_FLOAT, 0, _structSize
+            },
+            VertexConfig {
+                  1, 4, GL_FLOAT, 3 * sizeof(float), _structSize
+            }
+        },
+          Debug::batch->maxIndicesPerDrawCall);
+        CHECK_GL_ERROR("SpriteBatch configDebugShader")
     }
 
     SpriteBatch::~SpriteBatch() {};
@@ -173,23 +170,22 @@ namespace GDE {
 
     void SpriteBatch::flush() {
         for(auto& _batch : batches) {
-            if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.textureID < 0 || _batch.shaderID < 0)
+            auto _shaderID = _batch.shader->getShaderID();
+            if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0)
                 continue;
             
-            glUseProgram(_batch.shaderID);
-            GLint _location = glGetUniformLocation(_batch.shaderID, "viewProjectionMatrix");
-            glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
+            glUseProgram(_shaderID);
 
             glActiveTexture(GL_TEXTURE0);
 
-            glBindVertexArray(vao);
+            glBindVertexArray(_batch.shader->getShaderVAO());
 
             glBindTexture(GL_TEXTURE_2D, _batch.textureID);
 
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(sizeof(Vertex2dUVColor) * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0]);
+            glBindBuffer(GL_ARRAY_BUFFER, _batch.shader->getShaderVBO());
+            glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), _batch.vertexBuffer[0]);
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _batch.shader->getShaderIBO());
             glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (long)(sizeof(uint32_t) * _batch.indexBuffer.size()), &_batch.indexBuffer[0]);
 
             glDrawElements(GL_TRIANGLES, (int)_batch.indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
@@ -211,24 +207,22 @@ namespace GDE {
     }
 
     void SpriteBatch::Debug::flushDebug() {
-        ShaderID _id = batch->shaderManager->getShader("debug");
+        auto* _shader = batch->shaderManager->getShader("debug");
 
-        glBindVertexArray(debugVao);
-        glUseProgram(_id);
-        GLint _location = glGetUniformLocation(_id, "viewProjectionMatrix");
-        glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(batch->viewProjectionMatrix)));
+        glBindVertexArray(_shader->getShaderVAO());
+        glUseProgram(_shader->getShaderID());
 
         if(!vertexDebugBufferGeometrics.empty()) {
-            glBindBuffer(GL_ARRAY_BUFFER, debugVbo);
-            glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(VertexColorDebug) * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, _shader->getShaderVBO());
+            glBufferData(GL_ARRAY_BUFFER, (long)(_shader->getShaderVertexDataSize() * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             glDrawArrays(GL_TRIANGLES, 0, (int)vertexDebugBufferGeometrics.size());
         }
 
         if(!vertexDebugBufferLines.empty()) {
-            glBindBuffer(GL_ARRAY_BUFFER, debugVbo);
-            glBufferData(GL_ARRAY_BUFFER, (long) (sizeof(VertexColorDebug) * vertexDebugBufferLines.size()), &vertexDebugBufferLines[0], GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, _shader->getShaderVBO());
+            glBufferData(GL_ARRAY_BUFFER, (long) (_shader->getShaderVertexDataSize() * vertexDebugBufferLines.size()), &vertexDebugBufferLines[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             glDrawArrays(GL_LINES, 0, (int) vertexDebugBufferLines.size());
@@ -246,7 +240,7 @@ namespace GDE {
 
     SpriteBatch::Batch& SpriteBatch::getBatch(const IRenderizable& _renderer, int _layer, BatchPriority _priority) {
         for(auto& _batch : batches)
-            if(_renderer.getTexture() == _batch.textureID && _layer == _batch.layer && _batch.shaderID == _renderer.shaderID)
+            if(_renderer.getTexture() == _batch.textureID && _layer == _batch.layer && _batch.shader->getShaderID() == _renderer.shaderID)
                 return _batch;
 
         LOG_W("Created a new batch")
@@ -257,7 +251,7 @@ namespace GDE {
        _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 6);
         _batch.textureID = _renderer.getTexture();
         _batch.priority = _priority;
-        _batch.shaderID = _renderer.shaderID;
+        _batch.shader = shaderManager->getShader(_renderer.shaderID);
         _batch.spriteBatch = this;
         batches.push_back(_batch);
 
@@ -505,9 +499,5 @@ namespace GDE {
 //        glUniformMatrix4fv(_location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(batch->viewProjectionMatrix)));
 //
 //        glDrawArrays(GL_TRIANGLES, 0, 6);
-    }
-
-    void SpriteBatch::Debug::init(SpriteBatch* _batch) {
-        batch = _batch;
     }
 }

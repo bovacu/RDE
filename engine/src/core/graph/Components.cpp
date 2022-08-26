@@ -121,13 +121,13 @@ namespace GDE {
         font = _font;
         innerText = _text;
         recalcTextDimensions(_text);
-        shaderID = _scene->engine->manager.shaderManager.getShader("basicText");
+        shaderID = _scene->engine->manager.shaderManager.getShader("basicText")->getShaderID();
         texture = &font->getTexture();
     }
 
     TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font) {
         font = _font;
-        shaderID = _scene->engine->manager.shaderManager.getShader("basicText");
+        shaderID = _scene->engine->manager.shaderManager.getShader("basicText")->getShaderID();
         texture = &font->getTexture();
     }
 
@@ -299,12 +299,12 @@ namespace GDE {
 
 
     SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture) : texture(_texture) {
-        shaderID = _scene->engine->manager.shaderManager.getShader("basic");
+        shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
         viewport = _scene->getMainCamera()->getViewport();
     }
 
     SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene) {
-        shaderID = _scene->engine->manager.shaderManager.getShader("basic");
+        shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
         viewport = _scene->getMainCamera()->getViewport();
     }
 
@@ -326,12 +326,12 @@ namespace GDE {
 
 
     NinePatchSprite::NinePatchSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas) {
-        shaderID = _scene->engine->manager.shaderManager.getShader("basic");
+        shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
         interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);
     }
 
     NinePatchSprite::NinePatchSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture) {
-        shaderID = _scene->engine->manager.shaderManager.getShader("basic");
+        shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
         texture = _texture;
         ninePatchSize = _texture->getRegion().size;
         interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);
@@ -425,4 +425,8 @@ namespace GDE {
     UIInteractable::UIInteractable(const NodeID& _nodeId) {  }
     CanvasEventStopper::CanvasEventStopper(const NodeID& _nodeId) {  }
     StaticTransform::StaticTransform(const NodeID& _nodeId) {  }
+
+    void UI::FillBuffers(IViewPort* _viewport, const Transform& _transform, std::vector<uint32_t>& _indexBuffer, std::vector<void*>& _vertexBuffer, int _vertexCount) const {
+
+    }
 }

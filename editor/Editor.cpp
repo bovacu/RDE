@@ -34,7 +34,12 @@ namespace Editor {
 
     void Editor::onUpdate(Delta _dt) {
         Scene::onUpdate(_dt);
-        
+
+        static ShaderID _basicShaderId = engine->manager.shaderManager.getShader("basic")->getShaderID();
+        static ShaderID _debugShaderId = engine->manager.shaderManager.getShader("debug")->getShaderID();
+
+        engine->manager.shaderManager.setMat4(_basicShaderId, "viewProjectionMatrix", getMainCamera()->getViewProjectionMatrix());
+        engine->manager.shaderManager.setMat4(_debugShaderId, "viewProjectionMatrix", getMainCamera()->getViewProjectionMatrix());
     }
 
     void Editor::textStressTest() {

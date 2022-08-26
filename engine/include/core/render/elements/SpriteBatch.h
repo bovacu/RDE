@@ -92,7 +92,7 @@ namespace GDE {
                 /**
                  * @brief Shader that is going to be used to render the whole batch.
                  */
-                ShaderID shaderID = -1;
+                Shader* shader = nullptr;
 
                 /**
                  * @brief Data struct that contains all of the info of the vertices to be sent to the GPU.
@@ -181,7 +181,7 @@ namespace GDE {
                 /**
                  * @brief Initiates all the crucial elements of the debugging rendering.
                  */
-                void initDebugVbo();
+                void configDebugShader();
 
             public:
                 /**
@@ -366,6 +366,6 @@ namespace GDE {
             /**
              * @brief This method initiates the VertexBuffer on the GPU.
              */
-            void initVbo();
+            void configBasicShader();
     };
 }

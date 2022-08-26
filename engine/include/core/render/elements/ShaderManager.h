@@ -26,7 +26,8 @@ namespace GDE {
             /**
              * @brief Map with all of the loaded Shaders on the GPU.
              */
-            std::unordered_map<std::string, Shader*> shaders;
+            std::unordered_map<std::string, Shader*> shadersByName;
+            std::unordered_map<ShaderID, Shader*> shadersById;
             FileManager* fileManager = nullptr;
 
         public:
@@ -57,11 +58,26 @@ namespace GDE {
             void unloadShader(const std::string& _name);
 
             /**
-             * @brief Returns the OpenGL reference to the shader in memory.
+             * @brief Returns the shader.
              * @param _name Shader name
-             * @return ShaderID
+             * @return Shader
              */
-            ShaderID getShader(const std::string& _name);
+            Shader* getShader(const std::string& _name);
+
+            /**
+             * @brief Returns the shader.
+             * @param _shadeID Shader ID
+             * @return Shader
+             */
+            Shader* getShader(const ShaderID& _shaderID);
+
+            /**
+             * @brief Sets the VertexData of a shader. Call this method only AFTER loadShader
+             * @param _shaderName the name of the shader.
+             * @param _vertexConfig List of data for each vertex.
+             * @param _maxIndicesPerDrawCall Maximum number of indices per draw call.
+             */
+            void loadShaderVertexConfig(const std::string& _shaderName, const std::vector<VertexConfig>& _vertexConfig, int _maxIndicesPerDrawCall);
 
             /**
              * @brief Sets an 'int' uniform for a specific shader
