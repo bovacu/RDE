@@ -426,7 +426,7 @@ namespace GDE {
     CanvasEventStopper::CanvasEventStopper(const NodeID& _nodeId) {  }
     StaticTransform::StaticTransform(const NodeID& _nodeId) {  }
 
-    void UI::FillBuffers(IViewPort* _viewport, const Transform& _transform, std::vector<uint32_t>& _indexBuffer, std::vector<void*>& _vertexBuffer, int _vertexCount) const {
-
-    }
+//    void UI::FillBuffers(IViewPort* _viewport, const Transform& _transform, std::vector<uint32_t>& _indexBuffer, std::vector<void*>& _vertexBuffer, int _vertexCount) const {
+//
+//    }
 }

@@ -183,7 +183,7 @@ namespace GDE {
             glBindTexture(GL_TEXTURE_2D, _batch.textureID);
 
             glBindBuffer(GL_ARRAY_BUFFER, _batch.shader->getShaderVBO());
-            glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), _batch.vertexBuffer[0]);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0]);
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _batch.shader->getShaderIBO());
             glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (long)(sizeof(uint32_t) * _batch.indexBuffer.size()), &_batch.indexBuffer[0]);
