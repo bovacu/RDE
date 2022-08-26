@@ -183,7 +183,8 @@ namespace GDE {
         }
 
         if(_spriteRendererJson.contains("shader")) {
-            _spriteRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(_spriteRendererJson["shader"].get<std::string>());
+            _spriteRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(
+                    _spriteRendererJson["shader"].get<std::string>())->getShaderID();
         }
     }
 
@@ -340,8 +341,7 @@ namespace GDE {
         }
 
         if(_textRendererJson.contains("shader")){
-            _textRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(_textRendererJson["shader"].get<std::string>());
-
+            _textRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(_textRendererJson["shader"].get<std::string>())->getShaderID();
         }
     }
 

@@ -16,6 +16,43 @@
 
 namespace GDE {
 
+    class LoadVertexConfigNotInvoked : public std::exception {
+        public:
+        [[nodiscard]] auto what() const noexcept -> const char* override {
+            return "Load vertex config function was not called for shader, so the shader won't work.";
+        }
+    };
+
+    struct VertexConfig {
+
+        /**
+         * @brief First parameter of 'glVertexAttribPointer', the value that in shader is (layout = 'pointerIndex').
+         */
+        unsigned int pointerIndex = 0;
+
+        /**
+         * @brief Number of elements that data has. Ex: glm::vec3 -> 3, glm::vec4 -> 4.
+         */
+        int numberOfElements = 0;
+
+        /**
+         * @brief GL_FLOAT, GL_INT, GL_UNSIGNED_INT...
+         */
+        unsigned int openglDataType = 0;
+
+        /**
+         * @brief Offset in bytes from the first VertexData to the current one.
+         */
+        unsigned int stride = 0;
+
+        /**
+         * @brief This method must return how many bytes VertexData uses.
+         */
+        int structSize = 0;
+    };
+
+    struct VertexData {  };
+
     /**
      * @brief This class represents the Shader program compiled and stored in the GPU.
      */
@@ -30,7 +67,27 @@ namespace GDE {
             /**
              * @brief Shader ID in the GPU so the engine can locate it and enable it to render.
              */
-            GLuint shaderID;
+            GLuint shaderID = -1;
+
+            /**
+             * @brief VAO of the shader.
+             */
+            GLuint vao = -1;
+
+            /**
+             * @brief IBO of the shader.
+             */
+            GLuint ibo = -1;
+
+            /**
+             * @brief VBO of the shader.
+             */
+            GLuint vbo = -1;
+
+            /**
+             * @brief Size of VertexData in bytes.
+             */
+             long vertexDataSize;
 
         public:
             Shader();
@@ -53,10 +110,39 @@ namespace GDE {
             GLuint loadFromStrings(const std::string& _vertex, const std::string& _fragment);
 
             /**
+             * @brief Loads the data structure that is going to be sent to the GPU. This method MUST be called
+             */
+            void loadVertexConfig(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall);
+
+            /**
              * @brief Returns the ID of the Shader on the GPU
              * @return uint
              */
             GLuint getShaderID() const;
+
+            /**
+             * @brief Returns the ID of the VAO on the GPU
+             * @return uint
+             */
+            GLuint getShaderVAO() const;
+
+            /**
+            * @brief Returns the ID of the IBO on the GPU
+            * @return uint
+            */
+            GLuint getShaderIBO() const;
+
+            /**
+             * @brief Returns the ID of the VBO on the GPU
+             * @return uint
+             */
+            GLuint getShaderVBO() const;
+
+            /**
+             * @brief Returns the size of the VertexData structure in bytes.
+             * @return long
+             */
+            long getShaderVertexDataSize() const;
 
         private:
             /**
