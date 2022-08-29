@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <any>
 
 #include "core/render/Camera.h"
 #include "core/render/shapes/Shape.h"
@@ -13,7 +14,7 @@ namespace GDE {
     /**
      * @brief This is the data that is sent to the GPU when rendering default vertices.
      */
-    struct Vertex2dUVColor {
+    struct OpenGLVertex {
 
         /**
          * @brief Position in screen coordinates where the vertex should be placed.
@@ -30,13 +31,13 @@ namespace GDE {
          */
         glm::vec2 texCoord {0, 0};
 
-        Vertex2dUVColor(const glm::vec3& _position, const glm::vec2& _texCoord, const glm::vec4& _color) : position(_position), color(_color), texCoord(_texCoord) {  }
+        OpenGLVertex(const glm::vec3& _position, const glm::vec2& _texCoord, const glm::vec4& _color) : position(_position), color(_color), texCoord(_texCoord) {  }
     };
 
     /**
      * @brief This is the data that is sent to the GPU when rendering default debugging information.
      */
-    struct VertexColorDebug {
+    struct OpenGLVertexDebug {
 
         /**
          * @brief Position in screen coordinates where the vertex should be placed.
@@ -48,7 +49,7 @@ namespace GDE {
          */
         glm::vec4 color {1, 1, 1, 1};
 
-        VertexColorDebug(const glm::vec3& _position, const glm::vec4& _color) : position(_position), color(_color) {  }
+        OpenGLVertexDebug(const glm::vec3& _position, const glm::vec4& _color) : position(_position), color(_color) {  }
     };
 
     /**
@@ -97,11 +98,11 @@ namespace GDE {
                 /**
                  * @brief Data struct that contains all of the info of the vertices to be sent to the GPU.
                  */
-                std::vector<Vertex2dUVColor> vertexBuffer {};
+                std::vector<std::any> vertexBuffer {};
 
                 /**
                  * @brief Indices of the vertices to be sent to the GPU. We use indices as it is cheaper to send individual
-                 * uint32_t values that repeated Vertex2dUVColor.
+                 * uint32_t values that repeated OpenGLVertex.
                  */
                 std::vector<uint32_t> indexBuffer {};
 
@@ -160,12 +161,12 @@ namespace GDE {
                 /**
                  * @brief vertices to draw geometry more complex than a line.
                  */
-                std::vector<VertexColorDebug> vertexDebugBufferGeometrics {};
+                std::vector<OpenGLVertexDebug> vertexDebugBufferGeometrics {};
 
                 /**
                  * @brief vertices to draw simple lines.
                  */
-                std::vector<VertexColorDebug> vertexDebugBufferLines {};
+                std::vector<OpenGLVertexDebug> vertexDebugBufferLines {};
 
                 /**
                  * @brief Debug VertexBuffer ID on the GPU.

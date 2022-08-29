@@ -27,7 +27,7 @@ namespace GDE {
     }
 
     void SpriteBatch::configBasicShader() {
-        GLsizei _structSize = sizeof(Vertex2dUVColor);
+        GLsizei _structSize = sizeof(OpenGLVertex);
         shaderManager->loadShaderVertexConfig("basic", {
             VertexConfig {
                 0, 3, GL_FLOAT, 0, _structSize
@@ -302,10 +302,10 @@ namespace GDE {
         glm::vec4 _color = {(float)_spriteRenderer.color.r / 255.f, (float)_spriteRenderer.color.g/ 255.f,
                             (float)_spriteRenderer.color.b/ 255.f, (float)_spriteRenderer.color.a/ 255.f};
 
-        vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _bottomLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color });
+        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _bottomRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color });
+        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _topRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y), _color });
+        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _topLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y), _color });
 
         indexBuffer.emplace_back(vertexCount + 0);
         indexBuffer.emplace_back(vertexCount + 1);
@@ -373,10 +373,10 @@ namespace GDE {
             glm::vec2 _topLeftTextureCoord = {_chars[_char].offset.x, _chars[_char].offset.y + _chars[_char].bitmapSize.y / _atlasSize.y};
             glm::vec2 _topRightTextureCoord = {_chars[_char].offset.x + _chars[_char].bitmapSize.x / _atlasSize.x,_chars[_char].offset.y + _chars[_char].bitmapSize.y / _atlasSize.y};
 
-            vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner,_bottomLeftTextureCoord, _color);
-            vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner,_bottomRightTextureCoord, _color);
-            vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner,_topRightTextureCoord, _color);
-            vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner,_topLeftTextureCoord, _color);
+            vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _bottomLeftTextureCorner, _bottomLeftTextureCoord, _color });
+            vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord, _color });
+            vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _topRightTextureCorner, _topRightTextureCoord, _color });
+            vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _topLeftTextureCorner, _topLeftTextureCoord, _color });
 
             _x += _chars[_char].advance.x / 2.f;
             _y += _chars[_char].advance.y;
@@ -462,10 +462,10 @@ namespace GDE {
         glm::vec4 _color = {(float)_ninePatch.color.r / 255.f, (float)_ninePatch.color.g/ 255.f,
                             (float)_ninePatch.color.b/ 255.f, (float)_ninePatch.color.a/ 255.f};
 
-        vertexBuffer.emplace_back(_transformMat * _bottomLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _bottomRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _topRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
-        vertexBuffer.emplace_back(_transformMat * _topLeftTextureCorner, glm::vec2(_textureOriginNorm.x,  _textureOriginNorm.y + _textureTileSizeNorm.y), _color);
+        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _bottomLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color });
+        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _bottomRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color });
+        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _topRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y), _color });
+        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _topLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y), _color });
 
         indexBuffer.emplace_back(vertexCount + 0);
         indexBuffer.emplace_back(vertexCount + 1);
