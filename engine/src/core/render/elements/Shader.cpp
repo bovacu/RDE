@@ -74,9 +74,7 @@ namespace GDE {
     GLuint Shader::loadFromFiles(const std::string& _vertex, const std::string& _fragment, FileManager* _fileManager) {
         std::string _vertexCode;
         std::string _fragmentCode;
-
-
-
+        
         auto* _vertexFile = _fileManager->open(_vertex, FileMode::READ);
         if (_vertexFile == nullptr) {
             LOG_E("Can't read file: ", _vertex)
