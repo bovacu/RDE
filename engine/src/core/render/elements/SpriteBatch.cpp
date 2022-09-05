@@ -13,6 +13,7 @@
 
 #include "core/util/Functions.h"
 #include "core/graph/components/Transform.h"
+#include "glm/gtc/type_ptr.hpp"
 
 namespace GDE {
 
@@ -199,6 +200,9 @@ namespace GDE {
                 continue;
             
             glUseProgram(_shaderID);
+
+            GLint location = glGetUniformLocation(_shaderID, "viewProjectionMatrix");
+            glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
 
             glActiveTexture(GL_TEXTURE0);
 

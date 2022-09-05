@@ -137,7 +137,7 @@
                     "text" : "Hello World!!",
                     "font" : "arial",
                     "sizeSize" : 54,
-                    "color" : [255, 255, 255, 255],
+                    "color" : [0, 255, 0, 255],
                     "layer" : 0,
                     "shader" : "basicText"
                 }

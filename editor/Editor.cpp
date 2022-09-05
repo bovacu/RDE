@@ -3,7 +3,7 @@
 //
 
 #include "Editor.h"
-#include "core/graph/Components.h"
+#include "core/graph/components/Components.h"
 #include "core/graph/Scene.h"
 
 #if !IS_MOBILE()
@@ -30,16 +30,11 @@ namespace Editor {
         UDelegate<void(FrameBuffer*)> _delegate;
         _delegate.bind<&Editor::redirectRendering>(this);
         // engine->setRenderingRedirectionToImGui(_delegate);
+        textStressTest();
     }
 
     void Editor::onUpdate(Delta _dt) {
         Scene::onUpdate(_dt);
-
-        static ShaderID _basicShaderId = engine->manager.shaderManager.getShader("basic")->getShaderID();
-        static ShaderID _debugShaderId = engine->manager.shaderManager.getShader("debug")->getShaderID();
-
-        engine->manager.shaderManager.setMat4(_basicShaderId, "viewProjectionMatrix", getMainCamera()->getViewProjectionMatrix());
-        engine->manager.shaderManager.setMat4(_debugShaderId, "viewProjectionMatrix", getMainCamera()->getViewProjectionMatrix());
     }
 
     void Editor::textStressTest() {
@@ -51,6 +46,7 @@ namespace Editor {
                 auto _text = getMainGraph()->createNode("Block" + std::to_string(_i));
                 nodes.push_back(_text);
                 auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
+                _textTransform->staticTransform = true;
                 _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f, (float)engine->getWindow().getWindowSize().x / 2.f),
                                             _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f, (float)engine->getWindow().getWindowSize().y / 2.f));
                 getMainGraph()->addComponent<SpriteRenderer>(_text, this, _texture);
