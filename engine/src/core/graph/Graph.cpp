@@ -12,7 +12,7 @@
 
 namespace GDE {
 
-    template<typename... Type>
+/*    template<typename... Type>
     entt::type_list<Type...> as_type_list(const entt::type_list<Type...> &);
 
     template<typename Entity>
@@ -40,6 +40,7 @@ namespace GDE {
                 entt::value_list<&copy_to<Type>>
         >;
     };
+*/
 
     /// All of these are foo functions as Delegates need to have something assigned to be called.
     static void onEventDelFoo(NodeContainer&, Event& _event) {  }

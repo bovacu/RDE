@@ -227,7 +227,6 @@ namespace GDE {
              * @return std::string
              */
             std::string toString();
-            /// Returns the ID of the root Node.
 
             /**
              * @brief Returns the Id of the root.
