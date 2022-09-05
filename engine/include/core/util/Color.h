@@ -1,8 +1,8 @@
 // Created by borja on 24/12/21.
 
 
-#ifndef ENGINE2_0_COLOR_H
-#define ENGINE2_0_COLOR_H
+#ifndef GDE_COLOR_H
+#define GDE_COLOR_H
 
 #include <ostream>
 #include "core/Core.h"
@@ -44,4 +44,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE2_0_COLOR_H
+#endif //GDE_COLOR_H

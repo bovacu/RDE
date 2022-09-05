@@ -2,8 +2,8 @@
 // Created by borja on 14/12/21.
 //
 
-#ifndef RESOURCES_GAME_EASING_H
-#define RESOURCES_GAME_EASING_H
+#ifndef GDE_EASING_H
+#define GDE_EASING_H
 
 #include <cmath>
 #include "core/Core.h"
@@ -155,4 +155,4 @@ namespace GDE {
 
 }
 
-#endif //RESOURCES_GAME_EASING_H
+#endif //GDE_EASING_H

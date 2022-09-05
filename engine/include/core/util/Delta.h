@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef TIMESTEP_H
-#define TIMESTEP_H
+#ifndef GDE_TIME_STEP_H
+#define GDE_TIME_STEP_H
 
 namespace GDE {
 
@@ -20,4 +20,4 @@ namespace GDE {
 
 }
 
-#endif //TIMESTEP_H
+#endif //GDE_TIME_STEP_H

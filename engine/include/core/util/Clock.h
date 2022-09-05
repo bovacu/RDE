@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef CLOCK_H
-#define CLOCK_H
+#ifndef GDE_CLOCK_H
+#define GDE_CLOCK_H
 
 #include <cstdint>
 
@@ -30,4 +30,4 @@ namespace GDE {
 
 }
 
-#endif //CLOCK_H
+#endif //GDE_CLOCK_H

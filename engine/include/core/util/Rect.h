@@ -1,8 +1,8 @@
 // Created by borja on 6/1/22.
 
 
-#ifndef ENGINE2_0_RECT_H
-#define ENGINE2_0_RECT_H
+#ifndef GDE_RECT_H
+#define GDE_RECT_H
 
 #include "Vec.h"
 
@@ -25,4 +25,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE2_0_RECT_H
+#endif //GDE_RECT_H

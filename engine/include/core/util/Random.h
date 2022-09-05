@@ -2,8 +2,8 @@
 // Created by borja on 14/12/21.
 //
 
-#ifndef RESOURCES_GAME_RANDOM_H
-#define RESOURCES_GAME_RANDOM_H
+#ifndef GDE_RANDOM_H
+#define GDE_RANDOM_H
 
 #include <random>
 
@@ -69,4 +69,4 @@ namespace GDE {
 
 }
 
-#endif //RESOURCES_GAME_RANDOM_H
+#endif //GDE_RANDOM_H

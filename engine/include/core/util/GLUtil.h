@@ -1,5 +1,5 @@
-#ifndef ENGINE2_0_GLUTIL_H
-#define ENGINE2_0_GLUTIL_H
+#ifndef GDE_GL_UTIL_H
+#define GDE_GL_UTIL_H
 
 #ifdef NDEBUG
 #define CHECK_GL_ERROR(extraInfo)

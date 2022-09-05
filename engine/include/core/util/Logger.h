@@ -2,8 +2,8 @@
 // Created by borja on 3/12/21.
 //
 
-#ifndef RESOURCES_GAME_LOGGER_H
-#define RESOURCES_GAME_LOGGER_H
+#ifndef GDE_LOGGER_H
+#define GDE_LOGGER_H
 
 #include <iostream>
 #include <cstring>
@@ -85,4 +85,4 @@ inline void printer(const char* _init, const char* _end, Arg1&& arg1, Args&&... 
 #endif
 }
 
-#endif //RESOURCES_GAME_LOGGER_H
+#endif //GDE_LOGGER_H

@@ -43,8 +43,8 @@
     _myMDelegate(0, "");
     _myMDelegate.clear();
 */
-#ifndef ENGINE_DELEGATE_H
-#define ENGINE_DELEGATE_H
+#ifndef GDE_DELEGATE_H
+#define GDE_DELEGATE_H
 
 #include <exception>
 #include <functional>
@@ -232,4 +232,4 @@ namespace GDE {
     };
 }
 
-#endif //ENGINE_DELEGATE_H
+#endif //GDE_DELEGATE_H

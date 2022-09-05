@@ -1,8 +1,8 @@
 // Created by borja on 23/12/21.
 
 
-#ifndef RESOURCES_GAME_UTIL_H
-#define RESOURCES_GAME_UTIL_H
+#ifndef GDE_UTIL_H
+#define GDE_UTIL_H
 
 #include "Easing.h"
 #include "Logger.h"
@@ -21,4 +21,4 @@
 #include <map>
 #include <unordered_map>
 
-#endif //RESOURCES_GAME_UTIL_H
+#endif //GDE_UTIL_H

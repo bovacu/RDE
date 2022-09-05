@@ -1,7 +1,7 @@
 // Created by borja on 23/12/21.
 
-#ifndef RESOURCES_GAME_PERLIN_NOISE_H
-#define RESOURCES_GAME_PERLIN_NOISE_H
+#ifndef GDE_PERLIN_NOISE_H
+#define GDE_PERLIN_NOISE_H
 
 //----------------------------------------------------------------------------------------
 //
@@ -38,6 +38,7 @@
 # include <numeric>
 # include <random>
 # include <type_traits>
+#include <unordered_map>
 
 # if __has_include(<concepts>) && defined(__cpp_concepts)
 #	include <concepts>
@@ -658,7 +659,6 @@ namespace GDE {
     }
 
 
-
     typedef uint32_t PerlinSeed;
     struct NoiseMap {
         float** map;
@@ -729,7 +729,7 @@ namespace GDE {
 # undef SIVPERLIN_CONCEPT_URBG
 # undef SIVPERLIN_CONCEPT_URBG_
 
-#endif //RESOURCES_GAME_PERLIN_NOISE_H
+#endif //GDE_PERLIN_NOISE_H
 
 
 // -------------------------> EXAMPLE
