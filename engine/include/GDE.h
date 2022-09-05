@@ -25,4 +25,10 @@
 
 #include "core/systems/uiSystem/Canvas.h"
 
+#include "core/graph/components/Transform.h"
+#include "core/graph/components/SpriteRenderer.h"
+#include "core/graph/components/TextRenderer.h"
+#include "core/graph/components/Body.h"
+#include "core/graph/components/NineSliceSprite.h"
+
 #endif //ENGINE_GDE_H

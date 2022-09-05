@@ -1,7 +1,7 @@
 // Created by borja on 31/3/22.
 
 #include "core/systems/particleSystem/ParticleSystem.h"
-#include "core/graph/Components.h"
+#include "core/graph/components/Components.h"
 
 namespace GDE {
 

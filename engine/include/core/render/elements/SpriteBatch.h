@@ -4,7 +4,10 @@
 #include "core/render/Camera.h"
 #include "core/render/shapes/Shape.h"
 #include "core/render/elements/ShaderManager.h"
-#include "core/graph/Components.h"
+#include "core/graph/components/Components.h"
+#include "core/graph/components/SpriteRenderer.h"
+#include "core/graph/components/TextRenderer.h"
+#include "core/graph/components/NineSliceSprite.h"
 #include "core/systems/particleSystem/ParticleSystem.h"
 
 namespace GDE {
@@ -135,18 +138,18 @@ namespace GDE {
 
                 /**
                  * @brief Adds a NinePatchSprite data to the list of vertices to be sent to the GPU.
-                 * @param _ninePatch NinePatchSprite to be rendered
+                 * @param _nineSlice NinePatchSprite to be rendered
                  * @param _transform NinePatchSprite's Transform
                  */
-                void addNinePatchSprite(const NinePatchSprite& _ninePatch, const Transform& _transform);
+                void addNinePatchSprite(const NineSliceSprite& _nineSlice, const Transform& _transform);
 
                 /**
-                 * @brief Specific method to upload vertices for the NinePatch.
+                 * @brief Specific method to upload vertices for the NineSlice.
                  * @param _transform NinePatchSprite's Transform
-                 * @param _ninePatch NinePatchSprite to be rendered
-                 * @param _subTexture IntRect of the NinePatch
+                 * @param _nineSlice NineSliceSprite to be rendered
+                 * @param _subTexture IntRect of the NineSlice
                  */
-                void uploadVertices(const glm::mat4& _transform, const NinePatchSprite& _ninePatch, const IntRect& _subTexture);
+                void uploadVertices(const glm::mat4& _transform, const NineSliceSprite& _nineSlice, const IntRect& _subTexture);
         };
 
         /**
@@ -359,7 +362,7 @@ namespace GDE {
              * @param _ninePatch NinePatchSprite to be drawn
              * @param _transform NinePatchSprite's Transform
              */
-            void draw(const NinePatchSprite& _ninePatch, const Transform& _transform);
+            void draw(const NineSliceSprite& _nineSlice, const Transform& _transform);
 
             /**
              * @brief This method sends all of the geometry to the GPU and ends a Draw Call.

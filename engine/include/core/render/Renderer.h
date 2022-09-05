@@ -91,10 +91,10 @@ namespace GDE {
 
             /**
              * @brief Renders a nine patch. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
-             * @param _ninePatch Nine patch sprite
+             * @param _nineSlice Nine slice sprite
              * @param _transform Nine patch's transform
              */
-            static void draw(const NinePatchSprite& _ninePatch, const Transform& _transform);
+            static void draw(const NineSliceSprite& _nineSlice, const Transform& _transform);
 
             /**
              * @brief Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.

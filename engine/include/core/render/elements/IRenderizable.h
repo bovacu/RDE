@@ -11,6 +11,8 @@
 namespace GDE {
 
     class IViewPort;
+    struct OpenGLVertex;
+    struct Transform;
 
     /**
      * @brief Interface that elements to be rendered by the engine should follow. This gives the SpriteRenderer the
@@ -47,10 +49,11 @@ namespace GDE {
 
             /**
              * @brief Gets the size of the sprite (same as getSize()) and the bottom-left coordinate that represents the origin in the SpriteSheet.
-             * 
              * @return IntRect 
              */
             [[nodiscard]] virtual IntRect getRegion() const = 0;
+
+            virtual void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform) = 0;
 
             virtual ~IRenderizable() {  }
     };

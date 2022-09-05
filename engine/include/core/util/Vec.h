@@ -2,8 +2,11 @@
 // Created by borja on 9/12/21.
 //
 
-#ifndef RESOURCES_GAME_VEC_H
-#define RESOURCES_GAME_VEC_H
+#ifndef GDE_VEC_H
+#define GDE_VEC_H
+
+#include <ostream>
+#include <cmath>
 
 namespace GDE {
 
@@ -155,4 +158,4 @@ namespace GDE {
 
 }
 
-#endif //RESOURCES_GAME_VEC_H
+#endif //GDE_VEC_H

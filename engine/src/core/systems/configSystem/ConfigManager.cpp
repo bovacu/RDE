@@ -8,6 +8,10 @@
 #include "core/render/window/Window.h"
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/Engine.h"
+#include "core/graph/components/Transform.h"
+#include "core/graph/components/SpriteRenderer.h"
+#include "core/graph/components/Body.h"
+#include "core/graph/components/TextRenderer.h"
 
 namespace GDE {
 

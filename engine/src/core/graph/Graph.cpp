@@ -1,12 +1,14 @@
 // Created by borja on 9/3/22.
 
 #include "core/graph/Graph.h"
-#include "core/graph/Components.h"
+#include "core/graph/components/Transform.h"
+#include "core/graph/components/Body.h"
+#include "core/graph/components/SpriteRenderer.h"
+#include "core/graph/components/TextRenderer.h"
 #include "core/render/Renderer.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
-#include "core/systems/uiSystem/Canvas.h"
 
 namespace GDE {
 

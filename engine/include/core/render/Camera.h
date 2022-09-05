@@ -13,7 +13,7 @@
 
 namespace GDE {
 
-    struct Transform;
+    class Transform;
     class SceneManager;
     class Window;
 

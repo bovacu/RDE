@@ -3,7 +3,7 @@
 #include "core/graph/Scene.h"
 #include "core/render/Camera.h"
 #include "core/Engine.h"
-#include "core/graph/Components.h"
+#include "core/graph/components/Transform.h"
 #include "core/systems/uiSystem/Canvas.h"
 
 namespace GDE {

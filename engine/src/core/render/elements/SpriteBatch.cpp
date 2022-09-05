@@ -1,6 +1,6 @@
 #include "core/render/elements/SpriteBatch.h"
 #include "core/util/Logger.h"
-#include "core/graph/Components.h"
+#include "core/graph/components/Components.h"
 #include "core/util/GLUtil.h"
 
 #if IS_ANDROID()
@@ -12,7 +12,7 @@
 #endif
 
 #include "core/util/Functions.h"
-#include <glm/gtc/type_ptr.hpp>
+#include "core/graph/components/Transform.h"
 
 namespace GDE {
 
@@ -89,8 +89,8 @@ namespace GDE {
 
     }
 
-    void SpriteBatch::draw(const NinePatchSprite& _ninePatch, const Transform& _transform) {
-        getBatch(_ninePatch, _ninePatch.layer, BatchPriority::SpritePriority).addNinePatchSprite(_ninePatch, _transform);
+    void SpriteBatch::draw(const NineSliceSprite& _nineSlice, const Transform& _transform) {
+        getBatch(_nineSlice, _nineSlice.layer, BatchPriority::SpritePriority).addNinePatchSprite(_nineSlice, _transform);
     }
 
     void SpriteBatch::Debug::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
@@ -393,43 +393,44 @@ namespace GDE {
         }
     }
 
-    void SpriteBatch::Batch::addNinePatchSprite(const NinePatchSprite& _ninePatch, const Transform& _transform) {
+    void SpriteBatch::Batch::addNinePatchSprite(const NineSliceSprite& _nineSlice, const Transform& _transform) {
         if(vertexCount + 9 * 6 >= spriteBatch->maxIndicesPerDrawCall)
             spriteBatch->flush();
 
         if(textureID < 0)
-            textureID = _ninePatch.texture->getGLTexture();
+            textureID = _nineSlice.texture->getGLTexture();
 
-        auto _rectsAmount = *(&_ninePatch.getNinePatch().subRects + 1) - _ninePatch.getNinePatch().subRects;
+        auto _rectsAmount = *(&_nineSlice.getNineSlice().subRects + 1) - _nineSlice.getNineSlice().subRects;
         for(auto _i = 0; _i < _rectsAmount; _i++) {
-            auto& _subTextureRegion = _ninePatch.getNinePatch().subRects[_i];
+            auto& _subTextureRegion = _nineSlice.getNineSlice().subRects[_i];
             auto _transformMat = _transform.modelMatrix;
 
             float _distortX = 1.f, _distortY = 1.f;
-            auto _uiSize = _ninePatch.ninePatchSize;
-            auto _spriteSize = _ninePatch.getRegion().size;
+            auto _uiSize = _nineSlice.ninePatchSize;
+            auto _spriteSize = _nineSlice.getRegion().size;
 
-            auto _bottomLeftCornerLocal = Vec2F { (float)_subTextureRegion.bottomLeftCorner.x, (float)(_subTextureRegion.bottomLeftCorner.y - _ninePatch.getNinePatch().subRects[0].bottomLeftCorner.y) };
+            auto _bottomLeftCornerLocal = Vec2F { (float)_subTextureRegion.bottomLeftCorner.x, (float)(_subTextureRegion.bottomLeftCorner.y -
+                    _nineSlice.getNineSlice().subRects[0].bottomLeftCorner.y) };
             Vec2F _position = {_transform.getPositionLocal().x - (float)_spriteSize.x / 2.f + (float)_subTextureRegion.bottomLeftCorner.x + (float)_subTextureRegion.size.x / 2.f, _transform.getPositionWorld().y - (float)((float)_spriteSize.y / 2.f - _bottomLeftCornerLocal.y) + (float)_subTextureRegion.size.y / 2.f};
 
             if((float)_uiSize.x - (float)_spriteSize.x != 0) {
-                auto _widthOfCorners = (float)_ninePatch.getNinePatch().subRects[0].size.x + (float)_ninePatch.getNinePatch().subRects[2].size.x;
+                auto _widthOfCorners = (float) _nineSlice.getNineSlice().subRects[0].size.x + (float) _nineSlice.getNineSlice().subRects[2].size.x;
                 auto _totalDiffX = (float)_uiSize.x - _widthOfCorners;
                 _distortX = _totalDiffX / ((float)_spriteSize.x - _widthOfCorners);
 
-                auto _halfWidthOfDistortedMiddleRect = _distortX * _transformMat[0][0] * (float)_ninePatch.getNinePatch().subRects[1].size.x / 2.f;
-                auto _halfWidthOfOriginalMiddleRect = (float)_ninePatch.getNinePatch().subRects[1].size.x / 2.f;
+                auto _halfWidthOfDistortedMiddleRect = _distortX * _transformMat[0][0] * (float) _nineSlice.getNineSlice().subRects[1].size.x / 2.f;
+                auto _halfWidthOfOriginalMiddleRect = (float) _nineSlice.getNineSlice().subRects[1].size.x / 2.f;
                 if(_i == 0 || _i == 3 || _i == 6) _position.x -= _halfWidthOfDistortedMiddleRect - _halfWidthOfOriginalMiddleRect;
                 if(_i == 2 || _i == 5 || _i == 8) _position.x += _halfWidthOfDistortedMiddleRect - _halfWidthOfOriginalMiddleRect;
             }
 
             if((float)_uiSize.y - (float)_spriteSize.y != 0) {
-                auto _heightOfCorners = (float)_ninePatch.getNinePatch().subRects[0].size.y + (float)_ninePatch.getNinePatch().subRects[6].size.y;
+                auto _heightOfCorners = (float) _nineSlice.getNineSlice().subRects[0].size.y + (float) _nineSlice.getNineSlice().subRects[6].size.y;
                 auto _totalDiffY = (float)_uiSize.y - _heightOfCorners;
                 _distortY = _totalDiffY / ((float)_spriteSize.y - _heightOfCorners);
 
-                auto _halfHeightOfDistortedMiddleRect = _distortY * _transformMat[1][1] * (float)_ninePatch.getNinePatch().subRects[3].size.y / 2.f;
-                auto _halfHeightOfOriginalMiddleRect = (float)_ninePatch.getNinePatch().subRects[3].size.y / 2.f;
+                auto _halfHeightOfDistortedMiddleRect = _distortY * _transformMat[1][1] * (float) _nineSlice.getNineSlice().subRects[3].size.y / 2.f;
+                auto _halfHeightOfOriginalMiddleRect = (float) _nineSlice.getNineSlice().subRects[3].size.y / 2.f;
                 if(_i == 0 || _i == 1 || _i == 2) _position.y -= _halfHeightOfDistortedMiddleRect - _halfHeightOfOriginalMiddleRect;
                 if(_i == 6 || _i == 7 || _i == 8) _position.y += _halfHeightOfDistortedMiddleRect - _halfHeightOfOriginalMiddleRect;
             }
@@ -441,17 +442,17 @@ namespace GDE {
             if(_i == 3 || _i == 4 || _i == 5) _transformMat[1][1] *= _distortY;
 
 
-            uploadVertices(_transformMat, _ninePatch, _subTextureRegion);
+            uploadVertices(_transformMat, _nineSlice, _subTextureRegion);
         }
 
     }
 
-    void SpriteBatch::Batch::uploadVertices(const glm::mat4& _transformMat, const NinePatchSprite& _ninePatch, const IntRect& _subTextureRegion) {
-        Vec2F _textureOrigin = {(float)_subTextureRegion.bottomLeftCorner.x, (float)_subTextureRegion.bottomLeftCorner.y};
-        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_ninePatch.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)_ninePatch.texture->getSpriteSheetSize().y};
+    void SpriteBatch::Batch::uploadVertices(const glm::mat4& _transform, const NineSliceSprite& _nineSlice, const IntRect& _subTexture) {
+        Vec2F _textureOrigin = {(float)_subTexture.bottomLeftCorner.x, (float)_subTexture.bottomLeftCorner.y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_nineSlice.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)_nineSlice.texture->getSpriteSheetSize().y};
 
-        Vec2F _textureTileSize = {(float)_subTextureRegion.size.x, (float)_subTextureRegion.size.y};
-        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_ninePatch.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)_ninePatch.texture->getSpriteSheetSize().y};
+        Vec2F _textureTileSize = {(float)_subTexture.size.x, (float)_subTexture.size.y};
+        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_nineSlice.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)_nineSlice.texture->getSpriteSheetSize().y};
         auto _textureTileSizeOnScreen = Util::worldToScreenSize(spriteBatch->viewport, _textureTileSize);
 
         glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -459,13 +460,13 @@ namespace GDE {
         glm::vec4 _topRightTextureCorner = {_textureTileSizeOnScreen.x, _textureTileSizeOnScreen.y, 0.0f, 1.0f };
         glm::vec4 _topLeftTextureCorner = {-_textureTileSizeOnScreen.x, _textureTileSizeOnScreen.y, 0.0f, 1.0f };
 
-        glm::vec4 _color = {(float)_ninePatch.color.r / 255.f, (float)_ninePatch.color.g/ 255.f,
-                            (float)_ninePatch.color.b/ 255.f, (float)_ninePatch.color.a/ 255.f};
+        glm::vec4 _color = {(float)_nineSlice.color.r / 255.f, (float)_nineSlice.color.g / 255.f,
+                            (float)_nineSlice.color.b / 255.f, (float)_nineSlice.color.a / 255.f};
 
-        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _bottomLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color });
-        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _bottomRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color });
-        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _topRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y), _color });
-        vertexBuffer.emplace_back(OpenGLVertex {_transformMat * _topLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y), _color });
+        vertexBuffer.emplace_back(OpenGLVertex {_transform * _bottomLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y), _color });
+        vertexBuffer.emplace_back(OpenGLVertex {_transform * _bottomRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y), _color });
+        vertexBuffer.emplace_back(OpenGLVertex {_transform * _topRightTextureCorner, glm::vec2(_textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y), _color });
+        vertexBuffer.emplace_back(OpenGLVertex {_transform * _topLeftTextureCorner, glm::vec2(_textureOriginNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y), _color });
 
         indexBuffer.emplace_back(vertexCount + 0);
         indexBuffer.emplace_back(vertexCount + 1);
