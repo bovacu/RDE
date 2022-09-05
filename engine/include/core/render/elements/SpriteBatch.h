@@ -1,8 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <any>
-
 #include "core/render/Camera.h"
 #include "core/render/shapes/Shape.h"
 #include "core/render/elements/ShaderManager.h"
@@ -98,7 +96,7 @@ namespace GDE {
                 /**
                  * @brief Data struct that contains all of the info of the vertices to be sent to the GPU.
                  */
-                std::vector<std::any> vertexBuffer {};
+                std::vector<OpenGLVertex> vertexBuffer {};
 
                 /**
                  * @brief Indices of the vertices to be sent to the GPU. We use indices as it is cheaper to send individual
