@@ -35,6 +35,18 @@ namespace Editor {
 
     void Editor::onUpdate(Delta _dt) {
         Scene::onUpdate(_dt);
+
+        static float _timer = 0.f;
+        static int _fpsCounter = 0;
+        static int _frameCounter = 0;
+        if (_timer >= 1.f) {
+            _fpsCounter = _frameCounter;
+            engine->getWindow().setTitle("Engine: " + std::to_string(_fpsCounter));
+            _frameCounter = 0;
+            _timer = 0;
+        }
+        ++_frameCounter;
+        _timer += _dt;
     }
 
     void Editor::textStressTest() {

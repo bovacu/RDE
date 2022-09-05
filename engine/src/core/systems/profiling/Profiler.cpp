@@ -21,23 +21,31 @@ namespace GDE {
     };
 
     void Profiler::beginFrame(float _dt) {
+        #if DEBUG
         states.clear();
+        #endif
     }
 
     void Profiler::begin(ProfilerState _state) {
+        #if DEBUG
         State _s;
         _s.init = std::chrono::system_clock::now();
         _s.state = _state;
         _s.active = true;
         states[_state] = _s;
+        #endif
     }
 
     void Profiler::end(ProfilerState _state) {
+        #if DEBUG
         states[_state].end = std::chrono::system_clock::now();
+        #endif
     }
 
     void Profiler::endFrame() {
+        #if DEBUG
         lastStates = states;
+        #endif
     }
 
     std::unordered_map<ProfilerState, State>& Profiler::getStates() {

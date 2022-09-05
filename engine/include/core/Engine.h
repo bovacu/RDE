@@ -149,12 +149,6 @@ namespace GDE {
 
             Platform platform;
 
-        private:
-            /**
-             * @brief Updates the FPS on the window title.
-             */
-            void updateFps();
-
         public:
             Engine();
 

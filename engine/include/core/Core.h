@@ -40,7 +40,9 @@
 
 
 
+#if DEBUG
 #define ENGINE_DEBUG
+#endif
 
 #ifdef ENGINE_DEBUG
     #if defined(_WIN32)

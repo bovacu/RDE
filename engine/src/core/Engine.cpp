@@ -75,10 +75,6 @@ namespace GDE {
                 Profiler::begin(ProfilerState::RENDERING);
                 onRender(_dt);
                 Profiler::end(ProfilerState::RENDERING);
-
-                #ifdef ENGINE_DEBUG
-                updateFps();
-                #endif
             }
 
             GDE::Profiler::begin(ProfilerState::INPUT);
@@ -163,16 +159,6 @@ namespace GDE {
     }
 
     int Engine::getFps() const { return (int)fpsCounter; }
-
-    void Engine::updateFps() {
-        if (timer >= 1.f) {
-            fpsCounter = frameCounter;
-            window->setTitle("Engine: " + std::to_string(fpsCounter));
-            frameCounter = 0;
-            timer = 0;
-        }
-        ++frameCounter;
-    }
 
     Logs Engine::changeColorConsoleCommand(const std::vector<std::string>& _args) {
         backgroundColor = {(unsigned char)std::stoi(_args[0]), (unsigned char)std::stoi(_args[1]),
