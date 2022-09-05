@@ -29,7 +29,12 @@ namespace GDE {
          */
         glm::vec2 texCoord {0, 0};
 
-        OpenGLVertex(const glm::vec3& _position, const glm::vec2& _texCoord, const glm::vec4& _color) : position(_position), color(_color), texCoord(_texCoord) {  }
+        /**
+         * @brief Any other data that end-users would like to pass to the vertex shader.
+         */
+        float* extraData = nullptr;
+
+        OpenGLVertex(const glm::vec3& _position, const glm::vec2& _texCoord, const glm::vec4& _color, float* _extraData = nullptr) : position(_position), color(_color), texCoord(_texCoord), extraData(_extraData) {  }
     };
 
     /**
