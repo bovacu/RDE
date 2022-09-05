@@ -1,8 +1,8 @@
 // Created by borja on 23/12/21.
 
 
-#ifndef RESOURCES_GAME_FUNCTIONS_H
-#define RESOURCES_GAME_FUNCTIONS_H
+#ifndef GDE_FUNCTIONS_H
+#define GDE_FUNCTIONS_H
 
 #include "core/Engine.h"
 #include "core/render/Camera.h"
@@ -37,33 +37,33 @@ namespace GDE {
                 return base_filename.substr(base_filename.find_last_of('.') + 1, base_filename.size());
             }
 
-            static Vec2F worldToScreenCoords(IViewPort* _viewport, const Vec2F& _position) {
-                auto _windowSize = _viewport->getDeviceResolution();
-                return {_position.x * _viewport->getAspectRatio() * _viewport->getScalingFactor().x / ((float)_windowSize.x / 2),
-                        _position.y * _viewport->getScalingFactor().y / ((float)_windowSize.y / 2)};
+            static Vec2F worldToScreenCoords(const IViewPort& _viewport, const Vec2F& _position) {
+                auto _windowSize = _viewport.getDeviceResolution();
+                return {_position.x * _viewport.getAspectRatio() * _viewport.getScalingFactor().x / ((float)_windowSize.x / 2),
+                        _position.y * _viewport.getScalingFactor().y / ((float)_windowSize.y / 2)};
             }
 
             #if !IS_MAC() && !IS_WINDOWS()
             [[gnu::warning("Probably broken some versions ago, check it out again")]]
             #endif
-            static Vec2F screenToWorldCoords(IViewPort* _viewport, const Vec2F& _position) {
-                auto _windowSize = _viewport->getDeviceResolution();
-                return {_position.x / _viewport->getAspectRatio() * ((float)_windowSize.x / 2), _position.y * ((float)_windowSize.y / 2)};
+            static Vec2F screenToWorldCoords(const IViewPort& _viewport, const Vec2F& _position) {
+                auto _windowSize = _viewport.getDeviceResolution();
+                return {_position.x / _viewport.getAspectRatio() * ((float)_windowSize.x / 2), _position.y * ((float)_windowSize.y / 2)};
             }
 
-            static Vec2F worldToScreenSize(IViewPort* _viewport, const Vec2F& _size) {
-                auto _windowSize = _viewport->getDeviceResolution();
-                return {_size.x * _viewport->getAspectRatio() * _viewport->getScalingFactor().x / ((float)_windowSize.x),
-                        _size.y * _viewport->getScalingFactor().y / ((float)_windowSize.y)};
+            static Vec2F worldToScreenSize(const IViewPort& _viewport, const Vec2F& _size) {
+                auto _windowSize = _viewport.getDeviceResolution();
+                return {_size.x * _viewport.getAspectRatio() * _viewport.getScalingFactor().x / ((float)_windowSize.x),
+                        _size.y * _viewport.getScalingFactor().y / ((float)_windowSize.y)};
             }
 
-            static void worldToScreenSize(IViewPort* _viewport, float& _x, float& _y) {
+            static void worldToScreenSize(const IViewPort& _viewport, float& _x, float& _y) {
                 auto _new = worldToScreenCoords(_viewport, {_x, _y});
                 _x = _new.x;
                 _y = _new.y;
             }
 
-            static void screenToWorldCoords(IViewPort* _viewport, float& _x, float& _y) {
+            static void screenToWorldCoords(const IViewPort& _viewport, float& _x, float& _y) {
                 auto _new = screenToWorldCoords(_viewport, {_x, _y});
                 _x = _new.x;
                 _y = _new.y;
@@ -73,4 +73,4 @@ namespace GDE {
 
 }
 
-#endif //RESOURCES_GAME_FUNCTIONS_H
+#endif //GDE_FUNCTIONS_H

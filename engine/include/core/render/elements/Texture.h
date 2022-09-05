@@ -136,7 +136,7 @@ namespace GDE {
             /**
              * @see NineSlice
              */
-            NineSlice ninePatch;
+            NineSlice nineSlice;
 
         public:
             Texture() {};

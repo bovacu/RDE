@@ -46,7 +46,7 @@ namespace GDE {
 
         Renderer::beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
             _sprites.each([](const auto _entity, NineSliceSprite& _nineSlice, const Transform& _transform, const Active& _) {
-                Renderer::draw(_nineSlice, _transform);
+                Renderer::draw((const IRenderizable*)&_nineSlice, _transform);
             });
 
 //            // TODO add rendering for text in UI

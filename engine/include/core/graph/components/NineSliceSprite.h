@@ -13,19 +13,16 @@ namespace GDE {
     /**
      * @brief Component that is based on the SpriteRenderer, but allows to render UI images with a different size than the original
      * without loosing quality. The setup of this NineSlice should be done via TexturePacker.
-     *
      */
     class NineSliceSprite : public UI {
         public:
             /**
              * @brief This is the size we want the UI to be rendered, may or may not match UI::getSize().
-             *
              */
-            Vec2I ninePatchSize;
+            Vec2I nineSliceSize;
 
             /**
              * @see UIInteractable
-             *
              */
             UIInteractable* interaction = nullptr;
 
@@ -34,12 +31,11 @@ namespace GDE {
 
             /**
              * @brief Returns the NineSlice data. This is almost sure not to be needed by end-users.
-             *
              * @return NineSlice&
              */
             [[nodiscard]] NineSlice& getNineSlice() const;
 
-            void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform) override;
+            void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const override;
 
             ~NineSliceSprite() override {  }
     };

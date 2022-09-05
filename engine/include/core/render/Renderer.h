@@ -77,24 +77,11 @@ namespace GDE {
             static void beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness = 1.f);
 
             /**
-             * @brief Renders a sprite. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
-             * @param _sprite The sprite to be drawn.
+             * @brief Renders an IRenderizable. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
+             * @param _renderizable Component derived from IRenderizable.
+             * @param _transform Nine patch's transform.
              */
-            static void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
-
-            /**
-             * @brief Renders text on the screen. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
-             * @param _text Text renderer
-             * @param _transform Text renderer's transform
-             */
-            static void draw(const TextRenderer& _text, const Transform& _transform);
-
-            /**
-             * @brief Renders a nine patch. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
-             * @param _nineSlice Nine slice sprite
-             * @param _transform Nine patch's transform
-             */
-            static void draw(const NineSliceSprite& _nineSlice, const Transform& _transform);
+            static void draw(const IRenderizable* _renderizable, const Transform& _transform);
 
             /**
              * @brief Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.

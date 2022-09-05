@@ -164,7 +164,7 @@ namespace GDE {
         /**
          * @see IRenderizable
          */
-        void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform) override;
+        void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const override;
     };
 
 }

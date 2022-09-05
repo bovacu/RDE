@@ -112,7 +112,7 @@ namespace GDE {
     }
 
     void Graph::onRender() {
-        auto _spriteRendererGroup = registry.group<SpriteRenderer>(entt::get<Transform, Active>);
+        auto _spriteRendererGroup = registry.group<const SpriteRenderer>(entt::get<Transform, Active>);
         auto _textRendererGroup = registry.group<TextRenderer>(entt::get<Transform, Active>);
 
         for(auto* _camera : scene->cameras) {
@@ -121,12 +121,12 @@ namespace GDE {
             Renderer::beginDraw(*_camera, getComponent<Transform>(_camera->ID));
             _camera->setCameraSize(_camera->getCameraSize());
             {
-                _spriteRendererGroup.each([](const auto _entity, SpriteRenderer& _spriteRenderer, const Transform& _transform, const Active& _) {
-                    Renderer::draw(_spriteRenderer, _transform);
+                _spriteRendererGroup.each([](const auto _entity, const SpriteRenderer& _renderizable, const Transform& _transform, const Active& _) {
+                    Renderer::draw((const IRenderizable*)&_renderizable, _transform);
                 });
 
                 _textRendererGroup.each([](const auto _entity, TextRenderer& _text, const Transform& _transform, const Active& _) {
-                    Renderer::draw(_text, _transform);
+                    Renderer::draw((const IRenderizable*)&_text, _transform);
                 });
             }
             Renderer::endDraw();

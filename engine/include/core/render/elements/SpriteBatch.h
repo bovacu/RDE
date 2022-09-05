@@ -9,149 +9,17 @@
 #include "core/graph/components/TextRenderer.h"
 #include "core/graph/components/NineSliceSprite.h"
 #include "core/systems/particleSystem/ParticleSystem.h"
+#include "core/render/elements/Vertex.h"
+#include "core/render/elements/Batch.h"
 
 namespace GDE {
-
-    /**
-     * @brief This is the data that is sent to the GPU when rendering default vertices.
-     */
-    struct OpenGLVertex {
-
-        /**
-         * @brief Position in screen coordinates where the vertex should be placed.
-         */
-        glm::vec3 position {0, 0, 0};
-
-        /**
-         * @brief Color of the vertex.
-         */
-        glm::vec4 color { 1, 1, 1, 1 };
-
-        /**
-         * @brief Coordinate of the texture that this vertex has attached to it.
-         */
-        glm::vec2 texCoord {0, 0};
-
-        /**
-         * @brief Any other data that end-users would like to pass to the vertex shader.
-         */
-        float* extraData = nullptr;
-
-        OpenGLVertex(const glm::vec3& _position, const glm::vec2& _texCoord, const glm::vec4& _color, float* _extraData = nullptr) : position(_position), color(_color), texCoord(_texCoord), extraData(_extraData) {  }
-    };
-
-    /**
-     * @brief This is the data that is sent to the GPU when rendering default debugging information.
-     */
-    struct OpenGLVertexDebug {
-
-        /**
-         * @brief Position in screen coordinates where the vertex should be placed.
-         */
-        glm::vec3 position {0, 0, 0};
-
-        /**
-         * @brief Color of the vertex.
-         */
-        glm::vec4 color {1, 1, 1, 1};
-
-        OpenGLVertexDebug(const glm::vec3& _position, const glm::vec4& _color) : position(_position), color(_color) {  }
-    };
-
-    /**
-     * @brief This is the order of rendering of different Renderizable elements.
-     */
-    enum BatchPriority {
-        SpritePriority = 0,
-        TextPriority = 1
-    };
 
     /**
      * @brief This is the class in charge of sending the data that needs to be rendered to the GPU.
      * It has a special function for each type of different complex geometry.
      */
     class SpriteBatch {
-
-        /**
-         * @brief This class represents a group of geometry that shares common elements and therefor can be sent all
-         * together to the GPU so the number of Draw Calls is minimized as much as possible.
-         */
-        class Batch {
-            friend class SpriteBatch;
-
-            private:
-
-                /**
-                 * @see SpriteBatch
-                 */
-                SpriteBatch* spriteBatch = nullptr;
-
-                /**
-                 * @see BatchPriority
-                 */
-                BatchPriority priority = BatchPriority::SpritePriority;
-
-                /**
-                 * @brief How far or near it should be rendered on the Z-Axis.
-                 */
-                int layer = 0;
-
-                /**
-                 * @brief Shader that is going to be used to render the whole batch.
-                 */
-                Shader* shader = nullptr;
-
-                /**
-                 * @brief Data struct that contains all of the info of the vertices to be sent to the GPU.
-                 */
-                std::vector<OpenGLVertex> vertexBuffer {};
-
-                /**
-                 * @brief Indices of the vertices to be sent to the GPU. We use indices as it is cheaper to send individual
-                 * uint32_t values that repeated OpenGLVertex.
-                 */
-                std::vector<uint32_t> indexBuffer {};
-
-                /**
-                 * @brief Amount of vertices to be sent to the GPU.
-                 */
-                int vertexCount = 0;
-
-                /**
-                 * @brief Texture to be enabled on the GPU to be drawn by the vertices.
-                 */
-                GLuint textureID = -1;
-
-                /**
-                 * @brief Adds a SpriteRenderer data to the list of vertices to be sent to the GPU.
-                 * @param _spriteRenderer SpriteRenderer to be rendered
-                 * @param _transform SpriteRenderer's Transform
-                 */
-                void addSprite(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
-
-                /**
-                 * @brief Adds a TextRenderer data to the list of vertices to be sent to the GPU.
-                 * @param _text TextRenderer to be rendered
-                 * @param _transform TextRenderer's Transform
-                 */
-                void addText(const TextRenderer& _text, const Transform& _transform);
-
-                /**
-                 * @brief Adds a NinePatchSprite data to the list of vertices to be sent to the GPU.
-                 * @param _nineSlice NinePatchSprite to be rendered
-                 * @param _transform NinePatchSprite's Transform
-                 */
-                void addNinePatchSprite(const NineSliceSprite& _nineSlice, const Transform& _transform);
-
-                /**
-                 * @brief Specific method to upload vertices for the NineSlice.
-                 * @param _transform NinePatchSprite's Transform
-                 * @param _nineSlice NineSliceSprite to be rendered
-                 * @param _subTexture IntRect of the NineSlice
-                 */
-                void uploadVertices(const glm::mat4& _transform, const NineSliceSprite& _nineSlice, const IntRect& _subTexture);
-        };
-
+        friend class Batch;
         /**
          * @brief This class is like a batch but specific for rendering debug elements, such as lines, shapes..
          */
@@ -311,7 +179,7 @@ namespace GDE {
              * @param _priority Whether this element must be rendered after or before othe types.
              * @return Batch&
              */
-            Batch& getBatch(const IRenderizable& _renderer, int _layer, BatchPriority _priority);
+            Batch& getBatch(const IRenderizable* _renderer, int _layer, BatchPriority _priority);
 
             /**
              * @brief Orders the batches to be sent to the GPU based on some specific data, such as the texture used,
@@ -336,33 +204,7 @@ namespace GDE {
              */
             void beginDraw(Camera& _camera, Transform* _cameraTransform);
 
-            /**
-             * @brief Draws a SpriteRenderer
-             * @param _spriteRenderer SpriteRenderer to be drawn
-             * @param _transform SpriteRenderer's Transform
-             */
-            void draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform);
-
-            /**
-             * @brief Draws a TextRenderer
-             * @param _text TextRenderer to be drawn
-             * @param _transform TextRenderer's Transform
-             */
-            void draw(const TextRenderer& _text, const Transform& _transform);
-
-            /**
-             * @brief Draws a ParticleSystem
-             * @param _particleSystem ParticleSystem to be drawn
-             * @param _transform ParticleSystem's Transform
-             */
-            void draw(const ParticleSystem& _particleSystem, const Transform& _transform);
-
-            /**
-             * @brief Draws a NinePatchSprite
-             * @param _ninePatch NinePatchSprite to be drawn
-             * @param _transform NinePatchSprite's Transform
-             */
-            void draw(const NineSliceSprite& _nineSlice, const Transform& _transform);
+            void draw(const IRenderizable* _renderizable, const Transform& _transform);
 
             /**
              * @brief This method sends all of the geometry to the GPU and ends a Draw Call.
