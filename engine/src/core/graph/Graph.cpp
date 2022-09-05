@@ -43,8 +43,8 @@ namespace GDE {
 
     /// All of these are foo functions as Delegates need to have something assigned to be called.
     static void onEventDelFoo(NodeContainer&, Event& _event) {  }
-    static void onUpdateDelFoo(NodeContainer&, Delta _dt) {  }
-    static void onFixedUpdateDelFoo(NodeContainer&, Delta _dt) {  }
+    static void onUpdateDelFoo(NodeContainer&, Delta) {  }
+    static void onFixedUpdateDelFoo(NodeContainer&, Delta) {  }
     static void onRenderDelFoo(NodeContainer&) {  }
 
     Graph::Graph(Scene* _scene, const std::string& _sceneName) {
