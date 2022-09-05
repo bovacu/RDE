@@ -36,7 +36,7 @@ namespace GDE {
      *  Element 4 gets streched in XY axis.
      * 
      */
-    struct NinePatch {
+    struct NineSlice {
         /**
          * @brief Left separator line
          * 
@@ -134,9 +134,9 @@ namespace GDE {
 
         public:
             /**
-             * @see NinePatch
+             * @see NineSlice
              */
-            NinePatch ninePatch;
+            NineSlice nineSlice;
 
         public:
             Texture() {};

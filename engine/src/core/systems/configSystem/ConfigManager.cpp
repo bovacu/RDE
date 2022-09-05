@@ -8,6 +8,10 @@
 #include "core/render/window/Window.h"
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/Engine.h"
+#include "core/graph/components/Transform.h"
+#include "core/graph/components/SpriteRenderer.h"
+#include "core/graph/components/Body.h"
+#include "core/graph/components/TextRenderer.h"
 
 namespace GDE {
 
@@ -183,7 +187,8 @@ namespace GDE {
         }
 
         if(_spriteRendererJson.contains("shader")) {
-            _spriteRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(_spriteRendererJson["shader"].get<std::string>());
+            _spriteRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(
+                    _spriteRendererJson["shader"].get<std::string>())->getShaderID();
         }
     }
 
@@ -340,8 +345,7 @@ namespace GDE {
         }
 
         if(_textRendererJson.contains("shader")){
-            _textRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(_textRendererJson["shader"].get<std::string>());
-
+            _textRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(_textRendererJson["shader"].get<std::string>())->getShaderID();
         }
     }
 

@@ -9,7 +9,9 @@
 #include "core/systems/console/Console.h"
 #include "core/graph/Graph.h"
 #include "core/render/Renderer.h"
-#include "core/systems/uiSystem/Canvas.h"
+#include "core/graph/components/Transform.h"
+#include "core/graph/components/Body.h"
+#include "core/graph/components/TextRenderer.h"
 
 namespace GDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;

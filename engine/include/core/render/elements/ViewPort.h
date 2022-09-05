@@ -40,7 +40,7 @@ namespace GDE {
              * @brief Returns the virtual resolution.
              * @return Vec2I
              */
-            [[nodiscard]] Vec2I getVirtualResolution();
+            [[nodiscard]] Vec2I getVirtualResolution() const;
 
             /**
              * @brief Returns the aspect ration.
@@ -52,13 +52,13 @@ namespace GDE {
              * @brief Returns the scaling factor.
              * @return Vec2F
              */
-            [[nodiscard]] Vec2F getScalingFactor();
+            [[nodiscard]] Vec2F getScalingFactor() const;
 
             /**
              * @brief Returns the device resolution.
              * @return Vec2I
              */
-            [[nodiscard]] Vec2I getDeviceResolution();
+            [[nodiscard]] Vec2I getDeviceResolution() const;
 
             /**
              * @brief Updates the device resolution.

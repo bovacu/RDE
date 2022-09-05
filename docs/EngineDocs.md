@@ -186,13 +186,13 @@ Es decir, si a $v_0$ le asignamos la coordenada de textura (0, 0), a $v_1$ (1, 0
 Vista la teoria, vamos a ver como hariamos esto con codigo. Ya hemos creado anteriormente el buffer y lo hemos asignado para trabajar con el, ahora vamos a indicarle los atributos que vamos a usar, para ello:
 
 ```cpp
-struct Vertex2dUVColor {
+struct OpenGLVertex {
     glm::vec3 position;
     glm::vec4 color;
     glm::vec2 texCoord;
 };
 
-GLsizei _structSize = sizeof(Vertex2dUVColor);
+GLsizei _structSize = sizeof(OpenGLVertex);
 
 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, _structSize, (void*) nullptr);
 glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, _structSize, (void*)(4 * 3));
@@ -254,7 +254,7 @@ Asi quedarian los dos triangulos, T0 siendo el rojo con vertices $v_0$, $v_1$, $
 Vamos primero a dibujar un rectangulo sin textura, que es mas sencillo y luego dibujaremos un trinagulo con textura. Cuales son los pasos?
 
 ```cpp
-Vertex2dUVColor _vertices[6] = {
+OpenGLVertex _vertices[6] = {
 //        position          color       texture coords
     {{-0.5f, -0.5f, 0}, {0, 0, 1, 1}, {0, 0}},
     {{ 0.5f, -0.5f, 0}, {0, 0, 1, 1}, {0, 0}}, // T0
@@ -267,7 +267,7 @@ Vertex2dUVColor _vertices[6] = {
 
 
 glBindBuffer(GL_ARRAY_BUFFER, vbo);
-glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(Vertex2dUVColor) * 6), &_vertices[0], GL_STATIC_DRAW);
+glBufferData(GL_ARRAY_BUFFER, (long)(sizeof(OpenGLVertex) * 6), &_vertices[0], GL_STATIC_DRAW);
 glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 

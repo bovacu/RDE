@@ -6,7 +6,7 @@
 #include "nlohmann/json.hpp"
 #include "core/util/Delta.h"
 #include "core/graph/Graph.h"
-#include "core/graph/Components.h"
+#include "core/graph/components/Components.h"
 
 namespace GDE {
 

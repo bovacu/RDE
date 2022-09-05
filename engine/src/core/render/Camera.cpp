@@ -3,7 +3,7 @@
 
 #include "glm/ext/matrix_clip_space.hpp"
 #include "core/render/Camera.h"
-#include "core/graph/Components.h"
+#include "core/graph/components/Transform.h"
 #include "core/Engine.h"
 
 namespace GDE {

@@ -6,8 +6,6 @@
 #define ENGINE_CANVAS_H
 
 #include "core/graph/Scene.h"
-#include "core/graph/Components.h"
-
 
 namespace GDE {
 

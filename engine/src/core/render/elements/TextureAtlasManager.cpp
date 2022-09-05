@@ -55,10 +55,10 @@ namespace GDE {
 
             auto* _texture = new Texture { &_atlas, _rect };
             if(_spriteNode.contains("nine_patch")) {
-                _texture->ninePatch.left = _spriteNode["nine_patch"]["left"].get<int>();
-                _texture->ninePatch.top = _spriteNode["nine_patch"]["top"].get<int>();
-                _texture->ninePatch.right = _spriteNode["nine_patch"]["right"].get<int>();
-                _texture->ninePatch.bottom = _spriteNode["nine_patch"]["bottom"].get<int>();
+                _texture->nineSlice.left = _spriteNode["nine_patch"]["left"].get<int>();
+                _texture->nineSlice.top = _spriteNode["nine_patch"]["top"].get<int>();
+                _texture->nineSlice.right = _spriteNode["nine_patch"]["right"].get<int>();
+                _texture->nineSlice.bottom = _spriteNode["nine_patch"]["bottom"].get<int>();
 
                 cropNinePatchSubTextures(_texture, _spriteNode);
             }
@@ -108,55 +108,55 @@ namespace GDE {
         auto _origin = Vec2I {_spriteNode["origin"][0].get<int>(), _texture->getSpriteSheetSize().y - (_spriteNode["origin"][1].get<int>() + _texture->getRegion().size.y)};
         auto _size = Vec2I {_spriteNode["size"][0].get<int>(), _spriteNode["size"][1].get<int>()};
         // Bottom row
-        _texture->ninePatch.subRects[0] = {
+        _texture->nineSlice.subRects[0] = {
             .bottomLeftCorner = _origin,
-            .size = {_texture->ninePatch.left, _texture->getRegion().size.y - (_texture->ninePatch.top + _texture->ninePatch.bottom)}
+            .size = {_texture->nineSlice.left, _texture->getRegion().size.y - (_texture->nineSlice.top + _texture->nineSlice.bottom)}
         };
 
-        _texture->ninePatch.subRects[1] = {
-                .bottomLeftCorner = {_texture->ninePatch.left, _origin.y},
-                .size = {_texture->ninePatch.right, _size.y - (_texture->ninePatch.top + _texture->ninePatch.bottom)}
+        _texture->nineSlice.subRects[1] = {
+                .bottomLeftCorner = {_texture->nineSlice.left, _origin.y},
+                .size = {_texture->nineSlice.right, _size.y - (_texture->nineSlice.top + _texture->nineSlice.bottom)}
         };
 
-        _texture->ninePatch.subRects[2] = {
-                .bottomLeftCorner = {_texture->ninePatch.left + _texture->ninePatch.right, _origin.y},
-                .size = {_size.x - (_texture->ninePatch.left + _texture->ninePatch.right), _size.y - (_texture->ninePatch.top + _texture->ninePatch.bottom)}
+        _texture->nineSlice.subRects[2] = {
+                .bottomLeftCorner = {_texture->nineSlice.left + _texture->nineSlice.right, _origin.y},
+                .size = {_size.x - (_texture->nineSlice.left + _texture->nineSlice.right), _size.y - (_texture->nineSlice.top + _texture->nineSlice.bottom)}
         };
 
 
 
         // Middle row
-        _texture->ninePatch.subRects[3] = {
-                .bottomLeftCorner = {_texture->ninePatch.subRects[0].bottomLeftCorner.x, _origin.y + _texture->ninePatch.subRects[0].size.y},
-                .size = {_texture->ninePatch.subRects[0].size.x, _texture->ninePatch.bottom}
+        _texture->nineSlice.subRects[3] = {
+                .bottomLeftCorner = {_texture->nineSlice.subRects[0].bottomLeftCorner.x, _origin.y + _texture->nineSlice.subRects[0].size.y},
+                .size = {_texture->nineSlice.subRects[0].size.x, _texture->nineSlice.bottom}
         };
 
-        _texture->ninePatch.subRects[4] = {
-                .bottomLeftCorner = {_texture->ninePatch.subRects[1].bottomLeftCorner.x, _origin.y + _texture->ninePatch.subRects[1].size.y},
-                .size = {_texture->ninePatch.subRects[1].size.x, _texture->ninePatch.subRects[3].size.y}
+        _texture->nineSlice.subRects[4] = {
+                .bottomLeftCorner = {_texture->nineSlice.subRects[1].bottomLeftCorner.x, _origin.y + _texture->nineSlice.subRects[1].size.y},
+                .size = {_texture->nineSlice.subRects[1].size.x, _texture->nineSlice.subRects[3].size.y}
         };
 
-        _texture->ninePatch.subRects[5] = {
-                .bottomLeftCorner = {_texture->ninePatch.subRects[2].bottomLeftCorner.x, _origin.y + _texture->ninePatch.subRects[2].size.y},
-                .size = {_texture->ninePatch.subRects[2].size.x, _texture->ninePatch.subRects[3].size.y}
+        _texture->nineSlice.subRects[5] = {
+                .bottomLeftCorner = {_texture->nineSlice.subRects[2].bottomLeftCorner.x, _origin.y + _texture->nineSlice.subRects[2].size.y},
+                .size = {_texture->nineSlice.subRects[2].size.x, _texture->nineSlice.subRects[3].size.y}
         };
 
 
 
         // Top row
-        _texture->ninePatch.subRects[6] = {
-                .bottomLeftCorner = {_texture->ninePatch.subRects[0].bottomLeftCorner.x, _origin.y + _texture->ninePatch.subRects[0].size.y + _texture->ninePatch.subRects[3].size.y},
-                .size = {_texture->ninePatch.left, _texture->ninePatch.top}
+        _texture->nineSlice.subRects[6] = {
+                .bottomLeftCorner = {_texture->nineSlice.subRects[0].bottomLeftCorner.x, _origin.y + _texture->nineSlice.subRects[0].size.y + _texture->nineSlice.subRects[3].size.y},
+                .size = {_texture->nineSlice.left, _texture->nineSlice.top}
         };
 
-        _texture->ninePatch.subRects[7] = {
-                .bottomLeftCorner = {_texture->ninePatch.subRects[1].bottomLeftCorner.x, _origin.y + _texture->ninePatch.subRects[1].size.y + _texture->ninePatch.subRects[4].size.y},
-                .size = {_texture->ninePatch.subRects[4].size.x, _texture->ninePatch.top}
+        _texture->nineSlice.subRects[7] = {
+                .bottomLeftCorner = {_texture->nineSlice.subRects[1].bottomLeftCorner.x, _origin.y + _texture->nineSlice.subRects[1].size.y + _texture->nineSlice.subRects[4].size.y},
+                .size = {_texture->nineSlice.subRects[4].size.x, _texture->nineSlice.top}
         };
 
-        _texture->ninePatch.subRects[8] = {
-                .bottomLeftCorner = {_texture->ninePatch.subRects[2].bottomLeftCorner.x, _origin.y + _texture->ninePatch.subRects[2].size.y + _texture->ninePatch.subRects[5].size.y},
-                .size = {_texture->ninePatch.subRects[5].size.x, _texture->ninePatch.top}
+        _texture->nineSlice.subRects[8] = {
+                .bottomLeftCorner = {_texture->nineSlice.subRects[2].bottomLeftCorner.x, _origin.y + _texture->nineSlice.subRects[2].size.y + _texture->nineSlice.subRects[5].size.y},
+                .size = {_texture->nineSlice.subRects[5].size.x, _texture->nineSlice.top}
         };
     }
 

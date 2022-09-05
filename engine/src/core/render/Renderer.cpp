@@ -61,16 +61,8 @@ namespace GDE {
         batch.flush();
     }
 
-    void Renderer::draw(const SpriteRenderer& _spriteRenderer, const Transform& _transform) {
-        batch.draw(_spriteRenderer, _transform);
-    }
-
-    void Renderer::draw(const TextRenderer& _text, const Transform& _transform) {
-        batch.draw(_text, _transform);
-    }
-
-    void Renderer::draw(const NinePatchSprite& _ninePatch, const Transform& _transform) {
-        batch.draw(_ninePatch, _transform);
+    void Renderer::draw(const IRenderizable* _renderizable, const Transform& _transform) {
+        batch.draw(_renderizable, _transform);
     }
 
     void Renderer::beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness) {

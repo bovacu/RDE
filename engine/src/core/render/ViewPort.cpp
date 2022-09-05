@@ -4,7 +4,7 @@
 
 namespace GDE {
 
-    Vec2I IViewPort::getVirtualResolution() {
+    Vec2I IViewPort::getVirtualResolution() const {
         return virtualResolution;
     }
 
@@ -12,11 +12,11 @@ namespace GDE {
         return aspectRatio;
     }
 
-    Vec2F IViewPort::getScalingFactor() {
+    Vec2F IViewPort::getScalingFactor() const {
         return scalingFactor;
     }
 
-    Vec2I IViewPort::getDeviceResolution() {
+    Vec2I IViewPort::getDeviceResolution() const {
         return deviceResolution;
     }
 

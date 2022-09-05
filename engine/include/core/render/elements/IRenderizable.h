@@ -5,12 +5,14 @@
 #ifndef ENGINE_I_RENDERIZABLE_H
 #define ENGINE_I_RENDERIZABLE_H
 
-#include "Texture.h"
-#include "ShaderManager.h"
+#include "core/render/elements/Texture.h"
+#include "core/render/elements/ShaderManager.h"
 
 namespace GDE {
 
     class IViewPort;
+    struct OpenGLVertex;
+    struct Transform;
 
     /**
      * @brief Interface that elements to be rendered by the engine should follow. This gives the SpriteRenderer the
@@ -33,6 +35,8 @@ namespace GDE {
              */
             GLuint shaderID = -1;
 
+            int batchPriority;
+
         public:
             /**
              * @brief Gets the ID on the GPU of the SpriteSheet that contains the sprite.
@@ -47,10 +51,11 @@ namespace GDE {
 
             /**
              * @brief Gets the size of the sprite (same as getSize()) and the bottom-left coordinate that represents the origin in the SpriteSheet.
-             * 
              * @return IntRect 
              */
             [[nodiscard]] virtual IntRect getRegion() const = 0;
+
+            virtual void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const = 0;
 
             virtual ~IRenderizable() {  }
     };

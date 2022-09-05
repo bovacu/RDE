@@ -3,7 +3,7 @@
 //
 
 #include "core/systems/physicsSystem/PhysicsManager.h"
-#include "core/graph/Components.h"
+#include "core/graph/components/Body.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "NullDereference"

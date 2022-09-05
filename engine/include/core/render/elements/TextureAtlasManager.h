@@ -155,7 +155,7 @@ namespace GDE {
             void cropTextures(Atlas& _atlas, const nlohmann::json& _spritesNode);
 
             /**
-             * @brief Divides a Sprite into 9 sub-sprites to render the NinePatch.
+             * @brief Divides a Sprite into 9 sub-sprites to render the NineSlice.
              * @param _texture Texture to sub-divide
              * @param _spriteNode TexturePacker information about how it is sub-divided
              */
