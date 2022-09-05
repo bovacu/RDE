@@ -28,7 +28,7 @@ namespace GDE {
             _interacable.onEvent(_entity, _eventDispatcher, _event, this);
         });
 
-        graph.onEventDel(_event);
+        graph.onEventDel(_registry, _event);
     }
 
     void Canvas::onUpdate(Delta _dt) {
@@ -60,7 +60,7 @@ namespace GDE {
 //            });
         Renderer::endDraw();
 
-        graph.onRenderDel();
+        graph.onRenderDel(_registry);
     }
 
     void Canvas::onDebugRender() {

@@ -113,22 +113,22 @@ namespace GDE {
             /**
              * @brief A callback if we want our graph to make any specific task during its internal event polling.
              */
-            UDelegate<void(Event&)> onEventDel;
+            UDelegate<void(NodeContainer&, Event&)> onEventDel;
 
             /**
              * @brief A callback if we want our graph to make any specific task during its internal update.
              */
-            UDelegate<void(Delta)> onUpdateDel;
+            UDelegate<void(NodeContainer&, Delta)> onUpdateDel;
 
             /**
              * @brief A callback if we want our graph to make any specific task during its internal fixed update.
              */
-            UDelegate<void(Delta)> onFixedUpdateDel;
+            UDelegate<void(NodeContainer&, Delta)> onFixedUpdateDel;
 
             /**
              * @brief A callback if we want our graph to make any specific task during its internal render.
              */
-            UDelegate<void()> onRenderDel;
+            UDelegate<void(NodeContainer&)> onRenderDel;
 
         public:
             Graph(Scene* _scene, const std::string& _sceneName);

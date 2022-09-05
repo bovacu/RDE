@@ -14,7 +14,7 @@ namespace GDE {
     NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas) {
         shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
         interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);
-        IRenderizable::batchPriority = (int)BatchPriority::SpritePriority;
+        IRenderizable::batchPriority = BatchPriority::SpritePriority;
     }
 
     NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture) {
@@ -22,7 +22,7 @@ namespace GDE {
         texture = _texture;
         nineSliceSize = _texture->getRegion().size;
         interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);
-        IRenderizable::batchPriority = (int)BatchPriority::SpritePriority;
+        IRenderizable::batchPriority = BatchPriority::SpritePriority;
     }
 
     NineSlice& NineSliceSprite::getNineSlice() const {

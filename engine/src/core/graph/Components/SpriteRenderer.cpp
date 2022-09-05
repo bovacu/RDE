@@ -13,14 +13,12 @@ namespace GDE {
 
     SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture) : texture(_texture) {
         shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
-        viewport = _scene->getMainCamera()->getViewport();
-        IRenderizable::batchPriority = (int)BatchPriority::SpritePriority;
+        IRenderizable::batchPriority = BatchPriority::SpritePriority;
     }
 
     SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene) {
         shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
-        viewport = _scene->getMainCamera()->getViewport();
-        IRenderizable::batchPriority = (int)BatchPriority::SpritePriority;
+        IRenderizable::batchPriority = BatchPriority::SpritePriority;
     }
 
     std::string SpriteRenderer::getTexturePath() {

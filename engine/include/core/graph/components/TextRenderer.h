@@ -13,6 +13,8 @@ typedef entt::entity NodeID;
 
 namespace GDE {
 
+    class Font;
+
     /**
      * @brief Component used to render text on screen.  End user doesn't have, and in fact can't
      * make it render manually, it is all done internally by the ECS system.
@@ -61,11 +63,6 @@ namespace GDE {
          * @brief The texture of the generated font.
          */
         Texture* texture = nullptr;
-
-        /**
-         * @deprecated This needs to go.
-         */
-        IViewPort* viewport = nullptr;
 
 
         private:

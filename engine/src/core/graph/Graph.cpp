@@ -42,10 +42,10 @@ namespace GDE {
     };
 
     /// All of these are foo functions as Delegates need to have something assigned to be called.
-    static void onEventDelFoo(Event& _event) {  }
-    static void onUpdateDelFoo(Delta _dt) {  }
-    static void onFixedUpdateDelFoo(Delta _dt) {  }
-    static void onRenderDelFoo() {  }
+    static void onEventDelFoo(NodeContainer&, Event& _event) {  }
+    static void onUpdateDelFoo(NodeContainer&, Delta _dt) {  }
+    static void onFixedUpdateDelFoo(NodeContainer&, Delta _dt) {  }
+    static void onRenderDelFoo(NodeContainer&) {  }
 
     Graph::Graph(Scene* _scene, const std::string& _sceneName) {
         scene = _scene;
@@ -70,7 +70,7 @@ namespace GDE {
             _canvas->onEvent(_eventDispatcher, _event);
         }
 
-        onEventDel(_event);
+        onEventDel(registry, _event);
     }
 
     void Graph::onUpdate(Delta _dt) {
@@ -99,7 +99,7 @@ namespace GDE {
             _body.b2dConfig.lastPosition = _transform.getPositionLocal();
         });
 
-        onUpdateDel(_dt);
+        onUpdateDel(registry, _dt);
 
         for(auto* _canvas : scene->canvases) {
             _canvas->onUpdate(_dt);
@@ -108,7 +108,7 @@ namespace GDE {
 
     void Graph::onFixedUpdate(Delta _dt) {
 
-        onFixedUpdateDel(_dt);
+        onFixedUpdateDel(registry, _dt);
     }
 
     void Graph::onRender() {
@@ -129,10 +129,10 @@ namespace GDE {
                     Renderer::draw((const IRenderizable*)&_text, _transform);
                 });
             }
+
+            onRenderDel(registry);
             Renderer::endDraw();
         }
-
-        onRenderDel();
 
         for(auto* _canvas : scene->canvases) {
             _canvas->onRender();

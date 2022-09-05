@@ -142,26 +142,6 @@ namespace GDE {
             IViewPort* viewport = nullptr;
 
             /**
-             * @brief VertexBuffer ID on the GPU.
-             */
-            GLuint vbo = -1;
-
-            /**
-             * @brief VertexArrayBuffer ID on the GPU.
-             */
-            GLuint vao = -1;
-
-            /**
-             * @brief IndexBuffer ID on the GPU.
-             */
-            GLuint ibo = -1;
-
-            /**
-             * @brief Number of vertices drawn on a Draw Call, only used for debugging purposes.
-             */
-            int vertices = 0;
-
-            /**
              * @brief View Projection Matrix, this is the matrix that tells the GPU how to render the geometry.
              */
             glm::mat4 viewProjectionMatrix {1.0f};
@@ -204,6 +184,11 @@ namespace GDE {
              */
             void beginDraw(Camera& _camera, Transform* _cameraTransform);
 
+            /**
+             * This method is used to draw anything that extends IRenderizable.
+             * @param _renderizable An IRenderizable instance.
+             * @param _transform Transform of the IRenderizable.
+             */
             void draw(const IRenderizable* _renderizable, const Transform& _transform);
 
             /**

@@ -7,6 +7,7 @@
 #include "core/graph/components/Transform.h"
 #include "core/render/elements/Vertex.h"
 #include "core/render/elements/Batch.h"
+#include "core/systems/uiSystem/FontManager.h"
 
 namespace GDE {
 
@@ -16,14 +17,14 @@ namespace GDE {
         recalcTextDimensions(_text);
         shaderID = _scene->engine->manager.shaderManager.getShader("basicText")->getShaderID();
         texture = &font->getTexture();
-        IRenderizable::batchPriority = (int)BatchPriority::TextPriority;
+        IRenderizable::batchPriority = BatchPriority::TextPriority;
     }
 
     TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font) {
         font = _font;
         shaderID = _scene->engine->manager.shaderManager.getShader("basicText")->getShaderID();
         texture = &font->getTexture();
-        IRenderizable::batchPriority = (int)BatchPriority::TextPriority;
+        IRenderizable::batchPriority = BatchPriority::TextPriority;
     }
 
     void TextRenderer::setText(const std::string& _text) {

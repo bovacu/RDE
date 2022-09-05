@@ -28,11 +28,6 @@ namespace GDE {
              */
             Texture* texture = nullptr;
 
-            /**
-             * @deprecated Not of use anymore, needs to go.
-             */
-            IViewPort* viewport = nullptr; // TODO remove this, is not used anymore
-
         public:
             explicit SpriteRenderer(const NodeID& _nodeId, Scene* _scene);
             SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture);

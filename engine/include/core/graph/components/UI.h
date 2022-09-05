@@ -8,6 +8,9 @@
 #include "entt/entity/entity.hpp"
 #include "core/render/elements/IRenderizable.h"
 #include "core/systems/uiSystem/Canvas.h"
+#include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
+#include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
+#include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
 
 typedef entt::entity NodeID;
 

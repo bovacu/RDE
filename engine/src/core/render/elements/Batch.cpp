@@ -4,6 +4,7 @@
 
 #include "core/render/elements/Batch.h"
 #include "core/render/elements/SpriteBatch.h"
+#include "core/render/elements/IRenderizable.h"
 
 namespace GDE {
 

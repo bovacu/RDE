@@ -8,7 +8,6 @@
 #include <vector>
 #include "core/render/elements/Vertex.h"
 #include "core/render/elements/Shader.h"
-#include "core/render/elements/IRenderizable.h"
 #include "core/graph/components/Transform.h"
 
 
@@ -23,6 +22,7 @@ enum BatchPriority {
 namespace GDE {
 
     class SpriteBatch;
+    class IRenderizable;
 
     /**
      * @brief This class represents a group of geometry that shares common elements and therefor can be sent all

@@ -4,18 +4,6 @@
 #ifndef ENGINE2_0_COMPONENTS_H
 #define ENGINE2_0_COMPONENTS_H
 
-#include "core/util/Util.h"
-#include "core/render/elements/ShaderManager.h"
-#include "core/graph/Graph.h"
-#include "glm/ext/matrix_transform.hpp"
-#include "core/systems/uiSystem/FontManager.h"
-#include "core/render/elements/IRenderizable.h"
-#include "box2d/box2d.h"
-#include "core/systems/physicsSystem/PhysicsManager.h"
-#include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
-#include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
-#include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
-
 namespace GDE {
 
     class Manager; class Window; class Camera; class Canvas; class IViewPort;

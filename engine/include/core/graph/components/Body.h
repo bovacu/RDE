@@ -8,6 +8,7 @@
 #include "core/systems/physicsSystem/PhysicsManager.h"
 #include "entt/entity/entity.hpp"
 #include "core/graph/Scene.h"
+#include "core/graph/components/Transform.h"
 
 typedef entt::entity NodeID;
 

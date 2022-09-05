@@ -190,7 +190,7 @@ namespace GDE {
     }
 
     void SpriteBatch::draw(const IRenderizable* _renderizable, const Transform& _transform) {
-        getBatch(_renderizable, _renderizable->layer, BatchPriority::SpritePriority).draw(_renderizable, _transform);
+        getBatch(_renderizable, _renderizable->layer, _renderizable->batchPriority).draw(_renderizable, _transform);
     }
 
     void SpriteBatch::flush() {
@@ -230,7 +230,6 @@ namespace GDE {
             _batch.vertexCount = 0;
 
             drawCalls++;
-            vertices = 0;
         }
     }
 
