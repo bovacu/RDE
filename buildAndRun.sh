@@ -1,1 +1,7 @@
-cd build && cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_TOOLCHAIN_FILE=/home/borja/Documents/GDE/vcpkg/scripts/buildsystems/vcpkg.cmake .. && cmake --build . && ./GDE
+BUILD_TYPE=$1
+if [ -z "$BUILD_TYPE" ]
+then
+    echo "You need to specify release or debug"
+    exit 0
+fi
+cd build && cmake -G "Ninja" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_TOOLCHAIN_FILE=/home/borja/Documents/GDE/vcpkg/scripts/buildsystems/vcpkg.cmake .. && cmake --build . && ./GDE
