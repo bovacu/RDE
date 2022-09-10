@@ -51,8 +51,6 @@ namespace GDE {
         int structSize = 0;
     };
 
-    struct VertexData {  };
-
     /**
      * @brief This class represents the Shader program compiled and stored in the GPU.
      */

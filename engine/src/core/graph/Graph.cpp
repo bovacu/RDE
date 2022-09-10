@@ -100,6 +100,10 @@ namespace GDE {
             _body.b2dConfig.lastPosition = _transform.getPositionLocal();
         });
 
+        registry.group<ParticleSystem>(entt::get<Active>).each([&_dt](const auto _entity, ParticleSystem& _particleSystem, const Active& _) {
+            _particleSystem.update(_dt);
+        });
+
         onUpdateDel(registry, _dt);
 
         for(auto* _canvas : scene->canvases) {
@@ -114,6 +118,7 @@ namespace GDE {
 
     void Graph::onRender() {
         auto _spriteRendererGroup = registry.group<const SpriteRenderer>(entt::get<Transform, Active>);
+        auto _particleSystemGroup = registry.group<const ParticleSystem>(entt::get<Transform, Active>);
         auto _textRendererGroup = registry.group<TextRenderer>(entt::get<Transform, Active>);
 
         for(auto* _camera : scene->cameras) {
@@ -123,6 +128,10 @@ namespace GDE {
             _camera->setCameraSize(_camera->getCameraSize());
             {
                 _spriteRendererGroup.each([](const auto _entity, const SpriteRenderer& _renderizable, const Transform& _transform, const Active& _) {
+                    Renderer::draw((const IRenderizable*)&_renderizable, _transform);
+                });
+
+                _particleSystemGroup.each([](const auto _entity, const ParticleSystem& _renderizable, const Transform& _transform, const Active& _) {
                     Renderer::draw((const IRenderizable*)&_renderizable, _transform);
                 });
 

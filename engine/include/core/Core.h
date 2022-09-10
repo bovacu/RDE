@@ -40,7 +40,7 @@
 
 
 
-#if DEBUG
+#ifndef NDEBUG
 #define ENGINE_DEBUG
 #endif
 

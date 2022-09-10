@@ -21,13 +21,13 @@ namespace GDE {
     };
 
     void Profiler::beginFrame(float _dt) {
-        #if DEBUG
+        #ifdef ENGINE_DEBUG
         states.clear();
         #endif
     }
 
     void Profiler::begin(ProfilerState _state) {
-        #if DEBUG
+        #ifdef ENGINE_DEBUG
         State _s;
         _s.init = std::chrono::system_clock::now();
         _s.state = _state;
@@ -37,13 +37,13 @@ namespace GDE {
     }
 
     void Profiler::end(ProfilerState _state) {
-        #if DEBUG
+        #ifdef ENGINE_DEBUG
         states[_state].end = std::chrono::system_clock::now();
         #endif
     }
 
     void Profiler::endFrame() {
-        #if DEBUG
+        #ifdef ENGINE_DEBUG
         lastStates = states;
         #endif
     }

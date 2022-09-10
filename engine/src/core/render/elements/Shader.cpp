@@ -109,7 +109,7 @@ namespace GDE {
     }
 
     GLuint Shader::getShaderID() const {
-        #if DEBUG
+        #ifdef ENGINE_DEBUG
         if(shaderID == -1) {
             throw LoadVertexConfigNotInvoked();
         }
