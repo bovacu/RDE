@@ -7,6 +7,7 @@
 #include "core/systems/eventSystem/KeyEvent.h"
 #include "core/systems/eventSystem/ControllerEvent.h"
 #include "core/systems/eventSystem/MobileEvent.h"
+#include "core/graph/components/Components.h"
 
 namespace GDE {
 

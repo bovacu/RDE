@@ -8,7 +8,7 @@
 #include "core/systems/eventSystem/MouseEvent.h"
 #include "core/systems/console/Console.h"
 #include "core/graph/Graph.h"
-#include "core/render/Renderer.h"
+#include "core/render/RenderManager.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/Body.h"
 #include "core/graph/components/TextRenderer.h"
@@ -171,9 +171,9 @@ namespace GDE {
          auto* _memData = Profiler::getTotalVirtualMemory();
          ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
         ImGui::Separator();
-        ImGui::Text("Draw Calls: %d", Renderer::getDrawCalls());
-        ImGui::Text("Total Triangles: %d", Renderer::getTotalTriangles());
-        ImGui::Text("Total Images: %d", Renderer::getTotalTriangles() / 2);
+        ImGui::Text("Draw Calls: %d", engine->manager.renderManager.getDrawCalls());
+        ImGui::Text("Total Triangles: %d", engine->manager.renderManager.getTotalTriangles());
+        ImGui::Text("Total Images: %d", engine->manager.renderManager.getTotalTriangles() / 2);
         ImGui::Separator();
         if(ImGui::Button("Show Metrics")) {
             _showMetrics = !_showMetrics;

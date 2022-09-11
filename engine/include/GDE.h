@@ -8,7 +8,7 @@
 #include "core/Core.h"
 #include "core/util/Util.h"
 
-#include "core/render/Renderer.h"
+#include "core/render/RenderManager.h"
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/systems/inputSystem/input/Input.h"

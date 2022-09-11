@@ -1,7 +1,7 @@
 // Created by borja on 24/12/21.
 
 #include "core/Engine.h"
-#include "core/render/Renderer.h"
+#include "core/render/RenderManager.h"
 #include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/systems/ecsSystem/ECSManager.h"
 #include "core/systems/configSystem/ConfigManager.h"
@@ -31,7 +31,7 @@ namespace GDE {
 
         fixedDelta = 1.0f / 60.f;
         window->setVSync(true);
-        Renderer::setClearColor(backgroundColor);
+        manager.renderManager.setClearColor(backgroundColor);
 
         #if !IS_MOBILE()
         FrameBufferSpecification _specs = {(uint32_t)window->getWindowSize().x,(uint32_t)window->getWindowSize().y};
@@ -82,7 +82,7 @@ namespace GDE {
             GDE::Profiler::end(ProfilerState::INPUT);
 
             GDE::Profiler::endFrame();
-            Renderer::resetDebugInfo();
+            manager.renderManager.resetDebugInfo();
 
             Uint64 _end = SDL_GetPerformanceCounter();
             float _elapsedMS = (float)(_end - _start) / (float)SDL_GetPerformanceFrequency();
@@ -118,7 +118,7 @@ namespace GDE {
             frameBuffer->bind();
         #endif
 
-        Renderer::clear();
+        manager.renderManager.clear();
         manager.sceneManager.getDisplayedScene()->onRender(_dt);
         manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
 
@@ -163,7 +163,7 @@ namespace GDE {
     Logs Engine::changeColorConsoleCommand(const std::vector<std::string>& _args) {
         backgroundColor = {(unsigned char)std::stoi(_args[0]), (unsigned char)std::stoi(_args[1]),
                            (unsigned char)std::stoi(_args[2]), (unsigned char)std::stoi(_args[3])};
-        Renderer::setClearColor(backgroundColor);
+        manager.renderManager.setClearColor(backgroundColor);
         return {"Changed color"};
     }
 
@@ -180,7 +180,7 @@ namespace GDE {
     Logs Engine::componentsCommands(const std::vector<std::string>& _args) {
         backgroundColor = {(unsigned char)std::stoi(_args[0]), (unsigned char)std::stoi(_args[1]),
                            (unsigned char)std::stoi(_args[2]), (unsigned char)std::stoi(_args[3])};
-        Renderer::setClearColor(backgroundColor);
+        manager.renderManager.setClearColor(backgroundColor);
         return {"Changed color"};
     }
 

@@ -1,15 +1,12 @@
 // Created by borja on 26/12/21.
 
 #include "core/platform/PlatformHeaderSDLImage.h"
-#include "core/render/Renderer.h"
+#include "core/render/RenderManager.h"
 #include "core/util/GLUtil.h"
 
 namespace GDE {
 
-    SpriteBatch Renderer::batch;
-    Color Renderer::clearColor = Color::Red;
-
-    void Renderer::init(Engine* _engine) {
+    void RenderManager::init(Engine* _engine) {
     
         #if !IS_MOBILE()
         LOG_I("OpenGL Version: ", glGetString(GL_VERSION));
@@ -36,78 +33,78 @@ namespace GDE {
 
         batch.init(_engine);
         batch.debug.init(&batch);
-        CHECK_GL_ERROR("Renderer Initialization")
+        CHECK_GL_ERROR("RenderManager Initialization")
     }
 
-    void Renderer::clear() {
+    void RenderManager::clear() {
         glClearColor((float)clearColor.r / 255.f, (float)clearColor.g / 255.f, (float)clearColor.b / 255.f, (float)clearColor.a / 255.f);
-        CHECK_GL_ERROR("Renderer Clear")
+        CHECK_GL_ERROR("RenderManager Clear")
         resetBuffers();
     }
 
-    void Renderer::resetBuffers() {
+    void RenderManager::resetBuffers() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
-    void Renderer::beginDraw(Camera& _camera, Transform* _cameraTransform) {
+    void RenderManager::beginDraw(Camera& _camera, Transform* _cameraTransform) {
         batch.beginDraw(_camera, _cameraTransform);
     }
 
-    void Renderer::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
+    void RenderManager::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
         batch.debug.drawLine(_p0, _p1, _color);
     }
 
-    void Renderer::endDraw() {
+    void RenderManager::endDraw() {
         batch.flush();
     }
 
-    void Renderer::draw(const IRenderizable* _renderizable, const Transform& _transform) {
+    void RenderManager::draw(const IRenderizable* _renderizable, const Transform& _transform) {
         batch.draw(_renderizable, _transform);
     }
 
-    void Renderer::beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness) {
+    void RenderManager::beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness) {
         batch.debug.setDebugLinesThickness(_thickness);
         batch.beginDraw(_camera, _cameraTransform);
     }
 
-    void Renderer::endDebugDraw() {
+    void RenderManager::endDebugDraw() {
         batch.debug.flushDebug();
     }
 
-    void Renderer::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
+    void RenderManager::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
         batch.debug.drawSquare(_position, _size, _color, _rotation);
     }
 
-    void Renderer::drawShape(Shape& _shape) {
+    void RenderManager::drawShape(Shape& _shape) {
         batch.debug.drawShape(_shape);
     }
 
-    void Renderer::resetDebugInfo() {
+    void RenderManager::resetDebugInfo() {
         batch.drawCalls = 0;
         batch.totalTriangles = 0;
     }
 
-    int Renderer::getTotalTriangles() {
+    int RenderManager::getTotalTriangles() {
         return batch.totalTriangles;
     }
 
-    int Renderer::getDrawCalls() {
+    int RenderManager::getDrawCalls() {
         return batch.drawCalls;
     }
 
-    void Renderer::destroy() {
+    void RenderManager::destroy() {
         IMG_Quit();
     }
 
-    void Renderer::setClearColor(const Color& _color) {
+    void RenderManager::setClearColor(const Color& _color) {
         clearColor = _color;
     }
 
-    Color Renderer::getClearColor() {
+    Color RenderManager::getClearColor() {
         return clearColor;
     }
 
-    void Renderer::drawGrid(const Color& _color) {
+    void RenderManager::drawGrid(const Color& _color) {
         batch.debug.drawGrid(_color);
     }
 

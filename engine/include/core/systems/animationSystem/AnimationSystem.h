@@ -12,6 +12,8 @@
 
 namespace GDE {
 
+    class Manager;
+
     struct AnimationNode;
     struct AnimationTransition {
         std::string transitionCode;

@@ -7,11 +7,12 @@
 
 #include "core/render/elements/IRenderizable.h"
 #include "entt/entity/entity.hpp"
-#include "core/graph/Scene.h"
 
 typedef entt::entity NodeID;
 
 namespace GDE {
+
+    class Scene;
 
     /**
      * @brief Component that allows to render a texture or part of a texture on screen. End user doesn't have, and in fact can't

@@ -8,6 +8,7 @@
 #include "core/graph/components/Transform.h"
 #include "core/render/elements/Vertex.h"
 #include "core/render/elements/Batch.h"
+#include "core/graph/Scene.h"
 
 namespace GDE {
 

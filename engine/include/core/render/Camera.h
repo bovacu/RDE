@@ -9,9 +9,11 @@
 #include "core/util/Util.h"
 #include "core/systems/eventSystem/MouseEvent.h"
 #include "core/render/elements/ViewPort.h"
-#include "core/graph/Graph.h"
+#include "entt/entity/entity.hpp"
 
 namespace GDE {
+
+    typedef entt::entity NodeID;
 
     class Transform;
     class SceneManager;

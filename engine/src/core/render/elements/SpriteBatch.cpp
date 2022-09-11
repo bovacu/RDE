@@ -1,6 +1,5 @@
 #include "core/render/elements/SpriteBatch.h"
 #include "core/util/Logger.h"
-#include "core/graph/components/Components.h"
 #include "core/util/GLUtil.h"
 
 #if IS_ANDROID()

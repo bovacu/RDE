@@ -3,7 +3,7 @@
 
 #include "core/render/elements/FrameBuffer.h"
 #include "core/Manager.h"
-#include "core/render/Renderer.h"
+#include "core/render/RenderManager.h"
 #include "core/util/GLUtil.h"
 
 #if IS_ANDROID()
@@ -110,7 +110,7 @@ namespace GDE {
             }
             glBindVertexArray(0);
         } else{
-            Renderer::clear();
+            manager->renderManager.clear();
         }
         CHECK_GL_ERROR("FrameBuffer unbind")
     }

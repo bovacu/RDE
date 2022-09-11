@@ -14,12 +14,15 @@
 
 namespace GDE {
 
+    class Engine;
+
     /**
      * @brief This is the class in charge of sending the data that needs to be rendered to the GPU.
      * It has a special function for each type of different complex geometry.
      */
     class SpriteBatch {
         friend class Batch;
+        friend class RenderManager;
         /**
          * @brief This class is like a batch but specific for rendering debug elements, such as lines, shapes..
          */
@@ -151,6 +154,8 @@ namespace GDE {
              */
             std::vector<Batch> batches {};
 
+            SpriteBatch() {  }
+
         private:
             /**
              * @brief Returns a Batch that matches some specific information. If no match, it creates a new one.
@@ -168,7 +173,6 @@ namespace GDE {
             void orderBatches();
 
         public:
-            SpriteBatch() {};
             ~SpriteBatch();
 
             /**

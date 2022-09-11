@@ -5,7 +5,8 @@
 #ifndef ENGINE_CANVAS_H
 #define ENGINE_CANVAS_H
 
-#include "core/graph/Scene.h"
+#include "core/graph/Graph.h"
+#include "core/render/Camera.h"
 
 namespace GDE {
 

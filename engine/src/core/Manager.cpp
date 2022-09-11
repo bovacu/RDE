@@ -3,7 +3,7 @@
 //
 
 #include "core/Manager.h"
-#include "core/render/Renderer.h"
+#include "core/render/RenderManager.h"
 #include "core/Engine.h"
 
 namespace GDE {
@@ -12,7 +12,7 @@ namespace GDE {
 
     void Manager::init(Engine* _engine) {
         shaderManager.init(&fileManager);
-        Renderer::init(_engine);
+        renderManager.init(_engine);
         inputManager.init(_engine, &_engine->getWindow());
         fontManager.init();
         consoleManager.init();
@@ -28,7 +28,7 @@ namespace GDE {
         soundManager.destroy();
         textureManager.destroy();
         sceneManager.destroy();
-        Renderer::destroy();
+        renderManager.destroy();
         physics.destroy();
         ecsManager.destroy();
     }

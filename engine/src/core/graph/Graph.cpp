@@ -5,7 +5,6 @@
 #include "core/graph/components/Body.h"
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
-#include "core/render/Renderer.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
@@ -121,27 +120,29 @@ namespace GDE {
         auto _particleSystemGroup = registry.group<const ParticleSystem>(entt::get<Transform, Active>);
         auto _textRendererGroup = registry.group<TextRenderer>(entt::get<Transform, Active>);
 
+        auto& _renderManager = scene->engine->manager.renderManager;
+
         for(auto* _camera : scene->cameras) {
             if(!hasComponent<Active>(_camera->ID)) continue;
 
-            Renderer::beginDraw(*_camera, getComponent<Transform>(_camera->ID));
+            _renderManager.beginDraw(*_camera, getComponent<Transform>(_camera->ID));
             _camera->setCameraSize(_camera->getCameraSize());
             {
-                _spriteRendererGroup.each([](const auto _entity, const SpriteRenderer& _renderizable, const Transform& _transform, const Active& _) {
-                    Renderer::draw((const IRenderizable*)&_renderizable, _transform);
+                _spriteRendererGroup.each([&_renderManager](const auto _entity, const SpriteRenderer& _renderizable, const Transform& _transform, const Active& _) {
+                    _renderManager.draw((const IRenderizable*)&_renderizable, _transform);
                 });
 
-                _particleSystemGroup.each([](const auto _entity, const ParticleSystem& _renderizable, const Transform& _transform, const Active& _) {
-                    Renderer::draw((const IRenderizable*)&_renderizable, _transform);
+                _particleSystemGroup.each([&_renderManager](const auto _entity, const ParticleSystem& _renderizable, const Transform& _transform, const Active& _) {
+                    _renderManager.draw((const IRenderizable*)&_renderizable, _transform);
                 });
 
-                _textRendererGroup.each([](const auto _entity, TextRenderer& _text, const Transform& _transform, const Active& _) {
-                    Renderer::draw((const IRenderizable*)&_text, _transform);
+                _textRendererGroup.each([&_renderManager](const auto _entity, TextRenderer& _text, const Transform& _transform, const Active& _) {
+                    _renderManager.draw((const IRenderizable*)&_text, _transform);
                 });
             }
 
             onRenderDel(registry);
-            Renderer::endDraw();
+            _renderManager.endDraw();
         }
 
         for(auto* _canvas : scene->canvases) {
@@ -153,13 +154,15 @@ namespace GDE {
         auto _debug = registry.view<Body>();
         if(_debug.empty()) return;
 
-        Renderer::beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->ID));
+        auto& _renderManager = scene->engine->manager.renderManager;
 
-        _debug.each([](const auto _entity, const Body& _body) {
-            Renderer::drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
+        _renderManager.beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->ID));
+
+        _debug.each([&_renderManager](const auto _entity, const Body& _body) {
+            _renderManager.drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
         });
 
-        Renderer::endDebugDraw();
+        _renderManager.endDebugDraw();
     }
 
     NodeID Graph::createNode(const std::string& _tag, const NodeID& _parent) {

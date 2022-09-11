@@ -17,6 +17,7 @@
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/systems/fileSystem/FileManager.h"
 #include "core/systems/inputSystem/input/ControllerInput.h"
+#include "core/render/RenderManager.h"
 
 namespace GDE {
 
@@ -24,6 +25,15 @@ namespace GDE {
      * @brief This class contains all of the managers of the engine, so end users can access all of them from one single place.
      */
     class Manager {
+        friend class Graph;
+        friend class Engine;
+        friend class ImGuiScene;
+        friend class FrameBuffer;
+        friend class Canvas;
+
+        private:
+            RenderManager renderManager;
+
         public:
             Manager();
 

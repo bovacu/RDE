@@ -17,7 +17,7 @@ namespace Editor {
 
     class Editor : public Scene {
         public:
-            Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }
+            explicit Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }
             void onInit() override;
             void onUpdate(Delta _dt) override;
 

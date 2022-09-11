@@ -4,8 +4,12 @@
 
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/render/Camera.h"
-#include "core/render/Renderer.h"
 #include "core/graph/components/Transform.h"
+#include "core/graph/Scene.h"
+#include "core/graph/components/UI.h"
+#include "core/graph/components/NineSliceSprite.h"
+#include "core/render/RenderManager.h"
+#include "core/Engine.h"
 
 namespace GDE {
 
@@ -41,24 +45,13 @@ namespace GDE {
     void Canvas::onRender() {
         auto& _registry = graph.getNodeContainer();
         auto _sprites = _registry.group<NineSliceSprite>(entt::get<Transform, Active>);
-//        auto _buttons = _registry.group<UIButton>(entt::get<Transform, Active>);
-//        auto _texts = _registry.group<UIText>(entt::get<Transform, Active>, entt::exclude<UIButton>);
 
-        Renderer::beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
-            _sprites.each([](const auto _entity, NineSliceSprite& _nineSlice, const Transform& _transform, const Active& _) {
-                Renderer::draw((const IRenderizable*)&_nineSlice, _transform);
+        auto& _renderManager = graph.scene->engine->manager.renderManager;
+        _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
+            _sprites.each([&_renderManager](const auto _entity, NineSliceSprite& _nineSlice, const Transform& _transform, const Active& _) {
+                _renderManager.draw((const IRenderizable*)&_nineSlice, _transform);
             });
-
-//            // TODO add rendering for text in UI
-//            _buttons.each([](const auto _entity, UIButton& _button, const Transform& _transform, const Active& _) {
-//                Renderer::draw(*_button.background, _transform);
-//    //            Renderer::draw(*_button.text, _transform);
-//            });
-//
-//            _texts.each([](const auto _entity, UIText& _text, const Transform& _transform, const Active& _) {
-//    //            Renderer::draw(_text, _transform);
-//            });
-        Renderer::endDraw();
+        _renderManager.endDraw();
 
         graph.onRenderDel(_registry);
     }
@@ -67,40 +60,41 @@ namespace GDE {
         auto& _registry = graph.getNodeContainer();
         auto _sprites = _registry.group<NineSliceSprite>(entt::get<Transform, Active>);
 
-        Renderer::beginDebugDraw(*camera, graph.getComponent<Transform>(camera->ID));
-        _sprites.each([](const auto _entity, NineSliceSprite& _nineSlice, const Transform& _transform, const Active& _) {
+        auto& _renderManager = graph.scene->engine->manager.renderManager;
+       _renderManager.beginDebugDraw(*camera, graph.getComponent<Transform>(camera->ID));
+        _sprites.each([&_renderManager](const auto _entity, NineSliceSprite& _nineSlice, const Transform& _transform, const Active& _) {
             if(!_nineSlice.getNineSlice().isEnabled()) return;
 
             auto _rects = _nineSlice.getNineSlice().subRects;
-            Renderer::drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[0].bottomLeftCorner.x + (float)_rects[0].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[0].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[0].size.y / 2.f},
-                                 {(float)_rects[0].size.x, (float)_rects[0].size.y}, Color::Green);
+            _renderManager.drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[0].bottomLeftCorner.x + (float)_rects[0].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[0].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[0].size.y / 2.f},
+                                      {(float)_rects[0].size.x, (float)_rects[0].size.y}, Color::Green);
 
-            Renderer::drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[1].bottomLeftCorner.x + (float)_rects[1].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[1].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[1].size.y / 2.f},
-                                 {(float)_rects[1].size.x, (float)_rects[1].size.y}, Color::Black);
+            _renderManager.drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[1].bottomLeftCorner.x + (float)_rects[1].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[1].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[1].size.y / 2.f},
+                                      {(float)_rects[1].size.x, (float)_rects[1].size.y}, Color::Black);
 
-            Renderer::drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[2].bottomLeftCorner.x + (float)_rects[2].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[2].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[2].size.y / 2.f},
-                                 {(float)_rects[2].size.x, (float)_rects[2].size.y}, Color::Blue);
+            _renderManager.drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[2].bottomLeftCorner.x + (float)_rects[2].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[2].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[2].size.y / 2.f},
+                                      {(float)_rects[2].size.x, (float)_rects[2].size.y}, Color::Blue);
 //
-            Renderer::drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[3].bottomLeftCorner.x + (float)_rects[3].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[3].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[3].size.y / 2.f},
-                                 {(float)_rects[3].size.x, (float)_rects[3].size.y}, Color::Yellow);
+            _renderManager.drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[3].bottomLeftCorner.x + (float)_rects[3].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[3].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[3].size.y / 2.f},
+                                      {(float)_rects[3].size.x, (float)_rects[3].size.y}, Color::Yellow);
 
-            Renderer::drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[4].bottomLeftCorner.x + (float)_rects[4].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[4].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[4].size.y / 2.f},
-                                 {(float)_rects[4].size.x, (float)_rects[4].size.y}, Color::Orange);
+            _renderManager.drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[4].bottomLeftCorner.x + (float)_rects[4].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[4].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[4].size.y / 2.f},
+                                      {(float)_rects[4].size.x, (float)_rects[4].size.y}, Color::Orange);
 
-            Renderer::drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[5].bottomLeftCorner.x + (float)_rects[5].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[5].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[5].size.y / 2.f},
-                                 {(float)_rects[5].size.x, (float)_rects[5].size.y}, Color::Gray);
+            _renderManager.drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[5].bottomLeftCorner.x + (float)_rects[5].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[5].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[5].size.y / 2.f},
+                                      {(float)_rects[5].size.x, (float)_rects[5].size.y}, Color::Gray);
 
-            Renderer::drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[6].bottomLeftCorner.x + (float)_rects[6].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[6].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[6].size.y / 2.f},
-                                 {(float)_rects[6].size.x, (float)_rects[6].size.y}, Color::Magenta);
+            _renderManager.drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[6].bottomLeftCorner.x + (float)_rects[6].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[6].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[6].size.y / 2.f},
+                                      {(float)_rects[6].size.x, (float)_rects[6].size.y}, Color::Magenta);
 
-            Renderer::drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[7].bottomLeftCorner.x + (float)_rects[7].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[7].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[7].size.y / 2.f},
-                                 {(float)_rects[7].size.x, (float)_rects[7].size.y}, Color::Purple);
+            _renderManager.drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[7].bottomLeftCorner.x + (float)_rects[7].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[7].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[7].size.y / 2.f},
+                                      {(float)_rects[7].size.x, (float)_rects[7].size.y}, Color::Purple);
 
-            Renderer::drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[8].bottomLeftCorner.x + (float)_rects[8].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[8].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[8].size.y / 2.f},
-                                 {(float)_rects[8].size.x, (float)_rects[8].size.y}, Color::White);
+            _renderManager.drawSquare({_transform.getPositionLocal().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[8].bottomLeftCorner.x + (float)_rects[8].size.x / 2.f, _transform.getPositionLocal().y + (float)(_rects[8].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[8].size.y / 2.f},
+                                      {(float)_rects[8].size.x, (float)_rects[8].size.y}, Color::White);
 
         });
-        Renderer::endDebugDraw();
+        _renderManager.endDebugDraw();
     }
 
     Camera* Canvas::getCamera() {

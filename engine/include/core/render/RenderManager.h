@@ -9,57 +9,59 @@
 
 namespace GDE {
 
-    class Renderer {
+    class Engine;
+
+    class RenderManager {
 
         // Debug
         public:
-            static void resetDebugInfo();
-            static int getTotalTriangles();
-            static int getDrawCalls();
+            void resetDebugInfo();
+            int getTotalTriangles();
+            int getDrawCalls();
 
         private:
             /**
              * @see SpriteBatch
              */
-            static SpriteBatch batch;
+            SpriteBatch batch;
 
             /**
              * @brief Color to paint the background.
              */
-            static Color clearColor;
+            Color clearColor = Color::Red;
 
         public:
             /**
              * @attention This is not meant to be called by end-users.
              * @brief Must be called ONCE before rendering anything, BUT after creating the window.
              */
-            static void init(Engine* _engine);
+            void init(Engine* _engine);
 
             /**
              * @attention This is not meant to be called by end-users.
              * @brief Destroys all related data to the GPU.
              */
-            static void destroy();
+            void destroy();
 
             /**
              * @brief This must be called before any draw call on every frame (in main loop).
              * @param _color The color of the background
              */
-            static void clear();
+            void clear();
 
-            static void resetBuffers();
+            void resetBuffers();
 
             /**
              * @brief Sets the color to paint the background.
              * @param _color Color to paint the background
              */
-            static void setClearColor(const Color& _color);
+            void setClearColor(const Color& _color);
 
             /**
              * @brief Returns the current clear color.
              * @return Color
              */
-            static Color getClearColor();
+            Color getClearColor();
 
             /**
              * @brief Renders textures, sprites... It includes 2D batching for
@@ -67,21 +69,21 @@ namespace GDE {
              * @param _camera It is the main camera of the scene (or other camera if a special drawing is needed).
              * @param _renderShader The shader we want to use to render, by default the basic one.
              */
-            static void beginDraw(Camera& _camera, Transform* _cameraTransform);
+            void beginDraw(Camera& _camera, Transform* _cameraTransform);
 
             /**
              * @brief Renders geometry for debugging. It also includes batching.
              * @param _camera It is the main camera of the scene (or other camera if a special drawing is needed).
              * @param _renderShader The shader we want to use to render, by default the debugging one.
              */
-            static void beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness = 1.f);
+            void beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness = 1.f);
 
             /**
              * @brief Renders an IRenderizable. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
              * @param _renderizable Component derived from IRenderizable.
              * @param _transform Nine patch's transform.
              */
-            static void draw(const IRenderizable* _renderizable, const Transform& _transform);
+            void draw(const IRenderizable* _renderizable, const Transform& _transform);
 
             /**
              * @brief Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
@@ -90,7 +92,7 @@ namespace GDE {
              * @param _color Color of the line.
              * @param _thickness Thickness of the line.
              */
-            static void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::White);
+            void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::White);
 
             /**
              * @brief Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
@@ -99,29 +101,29 @@ namespace GDE {
              * @param _color Color of the line.
              * @param _rotation Rotation of the square.
              */
-            static void drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color = Color::White, float _rotation = 0.f);
+            void drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color = Color::White, float _rotation = 0.f);
 
             /**
              * @brief Draws a shape. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
              * @param _shape Complex shape
              */
-            static void drawShape(Shape& _shape);
+            void drawShape(Shape& _shape);
 
             /**
              * @brief Draws a grid on the screen.
              * @param _color Color of the grid
              */
-            static void drawGrid(const Color& _color = Color::White);
+            void drawGrid(const Color& _color = Color::White);
 
             /**
              * @brief Sends the data batched to the GPU, must be called after beginDraw and what we want to render.
              */
-            static void endDraw();
+            void endDraw();
 
             /**
              * @brief Sends the debug data batched to the GPU, must be called after beginDebugDraw and what we want to render.
              */
-            static void endDebugDraw();
+            void endDebugDraw();
     };
 }
 
