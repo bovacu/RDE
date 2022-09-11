@@ -10,9 +10,9 @@ namespace GDE {
         position = glm::vec3 { _parentPos.x, _parentPos.y, 0.f };
         Random _random;
         velocity = glm::vec2 { _random.randomf(-20, 20), _random.randomf(20, 100) };
-        life = _particleSystemConfig.lifeTime;
+        life = _particleSystemConfig.dataConfig.lifeTime;
         acceleration = glm::vec2 { };
-        color = _particleSystemConfig.initColor;
+        color = _particleSystemConfig.colorGradientConfig.initColor;
     }
 
 
@@ -22,20 +22,20 @@ namespace GDE {
         UDelegate<ParticleData()> _allocator;
         _allocator.bind<&ParticleSystem::allocator>(this);
         particleSystemConfig = _particleSystemConfig;
-        pool.init(_allocator, particleSystemConfig.numberOfParticles);
+        pool.init(_allocator, particleSystemConfig.dataConfig.numberOfParticles);
 
-        if(particleSystemConfig.effectFunction == nullptr) {
-            particleSystemConfig.effectFunction.bind<&ParticleSystem::defaultEffect>(this);
+        if(particleSystemConfig.callbacksConfig.effectFunction == nullptr) {
+            particleSystemConfig.callbacksConfig.effectFunction.bind<&ParticleSystem::defaultEffect>(this);
         }
 
-        if(particleSystemConfig.colorInterpolationFunction == nullptr) {
-            particleSystemConfig.colorInterpolationFunction.bind<&ParticleSystem::defaultColorInterpolationFunction>(this);
+        if(particleSystemConfig.callbacksConfig.colorInterpolationFunction == nullptr) {
+            particleSystemConfig.callbacksConfig.colorInterpolationFunction.bind<&ParticleSystem::defaultColorInterpolationFunction>(this);
         }
 
         shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
-        ENGINE_ASSERT(particleSystemConfig.texture != nullptr, "Tried to use a particle system without specifying a texture!!!")
+        ENGINE_ASSERT(particleSystemConfig.dataConfig.texture != nullptr, "Tried to use a particle system without specifying a texture!!!")
     }
 
     void ParticleSystem::update(Delta _dt) {
@@ -52,13 +52,13 @@ namespace GDE {
 
             if(!isPlaying) continue;
 
-            particleSystemConfig.effectFunction(*_it, _dt, particleSystemConfig);
-            _it->color = particleSystemConfig.colorInterpolationFunction(*_it, _dt, particleSystemConfig);
+            particleSystemConfig.callbacksConfig.effectFunction(*_it, _dt, particleSystemConfig);
+            _it->color = particleSystemConfig.callbacksConfig.colorInterpolationFunction(*_it, _dt, particleSystemConfig);
         }
 
         if(!isPlaying) return;
 
-        if(_timer > particleSystemConfig.timeToCreateNewParticleMs) {
+        if(_timer > particleSystemConfig.dataConfig.timeToCreateNewParticleMs) {
             ParticleData* _particle = pool.getElement();
             usedParticles.push_back(*_particle);
             _timer = 0.0f;
@@ -70,7 +70,15 @@ namespace GDE {
     ParticleData ParticleSystem::allocator() {
         auto _position = transform->getPositionWorld();
         Random _random;
-        auto _particle = ParticleData { glm::vec3 { _position.x, _position.y, 0.f }, glm::vec2 { _random.randomf(-20, 20), _random.randomf(20, 100) }, glm::vec2 {  }, particleSystemConfig.initColor, particleSystemConfig.lifeTime };
+
+        auto _particle = ParticleData {
+                            glm::vec3 { _position.x, _position.y, 0.f },
+                            glm::vec2 { _random.randomf(-20, 20), _random.randomf(20, 100) },
+                            glm::vec2 {  },
+                            particleSystemConfig.colorGradientConfig.initColor,
+                            particleSystemConfig.dataConfig.lifeTime
+                        };
+
         return _particle;
     }
 
@@ -88,11 +96,11 @@ namespace GDE {
             _transformMat[3][0] = _screenPos.x;
             _transformMat[3][1] = _screenPos.y;
 
-            Vec2F _textureOrigin = {(float)particleSystemConfig.texture->getRegion().bottomLeftCorner.x, (float)particleSystemConfig.texture->getRegion().bottomLeftCorner.y};
-            Vec2F _textureOriginNorm = {_textureOrigin.x / (float)particleSystemConfig.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)particleSystemConfig.texture->getSpriteSheetSize().y};
+            Vec2F _textureOrigin = {(float)particleSystemConfig.dataConfig.texture->getRegion().bottomLeftCorner.x, (float)particleSystemConfig.dataConfig.texture->getRegion().bottomLeftCorner.y};
+            Vec2F _textureOriginNorm = {_textureOrigin.x / (float)particleSystemConfig.dataConfig.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)particleSystemConfig.dataConfig.texture->getSpriteSheetSize().y};
 
-            Vec2F _textureTileSize = {(float)particleSystemConfig.texture->getRegion().size.x, (float)particleSystemConfig.texture->getRegion().size.y};
-            Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)particleSystemConfig.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)particleSystemConfig.texture->getSpriteSheetSize().y};
+            Vec2F _textureTileSize = {(float)particleSystemConfig.dataConfig.texture->getRegion().size.x, (float)particleSystemConfig.dataConfig.texture->getRegion().size.y};
+            Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)particleSystemConfig.dataConfig.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)particleSystemConfig.dataConfig.texture->getSpriteSheetSize().y};
             auto _textureTileSizeOnScreen = Util::worldToScreenSize(_viewport, _textureTileSize);
 
             glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -118,13 +126,13 @@ namespace GDE {
     }
 
     Color ParticleSystem::defaultColorInterpolationFunction(ParticleData& _particleData, Delta _dt, const ParticleSystemConfig& _config) {
-        if(_config.endColor == Color::NO_COLOR) return _particleData.color;
+        if(_config.colorGradientConfig.endColor == Color::NO_COLOR) return _particleData.color;
 
-        auto _percentage = _particleData.life < _config.lifeTime / 1.25f ? (1 - _particleData.life / _config.lifeTime) : 0.f;
-        auto _red   = Util::clamp(_particleData.color.r + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.r - _particleData.color.r)), 0, 255);
-        auto _green = Util::clamp(_particleData.color.g + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.g - _particleData.color.g)), 0, 255);
-        auto _blue  = Util::clamp(_particleData.color.b + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.b - _particleData.color.b)), 0, 255);
-        auto _alpha = Util::clamp(_particleData.color.a + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.a - _particleData.color.a)), 0, 255);
+        auto _percentage = _particleData.life < _config.dataConfig.lifeTime / 1.25f ? (1 - _particleData.life / _config.dataConfig.lifeTime) : 0.f;
+        auto _red   = Util::clamp(_particleData.color.r + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.r - _particleData.color.r)), 0, 255);
+        auto _green = Util::clamp(_particleData.color.g + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.g - _particleData.color.g)), 0, 255);
+        auto _blue  = Util::clamp(_particleData.color.b + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.b - _particleData.color.b)), 0, 255);
+        auto _alpha = Util::clamp(_particleData.color.a + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.a - _particleData.color.a)), 0, 255);
         return Color { (unsigned char)_red, (unsigned char)_green, (unsigned char)_blue, (unsigned char)_alpha };
     }
 

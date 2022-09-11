@@ -18,6 +18,9 @@ namespace GDE {
 
     struct ParticleSystemConfig;
 
+    /**
+     * @brief Information about a particle.
+     */
     struct ParticleData {
         glm::vec3 position;
         glm::vec2 velocity;
@@ -28,19 +31,46 @@ namespace GDE {
         void reset(const ParticleSystemConfig& _particleSystemConfig, Transform* _parentTransform);
     };
 
-    struct ParticleSystemConfig {
+    /**
+     * @brief Config for color gradient. TODO: improve this to be able to have 'n' colors and traverse through them.
+     */
+    struct ParticleSystemColorGradientConfig {
         Color initColor = Color::White;
         Color endColor = Color::NO_COLOR;
+    };
+
+    /**
+     * @brief Config for function callbacks.
+     */
+    struct ParticleSystemCallbacksConfig {
+        UDelegate<void(ParticleData&, Delta, const ParticleSystemConfig&)> effectFunction {};
+        UDelegate<Color(ParticleData&, Delta, const ParticleSystemConfig&)> colorInterpolationFunction {};
+    };
+
+    /**
+     * @brief Config with data related to each particle state.
+     */
+    struct ParticleSystemDataConfig {
         float lifeTime = -1;
         glm::vec2 initialVelocity;
         int numberOfParticles;
-        UDelegate<void(ParticleData&, Delta, const ParticleSystemConfig&)> effectFunction {};
-        UDelegate<Color(ParticleData&, Delta, const ParticleSystemConfig&)> colorInterpolationFunction {};
         Texture* texture = nullptr;
         float timeToCreateNewParticleMs = 100;
         bool loop = true;
     };
 
+    /**
+     * @brief Initial configuration of the particle system.
+     */
+    struct ParticleSystemConfig {
+        ParticleSystemColorGradientConfig colorGradientConfig;
+        ParticleSystemCallbacksConfig callbacksConfig;
+        ParticleSystemDataConfig dataConfig;
+    };
+
+    /**
+     * @brief Component that emits particles in a customizable way.
+     */
     class ParticleSystem : public IRenderizable {
         private:
             Pool<ParticleData> pool;
@@ -78,17 +108,17 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] GLuint getTexture() const override { return particleSystemConfig.texture->getGLTexture(); }
+            [[nodiscard]] GLuint getTexture() const override { return particleSystemConfig.dataConfig.texture->getGLTexture(); }
 
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] Vec2I getSize() const override { return particleSystemConfig.texture->getSize(); }
+            [[nodiscard]] Vec2I getSize() const override { return particleSystemConfig.dataConfig.texture->getSize(); }
 
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] IntRect getRegion() const override { return particleSystemConfig.texture->getRegion(); }
+            [[nodiscard]] IntRect getRegion() const override { return particleSystemConfig.dataConfig.texture->getRegion(); }
 
             /**
              * @see IRenderizable

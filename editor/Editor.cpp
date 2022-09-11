@@ -31,13 +31,24 @@ namespace Editor {
         // engine->setRenderingRedirectionToImGui(_delegate);
         textStressTest();
         auto _particleSystemNode = getMainGraph()->createNode("ParticleSystem");
-        ParticleSystemConfig _particleSystemConfig;
-        _particleSystemConfig.texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
-        _particleSystemConfig.numberOfParticles = 500;
-        _particleSystemConfig.initColor = Color {17, 79, 15, 255};
-        _particleSystemConfig.endColor = Color {223, 216, 88, 50};
-        _particleSystemConfig.lifeTime = 3.f;
-        _particleSystemConfig.timeToCreateNewParticleMs = 0.3f;
+
+        ParticleSystemConfig _particleSystemConfig {
+            ParticleSystemColorGradientConfig {
+                Color {17, 79, 15, 255},
+                Color {223, 216, 88, 50}
+            },
+            ParticleSystemCallbacksConfig {
+
+            },
+            ParticleSystemDataConfig {
+
+            }
+        };
+
+        _particleSystemConfig.dataConfig.texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
+        _particleSystemConfig.dataConfig.numberOfParticles = 500;
+        _particleSystemConfig.dataConfig.lifeTime = 3.f;
+        _particleSystemConfig.dataConfig.timeToCreateNewParticleMs = 0.3f;
         getMainGraph()->getComponent<Transform>(_particleSystemNode)->setPositionWorld(100, 0);
         auto _particleSystem = getMainGraph()->addComponent<ParticleSystem>(_particleSystemNode, this, _particleSystemConfig);
         _particleSystem->play();
