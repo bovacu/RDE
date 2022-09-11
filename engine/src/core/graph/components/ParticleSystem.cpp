@@ -118,6 +118,8 @@ namespace GDE {
     }
 
     Color ParticleSystem::defaultColorInterpolationFunction(ParticleData& _particleData, Delta _dt, const ParticleSystemConfig& _config) {
+        if(_config.endColor == Color::NO_COLOR) return _particleData.color;
+
         auto _percentage = _particleData.life < _config.lifeTime / 1.25f ? (1 - _particleData.life / _config.lifeTime) : 0.f;
         auto _red   = Util::clamp(_particleData.color.r + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.r - _particleData.color.r)), 0, 255);
         auto _green = Util::clamp(_particleData.color.g + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.g - _particleData.color.g)), 0, 255);

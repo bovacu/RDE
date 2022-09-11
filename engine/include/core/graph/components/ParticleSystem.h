@@ -29,8 +29,8 @@ namespace GDE {
     };
 
     struct ParticleSystemConfig {
-        Color initColor {};
-        Color endColor {};
+        Color initColor = Color::White;
+        Color endColor = Color::NO_COLOR;
         float lifeTime = -1;
         glm::vec2 initialVelocity;
         int numberOfParticles;

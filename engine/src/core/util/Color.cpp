@@ -16,5 +16,6 @@ namespace GDE {
     const Color Color::Purple(128, 0, 128, 255);
     const Color Color::Gray(128, 128, 128, 255);
     const Color Color::Transparent(0, 0, 0, 0);
+    const Color Color::NO_COLOR(-1, -1, -1, -1);
 
 }
