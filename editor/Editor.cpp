@@ -40,6 +40,7 @@ namespace Editor {
         _particleSystemConfig.timeToCreateNewParticleMs = 0.3f;
         getMainGraph()->getComponent<Transform>(_particleSystemNode)->setPositionWorld(100, 0);
         auto _particleSystem = getMainGraph()->addComponent<ParticleSystem>(_particleSystemNode, this, _particleSystemConfig);
+        _particleSystem->play();
     }
 
     void Editor::onUpdate(Delta _dt) {
