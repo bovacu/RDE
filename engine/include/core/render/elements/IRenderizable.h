@@ -2,8 +2,8 @@
 // Created by borja on 14/04/2022.
 //
 
-#ifndef ENGINE_I_RENDERIZABLE_H
-#define ENGINE_I_RENDERIZABLE_H
+#ifndef GDE_RENDERIZABLE_H
+#define GDE_RENDERIZABLE_H
 
 #include "core/render/elements/Texture.h"
 #include "core/render/elements/ShaderManager.h"
@@ -75,4 +75,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE_I_RENDERIZABLE_H
+#endif //GDE_RENDERIZABLE_H

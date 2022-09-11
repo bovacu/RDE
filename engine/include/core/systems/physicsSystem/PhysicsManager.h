@@ -2,8 +2,8 @@
 // Created by borja on 22/04/22.
 //
 
-#ifndef ENGINE_PHYSICS_MANAGER_H
-#define ENGINE_PHYSICS_MANAGER_H
+#ifndef GDE_PHYSICS_MANAGER_H
+#define GDE_PHYSICS_MANAGER_H
 
 #include "core/util/Util.h"
 #include "box2d/box2d.h"
@@ -304,4 +304,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE_PHYSICS_MANAGER_H
+#endif //GDE_PHYSICS_MANAGER_H

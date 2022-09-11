@@ -1,8 +1,8 @@
 // Created by borja on 30/12/21.
 
 
-#ifndef ENGINE2_0_SHAPE_H
-#define ENGINE2_0_SHAPE_H
+#ifndef GDE_SHAPE_H
+#define GDE_SHAPE_H
 
 #include "core/util/Util.h"
 
@@ -199,4 +199,4 @@ namespace GDE {
     };
 }
 
-#endif //ENGINE2_0_SHAPE_H
+#endif //GDE_SHAPE_H

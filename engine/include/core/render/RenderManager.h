@@ -1,8 +1,8 @@
 // Created by borja on 26/12/21.
 
 
-#ifndef ENGINE2_0_RENDERER_H
-#define ENGINE2_0_RENDERER_H
+#ifndef GDE_RENDER_MANAGER_H
+#define GDE_RENDER_MANAGER_H
 
 #include "core/util/Util.h"
 #include "core/render/elements/SpriteBatch.h"
@@ -136,4 +136,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_RENDERER_H
+#endif //GDE_RENDER_MANAGER_H

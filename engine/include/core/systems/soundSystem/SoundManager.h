@@ -1,8 +1,8 @@
 // Created by borja on 30/1/22.
 
 
-#ifndef ENGINE2_0_SOUND_MANAGER_H
-#define ENGINE2_0_SOUND_MANAGER_H
+#ifndef GDE_SOUND_MANAGER_H
+#define GDE_SOUND_MANAGER_H
 
 
 #include "core/util/Util.h"
@@ -230,4 +230,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_SOUND_MANAGER_H
+#endif //GDE_SOUND_MANAGER_H

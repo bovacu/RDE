@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef ENGINE2_0_EVENT_H
-#define ENGINE2_0_EVENT_H
+#ifndef GDE_EVENT_H
+#define GDE_EVENT_H
 
 #include "core/util/Delegate.h"
 #include <string>
@@ -142,4 +142,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE2_0_EVENT_H
+#endif //GDE_EVENT_H

@@ -1,8 +1,8 @@
 // Created by borja on 20/1/22.
 
 
-#ifndef ENGINE2_0_SHADER_MANAGER_H
-#define ENGINE2_0_SHADER_MANAGER_H
+#ifndef GDE_SHADER_MANAGER_H
+#define GDE_SHADER_MANAGER_H
 
 
 #include "core/util/Util.h"
@@ -171,4 +171,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_SHADER_MANAGER_H
+#endif //GDE_SHADER_MANAGER_H

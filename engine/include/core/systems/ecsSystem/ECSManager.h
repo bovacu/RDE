@@ -2,8 +2,8 @@
 // Created by borja on 29/04/22.
 //
 
-#ifndef ENGINE_GDE_SYSTEM_MANAGER_H
-#define ENGINE_GDE_SYSTEM_MANAGER_H
+#ifndef GDE_SYSTEM_MANAGER_H
+#define GDE_SYSTEM_MANAGER_H
 
 #include "core/util/Util.h"
 #include "core/systems/ecsSystem/ECSSystem.h"
@@ -68,4 +68,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE_GDE_SYSTEM_MANAGER_H
+#endif //GDE_SYSTEM_MANAGER_H

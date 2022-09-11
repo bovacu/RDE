@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KEYBOARD_KEYS_H
-#define KEYBOARD_KEYS_H
+#ifndef GDE_KEYBOARD_KEYS_H
+#define GDE_KEYBOARD_KEYS_H
 
 #include <cstdint>
 #include <ostream>
@@ -275,4 +275,4 @@ namespace GDE {
 #define KEY_RIGHT_SUPER     ::engine::Key::RightSuper
 #define KEY_MENU            ::engine::Key::Menu
 
-#endif // KEYBOARD_KEYS_H
+#endif // GDE_KEYBOARD_KEYS_H

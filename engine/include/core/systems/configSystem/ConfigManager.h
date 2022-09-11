@@ -2,8 +2,8 @@
 // Created by borja on 15/05/22.
 //
 
-#ifndef ENGINE_CONFIG_LOADER_H
-#define ENGINE_CONFIG_LOADER_H
+#ifndef GDE_CONFIG_LOADER_H
+#define GDE_CONFIG_LOADER_H
 
 #include "nlohmann/json.hpp"
 #include "core/graph/Scene.h"
@@ -76,4 +76,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE_CONFIG_LOADER_H
+#endif //GDE_CONFIG_LOADER_H

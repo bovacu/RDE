@@ -1,8 +1,8 @@
 // Created by borja on 27/2/22.
 
 
-#ifndef ENGINE_VIEWPORT_H
-#define ENGINE_VIEWPORT_H
+#ifndef GDE_VIEWPORT_H
+#define GDE_VIEWPORT_H
 
 #include "core/util/Util.h"
 
@@ -124,4 +124,4 @@ namespace GDE {
     };
 }
 
-#endif //ENGINE_VIEWPORT_H
+#endif //GDE_VIEWPORT_H

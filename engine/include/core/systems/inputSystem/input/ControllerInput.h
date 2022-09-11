@@ -1,8 +1,8 @@
 // Created by borja on 6/2/22.
 
 
-#ifndef ENGINE2_0_CONTROLLER_INPUT_H
-#define ENGINE2_0_CONTROLLER_INPUT_H
+#ifndef GDE_CONTROLLER_INPUT_H
+#define GDE_CONTROLLER_INPUT_H
 
 
 #include "core/util/Util.h"
@@ -296,4 +296,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_CONTROLLER_INPUT_H
+#endif //GDE_CONTROLLER_INPUT_H

@@ -1,8 +1,8 @@
 // Created by borja on 31/12/21.
 
 
-#ifndef ENGINE2_0_PROFILER_H
-#define ENGINE2_0_PROFILER_H
+#ifndef GDE_PROFILER_H
+#define GDE_PROFILER_H
 
 #include "core/Core.h"
 
@@ -92,4 +92,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE2_0_PROFILER_H
+#endif //GDE_PROFILER_H

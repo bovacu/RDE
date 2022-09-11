@@ -1,8 +1,8 @@
 // Created by borja on 10/2/22.
 
 
-#ifndef ENGINE2_0_MOBILE_INPUT_H
-#define ENGINE2_0_MOBILE_INPUT_H
+#ifndef GDE_MOBILE_INPUT_H
+#define GDE_MOBILE_INPUT_H
 
 #include "Input.h"
 
@@ -94,4 +94,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE2_0_MOBILE_INPUT_H
+#endif //GDE_MOBILE_INPUT_H

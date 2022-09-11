@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GDE_TEXTURE_H
+#define GDE_TEXTURE_H
 
 #include <iostream>
 #include "core/util/Util.h"
@@ -324,3 +325,5 @@ namespace GDE {
             ~Image();
     };
 }
+
+#endif //GDE_TEXTURE_H

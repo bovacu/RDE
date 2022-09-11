@@ -2,8 +2,8 @@
 // Created by borja on 16/05/22.
 //
 
-#ifndef ENGINE_SCENE_MANAGER_H
-#define ENGINE_SCENE_MANAGER_H
+#ifndef GDE_SCENE_MANAGER_H
+#define GDE_SCENE_MANAGER_H
 
 #include "core/util/Util.h"
 #include "core/systems/eventSystem/Event.h"
@@ -90,4 +90,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE_SCENE_MANAGER_H
+#endif //GDE_SCENE_MANAGER_H

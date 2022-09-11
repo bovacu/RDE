@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef GAMEPAD_KEYS_H
-#define GAMEPAD_KEYS_H
+#ifndef GDE_GAMEPAD_KEYS_H
+#define GDE_GAMEPAD_KEYS_H
 
 #include <cstdint>
 #include "core/platform/PlatformHeaderSDL.h"
@@ -65,4 +65,4 @@ namespace GDE {
 //    #define GAMEPAD_BUTTON_DPAD_DOWN        ::engine::GamePad::DPadDown
 //    #define GAMEPAD_BUTTON_DPAD_LEFT        ::engine::GamePad::DPadLeft
 
-#endif // GAMEPAD_KEYS_H
+#endif // GDE_GAMEPAD_KEYS_H

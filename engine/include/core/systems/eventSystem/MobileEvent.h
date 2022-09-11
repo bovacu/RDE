@@ -1,8 +1,8 @@
 // Created by borja on 10/2/22.
 
 
-#ifndef ENGINE2_0_MOBILE_EVENT_H
-#define ENGINE2_0_MOBILE_EVENT_H
+#ifndef GDE_MOBILE_EVENT_H
+#define GDE_MOBILE_EVENT_H
 
 #include "Event.h"
 #include "core/util/Vec.h"
@@ -136,4 +136,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE2_0_MOBILE_EVENT_H
+#endif //GDE_MOBILE_EVENT_H

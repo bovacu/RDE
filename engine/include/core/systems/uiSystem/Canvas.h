@@ -2,8 +2,8 @@
 // Created by borja on 29/05/22.
 //
 
-#ifndef ENGINE_CANVAS_H
-#define ENGINE_CANVAS_H
+#ifndef GDE_CANVAS_H
+#define GDE_CANVAS_H
 
 #include "core/graph/Graph.h"
 #include "core/render/Camera.h"
@@ -85,4 +85,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE_CANVAS_H
+#endif //GDE_CANVAS_H

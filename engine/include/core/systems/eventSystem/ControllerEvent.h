@@ -1,8 +1,8 @@
 // Created by borja on 30/1/22.
 
 
-#ifndef ENGINE2_0_JOYSTICK_EVENT_H
-#define ENGINE2_0_JOYSTICK_EVENT_H
+#ifndef GDE_JOYSTICK_EVENT_H
+#define GDE_JOYSTICK_EVENT_H
 
 #include "Event.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
@@ -103,4 +103,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE2_0_JOYSTICK_EVENT_H
+#endif //GDE_JOYSTICK_EVENT_H

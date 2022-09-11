@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef GDE_WINDOW_H
+#define GDE_WINDOW_H
 
 #include "core/util/Util.h"
 #include "core/systems/eventSystem/Event.h"
@@ -188,4 +188,4 @@ namespace GDE {
 
 }
 
-#endif // WINDOW_H
+#endif // GDE_WINDOW_H

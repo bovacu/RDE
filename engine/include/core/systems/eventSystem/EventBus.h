@@ -1,7 +1,7 @@
 // Created by borja on 17/12/21.
 
-#ifndef RESOURCES_GAME_EVENT_BUS
-#define RESOURCES_GAME_EVENT_BUS
+#ifndef GDE_EVENT_BUS
+#define GDE_EVENT_BUS
 
 #include "core/util/Logger.h"
 
@@ -126,4 +126,4 @@ namespace GDE {
 }
 
 
-#endif // RESOURCES_GAME_EVENT_BUS
+#endif // GDE_EVENT_BUS

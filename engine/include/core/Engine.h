@@ -262,7 +262,7 @@ namespace GDE {
             Logs componentsCommands(const std::vector<std::string>& _args);
     };
 
-    Engine* createEngine();
+    Engine* createEngine(int _argc, char** _argv);
 }
 
 

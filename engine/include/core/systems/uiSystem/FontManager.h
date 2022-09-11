@@ -1,10 +1,9 @@
 // Created by borja on 15/1/22.
 
 
-#ifndef ENGINE2_0_FONT_MANAGER_H
-#define ENGINE2_0_FONT_MANAGER_H
+#ifndef GDE_FONT_MANAGER_H
+#define GDE_FONT_MANAGER_H
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "core/util/Util.h"
 #include <ft2build.h>
 #include "freetype/freetype.h"
@@ -185,4 +184,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_FONT_MANAGER_H
+#endif //GDE_FONT_MANAGER_H

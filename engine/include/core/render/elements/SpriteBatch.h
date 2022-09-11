@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GDE_SPRITE_BATCH_H
+#define GDE_SPRITE_BATCH_H
 
 #include <vector>
 #include "core/render/Camera.h"
@@ -207,3 +208,5 @@ namespace GDE {
             void configBasicShader();
     };
 }
+
+#endif //GDE_SPRITE_BATCH_H

@@ -1,8 +1,8 @@
 // Created by borja on 20/1/22.
 
 
-#ifndef ENGINE2_0_FRAMEBUFFER_H
-#define ENGINE2_0_FRAMEBUFFER_H
+#ifndef GDE_FRAMEBUFFER_H
+#define GDE_FRAMEBUFFER_H
 
 
 #include "core/util/Util.h"
@@ -125,4 +125,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_FRAMEBUFFER_H
+#endif //GDE_FRAMEBUFFER_H

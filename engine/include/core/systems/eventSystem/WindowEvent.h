@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef ENGINE2_0_WINDOW_EVENT_H
-#define ENGINE2_0_WINDOW_EVENT_H
+#ifndef GDE_WINDOW_EVENT_H
+#define GDE_WINDOW_EVENT_H
 
 #include "Event.h"
 
@@ -178,4 +178,4 @@ namespace GDE {
     };
 }
 
-#endif //ENGINE2_0_WINDOW_EVENT_H
+#endif //GDE_WINDOW_EVENT_H

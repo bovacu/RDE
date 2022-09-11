@@ -1,8 +1,8 @@
 // Created by borja on 30/12/21.
 
 
-#ifndef ENGINE2_0_CAMERA_H
-#define ENGINE2_0_CAMERA_H
+#ifndef GDE_CAMERA_H
+#define GDE_CAMERA_H
 
 
 #include <glm/ext/matrix_float4x4.hpp>
@@ -229,4 +229,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_CAMERA_H
+#endif //GDE_CAMERA_H

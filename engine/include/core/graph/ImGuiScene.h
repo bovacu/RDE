@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef IMGUI_LAYER_H
-#define IMGUI_LAYER_H
+#ifndef GDE_IMGUI_LAYER_H
+#define GDE_IMGUI_LAYER_H
 
 #if !IS_MOBILE()
 
@@ -85,4 +85,4 @@ namespace GDE {
 
 #endif
 
-#endif //IMGUI_LAYER_H
+#endif //GDE_IMGUI_LAYER_H

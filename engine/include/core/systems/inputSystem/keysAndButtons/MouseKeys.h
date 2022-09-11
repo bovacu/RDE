@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef MOUSE_KEYS_H
-#define MOUSE_KEYS_H
+#ifndef GDE_MOUSE_KEYS_H
+#define GDE_MOUSE_KEYS_H
 
 #include <ostream>
 #include "core/platform/PlatformHeaderSDL.h"
@@ -50,4 +50,4 @@ namespace GDE {
 #define MOUSE_BUTTON_RIGHT  ::engine::Mouse::ButtonRight
 #define MOUSE_BUTTON_MIDDLE ::engine::Mouse::ButtonMiddle
 
-#endif // MOUSE_KEYS_H
+#endif // GDE_MOUSE_KEYS_H

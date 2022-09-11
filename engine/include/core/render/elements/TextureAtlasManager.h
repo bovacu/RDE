@@ -1,8 +1,8 @@
 // Created by borja on 6/1/22.
 
 
-#ifndef ENGINE2_0_TEXTURE_ATLAS_H
-#define ENGINE2_0_TEXTURE_ATLAS_H
+#ifndef GDE_TEXTURE_ATLAS_H
+#define GDE_TEXTURE_ATLAS_H
 
 
 #include "nlohmann/json.hpp"
@@ -165,4 +165,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_TEXTURE_ATLAS_H
+#endif //GDE_TEXTURE_ATLAS_H

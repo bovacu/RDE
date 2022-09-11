@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GDE_SHADER_H
+#define GDE_SHADER_H
 
 #include <string>
 #include <unordered_map>
@@ -152,3 +153,5 @@ namespace GDE {
             bool initFromString(const std::string& _shaderCode, GLenum _shaderType);
     };
 }
+
+#endif //GDE_SHADER_H

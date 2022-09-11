@@ -20,6 +20,6 @@ namespace Editor {
     };
 }
 
-GDE::Engine* GDE::createEngine() {
+GDE::Engine* GDE::createEngine(int _argc, char** _argv) {
     return new Editor::EditorEntry();
 }

@@ -1,8 +1,8 @@
 // Created by borja on 30/3/22.
 
 
-#ifndef ENGINE_GDE_H
-#define ENGINE_GDE_H
+#ifndef GDE_H
+#define GDE_H
 
 #include "core/Engine.h"
 #include "core/Core.h"
@@ -31,4 +31,4 @@
 #include "core/graph/components/Body.h"
 #include "core/graph/components/NineSliceSprite.h"
 
-#endif //ENGINE_GDE_H
+#endif //GDE_H

@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef ENGINE_SCENE_H
-#define ENGINE_SCENE_H
+#ifndef GDE_SCENE_H
+#define GDE_SCENE_H
 
 #include "nlohmann/json.hpp"
 #include "core/util/Delta.h"
@@ -219,4 +219,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE_SCENE_H
+#endif //GDE_SCENE_H

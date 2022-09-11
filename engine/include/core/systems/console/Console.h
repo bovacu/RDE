@@ -1,8 +1,8 @@
 // Created by borja on 12/1/22.
 
 
-#ifndef ENGINE2_0_CONSOLE_H
-#define ENGINE2_0_CONSOLE_H
+#ifndef GDE_CONSOLE_H
+#define GDE_CONSOLE_H
 
 
 #include "core/util/Util.h"
@@ -147,4 +147,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_CONSOLE_H
+#endif //GDE_CONSOLE_H

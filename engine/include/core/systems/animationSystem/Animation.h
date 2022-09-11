@@ -1,8 +1,8 @@
 // Created by borja on 9/1/22.
 
 
-#ifndef ENGINE2_0_ANIMATION_H
-#define ENGINE2_0_ANIMATION_H
+#ifndef GDE_ANIMATION_H
+#define GDE_ANIMATION_H
 
 
 #include "core/util/Util.h"
@@ -38,4 +38,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_ANIMATION_H
+#endif //GDE_ANIMATION_H

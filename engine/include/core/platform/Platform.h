@@ -1,8 +1,8 @@
 // Created by borja on 8/2/22.
 
 
-#ifndef ENGINE2_0_PLATFORM_H
-#define ENGINE2_0_PLATFORM_H
+#ifndef GDE_PLATFORM_H
+#define GDE_PLATFORM_H
 
 #include "core/systems/inputSystem/input/Input.h"
 namespace GDE {
@@ -27,4 +27,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_PLATFORM_H
+#endif //GDE_PLATFORM_H

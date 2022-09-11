@@ -1,8 +1,8 @@
 // Created by borja on 9/3/22.
 
 
-#ifndef ENGINE_GRAPH_H
-#define ENGINE_GRAPH_H
+#ifndef GDE_GRAPH_H
+#define GDE_GRAPH_H
 
 #include "entt/entt.hpp"
 #include "core/util/Delta.h"
@@ -313,4 +313,4 @@ namespace GDE {
     }
 }
 
-#endif //ENGINE_GRAPH_H
+#endif //GDE_GRAPH_H

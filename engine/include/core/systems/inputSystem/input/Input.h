@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef ENGINE2_0_INPUT_H
-#define ENGINE2_0_INPUT_H
+#ifndef GDE_INPUT_H
+#define GDE_INPUT_H
 
 #include "core/platform/PlatformHeaderSDL.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
@@ -363,4 +363,4 @@ namespace GDE {
     };
 }
 
-#endif //ENGINE2_0_INPUT_H
+#endif //GDE_INPUT_H

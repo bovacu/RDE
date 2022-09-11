@@ -2,8 +2,8 @@
 // Created by borja on 29/04/22.
 //
 
-#ifndef ENGINE_GDE_SYSTEM_H
-#define ENGINE_GDE_SYSTEM_H
+#ifndef GDE_SYSTEM_H
+#define GDE_SYSTEM_H
 
 #include "core/util/Util.h"
 #include "core/graph/Graph.h"
@@ -89,4 +89,4 @@ namespace GDE {
     };
 }
 
-#endif //ENGINE_GDE_SYSTEM_H
+#endif //GDE_SYSTEM_H

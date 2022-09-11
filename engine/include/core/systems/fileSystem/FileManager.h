@@ -1,8 +1,8 @@
 // Created by borja on 14/2/22.
 
 
-#ifndef ENGINE2_0_FILES_SYSTEM_H
-#define ENGINE2_0_FILES_SYSTEM_H
+#ifndef GDE_FILES_SYSTEM_H
+#define GDE_FILES_SYSTEM_H
 
 #include "core/util/Util.h"
 
@@ -310,4 +310,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE2_0_FILES_SYSTEM_H
+#endif //GDE_FILES_SYSTEM_H
