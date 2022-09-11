@@ -9,10 +9,9 @@ namespace GDE {
         auto _parentPos = _parentTransform->getPositionWorld();
         position = glm::vec3 { _parentPos.x, _parentPos.y, 0.f };
         Random _random;
-        speed = glm::vec2 { _random.randomf(-20, 20), _random.randomf(20, 100) };
+        velocity = glm::vec2 { _random.randomf(-20, 20), _random.randomf(20, 100) };
         life = _particleSystemConfig.lifeTime;
-        velocity = _particleSystemConfig.velocity;
-        acceleration = _particleSystemConfig.acceleration;
+        acceleration = glm::vec2 { };
         color = _particleSystemConfig.initColor;
     }
 
@@ -27,6 +26,10 @@ namespace GDE {
 
         if(particleSystemConfig.effectFunction == nullptr) {
             particleSystemConfig.effectFunction.bind<&ParticleSystem::defaultEffect>(this);
+        }
+
+        if(particleSystemConfig.colorInterpolationFunction == nullptr) {
+            particleSystemConfig.colorInterpolationFunction.bind<&ParticleSystem::defaultColorInterpolationFunction>(this);
         }
 
         shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
@@ -49,6 +52,7 @@ namespace GDE {
             }
 
             particleSystemConfig.effectFunction(*_it, _dt, particleSystemConfig);
+            _it->color = particleSystemConfig.colorInterpolationFunction(*_it, _dt, particleSystemConfig);
         }
 
         if(_timer > particleSystemConfig.timeToCreateNewParticleMs) {
@@ -63,15 +67,13 @@ namespace GDE {
     ParticleData ParticleSystem::allocator() {
         auto _position = transform->getPositionWorld();
         Random _random;
-        auto _particle = ParticleData { glm::vec3 { _position.x, _position.y, 0.f }, glm::vec2 { _random.randomf(-20, 20), _random.randomf(20, 100) }, particleSystemConfig.initColor, particleSystemConfig.lifeTime, particleSystemConfig.velocity, particleSystemConfig.acceleration };
+        auto _particle = ParticleData { glm::vec3 { _position.x, _position.y, 0.f }, glm::vec2 { _random.randomf(-20, 20), _random.randomf(20, 100) }, glm::vec2 {  }, particleSystemConfig.initColor, particleSystemConfig.lifeTime };
         return _particle;
     }
 
     void ParticleSystem::defaultEffect(ParticleData& _particleData, Delta _dt, const ParticleSystemConfig& _config) {
-        _particleData.speed += glm::vec2(_particleData.speed.x, _particleData.speed.y) * (float)_dt * 0.5f;
-        _particleData.position += glm::vec3 { _particleData.speed.x, _particleData.speed.y, 0.f } * (float)_dt;
-        auto _percentage = _particleData.life < _config.lifeTime / 1.5f ? _particleData.life / _config.lifeTime : 1.f;
-        _particleData.color = Color {_particleData.color.r, _particleData.color.g, _particleData.color.b, (unsigned char )(255 * _percentage) };
+        _particleData.velocity += glm::vec2(_particleData.velocity.x, _particleData.velocity.y) * (float)_dt * 0.5f;
+        _particleData.position += glm::vec3 { _particleData.velocity.x, _particleData.velocity.y, 0.f } * (float)_dt;
     }
 
     void ParticleSystem::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const {
@@ -110,5 +112,14 @@ namespace GDE {
             _indices.emplace_back(_vertexCount + 3);
             _indices.emplace_back(_vertexCount + 0);
         }
+    }
+
+    Color ParticleSystem::defaultColorInterpolationFunction(ParticleData& _particleData, Delta _dt, const ParticleSystemConfig& _config) {
+        auto _percentage = _particleData.life < _config.lifeTime / 1.25f ? (1 - _particleData.life / _config.lifeTime) : 0.f;
+        auto _red   = Util::clamp(_particleData.color.r + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.r - _particleData.color.r)), 0, 255);
+        auto _green = Util::clamp(_particleData.color.g + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.g - _particleData.color.g)), 0, 255);
+        auto _blue  = Util::clamp(_particleData.color.b + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.b - _particleData.color.b)), 0, 255);
+        auto _alpha = Util::clamp(_particleData.color.a + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.a - _particleData.color.a)), 0, 255);
+        return Color { (unsigned char)_red, (unsigned char)_green, (unsigned char)_blue, (unsigned char)_alpha };
     }
 }

@@ -34,8 +34,8 @@ namespace Editor {
         ParticleSystemConfig _particleSystemConfig;
         _particleSystemConfig.texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
         _particleSystemConfig.numberOfParticles = 500;
-        _particleSystemConfig.initColor = Color::White;
-        _particleSystemConfig.endColor = Color::White;
+        _particleSystemConfig.initColor = Color {17, 79, 15, 255};
+        _particleSystemConfig.endColor = Color {223, 216, 88, 50};
         _particleSystemConfig.lifeTime = 3.f;
         _particleSystemConfig.timeToCreateNewParticleMs = 0.3f;
         getMainGraph()->getComponent<Transform>(_particleSystemNode)->setPositionWorld(100, 0);

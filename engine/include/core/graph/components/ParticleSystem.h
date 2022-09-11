@@ -20,11 +20,10 @@ namespace GDE {
 
     struct ParticleData {
         glm::vec3 position;
-        glm::vec2 speed;
+        glm::vec2 velocity;
+        glm::vec2 acceleration;
         Color color;
         float life = -1;
-        float velocity = -1;
-        float acceleration = -1;
 
         void reset(const ParticleSystemConfig& _particleSystemConfig, Transform* _parentTransform);
     };
@@ -38,6 +37,7 @@ namespace GDE {
         float acceleration = 1;
         int numberOfParticles;
         UDelegate<void(ParticleData&, Delta, const ParticleSystemConfig&)> effectFunction {};
+        UDelegate<Color(ParticleData&, Delta, const ParticleSystemConfig&)> colorInterpolationFunction {};
         Texture* texture = nullptr;
         float timeToCreateNewParticleMs = 100;
         bool loop = true;
@@ -79,6 +79,7 @@ namespace GDE {
         private:
             ParticleData allocator();
             void defaultEffect(ParticleData& _particleData, Delta _dt, const ParticleSystemConfig& _config);
+            Color defaultColorInterpolationFunction(ParticleData& _particleData, Delta _dt, const ParticleSystemConfig& _config);
     };
 
 }
