@@ -13,6 +13,13 @@ namespace GDE {
 
     class RenderManager {
 
+        friend class Graph;
+        friend class Engine;
+        friend class ImGuiScene;
+        friend class FrameBuffer;
+        friend class Canvas;
+        friend class Manager;
+
         // Debug
         public:
             void resetDebugInfo();
@@ -30,7 +37,7 @@ namespace GDE {
              */
             Color clearColor = Color::Red;
 
-        public:
+        private:
             /**
              * @attention This is not meant to be called by end-users.
              * @brief Must be called ONCE before rendering anything, BUT after creating the window.
@@ -86,6 +93,17 @@ namespace GDE {
             void draw(const IRenderizable* _renderizable, const Transform& _transform);
 
             /**
+             * @brief Sends the data batched to the GPU, must be called after beginDraw and what we want to render.
+             */
+            void endDraw();
+
+            /**
+             * @brief Sends the debug data batched to the GPU, must be called after beginDebugDraw and what we want to render.
+             */
+            void endDebugDraw();
+
+        public:
+            /**
              * @brief Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
              * @param _p0 Starting point of the line.
              * @param _p1 Ending point of the line.
@@ -114,16 +132,6 @@ namespace GDE {
              * @param _color Color of the grid
              */
             void drawGrid(const Color& _color = Color::White);
-
-            /**
-             * @brief Sends the data batched to the GPU, must be called after beginDraw and what we want to render.
-             */
-            void endDraw();
-
-            /**
-             * @brief Sends the debug data batched to the GPU, must be called after beginDebugDraw and what we want to render.
-             */
-            void endDebugDraw();
     };
 }
 

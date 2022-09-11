@@ -25,14 +25,6 @@ namespace GDE {
      * @brief This class contains all of the managers of the engine, so end users can access all of them from one single place.
      */
     class Manager {
-        friend class Graph;
-        friend class Engine;
-        friend class ImGuiScene;
-        friend class FrameBuffer;
-        friend class Canvas;
-
-        private:
-            RenderManager renderManager;
 
         public:
             Manager();
@@ -96,6 +88,11 @@ namespace GDE {
             * @see ControllerVibrationManager
             */
             ControllerVibrationManager controllerVibrationManager;
+
+            /**
+             * @see RenderManager
+             */
+            RenderManager renderManager;
 
         public:
             /**
