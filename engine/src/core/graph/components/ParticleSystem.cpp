@@ -40,7 +40,6 @@ namespace GDE {
 
     void ParticleSystem::update(Delta _dt) {
         static float _timer = 0.0f;
-
         for (auto _it = usedParticles.begin(); _it != usedParticles.end(); ++_it) {
 
             _it->life -= _dt;
@@ -51,9 +50,13 @@ namespace GDE {
                 continue;
             }
 
+            if(!isPlaying) continue;
+
             particleSystemConfig.effectFunction(*_it, _dt, particleSystemConfig);
             _it->color = particleSystemConfig.colorInterpolationFunction(*_it, _dt, particleSystemConfig);
         }
+
+        if(!isPlaying) return;
 
         if(_timer > particleSystemConfig.timeToCreateNewParticleMs) {
             ParticleData* _particle = pool.getElement();
@@ -61,7 +64,7 @@ namespace GDE {
             _timer = 0.0f;
         }
 
-        _timer += _dt.GetMilliseconds();
+        _timer += _dt.getMilliseconds();
     }
 
     ParticleData ParticleSystem::allocator() {
@@ -121,5 +124,26 @@ namespace GDE {
         auto _blue  = Util::clamp(_particleData.color.b + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.b - _particleData.color.b)), 0, 255);
         auto _alpha = Util::clamp(_particleData.color.a + (unsigned char )(_percentage * _dt * std::abs(_config.endColor.a - _particleData.color.a)), 0, 255);
         return Color { (unsigned char)_red, (unsigned char)_green, (unsigned char)_blue, (unsigned char)_alpha };
+    }
+
+    void ParticleSystem::play() {
+        isPlaying = true;
+    }
+
+    void ParticleSystem::pause() {
+        isPlaying = false;
+    }
+
+    void ParticleSystem::stop() {
+        isPlaying = false;
+        reset();
+    }
+
+    void ParticleSystem::reset() {
+        for (auto _it = usedParticles.begin(); _it != usedParticles.end(); ++_it) {
+            _it->reset(particleSystemConfig, transform);
+            pool.returnElement(_it.base());
+            usedParticles.erase(_it);
+        }
     }
 }
