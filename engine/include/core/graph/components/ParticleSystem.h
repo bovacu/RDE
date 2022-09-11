@@ -1,8 +1,8 @@
 // Created by borja on 31/3/22.
 
 
-#ifndef ENGINE_PARTICLE_SYSTEM_H
-#define ENGINE_PARTICLE_SYSTEM_H
+#ifndef GDE_PARTICLE_SYSTEM_H
+#define GDE_PARTICLE_SYSTEM_H
 
 #include <vector>
 #include "glm/vec3.hpp"
@@ -152,4 +152,4 @@ namespace GDE {
 
 }
 
-#endif //ENGINE_PARTICLE_SYSTEM_H
+#endif //GDE_PARTICLE_SYSTEM_H
