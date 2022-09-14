@@ -45,7 +45,8 @@ namespace GDE {
             _it->life -= _dt;
             if (_it->life < 0) {
                 _it->reset(particleSystemConfig, transform);
-                pool.returnElement(_it.base());
+                auto _particle = _it;
+                pool.returnElement(&(*_it));
                 usedParticles.erase(_it);
                 continue;
             }
@@ -152,7 +153,7 @@ namespace GDE {
     void ParticleSystem::reset() {
         for (auto _it = usedParticles.begin(); _it != usedParticles.end(); ++_it) {
             _it->reset(particleSystemConfig, transform);
-            pool.returnElement(_it.base());
+            pool.returnElement(&(*_it));
             usedParticles.erase(_it);
         }
     }
