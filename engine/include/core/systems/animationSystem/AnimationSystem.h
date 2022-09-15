@@ -38,7 +38,7 @@ namespace GDE {
 
             template<typename T>
             T& getValue() {
-                ENGINE_ASSERT(whatEver, nullptr)
+                ENGINE_ASSERT(whatEver, nullptr, "There are no transition parameters, but you are trying to get them!")
                 return *(T*)whatEver;
             }
     };
