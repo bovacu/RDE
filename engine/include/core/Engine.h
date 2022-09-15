@@ -1,8 +1,8 @@
 // Created by borja on 24/12/21.
 
 
-#ifndef ENGINE2_0_ENGINE_H
-#define ENGINE2_0_ENGINE_H
+#ifndef GDE_ENGINE_H
+#define GDE_ENGINE_H
 
 
 #include "core/render/window/Window.h"
@@ -271,4 +271,4 @@ namespace GDE {
 }
 
 
-#endif //ENGINE2_0_ENGINE_H
+#endif //GDE_ENGINE_H
