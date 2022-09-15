@@ -10,37 +10,7 @@
 #include "core/Engine.h"
 
 namespace GDE {
-
-/*    template<typename... Type>
-    entt::type_list<Type...> as_type_list(const entt::type_list<Type...> &);
-
-    template<typename Entity>
-    struct PolyStorage: entt::type_list_cat_t<
-            decltype(as_type_list(std::declval<entt::storage<Entity>>())),
-            entt::type_list<void(entt::basic_registry<Entity> &, const Entity, const Entity)>
-    > {
-        template<typename Base>
-        struct type: entt::storage<Entity>::template type<Base> {
-            static constexpr auto base = decltype(as_type_list(std::declval<entt::storage<Entity>>()))::size;
-
-            void copy_to(entt::basic_registry<Entity> &reg, const Entity from, const Entity to) {
-                entt::poly_call<base + 0>(*this, reg, from, to);
-            }
-        };
-
-        template<typename Type>
-        static void copy_to(Type &pool, entt::basic_registry<Entity> &reg, const Entity from, const Entity to) {
-            pool.emplace(reg, to, pool.get(from));
-        }
-
-        template<typename Type>
-        using impl = entt::value_list_cat_t<
-                typename entt::storage<Entity>::template impl<Type>,
-                entt::value_list<&copy_to<Type>>
-        >;
-    };
-*/
-
+    
     /// All of these are foo functions as Delegates need to have something assigned to be called.
     static void onEventDelFoo(NodeContainer&, Event& _event) {  }
     static void onUpdateDelFoo(NodeContainer&, Delta) {  }
