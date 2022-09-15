@@ -202,7 +202,10 @@ namespace GDE {
              * 
              */
             CollisionCallback callback;
-            
+
+        public:
+            bool drawDebugInfo = true;
+
         public:
             PhysicsManager() = default;
 

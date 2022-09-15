@@ -77,6 +77,17 @@ namespace GDE {
         viewport = _camera.getViewport();
     }
 
+    void SpriteBatch::Debug::drawPoint(const Vec2F& _position, const Color& _color) {
+        glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
+        auto _screenPos = Util::worldToScreenCoords(*batch->viewport, _position);
+        auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x, _screenPos.y, 1.f));
+        auto _scalingFactor = batch->viewport->getScalingFactor();
+        if(_scalingFactor != 1) {
+            _transformMat *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
+        }
+        vertexDebugBufferPoints.emplace_back(_transformMat * glm::vec4 {_screenPos.x, _screenPos.y, 0.0f, 1.0f}, _colorVec4);
+    }
+
     void SpriteBatch::Debug::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
         auto _screenPos0 = Util::worldToScreenCoords(*batch->viewport, _p0);
@@ -238,6 +249,12 @@ namespace GDE {
         glBindVertexArray(_shader->getShaderVAO());
         glUseProgram(_shader->getShaderID());
 
+        GLint location = glGetUniformLocation(_shader->getShaderID(), "viewProjectionMatrix");
+        glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(batch->viewProjectionMatrix)));
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+
         if(!vertexDebugBufferGeometrics.empty()) {
             glBindBuffer(GL_ARRAY_BUFFER, _shader->getShaderVBO());
             glBufferData(GL_ARRAY_BUFFER, (long)(_shader->getShaderVertexDataSize() * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
@@ -254,10 +271,22 @@ namespace GDE {
             glDrawArrays(GL_LINES, 0, (int) vertexDebugBufferLines.size());
         }
 
+        if(!vertexDebugBufferPoints.empty()) {
+            glBindBuffer(GL_ARRAY_BUFFER, _shader->getShaderVBO());
+            glBufferData(GL_ARRAY_BUFFER, (long) (_shader->getShaderVertexDataSize() * vertexDebugBufferPoints.size()), &vertexDebugBufferPoints[0], GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            glDrawArrays(GL_POINTS, 0, (int) vertexDebugBufferPoints.size());
+        }
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+
         glBindVertexArray(0);
 
         vertexDebugBufferGeometrics.clear();
         vertexDebugBufferLines.clear();
+        vertexDebugBufferPoints.clear();
     }
 
     void SpriteBatch::Debug::setDebugLinesThickness(float _thickness) {

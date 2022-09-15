@@ -47,6 +47,11 @@ namespace GDE {
                 std::vector<OpenGLVertexDebug> vertexDebugBufferLines {};
 
                 /**
+                 * @brief vertices to draw simple points.
+                 */
+                std::vector<OpenGLVertexDebug> vertexDebugBufferPoints {};
+
+                /**
                  * @brief Debug VertexBuffer ID on the GPU.
                  */
                 GLuint debugVbo = -1;
@@ -74,6 +79,13 @@ namespace GDE {
                  * @param _color Color of the grid
                  */
                 void drawGrid(const Color& _color);
+
+                /**
+                 * @brief Draws a point at _position on _color.
+                 * @param _position Position
+                 * @param _color Color of the line
+                 */
+                void drawPoint(const Vec2F& _position, const Color& _color = Color::Green);
 
                 /**
                  * @brief Draws a line from _p0 to _p1 on _color

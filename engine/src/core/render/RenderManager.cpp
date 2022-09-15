@@ -18,7 +18,7 @@ namespace GDE {
 //        glCullFace(GL_FRONT);
 //        glFrontFace(GL_CW);
 
-#if !IS_MOBILE()
+        #if !IS_MOBILE()
         glEnable(GL_LINE_SMOOTH);
         glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
         #endif
@@ -48,6 +48,10 @@ namespace GDE {
 
     void RenderManager::beginDraw(Camera& _camera, Transform* _cameraTransform) {
         batch.beginDraw(_camera, _cameraTransform);
+    }
+
+    void RenderManager::drawPoint(const Vec2F& _position, const Color& _color) {
+        batch.debug.drawPoint(_position, _color);
     }
 
     void RenderManager::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {

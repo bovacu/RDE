@@ -104,6 +104,13 @@ namespace GDE {
 
         public:
             /**
+                 * @brief Draws a point at _position. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
+                 * @param _position Position.
+                 * @param _color Color of the line.
+                 */
+            void drawPoint(const Vec2F& _position, const Color& _color = Color::White);
+
+            /**
              * @brief Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
              * @param _p0 Starting point of the line.
              * @param _p1 Ending point of the line.
