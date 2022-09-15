@@ -121,7 +121,13 @@ namespace GDE {
                  * @brief Sets the lines thickness.
                  * @param _thickness Line thickness
                  */
-                void setDebugLinesThickness(float _thickness);
+                void setLinesThickness(float _thickness);
+
+                /**
+                 * @brief Sets the point size.
+                 * @param _size Point size
+                 */
+                void setPointSize(float _size);
         };
 
         public:

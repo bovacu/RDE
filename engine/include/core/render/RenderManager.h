@@ -139,6 +139,18 @@ namespace GDE {
              * @param _color Color of the grid
              */
             void drawGrid(const Color& _color = Color::White);
+
+            /**
+             * @brief Sets line thickness.
+             * @param _thickness Line thickness
+             */
+            void setLineThickness(float _thickness);
+
+            /**
+             * @brief Sets point size.
+             * @param _size Point size
+             */
+            void setPointSize(float _size);
     };
 }
 

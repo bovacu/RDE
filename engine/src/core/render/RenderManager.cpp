@@ -19,6 +19,7 @@ namespace GDE {
 //        glFrontFace(GL_CW);
 
         #if !IS_MOBILE()
+        glEnable(GL_PROGRAM_POINT_SIZE);
         glEnable(GL_LINE_SMOOTH);
         glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
         #endif
@@ -67,7 +68,7 @@ namespace GDE {
     }
 
     void RenderManager::beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness) {
-        batch.debug.setDebugLinesThickness(_thickness);
+        batch.debug.setLinesThickness(_thickness);
         batch.beginDraw(_camera, _cameraTransform);
     }
 
@@ -110,6 +111,14 @@ namespace GDE {
 
     void RenderManager::drawGrid(const Color& _color) {
         batch.debug.drawGrid(_color);
+    }
+
+    void RenderManager::setLineThickness(float _thickness) {
+        batch.debug.setLinesThickness(_thickness);
+    }
+
+    void RenderManager::setPointSize(float _size) {
+        batch.debug.setPointSize(_size);
     }
 
 

@@ -78,6 +78,9 @@ namespace GDE {
     }
 
     void SpriteBatch::Debug::drawPoint(const Vec2F& _position, const Color& _color) {
+        if(vertexDebugBufferPoints.size() > 50000)
+            flushDebug();
+
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
         auto _screenPos = Util::worldToScreenCoords(*batch->viewport, _position);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x, _screenPos.y, 1.f));
@@ -289,11 +292,13 @@ namespace GDE {
         vertexDebugBufferPoints.clear();
     }
 
-    void SpriteBatch::Debug::setDebugLinesThickness(float _thickness) {
+    void SpriteBatch::Debug::setLinesThickness(float _thickness) {
         glLineWidth(_thickness);
     }
 
-
+    void SpriteBatch::Debug::setPointSize(float _size) {
+        glPointSize(_size);
+    }
 
 
     SpriteBatch* SpriteBatch::Debug::batch;
