@@ -255,9 +255,6 @@ namespace GDE {
         GLint location = glGetUniformLocation(_shader->getShaderID(), "viewProjectionMatrix");
         glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(batch->viewProjectionMatrix)));
 
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-
         if(!vertexDebugBufferGeometrics.empty()) {
             glBindBuffer(GL_ARRAY_BUFFER, _shader->getShaderVBO());
             glBufferData(GL_ARRAY_BUFFER, (long)(_shader->getShaderVertexDataSize() * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
@@ -281,9 +278,6 @@ namespace GDE {
 
             glDrawArrays(GL_POINTS, 0, (int) vertexDebugBufferPoints.size());
         }
-
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
 
         glBindVertexArray(0);
 
