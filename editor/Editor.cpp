@@ -45,7 +45,7 @@ namespace Editor {
             }
         };
 
-        _particleSystemConfig.dataConfig.texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
+//        _particleSystemConfig.dataConfig.texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
         _particleSystemConfig.dataConfig.numberOfParticles = 500;
         _particleSystemConfig.dataConfig.lifeTime = 3.f;
         _particleSystemConfig.dataConfig.timeToCreateNewParticleMs = 0.3f;

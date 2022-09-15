@@ -1,0 +1,47 @@
+{
+    "sprite_sheet_name": "defaultAssets.png",
+    "sprite_sheet_size": [128, 32],
+    "sprite_sheet_settings": {
+        "format": "png",
+        "path": "/home/borja/Documents/GDE/defaultAssets/defaultAssets.png"
+    },
+    "sprites" : [
+        {
+            "name": "defaultParticle",
+            "size": [32, 32],
+            "size_in_uv": [0.25, 1],
+            "origin": [64, 0],
+            "origin_in_uv": [0.5, 0],
+            "origin_offset": [0, 0],
+            "center_pivot": [16, 16],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "defaultSprite",
+            "size": [32, 32],
+            "size_in_uv": [0.25, 1],
+            "origin": [96, 0],
+            "origin_in_uv": [0.75, 0],
+            "origin_offset": [0, 0],
+            "center_pivot": [16, 16],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "defaultUI",
+            "size": [64, 32],
+            "size_in_uv": [0.5, 1],
+            "origin": [0, 0],
+            "origin_in_uv": [0, 0],
+            "origin_offset": [0, 0],
+            "center_pivot": [32, 16],
+            "scaling_factor": 1,
+            "nine_patch" : {
+                "top": 7,
+                "left": 7,
+                "right": 50,
+                "bottom": 18
+            }
+        }
+    ]
+
+}

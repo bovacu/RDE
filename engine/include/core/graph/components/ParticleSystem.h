@@ -57,6 +57,7 @@ namespace GDE {
         Texture* texture = nullptr;
         float timeToCreateNewParticleMs = 100;
         bool loop = true;
+        ShaderID shader = -1;
     };
 
     /**

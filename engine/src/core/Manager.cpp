@@ -19,6 +19,7 @@ namespace GDE {
         soundManager.init();
         sceneManager.init(_engine);
         physics.init();
+        textureManager.init(&fileManager);
     }
 
     void Manager::destroy() {

@@ -13,6 +13,7 @@
 #endif
 
 #include "Texture.h"
+#include "core/systems/fileSystem/FileManager.h"
 
 namespace GDE {
 
@@ -107,9 +108,16 @@ namespace GDE {
     class TextureAtlasManager {
         private:
             std::unordered_map<std::string, Atlas*> atlases;
+            FileManager* fileManager;
 
         public:
-            bool loadSpriteSheet(const nlohmann::json& _spriteSheetNode);
+            /**
+             * @attention This function should not be called by end users.
+             * @brief Initiates the sound system.
+             */
+            void init(FileManager* _fileManager);
+
+            bool loadSpriteSheet(const std::string& _spriteSheetPath);
 
             /**
              * @brief This function returns a sub-texture inside the Sprite Sheet.

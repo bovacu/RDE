@@ -32,10 +32,17 @@ namespace GDE {
             particleSystemConfig.callbacksConfig.colorInterpolationFunction.bind<&ParticleSystem::defaultColorInterpolationFunction>(this);
         }
 
-        shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
+        if(shaderID == -1) {
+            shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
+        } else {
+            shaderID = _particleSystemConfig.dataConfig.shader;
+        }
+
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
-        ENGINE_ASSERT(particleSystemConfig.dataConfig.texture != nullptr, "Tried to use a particle system without specifying a texture!!!")
+        if(particleSystemConfig.dataConfig.texture == nullptr) {
+            particleSystemConfig.dataConfig.texture = _scene->engine->manager.textureManager.getSubTexture("defaultAssets", "defaultParticle");
+        }
     }
 
     void ParticleSystem::update(Delta _dt) {

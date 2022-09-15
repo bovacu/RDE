@@ -5,7 +5,14 @@
 
 namespace GDE {
 
-    bool TextureAtlasManager::loadSpriteSheet(const nlohmann::json& _spriteSheetNode) {
+    void TextureAtlasManager::init(FileManager* _fileManager) {
+        loadSpriteSheet("defaultAssets/defaultAssets.json");
+    }
+
+    bool TextureAtlasManager::loadSpriteSheet(const std::string& _spriteSheetPath) {
+        auto _handle = fileManager->open(_spriteSheetPath, FileMode::READ);
+        auto _spriteSheetNode = nlohmann::json::parse(fileManager->readFullFile(_handle).content);
+        fileManager->close(_handle);
         auto _pathToTexture = _spriteSheetNode["sprite_sheet_settings"]["path"].get<std::string>();
         auto _name = Util::getFileNameFromPath(_pathToTexture);
         LOG_I_TIME("Trying to load '", _pathToTexture, "'...")

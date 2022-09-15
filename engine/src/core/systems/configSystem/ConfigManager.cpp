@@ -51,9 +51,7 @@ namespace GDE {
         if(_assets.contains("textures")) {
             auto& _texturesNode = _assets["textures"];
             for (const auto& _texture : _texturesNode) {
-                auto _fileHandler = _scene->engine->manager.fileManager.open(_texture.get<std::string>(), FileMode::READ);
-                _scene->engine->manager.textureManager.loadSpriteSheet(nlohmann::json::parse(_scene->engine->manager.fileManager.readFullFile(_fileHandler).content));
-                _scene->engine->manager.fileManager.close(_fileHandler);
+                _scene->engine->manager.textureManager.loadSpriteSheet(_texture.get<std::string>());
             }
         }
 
