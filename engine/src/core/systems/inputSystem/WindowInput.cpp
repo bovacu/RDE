@@ -52,11 +52,11 @@ namespace GDE {
     }
 
     void WindowInput::onWindowGainFocus(SDL_Event& _event) {
-        window->setMinimized(false);
+        window->hasFocus = true;
     }
 
     void WindowInput::onWindowLostFocus(SDL_Event& _event) {
-
+        window->hasFocus = false;
     }
 
     void WindowInput::onWindowResize(SDL_Event& _event) {
@@ -72,13 +72,13 @@ namespace GDE {
     void WindowInput::onWindowMinimized(SDL_Event& _event) {
         WindowMinimizedEvent _e(1);
         window->consumeEvent(_e);
-        window->setMinimized(true);
+        window->minimized = true;
     }
 
     void WindowInput::onWindowMaximized(SDL_Event& _event) {
         WindowMinimizedEvent _e(0);
         window->consumeEvent(_e);
-        window->setMinimized(false);
+        window->minimized = false;
     }
 
     void WindowInput::onQuit(SDL_Event& _event) {
@@ -87,10 +87,12 @@ namespace GDE {
 
     void WindowInput::onDidEnterForegroundApp(SDL_Event& _event) {
         LOG_W("DID ENTER FOREGROUND")
+        window->hasFocus = true;
     }
 
     void WindowInput::onDidEnterBackground(SDL_Event& _event) {
         LOG_W("DID ENTER BACKGROUND")
+        window->hasFocus = false;
     }
 
     void WindowInput::onDestroyApp(SDL_Event& _event) {
@@ -100,11 +102,11 @@ namespace GDE {
 
     void WindowInput::onWillEnterForegroundApp(SDL_Event& _event) {
         LOG_W("WILL ENTER FOREGROUND")
-        window->setMinimized(false);
+        window->hasFocus = false;
     }
 
     void WindowInput::onWillEnterBackground(SDL_Event& _event) {
         LOG_W("WILL ENTER BACKGROUND")
-        window->setMinimized(true);
+        window->hasFocus = true;
     }
 }

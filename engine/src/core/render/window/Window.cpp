@@ -13,6 +13,10 @@
 
 namespace GDE {
 
+    static bool shouldUpdateWindowDefault() {
+        return true;
+    }
+
     Window::Window(GDEConfig* _config) : window(nullptr) {
         properties = _config;
 
@@ -33,6 +37,8 @@ namespace GDE {
         SDL_GetVersion(&linked);
         SDL_Log("We compiled against SDL version %u.%u.%u ...\n", compiled.major, compiled.minor, compiled.patch);
         SDL_Log("But we are linking against SDL version %u.%u.%u.\n", linked.major, linked.minor, linked.patch);
+
+        shouldUpdateWindow.bind<shouldUpdateWindowDefault>();
     }
 
     Window::~Window() {
@@ -65,10 +71,6 @@ namespace GDE {
 
     bool Window::isFullscreen() const {
         return properties->windowData.fullScreen;
-    }
-
-    void Window::setMinimized(bool _minimized) {
-        minimized = _minimized;
     }
 
     void Window::setIcon(const std::string& _path) {
@@ -128,6 +130,10 @@ namespace GDE {
 
     bool Window::isRunning() {
         return running;
+    }
+
+    bool Window::isFocused() {
+        return hasFocus;
     }
 
     void Window::stop() {

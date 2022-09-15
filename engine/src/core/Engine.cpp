@@ -59,8 +59,7 @@ namespace GDE {
             Profiler::beginFrame(_dt);
             manager.inputManager.pollEvents();
 
-            if (!window->isMinimized()) {
-
+            if (window->shouldUpdateWindow()) {
                 Profiler::begin(ProfilerState::UPDATE);
                 onUpdate(_dt);
                 Profiler::end(ProfilerState::UPDATE);
@@ -75,11 +74,11 @@ namespace GDE {
                 Profiler::begin(ProfilerState::RENDERING);
                 onRender(_dt);
                 Profiler::end(ProfilerState::RENDERING);
-            }
 
-            Profiler::begin(ProfilerState::INPUT);
-            window->update();
-            Profiler::end(ProfilerState::INPUT);
+                Profiler::begin(ProfilerState::INPUT);
+                window->update();
+                Profiler::end(ProfilerState::INPUT);
+            }
 
             Profiler::endFrame();
             manager.renderManager.resetDebugInfo();

@@ -14,6 +14,9 @@ namespace GDE {
      */
     struct GDEConfig;
     class Window {
+
+        friend class WindowInput;
+
         protected:
             /**
              * @brief SDL_Window used as a base of the engine Window.
@@ -42,9 +45,22 @@ namespace GDE {
             bool minimized = false;
 
             /**
+             * @brief If the Window has the focus.
+             */
+            bool hasFocus = true;
+
+            /**
              * @brief If the window is running or not.
              */
             bool running = true;
+
+        public:
+            /**
+             * @brief This callback lets the user define how and when the window should run the game. By default it is
+             * set to run always, but typical customization could be only run if the window is focused or if the window
+             * is not minimized.
+             */
+            UDelegate<bool()> shouldUpdateWindow;
 
         protected:
             explicit Window(GDEConfig* _props);
@@ -52,7 +68,6 @@ namespace GDE {
         public:
             ~Window() ;
 
-        public:
             /**
              * @brief This method is used to update the window, poll the events and
              * swap the buffers.
@@ -114,12 +129,6 @@ namespace GDE {
              */
             [[nodiscard]] bool isFullscreen() const;
 
-            /*
-             * @brief Sets the window to minimized.
-             * @param _minimized Sets the window to minimized or not.
-             */
-            void setMinimized(bool _minimized);
-
             /**
              * @brief Sets the method that will be executed when a polled event triggers.
              * @param _callback A void method with an Event& as parameter.
@@ -179,6 +188,12 @@ namespace GDE {
              * @return bool
              */
             bool isRunning();
+
+            /**
+             * @brief Returns if the Window is focused or not.
+             * @return bool
+             */
+            bool isFocused();
 
             /**
              * @brief Makes the window to close and the application to exit.

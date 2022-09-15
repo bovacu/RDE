@@ -43,6 +43,11 @@ namespace GDE {
              * @brief VSync active or not.
              */
             bool vsync = true;
+
+            /**
+             * @brief Allows the game to run even if it is not focused.
+             */
+            bool allowRunningOnBackground = true;
         };
 
         /**
