@@ -56,7 +56,7 @@ namespace GDE {
 
             if(manager.sceneManager.getDisplayedScene() == nullptr) return;
 
-            GDE::Profiler::beginFrame(_dt);
+            Profiler::beginFrame(_dt);
             manager.inputManager.pollEvents();
 
             if (!window->isMinimized()) {
@@ -77,11 +77,11 @@ namespace GDE {
                 Profiler::end(ProfilerState::RENDERING);
             }
 
-            GDE::Profiler::begin(ProfilerState::INPUT);
+            Profiler::begin(ProfilerState::INPUT);
             window->update();
-            GDE::Profiler::end(ProfilerState::INPUT);
+            Profiler::end(ProfilerState::INPUT);
 
-            GDE::Profiler::endFrame();
+            Profiler::endFrame();
             manager.renderManager.resetDebugInfo();
 
             Uint64 _end = SDL_GetPerformanceCounter();
