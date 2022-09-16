@@ -64,6 +64,9 @@ namespace GDE {
             size.y = std::max(size.y, _char.bitmapSize.y - _char.bearing.y);
         }
 
+        size.x *= transform->getScaleLocal().x;
+        size.y *= transform->getScaleLocal().y;
+
 //        debugShape.makeSquare(getPositionLocal(), size);
     }
 
