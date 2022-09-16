@@ -170,6 +170,7 @@ namespace GDE {
         auto* _transform = getComponent<Transform>(_copy);
         (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent))->children.push_back(_copy);
         _transform->setPosition(_position);
+        _transform->parentTransform = (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent));
         _transform->update();
         if(_parent != NODE_ID_NULL) setParent(_copy, _parent);
         setNodeActive(_copy, true);
@@ -233,6 +234,7 @@ namespace GDE {
         remove(_node, false);
         _nodeTransform->parent = _parent;
         auto* _parentTransform = &registry.get<Transform>(_parent);
+        _nodeTransform->parentTransform = _parentTransform;
         _parentTransform->children.push_back(_node);
     }
 
@@ -260,6 +262,7 @@ namespace GDE {
     void Graph::orphan(const NodeID& _node) {
         remove(_node, false);
         (&registry.get<Transform>(_node))->parent = sceneRoot;
+        (&registry.get<Transform>(_node))->parentTransform = getComponent<Transform>(sceneRoot);
         (&registry.get<Transform>(sceneRoot))->children.push_back(_node);
     }
 
