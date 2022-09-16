@@ -100,7 +100,7 @@ namespace GDE {
              * @brief The size of the Sprite, not the whole SpriteSheet EXCEPT if this texture is itself a the whole
              * SpriteSheet.
              */
-            Vec2I textureSize;
+            Vec2F textureSize;
 
             /**
              * @brief The size of the SpriteSheet this texture comes from or its natural size if this is the SpriteSheet itself.
@@ -121,7 +121,7 @@ namespace GDE {
              * @brief Out of the whole SpriteSheet, the portion that the renderer should draw on screen. If this texture
              * is itself the SpriteSheet, then the region is the whole SpriteSheet.
              */
-            IntRect region {};
+            FloatRect region {};
 
             /**
              * @brief Size in Kilobytes of the SpriteSheet.
@@ -142,7 +142,7 @@ namespace GDE {
         public:
             Texture() {};
             explicit Texture(char* filePath);
-            Texture(Atlas* _spriteSheet, const IntRect& _region);
+            Texture(Atlas* _spriteSheet, const FloatRect& _region);
             virtual ~Texture();
 
             /**
@@ -156,7 +156,7 @@ namespace GDE {
              * SpriteSheet itself.
              * @return Vec2I
              */
-            [[nodiscard]] Vec2I getSize() const;
+            [[nodiscard]] Vec2F getSize() const;
 
             /**
              * @brief Returns the size of the SpriteSheet where this sub-texture comes from.
@@ -211,7 +211,7 @@ namespace GDE {
              * @brief Returns the portion of the SpriteSheet that will be rendered.
              * @return IntRect&
              */
-            IntRect& getRegion();
+            FloatRect& getRegion();
 
             /**
              * @brief Returns the path to the location of the SpriteSheet.

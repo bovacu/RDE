@@ -19,15 +19,15 @@ namespace GDE {
             /**
              * @brief This is the size we want the UI to be rendered, may or may not match UI::getSize().
              */
-            Vec2I nineSliceSize;
+            Vec2F nineSliceSize;
 
             /**
              * @see UIInteractable
              */
             UIInteractable* interaction = nullptr;
 
-            NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas);
-            NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture);
+            NineSliceSprite(const NodeID& _nodeID, Transform* _transform, Scene* _scene, Canvas* _canvas);
+            NineSliceSprite(const NodeID& _nodeID, Transform* _transform, Scene* _scene, Canvas* _canvas, Texture* _texture);
 
             /**
              * @brief Returns the NineSlice data. This is almost sure not to be needed by end-users.

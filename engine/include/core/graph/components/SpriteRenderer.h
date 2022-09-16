@@ -30,8 +30,8 @@ namespace GDE {
             Texture* texture = nullptr;
 
         public:
-            explicit SpriteRenderer(const NodeID& _nodeId, Scene* _scene);
-            SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture);
+            explicit SpriteRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene);
+            SpriteRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Texture* _texture);
             ~SpriteRenderer() override {  }
 
             /**
@@ -68,12 +68,12 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] Vec2I getSize() const override { return texture->getSize(); }
+            [[nodiscard]] Vec2F getSize() const override { return {(float)texture->getSize().x * transform->getScaleLocal().x, (float)texture->getSize().y * transform->getScaleLocal().y}; }
 
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] IntRect getRegion() const override { return texture->getRegion(); }
+            [[nodiscard]] FloatRect getRegion() const override { return texture->getRegion(); }
 
             /**
              * @see IRenderizable

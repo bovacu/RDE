@@ -122,14 +122,21 @@ namespace GDE {
 
     void Graph::onDebugRender() {
         auto _debug = registry.view<Body>();
-        if(_debug.empty()) return;
+        if(_debug.empty() || !scene->engine->manager.physics.drawDebugInfo) return;
 
         auto& _renderManager = scene->engine->manager.renderManager;
 
         _renderManager.beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->ID));
 
         _debug.each([&_renderManager](const auto _entity, const Body& _body) {
-            _renderManager.drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
+            if(_body.bodyConfig.bodyShapeType == BodyShapeType::BOX) {
+                _renderManager.drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
+            } else if (_body.bodyConfig.bodyShapeType == BodyShapeType::CIRCLE) {
+//                Shape _circle;
+//                _circle.makeCircle(_body.getPosition(), _body.bodyConfig.size.x / 2.f * 0.4f, 400);
+//                _circle.showInnerColor(false);
+//                _renderManager.drawShape(_circle);
+            }
         });
 
         _renderManager.endDebugDraw();

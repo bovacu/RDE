@@ -83,7 +83,7 @@ namespace GDE {
             ParticleSystemConfig particleSystemConfig;
 
         public:
-            ParticleSystem(const NodeID& _nodeID, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig);
+            ParticleSystem(const NodeID& _nodeID, Transform* _transform, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig);
             void update(Delta dt);
 
             /**
@@ -114,12 +114,12 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] Vec2I getSize() const override { return particleSystemConfig.dataConfig.texture->getSize(); }
+            [[nodiscard]] Vec2F getSize() const override { return particleSystemConfig.dataConfig.texture->getSize(); }
 
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] IntRect getRegion() const override { return particleSystemConfig.dataConfig.texture->getRegion(); }
+            [[nodiscard]] FloatRect getRegion() const override { return particleSystemConfig.dataConfig.texture->getRegion(); }
 
             /**
              * @see IRenderizable

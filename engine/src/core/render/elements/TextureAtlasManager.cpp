@@ -54,11 +54,11 @@ namespace GDE {
     void TextureAtlasManager::cropTextures(Atlas& _atlas, const nlohmann::json& _spritesNode) {
 
         for(auto& _spriteNode : _spritesNode) {
-            IntRect _rect;
-            _rect.size.x = _spriteNode["size"][0].get<int>();
-            _rect.size.y = _spriteNode["size"][1].get<int>();
-            _rect.bottomLeftCorner.x = _spriteNode["origin"][0].get<int>();
-            _rect.bottomLeftCorner.y = (int)_atlas.textureHeight - (_spriteNode["origin"][1].get<int>() + _rect.size.y);
+            FloatRect _rect;
+            _rect.size.x = _spriteNode["size"][0].get<float>();
+            _rect.size.y = _spriteNode["size"][1].get<float>();
+            _rect.bottomLeftCorner.x = _spriteNode["origin"][0].get<float>();
+            _rect.bottomLeftCorner.y = _atlas.textureHeight - (_spriteNode["origin"][1].get<float>() + _rect.size.y);
 
             auto* _texture = new Texture { &_atlas, _rect };
             if(_spriteNode.contains("nine_patch")) {
@@ -112,12 +112,12 @@ namespace GDE {
     }
 
     void TextureAtlasManager::cropNinePatchSubTextures(Texture* _texture, const nlohmann::json& _spriteNode) {
-        auto _origin = Vec2I {_spriteNode["origin"][0].get<int>(), _texture->getSpriteSheetSize().y - (_spriteNode["origin"][1].get<int>() + _texture->getRegion().size.y)};
+        auto _origin = Vec2I {_spriteNode["origin"][0].get<int>(), static_cast<int>(_texture->getSpriteSheetSize().y - (_spriteNode["origin"][1].get<int>() + _texture->getRegion().size.y))};
         auto _size = Vec2I {_spriteNode["size"][0].get<int>(), _spriteNode["size"][1].get<int>()};
         // Bottom row
         _texture->nineSlice.subRects[0] = {
             .bottomLeftCorner = _origin,
-            .size = {_texture->nineSlice.left, _texture->getRegion().size.y - (_texture->nineSlice.top + _texture->nineSlice.bottom)}
+            .size = {_texture->nineSlice.left, static_cast<int>(_texture->getRegion().size.y - (_texture->nineSlice.top + _texture->nineSlice.bottom))}
         };
 
         _texture->nineSlice.subRects[1] = {

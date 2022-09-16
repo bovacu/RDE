@@ -1,42 +1,42 @@
 // Created by borja on 24/12/21.
 
 
-#ifndef ENGINE2_0_CORE_H
-#define ENGINE2_0_CORE_H
+#ifndef GDE_CORE_H
+#define GDE_CORE_H
 
-#define FRAMEBUFFER_VERTEX_SHADER_ES "assets/shaders/es/framebuffer/FrameBufferVertex.glsl"
-#define FRAMEBUFFER_FRAGMENT_SHADER_ES "assets/shaders/es/framebuffer/FrameBufferFragment.glsl"
-#define FRAMEBUFFER_VERTEX_SHADER_CORE "assets/shaders/core/framebuffer/FrameBufferVertex.glsl"
-#define FRAMEBUFFER_FRAGMENT_SHADER_CORE "assets/shaders/core/framebuffer/FrameBufferFragment.glsl"
-#define RML_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/rmlFragment.glsl"
-#define RML_FRAGMENT_COLOR_ONLY_SHADER_CORE "assets/shaders/core/texture/rmlFragmentColorOnly.glsl"
-#define RML_VERTEX_SHADER_CORE "assets/shaders/core/texture/rmlVertex.glsl"
+#define FRAMEBUFFER_VERTEX_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferVertex.glsl"
+#define FRAMEBUFFER_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferFragment.glsl"
+#define FRAMEBUFFER_VERTEX_SHADER_CORE "defaultAssets/shaders/core/framebuffer/FrameBufferVertex.glsl"
+#define FRAMEBUFFER_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/framebuffer/FrameBufferFragment.glsl"
+#define RML_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/rmlFragment.glsl"
+#define RML_FRAGMENT_COLOR_ONLY_SHADER_CORE "defaultAssets/shaders/core/texture/rmlFragmentColorOnly.glsl"
+#define RML_VERTEX_SHADER_CORE "defaultAssets/shaders/core/texture/rmlVertex.glsl"
 
-#define TEXTURE_VERTEX_SHADER_ES "assets/shaders/es/texture/vertex.glsl"
-#define DEBUG_VERTEX_SHADER_ES "assets/shaders/es/debug/debugVertex.glsl"
+#define TEXTURE_VERTEX_SHADER_ES "defaultAssets/shaders/es/texture/vertex.glsl"
+#define DEBUG_VERTEX_SHADER_ES "defaultAssets/shaders/es/debug/debugVertex.glsl"
 
-#define TEXTURE_VERTEX_SHADER_CORE "assets/shaders/core/texture/vertex.glsl"
-#define DEBUG_VERTEX_SHADER_CORE "assets/shaders/core/debug/debugVertex.glsl"
-#define DEBUG_GRID_VERTEX_SHADER_CORE "assets/shaders/core/debug/gridVertex.glsl"
-#define DEBUG_GRID_FRAGMENT_SHADER_CORE "assets/shaders/core/debug/gridFragment.glsl"
+#define TEXTURE_VERTEX_SHADER_CORE "defaultAssets/shaders/core/texture/vertex.glsl"
+#define DEBUG_VERTEX_SHADER_CORE "defaultAssets/shaders/core/debug/debugVertex.glsl"
+#define DEBUG_GRID_VERTEX_SHADER_CORE "defaultAssets/shaders/core/debug/gridVertex.glsl"
+#define DEBUG_GRID_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/debug/gridFragment.glsl"
 
-#define TEXTURE_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/fragment.glsl"
-#define MIRROR_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/mirrorFragment.glsl"
-#define MIRROR_VERTEX_SHADER_CORE "assets/shaders/core/texture/mirrorVertex.glsl"
-#define TEXT_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/textFragment.glsl"
-#define OUTLINE_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/outlineFragment.glsl"
-#define NEON_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/glowFragment.glsl"
-#define BLOOM_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/bloomFragment.glsl"
-#define BLUR_FRAGMENT_SHADER_CORE "assets/shaders/core/texture/blurFragment.glsl"
-#define DEBUG_FRAGMENT_SHADER_CORE "assets/shaders/core/debug/debugFragment.glsl"
+#define TEXTURE_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/fragment.glsl"
+#define MIRROR_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/mirrorFragment.glsl"
+#define MIRROR_VERTEX_SHADER_CORE "defaultAssets/shaders/core/texture/mirrorVertex.glsl"
+#define TEXT_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/textFragment.glsl"
+#define OUTLINE_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/outlineFragment.glsl"
+#define NEON_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/glowFragment.glsl"
+#define BLOOM_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/bloomFragment.glsl"
+#define BLUR_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/blurFragment.glsl"
+#define DEBUG_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/debug/debugFragment.glsl"
 
-#define TEXTURE_FRAGMENT_SHADER_ES "assets/shaders/es/texture/fragment.glsl"
-#define TEXT_FRAGMENT_SHADER_ES "assets/shaders/es/texture/textFragment.glsl"
-#define OUTLINE_FRAGMENT_SHADER_ES "assets/shaders/es/texture/outlineFragment.glsl"
-#define NEON_FRAGMENT_SHADER_ES "assets/shaders/es/texture/glowFragment.glsl"
-#define BLOOM_FRAGMENT_SHADER_ES "assets/shaders/es/texture/bloomFragment.glsl"
-#define BLUR_FRAGMENT_SHADER_ES "assets/shaders/es/texture/blurFragment.glsl"
-#define DEBUG_FRAGMENT_SHADER_ES "assets/shaders/es/debug/debugFragment.glsl"
+#define TEXTURE_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/fragment.glsl"
+#define TEXT_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/textFragment.glsl"
+#define OUTLINE_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/outlineFragment.glsl"
+#define NEON_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/glowFragment.glsl"
+#define BLOOM_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/bloomFragment.glsl"
+#define BLUR_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/blurFragment.glsl"
+#define DEBUG_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/debug/debugFragment.glsl"
 
 
 
@@ -88,20 +88,4 @@
     #define GDE_DEPRECATED(_explanation) [[gnu::deprecated(_explanation)]]
 #endif
 
-#define ENGINE_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return fn(std::forward<decltype(args)>(args)...); }
-
-// This is for the EventBus
-#define PLACEHOLDERS_1 std::placeholders::_1
-#define PLACEHOLDERS_2 std::placeholders::_1, std::placeholders::_2
-#define PLACEHOLDERS_3 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3
-#define PLACEHOLDERS_4 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4
-#define PLACEHOLDERS_5 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5
-
-#define BIND_FUNC_0(_method) std::bind(&_method, this)
-#define BIND_FUNC_1(_method) std::bind(&_method, this, PLACEHOLDERS_1)
-#define BIND_FUNC_2(_method) std::bind(&_method, this, PLACEHOLDERS_2)
-#define BIND_FUNC_3(_method) std::bind(&_method, this, PLACEHOLDERS_3)
-#define BIND_FUNC_4(_method) std::bind(&_method, this, PLACEHOLDERS_4)
-#define BIND_FUNC_5(_method) std::bind(&_method, this, PLACEHOLDERS_5)
-
-#endif //ENGINE2_0_CORE_H
+#endif //GDE_CORE_H

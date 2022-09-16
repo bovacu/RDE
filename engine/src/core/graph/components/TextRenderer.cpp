@@ -11,7 +11,7 @@
 
 namespace GDE {
 
-    TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text) {
+    TextRenderer::TextRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Font* _font, const std::string& _text) : IRenderizable(_transform) {
         font = _font;
         innerText = _text;
         recalcTextDimensions(_text);
@@ -20,7 +20,7 @@ namespace GDE {
         IRenderizable::batchPriority = BatchPriority::TextPriority;
     }
 
-    TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font) {
+    TextRenderer::TextRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Font* _font) : IRenderizable(_transform) {
         font = _font;
         shaderID = _scene->engine->manager.shaderManager.getShader("basicText")->getShaderID();
         texture = &font->getTexture();

@@ -166,7 +166,7 @@ namespace GDE {
 
     void ConfigManager::loadSpriteRendererComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _spriteRendererJson) {
         auto _ownerEntityID = _nodeID;
-        auto* _spriteRenderer = _scene->getMainGraph()->addComponent<SpriteRenderer>(_ownerEntityID, _scene);
+        auto* _spriteRenderer = _scene->getMainGraph()->addComponent<SpriteRenderer>(_ownerEntityID, _scene->getMainGraph()->getComponent<Transform>(_nodeID), _scene);
 
         ENGINE_ASSERT(_spriteRendererJson.contains("texture"), "SpriteRenderer component MUST have section 'texture'.")
         ENGINE_ASSERT(_spriteRendererJson["texture"].contains("atlas"), "SpriteRenderer component MUST have section 'atlas' in section 'texture'.")
@@ -328,7 +328,7 @@ namespace GDE {
         ENGINE_ASSERT(_textRendererJson.contains("font"), "TextRenderer MUST have section 'font'.")
         ENGINE_ASSERT(_textRendererJson.contains("text"), "TextRenderer MUST have section 'text'.")
 
-        auto* _textRenderer = _scene->getMainGraph()->addComponent<TextRenderer>(_ownerEntityID,
+        auto* _textRenderer = _scene->getMainGraph()->addComponent<TextRenderer>(_ownerEntityID, _scene->getMainGraph()->getComponent<Transform>(_nodeID),
                                                                                  _scene, _scene->engine->manager.fontManager.getDefaultFont(_textRendererJson["font"].get<std::string>()),
                                                                                  _textRendererJson["text"].get<std::string>());
 

@@ -19,7 +19,7 @@ namespace GDE {
         loadFromFile(_path);
     }
 
-    Texture::Texture(Atlas* _spriteSheet, const IntRect& _region) {
+    Texture::Texture(Atlas* _spriteSheet, const FloatRect& _region) {
         openGLTextureID = _spriteSheet->texture->openGLTextureID;
         region = _region;
         textureSize = _region.size;
@@ -38,7 +38,7 @@ namespace GDE {
         return openGLTextureID;
     }
 
-    Vec2I Texture::getSize() const {
+    Vec2F Texture::getSize() const {
         return textureSize;
     }
 
@@ -110,7 +110,7 @@ namespace GDE {
         return true;
     }
 
-    IntRect& Texture::getRegion() {
+    FloatRect& Texture::getRegion() {
         return region;
     }
 
@@ -130,7 +130,7 @@ namespace GDE {
         #if IS_MOBILE()
         glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, textureSize.x, textureSize.y, 0, GL_ALPHA, GL_UNSIGNED_BYTE, nullptr);
         #else
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, textureSize.x, textureSize.y, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, _width, _height, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
         #endif
         
         /* We require 1 byte alignment when uploading texture data */
@@ -252,7 +252,7 @@ namespace GDE {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        region = {{0, 0}, {_width, _height}};
+        region = {{0, 0}, {textureSize.x, textureSize.y}};
 
         return true;
     }
@@ -316,14 +316,14 @@ namespace GDE {
     }
 
     void Image::setPixel(int _x, int _y, const Color& _color) {
-        pixels[_x * channels + _y * textureSize.x * channels + 0] = _color.r;
-        pixels[_x * channels + _y * textureSize.x * channels + 1] = _color.g;
-        pixels[_x * channels + _y * textureSize.x * channels + 2] = _color.b;
-        pixels[_x * channels + _y * textureSize.x * channels + 3] = _color.a;
+        pixels[_x * channels + _y * (int)textureSize.x * channels + 0] = _color.r;
+        pixels[_x * channels + _y * (int)textureSize.x * channels + 1] = _color.g;
+        pixels[_x * channels + _y * (int)textureSize.x * channels + 2] = _color.b;
+        pixels[_x * channels + _y * (int)textureSize.x * channels + 3] = _color.a;
     }
 
     Color Image::getPixel(int _x, int _y) {
-        int _base = pixels[_x * channels + _y * textureSize.x * channels];
+        int _base = pixels[_x * channels + _y * (int)textureSize.x * channels];
         return {pixels[_base], pixels[_base + 1], pixels[_base + 2], pixels[_base + 3]};
     }
 

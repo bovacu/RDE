@@ -11,13 +11,13 @@
 
 namespace GDE {
 
-    NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas) {
+    NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Transform* _transform, Scene* _scene, Canvas* _canvas) : UI(_transform) {
         shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
         interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
     }
 
-    NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture) {
+    NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Transform* _transform, Scene* _scene, Canvas* _canvas, Texture* _texture) : UI(_transform) {
         shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
         texture = _texture;
         nineSliceSize = _texture->getRegion().size;

@@ -29,6 +29,8 @@ namespace GDE {
         public:
             friend class SpriteBatch;
 
+            UI(Transform* _transform) : IRenderizable(_transform) {  }
+
             /**
              * @see IRenderizable
              */
@@ -37,12 +39,12 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] Vec2I getSize() const override { return texture->getSize(); }
+            [[nodiscard]] Vec2F getSize() const override { return texture->getSize(); }
 
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] IntRect getRegion() const override { return texture->getRegion(); }
+            [[nodiscard]] FloatRect getRegion() const override { return texture->getRegion(); }
 
             virtual ~UI() override {};
     };

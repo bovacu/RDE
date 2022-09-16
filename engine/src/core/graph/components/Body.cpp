@@ -37,6 +37,7 @@ namespace GDE {
 
         b2dConfig.fixture = b2dConfig.body->CreateFixture(&b2dConfig.fixtureDef);
         b2dConfig.lastPosition = _transform->getPositionLocal();
+        b2dConfig.lastRotation = _transform->getRotationLocal();
         b2dConfig.body->GetUserData().pointer = reinterpret_cast<uintptr_t>(this);
     }
 

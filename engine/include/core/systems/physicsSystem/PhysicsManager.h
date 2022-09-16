@@ -125,6 +125,8 @@ namespace GDE {
          * 
          */
         Vec2F lastPosition;
+
+        float lastRotation;
     };
 
     struct Body;

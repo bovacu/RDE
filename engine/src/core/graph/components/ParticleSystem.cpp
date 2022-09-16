@@ -17,7 +17,7 @@ namespace GDE {
 
 
 
-    ParticleSystem::ParticleSystem(const GDE::NodeID& _nodeID, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig) {
+    ParticleSystem::ParticleSystem(const GDE::NodeID& _nodeID, Transform* _transform, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig) : IRenderizable(_transform) {
         transform = _scene->getMainGraph()->getComponent<Transform>(_nodeID);
         UDelegate<ParticleData()> _allocator;
         _allocator.bind<&ParticleSystem::allocator>(this);

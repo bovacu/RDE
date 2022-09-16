@@ -43,7 +43,11 @@ namespace GDE {
              */
             BatchPriority batchPriority = BatchPriority::SpritePriority;
 
+            Transform* transform;
+
         public:
+            IRenderizable(Transform* _transform) : transform(_transform) {  }
+
             /**
              * @brief Gets the ID on the GPU of the SpriteSheet that contains the sprite.
              * @return uint
@@ -53,13 +57,13 @@ namespace GDE {
             /**
              * @brief Gets the size of the sprite, same as the size of the region, not the whole SpriteSheet.
              */
-            [[nodiscard]] virtual Vec2I getSize() const = 0;
+            [[nodiscard]] virtual Vec2F getSize() const = 0;
 
             /**
              * @brief Gets the size of the sprite (same as getSize()) and the bottom-left coordinate that represents the origin in the SpriteSheet.
              * @return IntRect 
              */
-            [[nodiscard]] virtual IntRect getRegion() const = 0;
+            [[nodiscard]] virtual FloatRect getRegion() const = 0;
 
             /**
              * @brief Method that every renderizable must implement and it tells the SpriteBatch how to send the data to the GPU.

@@ -73,8 +73,8 @@ namespace GDE {
         void recalcTextDimensions(const std::string& _text);
 
         public:
-        TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text);
-        TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font);
+        TextRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Font* _font, const std::string& _text);
+        TextRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Font* _font);
         ~TextRenderer() override {  }
 
         /**
@@ -151,12 +151,12 @@ namespace GDE {
         /**
          * @see IRenderizable
          */
-        [[nodiscard]] Vec2I getSize() const override { return texture->getSize(); }
+        [[nodiscard]] Vec2F getSize() const override { return texture->getSize(); }
 
         /**
          * @see IRenderizable
          */
-        [[nodiscard]] IntRect getRegion() const override { return texture->getRegion(); }
+        [[nodiscard]] FloatRect getRegion() const override { return texture->getRegion(); }
 
         /**
          * @see IRenderizable
