@@ -49,8 +49,9 @@ namespace Editor {
         _particleSystemConfig.dataConfig.numberOfParticles = 500;
         _particleSystemConfig.dataConfig.lifeTime = 3.f;
         _particleSystemConfig.dataConfig.timeToCreateNewParticleMs = 0.3f;
-        getMainGraph()->getComponent<Transform>(_particleSystemNode)->setPositionWorld(100, 0);
-        auto _particleSystem = getMainGraph()->addComponent<ParticleSystem>(_particleSystemNode, this, _particleSystemConfig);
+        auto _particleSystemTransform = getMainGraph()->getComponent<Transform>(_particleSystemNode);
+        _particleSystemTransform->setPositionWorld(100, 0);
+        auto _particleSystem = getMainGraph()->addComponent<ParticleSystem>(_particleSystemNode, _particleSystemTransform, this, _particleSystemConfig);
         _particleSystem->play();
     }
 
@@ -74,15 +75,16 @@ namespace Editor {
             Random _r;
             auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
             // 40000 is the maximum I could get with 55fps of average performance, with texts -> "Text[0-40000]" ~350000 images
+            auto _parent = getMainGraph()->createNode("parent");
 
             for(int _i = 0; _i < 10; _i++) {
-                auto _text = getMainGraph()->createNode("Block" + std::to_string(_i));
+                auto _text = getMainGraph()->createNode("Block" + std::to_string(_i), _parent);
                 nodes.push_back(_text);
                 auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
                 _textTransform->staticTransform = true;
                 _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f, (float)engine->getWindow().getWindowSize().x / 2.f),
                                             _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f, (float)engine->getWindow().getWindowSize().y / 2.f));
-                getMainGraph()->addComponent<SpriteRenderer>(_text, this, _texture);
+                getMainGraph()->addComponent<SpriteRenderer>(_text, _textTransform, this, _texture);
             }
         }
 
