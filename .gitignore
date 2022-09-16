@@ -316,3 +316,5 @@ cmake-build-relwithdebinfo-mingw_clang/build.ninja
 cmake-build-relwithdebinfo-mingw_clang/cmake_install.cmake
 
 cmake-build-relwithdebinfo-mingw_clang/CMakeCache.txt
+
+imgui.ini

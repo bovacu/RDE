@@ -151,7 +151,7 @@ namespace GDE {
         /**
          * @see IRenderizable
          */
-        [[nodiscard]] Vec2F getSize() const override { return texture->getSize(); }
+        [[nodiscard]] Vec2F getSize() const override { return {(float)texture->getSize().x * transform->getScaleLocal().x, (float)texture->getSize().y * transform->getScaleLocal().y}; }
 
         /**
          * @see IRenderizable

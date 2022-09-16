@@ -213,7 +213,7 @@ namespace GDE {
             for(auto& _font : engine->manager.fontManager.getAllFonts()) {
                 if(ImGui::TreeNode((void*)(intptr_t)_child, "%s(font size %d)", _font->getFontName().c_str(), _font->getFontSize())) {
                     ImGui::Text("Kb: %.2f", _font->getTexture().getKb());
-                    ImGui::Text("Texture size: %dx%d", _font->getTexture().getSize().x, _font->getTexture().getSize().y);
+                    ImGui::Text("Texture size: %fx%f", _font->getTexture().getSize().x, _font->getTexture().getSize().y);
                     _child++;
                     ImGui::TreePop();
                 }
@@ -568,15 +568,15 @@ namespace GDE {
     }
 
     void ImGuiScene::bodyComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<Body>(_selectedNode)) return;
-
-        auto _body = _graph->getComponent<Body>(_selectedNode);
-
-        if(ImGui::CollapsingHeader("Body", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
-
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
-        }
+//        if(!_graph->hasComponent<Body>(_selectedNode)) return;
+//
+//        auto _body = _graph->getComponent<Body>(_selectedNode);
+//
+//        if(ImGui::CollapsingHeader("Body", ImGuiTreeNodeFlags_DefaultOpen)) {
+//            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+//
+//            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+//        }
     }
 
     void ImGuiScene::spriteComponent(Graph* _graph, const NodeID _selectedNode) {

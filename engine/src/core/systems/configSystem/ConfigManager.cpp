@@ -191,67 +191,67 @@ namespace GDE {
     }
 
     void ConfigManager::loadBodyComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _bodyJson) {
-        auto _ownerEntityID = _nodeID;
-
-        BodyType _bodyType;
-        if(_bodyJson.contains("type")) {
-            auto _type = _bodyJson["type"].get<std::string>();
-            if(std::equal(_type.begin(), _type.end(), "STATIC")) {
-                _bodyType = BodyType::STATIC;
-            } else if(std::equal(_type.begin(), _type.end(), "DYNAMIC")) {
-                _bodyType = BodyType::DYNAMIC;
-            } else if(std::equal(_type.begin(), _type.end(), "KINEMATIC")) {
-                _bodyType = BodyType::KINEMATIC;
-            } else {
-                _bodyType = BodyType::STATIC;
-                LOG_W("Tried to load a body with a body type not registered: ", _type)
-            }
-        } else {
-            _bodyType = BodyType::STATIC;
-        }
-
-        BodyShapeType _bodyShapeType;
-        if(_bodyJson.contains("shape")) {
-            auto _shape = _bodyJson["shape"].get<std::string>();
-            if(std::equal(_shape.begin(), _shape.end(), "BOX")) {
-                _bodyShapeType = BodyShapeType::BOX;
-            } else if(std::equal(_shape.begin(), _shape.end(), "CIRCLE")) {
-                _bodyShapeType = BodyShapeType::CIRCLE;
-            } else if(std::equal(_shape.begin(), _shape.end(), "POLYGON")) {
-                _bodyShapeType = BodyShapeType::POLYGON;
-            } else {
-                _bodyShapeType = BodyShapeType::BOX;
-                LOG_W("Tried to load a body with a body shape not registered: ", _shape)
-            }
-        } else {
-            _bodyShapeType = BodyShapeType::BOX;
-        }
-
-        ENGINE_ASSERT(_bodyJson.contains("size"), "Body MUST have section 'size'.")
-        ENGINE_ASSERT(_bodyJson["size"].size() == 2, "Body MUST have section 'size' with exactly 2 elements.")
-        ENGINE_ASSERT(_bodyJson.contains("mask"), "Body MUST have section 'mask'.")
-
-        BodyConfig _bodyConfig {
-                .size = {_bodyJson["size"][0].get<float>(), _bodyJson["size"][1].get<float>()},
-                .mask = static_cast<CollisionMask>(_bodyJson["mask"].get<int>()),
-                .bodyType = _bodyType,
-                .bodyShapeType = _bodyShapeType,
-        };
-
-        if(_bodyJson.contains("restitution")) {
-            _bodyConfig.restitution = _bodyJson["restitution"].get<float>();
-        }
-
-        if(_bodyJson.contains("friction")) {
-            _bodyConfig.friction = _bodyJson["friction"].get<float>();
-        }
-
-        if(_bodyJson.contains("mass")) {
-            _bodyConfig.mass = _bodyJson["mass"].get<float>();
-        }
-
-        auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
-        _scene->getMainGraph()->addComponent<Body>(_ownerEntityID, _scene, _bodyConfig, _ownerTransform);
+//        auto _ownerEntityID = _nodeID;
+//
+//        BodyType _bodyType;
+//        if(_bodyJson.contains("type")) {
+//            auto _type = _bodyJson["type"].get<std::string>();
+//            if(std::equal(_type.begin(), _type.end(), "STATIC")) {
+//                _bodyType = BodyType::STATIC;
+//            } else if(std::equal(_type.begin(), _type.end(), "DYNAMIC")) {
+//                _bodyType = BodyType::DYNAMIC;
+//            } else if(std::equal(_type.begin(), _type.end(), "KINEMATIC")) {
+//                _bodyType = BodyType::KINEMATIC;
+//            } else {
+//                _bodyType = BodyType::STATIC;
+//                LOG_W("Tried to load a body with a body type not registered: ", _type)
+//            }
+//        } else {
+//            _bodyType = BodyType::STATIC;
+//        }
+//
+//        BodyShapeType _bodyShapeType;
+//        if(_bodyJson.contains("shape")) {
+//            auto _shape = _bodyJson["shape"].get<std::string>();
+//            if(std::equal(_shape.begin(), _shape.end(), "BOX")) {
+//                _bodyShapeType = BodyShapeType::BOX;
+//            } else if(std::equal(_shape.begin(), _shape.end(), "CIRCLE")) {
+//                _bodyShapeType = BodyShapeType::CIRCLE;
+//            } else if(std::equal(_shape.begin(), _shape.end(), "POLYGON")) {
+//                _bodyShapeType = BodyShapeType::POLYGON;
+//            } else {
+//                _bodyShapeType = BodyShapeType::BOX;
+//                LOG_W("Tried to load a body with a body shape not registered: ", _shape)
+//            }
+//        } else {
+//            _bodyShapeType = BodyShapeType::BOX;
+//        }
+//
+//        ENGINE_ASSERT(_bodyJson.contains("size"), "Body MUST have section 'size'.")
+//        ENGINE_ASSERT(_bodyJson["size"].size() == 2, "Body MUST have section 'size' with exactly 2 elements.")
+//        ENGINE_ASSERT(_bodyJson.contains("mask"), "Body MUST have section 'mask'.")
+//
+//        BodyConfig _bodyConfig {
+//                .size = {_bodyJson["size"][0].get<float>(), _bodyJson["size"][1].get<float>()},
+//                .mask = static_cast<CollisionMask>(_bodyJson["mask"].get<int>()),
+//                .bodyType = _bodyType,
+//                .bodyShapeType = _bodyShapeType,
+//        };
+//
+//        if(_bodyJson.contains("restitution")) {
+//            _bodyConfig.restitution = _bodyJson["restitution"].get<float>();
+//        }
+//
+//        if(_bodyJson.contains("friction")) {
+//            _bodyConfig.friction = _bodyJson["friction"].get<float>();
+//        }
+//
+//        if(_bodyJson.contains("mass")) {
+//            _bodyConfig.mass = _bodyJson["mass"].get<float>();
+//        }
+//
+//        auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
+//        _scene->getMainGraph()->addComponent<Body>(_ownerEntityID, _scene, _bodyConfig, _ownerTransform);
     }
 
     void ConfigManager::loadCameraComponent(const NodeID& _nodeID, Scene* _scene, Window* _window, const nlohmann::json& _cameraJson) {

@@ -77,7 +77,7 @@ namespace GDE {
             /**
             * @see PhysicsManager
             */
-            PhysicsManager physics;
+//            PhysicsManager physics;
 
             /**
             * @see FileManager

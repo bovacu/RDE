@@ -100,7 +100,7 @@ namespace GDE {
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
-        manager.physics.step(_fixedDt);
+//        manager.physics.step(_fixedDt);
         manager.sceneManager.getDisplayedScene()->onFixedUpdate(_fixedDt);
     }
 
