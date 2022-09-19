@@ -10,7 +10,6 @@
 #include "core/graph/Graph.h"
 #include "core/render/RenderManager.h"
 #include "core/graph/components/Transform.h"
-#include "core/graph/components/Body.h"
 #include "core/graph/components/TextRenderer.h"
 
 namespace GDE {

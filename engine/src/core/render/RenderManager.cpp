@@ -80,7 +80,7 @@ namespace GDE {
         batch.debug.drawSquare(_position, _size, _color, _rotation);
     }
 
-    void RenderManager::drawShape(Shape& _shape) {
+    void RenderManager::drawShape(DebugShape& _shape) {
         batch.debug.drawShape(_shape);
     }
 

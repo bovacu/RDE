@@ -130,12 +130,12 @@ namespace GDE {
         vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
     }
 
-    void SpriteBatch::Debug::drawShape(Shape& _shape) {
+    void SpriteBatch::Debug::drawShape(DebugShape& _shape) {
         auto _scalingFactor = batch->viewport->getScalingFactor();
         auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x * _scalingFactor.x, _shape.getPosition().y * _scalingFactor.y, 1.f));
 
-        if(_shape.getRotation() != 0)
-            _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_shape.getRotation()), { 0.0f, 0.0f, 1.0f });
+        if(_shape.rotation != 0)
+            _transformMat *= glm::rotate(glm::mat4(1.0f), _shape.rotation, { 0.0f, 0.0f, 1.0f });
 
         if(_scalingFactor != 1)
             _transformMat *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "core/render/Camera.h"
-#include "core/render/shapes/Shape.h"
+#include "core/render/shapes/DebugShape.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/graph/components/Components.h"
 #include "core/graph/components/SpriteRenderer.h"
@@ -109,7 +109,7 @@ namespace GDE {
                  * @param _shape Shape to draw
                  * @see Shape
                  */
-                void drawShape(Shape& _shape);
+                void drawShape(DebugShape& _shape);
 
                 /**
                  * @attention This is not meant to be called by end-users.

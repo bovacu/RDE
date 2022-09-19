@@ -86,7 +86,6 @@ namespace GDE {
             Uint64 _end = SDL_GetPerformanceCounter();
             float _elapsedMS = (float)(_end - _start) / (float)SDL_GetPerformanceFrequency();
             _dt = _elapsedMS;
-            timer += _dt;
         }
     }
 

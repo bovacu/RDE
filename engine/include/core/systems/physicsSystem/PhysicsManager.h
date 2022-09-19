@@ -9,6 +9,7 @@
 #include "box2d/box2d.h"
 #include "PhysicsBody.h"
 #include "PhysicsManifold.h"
+#include "core/physics/Precompiled.h"
 
 #if IS_MOBILE() || IS_MAC() || defined(_WIN32)
     typedef unsigned long ulong;
@@ -20,22 +21,22 @@ namespace GDE {
 
     class PhysicsManager {
         private:
-            f32 m_dt;
+            f32 m_dt = 1.f / 60.f;
             uint32 m_iterations = 10;
-            std::vector<PhysicsBody*> bodies;
-            std::vector<PhysicsManifold> contacts;
+            std::vector<Physics::Body*> bodies;
+            std::vector<Physics::Manifold> contacts;
 
         public:
             void init();
             void destroy();
 
             void step(Delta _fxDt);
-            PhysicsBody* add(PhysicsShape* _physicsShape, const Vec2F& _position);
+        Physics::Body* add(Physics::Shape* _physicsShape, const Vec2F& _position);
             void debugRender(RenderManager* _renderManager);
 
         private:
-            void integrateForces( PhysicsBody *b, Delta _fxDt);
-            void integrateVelocity( PhysicsBody *b, Delta _fxDt);
+//            void integrateForces( PhysicsBody *b, Delta _fxDt);
+//            void integrateVelocity( PhysicsBody *b, Delta _fxDt);
     };
 
 //    typedef ulong CollisionMask;

@@ -1,17 +1,18 @@
 // Created by borja on 30/12/21.
 
 
-#ifndef GDE_SHAPE_H
-#define GDE_SHAPE_H
+#ifndef GDE_DEBUGSHAPE_H
+#define GDE_DEBUGSHAPE_H
 
 #include "core/util/Util.h"
+#include "core/physics/IEMath.h"
 
 namespace GDE {
 
     /**
      * @brief This class represents a Complex Geometry debugging shape.
      */
-    class Shape {
+    class DebugShape {
 
         protected:
             /**
@@ -43,6 +44,12 @@ namespace GDE {
              * @brief Center of the complex shape.
              */
             Vec2F center {};
+
+        public:
+            /**
+             * @brief Angle in degrees.
+             */
+            float rotation;
 
         public:
 
@@ -140,7 +147,7 @@ namespace GDE {
              * @param _rotation Rotation
              */
             void setRotation(float _rotation) {
-//                transform.setRotation(_rotation);
+
             }
 
             /**
@@ -199,4 +206,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_SHAPE_H
+#endif //GDE_DEBUGSHAPE_H
