@@ -71,7 +71,6 @@ namespace GDE {
     }
 
     void Graph::onFixedUpdate(Delta _dt) {
-
         onFixedUpdateDel(registry, _dt);
     }
 
@@ -114,9 +113,10 @@ namespace GDE {
 //        auto _debug = registry.view<Body>();
 //        if(_debug.empty() || !scene->engine->manager.physics.drawDebugInfo) return;
 //
-//        auto& _renderManager = scene->engine->manager.renderManager;
+        auto& _renderManager = scene->engine->manager.renderManager;
 //
-//        _renderManager.beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->ID));
+        _renderManager.beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->ID));
+        scene->engine->manager.physics.debugRender(&_renderManager);
 //
 //        _debug.each([&_renderManager](const auto _entity, const Body& _body) {
 //            if(_body.bodyConfig.bodyShapeType == BodyShapeType::BOX) {
@@ -129,7 +129,7 @@ namespace GDE {
 //            }
 //        });
 //
-//        _renderManager.endDebugDraw();
+        _renderManager.endDebugDraw();
     }
 
     NodeID Graph::createNode(const std::string& _tag, const NodeID& _parent) {

@@ -106,7 +106,7 @@ namespace GDE {
         }
 
         vertexDebugBufferLines.emplace_back(_transformMat0 * glm::vec4 {_screenPos0.x, _screenPos0.y, 0.0f, 1.0f}, _colorVec4);
-        vertexDebugBufferLines.emplace_back(_transformMat0 * glm::vec4 {_screenPos1.x, _screenPos1.y, 0.0f, 1.0f}, _colorVec4);
+        vertexDebugBufferLines.emplace_back(_transformMat1 * glm::vec4 {_screenPos1.x, _screenPos1.y, 0.0f, 1.0f}, _colorVec4);
     }
 
     void SpriteBatch::Debug::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
@@ -260,7 +260,7 @@ namespace GDE {
             glBufferData(GL_ARRAY_BUFFER, (long)(_shader->getShaderVertexDataSize() * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            glDrawArrays(GL_TRIANGLES, 0, (int)vertexDebugBufferGeometrics.size());
+            glDrawArrays(GL_LINE_LOOP, 0, (int)vertexDebugBufferGeometrics.size());
         }
 
         if(!vertexDebugBufferLines.empty()) {

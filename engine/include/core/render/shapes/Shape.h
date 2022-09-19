@@ -22,7 +22,7 @@ namespace GDE {
             /**
              * @brief Color of the outline.
              */
-            Color outerColor = Color::Green;
+            Color outerColor = Color::Blue;
 
             /**
              * @brief If the inner color is rendered.

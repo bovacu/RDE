@@ -3,118 +3,110 @@
 //
 
 #include "core/systems/physicsSystem/PhysicsManager.h"
-#include "core/graph/components/Body.h"
+#include "core/render/RenderManager.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "NullDereference"
 namespace GDE {
 
-//    void PhysicsManager::init() {
-//        world = new b2World({gravity.x, gravity.y});
-//        world->SetContactListener(&callback);
-//    }
-//
-//    void PhysicsManager::step(Delta _delta) {
-//        if(!active) return;
-//        world->Step(_delta, 6, 2);
-//    }
-//
-//    void PhysicsManager::setGravity(const Vec2F &_gravity) {
-//        gravity = _gravity;
-//        world->SetGravity({gravity.x, gravity.y});
-//    }
-//
-//    Vec2F PhysicsManager::getGravity() const {
-//        return gravity;
-//    }
-//
-//    void PhysicsManager::setPhysicsActive(bool _active) {
-//        active = _active;
-//    }
-//
-//    bool PhysicsManager::isPhysicsActive() const {
-//        return active;
-//    }
-//
-//    void PhysicsManager::destroy() {
-//        for(auto* _body : bodies)
-//            world->DestroyBody(_body);
-//        delete world;
-//    }
-//
-//    b2Body* PhysicsManager::createBody(const b2BodyDef& _bodyDef) {
-//        auto* _body = world->CreateBody(&_bodyDef);
-//        bodies.push_back(_body);
-//        return _body;
-//    }
-//
-//    void PhysicsManager::destroyBody(b2Body* _body) {
-//        auto _bodyToDestroy = std::find(bodies.begin(), bodies.end(), _body);
-//        if(_bodyToDestroy != bodies.end())
-//            bodies.erase(_bodyToDestroy);
-//    }
-//
-//    void PhysicsManager::setWhatBodyCollidesWith(Body* _body, CollisionMask _bodyCollideWith) {
-//        auto* _filter = reinterpret_cast<b2Filter*>(_body->b2dConfig.body->GetUserData().pointer);
-//        _filter->maskBits = _bodyCollideWith;
-//        _body->b2dConfig.body->GetUserData().pointer = reinterpret_cast<uintptr_t>(_body);
-//    }
-//
-//    UDelegate<void(b2Contact*)>& PhysicsManager::setCallbackForCollisionBetweenMasks(CollisionMask _colliderA, CollisionMask _colliderB) {
-//        return callback.masks[_colliderA | _colliderB].callback;
-//    }
-//
-//    void PhysicsManager::removeCollisionCallbackBetween(CollisionMask _colliderA, CollisionMask _colliderB) {
-//        callback.masks.erase(_colliderA | _colliderB);
-//    }
-//
-//    void PhysicsManager::removeAllCollisionCallbacksFrom(CollisionMask _collider) {
-//        std::vector<CollisionMask> _masksToDelete;
-//        for(auto& _mask : callback.masks)
-//            if((_mask.first & _collider) != 0) _masksToDelete.push_back(_mask.first);
-//
-//        for(auto& _mask : _masksToDelete)
-//            callback.masks.erase(_mask);
-//    }
-//
-//    void PhysicsManager::CollisionCallback::BeginContact(b2Contact* contact) {
-//        b2ContactListener::BeginContact(contact);
-//
-//        auto _a = contact->GetFixtureA()->GetBody();
-//        auto _b = contact->GetFixtureB()->GetBody();
-//
-//        auto _aMask = reinterpret_cast<Body*>(_a->GetUserData().pointer);
-//        auto _bMask = reinterpret_cast<Body*>(_b->GetUserData().pointer);
-//
-//        if(_aMask == nullptr || _bMask == nullptr) return;
-//
-//        auto _aCategory = _aMask->b2dConfig.fixtureDef.filter.categoryBits;
-//        auto _bCategory = _bMask->b2dConfig.fixtureDef.filter.categoryBits;
-//
-//        if(masks.find(_aCategory | _bCategory) != masks.end()) {
-//            masks[_aCategory | _bCategory].callback(contact);
-//            return;
-//        }
-//    }
-//
-//    void PhysicsManager::CollisionCallback::EndContact(b2Contact* contact) {
-//        b2ContactListener::EndContact(contact);
-//
-//        auto _a = contact->GetFixtureA();
-//        auto _b = contact->GetFixtureB();
-//
-//        auto _aMask = reinterpret_cast<Body*>(_a->GetUserData().pointer);
-//        auto _bMask = reinterpret_cast<Body*>(_b->GetUserData().pointer);
-//
-//        if(_aMask == nullptr || _bMask == nullptr) return;
-//
-//        auto _aCategory = _aMask->b2dConfig.fixtureDef.filter.categoryBits;
-//        auto _bCategory = _bMask->b2dConfig.fixtureDef.filter.categoryBits;
-//
-//        if(masks.find(_aCategory | _bCategory) != masks.end()) {
-//            masks[_aCategory | _bCategory].callback(contact);
-//            return;
-//        }
-//    }
+    void PhysicsManager::init() {
+
+    }
+
+    void PhysicsManager::destroy() {
+        for(auto* _body : bodies) {
+            delete _body->shape;
+            delete _body;
+        }
+    }
+
+    void PhysicsManager::step(Delta _fxDt) {
+        // Generate new collision info
+        contacts.clear( );
+        for(uint32 i = 0; i < bodies.size( ); ++i)
+        {
+            PhysicsBody *A = bodies[i];
+
+            for(uint32 j = i + 1; j < bodies.size( ); ++j)
+            {
+                PhysicsBody *B = bodies[j];
+                if(A->im == 0 && B->im == 0)
+                    continue;
+                PhysicsManifold m( A, B );
+                m.solve();
+                if(m.contact_count)
+                    contacts.emplace_back( m );
+            }
+        }
+
+        // Integrate forces
+        for(auto* body : bodies)
+            integrateForces( body, _fxDt );
+
+        // Initialize collision
+        for(auto& contact : contacts)
+            contact.initialize(_fxDt);
+
+        // Solve collisions
+        for(uint32 j = 0; j < m_iterations; ++j)
+            for(auto& contact : contacts)
+                contact.applyImpulse();
+
+        // Integrate velocities
+        for(auto* body : bodies)
+            integrateVelocity(body, _fxDt);
+
+        // Correct positions
+        for(auto & contact : contacts)
+            contact.positionalCorrection();
+
+        // Clear all forces
+        for(auto* b : bodies)
+        {
+            b->force = { 0.0f, 0.0f };
+            b->torque = 0;
+        }
+    }
+
+    void PhysicsManager::integrateForces(PhysicsBody* b, Delta _fixedDelta) {
+        if(b->im == 0.0f)
+            return;
+
+        auto _partialVelocity = (b->force * b->im + gravity);
+        auto _deltaHalf = (_fixedDelta / 2.0f);
+        auto _newVelocity = _partialVelocity * _deltaHalf;
+        b->velocity = b->velocity + _newVelocity;
+
+        auto _partialAngularVelocity = b->torque * b->iI;
+        auto _newAngularVelocity = _partialAngularVelocity * _deltaHalf;
+        b->angularVelocity = b->angularVelocity + _newAngularVelocity;
+    }
+
+    void PhysicsManager::integrateVelocity(PhysicsBody* b, Delta _fxDt) {
+        if(b->im == 0.0f)
+            return;
+
+        auto _newPos = b->velocity * _fxDt;
+        b->position = b->position + _newPos;
+        auto _newAngle = b->angularVelocity * _fxDt;
+        b->orient = b->orient + _newAngle;
+        b->setOrient(b->orient);
+        integrateForces(b, _fxDt);
+        integrateForces(b, _fxDt);
+    }
+
+    void PhysicsManager::debugRender(RenderManager* _renderManager) {
+        for(auto b : bodies)
+        {
+            auto _shape = b->shape->debugDraw();
+            _renderManager->drawShape(_shape);
+        }
+    }
+
+    PhysicsBody* PhysicsManager::add(PhysicsShape* _physicsShape, const Vec2F& _position) {
+        auto *b = new PhysicsBody( _physicsShape, _position );
+        bodies.push_back( b );
+        return b;
+    }
 }
 #pragma clang diagnostic pop

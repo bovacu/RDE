@@ -7,6 +7,8 @@
 
 #include "core/util/Util.h"
 #include "box2d/box2d.h"
+#include "PhysicsBody.h"
+#include "PhysicsManifold.h"
 
 #if IS_MOBILE() || IS_MAC() || defined(_WIN32)
     typedef unsigned long ulong;
@@ -14,68 +16,84 @@
 
 namespace GDE {
 
-    typedef ulong CollisionMask;
-    typedef UDelegate<void(b2Contact*)> CollisionMaskCallback;
+    class RenderManager;
 
-    enum BodyType {
-        DYNAMIC,
-        STATIC,
-        KINEMATIC
+    class PhysicsManager {
+        private:
+            f32 m_dt;
+            uint32 m_iterations = 10;
+            std::vector<PhysicsBody*> bodies;
+            std::vector<PhysicsManifold> contacts;
+
+        public:
+            void init();
+            void destroy();
+
+            void step(Delta _fxDt);
+            PhysicsBody* add(PhysicsShape* _physicsShape, const Vec2F& _position);
+            void debugRender(RenderManager* _renderManager);
+
+        private:
+            void integrateForces( PhysicsBody *b, Delta _fxDt);
+            void integrateVelocity( PhysicsBody *b, Delta _fxDt);
     };
 
-    enum BodyShapeType {
-        BOX,
-        CIRCLE,
-        POLYGON
-    };
-
-    /**
-     * @brief Configuration of the Body. This includes the physic properties that a body should have.
-     * 
-     */
-    struct BodyConfig {
-        /**
-         * @brief The mass of the entity.
-         * 
-         */
-        float mass = 1;
-
-        /**
-         * @brief The size of the entity. If rectanlge, both values are used, if a polygon, both values are used and if circle, only x is used.
-         * 
-         */
-        Vec2F size = { 64, 64 };
-
-        /**
-         * @brief Friction of the entity.
-         * 
-         */
-        float friction = 0;
-
-        /**
-         * @brief Restitution of the entity.
-         * 
-         */
-        float restitution = 0;
-
-        /**
-         * @brief Sets with what objects the entity can collide or trigger a ghost collision.
-         * 
-         */
-        CollisionMask mask = 0;
-
-        /**
-         * @brief Type of body: dynamic, kinematic or static.
-         * 
-         */
-        BodyType bodyType = BodyType::DYNAMIC;
-
-        /**
-         * @brief Type of shape: Box, Circle or Polygon.
-         * 
-         */
-        BodyShapeType bodyShapeType = BodyShapeType::BOX;
-    };
+//    typedef ulong CollisionMask;
+//    typedef UDelegate<void(b2Contact*)> CollisionMaskCallback;
+//
+//    enum BodyType {
+//        DYNAMIC,
+//        STATIC,
+//        KINEMATIC
+//    };
+//
+//    /**
+//     * @brief Configuration of the Body. This includes the physic properties that a body should have.
+//     *
+//     */
+//    struct BodyConfig {
+//        /**
+//         * @brief The mass of the entity.
+//         *
+//         */
+//        float mass = 1;
+//
+//        /**
+//         * @brief The size of the entity. If rectanlge, both values are used, if a polygon, both values are used and if circle, only x is used.
+//         *
+//         */
+//        Vec2F size = { 64, 64 };
+//
+//        /**
+//         * @brief Friction of the entity.
+//         *
+//         */
+//        float friction = 0;
+//
+//        /**
+//         * @brief Restitution of the entity.
+//         *
+//         */
+//        float restitution = 0;
+//
+//        /**
+//         * @brief Sets with what objects the entity can collide or trigger a ghost collision.
+//         *
+//         */
+//        CollisionMask mask = 0;
+//
+//        /**
+//         * @brief Type of body: dynamic, kinematic or static.
+//         *
+//         */
+//        BodyType bodyType = BodyType::DYNAMIC;
+//
+//        /**
+//         * @brief Type of shape: Box, Circle or Polygon.
+//         *
+//         */
+//        BodyShapeType bodyShapeType = BodyShapeType::BOX;
+//    };
 
 //    /**
 //     * @brief A wrapper around Box2D information.

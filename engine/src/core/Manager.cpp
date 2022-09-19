@@ -18,7 +18,7 @@ namespace GDE {
         consoleManager.init();
         soundManager.init();
         sceneManager.init(_engine);
-//        physics.init();
+        physics.init();
         textureManager.init(&fileManager);
     }
 
@@ -30,7 +30,7 @@ namespace GDE {
         textureManager.destroy();
         sceneManager.destroy();
         renderManager.destroy();
-//        physics.destroy();
+        physics.destroy();
         ecsManager.destroy();
     }
 }

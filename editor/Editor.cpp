@@ -32,6 +32,26 @@ namespace Editor {
         textStressTest();
         auto _particleSystemNode = getMainGraph()->createNode("ParticleSystem");
 
+        auto* poly = new PhysicsShape;
+        Random _random;
+        auto count = _random.randomi( 3, MAX_VERTICES_PER_POLYGON );
+        std::vector<Vec2F> vertices;
+        real e = _random.randomf( 5, 10 );
+        for(uint32 i = 0; i < count; ++i)
+            vertices.emplace_back(Vec2F { _random.randomf( -e, e ), _random.randomf( -e, e ) });
+        poly->makePolygon(vertices);
+        PhysicsBody *b = engine->manager.physics.add( poly, { 0, 0 });
+        b->setOrient( random( -PI, PI ) );
+        b->restitution = 0.2f;
+        b->dynamicFriction = 0.2f;
+        b->staticFriction = 0.4f;
+
+        auto* _ground = new PhysicsShape;
+        _ground->makeRectangle({100.0f, 5.0f});
+        auto* _groundBody = engine->manager.physics.add( _ground, {0, -50} );
+        _groundBody->setStatic();
+        _groundBody->setOrient(0);
+
         ParticleSystemConfig _particleSystemConfig {
             ParticleSystemColorGradientConfig {
                 Color {17, 79, 15, 255},
@@ -69,6 +89,10 @@ namespace Editor {
         }
         ++_frameCounter;
         _timer += _dt;
+
+        if(engine->manager.inputManager.isMouseJustPressed(MouseCode::ButtonLeft)) {
+
+        }
     }
 
     void Editor::textStressTest() {
@@ -88,4 +112,8 @@ namespace Editor {
             }
         }
 
+    void Editor::onDebugRender(Delta _dt) {
+        Scene::onDebugRender(_dt);
     }
+
+}
