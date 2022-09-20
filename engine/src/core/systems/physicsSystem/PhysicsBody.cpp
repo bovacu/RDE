@@ -18,6 +18,8 @@ namespace GDE {
         restitution = 0.2f;
         density = 1.0f;
 
+        collisionMask = 0;
+
         computeMass(_shape);
     }
 

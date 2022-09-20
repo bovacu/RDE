@@ -97,4 +97,9 @@
     #define GDE_DEPRECATED(_explanation) [[gnu::deprecated(_explanation)]]
 #endif
 
+#if IS_MOBILE() || IS_MAC() || defined(_WIN32)
+typedef unsigned long ulong;
+typedef unsigned int uint;
+#endif
+
 #endif //GDE_CORE_H

@@ -13,35 +13,38 @@
 namespace GDE {
 
     struct PhysicsBody {
-        PhysicsBody(PhysicsShape* _shape, const Vec2F& _position);
 
-        void applyForce(const Vec2F& _force);
-        void applyImpulse(const Vec2F& _impulse, const Vec2F& _contactVector);
-        void setStatic();
-        void rotate(float _degrees);
+        public:
+            PhysicsBody(PhysicsShape* _shape, const Vec2F& _position);
 
-        Transform* transform;
+            void applyForce(const Vec2F& _force);
+            void applyImpulse(const Vec2F& _impulse, const Vec2F& _contactVector);
+            void setStatic();
+            void rotate(float _degrees);
 
-        Vec2F velocity;
-        float angularVelocity;
-        float torque;
+            Transform* transform;
+            PhysicsShape *shape;
 
-        Vec2F force;
+            Vec2F velocity;
+            float angularVelocity;
+            float torque;
 
-        // Set by shape
-        float inertia;  // moment of inertia
-        float inverseInertia; // inverse inertia
-        float mass;  // mass
-        float inverseMass; // inverse masee
-        float density;
+            Vec2F force;
 
-        // http://gamedev.tutsplus.com/tutorials/implementation/how-to-create-a-custom-2d-physics-engine-friction-scene-and-jump-table/
-        float staticFriction;
-        float dynamicFriction;
-        float restitution;
+            float inertia;
+            float inverseInertia;
+            float mass;
+            float inverseMass;
+            float density;
 
-        // Shape interface
-        PhysicsShape *shape;
+            float staticFriction;
+            float dynamicFriction;
+            float restitution;
+
+            /**
+             * @brief This is the "ID" of the body, it tells which type of body it is. It must be a 2^n.
+             */
+            ulong collisionMask;
 
         private:
             void computeMass(PhysicsShape* _shape);

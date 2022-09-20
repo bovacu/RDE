@@ -5,8 +5,6 @@
 #include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/render/RenderManager.h"
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "NullDereference"
 namespace GDE {
 
     void PhysicsManager::init() {
@@ -14,6 +12,8 @@ namespace GDE {
         collisionHandler[PhysicsShape::CIRCLE][PhysicsShape::POLYGON].bind<&PhysicsManager::collisionCirclePolygon>(this);
         collisionHandler[PhysicsShape::POLYGON][PhysicsShape::CIRCLE].bind<&PhysicsManager::collisionPolygonCircle>(this);
         collisionHandler[PhysicsShape::POLYGON][PhysicsShape::POLYGON].bind<&PhysicsManager::collisionPolygonPolygon>(this);
+
+        collisionTable.insert(std::make_pair(0, 0));
     }
 
     void PhysicsManager::destroy() {
@@ -31,12 +31,14 @@ namespace GDE {
             for(auto _j = _i + 1; _j < bodies.size(); _j++) {
                 PhysicsBody* _b = bodies[_j];
 
-                if(_a->inverseMass == 0 && _b->inverseMass == 0)
+                if(_a->inverseMass == 0 && _b->inverseMass == 0 || !hasCollisionInTable(_a->collisionMask, _b->collisionMask))
                     continue;
 
                 PhysicsManifold _m(_a, _b );
 
-                collisionHandler[_a->shape->type][_b->shape->type](_m, _a, _b);
+                if(collisionHandler[_a->shape->type][_b->shape->type](_m, _a, _b)) {
+                    // TODO: handle OnCollisionEnter, OnCollisionStay, OnCollisionExit
+                }
 
                 if(_m.contactCount)
                     contacts.emplace_back(_m);
@@ -152,7 +154,7 @@ namespace GDE {
         return _physicsBody;
     }
 
-    void PhysicsManager::collisionCircleCircle(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
+    bool PhysicsManager::collisionCircleCircle(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
         auto* _a = _bodyA->shape;
         auto* _b = _bodyB->shape;
 
@@ -165,7 +167,7 @@ namespace GDE {
         // Not in contact
         if (_distSqr >= _radius * _radius) {
             _manifold.contactCount = 0;
-            return;
+            return false;
         }
 
         float _distance = std::sqrt(_distSqr);
@@ -181,9 +183,11 @@ namespace GDE {
             _manifold.normal = _normal / _distance; // Faster than using Normalized since we already performed sqrt
             _manifold.contacts[0] = _manifold.normal * _a->size.x + _bodyA->transform->getPositionLocal();
         }
+
+        return true;
     }
 
-    void PhysicsManager::collisionCirclePolygon(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
+    bool PhysicsManager::collisionCirclePolygon(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
         auto* _a = _bodyA->shape;
         auto* _b = _bodyB->shape;
 
@@ -201,7 +205,7 @@ namespace GDE {
             float _s = _b->normals[_i].dotProduct(_center - _b->vertices[_i]);
 
             if (_s > _a->size.x)
-                return;
+                return false;
 
             if (_s > _separation) {
                 _separation = _s;
@@ -220,7 +224,7 @@ namespace GDE {
             _manifold.normal = -(_b->getRotationMatrix() * _b->normals[_faceNormal]);
             _manifold.contacts[0] = _manifold.normal * _a->size.x + _bodyA->transform->getPositionLocal();
             _manifold.penetration = _a->size.x;
-            return;
+            return false;
         }
 
         // Determine which voronoi region of the edge _center of circle lies within
@@ -231,7 +235,7 @@ namespace GDE {
         // Closest to _v1
         if (_dot1 <= 0.0f) {
             if (_center.distanceSqr(_v1) > _a->size.x * _a->size.x)
-                return;
+                return false;
 
             _manifold.contactCount = 1;
             Vec2F _n = _v1 - _center;
@@ -245,7 +249,7 @@ namespace GDE {
             // Closest to _v2
         else if (_dot2 <= 0.0f) {
             if (_center.distance(_v2) > _a->size.x * _a->size.x)
-                return;
+                return false;
 
             _manifold.contactCount = 1;
             Vec2F _n = _v2 - _center;
@@ -260,21 +264,24 @@ namespace GDE {
         else {
             Vec2F _n = _b->normals[_faceNormal];
             if ((_center - _v1).dotProduct(_n) > _a->size.x)
-                return;
+                return false;
 
             _n = _b->getRotationMatrix() * _n;
             _manifold.normal = -_n;
             _manifold.contacts[0] = _manifold.normal * _a->size.x + _bodyA->transform->getPositionLocal();
             _manifold.contactCount = 1;
         }
+
+        return true;
     }
 
-    void PhysicsManager::collisionPolygonCircle(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
-        collisionCirclePolygon(_manifold, _bodyB, _bodyA);
+    bool PhysicsManager::collisionPolygonCircle(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
+        auto _collision = collisionCirclePolygon(_manifold, _bodyB, _bodyA);
         _manifold.normal = -_manifold.normal;
+        return _collision;
     }
 
-    void PhysicsManager::collisionPolygonPolygon(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
+    bool PhysicsManager::collisionPolygonPolygon(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
         auto* _a = _bodyA->shape;
         auto* _b = _bodyB->shape;
         _manifold.contactCount = 0;
@@ -283,13 +290,13 @@ namespace GDE {
         uint32_t _faceA;
         float _penetrationA = findAxisWithLeastPenetration(&_faceA, _a, _b);
         if (_penetrationA >= 0.0f)
-            return;
+            return false;
 
         // Check for _bodyA separating axis with _b's face planes
         uint32_t _faceB;
         float _penetrationB = findAxisWithLeastPenetration(&_faceB, _b, _a);
         if (_penetrationB >= 0.0f)
-            return;
+            return false;
 
         uint32_t _referenceIndex;
         bool _flip; // Always point from _bodyA to _bodyB
@@ -351,10 +358,10 @@ namespace GDE {
 
         // Clip incident face to reference face side planes
         if (clip(-_sidePlaneNormal, _negSide, _incidentFace) < 2)
-            return; // Due to floating point error, possible to not have required points
+            return false; // Due to floating point error, possible to not have required points
 
         if (clip(_sidePlaneNormal, _posSide, _incidentFace) < 2)
-            return; // Due to floating point error, possible to not have required points
+            return false; // Due to floating point error, possible to not have required points
 
         // Flip
         _manifold.normal = _flip ? -_refFaceNormal : _refFaceNormal;
@@ -381,6 +388,8 @@ namespace GDE {
         }
 
         _manifold.contactCount = _cp;
+
+        return true;
     }
 
     float PhysicsManager::findAxisWithLeastPenetration(uint32_t* _faceIndex, PhysicsShape* _shapeA, PhysicsShape* _shapeB) {
@@ -471,5 +480,47 @@ namespace GDE {
 
         return _sp;
     }
+
+    CollisionTable PhysicsManager::getCollisionTable() const {
+        return collisionTable;
+    }
+
+    bool PhysicsManager::addCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB) {
+        auto _newPair = std::make_pair(_bodyMaskA, _bodyMaskB);
+        auto _inverseNewPair = std::make_pair(_bodyMaskB, _bodyMaskA);
+        auto _it = collisionTable.find(_newPair);
+        auto _inverseIt = collisionTable.find(_inverseNewPair);
+
+        if(_it == collisionTable.end() && _inverseIt == collisionTable.end()) {
+            collisionTable.insert(_newPair);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool PhysicsManager::removeCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB) {
+        auto _toRemove = std::make_pair(_bodyMaskA, _bodyMaskB);
+        auto _inverseToRemove = std::make_pair(_bodyMaskB, _bodyMaskA);
+        auto _it = collisionTable.find(_toRemove);
+        auto _inverseIt = collisionTable.find(_inverseToRemove);
+
+        if(_it != collisionTable.end()) {
+            collisionTable.erase(_it);
+        }
+
+        if(_inverseIt != collisionTable.end()) {
+            collisionTable.erase(_inverseIt);
+        }
+
+        return _inverseIt != collisionTable.end() || _it != collisionTable.end();
+    }
+
+    bool PhysicsManager::hasCollisionInTable(ulong _bodyMaskA, ulong _bodyMaskB) {
+        auto _toCheck = std::make_pair(_bodyMaskA, _bodyMaskB);
+        auto _inverseToCheck = std::make_pair(_bodyMaskB, _bodyMaskA);
+        auto _it = collisionTable.find(_toCheck);
+        auto _inverseIt = collisionTable.find(_inverseToCheck);
+        return _it != collisionTable.end() || _inverseIt != collisionTable.end();
+    }
 }
-#pragma clang diagnostic pop
