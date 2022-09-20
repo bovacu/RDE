@@ -11,11 +11,21 @@
 
 namespace GDE {
 
+    #ifndef EPSILON
+    #define EPSILON 0.0001f
+    #endif
+
     template <class T>
-    class Vec2 {
-        public:
-            T x;
-            T y;
+    struct Vec2 {
+        union {
+            T m[1][1];
+            T v[2];
+
+            struct {
+                T x;
+                T y;
+            };
+        };
 
         public:
             Vec2() {
@@ -28,36 +38,21 @@ namespace GDE {
                 y = _y;
             }
 
-            Vec2<T> operator +(const Vec2<T> _vec) {
-                return {x + _vec.x, y + _vec.y};
-            }
-
-            Vec2<T> operator +=(const Vec2<T> _vec) {
-                return {x + _vec.x, y + _vec.y};
-            }
-
-            Vec2<T> operator -(const Vec2<T> _vec) {
-                return {x - _vec.x, y - _vec.y};
-            }
-
-            Vec2<T> operator -(const Vec2<T> _vec) const {
-                return {x - _vec.x, y - _vec.y};
-            }
-
-            Vec2<T> operator -=(const Vec2<T> _vec) {
-                return {x - _vec.x, y - _vec.y};
-            }
-
-            float operator *(const Vec2<T> _vec) {
-                return x * _vec.x + y * _vec.y;
-            }
-
-            float operator *=(float _scalar) {
-                return x * _scalar + y * _scalar;
+            void set(T _x, T _y) {
+                x = _x;
+                y = _y;
             }
 
             [[nodiscard]] float dotProduct(const Vec2<T>& _p) const {
                 return x * _p.x + y * _p.y;
+            }
+
+            [[nodiscard]] Vec2<T> crossProduct(float _scalar) const {
+                return { -_scalar * y, _scalar * x };
+            }
+
+            [[nodiscard]] float crossProduct(const Vec2<T> _vec) const {
+                return x * _vec.y - y * _vec.x;
             }
 
             [[nodiscard]] float distance(const Vec2<T>& _p) const {
@@ -95,43 +90,113 @@ namespace GDE {
                 return x >= _rectCenter.x - _rectSize.x / 2.f && x <= _rectCenter.x + _rectSize.x / 2.f &&
                        y >= _rectCenter.y - _rectSize.y / 2.f && y <= _rectCenter.y + _rectSize.y / 2.f;
             }
+
+            Vec2<T> operator+(const Vec2<T>& _rhs) const {
+                return Vec2( x + _rhs.x, y + _rhs.y );
+            }
+
+            Vec2<T> operator+(float _s) const {
+                return Vec2( x + _s, y + _s );
+            }
+
+            void operator+=(const Vec2& _rhs) {
+                x += _rhs.x;
+                y += _rhs.y;
+            }
+
+
+
+            Vec2<T> operator-(const Vec2<T>& _rhs) const {
+                return Vec2( x - _rhs.x, y - _rhs.y );
+            }
+
+            Vec2<T> operator-(float _s) const {
+                return Vec2( x - _s, y - _s );
+            }
+
+            void operator-=(const Vec2<T>& _rhs) {
+                x -= _rhs.x;
+                y -= _rhs.y;
+            }
+
+            Vec2<T> operator -() const {
+                return { -x, -y };
+            }
+
+
+            void operator *(float _scalar) {
+                x *= _scalar;
+                y *= _scalar;
+            }
+
+            void operator *=(float _scalar) {
+                x *= _scalar;
+                y *= _scalar;
+            }
+
+
+            void operator /(float _scalar) {
+                x /= _scalar;
+                y /= _scalar;
+            }
+
+            void operator /=(float _scalar) {
+                x /= _scalar;
+                y /= _scalar;
+            }
     };
 
-    inline Vec2<float> operator +(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
-        return {(float)_vec.x + _vec1.x, (float)_vec.y + _vec1.y};
+    inline Vec2<float> operator*(float _scalar, const Vec2<float>& _vec) {
+        return { _scalar * _vec.x, _scalar * _vec.y };
     }
 
-    inline Vec2<float> operator +(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
-        return _vec1 + _vec;
+    inline Vec2<int> operator*(float _scalar, const Vec2<int>& _vec) {
+        return { (int)(_scalar * (float)_vec.x), (int)(_scalar * (float)_vec.y) };
     }
 
-    inline Vec2<float> operator -(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
-        return {(float)_vec.x - _vec1.x, (float)_vec.y - _vec1.y};
+    inline Vec2<double> operator*(float _scalar, const Vec2<double>& _vec) {
+        return { _scalar * _vec.x, _scalar * _vec.y };
     }
 
-    inline Vec2<float> operator -(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
-        return _vec1 - _vec;
+    inline Vec2<long> operator*(float _scalar, const Vec2<long>& _vec) {
+        return { (long)(_scalar * (float)_vec.x), (long)(_scalar * (float)_vec.y) };
     }
 
-    inline float operator *(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
-        return _vec.x * (float)_vec1.x + _vec.y * (float)_vec1.y;
-    }
-
-    inline Vec2<float> operator *(const Vec2<float>& _vec, float _scalar) {
-        return { _vec.x * _scalar, _vec.y * _scalar };
-    }
-
-    inline Vec2<float> operator /(const Vec2<float>& _vec, float _scalar) {
-        return { _vec.x / _scalar, _vec.y / _scalar };
-    }
-
-    inline Vec2<float> operator *(float _scalar, const Vec2<float>& _vec) {
-        return { _vec.x * _scalar, _vec.y * _scalar };
-    }
-
-    inline float operator *(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
-        return _vec1 * _vec;
-    }
+//    inline Vec2<float> operator +(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
+//        return {(float)_vec.x + _vec1.x, (float)_vec.y + _vec1.y};
+//    }
+//
+//    inline Vec2<float> operator +(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
+//        return _vec1 + _vec;
+//    }
+//
+//    inline Vec2<float> operator -(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
+//        return {(float)_vec.x - _vec1.x, (float)_vec.y - _vec1.y};
+//    }
+//
+//    inline Vec2<float> operator -(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
+//        return _vec1 - _vec;
+//    }
+//
+//    inline float operator *(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
+//        return _vec.x * (float)_vec1.x + _vec.y * (float)_vec1.y;
+//    }
+//
+//    inline Vec2<float> operator *(const Vec2<float>& _vec, float _scalar) {
+//        return { _vec.x * _scalar, _vec.y * _scalar };
+//    }
+//
+//    inline Vec2<float> operator /(const Vec2<float>& _vec, float _scalar) {
+//        return { _vec.x / _scalar, _vec.y / _scalar };
+//    }
+//
+//    inline Vec2<float> operator *(float _scalar, const Vec2<float>& _vec) {
+//        return { _vec.x * _scalar, _vec.y * _scalar };
+//    }
+//
+//    inline float operator *(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
+//        return _vec1 * _vec;
+//    }
 
     typedef Vec2<int> Vec2I;
     typedef Vec2<float> Vec2F;
