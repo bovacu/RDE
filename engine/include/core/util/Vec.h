@@ -74,9 +74,12 @@ namespace GDE {
 
             void normalize() {
                 float _magnitude = magnitude();
-                float _invMagnitude = 1.0f / _magnitude;
-                x *= _invMagnitude;
-                y *= _invMagnitude;
+
+                if(_magnitude > EPSILON) {
+                    float _invMagnitude = 1.0f / _magnitude;
+                    x *= _invMagnitude;
+                    y *= _invMagnitude;
+                }
             }
 
             void rotate(float _degrees) {
