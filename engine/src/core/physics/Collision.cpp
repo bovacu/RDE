@@ -74,7 +74,7 @@ void CircletoPolygon( Physics::Manifold *m, Physics::Body *a, Physics::Body *b )
 
   // Transform circle center to Polygon model space
   GDE::Vec2F center = a->position;
-  center = B->u.Transpose( ) * (center - b->position);
+  center = B->u.transpose( ) * (center - b->position);
 
   // Find edge with minimum penetration
   // Exact concept as using support points in Polygon vs Polygon
@@ -176,7 +176,7 @@ real FindAxisLeastPenetration( uint32 *faceIndex, Physics::PolygonShape *A, Phys
     GDE::Vec2F nw = A->u * n;
 
     // Transform face normal into B's model space
-    Mat2 buT = B->u.Transpose( );
+    GDE::Mat2 buT = B->u.transpose( );
     n = buT * nw;
 
     // Retrieve support point from B along -n
@@ -210,7 +210,7 @@ void FindIncidentFace( GDE::Vec2F *v, Physics::PolygonShape *RefPoly, Physics::P
 
   // Calculate normal in incident's frame of reference
   referenceNormal = RefPoly->u * referenceNormal; // To world space
-  referenceNormal = IncPoly->u.Transpose( ) * referenceNormal; // To incident's model space
+  referenceNormal = IncPoly->u.transpose( ) * referenceNormal; // To incident's model space
 
   // Find most anti-normal face on incident polygon
   int32 incidentFace = 0;

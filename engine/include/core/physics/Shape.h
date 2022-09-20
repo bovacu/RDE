@@ -23,6 +23,7 @@
 #include "Body.h"
 #include "core/render/shapes/DebugShape.h"
 #include "IEMath.h"
+#include "core/util/Mat2.h"
 
 namespace Physics {
 
@@ -52,7 +53,7 @@ namespace Physics {
         real radius;
 
         // For Polygon shape
-        Mat2 u; // Orientation matrix from model to world
+        GDE::Mat2 u; // Orientation matrix from model to world
     };
 
     struct Circle : public Shape
@@ -159,7 +160,7 @@ namespace Physics {
 
         void SetOrient( real radians )
         {
-            u.Set( radians );
+            u.rotate( radians );
         }
 
         GDE::DebugShape Draw( void ) const
