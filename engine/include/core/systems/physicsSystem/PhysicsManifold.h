@@ -13,7 +13,6 @@ namespace GDE {
     struct PhysicsManifold {
         PhysicsManifold( PhysicsBody *a, PhysicsBody *b ) : A( a ) , B( b ) {  }
 
-        void solve();                 // Generate contact information
         void initialize(Delta _fxDt, const Vec2F& _gravity);            // Precalculations for impulse solving
         void applyImpulse();          // Solve impulse and apply
         void positionalCorrection();  // Naive correction of positional penetration

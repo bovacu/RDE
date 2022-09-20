@@ -3,13 +3,8 @@
 //
 
 #include "core/systems/physicsSystem/PhysicsManifold.h"
-#include "core/systems/physicsSystem/PhysicsCollider.h"
 
 namespace GDE {
-
-    void PhysicsManifold::solve() {
-        Dispatch[A->shape->type][B->shape->type]( this, A, B );
-    }
 
     void PhysicsManifold::initialize(Delta _fxDt, const Vec2F& _gravity) {
         // Calculate average restitution
