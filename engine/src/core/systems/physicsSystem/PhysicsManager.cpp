@@ -79,10 +79,9 @@ namespace GDE {
         if(_physicsBody->inverseMass == 0.0f)
             return;
 
-        _physicsBody->position += _physicsBody->velocity * _fxDt;
+        _physicsBody->transform->translate(_physicsBody->velocity * _fxDt);
 
-        _physicsBody->rotation += radiansToDegrees(_physicsBody->angularVelocity * _fxDt);
-        _physicsBody->rotate(_physicsBody->rotation);
+        _physicsBody->rotate(radiansToDegrees(_physicsBody->angularVelocity * _fxDt));
         integrateForces(_physicsBody, _fxDt);
     }
 
@@ -93,7 +92,7 @@ namespace GDE {
                 case PhysicsShape::Type::CIRCLE: {
 
                     const int _segments = 20;
-                    float _theta = _body->rotation;
+                    float _theta = _body->transform->getRotationLocal();
                     float _inc = PI * 2.0f / (float)_segments;
                     Vec2F _points[_segments];
 
@@ -101,7 +100,7 @@ namespace GDE {
                         _theta += _inc;
                         Vec2F _p(std::cos(_theta), std::sin(_theta) );
                         _p *= _body->shape->size.x;
-                        _p += _body->position;
+                        _p += _body->transform->getPositionLocal();
                         _point = _p;
                     }
 
@@ -127,8 +126,8 @@ namespace GDE {
                         if(_next == _polygon->vertices.size())
                             _next = 0;
 
-                        Vec2F _p0 = _body->position + _polygon->u * _polygon->vertices[_i];
-                        Vec2F _p1 = _body->position + _polygon->u * _polygon->vertices[_next];
+                        Vec2F _p0 = _body->transform->getPositionLocal() + _polygon->getRotationMatrix() * _polygon->vertices[_i];
+                        Vec2F _p1 = _body->transform->getPositionLocal() + _polygon->getRotationMatrix() * _polygon->vertices[_next];
 
                         _renderManager->drawLine(_p0, _p1, Color::Blue);
                     }
@@ -144,6 +143,7 @@ namespace GDE {
     PhysicsBody* PhysicsManager::add(PhysicsShape* _physicsShape, const Vec2F& _position) {
         ENGINE_ASSERT(_physicsShape, "Cannot add a NULLPTR physics body to the simulation!!");
         auto* _physicsBody = new PhysicsBody( _physicsShape, _position );
+        _physicsBody->transform->setPosition(_position);
         bodies.push_back(_physicsBody);
         return _physicsBody;
     }

@@ -20,12 +20,11 @@ namespace GDE {
         void setStatic();
         void rotate(float _degrees);
 
-        Vec2F position;
-        Vec2F velocity;
+        Transform* transform;
 
+        Vec2F velocity;
         float angularVelocity;
         float torque;
-        float rotation; // radians
 
         Vec2F force;
 

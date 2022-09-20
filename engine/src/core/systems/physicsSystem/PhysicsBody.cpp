@@ -8,11 +8,10 @@ namespace GDE {
 
     PhysicsBody::PhysicsBody(PhysicsShape* _shape, const Vec2F& _position ) : shape(_shape) {
         shape->physicsBody = this;
-        position = _position;
+        transform = shape->transform;
         velocity = { 0.0f, 0.0f };
         angularVelocity = 0;
         torque = 0;
-        rotation = 0;
         force = { 0.0f, 0.0f };
         staticFriction = 0.5f;
         dynamicFriction = 0.3f;
@@ -23,7 +22,6 @@ namespace GDE {
     }
 
     void PhysicsBody::rotate(float _degrees) {
-        rotation = _degrees;
         shape->rotate(_degrees);
     }
 
@@ -102,5 +100,4 @@ namespace GDE {
     void PhysicsBody::applyForce(const Vec2F& _force) {
         force += _force;
     }
-
 }

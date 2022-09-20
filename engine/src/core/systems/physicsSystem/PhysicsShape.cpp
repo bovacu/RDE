@@ -139,7 +139,13 @@ namespace GDE {
     }
 
     void PhysicsShape::rotate(float _degrees) {
-        u.rotate(_degrees);
+        transform->rotate(_degrees);
+    }
+
+    Mat2 PhysicsShape::getRotationMatrix() {
+        float _c = std::cos(degreesToRadians(transform->getRotationLocal()));
+        float _s = std::sin(degreesToRadians(transform->getRotationLocal()));
+        return { _c, -_s, _s, _c };
     }
 
 }

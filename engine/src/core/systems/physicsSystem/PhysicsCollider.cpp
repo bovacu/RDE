@@ -22,7 +22,7 @@ namespace GDE {
         auto* _b = _bodyB->shape;
 
         // Calculate translational vector, which is _normal
-        Vec2F _normal = _bodyB->position - _bodyA->position;
+        Vec2F _normal = _bodyB->transform->getPositionLocal() - _bodyA->transform->getPositionLocal();
 
         float _distSqr = _normal.magnitudeSqr();
         float _radius = _a->size.x + _b->size.x;
@@ -40,11 +40,11 @@ namespace GDE {
         if (_distance == 0.0f) {
             _manifold->penetration = _a->size.x;
             _manifold->normal = GDE::Vec2F(1, 0);
-            _manifold->contacts[0] = _bodyA->position;
+            _manifold->contacts[0] = _bodyA->transform->getPositionLocal();
         } else {
             _manifold->penetration = _radius - _distance;
             _manifold->normal = _normal / _distance; // Faster than using Normalized since we already performed sqrt
-            _manifold->contacts[0] = _manifold->normal * _a->size.x + _bodyA->position;
+            _manifold->contacts[0] = _manifold->normal * _a->size.x + _bodyA->transform->getPositionLocal();
         }
     }
 
@@ -55,8 +55,8 @@ namespace GDE {
         _manifold->contactCount = 0;
 
         // Transform circle _center to Polygon model space
-        Vec2F _center = _bodyA->position;
-        _center = _b->u.transpose() * (_center - _bodyB->position);
+        Vec2F _center = _bodyA->transform->getPositionLocal();
+        _center = _b->getRotationMatrix().transpose() * (_center - _bodyB->transform->getPositionLocal());
 
         // Find edge with minimum penetration
         // Exact concept as using support points in Polygon vs Polygon
@@ -82,8 +82,8 @@ namespace GDE {
         // Check to see if _center is within polygon
         if (_separation < EPSILON) {
             _manifold->contactCount = 1;
-            _manifold->normal = -(_b->u * _b->normals[_faceNormal]);
-            _manifold->contacts[0] = _manifold->normal * _a->size.x + _bodyA->position;
+            _manifold->normal = -(_b->getRotationMatrix() * _b->normals[_faceNormal]);
+            _manifold->contacts[0] = _manifold->normal * _a->size.x + _bodyA->transform->getPositionLocal();
             _manifold->penetration = _a->size.x;
             return;
         }
@@ -100,10 +100,10 @@ namespace GDE {
 
             _manifold->contactCount = 1;
             Vec2F _n = _v1 - _center;
-            _n = _b->u * _n;
+            _n = _b->getRotationMatrix() * _n;
             _n.normalize();
             _manifold->normal = _n;
-            _v1 = _b->u * _v1 + _bodyB->position;
+            _v1 = _b->getRotationMatrix() * _v1 + _bodyB->transform->getPositionLocal();
             _manifold->contacts[0] = _v1;
         }
 
@@ -114,9 +114,9 @@ namespace GDE {
 
             _manifold->contactCount = 1;
             Vec2F _n = _v2 - _center;
-            _v2 = _b->u * _v2 + _bodyB->position;
+            _v2 = _b->getRotationMatrix() * _v2 + _bodyB->transform->getPositionLocal();
             _manifold->contacts[0] = _v2;
-            _n = _b->u * _n;
+            _n = _b->getRotationMatrix() * _n;
             _n.normalize();
             _manifold->normal = _n;
         }
@@ -127,9 +127,9 @@ namespace GDE {
             if ((_center - _v1).dotProduct(_n) > _a->size.x)
                 return;
 
-            _n = _b->u * _n;
+            _n = _b->getRotationMatrix() * _n;
             _manifold->normal = -_n;
-            _manifold->contacts[0] = _manifold->normal * _a->size.x + _bodyA->position;
+            _manifold->contacts[0] = _manifold->normal * _a->size.x + _bodyA->transform->getPositionLocal();
             _manifold->contactCount = 1;
         }
     }
@@ -146,10 +146,10 @@ namespace GDE {
         for (auto _i = 0; _i < _shapeA->vertexCount; ++_i) {
             // Retrieve a face normal from _shapeA
             Vec2F _n = _shapeA->normals[_i];
-            Vec2F _nw = _shapeA->u * _n;
+            Vec2F _nw = _shapeA->getRotationMatrix() * _n;
 
             // Transform face normal into _shapeB'_s model space
-            Mat2 _buT = _shapeB->u.transpose();
+            Mat2 _buT = _shapeB->getRotationMatrix().transpose();
             _n = _buT * _nw;
 
             // Retrieve support point from _shapeB along -_n
@@ -158,8 +158,8 @@ namespace GDE {
             // Retrieve vertex on face from _shapeA, transform into
             // _shapeB'_s model space
             Vec2F _v = _shapeA->vertices[_i];
-            _v = _shapeA->u * _v + _shapeA->physicsBody->position;
-            _v -= _shapeB->physicsBody->position;
+            _v = _shapeA->getRotationMatrix() * _v + _shapeA->physicsBody->transform->getPositionLocal();
+            _v -= _shapeB->physicsBody->transform->getPositionLocal();
             _v = _buT * _v;
 
             // Compute penetration distance (in _shapeB'_s model space)
@@ -180,8 +180,8 @@ namespace GDE {
         Vec2F _referenceNormal = _refPoly->normals[_referenceIndex];
 
         // Calculate normal in incident's frame of reference
-        _referenceNormal = _refPoly->u * _referenceNormal; // To world space
-        _referenceNormal = _incPoly->u.transpose() * _referenceNormal; // To incident's model space
+        _referenceNormal = _refPoly->getRotationMatrix() * _referenceNormal; // To world space
+        _referenceNormal = _incPoly->getRotationMatrix().transpose() * _referenceNormal; // To incident's model space
 
         // Find most anti-normal face on incident polygon
         auto _incidentFace = 0;
@@ -195,9 +195,9 @@ namespace GDE {
         }
 
         // Assign face vertices for _incidentFace
-        _vec[0] = _incPoly->u * _incPoly->vertices[_incidentFace] + _incPoly->physicsBody->position;
+        _vec[0] = _incPoly->getRotationMatrix() * _incPoly->vertices[_incidentFace] + _incPoly->physicsBody->transform->getPositionLocal();
         _incidentFace = _incidentFace + 1 >= (int32_t) _incPoly->vertexCount ? 0 : _incidentFace + 1;
-        _vec[1] = _incPoly->u * _incPoly->vertices[_incidentFace] + _incPoly->physicsBody->position;
+        _vec[1] = _incPoly->getRotationMatrix() * _incPoly->vertices[_incidentFace] + _incPoly->physicsBody->transform->getPositionLocal();
     }
 
     int clip(Vec2F _n, float _c, Vec2F* _face) {
@@ -289,8 +289,8 @@ namespace GDE {
         Vec2F _v2 = _refPoly->vertices[_referenceIndex];
 
         // Transform vertices to world space
-        _v1 = _refPoly->u * _v1 + _refPoly->physicsBody->position;
-        _v2 = _refPoly->u * _v2 + _refPoly->physicsBody->position;
+        _v1 = _refPoly->getRotationMatrix() * _v1 + _refPoly->physicsBody->transform->getPositionLocal();
+        _v2 = _refPoly->getRotationMatrix() * _v2 + _refPoly->physicsBody->transform->getPositionLocal();
 
         // Calculate reference face side normal in world space
         Vec2F _sidePlaneNormal = (_v2 - _v1);

@@ -27,7 +27,6 @@ namespace GDE {
         Transform* transform = nullptr;
         Vec2F size = {};
         Type type = Type::POLYGON;
-        Mat2 u;
 
         std::vector<Vec2F> vertices;
         std::vector<Vec2F> normals;
@@ -39,6 +38,7 @@ namespace GDE {
         void makeCircle(float _radius);
         void rotate(float _degrees);
         Vec2F getSupport(const Vec2F& _dir);
+        Mat2 getRotationMatrix();
     };
 
 

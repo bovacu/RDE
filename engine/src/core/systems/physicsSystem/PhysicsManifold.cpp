@@ -21,8 +21,8 @@ namespace GDE {
 
         for (auto _i = 0; _i < contactCount; _i++) {
             // Calculate radii from COM to contact
-            Vec2F _ra = contacts[_i] - A->position;
-            Vec2F _rb = contacts[_i] - B->position;
+            Vec2F _ra = contacts[_i] - A->transform->getPositionLocal();
+            Vec2F _rb = contacts[_i] - B->transform->getPositionLocal();
 
             Vec2F _rv = B->velocity + _rb.crossProduct(B->angularVelocity) - A->velocity - _ra.crossProduct(A->angularVelocity);
 
@@ -43,8 +43,8 @@ namespace GDE {
 
         for (auto _i = 0; _i < contactCount; ++_i) {
             // Calculate radii from COM to contact
-            Vec2F _ra = contacts[_i] - A->position;
-            Vec2F _rb = contacts[_i] - B->position;
+            Vec2F _ra = contacts[_i] - A->transform->getPositionLocal();
+            Vec2F _rb = contacts[_i] - B->transform->getPositionLocal();
 
             // Relative velocity
             Vec2F _rv = B->velocity + _rb.crossProduct(B->angularVelocity) - A->velocity - _ra.crossProduct(A->angularVelocity);
@@ -102,8 +102,8 @@ namespace GDE {
         const float _slop = 0.05f; // Penetration allowance
         const float _percent = 0.4f; // Penetration percentage to correct
         Vec2F _correction = (std::max(penetration - _slop, 0.0f) / (A->inverseMass + B->inverseMass)) * normal * _percent;
-        A->position -= _correction * A->inverseMass;
-        B->position += _correction * B->inverseMass;
+        A->transform->translate(-(_correction * A->inverseMass));
+        B->transform->translate(_correction * B->inverseMass);
     }
 
     void PhysicsManifold::infiniteMassCorrection() {
