@@ -118,7 +118,7 @@ namespace Physics {
         void ComputeMass( real density )
         {
             // Calculate centroid and moment of interia
-            Physics::Vec2 c( 0.0f, 0.0f ); // centroid
+            GDE::Vec2F c( 0.0f, 0.0f ); // centroid
             real area = 0.0f;
             real I = 0.0f;
             const real k_inv3 = 1.0f / 3.0f;
@@ -126,9 +126,9 @@ namespace Physics {
             for(uint32 i1 = 0; i1 < m_vertexCount; ++i1)
             {
                 // Triangle vertices, third vertex implied as (0, 0)
-                Physics::Vec2 p1( m_vertices[i1] );
+                GDE::Vec2F p1( m_vertices[i1] );
                 uint32 i2 = i1 + 1 < m_vertexCount ? i1 + 1 : 0;
-                Physics::Vec2 p2( m_vertices[i2] );
+                GDE::Vec2F p2( m_vertices[i2] );
 
                 real D = Cross( p1, p2 );
                 real triangleArea = 0.5f * D;
@@ -181,7 +181,7 @@ namespace Physics {
         void SetBox( real hw, real hh )
         {
             m_vertexCount = 4;
-            m_vertices.emplace_back(Vec2 {-hw, -hh});
+            m_vertices.emplace_back( -hw, -hh );
             m_vertices.emplace_back(  hw, -hh );
             m_vertices.emplace_back(  hw,  hh );
             m_vertices.emplace_back( -hw,  hh );
@@ -191,7 +191,7 @@ namespace Physics {
             m_normals.emplace_back( -1.0f,   0.0f );
         }
 
-        void Set( Physics::Vec2 *vertices, uint32 count )
+        void Set( GDE::Vec2F *vertices, uint32 count )
         {
             // No hulls with less than 3 vertices (ensure actual polygon)
             assert( count > 2 && count <= MaxPolyVertexCount );
@@ -241,15 +241,15 @@ namespace Physics {
                     // Record each counter clockwise third vertex and add
                     // to the output hull
                     // See : http://www.oocities.org/pcgpe/math2d.html
-                    Physics::Vec2 e1 = vertices[nextHullIndex] - vertices[hull[outCount]];
-                    Physics::Vec2 e2 = vertices[i] - vertices[hull[outCount]];
+                    GDE::Vec2F e1 = vertices[nextHullIndex] - vertices[hull[outCount]];
+                    GDE::Vec2F e2 = vertices[i] - vertices[hull[outCount]];
                     real c = Cross( e1, e2 );
                     if(c < 0.0f)
                         nextHullIndex = i;
 
                     // Cross product is zero then e vectors are on same line
                     // therefor want to record vertex farthest along that line
-                    if(c == 0.0f && e2.LenSqr( ) > e1.LenSqr( ))
+                    if(c == 0.0f && e2.magnitudeSqr( ) > e1.magnitudeSqr( ))
                         nextHullIndex = i;
                 }
 
@@ -272,26 +272,26 @@ namespace Physics {
             for(uint32 i1 = 0; i1 < m_vertexCount; ++i1)
             {
                 uint32 i2 = i1 + 1 < m_vertexCount ? i1 + 1 : 0;
-                Physics::Vec2 face = m_vertices[i2] - m_vertices[i1];
+                GDE::Vec2F face = m_vertices[i2] - m_vertices[i1];
 
                 // Ensure no zero-length edges, because that's bad
-                assert( face.LenSqr( ) > EPSILON * EPSILON );
+                assert( face.magnitudeSqr( ) > EPSILON * EPSILON );
 
                 // Calculate normal with 2D cross product between vector and scalar
                 m_normals.emplace_back( face.y, -face.x );
-                m_normals[i1].Normalize( );
+                m_normals[i1].normalize();
             }
         }
 
         // The extreme point along a direction within a polygon
-        Physics::Vec2 GetSupport( const Physics::Vec2& dir )
+        GDE::Vec2F GetSupport( const GDE::Vec2F& dir )
         {
             real bestProjection = -FLT_MAX;
-            Physics::Vec2 bestVertex;
+            GDE::Vec2F bestVertex;
 
             for(uint32 i = 0; i < m_vertexCount; ++i)
             {
-                Physics::Vec2 v = m_vertices[i];
+                GDE::Vec2F v = m_vertices[i];
                 real projection = Dot( v, dir );
 
                 if(projection > bestProjection)
@@ -305,8 +305,8 @@ namespace Physics {
         }
 
         uint32 m_vertexCount;
-        std::vector<Vec2> m_vertices;
-        std::vector<Vec2> m_normals;
+        std::vector<GDE::Vec2F> m_vertices;
+        std::vector<GDE::Vec2F> m_normals;
     };
 
 }

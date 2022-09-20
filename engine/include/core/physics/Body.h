@@ -29,14 +29,14 @@ namespace Physics {
 // http://gamedev.tutsplus.com/tutorials/implementation/how-to-create-a-custom-2d-physics-engine-the-core-engine/
     struct Body
     {
-        Body( Shape *shape_, int x, int y );
+        Body(Shape *shape_, const GDE::Vec2F& _position);
 
-        void ApplyForce( const Vec2& f )
+        void ApplyForce( const GDE::Vec2F& f )
         {
             force += f;
         }
 
-        void ApplyImpulse( const Physics::Vec2& impulse, const Physics::Vec2& contactVector )
+        void ApplyImpulse( const GDE::Vec2F& impulse, const GDE::Vec2F& contactVector )
         {
             velocity += im * impulse;
             angularVelocity += iI * Cross( contactVector, impulse );
@@ -52,14 +52,14 @@ namespace Physics {
 
         void SetOrient( real radians );
 
-        Physics::Vec2 position;
-        Physics::Vec2 velocity;
+        GDE::Vec2F position;
+        GDE::Vec2F velocity;
 
         real angularVelocity;
         real torque;
         real orient; // radians
 
-        Physics::Vec2 force;
+        GDE::Vec2F force;
 
         // Set by shape
         real I;  // moment of inertia

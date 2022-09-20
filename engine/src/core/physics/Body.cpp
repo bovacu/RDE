@@ -21,17 +21,17 @@
 
 namespace Physics {
 
-    Body::Body( Shape *shape_, int x, int y )
+    Body::Body(Shape *shape_, const GDE::Vec2F& _position)
             : shape( shape_->Clone( ) )
     {
         shape->body = this;
-        position.Set( (real)x, (real)y );
-        velocity.Set( 0, 0 );
+        position.set(_position);
+        velocity.set( 0, 0 );
         angularVelocity = 0;
         torque = 0;
         GDE::Random _random;
         orient = _random.randomf( -PI, PI );
-        force.Set( 0, 0 );
+        force.set( 0, 0 );
         staticFriction = 0.5f;
         dynamicFriction = 0.3f;
         restitution = 0.2f;

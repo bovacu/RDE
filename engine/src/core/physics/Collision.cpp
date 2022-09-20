@@ -35,9 +35,9 @@ void CircletoCircle( Physics::Manifold *m, Physics::Body *a, Physics::Body *b )
     Physics::Circle *B = reinterpret_cast<Physics::Circle *>(b->shape);
 
   // Calculate translational vector, which is normal
-  Physics::Vec2 normal = b->position - a->position;
+  GDE::Vec2F normal = b->position - a->position;
 
-  real dist_sqr = normal.LenSqr( );
+  real dist_sqr = normal.magnitudeSqr( );
   real radius = A->radius + B->radius;
 
   // Not in contact
@@ -54,7 +54,7 @@ void CircletoCircle( Physics::Manifold *m, Physics::Body *a, Physics::Body *b )
   if(distance == 0.0f)
   {
     m->penetration = A->radius;
-    m->normal = Physics::Vec2( 1, 0 );
+    m->normal = GDE::Vec2F( 1, 0 );
     m->contacts [0] = a->position;
   }
   else
@@ -73,7 +73,7 @@ void CircletoPolygon( Physics::Manifold *m, Physics::Body *a, Physics::Body *b )
   m->contact_count = 0;
 
   // Transform circle center to Polygon model space
-  Physics::Vec2 center = a->position;
+  GDE::Vec2F center = a->position;
   center = B->u.Transpose( ) * (center - b->position);
 
   // Find edge with minimum penetration
@@ -95,9 +95,9 @@ void CircletoPolygon( Physics::Manifold *m, Physics::Body *a, Physics::Body *b )
   }
 
   // Grab face's vertices
-  Physics::Vec2 v1 = B->m_vertices[faceNormal];
+  GDE::Vec2F v1 = B->m_vertices[faceNormal];
   uint32 i2 = faceNormal + 1 < B->m_vertexCount ? faceNormal + 1 : 0;
-  Physics::Vec2 v2 = B->m_vertices[i2];
+  GDE::Vec2F v2 = B->m_vertices[i2];
 
   // Check to see if center is within polygon
   if(separation < EPSILON)
@@ -121,9 +121,9 @@ void CircletoPolygon( Physics::Manifold *m, Physics::Body *a, Physics::Body *b )
       return;
 
     m->contact_count = 1;
-    Physics::Vec2 n = v1 - center;
+    GDE::Vec2F n = v1 - center;
     n = B->u * n;
-    n.Normalize( );
+    n.normalize( );
     m->normal = n;
     v1 = B->u * v1 + b->position;
     m->contacts[0] = v1;
@@ -136,18 +136,18 @@ void CircletoPolygon( Physics::Manifold *m, Physics::Body *a, Physics::Body *b )
       return;
 
     m->contact_count = 1;
-    Physics::Vec2 n = v2 - center;
+    GDE::Vec2F n = v2 - center;
     v2 = B->u * v2 + b->position;
     m->contacts[0] = v2;
     n = B->u * n;
-    n.Normalize( );
+    n.normalize( );
     m->normal = n;
   }
 
   // Closest to face
   else
   {
-    Physics::Vec2 n = B->m_normals[faceNormal];
+    GDE::Vec2F n = B->m_normals[faceNormal];
     if(Dot( center - v1, n ) > A->radius)
       return;
 
@@ -172,19 +172,19 @@ real FindAxisLeastPenetration( uint32 *faceIndex, Physics::PolygonShape *A, Phys
   for(uint32 i = 0; i < A->m_vertexCount; ++i)
   {
     // Retrieve a face normal from A
-    Physics::Vec2 n = A->m_normals[i];
-    Physics::Vec2 nw = A->u * n;
+    GDE::Vec2F n = A->m_normals[i];
+    GDE::Vec2F nw = A->u * n;
 
     // Transform face normal into B's model space
     Mat2 buT = B->u.Transpose( );
     n = buT * nw;
 
     // Retrieve support point from B along -n
-    Physics::Vec2 s = B->GetSupport( -n );
+    GDE::Vec2F s = B->GetSupport( -n );
 
     // Retrieve vertex on face from A, transform into
     // B's model space
-    Physics::Vec2 v = A->m_vertices[i];
+    GDE::Vec2F v = A->m_vertices[i];
     v = A->u * v + A->body->position;
     v -= B->body->position;
     v = buT * v;
@@ -204,9 +204,9 @@ real FindAxisLeastPenetration( uint32 *faceIndex, Physics::PolygonShape *A, Phys
   return bestDistance;
 }
 
-void FindIncidentFace( Physics::Vec2 *v, Physics::PolygonShape *RefPoly, Physics::PolygonShape *IncPoly, uint32 referenceIndex )
+void FindIncidentFace( GDE::Vec2F *v, Physics::PolygonShape *RefPoly, Physics::PolygonShape *IncPoly, uint32 referenceIndex )
 {
-  Physics::Vec2 referenceNormal = RefPoly->m_normals[referenceIndex];
+  GDE::Vec2F referenceNormal = RefPoly->m_normals[referenceIndex];
 
   // Calculate normal in incident's frame of reference
   referenceNormal = RefPoly->u * referenceNormal; // To world space
@@ -231,10 +231,10 @@ void FindIncidentFace( Physics::Vec2 *v, Physics::PolygonShape *RefPoly, Physics
   v[1] = IncPoly->u * IncPoly->m_vertices[incidentFace] + IncPoly->body->position;
 }
 
-int32 Clip( Physics::Vec2 n, real c, Physics::Vec2 *face )
+int32 Clip( GDE::Vec2F n, real c, GDE::Vec2F *face )
 {
   uint32 sp = 0;
-  Physics::Vec2 out[2] = {
+  GDE::Vec2F out[2] = {
     face[0],
     face[1]
   };
@@ -308,7 +308,7 @@ void PolygontoPolygon( Physics::Manifold *m, Physics::Body *a, Physics::Body *b 
   }
 
   // World space incident face
-  Physics::Vec2 incidentFace[2];
+  GDE::Vec2F incidentFace[2];
   FindIncidentFace( incidentFace, RefPoly, IncPoly, referenceIndex );
 
   //        y
@@ -325,20 +325,20 @@ void PolygontoPolygon( Physics::Manifold *m, Physics::Body *a, Physics::Body *b 
   //  n : incident normal
 
   // Setup reference face vertices
-  Physics::Vec2 v1 = RefPoly->m_vertices[referenceIndex];
+  GDE::Vec2F v1 = RefPoly->m_vertices[referenceIndex];
   referenceIndex = referenceIndex + 1 == RefPoly->m_vertexCount ? 0 : referenceIndex + 1;
-  Physics::Vec2 v2 = RefPoly->m_vertices[referenceIndex];
+  GDE::Vec2F v2 = RefPoly->m_vertices[referenceIndex];
 
   // Transform vertices to world space
   v1 = RefPoly->u * v1 + RefPoly->body->position;
   v2 = RefPoly->u * v2 + RefPoly->body->position;
 
   // Calculate reference face side normal in world space
-  Physics::Vec2 sidePlaneNormal = (v2 - v1);
-  sidePlaneNormal.Normalize( );
+  GDE::Vec2F sidePlaneNormal = (v2 - v1);
+  sidePlaneNormal.normalize( );
 
   // Orthogonalize
-  Physics::Vec2 refFaceNormal( sidePlaneNormal.y, -sidePlaneNormal.x );
+  GDE::Vec2F refFaceNormal( sidePlaneNormal.y, -sidePlaneNormal.x );
 
   // ax + by = c
   // c is distance from origin

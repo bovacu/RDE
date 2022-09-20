@@ -43,6 +43,11 @@ namespace GDE {
                 y = _y;
             }
 
+            void set(const Vec2<T>& _vec) {
+                x = _vec.x;
+                y = _vec.y;
+            }
+
             [[nodiscard]] float dotProduct(const Vec2<T>& _p) const {
                 return x * _p.x + y * _p.y;
             }
@@ -124,9 +129,8 @@ namespace GDE {
             }
 
 
-            void operator *(float _scalar) {
-                x *= _scalar;
-                y *= _scalar;
+            Vec2<T> operator*( float _scalar ) const {
+                return Vec2<T>( x * _scalar, y * _scalar );
             }
 
             void operator *=(float _scalar) {
@@ -135,9 +139,8 @@ namespace GDE {
             }
 
 
-            void operator /(float _scalar) {
-                x /= _scalar;
-                y /= _scalar;
+            Vec2<T> operator/( float _scalar ) const {
+                return Vec2<T>(x / _scalar, y / _scalar);
             }
 
             void operator /=(float _scalar) {

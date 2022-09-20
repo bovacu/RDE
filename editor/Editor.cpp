@@ -91,10 +91,10 @@ namespace Editor {
             Physics::PolygonShape poly;
             GDE::Random _random;
             auto count = _random.randomi( 3, 10 );
-            auto *vertices = new Physics::Vec2[count];
+            auto *vertices = new Vec2F[count];
             real e = _random.randomf( 16, 32 );
             for(uint32 i = 0; i < count; ++i)
-                vertices[i].Set( _random.randomf( -e, e ), _random.randomf( -e, e ) );
+                vertices[i].set( _random.randomf( -e, e ), _random.randomf( -e, e ) );
             poly.Set( vertices, count );
             Physics::Body *b = engine->manager.physics.add( &poly, {engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y} );
             b->SetOrient( _random.randomf( -180, 3.180 ) );

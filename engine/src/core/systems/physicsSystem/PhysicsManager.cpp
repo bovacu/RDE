@@ -84,7 +84,7 @@ namespace GDE {
         for(uint32 i = 0; i < bodies.size( ); ++i)
         {
             Physics::Body *b = bodies[i];
-            b->force.Set( 0, 0 );
+            b->force.set( 0, 0 );
             b->torque = 0;
         }
     }
@@ -126,11 +126,11 @@ namespace GDE {
                     const uint32 k_segments = 20;
                     real theta = _body->orient;
                     real inc = PI * 2.0f / (real)k_segments;
-                    Physics::Vec2 _points[k_segments];
+                    GDE::Vec2F _points[k_segments];
                     for(uint32 i = 0; i < k_segments; ++i)
                     {
                         theta += inc;
-                        Physics::Vec2 p( std::cos( theta ), std::sin( theta ) );
+                        GDE::Vec2F p( std::cos( theta ), std::sin( theta ) );
                         p *= _body->shape->radius;
                         p += _body->position;
                         _points[i] = p;
@@ -142,8 +142,8 @@ namespace GDE {
                         if(_next == k_segments)
                             _next = 0;
 
-                        Physics::Vec2 _p0_ = _points[_i];
-                        Physics::Vec2 _p1_ =_points[_next];
+                        GDE::Vec2F _p0_ = _points[_i];
+                        GDE::Vec2F _p1_ =_points[_next];
 
                         Vec2F _p0 { _p0_.x, _p0_.y };
                         Vec2F _p1 { _p1_.x, _p1_.y };
@@ -161,8 +161,8 @@ namespace GDE {
                         if(_next == _polygon->m_vertices.size())
                             _next = 0;
 
-                        Physics::Vec2 _p0_ = _body->position + _polygon->u * _polygon->m_vertices[_i];
-                        Physics::Vec2 _p1_ = _body->position + _polygon->u * _polygon->m_vertices[_next];
+                        GDE::Vec2F _p0_ = _body->position + _polygon->u * _polygon->m_vertices[_i];
+                        GDE::Vec2F _p1_ = _body->position + _polygon->u * _polygon->m_vertices[_next];
 
                         Vec2F _p0 { _p0_.x, _p0_.y };
                         Vec2F _p1 { _p1_.x, _p1_.y };
@@ -179,7 +179,7 @@ namespace GDE {
 
     Physics::Body* PhysicsManager::add(Physics::Shape* _physicsShape, const Vec2F& _position) {
         assert( _physicsShape );
-        auto *b = new Physics::Body( _physicsShape, _position.x, _position.y );
+        auto *b = new Physics::Body( _physicsShape, _position );
         bodies.push_back( b );
         return b;
     }

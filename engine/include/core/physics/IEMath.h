@@ -25,6 +25,7 @@
 #include <cmath> // abs, sqrt
 #include <cassert> // assert
 #include <algorithm> // max, min
+#include "core/util/Vec.h"
 
 typedef float real;
 typedef double real64;
@@ -42,126 +43,9 @@ typedef float f32;
 typedef double f64;
 
 const real PI = 3.141592741f;
-const real EPSILON = 0.0001f;
-
-namespace Physics {
-
-    struct Vec2
-    {
-        union
-        {
-            real m[1][1];
-            real v[2];
-
-            struct
-            {
-                real x;
-                real y;
-            };
-        };
-
-        Vec2( ) {}
-        Vec2( real x_, real y_ )
-                : x( x_ )
-                , y( y_ )
-        {
-        }
-
-        void Set( real x_, real y_ )
-        {
-            x = x_;
-            y = y_;
-        }
-
-        Vec2 operator-( void ) const
-        {
-            return Vec2( -x, -y );
-        }
-
-        Vec2 operator*( real s ) const
-        {
-            return Vec2( x * s, y * s );
-        }
-
-        Vec2 operator/( real s ) const
-        {
-            return Vec2( x / s, y / s );
-        }
-
-        void operator*=( real s )
-        {
-            x *= s;
-            y *= s;
-        }
-
-        Vec2 operator+( const Vec2& rhs ) const
-        {
-            return Vec2( x + rhs.x, y + rhs.y );
-        }
-
-        Vec2 operator+( real s ) const
-        {
-            return Vec2( x + s, y + s );
-        }
-
-        void operator+=( const Vec2& rhs )
-        {
-            x += rhs.x;
-            y += rhs.y;
-        }
-
-        Vec2 operator-( const Vec2& rhs ) const
-        {
-            return Vec2( x - rhs.x, y - rhs.y );
-        }
-
-        void operator-=( const Vec2& rhs )
-        {
-            x -= rhs.x;
-            y -= rhs.y;
-        }
-
-        real LenSqr( void ) const
-        {
-            return x * x + y * y;
-        }
-
-        real Len( void ) const
-        {
-            return std::sqrt( x * x + y * y );
-        }
-
-        void Rotate( real radians )
-        {
-            real c = std::cos( radians );
-            real s = std::sin( radians );
-
-            real xp = x * c - y * s;
-            real yp = x * s + y * c;
-
-            x = xp;
-            y = yp;
-        }
-
-        void Normalize( void )
-        {
-            real len = Len( );
-
-            if(len > EPSILON)
-            {
-                real invLen = 1.0f / len;
-                x *= invLen;
-                y *= invLen;
-            }
-        }
-    };
-
-    inline Vec2 operator*( float s, const Vec2& v )
-    {
-        return Vec2( s * v.x, s * v.y );
-    }
-
-}
+#ifndef EPSILON
+#define EPSILON 0.0001f
+#endif
 
 struct Mat2
 {
@@ -207,14 +91,14 @@ struct Mat2
     return Mat2( std::abs( m00 ), std::abs( m01 ), std::abs( m10 ), std::abs( m11 ) );
   }
 
-  Physics::Vec2 AxisX( void ) const
+  GDE::Vec2F AxisX( void ) const
   {
-    return Physics::Vec2( m00, m10 );
+    return GDE::Vec2F( m00, m10 );
   }
 
-    Physics::Vec2 AxisY( void ) const
+    GDE::Vec2F AxisY( void ) const
   {
-    return Physics::Vec2( m01, m11 );
+    return GDE::Vec2F( m01, m11 );
   }
 
   Mat2 Transpose( void ) const
@@ -222,9 +106,9 @@ struct Mat2
     return Mat2( m00, m10, m01, m11 );
   }
 
-  const Physics::Vec2 operator*( const Physics::Vec2& rhs ) const
+  const GDE::Vec2F operator*( const GDE::Vec2F& rhs ) const
   {
-    return Physics::Vec2( m00 * rhs.x + m01 * rhs.y, m10 * rhs.x + m11 * rhs.y );
+    return GDE::Vec2F( m00 * rhs.x + m01 * rhs.y, m10 * rhs.x + m11 * rhs.y );
   }
 
   const Mat2 operator*( const Mat2& rhs ) const
@@ -241,38 +125,38 @@ struct Mat2
   }
 };
 
-inline Physics::Vec2 Min( const Physics::Vec2& a, const Physics::Vec2& b )
+inline GDE::Vec2F Min( const GDE::Vec2F& a, const GDE::Vec2F& b )
 {
-  return Physics::Vec2( std::min( a.x, b.x ), std::min( a.y, b.y ) );
+  return GDE::Vec2F( std::min( a.x, b.x ), std::min( a.y, b.y ) );
 }
 
-inline Physics::Vec2 Max( const Physics::Vec2& a, const Physics::Vec2& b )
+inline GDE::Vec2F Max( const GDE::Vec2F& a, const GDE::Vec2F& b )
 {
-  return Physics::Vec2( std::max( a.x, b.x ), std::max( a.y, b.y ) );
+  return GDE::Vec2F( std::max( a.x, b.x ), std::max( a.y, b.y ) );
 }
 
-inline real Dot( const Physics::Vec2& a, const Physics::Vec2& b )
+inline real Dot( const GDE::Vec2F& a, const GDE::Vec2F& b )
 {
   return a.x * b.x + a.y * b.y;
 }
 
-inline real DistSqr( const Physics::Vec2& a, const Physics::Vec2& b )
+inline real DistSqr( const GDE::Vec2F& a, const GDE::Vec2F& b )
 {
-    Physics::Vec2 c = a - b;
+    GDE::Vec2F c = a - b;
   return Dot( c, c );
 }
 
-inline Physics::Vec2 Cross( const Physics::Vec2& v, real a )
+inline GDE::Vec2F Cross( const GDE::Vec2F& v, real a )
 {
-  return Physics::Vec2( a * v.y, -a * v.x );
+  return GDE::Vec2F( a * v.y, -a * v.x );
 }
 
-inline Physics::Vec2 Cross( real a, const Physics::Vec2& v )
+inline GDE::Vec2F Cross( real a, const GDE::Vec2F& v )
 {
-  return Physics::Vec2( -a * v.y, a * v.x );
+  return GDE::Vec2F( -a * v.y, a * v.x );
 }
 
-inline real Cross( const Physics::Vec2& a, const Physics::Vec2& b )
+inline real Cross( const GDE::Vec2F& a, const GDE::Vec2F& b )
 {
   return a.x * b.y - a.y * b.x;
 }
@@ -310,7 +194,7 @@ inline bool BiasGreaterThan( real a, real b )
 }
 
 const f32 gravityScale = -5.0f;
-const Physics::Vec2 gravity( 0, 10.0f * gravityScale );
+const GDE::Vec2F gravity( 0, 10.0f * gravityScale );
 const float dt = 1.0f / 60.0f;
 
 #endif // IEMATH_H
