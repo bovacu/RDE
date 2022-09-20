@@ -22,7 +22,6 @@
 
 #include "Body.h"
 #include "core/render/shapes/DebugShape.h"
-#include "IEMath.h"
 #include "core/util/Mat2.h"
 
 namespace Physics {
@@ -41,8 +40,8 @@ namespace Physics {
         Shape( ) {}
         virtual Shape *Clone( void ) const = 0;
         virtual void Initialize( void ) = 0;
-        virtual void ComputeMass( real density ) = 0;
-        virtual void SetOrient( real radians ) = 0;
+        virtual void ComputeMass( float density ) = 0;
+        virtual void SetOrient( float radians ) = 0;
         virtual GDE::DebugShape Draw( void ) const = 0;
         virtual Type GetType( void ) const = 0;
         virtual ~Shape() {  }
@@ -50,7 +49,7 @@ namespace Physics {
         Body *body;
 
         // For circle shape
-        real radius;
+        float radius;
 
         // For Polygon shape
         GDE::Mat2 u; // Orientation matrix from model to world
@@ -58,7 +57,7 @@ namespace Physics {
 
     struct Circle : public Shape
     {
-        Circle( real r )
+        Circle( float r )
         {
             radius = r;
         }
@@ -73,7 +72,7 @@ namespace Physics {
             ComputeMass( 1.0f );
         }
 
-        void ComputeMass( real density )
+        void ComputeMass( float density )
         {
             body->m = PI * radius * radius * density;
             body->im = (body->m) ? 1.0f / body->m : 0.0f;
@@ -81,7 +80,7 @@ namespace Physics {
             body->iI = (body->I) ? 1.0f / body->I : 0.0f;
         }
 
-        void SetOrient( real radians )
+        void SetOrient( float radians )
         {
         }
 
@@ -107,7 +106,7 @@ namespace Physics {
         {
             PolygonShape *poly = new PolygonShape( );
             poly->u = u;
-            for(uint32 i = 0; i < m_vertexCount; ++i)
+            for(uint32_t i = 0; i < m_vertexCount; ++i)
             {
                 poly->m_vertices.push_back(m_vertices[i]);
                 poly->m_normals.push_back(m_normals[i]);
@@ -116,31 +115,31 @@ namespace Physics {
             return poly;
         }
 
-        void ComputeMass( real density )
+        void ComputeMass( float density )
         {
             // Calculate centroid and moment of interia
             GDE::Vec2F c( 0.0f, 0.0f ); // centroid
-            real area = 0.0f;
-            real I = 0.0f;
-            const real k_inv3 = 1.0f / 3.0f;
+            float area = 0.0f;
+            float I = 0.0f;
+            const float k_inv3 = 1.0f / 3.0f;
 
-            for(uint32 i1 = 0; i1 < m_vertexCount; ++i1)
+            for(uint32_t i1 = 0; i1 < m_vertexCount; ++i1)
             {
                 // Triangle vertices, third vertex implied as (0, 0)
                 GDE::Vec2F p1( m_vertices[i1] );
-                uint32 i2 = i1 + 1 < m_vertexCount ? i1 + 1 : 0;
+                uint32_t i2 = i1 + 1 < m_vertexCount ? i1 + 1 : 0;
                 GDE::Vec2F p2( m_vertices[i2] );
 
-                real D = Cross( p1, p2 );
-                real triangleArea = 0.5f * D;
+                float D = p1.crossProduct(p2);
+                float triangleArea = 0.5f * D;
 
                 area += triangleArea;
 
                 // Use area to weight the centroid average, not just vertex position
                 c += triangleArea * k_inv3 * (p1 + p2);
 
-                real intx2 = p1.x * p1.x + p2.x * p1.x + p2.x * p2.x;
-                real inty2 = p1.y * p1.y + p2.y * p1.y + p2.y * p2.y;
+                float intx2 = p1.x * p1.x + p2.x * p1.x + p2.x * p2.x;
+                float inty2 = p1.y * p1.y + p2.y * p1.y + p2.y * p2.y;
                 I += (0.25f * k_inv3 * D) * (intx2 + inty2);
             }
 
@@ -148,8 +147,8 @@ namespace Physics {
 
             // Translate vertices to centroid (make the centroid (0, 0)
             // for the polygon in model space)
-            // Not really necessary, but I like doing this anyway
-            for(uint32 i = 0; i < m_vertexCount; ++i)
+            // Not floatly necessary, but I like doing this anyway
+            for(uint32_t i = 0; i < m_vertexCount; ++i)
                 m_vertices[i] -= c;
 
             body->m = density * area;
@@ -158,7 +157,7 @@ namespace Physics {
             body->iI = body->I ? 1.0f / body->I : 0.0f;
         }
 
-        void SetOrient( real radians )
+        void SetOrient( float radians )
         {
             u.rotate( radians );
         }
@@ -179,7 +178,7 @@ namespace Physics {
         }
 
         // Half width and half height
-        void SetBox( real hw, real hh )
+        void SetBox( float hw, float hh )
         {
             m_vertexCount = 4;
             m_vertices.emplace_back( -hw, -hh );
@@ -192,18 +191,18 @@ namespace Physics {
             m_normals.emplace_back( -1.0f,   0.0f );
         }
 
-        void Set( GDE::Vec2F *vertices, uint32 count )
+        void Set( GDE::Vec2F *vertices, uint32_t count )
         {
             // No hulls with less than 3 vertices (ensure actual polygon)
             assert( count > 2 && count <= MaxPolyVertexCount );
-            count = std::min( (int32)count, MaxPolyVertexCount );
+            count = std::min( (int32_t)count, MaxPolyVertexCount );
 
             // Find the right most point on the hull
-            int32 rightMost = 0;
-            real highestXCoord = vertices[0].x;
-            for(uint32 i = 1; i < count; ++i)
+            int32_t rightMost = 0;
+            float highestXCoord = vertices[0].x;
+            for(uint32_t i = 1; i < count; ++i)
             {
-                real x = vertices[i].x;
+                float x = vertices[i].x;
                 if(x > highestXCoord)
                 {
                     highestXCoord = x;
@@ -216,9 +215,9 @@ namespace Physics {
                         rightMost = i;
             }
 
-            int32 hull[MaxPolyVertexCount];
-            int32 outCount = 0;
-            int32 indexHull = rightMost;
+            int32_t hull[MaxPolyVertexCount];
+            int32_t outCount = 0;
+            int32_t indexHull = rightMost;
 
             for (;;)
             {
@@ -227,8 +226,8 @@ namespace Physics {
                 // Search for next index that wraps around the hull
                 // by computing cross products to find the most counter-clockwise
                 // vertex in the set, given the previos hull index
-                int32 nextHullIndex = 0;
-                for(int32 i = 1; i < (int32)count; ++i)
+                int32_t nextHullIndex = 0;
+                for(int32_t i = 1; i < (int32_t)count; ++i)
                 {
                     // Skip if same coordinate as we need three unique
                     // points in the set to perform a cross product
@@ -244,7 +243,7 @@ namespace Physics {
                     // See : http://www.oocities.org/pcgpe/math2d.html
                     GDE::Vec2F e1 = vertices[nextHullIndex] - vertices[hull[outCount]];
                     GDE::Vec2F e2 = vertices[i] - vertices[hull[outCount]];
-                    real c = Cross( e1, e2 );
+                    float c = e1.crossProduct(e2);
                     if(c < 0.0f)
                         nextHullIndex = i;
 
@@ -266,13 +265,13 @@ namespace Physics {
             }
 
             // Copy vertices into shape's vertices
-            for(uint32 i = 0; i < m_vertexCount; ++i)
+            for(uint32_t i = 0; i < m_vertexCount; ++i)
                 m_vertices.push_back(vertices[hull[i]]);
 
             // Compute face normals
-            for(uint32 i1 = 0; i1 < m_vertexCount; ++i1)
+            for(uint32_t i1 = 0; i1 < m_vertexCount; ++i1)
             {
-                uint32 i2 = i1 + 1 < m_vertexCount ? i1 + 1 : 0;
+                uint32_t i2 = i1 + 1 < m_vertexCount ? i1 + 1 : 0;
                 GDE::Vec2F face = m_vertices[i2] - m_vertices[i1];
 
                 // Ensure no zero-length edges, because that's bad
@@ -287,13 +286,13 @@ namespace Physics {
         // The extreme point along a direction within a polygon
         GDE::Vec2F GetSupport( const GDE::Vec2F& dir )
         {
-            real bestProjection = -FLT_MAX;
+            float bestProjection = -FLT_MAX;
             GDE::Vec2F bestVertex;
 
-            for(uint32 i = 0; i < m_vertexCount; ++i)
+            for(uint32_t i = 0; i < m_vertexCount; ++i)
             {
                 GDE::Vec2F v = m_vertices[i];
-                real projection = Dot( v, dir );
+                float projection = v.dotProduct(dir);
 
                 if(projection > bestProjection)
                 {
@@ -305,7 +304,7 @@ namespace Physics {
             return bestVertex;
         }
 
-        uint32 m_vertexCount;
+        uint32_t m_vertexCount;
         std::vector<GDE::Vec2F> m_vertices;
         std::vector<GDE::Vec2F> m_normals;
     };

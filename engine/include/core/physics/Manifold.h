@@ -34,7 +34,7 @@ namespace Physics {
         }
 
         void Solve( void );                 // Generate contact information
-        void Initialize( void );            // Precalculations for impulse solving
+        void Initialize(GDE::Delta _fxDt, const GDE::Vec2F& _gravity);            // Precalculations for impulse solving
         void ApplyImpulse( void );          // Solve impulse and apply
         void PositionalCorrection( void );  // Naive correction of positional penetration
         void InfiniteMassCorrection( void );
@@ -42,13 +42,13 @@ namespace Physics {
         Body *A;
         Body *B;
 
-        real penetration;     // Depth of penetration from collision
+        float penetration;     // Depth of penetration from collision
         GDE::Vec2F normal;          // From A to B
         GDE::Vec2F contacts[2];     // Points of contact during collision
-        uint32 contact_count; // Number of contacts that occured during collision
-        real e;               // Mixed restitution
-        real df;              // Mixed dynamic friction
-        real sf;              // Mixed static friction
+        uint32_t contact_count; // Number of contacts that occured during collision
+        float e;               // Mixed restitution
+        float df;              // Mixed dynamic friction
+        float sf;              // Mixed static friction
     };
 
 }

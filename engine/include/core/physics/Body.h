@@ -20,7 +20,7 @@
 #ifndef BODY_H
 #define BODY_H
 
-#include "IEMath.h"
+#include "core/util/Vec.h"
 
 namespace Physics {
 
@@ -39,7 +39,7 @@ namespace Physics {
         void ApplyImpulse( const GDE::Vec2F& impulse, const GDE::Vec2F& contactVector )
         {
             velocity += im * impulse;
-            angularVelocity += iI * Cross( contactVector, impulse );
+            angularVelocity += iI * contactVector.crossProduct(impulse);
         }
 
         void SetStatic( void )
@@ -50,33 +50,33 @@ namespace Physics {
             im = 0.0f;
         }
 
-        void SetOrient( real radians );
+        void SetOrient( float radians );
 
         GDE::Vec2F position;
         GDE::Vec2F velocity;
 
-        real angularVelocity;
-        real torque;
-        real orient; // radians
+        float angularVelocity;
+        float torque;
+        float orient; // radians
 
         GDE::Vec2F force;
 
         // Set by shape
-        real I;  // moment of inertia
-        real iI; // inverse inertia
-        real m;  // mass
-        real im; // inverse masee
+        float I;  // moment of inertia
+        float iI; // inverse inertia
+        float m;  // mass
+        float im; // inverse masee
 
         // http://gamedev.tutsplus.com/tutorials/implementation/how-to-create-a-custom-2d-physics-engine-friction-scene-and-jump-table/
-        real staticFriction;
-        real dynamicFriction;
-        real restitution;
+        float staticFriction;
+        float dynamicFriction;
+        float restitution;
 
         // Shape interface
         Shape *shape;
 
         // Store a color in RGB format
-        real r, g, b;
+        float r, g, b;
     };
 
 }

@@ -38,7 +38,13 @@
 #define BLUR_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/blurFragment.glsl"
 #define DEBUG_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/debug/debugFragment.glsl"
 
+#ifndef EPSILON
+#define EPSILON 0.0001f
+#endif
 
+#ifndef PI
+#define PI 3.141592741f
+#endif
 
 #ifndef NDEBUG
 #define ENGINE_DEBUG

@@ -41,7 +41,7 @@ namespace Physics {
         b = _random.randomf( 0.2f, 1.0f );
     }
 
-    void Body::SetOrient( real radians )
+    void Body::SetOrient( float radians )
     {
         orient = radians;
         shape->SetOrient( radians );

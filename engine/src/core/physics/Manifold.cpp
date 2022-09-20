@@ -19,6 +19,7 @@
 
 #include "core/physics/Precompiled.h"
 #include "core/physics/Manifold.h"
+#include "core/systems/physicsSystem/PhysicsMath.h"
 
 namespace Physics {
 
@@ -26,7 +27,7 @@ namespace Physics {
         Dispatch[A->shape->GetType()][B->shape->GetType()](this, A, B);
     }
 
-    void Manifold::Initialize(void) {
+    void Manifold::Initialize(GDE::Delta _fxDt, const GDE::Vec2F& _gravity) {
         // Calculate average restitution
         e = std::min(A->restitution, B->restitution);
 
@@ -34,54 +35,54 @@ namespace Physics {
         sf = std::sqrt(A->staticFriction * B->staticFriction);
         df = std::sqrt(A->dynamicFriction * B->dynamicFriction);
 
-        for (uint32 i = 0; i < contact_count; ++i) {
+        for (uint32_t i = 0; i < contact_count; ++i) {
             // Calculate radii from COM to contact
             GDE::Vec2F ra = contacts[i] - A->position;
             GDE::Vec2F rb = contacts[i] - B->position;
 
-            GDE::Vec2F rv = B->velocity + Cross(B->angularVelocity, rb) -
-                            A->velocity - Cross(A->angularVelocity, ra);
+            GDE::Vec2F rv = B->velocity + rb.crossProduct(B->angularVelocity) -
+                            A->velocity - ra.crossProduct(A->angularVelocity);
 
 
             // Determine if we should perform a resting collision or not
             // The idea is if the only thing moving this object is gravity,
             // then the collision should be performed without any restitution
-            if (rv.magnitudeSqr() < (dt * gravity).magnitudeSqr() + EPSILON)
+            if (rv.magnitudeSqr() < (_fxDt * _gravity).magnitudeSqr() + EPSILON)
                 e = 0.0f;
         }
     }
 
     void Manifold::ApplyImpulse(void) {
         // Early out and positional correct if both objects have infinite mass
-        if (Equal(A->im + B->im, 0)) {
+        if (GDE::PhysicsMath::approximatelyEqual(A->im + B->im, 0)) {
             InfiniteMassCorrection();
             return;
         }
 
-        for (uint32 i = 0; i < contact_count; ++i) {
+        for (uint32_t i = 0; i < contact_count; ++i) {
             // Calculate radii from COM to contact
             GDE::Vec2F ra = contacts[i] - A->position;
             GDE::Vec2F rb = contacts[i] - B->position;
 
             // Relative velocity
-            GDE::Vec2F rv = B->velocity + Cross(B->angularVelocity, rb) -
-                            A->velocity - Cross(A->angularVelocity, ra);
+            GDE::Vec2F rv = B->velocity + rb.crossProduct(B->angularVelocity) -
+                            A->velocity - ra.crossProduct(A->angularVelocity);
 
             // Relative velocity along the normal
-            real contactVel = Dot(rv, normal);
+            float contactVel = rv.dotProduct(normal);
 
             // Do not resolve if velocities are separating
             if (contactVel > 0)
                 return;
 
-            real raCrossN = Cross(ra, normal);
-            real rbCrossN = Cross(rb, normal);
-            real invMassSum = A->im + B->im + Sqr(raCrossN) * A->iI + Sqr(rbCrossN) * B->iI;
+            float raCrossN = ra.crossProduct(normal);
+            float rbCrossN = rb.crossProduct(normal);
+            float invMassSum = A->im + B->im + (raCrossN * raCrossN) * A->iI + (rbCrossN * rbCrossN) * B->iI;
 
             // Calculate impulse scalar
-            real j = -(1.0f + e) * contactVel;
+            float j = -(1.0f + e) * contactVel;
             j /= invMassSum;
-            j /= (real) contact_count;
+            j /= (float) contact_count;
 
             // Apply impulse
             GDE::Vec2F impulse = normal * j;
@@ -89,19 +90,19 @@ namespace Physics {
             B->ApplyImpulse(impulse, rb);
 
             // Friction impulse
-            rv = B->velocity + Cross(B->angularVelocity, rb) -
-                 A->velocity - Cross(A->angularVelocity, ra);
+            rv = B->velocity + rb.crossProduct(B->angularVelocity) -
+                 A->velocity - ra.crossProduct(A->angularVelocity);
 
-            GDE::Vec2F t = rv - (normal * Dot(rv, normal));
+            GDE::Vec2F t = rv - (normal * rv.dotProduct(normal));
             t.normalize();
 
             // j tangent magnitude
-            real jt = -Dot(rv, t);
+            float jt = -rv.dotProduct(t);
             jt /= invMassSum;
-            jt /= (real) contact_count;
+            jt /= (float) contact_count;
 
             // Don't apply tiny friction impulses
-            if (Equal(jt, 0.0f))
+            if (GDE::PhysicsMath::approximatelyEqual(jt, 0.0f))
                 return;
 
             // Coulumb's law
@@ -118,8 +119,8 @@ namespace Physics {
     }
 
     void Manifold::PositionalCorrection(void) {
-        const real k_slop = 0.05f; // Penetration allowance
-        const real percent = 0.4f; // Penetration percentage to correct
+        const float k_slop = 0.05f; // Penetration allowance
+        const float percent = 0.4f; // Penetration percentage to correct
         GDE::Vec2F correction = (std::max(penetration - k_slop, 0.0f) / (A->im + B->im)) * normal * percent;
         A->position -= correction * A->im;
         B->position += correction * B->im;

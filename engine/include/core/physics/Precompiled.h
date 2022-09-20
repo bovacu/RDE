@@ -40,7 +40,6 @@
 #include <cfloat>  // FLT_MAX
 #include <vector>
 
-#include "core/physics/IEMath.h"
 #include "Body.h"
 #include "Shape.h"
 #include "Collision.h"

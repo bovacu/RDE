@@ -21,10 +21,12 @@ namespace GDE {
 
     class PhysicsManager {
         private:
-            f32 m_dt = 1.f / 60.f;
-            uint32 m_iterations = 10;
             std::vector<Physics::Body*> bodies;
             std::vector<Physics::Manifold> contacts;
+
+        public:
+            uint32 steps = 10;
+            Vec2F gravity;
 
         public:
             void init();

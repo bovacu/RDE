@@ -21,7 +21,9 @@ namespace GDE {
         }
     }
 
-    void IntegrateForces( Physics::Body *b, real _dt )
+    Vec2F gravity {0, -50.f};
+
+    void IntegrateForces( Physics::Body *b, float _dt )
     {
         if(b->im == 0.0f)
             return;
@@ -30,7 +32,7 @@ namespace GDE {
         b->angularVelocity += b->torque * b->iI * (_dt / 2.0f);
     }
 
-    void IntegrateVelocity( Physics::Body *b, real _dt )
+    void IntegrateVelocity( Physics::Body *b, float _dt )
     {
         if(b->im == 0.0f)
             return;
@@ -65,10 +67,10 @@ namespace GDE {
 
         // Initialize collision
         for(uint32 i = 0; i < contacts.size( ); ++i)
-            contacts[i].Initialize( );
+            contacts[i].Initialize(_fxDt, GDE::gravity);
 
         // Solve collisions
-        for(uint32 j = 0; j < m_iterations; ++j)
+        for(uint32 j = 0; j < steps; ++j)
             for(uint32 i = 0; i < contacts.size( ); ++i)
                 contacts[i].ApplyImpulse( );
 
@@ -124,10 +126,10 @@ namespace GDE {
                 case Physics::Shape::eCircle:
                 {
                     const uint32 k_segments = 20;
-                    real theta = _body->orient;
-                    real inc = PI * 2.0f / (real)k_segments;
+                    float theta = _body->orient;
+                    float inc = PI * 2.0f / (float)k_segments;
                     GDE::Vec2F _points[k_segments];
-                    for(uint32 i = 0; i < k_segments; ++i)
+                    for(auto i = 0; i < k_segments; ++i)
                     {
                         theta += inc;
                         GDE::Vec2F p( std::cos( theta ), std::sin( theta ) );

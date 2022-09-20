@@ -5,7 +5,6 @@
 #define GDE_DEBUGSHAPE_H
 
 #include "core/util/Util.h"
-#include "core/physics/IEMath.h"
 
 namespace GDE {
 

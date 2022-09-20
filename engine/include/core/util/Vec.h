@@ -64,6 +64,11 @@ namespace GDE {
                 return std::sqrt((_p.x - x) * (_p.x - x) + (_p.y - y) * (_p.y - y));
             }
 
+            [[nodiscard]] float distanceSqr(const Vec2<T>& _p) const {
+                Vec2<T> c = *this - _p;
+                return c.dotProduct(c);
+            }
+
             [[nodiscard]] float magnitude() const {
                 return std::sqrt(x * x + y * y);
             }

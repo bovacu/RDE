@@ -92,7 +92,7 @@ namespace Editor {
             GDE::Random _random;
             auto count = _random.randomi( 3, 10 );
             auto *vertices = new Vec2F[count];
-            real e = _random.randomf( 16, 32 );
+            float e = _random.randomf( 16, 32 );
             for(uint32 i = 0; i < count; ++i)
                 vertices[i].set( _random.randomf( -e, e ), _random.randomf( -e, e ) );
             poly.Set( vertices, count );
