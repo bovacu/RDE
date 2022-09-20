@@ -6,88 +6,101 @@
 
 namespace GDE {
 
-//    PhysicsBody::PhysicsBody(PhysicsShape* _shape, const Vec2F& _position ) : shape(_shape) {
-//        shape->physicsBody = this;
-//        position = _position;
-//        velocity = { 0.0f, 0.0f };
-//        angularVelocity = 0;
-//        torque = 0;
-//        orient = random( -PI, PI );
-//        force = { 0.0f, 0.0f };
-//        staticFriction = 0.5f;
-//        dynamicFriction = 0.3f;
-//        restitution = 0.2f;
-//        density = 1.0f;
-//        r = random( 0.2f, 1.0f );
-//        g = random( 0.2f, 1.0f );
-//        b = random( 0.2f, 1.0f );
-//
-//        computeMass(_shape);
-//    }
-//
-//    void PhysicsBody::setOrient(float _degrees) {
-//        orient = _degrees;
-//        shape->setOrient(_degrees);
-//    }
-//
-//    void PhysicsBody::computeMass(PhysicsShape* _shape) {
-//        switch (shape->type) {
-//            case PhysicsShape::CIRCLE:
-//                computeCircleMass(_shape);
-//                break;
-//            case PhysicsShape::POLYGON:
-//                computePolygonMass(_shape);
-//                break;
-//            default:
-//                break;
-//        }
-//    }
-//
-//    void PhysicsBody::computePolygonMass(PhysicsShape* _shape) {
-//        // Calculate centroid and moment of interia
-//        Vec2F c { 0.0f, 0.0f }; // centroid
-//        float area = 0.0f;
-//        float _inertia = 0.0f;
-//        const float k_inv3 = 1.0f / 3.0f;
-//
-//        for(uint32 i1 = 0; i1 < shape->vertexCount; ++i1) {
-//            // Triangle vertices, third vertex implied as (0, 0)
-//            Vec2F p1( _shape->vertices[i1] );
-//            uint32 i2 = i1 + 1 < _shape->vertexCount ? i1 + 1 : 0;
-//            Vec2F p2( _shape->vertices[i2] );
-//
-//            float D = cross( p1, p2 );
-//            float triangleArea = 0.5f * D;
-//
-//            area += triangleArea;
-//
-//            // Use area to weight the centroid average, not just vertex position
-//            c = c + triangleArea * k_inv3 * (p1 + p2);
-//
-//            real intx2 = p1.x * p1.x + p2.x * p1.x + p2.x * p2.x;
-//            real inty2 = p1.y * p1.y + p2.y * p1.y + p2.y * p2.y;
-//            _inertia += (0.25f * k_inv3 * D) * (intx2 + inty2);
-//        }
-//
-//        c = c * (1.0f / area);
-//
-//        // Translate vertices to centroid (make the centroid (0, 0)
-//        // for the polygon in model space)
-//        // Not really necessary, but I like doing this anyway
-//        for(uint32 i = 0; i < _shape->vertexCount; ++i)
-//            _shape->vertices[i] = _shape->vertices[i] - c;
-//
-//        m = density * area;
-//        im = (m) ? 1.0f / m : 0.0f;
-//        I = _inertia * density;
-//        iI = I ? 1.0f / I : 0.0f;
-//    }
-//
-//    void PhysicsBody::computeCircleMass(PhysicsShape* _shape) {
-//        m = PI * _shape->size.x * _shape->size.x * density;
-//        im = (m) ? 1.0f / m : 0.0f;
-//        I = m * _shape->size.x * _shape->size.x;
-//        iI = (I) ? 1.0f / I : 0.0f;
-//    }
+    PhysicsBody::PhysicsBody(PhysicsShape* _shape, const Vec2F& _position ) : shape(_shape) {
+        shape->physicsBody = this;
+        position = _position;
+        velocity = { 0.0f, 0.0f };
+        angularVelocity = 0;
+        torque = 0;
+        rotation = 0;
+        force = { 0.0f, 0.0f };
+        staticFriction = 0.5f;
+        dynamicFriction = 0.3f;
+        restitution = 0.2f;
+        density = 1.0f;
+
+        computeMass(_shape);
+    }
+
+    void PhysicsBody::rotate(float _degrees) {
+        rotation = _degrees;
+        shape->rotate(_degrees);
+    }
+
+    void PhysicsBody::computeMass(PhysicsShape* _shape) {
+        switch (shape->type) {
+            case PhysicsShape::CIRCLE:
+                computeCircleMass(_shape);
+                break;
+            case PhysicsShape::POLYGON:
+                computePolygonMass(_shape);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void PhysicsBody::computePolygonMass(PhysicsShape* _shape) {
+        // Calculate centroid and moment of interia
+        Vec2F _c( 0.0f, 0.0f ); // centroid
+        float _area = 0.0f;
+        float _inertia = 0.0f;
+        const float _inv3 = 1.0f / 3.0f;
+
+        for(auto _i = 0; _i < shape->vertexCount; ++_i) {
+            // Triangle vertices, third vertex implied as (0, 0)
+            Vec2F _p1( shape->vertices[_i] );
+            auto _i2 = _i + 1 < shape->vertexCount ? _i + 1 : 0;
+            Vec2F _p2( shape->vertices[_i2] );
+
+            float _d = _p1.crossProduct(_p2);
+            float _triangleArea = 0.5f * _d;
+
+            _area += _triangleArea;
+
+            // Use area to weight the centroid average, not just vertex position
+            _c += _triangleArea * _inv3 * (_p1 + _p2);
+
+            float _intX2 = _p1.x * _p1.x + _p2.x * _p1.x + _p2.x * _p2.x;
+            float _intY2 = _p1.y * _p1.y + _p2.y * _p1.y + _p2.y * _p2.y;
+            _inertia += (0.25f * _inv3 * _d) * (_intX2 + _intY2);
+        }
+
+        _c *= 1.0f / _area;
+
+        // Translate vertices to centroid (make the centroid (0, 0)
+        // for the polygon in model space)
+        // Not floatly necessary, but I like doing this anyway
+        for(auto _i = 0; _i < shape->vertexCount; _i++)
+            shape->vertices[_i] -= _c;
+
+        mass = density * _area;
+        inverseMass = (mass) ? 1.0f / mass : 0.0f;
+        inertia = _inertia * density;
+        inverseInertia = inertia ? 1.0f / inertia : 0.0f;
+    }
+
+    void PhysicsBody::computeCircleMass(PhysicsShape* _shape) {
+        mass = PI * _shape->size.x * _shape->size.x * density;
+        inverseMass = (mass) ? 1.0f / mass : 0.0f;
+        inertia = mass * _shape->size.x * _shape->size.x;
+        inverseInertia = (inertia) ? 1.0f / inertia : 0.0f;
+    }
+
+    void PhysicsBody::setStatic() {
+        inertia = 0.0f;
+        inverseInertia = 0.0f;
+        mass = 0.0f;
+        inverseMass = 0.0f;
+    }
+
+    void PhysicsBody::applyImpulse(const Vec2F& _impulse, const Vec2F& _contactVector) {
+        velocity += inverseMass * _impulse;
+        angularVelocity += inverseInertia * _contactVector.crossProduct(_impulse);
+    }
+
+    void PhysicsBody::applyForce(const Vec2F& _force) {
+        force += _force;
+    }
 
 }

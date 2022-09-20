@@ -6,17 +6,14 @@
 #define GDE_MAT2_H
 
 #include <cmath>
-#include "Vec.h"
+#include "core/util/Vec.h"
+#include "core/Core.h"
 
 namespace GDE {
 
-    #define degreesToRadians(x) x*(3.141592f/180.0f)
-
     struct Mat2 {
-        union
-        {
-            struct
-            {
+        union {
+            struct {
                 float m00, m01;
                 float m10, m11;
             };
@@ -45,8 +42,7 @@ namespace GDE {
             }
 
             void rotate(float _degrees) {
-//                auto _radians = degreesToRadians(_degrees);
-                auto _radians = _degrees;
+                auto _radians = degreesToRadians(_degrees);
                 float _cos = std::cos( _radians );
                 float _sin = std::sin( _radians );
 
@@ -70,13 +66,11 @@ namespace GDE {
                 return { m00, m10, m01, m11 };
             }
 
-            Vec2F operator*(const Vec2F& rhs) const
-            {
+            Vec2F operator*(const Vec2F& rhs) const {
                 return { m00 * rhs.x + m01 * rhs.y, m10 * rhs.x + m11 * rhs.y };
             }
 
-            Mat2 operator*(const Mat2& rhs) const
-            {
+            Mat2 operator*(const Mat2& rhs) const {
                 return {
                         m[0][0] * rhs.m[0][0] + m[0][1] * rhs.m[1][0],
                         m[0][0] * rhs.m[0][1] + m[0][1] * rhs.m[1][1],

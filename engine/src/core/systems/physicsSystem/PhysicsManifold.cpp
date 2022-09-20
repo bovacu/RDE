@@ -7,117 +7,107 @@
 
 namespace GDE {
 
-//    void PhysicsManifold::solve() {
-//        Dispatch[A->shape->type][B->shape->type]( this, A, B );
-//    }
-//
-//    void PhysicsManifold::initialize(Delta _fxDt) {
-//        // Calculate average restitution
-//        e = std::min( A->restitution, B->restitution );
-//
-//        // Calculate static and dynamic friction
-//        sf = std::sqrt( A->staticFriction * B->staticFriction );
-//        df = std::sqrt( A->dynamicFriction * B->dynamicFriction );
-//
-//        for(uint32 i = 0; i < contact_count; ++i)
-//        {
-//            // Calculate radii from COM to contact
-//            Vec2 ra = contacts[i] - A->position;
-//            Vec2 rb = contacts[i] - B->position;
-//
-//            Vec2 rv = B->velocity + cross( B->angularVelocity, rb ) -
-//                      A->velocity - cross( A->angularVelocity, ra );
-//
-//
-//            // Determine if we should perform a resting collision or not
-//            // The idea is if the only thing moving this object is gravity,
-//            // then the collision should be performed without any restitution
-//            if(rv.magnitudeSqr( ) < (_fxDt * gravity).magnitudeSqr( ) + EPSILON)
-//                e = 0.0f;
-//        }
-//    }
-//
-//    void PhysicsManifold::applyImpulse() {
-//        // Early out and positional correct if both objects have infinite mass
-//        if(equal( A->im + B->im, 0 ))
-//        {
-//            infiniteMassCorrection( );
-//            return;
-//        }
-//
-//        for(uint32 i = 0; i < contact_count; ++i)
-//        {
-//            // Calculate radii from COM to contact
-//            Vec2 ra = contacts[i] - A->position;
-//            Vec2 rb = contacts[i] - B->position;
-//
-//            // Relative velocity
-//            Vec2 rv = B->velocity + cross( B->angularVelocity, rb ) -
-//                      A->velocity - cross( A->angularVelocity, ra );
-//
-//            // Relative velocity along the normal
-//            real contactVel = dot( rv, normal );
-//
-//            // Do not resolve if velocities are separating
-//            if(contactVel > 0)
-//                return;
-//
-//            real raCrossN = cross( ra, normal );
-//            real rbCrossN = cross( rb, normal );
-//            real invMassSum = A->im + B->im + sqr( raCrossN ) * A->iI + sqr( rbCrossN ) * B->iI;
-//
-//            // Calculate impulse scalar
-//            real j = -(1.0f + e) * contactVel;
-//            j /= invMassSum;
-//            j /= (real)contact_count;
-//
-//            // Apply impulse
-//            Vec2 impulse = normal * j;
-//            A->applyImpulse( { -impulse.x, -impulse.y }, ra );
-//            B->applyImpulse(  impulse, rb );
-//
-//            // Friction impulse
-//            rv = B->velocity + cross( B->angularVelocity, rb ) -
-//                 A->velocity - cross( A->angularVelocity, ra );
-//
-//            Vec2 t = rv - (normal * dot( rv, normal ));
-//            t.normalize( );
-//
-//            // j tangent magnitude
-//            real jt = -dot( rv, t );
-//            jt /= invMassSum;
-//            jt /= (real)contact_count;
-//
-//            // Don't apply tiny friction impulses
-//            if(equal( jt, 0.0f ))
-//                return;
-//
-//            // Coulumb's law
-//            Vec2F tangentImpulse;
-//            if(std::abs( jt ) < j * sf)
-//                tangentImpulse = t * jt;
-//            else
-//                tangentImpulse = t * -j * df;
-//
-//            // Apply friction impulse
-//            A->applyImpulse( { -tangentImpulse.x, -tangentImpulse.y }, ra );
-//            B->applyImpulse(  tangentImpulse, rb );
-//        }
-//    }
-//
-//    void PhysicsManifold::positionalCorrection() {
-//        const real k_slop = 0.05f; // Penetration allowance
-//        const real percent = 0.4f; // Penetration percentage to correct
-//        Vec2 correction = (std::max( penetration - k_slop, 0.0f ) / (A->im + B->im)) * normal * percent;
-//        A->position = A->position - correction * A->im;
-//        B->position = B->position + correction * B->im;
-//    }
-//
-//    void PhysicsManifold::infiniteMassCorrection() {
-//        A->velocity.x = 0.0f;
-//        A->velocity.y = 0.0f;
-//
-//        B->velocity.x = 0.0f;
-//        B->velocity.y = 0.0f;
-//    }
+    void PhysicsManifold::solve() {
+        Dispatch[A->shape->type][B->shape->type]( this, A, B );
+    }
+
+    void PhysicsManifold::initialize(Delta _fxDt, const Vec2F& _gravity) {
+        // Calculate average restitution
+        e = std::min(A->restitution, B->restitution);
+
+        // Calculate static and dynamic friction
+        sf = std::sqrt(A->staticFriction * B->staticFriction);
+        df = std::sqrt(A->dynamicFriction * B->dynamicFriction);
+
+        for (auto _i = 0; _i < contactCount; _i++) {
+            // Calculate radii from COM to contact
+            Vec2F _ra = contacts[_i] - A->position;
+            Vec2F _rb = contacts[_i] - B->position;
+
+            Vec2F _rv = B->velocity + _rb.crossProduct(B->angularVelocity) - A->velocity - _ra.crossProduct(A->angularVelocity);
+
+            // Determine if we should perform a resting collision or not
+            // The idea is if the only thing moving this object is gravity,
+            // then the collision should be performed without any restitution
+            if (_rv.magnitudeSqr() < (_fxDt * _gravity).magnitudeSqr() + EPSILON)
+                e = 0.0f;
+        }
+    }
+
+    void PhysicsManifold::applyImpulse() {
+        // Early out and positional correct if both objects have infinite mass
+        if (PhysicsMath::approximatelyEqual(A->inverseMass + B->inverseMass, 0)) {
+            infiniteMassCorrection();
+            return;
+        }
+
+        for (auto _i = 0; _i < contactCount; ++_i) {
+            // Calculate radii from COM to contact
+            Vec2F _ra = contacts[_i] - A->position;
+            Vec2F _rb = contacts[_i] - B->position;
+
+            // Relative velocity
+            Vec2F _rv = B->velocity + _rb.crossProduct(B->angularVelocity) - A->velocity - _ra.crossProduct(A->angularVelocity);
+
+            // Relative velocity along the normal
+            float _contactVel = _rv.dotProduct(normal);
+
+            // Do not resolve if velocities are separating
+            if (_contactVel > 0)
+                return;
+
+            float _raCrossN = _ra.crossProduct(normal);
+            float _rbCrossN = _rb.crossProduct(normal);
+            float _invMassSum = A->inverseMass + B->inverseMass + (_raCrossN * _raCrossN) * A->inverseInertia + (_rbCrossN * _rbCrossN) * B->inverseInertia;
+
+            // Calculate _impulse scalar
+            float _j = -(1.0f + e) * _contactVel;
+            _j /= _invMassSum;
+            _j /= (float) contactCount;
+
+            // Apply _impulse
+            Vec2F _impulse = normal * _j;
+            A->applyImpulse(-_impulse, _ra);
+            B->applyImpulse(_impulse, _rb);
+
+            // Friction _impulse
+            _rv = B->velocity + _rb.crossProduct(B->angularVelocity) - A->velocity - _ra.crossProduct(A->angularVelocity);
+
+            Vec2F _t = _rv - (normal * _rv.dotProduct(normal));
+            _t.normalize();
+
+            // _j tangent magnitude
+            float _jt = -_rv.dotProduct(_t);
+            _jt /= _invMassSum;
+            _jt /= (float) contactCount;
+
+            // Don'_t apply tiny friction impulses
+            if (PhysicsMath::approximatelyEqual(_jt, 0.0f))
+                return;
+
+            // Coulumb's law
+            Vec2F _tangentImpulse;
+            if (std::abs(_jt) < _j * sf)
+                _tangentImpulse = _t * _jt;
+            else
+                _tangentImpulse = _t * -_j * df;
+
+            // Apply friction _impulse
+            A->applyImpulse(-_tangentImpulse, _ra);
+            B->applyImpulse(_tangentImpulse, _rb);
+        }
+    }
+
+    void PhysicsManifold::positionalCorrection() {
+        const float _slop = 0.05f; // Penetration allowance
+        const float _percent = 0.4f; // Penetration percentage to correct
+        Vec2F _correction = (std::max(penetration - _slop, 0.0f) / (A->inverseMass + B->inverseMass)) * normal * _percent;
+        A->position -= _correction * A->inverseMass;
+        B->position += _correction * B->inverseMass;
+    }
+
+    void PhysicsManifold::infiniteMassCorrection() {
+        A->velocity.set(0, 0);
+        B->velocity.set(0, 0);
+    }
 }

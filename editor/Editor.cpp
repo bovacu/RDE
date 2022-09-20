@@ -32,23 +32,23 @@ namespace Editor {
         textStressTest();
         auto _particleSystemNode = getMainGraph()->createNode("ParticleSystem");
 
-        auto* _ground = new Physics::PolygonShape;
-        _ground->SetBox(500.0f, 5.0f);
+        auto* _ground = new PhysicsShape;
+        _ground->makeRectangle({500.0f, 5.0f});
         auto* _groundBody = engine->manager.physics.add( _ground, {0, -100} );
-        _groundBody->SetStatic();
-        _groundBody->SetOrient(0);
+        _groundBody->setStatic();
+        _groundBody->rotate(0);
 
-        auto* _leftWall = new Physics::PolygonShape;
-        _leftWall->SetBox(5.0f, 250.0f);
+        auto* _leftWall = new PhysicsShape;
+        _leftWall->makeRectangle({5.0f, 250.0f});
         auto* _leftWallBody = engine->manager.physics.add( _leftWall, {-300, 0} );
-        _leftWallBody->SetStatic();
-        _leftWallBody->SetOrient(0);
+        _leftWallBody->setStatic();
+        _leftWallBody->rotate(0);
 
-        auto* _rightWall = new Physics::PolygonShape;
-        _rightWall->SetBox(5.0f, 250.0f);
+        auto* _rightWall = new PhysicsShape;
+        _rightWall->makeRectangle({5.0f, 250.0f});
         auto* _rightWallBody = engine->manager.physics.add( _rightWall, {300, 0} );
-        _rightWallBody->SetStatic();
-        _rightWallBody->SetOrient(0);
+        _rightWallBody->setStatic();
+        _rightWallBody->rotate(0);
 
         ParticleSystemConfig _particleSystemConfig {
             ParticleSystemColorGradientConfig {
@@ -88,24 +88,24 @@ namespace Editor {
         _timer += _dt;
 
         if(engine->manager.inputManager.isMouseJustPressed(MouseCode::ButtonLeft)) {
-            Physics::PolygonShape poly;
-            GDE::Random _random;
+            auto* poly = new PhysicsShape;
+            Random _random;
             auto count = _random.randomi( 3, 10 );
-            auto *vertices = new Vec2F[count];
+            std::vector<Vec2F> vertices;
             float e = _random.randomf( 16, 32 );
             for(uint32 i = 0; i < count; ++i)
-                vertices[i].set( _random.randomf( -e, e ), _random.randomf( -e, e ) );
-            poly.Set( vertices, count );
-            Physics::Body *b = engine->manager.physics.add( &poly, {engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y} );
-            b->SetOrient( _random.randomf( -180, 3.180 ) );
+                vertices.emplace_back( _random.randomf( -e, e ), _random.randomf( -e, e ) );
+            poly->makePolygon( vertices );
+            auto* b = engine->manager.physics.add(poly, {engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y} );
+            b->rotate(_random.randomf(-180, 180));
             b->restitution = 0.2f;
             b->dynamicFriction = 0.2f;
             b->staticFriction = 0.4f;
-            delete [] vertices;
         } else if(engine->manager.inputManager.isMouseJustPressed(MouseCode::ButtonRight)) {
-            GDE::Random _random;
-            Physics::Circle _circle(_random.randomf(5, 20));
-            Physics::Body *_circleBody = engine->manager.physics.add( &_circle, {engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y} );
+            Random _random;
+            auto* _circle = new PhysicsShape;
+            _circle->makeCircle(_random.randomf(5, 20));
+            auto* _circleBody = engine->manager.physics.add(_circle, {engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y} );
             _circleBody->restitution = 0.2f;
             _circleBody->dynamicFriction = 0.2f;
             _circleBody->staticFriction = 0.4f;

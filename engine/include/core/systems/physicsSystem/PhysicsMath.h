@@ -14,9 +14,9 @@ namespace GDE {
             }
 
             static bool biasGreaterThan(float _a, float _b) {
-                const float k_biasRelative = 0.95f;
-                const float k_biasAbsolute = 0.01f;
-                return _a >= _b * k_biasRelative + _a * k_biasAbsolute;
+                const float _biasRelative = 0.95f;
+                const float _biasAbsolute = 0.01f;
+                return _a >= _b * _biasRelative + _a * _biasAbsolute;
             }
     };
 

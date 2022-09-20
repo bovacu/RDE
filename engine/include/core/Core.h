@@ -46,6 +46,9 @@
 #define PI 3.141592741f
 #endif
 
+#define radiansToDegrees(x) x * (180.f / PI)
+#define degreesToRadians(x) x * (PI / 180.0f)
+
 #ifndef NDEBUG
 #define ENGINE_DEBUG
 #endif

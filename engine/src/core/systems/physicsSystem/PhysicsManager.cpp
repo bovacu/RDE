@@ -4,7 +4,6 @@
 
 #include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/render/RenderManager.h"
-#include "core/physics/Precompiled.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "NullDereference"
@@ -21,153 +20,116 @@ namespace GDE {
         }
     }
 
-    Vec2F gravity {0, -50.f};
-
-    void IntegrateForces( Physics::Body *b, float _dt )
-    {
-        if(b->im == 0.0f)
-            return;
-
-        b->velocity += (b->force * b->im + gravity) * (_dt / 2.0f);
-        b->angularVelocity += b->torque * b->iI * (_dt / 2.0f);
-    }
-
-    void IntegrateVelocity( Physics::Body *b, float _dt )
-    {
-        if(b->im == 0.0f)
-            return;
-
-        b->position += b->velocity * _dt;
-        b->orient += b->angularVelocity * _dt;
-        b->SetOrient( b->orient );
-        IntegrateForces( b, _dt );
-    }
-
     void PhysicsManager::step(Delta _fxDt) {
-        contacts.clear( );
-        for(uint32 i = 0; i < bodies.size( ); ++i)
-        {
-            Physics::Body *A = bodies[i];
+        contacts.clear();
+        for(auto _i = 0; _i < bodies.size(); _i++) {
+            PhysicsBody* _a = bodies[_i];
 
-            for(uint32 j = i + 1; j < bodies.size( ); ++j)
-            {
-                Physics::Body *B = bodies[j];
-                if(A->im == 0 && B->im == 0)
+            for(auto _j = _i + 1; _j < bodies.size(); _j++) {
+                PhysicsBody* _b = bodies[_j];
+
+                if(_a->inverseMass == 0 && _b->inverseMass == 0)
                     continue;
-                Physics::Manifold m( A, B );
-                m.Solve( );
-                if(m.contact_count)
-                    contacts.emplace_back( m );
+
+                PhysicsManifold _m(_a, _b );
+
+                _m.solve();
+                if(_m.contactCount)
+                    contacts.emplace_back(_m);
             }
         }
 
         // Integrate forces
-        for(uint32 i = 0; i < bodies.size( ); ++i)
-            IntegrateForces( bodies[i], _fxDt );
+        for(auto* _body : bodies)
+            integrateForces(_body, _fxDt );
 
         // Initialize collision
-        for(uint32 i = 0; i < contacts.size( ); ++i)
-            contacts[i].Initialize(_fxDt, GDE::gravity);
+        for(auto& _contact : contacts)
+            _contact.initialize(_fxDt, gravity);
 
         // Solve collisions
-        for(uint32 j = 0; j < steps; ++j)
-            for(uint32 i = 0; i < contacts.size( ); ++i)
-                contacts[i].ApplyImpulse( );
+        for(auto _i = 0; _i < steps; _i++)
+            for(auto& _contact : contacts)
+                _contact.applyImpulse();
 
         // Integrate velocities
-        for(uint32 i = 0; i < bodies.size( ); ++i)
-            IntegrateVelocity( bodies[i], _fxDt );
+        for(auto* _body : bodies)
+            integrateVelocity(_body, _fxDt);
 
         // Correct positions
-        for(uint32 i = 0; i < contacts.size( ); ++i)
-            contacts[i].PositionalCorrection( );
+        for(auto& _contact : contacts)
+            _contact.positionalCorrection();
 
         // Clear all forces
-        for(uint32 i = 0; i < bodies.size( ); ++i)
-        {
-            Physics::Body *b = bodies[i];
-            b->force.set( 0, 0 );
-            b->torque = 0;
+        for(auto* _body : bodies) {
+            _body->force.set( 0, 0 );
+            _body->torque = 0;
         }
     }
 
-//    void PhysicsManager::integrateForces(PhysicsBody* b, Delta _fixedDelta) {
-//        if(b->im == 0.0f)
-//            return;
-//
-//        auto _partialVelocity = (b->force * b->im + gravity);
-//        auto _deltaHalf = (_fixedDelta / 2.0f);
-//        auto _newVelocity = _partialVelocity * _deltaHalf;
-//        b->velocity = b->velocity + _newVelocity;
-//
-//        auto _partialAngularVelocity = b->torque * b->iI;
-//        auto _newAngularVelocity = _partialAngularVelocity * _deltaHalf;
-//        b->angularVelocity = b->angularVelocity + _newAngularVelocity;
-//    }
+    void PhysicsManager::integrateForces(PhysicsBody* _physicsBody, Delta _fixedDelta) {
+        if(_physicsBody->inverseMass == 0.0f)
+            return;
 
-//    void PhysicsManager::integrateVelocity(PhysicsBody* b, Delta _fxDt) {
-//        if(b->im == 0.0f)
-//            return;
-//
-//        auto _newPos = b->velocity * _fxDt;
-//        b->position = b->position + _newPos;
-//        auto _newAngle = b->angularVelocity * _fxDt;
-//        b->orient = b->orient + _newAngle;
-//        b->setOrient(b->orient);
-//        integrateForces(b, _fxDt);
-//        integrateForces(b, _fxDt);
-//    }
+        _physicsBody->velocity += (_physicsBody->force * _physicsBody->inverseMass + gravity) * (_fixedDelta / 2.0f);
+        _physicsBody->angularVelocity += _physicsBody->torque * _physicsBody->inverseInertia * (_fixedDelta / 2.0f);
+    }
+
+    void PhysicsManager::integrateVelocity(PhysicsBody* _physicsBody, Delta _fxDt) {
+        if(_physicsBody->inverseMass == 0.0f)
+            return;
+
+        _physicsBody->position += _physicsBody->velocity * _fxDt;
+
+        _physicsBody->rotation += radiansToDegrees(_physicsBody->angularVelocity * _fxDt);
+        _physicsBody->rotate(_physicsBody->rotation);
+        integrateForces(_physicsBody, _fxDt);
+    }
 
     void PhysicsManager::debugRender(RenderManager* _renderManager) {
-        for(auto* _body : bodies)
-        {
-            switch (_body->shape->GetType()) {
+        for(auto* _body : bodies) {
 
-                case Physics::Shape::eCircle:
-                {
-                    const uint32 k_segments = 20;
-                    float theta = _body->orient;
-                    float inc = PI * 2.0f / (float)k_segments;
-                    GDE::Vec2F _points[k_segments];
-                    for(auto i = 0; i < k_segments; ++i)
-                    {
-                        theta += inc;
-                        GDE::Vec2F p( std::cos( theta ), std::sin( theta ) );
-                        p *= _body->shape->radius;
-                        p += _body->position;
-                        _points[i] = p;
+            switch (_body->shape->type) {
+                case PhysicsShape::Type::CIRCLE: {
+
+                    const int _segments = 20;
+                    float _theta = _body->rotation;
+                    float _inc = PI * 2.0f / (float)_segments;
+                    Vec2F _points[_segments];
+
+                    for(auto& _point : _points) {
+                        _theta += _inc;
+                        Vec2F _p(std::cos(_theta), std::sin(_theta) );
+                        _p *= _body->shape->size.x;
+                        _p += _body->position;
+                        _point = _p;
                     }
 
-                    for (auto _i = 0; _i < k_segments; _i++) {
-
+                    for (auto _i = 0; _i < _segments; _i++) {
                         int _next = _i + 1;
-                        if(_next == k_segments)
+                        if(_next == _segments)
                             _next = 0;
 
-                        GDE::Vec2F _p0_ = _points[_i];
-                        GDE::Vec2F _p1_ =_points[_next];
+                        Vec2F _p0 = _points[_i];
+                        Vec2F _p1 =_points[_next];
 
-                        Vec2F _p0 { _p0_.x, _p0_.y };
-                        Vec2F _p1 { _p1_.x, _p1_.y };
                         _renderManager->drawLine(_p0, _p1, Color::Blue);
                     }
 
                     break;
                 }
-                case Physics::Shape::ePoly:
-                {
-                    auto* _polygon = dynamic_cast<Physics::PolygonShape*>(_body->shape);
-                    for (auto _i = 0; _i < _polygon->m_vertices.size(); _i++) {
+
+                case PhysicsShape::Type::POLYGON: {
+                    auto* _polygon = _body->shape;
+                    for (auto _i = 0; _i < _polygon->vertices.size(); _i++) {
 
                         int _next = _i + 1;
-                        if(_next == _polygon->m_vertices.size())
+                        if(_next == _polygon->vertices.size())
                             _next = 0;
 
-                        GDE::Vec2F _p0_ = _body->position + _polygon->u * _polygon->m_vertices[_i];
-                        GDE::Vec2F _p1_ = _body->position + _polygon->u * _polygon->m_vertices[_next];
+                        Vec2F _p0 = _body->position + _polygon->u * _polygon->vertices[_i];
+                        Vec2F _p1 = _body->position + _polygon->u * _polygon->vertices[_next];
 
-                        Vec2F _p0 { _p0_.x, _p0_.y };
-                        Vec2F _p1 { _p1_.x, _p1_.y };
                         _renderManager->drawLine(_p0, _p1, Color::Blue);
                     }
 
@@ -179,11 +141,11 @@ namespace GDE {
         }
     }
 
-    Physics::Body* PhysicsManager::add(Physics::Shape* _physicsShape, const Vec2F& _position) {
-        assert( _physicsShape );
-        auto *b = new Physics::Body( _physicsShape, _position );
-        bodies.push_back( b );
-        return b;
+    PhysicsBody* PhysicsManager::add(PhysicsShape* _physicsShape, const Vec2F& _position) {
+        ENGINE_ASSERT(_physicsShape, "Cannot add a NULLPTR physics body to the simulation!!");
+        auto* _physicsBody = new PhysicsBody( _physicsShape, _position );
+        bodies.push_back(_physicsBody);
+        return _physicsBody;
     }
 }
 #pragma clang diagnostic pop

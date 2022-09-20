@@ -7,359 +7,335 @@
 
 namespace GDE {
 
-//    CollisionCallback Dispatch[PhysicsShape::Type::MAX][PhysicsShape::Type::MAX] =
-//    {
-//        {
-//            circleToCircle, circleToPolygon
-//        },
-//        {
-//            polygonToCircle, polygonToPolygon
-//        },
-//    };
-//
-//    void circleToCircle(PhysicsManifold* m, PhysicsBody* a, PhysicsBody* b) {
-//        auto* A = a->shape;
-//        auto* B = b->shape;
-//
-//        // Calculate translational vector, which is normal
-//        Vec2F normal = b->position - a->position;
-//
-//        real dist_sqr = normal.magnitudeSqr();
-//        real radius = A->size.x + B->size.x;
-//
-//        // Not in contact
-//        if(dist_sqr >= radius * radius) {
-//            m->contact_count = 0;
-//            return;
-//        }
-//
-//        real distance = std::sqrt( dist_sqr );
-//
-//        m->contact_count = 1;
-//
-//        if(distance == 0.0f) {
-//            m->penetration = A->size.x;
-//            m->normal = Vec2F { 1, 0 };
-//            m->contacts [0] = a->position;
-//        } else {
-//            m->penetration = radius - distance;
-//            m->normal = normal / distance; // Faster than using Normalized since we already performed sqrt
-//            m->contacts[0] = m->normal * A->size.x + a->position;
-//        }
-//    }
-//
-//    void circleToPolygon(PhysicsManifold* m, PhysicsBody* a, PhysicsBody* b) {
-//        auto* A = a->shape; // Circle
-//        auto* B = b->shape; // Polygon
-//
-//        m->contact_count = 0;
-//
-//        // Transform circle center to Polygon model space
-//        Vec2 center = a->position;
-//        center = B->u.transpose( ) * (center - b->position);
-//
-//        // Find edge with minimum penetration
-//        // Exact concept as using support points in Polygon vs Polygon
-//        real separation = -FLT_MAX;
-//        uint32 faceNormal = 0;
-//        for(uint32 i = 0; i < B->vertexCount; ++i)
-//        {
-//            real s = dot( B->normals[i], center - B->vertices[i] );
-//
-//            if(s > A->size.x)
-//                return;
-//
-//            if(s > separation)
-//            {
-//                separation = s;
-//                faceNormal = i;
-//            }
-//        }
-//
-//        // Grab face's vertices
-//        Vec2 v1 = B->vertices[faceNormal];
-//        uint32 i2 = faceNormal + 1 < B->vertexCount ? faceNormal + 1 : 0;
-//        Vec2 v2 = B->vertices[i2];
-//
-//        // Check to see if center is within polygon
-//        if(separation < EPSILON)
-//        {
-//            m->contact_count = 1;
-//            m->normal = { -(B->u * B->normals[faceNormal]).x, -(B->u * B->normals[faceNormal]).y };
-//            m->contacts[0] = m->normal * A->size.x + a->position;
-//            m->penetration = A->size.x;
-//            return;
-//        }
-//
-//        // Determine which voronoi region of the edge center of circle lies within
-//        real dot1 = dot( center - v1, v2 - v1 );
-//        real dot2 = dot( center - v2, v1 - v2 );
-//        m->penetration = A->size.x - separation;
-//
-//        // Closest to v1
-//        if(dot1 <= 0.0f)
-//        {
-//            if(distSqr( center, v1 ) > A->size.x * A->size.x)
-//                return;
-//
-//            m->contact_count = 1;
-//            Vec2 n = v1 - center;
-//            n = B->u * n;
-//            n.normalize( );
-//            m->normal = n;
-//            v1 = B->u * v1 + b->position;
-//            m->contacts[0] = v1;
-//        }
-//
-//            // Closest to v2
-//        else if(dot2 <= 0.0f)
-//        {
-//            if(distSqr( center, v2 ) > A->size.x * A->size.x)
-//                return;
-//
-//            m->contact_count = 1;
-//            Vec2 n = v2 - center;
-//            v2 = B->u * v2 + b->position;
-//            m->contacts[0] = v2;
-//            n = B->u * n;
-//            n.normalize( );
-//            m->normal = n;
-//        }
-//
-//            // Closest to face
-//        else
-//        {
-//            Vec2 n = B->normals[faceNormal];
-//            if(dot( center - v1, n ) > A->size.x)
-//                return;
-//
-//            n = B->u * n;
-//            m->normal = { -n.x, -n.y };
-//            m->contacts[0] = m->normal * A->size.x + a->position;
-//            m->contact_count = 1;
-//        }
-//    }
-//
-//    void polygonToCircle(PhysicsManifold* m, PhysicsBody* a, PhysicsBody* b) {
-//        circleToPolygon( m, b, a );
-//        m->normal = { -m->normal.x, -m->normal.y };
-//    }
-//
-//    real FindAxisLeastPenetration( uint32 *faceIndex, PhysicsShape *A, PhysicsShape *B )
-//    {
-//        real bestDistance = -FLT_MAX;
-//        uint32 bestIndex;
-//
-//        for(uint32 i = 0; i < A->vertexCount; ++i)
-//        {
-//            // Retrieve a face normal from A
-//            Vec2 n = A->normals[i];
-//            Vec2 nw = A->u * n;
-//
-//            // Transform face normal into B's model space
-//            Mat2 buT = B->u.transpose( );
-//            n = buT * nw;
-//
-//            // Retrieve support point from B along -n
-//            Vec2 s = B->getSupport({ -n.x, -n.y });
-//
-//            // Retrieve vertex on face from A, transform into
-//            // B's model space
-//            Vec2F v = A->vertices[i];
-//            v = A->u * v + A->physicsBody->position;
-//            v = v - B->physicsBody->position;
-//            v = buT * v;
-//
-//            // Compute penetration distance (in B's model space)
-//            real d = dot( n, s - v );
-//
-//            // Store greatest distance
-//            if(d > bestDistance)
-//            {
-//                bestDistance = d;
-//                bestIndex = i;
-//            }
-//        }
-//
-//        *faceIndex = bestIndex;
-//        return bestDistance;
-//    }
-//
-//    void FindIncidentFace( Vec2F *v, PhysicsShape *RefPoly, PhysicsShape *IncPoly, uint32 referenceIndex )
-//    {
-//        Vec2 referenceNormal = RefPoly->normals[referenceIndex];
-//
-//        // Calculate normal in incident's frame of reference
-//        referenceNormal = RefPoly->u * referenceNormal; // To world space
-//        referenceNormal = IncPoly->u.transpose( ) * referenceNormal; // To incident's model space
-//
-//        // Find most anti-normal face on incident polygon
-//        int32 incidentFace = 0;
-//        real minDot = FLT_MAX;
-//        for(int i = 0; i < IncPoly->vertexCount; ++i)
-//        {
-//            real _dot = dot(referenceNormal, IncPoly->normals[i] );
-//            if(_dot < minDot)
-//            {
-//                minDot = _dot;
-//                incidentFace = i;
-//            }
-//        }
-//
-//        // Assign face vertices for incidentFace
-//        v[0] = IncPoly->u * IncPoly->vertices[incidentFace] + IncPoly->physicsBody->position;
-//        incidentFace = incidentFace + 1 >= IncPoly->vertexCount ? 0 : incidentFace + 1;
-//        v[1] = IncPoly->u * IncPoly->vertices[incidentFace] + IncPoly->physicsBody->position;
-//    }
-//
-//    int32 Clip(Vec2F n, real c, Vec2F *face )
-//    {
-//        uint32 sp = 0;
-//        Vec2F out[2] = {
-//                face[0],
-//                face[1]
-//        };
-//
-//        // Retrieve distances from each endpoint to the line
-//        // d = ax + by - c
-//        real d1 = dot( n, face[0] ) - c;
-//        real d2 = dot( n, face[1] ) - c;
-//
-//        // If negative (behind plane) clip
-//        if(d1 <= 0.0f) out[sp++] = face[0];
-//        if(d2 <= 0.0f) out[sp++] = face[1];
-//
-//        // If the points are on different sides of the plane
-//        if(d1 * d2 < 0.0f) // less than to ignore -0.0f
-//        {
-//            // Push interesection point
-//            real alpha = d1 / (d1 - d2);
-//            out[sp] = face[0] + alpha * (face[1] - face[0]);
-//            ++sp;
-//        }
-//
-//        // Assign our new converted values
-//        face[0] = out[0];
-//        face[1] = out[1];
-//
-//        assert( sp != 3 );
-//
-//        return sp;
-//    }
-//
-//    void polygonToPolygon(PhysicsManifold* m, PhysicsBody* a, PhysicsBody* b) {
-//        auto* A = a->shape;
-//        auto* B = b->shape;
-//        m->contact_count = 0;
-//
-//        // Check for a separating axis with A's face planes
-//        uint32 faceA;
-//        real penetrationA = FindAxisLeastPenetration( &faceA, A, B );
-//        if(penetrationA >= 0.0f)
-//            return;
-//
-//        // Check for a separating axis with B's face planes
-//        uint32 faceB;
-//        real penetrationB = FindAxisLeastPenetration( &faceB, B, A );
-//        if(penetrationB >= 0.0f)
-//            return;
-//
-//        uint32 referenceIndex;
-//        bool flip; // Always point from a to b
-//
-//        PhysicsShape *RefPoly; // Reference
-//        PhysicsShape *IncPoly; // Incident
-//
-//        // Determine which shape contains reference face
-//        if(biasGreaterThan( penetrationA, penetrationB ))
-//        {
-//            RefPoly = A;
-//            IncPoly = B;
-//            referenceIndex = faceA;
-//            flip = false;
-//        }
-//
-//        else
-//        {
-//            RefPoly = B;
-//            IncPoly = A;
-//            referenceIndex = faceB;
-//            flip = true;
-//        }
-//
-//        // World space incident face
-//        Vec2F incidentFace[2];
-//        FindIncidentFace( incidentFace, RefPoly, IncPoly, referenceIndex );
-//
-//        //        y
-//        //        ^  ->n       ^
-//        //      +---c ------posPlane--
-//        //  x < | i |\
-//  //      +---+ c-----negPlane--
-//        //             \       v
-//        //              r
-//        //
-//        //  r : reference face
-//        //  i : incident poly
-//        //  c : clipped point
-//        //  n : incident normal
-//
-//        // Setup reference face vertices
-//        Vec2 v1 = RefPoly->vertices[referenceIndex];
-//        referenceIndex = referenceIndex + 1 == RefPoly->vertexCount ? 0 : referenceIndex + 1;
-//        Vec2 v2 = RefPoly->vertices[referenceIndex];
-//
-//        // Transform vertices to world space
-//        v1 = RefPoly->u * v1 + RefPoly->physicsBody->position;
-//        v2 = RefPoly->u * v2 + RefPoly->physicsBody->position;
-//
-//        // Calculate reference face side normal in world space
-//        Vec2 sidePlaneNormal = (v2 - v1);
-//        sidePlaneNormal.normalize( );
-//
-//        // Orthogonalize
-//        Vec2 refFaceNormal( sidePlaneNormal.y, -sidePlaneNormal.x );
-//
-//        // ax + by = c
-//        // c is distance from origin
-//        real refC = dot( refFaceNormal, v1 );
-//        real negSide = -dot( sidePlaneNormal, v1 );
-//        real posSide =  dot( sidePlaneNormal, v2 );
-//
-//        // Clip incident face to reference face side planes
-//        if(Clip( { -sidePlaneNormal.x, -sidePlaneNormal.y }, negSide, incidentFace ) < 2)
-//            return; // Due to floating point error, possible to not have required points
-//
-//        if(Clip(  sidePlaneNormal, posSide, incidentFace ) < 2)
-//            return; // Due to floating point error, possible to not have required points
-//
-//        // Flip
-//        m->normal = flip ? Vec2F { -refFaceNormal.x, -refFaceNormal.y } : refFaceNormal;
-//
-//        // Keep points behind reference face
-//        uint32 cp = 0; // clipped points behind reference face
-//        real separation = dot( refFaceNormal, incidentFace[0] ) - refC;
-//        if(separation <= 0.0f)
-//        {
-//            m->contacts[cp] = incidentFace[0];
-//            m->penetration = -separation;
-//            ++cp;
-//        }
-//        else
-//            m->penetration = 0;
-//
-//        separation = dot( refFaceNormal, incidentFace[1] ) - refC;
-//        if(separation <= 0.0f)
-//        {
-//            m->contacts[cp] = incidentFace[1];
-//
-//            m->penetration += -separation;
-//            ++cp;
-//
-//            // Average penetration
-//            m->penetration /= (real)cp;
-//        }
-//
-//        m->contact_count = cp;
-//    }
+    CollisionCallback Dispatch[PhysicsShape::Type::MAX][PhysicsShape::Type::MAX] =
+    {
+        {
+            circleToCircle, circleToPolygon
+        },
+        {
+            polygonToCircle, polygonToPolygon
+        },
+    };
+
+    void circleToCircle(PhysicsManifold* _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
+        auto* _a = _bodyA->shape;
+        auto* _b = _bodyB->shape;
+
+        // Calculate translational vector, which is _normal
+        Vec2F _normal = _bodyB->position - _bodyA->position;
+
+        float _distSqr = _normal.magnitudeSqr();
+        float _radius = _a->size.x + _b->size.x;
+
+        // Not in contact
+        if (_distSqr >= _radius * _radius) {
+            _manifold->contactCount = 0;
+            return;
+        }
+
+        float _distance = std::sqrt(_distSqr);
+
+        _manifold->contactCount = 1;
+
+        if (_distance == 0.0f) {
+            _manifold->penetration = _a->size.x;
+            _manifold->normal = GDE::Vec2F(1, 0);
+            _manifold->contacts[0] = _bodyA->position;
+        } else {
+            _manifold->penetration = _radius - _distance;
+            _manifold->normal = _normal / _distance; // Faster than using Normalized since we already performed sqrt
+            _manifold->contacts[0] = _manifold->normal * _a->size.x + _bodyA->position;
+        }
+    }
+
+    void circleToPolygon(PhysicsManifold* _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
+        auto* _a = _bodyA->shape;
+        auto* _b = _bodyB->shape;
+
+        _manifold->contactCount = 0;
+
+        // Transform circle _center to Polygon model space
+        Vec2F _center = _bodyA->position;
+        _center = _b->u.transpose() * (_center - _bodyB->position);
+
+        // Find edge with minimum penetration
+        // Exact concept as using support points in Polygon vs Polygon
+        float _separation = -FLT_MAX;
+        auto _faceNormal = 0;
+        for (auto _i = 0; _i < _b->vertexCount; ++_i) {
+            float _s = _b->normals[_i].dotProduct(_center - _b->vertices[_i]);
+
+            if (_s > _a->size.x)
+                return;
+
+            if (_s > _separation) {
+                _separation = _s;
+                _faceNormal = _i;
+            }
+        }
+
+        // Grab face's vertices
+        Vec2F _v1 = _b->vertices[_faceNormal];
+        auto _i2 = _faceNormal + 1 < _b->vertexCount ? _faceNormal + 1 : 0;
+        Vec2F _v2 = _b->vertices[_i2];
+
+        // Check to see if _center is within polygon
+        if (_separation < EPSILON) {
+            _manifold->contactCount = 1;
+            _manifold->normal = -(_b->u * _b->normals[_faceNormal]);
+            _manifold->contacts[0] = _manifold->normal * _a->size.x + _bodyA->position;
+            _manifold->penetration = _a->size.x;
+            return;
+        }
+
+        // Determine which voronoi region of the edge _center of circle lies within
+        float _dot1 = (_center - _v1).dotProduct(_v2 - _v1);
+        float _dot2 = (_center - _v2).dotProduct(_v1 - _v2);
+        _manifold->penetration = _a->size.x - _separation;
+
+        // Closest to _v1
+        if (_dot1 <= 0.0f) {
+            if (_center.distanceSqr(_v1) > _a->size.x * _a->size.x)
+                return;
+
+            _manifold->contactCount = 1;
+            Vec2F _n = _v1 - _center;
+            _n = _b->u * _n;
+            _n.normalize();
+            _manifold->normal = _n;
+            _v1 = _b->u * _v1 + _bodyB->position;
+            _manifold->contacts[0] = _v1;
+        }
+
+            // Closest to _v2
+        else if (_dot2 <= 0.0f) {
+            if (_center.distance(_v2) > _a->size.x * _a->size.x)
+                return;
+
+            _manifold->contactCount = 1;
+            Vec2F _n = _v2 - _center;
+            _v2 = _b->u * _v2 + _bodyB->position;
+            _manifold->contacts[0] = _v2;
+            _n = _b->u * _n;
+            _n.normalize();
+            _manifold->normal = _n;
+        }
+
+            // Closest to face
+        else {
+            Vec2F _n = _b->normals[_faceNormal];
+            if ((_center - _v1).dotProduct(_n) > _a->size.x)
+                return;
+
+            _n = _b->u * _n;
+            _manifold->normal = -_n;
+            _manifold->contacts[0] = _manifold->normal * _a->size.x + _bodyA->position;
+            _manifold->contactCount = 1;
+        }
+    }
+
+    void polygonToCircle(PhysicsManifold* _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
+        circleToPolygon(_manifold, _bodyB, _bodyA);
+        _manifold->normal = -_manifold->normal;
+    }
+
+    float findAxisLeastPenetration(uint32_t* _faceIndex, PhysicsShape* _shapeA, PhysicsShape* _shapeB) {
+        float _bestDistance = -FLT_MAX;
+        uint32_t _bestIndex;
+
+        for (auto _i = 0; _i < _shapeA->vertexCount; ++_i) {
+            // Retrieve a face normal from _shapeA
+            Vec2F _n = _shapeA->normals[_i];
+            Vec2F _nw = _shapeA->u * _n;
+
+            // Transform face normal into _shapeB'_s model space
+            Mat2 _buT = _shapeB->u.transpose();
+            _n = _buT * _nw;
+
+            // Retrieve support point from _shapeB along -_n
+            Vec2F _s = _shapeB->getSupport(-_n);
+
+            // Retrieve vertex on face from _shapeA, transform into
+            // _shapeB'_s model space
+            Vec2F _v = _shapeA->vertices[_i];
+            _v = _shapeA->u * _v + _shapeA->physicsBody->position;
+            _v -= _shapeB->physicsBody->position;
+            _v = _buT * _v;
+
+            // Compute penetration distance (in _shapeB'_s model space)
+            float _d = _n.dotProduct(_s - _v);
+
+            // Store greatest distance
+            if (_d > _bestDistance) {
+                _bestDistance = _d;
+                _bestIndex = _i;
+            }
+        }
+
+        *_faceIndex = _bestIndex;
+        return _bestDistance;
+    }
+
+    void findIncidentFace(Vec2F* _vec, PhysicsShape* _refPoly, PhysicsShape* _incPoly, uint32_t _referenceIndex) {
+        Vec2F _referenceNormal = _refPoly->normals[_referenceIndex];
+
+        // Calculate normal in incident's frame of reference
+        _referenceNormal = _refPoly->u * _referenceNormal; // To world space
+        _referenceNormal = _incPoly->u.transpose() * _referenceNormal; // To incident's model space
+
+        // Find most anti-normal face on incident polygon
+        auto _incidentFace = 0;
+        float _minDot = FLT_MAX;
+        for (auto _i = 0; _i < _incPoly->vertexCount; ++_i) {
+            float _dot = _referenceNormal.dotProduct(_incPoly->normals[_i]);
+            if (_dot < _minDot) {
+                _minDot = _dot;
+                _incidentFace = _i;
+            }
+        }
+
+        // Assign face vertices for _incidentFace
+        _vec[0] = _incPoly->u * _incPoly->vertices[_incidentFace] + _incPoly->physicsBody->position;
+        _incidentFace = _incidentFace + 1 >= (int32_t) _incPoly->vertexCount ? 0 : _incidentFace + 1;
+        _vec[1] = _incPoly->u * _incPoly->vertices[_incidentFace] + _incPoly->physicsBody->position;
+    }
+
+    int clip(Vec2F _n, float _c, Vec2F* _face) {
+        auto _sp = 0;
+        Vec2F _out[2] = { _face[0],_face[1] };
+
+        // Retrieve distances from each endpoint to the line
+        // d = ax + by - _c
+        float _d1 = _n.dotProduct(_face[0]) - _c;
+        float _d2 = _n.dotProduct(_face[1]) - _c;
+
+        // If negative (behind plane) clip
+        if (_d1 <= 0.0f) _out[_sp++] = _face[0];
+        if (_d2 <= 0.0f) _out[_sp++] = _face[1];
+
+        // If the points are on different sides of the plane
+        if (_d1 * _d2 < 0.0f) {  // less than to ignore -0.0f
+            // Push interesection point
+            float _alpha = _d1 / (_d1 - _d2);
+            _out[_sp] = _face[0] + _alpha * (_face[1] - _face[0]);
+            ++_sp;
+        }
+
+        // Assign our new converted values
+        _face[0] = _out[0];
+        _face[1] = _out[1];
+
+        assert(_sp != 3);
+
+        return _sp;
+    }
+
+    void polygonToPolygon(PhysicsManifold* _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
+        auto* _a = _bodyA->shape;
+        auto* _b = _bodyB->shape;
+        _manifold->contactCount = 0;
+
+        // Check for _bodyA separating axis with _a's face planes
+        uint32_t _faceA;
+        float _penetrationA = findAxisLeastPenetration(&_faceA, _a, _b);
+        if (_penetrationA >= 0.0f)
+            return;
+
+        // Check for _bodyA separating axis with _b's face planes
+        uint32_t _faceB;
+        float _penetrationB = findAxisLeastPenetration(&_faceB, _b, _a);
+        if (_penetrationB >= 0.0f)
+            return;
+
+        uint32_t _referenceIndex;
+        bool _flip; // Always point from _bodyA to _bodyB
+
+        PhysicsShape* _refPoly; // Reference
+        PhysicsShape* _incPoly; // Incident
+
+        // Determine which shape contains reference face
+        if (PhysicsMath::biasGreaterThan(_penetrationA, _penetrationB)) {
+            _refPoly = _a;
+            _incPoly = _b;
+            _referenceIndex = _faceA;
+            _flip = false;
+        } else {
+            _refPoly = _b;
+            _incPoly = _a;
+            _referenceIndex = _faceB;
+            _flip = true;
+        }
+
+        // World space incident face
+        Vec2F _incidentFace[2];
+        findIncidentFace(_incidentFace, _refPoly, _incPoly, _referenceIndex);
+
+        //        y
+        //        ^  ->n       ^
+        //      +---c ------posPlane--
+        //  x < | i |\
+        //      +---+ c-----negPlane--
+        //             \       v
+        //              r
+        //
+        //  r : reference face
+        //  i : incident poly
+        //  c : clipped point
+        //  n : incident normal
+
+        // Setup reference face vertices
+        Vec2F _v1 = _refPoly->vertices[_referenceIndex];
+        _referenceIndex = _referenceIndex + 1 == _refPoly->vertexCount ? 0 : _referenceIndex + 1;
+        Vec2F _v2 = _refPoly->vertices[_referenceIndex];
+
+        // Transform vertices to world space
+        _v1 = _refPoly->u * _v1 + _refPoly->physicsBody->position;
+        _v2 = _refPoly->u * _v2 + _refPoly->physicsBody->position;
+
+        // Calculate reference face side normal in world space
+        Vec2F _sidePlaneNormal = (_v2 - _v1);
+        _sidePlaneNormal.normalize();
+
+        // Orthogonalize
+        Vec2F _refFaceNormal(_sidePlaneNormal.y, -_sidePlaneNormal.x);
+
+        // ax + by = c
+        // c is distance from origin
+        float _refC = _refFaceNormal.dotProduct(_v1);
+        float _negSide = -_sidePlaneNormal.dotProduct(_v1);
+        float _posSide = _sidePlaneNormal.dotProduct(_v2);
+
+        // Clip incident face to reference face side planes
+        if (clip(-_sidePlaneNormal, _negSide, _incidentFace) < 2)
+            return; // Due to floating point error, possible to not have required points
+
+        if (clip(_sidePlaneNormal, _posSide, _incidentFace) < 2)
+            return; // Due to floating point error, possible to not have required points
+
+        // Flip
+        _manifold->normal = _flip ? -_refFaceNormal : _refFaceNormal;
+
+        // Keep points behind reference face
+        auto _cp = 0; // clipped points behind reference face
+        float _separation = _refFaceNormal.dotProduct(_incidentFace[0]) - _refC;
+        if (_separation <= 0.0f) {
+            _manifold->contacts[_cp] = _incidentFace[0];
+            _manifold->penetration = -_separation;
+            ++_cp;
+        } else
+            _manifold->penetration = 0;
+
+        _separation = _refFaceNormal.dotProduct(_incidentFace[1]) - _refC;
+        if (_separation <= 0.0f) {
+            _manifold->contacts[_cp] = _incidentFace[1];
+
+            _manifold->penetration += -_separation;
+            ++_cp;
+
+            // Average penetration
+            _manifold->penetration /= (float) _cp;
+        }
+
+        _manifold->contactCount = _cp;
+    }
 }

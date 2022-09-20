@@ -8,12 +8,9 @@
 #include <ostream>
 #include <cmath>
 #include "glm/glm.hpp"
+#include "core/Core.h"
 
 namespace GDE {
-
-    #ifndef EPSILON
-    #define EPSILON 0.0001f
-    #endif
 
     template <class T>
     struct Vec2 {
@@ -172,42 +169,6 @@ namespace GDE {
     inline Vec2<long> operator*(float _scalar, const Vec2<long>& _vec) {
         return { (long)(_scalar * (float)_vec.x), (long)(_scalar * (float)_vec.y) };
     }
-
-//    inline Vec2<float> operator +(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
-//        return {(float)_vec.x + _vec1.x, (float)_vec.y + _vec1.y};
-//    }
-//
-//    inline Vec2<float> operator +(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
-//        return _vec1 + _vec;
-//    }
-//
-//    inline Vec2<float> operator -(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
-//        return {(float)_vec.x - _vec1.x, (float)_vec.y - _vec1.y};
-//    }
-//
-//    inline Vec2<float> operator -(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
-//        return _vec1 - _vec;
-//    }
-//
-//    inline float operator *(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
-//        return _vec.x * (float)_vec1.x + _vec.y * (float)_vec1.y;
-//    }
-//
-//    inline Vec2<float> operator *(const Vec2<float>& _vec, float _scalar) {
-//        return { _vec.x * _scalar, _vec.y * _scalar };
-//    }
-//
-//    inline Vec2<float> operator /(const Vec2<float>& _vec, float _scalar) {
-//        return { _vec.x / _scalar, _vec.y / _scalar };
-//    }
-//
-//    inline Vec2<float> operator *(float _scalar, const Vec2<float>& _vec) {
-//        return { _vec.x * _scalar, _vec.y * _scalar };
-//    }
-//
-//    inline float operator *(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
-//        return _vec1 * _vec;
-//    }
 
     typedef Vec2<int> Vec2I;
     typedef Vec2<float> Vec2F;
