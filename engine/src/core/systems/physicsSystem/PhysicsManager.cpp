@@ -24,6 +24,8 @@ namespace GDE {
     }
 
     void PhysicsManager::step(Delta _fxDt) {
+        if(!simulate) return;
+
         contacts.clear();
         for(auto _i = 0; _i < bodies.size(); _i++) {
             PhysicsBody* _a = bodies[_i];

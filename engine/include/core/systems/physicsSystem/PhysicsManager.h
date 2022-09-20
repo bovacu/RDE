@@ -28,6 +28,7 @@ namespace GDE {
         public:
             uint32_t steps = 10;
             Vec2F gravity = {0.f, -50.f};
+            bool simulate = true;
 
         public:
             void init();
