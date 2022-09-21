@@ -25,6 +25,7 @@ namespace GDE {
         float staticFriction = 0.5f;
         float restitution = 0.2f;
         float density = 1.0f;
+        bool ghost = false;
     };
 
     struct PhysicsBody {
@@ -55,6 +56,8 @@ namespace GDE {
             float staticFriction;
             float dynamicFriction;
             float restitution;
+
+            bool ghost;
 
             /**
              * @brief This is the "ID" of the body, it tells which type of body it is. It must be a 2^n.

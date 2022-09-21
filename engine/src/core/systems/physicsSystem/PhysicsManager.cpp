@@ -75,7 +75,7 @@ namespace GDE {
                     }
                 }
 
-                if(_m.contactCount)
+                if(_m.contactCount && !_a->ghost && !_b->ghost)
                     contacts.emplace_back(_m);
             }
         }
