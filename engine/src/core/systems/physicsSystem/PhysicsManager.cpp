@@ -22,7 +22,7 @@ namespace GDE {
         collisionHandler[PhysicsShape::BOX][PhysicsShape::POLYGON].bind<&PhysicsManager::collisionPolygonPolygon>(this);
         collisionHandler[PhysicsShape::BOX][PhysicsShape::CIRCLE].bind<&PhysicsManager::collisionPolygonCircle>(this);
 
-        auto* _callbacks = addOrGetCollisionToTable(0, 0);
+        addOrGetCollisionToTable(0, 0);
     }
 
     void PhysicsManager::destroy() {
