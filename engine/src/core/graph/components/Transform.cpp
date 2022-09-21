@@ -36,6 +36,7 @@ namespace GDE {
 
     void Transform::setPosition(float _x, float _y) {
         localPosition = glm::vec3 {_x, _y, 0.0f};
+        update();
         dirty = true;
     }
 
@@ -45,6 +46,7 @@ namespace GDE {
 
     void Transform::setRotation(float _rotation) {
         localRotation = _rotation;
+        update();
         dirty = true;
     }
 
@@ -58,6 +60,7 @@ namespace GDE {
 
     void Transform::setScale(float _x, float _y) {
         localScale = {_x, _y, 1.0f};
+        update();
         dirty = true;
     }
 
