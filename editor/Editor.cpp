@@ -25,8 +25,6 @@ namespace Editor {
         #endif
     }
 
-    NodeID colliderParent;
-
     void Editor::onInit() {
         UDelegate<void(FrameBuffer*)> _delegate;
         _delegate.bind<&Editor::redirectRendering>(this);
@@ -34,11 +32,11 @@ namespace Editor {
         textStressTest();
         auto _particleSystemNode = getMainGraph()->createNode("ParticleSystem");
 
-        auto _colliderParentId = getMainGraph()->createNode("colliderParent");
-        colliderParent = _colliderParentId;
+        NodeID _colliderParentId;
 
         {
-            auto _floorId = getMainGraph()->createNode("Floor", _colliderParentId);
+            auto _floorId = getMainGraph()->createNode("Floor");
+            _colliderParentId = _floorId;
             auto* _transform0 = getMainGraph()->getComponent<Transform>(_floorId);
             _transform0->setPosition(0, -100);
             ShapeConfig _floorShapeConfig{
@@ -145,7 +143,7 @@ namespace Editor {
                 .isStatic = false
             };
 
-            auto _polyId = getMainGraph()->createNode(APPEND_S("Poly", _counter), colliderParent);
+            auto _polyId = getMainGraph()->createNode(APPEND_S("Poly", _counter));
             auto* _transform = getMainGraph()->getComponent<Transform>(_polyId);
             _transform->setPosition(engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
             auto* _polyBody = getMainGraph()->addComponent<PhysicsBody>(_polyId, _transform, _bodyConfig);
@@ -203,7 +201,7 @@ namespace Editor {
                 auto _text = getMainGraph()->createNode("Block" + std::to_string(_i), _parent);
                 nodes.push_back(_text);
                 auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
-                _textTransform->staticTransform = true;
+//                _textTransform->staticTransform = true;
                 _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f, (float)engine->getWindow().getWindowSize().x / 2.f),
                                             _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f, (float)engine->getWindow().getWindowSize().y / 2.f));
                 getMainGraph()->addComponent<SpriteRenderer>(_text, _textTransform, this, _texture);

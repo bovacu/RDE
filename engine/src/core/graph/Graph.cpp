@@ -45,6 +45,7 @@ namespace GDE {
     void Graph::onUpdate(Delta _dt) {
         registry.view<Transform, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Active& _) {
             _transform.update();
+
             if(_transform.staticTransform) {
                 addComponent<StaticTransform>(_entity);
             }

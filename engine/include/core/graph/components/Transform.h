@@ -91,6 +91,8 @@ namespace GDE {
              */
             void update();
 
+            void forceUpdate();
+
             /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
              * @param _position Vector with position.
@@ -172,6 +174,10 @@ namespace GDE {
              * @param _y The amount to increase/decrease the scale in y
              */
             void scale(float _x, float _y);
+
+            Vec2F getModelMatrixPosition();
+            Vec2F getModelMatrixScale();
+            float getModelMatrixRotation();
     };
 
 }
