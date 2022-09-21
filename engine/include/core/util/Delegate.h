@@ -86,15 +86,15 @@ namespace GDE {
             auto operator=(const UDelegate& other) -> UDelegate& = default;
             auto operator==(UDelegate* _other) {
                 if (_other == nullptr) {
-                    return instance == nullptr;
+                    return instance == nullptr && stub == stub_null;
                 }
-                return _other->instance == instance;
+                return _other->instance == instance && _other->stub == stub;
             }
             auto operator!=(UDelegate* _other) {
                 if (_other == nullptr) {
-                    return instance != nullptr;
+                    return instance != nullptr || stub != stub_null;
                 }
-                return _other->instance != instance;
+                return _other->instance != instance && _other->stub != stub;
             }
             auto operator==(const UDelegate& _other) { return _other->instance == instance; }
             auto operator!=(const UDelegate& _other) { return _other->instance != instance; }

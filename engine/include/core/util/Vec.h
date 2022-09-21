@@ -7,14 +7,22 @@
 
 #include <ostream>
 #include <cmath>
+#include "glm/glm.hpp"
+#include "core/Core.h"
 
 namespace GDE {
 
     template <class T>
-    class Vec2 {
-        public:
-            T x;
-            T y;
+    struct Vec2 {
+        union {
+            T m[1][1];
+            T v[2];
+
+            struct {
+                T x;
+                T y;
+            };
+        };
 
         public:
             Vec2() {
@@ -27,32 +35,65 @@ namespace GDE {
                 y = _y;
             }
 
-            Vec2<T> operator +(const Vec2<T> _vec) {
-                return {x + _vec.x, y + _vec.y};
+            void set(T _x, T _y) {
+                x = _x;
+                y = _y;
             }
 
-            Vec2<T> operator -(const Vec2<T> _vec) {
-                return {x - _vec.x, y - _vec.y};
-            }
-
-            Vec2<T> operator -(const Vec2<T> _vec) const {
-                return {x - _vec.x, y - _vec.y};
-            }
-
-            float operator *(const Vec2<T> _vec) {
-                return x * _vec.x + y * _vec.y;
+            void set(const Vec2<T>& _vec) {
+                x = _vec.x;
+                y = _vec.y;
             }
 
             [[nodiscard]] float dotProduct(const Vec2<T>& _p) const {
                 return x * _p.x + y * _p.y;
             }
 
+            [[nodiscard]] Vec2<T> crossProduct(float _scalar) const {
+                return { -_scalar * y, _scalar * x };
+            }
+
+            [[nodiscard]] float crossProduct(const Vec2<T> _vec) const {
+                return x * _vec.y - y * _vec.x;
+            }
+
             [[nodiscard]] float distance(const Vec2<T>& _p) const {
                 return std::sqrt((_p.x - x) * (_p.x - x) + (_p.y - y) * (_p.y - y));
             }
 
+            [[nodiscard]] float distanceSqr(const Vec2<T>& _p) const {
+                Vec2<T> c = *this - _p;
+                return c.dotProduct(c);
+            }
+
             [[nodiscard]] float magnitude() const {
                 return std::sqrt(x * x + y * y);
+            }
+
+            [[nodiscard]] float magnitudeSqr() const {
+                return x * x + y * y;
+            }
+
+            void normalize() {
+                float _magnitude = magnitude();
+
+                if(_magnitude > EPSILON) {
+                    float _invMagnitude = 1.0f / _magnitude;
+                    x *= _invMagnitude;
+                    y *= _invMagnitude;
+                }
+            }
+
+            void rotate(float _degrees) {
+                auto _radians = glm::radians(_degrees);
+                float _c = std::cos(_radians);
+                float _s = std::sin(_radians);
+
+                float _xRotated = x * _c - y * _s;
+                float _yRotated = x * _s + y * _c;
+
+                x = _xRotated;
+                y = _yRotated;
             }
 
             bool isInside(const Vec2<T>& _rectCenter, const Vec2<T>& _rectSize) {
@@ -60,34 +101,73 @@ namespace GDE {
                        y >= _rectCenter.y - _rectSize.y / 2.f && y <= _rectCenter.y + _rectSize.y / 2.f;
             }
 
-            static Vec2<float> normalize(Vec2<T>& _p) {
-                float _magnitude = _p.magnitude();
-                return Vec2<float>(_p.x / _magnitude, _p.y / _magnitude);
+            Vec2<T> operator+(const Vec2<T>& _rhs) const {
+                return Vec2( x + _rhs.x, y + _rhs.y );
+            }
+
+            Vec2<T> operator+(float _s) const {
+                return Vec2( x + _s, y + _s );
+            }
+
+            void operator+=(const Vec2& _rhs) {
+                x += _rhs.x;
+                y += _rhs.y;
+            }
+
+
+
+            Vec2<T> operator-(const Vec2<T>& _rhs) const {
+                return Vec2( x - _rhs.x, y - _rhs.y );
+            }
+
+            Vec2<T> operator-(float _s) const {
+                return Vec2( x - _s, y - _s );
+            }
+
+            void operator-=(const Vec2<T>& _rhs) {
+                x -= _rhs.x;
+                y -= _rhs.y;
+            }
+
+            Vec2<T> operator -() const {
+                return { -x, -y };
+            }
+
+
+            Vec2<T> operator*( float _scalar ) const {
+                return Vec2<T>( x * _scalar, y * _scalar );
+            }
+
+            void operator *=(float _scalar) {
+                x *= _scalar;
+                y *= _scalar;
+            }
+
+
+            Vec2<T> operator/( float _scalar ) const {
+                return Vec2<T>(x / _scalar, y / _scalar);
+            }
+
+            void operator /=(float _scalar) {
+                x /= _scalar;
+                y /= _scalar;
             }
     };
 
-    inline Vec2<float> operator +(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
-        return {(float)_vec.x + _vec1.x, (float)_vec.y + _vec1.y};
+    inline Vec2<float> operator*(float _scalar, const Vec2<float>& _vec) {
+        return { _scalar * _vec.x, _scalar * _vec.y };
     }
 
-    inline Vec2<float> operator +(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
-        return _vec1 + _vec;
+    inline Vec2<int> operator*(float _scalar, const Vec2<int>& _vec) {
+        return { (int)(_scalar * (float)_vec.x), (int)(_scalar * (float)_vec.y) };
     }
 
-    inline Vec2<float> operator -(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
-        return {(float)_vec.x - _vec1.x, (float)_vec.y - _vec1.y};
+    inline Vec2<double> operator*(float _scalar, const Vec2<double>& _vec) {
+        return { _scalar * _vec.x, _scalar * _vec.y };
     }
 
-    inline Vec2<float> operator -(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
-        return _vec1 - _vec;
-    }
-
-    inline float operator *(const Vec2<float>& _vec, const Vec2<int>& _vec1) {
-        return _vec.x * (float)_vec1.x + _vec.y * (float)_vec1.y;
-    }
-
-    inline float operator *(const Vec2<int>& _vec, const Vec2<float>& _vec1) {
-        return _vec1 * _vec;
+    inline Vec2<long> operator*(float _scalar, const Vec2<long>& _vec) {
+        return { (long)(_scalar * (float)_vec.x), (long)(_scalar * (float)_vec.y) };
     }
 
     typedef Vec2<int> Vec2I;

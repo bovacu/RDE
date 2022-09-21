@@ -132,7 +132,7 @@ namespace GDE {
              * @brief Draws a shape. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
              * @param _shape Complex shape
              */
-            void drawShape(Shape& _shape);
+            void drawShape(DebugShape& _shape);
 
             /**
              * @brief Draws a grid on the screen.

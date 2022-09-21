@@ -64,8 +64,8 @@ namespace GDE {
             size.y = std::max(size.y, _char.bitmapSize.y - _char.bearing.y);
         }
 
-        size.x *= transform->getScaleLocal().x;
-        size.y *= transform->getScaleLocal().y;
+        size.x *= transform->getScale().x;
+        size.y *= transform->getScale().y;
 
 //        debugShape.makeSquare(getPositionLocal(), size);
     }
@@ -107,8 +107,8 @@ namespace GDE {
         auto* _atlas = font;
         auto _atlasSize = _atlas->getSize();
 
-        float _x = _transform.getPositionLocal().x - size.x / 2.f;
-        float _y = _transform.getPositionLocal().y - size.y / 4.f;
+        float _x = _transform.getPosition().x - size.x / 2.f;
+        float _y = _transform.getPosition().y - size.y / 4.f;
 
         auto* _chars = _atlas->getChars();
 
@@ -121,7 +121,7 @@ namespace GDE {
 
             if(_char == '\n') {
                 _y -= _chars[innerText[0]].bitmapSize.y * 0.8f;
-                _x = _transform.getPositionLocal().x - size.x / 2.f;
+                _x = _transform.getPosition().x - size.x / 2.f;
                 continue;
             }
 

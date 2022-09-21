@@ -6,7 +6,7 @@
 namespace GDE {
 
     void ParticleData::reset(const ParticleSystemConfig& _particleSystemConfig, Transform* _parentTransform) {
-        auto _parentPos = _parentTransform->getPositionWorld();
+        auto _parentPos = _parentTransform->getPosition();
         position = glm::vec3 { _parentPos.x, _parentPos.y, 0.f };
         Random _random;
         velocity = glm::vec2 { _random.randomf(-20, 20), _random.randomf(20, 100) };
@@ -76,7 +76,7 @@ namespace GDE {
     }
 
     ParticleData ParticleSystem::allocator() {
-        auto _position = transform->getPositionWorld();
+        auto _position = transform->getPosition();
         Random _random;
 
         auto _particle = ParticleData {

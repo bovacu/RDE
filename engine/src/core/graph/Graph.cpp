@@ -2,7 +2,6 @@
 
 #include "core/graph/Graph.h"
 #include "core/graph/components/Transform.h"
-#include "core/graph/components/Body.h"
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
@@ -46,6 +45,7 @@ namespace GDE {
     void Graph::onUpdate(Delta _dt) {
         registry.view<Transform, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Active& _) {
             _transform.update();
+
             if(_transform.staticTransform) {
                 addComponent<StaticTransform>(_entity);
             }
@@ -53,20 +53,6 @@ namespace GDE {
 
         registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
             _animationSystem.update(_dt, _spriteRenderer);
-        });
-
-        registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([](const auto _entity, Transform& _transform, Body& _body, const Active& _) {
-            auto _lastStoredPosition = _body.b2dConfig.lastPosition;
-            auto _diff = _transform.getPositionLocal() - _lastStoredPosition;
-
-            if(_diff != 0) {
-                auto _bodyTransform = _body.b2dConfig.body->GetTransform();
-                _body.b2dConfig.body->SetTransform({_bodyTransform.p.x + _diff.x, _bodyTransform.p.y + _diff.y}, _bodyTransform.q.GetAngle());
-            }
-
-            _transform.setPositionWorld(_body.getPosition());
-            _transform.setRotation(_body.getRotation());
-            _body.b2dConfig.lastPosition = _transform.getPositionLocal();
         });
 
         registry.group<ParticleSystem>(entt::get<Active>).each([&_dt](const auto _entity, ParticleSystem& _particleSystem, const Active& _) {
@@ -81,7 +67,6 @@ namespace GDE {
     }
 
     void Graph::onFixedUpdate(Delta _dt) {
-
         onFixedUpdateDel(registry, _dt);
     }
 
@@ -121,24 +106,25 @@ namespace GDE {
     }
 
     void Graph::onDebugRender() {
-        auto _debug = registry.view<Body>();
-        if(_debug.empty() || !scene->engine->manager.physics.drawDebugInfo) return;
-
+//        auto _debug = registry.view<Body>();
+//        if(_debug.empty() || !scene->engine->manager.physics.drawDebugInfo) return;
+//
         auto& _renderManager = scene->engine->manager.renderManager;
-
+//
         _renderManager.beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->ID));
-
-        _debug.each([&_renderManager](const auto _entity, const Body& _body) {
-            if(_body.bodyConfig.bodyShapeType == BodyShapeType::BOX) {
-                _renderManager.drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
-            } else if (_body.bodyConfig.bodyShapeType == BodyShapeType::CIRCLE) {
-//                Shape _circle;
-//                _circle.makeCircle(_body.getPosition(), _body.bodyConfig.size.x / 2.f * 0.4f, 400);
-//                _circle.showInnerColor(false);
-//                _renderManager.drawShape(_circle);
-            }
-        });
-
+        scene->engine->manager.physics.debugRender(&_renderManager);
+//
+//        _debug.each([&_renderManager](const auto _entity, const Body& _body) {
+//            if(_body.bodyConfig.bodyShapeType == BodyShapeType::BOX) {
+//                _renderManager.drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
+//            } else if (_body.bodyConfig.bodyShapeType == BodyShapeType::CIRCLE) {
+////                Shape _circle;
+////                _circle.makeCircle(_body.getPosition(), _body.bodyConfig.size.x / 2.f * 0.4f, 400);
+////                _circle.showInnerColor(false);
+////                _renderManager.drawShape(_circle);
+//            }
+//        });
+//
         _renderManager.endDebugDraw();
     }
 

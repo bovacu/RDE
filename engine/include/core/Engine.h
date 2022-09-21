@@ -100,11 +100,6 @@ namespace GDE {
             float fixedDelta = -1;
 
             /**
-             * @brief Second counter for FPS.
-             */
-            float timer = 0;
-
-            /**
              * @brief FPS counter.
              */
             unsigned int fpsCounter = 0;

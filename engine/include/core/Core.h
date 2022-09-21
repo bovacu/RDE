@@ -38,7 +38,16 @@
 #define BLUR_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/blurFragment.glsl"
 #define DEBUG_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/debug/debugFragment.glsl"
 
+#ifndef EPSILON
+#define EPSILON 0.0001f
+#endif
 
+#ifndef PI
+#define PI 3.141592741f
+#endif
+
+#define radiansToDegrees(x) x * (180.f / PI)
+#define degreesToRadians(x) x * (PI / 180.0f)
 
 #ifndef NDEBUG
 #define ENGINE_DEBUG
@@ -86,6 +95,11 @@
     #define GDE_HIDDEN [[gnu::visibility("hidden")]]
     #define GDE_INTERNAL [[gnu::visibility("internal")]]
     #define GDE_DEPRECATED(_explanation) [[gnu::deprecated(_explanation)]]
+#endif
+
+#if IS_MOBILE() || IS_MAC() || defined(_WIN32)
+typedef unsigned long ulong;
+typedef unsigned int uint;
 #endif
 
 #endif //GDE_CORE_H

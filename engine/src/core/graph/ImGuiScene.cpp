@@ -10,7 +10,6 @@
 #include "core/graph/Graph.h"
 #include "core/render/RenderManager.h"
 #include "core/graph/components/Transform.h"
-#include "core/graph/components/Body.h"
 #include "core/graph/components/TextRenderer.h"
 
 namespace GDE {
@@ -213,7 +212,7 @@ namespace GDE {
             for(auto& _font : engine->manager.fontManager.getAllFonts()) {
                 if(ImGui::TreeNode((void*)(intptr_t)_child, "%s(font size %d)", _font->getFontName().c_str(), _font->getFontSize())) {
                     ImGui::Text("Kb: %.2f", _font->getTexture().getKb());
-                    ImGui::Text("Texture size: %dx%d", _font->getTexture().getSize().x, _font->getTexture().getSize().y);
+                    ImGui::Text("Texture size: %fx%f", _font->getTexture().getSize().x, _font->getTexture().getSize().y);
                     _child++;
                     ImGui::TreePop();
                 }
@@ -474,7 +473,7 @@ namespace GDE {
             if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
             ImGui::Text("Position ");
 
-            float _pos[2] = {_transform->getPositionLocal().x, _transform->getPositionLocal().y};
+            float _pos[2] = {_transform->getPosition().x, _transform->getPosition().y};
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(1);
@@ -486,7 +485,7 @@ namespace GDE {
 
             ImGui::Text("Rotation ");
 
-            float _angle = _transform->getRotationLocal();
+            float _angle = _transform->getRotation();
             ImGui::SameLine();
             ImGui::SetNextItemWidth(50);
             ImGui::PushID(2);
@@ -497,7 +496,7 @@ namespace GDE {
 
             ImGui::Text("Scale ");
 
-            float _scale[2] = {_transform->getScaleLocal().x, _transform->getScaleLocal().y};
+            float _scale[2] = {_transform->getScale().x, _transform->getScale().y};
             ImGui::SameLine(0, 30);
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(3);
@@ -568,15 +567,15 @@ namespace GDE {
     }
 
     void ImGuiScene::bodyComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<Body>(_selectedNode)) return;
-
-        auto _body = _graph->getComponent<Body>(_selectedNode);
-
-        if(ImGui::CollapsingHeader("Body", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
-
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
-        }
+//        if(!_graph->hasComponent<Body>(_selectedNode)) return;
+//
+//        auto _body = _graph->getComponent<Body>(_selectedNode);
+//
+//        if(ImGui::CollapsingHeader("Body", ImGuiTreeNodeFlags_DefaultOpen)) {
+//            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+//
+//            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+//        }
     }
 
     void ImGuiScene::spriteComponent(Graph* _graph, const NodeID _selectedNode) {

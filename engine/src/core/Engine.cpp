@@ -86,7 +86,6 @@ namespace GDE {
             Uint64 _end = SDL_GetPerformanceCounter();
             float _elapsedMS = (float)(_end - _start) / (float)SDL_GetPerformanceFrequency();
             _dt = _elapsedMS;
-            timer += _dt;
         }
     }
 
@@ -101,7 +100,7 @@ namespace GDE {
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
         manager.physics.step(_fixedDt);
-        manager.sceneManager.getDisplayedScene()->onFixedUpdate(_fixedDt);
+//        manager.sceneManager.getDisplayedScene()->onFixedUpdate(_fixedDt);
     }
 
     void Engine::onUpdate(Delta _dt) {

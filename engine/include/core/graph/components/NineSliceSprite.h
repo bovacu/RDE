@@ -35,7 +35,8 @@ namespace GDE {
              */
             [[nodiscard]] NineSlice& getNineSlice() const;
 
-            [[nodiscard]] Vec2F getSize() const override { return {(float)nineSliceSize.x * transform->getScaleLocal().x, (float)nineSliceSize.y * transform->getScaleLocal().y}; }
+            [[nodiscard]] Vec2F getSize() const override { return {(float)nineSliceSize.x * transform->getScale().x, (float)nineSliceSize.y *
+                                                                                                                     transform->getScale().y}; }
 
             void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const override;
 

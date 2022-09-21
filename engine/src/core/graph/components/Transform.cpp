@@ -8,7 +8,7 @@
 namespace GDE {
 
     Transform::Transform(const NodeID& _nodeId) {
-
+        ID = _nodeId;
     }
 
     glm::mat4 Transform::getLocalModelMatrix() {
@@ -21,7 +21,7 @@ namespace GDE {
 
     void Transform::update() {
         if (parent != NODE_ID_NULL) {
-            if(!dirty && !parentTransform->dirty) return;
+            if(!parentTransform->dirty) return;
             modelMatrix = parentTransform->modelMatrix * getLocalModelMatrix();
         } else {
             modelMatrix = getLocalModelMatrix();
@@ -36,29 +36,22 @@ namespace GDE {
 
     void Transform::setPosition(float _x, float _y) {
         localPosition = glm::vec3 {_x, _y, 0.0f};
+        forceUpdate();
         dirty = true;
     }
 
-    void Transform::setPositionWorld(const Vec2F& _position) {
-        setPositionWorld(_position.x, _position.y);
-    }
-
-    void Transform::setPositionWorld(float _x, float _y) {
-        modelMatrix[3][0] = _x;
-        modelMatrix[3][1] = _y;
-    }
-
-    Vec2F Transform::getPositionLocal() const {
-        return {localPosition.x, localPosition.y};
+    Vec2F Transform::getPosition() const {
+        return { localModelMatrix[3][0], localModelMatrix[3][1] };
     }
 
     void Transform::setRotation(float _rotation) {
         localRotation = _rotation;
+        forceUpdate();
         dirty = true;
     }
 
-    float Transform::getRotationLocal() const {
-        return localRotation;
+    float Transform::getRotation() const {
+        return radiansToDegrees(std::atan2(localModelMatrix[0][1], localModelMatrix[0][0]));
     }
 
     void Transform::setScale(const Vec2F& _scale) {
@@ -67,11 +60,12 @@ namespace GDE {
 
     void Transform::setScale(float _x, float _y) {
         localScale = {_x, _y, 1.0f};
+        forceUpdate();
         dirty = true;
     }
 
-    Vec2F Transform::getScaleLocal() const {
-        return {localScale.x, localScale.y};
+    Vec2F Transform::getScale() const {
+        return { localModelMatrix[0][0], localModelMatrix[1][1] };
     }
 
     void Transform::translate(const Vec2F& _direction) {
@@ -81,11 +75,13 @@ namespace GDE {
     void Transform::translate(float _x, float _y) {
         localPosition.x += _x;
         localPosition.y += _y;
+        forceUpdate();
         dirty = true;
     }
 
     void Transform::rotate(float _amount) {
         localRotation += _amount;
+        forceUpdate();
         dirty = true;
     }
 
@@ -96,19 +92,27 @@ namespace GDE {
     void Transform::scale(float _x, float _y) {
         localScale.x += _x;
         localScale.y += _y;
+        forceUpdate();
         dirty = true;
     }
 
-    Vec2F Transform::getPositionWorld() const {
-        float _x = modelMatrix[3][0], _y =  modelMatrix[3][1];
-        return {_x, _y};
+    void Transform::forceUpdate() {
+        if (parent != NODE_ID_NULL) {
+            modelMatrix = parentTransform->modelMatrix * getLocalModelMatrix();
+        } else {
+            modelMatrix = getLocalModelMatrix();
+        }
     }
 
-    float Transform::getRotationWorld() const {
-        return -1;
+    Vec2F Transform::getModelMatrixPosition() {
+        return { modelMatrix[3][0], modelMatrix[3][1] };
     }
 
-    Vec2F Transform::getScaleLWorld() const {
+    Vec2F Transform::getModelMatrixScale() {
         return { modelMatrix[0][0], modelMatrix[1][1] };
+    }
+
+    float Transform::getModelMatrixRotation() {
+        return radiansToDegrees(std::atan2(modelMatrix[0][1], modelMatrix[0][0]));
     }
 }

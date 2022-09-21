@@ -96,17 +96,23 @@ namespace GDE {
         auto _screenPos0 = Util::worldToScreenCoords(*batch->viewport, _p0);
         auto _screenPos1 = Util::worldToScreenCoords(*batch->viewport, _p1);
 
-        auto _transformMat0 = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos0.x, _screenPos0.y, 1.f));
-        auto _transformMat1 = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos1.x, _screenPos1.y, 1.f));
+        auto _transformMat0 = glm::mat4(1.f);
+        auto _transformMat1 = glm::mat4(1.f);
+
+        _transformMat0[3][0] = _screenPos0.x;
+        _transformMat0[3][1] = _screenPos0.y;
+
+        _transformMat1[3][0] = _screenPos1.x;
+        _transformMat1[3][1] = _screenPos1.y;
 
         auto _scalingFactor = batch->viewport->getScalingFactor();
         if(_scalingFactor != 1) {
-            _transformMat0 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
-            _transformMat1 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
+            _transformMat0 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.y, 1.f});
+            _transformMat1 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.y, 1.f});
         }
 
-        vertexDebugBufferLines.emplace_back(_transformMat0 * glm::vec4 {_screenPos0.x, _screenPos0.y, 0.0f, 1.0f}, _colorVec4);
-        vertexDebugBufferLines.emplace_back(_transformMat0 * glm::vec4 {_screenPos1.x, _screenPos1.y, 0.0f, 1.0f}, _colorVec4);
+        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat0[3][0], _transformMat0[3][1], 1.0f}, _colorVec4);
+        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat1[3][0], _transformMat1[3][1], 1.0f}, _colorVec4);
     }
 
     void SpriteBatch::Debug::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
@@ -130,12 +136,12 @@ namespace GDE {
         vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
     }
 
-    void SpriteBatch::Debug::drawShape(Shape& _shape) {
+    void SpriteBatch::Debug::drawShape(DebugShape& _shape) {
         auto _scalingFactor = batch->viewport->getScalingFactor();
         auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x * _scalingFactor.x, _shape.getPosition().y * _scalingFactor.y, 1.f));
 
-        if(_shape.getRotation() != 0)
-            _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_shape.getRotation()), { 0.0f, 0.0f, 1.0f });
+        if(_shape.rotation != 0)
+            _transformMat *= glm::rotate(glm::mat4(1.0f), _shape.rotation, { 0.0f, 0.0f, 1.0f });
 
         if(_scalingFactor != 1)
             _transformMat *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
