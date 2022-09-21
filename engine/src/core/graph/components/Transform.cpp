@@ -41,7 +41,7 @@ namespace GDE {
     }
 
     Vec2F Transform::getPosition() const {
-        return {localPosition.x, localPosition.y};
+        return { modelMatrix[3][0], modelMatrix[3][1] };
     }
 
     void Transform::setRotation(float _rotation) {
@@ -51,7 +51,7 @@ namespace GDE {
     }
 
     float Transform::getRotation() const {
-        return localRotation;
+        return radiansToDegrees(std::atan2(modelMatrix[0][1], modelMatrix[0][0]));
     }
 
     void Transform::setScale(const Vec2F& _scale) {

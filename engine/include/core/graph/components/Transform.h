@@ -18,7 +18,7 @@ namespace GDE {
      * @brief Component common to every entity that tells the engine where it is, which scale it has and how much it is rotated.
      */
     class Transform {
-        // Local Space
+
         private:
             /**
              * @brief 3D (although just 2D coords are used) of where the entity is, related to its parent, in WorldSpace (but relative to its parent).
