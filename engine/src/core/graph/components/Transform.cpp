@@ -8,7 +8,7 @@
 namespace GDE {
 
     Transform::Transform(const NodeID& _nodeId) {
-
+        ID = _nodeId;
     }
 
     glm::mat4 Transform::getLocalModelMatrix() {

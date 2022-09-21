@@ -51,6 +51,11 @@ namespace GDE {
             explicit Transform(const NodeID& _nodeId);
 
             /**
+             * @brief Entity's ID.
+             */
+            NodeID ID;
+
+            /**
              * @brief ID of the direct parent.
              *
              */
