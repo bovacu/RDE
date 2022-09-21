@@ -7,10 +7,6 @@
 
 namespace GDE {
 
-    void fooCollisionEnter(PhysicsBody* _bodyA, PhysicsBody* _bodyB) {  }
-    void fooCollisionStay(PhysicsBody* _bodyA, PhysicsBody* _bodyB) {  }
-    void fooCollisionExit(PhysicsBody* _bodyA, PhysicsBody* _bodyB) {  }
-
     void PhysicsManager::init() {
         collisionHandler[PhysicsShape::CIRCLE][PhysicsShape::CIRCLE].bind<&PhysicsManager::collisionCircleCircle>(this);
         collisionHandler[PhysicsShape::CIRCLE][PhysicsShape::POLYGON].bind<&PhysicsManager::collisionCirclePolygon>(this);
