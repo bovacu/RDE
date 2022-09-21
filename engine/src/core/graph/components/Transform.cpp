@@ -39,16 +39,7 @@ namespace GDE {
         dirty = true;
     }
 
-    void Transform::setPositionWorld(const Vec2F& _position) {
-        setPositionWorld(_position.x, _position.y);
-    }
-
-    void Transform::setPositionWorld(float _x, float _y) {
-        modelMatrix[3][0] = _x;
-        modelMatrix[3][1] = _y;
-    }
-
-    Vec2F Transform::getPositionLocal() const {
+    Vec2F Transform::getPosition() const {
         return {localPosition.x, localPosition.y};
     }
 
@@ -57,7 +48,7 @@ namespace GDE {
         dirty = true;
     }
 
-    float Transform::getRotationLocal() const {
+    float Transform::getRotation() const {
         return localRotation;
     }
 
@@ -70,7 +61,7 @@ namespace GDE {
         dirty = true;
     }
 
-    Vec2F Transform::getScaleLocal() const {
+    Vec2F Transform::getScale() const {
         return {localScale.x, localScale.y};
     }
 
@@ -97,18 +88,5 @@ namespace GDE {
         localScale.x += _x;
         localScale.y += _y;
         dirty = true;
-    }
-
-    Vec2F Transform::getPositionWorld() const {
-        float _x = modelMatrix[3][0], _y =  modelMatrix[3][1];
-        return {_x, _y};
-    }
-
-    float Transform::getRotationWorld() const {
-        return -1;
-    }
-
-    Vec2F Transform::getScaleLWorld() const {
-        return { modelMatrix[0][0], modelMatrix[1][1] };
     }
 }

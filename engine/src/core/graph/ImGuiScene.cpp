@@ -473,7 +473,7 @@ namespace GDE {
             if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
             ImGui::Text("Position ");
 
-            float _pos[2] = {_transform->getPositionLocal().x, _transform->getPositionLocal().y};
+            float _pos[2] = {_transform->getPosition().x, _transform->getPosition().y};
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(1);
@@ -485,7 +485,7 @@ namespace GDE {
 
             ImGui::Text("Rotation ");
 
-            float _angle = _transform->getRotationLocal();
+            float _angle = _transform->getRotation();
             ImGui::SameLine();
             ImGui::SetNextItemWidth(50);
             ImGui::PushID(2);
@@ -496,7 +496,7 @@ namespace GDE {
 
             ImGui::Text("Scale ");
 
-            float _scale[2] = {_transform->getScaleLocal().x, _transform->getScaleLocal().y};
+            float _scale[2] = {_transform->getScale().x, _transform->getScale().y};
             ImGui::SameLine(0, 30);
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(3);

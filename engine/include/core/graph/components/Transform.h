@@ -98,19 +98,6 @@ namespace GDE {
             void setPosition(const Vec2F& _position);
 
             /**
-              * @brief Sets the position of the object in World Coordintes, so relative to the World.
-              * @param _position Vector with position.
-              */
-            void setPositionWorld(const Vec2F& _position);
-
-            /**
-             * @brief Sets the position of the object in World Coordintes, so relative to the World.
-             * @param _x Position x
-             * @param _y Position y
-             */
-            void setPositionWorld(float _x, float _y);
-
-            /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
              * @param _x Position x
              * @param _y Position y
@@ -121,13 +108,7 @@ namespace GDE {
              * @brief Returns the position relative to its parent.
              * @return Vec2F
              */
-            [[nodiscard]] Vec2F getPositionLocal() const;
-
-            /**
-             * @brief Returns the position relative to the World.
-             * @return Vec2F
-             */
-            [[nodiscard]] Vec2F getPositionWorld() const;
+            [[nodiscard]] Vec2F getPosition() const;
 
             /**
              * @brief Translates the current position by an amount. It is not the same as setPosition.
@@ -152,13 +133,7 @@ namespace GDE {
              * @brief Returns the rotation relative to its parent.
              * @return float
              */
-            [[nodiscard]] float getRotationLocal() const;
-
-            /**
-             * @brief Returns the rotation relative to the World.
-             * @return float
-             */
-            [[nodiscard]] float getRotationWorld() const;
+            [[nodiscard]] float getRotation() const;
 
             /**
              * @brief Rotates the entity by an amount of degrees. It is not the same as setRotation.
@@ -183,13 +158,7 @@ namespace GDE {
              * @brief Returns the scale relative to its parent.
              * @return Vec2F
              */
-            [[nodiscard]] Vec2F getScaleLocal() const;
-
-            /**
-             * @brief Returns the scale relative to the World.
-             * @return Vec2F
-             */
-            [[nodiscard]] Vec2F getScaleLWorld() const;
+            [[nodiscard]] Vec2F getScale() const;
 
             /**
              * @brief Adds an amount to the current scale. It is not the same as setScale.

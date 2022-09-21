@@ -143,8 +143,8 @@ namespace GDE {
     }
 
     Mat2 PhysicsShape::getRotationMatrix() {
-        float _c = std::cos(degreesToRadians(transform->getRotationLocal()));
-        float _s = std::sin(degreesToRadians(transform->getRotationLocal()));
+        float _c = std::cos(degreesToRadians(transform->getRotation()));
+        float _s = std::sin(degreesToRadians(transform->getRotation()));
         return { _c, -_s, _s, _c };
     }
 
