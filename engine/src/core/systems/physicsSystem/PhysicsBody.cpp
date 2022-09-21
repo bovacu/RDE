@@ -19,7 +19,8 @@ namespace GDE {
         restitution = _bodyConfig.restitution;
         density = _bodyConfig.density;
 
-        collisionMask = 0;
+        collisionMask = _bodyConfig.collisionMask;
+        ghost = _bodyConfig.ghost;
 
         switch (_bodyConfig.shapeConfig.type) {
             case PhysicsShape::CIRCLE:

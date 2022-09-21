@@ -26,6 +26,7 @@ namespace GDE {
         float restitution = 0.2f;
         float density = 1.0f;
         bool ghost = false;
+        ulong collisionMask = 0;
     };
 
     struct PhysicsBody {
