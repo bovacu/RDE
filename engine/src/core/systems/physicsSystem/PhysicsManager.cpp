@@ -23,9 +23,6 @@ namespace GDE {
         collisionHandler[PhysicsShape::BOX][PhysicsShape::CIRCLE].bind<&PhysicsManager::collisionPolygonCircle>(this);
 
         auto* _callbacks = addOrGetCollisionToTable(0, 0);
-        _callbacks->onCollisionEnter.bind<&fooCollisionEnter>();
-        _callbacks->onCollisionStay.bind<&fooCollisionStay>();
-        _callbacks->onCollisionStay.bind<&fooCollisionExit>();
     }
 
     void PhysicsManager::destroy() {
@@ -67,7 +64,7 @@ namespace GDE {
                         if(_it->state == CollisionState::NONE && _physicsCollisionCallback->onCollisionEnter != nullptr) {
                             _physicsCollisionCallback->onCollisionEnter(_a, _b);
                             _it->state = CollisionState::COLLISION_ENTER;
-                        } else if(_it->state == CollisionState::COLLISION_ENTER && _physicsCollisionCallback->onCollisionStay != nullptr) {
+                        } else if((_it->state == CollisionState::COLLISION_ENTER || CollisionState::COLLISION_STAY)  && _physicsCollisionCallback->onCollisionStay != nullptr) {
                             _physicsCollisionCallback->onCollisionStay(_a, _b);
                             _it->state = CollisionState::COLLISION_STAY;
                         }
