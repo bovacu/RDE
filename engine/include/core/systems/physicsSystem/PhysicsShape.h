@@ -15,11 +15,15 @@ namespace GDE {
 
     #define MAX_VERTICES_PER_POLYGON 32
 
+    /**
+     * @warning THIS CANNOT BE ADDED AS A COMPONENT, IT IS PART OF THE PHYSICS_BODY.
+     */
     struct PhysicsShape {
 
         enum Type {
             CIRCLE,
             POLYGON,
+            BOX,
             MAX
         };
 
@@ -40,8 +44,6 @@ namespace GDE {
         Vec2F getSupport(const Vec2F& _dir);
         Mat2 getRotationMatrix();
     };
-
-
 }
 
 

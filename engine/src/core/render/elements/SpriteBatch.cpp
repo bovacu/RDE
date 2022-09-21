@@ -96,17 +96,23 @@ namespace GDE {
         auto _screenPos0 = Util::worldToScreenCoords(*batch->viewport, _p0);
         auto _screenPos1 = Util::worldToScreenCoords(*batch->viewport, _p1);
 
-        auto _transformMat0 = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos0.x, _screenPos0.y, 1.f));
-        auto _transformMat1 = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos1.x, _screenPos1.y, 1.f));
+        auto _transformMat0 = glm::mat4(1.f);
+        auto _transformMat1 = glm::mat4(1.f);
+
+        _transformMat0[3][0] = _screenPos0.x;
+        _transformMat0[3][1] = _screenPos0.y;
+
+        _transformMat1[3][0] = _screenPos1.x;
+        _transformMat1[3][1] = _screenPos1.y;
 
         auto _scalingFactor = batch->viewport->getScalingFactor();
         if(_scalingFactor != 1) {
-            _transformMat0 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
-            _transformMat1 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
+            _transformMat0 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.y, 1.f});
+            _transformMat1 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.y, 1.f});
         }
 
-        vertexDebugBufferLines.emplace_back(_transformMat0 * glm::vec4 {_screenPos0.x, _screenPos0.y, 0.0f, 1.0f}, _colorVec4);
-        vertexDebugBufferLines.emplace_back(_transformMat1 * glm::vec4 {_screenPos1.x, _screenPos1.y, 0.0f, 1.0f}, _colorVec4);
+        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat0[3][0], _transformMat0[3][1], 1.0f}, _colorVec4);
+        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat1[3][0], _transformMat1[3][1], 1.0f}, _colorVec4);
     }
 
     void SpriteBatch::Debug::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
@@ -260,7 +266,7 @@ namespace GDE {
             glBufferData(GL_ARRAY_BUFFER, (long)(_shader->getShaderVertexDataSize() * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            glDrawArrays(GL_LINE_LOOP, 0, (int)vertexDebugBufferGeometrics.size());
+            glDrawArrays(GL_TRIANGLES, 0, (int)vertexDebugBufferGeometrics.size());
         }
 
         if(!vertexDebugBufferLines.empty()) {

@@ -12,13 +12,13 @@
 namespace GDE {
 
     void PhysicsShape::makeRectangle(const Vec2F& _size) {
-        type = Type::POLYGON;
+        type = Type::BOX;
 
         vertexCount = 4;
-        vertices.emplace_back( -_size.x / 2.f, -_size.y / 2.f );
-        vertices.emplace_back(  _size.x / 2.f, -_size.y / 2.f );
-        vertices.emplace_back(  _size.x / 2.f,  _size.y / 2.f );
-        vertices.emplace_back( -_size.x / 2.f,  _size.y / 2.f );
+        vertices.emplace_back( -_size.x / 2.f, -_size.y / 2.f);
+        vertices.emplace_back(  _size.x / 2.f, -_size.y / 2.f);
+        vertices.emplace_back(  _size.x / 2.f,  _size.y / 2.f);
+        vertices.emplace_back( -_size.x / 2.f,  _size.y / 2.f);
         normals.emplace_back(  0.0f,  -1.0f );
         normals.emplace_back(  1.0f,   0.0f );
         normals.emplace_back(  0.0f,   1.0f );
@@ -57,7 +57,7 @@ namespace GDE {
                     _rightMost = _i;
         }
 
-        int _hull[MAX_VERTICES_PER_POLYGON];
+        int _hull[_vertices.size()];
         int _outCount = 0;
         int _indexHull = _rightMost;
 

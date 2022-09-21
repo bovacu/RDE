@@ -33,8 +33,8 @@ namespace GDE {
     }
 
     void SceneManager::displayScene(const std::string& _sceneName) {
-        scenes[_sceneName]->onInit();
         sceneDisplayed = scenes[_sceneName];
+        sceneDisplayed->onInit();
     }
 
     Scene* SceneManager::getScene(const std::string& _sceneName) {

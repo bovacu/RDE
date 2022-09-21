@@ -10,17 +10,19 @@ namespace GDE {
     void PhysicsManager::init() {
         collisionHandler[PhysicsShape::CIRCLE][PhysicsShape::CIRCLE].bind<&PhysicsManager::collisionCircleCircle>(this);
         collisionHandler[PhysicsShape::CIRCLE][PhysicsShape::POLYGON].bind<&PhysicsManager::collisionCirclePolygon>(this);
+        collisionHandler[PhysicsShape::CIRCLE][PhysicsShape::BOX].bind<&PhysicsManager::collisionCirclePolygon>(this);
         collisionHandler[PhysicsShape::POLYGON][PhysicsShape::CIRCLE].bind<&PhysicsManager::collisionPolygonCircle>(this);
         collisionHandler[PhysicsShape::POLYGON][PhysicsShape::POLYGON].bind<&PhysicsManager::collisionPolygonPolygon>(this);
+        collisionHandler[PhysicsShape::POLYGON][PhysicsShape::BOX].bind<&PhysicsManager::collisionPolygonPolygon>(this);
+        collisionHandler[PhysicsShape::BOX][PhysicsShape::BOX].bind<&PhysicsManager::collisionPolygonPolygon>(this);
+        collisionHandler[PhysicsShape::BOX][PhysicsShape::POLYGON].bind<&PhysicsManager::collisionPolygonPolygon>(this);
+        collisionHandler[PhysicsShape::BOX][PhysicsShape::CIRCLE].bind<&PhysicsManager::collisionPolygonCircle>(this);
 
         collisionTable.insert(std::make_pair(0, 0));
     }
 
     void PhysicsManager::destroy() {
-        for(auto* _body : bodies) {
-            delete _body->shape;
-            delete _body;
-        }
+
     }
 
     void PhysicsManager::step(Delta _fxDt) {
@@ -38,7 +40,7 @@ namespace GDE {
 
                 PhysicsManifold _m(_a, _b );
 
-                if(collisionHandler[_a->shape->type][_b->shape->type](_m, _a, _b)) {
+                if(collisionHandler[_a->shape.type][_b->shape.type](_m, _a, _b)) {
                     // TODO: handle OnCollisionEnter, OnCollisionStay, OnCollisionExit
                 }
 
@@ -96,9 +98,8 @@ namespace GDE {
     void PhysicsManager::debugRender(RenderManager* _renderManager) {
         for(auto* _body : bodies) {
 
-            switch (_body->shape->type) {
+            switch (_body->shape.type) {
                 case PhysicsShape::Type::CIRCLE: {
-
                     const int _segments = 20;
                     float _theta = _body->transform->getRotationLocal();
                     float _inc = PI * 2.0f / (float)_segments;
@@ -107,7 +108,7 @@ namespace GDE {
                     for(auto& _point : _points) {
                         _theta += _inc;
                         Vec2F _p(std::cos(_theta), std::sin(_theta) );
-                        _p *= _body->shape->size.x;
+                        _p *= _body->shape.size.x;
                         _p += _body->transform->getPositionLocal();
                         _point = _p;
                     }
@@ -126,16 +127,17 @@ namespace GDE {
                     break;
                 }
 
+                case PhysicsShape::Type::BOX:
                 case PhysicsShape::Type::POLYGON: {
-                    auto* _polygon = _body->shape;
-                    for (auto _i = 0; _i < _polygon->vertices.size(); _i++) {
+                    auto& _polygon = _body->shape;
+                    for (auto _i = 0; _i < _polygon.vertices.size(); _i++) {
 
                         int _next = _i + 1;
-                        if(_next == _polygon->vertices.size())
+                        if(_next == _polygon.vertices.size())
                             _next = 0;
 
-                        Vec2F _p0 = _body->transform->getPositionLocal() + _polygon->getRotationMatrix() * _polygon->vertices[_i];
-                        Vec2F _p1 = _body->transform->getPositionLocal() + _polygon->getRotationMatrix() * _polygon->vertices[_next];
+                        Vec2F _p0 = _body->transform->getPositionLocal() + _polygon.getRotationMatrix() * _polygon.vertices[_i];
+                        Vec2F _p1 = _body->transform->getPositionLocal() + _polygon.getRotationMatrix() * _polygon.vertices[_next];
 
                         _renderManager->drawLine(_p0, _p1, Color::Blue);
                     }
@@ -148,23 +150,20 @@ namespace GDE {
         }
     }
 
-    PhysicsBody* PhysicsManager::add(PhysicsShape* _physicsShape, const Vec2F& _position) {
-        ENGINE_ASSERT(_physicsShape, "Cannot add a NULLPTR physics body to the simulation!!");
-        auto* _physicsBody = new PhysicsBody( _physicsShape, _position );
-        _physicsBody->transform->setPosition(_position);
+    void PhysicsManager::add(PhysicsBody* _physicsBody) {
+        ENGINE_ASSERT(_physicsBody, "Cannot add a NULLPTR physics body to the simulation!!");
         bodies.push_back(_physicsBody);
-        return _physicsBody;
     }
 
     bool PhysicsManager::collisionCircleCircle(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
-        auto* _a = _bodyA->shape;
-        auto* _b = _bodyB->shape;
+        auto& _a = _bodyA->shape;
+        auto& _b = _bodyB->shape;
 
         // Calculate translational vector, which is _normal
         Vec2F _normal = _bodyB->transform->getPositionLocal() - _bodyA->transform->getPositionLocal();
 
         float _distSqr = _normal.magnitudeSqr();
-        float _radius = _a->size.x + _b->size.x;
+        float _radius = _a.size.x + _b.size.x;
 
         // Not in contact
         if (_distSqr >= _radius * _radius) {
@@ -177,36 +176,36 @@ namespace GDE {
         _manifold.contactCount = 1;
 
         if (_distance == 0.0f) {
-            _manifold.penetration = _a->size.x;
+            _manifold.penetration = _a.size.x;
             _manifold.normal = GDE::Vec2F(1, 0);
             _manifold.contacts[0] = _bodyA->transform->getPositionLocal();
         } else {
             _manifold.penetration = _radius - _distance;
             _manifold.normal = _normal / _distance; // Faster than using Normalized since we already performed sqrt
-            _manifold.contacts[0] = _manifold.normal * _a->size.x + _bodyA->transform->getPositionLocal();
+            _manifold.contacts[0] = _manifold.normal * _a.size.x + _bodyA->transform->getPositionLocal();
         }
 
         return true;
     }
 
     bool PhysicsManager::collisionCirclePolygon(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
-        auto* _a = _bodyA->shape;
-        auto* _b = _bodyB->shape;
+        auto& _a = _bodyA->shape;
+        auto& _b = _bodyB->shape;
 
         _manifold.contactCount = 0;
 
         // Transform circle _center to Polygon model space
         Vec2F _center = _bodyA->transform->getPositionLocal();
-        _center = _b->getRotationMatrix().transpose() * (_center - _bodyB->transform->getPositionLocal());
+        _center = _b.getRotationMatrix().transpose() * (_center - _bodyB->transform->getPositionLocal());
 
         // Find edge with minimum penetration
         // Exact concept as using support points in Polygon vs Polygon
         float _separation = -FLT_MAX;
         auto _faceNormal = 0;
-        for (auto _i = 0; _i < _b->vertexCount; ++_i) {
-            float _s = _b->normals[_i].dotProduct(_center - _b->vertices[_i]);
+        for (auto _i = 0; _i < _b.vertexCount; ++_i) {
+            float _s = _b.normals[_i].dotProduct(_center - _b.vertices[_i]);
 
-            if (_s > _a->size.x)
+            if (_s > _a.size.x)
                 return false;
 
             if (_s > _separation) {
@@ -216,61 +215,61 @@ namespace GDE {
         }
 
         // Grab face's vertices
-        Vec2F _v1 = _b->vertices[_faceNormal];
-        auto _i2 = _faceNormal + 1 < _b->vertexCount ? _faceNormal + 1 : 0;
-        Vec2F _v2 = _b->vertices[_i2];
+        Vec2F _v1 = _b.vertices[_faceNormal];
+        auto _i2 = _faceNormal + 1 < _b.vertexCount ? _faceNormal + 1 : 0;
+        Vec2F _v2 = _b.vertices[_i2];
 
         // Check to see if _center is within polygon
         if (_separation < EPSILON) {
             _manifold.contactCount = 1;
-            _manifold.normal = -(_b->getRotationMatrix() * _b->normals[_faceNormal]);
-            _manifold.contacts[0] = _manifold.normal * _a->size.x + _bodyA->transform->getPositionLocal();
-            _manifold.penetration = _a->size.x;
+            _manifold.normal = -(_b.getRotationMatrix() * _b.normals[_faceNormal]);
+            _manifold.contacts[0] = _manifold.normal * _a.size.x + _bodyA->transform->getPositionLocal();
+            _manifold.penetration = _a.size.x;
             return false;
         }
 
         // Determine which voronoi region of the edge _center of circle lies within
         float _dot1 = (_center - _v1).dotProduct(_v2 - _v1);
         float _dot2 = (_center - _v2).dotProduct(_v1 - _v2);
-        _manifold.penetration = _a->size.x - _separation;
+        _manifold.penetration = _a.size.x - _separation;
 
         // Closest to _v1
         if (_dot1 <= 0.0f) {
-            if (_center.distanceSqr(_v1) > _a->size.x * _a->size.x)
+            if (_center.distanceSqr(_v1) > _a.size.x * _a.size.x)
                 return false;
 
             _manifold.contactCount = 1;
             Vec2F _n = _v1 - _center;
-            _n = _b->getRotationMatrix() * _n;
+            _n = _b.getRotationMatrix() * _n;
             _n.normalize();
             _manifold.normal = _n;
-            _v1 = _b->getRotationMatrix() * _v1 + _bodyB->transform->getPositionLocal();
+            _v1 = _b.getRotationMatrix() * _v1 + _bodyB->transform->getPositionLocal();
             _manifold.contacts[0] = _v1;
         }
 
             // Closest to _v2
         else if (_dot2 <= 0.0f) {
-            if (_center.distance(_v2) > _a->size.x * _a->size.x)
+            if (_center.distance(_v2) > _a.size.x * _a.size.x)
                 return false;
 
             _manifold.contactCount = 1;
             Vec2F _n = _v2 - _center;
-            _v2 = _b->getRotationMatrix() * _v2 + _bodyB->transform->getPositionLocal();
+            _v2 = _b.getRotationMatrix() * _v2 + _bodyB->transform->getPositionLocal();
             _manifold.contacts[0] = _v2;
-            _n = _b->getRotationMatrix() * _n;
+            _n = _b.getRotationMatrix() * _n;
             _n.normalize();
             _manifold.normal = _n;
         }
 
             // Closest to face
         else {
-            Vec2F _n = _b->normals[_faceNormal];
-            if ((_center - _v1).dotProduct(_n) > _a->size.x)
+            Vec2F _n = _b.normals[_faceNormal];
+            if ((_center - _v1).dotProduct(_n) > _a.size.x)
                 return false;
 
-            _n = _b->getRotationMatrix() * _n;
+            _n = _b.getRotationMatrix() * _n;
             _manifold.normal = -_n;
-            _manifold.contacts[0] = _manifold.normal * _a->size.x + _bodyA->transform->getPositionLocal();
+            _manifold.contacts[0] = _manifold.normal * _a.size.x + _bodyA->transform->getPositionLocal();
             _manifold.contactCount = 1;
         }
 
@@ -284,19 +283,19 @@ namespace GDE {
     }
 
     bool PhysicsManager::collisionPolygonPolygon(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
-        auto* _a = _bodyA->shape;
-        auto* _b = _bodyB->shape;
+        auto& _a = _bodyA->shape;
+        auto& _b = _bodyB->shape;
         _manifold.contactCount = 0;
 
         // Check for _bodyA separating axis with _a's face planes
         uint32_t _faceA;
-        float _penetrationA = findAxisWithLeastPenetration(&_faceA, _a, _b);
+        float _penetrationA = findAxisWithLeastPenetration(&_faceA, &_a, &_b);
         if (_penetrationA >= 0.0f)
             return false;
 
         // Check for _bodyA separating axis with _b's face planes
         uint32_t _faceB;
-        float _penetrationB = findAxisWithLeastPenetration(&_faceB, _b, _a);
+        float _penetrationB = findAxisWithLeastPenetration(&_faceB, &_b, &_a);
         if (_penetrationB >= 0.0f)
             return false;
 
@@ -308,13 +307,13 @@ namespace GDE {
 
         // Determine which shape contains reference face
         if (PhysicsMath::biasGreaterThan(_penetrationA, _penetrationB)) {
-            _refPoly = _a;
-            _incPoly = _b;
+            _refPoly = &_a;
+            _incPoly = &_b;
             _referenceIndex = _faceA;
             _flip = false;
         } else {
-            _refPoly = _b;
-            _incPoly = _a;
+            _refPoly = &_b;
+            _incPoly = &_a;
             _referenceIndex = _faceB;
             _flip = true;
         }

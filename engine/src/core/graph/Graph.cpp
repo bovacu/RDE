@@ -54,10 +54,6 @@ namespace GDE {
             _animationSystem.update(_dt, _spriteRenderer);
         });
 
-//        registry.view<Transform, Body, Active>(entt::exclude<StaticTransform>).each([](const auto _entity, Transform& _transform, Body& _body, const Active& _) {
-//            // TODO: implement with new custom physics engine
-//        });
-
         registry.group<ParticleSystem>(entt::get<Active>).each([&_dt](const auto _entity, ParticleSystem& _particleSystem, const Active& _) {
             _particleSystem.update(_dt);
         });

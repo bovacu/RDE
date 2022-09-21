@@ -35,7 +35,7 @@ namespace GDE {
             void destroy();
 
             void step(Delta _fxDt);
-            PhysicsBody* add(PhysicsShape* _physicsShape, const Vec2F& _position);
+            void add(PhysicsBody* _physicsBody);
             void debugRender(RenderManager* _renderManager);
 
             [[nodiscard]] CollisionTable getCollisionTable() const;
