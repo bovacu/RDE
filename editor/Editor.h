@@ -26,7 +26,6 @@ namespace Editor {
             void redirectRendering(FrameBuffer* _frameBuffer);
             void textStressTest();
             std::vector<NodeID> nodes;
-            std::vector<Transform*> transforms;
     };
 
 }

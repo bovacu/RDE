@@ -35,7 +35,6 @@ namespace Editor {
         auto _particleSystemNode = getMainGraph()->createNode("ParticleSystem");
 
         auto _colliderParentId = getMainGraph()->createNode("colliderParent");
-        transforms.push_back(getMainGraph()->getComponent<Transform>(_colliderParentId));
         colliderParent = _colliderParentId;
 
         {
@@ -53,7 +52,6 @@ namespace Editor {
             };
             auto* _floorBody = getMainGraph()->addComponent<PhysicsBody>(_floorId, _transform0, _floorBodyConfig);
             engine->manager.physics.add(_floorBody);
-            transforms.push_back(_transform0);
         }
 
         {
@@ -71,7 +69,6 @@ namespace Editor {
             };
             auto* _leftWallBody = getMainGraph()->addComponent<PhysicsBody>(_leftWallId, _transform1, _leftWallBodyConfig);
             engine->manager.physics.add(_leftWallBody);
-            transforms.push_back(_transform1);
         }
 
         {
@@ -138,9 +135,9 @@ namespace Editor {
                 vertices.emplace_back( _random.randomf( -e, e ), _random.randomf( -e, e ) );
 
             ShapeConfig _shapeConfig {
-                .type = PhysicsShape::BOX,
-                .size = { 32, 32 },
-//                .vertices = vertices,
+                .type = PhysicsShape::POLYGON,
+                .size = {  },
+                .vertices = vertices,
             };
 
             BodyConfig _bodyConfig {
@@ -150,7 +147,6 @@ namespace Editor {
 
             auto _polyId = getMainGraph()->createNode(APPEND_S("Poly", _counter), colliderParent);
             auto* _transform = getMainGraph()->getComponent<Transform>(_polyId);
-            transforms.push_back(_transform);
             _transform->setPosition(engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
             auto* _polyBody = getMainGraph()->addComponent<PhysicsBody>(_polyId, _transform, _bodyConfig);
             _polyBody->rotate(_random.randomf(-180, 180));
@@ -216,12 +212,6 @@ namespace Editor {
 
     void Editor::onDebugRender(Delta _dt) {
         Scene::onDebugRender(_dt);
-
-        for(auto* _transform : transforms) {
-            engine->manager.renderManager.drawSquare(_transform->getPositionLocal(), {8, 8}, Color::White, _transform->getRotationLocal());
-        }
-
-        engine->manager.renderManager.drawLine({64, 64}, {120, 180});
     }
 
 }

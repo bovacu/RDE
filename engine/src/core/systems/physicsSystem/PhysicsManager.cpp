@@ -95,11 +95,38 @@ namespace GDE {
         integrateForces(_physicsBody, _fxDt);
     }
 
+    void PhysicsManager::drawPolygon(PhysicsBody* _physicsBody, RenderManager* _renderManager, const Color& _lineColor, const Color& _radiusColor, bool _showLines, bool _showRadius) {
+        if(!_showLines) return;
+
+        auto& _polygon = _physicsBody->shape;
+        for (auto _i = 0; _i < _polygon.vertices.size(); _i++) {
+
+            int _next = _i + 1;
+            if(_next == _polygon.vertices.size())
+                _next = 0;
+
+            Vec2F _p0 = _physicsBody->transform->getPositionLocal() + _polygon.getRotationMatrix() * _polygon.vertices[_i];
+            Vec2F _p1 = _physicsBody->transform->getPositionLocal() + _polygon.getRotationMatrix() * _polygon.vertices[_next];
+
+            _renderManager->drawLine(_p0, _p1, _lineColor);
+        }
+
+        if(!_showRadius) return;
+
+        _renderManager->drawLine(_physicsBody->transform->getPositionLocal(),
+                                 _physicsBody->transform->getPositionLocal() + _polygon.getRotationMatrix() * _polygon.vertices[0],
+                                 _radiusColor);
+    }
+
     void PhysicsManager::debugRender(RenderManager* _renderManager) {
+        if(!debugOptions.showGeneralDebug) return;
+
         for(auto* _body : bodies) {
 
             switch (_body->shape.type) {
                 case PhysicsShape::Type::CIRCLE: {
+                    if(!debugOptions.showCircleLines) return;
+
                     const int _segments = 20;
                     float _theta = _body->transform->getRotationLocal();
                     float _inc = PI * 2.0f / (float)_segments;
@@ -121,27 +148,20 @@ namespace GDE {
                         Vec2F _p0 = _points[_i];
                         Vec2F _p1 =_points[_next];
 
-                        _renderManager->drawLine(_p0, _p1, Color::Blue);
+                        _renderManager->drawLine(_p0, _p1, debugOptions.circleLineColor);
                     }
+
+                    if(!debugOptions.showCircleRadius) return;
+                    _renderManager->drawLine(_body->transform->getPositionLocal(), _points[0], debugOptions.circleRadiusColor);
 
                     break;
                 }
 
                 case PhysicsShape::Type::BOX:
+                    drawPolygon(_body, _renderManager, debugOptions.boxLineColor, debugOptions.boxRadiusColor, debugOptions.showBoxLines, debugOptions.showBoxRadius);
+                    break;
                 case PhysicsShape::Type::POLYGON: {
-                    auto& _polygon = _body->shape;
-                    for (auto _i = 0; _i < _polygon.vertices.size(); _i++) {
-
-                        int _next = _i + 1;
-                        if(_next == _polygon.vertices.size())
-                            _next = 0;
-
-                        Vec2F _p0 = _body->transform->getPositionLocal() + _polygon.getRotationMatrix() * _polygon.vertices[_i];
-                        Vec2F _p1 = _body->transform->getPositionLocal() + _polygon.getRotationMatrix() * _polygon.vertices[_next];
-
-                        _renderManager->drawLine(_p0, _p1, Color::Blue);
-                    }
-
+                    drawPolygon(_body, _renderManager, debugOptions.polygonLineColor, debugOptions.polygonRadiusColor, debugOptions.showPolygonLines, debugOptions.showPolygonRadius);
                     break;
                 }
                 default:
@@ -524,4 +544,6 @@ namespace GDE {
         auto _inverseIt = collisionTable.find(_inverseToCheck);
         return _it != collisionTable.end() || _inverseIt != collisionTable.end();
     }
+
+
 }

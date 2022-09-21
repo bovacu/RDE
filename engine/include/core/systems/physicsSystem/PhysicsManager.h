@@ -17,6 +17,22 @@ namespace GDE {
     typedef std::pair<ulong, ulong> CollisionMaskPair;
     typedef std::set<CollisionMaskPair> CollisionTable;
 
+    struct DebugOptions {
+        bool showGeneralDebug = true;
+        bool showCircleLines = true;
+        bool showBoxLines = true;
+        bool showPolygonLines = true;
+        bool showCircleRadius = true;
+        bool showPolygonRadius = true;
+        bool showBoxRadius = true;
+        Color circleLineColor = Color::Blue;
+        Color boxLineColor = Color::Blue;
+        Color polygonLineColor = Color::Blue;
+        Color circleRadiusColor = Color::Yellow;
+        Color boxRadiusColor = Color::Yellow;
+        Color polygonRadiusColor = Color::Yellow;
+    };
+
     class PhysicsManager {
 
         private:
@@ -29,6 +45,7 @@ namespace GDE {
             uint32_t steps = 10;
             Vec2F gravity = {0.f, -50.f};
             bool simulate = true;
+            DebugOptions debugOptions;
 
         public:
             void init();
@@ -53,6 +70,7 @@ namespace GDE {
             float findAxisWithLeastPenetration(uint32_t* _faceIndex, PhysicsShape* _shapeA, PhysicsShape* _shapeB);
             void findIncidentFace(Vec2F* _vec, PhysicsShape* _refPoly, PhysicsShape* _incPoly, uint32_t _referenceIndex);
             int clip(Vec2F _n, float _c, Vec2F* _face);
+            void drawPolygon(PhysicsBody* _physicsBody, RenderManager* _renderManager, const Color& _lineColor, const Color& _radiusColor, bool _showLines, bool _showRadius);
     };
 }
 
