@@ -102,9 +102,31 @@ namespace GDE {
             }
         }
 
+        auto _mostNegativeX = FLT_MAX;
+        auto _mostNegativeY = FLT_MAX;
+        auto _mostPositiveX = FLT_MIN;
+        auto _mostPositiveY = FLT_MIN;
         // Copy vertices into shape's vertices
-        for(auto _i = 0; _i < vertexCount; ++_i)
+        for(auto _i = 0; _i < vertexCount; ++_i) {
             vertices.push_back(_vertices[_hull[_i]]);
+            if (_vertices[_hull[_i]].x < _mostNegativeX) {
+                _mostNegativeX = _vertices[_hull[_i]].x;
+            }
+
+            if (_vertices[_hull[_i]].x > _mostPositiveX) {
+                _mostPositiveX = _vertices[_hull[_i]].x;
+            }
+
+            if (_vertices[_hull[_i]].x < _mostNegativeY) {
+                _mostNegativeY = _vertices[_hull[_i]].y;
+            }
+
+            if (_vertices[_hull[_i]].x < _mostPositiveY) {
+                _mostPositiveY = _vertices[_hull[_i]].y;
+            }
+        }
+
+        size = { std::abs(_mostNegativeX - _mostPositiveX), std::abs(_mostPositiveY - _mostPositiveY) };
 
         // Compute face normals
         normals.reserve(vertexCount);
