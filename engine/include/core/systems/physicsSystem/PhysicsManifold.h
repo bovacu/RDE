@@ -6,9 +6,29 @@
 #define GDE_PHYSICS_MANIFOLD_H
 
 
-#include "PhysicsBody.h"
+#include "core/systems/physicsSystem/PhysicsBody.h"
 
 namespace GDE {
+
+    struct CollisionState {
+
+        enum State {
+            NONE,
+            COLLISION_ENTER,
+            COLLISION_STAY,
+            COLLISION_EXIT
+        };
+
+        PhysicsBody* A;
+        PhysicsBody* B;
+        State state = State::NONE;
+    };
+
+    struct PhysicsCollisionCallbacks {
+        UDelegate<void(PhysicsBody* bodyA, PhysicsBody* bodyB)> onCollisionEnter;
+        UDelegate<void(PhysicsBody* bodyA, PhysicsBody* bodyB)> onCollisionStay;
+        UDelegate<void(PhysicsBody* bodyA, PhysicsBody* bodyB)> onCollisionExit;
+    };
 
     struct PhysicsManifold {
         PhysicsManifold( PhysicsBody *a, PhysicsBody *b ) : A( a ) , B( b ) {  }

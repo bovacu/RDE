@@ -14,9 +14,6 @@ namespace GDE {
 
     class RenderManager;
 
-    typedef std::pair<ulong, ulong> CollisionMaskPair;
-    typedef std::set<CollisionMaskPair> CollisionTable;
-
     struct DebugOptions {
         bool showGeneralDebug = true;
         bool showCircleLines = true;
@@ -33,13 +30,21 @@ namespace GDE {
         Color polygonRadiusColor = Color::Yellow;
     };
 
+    typedef UDelegate<bool (PhysicsManifold& manifold, PhysicsBody* bodyA, PhysicsBody* bodyB)> SolveFn;
+    typedef std::vector<CollisionState> CollisionStates;
+
+    #ifndef MAX_MASKS
+    #define MAX_MASKS 128
+    #endif
+
     class PhysicsManager {
 
         private:
             std::vector<PhysicsBody*> bodies;
             std::vector<PhysicsManifold> contacts;
-            UDelegate<bool (PhysicsManifold& manifold, PhysicsBody* bodyA, PhysicsBody* bodyB)> collisionHandler[PhysicsShape::MAX][PhysicsShape::MAX];
-            CollisionTable collisionTable;
+            SolveFn collisionHandler[PhysicsShape::MAX][PhysicsShape::MAX];
+            PhysicsCollisionCallbacks* collisionTable[MAX_MASKS * 2][MAX_MASKS * 2];
+            CollisionStates collisionStates;
 
         public:
             uint32_t steps = 10;
@@ -55,8 +60,7 @@ namespace GDE {
             void add(PhysicsBody* _physicsBody);
             void debugRender(RenderManager* _renderManager);
 
-            [[nodiscard]] CollisionTable getCollisionTable() const;
-            bool addCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB);
+            PhysicsCollisionCallbacks* addOrGetCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB);
             bool removeCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB);
             bool hasCollisionInTable(ulong _bodyMaskA, ulong _bodyMaskB);
 

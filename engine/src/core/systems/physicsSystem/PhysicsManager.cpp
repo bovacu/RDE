@@ -7,6 +7,10 @@
 
 namespace GDE {
 
+    void fooCollisionEnter(PhysicsBody* _bodyA, PhysicsBody* _bodyB) {  }
+    void fooCollisionStay(PhysicsBody* _bodyA, PhysicsBody* _bodyB) {  }
+    void fooCollisionExit(PhysicsBody* _bodyA, PhysicsBody* _bodyB) {  }
+
     void PhysicsManager::init() {
         collisionHandler[PhysicsShape::CIRCLE][PhysicsShape::CIRCLE].bind<&PhysicsManager::collisionCircleCircle>(this);
         collisionHandler[PhysicsShape::CIRCLE][PhysicsShape::POLYGON].bind<&PhysicsManager::collisionCirclePolygon>(this);
@@ -18,11 +22,18 @@ namespace GDE {
         collisionHandler[PhysicsShape::BOX][PhysicsShape::POLYGON].bind<&PhysicsManager::collisionPolygonPolygon>(this);
         collisionHandler[PhysicsShape::BOX][PhysicsShape::CIRCLE].bind<&PhysicsManager::collisionPolygonCircle>(this);
 
-        collisionTable.insert(std::make_pair(0, 0));
+        auto* _callbacks = addOrGetCollisionToTable(0, 0);
+        _callbacks->onCollisionEnter.bind<&fooCollisionEnter>();
+        _callbacks->onCollisionStay.bind<&fooCollisionStay>();
+        _callbacks->onCollisionStay.bind<&fooCollisionExit>();
     }
 
     void PhysicsManager::destroy() {
-
+        for(auto _i = 0; _i < MAX_MASKS * 2; _i++) {
+            for(auto _j = 0; _j < MAX_MASKS * 2; _j++) {
+                delete collisionTable[_i][_j];
+            }
+        }
     }
 
     void PhysicsManager::step(Delta _fxDt) {
@@ -40,8 +51,35 @@ namespace GDE {
 
                 PhysicsManifold _m(_a, _b );
 
+                auto _it = std::find_if(collisionStates.begin(), collisionStates.end(), [_a, _b](CollisionState& _cs) {
+                    return _cs.A == _a && _cs.B == _b;
+                });
+
                 if(collisionHandler[_a->shape.type][_b->shape.type](_m, _a, _b)) {
-                    // TODO: handle OnCollisionEnter, OnCollisionStay, OnCollisionExit
+
+                    if(_it == collisionStates.end()) {
+                        collisionStates.emplace_back(CollisionState { _a, _b });
+                        _it = collisionStates.end() - 1;
+                    }
+
+                    auto* _physicsCollisionCallback = collisionTable[_a->collisionMask][_b->collisionMask];
+                    if(_physicsCollisionCallback != nullptr) {
+                        if(_it->state == CollisionState::NONE && _physicsCollisionCallback->onCollisionEnter != nullptr) {
+                            _physicsCollisionCallback->onCollisionEnter(_a, _b);
+                            _it->state = CollisionState::COLLISION_ENTER;
+                        } else if(_it->state == CollisionState::COLLISION_ENTER && _physicsCollisionCallback->onCollisionStay != nullptr) {
+                            _physicsCollisionCallback->onCollisionStay(_a, _b);
+                            _it->state = CollisionState::COLLISION_STAY;
+                        }
+                    }
+
+                } else {
+                    auto* _physicsCollisionCallback = collisionTable[_a->collisionMask][_b->collisionMask];
+                    if(_it != collisionStates.end() && _physicsCollisionCallback != nullptr) {
+                        if(_physicsCollisionCallback->onCollisionExit != nullptr) _physicsCollisionCallback->onCollisionExit(_a, _b);
+                        _it->state = CollisionState::COLLISION_EXIT;
+                        collisionStates.erase(_it);
+                    }
                 }
 
                 if(_m.contactCount)
@@ -171,7 +209,6 @@ namespace GDE {
     }
 
     void PhysicsManager::add(PhysicsBody* _physicsBody) {
-        ENGINE_ASSERT(_physicsBody, "Cannot add a NULLPTR physics body to the simulation!!");
         bodies.push_back(_physicsBody);
     }
 
@@ -504,47 +541,44 @@ namespace GDE {
         return _sp;
     }
 
-    CollisionTable PhysicsManager::getCollisionTable() const {
-        return collisionTable;
+    PhysicsCollisionCallbacks* PhysicsManager::addOrGetCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB) {
+        ENGINE_ASSERT(_bodyMaskA >= 0 && _bodyMaskA < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
+        ENGINE_ASSERT(_bodyMaskB >= 0 && _bodyMaskB < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
+
+        if(collisionTable[_bodyMaskA][_bodyMaskB] == nullptr && collisionTable[_bodyMaskA][_bodyMaskB] == nullptr) {
+            collisionTable[_bodyMaskA][_bodyMaskB] = new PhysicsCollisionCallbacks;
+            collisionTable[_bodyMaskB][_bodyMaskA] = collisionTable[_bodyMaskA][_bodyMaskB];
+        }
+
+        return collisionTable[_bodyMaskA][_bodyMaskB];
     }
 
-    bool PhysicsManager::addCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB) {
-        auto _newPair = std::make_pair(_bodyMaskA, _bodyMaskB);
-        auto _inverseNewPair = std::make_pair(_bodyMaskB, _bodyMaskA);
-        auto _it = collisionTable.find(_newPair);
-        auto _inverseIt = collisionTable.find(_inverseNewPair);
+    bool PhysicsManager::removeCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB) {
+        ENGINE_ASSERT(_bodyMaskA >= 0 && _bodyMaskA < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
+        ENGINE_ASSERT(_bodyMaskB >= 0 && _bodyMaskB < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
 
-        if(_it == collisionTable.end() && _inverseIt == collisionTable.end()) {
-            collisionTable.insert(_newPair);
+        if(collisionTable[_bodyMaskA][_bodyMaskB] != nullptr) {
+            delete collisionTable[_bodyMaskA][_bodyMaskB];
+            collisionTable[_bodyMaskA][_bodyMaskB] = nullptr;
+            collisionTable[_bodyMaskB][_bodyMaskA] = nullptr;
+            return true;
+        }
+
+        if(collisionTable[_bodyMaskB][_bodyMaskA] != nullptr) {
+            delete collisionTable[_bodyMaskB][_bodyMaskA];
+            collisionTable[_bodyMaskB][_bodyMaskA] = nullptr;
+            collisionTable[_bodyMaskA][_bodyMaskB] = nullptr;
             return true;
         }
 
         return false;
     }
 
-    bool PhysicsManager::removeCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB) {
-        auto _toRemove = std::make_pair(_bodyMaskA, _bodyMaskB);
-        auto _inverseToRemove = std::make_pair(_bodyMaskB, _bodyMaskA);
-        auto _it = collisionTable.find(_toRemove);
-        auto _inverseIt = collisionTable.find(_inverseToRemove);
-
-        if(_it != collisionTable.end()) {
-            collisionTable.erase(_it);
-        }
-
-        if(_inverseIt != collisionTable.end()) {
-            collisionTable.erase(_inverseIt);
-        }
-
-        return _inverseIt != collisionTable.end() || _it != collisionTable.end();
-    }
-
     bool PhysicsManager::hasCollisionInTable(ulong _bodyMaskA, ulong _bodyMaskB) {
-        auto _toCheck = std::make_pair(_bodyMaskA, _bodyMaskB);
-        auto _inverseToCheck = std::make_pair(_bodyMaskB, _bodyMaskA);
-        auto _it = collisionTable.find(_toCheck);
-        auto _inverseIt = collisionTable.find(_inverseToCheck);
-        return _it != collisionTable.end() || _inverseIt != collisionTable.end();
+        ENGINE_ASSERT(_bodyMaskA >= 0 && _bodyMaskA < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
+        ENGINE_ASSERT(_bodyMaskB >= 0 && _bodyMaskB < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
+
+        return collisionTable[_bodyMaskA][_bodyMaskB] != nullptr;
     }
 
 
