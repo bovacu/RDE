@@ -104,15 +104,15 @@ namespace GDE {
         }
     }
 
-    Vec2F Transform::getModelMatrixPosition() {
+    Vec2F Transform::getModelMatrixPosition() const {
         return { modelMatrix[3][0], modelMatrix[3][1] };
     }
 
-    Vec2F Transform::getModelMatrixScale() {
+    Vec2F Transform::getModelMatrixScale() const {
         return { modelMatrix[0][0], modelMatrix[1][1] };
     }
 
-    float Transform::getModelMatrixRotation() {
+    float Transform::getModelMatrixRotation() const {
         return radiansToDegrees(std::atan2(modelMatrix[0][1], modelMatrix[0][0]));
     }
 }

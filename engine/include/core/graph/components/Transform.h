@@ -180,9 +180,9 @@ namespace GDE {
              */
             void scale(float _x, float _y);
 
-            Vec2F getModelMatrixPosition();
-            Vec2F getModelMatrixScale();
-            float getModelMatrixRotation();
+            Vec2F getModelMatrixPosition() const;
+            Vec2F getModelMatrixScale() const;
+            float getModelMatrixRotation() const;
     };
 
 }
