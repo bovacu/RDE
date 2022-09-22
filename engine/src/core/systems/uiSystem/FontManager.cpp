@@ -58,20 +58,11 @@ namespace GDE {
             }
 
             texture.loadTextSubTextures({_ox, _oy}, {(int)g->bitmap.width, (int)g->bitmap.rows}, g->bitmap.buffer);
-            characters[_i].advance.x = (float)(g->advance.x >> 6);
-            characters[_i].advance.y = (float)(g->advance.y >> 6);
-
-            characters[_i].bitmapSize.x = (float)g->bitmap.width;
-            characters[_i].bitmapSize.y = (float)g->bitmap.rows;
-
-            characters[_i].bitmapPos.x = (float)g->bitmap_left;
-            characters[_i].bitmapPos.y = (float)g->bitmap_top;
-
-            characters[_i].offset.x = (float)_ox / (float)width;
-            characters[_i].offset.y = (float)_oy / (float)height;
-
-            characters[_i].bearing.x = (float)(g->metrics.width - g->metrics.horiBearingX);
-            characters[_i].bearing.y = (float)(g->metrics.height - g->metrics.horiBearingY);
+            characters[_i].advance.x = (int)g->advance.x >> 6;
+            characters[_i].advance.y = (int)g->advance.y >> 6;
+            characters[_i].size      = { static_cast<int>(face->glyph->bitmap.width), static_cast<int>(face->glyph->bitmap.rows) };
+            characters[_i].bearing   = { face->glyph->bitmap_left, face->glyph->bitmap_top };
+            characters[_i].offset    = { (float)_ox / (float)width, (float)_oy / (float)height };
 
             _rowHeight = _rowHeight > g->bitmap.rows ? (int)_rowHeight : (int)g->bitmap.rows;
             _ox += (int)g->bitmap.width + 1;

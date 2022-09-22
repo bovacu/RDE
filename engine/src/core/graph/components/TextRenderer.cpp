@@ -51,17 +51,12 @@ namespace GDE {
         for(auto _c : _text) {
             auto _char = font->getChars()[_c];
 
-            if(_c == ' ') {
-                size.x += _char.advance.x / 2.f;
-                continue;
-            }
-
             if(_c == '\n') {
                 continue;
             }
 
-            size.x += _char.advance.x / 2.f;
-            size.y = std::max(size.y, _char.bitmapSize.y - _char.bearing.y);
+            size.x += (float)_char.advance.x / 2.f;
+            size.y = std::max(size.y, (float)_char.advance.y);
         }
 
         size.x *= transform->getScale().x;
@@ -107,57 +102,48 @@ namespace GDE {
         auto* _atlas = font;
         auto _atlasSize = _atlas->getSize();
 
-        float _x = _transform.getPosition().x - size.x / 2.f;
-        float _y = _transform.getPosition().y - size.y / 4.f;
+        float _x = 0;
+        float _y = _transform.getModelMatrixPosition().y;
 
         auto* _chars = _atlas->getChars();
 
         for(char _char : innerText) {
             auto _vertexCount = _vertices.size();
-            float x2 = _x + _chars[_char].bitmapPos.x * 1;
-            float y2 = -_y - _chars[_char].bitmapPos.y * 1;
-            float w = _chars[_char].bitmapSize.x * 1;
-            float h = _chars[_char].bitmapSize.y * 1;
+            float xpos = _x + (float)_chars[_char].bearing.x * _transform.getModelMatrixScale().x;
+            float ypos = -(float)_chars[_char].bearing.y * _transform.getModelMatrixScale().x;
 
-            if(_char == '\n') {
-                _y -= _chars[innerText[0]].bitmapSize.y * 0.8f;
-                _x = _transform.getPosition().x - size.x / 2.f;
-                continue;
-            }
-
-            if (w == 0 || h == 0) {
-                _x += _chars[_char].advance.x / 2.f;
-                continue;
-            }
+            float w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
+            float h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;
 
             auto _transformMat = _transform.modelMatrix;
-            auto _screenPos = Util::worldToScreenCoords(_viewport, {_transform.modelMatrix[3][0], _transform.modelMatrix[3][1]});
+            auto _screenPos = Util::worldToScreenCoords(_viewport, { _transform.modelMatrix[3][0], _transform.modelMatrix[3][1] });
             _transformMat[3][0] = _screenPos.x;
             _transformMat[3][1] = _screenPos.y;
 
             auto _textColor = color;
             glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
 
-            auto _positionInScreen = Util::worldToScreenSize(_viewport, {x2 + _x, y2 + _y});
+            auto _positionInScreen = Util::worldToScreenSize(_viewport, {xpos, ypos});
             auto _sizeInScreen = Util::worldToScreenSize(_viewport, {w, h});
 
-            glm::vec4 _bottomLeftTextureCorner = { _positionInScreen.x, -_positionInScreen.y, 0.0f, 1.0f };
-            glm::vec4 _bottomRightTextureCorner = {_positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y, 0.0f, 1.0f };
-            glm::vec4 _topLeftTextureCorner = {_positionInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
-            glm::vec4 _topRightTextureCorner = {_positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
+            glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
+            glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };
+            glm::vec4 _topLeftTextureCorner     = { _positionInScreen.x                  , -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
+            glm::vec4 _topRightTextureCorner    = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
 
-            glm::vec2 _bottomLeftTextureCoord = {_chars[_char].offset.x, _chars[_char].offset.y};
-            glm::vec2 _bottomRightTextureCoord = {_chars[_char].offset.x + _chars[_char].bitmapSize.x / _atlasSize.x, _chars[_char].offset.y};
-            glm::vec2 _topLeftTextureCoord = {_chars[_char].offset.x, _chars[_char].offset.y + _chars[_char].bitmapSize.y / _atlasSize.y};
-            glm::vec2 _topRightTextureCoord = {_chars[_char].offset.x + _chars[_char].bitmapSize.x / _atlasSize.x,_chars[_char].offset.y + _chars[_char].bitmapSize.y / _atlasSize.y};
+            Vec2F _normSize = { (float)_chars[_char].size.x / _atlasSize.x, (float)_chars[_char].size.y / _atlasSize.y };
 
-            _vertices.emplace_back(OpenGLVertex {_transformMat * _bottomLeftTextureCorner, _bottomLeftTextureCoord, _color });
-            _vertices.emplace_back(OpenGLVertex {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord, _color });
-            _vertices.emplace_back(OpenGLVertex {_transformMat * _topRightTextureCorner, _topRightTextureCoord, _color });
-            _vertices.emplace_back(OpenGLVertex {_transformMat * _topLeftTextureCorner, _topLeftTextureCoord, _color });
+            glm::vec2 _bottomLeftTextureCoord   = { _chars[_char].offset.x              , _chars[_char].offset.y               };
+            glm::vec2 _bottomRightTextureCoord  = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y               };
+            glm::vec2 _topLeftTextureCoord      = { _chars[_char].offset.x              , _chars[_char].offset.y + _normSize.y };
+            glm::vec2 _topRightTextureCoord     = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y + _normSize.y };
 
-            _x += _chars[_char].advance.x / 2.f;
-            _y += _chars[_char].advance.y;
+            _vertices.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _color });
+            _vertices.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _color });
+            _vertices.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _color });
+            _vertices.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _color });
+
+            _x += (float)_chars[_char].advance.x * _transform.getModelMatrixScale().x;
 
             _indices.emplace_back(_vertexCount + 0);
             _indices.emplace_back(_vertexCount + 1);

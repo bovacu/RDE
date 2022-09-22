@@ -18,11 +18,10 @@ namespace GDE {
      * @brief This struct retains the information of each character.
      */
     struct CharInfo {
-        Vec2F advance;
-        Vec2F bitmapSize;
-        Vec2F bitmapPos;
-        Vec2F offset;
-        Vec2F bearing;
+        Vec2I  size;
+        Vec2I  bearing;
+        Vec2I  advance;
+        Vec2F  offset;
     };
 
     class FontManager;

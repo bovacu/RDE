@@ -25,7 +25,15 @@ namespace Editor {
         private:
             void redirectRendering(FrameBuffer* _frameBuffer);
             void textStressTest();
+            void physicsTest();
+            void particleSystemTest();
             std::vector<NodeID> nodes;
+
+
+            bool uiButtonTrigger(NodeID _nodeId, Canvas* _canvas);
+            void onMouseClick(MouseCode _mouseCode);
+            void onMouseEntered();
+            void onMouseExited();
     };
 
 }
