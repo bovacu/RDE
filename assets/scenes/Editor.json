@@ -129,12 +129,12 @@
             "components" : {
                 "active" : {},
                 "transform" : {
-                    "position" : [64, 64],
+                    "position" : [0, 0],
                     "scale" : [1, 1],
                     "rotation" : 0
                 },
                 "text_renderer" : {
-                    "text" : "Hello World!!",
+                    "text" : "Hello world! \nHello world 2! \nSello world 3! \nWello world 4!",
                     "font" : "arial",
                     "sizeSize" : 54,
                     "color" : [0, 255, 0, 255],
