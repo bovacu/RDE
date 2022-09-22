@@ -80,15 +80,6 @@ namespace GDE {
         return fontSize;
     }
 
-    void TextRenderer::setSpaceWidth(float _spaceWidth) {
-        spaceWidth = _spaceWidth;
-        recalcTextDimensions(innerText);
-    }
-
-    float TextRenderer::getSpaceWidth() const {
-        return spaceWidth;
-    }
-
     float TextRenderer::getSpacesBetweenChars() const {
         return spaceBetweenChars;
     }
@@ -103,14 +94,23 @@ namespace GDE {
         auto _atlasSize = _atlas->getSize();
 
         float _x = 0;
-        float _y = _transform.getModelMatrixPosition().y;
+        float _y = 0;
+        float _biggestAdvanceY = 0;
 
         auto* _chars = _atlas->getChars();
 
         for(char _char : innerText) {
             auto _vertexCount = _vertices.size();
-            float xpos = _x + (float)_chars[_char].bearing.x * _transform.getModelMatrixScale().x;
-            float ypos = -(float)_chars[_char].bearing.y * _transform.getModelMatrixScale().x;
+            _biggestAdvanceY = std::max(_biggestAdvanceY, (float)(_chars[_char].advance.y - _chars[_char].bearing.y) + newLineSize);
+
+            if(_char == '\n') {
+                _y += _biggestAdvanceY;
+                _x = 0;
+                continue;
+            }
+
+            float xpos = (_x + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
+            float ypos = _y - (float)_chars[_char].bearing.y * _transform.getModelMatrixScale().x;
 
             float w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
             float h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;

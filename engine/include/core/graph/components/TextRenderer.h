@@ -42,17 +42,12 @@ namespace GDE {
         /**
          * @brief Amount of space between each character.
          */
-        float spaceBetweenChars {};
-
-        /**
-         * @brief Size of the space character.
-         */
-        float spaceWidth {};
+        float spaceBetweenChars = 0.f;
 
         /**
          * @brief Height of the enter character.
          */
-        float enterHeight {};
+        float newLineSize = 5.f;
 
         /**
          * @brief Size of the font.
@@ -118,18 +113,6 @@ namespace GDE {
          * @return int
          */
         [[nodiscard]] int getFontSize() const;
-
-        /**
-         * @brief Sets the space character width.
-         * @param _spaceWidth Space character width.
-         */
-        void setSpaceWidth(float _spaceWidth);
-
-        /**
-         * @brief Get the space character width.
-         * @return float
-         */
-        [[nodiscard]] float getSpaceWidth() const;
 
         /**
          * @brief Gets the space between characters.

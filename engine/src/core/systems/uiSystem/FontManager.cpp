@@ -59,10 +59,10 @@ namespace GDE {
 
             texture.loadTextSubTextures({_ox, _oy}, {(int)g->bitmap.width, (int)g->bitmap.rows}, g->bitmap.buffer);
             characters[_i].advance.x = (int)g->advance.x >> 6;
-            characters[_i].advance.y = (int)g->advance.y >> 6;
             characters[_i].size      = { static_cast<int>(face->glyph->bitmap.width), static_cast<int>(face->glyph->bitmap.rows) };
             characters[_i].bearing   = { face->glyph->bitmap_left, face->glyph->bitmap_top };
             characters[_i].offset    = { (float)_ox / (float)width, (float)_oy / (float)height };
+            characters[_i].advance.y = characters[_i].size.y + characters[_i].bearing.y;
 
             _rowHeight = _rowHeight > g->bitmap.rows ? (int)_rowHeight : (int)g->bitmap.rows;
             _ox += (int)g->bitmap.width + 1;
