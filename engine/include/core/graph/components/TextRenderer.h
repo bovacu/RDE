@@ -24,128 +24,134 @@ namespace GDE {
         friend class SpriteBatch;
 
         private:
-        /**
-         * @brief The font used to render the text.
-         */
-        Font* font;
+            /**
+             * @brief The font used to render the text.
+             */
+            Font* font;
 
-        /**
-         * @brief Rendered text.
-         */
-        std::string innerText;
+            /**
+             * @brief Rendered text.
+             */
+            std::string innerText;
 
-        /**
-         * @brief Size of the whole text as a rectangle.
-         */
-        Vec2F size {};
+            /**
+             * @brief Size of the whole text as a rectangle.
+             */
+            Vec2F size {};
 
-        /**
-         * @brief Amount of space between each character.
-         */
-        float spaceBetweenChars = 0.f;
+            /**
+             * @brief Amount of space between each character.
+             */
+            float spaceBetweenChars = 0.f;
 
-        /**
-         * @brief Height of the enter character.
-         */
-        float newLineSize = 5.f;
+            /**
+             * @brief Height of the enter character.
+             */
+            float newLineSize = 5.f;
 
-        /**
-         * @brief Size of the font.
-         */
-        int fontSize {};
+            /**
+             * @brief Size of the font.
+             */
+            int fontSize {};
 
-        /**
-         * @brief The texture of the generated font.
-         */
-        Texture* texture = nullptr;
+            /**
+             * @brief The texture of the generated font.
+             */
+            Texture* texture = nullptr;
 
+            /**
+             * @brief The origin of the text, by default it is (0, 0) which is bottom-left corner.
+             *        Values are normalize to the size of the text, so (0.5, 0.5) is to center the text to the transform
+             *        position.
+             */
+             Vec2F pivot = { 0.5f, 0.5f };
 
         private:
-        /**
-         * @brief Recalculates the dimensions of the new text as a rectangle.
-         * @param _text the inner text.
-         */
-        void recalcTextDimensions(const std::string& _text);
+            /**
+             * @brief Recalculates the dimensions of the new text as a rectangle.
+             * @param _text the inner text.
+             */
+            void recalcTextDimensions(const std::string& _text);
 
         public:
-        TextRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Font* _font, const std::string& _text);
-        TextRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Font* _font);
-        ~TextRenderer() override {  }
+            TextRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Font* _font, const std::string& _text);
+            TextRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Font* _font);
+            ~TextRenderer() override {  }
 
-        /**
-         * @brief Sets the text to be rendered.
-         * @param _text The text to render.
-         */
-        void setText(const std::string& _text);
+            /**
+             * @brief Sets the text to be rendered.
+             * @param _text The text to render.
+             */
+            void setText(const std::string& _text);
 
-        /**
-         * @brief Sets the font.
-         * @param _font The font.
-         */
-        void setFont(Font* _font);
+            /**
+             * @brief Sets the font.
+             * @param _font The font.
+             */
+            void setFont(Font* _font);
 
-        /**
-         * @brief Get sthe font.
-         * @return Font*
-         */
-        [[nodiscard]] Font* getFont() const;
+            /**
+             * @brief Get sthe font.
+             * @return Font*
+             */
+            [[nodiscard]] Font* getFont() const;
 
-        /**
-         * @brief Gets the rendered text
-         * @return const std::string&
-         */
-        [[nodiscard]] const std::string& getText() const;
+            /**
+             * @brief Gets the rendered text
+             * @return const std::string&
+             */
+            [[nodiscard]] const std::string& getText() const;
 
-        /**
-         * @brief Gets the dimensions of the rendered text as a rectangle.
-         * @return Vec2F
-         */
-        [[nodiscard]] Vec2F getTextSize() const;
+            /**
+             * @brief Gets the dimensions of the rendered text as a rectangle.
+             * @return Vec2F
+             */
+            [[nodiscard]] Vec2F getTextSize() const;
 
-        /**
-         * @brief Sets the font size.
-         * @param _fontSize Size of the font.
-         */
-        void setFontSize(int _fontSize);
+            /**
+             * @brief Sets the font size.
+             * @param _fontSize Size of the font.
+             */
+            void setFontSize(int _fontSize);
 
-        /**
-         * @brief Gets the font size.
-         * @return int
-         */
-        [[nodiscard]] int getFontSize() const;
+            /**
+             * @brief Gets the font size.
+             * @return int
+             */
+            [[nodiscard]] int getFontSize() const;
 
-        /**
-         * @brief Gets the space between characters.
-         * @return float
-         */
-        [[nodiscard]] float getSpacesBetweenChars() const;
+            /**
+             * @brief Gets the space between characters.
+             * @return float
+             */
+            [[nodiscard]] float getSpacesBetweenChars() const;
 
-        /**
-         * @brief Sets the spaces between characters.
-         * @param _spaceBetweenChars Space between characters.
-         */
-        void setSpacesBetweenChars(float _spaceBetweenChars);
+            /**
+             * @brief Sets the spaces between characters.
+             * @param _spaceBetweenChars Space between characters.
+             */
+            void setSpacesBetweenChars(float _spaceBetweenChars);
 
-        /**
-         * @see IRenderizable
-         */
-        [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
+            /**
+             * @see IRenderizable
+             */
+            [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
 
-        /**
-         * @see IRenderizable
-         */
-        [[nodiscard]] Vec2F getSize() const override { return {(float)texture->getSize().x * transform->getScale().x, (float)texture->getSize().y *
-                                                                                                                      transform->getScale().y}; }
+            /**
+             * @see IRenderizable
+             */
+            [[nodiscard]] Vec2F getSize() const override { return {(float)texture->getSize().x * transform->getScale().x, (float)texture->getSize().y *
+                                                                                                                          transform->getScale().y}; }
 
-        /**
-         * @see IRenderizable
-         */
-        [[nodiscard]] FloatRect getRegion() const override { return texture->getRegion(); }
+            /**
+             * @see IRenderizable
+             */
+            [[nodiscard]] FloatRect getRegion() const override { return texture->getRegion(); }
 
-        /**
-         * @see IRenderizable
-         */
-        void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const override;
+            /**
+             * @see IRenderizable
+             */
+            void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const override;
     };
 
 }

@@ -45,35 +45,44 @@ namespace GDE {
     }
 
     void TextRenderer::recalcTextDimensions(const std::string& _text) {
-        size.y = -1;
+        size.y = 0;
         size.x = 0;
+        float _maxHeightOfLine = -1;
+        float _maxWidthOfLine = -1;
 
         for(auto _c : _text) {
             auto _char = font->getChars()[_c];
 
             if(_c == '\n') {
+                size.y += _maxHeightOfLine;
+                size.x = std::max(size.x, _maxWidthOfLine);
+                _maxHeightOfLine = 0;
+                _maxWidthOfLine = 0;
                 continue;
             }
 
-            size.x += (float)_char.advance.x / 2.f;
-            size.y = std::max(size.y, (float)_char.advance.y);
+            _maxWidthOfLine += (float)_char.advance.x;
+            _maxHeightOfLine = std::max(size.y, (float)_char.advance.y);
         }
 
-        size.x *= transform->getScale().x;
-        size.y *= transform->getScale().y;
+        if(size.y < _maxHeightOfLine) {
+            size.y = _maxHeightOfLine;
+        }
 
-//        debugShape.makeSquare(getPositionLocal(), size);
+        if(size.x < _maxWidthOfLine) {
+            size.x = _maxWidthOfLine;
+        }
     }
 
     Vec2F TextRenderer::getTextSize() const {
-        return size;
+        return { size.x * transform->getModelMatrixScale().x, size.y * transform->getModelMatrixScale().y };
     }
 
     void TextRenderer::setFontSize(int _fontSize) {
         LOG_W("Set font size not working!!")
 //        fontSize = _fontSize;
-//        recalcTextDimensions(innerText);
 //        font = FontManager::get().getSpecificFont(font->getFontName(), _fontSize);
+//        recalcTextDimensions(innerText);
     }
 
     int TextRenderer::getFontSize() const {
@@ -109,8 +118,8 @@ namespace GDE {
                 continue;
             }
 
-            float xpos = (_x + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
-            float ypos = _y - (float)_chars[_char].bearing.y * _transform.getModelMatrixScale().x;
+            float xpos = (_x - (pivot.x * size.x) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
+            float ypos = (_y + (pivot.y * size.y) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
 
             float w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
             float h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;
