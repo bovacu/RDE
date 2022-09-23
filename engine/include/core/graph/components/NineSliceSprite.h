@@ -26,7 +26,6 @@ namespace GDE {
              */
             UIInteractable* interaction = nullptr;
 
-            NineSliceSprite(const NodeID& _nodeID, Transform* _transform, Scene* _scene, Canvas* _canvas);
             NineSliceSprite(const NodeID& _nodeID, Transform* _transform, Scene* _scene, Canvas* _canvas, Texture* _texture);
 
             /**
