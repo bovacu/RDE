@@ -61,11 +61,10 @@ namespace GDE {
 
         public:
             /**
-            * @brief The origin of the text, by default it is (0, 0) which is bottom-left corner.
-            *        Values are normalize to the size of the text, so (0.5, 0.5) is to center the text to the transform
-            *        position.
+            * @brief The origin of the text, by default it is (0.5, 0.5) which is centered.
+            *        Values are normalize to the size of the text, so (0, 0) is the bottom-left corner alignment
             */
-            Vec2F pivot = { 0.f, 0.f };
+            Vec2F pivot = { 0.5f, 0.5f };
 
         private:
             /**

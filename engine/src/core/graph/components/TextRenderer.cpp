@@ -106,7 +106,7 @@ namespace GDE {
             _biggestAdvanceY = std::max(_biggestAdvanceY, (float)(_chars[_char].advance.y - _chars[_char].bearing.y) + newLineSize);
 
             if(_char == '\n') {
-                _y += _biggestAdvanceY * _transform.getModelMatrixScale().x;
+                _y += _biggestAdvanceY;
                 _x = 0;
                 continue;
             }
