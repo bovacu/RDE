@@ -19,7 +19,6 @@ namespace GDE {
         auto _textRendererId = _canvas->getGraph()->createNode("Text", _nodeID);
         textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textRendererId, _scene, _font, _text);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
-        textRenderer->pivot = { 0.5f, 0.5f };
     }
 
     NineSlice& UIButton::getNineSlice() const {

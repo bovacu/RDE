@@ -10,6 +10,7 @@
 #include "core/graph/components/NineSliceSprite.h"
 #include "core/render/RenderManager.h"
 #include "core/Engine.h"
+#include "core/graph/components/UIButton.h"
 
 namespace GDE {
 
@@ -44,14 +45,20 @@ namespace GDE {
 
     void Canvas::onRender() {
         auto& _registry = graph.getNodeContainer();
-        auto _sprites = _registry.group<NineSliceSprite>(entt::get<Transform, Active>);
-        auto _texts = _registry.group<TextRenderer>(entt::get<Transform, Active>);
+        auto _sprites = _registry.view<NineSliceSprite, Transform, Active>(entt::exclude<UIButton>);
+        auto _buttons = _registry.view<UIButton, Transform, Active>();
+        auto _texts = _registry.view<TextRenderer, Transform, Active>(entt::exclude<UIButton>);
 
         auto& _renderManager = graph.scene->engine->manager.renderManager;
         _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
 
             _sprites.each([&_renderManager](const auto _entity, NineSliceSprite& _nineSlice, const Transform& _transform, const Active& _) {
                 _renderManager.draw((const IRenderizable*)&_nineSlice, _transform);
+            });
+
+            _buttons.each([&_renderManager](const auto _entity, UIButton& _uiButton, const Transform& _transform, const Active& _) {
+                _renderManager.draw((const IRenderizable*)_uiButton.nineSliceSprite, _transform);
+                _renderManager.draw((const IRenderizable*)_uiButton.textRenderer, _transform);
             });
 
             _texts.each([&_renderManager](const auto _entity, TextRenderer& _textRenderer, const Transform& _transform, const Active& _) {

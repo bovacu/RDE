@@ -188,10 +188,10 @@ namespace GDE {
 
     Batch& SpriteBatch::getBatch(const IRenderizable* _renderer, int _layer, BatchPriority _priority) {
         for(auto& _batch : batches)
-            if(_renderer->getTexture() == _batch.textureID && _layer == _batch.layer && _batch.shader->getShaderID() == _renderer->shaderID)
+            if(_renderer->getTexture() == _batch.textureID && _layer == _batch.layer && _batch.shader->getShaderID() == _renderer->shaderID && _batch.priority == _renderer->batchPriority)
                 return _batch;
 
-        LOG_W("Created a new batch")
+        LOG_W("Created a new batch with Texture: ", _renderer->getTexture(), ", Layer: ", _layer, ", Priority: ", _renderer->batchPriority, " and ShaderID: ", _renderer->shaderID)
 
         Batch _batch;
         _batch.layer = _layer;
