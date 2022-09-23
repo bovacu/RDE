@@ -8,6 +8,7 @@
 #include "core/util/Delta.h"
 #include "core/systems/eventSystem/Event.h"
 #include "core/render/elements/Texture.h"
+#include "core/graph/components/Transform.h"
 
 namespace GDE {
 
@@ -288,8 +289,9 @@ namespace GDE {
 
     template<typename Component, typename... Args>
     Component* Graph::addComponent(Args... _args) {
-        auto& first = get<0>(std::forward<Args>(_args)...);
-        return &registry.template emplace<Component>(first, _args...);
+        auto& _first = get<0>(std::forward<Args>(_args)...);
+//        auto* _second = getComponent<Transform>(_first);
+        return &registry.template emplace<Component>(_first, _args...);
     }
 
     template<typename Component>

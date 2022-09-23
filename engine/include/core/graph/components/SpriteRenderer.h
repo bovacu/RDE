@@ -12,8 +12,6 @@ typedef entt::entity NodeID;
 
 namespace GDE {
 
-    class Scene;
-
     /**
      * @brief Component that allows to render a texture or part of a texture on screen. End user doesn't have, and in fact can't
      * make it render manually, it is all done internally by the ECS system.
@@ -30,8 +28,7 @@ namespace GDE {
             Texture* texture = nullptr;
 
         public:
-            explicit SpriteRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene);
-            SpriteRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Texture* _texture);
+            SpriteRenderer(const NodeID& _nodeId, Transform* _transform, Texture* _texture);
             ~SpriteRenderer() override {  }
 
             /**

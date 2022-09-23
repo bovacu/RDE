@@ -12,13 +12,8 @@
 
 namespace GDE {
 
-    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Texture* _texture) : IRenderizable(_transform), texture(_texture) {
-        shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
-        IRenderizable::batchPriority = BatchPriority::SpritePriority;
-    }
-
-    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene) : IRenderizable(_transform) {
-        shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
+    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Transform* _transform, Texture* _texture) : IRenderizable(_transform), texture(_texture) {
+        shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
     }
 

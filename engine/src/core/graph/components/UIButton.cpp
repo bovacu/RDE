@@ -8,16 +8,19 @@
 namespace GDE {
 
 
-    UIButton::UIButton(const NodeID& _nodeID, Transform* _transform, Scene* _scene, Canvas* _canvas, Texture* _texture, Font* _font, const std::string& _text) : UI(_transform) {
+    UIButton::UIButton(const NodeID& _nodeID, Transform* _transform, Canvas* _canvas, Texture* _texture, Font* _font, const std::string& _text) : UI(_transform) {
         UI::texture = _texture;
-        UI::shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
+        UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::texture = _texture;
         UI::batchPriority = BatchPriority::SpritePriority;
 
-        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_transform->ID, _transform, _scene, _font, _text);
-        textRenderer->batchPriority = BatchPriority::SpritePriority;
+        nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_transform->ID, _transform, _canvas, _texture);
 
-        nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_transform->ID, _transform, _scene, _canvas, _texture);
+        auto _textRendererId = _canvas->getGraph()->createNode("Text", _transform->ID);
+        auto* _textRendererTransform = _canvas->getGraph()->getComponent<Transform>(_textRendererId);
+        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textRendererId, _textRendererTransform, _font, _text);
+        textRenderer->batchPriority = BatchPriority::SpritePriority;
+        textRenderer->pivot = { 0.5f, 0.5f };
     }
 
     NineSlice& UIButton::getNineSlice() const {
@@ -29,7 +32,6 @@ namespace GDE {
     }
 
     void UIButton::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const {
-        nineSliceSprite->draw(_vertices, _indices, _transform, _viewport);
-        textRenderer->draw(_vertices, _indices, _transform, _viewport);
+
     }
 }

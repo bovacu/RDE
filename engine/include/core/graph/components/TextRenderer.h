@@ -7,7 +7,6 @@
 
 #include "core/render/elements/IRenderizable.h"
 #include "entt/entity/entity.hpp"
-#include "core/graph/Scene.h"
 
 typedef entt::entity NodeID;
 
@@ -59,12 +58,13 @@ namespace GDE {
              */
             Texture* texture = nullptr;
 
+        public:
             /**
-             * @brief The origin of the text, by default it is (0, 0) which is bottom-left corner.
-             *        Values are normalize to the size of the text, so (0.5, 0.5) is to center the text to the transform
-             *        position.
-             */
-             Vec2F pivot = { 0.f, 0.f };
+            * @brief The origin of the text, by default it is (0, 0) which is bottom-left corner.
+            *        Values are normalize to the size of the text, so (0.5, 0.5) is to center the text to the transform
+            *        position.
+            */
+            Vec2F pivot = { 0.f, 0.f };
 
         private:
             /**
@@ -74,8 +74,7 @@ namespace GDE {
             void recalcTextDimensions(const std::string& _text);
 
         public:
-            TextRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Font* _font, const std::string& _text);
-            TextRenderer(const NodeID& _nodeId, Transform* _transform, Scene* _scene, Font* _font);
+            TextRenderer(const NodeID& _nodeId, Transform* _transform, Font* _font, const std::string& _text);
             ~TextRenderer() override {  }
 
             /**

@@ -33,7 +33,7 @@ namespace GDE {
         }
 
         if(shaderID == -1) {
-            shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
+            shaderID = _scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER)->getShaderID();
         } else {
             shaderID = _particleSystemConfig.dataConfig.shader;
         }

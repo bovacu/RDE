@@ -38,6 +38,13 @@
 #define BLUR_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/blurFragment.glsl"
 #define DEBUG_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/debug/debugFragment.glsl"
 
+
+#define SPRITE_RENDERER_SHADER "basic"
+#define TEXT_RENDERER_SHADER "basicText"
+#define DEBUG_SHADER "debug"
+#define FRAMEBUFFER_SHADER "framebuffer"
+
+
 #ifndef EPSILON
 #define EPSILON 0.0001f
 #endif

@@ -22,6 +22,10 @@ namespace GDE {
      * Any new element that end-users want to create and render, must extend this method.
      */
     class IRenderizable {
+        protected:
+            friend class ShaderManager;
+            inline static std::unordered_map<std::string, ShaderID> defaultShaders;
+
         public:
             /**
              * @brief Color that the sprite should be tint in. White means natural color.

@@ -3,21 +3,22 @@
 #include "core/render/elements/ShaderManager.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "core/util/GLUtil.h"
+#include "core/render/elements/IRenderizable.h"
 
 namespace GDE {
 
     void ShaderManager::init(FileManager* _fileManager) {
         fileManager = _fileManager;
         #if IS_MOBILE()
-        loadShader("basic", TEXTURE_VERTEX_SHADER_ES, TEXTURE_FRAGMENT_SHADER_ES);
-        loadShader("debug", DEBUG_VERTEX_SHADER_ES, DEBUG_FRAGMENT_SHADER_ES);
-        loadShader("basicText", TEXTURE_VERTEX_SHADER_ES, TEXT_FRAGMENT_SHADER_ES);
-        loadShader("framebuffer", "assets/shaders/es/framebuffer/FrameBufferVertex.glsl", "assets/shaders/es/framebuffer/FrameBufferFragment.glsl");
+        IRenderizable::defaultShaders[SPRITE_RENDERER_SHADER] = loadShader(SPRITE_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_ES, TEXTURE_FRAGMENT_SHADER_ES);
+        IRenderizable::defaultShaders[DEBUG_SHADER] = loadShader(DEBUG_SHADER, DEBUG_VERTEX_SHADER_ES, DEBUG_FRAGMENT_SHADER_ES);
+        IRenderizable::defaultShaders[TEXT_RENDERER_SHADER] = loadShader(TEXT_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_ES, TEXT_FRAGMENT_SHADER_ES);
+        IRenderizable::defaultShaders[FRAMEBUFFER_SHADER] = loadShader(FRAMEBUFFER_SHADER, "assets/shaders/es/framebuffer/FrameBufferVertex.glsl", "assets/shaders/es/framebuffer/FrameBufferFragment.glsl");
         #else
-        loadShader("basic", TEXTURE_VERTEX_SHADER_CORE, TEXTURE_FRAGMENT_SHADER_CORE);
-        loadShader("debug", DEBUG_VERTEX_SHADER_CORE, DEBUG_FRAGMENT_SHADER_CORE);
-        loadShader("basicText", TEXTURE_VERTEX_SHADER_CORE, TEXT_FRAGMENT_SHADER_CORE);
-        loadShader("framebuffer", FRAMEBUFFER_VERTEX_SHADER_CORE, FRAMEBUFFER_FRAGMENT_SHADER_CORE);
+        IRenderizable::defaultShaders[SPRITE_RENDERER_SHADER] = loadShader(SPRITE_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_CORE, TEXTURE_FRAGMENT_SHADER_CORE);
+        IRenderizable::defaultShaders[DEBUG_SHADER] = loadShader(DEBUG_SHADER, DEBUG_VERTEX_SHADER_CORE, DEBUG_FRAGMENT_SHADER_CORE);
+        IRenderizable::defaultShaders[TEXT_RENDERER_SHADER] = loadShader(TEXT_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_CORE, TEXT_FRAGMENT_SHADER_CORE);
+        IRenderizable::defaultShaders[FRAMEBUFFER_SHADER] = loadShader(FRAMEBUFFER_SHADER, FRAMEBUFFER_VERTEX_SHADER_CORE, FRAMEBUFFER_FRAGMENT_SHADER_CORE);
     #endif
     CHECK_GL_ERROR("Shader Initializaation")
     }

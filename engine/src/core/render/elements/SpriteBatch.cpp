@@ -28,7 +28,7 @@ namespace GDE {
 
     void SpriteBatch::configBasicShader() {
         GLsizei _structSize = sizeof(OpenGLVertex);
-        shaderManager->loadShaderVertexConfig("basic", {
+        shaderManager->loadShaderVertexConfig(SPRITE_RENDERER_SHADER, {
             VertexConfig {
                 0, 3, GL_FLOAT, 0, _structSize
             },
@@ -41,7 +41,7 @@ namespace GDE {
         },
         maxIndicesPerDrawCall);
 
-        shaderManager->loadShaderVertexConfig("basicText", {
+        shaderManager->loadShaderVertexConfig(TEXT_RENDERER_SHADER, {
             VertexConfig {
                   0, 3, GL_FLOAT, 0, _structSize
             },
@@ -58,7 +58,7 @@ namespace GDE {
 
     void SpriteBatch::Debug::configDebugShader() {
         GLsizei _structSize = 3 * sizeof(float) + 4 * sizeof(float);
-        Debug::batch->shaderManager->loadShaderVertexConfig("debug", {
+        Debug::batch->shaderManager->loadShaderVertexConfig(DEBUG_SHADER, {
             VertexConfig {
                   0, 3, GL_FLOAT, 0, _structSize
             },
@@ -253,7 +253,7 @@ namespace GDE {
     }
 
     void SpriteBatch::Debug::flushDebug() {
-        auto* _shader = batch->shaderManager->getShader("debug");
+        auto* _shader = batch->shaderManager->getShader(DEBUG_SHADER);
 
         glBindVertexArray(_shader->getShaderVAO());
         glUseProgram(_shader->getShaderID());

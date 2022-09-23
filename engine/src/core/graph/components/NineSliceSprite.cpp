@@ -3,13 +3,12 @@
 //
 
 #include "core/graph/components/NineSliceSprite.h"
-#include "core/Engine.h"
 #include "core/util/Functions.h"
 
 namespace GDE {
 
-    NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Transform* _transform, Scene* _scene, Canvas* _canvas, Texture* _texture) : UI(_transform) {
-        shaderID = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
+    NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Transform* _transform, Canvas* _canvas, Texture* _texture) : UI(_transform) {
+        shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         texture = _texture;
         nineSliceSize = _texture->getRegion().size;
         interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);

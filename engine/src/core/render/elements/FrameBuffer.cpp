@@ -88,7 +88,7 @@ namespace GDE {
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        framebufferShader = manager->shaderManager.getShader("framebuffer")->getShaderID();
+        framebufferShader = manager->shaderManager.getShader(FRAMEBUFFER_SHADER)->getShaderID();
     }
 
     void FrameBuffer::bind() const {
