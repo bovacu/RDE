@@ -34,7 +34,7 @@ namespace Editor {
         auto _uiTest = getCanvases()[0]->getGraph()->createNode("TestUINode");
         auto* _transform = getCanvases()[0]->getGraph()->getComponent<Transform>(_uiTest);
         _transform->setPosition(-250, 0);
-        auto* ui = getCanvases()[0]->getGraph()->addComponent<NineSliceSprite>(_uiTest, _transform, getCanvases()[0],
+        auto* ui = getCanvases()[0]->getGraph()->addComponent<NineSliceSprite>(_uiTest, this, getCanvases()[0],
                                                                                        engine->manager.textureManager.getSubTexture(
                                                                                                "ui", "block1"));
         ui->nineSliceSize = {400, 225};
@@ -45,8 +45,7 @@ namespace Editor {
 
 
         auto _uiButtonId = getCanvases()[0]->getGraph()->createNode("UIButton");
-        auto* _uiButtonTransform = getCanvases()[0]->getGraph()->getComponent<Transform>(_uiButtonId);
-        auto* _uiButton = getCanvases()[0]->getGraph()->addComponent<UIButton>(_uiButtonId, _uiButtonTransform, getCanvases()[0], engine->manager.textureManager.getSubTexture(
+        auto* _uiButton = getCanvases()[0]->getGraph()->addComponent<UIButton>(_uiButtonId, this, getCanvases()[0], engine->manager.textureManager.getSubTexture(
                 "ui", "button"), engine->manager.fontManager.getDefaultFont("arial"), "Button");
         _uiButton->textRenderer->color = Color::Black;
     }
@@ -80,7 +79,7 @@ namespace Editor {
                 _textTransform->staticTransform = true;
                 _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f, (float)engine->getWindow().getWindowSize().x / 2.f),
                                             _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f, (float)engine->getWindow().getWindowSize().y / 2.f));
-                getMainGraph()->addComponent<SpriteRenderer>(_text, _textTransform, _texture);
+                getMainGraph()->addComponent<SpriteRenderer>(_text, this, _texture);
             }
         }
 

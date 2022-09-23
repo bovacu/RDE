@@ -17,7 +17,7 @@ namespace GDE {
             TextRenderer* textRenderer;
             NineSliceSprite* nineSliceSprite;
 
-            UIButton(const NodeID& _nodeID, Transform* _transform, Canvas* _canvas, Texture* _texture, Font* _font, const std::string& _text);
+            UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture, Font* _font, const std::string& _text);
 
             /**
              * @brief Returns the NineSlice data. This is almost sure not to be needed by end-users.

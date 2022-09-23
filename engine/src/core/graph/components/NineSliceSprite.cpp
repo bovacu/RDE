@@ -7,7 +7,7 @@
 
 namespace GDE {
 
-    NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Transform* _transform, Canvas* _canvas, Texture* _texture) : UI(_transform) {
+    NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture) : UI(_scene->getMainGraph()->getComponent<Transform>(_nodeID)) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         texture = _texture;
         nineSliceSize = _texture->getRegion().size;

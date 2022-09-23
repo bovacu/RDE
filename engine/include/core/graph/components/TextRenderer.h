@@ -13,6 +13,7 @@ typedef entt::entity NodeID;
 namespace GDE {
 
     class Font;
+    class Scene;
 
     /**
      * @brief Component used to render text on screen.  End user doesn't have, and in fact can't
@@ -74,7 +75,7 @@ namespace GDE {
             void recalcTextDimensions(const std::string& _text);
 
         public:
-            TextRenderer(const NodeID& _nodeId, Transform* _transform, Font* _font, const std::string& _text);
+            TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text);
             ~TextRenderer() override {  }
 
             /**

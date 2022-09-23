@@ -11,7 +11,7 @@
 
 namespace GDE {
 
-    TextRenderer::TextRenderer(const NodeID& _nodeId, Transform* _transform, Font* _font, const std::string& _text) : IRenderizable(_transform) {
+    TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text) : IRenderizable(_scene->getMainGraph()->getComponent<Transform>(_nodeId)) {
         font = _font;
         innerText = _text;
         recalcTextDimensions(_text);
