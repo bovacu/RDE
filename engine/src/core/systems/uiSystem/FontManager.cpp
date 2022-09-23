@@ -102,7 +102,7 @@ namespace GDE {
             return;
         }
 
-        LOG_S("FontManager loaded")
+        LOG_I("FontManager loaded successfully")
     }
 
     Font* FontManager::loadFont(FileManager& _fileManager, const std::string& _pathToFont, int _fontSize) {
@@ -126,7 +126,7 @@ namespace GDE {
 
         FT_Done_Face(_face);
 
-        LOG_S("Successfully loaded Font ", _name, " with font size ", _fontSize)
+        LOG_DEBUG("Successfully loaded Font ", _name, " with font size ", _fontSize)
 
         return fonts[_name].back().font;
     }

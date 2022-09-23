@@ -35,8 +35,7 @@ namespace GDE {
     
         SDL_VERSION(&compiled);
         SDL_GetVersion(&linked);
-        SDL_Log("We compiled against SDL version %u.%u.%u ...\n", compiled.major, compiled.minor, compiled.patch);
-        SDL_Log("But we are linking against SDL version %u.%u.%u.\n", linked.major, linked.minor, linked.patch);
+        LOG_I("We compiled against SDL version ", (int)compiled.major, ".", (int)compiled.minor, ".", (int)compiled.patch, " and linking to ", (int)linked.major, ".", (int)linked.minor, ".", (int)linked.patch);
 
         shouldUpdateWindow.bind<shouldUpdateWindowDefault>();
     }

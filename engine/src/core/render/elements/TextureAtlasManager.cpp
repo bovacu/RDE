@@ -15,7 +15,7 @@ namespace GDE {
         fileManager->close(_handle);
         auto _pathToTexture = _spriteSheetNode["sprite_sheet_settings"]["path"].get<std::string>();
         auto _name = Util::getFileNameFromPath(_pathToTexture);
-        LOG_I_TIME("Trying to load '", _pathToTexture, "'...")
+        LOG_DEBUG("Trying to load '", _pathToTexture, "'...")
         if(atlases.find(_name) != atlases.end()) {
             LOG_E_TIME("Atlas '", _name, "' was already loaded");
             return false;
@@ -33,7 +33,6 @@ namespace GDE {
 
         cropTextures(*_atlas, _spriteSheetNode["sprites"]);
         atlases[_name] = _atlas;
-        LOG_S_TIME("    Load successful!")
         return true;
     }
 

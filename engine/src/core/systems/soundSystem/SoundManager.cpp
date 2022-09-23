@@ -26,7 +26,7 @@ namespace GDE {
             return;
         }
 
-        LOG_S("Sound Manager initiated!")
+        LOG_I("Sound Manager loaded successfully!")
     }
 
     Music& SoundManager::loadMusic(const std::string& _musicPath) {

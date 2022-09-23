@@ -30,8 +30,6 @@ namespace GDE {
             return;
         }
 
-        LOG_S("SDL Image loader loaded successfully")
-
         batch.init(_engine);
         batch.debug.init(&batch);
         CHECK_GL_ERROR("RenderManager Initialization")

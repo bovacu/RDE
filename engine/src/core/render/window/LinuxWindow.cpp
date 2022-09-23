@@ -40,7 +40,7 @@ namespace GDE {
             LOG_E("Failed to initialize GLAD")
             return;
         }
-        LOG_S("GLAD and SDL2 initiated correctly");
+        LOG_I("GLAD and SDL2 loaded successfully");
 
         SDL_GL_SetSwapInterval(1);
 

@@ -28,7 +28,7 @@ namespace GDE {
         _shader->loadFromFiles(_vertex, _fragment, fileManager);
         shadersByName[_shaderName] = _shader;
         shadersById[shadersByName[_shaderName]->getShaderID()] = _shader;
-        LOG_S("Created Shader ", _shaderName, " with value ", shadersByName[_shaderName]->getShaderID())
+        LOG_DEBUG("Created Shader ", _shaderName, " with value ", shadersByName[_shaderName]->getShaderID())
         return shadersByName[_shaderName]->getShaderID();
     }
 
