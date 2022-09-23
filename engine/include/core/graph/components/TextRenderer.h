@@ -64,7 +64,7 @@ namespace GDE {
              *        Values are normalize to the size of the text, so (0.5, 0.5) is to center the text to the transform
              *        position.
              */
-             Vec2F pivot = { 0.5f, 0.5f };
+             Vec2F pivot = { 0.f, 0.f };
 
         private:
             /**
