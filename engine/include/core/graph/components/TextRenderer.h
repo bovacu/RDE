@@ -46,7 +46,7 @@ namespace GDE {
             float spaceBetweenChars = 0.f;
 
             /**
-             * @brief Height of the enter character.
+             * @brief It is calculated as a % of the total height of the full text. Only applicable if it is multiline text.
              */
             float newLineSize = 1.05f;
 
@@ -60,13 +60,6 @@ namespace GDE {
              */
             Texture* texture = nullptr;
 
-        public:
-            /**
-            * @brief The origin of the text, by default it is (0.5, 0.5) which is centered.
-            *        Values are normalize to the size of the text, so (0, 0) is the bottom-left corner alignment
-            */
-            Vec2F pivot = { 0.5f, 0.5f };
-
         private:
             /**
              * @brief Recalculates the dimensions of the new text as a rectangle.
@@ -78,7 +71,7 @@ namespace GDE {
                 std::string line;
                 float biggestCharHeight;
             };
-            auto calculateLinesInfo(CharInfo* _chars) const;
+            std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharInfo* _chars) const;
 
         public:
             TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text);

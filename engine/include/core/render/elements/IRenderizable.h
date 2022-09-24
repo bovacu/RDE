@@ -47,7 +47,15 @@ namespace GDE {
              */
             BatchPriority batchPriority = BatchPriority::SpritePriority;
 
+            /**
+             * @brief Transform of the Node.
+             */
             Transform* transform;
+
+            /**
+             * @brief Origin of the renderizable. By default it is (0.5, 0.5), which means it is centered.
+             */
+             Vec2F pivot { 0.5f, 0.5f };
 
         public:
             IRenderizable(Transform* _transform) : transform(_transform) {  }

@@ -38,31 +38,8 @@ namespace GDE {
     }
 
     void TextRenderer::recalcTextDimensions(const std::string& _text) {
-        size.y = 0;
-        size.x = 0;
-        float _maxHeightOfLine = -1;
-        float _maxWidthOfLine = -1;
-
-        for(auto _c : _text) {
-            auto _char = font->getChars()[_c];
-
-            if(_c == '\n') {
-                size.y += _maxHeightOfLine;
-                size.x = std::max(size.x, _maxWidthOfLine);
-                _maxHeightOfLine = 0;
-                _maxWidthOfLine = 0;
-                continue;
-            }
-
-            _maxWidthOfLine += (float)_char.advance.x;
-            _maxHeightOfLine = std::max(size.y, (float)_char.advance.y);
-        }
-
-        size.y += _maxHeightOfLine;
-
-        if(size.x < _maxWidthOfLine) {
-            size.x = _maxWidthOfLine;
-        }
+        auto [_, _totalWidth, _totalHeight] = calculateLinesInfo(font->getChars());
+        size.set(_totalWidth, _totalHeight);
     }
 
     Vec2F TextRenderer::getTextSize() const {
@@ -89,33 +66,6 @@ namespace GDE {
         recalcTextDimensions(innerText);
     }
 
-    auto TextRenderer::calculateLinesInfo(CharInfo* _chars) const {
-        auto _linesInfo = std::vector<LineInfo> {  };
-        auto _ss = std::stringstream { innerText };
-
-        auto _totalHeight = 0.0f;
-        for (std::string _line; std::getline(_ss, _line, '\n');) {
-            LineInfo _lineInfo {
-                    .line = _line
-            };
-
-            float _biggestHeight = -1;
-            if(!_line.empty()) {
-                for(auto _char : _line) {
-                    _biggestHeight = std::max(_biggestHeight, (float)_chars[_char].advance.y);
-                }
-            } else {
-                _biggestHeight = (float)fontSize;
-            }
-
-            _lineInfo.biggestCharHeight = _biggestHeight;
-            _linesInfo.push_back(_lineInfo);
-            _totalHeight += _biggestHeight;
-        }
-
-        return std::tuple {_linesInfo, _totalHeight};
-    }
-
     void TextRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const {
         auto* _atlas = font;
         auto _atlasSize = _atlas->getSize();
@@ -125,7 +75,7 @@ namespace GDE {
 
         auto* _chars = _atlas->getChars();
 
-        auto [_linesInfo, _totalHeight] = calculateLinesInfo(_chars);
+        auto [_linesInfo, _, _totalHeight] = calculateLinesInfo(_chars);
         const auto _numberOfLines = _linesInfo.size();
         const auto _percentage = 1.f / (float)_numberOfLines;
         auto _index = 0;
@@ -142,11 +92,11 @@ namespace GDE {
             for(char _char : _lineInfo.line) {
                 auto _vertexCount = _vertices.size();
 
-                float xpos = (_x - (pivot.x * size.x) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
-                float ypos = (_y + (pivot.y * _totalHeight) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
+                float _xPos = (_x - (pivot.x * size.x) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
+                float _yPos = (_y + (pivot.y * size.y) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
 
-                float w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
-                float h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;
+                float _w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
+                float _h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;
 
                 auto _transformMat = _transform.modelMatrix;
                 auto _screenPos = Util::worldToScreenCoords(_viewport, { _transform.modelMatrix[3][0], _transform.modelMatrix[3][1] });
@@ -156,8 +106,8 @@ namespace GDE {
                 auto _textColor = color;
                 glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
 
-                auto _positionInScreen = Util::worldToScreenSize(_viewport, {xpos, ypos});
-                auto _sizeInScreen = Util::worldToScreenSize(_viewport, {w, h});
+                auto _positionInScreen = Util::worldToScreenSize(_viewport, { _xPos, _yPos });
+                auto _sizeInScreen = Util::worldToScreenSize(_viewport, { _w, _h });
 
                 glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
                 glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };
@@ -187,6 +137,37 @@ namespace GDE {
                 _indices.emplace_back(_vertexCount + 0);
             }
         }
+    }
+
+    std::tuple<std::vector<TextRenderer::LineInfo>, float, float> TextRenderer::calculateLinesInfo(CharInfo* _chars) const {
+        auto _linesInfo = std::vector<LineInfo> {  };
+        auto _ss = std::stringstream { innerText };
+
+        auto _totalHeight = 0.0f;
+        auto _totalWidth = 0.0f;
+        for (std::string _line; std::getline(_ss, _line, '\n');) {
+            LineInfo _lineInfo {
+                    .line = _line
+            };
+
+            float _biggestHeight = -1;
+            float _biggestWidth = 0.f;
+            if(!_line.empty()) {
+                for(auto _char : _line) {
+                    _biggestHeight = std::max(_biggestHeight, (float)_chars[_char].advance.y);
+                    _biggestWidth += (float)_chars[_char].advance.x;
+                }
+            } else {
+                _biggestHeight = (float)fontSize;
+            }
+
+            _lineInfo.biggestCharHeight = _biggestHeight;
+            _linesInfo.push_back(_lineInfo);
+            _totalHeight += _biggestHeight;
+            _totalWidth = std::max(_totalWidth, _biggestWidth);
+        }
+
+        return std::tuple {_linesInfo, _totalWidth, _totalHeight};
     }
 
 }
