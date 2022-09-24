@@ -89,27 +89,14 @@ namespace GDE {
         recalcTextDimensions(innerText);
     }
 
-    struct LineInfo {
-        std::string line;
-        float biggestCharHeight;
-    };
-
-    void TextRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const {
-        auto* _atlas = font;
-        auto _atlasSize = _atlas->getSize();
-
-        float _x = 0;
-        float _y = 0;
-
-        auto* _chars = _atlas->getChars();
-
+    auto TextRenderer::calculateLinesInfo(CharInfo* _chars) const {
         auto _linesInfo = std::vector<LineInfo> {  };
         auto _ss = std::stringstream { innerText };
 
         auto _totalHeight = 0.0f;
         for (std::string _line; std::getline(_ss, _line, '\n');) {
             LineInfo _lineInfo {
-                .line = _line
+                    .line = _line
             };
 
             float _biggestHeight = -1;
@@ -126,11 +113,25 @@ namespace GDE {
             _totalHeight += _biggestHeight;
         }
 
+        return std::tuple {_linesInfo, _totalHeight};
+    }
+
+    void TextRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const {
+        auto* _atlas = font;
+        auto _atlasSize = _atlas->getSize();
+
+        float _x = 0;
+        float _y = 0;
+
+        auto* _chars = _atlas->getChars();
+
+        auto [_linesInfo, _totalHeight] = calculateLinesInfo(_chars);
         const auto _numberOfLines = _linesInfo.size();
         const auto _percentage = 1.f / (float)_numberOfLines;
         auto _index = 0;
         for(auto& _lineInfo : _linesInfo) {
 
+            // This is to adjust X, so it goes back to the right, and to set the Y to its proper height when in multiline.
             if(_linesInfo.size() > 1) {
                 auto _amountToAdd = (float)_numberOfLines / 2.f - (float)_index;
                 _y = -(_totalHeight * newLineSize) * _percentage * _amountToAdd - (_totalHeight / 2.f) + _lineInfo.biggestCharHeight;

@@ -14,6 +14,7 @@ namespace GDE {
 
     class Font;
     class Scene;
+    struct CharInfo;
 
     /**
      * @brief Component used to render text on screen.  End user doesn't have, and in fact can't
@@ -72,6 +73,12 @@ namespace GDE {
              * @param _text the inner text.
              */
             void recalcTextDimensions(const std::string& _text);
+
+            struct LineInfo {
+                std::string line;
+                float biggestCharHeight;
+            };
+            auto calculateLinesInfo(CharInfo* _chars) const;
 
         public:
             TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text);
