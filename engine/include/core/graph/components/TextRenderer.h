@@ -47,7 +47,7 @@ namespace GDE {
             /**
              * @brief Height of the enter character.
              */
-            float newLineSize = 5.f;
+            float newLineSize = 1.05f;
 
             /**
              * @brief Size of the font.

@@ -58,9 +58,7 @@ namespace GDE {
             _maxHeightOfLine = std::max(size.y, (float)_char.advance.y);
         }
 
-        if(size.y < _maxHeightOfLine) {
-            size.y = _maxHeightOfLine;
-        }
+        size.y += _maxHeightOfLine;
 
         if(size.x < _maxWidthOfLine) {
             size.x = _maxWidthOfLine;
@@ -91,69 +89,102 @@ namespace GDE {
         recalcTextDimensions(innerText);
     }
 
+    struct LineInfo {
+        std::string line;
+        float biggestCharHeight;
+    };
+
     void TextRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const {
         auto* _atlas = font;
         auto _atlasSize = _atlas->getSize();
 
         float _x = 0;
         float _y = 0;
-        float _biggestAdvanceY = 0;
 
         auto* _chars = _atlas->getChars();
 
-        for(char _char : innerText) {
-            auto _vertexCount = _vertices.size();
-            _biggestAdvanceY = std::max(_biggestAdvanceY, (float)(_chars[_char].advance.y - _chars[_char].bearing.y) + newLineSize);
+        auto _linesInfo = std::vector<LineInfo> {  };
+        auto _ss = std::stringstream { innerText };
 
-            if(_char == '\n') {
-                _y += _biggestAdvanceY;
-                _x = 0;
-                continue;
+        auto _totalHeight = 0.0f;
+        for (std::string _line; std::getline(_ss, _line, '\n');) {
+            LineInfo _lineInfo {
+                .line = _line
+            };
+
+            float _biggestHeight = -1;
+            if(!_line.empty()) {
+                for(auto _char : _line) {
+                    _biggestHeight = std::max(_biggestHeight, (float)_chars[_char].advance.y);
+                }
+            } else {
+                _biggestHeight = (float)fontSize;
             }
 
-            float xpos = (_x - (pivot.x * size.x) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
-            float ypos = (_y + (pivot.y * size.y) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
+            _lineInfo.biggestCharHeight = _biggestHeight;
+            _linesInfo.push_back(_lineInfo);
+            _totalHeight += _biggestHeight;
+        }
 
-            float w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
-            float h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;
+        const auto _numberOfLines = _linesInfo.size();
+        const auto _percentage = 1.f / (float)_numberOfLines;
+        auto _index = 0;
+        for(auto& _lineInfo : _linesInfo) {
 
-            auto _transformMat = _transform.modelMatrix;
-            auto _screenPos = Util::worldToScreenCoords(_viewport, { _transform.modelMatrix[3][0], _transform.modelMatrix[3][1] });
-            _transformMat[3][0] = _screenPos.x;
-            _transformMat[3][1] = _screenPos.y;
+            if(_linesInfo.size() > 1) {
+                auto _amountToAdd = (float)_numberOfLines / 2.f - (float)_index;
+                _y = -(_totalHeight * newLineSize) * _percentage * _amountToAdd - (_totalHeight / 2.f) + _lineInfo.biggestCharHeight;
+                _index++;
+                _x = 0;
+            }
 
-            auto _textColor = color;
-            glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
+            for(char _char : _lineInfo.line) {
+                auto _vertexCount = _vertices.size();
 
-            auto _positionInScreen = Util::worldToScreenSize(_viewport, {xpos, ypos});
-            auto _sizeInScreen = Util::worldToScreenSize(_viewport, {w, h});
+                float xpos = (_x - (pivot.x * size.x) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
+                float ypos = (_y + (pivot.y * _totalHeight) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
 
-            glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
-            glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };
-            glm::vec4 _topLeftTextureCorner     = { _positionInScreen.x                  , -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
-            glm::vec4 _topRightTextureCorner    = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
+                float w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
+                float h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;
 
-            Vec2F _normSize = { (float)_chars[_char].size.x / _atlasSize.x, (float)_chars[_char].size.y / _atlasSize.y };
+                auto _transformMat = _transform.modelMatrix;
+                auto _screenPos = Util::worldToScreenCoords(_viewport, { _transform.modelMatrix[3][0], _transform.modelMatrix[3][1] });
+                _transformMat[3][0] = _screenPos.x;
+                _transformMat[3][1] = _screenPos.y;
 
-            glm::vec2 _bottomLeftTextureCoord   = { _chars[_char].offset.x              , _chars[_char].offset.y               };
-            glm::vec2 _bottomRightTextureCoord  = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y               };
-            glm::vec2 _topLeftTextureCoord      = { _chars[_char].offset.x              , _chars[_char].offset.y + _normSize.y };
-            glm::vec2 _topRightTextureCoord     = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y + _normSize.y };
+                auto _textColor = color;
+                glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
 
-            _vertices.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _color });
-            _vertices.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _color });
-            _vertices.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _color });
-            _vertices.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _color });
+                auto _positionInScreen = Util::worldToScreenSize(_viewport, {xpos, ypos});
+                auto _sizeInScreen = Util::worldToScreenSize(_viewport, {w, h});
 
-            _x += (float)_chars[_char].advance.x * _transform.getModelMatrixScale().x;
+                glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
+                glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };
+                glm::vec4 _topLeftTextureCorner     = { _positionInScreen.x                  , -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
+                glm::vec4 _topRightTextureCorner    = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
 
-            _indices.emplace_back(_vertexCount + 0);
-            _indices.emplace_back(_vertexCount + 1);
-            _indices.emplace_back(_vertexCount + 2);
+                Vec2F _normSize = { (float)_chars[_char].size.x / _atlasSize.x, (float)_chars[_char].size.y / _atlasSize.y };
 
-            _indices.emplace_back(_vertexCount + 2);
-            _indices.emplace_back(_vertexCount + 3);
-            _indices.emplace_back(_vertexCount + 0);
+                glm::vec2 _bottomLeftTextureCoord   = { _chars[_char].offset.x              , _chars[_char].offset.y               };
+                glm::vec2 _bottomRightTextureCoord  = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y               };
+                glm::vec2 _topLeftTextureCoord      = { _chars[_char].offset.x              , _chars[_char].offset.y + _normSize.y };
+                glm::vec2 _topRightTextureCoord     = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y + _normSize.y };
+
+                _vertices.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _color });
+                _vertices.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _color });
+                _vertices.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _color });
+                _vertices.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _color });
+
+                _x += (float)_chars[_char].advance.x * _transform.getModelMatrixScale().x;
+
+                _indices.emplace_back(_vertexCount + 0);
+                _indices.emplace_back(_vertexCount + 1);
+                _indices.emplace_back(_vertexCount + 2);
+
+                _indices.emplace_back(_vertexCount + 2);
+                _indices.emplace_back(_vertexCount + 3);
+                _indices.emplace_back(_vertexCount + 0);
+            }
         }
     }
 

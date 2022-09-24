@@ -328,8 +328,14 @@ namespace GDE {
         ENGINE_ASSERT(_textRendererJson.contains("font"), "TextRenderer MUST have section 'font'.")
         ENGINE_ASSERT(_textRendererJson.contains("text"), "TextRenderer MUST have section 'text'.")
 
+        auto _fontSize = 54;
+
+        if(_textRendererJson.contains("fontSize")) {
+            _fontSize = _textRendererJson["fontSize"].get<int>();
+        }
+
         auto* _textRenderer = _scene->getMainGraph()->addComponent<TextRenderer>(_ownerEntityID, _scene,
-                                                                                 _scene->engine->manager.fontManager.getDefaultFont(_textRendererJson["font"].get<std::string>()),
+                                                                                 _scene->engine->manager.fontManager.getSpecificFont(_scene->engine->manager.fileManager, _textRendererJson["font"].get<std::string>(), _fontSize),
                                                                                  _textRendererJson["text"].get<std::string>());
 
         if(_textRendererJson.contains("color")) {
