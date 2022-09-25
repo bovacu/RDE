@@ -11,7 +11,7 @@
 namespace GDE {
 
     AndroidWindow::AndroidWindow(GDEConfig* _config) : Window(_config) {
-            LOG_I("Platform: Android")
+            LOG_DEBUG("Platform: Android")
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
             SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);

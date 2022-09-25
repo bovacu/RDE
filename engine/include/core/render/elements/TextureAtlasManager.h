@@ -52,7 +52,6 @@ namespace GDE {
         }
 
         ~Atlas() {
-            LOG_I("     Cleaning up Atlas ", name)
             for(auto& _texture : subTextures)
                 delete _texture.second;
 

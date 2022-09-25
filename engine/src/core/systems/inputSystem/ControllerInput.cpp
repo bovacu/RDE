@@ -105,9 +105,9 @@ namespace GDE {
 
     void ControllerInput::initControllers() {
         int _numJoysticks = SDL_NumJoysticks();
-        LOG_I("Num of Joysticks: ", _numJoysticks)
+        LOG_DEBUG("Num of Joysticks: ", _numJoysticks)
         if(_numJoysticks < 1) {
-            LOG_I("No joysticks connected")
+            LOG_DEBUG("No joysticks connected")
             return;
         }
         for(int _i = 0; _i < _numJoysticks; _i++) {
@@ -122,7 +122,7 @@ namespace GDE {
 
             if(controllers[SDL_JoystickGetDeviceInstanceID(_i)] != nullptr) continue;
 
-            LOG_I("Connected Controller ", _i, ", Device Instance: ", SDL_JoystickGetDeviceInstanceID(_i))
+            LOG_DEBUG("Connected Controller ", _i, ", Device Instance: ", SDL_JoystickGetDeviceInstanceID(_i))
             auto _controller = new Controller(_i);
             _controller->sdlGameController = _currentGameController;
             _controller->vibration = SDL_HapticOpenFromJoystick(SDL_GameControllerGetJoystick(_currentGameController));
@@ -131,7 +131,7 @@ namespace GDE {
             engine->manager.controllerVibrationManager.assignVibrationEffectToController("default", _controller->ID);
         }
 
-        LOG_I(_numJoysticks, " connected and ", controllers.size(), " loaded")
+        LOG_DEBUG(_numJoysticks, " connected and ", controllers.size(), " loaded")
     }
 
     void ControllerInput::onControllerMoved(SDL_Event& _event) {
@@ -260,12 +260,10 @@ namespace GDE {
     }
 
     void ControllerInput::destroy() {
-        LOG_S("Cleaning up vibrations effects")
         engine->manager.controllerVibrationManager.destroy();
 
-        LOG_S("Cleaning up controllers")
+        LOG_DEBUG("Cleaning up Controllers")
         for(auto& _controller : controllers) {
-            LOG_S("     Controller: ", _controller.second->ID)
             if(_controller.second->ID >= 0) {
                 SDL_HapticClose(_controller.second->vibration);
                 SDL_GameControllerClose(_controller.second->sdlGameController);

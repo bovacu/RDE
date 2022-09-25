@@ -21,7 +21,7 @@ namespace GDE {
         properties = _config;
 
         #ifdef ENGINE_DEBUG
-        LOG_I("Creating window ", _config->windowData.title, " (", _config->windowData.size.x, _config->windowData.size.y, ")");
+        LOG_DEBUG("Creating window ", _config->windowData.title, " (", _config->windowData.size.x, _config->windowData.size.y, ")");
         #endif
 
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -35,7 +35,7 @@ namespace GDE {
     
         SDL_VERSION(&compiled);
         SDL_GetVersion(&linked);
-        LOG_I("We compiled against SDL version ", (int)compiled.major, ".", (int)compiled.minor, ".", (int)compiled.patch, " and linking to ", (int)linked.major, ".", (int)linked.minor, ".", (int)linked.patch);
+        LOG_DEBUG("We compiled against SDL version ", (int)compiled.major, ".", (int)compiled.minor, ".", (int)compiled.patch, " and linking to ", (int)linked.major, ".", (int)linked.minor, ".", (int)linked.patch);
 
         shouldUpdateWindow.bind<shouldUpdateWindowDefault>();
     }

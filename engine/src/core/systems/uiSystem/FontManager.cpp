@@ -102,7 +102,7 @@ namespace GDE {
             return;
         }
 
-        LOG_I("FontManager loaded successfully")
+        LOG_DEBUG("FontManager loaded successfully")
     }
 
     Font* FontManager::loadFont(FileManager& _fileManager, const std::string& _pathToFont, int _fontSize) {
@@ -161,10 +161,9 @@ namespace GDE {
     }
 
     void FontManager::destroy() {
-        LOG_S("Cleaning up FontManager")
+        LOG_DEBUG("Cleaning up FontManager")
         for(auto& _fontHandler : fonts)
             for(auto& _font : _fontHandler.second) {
-                LOG_I("     Cleaning Font ", _font.font->fontName, " of size ", _font.font->fontSize)
                 delete _font.font;
             }
         FT_Done_FreeType(ftLibrary);

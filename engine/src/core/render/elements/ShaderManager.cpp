@@ -52,9 +52,8 @@ namespace GDE {
     }
 
     void ShaderManager::destroy() {
-        LOG_S("Cleaning up Shader Manager")
+        LOG_DEBUG("Cleaning up ShaderManager")
         for(auto& _shader : shadersByName) {
-            LOG_I("     Cleaning ", _shader.first)
             delete _shader.second;
         }
     }

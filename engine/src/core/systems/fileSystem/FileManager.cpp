@@ -222,7 +222,6 @@ namespace GDE {
     void FileManager::replaceChunkInFile(FileHandler* _handler, const std::string& _old, const std::string& _new) {
         checkFileMode(_handler, FileMode::READ_AND_WRITE);
         auto _f = readFullFile(_handler);
-        LOG_I(_f.content);
         REPLACE_S(_f.content, _old, _new);
         writeChunkToFile(_handler, _f.content);
     }

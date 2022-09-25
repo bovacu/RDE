@@ -22,6 +22,7 @@ namespace GDE {
     }
 
     void PhysicsManager::destroy() {
+        LOG_DEBUG("Cleaning up PhysicsManager")
         for(auto _i = 0; _i < MAX_MASKS * 2; _i++) {
             for(auto _j = 0; _j < MAX_MASKS * 2; _j++) {
                 delete collisionTable[_i][_j];
@@ -535,8 +536,8 @@ namespace GDE {
     }
 
     PhysicsCollisionCallbacks* PhysicsManager::addOrGetCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB) {
-        ENGINE_ASSERT(_bodyMaskA >= 0 && _bodyMaskA < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
-        ENGINE_ASSERT(_bodyMaskB >= 0 && _bodyMaskB < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
+        ENGINE_ASSERT(_bodyMaskA >= 0 && _bodyMaskA < MAX_MASKS, "Collision masks must be defined in the range of [0,", MAX_MASKS,")")
+        ENGINE_ASSERT(_bodyMaskB >= 0 && _bodyMaskB < MAX_MASKS, "Collision masks must be defined in the range of [0,", MAX_MASKS, ")")
 
         if(collisionTable[_bodyMaskA][_bodyMaskB] == nullptr && collisionTable[_bodyMaskA][_bodyMaskB] == nullptr) {
             collisionTable[_bodyMaskA][_bodyMaskB] = new PhysicsCollisionCallbacks;
@@ -547,8 +548,8 @@ namespace GDE {
     }
 
     bool PhysicsManager::removeCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB) {
-        ENGINE_ASSERT(_bodyMaskA >= 0 && _bodyMaskA < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
-        ENGINE_ASSERT(_bodyMaskB >= 0 && _bodyMaskB < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
+        ENGINE_ASSERT(_bodyMaskA >= 0 && _bodyMaskA < MAX_MASKS, "Collision masks must be defined in the range of [0,", MAX_MASKS,")")
+        ENGINE_ASSERT(_bodyMaskB >= 0 && _bodyMaskB < MAX_MASKS, "Collision masks must be defined in the range of [0,", MAX_MASKS,")")
 
         if(collisionTable[_bodyMaskA][_bodyMaskB] != nullptr) {
             delete collisionTable[_bodyMaskA][_bodyMaskB];
@@ -568,8 +569,8 @@ namespace GDE {
     }
 
     bool PhysicsManager::hasCollisionInTable(ulong _bodyMaskA, ulong _bodyMaskB) {
-        ENGINE_ASSERT(_bodyMaskA >= 0 && _bodyMaskA < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
-        ENGINE_ASSERT(_bodyMaskB >= 0 && _bodyMaskB < MAX_MASKS, "Collision masks must be defined in the range of [0,128)")
+        ENGINE_ASSERT(_bodyMaskA >= 0 && _bodyMaskA < MAX_MASKS, "Collision masks must be defined in the range of [0,", MAX_MASKS,")")
+        ENGINE_ASSERT(_bodyMaskB >= 0 && _bodyMaskB < MAX_MASKS, "Collision masks must be defined in the range of [0,", MAX_MASKS,")")
 
         return collisionTable[_bodyMaskA][_bodyMaskB] != nullptr;
     }

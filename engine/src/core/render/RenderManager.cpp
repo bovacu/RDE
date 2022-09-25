@@ -9,7 +9,7 @@ namespace GDE {
     void RenderManager::init(Engine* _engine) {
     
         #if !IS_MOBILE()
-        LOG_I("OpenGL Version: ", glGetString(GL_VERSION));
+        LOG_DEBUG("OpenGL Version: ", glGetString(GL_VERSION));
         #endif
 
         glEnable(GL_BLEND);
@@ -96,6 +96,7 @@ namespace GDE {
     }
 
     void RenderManager::destroy() {
+        LOG_DEBUG("Cleaning up RenderManager")
         IMG_Quit();
     }
 

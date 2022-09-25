@@ -105,7 +105,7 @@ namespace GDE {
     }
 
     void TextureAtlasManager::destroy() {
-        LOG_S("Cleaning up TextureAtlasManager")
+        LOG_DEBUG("Cleaning up TextureAtlasManager")
         for(auto& _atlas : atlases)
             delete _atlas.second;
     }

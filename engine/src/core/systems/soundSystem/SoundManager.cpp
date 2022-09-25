@@ -26,7 +26,7 @@ namespace GDE {
             return;
         }
 
-        LOG_I("Sound Manager loaded successfully!")
+        LOG_DEBUG("Sound Manager loaded successfully!")
     }
 
     Music& SoundManager::loadMusic(const std::string& _musicPath) {
@@ -123,16 +123,14 @@ namespace GDE {
     }
 
     void SoundManager::destroy() {
-        LOG_S("Cleaning up Sound Manager")
+        LOG_DEBUG("Cleaning up SoundManager")
         stopAll();
 
         for(auto& _music : musics) {
-            LOG_S("     Deleting music: ", _music.first)
             Mix_FreeMusic(_music.second.musicID);
         }
 
         for(auto& _sfx : sfxs) {
-            LOG_S("     Deleting sfx: ", _sfx.first)
             Mix_FreeChunk(_sfx.second.sfxID);
         }
 

@@ -10,7 +10,7 @@
 namespace GDE {
 
     WindowsWindow::WindowsWindow(GDEConfig* _config) : Window(_config) {
-        LOG_I("Platform: Windows")
+        LOG_DEBUG("Platform: Windows")
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -39,7 +39,7 @@ namespace GDE {
             LOG_E("Failed to initialize GLAD")
             return;
         }
-        LOG_I("GLAD and SDL2 loaded successfully");
+        LOG_DEBUG("GLAD and SDL2 loaded successfully");
 
         SDL_GL_SetSwapInterval(1);
 

@@ -34,7 +34,7 @@ namespace GDE {
     typedef std::vector<CollisionState> CollisionStates;
 
     #ifndef MAX_MASKS
-    #define MAX_MASKS 128
+    #define MAX_MASKS 64
     #endif
 
     class PhysicsManager {

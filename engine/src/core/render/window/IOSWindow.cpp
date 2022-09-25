@@ -11,7 +11,7 @@
 namespace GDE {
 
     IOSWindow::IOSWindow(GDEConfig* _config) : Window(_config) {
-        LOG_I("Platform: IOS")
+        LOG_DEBUG("Platform: IOS")
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);

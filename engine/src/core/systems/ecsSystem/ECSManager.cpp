@@ -38,6 +38,7 @@ namespace GDE {
     }
 
     void ECSManager::destroy() {
+        LOG_DEBUG("Cleaning up ECSManager")
         for(auto* system : systems)
             delete system;
     }

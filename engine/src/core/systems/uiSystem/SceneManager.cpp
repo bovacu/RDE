@@ -55,6 +55,7 @@ namespace GDE {
     }
 
     void SceneManager::destroy() {
+        LOG_DEBUG("Cleaning up SceneManager")
         for(auto& _scene : scenes) {
             _scene.second->onEnd();
             delete _scene.second;
