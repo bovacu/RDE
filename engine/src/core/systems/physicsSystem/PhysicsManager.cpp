@@ -23,11 +23,11 @@ namespace GDE {
 
     void PhysicsManager::destroy() {
         LOG_DEBUG("Cleaning up PhysicsManager")
-        for(auto _i = 0; _i < MAX_MASKS * 2; _i++) {
-            for(auto _j = 0; _j < MAX_MASKS * 2; _j++) {
-                delete collisionTable[_i][_j];
-            }
-        }
+//        for(auto _i = 0; _i < MAX_MASKS * 2; _i++) {
+//            for(auto _j = 0; _j < MAX_MASKS * 2; _j++) {
+//                delete collisionTable[_i][_j];
+//            }
+//        }
     }
 
     void PhysicsManager::step(Delta _fxDt) {
@@ -82,8 +82,10 @@ namespace GDE {
         }
 
         // Integrate forces
-        for(auto* _body : bodies)
-            integrateForces(_body, _fxDt );
+        for(auto* _body : bodies) {
+            if(_body->ignorePhysics) continue;
+            integrateForces(_body, _fxDt);
+        }
 
         // Initialize collision
         for(auto& _contact : contacts)
@@ -91,19 +93,24 @@ namespace GDE {
 
         // Solve collisions
         for(auto _i = 0; _i < steps; _i++)
-            for(auto& _contact : contacts)
+            for(auto& _contact : contacts) {
                 _contact.applyImpulse();
+            }
 
         // Integrate velocities
-        for(auto* _body : bodies)
+        for(auto* _body : bodies) {
+            if(_body->ignorePhysics) continue;
             integrateVelocity(_body, _fxDt);
+        }
 
         // Correct positions
-        for(auto& _contact : contacts)
+        for(auto& _contact : contacts) {
             _contact.positionalCorrection();
+        }
 
         // Clear all forces
         for(auto* _body : bodies) {
+            if(_body->ignorePhysics) continue;
             _body->force.set( 0, 0 );
             _body->torque = 0;
         }

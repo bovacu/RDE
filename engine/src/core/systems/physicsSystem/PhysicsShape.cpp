@@ -38,7 +38,9 @@ namespace GDE {
         type = Type::POLYGON;
 
         // No hulls with less than 3 vertices (ensure actual polygon)
-        ENGINE_ASSERT( _vertices.size() > 2 && _vertices.size() <= MAX_VERTICES_PER_POLYGON, "Number of vertices didn't meet requirements")
+        if(_vertices.size() <= 2 || _vertices.size() > MAX_VERTICES_PER_POLYGON) {
+            throw std::runtime_error(APPEND_S("Number of vertices must be in range (2,", MAX_VERTICES_PER_POLYGON, ")"));
+        }
         auto _count = std::min((int)_vertices.size(), MAX_VERTICES_PER_POLYGON );
 
         // Find the right most point on the _hull

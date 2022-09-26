@@ -27,17 +27,27 @@ namespace GDE {
         float density = 1.0f;
         bool ghost = false;
         ulong collisionMask = 0;
+        bool ignorePhysics = false;
     };
 
+    class Scene;
+
     struct PhysicsBody {
+        private:
+            bool staticBody;
+
+        private:
+            void setStatic();
 
         public:
-            PhysicsBody(const NodeID& _id, Transform* _transform, const BodyConfig& _bodyConfig);
+            PhysicsBody(const NodeID& _id, Scene* _scene, const BodyConfig& _bodyConfig);
 
             void applyForce(const Vec2F& _force);
             void applyImpulse(const Vec2F& _impulse, const Vec2F& _contactVector);
-            void setStatic();
             void rotate(float _degrees);
+
+            bool isStatic() const;
+            void setStatic(bool _static);
 
             Transform* transform;
             PhysicsShape shape;
@@ -59,6 +69,7 @@ namespace GDE {
             float restitution;
 
             bool ghost;
+            bool ignorePhysics;
 
             /**
              * @brief This is the "ID" of the body, it tells which type of body it is. It must be a 2^n.

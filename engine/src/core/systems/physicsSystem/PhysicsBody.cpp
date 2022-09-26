@@ -3,13 +3,15 @@
 //
 
 #include "core/systems/physicsSystem/PhysicsBody.h"
+#include "core/graph/Scene.h"
+#include "core/Engine.h"
 
 namespace GDE {
 
-    PhysicsBody::PhysicsBody(const NodeID& _id, Transform* _transform, const BodyConfig& _bodyConfig) {
+    PhysicsBody::PhysicsBody(const NodeID& _id, Scene* _scene, const BodyConfig& _bodyConfig) {
         shape.physicsBody = this;
-        shape.transform = _transform;
-        transform = _transform;
+        shape.transform = _scene->getMainGraph()->getComponent<Transform>(_id);
+        transform = shape.transform;
         velocity = { 0.0f, 0.0f };
         angularVelocity = 0;
         torque = 0;
@@ -41,6 +43,8 @@ namespace GDE {
         } else {
             computeMass(shape);
         }
+
+        _scene->engine->manager.physics.add(this);
     }
 
     void PhysicsBody::rotate(float _degrees) {
@@ -122,5 +126,21 @@ namespace GDE {
 
     void PhysicsBody::applyForce(const Vec2F& _force) {
         force += _force;
+    }
+
+    bool PhysicsBody::isStatic() const {
+        return staticBody;
+    }
+
+    void PhysicsBody::setStatic(bool _static) {
+        if(_static == staticBody) return;
+        staticBody = _static;
+
+        if(staticBody) {
+            setStatic();
+        } else {
+            computeMass(shape);
+        }
+
     }
 }
