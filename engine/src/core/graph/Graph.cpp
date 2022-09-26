@@ -222,6 +222,18 @@ namespace GDE {
         auto* _parentTransform = &registry.get<Transform>(_parent);
         _nodeTransform->parentTransform = _parentTransform;
         _parentTransform->children.push_back(_node);
+
+        auto _prevPosition = _nodeTransform->getModelMatrixPosition();
+        auto _prevScale = _nodeTransform->getModelMatrixScale();
+        auto _prevRotation = _nodeTransform->getModelMatrixRotation();
+
+        _nodeTransform->setPosition(0, 0);
+        _nodeTransform->setScale(1, 1);
+        _nodeTransform->setRotation(0);
+
+        _nodeTransform->translate(_prevPosition - _parentTransform->getModelMatrixPosition());
+        _nodeTransform->scale(_prevScale - _parentTransform->getModelMatrixScale());
+        _nodeTransform->rotate(_prevRotation - _parentTransform->getModelMatrixRotation());
     }
 
     void Graph::remove(const NodeID& _node, bool _delete) {

@@ -34,6 +34,9 @@ namespace Editor {
             void onMouseClick(MouseCode _mouseCode);
             void onMouseEntered();
             void onMouseExited();
+
+            void collisionA(PhysicsBody* _a, PhysicsBody* _b);
+            void collisionB(PhysicsBody* _a, PhysicsBody* _b);
     };
 
 }

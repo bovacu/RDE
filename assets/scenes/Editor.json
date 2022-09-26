@@ -9,7 +9,7 @@
         "fonts" : [
             {
                 "path" : "assets/fonts/arial.ttf",
-                "sizes" : [54]
+                "sizes" : [54, 24, 12]
             }
         ],
         "sfx" : [
@@ -62,10 +62,9 @@
                     "shader" : "basic"
                 },
                 "body" : {
-                    "type" : "DYNAMIC",
-                    "shape" : "BOX",
+                    "shape" : "CIRCLE",
                     "mass" : 1.0,
-                    "size" : [32, 32],
+                    "radius" : 32,
                     "friction" : 0.0,
                     "restitution" : 0.0,
                     "mask" : 2
@@ -92,7 +91,7 @@
                     "shader" : "basic"
                 },
                 "body" : {
-                    "type" : "STATIC",
+                    "isStatic" : true,
                     "shape" : "BOX",
                     "mass" : 1.0,
                     "size" : [32, 32],
@@ -129,14 +128,14 @@
             "components" : {
                 "active" : {},
                 "transform" : {
-                    "position" : [0, 0],
+                    "position" : [250, 64],
                     "scale" : [1, 1],
                     "rotation" : 0
                 },
                 "text_renderer" : {
-                    "text" : "Hello world! \nHello world 2! \nSello world 3! \nWello world 4!",
+                    "text" : "Hello world!\nAnother hello world\nAnother hello world",
                     "font" : "arial",
-                    "sizeSize" : 54,
+                    "fontSize" : 54,
                     "color" : [0, 255, 0, 255],
                     "layer" : 0,
                     "shader" : "basicText"

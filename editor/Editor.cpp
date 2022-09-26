@@ -31,6 +31,8 @@ namespace Editor {
         UDelegate<void(FrameBuffer*)> _delegate;
         _delegate.bind<&Editor::redirectRendering>(this);
 
+        physicsTest();
+
         auto _uiTest = getCanvases()[0]->getGraph()->createNode("TestUINode");
         auto* _transform = getCanvases()[0]->getGraph()->getComponent<Transform>(_uiTest);
         _transform->setPosition(-250, 0);
@@ -64,6 +66,13 @@ namespace Editor {
         }
         ++_frameCounter;
         _timer += _dt;
+
+        auto* _buttonTransform = getMainGraph()->getComponent<Transform>(getMainGraph()->getNode("button"));
+//        _buttonTransform->rotate(50 * _dt);
+
+        if(engine->manager.inputManager.isKeyJustPressed(KeyCode::K)) {
+            getMainGraph()->setParent(getMainGraph()->getNode("RightWall"), getMainGraph()->getNode("Text"));
+        }
     }
 
     void Editor::textStressTest() {
@@ -85,9 +94,8 @@ namespace Editor {
 
     void Editor::onDebugRender(Delta _dt) {
         Scene::onDebugRender(_dt);
-
-        auto _textNode = getMainGraph()->getNode("Text");
-        engine->manager.renderManager.drawSquare(getMainGraph()->getComponent<Transform>(_textNode)->getPosition(), {5, 5}, Color::Blue);
+        auto* _transformRightWall = getMainGraph()->getComponent<Transform>(getMainGraph()->getNode("RightWall"));
+        engine->manager.renderManager.drawSquare(_transformRightWall->getModelMatrixPosition(), {8, 8});
     }
 
     void Editor::physicsTest() {
@@ -107,8 +115,7 @@ namespace Editor {
                     .shapeConfig = _floorShapeConfig,
                     .isStatic = true
             };
-            auto* _floorBody = getMainGraph()->addComponent<PhysicsBody>(_floorId, _transform0, _floorBodyConfig);
-            engine->manager.physics.add(_floorBody);
+            auto* _floorBody = getMainGraph()->addComponent<PhysicsBody>(_floorId, this, _floorBodyConfig);
         }
 
         {
@@ -124,12 +131,11 @@ namespace Editor {
                     .shapeConfig = _leftWallShapeConfig,
                     .isStatic = true
             };
-            auto* _leftWallBody = getMainGraph()->addComponent<PhysicsBody>(_leftWallId, _transform1, _leftWallBodyConfig);
-            engine->manager.physics.add(_leftWallBody);
+            auto* _leftWallBody = getMainGraph()->addComponent<PhysicsBody>(_leftWallId, this, _leftWallBodyConfig);
         }
 
         {
-            auto _rightWallId = getMainGraph()->createNode("RightWall", _colliderParentId);
+            auto _rightWallId = getMainGraph()->createNode("RightWall");
             auto* _transform2 = getMainGraph()->getComponent<Transform>(_rightWallId);
             _transform2->setPosition(300, 0);
             ShapeConfig _rightWallShapeConfig {
@@ -141,71 +147,72 @@ namespace Editor {
                     .shapeConfig = _rightWallShapeConfig,
                     .isStatic = true
             };
-            auto* _rightWallBody = getMainGraph()->addComponent<PhysicsBody>(_rightWallId, _transform2, _rightWallBodyConfig);
-            engine->manager.physics.add(_rightWallBody);
+            auto* _rightWallBody = getMainGraph()->addComponent<PhysicsBody>(_rightWallId, this, _rightWallBodyConfig);
+            auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
+            getMainGraph()->addComponent<SpriteRenderer>(_rightWallId, this, _texture);
         }
 
-        {
-            static int _counter = 0;
-            Random _random;
+//        {
+//            static int _counter = 0;
+//            Random _random;
+//
+//            auto _circleId = getMainGraph()->createNode(APPEND_S("Circle", _counter));
+//            auto* _transform = getMainGraph()->getComponent<Transform>(_circleId);
+//            _transform->setPosition(engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
+//
+//            ShapeConfig _shapeConfig {
+//                    .type = PhysicsShape::CIRCLE,
+//                    .size = { _random.randomf(5, 20), 0 },
+//                    .vertices = {}
+//            };
+//
+//            BodyConfig _bodyConfig {
+//                    .shapeConfig = _shapeConfig,
+//                    .isStatic = false
+//            };
+//
+//            auto* _circleBody = getMainGraph()->addComponent<PhysicsBody>(_circleId, this, _bodyConfig);
+//            _circleBody->restitution = 0.2f;
+//            _circleBody->dynamicFriction = 0.2f;
+//            _circleBody->staticFriction = 0.4f;
+//            _counter++;
+//        }
+//
+//        {
+//            static int _counter = 0;
+//            Random _random;
+//            auto count = _random.randomi(3, 10);
+//            std::vector<Vec2F> vertices;
+//            float e = _random.randomf( 16, 32 );
+//            for(auto _i = 0; _i < count; _i++)
+//                vertices.emplace_back( _random.randomf( -e, e ), _random.randomf( -e, e ) );
+//
+//            ShapeConfig _shapeConfig {
+//                    .type = PhysicsShape::POLYGON,
+//                    .size = {  },
+//                    .vertices = vertices,
+//            };
+//
+//            BodyConfig _bodyConfig {
+//                    .shapeConfig = _shapeConfig,
+//                    .isStatic = false
+//            };
+//
+//            auto _polyId = getMainGraph()->createNode(APPEND_S("Poly", _counter));
+//            auto* _transform = getMainGraph()->getComponent<Transform>(_polyId);
+//            _transform->setPosition(engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
+//            auto* _polyBody = getMainGraph()->addComponent<PhysicsBody>(_polyId, this, _bodyConfig);
+//            _polyBody->rotate(_random.randomf(-180, 180));
+//            _polyBody->restitution = 0.2f;
+//            _polyBody->dynamicFriction = 0.2f;
+//            _polyBody->staticFriction = 0.4f;
+//
+//            _counter++;
+//        }
 
-            auto _circleId = getMainGraph()->createNode(APPEND_S("Circle", _counter));
-            auto* _transform = getMainGraph()->getComponent<Transform>(_circleId);
-            _transform->setPosition(engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
+        engine->manager.physics.addOrGetCollisionToTable(1, 2)->onCollisionEnter.bind<&Editor::collisionA>(this);
+        engine->manager.physics.addOrGetCollisionToTable(2, 2)->onCollisionEnter.bind<&Editor::collisionB>(this);
 
-            ShapeConfig _shapeConfig {
-                    .type = PhysicsShape::CIRCLE,
-                    .size = { _random.randomf(5, 20), 0 },
-                    .vertices = {}
-            };
-
-            BodyConfig _bodyConfig {
-                    .shapeConfig = _shapeConfig,
-                    .isStatic = false
-            };
-
-            auto* _circleBody = getMainGraph()->addComponent<PhysicsBody>(_circleId, _transform, _bodyConfig);
-            _circleBody->restitution = 0.2f;
-            _circleBody->dynamicFriction = 0.2f;
-            _circleBody->staticFriction = 0.4f;
-
-            engine->manager.physics.add(_circleBody);
-            _counter++;
-        }
-
-        {
-            static int _counter = 0;
-            Random _random;
-            auto count = _random.randomi(3, 10);
-            std::vector<Vec2F> vertices;
-            float e = _random.randomf( 16, 32 );
-            for(auto _i = 0; _i < count; _i++)
-                vertices.emplace_back( _random.randomf( -e, e ), _random.randomf( -e, e ) );
-
-            ShapeConfig _shapeConfig {
-                    .type = PhysicsShape::POLYGON,
-                    .size = {  },
-                    .vertices = vertices,
-            };
-
-            BodyConfig _bodyConfig {
-                    .shapeConfig = _shapeConfig,
-                    .isStatic = false
-            };
-
-            auto _polyId = getMainGraph()->createNode(APPEND_S("Poly", _counter));
-            auto* _transform = getMainGraph()->getComponent<Transform>(_polyId);
-            _transform->setPosition(engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
-            auto* _polyBody = getMainGraph()->addComponent<PhysicsBody>(_polyId, _transform, _bodyConfig);
-            _polyBody->rotate(_random.randomf(-180, 180));
-            _polyBody->restitution = 0.2f;
-            _polyBody->dynamicFriction = 0.2f;
-            _polyBody->staticFriction = 0.4f;
-
-            engine->manager.physics.add(_polyBody);
-
-            _counter++;
-        }
     }
 
     void Editor::particleSystemTest() {
@@ -251,6 +258,14 @@ namespace Editor {
 
     void Editor::onMouseExited() {
         LOG_I("Exited!")
+    }
+
+    void Editor::collisionA(PhysicsBody* _a, PhysicsBody* _b) {
+
+    }
+
+    void Editor::collisionB(PhysicsBody* _a, PhysicsBody* _b) {
+
     }
 
 }

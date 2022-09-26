@@ -14,7 +14,6 @@ ar -x ../vcpkg/installed/x64-linux/lib/libjpeg.a
 ar -x ../vcpkg/installed/x64-linux/lib/libmpg123.a
 ar -x ../vcpkg/installed/x64-linux/lib/libogg.a
 ar -x ../vcpkg/installed/x64-linux/lib/libout123.a
-#ar -x ../vcpkg/installed/x64-linux/lib/libsyn123.a
 ar -x ../vcpkg/installed/x64-linux/lib/libturbojpeg.a
 ar -x ../vcpkg/installed/x64-linux/lib/libvorbis.a
 ar -x ../vcpkg/installed/x64-linux/lib/libvorbisenc.a
