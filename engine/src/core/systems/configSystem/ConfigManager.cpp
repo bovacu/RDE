@@ -191,67 +191,67 @@ namespace GDE {
     }
 
     void ConfigManager::loadBodyComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _bodyJson) {
-//        auto _ownerEntityID = _nodeID;
-//
-//        BodyType _bodyType;
-//        if(_bodyJson.contains("type")) {
-//            auto _type = _bodyJson["type"].get<std::string>();
-//            if(std::equal(_type.begin(), _type.end(), "STATIC")) {
-//                _bodyType = BodyType::STATIC;
-//            } else if(std::equal(_type.begin(), _type.end(), "DYNAMIC")) {
-//                _bodyType = BodyType::DYNAMIC;
-//            } else if(std::equal(_type.begin(), _type.end(), "KINEMATIC")) {
-//                _bodyType = BodyType::KINEMATIC;
-//            } else {
-//                _bodyType = BodyType::STATIC;
-//                LOG_W("Tried to load a body with a body type not registered: ", _type)
-//            }
-//        } else {
-//            _bodyType = BodyType::STATIC;
-//        }
-//
-//        BodyShapeType _bodyShapeType;
-//        if(_bodyJson.contains("shape")) {
-//            auto _shape = _bodyJson["shape"].get<std::string>();
-//            if(std::equal(_shape.begin(), _shape.end(), "BOX")) {
-//                _bodyShapeType = BodyShapeType::BOX;
-//            } else if(std::equal(_shape.begin(), _shape.end(), "CIRCLE")) {
-//                _bodyShapeType = BodyShapeType::CIRCLE;
-//            } else if(std::equal(_shape.begin(), _shape.end(), "POLYGON")) {
-//                _bodyShapeType = BodyShapeType::POLYGON;
-//            } else {
-//                _bodyShapeType = BodyShapeType::BOX;
-//                LOG_W("Tried to load a body with a body shape not registered: ", _shape)
-//            }
-//        } else {
-//            _bodyShapeType = BodyShapeType::BOX;
-//        }
-//
-//        ENGINE_ASSERT(_bodyJson.contains("size"), "Body MUST have section 'size'.")
-//        ENGINE_ASSERT(_bodyJson["size"].size() == 2, "Body MUST have section 'size' with exactly 2 elements.")
-//        ENGINE_ASSERT(_bodyJson.contains("mask"), "Body MUST have section 'mask'.")
-//
-//        BodyConfig _bodyConfig {
-//                .size = {_bodyJson["size"][0].get<float>(), _bodyJson["size"][1].get<float>()},
-//                .mask = static_cast<CollisionMask>(_bodyJson["mask"].get<int>()),
-//                .bodyType = _bodyType,
-//                .bodyShapeType = _bodyShapeType,
-//        };
-//
-//        if(_bodyJson.contains("restitution")) {
-//            _bodyConfig.restitution = _bodyJson["restitution"].get<float>();
-//        }
-//
-//        if(_bodyJson.contains("friction")) {
-//            _bodyConfig.friction = _bodyJson["friction"].get<float>();
-//        }
-//
-//        if(_bodyJson.contains("mass")) {
-//            _bodyConfig.mass = _bodyJson["mass"].get<float>();
-//        }
-//
-//        auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
-//        _scene->getMainGraph()->addComponent<Body>(_ownerEntityID, _scene, _bodyConfig, _ownerTransform);
+        auto _ownerEntityID = _nodeID;
+        BodyConfig _bodyConfig;
+
+        ENGINE_ASSERT(_bodyJson.contains("shape"), "Body MUST have section 'shape' with a value of 'box', 'circle' or 'polygon'.")
+        if(_bodyJson.contains("shape")) {
+            auto _shape = _bodyJson["shape"].get<std::string>();
+            std::transform(_shape.begin(), _shape.end(), _shape.begin(), [](unsigned char c){ return std::tolower(c); });
+
+            if(std::equal(_shape.begin(), _shape.end(), "box")) {
+                _bodyConfig.shapeConfig.type = PhysicsShape::BOX;
+                ENGINE_ASSERT(_bodyJson.contains("size"), "PhysicsBody with shape BOX MUST have section 'size' with a Vec2F.")
+                _bodyConfig.shapeConfig.size = { _bodyJson["size"][0].get<float>(), _bodyJson["size"][1].get<float>() };
+            } else if(std::equal(_shape.begin(), _shape.end(), "circle")) {
+                _bodyConfig.shapeConfig.type = PhysicsShape::CIRCLE;
+                ENGINE_ASSERT(_bodyJson.contains("radius"), "PhysicsBody with shape CIRCLE MUST have section 'radius'.")
+                _bodyConfig.shapeConfig.size = { _bodyJson["radius"].get<float>(), 0.f };
+            } else if(std::equal(_shape.begin(), _shape.end(), "polygon")) {
+                _bodyConfig.shapeConfig.type = PhysicsShape::POLYGON;
+                ENGINE_ASSERT(_bodyJson.contains("vertices"), "PhysicsBody with shape POLYGON MUST have section 'vertices' with a list of vertices. Each vertex is a vector of 2 elements.")
+                for(auto& _vertex : _bodyJson["vertices"]) {
+                    _bodyConfig.shapeConfig.vertices.emplace_back(_vertex[0].get<float>(), _vertex[1].get<float>());
+                }
+            } else {
+                _bodyConfig.shapeConfig.type = PhysicsShape::BOX;
+                LOG_W("Tried to load a body with a body shape not registered: ", _shape)
+            }
+        }
+
+        if(_bodyJson.contains("isStatic")) {
+            _bodyConfig.isStatic = _bodyJson["isStatic"].get<bool>();
+        }
+
+        if(_bodyJson.contains("ignorePhysics")) {
+            _bodyConfig.ignorePhysics = _bodyJson["ignorePhysics"].get<bool>();
+        }
+
+        if(_bodyJson.contains("collisionMask")) {
+            _bodyConfig.collisionMask = _bodyJson["collisionMask"].get<ulong>();
+        }
+
+        if(_bodyJson.contains("ghost")) {
+            _bodyConfig.ghost = _bodyJson["ghost"].get<bool>();
+        }
+
+        if(_bodyJson.contains("restitution")) {
+            _bodyConfig.restitution = _bodyJson["restitution"].get<float>();
+        }
+
+        if(_bodyJson.contains("staticFriction")) {
+            _bodyConfig.staticFriction = _bodyJson["staticFriction"].get<float>();
+        }
+
+        if(_bodyJson.contains("dynamicFriction")) {
+            _bodyConfig.dynamicFriction = _bodyJson["dynamicFriction"].get<float>();
+        }
+
+        if(_bodyJson.contains("density")) {
+            _bodyConfig.density = _bodyJson["density"].get<float>();
+        }
+
+        _scene->getMainGraph()->addComponent<PhysicsBody>(_ownerEntityID, _scene, _bodyConfig);
     }
 
     void ConfigManager::loadCameraComponent(const NodeID& _nodeID, Scene* _scene, Window* _window, const nlohmann::json& _cameraJson) {
