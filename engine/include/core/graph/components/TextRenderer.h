@@ -102,12 +102,6 @@ namespace GDE {
             [[nodiscard]] const std::string& getText() const;
 
             /**
-             * @brief Gets the dimensions of the rendered text as a rectangle.
-             * @return Vec2F
-             */
-            [[nodiscard]] Vec2F getTextSize() const;
-
-            /**
              * @brief Sets the font size.
              * @param _fontSize Size of the font.
              */
@@ -139,8 +133,7 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] Vec2F getSize() const override { return {(float)texture->getSize().x * transform->getScale().x, (float)texture->getSize().y *
-                                                                                                                          transform->getScale().y}; }
+            [[nodiscard]] Vec2F getSize() const override { return size; }
 
             /**
              * @see IRenderizable

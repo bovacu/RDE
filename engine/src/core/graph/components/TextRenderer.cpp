@@ -42,10 +42,6 @@ namespace GDE {
         size.set(_totalWidth, _totalHeight);
     }
 
-    Vec2F TextRenderer::getTextSize() const {
-        return { size.x * transform->getModelMatrixScale().x, size.y * transform->getModelMatrixScale().y };
-    }
-
     void TextRenderer::setFontSize(int _fontSize) {
         LOG_W("Set font size not working!!")
 //        fontSize = _fontSize;
