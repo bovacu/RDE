@@ -212,6 +212,7 @@ namespace GDE {
 
         _nodeTransform->parent = _parent;
         auto* _parentTransform = &registry.get<Transform>(_parent);
+        auto _worldParent = _parentTransform->localToWorld();
 
         auto _prevPosition = _nodeTransform->getModelMatrixPosition();
         auto _prevScale = _nodeTransform->getModelMatrixScale();
@@ -221,7 +222,12 @@ namespace GDE {
         auto _newScale = Vec2F {_prevScale.x / _parentTransform->getModelMatrixScale().x, _prevScale.y / _parentTransform->getModelMatrixScale().y };
         auto _newRotation = _prevRotation - _parentTransform->getModelMatrixRotation();
 
-        _nodeTransform->setPosition( {_newPos.x * _newScale.x, _newPos.y * _newScale.y} );
+        auto _radians = glm::radians(_newRotation);
+        float _c = std::cos(_radians);
+        float _s = std::sin(_radians);
+
+        Vec2F _transformedPosition { (_newPos.x * _c - _newPos.y * _s) * _newScale.x, (_newPos.x * _s + _newPos.y * _c) * _newScale.y };
+        _nodeTransform->setPosition(_transformedPosition);
         _nodeTransform->setRotation(_newRotation);
         _nodeTransform->setScale(_newScale);
 
