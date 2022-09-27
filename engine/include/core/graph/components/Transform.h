@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "glm/ext/matrix_transform.hpp"
+#include "glm/gtc/quaternion.hpp"
 #include "core/util/Vec.h"
 #include "entt/entity/entity.hpp"
 
@@ -20,29 +21,9 @@ namespace GDE {
     class Transform {
 
         private:
-            /**
-             * @brief 3D (although just 2D coords are used) of where the entity is, related to its parent, in WorldSpace (but relative to its parent).
-             *
-             */
-            glm::vec3 localPosition {0.0f, 0.0f, 0.0f};
-
-            /**
-             * @brief 3D  (although just 2D coords are used) of the entity's scale.
-             *
-             */
-            glm::vec3 localScale { 1.0f, 1.0f, 1.0f };
-
-            /**
-             * @brief Rotation of the entity.
-             *
-             */
-            float localRotation = 0.0f;
-
-            /**
-             * @brief Flag that tells the internal ECS system if an object needs or not to be updated. This saves lots of computing resources.
-             *
-             */
-            bool dirty = false;
+            glm::vec3 innerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+            glm::quat innerRotation = glm::quat(glm::vec3(0, 0, 0));
+            glm::vec3 innerScale = glm::vec3(1.0f, 1.0f, 1.0f);
 
         public:
             bool staticTransform = false;
@@ -71,32 +52,6 @@ namespace GDE {
              *
              */
             std::vector<NodeID> children;
-
-            /**
-             * @brief 4x4 matrix containing the WorldSpace position, rotation and scale. Is the result of ParentModelMatrix * localModelMatrix.
-             *
-             */
-            glm::mat4 modelMatrix = glm::mat4(1.0f);
-
-            /**
-             * @brief Same as modelMatrix but relative to its parent.
-             *
-             */
-            glm::mat4 localModelMatrix = glm::mat4(1.0f);
-
-            /**
-             * @brief Calculates the new local model matrix of the entity.
-             *
-             * @return glm::mat4
-             */
-            glm::mat4 getLocalModelMatrix();
-
-            /**
-             * @brief This method updates the position, rotation and scale of the entity, modifying its local and model matrices.
-             */
-            void update();
-
-            void forceUpdate();
 
             /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
@@ -180,9 +135,16 @@ namespace GDE {
              */
             void scale(float _x, float _y);
 
-            Vec2F getModelMatrixPosition() const;
-            Vec2F getModelMatrixScale() const;
-            float getModelMatrixRotation() const;
+            [[nodiscard]] Vec2F getModelMatrixPosition() const;
+            [[nodiscard]] Vec2F getModelMatrixScale() const;
+            [[nodiscard]] float getModelMatrixRotation() const;
+
+            [[nodiscard]] glm::mat4 localToParent() const;
+            [[nodiscard]] glm::mat4 parentToLocal() const;
+            [[nodiscard]] glm::mat4 localToWorld() const;
+            [[nodiscard]] glm::mat4 worldToLocal() const;
+
+            void setMatrix(const glm::mat4& _matrix);
     };
 
 }

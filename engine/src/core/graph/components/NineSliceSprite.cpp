@@ -24,7 +24,7 @@ namespace GDE {
         for(auto _i = 0; _i < _rectsAmount; _i++) {
             auto _vertexCount = _vertices.size();
             auto& _subTextureRegion = texture->nineSlice.subRects[_i];
-            auto _transformMat = _transform.modelMatrix;
+            auto _transformMat = _transform.localToWorld();
 
             float _distortX = 1.f, _distortY = 1.f;
             auto _uiSize = nineSliceSize;

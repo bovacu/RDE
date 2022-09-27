@@ -94,8 +94,8 @@ namespace GDE {
                 float _w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
                 float _h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;
 
-                auto _transformMat = _transform.modelMatrix;
-                auto _screenPos = Util::worldToScreenCoords(_viewport, { _transform.modelMatrix[3][0], _transform.modelMatrix[3][1] });
+                auto _transformMat = _transform.localToWorld();
+                auto _screenPos = Util::worldToScreenCoords(_viewport, { _transformMat[3][0], _transformMat[3][1] });
                 _transformMat[3][0] = _screenPos.x;
                 _transformMat[3][1] = _screenPos.y;
 

@@ -1,0 +1,53 @@
+{
+    "scene_name" : "Test Scene",
+
+    "assets" : {
+        "textures" : [
+            "assets/sprites/assets.json"
+        ],
+        "fonts" : [
+            {
+                "path": "assets/fonts/Yulong-Regular.ttf",
+                "sizes": [ 54 ]
+            }
+        ],
+        "sfx" : [
+
+        ],
+        "music" : [
+            
+        ]
+    },
+
+    "nodes" : [
+        {
+            "tag" : "Main Camera",
+            "components" : {
+                "active" : {},
+                "transform" : {
+                    "position" : [0, 0],
+                    "scale" : [1, 1],
+                    "rotation" : 0
+                },
+                "camera" : {
+                    "tag" : "Main Camera",
+                    "zoom" : 1.0,
+                    "zoom_speed" : 0.25,
+                    "viewport" : "ADAPTIVE",
+                    "view_port_virtual_resolution" : [540, 960],
+                    "view_port_device_resolution" : [540, 960],
+                    "is_main" : true
+                }
+            }
+        }
+    ],
+
+    "canvases" : [
+        {
+            "tag" : "Main Canvas",
+            "nodes" : {
+
+            }
+        }
+    ]
+}
