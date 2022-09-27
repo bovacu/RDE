@@ -43,14 +43,6 @@ namespace GDE {
     }
 
     void Graph::onUpdate(Delta _dt) {
-        registry.view<Transform, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Active& _) {
-            _transform.update();
-
-            if(_transform.staticTransform) {
-                addComponent<StaticTransform>(_entity);
-            }
-        });
-
         registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
             _animationSystem.update(_dt, _spriteRenderer);
         });
@@ -157,7 +149,6 @@ namespace GDE {
         (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent))->children.push_back(_copy);
         _transform->setPosition(_position);
         _transform->parentTransform = (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent));
-        _transform->update();
         if(_parent != NODE_ID_NULL) setParent(_copy, _parent);
         setNodeActive(_copy, true);
 
@@ -218,22 +209,24 @@ namespace GDE {
         }
 
         remove(_node, false);
+
         _nodeTransform->parent = _parent;
         auto* _parentTransform = &registry.get<Transform>(_parent);
-        _nodeTransform->parentTransform = _parentTransform;
-        _parentTransform->children.push_back(_node);
 
         auto _prevPosition = _nodeTransform->getModelMatrixPosition();
         auto _prevScale = _nodeTransform->getModelMatrixScale();
         auto _prevRotation = _nodeTransform->getModelMatrixRotation();
 
-        _nodeTransform->setPosition(0, 0);
-        _nodeTransform->setScale(1, 1);
-        _nodeTransform->setRotation(0);
+        auto _newPos = _prevPosition - _parentTransform->getModelMatrixPosition();
+        auto _newScale = Vec2F {_prevScale.x / _parentTransform->getModelMatrixScale().x, _prevScale.y / _parentTransform->getModelMatrixScale().y };
+        auto _newRotation = _prevRotation - _parentTransform->getModelMatrixRotation();
 
-        _nodeTransform->translate(_prevPosition - _parentTransform->getModelMatrixPosition());
-        _nodeTransform->scale(_prevScale - _parentTransform->getModelMatrixScale());
-        _nodeTransform->rotate(_prevRotation - _parentTransform->getModelMatrixRotation());
+        _nodeTransform->setPosition( {_newPos.x * _newScale.x, _newPos.y * _newScale.y} );
+        _nodeTransform->setRotation(_newRotation);
+        _nodeTransform->setScale(_newScale);
+
+        _nodeTransform->parentTransform = _parentTransform;
+        _parentTransform->children.push_back(_node);
     }
 
     void Graph::remove(const NodeID& _node, bool _delete) {

@@ -32,8 +32,8 @@ namespace GDE {
     void SpriteRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const {
         auto _vertexCount = _vertices.size();
 
-        auto _transformMat = _transform.modelMatrix;
-        auto _screenPos = Util::worldToScreenCoords(_viewport, {_transform.modelMatrix[3][0], _transform.modelMatrix[3][1]});
+        auto _transformMat = _transform.localToWorld();
+        auto _screenPos = Util::worldToScreenCoords(_viewport, {_transformMat[3][0], _transformMat[3][1]});
         _transformMat[3][0] = _screenPos.x;
         _transformMat[3][1] = _screenPos.y;
 

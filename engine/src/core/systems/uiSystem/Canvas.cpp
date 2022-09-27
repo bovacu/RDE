@@ -37,10 +37,7 @@ namespace GDE {
     }
 
     void Canvas::onUpdate(Delta _dt) {
-        auto& _registry = graph.getNodeContainer();
-        _registry.view<Transform, Active>(entt::exclude<StaticTransform>).each([&](const auto _entity, Transform& _transform, const Active& _) {
-            _transform.update();
-        });
+
     }
 
     void Canvas::onRender() {

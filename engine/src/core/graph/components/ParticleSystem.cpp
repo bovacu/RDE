@@ -99,7 +99,7 @@ namespace GDE {
         for (auto& _particle : usedParticles) {
             auto _vertexCount = _vertices.size();
 
-            auto _transformMat = _transform.modelMatrix;
+            auto _transformMat = _transform.localToWorld();
             auto _screenPos = Util::worldToScreenCoords(_viewport, {_particle.position.x, _particle.position.y});
             _transformMat[3][0] = _screenPos.x;
             _transformMat[3][1] = _screenPos.y;
