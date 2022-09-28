@@ -20,6 +20,7 @@ namespace GDE {
         dynamicFriction = _bodyConfig.dynamicFriction;
         restitution = _bodyConfig.restitution;
         density = _bodyConfig.density;
+        ignorePhysics = _bodyConfig.ignorePhysics;
 
         collisionMask = _bodyConfig.collisionMask;
         ghost = _bodyConfig.ghost;

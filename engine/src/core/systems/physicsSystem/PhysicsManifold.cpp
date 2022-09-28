@@ -96,6 +96,11 @@ namespace GDE {
     void PhysicsManifold::positionalCorrection() {
         const float _slop = 0.05f; // Penetration allowance
         const float _percent = 0.4f; // Penetration percentage to correct
+
+        if(PhysicsMath::approximatelyEqual(A->inverseMass + B->inverseMass, 0)) {
+            return;
+        }
+
         Vec2F _correction = (std::max(penetration - _slop, 0.0f) / (A->inverseMass + B->inverseMass)) * normal * _percent;
         A->transform->translate(-(_correction * A->inverseMass));
         B->transform->translate(_correction * B->inverseMass);

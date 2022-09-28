@@ -26,7 +26,9 @@ namespace GDE {
         _config->windowData.title = data["title"].get<std::string>(),
         _config->windowData.fullScreen = data["fullscreen"].get<bool>(),
         _config->windowData.vsync = data["vsync"].get<bool>(),
+        #if !IS_MOBILE()
         _config->windowData.size = Vec2<unsigned int>{data["resolution"][0].get<unsigned int>(),data["resolution"][1].get<unsigned int>()};
+        #endif
         _config->projectData.iconPath = data["icon"].get<std::string>();
         _config->projectData.mainSceneToLoad = data["main_scene"].get<std::string>();
     }
@@ -267,10 +269,8 @@ namespace GDE {
             }
 
             #if IS_MOBILE()
-                auto _virtualRes = _cameraJson.contains("view_port_virtual_resolution") && _cameraJson["view_port_virtual_resolution"].size() == 2 ?
-                                   Vec2I{_cameraJson["view_port_virtual_resolution"][0].get<int>(), _cameraJson["view_port_virtual_resolution"][1].get<int>()} :
-                                   _window->getWindowSize();
-                _scene->getMainCamera()->setAdaptiveViewport(_virtualRes, _window->getWindowSize());
+                _scene->getMainCamera()->setFreeViewport({ _window->getWindowSize().x % 2 != 0 ? _window->getWindowSize().x + 1 : _window->getWindowSize().x,
+                                                           _window->getWindowSize().y % 2 != 0 ? _window->getWindowSize().y + 1 : _window->getWindowSize().y});
             #else
                 auto _viewPortType = _cameraJson["viewport"].get<std::string>();
                 if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
@@ -307,10 +307,8 @@ namespace GDE {
             }
 
             #if IS_MOBILE()
-                auto _virtualRes = _cameraJson.contains("view_port_virtual_resolution") && _cameraJson["view_port_virtual_resolution"].size() == 2 ?
-                                   Vec2I{_cameraJson["view_port_virtual_resolution"][0].get<int>(), _cameraJson["view_port_virtual_resolution"][1].get<int>()} :
-                                   _window->getWindowSize();
-                _camera->setAdaptiveViewport(_virtualRes, _window->getWindowSize());
+                _camera->setFreeViewport({ _window->getWindowSize().x % 2 != 0 ? _window->getWindowSize().x + 1 : _window->getWindowSize().x,
+                                                       _window->getWindowSize().y % 2 != 0 ? _window->getWindowSize().y + 1 : _window->getWindowSize().y});
             #else
                 auto _viewPortType = _cameraJson["viewport"].get<std::string>();
                 if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
