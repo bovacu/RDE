@@ -33,8 +33,9 @@ namespace GDE {
 
     void ConfigManager::loadScene(Manager* _manager, Scene* _scene, Window* _window, const std::string& _configFilePath) {
         auto _fileHandler = _manager->fileManager.open(_configFilePath, FileMode::READ);
-    
-        nlohmann::json _sceneJson = nlohmann::json::parse(_manager->fileManager.readFullFile(_fileHandler).content);
+
+        auto _content = _manager->fileManager.readFullFile(_fileHandler).content;
+        nlohmann::json _sceneJson = nlohmann::json::parse(_content);
         _manager->fileManager.close(_fileHandler);
 
         loadAssets(_scene, _window, _sceneJson);
@@ -265,24 +266,31 @@ namespace GDE {
                 _scene->getMainCamera()->setZoomSpeed(_cameraJson["zoom_speed"].get<float>());
             }
 
-            auto _viewPortType = _cameraJson["viewport"].get<std::string>();
-            if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
-
+            #if IS_MOBILE()
                 auto _virtualRes = _cameraJson.contains("view_port_virtual_resolution") && _cameraJson["view_port_virtual_resolution"].size() == 2 ?
                                    Vec2I{_cameraJson["view_port_virtual_resolution"][0].get<int>(), _cameraJson["view_port_virtual_resolution"][1].get<int>()} :
                                    _window->getWindowSize();
+                _scene->getMainCamera()->setAdaptiveViewport(_virtualRes, _window->getWindowSize());
+            #else
+                auto _viewPortType = _cameraJson["viewport"].get<std::string>();
+                if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
 
-                auto _deviceRes = _cameraJson.contains("view_port_device_resolution") && _cameraJson["view_port_device_resolution"].size() == 2 ?
-                                  Vec2I{_cameraJson["view_port_device_resolution"][0].get<int>(), _cameraJson["view_port_device_resolution"][1].get<int>()} :
-                                  _window->getWindowSize();
+                    auto _virtualRes = _cameraJson.contains("view_port_virtual_resolution") && _cameraJson["view_port_virtual_resolution"].size() == 2 ?
+                                       Vec2I{_cameraJson["view_port_virtual_resolution"][0].get<int>(), _cameraJson["view_port_virtual_resolution"][1].get<int>()} :
+                                       _window->getWindowSize();
 
-                _scene->getMainCamera()->setAdaptiveViewport(_virtualRes, _deviceRes);
-            } else if(std::equal(_viewPortType.begin(), _viewPortType.end(), "FREE")) {
-                _scene->getMainCamera()->setFreeViewport(_window->getWindowSize());
-            } else {
-                _scene->getMainCamera()->setFreeViewport(_window->getWindowSize());
-                LOG_W("Tried to load a camera viewport with a type not registered: ", _viewPortType)
-            }
+                    auto _deviceRes = _cameraJson.contains("view_port_device_resolution") && _cameraJson["view_port_device_resolution"].size() == 2 ?
+                                      Vec2I{_cameraJson["view_port_device_resolution"][0].get<int>(), _cameraJson["view_port_device_resolution"][1].get<int>()} :
+                                      _window->getWindowSize();
+
+                    _scene->getMainCamera()->setAdaptiveViewport(_virtualRes, _deviceRes);
+                } else if(std::equal(_viewPortType.begin(), _viewPortType.end(), "FREE")) {
+                    _scene->getMainCamera()->setFreeViewport(_window->getWindowSize());
+                } else {
+                    _scene->getMainCamera()->setFreeViewport(_window->getWindowSize());
+                    LOG_W("Tried to load a camera viewport with a type not registered: ", _viewPortType)
+                }
+            #endif
 
             _scene->getMainCamera()->getViewport()->update(_window->getWindowSize());
         } else {
@@ -298,26 +306,34 @@ namespace GDE {
                 _camera->setZoomSpeed(_cameraJson["zoom_speed"].get<float>());
             }
 
-            auto _viewPortType = _cameraJson["viewport"].get<std::string>();
-            if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
-
+            #if IS_MOBILE()
                 auto _virtualRes = _cameraJson.contains("view_port_virtual_resolution") && _cameraJson["view_port_virtual_resolution"].size() == 2 ?
                                    Vec2I{_cameraJson["view_port_virtual_resolution"][0].get<int>(), _cameraJson["view_port_virtual_resolution"][1].get<int>()} :
                                    _window->getWindowSize();
+                _camera->setAdaptiveViewport(_virtualRes, _window->getWindowSize());
+            #else
+                auto _viewPortType = _cameraJson["viewport"].get<std::string>();
+                if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
 
-                auto _deviceRes = _cameraJson.contains("view_port_device_resolution") && _cameraJson["view_port_device_resolution"].size() == 2 ?
-                                  Vec2I{_cameraJson["view_port_device_resolution"][0].get<int>(), _cameraJson["view_port_device_resolution"][1].get<int>()} :
-                                  _window->getWindowSize();
+                    auto _virtualRes = _cameraJson.contains("view_port_virtual_resolution") && _cameraJson["view_port_virtual_resolution"].size() == 2 ?
+                                       Vec2I{_cameraJson["view_port_virtual_resolution"][0].get<int>(), _cameraJson["view_port_virtual_resolution"][1].get<int>()} :
+                                       _window->getWindowSize();
 
-                _camera->setAdaptiveViewport(_virtualRes, _deviceRes);
-            } else if(std::equal(_viewPortType.begin(), _viewPortType.end(), "FREE")) {
-                _camera->setFreeViewport(_window->getWindowSize());
-            } else {
-                _camera->setFreeViewport(_window->getWindowSize());
-                LOG_W("Tried to load a camera viewport with a type not registered: ", _viewPortType)
-            }
+                    auto _deviceRes = _cameraJson.contains("view_port_device_resolution") && _cameraJson["view_port_device_resolution"].size() == 2 ?
+                                      Vec2I{_cameraJson["view_port_device_resolution"][0].get<int>(), _cameraJson["view_port_device_resolution"][1].get<int>()} :
+                                      _window->getWindowSize();
+
+                    _camera->setAdaptiveViewport(_virtualRes, _deviceRes);
+                } else if(std::equal(_viewPortType.begin(), _viewPortType.end(), "FREE")) {
+                    _camera->setFreeViewport(_window->getWindowSize());
+                } else {
+                    _camera->setFreeViewport(_window->getWindowSize());
+                    LOG_W("Tried to load a camera viewport with a type not registered: ", _viewPortType)
+                }
+            #endif
 
             _camera->getViewport()->update(_window->getWindowSize());
+            LOG_I("Created camera with viewport of size: ", _window->getWindowSize())
             _scene->getCameras().push_back(_camera);
         }
     }
@@ -330,8 +346,8 @@ namespace GDE {
 
         auto _fontSize = 54;
 
-        if(_textRendererJson.contains("fontSize")) {
-            _fontSize = _textRendererJson["fontSize"].get<int>();
+        if(_textRendererJson.contains("font_size")) {
+            _fontSize = _textRendererJson["font_size"].get<int>();
         }
 
         auto* _textRenderer = _scene->getMainGraph()->addComponent<TextRenderer>(_ownerEntityID, _scene,

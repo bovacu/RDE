@@ -29,5 +29,6 @@
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
 #include "core/graph/components/NineSliceSprite.h"
+#include "core/graph/components/UIButton.h"
 
 #endif //GDE_H

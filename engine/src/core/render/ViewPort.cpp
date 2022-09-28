@@ -47,7 +47,7 @@ namespace GDE {
     }
 
     void AdaptiveViewPort::update(const Vec2I& _deviceSize) {
-        scalingFactor = {(float)_deviceSize.x / (float)virtualResolution.x, (float)_deviceSize.y / (float)virtualResolution.y};
+        scalingFactor = {(float)virtualResolution.x / (float)_deviceSize.x, (float)virtualResolution.y / (float)_deviceSize.y};
         aspectRatio = (float)_deviceSize.x / (float)_deviceSize.y;
         deviceResolution = _deviceSize;
     }

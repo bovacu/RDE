@@ -297,7 +297,9 @@ namespace GDE {
     }
 
     void SpriteBatch::Debug::setPointSize(float _size) {
+    #if !IS_MOBILE()
         glPointSize(_size);
+    #endif
     }
 
 

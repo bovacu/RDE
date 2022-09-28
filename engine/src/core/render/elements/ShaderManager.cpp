@@ -13,7 +13,7 @@ namespace GDE {
         IRenderizable::defaultShaders[SPRITE_RENDERER_SHADER] = loadShader(SPRITE_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_ES, TEXTURE_FRAGMENT_SHADER_ES);
         IRenderizable::defaultShaders[DEBUG_SHADER] = loadShader(DEBUG_SHADER, DEBUG_VERTEX_SHADER_ES, DEBUG_FRAGMENT_SHADER_ES);
         IRenderizable::defaultShaders[TEXT_RENDERER_SHADER] = loadShader(TEXT_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_ES, TEXT_FRAGMENT_SHADER_ES);
-        IRenderizable::defaultShaders[FRAMEBUFFER_SHADER] = loadShader(FRAMEBUFFER_SHADER, "assets/shaders/es/framebuffer/FrameBufferVertex.glsl", "assets/shaders/es/framebuffer/FrameBufferFragment.glsl");
+        IRenderizable::defaultShaders[FRAMEBUFFER_SHADER] = loadShader(FRAMEBUFFER_SHADER, FRAMEBUFFER_VERTEX_SHADER_CORE, FRAMEBUFFER_FRAGMENT_SHADER_CORE);
         #else
         IRenderizable::defaultShaders[SPRITE_RENDERER_SHADER] = loadShader(SPRITE_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_CORE, TEXTURE_FRAGMENT_SHADER_CORE);
         IRenderizable::defaultShaders[DEBUG_SHADER] = loadShader(DEBUG_SHADER, DEBUG_VERTEX_SHADER_CORE, DEBUG_FRAGMENT_SHADER_CORE);
