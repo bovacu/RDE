@@ -3,7 +3,7 @@
     "sprite_sheet_size": [128, 32],
     "sprite_sheet_settings": {
         "format": "png",
-        "path": "/home/borja/Documents/GDE/defaultAssets/defaultAssets.png"
+        "path": "defaultAssets/defaultAssets.png"
     },
     "sprites" : [
         {
