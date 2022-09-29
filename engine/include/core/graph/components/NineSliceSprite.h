@@ -10,21 +10,20 @@
 
 namespace GDE {
 
+    class SpriteRenderer;
     /**
      * @brief Component that is based on the SpriteRenderer, but allows to render UI images with a different size than the original
      * without loosing quality. The setup of this NineSlice should be done via TexturePacker.
      */
     class NineSliceSprite : public UI {
+        private:
+            SpriteRenderer* spriteRenderer = nullptr;
+
         public:
             /**
              * @brief This is the size we want the UI to be rendered, may or may not match UI::getSize().
              */
             Vec2F nineSliceSize;
-
-            /**
-             * @see UIInteractable
-             */
-            UIInteractable* interaction = nullptr;
 
             NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture);
 

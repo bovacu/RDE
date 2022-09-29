@@ -36,7 +36,7 @@ namespace GDE {
         EventDispatcher _eventDispatcher(_event);
 
         for(auto* _canvas : scene->canvases) {
-            _canvas->onEvent(_eventDispatcher, _event);
+            _canvas->onEvent(scene->engine, _eventDispatcher, _event);
         }
 
         onEventDel(registry, _event);
@@ -163,7 +163,7 @@ namespace GDE {
     }
 
     void Graph::removeNode(const NodeID& _node) {
-        remove(_node, false);
+        remove(_node, true);
     }
 
     void Graph::removeNode(const std::string& _nodeTagName) {
@@ -210,7 +210,6 @@ namespace GDE {
 
         remove(_node, false);
 
-        _nodeTransform->parent = _parent;
         auto* _parentTransform = &registry.get<Transform>(_parent);
 
         auto _prevPosition = _nodeTransform->getModelMatrixPosition();
@@ -230,6 +229,7 @@ namespace GDE {
         _nodeTransform->setRotation(_newRotation);
         _nodeTransform->setScale(_newScale);
 
+        _nodeTransform->parent = _parent;
         _nodeTransform->parentTransform = _parentTransform;
         _parentTransform->children.push_back(_node);
     }
@@ -248,6 +248,10 @@ namespace GDE {
         if(_delete) {
             for(auto _child : _nodeTransform->children) {
                 remove(_child, _delete);
+            }
+
+            if(hasComponent<PhysicsBody>(_node)) {
+                scene->engine->manager.physics.remove(getComponent<PhysicsBody>(_node));
             }
 
             registry.destroy(_node);

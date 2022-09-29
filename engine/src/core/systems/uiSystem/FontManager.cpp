@@ -132,6 +132,10 @@ namespace GDE {
     }
 
     Font* FontManager::getDefaultFont(const std::string& _fontName) {
+        if(fonts.find(_fontName) == fonts.end()) {
+            LOG_E("Font ", _fontName, " is not loaded")
+            return nullptr;
+        }
         return fonts[_fontName].front().font;
     }
 

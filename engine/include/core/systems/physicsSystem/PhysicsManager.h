@@ -58,6 +58,7 @@ namespace GDE {
 
             void step(Delta _fxDt);
             void add(PhysicsBody* _physicsBody);
+            void remove(PhysicsBody* _physicsBody);
             void debugRender(RenderManager* _renderManager);
 
             PhysicsCollisionCallbacks* addOrGetCollisionToTable(ulong _bodyMaskA, ulong _bodyMaskB);

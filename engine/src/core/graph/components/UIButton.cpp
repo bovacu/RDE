@@ -8,16 +8,17 @@
 namespace GDE {
 
 
-    UIButton::UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture, Font* _font, const std::string& _text) : UI(_scene->getMainGraph()->getComponent<Transform>(_nodeID)) {
+    UIButton::UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture, Font* _font, const std::string& _text) : UI(_nodeID, _canvas) {
         UI::texture = _texture;
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::texture = _texture;
         UI::batchPriority = BatchPriority::SpritePriority;
 
         nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, _texture);
+        nineSliceSprite->interaction = UI::interaction;
 
         auto _textRendererId = _canvas->getGraph()->createNode("Text", _nodeID);
-        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textRendererId, _scene, _font, _text);
+        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textRendererId, _canvas, _font, _text);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
     }
 

@@ -34,7 +34,7 @@ namespace GDE {
 
     struct PhysicsBody {
         private:
-            bool staticBody;
+            bool staticBody = false;
 
         private:
             void setStatic();

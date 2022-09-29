@@ -213,6 +213,27 @@ namespace GDE {
         bodies.push_back(_physicsBody);
     }
 
+    void PhysicsManager::remove(PhysicsBody* _physicsBody) {
+        auto _it = std::find(bodies.begin(), bodies.end(), _physicsBody);
+        if(_it != bodies.end()) {
+            bodies.erase(_it);
+        }
+
+        auto _it1 = std::find_if(contacts.begin(), contacts.end(), [_physicsBody](PhysicsManifold& _contact) {
+            return _contact.A == _physicsBody || _contact.B == _physicsBody;
+        });
+        if(_it1 != contacts.end()) {
+            contacts.erase(_it1);
+        }
+
+        auto _it2 = std::find_if(collisionStates.begin(), collisionStates.end(), [_physicsBody](CollisionState& _collisionState) {
+            return _collisionState.A == _physicsBody || _collisionState.B == _physicsBody;
+        });
+        if(_it2 != collisionStates.end()) {
+            collisionStates.erase(_it2);
+        }
+    }
+
     bool PhysicsManager::collisionCircleCircle(PhysicsManifold& _manifold, PhysicsBody* _bodyA, PhysicsBody* _bodyB) {
         auto& _a = _bodyA->shape;
         auto& _b = _bodyB->shape;
@@ -581,6 +602,8 @@ namespace GDE {
 
         return collisionTable[_bodyMaskA][_bodyMaskB] != nullptr;
     }
+
+
 
 
 }

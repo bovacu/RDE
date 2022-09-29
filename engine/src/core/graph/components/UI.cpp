@@ -8,15 +8,25 @@
 #include "core/systems/eventSystem/ControllerEvent.h"
 #include "core/systems/eventSystem/MobileEvent.h"
 #include "core/graph/components/Components.h"
+#include "core/graph/components/NineSliceSprite.h"
+#include "core/Engine.h"
 
 namespace GDE {
 
     UIInteractable::UIInteractable(const NodeID& _nodeId) {  }
 
-    void UIInteractable::onEvent(const NodeID& _nodeID, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas) {
-        if (interactionTrigger == nullptr) return;
+    static bool trigger(const NodeID& _nodeID, Engine* _engine, Canvas* _canvas) {
+        auto* _ninePatch = _canvas->getGraph()->getComponent<NineSliceSprite>(_nodeID);
+        auto* _transform = _canvas->getGraph()->getComponent<Transform>(_nodeID);
+        auto _mousePos = _engine->manager.inputManager.getMousePosWorldPos();
 
-        if(interactionTrigger(_nodeID, _canvas)) {
+        return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_ninePatch->getSize().x, (float)_ninePatch->getSize().y});
+    }
+
+    void UIInteractable::onEvent(const NodeID& _nodeID, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas) {
+        if (!_canvas->getGraph()->hasComponent<Active>(_nodeID)) return;
+
+        if(trigger(_nodeID, _engine, _canvas)) {
             if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onClick.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
                 auto* _mre = (MouseButtonReleasedEvent*)&_event;

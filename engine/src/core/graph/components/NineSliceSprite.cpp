@@ -7,11 +7,15 @@
 
 namespace GDE {
 
-    NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture) : UI(_scene->getMainGraph()->getComponent<Transform>(_nodeID)) {
+    NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture) : UI(_nodeID, _canvas) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         texture = _texture;
+
+        if(!_texture->nineSlice.isEnabled()) {
+            spriteRenderer = _canvas->getGraph()->addComponent<SpriteRenderer>(_nodeID, _canvas, _texture);
+        }
+
         nineSliceSize = _texture->getRegion().size;
-        interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
     }
 
@@ -20,6 +24,11 @@ namespace GDE {
     }
 
     void NineSliceSprite::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const {
+        if(spriteRenderer) {
+            spriteRenderer->draw(_vertices, _indices, _transform, _viewport);
+            return;
+        }
+
         auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
         for(auto _i = 0; _i < _rectsAmount; _i++) {
             auto _vertexCount = _vertices.size();

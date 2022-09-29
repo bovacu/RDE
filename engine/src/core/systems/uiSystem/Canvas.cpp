@@ -25,12 +25,12 @@ namespace GDE {
         return &graph;
     }
 
-    void Canvas::onEvent(EventDispatcher& _eventDispatcher, Event& _event) {
+    void Canvas::onEvent(Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event) {
         auto& _registry = graph.getNodeContainer();
         auto _interactables = _registry.group<UIInteractable>(entt::get<Active>);
 
-        _interactables.each([&_eventDispatcher, &_event, this](const auto _entity, UIInteractable& _interacable, const Active& _) {
-            _interacable.onEvent(_entity, _eventDispatcher, _event, this);
+        _interactables.each([&_eventDispatcher, &_event, _engine, this](const auto _entity, UIInteractable& _interactable, const Active& _) {
+            _interactable.onEvent(_entity, _engine, _eventDispatcher, _event, this);
         });
 
         graph.onEventDel(_registry, _event);

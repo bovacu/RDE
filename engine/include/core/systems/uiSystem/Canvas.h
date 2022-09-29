@@ -64,7 +64,7 @@ namespace GDE {
              * @param _eventDispatcher Event dispatcher
              * @param _event Event
              */
-            void onEvent(EventDispatcher& _eventDispatcher, Event& _event);
+            void onEvent(Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event);
 
             /**
              * @brief Handles the update of the the UI elements.

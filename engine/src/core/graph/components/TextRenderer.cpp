@@ -20,6 +20,15 @@ namespace GDE {
         IRenderizable::batchPriority = BatchPriority::TextPriority;
     }
 
+    TextRenderer::TextRenderer(const NodeID& _nodeId, Canvas* _canvas, Font* _font, const std::string& _text) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeId)) {
+        font = _font;
+        innerText = _text;
+        recalcTextDimensions(_text);
+        shaderID = defaultShaders[TEXT_RENDERER_SHADER];
+        texture = &font->getTexture();
+        IRenderizable::batchPriority = BatchPriority::TextPriority;
+    }
+
     void TextRenderer::setText(const std::string& _text) {
         innerText = _text;
         recalcTextDimensions(_text);

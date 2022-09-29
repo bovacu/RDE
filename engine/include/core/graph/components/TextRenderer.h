@@ -14,6 +14,7 @@ namespace GDE {
 
     class Font;
     class Scene;
+    class Canvas;
     struct CharInfo;
 
     /**
@@ -75,6 +76,7 @@ namespace GDE {
 
         public:
             TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text);
+            TextRenderer(const NodeID& _nodeId, Canvas* _canvas, Font* _font, const std::string& _text);
             ~TextRenderer() override {  }
 
             /**

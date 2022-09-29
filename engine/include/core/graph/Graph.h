@@ -83,7 +83,7 @@ namespace GDE {
              * @param _node Node to remove components
              * @param _delete If also has to be destroyed from the scene
              */
-            void remove(const NodeID& _node, bool _delete);
+            void remove(const NodeID& _node, bool _delete = true);
 
             /**
              * @brief Manages the events that the graph must interact with.
