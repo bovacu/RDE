@@ -246,8 +246,8 @@ namespace GDE {
         }
 
         if(_delete) {
-            for(auto _child : _nodeTransform->children) {
-                remove(_child, _delete);
+            for(auto _it = _nodeTransform->children.rbegin(); _it < _nodeTransform->children.rend(); _it++) {
+                remove(*_it, _delete);
             }
 
             if(hasComponent<PhysicsBody>(_node)) {

@@ -28,6 +28,7 @@ namespace GDE {
         bool ghost = false;
         ulong collisionMask = 0;
         bool ignorePhysics = false;
+        Vec2F offset = { 0.f, 0.f };
     };
 
     class Scene;
@@ -51,6 +52,8 @@ namespace GDE {
 
             Transform* transform;
             PhysicsShape shape;
+
+            Vec2F offset;
 
             Vec2F velocity;
             float angularVelocity;

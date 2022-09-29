@@ -16,8 +16,8 @@ namespace GDE {
 
         for (auto _i = 0; _i < contactCount; _i++) {
             // Calculate radii from COM to contact
-            Vec2F _ra = contacts[_i] - A->transform->getModelMatrixPosition();
-            Vec2F _rb = contacts[_i] - B->transform->getModelMatrixPosition();
+            Vec2F _ra = contacts[_i] - (A->transform->getModelMatrixPosition() + A->offset);
+            Vec2F _rb = contacts[_i] - (B->transform->getModelMatrixPosition() + B->offset);
 
             Vec2F _rv = B->velocity + _rb.crossProduct(B->angularVelocity) - A->velocity - _ra.crossProduct(A->angularVelocity);
 
@@ -38,8 +38,8 @@ namespace GDE {
 
         for (auto _i = 0; _i < contactCount; ++_i) {
             // Calculate radii from COM to contact
-            Vec2F _ra = contacts[_i] - A->transform->getModelMatrixPosition();
-            Vec2F _rb = contacts[_i] - B->transform->getModelMatrixPosition();
+            Vec2F _ra = contacts[_i] - (A->transform->getModelMatrixPosition() + A->offset);
+            Vec2F _rb = contacts[_i] - (B->transform->getModelMatrixPosition() + B->offset);
 
             // Relative velocity
             Vec2F _rv = B->velocity + _rb.crossProduct(B->angularVelocity) - A->velocity - _ra.crossProduct(A->angularVelocity);

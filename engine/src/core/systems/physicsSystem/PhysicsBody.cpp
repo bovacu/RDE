@@ -16,6 +16,7 @@ namespace GDE {
         angularVelocity = 0;
         torque = 0;
         force = { 0.0f, 0.0f };
+        offset = _bodyConfig.offset;
         staticFriction = _bodyConfig.staticFriction;
         dynamicFriction = _bodyConfig.dynamicFriction;
         restitution = _bodyConfig.restitution;

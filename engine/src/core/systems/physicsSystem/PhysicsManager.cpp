@@ -92,7 +92,7 @@ namespace GDE {
             _contact.initialize(_fxDt, gravity);
 
         // Solve collisions
-        for(auto _i = 0; _i < steps; _i++)
+        for(auto _i = 0; _i < 1; _i++)
             for(auto& _contact : contacts) {
                 _contact.applyImpulse();
             }
@@ -144,16 +144,16 @@ namespace GDE {
             if(_next == _polygon.vertices.size())
                 _next = 0;
 
-            Vec2F _p0 = _physicsBody->transform->getModelMatrixPosition() + _polygon.getRotationMatrix() * _polygon.vertices[_i];
-            Vec2F _p1 = _physicsBody->transform->getModelMatrixPosition() + _polygon.getRotationMatrix() * _polygon.vertices[_next];
+            Vec2F _p0 = (_physicsBody->transform->getModelMatrixPosition()) + _polygon.getRotationMatrix() * (_polygon.vertices[_i] + _physicsBody->offset);
+            Vec2F _p1 = (_physicsBody->transform->getModelMatrixPosition()) + _polygon.getRotationMatrix() * (_polygon.vertices[_next] + _physicsBody->offset);
 
             _renderManager->drawLine(_p0, _p1, _lineColor);
         }
 
         if(!_showRadius) return;
 
-        _renderManager->drawLine(_physicsBody->transform->getModelMatrixPosition(),
-                                 _physicsBody->transform->getModelMatrixPosition() + _polygon.getRotationMatrix() * _polygon.vertices[0],
+        _renderManager->drawLine(_physicsBody->transform->getModelMatrixPosition() + _polygon.getRotationMatrix() * _physicsBody->offset,
+                                 _physicsBody->transform->getModelMatrixPosition() + _polygon.getRotationMatrix() * (_polygon.vertices[0] + _physicsBody->offset),
                                  _radiusColor);
     }
 
@@ -175,7 +175,7 @@ namespace GDE {
                         _theta += _inc;
                         Vec2F _p(std::cos(_theta), std::sin(_theta) );
                         _p *= _body->shape.size.x;
-                        _p += _body->transform->getModelMatrixPosition();
+                        _p += (_body->transform->getModelMatrixPosition() + _body->shape.getRotationMatrix() * _body->offset);
                         _point = _p;
                     }
 
@@ -191,7 +191,7 @@ namespace GDE {
                     }
 
                     if(!debugOptions.showCircleRadius) return;
-                    _renderManager->drawLine(_body->transform->getModelMatrixPosition(), _points[0], debugOptions.circleRadiusColor);
+                    _renderManager->drawLine((_body->transform->getModelMatrixPosition() + _body->shape.getRotationMatrix() * _body->offset), _points[0], debugOptions.circleRadiusColor);
 
                     break;
                 }
@@ -239,7 +239,7 @@ namespace GDE {
         auto& _b = _bodyB->shape;
 
         // Calculate translational vector, which is _normal
-        Vec2F _normal = _bodyB->transform->getModelMatrixPosition() - _bodyA->transform->getModelMatrixPosition();
+        Vec2F _normal = (_bodyB->transform->getModelMatrixPosition() + _bodyB->offset) - (_bodyA->transform->getModelMatrixPosition() + _bodyA->offset);
 
         float _distSqr = _normal.magnitudeSqr();
         float _radius = _a.size.x + _b.size.x;
@@ -257,11 +257,11 @@ namespace GDE {
         if (_distance == 0.0f) {
             _manifold.penetration = _a.size.x;
             _manifold.normal = GDE::Vec2F(1, 0);
-            _manifold.contacts[0] = _bodyA->transform->getModelMatrixPosition();
+            _manifold.contacts[0] = (_bodyA->transform->getModelMatrixPosition() + _bodyA->offset);
         } else {
             _manifold.penetration = _radius - _distance;
             _manifold.normal = _normal / _distance; // Faster than using Normalized since we already performed sqrt
-            _manifold.contacts[0] = _manifold.normal * _a.size.x + _bodyA->transform->getModelMatrixPosition();
+            _manifold.contacts[0] = _manifold.normal * _a.size.x + (_bodyA->transform->getModelMatrixPosition() + _bodyA->offset);
         }
 
         return true;
@@ -274,8 +274,8 @@ namespace GDE {
         _manifold.contactCount = 0;
 
         // Transform circle _center to Polygon model space
-        Vec2F _center = _bodyA->transform->getModelMatrixPosition();
-        _center = _b.getRotationMatrix().transpose() * (_center - _bodyB->transform->getModelMatrixPosition());
+        Vec2F _center = (_bodyA->transform->getModelMatrixPosition() + _bodyA->offset);
+        _center = _b.getRotationMatrix().transpose() * (_center - (_bodyB->transform->getModelMatrixPosition() + _bodyB->offset));
 
         // Find edge with minimum penetration
         // Exact concept as using support points in Polygon vs Polygon
@@ -302,7 +302,7 @@ namespace GDE {
         if (_separation < EPSILON) {
             _manifold.contactCount = 1;
             _manifold.normal = -(_b.getRotationMatrix() * _b.normals[_faceNormal]);
-            _manifold.contacts[0] = _manifold.normal * _a.size.x + _bodyA->transform->getModelMatrixPosition();
+            _manifold.contacts[0] = _manifold.normal * _a.size.x + (_bodyA->transform->getModelMatrixPosition() + _bodyA->offset);
             _manifold.penetration = _a.size.x;
             return false;
         }
@@ -322,7 +322,7 @@ namespace GDE {
             _n = _b.getRotationMatrix() * _n;
             _n.normalize();
             _manifold.normal = _n;
-            _v1 = _b.getRotationMatrix() * _v1 + _bodyB->transform->getModelMatrixPosition();
+            _v1 = _b.getRotationMatrix() * _v1 + (_bodyB->transform->getModelMatrixPosition() + _bodyB->offset);
             _manifold.contacts[0] = _v1;
         }
 
@@ -333,7 +333,7 @@ namespace GDE {
 
             _manifold.contactCount = 1;
             Vec2F _n = _v2 - _center;
-            _v2 = _b.getRotationMatrix() * _v2 + _bodyB->transform->getModelMatrixPosition();
+            _v2 = _b.getRotationMatrix() * _v2 + (_bodyB->transform->getModelMatrixPosition() + _bodyB->offset);
             _manifold.contacts[0] = _v2;
             _n = _b.getRotationMatrix() * _n;
             _n.normalize();
@@ -348,7 +348,7 @@ namespace GDE {
 
             _n = _b.getRotationMatrix() * _n;
             _manifold.normal = -_n;
-            _manifold.contacts[0] = _manifold.normal * _a.size.x + _bodyA->transform->getModelMatrixPosition();
+            _manifold.contacts[0] = _manifold.normal * _a.size.x + (_bodyA->transform->getModelMatrixPosition() + _bodyA->offset);
             _manifold.contactCount = 1;
         }
 
@@ -420,8 +420,8 @@ namespace GDE {
         Vec2F _v2 = _refPoly->vertices[_referenceIndex];
 
         // Transform vertices to world space
-        _v1 = _refPoly->getRotationMatrix() * _v1 + _refPoly->physicsBody->transform->getModelMatrixPosition();
-        _v2 = _refPoly->getRotationMatrix() * _v2 + _refPoly->physicsBody->transform->getModelMatrixPosition();
+        _v1 = _refPoly->getRotationMatrix() * _v1 + (_refPoly->physicsBody->transform->getModelMatrixPosition() + _refPoly->physicsBody->offset);
+        _v2 = _refPoly->getRotationMatrix() * _v2 + (_refPoly->physicsBody->transform->getModelMatrixPosition() + _refPoly->physicsBody->offset);
 
         // Calculate reference face side normal in world space
         Vec2F _sidePlaneNormal = (_v2 - _v1);
@@ -491,8 +491,8 @@ namespace GDE {
             // Retrieve vertex on face from _shapeA, transform into
             // _shapeB'_s model space
             Vec2F _v = _shapeA->vertices[_i];
-            _v = _shapeA->getRotationMatrix() * _v + _shapeA->physicsBody->transform->getModelMatrixPosition();
-            _v -= _shapeB->physicsBody->transform->getModelMatrixPosition();
+            _v = _shapeA->getRotationMatrix() * _v + (_shapeA->physicsBody->transform->getModelMatrixPosition() + _shapeA->physicsBody->offset);
+            _v -= (_shapeB->physicsBody->transform->getModelMatrixPosition() + _shapeB->physicsBody->offset);
             _v = _buT * _v;
 
             // Compute penetration distance (in _shapeB'_s model space)
@@ -529,10 +529,10 @@ namespace GDE {
 
         // Assign face vertices for _incidentFace
         _vec[0] = _incPoly->getRotationMatrix() * _incPoly->vertices[_incidentFace] +
-                _incPoly->physicsBody->transform->getModelMatrixPosition();
+                (_incPoly->physicsBody->transform->getModelMatrixPosition() + _incPoly->physicsBody->offset);
         _incidentFace = _incidentFace + 1 >= (int32_t) _incPoly->vertexCount ? 0 : _incidentFace + 1;
         _vec[1] = _incPoly->getRotationMatrix() * _incPoly->vertices[_incidentFace] +
-                _incPoly->physicsBody->transform->getModelMatrixPosition();
+                (_incPoly->physicsBody->transform->getModelMatrixPosition() + _incPoly->physicsBody->offset);
     }
 
     int PhysicsManager::clip(Vec2F _n, float _c, Vec2F* _face) {

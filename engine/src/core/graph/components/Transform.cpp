@@ -30,7 +30,6 @@ namespace GDE {
     }
 
     float Transform::getRotation() const {
-//        return radiansToDegrees(std::atan2(localModelMatrix[0][1], localModelMatrix[0][0]));
         return radiansToDegrees(glm::eulerAngles(innerRotation).z);
     }
 
