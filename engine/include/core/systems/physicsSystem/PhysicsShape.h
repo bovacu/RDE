@@ -11,7 +11,7 @@
 
 namespace GDE {
 
-    struct PhysicsBody;
+    FORWARD_DECLARE_STRUCT(PhysicsBody)
 
     #define MAX_VERTICES_PER_POLYGON 32
 

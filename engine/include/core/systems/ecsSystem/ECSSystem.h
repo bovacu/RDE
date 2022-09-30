@@ -52,7 +52,7 @@ namespace GDE {
      */
     class ECSSystem {
 
-        friend class ECSManager;
+        FRIEND_CLASS(ECSManager)
 
         private:
             /**

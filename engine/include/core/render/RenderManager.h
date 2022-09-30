@@ -9,16 +9,10 @@
 
 namespace GDE {
 
-    class Engine;
+    FORWARD_DECLARE_CLASS(Engine)
 
     class RenderManager {
-
-        friend class Graph;
-        friend class Engine;
-        friend class ImGuiScene;
-        friend class FrameBuffer;
-        friend class Canvas;
-        friend class Manager;
+        FRIEND_CLASS(Graph, Engine, ImGuiScene, FrameBuffer, Canvas, Manager)
 
         // Debug
         public:

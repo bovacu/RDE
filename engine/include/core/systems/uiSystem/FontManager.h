@@ -24,12 +24,13 @@ namespace GDE {
         Vec2F  offset;
     };
 
-    class FontManager;
+    FORWARD_DECLARE_CLASS(FontManager)
 
     /**
      * @brief This struct contains all the information needed to render text with this specific font.
      */
     class Font {
+        FRIEND_CLASS(FontManager)
         private:
             Texture texture;
             int width = -1;
@@ -40,7 +41,6 @@ namespace GDE {
             std::string originalPath;
 
         private:
-            friend class FontManager;
             Font() {}
 
         public:

@@ -120,4 +120,35 @@ public:                                                                         
     iteratorType::const_reverse_iterator crbegin()  { return iterable.crbegin();} \
     iteratorType::const_reverse_iterator crend()    { return iterable.crend();  } \
 
+#define FE_1_INVOKE(WHAT, X) WHAT(X)
+#define FE_2_INVOKE(WHAT, X, ...) WHAT(X)FE_1_INVOKE(WHAT, __VA_ARGS__)
+#define FE_3_INVOKE(WHAT, X, ...) WHAT(X)FE_2_INVOKE(WHAT, __VA_ARGS__)
+#define FE_4_INVOKE(WHAT, X, ...) WHAT(X)FE_3_INVOKE(WHAT, __VA_ARGS__)
+#define FE_5_INVOKE(WHAT, X, ...) WHAT(X)FE_4_INVOKE(WHAT, __VA_ARGS__)
+//... repeat as needed
+
+#define FE_1_DECLARATION(WHAT, X, Y) WHAT Y X
+#define FE_2_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_1_DECLARATION(WHAT, X, __VA_ARGS__)
+#define FE_3_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_2_DECLARATION(WHAT, X, __VA_ARGS__)
+#define FE_4_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_3_DECLARATION(WHAT, X, __VA_ARGS__)
+#define FE_5_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_4_DECLARATION(WHAT, X, __VA_ARGS__)
+#define FE_6_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_5_DECLARATION(WHAT, X, __VA_ARGS__)
+#define FE_7_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_6_DECLARATION(WHAT, X, __VA_ARGS__)
+#define FE_8_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_7_DECLARATION(WHAT, X, __VA_ARGS__)
+#define FE_9_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_8_DECLARATION(WHAT, X, __VA_ARGS__)
+#define FE_10_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_9_DECLARATION(WHAT, X, __VA_ARGS__)
+
+#define GET_MACRO(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,NAME, ...) NAME
+#define FOR_EACH_DECLARATION(init, end, ...) \
+  GET_MACRO(__VA_ARGS__,FE_10_DECLARATION,FE_9_DECLARATION,FE_8_DECLARATION,FE_7_DECLARATION,FE_6_DECLARATION,FE_5_DECLARATION,FE_4_DECLARATION,FE_3_DECLARATION,FE_2_DECLARATION,FE_1_DECLARATION)(init, end,__VA_ARGS__)
+
+#define FOR_EACH_INVOKE(action,...) \
+  GET_MACRO(__VA_ARGS__,FE_5_INVOKE,FE_4_INVOKE,FE_3_INVOKE,FE_2_INVOKE,FE_1_INVOKE)(action,__VA_ARGS__)
+
+
+#define FRIEND_CLASS(...) FOR_EACH_DECLARATION(friend class, ;, __VA_ARGS__)
+#define FORWARD_DECLARE_CLASS(...) FOR_EACH_DECLARATION(class, ;, __VA_ARGS__)
+#define FRIEND_STRUCT(...) FOR_EACH_DECLARATION(friend struct, ;, __VA_ARGS__)
+#define FORWARD_DECLARE_STRUCT(...) FOR_EACH_DECLARATION(struct, ;, __VA_ARGS__)
+
 #endif //GDE_CORE_H

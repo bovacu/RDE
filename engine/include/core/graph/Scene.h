@@ -10,17 +10,13 @@
 
 namespace GDE {
 
-    class Camera;
-    class Window;
-    class Engine;
-    class Canvas;
+    FORWARD_DECLARE_CLASS(Camera, Window, Engine, Canvas);
 
     /**
      * @brief This class represents what is rendered in the window and all its related systems.
      */
     class Scene {
-        friend class Graph;
-        friend class ConfigManager;
+        FRIEND_CLASS(Graph, ConfigManager)
 
         private:
             /**

@@ -14,17 +14,14 @@
 namespace GDE {
 
     typedef entt::entity NodeID;
-
-    class Transform;
-    class SceneManager;
-    class Window;
+    FORWARD_DECLARE_CLASS(Transform, SceneManager, Window)
 
     /**
      * @brief This class represents what the engine sees and what is going to be rendered. This is used as a Component of
      * the inner ECS System, so you can add Cameras to any desired Node.
      */
     class Camera {
-        friend class Scene;
+        FRIEND_CLASS(Scene)
         private:
             /**
              * @brief Size of the camera, as a rectangle.

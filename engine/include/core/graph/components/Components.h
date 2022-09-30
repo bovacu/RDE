@@ -5,9 +5,7 @@
 #define ENGINE2_0_COMPONENTS_H
 
 namespace GDE {
-
-    class Manager; class Window; class Camera; class Canvas; class IViewPort;
-
+    FORWARD_DECLARE_CLASS(Manager, Window, Camera, Canvas, IViewPort)
     /**
      * @brief Component common to every entity and that identifies it whit a name. It is recommended 
      * every entity to have a different one.

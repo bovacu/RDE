@@ -35,7 +35,7 @@ namespace GDE {
         bool renderToWindow = true;
     };
 
-    class Manager;
+    FORWARD_DECLARE_CLASS(Manager)
     /**
      * @brief This class adds final rendering effects to the whole scene.
      */

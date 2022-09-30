@@ -21,15 +21,14 @@ enum BatchPriority {
 
 namespace GDE {
 
-    class SpriteBatch;
-    class IRenderizable;
+    FORWARD_DECLARE_CLASS(SpriteBatch, IRenderizable)
 
     /**
      * @brief This class represents a group of geometry that shares common elements and therefor can be sent all
      * together to the GPU so the number of Draw Calls is minimized as much as possible.
      */
     class Batch {
-        friend class SpriteBatch;
+        FRIEND_CLASS(SpriteBatch)
 
         private:
 

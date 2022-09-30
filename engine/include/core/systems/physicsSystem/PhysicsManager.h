@@ -12,7 +12,7 @@
 
 namespace GDE {
 
-    class RenderManager;
+    FORWARD_DECLARE_CLASS(RenderManager)
 
     struct DebugOptions {
         bool showGeneralDebug = true;

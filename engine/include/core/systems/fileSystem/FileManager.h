@@ -49,11 +49,12 @@ namespace GDE {
     typedef File<std::vector<std::string>> FileLines;
 
 
-    class FileManager;
+    FORWARD_DECLARE_CLASS(FileManager)
     /**
      * @brief This class representes a loaded file.
      */
     class FileHandler {
+        FRIEND_CLASS(FileManager)
         private:
             /**
              * @brief Raw data of the file.
@@ -89,8 +90,6 @@ namespace GDE {
 
                 return "rb";
             }
-
-        friend class FileManager;
     };
 
 

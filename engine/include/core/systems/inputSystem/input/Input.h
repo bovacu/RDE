@@ -57,14 +57,13 @@ namespace GDE {
         MOBILE
     };
 
-    class Engine;
-    class Manager;
+    FORWARD_DECLARE_CLASS(Engine, Manager)
 
     /**
      * @brief This class is the base for any input specific class that the engine wants to implement.
      */
     class Input {
-        friend class InputManager;
+        FRIEND_CLASS(InputManager)
         protected:
             /**
              * @see Window
@@ -102,7 +101,7 @@ namespace GDE {
             bool ignoreEvent(const SDL_EventType& _eventType);
     };
 
-    class WindowInput; class KeyboardInput; class MouseInput; class ControllerInput; class MobileInput;
+    FORWARD_DECLARE_CLASS(WindowInput, KeyboardInput, MouseInput, ControllerInput, MobileInput)
     /**
      * @attention All managers destroy all the resources before closing the application, it is not needed to be done by the end user.
      * @brief This class allows the user to ask for any user input in a easy and accessible way.

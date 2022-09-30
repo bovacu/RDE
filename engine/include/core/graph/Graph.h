@@ -41,13 +41,10 @@ namespace GDE {
     typedef entt::registry NodeContainer;
     #define NODE_ID_NULL entt::null
 
-    class Engine;
-    class Scene;
+    FORWARD_DECLARE_CLASS(Engine, Scene)
 
     class Graph {
-
-        friend class Scene;
-        friend class Canvas;
+        FRIEND_CLASS(Scene, Canvas)
 
         private:
             /**

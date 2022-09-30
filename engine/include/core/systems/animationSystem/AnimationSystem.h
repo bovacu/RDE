@@ -12,9 +12,9 @@
 
 namespace GDE {
 
-    class Manager;
+    FORWARD_DECLARE_CLASS(Manager)
 
-    struct AnimationNode;
+    FORWARD_DECLARE_STRUCT(AnimationNode)
     struct AnimationTransition {
         std::string transitionCode;
         AnimationNode* nextAnimation;

@@ -10,7 +10,7 @@
 
 namespace GDE {
 
-    class SoundManager;
+    FORWARD_DECLARE_CLASS(SoundManager)
 
     /**
      * @brief Base class for different types of sounds.
@@ -42,8 +42,8 @@ namespace GDE {
      * @brief Background music.
      */
     struct Music : Sound {
+        FRIEND_CLASS(SoundManager)
         private:
-            friend class SoundManager;
             /**
              * @brief SDL music.
              */
@@ -54,13 +54,13 @@ namespace GDE {
      * @brief Sound effects.
      */
     struct Sfx : Sound {
+        FRIEND_CLASS(SoundManager)
         public:
             /**
              * @brief Channel the sound is being played.
              */
             int channel;
         private:
-            friend class SoundManager;
             /**
              * @brief SDL sound effect.
              */

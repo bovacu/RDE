@@ -61,12 +61,12 @@ namespace GDE {
         std::vector<int> controllerIDs = {  };
     };
 
-    class ControllerInput; struct Controller;
+    FORWARD_DECLARE_CLASS(ControllerInput, Controller)
     /**
      * @brief This class controls which controller is bind to which effects and how they play.
      */
     class ControllerVibrationManager {
-        friend class ControllerInput;
+        FRIEND_CLASS(ControllerInput)
         private:
             /**
              * @brief Map EffectName -> SDL_VibrationEffect.

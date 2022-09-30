@@ -9,9 +9,8 @@
 
 namespace GDE {
 
-    class TextRenderer;
-    class Font;
-    class NineSliceSprite;
+    FORWARD_DECLARE_CLASS(TextRenderer, Font, NineSliceSprite)
+
     class UIButton : public UI {
         public:
             TextRenderer* textRenderer;

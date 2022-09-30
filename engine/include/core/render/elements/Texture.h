@@ -14,7 +14,7 @@
 
 namespace GDE {
 
-    class Texture;
+    FORWARD_DECLARE_CLASS(Texture)
 
     /**
      * @brief Defines how the texture must be rendered so deformations on X and Y won't affect it's quality. It is separated 9 parts as follows:
@@ -79,7 +79,7 @@ namespace GDE {
         IntRect subRects[9];
     };
 
-    struct Atlas;
+    FORWARD_DECLARE_STRUCT(Atlas)
 
     /**
      * @brief This class represents a SpriteSheet or a simple Sprite that will be uploaded to the GPU.

@@ -12,10 +12,10 @@ namespace GDE {
     /**
      * @brief This class represents the window of the application and has methods to modify its components and get its data.
      */
-    struct GDEConfig;
+    FORWARD_DECLARE_STRUCT(GDEConfig)
     class Window {
 
-        friend class WindowInput;
+        FRIEND_CLASS(WindowInput)
 
         protected:
             /**

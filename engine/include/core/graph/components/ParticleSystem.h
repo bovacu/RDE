@@ -16,7 +16,7 @@
 
 namespace GDE {
 
-    struct ParticleSystemConfig;
+    FORWARD_DECLARE_STRUCT(ParticleSystemConfig)
 
     /**
      * @brief Information about a particle.

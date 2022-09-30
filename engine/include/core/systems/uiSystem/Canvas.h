@@ -15,8 +15,7 @@ namespace GDE {
      * A Scene can have multiple canvas.
      */
     class Canvas {
-            friend class Graph;
-            friend class Scene;
+        FRIEND_CLASS(Graph, Scene)
 
         private:
             /**

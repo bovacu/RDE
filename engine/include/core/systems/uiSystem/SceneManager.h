@@ -10,8 +10,7 @@
 
 namespace GDE {
 
-    class Scene;
-    class Engine;
+    FORWARD_DECLARE_CLASS(Scene, Engine)
 
     /**
      * @attention All managers destroy all the resources before closing the application, it is not needed to be done by the end user.

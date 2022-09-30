@@ -73,9 +73,9 @@ namespace GDE {
 
         public:
             class HandlerId {
+                FRIEND_CLASS(EventBus<AssociatedFunctionArgs...>)
                 public:
                     HandlerId() : valid(false) {  }
-                    friend class EventBus<AssociatedFunctionArgs...>;
                     size_t id{};
                     explicit HandlerId(size_t _id) : id(_id), valid(true) {  }
                     bool valid;

@@ -12,10 +12,8 @@ typedef entt::entity NodeID;
 
 namespace GDE {
 
-    class Font;
-    class Scene;
-    class Canvas;
-    struct CharInfo;
+    FORWARD_DECLARE_STRUCT(CharInfo)
+    FORWARD_DECLARE_CLASS(Font, Scene, Canvas)
 
     /**
      * @brief Component used to render text on screen.  End user doesn't have, and in fact can't
@@ -23,7 +21,7 @@ namespace GDE {
      */
     class TextRenderer : public IRenderizable {
 
-        friend class SpriteBatch;
+        FRIEND_CLASS(SpriteBatch)
 
         private:
             /**

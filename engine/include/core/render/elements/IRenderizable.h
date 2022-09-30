@@ -11,9 +11,8 @@
 
 namespace GDE {
 
-    class IViewPort;
-    struct OpenGLVertex;
-    class Transform;
+    FORWARD_DECLARE_STRUCT(OpenGLVertex)
+    FORWARD_DECLARE_CLASS(IViewPort, Transform)
 
     /**
      * @brief Interface that elements to be rendered by the engine should follow. This gives the SpriteRenderer the
@@ -22,8 +21,8 @@ namespace GDE {
      * Any new element that end-users want to create and render, must extend this method.
      */
     class IRenderizable {
+        FRIEND_CLASS(ShaderManager)
         protected:
-            friend class ShaderManager;
             inline static std::unordered_map<std::string, ShaderID> defaultShaders;
 
         public:

@@ -11,8 +11,8 @@
 
 namespace GDE {
 
-    class Window;
-    struct GDEConfig;
+    FORWARD_DECLARE_CLASS(Window)
+    FORWARD_DECLARE_STRUCT(GDEConfig)
 
     struct NodeID_JsonPair {
         NodeID nodeId;

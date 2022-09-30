@@ -16,7 +16,7 @@ namespace GDE {
 
     // This class is a fucking mess, and it needs to be reworked, but for now I just use it for debugging and it does the job.
 
-    class Graph;
+    FORWARD_DECLARE_CLASS(Graph)
     class ImGuiScene : public Scene {
         private:
             bool anyWindowHovered = false;

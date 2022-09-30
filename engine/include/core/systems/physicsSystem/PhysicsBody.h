@@ -31,7 +31,7 @@ namespace GDE {
         Vec2F offset = { 0.f, 0.f };
     };
 
-    class Scene;
+    FORWARD_DECLARE_CLASS(Scene)
 
     struct PhysicsBody {
         private:

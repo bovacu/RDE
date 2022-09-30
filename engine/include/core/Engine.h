@@ -17,7 +17,7 @@ int main(int argc, char** argv);
 
 namespace GDE {
 
-    class Scene;
+    FORWARD_DECLARE_CLASS(Scene)
 
     /**
      * @brief This struct contains some basic configuration of the window.

@@ -10,7 +10,7 @@
 
 namespace GDE {
 
-    class SpriteRenderer;
+    FORWARD_DECLARE_CLASS(SpriteRenderer)
     /**
      * @brief Component that is based on the SpriteRenderer, but allows to render UI images with a different size than the original
      * without loosing quality. The setup of this NineSlice should be done via TexturePacker.

@@ -12,8 +12,7 @@ typedef entt::entity NodeID;
 
 namespace GDE {
 
-    class Scene;
-    class Canvas;
+    FORWARD_DECLARE_CLASS(Scene, Canvas)
 
     /**
      * @brief Component that allows to render a texture or part of a texture on screen. End user doesn't have, and in fact can't
@@ -21,7 +20,7 @@ namespace GDE {
      */
     class SpriteRenderer : public IRenderizable {
 
-        friend class SpriteBatch;
+        FRIEND_CLASS(SpriteBatch)
 
         private:
             /**
