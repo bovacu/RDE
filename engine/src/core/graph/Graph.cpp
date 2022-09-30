@@ -207,7 +207,7 @@ namespace GDE {
             return;
         }
 
-        if(std::find(_nodeTransform->children.begin(), _nodeTransform->children.end(), getComponent<Transform>(_parent)) != _nodeTransform->children.end()) {
+        if(std::find(_nodeTransform->begin(), _nodeTransform->end(), getComponent<Transform>(_parent)) != _nodeTransform->end()) {
             LOG_E("Cannot set ", (int)_parent, " as the parent of ", (int)_node, " because ", (int)_node, " is the father of ", (int)_parent, "!!!!")
             return;
         }
@@ -236,6 +236,7 @@ namespace GDE {
         _nodeTransform->parent = _parent;
         _nodeTransform->parentTransform = _parentTransform;
         _parentTransform->children.push_back(_nodeTransform);
+        _nodeTransform->worldMatrixCache = _nodeTransform->recalculateCachedMatrix();
     }
 
     void Graph::remove(const NodeID& _node, bool _delete) {
