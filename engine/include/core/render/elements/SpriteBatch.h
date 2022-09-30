@@ -212,7 +212,7 @@ namespace GDE {
              * @param _renderizable An IRenderizable instance.
              * @param _transform Transform of the IRenderizable.
              */
-            void draw(const IRenderizable* _renderizable, const Transform& _transform);
+            void draw(const IRenderizable* _renderizable, Transform& _transform);
 
             /**
              * @brief This method sends all of the geometry to the GPU and ends a Draw Call.

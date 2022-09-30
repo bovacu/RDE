@@ -43,6 +43,10 @@ namespace GDE {
     }
 
     void Graph::onUpdate(Delta _dt) {
+//        registry.group<Transform>(entt::get<Active>).each([](const auto _entity, Transform& _transform, const Active& _) {
+//            _transform.update();
+//        });
+
         registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
             _animationSystem.update(_dt, _spriteRenderer);
         });
@@ -75,15 +79,15 @@ namespace GDE {
             _renderManager.beginDraw(*_camera, getComponent<Transform>(_camera->ID));
             _camera->setCameraSize(_camera->getCameraSize());
             {
-                _spriteRendererGroup.each([&_renderManager](const auto _entity, const SpriteRenderer& _renderizable, const Transform& _transform, const Active& _) {
+                _spriteRendererGroup.each([&_renderManager](const auto _entity, const SpriteRenderer& _renderizable, Transform& _transform, const Active& _) {
                     _renderManager.draw((const IRenderizable*)&_renderizable, _transform);
                 });
 
-                _particleSystemGroup.each([&_renderManager](const auto _entity, const ParticleSystem& _renderizable, const Transform& _transform, const Active& _) {
+                _particleSystemGroup.each([&_renderManager](const auto _entity, const ParticleSystem& _renderizable, Transform& _transform, const Active& _) {
                     _renderManager.draw((const IRenderizable*)&_renderizable, _transform);
                 });
 
-                _textRendererGroup.each([&_renderManager](const auto _entity, TextRenderer& _text, const Transform& _transform, const Active& _) {
+                _textRendererGroup.each([&_renderManager](const auto _entity, TextRenderer& _text, Transform& _transform, const Active& _) {
                     _renderManager.draw((const IRenderizable*)&_text, _transform);
                 });
             }
@@ -127,7 +131,7 @@ namespace GDE {
 
         registry.emplace<Tag>(_newNode, _newNode, _tag);
         registry.emplace<Transform>(_newNode, _newNode).parent = _parentRef;
-        (&registry.get<Transform>(_parentRef))->children.push_back(_newNode);
+        (&registry.get<Transform>(_parentRef))->children.push_back(&registry.get<Transform>(_newNode));
         (&registry.get<Transform>(_newNode))->parentTransform = (&registry.get<Transform>(_parentRef));
 
         registry.emplace<Active>(_newNode, _newNode);
@@ -146,7 +150,7 @@ namespace GDE {
         }
 
         auto* _transform = getComponent<Transform>(_copy);
-        (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent))->children.push_back(_copy);
+        (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent))->children.push_back(_transform);
         _transform->setPosition(_position);
         _transform->parentTransform = (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent));
         if(_parent != NODE_ID_NULL) setParent(_copy, _parent);
@@ -183,7 +187,7 @@ namespace GDE {
             _os << "\n";
             for(int _in = 0; _in < _indent; _in++) _os << "\t";
             _os << "|__ ";
-            printScene(_child, _os, _indent);
+            printScene(_child->ID, _os, _indent);
             _indent--;
         }
     }
@@ -203,7 +207,7 @@ namespace GDE {
             return;
         }
 
-        if(std::find(_nodeTransform->children.begin(), _nodeTransform->children.end(), _parent) != _nodeTransform->children.end()) {
+        if(std::find(_nodeTransform->children.begin(), _nodeTransform->children.end(), getComponent<Transform>(_parent)) != _nodeTransform->children.end()) {
             LOG_E("Cannot set ", (int)_parent, " as the parent of ", (int)_node, " because ", (int)_node, " is the father of ", (int)_parent, "!!!!")
             return;
         }
@@ -231,7 +235,7 @@ namespace GDE {
 
         _nodeTransform->parent = _parent;
         _nodeTransform->parentTransform = _parentTransform;
-        _parentTransform->children.push_back(_node);
+        _parentTransform->children.push_back(_nodeTransform);
     }
 
     void Graph::remove(const NodeID& _node, bool _delete) {
@@ -239,15 +243,15 @@ namespace GDE {
 
         if(_nodeTransform->parent != NODE_ID_NULL) {
             auto* _parentTransform = &registry.get<Transform>(_nodeTransform->parent);
-            auto _toRemove = std::remove_if(_parentTransform->children.begin(), _parentTransform->children.end(), [&](const NodeID& _nodeID) {
-                return _nodeID == _node;
+            auto _toRemove = std::remove_if(_parentTransform->children.begin(), _parentTransform->children.end(), [&](Transform* _transform) {
+                return _transform->ID == _node;
             });
             _parentTransform->children.erase(_toRemove);
         }
 
         if(_delete) {
             for(auto _it = _nodeTransform->children.rbegin(); _it < _nodeTransform->children.rend(); _it++) {
-                remove(*_it, _delete);
+                remove((*_it)->ID, _delete);
             }
 
             if(hasComponent<PhysicsBody>(_node)) {
@@ -263,7 +267,7 @@ namespace GDE {
         remove(_node, false);
         (&registry.get<Transform>(_node))->parent = sceneRoot;
         (&registry.get<Transform>(_node))->parentTransform = getComponent<Transform>(sceneRoot);
-        (&registry.get<Transform>(sceneRoot))->children.push_back(_node);
+        (&registry.get<Transform>(sceneRoot))->children.push_back(&registry.get<Transform>(_node));
     }
 
     void Graph::orphan(const std::string& _nodeTagName) {

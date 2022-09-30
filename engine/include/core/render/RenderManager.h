@@ -90,7 +90,7 @@ namespace GDE {
              * @param _renderizable Component derived from IRenderizable.
              * @param _transform Nine patch's transform.
              */
-            void draw(const IRenderizable* _renderizable, const Transform& _transform);
+            void draw(const IRenderizable* _renderizable, Transform& _transform);
 
             /**
              * @brief Sends the data batched to the GPU, must be called after beginDraw and what we want to render.

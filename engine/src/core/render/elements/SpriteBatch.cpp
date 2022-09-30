@@ -208,7 +208,7 @@ namespace GDE {
         return batches.back();
     }
 
-    void SpriteBatch::draw(const IRenderizable* _renderizable, const Transform& _transform) {
+    void SpriteBatch::draw(const IRenderizable* _renderizable, Transform& _transform) {
         getBatch(_renderizable, _renderizable->layer, _renderizable->batchPriority).draw(_renderizable, _transform);
     }
 

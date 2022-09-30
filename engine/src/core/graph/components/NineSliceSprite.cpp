@@ -23,7 +23,7 @@ namespace GDE {
         return texture->nineSlice;
     }
 
-    void NineSliceSprite::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const {
+    void NineSliceSprite::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) const {
         if(spriteRenderer) {
             spriteRenderer->draw(_vertices, _indices, _transform, _viewport);
             return;

@@ -380,7 +380,7 @@ namespace GDE {
                 }
 
                 for(auto _child : _transform->children) {
-                    hierarchyRecursionStub(_scene, _graph, _child, _selectedNode);
+                    hierarchyRecursionStub(_scene, _graph, _child->ID, _selectedNode);
                 }
 
                 ImGui::TreePop();
@@ -471,6 +471,7 @@ namespace GDE {
 
         if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
             if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            ImGui::Text("ID: %i", (int)_transform->ID);
             ImGui::Text("Position ");
 
             float _pos[2] = {_transform->getPosition().x, _transform->getPosition().y};

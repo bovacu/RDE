@@ -34,7 +34,7 @@ namespace GDE {
         return Util::getFileExtension(texture->getPath());
     }
 
-    void SpriteRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const {
+    void SpriteRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) const {
         auto _vertexCount = _vertices.size();
 
         auto _transformMat = _transform.localToWorld();

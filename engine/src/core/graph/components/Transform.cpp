@@ -11,6 +11,7 @@ namespace GDE {
 
     Transform::Transform(const NodeID& _nodeId) {
         ID = _nodeId;
+        worldMatrixCache = recalculateCachedMatrix();
     }
 
     void Transform::setPosition(const Vec2F& _position) {
@@ -19,6 +20,7 @@ namespace GDE {
 
     void Transform::setPosition(float _x, float _y) {
         innerPosition = glm::vec3 {_x, _y, 0.0f};
+        setDirty();
     }
 
     Vec2F Transform::getPosition() const {
@@ -27,6 +29,7 @@ namespace GDE {
 
     void Transform::setRotation(float _rotation) {
         innerRotation = glm::quat(glm::vec3(0, 0, glm::radians(_rotation)));
+        setDirty();
     }
 
     float Transform::getRotation() const {
@@ -39,6 +42,7 @@ namespace GDE {
 
     void Transform::setScale(float _x, float _y) {
         innerScale = {_x, _y, 1.0f};
+        setDirty();
     }
 
     Vec2F Transform::getScale() const {
@@ -52,11 +56,13 @@ namespace GDE {
     void Transform::translate(float _x, float _y) {
         innerPosition.x += _x;
         innerPosition.y += _y;
+        setDirty();
     }
 
     void Transform::rotate(float _amount) {
         glm::vec3 _euler = glm::eulerAngles(innerRotation);
         innerRotation = glm::quat(glm::vec3(_euler.x, _euler.y, _euler.z + degreesToRadians(_amount)));
+        setDirty();
     }
 
     void Transform::scale(const Vec2F& _scale) {
@@ -66,38 +72,36 @@ namespace GDE {
     void Transform::scale(float _x, float _y) {
         innerScale.x += _x;
         innerScale.y += _y;
+        setDirty();
     }
 
-    Vec2F Transform::getModelMatrixPosition() const {
-        auto _worldModelMatrix = localToWorld();
+    Vec2F Transform::getModelMatrixPosition() {
         glm::vec3 scale;
         glm::quat rotation;
         glm::vec3 translation;
         glm::vec3 skew;
         glm::vec4 perspective;
-        glm::decompose(_worldModelMatrix, scale, rotation, translation, skew, perspective);
+        glm::decompose(localToWorld(), scale, rotation, translation, skew, perspective);
         return { translation.x, translation.y };
     }
 
-    Vec2F Transform::getModelMatrixScale() const {
-        auto _worldModelMatrix = localToWorld();
+    Vec2F Transform::getModelMatrixScale() {
         glm::vec3 scale;
         glm::quat rotation;
         glm::vec3 translation;
         glm::vec3 skew;
         glm::vec4 perspective;
-        glm::decompose(_worldModelMatrix, scale, rotation, translation, skew, perspective);
+        glm::decompose(localToWorld(), scale, rotation, translation, skew, perspective);
         return { scale.x, scale.y };
     }
 
-    float Transform::getModelMatrixRotation() const {
-        auto _worldModelMatrix = localToWorld();
+    float Transform::getModelMatrixRotation() {
         glm::vec3 scale;
         glm::quat rotation;
         glm::vec3 translation;
         glm::vec3 skew;
         glm::vec4 perspective;
-        glm::decompose(_worldModelMatrix, scale, rotation, translation, skew, perspective);
+        glm::decompose(localToWorld(), scale, rotation, translation, skew, perspective);
         glm::vec3 _euler = glm::eulerAngles(rotation);
         return radiansToDegrees(_euler.z);
     }
@@ -138,13 +142,15 @@ namespace GDE {
         );
     }
 
-    glm::mat4 Transform::localToWorld() const {
+    glm::mat4 Transform::localToWorld() {
         if (parentTransform) {
-            auto _parentMatrix = parentTransform->localToWorld();
-            return _parentMatrix * localToParent();
-        } else {
-            return localToParent();
+            if(dirty) {
+                setDirty();
+                dirty = false;
+            }
         }
+
+        return worldMatrixCache;
     }
 
     glm::mat4 Transform::worldToLocal() const {
@@ -152,6 +158,22 @@ namespace GDE {
             return parentToLocal() * parentTransform->worldToLocal();
         } else {
             return parentToLocal();
+        }
+    }
+
+    glm::mat4 Transform::recalculateCachedMatrix() {
+        if (parentTransform) {
+            auto _parentMatrix = parentTransform->localToWorld();
+            return _parentMatrix * localToParent();
+        }
+
+        return localToParent();
+    }
+
+    void Transform::setDirty() {
+        worldMatrixCache = recalculateCachedMatrix();
+        for(auto* _transform : children) {
+            _transform->dirty = true;
         }
     }
 }

@@ -71,7 +71,7 @@ namespace GDE {
         recalcTextDimensions(innerText);
     }
 
-    void TextRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, const Transform& _transform, const IViewPort& _viewport) const {
+    void TextRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) const {
         auto* _atlas = font;
         auto _atlasSize = _atlas->getSize();
 

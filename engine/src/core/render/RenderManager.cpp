@@ -61,7 +61,7 @@ namespace GDE {
         batch.flush();
     }
 
-    void RenderManager::draw(const IRenderizable* _renderizable, const Transform& _transform) {
+    void RenderManager::draw(const IRenderizable* _renderizable, Transform& _transform) {
         batch.draw(_renderizable, _transform);
     }
 

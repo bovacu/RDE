@@ -25,8 +25,15 @@ namespace GDE {
             glm::quat innerRotation = glm::quat(glm::vec3(0, 0, 0));
             glm::vec3 innerScale = glm::vec3(1.0f, 1.0f, 1.0f);
 
+            glm::mat4 worldMatrixCache { 1.0f };
+            bool dirty = false;
+
         public:
             bool staticTransform = false;
+
+        private:
+            glm::mat4 recalculateCachedMatrix();
+            void setDirty();
 
         public:
             explicit Transform(const NodeID& _nodeId);
@@ -45,13 +52,13 @@ namespace GDE {
             /**
              * @brief Parent Transform
              */
-            Transform* parentTransform;
+            Transform* parentTransform = nullptr;
 
             /**
              * @brief All the children that an entity has.
              *
              */
-            std::vector<NodeID> children;
+            std::vector<Transform*> children;
 
             /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
@@ -135,13 +142,13 @@ namespace GDE {
              */
             void scale(float _x, float _y);
 
-            [[nodiscard]] Vec2F getModelMatrixPosition() const;
-            [[nodiscard]] Vec2F getModelMatrixScale() const;
-            [[nodiscard]] float getModelMatrixRotation() const;
+            [[nodiscard]] Vec2F getModelMatrixPosition();
+            [[nodiscard]] Vec2F getModelMatrixScale();
+            [[nodiscard]] float getModelMatrixRotation();
 
             [[nodiscard]] glm::mat4 localToParent() const;
             [[nodiscard]] glm::mat4 parentToLocal() const;
-            [[nodiscard]] glm::mat4 localToWorld() const;
+            [[nodiscard]] glm::mat4 localToWorld();
             [[nodiscard]] glm::mat4 worldToLocal() const;
 
             void setMatrix(const glm::mat4& _matrix);
