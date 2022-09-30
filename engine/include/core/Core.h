@@ -109,4 +109,15 @@ typedef unsigned long ulong;
 typedef unsigned int uint;
 #endif
 
+#define MAKE_CLASS_ITERABLE(iteratorType, iterable)                               \
+public:                                                                           \
+    iteratorType::iterator begin()                  { return iterable.begin();  } \
+    iteratorType::iterator end()                    { return iterable.end();    } \
+    iteratorType::reverse_iterator rbegin()         { return iterable.rbegin(); } \
+    iteratorType::reverse_iterator rend()           { return iterable.rend();   } \
+    iteratorType::const_iterator cbegin()           { return iterable.cbegin(); } \
+    iteratorType::const_iterator cend()             { return iterable.cend();   } \
+    iteratorType::const_reverse_iterator crbegin()  { return iterable.crbegin();} \
+    iteratorType::const_reverse_iterator crend()    { return iterable.crend();  } \
+
 #endif //GDE_CORE_H

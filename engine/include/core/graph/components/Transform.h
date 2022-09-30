@@ -19,6 +19,7 @@ namespace GDE {
      * @brief Component common to every entity that tells the engine where it is, which scale it has and how much it is rotated.
      */
     class Transform {
+        MAKE_CLASS_ITERABLE(std::vector<Transform*>, children)
 
         private:
             glm::vec3 innerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
