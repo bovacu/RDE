@@ -131,7 +131,7 @@ namespace GDE {
                 _vertices.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _color });
                 _vertices.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _color });
 
-                _x += (float)_chars[_char].advance.x * _transform.getModelMatrixScale().x;
+                _x += (float)_chars[_char].advance.x;
 
                 _indices.emplace_back(_vertexCount + 0);
                 _indices.emplace_back(_vertexCount + 1);
