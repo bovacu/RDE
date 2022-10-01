@@ -61,10 +61,6 @@ namespace GDE {
         loadAssets(_manager, _data);
     }
 
-    void ConfigManager::loadLocalization(GDEConfig* _gdeConfig, Manager* _manager) {
-        LOG_W("Loading localization not implemented yet")
-    }
-
     void ConfigManager::loadScene(Manager* _manager, Scene* _scene, Window* _window, const std::string& _configFilePath) {
         auto _fileHandler = _manager->fileManager.open(_configFilePath, FileMode::READ);
 
@@ -238,7 +234,7 @@ namespace GDE {
         ENGINE_ASSERT(_bodyJson.contains("shape"), "Body MUST have section 'shape' with a value of 'box', 'circle' or 'polygon'.")
         if(_bodyJson.contains("shape")) {
             auto _shape = _bodyJson["shape"].get<std::string>();
-            std::transform(_shape.begin(), _shape.end(), _shape.begin(), [](unsigned char c){ return std::tolower(c); });
+
 
             if(std::equal(_shape.begin(), _shape.end(), "box")) {
                 _bodyConfig.shapeConfig.type = PhysicsShape::BOX;

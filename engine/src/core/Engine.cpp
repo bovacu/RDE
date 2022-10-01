@@ -39,7 +39,6 @@ namespace GDE {
         #endif
 
         manager.configManager.loadResources(&gdeConfig, &manager);
-        manager.configManager.loadLocalization(&gdeConfig, &manager);
 
         manager.consoleManager.addCommand<&Engine::changeColorConsoleCommand>("background_color"," Changes background color 0 <= r,b,g,a <= 255", this, "r g b a");
         manager.consoleManager.addCommand<&Engine::setParentCommand>( "parent_set", "Sets the parent of A as B", this, "A B");

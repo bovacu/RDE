@@ -18,6 +18,7 @@
 #include "core/systems/fileSystem/FileManager.h"
 #include "core/systems/inputSystem/input/ControllerInput.h"
 #include "core/render/RenderManager.h"
+#include "core/systems/localization/LocalizationManager.h"
 
 namespace GDE {
 
@@ -93,6 +94,11 @@ namespace GDE {
              * @see RenderManager
              */
             RenderManager renderManager;
+
+            /**
+             * @brief LocalizationManager
+             */
+             LocalizationManager localizationManager;
 
         public:
             /**

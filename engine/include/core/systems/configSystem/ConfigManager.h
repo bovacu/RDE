@@ -33,13 +33,6 @@ namespace GDE {
             void loadResources(GDEConfig* _gdeConfig, Manager* _manager);
 
             /**
-             * @brief Loads the localization file of the project (Must be a .json).
-             * @param _gdeConfig Configuration of GDE
-             * @param _manager Manager
-             */
-            void loadLocalization(GDEConfig* _gdeConfig, Manager* _manager);
-
-            /**
              * @brief This method allows the user to load a Scene through its configuration file (Must be a .json).
              * @param _manager Manager of the engine
              * @param _scene Scene

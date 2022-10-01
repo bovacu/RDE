@@ -16,7 +16,10 @@
 #define SPLIT_S(str, delimiter) split(str, delimiter)
 #define SPLIT_S_I(str, delimiter, index) splitGetIndex(str, delimiter, index)
 #define APPEND_S(...) caller(__VA_ARGS__)
-#define REPLACE_S(_str, _old, _new) replaceAll(_str, _old, _new)
+#define REPLACE_S(_str, _old, _new) replaceAll(_str, _old, _new);
+
+#define TO_LOWER_S(str) std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::tolower(c); });
+#define TO_UPPER_S(str) std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::toupper(c); });
 
 inline std::vector<std::string> split(const std::string& _str, const std::string& _delimiter) {
     size_t pos = 0;

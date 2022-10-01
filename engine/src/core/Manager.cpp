@@ -20,6 +20,7 @@ namespace GDE {
         sceneManager.init(_engine);
         physics.init();
         textureManager.init(&fileManager);
+        localizationManager.init(_engine);
     }
 
     void Manager::destroy() {

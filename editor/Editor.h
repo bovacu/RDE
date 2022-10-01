@@ -27,6 +27,7 @@ namespace Editor {
             void textStressTest();
             void physicsTest();
             void particleSystemTest();
+            void localizationTest();
             std::vector<NodeID> nodes;
 
 
