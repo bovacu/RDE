@@ -5,7 +5,6 @@ project(${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++")
 
 add_compile_options("-Werror")
@@ -23,20 +22,17 @@ find_package(SDL2 CONFIG REQUIRED)
 find_package(sdl2-image CONFIG REQUIRED)
 find_package(SDL2_mixer CONFIG REQUIRED)
 find_package(freetype CONFIG REQUIRED)
-find_package(box2d CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/packages/nlohmann-json_x64-linux/share/nlohmann_json)
 find_package(imgui CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
 include_directories(engine/include)
-include_directories(editor)
+include_directories(demo)
 
 #GDEFirebase
 
-option(GDE_LIBRARY "Build library instead of executable" OFF)
 if(GDE_LIBRARY)
-    message("Building lib")
     add_library(${PROJECT_NAME} STATIC
             ${GDE_CPP_HEADERS}
             ${GDE_CPP_SOURCES}
@@ -44,12 +40,16 @@ if(GDE_LIBRARY)
             ${CPP_SOURCES}
             ${CPP_HEADERS}
             )
-    target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES})
+    if(FORCE_DEBUG)
+        message("Forcing debug info")
+        target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES} ENGINE_DEBUG)
+    else()
+        target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES})
+    endif()
 
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND bash -c "./postLibraryBuildingProcess.sh" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND bash -c "./postLibraryBuildingProcess.sh ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BUILD_TYPE}" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 else()
-    message("Building executable")
     add_executable(${PROJECT_NAME}
             editor/Editor.cpp editor/EditorEntry.cpp
 
@@ -59,6 +59,7 @@ else()
             ${CPP_SOURCES}
             ${CPP_HEADERS}
             )
+
     target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES})
 endif()
 unset(GDE_LIBRARY CACHE)
@@ -69,7 +70,6 @@ target_link_libraries(${PROJECT_NAME}
                         SDL2::SDL2_image
                         $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
                         ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/packages/freetype_x64-linux/lib/libfreetype.a
-                        box2d::box2d
                         glad::glad
                         EnTT::EnTT
                         nlohmann_json::nlohmann_json

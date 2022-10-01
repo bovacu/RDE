@@ -60,6 +60,10 @@
 #define ENGINE_DEBUG
 #endif
 
+#ifdef FORCE_DEBUG
+#define ENGINE_DEBUG
+#endif
+
 #ifdef ENGINE_DEBUG
     #if defined(_WIN32)
 		#define ENGINE_DEBUG_BREAK() __debugbreak()
