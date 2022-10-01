@@ -32,47 +32,83 @@ namespace GDE {
     Music& SoundManager::loadMusic(const std::string& _musicPath) {
         Music _m;
         _m.musicID = Mix_LoadMUS(_musicPath.c_str());
+
+        if(_m.musicID == nullptr) {
+            throw std::runtime_error(APPEND_S("Couldn't load Music with path ", _musicPath));
+        }
+
         _m.name = Util::getFileNameFromPath(_musicPath);
         musics[_m.name] = _m;
-        LOG_S("Successfully loaded ", _m.name)
+        LOG_DEBUG("Successfully loaded ", _m.name)
         return musics[_m.name];
     }
 
     Sfx& SoundManager::loadSfx(const std::string& _sfxPath) {
         Sfx _sfx;
         _sfx.sfxID = Mix_LoadWAV(_sfxPath.c_str());
+
+        if(_sfx.sfxID == nullptr) {
+            throw std::runtime_error(APPEND_S("Couldn't load SFX with path ", _sfxPath));
+        }
+
         _sfx.name = Util::getFileNameFromPath(_sfxPath);
         sfxs[_sfx.name] = _sfx;
+        LOG_DEBUG("Loaded sfx: ", _sfx.name)
         return sfxs[_sfx.name];
     }
 
-    void SoundManager::removeMusic(const std::string& _musicName) {
-        if(musics.find(_musicName) != musics.end())
+    void SoundManager::unloadMusic(const std::string& _musicName) {
+        if(musics.find(_musicName) != musics.end()) {
+            Mix_FreeMusic(musics[_musicName].musicID);
             musics.erase(_musicName);
+        } else {
+            LOG_E("Tried to unload Music '", _musicName, ", but it was not loaded in memory!")
+        }
     }
 
-    void SoundManager::removeSfx(const std::string& _sfxName) {
-        if(sfxs.find(_sfxName) != sfxs.end())
+    void SoundManager::unloadSfx(const std::string& _sfxName) {
+        if(sfxs.find(_sfxName) != sfxs.end()) {
+            Mix_FreeChunk(sfxs[_sfxName].sfxID);
             sfxs.erase(_sfxName);
+        } else {
+            LOG_E("Tried to unload SFX '", _sfxName, ", but it was not loaded in memory!")
+        }
     }
 
     Music& SoundManager::getMusic(const std::string& _musicName) {
+        if(musics.find(_musicName) == musics.end()) {
+            throw std::runtime_error(APPEND_S("Couldn't get Music '", _musicName, "'"));
+        }
         return musics[_musicName];
     }
 
     Sfx& SoundManager::getSfx(const std::string& _sfxName) {
+        if(sfxs.find(_sfxName) == sfxs.end()) {
+            throw std::runtime_error(APPEND_S("Couldn't get SFX '", _sfxName, "'"));
+        }
         return sfxs[_sfxName];
     }
 
     void SoundManager::playMusic(const std::string& _musicName) {
+        if(musics.find(_musicName) == musics.end()) {
+            throw std::runtime_error(APPEND_S("Couldn't get Music '", _musicName, "'"));
+        }
+
         Music _m = musics[_musicName];
         Mix_PlayMusic(_m.musicID, _m.repeat);
     }
 
     void SoundManager::playSfx(const std::string& _sfxName) {
+        if(sfxs.find(_sfxName) == sfxs.end()) {
+            throw std::runtime_error(APPEND_S("Couldn't get SFX '", _sfxName, "'"));
+        }
+
         Sfx _sfx = sfxs[_sfxName];
-        // -1 on the channel for the first free channel
-        sfxs[_sfxName].channel = Mix_PlayChannel(-1, _sfx.sfxID, _sfx.repeat);
+        sfxs[_sfxName].channel = Mix_PlayChannel(sfxs[_sfxName].channel, _sfx.sfxID, _sfx.repeat);
+
+        if(sfxs[_sfxName].channel == -1) {
+            LOG_W("All of the SFX available channels are in use! SFX may not play correctly")
+        }
     }
 
     void SoundManager::resumeMusic(const std::string& _musicName) {

@@ -59,7 +59,7 @@ namespace GDE {
             /**
              * @brief Channel the sound is being played.
              */
-            int channel;
+            int channel = -1;
         private:
             /**
              * @brief SDL sound effect.
@@ -127,13 +127,13 @@ namespace GDE {
              * @brief Unloads a background music.
              * @param _musicName Music name
              */
-            void removeMusic(const std::string& _musicName);
+            void unloadMusic(const std::string& _musicName);
 
             /**
              * @brief Unloads a sound effect.
              * @param _sfxName Sound effect name
              */
-            void removeSfx(const std::string& _sfxName);
+            void unloadSfx(const std::string& _sfxName);
 
             /**
              * @brief Gets a background music.
