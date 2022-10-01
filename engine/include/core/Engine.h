@@ -57,12 +57,17 @@ namespace GDE {
             /**
              * @brief Icon to be shown in the task bar and in the window's icon.
              */
-            std::string iconPath = "";
+            std::string iconPath;
 
             /**
-             * @brief Name of the main scene to load.
+             * @brief Path to the file resources.json, if it exists
              */
-            std::string mainSceneToLoad = "";
+            std::string resourcesPath;
+
+            /**
+             * @brief Path to the file localization.json, if it exists
+             */
+            std::string localizationPath;
         };
 
         /**

@@ -11,26 +11,58 @@
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
+#include "core/util/Functions.h"
 
 namespace GDE {
 
     void ConfigManager::loadGDEConfig(GDEConfig* _config, FileManager& _manager) {
 
         auto _configPath = "assets/config/desktop.json";
-        #if ANDROID
+
+        #if IS_ANDROID()
         _configPath = "assets/config/android.json";
         #endif
-        auto _fileHandler = _manager.open(_configPath, FileMode::READ);
-        nlohmann::json data = nlohmann::json::parse(_manager.readFullFile(_fileHandler).content);
-        _manager.close(_fileHandler);
-        _config->windowData.title = data["title"].get<std::string>(),
-        _config->windowData.fullScreen = data["fullscreen"].get<bool>(),
-        _config->windowData.vsync = data["vsync"].get<bool>(),
-        #if !IS_MOBILE()
-        _config->windowData.size = Vec2<unsigned int>{data["resolution"][0].get<unsigned int>(),data["resolution"][1].get<unsigned int>()};
+
+        #if IS_IOS()
+        _configPath = "assets/config/ios.json";
         #endif
-        _config->projectData.iconPath = data["icon"].get<std::string>();
-        _config->projectData.mainSceneToLoad = data["main_scene"].get<std::string>();
+
+        auto _fileHandler = _manager.open(_configPath, FileMode::READ);
+        nlohmann::json _data = nlohmann::json::parse(_manager.readFullFile(_fileHandler).content);
+        _manager.close(_fileHandler);
+
+        _config->windowData.title = _data.contains("title") ? _data["title"].get<std::string>() : "GDEProject";
+        _config->windowData.fullScreen = _data.contains("fullscreen") && _data["fullscreen"].get<bool>();
+        _config->windowData.vsync = !_data.contains("vsync") || _data["vsync"].get<bool>();
+
+        #if !IS_MOBILE()
+        _config->windowData.size = Vec2<unsigned int>{_data["resolution"][0].get<unsigned int>(),_data["resolution"][1].get<unsigned int>()};
+        #endif
+
+        _config->projectData.iconPath = _data.contains("icon") ? _data["icon"].get<std::string>() : "";
+        _config->projectData.resourcesPath = _data.contains("resources_path") ?  _data["resources_path"].get<std::string>() : "";
+        _config->projectData.localizationPath = _data.contains("localization_path") ? _data["localization_path"].get<std::string>() : "";
+    }
+
+    void ConfigManager::loadResources(GDEConfig* _gdeConfig, Manager* _manager) {
+        if(_gdeConfig->projectData.resourcesPath.empty()) {
+            return;
+        }
+
+        auto _fileHandler = _manager->fileManager.open(APPEND_S("assets/", _gdeConfig->projectData.resourcesPath), FileMode::READ);
+        nlohmann::json _data = nlohmann::json::parse(_manager->fileManager.readFullFile(_fileHandler).content);
+
+        if(_data.empty()) {
+            return;
+        }
+
+        _manager->fileManager.close(_fileHandler);
+
+        loadAssets(_manager, _data);
+    }
+
+    void ConfigManager::loadLocalization(GDEConfig* _gdeConfig, Manager* _manager) {
+        LOG_W("Loading localization not implemented yet")
     }
 
     void ConfigManager::loadScene(Manager* _manager, Scene* _scene, Window* _window, const std::string& _configFilePath) {
@@ -40,12 +72,12 @@ namespace GDE {
         nlohmann::json _sceneJson = nlohmann::json::parse(_content);
         _manager->fileManager.close(_fileHandler);
 
-        loadAssets(_scene, _window, _sceneJson);
+        loadAssets(_manager, _sceneJson);
         loadNodes(_scene, _window, _sceneJson, createNodes(_scene, _sceneJson));
         _scene->preInit(_manager, _window, _sceneJson);
     }
 
-    void ConfigManager::loadAssets(Scene* _scene, Window* _window, const nlohmann::json& _json) {
+    void ConfigManager::loadAssets(Manager* _manager, const nlohmann::json& _json) {
 
         ENGINE_ASSERT(_json.contains("assets"), "Scene MUST have the 'assets' section.")
         auto& _assets = _json["assets"];
@@ -53,7 +85,7 @@ namespace GDE {
         if(_assets.contains("textures")) {
             auto& _texturesNode = _assets["textures"];
             for (const auto& _texture : _texturesNode) {
-                _scene->engine->manager.textureManager.loadSpriteSheet(_texture.get<std::string>());
+                _manager->textureManager.loadSpriteSheet(APPEND_S("assets/", _texture.get<std::string>()));
             }
         }
 
@@ -61,16 +93,22 @@ namespace GDE {
             auto& _fontsNodes = _assets["fonts"];
             for (const auto& _font : _fontsNodes) {
                 for(auto _i = 0; _i < _font["sizes"].size(); _i++)
-                    _scene->engine->manager.fontManager.loadFont(_scene->engine->manager.fileManager, _font["path"].get<std::string>(), _font["sizes"][_i].get<int>());
+                    _manager->fontManager.loadFont(_manager->fileManager, APPEND_S("assets/", _font["path"].get<std::string>()), _font["sizes"][_i].get<int>());
             }
         }
 
         if(_assets.contains("sfx")) {
-
+            auto& _sfxs = _assets["sfx"];
+            for (const auto& _sfx : _sfxs) {
+                _manager->soundManager.loadSfx(APPEND_S("assets/", _sfx.get<std::string>()));
+            }
         }
 
         if(_assets.contains("music")) {
-
+            auto& _musics = _assets["music"];
+            for (const auto& _music : _musics) {
+                _manager->soundManager.loadMusic(APPEND_S("assets/", _music.get<std::string>()));
+            }
         }
     }
 
@@ -371,9 +409,48 @@ namespace GDE {
 
     }
 
-    void
-    ConfigManager::loadStaticTransformComponent(const NodeID& _node, Scene* _scene, const nlohmann::json& _bodyJson) {
+    void ConfigManager::unloadAssets(Scene* _scene, const nlohmann::json& _sceneJson) {
+        ENGINE_ASSERT(_sceneJson.contains("assets"), "Scene MUST have the 'assets' section.")
+        auto& _assets = _sceneJson["assets"];
 
+        if(_assets.contains("textures")) {
+            auto& _texturesNode = _assets["textures"];
+            for (const auto& _texture : _texturesNode) {
+                _scene->engine->manager.textureManager.unloadAtlas(Util::getFileNameFromPath(_texture.get<std::string>()));
+            }
+        }
+
+        if(_assets.contains("fonts")) {
+            auto& _fontsNodes = _assets["fonts"];
+            for (const auto& _font : _fontsNodes) {
+                for(auto _i = 0; _i < _font["sizes"].size(); _i++)
+                    _scene->engine->manager.fontManager.unloadFullFont(Util::getFileNameFromPath(_font["path"].get<std::string>()));
+            }
+        }
+
+        if(_assets.contains("sfx")) {
+            auto& _sfxs = _assets["sfx"];
+            for (const auto& _sfx : _sfxs) {
+                _scene->engine->manager.soundManager.unloadSfx(Util::getFileNameFromPath(_sfx.get<std::string>()));
+            }
+        }
+
+        if(_assets.contains("music")) {
+            auto& _musics = _assets["music"];
+            for (const auto& _music : _musics) {
+                _scene->engine->manager.soundManager.unloadMusic(Util::getFileNameFromPath(_music.get<std::string>()));
+            }
+        }
+    }
+
+    void ConfigManager::unloadScene(Manager* _manager, Scene* _scene, const std::string& _configFilePath) {
+        auto _fileHandler = _manager->fileManager.open(_configFilePath, FileMode::READ);
+
+        auto _content = _manager->fileManager.readFullFile(_fileHandler).content;
+        nlohmann::json _sceneJson = nlohmann::json::parse(_content);
+        _manager->fileManager.close(_fileHandler);
+
+        unloadAssets(_scene, _sceneJson);
     }
 
 }

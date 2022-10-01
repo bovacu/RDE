@@ -99,7 +99,6 @@ namespace GDE {
     }
 
     void TextureAtlasManager::unloadAtlas(const std::string& _atlasName) {
-        delete atlases[_atlasName]->texture;
         delete atlases[_atlasName];
         atlases.erase(_atlasName);
     }

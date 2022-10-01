@@ -44,6 +44,7 @@
 #define DEBUG_SHADER "debug"
 #define FRAMEBUFFER_SHADER "framebuffer"
 
+#define RESOURCES_PATH "assets/"
 
 #ifndef EPSILON
 #define EPSILON 0.0001f
