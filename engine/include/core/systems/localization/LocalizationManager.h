@@ -15,15 +15,23 @@
 namespace GDE {
 
     struct LocalizationInfo {
-        enum Language { EN, ES, PT_BR, FR, MAX };
+        enum Language { EN_US, EN_GB, EN_CA, ES_MX, ES_ES, PT_BR, FR, ZH, RU, DE, IT, JP, MAX };
         Language language;
 
         static const char* toString(Language _language) {
             switch (_language) {
-                case EN:    return "en";
-                case ES:    return "es";
+                case EN_US: return "en-us";
+                case ES_ES: return "es-es";
                 case PT_BR: return "pt-br";
                 case FR:    return "fr";
+                case EN_GB: return "en-gb";
+                case EN_CA: return "en-ca";
+                case ES_MX: return "es-mx";
+                case ZH:    return "zh";
+                case RU:    return "ru";
+                case DE:    return "de";
+                case IT:    return "it";
+                case JP:    return "jp";
                 default:    return "NON_LANGUAGE";
             }
         }
@@ -51,21 +59,24 @@ namespace GDE {
                         ulong   ULONG;
                         float   FLOAT;
                         double  DOUBLE;
-                        char*   STRING;
+                        const char*   STRING;
                     } data {  };
 
                 public:
-                    explicit Any(int   _e)   { data.INT    = _e; type = Int;     }
-                    explicit Any(uint   _e)  { data.UINT   = _e; type = UInt;    }
-                    explicit Any(long   _e)  { data.LONG   = _e; type = Long;    }
-                    explicit Any(ulong   _e) { data.ULONG  = _e; type = ULong;   }
-                    explicit Any(float _e)   { data.FLOAT  = _e; type = Float;   }
-                    explicit Any(double _e)  { data.DOUBLE = _e; type = Double;  }
-                    explicit Any(char* _e)   { data.STRING = _e; type = String;  }
+                    // DO NOT SET HERE explicit ON CONSTRUCTORS
+                    Any(int   _e)   { data.INT    = _e; type = Int;     }
+                    Any(uint   _e)  { data.UINT   = _e; type = UInt;    }
+                    Any(long   _e)  { data.LONG   = _e; type = Long;    }
+                    Any(ulong   _e) { data.ULONG  = _e; type = ULong;   }
+                    Any(float _e)   { data.FLOAT  = _e; type = Float;   }
+                    Any(double _e)  { data.DOUBLE = _e; type = Double;  }
+                    Any(const char* _e)   { data.STRING = _e; type = String;  }
+                    Any(const std::string &_e)   { data.STRING = _e.c_str(); type = String;  }
                     [[nodiscard]] Type getType()    const { return type;        }
                     [[nodiscard]] int getInt()      const { return data.INT;    }
                     [[nodiscard]] float getFloat()  const { return data.FLOAT;  }
-                    [[nodiscard]] char* getString() const { return data.STRING; }
+                    [[nodiscard]] double getDouble()  const { return data.DOUBLE;  }
+                    [[nodiscard]] const char* getString() const { return data.STRING; }
                     [[nodiscard]] uint getUInt()    const { return data.UINT;   }
                     [[nodiscard]] long getLong()    const { return data.LONG;   }
                     [[nodiscard]] ulong getULong()  const { return data.ULONG;  }
@@ -85,11 +96,11 @@ namespace GDE {
             std::string localize(const std::string& _key);
 
             template<typename... Args>
-            std::string localize(const std::string& _key, Args&&... _args);
+            std::string localize(const std::string& _key, Args&... _args);
     };
 
     template<typename... Args>
-    std::string LocalizationManager::localize(const std::string& _key, Args&&... _args) {
+    std::string LocalizationManager::localize(const std::string& _key, Args&... _args) {
         std::vector<Any> _vec = { _args... };
 
         if(localizationTable.find(localizationInfo.language) == localizationTable.end()) {
@@ -107,35 +118,37 @@ namespace GDE {
         for (auto& _i : _vec) {
             switch (_i.getType()) {
                 case Any::Int: {
-                    _string = localizeSubstitution(_string, std::to_string(_i.Int));
+                    _string = localizeSubstitution(_string, std::to_string(_i.getInt()));
                     break;
                 }
                 case Any::UInt:{
-                    _string = localizeSubstitution(_string, std::to_string(_i.UInt));
+                    _string = localizeSubstitution(_string, std::to_string(_i.getUInt()));
                     break;
                 }
                 case Any::Long:{
-                    _string = localizeSubstitution(_string, std::to_string(_i.Long));
+                    _string = localizeSubstitution(_string, std::to_string(_i.getLong()));
                     break;
                 }
                 case Any::ULong:{
-                    _string = localizeSubstitution(_string, std::to_string(_i.ULong));
+                    _string = localizeSubstitution(_string, std::to_string(_i.getULong()));
                     break;
                 }
                 case Any::Float:{
-                    _string = localizeSubstitution(_string, std::to_string(_i.Float));
+                    _string = localizeSubstitution(_string, std::to_string(_i.getFloat()));
                     break;
                 }
                 case Any::Double:{
-                    _string = localizeSubstitution(_string, std::to_string(_i.Double));
+                    _string = localizeSubstitution(_string, std::to_string(_i.getDouble()));
                     break;
                 }
                 case Any::String:{
-                    _string = localizeSubstitution(_string, std::to_string(_i.String));
+                    _string = localizeSubstitution(_string, std::string(_i.getString()));
                     break;
                 }
             }
         }
+
+        return _string;
     }
 
 

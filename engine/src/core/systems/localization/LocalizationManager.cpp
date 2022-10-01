@@ -59,13 +59,11 @@ namespace GDE {
     std::string LocalizationManager::localizeSubstitution(const std::string& _string, const std::string& _replacement) {
         auto _str = _string;
         const std::string _search = "~";
-        for (size_t pos = 0; ;pos += _replacement.length()) {
-            pos = _str.find(_search, pos);
-            if (pos == std::string::npos) break;
+        auto pos = _str.find(_search, 0);
+        if (pos == std::string::npos) return _str;
 
-            _str.erase(pos, _search.length());
-            _str.insert(pos, _replacement);
-        }
+        _str.erase(pos, _search.length());
+        _str.insert(pos, _replacement);
 
         return _str;
     }
