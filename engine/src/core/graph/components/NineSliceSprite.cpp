@@ -4,6 +4,7 @@
 
 #include "core/graph/components/NineSliceSprite.h"
 #include "core/util/Functions.h"
+#include "core/graph/components/SpriteRenderer.h"
 
 namespace GDE {
 

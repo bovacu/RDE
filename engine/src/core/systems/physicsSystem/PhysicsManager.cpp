@@ -40,7 +40,7 @@ namespace GDE {
             for(auto _j = _i + 1; _j < bodies.size(); _j++) {
                 PhysicsBody* _b = bodies[_j];
 
-                if(_a->inverseMass == 0 && _b->inverseMass == 0 || !hasCollisionInTable(_a->collisionMask, _b->collisionMask))
+                if((_a->inverseMass == 0 && _b->inverseMass == 0) || !hasCollisionInTable(_a->collisionMask, _b->collisionMask))
                     continue;
 
                 PhysicsManifold _m(_a, _b );
@@ -150,7 +150,7 @@ namespace GDE {
             _renderManager->drawLine(_p0, _p1, _lineColor);
         }
 
-        if(!_showRadius) return;
+        if(!_showRadius || _polygon.vertices.empty()) return;
 
         _renderManager->drawLine(_physicsBody->transform->getModelMatrixPosition() + _polygon.getRotationMatrix() * _physicsBody->offset,
                                  _physicsBody->transform->getModelMatrixPosition() + _polygon.getRotationMatrix() * (_polygon.vertices[0] + _physicsBody->offset),
@@ -196,9 +196,10 @@ namespace GDE {
                     break;
                 }
 
-                case PhysicsShape::Type::BOX:
+                case PhysicsShape::Type::BOX: {
                     drawPolygon(_body, _renderManager, debugOptions.boxLineColor, debugOptions.boxRadiusColor, debugOptions.showBoxLines, debugOptions.showBoxRadius);
                     break;
+                }
                 case PhysicsShape::Type::POLYGON: {
                     drawPolygon(_body, _renderManager, debugOptions.polygonLineColor, debugOptions.polygonRadiusColor, debugOptions.showPolygonLines, debugOptions.showPolygonRadius);
                     break;

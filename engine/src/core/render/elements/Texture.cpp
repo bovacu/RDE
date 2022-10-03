@@ -8,6 +8,7 @@
 #include "core/platform/PlatformHeaderSDLImage.h"
 #include "core/util/Functions.h"
 #include "core/util/GLUtil.h"
+#include "core/render/elements/TextureAtlasManager.h"
 
 namespace GDE {
 

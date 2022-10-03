@@ -15,6 +15,7 @@
 #include "Random.h"
 #include "Delegate.h"
 #include "core/Core.h"
+#include "Functions.h"
 
 #include <memory>
 #include <vector>

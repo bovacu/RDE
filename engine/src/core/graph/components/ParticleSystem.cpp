@@ -2,6 +2,7 @@
 
 #include "core/graph/components/ParticleSystem.h"
 #include "core/util/Functions.h"
+#include "core/Engine.h"
 
 namespace GDE {
 

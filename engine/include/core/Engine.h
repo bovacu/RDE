@@ -19,6 +19,18 @@ namespace GDE {
 
     FORWARD_DECLARE_CLASS(Scene)
 
+    struct LocalizationConfig {
+        /**
+         * @brief Path to the file localization.json, if it exists
+         */
+        std::string localizationPath;
+
+        /**
+         * @brief Symbol to use to replace arguments. By default is ~
+         */
+         std::string replacementSymbol = "~";
+    };
+
     /**
      * @brief This struct contains some basic configuration of the window.
      */
@@ -65,9 +77,9 @@ namespace GDE {
             std::string resourcesPath;
 
             /**
-             * @brief Path to the file localization.json, if it exists
+             * @brief Configuration for localization.
              */
-            std::string localizationPath;
+            LocalizationConfig localizationConfig;
         };
 
         /**

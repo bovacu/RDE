@@ -41,7 +41,7 @@ namespace GDE {
 
         _config->projectData.iconPath = _data.contains("icon") ? _data["icon"].get<std::string>() : "";
         _config->projectData.resourcesPath = _data.contains("resources_path") ?  _data["resources_path"].get<std::string>() : "";
-        _config->projectData.localizationPath = _data.contains("localization_path") ? _data["localization_path"].get<std::string>() : "";
+        _config->projectData.localizationConfig.localizationPath = _data.contains("localization_path") ? _data["localization_path"].get<std::string>() : "";
     }
 
     void ConfigManager::loadResources(GDEConfig* _gdeConfig, Manager* _manager) {

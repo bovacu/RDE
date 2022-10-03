@@ -4,8 +4,7 @@
 #ifndef GDE_FUNCTIONS_H
 #define GDE_FUNCTIONS_H
 
-#include "core/Engine.h"
-#include "core/render/Camera.h"
+#include "core/render/elements/ViewPort.h"
 
 namespace GDE {
 
@@ -17,10 +16,10 @@ namespace GDE {
                 return (_value < _minValue) ? _minValue : (_value > _maxValue) ? _maxValue : _value;
             }
 
-            #define clampF(_value, _minValue, _maxValue) clamp<float>(_value, _minValue, _maxValue);
-            #define clampD(_value, _minValue, _maxValue) clamp<double>(_value, _minValue, _maxValue);
-            #define clampI(_value, _minValue, _maxValue) clamp<int>(_value, _minValue, _maxValue);
-            #define clampL(_value, _minValue, _maxValue) clamp<long>(_value, _minValue, _maxValue);
+            #define clampF(_value, _minValue, _maxValue) Util::clamp<float>(_value, _minValue, _maxValue);
+            #define clampD(_value, _minValue, _maxValue) Util::clamp<double>(_value, _minValue, _maxValue);
+            #define clampI(_value, _minValue, _maxValue) Util::clamp<int>(_value, _minValue, _maxValue);
+            #define clampL(_value, _minValue, _maxValue) Util::clamp<long>(_value, _minValue, _maxValue);
 
             static std::string getFileNameFromPath(const std::string& _path)  {
                 std::string base_filename = _path.substr(_path.find_last_of("/\\") + 1);

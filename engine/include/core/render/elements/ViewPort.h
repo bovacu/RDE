@@ -4,7 +4,7 @@
 #ifndef GDE_VIEWPORT_H
 #define GDE_VIEWPORT_H
 
-#include "core/util/Util.h"
+#include "core/util/Vec.h"
 
 namespace GDE {
 

@@ -9,6 +9,7 @@
 #include "core/render/elements/Vertex.h"
 #include "core/render/elements/Batch.h"
 #include "core/graph/Scene.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 namespace GDE {
 

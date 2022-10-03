@@ -11,7 +11,6 @@ namespace GDE {
         engine = _engine;
     }
 
-
     void LocalizationManager::loadAllLanguages() {
         for(auto _i = 0; _i < LocalizationInfo::MAX; _i++) {
             loadLanguage((LocalizationInfo::Language)_i);
@@ -19,13 +18,13 @@ namespace GDE {
     }
 
     void LocalizationManager::loadLanguage(LocalizationInfo::Language _language) {
-        if(engine->gdeConfig.projectData.localizationPath.empty()) {
+        if(engine->gdeConfig.projectData.localizationConfig.localizationPath.empty()) {
             LOG_E("Cannot load localization because the file_path was not provided in the configuration file")
             return;
         }
 
         auto* _manager = &engine->manager;
-        auto _fileHandler = _manager->fileManager.open(APPEND_S("assets/", engine->gdeConfig.projectData.localizationPath), FileMode::READ);
+        auto _fileHandler = _manager->fileManager.open(APPEND_S("assets/", engine->gdeConfig.projectData.localizationConfig.localizationPath), FileMode::READ);
 
         auto _content = _manager->fileManager.readFullFile(_fileHandler).content;
         nlohmann::json _localizationJson = nlohmann::json::parse(_content);
@@ -58,7 +57,7 @@ namespace GDE {
 
     std::string LocalizationManager::localizeSubstitution(const std::string& _string, const std::string& _replacement) {
         auto _str = _string;
-        const std::string _search = "~";
+        const std::string _search = engine->gdeConfig.projectData.localizationConfig.replacementSymbol;
         auto pos = _str.find(_search, 0);
         if (pos == std::string::npos) return _str;
 

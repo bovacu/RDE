@@ -13,6 +13,7 @@
 #include "core/util/Functions.h"
 #include "core/graph/components/Transform.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "core/Engine.h"
 
 namespace GDE {
 

@@ -31,4 +31,6 @@
 #include "core/graph/components/NineSliceSprite.h"
 #include "core/graph/components/UIButton.h"
 
+#include "core/systems/localization/LocalizationManager.h"
+
 #endif //GDE_H
