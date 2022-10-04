@@ -1,0 +1,72 @@
+{
+    "scene_name" : "Test Scene",
+
+    "assets" : {
+        "textures" : [
+            "sprites/assets.json",
+            "sprites/ui2.json"
+        ],
+        "fonts" : [
+            {
+                "path": "fonts/Yulong-Regular.ttf",
+                "sizes": [ 54 ]
+            }
+        ],
+        "sfx" : [
+            "sounds/knifeAgainstLog.ogg"
+        ],
+        "music" : [
+
+        ]
+    },
+
+    "nodes" : [
+        {
+            "tag" : "Main Camera",
+            "components" : {
+                "active" : {},
+                "transform" : {
+                    "position" : [0, 0],
+                    "scale" : [1, 1],
+                    "rotation" : 0
+                },
+                "camera" : {
+                    "tag" : "Main Camera",
+                    "zoom" : 1.0,
+                    "zoom_speed" : 0.25,
+                    "viewport" : "FREE",
+                    "is_main" : true
+                }
+            }
+        },
+        {
+            "tag" : "Background",
+            "components" : {
+                "active" : {},
+                "transform" : {
+                    "position" : [0, 0],
+                    "scale" : [5, 5],
+                    "rotation" : 0
+                },
+                "sprite_renderer" : {
+                    "texture" : {
+                        "atlas" : "assets",
+                        "tile" : "sky"
+                    },
+                    "color" : [255, 255, 255, 255],
+                    "layer" : 0,
+                    "shader" : "basic"
+                }
+            }
+        }
+    ],
+
+    "canvases" : [
+        {
+            "tag" : "Main Canvas",
+            "nodes" : {
+
+            }
+        }
+    ]
+}
