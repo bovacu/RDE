@@ -69,15 +69,6 @@
     #if defined(_WIN32)
 		#define ENGINE_DEBUG_BREAK() __debugbreak()
         #define ENGINE_ENABLE_ASSERTS
-    #elif defined(__APPLE__)
-        #include "TargetConditionals.h"
-        #if TARGET_OS_IPHONE
-            #ifndef IOS_PLATFORM
-                #define IOS_PLATFORM
-            #endif
-        #elif TARGET_OS_MAC
-            #define MAC_PLATFORM
-        #endif
 	#elif defined(__linux__)
 		#include <csignal>
 		#define ENGINE_DEBUG_BREAK() raise(SIGTRAP)
@@ -85,6 +76,17 @@
 	#endif
 #else
 #define ENGINE_DEBUGBREAK()
+#endif
+
+#if defined(__APPLE__)
+#include "TargetConditionals.h"
+    #if TARGET_OS_IPHONE
+        #ifndef IOS_PLATFORM
+            #define IOS_PLATFORM
+        #endif
+    #elif TARGET_OS_MAC
+        #define MAC_PLATFORM
+    #endif
 #endif
 
 #define IS_MAC() (defined(__APPLE__) && defined(MAC_PLATFORM))
