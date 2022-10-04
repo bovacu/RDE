@@ -22,24 +22,10 @@
 #include "chipmunk/chipmunk.h"
 #include "chipmunk/chipmunk_unsafe.h"
 #include "ChipmunkDemo.h"
-#include <stdio.h>
-
-cpBody* ballBody = NULL;
-int isStatic = 0;
 
 static void
 update(cpSpace *space, double dt)
 {
-	if(isStatic == 0) {
-		cpVect _pos = cpBodyGetPosition(ballBody);
-		printf("%f \n", _pos.y);
-		cpBodySetPosition(ballBody, cpv(_pos.x, _pos.y + 300.f * dt ));
-		if(_pos.y >= 0) {
-			isStatic = 1;
-			ballBody = cpBodyInitStatic(ballBody);
-		}
-		cpSpaceReindexShapesForBody(space, ballBody);
-	}
 	cpSpaceStep(space, dt);
 }
 
@@ -91,8 +77,6 @@ init(void)
 	shape = cpSpaceAddShape(space, cpCircleShapeNew(body, radius, cpvzero));
 	cpShapeSetElasticity(shape, 0.0f);
 	cpShapeSetFriction(shape, 0.9f);
-
-	ballBody = body;
 	
 	return space;
 }
