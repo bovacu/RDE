@@ -86,5 +86,5 @@ target_link_libraries(${PROJECT_NAME}
                         imgui::imgui
                         glm::glm
                         ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/freetype/libfreetype.a
-                        ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/Chipmunk2D/libchipmunk.a
+                        ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/Chipmunk2D/libs/Linux/libchipmunk.a
                     )
