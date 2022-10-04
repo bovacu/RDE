@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18.1)
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+#set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 set(PROJECT_NAME GDE)
 project(${PROJECT_NAME})
 
@@ -17,17 +17,28 @@ file(GLOB_RECURSE GDE_CPP_SOURCES engine/src/*.cpp )
 set(CPP_HEADERS)
 set(CPP_SOURCES)
 
-find_package(EnTT CONFIG REQUIRED)
-find_package(SDL2 CONFIG REQUIRED)
-find_package(sdl2-image CONFIG REQUIRED)
-find_package(SDL2_mixer CONFIG REQUIRED)
-find_package(freetype CONFIG REQUIRED)
-find_package(glad CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/packages/nlohmann-json_x64-linux/share/nlohmann_json)
-find_package(imgui CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
+set(SDL2_DIR vcpkg/installed/x64-linux/share/sdl2)
+set(EnTT_DIR vcpkg/installed/x64-linux/share/entt)
+set(sdl2-image_DIR vcpkg/installed/x64-linux/share/sdl2-image)
+set(SDL2_mixer_DIR vcpkg/installed/x64-linux/share/SDL2_mixer)
+set(freetype_DIR vcpkg/installed/x64-linux/share/freetype)
+set(glad_DIR vcpkg/installed/x64-linux/share/glad)
+set(nlohmann_json_DIR vcpkg/installed/x64-linux/share/nlohmann_json)
+set(imgui_DIRvcpkg/installed/x64-linux/share/imgui)
+set(glm_DIR vcpkg/installed/x64-linux/share/glm)
+
+find_package(SDL2 CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/sdl2)
+find_package(sdl2-image CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/sdl2-image)
+find_package(SDL2_mixer CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/SDL2_mixer)
+find_package(glad CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/glad)
+find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/nlohmann_json)
+find_package(imgui CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/imgui)
+find_package(glm CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/glm)
+find_package(EnTT CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/entt)
 
 include_directories(engine/include)
+include_directories(nonVcpkgDeps/freetype/include)
+include_directories(nonVcpkgDeps/Chipmunk2D/include)
 include_directories(demo)
 
 #GDEFirebase
@@ -69,10 +80,11 @@ target_link_libraries(${PROJECT_NAME}
                         SDL2::SDL2 SDL2::SDL2main SDL2::SDL2-static
                         SDL2::SDL2_image
                         $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
-                        ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/packages/freetype_x64-linux/lib/libfreetype.a
                         glad::glad
                         EnTT::EnTT
                         nlohmann_json::nlohmann_json
                         imgui::imgui
                         glm::glm
+                        ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/freetype/libfreetype.a
+                        ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/Chipmunk2D/libchipmunk.a
                     )

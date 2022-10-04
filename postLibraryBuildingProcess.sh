@@ -12,8 +12,6 @@ ar -x "$WD"/vcpkg/installed/x64-linux/lib/libSDL2.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libSDL2main.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libSDL2_image.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libSDL2_mixer.a
-ar -x "$WD"/vcpkg/installed/x64-linux/lib/libbox2d.a
-ar -x "$WD"/vcpkg/installed/x64-linux/lib/libfreetype.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libglad.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libimgui.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libpng.a
@@ -27,6 +25,8 @@ ar -x "$WD"/vcpkg/installed/x64-linux/lib/libvorbis.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libvorbisenc.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libvorbisfile.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libz.a
+ar -x "$WD"/nonVcpkgDeps/freetype/libfreetype.a
+ar -x "$WD"/nonVcpkgDeps/Chipmunk2D/libchipmunk.a
 ar -x libGDE.a
 rm libGDE.a
 ar -qc libGDE.a *.o

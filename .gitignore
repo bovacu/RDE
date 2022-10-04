@@ -34,7 +34,6 @@ submodules/RmlUi
 CMakeFiles
 cmake-build-debug
 
-submodules/box2d
 submodules/glm
 submodules/entt
 submodules/freetype
