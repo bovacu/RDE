@@ -19,16 +19,24 @@ file(GLOB_RECURSE GDE_CPP_SOURCES engine/src/*.cpp )
 set(CPP_HEADERS)
 set(CPP_SOURCES)
 
-find_package(EnTT CONFIG REQUIRED)
-find_package(SDL2 CONFIG REQUIRED)
-find_package(sdl2-image CONFIG REQUIRED)
-find_package(SDL2_mixer CONFIG REQUIRED)
-find_package(freetype CONFIG REQUIRED)
-find_package(box2d CONFIG REQUIRED)
-find_package(glad CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/packages/nlohmann-json_x64-linux/share/nlohmann_json)
-find_package(imgui CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
+set(SDL2_DIR vcpkg/installed/x64-linux/share/sdl2)
+set(EnTT_DIR vcpkg/installed/x64-osx/share/entt)
+set(sdl2-image_DIR vcpkg/installed/x64-osx/share/sdl2-image)
+set(SDL2_mixer_DIR vcpkg/installed/x64-osx/share/SDL2_mixer)
+set(freetype_DIR vcpkg/installed/x64-osx/share/freetype)
+set(glad_DIR vcpkg/installed/x64-osx/share/glad)
+set(nlohmann_json_DIR vcpkg/installed/x64-osx/share/nlohmann_json)
+set(imgui_DIRvcpkg/installed/x64-osx/share/imgui)
+set(glm_DIR vcpkg/installed/x64-osx/share/glm)
+
+find_package(SDL2 CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/sdl2)
+find_package(sdl2-image CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/sdl2-image)
+find_package(SDL2_mixer CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/SDL2_mixer)
+find_package(glad CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/glad)
+find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/nlohmann_json)
+find_package(imgui CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/imgui)
+find_package(glm CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/glm)
+find_package(EnTT CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/entt)
 
 include_directories(engine/include)
 include_directories(editor)
@@ -70,8 +78,8 @@ target_link_libraries(${PROJECT_NAME}
                         SDL2::SDL2_image
                         $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
                         ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/installed/x64-osx/lib/libfreetype.a
-                        box2d::box2d
                         ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/installed/x64-osx/lib/libglad.a
+                        ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/Chipmunk2D/libchipmunk.a
                         EnTT::EnTT
                         nlohmann_json::nlohmann_json
                         imgui::imgui
