@@ -5,9 +5,8 @@ vcpkg/vcpkg.exe install libpng:x64-windows
 vcpkg/vcpkg.exe install libjpeg-turbo:x64-windows
 vcpkg/vcpkg.exe install libvorbis:x64-windows
 vcpkg/vcpkg.exe install mpg123:x64-windows
-vcpkg/vcpkg.exe install box2d:x64-windows
 vcpkg/vcpkg.exe install entt:x64-windows
-vcpkg/vcpkg.exe install toml11:x64-windows
+vcpkg/vcpkg.exe install chipmunk:x64-windows
 vcpkg/vcpkg.exe install freetype[core]:x64-windows
 vcpkg/vcpkg.exe install sdl2[core,x11]:x64-windows
 vcpkg/vcpkg.exe install sdl2-image[core,libjpeg-turbo]:x64-windows
