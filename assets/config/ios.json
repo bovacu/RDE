@@ -1,0 +1,7 @@
+{
+  "resolution" : [1080, 1920],
+  "vsync" : true,
+  "fullscreen" : false,
+  "icon" : "",
+  "title" : "Engine"
+}

@@ -39,6 +39,8 @@ find_package(glm CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/glm)
 find_package(EnTT CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/entt)
 
 include_directories(engine/include)
+include_directories(nonVcpkgDeps/freetype/include)
+include_directories(nonVcpkgDeps/Chipmunk2D/include)
 include_directories(editor)
 
 #GDEFirebase
@@ -79,7 +81,7 @@ target_link_libraries(${PROJECT_NAME}
                         $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
                         ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/installed/x64-osx/lib/libfreetype.a
                         ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/installed/x64-osx/lib/libglad.a
-                        ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/Chipmunk2D/libchipmunk.a
+                        ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/Chipmunk2D/libs/Mac/libchipmunk.a
                         EnTT::EnTT
                         nlohmann_json::nlohmann_json
                         imgui::imgui
