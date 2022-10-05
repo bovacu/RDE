@@ -130,20 +130,18 @@ namespace GDE {
     template<typename... Args>
     std::string LocalizationManager::localize(const std::string& _key, Args&... _args) {
         std::vector<Any> _vec = { _args... };
-        auto _keyCpy = _key;
-        _keyCpy = TO_LOWER_S(_keyCpy);
 
         if(localizationTable.find(localizationInfo.language) == localizationTable.end()) {
             LOG_E("Tried to localize to language '", LocalizationInfo::toString(localizationInfo.language), "', but it wasn't loaded")
             return APPEND_S("NotLanguageLoadedLocalizationError -> ", localizationInfo.language);
         }
 
-        if(localizationTable[localizationInfo.language].find(_keyCpy) == localizationTable[localizationInfo.language].end()) {
-            LOG_E("Tried to localize key '", _keyCpy, "', but it wasn't found!")
-            return APPEND_S("KeyNotFoundLocalizationError -> ", _keyCpy);
+        if(localizationTable[localizationInfo.language].find(_key) == localizationTable[localizationInfo.language].end()) {
+            LOG_E("Tried to localize key '", _key, "', but it wasn't found!")
+            return APPEND_S("KeyNotFoundLocalizationError -> ", _key);
         }
 
-        auto _string = localizationTable[localizationInfo.language][_keyCpy];
+        auto _string = localizationTable[localizationInfo.language][_key];
 
         for (auto& _i : _vec) {
             switch (_i.getType()) {
