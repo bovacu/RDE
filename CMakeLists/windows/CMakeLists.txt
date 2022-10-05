@@ -44,6 +44,7 @@ include_directories(
 
 include_directories(engine/include)
 include_directories(editor)
+include_directories(vcpkg/installed/x64-windows/include)
 
 #GDEFirebase
 
@@ -82,10 +83,10 @@ target_link_libraries(${PROJECT_NAME}
         SDL2::SDL2_image
         $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
         freetype
-        box2d::box2d
         glad::glad
         EnTT::EnTT
         nlohmann_json::nlohmann_json
         imgui::imgui
         glm::glm
+        ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/installed/x64-windows/lib/chipmunk.lib
         )

@@ -5,9 +5,7 @@ vcpkg/vcpkg install libpng:x64-osx
 vcpkg/vcpkg install libjpeg-turbo:x64-osx
 vcpkg/vcpkg install libvorbis:x64-osx
 vcpkg/vcpkg install mpg123:x64-osx
-vcpkg/vcpkg install box2d:x64-osx
 vcpkg/vcpkg install entt:x64-osx
-vcpkg/vcpkg install toml11:x64-osx
 vcpkg/vcpkg install freetype[core]:x64-osx
 vcpkg/vcpkg install sdl2[core,x11]:x64-osx
 vcpkg/vcpkg install sdl2-image[core,libjpeg-turbo]:x64-osx
