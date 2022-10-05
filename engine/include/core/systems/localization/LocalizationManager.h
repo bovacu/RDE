@@ -37,7 +37,7 @@ namespace GDE {
         }
 
         static Language toEnum(const char* _language) {
-            toEnum(std::string(_language));
+            return toEnum(std::string(_language));
         }
 
         static Language toEnum(const std::string& _language) {
