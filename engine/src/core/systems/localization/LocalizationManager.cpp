@@ -9,6 +9,22 @@ namespace GDE {
 
     void LocalizationManager::init(Engine* _engine) {
         engine = _engine;
+
+        auto* _locales = SDL_GetPreferredLocales();
+
+        if(_locales[0].language != nullptr) {
+            std::string _country;
+            if(_locales->country != nullptr) {
+                auto _countryStr = std::string(_locales[0].country);
+                _country = APPEND_S("_", TO_LOWER_S(_countryStr));
+            }
+
+            localizationInfo.language = LocalizationInfo::toEnum(APPEND_S(_locales[0].language, _country));
+        } else {
+            localizationInfo.language = LocalizationInfo::EN_US;
+        }
+
+        SDL_free(_locales);
     }
 
     void LocalizationManager::loadAllLanguages() {

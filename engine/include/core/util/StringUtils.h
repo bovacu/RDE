@@ -12,14 +12,25 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
 #define SPLIT_S(str, delimiter) split(str, delimiter)
 #define SPLIT_S_I(str, delimiter, index) splitGetIndex(str, delimiter, index)
 #define APPEND_S(...) caller(__VA_ARGS__)
 #define REPLACE_S(_str, _old, _new) replaceAll(_str, _old, _new);
 
-#define TO_LOWER_S(str) std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::tolower(c); });
-#define TO_UPPER_S(str) std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::toupper(c); });
+#define TO_LOWER_S(str) toLower(str)
+#define TO_UPPER_S(str) toUpper(str)
+
+inline std::string& toLower(std::string& _string) {
+    std::transform(_string.begin(), _string.end(), _string.begin(), [](unsigned char c){ return std::tolower(c); });
+    return _string;
+}
+
+inline std::string& toUpper(std::string& _string) {
+    std::transform(_string.begin(), _string.end(), _string.begin(), [](unsigned char c){ return std::toupper(c); });
+    return _string;
+}
 
 inline std::vector<std::string> split(const std::string& _str, const std::string& _delimiter) {
     size_t pos = 0;
