@@ -6,7 +6,9 @@
 #define GDE_SPRITE_RENDERER_H
 
 #include "core/render/elements/IRenderizable.h"
+#include "core/render/elements/Vertex.h"
 #include "entt/entity/entity.hpp"
+#include <glm/fwd.hpp>
 
 typedef entt::entity NodeID;
 
@@ -28,6 +30,11 @@ namespace GDE {
              * only its region will be rendered.
              */
             Texture* texture = nullptr;
+
+            OpenGLVertex geometry[4];
+
+        private:
+            void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport);
 
         public:
             SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture);
@@ -79,7 +86,7 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) const override;
+            void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
     };
 
 }

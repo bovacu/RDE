@@ -30,7 +30,7 @@ namespace GDE {
         return nineSliceSprite->getSize();
     }
 
-    void UIButton::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) const {
+    void UIButton::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
 
     }
 }

@@ -8,7 +8,7 @@
 
 namespace GDE {
 
-    void Batch::draw(const IRenderizable* _renderizable, Transform& _transform) {
+    void Batch::draw(IRenderizable* _renderizable, Transform& _transform) {
         if(indexBuffer.size() + 6 >= spriteBatch->maxIndicesPerDrawCall)
             spriteBatch->flush();
 

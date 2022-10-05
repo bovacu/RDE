@@ -73,7 +73,7 @@ namespace GDE {
          */
         GLuint textureID = -1;
 
-        void draw(const IRenderizable* _renderizable, Transform& _transform);
+        void draw(IRenderizable* _renderizable, Transform& _transform);
     };
 
 }

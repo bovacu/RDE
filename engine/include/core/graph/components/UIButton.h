@@ -26,7 +26,7 @@ namespace GDE {
 
             [[nodiscard]] Vec2F getSize() const override;
 
-            void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) const override;
+            void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
 
             ~UIButton() override {  }
     };

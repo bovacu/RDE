@@ -81,7 +81,8 @@ namespace GDE {
         glm::vec3 translation;
         glm::vec3 skew;
         glm::vec4 perspective;
-        glm::decompose(localToWorld(), scale, rotation, translation, skew, perspective);
+        auto [_transformMatrix, _] = localToWorld();
+        glm::decompose(_transformMatrix, scale, rotation, translation, skew, perspective);
         return { translation.x, translation.y };
     }
 
@@ -91,7 +92,8 @@ namespace GDE {
         glm::vec3 translation;
         glm::vec3 skew;
         glm::vec4 perspective;
-        glm::decompose(localToWorld(), scale, rotation, translation, skew, perspective);
+        auto [_transformMatrix, _] = localToWorld();
+        glm::decompose(_transformMatrix, scale, rotation, translation, skew, perspective);
         return { scale.x, scale.y };
     }
 
@@ -101,7 +103,8 @@ namespace GDE {
         glm::vec3 translation;
         glm::vec3 skew;
         glm::vec4 perspective;
-        glm::decompose(localToWorld(), scale, rotation, translation, skew, perspective);
+        auto [_transformMatrix, _] = localToWorld();
+        glm::decompose(_transformMatrix, scale, rotation, translation, skew, perspective);
         glm::vec3 _euler = glm::eulerAngles(rotation);
         return radiansToDegrees(_euler.z);
     }
@@ -142,15 +145,17 @@ namespace GDE {
         );
     }
 
-    glm::mat4 Transform::localToWorld() {
+    std::tuple<glm::mat4, bool> Transform::localToWorld() {
+        bool _wasDirty = false;
         if (parentTransform) {
             if(dirty) {
                 setDirty();
                 dirty = false;
+                _wasDirty = true;
             }
         }
 
-        return worldMatrixCache;
+        return { worldMatrixCache, _wasDirty };
     }
 
     glm::mat4 Transform::worldToLocal() const {
@@ -163,7 +168,7 @@ namespace GDE {
 
     glm::mat4 Transform::recalculateCachedMatrix() {
         if (parentTransform) {
-            auto _parentMatrix = parentTransform->localToWorld();
+            auto [_parentMatrix, _dirty] = parentTransform->localToWorld();
             return _parentMatrix * localToParent();
         }
 

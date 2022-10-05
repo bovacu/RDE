@@ -34,6 +34,7 @@ namespace GDE {
          */
         float* extraData = nullptr;
 
+        OpenGLVertex() {  }
         OpenGLVertex(const glm::vec3& _position, const glm::vec2& _texCoord, const glm::vec4& _color, float* _extraData = nullptr) : position(_position), color(_color), texCoord(_texCoord), extraData(_extraData) {  }
     };
 

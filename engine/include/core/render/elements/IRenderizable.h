@@ -54,7 +54,7 @@ namespace GDE {
             /**
              * @brief Origin of the renderizable. By default it is (0.5, 0.5), which means it is centered.
              */
-             Vec2F pivot { 0.5f, 0.5f };
+            Vec2F pivot { 0.5f, 0.5f };
 
         public:
             IRenderizable(Transform* _transform) : transform(_transform) {  }
@@ -83,7 +83,7 @@ namespace GDE {
              * @param _transform Transform of the renderizable.
              * @param _viewport Viewport of the scene.
              */
-            virtual void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) const = 0;
+            virtual void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) = 0;
 
             virtual ~IRenderizable() {  }
     };

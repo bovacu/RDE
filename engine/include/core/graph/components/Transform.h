@@ -5,6 +5,7 @@
 #ifndef GDE_TRANSFORM_H
 #define GDE_TRANSFORM_H
 
+#include <bits/utility.h>
 #include <vector>
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/gtc/quaternion.hpp"
@@ -150,7 +151,7 @@ namespace GDE {
 
             [[nodiscard]] glm::mat4 localToParent() const;
             [[nodiscard]] glm::mat4 parentToLocal() const;
-            [[nodiscard]] glm::mat4 localToWorld();
+            [[nodiscard]] std::tuple<glm::mat4, bool> localToWorld();
             [[nodiscard]] glm::mat4 worldToLocal() const;
 
             void setMatrix(const glm::mat4& _matrix);

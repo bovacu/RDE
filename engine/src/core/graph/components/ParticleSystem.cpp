@@ -96,11 +96,11 @@ namespace GDE {
         _particleData.position += glm::vec3 { _particleData.velocity.x, _particleData.velocity.y, 0.f } * (float)_dt;
     }
 
-    void ParticleSystem::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) const {
+    void ParticleSystem::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
         for (auto& _particle : usedParticles) {
             auto _vertexCount = _vertices.size();
 
-            auto _transformMat = _transform.localToWorld();
+            auto [_transformMat, _dirty] = _transform.localToWorld();
             auto _screenPos = Util::worldToScreenCoords(_viewport, {_particle.position.x, _particle.position.y});
             _transformMat[3][0] = _screenPos.x;
             _transformMat[3][1] = _screenPos.y;

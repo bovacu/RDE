@@ -4,23 +4,30 @@
 
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/render/Camera.h"
+#include "core/render/elements/ViewPort.h"
+#include "core/util/Color.h"
 #include "core/util/Functions.h"
 #include "core/graph/components/Transform.h"
 #include "core/render/elements/Vertex.h"
 #include "core/render/elements/Batch.h"
 #include "core/graph/Scene.h"
 #include "core/systems/uiSystem/Canvas.h"
+#include "core/util/Logger.h"
 
 namespace GDE {
 
     SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture) : IRenderizable(_scene->getMainGraph()->getComponent<Transform>(_nodeId)), texture(_texture) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
+        auto [_transformMat, _dirty] = transform->localToWorld();
+        calculateGeometry(_transformMat, *transform, *_scene->getMainCamera()->getViewport());
     }
 
     SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Canvas* _canvas, Texture* _texture) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeId)), texture(_texture)  {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
+        auto [_transformMat, _dirty] = transform->localToWorld();
+        calculateGeometry(_transformMat, *transform, *_canvas->getCamera()->getViewport());
     }
 
     std::string SpriteRenderer::getTexturePath() {
@@ -35,13 +42,10 @@ namespace GDE {
         return Util::getFileExtension(texture->getPath());
     }
 
-    void SpriteRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) const {
-        auto _vertexCount = _vertices.size();
-
-        auto _transformMat = _transform.localToWorld();
-        auto _screenPos = Util::worldToScreenCoords(_viewport, {_transformMat[3][0], _transformMat[3][1]});
-        _transformMat[3][0] = _screenPos.x;
-        _transformMat[3][1] = _screenPos.y;
+    void SpriteRenderer::calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport) {
+        auto _screenPos = Util::worldToScreenCoords(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
+        _transformMatrix[3][0] = _screenPos.x;
+        _transformMatrix[3][1] = _screenPos.y;
 
         Vec2F _textureOrigin = {(float)texture->getRegion().bottomLeftCorner.x, (float)texture->getRegion().bottomLeftCorner.y};
         Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
@@ -62,10 +66,25 @@ namespace GDE {
 
         glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
 
-        _vertices.emplace_back(OpenGLVertex {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color });
-        _vertices.emplace_back(OpenGLVertex {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord, _color });
-        _vertices.emplace_back(OpenGLVertex {_transformMat * _topRightTextureCorner   , _topRightTextureCoord   , _color });
-        _vertices.emplace_back(OpenGLVertex {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord    , _color });
+        geometry[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+        geometry[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+        geometry[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+        geometry[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+    } 
+
+    void SpriteRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+        auto _vertexCount = _vertices.size();
+
+        auto [_transformMat, _dirty] = _transform.localToWorld();
+
+        if(_dirty) {
+            calculateGeometry(_transformMat, _transform, _viewport);
+        }
+
+        _vertices.emplace_back(geometry[0]);
+        _vertices.emplace_back(geometry[1]);
+        _vertices.emplace_back(geometry[2]);
+        _vertices.emplace_back(geometry[3]);
 
         _indices.emplace_back(_vertexCount + 0);
         _indices.emplace_back(_vertexCount + 1);

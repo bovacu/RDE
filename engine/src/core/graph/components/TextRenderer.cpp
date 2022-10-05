@@ -73,7 +73,7 @@ namespace GDE {
         recalcTextDimensions(innerText);
     }
 
-    void TextRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) const {
+    void TextRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
         auto* _atlas = font;
         auto _atlasSize = _atlas->getSize();
 
@@ -105,7 +105,7 @@ namespace GDE {
                 float _w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
                 float _h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;
 
-                auto _transformMat = _transform.localToWorld();
+                auto [_transformMat, _dirty] = _transform.localToWorld();
                 auto _screenPos = Util::worldToScreenCoords(_viewport, { _transformMat[3][0], _transformMat[3][1] });
                 _transformMat[3][0] = _screenPos.x;
                 _transformMat[3][1] = _screenPos.y;

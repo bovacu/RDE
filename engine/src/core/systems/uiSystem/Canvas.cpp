@@ -50,16 +50,16 @@ namespace GDE {
         _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
 
             _sprites.each([&_renderManager](const auto _entity, NineSliceSprite& _nineSlice, Transform& _transform, const Active& _) {
-                _renderManager.draw((const IRenderizable*)&_nineSlice, _transform);
+                _renderManager.draw((IRenderizable*)&_nineSlice, _transform);
             });
 
             _buttons.each([&_renderManager](const auto _entity, UIButton& _uiButton, Transform& _transform, const Active& _) {
-                _renderManager.draw((const IRenderizable*)_uiButton.nineSliceSprite, _transform);
-                _renderManager.draw((const IRenderizable*)_uiButton.textRenderer, _transform);
+                _renderManager.draw((IRenderizable*)_uiButton.nineSliceSprite, _transform);
+                _renderManager.draw((IRenderizable*)_uiButton.textRenderer, _transform);
             });
 
             _texts.each([&_renderManager](const auto _entity, TextRenderer& _textRenderer, Transform& _transform, const Active& _) {
-                _renderManager.draw((const IRenderizable*)&_textRenderer, _transform);
+                _renderManager.draw((IRenderizable*)&_textRenderer, _transform);
             });
 
         _renderManager.endDraw();

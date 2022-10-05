@@ -74,7 +74,8 @@ namespace GDE {
     SpriteBatch::~SpriteBatch() {};
 
     void SpriteBatch::beginDraw(Camera& _camera, Transform* _cameraTransform) {
-        viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_cameraTransform->localToWorld());
+        auto [_transformMat, _dirty] = _cameraTransform->localToWorld();
+        viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_transformMat);
         viewport = _camera.getViewport();
     }
 
@@ -209,7 +210,7 @@ namespace GDE {
         return batches.back();
     }
 
-    void SpriteBatch::draw(const IRenderizable* _renderizable, Transform& _transform) {
+    void SpriteBatch::draw(IRenderizable* _renderizable, Transform& _transform) {
         getBatch(_renderizable, _renderizable->layer, _renderizable->batchPriority).draw(_renderizable, _transform);
     }
 

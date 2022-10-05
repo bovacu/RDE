@@ -80,15 +80,15 @@ namespace GDE {
             _camera->setCameraSize(_camera->getCameraSize());
             {
                 _spriteRendererGroup.each([&_renderManager](const auto _entity, const SpriteRenderer& _renderizable, Transform& _transform, const Active& _) {
-                    _renderManager.draw((const IRenderizable*)&_renderizable, _transform);
+                    _renderManager.draw((IRenderizable*)&_renderizable, _transform);
                 });
 
                 _particleSystemGroup.each([&_renderManager](const auto _entity, const ParticleSystem& _renderizable, Transform& _transform, const Active& _) {
-                    _renderManager.draw((const IRenderizable*)&_renderizable, _transform);
+                    _renderManager.draw((IRenderizable*)&_renderizable, _transform);
                 });
 
                 _textRendererGroup.each([&_renderManager](const auto _entity, TextRenderer& _text, Transform& _transform, const Active& _) {
-                    _renderManager.draw((const IRenderizable*)&_text, _transform);
+                    _renderManager.draw((IRenderizable*)&_text, _transform);
                 });
             }
 
