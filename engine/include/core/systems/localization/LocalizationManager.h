@@ -41,21 +41,24 @@ namespace GDE {
         }
 
         static Language toEnum(const std::string& _language) {
-            if(std::equal(_language.begin(), _language.end(), "en_us")) return Language::EN_US;
-            if(std::equal(_language.begin(), _language.end(), "en")) return Language::EN_US;
-            if(std::equal(_language.begin(), _language.end(), "es")) return Language::ES_ES;
-            if(std::equal(_language.begin(), _language.end(), "es_es")) return Language::ES_ES;
-            if(std::equal(_language.begin(), _language.end(), "pt")) return Language::PT_BR;
-            if(std::equal(_language.begin(), _language.end(), "pt_br")) return Language::PT_BR;
-            if(std::equal(_language.begin(), _language.end(), "fr"))    return Language::FR;
-            if(std::equal(_language.begin(), _language.end(), "en_gb")) return Language::EN_GB;
-            if(std::equal(_language.begin(), _language.end(), "en_ca")) return Language::EN_CA;
-            if(std::equal(_language.begin(), _language.end(), "es_mx")) return Language::ES_MX;
-            if(std::equal(_language.begin(), _language.end(), "zh"))    return Language::ZH;
-            if(std::equal(_language.begin(), _language.end(), "ru"))    return Language::RU;
-            if(std::equal(_language.begin(), _language.end(), "de"))    return Language::DE;
-            if(std::equal(_language.begin(), _language.end(), "it"))    return Language::IT;
-            if(std::equal(_language.begin(), _language.end(), "jp"))    return Language::JP;
+            auto _strCpy = _language;
+            _strCpy = TO_LOWER_S(_strCpy);
+
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "en_us")) return Language::EN_US;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "en"))    return Language::EN_US;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "es"))    return Language::ES_ES;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "es_es")) return Language::ES_ES;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "pt"))    return Language::PT_BR;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "pt_br")) return Language::PT_BR;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "fr"))    return Language::FR;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "en_gb")) return Language::EN_GB;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "en_ca")) return Language::EN_CA;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "es_mx")) return Language::ES_MX;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "zh"))    return Language::ZH;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "ru"))    return Language::RU;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "de"))    return Language::DE;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "it"))    return Language::IT;
+            if(std::equal(_strCpy.begin(), _strCpy.end(), "jp"))    return Language::JP;
 
             LOG_W("Locale: '", _language, "' is not implemented in the engine, defaulting to english")
             return Language::EN_US;

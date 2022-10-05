@@ -16,7 +16,7 @@ namespace GDE {
             std::string _country;
             if(_locales->country != nullptr) {
                 auto _countryStr = std::string(_locales[0].country);
-                _country = APPEND_S("_", TO_LOWER_S(_countryStr));
+                _country = APPEND_S("_", _countryStr);
             }
 
             localizationInfo.language = LocalizationInfo::toEnum(APPEND_S(_locales[0].language, _country));
