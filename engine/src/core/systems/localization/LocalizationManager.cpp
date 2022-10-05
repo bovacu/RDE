@@ -48,11 +48,22 @@ namespace GDE {
 
         for(auto it = _localizationJson.begin(); it != _localizationJson.end(); ++it) {
             auto _languageString = LocalizationInfo::toString(_language);
-            if((*it).contains(_languageString)) {
-                auto _value = (*it)[_languageString].get<std::string>();
-                localizationTable[_language][it.key()] = _value;
-            } else {
-                LOG_W("Localization in language '", LocalizationInfo::toString(_language), "' for key '", it.key(), "' was not present in localization.json")
+
+            auto _counter = 0;
+            for(auto _localization = (*it).begin(); _localization != (*it).end(); ++_localization) {
+                auto _languageKey = _localization.key();
+                _languageKey = TO_LOWER_S(_languageKey);
+                if(std::equal(_languageKey.begin(), _languageKey.end(), _languageString)) {
+                    auto _value = (*_localization).get<std::string>();
+                    localizationTable[_language][it.key()] = _value;
+                    break;
+                }
+
+                if(_counter + 1 == (*it).size()) {
+                    LOG_W("Localization in language '", LocalizationInfo::toString(_language), "' for key '", it.key(), "' was not present in localization.json")
+                }
+
+                _counter++;
             }
         }
     }
