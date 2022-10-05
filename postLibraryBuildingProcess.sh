@@ -26,7 +26,7 @@ ar -x "$WD"/vcpkg/installed/x64-linux/lib/libvorbisenc.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libvorbisfile.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libz.a
 ar -x "$WD"/nonVcpkgDeps/freetype/libfreetype.a
-ar -x "$WD"/nonVcpkgDeps/Chipmunk2D/libchipmunk.a
+ar -x "$WD"/nonVcpkgDeps/Chipmunk2D/libs/Linux/libchipmunk.a
 ar -x libGDE.a
 rm libGDE.a
 ar -qc libGDE.a *.o

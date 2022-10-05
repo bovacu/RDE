@@ -19,15 +19,15 @@ namespace GDE {
     SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture) : IRenderizable(_scene->getMainGraph()->getComponent<Transform>(_nodeId)), texture(_texture) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
-        auto [_transformMat, _dirty] = transform->localToWorld();
-        calculateGeometry(_transformMat, *transform, *_scene->getMainCamera()->getViewport());
+//        auto [_transformMat, _dirty] = transform->localToWorld();
+//        calculateGeometry(_transformMat, *transform, *_scene->getMainCamera()->getViewport());
     }
 
     SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Canvas* _canvas, Texture* _texture) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeId)), texture(_texture)  {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
-        auto [_transformMat, _dirty] = transform->localToWorld();
-        calculateGeometry(_transformMat, *transform, *_canvas->getCamera()->getViewport());
+//        auto [_transformMat, _dirty] = transform->localToWorld();
+//        calculateGeometry(_transformMat, *transform, *_canvas->getCamera()->getViewport());
     }
 
     std::string SpriteRenderer::getTexturePath() {
@@ -76,10 +76,7 @@ namespace GDE {
         auto _vertexCount = _vertices.size();
 
         auto [_transformMat, _dirty] = _transform.localToWorld();
-
-        if(_dirty) {
-            calculateGeometry(_transformMat, _transform, _viewport);
-        }
+        calculateGeometry(_transformMat, _transform, _viewport);
 
         _vertices.emplace_back(geometry[0]);
         _vertices.emplace_back(geometry[1]);

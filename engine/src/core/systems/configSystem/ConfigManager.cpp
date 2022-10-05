@@ -202,16 +202,14 @@ namespace GDE {
 
     void ConfigManager::loadSpriteRendererComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _spriteRendererJson) {
         auto _ownerEntityID = _nodeID;
-        auto _spriteShader = _scene->engine->manager.shaderManager.getShader("basic")->getShaderID();
-        auto* _spriteRenderer = _scene->getMainGraph()->addComponent<SpriteRenderer>(_ownerEntityID, _scene, nullptr);
+        auto* _texture = _scene->engine->manager.textureManager.getSubTexture(_spriteRendererJson["texture"]["atlas"].get<std::string>(),
+                                                                              _spriteRendererJson["texture"]["tile"].get<std::string>());
+        auto* _spriteRenderer = _scene->getMainGraph()->addComponent<SpriteRenderer>(_ownerEntityID, _scene, _texture);
 
         ENGINE_ASSERT(_spriteRendererJson.contains("texture"), "SpriteRenderer component MUST have section 'texture'.")
         ENGINE_ASSERT(_spriteRendererJson["texture"].contains("atlas"), "SpriteRenderer component MUST have section 'atlas' in section 'texture'.")
         ENGINE_ASSERT(_spriteRendererJson["texture"].contains("tile"), "SpriteRenderer component MUST have section 'tile' in 'texture'.")
 
-        _spriteRenderer->setTexture(
-                _scene->engine->manager.textureManager.getSubTexture(_spriteRendererJson["texture"]["atlas"].get<std::string>(),
-                                                                     _spriteRendererJson["texture"]["tile"].get<std::string>()));
         if(_spriteRendererJson.contains("color")) {
             auto& _color = _spriteRendererJson["color"];
             _spriteRenderer->color = Color { _color[0].get<unsigned char>(), _color[1].get<unsigned char>(), _color[2].get<unsigned char>(), _color[3].get<unsigned char>()};
