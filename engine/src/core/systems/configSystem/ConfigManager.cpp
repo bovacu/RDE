@@ -228,65 +228,155 @@ namespace GDE {
     void ConfigManager::loadBodyComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _bodyJson) {
         auto _ownerEntityID = _nodeID;
         BodyConfig _bodyConfig;
+        std::vector<ShapeConfig> _shapeConfigs;
 
-        ENGINE_ASSERT(_bodyJson.contains("shape"), "Body MUST have section 'shape' with a value of 'box', 'circle' or 'polygon'.")
-        if(_bodyJson.contains("shape")) {
-            auto _shape = _bodyJson["shape"].get<std::string>();
+        // load body config
+        if(_bodyJson.contains("type")) {
+            auto _bodyType = _bodyJson["type"].get<std::string>();
+            _bodyType = TO_LOWER_S(_bodyType);
 
-
-            if(std::equal(_shape.begin(), _shape.end(), "box")) {
-                _bodyConfig.shapeConfig.type = PhysicsShapeType::BOX;
-                ENGINE_ASSERT(_bodyJson.contains("size"), "PhysicsBody with shape BOX MUST have section 'size' with a Vec2F.")
-                _bodyConfig.shapeConfig.size = { _bodyJson["size"][0].get<float>(), _bodyJson["size"][1].get<float>() };
-            } else if(std::equal(_shape.begin(), _shape.end(), "circle")) {
-                _bodyConfig.shapeConfig.type = PhysicsShapeType::CIRCLE;
-                ENGINE_ASSERT(_bodyJson.contains("radius"), "PhysicsBody with shape CIRCLE MUST have section 'radius'.")
-                _bodyConfig.shapeConfig.size = { _bodyJson["radius"].get<float>(), 0.f };
-            } else if(std::equal(_shape.begin(), _shape.end(), "polygon")) {
-                _bodyConfig.shapeConfig.type = PhysicsShapeType::POLYGON;
-                ENGINE_ASSERT(_bodyJson.contains("vertices"), "PhysicsBody with shape POLYGON MUST have section 'vertices' with a list of vertices. Each vertex is a vector of 2 elements.")
-                for(auto& _vertex : _bodyJson["vertices"]) {
-                    _bodyConfig.shapeConfig.vertices.emplace_back(_vertex[0].get<float>(), _vertex[1].get<float>());
-                }
+            if(std::equal(_bodyType.begin(), _bodyType.end(), "static")) {
+                _bodyConfig.physicsBodyType = _bodyConfig.physicsBodyType = PhysicsBodyType::STATIC;
+            } else if(std::equal(_bodyType.begin(), _bodyType.end(), "dynamic")) {
+                _bodyConfig.physicsBodyType = _bodyConfig.physicsBodyType = PhysicsBodyType::DYNAMIC;
+            } else if(std::equal(_bodyType.begin(), _bodyType.end(), "kinematic")) {
+                _bodyConfig.physicsBodyType = _bodyConfig.physicsBodyType = PhysicsBodyType::KINEMATIC;
             } else {
-                _bodyConfig.shapeConfig.type = PhysicsShapeType::BOX;
-                LOG_W("Tried to load a body with a body shape not registered: ", _shape)
+                throw std::runtime_error(APPEND_S("Chosen PhysicsBodyType '", _bodyType, "' is not a known type for a PhysicsBody"));
+            }
+        } else {
+            _bodyConfig.physicsBodyType = PhysicsBodyType::DYNAMIC;
+        }
+
+        if(_bodyJson.contains("mass")) {
+            ENGINE_ASSERT(_bodyJson["mass"].is_number(), "'mass' is a float, so it is a single value, Ex: \"mass\": 5.4")
+            _bodyConfig.mass = _bodyJson["mass"].get<float>();
+        }
+
+        if(_bodyJson.contains("offset")) {
+            ENGINE_ASSERT(_bodyJson["offset"].size() == 2, "'offset' is a Vec2F, so it must contain exactly 2 elements, Ex: \"offset\": [x, y]")
+            _bodyConfig.offset.x = _bodyJson["offset"][0].get<float>();
+            _bodyConfig.offset.y = _bodyJson["offset"][1].get<float>();
+        }
+
+        if(_bodyJson.contains("physicShapes")) {
+            for(auto& _shapeJson : _bodyJson["physicShapes"]) {
+                ShapeConfig _shapeConfig;
+
+                ENGINE_ASSERT(_shapeJson.contains("type"), "Each PhysicsShape must contain the 'type' field, which is a PhysicsShapeType enum, so possible values are [BOX,CIRCLE,POLYGON,SEGMENT] no case sensitive, Ex: \"type\": \"BOX\"")
+                auto _type = _shapeJson["type"].get<std::string>();
+                _type = TO_LOWER_S(_type);
+
+                if(std::equal(_type.begin(), _type.end(), "box")) {
+                    _shapeConfig.type = PhysicsShapeType::BOX;
+                    ENGINE_ASSERT(_shapeJson.contains("size"), "PhysicsShape of type BOX must have field 'size' with a Vec2F: \"size\", Ex: [32, 32]")
+                    _shapeConfig.size = { _shapeJson["size"][0].get<float>(), _shapeJson["size"][1].get<float>() };
+                } else if(std::equal(_type.begin(), _type.end(), "circle")) {
+                    _shapeConfig.type = PhysicsShapeType::CIRCLE;
+                    ENGINE_ASSERT(_shapeJson.contains("size"), "PhysicsShape of type CIRCLE must have field 'size' with a Vec2F. X is the radius of the circle, Y is ignored, Ex: \\\"size\\\": [16, 0]\"")
+                    _shapeConfig.size = { _shapeJson["size"].get<float>(), 0.f };
+                } else if(std::equal(_type.begin(), _type.end(), "polygon")) {
+                    _shapeConfig.type = PhysicsShapeType::POLYGON;
+                    ENGINE_ASSERT(_shapeJson.contains("vertices") && _shapeJson["vertices"].size() >= 3, "PhysicsShape of type POLYGON must have field 'vertices' with an array of Vec2F and a minimum of 3 vertices, Ex: \"vertices\": [{-5,-5}, {5,-5}, {0,5}")
+                    for(auto& _vertex : _shapeJson["vertices"]) {
+                        _shapeConfig.vertices.emplace_back(_vertex[0].get<float>(), _vertex[1].get<float>());
+                    }
+                } else if(std::equal(_type.begin(), _type.end(), "segment")) {
+                    _shapeConfig.type = PhysicsShapeType::SEGMENT;
+                    ENGINE_ASSERT(_shapeJson.contains("vertices") && _shapeJson["vertices"].size() == 2, "PhysicsShape of type SEGMENT must have field 'vertices' with an array of exactly 2 Vec2F, Ex: \"vertices\": [{-5,0}, {5,0}")
+                    for(auto& _vertex : _shapeJson["vertices"]) {
+                        _shapeConfig.vertices.emplace_back(_vertex[0].get<float>(), _vertex[1].get<float>());
+                    }
+                } else {
+                    throw std::runtime_error(APPEND_S("Chosen PhysicsShapeType '", _type, "' is not a known type for a PhysicsShape"));
+                }
+
+                if(_shapeJson.contains("sensor")) {
+                    ENGINE_ASSERT(_shapeJson["sensor"].is_boolean(), "'sensor' is a bool, so it is a single value, Ex: \"sensor\": true")
+                    _shapeConfig.sensor = _shapeJson["sensor"].get<bool>();
+                }
+
+                if(_shapeJson.contains("friction")) {
+                    ENGINE_ASSERT(_shapeJson["friction"].is_number(), "'friction' is a float, so it is a single value, Ex: \"friction\": 0.4")
+                    _shapeConfig.friction = _shapeJson["friction"].get<float>();
+                }
+
+                if(_shapeJson.contains("restitution")) {
+                    ENGINE_ASSERT(_shapeJson["restitution"].is_number(), "'restitution' is a float, so it is a single value, Ex: \"restitution\": 0.2")
+                    _shapeConfig.restitution = _shapeJson["restitution"].get<float>();
+                }
+
+                if(_shapeJson.contains("density")) {
+                    ENGINE_ASSERT(_shapeJson ["density"].is_number(), "'density' is a float, so it is a single value, Ex: \"density\": 1.5")
+                    _shapeConfig.density = _shapeJson["density"].get<float>();
+                }
+
+                if(_shapeJson.contains("mask")) {
+                    if(_shapeJson["mask"].is_array()) {
+                        int _mask = _shapeJson["mask"][0].get<int>();
+                        ENGINE_ASSERT(((_mask & (_mask - 1)) == 0) && _mask >= 0 && _mask <= MAX_MASKS - 1, "'mask' must be a 2^n, where 'n' is the value of the mask between [0,32)")
+                        _shapeConfig.shapeMaskingConfig.mask = _mask;
+                        for(auto _i = 1; _i < _shapeJson["mask"].size(); _i++) {
+                            _mask = _shapeJson["mask"][_i].get<int>();
+                            ENGINE_ASSERT(((_mask & (_mask - 1)) == 0) && _mask >= 0 && _mask <= MAX_MASKS - 1, "'mask' must be a 2^n, where 'n' is the value of the mask between [0,32)")
+                            _shapeConfig.shapeMaskingConfig.mask |= _mask;
+                        }
+                    } else {
+                        int _mask = _shapeJson["mask"].get<int>();
+                        ENGINE_ASSERT(((_mask & (_mask - 1)) == 0) && _mask >= 0 && _mask <= MAX_MASKS - 1, "'mask' must be a 2^n, where 'n' is the value of the mask between [0,32)")
+                        _shapeConfig.shapeMaskingConfig.mask = _mask;
+                    }
+                }
+
+                if(_shapeJson.contains("group")) {
+                    if(_shapeJson["group"].is_array()) {
+                        int _group = _shapeJson["group"][0].get<int>();
+                        ENGINE_ASSERT(((_group & (_group - 1)) == 0) && _group >= 0 && _group <= MAX_MASKS - 1, "'group' must be a 2^n, where 'n' is the value of the group between [0,32). This property can be a single int or an array of int, in this last case all values of the array will be joined by bitwise operations")
+                        _shapeConfig.shapeMaskingConfig.group = _group;
+                        for(auto _i = 1; _i < _shapeJson["group"].size(); _i++) {
+                            _group = _shapeJson["group"][_i].get<int>();
+                            ENGINE_ASSERT(((_group & (_group - 1)) == 0) && _group >= 0 && _group <= MAX_MASKS - 1, "'group' must be a 2^n, where 'n' is the value of the group between [0,32). This property can be a single int or an array of int, in this last case all values of the array will be joined by bitwise operations")
+                            _shapeConfig.shapeMaskingConfig.group |= _group;
+                        }
+                    } else {
+                        int _group = _shapeJson["group"].get<int>();
+                        ENGINE_ASSERT(((_group & (_group - 1)) == 0) && _group >= 0 && _group <= MAX_MASKS - 1, "'group' must be a 2^n, where 'n' is the value of the group between [0,32). This property can be a single int or an array of int, in this last case all values of the array will be joined by bitwise operations")
+                        _shapeConfig.shapeMaskingConfig.group = _group;
+                    }
+                }
+
+                if(_shapeJson.contains("toCollideWith")) {
+                    if(_shapeJson["toCollideWith"].is_array()) {
+                        int _toCollideWith = _shapeJson["toCollideWith"][0].get<int>();
+                        ENGINE_ASSERT(((_toCollideWith & (_toCollideWith - 1)) == 0) && _toCollideWith >= 0 && _toCollideWith <= MAX_MASKS - 1, "'toCollideWith' must be a 2^n, where 'n' is the value of the toCollideWith between [0,32). This property can be a single int or an array of int, in this last case all values of the array will be joined by bitwise operations")
+                        _shapeConfig.shapeMaskingConfig.toCollideWith = _toCollideWith;
+                        for(auto _i = 1; _i < _shapeJson["toCollideWith"].size(); _i++) {
+                            _toCollideWith = _shapeJson["toCollideWith"][_i].get<int>();
+                            ENGINE_ASSERT(((_toCollideWith & (_toCollideWith - 1)) == 0) && _toCollideWith >= 0 && _toCollideWith <= MAX_MASKS - 1, "'toCollideWith' must be a 2^n, where 'n' is the value of the toCollideWith between [0,32). This property can be a single int or an array of int, in this last case all values of the array will be joined by bitwise operations")
+                            _shapeConfig.shapeMaskingConfig.toCollideWith |= _toCollideWith;
+                        }
+                    } else {
+                        int _toCollideWith = _shapeJson["toCollideWith"].get<int>();
+                        ENGINE_ASSERT(((_toCollideWith & (_toCollideWith - 1)) == 0) && _toCollideWith >= 0 && _toCollideWith <= MAX_MASKS - 1, "'toCollideWith' must be a 2^n, where 'n' is the value of the toCollideWith between [0,32). This property can be a single int or an array of int, in this last case all values of the array will be joined by bitwise operations")
+                        _shapeConfig.shapeMaskingConfig.toCollideWith = _toCollideWith;
+                    }
+                }
+
+                _shapeConfigs.push_back(_shapeConfig);
             }
         }
 
-        if(_bodyJson.contains("isStatic")) {
-            _bodyConfig.isStatic = _bodyJson["isStatic"].get<bool>();
+        if(_shapeConfigs.empty()) {
+            ShapeConfig _shapeConfig;
+            _shapeConfigs.push_back(_shapeConfig);
         }
 
-        if(_bodyJson.contains("ignorePhysics")) {
-            _bodyConfig.ignorePhysics = _bodyJson["ignorePhysics"].get<bool>();
-        }
+        _bodyConfig.shapeConfig = _shapeConfigs[0];
+        auto* _physicsBody = _scene->getMainGraph()->addComponent<PhysicsBody>(_ownerEntityID, _scene, _bodyConfig);
 
-        if(_bodyJson.contains("collisionMask")) {
-            _bodyConfig.collisionMask = _bodyJson["collisionMask"].get<ulong>();
+        for(auto _i = 1; _i < _shapeConfigs.size(); _i++) {
+            _physicsBody->addShape(_shapeConfigs[_i]);
         }
-
-        if(_bodyJson.contains("ghost")) {
-            _bodyConfig.shapeConfig.sensor = _bodyJson["ghost"].get<bool>();
-        }
-
-        if(_bodyJson.contains("restitution")) {
-            _bodyConfig.restitution = _bodyJson["restitution"].get<float>();
-        }
-
-        if(_bodyJson.contains("staticFriction")) {
-            _bodyConfig.staticFriction = _bodyJson["staticFriction"].get<float>();
-        }
-
-        if(_bodyJson.contains("dynamicFriction")) {
-            _bodyConfig.dynamicFriction = _bodyJson["dynamicFriction"].get<float>();
-        }
-
-        if(_bodyJson.contains("density")) {
-            _bodyConfig.density = _bodyJson["density"].get<float>();
-        }
-
-        _scene->getMainGraph()->addComponent<PhysicsBody>(_ownerEntityID, _scene, _bodyConfig);
     }
 
     void ConfigManager::loadCameraComponent(const NodeID& _nodeID, Scene* _scene, Window* _window, const nlohmann::json& _cameraJson) {

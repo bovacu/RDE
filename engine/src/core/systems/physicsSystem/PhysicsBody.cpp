@@ -8,58 +8,62 @@
 
 namespace GDE {
 
-    PhysicsBody::PhysicsBody(const NodeID& _id, Scene* _scene, const BodyConfig& _bodyConfig) {
+    PhysicsBody::PhysicsBody(const NodeID& _id, Scene* _scene, BodyConfig& _bodyConfig) {
         space = _scene->engine->manager.physics.space;
         transform = _scene->getMainGraph()->getComponent<Transform>(_id);
-        bodyConfig = _bodyConfig;
 
         switch (_bodyConfig.shapeConfig.type) {
             case PhysicsShapeType::CIRCLE:
-                calculateDataForCircle(_bodyConfig.shapeConfig);
+                calculateDataForCircle(_bodyConfig.shapeConfig, _bodyConfig.mass, _bodyConfig.physicsBodyType);
                 break;
             case PhysicsShapeType::POLYGON:
-                calculateDataForPolygon(_bodyConfig.shapeConfig);
+                calculateDataForPolygon(_bodyConfig.shapeConfig, _bodyConfig.mass, _bodyConfig.physicsBodyType);
                 break;
             case PhysicsShapeType::BOX:
-                calculateDataForBox(_bodyConfig.shapeConfig);
+                calculateDataForBox(_bodyConfig.shapeConfig, _bodyConfig.mass, _bodyConfig.physicsBodyType);
                 break;
             case PhysicsShapeType::SEGMENT:
-                calculateDataForSegment(_bodyConfig.shapeConfig);
+                calculateDataForSegment(_bodyConfig.shapeConfig, _bodyConfig.mass, _bodyConfig.physicsBodyType);
                 break;
         }
 
         cpBodySetUserData(body, this);
         _scene->engine->manager.physics.add(this);
+
     }
 
-    void PhysicsBody::calculateDataForBox(const ShapeConfig& _shapeConfig) {
+    void PhysicsBody::createBody(ShapeConfig& _shapeConfig, float _moment, float _bodyMass, PhysicsBodyType _bodyType) {
+        switch (_bodyType) {
+            case STATIC:
+                body = cpBodyNewStatic();
+                break;
+            case KINEMATIC:
+                body = cpBodyNewKinematic();
+                break;
+            case DYNAMIC:
+                body = cpBodyNew(_bodyMass, _moment);
+                break;
+        }
+
+        cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
+        auto _rotation = transform->getModelMatrixRotation();
+        auto _radians = degreesToRadians(_rotation);
+        cpBodySetAngle(body, _radians);
+        cpSpaceReindexShapesForBody(space, body);
+        cpSpaceAddBody(space, body);
+    }
+
+    void PhysicsBody::calculateDataForBox(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType) {
         auto _size = Vec2F { _shapeConfig.size.x * transform->getModelMatrixScale().x, _shapeConfig.size.y * transform->getModelMatrixScale().y };
 
-        bodyConfig.shapeConfig.vertices.emplace_back( -_size.x / 2.f, -_size.y / 2.f);
-        bodyConfig.shapeConfig.vertices.emplace_back(  _size.x / 2.f, -_size.y / 2.f);
-        bodyConfig.shapeConfig.vertices.emplace_back(  _size.x / 2.f,  _size.y / 2.f);
-        bodyConfig.shapeConfig.vertices.emplace_back( -_size.x / 2.f,  _size.y / 2.f);
+        _shapeConfig.vertices.emplace_back( -_size.x / 2.f, -_size.y / 2.f);
+        _shapeConfig.vertices.emplace_back(  _size.x / 2.f, -_size.y / 2.f);
+        _shapeConfig.vertices.emplace_back(  _size.x / 2.f,  _size.y / 2.f);
+        _shapeConfig.vertices.emplace_back( -_size.x / 2.f,  _size.y / 2.f);
 
         if(body == nullptr) {
-            auto _moment = cpMomentForBox(bodyConfig.mass, _size.x, _size.y);
-            switch (bodyConfig.physicsBodyType) {
-                case STATIC:
-                    body = cpBodyNewStatic();
-                    break;
-                case KINEMATIC:
-                    body = cpBodyNewKinematic();
-                    break;
-                case DYNAMIC:
-                    body = cpBodyNew(bodyConfig.mass, _moment);
-                    break;
-            }
-
-            cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
-            auto _rotation = transform->getModelMatrixRotation();
-            auto _radians = degreesToRadians(_rotation);
-            cpBodySetAngle(body, _radians);
-            cpSpaceReindexShapesForBody(space, body);
-            cpSpaceAddBody(space, body);
+            auto _moment = (float)cpMomentForBox(_bodyMass, _size.x, _size.y);
+            createBody(_shapeConfig, _moment, _bodyMass, _bodyType);
         }
 
         physicsShapes[keyCounter] = { _shapeConfig, cpBoxShapeNew(body, _shapeConfig.size.x, _shapeConfig.size.y, 0.f), keyCounter };
@@ -78,27 +82,13 @@ namespace GDE {
         keyCounter++;
     }
 
-    void PhysicsBody::calculateDataForCircle(const ShapeConfig& _shapeConfig) {
+    void PhysicsBody::calculateDataForCircle(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType) {
         if(body == nullptr) {
-            auto _moment = cpMomentForCircle(bodyConfig.mass, 0, _shapeConfig.size.x / 2.f * transform->getModelMatrixScale().x, cpvzero);
-            switch (bodyConfig.physicsBodyType) {
-                case STATIC:
-                    body = cpBodyNewStatic();
-                    break;
-                case KINEMATIC:
-                    body = cpBodyNewKinematic();
-                    break;
-                case DYNAMIC:
-                    body = cpBodyNew(bodyConfig.mass, _moment);
-                    break;
-            }
-
-            cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
-            cpBodySetAngle(body, degreesToRadians(transform->getModelMatrixRotation()));
-            cpSpaceAddBody(space, body);
+            auto _moment = (float)cpMomentForCircle(_bodyMass, 0, _shapeConfig.size.x / 2.f * transform->getModelMatrixScale().x, cpvzero);
+            createBody(_shapeConfig, _moment, _bodyMass, _bodyType);
         }
 
-        physicsShapes[keyCounter] = { _shapeConfig, cpCircleShapeNew(body, bodyConfig.shapeConfig.size.x / 2.f, cpvzero), keyCounter };
+        physicsShapes[keyCounter] = { _shapeConfig, cpCircleShapeNew(body, _shapeConfig.size.x / 2.f, cpvzero), keyCounter };
         cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
         cpShapeSetUserData(physicsShapes[keyCounter].shape, &physicsShapes[keyCounter]);
         cpShapeSetSensor(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.sensor);
@@ -114,32 +104,18 @@ namespace GDE {
         keyCounter++;
     }
 
-    void PhysicsBody::calculateDataForPolygon(const ShapeConfig& _shapeConfig) {
-        const auto _numOfVertices = bodyConfig.shapeConfig.vertices.size();
+    void PhysicsBody::calculateDataForPolygon(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType) {
+        const auto _numOfVertices = _shapeConfig.vertices.size();
         cpVect _vertices[_numOfVertices];
 
         for(auto _i = 0; _i < _numOfVertices; _i++) {
-            auto& _vertex = bodyConfig.shapeConfig.vertices[_i];
+            auto& _vertex = _shapeConfig.vertices[_i];
             _vertices[_i] = { _vertex.x * transform->getModelMatrixScale().x, _vertex.y * transform->getModelMatrixScale().y };
         }
 
         if(body == nullptr) {
-            auto _moment = cpMomentForPoly(bodyConfig.mass, (int)_numOfVertices, _vertices, cpvzero, 0.f);
-            switch (bodyConfig.physicsBodyType) {
-                case STATIC:
-                    body = cpBodyNewStatic();
-                    break;
-                case KINEMATIC:
-                    body = cpBodyNewKinematic();
-                    break;
-                case DYNAMIC:
-                    body = cpBodyNew(bodyConfig.mass, _moment);
-                    break;
-            }
-
-            cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
-            cpBodySetAngle(body, degreesToRadians(transform->getModelMatrixRotation()));
-            cpSpaceAddBody(space, body);
+            auto _moment = (float)cpMomentForPoly(_bodyMass, (int)_numOfVertices, _vertices, cpvzero, 0.f);
+            createBody(_shapeConfig, _moment, _bodyMass, _bodyType);
         }
 
         physicsShapes[keyCounter] = { _shapeConfig, cpPolyShapeNew(body, (int)_numOfVertices, _vertices, cpTransformIdentity, 0.f), keyCounter };
@@ -158,28 +134,14 @@ namespace GDE {
         keyCounter++;
     }
 
-    void PhysicsBody::calculateDataForSegment(const ShapeConfig& _shapeConfig) {
+    void PhysicsBody::calculateDataForSegment(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType) {
         auto _halfWidth = _shapeConfig.size.x / 2.f * transform->getModelMatrixScale().x;
         auto _a = cpVect { -_halfWidth, 0 };
         auto _b = cpVect { _halfWidth, 0 };
 
         if(body == nullptr) {
-            auto _moment = cpMomentForSegment(bodyConfig.mass, _a, _b, 0.f);
-            switch (bodyConfig.physicsBodyType) {
-                case STATIC:
-                    body = cpBodyNewStatic();
-                    break;
-                case KINEMATIC:
-                    body = cpBodyNewKinematic();
-                    break;
-                case DYNAMIC:
-                    body = cpBodyNew(bodyConfig.mass, _moment);
-                    break;
-            }
-
-            cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
-            cpBodySetAngle(body, degreesToRadians(transform->getModelMatrixRotation()));
-            cpSpaceAddBody(space, body);
+            auto _moment = (float)cpMomentForSegment(_bodyMass, _a, _b, 0.f);
+            createBody(_shapeConfig, _moment, _bodyMass, _bodyType);
         }
 
         physicsShapes[keyCounter] = { _shapeConfig, cpSegmentShapeNew(body, _a, _b, 0.f), keyCounter };
@@ -212,31 +174,23 @@ namespace GDE {
         }
     }
 
-    PhysicsShapeId PhysicsBody::addShape(const ShapeConfig& _shapeConfig, const Vec2F& _position, float _rotation) {
+    PhysicsShapeId PhysicsBody::addShape(ShapeConfig& _shapeConfig, const Vec2F& _position, float _rotation) {
         switch (_shapeConfig.type) {
             case PhysicsShapeType::CIRCLE:
-                calculateDataForCircle(_shapeConfig);
+                calculateDataForCircle(_shapeConfig, getMass(), getBodyType());
                 break;
             case PhysicsShapeType::POLYGON:
-                calculateDataForPolygon(_shapeConfig);
+                calculateDataForPolygon(_shapeConfig, getMass(), getBodyType());
                 break;
             case PhysicsShapeType::BOX:
-                calculateDataForBox(_shapeConfig);
+                calculateDataForBox(_shapeConfig, getMass(), getBodyType());
                 break;
             case PhysicsShapeType::SEGMENT:
-                calculateDataForSegment(_shapeConfig);
+                calculateDataForSegment(_shapeConfig, getMass(), getBodyType());
                 break;
         }
 
-        if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
-            auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.mask, _shapeConfig.shapeMaskingConfig.toCollideWith);
-            cpShapeSetFilter(physicsShapes[keyCounter - 1].shape, _filter);
-            if(_shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES) {
-                cpShapeSetCollisionType(physicsShapes[keyCounter - 1].shape, _shapeConfig.shapeMaskingConfig.mask);
-            }
-        }
-
-        return keyCounter;
+        return keyCounter - 1;
     }
 
     bool PhysicsBody::removeShape(PhysicsShapeId _id) {
@@ -334,5 +288,108 @@ namespace GDE {
         }
     }
 
+    void PhysicsBody::setBodyType(const PhysicsBodyType& _physicsBodyType) {
+        if(getBodyType() == _physicsBodyType) {
+            return;
+        }
 
+        switch (_physicsBodyType) {
+            case STATIC:
+                cpBodySetType(body, cpBodyType::CP_BODY_TYPE_STATIC);
+                break;
+            case KINEMATIC:
+                cpBodySetType(body, cpBodyType::CP_BODY_TYPE_KINEMATIC);
+                break;
+            case DYNAMIC:
+                cpBodySetType(body, cpBodyType::CP_BODY_TYPE_DYNAMIC);
+                break;
+        }
+    }
+
+    PhysicsBodyType PhysicsBody::getBodyType() {
+        switch (cpBodyGetType(body)) {
+            case cpBodyType::CP_BODY_TYPE_STATIC:
+                return PhysicsBodyType::STATIC;
+            case cpBodyType::CP_BODY_TYPE_KINEMATIC:
+                return PhysicsBodyType::KINEMATIC;
+            case cpBodyType::CP_BODY_TYPE_DYNAMIC:
+                return PhysicsBodyType::DYNAMIC;
+        }
+
+        return PhysicsBodyType::STATIC;
+    }
+
+    void PhysicsBody::setMass(float _mass) {
+        cpBodySetMass(body, _mass);
+    }
+
+    float PhysicsBody::getMass() {
+        return (float)cpBodyGetMass(body);
+    }
+
+    void PhysicsBody::setFriction(PhysicsShapeId _shapeID, float _friction) {
+        cpShapeSetFriction(physicsShapes[_shapeID].shape, _friction);
+    }
+
+    float PhysicsBody::getFriction(PhysicsShapeId _shapeID) {
+        return (float)cpShapeGetFriction(physicsShapes[_shapeID].shape);
+    }
+
+    void PhysicsBody::setRestitution(PhysicsShapeId _shapeID, float _restitution) {
+        cpShapeSetElasticity(physicsShapes[_shapeID].shape, _restitution);
+    }
+
+    float PhysicsBody::getRestitution(PhysicsShapeId _shapeID) {
+        return (float)cpShapeGetElasticity(physicsShapes[_shapeID].shape);
+    }
+
+    void PhysicsBody::setLinearVelocity(const Vec2F& _linearVelocity) {
+        cpBodySetVelocity(body, { _linearVelocity.x, _linearVelocity.y });
+    }
+
+    Vec2F PhysicsBody::getLinearVelocity() {
+        auto _linearVelocity = cpBodyGetVelocity(body);
+        return { (float)_linearVelocity.x, (float)_linearVelocity.y };
+    }
+
+    void PhysicsBody::setAngularLinearVelocity(float _linearAngularVelocity) {
+        cpBodySetAngularVelocity(body, _linearAngularVelocity);
+    }
+
+    float PhysicsBody::getAngularLinearVelocity() {
+        return (float)cpBodyGetAngularVelocity(body);
+    }
+
+    void PhysicsBody::setCenterOfGravity(const Vec2F& _centerOfGravity) {
+        cpBodySetCenterOfGravity(body, { _centerOfGravity.x, _centerOfGravity.y });
+    }
+
+    Vec2F PhysicsBody::getCenterOfGravity() {
+        auto _centerOfGravity = cpBodyGetCenterOfGravity(body);
+        return { (float)_centerOfGravity.x, (float)_centerOfGravity.y };
+    }
+
+    void PhysicsBody::setGhost(PhysicsShapeId _shapeID, bool _ghost) {
+        cpShapeSetSensor(physicsShapes[_shapeID].shape, _ghost);
+    }
+
+    bool PhysicsBody::isGhost(PhysicsShapeId _shapeID) {
+        return cpShapeGetSensor(physicsShapes[_shapeID].shape);
+    }
+
+    void PhysicsBody::applyImpulseLocal(const Vec2F& _impulse, const Vec2F& _where) {
+        cpBodyApplyImpulseAtLocalPoint(body, { _impulse.x, _impulse.y }, { _where.x, _where.y });
+    }
+
+    void PhysicsBody::applyImpulseWorld(const Vec2F& _impulse, const Vec2F& _where) {
+        cpBodyApplyImpulseAtWorldPoint(body, { _impulse.x, _impulse.y }, { _where.x, _where.y });
+    }
+
+    void PhysicsBody::applyForceLocal(const Vec2F& _force, const Vec2F& _where) {
+        cpBodyApplyForceAtLocalPoint(body, { _force.x, _force.y }, { _where.x, _where.y });
+    }
+
+    void PhysicsBody::applyForceWorld(const Vec2F& _force, const Vec2F& _where) {
+        cpBodyApplyForceAtWorldPoint(body, { _force.x, _force.y }, { _where.x, _where.y });
+    }
 }

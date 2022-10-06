@@ -50,29 +50,28 @@ namespace GDE {
         cpSpaceSetIterations(space, _iterations);
     }
 
-    void PhysicsManager::drawPolygon(PhysicsBody* _physicsBody, RenderManager* _renderManager, const Color& _lineColor, const Color& _radiusColor, bool _showLines, bool _showRadius) {
+    void PhysicsManager::drawPolygon(PhysicsBody* _physicsBody, const ShapeConfig& _shapeConfig, RenderManager* _renderManager, const Color& _lineColor, const Color& _radiusColor, bool _showLines, bool _showRadius) {
         if(!_showLines) return;
 
-        auto _polygon = _physicsBody->bodyConfig.shapeConfig;
         Mat2 _rotMatrix(1, _physicsBody->transform->getModelMatrixPosition().x, 0, _physicsBody->transform->getModelMatrixPosition().y);
         _rotMatrix.rotate(_physicsBody->transform->getModelMatrixRotation());
 
-        for (auto _i = 0; _i < _polygon.vertices.size(); _i++) {
+        for (auto _i = 0; _i < _shapeConfig.vertices.size(); _i++) {
 
             int _next = _i + 1;
-            if(_next == _polygon.vertices.size())
+            if(_next == _shapeConfig.vertices.size())
                 _next = 0;
 
-            Vec2F _p0 = _physicsBody->transform->getModelMatrixPosition() + _rotMatrix * _polygon.vertices[_i];
-            Vec2F _p1 = _physicsBody->transform->getModelMatrixPosition() + _rotMatrix * _polygon.vertices[_next];
+            Vec2F _p0 = _physicsBody->transform->getModelMatrixPosition() + _rotMatrix * _shapeConfig.vertices[_i];
+            Vec2F _p1 = _physicsBody->transform->getModelMatrixPosition() + _rotMatrix * _shapeConfig.vertices[_next];
 
             _renderManager->drawLine(_p0, _p1, _lineColor);
         }
 
-        if(!_showRadius || _polygon.vertices.empty()) return;
+        if(!_showRadius || _shapeConfig.vertices.empty()) return;
 
         _renderManager->drawLine(_physicsBody->transform->getModelMatrixPosition(),
-                                 _physicsBody->transform->getModelMatrixPosition() + _rotMatrix * _polygon.vertices[0],
+                                 _physicsBody->transform->getModelMatrixPosition() + _rotMatrix * _shapeConfig.vertices[0],
                                  _radiusColor);
     }
 
@@ -81,56 +80,60 @@ namespace GDE {
 
         for(auto* _body : bodies) {
 
-            switch (_body->bodyConfig.shapeConfig.type) {
-                case PhysicsShapeType::CIRCLE: {
-                    if(!debugOptions.showCircleLines) return;
+            for(auto& _physicsShape : _body->physicsShapes) {
 
-                    const int _segments = 20;
-                    float _theta = _body->transform->getRotation();
-                    float _inc = PI * 2.0f / (float)_segments;
-                    Vec2F _points[_segments];
+                switch (_physicsShape.second.shapeConfig.type) {
+                    case PhysicsShapeType::CIRCLE: {
+                        if(!debugOptions.showCircleLines) return;
 
-                    for(auto& _point : _points) {
-                        _theta += _inc;
-                        Vec2F _p(std::cos(_theta), std::sin(_theta) );
-                        _p *= _body->bodyConfig.shapeConfig.size.x;
-                        _p += _body->transform->getModelMatrixPosition();
-                        _point = _p;
+                        const int _segments = 20;
+                        float _theta = _body->transform->getRotation();
+                        float _inc = PI * 2.0f / (float)_segments;
+                        Vec2F _points[_segments];
+
+                        for(auto& _point : _points) {
+                            _theta += _inc;
+                            Vec2F _p(std::cos(_theta), std::sin(_theta) );
+                            _p *= _physicsShape.second.shapeConfig.size.x;
+                            _p += _body->transform->getModelMatrixPosition();
+                            _point = _p;
+                        }
+
+                        for (auto _i = 0; _i < _segments; _i++) {
+                            int _next = _i + 1;
+                            if(_next == _segments)
+                                _next = 0;
+
+                            Vec2F _p0 = _points[_i];
+                            Vec2F _p1 =_points[_next];
+
+                            _renderManager->drawLine(_p0, _p1, debugOptions.circleLineColor);
+                        }
+
+                        if(!debugOptions.showCircleRadius) return;
+                        _renderManager->drawLine(_body->transform->getModelMatrixPosition(), _points[0], debugOptions.circleRadiusColor);
+
+                        break;
                     }
 
-                    for (auto _i = 0; _i < _segments; _i++) {
-                        int _next = _i + 1;
-                        if(_next == _segments)
-                            _next = 0;
-
-                        Vec2F _p0 = _points[_i];
-                        Vec2F _p1 =_points[_next];
-
-                        _renderManager->drawLine(_p0, _p1, debugOptions.circleLineColor);
+                    case PhysicsShapeType::BOX: {
+                        drawPolygon(_body, _physicsShape.second.shapeConfig, _renderManager, debugOptions.boxLineColor, debugOptions.boxRadiusColor, debugOptions.showBoxLines, debugOptions.showBoxRadius);
+                        break;
                     }
-
-                    if(!debugOptions.showCircleRadius) return;
-                    _renderManager->drawLine(_body->transform->getModelMatrixPosition(), _points[0], debugOptions.circleRadiusColor);
-
-                    break;
+                    case PhysicsShapeType::POLYGON: {
+                        drawPolygon(_body, _physicsShape.second.shapeConfig, _renderManager, debugOptions.polygonLineColor, debugOptions.polygonRadiusColor, debugOptions.showPolygonLines, debugOptions.showPolygonRadius);
+                        break;
+                    }
+                    case PhysicsShapeType::SEGMENT: {
+                        _renderManager->drawLine({_body->transform->getModelMatrixPosition().x - _physicsShape.second.shapeConfig.size.x / 2.f, _body->transform->getModelMatrixPosition().y},
+                                                 {_body->transform->getModelMatrixPosition().x + _physicsShape.second.shapeConfig.size.x / 2.f, _body->transform->getModelMatrixPosition().y},
+                                                 Color::Blue);
+                        break;
+                    }
+                    default:
+                        break;
                 }
 
-                case PhysicsShapeType::BOX: {
-                    drawPolygon(_body, _renderManager, debugOptions.boxLineColor, debugOptions.boxRadiusColor, debugOptions.showBoxLines, debugOptions.showBoxRadius);
-                    break;
-                }
-                case PhysicsShapeType::POLYGON: {
-                    drawPolygon(_body, _renderManager, debugOptions.polygonLineColor, debugOptions.polygonRadiusColor, debugOptions.showPolygonLines, debugOptions.showPolygonRadius);
-                    break;
-                }
-                case PhysicsShapeType::SEGMENT: {
-                    _renderManager->drawLine({_body->transform->getModelMatrixPosition().x - _body->bodyConfig.shapeConfig.size.x / 2.f, _body->transform->getModelMatrixPosition().y},
-                                             {_body->transform->getModelMatrixPosition().x + _body->bodyConfig.shapeConfig.size.x / 2.f, _body->transform->getModelMatrixPosition().y},
-                                             Color::Blue);
-                    break;
-                }
-                default:
-                    break;
             }
         }
     }

@@ -73,7 +73,7 @@ namespace GDE {
             void setStepIterations(int _iterations);
 
         private:
-            void drawPolygon(PhysicsBody* _physicsBody, RenderManager* _renderManager, const Color& _lineColor, const Color& _radiusColor, bool _showLines, bool _showRadius);
+            void drawPolygon(PhysicsBody* _physicsBody, const ShapeConfig& _shapeConfig, RenderManager* _renderManager, const Color& _lineColor, const Color& _radiusColor, bool _showLines, bool _showRadius);
             static cpBool onCollisionEnter(cpArbiter* _arbiter, cpSpace* _space, void* _data);
             static void onCollisionExit(cpArbiter* _arbiter, cpSpace* _space, void* _data);
             static void onCollisionStay(cpArbiter* _arbiter, cpSpace* _space, void* _data);
