@@ -9,140 +9,290 @@
 namespace GDE {
 
     PhysicsBody::PhysicsBody(const NodeID& _id, Scene* _scene, const BodyConfig& _bodyConfig) {
-        shape.physicsBody = this;
-        shape.transform = _scene->getMainGraph()->getComponent<Transform>(_id);
-        transform = shape.transform;
-        velocity = { 0.0f, 0.0f };
-        angularVelocity = 0;
-        torque = 0;
-        force = { 0.0f, 0.0f };
-        offset = _bodyConfig.offset;
-        staticFriction = _bodyConfig.staticFriction;
-        dynamicFriction = _bodyConfig.dynamicFriction;
-        restitution = _bodyConfig.restitution;
-        density = _bodyConfig.density;
-        ignorePhysics = _bodyConfig.ignorePhysics;
-
-        collisionMask = _bodyConfig.collisionMask;
-        ghost = _bodyConfig.ghost;
+        space = _scene->engine->manager.physics.space;
+        transform = _scene->getMainGraph()->getComponent<Transform>(_id);
+        bodyConfig = _bodyConfig;
 
         switch (_bodyConfig.shapeConfig.type) {
-            case PhysicsShape::CIRCLE:
-                shape.makeCircle(_bodyConfig.shapeConfig.size.x);
+            case PhysicsShapeType::CIRCLE:
+                calculateDataForCircle(_bodyConfig.shapeConfig);
                 break;
-            case PhysicsShape::POLYGON:
-                shape.makePolygon(_bodyConfig.shapeConfig.vertices);
+            case PhysicsShapeType::POLYGON:
+                calculateDataForPolygon(_bodyConfig.shapeConfig);
                 break;
-            case PhysicsShape::BOX:
-                shape.makeRectangle(_bodyConfig.shapeConfig.size);
+            case PhysicsShapeType::BOX:
+                calculateDataForBox(_bodyConfig.shapeConfig);
                 break;
-            default:
+            case PhysicsShapeType::SEGMENT:
+                calculateDataForSegment(_bodyConfig.shapeConfig);
                 break;
         }
 
-        if(_bodyConfig.isStatic) {
-            setStatic();
-        } else {
-            computeMass(shape);
+        cpBodySetUserData(body, this);
+
+        if(_bodyConfig.shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _bodyConfig.shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _bodyConfig.shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
+            auto _filter = cpShapeFilterNew(_bodyConfig.shapeConfig.shapeMaskingConfig.group, _bodyConfig.shapeConfig.shapeMaskingConfig.toCollideWith, _bodyConfig.shapeConfig.shapeMaskingConfig.mask);
+            cpShapeSetFilter(physicsShapes[keyCounter - 1].shape, _filter);
         }
+
+        cpShapeSetSensor(physicsShapes[keyCounter - 1].shape, physicsShapes[keyCounter - 1].shapeConfig.sensor);
 
         _scene->engine->manager.physics.add(this);
     }
 
-    void PhysicsBody::rotate(float _degrees) {
-        shape.rotate(_degrees);
+    void PhysicsBody::calculateDataForBox(const ShapeConfig& _shapeConfig) {
+        auto _size = Vec2F { _shapeConfig.size.x * transform->getModelMatrixScale().x, _shapeConfig.size.y * transform->getModelMatrixScale().y };
+
+        bodyConfig.shapeConfig.vertices.emplace_back( -_size.x / 2.f, -_size.y / 2.f);
+        bodyConfig.shapeConfig.vertices.emplace_back(  _size.x / 2.f, -_size.y / 2.f);
+        bodyConfig.shapeConfig.vertices.emplace_back(  _size.x / 2.f,  _size.y / 2.f);
+        bodyConfig.shapeConfig.vertices.emplace_back( -_size.x / 2.f,  _size.y / 2.f);
+
+        if(body == nullptr) {
+            auto _moment = cpMomentForBox(bodyConfig.mass, _size.x, _size.y);
+            switch (bodyConfig.physicsBodyType) {
+                case STATIC:
+                    body = cpBodyNewStatic();
+                    break;
+                case KINEMATIC:
+                    body = cpBodyNewKinematic();
+                    break;
+                case DYNAMIC:
+                    body = cpBodyNew(bodyConfig.mass, _moment);
+                    break;
+            }
+
+            cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
+            auto _rotation = transform->getModelMatrixRotation();
+            auto _radians = degreesToRadians(_rotation);
+            cpBodySetAngle(body, _radians);
+            cpSpaceReindexShapesForBody(space, body);
+            cpSpaceAddBody(space, body);
+        }
+
+        physicsShapes[keyCounter] = { _shapeConfig, cpBoxShapeNew(body, _shapeConfig.size.x, _shapeConfig.size.y, 0.f) };
+        cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
+        cpShapeSetUserData(physicsShapes[keyCounter].shape, (void*)keyCounter);
+        keyCounter++;
     }
 
-    void PhysicsBody::computeMass(PhysicsShape& _shape) {
-        switch (shape.type) {
-            case PhysicsShape::CIRCLE:
-                computeCircleMass(_shape);
+    void PhysicsBody::calculateDataForCircle(const ShapeConfig& _shapeConfig) {
+        if(body == nullptr) {
+            auto _moment = cpMomentForCircle(bodyConfig.mass, 0, _shapeConfig.size.x / 2.f * transform->getModelMatrixScale().x, cpvzero);
+            switch (bodyConfig.physicsBodyType) {
+                case STATIC:
+                    body = cpBodyNewStatic();
+                    break;
+                case KINEMATIC:
+                    body = cpBodyNewKinematic();
+                    break;
+                case DYNAMIC:
+                    body = cpBodyNew(bodyConfig.mass, _moment);
+                    break;
+            }
+
+            cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
+            cpBodySetAngle(body, degreesToRadians(transform->getModelMatrixRotation()));
+            cpSpaceAddBody(space, body);
+        }
+
+        physicsShapes[keyCounter] = { _shapeConfig, cpCircleShapeNew(body, bodyConfig.shapeConfig.size.x / 2.f, cpvzero) };
+        cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
+        cpShapeSetUserData(physicsShapes[keyCounter].shape, (void*)keyCounter);
+        keyCounter++;
+    }
+
+    void PhysicsBody::calculateDataForPolygon(const ShapeConfig& _shapeConfig) {
+        const auto _numOfVertices = bodyConfig.shapeConfig.vertices.size();
+        cpVect _vertices[_numOfVertices];
+
+        for(auto _i = 0; _i < _numOfVertices; _i++) {
+            auto& _vertex = bodyConfig.shapeConfig.vertices[_i];
+            _vertices[_i] = { _vertex.x * transform->getModelMatrixScale().x, _vertex.y * transform->getModelMatrixScale().y };
+        }
+
+        if(body == nullptr) {
+            auto _moment = cpMomentForPoly(bodyConfig.mass, (int)_numOfVertices, _vertices, cpvzero, 0.f);
+            switch (bodyConfig.physicsBodyType) {
+                case STATIC:
+                    body = cpBodyNewStatic();
+                    break;
+                case KINEMATIC:
+                    body = cpBodyNewKinematic();
+                    break;
+                case DYNAMIC:
+                    body = cpBodyNew(bodyConfig.mass, _moment);
+                    break;
+            }
+
+            cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
+            cpBodySetAngle(body, degreesToRadians(transform->getModelMatrixRotation()));
+            cpSpaceAddBody(space, body);
+        }
+
+        physicsShapes[keyCounter] = { _shapeConfig, cpPolyShapeNew(body, (int)_numOfVertices, _vertices, cpTransformIdentity, 0.f) };
+        cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
+        cpShapeSetUserData(physicsShapes[keyCounter].shape, (void*)keyCounter);
+        keyCounter++;
+    }
+
+    void PhysicsBody::calculateDataForSegment(const ShapeConfig& _shapeConfig) {
+        auto _halfWidth = _shapeConfig.size.x / 2.f * transform->getModelMatrixScale().x;
+        auto _a = cpVect { -_halfWidth, 0 };
+        auto _b = cpVect { _halfWidth, 0 };
+
+        if(body == nullptr) {
+            auto _moment = cpMomentForSegment(bodyConfig.mass, _a, _b, 0.f);
+            switch (bodyConfig.physicsBodyType) {
+                case STATIC:
+                    body = cpBodyNewStatic();
+                    break;
+                case KINEMATIC:
+                    body = cpBodyNewKinematic();
+                    break;
+                case DYNAMIC:
+                    body = cpBodyNew(bodyConfig.mass, _moment);
+                    break;
+            }
+
+            cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
+            cpBodySetAngle(body, degreesToRadians(transform->getModelMatrixRotation()));
+            cpSpaceAddBody(space, body);
+        }
+
+        physicsShapes[keyCounter] = { _shapeConfig, cpSegmentShapeNew(body, _a, _b, 0.f) };
+        cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
+        cpShapeSetUserData(physicsShapes[keyCounter].shape, (void*)keyCounter);
+        keyCounter++;
+    }
+
+    PhysicsBody::~PhysicsBody() {
+        for(auto& _shape : physicsShapes) {
+            cpShapeFree(_shape.second.shape);
+        }
+        cpBodyFree(body);
+    }
+
+    PhysicsShapeId PhysicsBody::addShape(const ShapeConfig& _shapeConfig, const Vec2F& _position, float _rotation) {
+        switch (_shapeConfig.type) {
+            case PhysicsShapeType::CIRCLE:
+                calculateDataForCircle(_shapeConfig);
                 break;
-            case PhysicsShape::POLYGON:
-            case PhysicsShape::BOX:
-                computePolygonMass(_shape);
+            case PhysicsShapeType::POLYGON:
+                calculateDataForPolygon(_shapeConfig);
                 break;
-            default:
+            case PhysicsShapeType::BOX:
+                calculateDataForBox(_shapeConfig);
                 break;
+            case PhysicsShapeType::SEGMENT:
+                calculateDataForSegment(_shapeConfig);
+                break;
+        }
+
+        if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
+            auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.mask, _shapeConfig.shapeMaskingConfig.toCollideWith);
+            cpShapeSetFilter(physicsShapes[keyCounter - 1].shape, _filter);
+        }
+
+        cpShapeSetSensor(physicsShapes[keyCounter - 1].shape, _shapeConfig.sensor);
+
+        return keyCounter;
+    }
+
+    bool PhysicsBody::removeShape(PhysicsShapeId _id) {
+        auto _it = physicsShapes.find(_id);
+
+        if(_it == physicsShapes.end()) {
+            return false;
+        }
+
+        cpShapeFree(physicsShapes[_id].shape);
+        physicsShapes.erase(_it);
+        return true;
+    }
+
+    void PhysicsBody::setGroup(PhysicsShapeId _shapeID, uint _group) {
+        auto _currentFilter = cpShapeGetFilter(physicsShapes[_shapeID].shape);
+        _currentFilter.group = _group;
+        cpShapeSetFilter(physicsShapes[_shapeID].shape, _currentFilter);
+    }
+
+    void PhysicsBody::removeGroup(PhysicsShapeId _shapeID) {
+        auto _currentFilter = cpShapeGetFilter(physicsShapes[_shapeID].shape);
+        _currentFilter.group = CP_NO_GROUP;
+        cpShapeSetFilter(physicsShapes[_shapeID].shape, _currentFilter);
+    }
+
+    void PhysicsBody::setMask(PhysicsShapeId _shapeID, uint _mask) {
+        auto _currentFilter = cpShapeGetFilter(physicsShapes[_shapeID].shape);
+        _currentFilter.mask = _mask;
+        cpShapeSetFilter(physicsShapes[_shapeID].shape, _currentFilter);
+        cpShapeSetCollisionType(physicsShapes[_shapeID].shape, _mask);
+    }
+
+    void PhysicsBody::removeMask(PhysicsShapeId _shapeID) {
+        auto _currentFilter = cpShapeGetFilter(physicsShapes[_shapeID].shape);
+        _currentFilter.mask = CP_ALL_CATEGORIES;
+        cpShapeSetFilter(physicsShapes[_shapeID].shape, _currentFilter);
+        cpShapeSetCollisionType(physicsShapes[_shapeID].shape, 0);
+    }
+
+    void PhysicsBody::addMaskFilter(PhysicsShapeId _shapeID, uint _masksToAdd) {
+        auto _currentFilter = cpShapeGetFilter(physicsShapes[_shapeID].shape);
+        _currentFilter.categories |= _masksToAdd;
+        cpShapeSetFilter(physicsShapes[_shapeID].shape, _currentFilter);
+    }
+
+    void PhysicsBody::removeMaskFilter(PhysicsShapeId _shapeID, uint _masksToRemove) {
+        auto _currentFilter = cpShapeGetFilter(physicsShapes[_shapeID].shape);
+        _currentFilter.categories &= ~_masksToRemove;
+        cpShapeSetFilter(physicsShapes[_shapeID].shape, _currentFilter);
+    }
+
+    void PhysicsBody::resetMaskFilter(PhysicsShapeId _shapeID) {
+        auto _currentFilter = cpShapeGetFilter(physicsShapes[_shapeID].shape);
+        _currentFilter.categories = CP_ALL_CATEGORIES;
+        cpShapeSetFilter(physicsShapes[_shapeID].shape, _currentFilter);
+    }
+
+    uint PhysicsBody::getMasks(PhysicsShapeId _shapeID) {
+        return cpShapeGetFilter(physicsShapes[_shapeID].shape).categories;
+    }
+
+    uint PhysicsBody::getGroups(PhysicsShapeId _shapeID) {
+        return cpShapeGetFilter(physicsShapes[_shapeID].shape).group;
+    }
+
+    uint PhysicsBody::getToCollideWiths(PhysicsShapeId _shapeID) {
+        return cpShapeGetFilter(physicsShapes[_shapeID].shape).mask;
+    }
+
+    void PhysicsBody::update() {
+        Vec2F _transformPos = transform->getModelMatrixPosition();
+        float _transformRot = transform->getModelMatrixRotation();
+
+        Vec2F _bodyPosition = { (float)cpBodyGetPosition(body).x, (float)cpBodyGetPosition(body).y };
+        float _bodyRot = radiansToDegrees(cpBodyGetAngle(body));
+        bool _dirtyPos = false;
+        bool _dirtyRot = false;
+
+        if(_transformPos.x != _bodyPosition.x || _transformPos.y != _bodyPosition.y) {
+            cpBodySetPosition(body, { _transformPos.x, _transformPos.y });
+            _dirtyPos = true;
+        }
+
+        if(_transformRot != _bodyRot) {
+            cpBodySetAngle(body, degreesToRadians(_transformRot));
+            _dirtyRot = true;
+        }
+
+        if(_dirtyPos || _dirtyRot) {
+            if(_dirtyPos) {
+                cpBodySetVelocity(body, cpvzero);
+            }
+            cpSpaceReindexShapesForBody(space, body);
         }
     }
 
-    void PhysicsBody::computePolygonMass(PhysicsShape& _shape) {
-        // Calculate centroid and moment of interia
-        Vec2F _c( 0.0f, 0.0f ); // centroid
-        float _area = 0.0f;
-        float _inertia = 0.0f;
-        const float _inv3 = 1.0f / 3.0f;
 
-        for(auto _i = 0; _i < shape.vertexCount; ++_i) {
-            // Triangle vertices, third vertex implied as (0, 0)
-            Vec2F _p1( shape.vertices[_i] );
-            auto _i2 = _i + 1 < shape.vertexCount ? _i + 1 : 0;
-            Vec2F _p2( shape.vertices[_i2] );
-
-            float _d = _p1.crossProduct(_p2);
-            float _triangleArea = 0.5f * _d;
-
-            _area += _triangleArea;
-
-            // Use area to weight the centroid average, not just vertex position
-            _c += _triangleArea * _inv3 * (_p1 + _p2);
-
-            float _intX2 = _p1.x * _p1.x + _p2.x * _p1.x + _p2.x * _p2.x;
-            float _intY2 = _p1.y * _p1.y + _p2.y * _p1.y + _p2.y * _p2.y;
-            _inertia += (0.25f * _inv3 * _d) * (_intX2 + _intY2);
-        }
-
-        _c *= 1.0f / _area;
-
-        // Translate vertices to centroid (make the centroid (0, 0)
-        // for the polygon in model space)
-        // Not floatly necessary, but I like doing this anyway
-        for(auto _i = 0; _i < shape.vertexCount; _i++)
-            shape.vertices[_i] -= _c;
-
-        mass = density * _area;
-        inverseMass = (mass) ? 1.0f / mass : 0.0f;
-        inertia = _inertia * density;
-        inverseInertia = inertia ? 1.0f / inertia : 0.0f;
-    }
-
-    void PhysicsBody::computeCircleMass(PhysicsShape& _shape) {
-        mass = PI * _shape.size.x * _shape.size.x * density;
-        inverseMass = (mass) ? 1.0f / mass : 0.0f;
-        inertia = mass * _shape.size.x * _shape.size.x;
-        inverseInertia = (inertia) ? 1.0f / inertia : 0.0f;
-    }
-
-    void PhysicsBody::setStatic() {
-        inertia = 0.0f;
-        inverseInertia = 0.0f;
-        mass = 0.0f;
-        inverseMass = 0.0f;
-    }
-
-    void PhysicsBody::applyImpulse(const Vec2F& _impulse, const Vec2F& _contactVector) {
-        velocity += inverseMass * _impulse;
-        angularVelocity += inverseInertia * _contactVector.crossProduct(_impulse);
-    }
-
-    void PhysicsBody::applyForce(const Vec2F& _force) {
-        force += _force;
-    }
-
-    bool PhysicsBody::isStatic() const {
-        return staticBody;
-    }
-
-    void PhysicsBody::setStatic(bool _static) {
-        if(_static == staticBody) return;
-        staticBody = _static;
-
-        if(staticBody) {
-            setStatic();
-        } else {
-            computeMass(shape);
-        }
-
-    }
 }

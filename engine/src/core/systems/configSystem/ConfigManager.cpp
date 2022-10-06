@@ -235,21 +235,21 @@ namespace GDE {
 
 
             if(std::equal(_shape.begin(), _shape.end(), "box")) {
-                _bodyConfig.shapeConfig.type = PhysicsShape::BOX;
+                _bodyConfig.shapeConfig.type = PhysicsShapeType::BOX;
                 ENGINE_ASSERT(_bodyJson.contains("size"), "PhysicsBody with shape BOX MUST have section 'size' with a Vec2F.")
                 _bodyConfig.shapeConfig.size = { _bodyJson["size"][0].get<float>(), _bodyJson["size"][1].get<float>() };
             } else if(std::equal(_shape.begin(), _shape.end(), "circle")) {
-                _bodyConfig.shapeConfig.type = PhysicsShape::CIRCLE;
+                _bodyConfig.shapeConfig.type = PhysicsShapeType::CIRCLE;
                 ENGINE_ASSERT(_bodyJson.contains("radius"), "PhysicsBody with shape CIRCLE MUST have section 'radius'.")
                 _bodyConfig.shapeConfig.size = { _bodyJson["radius"].get<float>(), 0.f };
             } else if(std::equal(_shape.begin(), _shape.end(), "polygon")) {
-                _bodyConfig.shapeConfig.type = PhysicsShape::POLYGON;
+                _bodyConfig.shapeConfig.type = PhysicsShapeType::POLYGON;
                 ENGINE_ASSERT(_bodyJson.contains("vertices"), "PhysicsBody with shape POLYGON MUST have section 'vertices' with a list of vertices. Each vertex is a vector of 2 elements.")
                 for(auto& _vertex : _bodyJson["vertices"]) {
                     _bodyConfig.shapeConfig.vertices.emplace_back(_vertex[0].get<float>(), _vertex[1].get<float>());
                 }
             } else {
-                _bodyConfig.shapeConfig.type = PhysicsShape::BOX;
+                _bodyConfig.shapeConfig.type = PhysicsShapeType::BOX;
                 LOG_W("Tried to load a body with a body shape not registered: ", _shape)
             }
         }
@@ -267,7 +267,7 @@ namespace GDE {
         }
 
         if(_bodyJson.contains("ghost")) {
-            _bodyConfig.ghost = _bodyJson["ghost"].get<bool>();
+            _bodyConfig.shapeConfig.sensor = _bodyJson["ghost"].get<bool>();
         }
 
         if(_bodyJson.contains("restitution")) {

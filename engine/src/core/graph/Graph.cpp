@@ -43,10 +43,6 @@ namespace GDE {
     }
 
     void Graph::onUpdate(Delta _dt) {
-//        registry.group<Transform>(entt::get<Active>).each([](const auto _entity, Transform& _transform, const Active& _) {
-//            _transform.update();
-//        });
-
         registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
             _animationSystem.update(_dt, _spriteRenderer);
         });
@@ -64,6 +60,10 @@ namespace GDE {
 
     void Graph::onFixedUpdate(Delta _dt) {
         onFixedUpdateDel(registry, _dt);
+
+        for(auto* _body : scene->engine->manager.physics.bodies) {
+            _body->update();
+        }
     }
 
     void Graph::onRender() {

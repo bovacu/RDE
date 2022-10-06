@@ -131,6 +131,11 @@ namespace GDE {
                     return std::invoke(MemberFunction, _c, _args...);
                 });
             }
+
+            void unbind() {
+                instance = nullptr;
+                stub = stub_null;
+            }
     };
 
 
