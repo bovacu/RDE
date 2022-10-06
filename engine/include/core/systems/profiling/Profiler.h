@@ -28,6 +28,7 @@ namespace GDE {
         RENDERING,
         UPDATE,
         FIXED_UPDATE,
+        LATE_UPDATE,
         IMGUI,
         BOTTLE_NECK
     };

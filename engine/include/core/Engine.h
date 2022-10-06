@@ -220,6 +220,13 @@ namespace GDE {
             void onFixedUpdate(Delta _fixedDt);
 
             /**
+             * @brief This method is called once onUpdate and onFixedUpdate are finished, but before onRender. This is
+             * the perfect place to remove elements from collections used in onUpdate or onFixedUpdate.
+             * @param _dt The amount of time passed from the previous frame to this current one.
+             */
+            void onLateUpdate(Delta _dt);
+
+            /**
              * @brief This method is used to render everything in our game, renderization shouldn't be done other method.
              * @param _dt The amount of time passed from the previous frame to this current one.
              */

@@ -200,9 +200,16 @@ namespace GDE {
 
     PhysicsBody::~PhysicsBody() {
         for(auto& _shape : physicsShapes) {
-            cpShapeFree(_shape.second.shape);
+            if(cpSpaceContainsShape(space, _shape.second.shape)) {
+                cpSpaceRemoveShape(space, _shape.second.shape);
+                cpShapeFree(_shape.second.shape);
+            }
         }
-        cpBodyFree(body);
+
+        if(cpSpaceContainsBody(space, body)) {
+            cpSpaceRemoveBody(space, body);
+            cpBodyFree(body);
+        }
     }
 
     PhysicsShapeId PhysicsBody::addShape(const ShapeConfig& _shapeConfig, const Vec2F& _position, float _rotation) {

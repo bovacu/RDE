@@ -14,6 +14,9 @@ namespace GDE {
 
     void PhysicsManager::destroy() {
         LOG_DEBUG("Cleaning up PhysicsManager")
+        for(auto* _body : bodies) {
+            remove(_body);
+        }
         cpSpaceFree(space);
     }
 
@@ -173,7 +176,33 @@ namespace GDE {
         return cpTrue;
     }
 
-    cpBool PhysicsManager::onCollisionExit(cpArbiter* _arbiter, cpSpace* _space, void* _data) {
+    void PhysicsManager::onCollisionStay(cpArbiter* _arbiter, cpSpace* _space, void* _data) {
+        cpShape* _shapeA;
+        cpShape* _shapeB;
+        cpArbiterGetShapes(_arbiter, &_shapeA, &_shapeB);
+        auto* _physicsShapeA = static_cast<PhysicsShape*>(cpShapeGetUserData(_shapeA));
+        auto* _physicsShapeB = static_cast<PhysicsShape*>(cpShapeGetUserData(_shapeB));
+
+        cpBody* _bodyA;
+        cpBody* _bodyB;
+        cpArbiterGetBodies(_arbiter, &_bodyA, &_bodyB);
+
+        auto* _physicsBodyA = static_cast<PhysicsBody*>(cpBodyGetUserData(_bodyA));
+        auto* _physicsBodyB = static_cast<PhysicsBody*>(cpBodyGetUserData(_bodyB));
+
+        auto _shapeAMask = _physicsBodyA->getMasks(_physicsShapeA->id);
+        auto _shapeBMask = _physicsBodyB->getMasks(_physicsShapeB->id);
+
+        if(PhysicsManager::collisionCallbacksTable[_shapeAMask][_shapeBMask].onCollisionStay != nullptr) {
+            PhysicsManager::collisionCallbacksTable[_shapeAMask][_shapeBMask].onCollisionStay(_physicsBodyA, _physicsBodyB);
+        }
+
+        if(PhysicsManager::collisionCallbacksTable[_shapeBMask][_shapeAMask].onCollisionStay != nullptr) {
+            PhysicsManager::collisionCallbacksTable[_shapeBMask][_shapeAMask].onCollisionStay(_physicsBodyA, _physicsBodyB);
+        }
+    }
+
+    void PhysicsManager::onCollisionExit(cpArbiter* _arbiter, cpSpace* _space, void* _data) {
         cpShape* _shapeA;
         cpShape* _shapeB;
         cpArbiterGetShapes(_arbiter, &_shapeA, &_shapeB);
@@ -192,15 +221,11 @@ namespace GDE {
 
         if(PhysicsManager::collisionCallbacksTable[_shapeAMask][_shapeBMask].onCollisionExit != nullptr) {
             PhysicsManager::collisionCallbacksTable[_shapeAMask][_shapeBMask].onCollisionExit(_physicsBodyA, _physicsBodyB);
-            return cpTrue;
         }
 
         if(PhysicsManager::collisionCallbacksTable[_shapeBMask][_shapeAMask].onCollisionExit != nullptr) {
             PhysicsManager::collisionCallbacksTable[_shapeBMask][_shapeAMask].onCollisionExit(_physicsBodyA, _physicsBodyB);
-            return cpTrue;
         }
-
-        return cpTrue;
     }
 
     PhysicsCollisionCallbacks& PhysicsManager::getCollisionCallbacks(uint _maskA, uint _maskB) {
@@ -210,8 +235,9 @@ namespace GDE {
     void PhysicsManager::addCollisionCallbacks(uint _maskA, uint _maskB, PhysicsCollisionCallbacks _callbacks) {
         PhysicsManager::collisionCallbacksTable[_maskA][_maskB] = _callbacks;
         auto* _collisionHandler = cpSpaceAddCollisionHandler(space, _maskA, _maskB);
-        _collisionHandler->beginFunc = (cpCollisionBeginFunc)onCollisionEnter;
-        _collisionHandler->separateFunc = (cpCollisionSeparateFunc)onCollisionExit;
+        _collisionHandler->beginFunc = onCollisionEnter;
+        _collisionHandler->separateFunc = onCollisionExit;
+        _collisionHandler->postSolveFunc = onCollisionStay;
     }
 
 }

@@ -86,7 +86,7 @@ namespace GDE {
             /**
              * @brief This function is executed every frame of the application and here we should update logic and take inputs
              * to update the logic and components.
-             * @param the time that passed between the current frame and the last one.
+             * @param _dt time that passed between the current frame and the last one.
              */
             virtual void onUpdate(Delta _dt);
 
@@ -94,9 +94,16 @@ namespace GDE {
              * @brief This function is called a fixed amount of times per second. By default it is 60 times per second, but it
              * can be modified with Engine/setFixedDelta. This loop is used to handle physics and things that need a
              * consistent frame rate to work properly.
-             * @param _dt fixed value initially set at 1/60
+             * @param _dt fixed value initially set at 1/60/
              */
             virtual void onFixedUpdate(Delta _dt);
+
+            /**
+             * @brief This function is called as the last update method, after update and fixedUpdate, which is an ideal place
+             * to remove elements.
+             * @param _dt time that passed between the current frame and the last one.
+             */
+            virtual void onLateUpdate(Delta _dt) {  }
 
             /**
              * @brief This function is also called every frame and renders the geometry of the game. It is not virtual because

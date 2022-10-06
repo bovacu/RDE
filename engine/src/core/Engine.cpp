@@ -73,6 +73,11 @@ namespace GDE {
                 }
                 Profiler::end(ProfilerState::FIXED_UPDATE);
 
+
+                Profiler::begin(ProfilerState::LATE_UPDATE);
+                onLateUpdate(_dt);
+                Profiler::end(ProfilerState::LATE_UPDATE);
+
                 Profiler::begin(ProfilerState::RENDERING);
                 onRender(_dt);
                 Profiler::end(ProfilerState::RENDERING);
@@ -100,17 +105,21 @@ namespace GDE {
         manager.sceneManager.getDisplayedScene()->onEvent(_e);
     }
 
+    void Engine::onUpdate(Delta _dt) {
+        manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
+
+#if !IS_MOBILE()
+        if(manager.inputManager.isKeyJustPressed(KeyCode::Space)) imGuiLayer->show = !imGuiLayer->show;
+#endif
+    }
+
     void Engine::onFixedUpdate(Delta _fixedDt) {
         manager.sceneManager.getDisplayedScene()->onFixedUpdate(_fixedDt);
         manager.physics.step(_fixedDt);
     }
 
-    void Engine::onUpdate(Delta _dt) {
-        manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
-
-        #if !IS_MOBILE()
-        if(manager.inputManager.isKeyJustPressed(KeyCode::Space)) imGuiLayer->show = !imGuiLayer->show;
-        #endif
+    void Engine::onLateUpdate(Delta _dt) {
+        manager.sceneManager.getDisplayedScene()->onLateUpdate(_dt);
     }
 
     void Engine::onRender(Delta _dt) {
