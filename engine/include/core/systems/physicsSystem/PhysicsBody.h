@@ -56,6 +56,7 @@ namespace GDE {
     struct PhysicsShape {
         ShapeConfig shapeConfig {};
         cpShape* shape = nullptr;
+        PhysicsShapeId id;
     };
 
     struct BodyConfig {

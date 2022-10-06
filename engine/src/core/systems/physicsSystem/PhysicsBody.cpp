@@ -29,14 +29,6 @@ namespace GDE {
         }
 
         cpBodySetUserData(body, this);
-
-        if(_bodyConfig.shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _bodyConfig.shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _bodyConfig.shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
-            auto _filter = cpShapeFilterNew(_bodyConfig.shapeConfig.shapeMaskingConfig.group, _bodyConfig.shapeConfig.shapeMaskingConfig.toCollideWith, _bodyConfig.shapeConfig.shapeMaskingConfig.mask);
-            cpShapeSetFilter(physicsShapes[keyCounter - 1].shape, _filter);
-        }
-
-        cpShapeSetSensor(physicsShapes[keyCounter - 1].shape, physicsShapes[keyCounter - 1].shapeConfig.sensor);
-
         _scene->engine->manager.physics.add(this);
     }
 
@@ -70,9 +62,19 @@ namespace GDE {
             cpSpaceAddBody(space, body);
         }
 
-        physicsShapes[keyCounter] = { _shapeConfig, cpBoxShapeNew(body, _shapeConfig.size.x, _shapeConfig.size.y, 0.f) };
+        physicsShapes[keyCounter] = { _shapeConfig, cpBoxShapeNew(body, _shapeConfig.size.x, _shapeConfig.size.y, 0.f), keyCounter };
         cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
-        cpShapeSetUserData(physicsShapes[keyCounter].shape, (void*)keyCounter);
+        cpShapeSetUserData(physicsShapes[keyCounter].shape, &physicsShapes[keyCounter]);
+        cpShapeSetSensor(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.sensor);
+
+        if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
+            auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.toCollideWith, _shapeConfig.shapeMaskingConfig.mask);
+            cpShapeSetFilter(physicsShapes[keyCounter].shape, _filter);
+            if(_shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES) {
+                cpShapeSetCollisionType(physicsShapes[keyCounter].shape, _shapeConfig.shapeMaskingConfig.mask);
+            }
+        }
+
         keyCounter++;
     }
 
@@ -96,9 +98,19 @@ namespace GDE {
             cpSpaceAddBody(space, body);
         }
 
-        physicsShapes[keyCounter] = { _shapeConfig, cpCircleShapeNew(body, bodyConfig.shapeConfig.size.x / 2.f, cpvzero) };
+        physicsShapes[keyCounter] = { _shapeConfig, cpCircleShapeNew(body, bodyConfig.shapeConfig.size.x / 2.f, cpvzero), keyCounter };
         cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
-        cpShapeSetUserData(physicsShapes[keyCounter].shape, (void*)keyCounter);
+        cpShapeSetUserData(physicsShapes[keyCounter].shape, &physicsShapes[keyCounter]);
+        cpShapeSetSensor(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.sensor);
+
+        if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
+            auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.toCollideWith, _shapeConfig.shapeMaskingConfig.mask);
+            cpShapeSetFilter(physicsShapes[keyCounter].shape, _filter);
+            if(_shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES) {
+                cpShapeSetCollisionType(physicsShapes[keyCounter].shape, _shapeConfig.shapeMaskingConfig.mask);
+            }
+        }
+
         keyCounter++;
     }
 
@@ -130,9 +142,19 @@ namespace GDE {
             cpSpaceAddBody(space, body);
         }
 
-        physicsShapes[keyCounter] = { _shapeConfig, cpPolyShapeNew(body, (int)_numOfVertices, _vertices, cpTransformIdentity, 0.f) };
+        physicsShapes[keyCounter] = { _shapeConfig, cpPolyShapeNew(body, (int)_numOfVertices, _vertices, cpTransformIdentity, 0.f), keyCounter };
         cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
-        cpShapeSetUserData(physicsShapes[keyCounter].shape, (void*)keyCounter);
+        cpShapeSetUserData(physicsShapes[keyCounter].shape, &physicsShapes[keyCounter]);
+        cpShapeSetSensor(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.sensor);
+
+        if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
+            auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.toCollideWith, _shapeConfig.shapeMaskingConfig.mask);
+            cpShapeSetFilter(physicsShapes[keyCounter].shape, _filter);
+            if(_shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES) {
+                cpShapeSetCollisionType(physicsShapes[keyCounter].shape, _shapeConfig.shapeMaskingConfig.mask);
+            }
+        }
+
         keyCounter++;
     }
 
@@ -160,9 +182,19 @@ namespace GDE {
             cpSpaceAddBody(space, body);
         }
 
-        physicsShapes[keyCounter] = { _shapeConfig, cpSegmentShapeNew(body, _a, _b, 0.f) };
+        physicsShapes[keyCounter] = { _shapeConfig, cpSegmentShapeNew(body, _a, _b, 0.f), keyCounter };
         cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
-        cpShapeSetUserData(physicsShapes[keyCounter].shape, (void*)keyCounter);
+        cpShapeSetUserData(physicsShapes[keyCounter].shape, &physicsShapes[keyCounter]);
+        cpShapeSetSensor(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.sensor);
+
+        if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
+            auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.toCollideWith, _shapeConfig.shapeMaskingConfig.mask);
+            cpShapeSetFilter(physicsShapes[keyCounter].shape, _filter);
+            if(_shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES) {
+                cpShapeSetCollisionType(physicsShapes[keyCounter].shape, _shapeConfig.shapeMaskingConfig.mask);
+            }
+        }
+
         keyCounter++;
     }
 
@@ -192,9 +224,10 @@ namespace GDE {
         if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
             auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.mask, _shapeConfig.shapeMaskingConfig.toCollideWith);
             cpShapeSetFilter(physicsShapes[keyCounter - 1].shape, _filter);
+            if(_shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES) {
+                cpShapeSetCollisionType(physicsShapes[keyCounter - 1].shape, _shapeConfig.shapeMaskingConfig.mask);
+            }
         }
-
-        cpShapeSetSensor(physicsShapes[keyCounter - 1].shape, _shapeConfig.sensor);
 
         return keyCounter;
     }

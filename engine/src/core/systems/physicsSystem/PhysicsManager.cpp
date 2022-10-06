@@ -9,7 +9,7 @@ namespace GDE {
 
     void PhysicsManager::init() {
         space = cpSpaceNew();
-        cpSpaceSetGravity(space, { gravity.x, gravity.y });
+        cpSpaceSetGravity(space, { 0, -100 });
     }
 
     void PhysicsManager::destroy() {
@@ -28,6 +28,23 @@ namespace GDE {
             _body->transform->setPosition((float) _bodyPos.x, (float) _bodyPos.y);
             _body->transform->setRotation((float) _bodyAngle);
         }
+    }
+
+    void PhysicsManager::setGravity(const Vec2F& _gravity) {
+        cpSpaceSetGravity(space, { _gravity.x, _gravity.y });
+    }
+
+    Vec2F PhysicsManager::getGravity() {
+        auto _gravity = cpSpaceGetGravity(space);
+        return { (float)_gravity.x, (float)_gravity.y };
+    }
+
+    int PhysicsManager::getStepIterations() {
+        return cpSpaceGetIterations(space);
+    }
+
+    void PhysicsManager::setStepIterations(int _iterations) {
+        cpSpaceSetIterations(space, _iterations);
     }
 
     void PhysicsManager::drawPolygon(PhysicsBody* _physicsBody, RenderManager* _renderManager, const Color& _lineColor, const Color& _radiusColor, bool _showLines, bool _showRadius) {
@@ -130,8 +147,8 @@ namespace GDE {
         cpShape* _shapeA;
         cpShape* _shapeB;
         cpArbiterGetShapes(_arbiter, &_shapeA, &_shapeB);
-        ulong _shapeAID = *static_cast<ulong*>(cpShapeGetUserData(_shapeA));
-        ulong _shapeBID = *static_cast<ulong*>(cpShapeGetUserData(_shapeB));
+        auto* _physicsShapeA = static_cast<PhysicsShape*>(cpShapeGetUserData(_shapeA));
+        auto* _physicsShapeB = static_cast<PhysicsShape*>(cpShapeGetUserData(_shapeB));
 
         cpBody* _bodyA;
         cpBody* _bodyB;
@@ -140,28 +157,28 @@ namespace GDE {
         auto* _physicsBodyA = static_cast<PhysicsBody*>(cpBodyGetUserData(_bodyA));
         auto* _physicsBodyB = static_cast<PhysicsBody*>(cpBodyGetUserData(_bodyB));
 
-        auto _shapeAMask = _physicsBodyA->getMasks(_shapeAID);
-        auto _shapeBMask = _physicsBodyB->getMasks(_shapeBID);
+        auto _shapeAMask = _physicsBodyA->getMasks(_physicsShapeA->id);
+        auto _shapeBMask = _physicsBodyB->getMasks(_physicsShapeB->id);
 
         if(PhysicsManager::collisionCallbacksTable[_shapeAMask][_shapeBMask].onCollisionEnter != nullptr) {
             PhysicsManager::collisionCallbacksTable[_shapeAMask][_shapeBMask].onCollisionEnter(_physicsBodyA, _physicsBodyB);
-            return cpFalse;
+            return cpTrue;
         }
 
         if(PhysicsManager::collisionCallbacksTable[_shapeBMask][_shapeAMask].onCollisionEnter != nullptr) {
             PhysicsManager::collisionCallbacksTable[_shapeBMask][_shapeAMask].onCollisionEnter(_physicsBodyA, _physicsBodyB);
-            return cpFalse;
+            return cpTrue;
         }
 
-        return cpFalse;
+        return cpTrue;
     }
 
     cpBool PhysicsManager::onCollisionExit(cpArbiter* _arbiter, cpSpace* _space, void* _data) {
         cpShape* _shapeA;
         cpShape* _shapeB;
         cpArbiterGetShapes(_arbiter, &_shapeA, &_shapeB);
-        ulong _shapeAID = *static_cast<ulong*>(cpShapeGetUserData(_shapeA));
-        ulong _shapeBID = *static_cast<ulong*>(cpShapeGetUserData(_shapeB));
+        auto* _physicsShapeA = static_cast<PhysicsShape*>(cpShapeGetUserData(_shapeA));
+        auto* _physicsShapeB = static_cast<PhysicsShape*>(cpShapeGetUserData(_shapeB));
 
         cpBody* _bodyA;
         cpBody* _bodyB;
@@ -170,20 +187,20 @@ namespace GDE {
         auto* _physicsBodyA = static_cast<PhysicsBody*>(cpBodyGetUserData(_bodyA));
         auto* _physicsBodyB = static_cast<PhysicsBody*>(cpBodyGetUserData(_bodyB));
 
-        auto _shapeAMask = _physicsBodyA->getMasks(_shapeAID);
-        auto _shapeBMask = _physicsBodyB->getMasks(_shapeBID);
+        auto _shapeAMask = _physicsBodyA->getMasks(_physicsShapeA->id);
+        auto _shapeBMask = _physicsBodyB->getMasks(_physicsShapeB->id);
 
         if(PhysicsManager::collisionCallbacksTable[_shapeAMask][_shapeBMask].onCollisionExit != nullptr) {
             PhysicsManager::collisionCallbacksTable[_shapeAMask][_shapeBMask].onCollisionExit(_physicsBodyA, _physicsBodyB);
-            return cpFalse;
+            return cpTrue;
         }
 
         if(PhysicsManager::collisionCallbacksTable[_shapeBMask][_shapeAMask].onCollisionExit != nullptr) {
             PhysicsManager::collisionCallbacksTable[_shapeBMask][_shapeAMask].onCollisionExit(_physicsBodyA, _physicsBodyB);
-            return cpFalse;
+            return cpTrue;
         }
 
-        return cpFalse;
+        return cpTrue;
     }
 
     PhysicsCollisionCallbacks& PhysicsManager::getCollisionCallbacks(uint _maskA, uint _maskB) {

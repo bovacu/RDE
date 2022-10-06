@@ -48,9 +48,9 @@ namespace GDE {
             std::vector<PhysicsBody*> bodies;
             cpSpace* space;
             inline static PhysicsCollisionCallbacks collisionCallbacksTable[MAX_MASKS][MAX_MASKS];
+            Vec2F gravity = {0.f, -100.f};
 
         public:
-            Vec2F gravity = {0.f, -100.f};
             bool simulate = true;
             DebugOptions debugOptions;
 
@@ -65,6 +65,12 @@ namespace GDE {
 
             void addCollisionCallbacks(uint _maskA, uint _maskB, PhysicsCollisionCallbacks _callbacks);
             PhysicsCollisionCallbacks& getCollisionCallbacks(uint _maskA, uint _maskB);
+
+            void setGravity(const Vec2F& _gravity);
+            Vec2F getGravity();
+
+            int getStepIterations();
+            void setStepIterations(int _iterations);
 
         private:
             void drawPolygon(PhysicsBody* _physicsBody, RenderManager* _renderManager, const Color& _lineColor, const Color& _radiusColor, bool _showLines, bool _showRadius);
