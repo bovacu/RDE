@@ -53,6 +53,20 @@ namespace GDE {
         cpSpaceAddBody(space, body);
     }
 
+    void PhysicsBody::setupShape(ShapeConfig& _shapeConfig) {
+        cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
+        cpShapeSetUserData(physicsShapes[keyCounter].shape, &physicsShapes[keyCounter]);
+        cpShapeSetSensor(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.sensor);
+        cpShapeSetElasticity(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.restitution);
+        cpShapeSetFriction(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.friction);
+
+        if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
+            auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.toCollideWith, _shapeConfig.shapeMaskingConfig.mask);
+            cpShapeSetFilter(physicsShapes[keyCounter].shape, _filter);
+            cpShapeSetCollisionType(physicsShapes[keyCounter].shape, _shapeConfig.shapeMaskingConfig.mask);
+        }
+    }
+
     void PhysicsBody::calculateDataForBox(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType) {
         auto _size = Vec2F { _shapeConfig.size.x * transform->getModelMatrixScale().x, _shapeConfig.size.y * transform->getModelMatrixScale().y };
 
@@ -67,40 +81,20 @@ namespace GDE {
         }
 
         physicsShapes[keyCounter] = { _shapeConfig, cpBoxShapeNew(body, _shapeConfig.size.x, _shapeConfig.size.y, 0.f), keyCounter };
-        cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
-        cpShapeSetUserData(physicsShapes[keyCounter].shape, &physicsShapes[keyCounter]);
-        cpShapeSetSensor(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.sensor);
 
-        if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
-            auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.toCollideWith, _shapeConfig.shapeMaskingConfig.mask);
-            cpShapeSetFilter(physicsShapes[keyCounter].shape, _filter);
-            if(_shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES) {
-                cpShapeSetCollisionType(physicsShapes[keyCounter].shape, _shapeConfig.shapeMaskingConfig.mask);
-            }
-        }
+        setupShape(_shapeConfig);
 
         keyCounter++;
     }
 
     void PhysicsBody::calculateDataForCircle(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType) {
         if(body == nullptr) {
-            auto _moment = (float)cpMomentForCircle(_bodyMass, 0, _shapeConfig.size.x / 2.f * transform->getModelMatrixScale().x, cpvzero);
+            auto _moment = (float)cpMomentForCircle(_bodyMass, 0, _shapeConfig.size.x * transform->getModelMatrixScale().x, cpvzero);
             createBody(_shapeConfig, _moment, _bodyMass, _bodyType);
         }
 
-        physicsShapes[keyCounter] = { _shapeConfig, cpCircleShapeNew(body, _shapeConfig.size.x / 2.f, cpvzero), keyCounter };
-        cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
-        cpShapeSetUserData(physicsShapes[keyCounter].shape, &physicsShapes[keyCounter]);
-        cpShapeSetSensor(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.sensor);
-
-        if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
-            auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.toCollideWith, _shapeConfig.shapeMaskingConfig.mask);
-            cpShapeSetFilter(physicsShapes[keyCounter].shape, _filter);
-            if(_shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES) {
-                cpShapeSetCollisionType(physicsShapes[keyCounter].shape, _shapeConfig.shapeMaskingConfig.mask);
-            }
-        }
-
+        physicsShapes[keyCounter] = { _shapeConfig, cpCircleShapeNew(body, _shapeConfig.size.x, cpvzero), keyCounter };
+        setupShape(_shapeConfig);
         keyCounter++;
     }
 
@@ -119,18 +113,7 @@ namespace GDE {
         }
 
         physicsShapes[keyCounter] = { _shapeConfig, cpPolyShapeNew(body, (int)_numOfVertices, _vertices, cpTransformIdentity, 0.f), keyCounter };
-        cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
-        cpShapeSetUserData(physicsShapes[keyCounter].shape, &physicsShapes[keyCounter]);
-        cpShapeSetSensor(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.sensor);
-
-        if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
-            auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.toCollideWith, _shapeConfig.shapeMaskingConfig.mask);
-            cpShapeSetFilter(physicsShapes[keyCounter].shape, _filter);
-            if(_shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES) {
-                cpShapeSetCollisionType(physicsShapes[keyCounter].shape, _shapeConfig.shapeMaskingConfig.mask);
-            }
-        }
-
+        setupShape(_shapeConfig);
         keyCounter++;
     }
 
@@ -145,18 +128,7 @@ namespace GDE {
         }
 
         physicsShapes[keyCounter] = { _shapeConfig, cpSegmentShapeNew(body, _a, _b, 0.f), keyCounter };
-        cpSpaceAddShape(space, physicsShapes[keyCounter].shape);
-        cpShapeSetUserData(physicsShapes[keyCounter].shape, &physicsShapes[keyCounter]);
-        cpShapeSetSensor(physicsShapes[keyCounter].shape, physicsShapes[keyCounter].shapeConfig.sensor);
-
-        if(_shapeConfig.shapeMaskingConfig.group != CP_NO_GROUP || _shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES || _shapeConfig.shapeMaskingConfig.toCollideWith != CP_ALL_CATEGORIES) {
-            auto _filter = cpShapeFilterNew(_shapeConfig.shapeMaskingConfig.group, _shapeConfig.shapeMaskingConfig.toCollideWith, _shapeConfig.shapeMaskingConfig.mask);
-            cpShapeSetFilter(physicsShapes[keyCounter].shape, _filter);
-            if(_shapeConfig.shapeMaskingConfig.mask != CP_ALL_CATEGORIES) {
-                cpShapeSetCollisionType(physicsShapes[keyCounter].shape, _shapeConfig.shapeMaskingConfig.mask);
-            }
-        }
-
+        setupShape(_shapeConfig);
         keyCounter++;
     }
 
@@ -221,14 +193,24 @@ namespace GDE {
         auto _currentFilter = cpShapeGetFilter(physicsShapes[_shapeID].shape);
         _currentFilter.mask = _mask;
         cpShapeSetFilter(physicsShapes[_shapeID].shape, _currentFilter);
-        cpShapeSetCollisionType(physicsShapes[_shapeID].shape, _mask);
     }
 
     void PhysicsBody::removeMask(PhysicsShapeId _shapeID) {
         auto _currentFilter = cpShapeGetFilter(physicsShapes[_shapeID].shape);
         _currentFilter.mask = CP_ALL_CATEGORIES;
         cpShapeSetFilter(physicsShapes[_shapeID].shape, _currentFilter);
-        cpShapeSetCollisionType(physicsShapes[_shapeID].shape, 0);
+    }
+
+    void PhysicsBody::setToCollideWiths(PhysicsShapeId _shapeID, uint _toCollideWiths) {
+        auto _currentFilter = cpShapeGetFilter(physicsShapes[_shapeID].shape);
+        _currentFilter.categories = _toCollideWiths;
+        cpShapeSetFilter(physicsShapes[_shapeID].shape, _currentFilter);
+    }
+
+    void PhysicsBody::removeToCollideWiths(PhysicsShapeId _shapeID) {
+        auto _currentFilter = cpShapeGetFilter(physicsShapes[_shapeID].shape);
+        _currentFilter.categories = CP_ALL_CATEGORIES;
+        cpShapeSetFilter(physicsShapes[_shapeID].shape, _currentFilter);
     }
 
     void PhysicsBody::addMaskFilter(PhysicsShapeId _shapeID, uint _masksToAdd) {
@@ -250,7 +232,7 @@ namespace GDE {
     }
 
     uint PhysicsBody::getMasks(PhysicsShapeId _shapeID) {
-        return cpShapeGetFilter(physicsShapes[_shapeID].shape).categories;
+        return cpShapeGetFilter(physicsShapes[_shapeID].shape).mask;
     }
 
     uint PhysicsBody::getGroups(PhysicsShapeId _shapeID) {
@@ -258,7 +240,7 @@ namespace GDE {
     }
 
     uint PhysicsBody::getToCollideWiths(PhysicsShapeId _shapeID) {
-        return cpShapeGetFilter(physicsShapes[_shapeID].shape).mask;
+        return cpShapeGetFilter(physicsShapes[_shapeID].shape).categories;
     }
 
     void PhysicsBody::update() {
