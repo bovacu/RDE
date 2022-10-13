@@ -50,9 +50,8 @@ namespace GDE {
         Vec2F size = { 32, 32 };
         std::vector<Vec2F> vertices {  };
         bool sensor = false;
-        float density = 1.f;
-        float friction = 0.3f;
-        float restitution = 0.2f;
+        float friction = 0.4f;
+        float restitution = 0.f;
     };
 
     typedef ulong PhysicsShapeId;
@@ -90,11 +89,12 @@ namespace GDE {
             void calculateDataForPolygon(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType);
             void calculateDataForSegment(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType);
             void createBody(ShapeConfig& _shapeConfig, float _moment, float _bodyMass, PhysicsBodyType _bodyType);
-            void update();
+            void setupShape(ShapeConfig& _shapeConfig);
 
         public:
             PhysicsBody(const NodeID& _id, Scene* _scene, BodyConfig& _bodyConfig);
             ~PhysicsBody();
+            void update();
 
             PhysicsShapeId addShape(ShapeConfig& _shapeConfig, const Vec2F& _position = {0.f, 0.f}, float _rotation = 0.f);
             bool removeShape(PhysicsShapeId _id);
@@ -104,6 +104,9 @@ namespace GDE {
 
             void setMask(PhysicsShapeId _shapeID, uint _mask);
             void removeMask(PhysicsShapeId _shapeID);
+
+            void setToCollideWiths(PhysicsShapeId _shapeID, uint _toCollideWiths);
+            void removeToCollideWiths(PhysicsShapeId _shapeID);
 
             void addMaskFilter(PhysicsShapeId _shapeID, uint _masksToAdd);
             void removeMaskFilter(PhysicsShapeId _shapeID, uint _masksToRemove);

@@ -16,15 +16,21 @@ using namespace GDE;
 namespace Editor {
 
     class Editor : public Scene {
+
+        PhysicsBody* body;
+        NodeID circleNodeID;
+        bool collisionHappened = false;
+
         public:
             explicit Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }
             void onInit() override;
             void onUpdate(Delta _dt) override;
+            void onLateUpdate(Delta _dt) override;
             void onDebugRender(Delta _dt) override;
 
         private:
             void redirectRendering(FrameBuffer* _frameBuffer);
-            void textStressTest();
+            void textStressTest(int _amount);
             void physicsTest();
             void particleSystemTest();
             void localizationTest();
@@ -36,7 +42,7 @@ namespace Editor {
             void onMouseEntered();
             void onMouseExited();
 
-            void collisionA(PhysicsBody* _a, PhysicsBody* _b);
+            void onCollisionEnter(PhysicsBody* _a, PhysicsBody* _b);
             void collisionB(PhysicsBody* _a, PhysicsBody* _b);
     };
 

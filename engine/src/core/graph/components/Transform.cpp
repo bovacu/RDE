@@ -19,6 +19,7 @@ namespace GDE {
     }
 
     void Transform::setPosition(float _x, float _y) {
+        if(innerPosition.x == _x && innerPosition.y == _y) return;
         innerPosition = glm::vec3 {_x, _y, 0.0f};
         setDirty();
     }
@@ -28,6 +29,9 @@ namespace GDE {
     }
 
     void Transform::setRotation(float _rotation) {
+        auto _newRot = glm::quat(glm::vec3(0, 0, glm::radians(_rotation)));
+        if(innerRotation == _newRot) return;
+
         innerRotation = glm::quat(glm::vec3(0, 0, glm::radians(_rotation)));
         setDirty();
     }
@@ -109,6 +113,8 @@ namespace GDE {
         return radiansToDegrees(_euler.z);
     }
 
+
+
     glm::mat4 Transform::localToParent() const{
         return glm::mat4( //translate
                 glm::vec4(1.0f, 0.0f, 0.0f, 0.0f),
@@ -131,25 +137,27 @@ namespace GDE {
         inv_scale.y = (innerScale.y == 0.0f ? 0.0f : 1.0f / innerScale.y);
         inv_scale.z = 1.0f;
         return glm::mat4( //un-scale
-                glm::vec4(inv_scale.x, 0.0f, 0.0f, 0.0f),
-                glm::vec4(0.0f, inv_scale.y, 0.0f, 0.0f),
-                glm::vec4(0.0f, 0.0f, inv_scale.z, 0.0f),
-                glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
-        )
+                    glm::vec4(inv_scale.x, 0.0f, 0.0f, 0.0f),
+                    glm::vec4(0.0f, inv_scale.y, 0.0f, 0.0f),
+                    glm::vec4(0.0f, 0.0f, inv_scale.z, 0.0f),
+                    glm::vec4(0.0f, 0.0f, 0.0f,        1.0f)
+                )
+
                * glm::mat4_cast(glm::inverse(innerRotation)) //un-rotate
+
                * glm::mat4( //un-translate
-                glm::vec4(1.0f, 0.0f, 0.0f, 0.0f),
-                glm::vec4(0.0f, 1.0f, 0.0f, 0.0f),
-                glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
-                glm::vec4(-innerPosition, 1.0f)
-        );
+                    glm::vec4(1.0f, 0.0f, 0.0f, 0),
+                    glm::vec4(0.0f, 1.0f, 0.0f, 0),
+                    glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+                    glm::vec4(-innerPosition.x,-innerPosition.y, 0.0f, 1.0f)
+                );
     }
 
     std::tuple<glm::mat4, bool> Transform::localToWorld() {
         bool _wasDirty = false;
         if (parentTransform) {
             if(dirty) {
-                setDirty();
+                setDirty(false);
                 dirty = false;
                 _wasDirty = true;
             }
@@ -175,10 +183,83 @@ namespace GDE {
         return localToParent();
     }
 
-    void Transform::setDirty() {
+    void Transform::setDirty(bool _applyToExternalComponents) {
         worldMatrixCache = recalculateCachedMatrix();
+        otherComponentsNeedToUpdate = _applyToExternalComponents;
         for(auto* _transform : children) {
             _transform->dirty = true;
+            _transform->otherComponentsNeedToUpdate = true;
         }
+    }
+
+    void Transform::setMatrixModelPosition(const Vec2F& _worldPos) {
+        worldMatrixCache[3][0] = _worldPos.x;
+        worldMatrixCache[3][1] = _worldPos.y;
+        setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
+    }
+
+    void Transform::setMatrixModelRotation(float _rotation) {
+        glm::vec3 _scale;
+        glm::quat _rot;
+        glm::vec3 _translation;
+        glm::vec3 skew;
+        glm::vec4 perspective;
+
+        glm::decompose(worldMatrixCache, _scale, _rot, _translation, skew, perspective);
+
+        worldMatrixCache = glm::mat4( //translate
+                glm::vec4(1.0f, 0.0f, 0.0f, 0.0f),
+                glm::vec4(0.0f, 1.0f, 0.0f, 0.0f),
+                glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+                glm::vec4(_translation, 1.0f)
+        )
+        * glm::mat4_cast(glm::angleAxis(degreesToRadians(_rotation), glm::vec3 { 0, 0, 1 })) //rotate
+        * glm::mat4( //scale
+                glm::vec4(_scale[0], 0.0f, 0.0f, 0.0f),
+                glm::vec4(0.0f, _scale[1], 0.0f, 0.0f),
+                glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+                glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
+        );
+
+        setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
+    }
+
+    glm::mat4 Transform::worldPointToLocalPosition(const Vec2F& _position) {
+        glm::mat4 _newWorldMatrix = worldMatrixCache;
+        _newWorldMatrix[3][0] = _position.x;
+        _newWorldMatrix[3][1] = _position.y;
+
+        auto [_mat, _] = parentTransform->localToWorld();
+        return _newWorldMatrix * glm::inverse(_mat);
+    }
+
+    glm::mat4 Transform::worldPointToLocalRotation(float _rotation) {
+        glm::mat4 _newWorldMatrix = worldMatrixCache;
+        _newWorldMatrix[0][0] *= std::cos(_rotation);
+        _newWorldMatrix[0][1] *= -std::sin(_rotation);
+        _newWorldMatrix[1][0] *= std::sin(_rotation);
+        _newWorldMatrix[1][1] *= std::cos(_rotation);
+
+        auto [_mat, _] = parentTransform->localToWorld();
+        return _newWorldMatrix * glm::inverse(_mat);
+    }
+
+    glm::mat4 Transform::getLocalMatrix() const {
+        return localToParent();
+    }
+
+    void Transform::setLocalMatrix(const glm::mat4& _matrix) {
+        glm::vec3 _scale;
+        glm::quat _rotation;
+        glm::vec3 _translation;
+        glm::vec3 skew;
+        glm::vec4 perspective;
+
+        glm::decompose(_matrix, _scale, _rotation, _translation, skew, perspective);
+        glm::vec3 _euler = glm::eulerAngles(_rotation);
+
+        innerPosition = _translation;
+        innerRotation = _rotation;
+        innerScale = _scale;
     }
 }

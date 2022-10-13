@@ -27,9 +27,79 @@ namespace Editor {
         #endif
     }
 
+    static void test(PhysicsBody* _a, PhysicsBody* _b) {
+//        LOG_I("It fucking worked first try")
+    }
+
+    static void testExit(PhysicsBody* _a, PhysicsBody* _b) {
+//        LOG_I("It fucking worked first try exit")
+    }
+
+    static void testStay(PhysicsBody* _a, PhysicsBody* _b) {
+//        LOG_I("It fucking worked first try stay")
+    }
+
+    void Editor::onCollisionEnter(PhysicsBody* _a, PhysicsBody* _b) {
+        auto* _box = _a->transform->ID == circleNodeID ? _b : _a;
+        LOG_I("WPos: ", _box->transform->getModelMatrixPosition(), ", LPos: ", _box->transform->getPosition())
+        getMainGraph()->setParent(_box->transform->ID, circleNodeID);
+        LOG_I("WPos: ", _box->transform->getModelMatrixPosition(), ", LPos: ", _box->transform->getPosition())
+        collisionHappened = true;
+    }
+
     void Editor::onInit() {
         localizationTest();
-//        textStressTest();
+        textStressTest(5);
+
+        {
+            auto _floorId = getMainGraph()->createNode("Floor");
+            auto* _transform0 = getMainGraph()->getComponent<Transform>(_floorId);
+            _transform0->setPosition(0, -300);
+            ShapeConfig _floorShapeConfig{
+                    .type = PhysicsShapeType::SEGMENT,
+                    .size = {1280, 0},
+                    .vertices = {},
+            };
+
+            _floorShapeConfig.shapeMaskingConfig.mask = 2;
+            _floorShapeConfig.shapeMaskingConfig.toCollideWith = 1 | 5;
+            BodyConfig _floorBodyConfig{
+                    .shapeConfig = _floorShapeConfig
+            };
+            _floorBodyConfig.physicsBodyType = GDE::STATIC;
+            getMainGraph()->addComponent<PhysicsBody>(_floorId, this, _floorBodyConfig);
+        }
+
+        {
+            auto _floorId = getMainGraph()->createNode("Circle");
+            auto* _transform0 = getMainGraph()->getComponent<Transform>(_floorId);
+            _transform0->setPosition(0, 300);
+            ShapeConfig _floorShapeConfig{
+                    .type = PhysicsShapeType::CIRCLE,
+                    .size = {64, 64},
+                    .vertices = {},
+            };
+            _floorShapeConfig.restitution = 0;
+
+            _floorShapeConfig.shapeMaskingConfig.mask = 1;
+            _floorShapeConfig.shapeMaskingConfig.toCollideWith = 1;
+            BodyConfig _floorBodyConfig{
+                    .shapeConfig = _floorShapeConfig
+            };
+            _floorBodyConfig.physicsBodyType = GDE::STATIC;
+            getMainGraph()->addComponent<PhysicsBody>(_floorId, this, _floorBodyConfig);
+            circleNodeID = _floorId;
+
+            auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
+            getMainGraph()->addComponent<SpriteRenderer>(circleNodeID, this, _texture);
+        }
+
+        PhysicsCollisionCallbacks _callbacks;
+        _callbacks.onCollisionEnter.bind<&Editor::onCollisionEnter>(this);
+        _callbacks.onCollisionExit.bind<testExit>();
+        _callbacks.onCollisionStay.bind<testStay>();
+        engine->manager.physics.addCollisionCallbacks(1, 1, _callbacks);
+
 //        UDelegate<void(FrameBuffer*)> _delegate;
 //        _delegate.bind<&Editor::redirectRendering>(this);
 //
@@ -74,28 +144,66 @@ namespace Editor {
         ++_frameCounter;
         _timer += _dt;
 //
-//        auto* _buttonTransform = getMainGraph()->getComponent<Transform>(getMainGraph()->getNode("button"));
-////        _buttonTransform->rotate(50 * _dt);
+        auto* _circleTransform = getMainGraph()->getComponent<PhysicsBody>(circleNodeID);
+        _circleTransform->setAngularLinearVelocity(50.f);
 //
 //        if(engine->manager.inputManager.isKeyJustPressed(KeyCode::K)) {
 //            getMainGraph()->setParent(getMainGraph()->getNode("RightWall"), getMainGraph()->getNode("Text"));
 //        }
+
+        if(engine->manager.inputManager.isKeyJustPressed(KeyCode::K)) {
+            static int _knifeCounter = 0;
+            auto _floorId = getMainGraph()->createNode(APPEND_S("Knife", _knifeCounter++));
+            auto* _transform0 = getMainGraph()->getComponent<Transform>(_floorId);
+            _transform0->setPosition(0, -200);
+            ShapeConfig _floorShapeConfig{
+                    .type = PhysicsShapeType::BOX,
+                    .size = {16, 64},
+                    .vertices = {},
+            };
+            _floorShapeConfig.restitution = 0;
+
+            _floorShapeConfig.shapeMaskingConfig.mask = 1;
+            _floorShapeConfig.shapeMaskingConfig.toCollideWith = 1 | 2;
+            BodyConfig _floorBodyConfig{
+                    .shapeConfig = _floorShapeConfig
+            };
+            _floorBodyConfig.physicsBodyType = GDE::DYNAMIC;
+            body = getMainGraph()->addComponent<PhysicsBody>(_floorId, this, _floorBodyConfig);
+
+            body->applyImpulseLocal({0, 500}, {0, 0});
+        }
+
     }
 
-    void Editor::textStressTest() {
+    void Editor::onLateUpdate(Delta _dt) {
+        Scene::onLateUpdate(_dt);
+
+        if(collisionHappened) {
+//            body->setBodyType(PhysicsBodyType::STATIC);
+//            body->setMask(0, 5);
+            collisionHappened = false;
+//            body->update();
+        }
+    }
+
+    void Editor::textStressTest(int _amount) {
             GDE::Random _r;
             auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
             // 40000 is the maximum I could get with 55fps of average performance, with texts -> "Text[0-40000]" ~350000 images
             auto _parent = getMainGraph()->createNode("parent");
 
-            for(int _i = 0; _i < 300000; _i++) {
-                auto _text = getMainGraph()->createNode("Block" + std::to_string(_i), _parent);
+            auto _origin = Vec2F {200, 50};
+
+            for(int _i = 0; _i < _amount; _i++) {
+                auto _text = getMainGraph()->createNode("Block" + std::to_string(_i));
                 nodes.push_back(_text);
                 auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
                 _textTransform->staticTransform = true;
-                _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f, (float)engine->getWindow().getWindowSize().x / 2.f),
-                                            _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f, (float)engine->getWindow().getWindowSize().y / 2.f));
+                _textTransform->setPosition(_origin - Vec2F { 45.f * _i, 45.f * (float)_i });
+                _textTransform->setRotation(45);
                 getMainGraph()->addComponent<SpriteRenderer>(_text, this, _texture);
+                getMainGraph()->setParent(_text, _parent);
             }
         }
 
@@ -106,59 +214,59 @@ namespace Editor {
     }
 
     void Editor::physicsTest() {
-        NodeID _colliderParentId;
-
-        {
-            auto _floorId = getMainGraph()->createNode("Floor");
-            _colliderParentId = _floorId;
-            auto* _transform0 = getMainGraph()->getComponent<Transform>(_floorId);
-            _transform0->setPosition(0, -100);
-            ShapeConfig _floorShapeConfig{
-                    .type = PhysicsShape::BOX,
-                    .size = {500, 5},
-                    .vertices = {},
-            };
-            BodyConfig _floorBodyConfig{
-                    .shapeConfig = _floorShapeConfig,
-                    .isStatic = true
-            };
-            auto* _floorBody = getMainGraph()->addComponent<PhysicsBody>(_floorId, this, _floorBodyConfig);
-        }
-
-        {
-            auto _leftWallId = getMainGraph()->createNode("LeftWall", _colliderParentId);
-            auto* _transform1 = getMainGraph()->getComponent<Transform>(_leftWallId);
-            _transform1->setPosition(-300, 0);
-            ShapeConfig _leftWallShapeConfig {
-                    .type = PhysicsShape::BOX,
-                    .size = { 5, 500 },
-                    .vertices = {},
-            };
-            BodyConfig _leftWallBodyConfig {
-                    .shapeConfig = _leftWallShapeConfig,
-                    .isStatic = true
-            };
-            auto* _leftWallBody = getMainGraph()->addComponent<PhysicsBody>(_leftWallId, this, _leftWallBodyConfig);
-        }
-
-        {
-            auto _rightWallId = getMainGraph()->createNode("RightWall");
-            auto* _transform2 = getMainGraph()->getComponent<Transform>(_rightWallId);
-            _transform2->setScale(0.25f, 0.25f);
-            _transform2->setPosition(300, 0);
-            ShapeConfig _rightWallShapeConfig {
-                    .type = PhysicsShape::BOX,
-                    .size = { 5, 500 },
-                    .vertices = {},
-            };
-            BodyConfig _rightWallBodyConfig {
-                    .shapeConfig = _rightWallShapeConfig,
-                    .isStatic = true
-            };
-            auto* _rightWallBody = getMainGraph()->addComponent<PhysicsBody>(_rightWallId, this, _rightWallBodyConfig);
-            auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
-            getMainGraph()->addComponent<SpriteRenderer>(_rightWallId, this, _texture);
-        }
+//        NodeID _colliderParentId;
+//
+//        {
+//            auto _floorId = getMainGraph()->createNode("Floor");
+//            _colliderParentId = _floorId;
+//            auto* _transform0 = getMainGraph()->getComponent<Transform>(_floorId);
+//            _transform0->setPosition(0, -100);
+//            ShapeConfig _floorShapeConfig{
+//                    .type = PhysicsShape::BOX,
+//                    .size = {500, 5},
+//                    .vertices = {},
+//            };
+//            BodyConfig _floorBodyConfig{
+//                    .shapeConfig = _floorShapeConfig,
+//                    .isStatic = true
+//            };
+//            auto* _floorBody = getMainGraph()->addComponent<PhysicsBody>(_floorId, this, _floorBodyConfig);
+//        }
+//
+//        {
+//            auto _leftWallId = getMainGraph()->createNode("LeftWall", _colliderParentId);
+//            auto* _transform1 = getMainGraph()->getComponent<Transform>(_leftWallId);
+//            _transform1->setPosition(-300, 0);
+//            ShapeConfig _leftWallShapeConfig {
+//                    .type = PhysicsShape::BOX,
+//                    .size = { 5, 500 },
+//                    .vertices = {},
+//            };
+//            BodyConfig _leftWallBodyConfig {
+//                    .shapeConfig = _leftWallShapeConfig,
+//                    .isStatic = true
+//            };
+//            auto* _leftWallBody = getMainGraph()->addComponent<PhysicsBody>(_leftWallId, this, _leftWallBodyConfig);
+//        }
+//
+//        {
+//            auto _rightWallId = getMainGraph()->createNode("RightWall");
+//            auto* _transform2 = getMainGraph()->getComponent<Transform>(_rightWallId);
+//            _transform2->setScale(0.25f, 0.25f);
+//            _transform2->setPosition(300, 0);
+//            ShapeConfig _rightWallShapeConfig {
+//                    .type = PhysicsShape::BOX,
+//                    .size = { 5, 500 },
+//                    .vertices = {},
+//            };
+//            BodyConfig _rightWallBodyConfig {
+//                    .shapeConfig = _rightWallShapeConfig,
+//                    .isStatic = true
+//            };
+//            auto* _rightWallBody = getMainGraph()->addComponent<PhysicsBody>(_rightWallId, this, _rightWallBodyConfig);
+//            auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
+//            getMainGraph()->addComponent<SpriteRenderer>(_rightWallId, this, _texture);
+//        }
 
 //        {
 //            static int _counter = 0;
@@ -218,8 +326,8 @@ namespace Editor {
 //            _counter++;
 //        }
 
-        engine->manager.physics.addOrGetCollisionToTable(1, 2)->onCollisionEnter.bind<&Editor::collisionA>(this);
-        engine->manager.physics.addOrGetCollisionToTable(2, 2)->onCollisionEnter.bind<&Editor::collisionB>(this);
+//        engine->manager.physics.addOrGetCollisionToTable(1, 2)->onCollisionEnter.bind<&Editor::collisionA>(this);
+//        engine->manager.physics.addOrGetCollisionToTable(2, 2)->onCollisionEnter.bind<&Editor::collisionB>(this);
 
     }
 
@@ -268,10 +376,6 @@ namespace Editor {
         LOG_I("Exited!")
     }
 
-    void Editor::collisionA(PhysicsBody* _a, PhysicsBody* _b) {
-
-    }
-
     void Editor::collisionB(PhysicsBody* _a, PhysicsBody* _b) {
 
     }
@@ -285,5 +389,6 @@ namespace Editor {
         auto _d = 1L;
         LOG_W(engine->manager.localizationManager.localize("scoreKey",_a, _b, _c, _d))
     }
+
 
 }

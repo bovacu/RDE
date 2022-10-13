@@ -274,7 +274,7 @@ namespace GDE {
                 } else if(std::equal(_type.begin(), _type.end(), "circle")) {
                     _shapeConfig.type = PhysicsShapeType::CIRCLE;
                     ENGINE_ASSERT(_shapeJson.contains("size"), "PhysicsShape of type CIRCLE must have field 'size' with a Vec2F. X is the radius of the circle, Y is ignored, Ex: \\\"size\\\": [16, 0]\"")
-                    _shapeConfig.size = { _shapeJson["size"].get<float>(), 0.f };
+                    _shapeConfig.size = { _shapeJson["size"][0].get<float>(), 0.f };
                 } else if(std::equal(_type.begin(), _type.end(), "polygon")) {
                     _shapeConfig.type = PhysicsShapeType::POLYGON;
                     ENGINE_ASSERT(_shapeJson.contains("vertices") && _shapeJson["vertices"].size() >= 3, "PhysicsShape of type POLYGON must have field 'vertices' with an array of Vec2F and a minimum of 3 vertices, Ex: \"vertices\": [{-5,-5}, {5,-5}, {0,5}")
@@ -283,9 +283,14 @@ namespace GDE {
                     }
                 } else if(std::equal(_type.begin(), _type.end(), "segment")) {
                     _shapeConfig.type = PhysicsShapeType::SEGMENT;
-                    ENGINE_ASSERT(_shapeJson.contains("vertices") && _shapeJson["vertices"].size() == 2, "PhysicsShape of type SEGMENT must have field 'vertices' with an array of exactly 2 Vec2F, Ex: \"vertices\": [{-5,0}, {5,0}")
-                    for(auto& _vertex : _shapeJson["vertices"]) {
-                        _shapeConfig.vertices.emplace_back(_vertex[0].get<float>(), _vertex[1].get<float>());
+                    if(_shapeJson.contains("vertices") && !_shapeJson["vertices"].empty()) {
+                        ENGINE_ASSERT(_shapeJson.contains("vertices") && _shapeJson["vertices"].size() == 2, "PhysicsShape of type SEGMENT must have field 'vertices' with an array of exactly 2 Vec2F, Ex: \"vertices\": [{-5,0}, {5,0}")
+                        for(auto& _vertex : _shapeJson["vertices"]) {
+                            _shapeConfig.vertices.emplace_back(_vertex[0].get<float>(), _vertex[1].get<float>());
+                        }
+                    } else {
+                        ENGINE_ASSERT(_shapeJson.contains("size"), "PhysicsShape of type SEGMENT must have field 'size' with a Vec2F. X is the length of the segment, Y is ignored, Ex: \\\"size\\\": [16, 0]\"")
+                        _shapeConfig.size = { _shapeJson["size"].get<float>(), 0.f };
                     }
                 } else {
                     throw std::runtime_error(APPEND_S("Chosen PhysicsShapeType '", _type, "' is not a known type for a PhysicsShape"));
@@ -304,11 +309,6 @@ namespace GDE {
                 if(_shapeJson.contains("restitution")) {
                     ENGINE_ASSERT(_shapeJson["restitution"].is_number(), "'restitution' is a float, so it is a single value, Ex: \"restitution\": 0.2")
                     _shapeConfig.restitution = _shapeJson["restitution"].get<float>();
-                }
-
-                if(_shapeJson.contains("density")) {
-                    ENGINE_ASSERT(_shapeJson ["density"].is_number(), "'density' is a float, so it is a single value, Ex: \"density\": 1.5")
-                    _shapeConfig.density = _shapeJson["density"].get<float>();
                 }
 
                 if(_shapeJson.contains("mask")) {

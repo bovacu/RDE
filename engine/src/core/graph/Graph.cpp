@@ -216,27 +216,10 @@ namespace GDE {
 
         auto* _parentTransform = &registry.get<Transform>(_parent);
 
-        auto _prevPosition = _nodeTransform->getModelMatrixPosition();
-        auto _prevScale = _nodeTransform->getModelMatrixScale();
-        auto _prevRotation = _nodeTransform->getModelMatrixRotation();
-
-        auto _newPos = _prevPosition - _parentTransform->getPosition();
-        auto _newScale = Vec2F {_prevScale.x / _parentTransform->getScale().x, _prevScale.y / _parentTransform->getScale().y };
-        auto _newRotation = _prevRotation - _parentTransform->getRotation();
-
-        auto _radians = glm::radians(_newRotation);
-        float _c = std::cos(_radians);
-        float _s = std::sin(_radians);
-
-        Vec2F _transformedPosition { (_newPos.x * _c - _newPos.y * _s) / _parentTransform->getScale().x, (_newPos.x * _s + _newPos.y * _c) / _parentTransform->getScale().y };
-        _nodeTransform->setPosition(_transformedPosition);
-        _nodeTransform->setRotation(_newRotation);
-        _nodeTransform->setScale(_newScale);
-
         _nodeTransform->parent = _parent;
         _nodeTransform->parentTransform = _parentTransform;
         _parentTransform->children.push_back(_nodeTransform);
-        _nodeTransform->worldMatrixCache = _nodeTransform->recalculateCachedMatrix();
+        _nodeTransform->setLocalMatrix(glm::inverse(_parentTransform->getLocalMatrix()) * _nodeTransform->getLocalMatrix());
     }
 
     void Graph::remove(const NodeID& _node, bool _delete) {

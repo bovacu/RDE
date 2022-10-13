@@ -24,7 +24,7 @@ set(SDL2_mixer_DIR vcpkg/installed/x64-linux/share/SDL2_mixer)
 set(freetype_DIR vcpkg/installed/x64-linux/share/freetype)
 set(glad_DIR vcpkg/installed/x64-linux/share/glad)
 set(nlohmann_json_DIR vcpkg/installed/x64-linux/share/nlohmann_json)
-set(imgui_DIRvcpkg/installed/x64-linux/share/imgui)
+set(imgui_DIR vcpkg/installed/x64-linux/share/imgui)
 set(glm_DIR vcpkg/installed/x64-linux/share/glm)
 
 find_package(SDL2 CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/sdl2)

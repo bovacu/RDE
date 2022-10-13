@@ -20,7 +20,7 @@ namespace GDE {
      * @brief Component common to every entity that tells the engine where it is, which scale it has and how much it is rotated.
      */
     class Transform {
-        FRIEND_CLASS(Graph)
+        FRIEND_CLASS(Graph, PhysicsBody)
         MAKE_CLASS_ITERABLE(std::vector<Transform*>, children)
 
         private:
@@ -30,13 +30,16 @@ namespace GDE {
 
             glm::mat4 worldMatrixCache { 1.0f };
             bool dirty = false;
+            bool otherComponentsNeedToUpdate = false;
 
         public:
             bool staticTransform = false;
 
         private:
             glm::mat4 recalculateCachedMatrix();
-            void setDirty();
+            void setDirty(bool _applyToExternalComponents = true);
+            glm::mat4 worldPointToLocalPosition(const Vec2F& _position);
+            glm::mat4 worldPointToLocalRotation(float _rotation);
 
         public:
             explicit Transform(const NodeID& _nodeId);
@@ -148,13 +151,16 @@ namespace GDE {
             [[nodiscard]] Vec2F getModelMatrixPosition();
             [[nodiscard]] Vec2F getModelMatrixScale();
             [[nodiscard]] float getModelMatrixRotation();
+            void setMatrixModelPosition(const Vec2F& _worldPos);
+            void setMatrixModelRotation(float _rotation);
 
             [[nodiscard]] glm::mat4 localToParent() const;
             [[nodiscard]] glm::mat4 parentToLocal() const;
             [[nodiscard]] std::tuple<glm::mat4, bool> localToWorld();
             [[nodiscard]] glm::mat4 worldToLocal() const;
 
-            void setMatrix(const glm::mat4& _matrix);
+            glm::mat4 getLocalMatrix() const;
+            void setLocalMatrix(const glm::mat4& _matrix);
     };
 
 }

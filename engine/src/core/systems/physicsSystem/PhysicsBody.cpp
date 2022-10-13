@@ -252,14 +252,14 @@ namespace GDE {
         bool _dirtyPos = false;
         bool _dirtyRot = false;
 
-        if(_transformPos.x != _bodyPosition.x || _transformPos.y != _bodyPosition.y) {
-            cpBodySetPosition(body, { _transformPos.x, _transformPos.y });
-            _dirtyPos = true;
-        }
-
-        if(_transformRot != _bodyRot) {
+        if(!PhysicsMath::approximatelyEqual(_bodyRot, _transformRot)) {
             cpBodySetAngle(body, degreesToRadians(_transformRot));
             _dirtyRot = true;
+        }
+
+        if(!PhysicsMath::approximatelyEqual(_transformPos, _bodyPosition)) {
+            cpBodySetPosition(body, { _transformPos.x, _transformPos.y });
+            _dirtyPos = true;
         }
 
         if(_dirtyPos || _dirtyRot) {
@@ -268,6 +268,8 @@ namespace GDE {
             }
             cpSpaceReindexShapesForBody(space, body);
         }
+
+        transform->otherComponentsNeedToUpdate = false;
     }
 
     void PhysicsBody::setBodyType(const PhysicsBodyType& _physicsBodyType) {

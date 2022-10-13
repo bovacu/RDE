@@ -10,6 +10,7 @@ namespace GDE {
     void PhysicsManager::init() {
         space = cpSpaceNew();
         cpSpaceSetGravity(space, { 0, -100 });
+        cpSpaceSetCollisionSlop(space, 0.5f);
     }
 
     void PhysicsManager::destroy() {
@@ -26,10 +27,19 @@ namespace GDE {
         cpSpaceStep(space, _fxDt);
 
         for (auto* _body: bodies) {
-            auto _bodyPos = cpBodyGetPosition(_body->body);
+            auto _cpPos = cpBodyGetPosition(_body->body);
+            auto _bodyPos = Vec2F { (float)_cpPos.x, (float)_cpPos.y };
             auto _bodyAngle = radiansToDegrees(cpBodyGetAngle(_body->body));
-            _body->transform->setPosition((float) _bodyPos.x, (float) _bodyPos.y);
-            _body->transform->setRotation((float) _bodyAngle);
+            auto _transformPos = _body->transform->getModelMatrixPosition();
+            auto _transformRot = _body->transform->getModelMatrixRotation();
+
+            if(!PhysicsMath::approximatelyEqual(_transformRot, (float)_bodyAngle)) {
+                _body->transform->setMatrixModelRotation((float)_bodyAngle);
+            }
+
+            if(!PhysicsMath::approximatelyEqual(_transformPos, _bodyPos)) {
+                _body->transform->setMatrixModelPosition({(float)_bodyPos.x, (float)_bodyPos.y});
+            }
         }
     }
 
@@ -54,7 +64,7 @@ namespace GDE {
         if(!_showLines) return;
 
         Mat2 _rotMatrix(1, _physicsBody->transform->getModelMatrixPosition().x, 0, _physicsBody->transform->getModelMatrixPosition().y);
-        _rotMatrix.rotate(_physicsBody->transform->getModelMatrixRotation());
+        _rotMatrix.rotate(radiansToDegrees(cpBodyGetAngle(_physicsBody->body)));
 
         for (auto _i = 0; _i < _shapeConfig.vertices.size(); _i++) {
 
