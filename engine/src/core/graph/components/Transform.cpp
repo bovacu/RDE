@@ -157,7 +157,7 @@ namespace GDE {
         bool _wasDirty = false;
         if (parentTransform) {
             if(dirty) {
-                setDirty(false);
+                setDirty();
                 dirty = false;
                 _wasDirty = true;
             }
@@ -183,12 +183,10 @@ namespace GDE {
         return localToParent();
     }
 
-    void Transform::setDirty(bool _applyToExternalComponents) {
+    void Transform::setDirty() {
         worldMatrixCache = recalculateCachedMatrix();
-        otherComponentsNeedToUpdate = _applyToExternalComponents;
         for(auto* _transform : children) {
             _transform->dirty = true;
-            _transform->otherComponentsNeedToUpdate = true;
         }
     }
 

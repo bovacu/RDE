@@ -30,14 +30,13 @@ namespace GDE {
 
             glm::mat4 worldMatrixCache { 1.0f };
             bool dirty = false;
-            bool otherComponentsNeedToUpdate = false;
 
         public:
             bool staticTransform = false;
 
         private:
             glm::mat4 recalculateCachedMatrix();
-            void setDirty(bool _applyToExternalComponents = true);
+            void setDirty();
             glm::mat4 worldPointToLocalPosition(const Vec2F& _position);
             glm::mat4 worldPointToLocalRotation(float _rotation);
 

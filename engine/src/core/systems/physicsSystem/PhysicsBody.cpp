@@ -263,13 +263,8 @@ namespace GDE {
         }
 
         if(_dirtyPos || _dirtyRot) {
-            if(_dirtyPos) {
-                cpBodySetVelocity(body, cpvzero);
-            }
             cpSpaceReindexShapesForBody(space, body);
         }
-
-        transform->otherComponentsNeedToUpdate = false;
     }
 
     void PhysicsBody::setBodyType(const PhysicsBodyType& _physicsBodyType) {

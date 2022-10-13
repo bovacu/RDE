@@ -33,12 +33,12 @@ namespace GDE {
             auto _transformPos = _body->transform->getModelMatrixPosition();
             auto _transformRot = _body->transform->getModelMatrixRotation();
 
-            if(!PhysicsMath::approximatelyEqual(_transformRot, (float)_bodyAngle)) {
-                _body->transform->setMatrixModelRotation((float)_bodyAngle);
-            }
-
             if(!PhysicsMath::approximatelyEqual(_transformPos, _bodyPos)) {
                 _body->transform->setMatrixModelPosition({(float)_bodyPos.x, (float)_bodyPos.y});
+            }
+
+            if(!PhysicsMath::approximatelyEqual(_transformRot, (float)_bodyAngle)) {
+                _body->transform->setMatrixModelRotation((float)_bodyAngle);
             }
         }
     }
