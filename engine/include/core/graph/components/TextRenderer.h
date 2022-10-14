@@ -73,8 +73,8 @@ namespace GDE {
             std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharInfo* _chars) const;
 
         public:
-            TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text);
-            TextRenderer(const NodeID& _nodeId, Canvas* _canvas, Font* _font, const std::string& _text);
+            TextRenderer(const NodeID& _nodeId, Scene* _scene, const std::string& _text, Font* _font = nullptr);
+            TextRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font = nullptr);
             ~TextRenderer() override {  }
 
             /**

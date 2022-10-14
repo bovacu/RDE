@@ -18,7 +18,7 @@ namespace GDE {
         nineSliceSprite->interaction = UI::interaction;
 
         auto _textRendererId = _canvas->getGraph()->createNode("Text", _nodeID);
-        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textRendererId, _canvas, _font, _text);
+        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textRendererId, _scene, _canvas, _text, _font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
     }
 

@@ -42,7 +42,7 @@ namespace GDE {
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
         if(particleSystemConfig.dataConfig.texture == nullptr) {
-            particleSystemConfig.dataConfig.texture = _scene->engine->manager.textureManager.getSubTexture("defaultAssets", "defaultParticle");
+            particleSystemConfig.dataConfig.texture = _scene->engine->manager.textureManager.getSubTexture("assets", "handle");
         }
     }
 

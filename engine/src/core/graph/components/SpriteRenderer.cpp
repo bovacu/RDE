@@ -13,21 +13,30 @@
 #include "core/graph/Scene.h"
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/util/Logger.h"
+#include "core/Engine.h"
 
 namespace GDE {
 
-    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture) : IRenderizable(_scene->getMainGraph()->getComponent<Transform>(_nodeId)), texture(_texture) {
+    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture) : IRenderizable(_scene->getMainGraph()->getComponent<Transform>(_nodeId)) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
-//        auto [_transformMat, _dirty] = transform->localToWorld();
-//        calculateGeometry(_transformMat, *transform, *_scene->getMainCamera()->getViewport());
+
+        if(_texture == nullptr) {
+            texture = _scene->engine->manager.textureManager.getSubTexture("assets", "sprite");
+        } else {
+            texture = _texture;
+        }
     }
 
-    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Canvas* _canvas, Texture* _texture) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeId)), texture(_texture)  {
+    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, Texture* _texture) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeId))  {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
-//        auto [_transformMat, _dirty] = transform->localToWorld();
-//        calculateGeometry(_transformMat, *transform, *_canvas->getCamera()->getViewport());
+
+        if(_texture == nullptr) {
+            texture = _scene->engine->manager.textureManager.getSubTexture("assets", "sprite");
+        } else {
+            texture = _texture;
+        }
     }
 
     std::string SpriteRenderer::getTexturePath() {

@@ -37,8 +37,8 @@ namespace GDE {
             void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport);
 
         public:
-            SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture);
-            SpriteRenderer(const NodeID& _nodeId, Canvas* _canvas, Texture* _texture);
+            SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture = nullptr);
+            SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, Texture* _texture);
             ~SpriteRenderer() override {  }
 
             /**

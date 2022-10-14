@@ -14,7 +14,7 @@ namespace GDE {
         shaderManager.init(&fileManager);
         renderManager.init(_engine);
         inputManager.init(_engine, &_engine->getWindow());
-        fontManager.init();
+        fontManager.init(&fileManager);
         consoleManager.init();
         soundManager.init();
         sceneManager.init(_engine);

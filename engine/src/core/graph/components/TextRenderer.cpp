@@ -10,11 +10,18 @@
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/graph/Scene.h"
 #include "core/systems/uiSystem/Canvas.h"
+#include "core/Engine.h"
 
 namespace GDE {
 
-    TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, Font* _font, const std::string& _text) : IRenderizable(_scene->getMainGraph()->getComponent<Transform>(_nodeId)) {
-        font = _font;
+    TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, const std::string& _text, Font* _font) : IRenderizable(_scene->getMainGraph()->getComponent<Transform>(_nodeId)) {
+
+        if(_font == nullptr) {
+            font = _scene->engine->manager.fontManager.getDefaultFont("MontserratRegular");
+        } else {
+            font = _font;
+        }
+
         innerText = _text;
         recalcTextDimensions(_text);
         shaderID = defaultShaders[TEXT_RENDERER_SHADER];
@@ -22,8 +29,15 @@ namespace GDE {
         IRenderizable::batchPriority = BatchPriority::TextPriority;
     }
 
-    TextRenderer::TextRenderer(const NodeID& _nodeId, Canvas* _canvas, Font* _font, const std::string& _text) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeId)) {
+    TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeId)) {
         font = _font;
+
+        if(_font == nullptr) {
+            font = _scene->engine->manager.fontManager.getDefaultFont("MontserratRegular");
+        } else {
+            font = _font;
+        }
+
         innerText = _text;
         recalcTextDimensions(_text);
         shaderID = defaultShaders[TEXT_RENDERER_SHADER];

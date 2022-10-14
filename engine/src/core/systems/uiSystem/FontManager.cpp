@@ -96,11 +96,16 @@ namespace GDE {
 
     //----------------------------- FONT MANAGER -----------------
 
-    void FontManager::init() {
+    void FontManager::init(FileManager* _fileManager) {
         if(FT_Init_FreeType(&ftLibrary)) {
             LOG_E("Error initiating FreeType")
             return;
         }
+
+        loadFont(*_fileManager, "defaultAssets/fonts/MontserratRegular.ttf", 54);
+        loadFont(*_fileManager, "defaultAssets/fonts/MontserratItalic.ttf", 54);
+        loadFont(*_fileManager, "defaultAssets/fonts/MontserratBold.ttf", 54);
+        loadFont(*_fileManager, "defaultAssets/fonts/MontserratBoldItalic.ttf", 54);
 
         LOG_DEBUG("FontManager loaded successfully")
     }

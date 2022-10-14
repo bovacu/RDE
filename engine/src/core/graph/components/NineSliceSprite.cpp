@@ -13,7 +13,7 @@ namespace GDE {
         texture = _texture;
 
         if(!_texture->nineSlice.isEnabled()) {
-            spriteRenderer = _canvas->getGraph()->addComponent<SpriteRenderer>(_nodeID, _canvas, _texture);
+            spriteRenderer = _canvas->getGraph()->addComponent<SpriteRenderer>(_nodeID, _scene, _canvas, _texture);
         }
 
         nineSliceSize = _texture->getRegion().size;

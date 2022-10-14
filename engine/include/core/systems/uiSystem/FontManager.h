@@ -126,7 +126,7 @@ namespace GDE {
              * @attention This function should not be called by the end users.
              * @brief Initiates the system.
              */
-            void init();
+            void init(FileManager* _fileManager);
 
             /**
              * @attention This function should not be called by the end users.
