@@ -40,8 +40,8 @@ namespace GDE {
             auto _uiSize = nineSliceSize;
             auto _spriteSize = texture->getRegion().size;
 
-            auto _bottomLeftCornerLocal = Vec2F { (float)_subTextureRegion.bottomLeftCorner.x, (float)(_subTextureRegion.bottomLeftCorner.y - texture->nineSlice.subRects[0].bottomLeftCorner.y) };
-            Vec2F _position = {_transform.getPosition().x - (float)_spriteSize.x / 2.f + (float)_subTextureRegion.bottomLeftCorner.x + (float)_subTextureRegion.size.x / 2.f, _transform.getPosition().y - (float)((float)_spriteSize.y / 2.f - _bottomLeftCornerLocal.y) + (float)_subTextureRegion.size.y / 2.f};
+            auto _bottomLeftCornerLocal = Vec2F { (float)(_subTextureRegion.bottomLeftCorner.x - texture->nineSlice.subRects[0].bottomLeftCorner.x), (float)(_subTextureRegion.bottomLeftCorner.y - texture->nineSlice.subRects[0].bottomLeftCorner.y) };
+            Vec2F _position = {_transform.getPosition().x - (float)_spriteSize.x / 2.f + (float)_bottomLeftCornerLocal.x + (float)_subTextureRegion.size.x / 2.f, _transform.getPosition().y - (float)((float)_spriteSize.y / 2.f - _bottomLeftCornerLocal.y) + (float)_subTextureRegion.size.y / 2.f};
 
             if((float)_uiSize.x - (float)_spriteSize.x != 0) {
                 auto _widthOfCorners = (float) texture->nineSlice.subRects[0].size.x + (float) texture->nineSlice.subRects[2].size.x;

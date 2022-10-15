@@ -7,6 +7,7 @@ namespace GDE {
 
     void TextureAtlasManager::init(FileManager* _fileManager) {
         loadSpriteSheet("defaultAssets/assets.json");
+        loadSpriteSheet("assets/spriteSheets/test/ui.json");
     }
 
     bool TextureAtlasManager::loadSpriteSheet(const std::string& _spriteSheetPath) {
@@ -119,12 +120,12 @@ namespace GDE {
         };
 
         _texture->nineSlice.subRects[1] = {
-                .bottomLeftCorner = {_texture->nineSlice.left, _origin.y},
+                .bottomLeftCorner = {_origin.x + _texture->nineSlice.left, _origin.y},
                 .size = {_texture->nineSlice.right, _size.y - (_texture->nineSlice.top + _texture->nineSlice.bottom)}
         };
 
         _texture->nineSlice.subRects[2] = {
-                .bottomLeftCorner = {_texture->nineSlice.left + _texture->nineSlice.right, _origin.y},
+                .bottomLeftCorner = {_origin.x + _texture->nineSlice.left + _texture->nineSlice.right, _origin.y},
                 .size = {_size.x - (_texture->nineSlice.left + _texture->nineSlice.right), _size.y - (_texture->nineSlice.top + _texture->nineSlice.bottom)}
         };
 

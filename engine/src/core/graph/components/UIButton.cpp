@@ -8,18 +8,35 @@
 namespace GDE {
 
 
-    UIButton::UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture, Font* _font, const std::string& _text) : UI(_nodeID, _canvas) {
+    UIButton::UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config) : UI(_nodeID, _canvas) {
+        Texture* _texture = nullptr;
+        if(_config.texture == nullptr) {
+            _texture = _scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark");
+        } else {
+            _texture = _config.texture;
+        }
+
+        Font* _font = nullptr;
+        if(_config.font == nullptr) {
+            _font = _scene->engine->manager.fontManager.getDefaultFont("MontserratRegular");
+        } else {
+            _font = _config.font;
+        }
+
         UI::texture = _texture;
+
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
-        UI::texture = _texture;
         UI::batchPriority = BatchPriority::SpritePriority;
 
         nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, _texture);
         nineSliceSprite->interaction = UI::interaction;
 
         auto _textRendererId = _canvas->getGraph()->createNode("Text", _nodeID);
-        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textRendererId, _scene, _canvas, _text, _font);
+        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textRendererId, _scene, _canvas, _config.text, _font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
+
+        nineSliceSprite->nineSliceSize = _config.size;
+        nineSliceSprite->color = _config.color;
     }
 
     NineSlice& UIButton::getNineSlice() const {

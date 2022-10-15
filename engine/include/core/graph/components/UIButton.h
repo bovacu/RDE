@@ -11,12 +11,20 @@ namespace GDE {
 
     FORWARD_DECLARE_CLASS(TextRenderer, Font, NineSliceSprite)
 
+    struct UIButtonConfig {
+        std::string text = "Button Text";
+        Texture* texture = nullptr;
+        Font* font = nullptr;
+        Vec2F size = { 128, 48 };
+        Color color = Color::White;
+    };
+
     class UIButton : public UI {
         public:
             TextRenderer* textRenderer;
             NineSliceSprite* nineSliceSprite;
 
-            UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture, Font* _font, const std::string& _text);
+            UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
 
             /**
              * @brief Returns the NineSlice data. This is almost sure not to be needed by end-users.
