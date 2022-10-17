@@ -124,7 +124,7 @@ namespace GDE {
 
     void Engine::onRender(Delta _dt) {
         #if !IS_MOBILE()
-//            frameBuffer->bind();
+            frameBuffer->bind();
         #endif
 
         manager.renderManager.clear();
@@ -132,7 +132,7 @@ namespace GDE {
         manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
 
         #if !IS_MOBILE()
-//            frameBuffer->unbind();
+            frameBuffer->unbind();
         #endif
 
         Profiler::begin(ProfilerState::IMGUI);
