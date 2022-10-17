@@ -99,6 +99,10 @@ namespace GDE {
         _indices.emplace_back(_vertexCount + 2);
         _indices.emplace_back(_vertexCount + 3);
         _indices.emplace_back(_vertexCount + 0);
+
+        if(batchingType == BatchType::STATIC) {
+            batchingType = static_cast<BatchType>(batchingType | BatchType::ALREADY_BATCHED);
+        }
     }
 
 }

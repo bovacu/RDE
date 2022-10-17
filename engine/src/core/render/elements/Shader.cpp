@@ -1,5 +1,6 @@
 #include "core/render/elements/Shader.h"
 #include "core/util/Logger.h"
+#include "core/util/GLUtil.h"
 #include <iostream>
 
 namespace GDE {
@@ -17,29 +18,9 @@ namespace GDE {
     }
 
     void Shader::loadVertexConfig(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall) {
-        ENGINE_ASSERT(!_verticesConfig.empty(), "Cannot have a Shader with 0 vertices configs")
-        const int NUMBER_OF_INDICES = 6;
-
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-        glGenBuffers(1, &vbo);
-        glGenBuffers(1, &ibo);
-
-        auto _structSize = _verticesConfig[0].structSize;
-        vertexDataSize = _structSize;
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, _structSize * _maxIndicesPerDrawCall, nullptr, GL_DYNAMIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * _maxIndicesPerDrawCall * NUMBER_OF_INDICES), nullptr, GL_DYNAMIC_DRAW);
-
-        for(auto& _vertexConfig : _verticesConfig) {
-            glVertexAttribPointer(_vertexConfig.pointerIndex, _vertexConfig.numberOfElements, _vertexConfig.openglDataType, GL_FALSE, _structSize, reinterpret_cast<const void*>(_vertexConfig.stride));
-            glEnableVertexAttribArray(_vertexConfig.pointerIndex);
-        }
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        vertexDataSize = _verticesConfig[0].structSize;
+        loadVertexConfigSpecific(_verticesConfig, _maxIndicesPerDrawCall, GL_DYNAMIC_DRAW, vbo, ibo, vao);
+        loadVertexConfigSpecific(_verticesConfig, _maxIndicesPerDrawCall, GL_STATIC_DRAW, staticVbo, staticIbo, staticVao);
     }
 
     bool Shader::initFromString(const std::string& _shaderCode, GLenum _shaderType) {
@@ -117,20 +98,60 @@ namespace GDE {
         return shaderID;
     }
 
-    GLuint Shader::getShaderVAO() const {
+    GLuint Shader::getDynamicShaderVAO() const {
         return vao;
     }
 
-    GLuint Shader::getShaderIBO() const {
+    GLuint Shader::getDynamicShaderIBO() const {
         return ibo;
     }
 
-    GLuint Shader::getShaderVBO() const {
+    GLuint Shader::getDynamicShaderVBO() const {
         return vbo;
     }
 
     long Shader::getShaderVertexDataSize() const {
         return vertexDataSize;
+    }
+
+    GLuint Shader::getStaticShaderVAO() const {
+        return staticVao;
+    }
+
+    GLuint Shader::getStaticShaderIBO() const {
+        return staticIbo;
+    }
+
+    GLuint Shader::getStaticShaderVBO() const {
+        return staticVbo;
+    }
+
+    void Shader::loadVertexConfigSpecific(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall, GLenum _drawType, GLuint& _vbo, GLuint& _ibo, GLuint& _vao) {
+        ENGINE_ASSERT(!_verticesConfig.empty(), "Cannot have a Shader with 0 vertices configs")
+        const int NUMBER_OF_INDICES = 6;
+        const int NUMBER_OF_VERTICES = 4;
+
+        glGenVertexArrays(1, &_vao);
+        glBindVertexArray(_vao);
+        glGenBuffers(1, &_vbo);
+        glGenBuffers(1, &_ibo);
+
+
+        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertexDataSize * _maxIndicesPerDrawCall * NUMBER_OF_VERTICES, nullptr, _drawType);
+        LOG_DEBUG("Shader ", shaderID, " total VB space = ", vertexDataSize * _maxIndicesPerDrawCall * NUMBER_OF_VERTICES)
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
+        LOG_DEBUG("Shader ", shaderID, " total IB space = ", (long)(sizeof(uint32_t) * _maxIndicesPerDrawCall * NUMBER_OF_INDICES))
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * _maxIndicesPerDrawCall * NUMBER_OF_INDICES), nullptr, _drawType);
+
+        for(auto& _vertexConfig : _verticesConfig) {
+            glVertexAttribPointer(_vertexConfig.pointerIndex, _vertexConfig.numberOfElements, _vertexConfig.openglDataType, GL_FALSE, vertexDataSize, reinterpret_cast<const void*>(_vertexConfig.stride));
+            glEnableVertexAttribArray(_vertexConfig.pointerIndex);
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
 
 }

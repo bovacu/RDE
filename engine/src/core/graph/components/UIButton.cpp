@@ -31,8 +31,7 @@ namespace GDE {
         nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, _texture);
         nineSliceSprite->interaction = UI::interaction;
 
-        auto _textRendererId = _canvas->getGraph()->createNode("Text", _nodeID);
-        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textRendererId, _scene, _canvas, _config.text, _font);
+        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_nodeID, _scene, _canvas, _config.text, _font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
 
         nineSliceSprite->nineSliceSize = _config.size;

@@ -19,6 +19,12 @@ enum BatchPriority {
     TextPriority = 1
 };
 
+enum BatchType {
+    DYNAMIC = 1,
+    STATIC = 2,
+    ALREADY_BATCHED = 4
+};
+
 namespace GDE {
 
     FORWARD_DECLARE_CLASS(SpriteBatch, IRenderizable)
@@ -41,6 +47,8 @@ namespace GDE {
          * @see BatchPriority
          */
         BatchPriority priority = BatchPriority::SpritePriority;
+
+        BatchType batchingType = BatchType::DYNAMIC;
 
         /**
          * @brief How far or near it should be rendered on the Z-Axis.
@@ -72,6 +80,8 @@ namespace GDE {
          * @brief Texture to be enabled on the GPU to be drawn by the vertices.
          */
         GLuint textureID = -1;
+
+        bool alreadyDrawnThisFrame = false;
 
         void draw(IRenderizable* _renderizable, Transform& _transform);
     };

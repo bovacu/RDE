@@ -47,22 +47,22 @@ namespace GDE {
         auto _texts = _registry.view<TextRenderer, Transform, Active>(entt::exclude<UIButton>);
 
         auto& _renderManager = graph.scene->engine->manager.renderManager;
-        _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
+//        _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
 
             _sprites.each([&_renderManager](const auto _entity, NineSliceSprite& _nineSlice, Transform& _transform, const Active& _) {
-                _renderManager.draw((IRenderizable*)&_nineSlice, _transform);
+                _renderManager.drawUI((IRenderizable*)&_nineSlice, _transform);
             });
 
             _buttons.each([&_renderManager](const auto _entity, UIButton& _uiButton, Transform& _transform, const Active& _) {
-                _renderManager.draw((IRenderizable*)_uiButton.nineSliceSprite, _transform);
-                _renderManager.draw((IRenderizable*)_uiButton.textRenderer, _transform);
+                _renderManager.drawUI((IRenderizable*)_uiButton.nineSliceSprite, _transform);
+                _renderManager.drawUI((IRenderizable*)_uiButton.textRenderer, _transform);
             });
 
             _texts.each([&_renderManager](const auto _entity, TextRenderer& _textRenderer, Transform& _transform, const Active& _) {
-                _renderManager.draw((IRenderizable*)&_textRenderer, _transform);
+                _renderManager.drawUI((IRenderizable*)&_textRenderer, _transform);
             });
 
-        _renderManager.endDraw();
+//        _renderManager.endDraw();
 
         graph.onRenderDel(_registry);
     }

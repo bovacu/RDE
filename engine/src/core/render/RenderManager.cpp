@@ -14,9 +14,6 @@ namespace GDE {
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//        glEnable(GL_CULL_FACE);
-//        glCullFace(GL_FRONT);
-//        glFrontFace(GL_CW);
 
         #if !IS_MOBILE()
         glEnable(GL_PROGRAM_POINT_SIZE);
@@ -63,6 +60,10 @@ namespace GDE {
 
     void RenderManager::draw(IRenderizable* _renderizable, Transform& _transform) {
         batch.draw(_renderizable, _transform);
+    }
+
+    void RenderManager::drawUI(IRenderizable* _renderizable, Transform& _transform) {
+        batch.drawUI(_renderizable, _transform);
     }
 
     void RenderManager::beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness) {

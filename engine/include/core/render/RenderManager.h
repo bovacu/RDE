@@ -80,11 +80,18 @@ namespace GDE {
             void beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness = 1.f);
 
             /**
-             * @brief Renders an IRenderizable. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
+             * @brief Renders an IRenderizable using batching. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
              * @param _renderizable Component derived from IRenderizable.
              * @param _transform Nine patch's transform.
              */
             void draw(IRenderizable* _renderizable, Transform& _transform);
+
+            /**
+             * @brief Renders an IRenderizable immediately with no batching. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
+             * @param _renderizable Component derived from IRenderizable.
+             * @param _transform Nine patch's transform.
+             */
+            void drawUI(IRenderizable* _renderizable, Transform& _transform);
 
             /**
              * @brief Sends the data batched to the GPU, must be called after beginDraw and what we want to render.

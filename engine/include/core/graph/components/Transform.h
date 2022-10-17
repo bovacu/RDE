@@ -31,9 +31,6 @@ namespace GDE {
             glm::mat4 worldMatrixCache { 1.0f };
             bool dirty = false;
 
-        public:
-            bool staticTransform = false;
-
         private:
             glm::mat4 recalculateCachedMatrix();
             void setDirty();

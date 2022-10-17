@@ -7,6 +7,7 @@
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
+#include "core/util/GLUtil.h"
 
 namespace GDE {
     
@@ -67,7 +68,7 @@ namespace GDE {
     }
 
     void Graph::onRender() {
-        auto _spriteRendererGroup = registry.group<const SpriteRenderer>(entt::get<Transform, Active>);
+        auto _spriteRendererGroup = registry.view<const SpriteRenderer,Transform, Active>(entt::exclude<StaticTransform>);
         auto _particleSystemGroup = registry.group<const ParticleSystem>(entt::get<Transform, Active>);
         auto _textRendererGroup = registry.group<TextRenderer>(entt::get<Transform, Active>);
 

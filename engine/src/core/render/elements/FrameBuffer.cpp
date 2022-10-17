@@ -93,7 +93,7 @@ namespace GDE {
 
     void FrameBuffer::bind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, fboID);
-        CHECK_GL_ERROR("FrameBuffer bind")
+        CHECK_GL_ERROR("FrameBuffer bindFrameBuffer")
     }
 
     void FrameBuffer::unbind() const {

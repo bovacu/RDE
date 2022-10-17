@@ -71,22 +71,25 @@ namespace GDE {
             /**
              * @brief VAO of the shader.
              */
-            GLuint vao = -1;
+            GLuint vao = -1, staticVao = -1;
 
             /**
              * @brief IBO of the shader.
              */
-            GLuint ibo = -1;
+            GLuint ibo = -1, staticIbo = -1;
 
             /**
              * @brief VBO of the shader.
              */
-            GLuint vbo = -1;
+            GLuint vbo = -1, staticVbo = -1;
 
             /**
              * @brief Size of VertexData in bytes.
              */
              long vertexDataSize;
+
+        private:
+            void loadVertexConfigSpecific(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall, GLenum _drawType, GLuint& _vbo, GLuint& _ibo, GLuint& _vao);
 
         public:
             Shader();
@@ -120,22 +123,41 @@ namespace GDE {
             GLuint getShaderID() const;
 
             /**
-             * @brief Returns the ID of the VAO on the GPU
+             * @brief Returns the ID of the dynamic drawing VAO on the GPU
              * @return uint
              */
-            GLuint getShaderVAO() const;
+            GLuint getDynamicShaderVAO() const;
 
             /**
-            * @brief Returns the ID of the IBO on the GPU
+            * @brief Returns the ID of the dynamic drawing IBO on the GPU
             * @return uint
             */
-            GLuint getShaderIBO() const;
+            GLuint getDynamicShaderIBO() const;
 
             /**
-             * @brief Returns the ID of the VBO on the GPU
+             * @brief Returns the ID of the dynamic drawing VBO on the GPU
              * @return uint
              */
-            GLuint getShaderVBO() const;
+            GLuint getDynamicShaderVBO() const;
+
+            /**
+             * @brief Returns the ID of the static drawing VAO on the GPU
+             * @return uint
+             */
+            GLuint getStaticShaderVAO() const;
+
+            /**
+            * @brief Returns the ID of the static drawing IBO on the GPU
+            * @return uint
+            */
+            GLuint getStaticShaderIBO() const;
+
+            /**
+             * @brief Returns the ID of the static drawing VBO on the GPU
+             * @return uint
+             */
+            GLuint getStaticShaderVBO() const;
+
 
             /**
              * @brief Returns the size of the VertexData structure in bytes.

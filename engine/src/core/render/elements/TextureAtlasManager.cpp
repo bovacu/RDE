@@ -7,7 +7,6 @@ namespace GDE {
 
     void TextureAtlasManager::init(FileManager* _fileManager) {
         loadSpriteSheet("defaultAssets/assets.json");
-        loadSpriteSheet("assets/spriteSheets/test/ui.json");
     }
 
     bool TextureAtlasManager::loadSpriteSheet(const std::string& _spriteSheetPath) {

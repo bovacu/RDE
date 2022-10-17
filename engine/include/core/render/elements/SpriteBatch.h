@@ -149,7 +149,7 @@ namespace GDE {
              * @brief Maximum number of indices that can be accumulated in a single Draw Call, if it is exceeded, an
              * automatic Draw Call will be called to free the buffer.
              */
-            const int maxIndicesPerDrawCall = 50000; // Between 35.000 and 50.000 should be a good range
+            const int maxIndicesPerDrawCall = 65000; // Between 35.000 and 50.000 should be a good range
 
         private:
             /**
@@ -212,6 +212,13 @@ namespace GDE {
              * @param _transform Transform of the IRenderizable.
              */
             void draw(IRenderizable* _renderizable, Transform& _transform);
+
+            /**
+             * This method is used to draw anything that extends IRenderizable and that is UI.
+             * @param _renderizable An IRenderizable instance.
+             * @param _transform Transform of the IRenderizable.
+             */
+            void drawUI(IRenderizable* _renderizable, Transform& _transform);
 
             /**
              * @brief This method sends all of the geometry to the GPU and ends a Draw Call.

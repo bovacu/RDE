@@ -189,11 +189,18 @@ namespace GDE {
     }
 
     Batch& SpriteBatch::getBatch(const IRenderizable* _renderer, int _layer, BatchPriority _priority) {
-        for(auto& _batch : batches)
-            if(_renderer->getTexture() == _batch.textureID && _layer == _batch.layer && _batch.shader->getShaderID() == _renderer->shaderID && _batch.priority == _renderer->batchPriority)
+        for(auto& _batch : batches) {
+            if (_renderer->getTexture() == _batch.textureID &&
+                _layer == _batch.layer &&
+                _batch.shader->getShaderID() == _renderer->shaderID &&
+                _batch.priority == _renderer->batchPriority &&
+                (_batch.batchingType == static_cast<BatchType>(_renderer->batchingType & ~BatchType::ALREADY_BATCHED) || _batch.batchingType == _renderer->batchingType) &&
+                _batch.indexBuffer.size() + 6 < maxIndicesPerDrawCall) {
                 return _batch;
+            }
+        }
 
-        LOG_DEBUG("Created a new batch with Texture: ", _renderer->getTexture(), ", Layer: ", _layer, ", Priority: ", _renderer->batchPriority, " and ShaderID: ", _renderer->shaderID)
+        LOG_DEBUG("Created a new batch with Texture: ", _renderer->getTexture(), ", Layer: ", _layer, ", Priority: ", _renderer->batchPriority, ", ShaderID: ", _renderer->shaderID, " and BatchingType (1=DYN,2=STA,3=STA_DRAWN)", static_cast<BatchType>(_renderer->batchingType & ~BatchType::ALREADY_BATCHED))
 
         Batch _batch;
         _batch.layer = _layer;
@@ -203,6 +210,7 @@ namespace GDE {
         _batch.priority = _priority;
         _batch.shader = shaderManager->getShader(_renderer->shaderID);
         _batch.spriteBatch = this;
+        _batch.batchingType = static_cast<BatchType>(_renderer->batchingType & ~BatchType::ALREADY_BATCHED);
         batches.push_back(_batch);
 
         orderBatches();
@@ -227,15 +235,32 @@ namespace GDE {
 
             glActiveTexture(GL_TEXTURE0);
 
-            glBindVertexArray(_batch.shader->getShaderVAO());
+            if(_batch.batchingType == BatchType::DYNAMIC) {
+                glBindVertexArray(_batch.shader->getDynamicShaderVAO());
+            } else {
+                glBindVertexArray(_batch.shader->getStaticShaderVAO());
+            }
 
             glBindTexture(GL_TEXTURE_2D, _batch.textureID);
 
-            glBindBuffer(GL_ARRAY_BUFFER, _batch.shader->getShaderVBO());
-            glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0]);
+            if(_batch.batchingType == BatchType::DYNAMIC) {
+                glBindBuffer(GL_ARRAY_BUFFER, _batch.shader->getDynamicShaderVBO());
+                glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0]);
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _batch.shader->getShaderIBO());
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (long)(sizeof(uint32_t) * _batch.indexBuffer.size()), &_batch.indexBuffer[0]);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _batch.shader->getDynamicShaderIBO());
+                glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (long)(sizeof(uint32_t) * _batch.indexBuffer.size()), &_batch.indexBuffer[0]);
+            } else if((_batch.batchingType & BatchType::STATIC) == BatchType::STATIC) {
+                glBindBuffer(GL_ARRAY_BUFFER, _batch.shader->getStaticShaderVBO());
+                if((_batch.batchingType & BatchType::ALREADY_BATCHED) != BatchType::ALREADY_BATCHED) {
+                    glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0]);
+                }
+
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _batch.shader->getStaticShaderIBO());
+                if((_batch.batchingType & BatchType::ALREADY_BATCHED) != BatchType::ALREADY_BATCHED) {
+                    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (long)(sizeof(uint32_t) * _batch.indexBuffer.size()), &_batch.indexBuffer[0]);
+                    _batch.batchingType = static_cast<BatchType>(BatchType::STATIC | BatchType::ALREADY_BATCHED);
+                }
+            }
 
             glDrawElements(GL_TRIANGLES, (int)_batch.indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
 
@@ -246,25 +271,60 @@ namespace GDE {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
             totalTriangles += (int)_batch.vertexBuffer.size() / 2;
-            _batch.vertexBuffer.clear();
-            _batch.indexBuffer.clear();
-            _batch.vertexCount = 0;
+            if(_batch.batchingType == BatchType::DYNAMIC) {
+                _batch.vertexBuffer.clear();
+                _batch.indexBuffer.clear();
+                _batch.vertexCount = 0;
+            }
 
             drawCalls++;
         }
     }
 
+    void SpriteBatch::drawUI(IRenderizable* _renderizable, Transform& _transform) {
+        std::vector<OpenGLVertex> _vertices;
+        std::vector<uint32_t> _indices;
+
+        _renderizable->draw(_vertices, _indices, _transform, *viewport);
+        auto* _shader = shaderManager->getShader(_renderizable->shaderID);
+
+        glUseProgram(_renderizable->shaderID);
+
+        GLint location = glGetUniformLocation(_renderizable->shaderID, "viewProjectionMatrix");
+        glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
+
+        glActiveTexture(GL_TEXTURE0);
+
+        glBindVertexArray(_shader->getDynamicShaderVAO());
+
+        glBindTexture(GL_TEXTURE_2D, _renderizable->getTexture());
+
+        glBindBuffer(GL_ARRAY_BUFFER, _shader->getDynamicShaderVBO());
+        glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_shader->getShaderVertexDataSize() * _vertices.size()), &_vertices[0]);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _shader->getDynamicShaderIBO());
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (long)(sizeof(uint32_t) * _indices.size()), &_indices[0]);
+
+        glDrawElements(GL_TRIANGLES, (int)_indices.size(), GL_UNSIGNED_INT, nullptr);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        glBindVertexArray(0);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+
     void SpriteBatch::Debug::flushDebug() {
         auto* _shader = batch->shaderManager->getShader(DEBUG_SHADER);
 
-        glBindVertexArray(_shader->getShaderVAO());
+        glBindVertexArray(_shader->getDynamicShaderVAO());
         glUseProgram(_shader->getShaderID());
 
         GLint location = glGetUniformLocation(_shader->getShaderID(), "viewProjectionMatrix");
         glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(batch->viewProjectionMatrix)));
 
         if(!vertexDebugBufferGeometrics.empty()) {
-            glBindBuffer(GL_ARRAY_BUFFER, _shader->getShaderVBO());
+            glBindBuffer(GL_ARRAY_BUFFER, _shader->getDynamicShaderVBO());
             glBufferData(GL_ARRAY_BUFFER, (long)(_shader->getShaderVertexDataSize() * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -272,7 +332,7 @@ namespace GDE {
         }
 
         if(!vertexDebugBufferLines.empty()) {
-            glBindBuffer(GL_ARRAY_BUFFER, _shader->getShaderVBO());
+            glBindBuffer(GL_ARRAY_BUFFER, _shader->getDynamicShaderVBO());
             glBufferData(GL_ARRAY_BUFFER, (long) (_shader->getShaderVertexDataSize() * vertexDebugBufferLines.size()), &vertexDebugBufferLines[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -280,7 +340,7 @@ namespace GDE {
         }
 
         if(!vertexDebugBufferPoints.empty()) {
-            glBindBuffer(GL_ARRAY_BUFFER, _shader->getShaderVBO());
+            glBindBuffer(GL_ARRAY_BUFFER, _shader->getDynamicShaderVBO());
             glBufferData(GL_ARRAY_BUFFER, (long) (_shader->getShaderVertexDataSize() * vertexDebugBufferPoints.size()), &vertexDebugBufferPoints[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 

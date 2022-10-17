@@ -15,7 +15,7 @@ namespace GDE {
         std::string text = "Button Text";
         Texture* texture = nullptr;
         Font* font = nullptr;
-        Vec2F size = { 128, 48 };
+        Vec2F size = { 128, 32 };
         Color color = Color::White;
     };
 

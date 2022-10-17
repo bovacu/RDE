@@ -9,8 +9,7 @@
 namespace GDE {
 
     void Batch::draw(IRenderizable* _renderizable, Transform& _transform) {
-        if(indexBuffer.size() + 6 >= spriteBatch->maxIndicesPerDrawCall)
-            spriteBatch->flush();
+        if(_renderizable->batchingType == (BatchType::STATIC | BatchType::ALREADY_BATCHED)) return;
 
         if(textureID < 0)
             textureID = _renderizable->getTexture();
