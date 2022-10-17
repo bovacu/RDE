@@ -74,8 +74,7 @@ namespace GDE {
     SpriteBatch::~SpriteBatch() {};
 
     void SpriteBatch::beginDraw(Camera& _camera, Transform* _cameraTransform) {
-        auto [_transformMat, _dirty] = _cameraTransform->localToWorld();
-        viewProjectionMatrix = _camera.getProjectionMatrix() * glm::inverse(_transformMat);
+        viewProjectionMatrix = _camera.getViewProjectionMatrix();
         viewport = _camera.getViewport();
     }
 

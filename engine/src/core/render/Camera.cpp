@@ -33,16 +33,19 @@ namespace GDE {
     }
 
     void Camera::recalculateViewMatrix() {
-        glm::mat4 _transform = glm::translate(glm::mat4(1.0f), {0, 0, 0.0f}) *
-                               glm::rotate(glm::mat4(1.0f),
-                                           glm::radians(transform->getRotation()), glm::vec3(0, 0, 1));
-        viewMatrix = glm::inverse(_transform);
-        viewProjectionMatrix = projectionMatrix * viewMatrix;
+        auto [_mat, _dirty] = transform->localToWorld();
+
+        if(_dirty) {
+            auto _screenCoords = Util::worldToScreenCoords(*viewport, {_mat[3][0], _mat[3][1]});
+            _mat[3][0] = _screenCoords.x;
+            _mat[3][1] = _screenCoords.y;
+            viewMatrix = _mat;
+            viewProjectionMatrix = projectionMatrix * viewMatrix;
+        }
     }
 
     void Camera::setPosition(const Vec2F& _position) {
         transform->setPosition(_position);
-        recalculateViewMatrix();
     }
 
     Vec2F Camera::getPosition() {
@@ -51,7 +54,6 @@ namespace GDE {
 
     void Camera::setRotation(float _rotation) {
         transform->setRotation(_rotation);
-        recalculateViewMatrix();
     }
 
     float Camera::getRotation() {
@@ -156,6 +158,10 @@ namespace GDE {
         if (_elementBottomRight.y > _cameraTopLeft.y || _cameraBottomRight.y > _elementTopLeft.y) return false;
 
         return true;
+    }
+
+    void Camera::update() {
+        recalculateViewMatrix();
     }
 
 }

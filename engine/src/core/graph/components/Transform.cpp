@@ -185,6 +185,7 @@ namespace GDE {
 
     void Transform::setDirty() {
         worldMatrixCache = recalculateCachedMatrix();
+        dirty = true;
         for(auto* _transform : children) {
             _transform->dirty = true;
         }

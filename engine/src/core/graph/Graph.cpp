@@ -79,6 +79,7 @@ namespace GDE {
 
             _renderManager.beginDraw(*_camera, getComponent<Transform>(_camera->ID));
             _camera->setCameraSize(_camera->getCameraSize());
+            _camera->update();
             {
                 _spriteRendererGroup.each([&_renderManager](const auto _entity, const SpriteRenderer& _spriteRenderer, Transform& _transform, const Active& _) {
                     _renderManager.draw((IRenderizable*) &_spriteRenderer, _transform);

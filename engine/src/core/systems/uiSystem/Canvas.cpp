@@ -47,7 +47,7 @@ namespace GDE {
         auto _texts = _registry.view<TextRenderer, Transform, Active>(entt::exclude<UIButton>);
 
         auto& _renderManager = graph.scene->engine->manager.renderManager;
-//        _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
+        _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
 
             _sprites.each([&_renderManager](const auto _entity, NineSliceSprite& _nineSlice, Transform& _transform, const Active& _) {
                 _renderManager.drawUI((IRenderizable*)&_nineSlice, _transform);
