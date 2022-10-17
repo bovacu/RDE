@@ -3,7 +3,6 @@
 //
 
 #include "core/graph/components/SpriteRenderer.h"
-#include "core/render/Camera.h"
 #include "core/render/elements/ViewPort.h"
 #include "core/util/Color.h"
 #include "core/util/Functions.h"
@@ -12,7 +11,6 @@
 #include "core/render/elements/Batch.h"
 #include "core/graph/Scene.h"
 #include "core/systems/uiSystem/Canvas.h"
-#include "core/util/Logger.h"
 #include "core/Engine.h"
 
 namespace GDE {
@@ -26,6 +24,9 @@ namespace GDE {
         } else {
             texture = _texture;
         }
+
+        auto [_transformMat, _] = transform->localToWorld();
+        calculateGeometry(_transformMat, *transform, *_scene->getMainCamera()->getViewport());
     }
 
     SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, Texture* _texture) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeId))  {
@@ -85,7 +86,9 @@ namespace GDE {
         auto _vertexCount = _vertices.size();
 
         auto [_transformMat, _dirty] = _transform.localToWorld();
-        calculateGeometry(_transformMat, _transform, _viewport);
+        if(_dirty) {
+            calculateGeometry(_transformMat, _transform, _viewport);
+        }
 
         _vertices.emplace_back(geometry[0]);
         _vertices.emplace_back(geometry[1]);
@@ -99,10 +102,6 @@ namespace GDE {
         _indices.emplace_back(_vertexCount + 2);
         _indices.emplace_back(_vertexCount + 3);
         _indices.emplace_back(_vertexCount + 0);
-
-        if(batchingType == BatchType::STATIC) {
-            batchingType = static_cast<BatchType>(batchingType | BatchType::ALREADY_BATCHED);
-        }
     }
 
 }

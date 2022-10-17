@@ -30,6 +30,8 @@ namespace GDE {
              * only its region will be rendered.
              */
             Texture* texture = nullptr;
+            ulong verticesIndex = 0;
+            ulong indicesIndex = 0;
 
             OpenGLVertex geometry[4];
 

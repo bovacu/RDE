@@ -216,6 +216,12 @@ namespace GDE {
              */
             void setAdaptiveViewport(const Vec2I& _virtualDesiredSize, const Vec2I& _currentDeviceSize);
 
+        /**
+         * @brief Returns if an element is inside the camera boundaries.
+         * @return bool.
+         */
+        bool isElementInside(Transform* _transform, const Vec2F& _size) const;
+
         private:
             /**
              * @brief Computes the View Matrix of the camera.

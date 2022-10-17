@@ -13,6 +13,9 @@ namespace GDE {
      * used to draw. This interface is the base of ant custom-viewport provided by the engine and must be followed
      * for any user-defined viewport.
      */
+
+    FORWARD_DECLARE_CLASS(IRenderizable)
+
     class IViewPort {
         protected:
             /**

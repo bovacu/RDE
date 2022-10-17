@@ -20,7 +20,7 @@ namespace GDE {
     void Shader::loadVertexConfig(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall) {
         vertexDataSize = _verticesConfig[0].structSize;
         loadVertexConfigSpecific(_verticesConfig, _maxIndicesPerDrawCall, GL_DYNAMIC_DRAW, vbo, ibo, vao);
-        loadVertexConfigSpecific(_verticesConfig, _maxIndicesPerDrawCall, GL_STATIC_DRAW, staticVbo, staticIbo, staticVao);
+//        loadVertexConfigSpecific(_verticesConfig, _maxIndicesPerDrawCall, GL_STATIC_DRAW, staticVbo, staticIbo, staticVao);
     }
 
     bool Shader::initFromString(const std::string& _shaderCode, GLenum _shaderType) {

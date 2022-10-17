@@ -80,16 +80,16 @@ namespace GDE {
             _renderManager.beginDraw(*_camera, getComponent<Transform>(_camera->ID));
             _camera->setCameraSize(_camera->getCameraSize());
             {
-                _spriteRendererGroup.each([&_renderManager](const auto _entity, const SpriteRenderer& _renderizable, Transform& _transform, const Active& _) {
-                    _renderManager.draw((IRenderizable*)&_renderizable, _transform);
+                _spriteRendererGroup.each([&_renderManager](const auto _entity, const SpriteRenderer& _spriteRenderer, Transform& _transform, const Active& _) {
+                    _renderManager.draw((IRenderizable*) &_spriteRenderer, _transform);
                 });
 
-                _particleSystemGroup.each([&_renderManager](const auto _entity, const ParticleSystem& _renderizable, Transform& _transform, const Active& _) {
-                    _renderManager.draw((IRenderizable*)&_renderizable, _transform);
+                _particleSystemGroup.each([&_renderManager](const auto _entity, const ParticleSystem& _particleSystem, Transform& _transform, const Active& _) {
+                    _renderManager.draw((IRenderizable*) &_particleSystem, _transform);
                 });
 
                 _textRendererGroup.each([&_renderManager](const auto _entity, TextRenderer& _text, Transform& _transform, const Active& _) {
-                    _renderManager.draw((IRenderizable*)&_text, _transform);
+                    _renderManager.draw((IRenderizable*) &_text, _transform);
                 });
             }
 

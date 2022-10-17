@@ -140,4 +140,22 @@ namespace GDE {
         return size;
     }
 
+    bool Camera::isElementInside(Transform* _transform, const Vec2F& _size) const {
+        auto _elementTopLeft = _transform->getModelMatrixPosition();
+        auto _elementBottomRight = _elementTopLeft;
+        _elementTopLeft += { -_size.x / 2.f, _size.y / 2.f };
+        _elementBottomRight += { _size.x / 2.f, -_size.y / 2.f };
+
+        auto _cameraTopLeft = transform->getModelMatrixPosition();
+        auto _cameraBottomRight = transform->getModelMatrixPosition();
+        _cameraTopLeft += { -(float)size.x / 2.f * zoom, (float)size.y / 2.f * zoom };
+        _cameraBottomRight += { (float)size.x / 2.f * zoom, -(float)size.y / 2.f * zoom };
+
+        if (_elementTopLeft.x == _elementBottomRight.x || _elementTopLeft.y == _elementBottomRight.y || _cameraBottomRight.x == _cameraTopLeft.x || _cameraTopLeft.y == _cameraBottomRight.y) return false;
+        if(_elementTopLeft.x > _cameraBottomRight.x || _cameraTopLeft.x > _elementBottomRight.x) return false;
+        if (_elementBottomRight.y > _cameraTopLeft.y || _cameraBottomRight.y > _elementTopLeft.y) return false;
+
+        return true;
+    }
+
 }

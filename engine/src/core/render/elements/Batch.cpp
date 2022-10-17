@@ -9,8 +9,6 @@
 namespace GDE {
 
     void Batch::draw(IRenderizable* _renderizable, Transform& _transform) {
-        if(_renderizable->batchingType == (BatchType::STATIC | BatchType::ALREADY_BATCHED)) return;
-
         if(textureID < 0)
             textureID = _renderizable->getTexture();
 

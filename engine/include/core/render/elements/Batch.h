@@ -19,12 +19,6 @@ enum BatchPriority {
     TextPriority = 1
 };
 
-enum BatchType {
-    DYNAMIC = 1,
-    STATIC = 2,
-    ALREADY_BATCHED = 4
-};
-
 namespace GDE {
 
     FORWARD_DECLARE_CLASS(SpriteBatch, IRenderizable)
@@ -48,7 +42,7 @@ namespace GDE {
          */
         BatchPriority priority = BatchPriority::SpritePriority;
 
-        BatchType batchingType = BatchType::DYNAMIC;
+        int ID = -1;
 
         /**
          * @brief How far or near it should be rendered on the Z-Axis.
