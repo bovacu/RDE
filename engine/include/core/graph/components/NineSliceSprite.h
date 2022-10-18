@@ -16,6 +16,8 @@ namespace GDE {
      * without loosing quality. The setup of this NineSlice should be done via TexturePacker.
      */
     class NineSliceSprite : public UI {
+        FRIEND_CLASS(UIButton)
+
         private:
             SpriteRenderer* spriteRenderer = nullptr;
 

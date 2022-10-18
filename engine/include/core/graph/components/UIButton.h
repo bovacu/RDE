@@ -13,16 +13,29 @@ namespace GDE {
 
     struct UIButtonConfig {
         std::string text = "Button Text";
-        Texture* texture = nullptr;
+        Texture* idleTexture = nullptr;
+        Texture* selectedTexture = nullptr;
+        Texture* clickedTexture = nullptr;
+        Texture* disabledTexture = nullptr;
         Font* font = nullptr;
         Vec2F size = { 128, 32 };
-        Color color = Color::White;
+        Color buttonColor = Color::White;
+        Color textColor = Color::White;
     };
 
     class UIButton : public UI {
+        private:
+            Vec2F lastTextOffset = { 0.f, 0.f };
+            Vec2F lastTextScale = { 1.f, 1.f };
+            float lastTextRotation = 0.f;
+            UIButtonConfig config;
+
         public:
             TextRenderer* textRenderer;
             NineSliceSprite* nineSliceSprite;
+            Vec2F textOffset = { 0.f, 0.f };
+            Vec2F textScale = { 1.f, 1.f };
+            float textRotation = 0.f;
 
             UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
 
@@ -36,7 +49,16 @@ namespace GDE {
 
             void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
 
+            UIButtonConfig getConfig();
+            void setConfig(Scene* _scene, const UIButtonConfig& _config);
+
             ~UIButton() override {  }
+
+        private:
+            void onMouseEntered();
+            void onMouseExited();
+            void onMouseClicked(MouseCode _mouseCode);
+            void onMouseReleased(MouseCode _mouseCode);
     };
 
 }

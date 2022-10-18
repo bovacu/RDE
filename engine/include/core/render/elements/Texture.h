@@ -209,9 +209,14 @@ namespace GDE {
 
             /**
              * @brief Returns the portion of the SpriteSheet that will be rendered.
-             * @return IntRect&
+             * @return FloatRect&
              */
             FloatRect& getRegion();
+
+            /**
+             * @brief Sets the portion of the SpriteSheet that will be rendered.
+             */
+            void setRegion(const FloatRect& _region);
 
             /**
              * @brief Returns the path to the location of the SpriteSheet.

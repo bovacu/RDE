@@ -62,6 +62,7 @@ namespace GDE {
                 _renderManager.drawUI((IRenderizable*)&_textRenderer, _transform);
             });
 
+            // This is not needed for now
 //        _renderManager.endDraw();
 
         graph.onRenderDel(_registry);

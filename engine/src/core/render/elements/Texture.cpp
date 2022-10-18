@@ -262,6 +262,10 @@ namespace GDE {
         return path;
     }
 
+    void Texture::setRegion(const FloatRect& _region) {
+        region = _region;
+    }
+
 
     // ------------------------------ IMAGE --------------------------
 

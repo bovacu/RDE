@@ -7,35 +7,26 @@
 
 namespace GDE {
 
-
     UIButton::UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config) : UI(_nodeID, _canvas) {
-        Texture* _texture = nullptr;
-        if(_config.texture == nullptr) {
-            _texture = _scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark");
-        } else {
-            _texture = _config.texture;
-        }
+        setConfig(_scene, _config);
 
-        Font* _font = nullptr;
-        if(_config.font == nullptr) {
-            _font = _scene->engine->manager.fontManager.getDefaultFont("MontserratRegular");
-        } else {
-            _font = _config.font;
-        }
-
-        UI::texture = _texture;
+        UI::texture = config.idleTexture;
 
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;
 
-        nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, _texture);
+        nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, config.idleTexture);
         nineSliceSprite->interaction = UI::interaction;
-
-        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_nodeID, _scene, _canvas, _config.text, _font);
-        textRenderer->batchPriority = BatchPriority::SpritePriority;
-
+        nineSliceSprite->interaction->onInnerMouseEntered.bind<&UIButton::onMouseEntered>(this);
+        nineSliceSprite->interaction->onInnerMouseExited.bind<&UIButton::onMouseExited>(this);
+        nineSliceSprite->interaction->onInnerClicking.bind<&UIButton::onMouseClicked>(this);
+        nineSliceSprite->interaction->onInnerClickingReleased.bind<&UIButton::onMouseReleased>(this);
         nineSliceSprite->nineSliceSize = _config.size;
-        nineSliceSprite->color = _config.color;
+        nineSliceSprite->color = _config.buttonColor;
+
+        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_nodeID, _scene, _canvas, _config.text, config.font);
+        textRenderer->batchPriority = BatchPriority::SpritePriority;
+        textRenderer->color = config.textColor;
     }
 
     NineSlice& UIButton::getNineSlice() const {
@@ -47,6 +38,78 @@ namespace GDE {
     }
 
     void UIButton::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+        if(lastTextOffset != textOffset) {
+            textRenderer->transform->translate(textOffset - lastTextOffset);
+            lastTextOffset = textOffset;
+        }
 
+        if(lastTextScale != textScale) {
+            textRenderer->transform->scale(textScale - lastTextScale);
+            lastTextScale = textScale;
+        }
+
+        if(lastTextRotation != textRotation) {
+            textRenderer->transform->rotate(textRotation - lastTextRotation);
+            lastTextRotation = textRotation;
+        }
+    }
+
+    UIButtonConfig UIButton::getConfig() {
+        return config;
+    }
+
+    void UIButton::setConfig(Scene* _scene, const UIButtonConfig& _config) {
+        config = _config;
+
+        if(config.idleTexture == nullptr) {
+            config.idleTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark");
+        }
+
+        if(config.selectedTexture == nullptr) {
+            config.selectedTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "buttonDarkHighlited");
+        }
+
+        if(config.clickedTexture == nullptr) {
+            config.clickedTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "buttonDarkPressed");
+        }
+
+        if(config.disabledTexture == nullptr) {
+            config.disabledTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "buttonDarkLock");
+        }
+
+        if(config.font == nullptr) {
+            config.font = _scene->engine->manager.fontManager.getDefaultFont("MontserratRegular");
+        }
+
+        if(nineSliceSprite != nullptr) {
+            nineSliceSprite->nineSliceSize = config.size;
+            nineSliceSprite->color = config.buttonColor;
+        }
+
+        if(textRenderer != nullptr) {
+            textRenderer->setText(config.text);
+            textRenderer->color = config.textColor;
+            textRenderer->setFont(config.font);
+        }
+    }
+
+    void UIButton::onMouseEntered() {
+        nineSliceSprite->texture = config.selectedTexture;
+    }
+
+    void UIButton::onMouseExited() {
+        nineSliceSprite->texture = config.idleTexture;
+    }
+
+    void UIButton::onMouseClicked(MouseCode _mouseCode) {
+        nineSliceSprite->texture = config.clickedTexture;
+    }
+
+    void UIButton::onMouseReleased(MouseCode _mouseCode) {
+        if(nineSliceSprite->interaction->mouseInnerStatus == UIInteractable::MouseExited) {
+            nineSliceSprite->texture = config.idleTexture;
+        } else {
+            nineSliceSprite->texture = config.selectedTexture;
+        }
     }
 }
