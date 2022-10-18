@@ -39,7 +39,7 @@ namespace GDE {
             auto _screenCoords = Util::worldToScreenCoords(*viewport, {_mat[3][0], _mat[3][1]});
             _mat[3][0] = _screenCoords.x;
             _mat[3][1] = _screenCoords.y;
-            viewMatrix = _mat;
+            viewMatrix = glm::inverse(_mat);
             viewProjectionMatrix = projectionMatrix * viewMatrix;
         }
     }
