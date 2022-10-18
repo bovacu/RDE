@@ -27,20 +27,38 @@ namespace GDE {
         if (!_canvas->getGraph()->hasComponent<Active>(_nodeID)) return;
 
         if(trigger(_nodeID, _engine, _canvas)) {
-            if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onClick.isEmpty()) {
+
+            if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onInnerClickingReleased.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
                 auto* _mre = (MouseButtonReleasedEvent*)&_event;
-                onClick(_mre->getMouseButton());
-                return;
+                onInnerClickingReleased(_mre->getMouseButton());
+            }
+
+            if(_eventDispatcher.dispatchEvent<MouseButtonPressedEvent>() && !onInnerClicking.isEmpty()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                auto* _mre = (MouseButtonPressedEvent*)&_event;
+                onInnerClicking(_mre->getMouseButton());
             }
 
             if(_eventDispatcher.dispatchEvent<MouseMovedEvent>()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
-                if(mouseStatus == MouseStatus::MouseExited) {
-                    mouseStatus = MouseStatus::MouseEntered;
-                    if(onMouseEntered.isEmpty()) return;
-                    onMouseEntered();
+                if(mouseInnerStatus == MouseStatus::MouseExited) {
+                    mouseInnerStatus = MouseStatus::MouseEntered;
+                    if(onInnerMouseEntered.isEmpty()) return;
+                    onInnerMouseEntered();
                 }
+            }
+
+
+
+
+
+
+
+            if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onClick.isEmpty()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                auto* _mre = (MouseButtonReleasedEvent*)&_event;
+                onClick(_mre->getMouseButton());
                 return;
             }
 
@@ -73,6 +91,17 @@ namespace GDE {
             }
 
             return;
+        }
+
+
+
+        if(_eventDispatcher.dispatchEvent<MouseMovedEvent>()) {
+            if(mouseInnerStatus == MouseStatus::MouseEntered) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                mouseInnerStatus = MouseStatus::MouseExited;
+                if(onInnerMouseExited.isEmpty()) return;
+                onInnerMouseExited();
+            }
         }
 
         if(_eventDispatcher.dispatchEvent<MouseMovedEvent>()) {

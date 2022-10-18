@@ -24,7 +24,33 @@ namespace GDE {
      *
      */
     class UIInteractable {
-        FRIEND_CLASS(Canvas)
+        FRIEND_CLASS(Canvas, UIButton)
+
+        private:
+            /**
+             * @brief Callback triggered when the mouse just got pressed.
+             *
+             */
+            MDelegate<void(MouseCode)> onInnerClicking;
+
+            /**
+             * @brief Callback triggered when the mouse just got released.
+             *
+             */
+            MDelegate<void(MouseCode)> onInnerClickingReleased;
+
+            /**
+             * @brief Callback triggered when the mouse has just entered.
+             *
+             */
+            MDelegate<void()> onInnerMouseEntered;
+
+            /**
+             * @brief Callback triggered when the mouse has just exited.
+             *
+             */
+            MDelegate<void()> onInnerMouseExited;
+
         public:
 
             /**
@@ -91,6 +117,8 @@ namespace GDE {
              *
              */
             MouseStatus mouseStatus = MouseStatus::MouseExited;
+
+            MouseStatus mouseInnerStatus = MouseStatus::MouseExited;
 
             /**
              * @brief Function called inside the Graph system to take the events and handle them inside the UI elements.
