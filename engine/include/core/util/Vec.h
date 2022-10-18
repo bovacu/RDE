@@ -208,7 +208,7 @@ namespace GDE {
     }
 
     inline bool operator!=(const Vec2F & _v0, const Vec2F & _v1) {
-        return _v0.x != _v1.x || _v0.y == _v1.y;
+        return _v0.x != _v1.x || _v0.y != _v1.y;
     }
 
     inline bool operator==(const Vec2I & _v0, int _num) {
