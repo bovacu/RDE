@@ -11,6 +11,7 @@ namespace GDE {
         setConfig(_scene, _config);
 
         UI::texture = config.idleTexture;
+        _canvas->getGraph()->addComponent<CanvasEventStopper>(_nodeID);
 
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;

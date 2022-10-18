@@ -26,7 +26,7 @@ namespace GDE {
     void UIInteractable::onEvent(const NodeID& _nodeID, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas) {
         if (!_canvas->getGraph()->hasComponent<Active>(_nodeID)) return;
 
-        if(trigger(_nodeID, _engine, _canvas)) {
+        if(trigger(_nodeID, _engine, _canvas) && !_event.handled) {
 
             if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onInnerClickingReleased.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
@@ -95,7 +95,7 @@ namespace GDE {
 
 
 
-        if(_eventDispatcher.dispatchEvent<MouseMovedEvent>()) {
+        if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() || _event.handled) {
             if(mouseInnerStatus == MouseStatus::MouseEntered) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
                 mouseInnerStatus = MouseStatus::MouseExited;
@@ -104,7 +104,7 @@ namespace GDE {
             }
         }
 
-        if(_eventDispatcher.dispatchEvent<MouseMovedEvent>()) {
+        if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() || _event.handled) {
             if(mouseStatus == MouseStatus::MouseEntered) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
                 mouseStatus = MouseStatus::MouseExited;

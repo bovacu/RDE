@@ -7,7 +7,6 @@
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
-#include "core/util/GLUtil.h"
 
 namespace GDE {
     
@@ -68,7 +67,7 @@ namespace GDE {
     }
 
     void Graph::onRender() {
-        auto _spriteRendererGroup = registry.view<const SpriteRenderer,Transform, Active>(entt::exclude<StaticTransform>);
+        auto _spriteRendererGroup = registry.group<const SpriteRenderer>(entt::get<Transform, Active>);
         auto _particleSystemGroup = registry.group<const ParticleSystem>(entt::get<Transform, Active>);
         auto _textRendererGroup = registry.group<TextRenderer>(entt::get<Transform, Active>);
 
@@ -81,17 +80,27 @@ namespace GDE {
             _camera->setCameraSize(_camera->getCameraSize());
             _camera->update();
             {
-                _spriteRendererGroup.each([&_renderManager](const auto _entity, const SpriteRenderer& _spriteRenderer, Transform& _transform, const Active& _) {
+
+                for(auto _it = _spriteRendererGroup.rbegin(); _it != _spriteRendererGroup.rend(); _it++) {
+                    auto _entity = (*_it);
+                    auto& _transform = registry.get<Transform>(_entity);
+                    auto& _spriteRenderer = registry.get<SpriteRenderer>(_entity);
                     _renderManager.draw((IRenderizable*) &_spriteRenderer, _transform);
-                });
+                }
 
-                _particleSystemGroup.each([&_renderManager](const auto _entity, const ParticleSystem& _particleSystem, Transform& _transform, const Active& _) {
+                for(auto _it = _particleSystemGroup.rbegin(); _it != _particleSystemGroup.rend(); _it++) {
+                    auto _entity = (*_it);
+                    auto& _transform = registry.get<Transform>(_entity);
+                    auto& _particleSystem = registry.get<ParticleSystem>(_entity);
                     _renderManager.draw((IRenderizable*) &_particleSystem, _transform);
-                });
+                }
 
-                _textRendererGroup.each([&_renderManager](const auto _entity, TextRenderer& _text, Transform& _transform, const Active& _) {
+                for(auto _it = _textRendererGroup.rbegin(); _it != _textRendererGroup.rend(); _it++) {
+                    auto _entity = (*_it);
+                    auto& _transform = registry.get<Transform>(_entity);
+                    auto& _text = registry.get<TextRenderer>(_entity);
                     _renderManager.draw((IRenderizable*) &_text, _transform);
-                });
+                }
             }
 
             onRenderDel(registry);

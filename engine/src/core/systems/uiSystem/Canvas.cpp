@@ -29,9 +29,10 @@ namespace GDE {
         auto& _registry = graph.getNodeContainer();
         auto _interactables = _registry.group<UIInteractable>(entt::get<Active>);
 
-        _interactables.each([&_eventDispatcher, &_event, _engine, this](const auto _entity, UIInteractable& _interactable, const Active& _) {
-            _interactable.onEvent(_entity, _engine, _eventDispatcher, _event, this);
-        });
+        for(auto _it = _interactables.rbegin(); _it != _interactables.rend(); _it++) {
+            auto _entity = (*_it);
+            graph.getComponent<UIInteractable>(_entity)->onEvent(_entity, _engine, _eventDispatcher, _event, this);
+        }
 
         graph.onEventDel(_registry, _event);
     }
