@@ -11,6 +11,7 @@
 #include "core/render/RenderManager.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/TextRenderer.h"
+#include "core/graph/components/UIButton.h"
 
 namespace GDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
@@ -433,6 +434,7 @@ namespace GDE {
         spriteComponent(_graph, _selectedNode);
         bodyComponent(_graph, _selectedNode);
         textComponent(_graph, _selectedNode);
+        uiButtonComponent(_graph, _selectedNode);
 
         ImGui::End();
     }
@@ -599,10 +601,56 @@ namespace GDE {
     void ImGuiScene::textComponent(Graph* _graph, const NodeID _selectedNode) {
         if(!_graph->hasComponent<TextRenderer>(_selectedNode)) return;
 
-        auto _body = _graph->getComponent<TextRenderer>(_selectedNode);
+        auto _text = _graph->getComponent<TextRenderer>(_selectedNode);
+        auto _textTransform = _graph->getComponent<Transform>(_selectedNode);
 
         if(ImGui::CollapsingHeader("Text Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
             if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+
+            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::uiButtonComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<UIButton>(_selectedNode)) return;
+
+        auto _uiButton = _graph->getComponent<UIButton>(_selectedNode);
+
+        if(ImGui::CollapsingHeader("UI Button", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+
+            ImGui::Text("Text position ");
+
+            float _pos[2] = { _uiButton->textOffset.x, _uiButton->textOffset.y };
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(10);
+            if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
+                _uiButton->textOffset = { _pos[0], _pos[1] };
+            }
+            ImGui::PopID();
+
+
+            ImGui::Text("Text rotation ");
+
+            float _angle = _uiButton->textRotation;
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(50);
+            ImGui::PushID(11);
+            if(ImGui::DragFloat("##myInput", &_angle, 0.1f))
+                _uiButton->textRotation = _angle;
+            ImGui::PopID();
+
+
+            ImGui::Text("Text scale ");
+
+            float _scale[2] = { _uiButton->textScale.x, _uiButton->textScale.y };
+            ImGui::SameLine(0, 30);
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(12);
+            if(ImGui::DragFloat2("##myInput", _scale, 0.05))
+                _uiButton->textScale = { _scale[0], _scale[1] };
+            ImGui::PopID();
 
             if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
         }
