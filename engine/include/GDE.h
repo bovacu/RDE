@@ -28,8 +28,8 @@
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
-#include "core/graph/components/NineSliceSprite.h"
-#include "core/graph/components/UIButton.h"
+#include "core/graph/components/ui/NineSliceSprite.h"
+#include "core/graph/components/ui/UIButton.h"
 
 #include "core/systems/localization/LocalizationManager.h"
 

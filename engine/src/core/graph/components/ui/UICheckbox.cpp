@@ -2,7 +2,7 @@
 // Created by borja on 10/18/22.
 //
 
-#include "core/graph/components/UICheckbox.h"
+#include "core/graph/components/ui/UICheckbox.h"
 #include "core/Engine.h"
 
 namespace GDE {

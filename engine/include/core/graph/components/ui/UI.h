@@ -96,10 +96,9 @@ namespace GDE {
             MDelegate<void(int)> onMobileClick;
 
             /**
-             * @brief Order of execution of the different UI elements.
-             *
+             * @brief Size of the rectangle of interaction. Inside this area, there will be interaction, outside it will be ignored.
              */
-            int priority = 0;
+            Vec2F sizeOfInteraction;
 
             explicit UIInteractable(const NodeID& _nodeId);
 

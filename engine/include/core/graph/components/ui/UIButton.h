@@ -5,7 +5,7 @@
 #ifndef GDE_UI_BUTTON_H
 #define GDE_UI_BUTTON_H
 
-#include "core/graph/components/UI.h"
+#include "UI.h"
 
 namespace GDE {
 
@@ -25,17 +25,11 @@ namespace GDE {
 
     class UIButton : public UI {
         private:
-            Vec2F lastTextOffset = { 0.f, 0.f };
-            Vec2F lastTextScale = { 1.f, 1.f };
-            float lastTextRotation = 0.f;
             UIButtonConfig config;
 
         public:
             TextRenderer* textRenderer;
             NineSliceSprite* nineSliceSprite;
-            Vec2F textOffset = { 0.f, 0.f };
-            Vec2F textScale = { 1.f, 1.f };
-            float textRotation = 0.f;
 
             UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
 

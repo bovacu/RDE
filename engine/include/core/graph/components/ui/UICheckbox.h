@@ -5,7 +5,7 @@
 #ifndef GDE_UI_CHECKBOX_H
 #define GDE_UI_CHECKBOX_H
 
-#include "core/graph/components/UI.h"
+#include "UI.h"
 
 namespace GDE {
 

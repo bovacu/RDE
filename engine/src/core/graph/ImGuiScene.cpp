@@ -11,7 +11,7 @@
 #include "core/render/RenderManager.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/TextRenderer.h"
-#include "core/graph/components/UIButton.h"
+#include "core/graph/components/ui/UIButton.h"
 
 namespace GDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
@@ -618,39 +618,6 @@ namespace GDE {
 
         if(ImGui::CollapsingHeader("UI Button", ImGuiTreeNodeFlags_DefaultOpen)) {
             if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
-
-            ImGui::Text("Text position ");
-
-            float _pos[2] = { _uiButton->textOffset.x, _uiButton->textOffset.y };
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(100);
-            ImGui::PushID(10);
-            if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
-                _uiButton->textOffset = { _pos[0], _pos[1] };
-            }
-            ImGui::PopID();
-
-
-            ImGui::Text("Text rotation ");
-
-            float _angle = _uiButton->textRotation;
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(50);
-            ImGui::PushID(11);
-            if(ImGui::DragFloat("##myInput", &_angle, 0.1f))
-                _uiButton->textRotation = _angle;
-            ImGui::PopID();
-
-
-            ImGui::Text("Text scale ");
-
-            float _scale[2] = { _uiButton->textScale.x, _uiButton->textScale.y };
-            ImGui::SameLine(0, 30);
-            ImGui::SetNextItemWidth(100);
-            ImGui::PushID(12);
-            if(ImGui::DragFloat2("##myInput", _scale, 0.05))
-                _uiButton->textScale = { _scale[0], _scale[1] };
-            ImGui::PopID();
 
             if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
         }

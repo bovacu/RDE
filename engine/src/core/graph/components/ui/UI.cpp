@@ -2,13 +2,13 @@
 // Created by borja on 9/5/22.
 //
 
-#include "core/graph/components/UI.h"
+#include "core/graph/components/ui/UI.h"
 #include "core/systems/eventSystem/MouseEvent.h"
 #include "core/systems/eventSystem/KeyEvent.h"
 #include "core/systems/eventSystem/ControllerEvent.h"
 #include "core/systems/eventSystem/MobileEvent.h"
 #include "core/graph/components/Components.h"
-#include "core/graph/components/NineSliceSprite.h"
+#include "core/graph/components/ui/NineSliceSprite.h"
 #include "core/Engine.h"
 
 namespace GDE {
@@ -16,11 +16,11 @@ namespace GDE {
     UIInteractable::UIInteractable(const NodeID& _nodeId) {  }
 
     static bool trigger(const NodeID& _nodeID, Engine* _engine, Canvas* _canvas) {
-        auto* _ninePatch = _canvas->getGraph()->getComponent<NineSliceSprite>(_nodeID);
+        auto* _ninePatch = _canvas->getGraph()->getComponent<UIInteractable>(_nodeID);
         auto* _transform = _canvas->getGraph()->getComponent<Transform>(_nodeID);
         auto _mousePos = _engine->manager.inputManager.getMousePosWorldPos();
 
-        return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_ninePatch->getSize().x, (float)_ninePatch->getSize().y});
+        return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_ninePatch->sizeOfInteraction.x, (float)_ninePatch->sizeOfInteraction.y});
     }
 
     void UIInteractable::onEvent(const NodeID& _nodeID, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas) {

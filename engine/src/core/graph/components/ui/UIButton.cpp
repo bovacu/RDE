@@ -2,7 +2,7 @@
 // Created by borja on 9/22/22.
 //
 
-#include "core/graph/components/UIButton.h"
+#include "core/graph/components/ui/UIButton.h"
 #include "core/Engine.h"
 
 namespace GDE {
@@ -16,12 +16,13 @@ namespace GDE {
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;
 
+        UI::interaction->sizeOfInteraction = _config.size;
+        UI::interaction->onInnerMouseEntered.bind<&UIButton::onMouseEntered>(this);
+        UI::interaction->onInnerMouseExited.bind<&UIButton::onMouseExited>(this);
+        UI::interaction->onInnerClicking.bind<&UIButton::onMouseClicked>(this);
+        UI::interaction->onInnerClickingReleased.bind<&UIButton::onMouseReleased>(this);
+
         nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, config.idleTexture);
-        nineSliceSprite->interaction = UI::interaction;
-        nineSliceSprite->interaction->onInnerMouseEntered.bind<&UIButton::onMouseEntered>(this);
-        nineSliceSprite->interaction->onInnerMouseExited.bind<&UIButton::onMouseExited>(this);
-        nineSliceSprite->interaction->onInnerClicking.bind<&UIButton::onMouseClicked>(this);
-        nineSliceSprite->interaction->onInnerClickingReleased.bind<&UIButton::onMouseReleased>(this);
         nineSliceSprite->nineSliceSize = _config.size;
         nineSliceSprite->color = _config.buttonColor;
 
@@ -91,7 +92,7 @@ namespace GDE {
     }
 
     void UIButton::onMouseReleased(MouseCode _mouseCode) {
-        if(nineSliceSprite->interaction->mouseInnerStatus == UIInteractable::MouseExited) {
+        if(UI::interaction->mouseInnerStatus == UIInteractable::MouseExited) {
             nineSliceSprite->texture = config.idleTexture;
         } else {
             nineSliceSprite->texture = config.selectedTexture;

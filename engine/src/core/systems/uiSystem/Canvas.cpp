@@ -6,12 +6,12 @@
 #include "core/render/Camera.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/Scene.h"
-#include "core/graph/components/UI.h"
-#include "core/graph/components/NineSliceSprite.h"
+#include "core/graph/components/ui/UI.h"
+#include "core/graph/components/ui/NineSliceSprite.h"
 #include "core/render/RenderManager.h"
 #include "core/Engine.h"
-#include "core/graph/components/UIButton.h"
-#include "core/graph/components/UICheckbox.h"
+#include "core/graph/components/ui/UIButton.h"
+#include "core/graph/components/ui/UICheckbox.h"
 
 namespace GDE {
 
