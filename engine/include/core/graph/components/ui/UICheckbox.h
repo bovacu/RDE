@@ -15,7 +15,6 @@ namespace GDE {
         std::string text = "Checkbox text";
         Texture* checkboxTickTexture = nullptr;
         Texture* checkboxBackgroundTexture = nullptr;
-        Vec2F checkboxSize = { -1, -1 };
 
         Font* font = nullptr;
         Color checkboxColor = Color::White;
@@ -23,18 +22,21 @@ namespace GDE {
         Color tickColor = Color::White;
 
         bool checked = false;
+        Vec2F checkboxTextOffset = { 5, 0 };
     };
 
     class UICheckbox : public UI {
         private:
             UICheckboxConfig config;
             TextRenderer* textRenderer;
-            SpriteRenderer* spriteRenderer;
-            NineSliceSprite* nineSliceSprite;
+            SpriteRenderer* checkboxBackgroundSprite;
+            SpriteRenderer* tickSprite;
             bool checked;
+            NineSlice fakeNineSlice;
+            Transform* textTransform, *checkboxBackgroundTransform, *tickTransform;
 
         public:
-            UICheckbox(const NodeID& nodeId, Canvas* canvas, const NodeID& _nodeID, Scene* _scene, Canvas* _canvas,const UICheckboxConfig& _config);
+            UICheckbox(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas,const UICheckboxConfig& _config);
             ~UICheckbox() override {  }
 
             [[nodiscard]] NineSlice& getNineSlice() const;

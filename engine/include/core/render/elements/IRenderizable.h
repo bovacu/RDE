@@ -63,6 +63,8 @@ namespace GDE {
              */
             Vec2F pivot { 0.5f, 0.5f };
 
+            bool enabled = true;
+
         public:
             IRenderizable(Transform* _transform) : transform(_transform) {  }
 

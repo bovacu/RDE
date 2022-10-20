@@ -141,9 +141,6 @@ namespace GDE {
         auto _scalingFactor = batch->viewport->getScalingFactor();
         auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x * _scalingFactor.x, _shape.getPosition().y * _scalingFactor.y, 1.f));
 
-        if(_shape.rotation != 0)
-            _transformMat *= glm::rotate(glm::mat4(1.0f), _shape.rotation, { 0.0f, 0.0f, 1.0f });
-
         if(_scalingFactor != 1)
             _transformMat *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
 
@@ -163,11 +160,13 @@ namespace GDE {
             }
 
             if(_shape.isOuterShown()) {
+                Mat2 _rotMatrix(1, _transformMat[3][0], 0, _transformMat[3][1]);
+                _rotMatrix.rotate(_shape.rotation);
                 for(int _i = 0; _i < _shape.getPoints().size(); _i++) {
                     int _next = _i + 1;
                     if(_next == _shape.getPoints().size())
                         _next = 0;
-                    drawLine(_shape.getPoints()[_i], _shape.getPoints()[_next], _shape.getOuterColor());
+                    drawLine(_rotMatrix * _shape.getPoints()[_i], _rotMatrix * _shape.getPoints()[_next], _shape.getOuterColor());
                 }
             }
         }

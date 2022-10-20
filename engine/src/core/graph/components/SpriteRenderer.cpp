@@ -38,6 +38,9 @@ namespace GDE {
         } else {
             texture = _texture;
         }
+
+        auto [_transformMat, _] = transform->localToWorld();
+        calculateGeometry(_transformMat, *transform, *_scene->getMainCamera()->getViewport());
     }
 
     std::string SpriteRenderer::getTexturePath() {
@@ -83,6 +86,8 @@ namespace GDE {
     } 
 
     void SpriteRenderer::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+        if(!enabled) return;
+
         auto _vertexCount = _vertices.size();
 
         auto [_transformMat, _dirty] = _transform.localToWorld();

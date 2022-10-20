@@ -7,7 +7,7 @@
 
 namespace GDE {
 
-    UICheckbox::UICheckbox(const NodeID& nodeId, Canvas* canvas, const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UICheckboxConfig& _config) : UI(nodeId, canvas) {
+    UICheckbox::UICheckbox(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UICheckboxConfig& _config) : UI(_nodeID, _canvas) {
         setConfig(_scene, _config);
 
         UI::texture = config.checkboxTickTexture;
@@ -16,32 +16,37 @@ namespace GDE {
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;
 
-        nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, config.checkboxBackgroundTexture);
-        nineSliceSprite->interaction = UI::interaction;
-        nineSliceSprite->interaction->onInnerClickingReleased.bind<&UICheckbox::onMouseReleased>(this);
+        UI::interaction->onInnerClickingReleased.bind<&UICheckbox::onMouseReleased>(this);
 
-        if(config.checkboxSize.x > 0) {
-            nineSliceSprite->nineSliceSize.x = _config.checkboxSize.x;
-        }
-        if(config.checkboxSize.y > 0) {
-            nineSliceSprite->nineSliceSize.y = _config.checkboxSize.y;
-        }
-        nineSliceSprite->color = _config.checkboxColor;
-
-        spriteRenderer = _canvas->getGraph()->addComponent<SpriteRenderer>(_nodeID, _scene, _canvas, config.checkboxTickTexture);
-        spriteRenderer->color = config.tickColor;
-
-        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_nodeID, _scene, _canvas, _config.text, config.font);
+        auto _textID = _canvas->getGraph()->createNode("Text", _nodeID);
+        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textID, _scene, _canvas, _config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
         textRenderer->color = config.textColor;
+        textTransform = _canvas->getGraph()->getComponent<Transform>(_textID);
+
+        auto _checkboxBackgroundID = _canvas->getGraph()->createNode("CheckboxBackground", _nodeID);
+        checkboxBackgroundSprite = _canvas->getGraph()->addComponent<SpriteRenderer>(_checkboxBackgroundID, _scene, _canvas, config.checkboxBackgroundTexture);
+        checkboxBackgroundSprite->color = _config.checkboxColor;
+        checkboxBackgroundTransform = _canvas->getGraph()->getComponent<Transform>(_checkboxBackgroundID);
+
+        auto _tickID = _canvas->getGraph()->createNode("CheckboxTick", _checkboxBackgroundID);
+        tickSprite = _canvas->getGraph()->addComponent<SpriteRenderer>(_tickID, _scene, _canvas, config.checkboxTickTexture);
+        tickSprite->color = config.tickColor;
+        tickTransform = _canvas->getGraph()->getComponent<Transform>(_tickID);
+
+        UI::interaction->sizeOfInteraction = Vec2F { checkboxBackgroundSprite->getSize().x + textRenderer->getSize().x,
+                                               checkboxBackgroundSprite->getSize().y > textRenderer->getSize().y ? checkboxBackgroundSprite->getSize().y : textRenderer->getSize().y
+                                             } + config.checkboxTextOffset;
+
+        setConfig(_scene, config);
     }
 
     NineSlice& UICheckbox::getNineSlice() const {
-        return nineSliceSprite->getNineSlice();
+        return const_cast<NineSlice&>(fakeNineSlice);
     }
 
     Vec2F UICheckbox::getSize() const {
-        return { nineSliceSprite->getSize().x + textRenderer->getSize().x, nineSliceSprite->getSize().y > textRenderer->getSize().y ?nineSliceSprite->getSize().y : textRenderer->getSize().y };
+        return UI::interaction->sizeOfInteraction;
     }
 
     UICheckboxConfig UICheckbox::getConfig() {
@@ -54,27 +59,43 @@ namespace GDE {
         }
 
         if(config.checkboxTickTexture == nullptr) {
-            config.checkboxTickTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "checkmark64x64");
+            config.checkboxTickTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "checkmark");
         }
 
-        if(nineSliceSprite != nullptr) {
-            if(config.checkboxSize.x > 0) {
-                nineSliceSprite->nineSliceSize.x = _config.checkboxSize.x;
-            }
-            if(config.checkboxSize.y > 0) {
-                nineSliceSprite->nineSliceSize.y = _config.checkboxSize.y;
-            }
+        if(config.font == nullptr) {
+            config.font = _scene->engine->manager.fontManager.getDefaultFont("MontserratRegular");
         }
+
+        config.checkboxTextOffset = _config.checkboxTextOffset;
+        config.checked = _config.checked;
 
         if(textRenderer != nullptr) {
             textRenderer->setText(config.text);
             textRenderer->color = config.textColor;
             textRenderer->setFont(config.font);
         }
+
+        if(tickSprite != nullptr) {
+            tickSprite->enabled = config.checked;
+        }
+
+        if(checkboxBackgroundTransform != nullptr) {
+            auto _checkboxBackgroundPos = checkboxBackgroundTransform->getPosition();
+            checkboxBackgroundTransform->setPosition(_checkboxBackgroundPos.x - UI::interaction->sizeOfInteraction.x / 2.f + checkboxBackgroundSprite->getSize().x / 2.f, _checkboxBackgroundPos.y);
+        }
+
+        if(textTransform != nullptr) {
+            auto _textPosition = textTransform->getPosition();
+            auto _checkboxBackgroundPos = checkboxBackgroundTransform->getPosition();
+            textTransform->setPosition(_textPosition.x + _checkboxBackgroundPos.x + checkboxBackgroundSprite->getSize().x / 2.f + textRenderer->getSize().x / 2.f + config.checkboxTextOffset.x, _textPosition.y + config.checkboxTextOffset.y);
+        }
     }
 
     void UICheckbox::onMouseReleased(MouseCode _mouseButton) {
-
+        checked = !checked;
+        if(UI::interaction->mouseInnerStatus == UIInteractable::MouseEntered) {
+            tickSprite->enabled = checked;
+        }
     }
 
 

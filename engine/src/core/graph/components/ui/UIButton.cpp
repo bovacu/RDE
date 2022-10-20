@@ -16,14 +16,14 @@ namespace GDE {
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;
 
-        UI::interaction->sizeOfInteraction = _config.size;
+        UI::interaction->sizeOfInteraction = _config.interactableArea;
         UI::interaction->onInnerMouseEntered.bind<&UIButton::onMouseEntered>(this);
         UI::interaction->onInnerMouseExited.bind<&UIButton::onMouseExited>(this);
         UI::interaction->onInnerClicking.bind<&UIButton::onMouseClicked>(this);
         UI::interaction->onInnerClickingReleased.bind<&UIButton::onMouseReleased>(this);
 
         nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, config.idleTexture);
-        nineSliceSprite->nineSliceSize = _config.size;
+        nineSliceSprite->nineSliceSize = _config.buttonTextureSize;
         nineSliceSprite->color = _config.buttonColor;
 
         auto _textID = _canvas->getGraph()->createNode("Text", _nodeID);
@@ -37,7 +37,7 @@ namespace GDE {
     }
 
     Vec2F UIButton::getSize() const {
-        return nineSliceSprite->getSize();
+        return UI::interaction->sizeOfInteraction;
     }
 
     UIButtonConfig UIButton::getConfig() {
@@ -67,8 +67,10 @@ namespace GDE {
             config.font = _scene->engine->manager.fontManager.getDefaultFont("MontserratRegular");
         }
 
+        UI::interaction->sizeOfInteraction = config.interactableArea;
+
         if(nineSliceSprite != nullptr) {
-            nineSliceSprite->nineSliceSize = config.size;
+            nineSliceSprite->nineSliceSize = config.buttonTextureSize;
             nineSliceSprite->color = config.buttonColor;
         }
 
@@ -80,22 +82,43 @@ namespace GDE {
     }
 
     void UIButton::onMouseEntered() {
-        nineSliceSprite->texture = config.selectedTexture;
+        if(!config.disabled) {
+            nineSliceSprite->texture = config.selectedTexture;
+        }
     }
 
     void UIButton::onMouseExited() {
-        nineSliceSprite->texture = config.idleTexture;
+        if(!config.disabled) {
+            nineSliceSprite->texture = config.idleTexture;
+        }
     }
 
     void UIButton::onMouseClicked(MouseCode _mouseCode) {
-        nineSliceSprite->texture = config.clickedTexture;
+        if(!config.disabled) {
+            nineSliceSprite->texture = config.clickedTexture;
+        }
     }
 
     void UIButton::onMouseReleased(MouseCode _mouseCode) {
-        if(UI::interaction->mouseInnerStatus == UIInteractable::MouseExited) {
-            nineSliceSprite->texture = config.idleTexture;
-        } else {
-            nineSliceSprite->texture = config.selectedTexture;
+        if(!config.disabled) {
+            if(UI::interaction->mouseInnerStatus == UIInteractable::MouseExited) {
+                nineSliceSprite->texture = config.idleTexture;
+            } else {
+                nineSliceSprite->texture = config.selectedTexture;
+            }
         }
+    }
+
+    void UIButton::setDisabled(bool _disabled) {
+        config.disabled = _disabled;
+        if(config.disabled) {
+            nineSliceSprite->texture = config.disabledTexture;
+        } else {
+            onMouseReleased(MouseCode::ButtonLeft);
+        }
+    }
+
+    bool UIButton::isDisabled() {
+        return config.disabled;
     }
 }

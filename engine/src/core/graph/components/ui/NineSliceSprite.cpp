@@ -25,6 +25,8 @@ namespace GDE {
     }
 
     void NineSliceSprite::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+        if(!enabled) return;
+
         if(spriteRenderer) {
             spriteRenderer->drawBatched(_vertices, _indices, _transform, _viewport);
             return;
@@ -107,6 +109,8 @@ namespace GDE {
     }
 
     void NineSliceSprite::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {
+        if(!enabled) return;
+
         DrawAndFlushData _nineSliceData;
         _nineSliceData.textureID = getTexture();
         _nineSliceData.shaderID = shaderID;

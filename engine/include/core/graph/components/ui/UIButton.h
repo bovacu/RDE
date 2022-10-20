@@ -18,9 +18,11 @@ namespace GDE {
         Texture* clickedTexture = nullptr;
         Texture* disabledTexture = nullptr;
         Font* font = nullptr;
-        Vec2F size = { 128, 32 };
+        Vec2F buttonTextureSize = {128, 32 };
+        Vec2F interactableArea = {128, 32 };
         Color buttonColor = Color::White;
         Color textColor = Color::White;
+        bool disabled = false;
     };
 
     class UIButton : public UI {
@@ -38,6 +40,9 @@ namespace GDE {
 
             UIButtonConfig getConfig();
             void setConfig(Scene* _scene, const UIButtonConfig& _config);
+
+            void setDisabled(bool _disabled);
+            bool isDisabled();
 
             ~UIButton() override {  }
 

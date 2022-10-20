@@ -133,7 +133,7 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] Vec2F getSize() const override { return { size.x * transform->getScale().x, size.y * transform->getScale().y }; }
+            [[nodiscard]] Vec2F getSize() const override { return { size.x / 2.f * transform->getScale().x, size.y / 2.f * transform->getScale().y }; }
 
             /**
              * @see IRenderizable

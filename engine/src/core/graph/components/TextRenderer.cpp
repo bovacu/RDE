@@ -88,6 +88,8 @@ namespace GDE {
     }
 
     void TextRenderer::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+        if(!enabled) return;
+
         auto* _atlas = font;
         auto _atlasSize = _atlas->getSize();
 
@@ -161,6 +163,8 @@ namespace GDE {
     }
 
     std::tuple<std::vector<TextRenderer::LineInfo>, float, float> TextRenderer::calculateLinesInfo(CharInfo* _chars) const {
+        if(!enabled) return;
+
         auto _linesInfo = std::vector<LineInfo> {  };
         auto _ss = std::stringstream { innerText };
 

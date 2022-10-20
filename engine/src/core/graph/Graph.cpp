@@ -133,6 +133,10 @@ namespace GDE {
 //        });
 //
         _renderManager.endDebugDraw();
+
+        for(auto* _canvas : scene->canvases) {
+            _canvas->onDebugRender();
+        }
     }
 
     NodeID Graph::createNode(const std::string& _tag, const NodeID& _parent) {
