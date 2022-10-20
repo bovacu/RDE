@@ -6,7 +6,7 @@
 #define GDE_NINE_SLICE_SPRITE_H
 
 #include "core/util/Vec.h"
-#include "UI.h"
+#include "core/graph/components/ui/UI.h"
 
 namespace GDE {
 

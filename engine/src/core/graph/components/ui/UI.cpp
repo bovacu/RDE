@@ -8,7 +8,7 @@
 #include "core/systems/eventSystem/ControllerEvent.h"
 #include "core/systems/eventSystem/MobileEvent.h"
 #include "core/graph/components/Components.h"
-#include "core/graph/components/ui/NineSliceSprite.h"
+#include "core/graph/components/NineSliceSprite.h"
 #include "core/Engine.h"
 
 namespace GDE {

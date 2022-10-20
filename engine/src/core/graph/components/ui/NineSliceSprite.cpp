@@ -2,7 +2,7 @@
 // Created by borja on 9/5/22.
 //
 
-#include "core/graph/components/ui/NineSliceSprite.h"
+#include "core/graph/components/NineSliceSprite.h"
 #include "core/util/Functions.h"
 #include "core/graph/components/SpriteRenderer.h"
 

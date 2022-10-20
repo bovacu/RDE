@@ -163,8 +163,6 @@ namespace GDE {
     }
 
     std::tuple<std::vector<TextRenderer::LineInfo>, float, float> TextRenderer::calculateLinesInfo(CharInfo* _chars) const {
-        if(!enabled) return;
-
         auto _linesInfo = std::vector<LineInfo> {  };
         auto _ss = std::stringstream { innerText };
 
@@ -196,6 +194,7 @@ namespace GDE {
     }
 
     void TextRenderer::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {
+        if(!enabled) return;
         DrawAndFlushData _textData;
         _textData.textureID = getTexture();
         _textData.shaderID = shaderID;
