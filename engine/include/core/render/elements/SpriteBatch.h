@@ -36,17 +36,17 @@ namespace GDE {
                 static SpriteBatch* batch;
 
                 /**
-                 * @brief vertices to draw geometry more complex than a line.
+                 * @brief vertices to drawBatched geometry more complex than a line.
                  */
                 std::vector<OpenGLVertexDebug> vertexDebugBufferGeometrics {};
 
                 /**
-                 * @brief vertices to draw simple lines.
+                 * @brief vertices to drawBatched simple lines.
                  */
                 std::vector<OpenGLVertexDebug> vertexDebugBufferLines {};
 
                 /**
-                 * @brief vertices to draw simple points.
+                 * @brief vertices to drawBatched simple points.
                  */
                 std::vector<OpenGLVertexDebug> vertexDebugBufferPoints {};
 
@@ -105,7 +105,7 @@ namespace GDE {
 
                 /**
                  * @brief Draws a complex shape.
-                 * @param _shape Shape to draw
+                 * @param _shape Shape to drawBatched
                  * @see Shape
                  */
                 void drawShape(DebugShape& _shape);
@@ -207,18 +207,17 @@ namespace GDE {
             void beginDraw(Camera& _camera, Transform* _cameraTransform);
 
             /**
-             * This method is used to draw anything that extends IRenderizable.
+             * This method is used to drawBatched anything that extends IRenderizable.
              * @param _renderizable An IRenderizable instance.
              * @param _transform Transform of the IRenderizable.
              */
             void draw(IRenderizable* _renderizable, Transform& _transform);
 
             /**
-             * This method is used to draw anything that extends IRenderizable and that is UI.
-             * @param _renderizable An IRenderizable instance.
-             * @param _transform Transform of the IRenderizable.
+             * This method is used to drawBatched anything that extends IRenderizable and that is UI.
+             * @param _batches Static batches to render the UI.
              */
-            void drawUI(IRenderizable* _renderizable, Transform& _transform);
+            void drawUI(const std::vector<Batch>& _batches);
 
             /**
              * @brief This method sends all of the geometry to the GPU and ends a Draw Call.

@@ -7,6 +7,7 @@
 
 #include "core/graph/Graph.h"
 #include "core/render/Camera.h"
+#include "core/render/elements/Batch.h"
 
 namespace GDE {
 
@@ -37,6 +38,10 @@ namespace GDE {
              * @brief Inner elements container.
              */
             Graph graph;
+
+            std::vector<Batch> batches;
+            bool dirty = true;
+            int maxIndicesPerDrawCall = 1000;
 
         public:
             explicit Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag);
@@ -80,6 +85,10 @@ namespace GDE {
              * @brief Handles the debug rendering of the UI elements.
              */
             void onDebugRender();
+
+        private:
+            void recalculateDrawingBatches(const NodeID& _nodeID);
+            IRenderizable* getRenderizable(const NodeID& _nodeID);
     };
 
 }

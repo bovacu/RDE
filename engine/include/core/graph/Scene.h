@@ -119,7 +119,7 @@ namespace GDE {
             virtual void onImGuiRender(Delta _dt) {  }
 
             /**
-             * @brief This function is used to draw debugging lines, squares, circles...
+             * @brief This function is used to drawBatched debugging lines, squares, circles...
              * @param the time that passed between the current frame and the last one.
              */
             virtual void onDebugRender(Delta _dt);

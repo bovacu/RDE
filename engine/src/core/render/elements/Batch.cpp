@@ -12,7 +12,7 @@ namespace GDE {
         if(textureID < 0)
             textureID = _renderizable->getTexture();
 
-        _renderizable->draw(vertexBuffer, indexBuffer, _transform, *spriteBatch->viewport);
+        _renderizable->drawBatched(vertexBuffer, indexBuffer, _transform, *spriteBatch->viewport);
     }
 
 }

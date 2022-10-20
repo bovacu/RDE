@@ -24,9 +24,9 @@ namespace GDE {
         return texture->nineSlice;
     }
 
-    void NineSliceSprite::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+    void NineSliceSprite::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
         if(spriteRenderer) {
-            spriteRenderer->draw(_vertices, _indices, _transform, _viewport);
+            spriteRenderer->drawBatched(_vertices, _indices, _transform, _viewport);
             return;
         }
 
@@ -104,6 +104,14 @@ namespace GDE {
             _indices.emplace_back(_vertexCount + 3);
             _indices.emplace_back(_vertexCount + 0);
         }
+    }
+
+    void NineSliceSprite::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {
+        DrawAndFlushData _nineSliceData;
+        _nineSliceData.textureID = getTexture();
+        _nineSliceData.shaderID = shaderID;
+        drawBatched(_nineSliceData.vertices, _nineSliceData.indices, _transform, _viewport);
+        _data.push_back(_nineSliceData);
     }
 
 }

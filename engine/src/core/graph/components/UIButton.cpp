@@ -25,7 +25,8 @@ namespace GDE {
         nineSliceSprite->nineSliceSize = _config.size;
         nineSliceSprite->color = _config.buttonColor;
 
-        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_nodeID, _scene, _canvas, _config.text, config.font);
+        auto _textID = _canvas->getGraph()->createNode("Text", _nodeID);
+        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textID, _scene, _canvas, _config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
         textRenderer->color = config.textColor;
     }
@@ -36,23 +37,6 @@ namespace GDE {
 
     Vec2F UIButton::getSize() const {
         return nineSliceSprite->getSize();
-    }
-
-    void UIButton::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
-        if(lastTextOffset != textOffset) {
-            textRenderer->transform->translate(textOffset - lastTextOffset);
-            lastTextOffset = textOffset;
-        }
-
-        if(lastTextScale != textScale) {
-            textRenderer->transform->scale(textScale - lastTextScale);
-            lastTextScale = textScale;
-        }
-
-        if(lastTextRotation != textRotation) {
-            textRenderer->transform->rotate(textRotation - lastTextRotation);
-            lastTextRotation = textRotation;
-        }
     }
 
     UIButtonConfig UIButton::getConfig() {

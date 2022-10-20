@@ -264,6 +264,8 @@
             </struct>
             <key type="filename">sprites/buttonExit.png</key>
             <key type="filename">sprites/icons/64x64px/x64x64.png</key>
+            <key type="filename">../../defaultAssets/sprites/checkboxDark.png</key>
+            <key type="filename">../../defaultAssets/sprites/icons/64x64px/checmark64x64.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -456,7 +458,6 @@
             <key type="filename">sprites/icons/32x32px/arrowLeft32x32.png</key>
             <key type="filename">sprites/icons/32x32px/arrowRight32x32.png</key>
             <key type="filename">sprites/icons/32x32px/arrowUp32x32.png</key>
-            <key type="filename">sprites/icons/32x32px/checmark32x32.png</key>
             <key type="filename">sprites/icons/32x32px/x32x32.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -764,10 +765,11 @@
             <filename>sprites/icons/32x32px/arrowLeft32x32.png</filename>
             <filename>sprites/icons/32x32px/arrowRight32x32.png</filename>
             <filename>sprites/icons/32x32px/arrowUp32x32.png</filename>
-            <filename>sprites/icons/32x32px/checmark32x32.png</filename>
             <filename>sprites/icons/32x32px/x32x32.png</filename>
             <filename>sprites/icons/64x64px/x64x64.png</filename>
             <filename>sprites/sprite.png</filename>
+            <filename>../../defaultAssets/sprites/icons/64x64px/checmark64x64.png</filename>
+            <filename>../../defaultAssets/sprites/checkboxDark.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

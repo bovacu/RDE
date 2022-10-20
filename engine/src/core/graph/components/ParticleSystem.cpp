@@ -96,7 +96,7 @@ namespace GDE {
         _particleData.position += glm::vec3 { _particleData.velocity.x, _particleData.velocity.y, 0.f } * (float)_dt;
     }
 
-    void ParticleSystem::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+    void ParticleSystem::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
         for (auto& _particle : usedParticles) {
             auto _vertexCount = _vertices.size();
 

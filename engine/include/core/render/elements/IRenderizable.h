@@ -14,6 +14,13 @@ namespace GDE {
     FORWARD_DECLARE_STRUCT(OpenGLVertex)
     FORWARD_DECLARE_CLASS(IViewPort, Transform)
 
+    struct DrawAndFlushData {
+        std::vector<OpenGLVertex> vertices;
+        std::vector<uint32_t> indices;
+        ShaderID shaderID;
+        GLuint textureID;
+    };
+
     /**
      * @brief Interface that elements to be rendered by the engine should follow. This gives the SpriteRenderer the
      * exact data it needs to render elements on screen.
@@ -83,7 +90,8 @@ namespace GDE {
              * @param _transform Transform of the renderizable.
              * @param _viewport Viewport of the scene.
              */
-            virtual void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) = 0;
+            virtual void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {  };
+            virtual void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {  };
 
             virtual ~IRenderizable() {  }
     };

@@ -28,7 +28,7 @@ namespace GDE {
      * together to the GPU so the number of Draw Calls is minimized as much as possible.
      */
     class Batch {
-        FRIEND_CLASS(SpriteBatch)
+        FRIEND_CLASS(SpriteBatch, Canvas)
 
         private:
 

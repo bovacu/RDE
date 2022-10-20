@@ -45,7 +45,7 @@ namespace GDE {
             void destroy();
 
             /**
-             * @brief This must be called before any draw call on every frame (in main loop).
+             * @brief This must be called before any drawBatched call on every frame (in main loop).
              * @param _color The color of the background
              */
             void clear();
@@ -88,10 +88,9 @@ namespace GDE {
 
             /**
              * @brief Renders an IRenderizable immediately with no batching. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
-             * @param _renderizable Component derived from IRenderizable.
-             * @param _transform Nine patch's transform.
+             * @param _batches Static batches to render.
              */
-            void drawUI(IRenderizable* _renderizable, Transform& _transform);
+            void drawUI(const std::vector<Batch>& _batches);
 
             /**
              * @brief Sends the data batched to the GPU, must be called after beginDraw and what we want to render.

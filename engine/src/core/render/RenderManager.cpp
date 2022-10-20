@@ -62,8 +62,8 @@ namespace GDE {
         batch.draw(_renderizable, _transform);
     }
 
-    void RenderManager::drawUI(IRenderizable* _renderizable, Transform& _transform) {
-        batch.drawUI(_renderizable, _transform);
+    void RenderManager::drawUI(const std::vector<Batch>& _batches) {
+        batch.drawUI(_batches);
     }
 
     void RenderManager::beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness) {

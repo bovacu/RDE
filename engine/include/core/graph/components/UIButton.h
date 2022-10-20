@@ -39,15 +39,8 @@ namespace GDE {
 
             UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
 
-            /**
-             * @brief Returns the NineSlice data. This is almost sure not to be needed by end-users.
-             * @return NineSlice&
-             */
             [[nodiscard]] NineSlice& getNineSlice() const;
-
             [[nodiscard]] Vec2F getSize() const override;
-
-            void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
 
             UIButtonConfig getConfig();
             void setConfig(Scene* _scene, const UIButtonConfig& _config);

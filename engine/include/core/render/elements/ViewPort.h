@@ -10,7 +10,7 @@ namespace GDE {
 
     /**
      * @brief This class represents the way the scene is going to be rendered and how much of the screen is going to be
-     * used to draw. This interface is the base of ant custom-viewport provided by the engine and must be followed
+     * used to drawBatched. This interface is the base of ant custom-viewport provided by the engine and must be followed
      * for any user-defined viewport.
      */
 

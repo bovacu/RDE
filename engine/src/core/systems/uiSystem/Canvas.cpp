@@ -11,6 +11,7 @@
 #include "core/render/RenderManager.h"
 #include "core/Engine.h"
 #include "core/graph/components/UIButton.h"
+#include "core/graph/components/UICheckbox.h"
 
 namespace GDE {
 
@@ -38,33 +39,21 @@ namespace GDE {
     }
 
     void Canvas::onUpdate(Delta _dt) {
-
+        batches.clear();
+        Batch _batch;
+        _batch.shader = scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
+        _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
+        batches.emplace_back(_batch);
+        recalculateDrawingBatches(graph.sceneRoot);
     }
 
     void Canvas::onRender() {
         auto& _registry = graph.getNodeContainer();
-        auto _sprites = _registry.view<NineSliceSprite, Transform, Active>(entt::exclude<UIButton>);
-        auto _buttons = _registry.view<UIButton, Transform, Active>();
-        auto _texts = _registry.view<TextRenderer, Transform, Active>(entt::exclude<UIButton>);
 
         auto& _renderManager = graph.scene->engine->manager.renderManager;
         _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
 
-            _sprites.each([&_renderManager](const auto _entity, NineSliceSprite& _nineSlice, Transform& _transform, const Active& _) {
-                _renderManager.drawUI((IRenderizable*)&_nineSlice, _transform);
-            });
-
-            _buttons.each([&_renderManager](const auto _entity, UIButton& _uiButton, Transform& _transform, const Active& _) {
-                _renderManager.drawUI((IRenderizable*)_uiButton.nineSliceSprite, _transform);
-                _renderManager.drawUI((IRenderizable*)_uiButton.textRenderer, _transform);
-            });
-
-            _texts.each([&_renderManager](const auto _entity, TextRenderer& _textRenderer, Transform& _transform, const Active& _) {
-                _renderManager.drawUI((IRenderizable*)&_textRenderer, _transform);
-            });
-
-            // This is not needed for now
-//        _renderManager.endDraw();
+        _renderManager.drawUI(batches);
 
         graph.onRenderDel(_registry);
     }
@@ -80,39 +69,39 @@ namespace GDE {
 
             auto _rects = _nineSlice.getNineSlice().subRects;
             _renderManager.drawSquare({_transform.getPosition().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[0].bottomLeftCorner.x + (float)_rects[0].size.x / 2.f,
-                                       _transform.getPosition().y + (float)(_rects[0].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[0].size.y / 2.f},
+                                       _transform.getPosition().y + ((float)_rects[0].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[0].size.y / 2.f},
                                       {(float)_rects[0].size.x, (float)_rects[0].size.y}, Color::Green);
 
             _renderManager.drawSquare({_transform.getPosition().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[1].bottomLeftCorner.x + (float)_rects[1].size.x / 2.f,
-                                       _transform.getPosition().y + (float)(_rects[1].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[1].size.y / 2.f},
+                                       _transform.getPosition().y + ((float)_rects[1].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[1].size.y / 2.f},
                                       {(float)_rects[1].size.x, (float)_rects[1].size.y}, Color::Black);
 
             _renderManager.drawSquare({_transform.getPosition().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[2].bottomLeftCorner.x + (float)_rects[2].size.x / 2.f,
-                                       _transform.getPosition().y + (float)(_rects[2].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[2].size.y / 2.f},
+                                       _transform.getPosition().y + ((float)_rects[2].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[2].size.y / 2.f},
                                       {(float)_rects[2].size.x, (float)_rects[2].size.y}, Color::Blue);
 //
             _renderManager.drawSquare({_transform.getPosition().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[3].bottomLeftCorner.x + (float)_rects[3].size.x / 2.f,
-                                       _transform.getPosition().y + (float)(_rects[3].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[3].size.y / 2.f},
+                                       _transform.getPosition().y + ((float)_rects[3].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[3].size.y / 2.f},
                                       {(float)_rects[3].size.x, (float)_rects[3].size.y}, Color::Yellow);
 
             _renderManager.drawSquare({_transform.getPosition().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[4].bottomLeftCorner.x + (float)_rects[4].size.x / 2.f,
-                                       _transform.getPosition().y + (float)(_rects[4].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[4].size.y / 2.f},
+                                       _transform.getPosition().y + ((float)_rects[4].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[4].size.y / 2.f},
                                       {(float)_rects[4].size.x, (float)_rects[4].size.y}, Color::Orange);
 
             _renderManager.drawSquare({_transform.getPosition().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[5].bottomLeftCorner.x + (float)_rects[5].size.x / 2.f,
-                                       _transform.getPosition().y + (float)(_rects[5].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[5].size.y / 2.f},
+                                       _transform.getPosition().y + ((float)_rects[5].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[5].size.y / 2.f},
                                       {(float)_rects[5].size.x, (float)_rects[5].size.y}, Color::Gray);
 
             _renderManager.drawSquare({_transform.getPosition().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[6].bottomLeftCorner.x + (float)_rects[6].size.x / 2.f,
-                                       _transform.getPosition().y + (float)(_rects[6].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[6].size.y / 2.f},
+                                       _transform.getPosition().y + ((float)_rects[6].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[6].size.y / 2.f},
                                       {(float)_rects[6].size.x, (float)_rects[6].size.y}, Color::Magenta);
 
             _renderManager.drawSquare({_transform.getPosition().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[7].bottomLeftCorner.x + (float)_rects[7].size.x / 2.f,
-                                       _transform.getPosition().y + (float)(_rects[7].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[7].size.y / 2.f},
+                                       _transform.getPosition().y + ((float)_rects[7].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[7].size.y / 2.f},
                                       {(float)_rects[7].size.x, (float)_rects[7].size.y}, Color::Purple);
 
             _renderManager.drawSquare({_transform.getPosition().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[8].bottomLeftCorner.x + (float)_rects[8].size.x / 2.f,
-                                       _transform.getPosition().y + (float)(_rects[8].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[8].size.y / 2.f},
+                                       _transform.getPosition().y + ((float)_rects[8].bottomLeftCorner.y - _nineSlice.getRegion().size.y) - (float)_nineSlice.getRegion().size.y / 2.f + (float)_rects[8].size.y / 2.f},
                                       {(float)_rects[8].size.x, (float)_rects[8].size.y}, Color::White);
 
         });
@@ -129,6 +118,42 @@ namespace GDE {
             camera->setAdaptiveViewport(_mainCameraViewPort->getVirtualResolution(), _mainCameraViewPort->getDeviceResolution());
         } else
             camera->setFreeViewport(_mainCameraViewPort->getDeviceResolution());
+    }
+
+    void Canvas::recalculateDrawingBatches(const NodeID& _nodeID) {
+        if(_nodeID == NODE_ID_NULL) return;
+
+        Batch* _currentBatch = &batches.back();
+        auto _transform = graph.getComponent<Transform>(_nodeID);
+        if(graph.getNodeContainer().any_of<TextRenderer, UIButton, NineSliceSprite, UICheckbox>(_nodeID)){
+            auto* _renderizable = getRenderizable(_nodeID);
+
+            if (_currentBatch->shader == nullptr || _renderizable->getTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _renderizable->shaderID || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
+                Batch _newBatch;
+                _newBatch.shader = scene->engine->manager.shaderManager.getShader(_renderizable->shaderID);
+                _newBatch.textureID = _renderizable->getTexture();
+                batches.emplace_back(_newBatch);
+                _currentBatch = &batches.back();
+            }
+
+            _renderizable->drawBatched(_currentBatch->vertexBuffer, _currentBatch->indexBuffer, *_renderizable->transform, *camera->getViewport());
+        }
+
+        for(auto _child : _transform->children) {
+            recalculateDrawingBatches(_child->ID);
+        }
+    }
+
+    IRenderizable* Canvas::getRenderizable(const NodeID& _nodeID) {
+        if(graph.hasComponent<NineSliceSprite>(_nodeID)) {
+            return graph.getComponent<NineSliceSprite>(_nodeID);
+        }
+
+        if(graph.hasComponent<TextRenderer>(_nodeID)) {
+            return graph.getComponent<TextRenderer>(_nodeID);
+        }
+
+        return nullptr;
     }
 
 }

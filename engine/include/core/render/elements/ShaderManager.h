@@ -75,7 +75,7 @@ namespace GDE {
              * @brief Sets the VertexData of a shader. Call this method only AFTER loadShader
              * @param _shaderName the name of the shader.
              * @param _vertexConfig List of data for each vertex.
-             * @param _maxIndicesPerDrawCall Maximum number of indices per draw call.
+             * @param _maxIndicesPerDrawCall Maximum number of indices per drawBatched call.
              */
             void loadShaderVertexConfig(const std::string& _shaderName, const std::vector<VertexConfig>& _vertexConfig, int _maxIndicesPerDrawCall);
 

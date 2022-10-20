@@ -118,7 +118,7 @@ namespace GDE {
             GLenum dataFormat = -1;
 
             /**
-             * @brief Out of the whole SpriteSheet, the portion that the renderer should draw on screen. If this texture
+             * @brief Out of the whole SpriteSheet, the portion that the renderer should drawBatched on screen. If this texture
              * is itself the SpriteSheet, then the region is the whole SpriteSheet.
              */
             FloatRect region {};
