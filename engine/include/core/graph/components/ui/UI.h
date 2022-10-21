@@ -129,6 +129,11 @@ namespace GDE {
             void onEvent(const NodeID& _nodeID, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas);
     };
 
+    struct CommonUIConfig {
+        bool stopFurtherClicks = true;
+        bool disabled = false;
+    };
+
     /**
      * @brief Component that every UI element (Buttons, UITexts...) should follow to be rendered correctly by the engine.
      */
@@ -138,6 +143,8 @@ namespace GDE {
              * @brief Texture that contains the sprite of the rendered UI.
              */
             Texture* texture = nullptr;
+            Canvas* canvas = nullptr;
+            NodeID ID;
 
         public:
             FRIEND_CLASS(SpriteBatch)
@@ -151,6 +158,8 @@ namespace GDE {
                 if(!_canvas->getGraph()->hasComponent<UIInteractable>(_nodeID)) {
                     interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);
                 }
+                canvas = _canvas;
+                ID = _nodeID;
             }
 
             /**

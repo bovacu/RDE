@@ -15,6 +15,12 @@
 
 namespace GDE {
 
+    struct OnEventData {
+        Engine* engine;
+        EventDispatcher* eventDispatcher;
+        Event* event;
+    };
+
     Canvas::Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag) : graph(_scene, _canvasTag) {
         scene = _scene;
         auto _cameraID = graph.createNode("CanvasCamera");
@@ -27,15 +33,9 @@ namespace GDE {
     }
 
     void Canvas::onEvent(Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event) {
-        auto& _registry = graph.getNodeContainer();
-        auto _interactables = _registry.group<UIInteractable>(entt::get<Active>);
-
-        for(auto _it = _interactables.rbegin(); _it != _interactables.rend(); _it++) {
-            auto _entity = (*_it);
-            graph.getComponent<UIInteractable>(_entity)->onEvent(_entity, _engine, _eventDispatcher, _event, this);
-        }
-
-        graph.onEventDel(_registry, _event);
+        OnEventData _data { _engine, &_eventDispatcher, &_event };
+        traverseTreeReverse(graph.sceneRoot, (void*)&_data, &Canvas::onEventTreeElement, nullptr);
+        graph.onEventDel(graph.getNodeContainer(), _event);
     }
 
     void Canvas::onUpdate(Delta _dt) {
@@ -44,7 +44,7 @@ namespace GDE {
         _batch.shader = scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
         _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
         batches.emplace_back(_batch);
-        recalculateDrawingBatches(graph.sceneRoot);
+        traverseTree(graph.sceneRoot, nullptr, &Canvas::drawTreeElement, nullptr);
     }
 
     void Canvas::onRender() {
@@ -142,30 +142,32 @@ namespace GDE {
             camera->setFreeViewport(_mainCameraViewPort->getDeviceResolution());
     }
 
-    void Canvas::recalculateDrawingBatches(const NodeID& _nodeID) {
+    void Canvas::traverseTree(const NodeID& _nodeID, void* _data, void (Canvas::*_preFunc)(const NodeID&, void*), void (Canvas::*_postFunc)(const NodeID&, void*)) {
         if(_nodeID == NODE_ID_NULL) return;
 
-        Batch* _currentBatch = &batches.back();
         auto _transform = graph.getComponent<Transform>(_nodeID);
-        if(graph.getNodeContainer().any_of<TextRenderer, UIButton, NineSliceSprite, SpriteRenderer, UICheckbox>(_nodeID)){
-            auto* _renderizable = getRenderizable(_nodeID);
 
-            if(_renderizable != nullptr) {
-                if (_currentBatch->shader == nullptr || _renderizable->getTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _renderizable->shaderID || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
-                    Batch _newBatch;
-                    _newBatch.shader = scene->engine->manager.shaderManager.getShader(_renderizable->shaderID);
-                    _newBatch.textureID = _renderizable->getTexture();
-                    batches.emplace_back(_newBatch);
-                    _currentBatch = &batches.back();
-                }
+        if(_preFunc != nullptr) (this->*_preFunc)(_nodeID, _data);
 
-                _renderizable->drawBatched(_currentBatch->vertexBuffer, _currentBatch->indexBuffer, *_renderizable->transform, *camera->getViewport());
-            }
+        for(auto _it = _transform->children.begin(); _it != _transform->children.end(); _it++) {
+            traverseTree((*_it)->ID, _data, _preFunc, _postFunc);
         }
 
-        for(auto _child : _transform->children) {
-            recalculateDrawingBatches(_child->ID);
+        if(_postFunc != nullptr) (this->*_postFunc)(_nodeID, _data);
+    }
+
+    void Canvas::traverseTreeReverse(const NodeID& _nodeID, void* _data, void (Canvas::*_preFunc)(const NodeID&, void*), void (Canvas::*_postFunc)(const NodeID&, void*)) {
+        if(_nodeID == NODE_ID_NULL) return;
+
+        auto _transform = graph.getComponent<Transform>(_nodeID);
+
+        if(_preFunc != nullptr) (this->*_preFunc)(_nodeID, _data);
+
+        for(auto _it = _transform->children.rbegin(); _it != _transform->children.rend(); _it++) {
+            traverseTree((*_it)->ID, _data, _preFunc, _postFunc);
         }
+
+        if(_postFunc != nullptr) (this->*_postFunc)(_nodeID, _data);
     }
 
     IRenderizable* Canvas::getRenderizable(const NodeID& _nodeID) {
@@ -182,6 +184,32 @@ namespace GDE {
         }
 
         return nullptr;
+    }
+
+    void Canvas::drawTreeElement(const NodeID& _nodeID, void* _data) {
+        Batch* _currentBatch = &batches.back();
+        if(graph.getNodeContainer().any_of<TextRenderer, UIButton, NineSliceSprite, SpriteRenderer, UICheckbox>(_nodeID)){
+            auto* _renderizable = getRenderizable(_nodeID);
+
+            if(_renderizable != nullptr) {
+                if (_currentBatch->shader == nullptr || _renderizable->getTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _renderizable->shaderID || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
+                    Batch _newBatch;
+                    _newBatch.shader = scene->engine->manager.shaderManager.getShader(_renderizable->shaderID);
+                    _newBatch.textureID = _renderizable->getTexture();
+                    batches.emplace_back(_newBatch);
+                    _currentBatch = &batches.back();
+                }
+
+                _renderizable->drawBatched(_currentBatch->vertexBuffer, _currentBatch->indexBuffer, *_renderizable->transform, *camera->getViewport());
+            }
+        }
+    }
+
+    void Canvas::onEventTreeElement(const NodeID& _nodeID, void* _data) {
+        auto* _onEventData = (OnEventData*)_data;
+        if(graph.hasComponent<UIInteractable>(_nodeID)) {
+            graph.getComponent<UIInteractable>(_nodeID)->onEvent(_nodeID, _onEventData->engine, *_onEventData->eventDispatcher, *_onEventData->event, this);
+        }
     }
 
 }

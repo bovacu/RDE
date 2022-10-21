@@ -11,12 +11,12 @@ namespace GDE {
         setConfig(_scene, _config);
 
         UI::texture = config.checkboxTickTexture;
-        _canvas->getGraph()->addComponent<CanvasEventStopper>(_nodeID);
 
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;
 
         UI::interaction->onInnerClickingReleased.bind<&UICheckbox::onMouseReleased>(this);
+        UI::interaction->onInnerClicking.bind<&UICheckbox::onMouseClicked>(this);
 
         auto _textID = _canvas->getGraph()->createNode("Text", _nodeID);
         textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textID, _scene, _canvas, _config.text, config.font);
@@ -54,6 +54,18 @@ namespace GDE {
     }
 
     void UICheckbox::setConfig(Scene* _scene, const UICheckboxConfig& _config) {
+        config = _config;
+
+        if(config.stopFurtherClicks) {
+            if(!UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
+                canvas->getGraph()->addComponent<CanvasEventStopper>(ID);
+            }
+        } else {
+            if(UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
+                canvas->getGraph()->removeComponent<CanvasEventStopper>(ID);
+            }
+        }
+
         if(config.checkboxBackgroundTexture == nullptr) {
             config.checkboxBackgroundTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "checkboxDark");
         }

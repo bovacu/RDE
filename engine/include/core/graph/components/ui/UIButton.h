@@ -11,7 +11,7 @@ namespace GDE {
 
     FORWARD_DECLARE_CLASS(TextRenderer, Font, NineSliceSprite)
 
-    struct UIButtonConfig {
+    struct UIButtonConfig : CommonUIConfig {
         std::string text = "Button Text";
         Texture* idleTexture = nullptr;
         Texture* selectedTexture = nullptr;
@@ -22,7 +22,6 @@ namespace GDE {
         Vec2F interactableArea = {128, 32 };
         Color buttonColor = Color::White;
         Color textColor = Color::White;
-        bool disabled = false;
     };
 
     class UIButton : public UI {

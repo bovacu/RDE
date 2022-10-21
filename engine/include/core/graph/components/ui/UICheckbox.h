@@ -11,7 +11,7 @@ namespace GDE {
 
     FORWARD_DECLARE_CLASS(TextRenderer, Font, NineSliceSprite, SpriteRenderer)
 
-    struct UICheckboxConfig {
+    struct UICheckboxConfig : CommonUIConfig {
         std::string text = "Checkbox text";
         Texture* checkboxTickTexture = nullptr;
         Texture* checkboxBackgroundTexture = nullptr;
@@ -47,6 +47,7 @@ namespace GDE {
 
         private:
             void onMouseReleased(MouseCode _mouseButton);
+            void onMouseClicked(MouseCode _mouseButton) {  }
     };
 
 }

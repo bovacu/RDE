@@ -87,7 +87,10 @@ namespace GDE {
             void onDebugRender();
 
         private:
-            void recalculateDrawingBatches(const NodeID& _nodeID);
+            void traverseTree(const NodeID& _nodeID, void* _data, void (Canvas::*_preFunc)(const NodeID&, void*), void (Canvas::*_postFunc)(const NodeID&, void*));
+            void traverseTreeReverse(const NodeID& _nodeID, void* _data, void (Canvas::*_preFunc)(const NodeID&, void*), void (Canvas::*_postFunc)(const NodeID&, void*));
+            void drawTreeElement(const NodeID& _nodeID, void* _data);
+            void onEventTreeElement(const NodeID& _nodeID, void* _data);
             IRenderizable* getRenderizable(const NodeID& _nodeID);
     };
 

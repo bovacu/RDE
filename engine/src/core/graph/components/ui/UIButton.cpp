@@ -11,7 +11,6 @@ namespace GDE {
         setConfig(_scene, _config);
 
         UI::texture = config.idleTexture;
-        _canvas->getGraph()->addComponent<CanvasEventStopper>(_nodeID);
 
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;
@@ -46,6 +45,16 @@ namespace GDE {
 
     void UIButton::setConfig(Scene* _scene, const UIButtonConfig& _config) {
         config = _config;
+
+        if(config.stopFurtherClicks) {
+            if(!UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
+                canvas->getGraph()->addComponent<CanvasEventStopper>(ID);
+            }
+        } else {
+            if(UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
+                canvas->getGraph()->removeComponent<CanvasEventStopper>(ID);
+            }
+        }
 
         if(config.idleTexture == nullptr) {
             config.idleTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark");
