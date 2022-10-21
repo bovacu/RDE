@@ -12,6 +12,7 @@
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/TextRenderer.h"
 #include "core/graph/components/ui/UIButton.h"
+#include "core/graph/components/ui/UIPanel.h"
 
 namespace GDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
@@ -435,6 +436,7 @@ namespace GDE {
         bodyComponent(_graph, _selectedNode);
         textComponent(_graph, _selectedNode);
         uiButtonComponent(_graph, _selectedNode);
+        uiPanelComponent(_graph, _selectedNode);
 
         ImGui::End();
     }
@@ -479,7 +481,7 @@ namespace GDE {
             float _pos[2] = {_transform->getPosition().x, _transform->getPosition().y};
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
-            ImGui::PushID(1);
+            ImGui::PushID(2);
             if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
                 _transform->setPosition(_pos[0], _pos[1]);
             }
@@ -491,7 +493,7 @@ namespace GDE {
             float _angle = _transform->getRotation();
             ImGui::SameLine();
             ImGui::SetNextItemWidth(50);
-            ImGui::PushID(2);
+            ImGui::PushID(3);
             if(ImGui::DragFloat("##myInput", &_angle, 0.1f))
                 _transform->setRotation(_angle);
             ImGui::PopID();
@@ -502,7 +504,7 @@ namespace GDE {
             float _scale[2] = {_transform->getScale().x, _transform->getScale().y};
             ImGui::SameLine(0, 30);
             ImGui::SetNextItemWidth(100);
-            ImGui::PushID(3);
+            ImGui::PushID(4);
             if(ImGui::DragFloat2("##myInput", _scale, 0.05))
                 _transform->setScale(_scale[0], _scale[1]);
             ImGui::PopID();
@@ -548,7 +550,7 @@ namespace GDE {
                 int _pos[2] = {_mainCamera->getViewport()->getVirtualResolution().x, _mainCamera->getViewport()->getVirtualResolution().y};
                 ImGui::SameLine();
                 ImGui::SetNextItemWidth(100);
-                ImGui::PushID(2);
+                ImGui::PushID(5);
                 if(ImGui::InputInt2("##myInput", _pos)) {
                     _mainCamera->getViewport()->updateVirtualResolution({_pos[0], _pos[1]});
                 }
@@ -559,7 +561,7 @@ namespace GDE {
             float _zoomLevel[1] = {_camera->getCurrentZoomLevel()};
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
-            ImGui::PushID(1);
+            ImGui::PushID(6);
             if(ImGui::DragFloat("##myInput", _zoomLevel, 0.5f)) {
                 _mainCamera->setCurrentZoomLevel(_zoomLevel[0]);
             }
@@ -618,6 +620,46 @@ namespace GDE {
 
         if(ImGui::CollapsingHeader("UI Button", ImGuiTreeNodeFlags_DefaultOpen)) {
             if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+
+            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+
+            ImGui::Text("Size ");
+            float _size[2] = { _uiButton->nineSliceSprite->nineSliceSize.x, _uiButton->nineSliceSprite->nineSliceSize.y };
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(7);
+            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
+                auto _config = _uiButton->getConfig();
+                _config.buttonTextureSize = { _size[0], _size[1] };
+                _uiButton->setConfig(engine->manager.sceneManager.getDisplayedScene(), _config);
+            }
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+
+            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::uiPanelComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<UIPanel>(_selectedNode)) return;
+
+        auto _uiPanel = _graph->getComponent<UIPanel>(_selectedNode);
+
+        if(ImGui::CollapsingHeader("UI Panel", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+
+            ImGui::Text("Size ");
+            float _size[2] = { _uiPanel->nineSliceSprite->nineSliceSize.x, _uiPanel->nineSliceSprite->nineSliceSize.y };
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(8);
+            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
+                auto _config = _uiPanel->getConfig();
+                _config.size = { _size[0], _size[1] };
+                _uiPanel->setConfig(engine->manager.sceneManager.getDisplayedScene(), _config);
+            }
+            ImGui::PopID();
 
             if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
         }

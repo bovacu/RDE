@@ -32,14 +32,12 @@ namespace GDE {
             SpriteRenderer* checkboxBackgroundSprite;
             SpriteRenderer* tickSprite;
             bool checked;
-            NineSlice fakeNineSlice;
             Transform* textTransform, *checkboxBackgroundTransform, *tickTransform;
 
         public:
             UICheckbox(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas,const UICheckboxConfig& _config);
             ~UICheckbox() override {  }
 
-            [[nodiscard]] NineSlice& getNineSlice() const;
             [[nodiscard]] Vec2F getSize() const override;
 
             UICheckboxConfig getConfig();

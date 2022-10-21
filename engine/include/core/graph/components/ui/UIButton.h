@@ -34,7 +34,6 @@ namespace GDE {
 
             UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
 
-            [[nodiscard]] NineSlice& getNineSlice() const;
             [[nodiscard]] Vec2F getSize() const override;
 
             UIButtonConfig getConfig();

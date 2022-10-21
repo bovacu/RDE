@@ -52,9 +52,6 @@ namespace GDE {
 
 
 
-
-
-
             if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onClick.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
                 auto* _mre = (MouseButtonReleasedEvent*)&_event;

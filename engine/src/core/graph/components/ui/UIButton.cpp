@@ -31,10 +31,6 @@ namespace GDE {
         textRenderer->color = config.textColor;
     }
 
-    NineSlice& UIButton::getNineSlice() const {
-        return nineSliceSprite->getNineSlice();
-    }
-
     Vec2F UIButton::getSize() const {
         return UI::interaction->sizeOfInteraction;
     }

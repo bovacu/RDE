@@ -31,6 +31,7 @@
 #include "core/graph/components/NineSliceSprite.h"
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UICheckbox.h"
+#include "core/graph/components/ui/UIPanel.h"
 
 #include "core/systems/localization/LocalizationManager.h"
 

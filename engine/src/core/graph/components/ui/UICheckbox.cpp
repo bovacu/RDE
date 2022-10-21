@@ -41,10 +41,6 @@ namespace GDE {
         setConfig(_scene, config);
     }
 
-    NineSlice& UICheckbox::getNineSlice() const {
-        return const_cast<NineSlice&>(fakeNineSlice);
-    }
-
     Vec2F UICheckbox::getSize() const {
         return UI::interaction->sizeOfInteraction;
     }
