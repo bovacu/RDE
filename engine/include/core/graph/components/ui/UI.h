@@ -24,7 +24,26 @@ namespace GDE {
      *
      */
     class UIInteractable {
-        FRIEND_CLASS(Canvas, UIButton, UICheckbox)
+        FRIEND_CLASS(Canvas, UIButton, UICheckbox, NineSliceSprite)
+
+        private:
+            /**
+             * @brief Status of the mouse entering and exiting.
+             */
+            enum MouseStatus {
+                MouseEntered,
+                MouseExited
+            };
+
+            /**
+             * @brief Current mouse status.
+             *
+             */
+            MouseStatus mouseStatus = MouseStatus::MouseExited;
+
+            MouseStatus mouseInnerStatus = MouseStatus::MouseExited;
+
+            bool interactable = true;
 
         private:
             /**
@@ -104,22 +123,6 @@ namespace GDE {
 
         private:
             /**
-             * @brief Status of the mouse entering and exiting.
-             */
-            enum MouseStatus {
-                MouseEntered,
-                MouseExited
-            };
-
-            /**
-             * @brief Current mouse status.
-             *
-             */
-            MouseStatus mouseStatus = MouseStatus::MouseExited;
-
-            MouseStatus mouseInnerStatus = MouseStatus::MouseExited;
-
-            /**
              * @brief Function called inside the Graph system to take the events and handle them inside the UI elements.
              * @param _nodeID Entity that has the UI element
              * @param _eventDispatcher Event dispatcher
@@ -131,7 +134,6 @@ namespace GDE {
 
     struct CommonUIConfig {
         bool stopFurtherClicks = true;
-        bool disabled = false;
     };
 
     /**
@@ -161,6 +163,10 @@ namespace GDE {
                 canvas = _canvas;
                 ID = _nodeID;
             }
+
+            virtual bool isInteractable() = 0;
+
+            virtual void setInteractable(bool _interactable) = 0;
 
             /**
              * @see IRenderizable

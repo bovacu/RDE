@@ -28,11 +28,12 @@ namespace GDE {
      * Any new element that end-users want to create and render, must extend this method.
      */
     class IRenderizable {
-        FRIEND_CLASS(ShaderManager)
+        FRIEND_CLASS(ShaderManager, SpriteBatch, ConfigManager, Canvas)
+
         protected:
             inline static std::unordered_map<std::string, ShaderID> defaultShaders;
 
-        public:
+        protected:
             /**
              * @brief Color that the sprite should be tint in. White means natural color.
              */
@@ -54,16 +55,17 @@ namespace GDE {
             BatchPriority batchPriority = BatchPriority::SpritePriority;
 
             /**
-             * @brief Transform of the Node.
-             */
-            Transform* transform;
-
-            /**
              * @brief Origin of the renderizable. By default it is (0.5, 0.5), which means it is centered.
              */
             Vec2F pivot { 0.5f, 0.5f };
 
             bool enabled = true;
+
+        public:
+            /**
+             * @brief Transform of the Node.
+             */
+            Transform* transform;
 
         public:
             IRenderizable(Transform* _transform) : transform(_transform) {  }
@@ -85,6 +87,18 @@ namespace GDE {
              */
             [[nodiscard]] virtual FloatRect getRegion() const = 0;
 
+            // All the getters and setters are created because non-ui elements will use this default implementation, as they are simple
+            // but ui elements are complex and the result of this simple functions could be drastically different internally.
+            virtual ShaderID getShaderID() { return shaderID; }
+            virtual Color getColor() { return color; }
+            virtual int getLayer() { return layer; }
+            virtual Vec2F getPivot() { return pivot; }
+
+            virtual void setShaderID(ShaderID _shaderID) { shaderID = _shaderID; }
+            virtual void setColor(const Color& _color) { color = _color; }
+            virtual void setLayer(int _layer) { layer = _layer; }
+            virtual void setPivot(const Vec2F& _pivot) { pivot = _pivot; }
+
             /**
              * @brief Method that every renderizable must implement and it tells the SpriteBatch how to send the data to the GPU.
              * @param _vertices List with the current added vertices and where the new vertices must be added.
@@ -93,6 +107,14 @@ namespace GDE {
              * @param _viewport Viewport of the scene.
              */
             virtual void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {  };
+
+            /**
+             * @brief Method that every renderizable must implement and it tells the SpriteBatch how to send the data to the GPU.
+             * @param _vertices List with the current added vertices and where the new vertices must be added.
+             * @param _indices List with the current added indices and where the new indices must be added.
+             * @param _transform Transform of the renderizable.
+             * @param _viewport Viewport of the scene.
+             */
             virtual void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {  };
 
             virtual ~IRenderizable() {  }

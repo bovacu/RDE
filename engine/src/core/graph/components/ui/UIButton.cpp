@@ -91,43 +91,57 @@ namespace GDE {
     }
 
     void UIButton::onMouseEntered() {
-        if(!config.disabled) {
+        if(!interaction->interactable) return;
+
+        nineSliceSprite->texture = config.selectedTexture;
+    }
+
+    void UIButton::onMouseExited() {
+        if(!interaction->interactable) return;
+
+        nineSliceSprite->texture = config.idleTexture;
+    }
+
+    void UIButton::onMouseClicked(MouseCode _mouseCode) {
+        if(!interaction->interactable) return;
+
+        nineSliceSprite->texture = config.clickedTexture;
+    }
+
+    void UIButton::onMouseReleased(MouseCode _mouseCode) {
+        if(!interaction->interactable) return;
+
+        if(UI::interaction->mouseInnerStatus == UIInteractable::MouseExited) {
+            nineSliceSprite->texture = config.idleTexture;
+        } else {
             nineSliceSprite->texture = config.selectedTexture;
         }
     }
 
-    void UIButton::onMouseExited() {
-        if(!config.disabled) {
-            nineSliceSprite->texture = config.idleTexture;
-        }
-    }
-
-    void UIButton::onMouseClicked(MouseCode _mouseCode) {
-        if(!config.disabled) {
-            nineSliceSprite->texture = config.clickedTexture;
-        }
-    }
-
-    void UIButton::onMouseReleased(MouseCode _mouseCode) {
-        if(!config.disabled) {
-            if(UI::interaction->mouseInnerStatus == UIInteractable::MouseExited) {
-                nineSliceSprite->texture = config.idleTexture;
-            } else {
-                nineSliceSprite->texture = config.selectedTexture;
-            }
-        }
-    }
-
-    void UIButton::setDisabled(bool _disabled) {
-        config.disabled = _disabled;
-        if(config.disabled) {
+    void UIButton::setInteractable(bool _enabled) {
+        interaction->interactable = _enabled;
+        if(!interaction->interactable) {
             nineSliceSprite->texture = config.disabledTexture;
         } else {
             onMouseReleased(MouseCode::ButtonLeft);
         }
     }
 
-    bool UIButton::isDisabled() {
-        return config.disabled;
+    bool UIButton::isInteractable() {
+        return interaction->interactable;
+    }
+
+    void UIButton::setColor(const Color& _color) {
+        if(nineSliceSprite != nullptr) {
+            nineSliceSprite->color = _color;
+        }
+    }
+
+    Color UIButton::getColor() {
+        if(nineSliceSprite != nullptr) {
+            return nineSliceSprite->color;
+        }
+
+        return Color::White;
     }
 }

@@ -24,7 +24,7 @@ namespace GDE {
     }
 
     void UIInteractable::onEvent(const NodeID& _nodeID, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas) {
-        if (!_canvas->getGraph()->hasComponent<Active>(_nodeID)) return;
+        if (!_canvas->getGraph()->hasComponent<Active>(_nodeID) || !interactable) return;
 
         if(trigger(_nodeID, _engine, _canvas) && !_event.handled) {
 

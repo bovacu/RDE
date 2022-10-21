@@ -104,10 +104,30 @@ namespace GDE {
     }
 
     void UICheckbox::onMouseReleased(MouseCode _mouseButton) {
+        if(!interaction->interactable) return;
+
         checked = !checked;
         if(UI::interaction->mouseInnerStatus == UIInteractable::MouseEntered) {
             tickSprite->enabled = checked;
         }
+    }
+
+    void UICheckbox::setInteractable(bool _interactable) {
+        interaction->interactable = _interactable;
+
+        if(!interaction->interactable) {
+            checkboxBackgroundSprite->color = Color::Disabled;
+            tickSprite->color = Color::Disabled;
+            textRenderer->color = Color::Disabled;
+        } else {
+            checkboxBackgroundSprite->color = checkboxBackgroundSprite->color == Color::Disabled ? Color::White : checkboxBackgroundSprite->color;
+            tickSprite->color = tickSprite->color == Color::Disabled ? Color::White : tickSprite->color;
+            textRenderer->color = textRenderer->color == Color::Disabled ? Color::White : textRenderer->color;
+        }
+    }
+
+    bool UICheckbox::isInteractable() {
+        return interaction->interactable;
     }
 
 

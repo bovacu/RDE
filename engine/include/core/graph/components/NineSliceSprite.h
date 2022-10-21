@@ -10,16 +10,23 @@
 
 namespace GDE {
 
+    struct NineSliceSpriteConfig : CommonUIConfig {
+        Vec2F size = { -1, -1 };
+        Texture* texture = nullptr;
+        Color color = Color::White;
+    };
+
     FORWARD_DECLARE_CLASS(SpriteRenderer)
     /**
      * @brief Component that is based on the SpriteRenderer, but allows to render UI images with a different size than the original
      * without loosing quality. The setup of this NineSlice should be done via TexturePacker.
      */
     class NineSliceSprite : public UI {
-        FRIEND_CLASS(UIButton)
+        FRIEND_CLASS(UIButton, UIPanel)
 
         private:
             SpriteRenderer* spriteRenderer = nullptr;
+            NineSliceSpriteConfig config;
 
         public:
             /**
@@ -40,6 +47,9 @@ namespace GDE {
 
             void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
             void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) override;
+
+            void setInteractable(bool _enabled) override;
+            bool isInteractable() override;
 
             ~NineSliceSprite() override {  }
     };

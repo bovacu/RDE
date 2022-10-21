@@ -40,8 +40,11 @@ namespace GDE {
             UIButtonConfig getConfig();
             void setConfig(Scene* _scene, const UIButtonConfig& _config);
 
-            void setDisabled(bool _disabled);
-            bool isDisabled();
+            void setInteractable(bool _disabled) override;
+            bool isInteractable() override;
+
+            void setColor(const Color& _color) override;
+            Color getColor() override;
 
             ~UIButton() override {  }
 

@@ -87,7 +87,7 @@ namespace GDE {
 //        });
 
 //        _sprites.each([&_renderManager](const auto _entity, NineSliceSprite& _nineSlice, const Transform& _transform, const Active& _) {
-//            if(!_nineSlice.getNineSlice().isEnabled()) return;
+//            if(!_nineSlice.getNineSlice().isInteractable()) return;
 //
 //            auto _rects = _nineSlice.getNineSlice().subRects;
 //            _renderManager.drawSquare({_transform.getPosition().x - (float)_nineSlice.getRegion().size.x / 2.f + (float)_rects[0].bottomLeftCorner.x + (float)_rects[0].size.x / 2.f,

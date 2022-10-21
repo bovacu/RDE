@@ -45,6 +45,9 @@ namespace GDE {
             UICheckboxConfig getConfig();
             void setConfig(Scene* _scene, const UICheckboxConfig& _config);
 
+            void setInteractable(bool _interactable) override;
+            bool isInteractable() override;
+
         private:
             void onMouseReleased(MouseCode _mouseButton);
             void onMouseClicked(MouseCode _mouseButton) {  }

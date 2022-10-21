@@ -22,7 +22,7 @@ namespace GDE {
      */
     class SpriteRenderer : public IRenderizable {
 
-        FRIEND_CLASS(SpriteBatch)
+        FRIEND_CLASS(UICheckbox, UIButton)
 
         private:
             /**

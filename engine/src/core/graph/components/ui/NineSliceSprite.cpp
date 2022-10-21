@@ -118,4 +118,18 @@ namespace GDE {
         _data.push_back(_nineSliceData);
     }
 
+    void NineSliceSprite::setInteractable(bool _interactable) {
+        interaction->interactable = _interactable;
+
+        if(!interaction->interactable) {
+            color = Color::Disabled;
+        } else {
+            color = color == Color::Disabled ? Color::White : color;
+        }
+    }
+
+    bool NineSliceSprite::isInteractable() {
+        return interaction->interactable;
+    }
+
 }
