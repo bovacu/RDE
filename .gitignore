@@ -2,6 +2,10 @@
 cmake-build-debug/
 
 cmake-build-release/
+cmake-build-debug/
+cmake-build-releasewithdebuginfo_lib/
+cmake-build-rwdilib/
+cmake-build-releaselib/
 
 .cache/
 
@@ -461,3 +465,15 @@ cmake-build-rwdilib/.cmake/api/v1/reply/codemodel-v2-7bc0258fe0c8dd379e22.json
 cmake-build-rwdilib/.cmake/api/v1/reply/index-2022-10-18T19-25-48-0639.json
 
 cmake-build-rwdilib/.cmake/api/v1/reply/target-GDE-RelWithDebInfo-add0b34b9a2be8c76cb2.json
+
+cmake-build-releaselib/.cmake/api/v1/reply/codemodel-v2-b84f6a0148e04ae2a548.json
+
+cmake-build-releaselib/.cmake/api/v1/reply/index-2022-10-20T18-17-49-0044.json
+
+cmake-build-releaselib/.cmake/api/v1/reply/target-GDE-Release-41f0ff4166348eda1673.json
+
+cmake-build-rwdilib/.cmake/api/v1/reply/codemodel-v2-50d68631bb48f1633c37.json
+
+cmake-build-rwdilib/.cmake/api/v1/reply/index-2022-10-20T18-17-49-0067.json
+
+cmake-build-rwdilib/.cmake/api/v1/reply/target-GDE-RelWithDebInfo-acc5bd1b769f2aea4c5c.json
