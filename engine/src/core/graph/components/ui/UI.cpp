@@ -26,6 +26,27 @@ namespace GDE {
     void UIInteractable::onEvent(const NodeID& _nodeID, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas) {
         if (!_canvas->getGraph()->hasComponent<Active>(_nodeID) || !interactable) return;
 
+        if(focused) {
+            if(_eventDispatcher.dispatchEvent<KeyPressedEvent>() && !onInnerKeyPressed.isEmpty()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                auto* _kpe = (KeyPressedEvent*)&_event;
+                onInnerKeyPressed(_kpe->getKeyCode(), (char)SDL_GetKeyFromScancode((SDL_Scancode)_kpe->getKeyCode()));
+            }
+
+            if(_eventDispatcher.dispatchEvent<KeyReleasedEvent>() && !onInnerKeyReleased.isEmpty()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                auto* _kpe = (KeyReleasedEvent*)&_event;
+                onInnerKeyReleased(_kpe->getKeyCode(), (char)SDL_GetKeyFromScancode((SDL_Scancode)_kpe->getKeyCode()));
+            }
+
+            if(_eventDispatcher.dispatchEvent<KeyPressedEvent>() && !onKeyPressed.isEmpty()) {
+                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                auto* _kpe = (KeyPressedEvent*)&_event;
+                onKeyPressed(_kpe->getKeyCode(), (char)SDL_GetKeyFromScancode((SDL_Scancode)_kpe->getKeyCode()));
+                return;
+            }
+        }
+
         if(trigger(_nodeID, _engine, _canvas) && !_event.handled) {
 
             if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onInnerClickingReleased.isEmpty()) {
@@ -40,15 +61,13 @@ namespace GDE {
                 onInnerClicking(_mre->getMouseButton());
             }
 
-            if(_eventDispatcher.dispatchEvent<MouseMovedEvent>()) {
+            if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() && !onInnerMouseEntered.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
                 if(mouseInnerStatus == MouseStatus::MouseExited) {
                     mouseInnerStatus = MouseStatus::MouseEntered;
-                    if(onInnerMouseEntered.isEmpty()) return;
                     onInnerMouseEntered();
                 }
             }
-
 
 
 
@@ -66,12 +85,8 @@ namespace GDE {
                 return;
             }
 
-            if(_eventDispatcher.dispatchEvent<KeyReleasedEvent>() && !onKeyPressed.isEmpty()) {
-                _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
-                auto* _kre = (KeyReleasedEvent*)&_event;
-                onKeyPressed(_kre->getKeyCode());
-                return;
-            }
+
+
 
             if(_eventDispatcher.dispatchEvent<ControllerButtonUpEvent>() && !onGamepadButtonPressed.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);

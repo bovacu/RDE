@@ -139,10 +139,9 @@ namespace GDE {
 
     void Canvas::matchMainCameraViewPort() {
         auto* _mainCameraViewPort = scene->getMainCamera()->getViewport();
-        if(dynamic_cast<AdaptiveViewPort*>(_mainCameraViewPort)) {
-            camera->setAdaptiveViewport(_mainCameraViewPort->getVirtualResolution(), _mainCameraViewPort->getDeviceResolution());
-        } else
-            camera->setFreeViewport(_mainCameraViewPort->getDeviceResolution());
+
+        if(_mainCameraViewPort == nullptr) return;
+        camera->setAdaptiveViewport(_mainCameraViewPort->getVirtualResolution(), _mainCameraViewPort->getDeviceResolution());
     }
 
     void Canvas::traverseTree(const NodeID& _nodeID, void* _data, void (Canvas::*_preFunc)(const NodeID&, void*), void (Canvas::*_postFunc)(const NodeID&, void*)) {
@@ -152,8 +151,8 @@ namespace GDE {
 
         if(_preFunc != nullptr) (this->*_preFunc)(_nodeID, _data);
 
-        for(auto _it = _transform->children.begin(); _it != _transform->children.end(); _it++) {
-            traverseTree((*_it)->ID, _data, _preFunc, _postFunc);
+        for(auto& _it : _transform->children) {
+            traverseTree(_it->ID, _data, _preFunc, _postFunc);
         }
 
         if(_postFunc != nullptr) (this->*_postFunc)(_nodeID, _data);
@@ -202,10 +201,10 @@ namespace GDE {
             _currentBatch = &batches.back();
 
             glEnable(GL_SCISSOR_TEST);
-            glScissor(scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2 + _position.x - (_uiInput->getSize().x * _uiInput->pivot.x),
-                      scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2 + _position.y - (_uiInput->getSize().y * _uiInput->pivot.y),
-                      _uiInput->getSize().x,
-                      _uiInput->getSize().y
+            glScissor((GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x - (_uiInput->getSize().x * _uiInput->pivot.x)),
+                      (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y - (_uiInput->getSize().y * _uiInput->pivot.y)),
+                      (GLint)_uiInput->getSize().x,
+                      (GLint)_uiInput->getSize().y
                       );
         }
 

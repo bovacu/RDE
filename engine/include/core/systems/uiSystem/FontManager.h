@@ -11,6 +11,7 @@
 #include "core/systems/fileSystem/FileManager.h"
 
 #define MAX_WIDTH 1024
+#define MAX_CHARACTERS 128
 
 namespace GDE {
 
@@ -36,7 +37,7 @@ namespace GDE {
             int width = -1;
             int height = -1;
             int fontSize = -1;
-            CharInfo characters[128];
+            CharInfo characters[MAX_CHARACTERS];
             std::string fontName;
             std::string originalPath;
 

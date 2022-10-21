@@ -97,7 +97,7 @@ namespace GDE {
                         if(!debugOptions.showCircleLines) return;
 
                         const int _segments = 20;
-                        float _theta = _body->transform->getRotation();
+                        float _theta = degreesToRadians(_body->transform->getRotation());
                         float _inc = PI * 2.0f / (float)_segments;
                         Vec2F _points[_segments];
 

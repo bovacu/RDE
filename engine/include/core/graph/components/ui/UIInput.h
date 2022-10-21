@@ -12,7 +12,7 @@
 namespace GDE {
 
     struct UIInputConfig : CommonUIConfig {
-        Vec2F inputSize = { 128, 32 };
+        Vec2F inputSize = { 256, 32 };
         Texture* inputBackgroundTexture = nullptr;
         Color inputBackgroundColor = Color::White;
 
@@ -22,20 +22,31 @@ namespace GDE {
         bool showPlaceholderText = true;
         Color placeholderTextColor = Color::Placeholder;
 
-        Color textColor;
+        Color textColor = Color::White;
         std::string text = "";
 
         Vec2F textsOffsetFromLeft = { 5, 0 };
+
+        Texture* caretTexture = nullptr;
+        float caretHeight = 20.f;
     };
 
     class UIInput : public UI {
         private:
-        UIInputConfig config;
+            UIInputConfig config;
+            int pointer = 0;
+            float textDisplacement = 0;
+            bool pressingShift = false;
+            bool upperCase = false;
 
         public:
             TextRenderer* textRenderer;
             TextRenderer* placeholderTextRenderer;
             NineSliceSprite* nineSliceSprite;
+            SpriteRenderer* caretSprite;
+            Transform* caretTransform;
+            Transform* textTransform;
+            Transform* nineSliceTransform;
 
             UIInput(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIInputConfig& _config);
 
@@ -57,6 +68,10 @@ namespace GDE {
             void onMouseExited();
             void onMouseClicked(MouseCode _mouseCode);
             void onMouseReleased(MouseCode _mouseCode);
+            void onKeyPressed(KeyCode _keyCode, char _char);
+            void onKeyReleased(KeyCode _keyCode, char _char);
+            void updatePlaceholder();
+            void updateCaret();
     };
 
 } // GDE

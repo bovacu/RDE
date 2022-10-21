@@ -45,7 +45,7 @@ namespace GDE {
 
         _rowHeight = 0;
 
-        for (int _i = 32; _i < 128; _i++) {
+        for (int _i = 32; _i < MAX_CHARACTERS; _i++) {
             if (FT_Load_Char(face, _i, FT_LOAD_RENDER)) {
                 LOG_E("Loading character", _i, " failed!")
                 continue;
@@ -58,6 +58,7 @@ namespace GDE {
             }
 
             texture.loadTextSubTextures({_ox, _oy}, {(int)g->bitmap.width, (int)g->bitmap.rows}, g->bitmap.buffer);
+
             characters[_i].advance.x = (int)g->advance.x >> 6;
             characters[_i].size      = { static_cast<int>(face->glyph->bitmap.width), static_cast<int>(face->glyph->bitmap.rows) };
             characters[_i].bearing   = { face->glyph->bitmap_left, face->glyph->bitmap_top };

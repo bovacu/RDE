@@ -44,6 +44,7 @@ namespace GDE {
             MouseStatus mouseInnerStatus = MouseStatus::MouseExited;
 
             bool interactable = true;
+            bool focused = false;
 
         private:
             /**
@@ -69,6 +70,18 @@ namespace GDE {
              *
              */
             MDelegate<void()> onInnerMouseExited;
+
+            /**
+             * @brief Callback triggered when a key has just been pressed.
+             *
+             */
+            MDelegate<void(KeyCode, char)> onInnerKeyPressed;
+
+            /**
+             * @brief Callback triggered when a key has just been released.
+             *
+             */
+            MDelegate<void(KeyCode, char)> onInnerKeyReleased;
 
         public:
 
@@ -100,7 +113,7 @@ namespace GDE {
              * @brief Callback triggered when a key is pressed.
              *
              */
-            MDelegate<void(KeyCode)> onKeyPressed;
+            MDelegate<void(KeyCode, char)> onKeyPressed;
 
             /**
              * @brief Callback triggered when a gamepad button is pressed.
