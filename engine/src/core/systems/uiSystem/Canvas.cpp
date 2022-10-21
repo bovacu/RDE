@@ -12,6 +12,7 @@
 #include "core/Engine.h"
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UICheckbox.h"
+#include "core/graph/components/ui/UIInput.h"
 
 namespace GDE {
 
@@ -39,12 +40,7 @@ namespace GDE {
     }
 
     void Canvas::onUpdate(Delta _dt) {
-        batches.clear();
-        Batch _batch;
-        _batch.shader = scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
-        _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
-        batches.emplace_back(_batch);
-        traverseTree(graph.sceneRoot, nullptr, &Canvas::drawTreeElement, nullptr);
+
     }
 
     void Canvas::onRender() {
@@ -52,6 +48,13 @@ namespace GDE {
 
         auto& _renderManager = graph.scene->engine->manager.renderManager;
         _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
+
+        batches.clear();
+        Batch _batch;
+        _batch.shader = scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
+        _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
+        batches.emplace_back(_batch);
+        traverseTree(graph.sceneRoot, nullptr, &Canvas::drawTreeElementPre, &Canvas::drawTreeElementPost);
 
         _renderManager.drawUI(batches);
 
@@ -186,8 +189,26 @@ namespace GDE {
         return nullptr;
     }
 
-    void Canvas::drawTreeElement(const NodeID& _nodeID, void* _data) {
+    void Canvas::drawTreeElementPre(const NodeID& _nodeID, void* _data) {
         Batch* _currentBatch = &batches.back();
+
+        if(graph.hasComponent<UIInput>(_nodeID)) {
+            stencils.push(_nodeID);
+            auto* _transform = graph.getComponent<Transform>(_nodeID);
+            auto _position = _transform->getModelMatrixPosition();
+            auto* _uiInput = graph.getComponent<UIInput>(_nodeID);
+
+            forceRender();
+            _currentBatch = &batches.back();
+
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2 + _position.x - (_uiInput->getSize().x * _uiInput->pivot.x),
+                      scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2 + _position.y - (_uiInput->getSize().y * _uiInput->pivot.y),
+                      _uiInput->getSize().x,
+                      _uiInput->getSize().y
+                      );
+        }
+
         if(graph.getNodeContainer().any_of<TextRenderer, UIButton, NineSliceSprite, SpriteRenderer, UICheckbox>(_nodeID)){
             auto* _renderizable = getRenderizable(_nodeID);
 
@@ -205,11 +226,31 @@ namespace GDE {
         }
     }
 
+    void Canvas::drawTreeElementPost(const NodeID& _nodeID, void* _data) {
+        if(!stencils.empty() && stencils.top() == _nodeID) {
+            stencils.pop();
+            forceRender();
+            glDisable(GL_SCISSOR_TEST);
+        }
+    }
+
     void Canvas::onEventTreeElement(const NodeID& _nodeID, void* _data) {
         auto* _onEventData = (OnEventData*)_data;
         if(graph.hasComponent<UIInteractable>(_nodeID)) {
             graph.getComponent<UIInteractable>(_nodeID)->onEvent(_nodeID, _onEventData->engine, *_onEventData->eventDispatcher, *_onEventData->event, this);
         }
+    }
+
+    void Canvas::forceRender() {
+        auto& _renderManager = graph.scene->engine->manager.renderManager;
+        _renderManager.beginDraw(*camera, nullptr);
+        _renderManager.drawUI(batches);
+
+        batches.clear();
+        Batch _batch;
+        _batch.shader = scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
+        _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
+        batches.emplace_back(_batch);
     }
 
 }

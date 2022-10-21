@@ -172,7 +172,9 @@ namespace GDE {
          auto* _memData = Profiler::getTotalVirtualMemory();
          ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
         ImGui::Separator();
-        ImGui::Text("Draw Calls: %d", engine->manager.renderManager.getDrawCalls());
+        auto [_drawCalls, _uiDrawCalls] = engine->manager.renderManager.getDrawCalls();
+        ImGui::Text("Draw Calls: %d", _drawCalls);
+        ImGui::Text("UI Draw Calls: %d", _uiDrawCalls);
         ImGui::Text("Total Triangles: %d", engine->manager.renderManager.getTotalTriangles());
         ImGui::Text("Total Images: %d", engine->manager.renderManager.getTotalTriangles() / 2);
         ImGui::Separator();

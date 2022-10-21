@@ -155,8 +155,8 @@ namespace GDE {
 
     Font* FontManager::getSpecificFont(FileManager& _fileManager, const std::string& _fontName, int _fontSize) {
         if(fonts.find(_fontName) == fonts.end()) {
-            LOG_E("Font ", _fontName, " is not loaded")
-            return nullptr;
+            LOG_E("Font ", _fontName, " is not loaded, so creating it...")
+            return loadFont(_fileManager, _fontName, _fontSize);
         }
 
         for(auto& _fontHandler : fonts[_fontName]) {

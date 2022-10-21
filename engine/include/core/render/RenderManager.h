@@ -18,7 +18,7 @@ namespace GDE {
         public:
             void resetDebugInfo();
             int getTotalTriangles();
-            int getDrawCalls();
+            std::tuple<int, int> getDrawCalls();
 
         private:
             /**
@@ -90,7 +90,7 @@ namespace GDE {
              * @brief Renders an IRenderizable immediately with no batching. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
              * @param _batches Static batches to render.
              */
-            void drawUI(const std::vector<Batch>& _batches);
+            void drawUI(std::vector<Batch>& _batches);
 
             /**
              * @brief Sends the data batched to the GPU, must be called after beginDraw and what we want to render.

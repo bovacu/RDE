@@ -21,7 +21,7 @@ namespace GDE {
      */
     class TextRenderer : public IRenderizable {
 
-        FRIEND_CLASS(UIButton, UICheckbox)
+        FRIEND_CLASS(UIButton, UICheckbox, UIInput)
 
         private:
             /**

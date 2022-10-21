@@ -32,6 +32,7 @@ namespace GDE {
         static const Color Gray;
         static const Color Transparent;
         static const Color Disabled;
+        static const Color Placeholder;
         static const Color NO_COLOR;
     };
 

@@ -258,8 +258,8 @@ namespace GDE {
         }
     }
 
-    void SpriteBatch::drawUI(const std::vector<Batch>& _batches) {
-        for(const auto& _batch : _batches) {
+    void SpriteBatch::drawUI(std::vector<Batch>& _batches) {
+        for(auto& _batch : _batches) {
             auto _shaderID = _batch.shader->getShaderID();
             if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0)
                 continue;
@@ -290,7 +290,9 @@ namespace GDE {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
             totalTriangles += (int)_batch.vertexBuffer.size() / 2;
-            drawCalls++;
+            _batch.indexBuffer.clear();
+            _batch.vertexBuffer.clear();
+            uiDrawCalls++;
         }
     }
 

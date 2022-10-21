@@ -8,6 +8,7 @@
 #include "core/graph/Graph.h"
 #include "core/render/Camera.h"
 #include "core/render/elements/Batch.h"
+#include <stack>
 
 namespace GDE {
 
@@ -42,6 +43,8 @@ namespace GDE {
             std::vector<Batch> batches;
             bool dirty = true;
             int maxIndicesPerDrawCall = 1000;
+
+            std::stack<NodeID> stencils;
 
         public:
             explicit Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag);
@@ -89,9 +92,11 @@ namespace GDE {
         private:
             void traverseTree(const NodeID& _nodeID, void* _data, void (Canvas::*_preFunc)(const NodeID&, void*), void (Canvas::*_postFunc)(const NodeID&, void*));
             void traverseTreeReverse(const NodeID& _nodeID, void* _data, void (Canvas::*_preFunc)(const NodeID&, void*), void (Canvas::*_postFunc)(const NodeID&, void*));
-            void drawTreeElement(const NodeID& _nodeID, void* _data);
+            void drawTreeElementPre(const NodeID& _nodeID, void* _data);
+            void drawTreeElementPost(const NodeID& _nodeID, void* _data);
             void onEventTreeElement(const NodeID& _nodeID, void* _data);
             IRenderizable* getRenderizable(const NodeID& _nodeID);
+            void forceRender();
     };
 
 }

@@ -136,9 +136,14 @@ namespace GDE {
             int totalTriangles = 0;
 
             /**
-             * @brief Amount of Draw Calls per frame, only used for debugging purposes.
+             * @brief Amount of Draw Calls, only used for debugging purposes.
              */
             int drawCalls = 0;
+
+            /**
+             * @brief Amount of Draw Calls for the UI, only used for debugging purposes.
+             */
+            int uiDrawCalls = 0;
 
             /**
              * @see Debug
@@ -217,7 +222,7 @@ namespace GDE {
              * This method is used to drawBatched anything that extends IRenderizable and that is UI.
              * @param _batches Static batches to render the UI.
              */
-            void drawUI(const std::vector<Batch>& _batches);
+            void drawUI(std::vector<Batch>& _batches);
 
             /**
              * @brief This method sends all of the geometry to the GPU and ends a Draw Call.

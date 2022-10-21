@@ -24,7 +24,7 @@ namespace GDE {
      *
      */
     class UIInteractable {
-        FRIEND_CLASS(Canvas, UIButton, UICheckbox, UIPanel, NineSliceSprite)
+        FRIEND_CLASS(Canvas, NineSliceSprite, UIButton, UICheckbox, UIPanel, UIInput)
 
         private:
             /**

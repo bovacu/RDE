@@ -62,7 +62,7 @@ namespace GDE {
         batch.draw(_renderizable, _transform);
     }
 
-    void RenderManager::drawUI(const std::vector<Batch>& _batches) {
+    void RenderManager::drawUI(std::vector<Batch>& _batches) {
         batch.drawUI(_batches);
     }
 
@@ -85,6 +85,7 @@ namespace GDE {
 
     void RenderManager::resetDebugInfo() {
         batch.drawCalls = 0;
+        batch.uiDrawCalls = 0;
         batch.totalTriangles = 0;
     }
 
@@ -92,8 +93,8 @@ namespace GDE {
         return batch.totalTriangles;
     }
 
-    int RenderManager::getDrawCalls() {
-        return batch.drawCalls;
+    std::tuple<int, int> RenderManager::getDrawCalls() {
+        return { batch.drawCalls, batch.uiDrawCalls };
     }
 
     void RenderManager::destroy() {
