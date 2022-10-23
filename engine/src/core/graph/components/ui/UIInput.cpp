@@ -120,11 +120,15 @@ namespace GDE {
     }
 
     void UIInput::setInteractable(bool _disabled) {
+        UI::interaction->interactable = _disabled;
 
+        if(textRenderer != nullptr) {
+            textRenderer->color = _disabled ? Color::Disabled : config.textColor;
+        }
     }
 
     bool UIInput::isInteractable() {
-        return false;
+        return UI::interaction->interactable;
     }
 
     void UIInput::setColor(const Color& _color) {
@@ -153,7 +157,7 @@ namespace GDE {
     }
 
     void UIInput::onKeyPressed(KeyCode _keyCode, char _char) {
-        if(textRenderer == nullptr) return;
+        if(textRenderer == nullptr || !UI::interaction->interactable) return;
 
         if(_keyCode == KeyCode::Enter || _keyCode == KeyCode::Escape) {
             UI::interaction->focused = false;
