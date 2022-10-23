@@ -83,6 +83,12 @@ namespace GDE {
              */
             MDelegate<void(KeyCode, char)> onInnerKeyReleased;
 
+            /**
+             * @brief Callback triggered when an element of the UI has been unfocused.
+             *
+             */
+            MDelegate<void()> onInnerUnfocused;
+
         public:
 
             /**

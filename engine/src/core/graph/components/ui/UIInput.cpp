@@ -23,6 +23,7 @@ namespace GDE {
         UI::interaction->onInnerClickingReleased.bind<&UIInput::onMouseReleased>(this);
         UI::interaction->onInnerKeyPressed.bind<&UIInput::onKeyPressed>(this);
         UI::interaction->onInnerKeyReleased.bind<&UIInput::onKeyReleased>(this);
+        UI::interaction->onInnerUnfocused.bind<&UIInput::onUnfocused>(this);
 
         nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, config.inputBackgroundTexture);
         nineSliceSprite->nineSliceSize = config.inputSize;
@@ -53,6 +54,7 @@ namespace GDE {
         caretSprite->batchPriority = BatchPriority::SpritePriority;
         caretSprite->color = config.textColor;
         caretSprite->pivot = { 0, 0.5f };
+        caretSprite->enabled = false;
         caretTransform = _canvas->getGraph()->getComponent<Transform>(_caretID);
         auto _caretPosition = caretTransform->getPosition();
         caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - config.inputSize.x / 2.f + config.textsOffsetFromLeft.x, _caretPosition.y + config.textsOffsetFromLeft.y);
@@ -148,8 +150,25 @@ namespace GDE {
     }
 
     void UIInput::onMouseClicked(MouseCode _mouseCode) {
+        #if IS_ANDROID()
+        SDL_StartTextInput();
+        #elif IS_IOS()
+        SDL_StartTextInput();
+        #endif
+
+        caretSprite->enabled = true;
         UI::interaction->focused = true;
         updatePlaceholder();
+    }
+
+    void UIInput::onUnfocused() {
+        #if IS_ANDROID()
+        SDL_StopTextInput();
+        #elif IS_IOS()
+        SDL_StopTextInput();
+        #endif
+
+        caretSprite->enabled = false;
     }
 
     void UIInput::onMouseReleased(MouseCode _mouseCode) {

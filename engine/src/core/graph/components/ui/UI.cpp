@@ -54,7 +54,9 @@ namespace GDE {
             }
         }
 
-        if(trigger(_nodeID, _engine, _canvas) && !_event.handled) {
+        auto _eventInsideElement = trigger(_nodeID, _engine, _canvas);
+
+        if(_eventInsideElement && !_event.handled) {
 
             if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onInnerClickingReleased.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
@@ -112,7 +114,10 @@ namespace GDE {
             return;
         }
 
-
+        if(!_eventInsideElement && _eventDispatcher.dispatchEvent<MouseButtonPressedEvent>()) {
+            focused = false;
+            if(!onInnerUnfocused.isEmpty()) onInnerUnfocused();
+        }
 
         if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() || _event.handled) {
             if(mouseInnerStatus == MouseStatus::MouseEntered) {

@@ -68,6 +68,7 @@ namespace GDE {
             void onMouseReleased(MouseCode _mouseCode);
             void onKeyPressed(KeyCode _keyCode, char _char);
             void onKeyReleased(KeyCode _keyCode, char _char);
+            void onUnfocused();
             void updatePlaceholder();
             void updateCaret();
     };
