@@ -13,6 +13,7 @@
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UICheckbox.h"
 #include "core/graph/components/ui/UIInput.h"
+#include "core/graph/components/ui/UISlider.h"
 
 namespace GDE {
 
@@ -35,12 +36,15 @@ namespace GDE {
 
     void Canvas::onEvent(Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event) {
         OnEventData _data { _engine, &_eventDispatcher, &_event };
-        traverseTreeReverse(graph.sceneRoot, (void*)&_data, &Canvas::onEventTreeElement, nullptr);
+        bool _earlyBreak = false;
+        traverseTreeReverse(graph.sceneRoot, _earlyBreak, (void*)&_data, &Canvas::onEventTreeElement, nullptr);
         graph.onEventDel(graph.getNodeContainer(), _event);
     }
 
     void Canvas::onUpdate(Delta _dt) {
-
+        bool _earlyBreak = false;
+        traverseTreeReverse(graph.sceneRoot, _earlyBreak, (void*)&_dt, &Canvas::updateTreeElement, nullptr);
+        graph.onUpdateDel(graph.getNodeContainer(), _dt);
     }
 
     void Canvas::onRender() {
@@ -54,7 +58,8 @@ namespace GDE {
         _batch.shader = scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
         _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
         batches.emplace_back(_batch);
-        traverseTree(graph.sceneRoot, nullptr, &Canvas::drawTreeElementPre, &Canvas::drawTreeElementPost);
+        bool _earlyBreak = false;
+        traverseTree(graph.sceneRoot, _earlyBreak, nullptr, &Canvas::drawTreeElementPre, &Canvas::drawTreeElementPost);
 
         _renderManager.drawUI(batches);
 
@@ -144,29 +149,30 @@ namespace GDE {
         camera->setAdaptiveViewport(_mainCameraViewPort->getVirtualResolution(), _mainCameraViewPort->getDeviceResolution());
     }
 
-    void Canvas::traverseTree(const NodeID& _nodeID, void* _data, void (Canvas::*_preFunc)(const NodeID&, void*), void (Canvas::*_postFunc)(const NodeID&, void*)) {
+    void Canvas::traverseTree(const NodeID& _nodeID, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(const NodeID&, bool&, void*), void (Canvas::*_postFunc)(const NodeID&, void*)) {
         if(_nodeID == NODE_ID_NULL) return;
 
         auto _transform = graph.getComponent<Transform>(_nodeID);
 
-        if(_preFunc != nullptr) (this->*_preFunc)(_nodeID, _data);
+        if(_preFunc != nullptr) (this->*_preFunc)(_nodeID, _earlyBreak, _data);
+        if(_earlyBreak) return;
 
         for(auto& _it : _transform->children) {
-            traverseTree(_it->ID, _data, _preFunc, _postFunc);
+            traverseTree(_it->ID, _earlyBreak, _data, _preFunc, _postFunc);
         }
 
         if(_postFunc != nullptr) (this->*_postFunc)(_nodeID, _data);
     }
 
-    void Canvas::traverseTreeReverse(const NodeID& _nodeID, void* _data, void (Canvas::*_preFunc)(const NodeID&, void*), void (Canvas::*_postFunc)(const NodeID&, void*)) {
+    void Canvas::traverseTreeReverse(const NodeID& _nodeID, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(const NodeID&, bool&, void*), void (Canvas::*_postFunc)(const NodeID&, void*)) {
         if(_nodeID == NODE_ID_NULL) return;
 
         auto _transform = graph.getComponent<Transform>(_nodeID);
 
-        if(_preFunc != nullptr) (this->*_preFunc)(_nodeID, _data);
+        if(_preFunc != nullptr) (this->*_preFunc)(_nodeID, _earlyBreak, _data);
 
         for(auto _it = _transform->children.rbegin(); _it != _transform->children.rend(); _it++) {
-            traverseTree((*_it)->ID, _data, _preFunc, _postFunc);
+            traverseTree((*_it)->ID, _earlyBreak, _data, _preFunc, _postFunc);
         }
 
         if(_postFunc != nullptr) (this->*_postFunc)(_nodeID, _data);
@@ -188,8 +194,12 @@ namespace GDE {
         return nullptr;
     }
 
-    void Canvas::drawTreeElementPre(const NodeID& _nodeID, void* _data) {
+    void Canvas::drawTreeElementPre(const NodeID& _nodeID, bool& _earlyBreak, void* _data) {
         Batch* _currentBatch = &batches.back();
+        if(!graph.hasComponent<Active>(_nodeID)) {
+            _earlyBreak = true;
+            return;
+        }
 
         if(graph.hasComponent<UIInput>(_nodeID)) {
             stencils.push(_nodeID);
@@ -233,10 +243,32 @@ namespace GDE {
         }
     }
 
-    void Canvas::onEventTreeElement(const NodeID& _nodeID, void* _data) {
+    void Canvas::onEventTreeElement(const NodeID& _nodeID, bool& _earlyBreak, void* _data) {
+        if(!graph.hasComponent<Active>(_nodeID)) {
+            _earlyBreak = true;
+            return;
+        }
+
         auto* _onEventData = (OnEventData*)_data;
         if(graph.hasComponent<UIInteractable>(_nodeID)) {
             graph.getComponent<UIInteractable>(_nodeID)->onEvent(_nodeID, _onEventData->engine, *_onEventData->eventDispatcher, *_onEventData->event, this);
+        }
+    }
+
+    void Canvas::updateTreeElement(const NodeID& _nodeID, bool& _earlyBreak, void* _data) {
+        if(!graph.hasComponent<Active>(_nodeID)) {
+            _earlyBreak = true;
+            return;
+        }
+
+        if(graph.getNodeContainer().any_of<UISlider>(_nodeID)){
+            IRenderizable* _renderizable = nullptr;
+
+            if(graph.hasComponent<UISlider>(_nodeID)) {
+                _renderizable = graph.getComponent<UISlider>(_nodeID);
+            }
+
+            _renderizable->onUpdate(*(Delta*)_data);
         }
     }
 

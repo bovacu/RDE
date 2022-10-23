@@ -90,11 +90,12 @@ namespace GDE {
             void onDebugRender();
 
         private:
-            void traverseTree(const NodeID& _nodeID, void* _data, void (Canvas::*_preFunc)(const NodeID&, void*), void (Canvas::*_postFunc)(const NodeID&, void*));
-            void traverseTreeReverse(const NodeID& _nodeID, void* _data, void (Canvas::*_preFunc)(const NodeID&, void*), void (Canvas::*_postFunc)(const NodeID&, void*));
-            void drawTreeElementPre(const NodeID& _nodeID, void* _data);
+            void traverseTree(const NodeID& _nodeID, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(const NodeID&, bool&, void*), void (Canvas::*_postFunc)(const NodeID&, void*));
+            void traverseTreeReverse(const NodeID& _nodeID, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(const NodeID&, bool&, void*), void (Canvas::*_postFunc)(const NodeID&, void*));
+            void drawTreeElementPre(const NodeID& _nodeID, bool& _earlyBreak, void* _data);
             void drawTreeElementPost(const NodeID& _nodeID, void* _data);
-            void onEventTreeElement(const NodeID& _nodeID, void* _data);
+            void onEventTreeElement(const NodeID& _nodeID, bool& _earlyBreak, void* _data);
+            void updateTreeElement(const NodeID& _nodeID, bool& _earlyBreak, void* _data);
             IRenderizable* getRenderizable(const NodeID& _nodeID);
             void forceRender();
     };
