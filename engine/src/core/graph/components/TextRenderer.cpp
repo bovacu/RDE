@@ -116,7 +116,7 @@ namespace GDE {
                 auto _vertexCount = _vertices.size();
 
                 float _xPos = (_x - (pivot.x * size.x) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
-                float _yPos = (_y + (pivot.y * size.y) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
+                float _yPos = (_y + (pivot.y * size.y / 1.25f) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
 
                 float _w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
                 float _h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;
