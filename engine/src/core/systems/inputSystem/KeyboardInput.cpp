@@ -109,9 +109,10 @@ namespace GDE {
     }
 
     void KeyboardInput::onKeyDown(SDL_Event& _event) {
+        LOG_W(_event.key.keysym.mod)
         auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
 
-        KeyPressedEvent _e(_key, 1);
+        KeyPressedEvent _e(_key, _event.text.text[8], _event.text.text[20], 1);
         window->consumeEvent(_e);
 
         if(pressedKeyboardKeys[_key] == 2) return;
@@ -122,7 +123,7 @@ namespace GDE {
         auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
         pressedKeyboardKeys[_key] = 0;
 
-        KeyReleasedEvent _e(_key);
+        KeyReleasedEvent _e(_key, _event.text.text[8], _event.text.text[20]);
         window->consumeEvent(_e);
     }
 

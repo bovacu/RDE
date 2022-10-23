@@ -173,15 +173,12 @@ namespace GDE {
                     .line = _line
             };
 
-            float _biggestHeight = -1;
+            float _biggestHeight = font->getBiggestCharHeight();
             float _biggestWidth = 0.f;
             if(!_line.empty()) {
                 for(auto _char : _line) {
-                    _biggestHeight = std::max(_biggestHeight, (float)_chars[_char].advance.y);
                     _biggestWidth += (float)_chars[_char].advance.x;
                 }
-            } else {
-                _biggestHeight = (float)fontSize;
             }
 
             _lineInfo.biggestCharHeight = _biggestHeight;

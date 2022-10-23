@@ -67,6 +67,8 @@ namespace GDE {
 
             _rowHeight = _rowHeight > g->bitmap.rows ? (int)_rowHeight : (int)g->bitmap.rows;
             _ox += (int)g->bitmap.width + 1;
+
+            biggestCharHeight = biggestCharHeight < characters[_i].size.y ? characters[_i].size.y : biggestCharHeight;
         }
     }
 
@@ -92,6 +94,10 @@ namespace GDE {
 
     std::string& Font::getPath() {
         return originalPath;
+    }
+
+    float Font::getBiggestCharHeight() const {
+        return biggestCharHeight;
     }
 
 

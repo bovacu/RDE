@@ -23,6 +23,13 @@ namespace GDE {
         return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_ninePatch->sizeOfInteraction.x, (float)_ninePatch->sizeOfInteraction.y});
     }
 
+    static char getCorrectChar(const KeyEvent* _keyEvent) {
+        auto _modKeys = static_cast<const SDL_Keymod>(KMOD_SHIFT | KMOD_ALT | KMOD_CAPS);
+        bool _modifications = (SDL_GetModState() & _modKeys) == SDL_GetModState();
+        char _chosen = !_modifications ? _keyEvent->getChar() : _keyEvent->getAlternateChar();
+        return _chosen;
+    }
+
     void UIInteractable::onEvent(const NodeID& _nodeID, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas) {
         if (!_canvas->getGraph()->hasComponent<Active>(_nodeID) || !interactable) return;
 
@@ -30,19 +37,19 @@ namespace GDE {
             if(_eventDispatcher.dispatchEvent<KeyPressedEvent>() && !onInnerKeyPressed.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
                 auto* _kpe = (KeyPressedEvent*)&_event;
-                onInnerKeyPressed(_kpe->getKeyCode(), (char)SDL_GetKeyFromScancode((SDL_Scancode)_kpe->getKeyCode()));
+                onInnerKeyPressed(_kpe->getKeyCode(), getCorrectChar(_kpe));
             }
 
             if(_eventDispatcher.dispatchEvent<KeyReleasedEvent>() && !onInnerKeyReleased.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
-                auto* _kpe = (KeyReleasedEvent*)&_event;
-                onInnerKeyReleased(_kpe->getKeyCode(), (char)SDL_GetKeyFromScancode((SDL_Scancode)_kpe->getKeyCode()));
+                auto* _kre = (KeyReleasedEvent*)&_event;
+                onInnerKeyReleased(_kre->getKeyCode(), getCorrectChar(_kre));
             }
 
             if(_eventDispatcher.dispatchEvent<KeyPressedEvent>() && !onKeyPressed.isEmpty()) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
                 auto* _kpe = (KeyPressedEvent*)&_event;
-                onKeyPressed(_kpe->getKeyCode(), (char)SDL_GetKeyFromScancode((SDL_Scancode)_kpe->getKeyCode()));
+                onKeyPressed(_kpe->getKeyCode(), getCorrectChar(_kpe));
                 return;
             }
         }

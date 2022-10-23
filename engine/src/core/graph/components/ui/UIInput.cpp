@@ -11,10 +11,6 @@ namespace GDE {
     UIInput::UIInput(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIInputConfig& _config) : UI(_nodeID, _canvas) {
         setConfig(_scene, _config);
 
-        int _temp = SDL_GetModState();
-        _temp = _temp & KMOD_CAPS;
-        upperCase = _temp == KMOD_CAPS;
-
         UI::texture = config.inputBackgroundTexture;
 
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
@@ -159,15 +155,6 @@ namespace GDE {
     void UIInput::onKeyPressed(KeyCode _keyCode, char _char) {
         if(textRenderer == nullptr) return;
 
-        if(_keyCode == KeyCode::LeftShift || _keyCode == KeyCode::RightShift) {
-            pressingShift = true;
-        }
-
-        if(_keyCode == KeyCode::CapsLock) {
-            upperCase = !upperCase;
-            return;
-        }
-
         if(_keyCode == KeyCode::Enter || _keyCode == KeyCode::Escape) {
             UI::interaction->focused = false;
         } else if(_keyCode == KeyCode::Delete) {
@@ -188,14 +175,6 @@ namespace GDE {
             pointer = pointer + 1 < _textLength ? pointer + 1 : (int)_textLength;
             updateCaret();
         } else {
-            if(pressingShift ^ upperCase) {
-                if(_char < 65) {
-                    _char -= 16;
-                } else {
-                    _char -= 32;
-                }
-            }
-
             if(_char >= 32 && _char <= 126) {
                 auto _text = textRenderer->getText();
                 _text.insert(pointer, 1, _char);
@@ -213,9 +192,7 @@ namespace GDE {
     }
 
     void UIInput::onKeyReleased(KeyCode _keyCode, char _char) {
-        if(_keyCode == KeyCode::LeftShift || _keyCode == KeyCode::RightShift) {
-            pressingShift = false;
-        }
+
     }
 
     void UIInput::updatePlaceholder() {

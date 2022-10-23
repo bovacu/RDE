@@ -17,7 +17,7 @@ typedef entt::entity NodeID;
 namespace GDE {
 
 
-
+    FORWARD_DECLARE_CLASS(KeyEvent)
 
     /**
      * @brief Component that every UI element that wants to interact with events on the screen must include.

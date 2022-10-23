@@ -36,8 +36,6 @@ namespace GDE {
             UIInputConfig config;
             int pointer = 0;
             float textDisplacement = 0;
-            bool pressingShift = false;
-            bool upperCase = false;
 
         public:
             TextRenderer* textRenderer;

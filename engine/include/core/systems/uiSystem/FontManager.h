@@ -40,6 +40,7 @@ namespace GDE {
             CharInfo characters[MAX_CHARACTERS];
             std::string fontName;
             std::string originalPath;
+            float biggestCharHeight = 0;
 
         private:
             Font() {}
@@ -87,6 +88,8 @@ namespace GDE {
              * @return int
              */
             [[nodiscard]] int getFontSize() const;
+
+            float getBiggestCharHeight() const;
     };
 
     /**
