@@ -12,6 +12,16 @@
 
 namespace GDE {
 
+    FORWARD_DECLARE_CLASS(UI, UIInteractable)
+
+    struct CanvasElement {
+        NodeID nodeID = NODE_ID_NULL;
+        IRenderizable* renderizable = nullptr;
+        UIInteractable* interactable = nullptr;
+        IRenderizable* updatable = nullptr;
+        bool cropping = false;
+    };
+
     /**
      * @brief This class represents a container for elements related to the UI and it is in charge of render them, update them...
      * A Scene can have multiple canvas.
@@ -45,6 +55,7 @@ namespace GDE {
             int maxIndicesPerDrawCall = 1000;
 
             std::stack<NodeID> stencils;
+            std::vector<CanvasElement> canvasElementsOrderedList;
 
         public:
             explicit Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag);
@@ -91,13 +102,22 @@ namespace GDE {
 
         private:
             void traverseTree(const NodeID& _nodeID, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(const NodeID&, bool&, void*), void (Canvas::*_postFunc)(const NodeID&, void*));
-            void traverseTreeReverse(const NodeID& _nodeID, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(const NodeID&, bool&, void*), void (Canvas::*_postFunc)(const NodeID&, void*));
-            void drawTreeElementPre(const NodeID& _nodeID, bool& _earlyBreak, void* _data);
-            void drawTreeElementPost(const NodeID& _nodeID, void* _data);
-            void onEventTreeElement(const NodeID& _nodeID, bool& _earlyBreak, void* _data);
-            void updateTreeElement(const NodeID& _nodeID, bool& _earlyBreak, void* _data);
+
+            void batchTreeElementPre(CanvasElement* _canvasElement, void* _data);
+            void batchTreeElementPost(CanvasElement* _canvasElement, void* _data);
+
+            void onEventTreeElement(CanvasElement* _canvasElement, void* _data);
+
+            void updateTreeElement(CanvasElement* _canvasElement, void* _data);
+
+            void createElementListTreePre(const NodeID& _nodeID, bool& _earlyBreak, void* _data);
+
             IRenderizable* getRenderizable(const NodeID& _nodeID);
+            IRenderizable* getUpdatable(const NodeID& _nodeID);
+
             void forceRender();
+
+            void onTreeChanged(void* _data);
     };
 
 }

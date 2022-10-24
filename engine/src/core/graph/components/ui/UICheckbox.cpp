@@ -17,6 +17,7 @@ namespace GDE {
 
         UI::interaction->onInnerClickingReleased.bind<&UICheckbox::onMouseReleased>(this);
         UI::interaction->onInnerClicking.bind<&UICheckbox::onMouseClicked>(this);
+        UI::interaction->onInnerMouseEntered.bind<&UICheckbox::onMouseEntered>(this);
 
         auto _textID = _canvas->getGraph()->createNode("Text", _nodeID);
         textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textID, _scene, _canvas, _config.text, config.font);
@@ -77,11 +78,22 @@ namespace GDE {
         config.checkboxTextOffset = _config.checkboxTextOffset;
         config.checked = _config.checked;
 
+        UI::interaction->sizeOfInteraction = { 0.0f, 0.0f };
+        Vec2F textRendererSize;
+
         if(textRenderer != nullptr) {
             textRenderer->setText(config.text);
             textRenderer->color = config.textColor;
             textRenderer->setFont(config.font);
+            textRendererSize = textRenderer->getSize();
         }
+
+        Vec2F checkboxSize;
+        if(checkboxBackgroundSprite != nullptr) {
+            checkboxSize = checkboxBackgroundSprite->getSize();
+        }
+
+        UI::interaction->sizeOfInteraction = Vec2F { checkboxSize.x + textRendererSize.x, checkboxSize.y > textRendererSize.y ? checkboxSize.y : textRendererSize.y } + config.checkboxTextOffset;
 
         if(tickSprite != nullptr) {
             tickSprite->enabled = config.checked;

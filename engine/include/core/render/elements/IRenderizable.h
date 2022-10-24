@@ -100,7 +100,13 @@ namespace GDE {
             virtual void setPivot(const Vec2F& _pivot) { pivot = _pivot; }
 
             /**
-             * @brief Method that every renderizable must implement and it tells the SpriteBatch how to send the data to the GPU.
+             * @brief Method that every renderizable can implement to update its inner states.
+             * @param _dt Delta time
+             */
+            virtual void onUpdate(Delta _dt) {  };
+
+            /**
+             * @brief Method that every renderizable can implement and it tells the SpriteBatch how to send the data to the GPU.
              * @param _vertices List with the current added vertices and where the new vertices must be added.
              * @param _indices List with the current added indices and where the new indices must be added.
              * @param _transform Transform of the renderizable.
@@ -109,7 +115,7 @@ namespace GDE {
             virtual void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {  };
 
             /**
-             * @brief Method that every renderizable must implement and it tells the SpriteBatch how to send the data to the GPU.
+             * @brief Method that every renderizable can implement and it tells the SpriteBatch how to send the data to the GPU.
              * @param _vertices List with the current added vertices and where the new vertices must be added.
              * @param _indices List with the current added indices and where the new indices must be added.
              * @param _transform Transform of the renderizable.

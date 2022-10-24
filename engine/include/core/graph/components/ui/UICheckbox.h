@@ -5,7 +5,7 @@
 #ifndef GDE_UI_CHECKBOX_H
 #define GDE_UI_CHECKBOX_H
 
-#include "UI.h"
+#include "core/graph/components/ui/UI.h"
 
 namespace GDE {
 
@@ -49,6 +49,7 @@ namespace GDE {
         private:
             void onMouseReleased(MouseCode _mouseButton);
             void onMouseClicked(MouseCode _mouseButton) {  }
+            void onMouseEntered() {  }
     };
 
 }

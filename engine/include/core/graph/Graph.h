@@ -67,6 +67,8 @@ namespace GDE {
              */
             Scene* scene = nullptr;
 
+            UDelegate<void(void*)> onDataChanged;
+
         private:
             /**
              * @brief Prints the hierarchy tree on the console.
@@ -287,12 +289,15 @@ namespace GDE {
     template<typename Component, typename... Args>
     Component* Graph::addComponent(Args... _args) {
         auto& _first = get<0>(std::forward<Args>(_args)...);
-        return &registry.template emplace<Component>(_first, _args...);
+        auto* _component = &registry.template emplace<Component>(_first, _args...);
+        if(onDataChanged != nullptr) onDataChanged((void*)_component);
+        return _component;
     }
 
     template<typename Component>
     void Graph::removeComponent(const NodeID& _id) {
-        registry.template remove<Component>(_id);
+        auto _removed = registry.template remove<Component>(_id);
+        if(onDataChanged != nullptr) onDataChanged((void*)_removed);
     }
 
     template<typename Component>

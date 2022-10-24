@@ -141,6 +141,19 @@ namespace GDE {
         return nineSliceSprite->color;
     }
 
+    void UIInput::onUpdate(Delta _dt) {
+        IRenderizable::onUpdate(_dt);
+
+        if(UI::interaction != nullptr && UI::interaction->focused && caretSprite != nullptr) {
+            if(blinkingTimer > config.blinkingTimeSeconds) {
+                caretSprite->enabled = !caretSprite->enabled;
+                blinkingTimer = 0;
+            }
+
+            blinkingTimer += _dt;
+        }
+    }
+
     void UIInput::onMouseEntered() {
         updatePlaceholder();
     }
@@ -159,6 +172,7 @@ namespace GDE {
         caretSprite->enabled = true;
         UI::interaction->focused = true;
         updatePlaceholder();
+        blinkingTimer = 0;
     }
 
     void UIInput::onUnfocused() {

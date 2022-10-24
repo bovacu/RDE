@@ -151,6 +151,8 @@ namespace GDE {
 
         registry.emplace<Active>(_newNode, _newNode);
 
+        if(onDataChanged != nullptr) onDataChanged((void*)_newNode);
+
         return _newNode;
     }
 
@@ -171,6 +173,8 @@ namespace GDE {
         if(_parent != NODE_ID_NULL) setParent(_copy, _parent);
         setNodeActive(_copy, true);
 
+        if(onDataChanged != nullptr) onDataChanged((void*)_copy);
+
         return _copy;
     }
 
@@ -183,6 +187,7 @@ namespace GDE {
 
     void Graph::removeNode(const NodeID& _node) {
         remove(_node, true);
+        if(onDataChanged != nullptr) onDataChanged((void*)_node);
     }
 
     void Graph::removeNode(const std::string& _nodeTagName) {
@@ -235,6 +240,8 @@ namespace GDE {
         _nodeTransform->parentTransform = _parentTransform;
         _parentTransform->children.push_back(_nodeTransform);
         _nodeTransform->setLocalMatrix(glm::inverse(_parentTransform->getLocalMatrix()) * _nodeTransform->getLocalMatrix());
+
+        if(onDataChanged != nullptr) onDataChanged((void*)_node);
     }
 
     void Graph::remove(const NodeID& _node, bool _delete) {
@@ -267,6 +274,7 @@ namespace GDE {
         (&registry.get<Transform>(_node))->parent = sceneRoot;
         (&registry.get<Transform>(_node))->parentTransform = getComponent<Transform>(sceneRoot);
         (&registry.get<Transform>(sceneRoot))->children.push_back(&registry.get<Transform>(_node));
+        if(onDataChanged != nullptr) onDataChanged((void*)_node);
     }
 
     void Graph::orphan(const std::string& _nodeTagName) {
@@ -294,11 +302,14 @@ namespace GDE {
     void Graph::setNodeActive(NodeID _node, bool _active) {
         if(_active && !registry.any_of<Active>(_node)) {
             registry.emplace<Active>(_node, _node);
+            if(onDataChanged != nullptr) onDataChanged((void*)_node);
             return;
         }
 
-        if(!_active && registry.any_of<Active>(_node))
+        if(!_active && registry.any_of<Active>(_node)) {
             registry.remove<Active>(_node);
+            if(onDataChanged != nullptr) onDataChanged((void*)_node);
+        }
     }
 
     bool Graph::isNodeActive(NodeID _node) {

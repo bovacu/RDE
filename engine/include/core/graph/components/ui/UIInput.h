@@ -29,6 +29,7 @@ namespace GDE {
 
         Texture* caretTexture = nullptr;
         float caretHeight = 20.f;
+        float blinkingTimeSeconds = 0.5f;
     };
 
     class UIInput : public UI {
@@ -36,6 +37,7 @@ namespace GDE {
             UIInputConfig config;
             int pointer = 0;
             float textDisplacement = 0;
+            float blinkingTimer = 0;
 
         public:
             TextRenderer* textRenderer;
@@ -58,6 +60,8 @@ namespace GDE {
 
             void setColor(const Color& _color) override;
             Color getColor() override;
+
+            void onUpdate(Delta _dt) override;
 
             ~UIInput() override {  }
 

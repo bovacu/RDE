@@ -22,7 +22,7 @@ namespace GDE {
      */
     class SpriteRenderer : public IRenderizable {
 
-        FRIEND_CLASS(UICheckbox, UIButton, UIInput)
+        FRIEND_CLASS(UICheckbox, UIButton, UIInput, UISlider)
 
         private:
             /**

@@ -28,23 +28,183 @@ namespace GDE {
         auto _cameraID = graph.createNode("CanvasCamera");
         auto* _canvasTransform = graph.getComponent<Transform>(_cameraID);
         camera = graph.addComponent<Camera>(_cameraID, _window, _canvasTransform);
+        graph.onDataChanged.bind<&Canvas::onTreeChanged>(this);
+    }
+
+    void Canvas::traverseTree(const NodeID& _nodeID, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(const NodeID&, bool&, void*), void (Canvas::*_postFunc)(const NodeID&, void*)) {
+        if(_nodeID == NODE_ID_NULL) return;
+
+        auto _transform = graph.getComponent<Transform>(_nodeID);
+
+        if(_preFunc != nullptr) (this->*_preFunc)(_nodeID, _earlyBreak, _data);
+        if(_earlyBreak) return;
+
+        for(auto& _it : _transform->children) {
+            traverseTree(_it->ID, _earlyBreak, _data, _preFunc, _postFunc);
+        }
+
+        if(_postFunc != nullptr) (this->*_postFunc)(_nodeID, _data);
+    }
+
+    void Canvas::createElementListTreePre(const NodeID& _nodeID, bool& _earlyBreak, void* _data) {
+        if(!graph.hasComponent<Active>(_nodeID)) {
+            _earlyBreak = true;
+        }
+
+        auto* _elements = (std::vector<CanvasElement>*)_data;
+        CanvasElement _canvasElement { _nodeID };
+
+        if(graph.hasComponent<UIInteractable>(_nodeID)) {
+            _canvasElement.interactable = graph.getComponent<UIInteractable>(_nodeID);
+        }
+
+        if(graph.getNodeContainer().any_of<TextRenderer, UIButton, NineSliceSprite, SpriteRenderer, UICheckbox>(_nodeID)) {
+            _canvasElement.renderizable = getRenderizable(_nodeID);
+        }
+
+        if(graph.getNodeContainer().any_of<UISlider, UIInput>(_nodeID)) {
+            _canvasElement.updatable = getUpdatable(_nodeID);
+        }
+
+        _canvasElement.cropping = graph.getNodeContainer().any_of<UIInput>(_nodeID);
+
+        if(!_canvasElement.renderizable && !_canvasElement.interactable && !_canvasElement.updatable) return;
+
+        _elements->push_back(_canvasElement);
+    }
+
+    void Canvas::onTreeChanged(void* _data) {
+        bool _earlyBreak = false;
+        canvasElementsOrderedList.clear();
+        traverseTree(graph.sceneRoot, _earlyBreak, (void*)&canvasElementsOrderedList, &Canvas::createElementListTreePre, nullptr);
     }
 
     Graph* Canvas::getGraph() {
         return &graph;
     }
 
+
+
+
+
+
+    void Canvas::onEventTreeElement(CanvasElement* _canvasElement, void* _data) {
+        auto* _onEventData = (OnEventData*)_data;
+        if(_canvasElement->interactable) {
+            _canvasElement->interactable->onEvent(_canvasElement->nodeID, _onEventData->engine, *_onEventData->eventDispatcher, *_onEventData->event, this);
+        }
+    }
+
     void Canvas::onEvent(Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event) {
         OnEventData _data { _engine, &_eventDispatcher, &_event };
-        bool _earlyBreak = false;
-        traverseTreeReverse(graph.sceneRoot, _earlyBreak, (void*)&_data, &Canvas::onEventTreeElement, nullptr);
+        for(auto _it = canvasElementsOrderedList.rbegin(); _it != canvasElementsOrderedList.rend(); _it++) {
+            onEventTreeElement(&(*_it), (void*)&_data);
+        }
+
         graph.onEventDel(graph.getNodeContainer(), _event);
     }
 
+
+
+
+    IRenderizable* Canvas::getUpdatable(const NodeID& _nodeID) {
+        if(graph.hasComponent<UISlider>(_nodeID)) {
+            return graph.getComponent<UISlider>(_nodeID);
+        }
+
+        if(graph.hasComponent<UIInput>(_nodeID)) {
+            return graph.getComponent<UIInput>(_nodeID);
+        }
+
+        return nullptr;
+    }
+
+    void Canvas::updateTreeElement(CanvasElement* _canvasElement, void* _data) {
+        if(_canvasElement->updatable) {
+            _canvasElement->updatable->onUpdate(*(Delta*)_data);
+        }
+    }
+
     void Canvas::onUpdate(Delta _dt) {
-        bool _earlyBreak = false;
-        traverseTreeReverse(graph.sceneRoot, _earlyBreak, (void*)&_dt, &Canvas::updateTreeElement, nullptr);
+        for(auto& _it : canvasElementsOrderedList) {
+            updateTreeElement(&_it, (void*)&_dt);
+        }
         graph.onUpdateDel(graph.getNodeContainer(), _dt);
+    }
+
+
+
+
+
+    IRenderizable* Canvas::getRenderizable(const NodeID& _nodeID) {
+        if(graph.hasComponent<NineSliceSprite>(_nodeID)) {
+            return graph.getComponent<NineSliceSprite>(_nodeID);
+        }
+
+        if(graph.hasComponent<SpriteRenderer>(_nodeID)) {
+            return graph.getComponent<SpriteRenderer>(_nodeID);
+        }
+
+        if(graph.hasComponent<TextRenderer>(_nodeID)) {
+            return graph.getComponent<TextRenderer>(_nodeID);
+        }
+
+        return nullptr;
+    }
+
+    void Canvas::batchTreeElementPre(CanvasElement* _canvasElement, void* _data) {
+        Batch* _currentBatch = &batches.back();
+
+        if(_canvasElement->cropping) {
+            stencils.push(_canvasElement->nodeID);
+            auto* _transform = graph.getComponent<Transform>(_canvasElement->nodeID);
+            auto _position = _transform->getModelMatrixPosition();
+            auto* _uiInput = graph.getComponent<UIInput>(_canvasElement->nodeID);
+
+            forceRender();
+            _currentBatch = &batches.back();
+
+            glEnable(GL_SCISSOR_TEST);
+            glScissor((GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x - (_uiInput->getSize().x * _uiInput->pivot.x)),
+                      (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y - (_uiInput->getSize().y * _uiInput->pivot.y)),
+                      (GLint)_uiInput->getSize().x,
+                      (GLint)_uiInput->getSize().y
+            );
+        }
+
+        if(_canvasElement->renderizable != nullptr) {
+            auto* _renderizable = _canvasElement->renderizable;
+
+            if (_currentBatch->shader == nullptr || _renderizable->getTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _renderizable->shaderID || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
+                Batch _newBatch;
+                _newBatch.shader = scene->engine->manager.shaderManager.getShader(_renderizable->shaderID);
+                _newBatch.textureID = _renderizable->getTexture();
+                batches.emplace_back(_newBatch);
+                _currentBatch = &batches.back();
+            }
+
+            _renderizable->drawBatched(_currentBatch->vertexBuffer, _currentBatch->indexBuffer, *_renderizable->transform, *camera->getViewport());
+        }
+    }
+
+    void Canvas::batchTreeElementPost(CanvasElement* _canvasElement, void* _data) {
+        if(!stencils.empty() && stencils.top() == _canvasElement->nodeID) {
+            stencils.pop();
+            forceRender();
+            glDisable(GL_SCISSOR_TEST);
+        }
+    }
+
+    void Canvas::forceRender() {
+        auto& _renderManager = graph.scene->engine->manager.renderManager;
+        _renderManager.beginDraw(*camera, nullptr);
+        _renderManager.drawUI(batches);
+
+        batches.clear();
+        Batch _batch;
+        _batch.shader = scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
+        _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
+        batches.emplace_back(_batch);
     }
 
     void Canvas::onRender() {
@@ -58,8 +218,11 @@ namespace GDE {
         _batch.shader = scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
         _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
         batches.emplace_back(_batch);
-        bool _earlyBreak = false;
-        traverseTree(graph.sceneRoot, _earlyBreak, nullptr, &Canvas::drawTreeElementPre, &Canvas::drawTreeElementPost);
+
+        for(auto& _it : canvasElementsOrderedList) {
+            batchTreeElementPre(&_it, nullptr);
+            batchTreeElementPost(&_it, nullptr);
+        }
 
         _renderManager.drawUI(batches);
 
@@ -147,141 +310,6 @@ namespace GDE {
 
         if(_mainCameraViewPort == nullptr) return;
         camera->setAdaptiveViewport(_mainCameraViewPort->getVirtualResolution(), _mainCameraViewPort->getDeviceResolution());
-    }
-
-    void Canvas::traverseTree(const NodeID& _nodeID, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(const NodeID&, bool&, void*), void (Canvas::*_postFunc)(const NodeID&, void*)) {
-        if(_nodeID == NODE_ID_NULL) return;
-
-        auto _transform = graph.getComponent<Transform>(_nodeID);
-
-        if(_preFunc != nullptr) (this->*_preFunc)(_nodeID, _earlyBreak, _data);
-        if(_earlyBreak) return;
-
-        for(auto& _it : _transform->children) {
-            traverseTree(_it->ID, _earlyBreak, _data, _preFunc, _postFunc);
-        }
-
-        if(_postFunc != nullptr) (this->*_postFunc)(_nodeID, _data);
-    }
-
-    void Canvas::traverseTreeReverse(const NodeID& _nodeID, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(const NodeID&, bool&, void*), void (Canvas::*_postFunc)(const NodeID&, void*)) {
-        if(_nodeID == NODE_ID_NULL) return;
-
-        auto _transform = graph.getComponent<Transform>(_nodeID);
-
-        if(_preFunc != nullptr) (this->*_preFunc)(_nodeID, _earlyBreak, _data);
-
-        for(auto _it = _transform->children.rbegin(); _it != _transform->children.rend(); _it++) {
-            traverseTree((*_it)->ID, _earlyBreak, _data, _preFunc, _postFunc);
-        }
-
-        if(_postFunc != nullptr) (this->*_postFunc)(_nodeID, _data);
-    }
-
-    IRenderizable* Canvas::getRenderizable(const NodeID& _nodeID) {
-        if(graph.hasComponent<NineSliceSprite>(_nodeID)) {
-            return graph.getComponent<NineSliceSprite>(_nodeID);
-        }
-
-        if(graph.hasComponent<SpriteRenderer>(_nodeID)) {
-            return graph.getComponent<SpriteRenderer>(_nodeID);
-        }
-
-        if(graph.hasComponent<TextRenderer>(_nodeID)) {
-            return graph.getComponent<TextRenderer>(_nodeID);
-        }
-
-        return nullptr;
-    }
-
-    void Canvas::drawTreeElementPre(const NodeID& _nodeID, bool& _earlyBreak, void* _data) {
-        Batch* _currentBatch = &batches.back();
-        if(!graph.hasComponent<Active>(_nodeID)) {
-            _earlyBreak = true;
-            return;
-        }
-
-        if(graph.hasComponent<UIInput>(_nodeID)) {
-            stencils.push(_nodeID);
-            auto* _transform = graph.getComponent<Transform>(_nodeID);
-            auto _position = _transform->getModelMatrixPosition();
-            auto* _uiInput = graph.getComponent<UIInput>(_nodeID);
-
-            forceRender();
-            _currentBatch = &batches.back();
-
-            glEnable(GL_SCISSOR_TEST);
-            glScissor((GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x - (_uiInput->getSize().x * _uiInput->pivot.x)),
-                      (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y - (_uiInput->getSize().y * _uiInput->pivot.y)),
-                      (GLint)_uiInput->getSize().x,
-                      (GLint)_uiInput->getSize().y
-                      );
-        }
-
-        if(graph.getNodeContainer().any_of<TextRenderer, UIButton, NineSliceSprite, SpriteRenderer, UICheckbox>(_nodeID)){
-            auto* _renderizable = getRenderizable(_nodeID);
-
-            if(_renderizable != nullptr) {
-                if (_currentBatch->shader == nullptr || _renderizable->getTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _renderizable->shaderID || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
-                    Batch _newBatch;
-                    _newBatch.shader = scene->engine->manager.shaderManager.getShader(_renderizable->shaderID);
-                    _newBatch.textureID = _renderizable->getTexture();
-                    batches.emplace_back(_newBatch);
-                    _currentBatch = &batches.back();
-                }
-
-                _renderizable->drawBatched(_currentBatch->vertexBuffer, _currentBatch->indexBuffer, *_renderizable->transform, *camera->getViewport());
-            }
-        }
-    }
-
-    void Canvas::drawTreeElementPost(const NodeID& _nodeID, void* _data) {
-        if(!stencils.empty() && stencils.top() == _nodeID) {
-            stencils.pop();
-            forceRender();
-            glDisable(GL_SCISSOR_TEST);
-        }
-    }
-
-    void Canvas::onEventTreeElement(const NodeID& _nodeID, bool& _earlyBreak, void* _data) {
-        if(!graph.hasComponent<Active>(_nodeID)) {
-            _earlyBreak = true;
-            return;
-        }
-
-        auto* _onEventData = (OnEventData*)_data;
-        if(graph.hasComponent<UIInteractable>(_nodeID)) {
-            graph.getComponent<UIInteractable>(_nodeID)->onEvent(_nodeID, _onEventData->engine, *_onEventData->eventDispatcher, *_onEventData->event, this);
-        }
-    }
-
-    void Canvas::updateTreeElement(const NodeID& _nodeID, bool& _earlyBreak, void* _data) {
-        if(!graph.hasComponent<Active>(_nodeID)) {
-            _earlyBreak = true;
-            return;
-        }
-
-        if(graph.getNodeContainer().any_of<UISlider>(_nodeID)){
-            IRenderizable* _renderizable = nullptr;
-
-            if(graph.hasComponent<UISlider>(_nodeID)) {
-                _renderizable = graph.getComponent<UISlider>(_nodeID);
-            }
-
-            _renderizable->onUpdate(*(Delta*)_data);
-        }
-    }
-
-    void Canvas::forceRender() {
-        auto& _renderManager = graph.scene->engine->manager.renderManager;
-        _renderManager.beginDraw(*camera, nullptr);
-        _renderManager.drawUI(batches);
-
-        batches.clear();
-        Batch _batch;
-        _batch.shader = scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
-        _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
-        batches.emplace_back(_batch);
     }
 
 }

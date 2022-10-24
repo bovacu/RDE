@@ -119,21 +119,19 @@ namespace GDE {
             if(!onInnerUnfocused.isEmpty()) onInnerUnfocused();
         }
 
-        if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() || _event.handled) {
+        if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() && !_event.handled) {
             if(mouseInnerStatus == MouseStatus::MouseEntered) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                if(!onInnerMouseExited.isEmpty()) onInnerMouseExited();
                 mouseInnerStatus = MouseStatus::MouseExited;
-                if(onInnerMouseExited.isEmpty()) return;
-                onInnerMouseExited();
             }
         }
 
-        if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() || _event.handled) {
+        if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() && !_event.handled) {
             if(mouseStatus == MouseStatus::MouseEntered) {
                 _event.handled = _canvas->getGraph()->hasComponent<CanvasEventStopper>(_nodeID);
+                if(!onMouseExited.isEmpty()) onMouseExited();
                 mouseStatus = MouseStatus::MouseExited;
-                if(onMouseExited.isEmpty()) return;
-                onMouseExited();
             }
         }
     }
