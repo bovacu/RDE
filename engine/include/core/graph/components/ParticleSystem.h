@@ -17,6 +17,7 @@
 namespace GDE {
 
     FORWARD_DECLARE_STRUCT(ParticleSystemConfig)
+    FORWARD_DECLARE_CLASS(Graph, Manager)
 
     /**
      * @brief Information about a particle.
@@ -79,11 +80,11 @@ namespace GDE {
             bool isPlaying = false;
 
         public:
-            Transform* transform;
             ParticleSystemConfig particleSystemConfig;
 
         public:
-            ParticleSystem(const NodeID& _nodeID, Transform* _transform, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig);
+            ParticleSystem(Node* _node, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig);
+            ParticleSystem(Node* _node, Manager* _manager, Graph* _graph, const ParticleSystemConfig& _particleSystemConfig);
             void update(Delta dt);
 
             /**

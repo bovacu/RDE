@@ -9,9 +9,8 @@
 namespace GDE {
 
     Scene::Scene(Engine* _engine, const std::string& _debugName)  : mainGraph(this, _debugName), debugName(_debugName), engine(_engine) {
-        auto _mainCameraID = mainGraph.createNode("MainCamera");
-        auto* _cameraTransform = mainGraph.getComponent<Transform>(_mainCameraID);
-        auto* _camera = mainGraph.addComponent<Camera>(_mainCameraID, &_engine->getWindow(), _cameraTransform);
+        auto* _mainCameraNode = mainGraph.createNode("MainCamera");
+        auto* _camera = mainGraph.addComponent<Camera>(_mainCameraNode->getID(), _mainCameraNode, &engine->manager, getMainGraph(), &_engine->getWindow());
         cameras.push_back(_camera);
         mainCamera = _camera;
 
@@ -51,31 +50,33 @@ namespace GDE {
         return mainCamera;
     }
 
-    void Scene::switchMainCamera(const NodeID& _camera) {
-        mainCamera = mainGraph.getComponent<Camera>(_camera);
+    void Scene::switchMainCamera(Node* _camera) {
+        mainCamera = _camera->getComponent<Camera>();
     }
 
     Camera* Scene::addCamera(Window* window) {
-        auto _newCameraID = mainGraph.createNode(APPEND_S("Camera", cameras.size()));
-        auto* _entityTransform = getMainGraph()->getComponent<Transform>(_newCameraID);
-        auto* _camera = mainGraph.addComponent<Camera>(_newCameraID, window, _entityTransform);
+        auto _newCameraNode = mainGraph.createNode(APPEND_S("Camera", cameras.size()));
+        auto* _camera = _newCameraNode->addComponent<Camera>(window);
         cameras.push_back(_camera);
         return cameras.back();
     }
 
-    void Scene::enableCamera(const NodeID& _cameraID, bool _enable) {
+    void Scene::enableCamera(Node* _camera, bool _enable) {
         if(_enable) {
-            if(mainGraph.hasComponent<Active>(_cameraID)) return;
-            mainGraph.addComponent<Active>(_cameraID);
+            if(_camera->hasComponent<Active>()) return;
+            _camera->addComponent<Active>();
             return;
         }
 
-        if(mainGraph.hasComponent<Active>(_cameraID)) return;
-            mainGraph.removeComponent<Active>(_cameraID);
+        if(_camera->hasComponent<Active>()) return;
+        _camera->removeComponent<Active>();
     }
 
-    void Scene::removeCamera(const NodeID& _cameraID) {
-
+    void Scene::removeCamera(Node* _camera) {
+        auto _it = std::find(cameras.begin(), cameras.end(), _camera->getComponent<Camera>());
+        if(_it != cameras.end()) {
+            cameras.erase(_it);
+        }
     }
 
     std::vector<Camera*>& Scene::getCameras() {

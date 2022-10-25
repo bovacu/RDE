@@ -5,15 +5,19 @@
 #include "core/graph/components/NineSliceSprite.h"
 #include "core/util/Functions.h"
 #include "core/graph/components/SpriteRenderer.h"
+#include "core/Engine.h"
 
 namespace GDE {
 
-    NineSliceSprite::NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture) : UI(_nodeID, _canvas) {
+    NineSliceSprite::NineSliceSprite(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
+    NineSliceSprite(_node, &_scene->engine->manager, _canvas->getGraph(), _texture) {  }
+
+    NineSliceSprite::NineSliceSprite(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : UI(_node) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         texture = _texture;
 
         if(!_texture->nineSlice.isEnabled()) {
-            spriteRenderer = _canvas->getGraph()->addComponent<SpriteRenderer>(_nodeID, _scene, _canvas, _texture);
+            spriteRenderer = _node->addComponent<SpriteRenderer>(_texture);
         }
 
         nineSliceSize = _texture->getRegion().size;

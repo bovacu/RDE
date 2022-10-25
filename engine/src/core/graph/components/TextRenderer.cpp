@@ -14,26 +14,17 @@
 
 namespace GDE {
 
-    TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, const std::string& _text, Font* _font) : IRenderizable(_scene->getMainGraph()->getComponent<Transform>(_nodeId)) {
+    TextRenderer::TextRenderer(Node* _node, Scene* _scene, const std::string& _text, Font* _font) :
+    TextRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _text, _font) {  }
 
-        if(_font == nullptr) {
-            font = _scene->engine->manager.fontManager.getDefaultFont("MontserratRegular");
-        } else {
-            font = _font;
-        }
+    TextRenderer::TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font) :
+    TextRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _text, _font) {  }
 
-        innerText = _text;
-        recalcTextDimensions(_text);
-        shaderID = defaultShaders[TEXT_RENDERER_SHADER];
-        texture = &font->getTexture();
-        IRenderizable::batchPriority = BatchPriority::TextPriority;
-    }
-
-    TextRenderer::TextRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeId)) {
+    TextRenderer::TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const std::string& _text, Font* _font) : IRenderizable(_node) {
         font = _font;
 
         if(_font == nullptr) {
-            font = _scene->engine->manager.fontManager.getDefaultFont("MontserratRegular");
+            font = _manager->fontManager.getDefaultFont("MontserratRegular");
         } else {
             font = _font;
         }

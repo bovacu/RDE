@@ -18,8 +18,9 @@ namespace Editor {
     class Editor : public Scene {
 
         PhysicsBody* body;
-        NodeID circleNodeID;
+        Node* circleNode;
         bool collisionHappened = false;
+        UISlider* slider;
 
         public:
             explicit Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }
@@ -37,7 +38,6 @@ namespace Editor {
             std::vector<NodeID> nodes;
 
 
-            bool uiButtonTrigger(NodeID _nodeId, Canvas* _canvas);
             void onMouseClick(MouseCode _mouseCode);
             void onMouseEntered();
             void onMouseExited();

@@ -35,13 +35,13 @@ namespace GDE {
             Transform* textTransform = nullptr, *checkboxBackgroundTransform = nullptr, *tickTransform = nullptr;
 
         public:
-            UICheckbox(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas,const UICheckboxConfig& _config);
+            UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config);
             ~UICheckbox() override {  }
 
             [[nodiscard]] Vec2F getSize() const override;
 
             UICheckboxConfig getConfig();
-            void setConfig(Scene* _scene, const UICheckboxConfig& _config);
+            void setConfig(Manager* _manager, const UICheckboxConfig& _config);
 
             void setInteractable(bool _interactable) override;
             bool isInteractable() override;

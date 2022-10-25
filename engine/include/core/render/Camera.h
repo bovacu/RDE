@@ -14,7 +14,7 @@
 namespace GDE {
 
     typedef entt::entity NodeID;
-    FORWARD_DECLARE_CLASS(Transform, SceneManager, Window)
+    FORWARD_DECLARE_CLASS(Transform, SceneManager, Window, Node, Manager, Graph)
 
     /**
      * @brief This class represents what the engine sees and what is going to be rendered. This is used as a Component of
@@ -58,18 +58,10 @@ namespace GDE {
              */
             IViewPort* viewport;
 
-            /**
-             * @brief Transform of the camera.
-             */
-            Transform* transform;
-
         public:
-            /**
-             * @brief ID of the Node that contains this component.
-             */
-            NodeID ID;
+            Node* node;
 
-            Camera(const NodeID& _mainCameraID, const Window* _window, Transform* _entityTransform);
+            Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window);
             ~Camera();
 
             /**
@@ -111,37 +103,6 @@ namespace GDE {
             glm::mat4& getViewProjectionMatrix();
 
             /**
-             * @brief Returns the Transform.
-             * @return Transform&
-             */
-            Transform& getTransform();
-
-            /**
-             * @brief Sets the camera position.
-             * @param _position Position to set the camera
-             */
-            void setPosition(const Vec2F& _position);
-
-            /**
-             * @brief Translates the camera position by _translation. It is not the same as setPosition.
-             * @param _translation Amount of space to move the camera
-             */
-            void translate(const Vec2F& _translation);
-
-            /**
-             * @brief Translates the camera position by _translation. It is not the same as setPosition.
-             * @param _x Amount of space to move the camera on X axis
-             * @param _y Amount of space to move the camera on Y axis
-             */
-            void translate(float _x, float _y);
-
-            /**
-             * @brief Returns the camera position.
-             * @return Vec2F
-             */
-            Vec2F getPosition();
-
-            /**
              * @brief Sets the rectangle view size of the camera.
              * @param _cameraSize Size of the rectangle view of the camera
              */
@@ -159,9 +120,6 @@ namespace GDE {
              * @return Vec2I
              */
             Vec2I getCameraSize();
-
-            void setRotation(float _rotation);
-            float getRotation();
 
             /**
              * @brief Returns the aspect ratio of the Window.

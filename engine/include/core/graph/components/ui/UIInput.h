@@ -48,12 +48,12 @@ namespace GDE {
             Transform* textTransform = nullptr;
             Transform* nineSliceTransform = nullptr;
 
-            UIInput(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIInputConfig& _config);
+            UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config);
 
             [[nodiscard]] Vec2F getSize() const override;
 
             UIInputConfig getConfig();
-            void setConfig(Scene* _scene, const UIInputConfig& _config);
+            void setConfig(Manager* _manager, const UIInputConfig& _config);
 
             void setInteractable(bool _disabled) override;
             bool isInteractable() override;

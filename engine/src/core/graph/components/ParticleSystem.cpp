@@ -6,20 +6,10 @@
 
 namespace GDE {
 
-    void ParticleData::reset(const ParticleSystemConfig& _particleSystemConfig, Transform* _parentTransform) {
-        auto _parentPos = _parentTransform->getPosition();
-        position = glm::vec3 { _parentPos.x, _parentPos.y, 0.f };
-        Random _random;
-        velocity = glm::vec2 { _random.randomf(-20, 20), _random.randomf(20, 100) };
-        life = _particleSystemConfig.dataConfig.lifeTime;
-        acceleration = glm::vec2 { };
-        color = _particleSystemConfig.colorGradientConfig.initColor;
-    }
+    ParticleSystem::ParticleSystem(Node* _node, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig) :
+    ParticleSystem(_node, &_scene->engine->manager, _scene->getMainGraph(), _particleSystemConfig) {  }
 
-
-
-    ParticleSystem::ParticleSystem(const GDE::NodeID& _nodeID, Transform* _transform, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig) : IRenderizable(_transform) {
-        transform = _scene->getMainGraph()->getComponent<Transform>(_nodeID);
+    ParticleSystem::ParticleSystem(Node* _node, Manager* _manager, Graph* _graph, const ParticleSystemConfig& _particleSystemConfig)  : IRenderizable(_node) {
         UDelegate<ParticleData()> _allocator;
         _allocator.bind<&ParticleSystem::allocator>(this);
         particleSystemConfig = _particleSystemConfig;
@@ -34,7 +24,7 @@ namespace GDE {
         }
 
         if(shaderID == -1) {
-            shaderID = _scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER)->getShaderID();
+            shaderID = _manager->shaderManager.getShader(SPRITE_RENDERER_SHADER)->getShaderID();
         } else {
             shaderID = _particleSystemConfig.dataConfig.shader;
         }
@@ -42,8 +32,18 @@ namespace GDE {
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
         if(particleSystemConfig.dataConfig.texture == nullptr) {
-            particleSystemConfig.dataConfig.texture = _scene->engine->manager.textureManager.getSubTexture("assets", "handle");
+            particleSystemConfig.dataConfig.texture = _manager->textureManager.getSubTexture("assets", "handle");
         }
+    }
+
+    void ParticleData::reset(const ParticleSystemConfig& _particleSystemConfig, Transform* _parentTransform) {
+        auto _parentPos = _parentTransform->getPosition();
+        position = glm::vec3 { _parentPos.x, _parentPos.y, 0.f };
+        Random _random;
+        velocity = glm::vec2 { _random.randomf(-20, 20), _random.randomf(20, 100) };
+        life = _particleSystemConfig.dataConfig.lifeTime;
+        acceleration = glm::vec2 { };
+        color = _particleSystemConfig.colorGradientConfig.initColor;
     }
 
     void ParticleSystem::update(Delta _dt) {
@@ -52,7 +52,7 @@ namespace GDE {
 
             _it->life -= _dt;
             if (_it->life < 0) {
-                _it->reset(particleSystemConfig, transform);
+                _it->reset(particleSystemConfig, node->getTransform());
                 auto _particle = _it;
                 pool.returnElement(&(*_it));
                 usedParticles.erase(_it);
@@ -77,7 +77,7 @@ namespace GDE {
     }
 
     ParticleData ParticleSystem::allocator() {
-        auto _position = transform->getPosition();
+        auto _position = node->getTransform()->getPosition();
         Random _random;
 
         auto _particle = ParticleData {
@@ -162,7 +162,7 @@ namespace GDE {
 
     void ParticleSystem::reset() {
         for (auto _it = usedParticles.begin(); _it != usedParticles.end(); ++_it) {
-            _it->reset(particleSystemConfig, transform);
+            _it->reset(particleSystemConfig, node->getTransform());
             pool.returnElement(&(*_it));
             usedParticles.erase(_it);
         }

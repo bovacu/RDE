@@ -1,8 +1,9 @@
 // Created by borja on 27/12/21.
 
 
-#ifndef ENGINE2_0_COMPONENTS_H
-#define ENGINE2_0_COMPONENTS_H
+#ifndef GDE_COMPONENTS_H
+#define GDE_COMPONENTS_H
+
 
 namespace GDE {
     FORWARD_DECLARE_CLASS(Manager, Window, Camera, Canvas, IViewPort)
@@ -28,7 +29,7 @@ namespace GDE {
      * @brief Component that tells the internal ECS system if an entity should or not be updated in the different systems.
      */
     struct Active {
-        explicit Active(const NodeID& _nodeId) {  }
+        explicit Active(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
@@ -43,7 +44,7 @@ namespace GDE {
      *
      */
     struct StaticTransform {
-        explicit StaticTransform(const NodeID& _nodeId) {  }
+        explicit StaticTransform(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
@@ -58,7 +59,7 @@ namespace GDE {
      * 
      */
     struct CanvasEventStopper {
-        explicit CanvasEventStopper(const NodeID& _nodeId) {  }
+        explicit CanvasEventStopper(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
@@ -68,4 +69,4 @@ namespace GDE {
     };
 }
 
-#endif //ENGINE2_0_COMPONENTS_H
+#endif //GDE_COMPONENTS_H

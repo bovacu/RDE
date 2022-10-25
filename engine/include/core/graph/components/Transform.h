@@ -16,6 +16,7 @@ typedef entt::entity NodeID;
 
 namespace GDE {
 
+    FORWARD_DECLARE_STRUCT(Node)
     /**
      * @brief Component common to every entity that tells the engine where it is, which scale it has and how much it is rotated.
      */
@@ -38,12 +39,8 @@ namespace GDE {
             glm::mat4 worldPointToLocalRotation(float _rotation);
 
         public:
-            explicit Transform(const NodeID& _nodeId);
-
-            /**
-             * @brief Entity's ID.
-             */
-            NodeID ID;
+            explicit Transform();
+            Node* node;
 
             /**
              * @brief ID of the direct parent.

@@ -9,7 +9,7 @@
 
 namespace GDE {
 
-    FORWARD_DECLARE_CLASS(TextRenderer, Font, NineSliceSprite)
+    FORWARD_DECLARE_CLASS(Manager, TextRenderer, Font, NineSliceSprite)
 
     struct UIButtonConfig : CommonUIConfig {
         std::string text = "Button Text";
@@ -32,12 +32,13 @@ namespace GDE {
             TextRenderer* textRenderer = nullptr;
             NineSliceSprite* nineSliceSprite = nullptr;
 
-            UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
+            UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
+            UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config);
 
             [[nodiscard]] Vec2F getSize() const override;
 
             UIButtonConfig getConfig();
-            void setConfig(Scene* _scene, const UIButtonConfig& _config);
+            void setConfig(Manager* _manager, const UIButtonConfig& _config);
 
             void setInteractable(bool _disabled) override;
             bool isInteractable() override;

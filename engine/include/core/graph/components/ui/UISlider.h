@@ -36,13 +36,13 @@ namespace GDE {
             Transform* handleTransform = nullptr;
 
         public:
-            UISlider(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UISliderConfig& _config);
+            UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config);
             ~UISlider() {  }
 
             [[nodiscard]] Vec2F getSize() const override;
 
             UISliderConfig getConfig();
-            void setConfig(Scene* _scene, const UISliderConfig& _config);
+            void setConfig(Manager* _manager, const UISliderConfig& _config);
 
             void setInteractable(bool _disabled) override;
             bool isInteractable() override;

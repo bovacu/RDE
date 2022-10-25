@@ -60,8 +60,8 @@ namespace GDE {
             void showFileExplorer();
 
             void hierarchy(Scene* _scene);
-            void hierarchyRecursionStub(Scene* _scene, Graph* _graph, NodeID _node, NodeID& _selectedNode);
-            void showLoadedPrefabs(Scene* _scene, Graph* _graph, NodeID _node, NodeID& _selectedNode);
+            void hierarchyRecursionStub(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode);
+            void showLoadedPrefabs(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode);
             void nodeComponents(Graph* _graph, const NodeID _selectedNode);
             void activeComponent(Graph* _graph, const NodeID _selectedNode);
             void transformComponent(Graph* _graph, const NodeID _selectedNode);

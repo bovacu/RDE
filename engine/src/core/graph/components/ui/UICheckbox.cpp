@@ -7,8 +7,8 @@
 
 namespace GDE {
 
-    UICheckbox::UICheckbox(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UICheckboxConfig& _config) : UI(_nodeID, _canvas) {
-        setConfig(_scene, _config);
+    UICheckbox::UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config) : UI(_node) {
+        setConfig(_manager, _config);
 
         UI::texture = config.checkboxTickTexture;
 
@@ -19,27 +19,27 @@ namespace GDE {
         UI::interaction->onInnerClicking.bind<&UICheckbox::onMouseClicked>(this);
         UI::interaction->onInnerMouseEntered.bind<&UICheckbox::onMouseEntered>(this);
 
-        auto _textID = _canvas->getGraph()->createNode("Text", _nodeID);
-        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textID, _scene, _canvas, _config.text, config.font);
+        auto _textNode = _graph->createNode("Text", _node);
+        textRenderer = _textNode->addComponent<TextRenderer>(_config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
         textRenderer->color = config.textColor;
-        textTransform = _canvas->getGraph()->getComponent<Transform>(_textID);
+        textTransform = _textNode->getTransform();
 
-        auto _checkboxBackgroundID = _canvas->getGraph()->createNode("CheckboxBackground", _nodeID);
-        checkboxBackgroundSprite = _canvas->getGraph()->addComponent<SpriteRenderer>(_checkboxBackgroundID, _scene, _canvas, config.checkboxBackgroundTexture);
+        auto _checkboxBackgroundNode = _graph->createNode("CheckboxBackground", _node);
+        checkboxBackgroundSprite = _checkboxBackgroundNode->addComponent<SpriteRenderer>(config.checkboxBackgroundTexture);
         checkboxBackgroundSprite->color = _config.checkboxColor;
-        checkboxBackgroundTransform = _canvas->getGraph()->getComponent<Transform>(_checkboxBackgroundID);
+        checkboxBackgroundTransform = _checkboxBackgroundNode->getTransform();
 
-        auto _tickID = _canvas->getGraph()->createNode("CheckboxTick", _checkboxBackgroundID);
-        tickSprite = _canvas->getGraph()->addComponent<SpriteRenderer>(_tickID, _scene, _canvas, config.checkboxTickTexture);
+        auto _tickNode = _graph->createNode("CheckboxTick", _checkboxBackgroundNode);
+        tickSprite = _tickNode->addComponent<SpriteRenderer>(config.checkboxTickTexture);
         tickSprite->color = config.tickColor;
-        tickTransform = _canvas->getGraph()->getComponent<Transform>(_tickID);
+        tickTransform = _tickNode->getTransform();
 
         UI::interaction->sizeOfInteraction = Vec2F { checkboxBackgroundSprite->getSize().x + textRenderer->getSize().x,
                                                checkboxBackgroundSprite->getSize().y > textRenderer->getSize().y ? checkboxBackgroundSprite->getSize().y : textRenderer->getSize().y
                                              } + config.checkboxTextOffset;
 
-        setConfig(_scene, config);
+        setConfig(_manager, config);
     }
 
     Vec2F UICheckbox::getSize() const {
@@ -50,29 +50,29 @@ namespace GDE {
         return config;
     }
 
-    void UICheckbox::setConfig(Scene* _scene, const UICheckboxConfig& _config) {
+    void UICheckbox::setConfig(Manager* _manager, const UICheckboxConfig& _config) {
         config = _config;
 
         if(config.stopFurtherClicks) {
-            if(!UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
-                canvas->getGraph()->addComponent<CanvasEventStopper>(ID);
+            if(!UI::node->hasComponent<CanvasEventStopper>()) {
+                UI::node->addComponent<CanvasEventStopper>();
             }
         } else {
-            if(UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
-                canvas->getGraph()->removeComponent<CanvasEventStopper>(ID);
+            if(UI::node->hasComponent<CanvasEventStopper>()) {
+                UI::node->removeComponent<CanvasEventStopper>();
             }
         }
 
         if(config.checkboxBackgroundTexture == nullptr) {
-            config.checkboxBackgroundTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "checkboxDark");
+            config.checkboxBackgroundTexture = _manager->textureManager.getSubTexture("assets", "checkboxDark");
         }
 
         if(config.checkboxTickTexture == nullptr) {
-            config.checkboxTickTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "checkmark");
+            config.checkboxTickTexture = _manager->textureManager.getSubTexture("assets", "checkmark");
         }
 
         if(config.font == nullptr) {
-            config.font = _scene->engine->manager.fontManager.getDefaultFont("MontserratRegular");
+            config.font = _manager->fontManager.getDefaultFont("MontserratRegular");
         }
 
         config.checkboxTextOffset = _config.checkboxTextOffset;

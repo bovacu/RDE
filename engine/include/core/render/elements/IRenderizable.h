@@ -8,6 +8,7 @@
 #include "core/render/elements/Texture.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/render/elements/Batch.h"
+#include "core/graph/components/Node.h"
 
 namespace GDE {
 
@@ -62,13 +63,10 @@ namespace GDE {
             bool enabled = true;
 
         public:
-            /**
-             * @brief Transform of the Node.
-             */
-            Transform* transform;
+            Node* node = nullptr;
 
         public:
-            IRenderizable(Transform* _transform) : transform(_transform) {  }
+            IRenderizable(Node* _node) : node(_node) {  }
 
             /**
              * @brief Gets the ID on the GPU of the SpriteSheet that contains the sprite.

@@ -8,11 +8,9 @@
 
 namespace GDE {
 
-    Camera::Camera(const NodeID& _mainCameraID, const Window* _window, Transform* _entityTransform) {
-        ID = _mainCameraID;
+    Camera::Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window) : node(_node) {
         viewport = new FreeViewPort(_window->getWindowSize());
         onResize(_window->getWidth(), _window->getHeight());
-        transform = _entityTransform;
     }
 
     void Camera::onResize(int _width, int _height) {
@@ -28,12 +26,8 @@ namespace GDE {
         return projectionMatrix;
     }
 
-    Transform& Camera::getTransform() {
-        return *transform;
-    }
-
     void Camera::recalculateViewMatrix() {
-        auto [_mat, _dirty] = transform->localToWorld();
+        auto [_mat, _dirty] = node->getTransform()->localToWorld();
 
         if(_dirty) {
             auto _screenCoords = Util::worldToScreenCoords(*viewport, {_mat[3][0], _mat[3][1]});
@@ -42,22 +36,6 @@ namespace GDE {
             viewMatrix = glm::inverse(_mat);
             viewProjectionMatrix = projectionMatrix * viewMatrix;
         }
-    }
-
-    void Camera::setPosition(const Vec2F& _position) {
-        transform->setPosition(_position);
-    }
-
-    Vec2F Camera::getPosition() {
-        return transform->getPosition();
-    }
-
-    void Camera::setRotation(float _rotation) {
-        transform->setRotation(_rotation);
-    }
-
-    float Camera::getRotation() {
-        return transform->getRotation();
     }
 
     glm::mat4& Camera::getViewMatrix() {
@@ -121,15 +99,6 @@ namespace GDE {
         viewport->update(_currentDeviceSize);
     }
 
-    void Camera::translate(const Vec2F& _translation) {
-        translate(_translation.x, _translation.y);
-    }
-
-    void Camera::translate(float _x, float _y) {
-        auto _position = getPosition();
-        setPosition({_position.x + _x, _position.y + _y});
-    }
-
     void Camera::setCameraSize(const Vec2I& _cameraSize) {
         setCameraSize(_cameraSize.x, _cameraSize.y);
     }
@@ -148,8 +117,8 @@ namespace GDE {
         _elementTopLeft += { -_size.x / 2.f, _size.y / 2.f };
         _elementBottomRight += { _size.x / 2.f, -_size.y / 2.f };
 
-        auto _cameraTopLeft = transform->getModelMatrixPosition();
-        auto _cameraBottomRight = transform->getModelMatrixPosition();
+        auto _cameraTopLeft = node->getTransform()->getModelMatrixPosition();
+        auto _cameraBottomRight = node->getTransform()->getModelMatrixPosition();
         _cameraTopLeft += { -(float)size.x / 2.f * zoom, (float)size.y / 2.f * zoom };
         _cameraBottomRight += { (float)size.x / 2.f * zoom, -(float)size.y / 2.f * zoom };
 

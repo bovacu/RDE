@@ -108,85 +108,86 @@ namespace GDE {
         }
     }
 
-    std::unordered_map<std::string, NodeID_JsonPair> ConfigManager::createNodes(Scene* _scene, const nlohmann::json& _sceneJson) {
-        std::unordered_map<std::string, NodeID_JsonPair> _nodes;
+    std::unordered_map<std::string, Node_JsonPair> ConfigManager::createNodes(Scene* _scene, const nlohmann::json& _sceneJson) {
+        std::unordered_map<std::string, Node_JsonPair> _nodes;
 
-        std::unordered_map<NodeID, std::string> _parentingMap;
+        std::unordered_map<Node*, std::string> _parentingMap;
         if(_sceneJson.contains("nodes")) {
             auto& _nodesJson = _sceneJson["nodes"];
             int _entityCount = 0;
             for(auto& _node : _nodesJson) {
                 if(_node.contains("components") && _node["components"].contains("camera") && _node["components"]["camera"].contains("is_main") && _node["components"]["camera"]["is_main"].get<bool>()) {
                     auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : APPEND_S("Entity_", _entityCount);
-                    _nodes[_tag] = { _scene->getMainCamera()->ID, _node };
-                    _scene->getMainGraph()->getComponent<Tag>(_scene->getMainCamera()->ID)->tag = _tag;
+                    _nodes[_tag] = { _scene->getMainCamera()->node, _node };
+                    _scene->getMainGraph()->getComponent<Tag>(_scene->getMainCamera()->node->getID())->tag = _tag;
                     _entityCount++;
                     continue;
                 }
 
                 auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : APPEND_S("Entity_", _entityCount);
                 ENGINE_ASSERT(_nodes.find(_tag) == _nodes.end(), "Scene CANNOT have repeated 'tag' for different nodes, it is a unique identifier. Another '", _tag, "' prefab key was already defined.")
-                auto _entityID = _scene->getMainGraph()->createNode(_tag);
-                _nodes[_tag] = {_entityID, _node };
+                auto _entityNode = _scene->getMainGraph()->createNode(_tag);
+                _nodes[_tag] = {_entityNode, _node };
                 _entityCount++;
 
                 if(_node.contains("parent") && !_node["parent"].is_null()) {
-                    _parentingMap[_entityID] = _node["parent"];
+                    _parentingMap[_entityNode] = _node["parent"];
                 }
             }
 
             for(auto& _child : _parentingMap) {
-                _scene->getMainGraph()->setParent(_child.first, _nodes[_child.second].nodeId);
+                _scene->getMainGraph()->setParent(_child.first, _nodes[_child.second].node);
             }
         }
 
         return _nodes;
     }
 
-    void ConfigManager::loadNodes(Scene* _scene, Window* _window, const nlohmann::json& _sceneJson, const std::unordered_map<std::string, NodeID_JsonPair>& _nodes) {
+    void ConfigManager::loadNodes(Scene* _scene, Window* _window, const nlohmann::json& _sceneJson, const std::unordered_map<std::string, Node_JsonPair>& _nodes) {
         if(_sceneJson.contains("nodes")) {
             for(auto& _node : _nodes) {
-                auto _entityID = _node.second.nodeId;
+                auto _entity = _node.second.node;
                 auto& _nodeJson = _node.second.json;
 
                 if(_nodeJson.contains("components")) {
                     auto& _components = _nodeJson["components"];
 
                     if(!_components.contains("active")) {
-                        _scene->getMainGraph()->removeComponent<Active>(_entityID);
+                        _entity->removeComponent<Active>();
                     }
 
                     ENGINE_ASSERT(_components.contains("transform"), "Every node MUST contain a transform.");
-                    loadTransformComponent(_scene, _entityID, _components["transform"]);
+                    loadTransformComponent(_scene, _entity, _components["transform"]);
 
                     if(_components.contains("sprite_renderer")) {
-                        loadSpriteRendererComponent(_entityID, _scene, _components["sprite_renderer"]);
+                        loadSpriteRendererComponent(_entity, _scene, _components["sprite_renderer"]);
                     }
 
                     if(_components.contains("body")) {
-                        loadBodyComponent(_entityID, _scene, _components["body"]);
+                        loadBodyComponent(_entity, _scene, _components["body"]);
                     }
 
                     if(_components.contains("text_renderer")) {
-                        loadTextRendererComponent(_entityID, _scene, _components["text_renderer"]);
+                        loadTextRendererComponent(_entity, _scene, _components["text_renderer"]);
                     }
 
                     if(_components.contains("camera")) {
-                        loadCameraComponent(_entityID, _scene, _window, _components["camera"]);
+                        loadCameraComponent(_entity, _scene, _window, _components["camera"]);
                     }
 
                     if(_components.contains("is_prefab") && _components["is_prefab"].get<bool>()) {
-                        _scene->getMainGraph()->setNodeActive(_entityID, false);
-                        ENGINE_ASSERT(_scene->prefabs.find(_node.first) == _scene->prefabs.end(), "Scene CANNOT have repeated 'tag' for different prefabs. Another '", _node.first, "' prefab key was already defined.")
-                        _scene->prefabs[_node.first] = _entityID;
+//                        _scene->getMainGraph()->setNodeActive(_scene->getMainGraph()->getComponent<Node>(_entityID), false);
+//                        ENGINE_ASSERT(_scene->prefabs.find(_node.first) == _scene->prefabs.end(), "Scene CANNOT have repeated 'tag' for different prefabs. Another '", _node.first, "' prefab key was already defined.")
+//                        _scene->prefabs[_node.first] = _entityID;
+                        LOG_W("ConfigManager Prefab needs implementation!!")
                     }
                 }
             }
         }
     }
 
-    void ConfigManager::loadTransformComponent(Scene* _scene, const NodeID& _nodeID, const nlohmann::json& _transformJson) {
-        auto* _nodeTransform = _scene->getMainGraph()->getComponent<Transform>(_nodeID);
+    void ConfigManager::loadTransformComponent(Scene* _scene, Node* _node, const nlohmann::json& _transformJson) {
+        auto* _nodeTransform = _node->getTransform();
         if(_transformJson.contains("position")) {
             _nodeTransform->setPosition(_transformJson["position"][0].get<float>(), _transformJson["position"][1].get<float>());
         }
@@ -200,11 +201,10 @@ namespace GDE {
         }
     }
 
-    void ConfigManager::loadSpriteRendererComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _spriteRendererJson) {
-        auto _ownerEntityID = _nodeID;
+    void ConfigManager::loadSpriteRendererComponent(Node* _node, Scene* _scene, const nlohmann::json& _spriteRendererJson) {
         auto* _texture = _scene->engine->manager.textureManager.getSubTexture(_spriteRendererJson["texture"]["atlas"].get<std::string>(),
                                                                               _spriteRendererJson["texture"]["tile"].get<std::string>());
-        auto* _spriteRenderer = _scene->getMainGraph()->addComponent<SpriteRenderer>(_ownerEntityID, _scene, _texture);
+        auto* _spriteRenderer = _node->addComponent<SpriteRenderer>(_texture);
 
         ENGINE_ASSERT(_spriteRendererJson.contains("texture"), "SpriteRenderer component MUST have section 'texture'.")
         ENGINE_ASSERT(_spriteRendererJson["texture"].contains("atlas"), "SpriteRenderer component MUST have section 'atlas' in section 'texture'.")
@@ -225,8 +225,7 @@ namespace GDE {
         }
     }
 
-    void ConfigManager::loadBodyComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _bodyJson) {
-        auto _ownerEntityID = _nodeID;
+    void ConfigManager::loadBodyComponent(Node* _node, Scene* _scene, const nlohmann::json& _bodyJson) {
         BodyConfig _bodyConfig;
         std::vector<ShapeConfig> _shapeConfigs;
 
@@ -372,14 +371,14 @@ namespace GDE {
         }
 
         _bodyConfig.shapeConfig = _shapeConfigs[0];
-        auto* _physicsBody = _scene->getMainGraph()->addComponent<PhysicsBody>(_ownerEntityID, _scene, _bodyConfig);
+        auto* _physicsBody = _node->addComponent<PhysicsBody>(_bodyConfig);
 
         for(auto _i = 1; _i < _shapeConfigs.size(); _i++) {
             _physicsBody->addShape(_shapeConfigs[_i]);
         }
     }
 
-    void ConfigManager::loadCameraComponent(const NodeID& _nodeID, Scene* _scene, Window* _window, const nlohmann::json& _cameraJson) {
+    void ConfigManager::loadCameraComponent(Node* _node, Scene* _scene, Window* _window, const nlohmann::json& _cameraJson) {
         if(_cameraJson.contains("is_main") && _cameraJson["is_main"].get<bool>()) {
 
             if(_cameraJson.contains("zoom")) {
@@ -416,9 +415,8 @@ namespace GDE {
 
             _scene->getMainCamera()->getViewport()->update(_window->getWindowSize());
         } else {
-            auto _ownerEntityID = _nodeID;
-            auto* _ownerTransform = _scene->getMainGraph()->getComponent<Transform>(_ownerEntityID);
-            auto* _camera = _scene->getMainGraph()->addComponent<Camera>(_ownerEntityID, _window, _ownerTransform);
+            auto* _ownerTransform = _node->getTransform();
+            auto* _camera = _node->addComponent<Camera>(_window);
 
             if(_cameraJson.contains("zoom")) {
                 _camera->setCurrentZoomLevel(_cameraJson["zoom"].get<float>());
@@ -458,9 +456,7 @@ namespace GDE {
         }
     }
 
-    void ConfigManager::loadTextRendererComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _textRendererJson) {
-        auto _ownerEntityID = _nodeID;
-
+    void ConfigManager::loadTextRendererComponent(Node* _node, Scene* _scene, const nlohmann::json& _textRendererJson) {
         ENGINE_ASSERT(_textRendererJson.contains("font"), "TextRenderer MUST have section 'font'.")
         ENGINE_ASSERT(_textRendererJson.contains("text"), "TextRenderer MUST have section 'text'.")
 
@@ -470,9 +466,9 @@ namespace GDE {
             _fontSize = _textRendererJson["font_size"].get<int>();
         }
 
-        auto* _textRenderer = _scene->getMainGraph()->addComponent<TextRenderer>(_ownerEntityID, _scene,
-                                                                                 _textRendererJson["text"].get<std::string>(),
-                                                                                         _scene->engine->manager.fontManager.getSpecificFont(_scene->engine->manager.fileManager, _textRendererJson["font"].get<std::string>(), _fontSize));
+        auto* _textRenderer = _node->addComponent<TextRenderer>(_textRendererJson["text"].get<std::string>(),
+                                                                                         _scene->engine->manager.fontManager.getSpecificFont(_scene->engine->manager.fileManager,
+                                                                                         _textRendererJson["font"].get<std::string>(), _fontSize));
 
         if(_textRendererJson.contains("color")) {
             auto& _color = _textRendererJson["color"];

@@ -13,7 +13,7 @@ typedef entt::entity NodeID;
 namespace GDE {
 
     FORWARD_DECLARE_STRUCT(CharInfo)
-    FORWARD_DECLARE_CLASS(Font, Scene, Canvas)
+    FORWARD_DECLARE_CLASS(Font, Scene, Canvas, Graph, Manager)
 
     /**
      * @brief Component used to render text on screen.  End user doesn't have, and in fact can't
@@ -73,8 +73,9 @@ namespace GDE {
             std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharInfo* _chars) const;
 
         public:
-            TextRenderer(const NodeID& _nodeId, Scene* _scene, const std::string& _text, Font* _font = nullptr);
-            TextRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font = nullptr);
+            TextRenderer(Node* _node, Scene* _scene, const std::string& _text, Font* _font = nullptr);
+            TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font = nullptr);
+            TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const std::string& _text, Font* _font = nullptr);
             ~TextRenderer() override {  }
 
             /**
@@ -133,7 +134,8 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] Vec2F getSize() const override { return { size.x / 2.f * transform->getScale().x, size.y / 2.f * transform->getScale().y }; }
+            [[nodiscard]] Vec2F getSize() const override { return { size.x / 2.f * IRenderizable::node->getTransform()->getScale().x,
+                                                                    size.y / 2.f * IRenderizable::node->getTransform()->getScale().y }; }
 
             /**
              * @see IRenderizable

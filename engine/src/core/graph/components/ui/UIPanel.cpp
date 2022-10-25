@@ -15,8 +15,8 @@ namespace GDE {
 
     }
 
-    UIPanel::UIPanel(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIPanelConfig& _config) : UI(_nodeID, _canvas) {
-        setConfig(_scene, _config);
+    UIPanel::UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config) : UI(_node) {
+        setConfig(_manager, _config);
 
         UI::texture = config.texture;
 
@@ -29,11 +29,11 @@ namespace GDE {
         UI::interaction->onInnerClicking.bind<&foo2>();
         UI::interaction->onInnerClickingReleased.bind<&foo2>();
 
-        nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, config.texture);
+        nineSliceSprite = _node->addComponent<NineSliceSprite>(config.texture);
         nineSliceSprite->nineSliceSize = _config.size;
         nineSliceSprite->color = _config.color;
 
-        setConfig(_scene, _config);
+        setConfig(_manager, _config);
     }
 
     Vec2F UIPanel::getSize() const {
@@ -44,11 +44,11 @@ namespace GDE {
         return config;
     }
 
-    void UIPanel::setConfig(Scene* _scene, const UIPanelConfig& _config) {
+    void UIPanel::setConfig(Manager* _manager, const UIPanelConfig& _config) {
         config = _config;
 
         if(config.texture == nullptr) {
-            config.texture = _scene->engine->manager.textureManager.getSubTexture("assets", "panel");
+            config.texture = _manager->textureManager.getSubTexture("assets", "panel");
         }
 
         if(config.color == Color::NO_COLOR) {

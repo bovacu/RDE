@@ -8,8 +8,8 @@
 
 namespace GDE {
 
-    UISlider::UISlider(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UISliderConfig& _config) : UI(_nodeID, _canvas) {
-        setConfig(_scene, _config);
+    UISlider::UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config) : UI(_node) {
+        setConfig(_manager, _config);
 
         UI::texture = config.backgroundBarTexture;
 
@@ -20,24 +20,24 @@ namespace GDE {
         UI::interaction->onInnerClicking.bind<&UISlider::onMouseClicked>(this);
         UI::interaction->onInnerClickingReleased.bind<&UISlider::onMouseReleased>(this);
 
-        auto _backgroundBarID = _canvas->getGraph()->createNode("Background", _nodeID);
-        backgroundBarSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_backgroundBarID, _scene, _canvas, config.backgroundBarTexture);
+        auto _backgroundBarNode = _graph->createNode("Background", _node);
+        backgroundBarSprite = _backgroundBarNode->addComponent<NineSliceSprite>(config.backgroundBarTexture);
         backgroundBarSprite->nineSliceSize = config.barSize;
         backgroundBarSprite->color = config.backgroundBarColor;
-        backgroundBarTransform = _canvas->getGraph()->getComponent<Transform>(_backgroundBarID);
+        backgroundBarTransform = _backgroundBarNode->getTransform();
 
-        auto _fillBarID = _canvas->getGraph()->createNode("Fill", _nodeID);
-        fillBarSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_fillBarID, _scene, _canvas, config.fillingBarTexture);
+        auto _fillBarNode = _graph->createNode("Fill", _node);
+        fillBarSprite = _fillBarNode->addComponent<NineSliceSprite>(config.fillingBarTexture);
         fillBarSprite->nineSliceSize = { config.barSize.x * clampF(config.percentageFilled, 0.f, 1.f), config.barSize.y };
         fillBarSprite->color = config.fillingBarColor;
-        fillBarTransform = _canvas->getGraph()->getComponent<Transform>(_fillBarID);
+        fillBarTransform = _fillBarNode->getTransform();
 
 //        auto _handleID = _canvas->getGraph()->createNode("Handle", _nodeID);
 //        handleSprite = _canvas->getGraph()->addComponent<SpriteRenderer>(_handleID, _scene, _canvas, config.handleTexture);
 //        handleSprite->color = config.fillingBarColor;
 //        handleTransform = _canvas->getGraph()->getComponent<Transform>(_handleID);
 
-        setConfig(_scene, _config);
+        setConfig(_manager, _config);
     }
 
     Vec2F UISlider::getSize() const {
@@ -48,29 +48,29 @@ namespace GDE {
         return config;
     }
 
-    void UISlider::setConfig(Scene* _scene, const UISliderConfig& _config) {
+    void UISlider::setConfig(Manager* _manager, const UISliderConfig& _config) {
         config = _config;
 
         if(config.stopFurtherClicks) {
-            if(!UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
-                canvas->getGraph()->addComponent<CanvasEventStopper>(ID);
+            if(!UI::node->hasComponent<CanvasEventStopper>()) {
+                UI::node->addComponent<CanvasEventStopper>();
             }
         } else {
-            if(UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
-                canvas->getGraph()->removeComponent<CanvasEventStopper>(ID);
+            if(UI::node->hasComponent<CanvasEventStopper>()) {
+                UI::node->removeComponent<CanvasEventStopper>();
             }
         }
 
         if(config.backgroundBarTexture == nullptr) {
-            config.backgroundBarTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "fillAndBgrScrollBarHorizontal");
+            config.backgroundBarTexture = _manager->textureManager.getSubTexture("assets", "fillAndBgrScrollBarHorizontal");
         }
 
         if(config.fillingBarTexture == nullptr) {
-            config.fillingBarTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "fillAndBgrScrollBarHorizontal");
+            config.fillingBarTexture = _manager->textureManager.getSubTexture("assets", "fillAndBgrScrollBarHorizontal");
         }
 
         if(config.handleTexture == nullptr) {
-            config.handleTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "handle");
+            config.handleTexture = _manager->textureManager.getSubTexture("assets", "handle");
         }
 
 

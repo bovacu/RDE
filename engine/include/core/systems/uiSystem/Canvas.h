@@ -15,7 +15,7 @@ namespace GDE {
     FORWARD_DECLARE_CLASS(UI, UIInteractable)
 
     struct CanvasElement {
-        NodeID nodeID = NODE_ID_NULL;
+        Node* node = nullptr;
         IRenderizable* renderizable = nullptr;
         UIInteractable* interactable = nullptr;
         IRenderizable* updatable = nullptr;
@@ -101,7 +101,7 @@ namespace GDE {
             void onDebugRender();
 
         private:
-            void traverseTree(const NodeID& _nodeID, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(const NodeID&, bool&, void*), void (Canvas::*_postFunc)(const NodeID&, void*));
+            void traverseTree(Node* _node, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(Node* _node, bool&, void*), void (Canvas::*_postFunc)(Node* _node, void*));
 
             void batchTreeElementPre(CanvasElement* _canvasElement, void* _data);
             void batchTreeElementPost(CanvasElement* _canvasElement, void* _data);
@@ -110,10 +110,10 @@ namespace GDE {
 
             void updateTreeElement(CanvasElement* _canvasElement, void* _data);
 
-            void createElementListTreePre(const NodeID& _nodeID, bool& _earlyBreak, void* _data);
+            void createElementListTreePre(Node* _node, bool& _earlyBreak, void* _data);
 
-            IRenderizable* getRenderizable(const NodeID& _nodeID);
-            IRenderizable* getUpdatable(const NodeID& _nodeID);
+            IRenderizable* getRenderizable(Node* _node);
+            IRenderizable* getUpdatable(Node* _node);
 
             void forceRender();
 

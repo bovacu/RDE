@@ -8,9 +8,9 @@
 
 namespace GDE {
 
-    PhysicsBody::PhysicsBody(const NodeID& _id, Scene* _scene, BodyConfig& _bodyConfig) {
-        space = _scene->engine->manager.physics.space;
-        transform = _scene->getMainGraph()->getComponent<Transform>(_id);
+    PhysicsBody::PhysicsBody(Node* _node, Manager* _manager, Graph* _graph, BodyConfig& _bodyConfig) {
+        space = _manager->physics.space;
+        transform = _node->getTransform();
 
         switch (_bodyConfig.shapeConfig.type) {
             case PhysicsShapeType::CIRCLE:
@@ -28,7 +28,7 @@ namespace GDE {
         }
 
         cpBodySetUserData(body, this);
-        _scene->engine->manager.physics.add(this);
+        _manager->physics.add(this);
 
     }
 

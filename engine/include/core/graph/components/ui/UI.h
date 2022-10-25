@@ -17,7 +17,7 @@ typedef entt::entity NodeID;
 namespace GDE {
 
 
-    FORWARD_DECLARE_CLASS(KeyEvent)
+    FORWARD_DECLARE_CLASS(KeyEvent, Manager)
 
     /**
      * @brief Component that every UI element that wants to interact with events on the screen must include.
@@ -90,6 +90,7 @@ namespace GDE {
             MDelegate<void()> onInnerUnfocused;
 
         public:
+            UIInteractable(Node* _node, Manager* _manager, Graph* _graph);
 
             /**
              * @brief Callback triggered when the mouse is clicked.
@@ -138,8 +139,6 @@ namespace GDE {
              */
             Vec2F sizeOfInteraction;
 
-            explicit UIInteractable(const NodeID& _nodeId);
-
         private:
             /**
              * @brief Function called inside the Graph system to take the events and handle them inside the UI elements.
@@ -148,7 +147,7 @@ namespace GDE {
              * @param _event Event being handled
              * @param _canvas Canvas that contains the Entity
              */
-            void onEvent(const NodeID& _nodeID, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas);
+            void onEvent(Node* _node, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas);
     };
 
     struct CommonUIConfig {
@@ -164,8 +163,6 @@ namespace GDE {
              * @brief Texture that contains the sprite of the rendered UI.
              */
             Texture* texture = nullptr;
-            Canvas* canvas = nullptr;
-            NodeID ID;
 
         public:
             FRIEND_CLASS(SpriteBatch)
@@ -175,13 +172,7 @@ namespace GDE {
             */
             UIInteractable* interaction = nullptr;
 
-            UI(const NodeID& _nodeID, Canvas* _canvas) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeID)) {
-                if(!_canvas->getGraph()->hasComponent<UIInteractable>(_nodeID)) {
-                    interaction = _canvas->getGraph()->addComponent<UIInteractable>(_nodeID);
-                }
-                canvas = _canvas;
-                ID = _nodeID;
-            }
+            explicit UI(Node* _node);
 
             virtual bool isInteractable() = 0;
 

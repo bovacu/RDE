@@ -15,32 +15,24 @@
 
 namespace GDE {
 
-    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture) : IRenderizable(_scene->getMainGraph()->getComponent<Transform>(_nodeId)) {
+    SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Texture* _texture) :
+    SpriteRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _texture) {  }
+
+    SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
+    SpriteRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _texture)  {  }
+
+    SpriteRenderer::SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : IRenderizable(_node) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
         if(_texture == nullptr) {
-            texture = _scene->engine->manager.textureManager.getSubTexture("assets", "sprite");
+            texture = _manager->textureManager.getSubTexture("assets", "sprite");
         } else {
             texture = _texture;
         }
 
-        auto [_transformMat, _] = transform->localToWorld();
-        calculateGeometry(_transformMat, *transform, *_scene->getMainCamera()->getViewport());
-    }
-
-    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, Texture* _texture) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeId))  {
-        shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
-        IRenderizable::batchPriority = BatchPriority::SpritePriority;
-
-        if(_texture == nullptr) {
-            texture = _scene->engine->manager.textureManager.getSubTexture("assets", "sprite");
-        } else {
-            texture = _texture;
-        }
-
-        auto [_transformMat, _] = transform->localToWorld();
-        calculateGeometry(_transformMat, *transform, *_scene->getMainCamera()->getViewport());
+        auto [_transformMat, _] = _node->getTransform()->localToWorld();
+        calculateGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
     }
 
     std::string SpriteRenderer::getTexturePath() {

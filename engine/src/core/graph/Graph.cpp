@@ -19,12 +19,13 @@ namespace GDE {
     Graph::Graph(Scene* _scene, const std::string& _sceneName) {
         scene = _scene;
         name = _sceneName;
-        sceneRoot = registry.create();
+        auto _sceneRootID = registry.create();
 
-        registry.emplace<Tag>(sceneRoot, sceneRoot, _sceneName);
-        registry.emplace<Transform>(sceneRoot, sceneRoot).parent = NODE_ID_NULL;
-        registry.get<Transform>(sceneRoot).parentTransform = nullptr;
-        registry.emplace<Active>(sceneRoot, sceneRoot);
+        registry.emplace<Tag>(_sceneRootID, _sceneRootID, _sceneName);
+        registry.emplace<Transform>(_sceneRootID).parent = NODE_ID_NULL;
+        sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, &registry.get<Transform>(_sceneRootID));
+        registry.get<Transform>(_sceneRootID).parentTransform = nullptr;
+        registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
 
         onEventDel.bind<&onEventDelFoo>();
         onUpdateDel.bind<&onUpdateDelFoo>();
@@ -74,9 +75,9 @@ namespace GDE {
         auto& _renderManager = scene->engine->manager.renderManager;
 
         for(auto* _camera : scene->cameras) {
-            if(!hasComponent<Active>(_camera->ID)) continue;
+            if(!hasComponent<Active>(_camera->node->getID())) continue;
 
-            _renderManager.beginDraw(*_camera, getComponent<Transform>(_camera->ID));
+            _renderManager.beginDraw(*_camera, getComponent<Transform>(_camera->node->getID()));
             _camera->setCameraSize(_camera->getCameraSize());
             _camera->update();
             {
@@ -118,7 +119,7 @@ namespace GDE {
 //
         auto& _renderManager = scene->engine->manager.renderManager;
 //
-        _renderManager.beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->ID));
+        _renderManager.beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->node->getID()));
         scene->engine->manager.physics.debugRender(&_renderManager);
 //
 //        _debug.each([&_renderManager](const auto _entity, const Body& _body) {
@@ -139,53 +140,55 @@ namespace GDE {
         }
     }
 
-    NodeID Graph::createNode(const std::string& _tag, const NodeID& _parent) {
+    Node* Graph::createNode(const std::string& _tag, Node* _parent) {
         auto _newNode = registry.create();
 
-        auto _parentRef = _parent == NODE_ID_NULL ? sceneRoot : _parent;
+        auto _parentRef = _parent == nullptr ? sceneRoot->getID() : _parent->getID();
 
         registry.emplace<Tag>(_newNode, _newNode, _tag);
-        registry.emplace<Transform>(_newNode, _newNode).parent = _parentRef;
+        registry.emplace<Transform>(_newNode).parent = _parentRef;
         (&registry.get<Transform>(_parentRef))->children.push_back(&registry.get<Transform>(_newNode));
         (&registry.get<Transform>(_newNode))->parentTransform = (&registry.get<Transform>(_parentRef));
 
-        registry.emplace<Active>(_newNode, _newNode);
+        auto* _node = &registry.emplace<Node>(_newNode, _newNode, this, &scene->engine->manager, &registry.get<Transform>(_newNode));
+        registry.get<Transform>(_newNode).node = _node;
+        registry.emplace<Active>(_newNode, _node, &scene->engine->manager, this);
 
         if(onDataChanged != nullptr) onDataChanged((void*)_newNode);
 
-        return _newNode;
+        return _node;
     }
 
-    NodeID Graph::instantiatePrefab(const NodeID& _prefab, const Vec2F& _position, const NodeID& _parent) {
+    Node* Graph::instantiatePrefab(Node* _prefab, const Vec2F& _position, Node* _parent) {
         auto _copy = registry.create();
+        LOG_W("InstantiatePrefab Needs implementation!!!")
+//        for(auto&& _curr: registry.storage()) {
+//            auto& _storage = _curr.second;
+//            if(_storage.contains(_prefab)) {
+//                _storage.emplace(_copy, _storage.get(_prefab));
+//            }
+//        }
+//
+//        auto* _transform = getComponent<Transform>(_copy);
+//        (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent))->children.push_back(_transform);
+//        _transform->setPosition(_position);
+//        _transform->parentTransform = (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent));
+//        if(_parent != NODE_ID_NULL) setParent(_copy, _parent);
+//        setNodeActive(_copy, true);
+//
+//        if(onDataChanged != nullptr) onDataChanged((void*)_copy);
 
-        for(auto&& _curr: registry.storage()) {
-            auto& _storage = _curr.second;
-            if(_storage.contains(_prefab)) {
-                _storage.emplace(_copy, _storage.get(_prefab));
-            }
-        }
-
-        auto* _transform = getComponent<Transform>(_copy);
-        (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent))->children.push_back(_transform);
-        _transform->setPosition(_position);
-        _transform->parentTransform = (&registry.get<Transform>(getComponent<Transform>(_prefab)->parent));
-        if(_parent != NODE_ID_NULL) setParent(_copy, _parent);
-        setNodeActive(_copy, true);
-
-        if(onDataChanged != nullptr) onDataChanged((void*)_copy);
-
-        return _copy;
+        return nullptr;
     }
 
-    NodeID Graph::getNode(const std::string& _tagName) {
+    Node* Graph::getNode(const std::string& _tagName) {
         for(auto [_entity, _tag] : registry.view<Tag>().each())
-            if(strcmp(_tag.tag.c_str(), _tagName.c_str()) == 0) return _entity;
+            if(strcmp(_tag.tag.c_str(), _tagName.c_str()) == 0) return &registry.get<Node>(_entity);
 
         throw std::runtime_error("Tried to get node with tag '" + _tagName + "' but it was not found!");
     }
 
-    void Graph::removeNode(const NodeID& _node) {
+    void Graph::removeNode(Node* _node) {
         remove(_node, true);
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
     }
@@ -194,20 +197,20 @@ namespace GDE {
         removeNode(getNode(_nodeTagName));
     }
 
-    void Graph::printScene(const entt::entity& _id, std::ostream& _os, int& _indent) {
-        if(_id == NODE_ID_NULL) return;
+    void Graph::printScene(Node* _node, std::ostream& _os, int& _indent) {
+        if(_node->getID() == NODE_ID_NULL) return;
 
-        auto _tag = registry.get<Tag>(_id);
+        auto _tag = registry.get<Tag>(_node->getID());
         _os << "* " << _tag.tag;
 
-        auto _transform = registry.get<Transform>(_id);
+        auto _transform = _node->getTransform();
 
-        for(auto _child : _transform.children) {
+        for(auto _child : _transform->children) {
             _indent++;
             _os << "\n";
             for(int _in = 0; _in < _indent; _in++) _os << "\t";
             _os << "|__ ";
-            printScene(_child->ID, _os, _indent);
+            printScene(_child->node, _os, _indent);
             _indent--;
         }
     }
@@ -219,24 +222,24 @@ namespace GDE {
         return _ss.str();
     }
 
-    void Graph::setParent(const NodeID& _node, const NodeID& _parent) {
-        auto* _nodeTransform = &registry.get<Transform>(_node);
+    void Graph::setParent(Node* _node, Node* _parent) {
+        auto* _nodeTransform = _node->getTransform();
 
-        if(_nodeTransform->parent == _parent) {
-            LOG_W("Parent of ", (int)_node, " is already ", (int)_parent, "!!")
+        if(_nodeTransform->parent == _parent->getTransform()->parent) {
+            LOG_W("Parent of ", (int)_node->getID(), " is already ", (int)_parent->getID(), "!!")
             return;
         }
 
-        if(std::find(_nodeTransform->begin(), _nodeTransform->end(), getComponent<Transform>(_parent)) != _nodeTransform->end()) {
-            LOG_E("Cannot set ", (int)_parent, " as the parent of ", (int)_node, " because ", (int)_node, " is the father of ", (int)_parent, "!!!!")
+        if(std::find(_nodeTransform->begin(), _nodeTransform->end(), _parent->getTransform()) != _nodeTransform->end()) {
+            LOG_E("Cannot set ", (int)_parent->getID(), " as the parent of ", (int)_node->getID(), " because ", (int)_node->getID(), " is the father of ", (int)_parent->getID(), "!!!!")
             return;
         }
 
         remove(_node, false);
 
-        auto* _parentTransform = &registry.get<Transform>(_parent);
+        auto* _parentTransform = _parent->getTransform();
 
-        _nodeTransform->parent = _parent;
+        _nodeTransform->parent = _parent->getID();
         _nodeTransform->parentTransform = _parentTransform;
         _parentTransform->children.push_back(_nodeTransform);
         _nodeTransform->setLocalMatrix(glm::inverse(_parentTransform->getLocalMatrix()) * _nodeTransform->getLocalMatrix());
@@ -244,36 +247,36 @@ namespace GDE {
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
     }
 
-    void Graph::remove(const NodeID& _node, bool _delete) {
-        auto* _nodeTransform = &registry.get<Transform>(_node);
+    void Graph::remove(Node* _node, bool _delete) {
+        auto* _nodeTransform = _node->getTransform();
 
         if(_nodeTransform->parent != NODE_ID_NULL) {
             auto* _parentTransform = &registry.get<Transform>(_nodeTransform->parent);
             auto _toRemove = std::remove_if(_parentTransform->children.begin(), _parentTransform->children.end(), [&](Transform* _transform) {
-                return _transform->ID == _node;
+                return _transform->node->getID() == _node->getID();
             });
             _parentTransform->children.erase(_toRemove);
         }
 
         if(_delete) {
             for(auto _it = _nodeTransform->children.rbegin(); _it < _nodeTransform->children.rend(); _it++) {
-                remove((*_it)->ID, _delete);
+                remove((*_it)->node, _delete);
             }
 
-            if(hasComponent<PhysicsBody>(_node)) {
-                scene->engine->manager.physics.remove(getComponent<PhysicsBody>(_node));
+            if(hasComponent<PhysicsBody>(_node->getID())) {
+                scene->engine->manager.physics.remove(getComponent<PhysicsBody>(_node->getID()));
             }
 
-            registry.destroy(_node);
+            registry.destroy(_node->getID());
         }
 
     }
 
-    void Graph::orphan(const NodeID& _node) {
+    void Graph::orphan(Node* _node) {
         remove(_node, false);
-        (&registry.get<Transform>(_node))->parent = sceneRoot;
-        (&registry.get<Transform>(_node))->parentTransform = getComponent<Transform>(sceneRoot);
-        (&registry.get<Transform>(sceneRoot))->children.push_back(&registry.get<Transform>(_node));
+        _node->getTransform()->parent = sceneRoot->getID();
+        _node->getTransform()->parentTransform = sceneRoot->getTransform();
+        sceneRoot->getTransform()->children.push_back(_node->getTransform());
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
     }
 
@@ -281,39 +284,25 @@ namespace GDE {
         orphan(getNode(_nodeTagName));
     }
 
-    NodeID Graph::getID() {
+    Node* Graph::getRoot() {
         return sceneRoot;
     }
 
-    void Graph::setNodeStatic(NodeID _node, bool _static) {
-        if(_static && !registry.any_of<StaticTransform>(_node)) {
-            registry.emplace<StaticTransform>(_node, _node);
-            return;
-        }
-
-        if(!_static && registry.any_of<StaticTransform>(_node))
-            registry.remove<StaticTransform>(_node);
-    }
-
-    bool Graph::isNodeStatic(NodeID _node) {
-        return registry.any_of<StaticTransform>(_node);
-    }
-
-    void Graph::setNodeActive(NodeID _node, bool _active) {
-        if(_active && !registry.any_of<Active>(_node)) {
-            registry.emplace<Active>(_node, _node);
+    void Graph::setNodeActive(Node* _node, bool _active) {
+        if(_active && !registry.any_of<Active>(_node->getID())) {
+            registry.emplace<Active>(_node->getID(), _node, &scene->engine->manager, this);
             if(onDataChanged != nullptr) onDataChanged((void*)_node);
             return;
         }
 
-        if(!_active && registry.any_of<Active>(_node)) {
-            registry.remove<Active>(_node);
+        if(!_active && registry.any_of<Active>(_node->getID())) {
+            registry.remove<Active>(_node->getID());
             if(onDataChanged != nullptr) onDataChanged((void*)_node);
         }
     }
 
-    bool Graph::isNodeActive(NodeID _node) {
-        return registry.any_of<Active>(_node);
+    bool Graph::isNodeActive(Node* _node) {
+        return registry.any_of<Active>(_node->getID());
     }
 
     NodeContainer& Graph::getNodeContainer() {

@@ -8,8 +8,8 @@
 
 namespace GDE {
 
-    UIInput::UIInput(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIInputConfig& _config) : UI(_nodeID, _canvas) {
-        setConfig(_scene, _config);
+    UIInput::UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config) : UI(_node) {
+        setConfig(_manager, _config);
 
         UI::texture = config.inputBackgroundTexture;
 
@@ -25,41 +25,41 @@ namespace GDE {
         UI::interaction->onInnerKeyReleased.bind<&UIInput::onKeyReleased>(this);
         UI::interaction->onInnerUnfocused.bind<&UIInput::onUnfocused>(this);
 
-        nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, config.inputBackgroundTexture);
+        nineSliceSprite = _node->addComponent<NineSliceSprite>(config.inputBackgroundTexture);
         nineSliceSprite->nineSliceSize = config.inputSize;
         nineSliceSprite->color = config.inputBackgroundColor;
-        nineSliceTransform = _canvas->getGraph()->getComponent<Transform>(_nodeID);
+        nineSliceTransform = _node->getTransform();
 
-        auto _placeholderID = _canvas->getGraph()->createNode("Placeholder", _nodeID);
-        placeholderTextRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_placeholderID, _scene, _canvas, config.placeholderText, config.font);
+        auto _placeholderNode = _graph->createNode("Placeholder", _node);
+        placeholderTextRenderer = _placeholderNode->addComponent<TextRenderer>(config.placeholderText, config.font);
         placeholderTextRenderer->batchPriority = BatchPriority::SpritePriority;
         placeholderTextRenderer->color = config.placeholderTextColor;
         placeholderTextRenderer->pivot = { 0, 0.5f };
         placeholderTextRenderer->enabled = config.showPlaceholderText;
-        auto* _placeholderTransform = _canvas->getGraph()->getComponent<Transform>(_placeholderID);
+        auto* _placeholderTransform = _placeholderNode->getTransform();
         auto _placeholderPosition = _placeholderTransform->getPosition();
         _placeholderTransform->setPosition(_placeholderPosition.x - config.inputSize.x / 2.f + config.textsOffsetFromLeft.x, _placeholderPosition.y + config.textsOffsetFromLeft.y);
 
-        auto _textID = _canvas->getGraph()->createNode("Text", _nodeID);
-        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textID, _scene, _canvas, config.text, config.font);
+        auto _textNode = _graph->createNode("Text", _node);
+        textRenderer = _textNode->addComponent<TextRenderer>(config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
         textRenderer->color = config.textColor;
         textRenderer->pivot = { 0, 0.5f };
-        textTransform = _canvas->getGraph()->getComponent<Transform>(_textID);
+        textTransform = _textNode->getTransform();
         auto _textPosition = textTransform->getPosition();
         textTransform->setPosition(_textPosition.x - config.inputSize.x / 2.f + config.textsOffsetFromLeft.x, _textPosition.y + config.textsOffsetFromLeft.y);
 
-        auto _caretID = _canvas->getGraph()->createNode("Caret", _nodeID);
-        caretSprite = _canvas->getGraph()->addComponent<SpriteRenderer>(_caretID, _scene, _canvas, config.caretTexture);
+        auto _caretNode = _graph->createNode("Caret", _node);
+        caretSprite = _caretNode->addComponent<SpriteRenderer>(config.caretTexture);
         caretSprite->batchPriority = BatchPriority::SpritePriority;
         caretSprite->color = config.textColor;
         caretSprite->pivot = { 0, 0.5f };
         caretSprite->enabled = false;
-        caretTransform = _canvas->getGraph()->getComponent<Transform>(_caretID);
+        caretTransform = _caretNode->getTransform();
         auto _caretPosition = caretTransform->getPosition();
         caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - config.inputSize.x / 2.f + config.textsOffsetFromLeft.x, _caretPosition.y + config.textsOffsetFromLeft.y);
 
-        setConfig(_scene, _config);
+        setConfig(_manager, _config);
     }
 
     Vec2F UIInput::getSize() const {
@@ -70,29 +70,29 @@ namespace GDE {
         return config;
     }
 
-    void UIInput::setConfig(Scene* _scene, const UIInputConfig& _config) {
+    void UIInput::setConfig(Manager* _manager, const UIInputConfig& _config) {
         config = _config;
 
         if(config.stopFurtherClicks) {
-            if(!UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
-                canvas->getGraph()->addComponent<CanvasEventStopper>(ID);
+            if(!UI::node->hasComponent<CanvasEventStopper>()) {
+                UI::node->addComponent<CanvasEventStopper>();
             }
         } else {
-            if(UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
-                canvas->getGraph()->removeComponent<CanvasEventStopper>(ID);
+            if(UI::node->hasComponent<CanvasEventStopper>()) {
+                UI::node->removeComponent<CanvasEventStopper>();
             }
         }
 
         if(config.inputBackgroundTexture == nullptr) {
-            config.inputBackgroundTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "inputThemeDark");
+            config.inputBackgroundTexture = _manager->textureManager.getSubTexture("assets", "inputThemeDark");
         }
 
         if(config.caretTexture == nullptr) {
-            config.caretTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "caret");
+            config.caretTexture = _manager->textureManager.getSubTexture("assets", "caret");
         }
 
         if(config.font == nullptr) {
-            config.font = _scene->engine->manager.fontManager.getSpecificFont(_scene->engine->manager.fileManager, "MontserratRegular", 40);
+            config.font = _manager->fontManager.getSpecificFont(_manager->fileManager, "MontserratRegular", 40);
         }
 
         UI::interaction->sizeOfInteraction = config.inputSize;
@@ -256,8 +256,8 @@ namespace GDE {
             _width += _font->getChars()[textRenderer->getText()[_i]].advance.x + textRenderer->spaceBetweenChars;
         }
 
-        if(_width / 2.f * transform->getScale().x + config.textsOffsetFromLeft.x * 2.f >= getSize().x) {
-            textDisplacement = (_width / 2.f * transform->getScale().x + config.textsOffsetFromLeft.x * 2.f) - getSize().x;
+        if(_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * 2.f >= getSize().x) {
+            textDisplacement = (_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * 2.f) - getSize().x;
         } else {
             textDisplacement = 0;
         }
@@ -266,6 +266,6 @@ namespace GDE {
         textTransform->setMatrixModelPosition({_origin.x - textDisplacement, _origin.y});
 
         auto _caretPosition = caretTransform->getPosition();
-        caretTransform->setPosition(textTransform->getPosition().x + _width / 2.f * transform->getScale().x, _caretPosition.y);
+        caretTransform->setPosition(textTransform->getPosition().x + _width / 2.f * UI::node->getTransform()->getScale().x, _caretPosition.y);
     }
 }

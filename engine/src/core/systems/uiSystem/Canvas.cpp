@@ -25,48 +25,47 @@ namespace GDE {
 
     Canvas::Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag) : graph(_scene, _canvasTag) {
         scene = _scene;
-        auto _cameraID = graph.createNode("CanvasCamera");
-        auto* _canvasTransform = graph.getComponent<Transform>(_cameraID);
-        camera = graph.addComponent<Camera>(_cameraID, _window, _canvasTransform);
+        auto _cameraNode = graph.createNode("CanvasCamera");
+        camera = _cameraNode->addComponent<Camera>(_window);
         graph.onDataChanged.bind<&Canvas::onTreeChanged>(this);
     }
 
-    void Canvas::traverseTree(const NodeID& _nodeID, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(const NodeID&, bool&, void*), void (Canvas::*_postFunc)(const NodeID&, void*)) {
-        if(_nodeID == NODE_ID_NULL) return;
+    void Canvas::traverseTree(Node* _node, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(Node* _node, bool&, void*), void (Canvas::*_postFunc)(Node* _node, void*)) {
+        if(_node->getID() == NODE_ID_NULL) return;
 
-        auto _transform = graph.getComponent<Transform>(_nodeID);
+        auto _transform = _node->getTransform();
 
-        if(_preFunc != nullptr) (this->*_preFunc)(_nodeID, _earlyBreak, _data);
+        if(_preFunc != nullptr) (this->*_preFunc)(_node, _earlyBreak, _data);
         if(_earlyBreak) return;
 
         for(auto& _it : _transform->children) {
-            traverseTree(_it->ID, _earlyBreak, _data, _preFunc, _postFunc);
+            traverseTree(_it->node, _earlyBreak, _data, _preFunc, _postFunc);
         }
 
-        if(_postFunc != nullptr) (this->*_postFunc)(_nodeID, _data);
+        if(_postFunc != nullptr) (this->*_postFunc)(_node, _data);
     }
 
-    void Canvas::createElementListTreePre(const NodeID& _nodeID, bool& _earlyBreak, void* _data) {
-        if(!graph.hasComponent<Active>(_nodeID)) {
+    void Canvas::createElementListTreePre(Node* _node, bool& _earlyBreak, void* _data) {
+        if(!_node->hasComponent<Active>()) {
             _earlyBreak = true;
         }
 
         auto* _elements = (std::vector<CanvasElement>*)_data;
-        CanvasElement _canvasElement { _nodeID };
+        CanvasElement _canvasElement { _node };
 
-        if(graph.hasComponent<UIInteractable>(_nodeID)) {
-            _canvasElement.interactable = graph.getComponent<UIInteractable>(_nodeID);
+        if(_node->hasComponent<UIInteractable>()) {
+            _canvasElement.interactable = _node->getComponent<UIInteractable>();
         }
 
-        if(graph.getNodeContainer().any_of<TextRenderer, UIButton, NineSliceSprite, SpriteRenderer, UICheckbox, UISlider>(_nodeID)) {
-            _canvasElement.renderizable = getRenderizable(_nodeID);
+        if(graph.getNodeContainer().any_of<TextRenderer, UIButton, NineSliceSprite, SpriteRenderer, UICheckbox, UISlider>(_node->getID())) {
+            _canvasElement.renderizable = getRenderizable(_node);
         }
 
-        if(graph.getNodeContainer().any_of<UISlider, UIInput>(_nodeID)) {
-            _canvasElement.updatable = getUpdatable(_nodeID);
+        if(graph.getNodeContainer().any_of<UISlider, UIInput>(_node->getID())) {
+            _canvasElement.updatable = getUpdatable(_node);
         }
 
-        _canvasElement.cropping = graph.getNodeContainer().any_of<UIInput>(_nodeID);
+        _canvasElement.cropping = graph.getNodeContainer().any_of<UIInput>(_node->getID());
 
         if(!_canvasElement.renderizable && !_canvasElement.interactable && !_canvasElement.updatable) return;
 
@@ -91,7 +90,7 @@ namespace GDE {
     void Canvas::onEventTreeElement(CanvasElement* _canvasElement, void* _data) {
         auto* _onEventData = (OnEventData*)_data;
         if(_canvasElement->interactable) {
-            _canvasElement->interactable->onEvent(_canvasElement->nodeID, _onEventData->engine, *_onEventData->eventDispatcher, *_onEventData->event, this);
+            _canvasElement->interactable->onEvent(_canvasElement->node, _onEventData->engine, *_onEventData->eventDispatcher, *_onEventData->event, this);
         }
     }
 
@@ -107,13 +106,13 @@ namespace GDE {
 
 
 
-    IRenderizable* Canvas::getUpdatable(const NodeID& _nodeID) {
-        if(graph.hasComponent<UISlider>(_nodeID)) {
-            return graph.getComponent<UISlider>(_nodeID);
+    IRenderizable* Canvas::getUpdatable(Node* _node) {
+        if(_node->hasComponent<UISlider>()) {
+            return _node->getComponent<UISlider>();
         }
 
-        if(graph.hasComponent<UIInput>(_nodeID)) {
-            return graph.getComponent<UIInput>(_nodeID);
+        if(_node->hasComponent<UIInput>()) {
+            return _node->getComponent<UIInput>();
         }
 
         return nullptr;
@@ -136,17 +135,17 @@ namespace GDE {
 
 
 
-    IRenderizable* Canvas::getRenderizable(const NodeID& _nodeID) {
-        if(graph.hasComponent<NineSliceSprite>(_nodeID)) {
-            return graph.getComponent<NineSliceSprite>(_nodeID);
+    IRenderizable* Canvas::getRenderizable(Node* _node) {
+        if(_node->hasComponent<NineSliceSprite>()) {
+            return _node->getComponent<NineSliceSprite>();
         }
 
-        if(graph.hasComponent<SpriteRenderer>(_nodeID)) {
-            return graph.getComponent<SpriteRenderer>(_nodeID);
+        if(_node->hasComponent<SpriteRenderer>()) {
+            return _node->getComponent<SpriteRenderer>();
         }
 
-        if(graph.hasComponent<TextRenderer>(_nodeID)) {
-            return graph.getComponent<TextRenderer>(_nodeID);
+        if(_node->hasComponent<TextRenderer>()) {
+            return _node->getComponent<TextRenderer>();
         }
 
         return nullptr;
@@ -156,10 +155,10 @@ namespace GDE {
         Batch* _currentBatch = &batches.back();
 
         if(_canvasElement->cropping) {
-            stencils.push(_canvasElement->nodeID);
-            auto* _transform = graph.getComponent<Transform>(_canvasElement->nodeID);
+            stencils.push(_canvasElement->node->getID());
+            auto* _transform = _canvasElement->node->getTransform();
             auto _position = _transform->getModelMatrixPosition();
-            auto* _uiInput = graph.getComponent<UIInput>(_canvasElement->nodeID);
+            auto* _uiInput = _canvasElement->node->getComponent<UIInput>();
 
             forceRender();
             _currentBatch = &batches.back();
@@ -183,12 +182,12 @@ namespace GDE {
                 _currentBatch = &batches.back();
             }
 
-            _renderizable->drawBatched(_currentBatch->vertexBuffer, _currentBatch->indexBuffer, *_renderizable->transform, *camera->getViewport());
+            _renderizable->drawBatched(_currentBatch->vertexBuffer, _currentBatch->indexBuffer, *_renderizable->node->getTransform(), *camera->getViewport());
         }
     }
 
     void Canvas::batchTreeElementPost(CanvasElement* _canvasElement, void* _data) {
-        if(!stencils.empty() && stencils.top() == _canvasElement->nodeID) {
+        if(!stencils.empty() && stencils.top() == _canvasElement->node->getID()) {
             stencils.pop();
             forceRender();
             glDisable(GL_SCISSOR_TEST);
@@ -211,7 +210,7 @@ namespace GDE {
         auto& _registry = graph.getNodeContainer();
 
         auto& _renderManager = graph.scene->engine->manager.renderManager;
-        _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->ID));
+        _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->node->getID()));
 
         batches.clear();
         Batch _batch;
@@ -235,7 +234,7 @@ namespace GDE {
         auto _interactables = _registry.group<UIInteractable>(entt::get<Transform, Active>);
 
         auto& _renderManager = graph.scene->engine->manager.renderManager;
-       _renderManager.beginDebugDraw(*camera, graph.getComponent<Transform>(camera->ID));
+       _renderManager.beginDebugDraw(*camera, graph.getComponent<Transform>(camera->node->getID()));
 
 //        _interactables.each([&_renderManager](const auto _entity, UIInteractable& _interactable, Transform& _transform, const Active& _) {
 //            DebugShape _shape;

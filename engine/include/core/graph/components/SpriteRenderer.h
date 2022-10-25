@@ -14,7 +14,7 @@ typedef entt::entity NodeID;
 
 namespace GDE {
 
-    FORWARD_DECLARE_CLASS(Scene, Canvas)
+    FORWARD_DECLARE_CLASS(Manager, Graph, Scene, Canvas, Node)
 
     /**
      * @brief Component that allows to render a texture or part of a texture on screen. End user doesn't have, and in fact can't
@@ -39,8 +39,9 @@ namespace GDE {
             void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport);
 
         public:
-            SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture = nullptr);
-            SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, Texture* _texture);
+            SpriteRenderer(Node* _node, Scene* _scene, Texture* _texture = nullptr);
+            SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
+            SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture);
             ~SpriteRenderer() override {  }
 
             /**
@@ -77,8 +78,8 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] Vec2F getSize() const override { return {(float)texture->getSize().x * transform->getScale().x, (float)texture->getSize().y *
-                                                                                                                          transform->getScale().y}; }
+            [[nodiscard]] Vec2F getSize() const override { return {(float)texture->getSize().x * IRenderizable::node->getTransform()->getScale().x,
+                                                                   (float)texture->getSize().y * IRenderizable::node->getTransform()->getScale().y}; }
 
             /**
              * @see IRenderizable

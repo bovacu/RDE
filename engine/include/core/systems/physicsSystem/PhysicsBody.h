@@ -68,7 +68,7 @@ namespace GDE {
         PhysicsBodyType physicsBodyType = PhysicsBodyType::DYNAMIC;
     };
 
-    FORWARD_DECLARE_CLASS(Scene)
+    FORWARD_DECLARE_CLASS(Scene, Node, Manager, Graph)
 
     struct PhysicsBody {
 
@@ -92,7 +92,7 @@ namespace GDE {
             void setupShape(ShapeConfig& _shapeConfig);
 
         public:
-            PhysicsBody(const NodeID& _id, Scene* _scene, BodyConfig& _bodyConfig);
+            PhysicsBody(Node* _node, Manager* _manager, Graph* _graph, BodyConfig& _bodyConfig);
             ~PhysicsBody();
             void update();
 

@@ -23,12 +23,12 @@ namespace GDE {
         public:
             NineSliceSprite* nineSliceSprite = nullptr;
 
-            UIPanel(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIPanelConfig& _config);
+            UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config);
 
             [[nodiscard]] Vec2F getSize() const override;
 
             UIPanelConfig getConfig();
-            void setConfig(Scene* _scene, const UIPanelConfig& _config);
+            void setConfig(Manager* _manager, const UIPanelConfig& _config);
 
             void setInteractable(bool _disabled) override;
             bool isInteractable() override;

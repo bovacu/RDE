@@ -9,8 +9,7 @@
 
 namespace GDE {
 
-    Transform::Transform(const NodeID& _nodeId) {
-        ID = _nodeId;
+    Transform::Transform() {
         worldMatrixCache = recalculateCachedMatrix();
     }
 

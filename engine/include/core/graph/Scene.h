@@ -161,19 +161,19 @@ namespace GDE {
              * @param _cameraID Camera to enable or disable
              * @param _enable If the camera gets enabled or disabled
              */
-            void enableCamera(const NodeID& _cameraID, bool _enable);
+            void enableCamera(Node* _camera, bool _enable);
 
             /**
              * @brief Destroys a specific camera of the scene.
              * @param _cameraID Camera to be destroyed
              */
-            void removeCamera(const NodeID& _cameraID);
+            void removeCamera(Node* _camera);
 
             /**
              * @brief Sets an specific camera as the main one.
              * @param _camera Camera to be set as main
              */
-            void switchMainCamera(const NodeID& _camera);
+            void switchMainCamera(Node* _camera);
 
             /**
              * @brief Returns the name of the scene.

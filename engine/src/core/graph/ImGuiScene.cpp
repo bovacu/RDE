@@ -365,33 +365,33 @@ namespace GDE {
 
 
 
-    void ImGuiScene::hierarchyRecursionStub(Scene* _scene, Graph* _graph, NodeID _node, NodeID& _selectedNode) {
+    void ImGuiScene::hierarchyRecursionStub(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode) {
         auto _prefabs = _scene->getPrefabs();
-        if(std::find(_prefabs.begin(), _prefabs.end(), _node) != _prefabs.end()) return;
+        if(std::find(_prefabs.begin(), _prefabs.end(), _node->getID()) != _prefabs.end()) return;
 
-        auto* _transform = _graph->getComponent<Transform>(_node);
-        auto* _tag = _graph->getComponent<Tag>(_node);
+        auto* _transform =_node->getTransform();
+        auto* _tag = _node->getComponent<Tag>();
 
         if(!_transform->children.empty()) {
 
-            auto _flags = _node == _selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
+            auto _flags = _node->getID() == _selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
             if (ImGui::TreeNodeEx(_tag->tag.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | _flags)) {
 
                 if(ImGui::IsItemClicked()) {
-                    _selectedNode = _node;
+                    _selectedNode = _node->getID();
                     if(&selectedNode == &_selectedNode) selectedNodeCanvas = NODE_ID_NULL;
                     else selectedNode = NODE_ID_NULL;
                 }
 
                 for(auto _child : _transform->children) {
-                    hierarchyRecursionStub(_scene, _graph, _child->ID, _selectedNode);
+                    hierarchyRecursionStub(_scene, _graph, _child->node, _selectedNode);
                 }
 
                 ImGui::TreePop();
             }
         } else {
-            if (ImGui::Selectable(_tag->tag.c_str(), _selectedNode == _node)) {
-                _selectedNode = _node;
+            if (ImGui::Selectable(_tag->tag.c_str(), _selectedNode == _node->getID())) {
+                _selectedNode = _node->getID();
                 if(&selectedNode == &_selectedNode) selectedNodeCanvas = NODE_ID_NULL;
                 else selectedNode = NODE_ID_NULL;
             }
@@ -402,17 +402,17 @@ namespace GDE {
         ImGui::Begin("Hierarchy");
         windowsHovered[1] = checkForFocus();
         auto* _graph = _scene->getMainGraph();
-        hierarchyRecursionStub(_scene, _graph, _graph->getID(), selectedNode);
+        hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNode);
         for(auto* _canvas : _scene->getCanvases()) {
             _graph = _canvas->getGraph();
-            hierarchyRecursionStub(_scene, _graph, _graph->getID(), selectedNodeCanvas);
+            hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNodeCanvas);
         }
-        showLoadedPrefabs(_scene, _scene->getMainGraph(), _graph->getID(), selectedNode);
+        showLoadedPrefabs(_scene, _scene->getMainGraph(), _graph->getRoot(), selectedNode);
         ImGui::End();
     }
 
-    void ImGuiScene::showLoadedPrefabs(Scene* _scene, Graph* _graph, NodeID _node, NodeID& _selectedNode) {
-        auto _flags = _node == _selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
+    void ImGuiScene::showLoadedPrefabs(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode) {
+        auto _flags = _node->getID() == _selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
         if (ImGui::TreeNodeEx("Prefabs loaded in memory", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | _flags)) {
 
             auto _prefabs = _scene->getPrefabs();
@@ -450,7 +450,7 @@ namespace GDE {
         ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 30);
         ImGui::PushID(1);
         if(ImGui::Checkbox("###Active", &_active)) {
-            if(_active) _graph->addComponent<Active>(_selectedNode);
+            if(_active) _graph->addComponent<Active>(_selectedNode, _graph->getComponent<Node>(_selectedNode), &engine->manager, _graph);
             else _graph->removeComponent<Active>(_selectedNode);
         }
         ImGui::PopID();
@@ -476,8 +476,8 @@ namespace GDE {
         auto _transform = _graph->getComponent<Transform>(_selectedNode);
 
         if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
-            ImGui::Text("ID: %i", (int)_transform->ID);
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+            ImGui::Text("ID: %i", (int)_transform->node->getID());
             ImGui::Text("Position ");
 
             float _pos[2] = {_transform->getPosition().x, _transform->getPosition().y};
@@ -510,7 +510,7 @@ namespace GDE {
             if(ImGui::DragFloat2("##myInput", _scale, 0.05))
                 _transform->setScale(_scale[0], _scale[1]);
             ImGui::PopID();
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
 
         }
     }
@@ -521,7 +521,7 @@ namespace GDE {
         auto _camera = _graph->getComponent<Camera>(_selectedNode);
 
         if(ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
             const char* _viewports[] = { "Free Aspect", "Adaptative Aspect"};
 
@@ -569,7 +569,7 @@ namespace GDE {
             }
             ImGui::PopID();
 
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 
@@ -591,14 +591,14 @@ namespace GDE {
         auto _spriteRenderer = _graph->getComponent<SpriteRenderer>(_selectedNode);
 
         if(ImGui::CollapsingHeader("Sprite Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
             ImGui::Text("Texture"); ImGui::SameLine();
             auto _texturePath = _spriteRenderer->getTexturePath();
             ImGui::BeginDisabled(true);
             ImGui::InputText("###texture", const_cast<char*>(_texturePath.c_str()), _texturePath.size());
             ImGui::EndDisabled();
 
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 
@@ -609,9 +609,9 @@ namespace GDE {
         auto _textTransform = _graph->getComponent<Transform>(_selectedNode);
 
         if(ImGui::CollapsingHeader("Text Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 
@@ -621,9 +621,9 @@ namespace GDE {
         auto _uiButton = _graph->getComponent<UIButton>(_selectedNode);
 
         if(ImGui::CollapsingHeader("UI Button", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
             ImGui::Text("Size ");
             float _size[2] = { _uiButton->nineSliceSprite->getSize().x, _uiButton->nineSliceSprite->getSize().y };
@@ -633,13 +633,13 @@ namespace GDE {
             if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
                 auto _config = _uiButton->getConfig();
                 _config.buttonTextureSize = { _size[0], _size[1] };
-                _uiButton->setConfig(engine->manager.sceneManager.getDisplayedScene(), _config);
+                _uiButton->setConfig(&engine->manager, _config);
             }
             ImGui::PopID();
 
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
 
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 
@@ -649,7 +649,7 @@ namespace GDE {
         auto _uiPanel = _graph->getComponent<UIPanel>(_selectedNode);
 
         if(ImGui::CollapsingHeader("UI Panel", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
             ImGui::Text("Size ");
             float _size[2] = { _uiPanel->nineSliceSprite->getSize().x, _uiPanel->nineSliceSprite->getSize().y };
@@ -659,11 +659,11 @@ namespace GDE {
             if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
                 auto _config = _uiPanel->getConfig();
                 _config.size = { _size[0], _size[1] };
-                _uiPanel->setConfig(engine->manager.sceneManager.getDisplayedScene(), _config);
+                _uiPanel->setConfig(&engine->manager, _config);
             }
             ImGui::PopID();
 
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 

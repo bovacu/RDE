@@ -7,8 +7,11 @@
 
 namespace GDE {
 
-    UIButton::UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config) : UI(_nodeID, _canvas) {
-        setConfig(_scene, _config);
+    UIButton::UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config) :
+    UIButton(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
+
+    UIButton::UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config) : UI(_node) {
+        setConfig(_manager, _config);
 
         UI::texture = config.idleTexture;
 
@@ -21,12 +24,12 @@ namespace GDE {
         UI::interaction->onInnerClicking.bind<&UIButton::onMouseClicked>(this);
         UI::interaction->onInnerClickingReleased.bind<&UIButton::onMouseReleased>(this);
 
-        nineSliceSprite = _canvas->getGraph()->addComponent<NineSliceSprite>(_nodeID, _scene, _canvas, config.idleTexture);
+        nineSliceSprite = _node->addComponent<NineSliceSprite>(config.idleTexture);
         nineSliceSprite->nineSliceSize = _config.buttonTextureSize;
         nineSliceSprite->color = _config.buttonColor;
 
-        auto _textID = _canvas->getGraph()->createNode("Text", _nodeID);
-        textRenderer = _canvas->getGraph()->addComponent<TextRenderer>(_textID, _scene, _canvas, _config.text, config.font);
+        auto _textNode = _graph->createNode("Text", _node);
+        textRenderer = _textNode->addComponent<TextRenderer>(_config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
         textRenderer->color = config.textColor;
     }
@@ -39,37 +42,37 @@ namespace GDE {
         return config;
     }
 
-    void UIButton::setConfig(Scene* _scene, const UIButtonConfig& _config) {
+    void UIButton::setConfig(Manager* _manager, const UIButtonConfig& _config) {
         config = _config;
 
         if(config.stopFurtherClicks) {
-            if(!UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
-                canvas->getGraph()->addComponent<CanvasEventStopper>(ID);
+            if(!UI::node->hasComponent<CanvasEventStopper>()) {
+                UI::node->addComponent<CanvasEventStopper>();
             }
         } else {
-            if(UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
-                canvas->getGraph()->removeComponent<CanvasEventStopper>(ID);
+            if(UI::node->hasComponent<CanvasEventStopper>()) {
+                UI::node->removeComponent<CanvasEventStopper>();
             }
         }
 
         if(config.idleTexture == nullptr) {
-            config.idleTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark");
+            config.idleTexture = _manager->textureManager.getSubTexture("assets", "buttonDark");
         }
 
         if(config.selectedTexture == nullptr) {
-            config.selectedTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "buttonDarkHighlited");
+            config.selectedTexture = _manager->textureManager.getSubTexture("assets", "buttonDarkHighlited");
         }
 
         if(config.clickedTexture == nullptr) {
-            config.clickedTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "buttonDarkPressed");
+            config.clickedTexture = _manager->textureManager.getSubTexture("assets", "buttonDarkPressed");
         }
 
         if(config.disabledTexture == nullptr) {
-            config.disabledTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "buttonDarkLock");
+            config.disabledTexture = _manager->textureManager.getSubTexture("assets", "buttonDarkLock");
         }
 
         if(config.font == nullptr) {
-            config.font = _scene->engine->manager.fontManager.getDefaultFont("MontserratRegular");
+            config.font = _manager->fontManager.getDefaultFont("MontserratRegular");
         }
 
         UI::interaction->sizeOfInteraction = config.interactableArea;

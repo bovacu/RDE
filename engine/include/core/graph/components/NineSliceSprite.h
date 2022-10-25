@@ -16,7 +16,7 @@ namespace GDE {
         Color color = Color::White;
     };
 
-    FORWARD_DECLARE_CLASS(SpriteRenderer)
+    FORWARD_DECLARE_CLASS(SpriteRenderer, Manager, Graph)
     /**
      * @brief Component that is based on the SpriteRenderer, but allows to render UI images with a different size than the original
      * without loosing quality. The setup of this NineSlice should be done via TexturePacker.
@@ -35,7 +35,8 @@ namespace GDE {
 
         public:
 
-            NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture);
+            NineSliceSprite(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
+            NineSliceSprite(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture);
 
             /**
              * @brief Returns the NineSlice data. This is almost sure not to be needed by end-users.
@@ -43,7 +44,8 @@ namespace GDE {
              */
             [[nodiscard]] NineSlice& getNineSlice() const;
 
-            [[nodiscard]] Vec2F getSize() const override { return {(float)nineSliceSize.x * transform->getScale().x, (float)nineSliceSize.y * transform->getScale().y}; }
+            [[nodiscard]] Vec2F getSize() const override { return {(float)nineSliceSize.x * IRenderizable::node->getTransform()->getScale().x,
+                                                                   (float)nineSliceSize.y * IRenderizable::node->getTransform()->getScale().y}; }
             void setSize(const Vec2F& _size);
 
             void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
