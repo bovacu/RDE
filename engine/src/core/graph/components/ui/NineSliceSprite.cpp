@@ -74,11 +74,35 @@ namespace GDE {
             }
 
             if(_distortX == 0) {
+                float _sizeOfXCorners = (float)texture->nineSlice.subRects[0].size.x + (float)texture->nineSlice.subRects[2].size.x;
+                float _prop = _uiSize.x / _sizeOfXCorners;
 
+                if(_i == 0 || _i == 3 || _i == 6) {
+                    _position.x += ((float)_subTextureRegion.size.x - ((float)_subTextureRegion.size.x * _prop)) * 0.5f;
+                    if(_position.x > _transformMat[3][0]) _position.x = _transformMat[3][0];
+                    _transformMat[0][0] *= _prop;
+                }
+                if(_i == 2 || _i == 5 || _i == 8) {
+                    _position.x -= ((float)_subTextureRegion.size.x - ((float)_subTextureRegion.size.x * _prop)) * 0.5f;
+                    if(_position.x > _transformMat[3][0]) _position.x = _transformMat[3][0];
+                    _transformMat[0][0] *= _prop;
+                }
             }
 
             if(_distortY == 0) {
+                float _sizeOfYCorners = (float)texture->nineSlice.subRects[0].size.y + (float)texture->nineSlice.subRects[2].size.y;
+                float _prop = _uiSize.y / _sizeOfYCorners;
 
+                if(_i == 0 || _i == 1 || _i == 2) {
+                    _position.y += ((float)_subTextureRegion.size.y - ((float)_subTextureRegion.size.y * _prop)) * 0.5f;
+                    if(_position.y > _transformMat[3][1]) _position.y = _transformMat[3][1];
+                    _transformMat[1][1] *= _prop;
+                }
+                if(_i == 6 || _i == 7 || _i == 8) {
+                    _position.y -= ((float)_subTextureRegion.size.y - ((float)_subTextureRegion.size.y * _prop)) * 0.5f;
+                    if(_position.y > _transformMat[3][1]) _position.y = _transformMat[3][1];
+                    _transformMat[1][1] *= _prop;
+                }
             }
 
             auto _screenPos = Util::worldToScreenCoords(_viewport, {_position.x, _position.y});
