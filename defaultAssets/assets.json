@@ -777,7 +777,7 @@
             "scaling_factor": 1
         }, 
         {
-            "name": "fillAndBgrScrollBarHorisontal",
+            "name": "fillAndBgrScrollBarHorizontal",
             "size": [132, 15],
             "size_in_uv": [0.07300884955752213, 0.014423076923076924],
             "origin": [1219, 274],
@@ -786,10 +786,10 @@
             "center_pivot": [66, 7.5],
             "scaling_factor": 1,
             "nine_patch" : {
-                "top": 4,
-                "left": 33,
-                "right": 66,
-                "bottom": 7
+                "top": 5,
+                "left": 11,
+                "right": 110,
+                "bottom": 5
             }
         }, 
         {

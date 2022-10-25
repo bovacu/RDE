@@ -40,13 +40,13 @@ namespace GDE {
             float blinkingTimer = 0;
 
         public:
-            TextRenderer* textRenderer;
-            TextRenderer* placeholderTextRenderer;
-            NineSliceSprite* nineSliceSprite;
-            SpriteRenderer* caretSprite;
-            Transform* caretTransform;
-            Transform* textTransform;
-            Transform* nineSliceTransform;
+            TextRenderer* textRenderer = nullptr;
+            TextRenderer* placeholderTextRenderer = nullptr;
+            NineSliceSprite* nineSliceSprite = nullptr;
+            SpriteRenderer* caretSprite = nullptr;
+            Transform* caretTransform = nullptr;
+            Transform* textTransform = nullptr;
+            Transform* nineSliceTransform = nullptr;
 
             UIInput(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIInputConfig& _config);
 

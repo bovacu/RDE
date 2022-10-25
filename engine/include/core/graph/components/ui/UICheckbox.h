@@ -28,11 +28,11 @@ namespace GDE {
     class UICheckbox : public UI {
         private:
             UICheckboxConfig config;
-            TextRenderer* textRenderer;
-            SpriteRenderer* checkboxBackgroundSprite;
-            SpriteRenderer* tickSprite;
+            TextRenderer* textRenderer = nullptr;
+            SpriteRenderer* checkboxBackgroundSprite = nullptr;
+            SpriteRenderer* tickSprite = nullptr;
             bool checked;
-            Transform* textTransform, *checkboxBackgroundTransform, *tickTransform;
+            Transform* textTransform = nullptr, *checkboxBackgroundTransform = nullptr, *tickTransform = nullptr;
 
         public:
             UICheckbox(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas,const UICheckboxConfig& _config);

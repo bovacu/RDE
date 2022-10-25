@@ -3,6 +3,8 @@
 //
 
 #include "core/graph/components/ui/UISlider.h"
+#include "core/graph/components/Components.h"
+#include "core/Engine.h"
 
 namespace GDE {
 
@@ -29,65 +31,65 @@ namespace GDE {
         fillBarSprite->nineSliceSize = { config.barSize.x * clampF(config.percentageFilled, 0.f, 1.f), config.barSize.y };
         fillBarSprite->color = config.fillingBarColor;
         fillBarTransform = _canvas->getGraph()->getComponent<Transform>(_fillBarID);
+
+//        auto _handleID = _canvas->getGraph()->createNode("Handle", _nodeID);
+//        handleSprite = _canvas->getGraph()->addComponent<SpriteRenderer>(_handleID, _scene, _canvas, config.handleTexture);
+//        handleSprite->color = config.fillingBarColor;
+//        handleTransform = _canvas->getGraph()->getComponent<Transform>(_handleID);
+
+        setConfig(_scene, _config);
     }
 
     Vec2F UISlider::getSize() const {
-        return UI::getSize();
+        return UI::interaction->sizeOfInteraction;
     }
 
     UISliderConfig UISlider::getConfig() {
-        return UISliderConfig();
+        return config;
     }
 
     void UISlider::setConfig(Scene* _scene, const UISliderConfig& _config) {
-//        config = _config;
-//
-//        if(config.stopFurtherClicks) {
-//            if(!UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
-//                canvas->getGraph()->addComponent<CanvasEventStopper>(ID);
-//            }
-//        } else {
-//            if(UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
-//                canvas->getGraph()->removeComponent<CanvasEventStopper>(ID);
-//            }
-//        }
-//
-//        if(config.inputBackgroundTexture == nullptr) {
-//            config.inputBackgroundTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "inputThemeDark");
-//        }
-//
-//        if(config.caretTexture == nullptr) {
-//            config.caretTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "caret");
-//        }
-//
-//        if(config.font == nullptr) {
-//            config.font = _scene->engine->manager.fontManager.getSpecificFont(_scene->engine->manager.fileManager, "MontserratRegular", 40);
-//        }
-//
-//        UI::interaction->sizeOfInteraction = config.inputSize;
-//
-//        if(nineSliceSprite != nullptr) {
-//            nineSliceSprite->nineSliceSize = config.inputSize;
-//            nineSliceSprite->color = config.inputBackgroundColor;
-//        }
-//
-//        if(textRenderer != nullptr) {
-//            pointer = 0;
-//            textRenderer->setText(config.text);
-//            textRenderer->color = config.textColor;
-//            textRenderer->setFont(config.font);
-//        }
-//
-//        if(placeholderTextRenderer != nullptr) {
-//            placeholderTextRenderer->setText(config.placeholderText);
-//            placeholderTextRenderer->color = config.placeholderTextColor;
-//            placeholderTextRenderer->setFont(config.font);
-//            placeholderTextRenderer->enabled = config.showPlaceholderText;
-//        }
-//
-//        if(caretSprite != nullptr) {
-//            caretTransform->setScale(caretTransform->getScale().x, config.caretHeight / config.caretTexture->getSize().y);
-//        }
+        config = _config;
+
+        if(config.stopFurtherClicks) {
+            if(!UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
+                canvas->getGraph()->addComponent<CanvasEventStopper>(ID);
+            }
+        } else {
+            if(UI::canvas->getGraph()->hasComponent<CanvasEventStopper>(ID)) {
+                canvas->getGraph()->removeComponent<CanvasEventStopper>(ID);
+            }
+        }
+
+        if(config.backgroundBarTexture == nullptr) {
+            config.backgroundBarTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "fillAndBgrScrollBarHorizontal");
+        }
+
+        if(config.fillingBarTexture == nullptr) {
+            config.fillingBarTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "fillAndBgrScrollBarHorizontal");
+        }
+
+        if(config.handleTexture == nullptr) {
+            config.handleTexture = _scene->engine->manager.textureManager.getSubTexture("assets", "handle");
+        }
+
+
+        UI::interaction->sizeOfInteraction = config.barSize;
+
+        if(backgroundBarSprite != nullptr) {
+            backgroundBarSprite->nineSliceSize = config.barSize;
+            backgroundBarSprite->color = config.backgroundBarColor;
+        }
+
+        if(fillBarSprite != nullptr) {
+            fillBarSprite->nineSliceSize = config.barSize;
+            fillBarSprite->color = config.fillingBarColor;
+        }
+
+        if(handleSprite != nullptr) {
+            handleSprite->color = config.handleColor;
+            handleTransform->setScale(1.5f * config.barSize.y / handleSprite->getSize().x, 1.5f * config.barSize.y / handleSprite->getSize().y);
+        }
     }
 
     void UISlider::setInteractable(bool _disabled) {
@@ -95,7 +97,7 @@ namespace GDE {
     }
 
     bool UISlider::isInteractable() {
-        return false;
+        return UI::interaction->interactable;
     }
 
     void UISlider::setColor(const Color& _color) {
@@ -108,6 +110,8 @@ namespace GDE {
 
     void UISlider::onUpdate(Delta _dt) {
         IRenderizable::onUpdate(_dt);
+
+
 
         if(mouseDown) {
 

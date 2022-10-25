@@ -626,7 +626,7 @@ namespace GDE {
             if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
 
             ImGui::Text("Size ");
-            float _size[2] = { _uiButton->nineSliceSprite->nineSliceSize.x, _uiButton->nineSliceSprite->nineSliceSize.y };
+            float _size[2] = { _uiButton->nineSliceSprite->getSize().x, _uiButton->nineSliceSprite->getSize().y };
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(7);
@@ -652,7 +652,7 @@ namespace GDE {
             if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
 
             ImGui::Text("Size ");
-            float _size[2] = { _uiPanel->nineSliceSprite->nineSliceSize.x, _uiPanel->nineSliceSprite->nineSliceSize.y };
+            float _size[2] = { _uiPanel->nineSliceSprite->getSize().x, _uiPanel->nineSliceSprite->getSize().y };
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(8);

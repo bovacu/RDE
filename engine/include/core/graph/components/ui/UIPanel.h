@@ -18,7 +18,7 @@ namespace GDE {
 
     class UIPanel : public UI {
         private:
-        UIPanelConfig config;
+            UIPanelConfig config;
 
         public:
             NineSliceSprite* nineSliceSprite = nullptr;

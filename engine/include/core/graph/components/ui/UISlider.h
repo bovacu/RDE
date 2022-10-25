@@ -13,27 +13,27 @@ namespace GDE {
     struct UISliderConfig : CommonUIConfig {
         Texture* backgroundBarTexture = nullptr;
         Color backgroundBarColor = Color::White;
-        Vec2F barSize = { 128, 8 };
+        Vec2F barSize = { 256, 12 };
 
         Texture* fillingBarTexture = nullptr;
         Color fillingBarColor = Color::Green;
         float percentageFilled = 0.f;
 
         Texture* handleTexture = nullptr;
-        Color handleColor = Color::White;
+        Color handleColor = Color::Disabled;
     };
 
     class UISlider : public UI {
-        private:
+        public:
             UISliderConfig config;
             bool mouseDown = false;
-            NineSliceSprite* backgroundBarSprite;
-            NineSliceSprite* fillBarSprite;
-            SpriteRenderer* handleSprite;
+            NineSliceSprite* backgroundBarSprite = nullptr;
+            NineSliceSprite* fillBarSprite = nullptr;
+            SpriteRenderer* handleSprite = nullptr;
 
-            Transform* backgroundBarTransform;
-            Transform* fillBarTransform;
-            Transform* handleTransform;
+            Transform* backgroundBarTransform = nullptr;
+            Transform* fillBarTransform = nullptr;
+            Transform* handleTransform = nullptr;
 
         public:
             UISlider(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UISliderConfig& _config);

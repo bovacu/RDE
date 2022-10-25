@@ -58,7 +58,7 @@ namespace GDE {
             _canvasElement.interactable = graph.getComponent<UIInteractable>(_nodeID);
         }
 
-        if(graph.getNodeContainer().any_of<TextRenderer, UIButton, NineSliceSprite, SpriteRenderer, UICheckbox>(_nodeID)) {
+        if(graph.getNodeContainer().any_of<TextRenderer, UIButton, NineSliceSprite, SpriteRenderer, UICheckbox, UISlider>(_nodeID)) {
             _canvasElement.renderizable = getRenderizable(_nodeID);
         }
 

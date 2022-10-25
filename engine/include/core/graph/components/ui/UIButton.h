@@ -29,8 +29,8 @@ namespace GDE {
             UIButtonConfig config;
 
         public:
-            TextRenderer* textRenderer;
-            NineSliceSprite* nineSliceSprite;
+            TextRenderer* textRenderer = nullptr;
+            NineSliceSprite* nineSliceSprite = nullptr;
 
             UIButton(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
 

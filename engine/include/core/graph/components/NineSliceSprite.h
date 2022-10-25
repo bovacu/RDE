@@ -28,11 +28,12 @@ namespace GDE {
             SpriteRenderer* spriteRenderer = nullptr;
             NineSliceSpriteConfig config;
 
-        public:
             /**
              * @brief This is the size we want the UI to be rendered, may or may not match UI::getSize().
              */
             Vec2F nineSliceSize;
+
+        public:
 
             NineSliceSprite(const NodeID& _nodeID, Scene* _scene, Canvas* _canvas, Texture* _texture);
 
@@ -42,8 +43,8 @@ namespace GDE {
              */
             [[nodiscard]] NineSlice& getNineSlice() const;
 
-            [[nodiscard]] Vec2F getSize() const override { return {(float)nineSliceSize.x * transform->getScale().x, (float)nineSliceSize.y *
-                                                                                                                     transform->getScale().y}; }
+            [[nodiscard]] Vec2F getSize() const override { return {(float)nineSliceSize.x * transform->getScale().x, (float)nineSliceSize.y * transform->getScale().y}; }
+            void setSize(const Vec2F& _size);
 
             void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
             void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) override;

@@ -49,6 +49,7 @@ namespace GDE {
                 auto _widthOfCorners = (float) texture->nineSlice.subRects[0].size.x + (float) texture->nineSlice.subRects[2].size.x;
                 auto _totalDiffX = (float)_uiSize.x - _widthOfCorners;
                 _distortX = _totalDiffX / ((float)_spriteSize.x - _widthOfCorners);
+                if(_distortX < 0) _distortX = 0;
 
                 auto _halfWidthOfDistortedMiddleRect = _distortX * _transformMat[0][0] * (float)texture->nineSlice.subRects[1].size.x / 2.f;
                 auto _halfWidthOfOriginalMiddleRect = (float)texture->nineSlice.subRects[1].size.x / 2.f;
@@ -60,11 +61,20 @@ namespace GDE {
                 auto _heightOfCorners = (float)texture->nineSlice.subRects[0].size.y + (float)texture->nineSlice.subRects[6].size.y;
                 auto _totalDiffY = (float)_uiSize.y - _heightOfCorners;
                 _distortY = _totalDiffY / ((float)_spriteSize.y - _heightOfCorners);
+                if(_distortY < 0) _distortY = 0;
 
                 auto _halfHeightOfDistortedMiddleRect = _distortY * _transformMat[1][1] * (float)texture->nineSlice.subRects[3].size.y / 2.f;
                 auto _halfHeightOfOriginalMiddleRect = (float)texture->nineSlice.subRects[3].size.y / 2.f;
                 if(_i == 0 || _i == 1 || _i == 2) _position.y -= _halfHeightOfDistortedMiddleRect - _halfHeightOfOriginalMiddleRect;
                 if(_i == 6 || _i == 7 || _i == 8) _position.y += _halfHeightOfDistortedMiddleRect - _halfHeightOfOriginalMiddleRect;
+            }
+
+            if(_distortX == 0) {
+
+            }
+
+            if(_distortY == 0) {
+
             }
 
             auto _screenPos = Util::worldToScreenCoords(_viewport, {_position.x, _position.y});
@@ -130,6 +140,12 @@ namespace GDE {
 
     bool NineSliceSprite::isInteractable() {
         return interaction->interactable;
+    }
+
+    void NineSliceSprite::setSize(const Vec2F& _size) {
+        nineSliceSize = _size;
+        if(nineSliceSize.x < 0) nineSliceSize.x = 0;
+        if(nineSliceSize.y < 0) nineSliceSize.y = 0;
     }
 
 }
