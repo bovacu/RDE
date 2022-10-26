@@ -225,7 +225,7 @@ namespace GDE {
     void Graph::setParent(Node* _node, Node* _parent) {
         auto* _nodeTransform = _node->getTransform();
 
-        if(_nodeTransform->parent == _parent->getTransform()->parent) {
+        if(_nodeTransform->parent == _parent->getID()) {
             LOG_W("Parent of ", (int)_node->getID(), " is already ", (int)_parent->getID(), "!!")
             return;
         }
