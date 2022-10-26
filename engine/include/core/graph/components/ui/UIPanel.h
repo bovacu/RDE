@@ -30,7 +30,7 @@ namespace GDE {
             UIPanelConfig getConfig();
             void setConfig(Manager* _manager, const UIPanelConfig& _config);
 
-            void setInteractable(bool _disabled) override;
+            void setInteractable(bool _interactable) override;
             bool isInteractable() override;
 
             void setColor(const Color& _color) override;

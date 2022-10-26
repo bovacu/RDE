@@ -121,11 +121,11 @@ namespace GDE {
         }
     }
 
-    void UIInput::setInteractable(bool _disabled) {
-        UI::interaction->interactable = _disabled;
+    void UIInput::setInteractable(bool _interactable) {
+        UI::interaction->interactable = _interactable;
 
         if(textRenderer != nullptr) {
-            textRenderer->color = _disabled ? Color::Disabled : config.textColor;
+            textRenderer->color = _interactable ? Color::Disabled : config.textColor;
         }
     }
 

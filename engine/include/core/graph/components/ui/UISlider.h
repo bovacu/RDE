@@ -17,14 +17,14 @@ namespace GDE {
 
         Texture* fillingBarTexture = nullptr;
         Color fillingBarColor = Color::Green;
-        float percentageFilled = 0.f;
+        float percentageFilled = 0.25f;
 
         Texture* handleTexture = nullptr;
         Color handleColor = Color::Disabled;
     };
 
     class UISlider : public UI {
-        public:
+        private:
             UISliderConfig config;
             bool mouseDown = false;
             NineSliceSprite* backgroundBarSprite = nullptr;
@@ -44,13 +44,16 @@ namespace GDE {
             UISliderConfig getConfig();
             void setConfig(Manager* _manager, const UISliderConfig& _config);
 
-            void setInteractable(bool _disabled) override;
+            void setInteractable(bool _interactable) override;
             bool isInteractable() override;
 
             void setColor(const Color& _color) override;
             Color getColor() override;
 
             void onUpdate(Delta _dt) override;
+
+            void setFilledPercentage(float _percentage);
+            float getFilledPercentage() const;
 
         private:
             void onMouseClicked(MouseCode _mouseCode);

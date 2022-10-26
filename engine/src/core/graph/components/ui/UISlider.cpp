@@ -28,14 +28,16 @@ namespace GDE {
 
         auto _fillBarNode = _graph->createNode("Fill", _node);
         fillBarSprite = _fillBarNode->addComponent<NineSliceSprite>(config.fillingBarTexture);
-        fillBarSprite->nineSliceSize = { config.barSize.x * clampF(config.percentageFilled, 0.f, 1.f), config.barSize.y };
+        fillBarSprite->setSize({ config.barSize.x * clampF(config.percentageFilled, 0.f, 1.f), config.barSize.y });
         fillBarSprite->color = config.fillingBarColor;
         fillBarTransform = _fillBarNode->getTransform();
 
-//        auto _handleID = _canvas->getGraph()->createNode("Handle", _nodeID);
-//        handleSprite = _canvas->getGraph()->addComponent<SpriteRenderer>(_handleID, _scene, _canvas, config.handleTexture);
-//        handleSprite->color = config.fillingBarColor;
-//        handleTransform = _canvas->getGraph()->getComponent<Transform>(_handleID);
+        auto _handleNode = _graph->createNode("Handle", _node);
+        handleSprite = _handleNode->addComponent<SpriteRenderer>(config.handleTexture);
+        handleSprite->color = config.fillingBarColor;
+        handleTransform = _handleNode->getTransform();
+        handleTransform->setPosition(backgroundBarTransform->getPosition().x - backgroundBarSprite->getSize().x / 2.f + backgroundBarSprite->getSize().x * config.percentageFilled,
+                                     handleTransform->getPosition().y);
 
         setConfig(_manager, _config);
     }
@@ -82,18 +84,20 @@ namespace GDE {
         }
 
         if(fillBarSprite != nullptr) {
-            fillBarSprite->setSize(config.barSize);
+            setFilledPercentage(config.percentageFilled);
             fillBarSprite->color = config.fillingBarColor;
         }
 
         if(handleSprite != nullptr) {
             handleSprite->color = config.handleColor;
             handleTransform->setScale(1.5f * config.barSize.y / handleSprite->getSize().x, 1.5f * config.barSize.y / handleSprite->getSize().y);
+            handleTransform->setPosition(backgroundBarTransform->getPosition().x - backgroundBarSprite->getSize().x / 2.f + backgroundBarSprite->getSize().x * config.percentageFilled,
+                                         handleTransform->getPosition().y);
         }
     }
 
-    void UISlider::setInteractable(bool _disabled) {
-
+    void UISlider::setInteractable(bool _interactable) {
+        UI::interaction->interactable = _interactable;
     }
 
     bool UISlider::isInteractable() {
@@ -111,11 +115,30 @@ namespace GDE {
     void UISlider::onUpdate(Delta _dt) {
         IRenderizable::onUpdate(_dt);
 
-
-
         if(mouseDown) {
+            Vec2F _limits = { backgroundBarTransform->getModelMatrixPosition().x - backgroundBarSprite->getSize().x / 2.f,
+                                 backgroundBarTransform->getModelMatrixPosition().x + backgroundBarSprite->getSize().x / 2.f };
 
+            auto _posX = clampF(node->manager->inputManager.getMousePosWorldPos().x, _limits.v[0], _limits.v[1]);
+            handleTransform->setMatrixModelPosition({_posX, handleTransform->getModelMatrixPosition().y});
+
+            auto _distanceFromLowerPoint = _posX - _limits.v[0];
+            setFilledPercentage(_distanceFromLowerPoint / backgroundBarSprite->getSize().x);
         }
+
+        if(node->manager->inputManager.isMouseJustReleased(MouseCode::ButtonLeft) && mouseDown) {
+            mouseDown = false;
+        }
+    }
+
+    void UISlider::setFilledPercentage(float _percentage) {
+        config.percentageFilled = clampF(_percentage, 0.f, 1.f);
+        fillBarSprite->setSize({ config.barSize.x * clampF(config.percentageFilled, 0.f, 1.f), config.barSize.y });
+        fillBarTransform->setPosition({handleTransform->getPosition().x - fillBarSprite->getSize().x / 2.f, fillBarTransform->getPosition().y});
+    }
+
+    float UISlider::getFilledPercentage() const {
+        return config.percentageFilled;
     }
 
     void UISlider::onMouseClicked(MouseCode _mouseCode) {

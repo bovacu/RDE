@@ -65,7 +65,7 @@ namespace GDE {
         }
     }
 
-    void UIPanel::setInteractable(bool _disabled) {  }
+    void UIPanel::setInteractable(bool _interactable) {  }
 
     bool UIPanel::isInteractable() { return false; }
 

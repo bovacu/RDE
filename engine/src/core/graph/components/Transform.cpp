@@ -194,6 +194,7 @@ namespace GDE {
         worldMatrixCache[3][0] = _worldPos.x;
         worldMatrixCache[3][1] = _worldPos.y;
         setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
+        setDirty();
     }
 
     void Transform::setMatrixModelRotation(float _rotation) {
@@ -220,6 +221,7 @@ namespace GDE {
         );
 
         setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
+        setDirty();
     }
 
     glm::mat4 Transform::worldPointToLocalPosition(const Vec2F& _position) {

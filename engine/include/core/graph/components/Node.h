@@ -12,7 +12,7 @@ FORWARD_DECLARE_CLASS(Manager)
 namespace GDE {
 
     struct Node {
-        FRIEND_CLASS(ImGuiScene)
+        FRIEND_CLASS(ImGuiScene, UISlider)
 
         private:
             Graph* graph = nullptr;
