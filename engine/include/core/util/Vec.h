@@ -152,6 +152,10 @@ namespace GDE {
                 x /= _scalar;
                 y /= _scalar;
             }
+
+            bool operator ==(const Vec2<T>& _rhs) {
+                return x == _rhs.x && y == _rhs.y;
+            }
     };
 
     inline Vec2<float> operator*(float _scalar, const Vec2<float>& _vec) {

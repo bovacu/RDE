@@ -9,7 +9,7 @@
 
 namespace GDE {
 
-    FORWARD_DECLARE_CLASS(Manager, TextRenderer, Font, NineSliceSprite)
+    FORWARD_DECLARE_CLASS(Manager, UIText, Font, NineSliceSprite)
 
     struct UIButtonConfig : CommonUIConfig {
         std::string text = "Button Text";
@@ -29,7 +29,7 @@ namespace GDE {
             UIButtonConfig config;
 
         public:
-            TextRenderer* textRenderer = nullptr;
+            UIText* textRenderer = nullptr;
             NineSliceSprite* nineSliceSprite = nullptr;
 
             UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);

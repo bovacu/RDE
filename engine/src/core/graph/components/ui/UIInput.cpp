@@ -5,6 +5,9 @@
 #include "core/graph/components/ui/UIInput.h"
 #include "core/graph/components/Components.h"
 #include "core/Engine.h"
+#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/NineSliceSprite.h"
+#include "core/graph/components/ui/UIText.h"
 
 namespace GDE {
 
@@ -31,29 +34,28 @@ namespace GDE {
         nineSliceTransform = _node->getTransform();
 
         auto _placeholderNode = _graph->createNode("Placeholder", _node);
-        placeholderTextRenderer = _placeholderNode->addComponent<TextRenderer>(config.placeholderText, config.font);
+        placeholderTextRenderer = _placeholderNode->addComponent<UIText>(config.placeholderText, config.font);
         placeholderTextRenderer->batchPriority = BatchPriority::SpritePriority;
         placeholderTextRenderer->color = config.placeholderTextColor;
-        placeholderTextRenderer->pivot = { 0, 0.5f };
         placeholderTextRenderer->enabled = config.showPlaceholderText;
         auto* _placeholderTransform = _placeholderNode->getTransform();
+        ((UITransform*)_placeholderTransform)->setPivot({ 0.f, 0.5f });
         auto _placeholderPosition = _placeholderTransform->getPosition();
         _placeholderTransform->setPosition(_placeholderPosition.x - config.inputSize.x / 2.f + config.textsOffsetFromLeft.x, _placeholderPosition.y + config.textsOffsetFromLeft.y);
 
         auto _textNode = _graph->createNode("Text", _node);
-        textRenderer = _textNode->addComponent<TextRenderer>(config.text, config.font);
+        textRenderer = _textNode->addComponent<UIText>(config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
         textRenderer->color = config.textColor;
-        textRenderer->pivot = { 0, 0.5f };
         textTransform = _textNode->getTransform();
+        ((UITransform*)textTransform)->setPivot({ 0.0f, 0.5f });
         auto _textPosition = textTransform->getPosition();
         textTransform->setPosition(_textPosition.x - config.inputSize.x / 2.f + config.textsOffsetFromLeft.x, _textPosition.y + config.textsOffsetFromLeft.y);
 
         auto _caretNode = _graph->createNode("Caret", _node);
-        caretSprite = _caretNode->addComponent<SpriteRenderer>(config.caretTexture);
+        caretSprite = _caretNode->addComponent<UIImage>(config.caretTexture);
         caretSprite->batchPriority = BatchPriority::SpritePriority;
         caretSprite->color = config.textColor;
-        caretSprite->pivot = { 0, 0.5f };
         caretSprite->enabled = false;
         caretTransform = _caretNode->getTransform();
         auto _caretPosition = caretTransform->getPosition();

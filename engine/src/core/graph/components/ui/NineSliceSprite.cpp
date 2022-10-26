@@ -4,7 +4,7 @@
 
 #include "core/graph/components/NineSliceSprite.h"
 #include "core/util/Functions.h"
-#include "core/graph/components/SpriteRenderer.h"
+#include "core/graph/components/ui/UIImage.h"
 #include "core/Engine.h"
 
 namespace GDE {
@@ -17,7 +17,7 @@ namespace GDE {
         texture = _texture;
 
         if(!_texture->nineSlice.isEnabled()) {
-            spriteRenderer = _node->addComponent<SpriteRenderer>(_texture);
+            spriteRenderer = _node->addComponent<UIImage>(_texture);
         }
 
         nineSliceSize = _texture->getRegion().size;

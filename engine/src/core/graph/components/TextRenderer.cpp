@@ -92,6 +92,10 @@ namespace GDE {
         auto [_linesInfo, _, _totalHeight] = calculateLinesInfo(_chars);
         const auto _numberOfLines = _linesInfo.size();
         const auto _percentage = 1.f / (float)_numberOfLines;
+
+        const float _nonUIPivotY = 0.4f;
+        const float _nonUIPivotX = 0.5f;
+
         auto _index = 0;
         for(auto& _lineInfo : _linesInfo) {
 
@@ -106,8 +110,8 @@ namespace GDE {
             for(char _char : _lineInfo.line) {
                 auto _vertexCount = _vertices.size();
 
-                float _xPos = (_x - (pivot.x * size.x) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
-                float _yPos = (_y + (pivot.y * size.y / 1.25f) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
+                float _xPos = (_x - (size.x * _nonUIPivotX) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
+                float _yPos = (_y + (size.y * _nonUIPivotY) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
 
                 float _w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
                 float _h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;

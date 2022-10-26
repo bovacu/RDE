@@ -29,7 +29,7 @@ namespace GDE {
             bool mouseDown = false;
             NineSliceSprite* backgroundBarSprite = nullptr;
             NineSliceSprite* fillBarSprite = nullptr;
-            SpriteRenderer* handleSprite = nullptr;
+            UIImage* handleSprite = nullptr;
 
             Transform* backgroundBarTransform = nullptr;
             Transform* fillBarTransform = nullptr;

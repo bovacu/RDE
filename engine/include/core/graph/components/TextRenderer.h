@@ -23,7 +23,7 @@ namespace GDE {
 
         FRIEND_CLASS(UIButton, UICheckbox, UIInput)
 
-        private:
+        protected:
             /**
              * @brief The font used to render the text.
              */
@@ -59,7 +59,7 @@ namespace GDE {
              */
             Texture* texture = nullptr;
 
-        private:
+        protected:
             /**
              * @brief Recalculates the dimensions of the new text as a rectangle.
              * @param _text the inner text.
@@ -145,8 +145,8 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
-            void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) override;
+            virtual void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
+            virtual void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) override;
     };
 
 }

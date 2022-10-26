@@ -3,6 +3,8 @@
 //
 
 #include "core/graph/components/ui/UICheckbox.h"
+#include "core/graph/components/ui/UIText.h"
+#include "core/graph/components/ui/UIImage.h"
 #include "core/Engine.h"
 
 namespace GDE {
@@ -20,18 +22,18 @@ namespace GDE {
         UI::interaction->onInnerMouseEntered.bind<&UICheckbox::onMouseEntered>(this);
 
         auto _textNode = _graph->createNode("Text", _node);
-        textRenderer = _textNode->addComponent<TextRenderer>(_config.text, config.font);
+        textRenderer = _textNode->addComponent<UIText>(_config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
         textRenderer->color = config.textColor;
         textTransform = _textNode->getTransform();
 
         auto _checkboxBackgroundNode = _graph->createNode("CheckboxBackground", _node);
-        checkboxBackgroundSprite = _checkboxBackgroundNode->addComponent<SpriteRenderer>(config.checkboxBackgroundTexture);
+        checkboxBackgroundSprite = _checkboxBackgroundNode->addComponent<UIImage>(config.checkboxBackgroundTexture);
         checkboxBackgroundSprite->color = _config.checkboxColor;
         checkboxBackgroundTransform = _checkboxBackgroundNode->getTransform();
 
         auto _tickNode = _graph->createNode("CheckboxTick", _checkboxBackgroundNode);
-        tickSprite = _tickNode->addComponent<SpriteRenderer>(config.checkboxTickTexture);
+        tickSprite = _tickNode->addComponent<UIImage>(config.checkboxTickTexture);
         tickSprite->color = config.tickColor;
         tickTransform = _tickNode->getTransform();
 

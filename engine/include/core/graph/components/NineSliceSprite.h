@@ -7,6 +7,7 @@
 
 #include "core/util/Vec.h"
 #include "core/graph/components/ui/UI.h"
+#include "core/graph/components/ui/UIImage.h"
 
 namespace GDE {
 
@@ -16,7 +17,7 @@ namespace GDE {
         Color color = Color::White;
     };
 
-    FORWARD_DECLARE_CLASS(SpriteRenderer, Manager, Graph)
+    FORWARD_DECLARE_CLASS(UIImage, Manager, Graph)
     /**
      * @brief Component that is based on the SpriteRenderer, but allows to render UI images with a different size than the original
      * without loosing quality. The setup of this NineSlice should be done via TexturePacker.
@@ -25,7 +26,7 @@ namespace GDE {
         FRIEND_CLASS(UIButton, UIPanel, UIInput, UISlider)
 
         private:
-            SpriteRenderer* spriteRenderer = nullptr;
+            UIImage* spriteRenderer = nullptr;
             NineSliceSpriteConfig config;
 
             /**

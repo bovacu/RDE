@@ -24,7 +24,7 @@ namespace GDE {
 
         FRIEND_CLASS(UICheckbox, UIButton, UIInput, UISlider)
 
-        private:
+        protected:
             /**
              * @brief Texture that contains the sprite. This is the whole SpriteSheet, but it is limited by the region and
              * only its region will be rendered.
@@ -35,8 +35,8 @@ namespace GDE {
 
             OpenGLVertex geometry[4];
 
-        private:
-            void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport);
+        protected:
+            virtual void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport);
 
         public:
             SpriteRenderer(Node* _node, Scene* _scene, Texture* _texture = nullptr);

@@ -70,6 +70,8 @@ namespace GDE {
 
             UDelegate<void(void*)> onDataChanged;
 
+            bool isUI = false;
+
         private:
             /**
              * @brief Prints the hierarchy tree on the console.
@@ -174,7 +176,7 @@ namespace GDE {
             UDelegate<void(NodeContainer&)> onRenderDel;
 
         public:
-            Graph(Scene* _scene, const std::string& _sceneName);
+            Graph(Scene* _scene, const std::string& _sceneName, bool _isUI = false);
             ~Graph() {};
 
             /** This function creates and adds a new Node to the world. It is really recommended to add a tag value,

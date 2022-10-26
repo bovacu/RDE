@@ -6,10 +6,10 @@
 #define GDE_UI_INPUT_H
 
 #include "core/graph/components/ui/UI.h"
-#include "core/graph/components/TextRenderer.h"
-#include "core/graph/components/NineSliceSprite.h"
 
 namespace GDE {
+
+    FORWARD_DECLARE_CLASS(Font, UIText, UIImage, NineSliceSprite)
 
     struct UIInputConfig : CommonUIConfig {
         Vec2F inputSize = { 256, 32 };
@@ -40,10 +40,10 @@ namespace GDE {
             float blinkingTimer = 0;
 
         public:
-            TextRenderer* textRenderer = nullptr;
-            TextRenderer* placeholderTextRenderer = nullptr;
+            UIText* textRenderer = nullptr;
+            UIText* placeholderTextRenderer = nullptr;
             NineSliceSprite* nineSliceSprite = nullptr;
-            SpriteRenderer* caretSprite = nullptr;
+            UIImage* caretSprite = nullptr;
             Transform* caretTransform = nullptr;
             Transform* textTransform = nullptr;
             Transform* nineSliceTransform = nullptr;

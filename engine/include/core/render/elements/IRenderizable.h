@@ -55,11 +55,6 @@ namespace GDE {
              */
             BatchPriority batchPriority = BatchPriority::SpritePriority;
 
-            /**
-             * @brief Origin of the renderizable. By default it is (0.5, 0.5), which means it is centered.
-             */
-            Vec2F pivot { 0.5f, 0.5f };
-
             bool enabled = true;
 
         public:
@@ -90,12 +85,10 @@ namespace GDE {
             virtual ShaderID getShaderID() { return shaderID; }
             virtual Color getColor() { return color; }
             virtual int getLayer() { return layer; }
-            virtual Vec2F getPivot() { return pivot; }
 
             virtual void setShaderID(ShaderID _shaderID) { shaderID = _shaderID; }
             virtual void setColor(const Color& _color) { color = _color; }
             virtual void setLayer(int _layer) { layer = _layer; }
-            virtual void setPivot(const Vec2F& _pivot) { pivot = _pivot; }
 
             /**
              * @brief Method that every renderizable can implement to update its inner states.

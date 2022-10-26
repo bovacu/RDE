@@ -3,6 +3,7 @@
 //
 
 #include "core/graph/components/ui/UIButton.h"
+#include "core/graph/components/ui/UIText.h"
 #include "core/Engine.h"
 
 namespace GDE {
@@ -29,7 +30,7 @@ namespace GDE {
         nineSliceSprite->color = _config.buttonColor;
 
         auto _textNode = _graph->createNode("Text", _node);
-        textRenderer = _textNode->addComponent<TextRenderer>(_config.text, config.font);
+        textRenderer = _textNode->addComponent<UIText>(_config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
         textRenderer->color = config.textColor;
     }

@@ -33,7 +33,7 @@ namespace GDE {
         fillBarTransform = _fillBarNode->getTransform();
 
         auto _handleNode = _graph->createNode("Handle", _node);
-        handleSprite = _handleNode->addComponent<SpriteRenderer>(config.handleTexture);
+        handleSprite = _handleNode->addComponent<UIImage>(config.handleTexture);
         handleSprite->color = config.fillingBarColor;
         handleTransform = _handleNode->getTransform();
         handleTransform->setPosition(backgroundBarTransform->getPosition().x - backgroundBarSprite->getSize().x / 2.f + backgroundBarSprite->getSize().x * config.percentageFilled,

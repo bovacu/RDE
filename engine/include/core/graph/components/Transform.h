@@ -24,7 +24,7 @@ namespace GDE {
         FRIEND_CLASS(Graph, PhysicsBody)
         MAKE_CLASS_ITERABLE(std::vector<Transform*>, children)
 
-        private:
+        protected:
             glm::vec3 innerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
             glm::quat innerRotation = glm::quat(glm::vec3(0, 0, 0));
             glm::vec3 innerScale = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -32,7 +32,7 @@ namespace GDE {
             glm::mat4 worldMatrixCache { 1.0f };
             bool dirty = false;
 
-        private:
+        protected:
             glm::mat4 recalculateCachedMatrix();
             void setDirty();
             glm::mat4 worldPointToLocalPosition(const Vec2F& _position);
@@ -149,13 +149,12 @@ namespace GDE {
 
             [[nodiscard]] glm::mat4 localToParent() const;
             [[nodiscard]] glm::mat4 parentToLocal() const;
-            [[nodiscard]] std::tuple<glm::mat4, bool> localToWorld();
+            [[nodiscard]] virtual std::tuple<glm::mat4, bool> localToWorld();
             [[nodiscard]] glm::mat4 worldToLocal() const;
 
             glm::mat4 getLocalMatrix() const;
             void setLocalMatrix(const glm::mat4& _matrix);
     };
-
 }
 
 #endif //GDE_TRANSFORM_H

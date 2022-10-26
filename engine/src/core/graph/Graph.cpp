@@ -7,6 +7,7 @@
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
+#include "core/graph/components/ui/UITransform.h"
 
 namespace GDE {
     
@@ -16,16 +17,24 @@ namespace GDE {
     static void onFixedUpdateDelFoo(NodeContainer&, Delta) {  }
     static void onRenderDelFoo(NodeContainer&) {  }
 
-    Graph::Graph(Scene* _scene, const std::string& _sceneName) {
+    Graph::Graph(Scene* _scene, const std::string& _sceneName, bool _isIUI) : isUI(_isIUI) {
         scene = _scene;
         name = _sceneName;
         auto _sceneRootID = registry.create();
 
-        registry.emplace<Tag>(_sceneRootID, _sceneRootID, _sceneName);
-        registry.emplace<Transform>(_sceneRootID).parent = NODE_ID_NULL;
-        sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, &registry.get<Transform>(_sceneRootID));
-        registry.get<Transform>(_sceneRootID).parentTransform = nullptr;
-        registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
+        if(!_isIUI) {
+            registry.emplace<Tag>(_sceneRootID, _sceneRootID, _sceneName);
+            registry.emplace<Transform>(_sceneRootID).parent = NODE_ID_NULL;
+            sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, &registry.get<Transform>(_sceneRootID));
+            registry.get<Transform>(_sceneRootID).parentTransform = nullptr;
+            registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
+        } else {
+            registry.emplace<Tag>(_sceneRootID, _sceneRootID, _sceneName);
+            registry.emplace<UITransform>(_sceneRootID).parent = NODE_ID_NULL;
+            sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, (Transform*)&registry.get<UITransform>(_sceneRootID));
+            registry.get<UITransform>(_sceneRootID).parentTransform = nullptr;
+            registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
+        }
 
         onEventDel.bind<&onEventDelFoo>();
         onUpdateDel.bind<&onUpdateDelFoo>();
@@ -145,14 +154,27 @@ namespace GDE {
 
         auto _parentRef = _parent == nullptr ? sceneRoot->getID() : _parent->getID();
 
-        registry.emplace<Tag>(_newNode, _newNode, _tag);
-        registry.emplace<Transform>(_newNode).parent = _parentRef;
-        (&registry.get<Transform>(_parentRef))->children.push_back(&registry.get<Transform>(_newNode));
-        (&registry.get<Transform>(_newNode))->parentTransform = (&registry.get<Transform>(_parentRef));
+        Node* _node = nullptr;
 
-        auto* _node = &registry.emplace<Node>(_newNode, _newNode, this, &scene->engine->manager, &registry.get<Transform>(_newNode));
-        registry.get<Transform>(_newNode).node = _node;
-        registry.emplace<Active>(_newNode, _node, &scene->engine->manager, this);
+        if(!isUI) {
+            registry.emplace<Tag>(_newNode, _newNode, _tag);
+            registry.emplace<Transform>(_newNode).parent = _parentRef;
+            (&registry.get<Transform>(_parentRef))->children.push_back(&registry.get<Transform>(_newNode));
+            (&registry.get<Transform>(_newNode))->parentTransform = (&registry.get<Transform>(_parentRef));
+
+            _node = &registry.emplace<Node>(_newNode, _newNode, this, &scene->engine->manager, &registry.get<Transform>(_newNode));
+            registry.get<Transform>(_newNode).node = _node;
+            registry.emplace<Active>(_newNode, _node, &scene->engine->manager, this);
+        } else {
+            registry.emplace<Tag>(_newNode, _newNode, _tag);
+            registry.emplace<UITransform>(_newNode).parent = _parentRef;
+            (&registry.get<UITransform>(_parentRef))->children.push_back(&registry.get<UITransform>(_newNode));
+            (&registry.get<UITransform>(_newNode))->parentTransform = (&registry.get<UITransform>(_parentRef));
+
+            _node = &registry.emplace<Node>(_newNode, _newNode, this, &scene->engine->manager, (Transform*)&registry.get<UITransform>(_newNode));
+            registry.get<UITransform>(_newNode).node = _node;
+            registry.emplace<Active>(_newNode, _node, &scene->engine->manager, this);
+        }
 
         if(onDataChanged != nullptr) onDataChanged((void*)_newNode);
 

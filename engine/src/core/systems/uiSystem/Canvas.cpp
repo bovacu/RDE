@@ -3,17 +3,15 @@
 //
 
 #include "core/systems/uiSystem/Canvas.h"
-#include "core/render/Camera.h"
-#include "core/graph/components/Transform.h"
-#include "core/graph/Scene.h"
-#include "core/graph/components/ui/UI.h"
-#include "core/graph/components/NineSliceSprite.h"
-#include "core/render/RenderManager.h"
 #include "core/Engine.h"
+#include "core/graph/components/NineSliceSprite.h"
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UICheckbox.h"
 #include "core/graph/components/ui/UIInput.h"
 #include "core/graph/components/ui/UISlider.h"
+#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIText.h"
+#include "core/graph/components/ui/UIImage.h"
 
 namespace GDE {
 
@@ -23,7 +21,7 @@ namespace GDE {
         Event* event;
     };
 
-    Canvas::Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag) : graph(_scene, _canvasTag) {
+    Canvas::Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag) : graph(_scene, _canvasTag, true) {
         scene = _scene;
         auto _cameraNode = graph.createNode("CanvasCamera");
         camera = _cameraNode->addComponent<Camera>(_window);
@@ -57,7 +55,7 @@ namespace GDE {
             _canvasElement.interactable = _node->getComponent<UIInteractable>();
         }
 
-        if(graph.getNodeContainer().any_of<TextRenderer, UIButton, NineSliceSprite, SpriteRenderer, UICheckbox, UISlider>(_node->getID())) {
+        if(graph.getNodeContainer().any_of<UIText, UIButton, NineSliceSprite, UIImage, UICheckbox, UISlider>(_node->getID())) {
             _canvasElement.renderizable = getRenderizable(_node);
         }
 
@@ -140,12 +138,12 @@ namespace GDE {
             return _node->getComponent<NineSliceSprite>();
         }
 
-        if(_node->hasComponent<SpriteRenderer>()) {
-            return _node->getComponent<SpriteRenderer>();
+        if(_node->hasComponent<UIImage>()) {
+            return _node->getComponent<UIImage>();
         }
 
-        if(_node->hasComponent<TextRenderer>()) {
-            return _node->getComponent<TextRenderer>();
+        if(_node->hasComponent<UIText>()) {
+            return _node->getComponent<UIText>();
         }
 
         return nullptr;
@@ -156,7 +154,7 @@ namespace GDE {
 
         if(_canvasElement->cropping) {
             stencils.push(_canvasElement->node->getID());
-            auto* _transform = _canvasElement->node->getTransform();
+            auto* _transform = (UITransform*)_canvasElement->node->getTransform();
             auto _position = _transform->getModelMatrixPosition();
             auto* _uiInput = _canvasElement->node->getComponent<UIInput>();
 
@@ -164,8 +162,8 @@ namespace GDE {
             _currentBatch = &batches.back();
 
             glEnable(GL_SCISSOR_TEST);
-            glScissor((GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x - (_uiInput->getSize().x * _uiInput->pivot.x)),
-                      (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y - (_uiInput->getSize().y * _uiInput->pivot.y)),
+            glScissor((GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x - (_uiInput->getSize().x * _transform->getPivot().x)),
+                      (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y - (_uiInput->getSize().y * _transform->getPivot().y)),
                       (GLint)_uiInput->getSize().x,
                       (GLint)_uiInput->getSize().y
             );
@@ -210,7 +208,7 @@ namespace GDE {
         auto& _registry = graph.getNodeContainer();
 
         auto& _renderManager = graph.scene->engine->manager.renderManager;
-        _renderManager.beginDraw(*camera, graph.getComponent<Transform>(camera->node->getID()));
+        _renderManager.beginDraw(*camera, (Transform*)graph.getComponent<UITransform>(camera->node->getID()));
 
         batches.clear();
         Batch _batch;
@@ -230,11 +228,11 @@ namespace GDE {
 
     void Canvas::onDebugRender() {
         auto& _registry = graph.getNodeContainer();
-        auto _texts = _registry.group<TextRenderer>(entt::get<Transform, Active>);
-        auto _interactables = _registry.group<UIInteractable>(entt::get<Transform, Active>);
+        auto _texts = _registry.group<UIText>(entt::get<UITransform, Active>);
+        auto _interactables = _registry.group<UIInteractable>(entt::get<UITransform, Active>);
 
         auto& _renderManager = graph.scene->engine->manager.renderManager;
-       _renderManager.beginDebugDraw(*camera, graph.getComponent<Transform>(camera->node->getID()));
+       _renderManager.beginDebugDraw(*camera, (Transform*)graph.getComponent<UITransform>(camera->node->getID()));
 
 //        _interactables.each([&_renderManager](const auto _entity, UIInteractable& _interactable, Transform& _transform, const Active& _) {
 //            DebugShape _shape;
@@ -246,7 +244,7 @@ namespace GDE {
 //            _renderManager.drawShape(_shape);
 //        });
 //
-//        _texts.each([&_renderManager](const auto _entity, TextRenderer& _textRenderer, Transform& _transform, const Active& _) {
+//        _texts.each([&_renderManager](const auto _entity, UITextRenderer& _textRenderer, Transform& _transform, const Active& _) {
 //            DebugShape _shape;
 //            _shape.rotation = _transform.getModelMatrixRotation();
 //            _shape.makeSquare(_transform.getModelMatrixPosition(), _textRenderer.getSize());
