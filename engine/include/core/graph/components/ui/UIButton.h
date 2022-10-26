@@ -18,8 +18,8 @@ namespace GDE {
         Texture* clickedTexture = nullptr;
         Texture* disabledTexture = nullptr;
         Font* font = nullptr;
-        Vec2F buttonTextureSize = {128, 32 };
-        Vec2F interactableArea = {128, 32 };
+        Vec2F buttonTextureSize = {128, 45 };
+        Vec2F interactableArea = {128, 45 };
         Color buttonColor = Color::White;
         Color textColor = Color::White;
     };
