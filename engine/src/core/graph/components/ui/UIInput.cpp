@@ -98,7 +98,7 @@ namespace GDE {
         UI::interaction->sizeOfInteraction = config.inputSize;
 
         if(nineSliceSprite != nullptr) {
-            nineSliceSprite->nineSliceSize = config.inputSize;
+            nineSliceSprite->setSize(config.inputSize);
             nineSliceSprite->color = config.inputBackgroundColor;
         }
 

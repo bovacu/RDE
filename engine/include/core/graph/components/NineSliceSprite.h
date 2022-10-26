@@ -33,8 +33,14 @@ namespace GDE {
              */
             Vec2F nineSliceSize;
 
-        public:
+            OpenGLVertex geometry[36];
 
+            bool dirty = false;
+
+        private:
+            void calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport);
+
+        public:
             NineSliceSprite(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
             NineSliceSprite(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture);
 

@@ -78,7 +78,7 @@ namespace GDE {
         UI::interaction->sizeOfInteraction = config.interactableArea;
 
         if(nineSliceSprite != nullptr) {
-            nineSliceSprite->nineSliceSize = config.buttonTextureSize;
+            nineSliceSprite->setSize(config.buttonTextureSize);
             nineSliceSprite->color = config.buttonColor;
         }
 

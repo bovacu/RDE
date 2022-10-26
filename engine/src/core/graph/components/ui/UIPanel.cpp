@@ -58,9 +58,10 @@ namespace GDE {
         UI::interaction->sizeOfInteraction = config.size;
 
         if(nineSliceSprite != nullptr) {
-            nineSliceSprite->nineSliceSize = config.size;
+            nineSliceSprite->setSize(config.size);
             nineSliceSprite->color = config.color;
             nineSliceSprite->texture = config.texture;
+            nineSliceSprite->dirty = true;
         }
     }
 

@@ -77,12 +77,12 @@ namespace GDE {
         UI::interaction->sizeOfInteraction = config.barSize;
 
         if(backgroundBarSprite != nullptr) {
-            backgroundBarSprite->nineSliceSize = config.barSize;
+            backgroundBarSprite->setSize(config.barSize);
             backgroundBarSprite->color = config.backgroundBarColor;
         }
 
         if(fillBarSprite != nullptr) {
-            fillBarSprite->nineSliceSize = config.barSize;
+            fillBarSprite->setSize(config.barSize);
             fillBarSprite->color = config.fillingBarColor;
         }
 

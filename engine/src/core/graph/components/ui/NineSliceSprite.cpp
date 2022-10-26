@@ -22,6 +22,9 @@ namespace GDE {
 
         nineSliceSize = _texture->getRegion().size;
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
+
+        auto [_transformMat, _] = _node->getTransform()->localToWorld();
+        calculateGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
     }
 
     NineSlice& NineSliceSprite::getNineSlice() const {
@@ -36,11 +39,64 @@ namespace GDE {
             return;
         }
 
-        auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
         auto [_transformMat, _dirty] = _transform.localToWorld();
+        if(_dirty || dirty) {
+            calculateGeometry(_transformMat, _transform, _viewport);
+            dirty = true;
+        }
 
-        for(auto _i = 0; _i < _rectsAmount; _i++) {
+        for(auto _i = 0; _i < 9; _i++) {
             auto _vertexCount = _vertices.size();
+
+            _vertices.push_back(geometry[(_i * 4) + 0]);
+            _vertices.push_back(geometry[(_i * 4) + 1]);
+            _vertices.push_back(geometry[(_i * 4) + 2]);
+            _vertices.push_back(geometry[(_i * 4) + 3]);
+
+            _indices.emplace_back(_vertexCount + 0);
+            _indices.emplace_back(_vertexCount + 1);
+            _indices.emplace_back(_vertexCount + 2);
+
+            _indices.emplace_back(_vertexCount + 2);
+            _indices.emplace_back(_vertexCount + 3);
+            _indices.emplace_back(_vertexCount + 0);
+        }
+    }
+
+    void NineSliceSprite::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {
+        if(!enabled) return;
+
+        DrawAndFlushData _nineSliceData;
+        _nineSliceData.textureID = getTexture();
+        _nineSliceData.shaderID = shaderID;
+        drawBatched(_nineSliceData.vertices, _nineSliceData.indices, _transform, _viewport);
+        _data.push_back(_nineSliceData);
+    }
+
+    void NineSliceSprite::setInteractable(bool _interactable) {
+        interaction->interactable = _interactable;
+
+        if(!interaction->interactable) {
+            color = Color::Disabled;
+        } else {
+            color = color == Color::Disabled ? Color::White : color;
+        }
+    }
+
+    bool NineSliceSprite::isInteractable() {
+        return interaction->interactable;
+    }
+
+    void NineSliceSprite::setSize(const Vec2F& _size) {
+        nineSliceSize = _size;
+        if(nineSliceSize.x < 0) nineSliceSize.x = 0;
+        if(nineSliceSize.y < 0) nineSliceSize.y = 0;
+        dirty = true;
+    }
+
+    void NineSliceSprite::calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport) {
+        auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
+        for(auto _i = 0; _i < _rectsAmount; _i++) {
             auto& _subTextureRegion = texture->nineSlice.subRects[_i];
 
             float _distortX = 1.f, _distortY = 1.f;
@@ -51,6 +107,7 @@ namespace GDE {
             Vec2F _position = { -(float)_spriteSize.x / 2.f + (float)_bottomLeftCornerLocal.x + (float)_subTextureRegion.size.x / 2.f, -(float)((float)_spriteSize.y / 2.f - _bottomLeftCornerLocal.y) + (float)_subTextureRegion.size.y / 2.f};
             Vec2F _scale = { 1, 1 };
             Vec2F _noResizableScale = { 1, 1 };
+
             if((float)_uiSize.x - (float)_spriteSize.x != 0) {
                 auto _widthOfCorners = (float) texture->nineSlice.subRects[0].size.x + (float) texture->nineSlice.subRects[2].size.x;
                 auto _totalDiffX = (float)_uiSize.x - _widthOfCorners;
@@ -105,7 +162,7 @@ namespace GDE {
 
                 if(_i == 3 || _i == 5) {
                     _noResizableScale.x *= _propX;
-                    _position.x += _toMoveX * (_i == 3 ? 1 : -1);
+                    _position.x += _toMoveX * (_i == 3 ? 1.f : -1.f);
                 }
             }
 
@@ -127,7 +184,7 @@ namespace GDE {
 
                 if(_i == 1 || _i == 7) {
                     _noResizableScale.y *= _propY;
-                    _position.y += _toMoveY * (_i == 1 ? 1 : -1);
+                    _position.y += _toMoveY * (_i == 1 ? 1.f : -1.f);
                 }
             }
 
@@ -169,49 +226,11 @@ namespace GDE {
             glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y };
             glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                         , _textureOriginNorm.y + _textureTileSizeNorm.y };
 
-            _vertices.emplace_back(OpenGLVertex {_current9SliceMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color });
-            _vertices.emplace_back(OpenGLVertex {_current9SliceMat * _bottomRightTextureCorner, _bottomRightTextureCoord, _color });
-            _vertices.emplace_back(OpenGLVertex {_current9SliceMat * _topRightTextureCorner   , _topRightTextureCoord   , _color });
-            _vertices.emplace_back(OpenGLVertex {_current9SliceMat * _topLeftTextureCorner    , _topLeftTextureCoord    , _color });
-
-            _indices.emplace_back(_vertexCount + 0);
-            _indices.emplace_back(_vertexCount + 1);
-            _indices.emplace_back(_vertexCount + 2);
-
-            _indices.emplace_back(_vertexCount + 2);
-            _indices.emplace_back(_vertexCount + 3);
-            _indices.emplace_back(_vertexCount + 0);
+            geometry[(_i * 4) + 0] = OpenGLVertex {_current9SliceMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+            geometry[(_i * 4) + 1] = OpenGLVertex {_current9SliceMat * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+            geometry[(_i * 4) + 2] = OpenGLVertex {_current9SliceMat * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+            geometry[(_i * 4) + 3] = OpenGLVertex {_current9SliceMat * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
         }
-    }
-
-    void NineSliceSprite::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {
-        if(!enabled) return;
-
-        DrawAndFlushData _nineSliceData;
-        _nineSliceData.textureID = getTexture();
-        _nineSliceData.shaderID = shaderID;
-        drawBatched(_nineSliceData.vertices, _nineSliceData.indices, _transform, _viewport);
-        _data.push_back(_nineSliceData);
-    }
-
-    void NineSliceSprite::setInteractable(bool _interactable) {
-        interaction->interactable = _interactable;
-
-        if(!interaction->interactable) {
-            color = Color::Disabled;
-        } else {
-            color = color == Color::Disabled ? Color::White : color;
-        }
-    }
-
-    bool NineSliceSprite::isInteractable() {
-        return interaction->interactable;
-    }
-
-    void NineSliceSprite::setSize(const Vec2F& _size) {
-        nineSliceSize = _size;
-        if(nineSliceSize.x < 0) nineSliceSize.x = 0;
-        if(nineSliceSize.y < 0) nineSliceSize.y = 0;
     }
 
 }
