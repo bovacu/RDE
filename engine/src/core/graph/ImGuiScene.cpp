@@ -632,6 +632,8 @@ namespace GDE {
             ImGui::PushID(7);
             if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
                 auto _config = _uiButton->getConfig();
+                clampF(_size[0], 0, FLT_MAX);
+                clampF(_size[1], 0, FLT_MAX);
                 _config.buttonTextureSize = { _size[0], _size[1] };
                 _uiButton->setConfig(&engine->manager, _config);
             }
@@ -658,6 +660,8 @@ namespace GDE {
             ImGui::PushID(8);
             if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
                 auto _config = _uiPanel->getConfig();
+                clampF(_size[0], 0, FLT_MAX);
+                clampF(_size[1], 0, FLT_MAX);
                 _config.size = { _size[0], _size[1] };
                 _uiPanel->setConfig(&engine->manager, _config);
             }
