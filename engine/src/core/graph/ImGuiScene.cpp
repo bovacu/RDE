@@ -13,6 +13,7 @@
 #include "core/graph/components/TextRenderer.h"
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UIPanel.h"
+#include "core/graph/components/ui/UITransform.h"
 
 namespace GDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
@@ -473,7 +474,13 @@ namespace GDE {
     }
 
     void ImGuiScene::transformComponent(Graph* _graph, const NodeID _selectedNode) {
-        auto _transform = _graph->getComponent<Transform>(_selectedNode);
+        Transform* _transform = nullptr;
+
+        if(!_graph->isUI) {
+            _transform = _graph->getComponent<Transform>(_selectedNode);
+        } else {
+            _transform = (Transform*)_graph->getComponent<UITransform>(_selectedNode);
+        }
 
         if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);

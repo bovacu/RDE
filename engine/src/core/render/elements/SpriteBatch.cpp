@@ -83,7 +83,7 @@ namespace GDE {
             flushDebug();
 
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
-        auto _screenPos = Util::worldToScreenCoords(*batch->viewport, _position);
+        auto _screenPos = Util::worldToScreenSize(*batch->viewport, _position);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x, _screenPos.y, 1.f));
         auto _scalingFactor = batch->viewport->getScalingFactor();
         if(_scalingFactor != 1) {

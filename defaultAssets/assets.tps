@@ -333,21 +333,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">sprites/fillAndBgrScrollBarHorisontal.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>spriteScale</key>
-                <double>1</double>
-                <key>scale9Enabled</key>
-                <true/>
-                <key>scale9Borders</key>
-                <rect>33,4,66,7</rect>
-                <key>scale9Paddings</key>
-                <rect>33,4,66,7</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">sprites/fillAndBgrScrollBarVertical.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -680,6 +665,36 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">../../defaultAssets/sprites/caret.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>1,8,2,16</rect>
+                <key>scale9Paddings</key>
+                <rect>1,8,2,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">../../defaultAssets/sprites/fillAndBgrScrollBarHorizontal.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <true/>
+                <key>scale9Borders</key>
+                <rect>11,5,110,5</rect>
+                <key>scale9Paddings</key>
+                <rect>33,4,66,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
         </map>
         <key>fileList</key>
         <array>
@@ -729,7 +744,6 @@
             <filename>sprites/circleLoadingBar.png</filename>
             <filename>sprites/elipseWithOutline.png</filename>
             <filename>sprites/emptyLifeBubble.png</filename>
-            <filename>sprites/fillAndBgrScrollBarHorisontal.png</filename>
             <filename>sprites/fillAndBgrScrollBarVertical.png</filename>
             <filename>sprites/fillAndBgrSliderBar.png</filename>
             <filename>sprites/fillAndBgrSmallSliderBar.png</filename>
@@ -770,6 +784,8 @@
             <filename>sprites/sprite.png</filename>
             <filename>../../defaultAssets/sprites/checkboxDark.png</filename>
             <filename>../../defaultAssets/sprites/icons/32x32px/checkmark.png</filename>
+            <filename>../../defaultAssets/sprites/caret.png</filename>
+            <filename>../../defaultAssets/sprites/fillAndBgrScrollBarHorizontal.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

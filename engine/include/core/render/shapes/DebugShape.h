@@ -48,7 +48,7 @@ namespace GDE {
             /**
              * @brief Angle in degrees.
              */
-            float rotation;
+            float rotation = 0.f;
 
         public:
 
@@ -146,7 +146,7 @@ namespace GDE {
              * @param _rotation Rotation
              */
             void setRotation(float _rotation) {
-
+                rotation = _rotation;
             }
 
             /**

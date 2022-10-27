@@ -228,11 +228,41 @@ namespace GDE {
 
     void Canvas::onDebugRender() {
         auto& _registry = graph.getNodeContainer();
-        auto _texts = _registry.group<UIText>(entt::get<UITransform, Active>);
         auto _interactables = _registry.group<UIInteractable>(entt::get<UITransform, Active>);
 
         auto& _renderManager = graph.scene->engine->manager.renderManager;
        _renderManager.beginDebugDraw(*camera, (Transform*)graph.getComponent<UITransform>(camera->node->getID()));
+
+        _registry.group<UIImage>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
+            if(!_uiImage.enabled) return;
+            DebugShape _shape;
+            _shape.makeSquare(_transform.getModelMatrixPosition(), _uiImage.getSize());
+            _shape.showOutsideColor(true);
+            _shape.setOutlineColor(Color::Blue);
+            _shape.showInnerColor(false);
+            _shape.setRotation(_transform.getModelMatrixRotation());
+            _renderManager.drawShape(_shape);
+
+            _renderManager.drawSquare(_transform.getModelMatrixPosition(), {4, 4}, Color::Blue);
+            _renderManager.setPointSize(4);
+            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - _uiImage.getSize().x * _transform.getPivot().y,
+                                      _transform.getModelMatrixPosition().y - _uiImage.getSize().y * _transform.getPivot().x }, Color::Green);
+        });
+
+//        _registry.group<UIText>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UIText& _textRenderer, UITransform& _transform, const Active& _) {
+//            DebugShape _shape;
+//            _shape.rotation = _transform.getModelMatrixRotation();
+//            _shape.makeSquare(_transform.getModelMatrixPosition(), _textRenderer.getSize());
+//            _shape.showInnerColor(false);
+//            _shape.showOutsideColor(true);
+//            _shape.setOutlineColor(Color::Blue);
+//            _renderManager.drawShape(_shape);
+//
+//            _renderManager.drawSquare(_transform.getModelMatrixPosition(), {4, 4}, Color::Blue);
+//            _renderManager.setPointSize(4);
+//            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - _textRenderer.getSize().x * _transform.getPivot().y,
+//                                      _transform.getModelMatrixPosition().y - _textRenderer.getSize().y * _transform.getPivot().x }, Color::Green);
+//        });
 
 //        _interactables.each([&_renderManager](const auto _entity, UIInteractable& _interactable, Transform& _transform, const Active& _) {
 //            DebugShape _shape;
@@ -244,15 +274,6 @@ namespace GDE {
 //            _renderManager.drawShape(_shape);
 //        });
 //
-//        _texts.each([&_renderManager](const auto _entity, UITextRenderer& _textRenderer, Transform& _transform, const Active& _) {
-//            DebugShape _shape;
-//            _shape.rotation = _transform.getModelMatrixRotation();
-//            _shape.makeSquare(_transform.getModelMatrixPosition(), _textRenderer.getSize());
-//            _shape.showInnerColor(false);
-//            _shape.showOutsideColor(true);
-//            _shape.setOutlineColor(Color::Green);
-//            _renderManager.drawShape(_shape);
-//        });
 
 //        _sprites.each([&_renderManager](const auto _entity, NineSliceSprite& _nineSlice, const Transform& _transform, const Active& _) {
 //            if(!_nineSlice.getNineSlice().isInteractable()) return;

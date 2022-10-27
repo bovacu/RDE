@@ -5,6 +5,7 @@
 #include "core/graph/components/ui/UICheckbox.h"
 #include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UIImage.h"
+#include "core/graph/components/ui/UITransform.h"
 #include "core/Engine.h"
 
 namespace GDE {
@@ -25,17 +26,18 @@ namespace GDE {
         textRenderer = _textNode->addComponent<UIText>(_config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
         textRenderer->color = config.textColor;
-        textTransform = _textNode->getTransform();
+        textTransform = (UITransform*)_textNode->getTransform();
 
         auto _checkboxBackgroundNode = _graph->createNode("CheckboxBackground", _node);
         checkboxBackgroundSprite = _checkboxBackgroundNode->addComponent<UIImage>(config.checkboxBackgroundTexture);
         checkboxBackgroundSprite->color = _config.checkboxColor;
-        checkboxBackgroundTransform = _checkboxBackgroundNode->getTransform();
+        checkboxBackgroundTransform = (UITransform*)_checkboxBackgroundNode->getTransform();
+//        checkboxBackgroundTransform->setPivot({ 0, 0 });
 
         auto _tickNode = _graph->createNode("CheckboxTick", _checkboxBackgroundNode);
         tickSprite = _tickNode->addComponent<UIImage>(config.checkboxTickTexture);
         tickSprite->color = config.tickColor;
-        tickTransform = _tickNode->getTransform();
+        tickTransform = (UITransform*)_tickNode->getTransform();
 
         UI::interaction->sizeOfInteraction = Vec2F { checkboxBackgroundSprite->getSize().x + textRenderer->getSize().x,
                                                checkboxBackgroundSprite->getSize().y > textRenderer->getSize().y ? checkboxBackgroundSprite->getSize().y : textRenderer->getSize().y

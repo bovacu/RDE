@@ -9,7 +9,7 @@
 
 namespace GDE {
 
-    FORWARD_DECLARE_CLASS(UIText, Font, NineSliceSprite, UIImage)
+    FORWARD_DECLARE_CLASS(UIText, Font, NineSliceSprite, UIImage, UITransform)
 
     struct UICheckboxConfig : CommonUIConfig {
         std::string text = "Checkbox text";
@@ -32,7 +32,7 @@ namespace GDE {
             UIImage* checkboxBackgroundSprite = nullptr;
             UIImage* tickSprite = nullptr;
             bool checked;
-            Transform* textTransform = nullptr, *checkboxBackgroundTransform = nullptr, *tickTransform = nullptr;
+            UITransform* textTransform = nullptr, *checkboxBackgroundTransform = nullptr, *tickTransform = nullptr;
 
         public:
             UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config);

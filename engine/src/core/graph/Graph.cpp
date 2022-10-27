@@ -34,6 +34,11 @@ namespace GDE {
             sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, (Transform*)&registry.get<UITransform>(_sceneRootID));
             registry.get<UITransform>(_sceneRootID).parentTransform = nullptr;
             registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
+
+            auto* _interactable = &registry.emplace<UIInteractable>(_sceneRootID, sceneRoot, &scene->engine->manager, this);
+            _interactable->sizeOfInteraction = { (float)scene->mainCamera->getViewport()->getVirtualResolution().x, (float)scene->mainCamera->getViewport()->getVirtualResolution().y };
+            _interactable->interactable = false;
+            _interactable->focused = false;
         }
 
         onEventDel.bind<&onEventDelFoo>();
@@ -174,10 +179,6 @@ namespace GDE {
             _node = &registry.emplace<Node>(_newNode, _newNode, this, &scene->engine->manager, (Transform*)&registry.get<UITransform>(_newNode));
             registry.get<UITransform>(_newNode).node = _node;
             registry.emplace<Active>(_newNode, _node, &scene->engine->manager, this);
-            auto* _interactable = &registry.emplace<UIInteractable>(_newNode, _node, &scene->engine->manager, this);
-            _interactable->sizeOfInteraction = { (float)scene->mainCamera->getViewport()->getVirtualResolution().x, (float)scene->mainCamera->getViewport()->getVirtualResolution().y };
-            _interactable->interactable = false;
-            _interactable->focused = false;
         }
 
         if(onDataChanged != nullptr) onDataChanged((void*)_newNode);
