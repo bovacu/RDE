@@ -24,7 +24,7 @@ namespace GDE {
      *
      */
     class UIInteractable {
-        FRIEND_CLASS(Canvas, NineSliceSprite, UIButton, UICheckbox, UIPanel, UIInput, UISlider)
+        FRIEND_CLASS(Graph, Canvas, NineSliceSprite, UIButton, UICheckbox, UIPanel, UIInput, UISlider)
 
         private:
             /**
@@ -137,7 +137,7 @@ namespace GDE {
             /**
              * @brief Size of the rectangle of interaction. Inside this area, there will be interaction, outside it will be ignored.
              */
-            Vec2F sizeOfInteraction;
+            Vec2F sizeOfInteraction = { 32, 32 };
 
         private:
             /**

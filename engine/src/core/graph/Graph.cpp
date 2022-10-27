@@ -174,6 +174,10 @@ namespace GDE {
             _node = &registry.emplace<Node>(_newNode, _newNode, this, &scene->engine->manager, (Transform*)&registry.get<UITransform>(_newNode));
             registry.get<UITransform>(_newNode).node = _node;
             registry.emplace<Active>(_newNode, _node, &scene->engine->manager, this);
+            auto* _interactable = &registry.emplace<UIInteractable>(_newNode, _node, &scene->engine->manager, this);
+            _interactable->sizeOfInteraction = { (float)scene->mainCamera->getViewport()->getVirtualResolution().x, (float)scene->mainCamera->getViewport()->getVirtualResolution().y };
+            _interactable->interactable = false;
+            _interactable->focused = false;
         }
 
         if(onDataChanged != nullptr) onDataChanged((void*)_newNode);
