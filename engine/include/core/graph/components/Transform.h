@@ -59,6 +59,8 @@ namespace GDE {
              */
             std::vector<Transform*> children;
 
+            int getChildrenCount();
+
             /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
              * @param _position Vector with position.

@@ -264,4 +264,14 @@ namespace GDE {
         innerRotation = _rotation;
         innerScale = _scale;
     }
+
+    int Transform::getChildrenCount() {
+        int _childrenCount = 0;
+        for(auto& _child : children) {
+            _childrenCount++;
+            _childrenCount += _child->getChildrenCount();
+        }
+
+        return _childrenCount;
+    }
 }

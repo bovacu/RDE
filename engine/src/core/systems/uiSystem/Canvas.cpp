@@ -63,7 +63,9 @@ namespace GDE {
             _canvasElement.updatable = getUpdatable(_node);
         }
 
-        _canvasElement.cropping = graph.getNodeContainer().any_of<UIInput>(_node->getID());
+        if(graph.getNodeContainer().any_of<UIInput>(_node->getID())) {
+            _canvasElement.cropping = _node->getTransform()->getChildrenCount();
+        }
 
         if(!_canvasElement.renderizable && !_canvasElement.interactable && !_canvasElement.updatable) return;
 
@@ -185,7 +187,7 @@ namespace GDE {
     }
 
     void Canvas::batchTreeElementPost(CanvasElement* _canvasElement, void* _data) {
-        if(!stencils.empty() && stencils.top() == _canvasElement->node->getID()) {
+        if(_canvasElement->cropping == 0) {
             stencils.pop();
             forceRender();
             glDisable(GL_SCISSOR_TEST);
@@ -216,9 +218,22 @@ namespace GDE {
         _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
         batches.emplace_back(_batch);
 
+        // Depending on the element, we will need to restrict the area that can be rendered. In that case and as we
+        // precalculate a list in the correct order of rendering, we need to know when to begin the cropping and when to
+        // finish it, in this case we create a list of root elements that need to be cropped. We store how many children
+        // the root cropped element has, and we simply make a countdown until all children have been drawn, then we apply
+        // the crop.
+        std::vector<int> _cropList;
+
         for(auto& _it : canvasElementsOrderedList) {
             batchTreeElementPre(&_it, nullptr);
-            batchTreeElementPost(&_it, nullptr);
+
+            for(auto& _crop : _cropList) {
+                _crop--;
+                if(_crop == 0) batchTreeElementPost(&_it, nullptr);
+            }
+
+            if(_it.cropping > 0) _cropList.push_back(_it.cropping);
         }
 
         _renderManager.drawUI(batches);

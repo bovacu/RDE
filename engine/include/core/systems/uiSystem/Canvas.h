@@ -19,7 +19,7 @@ namespace GDE {
         IRenderizable* renderizable = nullptr;
         UIInteractable* interactable = nullptr;
         IRenderizable* updatable = nullptr;
-        bool cropping = false;
+        int cropping = 0;
     };
 
     /**
