@@ -96,10 +96,10 @@ namespace GDE {
     }
 
     void NineSliceSprite::calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport) {
+        // TODO this calculations are an absolute mess, I need to clean this up, rename variables, make it clearer and remove redundant operations, but I'm scared.
         auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
         auto _pivot = ((UITransform*)&_transform)->getPivot();
         for(auto _i = 0; _i < _rectsAmount; _i++) {
-//            if(_i > 0) continue;
             auto& _subTextureRegion = texture->nineSlice.subRects[_i];
 
             float _distortX = 1.f, _distortY = 1.f;
