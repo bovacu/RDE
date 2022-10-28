@@ -4,7 +4,7 @@
 
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/Engine.h"
-#include "core/graph/components/NineSliceSprite.h"
+#include "core/graph/components/ui/UI9Slice.h"
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UICheckbox.h"
 #include "core/graph/components/ui/UIInput.h"
@@ -55,7 +55,7 @@ namespace GDE {
             _canvasElement.interactable = _node->getComponent<UIInteractable>();
         }
 
-        if(graph.getNodeContainer().any_of<UIText, UIButton, NineSliceSprite, UIImage, UICheckbox, UISlider>(_node->getID())) {
+        if(graph.getNodeContainer().any_of<UIText, UIButton, UI9Slice, UIImage, UICheckbox, UISlider>(_node->getID())) {
             _canvasElement.renderizable = getRenderizable(_node);
         }
 
@@ -136,8 +136,8 @@ namespace GDE {
 
 
     IRenderizable* Canvas::getRenderizable(Node* _node) {
-        if(_node->hasComponent<NineSliceSprite>()) {
-            return _node->getComponent<NineSliceSprite>();
+        if(_node->hasComponent<UI9Slice>()) {
+            return _node->getComponent<UI9Slice>();
         }
 
         if(_node->hasComponent<UIImage>()) {
@@ -306,7 +306,7 @@ namespace GDE {
 //        });
 //
 
-//        _sprites.each([&_renderManager](const auto _entity, NineSliceSprite& _nineSlice, const Transform& _transform, const Active& _) {
+//        _sprites.each([&_renderManager](const auto _entity, UI9Slice& _nineSlice, const Transform& _transform, const Active& _) {
 //            if(!_nineSlice.getNineSlice().isInteractable()) return;
 //
 //            auto _rects = _nineSlice.getNineSlice().subRects;

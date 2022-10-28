@@ -42,7 +42,7 @@ namespace GDE {
         public:
             UIText* textRenderer = nullptr;
             UIText* placeholderTextRenderer = nullptr;
-            NineSliceSprite* nineSliceSprite = nullptr;
+            UI9Slice* nineSliceSprite = nullptr;
             UIImage* caretSprite = nullptr;
             Transform* caretTransform = nullptr;
             Transform* textTransform = nullptr;

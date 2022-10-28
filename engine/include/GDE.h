@@ -28,7 +28,7 @@
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
-#include "core/graph/components/NineSliceSprite.h"
+#include "core/graph/components/ui/UI9Slice.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UICheckbox.h"

@@ -21,13 +21,13 @@ namespace GDE {
         UI::interaction->onInnerClickingReleased.bind<&UISlider::onMouseReleased>(this);
 
         auto _backgroundBarNode = _graph->createNode("Background", _node);
-        backgroundBarSprite = _backgroundBarNode->addComponent<NineSliceSprite>(config.backgroundBarTexture);
+        backgroundBarSprite = _backgroundBarNode->addComponent<UI9Slice>(config.backgroundBarTexture);
         backgroundBarSprite->nineSliceSize = config.barSize;
         backgroundBarSprite->color = config.backgroundBarColor;
         backgroundBarTransform = _backgroundBarNode->getTransform();
 
         auto _fillBarNode = _graph->createNode("Fill", _node);
-        fillBarSprite = _fillBarNode->addComponent<NineSliceSprite>(config.fillingBarTexture);
+        fillBarSprite = _fillBarNode->addComponent<UI9Slice>(config.fillingBarTexture);
         fillBarSprite->setSize({ config.barSize.x * clampF(config.percentageFilled, 0.f, 1.f), config.barSize.y });
         fillBarSprite->color = config.fillingBarColor;
         fillBarTransform = _fillBarNode->getTransform();

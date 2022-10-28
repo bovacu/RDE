@@ -6,7 +6,7 @@
 #include "core/graph/components/Components.h"
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
-#include "core/graph/components/NineSliceSprite.h"
+#include "core/graph/components/ui/UI9Slice.h"
 #include "core/graph/components/ui/UIText.h"
 
 namespace GDE {
@@ -28,7 +28,7 @@ namespace GDE {
         UI::interaction->onInnerKeyReleased.bind<&UIInput::onKeyReleased>(this);
         UI::interaction->onInnerUnfocused.bind<&UIInput::onUnfocused>(this);
 
-        nineSliceSprite = _node->addComponent<NineSliceSprite>(config.inputBackgroundTexture);
+        nineSliceSprite = _node->addComponent<UI9Slice>(config.inputBackgroundTexture);
         nineSliceSprite->nineSliceSize = config.inputSize;
         nineSliceSprite->color = config.inputBackgroundColor;
         nineSliceTransform = _node->getTransform();

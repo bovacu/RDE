@@ -25,7 +25,7 @@ namespace GDE {
         UI::interaction->onInnerClicking.bind<&UIButton::onMouseClicked>(this);
         UI::interaction->onInnerClickingReleased.bind<&UIButton::onMouseReleased>(this);
 
-        nineSliceSprite = _node->addComponent<NineSliceSprite>(config.idleTexture);
+        nineSliceSprite = _node->addComponent<UI9Slice>(config.idleTexture);
         nineSliceSprite->nineSliceSize = _config.buttonTextureSize;
         nineSliceSprite->color = _config.buttonColor;
 

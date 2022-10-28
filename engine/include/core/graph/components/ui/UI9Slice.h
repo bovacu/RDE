@@ -22,7 +22,7 @@ namespace GDE {
      * @brief Component that is based on the SpriteRenderer, but allows to render UI images with a different size than the original
      * without loosing quality. The setup of this NineSlice should be done via TexturePacker.
      */
-    class NineSliceSprite : public UI {
+    class UI9Slice : public UI {
         FRIEND_CLASS(UIButton, UIPanel, UIInput, UISlider)
 
         private:
@@ -42,8 +42,8 @@ namespace GDE {
             void calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport);
 
         public:
-            NineSliceSprite(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
-            NineSliceSprite(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture);
+            UI9Slice(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
+            UI9Slice(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture);
 
             /**
              * @brief Returns the NineSlice data. This is almost sure not to be needed by end-users.
@@ -61,7 +61,7 @@ namespace GDE {
             void setInteractable(bool _enabled) override;
             bool isInteractable() override;
 
-            ~NineSliceSprite() override {  }
+            ~UI9Slice() override {  }
     };
 
 }

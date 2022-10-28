@@ -6,7 +6,7 @@
 #define GDE_UI_SLIDER_H
 
 #include "core/graph/components/ui/UI.h"
-#include "core/graph/components/NineSliceSprite.h"
+#include "core/graph/components/ui/UI9Slice.h"
 
 namespace GDE {
 
@@ -27,8 +27,8 @@ namespace GDE {
         private:
             UISliderConfig config;
             bool mouseDown = false;
-            NineSliceSprite* backgroundBarSprite = nullptr;
-            NineSliceSprite* fillBarSprite = nullptr;
+            UI9Slice* backgroundBarSprite = nullptr;
+            UI9Slice* fillBarSprite = nullptr;
             UIImage* handleSprite = nullptr;
 
             Transform* backgroundBarTransform = nullptr;

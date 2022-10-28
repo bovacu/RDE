@@ -2,7 +2,7 @@
 // Created by borja on 9/5/22.
 //
 
-#include "core/graph/components/NineSliceSprite.h"
+#include "core/graph/components/ui/UI9Slice.h"
 #include "core/util/Functions.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/graph/components/ui/UITransform.h"
@@ -10,10 +10,10 @@
 
 namespace GDE {
 
-    NineSliceSprite::NineSliceSprite(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
-    NineSliceSprite(_node, &_scene->engine->manager, _canvas->getGraph(), _texture) {  }
+    UI9Slice::UI9Slice(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
+            UI9Slice(_node, &_scene->engine->manager, _canvas->getGraph(), _texture) {  }
 
-    NineSliceSprite::NineSliceSprite(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : UI(_node) {
+    UI9Slice::UI9Slice(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : UI(_node) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         texture = _texture;
 
@@ -28,11 +28,11 @@ namespace GDE {
         calculateGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
     }
 
-    NineSlice& NineSliceSprite::getNineSlice() const {
+    NineSlice& UI9Slice::getNineSlice() const {
         return texture->nineSlice;
     }
 
-    void NineSliceSprite::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+    void UI9Slice::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
         if(!enabled) return;
 
         if(spriteRenderer) {
@@ -64,7 +64,7 @@ namespace GDE {
         }
     }
 
-    void NineSliceSprite::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {
+    void UI9Slice::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {
         if(!enabled) return;
 
         DrawAndFlushData _nineSliceData;
@@ -74,7 +74,7 @@ namespace GDE {
         _data.push_back(_nineSliceData);
     }
 
-    void NineSliceSprite::setInteractable(bool _interactable) {
+    void UI9Slice::setInteractable(bool _interactable) {
         interaction->interactable = _interactable;
 
         if(!interaction->interactable) {
@@ -84,18 +84,18 @@ namespace GDE {
         }
     }
 
-    bool NineSliceSprite::isInteractable() {
+    bool UI9Slice::isInteractable() {
         return interaction->interactable;
     }
 
-    void NineSliceSprite::setSize(const Vec2F& _size) {
+    void UI9Slice::setSize(const Vec2F& _size) {
         nineSliceSize = _size;
         if(nineSliceSize.x < 0) nineSliceSize.x = 0;
         if(nineSliceSize.y < 0) nineSliceSize.y = 0;
         dirty = true;
     }
 
-    void NineSliceSprite::calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport) {
+    void UI9Slice::calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport) {
         // TODO this calculations are an absolute mess, I need to clean this up, rename variables, make it clearer and remove redundant operations, but I'm scared.
         auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
         auto _pivot = ((UITransform*)&_transform)->getPivot();
@@ -111,6 +111,7 @@ namespace GDE {
             Vec2F _scale = { 1, 1 };
             Vec2F _noResizableScale = { 1, 1 };
 
+            // Resize and replace cross-X elements
             if((float)_uiSize.x - (float)_spriteSize.x != 0) {
                 auto _widthOfCorners = (float) texture->nineSlice.subRects[0].size.x + (float) texture->nineSlice.subRects[2].size.x;
                 auto _totalDiffX = (float)_uiSize.x - _widthOfCorners;
@@ -124,6 +125,7 @@ namespace GDE {
                 if(_i == 2 || _i == 5 || _i == 8) _position.x += _halfWidthOfDistortedMiddleRect - _halfWidthOfOriginalMiddleRect;
             }
 
+            // Resize and replace cross-Y elements
             if((float)_uiSize.y - (float)_spriteSize.y != 0) {
                 auto _heightOfCorners = (float)texture->nineSlice.subRects[0].size.y + (float)texture->nineSlice.subRects[6].size.y;
                 auto _totalDiffY = (float)_uiSize.y - _heightOfCorners;
@@ -147,6 +149,7 @@ namespace GDE {
             if(_propY < 0) _propY = 0.f;
             float _toMoveY = ((float)_subTextureRegion.size.y - ((float)_subTextureRegion.size.y * _propY)) * 0.5f;
 
+            // Scale and move elements that are not meant to be resized if the X is lower than the minimum size
             if(_sizeOfXCorners > _uiSize.x) {
 
                 if(_i == 0 || _i == 6) {
@@ -169,6 +172,7 @@ namespace GDE {
                 }
             }
 
+            // Scale and move elements that are not meant to be resized if the Y is lower than the minimum size
             if(_sizeOfYCorners > _uiSize.y) {
 
                 if(_i == 0 || _i == 2) {

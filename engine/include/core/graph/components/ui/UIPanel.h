@@ -6,7 +6,7 @@
 #define GDE_UI_PANEL_H
 
 #include "core/graph/components/ui/UI.h"
-#include "core/graph/components/NineSliceSprite.h"
+#include "core/graph/components/ui/UI9Slice.h"
 
 namespace GDE {
 
@@ -21,7 +21,7 @@ namespace GDE {
             UIPanelConfig config;
 
         public:
-            NineSliceSprite* nineSliceSprite = nullptr;
+            UI9Slice* nineSliceSprite = nullptr;
 
             UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config);
 

@@ -30,7 +30,7 @@ namespace GDE {
 
         public:
             UIText* textRenderer = nullptr;
-            NineSliceSprite* nineSliceSprite = nullptr;
+            UI9Slice* nineSliceSprite = nullptr;
 
             UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
             UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config);

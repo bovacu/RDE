@@ -29,7 +29,7 @@ namespace GDE {
         UI::interaction->onInnerClicking.bind<&foo2>();
         UI::interaction->onInnerClickingReleased.bind<&foo2>();
 
-        nineSliceSprite = _node->addComponent<NineSliceSprite>(config.texture);
+        nineSliceSprite = _node->addComponent<UI9Slice>(config.texture);
         nineSliceSprite->nineSliceSize = _config.size;
         nineSliceSprite->color = _config.color;
 
