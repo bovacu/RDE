@@ -17,9 +17,7 @@ namespace GDE {
 
     void UIImage::calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport) {
         auto _pivot = ((UITransform*)&_transform)->getPivot();
-        auto _screenPos = Util::worldToScreenCoords(_viewport, {_transformMatrix[3][0],
-                                                                _transformMatrix[3][1]
-        });
+        auto _screenPos = Util::worldToScreenCoords(_viewport, { _transformMatrix[3][0], _transformMatrix[3][1] });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;

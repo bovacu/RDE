@@ -264,6 +264,22 @@ namespace GDE {
                                       _transform.getModelMatrixPosition().y - _uiImage.getSize().y * _transform.getPivot().x }, Color::Green);
         });
 
+        _registry.group<UIButton>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UIButton& _uiButton, UITransform& _transform, const Active& _) {
+            if(!_uiButton.enabled) return;
+            DebugShape _shape;
+            _shape.makeSquare(_transform.getModelMatrixPosition(), _uiButton.getSize());
+            _shape.showOutsideColor(true);
+            _shape.setOutlineColor(Color::Yellow);
+            _shape.showInnerColor(false);
+            _shape.setRotation(_transform.getModelMatrixRotation());
+            _renderManager.drawShape(_shape);
+
+            _renderManager.drawSquare(_transform.getModelMatrixPosition(), {4, 4}, Color::Blue);
+            _renderManager.setPointSize(4);
+            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - _uiButton.getSize().x * _transform.getPivot().y,
+                                      _transform.getModelMatrixPosition().y - _uiButton.getSize().y * _transform.getPivot().x }, Color::Green);
+        });
+
 //        _registry.group<UIText>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UIText& _textRenderer, UITransform& _transform, const Active& _) {
 //            DebugShape _shape;
 //            _shape.rotation = _transform.getModelMatrixRotation();

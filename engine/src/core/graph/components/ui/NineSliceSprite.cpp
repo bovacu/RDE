@@ -5,6 +5,7 @@
 #include "core/graph/components/NineSliceSprite.h"
 #include "core/util/Functions.h"
 #include "core/graph/components/ui/UIImage.h"
+#include "core/graph/components/ui/UITransform.h"
 #include "core/Engine.h"
 
 namespace GDE {
@@ -96,7 +97,9 @@ namespace GDE {
 
     void NineSliceSprite::calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport) {
         auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
+        auto _pivot = ((UITransform*)&_transform)->getPivot();
         for(auto _i = 0; _i < _rectsAmount; _i++) {
+//            if(_i > 0) continue;
             auto& _subTextureRegion = texture->nineSlice.subRects[_i];
 
             float _distortX = 1.f, _distortY = 1.f;
@@ -202,7 +205,8 @@ namespace GDE {
 
             _current9SliceMat = _transformMat * _current9SliceMat;
 
-            auto _screenPos = Util::worldToScreenCoords(_viewport, {_current9SliceMat[3][0], _current9SliceMat[3][1]});
+            auto _subTextureReposition = Vec2F { _uiSize.x / 2.f - ((float)_subTextureRegion.size.x * 0.5f - (float)_subTextureRegion.size.x * _pivot.x) * _current9SliceMat[0][0], _uiSize.y / 2.f - ((float)_subTextureRegion.size.y * 0.5f - (float)_subTextureRegion.size.y * _pivot.y) * _current9SliceMat[1][1] };
+            auto _screenPos = Util::worldToScreenCoords(_viewport, {_current9SliceMat[3][0] + _subTextureReposition.x - _uiSize.x * _pivot.x, _current9SliceMat[3][1] + _subTextureReposition.y - _uiSize.y * _pivot.y });
             _current9SliceMat[3][0] = _screenPos.x;
             _current9SliceMat[3][1] = _screenPos.y;
 
@@ -214,10 +218,10 @@ namespace GDE {
             Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y};
             auto _textureTileSizeOnScreen = Util::worldToScreenSize(_viewport, _textureTileSize);
 
-            glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
-            glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
-            glm::vec4 _topRightTextureCorner    = {  _textureTileSizeOnScreen.x,  _textureTileSizeOnScreen.y, 0.0f, 1.0f };
-            glm::vec4 _topLeftTextureCorner     = { -_textureTileSizeOnScreen.x,  _textureTileSizeOnScreen.y, 0.0f, 1.0f };
+            glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x * _pivot.x * 2.f                                   , -_textureTileSizeOnScreen.y * _pivot.y * 2.f                                   , 0.0f, 1.0f };
+            glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x * 2.f - _textureTileSizeOnScreen.x * _pivot.x * 2.f, -_textureTileSizeOnScreen.y * _pivot.y * 2.f                                   , 0.0f, 1.0f };
+            glm::vec4 _topRightTextureCorner    = {  _textureTileSizeOnScreen.x * 2.f - _textureTileSizeOnScreen.x * _pivot.x * 2.f,  _textureTileSizeOnScreen.y * 2.f - _textureTileSizeOnScreen.y * _pivot.y * 2.f, 0.0f, 1.0f };
+            glm::vec4 _topLeftTextureCorner     = { -_textureTileSizeOnScreen.x * _pivot.x * 2.f                                   ,  _textureTileSizeOnScreen.y * 2.f - _textureTileSizeOnScreen.y * _pivot.y * 2.f, 0.0f, 1.0f };
 
             glm::vec4 _color = { (float)color.r / 255.f, (float)color.g / 255.f, (float)color.b / 255.f, (float)color.a / 255.f };
 
