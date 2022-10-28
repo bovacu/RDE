@@ -9,7 +9,7 @@
 
 namespace GDE {
 
-    FORWARD_DECLARE_CLASS(UIText, Font, NineSliceSprite, UIImage, UITransform)
+    FORWARD_DECLARE_CLASS(UIText, Font, UI9Slice, UIImage, UITransform)
 
     struct UICheckboxConfig : CommonUIConfig {
         std::string text = "Checkbox text";

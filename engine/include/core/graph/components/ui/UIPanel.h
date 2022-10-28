@@ -6,7 +6,6 @@
 #define GDE_UI_PANEL_H
 
 #include "core/graph/components/ui/UI.h"
-#include "core/graph/components/ui/UI9Slice.h"
 
 namespace GDE {
 
@@ -15,6 +14,8 @@ namespace GDE {
         Vec2F size { 128, 128 };
         Color color = Color::NO_COLOR;
     };
+
+    FORWARD_DECLARE_CLASS(UI9Slice)
 
     class UIPanel : public UI {
         private:

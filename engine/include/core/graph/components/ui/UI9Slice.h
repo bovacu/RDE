@@ -11,7 +11,7 @@
 
 namespace GDE {
 
-    struct NineSliceSpriteConfig : CommonUIConfig {
+    struct UI9SliceConfig : CommonUIConfig {
         Vec2F size = { -1, -1 };
         Texture* texture = nullptr;
         Color color = Color::White;
@@ -27,7 +27,7 @@ namespace GDE {
 
         private:
             UIImage* spriteRenderer = nullptr;
-            NineSliceSpriteConfig config;
+            UI9SliceConfig config;
 
             /**
              * @brief This is the size we want the UI to be rendered, may or may not match UI::getSize().

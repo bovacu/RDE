@@ -6,7 +6,6 @@
 #define GDE_UI_SLIDER_H
 
 #include "core/graph/components/ui/UI.h"
-#include "core/graph/components/ui/UI9Slice.h"
 
 namespace GDE {
 
@@ -22,6 +21,8 @@ namespace GDE {
         Texture* handleTexture = nullptr;
         Color handleColor = Color::Disabled;
     };
+
+    FORWARD_DECLARE_CLASS(UI9Slice, UIImage)
 
     class UISlider : public UI {
         private:

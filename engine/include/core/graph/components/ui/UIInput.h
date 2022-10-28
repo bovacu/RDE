@@ -9,7 +9,7 @@
 
 namespace GDE {
 
-    FORWARD_DECLARE_CLASS(Font, UIText, UIImage, NineSliceSprite)
+    FORWARD_DECLARE_CLASS(Font, UIText, UIImage, UI9Slice)
 
     struct UIInputConfig : CommonUIConfig {
         Vec2F inputSize = { 256, 32 };

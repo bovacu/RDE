@@ -9,7 +9,7 @@
 
 namespace GDE {
 
-    FORWARD_DECLARE_CLASS(Manager, UIText, Font, NineSliceSprite)
+    FORWARD_DECLARE_CLASS(Manager, UIText, Font, UI9Slice)
 
     struct UIButtonConfig : CommonUIConfig {
         std::string text = "Button Text";
