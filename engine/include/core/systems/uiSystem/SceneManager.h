@@ -17,6 +17,9 @@ namespace GDE {
      * @brief This class is in charge of loading and unloading scenes in memory and to decided when to render each one.
      */
     class SceneManager {
+
+        FRIEND_CLASS(ConfigManager)
+
         private:
             /**
              * @brief Map SceneName -> Scene*.

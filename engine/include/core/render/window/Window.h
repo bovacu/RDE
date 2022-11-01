@@ -199,6 +199,8 @@ namespace GDE {
              * @brief Makes the window to close and the application to exit.
              */
             void stop();
+
+            void refreshDpi();
     };
 
 }

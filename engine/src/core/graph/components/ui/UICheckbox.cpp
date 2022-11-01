@@ -68,11 +68,11 @@ namespace GDE {
         }
 
         if(config.checkboxBackgroundTexture == nullptr) {
-            config.checkboxBackgroundTexture = _manager->textureManager.getSubTexture("assets", "checkboxDark");
+            config.checkboxBackgroundTexture = _manager->textureManager.getSubTexture("defaultAssets", "checkboxDark");
         }
 
         if(config.checkboxTickTexture == nullptr) {
-            config.checkboxTickTexture = _manager->textureManager.getSubTexture("assets", "checkmark");
+            config.checkboxTickTexture = _manager->textureManager.getSubTexture("defaultAssets", "checkmark");
         }
 
         if(config.font == nullptr) {

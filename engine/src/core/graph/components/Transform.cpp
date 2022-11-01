@@ -159,7 +159,6 @@ namespace GDE {
         if (parentTransform) {
             if(dirty) {
                 setDirty();
-                dirty = false;
                 _wasDirty = true;
             }
         }
@@ -196,7 +195,7 @@ namespace GDE {
         worldMatrixCache[3][0] = _worldPos.x;
         worldMatrixCache[3][1] = _worldPos.y;
         setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
-        setDirty();
+        dirty = true;
     }
 
     void Transform::setMatrixModelRotation(float _rotation) {
@@ -223,7 +222,7 @@ namespace GDE {
         );
 
         setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
-        setDirty();
+        dirty = true;
     }
 
     glm::mat4 Transform::worldPointToLocalPosition(const Vec2F& _position) {
@@ -273,5 +272,9 @@ namespace GDE {
         }
 
         return _childrenCount;
+    }
+
+    void Transform::clearDirty() {
+        dirty = false;
     }
 }

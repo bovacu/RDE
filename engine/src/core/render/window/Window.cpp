@@ -139,4 +139,12 @@ namespace GDE {
         running = false;
     }
 
+    void Window::refreshDpi() {
+        if(SDL_GetDisplayDPI(SDL_GetWindowDisplayIndex(window), &properties->windowData.diagonalDpi, &properties->windowData.horizontalDpi, &properties->windowData.verticalDpi) != 0) {
+            LOG_W("No DPI could be obtained on the current display with index: ", SDL_GetWindowDisplayIndex(window))
+        } else {
+            LOG_DEBUG("DPI of the current window is -> (Diagonal, Horizontal, Vertical) - (", properties->windowData.diagonalDpi, ", ", properties->windowData.horizontalDpi, ", ", properties->windowData.verticalDpi, ")")
+        }
+    }
+
 }

@@ -36,7 +36,8 @@ namespace GDE {
         _config->windowData.vsync = !_data.contains("vsync") || _data["vsync"].get<bool>();
 
         #if !IS_MOBILE()
-        _config->windowData.size = Vec2<unsigned int>{_data["resolution"][0].get<unsigned int>(),_data["resolution"][1].get<unsigned int>()};
+        _config->windowData.size = _data.contains("resolution") ? Vec2<unsigned int>{_data["resolution"][0].get<unsigned int>(),_data["resolution"][1].get<unsigned int>()} :
+                                   Vec2<unsigned int> {1280, 720};
         #endif
 
         _config->projectData.iconPath = _data.contains("icon") ? _data["icon"].get<std::string>() : "";
@@ -50,6 +51,12 @@ namespace GDE {
         }
 
         auto _fileHandler = _manager->fileManager.open(APPEND_S("assets/", _gdeConfig->projectData.resourcesPath), FileMode::READ);
+
+        if(_fileHandler == nullptr) {
+            LOG_W("Resources path was set in the config.json, but the file couldn't be loaded!")
+            return;
+        }
+
         nlohmann::json _data = nlohmann::json::parse(_manager->fileManager.readFullFile(_fileHandler).content);
 
         if(_data.empty()) {
@@ -63,6 +70,11 @@ namespace GDE {
 
     void ConfigManager::loadScene(Manager* _manager, Scene* _scene, Window* _window, const std::string& _configFilePath) {
         auto _fileHandler = _manager->fileManager.open(_configFilePath, FileMode::READ);
+
+        if(_fileHandler == nullptr) {
+            LOG_W("JSON file for scene ", _scene->debugName, " was not found, so a DefaultScene is being created for it.")
+            return;
+        }
 
         auto _content = _manager->fileManager.readFullFile(_fileHandler).content;
         nlohmann::json _sceneJson = nlohmann::json::parse(_content);
@@ -252,12 +264,6 @@ namespace GDE {
             _bodyConfig.mass = _bodyJson["mass"].get<float>();
         }
 
-        if(_bodyJson.contains("offset")) {
-            ENGINE_ASSERT(_bodyJson["offset"].size() == 2, "'offset' is a Vec2F, so it must contain exactly 2 elements, Ex: \"offset\": [x, y]")
-            _bodyConfig.offset.x = _bodyJson["offset"][0].get<float>();
-            _bodyConfig.offset.y = _bodyJson["offset"][1].get<float>();
-        }
-
         if(_bodyJson.contains("physicShapes")) {
             for(auto& _shapeJson : _bodyJson["physicShapes"]) {
                 ShapeConfig _shapeConfig;
@@ -265,6 +271,12 @@ namespace GDE {
                 ENGINE_ASSERT(_shapeJson.contains("type"), "Each PhysicsShape must contain the 'type' field, which is a PhysicsShapeType enum, so possible values are [BOX,CIRCLE,POLYGON,SEGMENT] no case sensitive, Ex: \"type\": \"BOX\"")
                 auto _type = _shapeJson["type"].get<std::string>();
                 _type = TO_LOWER_S(_type);
+
+                if(_shapeJson.contains("offset")) {
+                    ENGINE_ASSERT(_bodyJson["offset"].size() == 2, "'offset' is a Vec2F, so it must contain exactly 2 elements, Ex: \"offset\": [x, y]")
+                    _shapeConfig.offset.x = _bodyJson["offset"][0].get<float>();
+                    _shapeConfig.offset.y = _bodyJson["offset"][1].get<float>();
+                }
 
                 if(std::equal(_type.begin(), _type.end(), "box")) {
                     _shapeConfig.type = PhysicsShapeType::BOX;

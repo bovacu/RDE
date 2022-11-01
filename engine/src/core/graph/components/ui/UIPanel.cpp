@@ -30,8 +30,8 @@ namespace GDE {
         UI::interaction->onInnerClickingReleased.bind<&foo2>();
 
         nineSliceSprite = _node->addComponent<UI9Slice>(config.texture);
-        nineSliceSprite->nineSliceSize = _config.size;
-        nineSliceSprite->color = _config.color;
+        nineSliceSprite->setSize(_config.size);
+        nineSliceSprite->setColor(_config.color);
 
         setConfig(_manager, _config);
     }
@@ -48,7 +48,7 @@ namespace GDE {
         config = _config;
 
         if(config.texture == nullptr) {
-            config.texture = _manager->textureManager.getSubTexture("assets", "panel");
+            config.texture = _manager->textureManager.getSubTexture("defaultAssets", "panel");
         }
 
         if(config.color == Color::NO_COLOR) {
@@ -59,9 +59,8 @@ namespace GDE {
 
         if(nineSliceSprite != nullptr) {
             nineSliceSprite->setSize(config.size);
-            nineSliceSprite->color = config.color;
+            nineSliceSprite->setColor(config.color);
             nineSliceSprite->texture = config.texture;
-            nineSliceSprite->dirty = true;
         }
     }
 

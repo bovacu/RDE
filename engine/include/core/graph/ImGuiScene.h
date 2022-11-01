@@ -72,6 +72,7 @@ namespace GDE {
             void textComponent(Graph* _graph, const NodeID _selectedNode);
             void uiButtonComponent(Graph* _graph, const NodeID _selectedNode);
             void uiPanelComponent(Graph* _graph, const NodeID _selectedNode);
+            void ui9SliceComponent(Graph* _graph, const NodeID _selectedNode);
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
 

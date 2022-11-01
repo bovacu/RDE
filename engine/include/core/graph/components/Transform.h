@@ -5,7 +5,6 @@
 #ifndef GDE_TRANSFORM_H
 #define GDE_TRANSFORM_H
 
-#include <bits/utility.h>
 #include <vector>
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/gtc/quaternion.hpp"
@@ -21,7 +20,7 @@ namespace GDE {
      * @brief Component common to every entity that tells the engine where it is, which scale it has and how much it is rotated.
      */
     class Transform {
-        FRIEND_CLASS(Graph, PhysicsBody)
+        FRIEND_CLASS(Graph, PhysicsBody, SpriteRenderer, TextRenderer, UIImage, UI9Slice, UIText)
         MAKE_CLASS_ITERABLE(std::vector<Transform*>, children)
 
         protected:
@@ -35,6 +34,7 @@ namespace GDE {
         protected:
             glm::mat4 recalculateCachedMatrix();
             void setDirty();
+            void clearDirty();
             glm::mat4 worldPointToLocalPosition(const Vec2F& _position);
             glm::mat4 worldPointToLocalRotation(float _rotation);
 

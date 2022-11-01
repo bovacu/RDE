@@ -86,11 +86,11 @@ namespace GDE {
         }
 
         if(config.inputBackgroundTexture == nullptr) {
-            config.inputBackgroundTexture = _manager->textureManager.getSubTexture("assets", "inputThemeDark");
+            config.inputBackgroundTexture = _manager->textureManager.getSubTexture("defaultAssets", "inputThemeDark");
         }
 
         if(config.caretTexture == nullptr) {
-            config.caretTexture = _manager->textureManager.getSubTexture("assets", "caret");
+            config.caretTexture = _manager->textureManager.getSubTexture("defaultAssets", "caret");
         }
 
         if(config.font == nullptr) {

@@ -439,6 +439,7 @@ namespace GDE {
         bodyComponent(_graph, _selectedNode);
         textComponent(_graph, _selectedNode);
         uiButtonComponent(_graph, _selectedNode);
+        ui9SliceComponent(_graph, _selectedNode);
         uiPanelComponent(_graph, _selectedNode);
 
         ImGui::End();
@@ -622,6 +623,30 @@ namespace GDE {
         }
     }
 
+    void ImGuiScene::ui9SliceComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<UI9Slice>(_selectedNode)) return;
+
+        auto _ui9Slice = _graph->getComponent<UI9Slice>(_selectedNode);
+
+        if(ImGui::CollapsingHeader("UI Panel", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            ImGui::Text("Size ");
+            float _size[2] = { _ui9Slice->getSize().x, _ui9Slice->getSize().y };
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(7);
+            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
+                clampF(_size[0], 0, FLT_MAX);
+                clampF(_size[1], 0, FLT_MAX);
+                _ui9Slice->setSize({_size[0], _size[1]});
+            }
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
+    }
+
     void ImGuiScene::uiButtonComponent(Graph* _graph, const NodeID _selectedNode) {
         if(!_graph->hasComponent<UIButton>(_selectedNode)) return;
 
@@ -630,23 +655,19 @@ namespace GDE {
         if(ImGui::CollapsingHeader("UI Button", ImGuiTreeNodeFlags_DefaultOpen)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
-            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
-
-            ImGui::Text("Size ");
-            float _size[2] = { _uiButton->nineSliceSprite->getSize().x, _uiButton->nineSliceSprite->getSize().y };
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(100);
-            ImGui::PushID(7);
-            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
-                auto _config = _uiButton->getConfig();
-                clampF(_size[0], 0, FLT_MAX);
-                clampF(_size[1], 0, FLT_MAX);
-                _config.buttonTextureSize = { _size[0], _size[1] };
-                _uiButton->setConfig(&engine->manager, _config);
-            }
-            ImGui::PopID();
-
-            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+//            ImGui::Text("Size ");
+//            float _size[2] = { _uiButton->nineSliceSprite->getSize().x, _uiButton->nineSliceSprite->getSize().y };
+//            ImGui::SameLine();
+//            ImGui::SetNextItemWidth(100);
+//            ImGui::PushID(8);
+//            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
+//                auto _config = _uiButton->getConfig();
+//                clampF(_size[0], 0, FLT_MAX);
+//                clampF(_size[1], 0, FLT_MAX);
+//                _config.buttonTextureSize = { _size[0], _size[1] };
+//                _uiButton->setConfig(&engine->manager, _config);
+//            }
+//            ImGui::PopID();
 
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
@@ -660,19 +681,19 @@ namespace GDE {
         if(ImGui::CollapsingHeader("UI Panel", ImGuiTreeNodeFlags_DefaultOpen)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
-            ImGui::Text("Size ");
-            float _size[2] = { _uiPanel->nineSliceSprite->getSize().x, _uiPanel->nineSliceSprite->getSize().y };
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(100);
-            ImGui::PushID(8);
-            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
-                auto _config = _uiPanel->getConfig();
-                clampF(_size[0], 0, FLT_MAX);
-                clampF(_size[1], 0, FLT_MAX);
-                _config.size = { _size[0], _size[1] };
-                _uiPanel->setConfig(&engine->manager, _config);
-            }
-            ImGui::PopID();
+//            ImGui::Text("Size ");
+//            float _size[2] = { _uiPanel->nineSliceSprite->getSize().x, _uiPanel->nineSliceSprite->getSize().y };
+//            ImGui::SameLine();
+//            ImGui::SetNextItemWidth(100);
+//            ImGui::PushID(9);
+//            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
+//                auto _config = _uiPanel->getConfig();
+//                clampF(_size[0], 0, FLT_MAX);
+//                clampF(_size[1], 0, FLT_MAX);
+//                _config.size = { _size[0], _size[1] };
+//                _uiPanel->setConfig(&engine->manager, _config);
+//            }
+//            ImGui::PopID();
 
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }

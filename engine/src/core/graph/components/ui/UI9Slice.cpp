@@ -28,10 +28,6 @@ namespace GDE {
         calculateGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
     }
 
-    NineSlice& UI9Slice::getNineSlice() const {
-        return texture->nineSlice;
-    }
-
     void UI9Slice::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
         if(!enabled) return;
 
@@ -43,7 +39,8 @@ namespace GDE {
         auto [_transformMat, _dirty] = _transform.localToWorld();
         if(_dirty || dirty) {
             calculateGeometry(_transformMat, _transform, _viewport);
-            dirty = true;
+            _transform.clearDirty();
+            dirty = false;
         }
 
         for(auto _i = 0; _i < 9; _i++) {

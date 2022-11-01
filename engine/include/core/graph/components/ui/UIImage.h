@@ -10,7 +10,7 @@
 
 namespace GDE {
 
-    class UIImage : public SpriteRenderer{
+    class UIImage : public SpriteRenderer {
         public:
             UIImage(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
             UIImage(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture);

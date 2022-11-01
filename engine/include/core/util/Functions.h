@@ -42,7 +42,7 @@ namespace GDE {
                         _position.y * _viewport.getScalingFactor().y / ((float)_windowSize.y / 2)};
             }
 
-            #if !IS_MAC() && !IS_WINDOWS()
+            #if !IS_MAC() && !IS_WINDOWS() && !IS_MOBILE()
             [[gnu::warning("Probably broken some versions ago, check it out again")]]
             #endif
             static Vec2F screenToWorldCoords(const IViewPort& _viewport, const Vec2F& _position) {

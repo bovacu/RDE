@@ -1,0 +1,343 @@
+{
+    "sprite_sheet_name": "assets.png",
+    "sprite_sheet_size": [1648, 1888],
+    "sprite_sheet_settings": {
+        "format": "png",
+        "path": "assets/sprites/assets.png"
+    },
+    "sprites" : [
+        {
+            "name": "backBtn",
+            "size": [99, 99],
+            "size_in_uv": [0.060072815533980584, 0.0524364406779661],
+            "origin": [1404, 252],
+            "origin_in_uv": [0.8519417475728155, 0.13347457627118645],
+            "origin_offset": [0, 0],
+            "center_pivot": [49.5, 49.5],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "background_0",
+            "size": [700, 1200],
+            "size_in_uv": [0.42475728155339804, 0.635593220338983],
+            "origin": [0, 0],
+            "origin_in_uv": [0, 0],
+            "origin_offset": [0, 0],
+            "center_pivot": [350, 600],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "background_1",
+            "size": [700, 1200],
+            "size_in_uv": [0.42475728155339804, 0.635593220338983],
+            "origin": [702, 0],
+            "origin_in_uv": [0.42597087378640774, 0],
+            "origin_offset": [0, 0],
+            "center_pivot": [350, 600],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "crownBronze",
+            "size": [37, 30],
+            "size_in_uv": [0.022451456310679612, 0.015889830508474576],
+            "origin": [0, 1855],
+            "origin_in_uv": [0, 0.982521186440678],
+            "origin_offset": [0, 0],
+            "center_pivot": [18.5, 15],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "crownGold",
+            "size": [37, 30],
+            "size_in_uv": [0.022451456310679612, 0.015889830508474576],
+            "origin": [39, 1855],
+            "origin_in_uv": [0.02366504854368932, 0.982521186440678],
+            "origin_offset": [0, 0],
+            "center_pivot": [18.5, 15],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "crownSilver",
+            "size": [37, 30],
+            "size_in_uv": [0.022451456310679612, 0.015889830508474576],
+            "origin": [78, 1855],
+            "origin_in_uv": [0.04733009708737864, 0.982521186440678],
+            "origin_offset": [0, 0],
+            "center_pivot": [18.5, 15],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "elementBackground",
+            "size": [418, 80],
+            "size_in_uv": [0.2536407766990291, 0.0423728813559322],
+            "origin": [523, 1806],
+            "origin_in_uv": [0.31735436893203883, 0.9565677966101694],
+            "origin_offset": [0, 0],
+            "center_pivot": [209, 40],
+            "scaling_factor": 1,
+            "nine_patch" : {
+                "top": 20,
+                "left": 20,
+                "right": 378,
+                "bottom": 40
+            }
+        }, 
+        {
+            "name": "emptySwordSlot",
+            "size": [65, 68],
+            "size_in_uv": [0.03944174757281554, 0.036016949152542374],
+            "origin": [1474, 353],
+            "origin_in_uv": [0.8944174757281553, 0.18697033898305085],
+            "origin_offset": [0, 0],
+            "center_pivot": [32.5, 34],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "fullSwordSlot",
+            "size": [65, 68],
+            "size_in_uv": [0.03944174757281554, 0.036016949152542374],
+            "origin": [1474, 423],
+            "origin_in_uv": [0.8944174757281553, 0.22404661016949154],
+            "origin_offset": [0, 0],
+            "center_pivot": [32.5, 34],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "playBtn",
+            "size": [244, 250],
+            "size_in_uv": [0.14805825242718446, 0.13241525423728814],
+            "origin": [1404, 0],
+            "origin_in_uv": [0.8519417475728155, 0],
+            "origin_offset": [0, 0],
+            "center_pivot": [122, 125],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "popup",
+            "size": [521, 651],
+            "size_in_uv": [0.3161407766990291, 0.3448093220338983],
+            "origin": [0, 1202],
+            "origin_in_uv": [0, 0.6366525423728814],
+            "origin_offset": [0, 0],
+            "center_pivot": [260.5, 325.5],
+            "scaling_factor": 1,
+            "nine_patch" : {
+                "top": 50,
+                "left": 50,
+                "right": 421,
+                "bottom": 551
+            }
+        }, 
+        {
+            "name": "settingsBtn",
+            "size": [99, 99],
+            "size_in_uv": [0.060072815533980584, 0.0524364406779661],
+            "origin": [1505, 252],
+            "origin_in_uv": [0.9132281553398058, 0.13347457627118645],
+            "origin_offset": [0, 0],
+            "center_pivot": [49.5, 49.5],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_0",
+            "size": [68, 225],
+            "size_in_uv": [0.0412621359223301, 0.11917372881355932],
+            "origin": [1404, 353],
+            "origin_in_uv": [0.8519417475728155, 0.18697033898305085],
+            "origin_offset": [0, 0],
+            "center_pivot": [34, 112.5],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_1",
+            "size": [36, 225],
+            "size_in_uv": [0.021844660194174758, 0.11917372881355932],
+            "origin": [1457, 723],
+            "origin_in_uv": [0.8841019417475728, 0.3829449152542373],
+            "origin_offset": [0, 0],
+            "center_pivot": [18, 112.5],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_2",
+            "size": [51, 228],
+            "size_in_uv": [0.030946601941747573, 0.12076271186440678],
+            "origin": [1404, 580],
+            "origin_in_uv": [0.8519417475728155, 0.3072033898305085],
+            "origin_offset": [0, 0],
+            "center_pivot": [25.5, 114],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_3",
+            "size": [60, 225],
+            "size_in_uv": [0.03640776699029126, 0.11917372881355932],
+            "origin": [1541, 353],
+            "origin_in_uv": [0.9350728155339806, 0.18697033898305085],
+            "origin_offset": [0, 0],
+            "center_pivot": [30, 112.5],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_4",
+            "size": [54, 228],
+            "size_in_uv": [0.032766990291262135, 0.12076271186440678],
+            "origin": [1474, 493],
+            "origin_in_uv": [0.8944174757281553, 0.2611228813559322],
+            "origin_offset": [0, 0],
+            "center_pivot": [27, 114],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_5",
+            "size": [36, 228],
+            "size_in_uv": [0.021844660194174758, 0.12076271186440678],
+            "origin": [1603, 522],
+            "origin_in_uv": [0.9726941747572816, 0.2764830508474576],
+            "origin_offset": [0, 0],
+            "center_pivot": [18, 114],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_6",
+            "size": [40, 224],
+            "size_in_uv": [0.024271844660194174, 0.11864406779661017],
+            "origin": [1606, 296],
+            "origin_in_uv": [0.9745145631067961, 0.15677966101694915],
+            "origin_offset": [0, 0],
+            "center_pivot": [20, 112],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_7",
+            "size": [36, 226],
+            "size_in_uv": [0.021844660194174758, 0.11970338983050847],
+            "origin": [1583, 801],
+            "origin_in_uv": [0.9605582524271845, 0.4242584745762712],
+            "origin_offset": [0, 0],
+            "center_pivot": [18, 113],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_8",
+            "size": [51, 228],
+            "size_in_uv": [0.030946601941747573, 0.12076271186440678],
+            "origin": [1530, 580],
+            "origin_in_uv": [0.9283980582524272, 0.3072033898305085],
+            "origin_offset": [0, 0],
+            "center_pivot": [25.5, 114],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_9",
+            "size": [34, 225],
+            "size_in_uv": [0.02063106796116505, 0.11917372881355932],
+            "origin": [1531, 810],
+            "origin_in_uv": [0.929004854368932, 0.4290254237288136],
+            "origin_offset": [0, 0],
+            "center_pivot": [17, 112.5],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_10",
+            "size": [34, 230],
+            "size_in_uv": [0.02063106796116505, 0.12182203389830508],
+            "origin": [1404, 810],
+            "origin_in_uv": [0.8519417475728155, 0.4290254237288136],
+            "origin_offset": [0, 0],
+            "center_pivot": [17, 115],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "sword_11",
+            "size": [34, 229],
+            "size_in_uv": [0.02063106796116505, 0.12129237288135593],
+            "origin": [1495, 810],
+            "origin_in_uv": [0.9071601941747572, 0.4290254237288136],
+            "origin_offset": [0, 0],
+            "center_pivot": [17, 114.5],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "target_0",
+            "size": [300, 300],
+            "size_in_uv": [0.1820388349514563, 0.15889830508474576],
+            "origin": [523, 1202],
+            "origin_in_uv": [0.31735436893203883, 0.6366525423728814],
+            "origin_offset": [0, 0],
+            "center_pivot": [150, 150],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "target_1",
+            "size": [300, 300],
+            "size_in_uv": [0.1820388349514563, 0.15889830508474576],
+            "origin": [523, 1504],
+            "origin_in_uv": [0.31735436893203883, 0.7966101694915254],
+            "origin_offset": [0, 0],
+            "center_pivot": [150, 150],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "target_2",
+            "size": [300, 300],
+            "size_in_uv": [0.1820388349514563, 0.15889830508474576],
+            "origin": [825, 1202],
+            "origin_in_uv": [0.5006067961165048, 0.6366525423728814],
+            "origin_offset": [0, 0],
+            "center_pivot": [150, 150],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "target_3",
+            "size": [300, 300],
+            "size_in_uv": [0.1820388349514563, 0.15889830508474576],
+            "origin": [825, 1504],
+            "origin_in_uv": [0.5006067961165048, 0.7966101694915254],
+            "origin_offset": [0, 0],
+            "center_pivot": [150, 150],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "target_4",
+            "size": [300, 300],
+            "size_in_uv": [0.1820388349514563, 0.15889830508474576],
+            "origin": [1127, 1202],
+            "origin_in_uv": [0.6838592233009708, 0.6366525423728814],
+            "origin_offset": [0, 0],
+            "center_pivot": [150, 150],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "target_5",
+            "size": [300, 300],
+            "size_in_uv": [0.1820388349514563, 0.15889830508474576],
+            "origin": [1127, 1504],
+            "origin_in_uv": [0.6838592233009708, 0.7966101694915254],
+            "origin_offset": [0, 0],
+            "center_pivot": [150, 150],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "tomato",
+            "size": [46, 47],
+            "size_in_uv": [0.027912621359223302, 0.02489406779661017],
+            "origin": [1583, 752],
+            "origin_in_uv": [0.9605582524271845, 0.3983050847457627],
+            "origin_offset": [0, 0],
+            "center_pivot": [23, 23.5],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "tomatoIcon",
+            "size": [41, 42],
+            "size_in_uv": [0.02487864077669903, 0.022245762711864406],
+            "origin": [1606, 252],
+            "origin_in_uv": [0.9745145631067961, 0.13347457627118645],
+            "origin_offset": [0, 0],
+            "center_pivot": [20.5, 21],
+            "scaling_factor": 1
+        }
+    ]
+
+}

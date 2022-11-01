@@ -26,7 +26,7 @@ namespace GDE {
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
         if(_texture == nullptr) {
-            texture = _manager->textureManager.getSubTexture("assets", "sprite");
+            texture = _manager->textureManager.getSubTexture("defaultAssets", "sprite");
         } else {
             texture = _texture;
         }
@@ -83,8 +83,10 @@ namespace GDE {
         auto _vertexCount = _vertices.size();
 
         auto [_transformMat, _dirty] = _transform.localToWorld();
-        if(_dirty) {
+        if(_dirty || dirty) {
             calculateGeometry(_transformMat, _transform, _viewport);
+            _transform.clearDirty();
+            dirty = false;
         }
 
         _vertices.emplace_back(geometry[0]);

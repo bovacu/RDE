@@ -57,6 +57,8 @@ namespace GDE {
 
             bool enabled = true;
 
+            bool dirty = false;
+
         public:
             Node* node = nullptr;
 
@@ -86,9 +88,9 @@ namespace GDE {
             virtual Color getColor() { return color; }
             virtual int getLayer() { return layer; }
 
-            virtual void setShaderID(ShaderID _shaderID) { shaderID = _shaderID; }
-            virtual void setColor(const Color& _color) { color = _color; }
-            virtual void setLayer(int _layer) { layer = _layer; }
+            virtual void setShaderID(ShaderID _shaderID) { shaderID = _shaderID; dirty = true; }
+            virtual void setColor(const Color& _color) { color = _color; dirty = true; }
+            virtual void setLayer(int _layer) { layer = _layer; dirty = true; }
 
             /**
              * @brief Method that every renderizable can implement to update its inner states.

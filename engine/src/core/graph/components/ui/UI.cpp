@@ -23,11 +23,11 @@ namespace GDE {
     UIInteractable::UIInteractable(Node* _node, Manager* _manager, Graph* _graph) {  }
 
     static bool trigger(Node* _node, Engine* _engine, Canvas* _canvas) {
-        auto* _ninePatch = _node->getComponent<UIInteractable>();
+        auto* _uiInteractable = _node->getComponent<UIInteractable>();
         auto* _transform = _node->getTransform();
         auto _mousePos = _engine->manager.inputManager.getMousePosWorldPos();
 
-        return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_ninePatch->sizeOfInteraction.x, (float)_ninePatch->sizeOfInteraction.y});
+        return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_uiInteractable->sizeOfInteraction.x, (float)_uiInteractable->sizeOfInteraction.y});
     }
 
     static char getCorrectChar(const KeyEvent* _keyEvent) {

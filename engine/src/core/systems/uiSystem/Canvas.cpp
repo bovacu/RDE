@@ -202,7 +202,7 @@ namespace GDE {
         batches.clear();
         Batch _batch;
         _batch.shader = scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
-        _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
+        _batch.textureID = scene->engine->manager.textureManager.getSubTexture("defaultAssets", "buttonDark")->getGLTexture();
         batches.emplace_back(_batch);
     }
 
@@ -215,7 +215,7 @@ namespace GDE {
         batches.clear();
         Batch _batch;
         _batch.shader = scene->engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
-        _batch.textureID = scene->engine->manager.textureManager.getSubTexture("assets", "buttonDark")->getGLTexture();
+        _batch.textureID = scene->engine->manager.textureManager.getSubTexture("defaultAssets", "buttonDark")->getGLTexture();
         batches.emplace_back(_batch);
 
         // Depending on the element, we will need to restrict the area that can be rendered. In that case and as we
@@ -260,8 +260,8 @@ namespace GDE {
 
             _renderManager.drawSquare(_transform.getModelMatrixPosition(), {4, 4}, Color::Blue);
             _renderManager.setPointSize(4);
-            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - _uiImage.getSize().x * _transform.getPivot().y,
-                                      _transform.getModelMatrixPosition().y - _uiImage.getSize().y * _transform.getPivot().x }, Color::Green);
+            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - (_uiImage.getSize().x * 0.5f - _uiImage.getSize().x * _transform.getPivot().x),
+                                      _transform.getModelMatrixPosition().y - (_uiImage.getSize().y * 0.5f - _uiImage.getSize().y * _transform.getPivot().y) }, Color::Green);
         });
 
         _registry.group<UIButton>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UIButton& _uiButton, UITransform& _transform, const Active& _) {
@@ -276,8 +276,8 @@ namespace GDE {
 
             _renderManager.drawSquare(_transform.getModelMatrixPosition(), {4, 4}, Color::Blue);
             _renderManager.setPointSize(4);
-            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - _uiButton.getSize().x * _transform.getPivot().y,
-                                      _transform.getModelMatrixPosition().y - _uiButton.getSize().y * _transform.getPivot().x }, Color::Green);
+            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - (_uiButton.getSize().x * 0.5f - _uiButton.getSize().x * _transform.getPivot().x),
+                                      _transform.getModelMatrixPosition().y - (_uiButton.getSize().y * 0.5f - _uiButton.getSize().y * _transform.getPivot().y) }, Color::Green);
         });
 
 //        _registry.group<UIText>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UIText& _textRenderer, UITransform& _transform, const Active& _) {

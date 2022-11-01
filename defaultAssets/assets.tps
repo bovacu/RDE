@@ -124,7 +124,7 @@
             <key>datafile</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>assets.json</filename>
+                <filename>defaultAssets.json</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -264,7 +264,6 @@
             </struct>
             <key type="filename">sprites/buttonExit.png</key>
             <key type="filename">sprites/icons/64x64px/x64x64.png</key>
-            <key type="filename">../../defaultAssets/sprites/checkboxDark.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -303,6 +302,36 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">sprites/caret.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>0,8,1,16</rect>
+                <key>scale9Paddings</key>
+                <rect>0,8,1,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/checkboxDark.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,12,12</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,12,12</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">sprites/circleLoadingBar.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -330,6 +359,21 @@
                 <rect>48,48,96,96</rect>
                 <key>scale9Paddings</key>
                 <rect>48,48,96,96</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/fillAndBgrScrollBarHorizontal.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <true/>
+                <key>scale9Borders</key>
+                <rect>33,4,66,7</rect>
+                <key>scale9Paddings</key>
+                <rect>33,4,66,7</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -443,7 +487,6 @@
             <key type="filename">sprites/icons/32x32px/arrowRight32x32.png</key>
             <key type="filename">sprites/icons/32x32px/arrowUp32x32.png</key>
             <key type="filename">sprites/icons/32x32px/x32x32.png</key>
-            <key type="filename">../../defaultAssets/sprites/icons/32x32px/checkmark.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -455,6 +498,21 @@
                 <rect>8,8,16,16</rect>
                 <key>scale9Paddings</key>
                 <rect>8,8,16,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/icons/32x32px/checkmark.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -665,36 +723,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../defaultAssets/sprites/caret.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>spriteScale</key>
-                <double>1</double>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>1,8,2,16</rect>
-                <key>scale9Paddings</key>
-                <rect>1,8,2,16</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../../defaultAssets/sprites/fillAndBgrScrollBarHorizontal.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>spriteScale</key>
-                <double>1</double>
-                <key>scale9Enabled</key>
-                <true/>
-                <key>scale9Borders</key>
-                <rect>11,5,110,5</rect>
-                <key>scale9Paddings</key>
-                <rect>33,4,66,7</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
         </map>
         <key>fileList</key>
         <array>
@@ -782,10 +810,10 @@
             <filename>sprites/icons/32x32px/x32x32.png</filename>
             <filename>sprites/icons/64x64px/x64x64.png</filename>
             <filename>sprites/sprite.png</filename>
-            <filename>../../defaultAssets/sprites/checkboxDark.png</filename>
-            <filename>../../defaultAssets/sprites/icons/32x32px/checkmark.png</filename>
-            <filename>../../defaultAssets/sprites/caret.png</filename>
-            <filename>../../defaultAssets/sprites/fillAndBgrScrollBarHorizontal.png</filename>
+            <filename>sprites/caret.png</filename>
+            <filename>sprites/checkboxDark.png</filename>
+            <filename>sprites/fillAndBgrScrollBarHorizontal.png</filename>
+            <filename>sprites/icons/32x32px/checkmark.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

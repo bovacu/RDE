@@ -60,6 +60,8 @@ namespace GDE {
              * @brief Allows the game to run even if it is not focused.
              */
             bool allowRunningOnBackground = true;
+
+            float verticalDpi = 0, horizontalDpi = 0, diagonalDpi = 0;
         };
 
         /**

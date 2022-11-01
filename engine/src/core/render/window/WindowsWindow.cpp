@@ -47,6 +47,8 @@ namespace GDE {
         SDL_SetWindowResizable(window, SDL_TRUE);
 
         if(!properties->projectData.iconPath.empty()) setIcon(properties->projectData.iconPath);
+
+        refreshDpi();
     }
 }
 

@@ -36,20 +36,12 @@ namespace GDE {
 
             OpenGLVertex geometry[36];
 
-            bool dirty = false;
-
         private:
             void calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport);
 
         public:
             UI9Slice(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
             UI9Slice(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture);
-
-            /**
-             * @brief Returns the NineSlice data. This is almost sure not to be needed by end-users.
-             * @return NineSlice&
-             */
-            [[nodiscard]] NineSlice& getNineSlice() const;
 
             [[nodiscard]] Vec2F getSize() const override { return {(float)nineSliceSize.x * IRenderizable::node->getTransform()->getScale().x,
                                                                    (float)nineSliceSize.y * IRenderizable::node->getTransform()->getScale().y}; }

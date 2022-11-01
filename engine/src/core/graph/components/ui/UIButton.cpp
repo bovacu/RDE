@@ -26,13 +26,13 @@ namespace GDE {
         UI::interaction->onInnerClickingReleased.bind<&UIButton::onMouseReleased>(this);
 
         nineSliceSprite = _node->addComponent<UI9Slice>(config.idleTexture);
-        nineSliceSprite->nineSliceSize = _config.buttonTextureSize;
-        nineSliceSprite->color = _config.buttonColor;
+        nineSliceSprite->setSize(_config.buttonTextureSize);
+        nineSliceSprite->setColor(_config.buttonColor);
 
         auto _textNode = _graph->createNode("Text", _node);
         textRenderer = _textNode->addComponent<UIText>(_config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
-        textRenderer->color = config.textColor;
+        textRenderer->setColor(config.textColor);
     }
 
     Vec2F UIButton::getSize() const {
@@ -57,19 +57,19 @@ namespace GDE {
         }
 
         if(config.idleTexture == nullptr) {
-            config.idleTexture = _manager->textureManager.getSubTexture("assets", "buttonDark");
+            config.idleTexture = _manager->textureManager.getSubTexture("defaultAssets", "buttonDark");
         }
 
         if(config.selectedTexture == nullptr) {
-            config.selectedTexture = _manager->textureManager.getSubTexture("assets", "buttonDarkHighlited");
+            config.selectedTexture = _manager->textureManager.getSubTexture("defaultAssets", "buttonDarkHighlited");
         }
 
         if(config.clickedTexture == nullptr) {
-            config.clickedTexture = _manager->textureManager.getSubTexture("assets", "buttonDarkPressed");
+            config.clickedTexture = _manager->textureManager.getSubTexture("defaultAssets", "buttonDarkPressed");
         }
 
         if(config.disabledTexture == nullptr) {
-            config.disabledTexture = _manager->textureManager.getSubTexture("assets", "buttonDarkLock");
+            config.disabledTexture = _manager->textureManager.getSubTexture("defaultAssets", "buttonDarkLock");
         }
 
         if(config.font == nullptr) {
@@ -80,12 +80,12 @@ namespace GDE {
 
         if(nineSliceSprite != nullptr) {
             nineSliceSprite->setSize(config.buttonTextureSize);
-            nineSliceSprite->color = config.buttonColor;
+            nineSliceSprite->setColor(config.buttonColor);
         }
 
         if(textRenderer != nullptr) {
             textRenderer->setText(config.text);
-            textRenderer->color = config.textColor;
+            textRenderer->setColor(config.textColor);
             textRenderer->setFont(config.font);
         }
     }
@@ -94,18 +94,21 @@ namespace GDE {
         if(!interaction->interactable) return;
 
         nineSliceSprite->texture = config.selectedTexture;
+        nineSliceSprite->dirty = true;
     }
 
     void UIButton::onMouseExited() {
         if(!interaction->interactable) return;
 
         nineSliceSprite->texture = config.idleTexture;
+        nineSliceSprite->dirty = true;
     }
 
     void UIButton::onMouseClicked(MouseCode _mouseCode) {
         if(!interaction->interactable) return;
 
         nineSliceSprite->texture = config.clickedTexture;
+        nineSliceSprite->dirty = true;
     }
 
     void UIButton::onMouseReleased(MouseCode _mouseCode) {
@@ -116,6 +119,8 @@ namespace GDE {
         } else {
             nineSliceSprite->texture = config.selectedTexture;
         }
+
+        nineSliceSprite->dirty = true;
     }
 
     void UIButton::setInteractable(bool _enabled) {
@@ -125,6 +130,8 @@ namespace GDE {
         } else {
             onMouseReleased(MouseCode::ButtonLeft);
         }
+
+        nineSliceSprite->dirty = true;
     }
 
     bool UIButton::isInteractable() {
@@ -133,13 +140,14 @@ namespace GDE {
 
     void UIButton::setColor(const Color& _color) {
         if(nineSliceSprite != nullptr) {
-            nineSliceSprite->color = _color;
+            nineSliceSprite->setColor(_color);
         }
+        nineSliceSprite->dirty = true;
     }
 
     Color UIButton::getColor() {
         if(nineSliceSprite != nullptr) {
-            return nineSliceSprite->color;
+            return nineSliceSprite->getColor();
         }
 
         return Color::White;

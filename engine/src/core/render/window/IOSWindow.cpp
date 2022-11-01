@@ -38,6 +38,8 @@ namespace GDE {
         SDL_GL_MakeCurrent(window, context);
 
         SDL_GL_SetSwapInterval(1);
+
+        refreshDpi();
     }
 }
 

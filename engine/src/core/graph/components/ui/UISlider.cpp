@@ -22,19 +22,20 @@ namespace GDE {
 
         auto _backgroundBarNode = _graph->createNode("Background", _node);
         backgroundBarSprite = _backgroundBarNode->addComponent<UI9Slice>(config.backgroundBarTexture);
-        backgroundBarSprite->nineSliceSize = config.barSize;
-        backgroundBarSprite->color = config.backgroundBarColor;
+        backgroundBarSprite->setSize(config.barSize);
+        backgroundBarSprite->setColor(config.backgroundBarColor);
         backgroundBarTransform = _backgroundBarNode->getTransform();
 
         auto _fillBarNode = _graph->createNode("Fill", _node);
         fillBarSprite = _fillBarNode->addComponent<UI9Slice>(config.fillingBarTexture);
         fillBarSprite->setSize({ config.barSize.x * clampF(config.percentageFilled, 0.f, 1.f), config.barSize.y });
-        fillBarSprite->color = config.fillingBarColor;
+        fillBarSprite->setColor(config.fillingBarColor);
+//        fillBarSprite->enabled = false;
         fillBarTransform = _fillBarNode->getTransform();
 
         auto _handleNode = _graph->createNode("Handle", _node);
         handleSprite = _handleNode->addComponent<UIImage>(config.handleTexture);
-        handleSprite->color = config.fillingBarColor;
+        handleSprite->setColor(config.handleColor);
         handleTransform = _handleNode->getTransform();
         handleTransform->setPosition(backgroundBarTransform->getPosition().x - backgroundBarSprite->getSize().x / 2.f + backgroundBarSprite->getSize().x * config.percentageFilled,
                                      handleTransform->getPosition().y);
@@ -64,15 +65,15 @@ namespace GDE {
         }
 
         if(config.backgroundBarTexture == nullptr) {
-            config.backgroundBarTexture = _manager->textureManager.getSubTexture("assets", "fillAndBgrScrollBarHorizontal");
+            config.backgroundBarTexture = _manager->textureManager.getSubTexture("defaultAssets", "fillAndBgrScrollBarHorizontal");
         }
 
         if(config.fillingBarTexture == nullptr) {
-            config.fillingBarTexture = _manager->textureManager.getSubTexture("assets", "fillAndBgrScrollBarHorizontal");
+            config.fillingBarTexture = _manager->textureManager.getSubTexture("defaultAssets", "fillAndBgrScrollBarHorizontal");
         }
 
         if(config.handleTexture == nullptr) {
-            config.handleTexture = _manager->textureManager.getSubTexture("assets", "handle");
+            config.handleTexture = _manager->textureManager.getSubTexture("defaultAssets", "handle");
         }
 
 
@@ -80,12 +81,12 @@ namespace GDE {
 
         if(backgroundBarSprite != nullptr) {
             backgroundBarSprite->setSize(config.barSize);
-            backgroundBarSprite->color = config.backgroundBarColor;
+            backgroundBarSprite->setColor(config.backgroundBarColor);
         }
 
         if(fillBarSprite != nullptr) {
             setFilledPercentage(config.percentageFilled);
-            fillBarSprite->color = config.fillingBarColor;
+            fillBarSprite->setColor(config.fillingBarColor);
         }
 
         if(handleSprite != nullptr) {

@@ -47,6 +47,7 @@ namespace GDE {
     struct ShapeConfig {
         ShapeMaskingConfig shapeMaskingConfig;
         PhysicsShapeType type = PhysicsShapeType::BOX;
+        Vec2F offset = { 0.f, 0.f };
         Vec2F size = { 32, 32 };
         std::vector<Vec2F> vertices {  };
         bool sensor = false;
@@ -63,7 +64,6 @@ namespace GDE {
 
     struct BodyConfig {
         ShapeConfig shapeConfig {  };
-        Vec2F offset = { 0.f, 0.f };
         float mass = 1.0f;
         PhysicsBodyType physicsBodyType = PhysicsBodyType::DYNAMIC;
     };

@@ -44,6 +44,8 @@ namespace GDE {
             SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
 
             SDL_GL_SetSwapInterval(1);
+
+            refreshDpi();
     }
 }
 
