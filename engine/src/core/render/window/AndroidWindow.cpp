@@ -13,7 +13,7 @@ namespace GDE {
     AndroidWindow::AndroidWindow(GDEConfig* _config) : Window(_config) {
             LOG_DEBUG("Platform: Android")
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
             SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
             SDL_DisplayMode mode;
             SDL_GetDisplayMode(0,0,&mode);
@@ -27,14 +27,14 @@ namespace GDE {
             SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
 
             if(window == nullptr) {
-                    LOG_E("SDL window creation failed: ", SDL_GetError());
-                    return;
+                LOG_E("SDL window creation failed: ", SDL_GetError());
+                return;
             }
             context = SDL_GL_CreateContext(window);
 
             if(context == nullptr) {
-                    LOG_E("OpenGL context couldn't initialize -> ", SDL_GetError())
-                    return;
+                LOG_E("OpenGL context couldn't initialize -> ", SDL_GetError())
+                return;
             }
 
             SDL_GL_MakeCurrent(window, context);
