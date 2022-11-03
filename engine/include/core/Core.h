@@ -54,8 +54,16 @@
 #define PI 3.141592741f
 #endif
 
+#ifndef BASE_DPI
+#define BASE_DPI 92.5f
+inline float currentDPI = 0;
+#endif
+
 #define radiansToDegrees(x) x * (180.f / PI)
 #define degreesToRadians(x) x * (PI / 180.0f)
+
+#define toDPI(x) x * currentDPI / BASE_DPI
+#define toDPI_V(vec) Vec2F {vec.x * currentDPI / BASE_DPI, vec.y * currentDPI / BASE_DPI}
 
 #ifndef NDEBUG
 #define ENGINE_DEBUG

@@ -21,11 +21,7 @@ namespace GDE {
         cpSpaceFree(space);
     }
 
-    void PhysicsManager::step(Delta _fxDt) {
-        if (!simulate) return;
-
-        cpSpaceStep(space, _fxDt);
-
+    void PhysicsManager::update(Delta _dt) {
         for (auto* _body: bodies) {
             auto _cpPos = cpBodyGetPosition(_body->body);
             auto _bodyPos = Vec2F { (float)_cpPos.x, (float)_cpPos.y };
@@ -41,6 +37,12 @@ namespace GDE {
                 _body->transform->setMatrixModelRotation((float)_bodyAngle);
             }
         }
+    }
+
+    void PhysicsManager::step(Delta _fxDt) {
+        if (!simulate) return;
+
+        cpSpaceStep(space, _fxDt);
     }
 
     void PhysicsManager::setGravity(const Vec2F& _gravity) {

@@ -100,6 +100,8 @@ namespace GDE {
              */
             void onDebugRender();
 
+            void onResize(uint _width, uint _height);
+
         private:
             void traverseTree(Node* _node, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(Node* _node, bool&, void*), void (Canvas::*_postFunc)(Node* _node, void*));
 

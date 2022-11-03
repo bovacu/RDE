@@ -11,7 +11,7 @@
 
 namespace GDE {
 
-    UI::UI(Node* _node) : IRenderizable(_node) {
+    UI::UI(Node* _node, IViewPort* _viewport) : IRenderizable(_node), viewport(_viewport) {
         if(!_node->hasComponent<UIInteractable>()) {
             interaction = _node->addComponent<UIInteractable>();
         }
@@ -20,7 +20,7 @@ namespace GDE {
 
 
 
-    UIInteractable::UIInteractable(Node* _node, Manager* _manager, Graph* _graph) {  }
+    UIInteractable::UIInteractable(Node* _node, Manager* _manager, Graph* _graph) {}
 
     static bool trigger(Node* _node, Engine* _engine, Canvas* _canvas) {
         auto* _uiInteractable = _node->getComponent<UIInteractable>();

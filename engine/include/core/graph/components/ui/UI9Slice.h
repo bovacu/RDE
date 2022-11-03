@@ -28,11 +28,12 @@ namespace GDE {
         private:
             UIImage* spriteRenderer = nullptr;
             UI9SliceConfig config;
+            float dpi = -1;
 
             /**
              * @brief This is the size we want the UI to be rendered, may or may not match UI::getSize().
              */
-            Vec2F nineSliceSize;
+            Vec2F nineSliceSize = { 0.05f, 0.05f };
 
             OpenGLVertex geometry[36];
 

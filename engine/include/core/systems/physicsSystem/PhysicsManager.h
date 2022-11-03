@@ -58,6 +58,7 @@ namespace GDE {
             void init();
             void destroy();
 
+            void update(Delta _dt);
             void step(Delta _fxDt);
             void add(PhysicsBody* _physicsBody);
             void remove(PhysicsBody* _physicsBody);

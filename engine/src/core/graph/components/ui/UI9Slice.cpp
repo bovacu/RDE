@@ -13,15 +13,15 @@ namespace GDE {
     UI9Slice::UI9Slice(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
             UI9Slice(_node, &_scene->engine->manager, _canvas->getGraph(), _texture) {  }
 
-    UI9Slice::UI9Slice(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : UI(_node) {
+    UI9Slice::UI9Slice(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : UI(_node, _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         texture = _texture;
+        dpi = _manager->sceneManager.getDisplayedScene()->engine->gdeConfig.windowData.diagonalDpi;
 
         if(!_texture->nineSlice.isEnabled()) {
             spriteRenderer = _node->addComponent<UIImage>(_texture);
         }
 
-        nineSliceSize = _texture->getRegion().size;
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();
@@ -72,9 +72,9 @@ namespace GDE {
     }
 
     void UI9Slice::setInteractable(bool _interactable) {
-        interaction->interactable = _interactable;
+        UI::interaction->interactable = _interactable;
 
-        if(!interaction->interactable) {
+        if(!UI::interaction->interactable) {
             color = Color::Disabled;
         } else {
             color = color == Color::Disabled ? Color::White : color;
@@ -82,11 +82,12 @@ namespace GDE {
     }
 
     bool UI9Slice::isInteractable() {
-        return interaction->interactable;
+        return UI::interaction->interactable;
     }
 
     void UI9Slice::setSize(const Vec2F& _size) {
         nineSliceSize = _size;
+        UI::interaction->sizeOfInteraction = Vec2F {_size.x * (float)viewport->getDeviceResolution().x, _size.y * (float)viewport->getDeviceResolution().y };
         if(nineSliceSize.x < 0) nineSliceSize.x = 0;
         if(nineSliceSize.y < 0) nineSliceSize.y = 0;
         dirty = true;
@@ -100,7 +101,7 @@ namespace GDE {
             auto& _subTextureRegion = texture->nineSlice.subRects[_i];
 
             float _distortX = 1.f, _distortY = 1.f;
-            auto _uiSize = nineSliceSize;
+            auto _uiSize = Vec2F { nineSliceSize.x * (float)viewport->getDeviceResolution().x, nineSliceSize.y * (float)viewport->getDeviceResolution().y };
             auto _spriteSize = texture->getRegion().size;
 
             auto _bottomLeftCornerLocal = Vec2F { (float)(_subTextureRegion.bottomLeftCorner.x - texture->nineSlice.subRects[0].bottomLeftCorner.x), (float)(_subTextureRegion.bottomLeftCorner.y - texture->nineSlice.subRects[0].bottomLeftCorner.y) };

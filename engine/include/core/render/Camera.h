@@ -174,6 +174,8 @@ namespace GDE {
              */
             void setAdaptiveViewport(const Vec2I& _virtualDesiredSize, const Vec2I& _currentDeviceSize);
 
+            bool isLandscape();
+
             /**
              * @brief Returns if an element is inside the camera boundaries.
              * @return bool.

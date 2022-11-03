@@ -11,7 +11,7 @@ namespace GDE {
     UIButton::UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config) :
     UIButton(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
 
-    UIButton::UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config) : UI(_node) {
+    UIButton::UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config) : UI(_node, _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()) {
         setConfig(_manager, _config);
 
         UI::texture = config.idleTexture;
@@ -19,20 +19,22 @@ namespace GDE {
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;
 
-        UI::interaction->sizeOfInteraction = _config.interactableArea;
         UI::interaction->onInnerMouseEntered.bind<&UIButton::onMouseEntered>(this);
         UI::interaction->onInnerMouseExited.bind<&UIButton::onMouseExited>(this);
         UI::interaction->onInnerClicking.bind<&UIButton::onMouseClicked>(this);
         UI::interaction->onInnerClickingReleased.bind<&UIButton::onMouseReleased>(this);
 
         nineSliceSprite = _node->addComponent<UI9Slice>(config.idleTexture);
-        nineSliceSprite->setSize(_config.buttonTextureSize);
+        nineSliceSprite->interaction = UI::interaction;
+        nineSliceSprite->setSize(_config.buttonSize);
         nineSliceSprite->setColor(_config.buttonColor);
 
         auto _textNode = _graph->createNode("Text", _node);
         textRenderer = _textNode->addComponent<UIText>(_config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
         textRenderer->setColor(config.textColor);
+
+        setConfig(_manager, _config);
     }
 
     Vec2F UIButton::getSize() const {
@@ -76,10 +78,10 @@ namespace GDE {
             config.font = _manager->fontManager.getDefaultFont("MontserratRegular");
         }
 
-        UI::interaction->sizeOfInteraction = config.interactableArea;
+        UI::interaction->sizeOfInteraction = Vec2F {config.buttonSize.x * (float)viewport->getDeviceResolution().x, config.buttonSize.y * (float)viewport->getDeviceResolution().y };
 
         if(nineSliceSprite != nullptr) {
-            nineSliceSprite->setSize(config.buttonTextureSize);
+            nineSliceSprite->setSize(config.buttonSize);
             nineSliceSprite->setColor(config.buttonColor);
         }
 

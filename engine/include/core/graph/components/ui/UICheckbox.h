@@ -22,7 +22,7 @@ namespace GDE {
         Color tickColor = Color::White;
 
         bool checked = false;
-        Vec2F checkboxTextOffset = { 5, 0 };
+        Vec2F checkboxTextOffset = { 0.005f, 0 };
     };
 
     class UICheckbox : public UI {

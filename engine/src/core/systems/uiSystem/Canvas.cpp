@@ -164,11 +164,16 @@ namespace GDE {
             _currentBatch = &batches.back();
 
             glEnable(GL_SCISSOR_TEST);
-            glScissor((GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x - (_uiInput->getSize().x * _transform->getPivot().x)),
-                      (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y - (_uiInput->getSize().y * _transform->getPivot().y)),
-                      (GLint)_uiInput->getSize().x,
-                      (GLint)_uiInput->getSize().y
-            );
+            auto _resolution = scene->getMainCamera()->getViewport()->getDeviceResolution();
+            auto _bottomLeftCorner = Vec2<GLint> {
+                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x - (_uiInput->getSize().x * (float)_resolution.x * _transform->getPivot().x)),
+                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y - (_uiInput->getSize().y * (float)_resolution.y *  _transform->getPivot().y))
+            };
+            auto _size = Vec2<GLint> {
+                    (GLint)(_uiInput->getSize().x * (float)_resolution.x),
+                    (GLint)(_uiInput->getSize().y * (float)_resolution.y)
+            };
+            glScissor(_bottomLeftCorner.x, _bottomLeftCorner.y, _size.x, _size.y);
         }
 
         if(_canvasElement->renderizable != nullptr) {
@@ -359,6 +364,10 @@ namespace GDE {
 
         if(_mainCameraViewPort == nullptr) return;
         camera->setAdaptiveViewport(_mainCameraViewPort->getVirtualResolution(), _mainCameraViewPort->getDeviceResolution());
+    }
+
+    void Canvas::onResize(uint _width, uint _height) {
+        graph.sceneRoot->getComponent<UIInteractable>()->sizeOfInteraction = Vec2F { (float)_width, (float)_height };
     }
 
 }

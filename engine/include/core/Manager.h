@@ -30,6 +30,7 @@ namespace GDE {
         public:
             Manager();
 
+            Engine* engine;
             /**
              * @see ConfigManager
              */

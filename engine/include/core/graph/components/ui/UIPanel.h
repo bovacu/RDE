@@ -11,7 +11,7 @@ namespace GDE {
 
     struct UIPanelConfig : CommonUIConfig {
         Texture* texture = nullptr;
-        Vec2F size { 128, 128 };
+        Vec2F size { -1.f, -1.f };
         Color color = Color::NO_COLOR;
     };
 

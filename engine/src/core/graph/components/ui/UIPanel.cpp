@@ -15,7 +15,7 @@ namespace GDE {
 
     }
 
-    UIPanel::UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config) : UI(_node) {
+    UIPanel::UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config) : UI(_node, _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()) {
         setConfig(_manager, _config);
 
         UI::texture = config.texture;
@@ -23,17 +23,18 @@ namespace GDE {
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;
 
-        UI::interaction->sizeOfInteraction = _config.size;
+        UI::interaction->sizeOfInteraction = config.size;
         UI::interaction->onInnerMouseEntered.bind<&foo>();
         UI::interaction->onInnerMouseExited.bind<&foo>();
         UI::interaction->onInnerClicking.bind<&foo2>();
         UI::interaction->onInnerClickingReleased.bind<&foo2>();
 
         nineSliceSprite = _node->addComponent<UI9Slice>(config.texture);
-        nineSliceSprite->setSize(_config.size);
-        nineSliceSprite->setColor(_config.color);
+        nineSliceSprite->interaction = UI::interaction;
+        nineSliceSprite->setSize(config.size);
+        nineSliceSprite->setColor(config.color);
 
-        setConfig(_manager, _config);
+        setConfig(_manager, config);
     }
 
     Vec2F UIPanel::getSize() const {
@@ -53,6 +54,14 @@ namespace GDE {
 
         if(config.color == Color::NO_COLOR) {
             config.color = Color(22, 29, 34, 255);
+        }
+
+        auto* _camera = _manager->sceneManager.getDisplayedScene()->getMainCamera();
+        float _aspectRatio = _camera->getAspectRatio();
+        bool _isLandscape = _camera->isLandscape();
+
+        if(config.size == -1) {
+            config.size = Vec2F { 0.05f * (_isLandscape ? 1.f : _aspectRatio), 0.05f * (_isLandscape ? _aspectRatio : 1.f) };
         }
 
         UI::interaction->sizeOfInteraction = config.size;

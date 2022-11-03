@@ -636,7 +636,7 @@ namespace GDE {
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(7);
-            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
+            if(ImGui::DragFloat2("##myInput", _size, 0.01f)) {
                 clampF(_size[0], 0, FLT_MAX);
                 clampF(_size[1], 0, FLT_MAX);
                 _ui9Slice->setSize({_size[0], _size[1]});
@@ -664,7 +664,7 @@ namespace GDE {
 //                auto _config = _uiButton->getConfig();
 //                clampF(_size[0], 0, FLT_MAX);
 //                clampF(_size[1], 0, FLT_MAX);
-//                _config.buttonTextureSize = { _size[0], _size[1] };
+//                _config.buttonSize = { _size[0], _size[1] };
 //                _uiButton->setConfig(&engine->manager, _config);
 //            }
 //            ImGui::PopID();

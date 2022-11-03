@@ -11,7 +11,7 @@
 
 namespace GDE {
 
-    UIInput::UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config) : UI(_node) {
+    UIInput::UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config) : UI(_node, _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()) {
         setConfig(_manager, _config);
 
         UI::texture = config.inputBackgroundTexture;
@@ -19,7 +19,6 @@ namespace GDE {
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;
 
-        UI::interaction->sizeOfInteraction = _config.inputSize;
         UI::interaction->onInnerMouseEntered.bind<&UIInput::onMouseEntered>(this);
         UI::interaction->onInnerMouseExited.bind<&UIInput::onMouseExited>(this);
         UI::interaction->onInnerClicking.bind<&UIInput::onMouseClicked>(this);
@@ -29,8 +28,9 @@ namespace GDE {
         UI::interaction->onInnerUnfocused.bind<&UIInput::onUnfocused>(this);
 
         nineSliceSprite = _node->addComponent<UI9Slice>(config.inputBackgroundTexture);
-        nineSliceSprite->nineSliceSize = config.inputSize;
-        nineSliceSprite->color = config.inputBackgroundColor;
+        nineSliceSprite->interaction = UI::interaction;
+        nineSliceSprite->setSize(config.inputSize);
+        nineSliceSprite->setColor(config.inputBackgroundColor);
         nineSliceTransform = _node->getTransform();
 
         auto _placeholderNode = _graph->createNode("Placeholder", _node);
@@ -41,16 +41,18 @@ namespace GDE {
         auto* _placeholderTransform = _placeholderNode->getTransform();
         ((UITransform*)_placeholderTransform)->setPivot({ 0.f, 0.5f });
         auto _placeholderPosition = _placeholderTransform->getPosition();
-        _placeholderTransform->setPosition(_placeholderPosition.x - config.inputSize.x / 2.f + config.textsOffsetFromLeft.x, _placeholderPosition.y + config.textsOffsetFromLeft.y);
+        _placeholderTransform->setPosition(_placeholderPosition.x - config.inputSize.x * (float)viewport->getDeviceResolution().x / 2.f + config.textsOffsetFromLeft.x * (float)viewport->getDeviceResolution().x,
+                                           _placeholderPosition.y + config.textsOffsetFromLeft.y * (float)viewport->getDeviceResolution().y);
 
         auto _textNode = _graph->createNode("Text", _node);
         textRenderer = _textNode->addComponent<UIText>(config.text, config.font);
         textRenderer->batchPriority = BatchPriority::SpritePriority;
-        textRenderer->color = config.textColor;
+        textRenderer->setColor(config.textColor);
         textTransform = _textNode->getTransform();
         ((UITransform*)textTransform)->setPivot({ 0.0f, 0.5f });
         auto _textPosition = textTransform->getPosition();
-        textTransform->setPosition(_textPosition.x - config.inputSize.x / 2.f + config.textsOffsetFromLeft.x, _textPosition.y + config.textsOffsetFromLeft.y);
+        textTransform->setPosition(_textPosition.x - config.inputSize.x * (float)viewport->getDeviceResolution().x / 2.f + config.textsOffsetFromLeft.x * (float)viewport->getDeviceResolution().x,
+                                   _textPosition.y + config.textsOffsetFromLeft.y * (float)viewport->getDeviceResolution().y);
 
         auto _caretNode = _graph->createNode("Caret", _node);
         caretSprite = _caretNode->addComponent<UIImage>(config.caretTexture);
@@ -59,7 +61,9 @@ namespace GDE {
         caretSprite->enabled = false;
         caretTransform = _caretNode->getTransform();
         auto _caretPosition = caretTransform->getPosition();
-        caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - config.inputSize.x / 2.f + config.textsOffsetFromLeft.x, _caretPosition.y + config.textsOffsetFromLeft.y);
+        auto _res = Vec2F { (float)viewport->getDeviceResolution().x, (float)viewport->getDeviceResolution().y };
+        caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - config.inputSize.x * _res.x / 2.f + config.textsOffsetFromLeft.x * _res.x,
+                                    _caretPosition.y + config.textsOffsetFromLeft.y * _res.y);
 
         setConfig(_manager, _config);
     }
@@ -97,29 +101,30 @@ namespace GDE {
             config.font = _manager->fontManager.getSpecificFont(_manager->fileManager, "MontserratRegular", 40);
         }
 
-        UI::interaction->sizeOfInteraction = config.inputSize;
+        auto _res = Vec2F { (float)viewport->getDeviceResolution().x, (float)viewport->getDeviceResolution().y };
+        UI::interaction->sizeOfInteraction = Vec2F { config.inputSize.x * _res.x, config.inputSize.y * _res.y };
 
         if(nineSliceSprite != nullptr) {
             nineSliceSprite->setSize(config.inputSize);
-            nineSliceSprite->color = config.inputBackgroundColor;
+            nineSliceSprite->setColor(config.inputBackgroundColor);
         }
 
         if(textRenderer != nullptr) {
             pointer = 0;
             textRenderer->setText(config.text);
-            textRenderer->color = config.textColor;
+            textRenderer->setColor(config.textColor);
             textRenderer->setFont(config.font);
         }
 
         if(placeholderTextRenderer != nullptr) {
             placeholderTextRenderer->setText(config.placeholderText);
-            placeholderTextRenderer->color = config.placeholderTextColor;
+            placeholderTextRenderer->setColor(config.placeholderTextColor);
             placeholderTextRenderer->setFont(config.font);
             placeholderTextRenderer->enabled = config.showPlaceholderText;
         }
 
         if(caretSprite != nullptr) {
-            caretTransform->setScale(caretTransform->getScale().x, config.caretHeight / config.caretTexture->getSize().y);
+            caretTransform->setScale(caretTransform->getScale().x, config.caretHeight * _res.y / config.caretTexture->getSize().y);
         }
     }
 
@@ -258,16 +263,19 @@ namespace GDE {
             _width += _font->getChars()[textRenderer->getText()[_i]].advance.x + textRenderer->spaceBetweenChars;
         }
 
-        if(_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * 2.f >= getSize().x) {
-            textDisplacement = (_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * 2.f) - getSize().x;
+        auto _res = Vec2F { (float)viewport->getDeviceResolution().x, (float)viewport->getDeviceResolution().y };
+        if(_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * _res.x * 2.f >= getSize().x * _res.x) {
+            textDisplacement = (_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * _res.y * 2.f) - getSize().x * _res.x;
         } else {
             textDisplacement = 0;
         }
 
-        auto _origin = Vec2F { nineSliceTransform->getModelMatrixPosition().x - getSize().x / 2.f + config.textsOffsetFromLeft.x, nineSliceTransform->getModelMatrixPosition().y };
+        auto _origin = Vec2F { nineSliceTransform->getModelMatrixPosition().x - getSize().x * _res.x / 2.f + config.textsOffsetFromLeft.x * _res.x, nineSliceTransform->getModelMatrixPosition().y };
         textTransform->setMatrixModelPosition({_origin.x - textDisplacement, _origin.y});
 
         auto _caretPosition = caretTransform->getPosition();
         caretTransform->setPosition(textTransform->getPosition().x + _width / 2.f * UI::node->getTransform()->getScale().x, _caretPosition.y);
+
+        caretTransform->setScale(caretTransform->getScale().x, config.caretHeight * _res.y / config.caretTexture->getSize().y);
     }
 }

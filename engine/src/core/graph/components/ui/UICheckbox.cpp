@@ -10,7 +10,7 @@
 
 namespace GDE {
 
-    UICheckbox::UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config) : UI(_node) {
+    UICheckbox::UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config) : UI(_node, _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()) {
         setConfig(_manager, _config);
 
         UI::texture = config.checkboxTickTexture;
@@ -41,7 +41,7 @@ namespace GDE {
 
         UI::interaction->sizeOfInteraction = Vec2F { checkboxBackgroundSprite->getSize().x + textRenderer->getSize().x,
                                                checkboxBackgroundSprite->getSize().y > textRenderer->getSize().y ? checkboxBackgroundSprite->getSize().y : textRenderer->getSize().y
-                                             } + config.checkboxTextOffset;
+                                             } + Vec2F { config.checkboxTextOffset.x * (float)viewport->getDeviceResolution().x, config.checkboxTextOffset.y * (float)viewport->getDeviceResolution().y };
 
         setConfig(_manager, config);
     }
@@ -82,7 +82,6 @@ namespace GDE {
         config.checkboxTextOffset = _config.checkboxTextOffset;
         config.checked = _config.checked;
 
-        UI::interaction->sizeOfInteraction = { 0.0f, 0.0f };
         Vec2F textRendererSize;
 
         if(textRenderer != nullptr) {
@@ -97,7 +96,8 @@ namespace GDE {
             checkboxSize = checkboxBackgroundSprite->getSize();
         }
 
-        UI::interaction->sizeOfInteraction = Vec2F { checkboxSize.x + textRendererSize.x, checkboxSize.y > textRendererSize.y ? checkboxSize.y : textRendererSize.y } + config.checkboxTextOffset;
+        auto _offset = Vec2F { config.checkboxTextOffset.x * (float)viewport->getDeviceResolution().x, config.checkboxTextOffset.y * (float)viewport->getDeviceResolution().y};
+        UI::interaction->sizeOfInteraction = Vec2F { checkboxSize.x + textRendererSize.x, checkboxSize.y > textRendererSize.y ? checkboxSize.y : textRendererSize.y } + _offset;
 
         if(tickSprite != nullptr) {
             tickSprite->enabled = config.checked;
@@ -111,7 +111,7 @@ namespace GDE {
         if(textTransform != nullptr) {
             auto _textPosition = textTransform->getPosition();
             auto _checkboxBackgroundPos = checkboxBackgroundTransform->getPosition();
-            textTransform->setPosition(_textPosition.x + _checkboxBackgroundPos.x + checkboxBackgroundSprite->getSize().x / 2.f + textRenderer->getSize().x / 2.f + config.checkboxTextOffset.x, _textPosition.y + config.checkboxTextOffset.y);
+            textTransform->setPosition(_textPosition.x + _checkboxBackgroundPos.x + checkboxBackgroundSprite->getSize().x / 2.f + textRenderer->getSize().x / 2.f + _offset.x, _textPosition.y + _offset.y);
         }
     }
 

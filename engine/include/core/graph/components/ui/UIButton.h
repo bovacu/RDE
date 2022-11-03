@@ -18,8 +18,7 @@ namespace GDE {
         Texture* clickedTexture = nullptr;
         Texture* disabledTexture = nullptr;
         Font* font = nullptr;
-        Vec2F buttonTextureSize = {128, 45 };
-        Vec2F interactableArea = {128, 45 };
+        Vec2F buttonSize = { 0.1, 0.05 };
         Color buttonColor = Color::White;
         Color textColor = Color::White;
     };
@@ -27,11 +26,10 @@ namespace GDE {
     class UIButton : public UI {
         private:
             UIButtonConfig config;
-
-        public:
             UIText* textRenderer = nullptr;
             UI9Slice* nineSliceSprite = nullptr;
 
+        public:
             UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
             UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config);
 

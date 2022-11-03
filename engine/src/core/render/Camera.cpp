@@ -133,4 +133,8 @@ namespace GDE {
         recalculateViewMatrix();
     }
 
+    bool Camera::isLandscape() {
+        return viewport->getDeviceResolution().x >= viewport->getDeviceResolution().y;
+    }
+
 }

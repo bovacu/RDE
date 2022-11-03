@@ -13,6 +13,7 @@ namespace GDE {
     Engine::Engine() {
         manager.configManager.loadGDEConfig(&gdeConfig, manager.fileManager);
         window = platform.createWindow(&gdeConfig);
+        currentDPI = gdeConfig.windowData.diagonalDpi;
 
         UDelegate<void(Event&)> onEventDelegate;
         onEventDelegate.bind<&Engine::onEvent>(this);
@@ -106,6 +107,7 @@ namespace GDE {
     }
 
     void Engine::onUpdate(Delta _dt) {
+        manager.physics.update(_dt);
         manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
 
 #if !IS_MOBILE()
@@ -164,6 +166,11 @@ namespace GDE {
         frameBuffer->resize(_width, _height);
         #endif
         manager.sceneManager.getDisplayedScene()->getMainCamera()->onResize(_width, _height);
+
+        for(auto* _canvas : manager.sceneManager.getDisplayedScene()->getCanvases()) {
+            _canvas->onResize(_width, _height);
+        }
+
         return true;
     }
 
