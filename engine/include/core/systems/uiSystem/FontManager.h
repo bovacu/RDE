@@ -111,6 +111,7 @@ namespace GDE {
              * @brief Freetype library.
              */
             FT_Library ftLibrary{};
+            FileManager* fileManager;
 
             /**
              * @brief Map FontName -> std::vector<FontHandler> because a font can have many sub-fonts with different sizes.
@@ -161,7 +162,7 @@ namespace GDE {
              * @param _fontSize font size
              * @return Font*
              */
-            Font* getSpecificFont(FileManager& _fileManager, const std::string& _fontName, int _fontSize);
+            Font* getSpecificFont(const std::string& _fontName, int _fontSize);
 
             /**
              * @brief This function unloads a font with all the sub-fonts created by size.

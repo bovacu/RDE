@@ -479,8 +479,8 @@ namespace GDE {
         }
 
         auto* _textRenderer = _node->addComponent<TextRenderer>(_textRendererJson["text"].get<std::string>(),
-                                                                                         _scene->engine->manager.fontManager.getSpecificFont(_scene->engine->manager.fileManager,
-                                                                                         _textRendererJson["font"].get<std::string>(), _fontSize));
+                                                                                         _scene->engine->manager.fontManager.
+                                                                                         getSpecificFont(_textRendererJson["font"].get<std::string>(), _fontSize));
 
         if(_textRendererJson.contains("color")) {
             auto& _color = _textRendererJson["color"];

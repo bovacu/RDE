@@ -109,6 +109,8 @@ namespace GDE {
             return;
         }
 
+        fileManager = _fileManager;
+
         loadFont(*_fileManager, "defaultAssets/fonts/MontserratRegular.ttf", 54);
         loadFont(*_fileManager, "defaultAssets/fonts/MontserratItalic.ttf", 54);
         loadFont(*_fileManager, "defaultAssets/fonts/MontserratBold.ttf", 54);
@@ -160,18 +162,18 @@ namespace GDE {
         return _fonts;
     }
 
-    Font* FontManager::getSpecificFont(FileManager& _fileManager, const std::string& _fontName, int _fontSize) {
+    Font* FontManager::getSpecificFont(const std::string& _fontName, int _fontSize) {
         if(fonts.find(_fontName) == fonts.end()) {
             LOG_E("Font ", _fontName, " is not loaded, so creating it...")
-            return loadFont(_fileManager, _fontName, _fontSize);
+            return loadFont(*fileManager, _fontName, _fontSize);
         }
 
         for(auto& _fontHandler : fonts[_fontName]) {
-            if(_fontHandler.fontSize == _fontSize || _fontHandler.fontSize - _fontSize <= maxDifferenceBetweenFontSizesBeforeCreatingANewOne)
+            if(_fontHandler.fontSize == _fontSize || std::abs(_fontHandler.fontSize - _fontSize) <= maxDifferenceBetweenFontSizesBeforeCreatingANewOne)
                 return _fontHandler.font;
         }
 
-        loadFont(_fileManager, fonts[_fontName].front().font->originalPath, _fontSize);
+        loadFont(*fileManager, fonts[_fontName].front().font->originalPath, _fontSize);
         LOG_W("Couldn't find Font ", _fontName, " in size ", _fontSize, " so a new Font in that size was created")
         return fonts[_fontName].back().font;
     }

@@ -98,7 +98,7 @@ namespace GDE {
         }
 
         if(config.font == nullptr) {
-            config.font = _manager->fontManager.getSpecificFont(_manager->fileManager, "MontserratRegular", 40);
+            config.font = _manager->fontManager.getSpecificFont("MontserratRegular", 40);
         }
 
         auto _res = Vec2F { (float)viewport->getDeviceResolution().x, (float)viewport->getDeviceResolution().y };
