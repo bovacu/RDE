@@ -40,6 +40,8 @@ namespace GDE {
      * @brief This class adds final rendering effects to the whole scene.
      */
     class FrameBuffer {
+        FRIEND_CLASS(Engine)
+
         private:
             /**
              * @brief FrameBuffer ID on the GPU.

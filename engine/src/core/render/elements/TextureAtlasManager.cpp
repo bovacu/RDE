@@ -54,8 +54,8 @@ namespace GDE {
 
         for(auto& _spriteNode : _spritesNode) {
             FloatRect _rect;
-            _rect.size.x = _spriteNode["size"][0].get<float>() - 1;
-            _rect.size.y = _spriteNode["size"][1].get<float>() - 1;
+            _rect.size.x = _spriteNode["size"][0].get<float>();
+            _rect.size.y = _spriteNode["size"][1].get<float>();
             _rect.bottomLeftCorner.x = _spriteNode["origin"][0].get<float>();
             _rect.bottomLeftCorner.y = _atlas.textureHeight - (_spriteNode["origin"][1].get<float>() + _rect.size.y);
 

@@ -226,9 +226,15 @@ namespace GDE {
 
     void Engine::setRenderingRedirection(UDelegate<void(FrameBuffer*)>& _redirectionFunc) {
         redirectionFunc = _redirectionFunc;
+        if(frameBuffer) {
+            frameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
+        }
     }
 
     void Engine::setRenderingRedirectionToImGui(UDelegate<void(FrameBuffer*)>& _redirectionFunc) {
         imGuiRedirectionFunc = _redirectionFunc;
+        if(frameBuffer) {
+            frameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
+        }
     }
 }

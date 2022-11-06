@@ -53,18 +53,6 @@ namespace GDE {
             void resetBuffers();
 
             /**
-             * @brief Sets the color to paint the background.
-             * @param _color Color to paint the background
-             */
-            void setClearColor(const Color& _color);
-
-            /**
-             * @brief Returns the current clear color.
-             * @return Color
-             */
-            Color getClearColor();
-
-            /**
              * @brief Renders textures, sprites... It includes 2D batching for
              * a much more performant drawing.
              * @param _camera It is the main camera of the scene (or other camera if a special drawing is needed).
@@ -103,6 +91,18 @@ namespace GDE {
             void endDebugDraw();
 
         public:
+            /**
+             * @brief Sets the color to paint the background.
+             * @param _color Color to paint the background
+             */
+            void setClearColor(const Color& _color);
+
+            /**
+             * @brief Returns the current clear color.
+             * @return Color
+             */
+            Color getClearColor();
+
             /**
                  * @brief Draws a point at _position. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
                  * @param _position Position.
