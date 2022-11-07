@@ -11,7 +11,7 @@
 
 namespace GDE {
 
-    UIInput::UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config) : UI(_node, _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()) {
+    UIInput::UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config) : UI(_node) {
         setConfig(_manager, _config);
 
         UI::texture = config.inputBackgroundTexture;
@@ -41,8 +41,10 @@ namespace GDE {
         auto* _placeholderTransform = _placeholderNode->getTransform();
         ((UITransform*)_placeholderTransform)->setPivot({ 0.f, 0.5f });
         auto _placeholderPosition = _placeholderTransform->getPosition();
-        _placeholderTransform->setPosition(_placeholderPosition.x - config.inputSize.x * (float)viewport->getDeviceResolution().x / 2.f + config.textsOffsetFromLeft.x * (float)viewport->getDeviceResolution().x,
-                                           _placeholderPosition.y + config.textsOffsetFromLeft.y * (float)viewport->getDeviceResolution().y);
+
+        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        _placeholderTransform->setPosition(_placeholderPosition.x - config.inputSize.x * _parentSize.x / 2.f + config.textsOffsetFromLeft.x * _parentSize.x,
+                                           _placeholderPosition.y + config.textsOffsetFromLeft.y * _parentSize.y);
 
         auto _textNode = _graph->createNode("Text", _node);
         textRenderer = _textNode->addComponent<UIText>(config.text, config.font);
@@ -51,8 +53,8 @@ namespace GDE {
         textTransform = _textNode->getTransform();
         ((UITransform*)textTransform)->setPivot({ 0.0f, 0.5f });
         auto _textPosition = textTransform->getPosition();
-        textTransform->setPosition(_textPosition.x - config.inputSize.x * (float)viewport->getDeviceResolution().x / 2.f + config.textsOffsetFromLeft.x * (float)viewport->getDeviceResolution().x,
-                                   _textPosition.y + config.textsOffsetFromLeft.y * (float)viewport->getDeviceResolution().y);
+        textTransform->setPosition(_textPosition.x - config.inputSize.x * _parentSize.x / 2.f + config.textsOffsetFromLeft.x * _parentSize.x,
+                                   _textPosition.y + config.textsOffsetFromLeft.y * _parentSize.y);
 
         auto _caretNode = _graph->createNode("Caret", _node);
         caretSprite = _caretNode->addComponent<UIImage>(config.caretTexture);
@@ -61,9 +63,8 @@ namespace GDE {
         caretSprite->enabled = false;
         caretTransform = _caretNode->getTransform();
         auto _caretPosition = caretTransform->getPosition();
-        auto _res = Vec2F { (float)viewport->getDeviceResolution().x, (float)viewport->getDeviceResolution().y };
-        caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - config.inputSize.x * _res.x / 2.f + config.textsOffsetFromLeft.x * _res.x,
-                                    _caretPosition.y + config.textsOffsetFromLeft.y * _res.y);
+        caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - config.inputSize.x * _parentSize.x / 2.f + config.textsOffsetFromLeft.x * _parentSize.x,
+                                    _caretPosition.y + config.textsOffsetFromLeft.y * _parentSize.y);
 
         setConfig(_manager, _config);
     }
@@ -101,8 +102,8 @@ namespace GDE {
             config.font = _manager->fontManager.getSpecificFont("MontserratRegular", 40);
         }
 
-        auto _res = Vec2F { (float)viewport->getDeviceResolution().x, (float)viewport->getDeviceResolution().y };
-        UI::interaction->sizeOfInteraction = Vec2F { config.inputSize.x * _res.x, config.inputSize.y * _res.y };
+        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        UI::interaction->sizeOfInteraction = Vec2F { config.inputSize.x * _parentSize.x, config.inputSize.y * _parentSize.y };
 
         if(nineSliceSprite != nullptr) {
             nineSliceSprite->setSize(config.inputSize);
@@ -124,7 +125,7 @@ namespace GDE {
         }
 
         if(caretSprite != nullptr) {
-            caretTransform->setScale(caretTransform->getScale().x, config.caretHeight * _res.y / config.caretTexture->getSize().y);
+            caretTransform->setScale(caretTransform->getScale().x, config.caretHeight * _parentSize.y / config.caretTexture->getSize().y);
         }
     }
 
@@ -263,19 +264,19 @@ namespace GDE {
             _width += _font->getChars()[textRenderer->getText()[_i]].advance.x + textRenderer->spaceBetweenChars;
         }
 
-        auto _res = Vec2F { (float)viewport->getDeviceResolution().x, (float)viewport->getDeviceResolution().y };
-        if(_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * _res.x * 2.f >= getSize().x * _res.x) {
-            textDisplacement = (_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * _res.y * 2.f) - getSize().x * _res.x;
+        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        if(_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * _parentSize.x * 2.f >= getSize().x * _parentSize.x) {
+            textDisplacement = (_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * _parentSize.y * 2.f) - getSize().x * _parentSize.x;
         } else {
             textDisplacement = 0;
         }
 
-        auto _origin = Vec2F { nineSliceTransform->getModelMatrixPosition().x - getSize().x * _res.x / 2.f + config.textsOffsetFromLeft.x * _res.x, nineSliceTransform->getModelMatrixPosition().y };
+        auto _origin = Vec2F { nineSliceTransform->getModelMatrixPosition().x - getSize().x * _parentSize.x / 2.f + config.textsOffsetFromLeft.x * _parentSize.x, nineSliceTransform->getModelMatrixPosition().y };
         textTransform->setMatrixModelPosition({_origin.x - textDisplacement, _origin.y});
 
         auto _caretPosition = caretTransform->getPosition();
         caretTransform->setPosition(textTransform->getPosition().x + _width / 2.f * UI::node->getTransform()->getScale().x, _caretPosition.y);
 
-        caretTransform->setScale(caretTransform->getScale().x, config.caretHeight * _res.y / config.caretTexture->getSize().y);
+        caretTransform->setScale(caretTransform->getScale().x, config.caretHeight * _parentSize.y / config.caretTexture->getSize().y);
     }
 }

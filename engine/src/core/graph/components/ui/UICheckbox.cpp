@@ -10,7 +10,7 @@
 
 namespace GDE {
 
-    UICheckbox::UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config) : UI(_node, _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()) {
+    UICheckbox::UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config) : UI(_node) {
         setConfig(_manager, _config);
 
         UI::texture = config.checkboxTickTexture;
@@ -39,9 +39,10 @@ namespace GDE {
         tickSprite->color = config.tickColor;
         tickTransform = (UITransform*)_tickNode->getTransform();
 
+        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
         UI::interaction->sizeOfInteraction = Vec2F { checkboxBackgroundSprite->getSize().x + textRenderer->getSize().x,
                                                checkboxBackgroundSprite->getSize().y > textRenderer->getSize().y ? checkboxBackgroundSprite->getSize().y : textRenderer->getSize().y
-                                             } + Vec2F { config.checkboxTextOffset.x * (float)viewport->getDeviceResolution().x, config.checkboxTextOffset.y * (float)viewport->getDeviceResolution().y };
+                                             } + Vec2F { config.checkboxTextOffset.x * _parentSize.x, config.checkboxTextOffset.y * _parentSize.y };
 
         setConfig(_manager, config);
     }
@@ -96,7 +97,8 @@ namespace GDE {
             checkboxSize = checkboxBackgroundSprite->getSize();
         }
 
-        auto _offset = Vec2F { config.checkboxTextOffset.x * (float)viewport->getDeviceResolution().x, config.checkboxTextOffset.y * (float)viewport->getDeviceResolution().y};
+        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        auto _offset = Vec2F { config.checkboxTextOffset.x * _parentSize.x, config.checkboxTextOffset.y * _parentSize.y};
         UI::interaction->sizeOfInteraction = Vec2F { checkboxSize.x + textRendererSize.x, checkboxSize.y > textRendererSize.y ? checkboxSize.y : textRendererSize.y } + _offset;
 
         if(tickSprite != nullptr) {

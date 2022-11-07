@@ -23,7 +23,7 @@ namespace GDE {
      * without loosing quality. The setup of this NineSlice should be done via TexturePacker.
      */
     class UI9Slice : public UI {
-        FRIEND_CLASS(UIButton, UIPanel, UIInput, UISlider)
+        FRIEND_CLASS(UITransform, UIButton, UIPanel, UIInput, UISlider)
 
         private:
             UIImage* spriteRenderer = nullptr;

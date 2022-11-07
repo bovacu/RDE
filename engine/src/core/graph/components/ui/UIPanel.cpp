@@ -15,7 +15,7 @@ namespace GDE {
 
     }
 
-    UIPanel::UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config) : UI(_node, _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()) {
+    UIPanel::UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config) : UI(_node) {
         setConfig(_manager, _config);
 
         UI::texture = config.texture;
@@ -64,7 +64,8 @@ namespace GDE {
             config.size = Vec2F { 0.05f * (_isLandscape ? 1.f : _aspectRatio), 0.05f * (_isLandscape ? _aspectRatio : 1.f) };
         }
 
-        UI::interaction->sizeOfInteraction = config.size;
+        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        UI::interaction->sizeOfInteraction = Vec2F {config.size.x * _parentSize.x, config.size.y * _parentSize.y };
 
         if(nineSliceSprite != nullptr) {
             nineSliceSprite->setSize(config.size);

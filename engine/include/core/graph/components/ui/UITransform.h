@@ -9,7 +9,7 @@
 
 namespace GDE {
 
-    enum UIAnchor {
+    enum Anchor {
         MIDDLE              = 1 << 1,
         LEFT                = 1 << 2,
         RIGHT               = 1 << 3,
@@ -25,8 +25,20 @@ namespace GDE {
         FULL_STRETCH        = 1 << 13
     };
 
+    FORWARD_DECLARE_STRUCT(UITransform)
+    struct UIAnchor {
+        FRIEND_CLASS(UITransform, UI9Slice)
+
+        Anchor anchor = Anchor::MIDDLE;
+        Vec2F anchorDistances;
+        Vec2F anchorPosition;
+
+        private:
+            void updateAnchor(UITransform* _transform);
+    };
+
     struct UITransform : public Transform {
-        FRIEND_CLASS(Graph)
+        FRIEND_CLASS(Graph, UI9Slice)
 
         private:
             Vec2F pivot { 0.5f, 0.5f };
@@ -39,8 +51,8 @@ namespace GDE {
             Vec2F getPivot();
             void setPivot(const Vec2F& _pivot);
 
-            UIAnchor getAnchor();
-            void setAnchor(UIAnchor _anchor);
+            Anchor getAnchor();
+            void setAnchor(Anchor _anchor);
 
             std::tuple<glm::mat4, bool> localToWorld() override;
 

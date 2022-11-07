@@ -13,7 +13,7 @@ namespace GDE {
     UI9Slice::UI9Slice(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
             UI9Slice(_node, &_scene->engine->manager, _canvas->getGraph(), _texture) {  }
 
-    UI9Slice::UI9Slice(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : UI(_node, _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()) {
+    UI9Slice::UI9Slice(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : UI(_node) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         texture = _texture;
         dpi = _manager->sceneManager.getDisplayedScene()->engine->gdeConfig.windowData.diagonalDpi;
@@ -87,25 +87,36 @@ namespace GDE {
 
     void UI9Slice::setSize(const Vec2F& _size) {
         nineSliceSize = _size;
-        UI::interaction->sizeOfInteraction = Vec2F {_size.x * (float)viewport->getDeviceResolution().x, _size.y * (float)viewport->getDeviceResolution().y };
+        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        UI::interaction->sizeOfInteraction = Vec2F {_size.x * _parentSize.x, _size.y * _parentSize.y };
         if(nineSliceSize.x < 0) nineSliceSize.x = 0;
         if(nineSliceSize.y < 0) nineSliceSize.y = 0;
+
+        ((UITransform*)node->getTransform())->setUIDirty();
+
         dirty = true;
     }
 
     void UI9Slice::calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport) {
         // TODO this calculations are an absolute mess, I need to clean this up, rename variables, make it clearer and remove redundant operations, but I'm scared.
         auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
+        auto _uiAnchor = ((UITransform*)&_transform)->anchor;
         auto _pivot = ((UITransform*)&_transform)->getPivot();
+        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+
+        Vec2F _anchorDisplacement;
+
         for(auto _i = 0; _i < _rectsAmount; _i++) {
             auto& _subTextureRegion = texture->nineSlice.subRects[_i];
 
             float _distortX = 1.f, _distortY = 1.f;
-            auto _uiSize = Vec2F { nineSliceSize.x * (float)viewport->getDeviceResolution().x, nineSliceSize.y * (float)viewport->getDeviceResolution().y };
+            auto _uiSize = Vec2F { nineSliceSize.x * _parentSize.x, nineSliceSize.y * _parentSize.y };
             auto _spriteSize = texture->getRegion().size;
 
             auto _bottomLeftCornerLocal = Vec2F { (float)(_subTextureRegion.bottomLeftCorner.x - texture->nineSlice.subRects[0].bottomLeftCorner.x), (float)(_subTextureRegion.bottomLeftCorner.y - texture->nineSlice.subRects[0].bottomLeftCorner.y) };
-            Vec2F _position = { -(float)_spriteSize.x / 2.f + (float)_bottomLeftCornerLocal.x + (float)_subTextureRegion.size.x / 2.f, -(float)((float)_spriteSize.y / 2.f - _bottomLeftCornerLocal.y) + (float)_subTextureRegion.size.y / 2.f};
+            Vec2F _position = { -(float)_spriteSize.x / 2.f + (float)_bottomLeftCornerLocal.x + (float)_subTextureRegion.size.x / 2.f ,
+                                -(float)((float)_spriteSize.y / 2.f - _bottomLeftCornerLocal.y) + (float)_subTextureRegion.size.y / 2.f
+            };
             Vec2F _scale = { 1, 1 };
             Vec2F _noResizableScale = { 1, 1 };
 

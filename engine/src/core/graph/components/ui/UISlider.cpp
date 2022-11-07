@@ -8,7 +8,7 @@
 
 namespace GDE {
 
-    UISlider::UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config) : UI(_node, _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()) {
+    UISlider::UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config) : UI(_node) {
         setConfig(_manager, _config);
 
         UI::texture = config.backgroundBarTexture;
@@ -35,8 +35,6 @@ namespace GDE {
         handleSprite = _handleNode->addComponent<UIImage>(config.handleTexture);
         handleSprite->setColor(config.handleColor);
         handleTransform = _handleNode->getTransform();
-        handleTransform->setPosition(backgroundBarTransform->getPosition().x - backgroundBarSprite->getSize().x * 0.5f + backgroundBarSprite->getSize().x * config.percentageFilled,
-                                     handleTransform->getPosition().y);
 
         setConfig(_manager, _config);
     }
@@ -74,18 +72,18 @@ namespace GDE {
             config.handleTexture = _manager->textureManager.getSubTexture("defaultAssets", "handle");
         }
 
-        auto _res = Vec2F { (float)viewport->getDeviceResolution().x, (float)viewport->getDeviceResolution().y };
-        UI::interaction->sizeOfInteraction = Vec2F { config.barSize.x * _res.x, config.barSize.y * _res.y };
+        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        UI::interaction->sizeOfInteraction = Vec2F {config.barSize.x * _parentSize.x, config.barSize.y * _parentSize.y };
 
         if(backgroundBarSprite != nullptr) {
-            backgroundBarSprite->setSize(config.barSize);
+            backgroundBarSprite->setSize({ 1 , 1 });
             backgroundBarSprite->setColor(config.backgroundBarColor);
         }
 
         if(handleSprite != nullptr) {
             handleSprite->color = config.handleColor;
-            handleTransform->setScale(1.5f * config.barSize.y * _res.y / handleSprite->getSize().x, 1.5f * config.barSize.y * _res.y / handleSprite->getSize().y);
-            handleTransform->setPosition(backgroundBarTransform->getPosition().x - backgroundBarSprite->getSize().x * _res.x / 2.f + backgroundBarSprite->getSize().x * _res.x * config.percentageFilled,
+            handleTransform->setScale(1.5f * config.barSize.y * _parentSize.y / handleSprite->getSize().x, 1.5f * config.barSize.y * _parentSize.y / handleSprite->getSize().y);
+            handleTransform->setPosition(backgroundBarTransform->getPosition().x - (config.barSize.x * _parentSize.x / 2.f) + config.barSize.x * _parentSize.x * config.percentageFilled,
                                          handleTransform->getPosition().y);
         }
 
@@ -115,15 +113,16 @@ namespace GDE {
         IRenderizable::onUpdate(_dt);
 
         if(mouseDown) {
-            auto _res = Vec2F { (float)viewport->getDeviceResolution().x, (float)viewport->getDeviceResolution().y };
-            Vec2F _limits = { backgroundBarTransform->getModelMatrixPosition().x - backgroundBarSprite->getSize().x * _res.x * 0.5f,
-                                 backgroundBarTransform->getModelMatrixPosition().x + backgroundBarSprite->getSize().x * _res.x * 0.5f };
+            auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+            auto _size = Vec2F { _parentSize.x * config.barSize.x, _parentSize.y * config.barSize.y };
+            Vec2F _limits = { backgroundBarTransform->getModelMatrixPosition().x - _size.x * 0.5f,
+                                 backgroundBarTransform->getModelMatrixPosition().x + _size.x * 0.5f };
 
             auto _posX = clampF(node->manager->inputManager.getMousePosWorldPos().x, _limits.v[0], _limits.v[1]);
             handleTransform->setMatrixModelPosition({_posX, handleTransform->getModelMatrixPosition().y});
 
             auto _distanceFromLowerPoint = _posX - _limits.v[0];
-            setFilledPercentage(_distanceFromLowerPoint / (backgroundBarSprite->getSize().x * _res.x));
+            setFilledPercentage(_distanceFromLowerPoint / (config.barSize.x * _parentSize.x));
         }
 
         if(node->manager->inputManager.isMouseJustReleased(MouseCode::ButtonLeft) && mouseDown) {
@@ -132,10 +131,10 @@ namespace GDE {
     }
 
     void UISlider::setFilledPercentage(float _percentage) {
+        auto _parentSize = fillBarTransform->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
         config.percentageFilled = clampF(_percentage, 0.f, 1.f);
-        auto _res = Vec2F { (float)viewport->getDeviceResolution().x, (float)viewport->getDeviceResolution().y };
-        fillBarSprite->setSize({ config.barSize.x * config.percentageFilled, config.barSize.y });
-        fillBarTransform->setPosition({handleTransform->getPosition().x - fillBarSprite->getSize().x * _res.x * 0.5f, fillBarTransform->getPosition().y});
+        fillBarSprite->setSize({ config.percentageFilled, 1 });
+        fillBarTransform->setPosition({handleTransform->getPosition().x - fillBarSprite->getSize().x * _parentSize.x * 0.5f, fillBarTransform->getPosition().y});
     }
 
     float UISlider::getFilledPercentage() const {

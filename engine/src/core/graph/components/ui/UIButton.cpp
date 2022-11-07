@@ -11,7 +11,7 @@ namespace GDE {
     UIButton::UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config) :
     UIButton(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
 
-    UIButton::UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config) : UI(_node, _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()) {
+    UIButton::UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config) : UI(_node) {
         setConfig(_manager, _config);
 
         UI::texture = config.idleTexture;
@@ -78,7 +78,8 @@ namespace GDE {
             config.font = _manager->fontManager.getDefaultFont("MontserratRegular");
         }
 
-        UI::interaction->sizeOfInteraction = Vec2F {config.buttonSize.x * (float)viewport->getDeviceResolution().x, config.buttonSize.y * (float)viewport->getDeviceResolution().y };
+        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        UI::interaction->sizeOfInteraction = Vec2F {config.buttonSize.x * _parentSize.x, config.buttonSize.y * _parentSize.y };
 
         if(nineSliceSprite != nullptr) {
             nineSliceSprite->setSize(config.buttonSize);

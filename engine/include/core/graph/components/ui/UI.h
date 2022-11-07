@@ -163,7 +163,6 @@ namespace GDE {
              * @brief Texture that contains the sprite of the rendered UI.
              */
             Texture* texture = nullptr;
-            IViewPort* viewport = nullptr;
 
         public:
             FRIEND_CLASS(SpriteBatch)
@@ -173,7 +172,7 @@ namespace GDE {
             */
             UIInteractable* interaction = nullptr;
 
-            explicit UI(Node* _node, IViewPort* _viewport);
+            explicit UI(Node* _node);
 
             virtual bool isInteractable() = 0;
 

@@ -27,12 +27,14 @@ namespace GDE {
             registry.emplace<Transform>(_sceneRootID).parent = NODE_ID_NULL;
             sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, &registry.get<Transform>(_sceneRootID));
             registry.get<Transform>(_sceneRootID).parentTransform = nullptr;
+            registry.get<Transform>(_sceneRootID).node = sceneRoot;
             registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
         } else {
             registry.emplace<Tag>(_sceneRootID, _sceneRootID, _sceneName);
             registry.emplace<UITransform>(_sceneRootID).parent = NODE_ID_NULL;
             sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, (Transform*)&registry.get<UITransform>(_sceneRootID));
             registry.get<UITransform>(_sceneRootID).parentTransform = nullptr;
+            registry.get<UITransform>(_sceneRootID).node = sceneRoot;
             registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
 
             auto* _interactable = &registry.emplace<UIInteractable>(_sceneRootID, sceneRoot, &scene->engine->manager, this);
@@ -128,25 +130,9 @@ namespace GDE {
     }
 
     void Graph::onDebugRender() {
-//        auto _debug = registry.view<Body>();
-//        if(_debug.empty() || !scene->engine->manager.physics.drawDebugInfo) return;
-//
         auto& _renderManager = scene->engine->manager.renderManager;
-//
         _renderManager.beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->node->getID()));
         scene->engine->manager.physics.debugRender(&_renderManager);
-//
-//        _debug.each([&_renderManager](const auto _entity, const Body& _body) {
-//            if(_body.bodyConfig.bodyShapeType == BodyShapeType::BOX) {
-//                _renderManager.drawSquare(_body.getPosition(), _body.bodyConfig.size, {Color::Green.r, Color::Green.g, Color::Green.b, 100}, _body.getRotation());
-//            } else if (_body.bodyConfig.bodyShapeType == BodyShapeType::CIRCLE) {
-////                Shape _circle;
-////                _circle.makeCircle(_body.getPosition(), _body.bodyConfig.size.x / 2.f * 0.4f, 400);
-////                _circle.showInnerColor(false);
-////                _renderManager.drawShape(_circle);
-//            }
-//        });
-//
         _renderManager.endDebugDraw();
 
         for(auto* _canvas : scene->canvases) {

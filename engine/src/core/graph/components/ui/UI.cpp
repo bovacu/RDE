@@ -11,7 +11,7 @@
 
 namespace GDE {
 
-    UI::UI(Node* _node, IViewPort* _viewport) : IRenderizable(_node), viewport(_viewport) {
+    UI::UI(Node* _node) : IRenderizable(_node) {
         if(!_node->hasComponent<UIInteractable>()) {
             interaction = _node->addComponent<UIInteractable>();
         }
