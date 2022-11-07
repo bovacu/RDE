@@ -11,7 +11,7 @@ namespace GDE {
     void UIAnchor::updateAnchor(UITransform* _transform) {
         auto _position = _transform->getPosition();
         auto _parentPosition = _transform->parentTransform->getPosition();
-        auto _parentSize = _transform->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        auto _parentSize = ((UITransform*)_transform->parentTransform->node->getTransform())->getSize();
 
         switch (anchor) {
             case MIDDLE: {
@@ -114,7 +114,7 @@ namespace GDE {
             _uiTransform->uiDirty = true;
             auto _lastAnchorPos = _uiTransform->anchor.anchorPosition;
             _uiTransform->anchor.updateAnchor(_uiTransform);
-            _uiTransform->translate(_uiTransform->anchor.anchorPosition.x - _lastAnchorPos.x, 0);
+            _uiTransform->translate(_uiTransform->anchor.anchorPosition.x - _lastAnchorPos.x, _uiTransform->anchor.anchorPosition.y - _lastAnchorPos.y);
         }
     }
 
