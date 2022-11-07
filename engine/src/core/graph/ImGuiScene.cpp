@@ -631,15 +631,27 @@ namespace GDE {
         if(ImGui::CollapsingHeader("UI Panel", ImGuiTreeNodeFlags_DefaultOpen)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
-            ImGui::Text("Size ");
-            float _size[2] = { _ui9Slice->getSize().x, _ui9Slice->getSize().y };
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(100);
-            ImGui::PushID(7);
-            if(ImGui::DragFloat2("##myInput", _size, 0.01f)) {
-                clampF(_size[0], 0, FLT_MAX);
-                clampF(_size[1], 0, FLT_MAX);
-                _ui9Slice->setSize({_size[0], _size[1]});
+            {
+                ImGui::Text("Size ");
+                float _size[2] = {_ui9Slice->getSize().x, _ui9Slice->getSize().y};
+                ImGui::SameLine(0, ImGui::CalcTextSize("Origin Offset ").x - ImGui::CalcTextSize("Size ").x + 8);
+                ImGui::SetNextItemWidth(100);
+                ImGui::PushID(7);
+                if (ImGui::DragFloat2("##myInput", _size, 1.f)) {
+                    _ui9Slice->setSize({ clampF(_size[0], 0, FLT_MAX),clampF(_size[1], 0, FLT_MAX) });
+                }
+                ImGui::PopID();
+            }
+
+            {
+                ImGui::Text("Origin Offset ");
+                float _originOffset[2] = {_ui9Slice->getOriginOffset().x, _ui9Slice->getOriginOffset().y};
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(100);
+                ImGui::PushID(8);
+                if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
+                    _ui9Slice->setOriginOffset({ clampF(_originOffset[0], FLT_MIN, FLT_MAX), clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
+                }
             }
             ImGui::PopID();
 

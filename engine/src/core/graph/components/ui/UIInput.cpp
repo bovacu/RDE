@@ -39,7 +39,9 @@ namespace GDE {
         placeholderTextRenderer->color = config.placeholderTextColor;
         placeholderTextRenderer->enabled = config.showPlaceholderText;
         auto* _placeholderTransform = _placeholderNode->getTransform();
-        ((UITransform*)_placeholderTransform)->setPivot({ 0.f, 0.5f });
+
+        // TODO: PIVOT CHANGES
+//        placeholderTextRenderer->setPivot({ 0.f, 0.5f });
         auto _placeholderPosition = _placeholderTransform->getPosition();
 
         auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
@@ -51,7 +53,9 @@ namespace GDE {
         textRenderer->batchPriority = BatchPriority::SpritePriority;
         textRenderer->setColor(config.textColor);
         textTransform = _textNode->getTransform();
-        ((UITransform*)textTransform)->setPivot({ 0.0f, 0.5f });
+
+        // TODO: PIVOT CHANGES
+//        ((UITransform*)textTransform)->setPivot({ 0.0f, 0.5f });
         auto _textPosition = textTransform->getPosition();
         textTransform->setPosition(_textPosition.x - config.inputSize.x * _parentSize.x / 2.f + config.textsOffsetFromLeft.x * _parentSize.x,
                                    _textPosition.y + config.textsOffsetFromLeft.y * _parentSize.y);

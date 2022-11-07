@@ -3,6 +3,7 @@
 //
 
 #include "core/graph/components/ui/UI.h"
+#include "core/graph/components/ui/UITransform.h"
 #include "core/systems/eventSystem/MouseEvent.h"
 #include "core/systems/eventSystem/KeyEvent.h"
 #include "core/systems/eventSystem/ControllerEvent.h"
@@ -17,7 +18,10 @@ namespace GDE {
         }
     }
 
-
+    void UI::setOriginOffset(const Vec2F& _originOffset) {
+        originOffset = _originOffset;
+        ((UITransform*)node->getTransform())->setUIDirty();
+    }
 
 
     UIInteractable::UIInteractable(Node* _node, Manager* _manager, Graph* _graph) {}

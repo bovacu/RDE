@@ -158,39 +158,26 @@ namespace GDE {
      * @brief Component that every UI element (Buttons, UITexts...) should follow to be rendered correctly by the engine.
      */
     class UI : public IRenderizable {
+        FRIEND_CLASS(SpriteBatch)
+
         protected:
-            /**
-             * @brief Texture that contains the sprite of the rendered UI.
-             */
             Texture* texture = nullptr;
+            Vec2F originOffset = { 0.f, 0.f };
 
         public:
-            FRIEND_CLASS(SpriteBatch)
-
-            /**
-            * @see UIInteractable
-            */
             UIInteractable* interaction = nullptr;
 
+        public:
             explicit UI(Node* _node);
 
             virtual bool isInteractable() = 0;
-
             virtual void setInteractable(bool _interactable) = 0;
 
-            /**
-             * @see IRenderizable
-             */
+            [[nodiscard]] Vec2F getOriginOffset() const { return originOffset; }
+            void setOriginOffset(const Vec2F& _originOffset);
+
             [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
-
-            /**
-             * @see IRenderizable
-             */
             [[nodiscard]] Vec2F getSize() const override { return texture->getSize(); }
-
-            /**
-             * @see IRenderizable
-             */
             [[nodiscard]] FloatRect getRegion() const override { return texture->getRegion(); }
 
             virtual ~UI() override {  };

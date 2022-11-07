@@ -95,15 +95,6 @@ namespace GDE {
 
     }
 
-    Vec2F UITransform::getPivot() {
-        return pivot;
-    }
-
-    void UITransform::setPivot(const Vec2F& _pivot) {
-        if(pivot == _pivot) return;
-        pivot = _pivot;
-    }
-
     Anchor UITransform::getAnchor() {
         return anchor.anchor;
     }
@@ -130,5 +121,14 @@ namespace GDE {
     std::tuple<glm::mat4, bool> UITransform::localToWorld() {
         auto [_mat, _dirty] = Transform::localToWorld();
         return { _mat, (_dirty || uiDirty) };
+    }
+
+    Vec2F UITransform::getSize() {
+        return size;
+    }
+
+    void UITransform::setSize(const Vec2F& _size) {
+        size = _size;
+        setUIDirty();
     }
 }

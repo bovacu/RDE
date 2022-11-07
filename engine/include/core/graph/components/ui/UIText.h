@@ -6,6 +6,7 @@
 #define GDE_UI_TEXT_RENDERER_H
 
 #include "core/graph/components/TextRenderer.h"
+#include "core/graph/components/ui/UI.h"
 
 namespace GDE {
 

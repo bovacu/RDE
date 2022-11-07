@@ -85,32 +85,26 @@ namespace GDE {
         return UI::interaction->interactable;
     }
 
+    Vec2F UI9Slice::getSize() const {
+        return ((UITransform*)node->getTransform())->getSize();
+    }
+
     void UI9Slice::setSize(const Vec2F& _size) {
-        nineSliceSize = _size;
-        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
-        UI::interaction->sizeOfInteraction = Vec2F {_size.x * _parentSize.x, _size.y * _parentSize.y };
-        if(nineSliceSize.x < 0) nineSliceSize.x = 0;
-        if(nineSliceSize.y < 0) nineSliceSize.y = 0;
-
-        ((UITransform*)node->getTransform())->setUIDirty();
-
+        ((UITransform*)node->getTransform())->setSize({ clampF(_size.x, 0, FLT_MAX), clampF(_size.y, 0, FLT_MAX) });
         dirty = true;
     }
 
     void UI9Slice::calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport) {
         // TODO this calculations are an absolute mess, I need to clean this up, rename variables, make it clearer and remove redundant operations, but I'm scared.
         auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
-        auto _uiAnchor = ((UITransform*)&_transform)->anchor;
-        auto _pivot = ((UITransform*)&_transform)->getPivot();
+        auto _originOffset = UI::getOriginOffset();
         auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
-
-        Vec2F _anchorDisplacement;
+        auto _uiSize = ((UITransform*)node->getTransform())->getSize();
 
         for(auto _i = 0; _i < _rectsAmount; _i++) {
             auto& _subTextureRegion = texture->nineSlice.subRects[_i];
 
             float _distortX = 1.f, _distortY = 1.f;
-            auto _uiSize = Vec2F { nineSliceSize.x * _parentSize.x, nineSliceSize.y * _parentSize.y };
             auto _spriteSize = texture->getRegion().size;
 
             auto _bottomLeftCornerLocal = Vec2F { (float)(_subTextureRegion.bottomLeftCorner.x - texture->nineSlice.subRects[0].bottomLeftCorner.x), (float)(_subTextureRegion.bottomLeftCorner.y - texture->nineSlice.subRects[0].bottomLeftCorner.y) };
@@ -218,8 +212,8 @@ namespace GDE {
 
             _current9SliceMat = _transformMat * _current9SliceMat;
 
-            auto _subTextureReposition = Vec2F { _uiSize.x / 2.f - ((float)_subTextureRegion.size.x * 0.5f - (float)_subTextureRegion.size.x * _pivot.x) * _current9SliceMat[0][0], _uiSize.y / 2.f - ((float)_subTextureRegion.size.y * 0.5f - (float)_subTextureRegion.size.y * _pivot.y) * _current9SliceMat[1][1] };
-            auto _screenPos = Util::worldToScreenCoords(_viewport, {_current9SliceMat[3][0] + _subTextureReposition.x - _uiSize.x * _pivot.x, _current9SliceMat[3][1] + _subTextureReposition.y - _uiSize.y * _pivot.y });
+            auto _subTextureReposition = Vec2F { _originOffset.x, _originOffset.y };
+            auto _screenPos = Util::worldToScreenCoords(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
             _current9SliceMat[3][0] = _screenPos.x;
             _current9SliceMat[3][1] = _screenPos.y;
 
@@ -231,22 +225,22 @@ namespace GDE {
             Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y};
             auto _textureTileSizeOnScreen = Util::worldToScreenSize(_viewport, _textureTileSize);
 
-            glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x * _pivot.x * 2.f                                   , -_textureTileSizeOnScreen.y * _pivot.y * 2.f                                   , 0.0f, 1.0f };
-            glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x * 2.f - _textureTileSizeOnScreen.x * _pivot.x * 2.f, -_textureTileSizeOnScreen.y * _pivot.y * 2.f                                   , 0.0f, 1.0f };
-            glm::vec4 _topRightTextureCorner    = {  _textureTileSizeOnScreen.x * 2.f - _textureTileSizeOnScreen.x * _pivot.x * 2.f,  _textureTileSizeOnScreen.y * 2.f - _textureTileSizeOnScreen.y * _pivot.y * 2.f, 0.0f, 1.0f };
-            glm::vec4 _topLeftTextureCorner     = { -_textureTileSizeOnScreen.x * _pivot.x * 2.f                                   ,  _textureTileSizeOnScreen.y * 2.f - _textureTileSizeOnScreen.y * _pivot.y * 2.f, 0.0f, 1.0f };
+            glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
+            glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
+            glm::vec4 _topRightTextureCorner    = {  _textureTileSizeOnScreen.x,  _textureTileSizeOnScreen.y, 0.0f, 1.0f };
+            glm::vec4 _topLeftTextureCorner     = { -_textureTileSizeOnScreen.x,  _textureTileSizeOnScreen.y, 0.0f, 1.0f };
 
             glm::vec4 _color = { (float)color.r / 255.f, (float)color.g / 255.f, (float)color.b / 255.f, (float)color.a / 255.f };
 
-            glm::vec2 _bottomLeftTextureCoord   = { _textureOriginNorm.x                         , _textureOriginNorm.y };
-            glm::vec2 _bottomRightTextureCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y };
+            glm::vec2 _bottomLeftTextureCoord   = { _textureOriginNorm.x                         , _textureOriginNorm.y                          };
+            glm::vec2 _bottomRightTextureCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y                          };
             glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y };
             glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                         , _textureOriginNorm.y + _textureTileSizeNorm.y };
 
-            geometry[(_i * 4) + 0] = OpenGLVertex {_current9SliceMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-            geometry[(_i * 4) + 1] = OpenGLVertex {_current9SliceMat * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-            geometry[(_i * 4) + 2] = OpenGLVertex {_current9SliceMat * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-            geometry[(_i * 4) + 3] = OpenGLVertex {_current9SliceMat * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+            geometry[(_i * 4) + 0] = OpenGLVertex { _current9SliceMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+            geometry[(_i * 4) + 1] = OpenGLVertex { _current9SliceMat * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+            geometry[(_i * 4) + 2] = OpenGLVertex { _current9SliceMat * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+            geometry[(_i * 4) + 3] = OpenGLVertex { _current9SliceMat * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
         }
     }
 

@@ -165,9 +165,14 @@ namespace GDE {
 
             glEnable(GL_SCISSOR_TEST);
             auto _resolution = scene->getMainCamera()->getViewport()->getDeviceResolution();
+            // TODO: PIVOT CHANGES
+//            auto _bottomLeftCorner = Vec2<GLint> {
+//                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x - (_uiInput->getSize().x * (float)_resolution.x * _transform->getPivot().x)),
+//                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y - (_uiInput->getSize().y * (float)_resolution.y *  _transform->getPivot().y))
+//            };
             auto _bottomLeftCorner = Vec2<GLint> {
-                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x - (_uiInput->getSize().x * (float)_resolution.x * _transform->getPivot().x)),
-                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y - (_uiInput->getSize().y * (float)_resolution.y *  _transform->getPivot().y))
+                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x),
+                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y)
             };
             auto _size = Vec2<GLint> {
                     (GLint)(_uiInput->getSize().x * (float)_resolution.x),
@@ -253,10 +258,10 @@ namespace GDE {
         auto& _renderManager = graph.scene->engine->manager.renderManager;
        _renderManager.beginDebugDraw(*camera, (Transform*)graph.getComponent<UITransform>(camera->node->getID()));
 
-        _registry.group<UIImage>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
-            if(!_uiImage.enabled) return;
+        _registry.group<UI9Slice>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UI9Slice& _ui9Slice, UITransform& _transform, const Active& _) {
+            if(!_ui9Slice.enabled) return;
             DebugShape _shape;
-            _shape.makeSquare(_transform.getModelMatrixPosition(), _uiImage.getSize());
+            _shape.makeSquare(_transform.getModelMatrixPosition(), _ui9Slice.getSize());
             _shape.showOutsideColor(true);
             _shape.setOutlineColor(Color::Blue);
             _shape.showInnerColor(false);
@@ -265,25 +270,45 @@ namespace GDE {
 
             _renderManager.drawSquare(_transform.getModelMatrixPosition(), {4, 4}, Color::Blue);
             _renderManager.setPointSize(4);
-            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - (_uiImage.getSize().x * 0.5f - _uiImage.getSize().x * _transform.getPivot().x),
-                                      _transform.getModelMatrixPosition().y - (_uiImage.getSize().y * 0.5f - _uiImage.getSize().y * _transform.getPivot().y) }, Color::Green);
+            // TODO: PIVOT CHANGES
+//            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - (_ui9Slice.getSize().x * 0.5f - _ui9Slice.getSize().x * _transform.getPivot().x),
+//                                      _transform.getModelMatrixPosition().y - (_ui9Slice.getSize().y * 0.5f - _ui9Slice.getSize().y * _transform.getPivot().y) }, Color::Green);
+//            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - (_ui9Slice.getSize().x * 0.5f),
+//                                      _transform.getModelMatrixPosition().y - (_ui9Slice.getSize().y * 0.5f)}, Color::Green);
         });
 
-        _registry.group<UIButton>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UIButton& _uiButton, UITransform& _transform, const Active& _) {
-            if(!_uiButton.enabled) return;
-            DebugShape _shape;
-            _shape.makeSquare(_transform.getModelMatrixPosition(), _uiButton.getSize());
-            _shape.showOutsideColor(true);
-            _shape.setOutlineColor(Color::Yellow);
-            _shape.showInnerColor(false);
-            _shape.setRotation(_transform.getModelMatrixRotation());
-            _renderManager.drawShape(_shape);
-
-            _renderManager.drawSquare(_transform.getModelMatrixPosition(), {4, 4}, Color::Blue);
-            _renderManager.setPointSize(4);
-            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - (_uiButton.getSize().x * 0.5f - _uiButton.getSize().x * _transform.getPivot().x),
-                                      _transform.getModelMatrixPosition().y - (_uiButton.getSize().y * 0.5f - _uiButton.getSize().y * _transform.getPivot().y) }, Color::Green);
-        });
+        // TODO: PIVOT CHANGES
+//        _registry.group<UIImage>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
+//            if(!_uiImage.enabled) return;
+//            DebugShape _shape;
+//            _shape.makeSquare(_transform.getModelMatrixPosition(), _uiImage.getSize());
+//            _shape.showOutsideColor(true);
+//            _shape.setOutlineColor(Color::Blue);
+//            _shape.showInnerColor(false);
+//            _shape.setRotation(_transform.getModelMatrixRotation());
+//            _renderManager.drawShape(_shape);
+//
+//            _renderManager.drawSquare(_transform.getModelMatrixPosition(), {4, 4}, Color::Blue);
+//            _renderManager.setPointSize(4);
+//            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - (_uiImage.getSize().x * 0.5f - _uiImage.getSize().x * _transform.getPivot().x),
+//                                      _transform.getModelMatrixPosition().y - (_uiImage.getSize().y * 0.5f - _uiImage.getSize().y * _transform.getPivot().y) }, Color::Green);
+//        });
+//
+//        _registry.group<UIButton>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UIButton& _uiButton, UITransform& _transform, const Active& _) {
+//            if(!_uiButton.enabled) return;
+//            DebugShape _shape;
+//            _shape.makeSquare(_transform.getModelMatrixPosition(), _uiButton.getSize());
+//            _shape.showOutsideColor(true);
+//            _shape.setOutlineColor(Color::Yellow);
+//            _shape.showInnerColor(false);
+//            _shape.setRotation(_transform.getModelMatrixRotation());
+//            _renderManager.drawShape(_shape);
+//
+//            _renderManager.drawSquare(_transform.getModelMatrixPosition(), {4, 4}, Color::Blue);
+//            _renderManager.setPointSize(4);
+//            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - (_uiButton.getSize().x * 0.5f - _uiButton.getSize().x * _transform.getPivot().x),
+//                                      _transform.getModelMatrixPosition().y - (_uiButton.getSize().y * 0.5f - _uiButton.getSize().y * _transform.getPivot().y) }, Color::Green);
+//        });
 
 //        _registry.group<UIText>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UIText& _textRenderer, UITransform& _transform, const Active& _) {
 //            DebugShape _shape;

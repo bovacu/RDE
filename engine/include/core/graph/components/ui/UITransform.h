@@ -38,21 +38,21 @@ namespace GDE {
     };
 
     struct UITransform : public Transform {
-        FRIEND_CLASS(Graph, UI9Slice)
+        FRIEND_CLASS(UI, Graph, UI9Slice)
 
         private:
-            Vec2F pivot { 0.5f, 0.5f };
             UIAnchor anchor;
+            Vec2F size { 64.f, 64.f };
             bool uiDirty = false;
 
         public:
             explicit UITransform();
 
-            Vec2F getPivot();
-            void setPivot(const Vec2F& _pivot);
-
             Anchor getAnchor();
             void setAnchor(Anchor _anchor);
+
+            Vec2F getSize();
+            void setSize(const Vec2F& _size);
 
             std::tuple<glm::mat4, bool> localToWorld() override;
 

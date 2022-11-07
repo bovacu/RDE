@@ -29,12 +29,6 @@ namespace GDE {
             UIImage* spriteRenderer = nullptr;
             UI9SliceConfig config;
             float dpi = -1;
-
-            /**
-             * @brief This is the size we want the UI to be rendered, may or may not match UI::getSize().
-             */
-            Vec2F nineSliceSize = { 0.05f, 0.05f };
-
             OpenGLVertex geometry[36];
 
         private:
@@ -44,8 +38,7 @@ namespace GDE {
             UI9Slice(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
             UI9Slice(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture);
 
-            [[nodiscard]] Vec2F getSize() const override { return {(float)nineSliceSize.x * IRenderizable::node->getTransform()->getScale().x,
-                                                                   (float)nineSliceSize.y * IRenderizable::node->getTransform()->getScale().y}; }
+            [[nodiscard]] Vec2F getSize() const override;
             void setSize(const Vec2F& _size);
 
             void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
