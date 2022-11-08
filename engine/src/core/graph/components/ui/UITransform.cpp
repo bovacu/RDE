@@ -6,85 +6,44 @@
 #include "core/graph/components/ui/UI.h"
 #include "core/graph/components/ui/UI9Slice.h"
 
+#define ANCHOR_BITS  0b0000001111111110
+#define STRETCH_BITS 0b0011110000000000
+
 namespace GDE {
 
     void UIAnchor::updateAnchor(UITransform* _transform) {
-        auto _position = _transform->getPosition();
         auto _parentPosition = _transform->parentTransform->getPosition();
         auto _parentSize = ((UITransform*)_transform->parentTransform->node->getTransform())->getSize();
 
-        switch (anchor) {
-            case MIDDLE: {
-                anchorPosition = _parentPosition;
-                anchorDistances = { _parentPosition.x - _position.x,
-                                    _parentPosition.y - _position.y
-                };
-                break;
-            }
-            case LEFT: {
-                anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f) , _parentPosition.y };
-                anchorDistances = { (_parentPosition.x - _parentSize.x * 0.5f) - _position.x,
-                                    _parentPosition.y - _position.y
-                };
-                break;
-            }
-            case RIGHT: {
-                anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f) , _parentPosition.y };
-                anchorDistances = { (_parentPosition.x + _parentSize.x * 0.5f) - _position.x,
-                                    _parentPosition.y - _position.y
-                };
-                break;
-            }
-            case TOP: {
-                anchorPosition = { _parentPosition.x, (_parentPosition.y + _parentSize.y * 0.5f) };
-                anchorDistances = { _parentPosition.x - _position.x,
-                                    (_parentPosition.y + _parentSize.y * 0.5f) - _position.y
-                };
-                break;
-            }
-            case BOTTOM: {
-                anchorPosition = { _parentPosition.x, (_parentPosition.y - _parentSize.y * 0.5f) };
-                anchorDistances = { _parentPosition.x - _position.x,
-                                    (_parentPosition.y - _parentSize.y * 0.5f) - _position.y
-                };
-                break;
-            }
-            case LEFT_BOTTOM: {
-                anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f), (_parentPosition.y - _parentSize.y * 0.5f) };
-                anchorDistances = { (_parentPosition.x - _parentSize.x * 0.5f) - _position.x,
-                                    (_parentPosition.y - _parentSize.y * 0.5f) - _position.y
-                };
-                break;
-            }
-            case LEFT_TOP: {
-                anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f), (_parentPosition.y + _parentSize.y * 0.5f) };
-                anchorDistances = { (_parentPosition.x - _parentSize.x * 0.5f) - _position.x,
-                                    (_parentPosition.y + _parentSize.y * 0.5f) - _position.y
-                };
-                break;
-            }
-            case RIGHT_BOTTOM: {
-                anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f), (_parentPosition.y - _parentSize.y * 0.5f) };
-                anchorDistances = { (_parentPosition.x + _parentSize.x * 0.5f) - _position.x,
-                                    (_parentPosition.y - _parentSize.y * 0.5f) - _position.y
-                };
-                break;
-            }
-            case RIGHT_TOP: {
-                anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f), (_parentPosition.y + _parentSize.y * 0.5f) };
-                anchorDistances = { (_parentPosition.x + _parentSize.x * 0.5f) - _position.x,
-                                    (_parentPosition.y + _parentSize.y * 0.5f) - _position.y
-                };
-                break;
-            }
-            case NO_STRETCH:
-                break;
-            case VERTICAL_STRETCH:
-                break;
-            case HORIZONTAL_STRETCH:
-                break;
-            case FULL_STRETCH:
-                break;
+        if((anchor & ANCHOR_BITS) == Anchor::MIDDLE) {
+            anchorPosition = _parentPosition;
+        } else if((anchor & ANCHOR_BITS) == Anchor::LEFT) {
+            anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f) , _parentPosition.y };
+        } else if((anchor & ANCHOR_BITS) == Anchor::RIGHT) {
+            anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f) , _parentPosition.y };
+        } else if((anchor & ANCHOR_BITS) == Anchor::TOP) {
+            anchorPosition = { _parentPosition.x, (_parentPosition.y + _parentSize.y * 0.5f) };
+        } else if((anchor & ANCHOR_BITS) == Anchor::BOTTOM) {
+            anchorPosition = { _parentPosition.x, (_parentPosition.y - _parentSize.y * 0.5f) };
+        } else if((anchor & ANCHOR_BITS) == Anchor::LEFT_TOP) {
+            anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f), (_parentPosition.y + _parentSize.y * 0.5f) };
+        } else if((anchor & ANCHOR_BITS) == Anchor::LEFT_BOTTOM) {
+            anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f), (_parentPosition.y - _parentSize.y * 0.5f) };
+        } else if((anchor & ANCHOR_BITS) == Anchor::RIGHT_TOP) {
+            anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f), (_parentPosition.y + _parentSize.y * 0.5f) };
+        } else if((anchor & ANCHOR_BITS) == Anchor::RIGHT_BOTTOM) {
+            anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f), (_parentPosition.y - _parentSize.y * 0.5f) };
+        }
+
+
+        if((anchor & STRETCH_BITS) == Stretch::NO_STRETCH) {
+            anchorSize = Vec2F { 0.f, 0.f };
+        } else if((anchor & STRETCH_BITS) == Stretch::HORIZONTAL_STRETCH) {
+            anchorSize.x = _parentSize.x;
+        } else if((anchor & STRETCH_BITS) == Stretch::VERTICAL_STRETCH) {
+            anchorSize.y = _parentSize.y;
+        } else if((anchor & STRETCH_BITS) == Stretch::FULL_STRETCH) {
+            anchorSize = _parentSize;
         }
     }
 
@@ -92,16 +51,25 @@ namespace GDE {
 
 
     UITransform::UITransform() {
-
+        anchor.anchor = Anchor::MIDDLE | Stretch::NO_STRETCH;
     }
 
-    Anchor UITransform::getAnchor() {
-        return anchor.anchor;
+    Anchor UITransform::getAnchor() const {
+        return (Anchor)(anchor.anchor & ANCHOR_BITS);
     }
 
     void UITransform::setAnchor(Anchor _anchor) {
-        if(_anchor == anchor.anchor) return;
-        anchor.anchor = _anchor;
+        anchor.anchor = _anchor | (anchor.anchor & STRETCH_BITS);
+        anchor.updateAnchor(this);
+        setUIDirty();
+    }
+
+    Stretch UITransform::getStretch() const {
+        return (Stretch)(anchor.anchor & STRETCH_BITS);
+    }
+
+    void UITransform::setStretch(Stretch _stretch) {
+        anchor.anchor = _stretch | (anchor.anchor & ANCHOR_BITS);
         anchor.updateAnchor(this);
         setUIDirty();
     }
@@ -113,8 +81,17 @@ namespace GDE {
             auto _uiTransform = (UITransform*)_t;
             _uiTransform->uiDirty = true;
             auto _lastAnchorPos = _uiTransform->anchor.anchorPosition;
+            auto _lastSize = _uiTransform->anchor.anchorSize;
+
             _uiTransform->anchor.updateAnchor(_uiTransform);
             _uiTransform->translate(_uiTransform->anchor.anchorPosition.x - _lastAnchorPos.x, _uiTransform->anchor.anchorPosition.y - _lastAnchorPos.y);
+
+            auto _sizeDiff = _uiTransform->anchor.anchorSize - _lastSize;
+            if(_sizeDiff != 0) {
+                _uiTransform->setSize(_uiTransform->getSize() + _sizeDiff);
+                // It is half the size because when a change in size happens, it is applied to both sides
+                _uiTransform->translate(_sizeDiff * 0.5f);
+            }
         }
     }
 

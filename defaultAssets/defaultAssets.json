@@ -3,9 +3,99 @@
     "sprite_sheet_size": [1808, 1040],
     "sprite_sheet_settings": {
         "format": "png",
-        "path": "defaultAssets/defaultAssets.png"
+        "path": "/home/borja/Documents/GDE/defaultAssets/defaultAssets.png"
     },
     "sprites" : [
+        {
+            "name": "anchorBottomLeft",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1630, 0],
+            "origin_in_uv": [0.9015486725663717, 0],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "anchorBottomMiddle",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1647, 0],
+            "origin_in_uv": [0.9109513274336283, 0],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "anchorBottomRight",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1130, 692],
+            "origin_in_uv": [0.625, 0.6653846153846154],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "anchorMiddleLeft",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1251, 878],
+            "origin_in_uv": [0.691924778761062, 0.8442307692307692],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "anchorMiddleMiddle",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1464, 218],
+            "origin_in_uv": [0.8097345132743363, 0.20961538461538462],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "anchorMiddleRight",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1322, 290],
+            "origin_in_uv": [0.7311946902654868, 0.27884615384615385],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "anchorTopLeft",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1555, 236],
+            "origin_in_uv": [0.860066371681416, 0.22692307692307692],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "anchorTopMiddle",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1549, 503],
+            "origin_in_uv": [0.8567477876106194, 0.48365384615384616],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "anchorTopRight",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1637, 562],
+            "origin_in_uv": [0.9054203539823009, 0.5403846153846154],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
         {
             "name": "arrowDown32x32",
             "size": [32, 32],
@@ -740,8 +830,8 @@
             "name": "checkmark",
             "size": [16, 16],
             "size_in_uv": [0.008849557522123894, 0.015384615384615385],
-            "origin": [1630, 0],
-            "origin_in_uv": [0.9015486725663717, 0],
+            "origin": [1524, 992],
+            "origin_in_uv": [0.8429203539823009, 0.9538461538461539],
             "origin_offset": [0, 0],
             "center_pivot": [8, 8],
             "scaling_factor": 1
@@ -1261,6 +1351,46 @@
                 "right": 16,
                 "bottom": 16
             }
+        }, 
+        {
+            "name": "stretchFull",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1461, 905],
+            "origin_in_uv": [0.808075221238938, 0.8701923076923077],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "stretchHorizontal",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1519, 847],
+            "origin_in_uv": [0.8401548672566371, 0.8144230769230769],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "stretchNone",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1637, 888],
+            "origin_in_uv": [0.9054203539823009, 0.8538461538461538],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "stretchVertical",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1696, 974],
+            "origin_in_uv": [0.9380530973451328, 0.9365384615384615],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
         }, 
         {
             "name": "x32x32",

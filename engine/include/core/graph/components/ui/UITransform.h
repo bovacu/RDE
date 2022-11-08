@@ -18,7 +18,10 @@ namespace GDE {
         LEFT_BOTTOM         = 1 << 6,
         LEFT_TOP            = 1 << 7,
         RIGHT_BOTTOM        = 1 << 8,
-        RIGHT_TOP           = 1 << 9,
+        RIGHT_TOP           = 1 << 9
+    };
+
+    enum Stretch {
         NO_STRETCH          = 1 << 10,
         VERTICAL_STRETCH    = 1 << 11,
         HORIZONTAL_STRETCH  = 1 << 12,
@@ -29,9 +32,9 @@ namespace GDE {
     struct UIAnchor {
         FRIEND_CLASS(UITransform, UI9Slice)
 
-        Anchor anchor = Anchor::MIDDLE;
-        Vec2F anchorDistances;
+        uint16_t anchor = Anchor::MIDDLE | Stretch::NO_STRETCH;
         Vec2F anchorPosition;
+        Vec2F anchorSize;
 
         private:
             void updateAnchor(UITransform* _transform);
@@ -48,8 +51,11 @@ namespace GDE {
         public:
             explicit UITransform();
 
-            Anchor getAnchor();
+            [[nodiscard]] Anchor getAnchor() const;
             void setAnchor(Anchor _anchor);
+
+            [[nodiscard]] Stretch getStretch() const;
+            void setStretch(Stretch _stretch);
 
             Vec2F getSize();
             void setSize(const Vec2F& _size);

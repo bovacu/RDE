@@ -93,6 +93,8 @@ namespace GDE {
             ImGui::RenderPlatformWindowsDefault();
             SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
         }
+
+        resetID();
     }
 
     void ImGuiScene::drawDebugInfo(Scene* _scene) {
@@ -438,6 +440,8 @@ namespace GDE {
         spriteComponent(_graph, _selectedNode);
         bodyComponent(_graph, _selectedNode);
         textComponent(_graph, _selectedNode);
+
+        uiTransformComponent(_graph, _selectedNode);
         uiButtonComponent(_graph, _selectedNode);
         ui9SliceComponent(_graph, _selectedNode);
         uiPanelComponent(_graph, _selectedNode);
@@ -450,7 +454,7 @@ namespace GDE {
         auto _tag = _graph->getComponent<Tag>(_selectedNode)->tag.c_str();
         ImGui::Text("%s", _tag);
         ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 30);
-        ImGui::PushID(1);
+        ImGui::PushID(createID());
         if(ImGui::Checkbox("###Active", &_active)) {
             if(_active) _graph->addComponent<Active>(_selectedNode, _graph->getComponent<Node>(_selectedNode), &engine->manager, _graph);
             else _graph->removeComponent<Active>(_selectedNode);
@@ -476,12 +480,7 @@ namespace GDE {
 
     void ImGuiScene::transformComponent(Graph* _graph, const NodeID _selectedNode) {
         Transform* _transform = nullptr;
-
-        if(!_graph->isUI) {
-            _transform = _graph->getComponent<Transform>(_selectedNode);
-        } else {
-            _transform = (Transform*)_graph->getComponent<UITransform>(_selectedNode);
-        }
+        if(!_graph->hasComponent<Transform>(_selectedNode)) return;
 
         if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -491,7 +490,7 @@ namespace GDE {
             float _pos[2] = {_transform->getPosition().x, _transform->getPosition().y};
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
-            ImGui::PushID(2);
+            ImGui::PushID(createID());
             if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
                 _transform->setPosition(_pos[0], _pos[1]);
             }
@@ -503,7 +502,7 @@ namespace GDE {
             float _angle = _transform->getRotation();
             ImGui::SameLine();
             ImGui::SetNextItemWidth(50);
-            ImGui::PushID(3);
+            ImGui::PushID(createID());
             if(ImGui::DragFloat("##myInput", &_angle, 0.1f))
                 _transform->setRotation(_angle);
             ImGui::PopID();
@@ -514,7 +513,7 @@ namespace GDE {
             float _scale[2] = {_transform->getScale().x, _transform->getScale().y};
             ImGui::SameLine(0, 30);
             ImGui::SetNextItemWidth(100);
-            ImGui::PushID(4);
+            ImGui::PushID(createID());
             if(ImGui::DragFloat2("##myInput", _scale, 0.05))
                 _transform->setScale(_scale[0], _scale[1]);
             ImGui::PopID();
@@ -560,7 +559,7 @@ namespace GDE {
                 int _pos[2] = {_mainCamera->getViewport()->getVirtualResolution().x, _mainCamera->getViewport()->getVirtualResolution().y};
                 ImGui::SameLine();
                 ImGui::SetNextItemWidth(100);
-                ImGui::PushID(5);
+                ImGui::PushID(createID());
                 if(ImGui::InputInt2("##myInput", _pos)) {
                     _mainCamera->getViewport()->updateVirtualResolution({_pos[0], _pos[1]});
                 }
@@ -571,7 +570,7 @@ namespace GDE {
             float _zoomLevel[1] = {_camera->getCurrentZoomLevel()};
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
-            ImGui::PushID(6);
+            ImGui::PushID(createID());
             if(ImGui::DragFloat("##myInput", _zoomLevel, 0.5f)) {
                 _mainCamera->setCurrentZoomLevel(_zoomLevel[0]);
             }
@@ -623,6 +622,226 @@ namespace GDE {
         }
     }
 
+    void ImGuiScene::uiTransformComponent(Graph* _graph, const NodeID _selectedNode) {
+        UITransform* _transform = nullptr;
+        if(!_graph->hasComponent<UITransform>(_selectedNode)) return;
+        _transform = _graph->getComponent<UITransform>(_selectedNode);
+        Anchor _selectedAnchor = _transform->getAnchor();
+        Stretch _selectedStretch = _transform->getStretch();
+
+        if(ImGui::CollapsingHeader("UITransform", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            ImGui::Text("ID: %i", (int)_transform->node->getID());
+
+            ImGui::Text("Anchor "); ImGui::SameLine(0, 20);
+            ImGui::Text("Stretch ");
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
+            ImVec4 _selectedColor = {204.f / 255.f, 204.f / 255.f, 0, 0.5f};
+            ImVec4 _noSelectedColor = {0, 0, 0, 0};
+            auto* _topLeft = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorBottomLeft");
+            auto* _topMiddle = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorBottomMiddle");
+            auto* _topRight = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorBottomRight");
+
+            auto* _middleLeft = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorMiddleLeft");
+            auto* _middle = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorMiddleMiddle");
+            auto* _middleRight = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorMiddleRight");
+
+            auto* _bottomLeft = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorTopLeft");
+            auto* _bottomMiddle = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorTopMiddle");
+            auto* _bottomRight = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorTopRight");
+
+            auto* _stretchNone = engine->manager.textureManager.getSubTexture("defaultAssets", "stretchNone");
+            auto* _stretchHorizontal = engine->manager.textureManager.getSubTexture("defaultAssets", "stretchHorizontal");
+            auto* _stretchVertical = engine->manager.textureManager.getSubTexture("defaultAssets", "stretchVertical");
+            auto* _stretchFull = engine->manager.textureManager.getSubTexture("defaultAssets", "stretchFull");
+
+
+            // Anchor top row
+            auto _topLeftInit = Vec2F { _topLeft->getRegion().bottomLeftCorner.x / _topLeft->getSpriteSheetSize().x, _topLeft->getRegion().bottomLeftCorner.y / _topLeft->getSpriteSheetSize().y};
+            auto _topLeftEnd = _topLeftInit + Vec2F { _topLeft->getRegion().size.x / _topLeft->getSpriteSheetSize().x, _topLeft->getRegion().size.y / _topLeft->getSpriteSheetSize().y};
+
+            auto _topMiddleInit = Vec2F { _topMiddle->getRegion().bottomLeftCorner.x / _topMiddle->getSpriteSheetSize().x, _topMiddle->getRegion().bottomLeftCorner.y / _topMiddle->getSpriteSheetSize().y};
+            auto _topMiddleEnd = _topMiddleInit + Vec2F { _topMiddle->getRegion().size.x / _topMiddle->getSpriteSheetSize().x, _topMiddle->getRegion().size.y / _topMiddle->getSpriteSheetSize().y};
+
+            auto _topRightInit = Vec2F { _topRight->getRegion().bottomLeftCorner.x / _topRight->getSpriteSheetSize().x, _topRight->getRegion().bottomLeftCorner.y / _topRight->getSpriteSheetSize().y};
+            auto _topRightEnd = _topRightInit + Vec2F { _topRight->getRegion().size.x / _topRight->getSpriteSheetSize().x, _topRight->getRegion().size.y / _topRight->getSpriteSheetSize().y};
+
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_topLeft->getGLTexture()), ImVec2(16, 16), {_topLeftInit.x, _topLeftInit.y}, {_topLeftEnd.x, _topLeftEnd.y}, 0, (_selectedAnchor == Anchor::LEFT_TOP ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::LEFT_TOP;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_topMiddle->getGLTexture()), ImVec2(16, 16), {_topMiddleInit.x, _topMiddleInit.y}, {_topMiddleEnd.x, _topMiddleEnd.y}, 0, (_selectedAnchor == Anchor::TOP ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::TOP;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_topRight->getGLTexture()), ImVec2(16, 16), {_topRightInit.x, _topRightInit.y}, {_topRightEnd.x, _topRightEnd.y}, 0, (_selectedAnchor == Anchor::RIGHT_TOP ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::RIGHT_TOP;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+
+
+            // Stretch top row
+            ImGui::SameLine(0, 20);
+            auto _stretchNoneInit = Vec2F { _stretchNone->getRegion().bottomLeftCorner.x / _stretchNone->getSpriteSheetSize().x, _stretchNone->getRegion().bottomLeftCorner.y / _stretchNone->getSpriteSheetSize().y};
+            auto _stretchNoneEnd = _stretchNoneInit + Vec2F { _stretchNone->getRegion().size.x / _stretchNone->getSpriteSheetSize().x, _stretchNone->getRegion().size.y / _stretchNone->getSpriteSheetSize().y};
+
+            auto _stretchFullInit = Vec2F { _stretchFull->getRegion().bottomLeftCorner.x / _stretchFull->getSpriteSheetSize().x, _stretchFull->getRegion().bottomLeftCorner.y / _stretchFull->getSpriteSheetSize().y};
+            auto _stretchFullEnd = _stretchFullInit + Vec2F { _stretchFull->getRegion().size.x / _stretchFull->getSpriteSheetSize().x, _stretchFull->getRegion().size.y / _stretchFull->getSpriteSheetSize().y};
+
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchNone->getGLTexture()), ImVec2(16, 16), {_stretchNoneInit.x, _stretchNoneInit.y}, {_stretchNoneEnd.x, _stretchNoneEnd.y}, 0, (_selectedStretch == Stretch::NO_STRETCH ? _selectedColor : _noSelectedColor))) {
+                _selectedStretch = Stretch::NO_STRETCH;
+                _transform->setStretch(_selectedStretch);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchFull->getGLTexture()), ImVec2(16, 16), {_stretchFullInit.x, _stretchFullInit.y}, {_stretchFullEnd.x, _stretchFullEnd.y}, 0, (_selectedStretch == Stretch::FULL_STRETCH ? _selectedColor : _noSelectedColor))) {
+                _selectedStretch = Stretch::FULL_STRETCH;
+                _transform->setStretch(_selectedStretch);
+            }
+            ImGui::PopID();
+
+
+            // Anchor middle row
+            auto _middleLeftInit = Vec2F { _middleLeft->getRegion().bottomLeftCorner.x / _middleLeft->getSpriteSheetSize().x, _middleLeft->getRegion().bottomLeftCorner.y / _middleLeft->getSpriteSheetSize().y};
+            auto _middleLeftEnd = _middleLeftInit + Vec2F { _middleLeft->getRegion().size.x / _middleLeft->getSpriteSheetSize().x, _middleLeft->getRegion().size.y / _middleLeft->getSpriteSheetSize().y};
+
+            auto _middleMiddleInit = Vec2F { _middle->getRegion().bottomLeftCorner.x / _middle->getSpriteSheetSize().x, _middle->getRegion().bottomLeftCorner.y / _middle->getSpriteSheetSize().y};
+            auto _middleMiddleEnd = _middleMiddleInit + Vec2F { _middle->getRegion().size.x / _middle->getSpriteSheetSize().x, _middle->getRegion().size.y / _middle->getSpriteSheetSize().y};
+
+            auto _middleRightInit = Vec2F { _middleRight->getRegion().bottomLeftCorner.x / _middleRight->getSpriteSheetSize().x, _middleRight->getRegion().bottomLeftCorner.y / _middleRight->getSpriteSheetSize().y};
+            auto _middleRightEnd = _middleRightInit + Vec2F { _middleRight->getRegion().size.x / _middleRight->getSpriteSheetSize().x, _middleRight->getRegion().size.y / _middleRight->getSpriteSheetSize().y};
+
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_middleLeft->getGLTexture()), ImVec2(16, 16), {_middleLeftInit.x, _middleLeftInit.y}, {_middleLeftEnd.x, _middleLeftEnd.y}, 0, (_selectedAnchor == Anchor::LEFT ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::LEFT;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_middle->getGLTexture()), ImVec2(16, 16),   {_middleMiddleInit.x, _middleMiddleInit.y}, {_middleMiddleEnd.x, _middleMiddleEnd.y}, 0, (_selectedAnchor == Anchor::MIDDLE ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::MIDDLE;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_middleRight->getGLTexture()), ImVec2(16, 16), {_middleRightInit.x, _middleRightInit.y}, {_middleRightEnd.x, _middleRightEnd.y}, 0, (_selectedAnchor == Anchor::RIGHT ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::RIGHT;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+
+
+
+            // Stretch bottom row
+            ImGui::SameLine(0, 20);
+            auto _stretchHorInit = Vec2F { _stretchHorizontal->getRegion().bottomLeftCorner.x / _stretchHorizontal->getSpriteSheetSize().x, _stretchHorizontal->getRegion().bottomLeftCorner.y / _stretchHorizontal->getSpriteSheetSize().y};
+            auto _stretchHorEnd = _stretchHorInit + Vec2F { _stretchHorizontal->getRegion().size.x / _stretchHorizontal->getSpriteSheetSize().x, _stretchHorizontal->getRegion().size.y / _stretchHorizontal->getSpriteSheetSize().y};
+
+            auto _stretchVertInit = Vec2F { _stretchVertical->getRegion().bottomLeftCorner.x / _stretchVertical->getSpriteSheetSize().x, _stretchVertical->getRegion().bottomLeftCorner.y / _stretchVertical->getSpriteSheetSize().y};
+            auto _stretchVertEnd = _stretchVertInit + Vec2F { _stretchVertical->getRegion().size.x / _stretchVertical->getSpriteSheetSize().x, _stretchVertical->getRegion().size.y / _stretchVertical->getSpriteSheetSize().y};
+
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchHorizontal->getGLTexture()), ImVec2(16, 16), {_stretchHorInit.x, _stretchHorInit.y}, {_stretchHorEnd.x, _stretchHorEnd.y}, 0, (_selectedStretch == Stretch::HORIZONTAL_STRETCH ? _selectedColor : _noSelectedColor))) {
+                _selectedStretch = Stretch::HORIZONTAL_STRETCH;
+                _transform->setStretch(_selectedStretch);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchVertical->getGLTexture()), ImVec2(16, 16), {_stretchVertInit.x, _stretchVertInit.y}, {_stretchVertEnd.x, _stretchVertEnd.y}, 0, (_selectedStretch == Stretch::VERTICAL_STRETCH ? _selectedColor : _noSelectedColor))) {
+                _selectedStretch = Stretch::VERTICAL_STRETCH;
+                _transform->setStretch(_selectedStretch);
+            }
+            ImGui::PopID();
+
+
+
+            // Anchor bottom row
+            auto _bottomLeftInit = Vec2F { _bottomLeft->getRegion().bottomLeftCorner.x / _bottomLeft->getSpriteSheetSize().x, _bottomLeft->getRegion().bottomLeftCorner.y / _bottomLeft->getSpriteSheetSize().y};
+            auto _bottomLeftEnd = _bottomLeftInit + Vec2F { _bottomLeft->getRegion().size.x / _bottomLeft->getSpriteSheetSize().x, _bottomLeft->getRegion().size.y / _bottomLeft->getSpriteSheetSize().y};
+
+            auto _bottomMiddleInit = Vec2F { _bottomMiddle->getRegion().bottomLeftCorner.x / _bottomMiddle->getSpriteSheetSize().x, _bottomMiddle->getRegion().bottomLeftCorner.y / _bottomMiddle->getSpriteSheetSize().y};
+            auto _bottomMiddleEnd = _bottomMiddleInit + Vec2F { _bottomMiddle->getRegion().size.x / _bottomMiddle->getSpriteSheetSize().x, _bottomMiddle->getRegion().size.y / _bottomMiddle->getSpriteSheetSize().y};
+
+            auto _bottomRightInit = Vec2F { _bottomRight->getRegion().bottomLeftCorner.x / _bottomRight->getSpriteSheetSize().x, _bottomRight->getRegion().bottomLeftCorner.y / _bottomRight->getSpriteSheetSize().y};
+            auto _bottomRightEnd = _bottomRightInit + Vec2F { _bottomRight->getRegion().size.x / _bottomRight->getSpriteSheetSize().x, _bottomRight->getRegion().size.y / _bottomRight->getSpriteSheetSize().y};
+
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_bottomLeft->getGLTexture()), ImVec2(16, 16),   {_bottomLeftInit.x, _bottomLeftInit.y}, {_bottomLeftEnd.x, _bottomLeftEnd.y}, 0, (_selectedAnchor == Anchor::LEFT_BOTTOM ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::LEFT_BOTTOM;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_bottomMiddle->getGLTexture()), ImVec2(16, 16), {_bottomMiddleInit.x, _bottomMiddleInit.y}, {_bottomMiddleEnd.x, _bottomMiddleEnd.y}, 0, (_selectedAnchor == Anchor::BOTTOM ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::BOTTOM;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_bottomRight->getGLTexture()), ImVec2(16, 16),  {_bottomRightInit.x, _bottomRightInit.y}, {_bottomRightEnd.x, _bottomRightEnd.y}, 0, (_selectedAnchor == Anchor::RIGHT_BOTTOM ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::RIGHT_BOTTOM;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+
+            ImGui::PopStyleVar();
+
+            ImGui::NewLine();
+
+            ImGui::Text("Position ");
+
+            float _pos[2] = {_transform->getPosition().x, _transform->getPosition().y};
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(createID());
+            if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
+                _transform->setPosition(_pos[0], _pos[1]);
+            }
+            ImGui::PopID();
+
+
+            ImGui::Text("Rotation ");
+
+            float _angle = _transform->getRotation();
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(50);
+            ImGui::PushID(createID());
+            if(ImGui::DragFloat("##myInput", &_angle, 0.1f))
+                _transform->setRotation(_angle);
+            ImGui::PopID();
+
+
+            ImGui::Text("Scale ");
+
+            float _scale[2] = {_transform->getScale().x, _transform->getScale().y};
+            ImGui::SameLine(0, 30);
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(createID());
+            if(ImGui::DragFloat2("##myInput", _scale, 0.05))
+                _transform->setScale(_scale[0], _scale[1]);
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
+    }
+
     void ImGuiScene::ui9SliceComponent(Graph* _graph, const NodeID _selectedNode) {
         if(!_graph->hasComponent<UI9Slice>(_selectedNode)) return;
 
@@ -636,7 +855,7 @@ namespace GDE {
                 float _size[2] = {_ui9Slice->getSize().x, _ui9Slice->getSize().y};
                 ImGui::SameLine(0, ImGui::CalcTextSize("Origin Offset ").x - ImGui::CalcTextSize("Size ").x + 8);
                 ImGui::SetNextItemWidth(100);
-                ImGui::PushID(7);
+                ImGui::PushID(createID());
                 if (ImGui::DragFloat2("##myInput", _size, 1.f)) {
                     _ui9Slice->setSize({ clampF(_size[0], 0, FLT_MAX),clampF(_size[1], 0, FLT_MAX) });
                 }
@@ -648,7 +867,7 @@ namespace GDE {
                 float _originOffset[2] = {_ui9Slice->getOriginOffset().x, _ui9Slice->getOriginOffset().y};
                 ImGui::SameLine();
                 ImGui::SetNextItemWidth(100);
-                ImGui::PushID(8);
+                ImGui::PushID(createID());
                 if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
                     _ui9Slice->setOriginOffset({ clampF(_originOffset[0], FLT_MIN, FLT_MAX), clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
                 }
@@ -671,7 +890,7 @@ namespace GDE {
 //            float _size[2] = { _uiButton->nineSliceSprite->getSize().x, _uiButton->nineSliceSprite->getSize().y };
 //            ImGui::SameLine();
 //            ImGui::SetNextItemWidth(100);
-//            ImGui::PushID(8);
+//            ImGui::PushID(createID());
 //            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
 //                auto _config = _uiButton->getConfig();
 //                clampF(_size[0], 0, FLT_MAX);
@@ -697,7 +916,7 @@ namespace GDE {
 //            float _size[2] = { _uiPanel->nineSliceSprite->getSize().x, _uiPanel->nineSliceSprite->getSize().y };
 //            ImGui::SameLine();
 //            ImGui::SetNextItemWidth(100);
-//            ImGui::PushID(9);
+//            ImGui::PushID(createID());
 //            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
 //                auto _config = _uiPanel->getConfig();
 //                clampF(_size[0], 0, FLT_MAX);
@@ -713,6 +932,14 @@ namespace GDE {
 
     bool ImGuiScene::checkForFocus() {
         return ImGui::IsWindowHovered() | ImGui::IsAnyItemActive() | ImGui::IsAnyItemHovered() | ImGui::IsAnyItemFocused();
+    }
+
+    int ImGuiScene::createID() {
+        return idIndex++;
+    }
+
+    void ImGuiScene::resetID() {
+        idIndex = 0;
     }
 }
 

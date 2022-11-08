@@ -19,6 +19,7 @@ namespace GDE {
     FORWARD_DECLARE_CLASS(Graph)
     class ImGuiScene : public Scene {
         private:
+            int idIndex = 0;
             bool anyWindowHovered = false;
             bool windowsHovered[4] {false, false, false, false};
             UDelegate<bool(MouseScrolledEvent&)> mseDel;
@@ -50,6 +51,9 @@ namespace GDE {
             void drawDebugInfo(Scene* _scene);
 
         private:
+            int createID();
+            void resetID();
+
             void console();
             static int consoleStub(ImGuiInputTextCallbackData* _data);
             int consoleIntro(ImGuiInputTextCallbackData* _data);
@@ -70,6 +74,8 @@ namespace GDE {
             void bodyComponent(Graph* _graph, const NodeID _selectedNode);
             void spriteComponent(Graph* _graph, const NodeID _selectedNode);
             void textComponent(Graph* _graph, const NodeID _selectedNode);
+
+            void uiTransformComponent(Graph* _graph, const NodeID _selectedNode);
             void uiButtonComponent(Graph* _graph, const NodeID _selectedNode);
             void uiPanelComponent(Graph* _graph, const NodeID _selectedNode);
             void ui9SliceComponent(Graph* _graph, const NodeID _selectedNode);
