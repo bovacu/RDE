@@ -41,7 +41,7 @@ namespace GDE {
     };
 
     struct UITransform : public Transform {
-        FRIEND_CLASS(UI, Graph, UI9Slice)
+        FRIEND_CLASS(Canvas, UI, Graph, UI9Slice)
 
         private:
             UIAnchor anchor;

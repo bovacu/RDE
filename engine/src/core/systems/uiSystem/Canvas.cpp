@@ -392,7 +392,7 @@ namespace GDE {
     }
 
     void Canvas::onResize(uint _width, uint _height) {
-        graph.sceneRoot->getComponent<UIInteractable>()->sizeOfInteraction = Vec2F { (float)_width, (float)_height };
+        ((UITransform*)graph.sceneRoot->getTransform())->setSize({ (float)_width, (float)_height });
     }
 
 }

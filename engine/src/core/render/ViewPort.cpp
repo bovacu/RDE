@@ -9,11 +9,13 @@ namespace GDE {
     }
 
     float IViewPort::getAspectRatio() const {
-        return aspectRatio;
+//        return aspectRatio;
+        return 1.777776f;
     }
 
     Vec2F IViewPort::getScalingFactor() const {
-        return scalingFactor;
+//        return scalingFactor;
+        return {1, 1};
     }
 
     Vec2I IViewPort::getDeviceResolution() const {

@@ -97,6 +97,9 @@ namespace GDE {
 
     std::tuple<glm::mat4, bool> UITransform::localToWorld() {
         auto [_mat, _dirty] = Transform::localToWorld();
+        if(_dirty) {
+            anchor.updateAnchor(this);
+        }
         return { _mat, (_dirty || uiDirty) };
     }
 

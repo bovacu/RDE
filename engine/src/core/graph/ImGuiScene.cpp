@@ -481,6 +481,7 @@ namespace GDE {
     void ImGuiScene::transformComponent(Graph* _graph, const NodeID _selectedNode) {
         Transform* _transform = nullptr;
         if(!_graph->hasComponent<Transform>(_selectedNode)) return;
+        _transform = _graph->getComponent<Transform>(_selectedNode);
 
         if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -533,11 +534,11 @@ namespace GDE {
             const char* _viewports[] = { "Free Aspect", "Adaptative Aspect"};
 
             std::string _viewPortSelected;
-            auto* _mainCamera = engine->manager.sceneManager.getDisplayedScene()->getMainCamera();
 
-            if(dynamic_cast< FreeViewPort* >(_mainCamera->getViewport())) _viewPortSelected = "Free Aspect";
+            if(dynamic_cast< FreeViewPort* >(_camera->getViewport())) _viewPortSelected = "Free Aspect";
             else _viewPortSelected = "Adaptative Aspect";
 
+            ImGui::PushID(createID());
             ImGui::Text("ViewPort"); ImGui::SameLine();
             ImGui::SetNextItemWidth(175);
             if (ImGui::BeginCombo("##combo", _viewPortSelected.c_str())){ // The second parameter is the label previewed before opening the combo. {
@@ -545,8 +546,8 @@ namespace GDE {
                     bool is_selected = (_viewPortSelected == _resolution);
                     if (ImGui::Selectable(_resolution, is_selected)) {
                         _viewPortSelected = _resolution;
-                        if(_viewPortSelected == "Free Aspect") _mainCamera->setFreeViewport(engine->getWindow().getWindowSize());
-                        else _mainCamera->setAdaptiveViewport({1920, 1080}, engine->getWindow().getWindowSize());
+                        if(_viewPortSelected == "Free Aspect") _camera->setFreeViewport(engine->getWindow().getWindowSize());
+                        else _camera->setAdaptiveViewport({1920, 1080}, engine->getWindow().getWindowSize());
                     }
                     if (is_selected)
                         ImGui::SetItemDefaultFocus();
@@ -556,15 +557,16 @@ namespace GDE {
 
             if(_viewPortSelected == "Adaptative Aspect") {
                 ImGui::Text("Virtual Resolution");
-                int _pos[2] = {_mainCamera->getViewport()->getVirtualResolution().x, _mainCamera->getViewport()->getVirtualResolution().y};
+                int _pos[2] = {_camera->getViewport()->getVirtualResolution().x, _camera->getViewport()->getVirtualResolution().y};
                 ImGui::SameLine();
                 ImGui::SetNextItemWidth(100);
                 ImGui::PushID(createID());
                 if(ImGui::InputInt2("##myInput", _pos)) {
-                    _mainCamera->getViewport()->updateVirtualResolution({_pos[0], _pos[1]});
+                    _camera->getViewport()->updateVirtualResolution({_pos[0], _pos[1]});
                 }
                 ImGui::PopID();
             }
+            ImGui::PopID();
 
             ImGui::Text("Zoom Level");
             float _zoomLevel[1] = {_camera->getCurrentZoomLevel()};
@@ -572,7 +574,7 @@ namespace GDE {
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(createID());
             if(ImGui::DragFloat("##myInput", _zoomLevel, 0.5f)) {
-                _mainCamera->setCurrentZoomLevel(_zoomLevel[0]);
+                _camera->setCurrentZoomLevel(_zoomLevel[0]);
             }
             ImGui::PopID();
 

@@ -33,7 +33,6 @@ namespace GDE {
         }
         scenes[_sceneName] = _scene;
         engine->manager.configManager.loadScene(&engine->manager, _scene, &engine->getWindow(), APPEND_S(SCENES_PATH, _sceneName, ".json"));
-        for(auto* _canvas : _scene->getCanvases()) _canvas->matchMainCameraViewPort();
         LOG_DEBUG("Loaded scene '", _sceneName, "'")
     }
 

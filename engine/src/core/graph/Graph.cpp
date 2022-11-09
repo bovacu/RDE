@@ -38,7 +38,7 @@ namespace GDE {
             registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
 
             auto* _interactable = &registry.emplace<UIInteractable>(_sceneRootID, sceneRoot, &scene->engine->manager, this);
-            _interactable->sizeOfInteraction = { (float)scene->mainCamera->getViewport()->getVirtualResolution().x, (float)scene->mainCamera->getViewport()->getVirtualResolution().y };
+            registry.get<UITransform>(_sceneRootID).setSize({ (float)scene->mainCamera->getViewport()->getVirtualResolution().x, (float)scene->mainCamera->getViewport()->getVirtualResolution().y });
             _interactable->interactable = false;
             _interactable->focused = false;
         }
