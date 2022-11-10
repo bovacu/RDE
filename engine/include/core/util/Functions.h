@@ -36,33 +36,31 @@ namespace GDE {
                 return base_filename.substr(base_filename.find_last_of('.') + 1, base_filename.size());
             }
 
-            static Vec2F worldToScreenCoords(const IViewPort& _viewport, const Vec2F& _position) {
+            static Vec2F worldToScreenCoords(const ViewPort& _viewport, const Vec2F& _position) {
                 auto _windowSize = _viewport.getVirtualResolution();
-                return {_position.x * _viewport.getAspectRatio() / _viewport.getScalingFactor().x / ((float)_windowSize.x / 2),
-                        _position.y / _viewport.getScalingFactor().y / ((float)_windowSize.y / 2)};
+                return {_position.x * _viewport.getVirtualAspectRatio() / ((float)_windowSize.x / 2), _position.y / ((float)_windowSize.y / 2) };
             }
 
             #if !IS_MAC() && !IS_WINDOWS() && !IS_MOBILE()
             [[gnu::warning("Probably broken some versions ago, check it out again")]]
             #endif
-            static Vec2F screenToWorldCoords(const IViewPort& _viewport, const Vec2F& _position) {
+            static Vec2F screenToWorldCoords(const ViewPort& _viewport, const Vec2F& _position) {
                 auto _windowSize = _viewport.getVirtualResolution();
-                return {_position.x / _viewport.getAspectRatio() * ((float)_windowSize.x / 2), _position.y * ((float)_windowSize.y / 2)};
+                return {_position.x / _viewport.getVirtualAspectRatio() * ((float)_windowSize.x / 2), _position.y * ((float)_windowSize.y / 2) };
             }
 
-            static Vec2F worldToScreenSize(const IViewPort& _viewport, const Vec2F& _size) {
+            static Vec2F worldToScreenSize(const ViewPort& _viewport, const Vec2F& _size) {
                 auto _windowSize = _viewport.getVirtualResolution();
-                return {_size.x * _viewport.getAspectRatio() / _viewport.getScalingFactor().x / ((float)_windowSize.x),
-                        _size.y / _viewport.getScalingFactor().y / ((float)_windowSize.y)};
+                return {_size.x * _viewport.getVirtualAspectRatio() / ((float)_windowSize.x), _size.y / ((float)_windowSize.y) };
             }
 
-            static void worldToScreenSize(const IViewPort& _viewport, float& _x, float& _y) {
+            static void worldToScreenSize(const ViewPort& _viewport, float& _x, float& _y) {
                 auto _new = worldToScreenCoords(_viewport, {_x, _y});
                 _x = _new.x;
                 _y = _new.y;
             }
 
-            static void screenToWorldCoords(const IViewPort& _viewport, float& _x, float& _y) {
+            static void screenToWorldCoords(const ViewPort& _viewport, float& _x, float& _y) {
                 auto _new = screenToWorldCoords(_viewport, {_x, _y});
                 _x = _new.x;
                 _y = _new.y;

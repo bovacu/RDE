@@ -85,10 +85,6 @@ namespace GDE {
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
         auto _screenPos = Util::worldToScreenSize(*batch->viewport, _position);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x, _screenPos.y, 1.f));
-        auto _scalingFactor = batch->viewport->getScalingFactor();
-        if(_scalingFactor != 1) {
-            _transformMat *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
-        }
         vertexDebugBufferPoints.emplace_back(_transformMat * glm::vec4 {_screenPos.x, _screenPos.y, 0.0f, 1.0f}, _colorVec4);
     }
 
@@ -105,12 +101,6 @@ namespace GDE {
 
         _transformMat1[3][0] = _screenPos1.x;
         _transformMat1[3][1] = _screenPos1.y;
-
-        auto _scalingFactor = batch->viewport->getScalingFactor();
-        if(_scalingFactor != 1) {
-            _transformMat0 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.y, 1.f});
-            _transformMat1 *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.y, 1.f});
-        }
 
         vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat0[3][0], _transformMat0[3][1], 1.0f}, _colorVec4);
         vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat1[3][0], _transformMat1[3][1], 1.0f}, _colorVec4);
@@ -138,11 +128,7 @@ namespace GDE {
     }
 
     void SpriteBatch::Debug::drawShape(DebugShape& _shape) {
-        auto _scalingFactor = batch->viewport->getScalingFactor();
-        auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x * _scalingFactor.x, _shape.getPosition().y * _scalingFactor.y, 1.f));
-
-        if(_scalingFactor != 1)
-            _transformMat *= glm::scale(glm::mat4(1.0f), {_scalingFactor.x, _scalingFactor.x, 1.f});
+        auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x, _shape.getPosition().y, 1.f));
 
         glm::vec4 _innerColor = {(float)_shape.getInnerColor().r / 255.f, (float)_shape.getInnerColor().g / 255.f,
                                  (float)_shape.getInnerColor().b/ 255.f, (float)_shape.getInnerColor().a/ 255.f};

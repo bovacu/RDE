@@ -18,8 +18,8 @@ namespace GDE {
             UIText(Node* _node, Manager* _manager, Graph* _graph, const std::string& _text, Font* _font = nullptr);
             ~UIText() override {  }
 
-            virtual void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
-            virtual void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) override;
+            virtual void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) override;
+            virtual void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) override;
     };
 
 } // GDE

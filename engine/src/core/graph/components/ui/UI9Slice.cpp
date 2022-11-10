@@ -28,7 +28,7 @@ namespace GDE {
         calculateGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
     }
 
-    void UI9Slice::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+    void UI9Slice::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
         if(!enabled) return;
 
         if(spriteRenderer) {
@@ -61,7 +61,7 @@ namespace GDE {
         }
     }
 
-    void UI9Slice::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {
+    void UI9Slice::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) {
         if(!enabled) return;
 
         DrawAndFlushData _nineSliceData;
@@ -94,7 +94,7 @@ namespace GDE {
         dirty = true;
     }
 
-    void UI9Slice::calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport) {
+    void UI9Slice::calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const ViewPort& _viewport) {
         // TODO this calculations are an absolute mess, I need to clean this up, rename variables, make it clearer and remove redundant operations, but I'm scared.
         auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
         auto _originOffset = UI::getOriginOffset();

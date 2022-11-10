@@ -139,8 +139,7 @@ namespace GDE {
         float _x = _mousePos.x - (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().x / 2.f : 0.f);
         float _y = (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().y / 2.f : 0.f) - _mousePos.y;
         float _zoom = mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getCurrentZoomLevel();
-        Vec2F _scalingFactor = engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->getScalingFactor();
-        return {_x * _zoom / _scalingFactor.x, _y * _zoom / _scalingFactor.y};
+        return {_x * _zoom, _y * _zoom};
     }
 
     Vec2F InputManager::getMousePosWorldPos() {
@@ -150,8 +149,7 @@ namespace GDE {
         float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.node->getTransform()->getPosition().x;
         float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.node->getTransform()->getPosition().y;
         float _zoom = _camera.getCurrentZoomLevel();
-        Vec2F _scalingFactor = engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->getScalingFactor();
-        return {_x * _zoom / _scalingFactor.x, - _y * _zoom / _scalingFactor.y};
+        return {_x * _zoom, - _y * _zoom};
     }
 
     Vec2F InputManager::getMousePosCanvas() {
@@ -160,8 +158,7 @@ namespace GDE {
         auto& _camera = *mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera();
         float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.node->getTransform()->getPosition().x;
         float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.node->getTransform()->getPosition().y;
-        Vec2F _scalingFactor = engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->getScalingFactor();
-        return {_x / _scalingFactor.x, - _y / _scalingFactor.y};
+        return {_x, - _y};
     }
 
     bool InputManager::reassignController(int _controllerID, int _as) {

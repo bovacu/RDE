@@ -9,13 +9,13 @@
 namespace GDE {
 
     Camera::Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window) : node(_node) {
-        viewport = new FreeViewPort(_window->getWindowSize());
+        viewport = new ViewPort(_window->getWindowSize(), _manager->engine->gdeConfig.windowData.resolution);
         onResize(_window->getWidth(), _window->getHeight());
     }
 
     void Camera::onResize(int _width, int _height) {
-        viewport->update({_width, _height}, isLandscape());
-        float _aspectRatio = (float)_width / (float)_height;
+        viewport->update({_width, _height});
+        float _aspectRatio = viewport->getPhysicalAspectRatio();
         glViewport(0, 0, _width, _height);
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
@@ -53,13 +53,13 @@ namespace GDE {
     bool Camera::onMouseScrolled(MouseScrolledEvent& _event) {
         zoom -= _event.getScrollY() * 0.1f;
         zoom = std::max(zoom, 0.5f);
-        float _aspectRatio = (float)viewport->getDeviceResolution().x / (float)viewport->getDeviceResolution().y;
+        float _aspectRatio = viewport->getPhysicalAspectRatio();
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
         return false;
     }
 
     float Camera::getAspectRatio() const {
-        return viewport->getAspectRatio();
+        return viewport->getVirtualAspectRatio();
     }
 
     float Camera::getCurrentZoomLevel() const {
@@ -68,7 +68,7 @@ namespace GDE {
 
     void Camera::setCurrentZoomLevel(float _zoomLevel) {
         zoom = _zoomLevel;
-        float _aspectRatio = (float)viewport->getDeviceResolution().x / (float)viewport->getDeviceResolution().y;
+        float _aspectRatio = viewport->getPhysicalAspectRatio();
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
     }
 
@@ -84,19 +84,8 @@ namespace GDE {
         delete viewport;
     }
 
-    IViewPort* Camera::getViewport() const {
+    ViewPort* Camera::getViewport() const {
         return viewport;
-    }
-
-    void Camera::setFreeViewport(const Vec2I& _windowSize) {
-        delete viewport;
-        viewport = new FreeViewPort(_windowSize);
-    }
-
-    void Camera::setAdaptiveViewport(const Vec2I& _virtualDesiredSize, const Vec2I& _currentDeviceSize) {
-        delete viewport;
-        viewport = new AdaptiveViewPort(_virtualDesiredSize);
-        viewport->update(_currentDeviceSize, isLandscape());
     }
 
     void Camera::setCameraSize(const Vec2I& _cameraSize) {
@@ -134,7 +123,7 @@ namespace GDE {
     }
 
     bool Camera::isLandscape() {
-        return viewport->getVirtualResolution().x >= viewport->getVirtualResolution().y;
+        return viewport->landscape;
     }
 
 }

@@ -36,7 +36,7 @@ namespace GDE {
             OpenGLVertex geometry[4];
 
         protected:
-            virtual void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport);
+            virtual void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
 
         public:
             SpriteRenderer(Node* _node, Scene* _scene, Texture* _texture = nullptr);
@@ -89,7 +89,7 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
+            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) override;
     };
 
 }

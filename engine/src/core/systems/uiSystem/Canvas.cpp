@@ -385,13 +385,6 @@ namespace GDE {
         return camera;
     }
 
-    void Canvas::matchMainCameraViewPort() {
-        auto* _mainCameraViewPort = scene->getMainCamera()->getViewport();
-
-        if(_mainCameraViewPort == nullptr) return;
-        camera->setAdaptiveViewport(_mainCameraViewPort->getVirtualResolution(), _mainCameraViewPort->getDeviceResolution());
-    }
-
     void Canvas::onResize(uint _width, uint _height) {
         ((UITransform*)graph.sceneRoot->getTransform())->setSize({ (float)_width, (float)_height });
         camera->setCameraSize((int)_width, (int)_height);

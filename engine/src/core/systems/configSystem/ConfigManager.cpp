@@ -404,21 +404,6 @@ namespace GDE {
                 _scene->getMainCamera()->setZoomSpeed(_cameraJson["zoom_speed"].get<float>());
             }
 
-            #if IS_MOBILE()
-                _scene->getMainCamera()->setFreeViewport({ _window->getWindowSize().x % 2 != 0 ? _window->getWindowSize().x + 1 : _window->getWindowSize().x,
-                                                           _window->getWindowSize().y % 2 != 0 ? _window->getWindowSize().y + 1 : _window->getWindowSize().y});
-            #else
-                auto _viewPortType = _cameraJson["viewport"].get<std::string>();
-                if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
-                    _scene->getMainCamera()->setAdaptiveViewport(_scene->engine->gdeConfig.windowData.resolution, _scene->engine->gdeConfig.windowData.size);
-                } else if(std::equal(_viewPortType.begin(), _viewPortType.end(), "FREE")) {
-                    _scene->getMainCamera()->setFreeViewport(_window->getWindowSize());
-                } else {
-                    _scene->getMainCamera()->setFreeViewport(_window->getWindowSize());
-                    LOG_W("Tried to load a camera viewport with a type not registered: ", _viewPortType)
-                }
-            #endif
-
         } else {
             auto* _ownerTransform = _node->getTransform();
             auto* _camera = _node->addComponent<Camera>(_window);
@@ -430,21 +415,6 @@ namespace GDE {
             if(_cameraJson.contains("zoom_speed")) {
                 _camera->setZoomSpeed(_cameraJson["zoom_speed"].get<float>());
             }
-
-            #if IS_MOBILE()
-                _camera->setFreeViewport({ _window->getWindowSize().x % 2 != 0 ? _window->getWindowSize().x + 1 : _window->getWindowSize().x,
-                                                       _window->getWindowSize().y % 2 != 0 ? _window->getWindowSize().y + 1 : _window->getWindowSize().y});
-            #else
-                auto _viewPortType = _cameraJson["viewport"].get<std::string>();
-                if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
-                    _camera->setAdaptiveViewport(_scene->engine->gdeConfig.windowData.resolution, _scene->engine->gdeConfig.windowData.size);
-                } else if(std::equal(_viewPortType.begin(), _viewPortType.end(), "FREE")) {
-                    _camera->setFreeViewport(_window->getWindowSize());
-                } else {
-                    _camera->setFreeViewport(_window->getWindowSize());
-                    LOG_W("Tried to load a camera viewport with a type not registered: ", _viewPortType)
-                }
-            #endif
 
             LOG_I("Created camera with viewport of size: ", _window->getWindowSize())
             _scene->getCameras().push_back(_camera);

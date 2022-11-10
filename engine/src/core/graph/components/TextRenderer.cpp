@@ -78,7 +78,7 @@ namespace GDE {
         recalcTextDimensions(innerText);
     }
 
-    void TextRenderer::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+    void TextRenderer::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
         if(!enabled) return;
 
         auto* _atlas = font;
@@ -189,7 +189,7 @@ namespace GDE {
         return std::tuple {_linesInfo, _totalWidth, _totalHeight};
     }
 
-    void TextRenderer::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {
+    void TextRenderer::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) {
         if(!enabled) return;
         DrawAndFlushData _textData;
         _textData.textureID = getTexture();

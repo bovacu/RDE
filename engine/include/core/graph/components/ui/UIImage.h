@@ -17,7 +17,7 @@ namespace GDE {
             ~UIImage() override {  }
 
         protected:
-            virtual void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport) override;
+            virtual void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) override;
     };
 
 }

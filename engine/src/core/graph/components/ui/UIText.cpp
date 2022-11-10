@@ -14,7 +14,7 @@ namespace GDE {
     UIText::UIText(Node* _node, Manager* _manager, Graph* _graph, const std::string& _text, Font* _font) :
     TextRenderer(_node, _manager, _graph, _text, _font) {  }
 
-    void UIText::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+    void UIText::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
         // TODO: PIVOT CHANGES
 //        if(!enabled) return;
 //
@@ -98,7 +98,7 @@ namespace GDE {
 //        }
     }
 
-    void UIText::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {
+    void UIText::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) {
         TextRenderer::drawAndFlush(_data, _transform, _viewport);
     }
 

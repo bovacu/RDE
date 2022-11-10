@@ -163,9 +163,9 @@ namespace GDE {
             ShaderManager* shaderManager = nullptr;
 
             /**
-             * @see IViewPort
+             * @see ViewPort
              */
-            IViewPort* viewport = nullptr;
+            ViewPort* viewport = nullptr;
 
             /**
              * @brief View Projection Matrix, this is the matrix that tells the GPU how to render the geometry.

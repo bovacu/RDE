@@ -18,12 +18,12 @@ namespace GDE {
         UDelegate<void(Event&)> onEventDelegate;
         onEventDelegate.bind<&Engine::onEvent>(this);
         window->setEventCallback(onEventDelegate);
+
+        manager.init(this);
     }
 
     void Engine::onInit(Scene* _scene) {
         wreDel.bind<&Engine::onWindowResized>(this);
-
-        manager.init(this);
 
         #if !IS_MOBILE()
         imGuiLayer = new ImGuiScene(this);

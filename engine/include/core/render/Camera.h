@@ -56,7 +56,7 @@ namespace GDE {
             /**
              * @see IViewPort
              */
-            IViewPort* viewport;
+            ViewPort* viewport;
 
         public:
             Node* node;
@@ -159,20 +159,7 @@ namespace GDE {
              * @brief Returns the viewport.
              * @return IViewPort*
              */
-            [[nodiscard]] IViewPort* getViewport() const;
-
-            /**
-             * @brief Changes the current viewport to a FreeViewport.
-             * @param _windowSize Window size
-             */
-            void setFreeViewport(const Vec2I& _windowSize);
-
-            /**
-             * @brief Changes the current viewport to a AdaptiveViewport.
-             * @param _virtualDesiredSize  Virtual screen size
-             * @param _currentDeviceSize Physical device size
-             */
-            void setAdaptiveViewport(const Vec2I& _virtualDesiredSize, const Vec2I& _currentDeviceSize);
+            [[nodiscard]] ViewPort* getViewport() const;
 
             bool isLandscape();
 

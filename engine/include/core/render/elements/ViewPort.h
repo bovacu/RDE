@@ -16,11 +16,11 @@ namespace GDE {
 
     FORWARD_DECLARE_CLASS(IRenderizable)
 
-    class IViewPort {
+    class ViewPort {
 
         FRIEND_CLASS(Camera)
 
-        protected:
+        private:
             /**
              * @brief Resolution that we want to render at.
              */
@@ -31,19 +31,18 @@ namespace GDE {
              */
             Vec2I deviceResolution = {};
 
-            /**
-             * @brief Scalar that scales up or down the scene to be rendered according to the IViewPort implementation.
-             */
-            Vec2F scalingFactor = {1, 1};
+            bool landscape = true;
 
         protected:
             /**
             * @brief Updates the device resolution.
             * @param _deviceSize Device resolution
             */
-            virtual void update(const Vec2I& _deviceSize, bool _isLandscape) = 0;
+            virtual void update(const Vec2I& _deviceSize);
 
         public:
+            ViewPort(const Vec2I& _deviceSize, const Vec2I& _resolutionSize);
+
             /**
              * @brief Returns the virtual resolution.
              * @return Vec2I
@@ -51,16 +50,16 @@ namespace GDE {
             [[nodiscard]] Vec2I getVirtualResolution() const;
 
             /**
-             * @brief Returns the aspect ration.
+             * @brief Returns the aspect ratio we want to keep rewarding the physical screen size.
              * @return float
              */
-            [[nodiscard]] float getAspectRatio() const;
+            [[nodiscard]] float getVirtualAspectRatio() const;
 
             /**
-             * @brief Returns the scaling factor.
-             * @return Vec2F
+             * @brief Returns the aspect ratio of the physical screen.
+             * @return float
              */
-            [[nodiscard]] Vec2F getScalingFactor() const;
+            [[nodiscard]] float getPhysicalAspectRatio() const;
 
             /**
              * @brief Returns the device resolution.
@@ -68,67 +67,7 @@ namespace GDE {
              */
             [[nodiscard]] Vec2I getDeviceResolution() const;
 
-            /**
-             * @brief Updates the virtual resolution.
-             * @param _virtualResolution Virtual resolution
-             */
-            virtual void updateVirtualResolution(const Vec2I& _virtualResolution) = 0;
-
-            virtual ~IViewPort() {};
-    };
-
-    /**
-     * @brief Make everything scale with the aspect-ratio of the device size and virtual device
-     */
-    class AdaptiveViewPort : public IViewPort {
-
-        FRIEND_CLASS(Camera)
-
-        public:
-            explicit AdaptiveViewPort(const Vec2I& _virtualDesiredResolution);
-
-            /**
-             * @see IViewPort
-             */
-            void update(const Vec2I& _deviceSize, bool _isLandscape) override;
-
-            /**
-             * @see IViewPort
-             */
-            void updateVirtualResolution(const Vec2I& _virtualResolution) override;
-
-            ~AdaptiveViewPort() override {}
-    };
-
-    /**
-     * @brief The bigger the device screen, the more you show, the smaller, the less
-     */
-    class FreeViewPort : public IViewPort {
-
-        FRIEND_CLASS(Camera)
-
-        public:
-            explicit FreeViewPort(const Vec2I& _windowSize);
-
-            /**
-             * @see IViewPort
-             */
-            void update(const Vec2I& _deviceSize, bool _isLandscape) override;
-
-            /**
-             * @see IViewPort
-             */
-            void updateVirtualResolution(const Vec2I& _virtualResolution) override;
-
-            ~FreeViewPort() override {}
-    };
-
-    /**
-     * @brief This one is the one that sets the black lines
-     * @warning Not implemented yet
-     */
-    class FixedViewPort : public IViewPort {
-
+            virtual ~ViewPort() {};
     };
 }
 

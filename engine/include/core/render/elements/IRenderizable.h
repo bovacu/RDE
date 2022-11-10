@@ -105,7 +105,7 @@ namespace GDE {
              * @param _transform Transform of the renderizable.
              * @param _viewport Viewport of the scene.
              */
-            virtual void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {  };
+            virtual void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {  };
 
             /**
              * @brief Method that every renderizable can implement and it tells the SpriteBatch how to send the data to the GPU.
@@ -114,7 +114,7 @@ namespace GDE {
              * @param _transform Transform of the renderizable.
              * @param _viewport Viewport of the scene.
              */
-            virtual void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) {  };
+            virtual void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) {  };
 
             virtual ~IRenderizable() {  }
     };

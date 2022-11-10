@@ -47,7 +47,7 @@ namespace GDE {
         return Util::getFileExtension(texture->getPath());
     }
 
-    void SpriteRenderer::calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport) {
+    void SpriteRenderer::calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
         auto _screenPos = Util::worldToScreenCoords(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -77,7 +77,7 @@ namespace GDE {
         geometry[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
     } 
 
-    void SpriteRenderer::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+    void SpriteRenderer::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
         if(!enabled) return;
 
         auto _vertexCount = _vertices.size();

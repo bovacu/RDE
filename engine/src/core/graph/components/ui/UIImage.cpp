@@ -15,7 +15,7 @@ namespace GDE {
     UIImage::UIImage(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) :
     SpriteRenderer(_node, _manager, _graph, _texture) {  }
 
-    void UIImage::calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport) {
+    void UIImage::calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
         // TODO: PIVOT CHANGES
 //        auto _pivot = ((UITransform*)&_transform)->getPivot();
 //        auto _screenPos = Util::worldToScreenCoords(_viewport, { _transformMatrix[3][0], _transformMatrix[3][1] });

@@ -73,11 +73,6 @@ namespace GDE {
             Camera* getCamera();
 
             /**
-             * @brief Makes the Canva's Camera viewport type to match with the Scene camera viewport
-             */
-            void matchMainCameraViewPort();
-
-            /**
              * @brief Handles the event related to the UI elements.
              * @param _eventDispatcher Event dispatcher
              * @param _event Event

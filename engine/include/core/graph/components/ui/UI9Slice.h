@@ -32,7 +32,7 @@ namespace GDE {
             OpenGLVertex geometry[36];
 
         private:
-            void calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const IViewPort& _viewport);
+            void calculateGeometry(glm::mat4& _transformMat, Transform& _transform, const ViewPort& _viewport);
 
         public:
             UI9Slice(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
@@ -41,8 +41,8 @@ namespace GDE {
             [[nodiscard]] Vec2F getSize() const override;
             void setSize(const Vec2F& _size);
 
-            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
-            void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const IViewPort& _viewport) override;
+            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) override;
+            void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) override;
 
             void setInteractable(bool _enabled) override;
             bool isInteractable() override;
