@@ -5,6 +5,7 @@
 #include "core/graph/components/ui/UISlider.h"
 #include "core/graph/components/Components.h"
 #include "core/Engine.h"
+#include "core/graph/components/ui/UITransform.h"
 
 namespace GDE {
 
@@ -40,7 +41,7 @@ namespace GDE {
     }
 
     Vec2F UISlider::getSize() const {
-        return UI::interaction->sizeOfInteraction;
+        return ((UITransform*)node->getTransform())->getSize();
     }
 
     UISliderConfig UISlider::getConfig() {
@@ -72,8 +73,8 @@ namespace GDE {
             config.handleTexture = _manager->textureManager.getSubTexture("defaultAssets", "handle");
         }
 
-        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
-        UI::interaction->sizeOfInteraction = Vec2F {config.barSize.x * _parentSize.x, config.barSize.y * _parentSize.y };
+        auto _parentSize = ((UITransform*)node->getTransform())->getSize();
+        ((UITransform*)node->getTransform())->setSize({config.barSize.x * _parentSize.x, config.barSize.y * _parentSize.y });
 
         if(backgroundBarSprite != nullptr) {
             backgroundBarSprite->setSize({ 1 , 1 });
@@ -113,7 +114,7 @@ namespace GDE {
         IRenderizable::onUpdate(_dt);
 
         if(mouseDown) {
-            auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+            auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
             auto _size = Vec2F { _parentSize.x * config.barSize.x, _parentSize.y * config.barSize.y };
             Vec2F _limits = { backgroundBarTransform->getModelMatrixPosition().x - _size.x * 0.5f,
                                  backgroundBarTransform->getModelMatrixPosition().x + _size.x * 0.5f };
@@ -131,7 +132,7 @@ namespace GDE {
     }
 
     void UISlider::setFilledPercentage(float _percentage) {
-        auto _parentSize = fillBarTransform->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        auto _parentSize = ((UITransform*)fillBarTransform->parentTransform->node->getTransform()->parentTransform)->getSize();
         config.percentageFilled = clampF(_percentage, 0.f, 1.f);
         fillBarSprite->setSize({ config.percentageFilled, 1 });
         fillBarTransform->setPosition({handleTransform->getPosition().x - fillBarSprite->getSize().x * _parentSize.x * 0.5f, fillBarTransform->getPosition().y});

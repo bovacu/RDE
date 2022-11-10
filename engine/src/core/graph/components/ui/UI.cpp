@@ -26,12 +26,12 @@ namespace GDE {
 
     UIInteractable::UIInteractable(Node* _node, Manager* _manager, Graph* _graph) {}
 
-    static bool trigger(Node* _node, Engine* _engine, Canvas* _canvas) {
-        auto* _uiInteractable = _node->getComponent<UIInteractable>();
+    static bool trigger(Node* _node, Engine* _engine) {
+        auto* _uiInteractable = _node->getComponent<UITransform>();
         auto* _transform = _node->getTransform();
         auto _mousePos = _engine->manager.inputManager.getMousePosWorldPos();
 
-        return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_uiInteractable->sizeOfInteraction.x, (float)_uiInteractable->sizeOfInteraction.y});
+        return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_uiInteractable->getSize().x, (float)_uiInteractable->getSize().y});
     }
 
     static char getCorrectChar(const KeyEvent* _keyEvent) {
@@ -41,7 +41,7 @@ namespace GDE {
         return _chosen;
     }
 
-    void UIInteractable::onEvent(Node* _node, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas) {
+    void UIInteractable::onEvent(Node* _node, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event) {
         if (!_node->hasComponent<Active>() || !interactable) return;
 
         if(focused) {
@@ -65,7 +65,7 @@ namespace GDE {
             }
         }
 
-        auto _eventInsideElement = trigger(_node, _engine, _canvas);
+        auto _eventInsideElement = trigger(_node, _engine);
 
         if(_eventInsideElement && !_event.handled) {
 

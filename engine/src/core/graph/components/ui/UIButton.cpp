@@ -5,6 +5,7 @@
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UIText.h"
 #include "core/Engine.h"
+#include "core/graph/components/ui/UITransform.h"
 
 namespace GDE {
 
@@ -38,7 +39,7 @@ namespace GDE {
     }
 
     Vec2F UIButton::getSize() const {
-        return UI::interaction->sizeOfInteraction;
+        return ((UITransform*)node->getTransform())->getSize();
     }
 
     UIButtonConfig UIButton::getConfig() {
@@ -78,8 +79,8 @@ namespace GDE {
             config.font = _manager->fontManager.getDefaultFont("MontserratRegular");
         }
 
-        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
-        UI::interaction->sizeOfInteraction = Vec2F {config.buttonSize.x * _parentSize.x, config.buttonSize.y * _parentSize.y };
+        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
+        ((UITransform*)node->getTransform())->setSize({config.buttonSize.x * _parentSize.x, config.buttonSize.y * _parentSize.y });
 
         if(nineSliceSprite != nullptr) {
             nineSliceSprite->setSize(config.buttonSize);

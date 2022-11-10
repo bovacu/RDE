@@ -39,16 +39,17 @@ namespace GDE {
         tickSprite->color = config.tickColor;
         tickTransform = (UITransform*)_tickNode->getTransform();
 
-        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
-        UI::interaction->sizeOfInteraction = Vec2F { checkboxBackgroundSprite->getSize().x + textRenderer->getSize().x,
-                                               checkboxBackgroundSprite->getSize().y > textRenderer->getSize().y ? checkboxBackgroundSprite->getSize().y : textRenderer->getSize().y
-                                             } + Vec2F { config.checkboxTextOffset.x * _parentSize.x, config.checkboxTextOffset.y * _parentSize.y };
+        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
+        auto _size = Vec2F { checkboxBackgroundSprite->getSize().x + textRenderer->getSize().x,
+                       checkboxBackgroundSprite->getSize().y > textRenderer->getSize().y ? checkboxBackgroundSprite->getSize().y : textRenderer->getSize().y
+        } + Vec2F { config.checkboxTextOffset.x * _parentSize.x, config.checkboxTextOffset.y * _parentSize.y };
+        ((UITransform*)node->getTransform())->setSize(_size);
 
         setConfig(_manager, config);
     }
 
     Vec2F UICheckbox::getSize() const {
-        return UI::interaction->sizeOfInteraction;
+        return ((UITransform*)node->getTransform())->getSize();
     }
 
     UICheckboxConfig UICheckbox::getConfig() {
@@ -97,9 +98,9 @@ namespace GDE {
             checkboxSize = checkboxBackgroundSprite->getSize();
         }
 
-        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
         auto _offset = Vec2F { config.checkboxTextOffset.x * _parentSize.x, config.checkboxTextOffset.y * _parentSize.y};
-        UI::interaction->sizeOfInteraction = Vec2F { checkboxSize.x + textRendererSize.x, checkboxSize.y > textRendererSize.y ? checkboxSize.y : textRendererSize.y } + _offset;
+        ((UITransform*)node->getTransform())->setSize(Vec2F { checkboxSize.x + textRendererSize.x, checkboxSize.y > textRendererSize.y ? checkboxSize.y : textRendererSize.y } + _offset);
 
         if(tickSprite != nullptr) {
             tickSprite->enabled = config.checked;
@@ -107,7 +108,8 @@ namespace GDE {
 
         if(checkboxBackgroundTransform != nullptr) {
             auto _checkboxBackgroundPos = checkboxBackgroundTransform->getPosition();
-            checkboxBackgroundTransform->setPosition(_checkboxBackgroundPos.x - UI::interaction->sizeOfInteraction.x / 2.f + checkboxBackgroundSprite->getSize().x / 2.f, _checkboxBackgroundPos.y);
+            auto _size = ((UITransform*)node->getTransform())->getSize();
+            checkboxBackgroundTransform->setPosition(_checkboxBackgroundPos.x - _size.x / 2.f + checkboxBackgroundSprite->getSize().x / 2.f, _checkboxBackgroundPos.y);
         }
 
         if(textTransform != nullptr) {

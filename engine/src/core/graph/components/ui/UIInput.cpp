@@ -44,7 +44,7 @@ namespace GDE {
 //        placeholderTextRenderer->setPivot({ 0.f, 0.5f });
         auto _placeholderPosition = _placeholderTransform->getPosition();
 
-        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
         _placeholderTransform->setPosition(_placeholderPosition.x - config.inputSize.x * _parentSize.x / 2.f + config.textsOffsetFromLeft.x * _parentSize.x,
                                            _placeholderPosition.y + config.textsOffsetFromLeft.y * _parentSize.y);
 
@@ -106,8 +106,8 @@ namespace GDE {
             config.font = _manager->fontManager.getSpecificFont("MontserratRegular", 40);
         }
 
-        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
-        UI::interaction->sizeOfInteraction = Vec2F { config.inputSize.x * _parentSize.x, config.inputSize.y * _parentSize.y };
+        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
+        ((UITransform*)node->getTransform())->setSize({ config.inputSize.x * _parentSize.x, config.inputSize.y * _parentSize.y });
 
         if(nineSliceSprite != nullptr) {
             nineSliceSprite->setSize(config.inputSize);
@@ -268,7 +268,7 @@ namespace GDE {
             _width += _font->getChars()[textRenderer->getText()[_i]].advance.x + textRenderer->spaceBetweenChars;
         }
 
-        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
         if(_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * _parentSize.x * 2.f >= getSize().x * _parentSize.x) {
             textDisplacement = (_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * _parentSize.y * 2.f) - getSize().x * _parentSize.x;
         } else {

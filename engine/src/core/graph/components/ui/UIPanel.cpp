@@ -4,6 +4,7 @@
 
 #include "core/graph/components/ui/UIPanel.h"
 #include "core/Engine.h"
+#include "core/graph/components/ui/UITransform.h"
 
 namespace GDE {
 
@@ -23,7 +24,7 @@ namespace GDE {
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;
 
-        UI::interaction->sizeOfInteraction = config.size;
+        ((UITransform*)_node->getTransform())->setSize(config.size);
         UI::interaction->onInnerMouseEntered.bind<&foo>();
         UI::interaction->onInnerMouseExited.bind<&foo>();
         UI::interaction->onInnerClicking.bind<&foo2>();
@@ -64,8 +65,8 @@ namespace GDE {
             config.size = Vec2F { 0.05f * (_isLandscape ? 1.f : _aspectRatio), 0.05f * (_isLandscape ? _aspectRatio : 1.f) };
         }
 
-        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
-        UI::interaction->sizeOfInteraction = Vec2F {config.size.x * _parentSize.x, config.size.y * _parentSize.y };
+        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
+        ((UITransform*)node->getTransform())->setSize( {config.size.x * _parentSize.x, config.size.y * _parentSize.y });
 
         if(nineSliceSprite != nullptr) {
             nineSliceSprite->setSize(config.size);

@@ -91,7 +91,7 @@ namespace GDE {
     void Canvas::onEventTreeElement(CanvasElement* _canvasElement, void* _data) {
         auto* _onEventData = (OnEventData*)_data;
         if(_canvasElement->interactable) {
-            _canvasElement->interactable->onEvent(_canvasElement->node, _onEventData->engine, *_onEventData->eventDispatcher, *_onEventData->event, this);
+            _canvasElement->interactable->onEvent(_canvasElement->node, _onEventData->engine, *_onEventData->eventDispatcher, *_onEventData->event);
         }
     }
 

@@ -134,20 +134,14 @@ namespace GDE {
              */
             MDelegate<void(int)> onMobileClick;
 
-            /**
-             * @brief Size of the rectangle of interaction. Inside this area, there will be interaction, outside it will be ignored.
-             */
-            Vec2F sizeOfInteraction = { 32, 32 };
-
         private:
             /**
              * @brief Function called inside the Graph system to take the events and handle them inside the UI elements.
              * @param _nodeID Entity that has the UI element
              * @param _eventDispatcher Event dispatcher
              * @param _event Event being handled
-             * @param _canvas Canvas that contains the Entity
              */
-            void onEvent(Node* _node, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event, Canvas* _canvas);
+            void onEvent(Node* _node, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event);
     };
 
     struct CommonUIConfig {

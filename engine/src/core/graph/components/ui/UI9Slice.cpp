@@ -98,7 +98,7 @@ namespace GDE {
         // TODO this calculations are an absolute mess, I need to clean this up, rename variables, make it clearer and remove redundant operations, but I'm scared.
         auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
         auto _originOffset = UI::getOriginOffset();
-        auto _parentSize = node->getTransform()->parentTransform->node->getComponent<UIInteractable>()->sizeOfInteraction;
+        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform->node->getTransform())->getSize();
         auto _uiSize = ((UITransform*)node->getTransform())->getSize();
 
         for(auto _i = 0; _i < _rectsAmount; _i++) {
