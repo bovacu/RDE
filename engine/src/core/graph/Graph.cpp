@@ -94,7 +94,7 @@ namespace GDE {
             if(!hasComponent<Active>(_camera->node->getID())) continue;
 
             _renderManager.beginDraw(*_camera, getComponent<Transform>(_camera->node->getID()));
-            _camera->setCameraSize(_camera->getCameraSize());
+//            _camera->setCameraSize(_camera->getCameraSize());
             _camera->update();
             {
 

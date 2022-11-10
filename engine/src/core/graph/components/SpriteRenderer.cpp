@@ -83,8 +83,8 @@ namespace GDE {
         auto _vertexCount = _vertices.size();
 
         auto [_transformMat, _dirty] = _transform.localToWorld();
+        calculateGeometry(_transformMat, _transform, _viewport);
         if(_dirty || dirty) {
-            calculateGeometry(_transformMat, _transform, _viewport);
             _transform.clearDirty();
             dirty = false;
         }

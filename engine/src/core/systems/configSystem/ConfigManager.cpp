@@ -36,8 +36,11 @@ namespace GDE {
         _config->windowData.vsync = !_data.contains("vsync") || _data["vsync"].get<bool>();
 
         #if !IS_MOBILE()
-        _config->windowData.size = _data.contains("resolution") ? Vec2<unsigned int>{_data["resolution"][0].get<unsigned int>(),_data["resolution"][1].get<unsigned int>()} :
-                                   Vec2<unsigned int> {1280, 720};
+        if(!_data.contains("resolution")) {
+            throw std::runtime_error("Config must contain the 'resolution' attribute, which is a Vec2I. This is the reference resolution the game will use to scale everything correctly. Only set for PC");
+        }
+        _config->windowData.resolution = Vec2I { _data["resolution"][0].get<int>(),_data["resolution"][1].get<int>() };
+        _config->windowData.size = _data.contains("resolution") ? Vec2I { _data["resolution"][0].get<int>(),_data["resolution"][1].get<int>() } : _config->windowData.size;
         #endif
 
         _config->projectData.iconPath = _data.contains("icon") ? _data["icon"].get<std::string>() : "";
@@ -407,16 +410,7 @@ namespace GDE {
             #else
                 auto _viewPortType = _cameraJson["viewport"].get<std::string>();
                 if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
-
-                    auto _virtualRes = _cameraJson.contains("view_port_virtual_resolution") && _cameraJson["view_port_virtual_resolution"].size() == 2 ?
-                                       Vec2I{_cameraJson["view_port_virtual_resolution"][0].get<int>(), _cameraJson["view_port_virtual_resolution"][1].get<int>()} :
-                                       _window->getWindowSize();
-
-                    auto _deviceRes = _cameraJson.contains("view_port_device_resolution") && _cameraJson["view_port_device_resolution"].size() == 2 ?
-                                      Vec2I{_cameraJson["view_port_device_resolution"][0].get<int>(), _cameraJson["view_port_device_resolution"][1].get<int>()} :
-                                      _window->getWindowSize();
-
-                    _scene->getMainCamera()->setAdaptiveViewport(_virtualRes, _deviceRes);
+                    _scene->getMainCamera()->setAdaptiveViewport(_scene->engine->gdeConfig.windowData.resolution, _scene->engine->gdeConfig.windowData.size);
                 } else if(std::equal(_viewPortType.begin(), _viewPortType.end(), "FREE")) {
                     _scene->getMainCamera()->setFreeViewport(_window->getWindowSize());
                 } else {
@@ -425,7 +419,6 @@ namespace GDE {
                 }
             #endif
 
-            _scene->getMainCamera()->getViewport()->update(_window->getWindowSize());
         } else {
             auto* _ownerTransform = _node->getTransform();
             auto* _camera = _node->addComponent<Camera>(_window);
@@ -444,16 +437,7 @@ namespace GDE {
             #else
                 auto _viewPortType = _cameraJson["viewport"].get<std::string>();
                 if(std::equal(_viewPortType.begin(), _viewPortType.end(), "ADAPTIVE")) {
-
-                    auto _virtualRes = _cameraJson.contains("view_port_virtual_resolution") && _cameraJson["view_port_virtual_resolution"].size() == 2 ?
-                                       Vec2I{_cameraJson["view_port_virtual_resolution"][0].get<int>(), _cameraJson["view_port_virtual_resolution"][1].get<int>()} :
-                                       _window->getWindowSize();
-
-                    auto _deviceRes = _cameraJson.contains("view_port_device_resolution") && _cameraJson["view_port_device_resolution"].size() == 2 ?
-                                      Vec2I{_cameraJson["view_port_device_resolution"][0].get<int>(), _cameraJson["view_port_device_resolution"][1].get<int>()} :
-                                      _window->getWindowSize();
-
-                    _camera->setAdaptiveViewport(_virtualRes, _deviceRes);
+                    _camera->setAdaptiveViewport(_scene->engine->gdeConfig.windowData.resolution, _scene->engine->gdeConfig.windowData.size);
                 } else if(std::equal(_viewPortType.begin(), _viewPortType.end(), "FREE")) {
                     _camera->setFreeViewport(_window->getWindowSize());
                 } else {
@@ -462,7 +446,6 @@ namespace GDE {
                 }
             #endif
 
-            _camera->getViewport()->update(_window->getWindowSize());
             LOG_I("Created camera with viewport of size: ", _window->getWindowSize())
             _scene->getCameras().push_back(_camera);
         }

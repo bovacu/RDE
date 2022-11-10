@@ -17,6 +17,9 @@ namespace GDE {
     FORWARD_DECLARE_CLASS(IRenderizable)
 
     class IViewPort {
+
+        FRIEND_CLASS(Camera)
+
         protected:
             /**
              * @brief Resolution that we want to render at.
@@ -33,10 +36,12 @@ namespace GDE {
              */
             Vec2F scalingFactor = {1, 1};
 
+        protected:
             /**
-             * @brief Aspect ratio of the Window or device screen.
-             */
-            float aspectRatio = -1;
+            * @brief Updates the device resolution.
+            * @param _deviceSize Device resolution
+            */
+            virtual void update(const Vec2I& _deviceSize, bool _isLandscape) = 0;
 
         public:
             /**
@@ -64,12 +69,6 @@ namespace GDE {
             [[nodiscard]] Vec2I getDeviceResolution() const;
 
             /**
-             * @brief Updates the device resolution.
-             * @param _deviceSize Device resolution
-             */
-            virtual void update(const Vec2I& _deviceSize) = 0;
-
-            /**
              * @brief Updates the virtual resolution.
              * @param _virtualResolution Virtual resolution
              */
@@ -82,13 +81,16 @@ namespace GDE {
      * @brief Make everything scale with the aspect-ratio of the device size and virtual device
      */
     class AdaptiveViewPort : public IViewPort {
+
+        FRIEND_CLASS(Camera)
+
         public:
             explicit AdaptiveViewPort(const Vec2I& _virtualDesiredResolution);
 
             /**
              * @see IViewPort
              */
-            void update(const Vec2I& _deviceSize) override;
+            void update(const Vec2I& _deviceSize, bool _isLandscape) override;
 
             /**
              * @see IViewPort
@@ -102,13 +104,16 @@ namespace GDE {
      * @brief The bigger the device screen, the more you show, the smaller, the less
      */
     class FreeViewPort : public IViewPort {
+
+        FRIEND_CLASS(Camera)
+
         public:
-            explicit FreeViewPort(const Vec2I & _windowSize);
+            explicit FreeViewPort(const Vec2I& _windowSize);
 
             /**
              * @see IViewPort
              */
-            void update(const Vec2I& _deviceSize) override;
+            void update(const Vec2I& _deviceSize, bool _isLandscape) override;
 
             /**
              * @see IViewPort

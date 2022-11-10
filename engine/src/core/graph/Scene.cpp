@@ -23,10 +23,6 @@ namespace GDE {
     }
 
     void Scene::onUpdate(Delta _dt) {
-        mainCamera->viewport->update(engine->getWindow().getWindowSize());
-        for(auto& _canvas : canvases) {
-            _canvas->getCamera()->viewport->update(engine->getWindow().getWindowSize());
-        }
         mainGraph.onUpdate(_dt);
     }
 

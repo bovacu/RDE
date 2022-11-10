@@ -556,15 +556,15 @@ namespace GDE {
             }
 
             if(_viewPortSelected == "Adaptative Aspect") {
-                ImGui::Text("Virtual Resolution");
-                int _pos[2] = {_camera->getViewport()->getVirtualResolution().x, _camera->getViewport()->getVirtualResolution().y};
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(100);
-                ImGui::PushID(createID());
-                if(ImGui::InputInt2("##myInput", _pos)) {
-                    _camera->getViewport()->updateVirtualResolution({_pos[0], _pos[1]});
-                }
-                ImGui::PopID();
+//                ImGui::Text("Virtual Resolution");
+//                int _pos[2] = {_camera->getViewport()->getVirtualResolution().x, _camera->getViewport()->getVirtualResolution().y};
+//                ImGui::SameLine();
+//                ImGui::SetNextItemWidth(100);
+//                ImGui::PushID(createID());
+//                if(ImGui::InputInt2("##myInput", _pos)) {
+//                    _camera->getViewport()->updateVirtualResolution({_pos[0], _pos[1]});
+//                }
+//                ImGui::PopID();
             }
             ImGui::PopID();
 

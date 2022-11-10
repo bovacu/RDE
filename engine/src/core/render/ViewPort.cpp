@@ -9,13 +9,11 @@ namespace GDE {
     }
 
     float IViewPort::getAspectRatio() const {
-//        return aspectRatio;
-        return 1.777776f;
+        return virtualResolution.x >= virtualResolution.y ? (float)virtualResolution.x / (float)virtualResolution.y : (float)virtualResolution.y / (float)virtualResolution.x;
     }
 
     Vec2F IViewPort::getScalingFactor() const {
-//        return scalingFactor;
-        return {1, 1};
+        return scalingFactor;
     }
 
     Vec2I IViewPort::getDeviceResolution() const {
@@ -31,10 +29,7 @@ namespace GDE {
         deviceResolution = _windowSize;
     }
 
-    void FreeViewPort::update(const Vec2I& _deviceSize) {
-        virtualResolution = _deviceSize;
-        aspectRatio = (float)_deviceSize.x / (float)_deviceSize.y;
-        scalingFactor = {1, 1};
+    void FreeViewPort::update(const Vec2I& _deviceSize, bool _isLandscape) {
         deviceResolution = _deviceSize;
     }
 
@@ -48,9 +43,7 @@ namespace GDE {
         virtualResolution = _virtualDesiredResolution;
     }
 
-    void AdaptiveViewPort::update(const Vec2I& _deviceSize) {
-        scalingFactor = {(float)virtualResolution.x / (float)_deviceSize.x, (float)virtualResolution.y / (float)_deviceSize.y};
-        aspectRatio = (float)_deviceSize.x / (float)_deviceSize.y;
+    void AdaptiveViewPort::update(const Vec2I& _deviceSize, bool _isLandscape) {
         deviceResolution = _deviceSize;
     }
 

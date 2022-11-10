@@ -165,7 +165,7 @@ namespace GDE {
         #if !IS_MOBILE()
         frameBuffer->resize(_width, _height);
         #endif
-        manager.sceneManager.getDisplayedScene()->getMainCamera()->onResize(_width, _height);
+        manager.sceneManager.getDisplayedScene()->getMainCamera()->setCameraSize(_width, _height);
 
         for(auto* _canvas : manager.sceneManager.getDisplayedScene()->getCanvases()) {
             _canvas->onResize(_width, _height);

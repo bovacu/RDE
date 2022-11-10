@@ -25,6 +25,7 @@ namespace GDE {
         scene = _scene;
         auto _cameraNode = graph.createNode("CanvasCamera");
         camera = _cameraNode->addComponent<Camera>(_window);
+        camera->setCameraSize(_window->getWindowSize());
         graph.onDataChanged.bind<&Canvas::onTreeChanged>(this);
     }
 
@@ -393,6 +394,7 @@ namespace GDE {
 
     void Canvas::onResize(uint _width, uint _height) {
         ((UITransform*)graph.sceneRoot->getTransform())->setSize({ (float)_width, (float)_height });
+        camera->setCameraSize((int)_width, (int)_height);
     }
 
 }

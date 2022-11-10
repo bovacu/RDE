@@ -37,23 +37,23 @@ namespace GDE {
             }
 
             static Vec2F worldToScreenCoords(const IViewPort& _viewport, const Vec2F& _position) {
-                auto _windowSize = _viewport.getDeviceResolution();
-                return {_position.x * _viewport.getAspectRatio() * _viewport.getScalingFactor().x / ((float)_windowSize.x / 2),
-                        _position.y * _viewport.getScalingFactor().y / ((float)_windowSize.y / 2)};
+                auto _windowSize = _viewport.getVirtualResolution();
+                return {_position.x * _viewport.getAspectRatio() / _viewport.getScalingFactor().x / ((float)_windowSize.x / 2),
+                        _position.y / _viewport.getScalingFactor().y / ((float)_windowSize.y / 2)};
             }
 
             #if !IS_MAC() && !IS_WINDOWS() && !IS_MOBILE()
             [[gnu::warning("Probably broken some versions ago, check it out again")]]
             #endif
             static Vec2F screenToWorldCoords(const IViewPort& _viewport, const Vec2F& _position) {
-                auto _windowSize = _viewport.getDeviceResolution();
+                auto _windowSize = _viewport.getVirtualResolution();
                 return {_position.x / _viewport.getAspectRatio() * ((float)_windowSize.x / 2), _position.y * ((float)_windowSize.y / 2)};
             }
 
             static Vec2F worldToScreenSize(const IViewPort& _viewport, const Vec2F& _size) {
-                auto _windowSize = _viewport.getDeviceResolution();
-                return {_size.x * _viewport.getAspectRatio() * _viewport.getScalingFactor().x / ((float)_windowSize.x),
-                        _size.y * _viewport.getScalingFactor().y / ((float)_windowSize.y)};
+                auto _windowSize = _viewport.getVirtualResolution();
+                return {_size.x * _viewport.getAspectRatio() / _viewport.getScalingFactor().x / ((float)_windowSize.x),
+                        _size.y / _viewport.getScalingFactor().y / ((float)_windowSize.y)};
             }
 
             static void worldToScreenSize(const IViewPort& _viewport, float& _x, float& _y) {

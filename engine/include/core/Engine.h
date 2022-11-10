@@ -44,7 +44,9 @@ namespace GDE {
             /**
              * @brief Size of the window.
              */
-            Vec2<unsigned int> size { 1280, 720 };
+            Vec2I size { 1280, 720 };
+
+            Vec2I resolution { 1280, 720 };
 
             /**
              * @brief Fullscreen active or not.
