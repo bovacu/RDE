@@ -39,6 +39,13 @@ namespace GDE {
     void SceneManager::displayScene(const std::string& _sceneName) {
         sceneDisplayed = scenes[_sceneName];
         sceneDisplayed->onInit();
+        auto _windowSize = engine->getWindow().getWindowSize();
+
+        sceneDisplayed->getMainCamera()->onResize(_windowSize.x, _windowSize.y);
+        for(auto& _canvas : sceneDisplayed->getCanvases()) {
+            _canvas->getCamera()->onResize(_windowSize.x, _windowSize.y);
+        }
+        
         LOG_DEBUG("Displayed scene '", _sceneName, "'")
     }
 
