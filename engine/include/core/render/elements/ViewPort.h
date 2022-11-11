@@ -67,6 +67,8 @@ namespace GDE {
              */
             [[nodiscard]] Vec2I getDeviceResolution() const;
 
+            bool isLandscape() const { return landscape; }
+
             virtual ~ViewPort() {};
     };
 }

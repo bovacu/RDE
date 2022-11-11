@@ -16,11 +16,11 @@ namespace GDE {
     }
 
     float ViewPort::getVirtualAspectRatio() const {
-        return landscape ? (float)virtualResolution.x / (float)virtualResolution.y : (float)virtualResolution.y / (float)virtualResolution.x;
+        return (float)virtualResolution.x / (float)virtualResolution.y;
     }
 
     float ViewPort::getPhysicalAspectRatio() const {
-        return landscape ? (float)deviceResolution.x / (float)deviceResolution.y : (float)deviceResolution.y / (float)deviceResolution.x;
+        return (float)deviceResolution.x / (float)deviceResolution.y;
     }
 
     Vec2I ViewPort::getDeviceResolution() const {

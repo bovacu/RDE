@@ -46,12 +46,14 @@ namespace GDE {
             #endif
             static Vec2F screenToWorldCoords(const ViewPort& _viewport, const Vec2F& _position) {
                 auto _windowSize = _viewport.getVirtualResolution();
-                return {_position.x / _viewport.getVirtualAspectRatio() * ((float)_windowSize.x * 0.5f), _position.y * ((float)_windowSize.y * 0.5f) };
+                return {_position.x / _viewport.getVirtualAspectRatio() * ((float)_windowSize.x * 0.5f),
+                        _position.y * ((float)_windowSize.y * 0.5f) };
             }
 
             static Vec2F worldToScreenSize(const ViewPort& _viewport, const Vec2F& _size) {
                 auto _virtualRes = _viewport.getVirtualResolution();
-                return {_size.x * _viewport.getVirtualAspectRatio() / ((float)_virtualRes.x), _size.y / ((float)_virtualRes.y) };
+                return {_size.x * _viewport.getVirtualAspectRatio() / ((float)_virtualRes.x),
+                        _size.y / ((float)_virtualRes.y) };
             }
 
             static Vec2F worldToScreenCoordsUI(const ViewPort& _viewport, const Vec2F& _position) {

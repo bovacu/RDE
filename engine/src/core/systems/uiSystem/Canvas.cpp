@@ -271,19 +271,9 @@ namespace GDE {
             auto _physicalRes = _viewport->getDeviceResolution();
             auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
 
-            if(camera->isLandscape()) {
-                if(_scale.y != 1) {
-                    _pos       *= _scale.y;
-                    _size      *= _scale.y;
-                    _pointSize *= _scale.y;
-                }
-            } else {
-                if(_scale.x != 1) {
-                    _pos       *= _scale.x;
-                    _size      *= _scale.x;
-                    _pointSize *= _scale.x;
-                }
-            }
+            _pos       *= _scale.y;
+            _size      *= _scale.y;
+            _pointSize *= _scale.y;
 
             _shape.makeSquare(_pos, _size);
             _shape.showOutsideColor(true);
