@@ -198,6 +198,13 @@ namespace GDE {
         dirty = true;
     }
 
+    void Transform::translateMatrixModelPosition(const Vec2F& _worldPos) {
+        worldMatrixCache[3][0] += _worldPos.x;
+        worldMatrixCache[3][1] += _worldPos.y;
+        setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
+        dirty = true;
+    }
+
     void Transform::setMatrixModelRotation(float _rotation) {
         glm::vec3 _scale;
         glm::quat _rot;

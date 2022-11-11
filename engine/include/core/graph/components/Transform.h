@@ -147,6 +147,7 @@ namespace GDE {
             [[nodiscard]] Vec2F getModelMatrixScale();
             [[nodiscard]] float getModelMatrixRotation();
             void setMatrixModelPosition(const Vec2F& _worldPos);
+            void translateMatrixModelPosition(const Vec2F& _worldPos);
             void setMatrixModelRotation(float _rotation);
 
             [[nodiscard]] glm::mat4 localToParent() const;

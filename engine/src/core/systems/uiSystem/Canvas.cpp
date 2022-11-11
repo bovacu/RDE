@@ -259,17 +259,40 @@ namespace GDE {
         auto& _renderManager = graph.scene->engine->manager.renderManager;
        _renderManager.beginDebugDraw(*camera, (Transform*)graph.getComponent<UITransform>(camera->node->getID()));
 
-        _registry.group<UI9Slice>(entt::get<UITransform, Active>).each([&_renderManager](const auto _entity, UI9Slice& _ui9Slice, UITransform& _transform, const Active& _) {
+        _registry.group<UI9Slice>(entt::get<UITransform, Active>).each([this, &_renderManager](const auto _entity, UI9Slice& _ui9Slice, UITransform& _transform, const Active& _) {
             if(!_ui9Slice.enabled) return;
             DebugShape _shape;
-            _shape.makeSquare(_transform.getModelMatrixPosition(), _ui9Slice.getSize());
+            Vec2F _pos = _transform.getModelMatrixPosition();
+            Vec2F _size = _ui9Slice.getSize();
+            Vec2F _pointSize = {4, 4};
+
+            auto _viewport = camera->getViewport();
+            auto _virtualRes = _viewport->getVirtualResolution();
+            auto _physicalRes = _viewport->getDeviceResolution();
+            auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
+
+            if(camera->isLandscape()) {
+                if(_scale.y != 1) {
+                    _pos       *= _scale.y;
+                    _size      *= _scale.y;
+                    _pointSize *= _scale.y;
+                }
+            } else {
+                if(_scale.x != 1) {
+                    _pos       *= _scale.x;
+                    _size      *= _scale.x;
+                    _pointSize *= _scale.x;
+                }
+            }
+
+            _shape.makeSquare(_pos, _size);
             _shape.showOutsideColor(true);
             _shape.setOutlineColor(Color::Blue);
             _shape.showInnerColor(false);
             _shape.setRotation(_transform.getModelMatrixRotation());
             _renderManager.drawShape(_shape);
 
-            _renderManager.drawSquare(_transform.getModelMatrixPosition(), {4, 4}, Color::Blue);
+            _renderManager.drawSquare(_pos, _pointSize, Color::Blue);
             _renderManager.setPointSize(4);
             // TODO: PIVOT CHANGES
 //            _renderManager.drawPoint({_transform.getModelMatrixPosition().x - (_ui9Slice.getSize().x * 0.5f - _ui9Slice.getSize().x * _transform.getPivot().x),

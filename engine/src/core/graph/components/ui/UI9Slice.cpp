@@ -37,6 +37,7 @@ namespace GDE {
         }
 
         auto [_transformMat, _dirty] = _transform.localToWorld();
+        // TODO: check why _dirty is always true, it is recalculating the geometry each frame.
         if(_dirty || dirty) {
             calculateGeometry(_transformMat, _transform, _viewport);
             _transform.clearDirty();
@@ -213,7 +214,7 @@ namespace GDE {
             _current9SliceMat = _transformMat * _current9SliceMat;
 
             auto _subTextureReposition = Vec2F { _originOffset.x, _originOffset.y };
-            auto _screenPos = Util::worldToScreenCoords(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
+            auto _screenPos = Util::worldToScreenCoordsUI(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
             _current9SliceMat[3][0] = _screenPos.x;
             _current9SliceMat[3][1] = _screenPos.y;
 
@@ -223,7 +224,7 @@ namespace GDE {
 
             Vec2F _textureTileSize = {(float)_subTextureRegion.size.x, (float)_subTextureRegion.size.y};
             Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y};
-            auto _textureTileSizeOnScreen = Util::worldToScreenSize(_viewport, _textureTileSize);
+            auto _textureTileSizeOnScreen = Util::worldToScreenSizeUI(_viewport, _textureTileSize);
 
             glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
             glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };

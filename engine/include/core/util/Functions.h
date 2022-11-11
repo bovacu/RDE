@@ -21,7 +21,7 @@ namespace GDE {
             #define clampI(_value, _minValue, _maxValue) Util::clamp<int>(_value, _minValue, _maxValue)
             #define clampL(_value, _minValue, _maxValue) Util::clamp<long>(_value, _minValue, _maxValue)
 
-            static std::string getFileNameFromPath(const std::string& _path)  {
+            static std::string getFileNameFromPath(const std::string& _path) {
                 std::string base_filename = _path.substr(_path.find_last_of("/\\") + 1);
                 std::string::size_type const p(base_filename.find_last_of('.'));
                 return base_filename.substr(0, p);
@@ -38,7 +38,7 @@ namespace GDE {
 
             static Vec2F worldToScreenCoords(const ViewPort& _viewport, const Vec2F& _position) {
                 auto _windowSize = _viewport.getVirtualResolution();
-                return {_position.x * _viewport.getVirtualAspectRatio() / ((float)_windowSize.x / 2), _position.y / ((float)_windowSize.y / 2) };
+                return {_position.x * _viewport.getVirtualAspectRatio() / ((float)_windowSize.x * 0.5f), _position.y / ((float)_windowSize.y * 0.5f) };
             }
 
             #if !IS_MAC() && !IS_WINDOWS() && !IS_MOBILE()
@@ -46,12 +46,26 @@ namespace GDE {
             #endif
             static Vec2F screenToWorldCoords(const ViewPort& _viewport, const Vec2F& _position) {
                 auto _windowSize = _viewport.getVirtualResolution();
-                return {_position.x / _viewport.getVirtualAspectRatio() * ((float)_windowSize.x / 2), _position.y * ((float)_windowSize.y / 2) };
+                return {_position.x / _viewport.getVirtualAspectRatio() * ((float)_windowSize.x * 0.5f), _position.y * ((float)_windowSize.y * 0.5f) };
             }
 
             static Vec2F worldToScreenSize(const ViewPort& _viewport, const Vec2F& _size) {
-                auto _windowSize = _viewport.getVirtualResolution();
-                return {_size.x * _viewport.getVirtualAspectRatio() / ((float)_windowSize.x), _size.y / ((float)_windowSize.y) };
+                auto _virtualRes = _viewport.getVirtualResolution();
+                return {_size.x * _viewport.getVirtualAspectRatio() / ((float)_virtualRes.x), _size.y / ((float)_virtualRes.y) };
+            }
+
+            static Vec2F worldToScreenCoordsUI(const ViewPort& _viewport, const Vec2F& _position) {
+                auto _physicalRes = _viewport.getDeviceResolution();
+                auto _virtualRes = _viewport.getVirtualResolution();
+                auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
+                return {_position.x * _viewport.getPhysicalAspectRatio() / ((float)_physicalRes.x * 0.5f), _position.y / ((float)_physicalRes.y * 0.5f) };
+            }
+
+            static Vec2F worldToScreenSizeUI(const ViewPort& _viewport, const Vec2F& _size) {
+                auto _physicalRes = _viewport.getDeviceResolution();
+                auto _virtualRes = _viewport.getVirtualResolution();
+                auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
+                return {_size.x * _viewport.getPhysicalAspectRatio() / ((float)_physicalRes.x), _size.y / ((float)_physicalRes.y) };
             }
 
             static void worldToScreenSize(const ViewPort& _viewport, float& _x, float& _y) {

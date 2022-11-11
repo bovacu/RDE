@@ -12,7 +12,7 @@
 namespace GDE {
 
     void UIAnchor::updateAnchor(UITransform* _transform) {
-        auto _parentPosition = _transform->parentTransform->getPosition();
+        auto _parentPosition = _transform->parentTransform->getModelMatrixPosition();
         auto _parentSize = ((UITransform*)_transform->parentTransform->node->getTransform())->getSize();
 
         if((anchor & ANCHOR_BITS) == Anchor::MIDDLE) {
@@ -84,13 +84,14 @@ namespace GDE {
             auto _lastSize = _uiTransform->anchor.anchorSize;
 
             _uiTransform->anchor.updateAnchor(_uiTransform);
-            _uiTransform->translate(_uiTransform->anchor.anchorPosition.x - _lastAnchorPos.x, _uiTransform->anchor.anchorPosition.y - _lastAnchorPos.y);
+            _uiTransform->translateMatrixModelPosition({_uiTransform->anchor.anchorPosition.x - _lastAnchorPos.x,
+                                                        _uiTransform->anchor.anchorPosition.y - _lastAnchorPos.y});
 
             auto _sizeDiff = _uiTransform->anchor.anchorSize - _lastSize;
             if(_sizeDiff != 0) {
                 _uiTransform->setSize(_uiTransform->getSize() + _sizeDiff);
                 // It is half the size because when a change in size happens, it is applied to both sides
-                _uiTransform->translate(_sizeDiff * 0.5f);
+                _uiTransform->translateMatrixModelPosition(_sizeDiff * 0.5f);
             }
         }
     }
