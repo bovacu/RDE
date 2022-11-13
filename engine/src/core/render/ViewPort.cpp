@@ -1,6 +1,7 @@
 // Created by borja on 27/2/22.
 
 #include "core/render/elements/ViewPort.h"
+#include "core/util/Logger.h"
 
 namespace GDE {
 
@@ -29,5 +30,18 @@ namespace GDE {
 
     void ViewPort::update(const Vec2I& _deviceSize) {
         deviceResolution = _deviceSize;
+    }
+
+    void ViewPort::setUIScaleWeightsForWidthAndHeight(float _width, float _height) {
+        if(_width > 1.f || _width < 0.f || _height > 1.f || _height < 0.f || _height + _width != 1.f) {
+            LOG_W("Input values for setting UI scale are ", Vec2F { _width, _height }, " but in some way they don't add up to 1! Not changing values.")
+            return;
+        }
+
+        scaleWithWidth = _width;
+    }
+
+    Vec2F ViewPort::getUIScaleWeights() const {
+        return { scaleWithWidth, 1.f - scaleWithWidth };
     }
 }

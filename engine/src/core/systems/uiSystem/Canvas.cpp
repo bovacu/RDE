@@ -403,4 +403,12 @@ namespace GDE {
         camera->setCameraSize((int)_width, (int)_height);
     }
 
+    void Canvas::setCanvasResolution(const Vec2I& _resolution) {
+        camera->getViewport()->virtualResolution = _resolution;
+    }
+
+    Vec2I Canvas::getCanvasResolution() {
+        return camera->getViewport()->virtualResolution;
+    }
+
 }

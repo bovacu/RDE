@@ -43,8 +43,8 @@ namespace GDE {
      * the scene rendering and life cycle.
      *
      */
-    struct StaticTransform {
-        explicit StaticTransform(Node* _node, Manager* _manager, Graph* _graph) {  }
+    struct OutOfRenderingScope {
+        explicit OutOfRenderingScope(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**

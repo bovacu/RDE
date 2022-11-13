@@ -18,7 +18,7 @@ namespace GDE {
 
     class ViewPort {
 
-        FRIEND_CLASS(Camera)
+        FRIEND_CLASS(Camera, Canvas)
 
         private:
             /**
@@ -32,6 +32,8 @@ namespace GDE {
             Vec2I deviceResolution = {};
 
             bool landscape = true;
+
+            float scaleWithWidth = 0.5f;
 
         protected:
             /**
@@ -66,6 +68,19 @@ namespace GDE {
              * @return Vec2I
              */
             [[nodiscard]] Vec2I getDeviceResolution() const;
+
+            /**
+             * Sets if the UI scales towards width screen changes, height screen changes or both.
+             * @param _width Value between 1f and 0f.
+             * @param _height The complement of _width to add up to 1f.
+             */
+            void setUIScaleWeightsForWidthAndHeight(float _width, float _height);
+
+            /**
+             * Returns the values set in setUIScaleWeightsForWidthAndHeight.
+             * @return Vec2F
+             */
+            Vec2F getUIScaleWeights() const;
 
             bool isLandscape() const { return landscape; }
 

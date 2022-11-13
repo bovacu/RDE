@@ -84,9 +84,9 @@ namespace GDE {
     }
 
     void Graph::onRender() {
-        auto _spriteRendererGroup = registry.group<const SpriteRenderer>(entt::get<Transform, Active>);
-        auto _particleSystemGroup = registry.group<const ParticleSystem>(entt::get<Transform, Active>);
-        auto _textRendererGroup = registry.group<TextRenderer>(entt::get<Transform, Active>);
+        auto _spriteRendererGroup = registry.group<const SpriteRenderer>(entt::get<Transform, Active>,  entt::exclude<OutOfRenderingScope>);
+        auto _particleSystemGroup = registry.group<const ParticleSystem>(entt::get<Transform, Active>,  entt::exclude<OutOfRenderingScope>);
+        auto _textRendererGroup = registry.group<  const TextRenderer>(entt::get<Transform, Active>,    entt::exclude<OutOfRenderingScope>);
 
         auto& _renderManager = scene->engine->manager.renderManager;
 
@@ -94,7 +94,6 @@ namespace GDE {
             if(!hasComponent<Active>(_camera->node->getID())) continue;
 
             _renderManager.beginDraw(*_camera, getComponent<Transform>(_camera->node->getID()));
-//            _camera->setCameraSize(_camera->getCameraSize());
             _camera->update();
             {
 

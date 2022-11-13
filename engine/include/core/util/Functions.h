@@ -58,15 +58,11 @@ namespace GDE {
 
             static Vec2F worldToScreenCoordsUI(const ViewPort& _viewport, const Vec2F& _position) {
                 auto _physicalRes = _viewport.getDeviceResolution();
-                auto _virtualRes = _viewport.getVirtualResolution();
-                auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
                 return {_position.x * _viewport.getPhysicalAspectRatio() / ((float)_physicalRes.x * 0.5f), _position.y / ((float)_physicalRes.y * 0.5f) };
             }
 
             static Vec2F worldToScreenSizeUI(const ViewPort& _viewport, const Vec2F& _size) {
                 auto _physicalRes = _viewport.getDeviceResolution();
-                auto _virtualRes = _viewport.getVirtualResolution();
-                auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
                 return {_size.x * _viewport.getPhysicalAspectRatio() / ((float)_physicalRes.x), _size.y / ((float)_physicalRes.y) };
             }
 

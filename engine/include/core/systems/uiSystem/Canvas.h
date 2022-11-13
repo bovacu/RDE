@@ -97,6 +97,10 @@ namespace GDE {
 
             void onResize(uint _width, uint _height);
 
+            void setCanvasResolution(const Vec2I& _resolution);
+
+            Vec2I getCanvasResolution();
+
         private:
             void traverseTree(Node* _node, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(Node* _node, bool&, void*), void (Canvas::*_postFunc)(Node* _node, void*));
 
