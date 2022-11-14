@@ -90,6 +90,15 @@ namespace GDE {
             auto _sizeDiff = _uiTransform->anchor.anchorSize - _lastSize;
             if(_sizeDiff != 0) {
                 _uiTransform->setSize(_uiTransform->getSize() + _sizeDiff);
+                if(((_uiTransform->anchor.anchor & Anchor::RIGHT) == Anchor::RIGHT) || ((_uiTransform->anchor.anchor & Anchor::RIGHT_BOTTOM) == Anchor::RIGHT_BOTTOM) ||
+                        ((_uiTransform->anchor.anchor & Anchor::RIGHT_TOP) == Anchor::RIGHT_TOP)) {
+                    _sizeDiff.x = -_sizeDiff.x;
+                }
+
+                if(((_uiTransform->anchor.anchor & Anchor::TOP) == Anchor::TOP) || ((_uiTransform->anchor.anchor & Anchor::RIGHT_TOP) == Anchor::RIGHT_TOP) ||
+                   ((_uiTransform->anchor.anchor & Anchor::LEFT_TOP) == Anchor::LEFT_TOP)) {
+                    _sizeDiff.y = -_sizeDiff.y;
+                }
                 // It is half the size because when a change in size happens, it is applied to both sides
                 _uiTransform->translateMatrixModelPosition(_sizeDiff * 0.5f);
             }
