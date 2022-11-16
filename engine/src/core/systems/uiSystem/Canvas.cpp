@@ -56,15 +56,15 @@ namespace GDE {
             _canvasElement.interactable = _node->getComponent<UIInteractable>();
         }
 
-        if(graph.getNodeContainer().any_of<UIText, UIButton, UI9Slice, UIImage, UICheckbox, UISlider>(_node->getID())) {
+        if(graph.getNodeContainer().any_of<UIText, UIButton, UI9Slice, UIImage, UICheckbox, UISlider>(_node->getID()) && _node->isEnabled(DisabledConfig::EnabledConfigRender)) {
             _canvasElement.renderizable = getRenderizable(_node);
         }
 
-        if(graph.getNodeContainer().any_of<UISlider, UIInput>(_node->getID())) {
+        if(graph.getNodeContainer().any_of<UISlider, UIInput>(_node->getID()) && _node->isEnabled(DisabledConfig::EnabledConfigUpdate)) {
             _canvasElement.updatable = getUpdatable(_node);
         }
 
-        if(graph.getNodeContainer().any_of<UIInput>(_node->getID())) {
+        if(graph.getNodeContainer().any_of<UIInput>(_node->getID()) && _node->isEnabled(DisabledConfig::EnabledConfigRender)) {
             _canvasElement.cropping = _node->getTransform()->getChildrenCount();
         }
 

@@ -444,7 +444,6 @@ namespace GDE {
         uiTransformComponent(_graph, _selectedNode);
         uiButtonComponent(_graph, _selectedNode);
         ui9SliceComponent(_graph, _selectedNode);
-        uiPanelComponent(_graph, _selectedNode);
 
         ImGui::End();
     }
@@ -476,6 +475,69 @@ namespace GDE {
             _tag = std::string(_buffer);
         }
         ImGui::Separator();
+    }
+
+    void ImGuiScene::disabledConfigComponent(Transform* _transform) {
+        ImGui::NewLine();
+
+        ImGui::Indent();
+        if(ImGui::CollapsingHeader("Disabled Config")) {
+            auto _node = _transform->node;
+            auto _config = _node->getDisabledConfig();
+
+            if(_transform->parentTransform->node->isEnabled()) {
+                ImGui::PushID(createID());
+                if(ImGui::Checkbox("Event", &_config.disabledForEvent)) {
+                    if(_config.disabledForEvent) {
+                        _node->setDisabled(_config | DisabledConfig::DisabledConfigEvent);
+                    } else {
+                        _node->setDisabled(_config | DisabledConfig::EnabledConfigEvent);
+                    }
+                }
+                ImGui::PopID();
+
+                ImGui::PushID(createID());
+                if(ImGui::Checkbox("Update", &_config.disabledForUpdate)) {
+                    if(_config.disabledForUpdate) {
+                        _node->setDisabled(_config | DisabledConfig::DisabledConfigUpdate);
+                    } else {
+                        _node->setDisabled(_config | DisabledConfig::EnabledConfigUpdate);
+                    }
+                }
+                ImGui::PopID();
+
+                ImGui::PushID(createID());
+                if(ImGui::Checkbox("Fixed Update", &_config.disabledForFixedUpdate)) {
+                    if(_config.disabledForFixedUpdate) {
+                        _node->setDisabled(_config | DisabledConfig::DisabledConfigFixedUpdate);
+                    } else {
+                        _node->setDisabled(_config | DisabledConfig::EnabledConfigFixedUpdate);
+                    }
+                }
+                ImGui::PopID();
+
+                ImGui::PushID(createID());
+                if(ImGui::Checkbox("Render", &_config.disabledForRender)) {
+                    if(_config.disabledForRender) {
+                        _node->setDisabled(_config | DisabledConfig::DisabledConfigRender);
+                    } else {
+                        _node->setDisabled(_config | DisabledConfig::EnabledConfigRender);
+                    }
+                }
+                ImGui::PopID();
+
+                ImGui::PushID(createID());
+                if(ImGui::Checkbox("Late Update", &_config.disabledForLateUpdate)) {
+                    if(_config.disabledForLateUpdate) {
+                        _node->setDisabled(_config | DisabledConfig::DisabledConfigLateUpdate);
+                    } else {
+                        _node->setDisabled(_config | DisabledConfig::EnabledConfigLateUpdate);
+                    }
+                }
+                ImGui::PopID();
+            }
+        }
+        ImGui::Unindent();
     }
 
     void ImGuiScene::transformComponent(Graph* _graph, const NodeID _selectedNode) {
@@ -518,8 +580,10 @@ namespace GDE {
             if(ImGui::DragFloat2("##myInput", _scale, 0.05))
                 _transform->setScale(_scale[0], _scale[1]);
             ImGui::PopID();
-            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
 
+            disabledConfigComponent(_transform);
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 
@@ -828,6 +892,8 @@ namespace GDE {
                 _transform->setScale(_scale[0], _scale[1]);
             ImGui::PopID();
 
+            disabledConfigComponent(_transform);
+
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
@@ -887,32 +953,6 @@ namespace GDE {
 //                clampF(_size[1], 0, FLT_MAX);
 //                _config.buttonSize = { _size[0], _size[1] };
 //                _uiButton->setConfig(&engine->manager, _config);
-//            }
-//            ImGui::PopID();
-
-            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
-        }
-    }
-
-    void ImGuiScene::uiPanelComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<UIPanel>(_selectedNode)) return;
-
-        auto _uiPanel = _graph->getComponent<UIPanel>(_selectedNode);
-
-        if(ImGui::CollapsingHeader("UI Panel", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
-
-//            ImGui::Text("Size ");
-//            float _size[2] = { _uiPanel->nineSliceSprite->getSize().x, _uiPanel->nineSliceSprite->getSize().y };
-//            ImGui::SameLine();
-//            ImGui::SetNextItemWidth(100);
-//            ImGui::PushID(createID());
-//            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
-//                auto _config = _uiPanel->getConfig();
-//                clampF(_size[0], 0, FLT_MAX);
-//                clampF(_size[1], 0, FLT_MAX);
-//                _config.size = { _size[0], _size[1] };
-//                _uiPanel->setConfig(&engine->manager, _config);
 //            }
 //            ImGui::PopID();
 

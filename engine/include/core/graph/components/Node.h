@@ -15,7 +15,7 @@ namespace GDE {
         bool disabledForEvent = false;
         bool disabledForUpdate = false;
         bool disabledForFixedUpdate = false;
-        bool disabledForRender = true;
+        bool disabledForRender = false;
         bool disabledForLateUpdate = false;
 
         static DisabledConfig DisabledConfigEvent;
@@ -130,6 +130,30 @@ namespace GDE {
                         !hasComponent<DisabledForFixedUpdate>() &&
                         !hasComponent<DisabledForRender>()      &&
                         !hasComponent<DisabledForLateUpdate>();
+            }
+
+            [[nodiscard]] bool isEnabled(const DisabledConfig& _disabledConfig) const {
+                if(!_disabledConfig.disabledForEvent) {
+                    if(hasComponent<DisabledForEvent>()) return false;
+                }
+
+                if(!_disabledConfig.disabledForUpdate) {
+                    if(hasComponent<DisabledForUpdate>()) return false;
+                }
+
+                if(!_disabledConfig.disabledForFixedUpdate) {
+                    if(hasComponent<DisabledForFixedUpdate>()) return false;
+                }
+
+                if(!_disabledConfig.disabledForRender) {
+                    if(hasComponent<DisabledForRender>()) return false;
+                }
+
+                if(!_disabledConfig.disabledForLateUpdate) {
+                    if(hasComponent<DisabledForLateUpdate>()) return false;
+                }
+
+                return true;
             }
 
             void overrideParentDisabledConfig(const DisabledConfig& _disabledConfig) {

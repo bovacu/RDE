@@ -69,6 +69,7 @@ namespace GDE {
             void nodeComponents(Graph* _graph, const NodeID _selectedNode);
             void activeComponent(Graph* _graph, const NodeID _selectedNode);
             void transformComponent(Graph* _graph, const NodeID _selectedNode);
+            void disabledConfigComponent(Transform* _transform);
             void tagComponent(Graph* _graph, const NodeID _selectedNode);
             void cameraComponent(Graph* _graph, const NodeID _selectedNode);
             void bodyComponent(Graph* _graph, const NodeID _selectedNode);
@@ -77,7 +78,6 @@ namespace GDE {
 
             void uiTransformComponent(Graph* _graph, const NodeID _selectedNode);
             void uiButtonComponent(Graph* _graph, const NodeID _selectedNode);
-            void uiPanelComponent(Graph* _graph, const NodeID _selectedNode);
             void ui9SliceComponent(Graph* _graph, const NodeID _selectedNode);
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
