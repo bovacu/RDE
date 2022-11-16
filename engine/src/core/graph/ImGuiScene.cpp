@@ -19,6 +19,18 @@ namespace GDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
     static ImGuiContext* i_Context = nullptr;
 
+    static void helpMarker(const char* desc) {
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted(desc);
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+    }
+
     ImGuiScene::ImGuiScene(Engine* _engine) : Scene(_engine, "ImGuiScene") {  }
 
     void ImGuiScene::onInit() {
@@ -452,12 +464,13 @@ namespace GDE {
         bool _active = _graph->hasComponent<Active>(_selectedNode);
         auto _tag = _graph->getComponent<Tag>(_selectedNode)->tag.c_str();
         ImGui::Text("%s", _tag);
-        ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 30);
+        ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 40 - ImGui::CalcTextSize("(?)").x);
         ImGui::PushID(createID());
         if(ImGui::Checkbox("###Active", &_active)) {
             if(_active) _graph->addComponent<Active>(_selectedNode, _graph->getComponent<Node>(_selectedNode), &engine->manager, _graph);
             else _graph->removeComponent<Active>(_selectedNode);
         }
+        helpMarker("This will set the Active property to true/false.\n Setting Active to false will make all of DisabledConfig elements to be disabled for the Node and children.");
         ImGui::PopID();
     }
 
@@ -494,6 +507,7 @@ namespace GDE {
                         _node->setDisabled(_config | DisabledConfig::EnabledConfigEvent);
                     }
                 }
+                helpMarker("This will make the Node and children not to run the main Event function.");
                 ImGui::PopID();
 
                 ImGui::PushID(createID());
@@ -504,6 +518,7 @@ namespace GDE {
                         _node->setDisabled(_config | DisabledConfig::EnabledConfigUpdate);
                     }
                 }
+                helpMarker("This will make the Node and children not to run the main Update function.");
                 ImGui::PopID();
 
                 ImGui::PushID(createID());
@@ -514,6 +529,7 @@ namespace GDE {
                         _node->setDisabled(_config | DisabledConfig::EnabledConfigFixedUpdate);
                     }
                 }
+                helpMarker("This will make the Node and children not to run the main FixedUpdate function.");
                 ImGui::PopID();
 
                 ImGui::PushID(createID());
@@ -524,6 +540,7 @@ namespace GDE {
                         _node->setDisabled(_config | DisabledConfig::EnabledConfigRender);
                     }
                 }
+                helpMarker("This will make the Node and children not to run the main Render function.");
                 ImGui::PopID();
 
                 ImGui::PushID(createID());
@@ -534,6 +551,7 @@ namespace GDE {
                         _node->setDisabled(_config | DisabledConfig::EnabledConfigLateUpdate);
                     }
                 }
+                helpMarker("This will make the Node and children not to run the main LateUpdate function.");
                 ImGui::PopID();
             }
         }
