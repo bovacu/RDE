@@ -11,14 +11,55 @@
 FORWARD_DECLARE_CLASS(Manager)
 
 namespace GDE {
-
     struct DisabledConfig {
         bool disabledForEvent = false;
         bool disabledForUpdate = false;
         bool disabledForFixedUpdate = false;
         bool disabledForRender = true;
         bool disabledForLateUpdate = false;
+
+        static DisabledConfig DisabledConfigEvent;
+        static DisabledConfig DisabledConfigUpdate;
+        static DisabledConfig DisabledConfigFixedUpdate;
+        static DisabledConfig DisabledConfigRender;
+        static DisabledConfig DisabledConfigLateUpdate;
+
+        static DisabledConfig EnabledConfigEvent;
+        static DisabledConfig EnabledConfigUpdate;
+        static DisabledConfig EnabledConfigFixedUpdate;
+        static DisabledConfig EnabledConfigRender;
+        static DisabledConfig EnabledConfigLateUpdate;
+
+        DisabledConfig operator ~() {
+            return {
+                .disabledForEvent       = !disabledForEvent,
+                .disabledForUpdate      = !disabledForUpdate,
+                .disabledForFixedUpdate = !disabledForFixedUpdate,
+                .disabledForRender      = !disabledForRender,
+                .disabledForLateUpdate  = !disabledForRender,
+            };
+        }
     };
+
+    inline DisabledConfig operator |(const DisabledConfig& _config0, const DisabledConfig& _config1) {
+        return {
+                .disabledForEvent       = (_config0.disabledForEvent        || _config1.disabledForEvent),
+                .disabledForUpdate      = (_config0.disabledForUpdate       || _config1.disabledForUpdate),
+                .disabledForFixedUpdate = (_config0.disabledForFixedUpdate  || _config1.disabledForFixedUpdate),
+                .disabledForRender      = (_config0.disabledForRender       || _config1.disabledForRender),
+                .disabledForLateUpdate  = (_config0.disabledForLateUpdate   || _config1.disabledForLateUpdate),
+        };
+    }
+
+    inline DisabledConfig operator &(const DisabledConfig& _config0, const DisabledConfig& _config1) {
+        return {
+                .disabledForEvent       = (_config0.disabledForEvent        && _config1.disabledForEvent),
+                .disabledForUpdate      = (_config0.disabledForUpdate       && _config1.disabledForUpdate),
+                .disabledForFixedUpdate = (_config0.disabledForFixedUpdate  && _config1.disabledForFixedUpdate),
+                .disabledForRender      = (_config0.disabledForRender       && _config1.disabledForRender),
+                .disabledForLateUpdate  = (_config0.disabledForLateUpdate   && _config1.disabledForLateUpdate),
+        };
+    }
 
     struct Node {
         FRIEND_CLASS(ImGuiScene, UISlider)
@@ -65,7 +106,18 @@ namespace GDE {
                 graph->setParent(this, _parent);
             }
 
-            void setEnabled(const DisabledConfig& _disabledConfig) {
+            /**
+             * @brief Enables or disables specific functionalities of a Node. If used on a Node with children, the configuration
+             *        will be inherited to all of them, but can be changed through overrideParentDisabledConfig.
+             *
+             *        There are predefined configs inside DisabledConfig. You can join many of them by using |, &, ~ operators as needed.
+             *
+             *        Example:
+             *              node->setDisabled(DisabledConfig::DisabledConfigRender | DisabledConfig::DisabledConfigUpdate);
+             *
+             * @param _disabledConfig
+             */
+            void setDisabled(const DisabledConfig& _disabledConfig = DisabledConfig::DisabledConfigRender) {
                 if(!getTransform()->parentTransform) return;
                 if(!getTransform()->parentTransform->node->isEnabled()) return;
 
@@ -82,6 +134,16 @@ namespace GDE {
 
             void overrideParentDisabledConfig(const DisabledConfig& _disabledConfig) {
                 applyConfig(_disabledConfig, this);
+            }
+
+            [[nodiscard]] DisabledConfig getDisabledConfig() const {
+                return {
+                    .disabledForEvent       = hasComponent<DisabledForEvent>(),
+                    .disabledForUpdate      = hasComponent<DisabledForUpdate>(),
+                    .disabledForFixedUpdate = hasComponent<DisabledForFixedUpdate>(),
+                    .disabledForRender      = hasComponent<DisabledForRender>(),
+                    .disabledForLateUpdate  = hasComponent<DisabledForLateUpdate>(),
+                };
             }
 
         private:
