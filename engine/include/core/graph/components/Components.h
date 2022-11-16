@@ -38,13 +38,49 @@ namespace GDE {
             short foo;
     };
 
-    /**
-     * @brief Component that helps the internal system work quickier. This component should be added to entities that won't move at all during
-     * the scene rendering and life cycle.
-     *
-     */
-    struct OutOfRenderingScope {
-        explicit OutOfRenderingScope(Node* _node, Manager* _manager, Graph* _graph) {  }
+
+    struct DisabledForRender {
+        explicit DisabledForRender(Node* _node, Manager* _manager, Graph* _graph) {  }
+
+        private:
+            /**
+             * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
+             */
+            short foo;
+    };
+
+    struct DisabledForEvent {
+        explicit DisabledForEvent(Node* _node, Manager* _manager, Graph* _graph) {  }
+
+        private:
+            /**
+             * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
+             */
+            short foo;
+    };
+
+    struct DisabledForUpdate {
+        explicit DisabledForUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
+
+        private:
+            /**
+             * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
+             */
+            short foo;
+    };
+
+    struct DisabledForFixedUpdate {
+        explicit DisabledForFixedUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
+
+        private:
+            /**
+             * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
+             */
+            short foo;
+    };
+
+    struct DisabledForLateUpdate {
+        explicit DisabledForLateUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**

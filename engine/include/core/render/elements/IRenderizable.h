@@ -9,6 +9,7 @@
 #include "core/render/elements/ShaderManager.h"
 #include "core/render/elements/Batch.h"
 #include "core/graph/components/Node.h"
+#include "core/graph/components/Components.h"
 
 namespace GDE {
 

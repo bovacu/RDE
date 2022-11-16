@@ -60,11 +60,11 @@ namespace GDE {
     }
 
     void Graph::onUpdate(Delta _dt) {
-        registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>).each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
+        registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>, entt::exclude<DisabledForUpdate>).each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
             _animationSystem.update(_dt, _spriteRenderer);
         });
 
-        registry.group<ParticleSystem>(entt::get<Active>).each([&_dt](const auto _entity, ParticleSystem& _particleSystem, const Active& _) {
+        registry.group<ParticleSystem>(entt::get<Active>, entt::exclude<DisabledForUpdate>).each([&_dt](const auto _entity, ParticleSystem& _particleSystem, const Active& _) {
             _particleSystem.update(_dt);
         });
 
@@ -79,14 +79,15 @@ namespace GDE {
         onFixedUpdateDel(registry, _dt);
 
         for(auto* _body : scene->engine->manager.physics.bodies) {
+            if(_body->transform->node->hasComponent<DisabledForFixedUpdate>()) continue;
             _body->update();
         }
     }
 
     void Graph::onRender() {
-        auto _spriteRendererGroup = registry.group<const SpriteRenderer>(entt::get<Transform, Active>,  entt::exclude<OutOfRenderingScope>);
-        auto _particleSystemGroup = registry.group<const ParticleSystem>(entt::get<Transform, Active>,  entt::exclude<OutOfRenderingScope>);
-        auto _textRendererGroup = registry.group<  const TextRenderer>(entt::get<Transform, Active>,    entt::exclude<OutOfRenderingScope>);
+        auto _spriteRendererGroup = registry.group<const SpriteRenderer>(entt::get<Transform, Active>, entt::exclude<DisabledForRender>);
+        auto _particleSystemGroup = registry.group<const ParticleSystem>(entt::get<Transform, Active>, entt::exclude<DisabledForRender>);
+        auto _textRendererGroup = registry.group<  const TextRenderer>(entt::get<Transform, Active>, entt::exclude<DisabledForRender>);
 
         auto& _renderManager = scene->engine->manager.renderManager;
 

@@ -152,7 +152,7 @@ namespace GDE {
              * @return bool
              */
             template<typename Component>
-            bool hasComponent(const NodeID& _id);
+            bool hasComponent(const NodeID& _id) const;
 
         public:
             /**
@@ -310,7 +310,7 @@ namespace GDE {
     }
 
     template<typename Component>
-    bool Graph::hasComponent(const NodeID& _id) {
+    bool Graph::hasComponent(const NodeID& _id) const {
         return registry.template any_of<Component>(_id);
     }
 }

@@ -99,6 +99,7 @@ namespace GDE {
                    ((_uiTransform->anchor.anchor & Anchor::LEFT_TOP) == Anchor::LEFT_TOP)) {
                     _sizeDiff.y = -_sizeDiff.y;
                 }
+
                 // It is half the size because when a change in size happens, it is applied to both sides
                 _uiTransform->translateMatrixModelPosition(_sizeDiff * 0.5f);
             }

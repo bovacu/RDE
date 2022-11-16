@@ -90,7 +90,7 @@ namespace GDE {
 
     void Canvas::onEventTreeElement(CanvasElement* _canvasElement, void* _data) {
         auto* _onEventData = (OnEventData*)_data;
-        if(_canvasElement->interactable) {
+        if(_canvasElement->interactable && !_canvasElement->node->hasComponent<DisabledForEvent>()) {
             _canvasElement->interactable->onEvent(_canvasElement->node, _onEventData->engine, *_onEventData->eventDispatcher, *_onEventData->event);
         }
     }
@@ -120,7 +120,7 @@ namespace GDE {
     }
 
     void Canvas::updateTreeElement(CanvasElement* _canvasElement, void* _data) {
-        if(_canvasElement->updatable) {
+        if(_canvasElement->updatable && !_canvasElement->node->hasComponent<DisabledForUpdate>()) {
             _canvasElement->updatable->onUpdate(*(Delta*)_data);
         }
     }
