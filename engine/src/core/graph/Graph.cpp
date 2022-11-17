@@ -60,11 +60,14 @@ namespace GDE {
     }
 
     void Graph::onUpdate(Delta _dt) {
-        registry.group<AnimationSystem>(entt::get<SpriteRenderer, Active>, entt::exclude<DisabledForUpdate>).each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
+        auto _animations = registry.view<AnimationSystem, SpriteRenderer, Active>(entt::exclude<DisabledForUpdate>);
+        auto _particleSystems = registry.view<ParticleSystem, Active>(entt::exclude<DisabledForUpdate>);
+
+        _animations.each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
             _animationSystem.update(_dt, _spriteRenderer);
         });
 
-        registry.group<ParticleSystem>(entt::get<Active>, entt::exclude<DisabledForUpdate>).each([&_dt](const auto _entity, ParticleSystem& _particleSystem, const Active& _) {
+        _particleSystems.each([&_dt](const auto _entity, ParticleSystem& _particleSystem, const Active& _) {
             _particleSystem.update(_dt);
         });
 
@@ -87,7 +90,7 @@ namespace GDE {
     void Graph::onRender() {
         auto _spriteRendererGroup = registry.group<const SpriteRenderer>(entt::get<Transform, Active>, entt::exclude<DisabledForRender>);
         auto _particleSystemGroup = registry.group<const ParticleSystem>(entt::get<Transform, Active>, entt::exclude<DisabledForRender>);
-        auto _textRendererGroup = registry.group<  const TextRenderer>(entt::get<Transform, Active>, entt::exclude<DisabledForRender>);
+        auto _textRendererGroup   = registry.group<const TextRenderer>(entt::get<Transform, Active>, entt::exclude<DisabledForRender>);
 
         auto& _renderManager = scene->engine->manager.renderManager;
 
@@ -105,19 +108,19 @@ namespace GDE {
                     _renderManager.draw((IRenderizable*) &_spriteRenderer, _transform);
                 }
 
-                for(auto _it = _particleSystemGroup.rbegin(); _it != _particleSystemGroup.rend(); _it++) {
-                    auto _entity = (*_it);
-                    auto& _transform = registry.get<Transform>(_entity);
-                    auto& _particleSystem = registry.get<ParticleSystem>(_entity);
-                    _renderManager.draw((IRenderizable*) &_particleSystem, _transform);
-                }
+//                for(auto _it = _particleSystemGroup.rbegin(); _it != _particleSystemGroup.rend(); _it++) {
+//                    auto _entity = (*_it);
+//                    auto& _transform = registry.get<Transform>(_entity);
+//                    auto& _particleSystem = registry.get<ParticleSystem>(_entity);
+//                    _renderManager.draw((IRenderizable*) &_particleSystem, _transform);
+//                }
 
-                for(auto _it = _textRendererGroup.rbegin(); _it != _textRendererGroup.rend(); _it++) {
-                    auto _entity = (*_it);
-                    auto& _transform = registry.get<Transform>(_entity);
-                    auto& _text = registry.get<TextRenderer>(_entity);
-                    _renderManager.draw((IRenderizable*) &_text, _transform);
-                }
+//                for(auto _it = _textRendererGroup.rbegin(); _it != _textRendererGroup.rend(); _it++) {
+//                    auto _entity = (*_it);
+//                    auto& _transform = registry.get<Transform>(_entity);
+//                    auto& _text = registry.get<TextRenderer>(_entity);
+//                    _renderManager.draw((IRenderizable*) &_text, _transform);
+//                }
             }
 
             onRenderDel(registry);
