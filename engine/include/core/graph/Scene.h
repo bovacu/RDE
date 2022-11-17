@@ -103,7 +103,7 @@ namespace GDE {
              * to remove elements.
              * @param _dt time that passed between the current frame and the last one.
              */
-            virtual void onLateUpdate(Delta _dt) {  }
+            virtual void onLateUpdate(Delta _dt);
 
             /**
              * @brief This function is also called every frame and renders the geometry of the game. It is not virtual because

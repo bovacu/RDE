@@ -129,6 +129,10 @@ namespace GDE {
         }
     }
 
+    void Graph::onLateUpdate(Delta _dt) {
+
+    }
+
     void Graph::onDebugRender() {
         auto& _renderManager = scene->engine->manager.renderManager;
         _renderManager.beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->node->getID()));

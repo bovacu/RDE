@@ -35,7 +35,7 @@ namespace GDE {
             /**
              * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
              */
-            short foo;
+            short foo{};
     };
 
 
@@ -46,7 +46,7 @@ namespace GDE {
             /**
              * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
              */
-            short foo;
+            short foo{};
     };
 
     struct DisabledForEvent {
@@ -56,7 +56,7 @@ namespace GDE {
             /**
              * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
              */
-            short foo;
+            short foo{};
     };
 
     struct DisabledForUpdate {
@@ -66,7 +66,7 @@ namespace GDE {
             /**
              * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
              */
-            short foo;
+            short foo{};
     };
 
     struct DisabledForFixedUpdate {
@@ -76,7 +76,7 @@ namespace GDE {
             /**
              * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
              */
-            short foo;
+            short foo{};
     };
 
     struct DisabledForLateUpdate {
@@ -86,7 +86,7 @@ namespace GDE {
             /**
              * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
              */
-            short foo;
+            short foo{};
     };
 
     /**
@@ -101,7 +101,7 @@ namespace GDE {
             /**
              * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
              */
-            short foo;
+            short foo{};
     };
 }
 

@@ -110,6 +110,8 @@ namespace GDE {
              */
             void onRender();
 
+            void onLateUpdate(Delta _dt);
+
             /**
              * @brief Renders debug information of the entities in the graph.
              */

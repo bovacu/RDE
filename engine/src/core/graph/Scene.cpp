@@ -34,6 +34,10 @@ namespace GDE {
         mainGraph.onRender();
     }
 
+    void Scene::onLateUpdate(Delta _dt) {
+        mainGraph.onLateUpdate(_dt);
+    }
+
     void Scene::onDebugRender(Delta _dt) {
         mainGraph.onDebugRender();
     }
