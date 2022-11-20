@@ -156,6 +156,10 @@ namespace GDE {
 
         protected:
             Texture* texture = nullptr;
+
+            /**
+             * @brief Amount of pixels from the origin to render the IRenderizable
+             */
             Vec2F originOffset = { 0.f, 0.f };
 
         public:

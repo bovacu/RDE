@@ -167,12 +167,12 @@ namespace GDE {
             glEnable(GL_SCISSOR_TEST);
             auto _resolution = scene->getMainCamera()->getViewport()->getDeviceResolution();
             auto _bottomLeftCorner = Vec2<GLint> {
-                    (GLint)(((float)scene->getMainCamera()->getViewport()->getDeviceResolution().x + _position.x - _uiInput->getSize().x) * 0.5f),
-                    (GLint)(((float)scene->getMainCamera()->getViewport()->getDeviceResolution().y + _position.y - _uiInput->getSize().y) * 0.5f)
+                    (GLint)(((float)_resolution.x - _uiInput->getSize().x) * 0.5f + _position.x),
+                    (GLint)(((float)_resolution.y - _uiInput->getSize().y) * 0.5f + _position.y)
             };
             auto _size = Vec2<GLint> {
-                    (GLint)(_uiInput->getSize().x * (float)_resolution.x),
-                    (GLint)(_uiInput->getSize().y * (float)_resolution.y)
+                    (GLint)(_uiInput->getSize().x),
+                    (GLint)(_uiInput->getSize().y)
             };
             glScissor(_bottomLeftCorner.x, _bottomLeftCorner.y, _size.x, _size.y);
         }

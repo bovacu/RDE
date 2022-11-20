@@ -24,25 +24,23 @@ namespace GDE {
 
         auto _textNode = _graph->createNode("Text", _node);
         textRenderer = _textNode->addComponent<UIText>(_config.text, config.font);
-        textRenderer->batchPriority = BatchPriority::SpritePriority;
-        textRenderer->color = config.textColor;
+        textRenderer->setBatchPriority(BatchPriority::SpritePriority);
+        textRenderer->setColor(config.textColor);
         textTransform = (UITransform*)_textNode->getTransform();
 
         auto _checkboxBackgroundNode = _graph->createNode("CheckboxBackground", _node);
         checkboxBackgroundSprite = _checkboxBackgroundNode->addComponent<UIImage>(config.checkboxBackgroundTexture);
-        checkboxBackgroundSprite->color = _config.checkboxColor;
+        checkboxBackgroundSprite->setColor(_config.checkboxColor);
         checkboxBackgroundTransform = (UITransform*)_checkboxBackgroundNode->getTransform();
-//        checkboxBackgroundTransform->setPivot({ 0, 0 });
 
         auto _tickNode = _graph->createNode("CheckboxTick", _checkboxBackgroundNode);
         tickSprite = _tickNode->addComponent<UIImage>(config.checkboxTickTexture);
-        tickSprite->color = config.tickColor;
+        tickSprite->setColor(config.tickColor);
         tickTransform = (UITransform*)_tickNode->getTransform();
 
-        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
         auto _size = Vec2F { checkboxBackgroundSprite->getSize().x + textRenderer->getSize().x,
                        checkboxBackgroundSprite->getSize().y > textRenderer->getSize().y ? checkboxBackgroundSprite->getSize().y : textRenderer->getSize().y
-        } + Vec2F { config.checkboxTextOffset.x * _parentSize.x, config.checkboxTextOffset.y * _parentSize.y };
+        } + Vec2F { config.checkboxTextOffset.x, config.checkboxTextOffset.y };
         ((UITransform*)node->getTransform())->setSize(_size);
 
         setConfig(_manager, config);
@@ -88,7 +86,7 @@ namespace GDE {
 
         if(textRenderer != nullptr) {
             textRenderer->setText(config.text);
-            textRenderer->color = config.textColor;
+            textRenderer->setColor(config.textColor);
             textRenderer->setFont(config.font);
             textRendererSize = textRenderer->getSize();
         }
@@ -98,12 +96,11 @@ namespace GDE {
             checkboxSize = checkboxBackgroundSprite->getSize();
         }
 
-        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
-        auto _offset = Vec2F { config.checkboxTextOffset.x * _parentSize.x, config.checkboxTextOffset.y * _parentSize.y};
+        auto _offset = Vec2F { config.checkboxTextOffset.x, config.checkboxTextOffset.y};
         ((UITransform*)node->getTransform())->setSize(Vec2F { checkboxSize.x + textRendererSize.x, checkboxSize.y > textRendererSize.y ? checkboxSize.y : textRendererSize.y } + _offset);
 
         if(tickSprite != nullptr) {
-            tickSprite->enabled = config.checked;
+            tickSprite->node->setDisabled(config.checked ? DisabledConfig::EnabledConfigRender : DisabledConfig::DisabledConfigRender);
         }
 
         if(checkboxBackgroundTransform != nullptr) {
@@ -122,9 +119,9 @@ namespace GDE {
     void UICheckbox::onMouseReleased(MouseCode _mouseButton) {
         if(!interaction->interactable) return;
 
-        checked = !checked;
+        config.checked = !config.checked;
         if(UI::interaction->mouseInnerStatus == UIInteractable::MouseEntered) {
-            tickSprite->enabled = checked;
+            tickSprite->node->setDisabled(config.checked ? DisabledConfig::EnabledConfigRender : DisabledConfig::DisabledConfigRender);
         }
     }
 
@@ -132,13 +129,13 @@ namespace GDE {
         interaction->interactable = _interactable;
 
         if(!interaction->interactable) {
-            checkboxBackgroundSprite->color = Color::Disabled;
-            tickSprite->color = Color::Disabled;
-            textRenderer->color = Color::Disabled;
+            checkboxBackgroundSprite->setColor(Color::Disabled);
+            tickSprite->setColor(Color::Disabled);
+            textRenderer->setColor(Color::Disabled);
         } else {
-            checkboxBackgroundSprite->color = checkboxBackgroundSprite->color == Color::Disabled ? Color::White : checkboxBackgroundSprite->color;
-            tickSprite->color = tickSprite->color == Color::Disabled ? Color::White : tickSprite->color;
-            textRenderer->color = textRenderer->color == Color::Disabled ? Color::White : textRenderer->color;
+            checkboxBackgroundSprite->setColor(checkboxBackgroundSprite->getColor() == Color::Disabled ? Color::White : checkboxBackgroundSprite->getColor());
+            tickSprite->setColor(tickSprite->getColor() == Color::Disabled ? Color::White : tickSprite->getColor());
+            textRenderer->setColor(textRenderer->getColor() == Color::Disabled ? Color::White : textRenderer->getColor());
         }
     }
 

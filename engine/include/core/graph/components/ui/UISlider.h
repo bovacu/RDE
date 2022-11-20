@@ -12,7 +12,7 @@ namespace GDE {
     struct UISliderConfig : CommonUIConfig {
         Texture* backgroundBarTexture = nullptr;
         Color backgroundBarColor = Color::White;
-        Vec2F barSize = { 0.2f, 0.02f };
+        Vec2F barSize = { 256.f, 12.f };
 
         Texture* fillingBarTexture = nullptr;
         Color fillingBarColor = Color::Green;

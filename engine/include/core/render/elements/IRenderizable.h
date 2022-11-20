@@ -88,10 +88,12 @@ namespace GDE {
             virtual ShaderID getShaderID() { return shaderID; }
             virtual Color getColor() { return color; }
             virtual int getLayer() { return layer; }
+            BatchPriority getBatchPriority() { return batchPriority; }
 
             virtual void setShaderID(ShaderID _shaderID) { shaderID = _shaderID; dirty = true; }
             virtual void setColor(const Color& _color) { color = _color; dirty = true; }
             virtual void setLayer(int _layer) { layer = _layer; dirty = true; }
+            void setBatchPriority(BatchPriority _batchPriority) { batchPriority = _batchPriority; dirty = true; }
 
             /**
              * @brief Method that every renderizable can implement to update its inner states.

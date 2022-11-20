@@ -30,13 +30,11 @@ namespace GDE {
              * only its region will be rendered.
              */
             Texture* texture = nullptr;
-            ulong verticesIndex = 0;
-            ulong indicesIndex = 0;
 
             OpenGLVertex geometry[4];
 
-        protected:
-            virtual void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
+        private:
+            void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
 
         public:
             SpriteRenderer(Node* _node, Scene* _scene, Texture* _texture = nullptr);

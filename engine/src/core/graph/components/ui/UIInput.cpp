@@ -37,16 +37,15 @@ namespace GDE {
         placeholderTextRenderer = _placeholderNode->addComponent<UIText>(config.placeholderText, config.font);
         placeholderTextRenderer->batchPriority = BatchPriority::SpritePriority;
         placeholderTextRenderer->color = config.placeholderTextColor;
-        placeholderTextRenderer->enabled = config.showPlaceholderText;
+        placeholderTextRenderer->node->setDisabled(!config.showPlaceholderText);
+        placeholderTextRenderer->setOriginOffset({placeholderTextRenderer->getSize().x * 0.5f, 0});
         auto* _placeholderTransform = _placeholderNode->getTransform();
+        ((UITransform*)_placeholderTransform)->setAnchor(Anchor::LEFT);
 
-        // TODO: PIVOT CHANGES
-//        placeholderTextRenderer->setPivot({ 0.f, 0.5f });
         auto _placeholderPosition = _placeholderTransform->getPosition();
 
-        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
-        _placeholderTransform->setPosition(_placeholderPosition.x - config.inputSize.x * _parentSize.x / 2.f + config.textsOffsetFromLeft.x * _parentSize.x,
-                                           _placeholderPosition.y + config.textsOffsetFromLeft.y * _parentSize.y);
+        _placeholderTransform->setPosition(_placeholderPosition.x - config.inputSize.x * 0.5f + config.textsOffsetFromLeft.x,
+                                           _placeholderPosition.y + config.textsOffsetFromLeft.y);
 
         auto _textNode = _graph->createNode("Text", _node);
         textRenderer = _textNode->addComponent<UIText>(config.text, config.font);
@@ -54,27 +53,27 @@ namespace GDE {
         textRenderer->setColor(config.textColor);
         textTransform = _textNode->getTransform();
 
-        // TODO: PIVOT CHANGES
-//        ((UITransform*)textTransform)->setPivot({ 0.0f, 0.5f });
+        textRenderer->setOriginOffset({ textRenderer->getSize().x * 0.5f, 0.f });
         auto _textPosition = textTransform->getPosition();
-        textTransform->setPosition(_textPosition.x - config.inputSize.x * _parentSize.x / 2.f + config.textsOffsetFromLeft.x * _parentSize.x,
-                                   _textPosition.y + config.textsOffsetFromLeft.y * _parentSize.y);
+        textTransform->setPosition(_textPosition.x - config.inputSize.x * 0.5f + config.textsOffsetFromLeft.x,
+                                   _textPosition.y + config.textsOffsetFromLeft.y);
 
         auto _caretNode = _graph->createNode("Caret", _node);
         caretSprite = _caretNode->addComponent<UIImage>(config.caretTexture);
-        caretSprite->batchPriority = BatchPriority::SpritePriority;
-        caretSprite->color = config.textColor;
-        caretSprite->enabled = false;
+        caretSprite->setBatchPriority(BatchPriority::SpritePriority);
+        caretSprite->setColor(config.textColor);
+        caretSprite->node->setDisabled();
         caretTransform = _caretNode->getTransform();
+        ((UITransform*)caretTransform)->setAnchor(Anchor::LEFT);
         auto _caretPosition = caretTransform->getPosition();
-        caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - config.inputSize.x * _parentSize.x / 2.f + config.textsOffsetFromLeft.x * _parentSize.x,
-                                    _caretPosition.y + config.textsOffsetFromLeft.y * _parentSize.y);
+        caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - config.inputSize.x * 0.5f + config.textsOffsetFromLeft.x,
+                                    _caretPosition.y + config.textsOffsetFromLeft.y);
 
         setConfig(_manager, _config);
     }
 
     Vec2F UIInput::getSize() const {
-        return config.inputSize;
+        return ((UITransform*)node->getTransform())->getSize();
     }
 
     UIInputConfig UIInput::getConfig() {
@@ -106,8 +105,7 @@ namespace GDE {
             config.font = _manager->fontManager.getSpecificFont("MontserratRegular", 40);
         }
 
-        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
-        ((UITransform*)node->getTransform())->setSize({ config.inputSize.x * _parentSize.x, config.inputSize.y * _parentSize.y });
+        ((UITransform*)node->getTransform())->setSize({ config.inputSize.x, config.inputSize.y });
 
         if(nineSliceSprite != nullptr) {
             nineSliceSprite->setSize(config.inputSize);
@@ -129,7 +127,7 @@ namespace GDE {
         }
 
         if(caretSprite != nullptr) {
-            caretTransform->setScale(caretTransform->getScale().x, config.caretHeight * _parentSize.y / config.caretTexture->getSize().y);
+            caretTransform->setScale(caretTransform->getScale().x, (config.caretHeight * getSize().y) / config.caretTexture->getSize().y);
         }
     }
 
@@ -158,7 +156,7 @@ namespace GDE {
 
         if(UI::interaction != nullptr && UI::interaction->focused && caretSprite != nullptr) {
             if(blinkingTimer > config.blinkingTimeSeconds) {
-                caretSprite->enabled = !caretSprite->enabled;
+                caretSprite->node->setDisabled(caretSprite->node->isEnabled() ? DisabledConfig::DisabledConfigRender : DisabledConfig::EnabledConfigRender);
                 blinkingTimer = 0;
             }
 
@@ -181,7 +179,7 @@ namespace GDE {
         SDL_StartTextInput();
         #endif
 
-        caretSprite->enabled = true;
+        caretSprite->node->setDisabled(false);
         UI::interaction->focused = true;
         updatePlaceholder();
         blinkingTimer = 0;
@@ -194,13 +192,14 @@ namespace GDE {
         SDL_StopTextInput();
         #endif
 
-        caretSprite->enabled = false;
+        caretSprite->node->setDisabled();
     }
 
     void UIInput::onMouseReleased(MouseCode _mouseCode) {
         updatePlaceholder();
     }
 
+    // TODO: caret is not in the right place when the text goes out of scope on the right
     void UIInput::onKeyPressed(KeyCode _keyCode, char _char) {
         if(textRenderer == nullptr || !UI::interaction->interactable) return;
 
@@ -237,6 +236,7 @@ namespace GDE {
             }
         }
 
+        textRenderer->setOriginOffset({ textRenderer->getSize().x * 0.5f, 0.f });
         updatePlaceholder();
     }
 
@@ -268,19 +268,18 @@ namespace GDE {
             _width += _font->getChars()[textRenderer->getText()[_i]].advance.x + textRenderer->spaceBetweenChars;
         }
 
-        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform)->getSize();
-        if(_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * _parentSize.x * 2.f >= getSize().x * _parentSize.x) {
-            textDisplacement = (_width / 2.f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * _parentSize.y * 2.f) - getSize().x * _parentSize.x;
+        if(_width * 0.5f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * 2.f >= getSize().x) {
+            textDisplacement = (_width * 0.5f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x) - getSize().x;
         } else {
             textDisplacement = 0;
         }
 
-        auto _origin = Vec2F { nineSliceTransform->getModelMatrixPosition().x - getSize().x * _parentSize.x / 2.f + config.textsOffsetFromLeft.x * _parentSize.x, nineSliceTransform->getModelMatrixPosition().y };
+        auto _origin = Vec2F { nineSliceTransform->getModelMatrixPosition().x - getSize().x * 0.5f + config.textsOffsetFromLeft.x, nineSliceTransform->getModelMatrixPosition().y };
         textTransform->setMatrixModelPosition({_origin.x - textDisplacement, _origin.y});
 
         auto _caretPosition = caretTransform->getPosition();
-        caretTransform->setPosition(textTransform->getPosition().x + _width / 2.f * UI::node->getTransform()->getScale().x, _caretPosition.y);
+        caretTransform->setPosition(textTransform->getPosition().x + _width * 0.5f * UI::node->getTransform()->getScale().x, _caretPosition.y);
 
-        caretTransform->setScale(caretTransform->getScale().x, config.caretHeight * _parentSize.y / config.caretTexture->getSize().y);
+        caretTransform->setScale(caretTransform->getScale().x, (config.caretHeight * getSize().y) / config.caretTexture->getSize().y);
     }
 }

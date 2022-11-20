@@ -124,6 +124,13 @@ namespace GDE {
                 enableOrDisableAllChildren(_disabledConfig, this);
             }
 
+            void setDisabled(bool _disabled) {
+                if(!getTransform()->parentTransform) return;
+                if(!getTransform()->parentTransform->node->isEnabled()) return;
+
+                enableOrDisableAllChildren(_disabled ? DisabledConfig::DisabledConfigRender : DisabledConfig::EnabledConfigRender, this);
+            }
+
             [[nodiscard]] bool isEnabled() const {
                 return  !hasComponent<DisabledForEvent>()       &&
                         !hasComponent<DisabledForUpdate>()      &&

@@ -12,7 +12,7 @@ namespace GDE {
     FORWARD_DECLARE_CLASS(Font, UIText, UIImage, UI9Slice)
 
     struct UIInputConfig : CommonUIConfig {
-        Vec2F inputSize = { 0.2f, 0.05f };
+        Vec2F inputSize = { 256.f, 32.f };
         Texture* inputBackgroundTexture = nullptr;
         Color inputBackgroundColor = Color::White;
 
@@ -25,10 +25,10 @@ namespace GDE {
         Color textColor = Color::White;
         std::string text = "";
 
-        Vec2F textsOffsetFromLeft = { 0.005f, 0 };
+        Vec2F textsOffsetFromLeft = { 5.f, 0 };
 
         Texture* caretTexture = nullptr;
-        float caretHeight = 0.035f;
+        float caretHeight = 0.75f;
         float blinkingTimeSeconds = 0.5f;
     };
 
