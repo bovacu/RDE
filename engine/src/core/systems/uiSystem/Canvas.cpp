@@ -166,14 +166,9 @@ namespace GDE {
 
             glEnable(GL_SCISSOR_TEST);
             auto _resolution = scene->getMainCamera()->getViewport()->getDeviceResolution();
-            // TODO: PIVOT CHANGES
-//            auto _bottomLeftCorner = Vec2<GLint> {
-//                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x - (_uiInput->getSize().x * (float)_resolution.x * _transform->getPivot().x)),
-//                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y - (_uiInput->getSize().y * (float)_resolution.y *  _transform->getPivot().y))
-//            };
             auto _bottomLeftCorner = Vec2<GLint> {
-                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().x / 2.f + _position.x),
-                    (GLint)((float)scene->getMainCamera()->getViewport()->getVirtualResolution().y / 2.f + _position.y)
+                    (GLint)(((float)scene->getMainCamera()->getViewport()->getDeviceResolution().x + _position.x - _uiInput->getSize().x) * 0.5f),
+                    (GLint)(((float)scene->getMainCamera()->getViewport()->getDeviceResolution().y + _position.y - _uiInput->getSize().y) * 0.5f)
             };
             auto _size = Vec2<GLint> {
                     (GLint)(_uiInput->getSize().x * (float)_resolution.x),
