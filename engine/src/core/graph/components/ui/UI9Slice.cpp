@@ -91,7 +91,7 @@ namespace RDE {
     }
 
     void UI9Slice::setSize(const Vec2F& _size) {
-        ((UITransform*)node->getTransform())->setSize({ clampF(_size.x, 0, FLT_MAX), clampF(_size.y, 0, FLT_MAX) });
+        ((UITransform*)node->getTransform())->setSize({ Util::Math::clampF(_size.x, 0, FLT_MAX), Util::Math::clampF(_size.y, 0, FLT_MAX) });
         dirty = true;
     }
 
@@ -214,7 +214,7 @@ namespace RDE {
             _current9SliceMat = _transformMat * _current9SliceMat;
 
             auto _subTextureReposition = Vec2F { _originOffset.x, _originOffset.y };
-            auto _screenPos = Util::worldToScreenCoordsUI(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
+            auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
             _current9SliceMat[3][0] = _screenPos.x;
             _current9SliceMat[3][1] = _screenPos.y;
 
@@ -224,7 +224,7 @@ namespace RDE {
 
             Vec2F _textureTileSize = {(float)_subTextureRegion.size.x, (float)_subTextureRegion.size.y};
             Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y};
-            auto _textureTileSizeOnScreen = Util::worldToScreenSizeUI(_viewport, _textureTileSize);
+            auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
 
             glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
             glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };

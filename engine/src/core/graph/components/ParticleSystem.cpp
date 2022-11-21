@@ -103,7 +103,7 @@ namespace RDE {
             auto _vertexCount = _vertices.size();
 
             auto [_transformMat, _dirty] = _transform.localToWorld();
-            auto _screenPos = Util::worldToScreenCoords(_viewport, {_particle.position.x, _particle.position.y});
+            auto _screenPos = Util::Math::worldToScreenCoords(_viewport, {_particle.position.x, _particle.position.y});
             _transformMat[3][0] = _screenPos.x;
             _transformMat[3][1] = _screenPos.y;
 
@@ -112,7 +112,7 @@ namespace RDE {
 
             Vec2F _textureTileSize = {(float)particleSystemConfig.dataConfig.texture->getRegion().size.x, (float)particleSystemConfig.dataConfig.texture->getRegion().size.y};
             Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)particleSystemConfig.dataConfig.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)particleSystemConfig.dataConfig.texture->getSpriteSheetSize().y};
-            auto _textureTileSizeOnScreen = Util::worldToScreenSize(_viewport, _textureTileSize);
+            auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
 
             glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
             glm::vec4 _bottomRightTextureCorner = {_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -140,10 +140,10 @@ namespace RDE {
         if(_config.colorGradientConfig.endColor == Color::NO_COLOR) return _particleData.color;
 
         auto _percentage = _particleData.life < _config.dataConfig.lifeTime / 1.25f ? (1 - _particleData.life / _config.dataConfig.lifeTime) : 0.f;
-        auto _red   = Util::clamp(_particleData.color.r + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.r - _particleData.color.r)), 0, 255);
-        auto _green = Util::clamp(_particleData.color.g + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.g - _particleData.color.g)), 0, 255);
-        auto _blue  = Util::clamp(_particleData.color.b + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.b - _particleData.color.b)), 0, 255);
-        auto _alpha = Util::clamp(_particleData.color.a + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.a - _particleData.color.a)), 0, 255);
+        auto _red   = Util::Math::clamp(_particleData.color.r + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.r - _particleData.color.r)), 0, 255);
+        auto _green = Util::Math::clamp(_particleData.color.g + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.g - _particleData.color.g)), 0, 255);
+        auto _blue  = Util::Math::clamp(_particleData.color.b + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.b - _particleData.color.b)), 0, 255);
+        auto _alpha = Util::Math::clamp(_particleData.color.a + (unsigned char )(_percentage * _dt * std::abs(_config.colorGradientConfig.endColor.a - _particleData.color.a)), 0, 255);
         return Color { (unsigned char)_red, (unsigned char)_green, (unsigned char)_blue, (unsigned char)_alpha };
     }
 

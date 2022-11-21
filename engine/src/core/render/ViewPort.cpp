@@ -1,7 +1,7 @@
 // Created by borja on 27/2/22.
 
 #include "core/render/elements/ViewPort.h"
-#include "core/util/Logger.h"
+#include "core/util/Functions.h"
 
 namespace RDE {
 
@@ -34,7 +34,7 @@ namespace RDE {
 
     void ViewPort::setUIScaleWeightsForWidthAndHeight(float _width, float _height) {
         if(_width > 1.f || _width < 0.f || _height > 1.f || _height < 0.f || _height + _width != 1.f) {
-            LOG_W("Input values for setting UI scale are ", Vec2F { _width, _height }, " but in some way they don't add up to 1! Not changing values.")
+            Util::Log::warn("Input values for setting UI scale are ", Vec2F { _width, _height }, " but in some way they don't add up to 1! Not changing values.");
             return;
         }
 

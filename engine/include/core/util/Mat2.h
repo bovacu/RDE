@@ -42,7 +42,7 @@ namespace RDE {
             }
 
             void rotate(float _degrees) {
-                auto _radians = degreesToRadians(_degrees);
+                auto _radians = Util::Math::degreesToRadians(_degrees);
                 float _cos = std::cos( _radians );
                 float _sin = std::sin( _radians );
 

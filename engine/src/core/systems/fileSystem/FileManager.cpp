@@ -8,7 +8,7 @@ namespace RDE {
         const char* _fm = FileHandler::modeToChar(_fileMode);
         auto* _file = SDL_RWFromFile(_filePath.c_str(), _fm);
         if(_file == nullptr) {
-            if(!_silentNotFound) LOG_E("Couldn't open file: ", _filePath)
+            if(!_silentNotFound) Util::Log::error("Couldn't open file: ", _filePath);
             return nullptr;
         }
 
@@ -222,7 +222,7 @@ namespace RDE {
     void FileManager::replaceChunkInFile(FileHandler* _handler, const std::string& _old, const std::string& _new) {
         checkFileMode(_handler, FileMode::READ_AND_WRITE);
         auto _f = readFullFile(_handler);
-        REPLACE_S(_f.content, _old, _new);
+        Util::String::replaceAll(_f.content, _old, _new);
         writeChunkToFile(_handler, _f.content);
     }
 
@@ -280,7 +280,7 @@ namespace RDE {
         auto _f = readFullFile(_handler);
 
         if(_initByte < 0 || _endByte > _f.content.size()) {
-            LOG_E("Tried to remove with init: ", _initByte, ", end: ", _endByte, ", but file size is: ", _f.content.size())
+            Util::Log::error("Tried to remove with init: ", _initByte, ", end: ", _endByte, ", but file size is: ", _f.content.size());
             return;
         }
 

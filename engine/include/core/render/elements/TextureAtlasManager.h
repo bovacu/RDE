@@ -62,11 +62,11 @@ namespace RDE {
          * @brief Prints info about the Sprite Sheet.
          */
         void debugInfo() {
-            LOG_I("Atlas: ", name)
-            LOG_I("   - Texture: ", &texture)
-            LOG_I("   - subTextures size: ", subTextures.size())
-            LOG_I("   - textureWidth: ", textureWidth)
-            LOG_I("   - textureHeight: ", textureHeight)
+            Util::Log::info("Atlas: ", name);
+            Util::Log::info("   - Texture: ", &texture);
+            Util::Log::info("   - subTextures size: ", subTextures.size());
+            Util::Log::info("   - textureWidth: ", textureWidth);
+            Util::Log::info("   - textureHeight: ", textureHeight);
         }
     };
 

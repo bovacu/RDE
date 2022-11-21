@@ -55,7 +55,7 @@ namespace RDE {
     }
 
     Camera* Scene::addCamera(Window* window) {
-        auto _newCameraNode = mainGraph.createNode(APPEND_S("Camera", cameras.size()));
+        auto _newCameraNode = mainGraph.createNode(Util::String::appendToString("Camera", cameras.size()));
         auto* _camera = _newCameraNode->addComponent<Camera>(window);
         cameras.push_back(_camera);
         return cameras.back();

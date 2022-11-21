@@ -59,9 +59,6 @@
 inline float currentDPI = 0;
 #endif
 
-#define radiansToDegrees(x) x * (180.f / PI)
-#define degreesToRadians(x) x * (PI / 180.0f)
-
 #define toDPI(x) x * currentDPI / BASE_DPI
 #define toDPI_V(vec) Vec2F {vec.x * currentDPI / BASE_DPI, vec.y * currentDPI / BASE_DPI}
 
@@ -107,7 +104,7 @@ inline float currentDPI = 0;
 #define IS_MOBILE() (IS_ANDROID() || IS_IOS())
 
 #ifdef ENGINE_ENABLE_ASSERTS
-    #define ENGINE_ASSERT(x, ...) { if(!(x)) { LOG_E("Assertion Failed: ", __VA_ARGS__); ENGINE_DEBUG_BREAK(); } }
+    #define ENGINE_ASSERT(x, ...) { if(!(x)) { Util::Log::error("Assertion Failed: ", __VA_ARGS__); ENGINE_DEBUG_BREAK(); } }
 #else
     #define ENGINE_ASSERT(x, ...)
 #endif

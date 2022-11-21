@@ -7,9 +7,8 @@
 
 
 #include "core/render/shapes/DebugShape.h"
-#include "core/systems/physicsSystem/PhysicsMath.h"
-#include "core/systems/physicsSystem/PhysicsShape.h"
 #include "chipmunk/chipmunk.h"
+#include "core/graph/components/Transform.h"
 
 namespace RDE {
 

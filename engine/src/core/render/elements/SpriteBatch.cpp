@@ -1,6 +1,4 @@
 #include "core/render/elements/SpriteBatch.h"
-#include "core/util/Logger.h"
-#include "core/util/GLUtil.h"
 
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
@@ -14,6 +12,7 @@
 #include "core/graph/components/Transform.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "core/Engine.h"
+#include "core/util/Mat2.h"
 
 namespace RDE {
 
@@ -54,7 +53,7 @@ namespace RDE {
             }
         },
         maxIndicesPerDrawCall);
-        CHECK_GL_ERROR("SpriteBatch configBasicShader")
+        Util::GL::checkError("SpriteBatch configBasicShader");
     }
 
     void SpriteBatch::Debug::configDebugShader() {
@@ -68,7 +67,7 @@ namespace RDE {
             }
         },
           Debug::batch->maxIndicesPerDrawCall);
-        CHECK_GL_ERROR("SpriteBatch configDebugShader")
+        Util::GL::checkError("SpriteBatch configDebugShader");
     }
 
     SpriteBatch::~SpriteBatch() {};
@@ -83,15 +82,15 @@ namespace RDE {
             flushDebug();
 
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
-        auto _screenPos = Util::worldToScreenSize(*batch->viewport, _position);
+        auto _screenPos = Util::Math::worldToScreenSize(*batch->viewport, _position);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x, _screenPos.y, 1.f));
         vertexDebugBufferPoints.emplace_back(_transformMat * glm::vec4 {_screenPos.x, _screenPos.y, 0.0f, 1.0f}, _colorVec4);
     }
 
     void SpriteBatch::Debug::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
-        auto _screenPos0 = Util::worldToScreenCoords(*batch->viewport, _p0);
-        auto _screenPos1 = Util::worldToScreenCoords(*batch->viewport, _p1);
+        auto _screenPos0 = Util::Math::worldToScreenCoords(*batch->viewport, _p0);
+        auto _screenPos1 = Util::Math::worldToScreenCoords(*batch->viewport, _p1);
 
         auto _transformMat0 = glm::mat4(1.f);
         auto _transformMat1 = glm::mat4(1.f);
@@ -107,7 +106,7 @@ namespace RDE {
     }
 
     void SpriteBatch::Debug::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
-        auto _screenPos = Util::worldToScreenCoords(*batch->viewport, _position);
+        auto _screenPos = Util::Math::worldToScreenCoords(*batch->viewport, _position);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x,_screenPos.y, 1.f));
 
         if(_rotation != 0)
@@ -115,7 +114,7 @@ namespace RDE {
 
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
 
-        auto _screenSize = Util::worldToScreenSize(*batch->viewport, _size);
+        auto _screenSize = Util::Math::worldToScreenSize(*batch->viewport, _size);
         // First triangle
         vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
         vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
@@ -183,8 +182,7 @@ namespace RDE {
             }
         }
 
-        LOG_DEBUG("Created a new batch with Texture: ", _renderer->getTexture(), ", Layer: ", _layer, ", Priority: ", _renderer->batchPriority, ", ShaderID: ", _renderer->shaderID)
-
+        Util::Log::debug("Created a new batch with Texture: ", _renderer->getTexture(), ", Layer: ", _layer, ", Priority: ", _renderer->batchPriority, ", ShaderID: ", _renderer->shaderID);
         Batch _batch;
         _batch.layer = _layer;
         _batch.indexBuffer.reserve(maxIndicesPerDrawCall * 6);

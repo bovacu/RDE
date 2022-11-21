@@ -936,7 +936,7 @@ namespace RDE {
                 ImGui::SetNextItemWidth(100);
                 ImGui::PushID(createID());
                 if (ImGui::DragFloat2("##myInput", _size, 1.f)) {
-                    _ui9Slice->setSize({ clampF(_size[0], 0, FLT_MAX),clampF(_size[1], 0, FLT_MAX) });
+                    _ui9Slice->setSize({ Util::Math::clampF(_size[0], 0.f, FLT_MAX), Util::Math::clampF(_size[1], 0.f, FLT_MAX) });
                 }
                 ImGui::PopID();
             }
@@ -948,7 +948,7 @@ namespace RDE {
                 ImGui::SetNextItemWidth(100);
                 ImGui::PushID(createID());
                 if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
-                    _ui9Slice->setOriginOffset({ clampF(_originOffset[0], FLT_MIN, FLT_MAX), clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
+                    _ui9Slice->setOriginOffset({ Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
                 }
             }
             ImGui::PopID();

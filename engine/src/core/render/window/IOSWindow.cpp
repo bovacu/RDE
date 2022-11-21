@@ -11,7 +11,7 @@
 namespace RDE {
 
     IOSWindow::IOSWindow(RDEConfig* _config) : Window(_config) {
-        LOG_DEBUG("Platform: IOS")
+        Util::Log::debug("Platform: IOS");
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
@@ -25,13 +25,13 @@ namespace RDE {
         window = SDL_CreateWindow(nullptr, 0, 0, displayMode.w, displayMode.h,  SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
 
         if(window == nullptr) {
-            LOG_E("SDL window creation failed: ", SDL_GetError());
+            Util::Log::error("SDL window creation failed: ", SDL_GetError());
             return;
         }
         context = SDL_GL_CreateContext(window);
 
         if(context == nullptr) {
-            LOG_E("OpenGL context couldn't initialize -> ", SDL_GetError())
+            Util::Log::error("OpenGL context couldn't initialize -> ", SDL_GetError());
             return;
         }
 

@@ -181,7 +181,7 @@ namespace RDE {
 
     Node* Graph::instantiatePrefab(Node* _prefab, const Vec2F& _position, Node* _parent) {
         auto _copy = registry.create();
-        LOG_W("InstantiatePrefab Needs implementation!!!")
+        Util::Log::warn("InstantiatePrefab Needs implementation!!!");
 //        for(auto&& _curr: registry.storage()) {
 //            auto& _storage = _curr.second;
 //            if(_storage.contains(_prefab)) {
@@ -246,12 +246,12 @@ namespace RDE {
         auto* _nodeTransform = _node->getTransform();
 
         if(_nodeTransform->parent == _parent->getID()) {
-            LOG_W("Parent of ", (int)_node->getID(), " is already ", (int)_parent->getID(), "!!")
+            Util::Log::warn("Parent of ", (int)_node->getID(), " is already ", (int)_parent->getID(), "!!");
             return;
         }
 
         if(std::find(_nodeTransform->begin(), _nodeTransform->end(), _parent->getTransform()) != _nodeTransform->end()) {
-            LOG_E("Cannot set ", (int)_parent->getID(), " as the parent of ", (int)_node->getID(), " because ", (int)_node->getID(), " is the father of ", (int)_parent->getID(), "!!!!")
+            Util::Log::error("Cannot set ", (int)_parent->getID(), " as the parent of ", (int)_node->getID(), " because ", (int)_node->getID(), " is the father of ", (int)_parent->getID(), "!!!!");
             return;
         }
 

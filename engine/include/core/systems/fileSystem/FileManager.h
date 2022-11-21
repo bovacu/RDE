@@ -5,6 +5,7 @@
 #define RDE_FILES_SYSTEM_H
 
 #include "core/util/Util.h"
+#include "core/platform/PlatformHeaderSDL.h"
 
 namespace RDE {
 

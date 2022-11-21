@@ -4,6 +4,7 @@
 
 #include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/render/RenderManager.h"
+#include "core/util/Mat2.h"
 
 namespace RDE {
 
@@ -14,7 +15,7 @@ namespace RDE {
     }
 
     void PhysicsManager::destroy() {
-        LOG_DEBUG("Cleaning up PhysicsManager")
+        Util::Log::debug("Cleaning up PhysicsManager");
         for(auto* _body : bodies) {
             remove(_body);
         }
@@ -25,15 +26,15 @@ namespace RDE {
         for (auto* _body: bodies) {
             auto _cpPos = cpBodyGetPosition(_body->body);
             auto _bodyPos = Vec2F { (float)_cpPos.x, (float)_cpPos.y };
-            auto _bodyAngle = radiansToDegrees(cpBodyGetAngle(_body->body));
+            auto _bodyAngle = Util::Math::radiansToDegrees(cpBodyGetAngle(_body->body));
             auto _transformPos = _body->transform->getModelMatrixPosition();
             auto _transformRot = _body->transform->getModelMatrixRotation();
 
-            if(!PhysicsMath::approximatelyEqual(_transformPos, _bodyPos)) {
+            if(!Util::Math::approximatelyEqual(_transformPos, _bodyPos)) {
                 _body->transform->setMatrixModelPosition({(float)_bodyPos.x, (float)_bodyPos.y});
             }
 
-            if(!PhysicsMath::approximatelyEqual(_transformRot, (float)_bodyAngle)) {
+            if(!Util::Math::approximatelyEqual(_transformRot, (float)_bodyAngle)) {
                 _body->transform->setMatrixModelRotation((float)_bodyAngle);
             }
         }
@@ -66,7 +67,7 @@ namespace RDE {
         if(!_showLines) return;
 
         Mat2 _rotMatrix(1, _physicsBody->transform->getModelMatrixPosition().x, 0, _physicsBody->transform->getModelMatrixPosition().y);
-        _rotMatrix.rotate(radiansToDegrees(cpBodyGetAngle(_physicsBody->body)));
+        _rotMatrix.rotate(Util::Math::radiansToDegrees(cpBodyGetAngle(_physicsBody->body)));
 
         for (auto _i = 0; _i < _shapeConfig.vertices.size(); _i++) {
 
@@ -99,7 +100,7 @@ namespace RDE {
                         if(!debugOptions.showCircleLines) return;
 
                         const int _segments = 20;
-                        float _theta = degreesToRadians(_body->transform->getRotation());
+                        float _theta = Util::Math::degreesToRadians(_body->transform->getRotation());
                         float _inc = PI * 2.0f / (float)_segments;
                         Vec2F _points[_segments];
 

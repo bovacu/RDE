@@ -38,7 +38,7 @@ namespace RDE {
     }
 
     void ECSManager::destroy() {
-        LOG_DEBUG("Cleaning up ECSManager")
+        Util::Log::debug("Cleaning up ECSManager");
         for(auto* system : systems)
             delete system;
     }

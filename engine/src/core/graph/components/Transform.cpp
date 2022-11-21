@@ -38,7 +38,7 @@ namespace RDE {
     }
 
     float Transform::getRotation() const {
-        return radiansToDegrees(glm::eulerAngles(innerRotation).z);
+        return Util::Math::radiansToDegrees(glm::eulerAngles(innerRotation).z);
     }
 
     void Transform::setScale(const Vec2F& _scale) {
@@ -66,7 +66,7 @@ namespace RDE {
 
     void Transform::rotate(float _amount) {
         glm::vec3 _euler = glm::eulerAngles(innerRotation);
-        innerRotation = glm::quat(glm::vec3(_euler.x, _euler.y, _euler.z + degreesToRadians(_amount)));
+        innerRotation = glm::quat(glm::vec3(_euler.x, _euler.y, _euler.z + Util::Math::degreesToRadians(_amount)));
         setDirty();
     }
 
@@ -111,7 +111,7 @@ namespace RDE {
         auto [_transformMatrix, _] = localToWorld();
         glm::decompose(_transformMatrix, scale, rotation, translation, skew, perspective);
         glm::vec3 _euler = glm::eulerAngles(rotation);
-        return radiansToDegrees(_euler.z);
+        return Util::Math::radiansToDegrees(_euler.z);
     }
 
 
@@ -220,7 +220,7 @@ namespace RDE {
                 glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
                 glm::vec4(_translation, 1.0f)
         )
-        * glm::mat4_cast(glm::angleAxis(degreesToRadians(_rotation), glm::vec3 { 0, 0, 1 })) //rotate
+        * glm::mat4_cast(glm::angleAxis(Util::Math::degreesToRadians(_rotation), glm::vec3 { 0, 0, 1 })) //rotate
         * glm::mat4( //scale
                 glm::vec4(_scale[0], 0.0f, 0.0f, 0.0f),
                 glm::vec4(0.0f, _scale[1], 0.0f, 0.0f),

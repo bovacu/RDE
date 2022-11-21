@@ -220,7 +220,7 @@ namespace Editor {
             auto _pos = _textNode->getTransform()->getPosition();
             if((_pos.x > engine->getWindow().getWidth() * 0.5f || _pos.x < -engine->getWindow().getWidth() * 0.5f) ||
                (_pos.y > engine->getWindow().getHeight() * 0.5f || -_pos.y < -engine->getWindow().getHeight() * 0.5f)) {
-                _sprite->node->setEnabled(true);
+                _sprite->node->setEnabled(INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
             }
             getMainGraph()->setParent(_textNode, _parentNode);
         }
@@ -401,15 +401,15 @@ namespace Editor {
     }
 
     void Editor::onMouseClick(MouseCode _mouseCode) {
-        LOG_I("I'm inside the UI sprite!!")
+        Util::Log::info("I'm inside the UI sprite!!");
     }
 
     void Editor::onMouseEntered() {
-        LOG_I("Entered!")
+        Util::Log::info("Entered!");
     }
 
     void Editor::onMouseExited() {
-        LOG_I("Exited!")
+        Util::Log::info("Exited!");
     }
 
     void Editor::collisionB(PhysicsBody* _a, PhysicsBody* _b) {
@@ -423,7 +423,7 @@ namespace Editor {
         auto _b = "MyString";
         auto _c = 3.14f;
         auto _d = 1L;
-        LOG_W(engine->manager.localizationManager.localize("scoreKey",_a, _b, _c, _d))
+        Util::Log::warn(engine->manager.localizationManager.localize("scoreKey",_a, _b, _c, _d));
     }
 
 

@@ -5,12 +5,13 @@
 #include "core/render/window/WindowsWindow.h"
 
 #if IS_WINDOWS() && !IS_ANDROID()
+
 #include "core/Engine.h"
 
 namespace RDE {
 
     WindowsWindow::WindowsWindow(RDEConfig* _config) : Window(_config) {
-        LOG_DEBUG("Platform: Windows")
+        Util::Log::debug("Platform: Windows");
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -23,7 +24,7 @@ namespace RDE {
                                   SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
 
         if(window == nullptr) {
-            LOG_E("SDL window creation failed: ", SDL_GetError());
+            Util::Log::error("SDL window creation failed: ", SDL_GetError());
             return;
         }
         context = SDL_GL_CreateContext(window);
@@ -36,10 +37,10 @@ namespace RDE {
         SDL_GL_MakeCurrent(window, context);
 
         if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-            LOG_E("Failed to initialize GLAD")
+            Util::Log::error("Failed to initialize GLAD")
             return;
         }
-        LOG_DEBUG("GLAD and SDL2 loaded successfully");
+        Util::Log::debug("GLAD and SDL2 loaded successfully");
 
         SDL_GL_SetSwapInterval(1);
 

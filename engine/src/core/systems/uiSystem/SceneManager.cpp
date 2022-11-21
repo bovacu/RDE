@@ -28,12 +28,12 @@ namespace RDE {
 
     void SceneManager::loadScene(Scene* _scene, const std::string& _sceneName) {
         if(scenes.find(_sceneName) != scenes.end()) {
-            LOG_W("Scene '", _sceneName, "' was already loaded, so no loading was made")
+            Util::Log::warn("Scene '", _sceneName, "' was already loaded, so no loading was made");
             return;
         }
         scenes[_sceneName] = _scene;
-        engine->manager.configManager.loadScene(&engine->manager, _scene, &engine->getWindow(), APPEND_S(SCENES_PATH, _sceneName, ".json"));
-        LOG_DEBUG("Loaded scene '", _sceneName, "'")
+        engine->manager.configManager.loadScene(&engine->manager, _scene, &engine->getWindow(), Util::String::appendToString(SCENES_PATH, _sceneName, ".json"));
+        Util::Log::debug("Loaded scene '", _sceneName, "'");
     }
 
     void SceneManager::displayScene(const std::string& _sceneName) {
@@ -45,8 +45,8 @@ namespace RDE {
         for(auto& _canvas : sceneDisplayed->getCanvases()) {
             _canvas->getCamera()->onResize(_windowSize.x, _windowSize.y);
         }
-        
-        LOG_DEBUG("Displayed scene '", _sceneName, "'")
+
+        Util::Log::debug("Displayed scene '", _sceneName, "'");
     }
 
     Scene* SceneManager::getScene(const std::string& _sceneName) {
@@ -60,16 +60,16 @@ namespace RDE {
         auto* _scene = scenes[_sceneName];
         _scene->onEnd();
         if(_scene == sceneDisplayed) _deletingDefaultScene = true;
-        engine->manager.configManager.unloadScene(&engine->manager, _scene, APPEND_S(SCENES_PATH, _sceneName, ".json"));
+        engine->manager.configManager.unloadScene(&engine->manager, _scene, Util::String::appendToString(SCENES_PATH, _sceneName, ".json"));
         delete _scene;
         scenes.erase(_sceneName);
 
         if(_deletingDefaultScene) sceneDisplayed = defaultScene;
-        LOG_DEBUG("Unloaded scene '", _sceneName, "'")
+        Util::Log::debug("Unloaded scene '", _sceneName, "'");
     }
 
     void SceneManager::destroy() {
-        LOG_DEBUG("Cleaning up SceneManager")
+        Util::Log::debug("Cleaning up SceneManager");
         for(auto& _scene : scenes) {
             _scene.second->onEnd();
             delete _scene.second;

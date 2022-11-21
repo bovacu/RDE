@@ -40,15 +40,15 @@ namespace RDE {
     }
 
     std::string SpriteRenderer::getTextureName() {
-        return Util::getFileNameFromPath(texture->getPath());
+        return Util::String::getFileNameFromPath(texture->getPath());
     }
 
     std::string SpriteRenderer::getTextureExtension() {
-        return Util::getFileExtension(texture->getPath());
+        return Util::String::getFileExtension(texture->getPath());
     }
 
     void SpriteRenderer::calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
-        auto _screenPos = Util::worldToScreenCoords(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
+        auto _screenPos = Util::Math::worldToScreenCoords(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
@@ -57,7 +57,7 @@ namespace RDE {
 
         Vec2F _textureTileSize = {(float)texture->getRegion().size.x, (float)texture->getRegion().size.y};
         Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y};
-        auto _textureTileSizeOnScreen = Util::worldToScreenSize(_viewport, _textureTileSize);
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
 
         glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
         glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };

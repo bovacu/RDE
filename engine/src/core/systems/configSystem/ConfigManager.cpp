@@ -43,7 +43,7 @@ namespace RDE {
         _config->windowData.size = _data.contains("resolution") ? Vec2I { _data["resolution"][0].get<int>(),_data["resolution"][1].get<int>() } : _config->windowData.size;
         #endif
 
-        _config->projectData.iconPath = _data.contains("icon") ? _data["icon"].get<std::string>() : "";
+        _config->projectData.iconPath = _data.contains("icon") ? _data["icon"].get<std::string>() : "defaultAssets/logo.ico";
         _config->projectData.resourcesPath = _data.contains("resources_path") ?  _data["resources_path"].get<std::string>() : "";
         _config->projectData.localizationConfig.localizationPath = _data.contains("localization_path") ? _data["localization_path"].get<std::string>() : "";
     }
@@ -53,10 +53,10 @@ namespace RDE {
             return;
         }
 
-        auto _fileHandler = _manager->fileManager.open(APPEND_S("assets/", _rdeConfig->projectData.resourcesPath), FileMode::READ);
+        auto _fileHandler = _manager->fileManager.open(Util::String::appendToString("assets/", _rdeConfig->projectData.resourcesPath), FileMode::READ);
 
         if(_fileHandler == nullptr) {
-            LOG_W("Resources path was set in the config.json, but the file couldn't be loaded!")
+            Util::Log::warn("Resources path was set in the config.json, but the file couldn't be loaded!");
             return;
         }
 
@@ -75,7 +75,7 @@ namespace RDE {
         auto _fileHandler = _manager->fileManager.open(_configFilePath, FileMode::READ);
 
         if(_fileHandler == nullptr) {
-            LOG_W("JSON file for scene ", _scene->debugName, " was not found, so a DefaultScene is being created for it.")
+            Util::Log::warn("JSON file for scene ", _scene->debugName, " was not found, so a DefaultScene is being created for it.");
             return;
         }
 
@@ -96,7 +96,7 @@ namespace RDE {
         if(_assets.contains("textures")) {
             auto& _texturesNode = _assets["textures"];
             for (const auto& _texture : _texturesNode) {
-                _manager->textureManager.loadSpriteSheet(APPEND_S("assets/", _texture.get<std::string>()));
+                _manager->textureManager.loadSpriteSheet(Util::String::appendToString("assets/", _texture.get<std::string>()));
             }
         }
 
@@ -104,21 +104,21 @@ namespace RDE {
             auto& _fontsNodes = _assets["fonts"];
             for (const auto& _font : _fontsNodes) {
                 for(auto _i = 0; _i < _font["sizes"].size(); _i++)
-                    _manager->fontManager.loadFont(_manager->fileManager, APPEND_S("assets/", _font["path"].get<std::string>()), _font["sizes"][_i].get<int>());
+                    _manager->fontManager.loadFont(_manager->fileManager, Util::String::appendToString("assets/", _font["path"].get<std::string>()), _font["sizes"][_i].get<int>());
             }
         }
 
         if(_assets.contains("sfx")) {
             auto& _sfxs = _assets["sfx"];
             for (const auto& _sfx : _sfxs) {
-                _manager->soundManager.loadSfx(APPEND_S("assets/", _sfx.get<std::string>()));
+                _manager->soundManager.loadSfx(Util::String::appendToString("assets/", _sfx.get<std::string>()));
             }
         }
 
         if(_assets.contains("music")) {
             auto& _musics = _assets["music"];
             for (const auto& _music : _musics) {
-                _manager->soundManager.loadMusic(APPEND_S("assets/", _music.get<std::string>()));
+                _manager->soundManager.loadMusic(Util::String::appendToString("assets/", _music.get<std::string>()));
             }
         }
     }
@@ -132,14 +132,14 @@ namespace RDE {
             int _entityCount = 0;
             for(auto& _node : _nodesJson) {
                 if(_node.contains("components") && _node["components"].contains("camera") && _node["components"]["camera"].contains("is_main") && _node["components"]["camera"]["is_main"].get<bool>()) {
-                    auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : APPEND_S("Entity_", _entityCount);
+                    auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : Util::String::appendToString("Entity_", _entityCount);
                     _nodes[_tag] = { _scene->getMainCamera()->node, _node };
                     _scene->getMainGraph()->getComponent<Tag>(_scene->getMainCamera()->node->getID())->tag = _tag;
                     _entityCount++;
                     continue;
                 }
 
-                auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : APPEND_S("Entity_", _entityCount);
+                auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : Util::String::appendToString("Entity_", _entityCount);
                 ENGINE_ASSERT(_nodes.find(_tag) == _nodes.end(), "Scene CANNOT have repeated 'tag' for different nodes, it is a unique identifier. Another '", _tag, "' prefab key was already defined.")
                 auto _entityNode = _scene->getMainGraph()->createNode(_tag);
                 _nodes[_tag] = {_entityNode, _node };
@@ -194,7 +194,7 @@ namespace RDE {
 //                        _scene->getMainGraph()->setNodeActive(_scene->getMainGraph()->getComponent<Node>(_entityID), false);
 //                        ENGINE_ASSERT(_scene->prefabs.find(_node.first) == _scene->prefabs.end(), "Scene CANNOT have repeated 'tag' for different prefabs. Another '", _node.first, "' prefab key was already defined.")
 //                        _scene->prefabs[_node.first] = _entityID;
-                        LOG_W("ConfigManager Prefab needs implementation!!")
+                        Util::Log::warn("ConfigManager Prefab needs implementation!!");
                     }
                 }
             }
@@ -247,7 +247,7 @@ namespace RDE {
         // load body config
         if(_bodyJson.contains("type")) {
             auto _bodyType = _bodyJson["type"].get<std::string>();
-            _bodyType = TO_LOWER_S(_bodyType);
+            _bodyType = Util::String::toLower(_bodyType);
 
             if(std::equal(_bodyType.begin(), _bodyType.end(), "static")) {
                 _bodyConfig.physicsBodyType = _bodyConfig.physicsBodyType = PhysicsBodyType::STATIC;
@@ -256,7 +256,7 @@ namespace RDE {
             } else if(std::equal(_bodyType.begin(), _bodyType.end(), "kinematic")) {
                 _bodyConfig.physicsBodyType = _bodyConfig.physicsBodyType = PhysicsBodyType::KINEMATIC;
             } else {
-                throw std::runtime_error(APPEND_S("Chosen PhysicsBodyType '", _bodyType, "' is not a known type for a PhysicsBody"));
+                throw std::runtime_error(Util::String::appendToString("Chosen PhysicsBodyType '", _bodyType, "' is not a known type for a PhysicsBody"));
             }
         } else {
             _bodyConfig.physicsBodyType = PhysicsBodyType::DYNAMIC;
@@ -273,7 +273,7 @@ namespace RDE {
 
                 ENGINE_ASSERT(_shapeJson.contains("type"), "Each PhysicsShape must contain the 'type' field, which is a PhysicsShapeType enum, so possible values are [BOX,CIRCLE,POLYGON,SEGMENT] no case sensitive, Ex: \"type\": \"BOX\"")
                 auto _type = _shapeJson["type"].get<std::string>();
-                _type = TO_LOWER_S(_type);
+                _type = Util::String::toLower(_type);
 
                 if(_shapeJson.contains("offset")) {
                     ENGINE_ASSERT(_bodyJson["offset"].size() == 2, "'offset' is a Vec2F, so it must contain exactly 2 elements, Ex: \"offset\": [x, y]")
@@ -307,7 +307,7 @@ namespace RDE {
                         _shapeConfig.size = { _shapeJson["size"].get<float>(), 0.f };
                     }
                 } else {
-                    throw std::runtime_error(APPEND_S("Chosen PhysicsShapeType '", _type, "' is not a known type for a PhysicsShape"));
+                    throw std::runtime_error(Util::String::appendToString("Chosen PhysicsShapeType '", _type, "' is not a known type for a PhysicsShape"));
                 }
 
                 if(_shapeJson.contains("sensor")) {
@@ -416,7 +416,7 @@ namespace RDE {
                 _camera->setZoomSpeed(_cameraJson["zoom_speed"].get<float>());
             }
 
-            LOG_I("Created camera with viewport of size: ", _window->getWindowSize())
+            Util::Log::info("Created camera with viewport of size: ", _window->getWindowSize());
             _scene->getCameras().push_back(_camera);
         }
     }
@@ -461,7 +461,7 @@ namespace RDE {
         if(_assets.contains("textures")) {
             auto& _texturesNode = _assets["textures"];
             for (const auto& _texture : _texturesNode) {
-                _scene->engine->manager.textureManager.unloadAtlas(Util::getFileNameFromPath(_texture.get<std::string>()));
+                _scene->engine->manager.textureManager.unloadAtlas(Util::String::getFileNameFromPath(_texture.get<std::string>()));
             }
         }
 
@@ -469,21 +469,21 @@ namespace RDE {
             auto& _fontsNodes = _assets["fonts"];
             for (const auto& _font : _fontsNodes) {
                 for(auto _i = 0; _i < _font["sizes"].size(); _i++)
-                    _scene->engine->manager.fontManager.unloadFullFont(Util::getFileNameFromPath(_font["path"].get<std::string>()));
+                    _scene->engine->manager.fontManager.unloadFullFont(Util::String::getFileNameFromPath(_font["path"].get<std::string>()));
             }
         }
 
         if(_assets.contains("sfx")) {
             auto& _sfxs = _assets["sfx"];
             for (const auto& _sfx : _sfxs) {
-                _scene->engine->manager.soundManager.unloadSfx(Util::getFileNameFromPath(_sfx.get<std::string>()));
+                _scene->engine->manager.soundManager.unloadSfx(Util::String::getFileNameFromPath(_sfx.get<std::string>()));
             }
         }
 
         if(_assets.contains("music")) {
             auto& _musics = _assets["music"];
             for (const auto& _music : _musics) {
-                _scene->engine->manager.soundManager.unloadMusic(Util::getFileNameFromPath(_music.get<std::string>()));
+                _scene->engine->manager.soundManager.unloadMusic(Util::String::getFileNameFromPath(_music.get<std::string>()));
             }
         }
     }

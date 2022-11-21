@@ -7,7 +7,6 @@
 
 #include "core/util/Util.h"
 #include "core/systems/physicsSystem/PhysicsBody.h"
-#include "core/systems/physicsSystem/PhysicsManifold.h"
 #include <set>
 
 namespace RDE {

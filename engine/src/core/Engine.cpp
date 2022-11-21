@@ -210,9 +210,9 @@ namespace RDE {
         try {
             auto _scene = manager.sceneManager.getDisplayedScene();
             _scene->getMainGraph()->setParent(_scene->getMainGraph()->getNode(_a), _scene->getMainGraph()->getNode(_b));
-            return {APPEND_S("Set ", _b, " as parent of ", _a) };
+            return {Util::String::appendToString("Set ", _b, " as parent of ", _a) };
         } catch (const std::runtime_error& _e) {
-            return {APPEND_S("[error] '", _a, "' or '", _b, "' or both don't exist on the scene!") };
+            return {Util::String::appendToString("[error] '", _a, "' or '", _b, "' or both don't exist on the scene!") };
         }
     }
 

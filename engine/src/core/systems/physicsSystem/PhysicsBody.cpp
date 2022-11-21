@@ -47,7 +47,7 @@ namespace RDE {
 
         cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
         auto _rotation = transform->getModelMatrixRotation();
-        auto _radians = degreesToRadians(_rotation);
+        auto _radians = Util::Math::degreesToRadians(_rotation);
         cpBodySetAngle(body, _radians);
         cpSpaceReindexShapesForBody(space, body);
         cpSpaceAddBody(space, body);
@@ -248,16 +248,16 @@ namespace RDE {
         float _transformRot = transform->getModelMatrixRotation();
 
         Vec2F _bodyPosition = { (float)cpBodyGetPosition(body).x, (float)cpBodyGetPosition(body).y };
-        float _bodyRot = radiansToDegrees(cpBodyGetAngle(body));
+        float _bodyRot = Util::Math::radiansToDegrees(cpBodyGetAngle(body));
         bool _dirtyPos = false;
         bool _dirtyRot = false;
 
-        if(!PhysicsMath::approximatelyEqual(_bodyRot, _transformRot)) {
-            cpBodySetAngle(body, degreesToRadians(_transformRot));
+        if(!Util::Math::approximatelyEqual(_bodyRot, _transformRot)) {
+            cpBodySetAngle(body, Util::Math::degreesToRadians(_transformRot));
             _dirtyRot = true;
         }
 
-        if(!PhysicsMath::approximatelyEqual(_transformPos, _bodyPosition)) {
+        if(!Util::Math::approximatelyEqual(_transformPos, _bodyPosition)) {
             cpBodySetPosition(body, { _transformPos.x, _transformPos.y });
             _dirtyPos = true;
         }

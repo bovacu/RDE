@@ -20,7 +20,7 @@ namespace RDE {
         /* Find minimum size for a texture holding all visible ASCII characters */
         for (int _i = 32; _i < 128; _i++) {
             if (FT_Load_Char(face, _i, FT_LOAD_RENDER)) {
-                LOG_E("Loading character", _i, " failed!")
+                Util::Log::error("Loading character", _i, " failed!");
                 continue;
             }
             if (_rowWidth + g->bitmap.width + 1 >= MAX_WIDTH) {
@@ -47,7 +47,7 @@ namespace RDE {
 
         for (int _i = 32; _i < MAX_CHARACTERS; _i++) {
             if (FT_Load_Char(face, _i, FT_LOAD_RENDER)) {
-                LOG_E("Loading character", _i, " failed!")
+                Util::Log::error("Loading character", _i, " failed!");
                 continue;
             }
 
@@ -105,7 +105,7 @@ namespace RDE {
 
     void FontManager::init(FileManager* _fileManager) {
         if(FT_Init_FreeType(&ftLibrary)) {
-            LOG_E("Error initiating FreeType")
+            Util::Log::error("Error initiating FreeType");
             return;
         }
 
@@ -116,7 +116,7 @@ namespace RDE {
         loadFont(*_fileManager, "defaultAssets/fonts/MontserratBold.ttf", 54);
         loadFont(*_fileManager, "defaultAssets/fonts/MontserratBoldItalic.ttf", 54);
 
-        LOG_DEBUG("FontManager loaded successfully")
+        Util::Log::debug("FontManager loaded successfully");
     }
 
     Font* FontManager::loadFont(FileManager& _fileManager, const std::string& _pathToFont, int _fontSize) {
@@ -126,28 +126,28 @@ namespace RDE {
         FT_Error _error = FT_New_Memory_Face(ftLibrary, reinterpret_cast<const FT_Byte*>(_data.c_str()), _data.size(), 0, &_face);
         _fileManager.close(_fileHandler);
         if (_error != FT_Err_Ok) {
-            LOG_E("Load memory failed with code -> ", _error)
+            Util::Log::error("Load memory failed with code -> ", _error);
             return nullptr;
         }
 
         auto* _font = new Font();
         _font->init(_face, _fontSize);
 
-        std::string _name = Util::getFileNameFromPath(_pathToFont);
+        std::string _name = Util::String::getFileNameFromPath(_pathToFont);
         _font->fontName = _name;
         _font->originalPath = _pathToFont;
         fonts[_name].emplace_back(FontHandler{ _font, _fontSize });
 
         FT_Done_Face(_face);
 
-        LOG_DEBUG("Successfully loaded Font ", _name, " with font size ", _fontSize)
+        Util::Log::debug("Successfully loaded Font ", _name, " with font size ", _fontSize);
 
         return fonts[_name].back().font;
     }
 
     Font* FontManager::getDefaultFont(const std::string& _fontName) {
         if(fonts.find(_fontName) == fonts.end()) {
-            LOG_E("Font ", _fontName, " is not loaded")
+            Util::Log::error("Font ", _fontName, " is not loaded");
             return nullptr;
         }
         return fonts[_fontName].front().font;
@@ -164,7 +164,7 @@ namespace RDE {
 
     Font* FontManager::getSpecificFont(const std::string& _fontName, int _fontSize) {
         if(fonts.find(_fontName) == fonts.end()) {
-            LOG_E("Font ", _fontName, " is not loaded, so creating it...")
+            Util::Log::error("Font ", _fontName, " is not loaded, so creating it...");
             return loadFont(*fileManager, _fontName, _fontSize);
         }
 
@@ -174,12 +174,12 @@ namespace RDE {
         }
 
         loadFont(*fileManager, fonts[_fontName].front().font->originalPath, _fontSize);
-        LOG_W("Couldn't find Font ", _fontName, " in size ", _fontSize, " so a new Font in that size was created")
+        Util::Log::warn("Couldn't find Font ", _fontName, " in size ", _fontSize, " so a new Font in that size was created");
         return fonts[_fontName].back().font;
     }
 
     void FontManager::destroy() {
-        LOG_DEBUG("Cleaning up FontManager")
+        Util::Log::debug("Cleaning up FontManager");
         for(auto& _fontHandler : fonts)
             for(auto& _font : _fontHandler.second) {
                 delete _font.font;

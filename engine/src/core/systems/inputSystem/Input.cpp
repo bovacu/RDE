@@ -69,7 +69,7 @@ namespace RDE {
             _eventImplemented |= mobileInput->ignoreEvent((SDL_EventType)_event.type);
 
             if(!_eventImplemented) {
-                LOG_W("System event ", _event.type, " not implemented!!")
+                Util::Log::warn("System event ", _event.type, " not implemented!!");
                 continue;
             }
         }
@@ -180,7 +180,7 @@ namespace RDE {
     bool InputManager::isGamepadButtonJustReleased(ControllerButtons _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) {
-            LOG_W("IS FALSE FOR ", _controllerID)
+            Util::Log::warn("IS FALSE FOR ", _controllerID);
             return false;
         }
 

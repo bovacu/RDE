@@ -3,8 +3,6 @@
 #ifndef RDE_EVENT_BUS
 #define RDE_EVENT_BUS
 
-#include "core/util/Logger.h"
-
 /**
  * @brief The Event bus works in the following way:
  *
@@ -93,14 +91,14 @@ namespace RDE {
 
             void unsubscribe(const Event& _type, HandlerId& _handlerId) {
                 if(!hasType(_type)) {
-                    LOG_W_TIME("Tried to unsubscribe Type ", typeid(_type).name(), " but it wasn't subscribed!")
+                    Util::Log::warn("Tried to unsubscribe Type ", typeid(_type).name(), " but it wasn't subscribed!");
                     return;
                 }
 
                 if (_handlerId.valid) {
                     handlers[_type].remove(_handlerId.id);
                 } else
-                LOG_W_TIME("Tried to unsubscribe an event", typeid(_type).name()," that wasn't subscribed yet!")
+                    Util::Log::warn("Tried to unsubscribe an event", typeid(_type).name()," that wasn't subscribed yet!");
             }
 
             bool dispatch(const Event& _type, AssociatedFunctionArgs... _args) {

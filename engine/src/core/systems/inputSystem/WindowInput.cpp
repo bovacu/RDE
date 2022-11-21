@@ -86,27 +86,27 @@ namespace RDE {
     }
 
     void WindowInput::onDidEnterForegroundApp(SDL_Event& _event) {
-        LOG_W("DID ENTER FOREGROUND")
+        Util::Log::warn("DID ENTER FOREGROUND");
         window->hasFocus = true;
     }
 
     void WindowInput::onDidEnterBackground(SDL_Event& _event) {
-        LOG_W("DID ENTER BACKGROUND")
+        Util::Log::warn("DID ENTER BACKGROUND");
         window->hasFocus = false;
     }
 
     void WindowInput::onDestroyApp(SDL_Event& _event) {
-        LOG_I("AUTO TERMINATING!!!!!")
+        Util::Log::warn("AUTO TERMINATING!!!!!");
         engine->getWindow().stop();
     }
 
     void WindowInput::onWillEnterForegroundApp(SDL_Event& _event) {
-        LOG_W("WILL ENTER FOREGROUND")
+        Util::Log::warn("WILL ENTER FOREGROUND");
         window->hasFocus = false;
     }
 
     void WindowInput::onWillEnterBackground(SDL_Event& _event) {
-        LOG_W("WILL ENTER BACKGROUND")
+        Util::Log::warn("WILL ENTER BACKGROUND");
         window->hasFocus = true;
     }
 }

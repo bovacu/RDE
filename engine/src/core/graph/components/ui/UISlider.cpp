@@ -117,7 +117,7 @@ namespace RDE {
             Vec2F _limits = { backgroundBarTransform->getModelMatrixPosition().x - _size.x * 0.5f,
                                  backgroundBarTransform->getModelMatrixPosition().x + _size.x * 0.5f };
 
-            auto _posX = clampF(node->manager->inputManager.getMousePosWorldPos().x, _limits.v[0], _limits.v[1]);
+            auto _posX = Util::Math::clampF(node->manager->inputManager.getMousePosWorldPos().x, _limits.v[0], _limits.v[1]);
             handleTransform->setMatrixModelPosition({_posX, handleTransform->getModelMatrixPosition().y});
 
             auto _distanceFromLowerPoint = _posX - _limits.v[0];
@@ -130,7 +130,7 @@ namespace RDE {
     }
 
     void UISlider::setFilledPercentage(float _percentage) {
-        config.percentageFilled = clampF(_percentage, 0.f, 1.f);
+        config.percentageFilled = Util::Math::clampF(_percentage, 0.f, 1.f);
         fillBarSprite->setSize({ config.barSize.x * config.percentageFilled, config.barSize.y });
         fillBarTransform->setPosition({handleTransform->getPosition().x - fillBarSprite->getSize().x * 0.5f, fillBarTransform->getPosition().y});
     }
