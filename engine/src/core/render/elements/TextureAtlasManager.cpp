@@ -104,7 +104,7 @@ namespace RDE {
     }
 
     void TextureAtlasManager::destroy() {
-        Util::Log::error("Cleaning up TextureAtlasManager");
+        Util::Log::debug("Cleaning up TextureAtlasManager");
         for(auto& _atlas : atlases)
             delete _atlas.second;
     }
