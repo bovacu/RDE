@@ -496,7 +496,7 @@ namespace GDE {
         ImGui::Indent();
         if(ImGui::CollapsingHeader("Enabled States")) {
             auto _node = _transform->node;
-            auto _flags = _node->getDisabledFlags();
+            auto _flags = _node->getEnabledFlags();
 
             if(_transform->parentTransform->node->isEnabled()) {
                 ImGui::PushID(createID());

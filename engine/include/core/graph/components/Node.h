@@ -54,7 +54,7 @@ namespace GDE {
             }
 
             template<typename Component>
-            bool hasComponent() const {
+            [[nodiscard]] bool hasComponent() const {
                 return graph->template hasComponent<Component>(ID);
             }
 
@@ -70,6 +70,38 @@ namespace GDE {
                 graph->setParent(this, _parent);
             }
 
+            // TODO: add to each component of the engine which main functions they use.
+            /**
+             * @brief Enables or disables and specific main function of the node. The main functions are:
+             *          - Event
+             *          - Update
+             *          - Fixed Update
+             *          - Late Update
+             *          - Render
+             *
+             *        Not all of the nodes may use internally all of the main functions. Usually if it is UI and interactable
+             *        it will use both Event and Update and all of them use Render. Non UI elements can use any of them. Check
+             *        the documentation for each specific one.
+             *
+             *        The uint8_t expected is a value of type EnabledStates. More than one can be passed at the same time
+             *        via |, &, ^... operators.
+             *
+             *        Passing the states to the function will clean up the current flags, so if you want to keep the current
+             *        enabled flags, pass it as getEnabledFlags() |/&/^ _enabledStates.
+             *
+             *        To disable, it is available INVERSE_ENABLED_STATE(x) which will return the selected flag with the bits
+             *        inverted. For example, RENDER is 10000 (1 << 4), the inverse would be 01111.
+             *
+             *        So for example, if I want to disable the render flag: setEnabled(INVERSE_ENABLED_STATE(EnabledStates::RENDER));
+             *        This will clear the current flags and set everything enabled but rendering.
+             *
+             *        If we want to keep the previous flags and also remove rendering: setEnabled(getEnabledFlags & INVERSE_ENABLED_STATE(EnabledStates::RENDER));
+             *
+             *        The enabled flags of the current node are passed to the children. If a specific flag of the parent is not desired
+             *        to be inherited by the children, you can override it using 'overrideParentDisabledConfig'
+             *
+             * @param _enabledStates States to be enabled or disabled.
+             */
             void setEnabled(uint8_t _enabledStates) {
                 if(!getTransform()->parentTransform) return;
                 if(!getTransform()->parentTransform->node->isEnabled()) return;
@@ -79,10 +111,19 @@ namespace GDE {
                 enableOrDisableAllChildren(_enabledStates, this);
             }
 
+            /**
+             * @brief Returns true if all of the flags are enabled.
+             * @return bool
+             */
             [[nodiscard]] bool isEnabled() const {
                 return enabledStates == EnabledStates::DS_ALL;
             }
 
+            /**
+             * @brief Checks for a specific flag of EnabledStates. No more than one value should be passed at once!
+             * @param _enabledState Flag to be checked.
+             * @return bool
+             */
             [[nodiscard]] bool isEnabledStateOn(EnabledStates _enabledState) const {
                 if(_enabledState == EnabledStates::DS_EVENT && (enabledStates & EnabledStates::DS_EVENT) == EnabledStates::DS_EVENT) {
                     return true;
@@ -107,12 +148,15 @@ namespace GDE {
                 return false;
             }
 
-            void overrideParentDisabledConfig(EnabledStates _disabledStates) {
-                enabledStates = _disabledStates;
-                applyConfig(_disabledStates, this);
+            /**
+             * @brief This is used to override an inherited enabled state of the parent.
+             * @param _enabledStates One or more flags of type EnabledStates.
+             */
+            void overrideParentEnabledStates(uint8_t _enabledStates) {
+                applyConfig(_enabledStates, this);
             }
 
-            [[nodiscard]] uint8_t getDisabledFlags() const {
+            [[nodiscard]] uint8_t getEnabledFlags() const {
                 return enabledStates;
             }
 
