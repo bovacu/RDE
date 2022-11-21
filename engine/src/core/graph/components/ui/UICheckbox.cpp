@@ -100,7 +100,7 @@ namespace GDE {
         ((UITransform*)node->getTransform())->setSize(Vec2F { checkboxSize.x + textRendererSize.x, checkboxSize.y > textRendererSize.y ? checkboxSize.y : textRendererSize.y } + _offset);
 
         if(tickSprite != nullptr) {
-            tickSprite->node->setDisabled(config.checked ? DisabledConfig::EnabledConfigRender : DisabledConfig::DisabledConfigRender);
+            tickSprite->node->setEnabled(config.checked ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
         }
 
         if(checkboxBackgroundTransform != nullptr) {
@@ -121,7 +121,7 @@ namespace GDE {
 
         config.checked = !config.checked;
         if(UI::interaction->mouseInnerStatus == UIInteractable::MouseEntered) {
-            tickSprite->node->setDisabled(config.checked ? DisabledConfig::EnabledConfigRender : DisabledConfig::DisabledConfigRender);
+            tickSprite->node->setEnabled(config.checked ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
         }
     }
 

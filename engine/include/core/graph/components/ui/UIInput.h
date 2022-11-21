@@ -75,6 +75,8 @@ namespace GDE {
             void onUnfocused();
             void updatePlaceholder();
             void updateCaret();
+
+            bool usable();
     };
 
 } // GDE

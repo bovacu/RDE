@@ -37,7 +37,7 @@ namespace GDE {
         placeholderTextRenderer = _placeholderNode->addComponent<UIText>(config.placeholderText, config.font);
         placeholderTextRenderer->batchPriority = BatchPriority::SpritePriority;
         placeholderTextRenderer->color = config.placeholderTextColor;
-        placeholderTextRenderer->node->setDisabled(!config.showPlaceholderText);
+        placeholderTextRenderer->node->setEnabled(config.showPlaceholderText ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
         placeholderTextRenderer->setOriginOffset({placeholderTextRenderer->getSize().x * 0.5f, 0});
         auto* _placeholderTransform = _placeholderNode->getTransform();
         ((UITransform*)_placeholderTransform)->setAnchor(Anchor::LEFT);
@@ -62,7 +62,7 @@ namespace GDE {
         caretSprite = _caretNode->addComponent<UIImage>(config.caretTexture);
         caretSprite->setBatchPriority(BatchPriority::SpritePriority);
         caretSprite->setColor(config.textColor);
-        caretSprite->node->setDisabled();
+        caretSprite->node->setEnabled(INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
         caretTransform = _caretNode->getTransform();
         ((UITransform*)caretTransform)->setAnchor(Anchor::LEFT);
         auto _caretPosition = caretTransform->getPosition();
@@ -153,10 +153,12 @@ namespace GDE {
 
     void UIInput::onUpdate(Delta _dt) {
         IRenderizable::onUpdate(_dt);
+        if(!usable()) return;
 
         if(UI::interaction != nullptr && UI::interaction->focused && caretSprite != nullptr) {
             if(blinkingTimer > config.blinkingTimeSeconds) {
-                caretSprite->node->setDisabled(caretSprite->node->isEnabled() ? DisabledConfig::DisabledConfigRender : DisabledConfig::EnabledConfigRender);
+                caretSprite->node->setEnabled(
+                        (uint8_t) (caretSprite->node->isEnabledStateOn(EnabledStates::DS_RENDER) ? INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER) : EnabledStates::DS_RENDER));
                 blinkingTimer = 0;
             }
 
@@ -165,43 +167,53 @@ namespace GDE {
     }
 
     void UIInput::onMouseEntered() {
+        if(!usable()) return;
+
         updatePlaceholder();
     }
 
     void UIInput::onMouseExited() {
+        if(!usable()) return;
+
         updatePlaceholder();
     }
 
     void UIInput::onMouseClicked(MouseCode _mouseCode) {
+        if(!usable()) return;
+
         #if IS_ANDROID()
         SDL_StartTextInput();
         #elif IS_IOS()
         SDL_StartTextInput();
         #endif
 
-        caretSprite->node->setDisabled(false);
+        caretSprite->node->setEnabled(EnabledStates::DS_RENDER);
         UI::interaction->focused = true;
         updatePlaceholder();
         blinkingTimer = 0;
     }
 
     void UIInput::onUnfocused() {
+        if(!usable()) return;
+
         #if IS_ANDROID()
         SDL_StopTextInput();
         #elif IS_IOS()
         SDL_StopTextInput();
         #endif
 
-        caretSprite->node->setDisabled();
+        caretSprite->node->setEnabled(INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
     }
 
     void UIInput::onMouseReleased(MouseCode _mouseCode) {
+        if(!usable()) return;
+
         updatePlaceholder();
     }
 
     // TODO: caret is not in the right place when the text goes out of scope on the right
     void UIInput::onKeyPressed(KeyCode _keyCode, char _char) {
-        if(textRenderer == nullptr || !UI::interaction->interactable) return;
+        if(!usable()) return;
 
         if(_keyCode == KeyCode::Enter || _keyCode == KeyCode::Escape) {
             UI::interaction->focused = false;
@@ -259,7 +271,7 @@ namespace GDE {
     }
 
     void UIInput::updateCaret() {
-        if(textRenderer == nullptr || caretSprite == nullptr) return;
+        if(!usable()) return;
 
         auto* _font = textRenderer->getFont();
         float _width = 0;
@@ -281,5 +293,9 @@ namespace GDE {
         caretTransform->setPosition(textTransform->getPosition().x + _width * 0.5f * UI::node->getTransform()->getScale().x, _caretPosition.y);
 
         caretTransform->setScale(caretTransform->getScale().x, (config.caretHeight * getSize().y) / config.caretTexture->getSize().y);
+    }
+
+    bool UIInput::usable() {
+        return textRenderer != nullptr && UI::interaction->interactable && node->isEnabledStateOn(EnabledStates::DS_UPDATE);
     }
 }

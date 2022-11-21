@@ -11,55 +11,18 @@
 FORWARD_DECLARE_CLASS(Manager)
 
 namespace GDE {
-    struct DisabledConfig {
-        bool disabledForEvent = false;
-        bool disabledForUpdate = false;
-        bool disabledForFixedUpdate = false;
-        bool disabledForRender = false;
-        bool disabledForLateUpdate = false;
 
-        static DisabledConfig DisabledConfigEvent;
-        static DisabledConfig DisabledConfigUpdate;
-        static DisabledConfig DisabledConfigFixedUpdate;
-        static DisabledConfig DisabledConfigRender;
-        static DisabledConfig DisabledConfigLateUpdate;
-
-        static DisabledConfig EnabledConfigEvent;
-        static DisabledConfig EnabledConfigUpdate;
-        static DisabledConfig EnabledConfigFixedUpdate;
-        static DisabledConfig EnabledConfigRender;
-        static DisabledConfig EnabledConfigLateUpdate;
-
-        DisabledConfig operator ~() {
-            return {
-                .disabledForEvent       = !disabledForEvent,
-                .disabledForUpdate      = !disabledForUpdate,
-                .disabledForFixedUpdate = !disabledForFixedUpdate,
-                .disabledForRender      = !disabledForRender,
-                .disabledForLateUpdate  = !disabledForRender,
-            };
-        }
+    enum EnabledStates {
+        DS_NONE         =      0,
+        DS_EVENT        = 1 << 0,
+        DS_UPDATE       = 1 << 1,
+        DS_FIXED_UPDATE = 1 << 2,
+        DS_LATE_UPDATE  = 1 << 3,
+        DS_RENDER       = 1 << 4,
+        DS_ALL          = DS_EVENT | DS_UPDATE | DS_FIXED_UPDATE | DS_LATE_UPDATE | DS_RENDER
     };
 
-    inline DisabledConfig operator |(const DisabledConfig& _config0, const DisabledConfig& _config1) {
-        return {
-                .disabledForEvent       = (_config0.disabledForEvent        || _config1.disabledForEvent),
-                .disabledForUpdate      = (_config0.disabledForUpdate       || _config1.disabledForUpdate),
-                .disabledForFixedUpdate = (_config0.disabledForFixedUpdate  || _config1.disabledForFixedUpdate),
-                .disabledForRender      = (_config0.disabledForRender       || _config1.disabledForRender),
-                .disabledForLateUpdate  = (_config0.disabledForLateUpdate   || _config1.disabledForLateUpdate),
-        };
-    }
-
-    inline DisabledConfig operator &(const DisabledConfig& _config0, const DisabledConfig& _config1) {
-        return {
-                .disabledForEvent       = (_config0.disabledForEvent        && _config1.disabledForEvent),
-                .disabledForUpdate      = (_config0.disabledForUpdate       && _config1.disabledForUpdate),
-                .disabledForFixedUpdate = (_config0.disabledForFixedUpdate  && _config1.disabledForFixedUpdate),
-                .disabledForRender      = (_config0.disabledForRender       && _config1.disabledForRender),
-                .disabledForLateUpdate  = (_config0.disabledForLateUpdate   && _config1.disabledForLateUpdate),
-        };
-    }
+#define INVERSE_ENABLED_STATE(x) (GDE::EnabledStates)(GDE::EnabledStates::DS_ALL ^ (x))
 
     struct Node {
         FRIEND_CLASS(ImGuiScene, UISlider)
@@ -69,6 +32,7 @@ namespace GDE {
             Manager* manager = nullptr;
             NodeID ID = NODE_ID_NULL;
             Transform* transform = nullptr;
+            uint8_t enabledStates = EnabledStates::DS_ALL;
 
         public:
             Node(const NodeID& _nodeID, Graph* _graph, Manager* _manager, Transform* _transform) : ID(_nodeID), graph(_graph), transform(_transform), manager(_manager) {  }
@@ -106,114 +70,111 @@ namespace GDE {
                 graph->setParent(this, _parent);
             }
 
-            /**
-             * @brief Enables or disables specific functionalities of a Node. If used on a Node with children, the configuration
-             *        will be inherited to all of them, but can be changed through overrideParentDisabledConfig.
-             *
-             *        There are predefined configs inside DisabledConfig. You can join many of them by using |, &, ~ operators as needed.
-             *
-             *        Example:
-             *              node->setDisabled(DisabledConfig::DisabledConfigRender | DisabledConfig::DisabledConfigUpdate);
-             *
-             * @param _disabledConfig
-             */
-            void setDisabled(const DisabledConfig& _disabledConfig = DisabledConfig::DisabledConfigRender) {
+            void setEnabled(uint8_t _enabledStates) {
                 if(!getTransform()->parentTransform) return;
                 if(!getTransform()->parentTransform->node->isEnabled()) return;
 
-                enableOrDisableAllChildren(_disabledConfig, this);
-            }
+                enabledStates = _enabledStates;
 
-            void setDisabled(bool _disabled) {
-                if(!getTransform()->parentTransform) return;
-                if(!getTransform()->parentTransform->node->isEnabled()) return;
-
-                enableOrDisableAllChildren(_disabled ? DisabledConfig::DisabledConfigRender : DisabledConfig::EnabledConfigRender, this);
+                enableOrDisableAllChildren(_enabledStates, this);
             }
 
             [[nodiscard]] bool isEnabled() const {
-                return  !hasComponent<DisabledForEvent>()       &&
-                        !hasComponent<DisabledForUpdate>()      &&
-                        !hasComponent<DisabledForFixedUpdate>() &&
-                        !hasComponent<DisabledForRender>()      &&
-                        !hasComponent<DisabledForLateUpdate>();
+                return enabledStates == EnabledStates::DS_ALL;
             }
 
-            [[nodiscard]] bool isEnabled(const DisabledConfig& _disabledConfig) const {
-                if(!_disabledConfig.disabledForEvent) {
-                    if(hasComponent<DisabledForEvent>()) return false;
+            [[nodiscard]] bool isEnabledStateOn(EnabledStates _enabledState) const {
+                if(_enabledState == EnabledStates::DS_EVENT && (enabledStates & EnabledStates::DS_EVENT) == EnabledStates::DS_EVENT) {
+                    return true;
                 }
 
-                if(!_disabledConfig.disabledForUpdate) {
-                    if(hasComponent<DisabledForUpdate>()) return false;
+                if(_enabledState == EnabledStates::DS_UPDATE && (enabledStates & EnabledStates::DS_UPDATE) == EnabledStates::DS_UPDATE) {
+                    return true;
                 }
 
-                if(!_disabledConfig.disabledForFixedUpdate) {
-                    if(hasComponent<DisabledForFixedUpdate>()) return false;
+                if(_enabledState == EnabledStates::DS_FIXED_UPDATE && (enabledStates & EnabledStates::DS_FIXED_UPDATE) == EnabledStates::DS_FIXED_UPDATE) {
+                    return true;
                 }
 
-                if(!_disabledConfig.disabledForRender) {
-                    if(hasComponent<DisabledForRender>()) return false;
+                if(_enabledState == EnabledStates::DS_LATE_UPDATE && (enabledStates & EnabledStates::DS_LATE_UPDATE) == EnabledStates::DS_LATE_UPDATE) {
+                    return true;
                 }
 
-                if(!_disabledConfig.disabledForLateUpdate) {
-                    if(hasComponent<DisabledForLateUpdate>()) return false;
+                if(_enabledState == EnabledStates::DS_RENDER && (enabledStates & EnabledStates::DS_RENDER) == EnabledStates::DS_RENDER) {
+                    return true;
                 }
 
-                return true;
+                return false;
             }
 
-            void overrideParentDisabledConfig(const DisabledConfig& _disabledConfig) {
-                applyConfig(_disabledConfig, this);
+            void overrideParentDisabledConfig(EnabledStates _disabledStates) {
+                enabledStates = _disabledStates;
+                applyConfig(_disabledStates, this);
             }
 
-            [[nodiscard]] DisabledConfig getDisabledConfig() const {
-                return {
-                    .disabledForEvent       = hasComponent<DisabledForEvent>(),
-                    .disabledForUpdate      = hasComponent<DisabledForUpdate>(),
-                    .disabledForFixedUpdate = hasComponent<DisabledForFixedUpdate>(),
-                    .disabledForRender      = hasComponent<DisabledForRender>(),
-                    .disabledForLateUpdate  = hasComponent<DisabledForLateUpdate>(),
-                };
+            [[nodiscard]] uint8_t getDisabledFlags() const {
+                return enabledStates;
             }
 
         private:
-            void applyConfig(const DisabledConfig& _disabledConfig, Node* _node) {
-                if(!_disabledConfig.disabledForEvent) {
-                    if(_node->hasComponent<DisabledForEvent>()) _node->removeComponent<DisabledForEvent>();
+            void applyConfig(uint8_t _enabledStates, Node* _node) {
+                enabledStates = _enabledStates;
+
+                if((_enabledStates & EnabledStates::DS_EVENT) == EnabledStates::DS_EVENT) {
+                    if(_node->hasComponent<DisabledForEvent>()) {
+                        _node->removeComponent<DisabledForEvent>();
+                    }
                 } else {
-                    if(!_node->hasComponent<DisabledForEvent>()) _node->addComponent<DisabledForEvent>();
+                    if(!_node->hasComponent<DisabledForEvent>()) {
+                        _node->addComponent<DisabledForEvent>();
+                    }
                 }
 
-                if(!_disabledConfig.disabledForUpdate) {
-                    if(_node->hasComponent<DisabledForUpdate>()) _node->removeComponent<DisabledForUpdate>();
+                if((_enabledStates & EnabledStates::DS_UPDATE) == EnabledStates::DS_UPDATE) {
+                    if(_node->hasComponent<DisabledForUpdate>()) {
+                        _node->removeComponent<DisabledForUpdate>();
+                    }
                 } else {
-                    if(!_node->hasComponent<DisabledForUpdate>()) _node->addComponent<DisabledForUpdate>();
+                    if(!_node->hasComponent<DisabledForUpdate>()) {
+                        _node->addComponent<DisabledForUpdate>();
+                    }
                 }
 
-                if(!_disabledConfig.disabledForFixedUpdate) {
-                    if(_node->hasComponent<DisabledForFixedUpdate>()) _node->removeComponent<DisabledForFixedUpdate>();
+                if((_enabledStates & EnabledStates::DS_FIXED_UPDATE) == EnabledStates::DS_FIXED_UPDATE) {
+                    if(_node->hasComponent<DisabledForFixedUpdate>()) {
+                        _node->removeComponent<DisabledForFixedUpdate>();
+                    }
                 } else {
-                    if(!_node->hasComponent<DisabledForFixedUpdate>()) _node->addComponent<DisabledForFixedUpdate>();
+                    if(!_node->hasComponent<DisabledForFixedUpdate>()) {
+                        _node->addComponent<DisabledForFixedUpdate>();
+                    }
                 }
 
-                if(!_disabledConfig.disabledForRender) {
-                    if(_node->hasComponent<DisabledForRender>()) _node->removeComponent<DisabledForRender>();
+                if((_enabledStates & EnabledStates::DS_LATE_UPDATE) == EnabledStates::DS_LATE_UPDATE) {
+                    if(_node->hasComponent<DisabledForLateUpdate>()) {
+                        _node->removeComponent<DisabledForLateUpdate>();
+                    }
                 } else {
-                    if(!_node->hasComponent<DisabledForRender>()) _node->addComponent<DisabledForRender>();
+                    if(!_node->hasComponent<DisabledForLateUpdate>()) {
+                        _node->addComponent<DisabledForLateUpdate>();
+                    }
                 }
 
-                if(!_disabledConfig.disabledForLateUpdate) {
-                    if(_node->hasComponent<DisabledForLateUpdate>()) _node->removeComponent<DisabledForLateUpdate>();
+                if((_enabledStates & EnabledStates::DS_RENDER) == EnabledStates::DS_RENDER) {
+                    if(_node->hasComponent<DisabledForRender>()) {
+                        _node->removeComponent<DisabledForRender>();
+                    }
                 } else {
-                    if(!_node->hasComponent<DisabledForLateUpdate>()) _node->addComponent<DisabledForLateUpdate>();
+                    if(!_node->hasComponent<DisabledForRender>()) {
+                        _node->addComponent<DisabledForRender>();
+                    }
                 }
             }
 
-            void enableOrDisableAllChildren(const DisabledConfig& _disabledConfig, Node* _node) {
-                applyConfig(_disabledConfig, _node);
+            void enableOrDisableAllChildren(uint8_t _disabledStates, Node* _node) {
+                applyConfig(_disabledStates, _node);
                 for(auto* _child : _node->getTransform()->children) {
-                    _child->node->enableOrDisableAllChildren(_disabledConfig, _child->node);
+                    _child->node->enableOrDisableAllChildren(_disabledStates, _child->node);
                 }
             }
     };

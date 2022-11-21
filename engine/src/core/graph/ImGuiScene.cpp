@@ -494,61 +494,66 @@ namespace GDE {
         ImGui::NewLine();
 
         ImGui::Indent();
-        if(ImGui::CollapsingHeader("Disabled Config")) {
+        if(ImGui::CollapsingHeader("Enabled States")) {
             auto _node = _transform->node;
-            auto _config = _node->getDisabledConfig();
+            auto _flags = _node->getDisabledFlags();
 
             if(_transform->parentTransform->node->isEnabled()) {
                 ImGui::PushID(createID());
-                if(ImGui::Checkbox("Event", &_config.disabledForEvent)) {
-                    if(_config.disabledForEvent) {
-                        _node->setDisabled(_config | DisabledConfig::DisabledConfigEvent);
+                static bool _enabledForEvent = true;
+                if(ImGui::Checkbox("Event", &_enabledForEvent)) {
+                    if(_enabledForEvent) {
+                        _node->setEnabled(_flags | EnabledStates::DS_EVENT);
                     } else {
-                        _node->setDisabled(_config | DisabledConfig::EnabledConfigEvent);
+                        _node->setEnabled(_flags & INVERSE_ENABLED_STATE(EnabledStates::DS_EVENT));
                     }
                 }
                 helpMarker("This will make the Node and children not to run the main Event function.");
                 ImGui::PopID();
 
                 ImGui::PushID(createID());
-                if(ImGui::Checkbox("Update", &_config.disabledForUpdate)) {
-                    if(_config.disabledForUpdate) {
-                        _node->setDisabled(_config | DisabledConfig::DisabledConfigUpdate);
+                static bool _enabledForUpdate = true;
+                if(ImGui::Checkbox("Update", &_enabledForUpdate)) {
+                    if(_enabledForUpdate) {
+                        _node->setEnabled(_flags | EnabledStates::DS_UPDATE);
                     } else {
-                        _node->setDisabled(_config | DisabledConfig::EnabledConfigUpdate);
+                        _node->setEnabled(_flags & INVERSE_ENABLED_STATE(EnabledStates::DS_UPDATE));
                     }
                 }
                 helpMarker("This will make the Node and children not to run the main Update function.");
                 ImGui::PopID();
 
                 ImGui::PushID(createID());
-                if(ImGui::Checkbox("Fixed Update", &_config.disabledForFixedUpdate)) {
-                    if(_config.disabledForFixedUpdate) {
-                        _node->setDisabled(_config | DisabledConfig::DisabledConfigFixedUpdate);
+                static bool _enabledForFixedUpdate = true;
+                if(ImGui::Checkbox("Fixed Update", &_enabledForFixedUpdate)) {
+                    if(_enabledForFixedUpdate) {
+                        _node->setEnabled(_flags | EnabledStates::DS_FIXED_UPDATE);
                     } else {
-                        _node->setDisabled(_config | DisabledConfig::EnabledConfigFixedUpdate);
+                        _node->setEnabled(_flags & INVERSE_ENABLED_STATE(EnabledStates::DS_FIXED_UPDATE));
                     }
                 }
                 helpMarker("This will make the Node and children not to run the main FixedUpdate function.");
                 ImGui::PopID();
 
                 ImGui::PushID(createID());
-                if(ImGui::Checkbox("Render", &_config.disabledForRender)) {
-                    if(_config.disabledForRender) {
-                        _node->setDisabled(_config | DisabledConfig::DisabledConfigRender);
+                static bool _enabledForRender = true;
+                if(ImGui::Checkbox("Render", &_enabledForRender)) {
+                    if(_enabledForRender) {
+                        _node->setEnabled(_flags | EnabledStates::DS_RENDER);
                     } else {
-                        _node->setDisabled(_config | DisabledConfig::EnabledConfigRender);
+                        _node->setEnabled(_flags & INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
                     }
                 }
                 helpMarker("This will make the Node and children not to run the main Render function.");
                 ImGui::PopID();
 
                 ImGui::PushID(createID());
-                if(ImGui::Checkbox("Late Update", &_config.disabledForLateUpdate)) {
-                    if(_config.disabledForLateUpdate) {
-                        _node->setDisabled(_config | DisabledConfig::DisabledConfigLateUpdate);
+                static bool _enabledForLateUpdate = true;
+                if(ImGui::Checkbox("Late Update", &_enabledForLateUpdate)) {
+                    if(_enabledForLateUpdate) {
+                        _node->setEnabled(_flags | EnabledStates::DS_LATE_UPDATE);
                     } else {
-                        _node->setDisabled(_config | DisabledConfig::EnabledConfigLateUpdate);
+                        _node->setEnabled(_flags & INVERSE_ENABLED_STATE(EnabledStates::DS_LATE_UPDATE));
                     }
                 }
                 helpMarker("This will make the Node and children not to run the main LateUpdate function.");
