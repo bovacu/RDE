@@ -10,7 +10,7 @@
 #include "core/util/GLUtil.h"
 #include "core/render/elements/TextureAtlasManager.h"
 
-namespace GDE {
+namespace RDE {
 
     #define SDL_LOCKIFMUST(s) (SDL_MUSTLOCK(s) ? SDL_LockSurface(s) : 0)
     #define SDL_UNLOCKIFMUST(s) { if(SDL_MUSTLOCK(s)) SDL_UnlockSurface(s); }

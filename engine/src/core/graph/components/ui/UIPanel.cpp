@@ -6,7 +6,7 @@
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
 
-namespace GDE {
+namespace RDE {
 
     static void foo() {
 

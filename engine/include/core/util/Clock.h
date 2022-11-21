@@ -1,11 +1,11 @@
 #pragma once
 
-#ifndef GDE_CLOCK_H
-#define GDE_CLOCK_H
+#ifndef RDE_CLOCK_H
+#define RDE_CLOCK_H
 
 #include <cstdint>
 
-namespace GDE {
+namespace RDE {
 
     /// This is a class that tracks the time passed since a specific moment.
     class Clock {
@@ -30,4 +30,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_CLOCK_H
+#endif //RDE_CLOCK_H

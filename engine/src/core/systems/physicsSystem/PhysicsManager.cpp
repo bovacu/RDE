@@ -5,7 +5,7 @@
 #include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/render/RenderManager.h"
 
-namespace GDE {
+namespace RDE {
 
     void PhysicsManager::init() {
         space = cpSpaceNew();

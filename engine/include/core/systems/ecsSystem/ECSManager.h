@@ -2,14 +2,14 @@
 // Created by borja on 29/04/22.
 //
 
-#ifndef GDE_SYSTEM_MANAGER_H
-#define GDE_SYSTEM_MANAGER_H
+#ifndef RDE_SYSTEM_MANAGER_H
+#define RDE_SYSTEM_MANAGER_H
 
 #include "core/util/Util.h"
 #include "core/systems/ecsSystem/ECSSystem.h"
 #include "core/graph/Graph.h"
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief Custom exception for Bad system swaping error.
@@ -68,4 +68,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_SYSTEM_MANAGER_H
+#endif //RDE_SYSTEM_MANAGER_H

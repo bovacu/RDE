@@ -2,15 +2,15 @@
 // Created by borja on 10/25/22.
 //
 
-#ifndef GDE_NODE_H
-#define GDE_NODE_H
+#ifndef RDE_NODE_H
+#define RDE_NODE_H
 
 #include "core/graph/Graph.h"
 #include "core/graph/components/Components.h"
 
 FORWARD_DECLARE_CLASS(Manager)
 
-namespace GDE {
+namespace RDE {
 
     enum EnabledStates {
         DS_NONE         =      0,
@@ -22,7 +22,7 @@ namespace GDE {
         DS_ALL          = DS_EVENT | DS_UPDATE | DS_FIXED_UPDATE | DS_LATE_UPDATE | DS_RENDER
     };
 
-#define INVERSE_ENABLED_STATE(x) (GDE::EnabledStates)(GDE::EnabledStates::DS_ALL ^ (x))
+#define INVERSE_ENABLED_STATE(x) (RDE::EnabledStates)(RDE::EnabledStates::DS_ALL ^ (x))
 
     struct Node {
         FRIEND_CLASS(ImGuiScene, UISlider)
@@ -225,4 +225,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_NODE_H
+#endif //RDE_NODE_H

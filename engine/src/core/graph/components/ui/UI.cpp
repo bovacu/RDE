@@ -10,7 +10,7 @@
 #include "core/systems/eventSystem/MobileEvent.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     UI::UI(Node* _node) : IRenderizable(_node) {
         if(!_node->hasComponent<UIInteractable>()) {

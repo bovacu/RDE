@@ -7,7 +7,7 @@
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
 
-namespace GDE {
+namespace RDE {
 
     UISlider::UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config) : UI(_node) {
         setConfig(_manager, _config);

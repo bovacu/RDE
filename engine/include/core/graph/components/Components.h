@@ -1,11 +1,11 @@
 // Created by borja on 27/12/21.
 
 
-#ifndef GDE_COMPONENTS_H
-#define GDE_COMPONENTS_H
+#ifndef RDE_COMPONENTS_H
+#define RDE_COMPONENTS_H
 
 
-namespace GDE {
+namespace RDE {
     FORWARD_DECLARE_CLASS(Manager, Window, Camera, Canvas, IViewPort)
     /**
      * @brief Component common to every entity and that identifies it whit a name. It is recommended 
@@ -105,4 +105,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_COMPONENTS_H
+#endif //RDE_COMPONENTS_H

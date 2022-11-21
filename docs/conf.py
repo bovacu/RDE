@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'GDE'
+project = 'RDE'
 copyright = '2022, Borja Vazquez Cuesta'
 author = 'Borja Vazquez Cuesta'
 version = '0.5.1'

@@ -2,14 +2,14 @@
 // Created by borja on 10/26/22.
 //
 
-#ifndef GDE_UI_IMAGE_H
-#define GDE_UI_IMAGE_H
+#ifndef RDE_UI_IMAGE_H
+#define RDE_UI_IMAGE_H
 
 
 #include "core/graph/components/SpriteRenderer.h"
 #include "UI.h"
 
-namespace GDE {
+namespace RDE {
 
     class UIImage : public UI {
         private:
@@ -82,4 +82,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_UI_IMAGE_H
+#endif //RDE_UI_IMAGE_H

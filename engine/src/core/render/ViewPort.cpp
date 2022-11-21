@@ -3,7 +3,7 @@
 #include "core/render/elements/ViewPort.h"
 #include "core/util/Logger.h"
 
-namespace GDE {
+namespace RDE {
 
     ViewPort::ViewPort(const Vec2I& _deviceSize, const Vec2I& _resolutionSize) {
         virtualResolution = _resolutionSize;

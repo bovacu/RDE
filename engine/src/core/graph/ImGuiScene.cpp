@@ -15,7 +15,7 @@
 #include "core/graph/components/ui/UIPanel.h"
 #include "core/graph/components/ui/UITransform.h"
 
-namespace GDE {
+namespace RDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
     static ImGuiContext* i_Context = nullptr;
 

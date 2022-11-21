@@ -2,12 +2,12 @@
 // Created by borja on 9/5/22.
 //
 
-#ifndef GDE_VERTEX_H
-#define GDE_VERTEX_H
+#ifndef RDE_VERTEX_H
+#define RDE_VERTEX_H
 
 #include <glm/glm.hpp>
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief This is the data that is sent to the GPU when rendering default vertices.
@@ -58,4 +58,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_VERTEX_H
+#endif //RDE_VERTEX_H

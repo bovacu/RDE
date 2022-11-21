@@ -1,8 +1,8 @@
 // Created by borja on 24/12/21.
 
 
-#ifndef GDE_CORE_H
-#define GDE_CORE_H
+#ifndef RDE_CORE_H
+#define RDE_CORE_H
 
 #define FRAMEBUFFER_VERTEX_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferVertex.glsl"
 #define FRAMEBUFFER_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferFragment.glsl"
@@ -112,11 +112,11 @@ inline float currentDPI = 0;
     #define ENGINE_ASSERT(x, ...)
 #endif
 
-#ifdef GDE_EXPORT
-    #define GDE_API [[gnu::visibility("default")]]
-    #define GDE_HIDDEN [[gnu::visibility("hidden")]]
-    #define GDE_INTERNAL [[gnu::visibility("internal")]]
-    #define GDE_DEPRECATED(_explanation) [[gnu::deprecated(_explanation)]]
+#ifdef RDE_EXPORT
+    #define RDE_API [[gnu::visibility("default")]]
+    #define RDE_HIDDEN [[gnu::visibility("hidden")]]
+    #define RDE_INTERNAL [[gnu::visibility("internal")]]
+    #define RDE_DEPRECATED(_explanation) [[gnu::deprecated(_explanation)]]
 #endif
 
 #if IS_MOBILE() || IS_MAC() || defined(_WIN32)
@@ -166,4 +166,4 @@ public:                                                                         
 #define FRIEND_STRUCT(...) FOR_EACH_DECLARATION(friend struct, ;, __VA_ARGS__)
 #define FORWARD_DECLARE_STRUCT(...) FOR_EACH_DECLARATION(struct, ;, __VA_ARGS__)
 
-#endif //GDE_CORE_H
+#endif //RDE_CORE_H

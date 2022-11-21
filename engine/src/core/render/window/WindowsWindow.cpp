@@ -7,9 +7,9 @@
 #if IS_WINDOWS() && !IS_ANDROID()
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
-    WindowsWindow::WindowsWindow(GDEConfig* _config) : Window(_config) {
+    WindowsWindow::WindowsWindow(RDEConfig* _config) : Window(_config) {
         LOG_DEBUG("Platform: Windows")
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);

@@ -1,12 +1,12 @@
 #pragma once
 
-#ifndef GDE_GAMEPAD_KEYS_H
-#define GDE_GAMEPAD_KEYS_H
+#ifndef RDE_GAMEPAD_KEYS_H
+#define RDE_GAMEPAD_KEYS_H
 
 #include <cstdint>
 #include "core/platform/PlatformHeaderSDL.h"
 
-namespace GDE {
+namespace RDE {
 
     /// -----------------------------------------------------------------
     /// |			CODES FOR GAMEPAD BUTTONS, THEY ARE 				|
@@ -65,4 +65,4 @@ namespace GDE {
 //    #define GAMEPAD_BUTTON_DPAD_DOWN        ::engine::GamePad::DPadDown
 //    #define GAMEPAD_BUTTON_DPAD_LEFT        ::engine::GamePad::DPadLeft
 
-#endif // GDE_GAMEPAD_KEYS_H
+#endif // RDE_GAMEPAD_KEYS_H

@@ -2,8 +2,8 @@
 // Created by borja on 9/5/22.
 //
 
-#ifndef GDE_BATCH_H
-#define GDE_BATCH_H
+#ifndef RDE_BATCH_H
+#define RDE_BATCH_H
 
 #include <vector>
 #include "core/render/elements/Vertex.h"
@@ -19,7 +19,7 @@ enum BatchPriority {
     TextPriority = 1
 };
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(SpriteBatch, IRenderizable)
 
@@ -82,4 +82,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_BATCH_H
+#endif //RDE_BATCH_H

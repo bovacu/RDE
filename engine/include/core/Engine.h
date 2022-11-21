@@ -1,8 +1,8 @@
 // Created by borja on 24/12/21.
 
 
-#ifndef GDE_ENGINE_H
-#define GDE_ENGINE_H
+#ifndef RDE_ENGINE_H
+#define RDE_ENGINE_H
 
 
 #include "core/render/window/Window.h"
@@ -15,7 +15,7 @@
 
 int main(int argc, char** argv);
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Scene)
 
@@ -34,7 +34,7 @@ namespace GDE {
     /**
      * @brief This struct contains some basic configuration of the window.
      */
-    struct GDEConfig {
+    struct RDEConfig {
         struct WindowProperties {
             /**
              * @brief Title of the window.
@@ -110,9 +110,9 @@ namespace GDE {
             Manager manager {};
 
             /**
-             * @see GDEConfig
+             * @see RDEConfig
              */
-            GDEConfig gdeConfig {};
+            RDEConfig rdeConfig {};
 
         private:
             /**
@@ -294,4 +294,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_ENGINE_H
+#endif //RDE_ENGINE_H

@@ -3,7 +3,7 @@
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/util/Functions.h"
 
-namespace GDE {
+namespace RDE {
 
     void TextureAtlasManager::init(FileManager* _fileManager) {
         loadSpriteSheet("defaultAssets/defaultAssets.json");

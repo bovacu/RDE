@@ -1,13 +1,13 @@
 // Created by borja on 26/12/21.
 
 
-#ifndef GDE_RENDER_MANAGER_H
-#define GDE_RENDER_MANAGER_H
+#ifndef RDE_RENDER_MANAGER_H
+#define RDE_RENDER_MANAGER_H
 
 #include "core/util/Util.h"
 #include "core/render/elements/SpriteBatch.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Engine)
 
@@ -155,4 +155,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_RENDER_MANAGER_H
+#endif //RDE_RENDER_MANAGER_H

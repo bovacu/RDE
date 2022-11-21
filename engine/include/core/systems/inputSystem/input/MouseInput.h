@@ -1,15 +1,15 @@
 // Created by borja on 6/2/22.
 
 
-#ifndef GDE_MOUSE_INPUT_H
-#define GDE_MOUSE_INPUT_H
+#ifndef RDE_MOUSE_INPUT_H
+#define RDE_MOUSE_INPUT_H
 
 
 #include "core/util/Util.h"
 #include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
 #include "Input.h"
 
-namespace GDE {
+namespace RDE {
 
     class MouseInput : public Input {
         private:
@@ -80,4 +80,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_MOUSE_INPUT_H
+#endif //RDE_MOUSE_INPUT_H

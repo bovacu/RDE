@@ -1,14 +1,14 @@
 // Created by borja on 6/2/22.
 
 
-#ifndef GDE_WINDOW_INPUT_H
-#define GDE_WINDOW_INPUT_H
+#ifndef RDE_WINDOW_INPUT_H
+#define RDE_WINDOW_INPUT_H
 
 
 #include "core/util/Util.h"
 #include "Input.h"
 
-namespace GDE {
+namespace RDE {
 
     class WindowInput : public Input {
         public:
@@ -114,4 +114,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_WINDOW_INPUT_H
+#endif //RDE_WINDOW_INPUT_H

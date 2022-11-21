@@ -1,8 +1,8 @@
 // Created by borja on 30/12/21.
 
 
-#ifndef GDE_CAMERA_H
-#define GDE_CAMERA_H
+#ifndef RDE_CAMERA_H
+#define RDE_CAMERA_H
 
 
 #include <glm/ext/matrix_float4x4.hpp>
@@ -11,7 +11,7 @@
 #include "core/render/elements/ViewPort.h"
 #include "entt/entity/entity.hpp"
 
-namespace GDE {
+namespace RDE {
 
     typedef entt::entity NodeID;
     FORWARD_DECLARE_CLASS(Transform, SceneManager, Window, Node, Manager, Graph)
@@ -181,4 +181,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_CAMERA_H
+#endif //RDE_CAMERA_H

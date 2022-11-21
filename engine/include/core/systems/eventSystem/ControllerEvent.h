@@ -1,8 +1,8 @@
 // Created by borja on 30/1/22.
 
 
-#ifndef GDE_JOYSTICK_EVENT_H
-#define GDE_JOYSTICK_EVENT_H
+#ifndef RDE_JOYSTICK_EVENT_H
+#define RDE_JOYSTICK_EVENT_H
 
 #include "Event.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
@@ -10,7 +10,7 @@
 #include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
 #include "core/util/Vec.h"
 
-namespace GDE {
+namespace RDE {
 
     class ControllerAxisMovedEvent : public Event {
         private:
@@ -103,4 +103,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_JOYSTICK_EVENT_H
+#endif //RDE_JOYSTICK_EVENT_H

@@ -4,7 +4,7 @@ pip install myst_parser
 
 cd $PWD && sphinx-quickstart << EOF
 n
-GDE
+RDE
 Borja Vazquez Cuesta
 0.5.0
 en
@@ -30,7 +30,7 @@ cat >conf.py <<EOL
 
 # -- Project information -----------------------------------------------------
 
-project = 'GDE'
+project = 'RDE'
 copyright = '2022, Borja Vazquez Cuesta'
 author = 'Borja Vazquez Cuesta'
 
@@ -114,12 +114,12 @@ html_static_path = ['_static']
 EOL
 
 cat >index.rst <<EOL
-.. GDE documentation master file, created by
+.. RDE documentation master file, created by
    sphinx-quickstart on Thu Jun 16 11:55:40 2022.
    You can adapt this file completely to your liking, but it should at least
    contain the root  directive.
 
-Welcome to GDE's documentation!
+Welcome to RDE's documentation!
 ===============================
 
 .. toctree::

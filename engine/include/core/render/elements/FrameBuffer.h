@@ -1,14 +1,14 @@
 // Created by borja on 20/1/22.
 
 
-#ifndef GDE_FRAMEBUFFER_H
-#define GDE_FRAMEBUFFER_H
+#ifndef RDE_FRAMEBUFFER_H
+#define RDE_FRAMEBUFFER_H
 
 
 #include "core/util/Util.h"
 #include "core/render/elements/ShaderManager.h"
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief Data about the FrameBuffer
@@ -127,4 +127,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_FRAMEBUFFER_H
+#endif //RDE_FRAMEBUFFER_H

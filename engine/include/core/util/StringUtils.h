@@ -1,8 +1,8 @@
 // Created by borja on 15/2/22.
 
 
-#ifndef GDE_STRING_UTILS_H
-#define GDE_STRING_UTILS_H
+#ifndef RDE_STRING_UTILS_H
+#define RDE_STRING_UTILS_H
 
 #include <iostream>
 #include <cstring>
@@ -80,4 +80,4 @@ inline std::string caller(Arg1&& arg1, Args&&... args) {
     return append(_ss, arg1, args...);
 }
 
-#endif //GDE_STRING_UTILS_H
+#endif //RDE_STRING_UTILS_H

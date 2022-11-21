@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
-set(PROJECT_NAME GDE)
+set(PROJECT_NAME RDE)
 project(${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
@@ -11,8 +11,8 @@ add_compile_options("-Werror")
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 
-file(GLOB_RECURSE GDE_CPP_HEADERS engine/include/*.h*)
-file(GLOB_RECURSE GDE_CPP_SOURCES engine/src/*.cpp )
+file(GLOB_RECURSE RDE_CPP_HEADERS engine/include/*.h*)
+file(GLOB_RECURSE RDE_CPP_SOURCES engine/src/*.cpp )
 
 set(CPP_HEADERS)
 set(CPP_SOURCES)
@@ -46,14 +46,14 @@ include_directories(engine/include)
 include_directories(editor)
 include_directories(vcpkg/installed/x64-windows/include)
 
-#GDEFirebase
+#RDEFirebase
 
-option(GDE_LIBRARY "Build library instead of executable" OFF)
-if(GDE_LIBRARY)
+option(RDE_LIBRARY "Build library instead of executable" OFF)
+if(RDE_LIBRARY)
     message("Building lib")
     add_library(${PROJECT_NAME} STATIC
-            ${GDE_CPP_HEADERS}
-            ${GDE_CPP_SOURCES}
+            ${RDE_CPP_HEADERS}
+            ${RDE_CPP_SOURCES}
 
             ${CPP_SOURCES}
             ${CPP_HEADERS}
@@ -67,15 +67,15 @@ else()
     add_executable(${PROJECT_NAME} WIN32
             editor/Editor.cpp editor/EditorEntry.cpp
 
-            ${GDE_CPP_HEADERS}
-            ${GDE_CPP_SOURCES}
+            ${RDE_CPP_HEADERS}
+            ${RDE_CPP_SOURCES}
 
             ${CPP_SOURCES}
             ${CPP_HEADERS}
             )
     target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES})
 endif()
-unset(GDE_LIBRARY CACHE)
+unset(RDE_LIBRARY CACHE)
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE

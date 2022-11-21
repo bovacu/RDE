@@ -1,8 +1,8 @@
 // Created by borja on 31/12/21.
 
 
-#ifndef GDE_PROFILER_H
-#define GDE_PROFILER_H
+#ifndef RDE_PROFILER_H
+#define RDE_PROFILER_H
 
 #include "core/Core.h"
 
@@ -21,7 +21,7 @@
 #include "sys/sysinfo.h"
 #endif
 
-namespace GDE {
+namespace RDE {
 
     enum ProfilerState {
         INPUT,
@@ -93,4 +93,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_PROFILER_H
+#endif //RDE_PROFILER_H

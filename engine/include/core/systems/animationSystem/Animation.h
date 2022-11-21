@@ -1,14 +1,14 @@
 // Created by borja on 9/1/22.
 
 
-#ifndef GDE_ANIMATION_H
-#define GDE_ANIMATION_H
+#ifndef RDE_ANIMATION_H
+#define RDE_ANIMATION_H
 
 
 #include "core/util/Util.h"
 #include "core/render/elements/Texture.h"
 
-namespace GDE {
+namespace RDE {
 
     class Animation {
         private:
@@ -38,4 +38,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_ANIMATION_H
+#endif //RDE_ANIMATION_H

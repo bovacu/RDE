@@ -2,12 +2,12 @@
 // Created by borja on 10/18/22.
 //
 
-#ifndef GDE_UI_CHECKBOX_H
-#define GDE_UI_CHECKBOX_H
+#ifndef RDE_UI_CHECKBOX_H
+#define RDE_UI_CHECKBOX_H
 
 #include "core/graph/components/ui/UI.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(UIText, Font, UI9Slice, UIImage, UITransform)
 
@@ -54,4 +54,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_UI_CHECKBOX_H
+#endif //RDE_UI_CHECKBOX_H

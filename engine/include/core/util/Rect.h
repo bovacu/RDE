@@ -1,12 +1,12 @@
 // Created by borja on 6/1/22.
 
 
-#ifndef GDE_RECT_H
-#define GDE_RECT_H
+#ifndef RDE_RECT_H
+#define RDE_RECT_H
 
 #include "Vec.h"
 
-namespace GDE {
+namespace RDE {
 
     template<typename T>
     struct Rect {
@@ -25,4 +25,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_RECT_H
+#endif //RDE_RECT_H

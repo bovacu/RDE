@@ -1,5 +1,5 @@
-#ifndef GDE_SPRITE_BATCH_H
-#define GDE_SPRITE_BATCH_H
+#ifndef RDE_SPRITE_BATCH_H
+#define RDE_SPRITE_BATCH_H
 
 #include <vector>
 #include "core/render/Camera.h"
@@ -13,7 +13,7 @@
 #include "core/render/elements/Vertex.h"
 #include "core/render/elements/Batch.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Engine)
 
@@ -237,4 +237,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_SPRITE_BATCH_H
+#endif //RDE_SPRITE_BATCH_H

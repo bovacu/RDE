@@ -2,17 +2,17 @@
 // Created by borja on 15/05/22.
 //
 
-#ifndef GDE_CONFIG_LOADER_H
-#define GDE_CONFIG_LOADER_H
+#ifndef RDE_CONFIG_LOADER_H
+#define RDE_CONFIG_LOADER_H
 
 #include "nlohmann/json.hpp"
 #include "core/graph/Scene.h"
 #include "core/systems/fileSystem/FileManager.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Window)
-    FORWARD_DECLARE_STRUCT(GDEConfig)
+    FORWARD_DECLARE_STRUCT(RDEConfig)
 
     struct Node_JsonPair {
         Node* node;
@@ -27,10 +27,10 @@ namespace GDE {
         public:
             /**
              * @brief Loads assets that need to be loaded between different scenes  (Must be a .json).
-             * @param _gdeConfig Configuration of GDE
+             * @param _rdeConfig Configuration of RDE
              * @param _manager Manager
              */
-            void loadResources(GDEConfig* _gdeConfig, Manager* _manager);
+            void loadResources(RDEConfig* _rdeConfig, Manager* _manager);
 
             /**
              * @brief This method allows the user to load a Scene through its configuration file (Must be a .json).
@@ -54,7 +54,7 @@ namespace GDE {
              * @brief This method allows to load a custom configuration for the engine.
              * @param _config New Configuration for the engine
              */
-            void loadGDEConfig(GDEConfig* _config, FileManager& _manager);
+            void loadRDEConfig(RDEConfig* _config, FileManager& _manager);
 
         private:
             /**
@@ -92,4 +92,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_CONFIG_LOADER_H
+#endif //RDE_CONFIG_LOADER_H

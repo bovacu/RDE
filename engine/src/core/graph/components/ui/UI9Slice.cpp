@@ -8,7 +8,7 @@
 #include "core/graph/components/ui/UITransform.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     UI9Slice::UI9Slice(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
             UI9Slice(_node, &_scene->engine->manager, _canvas->getGraph(), _texture) {  }
@@ -16,7 +16,7 @@ namespace GDE {
     UI9Slice::UI9Slice(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : UI(_node) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         texture = _texture;
-        dpi = _manager->sceneManager.getDisplayedScene()->engine->gdeConfig.windowData.diagonalDpi;
+        dpi = _manager->sceneManager.getDisplayedScene()->engine->rdeConfig.windowData.diagonalDpi;
 
         if(!_texture->nineSlice.isEnabled()) {
             spriteRenderer = _node->addComponent<UIImage>(_texture);

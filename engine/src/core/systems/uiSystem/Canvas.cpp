@@ -13,7 +13,7 @@
 #include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UIImage.h"
 
-namespace GDE {
+namespace RDE {
 
     struct OnEventData {
         Engine* engine;

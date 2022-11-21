@@ -2,14 +2,14 @@
 // Created by borja on 9/16/22.
 //
 
-#ifndef GDE_MAT2_H
-#define GDE_MAT2_H
+#ifndef RDE_MAT2_H
+#define RDE_MAT2_H
 
 #include <cmath>
 #include "core/util/Vec.h"
 #include "core/Core.h"
 
-namespace GDE {
+namespace RDE {
 
     struct Mat2 {
         union {
@@ -82,4 +82,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_MAT2_H
+#endif //RDE_MAT2_H

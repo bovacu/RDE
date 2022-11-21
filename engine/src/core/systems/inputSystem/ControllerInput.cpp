@@ -5,7 +5,7 @@
 #include "core/systems/eventSystem/ControllerEvent.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     void ControllerVibrationManager::init(std::unordered_map<int, Controller*>* _controllers) {
         controllers = _controllers;

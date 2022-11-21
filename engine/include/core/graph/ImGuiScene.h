@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef GDE_IMGUI_LAYER_H
-#define GDE_IMGUI_LAYER_H
+#ifndef RDE_IMGUI_LAYER_H
+#define RDE_IMGUI_LAYER_H
 
 #if !IS_MOBILE()
 
@@ -12,7 +12,7 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl.h"
 
-namespace GDE {
+namespace RDE {
 
     // This class is a fucking mess, and it needs to be reworked, but for now I just use it for debugging and it does the job.
 
@@ -94,4 +94,4 @@ namespace GDE {
 
 #endif
 
-#endif //GDE_IMGUI_LAYER_H
+#endif //RDE_IMGUI_LAYER_H

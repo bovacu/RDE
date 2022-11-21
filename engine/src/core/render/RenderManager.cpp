@@ -4,7 +4,7 @@
 #include "core/render/RenderManager.h"
 #include "core/util/GLUtil.h"
 
-namespace GDE {
+namespace RDE {
 
     void RenderManager::init(Engine* _engine) {
     

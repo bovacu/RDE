@@ -7,7 +7,7 @@
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
 
-namespace GDE {
+namespace RDE {
 
     UIButton::UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config) :
     UIButton(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }

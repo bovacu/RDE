@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef GDE_INPUT_H
-#define GDE_INPUT_H
+#ifndef RDE_INPUT_H
+#define RDE_INPUT_H
 
 #include "core/platform/PlatformHeaderSDL.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
@@ -15,7 +15,7 @@
 #define SDL_JOYSTICK_DISABLED
 #endif
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief All of the events that the input system handles.
@@ -362,4 +362,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_INPUT_H
+#endif //RDE_INPUT_H

@@ -1,8 +1,8 @@
 // Created by borja on 30/3/22.
 
 
-#ifndef GDE_H
-#define GDE_H
+#ifndef RDE_H
+#define RDE_H
 
 #include "core/Engine.h"
 #include "core/Core.h"
@@ -40,4 +40,4 @@
 
 #include "core/systems/localization/LocalizationManager.h"
 
-#endif //GDE_H
+#endif //RDE_H

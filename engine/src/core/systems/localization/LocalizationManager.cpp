@@ -5,7 +5,7 @@
 #include "core/systems/localization/LocalizationManager.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     void LocalizationManager::init(Engine* _engine) {
         engine = _engine;
@@ -34,13 +34,13 @@ namespace GDE {
     }
 
     void LocalizationManager::loadLanguage(LocalizationInfo::Language _language) {
-        if(engine->gdeConfig.projectData.localizationConfig.localizationPath.empty()) {
+        if(engine->rdeConfig.projectData.localizationConfig.localizationPath.empty()) {
             LOG_E("Cannot load localization because the file_path was not provided in the configuration file")
             return;
         }
 
         auto* _manager = &engine->manager;
-        auto _fileHandler = _manager->fileManager.open(APPEND_S("assets/", engine->gdeConfig.projectData.localizationConfig.localizationPath), FileMode::READ);
+        auto _fileHandler = _manager->fileManager.open(APPEND_S("assets/", engine->rdeConfig.projectData.localizationConfig.localizationPath), FileMode::READ);
 
         auto _content = _manager->fileManager.readFullFile(_fileHandler).content;
         nlohmann::json _localizationJson = nlohmann::json::parse(_content);
@@ -84,7 +84,7 @@ namespace GDE {
 
     std::string LocalizationManager::localizeSubstitution(const std::string& _string, const std::string& _replacement) {
         auto _str = _string;
-        const std::string _search = engine->gdeConfig.projectData.localizationConfig.replacementSymbol;
+        const std::string _search = engine->rdeConfig.projectData.localizationConfig.replacementSymbol;
         auto pos = _str.find(_search, 0);
         if (pos == std::string::npos) return _str;
 

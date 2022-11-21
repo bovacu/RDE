@@ -1,12 +1,12 @@
 // Created by borja on 30/12/21.
 
 
-#ifndef GDE_DEBUGSHAPE_H
-#define GDE_DEBUGSHAPE_H
+#ifndef RDE_DEBUGSHAPE_H
+#define RDE_DEBUGSHAPE_H
 
 #include "core/util/Util.h"
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief This class represents a Complex Geometry debugging shape.
@@ -205,4 +205,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_DEBUGSHAPE_H
+#endif //RDE_DEBUGSHAPE_H

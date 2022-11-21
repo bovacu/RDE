@@ -6,7 +6,7 @@
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     PhysicsBody::PhysicsBody(Node* _node, Manager* _manager, Graph* _graph, BodyConfig& _bodyConfig) {
         space = _manager->physics.space;

@@ -2,12 +2,12 @@
 // Created by borja on 9/22/22.
 //
 
-#ifndef GDE_UI_BUTTON_H
-#define GDE_UI_BUTTON_H
+#ifndef RDE_UI_BUTTON_H
+#define RDE_UI_BUTTON_H
 
 #include "core/graph/components/ui/UI.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Manager, UIText, Font, UI9Slice)
 
@@ -55,4 +55,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_UI_BUTTON_H
+#endif //RDE_UI_BUTTON_H

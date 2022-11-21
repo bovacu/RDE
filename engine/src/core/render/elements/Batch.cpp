@@ -6,7 +6,7 @@
 #include "core/render/elements/SpriteBatch.h"
 #include "core/render/elements/IRenderizable.h"
 
-namespace GDE {
+namespace RDE {
 
     void Batch::draw(IRenderizable* _renderizable, Transform& _transform) {
         if(textureID < 0)

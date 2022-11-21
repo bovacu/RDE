@@ -1,5 +1,5 @@
-#ifndef GDE_TEXTURE_H
-#define GDE_TEXTURE_H
+#ifndef RDE_TEXTURE_H
+#define RDE_TEXTURE_H
 
 #include <iostream>
 #include "core/util/Util.h"
@@ -12,7 +12,7 @@
     #include "glad/glad.h"
 #endif
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Texture)
 
@@ -331,4 +331,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_TEXTURE_H
+#endif //RDE_TEXTURE_H

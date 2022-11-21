@@ -2,13 +2,13 @@
 // Created by borja on 10/26/22.
 //
 
-#ifndef GDE_UI_TEXT_RENDERER_H
-#define GDE_UI_TEXT_RENDERER_H
+#ifndef RDE_UI_TEXT_RENDERER_H
+#define RDE_UI_TEXT_RENDERER_H
 
 #include "core/graph/components/ui/UI.h"
 #include "core/systems/uiSystem/FontManager.h"
 
-namespace GDE {
+namespace RDE {
     class UIText : public UI {
         FRIEND_CLASS(Canvas, UIButton, UICheckbox, UIInput)
 
@@ -133,6 +133,6 @@ namespace GDE {
             void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) override;
     };
 
-} // GDE
+} // RDE
 
-#endif //GDE_UI_TEXT_RENDERER_H
+#endif //RDE_UI_TEXT_RENDERER_H

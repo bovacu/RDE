@@ -3,7 +3,7 @@
 #include "core/procedural/CellularAutomataMapGenerator.h"
 #include "core/render/elements/Texture.h"
 
-namespace GDE {
+namespace RDE {
 
     void CellularAutomata::init(const GenerationSettings& _settings) {
         map.settings = _settings;

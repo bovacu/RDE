@@ -5,7 +5,7 @@
 #include "core/systems/ecsSystem/ECSManager.h"
 #include "entt/entt.hpp"
 
-namespace GDE {
+namespace RDE {
 
     SystemRef ECSManager::addSystem(ECSSystem *_system) {
         _system->systemRef = systemRefCounter++;

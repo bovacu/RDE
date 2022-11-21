@@ -24,7 +24,7 @@
 #include "core/render/window/IOSWindow.h"
 #endif
 
-namespace GDE {
+namespace RDE {
 
     PlatformType Platform::getPlatform() {
 
@@ -51,7 +51,7 @@ namespace GDE {
         return PlatformType::UNSUPPORTED;
     }
 
-    Window* Platform::createWindow(GDEConfig* _config) {
+    Window* Platform::createWindow(RDEConfig* _config) {
         #if IS_ANDROID()
             return new AndroidWindow(_config);
         #endif

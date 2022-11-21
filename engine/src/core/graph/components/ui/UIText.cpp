@@ -6,7 +6,7 @@
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
 
-namespace GDE {
+namespace RDE {
 
     UIText::UIText(Node* _node, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font) :
             UIText(_node, &_scene->engine->manager, _canvas->getGraph(), _text, _font) {  }

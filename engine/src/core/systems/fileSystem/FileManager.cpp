@@ -2,7 +2,7 @@
 
 #include "core/systems/fileSystem/FileManager.h"
 
-namespace GDE {
+namespace RDE {
 
     FileHandler* FileManager::open(const std::string& _filePath, const FileMode& _fileMode, bool _silentNotFound) {
         const char* _fm = FileHandler::modeToChar(_fileMode);

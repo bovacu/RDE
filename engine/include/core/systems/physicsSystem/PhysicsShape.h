@@ -2,14 +2,14 @@
 // Created by borja on 9/16/22.
 //
 
-#ifndef GDE_PHYSICS_SHAPE_H
-#define GDE_PHYSICS_SHAPE_H
+#ifndef RDE_PHYSICS_SHAPE_H
+#define RDE_PHYSICS_SHAPE_H
 
 #include "core/graph/components/Transform.h"
 #include "core/util/Mat2.h"
 #include "core/render/shapes/DebugShape.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_STRUCT(PhysicsBody)
 
@@ -47,4 +47,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_PHYSICS_SHAPE_H
+#endif //RDE_PHYSICS_SHAPE_H

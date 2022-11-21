@@ -2,14 +2,14 @@
 // Created by borja on 9/8/22.
 //
 
-#ifndef GDE_POOL_H
-#define GDE_POOL_H
+#ifndef RDE_POOL_H
+#define RDE_POOL_H
 
 #include <vector>
 #include "core/util/Delegate.h"
 #include "core/util/StringUtils.h"
 
-namespace GDE {
+namespace RDE {
 
     template<class T>
     class Pool {
@@ -83,4 +83,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_POOL_H
+#endif //RDE_POOL_H

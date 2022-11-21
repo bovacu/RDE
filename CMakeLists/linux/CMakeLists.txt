@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18.1)
 #set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
-set(PROJECT_NAME GDE)
+set(PROJECT_NAME RDE)
 project(${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
@@ -11,8 +11,8 @@ add_compile_options("-Werror")
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 
-file(GLOB_RECURSE GDE_CPP_HEADERS engine/include/*.h*)
-file(GLOB_RECURSE GDE_CPP_SOURCES engine/src/*.cpp )
+file(GLOB_RECURSE RDE_CPP_HEADERS engine/include/*.h*)
+file(GLOB_RECURSE RDE_CPP_SOURCES engine/src/*.cpp )
 
 set(CPP_HEADERS)
 set(CPP_SOURCES)
@@ -41,12 +41,12 @@ include_directories(nonVcpkgDeps/freetype/include)
 include_directories(nonVcpkgDeps/Chipmunk2D/include)
 include_directories(demo)
 
-#GDEFirebase
+#RDEFirebase
 
-if(GDE_LIBRARY)
+if(RDE_LIBRARY)
     add_library(${PROJECT_NAME} STATIC
-            ${GDE_CPP_HEADERS}
-            ${GDE_CPP_SOURCES}
+            ${RDE_CPP_HEADERS}
+            ${RDE_CPP_SOURCES}
 
             ${CPP_SOURCES}
             ${CPP_HEADERS}
@@ -64,8 +64,8 @@ else()
     add_executable(${PROJECT_NAME}
             editor/Editor.cpp editor/EditorEntry.cpp
 
-            ${GDE_CPP_HEADERS}
-            ${GDE_CPP_SOURCES}
+            ${RDE_CPP_HEADERS}
+            ${RDE_CPP_SOURCES}
 
             ${CPP_SOURCES}
             ${CPP_HEADERS}
@@ -73,7 +73,7 @@ else()
 
     target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES})
 endif()
-unset(GDE_LIBRARY CACHE)
+unset(RDE_LIBRARY CACHE)
 
 target_link_libraries(${PROJECT_NAME}
                         PRIVATE

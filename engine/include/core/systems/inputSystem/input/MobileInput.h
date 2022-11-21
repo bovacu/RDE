@@ -1,12 +1,12 @@
 // Created by borja on 10/2/22.
 
 
-#ifndef GDE_MOBILE_INPUT_H
-#define GDE_MOBILE_INPUT_H
+#ifndef RDE_MOBILE_INPUT_H
+#define RDE_MOBILE_INPUT_H
 
 #include "Input.h"
 
-namespace GDE {
+namespace RDE {
 
     typedef uint32_t TimeStamp;
 
@@ -94,4 +94,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_MOBILE_INPUT_H
+#endif //RDE_MOBILE_INPUT_H

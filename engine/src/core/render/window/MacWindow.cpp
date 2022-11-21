@@ -8,9 +8,9 @@
 
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
-    MacWindow::MacWindow(GDEConfig* _config) : Window(_config) {
+    MacWindow::MacWindow(RDEConfig* _config) : Window(_config) {
         LOG_DEBUG("Platform: MacOS")
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);

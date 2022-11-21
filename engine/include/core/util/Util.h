@@ -1,8 +1,8 @@
 // Created by borja on 23/12/21.
 
 
-#ifndef GDE_UTIL_H
-#define GDE_UTIL_H
+#ifndef RDE_UTIL_H
+#define RDE_UTIL_H
 
 #include "Easing.h"
 #include "Logger.h"
@@ -22,4 +22,4 @@
 #include <map>
 #include <unordered_map>
 
-#endif //GDE_UTIL_H
+#endif //RDE_UTIL_H

@@ -14,7 +14,7 @@
     #include "glad/glad.h"
 #endif
 
-namespace GDE {
+namespace RDE {
 
     FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs, Manager* _manager) : specs(_specs), manager(_manager) {
         glGenVertexArrays(1, &vao);

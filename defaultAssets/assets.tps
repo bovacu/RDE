@@ -32,7 +32,7 @@
         <key>dpi</key>
         <uint>72</uint>
         <key>dataFormat</key>
-        <string>GDE</string>
+        <string>RDE</string>
         <key>textureFileName</key>
         <filename></filename>
         <key>flipPVR</key>

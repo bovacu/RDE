@@ -9,7 +9,7 @@
 #include "core/graph/components/ui/UI9Slice.h"
 #include "core/graph/components/ui/UIText.h"
 
-namespace GDE {
+namespace RDE {
 
     UIInput::UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config) : UI(_node) {
         setConfig(_manager, _config);

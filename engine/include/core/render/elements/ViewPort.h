@@ -1,12 +1,12 @@
 // Created by borja on 27/2/22.
 
 
-#ifndef GDE_VIEWPORT_H
-#define GDE_VIEWPORT_H
+#ifndef RDE_VIEWPORT_H
+#define RDE_VIEWPORT_H
 
 #include "core/util/Vec.h"
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief This class represents the way the scene is going to be rendered and how much of the screen is going to be
@@ -88,4 +88,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_VIEWPORT_H
+#endif //RDE_VIEWPORT_H

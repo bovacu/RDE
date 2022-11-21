@@ -1,8 +1,8 @@
 // Created by borja on 9/1/22.
 
 
-#ifndef GDE_ANIMATION_SYSTEM_H
-#define GDE_ANIMATION_SYSTEM_H
+#ifndef RDE_ANIMATION_SYSTEM_H
+#define RDE_ANIMATION_SYSTEM_H
 
 
 #include "core/util/Util.h"
@@ -10,7 +10,7 @@
 #include "core/systems/eventSystem/EventBus.h"
 #include "core/graph/components/SpriteRenderer.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Manager)
 
@@ -84,4 +84,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_ANIMATION_SYSTEM_H
+#endif //RDE_ANIMATION_SYSTEM_H

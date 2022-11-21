@@ -9,7 +9,7 @@
 #include "core/Core.h"
 #include "core/util/Logger.h"
 
-namespace GDE {
+namespace RDE {
 
 //    void PhysicsShape::makeRectangle(const Vec2F& _size) {
 //        type = Type::BOX;

@@ -1,12 +1,12 @@
 #pragma once
 
-#ifndef GDE_MOUSE_KEYS_H
-#define GDE_MOUSE_KEYS_H
+#ifndef RDE_MOUSE_KEYS_H
+#define RDE_MOUSE_KEYS_H
 
 #include <ostream>
 #include "core/platform/PlatformHeaderSDL.h"
 
-namespace GDE {
+namespace RDE {
 
     /// -----------------------------------------------------------------
     /// |			CODES FOR MOUSE BUTTONS, THEY ARE					|
@@ -50,4 +50,4 @@ namespace GDE {
 #define MOUSE_BUTTON_RIGHT  ::engine::Mouse::ButtonRight
 #define MOUSE_BUTTON_MIDDLE ::engine::Mouse::ButtonMiddle
 
-#endif // GDE_MOUSE_KEYS_H
+#endif // RDE_MOUSE_KEYS_H

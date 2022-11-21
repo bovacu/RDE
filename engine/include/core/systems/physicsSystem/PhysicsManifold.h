@@ -2,13 +2,13 @@
 // Created by borja on 9/16/22.
 //
 
-#ifndef GDE_PHYSICS_MANIFOLD_H
-#define GDE_PHYSICS_MANIFOLD_H
+#ifndef RDE_PHYSICS_MANIFOLD_H
+#define RDE_PHYSICS_MANIFOLD_H
 
 
 #include "core/systems/physicsSystem/PhysicsBody.h"
 
-namespace GDE {
+namespace RDE {
 
 //    struct CollisionState {
 //
@@ -53,4 +53,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_PHYSICS_MANIFOLD_H
+#endif //RDE_PHYSICS_MANIFOLD_H

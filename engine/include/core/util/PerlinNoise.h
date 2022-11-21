@@ -1,7 +1,7 @@
 // Created by borja on 23/12/21.
 
-#ifndef GDE_PERLIN_NOISE_H
-#define GDE_PERLIN_NOISE_H
+#ifndef RDE_PERLIN_NOISE_H
+#define RDE_PERLIN_NOISE_H
 
 //----------------------------------------------------------------------------------------
 //
@@ -87,7 +87,7 @@
 # endif
 
 
-namespace GDE {
+namespace RDE {
     template <class Float>
     class BasicPerlinNoise
     {
@@ -670,7 +670,7 @@ namespace GDE {
         private:
             std::unordered_map<PerlinSeed, NoiseMap> maps;
             int counter;
-            GDE::PerlinNoise perlin{ 0 };
+            RDE::PerlinNoise perlin{ 0 };
         public:
             NoiseMap& generate2DMap(int _width, int _height, float _frequency, int _octaves, PerlinSeed _seed) {
                 perlin.reseed(_seed);
@@ -729,7 +729,7 @@ namespace GDE {
 # undef SIVPERLIN_CONCEPT_URBG
 # undef SIVPERLIN_CONCEPT_URBG_
 
-#endif //GDE_PERLIN_NOISE_H
+#endif //RDE_PERLIN_NOISE_H
 
 
 // -------------------------> EXAMPLE

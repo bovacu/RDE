@@ -2,8 +2,8 @@
 // Created by borja on 14/04/2022.
 //
 
-#ifndef GDE_RENDERIZABLE_H
-#define GDE_RENDERIZABLE_H
+#ifndef RDE_RENDERIZABLE_H
+#define RDE_RENDERIZABLE_H
 
 #include "core/render/elements/Texture.h"
 #include "core/render/elements/ShaderManager.h"
@@ -11,7 +11,7 @@
 #include "core/graph/components/Node.h"
 #include "core/graph/components/Components.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_STRUCT(OpenGLVertex)
     FORWARD_DECLARE_CLASS(IViewPort, Transform)
@@ -124,4 +124,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_RENDERIZABLE_H
+#endif //RDE_RENDERIZABLE_H

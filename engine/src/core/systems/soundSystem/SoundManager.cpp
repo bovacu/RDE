@@ -5,7 +5,7 @@
 #include "core/systems/soundSystem/SoundManager.h"
 #include "core/util/Functions.h"
 
-namespace GDE {
+namespace RDE {
 
     void SoundManager::init() {
         if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {

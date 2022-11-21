@@ -2,8 +2,8 @@
 // Created by borja on 10/1/22.
 //
 
-#ifndef GDE_LOCALIZATION_MANAGER_H
-#define GDE_LOCALIZATION_MANAGER_H
+#ifndef RDE_LOCALIZATION_MANAGER_H
+#define RDE_LOCALIZATION_MANAGER_H
 
 
 #include <string>
@@ -12,7 +12,7 @@
 #include "core/util/StringUtils.h"
 #include "core/util/Logger.h"
 
-namespace GDE {
+namespace RDE {
 
     struct LocalizationInfo {
         enum Language { EN_US, EN_GB, EN_CA, ES_MX, ES_ES, PT_BR, FR, ZH, RU, DE, IT, JP, MAX };
@@ -182,4 +182,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_LOCALIZATION_MANAGER_H
+#endif //RDE_LOCALIZATION_MANAGER_H

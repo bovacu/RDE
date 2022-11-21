@@ -1,8 +1,8 @@
 // Created by borja on 9/3/22.
 
 
-#ifndef GDE_GRAPH_H
-#define GDE_GRAPH_H
+#ifndef RDE_GRAPH_H
+#define RDE_GRAPH_H
 
 #include "entt/entt.hpp"
 #include "core/util/Delta.h"
@@ -10,7 +10,7 @@
 #include "core/render/elements/Texture.h"
 #include "core/graph/components/Transform.h"
 
-namespace GDE {
+namespace RDE {
 
     /** This class is a main concept to understand about the engine. It manages how components update and it does it in a
      * ECS way. That said, this engine doesn't force you to code in a ODD, you can perfectly work on a OPP way, although
@@ -317,4 +317,4 @@ namespace GDE {
     }
 }
 
-#endif //GDE_GRAPH_H
+#endif //RDE_GRAPH_H

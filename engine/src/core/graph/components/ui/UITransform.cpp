@@ -9,7 +9,7 @@
 #define ANCHOR_BITS  0b0000001111111110
 #define STRETCH_BITS 0b0011110000000000
 
-namespace GDE {
+namespace RDE {
 
     void UIAnchor::updateAnchor(UITransform* _transform) {
         auto _parentPosition = _transform->parentTransform->getModelMatrixPosition();

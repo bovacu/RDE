@@ -2,8 +2,8 @@
 // Created by borja on 9/5/22.
 //
 
-#ifndef GDE_UI_H
-#define GDE_UI_H
+#ifndef RDE_UI_H
+#define RDE_UI_H
 
 #include "entt/entity/entity.hpp"
 #include "core/render/elements/IRenderizable.h"
@@ -14,7 +14,7 @@
 
 typedef entt::entity NodeID;
 
-namespace GDE {
+namespace RDE {
 
 
     FORWARD_DECLARE_CLASS(KeyEvent, Manager)
@@ -183,4 +183,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_UI_H
+#endif //RDE_UI_H

@@ -2,15 +2,15 @@
 // Created by borja on 9/12/21.
 //
 
-#ifndef GDE_VEC_H
-#define GDE_VEC_H
+#ifndef RDE_VEC_H
+#define RDE_VEC_H
 
 #include <ostream>
 #include <cmath>
 #include "glm/glm.hpp"
 #include "core/Core.h"
 
-namespace GDE {
+namespace RDE {
 
     template <class T>
     struct Vec2 {
@@ -242,4 +242,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_VEC_H
+#endif //RDE_VEC_H

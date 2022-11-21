@@ -15,7 +15,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     void SpriteBatch::init(Engine* _engine) {
         shaderManager = &_engine->manager.shaderManager;

@@ -45,115 +45,119 @@ namespace Editor {
     }
 
     void Editor::onInit() {
-        localizationTest();
-        textStressTest(10);
+//        redirectRenderingDel.bind<&Editor::redirectRendering>(this);
+//        engine->setRenderingRedirectionToImGui(redirectRenderingDel);
+//        localizationTest();
+//        textStressTest(300000);
 
-        {
-            auto _floorNode = getMainGraph()->createNode("Floor");
-            _floorNode->getTransform()->setPosition(0, -300);
-            ShapeConfig _floorShapeConfig{
-                    .type = PhysicsShapeType::SEGMENT,
-                    .size = {1280, 0},
-                    .vertices = {},
-            };
-
-            _floorShapeConfig.shapeMaskingConfig.mask = 2;
-            _floorShapeConfig.shapeMaskingConfig.toCollideWith = 1 | 5;
-            BodyConfig _floorBodyConfig{
-                    .shapeConfig = _floorShapeConfig
-            };
-            _floorBodyConfig.physicsBodyType = GDE::STATIC;
-            _floorNode->addComponent<PhysicsBody>(_floorBodyConfig);
-        }
-
-        {
-            circleNode = getMainGraph()->createNode("Circle");
-            circleNode->getTransform()->setPosition(0, 300);
-            ShapeConfig _floorShapeConfig{
-                    .type = PhysicsShapeType::CIRCLE,
-                    .size = {64, 64},
-                    .vertices = {},
-            };
-            _floorShapeConfig.restitution = 0;
-
-            _floorShapeConfig.shapeMaskingConfig.mask = 1;
-            _floorShapeConfig.shapeMaskingConfig.toCollideWith = 1;
-            BodyConfig _floorBodyConfig{
-                    .shapeConfig = _floorShapeConfig
-            };
-            _floorBodyConfig.physicsBodyType = GDE::STATIC;
-            circleNode->addComponent<PhysicsBody>(_floorBodyConfig);
-
-//            getMainGraph()->addComponent<SpriteRenderer>(circleNodeID, this, engine->manager.textureManager.getSubTexture("assets", "buttonDark"));
-        }
-
-        PhysicsCollisionCallbacks _callbacks;
-        _callbacks.onCollisionEnter.bind<&Editor::onCollisionEnter>(this);
-        _callbacks.onCollisionExit.bind<testExit>();
-        _callbacks.onCollisionStay.bind<testStay>();
-        engine->manager.physics.addCollisionCallbacks(1, 1, _callbacks);
-
-//        particleSystemTest();
-
-//        UDelegate<void(FrameBuffer*)> _delegate;
-//        _delegate.bind<&Editor::redirectRendering>(this);
+//        {
+//            auto _floorNode = getMainGraph()->createNode("Floor");
+//            _floorNode->getTransform()->setPosition(0, -300);
+//            ShapeConfig _floorShapeConfig{
+//                    .type = PhysicsShapeType::SEGMENT,
+//                    .size = {1280, 0},
+//                    .vertices = {},
+//            };
 //
-//        physicsTest();
+//            _floorShapeConfig.shapeMaskingConfig.mask = 2;
+//            _floorShapeConfig.shapeMaskingConfig.toCollideWith = 1 | 5;
+//            BodyConfig _floorBodyConfig{
+//                    .shapeConfig = _floorShapeConfig
+//            };
+//            _floorBodyConfig.physicsBodyType = RDE::STATIC;
+//            _floorNode->addComponent<PhysicsBody>(_floorBodyConfig);
+//        }
 //
-//        auto _uiTest = getCanvases()[0]->getGraph()->createNode("TestUINode");
-//        auto* _transform = getCanvases()[0]->getGraph()->getComponent<Transform>(_uiTest);
-//        _transform->setPosition(-250, 0);
-//        auto* ui = getCanvases()[0]->getGraph()->addComponent<NineSliceSprite>(_uiTest, this, getCanvases()[0],
-//                                                                                       engine->manager.textureManager.getSubTexture(
-//                                                                                               "ui", "block1"));
-//        ui->nineSliceSize = {400, 225};
-//        ui->interaction->onClick.bind<&Editor::onMouseClick>(this);
-//        ui->interaction->onMouseEntered.bind<&Editor::onMouseEntered>(this);
-//        ui->interaction->onMouseExited.bind<&Editor::onMouseExited>(this);
+//        {
+//            circleNode = getMainGraph()->createNode("Circle");
+//            circleNode->getTransform()->setPosition(0, 300);
+//            ShapeConfig _floorShapeConfig{
+//                    .type = PhysicsShapeType::CIRCLE,
+//                    .size = {64, 64},
+//                    .vertices = {},
+//            };
+//            _floorShapeConfig.restitution = 0;
 //
+//            _floorShapeConfig.shapeMaskingConfig.mask = 1;
+//            _floorShapeConfig.shapeMaskingConfig.toCollideWith = 1;
+//            BodyConfig _floorBodyConfig{
+//                    .shapeConfig = _floorShapeConfig
+//            };
+//            _floorBodyConfig.physicsBodyType = RDE::STATIC;
+//            circleNode->addComponent<PhysicsBody>(_floorBodyConfig);
 //
+////            getMainGraph()->addComponent<SpriteRenderer>(circleNodeID, this, engine->manager.textureManager.getSubTexture("assets", "buttonDark"));
+//        }
+//
+//        PhysicsCollisionCallbacks _callbacks;
+//        _callbacks.onCollisionEnter.bind<&Editor::onCollisionEnter>(this);
+//        _callbacks.onCollisionExit.bind<testExit>();
+//        _callbacks.onCollisionStay.bind<testStay>();
+//        engine->manager.physics.addCollisionCallbacks(1, 1, _callbacks);
+//
+////        particleSystemTest();
+//
+
+        auto* _background = getMainGraph()->createNode("Background")->addComponent<SpriteRenderer>(nullptr);
+        _background->node->getTransform()->setScale(35, 21);
+        _background->setColor(Color::Gray);
 
         auto _panelNode = getCanvases()[0]->getGraph()->createNode("Panel");
-        auto* _panel = _panelNode->addComponent<UIPanel>(UIPanelConfig {  });
+        auto* _panel = _panelNode->addComponent<UIPanel>(UIPanelConfig { .size = {256, 256} });
 
+
+
+        auto _panelNode2 = getCanvases()[0]->getGraph()->createNode("PanelChild", _panelNode);
+        auto* _panel2 = _panelNode2->addComponent<UIPanel>(UIPanelConfig { .size = {64, 64}, .color = Color::Yellow });
+        _panelNode2->getTransform()->setPosition(-64, 64);
+        ((UITransform*)_panelNode2->getTransform())->setAnchor(Anchor::LEFT_TOP);
+        ((UITransform*)_panelNode2->getTransform())->setStretch(Stretch::HORIZONTAL_STRETCH);
+
+        auto _textNode = getCanvases()[0]->getGraph()->createNode("Text", _panelNode);
+        auto* _text = _textNode->addComponent<UIText>("Hello World!", engine->manager.fontManager.getDefaultFont("MontserratRegular"));
+        _text->setColor(Color::Orange);
+        _textNode->getTransform()->setPosition(64, 64);
+        ((UITransform*)_textNode->getTransform())->setAnchor(Anchor::RIGHT_TOP);
+
+//        auto _panelNode3 = getCanvases()[0]->getGraph()->createNode("PanelChild2", _panelNode2);
+//        auto* _panel3 = _panelNode3->addComponent<UIPanel>(UIPanelConfig { .size = {64, 64}, .color = Color::Green });
+//        ((UITransform*)_panelNode3->getTransform())->setAnchor(Anchor::RIGHT_TOP);
+//        ((UITransform*)_panelNode3->getTransform())->setStretch(Stretch::NO_STRETCH);
+//
         auto _uiButtonNode = getCanvases()[0]->getGraph()->createNode("UIButton");
-        auto* _uiButton = _uiButtonNode->addComponent<UIButton>(UIButtonConfig { .text = "Button" });
+        UIButtonConfig _uiButtonConfig;
+        _uiButtonConfig.text = "Button";
+        _uiButtonConfig.textColor = Color::Green;
+        auto* _uiButton = _uiButtonNode->addComponent<UIButton>(_uiButtonConfig);
         _uiButtonNode->getTransform()->setPosition(-140, 0);
-//        _uiButton->setInteractable(true);
-//        getCanvases()[0]->getGraph()->setNodeActive(_uiButtonId, false);
-
+//////        ((UITransform*)_uiButtonNode->getTransform())->setPivot({ 0, 0.5f });
+//////        _uiButton->setInteractable(true);
+//////        getCanvases()[0]->getGraph()->setNodeActive(_uiButtonId, false);
+//
         auto _checkboxNode = getCanvases()[0]->getGraph()->createNode("Checkbox");
         auto* _checkbox = _checkboxNode->addComponent<UICheckbox>(UICheckboxConfig {  });
-        _checkboxNode->getTransform()->setPosition(0, 64);
+        _checkboxNode->getTransform()->setPosition(0, 196);
 //        _checkbox->setInteractable(false);
-
-        auto _uiButtonNode2 = getCanvases()[0]->getGraph()->createNode("UIButton2");
-        auto* _uiButton2 = _uiButtonNode2->addComponent<UIButton>(UIButtonConfig { .text = "Button2" });
-        _uiButtonNode2->getTransform()->setPosition(140, 0);
-//        _uiButton2->setInteractable(false);
-
-
+//
+//        auto _uiButtonNode2 = getCanvases()[0]->getGraph()->createNode("UIButton2");
+//        UIButtonConfig _uiButtonConfig2;
+//        _uiButtonConfig2.text = "Button2";
+//        auto* _uiButton2 = _uiButtonNode2->addComponent<UIButton>(_uiButtonConfig2);
+//        _uiButtonNode2->getTransform()->setPosition(140, 0);
+////        _uiButton2->setInteractable(false);
+//
+//
         auto _inputTextNode = getCanvases()[0]->getGraph()->createNode("InputText");
         auto* _input = _inputTextNode->addComponent<UIInput>(UIInputConfig {  });
-        _inputTextNode->getTransform()->setPosition(0, 128);
+        _inputTextNode->getTransform()->setPosition(256, 128);
 
         auto _sliderNode = getCanvases()[0]->getGraph()->createNode("Slider");
         slider = _sliderNode->addComponent<UISlider>(UISliderConfig {  });
-        _sliderNode->getTransform()->setPosition(0, 230);
+        _sliderNode->getTransform()->setPosition(-256, 128);
     }
 
     void Editor::onUpdate(Delta _dt) {
         Scene::onUpdate(_dt);
-
-        if(engine->manager.inputManager.isKeyPressed(KeyCode::Left)) {
-            slider->fillBarSprite->setSize({slider->fillBarSprite->getSize().x - 1, slider->fillBarSprite->getSize().y});
-        }
-
-        if(engine->manager.inputManager.isKeyPressed(KeyCode::Right)) {
-            slider->fillBarSprite->setSize({slider->fillBarSprite->getSize().x + 1, slider->fillBarSprite->getSize().y});
-        }
-
-        LOG_I(slider->fillBarSprite->getSize())
 
         static float _timer = 0.f;
         static int _fpsCounter = 0;
@@ -167,33 +171,29 @@ namespace Editor {
         ++_frameCounter;
         _timer += _dt;
 //
-        circleNode->getTransform()->rotate(250.f * _dt);
-//
+//        circleNode->getTransform()->rotate(250.f * _dt);
+
 //        if(engine->manager.inputManager.isKeyJustPressed(KeyCode::K)) {
-//            getMainGraph()->setParent(getMainGraph()->getNode("RightWall"), getMainGraph()->getNode("Text"));
+//            static int _knifeCounter = 0;
+//            auto _knifeNode = getMainGraph()->createNode(APPEND_S("Knife", _knifeCounter++));
+//            _knifeNode->getTransform()->setPosition(0, -200);
+//            ShapeConfig _floorShapeConfig{
+//                    .type = PhysicsShapeType::BOX,
+//                    .size = {16, 64},
+//                    .vertices = {},
+//            };
+//            _floorShapeConfig.restitution = 0;
+//
+//            _floorShapeConfig.shapeMaskingConfig.mask = 1;
+//            _floorShapeConfig.shapeMaskingConfig.toCollideWith = 1 | 2 | 5;
+//            BodyConfig _floorBodyConfig{
+//                    .shapeConfig = _floorShapeConfig
+//            };
+//            _floorBodyConfig.physicsBodyType = RDE::DYNAMIC;
+//            body = _knifeNode->addComponent<PhysicsBody>(_floorBodyConfig);
+//
+//            body->applyImpulseLocal({0, 2500}, {0, 0});
 //        }
-
-        if(engine->manager.inputManager.isKeyJustPressed(KeyCode::K)) {
-            static int _knifeCounter = 0;
-            auto _knifeNode = getMainGraph()->createNode(APPEND_S("Knife", _knifeCounter++));
-            _knifeNode->getTransform()->setPosition(0, -200);
-            ShapeConfig _floorShapeConfig{
-                    .type = PhysicsShapeType::BOX,
-                    .size = {16, 64},
-                    .vertices = {},
-            };
-            _floorShapeConfig.restitution = 0;
-
-            _floorShapeConfig.shapeMaskingConfig.mask = 1;
-            _floorShapeConfig.shapeMaskingConfig.toCollideWith = 1 | 2 | 5;
-            BodyConfig _floorBodyConfig{
-                    .shapeConfig = _floorShapeConfig
-            };
-            _floorBodyConfig.physicsBodyType = GDE::DYNAMIC;
-            body = _knifeNode->addComponent<PhysicsBody>(_floorBodyConfig);
-
-            body->applyImpulseLocal({0, 2500}, {0, 0});
-        }
     }
 
     void Editor::onLateUpdate(Delta _dt) {
@@ -207,24 +207,54 @@ namespace Editor {
     }
 
     void Editor::textStressTest(int _amount) {
-            GDE::Random _r;
-            auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
-            auto _parentNode = getMainGraph()->createNode("parent");
+        RDE::Random _r;
+        auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
+        auto _parentNode = getMainGraph()->createNode("parent");
 
-            for(int _i = 0; _i < _amount; _i++) {
-                auto _textNode = getMainGraph()->createNode("Block" + std::to_string(_i));
-                nodes.push_back(_textNode->getID());
-                _textNode->getTransform()->setPosition(_r.randomf(-engine->getWindow().getWidth() / 2.f, engine->getWindow().getWidth() / 2.f), _r.randomf(-engine->getWindow().getHeight() / 2.f, engine->getWindow().getHeight() / 2.f));
-                _textNode->getTransform()->setRotation(45);
-                auto* _sprite = _textNode->addComponent<SpriteRenderer>(_texture);
-                getMainGraph()->setParent(_textNode, _parentNode);
+        for(int _i = 0; _i < _amount; _i++) {
+            auto _textNode = getMainGraph()->createNode("Block" + std::to_string(_i));
+            nodes.push_back(_textNode->getID());
+            _textNode->getTransform()->setPosition(_r.randomf(-engine->getWindow().getWidth() * 10.f, engine->getWindow().getWidth() * 10.f), _r.randomf(-engine->getWindow().getHeight() * 10.f, engine->getWindow().getHeight() * 10.f));
+            _textNode->getTransform()->setRotation(45);
+            auto* _sprite = _textNode->addComponent<SpriteRenderer>(_texture);
+            auto _pos = _textNode->getTransform()->getPosition();
+            if((_pos.x > engine->getWindow().getWidth() * 0.5f || _pos.x < -engine->getWindow().getWidth() * 0.5f) ||
+               (_pos.y > engine->getWindow().getHeight() * 0.5f || -_pos.y < -engine->getWindow().getHeight() * 0.5f)) {
+                _sprite->node->setEnabled(true);
             }
+            getMainGraph()->setParent(_textNode, _parentNode);
+        }
+
+//        auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
+//        auto _parentNode = getMainGraph()->createNode("parent");
+//        auto _horizontalElements = engine->getWindow().getWidth() / _texture->getSize().x;
+//        auto _verticalElements = engine->getWindow().getHeight() / _texture->getSize().y;
+//
+//        for(int _i = -_verticalElements / 2; _i < _verticalElements / 2; _i++) {
+//            for(int _j = -_horizontalElements / 2; _j < _horizontalElements / 2; _j++) {
+//                auto _textNode = getMainGraph()->createNode("Block" + std::to_string(_i));
+//                nodes.push_back(_textNode->getID());
+//                _textNode->getTransform()->setPosition(_j * _texture->getSize().x, _i * _texture->getSize().y);
+////                    _textNode->getTransform()->setRotation(45);
+//                auto* _sprite = _textNode->addComponent<SpriteRenderer>(_texture);
+//                getMainGraph()->setParent(_textNode, _parentNode);
+//            }
+//        }
+
         }
 
     void Editor::onDebugRender(Delta _dt) {
         Scene::onDebugRender(_dt);
 //        auto* _transformRightWall = getMainGraph()->getComponent<Transform>(getMainGraph()->getNode("RightWall"));
 //        engine->manager.renderManager.drawSquare(_transformRightWall->getModelMatrixPosition(), {8, 8});
+
+        auto _resolution = getMainCamera()->getViewport()->getDeviceResolution();
+        auto _bottomLeftCorner = Vec2<float> {
+               (((float)_resolution.x + slider->node->getTransform()->getModelMatrixPosition().x - slider->getSize().x) * 0.5f),
+                (((float)_resolution.y + slider->node->getTransform()->getModelMatrixPosition().y - slider->getSize().y) * 0.5f)
+        };
+
+        engine->manager.renderManager.drawPoint(_bottomLeftCorner, Color::White);
     }
 
     void Editor::physicsTest() {

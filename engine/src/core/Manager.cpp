@@ -6,7 +6,7 @@
 #include "core/render/RenderManager.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     Manager::Manager() {  }
 

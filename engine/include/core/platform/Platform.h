@@ -1,11 +1,11 @@
 // Created by borja on 8/2/22.
 
 
-#ifndef GDE_PLATFORM_H
-#define GDE_PLATFORM_H
+#ifndef RDE_PLATFORM_H
+#define RDE_PLATFORM_H
 
 #include "core/systems/inputSystem/input/Input.h"
-namespace GDE {
+namespace RDE {
 
     enum PlatformType {
         LINUX,
@@ -18,7 +18,7 @@ namespace GDE {
 
     class Platform {
         public:
-            Window* createWindow(GDEConfig* _config);
+            Window* createWindow(RDEConfig* _config);
 
         private:
             PlatformType getPlatform();
@@ -27,4 +27,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_PLATFORM_H
+#endif //RDE_PLATFORM_H

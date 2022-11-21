@@ -5,7 +5,7 @@
 #include "core/util/GLUtil.h"
 #include "core/render/elements/IRenderizable.h"
 
-namespace GDE {
+namespace RDE {
 
     void ShaderManager::init(FileManager* _fileManager) {
         fileManager = _fileManager;

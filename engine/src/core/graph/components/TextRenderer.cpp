@@ -12,7 +12,7 @@
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     TextRenderer::TextRenderer(Node* _node, Scene* _scene, const std::string& _text, Font* _font) :
     TextRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _text, _font) {  }

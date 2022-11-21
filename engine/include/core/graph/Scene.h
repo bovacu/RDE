@@ -1,14 +1,14 @@
 #pragma once
 
-#ifndef GDE_SCENE_H
-#define GDE_SCENE_H
+#ifndef RDE_SCENE_H
+#define RDE_SCENE_H
 
 #include "nlohmann/json.hpp"
 #include "core/util/Delta.h"
 #include "core/graph/Graph.h"
 #include "core/graph/components/Components.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Camera, Window, Engine, Canvas);
 
@@ -222,4 +222,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_SCENE_H
+#endif //RDE_SCENE_H

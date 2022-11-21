@@ -1,5 +1,5 @@
-#ifndef GDE_GL_UTIL_H
-#define GDE_GL_UTIL_H
+#ifndef RDE_GL_UTIL_H
+#define RDE_GL_UTIL_H
 
 #ifdef NDEBUG
 #define CHECK_GL_ERROR(extraInfo)

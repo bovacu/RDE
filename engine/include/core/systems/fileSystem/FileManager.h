@@ -1,12 +1,12 @@
 // Created by borja on 14/2/22.
 
 
-#ifndef GDE_FILES_SYSTEM_H
-#define GDE_FILES_SYSTEM_H
+#ifndef RDE_FILES_SYSTEM_H
+#define RDE_FILES_SYSTEM_H
 
 #include "core/util/Util.h"
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief Result of a file operation.
@@ -309,4 +309,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_FILES_SYSTEM_H
+#endif //RDE_FILES_SYSTEM_H

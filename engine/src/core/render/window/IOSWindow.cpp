@@ -8,9 +8,9 @@
 
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
-    IOSWindow::IOSWindow(GDEConfig* _config) : Window(_config) {
+    IOSWindow::IOSWindow(RDEConfig* _config) : Window(_config) {
         LOG_DEBUG("Platform: IOS")
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);

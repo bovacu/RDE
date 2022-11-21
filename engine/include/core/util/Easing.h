@@ -2,8 +2,8 @@
 // Created by borja on 14/12/21.
 //
 
-#ifndef GDE_EASING_H
-#define GDE_EASING_H
+#ifndef RDE_EASING_H
+#define RDE_EASING_H
 
 #include <cmath>
 #include "core/Core.h"
@@ -14,7 +14,7 @@
     #endif
 #endif
 
-namespace GDE {
+namespace RDE {
 
     class Easing {
         public:
@@ -155,4 +155,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_EASING_H
+#endif //RDE_EASING_H

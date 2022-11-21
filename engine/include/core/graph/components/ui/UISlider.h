@@ -2,12 +2,12 @@
 // Created by borja on 10/20/22.
 //
 
-#ifndef GDE_UI_SLIDER_H
-#define GDE_UI_SLIDER_H
+#ifndef RDE_UI_SLIDER_H
+#define RDE_UI_SLIDER_H
 
 #include "core/graph/components/ui/UI.h"
 
-namespace GDE {
+namespace RDE {
 
     struct UISliderConfig : CommonUIConfig {
         Texture* backgroundBarTexture = nullptr;
@@ -63,4 +63,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_UI_SLIDER_H
+#endif //RDE_UI_SLIDER_H

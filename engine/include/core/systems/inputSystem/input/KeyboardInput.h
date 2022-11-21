@@ -1,15 +1,15 @@
 // Created by borja on 6/2/22.
 
 
-#ifndef GDE_KEYBOARD_INPUT_H
-#define GDE_KEYBOARD_INPUT_H
+#ifndef RDE_KEYBOARD_INPUT_H
+#define RDE_KEYBOARD_INPUT_H
 
 
 #include "core/util/Util.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 #include "Input.h"
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief This class handles all of the keyboard inputs.
@@ -60,4 +60,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_KEYBOARD_INPUT_H
+#endif //RDE_KEYBOARD_INPUT_H

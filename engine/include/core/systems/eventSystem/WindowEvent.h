@@ -1,11 +1,11 @@
 #pragma once
 
-#ifndef GDE_WINDOW_EVENT_H
-#define GDE_WINDOW_EVENT_H
+#ifndef RDE_WINDOW_EVENT_H
+#define RDE_WINDOW_EVENT_H
 
 #include "Event.h"
 
-namespace GDE {
+namespace RDE {
 
     /// This class represents all of the events that involves resizing the window.
     class WindowResizedEvent    : public Event {
@@ -178,4 +178,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_WINDOW_EVENT_H
+#endif //RDE_WINDOW_EVENT_H

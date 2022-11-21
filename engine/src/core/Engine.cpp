@@ -7,13 +7,13 @@
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/systems/profiling/Profiler.h"
 
-namespace GDE {
+namespace RDE {
 
 
     Engine::Engine() {
-        manager.configManager.loadGDEConfig(&gdeConfig, manager.fileManager);
-        window = platform.createWindow(&gdeConfig);
-        currentDPI = gdeConfig.windowData.diagonalDpi;
+        manager.configManager.loadRDEConfig(&rdeConfig, manager.fileManager);
+        window = platform.createWindow(&rdeConfig);
+        currentDPI = rdeConfig.windowData.diagonalDpi;
 
         UDelegate<void(Event&)> onEventDelegate;
         onEventDelegate.bind<&Engine::onEvent>(this);
@@ -39,7 +39,7 @@ namespace GDE {
         frameBuffer = new FrameBuffer(_specs, &manager);
         #endif
 
-        manager.configManager.loadResources(&gdeConfig, &manager);
+        manager.configManager.loadResources(&rdeConfig, &manager);
 
         manager.consoleManager.addCommand<&Engine::changeColorConsoleCommand>("background_color"," Changes background color 0 <= r,b,g,a <= 255", this, "r g b a");
         manager.consoleManager.addCommand<&Engine::setParentCommand>( "parent_set", "Sets the parent of A as B", this, "A B");

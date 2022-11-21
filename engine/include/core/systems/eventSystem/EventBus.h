@@ -1,7 +1,7 @@
 // Created by borja on 17/12/21.
 
-#ifndef GDE_EVENT_BUS
-#define GDE_EVENT_BUS
+#ifndef RDE_EVENT_BUS
+#define RDE_EVENT_BUS
 
 #include "core/util/Logger.h"
 
@@ -55,7 +55,7 @@
  *      And with this, all of the linked functions will know about this change and will react as the function specifies
  */
 
-namespace GDE {
+namespace RDE {
 
     template <typename Event, typename... AssociatedFunctionArgs>
     /**
@@ -69,7 +69,7 @@ namespace GDE {
             typedef std::function<bool(AssociatedFunctionArgs...)> HandlerFunc;
 
         private:
-            std::map<Event, GDE::MDelegate<bool(AssociatedFunctionArgs...)>> handlers;
+            std::map<Event, RDE::MDelegate<bool(AssociatedFunctionArgs...)>> handlers;
 
         public:
             class HandlerId {
@@ -126,4 +126,4 @@ namespace GDE {
 }
 
 
-#endif // GDE_EVENT_BUS
+#endif // RDE_EVENT_BUS

@@ -2,8 +2,8 @@
 // Created by borja on 9/5/22.
 //
 
-#ifndef GDE_TRANSFORM_H
-#define GDE_TRANSFORM_H
+#ifndef RDE_TRANSFORM_H
+#define RDE_TRANSFORM_H
 
 #include <vector>
 #include "glm/ext/matrix_transform.hpp"
@@ -13,7 +13,7 @@
 
 typedef entt::entity NodeID;
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_STRUCT(Node)
     /**
@@ -160,4 +160,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_TRANSFORM_H
+#endif //RDE_TRANSFORM_H

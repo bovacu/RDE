@@ -1,14 +1,14 @@
 // Created by borja on 30/1/22.
 
 
-#ifndef GDE_SOUND_MANAGER_H
-#define GDE_SOUND_MANAGER_H
+#ifndef RDE_SOUND_MANAGER_H
+#define RDE_SOUND_MANAGER_H
 
 
 #include "core/util/Util.h"
 #include "core/platform/PlatformHeaderSDLMixer.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(SoundManager)
 
@@ -230,4 +230,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_SOUND_MANAGER_H
+#endif //RDE_SOUND_MANAGER_H

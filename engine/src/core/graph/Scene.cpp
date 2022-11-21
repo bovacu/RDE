@@ -6,7 +6,7 @@
 #include "core/graph/components/Transform.h"
 #include "core/systems/uiSystem/Canvas.h"
 
-namespace GDE {
+namespace RDE {
 
     Scene::Scene(Engine* _engine, const std::string& _debugName)  : mainGraph(this, _debugName), debugName(_debugName), engine(_engine) {
         auto* _mainCameraNode = mainGraph.createNode("MainCamera");

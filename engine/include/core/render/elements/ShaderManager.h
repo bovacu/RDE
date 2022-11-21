@@ -1,8 +1,8 @@
 // Created by borja on 20/1/22.
 
 
-#ifndef GDE_SHADER_MANAGER_H
-#define GDE_SHADER_MANAGER_H
+#ifndef RDE_SHADER_MANAGER_H
+#define RDE_SHADER_MANAGER_H
 
 
 #include "core/util/Util.h"
@@ -13,7 +13,7 @@
 #include "glm/ext/matrix_float4x4.hpp"
 #include "core/systems/fileSystem/FileManager.h"
 
-namespace GDE {
+namespace RDE {
 
     typedef GLuint ShaderID;
 
@@ -171,4 +171,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_SHADER_MANAGER_H
+#endif //RDE_SHADER_MANAGER_H

@@ -1,8 +1,8 @@
 // Created by borja on 31/3/22.
 
 
-#ifndef GDE_PARTICLE_SYSTEM_H
-#define GDE_PARTICLE_SYSTEM_H
+#ifndef RDE_PARTICLE_SYSTEM_H
+#define RDE_PARTICLE_SYSTEM_H
 
 #include <vector>
 #include "glm/vec3.hpp"
@@ -14,7 +14,7 @@
 #include "core/graph/components/Transform.h"
 #include "core/render/elements/IRenderizable.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_STRUCT(ParticleSystemConfig)
     FORWARD_DECLARE_CLASS(Graph, Manager)
@@ -154,4 +154,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_PARTICLE_SYSTEM_H
+#endif //RDE_PARTICLE_SYSTEM_H

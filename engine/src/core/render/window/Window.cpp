@@ -11,13 +11,13 @@
     #include "glad/glad.h"
 #endif
 
-namespace GDE {
+namespace RDE {
 
     static bool shouldUpdateWindowDefault() {
         return true;
     }
 
-    Window::Window(GDEConfig* _config) : window(nullptr) {
+    Window::Window(RDEConfig* _config) : window(nullptr) {
         properties = _config;
 
         #ifdef ENGINE_DEBUG

@@ -2,15 +2,15 @@
 // Created by borja on 22/04/22.
 //
 
-#ifndef GDE_PHYSICS_MANAGER_H
-#define GDE_PHYSICS_MANAGER_H
+#ifndef RDE_PHYSICS_MANAGER_H
+#define RDE_PHYSICS_MANAGER_H
 
 #include "core/util/Util.h"
 #include "core/systems/physicsSystem/PhysicsBody.h"
 #include "core/systems/physicsSystem/PhysicsManifold.h"
 #include <set>
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(RenderManager)
 
@@ -81,4 +81,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_PHYSICS_MANAGER_H
+#endif //RDE_PHYSICS_MANAGER_H

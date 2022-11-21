@@ -6,7 +6,7 @@
 #include "core/graph/components/ui/UITransform.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
 
     UIImage::UIImage(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :

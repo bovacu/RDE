@@ -1,13 +1,13 @@
 #pragma once
 
-#ifndef GDE_KEY_EVENT_H
-#define GDE_KEY_EVENT_H
+#ifndef RDE_KEY_EVENT_H
+#define RDE_KEY_EVENT_H
 
 #include "Event.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 
 
-namespace GDE {
+namespace RDE {
 
     /// Base class for all the key events
     class KeyEvent          : public Event {
@@ -113,4 +113,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_KEY_EVENT_H
+#endif //RDE_KEY_EVENT_H

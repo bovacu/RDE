@@ -2,12 +2,12 @@
 // Created by borja on 14/12/21.
 //
 
-#ifndef GDE_RANDOM_H
-#define GDE_RANDOM_H
+#ifndef RDE_RANDOM_H
+#define RDE_RANDOM_H
 
 #include <random>
 
-namespace GDE {
+namespace RDE {
 
     struct Probability {
         float prob = 0.0f;
@@ -69,4 +69,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_RANDOM_H
+#endif //RDE_RANDOM_H

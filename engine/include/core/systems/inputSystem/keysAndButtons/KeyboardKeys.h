@@ -1,13 +1,13 @@
 #pragma once
 
-#ifndef GDE_KEYBOARD_KEYS_H
-#define GDE_KEYBOARD_KEYS_H
+#ifndef RDE_KEYBOARD_KEYS_H
+#define RDE_KEYBOARD_KEYS_H
 
 #include <cstdint>
 #include <ostream>
 #include "core/platform/PlatformHeaderSDL.h"
 
-namespace GDE {
+namespace RDE {
 
     /// -----------------------------------------------------------------
     /// |			CODES FOR KEY BUTTONS, THEY ARE						|
@@ -275,4 +275,4 @@ namespace GDE {
 #define KEY_RIGHT_SUPER     ::engine::Key::RightSuper
 #define KEY_MENU            ::engine::Key::Menu
 
-#endif // GDE_KEYBOARD_KEYS_H
+#endif // RDE_KEYBOARD_KEYS_H

@@ -7,7 +7,7 @@
 #include "core/Engine.h"
 #include "core/systems/uiSystem/Canvas.h"
 
-namespace GDE {
+namespace RDE {
 
     struct DefaultScene : public Scene {
         public:

@@ -2,15 +2,15 @@
 // Created by borja on 9/5/22.
 //
 
-#ifndef GDE_TEXT_RENDERER_H
-#define GDE_TEXT_RENDERER_H
+#ifndef RDE_TEXT_RENDERER_H
+#define RDE_TEXT_RENDERER_H
 
 #include "core/render/elements/IRenderizable.h"
 #include "entt/entity/entity.hpp"
 
 typedef entt::entity NodeID;
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_STRUCT(CharInfo)
     FORWARD_DECLARE_CLASS(Font, Scene, Canvas, Graph, Manager)
@@ -151,4 +151,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_TEXT_RENDERER_H
+#endif //RDE_TEXT_RENDERER_H

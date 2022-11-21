@@ -2,14 +2,14 @@
 // Created by borja on 9/5/22.
 //
 
-#ifndef GDE_NINE_SLICE_SPRITE_H
-#define GDE_NINE_SLICE_SPRITE_H
+#ifndef RDE_NINE_SLICE_SPRITE_H
+#define RDE_NINE_SLICE_SPRITE_H
 
 #include "core/util/Vec.h"
 #include "core/graph/components/ui/UI.h"
 #include "core/graph/components/ui/UIImage.h"
 
-namespace GDE {
+namespace RDE {
 
     struct UI9SliceConfig : CommonUIConfig {
         Vec2F size = { -1, -1 };
@@ -52,4 +52,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_NINE_SLICE_SPRITE_H
+#endif //RDE_NINE_SLICE_SPRITE_H

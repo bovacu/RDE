@@ -2,8 +2,8 @@
 // Created by borja on 9/5/22.
 //
 
-#ifndef GDE_SPRITE_RENDERER_H
-#define GDE_SPRITE_RENDERER_H
+#ifndef RDE_SPRITE_RENDERER_H
+#define RDE_SPRITE_RENDERER_H
 
 #include "core/render/elements/IRenderizable.h"
 #include "core/render/elements/Vertex.h"
@@ -12,7 +12,7 @@
 
 typedef entt::entity NodeID;
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Manager, Graph, Scene, Canvas, Node)
 
@@ -92,4 +92,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_SPRITE_RENDERER_H
+#endif //RDE_SPRITE_RENDERER_H

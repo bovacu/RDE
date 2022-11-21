@@ -3,7 +3,7 @@
 #include "core/systems/inputSystem/input/MobileInput.h"
 #include "core/systems/eventSystem/MobileEvent.h"
 
-namespace GDE {
+namespace RDE {
 
 
     void MobileInput::init(Engine* _engine, Window* _window) {

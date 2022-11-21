@@ -2,8 +2,8 @@
 // Created by borja on 3/12/21.
 //
 
-#ifndef GDE_LOGGER_H
-#define GDE_LOGGER_H
+#ifndef RDE_LOGGER_H
+#define RDE_LOGGER_H
 
 #include <iostream>
 #include <cstring>
@@ -157,4 +157,4 @@ inline void printerd(const char* _init, const char* _end, Arg1&& arg1, Args&&...
 #endif
 }
 
-#endif //GDE_LOGGER_H
+#endif //RDE_LOGGER_H

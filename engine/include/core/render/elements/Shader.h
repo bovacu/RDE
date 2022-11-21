@@ -1,5 +1,5 @@
-#ifndef GDE_SHADER_H
-#define GDE_SHADER_H
+#ifndef RDE_SHADER_H
+#define RDE_SHADER_H
 
 #include <string>
 #include <unordered_map>
@@ -15,7 +15,7 @@
 
 #include "core/systems/fileSystem/FileManager.h"
 
-namespace GDE {
+namespace RDE {
 
     class LoadVertexConfigNotInvoked : public std::exception {
         public:
@@ -176,4 +176,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_SHADER_H
+#endif //RDE_SHADER_H

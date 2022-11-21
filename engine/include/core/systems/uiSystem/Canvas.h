@@ -2,15 +2,15 @@
 // Created by borja on 29/05/22.
 //
 
-#ifndef GDE_CANVAS_H
-#define GDE_CANVAS_H
+#ifndef RDE_CANVAS_H
+#define RDE_CANVAS_H
 
 #include "core/graph/Graph.h"
 #include "core/render/Camera.h"
 #include "core/render/elements/Batch.h"
 #include <stack>
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(UI, UIInteractable)
 
@@ -123,4 +123,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_CANVAS_H
+#endif //RDE_CANVAS_H

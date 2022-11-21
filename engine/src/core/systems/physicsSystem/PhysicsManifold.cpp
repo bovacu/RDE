@@ -4,7 +4,7 @@
 
 #include "core/systems/physicsSystem/PhysicsManifold.h"
 
-namespace GDE {
+namespace RDE {
 
 //    void PhysicsManifold::initialize(Delta _fxDt, const Vec2F& _gravity) {
 //        // Calculate average restitution

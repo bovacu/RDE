@@ -8,9 +8,9 @@
 
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
-    AndroidWindow::AndroidWindow(GDEConfig* _config) : Window(_config) {
+    AndroidWindow::AndroidWindow(RDEConfig* _config) : Window(_config) {
             LOG_DEBUG("Platform: Android")
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);

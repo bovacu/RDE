@@ -3,7 +3,7 @@
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/util/Functions.h"
 
-namespace GDE {
+namespace RDE {
 
     void Font::init(FT_Face face, int _fontSize)  {
         FT_Set_Pixel_Sizes(face, 0, _fontSize);

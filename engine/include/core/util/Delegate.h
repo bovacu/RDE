@@ -43,13 +43,13 @@
     _myMDelegate(0, "");
     _myMDelegate.clear();
 */
-#ifndef GDE_DELEGATE_H
-#define GDE_DELEGATE_H
+#ifndef RDE_DELEGATE_H
+#define RDE_DELEGATE_H
 
 #include <exception>
 #include <functional>
 
-namespace GDE {
+namespace RDE {
 
     // Primary template intentionally left empty
     template <typename Signature>
@@ -237,4 +237,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_DELEGATE_H
+#endif //RDE_DELEGATE_H

@@ -9,7 +9,7 @@
 #include "core/graph/components/Node.h"
 #include "core/graph/components/ui/UI.h"
 
-namespace GDE {
+namespace RDE {
 
     Transform::Transform() {
         worldMatrixCache = recalculateCachedMatrix();

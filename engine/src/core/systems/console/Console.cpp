@@ -3,7 +3,7 @@
 
 #include "core/systems/console/Console.h"
 
-namespace GDE {
+namespace RDE {
 
     void Console::init() {
         addCommand<&Console::help>("help", "Gives all available commands information", this);

@@ -10,7 +10,7 @@
 
 #include "core/render/Camera.h"
 
-namespace GDE {
+namespace RDE {
 
     bool Input::pollEvent(SDL_Event& _event) {
         if(events.find((SystemEventEnum)_event.type) == events.end()) {

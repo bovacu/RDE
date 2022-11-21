@@ -8,7 +8,7 @@
 #include "core/graph/components/ui/UITransform.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     UICheckbox::UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config) : UI(_node) {
         setConfig(_manager, _config);

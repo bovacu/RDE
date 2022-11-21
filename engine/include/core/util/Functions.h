@@ -1,12 +1,12 @@
 // Created by borja on 23/12/21.
 
 
-#ifndef GDE_FUNCTIONS_H
-#define GDE_FUNCTIONS_H
+#ifndef RDE_FUNCTIONS_H
+#define RDE_FUNCTIONS_H
 
 #include "core/render/elements/ViewPort.h"
 
-namespace GDE {
+namespace RDE {
 
     class Util {
 
@@ -82,4 +82,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_FUNCTIONS_H
+#endif //RDE_FUNCTIONS_H

@@ -1,8 +1,8 @@
 // Created by borja on 15/1/22.
 
 
-#ifndef GDE_FONT_MANAGER_H
-#define GDE_FONT_MANAGER_H
+#ifndef RDE_FONT_MANAGER_H
+#define RDE_FONT_MANAGER_H
 
 #include "core/util/Util.h"
 #include <ft2build.h>
@@ -13,7 +13,7 @@
 #define MAX_WIDTH 1024
 #define MAX_CHARACTERS 128
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief This struct retains the information of each character.
@@ -188,4 +188,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_FONT_MANAGER_H
+#endif //RDE_FONT_MANAGER_H

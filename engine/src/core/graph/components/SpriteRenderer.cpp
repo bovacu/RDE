@@ -13,7 +13,7 @@
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Texture* _texture) :
     SpriteRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _texture) {  }

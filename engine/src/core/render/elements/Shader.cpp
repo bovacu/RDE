@@ -3,7 +3,7 @@
 #include "core/util/GLUtil.h"
 #include <iostream>
 
-namespace GDE {
+namespace RDE {
 
     Shader::Shader() {  }
 

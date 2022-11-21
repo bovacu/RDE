@@ -6,10 +6,10 @@
 #include "core/graph/components/Transform.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     Camera::Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window) : node(_node) {
-        viewport = new ViewPort(_window->getWindowSize(), _manager->engine->gdeConfig.windowData.resolution);
+        viewport = new ViewPort(_window->getWindowSize(), _manager->engine->rdeConfig.windowData.resolution);
         onResize(_window->getWidth(), _window->getHeight());
     }
 

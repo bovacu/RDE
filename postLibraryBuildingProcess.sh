@@ -5,7 +5,7 @@ BUILD_TYPE=$3
 
 mkdir -p build
 mkdir -p build/"$3"
-rm -f "$1"/build/"$3"/libGDE.a
+rm -f "$1"/build/"$3"/libRDE.a
 
 cd $2
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libSDL2.a
@@ -27,9 +27,9 @@ ar -x "$WD"/vcpkg/installed/x64-linux/lib/libvorbisfile.a
 ar -x "$WD"/vcpkg/installed/x64-linux/lib/libz.a
 ar -x "$WD"/nonVcpkgDeps/freetype/libfreetype.a
 ar -x "$WD"/nonVcpkgDeps/Chipmunk2D/libs/Linux/libchipmunk.a
-ar -x libGDE.a
-rm libGDE.a
-ar -qc libGDE.a *.o
+ar -x libRDE.a
+rm libRDE.a
+ar -qc libRDE.a *.o
 rm *.o
-cp libGDE.a "$WD"/build/"$3"
+cp libRDE.a "$WD"/build/"$3"
 echo "Post processing finished!"

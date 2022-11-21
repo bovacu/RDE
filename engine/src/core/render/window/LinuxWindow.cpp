@@ -7,9 +7,9 @@
 #if IS_LINUX() && !IS_ANDROID()
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
-    LinuxWindow::LinuxWindow(GDEConfig* _config) : Window(_config) {
+    LinuxWindow::LinuxWindow(RDEConfig* _config) : Window(_config) {
 
         LOG_DEBUG("Platform: Linux")
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);

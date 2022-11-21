@@ -4,7 +4,7 @@
 #include "core/util/Functions.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     ParticleSystem::ParticleSystem(Node* _node, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig) :
     ParticleSystem(_node, &_scene->engine->manager, _scene->getMainGraph(), _particleSystemConfig) {  }

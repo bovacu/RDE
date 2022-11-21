@@ -13,9 +13,9 @@
 #include "core/graph/components/TextRenderer.h"
 #include "core/util/Functions.h"
 
-namespace GDE {
+namespace RDE {
 
-    void ConfigManager::loadGDEConfig(GDEConfig* _config, FileManager& _manager) {
+    void ConfigManager::loadRDEConfig(RDEConfig* _config, FileManager& _manager) {
 
         auto _configPath = "assets/config/desktop.json";
 
@@ -31,7 +31,7 @@ namespace GDE {
         nlohmann::json _data = nlohmann::json::parse(_manager.readFullFile(_fileHandler).content);
         _manager.close(_fileHandler);
 
-        _config->windowData.title = _data.contains("title") ? _data["title"].get<std::string>() : "GDEProject";
+        _config->windowData.title = _data.contains("title") ? _data["title"].get<std::string>() : "RDEProject";
         _config->windowData.fullScreen = _data.contains("fullscreen") && _data["fullscreen"].get<bool>();
         _config->windowData.vsync = !_data.contains("vsync") || _data["vsync"].get<bool>();
 
@@ -48,12 +48,12 @@ namespace GDE {
         _config->projectData.localizationConfig.localizationPath = _data.contains("localization_path") ? _data["localization_path"].get<std::string>() : "";
     }
 
-    void ConfigManager::loadResources(GDEConfig* _gdeConfig, Manager* _manager) {
-        if(_gdeConfig->projectData.resourcesPath.empty()) {
+    void ConfigManager::loadResources(RDEConfig* _rdeConfig, Manager* _manager) {
+        if(_rdeConfig->projectData.resourcesPath.empty()) {
             return;
         }
 
-        auto _fileHandler = _manager->fileManager.open(APPEND_S("assets/", _gdeConfig->projectData.resourcesPath), FileMode::READ);
+        auto _fileHandler = _manager->fileManager.open(APPEND_S("assets/", _rdeConfig->projectData.resourcesPath), FileMode::READ);
 
         if(_fileHandler == nullptr) {
             LOG_W("Resources path was set in the config.json, but the file couldn't be loaded!")

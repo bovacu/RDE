@@ -7,20 +7,20 @@
 //
 
 #include "core/Engine.h"
-#include "GDEEntry.h"
-#include "GDEDemo.h"
+#include "RDEEntry.h"
+#include "RDEDemo.h"
 
-class GDEDemoEntry : public GDE::Engine {
+class RDEDemoEntry : public RDE::Engine {
     public:
-        explicit GDEDemoEntry() : GDE::Engine() {
-            GDE::Engine::onInit(new GDEDemo(this));
+        explicit RDEDemoEntry() : RDE::Engine() {
+            RDE::Engine::onInit(new RDEDemo(this));
         }
 
-        ~GDEDemoEntry() {
+        ~RDEDemoEntry() {
 
         }
 };
 
-GDE::Engine* GDE::createEngine(int _argc, char** _argv) {
-    return new GDEDemoEntry();
+RDE::Engine* RDE::createEngine(int _argc, char** _argv) {
+    return new RDEDemoEntry();
 }

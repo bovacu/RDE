@@ -2,7 +2,7 @@
 
 #include "core/util/Color.h"
 
-namespace GDE {
+namespace RDE {
 
     const Color Color::White(255, 255, 255, 255);
     const Color Color::Black(0, 0, 0, 255);

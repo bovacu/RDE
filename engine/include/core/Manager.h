@@ -20,7 +20,7 @@
 #include "core/render/RenderManager.h"
 #include "core/systems/localization/LocalizationManager.h"
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief This class contains all of the managers of the engine, so end users can access all of them from one single place.

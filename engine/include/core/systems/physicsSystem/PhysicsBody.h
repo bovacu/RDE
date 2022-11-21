@@ -2,8 +2,8 @@
 // Created by borja on 9/16/22.
 //
 
-#ifndef GDE_PHYSICS_BODY_H
-#define GDE_PHYSICS_BODY_H
+#ifndef RDE_PHYSICS_BODY_H
+#define RDE_PHYSICS_BODY_H
 
 
 #include "core/render/shapes/DebugShape.h"
@@ -11,7 +11,7 @@
 #include "core/systems/physicsSystem/PhysicsShape.h"
 #include "chipmunk/chipmunk.h"
 
-namespace GDE {
+namespace RDE {
 
     enum PhysicsBodyType {
         STATIC,
@@ -150,4 +150,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_PHYSICS_BODY_H
+#endif //RDE_PHYSICS_BODY_H

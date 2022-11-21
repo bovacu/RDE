@@ -2,10 +2,10 @@
 // Created by borja on 9/16/22.
 //
 
-#ifndef GDE_PHYSICS_MATH
-#define GDE_PHYSICS_MATH
+#ifndef RDE_PHYSICS_MATH
+#define RDE_PHYSICS_MATH
 
-namespace GDE {
+namespace RDE {
 
     class PhysicsMath {
         public:
@@ -34,4 +34,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_PHYSICS_MATH
+#endif //RDE_PHYSICS_MATH

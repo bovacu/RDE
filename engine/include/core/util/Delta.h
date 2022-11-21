@@ -1,9 +1,9 @@
 #pragma once
 
-#ifndef GDE_TIME_STEP_H
-#define GDE_TIME_STEP_H
+#ifndef RDE_TIME_STEP_H
+#define RDE_TIME_STEP_H
 
-namespace GDE {
+namespace RDE {
 
     class Delta {
         private:
@@ -20,4 +20,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_TIME_STEP_H
+#endif //RDE_TIME_STEP_H

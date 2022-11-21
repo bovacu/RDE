@@ -2,12 +2,12 @@
 // Created by borja on 10/20/22.
 //
 
-#ifndef GDE_UI_PANEL_H
-#define GDE_UI_PANEL_H
+#ifndef RDE_UI_PANEL_H
+#define RDE_UI_PANEL_H
 
 #include "core/graph/components/ui/UI.h"
 
-namespace GDE {
+namespace RDE {
 
     struct UIPanelConfig : CommonUIConfig {
         Texture* texture = nullptr;
@@ -43,4 +43,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_UI_PANEL_H
+#endif //RDE_UI_PANEL_H

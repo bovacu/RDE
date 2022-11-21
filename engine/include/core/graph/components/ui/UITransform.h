@@ -2,12 +2,12 @@
 // Created by borja on 10/26/22.
 //
 
-#ifndef GDE_UI_TRANSFORM_H
-#define GDE_UI_TRANSFORM_H
+#ifndef RDE_UI_TRANSFORM_H
+#define RDE_UI_TRANSFORM_H
 
 #include "core/graph/components/Transform.h"
 
-namespace GDE {
+namespace RDE {
 
     enum Anchor {
         MIDDLE              = 1 << 1,
@@ -66,6 +66,6 @@ namespace GDE {
             void setUIDirty();
     };
 
-} // GDE
+} // RDE
 
-#endif //GDE_UI_TRANSFORM_H
+#endif //RDE_UI_TRANSFORM_H
