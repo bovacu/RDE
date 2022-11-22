@@ -126,7 +126,7 @@ namespace RDE {
             placeholderTextRenderer->setText(config.placeholderText);
             placeholderTextRenderer->setColor(config.placeholderTextColor);
             placeholderTextRenderer->setFont(config.font);
-            placeholderTextRenderer->enabled = config.showPlaceholderText;
+            placeholderTextRenderer->node->setEnabled(config.showPlaceholderText ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
         }
 
         if(caretSprite != nullptr) {
@@ -262,12 +262,12 @@ namespace RDE {
     void UIInput::updatePlaceholder() {
         if(placeholderTextRenderer != nullptr) {
             if(UI::interaction->focused) {
-                placeholderTextRenderer->enabled = textRenderer->getText().empty();
+                placeholderTextRenderer->node->setEnabled(textRenderer->getText().empty() ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
             } else {
                 if(textRenderer != nullptr) {
-                    placeholderTextRenderer->enabled = textRenderer->getText().empty();
+                    placeholderTextRenderer->node->setEnabled(textRenderer->getText().empty() ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
                 } else {
-                    placeholderTextRenderer->enabled = config.showPlaceholderText;
+                    placeholderTextRenderer->node->setEnabled(config.showPlaceholderText ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
                 }
             }
         }

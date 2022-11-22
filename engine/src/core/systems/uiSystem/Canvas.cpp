@@ -265,7 +265,6 @@ namespace RDE {
        _renderManager.beginDebugDraw(*camera, (Transform*)graph.getComponent<UITransform>(camera->node->getID()));
 
         _registry.group<UI9Slice>(entt::get<UITransform, Active>).each([this, &_renderManager](const auto _entity, UI9Slice& _ui9Slice, UITransform& _transform, const Active& _) {
-            if(!_ui9Slice.enabled) return;
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
             Vec2F _size = _ui9Slice.getSize();

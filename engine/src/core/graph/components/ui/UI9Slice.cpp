@@ -29,8 +29,6 @@ namespace RDE {
     }
 
     void UI9Slice::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
-        if(!enabled) return;
-
         if(spriteRenderer) {
             spriteRenderer->drawBatched(_vertices, _indices, _transform, _viewport);
             return;
@@ -63,8 +61,6 @@ namespace RDE {
     }
 
     void UI9Slice::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) {
-        if(!enabled) return;
-
         DrawAndFlushData _nineSliceData;
         _nineSliceData.textureID = getTexture();
         _nineSliceData.shaderID = shaderID;

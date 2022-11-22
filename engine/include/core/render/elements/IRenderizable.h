@@ -56,8 +56,6 @@ namespace RDE {
              */
             BatchPriority batchPriority = BatchPriority::SpritePriority;
 
-            bool enabled = true;
-
             bool dirty = false;
 
         public:

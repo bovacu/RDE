@@ -28,11 +28,8 @@ namespace RDE {
     }
 
     void UIText::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
-        if(!enabled) return;
-
         auto* _uiTransform = (UITransform*)&_transform;
         auto _originOffset = UI::getOriginOffset();
-        auto _anchor = _uiTransform->getAnchor();
 
         auto* _atlas = font;
         auto _atlasSize = _atlas->getSize();

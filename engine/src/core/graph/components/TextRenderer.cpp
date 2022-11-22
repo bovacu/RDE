@@ -79,8 +79,6 @@ namespace RDE {
     }
 
     void TextRenderer::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
-        if(!enabled) return;
-
         auto* _atlas = font;
         auto _atlasSize = _atlas->getSize();
 
@@ -190,7 +188,6 @@ namespace RDE {
     }
 
     void TextRenderer::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) {
-        if(!enabled) return;
         DrawAndFlushData _textData;
         _textData.textureID = getTexture();
         _textData.shaderID = shaderID;

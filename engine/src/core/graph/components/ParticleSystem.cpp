@@ -97,8 +97,6 @@ namespace RDE {
     }
 
     void ParticleSystem::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
-        if(!enabled) return;
-
         for (auto& _particle : usedParticles) {
             auto _vertexCount = _vertices.size();
 
