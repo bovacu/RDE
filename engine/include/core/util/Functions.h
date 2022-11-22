@@ -599,10 +599,10 @@ namespace RDE::Util {
             while((err = glGetError()) != GL_NO_ERROR){
                 Util::Log::error("GL_ERROR ", _message," -> ", err);
             }
-        }
         #endif
-
+        }
     }
+
     #endif
 }
 
