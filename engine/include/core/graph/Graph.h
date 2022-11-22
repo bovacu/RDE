@@ -9,6 +9,7 @@
 #include "core/systems/eventSystem/Event.h"
 #include "core/render/elements/Texture.h"
 #include "core/graph/components/Transform.h"
+#include "core/graph/components/Components.h"
 
 namespace RDE {
 
@@ -69,8 +70,10 @@ namespace RDE {
             Scene* scene = nullptr;
 
             UDelegate<void(void*)> onDataChanged;
-
             bool isUI = false;
+
+            std::vector<IRenderizable*> renderizableTree;
+            bool isRenderizableTreeDirty = false;
 
         private:
             /**
@@ -154,7 +157,9 @@ namespace RDE {
              * @return bool
              */
             template<typename Component>
-            bool hasComponent(const NodeID& _id) const;
+            [[nodiscard]] bool hasComponent(const NodeID& _id) const;
+
+            void recalculateRenderizableTree(Node* _node, std::vector<IRenderizable*>* _renderizables);
 
         public:
             /**
@@ -285,6 +290,7 @@ namespace RDE {
         auto* _first = get<0>(std::forward<Args>(_args)...);
         auto* _component = &registry.template emplace<Component>(_first->getID(), _args...);
         if(onDataChanged != nullptr) onDataChanged((void*)_component);
+        isRenderizableTreeDirty |= (std::is_same<Component, IRenderizable>::value || std::is_same<Component, DisabledForRender>::value);
         return _component;
     }
 
@@ -292,6 +298,7 @@ namespace RDE {
     Component* Graph::addComponent(NodeID _nodeID, Node* _node, Manager* _manager, Graph* _graph, Args... _args) {
         auto* _component = &registry.template emplace<Component>(_nodeID, _node, _manager, _graph, _args...);
         if(onDataChanged != nullptr) onDataChanged((void*)_component);
+        isRenderizableTreeDirty |= (std::is_same<Component, IRenderizable>::value || std::is_same<Component, DisabledForRender>::value);
         return _component;
     }
 
@@ -299,6 +306,7 @@ namespace RDE {
     void Graph::removeComponent(const NodeID& _id) {
         auto _removed = registry.template remove<Component>(_id);
         if(onDataChanged != nullptr) onDataChanged((void*)_removed);
+        isRenderizableTreeDirty |= (std::is_same<Component, IRenderizable>::value || std::is_same<Component, DisabledForRender>::value);
     }
 
     template<typename Component>

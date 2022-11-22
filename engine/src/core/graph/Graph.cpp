@@ -88,10 +88,6 @@ namespace RDE {
     }
 
     void Graph::onRender() {
-        auto _spriteRendererGroup = registry.group<const SpriteRenderer>(entt::get<Transform, Active>, entt::exclude<DisabledForRender>);
-        auto _particleSystemGroup = registry.group<const ParticleSystem>(entt::get<Transform, Active>, entt::exclude<DisabledForRender>);
-        auto _textRendererGroup   = registry.group<const TextRenderer>(entt::get<Transform, Active>, entt::exclude<DisabledForRender>);
-
         auto& _renderManager = scene->engine->manager.renderManager;
 
         for(auto* _camera : scene->cameras) {
@@ -100,27 +96,9 @@ namespace RDE {
             _renderManager.beginDraw(*_camera, getComponent<Transform>(_camera->node->getID()));
             _camera->update();
             {
-
-                for(auto _it = _spriteRendererGroup.rbegin(); _it != _spriteRendererGroup.rend(); _it++) {
-                    auto _entity = (*_it);
-                    auto& _transform = registry.get<Transform>(_entity);
-                    auto& _spriteRenderer = registry.get<SpriteRenderer>(_entity);
-                    _renderManager.draw((IRenderizable*) &_spriteRenderer, _transform);
+                for(auto* _renderizable : renderizableTree) {
+                    _renderManager.draw(_renderizable, *_renderizable->node->getTransform());
                 }
-
-//                for(auto _it = _particleSystemGroup.rbegin(); _it != _particleSystemGroup.rend(); _it++) {
-//                    auto _entity = (*_it);
-//                    auto& _transform = registry.get<Transform>(_entity);
-//                    auto& _particleSystem = registry.get<ParticleSystem>(_entity);
-//                    _renderManager.draw((IRenderizable*) &_particleSystem, _transform);
-//                }
-
-//                for(auto _it = _textRendererGroup.rbegin(); _it != _textRendererGroup.rend(); _it++) {
-//                    auto _entity = (*_it);
-//                    auto& _transform = registry.get<Transform>(_entity);
-//                    auto& _text = registry.get<TextRenderer>(_entity);
-//                    _renderManager.draw((IRenderizable*) &_text, _transform);
-//                }
             }
 
             onRenderDel(registry);
@@ -133,7 +111,30 @@ namespace RDE {
     }
 
     void Graph::onLateUpdate(Delta _dt) {
+        if(isRenderizableTreeDirty) {
 
+            renderizableTree.clear();
+
+            // [0] -> SpriteRenderer
+            // [1] -> ParticleSystem
+            // [2] -> TextRenderer
+            const int RENDERIZABLES_COUNT = 3;
+            std::vector<IRenderizable*> _renderizables[RENDERIZABLES_COUNT];
+            recalculateRenderizableTree(sceneRoot, _renderizables);
+
+            int _totalElementsToReserve = 0;
+            for(auto _i = 0; _i < RENDERIZABLES_COUNT; _i++) {
+                _totalElementsToReserve += _renderizables[_i].size();
+            }
+
+            renderizableTree.reserve(_totalElementsToReserve);
+
+            for(auto _i = 0; _i < RENDERIZABLES_COUNT; _i++) {
+                renderizableTree.insert(renderizableTree.end(), _renderizables[_i].begin(), _renderizables[_i].end());
+            }
+
+            isRenderizableTreeDirty = false;
+        }
     }
 
     void Graph::onDebugRender() {
@@ -176,6 +177,8 @@ namespace RDE {
 
         if(onDataChanged != nullptr) onDataChanged((void*)_newNode);
 
+        isRenderizableTreeDirty |= true;
+
         return _node;
     }
 
@@ -211,6 +214,7 @@ namespace RDE {
     void Graph::removeNode(Node* _node) {
         remove(_node, true);
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
+        isRenderizableTreeDirty |= true;
     }
 
     void Graph::removeNode(const std::string& _nodeTagName) {
@@ -265,6 +269,7 @@ namespace RDE {
         _nodeTransform->setLocalMatrix(glm::inverse(_parentTransform->getLocalMatrix()) * _nodeTransform->getLocalMatrix());
 
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
+        isRenderizableTreeDirty |= true;
     }
 
     void Graph::remove(Node* _node, bool _delete) {
@@ -298,6 +303,7 @@ namespace RDE {
         _node->getTransform()->parentTransform = sceneRoot->getTransform();
         sceneRoot->getTransform()->children.push_back(_node->getTransform());
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
+        isRenderizableTreeDirty |= true;
     }
 
     void Graph::orphan(const std::string& _nodeTagName) {
@@ -312,12 +318,14 @@ namespace RDE {
         if(_active && !registry.any_of<Active>(_node->getID())) {
             registry.emplace<Active>(_node->getID(), _node, &scene->engine->manager, this);
             if(onDataChanged != nullptr) onDataChanged((void*)_node);
+            isRenderizableTreeDirty |= true;
             return;
         }
 
         if(!_active && registry.any_of<Active>(_node->getID())) {
             registry.remove<Active>(_node->getID());
             if(onDataChanged != nullptr) onDataChanged((void*)_node);
+            isRenderizableTreeDirty |= true;
         }
     }
 
@@ -327,5 +335,28 @@ namespace RDE {
 
     NodeContainer& Graph::getNodeContainer() {
         return registry;
+    }
+
+    void Graph::recalculateRenderizableTree(Node* _node, std::vector<IRenderizable*>* _renderizables) {
+        auto _id = _node->getID();
+
+        if(!hasComponent<DisabledForRender>(_id)) {
+
+            if(hasComponent<SpriteRenderer>(_id)) {
+                _renderizables[0].push_back(getComponent<SpriteRenderer>(_id));
+            }
+
+            if(hasComponent<ParticleSystem>(_id)) {
+                _renderizables[1].push_back(getComponent<ParticleSystem>(_id));
+            }
+
+            if(hasComponent<TextRenderer>(_id)) {
+                _renderizables[2].push_back(getComponent<TextRenderer>(_id));
+            }
+        }
+
+        for(auto* _child : _node->getTransform()->children) {
+            recalculateRenderizableTree(_child->node, _renderizables);
+        }
     }
 }
