@@ -37,6 +37,7 @@
 #include "core/graph/components/ui/UIPanel.h"
 #include "core/graph/components/ui/UIInput.h"
 #include "core/graph/components/ui/UISlider.h"
+#include "core/graph/components/ui/UIMask.h"
 
 #include "core/systems/localization/LocalizationManager.h"
 

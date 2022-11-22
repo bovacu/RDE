@@ -79,6 +79,7 @@ namespace RDE {
             void uiTransformComponent(Graph* _graph, const NodeID _selectedNode);
             void uiButtonComponent(Graph* _graph, const NodeID _selectedNode);
             void ui9SliceComponent(Graph* _graph, const NodeID _selectedNode);
+            void uiMaskComponent(Graph* _graph, const NodeID _selectedNode);
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
 

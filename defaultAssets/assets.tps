@@ -291,7 +291,9 @@
                 <false/>
             </struct>
             <key type="filename">sprites/buttonExit.png</key>
+            <key type="filename">sprites/circleUIMask.png</key>
             <key type="filename">sprites/icons/64x64px/x64x64.png</key>
+            <key type="filename">sprites/rectangleUIMaks.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -840,6 +842,8 @@
             <filename>sprites/stretchHorizontal.png</filename>
             <filename>sprites/stretchNone.png</filename>
             <filename>sprites/stretchVertical.png</filename>
+            <filename>sprites/circleUIMask.png</filename>
+            <filename>sprites/rectangleUIMaks.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
