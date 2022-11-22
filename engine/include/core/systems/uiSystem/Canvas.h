@@ -54,7 +54,6 @@ namespace RDE {
             bool dirty = true;
             int maxIndicesPerDrawCall = 1000;
 
-            std::stack<NodeID> stencils;
             std::vector<CanvasElement> canvasElementsOrderedList;
 
         public:

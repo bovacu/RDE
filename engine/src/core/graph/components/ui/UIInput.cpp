@@ -8,6 +8,7 @@
 #include "core/graph/components/ui/UITransform.h"
 #include "core/graph/components/ui/UI9Slice.h"
 #include "core/graph/components/ui/UIText.h"
+#include "core/graph/components/ui/UIMask.h"
 
 namespace RDE {
 
@@ -27,7 +28,9 @@ namespace RDE {
         UI::interaction->onInnerKeyReleased.bind<&UIInput::onKeyReleased>(this);
         UI::interaction->onInnerUnfocused.bind<&UIInput::onUnfocused>(this);
 
-        nineSliceSprite = _node->addComponent<UI9Slice>(config.inputBackgroundTexture);
+        node->addComponent<UIMask>();
+
+        nineSliceSprite = node->addComponent<UI9Slice>(config.inputBackgroundTexture);
         nineSliceSprite->interaction = UI::interaction;
         nineSliceSprite->setSize(config.inputSize);
         nineSliceSprite->setColor(config.inputBackgroundColor);

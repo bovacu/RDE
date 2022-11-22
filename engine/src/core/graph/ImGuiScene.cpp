@@ -14,6 +14,7 @@
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UIPanel.h"
 #include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIMask.h"
 
 namespace RDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
@@ -456,6 +457,7 @@ namespace RDE {
         uiTransformComponent(_graph, _selectedNode);
         uiButtonComponent(_graph, _selectedNode);
         ui9SliceComponent(_graph, _selectedNode);
+        uiMaskComponent(_graph, _selectedNode);
 
         ImGui::End();
     }
@@ -951,6 +953,24 @@ namespace RDE {
                     _ui9Slice->setOriginOffset({ Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
                 }
             }
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::uiMaskComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<UIMask>(_selectedNode)) return;
+
+        auto _uiMask = _graph->getComponent<UIMask>(_selectedNode);
+
+        if(ImGui::CollapsingHeader("UI Mask", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            ImGui::Text("Inverted ");
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if (ImGui::Checkbox("##Inverted", &_uiMask->inverted)) {}
             ImGui::PopID();
 
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();

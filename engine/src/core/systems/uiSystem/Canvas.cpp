@@ -12,6 +12,7 @@
 #include "core/graph/components/ui/UITransform.h"
 #include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UIImage.h"
+#include "core/graph/components/ui/UIMask.h"
 
 namespace RDE {
 
@@ -64,7 +65,7 @@ namespace RDE {
             _canvasElement.updatable = getUpdatable(_node);
         }
 
-        if(graph.getNodeContainer().any_of<UIInput>(_node->getID()) && _node->isEnabledStateOn(EnabledStates::DS_RENDER)) {
+        if(graph.getNodeContainer().any_of<UIMask>(_node->getID()) && _node->isEnabledStateOn(EnabledStates::DS_RENDER)) {
             _canvasElement.cropping = _node->getTransform()->getChildrenCount();
         }
 
@@ -155,26 +156,36 @@ namespace RDE {
     void Canvas::batchTreeElementPre(CanvasElement* _canvasElement, void* _data) {
         Batch* _currentBatch = &batches.back();
 
-        if(_canvasElement->cropping) {
-            stencils.push(_canvasElement->node->getID());
-            auto* _transform = (UITransform*)_canvasElement->node->getTransform();
-            auto _position = _transform->getModelMatrixPosition();
-            auto* _uiInput = _canvasElement->node->getComponent<UIInput>();
+        if(_canvasElement->cropping > 0) {
+            if((_canvasElement->node->hasComponent<UIImage>() || _canvasElement->node->hasComponent<UI9Slice>()) && !_canvasElement->node->hasComponent<DisabledForRender>()) {
+                forceRender();
+                auto* _mask = _canvasElement->node->getComponent<UIMask>();
 
-            forceRender();
-            _currentBatch = &batches.back();
+                _currentBatch = &batches.back();
 
-            glEnable(GL_SCISSOR_TEST);
-            auto _resolution = scene->getMainCamera()->getViewport()->getDeviceResolution();
-            auto _bottomLeftCorner = Vec2<GLint> {
-                    (GLint)(((float)_resolution.x - _uiInput->getSize().x) * 0.5f + _position.x),
-                    (GLint)(((float)_resolution.y - _uiInput->getSize().y) * 0.5f + _position.y)
-            };
-            auto _size = Vec2<GLint> {
-                    (GLint)(_uiInput->getSize().x),
-                    (GLint)(_uiInput->getSize().y)
-            };
-            glScissor(_bottomLeftCorner.x, _bottomLeftCorner.y, _size.x, _size.y);
+                glEnable(GL_STENCIL_TEST);
+
+                glColorMask(GL_FALSE , GL_FALSE , GL_FALSE , GL_FALSE);
+                glStencilFunc(GL_ALWAYS , _mask->inverted ? 1 : 2, _mask->inverted ? 0xFF : ~0);
+                glStencilOp(GL_REPLACE , GL_REPLACE , GL_REPLACE);
+
+                auto* _renderizable = _canvasElement->node->hasComponent<UIImage>() ? (UI*)_canvasElement->node->getComponent<UIImage>() : (UI*)_canvasElement->node->getComponent<UI9Slice>();
+
+                if (_currentBatch->shader == nullptr || _renderizable->getTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _renderizable->shaderID || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
+                    Batch _newBatch;
+                    _newBatch.shader = scene->engine->manager.shaderManager.getShader(_renderizable->shaderID);
+                    _newBatch.textureID = _renderizable->getTexture();
+                    batches.emplace_back(_newBatch);
+                    _currentBatch = &batches.back();
+                }
+
+                _renderizable->drawBatched(_currentBatch->vertexBuffer, _currentBatch->indexBuffer, *_renderizable->node->getTransform(), *camera->getViewport());
+                forceRender();
+
+                glColorMask( GL_TRUE , GL_TRUE , GL_TRUE , GL_TRUE);
+                glStencilFunc( GL_EQUAL , _mask->inverted ? 0 : 2 , _mask->inverted ? 0xFF : ~0);
+                glStencilOp( GL_KEEP , GL_KEEP , GL_KEEP);
+            }
         }
 
         if(_canvasElement->renderizable != nullptr) {
@@ -194,9 +205,8 @@ namespace RDE {
 
     void Canvas::batchTreeElementPost(CanvasElement* _canvasElement, void* _data) {
         if(_canvasElement->cropping == 0) {
-            stencils.pop();
             forceRender();
-            glDisable(GL_SCISSOR_TEST);
+            glDisable(GL_STENCIL_TEST);
         }
     }
 
