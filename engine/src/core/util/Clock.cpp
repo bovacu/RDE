@@ -3,7 +3,7 @@
 #include "SDL_timer.h"
 #include "core/Core.h"
 
-namespace GDE {
+namespace RDE {
 
     #if IS_IOS()
     Clock::Clock() : startTime(SDL_GetTicks()) {  }

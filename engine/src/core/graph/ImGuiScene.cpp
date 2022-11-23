@@ -11,11 +11,28 @@
 #include "core/render/RenderManager.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/TextRenderer.h"
-#include "core/graph/components/UIButton.h"
+#include "core/graph/components/ui/UIButton.h"
+#include "core/graph/components/ui/UIPanel.h"
+#include "core/graph/components/ui/UIText.h"
+#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIMask.h"
+#include "core/graph/components/ComponentBase.h"
 
-namespace GDE {
+namespace RDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
     static ImGuiContext* i_Context = nullptr;
+
+    static void helpMarker(const char* desc) {
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted(desc);
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+    }
 
     ImGuiScene::ImGuiScene(Engine* _engine) : Scene(_engine, "ImGuiScene") {  }
 
@@ -91,6 +108,8 @@ namespace GDE {
             ImGui::RenderPlatformWindowsDefault();
             SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
         }
+
+        resetID();
     }
 
     void ImGuiScene::drawDebugInfo(Scene* _scene) {
@@ -171,7 +190,9 @@ namespace GDE {
          auto* _memData = Profiler::getTotalVirtualMemory();
          ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
         ImGui::Separator();
-        ImGui::Text("Draw Calls: %d", engine->manager.renderManager.getDrawCalls());
+        auto [_drawCalls, _uiDrawCalls] = engine->manager.renderManager.getDrawCalls();
+        ImGui::Text("Draw Calls: %d", _drawCalls);
+        ImGui::Text("UI Draw Calls: %d", _uiDrawCalls);
         ImGui::Text("Total Triangles: %d", engine->manager.renderManager.getTotalTriangles());
         ImGui::Text("Total Images: %d", engine->manager.renderManager.getTotalTriangles() / 2);
         ImGui::Separator();
@@ -362,33 +383,33 @@ namespace GDE {
 
 
 
-    void ImGuiScene::hierarchyRecursionStub(Scene* _scene, Graph* _graph, NodeID _node, NodeID& _selectedNode) {
+    void ImGuiScene::hierarchyRecursionStub(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode) {
         auto _prefabs = _scene->getPrefabs();
-        if(std::find(_prefabs.begin(), _prefabs.end(), _node) != _prefabs.end()) return;
+        if(std::find(_prefabs.begin(), _prefabs.end(), _node->getID()) != _prefabs.end()) return;
 
-        auto* _transform = _graph->getComponent<Transform>(_node);
-        auto* _tag = _graph->getComponent<Tag>(_node);
+        auto* _transform =_node->getTransform();
+        auto* _tag = _node->getComponent<Tag>();
 
         if(!_transform->children.empty()) {
 
-            auto _flags = _node == _selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
+            auto _flags = _node->getID() == _selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
             if (ImGui::TreeNodeEx(_tag->tag.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | _flags)) {
 
                 if(ImGui::IsItemClicked()) {
-                    _selectedNode = _node;
+                    _selectedNode = _node->getID();
                     if(&selectedNode == &_selectedNode) selectedNodeCanvas = NODE_ID_NULL;
                     else selectedNode = NODE_ID_NULL;
                 }
 
                 for(auto _child : _transform->children) {
-                    hierarchyRecursionStub(_scene, _graph, _child->ID, _selectedNode);
+                    hierarchyRecursionStub(_scene, _graph, _child->node, _selectedNode);
                 }
 
                 ImGui::TreePop();
             }
         } else {
-            if (ImGui::Selectable(_tag->tag.c_str(), _selectedNode == _node)) {
-                _selectedNode = _node;
+            if (ImGui::Selectable(_tag->tag.c_str(), _selectedNode == _node->getID())) {
+                _selectedNode = _node->getID();
                 if(&selectedNode == &_selectedNode) selectedNodeCanvas = NODE_ID_NULL;
                 else selectedNode = NODE_ID_NULL;
             }
@@ -399,17 +420,17 @@ namespace GDE {
         ImGui::Begin("Hierarchy");
         windowsHovered[1] = checkForFocus();
         auto* _graph = _scene->getMainGraph();
-        hierarchyRecursionStub(_scene, _graph, _graph->getID(), selectedNode);
+        hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNode);
         for(auto* _canvas : _scene->getCanvases()) {
             _graph = _canvas->getGraph();
-            hierarchyRecursionStub(_scene, _graph, _graph->getID(), selectedNodeCanvas);
+            hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNodeCanvas);
         }
-        showLoadedPrefabs(_scene, _scene->getMainGraph(), _graph->getID(), selectedNode);
+        showLoadedPrefabs(_scene, _scene->getMainGraph(), _graph->getRoot(), selectedNode);
         ImGui::End();
     }
 
-    void ImGuiScene::showLoadedPrefabs(Scene* _scene, Graph* _graph, NodeID _node, NodeID& _selectedNode) {
-        auto _flags = _node == _selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
+    void ImGuiScene::showLoadedPrefabs(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode) {
+        auto _flags = _node->getID() == _selectedNode ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
         if (ImGui::TreeNodeEx("Prefabs loaded in memory", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | _flags)) {
 
             auto _prefabs = _scene->getPrefabs();
@@ -434,7 +455,13 @@ namespace GDE {
         spriteComponent(_graph, _selectedNode);
         bodyComponent(_graph, _selectedNode);
         textComponent(_graph, _selectedNode);
+
+        uiTransformComponent(_graph, _selectedNode);
         uiButtonComponent(_graph, _selectedNode);
+        ui9SliceComponent(_graph, _selectedNode);
+        uiImageComponent(_graph, _selectedNode);
+        uiTextComponent(_graph, _selectedNode);
+        uiMaskComponent(_graph, _selectedNode);
 
         ImGui::End();
     }
@@ -443,12 +470,12 @@ namespace GDE {
         bool _active = _graph->hasComponent<Active>(_selectedNode);
         auto _tag = _graph->getComponent<Tag>(_selectedNode)->tag.c_str();
         ImGui::Text("%s", _tag);
-        ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 30);
-        ImGui::PushID(1);
+        ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 40 - ImGui::CalcTextSize("(?)").x);
+        ImGui::PushID(createID());
         if(ImGui::Checkbox("###Active", &_active)) {
-            if(_active) _graph->addComponent<Active>(_selectedNode);
-            else _graph->removeComponent<Active>(_selectedNode);
+            _graph->getComponent<Node>(_selectedNode)->setActive(_active);
         }
+        helpMarker("This will set the Active property to true/false.\n Setting Active to false will make all of DisabledConfig elements to be disabled for the Node and children.");
         ImGui::PopID();
     }
 
@@ -469,17 +496,19 @@ namespace GDE {
     }
 
     void ImGuiScene::transformComponent(Graph* _graph, const NodeID _selectedNode) {
-        auto _transform = _graph->getComponent<Transform>(_selectedNode);
+        Transform* _transform = nullptr;
+        if(!_graph->hasComponent<Transform>(_selectedNode)) return;
+        _transform = _graph->getComponent<Transform>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
-            ImGui::Text("ID: %i", (int)_transform->ID);
+        if(createHeader("Transform", nullptr)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+            ImGui::Text("ID: %i", (int)_transform->node->getID());
             ImGui::Text("Position ");
 
             float _pos[2] = {_transform->getPosition().x, _transform->getPosition().y};
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
-            ImGui::PushID(1);
+            ImGui::PushID(createID());
             if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
                 _transform->setPosition(_pos[0], _pos[1]);
             }
@@ -491,7 +520,7 @@ namespace GDE {
             float _angle = _transform->getRotation();
             ImGui::SameLine();
             ImGui::SetNextItemWidth(50);
-            ImGui::PushID(2);
+            ImGui::PushID(createID());
             if(ImGui::DragFloat("##myInput", &_angle, 0.1f))
                 _transform->setRotation(_angle);
             ImGui::PopID();
@@ -502,12 +531,12 @@ namespace GDE {
             float _scale[2] = {_transform->getScale().x, _transform->getScale().y};
             ImGui::SameLine(0, 30);
             ImGui::SetNextItemWidth(100);
-            ImGui::PushID(3);
+            ImGui::PushID(createID());
             if(ImGui::DragFloat2("##myInput", _scale, 0.05))
                 _transform->setScale(_scale[0], _scale[1]);
             ImGui::PopID();
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
 
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 
@@ -516,69 +545,58 @@ namespace GDE {
 
         auto _camera = _graph->getComponent<Camera>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+        if(createHeader("Camera", nullptr)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
-            const char* _viewports[] = { "Free Aspect", "Adaptative Aspect"};
-
-            std::string _viewPortSelected;
-            auto* _mainCamera = engine->manager.sceneManager.getDisplayedScene()->getMainCamera();
-
-            if(dynamic_cast< FreeViewPort* >(_mainCamera->getViewport())) _viewPortSelected = "Free Aspect";
-            else _viewPortSelected = "Adaptative Aspect";
-
-            ImGui::Text("ViewPort"); ImGui::SameLine();
-            ImGui::SetNextItemWidth(175);
-            if (ImGui::BeginCombo("##combo", _viewPortSelected.c_str())){ // The second parameter is the label previewed before opening the combo. {
-                for (auto & _resolution : _viewports) {
-                    bool is_selected = (_viewPortSelected == _resolution);
-                    if (ImGui::Selectable(_resolution, is_selected)) {
-                        _viewPortSelected = _resolution;
-                        if(_viewPortSelected == "Free Aspect") _mainCamera->setFreeViewport(engine->getWindow().getWindowSize());
-                        else _mainCamera->setAdaptiveViewport({1920, 1080}, engine->getWindow().getWindowSize());
-                    }
-                    if (is_selected)
-                        ImGui::SetItemDefaultFocus();
-                }
-                ImGui::EndCombo();
-            }
-
-            if(_viewPortSelected == "Adaptative Aspect") {
-                ImGui::Text("Virtual Resolution");
-                int _pos[2] = {_mainCamera->getViewport()->getVirtualResolution().x, _mainCamera->getViewport()->getVirtualResolution().y};
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(100);
-                ImGui::PushID(2);
-                if(ImGui::InputInt2("##myInput", _pos)) {
-                    _mainCamera->getViewport()->updateVirtualResolution({_pos[0], _pos[1]});
-                }
-                ImGui::PopID();
-            }
+//            const char* _viewports[] = { "Free Aspect", "Adaptative Aspect"};
+//
+//            std::string _viewPortSelected;
+//
+//            if(dynamic_cast< FreeViewPort* >(_camera->getViewport())) _viewPortSelected = "Free Aspect";
+//            else _viewPortSelected = "Adaptative Aspect";
+//
+//            ImGui::PushID(createID());
+//            ImGui::Text("ViewPort"); ImGui::SameLine();
+//            ImGui::SetNextItemWidth(175);
+//            if (ImGui::BeginCombo("##combo", _viewPortSelected.c_str())){ // The second parameter is the label previewed before opening the combo. {
+//                for (auto & _resolution : _viewports) {
+//                    bool is_selected = (_viewPortSelected == _resolution);
+//                    if (ImGui::Selectable(_resolution, is_selected)) {
+//                        _viewPortSelected = _resolution;
+//                        if(_viewPortSelected == "Free Aspect") _camera->setFreeViewport(engine->getWindow().getWindowSize());
+//                        else _camera->setAdaptiveViewport({1920, 1080}, engine->getWindow().getWindowSize());
+//                    }
+//                    if (is_selected)
+//                        ImGui::SetItemDefaultFocus();
+//                }
+//                ImGui::EndCombo();
+//            }
+//            ImGui::PopID();
 
             ImGui::Text("Zoom Level");
             float _zoomLevel[1] = {_camera->getCurrentZoomLevel()};
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
-            ImGui::PushID(1);
+            ImGui::PushID(createID());
             if(ImGui::DragFloat("##myInput", _zoomLevel, 0.5f)) {
-                _mainCamera->setCurrentZoomLevel(_zoomLevel[0]);
+                _camera->setCurrentZoomLevel(_zoomLevel[0]);
             }
             ImGui::PopID();
 
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 
     void ImGuiScene::bodyComponent(Graph* _graph, const NodeID _selectedNode) {
-//        if(!_graph->hasComponent<Body>(_selectedNode)) return;
-//
-//        auto _body = _graph->getComponent<Body>(_selectedNode);
-//
-//        if(ImGui::CollapsingHeader("Body", ImGuiTreeNodeFlags_DefaultOpen)) {
-//            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
-//
-//            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
-//        }
+        if(!_graph->hasComponent<PhysicsBody>(_selectedNode)) return;
+
+        auto _body = _graph->getComponent<PhysicsBody>(_selectedNode);
+
+        if(createHeader("Physics Body", _body)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
     }
 
     void ImGuiScene::spriteComponent(Graph* _graph, const NodeID _selectedNode) {
@@ -586,15 +604,15 @@ namespace GDE {
 
         auto _spriteRenderer = _graph->getComponent<SpriteRenderer>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("Sprite Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+        if(createHeader("Sprite Renderer", _spriteRenderer)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
             ImGui::Text("Texture"); ImGui::SameLine();
             auto _texturePath = _spriteRenderer->getTexturePath();
             ImGui::BeginDisabled(true);
             ImGui::InputText("###texture", const_cast<char*>(_texturePath.c_str()), _texturePath.size());
             ImGui::EndDisabled();
 
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 
@@ -604,10 +622,332 @@ namespace GDE {
         auto _text = _graph->getComponent<TextRenderer>(_selectedNode);
         auto _textTransform = _graph->getComponent<Transform>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("Text Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+        if(createHeader("Text Renderer", _text)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::uiTransformComponent(Graph* _graph, const NodeID _selectedNode) {
+        UITransform* _transform = nullptr;
+        if(!_graph->hasComponent<UITransform>(_selectedNode)) return;
+        _transform = _graph->getComponent<UITransform>(_selectedNode);
+        Anchor _selectedAnchor = _transform->getAnchor();
+        Stretch _selectedStretch = _transform->getStretch();
+
+        if(createHeader("UITransform", nullptr)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            ImGui::Text("ID: %i", (int)_transform->node->getID());
+
+            ImGui::Text("Anchor "); ImGui::SameLine(0, 20);
+            ImGui::Text("Stretch ");
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
+            ImVec4 _selectedColor = {204.f / 255.f, 204.f / 255.f, 0, 0.5f};
+            ImVec4 _noSelectedColor = {0, 0, 0, 0};
+            auto* _topLeft = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorBottomLeft");
+            auto* _topMiddle = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorBottomMiddle");
+            auto* _topRight = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorBottomRight");
+
+            auto* _middleLeft = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorMiddleLeft");
+            auto* _middle = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorMiddleMiddle");
+            auto* _middleRight = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorMiddleRight");
+
+            auto* _bottomLeft = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorTopLeft");
+            auto* _bottomMiddle = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorTopMiddle");
+            auto* _bottomRight = engine->manager.textureManager.getSubTexture("defaultAssets", "anchorTopRight");
+
+            auto* _stretchNone = engine->manager.textureManager.getSubTexture("defaultAssets", "stretchNone");
+            auto* _stretchHorizontal = engine->manager.textureManager.getSubTexture("defaultAssets", "stretchHorizontal");
+            auto* _stretchVertical = engine->manager.textureManager.getSubTexture("defaultAssets", "stretchVertical");
+            auto* _stretchFull = engine->manager.textureManager.getSubTexture("defaultAssets", "stretchFull");
+
+
+            // Anchor top row
+            auto _topLeftInit = Vec2F { _topLeft->getRegion().bottomLeftCorner.x / _topLeft->getSpriteSheetSize().x, _topLeft->getRegion().bottomLeftCorner.y / _topLeft->getSpriteSheetSize().y};
+            auto _topLeftEnd = _topLeftInit + Vec2F { _topLeft->getRegion().size.x / _topLeft->getSpriteSheetSize().x, _topLeft->getRegion().size.y / _topLeft->getSpriteSheetSize().y};
+
+            auto _topMiddleInit = Vec2F { _topMiddle->getRegion().bottomLeftCorner.x / _topMiddle->getSpriteSheetSize().x, _topMiddle->getRegion().bottomLeftCorner.y / _topMiddle->getSpriteSheetSize().y};
+            auto _topMiddleEnd = _topMiddleInit + Vec2F { _topMiddle->getRegion().size.x / _topMiddle->getSpriteSheetSize().x, _topMiddle->getRegion().size.y / _topMiddle->getSpriteSheetSize().y};
+
+            auto _topRightInit = Vec2F { _topRight->getRegion().bottomLeftCorner.x / _topRight->getSpriteSheetSize().x, _topRight->getRegion().bottomLeftCorner.y / _topRight->getSpriteSheetSize().y};
+            auto _topRightEnd = _topRightInit + Vec2F { _topRight->getRegion().size.x / _topRight->getSpriteSheetSize().x, _topRight->getRegion().size.y / _topRight->getSpriteSheetSize().y};
+
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_topLeft->getGLTexture()), ImVec2(16, 16), {_topLeftInit.x, _topLeftInit.y}, {_topLeftEnd.x, _topLeftEnd.y}, 0, (_selectedAnchor == Anchor::LEFT_TOP ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::LEFT_TOP;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_topMiddle->getGLTexture()), ImVec2(16, 16), {_topMiddleInit.x, _topMiddleInit.y}, {_topMiddleEnd.x, _topMiddleEnd.y}, 0, (_selectedAnchor == Anchor::TOP ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::TOP;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_topRight->getGLTexture()), ImVec2(16, 16), {_topRightInit.x, _topRightInit.y}, {_topRightEnd.x, _topRightEnd.y}, 0, (_selectedAnchor == Anchor::RIGHT_TOP ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::RIGHT_TOP;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+
+
+            // Stretch top row
+            ImGui::SameLine(0, 20);
+            auto _stretchNoneInit = Vec2F { _stretchNone->getRegion().bottomLeftCorner.x / _stretchNone->getSpriteSheetSize().x, _stretchNone->getRegion().bottomLeftCorner.y / _stretchNone->getSpriteSheetSize().y};
+            auto _stretchNoneEnd = _stretchNoneInit + Vec2F { _stretchNone->getRegion().size.x / _stretchNone->getSpriteSheetSize().x, _stretchNone->getRegion().size.y / _stretchNone->getSpriteSheetSize().y};
+
+            auto _stretchFullInit = Vec2F { _stretchFull->getRegion().bottomLeftCorner.x / _stretchFull->getSpriteSheetSize().x, _stretchFull->getRegion().bottomLeftCorner.y / _stretchFull->getSpriteSheetSize().y};
+            auto _stretchFullEnd = _stretchFullInit + Vec2F { _stretchFull->getRegion().size.x / _stretchFull->getSpriteSheetSize().x, _stretchFull->getRegion().size.y / _stretchFull->getSpriteSheetSize().y};
+
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchNone->getGLTexture()), ImVec2(16, 16), {_stretchNoneInit.x, _stretchNoneInit.y}, {_stretchNoneEnd.x, _stretchNoneEnd.y}, 0, (_selectedStretch == Stretch::NO_STRETCH ? _selectedColor : _noSelectedColor))) {
+                _selectedStretch = Stretch::NO_STRETCH;
+                _transform->setStretch(_selectedStretch);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchFull->getGLTexture()), ImVec2(16, 16), {_stretchFullInit.x, _stretchFullInit.y}, {_stretchFullEnd.x, _stretchFullEnd.y}, 0, (_selectedStretch == Stretch::FULL_STRETCH ? _selectedColor : _noSelectedColor))) {
+                _selectedStretch = Stretch::FULL_STRETCH;
+                _transform->setStretch(_selectedStretch);
+            }
+            ImGui::PopID();
+
+
+            // Anchor middle row
+            auto _middleLeftInit = Vec2F { _middleLeft->getRegion().bottomLeftCorner.x / _middleLeft->getSpriteSheetSize().x, _middleLeft->getRegion().bottomLeftCorner.y / _middleLeft->getSpriteSheetSize().y};
+            auto _middleLeftEnd = _middleLeftInit + Vec2F { _middleLeft->getRegion().size.x / _middleLeft->getSpriteSheetSize().x, _middleLeft->getRegion().size.y / _middleLeft->getSpriteSheetSize().y};
+
+            auto _middleMiddleInit = Vec2F { _middle->getRegion().bottomLeftCorner.x / _middle->getSpriteSheetSize().x, _middle->getRegion().bottomLeftCorner.y / _middle->getSpriteSheetSize().y};
+            auto _middleMiddleEnd = _middleMiddleInit + Vec2F { _middle->getRegion().size.x / _middle->getSpriteSheetSize().x, _middle->getRegion().size.y / _middle->getSpriteSheetSize().y};
+
+            auto _middleRightInit = Vec2F { _middleRight->getRegion().bottomLeftCorner.x / _middleRight->getSpriteSheetSize().x, _middleRight->getRegion().bottomLeftCorner.y / _middleRight->getSpriteSheetSize().y};
+            auto _middleRightEnd = _middleRightInit + Vec2F { _middleRight->getRegion().size.x / _middleRight->getSpriteSheetSize().x, _middleRight->getRegion().size.y / _middleRight->getSpriteSheetSize().y};
+
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_middleLeft->getGLTexture()), ImVec2(16, 16), {_middleLeftInit.x, _middleLeftInit.y}, {_middleLeftEnd.x, _middleLeftEnd.y}, 0, (_selectedAnchor == Anchor::LEFT ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::LEFT;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_middle->getGLTexture()), ImVec2(16, 16),   {_middleMiddleInit.x, _middleMiddleInit.y}, {_middleMiddleEnd.x, _middleMiddleEnd.y}, 0, (_selectedAnchor == Anchor::MIDDLE ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::MIDDLE;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_middleRight->getGLTexture()), ImVec2(16, 16), {_middleRightInit.x, _middleRightInit.y}, {_middleRightEnd.x, _middleRightEnd.y}, 0, (_selectedAnchor == Anchor::RIGHT ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::RIGHT;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+
+
+
+            // Stretch bottom row
+            ImGui::SameLine(0, 20);
+            auto _stretchHorInit = Vec2F { _stretchHorizontal->getRegion().bottomLeftCorner.x / _stretchHorizontal->getSpriteSheetSize().x, _stretchHorizontal->getRegion().bottomLeftCorner.y / _stretchHorizontal->getSpriteSheetSize().y};
+            auto _stretchHorEnd = _stretchHorInit + Vec2F { _stretchHorizontal->getRegion().size.x / _stretchHorizontal->getSpriteSheetSize().x, _stretchHorizontal->getRegion().size.y / _stretchHorizontal->getSpriteSheetSize().y};
+
+            auto _stretchVertInit = Vec2F { _stretchVertical->getRegion().bottomLeftCorner.x / _stretchVertical->getSpriteSheetSize().x, _stretchVertical->getRegion().bottomLeftCorner.y / _stretchVertical->getSpriteSheetSize().y};
+            auto _stretchVertEnd = _stretchVertInit + Vec2F { _stretchVertical->getRegion().size.x / _stretchVertical->getSpriteSheetSize().x, _stretchVertical->getRegion().size.y / _stretchVertical->getSpriteSheetSize().y};
+
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchHorizontal->getGLTexture()), ImVec2(16, 16), {_stretchHorInit.x, _stretchHorInit.y}, {_stretchHorEnd.x, _stretchHorEnd.y}, 0, (_selectedStretch == Stretch::HORIZONTAL_STRETCH ? _selectedColor : _noSelectedColor))) {
+                _selectedStretch = Stretch::HORIZONTAL_STRETCH;
+                _transform->setStretch(_selectedStretch);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchVertical->getGLTexture()), ImVec2(16, 16), {_stretchVertInit.x, _stretchVertInit.y}, {_stretchVertEnd.x, _stretchVertEnd.y}, 0, (_selectedStretch == Stretch::VERTICAL_STRETCH ? _selectedColor : _noSelectedColor))) {
+                _selectedStretch = Stretch::VERTICAL_STRETCH;
+                _transform->setStretch(_selectedStretch);
+            }
+            ImGui::PopID();
+
+
+
+            // Anchor bottom row
+            auto _bottomLeftInit = Vec2F { _bottomLeft->getRegion().bottomLeftCorner.x / _bottomLeft->getSpriteSheetSize().x, _bottomLeft->getRegion().bottomLeftCorner.y / _bottomLeft->getSpriteSheetSize().y};
+            auto _bottomLeftEnd = _bottomLeftInit + Vec2F { _bottomLeft->getRegion().size.x / _bottomLeft->getSpriteSheetSize().x, _bottomLeft->getRegion().size.y / _bottomLeft->getSpriteSheetSize().y};
+
+            auto _bottomMiddleInit = Vec2F { _bottomMiddle->getRegion().bottomLeftCorner.x / _bottomMiddle->getSpriteSheetSize().x, _bottomMiddle->getRegion().bottomLeftCorner.y / _bottomMiddle->getSpriteSheetSize().y};
+            auto _bottomMiddleEnd = _bottomMiddleInit + Vec2F { _bottomMiddle->getRegion().size.x / _bottomMiddle->getSpriteSheetSize().x, _bottomMiddle->getRegion().size.y / _bottomMiddle->getSpriteSheetSize().y};
+
+            auto _bottomRightInit = Vec2F { _bottomRight->getRegion().bottomLeftCorner.x / _bottomRight->getSpriteSheetSize().x, _bottomRight->getRegion().bottomLeftCorner.y / _bottomRight->getSpriteSheetSize().y};
+            auto _bottomRightEnd = _bottomRightInit + Vec2F { _bottomRight->getRegion().size.x / _bottomRight->getSpriteSheetSize().x, _bottomRight->getRegion().size.y / _bottomRight->getSpriteSheetSize().y};
+
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_bottomLeft->getGLTexture()), ImVec2(16, 16),   {_bottomLeftInit.x, _bottomLeftInit.y}, {_bottomLeftEnd.x, _bottomLeftEnd.y}, 0, (_selectedAnchor == Anchor::LEFT_BOTTOM ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::LEFT_BOTTOM;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_bottomMiddle->getGLTexture()), ImVec2(16, 16), {_bottomMiddleInit.x, _bottomMiddleInit.y}, {_bottomMiddleEnd.x, _bottomMiddleEnd.y}, 0, (_selectedAnchor == Anchor::BOTTOM ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::BOTTOM;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_bottomRight->getGLTexture()), ImVec2(16, 16),  {_bottomRightInit.x, _bottomRightInit.y}, {_bottomRightEnd.x, _bottomRightEnd.y}, 0, (_selectedAnchor == Anchor::RIGHT_BOTTOM ? _selectedColor : _noSelectedColor))) {
+                _selectedAnchor = Anchor::RIGHT_BOTTOM;
+                _transform->setAnchor(_selectedAnchor);
+            }
+            ImGui::PopID();
+
+            ImGui::PopStyleVar();
+
+            ImGui::NewLine();
+
+            ImGui::Text("Position ");
+
+            float _pos[2] = {_transform->getPosition().x, _transform->getPosition().y};
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(createID());
+            if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
+                _transform->setPosition(_pos[0], _pos[1]);
+            }
+            ImGui::PopID();
+
+
+            ImGui::Text("Rotation ");
+
+            float _angle = _transform->getRotation();
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(50);
+            ImGui::PushID(createID());
+            if(ImGui::DragFloat("##myInput", &_angle, 0.1f))
+                _transform->setRotation(_angle);
+            ImGui::PopID();
+
+
+            ImGui::Text("Scale ");
+
+            float _scale[2] = {_transform->getScale().x, _transform->getScale().y};
+            ImGui::SameLine(0, 30);
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(createID());
+            if(ImGui::DragFloat2("##myInput", _scale, 0.05))
+                _transform->setScale(_scale[0], _scale[1]);
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::ui9SliceComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<UI9Slice>(_selectedNode)) return;
+
+        auto _ui9Slice = _graph->getComponent<UI9Slice>(_selectedNode);
+
+        if(createHeader("UI 9Slice", _ui9Slice)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            {
+                ImGui::Text("Size ");
+                float _size[2] = {_ui9Slice->getSize().x, _ui9Slice->getSize().y};
+                ImGui::SameLine(0, ImGui::CalcTextSize("Origin Offset ").x - ImGui::CalcTextSize("Size ").x + 8);
+                ImGui::SetNextItemWidth(100);
+                ImGui::PushID(createID());
+                if (ImGui::DragFloat2("##myInput", _size, 1.f)) {
+                    _ui9Slice->setSize({ Util::Math::clampF(_size[0], 0.f, FLT_MAX), Util::Math::clampF(_size[1], 0.f, FLT_MAX) });
+                }
+                ImGui::PopID();
+            }
+
+            {
+                ImGui::Text("Origin Offset ");
+                float _originOffset[2] = {_ui9Slice->getOriginOffset().x, _ui9Slice->getOriginOffset().y};
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(100);
+                ImGui::PushID(createID());
+                if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
+                    _ui9Slice->setOriginOffset({ Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
+                }
+            }
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::uiImageComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<UIImage>(_selectedNode)) return;
+
+        auto _uiImage = _graph->getComponent<UIImage>(_selectedNode);
+
+        if(createHeader("UI Image", _uiImage)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            {
+                ImGui::Text("Origin Offset ");
+                float _originOffset[2] = {_uiImage->getOriginOffset().x, _uiImage->getOriginOffset().y};
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(100);
+                ImGui::PushID(createID());
+                if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
+                    _uiImage->setOriginOffset({Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
+                }
+            }
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::uiTextComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<UIText>(_selectedNode)) return;
+
+        auto _uiText = _graph->getComponent<UIText>(_selectedNode);
+
+        if(createHeader("UI Text", _uiText)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            {
+                ImGui::Text("Origin Offset ");
+                float _originOffset[2] = {_uiText->getOriginOffset().x, _uiText->getOriginOffset().y};
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(100);
+                ImGui::PushID(createID());
+                if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
+                    _uiText->setOriginOffset({Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
+                }
+            }
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::uiMaskComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<UIMask>(_selectedNode)) return;
+
+        auto _uiMask = _graph->getComponent<UIMask>(_selectedNode);
+
+        if(createHeader("UI Mask", _uiMask)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            ImGui::Text("Inverted ");
+            ImGui::SameLine();
+            ImGui::PushID(createID());
+            if (ImGui::Checkbox("##Inverted", &_uiMask->inverted)) {}
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 
@@ -616,48 +956,55 @@ namespace GDE {
 
         auto _uiButton = _graph->getComponent<UIButton>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("UI Button", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
+        if(createHeader("UI Button", _uiButton)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
-            ImGui::Text("Text position ");
+//            ImGui::Text("Size ");
+//            float _size[2] = { _uiButton->nineSliceSprite->getSize().x, _uiButton->nineSliceSprite->getSize().y };
+//            ImGui::SameLine();
+//            ImGui::SetNextItemWidth(100);
+//            ImGui::PushID(createID());
+//            if(ImGui::DragFloat2("##myInput", _size, 0.5f)) {
+//                auto _config = _uiButton->getConfig();
+//                clampF(_size[0], 0, FLT_MAX);
+//                clampF(_size[1], 0, FLT_MAX);
+//                _config.buttonSize = { _size[0], _size[1] };
+//                _uiButton->setConfig(&engine->manager, _config);
+//            }
+//            ImGui::PopID();
 
-            float _pos[2] = { _uiButton->textOffset.x, _uiButton->textOffset.y };
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(100);
-            ImGui::PushID(10);
-            if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
-                _uiButton->textOffset = { _pos[0], _pos[1] };
-            }
-            ImGui::PopID();
-
-
-            ImGui::Text("Text rotation ");
-
-            float _angle = _uiButton->textRotation;
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(50);
-            ImGui::PushID(11);
-            if(ImGui::DragFloat("##myInput", &_angle, 0.1f))
-                _uiButton->textRotation = _angle;
-            ImGui::PopID();
-
-
-            ImGui::Text("Text scale ");
-
-            float _scale[2] = { _uiButton->textScale.x, _uiButton->textScale.y };
-            ImGui::SameLine(0, 30);
-            ImGui::SetNextItemWidth(100);
-            ImGui::PushID(12);
-            if(ImGui::DragFloat2("##myInput", _scale, 0.05))
-                _uiButton->textScale = { _scale[0], _scale[1] };
-            ImGui::PopID();
-
-            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 
     bool ImGuiScene::checkForFocus() {
         return ImGui::IsWindowHovered() | ImGui::IsAnyItemActive() | ImGui::IsAnyItemHovered() | ImGui::IsAnyItemFocused();
+    }
+
+    int ImGuiScene::createID() {
+        return idIndex++;
+    }
+
+    void ImGuiScene::resetID() {
+        idIndex = 0;
+    }
+
+    void ImGuiScene::enabledComponent(ComponentBase* _base) {
+        if(!_base) return;
+
+        ImGui::PushID(createID());
+        static bool _enabled = _base->isEnabled();
+        if(ImGui::Checkbox("##enabled", &_enabled)) {
+            _base->setEnabled(_enabled);
+        }
+        ImGui::PopID();
+        ImGui::SameLine();
+    }
+
+    bool ImGuiScene::createHeader(const char* _title, ComponentBase* _enable) {
+        enabledComponent(_enable);
+        bool _opened = ImGui::CollapsingHeader(_title, ImGuiTreeNodeFlags_DefaultOpen);
+        return _opened;
     }
 }
 

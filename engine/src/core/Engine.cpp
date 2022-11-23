@@ -7,22 +7,23 @@
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/systems/profiling/Profiler.h"
 
-namespace GDE {
+namespace RDE {
 
 
     Engine::Engine() {
-        manager.configManager.loadGDEConfig(&gdeConfig, manager.fileManager);
-        window = platform.createWindow(&gdeConfig);
+        manager.configManager.loadRDEConfig(&rdeConfig, manager.fileManager);
+        window = platform.createWindow(&rdeConfig);
+        currentDPI = rdeConfig.windowData.diagonalDpi;
 
         UDelegate<void(Event&)> onEventDelegate;
         onEventDelegate.bind<&Engine::onEvent>(this);
         window->setEventCallback(onEventDelegate);
+
+        manager.init(this);
     }
 
     void Engine::onInit(Scene* _scene) {
         wreDel.bind<&Engine::onWindowResized>(this);
-
-        manager.init(this);
 
         #if !IS_MOBILE()
         imGuiLayer = new ImGuiScene(this);
@@ -38,7 +39,7 @@ namespace GDE {
         frameBuffer = new FrameBuffer(_specs, &manager);
         #endif
 
-        manager.configManager.loadResources(&gdeConfig, &manager);
+        manager.configManager.loadResources(&rdeConfig, &manager);
 
         manager.consoleManager.addCommand<&Engine::changeColorConsoleCommand>("background_color"," Changes background color 0 <= r,b,g,a <= 255", this, "r g b a");
         manager.consoleManager.addCommand<&Engine::setParentCommand>( "parent_set", "Sets the parent of A as B", this, "A B");
@@ -106,6 +107,7 @@ namespace GDE {
     }
 
     void Engine::onUpdate(Delta _dt) {
+        manager.physics.update(_dt);
         manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
 
 #if !IS_MOBILE()
@@ -163,7 +165,12 @@ namespace GDE {
         #if !IS_MOBILE()
         frameBuffer->resize(_width, _height);
         #endif
-        manager.sceneManager.getDisplayedScene()->getMainCamera()->onResize(_width, _height);
+        manager.sceneManager.getDisplayedScene()->getMainCamera()->setCameraSize(_width, _height);
+
+        for(auto* _canvas : manager.sceneManager.getDisplayedScene()->getCanvases()) {
+            _canvas->onResize(_width, _height);
+        }
+
         return true;
     }
 
@@ -203,9 +210,9 @@ namespace GDE {
         try {
             auto _scene = manager.sceneManager.getDisplayedScene();
             _scene->getMainGraph()->setParent(_scene->getMainGraph()->getNode(_a), _scene->getMainGraph()->getNode(_b));
-            return {APPEND_S("Set ", _b, " as parent of ", _a) };
+            return {Util::String::appendToString("Set ", _b, " as parent of ", _a) };
         } catch (const std::runtime_error& _e) {
-            return {APPEND_S("[error] '", _a, "' or '", _b, "' or both don't exist on the scene!") };
+            return {Util::String::appendToString("[error] '", _a, "' or '", _b, "' or both don't exist on the scene!") };
         }
     }
 
@@ -219,9 +226,15 @@ namespace GDE {
 
     void Engine::setRenderingRedirection(UDelegate<void(FrameBuffer*)>& _redirectionFunc) {
         redirectionFunc = _redirectionFunc;
+        if(frameBuffer) {
+            frameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
+        }
     }
 
     void Engine::setRenderingRedirectionToImGui(UDelegate<void(FrameBuffer*)>& _redirectionFunc) {
         imGuiRedirectionFunc = _redirectionFunc;
+        if(frameBuffer) {
+            frameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
+        }
     }
 }

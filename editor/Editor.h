@@ -5,21 +5,23 @@
 #ifndef ENGINE_EDITOR_H
 #define ENGINE_EDITOR_H
 
-#include "GDE.h"
+#include "RDE.h"
 #include "core/graph/Scene.h"
 #include "core/render/elements/FrameBuffer.h"
 #include "core/util/Delta.h"
 #include <vector>
 
-using namespace GDE;
+using namespace RDE;
 
 namespace Editor {
 
     class Editor : public Scene {
 
         PhysicsBody* body;
-        NodeID circleNodeID;
+        Node* circleNode;
         bool collisionHappened = false;
+        UISlider* slider;
+        UDelegate<void(FrameBuffer*)> redirectRenderingDel;
 
         public:
             explicit Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }
@@ -37,7 +39,6 @@ namespace Editor {
             std::vector<NodeID> nodes;
 
 
-            bool uiButtonTrigger(NodeID _nodeId, Canvas* _canvas);
             void onMouseClick(MouseCode _mouseCode);
             void onMouseEntered();
             void onMouseExited();

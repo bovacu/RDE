@@ -6,18 +6,16 @@
 #include "core/graph/components/Transform.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
-    Camera::Camera(const NodeID& _mainCameraID, const Window* _window, Transform* _entityTransform) {
-        ID = _mainCameraID;
-        viewport = new FreeViewPort(_window->getWindowSize());
+    Camera::Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window) : node(_node) {
+        viewport = new ViewPort(_window->getWindowSize(), _manager->engine->rdeConfig.windowData.resolution);
         onResize(_window->getWidth(), _window->getHeight());
-        transform = _entityTransform;
     }
 
     void Camera::onResize(int _width, int _height) {
         viewport->update({_width, _height});
-        float _aspectRatio = viewport->getAspectRatio();
+        float _aspectRatio = viewport->getPhysicalAspectRatio();
         glViewport(0, 0, _width, _height);
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
@@ -28,36 +26,16 @@ namespace GDE {
         return projectionMatrix;
     }
 
-    Transform& Camera::getTransform() {
-        return *transform;
-    }
-
     void Camera::recalculateViewMatrix() {
-        auto [_mat, _dirty] = transform->localToWorld();
+        auto [_mat, _dirty] = node->getTransform()->localToWorld();
 
         if(_dirty) {
-            auto _screenCoords = Util::worldToScreenCoords(*viewport, {_mat[3][0], _mat[3][1]});
+            auto _screenCoords = Util::Math::worldToScreenCoords(*viewport, {_mat[3][0], _mat[3][1]});
             _mat[3][0] = _screenCoords.x;
             _mat[3][1] = _screenCoords.y;
             viewMatrix = glm::inverse(_mat);
             viewProjectionMatrix = projectionMatrix * viewMatrix;
         }
-    }
-
-    void Camera::setPosition(const Vec2F& _position) {
-        transform->setPosition(_position);
-    }
-
-    Vec2F Camera::getPosition() {
-        return transform->getPosition();
-    }
-
-    void Camera::setRotation(float _rotation) {
-        transform->setRotation(_rotation);
-    }
-
-    float Camera::getRotation() {
-        return transform->getRotation();
     }
 
     glm::mat4& Camera::getViewMatrix() {
@@ -75,13 +53,13 @@ namespace GDE {
     bool Camera::onMouseScrolled(MouseScrolledEvent& _event) {
         zoom -= _event.getScrollY() * 0.1f;
         zoom = std::max(zoom, 0.5f);
-        float _aspectRatio = viewport->getAspectRatio();
+        float _aspectRatio = viewport->getPhysicalAspectRatio();
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
         return false;
     }
 
     float Camera::getAspectRatio() const {
-        return viewport->getAspectRatio();
+        return viewport->getVirtualAspectRatio();
     }
 
     float Camera::getCurrentZoomLevel() const {
@@ -90,7 +68,7 @@ namespace GDE {
 
     void Camera::setCurrentZoomLevel(float _zoomLevel) {
         zoom = _zoomLevel;
-        float _aspectRatio = viewport->getAspectRatio();
+        float _aspectRatio = viewport->getPhysicalAspectRatio();
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
     }
 
@@ -106,28 +84,8 @@ namespace GDE {
         delete viewport;
     }
 
-    IViewPort* Camera::getViewport() const {
+    ViewPort* Camera::getViewport() const {
         return viewport;
-    }
-
-    void Camera::setFreeViewport(const Vec2I& _windowSize) {
-        delete viewport;
-        viewport = new FreeViewPort(_windowSize);
-    }
-
-    void Camera::setAdaptiveViewport(const Vec2I& _virtualDesiredSize, const Vec2I& _currentDeviceSize) {
-        delete viewport;
-        viewport = new AdaptiveViewPort(_virtualDesiredSize);
-        viewport->update(_currentDeviceSize);
-    }
-
-    void Camera::translate(const Vec2F& _translation) {
-        translate(_translation.x, _translation.y);
-    }
-
-    void Camera::translate(float _x, float _y) {
-        auto _position = getPosition();
-        setPosition({_position.x + _x, _position.y + _y});
     }
 
     void Camera::setCameraSize(const Vec2I& _cameraSize) {
@@ -148,8 +106,8 @@ namespace GDE {
         _elementTopLeft += { -_size.x / 2.f, _size.y / 2.f };
         _elementBottomRight += { _size.x / 2.f, -_size.y / 2.f };
 
-        auto _cameraTopLeft = transform->getModelMatrixPosition();
-        auto _cameraBottomRight = transform->getModelMatrixPosition();
+        auto _cameraTopLeft = node->getTransform()->getModelMatrixPosition();
+        auto _cameraBottomRight = node->getTransform()->getModelMatrixPosition();
         _cameraTopLeft += { -(float)size.x / 2.f * zoom, (float)size.y / 2.f * zoom };
         _cameraBottomRight += { (float)size.x / 2.f * zoom, -(float)size.y / 2.f * zoom };
 
@@ -162,6 +120,20 @@ namespace GDE {
 
     void Camera::update() {
         recalculateViewMatrix();
+    }
+
+    bool Camera::isLandscape() {
+        return viewport->landscape;
+    }
+
+    // TODO: implement
+    void Camera::setEnabled(bool _enabled) {
+
+    }
+
+    // TODO: implement
+    bool Camera::isEnabled() {
+        return true;
     }
 
 }

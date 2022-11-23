@@ -10,7 +10,7 @@
 
 #include "core/render/Camera.h"
 
-namespace GDE {
+namespace RDE {
 
     bool Input::pollEvent(SDL_Event& _event) {
         if(events.find((SystemEventEnum)_event.type) == events.end()) {
@@ -69,7 +69,7 @@ namespace GDE {
             _eventImplemented |= mobileInput->ignoreEvent((SDL_EventType)_event.type);
 
             if(!_eventImplemented) {
-                LOG_W("System event ", _event.type, " not implemented!!")
+                Util::Log::warn("System event ", _event.type, " not implemented!!");
                 continue;
             }
         }
@@ -139,29 +139,26 @@ namespace GDE {
         float _x = _mousePos.x - (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().x / 2.f : 0.f);
         float _y = (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().y / 2.f : 0.f) - _mousePos.y;
         float _zoom = mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getCurrentZoomLevel();
-        Vec2F _scalingFactor = engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->getScalingFactor();
-        return {_x * _zoom / _scalingFactor.x, _y * _zoom / _scalingFactor.y};
+        return {_x * _zoom, _y * _zoom};
     }
 
     Vec2F InputManager::getMousePosWorldPos() {
         auto _mousePos = mouseInput->getMousePosition();
         auto& _wi = windowInput;
         auto& _camera = *mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera();
-        float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.getPosition().x;
-        float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.getPosition().y;
+        float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.node->getTransform()->getPosition().x;
+        float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.node->getTransform()->getPosition().y;
         float _zoom = _camera.getCurrentZoomLevel();
-        Vec2F _scalingFactor = engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->getScalingFactor();
-        return {_x * _zoom / _scalingFactor.x, - _y * _zoom / _scalingFactor.y};
+        return {_x * _zoom, - _y * _zoom};
     }
 
     Vec2F InputManager::getMousePosCanvas() {
         auto _mousePos = mouseInput->getMousePosition();
         auto& _wi = windowInput;
         auto& _camera = *mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera();
-        float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.getPosition().x;
-        float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.getPosition().y;
-        Vec2F _scalingFactor = engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getViewport()->getScalingFactor();
-        return {_x / _scalingFactor.x, - _y / _scalingFactor.y};
+        float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.node->getTransform()->getPosition().x;
+        float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.node->getTransform()->getPosition().y;
+        return {_x, - _y};
     }
 
     bool InputManager::reassignController(int _controllerID, int _as) {
@@ -183,7 +180,7 @@ namespace GDE {
     bool InputManager::isGamepadButtonJustReleased(ControllerButtons _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) {
-            LOG_W("IS FALSE FOR ", _controllerID)
+            Util::Log::warn("IS FALSE FOR ", _controllerID);
             return false;
         }
 

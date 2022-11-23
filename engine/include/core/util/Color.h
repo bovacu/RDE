@@ -1,8 +1,8 @@
 // Created by borja on 24/12/21.
 
 
-#ifndef GDE_COLOR_H
-#define GDE_COLOR_H
+#ifndef RDE_COLOR_H
+#define RDE_COLOR_H
 
 #include <ostream>
 #include "core/Core.h"
@@ -11,7 +11,7 @@
     typedef unsigned int uint;
 #endif
 
-namespace GDE {
+namespace RDE {
 
     struct Color {
         unsigned char r, g, b, a;
@@ -31,6 +31,8 @@ namespace GDE {
         static const Color Purple;
         static const Color Gray;
         static const Color Transparent;
+        static const Color Disabled;
+        static const Color Placeholder;
         static const Color NO_COLOR;
     };
 
@@ -45,4 +47,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_COLOR_H
+#endif //RDE_COLOR_H

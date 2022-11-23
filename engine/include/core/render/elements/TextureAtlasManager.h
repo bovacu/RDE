@@ -1,8 +1,8 @@
 // Created by borja on 6/1/22.
 
 
-#ifndef GDE_TEXTURE_ATLAS_H
-#define GDE_TEXTURE_ATLAS_H
+#ifndef RDE_TEXTURE_ATLAS_H
+#define RDE_TEXTURE_ATLAS_H
 
 
 #include "nlohmann/json.hpp"
@@ -15,7 +15,7 @@
 #include "Texture.h"
 #include "core/systems/fileSystem/FileManager.h"
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief An atlas is a group of images normally related between them, or as also known, a Sprite Sheet. This struct holds
@@ -62,11 +62,11 @@ namespace GDE {
          * @brief Prints info about the Sprite Sheet.
          */
         void debugInfo() {
-            LOG_I("Atlas: ", name)
-            LOG_I("   - Texture: ", &texture)
-            LOG_I("   - subTextures size: ", subTextures.size())
-            LOG_I("   - textureWidth: ", textureWidth)
-            LOG_I("   - textureHeight: ", textureHeight)
+            Util::Log::info("Atlas: ", name);
+            Util::Log::info("   - Texture: ", &texture);
+            Util::Log::info("   - subTextures size: ", subTextures.size());
+            Util::Log::info("   - textureWidth: ", textureWidth);
+            Util::Log::info("   - textureHeight: ", textureHeight);
         }
     };
 
@@ -172,4 +172,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_TEXTURE_ATLAS_H
+#endif //RDE_TEXTURE_ATLAS_H

@@ -2,18 +2,18 @@
 // Created by borja on 9/5/22.
 //
 
-#ifndef GDE_TEXT_RENDERER_H
-#define GDE_TEXT_RENDERER_H
+#ifndef RDE_TEXT_RENDERER_H
+#define RDE_TEXT_RENDERER_H
 
 #include "core/render/elements/IRenderizable.h"
 #include "entt/entity/entity.hpp"
 
 typedef entt::entity NodeID;
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_STRUCT(CharInfo)
-    FORWARD_DECLARE_CLASS(Font, Scene, Canvas)
+    FORWARD_DECLARE_CLASS(Font, Scene, Canvas, Graph, Manager)
 
     /**
      * @brief Component used to render text on screen.  End user doesn't have, and in fact can't
@@ -21,9 +21,9 @@ namespace GDE {
      */
     class TextRenderer : public IRenderizable {
 
-        FRIEND_CLASS(SpriteBatch)
+        FRIEND_CLASS(UIText, UIButton, UICheckbox, UIInput)
 
-        private:
+        protected:
             /**
              * @brief The font used to render the text.
              */
@@ -59,7 +59,7 @@ namespace GDE {
              */
             Texture* texture = nullptr;
 
-        private:
+        protected:
             /**
              * @brief Recalculates the dimensions of the new text as a rectangle.
              * @param _text the inner text.
@@ -73,8 +73,9 @@ namespace GDE {
             std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharInfo* _chars) const;
 
         public:
-            TextRenderer(const NodeID& _nodeId, Scene* _scene, const std::string& _text, Font* _font = nullptr);
-            TextRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font = nullptr);
+            TextRenderer(Node* _node, Scene* _scene, const std::string& _text, Font* _font = nullptr);
+            TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font = nullptr);
+            TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const std::string& _text, Font* _font = nullptr);
             ~TextRenderer() override {  }
 
             /**
@@ -133,7 +134,8 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] Vec2F getSize() const override { return { size.x * transform->getScale().x, size.y * transform->getScale().y }; }
+            [[nodiscard]] Vec2F getSize() const override { return { size.x / 2.f * IRenderizable::node->getTransform()->getScale().x,
+                                                                    size.y / 2.f * IRenderizable::node->getTransform()->getScale().y }; }
 
             /**
              * @see IRenderizable
@@ -143,9 +145,10 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
+            virtual void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) override;
+            virtual void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) override;
     };
 
 }
 
-#endif //GDE_TEXT_RENDERER_H
+#endif //RDE_TEXT_RENDERER_H

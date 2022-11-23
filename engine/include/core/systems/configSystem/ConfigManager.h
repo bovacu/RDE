@@ -2,20 +2,20 @@
 // Created by borja on 15/05/22.
 //
 
-#ifndef GDE_CONFIG_LOADER_H
-#define GDE_CONFIG_LOADER_H
+#ifndef RDE_CONFIG_LOADER_H
+#define RDE_CONFIG_LOADER_H
 
 #include "nlohmann/json.hpp"
 #include "core/graph/Scene.h"
 #include "core/systems/fileSystem/FileManager.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Window)
-    FORWARD_DECLARE_STRUCT(GDEConfig)
+    FORWARD_DECLARE_STRUCT(RDEConfig)
 
-    struct NodeID_JsonPair {
-        NodeID nodeId;
+    struct Node_JsonPair {
+        Node* node;
         nlohmann::json json;
     };
 
@@ -27,10 +27,10 @@ namespace GDE {
         public:
             /**
              * @brief Loads assets that need to be loaded between different scenes  (Must be a .json).
-             * @param _gdeConfig Configuration of GDE
+             * @param _rdeConfig Configuration of RDE
              * @param _manager Manager
              */
-            void loadResources(GDEConfig* _gdeConfig, Manager* _manager);
+            void loadResources(RDEConfig* _rdeConfig, Manager* _manager);
 
             /**
              * @brief This method allows the user to load a Scene through its configuration file (Must be a .json).
@@ -54,7 +54,7 @@ namespace GDE {
              * @brief This method allows to load a custom configuration for the engine.
              * @param _config New Configuration for the engine
              */
-            void loadGDEConfig(GDEConfig* _config, FileManager& _manager);
+            void loadRDEConfig(RDEConfig* _config, FileManager& _manager);
 
         private:
             /**
@@ -64,9 +64,9 @@ namespace GDE {
              */
             void instantiatePrefab(Scene* _scene, const nlohmann::json& _json);
 
-            std::unordered_map<std::string, NodeID_JsonPair> createNodes(Scene* _scene, const nlohmann::json& _sceneJson);
+            std::unordered_map<std::string, Node_JsonPair> createNodes(Scene* _scene, const nlohmann::json& _sceneJson);
 
-            void loadNodes(Scene* _scene, Window* _window, const nlohmann::json& _sceneJson, const std::unordered_map<std::string, NodeID_JsonPair>& _nodes);
+            void loadNodes(Scene* _scene, Window* _window, const nlohmann::json& _sceneJson, const std::unordered_map<std::string, Node_JsonPair>& _nodes);
 
             /**
              * @brief Loads all the assets defined in the .json for the Scene.
@@ -77,19 +77,19 @@ namespace GDE {
              */
             void loadAssets(Manager* _manager, const nlohmann::json& _json);
 
-            void loadTransformComponent(Scene* _scene, const NodeID& _nodeID, const nlohmann::json& _transformJson);
+            void loadTransformComponent(Scene* _scene, Node* _node, const nlohmann::json& _transformJson);
 
-            void loadCameraComponent(const NodeID& _nodeID, Scene* _scene, Window* _window, const nlohmann::json& _cameraJson);
+            void loadCameraComponent(Node* _nodeD, Scene* _scene, Window* _window, const nlohmann::json& _cameraJson);
 
-            void loadSpriteRendererComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _spriteRendererJson);
+            void loadSpriteRendererComponent(Node* _node, Scene* _scene, const nlohmann::json& _spriteRendererJson);
 
-            void loadTextRendererComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _textRendererJson);
+            void loadTextRendererComponent(Node* _node, Scene* _scene, const nlohmann::json& _textRendererJson);
 
-            void loadBodyComponent(const NodeID& _nodeID, Scene* _scene, const nlohmann::json& _bodyJson);
+            void loadBodyComponent(Node* _node, Scene* _scene, const nlohmann::json& _bodyJson);
 
             void unloadAssets(Scene* _scene, const nlohmann::json& _sceneJson);
     };
 
 }
 
-#endif //GDE_CONFIG_LOADER_H
+#endif //RDE_CONFIG_LOADER_H

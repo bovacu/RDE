@@ -1,8 +1,8 @@
 // Created by borja on 31/3/22.
 
 
-#ifndef GDE_PARTICLE_SYSTEM_H
-#define GDE_PARTICLE_SYSTEM_H
+#ifndef RDE_PARTICLE_SYSTEM_H
+#define RDE_PARTICLE_SYSTEM_H
 
 #include <vector>
 #include "glm/vec3.hpp"
@@ -14,9 +14,10 @@
 #include "core/graph/components/Transform.h"
 #include "core/render/elements/IRenderizable.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_STRUCT(ParticleSystemConfig)
+    FORWARD_DECLARE_CLASS(Graph, Manager)
 
     /**
      * @brief Information about a particle.
@@ -79,11 +80,11 @@ namespace GDE {
             bool isPlaying = false;
 
         public:
-            Transform* transform;
             ParticleSystemConfig particleSystemConfig;
 
         public:
-            ParticleSystem(const NodeID& _nodeID, Transform* _transform, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig);
+            ParticleSystem(Node* _node, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig);
+            ParticleSystem(Node* _node, Manager* _manager, Graph* _graph, const ParticleSystemConfig& _particleSystemConfig);
             void update(Delta dt);
 
             /**
@@ -124,7 +125,7 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
+            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) override;
 
         private:
             /**
@@ -153,4 +154,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_PARTICLE_SYSTEM_H
+#endif //RDE_PARTICLE_SYSTEM_H

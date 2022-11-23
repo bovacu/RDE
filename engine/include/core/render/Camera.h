@@ -1,26 +1,27 @@
 // Created by borja on 30/12/21.
 
 
-#ifndef GDE_CAMERA_H
-#define GDE_CAMERA_H
+#ifndef RDE_CAMERA_H
+#define RDE_CAMERA_H
 
 
+#include "core/graph/components/ComponentBase.h"
 #include <glm/ext/matrix_float4x4.hpp>
 #include "core/util/Util.h"
 #include "core/systems/eventSystem/MouseEvent.h"
 #include "core/render/elements/ViewPort.h"
 #include "entt/entity/entity.hpp"
 
-namespace GDE {
+namespace RDE {
 
     typedef entt::entity NodeID;
-    FORWARD_DECLARE_CLASS(Transform, SceneManager, Window)
+    FORWARD_DECLARE_CLASS(Transform, SceneManager, Window, Node, Manager, Graph)
 
     /**
      * @brief This class represents what the engine sees and what is going to be rendered. This is used as a Component of
      * the inner ECS System, so you can add Cameras to any desired Node.
      */
-    class Camera {
+    class Camera : public ComponentBase {
         FRIEND_CLASS(Scene)
         private:
             /**
@@ -56,20 +57,12 @@ namespace GDE {
             /**
              * @see IViewPort
              */
-            IViewPort* viewport;
-
-            /**
-             * @brief Transform of the camera.
-             */
-            Transform* transform;
+            ViewPort* viewport;
 
         public:
-            /**
-             * @brief ID of the Node that contains this component.
-             */
-            NodeID ID;
+            Node* node;
 
-            Camera(const NodeID& _mainCameraID, const Window* _window, Transform* _entityTransform);
+            Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window);
             ~Camera();
 
             /**
@@ -111,37 +104,6 @@ namespace GDE {
             glm::mat4& getViewProjectionMatrix();
 
             /**
-             * @brief Returns the Transform.
-             * @return Transform&
-             */
-            Transform& getTransform();
-
-            /**
-             * @brief Sets the camera position.
-             * @param _position Position to set the camera
-             */
-            void setPosition(const Vec2F& _position);
-
-            /**
-             * @brief Translates the camera position by _translation. It is not the same as setPosition.
-             * @param _translation Amount of space to move the camera
-             */
-            void translate(const Vec2F& _translation);
-
-            /**
-             * @brief Translates the camera position by _translation. It is not the same as setPosition.
-             * @param _x Amount of space to move the camera on X axis
-             * @param _y Amount of space to move the camera on Y axis
-             */
-            void translate(float _x, float _y);
-
-            /**
-             * @brief Returns the camera position.
-             * @return Vec2F
-             */
-            Vec2F getPosition();
-
-            /**
              * @brief Sets the rectangle view size of the camera.
              * @param _cameraSize Size of the rectangle view of the camera
              */
@@ -159,9 +121,6 @@ namespace GDE {
              * @return Vec2I
              */
             Vec2I getCameraSize();
-
-            void setRotation(float _rotation);
-            float getRotation();
 
             /**
              * @brief Returns the aspect ratio of the Window.
@@ -201,20 +160,9 @@ namespace GDE {
              * @brief Returns the viewport.
              * @return IViewPort*
              */
-            [[nodiscard]] IViewPort* getViewport() const;
+            [[nodiscard]] ViewPort* getViewport() const;
 
-            /**
-             * @brief Changes the current viewport to a FreeViewport.
-             * @param _windowSize Window size
-             */
-            void setFreeViewport(const Vec2I& _windowSize);
-
-            /**
-             * @brief Changes the current viewport to a AdaptiveViewport.
-             * @param _virtualDesiredSize  Virtual screen size
-             * @param _currentDeviceSize Physical device size
-             */
-            void setAdaptiveViewport(const Vec2I& _virtualDesiredSize, const Vec2I& _currentDeviceSize);
+            bool isLandscape();
 
             /**
              * @brief Returns if an element is inside the camera boundaries.
@@ -223,6 +171,9 @@ namespace GDE {
             bool isElementInside(Transform* _transform, const Vec2F& _size) const;
 
             void update();
+
+            void setEnabled(bool _enabled) override;
+            bool isEnabled() override;
 
         private:
             /**
@@ -234,4 +185,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_CAMERA_H
+#endif //RDE_CAMERA_H

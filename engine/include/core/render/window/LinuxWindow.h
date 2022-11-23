@@ -2,8 +2,8 @@
 // Created by borja on 8/20/22.
 //
 
-#ifndef GDE_LINUX_WINDOW_H
-#define GDE_LINUX_WINDOW_H
+#ifndef RDE_LINUX_WINDOW_H
+#define RDE_LINUX_WINDOW_H
 
 #include "core/Core.h"
 
@@ -11,15 +11,15 @@
 
 #include "core/render/window/Window.h"
 
-namespace GDE {
+namespace RDE {
 
     class LinuxWindow : public Window {
         public:
-            explicit LinuxWindow(GDEConfig* _config);
+            explicit LinuxWindow(RDEConfig* _config);
     };
 
 }
 
 #endif
 
-#endif //GDE_LINUX_WINDOW_H
+#endif //RDE_LINUX_WINDOW_H

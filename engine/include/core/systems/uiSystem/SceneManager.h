@@ -2,13 +2,13 @@
 // Created by borja on 16/05/22.
 //
 
-#ifndef GDE_SCENE_MANAGER_H
-#define GDE_SCENE_MANAGER_H
+#ifndef RDE_SCENE_MANAGER_H
+#define RDE_SCENE_MANAGER_H
 
 #include "core/util/Util.h"
 #include "core/systems/eventSystem/Event.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Scene, Engine)
 
@@ -17,6 +17,9 @@ namespace GDE {
      * @brief This class is in charge of loading and unloading scenes in memory and to decided when to render each one.
      */
     class SceneManager {
+
+        FRIEND_CLASS(ConfigManager)
+
         private:
             /**
              * @brief Map SceneName -> Scene*.
@@ -89,4 +92,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_SCENE_MANAGER_H
+#endif //RDE_SCENE_MANAGER_H

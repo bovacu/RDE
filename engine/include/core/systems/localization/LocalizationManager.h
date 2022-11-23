@@ -2,17 +2,16 @@
 // Created by borja on 10/1/22.
 //
 
-#ifndef GDE_LOCALIZATION_MANAGER_H
-#define GDE_LOCALIZATION_MANAGER_H
+#ifndef RDE_LOCALIZATION_MANAGER_H
+#define RDE_LOCALIZATION_MANAGER_H
 
 
 #include <string>
 #include "core/Core.h"
 #include "nlohmann/json.hpp"
-#include "core/util/StringUtils.h"
-#include "core/util/Logger.h"
+#include "core/util/Functions.h"
 
-namespace GDE {
+namespace RDE {
 
     struct LocalizationInfo {
         enum Language { EN_US, EN_GB, EN_CA, ES_MX, ES_ES, PT_BR, FR, ZH, RU, DE, IT, JP, MAX };
@@ -42,7 +41,7 @@ namespace GDE {
 
         static Language toEnum(const std::string& _language) {
             auto _strCpy = _language;
-            _strCpy = TO_LOWER_S(_strCpy);
+            _strCpy = Util::String::toLower(_strCpy);
 
             if(std::equal(_strCpy.begin(), _strCpy.end(), "en_us")) return Language::EN_US;
             if(std::equal(_strCpy.begin(), _strCpy.end(), "en"))    return Language::EN_US;
@@ -60,7 +59,7 @@ namespace GDE {
             if(std::equal(_strCpy.begin(), _strCpy.end(), "it"))    return Language::IT;
             if(std::equal(_strCpy.begin(), _strCpy.end(), "jp"))    return Language::JP;
 
-            LOG_W("Locale: '", _language, "' is not implemented in the engine, defaulting to english")
+            Util::Log::warn("Locale: '", _language, "' is not implemented in the engine, defaulting to english");
             return Language::EN_US;
         }
     };
@@ -132,13 +131,13 @@ namespace GDE {
         std::vector<Any> _vec = { _args... };
 
         if(localizationTable.find(localizationInfo.language) == localizationTable.end()) {
-            LOG_E("Tried to localize to language '", LocalizationInfo::toString(localizationInfo.language), "', but it wasn't loaded")
-            return APPEND_S("NotLanguageLoadedLocalizationError -> ", localizationInfo.language);
+            Util::Log::error("Tried to localize to language '", LocalizationInfo::toString(localizationInfo.language), "', but it wasn't loaded");
+            return Util::String::appendToString("NotLanguageLoadedLocalizationError -> ", localizationInfo.language);
         }
 
         if(localizationTable[localizationInfo.language].find(_key) == localizationTable[localizationInfo.language].end()) {
-            LOG_E("Tried to localize key '", _key, "', but it wasn't found!")
-            return APPEND_S("KeyNotFoundLocalizationError -> ", _key);
+            Util::Log::error("Tried to localize key '", _key, "', but it wasn't found!");
+            return Util::String::appendToString("KeyNotFoundLocalizationError -> ", _key);
         }
 
         auto _string = localizationTable[localizationInfo.language][_key];
@@ -182,4 +181,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_LOCALIZATION_MANAGER_H
+#endif //RDE_LOCALIZATION_MANAGER_H

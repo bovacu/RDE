@@ -2,8 +2,8 @@
 // Created by borja on 9/5/22.
 //
 
-#ifndef GDE_SPRITE_RENDERER_H
-#define GDE_SPRITE_RENDERER_H
+#ifndef RDE_SPRITE_RENDERER_H
+#define RDE_SPRITE_RENDERER_H
 
 #include "core/render/elements/IRenderizable.h"
 #include "core/render/elements/Vertex.h"
@@ -12,9 +12,9 @@
 
 typedef entt::entity NodeID;
 
-namespace GDE {
+namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Scene, Canvas)
+    FORWARD_DECLARE_CLASS(Manager, Graph, Scene, Canvas, Node)
 
     /**
      * @brief Component that allows to render a texture or part of a texture on screen. End user doesn't have, and in fact can't
@@ -22,25 +22,24 @@ namespace GDE {
      */
     class SpriteRenderer : public IRenderizable {
 
-        FRIEND_CLASS(SpriteBatch)
+        FRIEND_CLASS(UICheckbox, UIButton, UIInput, UISlider)
 
-        private:
+        protected:
             /**
              * @brief Texture that contains the sprite. This is the whole SpriteSheet, but it is limited by the region and
              * only its region will be rendered.
              */
             Texture* texture = nullptr;
-            ulong verticesIndex = 0;
-            ulong indicesIndex = 0;
 
             OpenGLVertex geometry[4];
 
         private:
-            void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport);
+            void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
 
         public:
-            SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture = nullptr);
-            SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, Texture* _texture);
+            SpriteRenderer(Node* _node, Scene* _scene, Texture* _texture = nullptr);
+            SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
+            SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture);
             ~SpriteRenderer() override {  }
 
             /**
@@ -77,8 +76,8 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            [[nodiscard]] Vec2F getSize() const override { return {(float)texture->getSize().x * transform->getScale().x, (float)texture->getSize().y *
-                                                                                                                          transform->getScale().y}; }
+            [[nodiscard]] Vec2F getSize() const override { return {(float)texture->getSize().x * IRenderizable::node->getTransform()->getScale().x,
+                                                                   (float)texture->getSize().y * IRenderizable::node->getTransform()->getScale().y}; }
 
             /**
              * @see IRenderizable
@@ -88,9 +87,9 @@ namespace GDE {
             /**
              * @see IRenderizable
              */
-            void draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) override;
+            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) override;
     };
 
 }
 
-#endif //GDE_SPRITE_RENDERER_H
+#endif //RDE_SPRITE_RENDERER_H

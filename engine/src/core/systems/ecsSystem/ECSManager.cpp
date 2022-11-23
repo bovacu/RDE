@@ -5,7 +5,7 @@
 #include "core/systems/ecsSystem/ECSManager.h"
 #include "entt/entt.hpp"
 
-namespace GDE {
+namespace RDE {
 
     SystemRef ECSManager::addSystem(ECSSystem *_system) {
         _system->systemRef = systemRefCounter++;
@@ -38,7 +38,7 @@ namespace GDE {
     }
 
     void ECSManager::destroy() {
-        LOG_DEBUG("Cleaning up ECSManager")
+        Util::Log::debug("Cleaning up ECSManager");
         for(auto* system : systems)
             delete system;
     }

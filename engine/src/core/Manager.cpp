@@ -6,11 +6,12 @@
 #include "core/render/RenderManager.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     Manager::Manager() {  }
 
     void Manager::init(Engine* _engine) {
+        engine = _engine;
         shaderManager.init(&fileManager);
         renderManager.init(_engine);
         inputManager.init(_engine, &_engine->getWindow());

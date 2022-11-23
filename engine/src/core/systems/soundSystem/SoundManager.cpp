@@ -5,11 +5,11 @@
 #include "core/systems/soundSystem/SoundManager.h"
 #include "core/util/Functions.h"
 
-namespace GDE {
+namespace RDE {
 
     void SoundManager::init() {
         if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-            LOG_E("Mix_OpenAudio Error: ", Mix_GetError())
+            Util::Log::error("Mix_OpenAudio Error: ", Mix_GetError());
             return;
         }
 
@@ -22,11 +22,11 @@ namespace GDE {
         int _initiated = Mix_Init(_flags);
 
         if((_initiated & _flags) != _flags) {
-            LOG_E("Mix_Init Error: ", Mix_GetError())
+            Util::Log::error("Mix_Init Error: ", Mix_GetError());
             return;
         }
 
-        LOG_DEBUG("Sound Manager loaded successfully!")
+        Util::Log::debug("Sound Manager loaded successfully!");
     }
 
     Music& SoundManager::loadMusic(const std::string& _musicPath) {
@@ -34,12 +34,12 @@ namespace GDE {
         _m.musicID = Mix_LoadMUS(_musicPath.c_str());
 
         if(_m.musicID == nullptr) {
-            throw std::runtime_error(APPEND_S("Couldn't load Music with path ", _musicPath));
+            throw std::runtime_error(Util::String::appendToString("Couldn't load Music with path ", _musicPath));
         }
 
-        _m.name = Util::getFileNameFromPath(_musicPath);
+        _m.name = Util::String::getFileNameFromPath(_musicPath);
         musics[_m.name] = _m;
-        LOG_DEBUG("Successfully loaded ", _m.name)
+        Util::Log::debug("Successfully loaded ", _m.name);
         return musics[_m.name];
     }
 
@@ -48,12 +48,12 @@ namespace GDE {
         _sfx.sfxID = Mix_LoadWAV(_sfxPath.c_str());
 
         if(_sfx.sfxID == nullptr) {
-            throw std::runtime_error(APPEND_S("Couldn't load SFX with path ", _sfxPath));
+            throw std::runtime_error(Util::String::appendToString("Couldn't load SFX with path ", _sfxPath));
         }
 
-        _sfx.name = Util::getFileNameFromPath(_sfxPath);
+        _sfx.name = Util::String::getFileNameFromPath(_sfxPath);
         sfxs[_sfx.name] = _sfx;
-        LOG_DEBUG("Loaded sfx: ", _sfx.name)
+        Util::Log::debug("Loaded sfx: ", _sfx.name);
         return sfxs[_sfx.name];
     }
 
@@ -62,7 +62,7 @@ namespace GDE {
             Mix_FreeMusic(musics[_musicName].musicID);
             musics.erase(_musicName);
         } else {
-            LOG_E("Tried to unload Music '", _musicName, ", but it was not loaded in memory!")
+            Util::Log::error("Tried to unload Music '", _musicName, ", but it was not loaded in memory!");
         }
     }
 
@@ -71,27 +71,27 @@ namespace GDE {
             Mix_FreeChunk(sfxs[_sfxName].sfxID);
             sfxs.erase(_sfxName);
         } else {
-            LOG_E("Tried to unload SFX '", _sfxName, ", but it was not loaded in memory!")
+            Util::Log::error("Tried to unload SFX '", _sfxName, ", but it was not loaded in memory!");
         }
     }
 
     Music& SoundManager::getMusic(const std::string& _musicName) {
         if(musics.find(_musicName) == musics.end()) {
-            throw std::runtime_error(APPEND_S("Couldn't get Music '", _musicName, "'"));
+            throw std::runtime_error(Util::String::appendToString("Couldn't get Music '", _musicName, "'"));
         }
         return musics[_musicName];
     }
 
     Sfx& SoundManager::getSfx(const std::string& _sfxName) {
         if(sfxs.find(_sfxName) == sfxs.end()) {
-            throw std::runtime_error(APPEND_S("Couldn't get SFX '", _sfxName, "'"));
+            throw std::runtime_error(Util::String::appendToString("Couldn't get SFX '", _sfxName, "'"));
         }
         return sfxs[_sfxName];
     }
 
     void SoundManager::playMusic(const std::string& _musicName) {
         if(musics.find(_musicName) == musics.end()) {
-            throw std::runtime_error(APPEND_S("Couldn't get Music '", _musicName, "'"));
+            throw std::runtime_error(Util::String::appendToString("Couldn't get Music '", _musicName, "'"));
         }
 
         Music _m = musics[_musicName];
@@ -100,14 +100,14 @@ namespace GDE {
 
     void SoundManager::playSfx(const std::string& _sfxName) {
         if(sfxs.find(_sfxName) == sfxs.end()) {
-            throw std::runtime_error(APPEND_S("Couldn't get SFX '", _sfxName, "'"));
+            throw std::runtime_error(Util::String::appendToString("Couldn't get SFX '", _sfxName, "'"));
         }
 
         Sfx _sfx = sfxs[_sfxName];
         sfxs[_sfxName].channel = Mix_PlayChannel(sfxs[_sfxName].channel, _sfx.sfxID, _sfx.repeat);
 
         if(sfxs[_sfxName].channel == -1) {
-            LOG_W("All of the SFX available channels are in use! SFX may not play correctly")
+            Util::Log::warn("All of the SFX available channels are in use! SFX may not play correctly");
         }
     }
 
@@ -159,7 +159,7 @@ namespace GDE {
     }
 
     void SoundManager::destroy() {
-        LOG_DEBUG("Cleaning up SoundManager")
+        Util::Log::debug("Cleaning up SoundManager");
         stopAll();
 
         for(auto& _music : musics) {

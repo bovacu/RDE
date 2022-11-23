@@ -1,9 +1,7 @@
 // Created by borja on 17/12/21.
 
-#ifndef GDE_EVENT_BUS
-#define GDE_EVENT_BUS
-
-#include "core/util/Logger.h"
+#ifndef RDE_EVENT_BUS
+#define RDE_EVENT_BUS
 
 /**
  * @brief The Event bus works in the following way:
@@ -55,7 +53,7 @@
  *      And with this, all of the linked functions will know about this change and will react as the function specifies
  */
 
-namespace GDE {
+namespace RDE {
 
     template <typename Event, typename... AssociatedFunctionArgs>
     /**
@@ -69,7 +67,7 @@ namespace GDE {
             typedef std::function<bool(AssociatedFunctionArgs...)> HandlerFunc;
 
         private:
-            std::map<Event, GDE::MDelegate<bool(AssociatedFunctionArgs...)>> handlers;
+            std::map<Event, RDE::MDelegate<bool(AssociatedFunctionArgs...)>> handlers;
 
         public:
             class HandlerId {
@@ -93,14 +91,14 @@ namespace GDE {
 
             void unsubscribe(const Event& _type, HandlerId& _handlerId) {
                 if(!hasType(_type)) {
-                    LOG_W_TIME("Tried to unsubscribe Type ", typeid(_type).name(), " but it wasn't subscribed!")
+                    Util::Log::warn("Tried to unsubscribe Type ", typeid(_type).name(), " but it wasn't subscribed!");
                     return;
                 }
 
                 if (_handlerId.valid) {
                     handlers[_type].remove(_handlerId.id);
                 } else
-                LOG_W_TIME("Tried to unsubscribe an event", typeid(_type).name()," that wasn't subscribed yet!")
+                    Util::Log::warn("Tried to unsubscribe an event", typeid(_type).name()," that wasn't subscribed yet!");
             }
 
             bool dispatch(const Event& _type, AssociatedFunctionArgs... _args) {
@@ -126,4 +124,4 @@ namespace GDE {
 }
 
 
-#endif // GDE_EVENT_BUS
+#endif // RDE_EVENT_BUS

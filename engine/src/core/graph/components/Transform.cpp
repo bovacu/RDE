@@ -6,11 +6,12 @@
 #include "core/graph/Graph.h"
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include "core/graph/components/Node.h"
+#include "core/graph/components/ui/UI.h"
 
-namespace GDE {
+namespace RDE {
 
-    Transform::Transform(const NodeID& _nodeId) {
-        ID = _nodeId;
+    Transform::Transform() {
         worldMatrixCache = recalculateCachedMatrix();
     }
 
@@ -37,7 +38,7 @@ namespace GDE {
     }
 
     float Transform::getRotation() const {
-        return radiansToDegrees(glm::eulerAngles(innerRotation).z);
+        return Util::Math::radiansToDegrees(glm::eulerAngles(innerRotation).z);
     }
 
     void Transform::setScale(const Vec2F& _scale) {
@@ -65,7 +66,7 @@ namespace GDE {
 
     void Transform::rotate(float _amount) {
         glm::vec3 _euler = glm::eulerAngles(innerRotation);
-        innerRotation = glm::quat(glm::vec3(_euler.x, _euler.y, _euler.z + degreesToRadians(_amount)));
+        innerRotation = glm::quat(glm::vec3(_euler.x, _euler.y, _euler.z + Util::Math::degreesToRadians(_amount)));
         setDirty();
     }
 
@@ -110,7 +111,7 @@ namespace GDE {
         auto [_transformMatrix, _] = localToWorld();
         glm::decompose(_transformMatrix, scale, rotation, translation, skew, perspective);
         glm::vec3 _euler = glm::eulerAngles(rotation);
-        return radiansToDegrees(_euler.z);
+        return Util::Math::radiansToDegrees(_euler.z);
     }
 
 
@@ -158,7 +159,6 @@ namespace GDE {
         if (parentTransform) {
             if(dirty) {
                 setDirty();
-                dirty = false;
                 _wasDirty = true;
             }
         }
@@ -195,6 +195,14 @@ namespace GDE {
         worldMatrixCache[3][0] = _worldPos.x;
         worldMatrixCache[3][1] = _worldPos.y;
         setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
+        dirty = true;
+    }
+
+    void Transform::translateMatrixModelPosition(const Vec2F& _worldPos) {
+        worldMatrixCache[3][0] += _worldPos.x;
+        worldMatrixCache[3][1] += _worldPos.y;
+        setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
+        dirty = true;
     }
 
     void Transform::setMatrixModelRotation(float _rotation) {
@@ -212,7 +220,7 @@ namespace GDE {
                 glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
                 glm::vec4(_translation, 1.0f)
         )
-        * glm::mat4_cast(glm::angleAxis(degreesToRadians(_rotation), glm::vec3 { 0, 0, 1 })) //rotate
+        * glm::mat4_cast(glm::angleAxis(Util::Math::degreesToRadians(_rotation), glm::vec3 { 0, 0, 1 })) //rotate
         * glm::mat4( //scale
                 glm::vec4(_scale[0], 0.0f, 0.0f, 0.0f),
                 glm::vec4(0.0f, _scale[1], 0.0f, 0.0f),
@@ -221,6 +229,7 @@ namespace GDE {
         );
 
         setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
+        dirty = true;
     }
 
     glm::mat4 Transform::worldPointToLocalPosition(const Vec2F& _position) {
@@ -260,5 +269,19 @@ namespace GDE {
         innerPosition = _translation;
         innerRotation = _rotation;
         innerScale = _scale;
+    }
+
+    int Transform::getChildrenCount() {
+        int _childrenCount = 0;
+        for(auto& _child : children) {
+            _childrenCount++;
+            _childrenCount += _child->getChildrenCount();
+        }
+
+        return _childrenCount;
+    }
+
+    void Transform::clearDirty() {
+        dirty = false;
     }
 }

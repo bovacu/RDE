@@ -1,24 +1,26 @@
 #pragma once
 
-#ifndef GDE_IMGUI_LAYER_H
-#define GDE_IMGUI_LAYER_H
+#ifndef RDE_IMGUI_LAYER_H
+#define RDE_IMGUI_LAYER_H
 
 #if !IS_MOBILE()
 
 #include <chrono>
 #include "core/graph/Scene.h"
+#include "core/graph/components/ComponentBase.h"
 #include "core/systems/eventSystem/MouseEvent.h"
 #include "core/systems/profiling/Profiler.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl.h"
 
-namespace GDE {
+namespace RDE {
 
     // This class is a fucking mess, and it needs to be reworked, but for now I just use it for debugging and it does the job.
 
     FORWARD_DECLARE_CLASS(Graph)
     class ImGuiScene : public Scene {
         private:
+            int idIndex = 0;
             bool anyWindowHovered = false;
             bool windowsHovered[4] {false, false, false, false};
             UDelegate<bool(MouseScrolledEvent&)> mseDel;
@@ -50,6 +52,9 @@ namespace GDE {
             void drawDebugInfo(Scene* _scene);
 
         private:
+            int createID();
+            void resetID();
+
             void console();
             static int consoleStub(ImGuiInputTextCallbackData* _data);
             int consoleIntro(ImGuiInputTextCallbackData* _data);
@@ -60,8 +65,9 @@ namespace GDE {
             void showFileExplorer();
 
             void hierarchy(Scene* _scene);
-            void hierarchyRecursionStub(Scene* _scene, Graph* _graph, NodeID _node, NodeID& _selectedNode);
-            void showLoadedPrefabs(Scene* _scene, Graph* _graph, NodeID _node, NodeID& _selectedNode);
+            void hierarchyRecursionStub(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode);
+            void showLoadedPrefabs(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode);
+            bool createHeader(const char* _title, ComponentBase* _enable);
             void nodeComponents(Graph* _graph, const NodeID _selectedNode);
             void activeComponent(Graph* _graph, const NodeID _selectedNode);
             void transformComponent(Graph* _graph, const NodeID _selectedNode);
@@ -70,7 +76,14 @@ namespace GDE {
             void bodyComponent(Graph* _graph, const NodeID _selectedNode);
             void spriteComponent(Graph* _graph, const NodeID _selectedNode);
             void textComponent(Graph* _graph, const NodeID _selectedNode);
+            void enabledComponent(ComponentBase* _base);
+
+            void uiTransformComponent(Graph* _graph, const NodeID _selectedNode);
             void uiButtonComponent(Graph* _graph, const NodeID _selectedNode);
+            void ui9SliceComponent(Graph* _graph, const NodeID _selectedNode);
+            void uiImageComponent(Graph* _graph, const NodeID _selectedNode);
+            void uiTextComponent(Graph* _graph, const NodeID _selectedNode);
+            void uiMaskComponent(Graph* _graph, const NodeID _selectedNode);
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
 
@@ -86,4 +99,4 @@ namespace GDE {
 
 #endif
 
-#endif //GDE_IMGUI_LAYER_H
+#endif //RDE_IMGUI_LAYER_H

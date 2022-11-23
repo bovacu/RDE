@@ -2,14 +2,13 @@
 
 #include "core/platform/PlatformHeaderSDLImage.h"
 #include "core/render/RenderManager.h"
-#include "core/util/GLUtil.h"
 
-namespace GDE {
+namespace RDE {
 
     void RenderManager::init(Engine* _engine) {
     
         #if !IS_MOBILE()
-        LOG_DEBUG("OpenGL Version: ", glGetString(GL_VERSION));
+        Util::Log::info("OpenGL Version: ", glGetString(GL_VERSION));;
         #endif
 
         glEnable(GL_BLEND);
@@ -23,18 +22,18 @@ namespace GDE {
 
         int _flags = IMG_INIT_PNG | IMG_INIT_JPG;
         if(IMG_Init(_flags) != _flags) {
-            LOG_E("SDL Image loader couldn't initialize all png and jpg")
+            Util::Log::error("SDL Image loader couldn't initialize all png and jpg");
             return;
         }
 
         batch.init(_engine);
         batch.debug.init(&batch);
-        CHECK_GL_ERROR("RenderManager Initialization")
+        Util::GL::checkError("RenderManager Initialization");
     }
 
     void RenderManager::clear() {
         glClearColor((float)clearColor.r / 255.f, (float)clearColor.g / 255.f, (float)clearColor.b / 255.f, (float)clearColor.a / 255.f);
-        CHECK_GL_ERROR("RenderManager Clear")
+        Util::GL::checkError("RenderManager Clear");
         resetBuffers();
     }
 
@@ -62,8 +61,8 @@ namespace GDE {
         batch.draw(_renderizable, _transform);
     }
 
-    void RenderManager::drawUI(IRenderizable* _renderizable, Transform& _transform) {
-        batch.drawUI(_renderizable, _transform);
+    void RenderManager::drawUI(std::vector<Batch>& _batches) {
+        batch.drawUI(_batches);
     }
 
     void RenderManager::beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness) {
@@ -85,6 +84,7 @@ namespace GDE {
 
     void RenderManager::resetDebugInfo() {
         batch.drawCalls = 0;
+        batch.uiDrawCalls = 0;
         batch.totalTriangles = 0;
     }
 
@@ -92,12 +92,12 @@ namespace GDE {
         return batch.totalTriangles;
     }
 
-    int RenderManager::getDrawCalls() {
-        return batch.drawCalls;
+    std::tuple<int, int> RenderManager::getDrawCalls() {
+        return { batch.drawCalls, batch.uiDrawCalls };
     }
 
     void RenderManager::destroy() {
-        LOG_DEBUG("Cleaning up RenderManager")
+        Util::Log::debug("Cleaning up RenderManager");
         IMG_Quit();
     }
 

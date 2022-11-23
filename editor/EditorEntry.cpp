@@ -3,15 +3,15 @@
 //
 
 #include "core/Engine.h"
-#include "GDEEntry.h"
+#include "RDEEntry.h"
 #include "Editor.h"
 
 namespace Editor {
 
-    class EditorEntry : public GDE::Engine {
+    class EditorEntry : public RDE::Engine {
         public:
-        explicit EditorEntry() : GDE::Engine() {
-            GDE::Engine::onInit(new Editor(this));
+        explicit EditorEntry() : RDE::Engine() {
+            RDE::Engine::onInit(new Editor(this));
         }
 
         ~EditorEntry() {
@@ -20,6 +20,6 @@ namespace Editor {
     };
 }
 
-GDE::Engine* GDE::createEngine(int _argc, char** _argv) {
+RDE::Engine* RDE::createEngine(int _argc, char** _argv) {
     return new Editor::EditorEntry();
 }

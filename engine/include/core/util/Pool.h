@@ -2,14 +2,13 @@
 // Created by borja on 9/8/22.
 //
 
-#ifndef GDE_POOL_H
-#define GDE_POOL_H
+#ifndef RDE_POOL_H
+#define RDE_POOL_H
 
 #include <vector>
 #include "core/util/Delegate.h"
-#include "core/util/StringUtils.h"
 
-namespace GDE {
+namespace RDE {
 
     template<class T>
     class Pool {
@@ -62,7 +61,7 @@ namespace GDE {
 
         #ifdef ENGINE_DEBUG
         if(pool.empty()) {
-            throw std::runtime_error(APPEND_S("There are no more elements in the pool, the maximum number of elements was reached and no element was returned yet to the pool!", __LINE__, " in file ", __FILE_NAME__));
+            throw std::runtime_error(Util::String::appendToString("There are no more elements in the pool, the maximum number of elements was reached and no element was returned yet to the pool!", __LINE__, " in file ", __FILE_NAME__));
         }
         #endif
 
@@ -83,4 +82,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_POOL_H
+#endif //RDE_POOL_H

@@ -1,8 +1,9 @@
-#ifndef GDE_TEXTURE_H
-#define GDE_TEXTURE_H
+#ifndef RDE_TEXTURE_H
+#define RDE_TEXTURE_H
 
 #include <iostream>
 #include "core/util/Util.h"
+#include "core/platform/PlatformHeaderSDL.h"
 
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
@@ -12,7 +13,7 @@
     #include "glad/glad.h"
 #endif
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Texture)
 
@@ -118,7 +119,7 @@ namespace GDE {
             GLenum dataFormat = -1;
 
             /**
-             * @brief Out of the whole SpriteSheet, the portion that the renderer should draw on screen. If this texture
+             * @brief Out of the whole SpriteSheet, the portion that the renderer should drawBatched on screen. If this texture
              * is itself the SpriteSheet, then the region is the whole SpriteSheet.
              */
             FloatRect region {};
@@ -223,27 +224,6 @@ namespace GDE {
              * @return std::string
              */
             [[nodiscard]]std::string getPath();
-
-        private:
-            /**
-             * @brief SDL2 loads the texture backwards so this returns it to its normal state.
-             * @param surface SDL2 surface needed to load the texture.
-             * @return int
-             */
-            int invertSDLSurface(SDL_Surface *surface);
-
-            /**
-             * @brief Generates and SDL2 surface to work with the texture when loading it.
-             * @param _imageFile Raw data of the SpriteSheet.
-             * @param _pathToFile Path to the file.
-             * @return SDL_Surface*
-             */
-            SDL_Surface* getSDLSurface(SDL_RWops* _imageFile, const std::string& _pathToFile);
-
-            /**
-             * @brief Checks for any OpenGL error on a given moment and prints it on screen.
-             */
-            void checkGLError();
     };
 
     /**
@@ -331,4 +311,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_TEXTURE_H
+#endif //RDE_TEXTURE_H

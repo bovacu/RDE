@@ -32,7 +32,7 @@
         <key>dpi</key>
         <uint>72</uint>
         <key>dataFormat</key>
-        <string>GDE</string>
+        <string>RDE</string>
         <key>textureFileName</key>
         <filename></filename>
         <key>flipPVR</key>
@@ -124,7 +124,7 @@
             <key>datafile</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>assets.json</filename>
+                <filename>defaultAssets.json</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -173,6 +173,34 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">sprites/anchorBottomLeft.png</key>
+            <key type="filename">sprites/anchorBottomMiddle.png</key>
+            <key type="filename">sprites/anchorBottomRight.png</key>
+            <key type="filename">sprites/anchorMiddleLeft.png</key>
+            <key type="filename">sprites/anchorMiddleMiddle.png</key>
+            <key type="filename">sprites/anchorMiddleRight.png</key>
+            <key type="filename">sprites/anchorTopLeft.png</key>
+            <key type="filename">sprites/anchorTopMiddle.png</key>
+            <key type="filename">sprites/anchorTopRight.png</key>
+            <key type="filename">sprites/icons/32x32px/checkmark.png</key>
+            <key type="filename">sprites/stretchFull.png</key>
+            <key type="filename">sprites/stretchHorizontal.png</key>
+            <key type="filename">sprites/stretchNone.png</key>
+            <key type="filename">sprites/stretchVertical.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">sprites/bgrRadiobitton.png</key>
             <key type="filename">sprites/elipseWithOutline.png</key>
             <struct type="IndividualSpriteSettings">
@@ -263,7 +291,9 @@
                 <false/>
             </struct>
             <key type="filename">sprites/buttonExit.png</key>
+            <key type="filename">sprites/circleUIMask.png</key>
             <key type="filename">sprites/icons/64x64px/x64x64.png</key>
+            <key type="filename">sprites/rectangleUIMaks.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -302,6 +332,36 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">sprites/caret.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>0,8,1,16</rect>
+                <key>scale9Paddings</key>
+                <rect>0,8,1,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/checkboxDark.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,12,12</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,12,12</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">sprites/circleLoadingBar.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -332,7 +392,7 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">sprites/fillAndBgrScrollBarHorisontal.png</key>
+            <key type="filename">sprites/fillAndBgrScrollBarHorizontal.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -456,7 +516,6 @@
             <key type="filename">sprites/icons/32x32px/arrowLeft32x32.png</key>
             <key type="filename">sprites/icons/32x32px/arrowRight32x32.png</key>
             <key type="filename">sprites/icons/32x32px/arrowUp32x32.png</key>
-            <key type="filename">sprites/icons/32x32px/checmark32x32.png</key>
             <key type="filename">sprites/icons/32x32px/x32x32.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -728,7 +787,6 @@
             <filename>sprites/circleLoadingBar.png</filename>
             <filename>sprites/elipseWithOutline.png</filename>
             <filename>sprites/emptyLifeBubble.png</filename>
-            <filename>sprites/fillAndBgrScrollBarHorisontal.png</filename>
             <filename>sprites/fillAndBgrScrollBarVertical.png</filename>
             <filename>sprites/fillAndBgrSliderBar.png</filename>
             <filename>sprites/fillAndBgrSmallSliderBar.png</filename>
@@ -764,10 +822,28 @@
             <filename>sprites/icons/32x32px/arrowLeft32x32.png</filename>
             <filename>sprites/icons/32x32px/arrowRight32x32.png</filename>
             <filename>sprites/icons/32x32px/arrowUp32x32.png</filename>
-            <filename>sprites/icons/32x32px/checmark32x32.png</filename>
             <filename>sprites/icons/32x32px/x32x32.png</filename>
             <filename>sprites/icons/64x64px/x64x64.png</filename>
             <filename>sprites/sprite.png</filename>
+            <filename>sprites/caret.png</filename>
+            <filename>sprites/checkboxDark.png</filename>
+            <filename>sprites/fillAndBgrScrollBarHorizontal.png</filename>
+            <filename>sprites/icons/32x32px/checkmark.png</filename>
+            <filename>sprites/anchorBottomLeft.png</filename>
+            <filename>sprites/anchorBottomRight.png</filename>
+            <filename>sprites/anchorTopLeft.png</filename>
+            <filename>sprites/anchorTopRight.png</filename>
+            <filename>sprites/anchorBottomMiddle.png</filename>
+            <filename>sprites/anchorMiddleLeft.png</filename>
+            <filename>sprites/anchorMiddleMiddle.png</filename>
+            <filename>sprites/anchorMiddleRight.png</filename>
+            <filename>sprites/anchorTopMiddle.png</filename>
+            <filename>sprites/stretchFull.png</filename>
+            <filename>sprites/stretchHorizontal.png</filename>
+            <filename>sprites/stretchNone.png</filename>
+            <filename>sprites/stretchVertical.png</filename>
+            <filename>sprites/circleUIMask.png</filename>
+            <filename>sprites/rectangleUIMaks.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

@@ -1,13 +1,13 @@
 // Created by borja on 26/12/21.
 
 
-#ifndef GDE_RENDER_MANAGER_H
-#define GDE_RENDER_MANAGER_H
+#ifndef RDE_RENDER_MANAGER_H
+#define RDE_RENDER_MANAGER_H
 
 #include "core/util/Util.h"
 #include "core/render/elements/SpriteBatch.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Engine)
 
@@ -18,7 +18,7 @@ namespace GDE {
         public:
             void resetDebugInfo();
             int getTotalTriangles();
-            int getDrawCalls();
+            std::tuple<int, int> getDrawCalls();
 
         private:
             /**
@@ -45,24 +45,12 @@ namespace GDE {
             void destroy();
 
             /**
-             * @brief This must be called before any draw call on every frame (in main loop).
+             * @brief This must be called before any drawBatched call on every frame (in main loop).
              * @param _color The color of the background
              */
             void clear();
 
             void resetBuffers();
-
-            /**
-             * @brief Sets the color to paint the background.
-             * @param _color Color to paint the background
-             */
-            void setClearColor(const Color& _color);
-
-            /**
-             * @brief Returns the current clear color.
-             * @return Color
-             */
-            Color getClearColor();
 
             /**
              * @brief Renders textures, sprites... It includes 2D batching for
@@ -88,10 +76,9 @@ namespace GDE {
 
             /**
              * @brief Renders an IRenderizable immediately with no batching. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
-             * @param _renderizable Component derived from IRenderizable.
-             * @param _transform Nine patch's transform.
+             * @param _batches Static batches to render.
              */
-            void drawUI(IRenderizable* _renderizable, Transform& _transform);
+            void drawUI(std::vector<Batch>& _batches);
 
             /**
              * @brief Sends the data batched to the GPU, must be called after beginDraw and what we want to render.
@@ -104,6 +91,18 @@ namespace GDE {
             void endDebugDraw();
 
         public:
+            /**
+             * @brief Sets the color to paint the background.
+             * @param _color Color to paint the background
+             */
+            void setClearColor(const Color& _color);
+
+            /**
+             * @brief Returns the current clear color.
+             * @return Color
+             */
+            Color getClearColor();
+
             /**
                  * @brief Draws a point at _position. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
                  * @param _position Position.
@@ -156,4 +155,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_RENDER_MANAGER_H
+#endif //RDE_RENDER_MANAGER_H

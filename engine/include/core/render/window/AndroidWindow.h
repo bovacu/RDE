@@ -2,8 +2,8 @@
 // Created by borja on 8/20/22.
 //
 
-#ifndef GDE_ANDROID_WINDOW_H
-#define GDE_ANDROID_WINDOW_H
+#ifndef RDE_ANDROID_WINDOW_H
+#define RDE_ANDROID_WINDOW_H
 
 #include "core/Core.h"
 
@@ -11,14 +11,14 @@
 
 #include "Window.h"
 
-namespace GDE {
+namespace RDE {
 
     class AndroidWindow : public Window {
     public:
-        explicit AndroidWindow(GDEConfig* _config);
+        explicit AndroidWindow(RDEConfig* _config);
     };
 }
 
 #endif
 
-#endif //GDE_ANDROID_WINDOW_H
+#endif //RDE_ANDROID_WINDOW_H

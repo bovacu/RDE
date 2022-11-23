@@ -2,6 +2,10 @@
 cmake-build-debug/
 
 cmake-build-release/
+cmake-build-debug/
+cmake-build-releasewithdebuginfo_lib/
+cmake-build-rwdilib/
+cmake-build-releaselib/
 
 .cache/
 
@@ -68,7 +72,7 @@ cmake-build-debug-mingw_clang/.cmake/api/v1/reply/directory-.-Debug-d0094a50bb20
 
 cmake-build-debug-mingw_clang/.cmake/api/v1/reply/index-2022-08-12T23-36-26-0642.json
 
-cmake-build-debug-mingw_clang/.cmake/api/v1/reply/target-GDE-Debug-280116aefdcfd512c231.json
+cmake-build-debug-mingw_clang/.cmake/api/v1/reply/target-RDE-Debug-280116aefdcfd512c231.json
 
 cmake-build-debug-mingw_clang/.cmake/api/v1/reply/toolchains-v1-9308c8f498dca15d7bdf.json
 
@@ -188,9 +192,9 @@ cmake-build-debug-mingw_clang/CMakeCache.txt
 
 cmake-build-debug-mingw_clang/freetyped.dll
 
-cmake-build-debug-mingw_clang/GDE.exe
+cmake-build-debug-mingw_clang/RDE.exe
 
-cmake-build-debug-mingw_clang/GDE.pdb
+cmake-build-debug-mingw_clang/RDE.pdb
 
 cmake-build-debug-mingw_clang/imgui.ini
 
@@ -226,7 +230,7 @@ cmake-build-release-mingw_clang/.cmake/api/v1/reply/directory-.-Release-d0094a50
 
 cmake-build-release-mingw_clang/.cmake/api/v1/reply/index-2022-08-12T23-36-15-0027.json
 
-cmake-build-release-mingw_clang/.cmake/api/v1/reply/target-GDE-Release-d65e193e4599b2fb92aa.json
+cmake-build-release-mingw_clang/.cmake/api/v1/reply/target-RDE-Release-d65e193e4599b2fb92aa.json
 
 cmake-build-release-mingw_clang/.cmake/api/v1/reply/toolchains-v1-9308c8f498dca15d7bdf.json
 
@@ -248,7 +252,7 @@ cmake-build-release-mingw_clang/CMakeCache.txt
 
 cmake-build-release-mingw_clang/freetype.dll
 
-cmake-build-release-mingw_clang/GDE.exe
+cmake-build-release-mingw_clang/RDE.exe
 
 cmake-build-release-mingw_clang/jpeg62.dll
 
@@ -274,7 +278,7 @@ cmake-build-debug-mingw_clang/.cmake/api/v1/reply/codemodel-v2-4a76c52c31447a62c
 
 cmake-build-debug-mingw_clang/.cmake/api/v1/reply/index-2022-08-20T23-32-54-0423.json
 
-cmake-build-debug-mingw_clang/.cmake/api/v1/reply/target-GDE-Debug-557727192fc3a56a86c6.json
+cmake-build-debug-mingw_clang/.cmake/api/v1/reply/target-RDE-Debug-557727192fc3a56a86c6.json
 
 cmake-build-release-mingw_clang/.cmake/api/v1/reply/cache-v2-a68f94d12a2751f18807.json
 
@@ -282,7 +286,7 @@ cmake-build-release-mingw_clang/.cmake/api/v1/reply/codemodel-v2-f5c15fed433ffab
 
 cmake-build-release-mingw_clang/.cmake/api/v1/reply/index-2022-08-20T23-32-54-0439.json
 
-cmake-build-release-mingw_clang/.cmake/api/v1/reply/target-GDE-Release-e6d8a7a949a676a27896.json
+cmake-build-release-mingw_clang/.cmake/api/v1/reply/target-RDE-Release-e6d8a7a949a676a27896.json
 
 cmake-build-relwithdebinfo-mingw_clang/.cmake/api/v1/query/cache-v2
 
@@ -302,7 +306,7 @@ cmake-build-relwithdebinfo-mingw_clang/.cmake/api/v1/reply/directory-.-RelWithDe
 
 cmake-build-relwithdebinfo-mingw_clang/.cmake/api/v1/reply/index-2022-08-20T23-32-54-0418.json
 
-cmake-build-relwithdebinfo-mingw_clang/.cmake/api/v1/reply/target-GDE-RelWithDebInfo-520a14f956b6cb5bcbe6.json
+cmake-build-relwithdebinfo-mingw_clang/.cmake/api/v1/reply/target-RDE-RelWithDebInfo-520a14f956b6cb5bcbe6.json
 
 cmake-build-relwithdebinfo-mingw_clang/.cmake/api/v1/reply/toolchains-v1-9308c8f498dca15d7bdf.json
 
@@ -332,7 +336,7 @@ cmake-build-releasewithdebuginfo_lib/.cmake/api/v1/reply/directory-.-RelWithDebI
 
 cmake-build-releasewithdebuginfo_lib/.cmake/api/v1/reply/index-2022-10-01T15-17-26-0419.json
 
-cmake-build-releasewithdebuginfo_lib/.cmake/api/v1/reply/target-GDE-RelWithDebInfo-fa3d07627bf5a3e72bfa.json
+cmake-build-releasewithdebuginfo_lib/.cmake/api/v1/reply/target-RDE-RelWithDebInfo-fa3d07627bf5a3e72bfa.json
 
 cmake-build-releasewithdebuginfo_lib/.cmake/api/v1/reply/toolchains-v1-befc405f6879dbf05623.json
 
@@ -346,21 +350,21 @@ cmake-build-releasewithdebuginfo_lib/cmake_install.cmake
 
 cmake-build-releasewithdebuginfo_lib/CMakeCache.txt
 
-cmake-build-releasewithdebuginfo_lib/libGDE.a
+cmake-build-releasewithdebuginfo_lib/libRDE.a
 
 cmake-build-releasewithdebuginfo_lib/Testing/Temporary/LastTest.log
 
 cmake-build-releasewithdebuginfo_lib/.cmake/api/v1/reply/index-2022-10-01T15-33-13-0036.json
 
-demo/GDEDemo.cpp
+demo/RDEDemo.cpp
 
-demo/GDEDemo.h
+demo/RDEDemo.h
 
 cmake-build-releasewithdebuginfo_lib/.cmake/api/v1/reply/codemodel-v2-3eab8117630034a1c9b5.json
 
 cmake-build-releasewithdebuginfo_lib/.cmake/api/v1/reply/index-2022-10-01T17-48-32-0303.json
 
-cmake-build-releasewithdebuginfo_lib/.cmake/api/v1/reply/target-GDE-RelWithDebInfo-2d480456bfb7f4f31cac.json
+cmake-build-releasewithdebuginfo_lib/.cmake/api/v1/reply/target-RDE-RelWithDebInfo-2d480456bfb7f4f31cac.json
 
 cmake-build-releaselib/.cmake/api/v1/query/cache-v2
 
@@ -380,7 +384,7 @@ cmake-build-releaselib/.cmake/api/v1/reply/directory-.-Release-f5ebdc15457944623
 
 cmake-build-releaselib/.cmake/api/v1/reply/index-2022-10-05T03-46-22-0265.json
 
-cmake-build-releaselib/.cmake/api/v1/reply/target-GDE-Release-4e0b206fd95969189376.json
+cmake-build-releaselib/.cmake/api/v1/reply/target-RDE-Release-4e0b206fd95969189376.json
 
 cmake-build-releaselib/.cmake/api/v1/reply/toolchains-v1-befc405f6879dbf05623.json
 
@@ -394,7 +398,7 @@ cmake-build-releaselib/cmake_install.cmake
 
 cmake-build-releaselib/CMakeCache.txt
 
-cmake-build-releaselib/libGDE.a
+cmake-build-releaselib/libRDE.a
 
 cmake-build-releaselib/Testing/Temporary/LastTest.log
 
@@ -416,7 +420,7 @@ cmake-build-rwdilib/.cmake/api/v1/reply/directory-.-RelWithDebInfo-f5ebdc1545794
 
 cmake-build-rwdilib/.cmake/api/v1/reply/index-2022-10-05T03-46-22-0606.json
 
-cmake-build-rwdilib/.cmake/api/v1/reply/target-GDE-RelWithDebInfo-83f7976ec26059e73c55.json
+cmake-build-rwdilib/.cmake/api/v1/reply/target-RDE-RelWithDebInfo-83f7976ec26059e73c55.json
 
 cmake-build-rwdilib/.cmake/api/v1/reply/toolchains-v1-befc405f6879dbf05623.json
 
@@ -430,7 +434,7 @@ cmake-build-rwdilib/cmake_install.cmake
 
 cmake-build-rwdilib/CMakeCache.txt
 
-cmake-build-rwdilib/libGDE.a
+cmake-build-rwdilib/libRDE.a
 
 cmake-build-rwdilib/Testing/Temporary/LastTest.log
 
@@ -445,3 +449,31 @@ cmake-build-rwdilib/.cmake/api/v1/reply/cache-v2-cfcc76718ba4f659d488.json
 cmake-build-rwdilib/.cmake/api/v1/reply/cmakeFiles-v1-9c13830f3e8e36a381ef.json
 
 cmake-build-rwdilib/.cmake/api/v1/reply/index-2022-10-14T13-41-41-0360.json
+
+cmake-build-releaselib/.cmake/api/v1/reply/cmakeFiles-v1-6cd195c3275b2222df59.json
+
+cmake-build-releaselib/.cmake/api/v1/reply/codemodel-v2-3d36a6da1e154accd473.json
+
+cmake-build-releaselib/.cmake/api/v1/reply/index-2022-10-18T19-25-48-0645.json
+
+cmake-build-releaselib/.cmake/api/v1/reply/target-RDE-Release-4ac4acf101c40878a684.json
+
+cmake-build-rwdilib/.cmake/api/v1/reply/cmakeFiles-v1-1e15c9d3abfe7159b6a2.json
+
+cmake-build-rwdilib/.cmake/api/v1/reply/codemodel-v2-7bc0258fe0c8dd379e22.json
+
+cmake-build-rwdilib/.cmake/api/v1/reply/index-2022-10-18T19-25-48-0639.json
+
+cmake-build-rwdilib/.cmake/api/v1/reply/target-RDE-RelWithDebInfo-add0b34b9a2be8c76cb2.json
+
+cmake-build-releaselib/.cmake/api/v1/reply/codemodel-v2-b84f6a0148e04ae2a548.json
+
+cmake-build-releaselib/.cmake/api/v1/reply/index-2022-10-20T18-17-49-0044.json
+
+cmake-build-releaselib/.cmake/api/v1/reply/target-RDE-Release-41f0ff4166348eda1673.json
+
+cmake-build-rwdilib/.cmake/api/v1/reply/codemodel-v2-50d68631bb48f1633c37.json
+
+cmake-build-rwdilib/.cmake/api/v1/reply/index-2022-10-20T18-17-49-0067.json
+
+cmake-build-rwdilib/.cmake/api/v1/reply/target-RDE-RelWithDebInfo-acc5bd1b769f2aea4c5c.json

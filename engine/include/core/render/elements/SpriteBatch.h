@@ -1,5 +1,5 @@
-#ifndef GDE_SPRITE_BATCH_H
-#define GDE_SPRITE_BATCH_H
+#ifndef RDE_SPRITE_BATCH_H
+#define RDE_SPRITE_BATCH_H
 
 #include <vector>
 #include "core/render/Camera.h"
@@ -8,12 +8,12 @@
 #include "core/graph/components/Components.h"
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
-#include "core/graph/components/NineSliceSprite.h"
+#include "core/graph/components/ui/UI9Slice.h"
 #include "core/graph/components/ParticleSystem.h"
 #include "core/render/elements/Vertex.h"
 #include "core/render/elements/Batch.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Engine)
 
@@ -36,17 +36,17 @@ namespace GDE {
                 static SpriteBatch* batch;
 
                 /**
-                 * @brief vertices to draw geometry more complex than a line.
+                 * @brief vertices to drawBatched geometry more complex than a line.
                  */
                 std::vector<OpenGLVertexDebug> vertexDebugBufferGeometrics {};
 
                 /**
-                 * @brief vertices to draw simple lines.
+                 * @brief vertices to drawBatched simple lines.
                  */
                 std::vector<OpenGLVertexDebug> vertexDebugBufferLines {};
 
                 /**
-                 * @brief vertices to draw simple points.
+                 * @brief vertices to drawBatched simple points.
                  */
                 std::vector<OpenGLVertexDebug> vertexDebugBufferPoints {};
 
@@ -105,7 +105,7 @@ namespace GDE {
 
                 /**
                  * @brief Draws a complex shape.
-                 * @param _shape Shape to draw
+                 * @param _shape Shape to drawBatched
                  * @see Shape
                  */
                 void drawShape(DebugShape& _shape);
@@ -136,9 +136,14 @@ namespace GDE {
             int totalTriangles = 0;
 
             /**
-             * @brief Amount of Draw Calls per frame, only used for debugging purposes.
+             * @brief Amount of Draw Calls, only used for debugging purposes.
              */
             int drawCalls = 0;
+
+            /**
+             * @brief Amount of Draw Calls for the UI, only used for debugging purposes.
+             */
+            int uiDrawCalls = 0;
 
             /**
              * @see Debug
@@ -158,9 +163,9 @@ namespace GDE {
             ShaderManager* shaderManager = nullptr;
 
             /**
-             * @see IViewPort
+             * @see ViewPort
              */
-            IViewPort* viewport = nullptr;
+            ViewPort* viewport = nullptr;
 
             /**
              * @brief View Projection Matrix, this is the matrix that tells the GPU how to render the geometry.
@@ -207,18 +212,17 @@ namespace GDE {
             void beginDraw(Camera& _camera, Transform* _cameraTransform);
 
             /**
-             * This method is used to draw anything that extends IRenderizable.
+             * This method is used to drawBatched anything that extends IRenderizable.
              * @param _renderizable An IRenderizable instance.
              * @param _transform Transform of the IRenderizable.
              */
             void draw(IRenderizable* _renderizable, Transform& _transform);
 
             /**
-             * This method is used to draw anything that extends IRenderizable and that is UI.
-             * @param _renderizable An IRenderizable instance.
-             * @param _transform Transform of the IRenderizable.
+             * This method is used to drawBatched anything that extends IRenderizable and that is UI.
+             * @param _batches Static batches to render the UI.
              */
-            void drawUI(IRenderizable* _renderizable, Transform& _transform);
+            void drawUI(std::vector<Batch>& _batches);
 
             /**
              * @brief This method sends all of the geometry to the GPU and ends a Draw Call.
@@ -233,4 +237,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_SPRITE_BATCH_H
+#endif //RDE_SPRITE_BATCH_H

@@ -11,22 +11,21 @@
     #include "glad/glad.h"
 #endif
 
-namespace GDE {
+namespace RDE {
 
     static bool shouldUpdateWindowDefault() {
         return true;
     }
 
-    Window::Window(GDEConfig* _config) : window(nullptr) {
+    Window::Window(RDEConfig* _config) : window(nullptr) {
         properties = _config;
 
         #ifdef ENGINE_DEBUG
-        LOG_DEBUG("Creating window ", _config->windowData.title, " (", _config->windowData.size.x, _config->windowData.size.y, ")");
+        Util::Log::debug("Creating window ", _config->windowData.title, " (", _config->windowData.size.x, _config->windowData.size.y, ")");
         #endif
 
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-            LOG_E("At least one module of SDL couldn't be initialized, so can't start the engine")
-            printf("SDL_Init failed: %s\n", SDL_GetError());
+            Util::Log::error("At least one module of SDL couldn't be initialized, so can't start the engine: ", SDL_GetError());
             return;
         }
 
@@ -35,7 +34,7 @@ namespace GDE {
     
         SDL_VERSION(&compiled);
         SDL_GetVersion(&linked);
-        LOG_DEBUG("We compiled against SDL version ", (int)compiled.major, ".", (int)compiled.minor, ".", (int)compiled.patch, " and linking to ", (int)linked.major, ".", (int)linked.minor, ".", (int)linked.patch);
+        Util::Log::debug("We compiled against SDL version ", (int)compiled.major, ".", (int)compiled.minor, ".", (int)compiled.patch, " and linking to ", (int)linked.major, ".", (int)linked.minor, ".", (int)linked.patch);
 
         shouldUpdateWindow.bind<shouldUpdateWindowDefault>();
     }
@@ -74,8 +73,9 @@ namespace GDE {
 
     void Window::setIcon(const std::string& _path) {
         properties->projectData.iconPath = _path;
-        LOG_W("Setting icon is not supported yet!!!!")
-        SDL_SetWindowIcon(window, nullptr);
+        auto* _surface = Util::Texture::getSDLSurface(_path);
+        SDL_SetWindowIcon(window, _surface);
+        SDL_FreeSurface(_surface);
     }
 
     void Window::setPosition(const Vec2I& _position) {
@@ -137,6 +137,14 @@ namespace GDE {
 
     void Window::stop() {
         running = false;
+    }
+
+    void Window::refreshDpi() {
+        if(SDL_GetDisplayDPI(SDL_GetWindowDisplayIndex(window), &properties->windowData.diagonalDpi, &properties->windowData.horizontalDpi, &properties->windowData.verticalDpi) != 0) {
+            Util::Log::warn("No DPI could be obtained on the current display with index: ", SDL_GetWindowDisplayIndex(window));
+        } else {
+            Util::Log::debug("DPI of the current window is -> (Diagonal, Horizontal, Vertical) - (", properties->windowData.diagonalDpi, ", ", properties->windowData.horizontalDpi, ", ", properties->windowData.verticalDpi, ")");
+        }
     }
 
 }

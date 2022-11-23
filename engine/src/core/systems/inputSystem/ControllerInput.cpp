@@ -5,7 +5,7 @@
 #include "core/systems/eventSystem/ControllerEvent.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     void ControllerVibrationManager::init(std::unordered_map<int, Controller*>* _controllers) {
         controllers = _controllers;
@@ -105,15 +105,15 @@ namespace GDE {
 
     void ControllerInput::initControllers() {
         int _numJoysticks = SDL_NumJoysticks();
-        LOG_DEBUG("Num of Joysticks: ", _numJoysticks)
+        Util::Log::debug("Num of Joysticks: ", _numJoysticks);
         if(_numJoysticks < 1) {
-            LOG_DEBUG("No joysticks connected")
+            Util::Log::debug("No joysticks connected");
             return;
         }
         for(int _i = 0; _i < _numJoysticks; _i++) {
             auto* _currentGameController = SDL_GameControllerOpen(_i);
             if(_currentGameController == nullptr) {
-                LOG_E("Error with controller ", _i)
+                Util::Log::error("Error with controller ", _i);
                 auto _controller = new Controller(-100);
                 _controller->sdlGameController = _currentGameController;
                 controllers[SDL_JoystickGetDeviceInstanceID(_i)] = _controller;
@@ -122,7 +122,7 @@ namespace GDE {
 
             if(controllers[SDL_JoystickGetDeviceInstanceID(_i)] != nullptr) continue;
 
-            LOG_DEBUG("Connected Controller ", _i, ", Device Instance: ", SDL_JoystickGetDeviceInstanceID(_i))
+            Util::Log::debug("Connected Controller ", _i, ", Device Instance: ", SDL_JoystickGetDeviceInstanceID(_i));
             auto _controller = new Controller(_i);
             _controller->sdlGameController = _currentGameController;
             _controller->vibration = SDL_HapticOpenFromJoystick(SDL_GameControllerGetJoystick(_currentGameController));
@@ -131,7 +131,7 @@ namespace GDE {
             engine->manager.controllerVibrationManager.assignVibrationEffectToController("default", _controller->ID);
         }
 
-        LOG_DEBUG(_numJoysticks, " connected and ", controllers.size(), " loaded")
+        Util::Log::debug(_numJoysticks, " connected and ", controllers.size(), " loaded");
     }
 
     void ControllerInput::onControllerMoved(SDL_Event& _event) {
@@ -206,7 +206,7 @@ namespace GDE {
     }
 
     void ControllerInput::onControllerDisconnected(SDL_Event& _event) {
-        LOG_W("Removed controller: ", controllers[_event.cdevice.which]->ID)
+        Util::Log::debug("Removed controller: ", controllers[_event.cdevice.which]->ID);
         if(controllers[_event.cdevice.which]->ID >= 0)
             SDL_GameControllerClose(controllers[_event.cdevice.which]->sdlGameController);
         int _removedID = controllers[_event.cdevice.which]->ID;
@@ -215,7 +215,7 @@ namespace GDE {
 
         for(auto& _controller : controllers)
             if(_controller.second->ID > _removedID) {
-                LOG_W("Reassigned controller ", _controller.second->ID, " to ", _controller.second->ID - 1)
+                Util::Log::debug("Reassigned controller ", _controller.second->ID, " to ", _controller.second->ID - 1);
                 _controller.second->ID--;
             }
     }
@@ -262,7 +262,7 @@ namespace GDE {
     void ControllerInput::destroy() {
         engine->manager.controllerVibrationManager.destroy();
 
-        LOG_DEBUG("Cleaning up Controllers")
+        Util::Log::debug("Cleaning up Controllers");
         for(auto& _controller : controllers) {
             if(_controller.second->ID >= 0) {
                 SDL_HapticClose(_controller.second->vibration);
@@ -280,7 +280,7 @@ namespace GDE {
 
     bool ControllerInput::reassignController(int _controllerID, int _as) {
         if(!(hasController(_controllerID) || hasController(_as) || _controllerID < 0 || _as < 0)) {
-            LOG_E("Tried to reassigned controller ", _controllerID, " to ", _as, " but at least one of them didn't exist")
+            Util::Log::error("Tried to reassigned controller ", _controllerID, " to ", _as, " but at least one of them didn't exist");
             return false;
         }
 

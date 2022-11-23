@@ -4,8 +4,9 @@
 
 #include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/render/RenderManager.h"
+#include "core/util/Mat2.h"
 
-namespace GDE {
+namespace RDE {
 
     void PhysicsManager::init() {
         space = cpSpaceNew();
@@ -14,33 +15,35 @@ namespace GDE {
     }
 
     void PhysicsManager::destroy() {
-        LOG_DEBUG("Cleaning up PhysicsManager")
+        Util::Log::debug("Cleaning up PhysicsManager");
         for(auto* _body : bodies) {
             remove(_body);
         }
         cpSpaceFree(space);
     }
 
+    void PhysicsManager::update(Delta _dt) {
+        for (auto* _body: bodies) {
+            auto _cpPos = cpBodyGetPosition(_body->body);
+            auto _bodyPos = Vec2F { (float)_cpPos.x, (float)_cpPos.y };
+            auto _bodyAngle = Util::Math::radiansToDegrees(cpBodyGetAngle(_body->body));
+            auto _transformPos = _body->transform->getModelMatrixPosition();
+            auto _transformRot = _body->transform->getModelMatrixRotation();
+
+            if(!Util::Math::approximatelyEqual(_transformPos, _bodyPos)) {
+                _body->transform->setMatrixModelPosition({(float)_bodyPos.x, (float)_bodyPos.y});
+            }
+
+            if(!Util::Math::approximatelyEqual(_transformRot, (float)_bodyAngle)) {
+                _body->transform->setMatrixModelRotation((float)_bodyAngle);
+            }
+        }
+    }
+
     void PhysicsManager::step(Delta _fxDt) {
         if (!simulate) return;
 
         cpSpaceStep(space, _fxDt);
-
-        for (auto* _body: bodies) {
-            auto _cpPos = cpBodyGetPosition(_body->body);
-            auto _bodyPos = Vec2F { (float)_cpPos.x, (float)_cpPos.y };
-            auto _bodyAngle = radiansToDegrees(cpBodyGetAngle(_body->body));
-            auto _transformPos = _body->transform->getModelMatrixPosition();
-            auto _transformRot = _body->transform->getModelMatrixRotation();
-
-            if(!PhysicsMath::approximatelyEqual(_transformPos, _bodyPos)) {
-                _body->transform->setMatrixModelPosition({(float)_bodyPos.x, (float)_bodyPos.y});
-            }
-
-            if(!PhysicsMath::approximatelyEqual(_transformRot, (float)_bodyAngle)) {
-                _body->transform->setMatrixModelRotation((float)_bodyAngle);
-            }
-        }
     }
 
     void PhysicsManager::setGravity(const Vec2F& _gravity) {
@@ -64,7 +67,7 @@ namespace GDE {
         if(!_showLines) return;
 
         Mat2 _rotMatrix(1, _physicsBody->transform->getModelMatrixPosition().x, 0, _physicsBody->transform->getModelMatrixPosition().y);
-        _rotMatrix.rotate(radiansToDegrees(cpBodyGetAngle(_physicsBody->body)));
+        _rotMatrix.rotate(Util::Math::radiansToDegrees(cpBodyGetAngle(_physicsBody->body)));
 
         for (auto _i = 0; _i < _shapeConfig.vertices.size(); _i++) {
 
@@ -90,6 +93,8 @@ namespace GDE {
 
         for(auto* _body : bodies) {
 
+            if(!_body->isEnabled()) continue;
+
             for(auto& _physicsShape : _body->physicsShapes) {
 
                 switch (_physicsShape.second.shapeConfig.type) {
@@ -97,7 +102,7 @@ namespace GDE {
                         if(!debugOptions.showCircleLines) return;
 
                         const int _segments = 20;
-                        float _theta = _body->transform->getRotation();
+                        float _theta = Util::Math::degreesToRadians(_body->transform->getRotation());
                         float _inc = PI * 2.0f / (float)_segments;
                         Vec2F _points[_segments];
 

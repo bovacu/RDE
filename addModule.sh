@@ -9,28 +9,28 @@ then
 fi
 
 function android {
-    if [[ -d "targets/GDEAndroid" ]]
+    if [[ -d "targets/RDEAndroid" ]]
         then
           echo "Module already configured"
           exit 0
     fi
     mkdir targets
-    cd targets && git clone https://github.com/bovacu/GDEAndroid
-    cd GDEAndroid/sdl/jni && ./buildAndroidLibs.sh
+    cd targets && git clone https://github.com/bovacu/RDEAndroid
+    cd RDEAndroid/sdl/jni && ./buildAndroidLibs.sh
     cd "$BASE_DIR"
 }
 
 function firebase {
     cd "$BASE_DIR"
-    if [[ -d "targets/GDEFirebase" ]]
+    if [[ -d "targets/RDEFirebase" ]]
         then
             echo "Module already configured"
             exit 0
         fi
 
     mkdir targets
-    cd targets && git submodule add https://github.com/bovacu/GDEFirebase
-    cd GDEFirebase && ./setup.sh
+    cd targets && git submodule add https://github.com/bovacu/RDEFirebase
+    cd RDEFirebase && ./setup.sh
     cd "$BASE_DIR"
 }
 

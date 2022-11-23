@@ -1,15 +1,15 @@
 // Created by borja on 6/2/22.
 
 
-#ifndef GDE_CONTROLLER_INPUT_H
-#define GDE_CONTROLLER_INPUT_H
+#ifndef RDE_CONTROLLER_INPUT_H
+#define RDE_CONTROLLER_INPUT_H
 
 
 #include "core/util/Util.h"
 #include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
 #include "Input.h"
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief Data struct that configures how the controller should vibrate.
@@ -296,4 +296,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_CONTROLLER_INPUT_H
+#endif //RDE_CONTROLLER_INPUT_H

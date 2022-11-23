@@ -13,31 +13,26 @@
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
-    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Texture* _texture) : IRenderizable(_scene->getMainGraph()->getComponent<Transform>(_nodeId)) {
+    SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Texture* _texture) :
+    SpriteRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _texture) {  }
+
+    SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
+    SpriteRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _texture)  {  }
+
+    SpriteRenderer::SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : IRenderizable(_node) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
         if(_texture == nullptr) {
-            texture = _scene->engine->manager.textureManager.getSubTexture("assets", "sprite");
+            texture = _manager->textureManager.getSubTexture("defaultAssets", "sprite");
         } else {
             texture = _texture;
         }
 
-        auto [_transformMat, _] = transform->localToWorld();
-        calculateGeometry(_transformMat, *transform, *_scene->getMainCamera()->getViewport());
-    }
-
-    SpriteRenderer::SpriteRenderer(const NodeID& _nodeId, Scene* _scene, Canvas* _canvas, Texture* _texture) : IRenderizable(_canvas->getGraph()->getComponent<Transform>(_nodeId))  {
-        shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
-        IRenderizable::batchPriority = BatchPriority::SpritePriority;
-
-        if(_texture == nullptr) {
-            texture = _scene->engine->manager.textureManager.getSubTexture("assets", "sprite");
-        } else {
-            texture = _texture;
-        }
+        auto [_transformMat, _] = _node->getTransform()->localToWorld();
+        calculateGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
     }
 
     std::string SpriteRenderer::getTexturePath() {
@@ -45,15 +40,15 @@ namespace GDE {
     }
 
     std::string SpriteRenderer::getTextureName() {
-        return Util::getFileNameFromPath(texture->getPath());
+        return Util::String::getFileNameFromPath(texture->getPath());
     }
 
     std::string SpriteRenderer::getTextureExtension() {
-        return Util::getFileExtension(texture->getPath());
+        return Util::String::getFileExtension(texture->getPath());
     }
 
-    void SpriteRenderer::calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const IViewPort& _viewport) {
-        auto _screenPos = Util::worldToScreenCoords(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
+    void SpriteRenderer::calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+        auto _screenPos = Util::Math::worldToScreenCoords(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
@@ -62,7 +57,7 @@ namespace GDE {
 
         Vec2F _textureTileSize = {(float)texture->getRegion().size.x, (float)texture->getRegion().size.y};
         Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y};
-        auto _textureTileSizeOnScreen = Util::worldToScreenSize(_viewport, _textureTileSize);
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
 
         glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
         glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -82,12 +77,14 @@ namespace GDE {
         geometry[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
     } 
 
-    void SpriteRenderer::draw(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const IViewPort& _viewport) {
+    void SpriteRenderer::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
         auto _vertexCount = _vertices.size();
 
         auto [_transformMat, _dirty] = _transform.localToWorld();
-        if(_dirty) {
-            calculateGeometry(_transformMat, _transform, _viewport);
+        calculateGeometry(_transformMat, _transform, _viewport);
+        if(_dirty || dirty) {
+            _transform.clearDirty();
+            dirty = false;
         }
 
         _vertices.emplace_back(geometry[0]);

@@ -2,16 +2,16 @@
 // Created by borja on 9/16/22.
 //
 
-#ifndef GDE_PHYSICS_BODY_H
-#define GDE_PHYSICS_BODY_H
+#ifndef RDE_PHYSICS_BODY_H
+#define RDE_PHYSICS_BODY_H
 
 
 #include "core/render/shapes/DebugShape.h"
-#include "core/systems/physicsSystem/PhysicsMath.h"
-#include "core/systems/physicsSystem/PhysicsShape.h"
 #include "chipmunk/chipmunk.h"
+#include "core/graph/components/Transform.h"
+#include "core/graph/components/ComponentBase.h"
 
-namespace GDE {
+namespace RDE {
 
     enum PhysicsBodyType {
         STATIC,
@@ -47,6 +47,7 @@ namespace GDE {
     struct ShapeConfig {
         ShapeMaskingConfig shapeMaskingConfig;
         PhysicsShapeType type = PhysicsShapeType::BOX;
+        Vec2F offset = { 0.f, 0.f };
         Vec2F size = { 32, 32 };
         std::vector<Vec2F> vertices {  };
         bool sensor = false;
@@ -63,14 +64,13 @@ namespace GDE {
 
     struct BodyConfig {
         ShapeConfig shapeConfig {  };
-        Vec2F offset = { 0.f, 0.f };
         float mass = 1.0f;
         PhysicsBodyType physicsBodyType = PhysicsBodyType::DYNAMIC;
     };
 
-    FORWARD_DECLARE_CLASS(Scene)
+    FORWARD_DECLARE_CLASS(Scene, Node, Manager, Graph)
 
-    struct PhysicsBody {
+    struct PhysicsBody : public ComponentBase {
 
         FRIEND_CLASS(PhysicsManager, Graph)
 
@@ -92,7 +92,7 @@ namespace GDE {
             void setupShape(ShapeConfig& _shapeConfig);
 
         public:
-            PhysicsBody(const NodeID& _id, Scene* _scene, BodyConfig& _bodyConfig);
+            PhysicsBody(Node* _node, Manager* _manager, Graph* _graph, BodyConfig& _bodyConfig);
             ~PhysicsBody();
             void update();
 
@@ -145,9 +145,12 @@ namespace GDE {
 
             void applyForceLocal(const Vec2F& _force, const Vec2F& _where);
             void applyForceWorld(const Vec2F& _force, const Vec2F& _where);
+
+            void setEnabled(bool _enabled) override;
+            bool isEnabled() override;
     };
 
 }
 
 
-#endif //GDE_PHYSICS_BODY_H
+#endif //RDE_PHYSICS_BODY_H

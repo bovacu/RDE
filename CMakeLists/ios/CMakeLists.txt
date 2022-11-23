@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(PROJECT_NAME Engine)
 
-add_definitions("-DGDE_EXPORT")
+add_definitions("-DRDE_EXPORT")
 #add_definitions("-DRUN_TESTS")
 
 # THIS IS NEEDED FOR OpenGL ES!!!!!!!!!!!!!!
@@ -131,20 +131,20 @@ target_include_directories("ImGuiNodeEditor" PUBLIC ${IMGUI_NODE_EDITOR_PATH})
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 
-file(GLOB_RECURSE GDE_CPP_HEADERS engine/include/*.h*)
-file(GLOB_RECURSE GDE_CPP_SOURCES engine/src/*.cpp)
+file(GLOB_RECURSE RDE_CPP_HEADERS engine/include/*.h*)
+file(GLOB_RECURSE RDE_CPP_SOURCES engine/src/*.cpp)
 
 set(CPP_HEADERS)
 set(CPP_SOURCES)
 
-#GDEFirebase
+#RDEFirebase
 
-option(GDE_LIBRARY "Build library instead of executable" OFF)
-if(GDE_LIBRARY)
+option(RDE_LIBRARY "Build library instead of executable" OFF)
+if(RDE_LIBRARY)
     message("Building lib")
     add_library(Engine STATIC
-        ${GDE_CPP_HEADERS}
-        ${GDE_CPP_SOURCES}
+        ${RDE_CPP_HEADERS}
+        ${RDE_CPP_SOURCES}
 
         ${CPP_SOURCES}
         ${CPP_HEADERS}
@@ -153,14 +153,14 @@ else()
     message("Building executable")
     add_executable(Engine sandbox/Sandbox.h sandbox/Sandbox.cpp
 
-        ${GDE_CPP_HEADERS}
-        ${GDE_CPP_SOURCES}
+        ${RDE_CPP_HEADERS}
+        ${RDE_CPP_SOURCES}
 
         ${CPP_SOURCES}
         ${CPP_HEADERS}
     )
 endif()
-unset(GDE_LIBRARY CACHE)
+unset(RDE_LIBRARY CACHE)
 
 target_link_libraries(Engine ${TARGET_LINKS})
 target_compile_definitions(Engine PRIVATE ${GL_PROFILES})

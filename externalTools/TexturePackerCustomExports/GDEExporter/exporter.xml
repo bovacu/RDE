@@ -1,12 +1,12 @@
 <exporter version="1.0">
     <!-- identifier of the exporter -->
-    <name>GDE</name>
+    <name>RDE</name>
 	
     <!-- display name of the exporter for the combo box -->
-    <displayName>GDE</displayName>
+    <displayName>RDE</displayName>
              
     <!-- description of the exporter -->
-    <description>GDE format</description>
+    <description>RDE format</description>
 
     <!-- exporter version -->
     <version>1.0</version>

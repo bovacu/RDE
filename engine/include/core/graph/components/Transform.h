@@ -2,10 +2,9 @@
 // Created by borja on 9/5/22.
 //
 
-#ifndef GDE_TRANSFORM_H
-#define GDE_TRANSFORM_H
+#ifndef RDE_TRANSFORM_H
+#define RDE_TRANSFORM_H
 
-#include <bits/utility.h>
 #include <vector>
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/gtc/quaternion.hpp"
@@ -14,16 +13,17 @@
 
 typedef entt::entity NodeID;
 
-namespace GDE {
+namespace RDE {
 
+    FORWARD_DECLARE_STRUCT(Node)
     /**
      * @brief Component common to every entity that tells the engine where it is, which scale it has and how much it is rotated.
      */
     class Transform {
-        FRIEND_CLASS(Graph, PhysicsBody)
+        FRIEND_CLASS(Graph, PhysicsBody, SpriteRenderer, TextRenderer, UIImage, UI9Slice, UIText)
         MAKE_CLASS_ITERABLE(std::vector<Transform*>, children)
 
-        private:
+        protected:
             glm::vec3 innerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
             glm::quat innerRotation = glm::quat(glm::vec3(0, 0, 0));
             glm::vec3 innerScale = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -31,19 +31,16 @@ namespace GDE {
             glm::mat4 worldMatrixCache { 1.0f };
             bool dirty = false;
 
-        private:
+        protected:
             glm::mat4 recalculateCachedMatrix();
             void setDirty();
+            void clearDirty();
             glm::mat4 worldPointToLocalPosition(const Vec2F& _position);
             glm::mat4 worldPointToLocalRotation(float _rotation);
 
         public:
-            explicit Transform(const NodeID& _nodeId);
-
-            /**
-             * @brief Entity's ID.
-             */
-            NodeID ID;
+            explicit Transform();
+            Node* node;
 
             /**
              * @brief ID of the direct parent.
@@ -61,6 +58,12 @@ namespace GDE {
              *
              */
             std::vector<Transform*> children;
+
+            /**
+             * @brief Returns the total number of children, from all of the generations.
+             * @return int
+             */
+            int getChildrenCount();
 
             /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
@@ -148,17 +151,17 @@ namespace GDE {
             [[nodiscard]] Vec2F getModelMatrixScale();
             [[nodiscard]] float getModelMatrixRotation();
             void setMatrixModelPosition(const Vec2F& _worldPos);
+            void translateMatrixModelPosition(const Vec2F& _worldPos);
             void setMatrixModelRotation(float _rotation);
 
             [[nodiscard]] glm::mat4 localToParent() const;
             [[nodiscard]] glm::mat4 parentToLocal() const;
-            [[nodiscard]] std::tuple<glm::mat4, bool> localToWorld();
+            [[nodiscard]] virtual std::tuple<glm::mat4, bool> localToWorld();
             [[nodiscard]] glm::mat4 worldToLocal() const;
 
             glm::mat4 getLocalMatrix() const;
             void setLocalMatrix(const glm::mat4& _matrix);
     };
-
 }
 
-#endif //GDE_TRANSFORM_H
+#endif //RDE_TRANSFORM_H

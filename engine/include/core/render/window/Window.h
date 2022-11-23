@@ -1,18 +1,18 @@
 #pragma once
 
-#ifndef GDE_WINDOW_H
-#define GDE_WINDOW_H
+#ifndef RDE_WINDOW_H
+#define RDE_WINDOW_H
 
 #include "core/util/Util.h"
 #include "core/systems/eventSystem/Event.h"
 #include "core/platform/PlatformHeaderSDL.h"
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief This class represents the window of the application and has methods to modify its components and get its data.
      */
-    FORWARD_DECLARE_STRUCT(GDEConfig)
+    FORWARD_DECLARE_STRUCT(RDEConfig)
     class Window {
 
         FRIEND_CLASS(WindowInput)
@@ -35,9 +35,9 @@ namespace GDE {
             UDelegate<void(Event&)> eventCallback;
 
             /**
-             * @see GDEConfig
+             * @see RDEConfig
              */
-            GDEConfig* properties = nullptr;
+            RDEConfig* properties = nullptr;
 
             /**
              * @brief If the Window is minimized or not.
@@ -63,7 +63,7 @@ namespace GDE {
             UDelegate<bool()> shouldUpdateWindow;
 
         protected:
-            explicit Window(GDEConfig* _props);
+            explicit Window(RDEConfig* _props);
 
         public:
             ~Window() ;
@@ -199,8 +199,10 @@ namespace GDE {
              * @brief Makes the window to close and the application to exit.
              */
             void stop();
+
+            void refreshDpi();
     };
 
 }
 
-#endif // GDE_WINDOW_H
+#endif // RDE_WINDOW_H

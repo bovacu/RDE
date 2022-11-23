@@ -4,7 +4,6 @@
 #include "core/render/elements/FrameBuffer.h"
 #include "core/Manager.h"
 #include "core/render/RenderManager.h"
-#include "core/util/GLUtil.h"
 
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
@@ -14,12 +13,12 @@
     #include "glad/glad.h"
 #endif
 
-namespace GDE {
+namespace RDE {
 
     FrameBuffer::FrameBuffer(const FrameBufferSpecification& _specs, Manager* _manager) : specs(_specs), manager(_manager) {
         glGenVertexArrays(1, &vao);
         invalidate();
-        CHECK_GL_ERROR("FrameBuffer constructor")
+        Util::GL::checkError("FrameBuffer constructor");
     }
 
     FrameBuffer::~FrameBuffer() {
@@ -93,7 +92,7 @@ namespace GDE {
 
     void FrameBuffer::bind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, fboID);
-        CHECK_GL_ERROR("FrameBuffer bindFrameBuffer")
+        Util::GL::checkError("FrameBuffer bindFrameBuffer");
     }
 
     void FrameBuffer::unbind() const {
@@ -112,7 +111,7 @@ namespace GDE {
         } else{
             manager->renderManager.clear();
         }
-        CHECK_GL_ERROR("FrameBuffer unbind")
+        Util::GL::checkError("FrameBuffer unbind");
     }
 
     void FrameBuffer::resize(uint32_t _width, uint32_t _height) {

@@ -1,8 +1,8 @@
 // Created by borja on 15/1/22.
 
 
-#ifndef GDE_FONT_MANAGER_H
-#define GDE_FONT_MANAGER_H
+#ifndef RDE_FONT_MANAGER_H
+#define RDE_FONT_MANAGER_H
 
 #include "core/util/Util.h"
 #include <ft2build.h>
@@ -11,8 +11,9 @@
 #include "core/systems/fileSystem/FileManager.h"
 
 #define MAX_WIDTH 1024
+#define MAX_CHARACTERS 128
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief This struct retains the information of each character.
@@ -36,9 +37,10 @@ namespace GDE {
             int width = -1;
             int height = -1;
             int fontSize = -1;
-            CharInfo characters[128];
+            CharInfo characters[MAX_CHARACTERS];
             std::string fontName;
             std::string originalPath;
+            float biggestCharHeight = 0;
 
         private:
             Font() {}
@@ -86,6 +88,8 @@ namespace GDE {
              * @return int
              */
             [[nodiscard]] int getFontSize() const;
+
+            float getBiggestCharHeight() const;
     };
 
     /**
@@ -107,6 +111,7 @@ namespace GDE {
              * @brief Freetype library.
              */
             FT_Library ftLibrary{};
+            FileManager* fileManager;
 
             /**
              * @brief Map FontName -> std::vector<FontHandler> because a font can have many sub-fonts with different sizes.
@@ -157,7 +162,7 @@ namespace GDE {
              * @param _fontSize font size
              * @return Font*
              */
-            Font* getSpecificFont(FileManager& _fileManager, const std::string& _fontName, int _fontSize);
+            Font* getSpecificFont(const std::string& _fontName, int _fontSize);
 
             /**
              * @brief This function unloads a font with all the sub-fonts created by size.
@@ -183,4 +188,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_FONT_MANAGER_H
+#endif //RDE_FONT_MANAGER_H

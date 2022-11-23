@@ -3,10 +3,10 @@
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/util/Functions.h"
 
-namespace GDE {
+namespace RDE {
 
     void TextureAtlasManager::init(FileManager* _fileManager) {
-        loadSpriteSheet("defaultAssets/assets.json");
+        loadSpriteSheet("defaultAssets/defaultAssets.json");
     }
 
     bool TextureAtlasManager::loadSpriteSheet(const std::string& _spriteSheetPath) {
@@ -14,16 +14,16 @@ namespace GDE {
         auto _spriteSheetNode = nlohmann::json::parse(fileManager->readFullFile(_handle).content);
         fileManager->close(_handle);
         auto _pathToTexture = _spriteSheetNode["sprite_sheet_settings"]["path"].get<std::string>();
-        auto _name = Util::getFileNameFromPath(_pathToTexture);
-        LOG_DEBUG("Trying to load '", _pathToTexture, "'...")
+        auto _name = Util::String::getFileNameFromPath(_pathToTexture);
+        Util::Log::debug("Trying to load '", _pathToTexture, "'...");
         if(atlases.find(_name) != atlases.end()) {
-            LOG_E_TIME("Atlas '", _name, "' was already loaded");
+            Util::Log::error("Atlas '", _name, "' was already loaded");;
             return false;
         }
 
         auto* _atlas = new Atlas;
         if(!_atlas->texture->loadFromFile(_pathToTexture.c_str())) {
-            LOG_E_TIME("Atlas '", _pathToTexture, "' could not be loaded");
+            Util::Log::error("Atlas '", _pathToTexture, "' could not be loaded");;
             return false;
         }
 
@@ -38,12 +38,12 @@ namespace GDE {
 
     Texture* TextureAtlasManager::getSubTexture(const std::string& _atlasName, const std::string& _textureName) {
         if(atlases.find(_atlasName) == atlases.end()) {
-            LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
+            Util::Log::error("Atlas '", _atlasName, "' was not loaded! But tried to be accessed");
             return nullptr;
         }
 
         if(atlases[_atlasName]->subTextures.find(_textureName) == atlases[_atlasName]->subTextures.end()) {
-            LOG_E_TIME("Texture '", _textureName, "' in '",_atlasName ,"' was not found! But tried to be accessed")
+            Util::Log::error("Texture '", _textureName, "' in '",_atlasName ,"' was not found! But tried to be accessed");
             return nullptr;
         }
 
@@ -75,7 +75,7 @@ namespace GDE {
 
     Atlas* TextureAtlasManager::getAtlas(const std::string& _atlasName) {
         if(atlases.find(_atlasName) == atlases.end()) {
-            LOG_E_TIME("Atlas '", _atlasName, "' was not loaded! But tried to be accessed")
+            Util::Log::error("Atlas '", _atlasName, "' was not loaded! But tried to be accessed");
             return nullptr;
         }
 
@@ -104,7 +104,7 @@ namespace GDE {
     }
 
     void TextureAtlasManager::destroy() {
-        LOG_DEBUG("Cleaning up TextureAtlasManager")
+        Util::Log::debug("Cleaning up TextureAtlasManager");
         for(auto& _atlas : atlases)
             delete _atlas.second;
     }

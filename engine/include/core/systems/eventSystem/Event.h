@@ -1,12 +1,12 @@
 #pragma once
 
-#ifndef GDE_EVENT_H
-#define GDE_EVENT_H
+#ifndef RDE_EVENT_H
+#define RDE_EVENT_H
 
 #include "core/util/Delegate.h"
 #include <string>
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief All the different types of events that the engine can manage.
@@ -142,4 +142,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_EVENT_H
+#endif //RDE_EVENT_H

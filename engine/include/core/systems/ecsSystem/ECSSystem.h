@@ -2,14 +2,14 @@
 // Created by borja on 29/04/22.
 //
 
-#ifndef GDE_SYSTEM_H
-#define GDE_SYSTEM_H
+#ifndef RDE_SYSTEM_H
+#define RDE_SYSTEM_H
 
 #include "core/util/Util.h"
 #include "core/graph/Graph.h"
 #include <type_traits>
 
-namespace GDE {
+namespace RDE {
 
     /** This class is the base that every custom ECS system should inherit from. The only method that is mandatory to
      * implement is the update method.
@@ -89,4 +89,4 @@ namespace GDE {
     };
 }
 
-#endif //GDE_SYSTEM_H
+#endif //RDE_SYSTEM_H

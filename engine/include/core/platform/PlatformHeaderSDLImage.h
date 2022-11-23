@@ -1,8 +1,8 @@
 // Created by borja on 9/2/22.
 
 
-#ifndef GDE_PLATFORM_HEADER_SDL_IMAGE_H
-#define GDE_PLATFORM_HEADER_SDL_IMAGE_H
+#ifndef RDE_PLATFORM_HEADER_SDL_IMAGE_H
+#define RDE_PLATFORM_HEADER_SDL_IMAGE_H
 
 #include "core/Core.h"
 
@@ -12,4 +12,4 @@
 #include "SDL2/SDL_image.h"
 #endif
 
-#endif //GDE_PLATFORM_HEADER_SDL_IMAGE_H
+#endif //RDE_PLATFORM_HEADER_SDL_IMAGE_H

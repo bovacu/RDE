@@ -1,13 +1,13 @@
 // Created by borja on 12/1/22.
 
 
-#ifndef GDE_CONSOLE_H
-#define GDE_CONSOLE_H
+#ifndef RDE_CONSOLE_H
+#define RDE_CONSOLE_H
 
 
 #include "core/util/Util.h"
 
-namespace GDE {
+namespace RDE {
 
     /**
      * @brief This class represents a command of the internal engine console.
@@ -147,4 +147,4 @@ namespace GDE {
 }
 
 
-#endif //GDE_CONSOLE_H
+#endif //RDE_CONSOLE_H

@@ -1,13 +1,13 @@
 #pragma once
 
-#ifndef GDE_MOUSE_EVENT_H
-#define GDE_MOUSE_EVENT_H
+#ifndef RDE_MOUSE_EVENT_H
+#define RDE_MOUSE_EVENT_H
 
 #include "Event.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
 
-namespace GDE {
+namespace RDE {
 
     /// This class represents all of the events that involves moving the mouse.
     class MouseMovedEvent           : public Event {
@@ -134,4 +134,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_MOUSE_EVENT_H
+#endif //RDE_MOUSE_EVENT_H

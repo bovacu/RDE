@@ -1,13 +1,13 @@
 // Created by borja on 10/2/22.
 
 
-#ifndef GDE_MOBILE_EVENT_H
-#define GDE_MOBILE_EVENT_H
+#ifndef RDE_MOBILE_EVENT_H
+#define RDE_MOBILE_EVENT_H
 
 #include "Event.h"
 #include "core/util/Vec.h"
 
-namespace GDE {
+namespace RDE {
 
     typedef uint32_t TimeStamp;
 
@@ -136,4 +136,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_MOBILE_EVENT_H
+#endif //RDE_MOBILE_EVENT_H

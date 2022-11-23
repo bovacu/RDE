@@ -8,10 +8,10 @@
 
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
-    MacWindow::MacWindow(GDEConfig* _config) : Window(_config) {
-        LOG_DEBUG("Platform: MacOS")
+    MacWindow::MacWindow(RDEConfig* _config) : Window(_config) {
+        Util::Log::debug("Platform: MacOS");
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -24,28 +24,30 @@ namespace GDE {
                                   SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
 
         if(window == nullptr) {
-            LOG_E("SDL window creation failed: ", SDL_GetError());
+            Util::Log::error("SDL window creation failed: ", SDL_GetError());
             return;
         }
         context = SDL_GL_CreateContext(window);
 
         if(context == nullptr) {
-            LOG_E("OpenGL context couldn't initialize -> ", SDL_GetError())
+            Util::Log::error("OpenGL context couldn't initialize -> ", SDL_GetError());
             return;
         }
 
         SDL_GL_MakeCurrent(window, context);
 
         if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-            LOG_E("Failed to initialize GLAD")
+            Util::Log::error("Failed to initialize GLAD");
             return;
         }
-        LOG_DEBUG("GLAD and SDL2 loaded successfully");
+        Util::Log::debug("GLAD and SDL2 loaded successfully");
 
         SDL_GL_SetSwapInterval(1);
 
         SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         SDL_SetWindowResizable(window, SDL_TRUE);
+
+        refreshDpi();
     }
 }
 

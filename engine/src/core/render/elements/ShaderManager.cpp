@@ -2,10 +2,9 @@
 
 #include "core/render/elements/ShaderManager.h"
 #include "glm/gtc/type_ptr.hpp"
-#include "core/util/GLUtil.h"
 #include "core/render/elements/IRenderizable.h"
 
-namespace GDE {
+namespace RDE {
 
     void ShaderManager::init(FileManager* _fileManager) {
         fileManager = _fileManager;
@@ -13,14 +12,15 @@ namespace GDE {
         IRenderizable::defaultShaders[SPRITE_RENDERER_SHADER] = loadShader(SPRITE_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_ES, TEXTURE_FRAGMENT_SHADER_ES);
         IRenderizable::defaultShaders[DEBUG_SHADER] = loadShader(DEBUG_SHADER, DEBUG_VERTEX_SHADER_ES, DEBUG_FRAGMENT_SHADER_ES);
         IRenderizable::defaultShaders[TEXT_RENDERER_SHADER] = loadShader(TEXT_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_ES, TEXT_FRAGMENT_SHADER_ES);
-        IRenderizable::defaultShaders[FRAMEBUFFER_SHADER] = loadShader(FRAMEBUFFER_SHADER, FRAMEBUFFER_VERTEX_SHADER_CORE, FRAMEBUFFER_FRAGMENT_SHADER_CORE);
+        IRenderizable::defaultShaders[FRAMEBUFFER_SHADER] = loadShader(FRAMEBUFFER_SHADER, FRAMEBUFFER_VERTEX_SHADER_ES, FRAMEBUFFER_FRAGMENT_SHADER_ES);
         #else
         IRenderizable::defaultShaders[SPRITE_RENDERER_SHADER] = loadShader(SPRITE_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_CORE, TEXTURE_FRAGMENT_SHADER_CORE);
         IRenderizable::defaultShaders[DEBUG_SHADER] = loadShader(DEBUG_SHADER, DEBUG_VERTEX_SHADER_CORE, DEBUG_FRAGMENT_SHADER_CORE);
         IRenderizable::defaultShaders[TEXT_RENDERER_SHADER] = loadShader(TEXT_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_CORE, TEXT_FRAGMENT_SHADER_CORE);
         IRenderizable::defaultShaders[FRAMEBUFFER_SHADER] = loadShader(FRAMEBUFFER_SHADER, FRAMEBUFFER_VERTEX_SHADER_CORE, FRAMEBUFFER_FRAGMENT_SHADER_CORE);
-    #endif
-    CHECK_GL_ERROR("Shader Initializaation")
+        #endif
+
+        Util::GL::checkError("Shader Initializaation");
     }
 
     ShaderID ShaderManager::loadShader(const std::string& _shaderName, const std::string& _vertex, const std::string& _fragment) {
@@ -28,7 +28,7 @@ namespace GDE {
         _shader->loadFromFiles(_vertex, _fragment, fileManager);
         shadersByName[_shaderName] = _shader;
         shadersById[shadersByName[_shaderName]->getShaderID()] = _shader;
-        LOG_DEBUG("Created Shader ", _shaderName, " with value ", shadersByName[_shaderName]->getShaderID())
+        Util::Log::debug("Created Shader ", _shaderName, " with value ", shadersByName[_shaderName]->getShaderID());
         return shadersByName[_shaderName]->getShaderID();
     }
 
@@ -52,7 +52,7 @@ namespace GDE {
     }
 
     void ShaderManager::destroy() {
-        LOG_DEBUG("Cleaning up ShaderManager")
+        Util::Log::debug("Cleaning up ShaderManager");
         for(auto& _shader : shadersByName) {
             delete _shader.second;
         }

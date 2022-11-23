@@ -2,13 +2,25 @@
 // Created by borja on 29/05/22.
 //
 
-#ifndef GDE_CANVAS_H
-#define GDE_CANVAS_H
+#ifndef RDE_CANVAS_H
+#define RDE_CANVAS_H
 
 #include "core/graph/Graph.h"
 #include "core/render/Camera.h"
+#include "core/render/elements/Batch.h"
+#include <stack>
 
-namespace GDE {
+namespace RDE {
+
+    FORWARD_DECLARE_CLASS(UI, UIInteractable)
+
+    struct CanvasElement {
+        Node* node = nullptr;
+        IRenderizable* renderizable = nullptr;
+        UIInteractable* interactable = nullptr;
+        IRenderizable* updatable = nullptr;
+        int cropping = 0;
+    };
 
     /**
      * @brief This class represents a container for elements related to the UI and it is in charge of render them, update them...
@@ -38,6 +50,14 @@ namespace GDE {
              */
             Graph graph;
 
+            std::vector<Batch> batches;
+            bool dirty = true;
+            int maxIndicesPerDrawCall = 1000;
+
+            std::vector<CanvasElement> uiRenderizables;
+            std::vector<CanvasElement> uiInteractables;
+            std::vector<CanvasElement> uiUpdatables;
+
         public:
             explicit Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag);
 
@@ -54,16 +74,11 @@ namespace GDE {
             Camera* getCamera();
 
             /**
-             * @brief Makes the Canva's Camera viewport type to match with the Scene camera viewport
-             */
-            void matchMainCameraViewPort();
-
-            /**
              * @brief Handles the event related to the UI elements.
              * @param _eventDispatcher Event dispatcher
              * @param _event Event
              */
-            void onEvent(Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event);
+            void onEvent(Engine* _engine, Event& _event);
 
             /**
              * @brief Handles the update of the the UI elements.
@@ -80,8 +95,27 @@ namespace GDE {
              * @brief Handles the debug rendering of the UI elements.
              */
             void onDebugRender();
+
+            void onLateUpdate();
+
+            void onResize(uint _width, uint _height);
+
+            void setCanvasResolution(const Vec2I& _resolution);
+
+            Vec2I getCanvasResolution();
+
+        private:
+            void recalculateRenderizableTree(Node* _node);
+
+            void batchTreeElementPre(CanvasElement* _canvasElement, void* _data);
+            void batchTreeElementPost(CanvasElement* _canvasElement, void* _data);
+
+            IRenderizable* getRenderizable(Node* _node);
+            IRenderizable* getUpdatable(Node* _node);
+
+            void forceRender();
     };
 
 }
 
-#endif //GDE_CANVAS_H
+#endif //RDE_CANVAS_H

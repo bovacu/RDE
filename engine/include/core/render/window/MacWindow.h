@@ -2,22 +2,22 @@
 // Created by borja on 8/20/22.
 //
 
-#ifndef GDE_MAC_WINDOW_H
-#define GDE_MAC_WINDOW_H
+#ifndef RDE_MAC_WINDOW_H
+#define RDE_MAC_WINDOW_H
 
 #include "core/Core.h"
 #if IS_MAC()
 
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
     class MacWindow : public Window {
         public:
-            explicit MacWindow(GDEConfig* _config);
+            explicit MacWindow(RDEConfig* _config);
     };
 
 }
 
 #endif
 
-#endif //GDE_MAC_WINDOW_H
+#endif //RDE_MAC_WINDOW_H

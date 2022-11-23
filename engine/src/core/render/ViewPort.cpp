@@ -1,58 +1,47 @@
 // Created by borja on 27/2/22.
 
 #include "core/render/elements/ViewPort.h"
+#include "core/util/Functions.h"
 
-namespace GDE {
+namespace RDE {
 
-    Vec2I IViewPort::getVirtualResolution() const {
+    ViewPort::ViewPort(const Vec2I& _deviceSize, const Vec2I& _resolutionSize) {
+        virtualResolution = _resolutionSize;
+        deviceResolution = _deviceSize;
+
+        landscape = virtualResolution.x > virtualResolution.y;
+    }
+
+    Vec2I ViewPort::getVirtualResolution() const {
         return virtualResolution;
     }
 
-    float IViewPort::getAspectRatio() const {
-        return aspectRatio;
+    float ViewPort::getVirtualAspectRatio() const {
+        return (float)virtualResolution.x / (float)virtualResolution.y;
     }
 
-    Vec2F IViewPort::getScalingFactor() const {
-        return scalingFactor;
+    float ViewPort::getPhysicalAspectRatio() const {
+        return (float)deviceResolution.x / (float)deviceResolution.y;
     }
 
-    Vec2I IViewPort::getDeviceResolution() const {
+    Vec2I ViewPort::getDeviceResolution() const {
         return deviceResolution;
     }
 
-
-    // ---------------- FREE VIEWPORT
-
-
-    FreeViewPort::FreeViewPort(const Vec2I& _windowSize) {
-        virtualResolution = _windowSize;
-        deviceResolution = _windowSize;
-    }
-
-    void FreeViewPort::update(const Vec2I& _deviceSize) {
-        virtualResolution = _deviceSize;
-        aspectRatio = (float)_deviceSize.x / (float)_deviceSize.y;
-        scalingFactor = {1, 1};
+    void ViewPort::update(const Vec2I& _deviceSize) {
         deviceResolution = _deviceSize;
     }
 
-    void FreeViewPort::updateVirtualResolution(const Vec2I& _virtualResolution) {  }
+    void ViewPort::setUIScaleWeightsForWidthAndHeight(float _width, float _height) {
+        if(_width > 1.f || _width < 0.f || _height > 1.f || _height < 0.f || _height + _width != 1.f) {
+            Util::Log::warn("Input values for setting UI scale are ", Vec2F { _width, _height }, " but in some way they don't add up to 1! Not changing values.");
+            return;
+        }
 
-
-    // --------------- ADAPTIVE VIEWPORT
-
-
-    AdaptiveViewPort::AdaptiveViewPort(const Vec2I& _virtualDesiredResolution) {
-        virtualResolution = _virtualDesiredResolution;
+        scaleWithWidth = _width;
     }
 
-    void AdaptiveViewPort::update(const Vec2I& _deviceSize) {
-        scalingFactor = {(float)virtualResolution.x / (float)_deviceSize.x, (float)virtualResolution.y / (float)_deviceSize.y};
-        aspectRatio = (float)_deviceSize.x / (float)_deviceSize.y;
-        deviceResolution = _deviceSize;
-    }
-
-    void AdaptiveViewPort::updateVirtualResolution(const Vec2I& _virtualResolution) {
-        virtualResolution = _virtualResolution;
+    Vec2F ViewPort::getUIScaleWeights() const {
+        return { scaleWithWidth, 1.f - scaleWithWidth };
     }
 }

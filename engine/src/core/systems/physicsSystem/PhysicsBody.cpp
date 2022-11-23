@@ -6,11 +6,11 @@
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
-    PhysicsBody::PhysicsBody(const NodeID& _id, Scene* _scene, BodyConfig& _bodyConfig) {
-        space = _scene->engine->manager.physics.space;
-        transform = _scene->getMainGraph()->getComponent<Transform>(_id);
+    PhysicsBody::PhysicsBody(Node* _node, Manager* _manager, Graph* _graph, BodyConfig& _bodyConfig) {
+        space = _manager->physics.space;
+        transform = _node->getTransform();
 
         switch (_bodyConfig.shapeConfig.type) {
             case PhysicsShapeType::CIRCLE:
@@ -28,7 +28,7 @@ namespace GDE {
         }
 
         cpBodySetUserData(body, this);
-        _scene->engine->manager.physics.add(this);
+        _manager->physics.add(this);
 
     }
 
@@ -47,7 +47,7 @@ namespace GDE {
 
         cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
         auto _rotation = transform->getModelMatrixRotation();
-        auto _radians = degreesToRadians(_rotation);
+        auto _radians = Util::Math::degreesToRadians(_rotation);
         cpBodySetAngle(body, _radians);
         cpSpaceReindexShapesForBody(space, body);
         cpSpaceAddBody(space, body);
@@ -248,16 +248,16 @@ namespace GDE {
         float _transformRot = transform->getModelMatrixRotation();
 
         Vec2F _bodyPosition = { (float)cpBodyGetPosition(body).x, (float)cpBodyGetPosition(body).y };
-        float _bodyRot = radiansToDegrees(cpBodyGetAngle(body));
+        float _bodyRot = Util::Math::radiansToDegrees(cpBodyGetAngle(body));
         bool _dirtyPos = false;
         bool _dirtyRot = false;
 
-        if(!PhysicsMath::approximatelyEqual(_bodyRot, _transformRot)) {
-            cpBodySetAngle(body, degreesToRadians(_transformRot));
+        if(!Util::Math::approximatelyEqual(_bodyRot, _transformRot)) {
+            cpBodySetAngle(body, Util::Math::degreesToRadians(_transformRot));
             _dirtyRot = true;
         }
 
-        if(!PhysicsMath::approximatelyEqual(_transformPos, _bodyPosition)) {
+        if(!Util::Math::approximatelyEqual(_transformPos, _bodyPosition)) {
             cpBodySetPosition(body, { _transformPos.x, _transformPos.y });
             _dirtyPos = true;
         }
@@ -370,5 +370,20 @@ namespace GDE {
 
     void PhysicsBody::applyForceWorld(const Vec2F& _force, const Vec2F& _where) {
         cpBodyApplyForceAtWorldPoint(body, { _force.x, _force.y }, { _where.x, _where.y });
+    }
+
+    void PhysicsBody::setEnabled(bool _enabled) {
+        if(_enabled && transform->node->hasComponent<DisabledForFixedUpdate>()) {
+            transform->node->removeComponent<DisabledForFixedUpdate>();
+            return;
+        }
+
+        if(!_enabled && !transform->node->hasComponent<DisabledForFixedUpdate>()) {
+            transform->node->addComponent<DisabledForFixedUpdate>();
+        }
+    }
+
+    bool PhysicsBody::isEnabled() {
+        return !transform->node->hasComponent<DisabledForFixedUpdate>();
     }
 }

@@ -1,11 +1,13 @@
 // Created by borja on 27/12/21.
 
 
-#ifndef ENGINE2_0_COMPONENTS_H
-#define ENGINE2_0_COMPONENTS_H
+#ifndef RDE_COMPONENTS_H
+#define RDE_COMPONENTS_H
 
-namespace GDE {
-    FORWARD_DECLARE_CLASS(Manager, Window, Camera, Canvas, IViewPort)
+
+namespace RDE {
+    FORWARD_DECLARE_CLASS(Manager, Window, Camera, Canvas, IViewPort, Graph)
+
     /**
      * @brief Component common to every entity and that identifies it whit a name. It is recommended 
      * every entity to have a different one.
@@ -28,28 +30,64 @@ namespace GDE {
      * @brief Component that tells the internal ECS system if an entity should or not be updated in the different systems.
      */
     struct Active {
-        explicit Active(const NodeID& _nodeId) {  }
+        explicit Active(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
              * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
              */
-            short foo;
+            short foo{};
     };
 
-    /**
-     * @brief Component that helps the internal system work quickier. This component should be added to entities that won't move at all during
-     * the scene rendering and life cycle.
-     *
-     */
-    struct StaticTransform {
-        explicit StaticTransform(const NodeID& _nodeId) {  }
+
+    struct DisabledForRender {
+        explicit DisabledForRender(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
              * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
              */
-            short foo;
+            short foo{};
+    };
+
+    struct DisabledForEvent {
+        explicit DisabledForEvent(Node* _node, Manager* _manager, Graph* _graph) {  }
+
+        private:
+            /**
+             * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
+             */
+            short foo{};
+    };
+
+    struct DisabledForUpdate {
+        explicit DisabledForUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
+
+        private:
+            /**
+             * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
+             */
+            short foo{};
+    };
+
+    struct DisabledForFixedUpdate {
+        explicit DisabledForFixedUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
+
+        private:
+            /**
+             * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
+             */
+            short foo{};
+    };
+
+    struct DisabledForLateUpdate {
+        explicit DisabledForLateUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
+
+        private:
+            /**
+             * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
+             */
+            short foo{};
     };
 
     /**
@@ -58,14 +96,14 @@ namespace GDE {
      * 
      */
     struct CanvasEventStopper {
-        explicit CanvasEventStopper(const NodeID& _nodeId) {  }
+        explicit CanvasEventStopper(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
              * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
              */
-            short foo;
+            short foo{};
     };
 }
 
-#endif //ENGINE2_0_COMPONENTS_H
+#endif //RDE_COMPONENTS_H

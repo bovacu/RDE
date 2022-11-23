@@ -1,12 +1,12 @@
 // Created by borja on 14/2/22.
 
 
-#ifndef GDE_CELLULAR_AUTOMATA_MAP_GENERATOR_H
-#define GDE_CELLULAR_AUTOMATA_MAP_GENERATOR_H
+#ifndef RDE_CELLULAR_AUTOMATA_MAP_GENERATOR_H
+#define RDE_CELLULAR_AUTOMATA_MAP_GENERATOR_H
 
 #include "core/util/Util.h"
 
-namespace GDE {
+namespace RDE {
 
     struct GenerationSettings {
         Vec2I size = {128, 128};
@@ -54,4 +54,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_CELLULAR_AUTOMATA_MAP_GENERATOR_H
+#endif //RDE_CELLULAR_AUTOMATA_MAP_GENERATOR_H

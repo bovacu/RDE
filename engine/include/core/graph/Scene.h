@@ -1,14 +1,14 @@
 #pragma once
 
-#ifndef GDE_SCENE_H
-#define GDE_SCENE_H
+#ifndef RDE_SCENE_H
+#define RDE_SCENE_H
 
 #include "nlohmann/json.hpp"
 #include "core/util/Delta.h"
 #include "core/graph/Graph.h"
 #include "core/graph/components/Components.h"
 
-namespace GDE {
+namespace RDE {
 
     FORWARD_DECLARE_CLASS(Camera, Window, Engine, Canvas);
 
@@ -103,7 +103,7 @@ namespace GDE {
              * to remove elements.
              * @param _dt time that passed between the current frame and the last one.
              */
-            virtual void onLateUpdate(Delta _dt) {  }
+            virtual void onLateUpdate(Delta _dt);
 
             /**
              * @brief This function is also called every frame and renders the geometry of the game. It is not virtual because
@@ -119,7 +119,7 @@ namespace GDE {
             virtual void onImGuiRender(Delta _dt) {  }
 
             /**
-             * @brief This function is used to draw debugging lines, squares, circles...
+             * @brief This function is used to drawBatched debugging lines, squares, circles...
              * @param the time that passed between the current frame and the last one.
              */
             virtual void onDebugRender(Delta _dt);
@@ -161,19 +161,19 @@ namespace GDE {
              * @param _cameraID Camera to enable or disable
              * @param _enable If the camera gets enabled or disabled
              */
-            void enableCamera(const NodeID& _cameraID, bool _enable);
+            void enableCamera(Node* _camera, bool _enable);
 
             /**
              * @brief Destroys a specific camera of the scene.
              * @param _cameraID Camera to be destroyed
              */
-            void removeCamera(const NodeID& _cameraID);
+            void removeCamera(Node* _camera);
 
             /**
              * @brief Sets an specific camera as the main one.
              * @param _camera Camera to be set as main
              */
-            void switchMainCamera(const NodeID& _camera);
+            void switchMainCamera(Node* _camera);
 
             /**
              * @brief Returns the name of the scene.
@@ -222,4 +222,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_SCENE_H
+#endif //RDE_SCENE_H

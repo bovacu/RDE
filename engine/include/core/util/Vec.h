@@ -2,15 +2,15 @@
 // Created by borja on 9/12/21.
 //
 
-#ifndef GDE_VEC_H
-#define GDE_VEC_H
+#ifndef RDE_VEC_H
+#define RDE_VEC_H
 
 #include <ostream>
 #include <cmath>
 #include "glm/glm.hpp"
 #include "core/Core.h"
 
-namespace GDE {
+namespace RDE {
 
     template <class T>
     struct Vec2 {
@@ -152,6 +152,10 @@ namespace GDE {
                 x /= _scalar;
                 y /= _scalar;
             }
+
+            bool operator ==(const Vec2<T>& _rhs) {
+                return x == _rhs.x && y == _rhs.y;
+            }
     };
 
     inline Vec2<float> operator*(float _scalar, const Vec2<float>& _vec) {
@@ -238,4 +242,4 @@ namespace GDE {
 
 }
 
-#endif //GDE_VEC_H
+#endif //RDE_VEC_H

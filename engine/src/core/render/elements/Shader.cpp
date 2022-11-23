@@ -1,9 +1,7 @@
 #include "core/render/elements/Shader.h"
-#include "core/util/Logger.h"
-#include "core/util/GLUtil.h"
 #include <iostream>
 
-namespace GDE {
+namespace RDE {
 
     Shader::Shader() {  }
 
@@ -19,7 +17,7 @@ namespace GDE {
 
     void Shader::loadVertexConfig(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall) {
         vertexDataSize = _verticesConfig[0].structSize;
-        loadVertexConfigSpecific(_verticesConfig, _maxIndicesPerDrawCall, GL_DYNAMIC_DRAW, vbo, ibo, vao);
+        loadVertexConfigSpecific(_verticesConfig, _maxIndicesPerDrawCall, GL_STATIC_DRAW, vbo, ibo, vao);
 //        loadVertexConfigSpecific(_verticesConfig, _maxIndicesPerDrawCall, GL_STATIC_DRAW, staticVbo, staticIbo, staticVao);
     }
 
@@ -40,7 +38,7 @@ namespace GDE {
         if (!_isCompiled) {
             char _infolog[1024];
             glGetShaderInfoLog(_shaderID, 1024, nullptr, _infolog);
-            LOG_E("Shader compile failed with error: ", _infolog)
+            Util::Log::error("Shader compile failed with error: ", _infolog);
 
             // Delete the shader, and set the index to zero so that this object knows it doesn't have a shader.
             glDeleteShader(_shaderID);
@@ -58,7 +56,7 @@ namespace GDE {
         
         auto* _vertexFile = _fileManager->open(_vertex, FileMode::READ);
         if (_vertexFile == nullptr) {
-            LOG_E("Can't read file: ", _vertex)
+            Util::Log::error("Can't read file: ", _vertex);
             return false;
         }
         _vertexCode = _fileManager->readFullFile(_vertexFile).content;
@@ -66,7 +64,7 @@ namespace GDE {
 
         auto* _fragmentFile = _fileManager->open(_fragment, FileMode::READ);
         if (_fragmentFile == nullptr) {
-            LOG_E("Can't read file: ", _fragment)
+            Util::Log::info("Can't read file: ", _fragment);
             return false;
         }
 
@@ -139,10 +137,10 @@ namespace GDE {
 
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(GL_ARRAY_BUFFER, vertexDataSize * _maxIndicesPerDrawCall * NUMBER_OF_VERTICES, nullptr, _drawType);
-        LOG_DEBUG("Shader ", shaderID, " total VB space = ", vertexDataSize * _maxIndicesPerDrawCall * NUMBER_OF_VERTICES)
+        Util::Log::debug("Shader ", shaderID, " total VB space = ", vertexDataSize * _maxIndicesPerDrawCall * NUMBER_OF_VERTICES);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-        LOG_DEBUG("Shader ", shaderID, " total IB space = ", (long)(sizeof(uint32_t) * _maxIndicesPerDrawCall * NUMBER_OF_INDICES))
+        Util::Log::debug("Shader ", shaderID, " total IB space = ", (long)(sizeof(uint32_t) * _maxIndicesPerDrawCall * NUMBER_OF_INDICES));
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * _maxIndicesPerDrawCall * NUMBER_OF_INDICES), nullptr, _drawType);
 
         for(auto& _vertexConfig : _verticesConfig) {

@@ -3,7 +3,7 @@
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/Engine.h"
 
-namespace GDE {
+namespace RDE {
 
     AnimationSystem::AnimationSystem(Manager* _manager) {
         manager = _manager;
