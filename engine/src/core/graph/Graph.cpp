@@ -123,6 +123,12 @@ namespace RDE {
 
             isRenderizableTreeDirty = false;
         }
+
+        registry.view<DynamicSpriteRenderer, Active>().each([](const NodeID _nodeID, DynamicSpriteRenderer& _dynamicSpriteRenderer, Active& _) {
+            if(_dynamicSpriteRenderer.isEnabled()) {
+                _dynamicSpriteRenderer.texture->uploadToGPU();
+            }
+        });
     }
 
     void Graph::onDebugRender() {

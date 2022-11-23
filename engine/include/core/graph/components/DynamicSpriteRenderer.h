@@ -16,6 +16,9 @@ namespace RDE {
     };
 
     class DynamicSpriteRenderer : public IRenderizable {
+
+        FRIEND_CLASS(Graph)
+
         protected:
             /**
              * @brief Texture that contains the sprite. This is the whole SpriteSheet, but it is limited by the region and
@@ -32,7 +35,7 @@ namespace RDE {
             DynamicSpriteRenderer(Node* _node, Scene* _scene, const DynamicSpriteRendererConfig& _config);
             DynamicSpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const DynamicSpriteRendererConfig& _config);
             DynamicSpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const DynamicSpriteRendererConfig& _config);
-            ~DynamicSpriteRenderer() override {  }
+            ~DynamicSpriteRenderer() override;
 
             /**
              * @brief Sets the color of a pixel, coordinate system starts at bottom-left.

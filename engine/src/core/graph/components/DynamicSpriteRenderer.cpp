@@ -105,8 +105,12 @@ namespace RDE {
     }
 
     void DynamicSpriteRenderer::resizeImage(const Vec2<uint>& _newSize) {
-        Util::Log::warn("Resizing images is not implemented yet!");
+        texture->resizeImage(_newSize);
         dirty = true;
+    }
+
+    DynamicSpriteRenderer::~DynamicSpriteRenderer() {
+        delete texture;
     }
 
 } // RDE

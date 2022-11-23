@@ -211,6 +211,8 @@ namespace RDE {
     }
 
     void Image::uploadToGPU() {
+        if(!dirty) return;
+
         if(openGLTextureID == -1) {
             GLenum _internalFormat = 0, _dataFormat = 0;
             if (channels == 4) {
@@ -271,6 +273,11 @@ namespace RDE {
         }
 
         return -1;
+    }
+
+    void Image::resizeImage(const Vec2<uint>& _newSize) {
+        Util::Log::warn("Resizing images is not implemented yet!");
+        dirty = true;
     }
 
 

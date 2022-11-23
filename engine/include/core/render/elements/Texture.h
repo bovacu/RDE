@@ -308,6 +308,7 @@ namespace RDE {
              */
             Color getPixel(int _x, int _y);
 
+            void resizeImage(const Vec2<uint>& _newSize);
 
             ~Image();
     };
