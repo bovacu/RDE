@@ -9,7 +9,7 @@
 #include "core/render/elements/ShaderManager.h"
 #include "core/render/elements/Batch.h"
 #include "core/graph/components/Node.h"
-#include "core/graph/components/Components.h"
+#include "core/graph/components/ComponentBase.h"
 
 namespace RDE {
 
@@ -29,7 +29,7 @@ namespace RDE {
      *
      * Any new element that end-users want to create and render, must extend this method.
      */
-    class IRenderizable {
+    class IRenderizable : public ComponentBase {
         FRIEND_CLASS(ShaderManager, SpriteBatch, ConfigManager, Canvas)
 
         protected:
@@ -87,11 +87,24 @@ namespace RDE {
             virtual Color getColor() { return color; }
             virtual int getLayer() { return layer; }
             BatchPriority getBatchPriority() { return batchPriority; }
+            bool isEnabled() override { return !node->hasComponent<DisabledForRender>(); }
 
             virtual void setShaderID(ShaderID _shaderID) { shaderID = _shaderID; dirty = true; }
             virtual void setColor(const Color& _color) { color = _color; dirty = true; }
             virtual void setLayer(int _layer) { layer = _layer; dirty = true; }
             void setBatchPriority(BatchPriority _batchPriority) { batchPriority = _batchPriority; dirty = true; }
+            void setEnabled(bool _enabled) override {
+                if(_enabled && node->hasComponent<DisabledForRender>()) {
+                    node->removeComponent<DisabledForRender>();
+                    dirty = true;
+                    return;
+                }
+
+                if(!_enabled && !node->hasComponent<DisabledForRender>()) {
+                    node->addComponent<DisabledForRender>();
+                    dirty = true;
+                }
+            }
 
             /**
              * @brief Method that every renderizable can implement to update its inner states.

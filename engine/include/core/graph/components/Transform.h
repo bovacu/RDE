@@ -59,6 +59,10 @@ namespace RDE {
              */
             std::vector<Transform*> children;
 
+            /**
+             * @brief Returns the total number of children, from all of the generations.
+             * @return int
+             */
             int getChildrenCount();
 
             /**

@@ -9,6 +9,7 @@
 #include "core/render/shapes/DebugShape.h"
 #include "chipmunk/chipmunk.h"
 #include "core/graph/components/Transform.h"
+#include "core/graph/components/ComponentBase.h"
 
 namespace RDE {
 
@@ -69,7 +70,7 @@ namespace RDE {
 
     FORWARD_DECLARE_CLASS(Scene, Node, Manager, Graph)
 
-    struct PhysicsBody {
+    struct PhysicsBody : public ComponentBase {
 
         FRIEND_CLASS(PhysicsManager, Graph)
 
@@ -144,6 +145,9 @@ namespace RDE {
 
             void applyForceLocal(const Vec2F& _force, const Vec2F& _where);
             void applyForceWorld(const Vec2F& _force, const Vec2F& _where);
+
+            void setEnabled(bool _enabled) override;
+            bool isEnabled() override;
     };
 
 }

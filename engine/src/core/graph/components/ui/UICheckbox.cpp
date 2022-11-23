@@ -100,7 +100,8 @@ namespace RDE {
         ((UITransform*)node->getTransform())->setSize(Vec2F { checkboxSize.x + textRendererSize.x, checkboxSize.y > textRendererSize.y ? checkboxSize.y : textRendererSize.y } + _offset);
 
         if(tickSprite != nullptr) {
-            tickSprite->node->setEnabled(config.checked ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
+            tickSprite->setEnabled(config.checked);
+            Util::Log::info(UI::getSize());
         }
 
         if(checkboxBackgroundTransform != nullptr) {
@@ -121,7 +122,7 @@ namespace RDE {
 
         config.checked = !config.checked;
         if(UI::interaction->mouseInnerStatus == UIInteractable::MouseEntered) {
-            tickSprite->node->setEnabled(config.checked ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
+            tickSprite->setEnabled(config.checked);
         }
     }
 

@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include "core/graph/Scene.h"
+#include "core/graph/components/ComponentBase.h"
 #include "core/systems/eventSystem/MouseEvent.h"
 #include "core/systems/profiling/Profiler.h"
 #include "imgui_impl_opengl3.h"
@@ -66,19 +67,22 @@ namespace RDE {
             void hierarchy(Scene* _scene);
             void hierarchyRecursionStub(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode);
             void showLoadedPrefabs(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode);
+            bool createHeader(const char* _title, ComponentBase* _enable);
             void nodeComponents(Graph* _graph, const NodeID _selectedNode);
             void activeComponent(Graph* _graph, const NodeID _selectedNode);
             void transformComponent(Graph* _graph, const NodeID _selectedNode);
-            void disabledConfigComponent(Transform* _transform);
             void tagComponent(Graph* _graph, const NodeID _selectedNode);
             void cameraComponent(Graph* _graph, const NodeID _selectedNode);
             void bodyComponent(Graph* _graph, const NodeID _selectedNode);
             void spriteComponent(Graph* _graph, const NodeID _selectedNode);
             void textComponent(Graph* _graph, const NodeID _selectedNode);
+            void enabledComponent(ComponentBase* _base);
 
             void uiTransformComponent(Graph* _graph, const NodeID _selectedNode);
             void uiButtonComponent(Graph* _graph, const NodeID _selectedNode);
             void ui9SliceComponent(Graph* _graph, const NodeID _selectedNode);
+            void uiImageComponent(Graph* _graph, const NodeID _selectedNode);
+            void uiTextComponent(Graph* _graph, const NodeID _selectedNode);
             void uiMaskComponent(Graph* _graph, const NodeID _selectedNode);
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;

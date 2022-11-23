@@ -54,7 +54,9 @@ namespace RDE {
             bool dirty = true;
             int maxIndicesPerDrawCall = 1000;
 
-            std::vector<CanvasElement> canvasElementsOrderedList;
+            std::vector<CanvasElement> uiRenderizables;
+            std::vector<CanvasElement> uiInteractables;
+            std::vector<CanvasElement> uiUpdatables;
 
         public:
             explicit Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag);
@@ -76,7 +78,7 @@ namespace RDE {
              * @param _eventDispatcher Event dispatcher
              * @param _event Event
              */
-            void onEvent(Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event);
+            void onEvent(Engine* _engine, Event& _event);
 
             /**
              * @brief Handles the update of the the UI elements.
@@ -94,6 +96,8 @@ namespace RDE {
              */
             void onDebugRender();
 
+            void onLateUpdate();
+
             void onResize(uint _width, uint _height);
 
             void setCanvasResolution(const Vec2I& _resolution);
@@ -101,23 +105,15 @@ namespace RDE {
             Vec2I getCanvasResolution();
 
         private:
-            void traverseTree(Node* _node, bool _earlyBreak, void* _data, void (Canvas::*_preFunc)(Node* _node, bool&, void*), void (Canvas::*_postFunc)(Node* _node, void*));
+            void recalculateRenderizableTree(Node* _node);
 
             void batchTreeElementPre(CanvasElement* _canvasElement, void* _data);
             void batchTreeElementPost(CanvasElement* _canvasElement, void* _data);
-
-            void onEventTreeElement(CanvasElement* _canvasElement, void* _data);
-
-            void updateTreeElement(CanvasElement* _canvasElement, void* _data);
-
-            void createElementListTreePre(Node* _node, bool& _earlyBreak, void* _data);
 
             IRenderizable* getRenderizable(Node* _node);
             IRenderizable* getUpdatable(Node* _node);
 
             void forceRender();
-
-            void onTreeChanged(void* _data);
     };
 
 }

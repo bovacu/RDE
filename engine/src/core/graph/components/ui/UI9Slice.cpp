@@ -240,5 +240,4 @@ namespace RDE {
             geometry[(_i * 4) + 3] = OpenGLVertex { _current9SliceMat * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
         }
     }
-
 }

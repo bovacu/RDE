@@ -13,8 +13,10 @@
 #include "core/graph/components/TextRenderer.h"
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UIPanel.h"
+#include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/graph/components/ui/UIMask.h"
+#include "core/graph/components/ComponentBase.h"
 
 namespace RDE {
     std::unordered_map<ProfilerState, RollingBuffer> ImGuiScene::plotBuffers;
@@ -457,6 +459,8 @@ namespace RDE {
         uiTransformComponent(_graph, _selectedNode);
         uiButtonComponent(_graph, _selectedNode);
         ui9SliceComponent(_graph, _selectedNode);
+        uiImageComponent(_graph, _selectedNode);
+        uiTextComponent(_graph, _selectedNode);
         uiMaskComponent(_graph, _selectedNode);
 
         ImGui::End();
@@ -469,8 +473,7 @@ namespace RDE {
         ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 40 - ImGui::CalcTextSize("(?)").x);
         ImGui::PushID(createID());
         if(ImGui::Checkbox("###Active", &_active)) {
-            if(_active) _graph->addComponent<Active>(_selectedNode, _graph->getComponent<Node>(_selectedNode), &engine->manager, _graph);
-            else _graph->removeComponent<Active>(_selectedNode);
+            _graph->getComponent<Node>(_selectedNode)->setActive(_active);
         }
         helpMarker("This will set the Active property to true/false.\n Setting Active to false will make all of DisabledConfig elements to be disabled for the Node and children.");
         ImGui::PopID();
@@ -492,85 +495,12 @@ namespace RDE {
         ImGui::Separator();
     }
 
-    void ImGuiScene::disabledConfigComponent(Transform* _transform) {
-        ImGui::NewLine();
-
-        ImGui::Indent();
-        if(ImGui::CollapsingHeader("Enabled States")) {
-            auto _node = _transform->node;
-            auto _flags = _node->getEnabledFlags();
-
-            if(_transform->parentTransform->node->isEnabled()) {
-                ImGui::PushID(createID());
-                static bool _enabledForEvent = true;
-                if(ImGui::Checkbox("Event", &_enabledForEvent)) {
-                    if(_enabledForEvent) {
-                        _node->setEnabled(_flags | EnabledStates::DS_EVENT);
-                    } else {
-                        _node->setEnabled(_flags & INVERSE_ENABLED_STATE(EnabledStates::DS_EVENT));
-                    }
-                }
-                helpMarker("This will make the Node and children not to run the main Event function.");
-                ImGui::PopID();
-
-                ImGui::PushID(createID());
-                static bool _enabledForUpdate = true;
-                if(ImGui::Checkbox("Update", &_enabledForUpdate)) {
-                    if(_enabledForUpdate) {
-                        _node->setEnabled(_flags | EnabledStates::DS_UPDATE);
-                    } else {
-                        _node->setEnabled(_flags & INVERSE_ENABLED_STATE(EnabledStates::DS_UPDATE));
-                    }
-                }
-                helpMarker("This will make the Node and children not to run the main Update function.");
-                ImGui::PopID();
-
-                ImGui::PushID(createID());
-                static bool _enabledForFixedUpdate = true;
-                if(ImGui::Checkbox("Fixed Update", &_enabledForFixedUpdate)) {
-                    if(_enabledForFixedUpdate) {
-                        _node->setEnabled(_flags | EnabledStates::DS_FIXED_UPDATE);
-                    } else {
-                        _node->setEnabled(_flags & INVERSE_ENABLED_STATE(EnabledStates::DS_FIXED_UPDATE));
-                    }
-                }
-                helpMarker("This will make the Node and children not to run the main FixedUpdate function.");
-                ImGui::PopID();
-
-                ImGui::PushID(createID());
-                static bool _enabledForRender = true;
-                if(ImGui::Checkbox("Render", &_enabledForRender)) {
-                    if(_enabledForRender) {
-                        _node->setEnabled(_flags | EnabledStates::DS_RENDER);
-                    } else {
-                        _node->setEnabled(_flags & INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
-                    }
-                }
-                helpMarker("This will make the Node and children not to run the main Render function.");
-                ImGui::PopID();
-
-                ImGui::PushID(createID());
-                static bool _enabledForLateUpdate = true;
-                if(ImGui::Checkbox("Late Update", &_enabledForLateUpdate)) {
-                    if(_enabledForLateUpdate) {
-                        _node->setEnabled(_flags | EnabledStates::DS_LATE_UPDATE);
-                    } else {
-                        _node->setEnabled(_flags & INVERSE_ENABLED_STATE(EnabledStates::DS_LATE_UPDATE));
-                    }
-                }
-                helpMarker("This will make the Node and children not to run the main LateUpdate function.");
-                ImGui::PopID();
-            }
-        }
-        ImGui::Unindent();
-    }
-
     void ImGuiScene::transformComponent(Graph* _graph, const NodeID _selectedNode) {
         Transform* _transform = nullptr;
         if(!_graph->hasComponent<Transform>(_selectedNode)) return;
         _transform = _graph->getComponent<Transform>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if(createHeader("Transform", nullptr)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
             ImGui::Text("ID: %i", (int)_transform->node->getID());
             ImGui::Text("Position ");
@@ -606,8 +536,6 @@ namespace RDE {
                 _transform->setScale(_scale[0], _scale[1]);
             ImGui::PopID();
 
-            disabledConfigComponent(_transform);
-
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
@@ -617,7 +545,7 @@ namespace RDE {
 
         auto _camera = _graph->getComponent<Camera>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if(createHeader("Camera", nullptr)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
 //            const char* _viewports[] = { "Free Aspect", "Adaptative Aspect"};
@@ -660,15 +588,15 @@ namespace RDE {
     }
 
     void ImGuiScene::bodyComponent(Graph* _graph, const NodeID _selectedNode) {
-//        if(!_graph->hasComponent<Body>(_selectedNode)) return;
-//
-//        auto _body = _graph->getComponent<Body>(_selectedNode);
-//
-//        if(ImGui::CollapsingHeader("Body", ImGuiTreeNodeFlags_DefaultOpen)) {
-//            if(_selectedNode == _graph->getID()) ImGui::BeginDisabled(true);
-//
-//            if(_selectedNode == _graph->getID()) ImGui::EndDisabled();
-//        }
+        if(!_graph->hasComponent<PhysicsBody>(_selectedNode)) return;
+
+        auto _body = _graph->getComponent<PhysicsBody>(_selectedNode);
+
+        if(createHeader("Physics Body", _body)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
     }
 
     void ImGuiScene::spriteComponent(Graph* _graph, const NodeID _selectedNode) {
@@ -676,7 +604,7 @@ namespace RDE {
 
         auto _spriteRenderer = _graph->getComponent<SpriteRenderer>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("Sprite Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if(createHeader("Sprite Renderer", _spriteRenderer)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
             ImGui::Text("Texture"); ImGui::SameLine();
             auto _texturePath = _spriteRenderer->getTexturePath();
@@ -694,7 +622,7 @@ namespace RDE {
         auto _text = _graph->getComponent<TextRenderer>(_selectedNode);
         auto _textTransform = _graph->getComponent<Transform>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("Text Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if(createHeader("Text Renderer", _text)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
@@ -708,7 +636,7 @@ namespace RDE {
         Anchor _selectedAnchor = _transform->getAnchor();
         Stretch _selectedStretch = _transform->getStretch();
 
-        if(ImGui::CollapsingHeader("UITransform", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if(createHeader("UITransform", nullptr)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
             ImGui::Text("ID: %i", (int)_transform->node->getID());
@@ -917,8 +845,6 @@ namespace RDE {
                 _transform->setScale(_scale[0], _scale[1]);
             ImGui::PopID();
 
-            disabledConfigComponent(_transform);
-
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
@@ -928,7 +854,7 @@ namespace RDE {
 
         auto _ui9Slice = _graph->getComponent<UI9Slice>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("UI Panel", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if(createHeader("UI 9Slice", _ui9Slice)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
             {
@@ -959,12 +885,60 @@ namespace RDE {
         }
     }
 
+    void ImGuiScene::uiImageComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<UIImage>(_selectedNode)) return;
+
+        auto _uiImage = _graph->getComponent<UIImage>(_selectedNode);
+
+        if(createHeader("UI Image", _uiImage)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            {
+                ImGui::Text("Origin Offset ");
+                float _originOffset[2] = {_uiImage->getOriginOffset().x, _uiImage->getOriginOffset().y};
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(100);
+                ImGui::PushID(createID());
+                if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
+                    _uiImage->setOriginOffset({Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
+                }
+            }
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::uiTextComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<UIText>(_selectedNode)) return;
+
+        auto _uiText = _graph->getComponent<UIText>(_selectedNode);
+
+        if(createHeader("UI Text", _uiText)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+
+            {
+                ImGui::Text("Origin Offset ");
+                float _originOffset[2] = {_uiText->getOriginOffset().x, _uiText->getOriginOffset().y};
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(100);
+                ImGui::PushID(createID());
+                if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
+                    _uiText->setOriginOffset({Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
+                }
+            }
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
+    }
+
     void ImGuiScene::uiMaskComponent(Graph* _graph, const NodeID _selectedNode) {
         if(!_graph->hasComponent<UIMask>(_selectedNode)) return;
 
         auto _uiMask = _graph->getComponent<UIMask>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("UI Mask", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if(createHeader("UI Mask", _uiMask)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
             ImGui::Text("Inverted ");
@@ -982,7 +956,7 @@ namespace RDE {
 
         auto _uiButton = _graph->getComponent<UIButton>(_selectedNode);
 
-        if(ImGui::CollapsingHeader("UI Button", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if(createHeader("UI Button", _uiButton)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
 //            ImGui::Text("Size ");
@@ -1013,6 +987,24 @@ namespace RDE {
 
     void ImGuiScene::resetID() {
         idIndex = 0;
+    }
+
+    void ImGuiScene::enabledComponent(ComponentBase* _base) {
+        if(!_base) return;
+
+        ImGui::PushID(createID());
+        static bool _enabled = _base->isEnabled();
+        if(ImGui::Checkbox("##enabled", &_enabled)) {
+            _base->setEnabled(_enabled);
+        }
+        ImGui::PopID();
+        ImGui::SameLine();
+    }
+
+    bool ImGuiScene::createHeader(const char* _title, ComponentBase* _enable) {
+        enabledComponent(_enable);
+        bool _opened = ImGui::CollapsingHeader(_title, ImGuiTreeNodeFlags_DefaultOpen);
+        return _opened;
     }
 }
 

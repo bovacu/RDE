@@ -27,11 +27,11 @@ namespace RDE {
     UIInteractable::UIInteractable(Node* _node, Manager* _manager, Graph* _graph) {}
 
     static bool trigger(Node* _node, Engine* _engine) {
-        auto* _uiInteractable = _node->getComponent<UITransform>();
+        auto* _uiTransform = _node->getComponent<UITransform>();
         auto* _transform = _node->getTransform();
         auto _mousePos = _engine->manager.inputManager.getMousePosWorldPos();
 
-        return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_uiInteractable->getSize().x, (float)_uiInteractable->getSize().y});
+        return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_uiTransform->getSize().x, (float)_uiTransform->getSize().y});
     }
 
     static char getCorrectChar(const KeyEvent* _keyEvent) {
@@ -42,7 +42,9 @@ namespace RDE {
     }
 
     void UIInteractable::onEvent(Node* _node, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event) {
-        if (!_node->hasComponent<Active>() || !interactable) return;
+        if (!_node->isActive() || !interactable) {
+            return;
+        }
 
         if(focused) {
             if(_eventDispatcher.dispatchEvent<KeyPressedEvent>() && !onInnerKeyPressed.isEmpty()) {

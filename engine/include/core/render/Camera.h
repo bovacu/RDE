@@ -5,6 +5,7 @@
 #define RDE_CAMERA_H
 
 
+#include "core/graph/components/ComponentBase.h"
 #include <glm/ext/matrix_float4x4.hpp>
 #include "core/util/Util.h"
 #include "core/systems/eventSystem/MouseEvent.h"
@@ -20,7 +21,7 @@ namespace RDE {
      * @brief This class represents what the engine sees and what is going to be rendered. This is used as a Component of
      * the inner ECS System, so you can add Cameras to any desired Node.
      */
-    class Camera {
+    class Camera : public ComponentBase {
         FRIEND_CLASS(Scene)
         private:
             /**
@@ -170,6 +171,9 @@ namespace RDE {
             bool isElementInside(Transform* _transform, const Vec2F& _size) const;
 
             void update();
+
+            void setEnabled(bool _enabled) override;
+            bool isEnabled() override;
 
         private:
             /**

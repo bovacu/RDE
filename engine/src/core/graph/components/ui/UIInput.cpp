@@ -40,7 +40,7 @@ namespace RDE {
         placeholderTextRenderer = _placeholderNode->addComponent<UIText>(config.placeholderText, config.font);
         placeholderTextRenderer->batchPriority = BatchPriority::SpritePriority;
         placeholderTextRenderer->color = config.placeholderTextColor;
-        placeholderTextRenderer->node->setEnabled(config.showPlaceholderText ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
+        placeholderTextRenderer->setEnabled(config.showPlaceholderText);
         placeholderTextRenderer->setOriginOffset({placeholderTextRenderer->getSize().x * 0.5f, 0});
         auto* _placeholderTransform = _placeholderNode->getTransform();
         ((UITransform*)_placeholderTransform)->setAnchor(Anchor::LEFT);
@@ -65,7 +65,7 @@ namespace RDE {
         caretSprite = _caretNode->addComponent<UIImage>(config.caretTexture);
         caretSprite->setBatchPriority(BatchPriority::SpritePriority);
         caretSprite->setColor(config.textColor);
-        caretSprite->node->setEnabled(INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
+        caretSprite->setEnabled(false);
         caretTransform = _caretNode->getTransform();
         ((UITransform*)caretTransform)->setAnchor(Anchor::LEFT);
         auto _caretPosition = caretTransform->getPosition();
@@ -126,7 +126,7 @@ namespace RDE {
             placeholderTextRenderer->setText(config.placeholderText);
             placeholderTextRenderer->setColor(config.placeholderTextColor);
             placeholderTextRenderer->setFont(config.font);
-            placeholderTextRenderer->node->setEnabled(config.showPlaceholderText ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
+            placeholderTextRenderer->setEnabled(config.showPlaceholderText);
         }
 
         if(caretSprite != nullptr) {
@@ -160,8 +160,7 @@ namespace RDE {
 
         if(UI::interaction != nullptr && UI::interaction->focused && caretSprite != nullptr) {
             if(blinkingTimer > config.blinkingTimeSeconds) {
-                caretSprite->node->setEnabled(
-                        (uint8_t) (caretSprite->node->isEnabledStateOn(EnabledStates::DS_RENDER) ? INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER) : EnabledStates::DS_RENDER));
+                caretSprite->setEnabled(!caretSprite->isEnabled());
                 blinkingTimer = 0;
             }
 
@@ -190,7 +189,7 @@ namespace RDE {
         SDL_StartTextInput();
         #endif
 
-        caretSprite->node->setEnabled(EnabledStates::DS_RENDER);
+        caretSprite->setEnabled(true);
         UI::interaction->focused = true;
         updatePlaceholder();
         blinkingTimer = 0;
@@ -205,7 +204,7 @@ namespace RDE {
         SDL_StopTextInput();
         #endif
 
-        caretSprite->node->setEnabled(INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
+        caretSprite->setEnabled(false);
     }
 
     void UIInput::onMouseReleased(MouseCode _mouseCode) {
@@ -262,12 +261,12 @@ namespace RDE {
     void UIInput::updatePlaceholder() {
         if(placeholderTextRenderer != nullptr) {
             if(UI::interaction->focused) {
-                placeholderTextRenderer->node->setEnabled(textRenderer->getText().empty() ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
+                placeholderTextRenderer->setEnabled(textRenderer->getText().empty());
             } else {
                 if(textRenderer != nullptr) {
-                    placeholderTextRenderer->node->setEnabled(textRenderer->getText().empty() ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
+                    placeholderTextRenderer->setEnabled(textRenderer->getText().empty());
                 } else {
-                    placeholderTextRenderer->node->setEnabled(config.showPlaceholderText ? EnabledStates::DS_RENDER : INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
+                    placeholderTextRenderer->setEnabled(config.showPlaceholderText);
                 }
             }
         }
@@ -299,6 +298,6 @@ namespace RDE {
     }
 
     bool UIInput::usable() {
-        return textRenderer != nullptr && UI::interaction->interactable && node->isEnabledStateOn(EnabledStates::DS_UPDATE);
+        return textRenderer != nullptr && UI::interaction->interactable && nineSliceSprite->isEnabled();
     }
 }

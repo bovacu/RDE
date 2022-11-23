@@ -19,27 +19,51 @@ namespace RDE {
     }
 
     void Scene::onEvent(Event& _event) {
+        for(auto* _canvas : canvases) {
+            _canvas->onEvent(engine, _event);
+        }
+
         mainGraph.onEvent(_event);
     }
 
     void Scene::onUpdate(Delta _dt) {
         mainGraph.onUpdate(_dt);
+
+        for(auto* _canvas : canvases) {
+            _canvas->onUpdate(_dt);
+        }
     }
 
     void Scene::onFixedUpdate(Delta _dt) {
         mainGraph.onFixedUpdate(_dt);
-    }
 
-    void Scene::onRender(Delta _dt) {
-        mainGraph.onRender();
+        for(auto* _canvas : canvases) {
+//            _canvas->onFixedUpdate();
+        }
     }
 
     void Scene::onLateUpdate(Delta _dt) {
         mainGraph.onLateUpdate(_dt);
+
+        for(auto* _canvas : canvases) {
+            _canvas->onLateUpdate();
+        }
+    }
+
+    void Scene::onRender(Delta _dt) {
+        mainGraph.onRender();
+
+        for(auto* _canvas : canvases) {
+            _canvas->onRender();
+        }
     }
 
     void Scene::onDebugRender(Delta _dt) {
         mainGraph.onDebugRender();
+
+        for(auto* _canvas : canvases) {
+            _canvas->onDebugRender();
+        }
     }
 
     Graph* Scene::getMainGraph() {

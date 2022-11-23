@@ -7,6 +7,7 @@
 
 namespace RDE {
     FORWARD_DECLARE_CLASS(Manager, Window, Camera, Canvas, IViewPort, Graph)
+
     /**
      * @brief Component common to every entity and that identifies it whit a name. It is recommended 
      * every entity to have a different one.

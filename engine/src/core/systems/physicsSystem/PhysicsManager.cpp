@@ -93,6 +93,8 @@ namespace RDE {
 
         for(auto* _body : bodies) {
 
+            if(!_body->isEnabled()) continue;
+
             for(auto& _physicsShape : _body->physicsShapes) {
 
                 switch (_physicsShape.second.shapeConfig.type) {

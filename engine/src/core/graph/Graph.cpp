@@ -50,18 +50,13 @@ namespace RDE {
     }
 
     void Graph::onEvent(Event& _event) {
-        EventDispatcher _eventDispatcher(_event);
-
-        for(auto* _canvas : scene->canvases) {
-            _canvas->onEvent(scene->engine, _eventDispatcher, _event);
-        }
-
         onEventDel(registry, _event);
     }
 
     void Graph::onUpdate(Delta _dt) {
-        auto _animations = registry.view<AnimationSystem, SpriteRenderer, Active>(entt::exclude<DisabledForUpdate>);
-        auto _particleSystems = registry.view<ParticleSystem, Active>(entt::exclude<DisabledForUpdate>);
+        // Is DisabledForRender because that is the flag used by renderizable elements to be enabled/disabled.
+        auto _animations = registry.view<AnimationSystem, SpriteRenderer, Active>(entt::exclude<DisabledForRender>);
+        auto _particleSystems = registry.view<ParticleSystem, Active>(entt::exclude<DisabledForRender>);
 
         _animations.each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
             _animationSystem.update(_dt, _spriteRenderer);
@@ -72,17 +67,13 @@ namespace RDE {
         });
 
         onUpdateDel(registry, _dt);
-
-        for(auto* _canvas : scene->canvases) {
-            _canvas->onUpdate(_dt);
-        }
     }
 
     void Graph::onFixedUpdate(Delta _dt) {
         onFixedUpdateDel(registry, _dt);
 
         for(auto* _body : scene->engine->manager.physics.bodies) {
-            if(_body->transform->node->hasComponent<DisabledForFixedUpdate>()) continue;
+            if(!_body->isEnabled()) continue;
             _body->update();
         }
     }
@@ -104,10 +95,6 @@ namespace RDE {
             onRenderDel(registry);
             _renderManager.endDraw();
         }
-
-        for(auto* _canvas : scene->canvases) {
-            _canvas->onRender();
-        }
     }
 
     void Graph::onLateUpdate(Delta _dt) {
@@ -124,7 +111,7 @@ namespace RDE {
 
             int _totalElementsToReserve = 0;
             for(auto _i = 0; _i < RENDERIZABLES_COUNT; _i++) {
-                _totalElementsToReserve += _renderizables[_i].size();
+                _totalElementsToReserve += (int)_renderizables[_i].size();
             }
 
             renderizableTree.reserve(_totalElementsToReserve);
@@ -142,10 +129,6 @@ namespace RDE {
         _renderManager.beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->node->getID()));
         scene->engine->manager.physics.debugRender(&_renderManager);
         _renderManager.endDebugDraw();
-
-        for(auto* _canvas : scene->canvases) {
-            _canvas->onDebugRender();
-        }
     }
 
     Node* Graph::createNode(const std::string& _tag, Node* _parent) {

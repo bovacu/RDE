@@ -126,4 +126,14 @@ namespace RDE {
         return viewport->landscape;
     }
 
+    // TODO: implement
+    void Camera::setEnabled(bool _enabled) {
+
+    }
+
+    // TODO: implement
+    bool Camera::isEnabled() {
+        return true;
+    }
+
 }

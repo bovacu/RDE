@@ -371,4 +371,19 @@ namespace RDE {
     void PhysicsBody::applyForceWorld(const Vec2F& _force, const Vec2F& _where) {
         cpBodyApplyForceAtWorldPoint(body, { _force.x, _force.y }, { _where.x, _where.y });
     }
+
+    void PhysicsBody::setEnabled(bool _enabled) {
+        if(_enabled && transform->node->hasComponent<DisabledForFixedUpdate>()) {
+            transform->node->removeComponent<DisabledForFixedUpdate>();
+            return;
+        }
+
+        if(!_enabled && !transform->node->hasComponent<DisabledForFixedUpdate>()) {
+            transform->node->addComponent<DisabledForFixedUpdate>();
+        }
+    }
+
+    bool PhysicsBody::isEnabled() {
+        return !transform->node->hasComponent<DisabledForFixedUpdate>();
+    }
 }

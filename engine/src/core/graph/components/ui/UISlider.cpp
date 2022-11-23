@@ -20,19 +20,19 @@ namespace RDE {
         UI::interaction->onInnerClicking.bind<&UISlider::onMouseClicked>(this);
         UI::interaction->onInnerClickingReleased.bind<&UISlider::onMouseReleased>(this);
 
-        auto _backgroundBarNode = _graph->createNode("Background", _node);
+        auto _backgroundBarNode = _graph->createNode("Background", node);
         backgroundBarSprite = _backgroundBarNode->addComponent<UI9Slice>(config.backgroundBarTexture);
         backgroundBarSprite->interaction = UI::interaction;
         backgroundBarSprite->setSize(config.barSize);
         backgroundBarSprite->setColor(config.backgroundBarColor);
         backgroundBarTransform = _backgroundBarNode->getTransform();
 
-        auto _fillBarNode = _graph->createNode("Fill", _node);
+        auto _fillBarNode = _graph->createNode("Fill", node);
         fillBarSprite = _fillBarNode->addComponent<UI9Slice>(config.fillingBarTexture);
         fillBarSprite->setColor(config.fillingBarColor);
         fillBarTransform = _fillBarNode->getTransform();
 
-        auto _handleNode = _graph->createNode("Handle", _node);
+        auto _handleNode = _graph->createNode("Handle", node);
         handleSprite = _handleNode->addComponent<UIImage>(config.handleTexture);
         handleSprite->setColor(config.handleColor);
         handleTransform = _handleNode->getTransform();
@@ -116,9 +116,7 @@ namespace RDE {
             auto _size = Vec2F { config.barSize.x, config.barSize.y };
             Vec2F _limits = { backgroundBarTransform->getModelMatrixPosition().x - _size.x * 0.5f,
                                  backgroundBarTransform->getModelMatrixPosition().x + _size.x * 0.5f };
-
             auto _posX = Util::Math::clampF(node->manager->inputManager.getMousePosWorldPos().x, _limits.v[0], _limits.v[1]);
-            handleTransform->setMatrixModelPosition({_posX, handleTransform->getModelMatrixPosition().y});
 
             auto _distanceFromLowerPoint = _posX - _limits.v[0];
             setFilledPercentage(_distanceFromLowerPoint / (config.barSize.x));
@@ -131,6 +129,11 @@ namespace RDE {
 
     void UISlider::setFilledPercentage(float _percentage) {
         config.percentageFilled = Util::Math::clampF(_percentage, 0.f, 1.f);
+
+        auto _width = ((UITransform*)node->getTransform())->getSize().x;
+        auto _leftPos = node->getTransform()->getModelMatrixPosition().x - _width * 0.5f;
+        handleTransform->setMatrixModelPosition({ _leftPos + config.percentageFilled * _width, handleTransform->getModelMatrixPosition().y});
+
         fillBarSprite->setSize({ config.barSize.x * config.percentageFilled, config.barSize.y });
         fillBarTransform->setPosition({handleTransform->getPosition().x - fillBarSprite->getSize().x * 0.5f, fillBarTransform->getPosition().y});
     }
