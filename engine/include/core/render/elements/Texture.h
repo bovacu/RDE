@@ -246,6 +246,8 @@ namespace RDE {
              */
             unsigned char* pixels = nullptr;
 
+            bool dirty = false;
+
             /**
              * @brief Type of texture.
              */
@@ -306,6 +308,7 @@ namespace RDE {
              */
             Color getPixel(int _x, int _y);
 
+            void resizeImage(const Vec2<uint>& _newSize);
 
             ~Image();
     };

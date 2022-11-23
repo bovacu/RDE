@@ -8,6 +8,7 @@
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/DynamicSpriteRenderer.h"
 
 namespace RDE {
     
@@ -122,6 +123,12 @@ namespace RDE {
 
             isRenderizableTreeDirty = false;
         }
+
+        registry.view<DynamicSpriteRenderer, Active>().each([](const NodeID _nodeID, DynamicSpriteRenderer& _dynamicSpriteRenderer, Active& _) {
+            if(_dynamicSpriteRenderer.isEnabled()) {
+                _dynamicSpriteRenderer.texture->uploadToGPU();
+            }
+        });
     }
 
     void Graph::onDebugRender() {
@@ -327,6 +334,10 @@ namespace RDE {
 
             if(hasComponent<SpriteRenderer>(_id)) {
                 _renderizables[0].push_back(getComponent<SpriteRenderer>(_id));
+            }
+
+            if(hasComponent<DynamicSpriteRenderer>(_id)) {
+                _renderizables[0].push_back(getComponent<DynamicSpriteRenderer>(_id));
             }
 
             if(hasComponent<ParticleSystem>(_id)) {

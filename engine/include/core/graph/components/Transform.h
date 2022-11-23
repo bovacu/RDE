@@ -20,7 +20,7 @@ namespace RDE {
      * @brief Component common to every entity that tells the engine where it is, which scale it has and how much it is rotated.
      */
     class Transform {
-        FRIEND_CLASS(Graph, PhysicsBody, SpriteRenderer, TextRenderer, UIImage, UI9Slice, UIText)
+        FRIEND_CLASS(Graph, PhysicsBody, SpriteRenderer, DynamicSpriteRenderer, TextRenderer, UIImage, UI9Slice, UIText)
         MAKE_CLASS_ITERABLE(std::vector<Transform*>, children)
 
         protected:

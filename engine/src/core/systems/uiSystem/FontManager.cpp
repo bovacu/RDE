@@ -70,6 +70,8 @@ namespace RDE {
 
             biggestCharHeight = biggestCharHeight < characters[_i].size.y ? characters[_i].size.y : biggestCharHeight;
         }
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
     }
 
     Texture& Font::getTexture() {
