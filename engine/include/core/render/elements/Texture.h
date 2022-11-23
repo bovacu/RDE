@@ -246,6 +246,8 @@ namespace RDE {
              */
             unsigned char* pixels = nullptr;
 
+            bool dirty = false;
+
             /**
              * @brief Type of texture.
              */

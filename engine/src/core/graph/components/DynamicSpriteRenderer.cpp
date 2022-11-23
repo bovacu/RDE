@@ -1,53 +1,35 @@
 //
-// Created by borja on 9/5/22.
+// Created by borja on 11/22/22.
 //
 
-#include "core/graph/components/SpriteRenderer.h"
-#include "core/render/elements/ViewPort.h"
-#include "core/util/Color.h"
-#include "core/util/Functions.h"
-#include "core/graph/components/Transform.h"
-#include "core/render/elements/Vertex.h"
-#include "core/render/elements/Batch.h"
-#include "core/graph/Scene.h"
-#include "core/systems/uiSystem/Canvas.h"
+#include "core/graph/components/DynamicSpriteRenderer.h"
 #include "core/Engine.h"
 
 namespace RDE {
 
-    SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Texture* _texture) :
-    SpriteRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _texture) {  }
+    DynamicSpriteRenderer::DynamicSpriteRenderer(Node* _node, Scene* _scene, const DynamicSpriteRendererConfig& _config) :
+    DynamicSpriteRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _config) {  }
 
-    SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
-    SpriteRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _texture)  {  }
+    DynamicSpriteRenderer::DynamicSpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const DynamicSpriteRendererConfig& _config) :
+    DynamicSpriteRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _config)  {  }
 
-    SpriteRenderer::SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : IRenderizable(_node) {
+    DynamicSpriteRenderer::DynamicSpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const DynamicSpriteRendererConfig& _config) : IRenderizable(_node) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
-        if(_texture == nullptr) {
-            texture = _manager->textureManager.getSubTexture("defaultAssets", "sprite");
+        texture = new Image;
+
+        if(_config.pixels == nullptr) {
+            texture->init((int)_config.size.x, (int)_config.size.y, _config.imageType);
         } else {
-            texture = _texture;
+            texture->init((int)_config.size.x, (int)_config.size.y, _config.pixels, _config.imageType);
         }
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();
         calculateGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
     }
 
-    std::string SpriteRenderer::getTexturePath() {
-        return texture->getPath();
-    }
-
-    std::string SpriteRenderer::getTextureName() {
-        return Util::String::getFileNameFromPath(texture->getPath());
-    }
-
-    std::string SpriteRenderer::getTextureExtension() {
-        return Util::String::getFileExtension(texture->getPath());
-    }
-
-    void SpriteRenderer::calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+    void DynamicSpriteRenderer::calculateGeometry(glm::mat4& _transformMatrix, RDE::Transform& _transform, const RDE::ViewPort& _viewport) {
         auto _screenPos = Util::Math::worldToScreenCoords(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -75,9 +57,21 @@ namespace RDE {
         geometry[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
         geometry[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
         geometry[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
-    } 
+    }
 
-    void SpriteRenderer::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
+    std::string DynamicSpriteRenderer::getTexturePath() {
+        return texture->getPath();
+    }
+
+    std::string DynamicSpriteRenderer::getTextureName() {
+        return Util::String::getFileNameFromPath(texture->getPath());
+    }
+
+    std::string DynamicSpriteRenderer::getTextureExtension() {
+        return Util::String::getFileExtension(texture->getPath());
+    }
+
+    void DynamicSpriteRenderer::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
         auto _vertexCount = _vertices.size();
 
         auto [_transformMat, _dirty] = _transform.localToWorld();
@@ -101,4 +95,18 @@ namespace RDE {
         _indices.emplace_back(_vertexCount + 0);
     }
 
-}
+    void DynamicSpriteRenderer::setPixel(int _x, int _y, const Color& _color) {
+        texture->setPixel(_x, _y, _color);
+        dirty = true;
+    }
+
+    Color DynamicSpriteRenderer::getPixel(int _x, int _y) {
+        return texture->getPixel(_x, _y);
+    }
+
+    void DynamicSpriteRenderer::resizeImage(const Vec2<uint>& _newSize) {
+        Util::Log::warn("Resizing images is not implemented yet!");
+        dirty = true;
+    }
+
+} // RDE

@@ -187,6 +187,10 @@ namespace RDE {
         pixels = _pixels;
         channels = getChannels(_imageType);
         imageType = _imageType;
+        openGLTextureID = -1;
+        region = { { 0, 0 }, { textureSize.x , textureSize.y} };
+        spriteSheetSize = { (int)textureSize.x, (int)textureSize.y };
+        uploadToGPU();
     }
 
     void Image::init(int _width, int _height, const ImageType& _imageType) {
@@ -194,7 +198,16 @@ namespace RDE {
         textureSize.y = (float)_height;
         channels = getChannels(_imageType);
         pixels = new unsigned char[_width * _height * channels];
+        for(auto _i = 0; _i < _height; _i++) {
+            for(auto _j = 0; _j < _width; _j++) {
+                setPixel(_j, _i, Color::Magenta);
+            }
+        }
         imageType = _imageType;
+        openGLTextureID = -1;
+        region = { { 0, 0 }, { textureSize.x , textureSize.y} };
+        spriteSheetSize = { (int)textureSize.x, (int)textureSize.y };
+        uploadToGPU();
     }
 
     void Image::uploadToGPU() {
@@ -222,8 +235,8 @@ namespace RDE {
 
             glTexImage2D(GL_TEXTURE_2D, 0, (int)internalFormat, (int)textureSize.x, (int)textureSize.y, 0, dataFormat, GL_UNSIGNED_BYTE, pixels);
         } else {
-            // TODO re-upload to GPU of image
-            Util::Log::error("Re-upload to GPU not implemented!!");
+            glBindTexture(GL_TEXTURE_2D, openGLTextureID);
+            glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, (int)textureSize.x, (int)textureSize.y, dataFormat, GL_UNSIGNED_BYTE, pixels);
         }
     }
 
@@ -236,6 +249,7 @@ namespace RDE {
         pixels[_x * channels + _y * (int)textureSize.x * channels + 1] = _color.g;
         pixels[_x * channels + _y * (int)textureSize.x * channels + 2] = _color.b;
         pixels[_x * channels + _y * (int)textureSize.x * channels + 3] = _color.a;
+        dirty = true;
     }
 
     Color Image::getPixel(int _x, int _y) {

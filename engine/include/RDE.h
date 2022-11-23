@@ -27,6 +27,7 @@
 
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/SpriteRenderer.h"
+#include "core/graph/components/DynamicSpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
 #include "core/graph/components/ui/UI9Slice.h"
 #include "core/graph/components/ui/UITransform.h"

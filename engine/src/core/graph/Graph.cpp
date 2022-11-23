@@ -8,6 +8,7 @@
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/DynamicSpriteRenderer.h"
 
 namespace RDE {
     
@@ -327,6 +328,10 @@ namespace RDE {
 
             if(hasComponent<SpriteRenderer>(_id)) {
                 _renderizables[0].push_back(getComponent<SpriteRenderer>(_id));
+            }
+
+            if(hasComponent<DynamicSpriteRenderer>(_id)) {
+                _renderizables[0].push_back(getComponent<DynamicSpriteRenderer>(_id));
             }
 
             if(hasComponent<ParticleSystem>(_id)) {
