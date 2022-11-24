@@ -10,16 +10,20 @@
 
 namespace RDE {
 
-    UI9Slice::UI9Slice(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
-            UI9Slice(_node, &_scene->engine->manager, _canvas->getGraph(), _texture) {  }
+    UI9Slice::UI9Slice(Node* _node, Scene* _scene, Canvas* _canvas, const UI9SliceConfig& _config) :
+            UI9Slice(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
 
-    UI9Slice::UI9Slice(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : UI(_node) {
+    UI9Slice::UI9Slice(Node* _node, Manager* _manager, Graph* _graph, const UI9SliceConfig& _config) : UI(_node, &_config) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
-        texture = _texture;
+        texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "panel") :
+                  _config.texture;
         dpi = _manager->sceneManager.getDisplayedScene()->engine->rdeConfig.windowData.diagonalDpi;
 
-        if(!_texture->nineSlice.isEnabled()) {
-            spriteRenderer = _node->addComponent<UIImage>(_texture);
+        setColor(_config.color);
+        setSize(_config.size);
+
+        if(!texture->nineSlice.isEnabled()) {
+            spriteRenderer = _node->addComponent<UIImage>( UIImageConfig { .texture = texture });
         }
 
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
@@ -82,10 +86,6 @@ namespace RDE {
         return UI::interaction->interactable;
     }
 
-    Vec2F UI9Slice::getSize() const {
-        return ((UITransform*)node->getTransform())->getSize();
-    }
-
     void UI9Slice::setSize(const Vec2F& _size) {
         ((UITransform*)node->getTransform())->setSize({ Util::Math::clampF(_size.x, 0, FLT_MAX), Util::Math::clampF(_size.y, 0, FLT_MAX) });
         dirty = true;
@@ -95,7 +95,6 @@ namespace RDE {
         // TODO this calculations are an absolute mess, I need to clean this up, rename variables, make it clearer and remove redundant operations, but I'm scared.
         auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
         auto _originOffset = UI::getOriginOffset();
-        auto _parentSize = ((UITransform*)node->getTransform()->parentTransform->node->getTransform())->getSize();
         auto _uiSize = ((UITransform*)node->getTransform())->getSize();
 
         for(auto _i = 0; _i < _rectsAmount; _i++) {

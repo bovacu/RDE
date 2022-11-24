@@ -12,24 +12,18 @@ namespace RDE {
     struct UIPanelConfig : CommonUIConfig {
         Texture* texture = nullptr;
         Vec2F size { -1.f, -1.f };
-        Color color = Color::NO_COLOR;
+        Color color = { 22, 29, 34, 255 };
     };
 
     FORWARD_DECLARE_CLASS(UI9Slice)
 
     class UIPanel : public UI {
-        private:
-            UIPanelConfig config;
-
         public:
             UI9Slice* nineSliceSprite = nullptr;
 
             UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config);
 
             [[nodiscard]] Vec2F getSize() const override;
-
-            UIPanelConfig getConfig();
-            void setConfig(Manager* _manager, const UIPanelConfig& _config);
 
             void setInteractable(bool _interactable) override;
             bool isInteractable() override;

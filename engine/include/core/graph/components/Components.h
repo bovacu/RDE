@@ -5,6 +5,8 @@
 #define RDE_COMPONENTS_H
 
 
+#include "ComponentBase.h"
+
 namespace RDE {
     FORWARD_DECLARE_CLASS(Manager, Window, Camera, Canvas, IViewPort, Graph)
 
@@ -95,8 +97,17 @@ namespace RDE {
      * handles an event without this component, the event will propagate in deeper elements.
      * 
      */
-    struct CanvasEventStopper {
+    struct CanvasEventStopper : public ComponentBase {
         explicit CanvasEventStopper(Node* _node, Manager* _manager, Graph* _graph) {  }
+
+        // TODO: implement and use it in UI.cpp
+        void setEnabled(bool _enabled) override {
+
+        }
+
+        bool isEnabled() override {
+            return true;
+        }
 
         private:
             /**

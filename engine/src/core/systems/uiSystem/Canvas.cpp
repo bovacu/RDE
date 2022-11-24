@@ -243,7 +243,7 @@ namespace RDE {
             _renderManager.setPointSize(4);
         });
 
-        _registry.view<UICheckbox, Transform>().each([this, &_renderManager](const NodeID _nodeID, UICheckbox& _checkbox, Transform& _transform) {
+        _registry.view<UICheckbox, UITransform, Active>().each([this, &_renderManager](const NodeID _nodeID, UICheckbox& _checkbox, UITransform& _transform, Active& _) {
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
             Vec2F _size = _checkbox.getSize();
@@ -262,6 +262,33 @@ namespace RDE {
             _shape.showInnerColor(false);
             _shape.setRotation(_transform.getModelMatrixRotation());
             _renderManager.drawShape(_shape);
+        });
+
+        _registry.view<UIText, UITransform, Active>().each([this, &_renderManager](const NodeID _nodeID, UIText& _uiText, UITransform& _transform, Active& _) {
+            if(!_uiText.isEnabled()) return;
+
+            DebugShape _shape;
+            Vec2F _pos = _transform.getModelMatrixPosition();
+            Vec2F _size = _uiText.getSize();
+
+            auto _viewport = camera->getViewport();
+            auto _virtualRes = _viewport->getVirtualResolution();
+            auto _physicalRes = _viewport->getDeviceResolution();
+            auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
+
+            _pos       *= _scale.y;
+            _size      *= _scale.y;
+
+            _shape.makeSquare(_pos, _size);
+            _shape.showOutsideColor(true);
+            _shape.setOutlineColor(Color::Blue);
+            _shape.showInnerColor(false);
+            _shape.setRotation(_transform.getModelMatrixRotation());
+            _renderManager.drawShape(_shape);
+
+            Vec2F _pointSize = {4, 4};
+            _renderManager.drawSquare(_pos, _pointSize, Color::Yellow);
+            _renderManager.setPointSize(4);
         });
 
         _renderManager.endDebugDraw();
@@ -300,7 +327,7 @@ namespace RDE {
             _canvasElement.renderizable = getRenderizable(_node);
 
             if(graph.getNodeContainer().any_of<UIMask>(_node->getID()) && _node->getComponent<UIMask>()->isEnabled()) {
-                _canvasElement.cropping = _node->getTransform()->getChildrenCount() - 1;
+                _canvasElement.cropping = _node->getTransform()->getEnabledChildrenCount();
             }
 
             if(_canvasElement.renderizable != nullptr) {

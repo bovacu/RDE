@@ -6,6 +6,7 @@
 #define RDE_UI_SLIDER_H
 
 #include "core/graph/components/ui/UI.h"
+#include "core/graph/components/ui/UITransform.h"
 
 namespace RDE {
 
@@ -26,30 +27,23 @@ namespace RDE {
 
     class UISlider : public UI {
         private:
-            UISliderConfig config;
             bool mouseDown = false;
             UI9Slice* backgroundBarSprite = nullptr;
             UI9Slice* fillBarSprite = nullptr;
             UIImage* handleSprite = nullptr;
 
-            Transform* backgroundBarTransform = nullptr;
-            Transform* fillBarTransform = nullptr;
-            Transform* handleTransform = nullptr;
+            UITransform* backgroundBarTransform = nullptr;
+            UITransform* fillBarTransform = nullptr;
+            UITransform* handleTransform = nullptr;
+
+            float percentageFilled = 0.f;
 
         public:
             UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config);
             ~UISlider() {  }
 
-            [[nodiscard]] Vec2F getSize() const override;
-
-            UISliderConfig getConfig();
-            void setConfig(Manager* _manager, const UISliderConfig& _config);
-
             void setInteractable(bool _interactable) override;
             bool isInteractable() override;
-
-            void setColor(const Color& _color) override;
-            Color getColor() override;
 
             void onUpdate(Delta _dt) override;
 

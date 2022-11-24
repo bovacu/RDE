@@ -166,7 +166,7 @@ namespace RDE {
             UIInteractable* interaction = nullptr;
 
         public:
-            explicit UI(Node* _node);
+            explicit UI(Node* _node, const CommonUIConfig* _config);
 
             virtual bool isInteractable() = 0;
             virtual void setInteractable(bool _interactable) = 0;
@@ -175,7 +175,7 @@ namespace RDE {
             void setOriginOffset(const Vec2F& _originOffset);
 
             [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
-            [[nodiscard]] Vec2F getSize() const override { return texture->getSize(); }
+            [[nodiscard]] Vec2F getSize() const override;
             [[nodiscard]] FloatRect getRegion() const override { return texture->getRegion(); }
 
             virtual ~UI() override {  };

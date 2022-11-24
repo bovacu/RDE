@@ -28,18 +28,17 @@ namespace RDE {
         Vec2F textsOffsetFromLeft = { 5.f, 0 };
 
         Texture* caretTexture = nullptr;
+        Color caretColor = Color::White;
         float caretHeight = 0.75f;
         float blinkingTimeSeconds = 0.5f;
     };
 
     class UIInput : public UI {
         private:
-            UIInputConfig config;
             int pointer = 0;
             float textDisplacement = 0;
             float blinkingTimer = 0;
 
-        public:
             UIText* textRenderer = nullptr;
             UIText* placeholderTextRenderer = nullptr;
             UI9Slice* nineSliceSprite = nullptr;
@@ -47,13 +46,19 @@ namespace RDE {
             Transform* caretTransform = nullptr;
             Transform* textTransform = nullptr;
             Transform* nineSliceTransform = nullptr;
+            Texture* caretTexture;
+
+        public:
+            float blinkingTimeSeconds = 0;
+            bool showPlaceholderText = true;
+            Vec2F textOffsetFromLeft;
+
+            /**
+             * @brief This is a % of the height of the input text
+             */
+            float caretHeight = 0.75;
 
             UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config);
-
-            [[nodiscard]] Vec2F getSize() const override;
-
-            UIInputConfig getConfig();
-            void setConfig(Manager* _manager, const UIInputConfig& _config);
 
             void setInteractable(bool _interactable) override;
             bool isInteractable() override;

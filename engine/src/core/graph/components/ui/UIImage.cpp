@@ -9,18 +9,15 @@
 namespace RDE {
 
 
-    UIImage::UIImage(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
-    UIImage(_node, &_scene->engine->manager, _canvas->getGraph(), _texture) {  }
+    UIImage::UIImage(Node* _node, Scene* _scene, Canvas* _canvas, const UIImageConfig& _config) :
+    UIImage(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
 
-    UIImage::UIImage(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : UI(_node) {
+    UIImage::UIImage(Node* _node, Manager* _manager, Graph* _graph, const UIImageConfig& _config) : UI(_node, &_config) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
-        if(_texture == nullptr) {
-            texture = _manager->textureManager.getSubTexture("defaultAssets", "sprite");
-        } else {
-            texture = _texture;
-        }
+        texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "sprite") : _config.texture;
+        setColor(_config.color);
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();
         calculateGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
