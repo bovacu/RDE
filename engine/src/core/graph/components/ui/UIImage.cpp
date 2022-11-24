@@ -19,6 +19,8 @@ namespace RDE {
         texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "sprite") : _config.texture;
         setColor(_config.color);
 
+        ((UITransform*)node->getTransform())->setSize(texture->getSize());
+
         auto [_transformMat, _] = _node->getTransform()->localToWorld();
         calculateGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
     }
