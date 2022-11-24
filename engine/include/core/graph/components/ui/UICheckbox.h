@@ -11,7 +11,7 @@ namespace RDE {
 
     FORWARD_DECLARE_CLASS(UIText, Font, UI9Slice, UIImage, UITransform)
 
-    struct UICheckboxConfig : CommonUIConfig {
+    struct UICheckboxConfig : public CommonUIConfig {
         std::string text = "Checkbox text";
         Texture* checkboxTickTexture = nullptr;
         Texture* checkboxBackgroundTexture = nullptr;
@@ -27,23 +27,24 @@ namespace RDE {
 
     class UICheckbox : public UI {
         private:
-            UICheckboxConfig config;
+            bool checked = false;
             UIText* textRenderer = nullptr;
             UIImage* checkboxBackgroundSprite = nullptr;
             UIImage* tickSprite = nullptr;
-            UITransform* textTransform = nullptr, *checkboxBackgroundTransform = nullptr, *tickTransform = nullptr;
+
+        public:
+            MDelegate<void(bool)> onClickedCheckbox;
+            Vec2F checkboxTextOffset;
 
         public:
             UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config);
             ~UICheckbox() override {  }
 
-            [[nodiscard]] Vec2F getSize() const override;
-
-            UICheckboxConfig getConfig();
-            void setConfig(Manager* _manager, const UICheckboxConfig& _config);
-
             void setInteractable(bool _interactable) override;
             bool isInteractable() override;
+
+            void setChecked(bool _checked);
+            [[nodiscard]] bool isChecked() const;
 
         private:
             void onMouseReleased(MouseCode _mouseButton);

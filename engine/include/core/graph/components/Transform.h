@@ -66,6 +66,24 @@ namespace RDE {
             int getChildrenCount();
 
             /**
+             * @brief Returns the total number of children, from all of the generations, that are active.
+             * @return int
+             */
+            int getActiveChildrenCount();
+
+            /**
+             * @brief Returns the total number of children, from all of the generations, that are enabled.
+             * @return int
+             */
+            int getEnabledChildrenCount();
+
+            /**
+             * @brief Returns the total number of children, from all of the generations, that are enabled and active.
+             * @return int
+             */
+            int getEnabledAndActiveChildrenCount();
+
+            /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
              * @param _position Vector with position.
              */

@@ -8,27 +8,22 @@
 
 namespace RDE {
 
-    UIText::UIText(Node* _node, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font) :
-            UIText(_node, &_scene->engine->manager, _canvas->getGraph(), _text, _font) {  }
+    UIText::UIText(Node* _node, Scene* _scene, Canvas* _canvas, const UITextConfig& _config) :
+            UIText(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
 
-    UIText::UIText(Node* _node, Manager* _manager, Graph* _graph, const std::string& _text, Font* _font) : UI(_node) {
-        font = _font;
-
-        if(_font == nullptr) {
-            font = _manager->fontManager.getDefaultFont("MontserratRegular");
-        } else {
-            font = _font;
-        }
-
-        innerText = _text;
-        recalcTextDimensions(_text);
+    UIText::UIText(Node* _node, Manager* _manager, Graph* _graph, const UITextConfig& _config) : UI(_node, &_config) {
+        font = _config.font == nullptr ? _manager->fontManager.getDefaultFont("MontserratRegular") : _config.font;
+        innerText = _config.text;
+        recalcTextDimensions(innerText);
+        setColor(_config.textColor);
         shaderID = defaultShaders[TEXT_RENDERER_SHADER];
         texture = &font->getTexture();
         IRenderizable::batchPriority = BatchPriority::TextPriority;
+
+        ((UITransform*)node->getTransform())->setSize(textSize);
     }
 
     void UIText::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
-        auto* _uiTransform = (UITransform*)&_transform;
         auto _originOffset = UI::getOriginOffset();
 
         auto* _atlas = font;
@@ -56,9 +51,8 @@ namespace RDE {
             for(char _char : _lineInfo.line) {
                 auto _vertexCount = _vertices.size();
 
-                float _xPos = (_x - (size.x * 0.5f) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
-                // 0.4 = 0.5f / 1.25f;
-                float _yPos = (_y + (size.y * 0.4f) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
+                float _xPos = (_x - (textSize.x) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
+                float _yPos = (_y + (textSize.y * 0.75f) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
 
                 float _w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
                 float _h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;
@@ -142,7 +136,7 @@ namespace RDE {
 
     void UIText::recalcTextDimensions(const std::string& _text) {
         auto [_, _totalWidth, _totalHeight] = calculateLinesInfo(font->getChars());
-        size.set(_totalWidth, _totalHeight);
+        textSize.set(_totalWidth * 0.5f, _totalHeight * 0.5f);
     }
 
     void UIText::setFontSize(int _fontSize) {
@@ -191,6 +185,10 @@ namespace RDE {
         }
 
         return std::tuple {_linesInfo, _totalWidth, _totalHeight};
+    }
+
+    Vec2F UIText::getTextSize() {
+        return textSize;
     }
 
 }

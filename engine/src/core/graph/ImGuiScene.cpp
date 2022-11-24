@@ -462,6 +462,7 @@ namespace RDE {
         uiImageComponent(_graph, _selectedNode);
         uiTextComponent(_graph, _selectedNode);
         uiMaskComponent(_graph, _selectedNode);
+        uiCanvasStopperComponent(_graph, _selectedNode);
 
         ImGui::End();
     }
@@ -811,6 +812,19 @@ namespace RDE {
             ImGui::PopStyleVar();
 
             ImGui::NewLine();
+            ImGui::Text("Size ");
+            float _size[2] = {_transform->getSize().x, _transform->getSize().y};
+            ImGui::SameLine(0, 35);
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(createID());
+            if (ImGui::DragFloat2("##myInput", _size, 1.f)) {
+                _transform->setSize({ Util::Math::clampF(_size[0], 0.f, FLT_MAX), Util::Math::clampF(_size[1], 0.f, FLT_MAX) });
+            }
+            ImGui::PopID();
+
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+
+            ImGui::NewLine();
 
             ImGui::Text("Position ");
 
@@ -844,8 +858,6 @@ namespace RDE {
             if(ImGui::DragFloat2("##myInput", _scale, 0.05))
                 _transform->setScale(_scale[0], _scale[1]);
             ImGui::PopID();
-
-            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }
 
@@ -856,18 +868,6 @@ namespace RDE {
 
         if(createHeader("UI 9Slice", _ui9Slice)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
-
-            {
-                ImGui::Text("Size ");
-                float _size[2] = {_ui9Slice->getSize().x, _ui9Slice->getSize().y};
-                ImGui::SameLine(0, ImGui::CalcTextSize("Origin Offset ").x - ImGui::CalcTextSize("Size ").x + 8);
-                ImGui::SetNextItemWidth(100);
-                ImGui::PushID(createID());
-                if (ImGui::DragFloat2("##myInput", _size, 1.f)) {
-                    _ui9Slice->setSize({ Util::Math::clampF(_size[0], 0.f, FLT_MAX), Util::Math::clampF(_size[1], 0.f, FLT_MAX) });
-                }
-                ImGui::PopID();
-            }
 
             {
                 ImGui::Text("Origin Offset ");
@@ -947,6 +947,17 @@ namespace RDE {
             if (ImGui::Checkbox("##Inverted", &_uiMask->inverted)) {}
             ImGui::PopID();
 
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
+        }
+    }
+
+    void ImGuiScene::uiCanvasStopperComponent(Graph* _graph, const NodeID _selectedNode) {
+        if(!_graph->hasComponent<CanvasEventStopper>(_selectedNode)) return;
+
+        auto _ = _graph->getComponent<CanvasEventStopper>(_selectedNode);
+
+        if(createHeader("Canvas Event Stopper", _)) {
+            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }
     }

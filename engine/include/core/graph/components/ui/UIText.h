@@ -9,6 +9,13 @@
 #include "core/systems/uiSystem/FontManager.h"
 
 namespace RDE {
+
+    struct UITextConfig : public CommonUIConfig {
+        Font* font = nullptr;
+        std::string text = "Rubber Duck";
+        Color textColor = Color::White;
+    };
+
     class UIText : public UI {
         FRIEND_CLASS(Canvas, UIButton, UICheckbox, UIInput)
 
@@ -27,7 +34,7 @@ namespace RDE {
             /**
              * @brief Size of the whole text as a rectangle.
              */
-            Vec2F size {};
+            Vec2F textSize {};
 
             /**
              * @brief Amount of space between each character.
@@ -58,8 +65,8 @@ namespace RDE {
             std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharInfo* _chars) const;
 
         public:
-            UIText(Node* _node, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font = nullptr);
-            UIText(Node* _node, Manager* _manager, Graph* _graph, const std::string& _text, Font* _font = nullptr);
+            UIText(Node* _node, Scene* _scene, Canvas* _canvas, const UITextConfig& _config);
+            UIText(Node* _node, Manager* _manager, Graph* _graph, const UITextConfig& _config);
             ~UIText() override {  }
 
             bool isInteractable() override;
@@ -70,6 +77,7 @@ namespace RDE {
              * @param _text The text to render.
              */
             void setText(const std::string& _text);
+            Vec2F getTextSize();
 
             /**
              * @brief Sets the font.
@@ -117,12 +125,6 @@ namespace RDE {
              * @see IRenderizable
              */
             [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
-
-            /**
-             * @see IRenderizable
-             */
-            [[nodiscard]] Vec2F getSize() const override { return { size.x / 2.f * IRenderizable::node->getTransform()->getScale().x,
-                                                                    size.y / 2.f * IRenderizable::node->getTransform()->getScale().y }; }
 
             /**
              * @see IRenderizable

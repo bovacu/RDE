@@ -25,18 +25,17 @@ namespace RDE {
 
     class UIButton : public UI {
         private:
-            UIButtonConfig config;
             UIText* textRenderer = nullptr;
             UI9Slice* nineSliceSprite = nullptr;
+            // [0] -> idle
+            // [1] -> selected
+            // [2] -> clicked
+            // [3] -> disabled
+            Texture* statesTextures[4];
 
         public:
             UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
             UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config);
-
-            [[nodiscard]] Vec2F getSize() const override;
-
-            UIButtonConfig getConfig();
-            void setConfig(Manager* _manager, const UIButtonConfig& _config);
 
             void setInteractable(bool _interactable) override;
             bool isInteractable() override;

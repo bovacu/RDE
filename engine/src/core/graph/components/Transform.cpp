@@ -281,6 +281,47 @@ namespace RDE {
         return _childrenCount;
     }
 
+    int Transform::getActiveChildrenCount() {
+        int _childrenCount = 0;
+        for(auto& _child : children) {
+            if(_child->node->isActive()) {
+                _childrenCount++;
+                _childrenCount += _child->getChildrenCount();
+            }
+        }
+
+        return _childrenCount;
+    }
+
+    int Transform::getEnabledChildrenCount() {
+        int _childrenCount = 0;
+        for(auto& _child : children) {
+            if(!_child->node->hasComponent<DisabledForRender>() && !_child->node->hasComponent<DisabledForUpdate>() &&
+                    !_child->node->hasComponent<DisabledForLateUpdate>() && !_child->node->hasComponent<DisabledForFixedUpdate>()
+                            && !_child->node->hasComponent<DisabledForLateUpdate>()) {
+                _childrenCount++;
+            }
+
+            _childrenCount += _child->getChildrenCount();
+        }
+
+        return _childrenCount;
+    }
+
+    int Transform::getEnabledAndActiveChildrenCount() {
+        int _childrenCount = 0;
+        for(auto& _child : children) {
+            if(node->isActive() && !_child->node->hasComponent<DisabledForRender>() && !_child->node->hasComponent<DisabledForUpdate>() &&
+               !_child->node->hasComponent<DisabledForLateUpdate>() && !_child->node->hasComponent<DisabledForFixedUpdate>()
+               && !_child->node->hasComponent<DisabledForLateUpdate>()) {
+                _childrenCount++;
+                _childrenCount += _child->getChildrenCount();
+            }
+        }
+
+        return _childrenCount;
+    }
+
     void Transform::clearDirty() {
         dirty = false;
     }

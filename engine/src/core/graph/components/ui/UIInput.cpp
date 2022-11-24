@@ -12,10 +12,11 @@
 
 namespace RDE {
 
-    UIInput::UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config) : UI(_node) {
-        setConfig(_manager, _config);
+    UIInput::UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config) : UI(_node, &_config) {
+        UI::texture = _config.inputBackgroundTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "inputThemeDark") :
+                      _config.inputBackgroundTexture;
 
-        UI::texture = config.inputBackgroundTexture;
+        ((UITransform*)node->getTransform())->setSize({ _config.inputSize.x, _config.inputSize.y });
 
         UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         UI::batchPriority = BatchPriority::SpritePriority;
@@ -30,115 +31,70 @@ namespace RDE {
 
         node->addComponent<UIMask>();
 
-        nineSliceSprite = node->addComponent<UI9Slice>(config.inputBackgroundTexture);
-        nineSliceSprite->interaction = UI::interaction;
-        nineSliceSprite->setSize(config.inputSize);
-        nineSliceSprite->setColor(config.inputBackgroundColor);
+        nineSliceSprite = node->addComponent<UI9Slice>(UI9SliceConfig {
+            .size = UI::getSize(),
+            .texture = UI::texture,
+            .color = _config.inputBackgroundColor
+        });
         nineSliceTransform = _node->getTransform();
 
         auto _placeholderNode = _graph->createNode("Placeholder", _node);
-        placeholderTextRenderer = _placeholderNode->addComponent<UIText>(config.placeholderText, config.font);
+        placeholderTextRenderer = _placeholderNode->addComponent<UIText>(UITextConfig {
+            .font = _config.font == nullptr ? _manager->fontManager.getSpecificFont("MontserratRegular", 40) :
+                    _config.font,
+            .text = _config.placeholderText,
+            .textColor = _config.placeholderTextColor
+        });
         placeholderTextRenderer->batchPriority = BatchPriority::SpritePriority;
-        placeholderTextRenderer->color = config.placeholderTextColor;
-        placeholderTextRenderer->setEnabled(config.showPlaceholderText);
-        placeholderTextRenderer->setOriginOffset({placeholderTextRenderer->getSize().x * 0.5f, 0});
+        placeholderTextRenderer->setEnabled(_config.showPlaceholderText);
         auto* _placeholderTransform = _placeholderNode->getTransform();
         ((UITransform*)_placeholderTransform)->setAnchor(Anchor::LEFT);
-
         auto _placeholderPosition = _placeholderTransform->getPosition();
-
-        _placeholderTransform->setPosition(_placeholderPosition.x - config.inputSize.x * 0.5f + config.textsOffsetFromLeft.x,
-                                           _placeholderPosition.y + config.textsOffsetFromLeft.y);
+        _placeholderTransform->setPosition(_placeholderPosition.x + placeholderTextRenderer->getSize().x * 0.5f - UI::getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
+                                           _placeholderPosition.y + _config.textsOffsetFromLeft.y);
 
         auto _textNode = _graph->createNode("Text", _node);
-        textRenderer = _textNode->addComponent<UIText>(config.text, config.font);
+        textRenderer = _textNode->addComponent<UIText>(UITextConfig {
+                .font = _config.font == nullptr ? _manager->fontManager.getSpecificFont("MontserratRegular", 40) :
+                        _config.font,
+                .text = _config.text,
+                .textColor = _config.textColor
+        });
         textRenderer->batchPriority = BatchPriority::SpritePriority;
-        textRenderer->setColor(config.textColor);
         textTransform = _textNode->getTransform();
-
-        textRenderer->setOriginOffset({ textRenderer->getSize().x * 0.5f, 0.f });
         auto _textPosition = textTransform->getPosition();
-        textTransform->setPosition(_textPosition.x - config.inputSize.x * 0.5f + config.textsOffsetFromLeft.x,
-                                   _textPosition.y + config.textsOffsetFromLeft.y);
+        ((UITransform*)textTransform)->setAnchor(Anchor::LEFT);
+        textRenderer->setOriginOffset({ textRenderer->getTextSize().x * 0.5f, 0.f });
+        textTransform->setPosition(_textPosition.x + textRenderer->getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
+                                   _textPosition.y + _config.textsOffsetFromLeft.y);
 
         auto _caretNode = _graph->createNode("Caret", _node);
-        caretSprite = _caretNode->addComponent<UIImage>(config.caretTexture);
+        auto* _caretTexture = _config.caretTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "caret") :
+                              _config.caretTexture;
+        caretSprite = _caretNode->addComponent<UIImage>(UIImageConfig {
+            .texture = _caretTexture,
+            .color = _config.caretColor
+        });
         caretSprite->setBatchPriority(BatchPriority::SpritePriority);
-        caretSprite->setColor(config.textColor);
         caretSprite->setEnabled(false);
         caretTransform = _caretNode->getTransform();
         ((UITransform*)caretTransform)->setAnchor(Anchor::LEFT);
         auto _caretPosition = caretTransform->getPosition();
-        caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - config.inputSize.x * 0.5f + config.textsOffsetFromLeft.x,
-                                    _caretPosition.y + config.textsOffsetFromLeft.y);
+        caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - UI::getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
+                                    _caretPosition.y + _config.textsOffsetFromLeft.y);
 
-        setConfig(_manager, _config);
-    }
-
-    Vec2F UIInput::getSize() const {
-        return ((UITransform*)node->getTransform())->getSize();
-    }
-
-    UIInputConfig UIInput::getConfig() {
-        return config;
-    }
-
-    void UIInput::setConfig(Manager* _manager, const UIInputConfig& _config) {
-        config = _config;
-
-        if(config.stopFurtherClicks) {
-            if(!UI::node->hasComponent<CanvasEventStopper>()) {
-                UI::node->addComponent<CanvasEventStopper>();
-            }
-        } else {
-            if(UI::node->hasComponent<CanvasEventStopper>()) {
-                UI::node->removeComponent<CanvasEventStopper>();
-            }
-        }
-
-        if(config.inputBackgroundTexture == nullptr) {
-            config.inputBackgroundTexture = _manager->textureManager.getSubTexture("defaultAssets", "inputThemeDark");
-        }
-
-        if(config.caretTexture == nullptr) {
-            config.caretTexture = _manager->textureManager.getSubTexture("defaultAssets", "caret");
-        }
-
-        if(config.font == nullptr) {
-            config.font = _manager->fontManager.getSpecificFont("MontserratRegular", 40);
-        }
-
-        ((UITransform*)node->getTransform())->setSize({ config.inputSize.x, config.inputSize.y });
-
-        if(nineSliceSprite != nullptr) {
-            nineSliceSprite->setSize(config.inputSize);
-            nineSliceSprite->setColor(config.inputBackgroundColor);
-        }
-
-        if(textRenderer != nullptr) {
-            pointer = 0;
-            textRenderer->setText(config.text);
-            textRenderer->setColor(config.textColor);
-            textRenderer->setFont(config.font);
-        }
-
-        if(placeholderTextRenderer != nullptr) {
-            placeholderTextRenderer->setText(config.placeholderText);
-            placeholderTextRenderer->setColor(config.placeholderTextColor);
-            placeholderTextRenderer->setFont(config.font);
-            placeholderTextRenderer->setEnabled(config.showPlaceholderText);
-        }
-
-        if(caretSprite != nullptr) {
-            caretTransform->setScale(caretTransform->getScale().x, (config.caretHeight * getSize().y) / config.caretTexture->getSize().y);
-        }
+        blinkingTimeSeconds = _config.blinkingTimeSeconds;
+        showPlaceholderText = _config.showPlaceholderText;
+        caretHeight = _config.caretHeight;
+        caretTexture = _caretTexture;
+        textOffsetFromLeft = _config.textsOffsetFromLeft;
     }
 
     void UIInput::setInteractable(bool _interactable) {
         UI::interaction->interactable = _interactable;
 
         if(textRenderer != nullptr) {
-            textRenderer->color = _interactable ? Color::Disabled : config.textColor;
+            textRenderer->color = _interactable ? Color::Disabled : textRenderer->getColor();
         }
     }
 
@@ -159,7 +115,7 @@ namespace RDE {
         if(!usable()) return;
 
         if(UI::interaction != nullptr && UI::interaction->focused && caretSprite != nullptr) {
-            if(blinkingTimer > config.blinkingTimeSeconds) {
+            if(blinkingTimer > blinkingTimeSeconds) {
                 caretSprite->setEnabled(!caretSprite->isEnabled());
                 blinkingTimer = 0;
             }
@@ -250,7 +206,7 @@ namespace RDE {
             }
         }
 
-        textRenderer->setOriginOffset({ textRenderer->getSize().x * 0.5f, 0.f });
+        textRenderer->setOriginOffset({ textRenderer->getTextSize().x * 0.5f, 0.f });
         updatePlaceholder();
     }
 
@@ -266,7 +222,7 @@ namespace RDE {
                 if(textRenderer != nullptr) {
                     placeholderTextRenderer->setEnabled(textRenderer->getText().empty());
                 } else {
-                    placeholderTextRenderer->setEnabled(config.showPlaceholderText);
+                    placeholderTextRenderer->setEnabled(showPlaceholderText);
                 }
             }
         }
@@ -275,26 +231,20 @@ namespace RDE {
     void UIInput::updateCaret() {
         if(!usable()) return;
 
-        auto* _font = textRenderer->getFont();
-        float _width = 0;
-
-        for(auto _i = 0; _i < pointer; _i++) {
-            _width += _font->getChars()[textRenderer->getText()[_i]].advance.x + textRenderer->spaceBetweenChars;
-        }
-
-        if(_width * 0.5f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x * 2.f >= getSize().x) {
-            textDisplacement = (_width * 0.5f * UI::node->getTransform()->getScale().x + config.textsOffsetFromLeft.x) - getSize().x;
+        float _width = textRenderer->getTextSize().x;
+        if(_width * 0.5f * UI::node->getTransform()->getScale().x + textOffsetFromLeft.x * 2.f >= getSize().x) {
+            textDisplacement = (_width * 0.5f * UI::node->getTransform()->getScale().x + textOffsetFromLeft.x) - getSize().x;
         } else {
             textDisplacement = 0;
         }
 
-        auto _origin = Vec2F { nineSliceTransform->getModelMatrixPosition().x - getSize().x * 0.5f + config.textsOffsetFromLeft.x, nineSliceTransform->getModelMatrixPosition().y };
+        auto _origin = Vec2F { nineSliceTransform->getModelMatrixPosition().x - getSize().x * 0.5f + textOffsetFromLeft.x, nineSliceTransform->getModelMatrixPosition().y };
         textTransform->setMatrixModelPosition({_origin.x - textDisplacement, _origin.y});
 
         auto _caretPosition = caretTransform->getPosition();
-        caretTransform->setPosition(textTransform->getPosition().x + _width * 0.5f * UI::node->getTransform()->getScale().x, _caretPosition.y);
+        caretTransform->setPosition(textTransform->getPosition().x + _width * UI::node->getTransform()->getScale().x, _caretPosition.y);
 
-        caretTransform->setScale(caretTransform->getScale().x, (config.caretHeight * getSize().y) / config.caretTexture->getSize().y);
+        caretTransform->setScale(caretTransform->getScale().x, (caretHeight * getSize().y) / caretTexture->getSize().y);
     }
 
     bool UIInput::usable() {

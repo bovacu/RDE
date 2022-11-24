@@ -84,6 +84,7 @@ namespace RDE {
             void uiImageComponent(Graph* _graph, const NodeID _selectedNode);
             void uiTextComponent(Graph* _graph, const NodeID _selectedNode);
             void uiMaskComponent(Graph* _graph, const NodeID _selectedNode);
+            void uiCanvasStopperComponent(Graph* _graph, const NodeID _selectedNode);
 
             static std::unordered_map<ProfilerState, RollingBuffer> plotBuffers;
 

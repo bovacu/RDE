@@ -11,6 +11,11 @@
 
 namespace RDE {
 
+    struct UIImageConfig : public CommonUIConfig {
+        Texture* texture = nullptr;
+        Color color = Color::White;
+    };
+
     class UIImage : public UI {
         private:
             /**
@@ -22,8 +27,8 @@ namespace RDE {
             OpenGLVertex geometry[4];
 
         public:
-            UIImage(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
-            UIImage(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture);
+            UIImage(Node* _node, Scene* _scene, Canvas* _canvas, const UIImageConfig& _config);
+            UIImage(Node* _node, Manager* _manager, Graph* _graph, const UIImageConfig& _config);
             ~UIImage() override {  }
 
             /**
@@ -55,12 +60,6 @@ namespace RDE {
              * @see IRenderizable
              */
             [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
-
-            /**
-             * @see IRenderizable
-             */
-            [[nodiscard]] Vec2F getSize() const override { return {(float)texture->getSize().x * IRenderizable::node->getTransform()->getScale().x,
-                                                                   (float)texture->getSize().y * IRenderizable::node->getTransform()->getScale().y}; }
 
             /**
              * @see IRenderizable
