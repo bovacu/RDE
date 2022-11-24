@@ -36,19 +36,30 @@ namespace RDE {
             .color = _config.checkboxColor
         });
 
+        ((UITransform*)node->getTransform())->setSize({ textRenderer->getSize().x + checkboxBackgroundSprite->getSize().x + _config.checkboxTextOffset.x,
+                                                        std::max(checkboxBackgroundSprite->getSize().y, textRenderer->getSize().y * 0.5f)});
+
+        ((UITransform*)_checkboxBackgroundNode->getTransform())->setAnchor(Anchor::LEFT);
+        _checkboxBackgroundNode->getTransform()->setMatrixModelPosition({
+            _checkboxBackgroundNode->getTransform()->getModelMatrixPosition().x - UI::getSize().x * 0.5f + checkboxBackgroundSprite->getSize().x * 0.5f,
+            _checkboxBackgroundNode->getTransform()->getModelMatrixPosition().y
+        });
+
         auto _tickNode = _graph->createNode("CheckboxTick", _checkboxBackgroundNode);
         tickSprite = _tickNode->addComponent<UIImage>(UIImageConfig {
             .texture = _config.checkboxTickTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "checkmark") :
                        _config.checkboxTickTexture,
             .color = _config.tickColor
         });
+        tickSprite->setEnabled(_config.checked);
 
-        ((UITransform*)node->getTransform())->setSize({ textRenderer->getSize() + checkboxBackgroundSprite->getSize() + _config.checkboxTextOffset });
 
-        auto _size = Vec2F { checkboxBackgroundSprite->getSize().x + textRenderer->getSize().x,
-                       checkboxBackgroundSprite->getSize().y > textRenderer->getSize().y ? checkboxBackgroundSprite->getSize().y : textRenderer->getSize().y
-        } + Vec2F { _config.checkboxTextOffset.x, _config.checkboxTextOffset.y };
-        ((UITransform*)node->getTransform())->setSize(_size);
+        ((UITransform*)_textNode->getTransform())->setAnchor(Anchor::LEFT);
+        _textNode->getTransform()->setMatrixModelPosition({
+            _textNode->getTransform()->getModelMatrixPosition().x - UI::getSize().x * 0.5f +
+            checkboxBackgroundSprite->getSize().x + textRenderer->getTextSize().x * 0.5f + _config.checkboxTextOffset.x,
+            _textNode->getTransform()->getModelMatrixPosition().y
+        });
 
         checked = _config.checked;
         checkboxTextOffset = _config.checkboxTextOffset;
