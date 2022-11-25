@@ -9,7 +9,7 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Manager, UIText, Font, UI9Slice)
+    FORWARD_DECLARE_CLASS(Manager, UIText, Font, UIImage)
 
     struct UIButtonConfig : CommonUIConfig {
         std::string text = "Button Text";
@@ -26,7 +26,7 @@ namespace RDE {
     class UIButton : public UI {
         private:
             UIText* textRenderer = nullptr;
-            UI9Slice* nineSliceSprite = nullptr;
+            UIImage* uiImage = nullptr;
             // [0] -> idle
             // [1] -> selected
             // [2] -> clicked

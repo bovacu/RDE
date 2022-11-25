@@ -16,6 +16,7 @@
 #include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/graph/components/ui/UIMask.h"
+#include "core/graph/components/ui/UIImage.h"
 #include "core/graph/components/ComponentBase.h"
 
 namespace RDE {
@@ -862,21 +863,21 @@ namespace RDE {
     }
 
     void ImGuiScene::ui9SliceComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<UI9Slice>(_selectedNode)) return;
+        if(!_graph->hasComponent<UIImage>(_selectedNode)) return;
 
-        auto _ui9Slice = _graph->getComponent<UI9Slice>(_selectedNode);
+        auto _uiImage = _graph->getComponent<UIImage>(_selectedNode);
 
-        if(createHeader("UI 9Slice", _ui9Slice)) {
+        if(createHeader("UI 9Slice", _uiImage)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
             {
                 ImGui::Text("Origin Offset ");
-                float _originOffset[2] = {_ui9Slice->getOriginOffset().x, _ui9Slice->getOriginOffset().y};
+                float _originOffset[2] = {_uiImage->getOriginOffset().x, _uiImage->getOriginOffset().y};
                 ImGui::SameLine();
                 ImGui::SetNextItemWidth(100);
                 ImGui::PushID(createID());
                 if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
-                    _ui9Slice->setOriginOffset({ Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
+                    _uiImage->setOriginOffset({Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
                 }
             }
             ImGui::PopID();
@@ -971,7 +972,7 @@ namespace RDE {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
 //            ImGui::Text("Size ");
-//            float _size[2] = { _uiButton->nineSliceSprite->getSize().x, _uiButton->nineSliceSprite->getSize().y };
+//            float _size[2] = { _uiButton->uiImage->getSize().x, _uiButton->uiImage->getSize().y };
 //            ImGui::SameLine();
 //            ImGui::SetNextItemWidth(100);
 //            ImGui::PushID(createID());

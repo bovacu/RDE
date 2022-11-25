@@ -3,12 +3,11 @@
 //
 
 #include "core/graph/components/ui/UIInput.h"
-#include "core/graph/components/Components.h"
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
-#include "core/graph/components/ui/UI9Slice.h"
 #include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UIMask.h"
+#include "core/graph/components/ui/UIImage.h"
 
 namespace RDE {
 
@@ -31,10 +30,11 @@ namespace RDE {
 
         node->addComponent<UIMask>();
 
-        nineSliceSprite = node->addComponent<UI9Slice>(UI9SliceConfig {
+        background = node->addComponent<UIImage>(UIImageConfig {
             .size = UI::getSize(),
             .texture = UI::texture,
-            .color = _config.inputBackgroundColor
+            .color = _config.inputBackgroundColor,
+            .imageRenderingType = ImageRenderingType::NINE_SLICE
         });
         nineSliceTransform = _node->getTransform();
 
@@ -103,11 +103,11 @@ namespace RDE {
     }
 
     void UIInput::setColor(const Color& _color) {
-        nineSliceSprite->color = _color;
+        background->setColor(_color);
     }
 
     Color UIInput::getColor() {
-        return nineSliceSprite->color;
+        return background->getColor();
     }
 
     void UIInput::onUpdate(Delta _dt) {
@@ -248,6 +248,6 @@ namespace RDE {
     }
 
     bool UIInput::usable() {
-        return textRenderer != nullptr && UI::interaction->interactable && nineSliceSprite->isEnabled();
+        return textRenderer != nullptr && UI::interaction->interactable && background->isEnabled();
     }
 }

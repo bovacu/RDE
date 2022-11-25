@@ -4,7 +4,6 @@
 
 #include "core/graph/components/ui/UITransform.h"
 #include "core/graph/components/ui/UI.h"
-#include "core/graph/components/ui/UI9Slice.h"
 
 #define ANCHOR_BITS  0b0000001111111110
 #define STRETCH_BITS 0b0011110000000000

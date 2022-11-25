@@ -11,9 +11,19 @@
 
 namespace RDE {
 
+    enum ImageRenderingType {
+        NORMAL,
+        NINE_SLICE,
+        PARTIAL_VERTICAL,
+        PARTIAL_HORIZONTAL,
+        PARTIAL_CIRCULAR
+    };
+
     struct UIImageConfig : public CommonUIConfig {
+        Vec2F size = { -1, -1 };
         Texture* texture = nullptr;
         Color color = Color::White;
+        ImageRenderingType imageRenderingType = ImageRenderingType::NORMAL;
     };
 
     class UIImage : public UI {
@@ -24,7 +34,9 @@ namespace RDE {
              */
             Texture* texture = nullptr;
 
-            OpenGLVertex geometry[4];
+            OpenGLVertex geometry[36];
+
+            ImageRenderingType imageRenderingType = ImageRenderingType::NORMAL;
 
         public:
             UIImage(Node* _node, Scene* _scene, Canvas* _canvas, const UIImageConfig& _config);
@@ -36,7 +48,7 @@ namespace RDE {
              * @return Vec2 with {width, height}.
              * @see TextureAtlasManager
              */
-            void setTexture(Texture* _texture) { texture = _texture; }
+            void setTexture(Texture* _texture) { dirty = true; texture = _texture; }
 
             /**
              * @brief Gets the path where the SpriteSheet is stored.
@@ -69,13 +81,26 @@ namespace RDE {
             void setInteractable(bool _interactable) override;
             bool isInteractable() override;
 
+            void setImageRenderingType(ImageRenderingType _imageRenderingType);
+            [[nodiscard]]ImageRenderingType getImageRenderingType() const { return imageRenderingType; }
+
+            void setSize(const Vec2F& _size);
+
             /**
              * @see IRenderizable
              */
             void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) override;
 
         private:
-            void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
+            void calculateNormalGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
+            void calculate9SliceGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
+            void calculatePartialHGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
+            void calculatePartialVGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
+            void calculatePartialCGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
+
+            void batchFourVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices);
+            void batch9SliceVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices);
+            void batchPartialCircularVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices);
     };
 
 }

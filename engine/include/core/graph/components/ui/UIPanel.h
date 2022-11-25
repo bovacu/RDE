@@ -15,11 +15,11 @@ namespace RDE {
         Color color = { 22, 29, 34, 255 };
     };
 
-    FORWARD_DECLARE_CLASS(UI9Slice)
+    FORWARD_DECLARE_CLASS(UIImage)
 
     class UIPanel : public UI {
         public:
-            UI9Slice* nineSliceSprite = nullptr;
+            UIImage* nineSliceSprite = nullptr;
 
             UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config);
 
