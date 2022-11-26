@@ -16,7 +16,7 @@ namespace RDE {
         NINE_SLICE,
         PARTIAL_VERTICAL,
         PARTIAL_HORIZONTAL,
-        PARTIAL_CIRCULAR
+        PARTIAL_RADIAL
     };
 
     struct UIImageConfig : public CommonUIConfig {
@@ -33,10 +33,10 @@ namespace RDE {
              * only its region will be rendered.
              */
             Texture* texture = nullptr;
-
             OpenGLVertex geometry[36];
-
             ImageRenderingType imageRenderingType = ImageRenderingType::NORMAL;
+            bool partialRenderingInverted = false;
+            float partialRenderingPercentage = 1.f;
 
         public:
             UIImage(Node* _node, Scene* _scene, Canvas* _canvas, const UIImageConfig& _config);
@@ -83,6 +83,12 @@ namespace RDE {
 
             void setImageRenderingType(ImageRenderingType _imageRenderingType);
             [[nodiscard]]ImageRenderingType getImageRenderingType() const { return imageRenderingType; }
+
+            [[nodiscard]]bool isPartialRenderingInverted() const { return partialRenderingInverted;}
+            void setPartialRenderingInverted(bool _inverted);
+
+            [[nodiscard]] float getPartialRenderingPercentage() const { return partialRenderingPercentage; }
+            void setPartialRenderingPercentage(float _percentage);
 
             void setSize(const Vec2F& _size);
 

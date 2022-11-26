@@ -459,7 +459,6 @@ namespace RDE {
 
         uiTransformComponent(_graph, _selectedNode);
         uiButtonComponent(_graph, _selectedNode);
-        ui9SliceComponent(_graph, _selectedNode);
         uiImageComponent(_graph, _selectedNode);
         uiTextComponent(_graph, _selectedNode);
         uiMaskComponent(_graph, _selectedNode);
@@ -862,28 +861,14 @@ namespace RDE {
         }
     }
 
-    void ImGuiScene::ui9SliceComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<UIImage>(_selectedNode)) return;
+    static ImageRenderingType renderingTypeStringToEnum(std::string* _types, const std::string& _type) {
+        if(_type == _types[0]) return ImageRenderingType::NORMAL;
+        if(_type == _types[1]) return ImageRenderingType::NINE_SLICE;
+        if(_type == _types[2]) return ImageRenderingType::PARTIAL_VERTICAL;
+        if(_type == _types[3]) return ImageRenderingType::PARTIAL_HORIZONTAL;
+        if(_type == _types[4]) return ImageRenderingType::PARTIAL_RADIAL;
 
-        auto _uiImage = _graph->getComponent<UIImage>(_selectedNode);
-
-        if(createHeader("UI 9Slice", _uiImage)) {
-            if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
-
-            {
-                ImGui::Text("Origin Offset ");
-                float _originOffset[2] = {_uiImage->getOriginOffset().x, _uiImage->getOriginOffset().y};
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(100);
-                ImGui::PushID(createID());
-                if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
-                    _uiImage->setOriginOffset({Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
-                }
-            }
-            ImGui::PopID();
-
-            if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
-        }
+        return ImageRenderingType::NORMAL;
     }
 
     void ImGuiScene::uiImageComponent(Graph* _graph, const NodeID _selectedNode) {
@@ -894,17 +879,78 @@ namespace RDE {
         if(createHeader("UI Image", _uiImage)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
-            {
-                ImGui::Text("Origin Offset ");
-                float _originOffset[2] = {_uiImage->getOriginOffset().x, _uiImage->getOriginOffset().y};
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(100);
-                ImGui::PushID(createID());
-                if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
-                    _uiImage->setOriginOffset({Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
-                }
+            ImGui::Text("Origin Offset ");
+            float _originOffset[2] = {_uiImage->getOriginOffset().x, _uiImage->getOriginOffset().y};
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            ImGui::PushID(createID());
+            if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
+                _uiImage->setOriginOffset({Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
             }
             ImGui::PopID();
+
+
+            std::string _imageRenderingTypes[] = { "Normal", "9-Slice", "Partial Vert", "Partial Horiz", "Partial Radial"};
+            int _partialType = 0;
+
+            std::string _imageRenderingSelected;
+
+            switch(_uiImage->getImageRenderingType()) {
+                case NORMAL:
+                    _imageRenderingSelected = _imageRenderingTypes[0];
+                    break;
+                case NINE_SLICE:
+                    _imageRenderingSelected = _imageRenderingTypes[1];
+                    break;
+                case PARTIAL_VERTICAL:
+                    _imageRenderingSelected = _imageRenderingTypes[2];
+                    _partialType = 0;
+                    break;
+                case PARTIAL_HORIZONTAL:
+                    _imageRenderingSelected = _imageRenderingTypes[3];
+                    break;
+                case PARTIAL_RADIAL:
+                    _imageRenderingSelected = _imageRenderingTypes[4];
+                    break;
+            }
+
+            ImGui::PushID(createID());
+            ImGui::Text("Rendering Type"); ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            if (ImGui::BeginCombo("##combo", _imageRenderingSelected.c_str())) { // The second parameter is the label previewed before opening the combo. {
+                for (auto& _renderType : _imageRenderingTypes) {
+                    bool is_selected = (_imageRenderingSelected == _renderType);
+                    if (ImGui::Selectable(_renderType.c_str(), is_selected)) {
+                        _imageRenderingSelected = _renderType;
+                        _uiImage->setImageRenderingType(renderingTypeStringToEnum(_imageRenderingTypes, _imageRenderingSelected));
+                    }
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopID();
+
+            if(_imageRenderingSelected == _imageRenderingTypes[2] || _imageRenderingSelected == _imageRenderingTypes[3] || _imageRenderingSelected == _imageRenderingTypes[4]) {
+                ImGui::PushID(createID());
+                static float _percentage = _uiImage->getPartialRenderingPercentage();
+
+                ImGui::Text("Percentage");
+                ImGui::SameLine(114);
+                ImGui::SetNextItemWidth(100);
+                if(ImGui::SliderFloat("##Percentage", &_percentage, 0.f, 1.f)) {
+                    _uiImage->setPartialRenderingPercentage(_percentage);
+                }
+
+                ImGui::Text("Inverted");
+                ImGui::SameLine(114);
+                static bool _inverted = _uiImage->isPartialRenderingInverted();
+                if(ImGui::Checkbox("##Inverted", &_inverted)) {
+                    _uiImage->setPartialRenderingInverted(_inverted);
+                }
+
+                ImGui::PopID();
+            }
 
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }

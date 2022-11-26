@@ -38,7 +38,7 @@ namespace RDE {
                 calculatePartialVGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
             case PARTIAL_HORIZONTAL:
                 calculatePartialHGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
-            case PARTIAL_CIRCULAR:
+            case PARTIAL_RADIAL:
                 calculatePartialCGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
         }
     }
@@ -64,6 +64,17 @@ namespace RDE {
         dirty = true;
     }
 
+    void UIImage::setPartialRenderingInverted(bool _inverted) {
+        partialRenderingInverted = _inverted;
+        dirty = true;
+    }
+
+    void UIImage::setPartialRenderingPercentage(float _percentage) {
+        _percentage = Util::Math::clampF(_percentage, 0, 1);
+        partialRenderingPercentage = _percentage;
+        dirty = true;
+    }
+
     void UIImage::setSize(const Vec2F& _size) {
         ((UITransform*)node->getTransform())->setSize({ Util::Math::clampF(_size.x, 0, FLT_MAX), Util::Math::clampF(_size.y, 0, FLT_MAX) });
         dirty = true;
@@ -81,7 +92,7 @@ namespace RDE {
                     calculatePartialVGeometry(_transformMat, _transform, _viewport); break;
                 case PARTIAL_HORIZONTAL:
                     calculatePartialHGeometry(_transformMat, _transform, _viewport); break;
-                case PARTIAL_CIRCULAR:
+                case PARTIAL_RADIAL:
                     calculatePartialCGeometry(_transformMat, _transform, _viewport); break;
             }
 
@@ -96,7 +107,7 @@ namespace RDE {
                 batchFourVertexGeometry(_vertices, _indices); break;
             case NINE_SLICE:
                 batch9SliceVertexGeometry(_vertices, _indices); break;
-            case PARTIAL_CIRCULAR:
+            case PARTIAL_RADIAL:
                 batchPartialCircularVertexGeometry(_vertices, _indices); break;
         }
     }
@@ -293,11 +304,73 @@ namespace RDE {
     }
 
     void UIImage::calculatePartialHGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+        auto _originOffset = UI::getOriginOffset();
+        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
 
+        _transformMatrix[3][0] = _screenPos.x;
+        _transformMatrix[3][1] = _screenPos.y;
+
+        Vec2F _textureOrigin = {(float)texture->getRegion().bottomLeftCorner.x, (float)texture->getRegion().bottomLeftCorner.y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
+
+        Vec2F _textureTileSize = {(float)texture->getRegion().size.x, (float)texture->getRegion().size.y};
+        Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y };
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+
+        auto _partialRenderCorner = _textureTileSizeOnScreen.x * (1.f - partialRenderingPercentage) * 2.f;
+        auto _inv = partialRenderingInverted;
+        glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x + ( _inv ? _partialRenderCorner : 0), -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
+        glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x - (!_inv ? _partialRenderCorner : 0), -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
+        glm::vec4 _topRightTextureCorner    = {  _textureTileSizeOnScreen.x - (!_inv ? _partialRenderCorner : 0),  _textureTileSizeOnScreen.y, 0.0f, 1.0f };
+        glm::vec4 _topLeftTextureCorner     = { -_textureTileSizeOnScreen.x + ( _inv ? _partialRenderCorner : 0),  _textureTileSizeOnScreen.y, 0.0f, 1.0f };
+
+        auto _partialRenderCoord = _textureTileSizeNorm.x * (1.f - partialRenderingPercentage);
+        glm::vec2 _bottomLeftTextureCoord   = { _textureOriginNorm.x + (_inv ? _textureTileSizeNorm.x - _textureTileSizeNorm.x * partialRenderingPercentage : 0), _textureOriginNorm.y };
+        glm::vec2 _bottomRightTextureCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x - (!_inv ? _partialRenderCoord : 0)                               , _textureOriginNorm.y };
+        glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x - (!_inv ? _partialRenderCoord : 0)                               , _textureOriginNorm.y + _textureTileSizeNorm.y };
+        glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x + (_inv ? _textureTileSizeNorm.x - _textureTileSizeNorm.x * partialRenderingPercentage : 0), _textureOriginNorm.y + _textureTileSizeNorm.y };
+
+        glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+
+        geometry[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+        geometry[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+        geometry[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+        geometry[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
     }
 
     void UIImage::calculatePartialVGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+        auto _originOffset = UI::getOriginOffset();
+        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
 
+        _transformMatrix[3][0] = _screenPos.x;
+        _transformMatrix[3][1] = _screenPos.y;
+
+        Vec2F _textureOrigin = {(float)texture->getRegion().bottomLeftCorner.x, (float)texture->getRegion().bottomLeftCorner.y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
+
+        Vec2F _textureTileSize = {(float)texture->getRegion().size.x, (float)texture->getRegion().size.y};
+        Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y };
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+
+        auto _partialRenderCorner = _textureTileSizeOnScreen.y * (1.f - partialRenderingPercentage) * 2.f;
+        auto _inv = partialRenderingInverted;
+        glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y + (_inv ? _partialRenderCorner : 0), 0.0f, 1.0f };
+        glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y + (_inv ? _partialRenderCorner : 0), 0.0f, 1.0f };
+        glm::vec4 _topRightTextureCorner    = {  _textureTileSizeOnScreen.x,  _textureTileSizeOnScreen.y - (!_inv ? _partialRenderCorner : 0), 0.0f, 1.0f };
+        glm::vec4 _topLeftTextureCorner     = { -_textureTileSizeOnScreen.x,  _textureTileSizeOnScreen.y - (!_inv ? _partialRenderCorner : 0), 0.0f, 1.0f };
+
+        auto _partialRenderCoord = _textureTileSizeNorm.y * (1.f - partialRenderingPercentage);
+        glm::vec2 _bottomLeftTextureCoord   = { _textureOriginNorm.x                         , _textureOriginNorm.y + (_inv ? _textureTileSizeNorm.y - _textureTileSizeNorm.y * partialRenderingPercentage : 0) };
+        glm::vec2 _bottomRightTextureCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + (_inv ? _textureTileSizeNorm.y - _textureTileSizeNorm.y * partialRenderingPercentage : 0) };
+        glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y - (!_inv ? _partialRenderCoord : 0) };
+        glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                         , _textureOriginNorm.y + _textureTileSizeNorm.y - (!_inv ? _partialRenderCoord : 0) };
+
+        glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+
+        geometry[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+        geometry[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+        geometry[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+        geometry[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
     }
 
     void UIImage::calculatePartialCGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
