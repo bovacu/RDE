@@ -4,7 +4,6 @@
 
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/Engine.h"
-#include "core/graph/components/ui/UI9Slice.h"
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UICheckbox.h"
 #include "core/graph/components/ui/UIInput.h"
@@ -91,10 +90,6 @@ namespace RDE {
     IRenderizable* Canvas::getRenderizable(Node* _node) {
         IRenderizable* _renderizable = nullptr;
 
-        if(_node->hasComponent<UI9Slice>()) {
-            _renderizable = _node->getComponent<UI9Slice>();
-        }
-
         if(_node->hasComponent<UIImage>()) {
             _renderizable = _node->getComponent<UIImage>();
         }
@@ -114,8 +109,7 @@ namespace RDE {
         Batch* _currentBatch = &batches.back();
 
         if(_canvasElement->cropping > 0) {
-            if((_canvasElement->node->hasComponent<UIImage>() || _canvasElement->node->hasComponent<UI9Slice>()) &&
-                _canvasElement->renderizable != nullptr && _canvasElement->renderizable->isEnabled()) {
+            if(_canvasElement->node->hasComponent<UIImage>() && _canvasElement->renderizable != nullptr && _canvasElement->renderizable->isEnabled()) {
                 forceRender();
                 auto* _mask = _canvasElement->node->getComponent<UIMask>();
 
@@ -127,7 +121,7 @@ namespace RDE {
                 glStencilFunc(GL_ALWAYS , _mask->inverted ? 1 : 2, _mask->inverted ? 0xFF : ~0);
                 glStencilOp(GL_REPLACE , GL_REPLACE , GL_REPLACE);
 
-                auto* _renderizable = _canvasElement->node->hasComponent<UIImage>() ? (UI*)_canvasElement->node->getComponent<UIImage>() : (UI*)_canvasElement->node->getComponent<UI9Slice>();
+                auto* _renderizable = _canvasElement->node->getComponent<UIImage>();
 
                 if (_currentBatch->shader == nullptr || _renderizable->getTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _renderizable->shaderID || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
                     Batch _newBatch;
@@ -217,10 +211,10 @@ namespace RDE {
         auto& _renderManager = graph.scene->engine->manager.renderManager;
        _renderManager.beginDebugDraw(*camera, (Transform*)graph.getComponent<UITransform>(camera->node->getID()));
 
-        _registry.view<UI9Slice, UITransform, Active>().each([this, &_renderManager](const auto _entity, UI9Slice& _ui9Slice, UITransform& _transform, const Active& _) {
+        _registry.view<UIImage, UITransform, Active>().each([this, &_renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
-            Vec2F _size = _ui9Slice.getSize();
+            Vec2F _size = _uiImage.getSize();
             Vec2F _pointSize = {4, 4};
 
             auto _viewport = camera->getViewport();
@@ -323,7 +317,7 @@ namespace RDE {
             uiInteractables.push_back(_canvasElement);
         }
 
-        if(graph.getNodeContainer().any_of<UIText, UIButton, UI9Slice, UIImage, UISlider>(_node->getID())) {
+        if(graph.getNodeContainer().any_of<UIText, UIButton, UIImage, UISlider>(_node->getID())) {
             _canvasElement.renderizable = getRenderizable(_node);
 
             if(graph.getNodeContainer().any_of<UIMask>(_node->getID()) && _node->getComponent<UIMask>()->isEnabled()) {

@@ -4,6 +4,7 @@
 
 #include "core/graph/components/DynamicSpriteRenderer.h"
 #include "core/Engine.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 namespace RDE {
 

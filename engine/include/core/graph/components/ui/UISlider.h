@@ -28,8 +28,8 @@ namespace RDE {
     class UISlider : public UI {
         private:
             bool mouseDown = false;
-            UI9Slice* backgroundBarSprite = nullptr;
-            UI9Slice* fillBarSprite = nullptr;
+            UIImage* backgroundBarSprite = nullptr;
+            UIImage* fillBarSprite = nullptr;
             UIImage* handleSprite = nullptr;
 
             UITransform* backgroundBarTransform = nullptr;

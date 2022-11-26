@@ -41,7 +41,7 @@ namespace RDE {
 
             UIText* textRenderer = nullptr;
             UIText* placeholderTextRenderer = nullptr;
-            UI9Slice* nineSliceSprite = nullptr;
+            UIImage* background = nullptr;
             UIImage* caretSprite = nullptr;
             Transform* caretTransform = nullptr;
             Transform* textTransform = nullptr;

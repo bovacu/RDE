@@ -6,6 +6,7 @@
 #include "core/graph/components/Components.h"
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIImage.h"
 
 namespace RDE {
 
@@ -19,21 +20,23 @@ namespace RDE {
         UI::interaction->onInnerClicking.bind<&UISlider::onMouseClicked>(this);
         UI::interaction->onInnerClickingReleased.bind<&UISlider::onMouseReleased>(this);
 
-        backgroundBarSprite = node->addComponent<UI9Slice>(UI9SliceConfig {
+        backgroundBarSprite = node->addComponent<UIImage>(UIImageConfig {
             .size = _config.barSize,
             .texture = _config.backgroundBarTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets","fillAndBgrScrollBarHorizontal") :
                 _config.backgroundBarTexture,
             .color = _config.backgroundBarColor,
+            .imageRenderingType = ImageRenderingType::NINE_SLICE
         });
         backgroundBarSprite->interaction = UI::interaction;
         backgroundBarTransform = (UITransform*)node->getTransform();
 
         auto _fillBarNode = _graph->createNode("Fill", node);
-        fillBarSprite = _fillBarNode->addComponent<UI9Slice>(UI9SliceConfig {
+        fillBarSprite = _fillBarNode->addComponent<UIImage>(UIImageConfig {
             .size = backgroundBarTransform->getSize(),
             .texture = _config.fillingBarTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "fillAndBgrScrollBarHorizontal") :
                        _config.fillingBarTexture,
-            .color = _config.fillingBarColor
+            .color = _config.fillingBarColor,
+            .imageRenderingType = ImageRenderingType::NINE_SLICE
         });
 
         fillBarTransform = (UITransform*)_fillBarNode->getTransform();

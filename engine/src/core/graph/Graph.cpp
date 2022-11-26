@@ -9,6 +9,7 @@
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/graph/components/DynamicSpriteRenderer.h"
+#include "core/graph/components/ui/UI.h"
 
 namespace RDE {
     

@@ -80,7 +80,6 @@ namespace RDE {
 
             void uiTransformComponent(Graph* _graph, const NodeID _selectedNode);
             void uiButtonComponent(Graph* _graph, const NodeID _selectedNode);
-            void ui9SliceComponent(Graph* _graph, const NodeID _selectedNode);
             void uiImageComponent(Graph* _graph, const NodeID _selectedNode);
             void uiTextComponent(Graph* _graph, const NodeID _selectedNode);
             void uiMaskComponent(Graph* _graph, const NodeID _selectedNode);

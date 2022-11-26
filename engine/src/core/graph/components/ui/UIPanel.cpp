@@ -5,6 +5,7 @@
 #include "core/graph/components/ui/UIPanel.h"
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIImage.h"
 
 namespace RDE {
 
@@ -29,10 +30,11 @@ namespace RDE {
         UI::interaction->onInnerClicking.bind<&foo2>();
         UI::interaction->onInnerClickingReleased.bind<&foo2>();
 
-        nineSliceSprite = _node->addComponent<UI9Slice>(UI9SliceConfig {
+        nineSliceSprite = _node->addComponent<UIImage>(UIImageConfig {
             .size = UI::getSize(),
             .texture = UI::texture,
-            .color = _config.color
+            .color = _config.color,
+            .imageRenderingType = ImageRenderingType::NINE_SLICE
         });
         nineSliceSprite->interaction = UI::interaction;
     }
@@ -47,13 +49,13 @@ namespace RDE {
 
     void UIPanel::setColor(const Color& _color) {
         if(nineSliceSprite != nullptr) {
-            nineSliceSprite->color = _color;
+            nineSliceSprite->setColor(_color);
         }
     }
 
     Color UIPanel::getColor() {
         if(nineSliceSprite != nullptr) {
-           return  nineSliceSprite->color;
+           return nineSliceSprite->getColor();
         }
 
         return Color::White;

@@ -6,6 +6,7 @@
 #include "core/graph/components/ui/UIText.h"
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIImage.h"
 
 namespace RDE {
 
@@ -34,13 +35,14 @@ namespace RDE {
 
         ((UITransform*)node->getTransform())->setSize(_config.buttonSize);
 
-        nineSliceSprite = _node->addComponent<UI9Slice>( UI9SliceConfig {
+        uiImage = _node->addComponent<UIImage>(UIImageConfig {
             .size = UI::getSize(),
             .texture = _config.idleTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "buttonDark") :
                        _config.idleTexture,
-            .color = _config.buttonColor
+            .color = _config.buttonColor,
+            .imageRenderingType = ImageRenderingType::NINE_SLICE
         });
-        nineSliceSprite->interaction = UI::interaction;
+        uiImage->interaction = UI::interaction;
 
         auto _textNode = _graph->createNode("Text", _node);
         textRenderer = _textNode->addComponent<UIText>(UITextConfig {
@@ -53,46 +55,36 @@ namespace RDE {
 
     void UIButton::onMouseEntered() {
         if(!interaction->interactable) return;
-
-        nineSliceSprite->texture = statesTextures[1];
-        nineSliceSprite->dirty = true;
+        uiImage->setTexture(statesTextures[1]);
     }
 
     void UIButton::onMouseExited() {
         if(!interaction->interactable) return;
-
-        nineSliceSprite->texture = statesTextures[0];
-        nineSliceSprite->dirty = true;
+        uiImage->setTexture(statesTextures[0]);
     }
 
     void UIButton::onMouseClicked(MouseCode _mouseCode) {
         if(!interaction->interactable) return;
-
-        nineSliceSprite->texture = statesTextures[2];
-        nineSliceSprite->dirty = true;
+        uiImage->setTexture(statesTextures[2]);
     }
 
     void UIButton::onMouseReleased(MouseCode _mouseCode) {
         if(!interaction->interactable) return;
 
         if(UI::interaction->mouseInnerStatus == UIInteractable::MouseExited) {
-            nineSliceSprite->texture = statesTextures[0];
+            uiImage->setTexture(statesTextures[0]);
         } else {
-            nineSliceSprite->texture = statesTextures[1];
+            uiImage->setTexture(statesTextures[1]);
         }
-
-        nineSliceSprite->dirty = true;
     }
 
     void UIButton::setInteractable(bool _enabled) {
         interaction->interactable = _enabled;
         if(!interaction->interactable) {
-            nineSliceSprite->texture = statesTextures[3];
+            uiImage->setTexture(statesTextures[3]);
         } else {
             onMouseReleased(MouseCode::ButtonLeft);
         }
-
-        nineSliceSprite->dirty = true;
     }
 
     bool UIButton::isInteractable() {
@@ -100,15 +92,14 @@ namespace RDE {
     }
 
     void UIButton::setColor(const Color& _color) {
-        if(nineSliceSprite != nullptr) {
-            nineSliceSprite->setColor(_color);
+        if(uiImage != nullptr) {
+            uiImage->setColor(_color);
         }
-        nineSliceSprite->dirty = true;
     }
 
     Color UIButton::getColor() {
-        if(nineSliceSprite != nullptr) {
-            return nineSliceSprite->getColor();
+        if(uiImage != nullptr) {
+            return uiImage->getColor();
         }
 
         return Color::White;

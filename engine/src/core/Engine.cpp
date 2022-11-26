@@ -1,11 +1,11 @@
 // Created by borja on 24/12/21.
 
 #include "core/Engine.h"
-#include "core/render/RenderManager.h"
 #include "core/systems/physicsSystem/PhysicsManager.h"
 #include "core/systems/ecsSystem/ECSManager.h"
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/systems/profiling/Profiler.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 namespace RDE {
 

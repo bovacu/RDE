@@ -8,7 +8,6 @@
 #include "core/graph/components/Components.h"
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
-#include "core/graph/components/ui/UI9Slice.h"
 #include "core/graph/components/ParticleSystem.h"
 #include "core/render/elements/Vertex.h"
 #include "core/render/elements/Batch.h"
