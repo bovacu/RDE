@@ -127,15 +127,14 @@ namespace RDE {
     }
 
     void UIImage::calculateNormalGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
-        auto _uiT = (UITransform*)&_transformMatrix;
+        auto _uiT = (UITransform*)&_transform;
         auto _originOffset = UI::getOriginOffset();
         auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
-        auto _uiSizeScale = Vec2F { texture->getSize().x / _uiT->getSize().x, texture->getSize().y / _uiT->getSize().y };
-
+        auto _uiSizeScale = Vec2F { _uiT->getSize().x /  texture->getSize().x, _uiT->getSize().y / texture->getSize().y };
         _transformMatrix[0][0] *= _uiSizeScale.x;
         _transformMatrix[1][1] *= _uiSizeScale.y;
 
@@ -315,11 +314,16 @@ namespace RDE {
     }
 
     void UIImage::calculatePartialHGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+        auto _uiT = (UITransform*)&_transform;
         auto _originOffset = UI::getOriginOffset();
         auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
+
+        auto _uiSizeScale = Vec2F { _uiT->getSize().x /  texture->getSize().x, _uiT->getSize().y / texture->getSize().y };
+        _transformMatrix[0][0] *= _uiSizeScale.x;
+        _transformMatrix[1][1] *= _uiSizeScale.y;
 
         Vec2F _textureOrigin = {(float)texture->getRegion().bottomLeftCorner.x, (float)texture->getRegion().bottomLeftCorner.y};
         Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
@@ -350,11 +354,16 @@ namespace RDE {
     }
 
     void UIImage::calculatePartialVGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+        auto _uiT = (UITransform*)&_transform;
         auto _originOffset = UI::getOriginOffset();
         auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
+
+        auto _uiSizeScale = Vec2F { _uiT->getSize().x /  texture->getSize().x, _uiT->getSize().y / texture->getSize().y };
+        _transformMatrix[0][0] *= _uiSizeScale.x;
+        _transformMatrix[1][1] *= _uiSizeScale.y;
 
         Vec2F _textureOrigin = {(float)texture->getRegion().bottomLeftCorner.x, (float)texture->getRegion().bottomLeftCorner.y};
         Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
@@ -385,11 +394,16 @@ namespace RDE {
     }
 
     void UIImage::calculatePartialRGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+        auto _uiT = (UITransform*)&_transform;
         auto _originOffset = UI::getOriginOffset();
         auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
+
+        auto _uiSizeScale = Vec2F { _uiT->getSize().x /  texture->getSize().x, _uiT->getSize().y / texture->getSize().y };
+        _transformMatrix[0][0] *= _uiSizeScale.x;
+        _transformMatrix[1][1] *= _uiSizeScale.y;
 
         Vec2F _textureOrigin = {(float)texture->getRegion().bottomLeftCorner.x, (float)texture->getRegion().bottomLeftCorner.y};
         Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
