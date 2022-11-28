@@ -114,6 +114,8 @@ namespace RDE {
             IRenderizable* getUpdatable(Node* _node);
 
             void forceRender();
+
+            void postRenderSync();
     };
 
 }

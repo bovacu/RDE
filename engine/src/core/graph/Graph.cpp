@@ -26,14 +26,14 @@ namespace RDE {
 
         if(!_isIUI) {
             registry.emplace<Tag>(_sceneRootID, _sceneRootID, _sceneName);
-            registry.emplace<Transform>(_sceneRootID).parent = NODE_ID_NULL;
+            registry.emplace<Transform>(_sceneRootID, this).parent = NODE_ID_NULL;
             sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, &registry.get<Transform>(_sceneRootID));
             registry.get<Transform>(_sceneRootID).parentTransform = nullptr;
             registry.get<Transform>(_sceneRootID).node = sceneRoot;
             registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
         } else {
             registry.emplace<Tag>(_sceneRootID, _sceneRootID, _sceneName);
-            registry.emplace<UITransform>(_sceneRootID).parent = NODE_ID_NULL;
+            registry.emplace<UITransform>(_sceneRootID, this).parent = NODE_ID_NULL;
             sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, (Transform*)&registry.get<UITransform>(_sceneRootID));
             registry.get<UITransform>(_sceneRootID).parentTransform = nullptr;
             registry.get<UITransform>(_sceneRootID).node = sceneRoot;
@@ -97,6 +97,8 @@ namespace RDE {
             onRenderDel(registry);
             _renderManager.endDraw();
         }
+
+        postRenderSync();
     }
 
     void Graph::onLateUpdate(Delta _dt) {
@@ -148,7 +150,7 @@ namespace RDE {
 
         if(!isUI) {
             registry.emplace<Tag>(_newNode, _newNode, _tag);
-            registry.emplace<Transform>(_newNode).parent = _parentRef;
+            registry.emplace<Transform>(_newNode, this).parent = _parentRef;
             (&registry.get<Transform>(_parentRef))->children.push_back(&registry.get<Transform>(_newNode));
             (&registry.get<Transform>(_newNode))->parentTransform = (&registry.get<Transform>(_parentRef));
 
@@ -157,7 +159,7 @@ namespace RDE {
             registry.emplace<Active>(_newNode, _node, &scene->engine->manager, this);
         } else {
             registry.emplace<Tag>(_newNode, _newNode, _tag);
-            registry.emplace<UITransform>(_newNode).parent = _parentRef;
+            registry.emplace<UITransform>(_newNode, this).parent = _parentRef;
             (&registry.get<UITransform>(_parentRef))->children.push_back(&registry.get<UITransform>(_newNode));
             (&registry.get<UITransform>(_newNode))->parentTransform = (&registry.get<UITransform>(_parentRef));
 
@@ -353,5 +355,12 @@ namespace RDE {
         for(auto* _child : _node->getTransform()->children) {
             recalculateRenderizableTree(_child->node, _renderizables);
         }
+    }
+
+    void Graph::postRenderSync() {
+        for(auto* _dirtyTransform : dirtyTransforms) {
+            _dirtyTransform->clearDirty();
+        }
+        dirtyTransforms.clear();
     }
 }

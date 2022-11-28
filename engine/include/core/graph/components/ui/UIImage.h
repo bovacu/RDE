@@ -102,7 +102,7 @@ namespace RDE {
             void calculate9SliceGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
             void calculatePartialHGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
             void calculatePartialVGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
-            void calculatePartialCGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
+            void calculatePartialRGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
 
             void batchFourVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices);
             void batch9SliceVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices);

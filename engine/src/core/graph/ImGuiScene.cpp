@@ -885,7 +885,7 @@ namespace RDE {
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(createID());
             if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
-                _uiImage->setOriginOffset({Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
+                _uiImage->setOriginOffset({Util::Math::clampF(_originOffset[0], -FLT_MAX, FLT_MAX), Util::Math::clampF(_originOffset[1], -FLT_MAX, FLT_MAX) });
             }
             ImGui::PopID();
 
@@ -971,7 +971,7 @@ namespace RDE {
                 ImGui::SetNextItemWidth(100);
                 ImGui::PushID(createID());
                 if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
-                    _uiText->setOriginOffset({Util::Math::clampF(_originOffset[0], FLT_MIN, FLT_MAX), Util::Math::clampF(_originOffset[1], FLT_MIN, FLT_MAX) });
+                    _uiText->setOriginOffset({Util::Math::clampF(_originOffset[0], -FLT_MAX, FLT_MAX), Util::Math::clampF(_originOffset[1], -FLT_MAX, FLT_MAX) });
                 }
             }
             ImGui::PopID();

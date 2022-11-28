@@ -203,6 +203,8 @@ namespace RDE {
         }
 
         _renderManager.drawUI(batches);
+
+        postRenderSync();
     }
 
     void Canvas::onDebugRender() {
@@ -340,6 +342,13 @@ namespace RDE {
         for(auto* _child : _node->getTransform()->children) {
             recalculateRenderizableTree(_child->node);
         }
+    }
+
+    void Canvas::postRenderSync() {
+        for(auto* _dirtyTransform : graph.dirtyTransforms) {
+            ((UITransform*)_dirtyTransform)->clearDirty();
+        }
+        graph.dirtyTransforms.clear();
     }
 
 }

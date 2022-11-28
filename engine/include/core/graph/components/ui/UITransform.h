@@ -49,7 +49,9 @@ namespace RDE {
             bool uiDirty = false;
 
         public:
-            explicit UITransform();
+            explicit UITransform(Graph* _graph);
+
+            void clearDirty() override;
 
             [[nodiscard]] Anchor getAnchor() const;
             void setAnchor(Anchor _anchor);

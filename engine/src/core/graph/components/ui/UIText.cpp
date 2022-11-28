@@ -59,7 +59,6 @@ namespace RDE {
 
                 auto [_transformMat, _dirty] = _transform.localToWorld();
                 if(_dirty || dirty) {
-                    _transform.clearDirty();
                     dirty = false;
                 }
                 auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMat[3][0] + _originOffset.x * _transform.getModelMatrixScale().x,
