@@ -16,6 +16,11 @@ namespace RDE {
 
     FORWARD_DECLARE_CLASS(Manager, Graph, Scene, Canvas, Node)
 
+    struct SpriteRendererConfig {
+        Texture* texture = nullptr;
+        Color color = Color::White;
+    };
+
     /**
      * @brief Component that allows to render a texture or part of a texture on screen. End user doesn't have, and in fact can't
      * make it render manually, it is all done internally by the ECS system.
@@ -37,9 +42,9 @@ namespace RDE {
             void calculateGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
 
         public:
-            SpriteRenderer(Node* _node, Scene* _scene, Texture* _texture = nullptr);
-            SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture);
-            SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture);
+            SpriteRenderer(Node* _node, Scene* _scene, const SpriteRendererConfig& _config);
+            SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const SpriteRendererConfig& _config);
+            SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const SpriteRendererConfig& _config);
             ~SpriteRenderer() override {  }
 
             /**

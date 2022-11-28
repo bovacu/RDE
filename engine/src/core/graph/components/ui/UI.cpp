@@ -56,6 +56,10 @@ namespace RDE {
         return _chosen;
     }
 
+    static void shouldStopEventPropagation(Event& _event, Node* _node) {
+        _event.handled = _node->hasComponent<CanvasEventStopper>() && _node->getComponent<CanvasEventStopper>()->isEnabled();
+    }
+
     void UIInteractable::onEvent(Node* _node, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event) {
         if (!_node->isActive() || !interactable) {
             return;
@@ -63,19 +67,19 @@ namespace RDE {
 
         if(focused) {
             if(_eventDispatcher.dispatchEvent<KeyPressedEvent>() && !onInnerKeyPressed.isEmpty()) {
-                _event.handled = _node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 auto* _kpe = (KeyPressedEvent*)&_event;
                 onInnerKeyPressed(_kpe->getKeyCode(), getCorrectChar(_kpe));
             }
 
             if(_eventDispatcher.dispatchEvent<KeyReleasedEvent>() && !onInnerKeyReleased.isEmpty()) {
-                _event.handled = _node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 auto* _kre = (KeyReleasedEvent*)&_event;
                 onInnerKeyReleased(_kre->getKeyCode(), getCorrectChar(_kre));
             }
 
             if(_eventDispatcher.dispatchEvent<KeyPressedEvent>() && !onKeyPressed.isEmpty()) {
-                _event.handled = _node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 auto* _kpe = (KeyPressedEvent*)&_event;
                 onKeyPressed(_kpe->getKeyCode(), getCorrectChar(_kpe));
                 return;
@@ -87,19 +91,19 @@ namespace RDE {
         if(_eventInsideElement && !_event.handled) {
 
             if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onInnerClickingReleased.isEmpty()) {
-                _event.handled =_node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 auto* _mre = (MouseButtonReleasedEvent*)&_event;
                 onInnerClickingReleased(_mre->getMouseButton());
             }
 
             if(_eventDispatcher.dispatchEvent<MouseButtonPressedEvent>() && !onInnerClicking.isEmpty()) {
-                _event.handled = _node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 auto* _mre = (MouseButtonPressedEvent*)&_event;
                 onInnerClicking(_mre->getMouseButton());
             }
 
             if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() && !onInnerMouseEntered.isEmpty()) {
-                _event.handled = _node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 if(mouseInnerStatus == MouseStatus::MouseExited) {
                     mouseInnerStatus = MouseStatus::MouseEntered;
                     onInnerMouseEntered();
@@ -109,14 +113,14 @@ namespace RDE {
 
 
             if(_eventDispatcher.dispatchEvent<MouseButtonReleasedEvent>() && !onClick.isEmpty()) {
-                _event.handled = _node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 auto* _mre = (MouseButtonReleasedEvent*)&_event;
                 onClick(_mre->getMouseButton());
                 return;
             }
 
             if(_eventDispatcher.dispatchEvent<MouseScrolledEvent>() && !onScroll.isEmpty()) {
-                _event.handled = _node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 auto* _mse = (MouseScrolledEvent*)&_event;
                 onScroll({_mse->getScrollX(), _mse->getScrollY()});
                 return;
@@ -126,14 +130,14 @@ namespace RDE {
 
 
             if(_eventDispatcher.dispatchEvent<ControllerButtonUpEvent>() && !onGamepadButtonPressed.isEmpty()) {
-                _event.handled = _node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 auto* _jbue = (ControllerButtonUpEvent*)&_event;
                 onGamepadButtonPressed(_jbue->getButton());
                 return;
             }
 
             if(_eventDispatcher.dispatchEvent<MobileTouchUpEvent>() && !onMobileClick.isEmpty()) {
-                _event.handled = _node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 auto* _mtue = (MobileTouchUpEvent*)&_event;
                 onMobileClick(_mtue->getFingerID());
                 return;
@@ -149,7 +153,7 @@ namespace RDE {
 
         if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() && !_event.handled) {
             if(mouseInnerStatus == MouseStatus::MouseEntered) {
-                _event.handled = _node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 if(!onInnerMouseExited.isEmpty()) onInnerMouseExited();
                 mouseInnerStatus = MouseStatus::MouseExited;
             }
@@ -157,7 +161,7 @@ namespace RDE {
 
         if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() && !_event.handled) {
             if(mouseStatus == MouseStatus::MouseEntered) {
-                _event.handled = _node->hasComponent<CanvasEventStopper>();
+                shouldStopEventPropagation(_event, _node);
                 if(!onMouseExited.isEmpty()) onMouseExited();
                 mouseStatus = MouseStatus::MouseExited;
             }

@@ -12,7 +12,7 @@ namespace RDE {
 
     struct UITextConfig : public CommonUIConfig {
         Font* font = nullptr;
-        std::string text = "Rubber Duck";
+        std::string text = "Hello Duck!";
         Color textColor = Color::White;
     };
 

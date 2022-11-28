@@ -62,7 +62,7 @@ namespace RDE {
         PhysicsShapeId id;
     };
 
-    struct BodyConfig {
+    struct PhysicsBodyConfig {
         ShapeConfig shapeConfig {  };
         float mass = 1.0f;
         PhysicsBodyType physicsBodyType = PhysicsBodyType::DYNAMIC;
@@ -92,7 +92,7 @@ namespace RDE {
             void setupShape(ShapeConfig& _shapeConfig);
 
         public:
-            PhysicsBody(Node* _node, Manager* _manager, Graph* _graph, BodyConfig& _bodyConfig);
+            PhysicsBody(Node* _node, Manager* _manager, Graph* _graph, PhysicsBodyConfig& _bodyConfig);
             ~PhysicsBody();
             void update();
 

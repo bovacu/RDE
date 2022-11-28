@@ -24,7 +24,7 @@ namespace RDE {
      *
      */
     class UIInteractable {
-        FRIEND_CLASS(Graph, Canvas, UI9Slice, UIButton, UICheckbox, UIPanel, UIInput, UISlider)
+        FRIEND_CLASS(Graph, Canvas, UIImage, UIButton, UICheckbox, UIPanel, UIInput, UISlider)
 
         private:
             /**

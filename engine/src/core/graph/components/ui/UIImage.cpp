@@ -117,13 +117,12 @@ namespace RDE {
         }
     }
 
-    // TODO: implement interactable for UIImage
     void UIImage::setInteractable(bool _interactable) {
-
+        UI::interaction->interactable = _interactable;
     }
 
     bool UIImage::isInteractable() {
-        return false;
+        return UI::interaction->interactable;
     }
 
     void UIImage::calculateNormalGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {

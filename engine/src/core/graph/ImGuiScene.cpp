@@ -1001,9 +1001,9 @@ namespace RDE {
     void ImGuiScene::uiCanvasStopperComponent(Graph* _graph, const NodeID _selectedNode) {
         if(!_graph->hasComponent<CanvasEventStopper>(_selectedNode)) return;
 
-        auto _ = _graph->getComponent<CanvasEventStopper>(_selectedNode);
+        auto _canvasStopper = _graph->getComponent<CanvasEventStopper>(_selectedNode);
 
-        if(createHeader("Canvas Event Stopper", _)) {
+        if(createHeader("Canvas Event Stopper", _canvasStopper)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }

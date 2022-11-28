@@ -100,20 +100,19 @@ namespace RDE {
     struct CanvasEventStopper : public ComponentBase {
         explicit CanvasEventStopper(Node* _node, Manager* _manager, Graph* _graph) {  }
 
-        // TODO: implement and use it in UI.cpp
         void setEnabled(bool _enabled) override {
-
+            enabled = _enabled;
         }
 
         bool isEnabled() override {
-            return true;
+            return enabled;
         }
 
         private:
             /**
              * @brief This element is needed, otherwise an empty struct won't compile (don't know exactly why).
              */
-            short foo{};
+            bool enabled = true;
     };
 }
 

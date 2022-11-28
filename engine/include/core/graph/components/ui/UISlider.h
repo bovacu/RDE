@@ -25,6 +25,7 @@ namespace RDE {
 
     FORWARD_DECLARE_CLASS(UI9Slice, UIImage)
 
+    // TODO: Check why 2 or more sliders act weird
     class UISlider : public UI {
         private:
             bool mouseDown = false;

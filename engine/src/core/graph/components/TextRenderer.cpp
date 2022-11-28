@@ -14,25 +14,19 @@
 
 namespace RDE {
 
-    TextRenderer::TextRenderer(Node* _node, Scene* _scene, const std::string& _text, Font* _font) :
-    TextRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _text, _font) {  }
+    TextRenderer::TextRenderer(Node* _node, Scene* _scene, const TextRendererConfig& _config) :
+    TextRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _config) {  }
 
-    TextRenderer::TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font) :
-    TextRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _text, _font) {  }
+    TextRenderer::TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const TextRendererConfig& _config) :
+    TextRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
 
-    TextRenderer::TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const std::string& _text, Font* _font) : IRenderizable(_node) {
-        font = _font;
-
-        if(_font == nullptr) {
-            font = _manager->fontManager.getDefaultFont("MontserratRegular");
-        } else {
-            font = _font;
-        }
-
-        innerText = _text;
-        recalcTextDimensions(_text);
+    TextRenderer::TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const TextRendererConfig& _config) : IRenderizable(_node) {
+        font = _config.font == nullptr ? _manager->fontManager.getDefaultFont("MontserratRegular") : _config.font;
+        innerText = _config.text;
+        recalcTextDimensions(innerText);
         shaderID = defaultShaders[TEXT_RENDERER_SHADER];
         texture = &font->getTexture();
+        setColor(_config.color);
         IRenderizable::batchPriority = BatchPriority::TextPriority;
     }
 

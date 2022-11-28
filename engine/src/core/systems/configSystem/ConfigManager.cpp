@@ -219,7 +219,9 @@ namespace RDE {
     void ConfigManager::loadSpriteRendererComponent(Node* _node, Scene* _scene, const nlohmann::json& _spriteRendererJson) {
         auto* _texture = _scene->engine->manager.textureManager.getSubTexture(_spriteRendererJson["texture"]["atlas"].get<std::string>(),
                                                                               _spriteRendererJson["texture"]["tile"].get<std::string>());
-        auto* _spriteRenderer = _node->addComponent<SpriteRenderer>(_texture);
+        auto* _spriteRenderer = _node->addComponent<SpriteRenderer>(SpriteRendererConfig {
+            .texture = _texture
+        });
 
         ENGINE_ASSERT(_spriteRendererJson.contains("texture"), "SpriteRenderer component MUST have section 'texture'.")
         ENGINE_ASSERT(_spriteRendererJson["texture"].contains("atlas"), "SpriteRenderer component MUST have section 'atlas' in section 'texture'.")
@@ -227,21 +229,20 @@ namespace RDE {
 
         if(_spriteRendererJson.contains("color")) {
             auto& _color = _spriteRendererJson["color"];
-            _spriteRenderer->color = Color { _color[0].get<unsigned char>(), _color[1].get<unsigned char>(), _color[2].get<unsigned char>(), _color[3].get<unsigned char>()};
+            _spriteRenderer->setColor({ _color[0].get<unsigned char>(), _color[1].get<unsigned char>(), _color[2].get<unsigned char>(), _color[3].get<unsigned char>()});
         }
 
         if(_spriteRendererJson.contains("layer")) {
-            _spriteRenderer->layer = _spriteRendererJson["layer"].get<int>();
+            _spriteRenderer->setLayer(_spriteRendererJson["layer"].get<int>());
         }
 
         if(_spriteRendererJson.contains("shader")) {
-            _spriteRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(
-                    _spriteRendererJson["shader"].get<std::string>())->getShaderID();
+            _spriteRenderer->setShaderID(_scene->engine->manager.shaderManager.getShader(_spriteRendererJson["shader"].get<std::string>())->getShaderID());
         }
     }
 
     void ConfigManager::loadBodyComponent(Node* _node, Scene* _scene, const nlohmann::json& _bodyJson) {
-        BodyConfig _bodyConfig;
+        PhysicsBodyConfig _bodyConfig;
         std::vector<ShapeConfig> _shapeConfigs;
 
         // load body config
@@ -431,22 +432,22 @@ namespace RDE {
             _fontSize = _textRendererJson["font_size"].get<int>();
         }
 
-        auto* _textRenderer = _node->addComponent<TextRenderer>(_textRendererJson["text"].get<std::string>(),
-                                                                                         _scene->engine->manager.fontManager.
-                                                                                         getSpecificFont(_textRendererJson["font"].get<std::string>(), _fontSize));
+        auto* _textRenderer = _node->addComponent<TextRenderer>(TextRendererConfig {
+            .text = _textRendererJson["text"].get<std::string>(),
+            .font = _scene->engine->manager.fontManager.getSpecificFont(_textRendererJson["font"].get<std::string>(), _fontSize)
+        });
 
         if(_textRendererJson.contains("color")) {
             auto& _color = _textRendererJson["color"];
-            _textRenderer->color = Color {_color[0].get<unsigned char>(), _color[1].get<unsigned char>(),
-                                          _color[2].get<unsigned char>(), _color[3].get<unsigned char>()};
+            _textRenderer->setColor({_color[0].get<unsigned char>(), _color[1].get<unsigned char>(), _color[2].get<unsigned char>(), _color[3].get<unsigned char>()});
         }
 
         if(_textRendererJson.contains("layer")) {
-            _textRenderer->layer = _textRendererJson["layer"].get<int>();
+            _textRenderer->setLayer(_textRendererJson["layer"].get<int>());
         }
 
         if(_textRendererJson.contains("shader")){
-            _textRenderer->shaderID = _scene->engine->manager.shaderManager.getShader(_textRendererJson["shader"].get<std::string>())->getShaderID();
+            _textRenderer->setShaderID(_scene->engine->manager.shaderManager.getShader(_textRendererJson["shader"].get<std::string>())->getShaderID());
         }
     }
 
