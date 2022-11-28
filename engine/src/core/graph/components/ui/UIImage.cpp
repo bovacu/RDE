@@ -39,7 +39,8 @@ namespace RDE {
             case PARTIAL_HORIZONTAL:
                 calculatePartialHGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
             case PARTIAL_RADIAL:
-                calculatePartialCGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
+                calculatePartialRGeometry(_transformMat, *_node->getTransform(),
+                                          *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
         }
     }
 
@@ -60,6 +61,11 @@ namespace RDE {
             Util::Log::warn("UIImage cannot be rendered as 9Slice as the texture is not configured like so.");
             return;
         }
+
+        for(auto& _vertex : geometry) {
+            _vertex = {};
+        }
+
         imageRenderingType = _imageRenderingType;
         dirty = true;
     }
@@ -93,10 +99,9 @@ namespace RDE {
                 case PARTIAL_HORIZONTAL:
                     calculatePartialHGeometry(_transformMat, _transform, _viewport); break;
                 case PARTIAL_RADIAL:
-                    calculatePartialCGeometry(_transformMat, _transform, _viewport); break;
+                    calculatePartialRGeometry(_transformMat, _transform, _viewport); break;
             }
 
-            _transform.clearDirty();
             dirty = false;
         }
 
@@ -373,8 +378,189 @@ namespace RDE {
         geometry[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
     }
 
-    void UIImage::calculatePartialCGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+    void UIImage::calculatePartialRGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+        auto _originOffset = UI::getOriginOffset();
+        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
 
+        _transformMatrix[3][0] = _screenPos.x;
+        _transformMatrix[3][1] = _screenPos.y;
+
+        Vec2F _textureOrigin = {(float)texture->getRegion().bottomLeftCorner.x, (float)texture->getRegion().bottomLeftCorner.y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
+
+        Vec2F _textureTileSize = {(float)texture->getRegion().size.x, (float)texture->getRegion().size.y};
+        Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y };
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+
+        Util::Log::info("AAAAHHHH");
+
+        // Bottom-Right square
+        if(partialRenderingPercentage > .75f) {
+
+            // Multiply by 8 because we divide the whole rectangle into 8 parts
+            float _v1 = 0.f;
+            if(partialRenderingPercentage == 1.f)    _v1 = 0;
+            if(partialRenderingPercentage < 1.f)     _v1 = (1.f - partialRenderingPercentage) * _textureTileSizeOnScreen.x * 8.f;
+            if(partialRenderingPercentage <= 0.875f) _v1 = 0.125f * _textureTileSizeOnScreen.x * 8.f;
+
+            float _v2 = 0.f;
+            if(partialRenderingPercentage == 0.875f) _v2 = 0;
+            if(partialRenderingPercentage < 0.875f)  _v2 = (0.875f - partialRenderingPercentage) * _textureTileSizeOnScreen.y * 8.f;
+            if(partialRenderingPercentage <= 0.75f)  _v2 = 0.25f * _textureTileSizeOnScreen.y * 8.f;
+            glm::vec4 _TLCorner = { 0                         , 0                                 , 0.0f, 1.0f };
+            glm::vec4 _BLCorner = { _v1                       , -_textureTileSizeOnScreen.y + _v2 , 0.0f, 1.0f };
+            glm::vec4 _BRCorner = { _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y + _v2 , 0.0f, 1.0f };
+            glm::vec4 _TRCorner = { _textureTileSizeOnScreen.x, 0                                 , 0.0f, 1.0f };
+
+            // Multiply by 4 because we divide the rectangle in 8 parts, but the texture is already on the left.
+            float _v1C = 0.f;
+            if(partialRenderingPercentage == 1.f)    _v1C = 0;
+            if(partialRenderingPercentage < 1.f)     _v1C = (1.f - partialRenderingPercentage) * _textureTileSizeNorm.x * 4.f;
+            if(partialRenderingPercentage <= 0.875f) _v1C = 0.125f * _textureTileSizeNorm.x * 4.f;
+
+            float _v2C = 0.f;
+            if(partialRenderingPercentage == 0.875f) _v2C = 0;
+            if(partialRenderingPercentage < 0.875f)  _v2C = (0.875f - partialRenderingPercentage) * _textureTileSizeNorm.y * 4.f;
+            if(partialRenderingPercentage <= 0.75f)  _v2C = 0.25f * _textureTileSizeNorm.y * 4.f;
+            glm::vec2 _TLCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f       , _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f };
+            glm::vec2 _BLCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f + _v1C, _textureOriginNorm.y + _v2C                          };
+            glm::vec2 _BRCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x              , _textureOriginNorm.y + _v2C                          };
+            glm::vec2 _TRCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x              , _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f };
+
+            glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+
+            geometry[0] = OpenGLVertex {_transformMatrix * _TLCorner, _TLCoord, _color };
+            geometry[1] = OpenGLVertex {_transformMatrix * _BLCorner, _BLCoord, _color };
+            geometry[2] = OpenGLVertex {_transformMatrix * _BRCorner, _BRCoord, _color };
+            geometry[3] = OpenGLVertex {_transformMatrix * _TRCorner, _TRCoord, _color };
+        }
+
+        // Top-Right square
+        if(partialRenderingPercentage > 0.5f) {
+            // Multiply by 8 because we divide the whole rectangle into 8 parts
+            float _v1 = 0.f;
+            if(partialRenderingPercentage == 0.75f)  _v1 = 0;
+            if(partialRenderingPercentage < 0.75f)   _v1 = (0.75f - partialRenderingPercentage) * _textureTileSizeOnScreen.y * 8.f;
+            if(partialRenderingPercentage <= 0.625f) _v1 = 0.125f * _textureTileSizeOnScreen.y * 8.f;
+
+            float _v2 = 0.f;
+            if(partialRenderingPercentage == 0.625f) _v2 = 0;
+            if(partialRenderingPercentage < 0.625f)  _v2 = (0.625f - partialRenderingPercentage) * _textureTileSizeOnScreen.x * 8.f;
+            if(partialRenderingPercentage <= 0.5f)   _v2 = 0.25f * _textureTileSizeOnScreen.x * 8.f;
+
+            glm::vec4 _bottomLeftTextureCorner  = { 0                               , 0                         , 0.0f, 1.0f };
+            glm::vec4 _bottomRightTextureCorner = { _textureTileSizeOnScreen.x - _v2, _v1                       , 0.0f, 1.0f };
+            glm::vec4 _topRightTextureCorner    = { _textureTileSizeOnScreen.x - _v2, _textureTileSizeOnScreen.y, 0.0f, 1.0f };
+            glm::vec4 _topLeftTextureCorner     = { 0                               , _textureTileSizeOnScreen.y, 0.0f, 1.0f };
+
+
+            // Multiply by 4 because we divide the rectangle in 8 parts, but the texture is already on the left.
+            float _v1C = 0.f;
+            if(partialRenderingPercentage == 0.75f)  _v1C = 0;
+            if(partialRenderingPercentage < 0.75f)   _v1C = (0.75f - partialRenderingPercentage) * _textureTileSizeNorm.y * 4.f;
+            if(partialRenderingPercentage <= 0.625f) _v1C = 0.125f * _textureTileSizeNorm.y * 4.f;
+
+            float _v2C = 0.f;
+            if(partialRenderingPercentage == 0.625f) _v2C = 0;
+            if(partialRenderingPercentage < 0.625f)  _v2C = (0.625f - partialRenderingPercentage) * _textureTileSizeNorm.x * 4.f;
+            if(partialRenderingPercentage <= 0.5f)   _v2C = 0.25f * _textureTileSizeNorm.x * 4.f;
+
+            glm::vec2 _bottomLeftTextureCoord   = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f, _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f        };
+            glm::vec2 _bottomRightTextureCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x - _v2C, _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f + _v1C };
+            glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x - _v2C, _textureOriginNorm.y + _textureTileSizeNorm.y               };
+            glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f, _textureOriginNorm.y + _textureTileSizeNorm.y               };
+
+            glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+
+            geometry[4] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+            geometry[5] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+            geometry[6] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+            geometry[7] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+        }
+
+        // Top-Left square
+        if(partialRenderingPercentage > 0.25f) {
+            // Multiply by 8 because we divide the whole rectangle into 8 parts.
+            float _v1 = 0.f;
+            if(partialRenderingPercentage == 0.5f)   _v1 = 0;
+            if(partialRenderingPercentage < 0.5f)    _v1 = (0.5f - partialRenderingPercentage) * _textureTileSizeOnScreen.x * 8.f;
+            if(partialRenderingPercentage <= 0.375f) _v1 = 0.125f * _textureTileSizeOnScreen.x * 8.f;
+
+            float _v2 = 0.f;
+            if(partialRenderingPercentage == 0.375f) _v2 = 0;
+            if(partialRenderingPercentage < 0.375f)  _v2 = (0.375f - partialRenderingPercentage) * _textureTileSizeOnScreen.y * 8.f;
+            if(partialRenderingPercentage <= 0.125f) _v2 = 0.25f * _textureTileSizeOnScreen.y * 8.f;
+
+            glm::vec4 _bottomLeftTextureCorner  = {  0                         , 0                                 , 0.0f, 1.0f };
+            glm::vec4 _bottomRightTextureCorner = { -_v1                       , _textureTileSizeOnScreen.y - _v2  , 0.0f, 1.0f };
+            glm::vec4 _topRightTextureCorner    = { -_textureTileSizeOnScreen.x, _textureTileSizeOnScreen.y - _v2  , 0.0f, 1.0f };
+            glm::vec4 _topLeftTextureCorner     = { -_textureTileSizeOnScreen.x, 0                                 , 0.0f, 1.0f };
+
+            // Multiply by 4 because we divide the rectangle in 8 parts, but the texture is already on the left.
+            float _v1C = 0.f;
+            if(partialRenderingPercentage == 0.5f)   _v1C = 0;
+            if(partialRenderingPercentage < 0.5f)    _v1C = (0.5f - partialRenderingPercentage) * _textureTileSizeNorm.x * 4.f;
+            if(partialRenderingPercentage <= 0.375f) _v1C = 0.125f * _textureTileSizeNorm.x * 4.f;
+
+            float _v2C = 0.f;
+            if(partialRenderingPercentage == 0.375f) _v2C = 0;
+            if(partialRenderingPercentage < 0.375f)  _v2C = (0.375f - partialRenderingPercentage) * _textureTileSizeNorm.y * 4.f;
+            if(partialRenderingPercentage <= 0.125f) _v2C = 0.25f * _textureTileSizeNorm.y * 4.f;
+
+            glm::vec2 _bottomLeftTextureCoord   = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f       , _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f };
+            glm::vec2 _bottomRightTextureCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f - _v1C, _textureOriginNorm.y + _textureTileSizeNorm.y - _v2C };
+            glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x                                       , _textureOriginNorm.y + _textureTileSizeNorm.y - _v2C };
+            glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                                       , _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f };
+
+            glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+
+            geometry[8]  = OpenGLVertex { _transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+            geometry[9]  = OpenGLVertex { _transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+            geometry[10] = OpenGLVertex { _transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+            geometry[11] = OpenGLVertex { _transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+        }
+
+        // Bottom-Left square
+        if(partialRenderingPercentage > 0) {
+            // Multiply by 8 because we divide the whole rectangle into 8 parts
+            float _v1 = 0.f;
+            if(partialRenderingPercentage == 0.25f)   _v1 = 0;
+            if(partialRenderingPercentage < 0.25)     _v1 = (0.25f - partialRenderingPercentage) * _textureTileSizeOnScreen.y * 8.f;
+            if(partialRenderingPercentage <= 0.125f)  _v1 = 0.125f * _textureTileSizeOnScreen.y * 8.f;
+
+            float _v2 = 0.f;
+            if(partialRenderingPercentage == 0.125) _v2 = 0;
+            if(partialRenderingPercentage < 0.125)  _v2 = (0.125f - partialRenderingPercentage) * _textureTileSizeOnScreen.x * 8.f;
+            if(partialRenderingPercentage <= 0.f)   _v2 = 0.25f * _textureTileSizeOnScreen.x * 8.f;
+
+            glm::vec4 _bottomLeftTextureCorner  = {  0                               ,  0                                 , 0.0f, 1.0f };
+            glm::vec4 _bottomRightTextureCorner = { -_textureTileSizeOnScreen.x + _v2, -_v1                               , 0.0f, 1.0f };
+            glm::vec4 _topRightTextureCorner    = { -_textureTileSizeOnScreen.x + _v2, -_textureTileSizeOnScreen.y        , 0.0f, 1.0f };
+            glm::vec4 _topLeftTextureCorner     = {  0                               , -_textureTileSizeOnScreen.y        , 0.0f, 1.0f };
+
+            // Multiply by 4 because we divide the rectangle in 8 parts, but the texture is already on the left.
+            float _v1C = 0.f;
+            if(partialRenderingPercentage == 0.25f)   _v1C = 0;
+            if(partialRenderingPercentage < 0.25)     _v1C = (0.25f - partialRenderingPercentage) * _textureTileSizeNorm.y * 4.f;
+            if(partialRenderingPercentage <= 0.125f)  _v1C = 0.125f * _textureTileSizeNorm.y * 4.f;
+
+            float _v2C = 0.f;
+            if(partialRenderingPercentage == 0.125) _v2C = 0;
+            if(partialRenderingPercentage < 0.125)  _v2C = (0.125f - partialRenderingPercentage) * _textureTileSizeNorm.x * 4.f;
+            if(partialRenderingPercentage <= 0.f)   _v2C = 0.25f * _textureTileSizeNorm.x * 4.f;
+
+            glm::vec2 _bottomLeftTextureCoord   = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f, _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f        };
+            glm::vec2 _bottomRightTextureCoord  = { _textureOriginNorm.x + _v2C                         , _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f - _v1C };
+            glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _v2C                         , _textureOriginNorm.y                                        };
+            glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f, _textureOriginNorm.y                                        };
+
+            glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+
+            geometry[12] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+            geometry[13] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+            geometry[14] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+            geometry[15] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+        }
     }
 
     void UIImage::batchFourVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices) {
@@ -414,6 +600,28 @@ namespace RDE {
     }
 
     void UIImage::batchPartialCircularVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices) {
+        auto _squares = 0;
 
+        if(partialRenderingPercentage <= 0.75f) _squares++;
+        if(partialRenderingPercentage <= 0.5f)  _squares++;
+        if(partialRenderingPercentage <= 0.25f) _squares++;
+        if(partialRenderingPercentage <= 0.f)   _squares++;
+
+        for(auto _i = 3; _i >= _squares; _i--) {
+            auto _vertexCount = _vertices.size();
+
+            _vertices.push_back(geometry[(_i * 4) + 0]);
+            _vertices.push_back(geometry[(_i * 4) + 1]);
+            _vertices.push_back(geometry[(_i * 4) + 2]);
+            _vertices.push_back(geometry[(_i * 4) + 3]);
+
+            _indices.emplace_back(_vertexCount + 0);
+            _indices.emplace_back(_vertexCount + 1);
+            _indices.emplace_back(_vertexCount + 2);
+
+            _indices.emplace_back(_vertexCount + 2);
+            _indices.emplace_back(_vertexCount + 3);
+            _indices.emplace_back(_vertexCount + 0);
+        }
     }
 }

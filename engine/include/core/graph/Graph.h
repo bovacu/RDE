@@ -10,6 +10,7 @@
 #include "core/render/elements/Texture.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/Components.h"
+#include "core/graph/components/ui/UITransform.h"
 
 namespace RDE {
 
@@ -46,7 +47,7 @@ namespace RDE {
     FORWARD_DECLARE_STRUCT(Node)
 
     class Graph {
-        FRIEND_CLASS(Scene, Canvas, Node, ImGuiScene, ConfigManager)
+        FRIEND_CLASS(Transform, UITransform, Scene, Canvas, Node, ImGuiScene, ConfigManager)
 
         private:
             /**
@@ -74,6 +75,8 @@ namespace RDE {
 
             std::vector<IRenderizable*> renderizableTree;
             bool isRenderizableTreeDirty = false;
+
+            std::vector<Transform*> dirtyTransforms;
 
         private:
             /**
@@ -160,6 +163,8 @@ namespace RDE {
             [[nodiscard]] bool hasComponent(const NodeID& _id) const;
 
             void recalculateRenderizableTree(Node* _node, std::vector<IRenderizable*>* _renderizables);
+
+            void postRenderSync();
 
         public:
             /**

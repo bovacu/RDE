@@ -11,7 +11,7 @@
 
 namespace RDE {
 
-    Transform::Transform() {
+    Transform::Transform(Graph* _graph) : graph(_graph) {
         worldMatrixCache = recalculateCachedMatrix();
     }
 
@@ -22,7 +22,7 @@ namespace RDE {
     void Transform::setPosition(float _x, float _y) {
         if(innerPosition.x == _x && innerPosition.y == _y) return;
         innerPosition = glm::vec3 {_x, _y, 0.0f};
-        setDirty();
+        setDirty(this);
     }
 
     Vec2F Transform::getPosition() const {
@@ -34,7 +34,7 @@ namespace RDE {
         if(innerRotation == _newRot) return;
 
         innerRotation = glm::quat(glm::vec3(0, 0, glm::radians(_rotation)));
-        setDirty();
+        setDirty(this);
     }
 
     float Transform::getRotation() const {
@@ -47,7 +47,7 @@ namespace RDE {
 
     void Transform::setScale(float _x, float _y) {
         innerScale = {_x, _y, 1.0f};
-        setDirty();
+        setDirty(this);
     }
 
     Vec2F Transform::getScale() const {
@@ -61,13 +61,13 @@ namespace RDE {
     void Transform::translate(float _x, float _y) {
         innerPosition.x += _x;
         innerPosition.y += _y;
-        setDirty();
+        setDirty(this);
     }
 
     void Transform::rotate(float _amount) {
         glm::vec3 _euler = glm::eulerAngles(innerRotation);
         innerRotation = glm::quat(glm::vec3(_euler.x, _euler.y, _euler.z + Util::Math::degreesToRadians(_amount)));
-        setDirty();
+        setDirty(this);
     }
 
     void Transform::scale(const Vec2F& _scale) {
@@ -77,7 +77,7 @@ namespace RDE {
     void Transform::scale(float _x, float _y) {
         innerScale.x += _x;
         innerScale.y += _y;
-        setDirty();
+        setDirty(this);
     }
 
     Vec2F Transform::getModelMatrixPosition() {
@@ -155,15 +155,7 @@ namespace RDE {
     }
 
     std::tuple<glm::mat4, bool> Transform::localToWorld() {
-        bool _wasDirty = false;
-        if (parentTransform) {
-            if(dirty) {
-                setDirty();
-                _wasDirty = true;
-            }
-        }
-
-        return { worldMatrixCache, _wasDirty };
+        return { worldMatrixCache, dirty };
     }
 
     glm::mat4 Transform::worldToLocal() const {
@@ -183,12 +175,14 @@ namespace RDE {
         return localToParent();
     }
 
-    void Transform::setDirty() {
-        worldMatrixCache = recalculateCachedMatrix();
-        dirty = true;
-        for(auto* _transform : children) {
-            _transform->dirty = true;
+    void Transform::setDirty(Transform* _transform) {
+        worldMatrixCache = _transform->recalculateCachedMatrix();
+        _transform->dirty = true;
+        for(auto* _child : children) {
+            _child->setDirty(_child);
         }
+
+        graph->dirtyTransforms.push_back(_transform);
     }
 
     void Transform::setMatrixModelPosition(const Vec2F& _worldPos) {

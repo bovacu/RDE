@@ -49,7 +49,7 @@ namespace RDE {
 
 
 
-    UITransform::UITransform() {
+    UITransform::UITransform(Graph* _graph) : Transform(_graph) {
         anchor.anchor = Anchor::MIDDLE | Stretch::NO_STRETCH;
     }
 
@@ -103,6 +103,8 @@ namespace RDE {
                 _uiTransform->translateMatrixModelPosition(_sizeDiff * 0.5f);
             }
         }
+
+        graph->dirtyTransforms.push_back(this);
     }
 
     std::tuple<glm::mat4, bool> UITransform::localToWorld() {
@@ -120,5 +122,10 @@ namespace RDE {
     void UITransform::setSize(const Vec2F& _size) {
         size = _size;
         setUIDirty();
+    }
+
+    void UITransform::clearDirty() {
+        Transform::clearDirty();
+        uiDirty = false;
     }
 }

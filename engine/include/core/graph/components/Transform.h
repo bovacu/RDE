@@ -15,12 +15,12 @@ typedef entt::entity NodeID;
 
 namespace RDE {
 
-    FORWARD_DECLARE_STRUCT(Node)
+    FORWARD_DECLARE_STRUCT(Node, Graph)
     /**
      * @brief Component common to every entity that tells the engine where it is, which scale it has and how much it is rotated.
      */
     class Transform {
-        FRIEND_CLASS(Graph, PhysicsBody, SpriteRenderer, DynamicSpriteRenderer, TextRenderer, UIImage, UI9Slice, UIText)
+        FRIEND_CLASS(Graph, Camera, PhysicsBody, SpriteRenderer, DynamicSpriteRenderer, TextRenderer, UIImage, UI9Slice, UIText)
         MAKE_CLASS_ITERABLE(std::vector<Transform*>, children)
 
         protected:
@@ -31,15 +31,17 @@ namespace RDE {
             glm::mat4 worldMatrixCache { 1.0f };
             bool dirty = false;
 
+            Graph* graph;
+
         protected:
             glm::mat4 recalculateCachedMatrix();
-            void setDirty();
-            void clearDirty();
+            void setDirty(Transform* _transform);
+            virtual void clearDirty();
             glm::mat4 worldPointToLocalPosition(const Vec2F& _position);
             glm::mat4 worldPointToLocalRotation(float _rotation);
 
         public:
-            explicit Transform();
+            explicit Transform(Graph* _graph);
             Node* node;
 
             /**

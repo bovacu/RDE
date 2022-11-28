@@ -83,7 +83,6 @@ namespace RDE {
         auto [_transformMat, _dirty] = _transform.localToWorld();
         if(_dirty || dirty) {
             calculateGeometry(_transformMat, _transform, _viewport);
-            _transform.clearDirty();
             dirty = false;
         }
 
