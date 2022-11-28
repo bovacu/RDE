@@ -5,6 +5,10 @@
 #ifndef RDE_ENTRY_H
 #define RDE_ENTRY_H
 
+/**
+ * @brief This is an automatic 'main' so the final user doesn't need to create one and can just run the game or apps.
+ */
+
 #include "core/Engine.h"
 
 int main(int _argc, char** _argv) {

@@ -392,6 +392,7 @@ namespace RDE {
         geometry[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
     }
 
+    // TODO: inverted of Radial Geometry.
     void UIImage::calculatePartialRGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
         auto _uiT = (UITransform*)&_transform;
         auto _originOffset = UI::getOriginOffset();

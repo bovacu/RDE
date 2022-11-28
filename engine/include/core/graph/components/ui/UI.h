@@ -41,9 +41,19 @@ namespace RDE {
              */
             MouseStatus mouseStatus = MouseStatus::MouseExited;
 
+            /**
+             * @brief Current inner status of the mouse.
+             */
             MouseStatus mouseInnerStatus = MouseStatus::MouseExited;
 
+            /**
+             * @brief Flag that keeps if the Component is or not interactable.
+             */
             bool interactable = true;
+
+            /**
+             * @brief Flag that keeps if the Component is focused or not.
+             */
             bool focused = false;
 
         private:
@@ -168,10 +178,28 @@ namespace RDE {
         public:
             explicit UI(Node* _node, const CommonUIConfig* _config);
 
+            /**
+             * @brief Returns if the the Component is interactable, usually the return is just UI::interaction->interactable.
+             * @return bool
+             */
             virtual bool isInteractable() = 0;
+
+            /**
+             * @brief Makes the Component interactable or not. In the inside of each Component it may compute other elements.
+             * @param _interactable True/False
+             */
             virtual void setInteractable(bool _interactable) = 0;
 
+            /**
+             * @brief Returns how far the rendering will be performed from the origin.
+             * @return Vec2F
+             */
             [[nodiscard]] Vec2F getOriginOffset() const { return originOffset; }
+
+            /**
+             * @brief Sets how far the rendering will be performed from the origin. This function will shoot an inner hierarchy update.
+             * @param _originOffset Vec2F
+             */
             void setOriginOffset(const Vec2F& _originOffset);
 
             [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }

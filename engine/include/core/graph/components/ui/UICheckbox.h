@@ -40,15 +40,44 @@ namespace RDE {
             UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config);
             ~UICheckbox() override {  }
 
+            /**
+             * @see UI
+             * @param _interactable
+             */
             void setInteractable(bool _interactable) override;
+
+            /**
+             * @see UI
+             * @return bool
+             */
             bool isInteractable() override;
 
+            /**
+             * @brief Sets the inner state as checked/unchecked, changes the tick sprite and fires 'onClickedCheckbox' callback.
+             * @param _checked True/False
+             */
             void setChecked(bool _checked);
+
+            /**
+             * @brief Returns if the Checkbox is checked or unchecked.
+             * @return
+             */
             [[nodiscard]] bool isChecked() const;
 
         private:
+            /**
+            * @brief Function that executes and makes internal calculations when mouse enters, clicks and then is released the UITransform::size area.
+            */
             void onMouseReleased(MouseCode _mouseButton);
+
+            /**
+            * @brief Function that executes and makes internal calculations when mouse enters and clicks the UITransform::size area.
+            */
             void onMouseClicked(MouseCode _mouseButton) {  }
+
+            /**
+            * @brief Function that executes and makes internal calculations when mouse exits the UITransform::size area.
+            */
             void onMouseEntered() {  }
     };
 
