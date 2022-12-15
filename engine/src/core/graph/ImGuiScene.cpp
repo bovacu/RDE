@@ -188,8 +188,10 @@ namespace RDE {
         ImGui::Separator();
         ImGui::Text("X: %f, Y: %f", engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
         ImGui::Separator();
-         auto* _memData = Profiler::getTotalVirtualMemory();
-         ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
+        #if IS_LINUX()
+        auto* _memData = Profiler::getTotalVirtualMemory();
+        ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
+        #endif
         ImGui::Separator();
         auto [_drawCalls, _uiDrawCalls] = engine->manager.renderManager.getDrawCalls();
         ImGui::Text("Draw Calls: %d", _drawCalls);

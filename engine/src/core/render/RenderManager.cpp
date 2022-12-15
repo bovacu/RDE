@@ -8,7 +8,7 @@ namespace RDE {
     void RenderManager::init(Engine* _engine) {
     
         #if !IS_MOBILE()
-        Util::Log::info("OpenGL Version: ", glGetString(GL_VERSION));;
+        Util::Log::info("OpenGL Version: ", glGetString(GL_VERSION), ", Vendor: ", glGetString(GL_VENDOR), ", GPU: ", glGetString(GL_RENDERER));
         #endif
 
         glEnable(GL_BLEND);
@@ -21,9 +21,14 @@ namespace RDE {
         #endif
 
         int _flags = IMG_INIT_PNG | IMG_INIT_JPG;
-        if(IMG_Init(_flags) != _flags) {
-            Util::Log::error("SDL Image loader couldn't initialize all png and jpg");
-            return;
+        if(auto _returned = IMG_Init(_flags) != _flags) {
+            if((_returned & IMG_INIT_PNG) != IMG_INIT_PNG) {
+                Util::Log::error("SDL Image loader couldn't initialize all PNG");
+            }
+
+            if((_returned & IMG_INIT_JPG) != IMG_INIT_JPG) {
+                Util::Log::error("SDL Image loader couldn't initialize all JPG");
+            }
         }
 
         batch.init(_engine);

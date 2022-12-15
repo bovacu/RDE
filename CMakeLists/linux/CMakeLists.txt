@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18.1)
-#set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 set(PROJECT_NAME RDE)
 project(${PROJECT_NAME})
 
@@ -28,7 +28,7 @@ set(imgui_DIR vcpkg/installed/x64-linux/share/imgui)
 set(glm_DIR vcpkg/installed/x64-linux/share/glm)
 
 find_package(SDL2 CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/sdl2)
-find_package(sdl2-image CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/sdl2-image)
+find_package(SDL2_image CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/sdl2-image)
 find_package(SDL2_mixer CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/SDL2_mixer)
 find_package(glad CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/glad)
 find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/nlohmann_json)
@@ -77,8 +77,8 @@ unset(RDE_LIBRARY CACHE)
 
 target_link_libraries(${PROJECT_NAME}
                         PRIVATE
-                        SDL2::SDL2 SDL2::SDL2main SDL2::SDL2-static
-                        SDL2::SDL2_image
+                        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2main,SDL2::SDL2-static>
+                        $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
                         $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
                         glad::glad
                         EnTT::EnTT

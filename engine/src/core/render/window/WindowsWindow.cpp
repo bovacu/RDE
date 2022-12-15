@@ -30,14 +30,14 @@ namespace RDE {
         context = SDL_GL_CreateContext(window);
 
         if(context == nullptr) {
-            LOG_E("OpenGL context couldn't initialize -> ", SDL_GetError())
+            Util::Log::error("OpenGL context couldn't initialize -> ", SDL_GetError());
             return;
         }
 
         SDL_GL_MakeCurrent(window, context);
 
         if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-            Util::Log::error("Failed to initialize GLAD")
+            Util::Log::error("Failed to initialize GLAD");
             return;
         }
         Util::Log::debug("GLAD and SDL2 loaded successfully");
