@@ -7,6 +7,8 @@ cmake-build-releasewithdebuginfo_lib/
 cmake-build-rwdilib/
 cmake-build-releaselib/
 
+Obsidian_RDE/
+
 .cache/
 
 build/
