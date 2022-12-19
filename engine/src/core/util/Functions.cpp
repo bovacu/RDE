@@ -6,6 +6,16 @@
 #include "core/render/elements/Texture.h"
 #include "core/render/window/Window.h"
 #include "core/render/elements/ViewPort.h"
+#include "core/platform/PlatformHeaderSDL.h"
+#include "core/platform/PlatformHeaderSDLImage.h"
+
+#if IS_ANDROID()
+#include <GLES3/gl32.h>
+#elif IS_IOS()
+#include <OpenGLES/ES3/gl.h>
+#else
+#include "glad/glad.h"
+#endif
 
 namespace RDE::Util::Math {
 	Vec2F worldToScreenCoords(const ViewPort& _viewport, const Vec2F& _position) {
@@ -45,6 +55,17 @@ namespace RDE::Util::Math {
         auto _new = screenToWorldCoords(_viewport, {_x, _y});
         _x = _new.x;
         _y = _new.y;
+    }
+}
+
+namespace RDE::Util::GL {
+    void checkError(const std::string& _message)  {
+        #ifdef ENGINE_DEBUG
+            GLenum err;
+            while((err = glGetError()) != GL_NO_ERROR){
+                Util::Log::error("GL_ERROR ", _message," -> ", err);
+            }
+        #endif
     }
 }
 

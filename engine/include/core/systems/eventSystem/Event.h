@@ -5,6 +5,7 @@
 
 #include "core/util/Delegate.h"
 #include <string>
+#include <sstream>
 
 namespace RDE {
 

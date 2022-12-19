@@ -1,13 +1,10 @@
 #include "core/render/elements/Texture.h"
-#include <SDL_image.h>
-#include <SDL_surface.h>
 
 #if !IS_MOBILE()
 #include <filesystem>
 #endif
 
 #include "core/platform/PlatformHeaderSDLImage.h"
-#include "core/util/Functions.h"
 #include "core/render/elements/TextureAtlasManager.h"
 
 namespace RDE {

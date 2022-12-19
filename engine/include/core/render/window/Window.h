@@ -3,7 +3,7 @@
 #ifndef RDE_WINDOW_H
 #define RDE_WINDOW_H
 
-#include "core/util/Util.h"
+#include "core/util/Vec.h"
 #include "core/systems/eventSystem/Event.h"
 #include "core/platform/PlatformHeaderSDL.h"
 

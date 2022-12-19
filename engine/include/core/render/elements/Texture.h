@@ -2,8 +2,8 @@
 #define RDE_TEXTURE_H
 
 #include <iostream>
-#include "core/util/Util.h"
-#include "core/platform/PlatformHeaderSDL.h"
+#include "core/util/Rect.h"
+#include "core/util/Color.h"
 
 #if IS_ANDROID()
     #include <GLES3/gl32.h>

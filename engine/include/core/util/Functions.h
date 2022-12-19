@@ -5,18 +5,9 @@
 #define RDE_FUNCTIONS_H
 
 #include "core/Core.h"
+#include "core/util/Vec.h"
 #include "core/platform/PlatformHeaderSDL.h"
 #include "core/platform/PlatformHeaderSDLImage.h"
-#include "core/render/elements/ViewPort.h"
-#include "core/util/Vec.h"
-
-#if IS_ANDROID()
-#include <GLES3/gl32.h>
-#elif IS_IOS()
-#include <OpenGLES/ES3/gl.h>
-#else
-#include "glad/glad.h"
-#endif
 
 #include <sstream>
 #include <chrono>
@@ -572,15 +563,7 @@ namespace RDE {
         #ifndef UTIL_GL
         #define UTIL_GL
         namespace GL {
-
-            inline void checkError(const std::string& _message) {
-            #ifdef ENGINE_DEBUG
-                GLenum err;
-                while((err = glGetError()) != GL_NO_ERROR){
-                    Util::Log::error("GL_ERROR ", _message," -> ", err);
-                }
-            #endif
-            }
+            void checkError(const std::string& _message);
         }
         #endif
 

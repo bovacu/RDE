@@ -7,7 +7,6 @@
 #include "entt/entt.hpp"
 #include "core/util/Delta.h"
 #include "core/systems/eventSystem/Event.h"
-#include "core/render/elements/Texture.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/Components.h"
 #include "core/graph/components/ui/UITransform.h"
@@ -47,7 +46,7 @@ namespace RDE {
     FORWARD_DECLARE_STRUCT(Node)
 
     class Graph {
-        FRIEND_CLASS(Transform, UITransform, Scene, Canvas, Node, ImGuiScene, ConfigManager)
+        FRIEND_CLASS(Transform, UITransform, Scene, Canvas, Node, ImGuiScene, ConfigManager, IRenderizable)
 
         private:
             /**
