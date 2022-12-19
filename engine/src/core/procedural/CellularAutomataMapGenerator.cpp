@@ -34,7 +34,7 @@ namespace RDE {
     }
 
     void CellularAutomata::fillData() {
-        Image _image;
+        CPUTexture _image;
         _image.init(map.settings.size.x, map.settings.size.y, ImageType::PNG);
         for(int _y = 0; _y < map.settings.size.y; _y++)
             for(int _x = 0; _x < map.settings.size.x; _x++)

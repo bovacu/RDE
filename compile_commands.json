@@ -303,5 +303,10 @@
   "directory": "C:/Users/vazqu/Documents/RDE/build/windows/debug",
   "command": "C:\\PROGRA~1\\LLVM\\bin\\CLANG_~1.EXE -DGL_PROFILE_GL3 -IC:/Users/vazqu/Documents/RDE/vcpkg/installed/x64-windows/include/SDL2/SDL2 -IC:/Users/vazqu/Documents/RDE/engine/include -IC:/Users/vazqu/Documents/RDE/editor -IC:/Users/vazqu/Documents/RDE/nonVcpkgDeps/freetype/include -IC:/Users/vazqu/Documents/RDE/nonVcpkgDeps/Chipmunk2D/include -isystem C:/Users/vazqu/Documents/RDE/vcpkg/installed/x64-windows/include/SDL2 -isystem C:/Users/vazqu/Documents/RDE/vcpkg/installed/x64-windows/include -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu++17 -o CMakeFiles\\RDE.dir\\engine\\src\\core\\util\\Color.cpp.obj -c C:\\Users\\vazqu\\Documents\\RDE\\engine\\src\\core\\util\\Color.cpp",
   "file": "C:\\Users\\vazqu\\Documents\\RDE\\engine\\src\\core\\util\\Color.cpp"
+},
+{
+  "directory": "C:/Users/vazqu/Documents/RDE/build/windows/debug",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\CLANG_~1.EXE -DGL_PROFILE_GL3 -IC:/Users/vazqu/Documents/RDE/vcpkg/installed/x64-windows/include/SDL2/SDL2 -IC:/Users/vazqu/Documents/RDE/engine/include -IC:/Users/vazqu/Documents/RDE/editor -IC:/Users/vazqu/Documents/RDE/nonVcpkgDeps/freetype/include -IC:/Users/vazqu/Documents/RDE/nonVcpkgDeps/Chipmunk2D/include -isystem C:/Users/vazqu/Documents/RDE/vcpkg/installed/x64-windows/include/SDL2 -isystem C:/Users/vazqu/Documents/RDE/vcpkg/installed/x64-windows/include -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu++17 -o CMakeFiles\\RDE.dir\\engine\\src\\core\\util\\Functions.cpp.obj -c C:\\Users\\vazqu\\Documents\\RDE\\engine\\src\\core\\util\\Functions.cpp",
+  "file": "C:\\Users\\vazqu\\Documents\\RDE\\engine\\src\\core\\util\\Functions.cpp"
 }
 ]

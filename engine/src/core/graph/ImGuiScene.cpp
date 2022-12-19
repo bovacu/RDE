@@ -878,7 +878,7 @@ namespace RDE {
 
         auto _uiImage = _graph->getComponent<UIImage>(_selectedNode);
 
-        if(createHeader("UI Image", _uiImage)) {
+        if(createHeader("UI CPUTexture", _uiImage)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
             ImGui::Text("Origin Offset ");

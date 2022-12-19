@@ -239,7 +239,7 @@ namespace RDE {
      * @attention Not recommended to use as hasn't been updated for many versions.
      * @brief This is another type of texture that resides in the CPU also so we can modify its data on runtime more easily.
      */
-    class Image : public Texture {
+    class CPUTexture : public Texture {
         private:
             /**
              * @brief Data of the texture.
@@ -247,11 +247,6 @@ namespace RDE {
             unsigned char* pixels = nullptr;
 
             bool dirty = false;
-
-            /**
-             * @brief Type of texture.
-             */
-            ImageType imageType;
 
         private:
             /**
@@ -262,7 +257,13 @@ namespace RDE {
             int getChannels(const ImageType& _imageType);
 
         public:
-            Image() {};
+            /**
+             * @brief Type of texture.
+             */
+            ImageType imageType = ImageType::PNG;
+
+        public:
+            CPUTexture() {};
 
             /**
              * @brief Inits a CPU texture given a width, height, data of the texture and type of texture.
@@ -310,7 +311,7 @@ namespace RDE {
 
             void resizeImage(const Vec2<uint>& _newSize);
 
-            ~Image();
+            ~CPUTexture();
     };
 }
 

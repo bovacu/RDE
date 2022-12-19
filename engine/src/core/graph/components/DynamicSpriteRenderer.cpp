@@ -18,7 +18,7 @@ namespace RDE {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
-        texture = new Image;
+        texture = new CPUTexture;
 
         if(_config.pixels == nullptr) {
             texture->init((int)_config.size.x, (int)_config.size.y, _config.imageType);

@@ -12,18 +12,6 @@ FORWARD_DECLARE_CLASS(Manager)
 
 namespace RDE {
 
-    enum EnabledStates {
-        DS_NONE         =      0,
-        DS_EVENT        = 1 << 0,
-        DS_UPDATE       = 1 << 1,
-        DS_FIXED_UPDATE = 1 << 2,
-        DS_LATE_UPDATE  = 1 << 3,
-        DS_RENDER       = 1 << 4,
-        DS_ALL          = DS_EVENT | DS_UPDATE | DS_FIXED_UPDATE | DS_LATE_UPDATE | DS_RENDER
-    };
-
-#define INVERSE_ENABLED_STATE(x) (RDE::EnabledStates)(RDE::EnabledStates::DS_ALL ^ (x))
-
     struct Node {
         FRIEND_CLASS(ImGuiScene, UISlider)
 
@@ -32,7 +20,6 @@ namespace RDE {
             Manager* manager = nullptr;
             NodeID ID = NODE_ID_NULL;
             Transform* transform = nullptr;
-            uint8_t enabledStates = EnabledStates::DS_ALL;
 
         public:
             Node(const NodeID& _nodeID, Graph* _graph, Manager* _manager, Transform* _transform) : ID(_nodeID), graph(_graph), transform(_transform), manager(_manager) {  }

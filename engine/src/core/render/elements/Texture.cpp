@@ -1,4 +1,6 @@
 #include "core/render/elements/Texture.h"
+#include <SDL_image.h>
+#include <SDL_surface.h>
 
 #if !IS_MOBILE()
 #include <filesystem>
@@ -9,6 +11,19 @@
 #include "core/render/elements/TextureAtlasManager.h"
 
 namespace RDE {
+
+    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        Uint32 rmask = 0xff000000;
+        Uint32 gmask = 0x00ff0000;
+        Uint32 bmask = 0x0000ff00;
+        Uint32 amask = 0x000000ff;  
+    #else
+        Uint32 rmask = 0x000000ff;
+        Uint32 gmask = 0x0000ff00;
+        Uint32 bmask = 0x00ff0000;
+        Uint32 amask = 0xff000000;
+    #endif
+
 
     Texture::Texture(char* _path) {
         path = std::string(_path);
@@ -181,7 +196,7 @@ namespace RDE {
     // ------------------------------ IMAGE --------------------------
 
 
-    void Image::init(int _width, int _height, unsigned char* _pixels, const ImageType& _imageType) {
+    void CPUTexture::init(int _width, int _height, unsigned char* _pixels, const ImageType& _imageType) {
         textureSize.x = (float)_width;
         textureSize.y = (float)_height;
         pixels = _pixels;
@@ -193,7 +208,7 @@ namespace RDE {
         uploadToGPU();
     }
 
-    void Image::init(int _width, int _height, const ImageType& _imageType) {
+    void CPUTexture::init(int _width, int _height, const ImageType& _imageType) {
         textureSize.x = (float)_width;
         textureSize.y = (float)_height;
         channels = getChannels(_imageType);
@@ -210,7 +225,7 @@ namespace RDE {
         uploadToGPU();
     }
 
-    void Image::uploadToGPU() {
+    void CPUTexture::uploadToGPU() {
         if(!dirty) return;
 
         if(openGLTextureID == -1) {
@@ -242,11 +257,32 @@ namespace RDE {
         }
     }
 
-    void Image::saveAs(const std::string& _pathToSave) {
-        // TODO implement
+    void CPUTexture::saveAs(const std::string& _pathToSave) {
+        SDL_Surface* _surface = nullptr;
+
+        switch (imageType) {
+            case PNG: {
+                _surface = SDL_CreateRGBSurfaceFrom(pixels, textureSize.x, textureSize.y, 32, 4, rmask, gmask, bmask, amask);
+                IMG_SavePNG(_surface, _pathToSave.c_str());
+                break;
+            }
+            case JPG: {
+                _surface = SDL_CreateRGBSurfaceFrom(pixels, textureSize.x, textureSize.y, 32, 3, rmask, gmask, bmask, amask);
+                IMG_SaveJPG(_surface, _pathToSave.c_str(), 100);
+                break;
+            }
+            case BMP:
+                _surface = SDL_CreateRGBSurfaceFrom(pixels, textureSize.x, textureSize.y, 32, 3, rmask, gmask, bmask, amask);
+                SDL_SaveBMP(_surface, _pathToSave.c_str());
+                break;
+            }
+
+        if(_surface) {
+            SDL_FreeSurface(_surface);
+        }
     }
 
-    void Image::setPixel(int _x, int _y, const Color& _color) {
+    void CPUTexture::setPixel(int _x, int _y, const Color& _color) {
         pixels[_x * channels + _y * (int)textureSize.x * channels + 0] = _color.r;
         pixels[_x * channels + _y * (int)textureSize.x * channels + 1] = _color.g;
         pixels[_x * channels + _y * (int)textureSize.x * channels + 2] = _color.b;
@@ -254,18 +290,18 @@ namespace RDE {
         dirty = true;
     }
 
-    Color Image::getPixel(int _x, int _y) {
+    Color CPUTexture::getPixel(int _x, int _y) {
         int _base = pixels[_x * channels + _y * (int)textureSize.x * channels];
         return {pixels[_base], pixels[_base + 1], pixels[_base + 2], pixels[_base + 3]};
     }
 
-    Image::~Image() {
+    CPUTexture::~CPUTexture() {
         delete [] pixels;
         if(openGLTextureID != -1)
             glDeleteTextures(1, &openGLTextureID);
     }
 
-    int Image::getChannels(const ImageType& _imageType) {
+    int CPUTexture::getChannels(const ImageType& _imageType) {
         switch (_imageType) {
             case PNG:
             case BMP: return 4;
@@ -275,7 +311,7 @@ namespace RDE {
         return -1;
     }
 
-    void Image::resizeImage(const Vec2<uint>& _newSize) {
+    void CPUTexture::resizeImage(const Vec2<uint>& _newSize) {
         Util::Log::warn("Resizing images is not implemented yet!");
         dirty = true;
     }

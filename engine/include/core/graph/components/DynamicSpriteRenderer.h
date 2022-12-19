@@ -24,7 +24,7 @@ namespace RDE {
              * @brief Texture that contains the sprite. This is the whole SpriteSheet, but it is limited by the region and
              * only its region will be rendered.
              */
-            Image* texture = nullptr;
+            CPUTexture* texture = nullptr;
 
             OpenGLVertex geometry[4];
 
