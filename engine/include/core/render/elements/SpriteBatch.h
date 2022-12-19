@@ -159,7 +159,7 @@ namespace RDE {
             /**
              * @see ShaderManager
              */
-            ShaderManager* shaderManager = nullptr;
+            Engine* engine = nullptr;
 
             /**
              * @see ViewPort

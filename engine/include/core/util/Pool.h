@@ -61,7 +61,11 @@ namespace RDE {
 
         #ifdef ENGINE_DEBUG
         if(pool.empty()) {
-            throw std::runtime_error(Util::String::appendToString("There are no more elements in the pool, the maximum number of elements was reached and no element was returned yet to the pool!", __LINE__, " in file ", __FILE_NAME__));
+            #if IS_WINDOWS()
+            throw std::runtime_error(Util::String::appendToString("There are no more elements in the pool, the maximum number of elements was reached and no element was returned yet to the pool!", __LINE__, " in file ", __FILE__));
+            #else
+                throw std::runtime_error(Util::String::appendToString("There are no more elements in the pool, the maximum number of elements was reached and no element was returned yet to the pool!", __LINE__, " in file ", __FILE_NAME__));
+            #endif
         }
         #endif
 

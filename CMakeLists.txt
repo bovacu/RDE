@@ -1,3 +1,4 @@
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 cmake_minimum_required(VERSION 3.18.1)
 project(Engine)
 if(APPLE)

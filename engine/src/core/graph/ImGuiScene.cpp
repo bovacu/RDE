@@ -188,8 +188,10 @@ namespace RDE {
         ImGui::Separator();
         ImGui::Text("X: %f, Y: %f", engine->manager.inputManager.getMousePosScreenCoords().x, engine->manager.inputManager.getMousePosScreenCoords().y);
         ImGui::Separator();
-         auto* _memData = Profiler::getTotalVirtualMemory();
-         ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
+        #if IS_LINUX()
+        auto* _memData = Profiler::getTotalVirtualMemory();
+        ImGui::Text("RAM Used: %.2f MBs", (float)_memData[1] / 1000.f);
+        #endif
         ImGui::Separator();
         auto [_drawCalls, _uiDrawCalls] = engine->manager.renderManager.getDrawCalls();
         ImGui::Text("Draw Calls: %d", _drawCalls);
@@ -1001,9 +1003,9 @@ namespace RDE {
     void ImGuiScene::uiCanvasStopperComponent(Graph* _graph, const NodeID _selectedNode) {
         if(!_graph->hasComponent<CanvasEventStopper>(_selectedNode)) return;
 
-        auto _ = _graph->getComponent<CanvasEventStopper>(_selectedNode);
+        auto _canvasStopper = _graph->getComponent<CanvasEventStopper>(_selectedNode);
 
-        if(createHeader("Canvas Event Stopper", _)) {
+        if(createHeader("Canvas Event Stopper", _canvasStopper)) {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         }

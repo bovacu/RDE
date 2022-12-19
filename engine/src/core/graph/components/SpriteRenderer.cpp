@@ -15,21 +15,18 @@
 
 namespace RDE {
 
-    SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Texture* _texture) :
-    SpriteRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _texture) {  }
+    SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, const SpriteRendererConfig& _config) :
+    SpriteRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _config) {  }
 
-    SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, Texture* _texture) :
-    SpriteRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _texture)  {  }
+    SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const SpriteRendererConfig& _config) :
+    SpriteRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _config)  {  }
 
-    SpriteRenderer::SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, Texture* _texture) : IRenderizable(_node) {
+    SpriteRenderer::SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const SpriteRendererConfig& _config) : IRenderizable(_node) {
         shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
         IRenderizable::batchPriority = BatchPriority::SpritePriority;
 
-        if(_texture == nullptr) {
-            texture = _manager->textureManager.getSubTexture("defaultAssets", "sprite");
-        } else {
-            texture = _texture;
-        }
+        texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "sprite") : _config.texture;
+        setColor(_config.color);
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();
         calculateGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());

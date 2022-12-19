@@ -4,6 +4,10 @@
 #ifndef RDE_H
 #define RDE_H
 
+/**
+ * @brief This header file includes all necessary headers for the use of the engine
+ */
+
 #include "core/Engine.h"
 #include "core/Core.h"
 #include "core/util/Util.h"

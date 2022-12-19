@@ -338,8 +338,8 @@ namespace RDE::Util {
 
             #if IS_WINDOWS()
             std::tm _now {};
-    localtime_s(&_now, &t);
-    std::tm* now = &_now;
+            localtime_s(&_now, &t);
+            std::tm* now = &_now;
             #else
             std::tm* now = std::localtime(&t);
             #endif
@@ -353,17 +353,18 @@ namespace RDE::Util {
         inline void __printer(const char* _init, const char* _end, Arg1&& arg1) {
             #if IS_MOBILE()
             std::stringstream _stream;
-    _stream << arg1;
+            _stream << arg1;
 
-    if(strcmp("\033[1;m", _init) == 0) {
-        SDL_Log("%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;33m", _init) == 0) {
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;31m", _init) == 0) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;32m", _init) == 0) {
-        SDL_Log("%s", _stream.str().c_str());
-    }
+            if(strcmp("\033[1;m", _init) == 0) {
+                SDL_Log("%s", _stream.str().c_str());
+            } else if (strcmp("\033[1;33m", _init) == 0) {
+                SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
+            } else if (strcmp("\033[1;31m", _init) == 0) {
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
+            } else if (strcmp("\033[1;32m", _init) == 0) {
+                SDL_Log("%s", _stream.str().c_str());
+            }
+
             #elif IS_DESKTOP()
             std::cout << _init << arg1 << _end << std::endl;
             #endif
@@ -374,20 +375,21 @@ namespace RDE::Util {
         inline void __printer(const char* _init, const char* _end, Arg1&& arg1, Args&&... args) {
             #if IS_MOBILE()
             std::stringstream _stream;
-    _stream << arg1;
+            _stream << arg1;
 
-    using expander = int[];
-    (void)expander{0, (void(_stream << args), 0)...};
+            using expander = int[];
+            (void)expander{0, (void(_stream << args), 0)...};
 
-    if(strcmp("\033[1;m", _init) == 0) {
-        SDL_Log("%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;33m", _init) == 0) {
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;31m", _init) == 0) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;32m", _init) == 0) {
-        SDL_Log("%s", _stream.str().c_str());
-    }
+            if(strcmp("\033[1;m", _init) == 0) {
+                SDL_Log("%s", _stream.str().c_str());
+            } else if (strcmp("\033[1;33m", _init) == 0) {
+                SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
+            } else if (strcmp("\033[1;31m", _init) == 0) {
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
+            } else if (strcmp("\033[1;32m", _init) == 0) {
+                SDL_Log("%s", _stream.str().c_str());
+            }
+
             #elif IS_DESKTOP()
             std::cout << _init << arg1;
             __printer(_init, _end, args...);
@@ -398,41 +400,42 @@ namespace RDE::Util {
 
         inline void printTimed(const char* _init, const char* _end) {
             #ifdef ENGINE_DEBUG
-            std::time_t t = std::time(nullptr);   // get time now
+                std::time_t t = std::time(nullptr);   // get time now
 
-            #if IS_WINDOWS()
-            std::tm _now {};
-            localtime_s(&_now, &t);
-            std::tm* now = &_now;
-            #else
-            std::tm* now = std::localtime(&t);
-            #endif
+                #if IS_WINDOWS()
+                std::tm _now {};
+                localtime_s(&_now, &t);
+                std::tm* now = &_now;
+                #else
+                std::tm* now = std::localtime(&t);
+                #endif
 
-            #if IS_DESKTOP()
-            std::cout << _init << "[" << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << "] " << _end;
-            #endif
+                #if IS_DESKTOP()
+                std::cout << _init << "[" << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << "] " << _end;
+                #endif
             #endif
         }
 
         template <typename Arg1>
         inline void printerd(const char* _init, const char* _end, Arg1&& arg1) {
             #ifdef ENGINE_DEBUG
-            #if IS_MOBILE()
-            std::stringstream _stream;
-    _stream << arg1;
+                #if IS_MOBILE()
+                std::stringstream _stream;
+                _stream << arg1;
 
-    if(strcmp("\033[1;m", _init) == 0) {
-        SDL_Log("%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;33m", _init) == 0) {
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;31m", _init) == 0) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;32m", _init) == 0) {
-        SDL_Log("%s", _stream.str().c_str());
-    }
-            #elif IS_DESKTOP()
-            std::cout << _init << arg1 << _end << std::endl;
-            #endif
+                if(strcmp("\033[1;m", _init) == 0) {
+                    SDL_Log("%s", _stream.str().c_str());
+                } else if (strcmp("\033[1;33m", _init) == 0) {
+                    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
+                } else if (strcmp("\033[1;31m", _init) == 0) {
+                    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
+                } else if (strcmp("\033[1;32m", _init) == 0) {
+                    SDL_Log("%s", _stream.str().c_str());
+                }
+
+                #elif IS_DESKTOP()
+                std::cout << _init << arg1 << _end << std::endl;
+                #endif
             #endif
         }
 
@@ -442,20 +445,21 @@ namespace RDE::Util {
             #ifdef ENGINE_DEBUG
             #if IS_MOBILE()
             std::stringstream _stream;
-    _stream << arg1;
+            _stream << arg1;
 
-    using expander = int[];
-    (void)expander{0, (void(_stream << args), 0)...};
+            using expander = int[];
+            (void)expander{0, (void(_stream << args), 0)...};
 
-    if(strcmp("\033[1;m", _init) == 0) {
-        SDL_Log("%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;33m", _init) == 0) {
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;31m", _init) == 0) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
-    } else if (strcmp("\033[1;32m", _init) == 0) {
-        SDL_Log("%s", _stream.str().c_str());
-    }
+            if(strcmp("\033[1;m", _init) == 0) {
+                SDL_Log("%s", _stream.str().c_str());
+            } else if (strcmp("\033[1;33m", _init) == 0) {
+                SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
+            } else if (strcmp("\033[1;31m", _init) == 0) {
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", _stream.str().c_str());
+            } else if (strcmp("\033[1;32m", _init) == 0) {
+                SDL_Log("%s", _stream.str().c_str());
+            }
+            
             #elif IS_DESKTOP()
             std::cout << _init << arg1;
             __printer(_init, _end, args...);

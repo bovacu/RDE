@@ -1,0 +1,69 @@
+{
+	"build_systems":
+    [
+    	{
+    		"working_dir": "$file_path",
+            "name": "Build Debug",
+            "shell_cmd": "build.py compile debug",
+            "file_regex": "/([^/:]+):(\\d+):(\\d+): ",
+        },
+        {
+            "working_dir": "$file_path",
+            "name": "Run Debug",
+            "shell_cmd": "build.py run debug",
+            "file_regex": "/([^/:]+):(\\d+):(\\d+): ",
+        },
+        {
+            "working_dir": "$file_path",
+            "name": "Build & Run Debug",
+            "shell_cmd": "build.py compile-run debug",
+            "file_regex": "/([^/:]+):(\\d+):(\\d+): ",
+        },
+
+        {
+            "working_dir": "$file_path",
+            "name": "Build Release",
+            "shell_cmd": "build.py compile release",
+            "file_regex": "/([^/:]+):(\\d+):(\\d+): ",
+        },
+        {
+            "working_dir": "$file_path",
+            "name": "Run Release",
+            "shell_cmd": "build.py run release",
+            "file_regex": "/([^/:]+):(\\d+):(\\d+): ",
+        },
+        {
+            "working_dir": "$file_path",
+            "name": "Build & Run Release",
+            "shell_cmd": "build.py compile-run release",
+            "file_regex": "/([^/:]+):(\\d+):(\\d+): ",
+        },
+    ],
+	"folders":
+	[
+		{
+			"path": ".",
+		}
+    ],
+	"debugger_configurations":
+	[
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Launch",
+            "program": "${folder}/build/windows/RDE",
+            "args": [],
+            "cwd": "${folder}"
+        },
+    ],
+    "settings":
+    {
+		"LSP":
+		{
+			"clangd":
+			{
+				"enabled": true
+			}
+		}
+	},
+}

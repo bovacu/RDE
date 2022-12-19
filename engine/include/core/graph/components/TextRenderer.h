@@ -15,6 +15,12 @@ namespace RDE {
     FORWARD_DECLARE_STRUCT(CharInfo)
     FORWARD_DECLARE_CLASS(Font, Scene, Canvas, Graph, Manager)
 
+    struct TextRendererConfig {
+        std::string text = "Hello Duck!";
+        Font* font = nullptr;
+        Color color = Color::White;
+    };
+
     /**
      * @brief Component used to render text on screen.  End user doesn't have, and in fact can't
      * make it render manually, it is all done internally by the ECS system.
@@ -73,9 +79,9 @@ namespace RDE {
             std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharInfo* _chars) const;
 
         public:
-            TextRenderer(Node* _node, Scene* _scene, const std::string& _text, Font* _font = nullptr);
-            TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const std::string& _text, Font* _font = nullptr);
-            TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const std::string& _text, Font* _font = nullptr);
+            TextRenderer(Node* _node, Scene* _scene, const TextRendererConfig& _config);
+            TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const TextRendererConfig& _config);
+            TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const TextRendererConfig& _config);
             ~TextRenderer() override {  }
 
             /**

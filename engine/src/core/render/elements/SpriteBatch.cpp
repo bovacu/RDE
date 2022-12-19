@@ -17,7 +17,7 @@
 namespace RDE {
 
     void SpriteBatch::init(Engine* _engine) {
-        shaderManager = &_engine->manager.shaderManager;
+        engine = _engine;
         configBasicShader();
     }
 
@@ -28,7 +28,7 @@ namespace RDE {
 
     void SpriteBatch::configBasicShader() {
         GLsizei _structSize = sizeof(OpenGLVertex);
-        shaderManager->loadShaderVertexConfig(SPRITE_RENDERER_SHADER, {
+        engine->manager.shaderManager.loadShaderVertexConfig(SPRITE_RENDERER_SHADER, {
             VertexConfig {
                 0, 3, GL_FLOAT, 0, _structSize
             },
@@ -41,7 +41,7 @@ namespace RDE {
         },
         maxIndicesPerDrawCall);
 
-        shaderManager->loadShaderVertexConfig(TEXT_RENDERER_SHADER, {
+        engine->manager.shaderManager.loadShaderVertexConfig(TEXT_RENDERER_SHADER, {
             VertexConfig {
                   0, 3, GL_FLOAT, 0, _structSize
             },
@@ -58,7 +58,7 @@ namespace RDE {
 
     void SpriteBatch::Debug::configDebugShader() {
         GLsizei _structSize = 3 * sizeof(float) + 4 * sizeof(float);
-        Debug::batch->shaderManager->loadShaderVertexConfig(DEBUG_SHADER, {
+        Debug::batch->engine->manager.shaderManager.loadShaderVertexConfig(DEBUG_SHADER, {
             VertexConfig {
                   0, 3, GL_FLOAT, 0, _structSize
             },
@@ -189,7 +189,7 @@ namespace RDE {
         _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 6);
         _batch.textureID = _renderer->getTexture();
         _batch.priority = _priority;
-        _batch.shader = shaderManager->getShader(_renderer->shaderID);
+        _batch.shader = engine->manager.shaderManager.getShader(_renderer->shaderID);
         _batch.spriteBatch = this;
         batches.push_back(_batch);
 
@@ -281,7 +281,7 @@ namespace RDE {
     }
 
     void SpriteBatch::Debug::flushDebug() {
-        auto* _shader = batch->shaderManager->getShader(DEBUG_SHADER);
+        auto* _shader = batch->engine->manager.shaderManager.getShader(DEBUG_SHADER);
 
         glBindVertexArray(_shader->getDynamicShaderVAO());
         glUseProgram(_shader->getShaderID());

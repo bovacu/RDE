@@ -8,6 +8,7 @@
 #include "core/graph/Graph.h"
 #include "core/render/Camera.h"
 #include "core/render/elements/Batch.h"
+#include "core/graph/components/Node.h"
 #include <stack>
 
 namespace RDE {
@@ -15,7 +16,7 @@ namespace RDE {
     FORWARD_DECLARE_CLASS(UI, UIInteractable)
 
     struct CanvasElement {
-        Node* node = nullptr;
+        RDE::Node* node = nullptr;
         IRenderizable* renderizable = nullptr;
         UIInteractable* interactable = nullptr;
         IRenderizable* updatable = nullptr;

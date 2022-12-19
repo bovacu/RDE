@@ -48,7 +48,7 @@ namespace Editor {
 //        redirectRenderingDel.bind<&Editor::redirectRendering>(this);
 //        engine->setRenderingRedirectionToImGui(redirectRenderingDel);
 //        localizationTest();
-//        textStressTest(300000);
+        textStressTest(20);
 
 //        {
 //            auto _floorNode = getMainGraph()->createNode("Floor");
@@ -98,62 +98,67 @@ namespace Editor {
 ////        particleSystemTest();
 //
 
-        auto* _background = getMainGraph()->createNode("Background")->addComponent<SpriteRenderer>(nullptr);
-        _background->node->getTransform()->setScale(35, 21);
-        _background->setColor(Color::Gray);
-
-        auto _panelNode = getCanvases()[0]->getGraph()->createNode("Panel");
-        auto* _panel = _panelNode->addComponent<UIPanel>(UIPanelConfig { .size = {256, 256} });
-
-
-
-        auto _panelNode2 = getCanvases()[0]->getGraph()->createNode("PanelChild", _panelNode);
-        auto* _panel2 = _panelNode2->addComponent<UIPanel>(UIPanelConfig { .size = {64, 64}, .color = Color::Yellow });
-        _panelNode2->getTransform()->setPosition(-64, 64);
-        ((UITransform*)_panelNode2->getTransform())->setAnchor(Anchor::LEFT_TOP);
-        ((UITransform*)_panelNode2->getTransform())->setStretch(Stretch::HORIZONTAL_STRETCH);
-
-        auto _textNode = getCanvases()[0]->getGraph()->createNode("Text", _panelNode);
-        auto* _text = _textNode->addComponent<UIText>("Hello World!", engine->manager.fontManager.getDefaultFont("MontserratRegular"));
-        _text->setColor(Color::Orange);
-        _textNode->getTransform()->setPosition(64, 64);
-        ((UITransform*)_textNode->getTransform())->setAnchor(Anchor::RIGHT_TOP);
-
-//        auto _panelNode3 = getCanvases()[0]->getGraph()->createNode("PanelChild2", _panelNode2);
-//        auto* _panel3 = _panelNode3->addComponent<UIPanel>(UIPanelConfig { .size = {64, 64}, .color = Color::Green });
-//        ((UITransform*)_panelNode3->getTransform())->setAnchor(Anchor::RIGHT_TOP);
-//        ((UITransform*)_panelNode3->getTransform())->setStretch(Stretch::NO_STRETCH);
+//        auto* _background = getMainGraph()->createNode("Background")->addComponent<SpriteRenderer>(SpriteRendererConfig {
+//            .texture = nullptr
+//        });
+//        _background->node->getTransform()->setScale(35, 21);
+//        _background->setColor(Color::Gray);
 //
-        auto _uiButtonNode = getCanvases()[0]->getGraph()->createNode("UIButton");
-        UIButtonConfig _uiButtonConfig;
-        _uiButtonConfig.text = "Button";
-        _uiButtonConfig.textColor = Color::Green;
-        auto* _uiButton = _uiButtonNode->addComponent<UIButton>(_uiButtonConfig);
-        _uiButtonNode->getTransform()->setPosition(-140, 0);
-//////        ((UITransform*)_uiButtonNode->getTransform())->setPivot({ 0, 0.5f });
-//////        _uiButton->setInteractable(true);
-//////        getCanvases()[0]->getGraph()->setNodeActive(_uiButtonId, false);
-//
-        auto _checkboxNode = getCanvases()[0]->getGraph()->createNode("Checkbox");
-        auto* _checkbox = _checkboxNode->addComponent<UICheckbox>(UICheckboxConfig {  });
-        _checkboxNode->getTransform()->setPosition(0, 196);
-//        _checkbox->setInteractable(false);
-//
-//        auto _uiButtonNode2 = getCanvases()[0]->getGraph()->createNode("UIButton2");
-//        UIButtonConfig _uiButtonConfig2;
-//        _uiButtonConfig2.text = "Button2";
-//        auto* _uiButton2 = _uiButtonNode2->addComponent<UIButton>(_uiButtonConfig2);
-//        _uiButtonNode2->getTransform()->setPosition(140, 0);
-////        _uiButton2->setInteractable(false);
+//        auto _panelNode = getCanvases()[0]->getGraph()->createNode("Panel");
+//        auto* _panel = _panelNode->addComponent<UIPanel>(UIPanelConfig { .size = {256, 256} });
 //
 //
-        auto _inputTextNode = getCanvases()[0]->getGraph()->createNode("InputText");
-        auto* _input = _inputTextNode->addComponent<UIInput>(UIInputConfig {  });
-        _inputTextNode->getTransform()->setPosition(256, 128);
-
-        auto _sliderNode = getCanvases()[0]->getGraph()->createNode("Slider");
-        slider = _sliderNode->addComponent<UISlider>(UISliderConfig {  });
-        _sliderNode->getTransform()->setPosition(-256, 128);
+//
+//        auto _panelNode2 = getCanvases()[0]->getGraph()->createNode("PanelChild", _panelNode);
+//        auto* _panel2 = _panelNode2->addComponent<UIPanel>(UIPanelConfig { .size = {64, 64}, .color = Color::Yellow });
+//        _panelNode2->getTransform()->setPosition(-64, 64);
+//        ((UITransform*)_panelNode2->getTransform())->setAnchor(Anchor::LEFT_TOP);
+//        ((UITransform*)_panelNode2->getTransform())->setStretch(Stretch::HORIZONTAL_STRETCH);
+//
+//        auto _textNode = getCanvases()[0]->getGraph()->createNode("Text", _panelNode);
+//        auto* _text = _textNode->addComponent<UIText>(UITextConfig {
+//            .font = engine->manager.fontManager.getDefaultFont("MontserratRegular"),
+//            .text = "Hello World!"
+//        });
+//        _text->setColor(Color::Orange);
+//        _textNode->getTransform()->setPosition(64, 64);
+//        ((UITransform*)_textNode->getTransform())->setAnchor(Anchor::RIGHT_TOP);
+//
+////        auto _panelNode3 = getCanvases()[0]->getGraph()->createNode("PanelChild2", _panelNode2);
+////        auto* _panel3 = _panelNode3->addComponent<UIPanel>(UIPanelConfig { .size = {64, 64}, .color = Color::Green });
+////        ((UITransform*)_panelNode3->getTransform())->setAnchor(Anchor::RIGHT_TOP);
+////        ((UITransform*)_panelNode3->getTransform())->setStretch(Stretch::NO_STRETCH);
+////
+//        auto _uiButtonNode = getCanvases()[0]->getGraph()->createNode("UIButton");
+//        UIButtonConfig _uiButtonConfig;
+//        _uiButtonConfig.text = "Button";
+//        _uiButtonConfig.textColor = Color::Green;
+//        auto* _uiButton = _uiButtonNode->addComponent<UIButton>(_uiButtonConfig);
+//        _uiButtonNode->getTransform()->setPosition(-140, 0);
+////////        ((UITransform*)_uiButtonNode->getTransform())->setPivot({ 0, 0.5f });
+////////        _uiButton->setInteractable(true);
+////////        getCanvases()[0]->getGraph()->setNodeActive(_uiButtonId, false);
+////
+//        auto _checkboxNode = getCanvases()[0]->getGraph()->createNode("Checkbox");
+//        auto* _checkbox = _checkboxNode->addComponent<UICheckbox>(UICheckboxConfig {  });
+//        _checkboxNode->getTransform()->setPosition(0, 196);
+////        _checkbox->setInteractable(false);
+////
+////        auto _uiButtonNode2 = getCanvases()[0]->getGraph()->createNode("UIButton2");
+////        UIButtonConfig _uiButtonConfig2;
+////        _uiButtonConfig2.text = "Button2";
+////        auto* _uiButton2 = _uiButtonNode2->addComponent<UIButton>(_uiButtonConfig2);
+////        _uiButtonNode2->getTransform()->setPosition(140, 0);
+//////        _uiButton2->setInteractable(false);
+////
+////
+//        auto _inputTextNode = getCanvases()[0]->getGraph()->createNode("InputText");
+//        auto* _input = _inputTextNode->addComponent<UIInput>(UIInputConfig {  });
+//        _inputTextNode->getTransform()->setPosition(256, 128);
+//
+//        auto _sliderNode = getCanvases()[0]->getGraph()->createNode("Slider");
+//        slider = _sliderNode->addComponent<UISlider>(UISliderConfig {  });
+//        _sliderNode->getTransform()->setPosition(-256, 128);
     }
 
     void Editor::onUpdate(Delta _dt) {
@@ -214,47 +219,32 @@ namespace Editor {
         for(int _i = 0; _i < _amount; _i++) {
             auto _textNode = getMainGraph()->createNode("Block" + std::to_string(_i));
             nodes.push_back(_textNode->getID());
-            _textNode->getTransform()->setPosition(_r.randomf(-engine->getWindow().getWidth() * 10.f, engine->getWindow().getWidth() * 10.f), _r.randomf(-engine->getWindow().getHeight() * 10.f, engine->getWindow().getHeight() * 10.f));
+            _textNode->getTransform()->setPosition(_r.randomf(-engine->getWindow().getWidth() * 0.5f, engine->getWindow().getWidth() * 0.5f), _r.randomf(-engine->getWindow().getHeight() * 0.5f, engine->getWindow().getHeight() * 0.5f));
             _textNode->getTransform()->setRotation(45);
-            auto* _sprite = _textNode->addComponent<SpriteRenderer>(_texture);
+            auto* _sprite = _textNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
+                .texture = _texture
+            });
             auto _pos = _textNode->getTransform()->getPosition();
-            if((_pos.x > engine->getWindow().getWidth() * 0.5f || _pos.x < -engine->getWindow().getWidth() * 0.5f) ||
-               (_pos.y > engine->getWindow().getHeight() * 0.5f || -_pos.y < -engine->getWindow().getHeight() * 0.5f)) {
-                _sprite->node->setEnabled(INVERSE_ENABLED_STATE(EnabledStates::DS_RENDER));
-            }
+            // if((_pos.x > engine->getWindow().getWidth() * 0.5f || _pos.x < -engine->getWindow().getWidth() * 0.5f) ||
+            //    (_pos.y > engine->getWindow().getHeight() * 0.5f || -_pos.y < -engine->getWindow().getHeight() * 0.5f)) {
+            //     _sprite->node->setActive(false);
+            // }
             getMainGraph()->setParent(_textNode, _parentNode);
         }
-
-//        auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
-//        auto _parentNode = getMainGraph()->createNode("parent");
-//        auto _horizontalElements = engine->getWindow().getWidth() / _texture->getSize().x;
-//        auto _verticalElements = engine->getWindow().getHeight() / _texture->getSize().y;
-//
-//        for(int _i = -_verticalElements / 2; _i < _verticalElements / 2; _i++) {
-//            for(int _j = -_horizontalElements / 2; _j < _horizontalElements / 2; _j++) {
-//                auto _textNode = getMainGraph()->createNode("Block" + std::to_string(_i));
-//                nodes.push_back(_textNode->getID());
-//                _textNode->getTransform()->setPosition(_j * _texture->getSize().x, _i * _texture->getSize().y);
-////                    _textNode->getTransform()->setRotation(45);
-//                auto* _sprite = _textNode->addComponent<SpriteRenderer>(_texture);
-//                getMainGraph()->setParent(_textNode, _parentNode);
-//            }
-//        }
-
-        }
+    }
 
     void Editor::onDebugRender(Delta _dt) {
         Scene::onDebugRender(_dt);
 //        auto* _transformRightWall = getMainGraph()->getComponent<Transform>(getMainGraph()->getNode("RightWall"));
 //        engine->manager.renderManager.drawSquare(_transformRightWall->getModelMatrixPosition(), {8, 8});
 
-        auto _resolution = getMainCamera()->getViewport()->getDeviceResolution();
-        auto _bottomLeftCorner = Vec2<float> {
-               (((float)_resolution.x + slider->node->getTransform()->getModelMatrixPosition().x - slider->getSize().x) * 0.5f),
-                (((float)_resolution.y + slider->node->getTransform()->getModelMatrixPosition().y - slider->getSize().y) * 0.5f)
-        };
-
-        engine->manager.renderManager.drawPoint(_bottomLeftCorner, Color::White);
+//        auto _resolution = getMainCamera()->getViewport()->getDeviceResolution();
+//        auto _bottomLeftCorner = Vec2<float> {
+//               (((float)_resolution.x + slider->node->getTransform()->getModelMatrixPosition().x - slider->getSize().x) * 0.5f),
+//                (((float)_resolution.y + slider->node->getTransform()->getModelMatrixPosition().y - slider->getSize().y) * 0.5f)
+//        };
+//
+//        engine->manager.renderManager.drawPoint(_bottomLeftCorner, Color::White);
     }
 
     void Editor::physicsTest() {

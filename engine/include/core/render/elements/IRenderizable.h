@@ -89,10 +89,35 @@ namespace RDE {
             BatchPriority getBatchPriority() { return batchPriority; }
             bool isEnabled() override { return !node->hasComponent<DisabledForRender>(); }
 
+            /**
+             * @brief Sets the ShaderID. This will trigger an inner hierarchy update.
+             * @param _shaderID
+             */
             virtual void setShaderID(ShaderID _shaderID) { shaderID = _shaderID; dirty = true; }
+
+            /**
+             * @brief Sets the Color. This will trigger an inner hierarchy update.
+             * @param _shaderID
+             */
             virtual void setColor(const Color& _color) { color = _color; dirty = true; }
+
+            /**
+             * @brief Sets the layer. This will trigger an inner hierarchy update.
+             * @param _shaderID
+             */
             virtual void setLayer(int _layer) { layer = _layer; dirty = true; }
+
+            /**
+             * @brief Sets the BatchPriority. This will trigger an inner hierarchy update.
+             * @param _shaderID
+             */
             void setBatchPriority(BatchPriority _batchPriority) { batchPriority = _batchPriority; dirty = true; }
+
+            /**
+             * @brief Enables or disables the Component. It will add or remove the DisabledForRender component.
+             * This will trigger an inner hierarchy update.
+             * @param _shaderID
+             */
             void setEnabled(bool _enabled) override {
                 if(_enabled && node->hasComponent<DisabledForRender>()) {
                     node->removeComponent<DisabledForRender>();
