@@ -13,11 +13,11 @@ def windows(args):
 
     c_compiler = "clang"
     if len(args) > 4:
-        generator = args[4]
+        c_compiler = args[4]
 
     cxx_compiler = "clang++"
     if len(args) > 5:
-        generator = args[5]
+        cxx_compiler = args[5]
 
     create_build_folder = "if not exist build mkdir build"
     create_windows_folder = "if not exist build\\windows mkdir build\\windows"
@@ -63,11 +63,11 @@ def linux(args):
 
     c_compiler = "clang"
     if len(args) > 4:
-        generator = args[4]
+        c_compiler = args[4]
 
     cxx_compiler = "clang++"
     if len(args) > 5:
-        generator = args[5]
+        cxx_compiler = args[5]
 
     create_build_folder = "mkdir -p build"
     create_linux_folder = "mkdir -p build/linux"
@@ -114,11 +114,11 @@ def mac(args):
 
     c_compiler = "clang"
     if len(args) > 4:
-        generator = args[4]
+        c_compiler = args[4]
 
     cxx_compiler = "clang++"
     if len(args) > 5:
-        generator = args[5]
+        cxx_compiler = args[5]
 
     create_build_folder = "mkdir -p build"
     create_mac_folder = "mkdir -p build/mac"
