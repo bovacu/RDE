@@ -272,7 +272,7 @@ namespace RDE {
              * @param _pixels Data of the texture.
              * @param _imageType Type of the texture.
              */
-            void init(int _width, int _height, unsigned char* _pixels, const ImageType& _imageType);
+            void init(int _width, int _height, unsigned char* _pixels, const ImageType& _imageType = ImageType::PNG);
 
             /**
              * @brief Inits a CPU texture given a width, height and type of texture but no information.
@@ -280,7 +280,7 @@ namespace RDE {
              * @param _height Height of the texture.
              * @param _imageType Type of the texture.
              */
-            void init(int _width, int _height, const ImageType& _imageType);
+            void init(int _width, int _height, const ImageType& _imageType = ImageType::PNG);
 
             /**
              * @brief Sends the data to the GPU.
