@@ -42,7 +42,7 @@ namespace RDE {
     typedef entt::registry NodeContainer;
     #define NODE_ID_NULL entt::null
 
-    FORWARD_DECLARE_CLASS(Engine, Scene, Manager)
+    FORWARD_DECLARE_CLASS(Engine, Scene, Manager, IRenderizable)
     FORWARD_DECLARE_STRUCT(Node)
 
     class Graph {

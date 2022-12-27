@@ -1,5 +1,6 @@
 // Created by borja on 24/12/21.
 
+#include <iostream>
 
 #ifndef RDE_CORE_H
 #define RDE_CORE_H
@@ -104,9 +105,9 @@ inline float currentDPI = 0;
 #define IS_MOBILE() (IS_ANDROID() || IS_IOS())
 
 #ifdef ENGINE_ENABLE_ASSERTS
-    #define ENGINE_ASSERT(x, ...) { if(!(x)) { Util::Log::error("Assertion Failed: ", __VA_ARGS__); ENGINE_DEBUG_BREAK(); } }
+    #define ENGINE_ASSERT(x, message) { if(!(x)) { std::cout << (message) << std::endl; ENGINE_DEBUG_BREAK(); } }
 #else
-    #define ENGINE_ASSERT(x, ...)
+    #define ENGINE_ASSERT(x, message)
 #endif
 
 #ifdef RDE_EXPORT

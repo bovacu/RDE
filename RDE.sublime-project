@@ -51,7 +51,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "Launch",
-            "program": "${folder}/build/windows/RDE",
+            "program": "${folder}/build/windows/debug/RDE",
             "args": [],
             "cwd": "${folder}"
         },

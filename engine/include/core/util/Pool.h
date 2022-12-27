@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "core/util/Delegate.h"
+#include "core/util/Functions.h"
 
 namespace RDE {
 
