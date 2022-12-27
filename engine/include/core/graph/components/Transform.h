@@ -167,11 +167,43 @@ namespace RDE {
              */
             void scale(float _x, float _y);
 
+            /**
+             * @brief Returns the position of the Node in world coordinates. This is useful when the Node you need the position is a child of other Node and you need
+             * the position relative to the world and not the parent (which getPosition() gives).
+             * @return Vec2F
+             */
             [[nodiscard]] Vec2F getModelMatrixPosition();
+
+            /**
+             * @brief Returns the scale of the Node in world units. This is useful when the Node you need the scale is a child of other Node and you need
+             * the scale relative to the world and not the parent (which getScale() gives).
+             * @return Vec2F
+             */
             [[nodiscard]] Vec2F getModelMatrixScale();
+
+            /**
+             * @brief Returns the rotation of the Node in world degrees units. This is useful when the Node you need the rotation is a child of other Node and you need
+             * the rotation relative to the world and not the parent (which getRotation() gives).
+             * @return Vec2F
+             */
             [[nodiscard]] float getModelMatrixRotation();
+
+            /**
+             * @brief Sets the position of the Node in world coordinates.
+             * @param _worldPos Position in world coordinates.
+             */
             void setMatrixModelPosition(const Vec2F& _worldPos);
+
+            /**
+             * @brief Translates the position of the Node in world coordinates units.
+             * @param _worldPos Amount to translate.
+             */
             void translateMatrixModelPosition(const Vec2F& _worldPos);
+
+            /**
+             * @brief Sets the rotation of the Node in world degrees.
+             * @param _rotation Rotation in world degree units.
+             */
             void setMatrixModelRotation(float _rotation);
 
             [[nodiscard]] glm::mat4 localToParent() const;
