@@ -2,11 +2,16 @@
 
 #include "core/platform/PlatformHeaderSDLImage.h"
 #include "core/render/RenderManager.h"
+#include "core/Engine.h"
+#include "core/util/Functions.h"
+#include "core/util/Vec.h"
 
 namespace RDE {
 
     void RenderManager::init(Engine* _engine) {
     
+        engine = _engine;
+
         #if !IS_MOBILE()
         Util::Log::info("OpenGL Version: ", glGetString(GL_VERSION), ", Vendor: ", glGetString(GL_VENDOR), ", GPU: ", glGetString(GL_RENDERER));
         #endif
@@ -127,4 +132,42 @@ namespace RDE {
     }
 
 
+
+    void RenderManager::fillBackgroundCPUTexture(CPUTexture* _cpuTexture, const Color& _color) {
+        for(auto _y = 0; _y < _cpuTexture->getSize().y; _y++) {
+            for(auto _x = 0; _x < _cpuTexture->getSize().x; _x++) {
+                _cpuTexture->setPixel(_x, _y, _color);
+            }
+        }
+    }
+
+    void RenderManager::drawPointToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _position, const Color& _color, int _size) {
+        auto _halfTextureSize = _cpuTexture->getSize() / 2;
+        auto _nodePos = _cpuTextureTransform->getModelMatrixPosition();
+
+        for(int _y = -_size / 2; _y < _size; _y++) {
+            for(int _x = -_size / 2; _x < _size; _x++) {
+                if(_position.x + _x > _halfTextureSize.x || _position.x + _x < -_halfTextureSize.x || 
+                   _position.y + _y > _halfTextureSize.y || _position.y + _y < -_halfTextureSize.y) {
+                    continue;
+                }
+                
+                _cpuTexture->setPixel(_halfTextureSize.x + _position.x + _x, _halfTextureSize.y +  _position.y + _y, _color);
+            }
+        }
+    }
+
+    void RenderManager::drawRectangleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _position, const Vec2F& _size, const Color& _color) {
+        auto _halfTextureSize = _cpuTexture->getSize() / 2;
+
+        for(auto _y = -_size.y / 2; _y < _size.y; _y++) {
+            for(auto _x = -_size.x / 2; _x < _size.x; _x++) {
+                if(_position.x + _x > _halfTextureSize.x || _position.x + _x < -_halfTextureSize.x || 
+                   _position.y + _y > _halfTextureSize.y || _position.y + _y < -_halfTextureSize.y) {
+                    continue;
+                }
+                _cpuTexture->setPixel(_halfTextureSize.x + _position.x + _x - _size.x * 0.25f, _halfTextureSize.y + _position.y + _y - _size.y * 0.25f, _color);
+            }
+        }
+    }
 }

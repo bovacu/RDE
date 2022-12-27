@@ -4,8 +4,12 @@
 #ifndef RDE_RENDER_MANAGER_H
 #define RDE_RENDER_MANAGER_H
 
+#include "core/graph/components/Transform.h"
+#include "core/render/elements/Texture.h"
 #include "core/util/Util.h"
 #include "core/render/elements/SpriteBatch.h"
+#include "core/util/Vec.h"
+#include <vector>
 
 namespace RDE {
 
@@ -30,6 +34,11 @@ namespace RDE {
              * @brief Color to paint the background.
              */
             Color clearColor = Color::Red;
+
+            /**
+             * @brief Engine reference.
+             */
+            Engine* engine;
 
         private:
             /**
@@ -151,6 +160,78 @@ namespace RDE {
              * @param _size Point size
              */
             void setPointSize(float _size);
+
+            /**
+             * @brief Fills the whole CPUTexture with a specific color.
+             * @param _cpuTexture The CPUTexutre to modify.
+             * @param _color      Color to fill the whole CPUTexture.
+             */
+            void fillBackgroundCPUTexture(CPUTexture* _cpuTexture, const Color& _color);
+
+            /**
+             * @brief Draws a point on the CPUTexture.
+             * @param _cpuTexture The CPUTexutre to modify.
+             * @param _position   Where to draw the point.
+             * @param _color      Color to draw the point.
+             * @param _size       Size of the point. Minimum is 1, this means that the pixel according to position will be filled and also 1 unit to each side.
+             */
+            void drawPointToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _position, const Color& _color = Color::Blue, int _size = 1);
+
+            /**
+             * @brief Draws a line on the CPUTexure.
+             * @param _cpuTexture The CPUTexutre to modify.
+             * @param _p0         Initial position of the line.
+             * @param _p1         End position of the line.
+             * @param _color      Color to draw the line.
+             * @param _thickness  Thickness of the line.
+             */
+            void drawLineToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Blue, int _thickness = 1);
+
+            /**
+             * @brief Draws a rectangle on the CPUTexture.
+             * @param _cpuTexture The CPUTexutre to modify.
+             * @param _position   The centered position of the rectangle.      
+             * @param _size       Size of the rectangle. It will expando half of the size to each side from _position.
+             * @param _color      Color to draw the rectangle.
+             */
+            void drawRectangleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _position, const Vec2F& _size, const Color& _color = Color::Blue);
+
+            /**
+             * @brief Draws a filled circle on the CPUTexture.
+             * @param _cpuTexture The CPUTexutre to modify.
+             * @param _center     Center of the circle.
+             * @param _radius     Radius of the circle
+             * @param _color      Color to draw the circle.
+             */
+            void drawFilledCircleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _center, float _radius, const Color& _color = Color::Blue);
+
+            /**
+             * @brief Draws the outline of a circle on the CPUTexture.
+             * @param _cpuTexture The CPUTexutre to modify.
+             * @param _center     Center of the outline of the circle.
+             * @param _radius     Radius of the outline of the circle.
+             * @param _color      Color to draw the outline of the circle.
+             * @param _thickness  Thickness of the outline of the circle.
+             */
+            void drawLinedCircleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _center, float _radius, const Color& _color = Color::Blue, int _thickness = 1);
+
+            /**
+             * @brief Draws a triangle on the CPUTexture.
+             * @param _cpuTexture The CPUTexutre to modify.
+             * @param _p0         First vertex of the triangle.
+             * @param _p1         Second vertex of the triangle.
+             * @param _p2         Third vertex of the triangle.
+             * @param _color      Color to draw the triangle.
+             */
+            void drawTriangleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _p0, const Vec2F& _p1, const Vec2F& _p2, const Color& _color = Color::Blue);
+
+            /**
+             * @brief Draws a shape on the CPUTexture.
+             * @param _cpuTexture The CPUTexutre to modify.
+             * @param _points     List of the vertices of the shape.
+             * @param _color      Color to draw the shape.
+             */
+            void drawShapeToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, std::vector<Vec2F> _points, const Color& _color = Color::Blue);
     };
 }
 
