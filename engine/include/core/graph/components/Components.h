@@ -6,9 +6,13 @@
 
 
 #include "ComponentBase.h"
+#include "core/Core.h"
+#include "entt/entity/entity.hpp"
+
+typedef entt::entity NodeID;
 
 namespace RDE {
-    FORWARD_DECLARE_CLASS(Manager, Window, Camera, Canvas, IViewPort, Graph)
+    FORWARD_DECLARE_CLASS(Manager, Window, Camera, Canvas, IViewPort, Graph, Node)
 
     /**
      * @brief Component common to every entity and that identifies it whit a name. It is recommended 
