@@ -67,14 +67,14 @@ namespace RDE {
              * @param _camera It is the main camera of the scene (or other camera if a special drawing is needed).
              * @param _renderShader The shader we want to use to render, by default the basic one.
              */
-            void beginDraw(Camera& _camera, Transform* _cameraTransform);
+            void beginDraw(Camera* _camera, Transform* _cameraTransform);
 
             /**
              * @brief Renders geometry for debugging. It also includes batching.
              * @param _camera It is the main camera of the scene (or other camera if a special drawing is needed).
              * @param _renderShader The shader we want to use to render, by default the debugging one.
              */
-            void beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness = 1.f);
+            void beginDebugDraw(Camera* _camera, Transform* _cameraTransform, float _thickness = 1.f);
 
             /**
              * @brief Renders an IRenderizable using batching. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.

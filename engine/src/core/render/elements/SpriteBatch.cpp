@@ -72,9 +72,9 @@ namespace RDE {
 
     SpriteBatch::~SpriteBatch() {};
 
-    void SpriteBatch::beginDraw(Camera& _camera, Transform* _cameraTransform) {
-        viewProjectionMatrix = _camera.getViewProjectionMatrix();
-        viewport = _camera.getViewport();
+    void SpriteBatch::beginDraw(Camera* _camera, Transform* _cameraTransform) {
+        viewProjectionMatrix = _camera->getViewProjectionMatrix();
+        viewport = _camera->getViewport();
     }
 
     void SpriteBatch::Debug::drawPoint(const Vec2F& _position, const Color& _color) {

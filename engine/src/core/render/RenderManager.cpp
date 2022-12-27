@@ -51,7 +51,7 @@ namespace RDE {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
-    void RenderManager::beginDraw(Camera& _camera, Transform* _cameraTransform) {
+    void RenderManager::beginDraw(Camera* _camera, Transform* _cameraTransform) {
         batch.beginDraw(_camera, _cameraTransform);
     }
 
@@ -75,7 +75,7 @@ namespace RDE {
         batch.drawUI(_batches);
     }
 
-    void RenderManager::beginDebugDraw(Camera& _camera, Transform* _cameraTransform, float _thickness) {
+    void RenderManager::beginDebugDraw(Camera* _camera, Transform* _cameraTransform, float _thickness) {
         batch.debug.setLinesThickness(_thickness);
         batch.beginDraw(_camera, _cameraTransform);
     }

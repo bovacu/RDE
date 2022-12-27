@@ -208,7 +208,7 @@ namespace RDE {
              * @param _camera Camera that will render the Draw Call
              * @param _cameraTransform Cameras position to be combined with the View Projection Matrix.
              */
-            void beginDraw(Camera& _camera, Transform* _cameraTransform);
+            void beginDraw(Camera* _camera, Transform* _cameraTransform);
 
             /**
              * This method is used to drawBatched anything that extends IRenderizable.

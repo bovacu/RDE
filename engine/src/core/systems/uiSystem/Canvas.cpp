@@ -164,7 +164,7 @@ namespace RDE {
 
     void Canvas::forceRender() {
         auto& _renderManager = graph.scene->engine->manager.renderManager;
-        _renderManager.beginDraw(*camera, nullptr);
+        _renderManager.beginDraw(camera, nullptr);
         _renderManager.drawUI(batches);
 
         batches.clear();
@@ -176,7 +176,7 @@ namespace RDE {
 
     void Canvas::onRender() {
         auto& _renderManager = graph.scene->engine->manager.renderManager;
-        _renderManager.beginDraw(*camera, (Transform*)graph.getComponent<UITransform>(camera->node->getID()));
+        _renderManager.beginDraw(camera, (Transform*)graph.getComponent<UITransform>(camera->node->getID()));
 
         batches.clear();
         Batch _batch;
@@ -211,7 +211,7 @@ namespace RDE {
         auto& _registry = graph.getNodeContainer();
 
         auto& _renderManager = graph.scene->engine->manager.renderManager;
-       _renderManager.beginDebugDraw(*camera, (Transform*)graph.getComponent<UITransform>(camera->node->getID()));
+       _renderManager.beginDebugDraw(camera, (Transform*)graph.getComponent<UITransform>(camera->node->getID()));
 
         _registry.view<UIImage, UITransform, Active>().each([this, &_renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
             DebugShape _shape;

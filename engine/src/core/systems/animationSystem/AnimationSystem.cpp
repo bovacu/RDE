@@ -49,7 +49,7 @@ namespace RDE {
         currentNode->animation.restart();
     }
 
-    void AnimationSystem::update(float _dt, SpriteRenderer& _spriteRenderer, TransitionParams _params) {
+    void AnimationSystem::update(float _dt, SpriteRenderer* _spriteRenderer, TransitionParams _params) {
         AnimationNode* _nextAnimation = nullptr;
         for(auto& _transition : currentNode->transitions) {
             if(bus.dispatch(_transition.transitionCode, _params)) {
@@ -62,8 +62,8 @@ namespace RDE {
         if(_nextAnimation != nullptr) currentNode = _nextAnimation;
         currentNode->animation.update(_dt);
 
-        if(_spriteRenderer.getTexture() != getCurrentAnimation()->animation.getCurrentFrame()->getGLTexture())
-            _spriteRenderer.setTexture(getCurrentAnimation()->animation.getCurrentFrame());
+        if(_spriteRenderer->getTexture() != getCurrentAnimation()->animation.getCurrentFrame()->getGLTexture())
+            _spriteRenderer->setTexture(getCurrentAnimation()->animation.getCurrentFrame());
     }
 
     AnimationNode* AnimationSystem::getCurrentAnimation() {

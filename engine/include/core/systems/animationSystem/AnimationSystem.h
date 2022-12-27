@@ -71,7 +71,7 @@ namespace RDE {
             void stop();
             void restart();
 
-            void update(float _dt, SpriteRenderer& _spriteRenderer, TransitionParams _params = {});
+            void update(float _dt, SpriteRenderer* _spriteRenderer, TransitionParams _params = {});
     };
 
     template<auto TransitionFunc, typename Class>

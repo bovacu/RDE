@@ -61,7 +61,7 @@ namespace RDE {
         auto _particleSystems = registry.view<ParticleSystem, Active>(entt::exclude<DisabledForRender>);
 
         _animations.each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
-            _animationSystem.update(_dt, _spriteRenderer);
+            _animationSystem.update(_dt, &_spriteRenderer);
         });
 
         _particleSystems.each([&_dt](const auto _entity, ParticleSystem& _particleSystem, const Active& _) {
@@ -86,7 +86,7 @@ namespace RDE {
         for(auto* _camera : scene->cameras) {
             if(!hasComponent<Active>(_camera->node->getID())) continue;
 
-            _renderManager.beginDraw(*_camera, getComponent<Transform>(_camera->node->getID()));
+            _renderManager.beginDraw(_camera, getComponent<Transform>(_camera->node->getID()));
             _camera->update();
             {
                 for(auto* _renderizable : renderizableTree) {
@@ -136,7 +136,7 @@ namespace RDE {
 
     void Graph::onDebugRender() {
         auto& _renderManager = scene->engine->manager.renderManager;
-        _renderManager.beginDebugDraw(*scene->mainCamera, getComponent<Transform>(scene->mainCamera->node->getID()));
+        _renderManager.beginDebugDraw(scene->mainCamera, getComponent<Transform>(scene->mainCamera->node->getID()));
         scene->engine->manager.physics.debugRender(&_renderManager);
         _renderManager.endDebugDraw();
     }
