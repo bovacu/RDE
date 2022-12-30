@@ -9,6 +9,7 @@
 #include "core/systems/inputSystem/input/MobileInput.h"
 
 #include "core/render/Camera.h"
+#include "core/graph/components/Node.h"
 
 namespace RDE {
 

@@ -17,9 +17,9 @@ namespace RDE {
 
     struct CanvasElement {
         RDE::Node* node = nullptr;
-        IRenderizable* renderizable = nullptr;
+        // IRenderizable* renderizable = nullptr;
         UIInteractable* interactable = nullptr;
-        IRenderizable* updatable = nullptr;
+        // IRenderizable* updatable = nullptr;
         int cropping = 0;
     };
 
@@ -111,8 +111,8 @@ namespace RDE {
             void batchTreeElementPre(CanvasElement* _canvasElement, void* _data);
             void batchTreeElementPost(CanvasElement* _canvasElement, void* _data);
 
-            IRenderizable* getRenderizable(Node* _node);
-            IRenderizable* getUpdatable(Node* _node);
+            // IRenderizable* getRenderizable(Node* _node);
+            // IRenderizable* getUpdatable(Node* _node);
 
             void forceRender();
 

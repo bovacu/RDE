@@ -30,7 +30,7 @@ namespace RDE {
 
     FORWARD_DECLARE_STRUCT(UITransform)
     struct UIAnchor {
-        FRIEND_CLASS(UITransform, UI9Slice)
+        FRIEND_CLASS(UITransform, UIImage)
 
         uint16_t anchor = Anchor::MIDDLE | Stretch::NO_STRETCH;
         Vec2F anchorPosition;
@@ -41,7 +41,7 @@ namespace RDE {
     };
 
     struct UITransform : public Transform {
-        FRIEND_CLASS(Canvas, UI, Graph, UI9Slice)
+        FRIEND_CLASS(Canvas, UI, Graph, UIImage, UIText)
 
         private:
             UIAnchor anchor;

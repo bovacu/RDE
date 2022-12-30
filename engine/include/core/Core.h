@@ -164,4 +164,6 @@ public:                                                                         
 #define FRIEND_STRUCT(...) FOR_EACH_DECLARATION(friend struct, ;, __VA_ARGS__)
 #define FORWARD_DECLARE_STRUCT(...) FOR_EACH_DECLARATION(struct, ;, __VA_ARGS__)
 
+#define SAFE_POINTER(_var, _function) if(_var) do { _var->_function; } while(0);
+
 #endif //RDE_CORE_H

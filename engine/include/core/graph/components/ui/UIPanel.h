@@ -6,6 +6,7 @@
 #define RDE_UI_PANEL_H
 
 #include "core/graph/components/ui/UI.h"
+#include "core/render/elements/IRenderizable.h"
 
 namespace RDE {
 
@@ -17,21 +18,18 @@ namespace RDE {
 
     FORWARD_DECLARE_CLASS(UIImage)
 
-    class UIPanel : public UI {
+    class UIPanel {
+
+        RENDERIZABLE_UI_BASIC_PROPERTIES()
+
         public:
-            UIImage* nineSliceSprite = nullptr;
+            UIImage* uiImage = nullptr;
 
-            UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config);
+            UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config = {});
 
-            [[nodiscard]] Vec2F getSize() const override;
+            RENDERIZABLE_UI_BASIC_METHODS()
 
-            void setInteractable(bool _interactable) override;
-            bool isInteractable() override;
-
-            void setColor(const Color& _color) override;
-            Color getColor() override;
-
-            ~UIPanel() override {  }
+            ~UIPanel() {  }
     };
 
 }

@@ -5,6 +5,7 @@
 #include "core/render/Camera.h"
 #include "core/graph/components/Transform.h"
 #include "core/Engine.h"
+#include "core/graph/components/Node.h"
 
 namespace RDE {
 

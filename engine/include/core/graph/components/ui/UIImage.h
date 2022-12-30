@@ -5,11 +5,12 @@
 #ifndef RDE_UI_IMAGE_H
 #define RDE_UI_IMAGE_H
 
-
-#include "core/graph/components/SpriteRenderer.h"
-#include "UI.h"
+#include "core/graph/components/ui/UI.h"
+#include "core/render/elements/IRenderizable.h"
 
 namespace RDE {
+
+    FORWARD_DECLARE_CLASS(Scene)
 
     enum ImageRenderingType {
         NORMAL,
@@ -26,29 +27,22 @@ namespace RDE {
         ImageRenderingType imageRenderingType = ImageRenderingType::NORMAL;
     };
 
-    class UIImage : public UI {
+    class UIImage {
+        FRIEND_CLASS(UIPanel, UIButton, UIInput, UICheckbox, UISlider)
+
         private:
-            /**
-             * @brief Texture that contains the sprite. This is the whole SpriteSheet, but it is limited by the region and
-             * only its region will be rendered.
-             */
-            Texture* texture = nullptr;
-            OpenGLVertex geometry[36];
             ImageRenderingType imageRenderingType = ImageRenderingType::NORMAL;
             bool partialRenderingInverted = false;
             float partialRenderingPercentage = 1.f;
 
-        public:
-            UIImage(Node* _node, Scene* _scene, Canvas* _canvas, const UIImageConfig& _config);
-            UIImage(Node* _node, Manager* _manager, Graph* _graph, const UIImageConfig& _config);
-            ~UIImage() override {  }
+        RENDERIZABLE_UI_BASIC_PROPERTIES()
 
-            /**
-             * @brief Sets the texture. This should be taken from the TextureAtlasManager.
-             * @return Vec2 with {width, height}.
-             * @see TextureAtlasManager
-             */
-            void setTexture(Texture* _texture) { dirty = true; texture = _texture; }
+        public:
+            UIImage(Node* _node, Scene* _scene, Canvas* _canvas, const UIImageConfig& _config = {});
+            UIImage(Node* _node, Manager* _manager, Graph* _graph, const UIImageConfig& _config = {});
+            ~UIImage() {  }
+
+            RENDERIZABLE_UI_BASIC_METHODS()
 
             /**
              * @brief Gets the path where the SpriteSheet is stored.
@@ -67,28 +61,6 @@ namespace RDE {
              * @return std::string
              */
             [[nodiscard]] std::string getTextureExtension();
-
-            /**
-             * @see IRenderizable
-             */
-            [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
-
-            /**
-             * @see IRenderizable
-             */
-            [[nodiscard]] FloatRect getRegion() const override { return texture->getRegion(); }
-
-            /**
-             * @see UI
-             * @param _interactable
-             */
-            void setInteractable(bool _interactable) override;
-
-            /**
-             * @see UI
-             * @return bool
-             */
-            bool isInteractable() override;
 
             /**
              * @brief Sets the rendering type of the UIImage. Can be any element of 'ImageRenderingType'.
@@ -138,24 +110,16 @@ namespace RDE {
             void setPartialRenderingPercentage(float _percentage);
 
             /**
-             * @brief Sets the size of the UIImage. If the rendering type is Nine-Slice, then the configuration will be
-             * applied. If it is any other type, the difference between original size and new size will be applied as
-             * extra scale. It will modify the size of the UITransform
-             * @param _size Size of the image. Will modify directly the size of the UITransform.
-             */
-            void setSize(const Vec2F& _size);
-
-            /**
              * @see IRenderizable
              */
-            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) override;
+            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform* _transform, const ViewPort* _viewport);
 
         private:
-            void calculateNormalGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
-            void calculate9SliceGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
-            void calculatePartialHGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
-            void calculatePartialVGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
-            void calculatePartialRGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport);
+            void calculateNormalGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
+            void calculate9SliceGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
+            void calculatePartialHGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
+            void calculatePartialVGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
+            void calculatePartialRGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
 
             void batchFourVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices);
             void batch9SliceVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices);

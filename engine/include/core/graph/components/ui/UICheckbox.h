@@ -6,6 +6,7 @@
 #define RDE_UI_CHECKBOX_H
 
 #include "core/graph/components/ui/UI.h"
+#include "core/render/elements/IRenderizable.h"
 
 namespace RDE {
 
@@ -25,32 +26,29 @@ namespace RDE {
         Vec2F checkboxTextOffset = { 5.f, 0 };
     };
 
-    class UICheckbox : public UI {
+    class UICheckbox {
         private:
             bool checked = false;
             UIText* textRenderer = nullptr;
             UIImage* checkboxBackgroundSprite = nullptr;
             UIImage* tickSprite = nullptr;
+            Vec2F checkboxTextOffset;
+
+            Node* textNode = nullptr;
+            Node* tickNode = nullptr;
+
+        RENDERIZABLE_UI_BASIC_PROPERTIES()
 
         public:
             MDelegate<void(bool)> onClickedCheckbox;
-            Vec2F checkboxTextOffset;
+            
 
         public:
-            UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config);
-            ~UICheckbox() override {  }
+            UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config = {});
+            ~UICheckbox() {  }
 
-            /**
-             * @see UI
-             * @param _interactable
-             */
-            void setInteractable(bool _interactable) override;
-
-            /**
-             * @see UI
-             * @return bool
-             */
-            bool isInteractable() override;
+            
+            RENDERIZABLE_UI_BASIC_METHODS()
 
             /**
              * @brief Sets the inner state as checked/unchecked, changes the tick sprite and fires 'onClickedCheckbox' callback.
@@ -63,6 +61,9 @@ namespace RDE {
              * @return
              */
             [[nodiscard]] bool isChecked() const;
+
+            Node* getTickNode();
+            Node* getTextNode();
 
         private:
             /**

@@ -331,9 +331,8 @@ namespace RDE {
                 } else if (strcmp("\033[1;32m", _init) == 0) {
                     SDL_Log("%s", _stream.str().c_str());
                 }
-
                 #elif IS_DESKTOP()
-                std::cout << _init << arg1 << _end << std::endl;
+                std::cout << arg1 << _end << std::endl;
                 #endif
             }
 
@@ -356,9 +355,8 @@ namespace RDE {
                 } else if (strcmp("\033[1;32m", _init) == 0) {
                     SDL_Log("%s", _stream.str().c_str());
                 }
-
                 #elif IS_DESKTOP()
-                std::cout << _init << arg1;
+                std::cout << arg1;
                 __printer(_init, _end, args...);
                 #endif
             }
@@ -399,7 +397,6 @@ namespace RDE {
                     } else if (strcmp("\033[1;32m", _init) == 0) {
                         SDL_Log("%s", _stream.str().c_str());
                     }
-
                     #elif IS_DESKTOP()
                     std::cout << _init << arg1 << _end << std::endl;
                     #endif
@@ -426,7 +423,6 @@ namespace RDE {
                 } else if (strcmp("\033[1;32m", _init) == 0) {
                     SDL_Log("%s", _stream.str().c_str());
                 }
-                
                 #elif IS_DESKTOP()
                 std::cout << _init << arg1;
                 __printer(_init, _end, args...);
@@ -436,27 +432,53 @@ namespace RDE {
 
             template <typename Arg1, typename... Args>
             void info(Arg1&& _arg1, Args&&... args) {
+                #if IS_WINDOWS() || IS_MOBILE()
+                std::cout << "[INFO] ";
+                __printer("", "", _arg1, args...);
+                #else
                 __printer("\033[1;m", "\033[0m", _arg1, args...);
+                #endif
             }
 
             template <typename Arg1, typename... Args>
             void warn(Arg1&& _arg1, Args&&... args) {
-                __printer("\033[1;33m", "\033[0m", _arg1, args...);
+                #if IS_WINDOWS() || IS_MOBILE()
+                std::cout << "[WARN] ";
+                __printer("", "", _arg1, args...);
+                #else
+                __printer("\033[1;m", "\033[0m", _arg1, args...);
+                #endif
             }
 
             template <typename Arg1, typename... Args>
             void error(Arg1&& _arg1, Args&&... args) {
+                #if IS_WINDOWS() || IS_MOBILE()
+                std::cout << "[ERROR] ";
+                __printer("", "", _arg1, args...);
+                #else
                 __printer("\033[1;31m", "\033[0m", _arg1, args...);
+                #endif
             }
 
             template <typename Arg1, typename... Args>
             void success(Arg1&& _arg1, Args&&... args) {
+                #if IS_WINDOWS() || IS_MOBILE()
+                std::cout << "[SUCCESS] ";
+                __printer("", "", _arg1, args...);
+                #else
                 __printer("\033[1;32m", "\033[0m", _arg1, args...);
+                #endif
+
             }
 
             template <typename Arg1, typename... Args>
             void debug(Arg1&& _arg1, Args&&... args) {
+                #if IS_WINDOWS() || IS_MOBILE()
+                std::cout << "[DEBUG] ";
+                __printer("", "", _arg1, args...);
+                #else
                 __printer("\033[1;m", "\033[0m", _arg1, args...);
+                #endif
             }
         }
         #endif

@@ -9,35 +9,9 @@
 #include "core/systems/eventSystem/ControllerEvent.h"
 #include "core/systems/eventSystem/MobileEvent.h"
 #include "core/Engine.h"
+#include "core/graph/components/Node.h"
 
 namespace RDE {
-
-    UI::UI(Node* _node, const CommonUIConfig* _config) : IRenderizable(_node) {
-        if(!_node->hasComponent<UIInteractable>()) {
-            interaction = _node->addComponent<UIInteractable>();
-        }
-
-        if(_config->stopFurtherClicks) {
-            if(!UI::node->hasComponent<CanvasEventStopper>()) {
-                UI::node->addComponent<CanvasEventStopper>();
-            }
-        } else {
-            if (UI::node->hasComponent<CanvasEventStopper>()) {
-                UI::node->removeComponent<CanvasEventStopper>();
-            }
-        }
-    }
-
-    void UI::setOriginOffset(const Vec2F& _originOffset) {
-        originOffset = _originOffset;
-        ((UITransform*)node->getTransform())->setUIDirty();
-    }
-
-    Vec2F UI::getSize() const {
-        auto* _transform = ((UITransform*)node->getTransform());
-        return { _transform->getSize().x * _transform->getScale().x, _transform->getSize().y * _transform->getScale().y };
-    }
-
 
     UIInteractable::UIInteractable(Node* _node, Manager* _manager, Graph* _graph) {}
 

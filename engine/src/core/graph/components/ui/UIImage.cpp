@@ -5,6 +5,10 @@
 #include "core/graph/components/ui/UIImage.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/Engine.h"
+#include "core/render/elements/Batch.h"
+#include "core/render/elements/IRenderizable.h"
+#include "core/graph/components/Node.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 namespace RDE {
 
@@ -12,17 +16,17 @@ namespace RDE {
     UIImage::UIImage(Node* _node, Scene* _scene, Canvas* _canvas, const UIImageConfig& _config) :
     UIImage(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
 
-    UIImage::UIImage(Node* _node, Manager* _manager, Graph* _graph, const UIImageConfig& _config) : UI(_node, &_config) {
-        shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
-        IRenderizable::batchPriority = BatchPriority::SpritePriority;
+    UIImage::UIImage(Node* _node, Manager* _manager, Graph* _graph, const UIImageConfig& _config) {
 
-        texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "sprite") : _config.texture;
+        RENDERIZABLE_UI_BASIC_PROPERTIES_INITIALIZATION(36, SPRITE_RENDERER_SHADER, BatchPriority::SpritePriority)
+
+        data.RenderizableInnerData.texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "sprite") : _config.texture;
         setColor(_config.color);
 
-        ((UITransform*)node->getTransform())->setSize(_config.size == -1 ? texture->getSize() : _config.size);
+        ((UITransform*)node->getTransform())->setSize(_config.size == -1 ? data.RenderizableInnerData.texture->getSize() : _config.size);
 
         imageRenderingType = _config.imageRenderingType;
-        if(imageRenderingType == ImageRenderingType::NINE_SLICE && !texture->nineSlice.isEnabled()) {
+        if(imageRenderingType == ImageRenderingType::NINE_SLICE && !data.RenderizableInnerData.texture->nineSlice.isEnabled()) {
             Util::Log::warn("UIImage cannot be rendered as 9Slice as the texture is not configured like so.");
             imageRenderingType = ImageRenderingType::NORMAL;
             return;
@@ -31,64 +35,67 @@ namespace RDE {
         auto [_transformMat, _] = _node->getTransform()->localToWorld();
         switch (imageRenderingType) {
             case NORMAL:
-                calculateNormalGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
+                calculateNormalGeometry(_transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
             case NINE_SLICE:
-                calculate9SliceGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
+                calculate9SliceGeometry(_transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
             case PARTIAL_VERTICAL:
-                calculatePartialVGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
+                calculatePartialVGeometry(_transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
             case PARTIAL_HORIZONTAL:
-                calculatePartialHGeometry(_transformMat, *_node->getTransform(), *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
+                calculatePartialHGeometry(_transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
             case PARTIAL_RADIAL:
-                calculatePartialRGeometry(_transformMat, *_node->getTransform(),
-                                          *_manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
+                calculatePartialRGeometry(_transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport()); break;
         }
     }
 
+
+    RENDERIZABLE_UI_BASIC_METHODS_IMPL(UIImage, 
+        ((UITransform*)node->getTransform())->getSize().x * ((UITransform*)node->getTransform())->getScale().x, 
+        ((UITransform*)node->getTransform())->getSize().y * ((UITransform*)node->getTransform())->getScale().y,
+        {
+            ((UITransform*)node->getTransform())->setSize({ Util::Math::clampF(_size.x, 0, FLT_MAX), Util::Math::clampF(_size.y, 0, FLT_MAX) });
+        })
+
+
     std::string UIImage::getTexturePath() {
-        return texture->getPath();
+        return data.RenderizableInnerData.texture->getPath();
     }
 
     std::string UIImage::getTextureName() {
-        return Util::String::getFileNameFromPath(texture->getPath());
+        return Util::String::getFileNameFromPath(data.RenderizableInnerData.texture->getPath());
     }
 
     std::string UIImage::getTextureExtension() {
-        return Util::String::getFileExtension(texture->getPath());
+        return Util::String::getFileExtension(data.RenderizableInnerData.texture->getPath());
     }
 
     void UIImage::setImageRenderingType(ImageRenderingType _imageRenderingType) {
-        if(_imageRenderingType == ImageRenderingType::NINE_SLICE && !texture->nineSlice.isEnabled()) {
+        if(_imageRenderingType == ImageRenderingType::NINE_SLICE && !data.RenderizableInnerData.texture->nineSlice.isEnabled()) {
             Util::Log::warn("UIImage cannot be rendered as 9Slice as the texture is not configured like so.");
             return;
         }
 
-        for(auto& _vertex : geometry) {
+        for(auto& _vertex : data.RenderizableInnerData.vertices) {
             _vertex = {};
         }
 
         imageRenderingType = _imageRenderingType;
-        dirty = true;
+        data.RenderizableInnerData.dirty = true;
     }
 
     void UIImage::setPartialRenderingInverted(bool _inverted) {
         partialRenderingInverted = _inverted;
-        dirty = true;
+        data.RenderizableInnerData.dirty = true;
     }
 
     void UIImage::setPartialRenderingPercentage(float _percentage) {
         _percentage = Util::Math::clampF(_percentage, 0, 1);
         partialRenderingPercentage = _percentage;
-        dirty = true;
+        data.RenderizableInnerData.dirty = true;
     }
 
-    void UIImage::setSize(const Vec2F& _size) {
-        ((UITransform*)node->getTransform())->setSize({ Util::Math::clampF(_size.x, 0, FLT_MAX), Util::Math::clampF(_size.y, 0, FLT_MAX) });
-        dirty = true;
-    }
-
-    void UIImage::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
-        auto [_transformMat, _dirty] = _transform.localToWorld();
-        if(_dirty || dirty) {
+    void UIImage::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform* _transform, const ViewPort* _viewport) {
+        auto [_transformMat, _dirty] = _transform->localToWorld();
+        if(_dirty || data.RenderizableInnerData.dirty) {
             switch (imageRenderingType) {
                 case NORMAL:
                     calculateNormalGeometry(_transformMat, _transform, _viewport); break;
@@ -102,7 +109,7 @@ namespace RDE {
                     calculatePartialRGeometry(_transformMat, _transform, _viewport); break;
             }
 
-            dirty = false;
+            data.RenderizableInnerData.dirty = false;
         }
 
         switch (imageRenderingType) {
@@ -117,32 +124,24 @@ namespace RDE {
         }
     }
 
-    void UIImage::setInteractable(bool _interactable) {
-        UI::interaction->interactable = _interactable;
-    }
-
-    bool UIImage::isInteractable() {
-        return UI::interaction->interactable;
-    }
-
-    void UIImage::calculateNormalGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+    void UIImage::calculateNormalGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)&_transform;
-        auto _originOffset = UI::getOriginOffset();
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+        auto _originOffset = getOriginOffset();
+        auto _screenPos = Util::Math::worldToScreenCoordsUI(*_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
-        auto _uiSizeScale = Vec2F { _uiT->getSize().x /  texture->getSize().x, _uiT->getSize().y / texture->getSize().y };
+        auto _uiSizeScale = Vec2F { _uiT->getSize().x / data.RenderizableInnerData.texture->getSize().x, _uiT->getSize().y / data.RenderizableInnerData.texture->getSize().y };
         _transformMatrix[0][0] *= _uiSizeScale.x;
         _transformMatrix[1][1] *= _uiSizeScale.y;
 
-        Vec2F _textureOrigin = {(float)texture->getRegion().bottomLeftCorner.x, (float)texture->getRegion().bottomLeftCorner.y};
-        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
+        Vec2F _textureOrigin = {(float)data.RenderizableInnerData.texture->getRegion().bottomLeftCorner.x, (float)data.RenderizableInnerData.texture->getRegion().bottomLeftCorner.y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().y};
 
-        Vec2F _textureTileSize = {(float)texture->getRegion().size.x, (float)texture->getRegion().size.y};
-        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y};
-        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+        Vec2F _textureTileSize = {(float)data.RenderizableInnerData.texture->getRegion().size.x, (float)data.RenderizableInnerData.texture->getRegion().size.y};
+        Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().y};
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(*_viewport, _textureTileSize);
 
 
         glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -155,27 +154,28 @@ namespace RDE {
         glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y };
         glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                         , _textureOriginNorm.y + _textureTileSizeNorm.y };
 
-        glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+        glm::vec4 _color = { (float)data.RenderizableInnerData.color.r / 255.f, (float)data.RenderizableInnerData.color.g/ 255.f, 
+                             (float)data.RenderizableInnerData.color.b / 255.f, (float)data.RenderizableInnerData.color.a/ 255.f };
 
-        geometry[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-        geometry[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-        geometry[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-        geometry[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+        data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+        data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+        data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+        data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
     }
 
-    void UIImage::calculate9SliceGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+    void UIImage::calculate9SliceGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         // TODO this calculations are an absolute mess, I need to clean this up, rename variables, make it clearer and remove redundant operations, but I'm scared.
-        auto _rectsAmount = *(&texture->nineSlice.subRects + 1) - texture->nineSlice.subRects;
-        auto _originOffset = UI::getOriginOffset();
+        auto _rectsAmount = data.RenderizableInnerData.texture->nineSlice.subRects + 1 - data.RenderizableInnerData.texture->nineSlice.subRects;
+        auto _originOffset = getOriginOffset();
         auto _uiSize = ((UITransform*)node->getTransform())->getSize();
 
         for(auto _i = 0; _i < _rectsAmount; _i++) {
-            auto& _subTextureRegion = texture->nineSlice.subRects[_i];
+            auto& _subTextureRegion = data.RenderizableInnerData.texture->nineSlice.subRects[_i];
 
             float _distortX = 1.f, _distortY = 1.f;
-            auto _spriteSize = texture->getRegion().size;
+            auto _spriteSize = data.RenderizableInnerData.texture->getRegion().size;
 
-            auto _bottomLeftCornerLocal = Vec2F { (float)(_subTextureRegion.bottomLeftCorner.x - texture->nineSlice.subRects[0].bottomLeftCorner.x), (float)(_subTextureRegion.bottomLeftCorner.y - texture->nineSlice.subRects[0].bottomLeftCorner.y) };
+            auto _bottomLeftCornerLocal = Vec2F { (float)(_subTextureRegion.bottomLeftCorner.x - data.RenderizableInnerData.texture->nineSlice.subRects[0].bottomLeftCorner.x), (float)(_subTextureRegion.bottomLeftCorner.y - data.RenderizableInnerData.texture->nineSlice.subRects[0].bottomLeftCorner.y) };
             Vec2F _position = { -(float)_spriteSize.x / 2.f + (float)_bottomLeftCornerLocal.x + (float)_subTextureRegion.size.x / 2.f ,
                                 -(float)((float)_spriteSize.y / 2.f - _bottomLeftCornerLocal.y) + (float)_subTextureRegion.size.y / 2.f
             };
@@ -184,38 +184,38 @@ namespace RDE {
 
             // Resize and replace cross-X elements
             if((float)_uiSize.x - (float)_spriteSize.x != 0) {
-                auto _widthOfCorners = (float) texture->nineSlice.subRects[0].size.x + (float) texture->nineSlice.subRects[2].size.x;
+                auto _widthOfCorners = (float) data.RenderizableInnerData.texture->nineSlice.subRects[0].size.x + (float) data.RenderizableInnerData.texture->nineSlice.subRects[2].size.x;
                 auto _totalDiffX = (float)_uiSize.x - _widthOfCorners;
                 _distortX = _totalDiffX / ((float)_spriteSize.x - _widthOfCorners);
                 if(_distortX < 0) _distortX = 0;
                 _scale.x *= _distortX;
 
-                auto _halfWidthOfDistortedMiddleRect = _distortX * _transform.getScale().y * (float)texture->nineSlice.subRects[1].size.x / 2.f;
-                auto _halfWidthOfOriginalMiddleRect = (float)texture->nineSlice.subRects[1].size.x / 2.f;
+                auto _halfWidthOfDistortedMiddleRect = _distortX * _transform->getScale().y * (float)data.RenderizableInnerData.texture->nineSlice.subRects[1].size.x / 2.f;
+                auto _halfWidthOfOriginalMiddleRect = (float)data.RenderizableInnerData.texture->nineSlice.subRects[1].size.x / 2.f;
                 if(_i == 0 || _i == 3 || _i == 6) _position.x -= _halfWidthOfDistortedMiddleRect - _halfWidthOfOriginalMiddleRect;
                 if(_i == 2 || _i == 5 || _i == 8) _position.x += _halfWidthOfDistortedMiddleRect - _halfWidthOfOriginalMiddleRect;
             }
 
             // Resize and replace cross-Y elements
             if((float)_uiSize.y - (float)_spriteSize.y != 0) {
-                auto _heightOfCorners = (float)texture->nineSlice.subRects[0].size.y + (float)texture->nineSlice.subRects[6].size.y;
+                auto _heightOfCorners = (float)data.RenderizableInnerData.texture->nineSlice.subRects[0].size.y + (float)data.RenderizableInnerData.texture->nineSlice.subRects[6].size.y;
                 auto _totalDiffY = (float)_uiSize.y - _heightOfCorners;
                 _distortY = _totalDiffY / ((float)_spriteSize.y - _heightOfCorners);
                 if(_distortY < 0) _distortY = 0;
                 _scale.y *= _distortY;
 
-                auto _halfHeightOfDistortedMiddleRect = _distortY * _transform.getScale().y * (float)texture->nineSlice.subRects[3].size.y / 2.f;
-                auto _halfHeightOfOriginalMiddleRect = (float)texture->nineSlice.subRects[3].size.y / 2.f;
+                auto _halfHeightOfDistortedMiddleRect = _distortY * _transform->getScale().y * (float)data.RenderizableInnerData.texture->nineSlice.subRects[3].size.y / 2.f;
+                auto _halfHeightOfOriginalMiddleRect = (float)data.RenderizableInnerData.texture->nineSlice.subRects[3].size.y / 2.f;
                 if(_i == 0 || _i == 1 || _i == 2) _position.y -= _halfHeightOfDistortedMiddleRect - _halfHeightOfOriginalMiddleRect;
                 if(_i == 6 || _i == 7 || _i == 8) _position.y += _halfHeightOfDistortedMiddleRect - _halfHeightOfOriginalMiddleRect;
             }
 
-            float _sizeOfXCorners = (float)texture->nineSlice.subRects[0].size.x + (float)texture->nineSlice.subRects[2].size.x;
+            float _sizeOfXCorners = (float)data.RenderizableInnerData.texture->nineSlice.subRects[0].size.x + (float)data.RenderizableInnerData.texture->nineSlice.subRects[2].size.x;
             float _propX = _uiSize.x / _sizeOfXCorners;
             if(_propX < 0) _propX = 0.f;
             float _toMoveX = ((float)_subTextureRegion.size.x - ((float)_subTextureRegion.size.x * _propX)) * 0.5f;
 
-            float _sizeOfYCorners = (float)texture->nineSlice.subRects[0].size.y + (float)texture->nineSlice.subRects[6].size.y;
+            float _sizeOfYCorners = (float)data.RenderizableInnerData.texture->nineSlice.subRects[0].size.y + (float)data.RenderizableInnerData.texture->nineSlice.subRects[6].size.y;
             float _propY = _uiSize.y / _sizeOfYCorners;
             if(_propY < 0) _propY = 0.f;
             float _toMoveY = ((float)_subTextureRegion.size.y - ((float)_subTextureRegion.size.y * _propY)) * 0.5f;
@@ -281,55 +281,56 @@ namespace RDE {
             _current9SliceMat = _transformMatrix * _current9SliceMat;
 
             auto _subTextureReposition = Vec2F { _originOffset.x, _originOffset.y };
-            auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
+            auto _screenPos = Util::Math::worldToScreenCoordsUI(*_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
             _current9SliceMat[3][0] = _screenPos.x;
             _current9SliceMat[3][1] = _screenPos.y;
 
 
             Vec2F _textureOrigin = {(float)_subTextureRegion.bottomLeftCorner.x, (float)_subTextureRegion.bottomLeftCorner.y};
-            Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
+            Vec2F _textureOriginNorm = {_textureOrigin.x / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().y};
 
             Vec2F _textureTileSize = {(float)_subTextureRegion.size.x, (float)_subTextureRegion.size.y};
-            Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y};
-            auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+            Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().y};
+            auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(*_viewport, _textureTileSize);
 
             glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
             glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
             glm::vec4 _topRightTextureCorner    = {  _textureTileSizeOnScreen.x,  _textureTileSizeOnScreen.y, 0.0f, 1.0f };
             glm::vec4 _topLeftTextureCorner     = { -_textureTileSizeOnScreen.x,  _textureTileSizeOnScreen.y, 0.0f, 1.0f };
 
-            glm::vec4 _color = { (float)color.r / 255.f, (float)color.g / 255.f, (float)color.b / 255.f, (float)color.a / 255.f };
+            glm::vec4 _color = { (float)data.RenderizableInnerData.color.r / 255.f, (float)data.RenderizableInnerData.color.g / 255.f,
+                                 (float)data.RenderizableInnerData.color.b / 255.f, (float)data.RenderizableInnerData.color.a / 255.f };
 
             glm::vec2 _bottomLeftTextureCoord   = { _textureOriginNorm.x                         , _textureOriginNorm.y                          };
             glm::vec2 _bottomRightTextureCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y                          };
             glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y };
             glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                         , _textureOriginNorm.y + _textureTileSizeNorm.y };
 
-            geometry[(_i * 4) + 0] = OpenGLVertex { _current9SliceMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-            geometry[(_i * 4) + 1] = OpenGLVertex { _current9SliceMat * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-            geometry[(_i * 4) + 2] = OpenGLVertex { _current9SliceMat * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-            geometry[(_i * 4) + 3] = OpenGLVertex { _current9SliceMat * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+            data.RenderizableInnerData.vertices[(_i * 4) + 0] = OpenGLVertex { _current9SliceMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+            data.RenderizableInnerData.vertices[(_i * 4) + 1] = OpenGLVertex { _current9SliceMat * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+            data.RenderizableInnerData.vertices[(_i * 4) + 2] = OpenGLVertex { _current9SliceMat * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+            data.RenderizableInnerData.vertices[(_i * 4) + 3] = OpenGLVertex { _current9SliceMat * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
         }
     }
 
-    void UIImage::calculatePartialHGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+    void UIImage::calculatePartialHGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)&_transform;
-        auto _originOffset = UI::getOriginOffset();
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+        auto _originOffset = getOriginOffset();
+        auto _screenPos = Util::Math::worldToScreenCoordsUI(*_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
-        auto _uiSizeScale = Vec2F { _uiT->getSize().x /  texture->getSize().x, _uiT->getSize().y / texture->getSize().y };
+        auto _uiSizeScale = Vec2F { _uiT->getSize().x / data.RenderizableInnerData.texture->getSize().x, _uiT->getSize().y / data.RenderizableInnerData.texture->getSize().y };
         _transformMatrix[0][0] *= _uiSizeScale.x;
         _transformMatrix[1][1] *= _uiSizeScale.y;
 
-        Vec2F _textureOrigin = {(float)texture->getRegion().bottomLeftCorner.x, (float)texture->getRegion().bottomLeftCorner.y};
-        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
+        Vec2F _textureOrigin = {(float)data.RenderizableInnerData.texture->getRegion().bottomLeftCorner.x, (float)data.RenderizableInnerData.texture->getRegion().bottomLeftCorner.y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().y};
 
-        Vec2F _textureTileSize = {(float)texture->getRegion().size.x, (float)texture->getRegion().size.y};
-        Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y };
-        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+        Vec2F _textureTileSize = {(float)data.RenderizableInnerData.texture->getRegion().size.x, (float)data.RenderizableInnerData.texture->getRegion().size.y};
+        Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().y };
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(*_viewport, _textureTileSize);
 
         auto _partialRenderCorner = _textureTileSizeOnScreen.x * (1.f - partialRenderingPercentage) * 2.f;
         auto _inv = partialRenderingInverted;
@@ -344,32 +345,33 @@ namespace RDE {
         glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x - (!_inv ? _partialRenderCoord : 0)                               , _textureOriginNorm.y + _textureTileSizeNorm.y };
         glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x + (_inv ? _textureTileSizeNorm.x - _textureTileSizeNorm.x * partialRenderingPercentage : 0), _textureOriginNorm.y + _textureTileSizeNorm.y };
 
-        glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+        glm::vec4 _color = { (float)data.RenderizableInnerData.color.r / 255.f, (float)data.RenderizableInnerData.color.g / 255.f,
+                             (float)data.RenderizableInnerData.color.b / 255.f, (float)data.RenderizableInnerData.color.a / 255.f };
 
-        geometry[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-        geometry[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-        geometry[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-        geometry[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+        data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+        data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+        data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+        data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
     }
 
-    void UIImage::calculatePartialVGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+    void UIImage::calculatePartialVGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)&_transform;
-        auto _originOffset = UI::getOriginOffset();
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+        auto _originOffset = getOriginOffset();
+        auto _screenPos = Util::Math::worldToScreenCoordsUI(*_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
-        auto _uiSizeScale = Vec2F { _uiT->getSize().x /  texture->getSize().x, _uiT->getSize().y / texture->getSize().y };
+        auto _uiSizeScale = Vec2F { _uiT->getSize().x / data.RenderizableInnerData.texture->getSize().x, _uiT->getSize().y / data.RenderizableInnerData.texture->getSize().y };
         _transformMatrix[0][0] *= _uiSizeScale.x;
         _transformMatrix[1][1] *= _uiSizeScale.y;
 
-        Vec2F _textureOrigin = {(float)texture->getRegion().bottomLeftCorner.x, (float)texture->getRegion().bottomLeftCorner.y};
-        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
+        Vec2F _textureOrigin = {(float)data.RenderizableInnerData.texture->getRegion().bottomLeftCorner.x, (float)data.RenderizableInnerData.texture->getRegion().bottomLeftCorner.y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().y};
 
-        Vec2F _textureTileSize = {(float)texture->getRegion().size.x, (float)texture->getRegion().size.y};
-        Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y };
-        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+        Vec2F _textureTileSize = {(float)data.RenderizableInnerData.texture->getRegion().size.x, (float)data.RenderizableInnerData.texture->getRegion().size.y};
+        Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().y };
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(*_viewport, _textureTileSize);
 
         auto _partialRenderCorner = _textureTileSizeOnScreen.y * (1.f - partialRenderingPercentage) * 2.f;
         auto _inv = partialRenderingInverted;
@@ -384,33 +386,34 @@ namespace RDE {
         glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y - (!_inv ? _partialRenderCoord : 0) };
         glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                         , _textureOriginNorm.y + _textureTileSizeNorm.y - (!_inv ? _partialRenderCoord : 0) };
 
-        glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+        glm::vec4 _color = { (float)data.RenderizableInnerData.color.r / 255.f, (float)data.RenderizableInnerData.color.g / 255.f,
+                             (float)data.RenderizableInnerData.color.b / 255.f, (float)data.RenderizableInnerData.color.a / 255.f };
 
-        geometry[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-        geometry[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-        geometry[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-        geometry[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+        data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+        data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+        data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+        data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
     }
 
     // TODO: inverted of Radial Geometry.
-    void UIImage::calculatePartialRGeometry(glm::mat4& _transformMatrix, Transform& _transform, const ViewPort& _viewport) {
+    void UIImage::calculatePartialRGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)&_transform;
-        auto _originOffset = UI::getOriginOffset();
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+        auto _originOffset = getOriginOffset();
+        auto _screenPos = Util::Math::worldToScreenCoordsUI(*_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
-        auto _uiSizeScale = Vec2F { _uiT->getSize().x /  texture->getSize().x, _uiT->getSize().y / texture->getSize().y };
+        auto _uiSizeScale = Vec2F { _uiT->getSize().x / data.RenderizableInnerData.texture->getSize().x, _uiT->getSize().y / data.RenderizableInnerData.texture->getSize().y };
         _transformMatrix[0][0] *= _uiSizeScale.x;
         _transformMatrix[1][1] *= _uiSizeScale.y;
 
-        Vec2F _textureOrigin = {(float)texture->getRegion().bottomLeftCorner.x, (float)texture->getRegion().bottomLeftCorner.y};
-        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)texture->getSpriteSheetSize().x, _textureOrigin.y / (float)texture->getSpriteSheetSize().y};
+        Vec2F _textureOrigin = {(float)data.RenderizableInnerData.texture->getRegion().bottomLeftCorner.x, (float)data.RenderizableInnerData.texture->getRegion().bottomLeftCorner.y};
+        Vec2F _textureOriginNorm = {_textureOrigin.x / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().y};
 
-        Vec2F _textureTileSize = {(float)texture->getRegion().size.x, (float)texture->getRegion().size.y};
-        Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)texture->getSpriteSheetSize().x, _textureTileSize.y / (float)texture->getSpriteSheetSize().y };
-        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+        Vec2F _textureTileSize = {(float)data.RenderizableInnerData.texture->getRegion().size.x, (float)data.RenderizableInnerData.texture->getRegion().size.y};
+        Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)data.RenderizableInnerData.texture->getSpriteSheetSize().y };
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(*_viewport, _textureTileSize);
 
         // Bottom-Right square
         if(partialRenderingPercentage > .75f) {
@@ -445,12 +448,13 @@ namespace RDE {
             glm::vec2 _BRCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x              , _textureOriginNorm.y + _v2C                          };
             glm::vec2 _TRCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x              , _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f };
 
-            glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+            glm::vec4 _color = { (float)data.RenderizableInnerData.color.r / 255.f, (float)data.RenderizableInnerData.color.g / 255.f,
+                                 (float)data.RenderizableInnerData.color.b / 255.f, (float)data.RenderizableInnerData.color.a / 255.f };
 
-            geometry[0] = OpenGLVertex {_transformMatrix * _TLCorner, _TLCoord, _color };
-            geometry[1] = OpenGLVertex {_transformMatrix * _BLCorner, _BLCoord, _color };
-            geometry[2] = OpenGLVertex {_transformMatrix * _BRCorner, _BRCoord, _color };
-            geometry[3] = OpenGLVertex {_transformMatrix * _TRCorner, _TRCoord, _color };
+            data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _TLCorner, _TLCoord, _color };
+            data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _BLCorner, _BLCoord, _color };
+            data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _BRCorner, _BRCoord, _color };
+            data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _TRCorner, _TRCoord, _color };
         }
 
         // Top-Right square
@@ -488,12 +492,13 @@ namespace RDE {
             glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x - _v2C, _textureOriginNorm.y + _textureTileSizeNorm.y               };
             glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f, _textureOriginNorm.y + _textureTileSizeNorm.y               };
 
-            glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+            glm::vec4 _color = { (float)data.RenderizableInnerData.color.r / 255.f, (float)data.RenderizableInnerData.color.g / 255.f,
+                                 (float)data.RenderizableInnerData.color.b / 255.f, (float)data.RenderizableInnerData.color.a / 255.f };
 
-            geometry[4] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-            geometry[5] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-            geometry[6] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-            geometry[7] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+            data.RenderizableInnerData.vertices[4] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+            data.RenderizableInnerData.vertices[5] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+            data.RenderizableInnerData.vertices[6] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+            data.RenderizableInnerData.vertices[7] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
         }
 
         // Top-Left square
@@ -530,12 +535,13 @@ namespace RDE {
             glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x                                       , _textureOriginNorm.y + _textureTileSizeNorm.y - _v2C };
             glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                                       , _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f };
 
-            glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+            glm::vec4 _color = { (float)data.RenderizableInnerData.color.r / 255.f, (float)data.RenderizableInnerData.color.g / 255.f,
+                                 (float)data.RenderizableInnerData.color.b / 255.f, (float)data.RenderizableInnerData.color.a / 255.f };
 
-            geometry[8]  = OpenGLVertex { _transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-            geometry[9]  = OpenGLVertex { _transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-            geometry[10] = OpenGLVertex { _transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-            geometry[11] = OpenGLVertex { _transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+            data.RenderizableInnerData.vertices[8]  = OpenGLVertex { _transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+            data.RenderizableInnerData.vertices[9]  = OpenGLVertex { _transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+            data.RenderizableInnerData.vertices[10] = OpenGLVertex { _transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+            data.RenderizableInnerData.vertices[11] = OpenGLVertex { _transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
         }
 
         // Bottom-Left square
@@ -572,22 +578,23 @@ namespace RDE {
             glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _v2C                         , _textureOriginNorm.y                                        };
             glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f, _textureOriginNorm.y                                        };
 
-            glm::vec4 _color = { (float)color.r / 255.f, (float)color.g/ 255.f,(float)color.b/ 255.f, (float)color.a/ 255.f };
+            glm::vec4 _color = { (float)data.RenderizableInnerData.color.r / 255.f, (float)data.RenderizableInnerData.color.g / 255.f, 
+                                 (float)data.RenderizableInnerData.color.b / 255.f, (float)data.RenderizableInnerData.color.a / 255.f };
 
-            geometry[12] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-            geometry[13] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-            geometry[14] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-            geometry[15] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+            data.RenderizableInnerData.vertices[12] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
+            data.RenderizableInnerData.vertices[13] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
+            data.RenderizableInnerData.vertices[14] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
+            data.RenderizableInnerData.vertices[15] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
         }
     }
 
     void UIImage::batchFourVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices) {
         auto _vertexCount = _vertices.size();
 
-        _vertices.emplace_back(geometry[0]);
-        _vertices.emplace_back(geometry[1]);
-        _vertices.emplace_back(geometry[2]);
-        _vertices.emplace_back(geometry[3]);
+        _vertices.emplace_back(data.RenderizableInnerData.vertices[0]);
+        _vertices.emplace_back(data.RenderizableInnerData.vertices[1]);
+        _vertices.emplace_back(data.RenderizableInnerData.vertices[2]);
+        _vertices.emplace_back(data.RenderizableInnerData.vertices[3]);
 
         _indices.emplace_back(_vertexCount + 0);
         _indices.emplace_back(_vertexCount + 1);
@@ -602,10 +609,10 @@ namespace RDE {
         for(auto _i = 0; _i < 9; _i++) {
             auto _vertexCount = _vertices.size();
 
-            _vertices.push_back(geometry[(_i * 4) + 0]);
-            _vertices.push_back(geometry[(_i * 4) + 1]);
-            _vertices.push_back(geometry[(_i * 4) + 2]);
-            _vertices.push_back(geometry[(_i * 4) + 3]);
+            _vertices.push_back(data.RenderizableInnerData.vertices[(_i * 4) + 0]);
+            _vertices.push_back(data.RenderizableInnerData.vertices[(_i * 4) + 1]);
+            _vertices.push_back(data.RenderizableInnerData.vertices[(_i * 4) + 2]);
+            _vertices.push_back(data.RenderizableInnerData.vertices[(_i * 4) + 3]);
 
             _indices.emplace_back(_vertexCount + 0);
             _indices.emplace_back(_vertexCount + 1);
@@ -628,10 +635,10 @@ namespace RDE {
         for(auto _i = 3; _i >= _squares; _i--) {
             auto _vertexCount = _vertices.size();
 
-            _vertices.push_back(geometry[(_i * 4) + 0]);
-            _vertices.push_back(geometry[(_i * 4) + 1]);
-            _vertices.push_back(geometry[(_i * 4) + 2]);
-            _vertices.push_back(geometry[(_i * 4) + 3]);
+            _vertices.push_back(data.RenderizableInnerData.vertices[(_i * 4) + 0]);
+            _vertices.push_back(data.RenderizableInnerData.vertices[(_i * 4) + 1]);
+            _vertices.push_back(data.RenderizableInnerData.vertices[(_i * 4) + 2]);
+            _vertices.push_back(data.RenderizableInnerData.vertices[(_i * 4) + 3]);
 
             _indices.emplace_back(_vertexCount + 0);
             _indices.emplace_back(_vertexCount + 1);

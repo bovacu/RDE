@@ -4,12 +4,15 @@
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
+#include "core/render/elements/IRenderizable.h"
+#include "core/render/elements/Texture.h"
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/graph/components/DynamicSpriteRenderer.h"
 #include "core/graph/components/ui/UI.h"
+#include "core/graph/components/Node.h"
 
 namespace RDE {
     
@@ -89,8 +92,13 @@ namespace RDE {
             _renderManager.beginDraw(_camera, getComponent<Transform>(_camera->node->getID()));
             _camera->update();
             {
-                for(auto* _renderizable : renderizableTree) {
-                    _renderManager.draw(_renderizable, *_renderizable->node->getTransform());
+                for(auto [_innerData, _transform, _extraData] : renderizableTree[0]) {
+                    _renderManager.drawSpriteRenderer(*_innerData, _transform);
+                }
+
+                for(auto [_innerData, _transform, _extraData] : renderizableTree[1]) {
+                    _innerData->extraInfo = _extraData;
+                    _renderManager.drawTextRenderer(*_innerData, _transform);
                 }
             }
 
@@ -103,33 +111,32 @@ namespace RDE {
 
     void Graph::onLateUpdate(Delta _dt) {
         if(isRenderizableTreeDirty) {
-
-            renderizableTree.clear();
-
             // [0] -> SpriteRenderer
-            // [1] -> ParticleSystem
-            // [2] -> TextRenderer
-            const int RENDERIZABLES_COUNT = 3;
-            std::vector<IRenderizable*> _renderizables[RENDERIZABLES_COUNT];
+            // [1] -> DynamicSpriteRenderer
+            // [2] -> ParticleSystem
+            // [3] -> TextRenderer
+            const int RENDERIZABLES_COUNT = 4;
+
+            renderizableTree[0].clear();
+            renderizableTree[1].clear();
+
+            std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> _renderizables[RENDERIZABLES_COUNT];
             recalculateRenderizableTree(sceneRoot, _renderizables);
 
-            int _totalElementsToReserve = 0;
-            for(auto _i = 0; _i < RENDERIZABLES_COUNT; _i++) {
-                _totalElementsToReserve += (int)_renderizables[_i].size();
-            }
+            renderizableTree[0].reserve((int)_renderizables[0].size() + (int)_renderizables[1].size() + (int)_renderizables[2].size());
+            renderizableTree[1].reserve((int)_renderizables[3].size());
 
-            renderizableTree.reserve(_totalElementsToReserve);
-
-            for(auto _i = 0; _i < RENDERIZABLES_COUNT; _i++) {
-                renderizableTree.insert(renderizableTree.end(), _renderizables[_i].begin(), _renderizables[_i].end());
-            }
+            renderizableTree[0].insert(renderizableTree[0].end(), _renderizables[0].begin(), _renderizables[0].end());
+            renderizableTree[0].insert(renderizableTree[0].end(), _renderizables[1].begin(), _renderizables[1].end());
+            renderizableTree[0].insert(renderizableTree[0].end(), _renderizables[2].begin(), _renderizables[2].end());
+            renderizableTree[1].insert(renderizableTree[1].end(), _renderizables[3].begin(), _renderizables[3].end());
 
             isRenderizableTreeDirty = false;
         }
 
         registry.view<DynamicSpriteRenderer, Active>().each([](const NodeID _nodeID, DynamicSpriteRenderer& _dynamicSpriteRenderer, Active& _) {
             if(_dynamicSpriteRenderer.isEnabled()) {
-                _dynamicSpriteRenderer.texture->uploadToGPU();
+                ((CPUTexture*)_dynamicSpriteRenderer.data.texture)->uploadToGPU();
             }
         });
     }
@@ -330,25 +337,26 @@ namespace RDE {
         return registry;
     }
 
-    void Graph::recalculateRenderizableTree(Node* _node, std::vector<IRenderizable*>* _renderizables) {
+    void Graph::recalculateRenderizableTree(Node* _node, std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>>* _renderizables) {
         auto _id = _node->getID();
 
         if(!hasComponent<DisabledForRender>(_id)) {
 
             if(hasComponent<SpriteRenderer>(_id)) {
-                _renderizables[0].push_back(getComponent<SpriteRenderer>(_id));
+                _renderizables[0].emplace_back( &getComponent<SpriteRenderer>(_id)->data, _node->getTransform(), nullptr );
             }
 
             if(hasComponent<DynamicSpriteRenderer>(_id)) {
-                _renderizables[0].push_back(getComponent<DynamicSpriteRenderer>(_id));
+                _renderizables[1].emplace_back( &getComponent<DynamicSpriteRenderer>(_id)->data, _node->getTransform(), nullptr );
             }
 
             if(hasComponent<ParticleSystem>(_id)) {
-                _renderizables[1].push_back(getComponent<ParticleSystem>(_id));
+                _renderizables[2].emplace_back( &getComponent<ParticleSystem>(_id)->data, _node->getTransform(), nullptr );
             }
 
             if(hasComponent<TextRenderer>(_id)) {
-                _renderizables[2].push_back(getComponent<TextRenderer>(_id));
+                auto* _textRenderer = getComponent<TextRenderer>(_id);
+                _renderizables[3].emplace_back( &_textRenderer->data, _node->getTransform(), (void*)_textRenderer );
             }
         }
 

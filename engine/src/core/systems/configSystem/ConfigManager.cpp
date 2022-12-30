@@ -12,6 +12,7 @@
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
 #include "core/util/Functions.h"
+#include "core/graph/components/Node.h"
 
 namespace RDE {
 

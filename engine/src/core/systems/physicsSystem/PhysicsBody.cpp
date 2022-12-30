@@ -5,6 +5,7 @@
 #include "core/systems/physicsSystem/PhysicsBody.h"
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
+#include "core/graph/components/Node.h"
 
 namespace RDE {
 

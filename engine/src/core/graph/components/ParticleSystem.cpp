@@ -1,15 +1,21 @@
 // Created by borja on 31/3/22.
 
 #include "core/graph/components/ParticleSystem.h"
+#include "core/render/elements/Batch.h"
+#include "core/render/elements/IRenderizable.h"
 #include "core/util/Functions.h"
 #include "core/Engine.h"
+#include "core/graph/components/Node.h"
 
 namespace RDE {
 
     ParticleSystem::ParticleSystem(Node* _node, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig) :
     ParticleSystem(_node, &_scene->engine->manager, _scene->getMainGraph(), _particleSystemConfig) {  }
 
-    ParticleSystem::ParticleSystem(Node* _node, Manager* _manager, Graph* _graph, const ParticleSystemConfig& _particleSystemConfig)  : IRenderizable(_node) {
+    ParticleSystem::ParticleSystem(Node* _node, Manager* _manager, Graph* _graph, const ParticleSystemConfig& _particleSystemConfig) {
+
+        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(50, SPRITE_RENDERER_SHADER, BatchPriority::SpritePriority)
+
         UDelegate<ParticleData()> _allocator;
         _allocator.bind<&ParticleSystem::allocator>(this);
         particleSystemConfig = _particleSystemConfig;
@@ -23,18 +29,12 @@ namespace RDE {
             particleSystemConfig.callbacksConfig.colorInterpolationFunction.bind<&ParticleSystem::defaultColorInterpolationFunction>(this);
         }
 
-        if(shaderID == -1) {
-            shaderID = _manager->shaderManager.getShader(SPRITE_RENDERER_SHADER)->getShaderID();
-        } else {
-            shaderID = _particleSystemConfig.dataConfig.shader;
-        }
-
-        IRenderizable::batchPriority = BatchPriority::SpritePriority;
-
         if(particleSystemConfig.dataConfig.texture == nullptr) {
             particleSystemConfig.dataConfig.texture = _manager->textureManager.getSubTexture("defaultAssets", "handle");
         }
     }
+
+    RENDERIZABLE_BASIC_METHODS_IMPL(ParticleSystem, particleSystemConfig.dataConfig.texture->getSize().x, particleSystemConfig.dataConfig.texture->getSize().y)
 
     void ParticleData::reset(const ParticleSystemConfig& _particleSystemConfig, Transform* _parentTransform) {
         auto _parentPos = _parentTransform->getPosition();
@@ -96,12 +96,12 @@ namespace RDE {
         _particleData.position += glm::vec3 { _particleData.velocity.x, _particleData.velocity.y, 0.f } * (float)_dt;
     }
 
-    void ParticleSystem::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
+    void ParticleSystem::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform* _transform, const ViewPort* _viewport) {
         for (auto& _particle : usedParticles) {
             auto _vertexCount = _vertices.size();
 
-            auto [_transformMat, _dirty] = _transform.localToWorld();
-            auto _screenPos = Util::Math::worldToScreenCoords(_viewport, {_particle.position.x, _particle.position.y});
+            auto [_transformMat, _dirty] = _transform->localToWorld();
+            auto _screenPos = Util::Math::worldToScreenCoords(*_viewport, {_particle.position.x, _particle.position.y});
             _transformMat[3][0] = _screenPos.x;
             _transformMat[3][1] = _screenPos.y;
 
@@ -110,7 +110,7 @@ namespace RDE {
 
             Vec2F _textureTileSize = {(float)particleSystemConfig.dataConfig.texture->getRegion().size.x, (float)particleSystemConfig.dataConfig.texture->getRegion().size.y};
             Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)particleSystemConfig.dataConfig.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)particleSystemConfig.dataConfig.texture->getSpriteSheetSize().y};
-            auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
+            auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(*_viewport, _textureTileSize);
 
             glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
             glm::vec4 _bottomRightTextureCorner = {_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };

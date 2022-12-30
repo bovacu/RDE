@@ -5,26 +5,31 @@
 #include "core/graph/components/ui/UIText.h"
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
+#include "core/render/elements/Batch.h"
+#include "core/render/elements/IRenderizable.h"
+#include "core/graph/components/Node.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 namespace RDE {
 
     UIText::UIText(Node* _node, Scene* _scene, Canvas* _canvas, const UITextConfig& _config) :
             UIText(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
 
-    UIText::UIText(Node* _node, Manager* _manager, Graph* _graph, const UITextConfig& _config) : UI(_node, &_config) {
+    UIText::UIText(Node* _node, Manager* _manager, Graph* _graph, const UITextConfig& _config) {
+
+        RENDERIZABLE_UI_BASIC_PROPERTIES_INITIALIZATION(50, TEXT_RENDERER_SHADER, BatchPriority::TextPriority)
+
         font = _config.font == nullptr ? _manager->fontManager.getDefaultFont("MontserratRegular") : _config.font;
         innerText = _config.text;
         recalcTextDimensions(innerText);
         setColor(_config.textColor);
-        shaderID = defaultShaders[TEXT_RENDERER_SHADER];
-        texture = &font->getTexture();
-        IRenderizable::batchPriority = BatchPriority::TextPriority;
+        data.RenderizableInnerData.texture = &font->getTexture();
 
         ((UITransform*)node->getTransform())->setSize(textSize);
     }
 
-    void UIText::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) {
-        auto _originOffset = UI::getOriginOffset();
+    void UIText::drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform* _transform, const ViewPort* _viewport) {
+        auto _originOffset = getOriginOffset();
 
         auto* _atlas = font;
         auto _atlasSize = _atlas->getSize();
@@ -51,26 +56,26 @@ namespace RDE {
             for(char _char : _lineInfo.line) {
                 auto _vertexCount = _vertices.size();
 
-                float _xPos = (_x - (textSize.x) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform.getModelMatrixScale().x;
-                float _yPos = (_y + (textSize.y * 0.75f) - (float)_chars[_char].bearing.y) * _transform.getModelMatrixScale().x;
+                float _xPos = (_x - (textSize.x) + (float)_chars[_char].bearing.x + spaceBetweenChars) * _transform->getModelMatrixScale().x;
+                float _yPos = (_y + (textSize.y * 0.75f) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;
 
-                float _w = (float)_chars[_char].size.x * _transform.getModelMatrixScale().x;
-                float _h = (float)_chars[_char].size.y * _transform.getModelMatrixScale().x;
+                float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
+                float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
 
-                auto [_transformMat, _dirty] = _transform.localToWorld();
-                if(_dirty || dirty) {
-                    dirty = false;
+                auto [_transformMat, _dirty] = _transform->localToWorld();
+                if(_dirty || data.RenderizableInnerData.dirty) {
+                    data.RenderizableInnerData.dirty = false;
                 }
-                auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMat[3][0] + _originOffset.x * _transform.getModelMatrixScale().x,
-                                                                           _transformMat[3][1] + _originOffset.y  * _transform.getModelMatrixScale().y });
+                auto _screenPos = Util::Math::worldToScreenCoordsUI(*_viewport, { _transformMat[3][0] + _originOffset.x * _transform->getModelMatrixScale().x,
+                                                                           _transformMat[3][1] + _originOffset.y  * _transform->getModelMatrixScale().y });
                 _transformMat[3][0] = _screenPos.x;
                 _transformMat[3][1] = _screenPos.y;
 
-                auto _textColor = color;
+                auto _textColor = data.RenderizableInnerData.color;
                 glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
 
-                auto _positionInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _xPos, _yPos });
-                auto _sizeInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _w, _h });
+                auto _positionInScreen = Util::Math::worldToScreenSizeUI(*_viewport, { _xPos, _yPos });
+                auto _sizeInScreen = Util::Math::worldToScreenSizeUI(*_viewport, { _w, _h });
 
                 glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
                 glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };
@@ -102,18 +107,8 @@ namespace RDE {
         }
     }
 
-    void UIText::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) {
-        UI::drawAndFlush(_data, _transform, _viewport);
-    }
-
-    // TODO: implement
-    bool UIText::isInteractable() {
-        return false;
-    }
-
-    // TODO: implement
-    void UIText::setInteractable(bool _interactable) {
-
+    void UIText::drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform* _transform, const ViewPort* _viewport) {
+        
     }
 
     void UIText::setText(const std::string& _text) {
@@ -190,4 +185,6 @@ namespace RDE {
         return textSize;
     }
 
+
+    RENDERIZABLE_UI_BASIC_METHODS_IMPL(UIText, textSize.x, textSize.y, {})
 }

@@ -6,10 +6,11 @@
 #define RDE_UI_BUTTON_H
 
 #include "core/graph/components/ui/UI.h"
+#include "core/render/elements/IRenderizable.h"
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Manager, UIText, Font, UIImage)
+    FORWARD_DECLARE_CLASS(Scene, Manager, UIText, Font, UIImage)
 
     struct UIButtonConfig : CommonUIConfig {
         std::string text = "Button Text";
@@ -23,10 +24,11 @@ namespace RDE {
         Color textColor = Color::White;
     };
 
-    class UIButton : public UI {
+    class UIButton {
         private:
             UIText* textRenderer = nullptr;
             UIImage* uiImage = nullptr;
+            Node* textNode = nullptr;
 
             /**
              * @brief Those are the possible states associated with a different texture.
@@ -37,35 +39,17 @@ namespace RDE {
              */
             Texture* statesTextures[4];
 
+        RENDERIZABLE_UI_BASIC_PROPERTIES()
+
         public:
-            UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config);
-            UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config);
+            UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config = {});
+            UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config = {});
 
-            /**
-             * @see UI
-             * @param _interactable
-             */
-            void setInteractable(bool _interactable) override;
+            RENDERIZABLE_UI_BASIC_METHODS()
 
-            /**
-             * @see UI
-             * @return bool
-             */
-            bool isInteractable() override;
+            Node* getTextNode();
 
-            /**
-             * @see IRenderizable
-             * @param _interactable
-             */
-            void setColor(const Color& _color) override;
-
-            /**
-             * @see IRenderizable
-             * @return Color
-             */
-            Color getColor() override;
-
-            ~UIButton() override {  }
+            ~UIButton() {  }
 
         private:
             /**

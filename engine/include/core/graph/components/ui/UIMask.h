@@ -12,7 +12,7 @@ namespace RDE {
 
     FORWARD_DECLARE_CLASS(Node, Manager, Graph)
 
-    class UIMask : public ComponentBase {
+    class UIMask {
         private:
             Node* node;
 
@@ -23,11 +23,11 @@ namespace RDE {
             UIMask(Node* _node, Manager* _manager, Graph* _graph) : node(_node) {  }
             ~UIMask() {  }
 
-            bool isEnabled() override {
+            bool isEnabled() {
                 return !node->hasComponent<DisabledForRender>();
             }
 
-            void setEnabled(bool _enabled) override {
+            void setEnabled(bool _enabled) {
                 if(_enabled && node->hasComponent<DisabledForRender>()) {
                     node->removeComponent<DisabledForRender>();
                     return;
