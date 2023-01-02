@@ -49,7 +49,7 @@ namespace RDE {
             /**
              * @brief Engine reference.
              */
-            Engine* engine;
+            Engine* engine = nullptr;
 
         private:
             /**

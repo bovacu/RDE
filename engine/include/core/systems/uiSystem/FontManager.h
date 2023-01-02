@@ -113,7 +113,7 @@ namespace RDE {
              * @brief Freetype library.
              */
             FT_Library ftLibrary{};
-            FileManager* fileManager;
+            FileManager* fileManager = nullptr;
 
             /**
              * @brief Map FontName -> std::vector<FontHandler> because a font can have many sub-fonts with different sizes.

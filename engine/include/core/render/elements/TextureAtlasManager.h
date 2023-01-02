@@ -107,7 +107,7 @@ namespace RDE {
     class TextureAtlasManager {
         private:
             std::unordered_map<std::string, Atlas*> atlases;
-            FileManager* fileManager;
+            FileManager* fileManager = nullptr;
 
         public:
             /**

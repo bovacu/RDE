@@ -59,7 +59,7 @@ namespace RDE {
     struct PhysicsShape {
         ShapeConfig shapeConfig {};
         cpShape* shape = nullptr;
-        PhysicsShapeId id;
+        PhysicsShapeId id = 0;
     };
 
     struct PhysicsBodyConfig {

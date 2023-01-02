@@ -65,7 +65,7 @@ namespace RDE {
     };
 
     struct RollingBuffer {
-        float Span;
+        float Span = 0;
         ImVector<ImVec2> Data;
 //        RollingBuffer();
 //        void AddPoint(float x, float y);
