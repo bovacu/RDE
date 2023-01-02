@@ -10,7 +10,8 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Scene)
+    class Scene;
+    class Canvas;
 
     enum ImageRenderingType {
         NORMAL,
@@ -28,7 +29,11 @@ namespace RDE {
     };
 
     class UIImage {
-        FRIEND_CLASS(UIPanel, UIButton, UIInput, UICheckbox, UISlider)
+        friend class UIPanel;
+        friend class UIButton;
+        friend class UIInput;
+        friend class UICheckbox;
+        friend class UISlider;
 
         private:
             ImageRenderingType imageRenderingType = ImageRenderingType::NORMAL;

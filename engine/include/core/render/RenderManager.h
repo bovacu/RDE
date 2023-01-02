@@ -17,13 +17,20 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Engine)
+    class Engine;
 
     class RenderManager {
-        FRIEND_CLASS(Graph, Engine, ImGuiScene, FrameBuffer, Canvas, Manager)
+        friend class Graph;
+        friend class Engine;
+        friend class ImGuiScene;
+        friend class FrameBuffer;
+        friend class Canvas;
+        friend class Manager;
 
         // Debug
         public:
+            RenderManager() {  }
+
             void resetDebugInfo();
             int getTotalTriangles();
             std::tuple<int, int> getDrawCalls();

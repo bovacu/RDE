@@ -4,6 +4,10 @@
 
 #include "Editor.h"
 #include "core/graph/Scene.h"
+#include "core/graph/components/SpriteRenderer.h"
+#include "core/render/elements/Texture.h"
+#include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
+#include "core/util/Functions.h"
 
 #if !IS_MOBILE()
 #include "imgui.h"
@@ -159,10 +163,29 @@ namespace Editor {
 //        auto _sliderNode = getCanvases()[0]->getGraph()->createNode("Slider");
 //        slider = _sliderNode->addComponent<UISlider>(UISliderConfig {  });
 //        _sliderNode->getTransform()->setPosition(-256, 128);
+    
+
+        auto* _cpuTextureNode = getMainGraph()->createNode("CPUTextureNode");
+        _cpuTextureNode->getTransform()->setPosition({100, -100});
+        auto* _cpuTexture = new CPUTexture();
+        _cpuTexture->init(512, 512, ImageType::PNG);
+        engine->manager.renderManager.fillBackgroundCPUTexture(_cpuTexture, Color::Blue);
+        engine->manager.renderManager.drawRectangleToCPUTexture(_cpuTexture, _cpuTextureNode->getTransform(), {0, 0}, {134, 27}, Color::Purple);
+        engine->manager.renderManager.drawPointToCPUTexture(_cpuTexture, _cpuTextureNode->getTransform(), {0, 0}, Color::White);
+        _cpuTexture->uploadToGPU();
+        auto* _cpuSprite = _cpuTextureNode->addComponent<SpriteRenderer>(SpriteRendererConfig {.texture = _cpuTexture});
     }
 
     void Editor::onUpdate(Delta _dt) {
         Scene::onUpdate(_dt);
+
+        // if(engine->manager.inputManager.isKeyJustPressed(KeyCode::S)) {
+        //     Util::Graphics::takeScreenshot(engine->getWindow(), {100, -100}, {100, 100}, "C:\\Users\\vazqu\\Documents\\RDE\\screenshot.png");
+        // }
+
+        if(engine->manager.inputManager.isKeyJustPressed(KeyCode::S)) {
+            Util::Graphics::takeScreenshot(engine->getWindow(), "C:\\Users\\vazqu\\Documents\\RDE\\screenshot.png");
+        }
 
         static float _timer = 0.f;
         static int _fpsCounter = 0;
@@ -216,20 +239,33 @@ namespace Editor {
         auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
         auto _parentNode = getMainGraph()->createNode("parent");
 
-        for(int _i = 0; _i < _amount; _i++) {
-            auto _textNode = getMainGraph()->createNode("Block" + std::to_string(_i));
-            nodes.push_back(_textNode->getID());
-            _textNode->getTransform()->setPosition(_r.randomf(-engine->getWindow().getWidth() * 0.5f, engine->getWindow().getWidth() * 0.5f), _r.randomf(-engine->getWindow().getHeight() * 0.5f, engine->getWindow().getHeight() * 0.5f));
-            _textNode->getTransform()->setRotation(45);
-            auto* _sprite = _textNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
-                .texture = _texture
-            });
-            auto _pos = _textNode->getTransform()->getPosition();
-            // if((_pos.x > engine->getWindow().getWidth() * 0.5f || _pos.x < -engine->getWindow().getWidth() * 0.5f) ||
-            //    (_pos.y > engine->getWindow().getHeight() * 0.5f || -_pos.y < -engine->getWindow().getHeight() * 0.5f)) {
-            //     _sprite->node->setActive(false);
-            // }
-            getMainGraph()->setParent(_textNode, _parentNode);
+        // for(int _i = 0; _i < _amount; _i++) {
+        //     auto _textNode = getMainGraph()->createNode("Block" + std::to_string(_i));
+        //     nodes.push_back(_textNode->getID());
+        //     _textNode->getTransform()->setPosition(_r.randomf(-engine->getWindow().getWidth() * 0.5f, engine->getWindow().getWidth() * 0.5f), _r.randomf(-engine->getWindow().getHeight() * 0.5f, engine->getWindow().getHeight() * 0.5f));
+        //     _textNode->getTransform()->setRotation(45);
+        //     auto* _sprite = _textNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
+        //         .texture = _texture
+        //     });
+        //     auto _pos = _textNode->getTransform()->getPosition();
+        //     // if((_pos.x > engine->getWindow().getWidth() * 0.5f || _pos.x < -engine->getWindow().getWidth() * 0.5f) ||
+        //     //    (_pos.y > engine->getWindow().getHeight() * 0.5f || -_pos.y < -engine->getWindow().getHeight() * 0.5f)) {
+        //     //     _sprite->node->setActive(false);
+        //     // }
+        //     getMainGraph()->setParent(_textNode, _parentNode);
+        // }
+        
+        for(auto _y = 0; _y <= engine->getWindow().getHeight() / _texture->getSize().y;  _y++) {
+            for(auto _x = 0; _x <= engine->getWindow().getWidth() / _texture->getSize().x;  _x++) {
+                auto _textNode = getMainGraph()->createNode("Block" + std::to_string(_x + _y));
+                nodes.push_back(_textNode->getID());
+                _textNode->getTransform()->setPosition({-engine->getWindow().getWidth() * 0.5f + _texture->getSize().x * _x, engine->getWindow().getHeight() * 0.5f - _texture->getSize().y *_y});
+                auto* _sprite = _textNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
+                    .texture = _texture,
+                    .color = Color(_r.randomi(0, 255), _r.randomi(0, 255), _r.randomi(0, 255), 255)
+                });
+                auto _pos = _textNode->getTransform()->getPosition();
+            }
         }
     }
 

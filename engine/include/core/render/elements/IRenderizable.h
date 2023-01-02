@@ -13,11 +13,13 @@
 #include "core/util/Color.h"
 #include "core/util/Vec.h"
 #include <vector>
+#include "core/render/elements/Batch.h"
 
 namespace RDE {
 
-    FORWARD_DECLARE_STRUCT(OpenGLVertex)
-    FORWARD_DECLARE_CLASS(IViewPort, Transform)
+    struct OpenGLVertex;
+    class IViewPort;
+    class Transform;
 
     typedef GLuint TextureID;
 
@@ -106,7 +108,7 @@ namespace RDE {
 
 
     #define RENDERIZABLE_BASIC_METHODS()                    \
-    FRIEND_CLASS(Graph)                                     \
+    friend class Graph;                                     \
     [[nodiscard]] Texture* getTexture() const;              \
     void setTexture(Texture* _texture);                     \
                                                             \

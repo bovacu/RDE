@@ -31,7 +31,7 @@ namespace RDE {
         auto [_mat, _dirty] = node->getTransform()->localToWorld();
 
         if(_dirty) {
-            auto _screenCoords = Util::Math::worldToScreenCoords(*viewport, {_mat[3][0], _mat[3][1]});
+            auto _screenCoords = Util::Math::worldToScreenCoords(viewport, {_mat[3][0], _mat[3][1]});
             _mat[3][0] = _screenCoords.x;
             _mat[3][1] = _screenCoords.y;
             viewMatrix = glm::inverse(_mat);

@@ -43,11 +43,22 @@ namespace RDE {
     typedef entt::registry NodeContainer;
     #define NODE_ID_NULL entt::null
 
-    FORWARD_DECLARE_CLASS(Engine, Scene, Manager)
-    FORWARD_DECLARE_STRUCT(Node)
+    class Engine; 
+    class Scene; 
+    class Manager;
+
+    struct Node; 
+    struct RenderizableInnerData;
 
     class Graph {
-        FRIEND_CLASS(Transform, UITransform, Scene, Canvas, Node, ImGuiScene, ConfigManager, RenderizableInnerData)
+        friend class Transform;
+        friend class UITransform;
+        friend class Scene;
+        friend class Canvas;
+        friend class Node;
+        friend class ImGuiScene;
+        friend class ConfigManager;
+        friend class RenderizableInnerData;
 
         private:
             /**

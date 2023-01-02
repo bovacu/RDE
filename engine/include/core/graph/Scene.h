@@ -10,13 +10,17 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Camera, Window, Engine, Canvas);
+    class Camera;
+    class Window; 
+    class Engine;
+    class Canvas;
 
     /**
      * @brief This class represents what is rendered in the window and all its related systems.
      */
     class Scene {
-        FRIEND_CLASS(Graph, ConfigManager)
+        friend class Graph;
+        friend class ConfigManager;
 
         private:
             /**

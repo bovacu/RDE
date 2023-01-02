@@ -35,12 +35,13 @@ namespace RDE {
         bool renderToWindow = true;
     };
 
-    FORWARD_DECLARE_CLASS(Manager)
+    class Manager;
+
     /**
      * @brief This class adds final rendering effects to the whole scene.
      */
     class FrameBuffer {
-        FRIEND_CLASS(Engine)
+        friend class Engine;
 
         private:
             /**

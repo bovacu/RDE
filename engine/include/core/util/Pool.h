@@ -8,6 +8,7 @@
 #include <vector>
 #include "core/util/Delegate.h"
 #include "core/util/Functions.h"
+#include "core/Core.h"
 
 namespace RDE {
 
@@ -35,7 +36,11 @@ namespace RDE {
         pool.reserve(_initialNumberOfElements);
         for(auto _i = 0; _i < _initialNumberOfElements; _i++) {
             auto _element = _allocator();
+            #if IS_WINDOWS()
+            pool.emplace_back(_element);
+            #else
             pool.template emplace_back(_element);
+            #endif
         }
 
         currentNumberOfInstances = _initialNumberOfElements;

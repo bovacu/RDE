@@ -16,14 +16,26 @@ typedef entt::entity NodeID;
 namespace RDE {
 
 
-    FORWARD_DECLARE_CLASS(KeyEvent, Manager,Engine, EventDispatcher, Event)
+    class KeyEvent;
+    class Manager;
+    class Engine;
+    class EventDispatcher;
+    class Event;
 
     /**
      * @brief Component that every UI element that wants to interact with events on the screen must include.
      *
      */
     class UIInteractable {
-        FRIEND_CLASS(Graph, Canvas, UIImage, UIButton, UICheckbox, UIPanel, UIInput, UISlider, UIText)
+        friend class Graph;
+        friend class Canvas;
+        friend class UIImage;
+        friend class UIButton;
+        friend class UICheckbox;
+        friend class UIPanel;
+        friend class UIInput;
+        friend class UISlider;
+        friend class UIText;
 
         private:
             /**

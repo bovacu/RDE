@@ -16,8 +16,9 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_STRUCT(ParticleSystemConfig)
-    FORWARD_DECLARE_CLASS(Graph, Manager)
+    struct ParticleSystemConfig;
+    class Graph;
+    class Manager;
 
     /**
      * @brief Information about a particle.
@@ -58,7 +59,7 @@ namespace RDE {
         Texture* texture = nullptr;
         float timeToCreateNewParticleMs = 100;
         bool loop = true;
-        ShaderID shader = -1;
+        ShaderID shader = 0;
     };
 
     /**

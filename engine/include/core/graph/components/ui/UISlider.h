@@ -8,6 +8,7 @@
 #include "core/graph/components/ui/UI.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/render/elements/IRenderizable.h"
+#include "core/render/elements/Batch.h"
 
 namespace RDE {
 
@@ -24,7 +25,9 @@ namespace RDE {
         Color handleColor = Color::Disabled;
     };
 
-    FORWARD_DECLARE_CLASS(UI9Slice, UIImage)
+    class Scene;
+    class Canvas;
+    class UIImage;
 
     // TODO: Check why 2 or more sliders act weird
     class UISlider {

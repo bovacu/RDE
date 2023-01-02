@@ -10,7 +10,12 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(UIText, Font, UI9Slice, UIImage, UITransform)
+    class Scene;
+    class Canvas;
+    class UIText;
+    class Font;
+    class UIImage;
+    class UITransform;
 
     struct UICheckboxConfig : public CommonUIConfig {
         std::string text = "Checkbox text";

@@ -17,7 +17,7 @@ int main(int argc, char** argv);
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Scene)
+    class Scene;
 
     struct LocalizationConfig {
         /**

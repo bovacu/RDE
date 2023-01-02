@@ -16,7 +16,12 @@ typedef entt::entity NodeID;
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Manager, Graph, Scene, Canvas, Node)
+    class Manager; 
+    class Graph;
+    class Scene;
+    class Canvas;
+
+    struct Node;
 
     struct SpriteRendererConfig {
         Texture* texture = nullptr;
@@ -29,7 +34,10 @@ namespace RDE {
      */
     class SpriteRenderer {
 
-        FRIEND_CLASS(UICheckbox, UIButton, UIInput, UISlider)
+        friend class UICheckbox;
+        friend class UIButton;
+        friend class UIInput;
+        friend class UISlider;
 
         RENDERIZABLE_BASIC_PROPERTIES()
 

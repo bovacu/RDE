@@ -16,19 +16,20 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Engine)
+    class Engine;
 
     /**
      * @brief This is the class in charge of sending the data that needs to be rendered to the GPU.
      * It has a special function for each type of different complex geometry.
      */
     class SpriteBatch {
-        FRIEND_CLASS(Batch, RenderManager)
+        friend class Batch;
+        friend class RenderManager;
         /**
          * @brief This class is like a batch but specific for rendering debug elements, such as lines, shapes..
          */
         class Debug {
-            FRIEND_CLASS(SpriteBatch)
+            friend class SpriteBatch;
 
             private:
                 /**

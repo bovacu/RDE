@@ -10,7 +10,9 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Font, UIText, UIImage, UI9Slice)
+    class Font;
+    class UIText;
+    class UIImage;
 
     struct UIInputConfig : CommonUIConfig {
         Vec2F inputSize = { 256.f, 32.f };

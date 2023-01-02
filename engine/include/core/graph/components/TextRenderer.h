@@ -13,8 +13,12 @@ typedef entt::entity NodeID;
 
 namespace RDE {
 
-    FORWARD_DECLARE_STRUCT(CharInfo)
-    FORWARD_DECLARE_CLASS(Font, Scene, Canvas, Graph, Manager)
+    struct CharInfo;
+    class Font;
+    class Scene;
+    class Canvas;
+    class Graph;
+    class Manager;
 
     struct TextRendererConfig {
         std::string text = "Hello Duck!";
@@ -28,7 +32,10 @@ namespace RDE {
      */
     class TextRenderer {
 
-        FRIEND_CLASS(UIText, UIButton, UICheckbox, UIInput)
+        friend class UIText;
+        friend class UIButton;
+        friend class UICheckbox;
+        friend class UIInput;
 
         private:
             /**

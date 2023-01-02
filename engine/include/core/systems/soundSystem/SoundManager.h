@@ -10,7 +10,7 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(SoundManager)
+    class SoundManager;
 
     /**
      * @brief Base class for different types of sounds.
@@ -42,7 +42,7 @@ namespace RDE {
      * @brief Background music.
      */
     struct Music : Sound {
-        FRIEND_CLASS(SoundManager)
+        friend class SoundManager;
         private:
             /**
              * @brief SDL music.
@@ -54,7 +54,7 @@ namespace RDE {
      * @brief Sound effects.
      */
     struct Sfx : Sound {
-        FRIEND_CLASS(SoundManager)
+        friend class SoundManager;
         public:
             /**
              * @brief Channel the sound is being played.

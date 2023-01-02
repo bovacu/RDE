@@ -9,7 +9,7 @@
 namespace RDE {
 
 	void calculateGeometryForSpriteRenderer(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform *_transform, const ViewPort *_viewport)  {
-	    auto _screenPos = Util::Math::worldToScreenCoords(*_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
+	    auto _screenPos = Util::Math::worldToScreenCoords(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
 	    _transformMatrix[3][0] = _screenPos.x;
 	    _transformMatrix[3][1] = _screenPos.y;
 
@@ -18,7 +18,7 @@ namespace RDE {
 
 	    Vec2F _textureTileSize = {(float)_data.texture->getRegion().size.x, (float)_data.texture->getRegion().size.y};
 	    Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_data.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)_data.texture->getSpriteSheetSize().y};
-	    auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(*_viewport, _textureTileSize);
+	    auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
 
 	    glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
 	    glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -110,15 +110,15 @@ namespace RDE {
                 if(_dirty || _data.dirty) {
                     _data.dirty = false;
                 }
-                auto _screenPos = Util::Math::worldToScreenCoords(*_viewport, { _transformMat[3][0], _transformMat[3][1] });
+                auto _screenPos = Util::Math::worldToScreenCoords(_viewport, { _transformMat[3][0], _transformMat[3][1] });
                 _transformMat[3][0] = _screenPos.x;
                 _transformMat[3][1] = _screenPos.y;
 
                 auto _textColor = _data.color;
                 glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
 
-                auto _positionInScreen = Util::Math::worldToScreenSize(*_viewport, { _xPos, _yPos });
-                auto _sizeInScreen = Util::Math::worldToScreenSize(*_viewport, { _w, _h });
+                auto _positionInScreen = Util::Math::worldToScreenSize(_viewport, { _xPos, _yPos });
+                auto _sizeInScreen = Util::Math::worldToScreenSize(_viewport, { _w, _h });
 
                 glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
                 glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };

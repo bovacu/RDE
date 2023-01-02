@@ -91,7 +91,7 @@ namespace RDE {
     }
 
     void CellularAutomata::step() {
-       int _buffer[map.settings.size.x][map.settings.size.y];
+       /*int _buffer[map.settings.size.x][map.settings.size.y];
 
         for (int x = 0; x < map.settings.size.x; ++x) {
             for (int y = 0; y < map.settings.size.y; ++y) {
@@ -104,7 +104,7 @@ namespace RDE {
             for (int y = 0; y < map.settings.size.y; ++y) {
                 map.data[x][y] = (float)_buffer[x][y];
             }
-        }
+        }*/
     }
 
 

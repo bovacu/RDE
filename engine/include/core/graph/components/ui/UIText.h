@@ -11,7 +11,8 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Scene)
+    class Scene;
+    class Canvas;
 
     struct UITextConfig : public CommonUIConfig {
         Font* font = nullptr;
@@ -20,7 +21,10 @@ namespace RDE {
     };
 
     class UIText {
-        FRIEND_CLASS(Canvas, UIButton, UICheckbox, UIInput)
+        friend class Canvas;
+        friend class UIButton;
+        friend class UICheckbox;
+        friend class UIInput;
 
         private:
             protected:

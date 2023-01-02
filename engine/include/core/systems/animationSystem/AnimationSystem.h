@@ -12,9 +12,11 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Manager)
+    class Manager;
 
-    FORWARD_DECLARE_STRUCT(AnimationNode)
+    struct AnimationNode;
+
+
     struct AnimationTransition {
         std::string transitionCode;
         AnimationNode* nextAnimation;

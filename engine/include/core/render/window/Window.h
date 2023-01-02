@@ -12,10 +12,11 @@ namespace RDE {
     /**
      * @brief This class represents the window of the application and has methods to modify its components and get its data.
      */
-    FORWARD_DECLARE_STRUCT(RDEConfig)
+    struct RDEConfig;
+
     class Window {
 
-        FRIEND_CLASS(WindowInput)
+        friend class WindowInput;
 
         protected:
             /**

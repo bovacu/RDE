@@ -15,12 +15,24 @@ typedef entt::entity NodeID;
 
 namespace RDE {
 
-    FORWARD_DECLARE_STRUCT(Node, Graph)
+    struct Node;
+    class Graph;
+    class Scene;
+
     /**
      * @brief Component common to every entity that tells the engine where it is, which scale it has and how much it is rotated.
      */
     class Transform {
-        FRIEND_CLASS(Graph, Camera, PhysicsBody, SpriteRenderer, DynamicSpriteRenderer, TextRenderer, UIImage, UI9Slice, UIText)
+        friend class Graph;
+        friend class Camera;
+        friend class SpriteRenderer;
+        friend class DynamicSpriteRenderer;
+        friend class TextRenderer;
+        friend class UIImage;
+        friend class UIText;
+
+        friend struct PhysicsBody;
+
         MAKE_CLASS_ITERABLE(std::vector<Transform*>, children)
 
         protected:

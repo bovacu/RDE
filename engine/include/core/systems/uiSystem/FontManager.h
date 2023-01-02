@@ -25,13 +25,15 @@ namespace RDE {
         Vec2F  offset;
     };
 
-    FORWARD_DECLARE_CLASS(FontManager)
+    class FontManager;
 
     /**
      * @brief This struct contains all the information needed to render text with this specific font.
      */
     class Font {
-        FRIEND_CLASS(FontManager)
+        
+        friend class FontManager;
+
         private:
             Texture texture;
             int width = -1;

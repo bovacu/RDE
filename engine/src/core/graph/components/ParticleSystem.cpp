@@ -101,7 +101,7 @@ namespace RDE {
             auto _vertexCount = _vertices.size();
 
             auto [_transformMat, _dirty] = _transform->localToWorld();
-            auto _screenPos = Util::Math::worldToScreenCoords(*_viewport, {_particle.position.x, _particle.position.y});
+            auto _screenPos = Util::Math::worldToScreenCoords(_viewport, {_particle.position.x, _particle.position.y});
             _transformMat[3][0] = _screenPos.x;
             _transformMat[3][1] = _screenPos.y;
 
@@ -110,7 +110,7 @@ namespace RDE {
 
             Vec2F _textureTileSize = {(float)particleSystemConfig.dataConfig.texture->getRegion().size.x, (float)particleSystemConfig.dataConfig.texture->getRegion().size.y};
             Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)particleSystemConfig.dataConfig.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)particleSystemConfig.dataConfig.texture->getSpriteSheetSize().y};
-            auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(*_viewport, _textureTileSize);
+            auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
 
             glm::vec4 _bottomLeftTextureCorner = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
             glm::vec4 _bottomRightTextureCorner = {_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };

@@ -52,7 +52,7 @@ namespace RDE {
      */
     class ECSSystem {
 
-        FRIEND_CLASS(ECSManager)
+        friend class ECSManager;
 
         private:
             /**

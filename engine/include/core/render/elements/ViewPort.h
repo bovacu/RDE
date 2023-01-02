@@ -16,7 +16,8 @@ namespace RDE {
 
     class ViewPort {
 
-        FRIEND_CLASS(Camera, Canvas)
+        friend class Camera;
+        friend class Canvas;
 
         private:
             /**

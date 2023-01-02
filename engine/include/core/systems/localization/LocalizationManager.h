@@ -64,11 +64,11 @@ namespace RDE {
         }
     };
 
-    FORWARD_DECLARE_CLASS(Engine)
+    class Engine;
 
     class LocalizationManager {
 
-        FRIEND_CLASS(Manager)
+        friend class Manager;
 
         private:
             std::unordered_map<LocalizationInfo::Language, std::unordered_map<std::string, std::string>> localizationTable;

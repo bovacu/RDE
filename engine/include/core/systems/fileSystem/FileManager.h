@@ -50,12 +50,14 @@ namespace RDE {
     typedef File<std::vector<std::string>> FileLines;
 
 
-    FORWARD_DECLARE_CLASS(FileManager)
+    class FileManager;
     /**
      * @brief This class representes a loaded file.
      */
     class FileHandler {
-        FRIEND_CLASS(FileManager)
+        
+        friend class FileManager;
+
         private:
             /**
              * @brief Raw data of the file.

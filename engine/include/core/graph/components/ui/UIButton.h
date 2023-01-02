@@ -10,7 +10,12 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Scene, Manager, UIText, Font, UIImage)
+    class Scene;
+    class Canvas; 
+    class Manager;
+    class UIText;
+    class Font;
+    class UIImage;
 
     struct UIButtonConfig : CommonUIConfig {
         std::string text = "Button Text";

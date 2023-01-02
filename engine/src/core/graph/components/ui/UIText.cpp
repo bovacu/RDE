@@ -66,7 +66,7 @@ namespace RDE {
                 if(_dirty || data.RenderizableInnerData.dirty) {
                     data.RenderizableInnerData.dirty = false;
                 }
-                auto _screenPos = Util::Math::worldToScreenCoordsUI(*_viewport, { _transformMat[3][0] + _originOffset.x * _transform->getModelMatrixScale().x,
+                auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMat[3][0] + _originOffset.x * _transform->getModelMatrixScale().x,
                                                                            _transformMat[3][1] + _originOffset.y  * _transform->getModelMatrixScale().y });
                 _transformMat[3][0] = _screenPos.x;
                 _transformMat[3][1] = _screenPos.y;
@@ -74,8 +74,8 @@ namespace RDE {
                 auto _textColor = data.RenderizableInnerData.color;
                 glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
 
-                auto _positionInScreen = Util::Math::worldToScreenSizeUI(*_viewport, { _xPos, _yPos });
-                auto _sizeInScreen = Util::Math::worldToScreenSizeUI(*_viewport, { _w, _h });
+                auto _positionInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _xPos, _yPos });
+                auto _sizeInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _w, _h });
 
                 glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
                 glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };

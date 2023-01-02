@@ -8,12 +8,13 @@
 #include "core/graph/Graph.h"
 #include "core/graph/components/Components.h"
 
-FORWARD_DECLARE_CLASS(Manager)
+class Manager;
 
 namespace RDE {
 
     struct Node {
-        FRIEND_CLASS(ImGuiScene, UISlider)
+        friend class ImGuiScene; 
+        friend class UISlider;
 
         private:
             Graph* graph = nullptr;

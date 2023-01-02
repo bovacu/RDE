@@ -9,7 +9,12 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Manager, Graph, Scene, Canvas, Node)
+    class Manager;
+    class Graph; 
+    class Scene;
+    class Canvas;
+
+    struct Node;
 
     struct DynamicSpriteRendererConfig {
         Vec2<uint> size = { 64, 64 };
@@ -19,7 +24,7 @@ namespace RDE {
 
     class DynamicSpriteRenderer {
 
-        FRIEND_CLASS(Graph)
+        friend class Graph;
 
         RENDERIZABLE_BASIC_PROPERTIES()
 

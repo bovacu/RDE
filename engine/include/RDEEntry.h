@@ -10,14 +10,19 @@
  */
 
 #include "core/Engine.h"
+#include "core/util/Functions.h"
 #if IS_WINDOWS()
 #include <io.h>
 #include <fcntl.h>
 #include <windows.h>
 #endif
 
-int main(int _argc, char** _argv) {
+struct Mystruct {
+    int a;
+    int b;
+};
 
+int main(int _argc, char** _argv) {
     // This is needed because on windows SDL2 disables the console and logs if it is not in Debug.
     #if IS_WINDOWS()
         #ifdef ENGINE_DEBUG
@@ -34,6 +39,7 @@ int main(int _argc, char** _argv) {
     _e->onRun();
     _e->destroy();
     delete _e;
+
     return EXIT_SUCCESS;
 }
 

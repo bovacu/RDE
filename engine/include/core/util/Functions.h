@@ -17,7 +17,9 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Window, CPUTexture, ViewPort)
+    class Window; 
+    class CPUTexture; 
+    class ViewPort;
 
     namespace Util {
 
@@ -25,13 +27,13 @@ namespace RDE {
         #define UTIL_MATH
         namespace Math {
 
-            Vec2F worldToScreenCoords(const ViewPort& _viewport, const Vec2F& _position);
-            Vec2F screenToWorldCoords(const ViewPort& _viewport, const Vec2F& _position);
-            Vec2F worldToScreenSize(const ViewPort& _viewport, const Vec2F& _size);
-            Vec2F worldToScreenCoordsUI(const ViewPort& _viewport, const Vec2F& _position);
-            Vec2F worldToScreenSizeUI(const ViewPort& _viewport, const Vec2F& _size);
-            void worldToScreenSize(const ViewPort& _viewport, float& _x, float& _y);
-            void screenToWorldCoords(const ViewPort& _viewport, float& _x, float& _y);
+            Vec2F worldToScreenCoords(const ViewPort* _viewport, const Vec2F& _position);
+            Vec2F screenToWorldCoords(const ViewPort* _viewport, const Vec2F& _position);
+            Vec2F worldToScreenSize(const ViewPort* _viewport, const Vec2F& _size);
+            Vec2F worldToScreenCoordsUI(const ViewPort* _viewport, const Vec2F& _position);
+            Vec2F worldToScreenSizeUI(const ViewPort* _viewport, const Vec2F& _size);
+            void worldToScreenSize(const ViewPort* _viewport, float& _x, float& _y);
+            void screenToWorldCoords(const ViewPort* _viewport, float& _x, float& _y);
 
             template<typename T>
             inline T clamp(T _value, T _minValue, T _maxValue) {

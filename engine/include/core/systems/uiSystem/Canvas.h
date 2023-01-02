@@ -13,13 +13,11 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(UI, UIInteractable)
+    class UIInteractable;
 
     struct CanvasElement {
-        RDE::Node* node = nullptr;
-        // IRenderizable* renderizable = nullptr;
+        Node* node = nullptr;
         UIInteractable* interactable = nullptr;
-        // IRenderizable* updatable = nullptr;
         int cropping = 0;
     };
 
@@ -28,7 +26,8 @@ namespace RDE {
      * A Scene can have multiple canvas.
      */
     class Canvas {
-        FRIEND_CLASS(Graph, Scene)
+        friend class Graph;
+        friend class Scene;
 
         private:
             /**

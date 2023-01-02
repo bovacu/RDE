@@ -10,7 +10,8 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Scene, Engine)
+    class Scene;
+    class Engine;
 
     /**
      * @attention All managers destroy all the resources before closing the application, it is not needed to be done by the end user.
@@ -18,7 +19,7 @@ namespace RDE {
      */
     class SceneManager {
 
-        FRIEND_CLASS(ConfigManager)
+        friend class ConfigManager;
 
         private:
             /**

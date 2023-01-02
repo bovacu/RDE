@@ -10,7 +10,10 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Node, Manager, Graph)
+    class Manager;
+    class Graph;
+
+    struct Node;
 
     class UIMask {
         private:

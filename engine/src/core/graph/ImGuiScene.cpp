@@ -675,7 +675,7 @@ namespace RDE {
         Anchor _selectedAnchor = _transform->getAnchor();
         Stretch _selectedStretch = _transform->getStretch();
 
-        CREATE_NON_DISABLEABLE_HEADER("UITransform", nullptr, {
+        CREATE_NON_DISABLEABLE_HEADER("UITransform", _transform, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
             ImGui::Text("ID: %i", (int)_transform->node->getID());
@@ -1090,7 +1090,7 @@ namespace RDE {
     }
 
     bool ImGuiScene::checkForFocus() {
-        return ImGui::IsWindowHovered() | ImGui::IsAnyItemActive() | ImGui::IsAnyItemHovered() | ImGui::IsAnyItemFocused();
+        return ImGui::IsWindowHovered() || ImGui::IsAnyItemActive() || ImGui::IsAnyItemHovered() || ImGui::IsAnyItemFocused();
     }
 
     int ImGuiScene::createID() {

@@ -11,7 +11,7 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(RenderManager)
+    class RenderManager;
 
     struct DebugOptions {
         bool showGeneralDebug = true;
@@ -41,7 +41,8 @@ namespace RDE {
     };
 
     class PhysicsManager {
-        FRIEND_CLASS(PhysicsBody, Graph)
+        friend class PhysicsBody;
+        friend class Graph;
 
         private:
             std::vector<PhysicsBody*> bodies;

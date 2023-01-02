@@ -16,7 +16,7 @@ namespace RDE {
         Color color = { 22, 29, 34, 255 };
     };
 
-    FORWARD_DECLARE_CLASS(UIImage)
+    class UIImage;
 
     class UIPanel {
 
