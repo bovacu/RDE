@@ -8,7 +8,7 @@
 
 namespace RDE {
 
-	void calculateGeometryForSpriteRenderer(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform *_transform, const ViewPort *_viewport)  {
+	void calculateGeometryForSpriteRenderer(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport)  {
 	    auto _screenPos = Util::Math::worldToScreenCoords(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
 	    _transformMatrix[3][0] = _screenPos.x;
 	    _transformMatrix[3][1] = _screenPos.y;
@@ -38,8 +38,8 @@ namespace RDE {
 	   _data.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
 	}
 
-	void drawBatchedSpriteRenderer(RenderizableInnerData& _data, Batch& _batch, Transform *_transform, const ViewPort *_viewport) {
-        auto _vertexCount = _batch.vertexBuffer.size();
+	void drawBatchedSpriteRenderer(RenderizableInnerData& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport) {
+        auto _vertexCount = _batch->vertexBuffer.size();
 
         auto [_transformMat, _dirty] = _transform->localToWorld();
         if(_dirty || _data.dirty) {
@@ -47,28 +47,28 @@ namespace RDE {
             _data.dirty = false;
         }
 
-        _batch.vertexBuffer.emplace_back(_data.vertices[0]);
-        _batch.vertexBuffer.emplace_back(_data.vertices[1]);
-        _batch.vertexBuffer.emplace_back(_data.vertices[2]);
-        _batch.vertexBuffer.emplace_back(_data.vertices[3]);
+        _batch->vertexBuffer.emplace_back(_data.vertices[0]);
+        _batch->vertexBuffer.emplace_back(_data.vertices[1]);
+        _batch->vertexBuffer.emplace_back(_data.vertices[2]);
+        _batch->vertexBuffer.emplace_back(_data.vertices[3]);
 
-        _batch.indexBuffer.emplace_back(_vertexCount + 0);
-        _batch.indexBuffer.emplace_back(_vertexCount + 1);
-        _batch.indexBuffer.emplace_back(_vertexCount + 2);
+        _batch->indexBuffer.emplace_back(_vertexCount + 0);
+        _batch->indexBuffer.emplace_back(_vertexCount + 1);
+        _batch->indexBuffer.emplace_back(_vertexCount + 2);
 
-        _batch.indexBuffer.emplace_back(_vertexCount + 2);
-        _batch.indexBuffer.emplace_back(_vertexCount + 3);
-        _batch.indexBuffer.emplace_back(_vertexCount + 0);
+        _batch->indexBuffer.emplace_back(_vertexCount + 2);
+        _batch->indexBuffer.emplace_back(_vertexCount + 3);
+        _batch->indexBuffer.emplace_back(_vertexCount + 0);
     }
 
 
 
 
-    void calculateGeometryForTextRenderer(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform *_transform, const ViewPort *_viewport) {
+    void calculateGeometryForTextRenderer(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
 
     }
 
-    void drawBatchedTextRenderer(RenderizableInnerData& _data, Batch& _batch, Transform *_transform, const ViewPort *_viewport) {
+    void drawBatchedTextRenderer(RenderizableInnerData& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport) {
     	TextRenderer* _textRenderer = (TextRenderer*)_data.extraInfo;
 
     	auto* _atlas = _textRenderer->getFont();
@@ -98,7 +98,7 @@ namespace RDE {
             }
 
             for(char _char : _lineInfo.line) {
-                auto _vertexCount = _batch.vertexBuffer.size();
+                auto _vertexCount = _batch->vertexBuffer.size();
 
                 float _xPos = (_x - (_textRenderer->getTextSize().x * _nonUIPivotX) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _transform->getModelMatrixScale().x;
                 float _yPos = (_y + (_textRenderer->getTextSize().y * _nonUIPivotY) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;
@@ -132,20 +132,20 @@ namespace RDE {
                 glm::vec2 _topLeftTextureCoord      = { _chars[_char].offset.x              , _chars[_char].offset.y + _normSize.y };
                 glm::vec2 _topRightTextureCoord     = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y + _normSize.y };
 
-                _batch.vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _color });
-                _batch.vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _color });
-                _batch.vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _color });
-                _batch.vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _color });
 
                 _x += (float)_chars[_char].advance.x;
 
-                _batch.indexBuffer.emplace_back(_vertexCount + 0);
-                _batch.indexBuffer.emplace_back(_vertexCount + 1);
-                _batch.indexBuffer.emplace_back(_vertexCount + 2);
+                _batch->indexBuffer.emplace_back(_vertexCount + 0);
+                _batch->indexBuffer.emplace_back(_vertexCount + 1);
+                _batch->indexBuffer.emplace_back(_vertexCount + 2);
 
-                _batch.indexBuffer.emplace_back(_vertexCount + 2);
-                _batch.indexBuffer.emplace_back(_vertexCount + 3);
-                _batch.indexBuffer.emplace_back(_vertexCount + 0);
+                _batch->indexBuffer.emplace_back(_vertexCount + 2);
+                _batch->indexBuffer.emplace_back(_vertexCount + 3);
+                _batch->indexBuffer.emplace_back(_vertexCount + 0);
             }
         }
     }
@@ -153,22 +153,22 @@ namespace RDE {
 
 
 
-    void calculateGeometryForUIText(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform *_transform, const ViewPort *_viewport) {
+    void calculateGeometryForUIText(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
 
     }
 
-    void drawBatchedUIText(RenderizableInnerData& _data, Batch& _batch, Transform *_transform, const ViewPort *_viewport) {
+    void drawBatchedUIText(RenderizableInnerData& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport) {
 
     }
 
 
 
 
-    void calculateGeometryForUIImage(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform *_transform, const ViewPort *_viewport) {
+    void calculateGeometryForUIImage(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
 
     }
 
-    void drawBatchedUIImage(RenderizableInnerData& _data, Batch& _batch, Transform *_transform, const ViewPort *_viewport) {
+    void drawBatchedUIImage(RenderizableInnerData& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport) {
 
     }
 

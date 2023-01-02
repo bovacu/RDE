@@ -176,14 +176,14 @@ namespace RDE {
         });
     }
 
-    Batch& SpriteBatch::getBatch(const RenderizableInnerData& _innerData) {
+    Batch* SpriteBatch::getBatch(const RenderizableInnerData& _innerData) {
         for(auto& _batch : batches) {
             if (_innerData.texture->getGLTexture()  == _batch.textureID &&
                 _innerData.layer                    == _batch.layer &&
                 _innerData.shader                   == _batch.shader->getShaderID() &&
                 _innerData.batchPriority            == _batch.priority &&
                 _batch.indexBuffer.size() + 6       < maxIndicesPerDrawCall) {
-                return _batch;
+                return &_batch;
             }
         }
 
@@ -201,18 +201,18 @@ namespace RDE {
 
         orderBatches();
 
-        return batches.back();
+        return &batches.back();
     }
 
     void SpriteBatch::drawSpriteRenderer(RenderizableInnerData& _innerData, Transform* _transform) {
-        auto _batch = getBatch(_innerData);
-         if(_batch.textureID < 0) _batch.textureID = _innerData.texture->getGLTexture();
+        auto* _batch = getBatch(_innerData);
+         if(_batch->textureID < 0) _batch->textureID = _innerData.texture->getGLTexture();
         drawBatchedSpriteRenderer(_innerData, _batch, _transform, viewport);
     }
 
     void SpriteBatch::drawTextRenderer(RenderizableInnerData& _innerData, Transform* _transform) {
-        auto _batch = getBatch(_innerData);
-         if(_batch.textureID < 0) _batch.textureID = _innerData.texture->getGLTexture();
+        auto* _batch = getBatch(_innerData);
+         if(_batch->textureID < 0) _batch->textureID = _innerData.texture->getGLTexture();
         drawBatchedTextRenderer(_innerData, _batch, _transform, viewport);
     }
 

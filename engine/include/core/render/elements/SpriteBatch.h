@@ -189,7 +189,7 @@ namespace RDE {
              * @param _priority Whether this element must be rendered after or before othe types.
              * @return Batch&
              */
-            Batch& getBatch(const RenderizableInnerData& _innerData);
+            Batch* getBatch(const RenderizableInnerData& _innerData);
 
             /**
              * @brief Orders the batches to be sent to the GPU based on some specific data, such as the texture used,
