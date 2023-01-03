@@ -2,6 +2,19 @@ from sys import platform
 import sys
 import os
 
+print("============================================================================================================")
+print("To execute the building process call this script with one of the following arguments:")
+print("     compile (compiles the project to the current platform)")
+print("     run (runs the last generated build)")
+print("     compile-run (compiles the project to the current platform and runs it)")
+print("")
+print("Additionally and in order, those are the other optional arguments:")
+print("     release/debug   (type of build)")
+print("     Ninja/MSVC      (generator for the build. MSVC has a special name for each version, so check it out)")
+print("     clang/cl/gcc    (C compiler)")
+print("     clang++/cl/g++  (C++ compiler)")
+print("============================================================================================================")
+
 def windows(args):
     build_type = "debug"
     if len(args) > 2:
@@ -157,6 +170,6 @@ def mac(args):
 if platform == "linux" or platform == "linux2":
     linux(sys.argv)
 elif platform == "darwin":
-    pass
+    mac(sys.argv)
 elif platform == "win32":
     windows(sys.argv)
