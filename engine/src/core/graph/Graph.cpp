@@ -1,6 +1,7 @@
 // Created by borja on 9/3/22.
 
 #include "core/graph/Graph.h"
+#include "core/graph/components/Components.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
@@ -318,14 +319,14 @@ namespace RDE {
         if(_active && !registry.any_of<Active>(_node->getID())) {
             registry.emplace<Active>(_node->getID(), _node, &scene->engine->manager, this);
             if(onDataChanged != nullptr) onDataChanged((void*)_node);
-            isRenderizableTreeDirty |= true;
+            isRenderizableTreeDirty = true;
             return;
         }
 
         if(!_active && registry.any_of<Active>(_node->getID())) {
             registry.remove<Active>(_node->getID());
             if(onDataChanged != nullptr) onDataChanged((void*)_node);
-            isRenderizableTreeDirty |= true;
+            isRenderizableTreeDirty = true;
         }
     }
 
@@ -340,7 +341,7 @@ namespace RDE {
     void Graph::recalculateRenderizableTree(Node* _node, std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>>* _renderizables) {
         auto _id = _node->getID();
 
-        if(!hasComponent<DisabledForRender>(_id)) {
+        if(!hasComponent<DisabledForRender>(_id) && hasComponent<Active>(_id)) {
 
             if(hasComponent<SpriteRenderer>(_id)) {
                 _renderizables[0].emplace_back( &getComponent<SpriteRenderer>(_id)->data, _node->getTransform(), nullptr );
