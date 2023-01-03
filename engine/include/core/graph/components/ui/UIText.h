@@ -60,7 +60,7 @@ namespace RDE {
 
         RENDERIZABLE_UI_BASIC_PROPERTIES()
 
-        protected:
+        public:
             /**
              * @brief Recalculates the dimensions of the new text as a rectangle.
              * @param _text the inner text.
@@ -130,8 +130,11 @@ namespace RDE {
              */
             void setSpacesBetweenChars(float _spaceBetweenChars);
 
-            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform* _transform, const ViewPort* _viewport);
-            void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform* _transform, const ViewPort* _viewport);
+            /**
+             * @brief Returns the size of the new line.
+             * @return float
+             */
+            [[nodiscard]] float getNewLineSize() const;
     };
 
 } // RDE

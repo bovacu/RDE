@@ -14,11 +14,11 @@ namespace RDE {
     class Canvas;
 
     enum ImageRenderingType {
-        NORMAL,
-        NINE_SLICE,
-        PARTIAL_VERTICAL,
-        PARTIAL_HORIZONTAL,
-        PARTIAL_RADIAL
+        NORMAL              = 0,
+        NINE_SLICE          = 1,
+        PARTIAL_VERTICAL    = 2,
+        PARTIAL_HORIZONTAL  = 3,
+        PARTIAL_RADIAL      = 4
     };
 
     struct UIImageConfig : public CommonUIConfig {
@@ -113,22 +113,6 @@ namespace RDE {
              * @param _percentage Percentage [0f, 1f]
              */
             void setPartialRenderingPercentage(float _percentage);
-
-            /**
-             * @see IRenderizable
-             */
-            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform* _transform, const ViewPort* _viewport);
-
-        private:
-            void calculateNormalGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
-            void calculate9SliceGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
-            void calculatePartialHGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
-            void calculatePartialVGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
-            void calculatePartialRGeometry(glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
-
-            void batchFourVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices);
-            void batch9SliceVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices);
-            void batchPartialCircularVertexGeometry(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices);
     };
 
 }

@@ -45,6 +45,9 @@ namespace RDE {
     struct RenderizableInnerDataUI {
         Vec2F originOffset;
         RenderizableInnerData RenderizableInnerData;
+        uint imageRenderingType = 0;
+        float partialRenderingPercentage = 1.f;
+        bool partialRenderingInverted = false;
     };
 
     struct CommonUIConfig {

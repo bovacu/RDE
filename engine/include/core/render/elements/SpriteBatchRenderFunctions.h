@@ -17,9 +17,9 @@ namespace RDE {
 
 
 
-    void calculateGeometryForUIImage(RenderizableInnerData& data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
-    void drawBatchedUIImage(RenderizableInnerData& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport);
+    void calculateGeometryForUIImage(RenderizableInnerDataUI& data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
+    void drawBatchedUIImage(RenderizableInnerDataUI& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport);
 
-    void calculateGeometryForUIText(RenderizableInnerData& data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
-    void drawBatchedUIText(RenderizableInnerData& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport);
+    void calculateGeometryForUIText(RenderizableInnerDataUI& data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport);
+    void drawBatchedUIText(RenderizableInnerDataUI& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport);
 }
