@@ -66,6 +66,8 @@ namespace RDE {
              */
             ViewPort* viewport;
 
+            bool dirty = false;
+
         public:
             Node* node;
 

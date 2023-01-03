@@ -613,12 +613,12 @@ namespace RDE {
 //            ImGui::PopID();
 
             ImGui::Text("Zoom Level");
-            float _zoomLevel[1] = {_camera->getCurrentZoomLevel()};
+            float _zoomLevel = _camera->getCurrentZoomLevel();
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(createID());
-            if(ImGui::DragFloat("##myInput", _zoomLevel, 0.5f)) {
-                _camera->setCurrentZoomLevel(_zoomLevel[0]);
+            if(ImGui::DragFloat("##myInput", &_zoomLevel, 0.5f)) {
+                _camera->setCurrentZoomLevel(_zoomLevel);
             }
             ImGui::PopID();
 

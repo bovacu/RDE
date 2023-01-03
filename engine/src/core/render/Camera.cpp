@@ -21,6 +21,7 @@ namespace RDE {
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
         size = {_width, _height};
+        dirty = true;
     }
 
     glm::mat4& Camera::getProjectionMatrix() {
@@ -30,12 +31,13 @@ namespace RDE {
     void Camera::recalculateViewMatrix() {
         auto [_mat, _dirty] = node->getTransform()->localToWorld();
 
-        if(_dirty) {
+        if(_dirty || dirty) {
             auto _screenCoords = Util::Math::worldToScreenCoords(viewport, {_mat[3][0], _mat[3][1]});
             _mat[3][0] = _screenCoords.x;
             _mat[3][1] = _screenCoords.y;
             viewMatrix = glm::inverse(_mat);
             viewProjectionMatrix = projectionMatrix * viewMatrix;
+            dirty = false;
         }
     }
 
@@ -56,6 +58,7 @@ namespace RDE {
         zoom = std::max(zoom, 0.5f);
         float _aspectRatio = viewport->getPhysicalAspectRatio();
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
+        dirty = true;
         return false;
     }
 
@@ -69,8 +72,9 @@ namespace RDE {
 
     void Camera::setCurrentZoomLevel(float _zoomLevel) {
         zoom = _zoomLevel;
-        float _aspectRatio = viewport->getPhysicalAspectRatio();
+        float _aspectRatio = viewport->getVirtualAspectRatio();
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
+        dirty = true;
     }
 
     float Camera::getZoomSpeed() const {
@@ -95,6 +99,7 @@ namespace RDE {
 
     void Camera::setCameraSize(int _width, int _height) {
         onResize(_width, _height);
+        dirty = true;
     }
 
     Vec2I Camera::getCameraSize() {
@@ -127,12 +132,12 @@ namespace RDE {
         return viewport->landscape;
     }
 
-    // TODO: implement
+    // TODO (RDE): implement
     void Camera::setEnabled(bool _enabled) {
 
     }
 
-    // TODO: implement
+    // TODO (RDE): implement
     bool Camera::isEnabled() {
         return true;
     }
