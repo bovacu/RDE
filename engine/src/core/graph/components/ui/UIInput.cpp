@@ -10,12 +10,15 @@
 #include "core/graph/components/ui/UIImage.h"
 #include "core/render/elements/Batch.h"
 #include "core/render/elements/IRenderizable.h"
+#include "core/util/Functions.h"
+#include <SDL_keyboard.h>
 
 namespace RDE {
 
     UIInput::UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config) {
-        data.RenderizableInnerData.texture = _config.inputBackgroundTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "panel") : _config.inputBackgroundTexture;
+        data.RenderizableInnerData.texture = _config.inputBackgroundTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "inputThemeDark") : _config.inputBackgroundTexture;
         data.RenderizableInnerData.color = _config.inputBackgroundColor;
+        data.RenderizableInnerData.renderizableType = RenderizableType::RT_UI_IMAGE;
 
         node = _node;
 
@@ -41,6 +44,7 @@ namespace RDE {
         uiInteractable->onInnerClickingReleased.bind<&UIInput::onMouseReleased>(this);
         uiInteractable->onInnerKeyPressed.bind<&UIInput::onKeyPressed>(this);
         uiInteractable->onInnerKeyReleased.bind<&UIInput::onKeyReleased>(this);
+        uiInteractable->onInnerTextTyped.bind<&UIInput::onTextTyping>(this);
         uiInteractable->onInnerUnfocused.bind<&UIInput::onUnfocused>(this);
 
         node->addComponent<UIMask>();
@@ -205,11 +209,7 @@ namespace RDE {
     void UIInput::onMouseClicked(MouseCode _mouseCode) {
         if(!usable()) return;
 
-        #if IS_ANDROID()
         SDL_StartTextInput();
-        #elif IS_IOS()
-        SDL_StartTextInput();
-        #endif
 
         caretSprite->setEnabled(true);
         uiInteractable->focused = true;
@@ -220,12 +220,7 @@ namespace RDE {
     void UIInput::onUnfocused() {
         if(!usable()) return;
 
-        #if IS_ANDROID()
         SDL_StopTextInput();
-        #elif IS_IOS()
-        SDL_StopTextInput();
-        #endif
-
         caretSprite->setEnabled(false);
     }
 
@@ -235,13 +230,33 @@ namespace RDE {
         updatePlaceholder();
     }
 
+    void UIInput::onTextTyping(const std::string& _text) {
+        auto _innerText = textRenderer->getText();
+        _innerText.insert(pointer, _text);
+        textRenderer->setText(_innerText);
+
+        if(pointer == _innerText.size() - 1) {
+            pointer++;
+        }
+
+        updateCaret();
+
+    }
+
     // TODO: caret is not in the right place when the text goes out of scope on the right
-    void UIInput::onKeyPressed(KeyCode _keyCode, char _char) {
+    void UIInput::onKeyPressed(KeyCode _keyCode) {
         if(!usable()) return;
 
         if(_keyCode == KeyCode::Enter || _keyCode == KeyCode::Escape) {
             uiInteractable->focused = false;
-        } else if(_keyCode == KeyCode::Delete) {
+        } else if(_keyCode == KeyCode::Left) {
+            pointer = pointer - 1 > 0 ? pointer - 1 : 0;
+            updateCaret();
+        } else if(_keyCode == KeyCode::Right) {
+            auto _textLength = textRenderer->getText().size();
+            pointer = pointer + 1 < _textLength ? pointer + 1 : (int)_textLength;
+            updateCaret();
+        }  else if(_keyCode == KeyCode::Delete) {
             updateCaret();
         } else if(_keyCode == KeyCode::Backspace) {
             if(pointer - 1 >= 0) {
@@ -251,32 +266,14 @@ namespace RDE {
                 textRenderer->setText(_text);
             }
             updateCaret();
-        } else if(_keyCode == KeyCode::Left) {
-            pointer = pointer - 1 > 0 ? pointer - 1 : 0;
-            updateCaret();
-        } else if(_keyCode == KeyCode::Right) {
-            auto _textLength = textRenderer->getText().size();
-            pointer = pointer + 1 < _textLength ? pointer + 1 : (int)_textLength;
-            updateCaret();
-        } else {
-            if(_char >= 32 && _char <= 126) {
-                auto _text = textRenderer->getText();
-                _text.insert(pointer, 1, _char);
-                textRenderer->setText(_text);
-
-                if(pointer == _text.size() - 1) {
-                    pointer++;
-                }
-
-                updateCaret();
-            }
         }
+
 
         textRenderer->setOriginOffset({ textRenderer->getTextSize().x * 0.5f, 0.f });
         updatePlaceholder();
     }
 
-    void UIInput::onKeyReleased(KeyCode _keyCode, char _char) {
+    void UIInput::onKeyReleased(KeyCode _keyCode) {
 
     }
 

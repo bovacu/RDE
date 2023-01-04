@@ -178,7 +178,7 @@ namespace RDE {
 
         if(onDataChanged != nullptr) onDataChanged((void*)_newNode);
 
-        isRenderizableTreeDirty |= true;
+        isRenderizableTreeDirty = true;
 
         return _node;
     }
@@ -215,7 +215,7 @@ namespace RDE {
     void Graph::removeNode(Node* _node) {
         remove(_node, true);
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
-        isRenderizableTreeDirty |= true;
+        isRenderizableTreeDirty = true;
     }
 
     void Graph::removeNode(const std::string& _nodeTagName) {
@@ -270,7 +270,7 @@ namespace RDE {
         _nodeTransform->setLocalMatrix(glm::inverse(_parentTransform->getLocalMatrix()) * _nodeTransform->getLocalMatrix());
 
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
-        isRenderizableTreeDirty |= true;
+        isRenderizableTreeDirty = true;
     }
 
     void Graph::remove(Node* _node, bool _delete) {
@@ -304,7 +304,7 @@ namespace RDE {
         _node->getTransform()->parentTransform = sceneRoot->getTransform();
         sceneRoot->getTransform()->children.push_back(_node->getTransform());
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
-        isRenderizableTreeDirty |= true;
+        isRenderizableTreeDirty = true;
     }
 
     void Graph::orphan(const std::string& _nodeTagName) {

@@ -24,6 +24,7 @@ namespace RDE {
         recalcTextDimensions(innerText);
         setColor(_config.textColor);
         data.RenderizableInnerData.texture = &font->getTexture();
+        data.RenderizableInnerData.renderizableType = RenderizableType::RT_UI_TEXT;
 
         ((UITransform*)node->getTransform())->setSize(textSize);
     }

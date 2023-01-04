@@ -3,6 +3,10 @@
 
 #include "core/systems/inputSystem/input/KeyboardInput.h"
 #include "core/systems/eventSystem/KeyEvent.h"
+#include "core/systems/inputSystem/input/Input.h"
+#include "core/util/Functions.h"
+#include <SDL_events.h>
+#include <stdio.h>
 
 namespace RDE {
 
@@ -11,12 +15,14 @@ namespace RDE {
         engine = _engine;
         window = _window;
 
-        UDelegate<void(SDL_Event&)> kdeDel, kueDel;
+        UDelegate<void(SDL_Event&)> kdeDel, kueDel, tteDel;
         kdeDel.bind<&KeyboardInput::onKeyDown>(this);
         kueDel.bind<&KeyboardInput::onKeyUp>(this);
+        tteDel.bind<&KeyboardInput::onTextTyped>(this);
 
         events[SystemEventEnum::KEY_DOWN_E] = kdeDel;
         events[SystemEventEnum::KEY_UP_E] = kueDel;
+        events[SystemEventEnum::KEY_TEXT_INPUT_E] = tteDel;
 
         pressedKeyboardKeys = {
                 {KeyCode::LeftControl,  0},
@@ -105,13 +111,13 @@ namespace RDE {
 
         };
 
-        ignoredEvents = { KEY_MAP_CHANGED_E, KEY_TEXT_INPUT_E, KEY_TEXT_EDITING_E };
+        ignoredEvents = { KEY_MAP_CHANGED_E, KEY_TEXT_EDITING_E };
     }
 
     void KeyboardInput::onKeyDown(SDL_Event& _event) {
         auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
 
-        KeyPressedEvent _e(_key, _event.text.text[8], _event.text.text[20], 1);
+        KeyPressedEvent _e(_key, 1);
         window->consumeEvent(_e);
 
         if(pressedKeyboardKeys[_key] == 2) return;
@@ -122,7 +128,13 @@ namespace RDE {
         auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
         pressedKeyboardKeys[_key] = 0;
 
-        KeyReleasedEvent _e(_key, _event.text.text[8], _event.text.text[20]);
+        KeyReleasedEvent _e(_key);
+        window->consumeEvent(_e);
+    }
+
+    void KeyboardInput::onTextTyped(SDL_Event& _event) {
+        TextTypedEvent _e(_event.text.text);
+        Util::Log::info(_e.text);
         window->consumeEvent(_e);
     }
 

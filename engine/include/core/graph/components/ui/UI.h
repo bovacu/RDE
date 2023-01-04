@@ -96,13 +96,19 @@ namespace RDE {
              * @brief Callback triggered when a key has just been pressed.
              *
              */
-            MDelegate<void(KeyCode, char)> onInnerKeyPressed;
+            MDelegate<void(KeyCode)> onInnerKeyPressed;
+
+            /**
+             * @brief Callback triggered when text editing mode is on and a key is pressed.
+             *
+             */
+            MDelegate<void(const std::string&)> onInnerTextTyped;
 
             /**
              * @brief Callback triggered when a key has just been released.
              *
              */
-            MDelegate<void(KeyCode, char)> onInnerKeyReleased;
+            MDelegate<void(KeyCode)> onInnerKeyReleased;
 
             /**
              * @brief Callback triggered when an element of the UI has been unfocused.
@@ -141,7 +147,7 @@ namespace RDE {
              * @brief Callback triggered when a key is pressed.
              *
              */
-            MDelegate<void(KeyCode, char)> onKeyPressed;
+            MDelegate<void(KeyCode)> onKeyPressed;
 
             /**
              * @brief Callback triggered when a gamepad button is pressed.

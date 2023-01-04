@@ -285,7 +285,7 @@ namespace RDE {
 
     void calculate9SliceGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         // TODO this calculations are an absolute mess, I need to clean this up, rename variables, make it clearer and remove redundant operations, but I'm scared.
-        auto _rectsAmount = _data.RenderizableInnerData.texture->nineSlice.subRects + 1 - _data.RenderizableInnerData.texture->nineSlice.subRects;
+        auto _rectsAmount = sizeof(_data.RenderizableInnerData.texture->nineSlice.subRects) / sizeof(IntRect);
         auto _originOffset = _data.originOffset;
         auto _uiSize = ((UITransform*)_transform)->getSize();
 

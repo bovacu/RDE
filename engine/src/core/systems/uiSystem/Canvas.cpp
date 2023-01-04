@@ -12,6 +12,10 @@
 #include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/graph/components/ui/UIMask.h"
+#include "core/graph/components/ui/UIPanel.h"
+#include "core/render/elements/IRenderizable.h"
+#include "core/util/Functions.h"
+#include "core/render/elements/SpriteBatchRenderFunctions.h"
 
 namespace RDE {
 
@@ -46,29 +50,41 @@ namespace RDE {
 
 
 
+    void Canvas::getUpdatable(Node* _node, CanvasElement* _canvasElement) {
+        if(_node->hasComponent<UISlider>()) {
+            auto* _uiSlider = _node->getComponent<UISlider>();
+            if(_uiSlider->isEnabled() && _uiSlider->node->isActive()) {
+                _canvasElement->updatableData.updatable = (void*)_node->getComponent<UISlider>();
+                _canvasElement->updatableData.updatableType = UpdatableType::UT_UI_SLIDER;
+                return;
+            }
+        }
 
-    // IRenderizable* Canvas::getUpdatable(Node* _node) {
-    //     IRenderizable* _renderizable = nullptr;
-
-    //     if(_node->hasComponent<UISlider>()) {
-    //         _renderizable = _node->getComponent<UISlider>();
-    //     }
-
-    //     if(_node->hasComponent<UIInput>()) {
-    //         _renderizable = _node->getComponent<UIInput>();
-    //     }
-
-    //     if(_renderizable != nullptr && _renderizable->isEnabled()) {
-    //         return _renderizable;
-    //     }
-
-    //     return nullptr;
-    // }
+        if(_node->hasComponent<UIInput>()) {
+            auto* _uiInput = _node->getComponent<UIInput>();
+            if(_uiInput->isEnabled() && _uiInput->node->isActive()) {
+                _canvasElement->updatableData.updatable = (void*)_node->getComponent<UIInput>();
+                _canvasElement->updatableData.updatableType = UpdatableType::UT_UI_INPUT;
+                return;                
+            }
+        }
+    }
 
     void Canvas::onUpdate(Delta _dt) {
-        // for(auto& _it : uiUpdatables) {
-        //     _it.updatable->onUpdate(_dt);
-        // }
+        for(auto& _it : uiUpdatables) {
+            switch (_it.updatableData.updatableType) {
+                case UT_NONE:
+                    break;
+                case UT_UI_INPUT: {
+                    ((UIInput*)_it.updatableData.updatable)->onUpdate(_dt);
+                    break;
+                }
+                case UT_UI_SLIDER: {
+                    ((UISlider*)_it.updatableData.updatable)->onUpdate(_dt);
+                    break;
+                }
+            }
+        }
     }
 
 
@@ -87,72 +103,108 @@ namespace RDE {
 
 
 
-    // IRenderizable* Canvas::getRenderizable(Node* _node) {
-    //     IRenderizable* _renderizable = nullptr;
+    void Canvas::getRenderizable(Node* _node, CanvasElement* _canvasElement) {
+        if(_node->hasComponent<UIImage>()) {
+            auto* _uiImage = _node->getComponent<UIImage>();
+            if(_uiImage->isEnabled() && _uiImage->node->isActive()) {
+                _uiImage->data.RenderizableInnerData.extraInfo = (void*)_uiImage;
+                _canvasElement->renderizableInnerData = &_uiImage->data;
+                return;
+            }
+        }
 
-    //     if(_node->hasComponent<UIImage>()) {
-    //         _renderizable = _node->getComponent<UIImage>();
-    //     }
-
-    //     if(_node->hasComponent<UIText>()) {
-    //         _renderizable = _node->getComponent<UIText>();
-    //     }
-
-    //     if(_renderizable != nullptr && _renderizable->isEnabled()) {
-    //         return _renderizable;
-    //     }
-
-    //     return nullptr;
-    // }
+        if(_node->hasComponent<UIText>()) {
+            auto* _uiText = _node->getComponent<UIText>();
+            if(_uiText->isEnabled() && _uiText->node->isActive()) {
+                _uiText->data.RenderizableInnerData.extraInfo = (void*)_uiText;
+                _canvasElement->renderizableInnerData = &_uiText->data;
+                return;
+            }
+        }
+    }
 
     void Canvas::batchTreeElementPre(CanvasElement* _canvasElement, void* _data) {
-        // Batch* _currentBatch = &batches.back();
+        Batch* _currentBatch = &batches.back();
 
-        // if(_canvasElement->cropping > 0) {
-        //     if(_canvasElement->node->hasComponent<UIImage>() && _canvasElement->renderizable != nullptr && _canvasElement->renderizable->isEnabled()) {
-        //         forceRender();
-        //         auto* _mask = _canvasElement->node->getComponent<UIMask>();
+        // This checks if there is a beggining on the Cropping System, for masks.
+        if(_canvasElement->cropping > 0) {
+            if(_canvasElement->node->hasComponent<UIImage>() && _canvasElement->renderizableInnerData != nullptr) {
+                forceRender();
+                auto* _mask = _canvasElement->node->getComponent<UIMask>();
 
-        //         _currentBatch = &batches.back();
+                _currentBatch = &batches.back();
 
-        //         glEnable(GL_STENCIL_TEST);
+                glEnable(GL_STENCIL_TEST);
 
-        //         glColorMask(GL_FALSE , GL_FALSE , GL_FALSE , GL_FALSE);
-        //         glStencilFunc(GL_ALWAYS , _mask->inverted ? 1 : 2, _mask->inverted ? 0xFF : ~0);
-        //         glStencilOp(GL_REPLACE , GL_REPLACE , GL_REPLACE);
+                glColorMask(GL_FALSE , GL_FALSE , GL_FALSE , GL_FALSE);
+                glStencilFunc(GL_ALWAYS , _mask->inverted ? 1 : 2, _mask->inverted ? 0xFF : ~0);
+                glStencilOp(GL_REPLACE , GL_REPLACE , GL_REPLACE);
 
-        //         auto* _renderizable = _canvasElement->node->getComponent<UIImage>();
+                auto& _data = _canvasElement->node->getComponent<UIImage>()->data;
 
-        //         if (_currentBatch->shader == nullptr || _renderizable->getTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _renderizable->shaderID || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
-        //             Batch _newBatch;
-        //             _newBatch.shader = scene->engine->manager.shaderManager.getShader(_renderizable->shaderID);
-        //             _newBatch.textureID = _renderizable->getTexture();
-        //             batches.emplace_back(_newBatch);
-        //             _currentBatch = &batches.back();
-        //         }
+                if (_currentBatch->shader == nullptr || _data.RenderizableInnerData.texture->getGLTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _data.RenderizableInnerData.shader || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
+                    Batch _newBatch;
+                    _newBatch.shader = scene->engine->manager.shaderManager.getShader(_data.RenderizableInnerData.shader);
+                    _newBatch.textureID = _data.RenderizableInnerData.texture->getGLTexture();
+                    batches.emplace_back(_newBatch);
+                    _currentBatch = &batches.back();
+                }
 
-        //         _renderizable->drawBatched(_currentBatch->vertexBuffer, _currentBatch->indexBuffer, *_renderizable->node->getTransform(), *camera->getViewport());
-        //         forceRender();
+                switch (_data.RenderizableInnerData.renderizableType) {
+                    case RT_NONE: {
+                        Util::Log::debug("In Canvas, an element is trying to be rendered with a value of renerizableType == NONE");
+                        break;
+                    }
+                    case RT_UI_IMAGE: {
+                        drawBatchedUIImage(_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
+                        break;
+                    }
+                    case RT_UI_TEXT: {
+                        drawBatchedUIText(_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
+                        break;
+                    }
+                    case RT_SPRITE:
+                    case RT_TEXT:
+                        break;
+                }
 
-        //         glColorMask( GL_TRUE , GL_TRUE , GL_TRUE , GL_TRUE);
-        //         glStencilFunc( GL_EQUAL , _mask->inverted ? 0 : 2 , _mask->inverted ? 0xFF : ~0);
-        //         glStencilOp( GL_KEEP , GL_KEEP , GL_KEEP);
-        //     }
-        // }
+                forceRender();
 
-        // if(_canvasElement->renderizable != nullptr) {
-        //     auto* _renderizable = _canvasElement->renderizable;
+                glColorMask( GL_TRUE , GL_TRUE , GL_TRUE , GL_TRUE);
+                glStencilFunc( GL_EQUAL , _mask->inverted ? 0 : 2 , _mask->inverted ? 0xFF : ~0);
+                glStencilOp( GL_KEEP , GL_KEEP , GL_KEEP);
+            }
+        }
 
-        //     if (_currentBatch->shader == nullptr || _renderizable->getTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _renderizable->shaderID || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
-        //         Batch _newBatch;
-        //         _newBatch.shader = scene->engine->manager.shaderManager.getShader(_renderizable->shaderID);
-        //         _newBatch.textureID = _renderizable->getTexture();
-        //         batches.emplace_back(_newBatch);
-        //         _currentBatch = &batches.back();
-        //     }
+        if(_canvasElement->renderizableInnerData != nullptr) {
+            auto* _data = _canvasElement->renderizableInnerData;
 
-        //     _renderizable->drawBatched(_currentBatch->vertexBuffer, _currentBatch->indexBuffer, *_renderizable->node->getTransform(), *camera->getViewport());
-        // }
+            if (_currentBatch->shader == nullptr || _data->RenderizableInnerData.texture->getGLTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _data->RenderizableInnerData.shader || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
+                Batch _newBatch;
+                _newBatch.shader = scene->engine->manager.shaderManager.getShader(_data->RenderizableInnerData.shader);
+                _newBatch.textureID = _data->RenderizableInnerData.texture->getGLTexture();
+                batches.emplace_back(_newBatch);
+                _currentBatch = &batches.back();
+            }
+
+            switch (_data->RenderizableInnerData.renderizableType) {
+                case RT_NONE: {
+                    Util::Log::debug("In Canvas, an element is trying to be rendered with a value of renerizableType == NONE");
+                    break;
+                }
+                case RT_UI_IMAGE: {
+                    drawBatchedUIImage(*_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
+                    break;
+                }
+                case RT_UI_TEXT: {
+                    drawBatchedUIText(*_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
+                    break;
+                }
+                case RT_SPRITE:
+                case RT_TEXT:
+                    break;
+            }
+        }
     }
 
     void Canvas::batchTreeElementPost(CanvasElement* _canvasElement, void* _data) {
@@ -308,40 +360,40 @@ namespace RDE {
     }
 
     void Canvas::recalculateRenderizableTree(Node* _node) {
-        // if(!_node->isActive()) {
-        //     return;
-        // }
+        if(!_node->isActive()) {
+            return;
+        }
 
-        // CanvasElement _canvasElement { _node };
+        CanvasElement _canvasElement { _node };
 
-        // if(graph.getNodeContainer().any_of<UIInteractable>(_node->getID())) {
-        //     _canvasElement.interactable = _node->getComponent<UIInteractable>();
-        //     uiInteractables.push_back(_canvasElement);
-        // }
+        if(graph.getNodeContainer().any_of<UIInteractable>(_node->getID())) {
+            _canvasElement.interactable = _node->getComponent<UIInteractable>();
+            uiInteractables.push_back(_canvasElement);
+        }
 
-        // if(graph.getNodeContainer().any_of<UIText, UIButton, UIImage, UISlider>(_node->getID())) {
-        //     _canvasElement.renderizable = getRenderizable(_node);
+        if(graph.getNodeContainer().any_of<UIText, UIButton, UIImage, UISlider, UIPanel>(_node->getID())) {
+            getRenderizable(_node, &_canvasElement);
 
-        //     if(graph.getNodeContainer().any_of<UIMask>(_node->getID()) && _node->getComponent<UIMask>()->isEnabled()) {
-        //         _canvasElement.cropping = _node->getTransform()->getEnabledChildrenCount();
-        //     }
+            if(graph.getNodeContainer().any_of<UIMask>(_node->getID()) && _node->getComponent<UIMask>()->isEnabled()) {
+                _canvasElement.cropping = _node->getTransform()->getEnabledChildrenCount();
+            }
 
-        //     if(_canvasElement.renderizable != nullptr) {
-        //         uiRenderizables.push_back(_canvasElement);
-        //     }
-        // }
+            if(_canvasElement.renderizableInnerData != nullptr) {
+                uiRenderizables.push_back(_canvasElement);
+            }
+        }
 
-        // if(graph.getNodeContainer().any_of<UISlider, UIInput>(_node->getID())) {
-        //     _canvasElement.updatable = getUpdatable(_node);
+        if(graph.getNodeContainer().any_of<UISlider, UIInput>(_node->getID())) {
+            getUpdatable(_node, &_canvasElement);
 
-        //     if(_canvasElement.updatable != nullptr) {
-        //         uiUpdatables.push_back(_canvasElement);
-        //     }
-        // }
+            if(_canvasElement.updatableData.updatable != nullptr) {
+                uiUpdatables.push_back(_canvasElement);
+            }
+        }
 
-        // for(auto* _child : _node->getTransform()->children) {
-        //     recalculateRenderizableTree(_child->node);
-        // }
+         for(auto* _child : _node->getTransform()->children) {
+             recalculateRenderizableTree(_child->node);
+         }
     }
 
     void Canvas::postRenderSync() {

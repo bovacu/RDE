@@ -89,8 +89,9 @@ namespace RDE {
             void onMouseExited();
             void onMouseClicked(MouseCode _mouseCode);
             void onMouseReleased(MouseCode _mouseCode);
-            void onKeyPressed(KeyCode _keyCode, char _char);
-            void onKeyReleased(KeyCode _keyCode, char _char);
+            void onKeyPressed(KeyCode _keyCode);
+            void onKeyReleased(KeyCode _keyCode);
+            void onTextTyping(const std::string& _text);
             void onUnfocused();
             void updatePlaceholder();
             void updateCaret();

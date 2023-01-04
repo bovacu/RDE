@@ -920,7 +920,7 @@ namespace RDE {
 
         auto _uiImage = _graph->getComponent<UIImage>(_selectedNode);
 
-        CREATE_DISABLEABLE_HEADER("UI CPUTexture", _uiImage, {
+        CREATE_DISABLEABLE_HEADER("UI Image", _uiImage, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
             ImGui::Text("Origin Offset ");

@@ -22,6 +22,7 @@ namespace RDE {
         RENDERIZABLE_UI_BASIC_PROPERTIES_INITIALIZATION(36, SPRITE_RENDERER_SHADER, BatchPriority::SpritePriority)
 
         data.RenderizableInnerData.texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "sprite") : _config.texture;
+        data.RenderizableInnerData.renderizableType = RenderizableType::RT_UI_IMAGE;
         setColor(_config.color);
 
         ((UITransform*)node->getTransform())->setSize(_config.size == -1 ? data.RenderizableInnerData.texture->getSize() : _config.size);
@@ -32,6 +33,8 @@ namespace RDE {
             imageRenderingType = ImageRenderingType::NORMAL;
             return;
         }
+
+        data.imageRenderingType = (uint)imageRenderingType;
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();
         calculateGeometryForUIImage(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
@@ -70,6 +73,7 @@ namespace RDE {
 
         imageRenderingType = _imageRenderingType;
         data.RenderizableInnerData.dirty = true;
+        data.imageRenderingType = (uint)_imageRenderingType;
     }
 
     void UIImage::setPartialRenderingInverted(bool _inverted) {

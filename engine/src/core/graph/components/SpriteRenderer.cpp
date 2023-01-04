@@ -31,6 +31,8 @@ namespace RDE {
         RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(4, SPRITE_RENDERER_SHADER, BatchPriority::SpritePriority)
 
         data.texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "sprite") : _config.texture;
+        data.renderizableType = RenderizableType::RT_SPRITE;
+        
         setColor(_config.color);
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();

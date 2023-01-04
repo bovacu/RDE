@@ -2,6 +2,7 @@
 // Created by borja on 9/5/22.
 //
 
+#include "core/Core.h"
 #include "core/graph/components/ui/UI.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/systems/eventSystem/MouseEvent.h"
@@ -23,15 +24,8 @@ namespace RDE {
         return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_uiTransform->getSize().x, (float)_uiTransform->getSize().y});
     }
 
-    static char getCorrectChar(const KeyEvent* _keyEvent) {
-        auto _modKeys = static_cast<const SDL_Keymod>(KMOD_SHIFT | KMOD_ALT | KMOD_CAPS);
-        bool _modifications = (SDL_GetModState() & _modKeys) == SDL_GetModState();
-        char _chosen = !_modifications ? _keyEvent->getChar() : _keyEvent->getAlternateChar();
-        return _chosen;
-    }
-
-    static void shouldStopEventPropagation(Event& _event, Node* _node) {
-        _event.handled = _node->hasComponent<CanvasEventStopper>() && _node->getComponent<CanvasEventStopper>()->isEnabled();
+    static void shouldStopEventPropagation(Event& _event, Node* _node, bool _forceStop = false) {
+        _event.handled = _node->hasComponent<CanvasEventStopper>() && _node->getComponent<CanvasEventStopper>()->isEnabled() || !_forceStop;
     }
 
     void UIInteractable::onEvent(Node* _node, Engine* _engine, EventDispatcher& _eventDispatcher, Event& _event) {
@@ -40,22 +34,28 @@ namespace RDE {
         }
 
         if(focused) {
-            if(_eventDispatcher.dispatchEvent<KeyPressedEvent>() && !onInnerKeyPressed.isEmpty()) {
-                shouldStopEventPropagation(_event, _node);
-                auto* _kpe = (KeyPressedEvent*)&_event;
-                onInnerKeyPressed(_kpe->getKeyCode(), getCorrectChar(_kpe));
+            if(_eventDispatcher.dispatchEvent<TextTypedEvent>() && !onInnerTextTyped.isEmpty()) {
+                shouldStopEventPropagation(_event, _node, true);
+                auto* _ttEvent = ((TextTypedEvent*)&_event);
+                onInnerTextTyped(_ttEvent->text);
             }
 
-            if(_eventDispatcher.dispatchEvent<KeyReleasedEvent>() && !onInnerKeyReleased.isEmpty()) {
+            if(_eventDispatcher.dispatchEvent<KeyPressedEvent>() && !onInnerKeyPressed.isEmpty() && !_event.handled) {
+                shouldStopEventPropagation(_event, _node);
+                auto* _kpe = (KeyPressedEvent*)&_event;
+                onInnerKeyPressed(_kpe->getKeyCode());
+            }
+
+            if(_eventDispatcher.dispatchEvent<KeyReleasedEvent>() && !onInnerKeyReleased.isEmpty() && !_event.handled) {
                 shouldStopEventPropagation(_event, _node);
                 auto* _kre = (KeyReleasedEvent*)&_event;
-                onInnerKeyReleased(_kre->getKeyCode(), getCorrectChar(_kre));
+                onInnerKeyReleased(_kre->getKeyCode());
             }
 
-            if(_eventDispatcher.dispatchEvent<KeyPressedEvent>() && !onKeyPressed.isEmpty()) {
+            if(_eventDispatcher.dispatchEvent<KeyPressedEvent>() && !onKeyPressed.isEmpty() && !_event.handled) {
                 shouldStopEventPropagation(_event, _node);
                 auto* _kpe = (KeyPressedEvent*)&_event;
-                onKeyPressed(_kpe->getKeyCode(), getCorrectChar(_kpe));
+                onKeyPressed(_kpe->getKeyCode());
                 return;
             }
         }

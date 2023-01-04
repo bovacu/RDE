@@ -17,11 +17,6 @@
 #include <windows.h>
 #endif
 
-struct Mystruct {
-    int a;
-    int b;
-};
-
 int main(int _argc, char** _argv) {
     // This is needed because on windows SDL2 disables the console and logs if it is not in Debug.
     #if IS_WINDOWS()

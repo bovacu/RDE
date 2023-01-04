@@ -21,6 +21,14 @@ namespace RDE {
     class IViewPort;
     class Transform;
 
+    enum RenderizableType {
+        RT_NONE        = 0,
+        RT_SPRITE      = 1,
+        RT_TEXT        = 2,
+        RT_UI_IMAGE    = 3,
+        RT_UI_TEXT     = 4
+    };
+
     typedef GLuint TextureID;
 
     struct DrawAndFlushData {
@@ -38,6 +46,7 @@ namespace RDE {
         std::vector<OpenGLVertex> vertices;
         bool dirty = false;
         BatchPriority batchPriority = BatchPriority::SpritePriority;
+        RenderizableType renderizableType = RenderizableType::RT_NONE;
 
         void* extraInfo = nullptr;
     };
@@ -74,6 +83,7 @@ namespace RDE {
 
 
     #define RENDERIZABLE_UI_BASIC_PROPERTIES()  \
+    friend class Canvas;                        \
     public:                                     \
         Node* node = nullptr;                   \
     private:                                    \
