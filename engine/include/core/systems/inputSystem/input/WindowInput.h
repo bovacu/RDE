@@ -63,6 +63,13 @@ namespace RDE {
             void onWindowMoved(SDL_Event& _event);
 
             /**
+            * @brief Handles when the window is changed of display. SDL does not provide a direct event for this, so we could call this
+            * 'an artifical' even, this is why the parameter doesn't match the others.
+            * @param _event int
+            */
+            void onWindowDisplayChanged(int _newWindowDisplay);
+
+            /**
             * @brief Handles when the window is minimized.
             * @param _event Event
             */
@@ -109,8 +116,6 @@ namespace RDE {
              * @param _event Event
              */
             void onWillEnterBackground(SDL_Event& _event);
-
-            void onWindowDisplayChanged(int _newWindowDisplay);
     };
 
 }

@@ -29,7 +29,7 @@ namespace RDE {
     class Canvas;
     class UIImage;
 
-    // TODO: Check why 2 or more sliders act weird
+    // TODO (RDE): Check why 2 or more sliders act weird
     class UISlider {
         private:
             bool mouseDown = false;

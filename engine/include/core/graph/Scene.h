@@ -62,6 +62,9 @@ namespace RDE {
             Engine* engine = nullptr;
 
         protected:
+            /**
+             * @brief Callback for the Scene to refresh whatever is needed if the display is changed.
+             */
             void onDisplayChanged();
 
         public:

@@ -243,7 +243,7 @@ namespace RDE {
 
     }
 
-    // TODO: caret is not in the right place when the text goes out of scope on the right
+    // TODO (RDE): caret is not in the right place when the text goes out of scope on the right
     void UIInput::onKeyPressed(KeyCode _keyCode) {
         if(!usable()) return;
 

@@ -66,12 +66,39 @@ namespace RDE {
              */
             UDelegate<bool()> shouldUpdateWindow;
 
+            /**
+             * @brief Callback invoked each time the window is moved.
+             */
             MDelegate<void(const Vec2F&)> onWindowMovedCallback;
+
+            /**
+             * @brief Callback invoked each time the window is resized.
+             */
             MDelegate<void(const Vec2I&)> onWindowResizedCallback;
+
+            /**
+             * @brief Callback invoked each time the window is changed of display.
+             */
             MDelegate<void(int)> onWindowDisplayChangedCallback;
+
+            /**
+             * @brief Callback invoked each time the window is minimized.
+             */
             MDelegate<void()> onWindowMinimizedCallback;
+
+            /**
+             * @brief Callback invoked each time the window is maximized.
+             */
             MDelegate<void()> onWindowMaximizedCallback;
+
+            /**
+             * @brief Callback invoked each time the window is focused.
+             */
             MDelegate<void()> onWindowFocusedCallback;
+
+            /**
+             * @brief Callback invoked each time the window is unfocused.
+             */
             MDelegate<void()> onWindowUnfocusedCallback;
 
         protected:

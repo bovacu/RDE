@@ -72,7 +72,7 @@ namespace RDE {
 
 
 
-    /// This class represents all of the events that involves minimizing the window.
+    /// This class represents all of the events that involves changing the display of the window.
     class WindowDisplayChangedEvent  : public Event {
         private:
             int windowDisplayIndex;
