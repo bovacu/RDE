@@ -15,7 +15,7 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Texture)
+    class Texture;
 
     /**
      * @brief Defines how the texture must be rendered so deformations on X and Y won't affect it's quality. It is separated 9 parts as follows:
@@ -80,7 +80,7 @@ namespace RDE {
         IntRect subRects[9];
     };
 
-    FORWARD_DECLARE_STRUCT(Atlas)
+    struct Atlas;
 
     /**
      * @brief This class represents a SpriteSheet or a simple Sprite that will be uploaded to the GPU.

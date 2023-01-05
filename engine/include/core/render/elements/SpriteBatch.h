@@ -2,7 +2,9 @@
 #define RDE_SPRITE_BATCH_H
 
 #include <vector>
+#include "core/graph/components/Transform.h"
 #include "core/render/Camera.h"
+#include "core/render/elements/IRenderizable.h"
 #include "core/render/shapes/DebugShape.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/graph/components/Components.h"
@@ -14,19 +16,20 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Engine)
+    class Engine;
 
     /**
      * @brief This is the class in charge of sending the data that needs to be rendered to the GPU.
      * It has a special function for each type of different complex geometry.
      */
     class SpriteBatch {
-        FRIEND_CLASS(Batch, RenderManager)
+        friend class Batch;
+        friend class RenderManager;
         /**
          * @brief This class is like a batch but specific for rendering debug elements, such as lines, shapes..
          */
         class Debug {
-            FRIEND_CLASS(SpriteBatch)
+            friend class SpriteBatch;
 
             private:
                 /**
@@ -186,7 +189,7 @@ namespace RDE {
              * @param _priority Whether this element must be rendered after or before othe types.
              * @return Batch&
              */
-            Batch& getBatch(const IRenderizable* _renderer, int _layer, BatchPriority _priority);
+            Batch* getBatch(const RenderizableInnerData& _innerData);
 
             /**
              * @brief Orders the batches to be sent to the GPU based on some specific data, such as the texture used,
@@ -215,7 +218,8 @@ namespace RDE {
              * @param _renderizable An IRenderizable instance.
              * @param _transform Transform of the IRenderizable.
              */
-            void draw(IRenderizable* _renderizable, Transform& _transform);
+            void drawSpriteRenderer(RenderizableInnerData& _innerData, Transform* _transform);
+            void drawTextRenderer(RenderizableInnerData& _innerData, Transform* _transform);
 
             /**
              * This method is used to drawBatched anything that extends IRenderizable and that is UI.

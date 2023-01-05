@@ -6,6 +6,12 @@
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/graph/components/ui/UIImage.h"
+#include "core/render/elements/Batch.h"
+#include "core/render/elements/IRenderizable.h"
+#include "core/render/elements/ShaderManager.h"
+#include "core/render/elements/Texture.h"
+#include "core/util/Vec.h"
+#include "core/graph/components/Node.h"
 
 namespace RDE {
 
@@ -17,47 +23,97 @@ namespace RDE {
 
     }
 
-    UIPanel::UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config) : UI(_node, &_config) {
-        UI::texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "panel") :
-                      _config.texture;
+    UIPanel::UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config) {
+        data.RenderizableInnerData.texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "panel") : _config.texture;
+        data.RenderizableInnerData.color = _config.color;
+        data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
 
-        UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
-        UI::batchPriority = BatchPriority::SpritePriority;
+        node = _node;
+
+        if(!_node->hasComponent<UIInteractable>()) {
+            uiInteractable = _node->addComponent<UIInteractable>();
+        }
+                                                                                                           
+        if(_config.stopFurtherClicks) {
+            if(!node->hasComponent<CanvasEventStopper>()) {
+                node->addComponent<CanvasEventStopper>();
+            }
+        } else {
+            if (node->hasComponent<CanvasEventStopper>()) {
+                node->removeComponent<CanvasEventStopper>();
+            }
+        }
 
         ((UITransform*)_node->getTransform())->setSize(_config.size);
-        UI::interaction->onInnerMouseEntered.bind<&foo>();
-        UI::interaction->onInnerMouseExited.bind<&foo>();
-        UI::interaction->onInnerClicking.bind<&foo2>();
-        UI::interaction->onInnerClickingReleased.bind<&foo2>();
 
-        nineSliceSprite = _node->addComponent<UIImage>(UIImageConfig {
-            .size = UI::getSize(),
-            .texture = UI::texture,
+        uiInteractable->onInnerMouseEntered.bind<&foo>();
+        uiInteractable->onInnerMouseExited.bind<&foo>();
+        uiInteractable->onInnerClicking.bind<&foo2>();
+        uiInteractable->onInnerClickingReleased.bind<&foo2>();
+
+        uiImage = _node->addComponent<UIImage>(UIImageConfig {
+            .size = _config.size,
+            .texture = data.RenderizableInnerData.texture,
             .color = _config.color,
             .imageRenderingType = ImageRenderingType::NINE_SLICE
         });
-        nineSliceSprite->interaction = UI::interaction;
+
+        uiImage->uiInteractable = uiInteractable;
+        data.RenderizableInnerData.shader = uiImage->getShaderID();
     }
 
-    Vec2F UIPanel::getSize() const {
-        return UI::getSize();
-    }
+    
+    SIZE_METHODS_DEFAULT_IMPL(UIPanel)
+    INTERACTABLE_DEFAULT_IMPL(UIPanel)
+    ENABLED_DEFAULT_IMPL(UIPanel)
 
-    void UIPanel::setInteractable(bool _interactable) {  }
-
-    bool UIPanel::isInteractable() { return false; }
 
     void UIPanel::setColor(const Color& _color) {
-        if(nineSliceSprite != nullptr) {
-            nineSliceSprite->setColor(_color);
-        }
+        SAFE_POINTER(uiImage, setColor(_color))
+        data.RenderizableInnerData.color = _color;
     }
 
-    Color UIPanel::getColor() {
-        if(nineSliceSprite != nullptr) {
-           return nineSliceSprite->getColor();
-        }
+    Color UIPanel::getColor() const {
+        return data.RenderizableInnerData.color;
+    }
 
-        return Color::White;
+
+    void UIPanel::setLayer(int _layer) {
+        SAFE_POINTER(uiImage, setLayer(_layer))
+        data.RenderizableInnerData.layer = _layer;
+    }
+
+    int UIPanel::getLayer() const {
+        return data.RenderizableInnerData.layer;
+    }
+
+
+    void UIPanel::setTexture(Texture* _texture) {
+        SAFE_POINTER(uiImage, setTexture(_texture))
+        data.RenderizableInnerData.texture = _texture;
+    }
+
+    Texture* UIPanel::getTexture() const {
+        return data.RenderizableInnerData.texture;
+    }
+
+
+    void UIPanel::setOriginOffset(const Vec2F& _offset) {
+        SAFE_POINTER(uiImage,setOriginOffset(_offset))
+        data.originOffset = _offset;
+    }
+
+    Vec2F UIPanel::getOriginOffset() const {
+        return data.originOffset;
+    }
+
+
+    void UIPanel::setShaderID(ShaderID _shaderID) {
+        SAFE_POINTER(uiImage, setShaderID(_shaderID))
+        data.RenderizableInnerData.shader = _shaderID;
+    }
+
+    ShaderID UIPanel::getShaderID() const {
+        return data.RenderizableInnerData.shader;
     }
 }

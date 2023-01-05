@@ -6,10 +6,13 @@
 #define RDE_UI_INPUT_H
 
 #include "core/graph/components/ui/UI.h"
+#include "core/render/elements/IRenderizable.h"
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Font, UIText, UIImage, UI9Slice)
+    class Font;
+    class UIText;
+    class UIImage;
 
     struct UIInputConfig : CommonUIConfig {
         Vec2F inputSize = { 256.f, 32.f };
@@ -33,20 +36,29 @@ namespace RDE {
         float blinkingTimeSeconds = 0.5f;
     };
 
-    class UIInput : public UI {
+    class UIInput {
         private:
             int pointer = 0;
             float textDisplacement = 0;
             float blinkingTimer = 0;
 
             UIText* textRenderer = nullptr;
+            Node* textNode = nullptr;
+
             UIText* placeholderTextRenderer = nullptr;
+            Node* placeholderNode = nullptr;
+
             UIImage* background = nullptr;
+            
             UIImage* caretSprite = nullptr;
+            Node* caretNode = nullptr;
+
             Transform* caretTransform = nullptr;
             Transform* textTransform = nullptr;
             Transform* nineSliceTransform = nullptr;
             Texture* caretTexture;
+
+        RENDERIZABLE_UI_BASIC_PROPERTIES()
 
         public:
             float blinkingTimeSeconds = 0;
@@ -58,25 +70,28 @@ namespace RDE {
              */
             float caretHeight = 0.75;
 
-            UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config);
 
-            void setInteractable(bool _interactable) override;
-            bool isInteractable() override;
+        public:
+            UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config = {});
 
-            void setColor(const Color& _color) override;
-            Color getColor() override;
+            RENDERIZABLE_UI_BASIC_METHODS()
 
-            void onUpdate(Delta _dt) override;
+            void onUpdate(Delta _dt);
 
-            ~UIInput() override {  }
+            Node* getTextNode();
+            Node* getTextPlaceholderNode();
+            Node* getCaretNode();
+
+            ~UIInput() {  }
 
         private:
             void onMouseEntered();
             void onMouseExited();
             void onMouseClicked(MouseCode _mouseCode);
             void onMouseReleased(MouseCode _mouseCode);
-            void onKeyPressed(KeyCode _keyCode, char _char);
-            void onKeyReleased(KeyCode _keyCode, char _char);
+            void onKeyPressed(KeyCode _keyCode);
+            void onKeyReleased(KeyCode _keyCode);
+            void onTextTyping(const std::string& _text);
             void onUnfocused();
             void updatePlaceholder();
             void updateCaret();

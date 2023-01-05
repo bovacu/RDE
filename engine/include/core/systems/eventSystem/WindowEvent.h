@@ -72,6 +72,27 @@ namespace RDE {
 
 
 
+    /// This class represents all of the events that involves minimizing the window.
+    class WindowDisplayChangedEvent  : public Event {
+        private:
+            int windowDisplayIndex;
+
+        public:
+            explicit WindowDisplayChangedEvent(int _windowDisplayIndex) : windowDisplayIndex(_windowDisplayIndex) {  }
+            [[nodiscard]] int getWindowDisplayIndex() const { return windowDisplayIndex; }
+
+            [[nodiscard]] std::string toString() const override {
+                std::stringstream _sst;
+                _sst << getName() << " -> window display index = " << windowDisplayIndex;
+                return _sst.str();
+            }
+
+            /// Implementation of the rest of the static and virtual methods.
+            static EventType getStaticType() { return EventType::WindowDisplayChanged; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "WindowDisplayChanged"; }
+            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
+    };
 
 
 

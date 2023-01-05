@@ -71,7 +71,7 @@ namespace RDE {
 
         public:
             class HandlerId {
-                FRIEND_CLASS(EventBus<AssociatedFunctionArgs...>)
+                friend class EventBus<AssociatedFunctionArgs...>;
                 public:
                     HandlerId() : valid(false) {  }
                     size_t id{};

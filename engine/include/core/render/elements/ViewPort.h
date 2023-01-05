@@ -14,11 +14,10 @@ namespace RDE {
      * for any user-defined viewport.
      */
 
-    FORWARD_DECLARE_CLASS(IRenderizable)
-
     class ViewPort {
 
-        FRIEND_CLASS(Camera, Canvas)
+        friend class Camera;
+        friend class Canvas;
 
         private:
             /**

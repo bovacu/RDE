@@ -96,7 +96,7 @@ inline float currentDPI = 0;
 #endif
 
 #define IS_MAC() (defined(__APPLE__) && defined(MAC_PLATFORM))
-#define IS_WINDOWS() (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
+#define IS_WINDOWS() _WIN32
 #define IS_LINUX() (defined(__linux__))
 #define IS_DESKTOP() (IS_LINUX() || IS_MAC() || IS_WINDOWS())
 
@@ -133,12 +133,13 @@ public:                                                                         
     iteratorType::const_reverse_iterator crbegin()  { return iterable.crbegin();} \
     iteratorType::const_reverse_iterator crend()    { return iterable.crend();  } \
 
+#ifdef _MSC_VER 
+#else
 #define FE_1_INVOKE(WHAT, X) WHAT(X)
 #define FE_2_INVOKE(WHAT, X, ...) WHAT(X)FE_1_INVOKE(WHAT, __VA_ARGS__)
 #define FE_3_INVOKE(WHAT, X, ...) WHAT(X)FE_2_INVOKE(WHAT, __VA_ARGS__)
 #define FE_4_INVOKE(WHAT, X, ...) WHAT(X)FE_3_INVOKE(WHAT, __VA_ARGS__)
 #define FE_5_INVOKE(WHAT, X, ...) WHAT(X)FE_4_INVOKE(WHAT, __VA_ARGS__)
-//... repeat as needed
 
 #define FE_1_DECLARATION(WHAT, X, Y) WHAT Y X
 #define FE_2_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_1_DECLARATION(WHAT, X, __VA_ARGS__)
@@ -163,5 +164,8 @@ public:                                                                         
 #define FORWARD_DECLARE_CLASS(...) FOR_EACH_DECLARATION(class, ;, __VA_ARGS__)
 #define FRIEND_STRUCT(...) FOR_EACH_DECLARATION(friend struct, ;, __VA_ARGS__)
 #define FORWARD_DECLARE_STRUCT(...) FOR_EACH_DECLARATION(struct, ;, __VA_ARGS__)
+#endif
+
+#define SAFE_POINTER(_var, _function) if(_var) do { _var->_function; } while(0);
 
 #endif //RDE_CORE_H

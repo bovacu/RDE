@@ -59,7 +59,7 @@ namespace RDE {
     struct PhysicsShape {
         ShapeConfig shapeConfig {};
         cpShape* shape = nullptr;
-        PhysicsShapeId id;
+        PhysicsShapeId id = 0;
     };
 
     struct PhysicsBodyConfig {
@@ -68,11 +68,16 @@ namespace RDE {
         PhysicsBodyType physicsBodyType = PhysicsBodyType::DYNAMIC;
     };
 
-    FORWARD_DECLARE_CLASS(Scene, Node, Manager, Graph)
+    class Scene;
+    class Manager;
+    class Graph;
+
+    struct Node;
 
     struct PhysicsBody : public ComponentBase {
 
-        FRIEND_CLASS(PhysicsManager, Graph)
+        friend class PhysicsManager;
+        friend class Graph;
 
         private:
             ulong keyCounter = 0;

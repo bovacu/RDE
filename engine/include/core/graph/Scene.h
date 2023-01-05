@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/systems/inputSystem/input/WindowInput.h"
 #ifndef RDE_SCENE_H
 #define RDE_SCENE_H
 
@@ -10,13 +11,18 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Camera, Window, Engine, Canvas);
+    class Camera;
+    class Window; 
+    class Engine;
+    class Canvas;
 
     /**
      * @brief This class represents what is rendered in the window and all its related systems.
      */
     class Scene {
-        FRIEND_CLASS(Graph, ConfigManager)
+        friend class Graph;
+        friend class ConfigManager;
+        friend class WindowInput;
 
         private:
             /**
@@ -54,6 +60,9 @@ namespace RDE {
              * @see Engine
              */
             Engine* engine = nullptr;
+
+        protected:
+            void onDisplayChanged();
 
         public:
             explicit Scene(Engine* _engine, const std::string& _debugName = "Scene");

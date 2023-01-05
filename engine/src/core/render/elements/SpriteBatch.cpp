@@ -1,4 +1,9 @@
 #include "core/render/elements/SpriteBatch.h"
+#include "core/graph/components/SpriteRenderer.h"
+#include "core/graph/components/TextRenderer.h"
+#include "core/render/elements/Batch.h"
+#include "core/render/elements/IRenderizable.h"
+#include "core/render/elements/SpriteBatchRenderFunctions.h"
 
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
@@ -82,15 +87,15 @@ namespace RDE {
             flushDebug();
 
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
-        auto _screenPos = Util::Math::worldToScreenSize(*batch->viewport, _position);
+        auto _screenPos = Util::Math::worldToScreenSize(batch->viewport, _position);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x, _screenPos.y, 1.f));
         vertexDebugBufferPoints.emplace_back(_transformMat * glm::vec4 {_screenPos.x, _screenPos.y, 0.0f, 1.0f}, _colorVec4);
     }
 
     void SpriteBatch::Debug::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
-        auto _screenPos0 = Util::Math::worldToScreenCoords(*batch->viewport, _p0);
-        auto _screenPos1 = Util::Math::worldToScreenCoords(*batch->viewport, _p1);
+        auto _screenPos0 = Util::Math::worldToScreenCoords(batch->viewport, _p0);
+        auto _screenPos1 = Util::Math::worldToScreenCoords(batch->viewport, _p1);
 
         auto _transformMat0 = glm::mat4(1.f);
         auto _transformMat1 = glm::mat4(1.f);
@@ -106,7 +111,7 @@ namespace RDE {
     }
 
     void SpriteBatch::Debug::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
-        auto _screenPos = Util::Math::worldToScreenCoords(*batch->viewport, _position);
+        auto _screenPos = Util::Math::worldToScreenCoords(batch->viewport, _position);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x,_screenPos.y, 1.f));
 
         if(_rotation != 0)
@@ -114,7 +119,7 @@ namespace RDE {
 
         glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
 
-        auto _screenSize = Util::Math::worldToScreenSize(*batch->viewport, _size);
+        auto _screenSize = Util::Math::worldToScreenSize(batch->viewport, _size);
         // First triangle
         vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
         vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
@@ -171,42 +176,53 @@ namespace RDE {
         });
     }
 
-    Batch& SpriteBatch::getBatch(const IRenderizable* _renderer, int _layer, BatchPriority _priority) {
+    Batch* SpriteBatch::getBatch(const RenderizableInnerData& _innerData) {
         for(auto& _batch : batches) {
-            if (_renderer->getTexture() == _batch.textureID &&
-                _layer == _batch.layer &&
-                _batch.shader->getShaderID() == _renderer->shaderID &&
-                _batch.priority == _renderer->batchPriority &&
-                _batch.indexBuffer.size() + 6 < maxIndicesPerDrawCall) {
-                return _batch;
+            if (_innerData.texture->getGLTexture()  == _batch.textureID &&
+                _innerData.layer                    == _batch.layer &&
+                _innerData.shader                   == _batch.shader->getShaderID() &&
+                _innerData.batchPriority            == _batch.priority &&
+                _batch.indexBuffer.size() + 6       < maxIndicesPerDrawCall) {
+                return &_batch;
             }
         }
 
-        Util::Log::debug("Created a new batch with Texture: ", _renderer->getTexture(), ", Layer: ", _layer, ", Priority: ", _renderer->batchPriority, ", ShaderID: ", _renderer->shaderID);
+        Util::Log::debug("Created a new batch with Texture: ", _innerData.texture->getGLTexture(), ", Layer: ", _innerData.layer, ", Priority: ", _innerData.batchPriority, ", ShaderID: ", _innerData.shader);
         Batch _batch;
-        _batch.layer = _layer;
+        _batch.ID = batches.size();
+        _batch.layer = _innerData.layer;
         _batch.indexBuffer.reserve(maxIndicesPerDrawCall * 6);
         _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 6);
-        _batch.textureID = _renderer->getTexture();
-        _batch.priority = _priority;
-        _batch.shader = engine->manager.shaderManager.getShader(_renderer->shaderID);
+        _batch.textureID = _innerData.texture->getGLTexture();
+        _batch.priority = _innerData.batchPriority;
+        _batch.shader = engine->manager.shaderManager.getShader(_innerData.shader);
         _batch.spriteBatch = this;
         batches.push_back(_batch);
 
         orderBatches();
 
-        return batches.back();
+        return &batches.back();
     }
 
-    void SpriteBatch::draw(IRenderizable* _renderizable, Transform& _transform) {
-        getBatch(_renderizable, _renderizable->layer, _renderizable->batchPriority).draw(_renderizable, _transform);
+    void SpriteBatch::drawSpriteRenderer(RenderizableInnerData& _innerData, Transform* _transform) {
+        auto* _batch = getBatch(_innerData);
+         if(_batch->textureID < 0) _batch->textureID = _innerData.texture->getGLTexture();
+        drawBatchedSpriteRenderer(_innerData, _batch, _transform, viewport);
+    }
+
+    void SpriteBatch::drawTextRenderer(RenderizableInnerData& _innerData, Transform* _transform) {
+        auto* _batch = getBatch(_innerData);
+         if(_batch->textureID < 0) _batch->textureID = _innerData.texture->getGLTexture();
+        drawBatchedTextRenderer(_innerData, _batch, _transform, viewport);
     }
 
     void SpriteBatch::flush() {
         for(auto& _batch : batches) {
             auto _shaderID = _batch.shader->getShaderID();
-            if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0)
+            if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0) {
+                Util::Log::warn("Batch: ", _batch.ID, " was skipped, data - VB size: ", _batch.vertexBuffer.size(), ", IB size: ", _batch.indexBuffer.size(), ", Texture: ", _batch.textureID, ", Shader: ", _shaderID);
                 continue;
+            }
             
             glUseProgram(_shaderID);
 

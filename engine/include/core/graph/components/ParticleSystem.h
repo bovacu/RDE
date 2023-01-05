@@ -16,8 +16,9 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_STRUCT(ParticleSystemConfig)
-    FORWARD_DECLARE_CLASS(Graph, Manager)
+    struct ParticleSystemConfig;
+    class Graph;
+    class Manager;
 
     /**
      * @brief Information about a particle.
@@ -58,7 +59,7 @@ namespace RDE {
         Texture* texture = nullptr;
         float timeToCreateNewParticleMs = 100;
         bool loop = true;
-        ShaderID shader = -1;
+        ShaderID shader = 0;
     };
 
     /**
@@ -73,7 +74,7 @@ namespace RDE {
     /**
      * @brief Component that emits particles in a customizable way.
      */
-    class ParticleSystem : public IRenderizable {
+    class ParticleSystem {
         private:
             Pool<ParticleData> pool;
             std::vector<ParticleData> usedParticles {};
@@ -82,10 +83,15 @@ namespace RDE {
         public:
             ParticleSystemConfig particleSystemConfig;
 
+        RENDERIZABLE_BASIC_PROPERTIES()
+
         public:
             ParticleSystem(Node* _node, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig);
             ParticleSystem(Node* _node, Manager* _manager, Graph* _graph, const ParticleSystemConfig& _particleSystemConfig);
             void update(Delta dt);
+
+
+            RENDERIZABLE_BASIC_METHODS()
 
             /**
              * @brief Starts the particle system. By default the particle system won't start until this method is called.
@@ -107,25 +113,7 @@ namespace RDE {
              */
             void reset();
 
-            /**
-             * @see IRenderizable
-             */
-            [[nodiscard]] GLuint getTexture() const override { return particleSystemConfig.dataConfig.texture->getGLTexture(); }
-
-            /**
-             * @see IRenderizable
-             */
-            [[nodiscard]] Vec2F getSize() const override { return particleSystemConfig.dataConfig.texture->getSize(); }
-
-            /**
-             * @see IRenderizable
-             */
-            [[nodiscard]] FloatRect getRegion() const override { return particleSystemConfig.dataConfig.texture->getRegion(); }
-
-            /**
-             * @see IRenderizable
-             */
-            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) override;
+            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform* _transform, const ViewPort* _viewport);
 
         private:
             /**

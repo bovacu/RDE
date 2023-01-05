@@ -13,24 +13,14 @@ namespace RDE {
     class KeyEvent          : public Event {
         protected:
             KeyCode keyCode;
-            char normalChar;
-            char modifiedChar;
 
         protected:
-            explicit KeyEvent(KeyCode _keyCode, char _normalChar, char _alternativeChar) : keyCode(_keyCode), normalChar(_normalChar), modifiedChar(_alternativeChar) {}
+            explicit KeyEvent(KeyCode _keyCode) : keyCode(_keyCode) {}
 
         public:
             /// Returns the code of the key that has been pressed, typed or released.
             /// @return The code of the key that made the event happened.
             [[nodiscard]] inline KeyCode getKeyCode() const { return keyCode; }
-
-            /// Returns the char of the key that has been pressed, typed or released.
-            /// @return The char of the key that made the event happened.
-            [[nodiscard]] inline char getChar() const { return normalChar; }
-
-            /// Returns the alternative char of the key that has been pressed, typed or released.
-            /// @return The alternative char of the key that made the event happened.
-            [[nodiscard]] inline char getAlternateChar() const { return modifiedChar; }
 
             /// Returns the flag with all the categories that the event fills in.
             /// @return The flag with the categories.
@@ -46,7 +36,7 @@ namespace RDE {
             int repeatedTimes;
 
         public:
-            KeyPressedEvent(KeyCode _keyCode, char _normalChar, char _alternativeChar, int _repeatedTimes) : KeyEvent(_keyCode, _normalChar, _alternativeChar), repeatedTimes(_repeatedTimes) {}
+            KeyPressedEvent(KeyCode _keyCode, int _repeatedTimes) : KeyEvent(_keyCode), repeatedTimes(_repeatedTimes) {}
 
             /// Returns the number of times in a sequence that the key has been pressed.
             /// @return The number of pressing times.
@@ -73,7 +63,7 @@ namespace RDE {
             char typedChar;
 
         public:
-            explicit KeyTypedEvent(KeyCode _keyCode, char _normalChar, char _modifiedChar) : KeyEvent(_keyCode, _normalChar, _modifiedChar), typedChar((char)keyCode) {  }
+            explicit KeyTypedEvent(KeyCode _keyCode) : KeyEvent(_keyCode), typedChar((char)keyCode) {  }
 
             /// Returns the number of times in a sequence that the key has been pressed.
             /// @return The char typed.
@@ -97,7 +87,7 @@ namespace RDE {
     /// This class represents all of the events that involves releasing a key.
     class KeyReleasedEvent  : public KeyEvent {
         public:
-            explicit KeyReleasedEvent(KeyCode _keyCode, char _normalChar, char _modifiedChar) : KeyEvent(_keyCode, _normalChar, _modifiedChar) {}
+            explicit KeyReleasedEvent(KeyCode _keyCode) : KeyEvent(_keyCode) {}
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
@@ -109,6 +99,26 @@ namespace RDE {
             static EventType getStaticType()  { return EventType::KeyReleased; }
             [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "KeyReleased"; }
+    };
+
+
+    /// This class represents all of the events that involves releasing a key.
+    class TextTypedEvent  : public KeyEvent {
+        public:
+            explicit TextTypedEvent(char* _text) : KeyEvent(KeyCode::D0) { text = std::string(_text); }
+
+            std::string text;
+
+            [[nodiscard]] std::string toString() const override {
+                std::stringstream _sst;
+                _sst << getName() << ": Text = " << text;
+                return _sst.str();
+            }
+
+            /// Implementation of the rest of the static and virtual methods.
+            static EventType getStaticType()  { return EventType::TextTyped; }
+            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+            [[nodiscard]] const char* getName() const override { return "TextTyped"; }
     };
 
 }

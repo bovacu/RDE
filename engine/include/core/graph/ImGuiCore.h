@@ -4,6 +4,8 @@
 #ifndef RDE_IMGUI_CORE_H
 #define RDE_IMGUI_CORE_H
 
+#include "core/Core.h"
+
 #if !IS_MOBILE()
 #include "imgui.h"
 #endif

@@ -62,7 +62,7 @@ namespace RDE {
         if(_nextAnimation != nullptr) currentNode = _nextAnimation;
         currentNode->animation.update(_dt);
 
-        if(_spriteRenderer->getTexture() != getCurrentAnimation()->animation.getCurrentFrame()->getGLTexture())
+        if(_spriteRenderer->getTexture()->getGLTexture() != getCurrentAnimation()->animation.getCurrentFrame()->getGLTexture())
             _spriteRenderer->setTexture(getCurrentAnimation()->animation.getCurrentFrame());
     }
 

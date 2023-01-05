@@ -6,14 +6,19 @@
 #define RDE_TEXT_RENDERER_H
 
 #include "core/render/elements/IRenderizable.h"
+#include "core/util/Vec.h"
 #include "entt/entity/entity.hpp"
 
 typedef entt::entity NodeID;
 
 namespace RDE {
 
-    FORWARD_DECLARE_STRUCT(CharInfo)
-    FORWARD_DECLARE_CLASS(Font, Scene, Canvas, Graph, Manager)
+    struct CharInfo;
+    class Font;
+    class Scene;
+    class Canvas;
+    class Graph;
+    class Manager;
 
     struct TextRendererConfig {
         std::string text = "Hello Duck!";
@@ -25,11 +30,14 @@ namespace RDE {
      * @brief Component used to render text on screen.  End user doesn't have, and in fact can't
      * make it render manually, it is all done internally by the ECS system.
      */
-    class TextRenderer : public IRenderizable {
+    class TextRenderer {
 
-        FRIEND_CLASS(UIText, UIButton, UICheckbox, UIInput)
+        friend class UIText;
+        friend class UIButton;
+        friend class UICheckbox;
+        friend class UIInput;
 
-        protected:
+        private:
             /**
              * @brief The font used to render the text.
              */
@@ -60,12 +68,9 @@ namespace RDE {
              */
             int fontSize {};
 
-            /**
-             * @brief The texture of the generated font.
-             */
-            Texture* texture = nullptr;
+        RENDERIZABLE_BASIC_PROPERTIES()
 
-        protected:
+        private:
             /**
              * @brief Recalculates the dimensions of the new text as a rectangle.
              * @param _text the inner text.
@@ -76,19 +81,30 @@ namespace RDE {
                 std::string line;
                 float biggestCharHeight;
             };
+
+        // TODO (RDE): this needs a better fix than making it public, the affected part is SpriteBatchRenderFunctions.cpp -> drawBatchedForTextRenderer. 
+        public:
             std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharInfo* _chars) const;
 
         public:
-            TextRenderer(Node* _node, Scene* _scene, const TextRendererConfig& _config);
-            TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const TextRendererConfig& _config);
-            TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const TextRendererConfig& _config);
-            ~TextRenderer() override {  }
+            TextRenderer(Node* _node, Scene* _scene, const TextRendererConfig& _config = {});
+            TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const TextRendererConfig& _config = {});
+            TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const TextRendererConfig& _config = {});
+            ~TextRenderer() {  }
+
+            RENDERIZABLE_BASIC_METHODS()
 
             /**
              * @brief Sets the text to be rendered.
              * @param _text The text to render.
              */
             void setText(const std::string& _text);
+
+            /**
+             * @brief Returns the size of the text.
+             * @return Vec2F
+             */
+            [[nodiscard]] Vec2F getTextSize() const;
 
             /**
              * @brief Sets the font.
@@ -126,33 +142,16 @@ namespace RDE {
              */
             [[nodiscard]] float getSpacesBetweenChars() const;
 
+
+            void setNewLineSize(float _newLineSize);
+            [[nodiscard]] float getNewLineSize() const;
+
+
             /**
              * @brief Sets the spaces between characters.
              * @param _spaceBetweenChars Space between characters.
              */
             void setSpacesBetweenChars(float _spaceBetweenChars);
-
-            /**
-             * @see IRenderizable
-             */
-            [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
-
-            /**
-             * @see IRenderizable
-             */
-            [[nodiscard]] Vec2F getSize() const override { return { size.x / 2.f * IRenderizable::node->getTransform()->getScale().x,
-                                                                    size.y / 2.f * IRenderizable::node->getTransform()->getScale().y }; }
-
-            /**
-             * @see IRenderizable
-             */
-            [[nodiscard]] FloatRect getRegion() const override { return texture->getRegion(); }
-
-            /**
-             * @see IRenderizable
-             */
-            virtual void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) override;
-            virtual void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) override;
     };
 
 }

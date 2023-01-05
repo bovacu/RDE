@@ -25,13 +25,15 @@ namespace RDE {
         Vec2F  offset;
     };
 
-    FORWARD_DECLARE_CLASS(FontManager)
+    class FontManager;
 
     /**
      * @brief This struct contains all the information needed to render text with this specific font.
      */
     class Font {
-        FRIEND_CLASS(FontManager)
+        
+        friend class FontManager;
+
         private:
             Texture texture;
             int width = -1;
@@ -111,7 +113,7 @@ namespace RDE {
              * @brief Freetype library.
              */
             FT_Library ftLibrary{};
-            FileManager* fileManager;
+            FileManager* fileManager = nullptr;
 
             /**
              * @brief Map FontName -> std::vector<FontHandler> because a font can have many sub-fonts with different sizes.

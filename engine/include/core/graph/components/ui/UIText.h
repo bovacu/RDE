@@ -6,9 +6,13 @@
 #define RDE_UI_TEXT_RENDERER_H
 
 #include "core/graph/components/ui/UI.h"
+#include "core/render/elements/IRenderizable.h"
 #include "core/systems/uiSystem/FontManager.h"
 
 namespace RDE {
+
+    class Scene;
+    class Canvas;
 
     struct UITextConfig : public CommonUIConfig {
         Font* font = nullptr;
@@ -16,8 +20,11 @@ namespace RDE {
         Color textColor = Color::White;
     };
 
-    class UIText : public UI {
-        FRIEND_CLASS(Canvas, UIButton, UICheckbox, UIInput)
+    class UIText {
+        friend class Canvas;
+        friend class UIButton;
+        friend class UICheckbox;
+        friend class UIInput;
 
         private:
             protected:
@@ -51,7 +58,9 @@ namespace RDE {
              */
             int fontSize {};
 
-        protected:
+        RENDERIZABLE_UI_BASIC_PROPERTIES()
+
+        public:
             /**
              * @brief Recalculates the dimensions of the new text as a rectangle.
              * @param _text the inner text.
@@ -67,16 +76,16 @@ namespace RDE {
         public:
             UIText(Node* _node, Scene* _scene, Canvas* _canvas, const UITextConfig& _config);
             UIText(Node* _node, Manager* _manager, Graph* _graph, const UITextConfig& _config);
-            ~UIText() override {  }
+            ~UIText() {  }
 
-            bool isInteractable() override;
-            void setInteractable(bool _interactable) override;
+            RENDERIZABLE_UI_BASIC_METHODS()
 
             /**
              * @brief Sets the text to be rendered.
              * @param _text The text to render.
              */
             void setText(const std::string& _text);
+
             Vec2F getTextSize();
 
             /**
@@ -122,17 +131,10 @@ namespace RDE {
             void setSpacesBetweenChars(float _spaceBetweenChars);
 
             /**
-             * @see IRenderizable
+             * @brief Returns the size of the new line.
+             * @return float
              */
-            [[nodiscard]] GLuint getTexture() const override { return texture->getGLTexture(); }
-
-            /**
-             * @see IRenderizable
-             */
-            [[nodiscard]] FloatRect getRegion() const override { return texture->getRegion(); }
-
-            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform& _transform, const ViewPort& _viewport) override;
-            void drawAndFlush(std::vector<DrawAndFlushData>& _data, Transform& _transform, const ViewPort& _viewport) override;
+            [[nodiscard]] float getNewLineSize() const;
     };
 
 } // RDE

@@ -14,8 +14,8 @@ namespace RDE {
      */
     enum class EventType : unsigned {
         None, WindowClosed, WindowResized, WindowMoved, WindowFocused, WindowLostFocus, GameFrame, GameUpdate,
-        GameRender, KeyPressed, KeyDown, KeyReleased, KeyTyped, MouseButtonPressed, MouseButtonDown, MouseButtonReleased,
-        MouseScrolled, MouseMoved, WindowMinimized,
+        GameRender, KeyPressed, KeyDown, KeyReleased, KeyTyped, TextTyped, MouseButtonPressed, MouseButtonDown, MouseButtonReleased,
+        MouseScrolled, MouseMoved, WindowMinimized, WindowDisplayChanged,
 
         ControllerAxisMoved, ControllerButtonDown, ControllerButtonUp,
 

@@ -7,31 +7,47 @@
 #include "core/Engine.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/graph/components/ui/UIImage.h"
+#include "core/render/elements/IRenderizable.h"
+#include "core/graph/components/Node.h"
 
 namespace RDE {
 
-    UISlider::UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config) : UI(_node, &_config) {
-        UI::texture = _config.backgroundBarTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "fillAndBgrScrollBarHorizontal") :
-                      _config.backgroundBarTexture;
+    UISlider::UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config) {
+        data.RenderizableInnerData.texture = _config.backgroundBarTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "panel") : _config.backgroundBarTexture;
+        data.RenderizableInnerData.color = _config.backgroundBarColor;
+        data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
 
-        UI::shaderID = defaultShaders[SPRITE_RENDERER_SHADER];
-        UI::batchPriority = BatchPriority::SpritePriority;
+        node = _node;
 
-        UI::interaction->onInnerClicking.bind<&UISlider::onMouseClicked>(this);
-        UI::interaction->onInnerClickingReleased.bind<&UISlider::onMouseReleased>(this);
+        if(!_node->hasComponent<UIInteractable>()) {
+            uiInteractable = _node->addComponent<UIInteractable>();
+        }
+                                                                                                           
+        if(_config.stopFurtherClicks) {
+            if(!node->hasComponent<CanvasEventStopper>()) {
+                node->addComponent<CanvasEventStopper>();
+            }
+        } else {
+            if (node->hasComponent<CanvasEventStopper>()) {
+                node->removeComponent<CanvasEventStopper>();
+            }
+        }
+
+        uiInteractable->onInnerClicking.bind<&UISlider::onMouseClicked>(this);
+        uiInteractable->onInnerClickingReleased.bind<&UISlider::onMouseReleased>(this);
 
         backgroundBarSprite = node->addComponent<UIImage>(UIImageConfig {
             .size = _config.barSize,
-            .texture = _config.backgroundBarTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets","fillAndBgrScrollBarHorizontal") :
-                _config.backgroundBarTexture,
+            .texture = data.RenderizableInnerData.texture,
             .color = _config.backgroundBarColor,
             .imageRenderingType = ImageRenderingType::NINE_SLICE
         });
-        backgroundBarSprite->interaction = UI::interaction;
+        backgroundBarSprite->uiInteractable = uiInteractable;
         backgroundBarTransform = (UITransform*)node->getTransform();
+        data.RenderizableInnerData.shader = backgroundBarSprite->getShaderID();
 
-        auto _fillBarNode = _graph->createNode("Fill", node);
-        fillBarSprite = _fillBarNode->addComponent<UIImage>(UIImageConfig {
+        fillBarNode = _graph->createNode("Fill", node);
+        fillBarSprite = fillBarNode->addComponent<UIImage>(UIImageConfig {
             .size = backgroundBarTransform->getSize(),
             .texture = _config.fillingBarTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "fillAndBgrScrollBarHorizontal") :
                        _config.fillingBarTexture,
@@ -39,17 +55,17 @@ namespace RDE {
             .imageRenderingType = ImageRenderingType::NINE_SLICE
         });
 
-        fillBarTransform = (UITransform*)_fillBarNode->getTransform();
+        fillBarTransform = (UITransform*)fillBarNode->getTransform();
         fillBarTransform->setAnchor(Anchor::LEFT);
         fillBarTransform->setStretch(Stretch::HORIZONTAL_STRETCH);
 
-        auto _handleNode = _graph->createNode("Handle", node);
-        handleSprite = _handleNode->addComponent<UIImage>(UIImageConfig {
+        handleNode = _graph->createNode("Handle", node);
+        handleSprite = handleNode->addComponent<UIImage>(UIImageConfig {
            .texture = _config.handleTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "handle") :
                       _config.handleTexture,
            .color = _config.handleColor
         });
-        handleTransform = (UITransform*)_handleNode->getTransform();
+        handleTransform = (UITransform*)handleNode->getTransform();
         handleTransform->setScale(1.5f * _config.barSize.y / handleSprite->getSize().x, 1.5f * _config.barSize.y / handleSprite->getSize().y);
         handleTransform->setPosition(backgroundBarTransform->getPosition().x - (_config.barSize.x * 0.5f) + _config.barSize.x * _config.percentageFilled,
                                      handleTransform->getPosition().y);
@@ -58,25 +74,19 @@ namespace RDE {
         setFilledPercentage(_config.percentageFilled);
     }
 
-    void UISlider::setInteractable(bool _interactable) {
-        UI::interaction->interactable = _interactable;
-    }
-
-    bool UISlider::isInteractable() {
-        return UI::interaction->interactable;
-    }
+    ENABLED_DEFAULT_IMPL(UISlider)
+    SIZE_METHODS_DEFAULT_IMPL(UISlider)
+    INTERACTABLE_DEFAULT_IMPL(UISlider)
 
     void UISlider::onUpdate(Delta _dt) {
-        IRenderizable::onUpdate(_dt);
-
         if(mouseDown) {
-            auto _size = Vec2F { UI::getSize().x, UI::getSize().y };
+            auto _size = Vec2F { getSize().x, getSize().y };
             Vec2F _limits = { backgroundBarTransform->getModelMatrixPosition().x - _size.x * 0.5f,
                                  backgroundBarTransform->getModelMatrixPosition().x + _size.x * 0.5f };
             auto _posX = Util::Math::clampF(node->manager->inputManager.getMousePosWorldPos().x, _limits.v[0], _limits.v[1]);
 
             auto _distanceFromLowerPoint = _posX - _limits.v[0];
-            setFilledPercentage(_distanceFromLowerPoint / (UI::getSize().x));
+            setFilledPercentage(_distanceFromLowerPoint / getSize().x);
         }
 
         if(node->manager->inputManager.isMouseJustReleased(MouseCode::ButtonLeft) && mouseDown) {
@@ -91,7 +101,7 @@ namespace RDE {
         auto _leftPos = node->getTransform()->getModelMatrixPosition().x - _width * 0.5f;
         handleTransform->setMatrixModelPosition({ _leftPos + percentageFilled * _width, handleTransform->getModelMatrixPosition().y});
 
-        fillBarSprite->setSize({ UI::getSize().x * percentageFilled, UI::getSize().y });
+        fillBarSprite->setSize({ getSize().x * percentageFilled, getSize().y });
         fillBarTransform->setPosition({handleTransform->getPosition().x - fillBarSprite->getSize().x * 0.5f, fillBarTransform->getPosition().y});
     }
 
@@ -105,6 +115,69 @@ namespace RDE {
 
     void UISlider::onMouseReleased(MouseCode _mouseCode) {
         mouseDown = false;
+    }
+
+
+    void UISlider::setColor(const Color& _color) {
+        SAFE_POINTER(backgroundBarSprite, setColor(_color))
+        data.RenderizableInnerData.color = _color;
+    }
+
+    Color UISlider::getColor() const {
+        return data.RenderizableInnerData.color;
+    }
+
+
+    void UISlider::setLayer(int _layer) {
+        SAFE_POINTER(backgroundBarSprite, setLayer(_layer))
+        SAFE_POINTER(fillBarSprite, setLayer(_layer))
+        SAFE_POINTER(handleSprite, setLayer(_layer))
+        data.RenderizableInnerData.layer = _layer;
+    }
+
+    int UISlider::getLayer() const {
+        return data.RenderizableInnerData.layer;
+    }
+
+
+    void UISlider::setTexture(Texture* _texture) {
+        SAFE_POINTER(backgroundBarSprite, setTexture(_texture))
+        data.RenderizableInnerData.texture = _texture;
+    }
+
+    Texture* UISlider::getTexture() const {
+        return data.RenderizableInnerData.texture;
+    }
+
+
+    void UISlider::setOriginOffset(const Vec2F& _offset) {
+        SAFE_POINTER(backgroundBarSprite,setOriginOffset(_offset))
+        SAFE_POINTER(fillBarSprite,setOriginOffset(_offset))
+        SAFE_POINTER(handleSprite,setOriginOffset(_offset))
+        data.originOffset = _offset;
+    }
+
+    Vec2F UISlider::getOriginOffset() const {
+        return data.originOffset;
+    }
+
+
+    void UISlider::setShaderID(ShaderID _shaderID) {
+        SAFE_POINTER(backgroundBarSprite, setShaderID(_shaderID))
+        data.RenderizableInnerData.shader = _shaderID;
+    }
+
+    ShaderID UISlider::getShaderID() const {
+        return data.RenderizableInnerData.shader;
+    }
+
+
+    Node* UISlider::getFillBarNode() {
+        return fillBarNode;
+    }
+
+    Node* UISlider::getHandleNode() {
+        return handleNode;
     }
 
 }

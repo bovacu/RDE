@@ -11,8 +11,8 @@
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(Window)
-    FORWARD_DECLARE_STRUCT(RDEConfig)
+    class Window;
+    struct RDEConfig;
 
     struct Node_JsonPair {
         Node* node;

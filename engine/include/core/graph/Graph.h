@@ -10,6 +10,7 @@
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/Components.h"
 #include "core/graph/components/ui/UITransform.h"
+#include <tuple>
 
 namespace RDE {
 
@@ -42,11 +43,22 @@ namespace RDE {
     typedef entt::registry NodeContainer;
     #define NODE_ID_NULL entt::null
 
-    FORWARD_DECLARE_CLASS(Engine, Scene, Manager, IRenderizable)
-    FORWARD_DECLARE_STRUCT(Node)
+    class Engine; 
+    class Scene; 
+    class Manager;
+
+    struct Node; 
+    struct RenderizableInnerData;
 
     class Graph {
-        FRIEND_CLASS(Transform, UITransform, Scene, Canvas, Node, ImGuiScene, ConfigManager, IRenderizable)
+        friend class Transform;
+        friend class UITransform;
+        friend class Scene;
+        friend class Canvas;
+        friend class Node;
+        friend class ImGuiScene;
+        friend class ConfigManager;
+        friend class RenderizableInnerData;
 
         private:
             /**
@@ -72,7 +84,7 @@ namespace RDE {
             UDelegate<void(void*)> onDataChanged;
             bool isUI = false;
 
-            std::vector<IRenderizable*> renderizableTree;
+            std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> renderizableTree[2]; // One for sprites and another for UI
             bool isRenderizableTreeDirty = false;
 
             std::vector<Transform*> dirtyTransforms;
@@ -161,7 +173,7 @@ namespace RDE {
             template<typename Component>
             [[nodiscard]] bool hasComponent(const NodeID& _id) const;
 
-            void recalculateRenderizableTree(Node* _node, std::vector<IRenderizable*>* _renderizables);
+            void recalculateRenderizableTree(Node* _node, std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>>* _renderizables);
 
             void postRenderSync();
 
@@ -294,7 +306,7 @@ namespace RDE {
         auto* _first = get<0>(std::forward<Args>(_args)...);
         auto* _component = &registry.template emplace<Component>(_first->getID(), _args...);
         if(onDataChanged != nullptr) onDataChanged((void*)_component);
-        isRenderizableTreeDirty |= (std::is_same<Component, IRenderizable>::value || std::is_same<Component, DisabledForRender>::value);
+        isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
         return _component;
     }
 
@@ -302,7 +314,7 @@ namespace RDE {
     Component* Graph::addComponent(NodeID _nodeID, Node* _node, Manager* _manager, Graph* _graph, Args... _args) {
         auto* _component = &registry.template emplace<Component>(_nodeID, _node, _manager, _graph, _args...);
         if(onDataChanged != nullptr) onDataChanged((void*)_component);
-        isRenderizableTreeDirty |= (std::is_same<Component, IRenderizable>::value || std::is_same<Component, DisabledForRender>::value);
+        isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
         return _component;
     }
 
@@ -310,7 +322,7 @@ namespace RDE {
     void Graph::removeComponent(const NodeID& _id) {
         auto _removed = registry.template remove<Component>(_id);
         if(onDataChanged != nullptr) onDataChanged((void*)_removed);
-        isRenderizableTreeDirty |= (std::is_same<Component, IRenderizable>::value || std::is_same<Component, DisabledForRender>::value);
+        isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
     }
 
     template<typename Component>

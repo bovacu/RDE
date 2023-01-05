@@ -48,6 +48,7 @@
 
 #include <exception>
 #include <functional>
+#include "core/Core.h"
 
 namespace RDE {
 
@@ -183,7 +184,11 @@ namespace RDE {
             }
 
             void exec(std::vector<R>& _results, Args... args) {
-                for(auto& _stub : stubs) _results.template emplace_back(std::invoke(_stub.stub, _stub.instance, args...));
+                #if IS_WINDOWS()
+                for (auto& _stub : stubs) _results.emplace_back(std::invoke(_stub.stub, _stub.instance, args...));
+                #else
+                for (auto& _stub : stubs) _results.template emplace_back(std::invoke(_stub.stub, _stub.instance, args...));
+                #endif
             }
 
             template <auto Function, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(Function),Args...>>>

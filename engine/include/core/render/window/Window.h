@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/util/Delegate.h"
 #ifndef RDE_WINDOW_H
 #define RDE_WINDOW_H
 
@@ -12,10 +13,11 @@ namespace RDE {
     /**
      * @brief This class represents the window of the application and has methods to modify its components and get its data.
      */
-    FORWARD_DECLARE_STRUCT(RDEConfig)
+    struct RDEConfig;
+
     class Window {
 
-        FRIEND_CLASS(WindowInput)
+        friend class WindowInput;
 
         protected:
             /**
@@ -54,6 +56,8 @@ namespace RDE {
              */
             bool running = true;
 
+            int currentDisplayIndex = -1;
+
         public:
             /**
              * @brief This callback lets the user define how and when the window should run the game. By default it is
@@ -61,6 +65,14 @@ namespace RDE {
              * is not minimized.
              */
             UDelegate<bool()> shouldUpdateWindow;
+
+            MDelegate<void(const Vec2F&)> onWindowMovedCallback;
+            MDelegate<void(const Vec2I&)> onWindowResizedCallback;
+            MDelegate<void(int)> onWindowDisplayChangedCallback;
+            MDelegate<void()> onWindowMinimizedCallback;
+            MDelegate<void()> onWindowMaximizedCallback;
+            MDelegate<void()> onWindowFocusedCallback;
+            MDelegate<void()> onWindowUnfocusedCallback;
 
         protected:
             explicit Window(RDEConfig* _props);
@@ -200,7 +212,16 @@ namespace RDE {
              */
             void stop();
 
+            /**
+             * @brief Refresh inner calculations for new DPIs on the screen.
+             */
             void refreshDpi();
+
+            /**
+             * @brief Traps the mouse inside the window or allows it to move outside.
+             * @param _allow If true, mouse will be able to leave the window, otherwise it won't.
+             */
+            void allowMouseToMoveOutOfWindow(bool _allow);
     };
 
 }

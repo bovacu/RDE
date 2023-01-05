@@ -8,6 +8,7 @@
 #include "core/util/Util.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 #include "Input.h"
+#include <SDL_events.h>
 
 namespace RDE {
 
@@ -55,6 +56,8 @@ namespace RDE {
              * @param _event Event
              */
             void onKeyUp(SDL_Event& _event);
+
+            void onTextTyped(SDL_Event& _event);
     };
 
 }

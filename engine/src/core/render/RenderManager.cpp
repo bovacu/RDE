@@ -1,8 +1,13 @@
 // Created by borja on 26/12/21.
 
+#include "core/graph/components/DynamicSpriteRenderer.h"
+#include "core/graph/components/SpriteRenderer.h"
+#include "core/graph/components/TextRenderer.h"
+#include "core/graph/components/Transform.h"
 #include "core/platform/PlatformHeaderSDLImage.h"
 #include "core/render/RenderManager.h"
 #include "core/Engine.h"
+#include "core/render/elements/IRenderizable.h"
 #include "core/util/Functions.h"
 #include "core/util/Vec.h"
 
@@ -67,8 +72,12 @@ namespace RDE {
         batch.flush();
     }
 
-    void RenderManager::draw(IRenderizable* _renderizable, Transform& _transform) {
-        batch.draw(_renderizable, _transform);
+    void RenderManager::drawSpriteRenderer(RenderizableInnerData& _innerData, Transform* _transform) {
+        batch.drawSpriteRenderer(_innerData, _transform);
+    }
+
+    void RenderManager::drawTextRenderer(RenderizableInnerData& _innerData, Transform* _transform) {
+        batch.drawTextRenderer(_innerData, _transform);
     }
 
     void RenderManager::drawUI(std::vector<Batch>& _batches) {

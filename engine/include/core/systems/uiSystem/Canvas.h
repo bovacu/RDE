@@ -9,18 +9,30 @@
 #include "core/render/Camera.h"
 #include "core/render/elements/Batch.h"
 #include "core/graph/components/Node.h"
+#include "core/render/elements/IRenderizable.h"
 #include <stack>
 
 namespace RDE {
 
-    FORWARD_DECLARE_CLASS(UI, UIInteractable)
+    class UIInteractable;
+
+    enum UpdatableType {
+        UT_NONE        = 0,
+        UT_UI_INPUT    = 1,
+        UT_UI_SLIDER   = 2
+    };
+
+    struct UpdatableData {
+        UpdatableType updatableType = UpdatableType::UT_NONE;
+        void* updatable = nullptr;
+    };
 
     struct CanvasElement {
-        RDE::Node* node = nullptr;
-        IRenderizable* renderizable = nullptr;
+        Node* node = nullptr;
+        RenderizableInnerDataUI* renderizableInnerData;
         UIInteractable* interactable = nullptr;
-        IRenderizable* updatable = nullptr;
         int cropping = 0;
+        UpdatableData updatableData;
     };
 
     /**
@@ -28,7 +40,8 @@ namespace RDE {
      * A Scene can have multiple canvas.
      */
     class Canvas {
-        FRIEND_CLASS(Graph, Scene)
+        friend class Graph;
+        friend class Scene;
 
         private:
             /**
@@ -111,8 +124,8 @@ namespace RDE {
             void batchTreeElementPre(CanvasElement* _canvasElement, void* _data);
             void batchTreeElementPost(CanvasElement* _canvasElement, void* _data);
 
-            IRenderizable* getRenderizable(Node* _node);
-            IRenderizable* getUpdatable(Node* _node);
+            void getRenderizable(Node* _node, CanvasElement* _canvasElement);
+            void getUpdatable(Node* _node, CanvasElement* _canvasElement);
 
             void forceRender();
 

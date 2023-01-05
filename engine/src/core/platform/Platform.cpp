@@ -71,5 +71,7 @@ namespace RDE {
         #if IS_MAC() && !IS_ANDROID()
             return new MacWindow(_config);
         #endif
+
+        return nullptr;
     }
 }

@@ -15,14 +15,21 @@
 namespace RDE {
 
     typedef entt::entity NodeID;
-    FORWARD_DECLARE_CLASS(Transform, SceneManager, Window, Node, Manager, Graph)
+    class Transform;
+    class SceneManager;
+    class Window;
+    class Manager;
+    class Graph;
+
+    struct Node;
 
     /**
      * @brief This class represents what the engine sees and what is going to be rendered. This is used as a Component of
      * the inner ECS System, so you can add Cameras to any desired Node.
      */
     class Camera : public ComponentBase {
-        FRIEND_CLASS(Scene)
+        friend class Scene;
+
         private:
             /**
              * @brief Size of the camera, as a rectangle.
@@ -58,6 +65,8 @@ namespace RDE {
              * @see IViewPort
              */
             ViewPort* viewport;
+
+            bool dirty = false;
 
         public:
             Node* node;

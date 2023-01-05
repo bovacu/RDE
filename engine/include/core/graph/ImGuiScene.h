@@ -3,6 +3,8 @@
 #ifndef RDE_IMGUI_LAYER_H
 #define RDE_IMGUI_LAYER_H
 
+#include "core/Core.h"
+
 #if !IS_MOBILE()
 
 #include <chrono>
@@ -17,7 +19,8 @@ namespace RDE {
 
     // This class is a fucking mess, and it needs to be reworked, but for now I just use it for debugging and it does the job.
 
-    FORWARD_DECLARE_CLASS(Graph)
+    class Graph;
+
     class ImGuiScene : public Scene {
         private:
             int idIndex = 0;
@@ -67,7 +70,6 @@ namespace RDE {
             void hierarchy(Scene* _scene);
             void hierarchyRecursionStub(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode);
             void showLoadedPrefabs(Scene* _scene, Graph* _graph, Node* _node, NodeID& _selectedNode);
-            bool createHeader(const char* _title, ComponentBase* _enable);
             void nodeComponents(Graph* _graph, const NodeID _selectedNode);
             void activeComponent(Graph* _graph, const NodeID _selectedNode);
             void transformComponent(Graph* _graph, const NodeID _selectedNode);

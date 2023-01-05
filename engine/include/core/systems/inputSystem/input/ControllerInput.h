@@ -61,12 +61,15 @@ namespace RDE {
         std::vector<int> controllerIDs = {  };
     };
 
-    FORWARD_DECLARE_CLASS(ControllerInput, Controller)
+    class ControllerInput;
+    struct Controller;
+
     /**
      * @brief This class controls which controller is bind to which effects and how they play.
      */
     class ControllerVibrationManager {
-        FRIEND_CLASS(ControllerInput)
+        friend class ControllerInput;
+
         private:
             /**
              * @brief Map EffectName -> SDL_VibrationEffect.

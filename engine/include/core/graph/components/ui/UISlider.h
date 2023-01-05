@@ -7,6 +7,8 @@
 
 #include "core/graph/components/ui/UI.h"
 #include "core/graph/components/ui/UITransform.h"
+#include "core/render/elements/IRenderizable.h"
+#include "core/render/elements/Batch.h"
 
 namespace RDE {
 
@@ -23,15 +25,21 @@ namespace RDE {
         Color handleColor = Color::Disabled;
     };
 
-    FORWARD_DECLARE_CLASS(UI9Slice, UIImage)
+    class Scene;
+    class Canvas;
+    class UIImage;
 
     // TODO: Check why 2 or more sliders act weird
-    class UISlider : public UI {
+    class UISlider {
         private:
             bool mouseDown = false;
             UIImage* backgroundBarSprite = nullptr;
+            
             UIImage* fillBarSprite = nullptr;
+            Node* fillBarNode = nullptr;
+
             UIImage* handleSprite = nullptr;
+            Node* handleNode = nullptr;
 
             UITransform* backgroundBarTransform = nullptr;
             UITransform* fillBarTransform = nullptr;
@@ -39,17 +47,21 @@ namespace RDE {
 
             float percentageFilled = 0.f;
 
+        RENDERIZABLE_UI_BASIC_PROPERTIES()
+
         public:
-            UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config);
+            UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config = {});
             ~UISlider() {  }
 
-            void setInteractable(bool _interactable) override;
-            bool isInteractable() override;
+            RENDERIZABLE_UI_BASIC_METHODS()
 
-            void onUpdate(Delta _dt) override;
+            void onUpdate(Delta _dt);
 
             void setFilledPercentage(float _percentage);
             float getFilledPercentage() const;
+
+            Node* getFillBarNode();
+            Node* getHandleNode();
 
         private:
             void onMouseClicked(MouseCode _mouseCode);

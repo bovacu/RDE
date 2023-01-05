@@ -9,6 +9,10 @@ cmake-build-releaselib/
 
 Obsidian_RDE/
 
+.vs/
+
+out/
+
 .cache/
 
 build/

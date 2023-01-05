@@ -28,7 +28,7 @@ namespace RDE {
     class Manager {
 
         public:
-            Manager();
+            explicit Manager();
 
             Engine* engine;
             /**

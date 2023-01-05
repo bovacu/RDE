@@ -5,6 +5,7 @@
 #include "core/systems/physicsSystem/PhysicsBody.h"
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
+#include "core/graph/components/Node.h"
 
 namespace RDE {
 
@@ -99,8 +100,10 @@ namespace RDE {
     }
 
     void PhysicsBody::calculateDataForPolygon(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType) {
+        // TODO (RDE): If physics act weird or stop working check this.
         const auto _numOfVertices = _shapeConfig.vertices.size();
-        cpVect _vertices[_numOfVertices];
+        std::vector<cpVect> _vertices;
+        _vertices.resize(_numOfVertices);
 
         for(auto _i = 0; _i < _numOfVertices; _i++) {
             auto& _vertex = _shapeConfig.vertices[_i];
@@ -108,11 +111,11 @@ namespace RDE {
         }
 
         if(body == nullptr) {
-            auto _moment = (float)cpMomentForPoly(_bodyMass, (int)_numOfVertices, _vertices, cpvzero, 0.f);
+            auto _moment = (float)cpMomentForPoly(_bodyMass, (int)_numOfVertices, &_vertices[0], cpvzero, 0.f);
             createBody(_shapeConfig, _moment, _bodyMass, _bodyType);
         }
 
-        physicsShapes[keyCounter] = { _shapeConfig, cpPolyShapeNew(body, (int)_numOfVertices, _vertices, cpTransformIdentity, 0.f), keyCounter };
+        physicsShapes[keyCounter] = { _shapeConfig, cpPolyShapeNew(body, (int)_numOfVertices, &_vertices[0], cpTransformIdentity, 0.f), keyCounter };
         setupShape(_shapeConfig);
         keyCounter++;
     }
