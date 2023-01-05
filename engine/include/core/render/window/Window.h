@@ -201,7 +201,16 @@ namespace RDE {
              */
             void stop();
 
+            /**
+             * @brief Refresh inner calculations for new DPIs on the screen.
+             */
             void refreshDpi();
+
+            /**
+             * @brief Traps the mouse inside the window or allows it to move outside.
+             * @param _allow If true, mouse will be able to leave the window, otherwise it won't.
+             */
+            void allowMouseToMoveOutOfWindow(bool _allow);
     };
 
 }

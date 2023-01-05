@@ -2,6 +2,8 @@
 #include "core/systems/eventSystem/WindowEvent.h"
 #include "core/platform/PlatformHeaderSDL.h"
 #include "core/Engine.h"
+#include <SDL_mouse.h>
+#include <SDL_stdinc.h>
 
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
@@ -145,6 +147,10 @@ namespace RDE {
         } else {
             Util::Log::debug("DPI of the current window is -> (Diagonal, Horizontal, Vertical) - (", properties->windowData.diagonalDpi, ", ", properties->windowData.horizontalDpi, ", ", properties->windowData.verticalDpi, ")");
         }
+    }
+
+    void Window::allowMouseToMoveOutOfWindow(bool _allow) {
+        SDL_SetRelativeMouseMode(_allow ? SDL_FALSE : SDL_TRUE);
     }
 
 }
