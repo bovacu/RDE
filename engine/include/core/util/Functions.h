@@ -13,7 +13,6 @@
 #include <chrono>
 #include <iostream>
 #include <algorithm>
-#include <vcruntime.h>
 #include <vector>
 
 namespace RDE {
