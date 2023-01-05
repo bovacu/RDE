@@ -109,6 +109,8 @@ namespace RDE {
              * @param _event Event
              */
             void onWillEnterBackground(SDL_Event& _event);
+
+            void onWindowDisplayChanged(int _newWindowDisplay);
     };
 
 }

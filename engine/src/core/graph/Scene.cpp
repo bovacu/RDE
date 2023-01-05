@@ -5,6 +5,7 @@
 #include "core/Engine.h"
 #include "core/graph/components/Transform.h"
 #include "core/systems/uiSystem/Canvas.h"
+#include "core/util/Functions.h"
 
 namespace RDE {
 
@@ -16,6 +17,13 @@ namespace RDE {
 
         auto* _canvas = new Canvas(this, &engine->getWindow(), "Canvas");
         canvases.push_back(_canvas);
+    }
+
+    Scene::~Scene() {
+        for(auto* _canvas : canvases)
+            delete _canvas;
+
+        prefabs.clear();
     }
 
     void Scene::onEvent(Event& _event) {
@@ -111,13 +119,6 @@ namespace RDE {
         return canvases;
     }
 
-    Scene::~Scene() {
-        for(auto* _canvas : canvases)
-            delete _canvas;
-
-        prefabs.clear();
-    }
-
     Canvas* Scene::addNewCanvas(const std::string& _canvasTag) {
         auto* _canvas = new Canvas(this, &engine->getWindow(), _canvasTag);
         canvases.push_back(_canvas);
@@ -150,5 +151,10 @@ namespace RDE {
 
     NodeID Scene::getPrefab(const std::string& _prefabKey) {
         return prefabs[_prefabKey];
+    }
+
+    // TODO (RDE): Implement canvas and graph refresh after the display is changed on runtime.
+    void Scene::onDisplayChanged() {
+        Util::Log::warn("The display changed, Scene has received the event but it has no effect as it needs to be implemented");        
     }
 }

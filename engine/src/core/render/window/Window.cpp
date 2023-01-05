@@ -2,6 +2,8 @@
 #include "core/systems/eventSystem/WindowEvent.h"
 #include "core/platform/PlatformHeaderSDL.h"
 #include "core/Engine.h"
+#include "core/util/Functions.h"
+#include "core/util/Vec.h"
 #include <SDL_mouse.h>
 #include <SDL_stdinc.h>
 
@@ -152,5 +154,4 @@ namespace RDE {
     void Window::allowMouseToMoveOutOfWindow(bool _allow) {
         SDL_SetRelativeMouseMode(_allow ? SDL_FALSE : SDL_TRUE);
     }
-
 }

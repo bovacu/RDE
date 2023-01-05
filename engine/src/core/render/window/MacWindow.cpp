@@ -47,6 +47,8 @@ namespace RDE {
         SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         SDL_SetWindowResizable(window, SDL_TRUE);
 
+        currentDisplayIndex = SDL_GetWindowDisplayIndex(window);
+
         refreshDpi();
     }
 }

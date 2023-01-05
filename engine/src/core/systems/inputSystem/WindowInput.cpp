@@ -3,7 +3,9 @@
 
 #include "core/systems/inputSystem/input/WindowInput.h"
 #include "core/systems/eventSystem/WindowEvent.h"
+#include "core/systems/uiSystem/SceneManager.h"
 #include "core/Engine.h"
+#include "SDL2/SDL_video.h"
 
 namespace RDE {
 
@@ -53,32 +55,75 @@ namespace RDE {
 
     void WindowInput::onWindowGainFocus(SDL_Event& _event) {
         window->hasFocus = true;
+
+        if(!window->onWindowFocusedCallback.isEmpty()) {
+            window->onWindowFocusedCallback();
+        }
     }
 
     void WindowInput::onWindowLostFocus(SDL_Event& _event) {
         window->hasFocus = false;
+        
+        if(!window->onWindowUnfocusedCallback.isEmpty()) {
+            window->onWindowUnfocusedCallback();
+        }
     }
 
     void WindowInput::onWindowResize(SDL_Event& _event) {
         WindowResizedEvent _rwEvent(_event.window.data1, _event.window.data2);
         window->consumeEvent(_rwEvent);
+        
+        if(!window->onWindowResizedCallback.isEmpty()) {
+            window->onWindowResizedCallback(Vec2I { _event.window.data1, _event.window.data2 });
+        }
     }
 
     void WindowInput::onWindowMoved(SDL_Event& _event) {
         WindowMovedEvent _wmEvent(_event.window.data1, _event.window.data2);
         window->consumeEvent(_wmEvent);
+
+        if(!window->onWindowMovedCallback.isEmpty()) {
+            window->onWindowMovedCallback(Vec2F { (float)_event.window.data1, (float)_event.window.data2 });
+        }
+
+        onWindowDisplayChanged(SDL_GetWindowDisplayIndex(window->window));
+    }
+
+    void WindowInput::onWindowDisplayChanged(int _display) {
+        if(window->currentDisplayIndex == _display) {
+            return;
+        }
+
+        window->currentDisplayIndex = _display;
+        WindowDisplayChangedEvent _e(_display);
+        window->consumeEvent(_e);
+
+        window->refreshDpi();
+        engine->manager.sceneManager.getDisplayedScene()->onDisplayChanged();
+
+        if(!window->onWindowDisplayChangedCallback.isEmpty()) {
+            window->onWindowDisplayChangedCallback(_display);
+        }
     }
 
     void WindowInput::onWindowMinimized(SDL_Event& _event) {
         WindowMinimizedEvent _e(1);
         window->consumeEvent(_e);
         window->minimized = true;
+
+        if(!window->onWindowMinimizedCallback.isEmpty()) {
+            window->onWindowMinimizedCallback();
+        }
     }
 
     void WindowInput::onWindowMaximized(SDL_Event& _event) {
         WindowMinimizedEvent _e(0);
         window->consumeEvent(_e);
         window->minimized = false;
+
+        if(!window->onWindowMaximizedCallback.isEmpty()) {
+            window->onWindowMaximizedCallback();
+        }
     }
 
     void WindowInput::onQuit(SDL_Event& _event) {

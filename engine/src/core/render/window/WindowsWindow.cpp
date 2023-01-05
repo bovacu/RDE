@@ -3,6 +3,7 @@
 //
 
 #include "core/render/window/WindowsWindow.h"
+#include <SDL_video.h>
 
 #if IS_WINDOWS() && !IS_ANDROID()
 
@@ -48,6 +49,8 @@ namespace RDE {
         SDL_SetWindowResizable(window, SDL_TRUE);
 
         if(!properties->projectData.iconPath.empty()) setIcon(properties->projectData.iconPath);
+
+        currentDisplayIndex = SDL_GetWindowDisplayIndex(window);
 
         refreshDpi();
     }

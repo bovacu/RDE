@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/util/Delegate.h"
 #ifndef RDE_WINDOW_H
 #define RDE_WINDOW_H
 
@@ -55,6 +56,8 @@ namespace RDE {
              */
             bool running = true;
 
+            int currentDisplayIndex = -1;
+
         public:
             /**
              * @brief This callback lets the user define how and when the window should run the game. By default it is
@@ -62,6 +65,14 @@ namespace RDE {
              * is not minimized.
              */
             UDelegate<bool()> shouldUpdateWindow;
+
+            MDelegate<void(const Vec2F&)> onWindowMovedCallback;
+            MDelegate<void(const Vec2I&)> onWindowResizedCallback;
+            MDelegate<void(int)> onWindowDisplayChangedCallback;
+            MDelegate<void()> onWindowMinimizedCallback;
+            MDelegate<void()> onWindowMaximizedCallback;
+            MDelegate<void()> onWindowFocusedCallback;
+            MDelegate<void()> onWindowUnfocusedCallback;
 
         protected:
             explicit Window(RDEConfig* _props);

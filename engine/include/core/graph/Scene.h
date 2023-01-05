@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/systems/inputSystem/input/WindowInput.h"
 #ifndef RDE_SCENE_H
 #define RDE_SCENE_H
 
@@ -21,6 +22,7 @@ namespace RDE {
     class Scene {
         friend class Graph;
         friend class ConfigManager;
+        friend class WindowInput;
 
         private:
             /**
@@ -58,6 +60,9 @@ namespace RDE {
              * @see Engine
              */
             Engine* engine = nullptr;
+
+        protected:
+            void onDisplayChanged();
 
         public:
             explicit Scene(Engine* _engine, const std::string& _debugName = "Scene");
