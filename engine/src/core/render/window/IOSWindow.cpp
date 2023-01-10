@@ -22,7 +22,7 @@ namespace RDE {
 
         SDL_DisplayMode displayMode;
         SDL_GetDesktopDisplayMode(0, &displayMode);
-        window = SDL_CreateWindow(nullptr, 0, 0, displayMode.w, displayMode.h,  SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
+        window = SDL_CreateWindow(nullptr, 0, 0, displayMode.w, displayMode.h,  SDL_WINDOW_OPENGL);
 
         if(window == nullptr) {
             Util::Log::error("SDL window creation failed: ", SDL_GetError());

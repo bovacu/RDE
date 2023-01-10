@@ -22,7 +22,7 @@ namespace RDE {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
         window = SDL_CreateWindow(_config->windowData.title.c_str(), 0, 0,
                                   (int)_config->windowData.size.x, (int)_config->windowData.size.y,
-                                  SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
+                                  SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
         if(window == nullptr) {
             Util::Log::error("SDL window creation failed: ", SDL_GetError());
