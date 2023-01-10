@@ -182,7 +182,7 @@ namespace RDE {
                 _innerData.layer                    == _batch.layer &&
                 _innerData.shader                   == _batch.shader->getShaderID() &&
                 _innerData.batchPriority            == _batch.priority &&
-                _batch.indexBuffer.size() + 6       < maxIndicesPerDrawCall) {
+                _batch.vertexBuffer.size()          <= maxIndicesPerDrawCall * 6) {
                 return &_batch;
             }
         }
@@ -191,7 +191,6 @@ namespace RDE {
         Batch _batch;
         _batch.ID = batches.size();
         _batch.layer = _innerData.layer;
-        _batch.indexBuffer.reserve(maxIndicesPerDrawCall * 6);
         _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 6);
         _batch.textureID = _innerData.texture->getGLTexture();
         _batch.priority = _innerData.batchPriority;
@@ -219,7 +218,7 @@ namespace RDE {
     void SpriteBatch::flush() {
         for(auto& _batch : batches) {
             auto _shaderID = _batch.shader->getShaderID();
-            if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0) {
+            if (_batch.vertexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0) {
                 Util::Log::warn("Batch: ", _batch.ID, " was skipped, data - VB size: ", _batch.vertexBuffer.size(), ", IB size: ", _batch.indexBuffer.size(), ", Texture: ", _batch.textureID, ", Shader: ", _shaderID);
                 continue;
             }
@@ -238,20 +237,14 @@ namespace RDE {
             glBindBuffer(GL_ARRAY_BUFFER, _batch.shader->getDynamicShaderVBO());
             glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0]);
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _batch.shader->getDynamicShaderIBO());
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (long)(sizeof(uint32_t) * _batch.indexBuffer.size()), &_batch.indexBuffer[0]);
-
-            glDrawElements(GL_TRIANGLES, (int)_batch.indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
+            glDrawArrays(GL_TRIANGLES, 0, _batch.vertexBuffer.size());
 
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             glBindVertexArray(0);
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
             totalTriangles += (int)_batch.vertexBuffer.size() / 2;
             _batch.vertexBuffer.clear();
-            _batch.indexBuffer.clear();
             _batch.vertexCount = 0;
 
             drawCalls++;

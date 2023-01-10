@@ -53,15 +53,19 @@ namespace RDE {
         _batch->vertexBuffer.emplace_back(_data.vertices[0]);
         _batch->vertexBuffer.emplace_back(_data.vertices[1]);
         _batch->vertexBuffer.emplace_back(_data.vertices[2]);
+
+
+        _batch->vertexBuffer.emplace_back(_data.vertices[2]);
         _batch->vertexBuffer.emplace_back(_data.vertices[3]);
+        _batch->vertexBuffer.emplace_back(_data.vertices[0]);
 
-        _batch->indexBuffer.emplace_back(_vertexCount + 0);
-        _batch->indexBuffer.emplace_back(_vertexCount + 1);
-        _batch->indexBuffer.emplace_back(_vertexCount + 2);
+        // _batch->indexBuffer.emplace_back(_vertexCount + 0);
+        // _batch->indexBuffer.emplace_back(_vertexCount + 1);
+        // _batch->indexBuffer.emplace_back(_vertexCount + 2);
 
-        _batch->indexBuffer.emplace_back(_vertexCount + 2);
-        _batch->indexBuffer.emplace_back(_vertexCount + 3);
-        _batch->indexBuffer.emplace_back(_vertexCount + 0);
+        // _batch->indexBuffer.emplace_back(_vertexCount + 2);
+        // _batch->indexBuffer.emplace_back(_vertexCount + 3);
+        // _batch->indexBuffer.emplace_back(_vertexCount + 0);
     }
 
 

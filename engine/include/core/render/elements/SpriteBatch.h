@@ -156,7 +156,7 @@ namespace RDE {
              * @brief Maximum number of indices that can be accumulated in a single Draw Call, if it is exceeded, an
              * automatic Draw Call will be called to free the buffer.
              */
-            const int maxIndicesPerDrawCall = 65000; // Between 35.000 and 50.000 should be a good range
+            const int maxIndicesPerDrawCall = 120000; // Between 35.000 and 50.000 should be a good range
 
         private:
             /**
