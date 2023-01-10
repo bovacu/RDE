@@ -22,17 +22,17 @@ namespace RDE {
             int initialNumberOfElements = -1;
             int numberOfNewElementsToCreateIfNotEnough = -1;
             int maxNumberOfElements = -1;
-            UDelegate<T()> allocator {};
+            UniqueDelegate<T()> allocator {};
 
         public:
-            void init(UDelegate<T()> _allocator, int _initialNumberOfElements = 100, int _numberOfNewElementsToCreateIfNotEnough = 25, int _maxNumberOfElements = 1000);
+            void init(UniqueDelegate<T()> _allocator, int _initialNumberOfElements = 100, int _numberOfNewElementsToCreateIfNotEnough = 25, int _maxNumberOfElements = 1000);
             T* getElement();
             void returnElement(T* _element);
             void clear();
     };
 
     template<class T>
-    void Pool<T>::init(UDelegate<T()> _allocator, int _initialNumberOfElements, int _numberOfNewElementsToCreateIfNotEnough, int _maxNumberOfElements) {
+    void Pool<T>::init(UniqueDelegate<T()> _allocator, int _initialNumberOfElements, int _numberOfNewElementsToCreateIfNotEnough, int _maxNumberOfElements) {
         pool.reserve(_initialNumberOfElements);
         for(auto _i = 0; _i < _initialNumberOfElements; _i++) {
             auto _element = _allocator();

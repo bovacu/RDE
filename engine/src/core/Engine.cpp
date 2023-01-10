@@ -15,7 +15,7 @@ namespace RDE {
         window = platform.createWindow(&rdeConfig);
         currentDPI = rdeConfig.windowData.diagonalDpi;
 
-        UDelegate<void(Event&)> onEventDelegate;
+        UniqueDelegate<void(Event&)> onEventDelegate;
         onEventDelegate.bind<&Engine::onEvent>(this);
         window->setEventCallback(onEventDelegate);
 
@@ -224,14 +224,14 @@ namespace RDE {
         fixedDelta = _fixedDelta;
     }
 
-    void Engine::setRenderingRedirection(UDelegate<void(FrameBuffer*)>& _redirectionFunc) {
+    void Engine::setRenderingRedirection(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc) {
         redirectionFunc = _redirectionFunc;
         if(frameBuffer) {
             frameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
         }
     }
 
-    void Engine::setRenderingRedirectionToImGui(UDelegate<void(FrameBuffer*)>& _redirectionFunc) {
+    void Engine::setRenderingRedirectionToImGui(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc) {
         imGuiRedirectionFunc = _redirectionFunc;
         if(frameBuffer) {
             frameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);

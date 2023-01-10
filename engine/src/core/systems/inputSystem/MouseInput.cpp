@@ -11,7 +11,7 @@ namespace RDE {
         engine = _engine;
         window = _window;
 
-        UDelegate<void(SDL_Event&)> mmeDel, mdeDel, mueDel, mseDel;
+        UniqueDelegate<void(SDL_Event&)> mmeDel, mdeDel, mueDel, mseDel;
         mmeDel.bind<&MouseInput::onMouseMoved>(this);
         mdeDel.bind<&MouseInput::onMouseDown>(this);
         mueDel.bind<&MouseInput::onMouseUp>(this);

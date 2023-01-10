@@ -45,7 +45,7 @@ namespace RDE {
         RENDERIZABLE_UI_BASIC_PROPERTIES()
 
         public:
-            MDelegate<void(bool)> onClickedCheckbox;
+            Delegate<void(bool)> onClickedCheckbox;
             
 
         public:

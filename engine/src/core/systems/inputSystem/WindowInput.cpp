@@ -13,7 +13,7 @@ namespace RDE {
         window = _window;
         engine = _engine;
 
-        UDelegate<void(SDL_Event&)> weDel, wdeDel, wdebeDel, wdefeDel, wwebeDel, wwefeDel;
+        UniqueDelegate<void(SDL_Event&)> weDel, wdeDel, wdebeDel, wdefeDel, wwebeDel, wwefeDel;
         weDel.bind<&WindowInput::onWindowEvent>(this);
         wdeDel.bind<&WindowInput::onDestroyApp>(this);
         wdebeDel.bind<&WindowInput::onDidEnterBackground>(this);

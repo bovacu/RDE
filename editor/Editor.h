@@ -21,7 +21,7 @@ namespace Editor {
         Node* circleNode;
         bool collisionHappened = false;
         UISlider* slider;
-        UDelegate<void(FrameBuffer*)> redirectRenderingDel;
+        UniqueDelegate<void(FrameBuffer*)> redirectRenderingDel;
 
         public:
             explicit Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }

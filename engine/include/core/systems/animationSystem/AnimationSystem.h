@@ -45,7 +45,7 @@ namespace RDE {
             }
     };
 
-    typedef MDelegate<bool(const TransitionParams&)> transitionFunc;
+    typedef ReturnDelegate<bool(const TransitionParams&)> transitionFunc;
 
     class AnimationSystem {
         private:

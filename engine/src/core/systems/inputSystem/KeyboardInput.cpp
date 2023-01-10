@@ -15,7 +15,7 @@ namespace RDE {
         engine = _engine;
         window = _window;
 
-        UDelegate<void(SDL_Event&)> kdeDel, kueDel, tteDel;
+        UniqueDelegate<void(SDL_Event&)> kdeDel, kueDel, tteDel;
         kdeDel.bind<&KeyboardInput::onKeyDown>(this);
         kueDel.bind<&KeyboardInput::onKeyUp>(this);
         tteDel.bind<&KeyboardInput::onTextTyped>(this);

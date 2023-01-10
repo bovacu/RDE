@@ -116,7 +116,7 @@ namespace RDE {
          * @return bool
          */
         template<typename T>
-        bool dispatchEvent(const UDelegate<bool(T&)>& _delegate) {
+        bool dispatchEvent(const UniqueDelegate<bool(T&)>& _delegate) {
             if(event.handled) return false;
             /// This is why we needed the static version of getType.
             if (event.getEventType() == T::getStaticType()) {

@@ -1,63 +1,24 @@
 // Created by borja on 8/3/22.
 
-/* EXAMPLE USAGE
-    struct A {
-        bool myFunc(int _a, const std::string& _b) {
-            LOG_I("Called from A")
-            return false;
-        }
-    };
-
-    struct B {
-        bool myFunc(int _a, const std::string& _b) {
-            LOG_I("Called from B")
-            return false;
-        }
-    };
-
-    struct C {
-        bool myFunc(int _a, const std::string& _b) {
-            LOG_I("Called from C")
-            return false;
-        }
-    };
-
-    bool myFunc(int _a, const std::string& _b) {
-        LOG_I("Called from free")
-        return false;
-    }
-
-
-    engine::MDelegate<bool(int, const std::string&)> _myMDelegate;
-    engine::UDelegate<bool(int, const std::string&)> _myUDelegate;
-    A _a;
-    C _c;
-
-    _myUDelegate.bind<&myFunc>();
-    _myUDelegate.bind<&A::myFunc>(&_a);
-
-    _myMDelegate.bind<&myFunc>();
-    _myMDelegate.bind<&A::myFunc>(&_a);
-    _myMDelegate.bind<&A::myFunc>(&_a);
-    _myMDelegate.bind<&C::myFunc>(&_c);
-    _myMDelegate(0, "");
-    _myMDelegate.clear();
-*/
 #ifndef RDE_DELEGATE_H
 #define RDE_DELEGATE_H
 
 #include <exception>
 #include <functional>
+#include <unordered_map>
 #include "core/Core.h"
 
 namespace RDE {
 
+    template <typename R = void, typename...Args>   
+    struct Delegate;
+
     // Primary template intentionally left empty
     template <typename Signature>
-    class UDelegate;
+    struct UniqueDelegate;
 
     template <typename Signature>
-    class MDelegate;
+    struct ReturnDelegate;
 
     template <typename Signature>
     struct Stub;
@@ -65,13 +26,35 @@ namespace RDE {
     class BadDelegateCall : public std::exception {
         public:
             [[nodiscard]] auto what() const noexcept -> const char* override {
-//                auto _error = APPEND_S("Delegate had no attached function, in line ", __LINE__, " in file ", __FILE_NAME__);
+                // auto _error = APPEND_S("Delegate had no attached function, in line ", __LINE__, " in file ", __FILE_NAME__);
                 return "Delegate had no attached function";
             }
     };
 
     template <typename R, typename...Args>
-    class UDelegate<R(Args...)> {
+    struct Stub<R(Args...)> {
+        using stub_function = R(*)(const void*, Args...);
+        const void* instance = nullptr; ///< A pointer to the instance (if it exists)
+        stub_function stub = &stub_null; ///< A pointer to the function to invoke
+
+        [[noreturn]] static auto stub_null(const void* _p, Args...) -> R {
+            throw BadDelegateCall{};
+        }
+    };
+
+    typedef uint32_t DelegateID;
+
+
+    /**
+     * @brief This struct can hold one reference to another function, and execute it whenever is needed. It can return void or any other desired type. Use it if just one function reference is
+     * going to be stored. 
+     */ 
+    template <typename R, typename...Args>
+    struct UniqueDelegate<R(Args...)> {
+
+        friend class Delegate<R(Args...)>;
+        friend class ReturnDelegate<R(Args...)>;
+
         protected:
             [[noreturn]] static auto stub_null(const void* _p, Args...) -> R {
                 throw BadDelegateCall{};
@@ -82,23 +65,23 @@ namespace RDE {
             stub_function stub = &stub_null; ///< A pointer to the function to invoke
 
         public:
-            UDelegate() {}
-            UDelegate(const UDelegate& other) = default;
-            auto operator=(const UDelegate& other) -> UDelegate& = default;
-            auto operator==(UDelegate* _other) {
+            UniqueDelegate() {}
+            UniqueDelegate(const UniqueDelegate& other) = default;
+            auto operator=(const UniqueDelegate& other) -> UniqueDelegate& = default;
+            auto operator==(UniqueDelegate* _other) {
                 if (_other == nullptr) {
                     return instance == nullptr && stub == stub_null;
                 }
                 return _other->instance == instance && _other->stub == stub;
             }
-            auto operator!=(UDelegate* _other) {
+            auto operator!=(UniqueDelegate* _other) {
                 if (_other == nullptr) {
                     return instance != nullptr || stub != stub_null;
                 }
                 return _other->instance != instance && _other->stub != stub;
             }
-            auto operator==(const UDelegate& _other) { return _other->instance == instance; }
-            auto operator!=(const UDelegate& _other) { return _other->instance != instance; }
+            auto operator==(const UniqueDelegate& _other) { return _other->instance == instance; }
+            auto operator!=(const UniqueDelegate& _other) { return _other->instance != instance; }
             auto operator()(Args... _args) const -> R {
                 return std::invoke(stub, instance, _args...);
             }
@@ -139,105 +122,152 @@ namespace RDE {
             }
     };
 
-
+    /**
+     * @brief This struct can store as many void functions as needed and execute them all at once when needed. Only void function types allowed. To return values use UniqueDelegate or ReturnDelegate.
+     */
     template <typename R, typename...Args>
-    struct Stub<R(Args...)> {
-        using stub_function = R(*)(const void*, Args...);
-        const void* instance = nullptr; ///< A pointer to the instance (if it exists)
-        stub_function stub = &stub_null; ///< A pointer to the function to invoke
-
-        [[noreturn]] static auto stub_null(const void* _p, Args...) -> R {
-            throw BadDelegateCall{};
-        }
-    };
-
-    typedef uint32_t DelegateRef;
-    template <typename R, typename...Args>
-    class MDelegate<R(Args...)> {
-        using stub_function = R(*)(const void*, Args...);
+    struct Delegate<R(Args...)> {
         private:
-            std::vector<Stub<R(Args...)>> stubs;
-            size_t counter = 0;
+            using stub_function = R(*)(const void*, Args...);
+            std::unordered_map<DelegateID, UniqueDelegate<R(Args...)>> callables;
+            uint32_t id;
 
         public:
-            // Creates an unbound delegate
-            MDelegate() {}
-
-            // We want the Delegate to be copyable, since its lightweight
-            MDelegate(const MDelegate& other) = default;
-            auto operator=(const MDelegate& other) -> MDelegate& = default;
-
-            size_t getEnd() {
-                return counter;
-            }
-
-            void remove(size_t _position) {
-                stubs.erase(stubs.begin() + _position);
-            }
-
-            /**
-             * WARNING calling this won't return any value, just will run the functions, if the return value is needed
-             * then call exec(std::vector<R>&, Args...), this will return each result for each executed method
-             */
             auto operator()(Args... args) {
-                for(auto& _stub : stubs) std::invoke(_stub.stub, _stub.instance, args...);
+                for(auto _it = callables.begin(); _it != callables.end(); _it++) _it->second(args...);
             }
 
-            void exec(std::vector<R>& _results, Args... args) {
-                #if IS_WINDOWS()
-                for (auto& _stub : stubs) _results.emplace_back(std::invoke(_stub.stub, _stub.instance, args...));
-                #else
-                for (auto& _stub : stubs) _results.template emplace_back(std::invoke(_stub.stub, _stub.instance, args...));
-                #endif
+            // FREE FUNCTION
+            template <auto Function, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(Function), Args...>>>
+            DelegateID bind() {
+                callables[id] = UniqueDelegate<R(Args...)>();
+                callables[id].instance = nullptr;
+                callables[id].stub = static_cast<stub_function>([](const void*, Args... _args) -> R{
+                    return std::invoke(Function, std::forward<Args>(_args)...);
+                });
+
+                return id++;
             }
 
-            template <auto Function, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(Function),Args...>>>
-            auto bind() -> DelegateRef {
-                Stub<R(Args...)> _s {
-                    nullptr,
-                    static_cast<stub_function>([](const void*, Args... _args) -> R {
-                        return std::invoke(Function, std::forward<Args>(_args)...);
-                    })
-                };
-                stubs.push_back(_s);
-                counter = stubs.size();
-                return counter;
-            }
-
+            // CONST MEMBER FUNCTION
             template <auto MemberFunction, typename Class, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(MemberFunction),const Class*, Args...>>>
-            auto bind(const Class* _cls) -> DelegateRef {
-                Stub<R(Args...)> _s {
-                        _cls,
-                        static_cast<stub_function>([](const void* _p, Args... _args) -> R {
-                            const auto* _c = static_cast<const Class*>(_p);
-                            return std::invoke(MemberFunction, _c, _args...);
-                        })
-                };
-                stubs.push_back(_s);
-                counter = stubs.size();
-                return counter;
+            DelegateID bind(const Class* _cls) {
+                callables[id] = UniqueDelegate<R(Args...)>();
+                callables[id].instance = _cls;
+                callables[id].stub = static_cast<stub_function>([](const void* _p, Args... _args) -> R{
+                    const auto* _c = static_cast<const Class*>(_p);
+                    return std::invoke(MemberFunction, _c, _args...);
+                });
+
+                return id++;
             }
 
+            // NON-CONST MEMBER FUNCTION
             template <auto MemberFunction, typename Class, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(MemberFunction),Class*, Args...>>>
-            auto bind(Class* _cls) -> DelegateRef {
-                Stub<R(Args...)> _s {
-                        _cls,
-                        static_cast<stub_function>([](const void* _p, Args... _args) -> R {
-                            auto* _c = const_cast<Class*>(static_cast<const Class*>(_p));
-                            return std::invoke(MemberFunction, _c, _args...);
-                        })
-                };
-                stubs.push_back(_s);
-                counter = stubs.size();
-                return counter;
+            DelegateID bind(Class* _cls) {
+                callables[id] = UniqueDelegate<R(Args...)>();
+                callables[id].instance = _cls;
+                callables[id].stub = static_cast<stub_function>([](const void* _p, Args... _args) -> R{
+                    auto* _c = const_cast<Class*>(static_cast<const Class*>(_p));
+                    return std::invoke(MemberFunction, _c, _args...);
+                });
+
+                return id++;
             }
+
 
             void clear() {
-                stubs.clear();
+                callables.clear();
+            }
+
+            void unbind(DelegateID _id) {
+                auto _it = callables.find(_id);
+                if(_it != callables.end()) {
+                    callables.erase(_id);
+                }
             }
 
             bool isEmpty() {
-                return stubs.empty();
+                return callables.empty();
+            }
+    };
+
+    /**
+     * @brief This struct can store as many return type functions as needed and execute them all at once when needed. Any return type is valid except void. If no value is returned, use UniqueDelegate or Delegate.
+     */
+    typedef uint32_t DelegateRef;
+    template <typename R, typename...Args>
+    struct ReturnDelegate<R(Args...)> {
+        using stub_function = R(*)(const void*, Args...);
+        private:
+            std::unordered_map<DelegateID, UniqueDelegate<R(Args...)>> callables;
+            uint32_t id;
+
+        public:
+            // Creates an unbound delegate
+            ReturnDelegate() {}
+
+            // We want the Delegate to be copyable, since its lightweight
+            ReturnDelegate(const ReturnDelegate& other) = default;
+            auto operator=(const ReturnDelegate& other) -> ReturnDelegate& = default;
+            std::vector<R> operator()(Args... args) {
+                std::vector<R> _results;
+                for(auto _it = callables.begin(); _it != callables.end(); _it++) _it->second(args...);
+                return _results;
+            }
+
+                        // FREE FUNCTION
+            template <auto Function, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(Function), Args...>>>
+            DelegateID bind() {
+                callables[id] = UniqueDelegate<R(Args...)>();
+                callables[id].instance = nullptr;
+                callables[id].stub = static_cast<stub_function>([](const void*, Args... _args) -> R{
+                    return std::invoke(Function, std::forward<Args>(_args)...);
+                });
+
+                return id++;
+            }
+
+            // CONST MEMBER FUNCTION
+            template <auto MemberFunction, typename Class, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(MemberFunction),const Class*, Args...>>>
+            DelegateID bind(const Class* _cls) {
+                callables[id] = UniqueDelegate<R(Args...)>();
+                callables[id].instance = _cls;
+                callables[id].stub = static_cast<stub_function>([](const void* _p, Args... _args) -> R{
+                    const auto* _c = static_cast<const Class*>(_p);
+                    return std::invoke(MemberFunction, _c, _args...);
+                });
+
+                return id++;
+            }
+
+            // NON-CONST MEMBER FUNCTION
+            template <auto MemberFunction, typename Class, typename = std::enable_if_t<std::is_invocable_r_v<R, decltype(MemberFunction),Class*, Args...>>>
+            DelegateID bind(Class* _cls) {
+                callables[id] = UniqueDelegate<R(Args...)>();
+                callables[id].instance = _cls;
+                callables[id].stub = static_cast<stub_function>([](const void* _p, Args... _args) -> R{
+                    auto* _c = const_cast<Class*>(static_cast<const Class*>(_p));
+                    return std::invoke(MemberFunction, _c, _args...);
+                });
+
+                return id++;
+            }
+
+
+            void clear() {
+                callables.clear();
+            }
+
+            void unbind(DelegateID _id) {
+                auto _it = callables.find(_id);
+                if(_it != callables.end()) {
+                    callables.erase(_id);
+                }
+            }
+
+            bool isEmpty() {
+                return callables.empty();
             }
     };
 }

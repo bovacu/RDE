@@ -81,7 +81,7 @@ namespace RDE {
              */
             Scene* scene = nullptr;
 
-            UDelegate<void(void*)> onDataChanged;
+            UniqueDelegate<void(void*)> onDataChanged;
             bool isUI = false;
 
             std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> renderizableTree[2]; // One for sprites and another for UI
@@ -181,22 +181,22 @@ namespace RDE {
             /**
              * @brief A callback if we want our graph to make any specific task during its internal event polling.
              */
-            UDelegate<void(NodeContainer&, Event&)> onEventDel;
+            UniqueDelegate<void(NodeContainer&, Event&)> onEventDel;
 
             /**
              * @brief A callback if we want our graph to make any specific task during its internal update.
              */
-            UDelegate<void(NodeContainer&, Delta)> onUpdateDel;
+            UniqueDelegate<void(NodeContainer&, Delta)> onUpdateDel;
 
             /**
              * @brief A callback if we want our graph to make any specific task during its internal fixed update.
              */
-            UDelegate<void(NodeContainer&, Delta)> onFixedUpdateDel;
+            UniqueDelegate<void(NodeContainer&, Delta)> onFixedUpdateDel;
 
             /**
              * @brief A callback if we want our graph to make any specific task during its internal render.
              */
-            UDelegate<void(NodeContainer&)> onRenderDel;
+            UniqueDelegate<void(NodeContainer&)> onRenderDel;
 
         public:
             Graph(Scene* _scene, const std::string& _sceneName, bool _isUI = false);

@@ -47,7 +47,7 @@ namespace RDE {
             /**
              * @brief All the registeredCommands.
              */
-            std::map<std::string, MDelegate<Logs (const std::vector<std::string>&)>> commands;
+            std::map<std::string, ReturnDelegate<Logs (const std::vector<std::string>&)>> commands;
 
             /**
              * @brief All the descriptions of the commands.

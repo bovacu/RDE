@@ -67,7 +67,7 @@ namespace RDE {
             typedef std::function<bool(AssociatedFunctionArgs...)> HandlerFunc;
 
         private:
-            std::map<Event, RDE::MDelegate<bool(AssociatedFunctionArgs...)>> handlers;
+            std::map<Event, RDE::ReturnDelegate<bool(AssociatedFunctionArgs...)>> handlers;
 
         public:
             class HandlerId {
@@ -83,7 +83,11 @@ namespace RDE {
             template<auto Func, typename Class>
             HandlerId subscribe(const Event& _key, Class* _class) {
                 if (Func) {
+                    #if IS_WINDOWS()
+                    handlers[_key].bind<Func>(_class);
+                    #else
                     handlers[_key].template bind<Func>(_class);
+                    #endif
                     return HandlerId(handlers[_key].getEnd());
                 }
                 return HandlerId();
@@ -106,8 +110,7 @@ namespace RDE {
                     return false;
                 }
 
-                std::vector<bool> _results;
-                handlers[_type].exec(_results, _args...);
+                std::vector<bool> _results = handlers[_type](_args...);
                 return std::all_of(_results.begin(), _results.end(), [](bool v) { return v; });
             }
 

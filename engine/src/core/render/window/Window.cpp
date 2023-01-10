@@ -96,7 +96,7 @@ namespace RDE {
         return window;
     }
 
-    void Window::setEventCallback(const UDelegate<void(Event&)>& _callback) {
+    void Window::setEventCallback(const UniqueDelegate<void(Event&)>& _callback) {
         eventCallback = _callback;
     }
 

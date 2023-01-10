@@ -10,7 +10,7 @@ namespace RDE {
         engine = _engine;
         window = _window;
 
-        UDelegate<void(SDL_Event&)> otdDel, otuDel, otmDel;
+        UniqueDelegate<void(SDL_Event&)> otdDel, otuDel, otmDel;
         otdDel.bind<&MobileInput::onTouchDown>(this);
         otuDel.bind<&MobileInput::onTouchUp>(this);
         otmDel.bind<&MobileInput::onTouchMoved>(this);

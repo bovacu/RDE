@@ -35,9 +35,9 @@ namespace RDE {
     #endif
 
     struct PhysicsCollisionCallbacks {
-        UDelegate<void(PhysicsBody* bodyA, PhysicsBody* bodyB)> onCollisionEnter;
-        UDelegate<void(PhysicsBody* bodyA, PhysicsBody* bodyB)> onCollisionStay;
-        UDelegate<void(PhysicsBody* bodyA, PhysicsBody* bodyB)> onCollisionExit;
+        UniqueDelegate<void(PhysicsBody* bodyA, PhysicsBody* bodyB)> onCollisionEnter;
+        UniqueDelegate<void(PhysicsBody* bodyA, PhysicsBody* bodyB)> onCollisionStay;
+        UniqueDelegate<void(PhysicsBody* bodyA, PhysicsBody* bodyB)> onCollisionExit;
     };
 
     class PhysicsManager {

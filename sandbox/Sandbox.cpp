@@ -92,7 +92,7 @@ namespace GDE {
 //        ui->interaction->onMouseEntered.bind<&Sandbox::onMouseEntered>(this);
 //        ui->interaction->onMouseExited.bind<&Sandbox::onMouseExited>(this);
 //
-//        UDelegate<void(FrameBuffer*)> _redirectFunc;
+//        UniqueDelegate<void(FrameBuffer*)> _redirectFunc;
 //        _redirectFunc.bind<&Sandbox::redirectRendering>(this);
 //        engine->setRenderingRedirectionToImGui(_redirectFunc);
 //

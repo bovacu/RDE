@@ -79,7 +79,7 @@ namespace RDE {
             /**
              * @brief Map EventID -> Callback for event.
              */
-            std::unordered_map<int, UDelegate<void(SDL_Event&)>> events;
+            std::unordered_map<int, UniqueDelegate<void(SDL_Event&)>> events;
 
             /**
              * @brief Events that the system doesn't handle on purpose.

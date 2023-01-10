@@ -34,7 +34,7 @@ namespace RDE {
              * @brief Sets the function that will handle the events of the Window/
              * @see Engine::onEvent(Event&)
              */
-            UDelegate<void(Event&)> eventCallback;
+            UniqueDelegate<void(Event&)> eventCallback;
 
             /**
              * @see RDEConfig
@@ -64,42 +64,42 @@ namespace RDE {
              * set to run always, but typical customization could be only run if the window is focused or if the window
              * is not minimized.
              */
-            UDelegate<bool()> shouldUpdateWindow;
+            UniqueDelegate<bool()> shouldUpdateWindow;
 
             /**
              * @brief Callback invoked each time the window is moved.
              */
-            MDelegate<void(const Vec2F&)> onWindowMovedCallback;
+            Delegate<void(const Vec2F&)> onWindowMovedCallback;
 
             /**
              * @brief Callback invoked each time the window is resized.
              */
-            MDelegate<void(const Vec2I&)> onWindowResizedCallback;
+            Delegate<void(const Vec2I&)> onWindowResizedCallback;
 
             /**
              * @brief Callback invoked each time the window is changed of display.
              */
-            MDelegate<void(int)> onWindowDisplayChangedCallback;
+            Delegate<void(int)> onWindowDisplayChangedCallback;
 
             /**
              * @brief Callback invoked each time the window is minimized.
              */
-            MDelegate<void()> onWindowMinimizedCallback;
+            Delegate<void()> onWindowMinimizedCallback;
 
             /**
              * @brief Callback invoked each time the window is maximized.
              */
-            MDelegate<void()> onWindowMaximizedCallback;
+            Delegate<void()> onWindowMaximizedCallback;
 
             /**
              * @brief Callback invoked each time the window is focused.
              */
-            MDelegate<void()> onWindowFocusedCallback;
+            Delegate<void()> onWindowFocusedCallback;
 
             /**
              * @brief Callback invoked each time the window is unfocused.
              */
-            MDelegate<void()> onWindowUnfocusedCallback;
+            Delegate<void()> onWindowUnfocusedCallback;
 
         protected:
             explicit Window(RDEConfig* _props);
@@ -172,7 +172,7 @@ namespace RDE {
              * @brief Sets the method that will be executed when a polled event triggers.
              * @param _callback A void method with an Event& as parameter.
              */
-            void setEventCallback(const UDelegate<void(Event&)>& _callback);
+            void setEventCallback(const UniqueDelegate<void(Event&)>& _callback);
 
             /**
              * @brief Enables or disables VSync.

@@ -37,7 +37,8 @@ namespace RDE {
         }
 
         std::vector<Logs> _commandResult {};
-        commands[_command.name].exec(_commandResult, _command.arguments);
+        _commandResult = commands[_command.name](_command.arguments);
+        
         for(auto& _c : _commandResult)
             for(auto& _log : _c)
                 _logs.push_back(_log);

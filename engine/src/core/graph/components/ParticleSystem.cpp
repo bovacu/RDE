@@ -16,7 +16,7 @@ namespace RDE {
 
         RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(50, SPRITE_RENDERER_SHADER, BatchPriority::SpritePriority)
 
-        UDelegate<ParticleData()> _allocator;
+        UniqueDelegate<ParticleData()> _allocator;
         _allocator.bind<&ParticleSystem::allocator>(this);
         particleSystemConfig = _particleSystemConfig;
         pool.init(_allocator, particleSystemConfig.dataConfig.numberOfParticles);

@@ -45,8 +45,8 @@ namespace RDE {
      * @brief Config for function callbacks.
      */
     struct ParticleSystemCallbacksConfig {
-        UDelegate<void(ParticleData&, Delta, const ParticleSystemConfig&)> effectFunction {};
-        UDelegate<Color(ParticleData&, Delta, const ParticleSystemConfig&)> colorInterpolationFunction {};
+        UniqueDelegate<void(ParticleData&, Delta, const ParticleSystemConfig&)> effectFunction {};
+        UniqueDelegate<Color(ParticleData&, Delta, const ParticleSystemConfig&)> colorInterpolationFunction {};
     };
 
     /**

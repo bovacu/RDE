@@ -8,6 +8,7 @@
 #include <cmath>
 #include "core/util/Vec.h"
 #include "core/Core.h"
+#include "core/util/Functions.h"
 
 namespace RDE {
 

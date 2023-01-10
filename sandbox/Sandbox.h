@@ -11,7 +11,7 @@ namespace GDE {
 
     class Sandbox : public Scene {
         private:
-            UDelegate<bool(MouseScrolledEvent&)> mseDelegate;
+            UniqueDelegate<bool(MouseScrolledEvent&)> mseDelegate;
             NinePatchSprite* ui;
 
         public:

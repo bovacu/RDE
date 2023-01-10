@@ -26,9 +26,9 @@ namespace RDE {
             int idIndex = 0;
             bool anyWindowHovered = false;
             bool windowsHovered[4] {false, false, false, false};
-            UDelegate<bool(MouseScrolledEvent&)> mseDel;
-            UDelegate<bool(MouseButtonPressedEvent&)> mbpeDel;
-            UDelegate<bool(MouseMovedEvent&)> mmeDel;
+            UniqueDelegate<bool(MouseScrolledEvent&)> mseDel;
+            UniqueDelegate<bool(MouseButtonPressedEvent&)> mbpeDel;
+            UniqueDelegate<bool(MouseMovedEvent&)> mmeDel;
             NodeID selectedNode = NODE_ID_NULL;
             NodeID selectedNodeCanvas = NODE_ID_NULL;
 

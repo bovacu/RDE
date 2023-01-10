@@ -84,7 +84,7 @@ namespace RDE {
         engine = _engine;
         window = _window;
 
-        UDelegate<void(SDL_Event&)> _gpJ, _gpBD, _gpBU, _gpD, _gpC;
+        UniqueDelegate<void(SDL_Event&)> _gpJ, _gpBD, _gpBU, _gpD, _gpC;
         _gpJ.bind<&ControllerInput::onControllerMoved>(this);
         _gpBD.bind<&ControllerInput::onControllerButtonDown>(this);
         _gpBU.bind<&ControllerInput::onControllerButtonUp>(this);

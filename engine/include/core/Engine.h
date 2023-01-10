@@ -143,12 +143,12 @@ namespace RDE {
             /**
              * @brief Function to render in a custom way.
              */
-            UDelegate<void(FrameBuffer*)> redirectionFunc;
+            UniqueDelegate<void(FrameBuffer*)> redirectionFunc;
 
             /**
             * @brief Function to render to ImGui.
             */
-            UDelegate<void(FrameBuffer*)> imGuiRedirectionFunc;
+            UniqueDelegate<void(FrameBuffer*)> imGuiRedirectionFunc;
 
             /**
              * @see Window
@@ -166,7 +166,7 @@ namespace RDE {
             /**
              * @brief Callback for window resizing.
              */
-            UDelegate<bool(WindowResizedEvent&)> wreDel;
+            UniqueDelegate<bool(WindowResizedEvent&)> wreDel;
 
             Platform platform;
 
@@ -251,13 +251,13 @@ namespace RDE {
              * @brief Allows the end-user to render to something different than the default window.
              * @param _redirectionFunc FrameBuffer
              */
-            void setRenderingRedirection(UDelegate<void(FrameBuffer*)>& _redirectionFunc);
+            void setRenderingRedirection(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc);
 
             /**
              * @brief Allows the end-user to render to ImGui specifically.
              * @param _redirectionFunc FrameBuffer
              */
-            void setRenderingRedirectionToImGui(UDelegate<void(FrameBuffer*)>& _redirectionFunc);
+            void setRenderingRedirectionToImGui(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc);
 
         private:
             /**

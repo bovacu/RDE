@@ -72,49 +72,49 @@ namespace RDE {
              * @brief Callback triggered when the mouse just got pressed.
              *
              */
-            MDelegate<void(MouseCode)> onInnerClicking;
+            Delegate<void(MouseCode)> onInnerClicking;
 
             /**
              * @brief Callback triggered when the mouse just got released.
              *
              */
-            MDelegate<void(MouseCode)> onInnerClickingReleased;
+            Delegate<void(MouseCode)> onInnerClickingReleased;
 
             /**
              * @brief Callback triggered when the mouse has just entered.
              *
              */
-            MDelegate<void()> onInnerMouseEntered;
+            Delegate<void()> onInnerMouseEntered;
 
             /**
              * @brief Callback triggered when the mouse has just exited.
              *
              */
-            MDelegate<void()> onInnerMouseExited;
+            Delegate<void()> onInnerMouseExited;
 
             /**
              * @brief Callback triggered when a key has just been pressed.
              *
              */
-            MDelegate<void(KeyCode)> onInnerKeyPressed;
+            Delegate<void(KeyCode)> onInnerKeyPressed;
 
             /**
              * @brief Callback triggered when text editing mode is on and a key is pressed.
              *
              */
-            MDelegate<void(const std::string&)> onInnerTextTyped;
+            Delegate<void(const std::string&)> onInnerTextTyped;
 
             /**
              * @brief Callback triggered when a key has just been released.
              *
              */
-            MDelegate<void(KeyCode)> onInnerKeyReleased;
+            Delegate<void(KeyCode)> onInnerKeyReleased;
 
             /**
              * @brief Callback triggered when an element of the UI has been unfocused.
              *
              */
-            MDelegate<void()> onInnerUnfocused;
+            Delegate<void()> onInnerUnfocused;
 
         public:
             UIInteractable(Node* _node, Manager* _manager, Graph* _graph);
@@ -123,43 +123,43 @@ namespace RDE {
              * @brief Callback triggered when the mouse is clicked.
              *
              */
-            MDelegate<void(MouseCode)> onClick;
+            Delegate<void(MouseCode)> onClick;
 
             /**
              * @brief Callback triggered when the mouse has just entered.
              *
              */
-            MDelegate<void()> onMouseEntered;
+            Delegate<void()> onMouseEntered;
 
             /**
              * @brief Callback triggered when the mouse has just exited.
              *
              */
-            MDelegate<void()> onMouseExited;
+            Delegate<void()> onMouseExited;
 
             /**
              * @brief Callback triggered when the mouse is scrolled.
              *
              */
-            MDelegate<void(Vec2F)> onScroll;
+            Delegate<void(Vec2F)> onScroll;
 
             /**
              * @brief Callback triggered when a key is pressed.
              *
              */
-            MDelegate<void(KeyCode)> onKeyPressed;
+            Delegate<void(KeyCode)> onKeyPressed;
 
             /**
              * @brief Callback triggered when a gamepad button is pressed.
              *
              */
-            MDelegate<void(ControllerButtons)> onGamepadButtonPressed;
+            Delegate<void(ControllerButtons)> onGamepadButtonPressed;
 
             /**
              * @brief Callback triggered when the mobile screen is touched.
              *
              */
-            MDelegate<void(int)> onMobileClick;
+            Delegate<void(int)> onMobileClick;
 
         private:
             /**
