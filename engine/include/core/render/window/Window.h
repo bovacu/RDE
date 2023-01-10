@@ -157,6 +157,12 @@ namespace RDE {
             [[nodiscard]] Vec2I getWindowSize() const;
 
             /**
+             * @brief Gets the size of the full display, which might be different from the size of the window.
+             * @return Vec2I 
+             */
+            [[nodiscard]] Vec2I getDisplaySize() const;
+
+            /**
              * @brief Enables or disables fullscreen mode.
              * @param _fullscreen True or false to enable/disable.
              */

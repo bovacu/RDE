@@ -102,8 +102,14 @@ namespace RDE {
 
     Vec2I Window::getWindowSize() const {
         int _width, _height;
-        SDL_GL_GetDrawableSize(window, &_width, &_height);
+        SDL_GetWindowSize(window, &_width, &_height);
         return  {_width, _height};
+    }
+
+    Vec2I Window::getDisplaySize() const {
+        int _width, _height;
+        SDL_GL_GetDrawableSize(window, &_width, &_height);
+        return {_width, _height};
     }
 
     void Window::setTitle(const std::string& _title) {
