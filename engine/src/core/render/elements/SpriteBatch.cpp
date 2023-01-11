@@ -35,26 +35,26 @@ namespace RDE {
         GLsizei _structSize = sizeof(OpenGLVertex);
         engine->manager.shaderManager.loadShaderVertexConfig(SPRITE_RENDERER_SHADER, {
             VertexConfig {
-                0, 3, GL_FLOAT, 0, _structSize
+                0, 2, GL_FLOAT, 0, _structSize
             },
             VertexConfig {
-                1, 4, GL_FLOAT, 4 * 3, _structSize
+                1, 4, GL_UNSIGNED_BYTE, 4 * 2, _structSize
             },
             VertexConfig {
-                2, 2, GL_FLOAT, 4 * 3 + 4 * 4, _structSize
+                2, 2, GL_FLOAT, 4 * 2 + 4 * 1, _structSize
             }
         },
         maxIndicesPerDrawCall);
 
         engine->manager.shaderManager.loadShaderVertexConfig(TEXT_RENDERER_SHADER, {
             VertexConfig {
-                  0, 3, GL_FLOAT, 0, _structSize
+                  0, 2, GL_FLOAT, 0, _structSize
             },
             VertexConfig {
-                  1, 4, GL_FLOAT, 4 * 3, _structSize
+                  1, 4, GL_UNSIGNED_BYTE, 4 * 2, _structSize
             },
             VertexConfig {
-                  2, 2, GL_FLOAT, 4 * 3 + 4 * 4, _structSize
+                  2, 2, GL_FLOAT, 4 * 2 + 4 * 1, _structSize
             }
         },
         maxIndicesPerDrawCall);
@@ -65,10 +65,10 @@ namespace RDE {
         GLsizei _structSize = 3 * sizeof(float) + 4 * sizeof(float);
         Debug::batch->engine->manager.shaderManager.loadShaderVertexConfig(DEBUG_SHADER, {
             VertexConfig {
-                  0, 3, GL_FLOAT, 0, _structSize
+                  0, 2, GL_FLOAT, 0, _structSize
             },
             VertexConfig {
-                  1, 4, GL_FLOAT, 3 * sizeof(float), _structSize
+                  1, 4, GL_UNSIGNED_BYTE, 2 * sizeof(float), _structSize
             }
         },
           Debug::batch->maxIndicesPerDrawCall);
@@ -86,10 +86,10 @@ namespace RDE {
         if(vertexDebugBufferPoints.size() > 50000)
             flushDebug();
 
-        glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
+        auto _uint32Color = Util::Math::colorToUint32_t(_color);
         auto _screenPos = Util::Math::worldToScreenSize(batch->viewport, _position);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x, _screenPos.y, 1.f));
-        vertexDebugBufferPoints.emplace_back(_transformMat * glm::vec4 {_screenPos.x, _screenPos.y, 0.0f, 1.0f}, _colorVec4);
+        vertexDebugBufferPoints.emplace_back(_transformMat * glm::vec4 {_screenPos.x, _screenPos.y, 0.0f, 1.0f}, _uint32Color);
     }
 
     void SpriteBatch::Debug::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
@@ -106,8 +106,10 @@ namespace RDE {
         _transformMat1[3][0] = _screenPos1.x;
         _transformMat1[3][1] = _screenPos1.y;
 
-        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat0[3][0], _transformMat0[3][1], 1.0f}, _colorVec4);
-        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat1[3][0], _transformMat1[3][1], 1.0f}, _colorVec4);
+        auto _uint32Color = Util::Math::colorToUint32_t(_color);
+
+        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat0[3][0], _transformMat0[3][1], 1.0f}, _uint32Color);
+        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat1[3][0], _transformMat1[3][1], 1.0f}, _uint32Color);
     }
 
     void SpriteBatch::Debug::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
@@ -117,25 +119,24 @@ namespace RDE {
         if(_rotation != 0)
             _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_rotation), { 0.0f, 0.0f, 1.0f });
 
-        glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
+        auto _uint32Color = Util::Math::colorToUint32_t(_color);
 
         auto _screenSize = Util::Math::worldToScreenSize(batch->viewport, _size);
         // First triangle
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _colorVec4);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _uint32Color);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, _screenSize.y, 0.0f, 1.f}, _uint32Color);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _uint32Color);
 
         // Second triangle
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _uint32Color);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _uint32Color);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _uint32Color);
     }
 
     void SpriteBatch::Debug::drawShape(DebugShape& _shape) {
         auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x, _shape.getPosition().y, 1.f));
 
-        glm::vec4 _innerColor = {(float)_shape.getInnerColor().r / 255.f, (float)_shape.getInnerColor().g / 255.f,
-                                 (float)_shape.getInnerColor().b/ 255.f, (float)_shape.getInnerColor().a/ 255.f};
+        auto _innerColor = Util::Math::colorToUint32_t(_shape.getInnerColor());
 
         if(_shape.getPoints().size() == 2) {
             drawLine(_shape.getPoints()[0], _shape.getPoints()[1], _shape.getOuterColor());
@@ -243,7 +244,7 @@ namespace RDE {
 
             glBindVertexArray(0);
 
-            totalTriangles += (int)_batch.vertexBuffer.size() / 2;
+            totalTriangles += (int)_batch.vertexBuffer.size() / 3;
             _batch.vertexBuffer.clear();
             _batch.vertexCount = 0;
 

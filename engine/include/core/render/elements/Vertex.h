@@ -17,12 +17,12 @@ namespace RDE {
         /**
          * @brief Position in screen coordinates where the vertex should be placed.
          */
-        glm::vec3 position {0, 0, 0};
+        glm::vec2 position {0, 0};
 
         /**
          * @brief Color of the vertex.
          */
-        glm::vec4 color { 1, 1, 1, 1 };
+        uint32_t color = 0xFFFFFF;
 
         /**
          * @brief Coordinate of the texture that this vertex has attached to it.
@@ -35,7 +35,7 @@ namespace RDE {
         float* extraData = nullptr;
 
         OpenGLVertex() {  }
-        OpenGLVertex(const glm::vec3& _position, const glm::vec2& _texCoord, const glm::vec4& _color, float* _extraData = nullptr) : position(_position), color(_color), texCoord(_texCoord), extraData(_extraData) {  }
+        OpenGLVertex(const glm::vec2& _position, const glm::vec2& _texCoord, uint32_t _color, float* _extraData = nullptr) : position(_position), color(_color), texCoord(_texCoord), extraData(_extraData) {  }
     };
 
     /**
@@ -46,14 +46,14 @@ namespace RDE {
         /**
          * @brief Position in screen coordinates where the vertex should be placed.
          */
-        glm::vec3 position {0, 0, 0};
+        glm::vec2 position {0, 0};
 
         /**
          * @brief Color of the vertex.
          */
-        glm::vec4 color {1, 1, 1, 1};
+        uint32_t color = 0xFFFFFF;
 
-        OpenGLVertexDebug(const glm::vec3& _position, const glm::vec4& _color) : position(_position), color(_color) {  }
+        OpenGLVertexDebug(const glm::vec2& _position, uint32_t _color) : position(_position), color(_color) {  }
     };
 
 }
