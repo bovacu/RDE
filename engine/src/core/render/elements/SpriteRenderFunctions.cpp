@@ -58,14 +58,6 @@ namespace RDE {
         _batch->vertexBuffer.emplace_back(_data.vertices[2]);
         _batch->vertexBuffer.emplace_back(_data.vertices[3]);
         _batch->vertexBuffer.emplace_back(_data.vertices[0]);
-
-        // _batch->indexBuffer.emplace_back(_vertexCount + 0);
-        // _batch->indexBuffer.emplace_back(_vertexCount + 1);
-        // _batch->indexBuffer.emplace_back(_vertexCount + 2);
-
-        // _batch->indexBuffer.emplace_back(_vertexCount + 2);
-        // _batch->indexBuffer.emplace_back(_vertexCount + 3);
-        // _batch->indexBuffer.emplace_back(_vertexCount + 0);
     }
 
 
@@ -144,14 +136,6 @@ namespace RDE {
                 _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color });
 
                 _x += (float)_chars[_char].advance.x;
-
-                _batch->indexBuffer.emplace_back(_vertexCount + 0);
-                _batch->indexBuffer.emplace_back(_vertexCount + 1);
-                _batch->indexBuffer.emplace_back(_vertexCount + 2);
-
-                _batch->indexBuffer.emplace_back(_vertexCount + 2);
-                _batch->indexBuffer.emplace_back(_vertexCount + 3);
-                _batch->indexBuffer.emplace_back(_vertexCount + 0);
             }
         }
     }
@@ -230,14 +214,6 @@ namespace RDE {
                 _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color });
 
                 _x += (float)_chars[_char].advance.x;
-
-                _batch->indexBuffer.emplace_back(_vertexCount + 0);
-                _batch->indexBuffer.emplace_back(_vertexCount + 1);
-                _batch->indexBuffer.emplace_back(_vertexCount + 2);
-
-                _batch->indexBuffer.emplace_back(_vertexCount + 2);
-                _batch->indexBuffer.emplace_back(_vertexCount + 3);
-                _batch->indexBuffer.emplace_back(_vertexCount + 0);
             }
         }
     }
@@ -719,24 +695,16 @@ namespace RDE {
     }
 
 
-    void batchFourVertexGeometry(RenderizableInnerDataUI& _data,std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices) {
+    void batchFourVertexGeometry(RenderizableInnerDataUI& _data,std::vector<OpenGLVertex>& _vertices) {
         auto _vertexCount = _vertices.size();
 
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[0]);
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[1]);
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[2]);
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[3]);
-
-        _indices.emplace_back(_vertexCount + 0);
-        _indices.emplace_back(_vertexCount + 1);
-        _indices.emplace_back(_vertexCount + 2);
-
-        _indices.emplace_back(_vertexCount + 2);
-        _indices.emplace_back(_vertexCount + 3);
-        _indices.emplace_back(_vertexCount + 0);
     }
 
-    void batch9SliceVertexGeometry(RenderizableInnerDataUI& _data, std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices) {
+    void batch9SliceVertexGeometry(RenderizableInnerDataUI& _data, std::vector<OpenGLVertex>& _vertices) {
         for(auto _i = 0; _i < 9; _i++) {
             auto _vertexCount = _vertices.size();
 
@@ -744,18 +712,10 @@ namespace RDE {
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 1]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 2]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 3]);
-
-            _indices.emplace_back(_vertexCount + 0);
-            _indices.emplace_back(_vertexCount + 1);
-            _indices.emplace_back(_vertexCount + 2);
-
-            _indices.emplace_back(_vertexCount + 2);
-            _indices.emplace_back(_vertexCount + 3);
-            _indices.emplace_back(_vertexCount + 0);
         }
     }
 
-    void batchPartialCircularVertexGeometry(RenderizableInnerDataUI& _data, std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices) {
+    void batchPartialCircularVertexGeometry(RenderizableInnerDataUI& _data, std::vector<OpenGLVertex>& _vertices) {
         auto _squares = 0;
 
         if(_data.partialRenderingPercentage <= 0.75f) _squares++;
@@ -770,14 +730,6 @@ namespace RDE {
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 1]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 2]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 3]);
-
-            _indices.emplace_back(_vertexCount + 0);
-            _indices.emplace_back(_vertexCount + 1);
-            _indices.emplace_back(_vertexCount + 2);
-
-            _indices.emplace_back(_vertexCount + 2);
-            _indices.emplace_back(_vertexCount + 3);
-            _indices.emplace_back(_vertexCount + 0);
         }
     }
 
@@ -804,11 +756,11 @@ namespace RDE {
             case NORMAL:
             case PARTIAL_VERTICAL:
             case PARTIAL_HORIZONTAL:
-                batchFourVertexGeometry(_data, _batch->vertexBuffer, _batch->indexBuffer); break;
+                batchFourVertexGeometry(_data, _batch->vertexBuffer); break;
             case NINE_SLICE:
-                batch9SliceVertexGeometry(_data, _batch->vertexBuffer, _batch->indexBuffer); break;
+                batch9SliceVertexGeometry(_data, _batch->vertexBuffer); break;
             case PARTIAL_RADIAL:
-                batchPartialCircularVertexGeometry(_data, _batch->vertexBuffer, _batch->indexBuffer); break;
+                batchPartialCircularVertexGeometry(_data, _batch->vertexBuffer); break;
         }
     }
 

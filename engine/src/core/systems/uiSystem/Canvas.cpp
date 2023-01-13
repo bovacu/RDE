@@ -142,7 +142,7 @@ namespace RDE {
 
                 auto& _data = _canvasElement->node->getComponent<UIImage>()->data;
 
-                if (_currentBatch->shader == nullptr || _data.RenderizableInnerData.texture->getGLTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _data.RenderizableInnerData.shader || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
+                if (_currentBatch->shader == nullptr || _data.RenderizableInnerData.texture->getGLTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _data.RenderizableInnerData.shader || _currentBatch->vertexBuffer.size() >= maxIndicesPerDrawCall) {
                     Batch _newBatch;
                     _newBatch.shader = scene->engine->manager.shaderManager.getShader(_data.RenderizableInnerData.shader);
                     _newBatch.textureID = _data.RenderizableInnerData.texture->getGLTexture();
@@ -179,7 +179,7 @@ namespace RDE {
         if(_canvasElement->renderizableInnerData != nullptr) {
             auto* _data = _canvasElement->renderizableInnerData;
 
-            if (_currentBatch->shader == nullptr || _data->RenderizableInnerData.texture->getGLTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _data->RenderizableInnerData.shader || _currentBatch->indexBuffer.size() + 6 >= maxIndicesPerDrawCall) {
+            if (_currentBatch->shader == nullptr || _data->RenderizableInnerData.texture->getGLTexture() != _currentBatch->textureID || _currentBatch->shader->getShaderID() != _data->RenderizableInnerData.shader || _currentBatch->vertexBuffer.size() >= maxIndicesPerDrawCall) {
                 Batch _newBatch;
                 _newBatch.shader = scene->engine->manager.shaderManager.getShader(_data->RenderizableInnerData.shader);
                 _newBatch.textureID = _data->RenderizableInnerData.texture->getGLTexture();
