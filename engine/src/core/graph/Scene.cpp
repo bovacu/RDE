@@ -11,7 +11,7 @@ namespace RDE {
 
     Scene::Scene(Engine* _engine, const std::string& _debugName)  : mainGraph(this, _debugName), debugName(_debugName), engine(_engine) {
         auto* _mainCameraNode = mainGraph.createNode("MainCamera");
-        auto* _camera = mainGraph.addComponent<Camera>(_mainCameraNode->getID(), _mainCameraNode, &engine->manager, getMainGraph(), &_engine->getWindow());
+        auto* _camera = _mainCameraNode->addComponent<Camera>(&_engine->getWindow());
         cameras.push_back(_camera);
         mainCamera = _camera;
 

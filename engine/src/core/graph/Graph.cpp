@@ -88,9 +88,9 @@ namespace RDE {
         auto& _renderManager = scene->engine->manager.renderManager;
 
         for(auto* _camera : scene->cameras) {
-            if(!hasComponent<Active>(_camera->node->getID())) continue;
+            if(!_camera->node->hasComponent<Active>()) continue;
 
-            _renderManager.beginDraw(_camera, getComponent<Transform>(_camera->node->getID()));
+            _renderManager.beginDraw(_camera, _camera->node->getComponent<Transform>());
             _camera->update();
             {
                 for(auto [_innerData, _transform, _extraData] : renderizableTree[0]) {
@@ -144,7 +144,7 @@ namespace RDE {
 
     void Graph::onDebugRender() {
         auto& _renderManager = scene->engine->manager.renderManager;
-        _renderManager.beginDebugDraw(scene->mainCamera, getComponent<Transform>(scene->mainCamera->node->getID()));
+        _renderManager.beginDebugDraw(scene->mainCamera, scene->mainCamera->node->getComponent<Transform>());
         scene->engine->manager.physics.debugRender(&_renderManager);
         _renderManager.endDebugDraw();
     }
@@ -212,8 +212,12 @@ namespace RDE {
         throw std::runtime_error("Tried to get node with tag '" + _tagName + "' but it was not found!");
     }
 
+    Node* Graph::getNode(const NodeID& _nodeID) {
+        return &registry.get<Node>(_nodeID);
+    }
+
     void Graph::removeNode(Node* _node) {
-        remove(_node, true);
+        removeNodeInner(_node, true);
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
         isRenderizableTreeDirty = true;
     }
@@ -260,7 +264,7 @@ namespace RDE {
             return;
         }
 
-        remove(_node, false);
+        removeNodeInner(_node, false);
 
         auto* _parentTransform = _parent->getTransform();
 
@@ -273,7 +277,7 @@ namespace RDE {
         isRenderizableTreeDirty = true;
     }
 
-    void Graph::remove(Node* _node, bool _delete) {
+    void Graph::removeNodeInner(Node* _node, bool _delete) {
         auto* _nodeTransform = _node->getTransform();
 
         if(_nodeTransform->parent != NODE_ID_NULL) {
@@ -286,11 +290,11 @@ namespace RDE {
 
         if(_delete) {
             for(auto _it = _nodeTransform->children.rbegin(); _it < _nodeTransform->children.rend(); _it++) {
-                remove((*_it)->node, _delete);
+                removeNodeInner((*_it)->node, _delete);
             }
 
-            if(hasComponent<PhysicsBody>(_node->getID())) {
-                scene->engine->manager.physics.remove(getComponent<PhysicsBody>(_node->getID()));
+            if(_node->hasComponent<PhysicsBody>()) {
+                scene->engine->manager.physics.remove(_node->getComponent<PhysicsBody>());
             }
 
             registry.destroy(_node->getID());
@@ -299,7 +303,7 @@ namespace RDE {
     }
 
     void Graph::orphan(Node* _node) {
-        remove(_node, false);
+        removeNodeInner(_node, false);
         _node->getTransform()->parent = sceneRoot->getID();
         _node->getTransform()->parentTransform = sceneRoot->getTransform();
         sceneRoot->getTransform()->children.push_back(_node->getTransform());
@@ -341,22 +345,22 @@ namespace RDE {
     void Graph::recalculateRenderizableTree(Node* _node, std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>>* _renderizables) {
         auto _id = _node->getID();
 
-        if(!hasComponent<DisabledForRender>(_id) && hasComponent<Active>(_id)) {
+        if(!_node->hasComponent<DisabledForRender>() && _node->hasComponent<Active>()) {
 
-            if(hasComponent<SpriteRenderer>(_id)) {
-                _renderizables[0].emplace_back( &getComponent<SpriteRenderer>(_id)->data, _node->getTransform(), nullptr );
+            if(_node->hasComponent<SpriteRenderer>()) {
+                _renderizables[0].emplace_back(&_node->getComponent<SpriteRenderer>()->data, _node->getTransform(), nullptr );
             }
 
-            if(hasComponent<DynamicSpriteRenderer>(_id)) {
-                _renderizables[1].emplace_back( &getComponent<DynamicSpriteRenderer>(_id)->data, _node->getTransform(), nullptr );
+            if(_node->hasComponent<DynamicSpriteRenderer>()) {
+                _renderizables[1].emplace_back(&_node->getComponent<DynamicSpriteRenderer>()->data, _node->getTransform(), nullptr );
             }
 
-            if(hasComponent<ParticleSystem>(_id)) {
-                _renderizables[2].emplace_back( &getComponent<ParticleSystem>(_id)->data, _node->getTransform(), nullptr );
+            if(_node->hasComponent<ParticleSystem>()) {
+                _renderizables[2].emplace_back(&_node->getComponent<ParticleSystem>()->data, _node->getTransform(), nullptr );
             }
 
-            if(hasComponent<TextRenderer>(_id)) {
-                auto* _textRenderer = getComponent<TextRenderer>(_id);
+            if(_node->hasComponent<TextRenderer>()) {
+                auto* _textRenderer = _node->getComponent<TextRenderer>();
                 _renderizables[3].emplace_back( &_textRenderer->data, _node->getTransform(), (void*)_textRenderer );
             }
         }

@@ -135,7 +135,7 @@ namespace RDE {
                 if(_node.contains("components") && _node["components"].contains("camera") && _node["components"]["camera"].contains("is_main") && _node["components"]["camera"]["is_main"].get<bool>()) {
                     auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : Util::String::appendToString("Entity_", _entityCount);
                     _nodes[_tag] = { _scene->getMainCamera()->node, _node };
-                    _scene->getMainGraph()->getComponent<Tag>(_scene->getMainCamera()->node->getID())->tag = _tag;
+                    _scene->getMainCamera()->node->getComponent<Tag>()->tag = _tag;
                     _entityCount++;
                     continue;
                 }

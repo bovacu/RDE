@@ -469,7 +469,7 @@ namespace RDE {
 
             auto _prefabs = _scene->getPrefabs();
             for(auto& _nodeID : _prefabs) {
-                auto _tag = _graph->getComponent<Tag>(_nodeID);
+                auto _tag = _node->getComponent<Tag>();
                 ImGui::TextColored(ImVec4(0, 1, 0, 1), "%s", _tag->tag.c_str());
             }
 
@@ -501,22 +501,26 @@ namespace RDE {
     }
 
     void ImGuiScene::activeComponent(Graph* _graph, const NodeID _selectedNode) {
-        bool _active = _graph->hasComponent<Active>(_selectedNode);
-        auto _tag = _graph->getComponent<Tag>(_selectedNode)->tag.c_str();
+        auto* _node = _graph->getNode(_selectedNode);
+        
+        bool _active = _node->hasComponent<Active>();
+        auto _tag = _node->getComponent<Tag>()->tag.c_str();
         ImGui::Text("%s", _tag);
         ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 40 - ImGui::CalcTextSize("(?)").x);
         ImGui::PushID(createID());
         if(ImGui::Checkbox("###Active", &_active)) {
-            _graph->getComponent<Node>(_selectedNode)->setActive(_active);
+           _node->setActive(_active);
         }
         helpMarker("This will set the Active property to true/false.\n Setting Active to false will make all of DisabledConfig elements to be disabled for the Node and children.");
         ImGui::PopID();
     }
 
     void ImGuiScene::tagComponent(Graph* _graph, const NodeID _selectedNode) {
+        auto* _node = _graph->getNode(_selectedNode);
+
         ImGui::Text("Tag"); ImGui::SameLine();
         char _buffer[256] = { 0 };
-        auto& _tag = _graph->getComponent<Tag>(_selectedNode)->tag;
+        auto& _tag = _node->getComponent<Tag>()->tag;
         #if IS_WINDOWS()
         strcpy_s(_buffer, _tag.c_str());
         #else
@@ -530,9 +534,11 @@ namespace RDE {
     }
 
     void ImGuiScene::transformComponent(Graph* _graph, const NodeID _selectedNode) {
+        auto* _node = _graph->getNode(_selectedNode);
+
         Transform* _transform = nullptr;
-        if(!_graph->hasComponent<Transform>(_selectedNode)) return;
-        _transform = _graph->getComponent<Transform>(_selectedNode);
+        if(!_node->hasComponent<Transform>()) return;
+        _transform = _node->getComponent<Transform>();
 
         CREATE_NON_DISABLEABLE_HEADER("Transform", _transform, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -580,9 +586,11 @@ namespace RDE {
 
 
     void ImGuiScene::cameraComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<Camera>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _camera = _graph->getComponent<Camera>(_selectedNode);
+        if(!_node->hasComponent<Camera>()) return;
+
+        auto _camera = _node->getComponent<Camera>();
 
         CREATE_NON_DISABLEABLE_HEADER("Camera", _camera, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -627,9 +635,11 @@ namespace RDE {
     }
 
     void ImGuiScene::bodyComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<PhysicsBody>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _body = _graph->getComponent<PhysicsBody>(_selectedNode);
+        if(!_node->hasComponent<PhysicsBody>()) return;
+
+        auto _body = _node->getComponent<PhysicsBody>();
 
         CREATE_DISABLEABLE_HEADER("Physics Body", _body, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -639,9 +649,11 @@ namespace RDE {
     }
 
     void ImGuiScene::spriteComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<SpriteRenderer>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _spriteRenderer = _graph->getComponent<SpriteRenderer>(_selectedNode);
+        if(!_node->hasComponent<SpriteRenderer>()) return;
+
+        auto _spriteRenderer = _node->getComponent<SpriteRenderer>();
 
         CREATE_DISABLEABLE_HEADER("Sprite Renderer", _spriteRenderer, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -656,10 +668,12 @@ namespace RDE {
     }
 
     void ImGuiScene::textComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<TextRenderer>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _text = _graph->getComponent<TextRenderer>(_selectedNode);
-        auto _textTransform = _graph->getComponent<Transform>(_selectedNode);
+        if(!_node->hasComponent<TextRenderer>()) return;
+
+        auto _text = _node->getComponent<TextRenderer>();
+        auto _textTransform = _node->getComponent<Transform>();
 
         CREATE_DISABLEABLE_HEADER("Text Renderer", _text, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -669,9 +683,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiTransformComponent(Graph* _graph, const NodeID _selectedNode) {
+        auto* _node = _graph->getNode(_selectedNode);
+
         UITransform* _transform = nullptr;
-        if(!_graph->hasComponent<UITransform>(_selectedNode)) return;
-        _transform = _graph->getComponent<UITransform>(_selectedNode);
+        if(!_node->hasComponent<UITransform>()) return;
+        _transform = _node->getComponent<UITransform>();
         Anchor _selectedAnchor = _transform->getAnchor();
         Stretch _selectedStretch = _transform->getStretch();
 
@@ -916,9 +932,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiImageComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<UIImage>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _uiImage = _graph->getComponent<UIImage>(_selectedNode);
+        if(!_node->hasComponent<UIImage>()) return;
+
+        auto _uiImage = _node->getComponent<UIImage>();
 
         CREATE_DISABLEABLE_HEADER("UI Image", _uiImage, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -1009,9 +1027,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiTextComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<UIText>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _uiText = _graph->getComponent<UIText>(_selectedNode);
+        if(!_node->hasComponent<UIText>()) return;
+
+        auto _uiText = _node->getComponent<UIText>();
 
         CREATE_DISABLEABLE_HEADER("UI Text", _uiText, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -1035,9 +1055,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiMaskComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<UIMask>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _uiMask = _graph->getComponent<UIMask>(_selectedNode);
+        if(!_node->hasComponent<UIMask>()) return;
+
+        auto _uiMask = _node->getComponent<UIMask>();
 
         CREATE_DISABLEABLE_HEADER("UI Mask", _uiMask, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -1053,9 +1075,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiCanvasStopperComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<CanvasEventStopper>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _canvasStopper = _graph->getComponent<CanvasEventStopper>(_selectedNode);
+        if(!_node->hasComponent<CanvasEventStopper>()) return;
+
+        auto _canvasStopper = _node->getComponent<CanvasEventStopper>();
 
         CREATE_DISABLEABLE_HEADER("Canvas Event Stopper", _canvasStopper, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -1064,9 +1088,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiButtonComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<UIButton>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _uiButton = _graph->getComponent<UIButton>(_selectedNode);
+        if(!_node->hasComponent<UIButton>()) return;
+
+        auto _uiButton = _node->getComponent<UIButton>();
 
         CREATE_DISABLEABLE_HEADER("UI Button", _uiButton, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
