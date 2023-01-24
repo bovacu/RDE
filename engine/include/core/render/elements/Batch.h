@@ -60,12 +60,6 @@ namespace RDE {
             std::vector<OpenGLVertex> vertexBuffer {};
 
             /**
-             * @brief Indices of the vertices to be sent to the GPU. We use indices as it is cheaper to send individual
-             * uint32_t values that repeated OpenGLVertex.
-             */
-            std::vector<uint32_t> indexBuffer {};
-
-            /**
              * @brief Amount of vertices to be sent to the GPU.
              */
             int vertexCount = 0;

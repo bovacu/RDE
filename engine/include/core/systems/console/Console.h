@@ -4,7 +4,7 @@
 #ifndef RDE_CONSOLE_H
 #define RDE_CONSOLE_H
 
-
+#include "core/Core.h"
 #include "core/util/Util.h"
 
 namespace RDE {
@@ -104,7 +104,11 @@ namespace RDE {
              */
             template<auto Func, typename Class>
             void addCommand(const std::string& _commandName, const std::string& _description, Class* _class = nullptr, const std::string& _argumentsDescription = "") {
+                #if IS_WINDOWS()
+                commands[_commandName].bind<Func>(_class);
+                #else
                 commands[_commandName].template bind<Func>(_class);
+                #endif
                 commandsAndDescriptions[_commandName] = _argumentsDescription + ": " + _description;
             }
 

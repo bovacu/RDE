@@ -126,22 +126,16 @@ namespace RDE {
 
     void Shader::loadVertexConfigSpecific(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall, GLenum _drawType, GLuint& _vbo, GLuint& _ibo, GLuint& _vao) {
         ENGINE_ASSERT(!_verticesConfig.empty(), "Cannot have a Shader with 0 vertices configs")
-        const int NUMBER_OF_INDICES = 6;
-        const int NUMBER_OF_VERTICES = 4;
+        const int NUMBER_OF_VERTICES = 6;
 
         glGenVertexArrays(1, &_vao);
         glBindVertexArray(_vao);
         glGenBuffers(1, &_vbo);
-        glGenBuffers(1, &_ibo);
 
 
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(GL_ARRAY_BUFFER, vertexDataSize * _maxIndicesPerDrawCall * NUMBER_OF_VERTICES, nullptr, _drawType);
         Util::Log::debug("Shader ", shaderID, " total VB space = ", vertexDataSize * _maxIndicesPerDrawCall * NUMBER_OF_VERTICES);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-        Util::Log::debug("Shader ", shaderID, " total IB space = ", (long)(sizeof(uint32_t) * _maxIndicesPerDrawCall * NUMBER_OF_INDICES));
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(sizeof(uint32_t) * _maxIndicesPerDrawCall * NUMBER_OF_INDICES), nullptr, _drawType);
 
         for(auto& _vertexConfig : _verticesConfig) {
             glVertexAttribPointer(_vertexConfig.pointerIndex, _vertexConfig.numberOfElements, _vertexConfig.openglDataType, GL_FALSE, vertexDataSize, reinterpret_cast<const void*>(_vertexConfig.stride));

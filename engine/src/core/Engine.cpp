@@ -6,6 +6,7 @@
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/systems/profiling/Profiler.h"
 #include "core/systems/uiSystem/Canvas.h"
+#include "core/util/Functions.h"
 
 namespace RDE {
 

@@ -304,7 +304,11 @@ namespace RDE {
     template<typename Component, typename... Args>
     Component* Graph::addComponent(Args... _args) {
         auto* _first = get<0>(std::forward<Args>(_args)...);
+        #if IS_WINDOWS()
+        auto* _component = &registry.emplace<Component>(_first->getID(), _args...);
+        #else
         auto* _component = &registry.template emplace<Component>(_first->getID(), _args...);
+        #endif
         if(onDataChanged != nullptr) onDataChanged((void*)_component);
         isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
         return _component;
@@ -312,7 +316,11 @@ namespace RDE {
 
     template<typename Component, typename... Args>
     Component* Graph::addComponent(NodeID _nodeID, Node* _node, Manager* _manager, Graph* _graph, Args... _args) {
+        #if IS_WINDOWS()
+        auto* _component = &registry.emplace<Component>(_nodeID, _node, _manager, _graph, _args...);
+        #else
         auto* _component = &registry.template emplace<Component>(_nodeID, _node, _manager, _graph, _args...);
+        #endif
         if(onDataChanged != nullptr) onDataChanged((void*)_component);
         isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
         return _component;
@@ -320,25 +328,42 @@ namespace RDE {
 
     template<typename Component>
     void Graph::removeComponent(const NodeID& _id) {
+        #if IS_WINDOWS()
+        auto _removed = registry.remove<Component>(_id);
+        #else
         auto _removed = registry.template remove<Component>(_id);
+        #endif
         if(onDataChanged != nullptr) onDataChanged((void*)_removed);
         isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
     }
 
     template<typename Component>
     Component* Graph::getComponent(const NodeID& _id) {
+        #if IS_WINDOWS()
+        return &registry.get<Component>(_id);
+        #else
         return &registry.template get<Component>(_id);
+        #endif
     }
 
     template<typename... Archetype>
     auto Graph::query() {
+        #if IS_WINDOWS()
+        return registry.view<Archetype...>().each();
+        #else
         return registry.template view<Archetype...>().each();
+        #endif
     }
 
     template<typename Component>
     bool Graph::hasComponent(const NodeID& _id) const {
+        #if IS_WINDOWS()
+        return registry.any_of<Component>(_id);
+        #else
         return registry.template any_of<Component>(_id);
+        #endif
     }
+
 }
 
 #endif //RDE_GRAPH_H

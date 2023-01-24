@@ -35,26 +35,26 @@ namespace RDE {
         GLsizei _structSize = sizeof(OpenGLVertex);
         engine->manager.shaderManager.loadShaderVertexConfig(SPRITE_RENDERER_SHADER, {
             VertexConfig {
-                0, 3, GL_FLOAT, 0, _structSize
+                0, 2, GL_FLOAT, 0, _structSize
             },
             VertexConfig {
-                1, 4, GL_FLOAT, 4 * 3, _structSize
+                1, 4, GL_UNSIGNED_BYTE, 4 * 2, _structSize
             },
             VertexConfig {
-                2, 2, GL_FLOAT, 4 * 3 + 4 * 4, _structSize
+                2, 2, GL_FLOAT, 4 * 2 + 4 * 1, _structSize
             }
         },
         maxIndicesPerDrawCall);
 
         engine->manager.shaderManager.loadShaderVertexConfig(TEXT_RENDERER_SHADER, {
             VertexConfig {
-                  0, 3, GL_FLOAT, 0, _structSize
+                  0, 2, GL_FLOAT, 0, _structSize
             },
             VertexConfig {
-                  1, 4, GL_FLOAT, 4 * 3, _structSize
+                  1, 4, GL_UNSIGNED_BYTE, 4 * 2, _structSize
             },
             VertexConfig {
-                  2, 2, GL_FLOAT, 4 * 3 + 4 * 4, _structSize
+                  2, 2, GL_FLOAT, 4 * 2 + 4 * 1, _structSize
             }
         },
         maxIndicesPerDrawCall);
@@ -65,10 +65,10 @@ namespace RDE {
         GLsizei _structSize = 3 * sizeof(float) + 4 * sizeof(float);
         Debug::batch->engine->manager.shaderManager.loadShaderVertexConfig(DEBUG_SHADER, {
             VertexConfig {
-                  0, 3, GL_FLOAT, 0, _structSize
+                  0, 2, GL_FLOAT, 0, _structSize
             },
             VertexConfig {
-                  1, 4, GL_FLOAT, 3 * sizeof(float), _structSize
+                  1, 4, GL_UNSIGNED_BYTE, 2 * sizeof(float), _structSize
             }
         },
           Debug::batch->maxIndicesPerDrawCall);
@@ -86,10 +86,10 @@ namespace RDE {
         if(vertexDebugBufferPoints.size() > 50000)
             flushDebug();
 
-        glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
+        auto _uint32Color = Util::Math::colorToUint32_t(_color);
         auto _screenPos = Util::Math::worldToScreenSize(batch->viewport, _position);
         auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x, _screenPos.y, 1.f));
-        vertexDebugBufferPoints.emplace_back(_transformMat * glm::vec4 {_screenPos.x, _screenPos.y, 0.0f, 1.0f}, _colorVec4);
+        vertexDebugBufferPoints.emplace_back(_transformMat * glm::vec4 {_screenPos.x, _screenPos.y, 0.0f, 1.0f}, _uint32Color);
     }
 
     void SpriteBatch::Debug::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
@@ -106,8 +106,10 @@ namespace RDE {
         _transformMat1[3][0] = _screenPos1.x;
         _transformMat1[3][1] = _screenPos1.y;
 
-        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat0[3][0], _transformMat0[3][1], 1.0f}, _colorVec4);
-        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat1[3][0], _transformMat1[3][1], 1.0f}, _colorVec4);
+        auto _uint32Color = Util::Math::colorToUint32_t(_color);
+
+        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat0[3][0], _transformMat0[3][1], 1.0f}, _uint32Color);
+        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat1[3][0], _transformMat1[3][1], 1.0f}, _uint32Color);
     }
 
     void SpriteBatch::Debug::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
@@ -117,25 +119,24 @@ namespace RDE {
         if(_rotation != 0)
             _transformMat *= glm::rotate(glm::mat4(1.0f), glm::radians(_rotation), { 0.0f, 0.0f, 1.0f });
 
-        glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
+        auto _uint32Color = Util::Math::colorToUint32_t(_color);
 
         auto _screenSize = Util::Math::worldToScreenSize(batch->viewport, _size);
         // First triangle
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _colorVec4);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _uint32Color);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, _screenSize.y, 0.0f, 1.f}, _uint32Color);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _uint32Color);
 
         // Second triangle
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _colorVec4);
-        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _colorVec4);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _uint32Color);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, -_screenSize.y, 0.0f, 1.f}, _uint32Color);
+        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_screenSize.x, _screenSize.y, 0.0f, 1.f}, _uint32Color);
     }
 
     void SpriteBatch::Debug::drawShape(DebugShape& _shape) {
         auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x, _shape.getPosition().y, 1.f));
 
-        glm::vec4 _innerColor = {(float)_shape.getInnerColor().r / 255.f, (float)_shape.getInnerColor().g / 255.f,
-                                 (float)_shape.getInnerColor().b/ 255.f, (float)_shape.getInnerColor().a/ 255.f};
+        auto _innerColor = Util::Math::colorToUint32_t(_shape.getInnerColor());
 
         if(_shape.getPoints().size() == 2) {
             drawLine(_shape.getPoints()[0], _shape.getPoints()[1], _shape.getOuterColor());
@@ -182,7 +183,7 @@ namespace RDE {
                 _innerData.layer                    == _batch.layer &&
                 _innerData.shader                   == _batch.shader->getShaderID() &&
                 _innerData.batchPriority            == _batch.priority &&
-                _batch.indexBuffer.size() + 6       < maxIndicesPerDrawCall) {
+                _batch.vertexBuffer.size()          < maxIndicesPerDrawCall * 6) {
                 return &_batch;
             }
         }
@@ -191,7 +192,6 @@ namespace RDE {
         Batch _batch;
         _batch.ID = batches.size();
         _batch.layer = _innerData.layer;
-        _batch.indexBuffer.reserve(maxIndicesPerDrawCall * 6);
         _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 6);
         _batch.textureID = _innerData.texture->getGLTexture();
         _batch.priority = _innerData.batchPriority;
@@ -219,39 +219,44 @@ namespace RDE {
     void SpriteBatch::flush() {
         for(auto& _batch : batches) {
             auto _shaderID = _batch.shader->getShaderID();
-            if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0) {
-                Util::Log::warn("Batch: ", _batch.ID, " was skipped, data - VB size: ", _batch.vertexBuffer.size(), ", IB size: ", _batch.indexBuffer.size(), ", Texture: ", _batch.textureID, ", Shader: ", _shaderID);
+            if (_batch.vertexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0) {
+                Util::Log::warn("Batch: ", _batch.ID, " was skipped, data - VB size: ", _batch.vertexBuffer.size(), ", Texture: ", _batch.textureID, ", Shader: ", _shaderID);
                 continue;
             }
             
             glUseProgram(_shaderID);
+            Util::GL::checkError("After glUseProgram");
 
             GLint location = glGetUniformLocation(_shaderID, "viewProjectionMatrix");
+            Util::GL::checkError("After glGetUniformLocation");
             glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
+            Util::GL::checkError("After glUniformMatrix4fv");
 
             glActiveTexture(GL_TEXTURE0);
+            Util::GL::checkError("After glActiveTexture");
 
             glBindVertexArray(_batch.shader->getDynamicShaderVAO());
+            Util::GL::checkError("After glBindVertexArray");
 
             glBindTexture(GL_TEXTURE_2D, _batch.textureID);
+            Util::GL::checkError("After glBindTexture");
 
             glBindBuffer(GL_ARRAY_BUFFER, _batch.shader->getDynamicShaderVBO());
+            Util::GL::checkError("After glBindBuffer");
             glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0]);
+            Util::GL::checkError("After glBufferSubData");
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _batch.shader->getDynamicShaderIBO());
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (long)(sizeof(uint32_t) * _batch.indexBuffer.size()), &_batch.indexBuffer[0]);
-
-            glDrawElements(GL_TRIANGLES, (int)_batch.indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
+            glDrawArrays(GL_TRIANGLES, 0, _batch.vertexBuffer.size());
+            Util::GL::checkError("After glDrawArrays");
 
             glBindBuffer(GL_ARRAY_BUFFER, 0);
+            Util::GL::checkError("After glBindBuffer disable");
 
             glBindVertexArray(0);
+            Util::GL::checkError("After glBindVertexArray disable");
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-            totalTriangles += (int)_batch.vertexBuffer.size() / 2;
+            totalTriangles += (int)_batch.vertexBuffer.size() / 3;
             _batch.vertexBuffer.clear();
-            _batch.indexBuffer.clear();
             _batch.vertexCount = 0;
 
             drawCalls++;
@@ -260,39 +265,39 @@ namespace RDE {
 
     void SpriteBatch::drawUI(std::vector<Batch>& _batches) {
         for(auto& _batch : _batches) {
-            auto _shaderID = _batch.shader->getShaderID();
-            if (_batch.vertexBuffer.empty() || _batch.indexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0)
-                continue;
+            // auto _shaderID = _batch.shader->getShaderID();
+            // if (_batch.vertexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0)
+            //     continue;
 
-            glUseProgram(_shaderID);
+            // glUseProgram(_shaderID);
 
-            GLint location = glGetUniformLocation(_shaderID, "viewProjectionMatrix");
-            glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
+            // GLint location = glGetUniformLocation(_shaderID, "viewProjectionMatrix");
+            // glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
 
-            glActiveTexture(GL_TEXTURE0);
+            // glActiveTexture(GL_TEXTURE0);
 
-            glBindVertexArray(_batch.shader->getDynamicShaderVAO());
+            // glBindVertexArray(_batch.shader->getDynamicShaderVAO());
 
-            glBindTexture(GL_TEXTURE_2D, _batch.textureID);
+            // glBindTexture(GL_TEXTURE_2D, _batch.textureID);
 
-            glBindBuffer(GL_ARRAY_BUFFER, _batch.shader->getDynamicShaderVBO());
-            glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0]);
+            // glBindBuffer(GL_ARRAY_BUFFER, _batch.shader->getDynamicShaderVBO());
+            // glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0]);
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _batch.shader->getDynamicShaderIBO());
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (long)(sizeof(uint32_t) * _batch.indexBuffer.size()), &_batch.indexBuffer[0]);
+            // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _batch.shader->getDynamicShaderIBO());
+            // glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (long)(sizeof(uint32_t) * _batch.indexBuffer.size()), &_batch.indexBuffer[0]);
 
-            glDrawElements(GL_TRIANGLES, (int)_batch.indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
+            // glDrawElements(GL_TRIANGLES, (int)_batch.indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
 
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            // glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            glBindVertexArray(0);
+            // glBindVertexArray(0);
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-            totalTriangles += (int)_batch.vertexBuffer.size() / 2;
-            _batch.indexBuffer.clear();
-            _batch.vertexBuffer.clear();
-            uiDrawCalls++;
+            // totalTriangles += (int)_batch.vertexBuffer.size() / 2;
+            // _batch.indexBuffer.clear();
+            // _batch.vertexBuffer.clear();
+            // uiDrawCalls++;
         }
     }
 

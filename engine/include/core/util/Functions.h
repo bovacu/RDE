@@ -5,6 +5,7 @@
 #define RDE_FUNCTIONS_H
 
 #include "core/Core.h"
+#include "core/util/Color.h"
 #include "core/util/Vec.h"
 #include "core/platform/PlatformHeaderSDL.h"
 #include "core/platform/PlatformHeaderSDLImage.h"
@@ -78,6 +79,10 @@ namespace RDE {
 
             inline float degreesToRadians(float _degrees) {
                 return _degrees * (PI / 180.0f);
+            }
+
+            inline uint32_t colorToUint32_t(const Color& _color) {
+                return (int(_color.a) << 24) + (int(_color.r) << 16) + (int(_color.g) << 8) + int(_color.b);
             }
         }
         #endif

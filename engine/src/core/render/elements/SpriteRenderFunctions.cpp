@@ -33,12 +33,12 @@ namespace RDE {
 	    glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y };
 	    glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                         , _textureOriginNorm.y + _textureTileSizeNorm.y };
 
-	    glm::vec4 _color = { (float)_data.color.r / 255.f, (float)_data.color.g/ 255.f,(float)_data.color.b/ 255.f, (float)_data.color.a/ 255.f };
+        auto _uint32Color = Util::Math::colorToUint32_t(_data.color);
 
-	   _data.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-	   _data.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-	   _data.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-	   _data.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+	   _data.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _uint32Color };
+	   _data.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _uint32Color };
+	   _data.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _uint32Color };
+	   _data.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
 	}
 
 	void drawBatchedSpriteRenderer(RenderizableInnerData& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport) {
@@ -53,15 +53,11 @@ namespace RDE {
         _batch->vertexBuffer.emplace_back(_data.vertices[0]);
         _batch->vertexBuffer.emplace_back(_data.vertices[1]);
         _batch->vertexBuffer.emplace_back(_data.vertices[2]);
+
+
+        _batch->vertexBuffer.emplace_back(_data.vertices[2]);
         _batch->vertexBuffer.emplace_back(_data.vertices[3]);
-
-        _batch->indexBuffer.emplace_back(_vertexCount + 0);
-        _batch->indexBuffer.emplace_back(_vertexCount + 1);
-        _batch->indexBuffer.emplace_back(_vertexCount + 2);
-
-        _batch->indexBuffer.emplace_back(_vertexCount + 2);
-        _batch->indexBuffer.emplace_back(_vertexCount + 3);
-        _batch->indexBuffer.emplace_back(_vertexCount + 0);
+        _batch->vertexBuffer.emplace_back(_data.vertices[0]);
     }
 
 
@@ -117,9 +113,6 @@ namespace RDE {
                 _transformMat[3][0] = _screenPos.x;
                 _transformMat[3][1] = _screenPos.y;
 
-                auto _textColor = _data.color;
-                glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
-
                 auto _positionInScreen = Util::Math::worldToScreenSize(_viewport, { _xPos, _yPos });
                 auto _sizeInScreen = Util::Math::worldToScreenSize(_viewport, { _w, _h });
 
@@ -135,20 +128,14 @@ namespace RDE {
                 glm::vec2 _topLeftTextureCoord      = { _chars[_char].offset.x              , _chars[_char].offset.y + _normSize.y };
                 glm::vec2 _topRightTextureCoord     = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y + _normSize.y };
 
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _color });
+                auto _uint32Color = Util::Math::colorToUint32_t(_data.color);
+
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _uint32Color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color });
 
                 _x += (float)_chars[_char].advance.x;
-
-                _batch->indexBuffer.emplace_back(_vertexCount + 0);
-                _batch->indexBuffer.emplace_back(_vertexCount + 1);
-                _batch->indexBuffer.emplace_back(_vertexCount + 2);
-
-                _batch->indexBuffer.emplace_back(_vertexCount + 2);
-                _batch->indexBuffer.emplace_back(_vertexCount + 3);
-                _batch->indexBuffer.emplace_back(_vertexCount + 0);
             }
         }
     }
@@ -204,9 +191,6 @@ namespace RDE {
                 _transformMat[3][0] = _screenPos.x;
                 _transformMat[3][1] = _screenPos.y;
 
-                auto _textColor = _data.RenderizableInnerData.color;
-                glm::vec4 _color = {(float)_textColor.r / 255.f, (float)_textColor.g/ 255.f,(float)_textColor.b/ 255.f, (float)_textColor.a/ 255.f};
-
                 auto _positionInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _xPos, _yPos });
                 auto _sizeInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _w, _h });
 
@@ -222,20 +206,14 @@ namespace RDE {
                 glm::vec2 _topLeftTextureCoord      = { _chars[_char].offset.x              , _chars[_char].offset.y + _normSize.y };
                 glm::vec2 _topRightTextureCoord     = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y + _normSize.y };
 
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _color });
+                auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
+
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _uint32Color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color });
 
                 _x += (float)_chars[_char].advance.x;
-
-                _batch->indexBuffer.emplace_back(_vertexCount + 0);
-                _batch->indexBuffer.emplace_back(_vertexCount + 1);
-                _batch->indexBuffer.emplace_back(_vertexCount + 2);
-
-                _batch->indexBuffer.emplace_back(_vertexCount + 2);
-                _batch->indexBuffer.emplace_back(_vertexCount + 3);
-                _batch->indexBuffer.emplace_back(_vertexCount + 0);
             }
         }
     }
@@ -274,13 +252,12 @@ namespace RDE {
         glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y };
         glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                         , _textureOriginNorm.y + _textureTileSizeNorm.y };
 
-        glm::vec4 _color = { (float)_data.RenderizableInnerData.color.r / 255.f, (float)_data.RenderizableInnerData.color.g/ 255.f, 
-                             (float)_data.RenderizableInnerData.color.b / 255.f, (float)_data.RenderizableInnerData.color.a/ 255.f };
+        auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
 
-        _data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-        _data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-        _data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-        _data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+        _data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _uint32Color };
+        _data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _uint32Color };
+        _data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _uint32Color };
+        _data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
     }
 
     void calculate9SliceGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
@@ -418,18 +395,18 @@ namespace RDE {
             glm::vec4 _topRightTextureCorner    = {  _textureTileSizeOnScreen.x,  _textureTileSizeOnScreen.y, 0.0f, 1.0f };
             glm::vec4 _topLeftTextureCorner     = { -_textureTileSizeOnScreen.x,  _textureTileSizeOnScreen.y, 0.0f, 1.0f };
 
-            glm::vec4 _color = { (float)_data.RenderizableInnerData.color.r / 255.f, (float)_data.RenderizableInnerData.color.g / 255.f,
-                                 (float)_data.RenderizableInnerData.color.b / 255.f, (float)_data.RenderizableInnerData.color.a / 255.f };
-
             glm::vec2 _bottomLeftTextureCoord   = { _textureOriginNorm.x                         , _textureOriginNorm.y                          };
             glm::vec2 _bottomRightTextureCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y                          };
             glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y };
             glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                         , _textureOriginNorm.y + _textureTileSizeNorm.y };
 
-            _data.RenderizableInnerData.vertices[(_i * 4) + 0] = OpenGLVertex { _current9SliceMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-            _data.RenderizableInnerData.vertices[(_i * 4) + 1] = OpenGLVertex { _current9SliceMat * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-            _data.RenderizableInnerData.vertices[(_i * 4) + 2] = OpenGLVertex { _current9SliceMat * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-            _data.RenderizableInnerData.vertices[(_i * 4) + 3] = OpenGLVertex { _current9SliceMat * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+
+            auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
+
+            _data.RenderizableInnerData.vertices[(_i * 4) + 0] = OpenGLVertex { _current9SliceMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _uint32Color };
+            _data.RenderizableInnerData.vertices[(_i * 4) + 1] = OpenGLVertex { _current9SliceMat * _bottomRightTextureCorner, _bottomRightTextureCoord, _uint32Color };
+            _data.RenderizableInnerData.vertices[(_i * 4) + 2] = OpenGLVertex { _current9SliceMat * _topRightTextureCorner   , _topRightTextureCoord   , _uint32Color };
+            _data.RenderizableInnerData.vertices[(_i * 4) + 3] = OpenGLVertex { _current9SliceMat * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
         }
     }
 
@@ -465,13 +442,12 @@ namespace RDE {
         glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x - (!_inv ? _partialRenderCoord : 0)                                     , _textureOriginNorm.y + _textureTileSizeNorm.y };
         glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x + (_inv ? _textureTileSizeNorm.x - _textureTileSizeNorm.x * _data.partialRenderingPercentage : 0), _textureOriginNorm.y + _textureTileSizeNorm.y };
 
-        glm::vec4 _color = { (float)_data.RenderizableInnerData.color.r / 255.f, (float)_data.RenderizableInnerData.color.g / 255.f,
-                             (float)_data.RenderizableInnerData.color.b / 255.f, (float)_data.RenderizableInnerData.color.a / 255.f };
+        auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
 
-        _data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-        _data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-        _data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-        _data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+        _data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _uint32Color };
+        _data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _uint32Color };
+        _data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _uint32Color };
+        _data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
     }
 
     void calculatePartialVGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
@@ -506,13 +482,12 @@ namespace RDE {
         glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x, _textureOriginNorm.y + _textureTileSizeNorm.y - (!_inv ? _partialRenderCoord : 0)                                      };
         glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                         , _textureOriginNorm.y + _textureTileSizeNorm.y - (!_inv ? _partialRenderCoord : 0)                                      };
 
-        glm::vec4 _color = { (float)_data.RenderizableInnerData.color.r / 255.f, (float)_data.RenderizableInnerData.color.g / 255.f,
-                             (float)_data.RenderizableInnerData.color.b / 255.f, (float)_data.RenderizableInnerData.color.a / 255.f };
+        auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
 
-        _data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-        _data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-        _data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-        _data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+        _data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _uint32Color };
+        _data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _uint32Color };
+        _data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _uint32Color };
+        _data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
     }
 
     void calculatePartialRGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
@@ -567,13 +542,12 @@ namespace RDE {
             glm::vec2 _BRCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x              , _textureOriginNorm.y + _v2C                          };
             glm::vec2 _TRCoord  = { _textureOriginNorm.x + _textureTileSizeNorm.x              , _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f };
 
-            glm::vec4 _color = { (float)_data.RenderizableInnerData.color.r / 255.f, (float)_data.RenderizableInnerData.color.g / 255.f,
-                                 (float)_data.RenderizableInnerData.color.b / 255.f, (float)_data.RenderizableInnerData.color.a / 255.f };
+            auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
 
-            _data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _TLCorner, _TLCoord, _color };
-            _data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _BLCorner, _BLCoord, _color };
-            _data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _BRCorner, _BRCoord, _color };
-            _data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _TRCorner, _TRCoord, _color };
+            _data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _TLCorner, _TLCoord, _uint32Color };
+            _data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _BLCorner, _BLCoord, _uint32Color };
+            _data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _BRCorner, _BRCoord, _uint32Color };
+            _data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _TRCorner, _TRCoord, _uint32Color };
         }
 
         // Top-Right square
@@ -611,13 +585,12 @@ namespace RDE {
             glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _textureTileSizeNorm.x - _v2C, _textureOriginNorm.y + _textureTileSizeNorm.y               };
             glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f, _textureOriginNorm.y + _textureTileSizeNorm.y               };
 
-            glm::vec4 _color = { (float)_data.RenderizableInnerData.color.r / 255.f, (float)_data.RenderizableInnerData.color.g / 255.f,
-                                 (float)_data.RenderizableInnerData.color.b / 255.f, (float)_data.RenderizableInnerData.color.a / 255.f };
+            auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
 
-            _data.RenderizableInnerData.vertices[4] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-            _data.RenderizableInnerData.vertices[5] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-            _data.RenderizableInnerData.vertices[6] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-            _data.RenderizableInnerData.vertices[7] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+            _data.RenderizableInnerData.vertices[4] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _uint32Color };
+            _data.RenderizableInnerData.vertices[5] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _uint32Color };
+            _data.RenderizableInnerData.vertices[6] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _uint32Color };
+            _data.RenderizableInnerData.vertices[7] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
         }
 
         // Top-Left square
@@ -654,13 +627,12 @@ namespace RDE {
             glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x                                       , _textureOriginNorm.y + _textureTileSizeNorm.y - _v2C };
             glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x                                       , _textureOriginNorm.y + _textureTileSizeNorm.y * 0.5f };
 
-            glm::vec4 _color = { (float)_data.RenderizableInnerData.color.r / 255.f, (float)_data.RenderizableInnerData.color.g / 255.f,
-                                 (float)_data.RenderizableInnerData.color.b / 255.f, (float)_data.RenderizableInnerData.color.a / 255.f };
+            auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
 
-            _data.RenderizableInnerData.vertices[8]  = OpenGLVertex { _transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-            _data.RenderizableInnerData.vertices[9]  = OpenGLVertex { _transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-            _data.RenderizableInnerData.vertices[10] = OpenGLVertex { _transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-            _data.RenderizableInnerData.vertices[11] = OpenGLVertex { _transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+            _data.RenderizableInnerData.vertices[8]  = OpenGLVertex { _transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _uint32Color };
+            _data.RenderizableInnerData.vertices[9]  = OpenGLVertex { _transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _uint32Color };
+            _data.RenderizableInnerData.vertices[10] = OpenGLVertex { _transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _uint32Color };
+            _data.RenderizableInnerData.vertices[11] = OpenGLVertex { _transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
         }
 
         // Bottom-Left square
@@ -697,13 +669,12 @@ namespace RDE {
             glm::vec2 _topRightTextureCoord     = { _textureOriginNorm.x + _v2C                         , _textureOriginNorm.y                                        };
             glm::vec2 _topLeftTextureCoord      = { _textureOriginNorm.x + _textureTileSizeNorm.x * 0.5f, _textureOriginNorm.y                                        };
 
-            glm::vec4 _color = { (float)_data.RenderizableInnerData.color.r / 255.f, (float)_data.RenderizableInnerData.color.g / 255.f, 
-                                 (float)_data.RenderizableInnerData.color.b / 255.f, (float)_data.RenderizableInnerData.color.a / 255.f };
+            auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
 
-            _data.RenderizableInnerData.vertices[12] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _color };
-            _data.RenderizableInnerData.vertices[13] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _color };
-            _data.RenderizableInnerData.vertices[14] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _color };
-            _data.RenderizableInnerData.vertices[15] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _color };
+            _data.RenderizableInnerData.vertices[12] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _uint32Color };
+            _data.RenderizableInnerData.vertices[13] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _uint32Color };
+            _data.RenderizableInnerData.vertices[14] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _uint32Color };
+            _data.RenderizableInnerData.vertices[15] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
         }
     }
 
@@ -724,24 +695,16 @@ namespace RDE {
     }
 
 
-    void batchFourVertexGeometry(RenderizableInnerDataUI& _data,std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices) {
+    void batchFourVertexGeometry(RenderizableInnerDataUI& _data,std::vector<OpenGLVertex>& _vertices) {
         auto _vertexCount = _vertices.size();
 
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[0]);
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[1]);
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[2]);
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[3]);
-
-        _indices.emplace_back(_vertexCount + 0);
-        _indices.emplace_back(_vertexCount + 1);
-        _indices.emplace_back(_vertexCount + 2);
-
-        _indices.emplace_back(_vertexCount + 2);
-        _indices.emplace_back(_vertexCount + 3);
-        _indices.emplace_back(_vertexCount + 0);
     }
 
-    void batch9SliceVertexGeometry(RenderizableInnerDataUI& _data, std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices) {
+    void batch9SliceVertexGeometry(RenderizableInnerDataUI& _data, std::vector<OpenGLVertex>& _vertices) {
         for(auto _i = 0; _i < 9; _i++) {
             auto _vertexCount = _vertices.size();
 
@@ -749,18 +712,10 @@ namespace RDE {
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 1]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 2]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 3]);
-
-            _indices.emplace_back(_vertexCount + 0);
-            _indices.emplace_back(_vertexCount + 1);
-            _indices.emplace_back(_vertexCount + 2);
-
-            _indices.emplace_back(_vertexCount + 2);
-            _indices.emplace_back(_vertexCount + 3);
-            _indices.emplace_back(_vertexCount + 0);
         }
     }
 
-    void batchPartialCircularVertexGeometry(RenderizableInnerDataUI& _data, std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices) {
+    void batchPartialCircularVertexGeometry(RenderizableInnerDataUI& _data, std::vector<OpenGLVertex>& _vertices) {
         auto _squares = 0;
 
         if(_data.partialRenderingPercentage <= 0.75f) _squares++;
@@ -775,14 +730,6 @@ namespace RDE {
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 1]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 2]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 3]);
-
-            _indices.emplace_back(_vertexCount + 0);
-            _indices.emplace_back(_vertexCount + 1);
-            _indices.emplace_back(_vertexCount + 2);
-
-            _indices.emplace_back(_vertexCount + 2);
-            _indices.emplace_back(_vertexCount + 3);
-            _indices.emplace_back(_vertexCount + 0);
         }
     }
 
@@ -809,11 +756,11 @@ namespace RDE {
             case NORMAL:
             case PARTIAL_VERTICAL:
             case PARTIAL_HORIZONTAL:
-                batchFourVertexGeometry(_data, _batch->vertexBuffer, _batch->indexBuffer); break;
+                batchFourVertexGeometry(_data, _batch->vertexBuffer); break;
             case NINE_SLICE:
-                batch9SliceVertexGeometry(_data, _batch->vertexBuffer, _batch->indexBuffer); break;
+                batch9SliceVertexGeometry(_data, _batch->vertexBuffer); break;
             case PARTIAL_RADIAL:
-                batchPartialCircularVertexGeometry(_data, _batch->vertexBuffer, _batch->indexBuffer); break;
+                batchPartialCircularVertexGeometry(_data, _batch->vertexBuffer); break;
         }
     }
 
