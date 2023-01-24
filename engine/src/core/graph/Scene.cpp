@@ -74,7 +74,7 @@ namespace RDE {
         }
     }
 
-    Graph* Scene::getMainGraph() {
+    Graph* Scene::getGraph() {
         return &mainGraph;
     }
 

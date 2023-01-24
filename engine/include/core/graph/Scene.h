@@ -147,7 +147,7 @@ namespace RDE {
              * create new ones or destroy them.
              * @return the graph of the scene.
              */
-            Graph* getMainGraph();
+            Graph* getGraph();
 
             /**
              * @brief Returns all of the cameras used in the scene.

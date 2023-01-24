@@ -12,7 +12,7 @@
 namespace RDE {
 
     DynamicSpriteRenderer::DynamicSpriteRenderer(Node* _node, Scene* _scene, const DynamicSpriteRendererConfig& _config) :
-    DynamicSpriteRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _config) {  }
+    DynamicSpriteRenderer(_node, &_scene->engine->manager, _scene->getGraph(), _config) {  }
 
     DynamicSpriteRenderer::DynamicSpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const DynamicSpriteRendererConfig& _config) :
     DynamicSpriteRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _config)  {  }

@@ -10,7 +10,7 @@
 namespace RDE {
 
     ParticleSystem::ParticleSystem(Node* _node, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig) :
-    ParticleSystem(_node, &_scene->engine->manager, _scene->getMainGraph(), _particleSystemConfig) {  }
+    ParticleSystem(_node, &_scene->engine->manager, _scene->getGraph(), _particleSystemConfig) {  }
 
     ParticleSystem::ParticleSystem(Node* _node, Manager* _manager, Graph* _graph, const ParticleSystemConfig& _particleSystemConfig) {
 

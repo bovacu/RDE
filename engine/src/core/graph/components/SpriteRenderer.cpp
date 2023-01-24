@@ -21,7 +21,7 @@
 namespace RDE {
 
     SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, const SpriteRendererConfig& _config) :
-    SpriteRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _config) {  }
+    SpriteRenderer(_node, &_scene->engine->manager, _scene->getGraph(), _config) {  }
 
     SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const SpriteRendererConfig& _config) :
     SpriteRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _config)  {  }

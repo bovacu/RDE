@@ -142,7 +142,7 @@ namespace RDE {
 
                 auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : Util::String::appendToString("Entity_", _entityCount);
                 ENGINE_ASSERT(_nodes.find(_tag) == _nodes.end(), Util::String::appendToString("Scene CANNOT have repeated 'tag' for different nodes, it is a unique identifier. Another '", _tag, "' prefab key was already defined."))
-                auto _entityNode = _scene->getMainGraph()->createNode(_tag);
+                auto _entityNode = _scene->getGraph()->createNode(_tag);
                 _nodes[_tag] = {_entityNode, _node };
                 _entityCount++;
 
@@ -152,7 +152,7 @@ namespace RDE {
             }
 
             for(auto& _child : _parentingMap) {
-                _scene->getMainGraph()->setParent(_child.first, _nodes[_child.second].node);
+                _scene->getGraph()->setParent(_child.first, _nodes[_child.second].node);
             }
         }
 

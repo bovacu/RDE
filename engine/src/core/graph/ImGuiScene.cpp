@@ -160,7 +160,7 @@ namespace RDE {
         // so I need to split how both are selected and shown and switch between one registry and the other, so that's why there
         // is selectedNode and selectedNodeCanvas, if one is used, the other is set as null, this way just one of the registries
         // is shown and everything works fine, and we reuse all the code just by using 2 switching variables.
-        auto* _mainGraph = _scene->getMainGraph();
+        auto* _mainGraph = _scene->getGraph();
         hierarchy(_scene);
 
         if(selectedNode != NODE_ID_NULL) nodeComponents(_mainGraph, selectedNode);
@@ -453,13 +453,13 @@ namespace RDE {
     void ImGuiScene::hierarchy(Scene* _scene) {
         ImGui::Begin("Hierarchy");
         windowsHovered[1] = checkForFocus();
-        auto* _graph = _scene->getMainGraph();
+        auto* _graph = _scene->getGraph();
         hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNode);
         for(auto* _canvas : _scene->getCanvases()) {
             _graph = _canvas->getGraph();
             hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNodeCanvas);
         }
-        showLoadedPrefabs(_scene, _scene->getMainGraph(), _graph->getRoot(), selectedNode);
+        showLoadedPrefabs(_scene, _scene->getGraph(), _graph->getRoot(), selectedNode);
         ImGui::End();
     }
 
