@@ -1,9 +1,7 @@
-#pragma once
-
-#include "core/systems/inputSystem/input/WindowInput.h"
 #ifndef RDE_SCENE_H
 #define RDE_SCENE_H
 
+#include "core/systems/inputSystem/input/WindowInput.h"
 #include "nlohmann/json.hpp"
 #include "core/util/Delta.h"
 #include "core/graph/Graph.h"
@@ -15,6 +13,7 @@ namespace RDE {
     class Window; 
     class Engine;
     class Canvas;
+    struct RenderizableInnerData;
 
     /**
      * @brief This class represents what is rendered in the window and all its related systems.
@@ -23,6 +22,7 @@ namespace RDE {
         friend class Graph;
         friend class ConfigManager;
         friend class WindowInput;
+        friend class Engine;
 
         private:
             /**
@@ -67,6 +67,58 @@ namespace RDE {
              */
             void onDisplayChanged();
 
+            /**
+             * @brief This function captures all the events that happen inside the application. It captures too mouse, keyboard
+             * and gamepads, but it is not recommended to use this input inside this function. The class InputManager is
+             * the one you are looking for. This is used to manage window related or screen related events mainly.
+             * @param _event the event that was just captured.
+             * @see InputManager
+             */
+            void onInnerEvent(Event& _event);
+
+            /**
+             * @brief This function is executed every frame of the application and here we should update logic and take inputs
+             * to update the logic and components.
+             * @param _dt time that passed between the current frame and the last one.
+             */
+            void onInnerUpdate(Delta _dt);
+
+            /**
+             * @brief This function is called a fixed amount of times per second. By default it is 60 times per second, but it
+             * can be modified with Engine/setFixedDelta. This loop is used to handle physics and things that need a
+             * consistent frame rate to work properly.
+             * @param _dt fixed value initially set at 1/60/
+             */
+            void onInnerFixedUpdate(Delta _dt);
+
+            /**
+             * @brief This function is called as the last update method, after update and fixedUpdate, which is an ideal place
+             * to remove elements.
+             * @param _dt time that passed between the current frame and the last one.
+             */
+            void onInnerLateUpdate(Delta _dt);
+            void recalculateRenderizableTree(Node* _node, std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>>* _renderizables);
+
+            /**
+             * @brief This function is also called every frame and renders the geometry of the game. It is not virtual because
+             * the main rendering pipeline is handled inside the core of the engine. Users don't need to mess with it.
+             * @param _dt the time that passed between the current frame and the last one.
+             */
+            void onInnerRender(Delta _dt);
+
+            /**
+             * @brief This function is also called every frame and renders the geometry of the game's UI. It is not virtual because
+             * the main rendering pipeline is handled inside the core of the engine. Users don't need to mess with it.
+             * @param _dt the time that passed between the current frame and the last one.
+             */
+            void onInnerRenderUI(Delta _dt);
+
+            /**
+             * @brief This function is used to drawBatched debugging lines, squares, circles...
+             * @param the time that passed between the current frame and the last one.
+             */
+            void onInnerDebugRender(Delta _dt);
+
         public:
             explicit Scene(Engine* _engine, const std::string& _debugName = "Scene");
             virtual ~Scene();
@@ -93,14 +145,14 @@ namespace RDE {
              * @param _event the event that was just captured.
              * @see InputManager
              */
-            virtual void onEvent(Event& _event);
+            virtual void onEvent(Event& _event) {  }
 
             /**
              * @brief This function is executed every frame of the application and here we should update logic and take inputs
              * to update the logic and components.
              * @param _dt time that passed between the current frame and the last one.
              */
-            virtual void onUpdate(Delta _dt);
+            virtual void onUpdate(Delta _dt) {  }
 
             /**
              * @brief This function is called a fixed amount of times per second. By default it is 60 times per second, but it
@@ -108,21 +160,14 @@ namespace RDE {
              * consistent frame rate to work properly.
              * @param _dt fixed value initially set at 1/60/
              */
-            virtual void onFixedUpdate(Delta _dt);
+            virtual void onFixedUpdate(Delta _dt) {  }
 
             /**
              * @brief This function is called as the last update method, after update and fixedUpdate, which is an ideal place
              * to remove elements.
              * @param _dt time that passed between the current frame and the last one.
              */
-            virtual void onLateUpdate(Delta _dt);
-
-            /**
-             * @brief This function is also called every frame and renders the geometry of the game. It is not virtual because
-             * the main rendering pipeline is handled inside the core of the engine. Users don't need to mess with it.
-             * @param the time that passed between the current frame and the last one.
-             */
-            void onRender(Delta _dt);
+            virtual void onLateUpdate(Delta _dt) {  }
 
             /**
              * @brief This function is used to render specifically ImGui elements, nothing else.
@@ -134,7 +179,7 @@ namespace RDE {
              * @brief This function is used to drawBatched debugging lines, squares, circles...
              * @param the time that passed between the current frame and the last one.
              */
-            virtual void onDebugRender(Delta _dt);
+            virtual void onDebugRender(Delta _dt) {  }
 
             /**
              * @brief This function is called when unloading the scene and should be used to release any allocated memory or

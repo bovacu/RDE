@@ -65,6 +65,7 @@ namespace RDE {
 
 
     #define RENDERIZABLE_BASIC_PROPERTIES()     \
+    friend class Scene;                         \
     public:                                     \
         Node* node = nullptr;                   \
     private:                                    \

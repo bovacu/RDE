@@ -6,6 +6,9 @@
 #include "core/graph/components/Transform.h"
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/util/Functions.h"
+#include "entt/entt.hpp"
+#include "core/graph/components/DynamicSpriteRenderer.h"
+#include "core/systems/animationSystem/AnimationSystem.h"
 
 namespace RDE {
 
@@ -26,52 +29,151 @@ namespace RDE {
         prefabs.clear();
     }
 
-    void Scene::onEvent(Event& _event) {
-        for(auto* _canvas : canvases) {
-            _canvas->onEvent(engine, _event);
-        }
-
-        mainGraph.onEvent(_event);
+    void Scene::onInnerEvent(Event& _event) {
+        // for(auto* _canvas : canvases) {
+        //     _canvas->onEvent(engine, _event);
+        // }
     }
 
-    void Scene::onUpdate(Delta _dt) {
-        mainGraph.onUpdate(_dt);
+    void Scene::onInnerUpdate(Delta _dt) {
+        auto _animations = mainGraph.registry.view<AnimationSystem, SpriteRenderer, Active>(entt::exclude<DisabledForRender>);
+        auto _particleSystems = mainGraph.registry.view<ParticleSystem, Active>(entt::exclude<DisabledForRender>);
 
-        for(auto* _canvas : canvases) {
-            _canvas->onUpdate(_dt);
+        _animations.each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
+            _animationSystem.update(_dt, &_spriteRenderer);
+        });
+
+        _particleSystems.each([&_dt](const auto _entity, ParticleSystem& _particleSystem, const Active& _) {
+            _particleSystem.update(_dt);
+        });
+
+        onUpdate(_dt);
+
+        // for(auto* _canvas : canvases) {
+        //     _canvas->onUpdate(_dt);
+        // }
+    }
+
+    void Scene::onInnerFixedUpdate(Delta _dt) {
+        for(auto* _body : engine->manager.physics.bodies) {
+            if(!_body->isEnabled()) continue;
+            _body->update();
+        }
+
+        // for(auto* _canvas : canvases) {
+        //    _canvas->onFixedUpdate();
+        // }
+    }
+
+    void Scene::recalculateRenderizableTree(Node* _node, std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>>* _renderizables) {
+        auto _id = _node->getID();
+
+        if(!_node->hasComponent<DisabledForRender>() && _node->hasComponent<Active>()) {
+
+            if(_node->hasComponent<SpriteRenderer>()) {
+                _renderizables[0].emplace_back(&_node->getComponent<SpriteRenderer>()->data, _node->getTransform(), nullptr );
+            }
+
+            if(_node->hasComponent<DynamicSpriteRenderer>()) {
+                _renderizables[1].emplace_back(&_node->getComponent<DynamicSpriteRenderer>()->data, _node->getTransform(), nullptr );
+            }
+
+            if(_node->hasComponent<ParticleSystem>()) {
+                _renderizables[2].emplace_back(&_node->getComponent<ParticleSystem>()->data, _node->getTransform(), nullptr );
+            }
+
+            if(_node->hasComponent<TextRenderer>()) {
+                auto* _textRenderer = _node->getComponent<TextRenderer>();
+                _renderizables[3].emplace_back( &_textRenderer->data, _node->getTransform(), (void*)_textRenderer );
+            }
+        }
+
+        for(auto* _child : _node->getTransform()->children) {
+            recalculateRenderizableTree(_child->node, _renderizables);
         }
     }
 
-    void Scene::onFixedUpdate(Delta _dt) {
-        mainGraph.onFixedUpdate(_dt);
+    void Scene::onInnerLateUpdate(Delta _dt) {
+        if(mainGraph.isRenderizableTreeDirty) {
+            // [0] -> SpriteRenderer
+            // [1] -> DynamicSpriteRenderer
+            // [2] -> ParticleSystem
+            // [3] -> TextRenderer
+            const int RENDERIZABLES_COUNT = 4;
 
-        for(auto* _canvas : canvases) {
-//            _canvas->onFixedUpdate();
+            mainGraph.renderizableTree[0].clear();
+            mainGraph.renderizableTree[1].clear();
+
+            std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> _renderizables[RENDERIZABLES_COUNT];
+            recalculateRenderizableTree(mainGraph.getRoot(), _renderizables);
+
+            mainGraph.renderizableTree[0].reserve((int)_renderizables[0].size() + (int)_renderizables[1].size() + (int)_renderizables[2].size());
+            mainGraph.renderizableTree[1].reserve((int)_renderizables[3].size());
+
+            mainGraph.renderizableTree[0].insert(mainGraph.renderizableTree[0].end(), _renderizables[0].begin(), _renderizables[0].end());
+            mainGraph.renderizableTree[0].insert(mainGraph.renderizableTree[0].end(), _renderizables[1].begin(), _renderizables[1].end());
+            mainGraph.renderizableTree[0].insert(mainGraph.renderizableTree[0].end(), _renderizables[2].begin(), _renderizables[2].end());
+            mainGraph.renderizableTree[1].insert(mainGraph.renderizableTree[1].end(), _renderizables[3].begin(), _renderizables[3].end());
+
+            mainGraph.isRenderizableTreeDirty = false;
         }
-    }
 
-    void Scene::onLateUpdate(Delta _dt) {
-        mainGraph.onLateUpdate(_dt);
+        mainGraph.registry.view<DynamicSpriteRenderer, Active>().each([](const NodeID _nodeID, DynamicSpriteRenderer& _dynamicSpriteRenderer, Active& _) {
+            if(_dynamicSpriteRenderer.isEnabled()) {
+                ((CPUTexture*)_dynamicSpriteRenderer.data.texture)->uploadToGPU();
+            }
+        });
 
         for(auto* _canvas : canvases) {
             _canvas->onLateUpdate();
         }
+
+        onLateUpdate(_dt);
     }
 
-    void Scene::onRender(Delta _dt) {
-        mainGraph.onRender();
+    void Scene::onInnerRender(Delta _dt) {
+        auto& _renderManager = engine->manager.renderManager;
 
-        for(auto* _canvas : canvases) {
-            _canvas->onRender();
+        for(auto* _camera : cameras) {
+            if(!_camera->node->hasComponent<Active>()) continue;
+
+            _renderManager.beginDraw(_camera, _camera->node->getComponent<Transform>());
+            _camera->update();
+            {
+                for(auto [_innerData, _transform, _extraData] : mainGraph.renderizableTree[0]) {
+                    _renderManager.drawSpriteRenderer(*_innerData, _transform);
+                }
+
+                for(auto [_innerData, _transform, _extraData] : mainGraph.renderizableTree[1]) {
+                    _innerData->extraInfo = _extraData;
+                    _renderManager.drawTextRenderer(*_innerData, _transform);
+                }
+            }
+
+            _renderManager.endDraw();
         }
+
+        for(auto* _dirtyTransform : mainGraph.dirtyTransforms) {
+            _dirtyTransform->clearDirty();
+        }
+        mainGraph.dirtyTransforms.clear();
     }
 
-    void Scene::onDebugRender(Delta _dt) {
-        mainGraph.onDebugRender();
+    void Scene::onInnerRenderUI(Delta _dt) {
+        // for(auto* _canvas : canvases) {
+        //     _canvas->onRender();
+        // }
+    }
 
-        for(auto* _canvas : canvases) {
-            _canvas->onDebugRender();
-        }
+    void Scene::onInnerDebugRender(Delta _dt) {
+        auto& _renderManager = engine->manager.renderManager;
+        _renderManager.beginDebugDraw(mainCamera, mainCamera->node->getComponent<Transform>());
+        engine->manager.physics.debugRender(&_renderManager);
+        _renderManager.endDebugDraw();
+
+        // for(auto* _canvas : canvases) {
+        //     _canvas->onDebugRender();
+        // }
     }
 
     Graph* Scene::getGraph() {

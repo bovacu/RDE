@@ -81,9 +81,8 @@ namespace RDE {
             bool isUI = false;
 
             std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> renderizableTree[2]; // One for sprites and another for UI
-            bool isRenderizableTreeDirty = false;
-
             std::vector<Transform*> dirtyTransforms;
+            bool isRenderizableTreeDirty = false;
 
         private:
             /**
@@ -100,60 +99,11 @@ namespace RDE {
              */
             void removeNodeInner(Node* _node, bool _delete = true);
 
-            /**
-             * @brief Manages the events that the graph must interact with.
-             * @param _event Event to handle.
-             */
-            void onEvent(Event& _event);
-
-            /**
-             * @brief Updates the entities in the graph.
-             * @param _dt Delta time
-             */
-            void onUpdate(Delta _dt);
-
-            /**
-             * @brief Updates the entities's physics in the graph.
-             * @param _dt Delta time
-             */
-            void onFixedUpdate(Delta _dt);
-
-            /**
-             * @brief Renders the entities in the graph
-             */
-            void onRender();
-
-            void onLateUpdate(Delta _dt);
-
-            /**
-             * @brief Renders debug information of the entities in the graph.
-             */
-            void onDebugRender();
-
-            void recalculateRenderizableTree(Node* _node, std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>>* _renderizables);
-
-            void postRenderSync();
-
         public:
             /**
              * @brief A callback if we want our graph to make any specific task during its internal event polling.
              */
             UniqueDelegate<void(NodeContainer&, Event&)> onEventDel;
-
-            /**
-             * @brief A callback if we want our graph to make any specific task during its internal update.
-             */
-            UniqueDelegate<void(NodeContainer&, Delta)> onUpdateDel;
-
-            /**
-             * @brief A callback if we want our graph to make any specific task during its internal fixed update.
-             */
-            UniqueDelegate<void(NodeContainer&, Delta)> onFixedUpdateDel;
-
-            /**
-             * @brief A callback if we want our graph to make any specific task during its internal render.
-             */
-            UniqueDelegate<void(NodeContainer&)> onRenderDel;
 
         public:
             Graph(Scene* _scene, const std::string& _sceneName, bool _isUI = false);

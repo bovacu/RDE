@@ -104,12 +104,12 @@ namespace RDE {
         #if !IS_MOBILE()
         imGuiLayer->onEvent(_e);
         #endif
-        manager.sceneManager.getDisplayedScene()->onEvent(_e);
+        manager.sceneManager.getDisplayedScene()->onInnerEvent(_e);
     }
 
     void Engine::onUpdate(Delta _dt) {
         manager.physics.update(_dt);
-        manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
+        manager.sceneManager.getDisplayedScene()->onInnerUpdate(_dt);
 
 #if !IS_MOBILE()
         if(manager.inputManager.isKeyJustPressed(KeyCode::Space)) imGuiLayer->show = !imGuiLayer->show;
@@ -117,12 +117,12 @@ namespace RDE {
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
-        manager.sceneManager.getDisplayedScene()->onFixedUpdate(_fixedDt);
+        manager.sceneManager.getDisplayedScene()->onInnerFixedUpdate(_fixedDt);
         manager.physics.step(_fixedDt);
     }
 
     void Engine::onLateUpdate(Delta _dt) {
-        manager.sceneManager.getDisplayedScene()->onLateUpdate(_dt);
+        manager.sceneManager.getDisplayedScene()->onInnerLateUpdate(_dt);
     }
 
     void Engine::onRender(Delta _dt) {
@@ -131,8 +131,9 @@ namespace RDE {
         #endif
 
         manager.renderManager.clear();
-        manager.sceneManager.getDisplayedScene()->onRender(_dt);
-        manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
+        manager.sceneManager.getDisplayedScene()->onInnerRender(_dt);
+        manager.sceneManager.getDisplayedScene()->onInnerRenderUI(_dt);
+        manager.sceneManager.getDisplayedScene()->onInnerDebugRender(_dt);
 
         #if !IS_MOBILE()
             frameBuffer->unbind();

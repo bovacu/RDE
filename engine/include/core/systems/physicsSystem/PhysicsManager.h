@@ -42,7 +42,7 @@ namespace RDE {
 
     class PhysicsManager {
         friend class PhysicsBody;
-        friend class Graph;
+        friend class Scene;
 
         private:
             std::vector<PhysicsBody*> bodies;
