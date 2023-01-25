@@ -59,11 +59,6 @@ namespace RDE {
              */
             int layer = 0;
 
-            /**
-             * @brief Inner elements container.
-             */
-            Graph graph;
-
             std::vector<Batch> batches;
             bool dirty = true;
             int maxIndicesPerDrawCall = 1000;
@@ -73,13 +68,15 @@ namespace RDE {
             std::vector<CanvasElement> uiUpdatables;
 
         public:
-            explicit Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag);
-
             /**
              * @brief Returns the inner container Graph
              * @return Graph*
              */
-            Graph* getGraph();
+            Graph* graph;
+
+        public:
+            explicit Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag);
+            ~Canvas();
 
             /**
              * @brief Gets the rendering Camera

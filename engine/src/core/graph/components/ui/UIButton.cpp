@@ -14,7 +14,7 @@
 namespace RDE {
 
     UIButton::UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config) :
-    UIButton(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
+    UIButton(_node, &_scene->engine->manager, _canvas->graph, _config) {  }
 
     UIButton::UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config) {
         node = _node;

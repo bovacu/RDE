@@ -358,7 +358,7 @@ namespace RDE {
 //        auto _shader = batch->manager->shaderManager.getShader("grid");
 //        glUseProgram(_shader);
 //
-//        float _zoom = Engine::get().manager.sceneManager.getDisplayedScene()->getMainCamera()->getCurrentZoomLevel();
+//        float _zoom = Engine::get().manager.sceneManager.getDisplayedScene()->mainCamera->getCurrentZoomLevel();
 //        float _params[4] = {(float)Engine::get().getWindowSize().x, (float)Engine::get().getWindowSize().y, 32.f * (1.f / _zoom), 32.f * (1.f / _zoom)};
 //
 //        GLint _location = glGetUniformLocation(_shader, "params");

@@ -167,7 +167,7 @@ namespace RDE {
         #if !IS_MOBILE()
         frameBuffer->resize(_width, _height);
         #endif
-        manager.sceneManager.getDisplayedScene()->getMainCamera()->setCameraSize(_width, _height);
+        manager.sceneManager.getDisplayedScene()->mainCamera->setCameraSize(_width, _height);
         manager.sceneManager.getDisplayedScene()->canvas->onResize(_width, _height);
 
         return true;
@@ -208,7 +208,7 @@ namespace RDE {
 
         try {
             auto _scene = manager.sceneManager.getDisplayedScene();
-            _scene->getGraph()->setParent(_scene->getGraph()->getNode(_a), _scene->getGraph()->getNode(_b));
+            _scene->graph->setParent(_scene->graph->getNode(_a), _scene->graph->getNode(_b));
             return {Util::String::appendToString("Set ", _b, " as parent of ", _a) };
         } catch (const std::runtime_error& _e) {
             return {Util::String::appendToString("[error] '", _a, "' or '", _b, "' or both don't exist on the scene!") };

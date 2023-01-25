@@ -6,13 +6,13 @@
 #include "core/util/Delta.h"
 #include "core/graph/Graph.h"
 #include "core/graph/components/Components.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 namespace RDE {
 
     class Camera;
     class Window; 
     class Engine;
-    class Canvas;
     struct RenderizableInnerData;
 
     /**
@@ -28,25 +28,9 @@ namespace RDE {
 
         private:
             /**
-             * @brief Graph for entities hierarchy.
-             * @see Graph
-             */
-            Graph graph;
-
-            /**
-             * @brief All of the UI canvases that the scene has.
-             */
-            Canvas* canvas;
-
-            /**
              * @brief All of the cameras that will render the scene.
              */
             std::vector<Camera*> cameras;
-
-            /**
-             * @brief Main camera renderer.
-             */
-            Camera* mainCamera = nullptr;
 
             /**
              * @brief Map PrefabKey -> NodeID.
@@ -63,6 +47,22 @@ namespace RDE {
              * @see Engine
              */
             Engine* engine = nullptr;
+
+            /**
+             * @brief Graph for entities hierarchy.
+             * @see Graph
+             */
+            Graph* graph = nullptr;
+
+            /**
+             * @brief All of the UI canvases that the scene has.
+             */
+            Canvas* canvas = nullptr;
+
+            /**
+             * @brief Main camera renderer.
+             */
+            Camera* mainCamera = nullptr;
 
         protected:
             /**
@@ -225,23 +225,10 @@ namespace RDE {
             virtual void onEnd() {  }
 
             /**
-             * @brief This function returns the graph system of this specific scene, so we can access any entity and it's components,
-             * create new ones or destroy them.
-             * @return the graph of the scene.
-             */
-            Graph* getGraph();
-
-            /**
              * @brief Returns all of the cameras used in the scene.
              * @return std::vector<Camera*>&
              */
             std::vector<Camera*>& getCameras();
-
-            /**
-             * @brief Returns the main camera.
-             * @return Camera*
-             */
-            Camera* getMainCamera();
 
             /**
              * @brief Adds a new camera to the scene and returns it to make any modifications needed.

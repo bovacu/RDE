@@ -4,6 +4,7 @@
 
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/Engine.h"
+#include "core/graph/components/Transform.h"
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UICheckbox.h"
 #include "core/graph/components/ui/UIInput.h"
@@ -25,15 +26,17 @@ namespace RDE {
         Event* event;
     };
 
-    Canvas::Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag) : graph(_scene, _canvasTag, true) {
+    Canvas::Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag) {
+        graph = new Graph(_scene, _canvasTag, true);
+
         scene = _scene;
-        auto _cameraNode = graph.createNode("CanvasCamera");
-        camera = _cameraNode->addComponent<Camera>(_window);
-        camera->setCameraSize(_window->getWindowSize());
+        auto* _cameraNode = graph->createNode("CanvasCamera");
+        camera = _cameraNode->addComponent<Camera>(scene->engine->getWindow());
+        camera->setCameraSize(scene->engine->getWindow()->getWindowSize());
     }
 
-    Graph* Canvas::getGraph() {
-        return &graph;
+    Canvas::~Canvas() {
+        delete graph;
     }
 
     void Canvas::getUpdatable(Node* _node, CanvasElement* _canvasElement) {
@@ -168,7 +171,7 @@ namespace RDE {
     }
 
     void Canvas::forceRender() {
-        auto& _renderManager = graph.scene->engine->manager.renderManager;
+        auto& _renderManager = graph->scene->engine->manager.renderManager;
         _renderManager.beginDraw(camera, nullptr);
         _renderManager.drawUI(batches);
 
@@ -184,7 +187,7 @@ namespace RDE {
     }
 
     void Canvas::onResize(uint _width, uint _height) {
-        ((UITransform*)graph.sceneRoot->getTransform())->setSize({ (float)_width, (float)_height });
+        ((UITransform*)graph->sceneRoot->getTransform())->setSize({ (float)_width, (float)_height });
         camera->setCameraSize((int)_width, (int)_height);
     }
 

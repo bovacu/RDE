@@ -27,16 +27,19 @@ namespace RDE {
         Event* event;
     };
 
-    Scene::Scene(Engine* _engine, const std::string& _debugName) : graph(this, _debugName), debugName(_debugName), engine(_engine) {
-        auto* _mainCameraNode = graph.createNode("MainCamera");
-        auto* _camera = _mainCameraNode->addComponent<Camera>(&_engine->getWindow());
+    Scene::Scene(Engine* _engine, const std::string& _debugName) : debugName(_debugName), engine(_engine) {
+        graph = new Graph(this, _debugName);
+        auto* _mainCameraNode = graph->createNode("MainCamera");
+        auto* _camera = _mainCameraNode->addComponent<Camera>(_engine->getWindow());
         cameras.push_back(_camera);
         mainCamera = _camera;
 
-        canvas = new Canvas(this, &engine->getWindow(), "Canvas");
+        canvas = new Canvas(this, _engine->getWindow(), "Canvas");
+        canvas->onResize(_engine->getWindow()->getWidth(), _engine->getWindow()->getHeight());
     }
 
     Scene::~Scene() {
+        delete graph;
         delete canvas;
         prefabs.clear();
     }
@@ -57,8 +60,8 @@ namespace RDE {
 
 
     void Scene::onInnerUpdateHierarchy(Delta _dt) {
-        auto _animations = graph.registry.view<AnimationSystem, SpriteRenderer, Active>(entt::exclude<DisabledForRender>);
-        auto _particleSystems = graph.registry.view<ParticleSystem, Active>(entt::exclude<DisabledForRender>);
+        auto _animations = graph->registry.view<AnimationSystem, SpriteRenderer, Active>(entt::exclude<DisabledForRender>);
+        auto _particleSystems = graph->registry.view<ParticleSystem, Active>(entt::exclude<DisabledForRender>);
 
         _animations.each([&_dt](const auto _entity, AnimationSystem& _animationSystem, SpriteRenderer& _spriteRenderer, const Active& _) {
             _animationSystem.update(_dt, &_spriteRenderer);
@@ -94,20 +97,20 @@ namespace RDE {
         if(!_node->hasComponent<DisabledForRender>() && _node->hasComponent<Active>()) {
 
             if(_node->hasComponent<SpriteRenderer>()) {
-                graph.renderingTreeData.sprites.emplace_back(&_node->getComponent<SpriteRenderer>()->data, _node->getTransform(), nullptr );
+                graph->renderingTreeData.sprites.emplace_back(&_node->getComponent<SpriteRenderer>()->data, _node->getTransform(), nullptr );
             }
 
             if(_node->hasComponent<DynamicSpriteRenderer>()) {
-                graph.renderingTreeData.dynamicSprites.emplace_back(&_node->getComponent<DynamicSpriteRenderer>()->data, _node->getTransform(), nullptr );
+                graph->renderingTreeData.dynamicSprites.emplace_back(&_node->getComponent<DynamicSpriteRenderer>()->data, _node->getTransform(), nullptr );
             }
 
             if(_node->hasComponent<ParticleSystem>()) {
-                graph.renderingTreeData.particleSystmes.emplace_back(&_node->getComponent<ParticleSystem>()->data, _node->getTransform(), nullptr );
+                graph->renderingTreeData.particleSystmes.emplace_back(&_node->getComponent<ParticleSystem>()->data, _node->getTransform(), nullptr );
             }
 
             if(_node->hasComponent<TextRenderer>()) {
                 auto* _textRenderer = _node->getComponent<TextRenderer>();
-                graph.renderingTreeData.texts.emplace_back( &_textRenderer->data, _node->getTransform(), (void*)_textRenderer );
+                graph->renderingTreeData.texts.emplace_back( &_textRenderer->data, _node->getTransform(), (void*)_textRenderer );
             }
         }
 
@@ -123,15 +126,15 @@ namespace RDE {
 
         CanvasElement _canvasElement { _node };
 
-        if(graph.getNodeContainer().any_of<UIInteractable>(_node->getID())) {
+        if(graph->getNodeContainer().any_of<UIInteractable>(_node->getID())) {
             _canvasElement.interactable = _node->getComponent<UIInteractable>();
             canvas->uiInteractables.push_back(_canvasElement);
         }
 
-        if(graph.getNodeContainer().any_of<UIText, UIButton, UIImage, UISlider, UIPanel>(_node->getID())) {
+        if(graph->getNodeContainer().any_of<UIText, UIButton, UIImage, UISlider, UIPanel>(_node->getID())) {
             canvas->getRenderizable(_node, &_canvasElement);
 
-            if(graph.getNodeContainer().any_of<UIMask>(_node->getID()) && _node->getComponent<UIMask>()->isEnabled()) {
+            if(graph->getNodeContainer().any_of<UIMask>(_node->getID()) && _node->getComponent<UIMask>()->isEnabled()) {
                 _canvasElement.cropping = _node->getTransform()->getEnabledChildrenCount();
             }
 
@@ -140,7 +143,7 @@ namespace RDE {
             }
         }
 
-        if(graph.getNodeContainer().any_of<UISlider, UIInput>(_node->getID())) {
+        if(graph->getNodeContainer().any_of<UISlider, UIInput>(_node->getID())) {
             canvas->getUpdatable(_node, &_canvasElement);
 
             if(_canvasElement.updatableData.updatable != nullptr) {
@@ -154,23 +157,23 @@ namespace RDE {
     }
 
     void Scene::onInnerLateUpdateHierarchy(Delta _dt) {
-        if(graph.renderingTreeData.isRenderizableTreeDirty) {
+        if(graph->renderingTreeData.isRenderizableTreeDirty) {
             // [0] -> SpriteRenderer
             // [1] -> DynamicSpriteRenderer
             // [2] -> ParticleSystem
             // [3] -> TextRenderer
             const int RENDERIZABLES_COUNT = 4;
 
-            graph.renderingTreeData.sprites.clear();
-            graph.renderingTreeData.dynamicSprites.clear();
-            graph.renderingTreeData.particleSystmes.clear();
-            graph.renderingTreeData.texts.clear();
+            graph->renderingTreeData.sprites.clear();
+            graph->renderingTreeData.dynamicSprites.clear();
+            graph->renderingTreeData.particleSystmes.clear();
+            graph->renderingTreeData.texts.clear();
 
-            recalculateRenderizableTree(graph.getRoot());
-            graph.renderingTreeData.isRenderizableTreeDirty = false;
+            recalculateRenderizableTree(graph->getRoot());
+            graph->renderingTreeData.isRenderizableTreeDirty = false;
         }
 
-        graph.registry.view<DynamicSpriteRenderer, Active>().each([](const NodeID _nodeID, DynamicSpriteRenderer& _dynamicSpriteRenderer, Active& _) {
+        graph->registry.view<DynamicSpriteRenderer, Active>().each([](const NodeID _nodeID, DynamicSpriteRenderer& _dynamicSpriteRenderer, Active& _) {
             if(_dynamicSpriteRenderer.isEnabled()) {
                 ((CPUTexture*)_dynamicSpriteRenderer.data.texture)->uploadToGPU();
             }
@@ -178,12 +181,12 @@ namespace RDE {
     }
 
     void Scene::onInnerLateUpdateUI(Delta _dt) {
-        if(graph.renderingTreeData.isRenderizableTreeDirty) {
-            graph.renderingTreeData.isRenderizableTreeDirty = false;
+        if(graph->renderingTreeData.isRenderizableTreeDirty) {
+            graph->renderingTreeData.isRenderizableTreeDirty = false;
             canvas->uiInteractables.clear();
             canvas->uiUpdatables.clear();
             canvas->uiRenderizables.clear();
-            recalculateRenderizableTreeUI(graph.sceneRoot);
+            recalculateRenderizableTreeUI(graph->sceneRoot);
         }
     }
 
@@ -198,11 +201,11 @@ namespace RDE {
             _renderManager.beginDraw(_camera, _camera->node->getComponent<Transform>());
             _camera->update();
             {
-                for(auto [_innerData, _transform, _extraData] : graph.renderingTreeData.sprites) {
+                for(auto [_innerData, _transform, _extraData] : graph->renderingTreeData.sprites) {
                     _renderManager.drawSpriteRenderer(*_innerData, _transform);
                 }
 
-                for(auto [_innerData, _transform, _extraData] : graph.renderingTreeData.texts) {
+                for(auto [_innerData, _transform, _extraData] : graph->renderingTreeData.texts) {
                     _innerData->extraInfo = _extraData;
                     _renderManager.drawTextRenderer(*_innerData, _transform);
                 }
@@ -215,14 +218,14 @@ namespace RDE {
     }
 
     void Scene::postRenderSync() {
-        for(auto* _dirtyTransform : graph.renderingTreeData.dirtyTransforms) {
+        for(auto* _dirtyTransform : graph->renderingTreeData.dirtyTransforms) {
             _dirtyTransform->clearDirty();
         }
-        graph.renderingTreeData.dirtyTransforms.clear();
+        graph->renderingTreeData.dirtyTransforms.clear();
     }
 
     void Scene::onInnerRenderUI(Delta _dt) {
-        auto& _renderManager = graph.scene->engine->manager.renderManager;
+        auto& _renderManager = graph->scene->engine->manager.renderManager;
         _renderManager.beginDraw(canvas->camera, (Transform*)canvas->camera->node->getComponent<UITransform>());
 
         canvas->batches.clear();
@@ -255,10 +258,10 @@ namespace RDE {
     }
 
     void Scene::postRenderSyncUI() {
-        for(auto* _dirtyTransform : graph.renderingTreeData.dirtyTransforms) {
+        for(auto* _dirtyTransform : graph->renderingTreeData.dirtyTransforms) {
             ((UITransform*)_dirtyTransform)->clearDirty();
         }
-        graph.renderingTreeData.dirtyTransforms.clear();
+        graph->renderingTreeData.dirtyTransforms.clear();
     }
 
 
@@ -271,19 +274,18 @@ namespace RDE {
     }
 
     void Scene::onInnerDebugRenderUI(Delta _dt) {
-        auto& _registry = graph.getNodeContainer();
-        auto* _camera = getMainCamera();
+        auto& _registry = graph->getNodeContainer();
 
         auto& _renderManager = engine->manager.renderManager;
-       _renderManager.beginDebugDraw(_camera, (Transform*)_camera->node->getComponent<UITransform>());
+       _renderManager.beginDebugDraw(mainCamera, (Transform*)mainCamera->node->getComponent<UITransform>());
 
-        _registry.view<UIImage, UITransform, Active>().each([this, _camera, &_renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
+        _registry.view<UIImage, UITransform, Active>().each([this, &_renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
             Vec2F _size = _uiImage.getSize();
             Vec2F _pointSize = {4, 4};
 
-            auto _viewport = _camera->getViewport();
+            auto _viewport = mainCamera->getViewport();
             auto _virtualRes = _viewport->getVirtualResolution();
             auto _physicalRes = _viewport->getDeviceResolution();
             auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
@@ -303,12 +305,12 @@ namespace RDE {
             _renderManager.setPointSize(4);
         });
 
-        _registry.view<UICheckbox, UITransform, Active>().each([this, _camera, &_renderManager](const NodeID _nodeID, UICheckbox& _checkbox, UITransform& _transform, Active& _) {
+        _registry.view<UICheckbox, UITransform, Active>().each([this, &_renderManager](const NodeID _nodeID, UICheckbox& _checkbox, UITransform& _transform, Active& _) {
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
             Vec2F _size = _checkbox.getSize();
 
-            auto _viewport = _camera->getViewport();
+            auto _viewport = mainCamera->getViewport();
             auto _virtualRes = _viewport->getVirtualResolution();
             auto _physicalRes = _viewport->getDeviceResolution();
             auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
@@ -324,14 +326,14 @@ namespace RDE {
             _renderManager.drawShape(_shape);
         });
 
-        _registry.view<UIText, UITransform, Active>().each([this, _camera, &_renderManager](const NodeID _nodeID, UIText& _uiText, UITransform& _transform, Active& _) {
+        _registry.view<UIText, UITransform, Active>().each([this, &_renderManager](const NodeID _nodeID, UIText& _uiText, UITransform& _transform, Active& _) {
             if(!_uiText.isEnabled()) return;
 
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
             Vec2F _size = _uiText.getSize();
 
-            auto _viewport = _camera->getViewport();
+            auto _viewport = mainCamera->getViewport();
             auto _virtualRes = _viewport->getVirtualResolution();
             auto _physicalRes = _viewport->getDeviceResolution();
             auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
@@ -356,20 +358,12 @@ namespace RDE {
 
 
 
-    Graph* Scene::getGraph() {
-        return &graph;
-    }
-
-    Camera* Scene::getMainCamera() {
-        return mainCamera;
-    }
-
     void Scene::switchMainCamera(Node* _camera) {
         mainCamera = _camera->getComponent<Camera>();
     }
 
     Camera* Scene::addCamera(Window* window) {
-        auto _newCameraNode = graph.createNode(Util::String::appendToString("Camera", cameras.size()));
+        auto _newCameraNode = graph->createNode(Util::String::appendToString("Camera", cameras.size()));
         auto* _camera = _newCameraNode->addComponent<Camera>(window);
         cameras.push_back(_camera);
         return cameras.back();
@@ -397,6 +391,7 @@ namespace RDE {
         return cameras;
     }
 
+
     std::vector<NodeID> Scene::getPrefabs() {
         std::vector<NodeID> _prefabs;
 
@@ -409,6 +404,7 @@ namespace RDE {
         return prefabs[_prefabKey];
     }
 
+    
     // TODO (RDE): Implement canvas and graph refresh after the display is changed on runtime.
     void Scene::onDisplayChanged() {
         Util::Log::warn("The display changed, Scene has received the event but it has no effect as it needs to be implemented");        

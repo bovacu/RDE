@@ -127,7 +127,7 @@ namespace RDE {
     }
 
     void WindowInput::onQuit(SDL_Event& _event) {
-        engine->getWindow().stop();
+        engine->getWindow()->stop();
     }
 
     void WindowInput::onDidEnterForegroundApp(SDL_Event& _event) {
@@ -142,7 +142,7 @@ namespace RDE {
 
     void WindowInput::onDestroyApp(SDL_Event& _event) {
         Util::Log::warn("AUTO TERMINATING!!!!!");
-        engine->getWindow().stop();
+        engine->getWindow()->stop();
     }
 
     void WindowInput::onWillEnterForegroundApp(SDL_Event& _event) {

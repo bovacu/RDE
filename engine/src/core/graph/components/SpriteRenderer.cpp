@@ -21,10 +21,10 @@
 namespace RDE {
 
     SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, const SpriteRendererConfig& _config) :
-    SpriteRenderer(_node, &_scene->engine->manager, _scene->getGraph(), _config) {  }
+    SpriteRenderer(_node, &_scene->engine->manager, _scene->graph, _config) {  }
 
     SpriteRenderer::SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const SpriteRendererConfig& _config) :
-    SpriteRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _config)  {  }
+    SpriteRenderer(_node, &_scene->engine->manager, _canvas->graph, _config)  {  }
 
     SpriteRenderer::SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const SpriteRendererConfig& _config) {
         
@@ -36,7 +36,7 @@ namespace RDE {
         setColor(_config.color);
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();
-        calculateGeometryForSpriteRenderer(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
+        calculateGeometryForSpriteRenderer(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->mainCamera->getViewport());
     }
 
     RENDERIZABLE_BASIC_METHODS_IMPL(SpriteRenderer, (float)data.texture->getSize().x * node->getTransform()->getScale().x, (float)data.texture->getSize().y * node->getTransform()->getScale().y)

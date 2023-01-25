@@ -15,7 +15,7 @@ namespace RDE {
 
 
     UIImage::UIImage(Node* _node, Scene* _scene, Canvas* _canvas, const UIImageConfig& _config) :
-    UIImage(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
+    UIImage(_node, &_scene->engine->manager, _canvas->graph, _config) {  }
 
     UIImage::UIImage(Node* _node, Manager* _manager, Graph* _graph, const UIImageConfig& _config) {
 
@@ -37,7 +37,7 @@ namespace RDE {
         data.imageRenderingType = (uint)imageRenderingType;
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();
-        calculateGeometryForUIImage(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
+        calculateGeometryForUIImage(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->mainCamera->getViewport());
     }
 
 

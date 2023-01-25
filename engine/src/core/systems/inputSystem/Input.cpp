@@ -139,14 +139,14 @@ namespace RDE {
         auto& _wi = windowInput;
         float _x = _mousePos.x - (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().x / 2.f : 0.f);
         float _y = (_centeredMiddleScreen ? (float)_wi->window->getWindowSize().y / 2.f : 0.f) - _mousePos.y;
-        float _zoom = mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera()->getCurrentZoomLevel();
+        float _zoom = mouseInput->engine->manager.sceneManager.getDisplayedScene()->mainCamera->getCurrentZoomLevel();
         return {_x * _zoom, _y * _zoom};
     }
 
     Vec2F InputManager::getMousePosWorldPos() {
         auto _mousePos = mouseInput->getMousePosition();
         auto& _wi = windowInput;
-        auto& _camera = *mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera();
+        auto& _camera = *mouseInput->engine->manager.sceneManager.getDisplayedScene()->mainCamera;
         float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.node->getTransform()->getPosition().x;
         float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.node->getTransform()->getPosition().y;
         float _zoom = _camera.getCurrentZoomLevel();
@@ -156,7 +156,7 @@ namespace RDE {
     Vec2F InputManager::getMousePosCanvas() {
         auto _mousePos = mouseInput->getMousePosition();
         auto& _wi = windowInput;
-        auto& _camera = *mouseInput->engine->manager.sceneManager.getDisplayedScene()->getMainCamera();
+        auto& _camera = *mouseInput->engine->manager.sceneManager.getDisplayedScene()->mainCamera;
         float _x = _mousePos.x - (float)_wi->window->getWindowSize().x / 2.f + _camera.node->getTransform()->getPosition().x;
         float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.node->getTransform()->getPosition().y;
         return {_x, - _y};

@@ -245,7 +245,7 @@ namespace RDE {
              * @brief Returns the Window instance.
              * @return The main window.
              */
-            Window& getWindow() { return *window; }
+            Window* getWindow() { return window; }
 
             /**
              * @brief Allows the end-user to render to something different than the default window.

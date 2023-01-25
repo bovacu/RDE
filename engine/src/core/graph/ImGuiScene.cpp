@@ -91,10 +91,10 @@ namespace RDE {
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
-        auto* window = static_cast<SDL_Window*>(engine->getWindow().getNativeWindow());
+        auto* window = static_cast<SDL_Window*>(engine->getWindow()->getNativeWindow());
 
         // Setup Platform/Renderer bindings
-        ImGui_ImplSDL2_InitForOpenGL(window, engine->getWindow().getContext());
+        ImGui_ImplSDL2_InitForOpenGL(window, engine->getWindow()->getContext());
         ImGui_ImplOpenGL3_Init("#version 410");
 
         for(auto& _state : State::stateToNameDict) {
@@ -127,15 +127,15 @@ namespace RDE {
 
     void ImGuiScene::end() {
         ImGuiIO& io = ImGui::GetIO();
-        io.DisplaySize = ImVec2((float)engine->getWindow().getWidth(), (float)engine->getWindow().getHeight());
+        io.DisplaySize = ImVec2((float)engine->getWindow()->getWidth(), (float)engine->getWindow()->getHeight());
 
         // Rendering
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            SDL_Window* backup_current_window = engine->getWindow().getNativeWindow();
-            SDL_GLContext backup_current_context = engine->getWindow().getContext();
+            SDL_Window* backup_current_window = engine->getWindow()->getNativeWindow();
+            SDL_GLContext backup_current_context = engine->getWindow()->getContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
             SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
@@ -160,13 +160,13 @@ namespace RDE {
         // so I need to split how both are selected and shown and switch between one registry and the other, so that's why there
         // is selectedNode and selectedNodeCanvas, if one is used, the other is set as null, this way just one of the registries
         // is shown and everything works fine, and we reuse all the code just by using 2 switching variables.
-        auto* _mainGraph = _scene->getGraph();
+        auto* _mainGraph = _scene->graph;
         hierarchy(_scene);
 
         if(selectedNode != NODE_ID_NULL) nodeComponents(_mainGraph, selectedNode);
 
         if(selectedNodeCanvas != NODE_ID_NULL) {
-            auto* _graph = _scene->canvas->getGraph();
+            auto* _graph = _scene->canvas->graph;
             nodeComponents(_graph, selectedNodeCanvas);
         }
     }
@@ -280,17 +280,17 @@ namespace RDE {
     }
 
     void ImGuiScene::printResolutionFullscreenAndVSync() {
-        static bool _vsync = engine->getWindow().isVSyncActive(), _fullscreen = false;
-        static int _windowRes[2] = {(int) engine->getWindow().getWindowSize().x, (int) engine->getWindow().getWindowSize().y};
+        static bool _vsync = engine->getWindow()->isVSyncActive(), _fullscreen = false;
+        static int _windowRes[2] = {(int) engine->getWindow()->getWindowSize().x, (int) engine->getWindow()->getWindowSize().y};
 
-        std::string _windowResolution = std::to_string(engine->getWindow().getWindowSize().x) + "x" + std::to_string(engine->getWindow().getWindowSize().y);
+        std::string _windowResolution = std::to_string(engine->getWindow()->getWindowSize().x) + "x" + std::to_string(engine->getWindow()->getWindowSize().y);
         static const char* _resSelected = _windowResolution.c_str();
 
         if(ImGui::Checkbox("VSync Active", &_vsync))
-            engine->getWindow().setVSync(_vsync);
+            engine->getWindow()->setVSync(_vsync);
 
         if(ImGui::Checkbox("Fullscreen", &_fullscreen))
-            engine->getWindow().setFullscreen(_fullscreen);
+            engine->getWindow()->setFullscreen(_fullscreen);
 
         const char* _resolutions[] = { "2560x1440", "1920x1080", "1366x768", "1280x720", "1920x1200", "1680x1050",
                                        "1440x900" ,"1280x800" ,"1024x768" ,"800x600", "800x480","640x480", "320x240"
@@ -304,7 +304,7 @@ namespace RDE {
                 if (ImGui::Selectable(_resolution, is_selected)) {
                     _resSelected = _resolution;
                     charToIntSize(std::string(_resolution), _windowRes);
-                    engine->getWindow().setWindowSize(_windowRes[0], _windowRes[1]);
+                    engine->getWindow()->setWindowSize(_windowRes[0], _windowRes[1]);
                     WindowResizedEvent _e(_windowRes[0], _windowRes[1]);
                     engine->onEvent(_e);
                 }
@@ -452,11 +452,11 @@ namespace RDE {
     void ImGuiScene::hierarchy(Scene* _scene) {
         ImGui::Begin("Hierarchy");
         windowsHovered[1] = checkForFocus();
-        auto* _graph = _scene->getGraph();
+        auto* _graph = _scene->graph;
         hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNode);
-        _graph = _scene->canvas->getGraph();
+        _graph = _scene->canvas->graph;
         hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNodeCanvas);
-        showLoadedPrefabs(_scene, _scene->getGraph(), _graph->getRoot(), selectedNode);
+        showLoadedPrefabs(_scene, _scene->graph, _graph->getRoot(), selectedNode);
         ImGui::End();
     }
 
@@ -607,8 +607,8 @@ namespace RDE {
 //                    bool is_selected = (_viewPortSelected == _resolution);
 //                    if (ImGui::Selectable(_resolution, is_selected)) {
 //                        _viewPortSelected = _resolution;
-//                        if(_viewPortSelected == "Free Aspect") _camera->setFreeViewport(engine->getWindow().getWindowSize());
-//                        else _camera->setAdaptiveViewport({1920, 1080}, engine->getWindow().getWindowSize());
+//                        if(_viewPortSelected == "Free Aspect") _camera->setFreeViewport(engine->getWindow()->getWindowSize());
+//                        else _camera->setAdaptiveViewport({1920, 1080}, engine->getWindow()->getWindowSize());
 //                    }
 //                    if (is_selected)
 //                        ImGui::SetItemDefaultFocus();
