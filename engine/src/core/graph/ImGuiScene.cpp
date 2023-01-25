@@ -165,11 +165,10 @@ namespace RDE {
 
         if(selectedNode != NODE_ID_NULL) nodeComponents(_mainGraph, selectedNode);
 
-        if(selectedNodeCanvas != NODE_ID_NULL)
-            for(auto* _canvas : _scene->getCanvases()) {
-                auto* _graph = _canvas->getGraph();
-                nodeComponents(_graph, selectedNodeCanvas);
-            }
+        if(selectedNodeCanvas != NODE_ID_NULL) {
+            auto* _graph = _scene->canvas->getGraph();
+            nodeComponents(_graph, selectedNodeCanvas);
+        }
     }
 
     void ImGuiScene::metrics() {
@@ -455,10 +454,8 @@ namespace RDE {
         windowsHovered[1] = checkForFocus();
         auto* _graph = _scene->getGraph();
         hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNode);
-        for(auto* _canvas : _scene->getCanvases()) {
-            _graph = _canvas->getGraph();
-            hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNodeCanvas);
-        }
+        _graph = _scene->canvas->getGraph();
+        hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNodeCanvas);
         showLoadedPrefabs(_scene, _scene->getGraph(), _graph->getRoot(), selectedNode);
         ImGui::End();
     }

@@ -168,10 +168,7 @@ namespace RDE {
         frameBuffer->resize(_width, _height);
         #endif
         manager.sceneManager.getDisplayedScene()->getMainCamera()->setCameraSize(_width, _height);
-
-        for(auto* _canvas : manager.sceneManager.getDisplayedScene()->getCanvases()) {
-            _canvas->onResize(_width, _height);
-        }
+        manager.sceneManager.getDisplayedScene()->canvas->onResize(_width, _height);
 
         return true;
     }

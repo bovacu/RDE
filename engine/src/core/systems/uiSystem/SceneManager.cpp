@@ -42,9 +42,7 @@ namespace RDE {
         auto _windowSize = engine->getWindow().getWindowSize();
 
         sceneDisplayed->getMainCamera()->onResize(_windowSize.x, _windowSize.y);
-        for(auto& _canvas : sceneDisplayed->getCanvases()) {
-            _canvas->getCamera()->onResize(_windowSize.x, _windowSize.y);
-        }
+        sceneDisplayed->canvas->getCamera()->onResize(_windowSize.x, _windowSize.y);
 
         Util::Log::debug("Displayed scene '", _sceneName, "'");
     }

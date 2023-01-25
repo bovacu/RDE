@@ -87,31 +87,6 @@ namespace RDE {
              */
             Camera* getCamera();
 
-            /**
-             * @brief Handles the event related to the UI elements.
-             * @param _eventDispatcher Event dispatcher
-             * @param _event Event
-             */
-            void onEvent(Engine* _engine, Event& _event);
-
-            /**
-             * @brief Handles the update of the the UI elements.
-             * @param _dt Delta time
-             */
-            void onUpdate(Delta _dt);
-
-            /**
-             * @brief Handles the rendering of the UI elements.
-             */
-            void onRender();
-
-            /**
-             * @brief Handles the debug rendering of the UI elements.
-             */
-            void onDebugRender();
-
-            void onLateUpdate();
-
             void onResize(uint _width, uint _height);
 
             void setCanvasResolution(const Vec2I& _resolution);
@@ -119,8 +94,6 @@ namespace RDE {
             Vec2I getCanvasResolution();
 
         private:
-            void recalculateRenderizableTree(Node* _node);
-
             void batchTreeElementPre(CanvasElement* _canvasElement, void* _data);
             void batchTreeElementPost(CanvasElement* _canvasElement, void* _data);
 

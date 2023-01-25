@@ -35,7 +35,7 @@ namespace RDE {
                 auto* _component = &registry.template emplace<Component>(ID, this, manager, graph, _args...);
                 #endif
                 if(graph->onDataChanged != nullptr) graph->onDataChanged((void*)_component);
-                graph->isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
+                graph->renderingTreeData.isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
                 return _component;
             }
 
@@ -56,7 +56,7 @@ namespace RDE {
                 auto _removed = graph->registry.template remove<Component>(ID);
                 #endif
                 if(graph->onDataChanged != nullptr) graph->onDataChanged((void*)_removed);
-                graph->isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
+                graph->renderingTreeData.isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
             }
 
             template<typename Component>

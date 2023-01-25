@@ -23,22 +23,25 @@ namespace RDE {
         friend class ConfigManager;
         friend class WindowInput;
         friend class Engine;
+        friend class ImGuiScene;
+        friend class SceneManager;
 
         private:
             /**
+             * @brief Graph for entities hierarchy.
              * @see Graph
              */
-            Graph mainGraph;
+            Graph graph;
+
+            /**
+             * @brief All of the UI canvases that the scene has.
+             */
+            Canvas* canvas;
 
             /**
              * @brief All of the cameras that will render the scene.
              */
             std::vector<Camera*> cameras;
-
-            /**
-             * @brief All of the UI canvases that the scene has.
-             */
-            std::vector<Canvas*> canvases;
 
             /**
              * @brief Main camera renderer.
@@ -74,14 +77,27 @@ namespace RDE {
              * @param _event the event that was just captured.
              * @see InputManager
              */
-            void onInnerEvent(Event& _event);
+            void onInnerEvent(Event& _event) {
+                onInnerEventUI(_event);
+                onInnerEventHierarchy(_event);
+                onEvent(_event);
+            }
+
+            void onInnerEventHierarchy(Event& _event); 
+            void onInnerEventUI(Event& _event);
 
             /**
              * @brief This function is executed every frame of the application and here we should update logic and take inputs
              * to update the logic and components.
              * @param _dt time that passed between the current frame and the last one.
              */
-            void onInnerUpdate(Delta _dt);
+            void onInnerUpdate(Delta _dt) {
+                onInnerUpdateHierarchy(_dt);
+                onInnerUpdateUI(_dt);
+                onUpdate(_dt);
+            }
+            void onInnerUpdateHierarchy(Delta _dt); 
+            void onInnerUpdateUI(Delta _dt);
 
             /**
              * @brief This function is called a fixed amount of times per second. By default it is 60 times per second, but it
@@ -89,35 +105,56 @@ namespace RDE {
              * consistent frame rate to work properly.
              * @param _dt fixed value initially set at 1/60/
              */
-            void onInnerFixedUpdate(Delta _dt);
+            void onInnerFixedUpdate(Delta _dt) {
+                onInnerFixedUpdateHierarchy(_dt);
+                onInnerFixedUpdateUI(_dt);
+                onFixedUpdate(_dt);
+            }
+            void onInnerFixedUpdateHierarchy(Delta _dtt); 
+            void onInnerFixedUpdateUI(Delta _dt);
 
             /**
              * @brief This function is called as the last update method, after update and fixedUpdate, which is an ideal place
              * to remove elements.
              * @param _dt time that passed between the current frame and the last one.
              */
-            void onInnerLateUpdate(Delta _dt);
-            void recalculateRenderizableTree(Node* _node, std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>>* _renderizables);
+            void onInnerLateUpdate(Delta _dt) {
+                onInnerLateUpdateHierarchy(_dt);
+                onInnerLateUpdateUI(_dt);
+                onLateUpdate(_dt);
+            }
+            void onInnerLateUpdateHierarchy(Delta _dt); 
+            void onInnerLateUpdateUI(Delta _dt);
+            
+            void recalculateRenderizableTree(Node* _node);
+            void recalculateRenderizableTreeUI(Node* _node);
 
             /**
              * @brief This function is also called every frame and renders the geometry of the game. It is not virtual because
              * the main rendering pipeline is handled inside the core of the engine. Users don't need to mess with it.
              * @param _dt the time that passed between the current frame and the last one.
              */
-            void onInnerRender(Delta _dt);
-
-            /**
-             * @brief This function is also called every frame and renders the geometry of the game's UI. It is not virtual because
-             * the main rendering pipeline is handled inside the core of the engine. Users don't need to mess with it.
-             * @param _dt the time that passed between the current frame and the last one.
-             */
+            void onInnerRender(Delta _dt) {
+                onInnerRenderHierarchy(_dt); 
+                onInnerRenderUI(_dt); 
+            }
+            void onInnerRenderHierarchy(Delta _dt); 
             void onInnerRenderUI(Delta _dt);
+
+            void postRenderSync();
+            void postRenderSyncUI();
 
             /**
              * @brief This function is used to drawBatched debugging lines, squares, circles...
              * @param the time that passed between the current frame and the last one.
              */
-            void onInnerDebugRender(Delta _dt);
+            void onInnerDebugRender(Delta _dt) {
+                onInnerDebugRenderHierarchy(_dt);
+                onInnerDebugRenderHierarchy(_dt);
+                onDebugRender(_dt);
+            }
+            void onInnerDebugRenderHierarchy(Delta _dt); 
+            void onInnerDebugRenderUI(Delta _dt);
 
         public:
             explicit Scene(Engine* _engine, const std::string& _debugName = "Scene");
@@ -237,31 +274,6 @@ namespace RDE {
              * @return const std::string&
              */
             [[nodiscard]] const std::string& getName() const { return debugName; }
-
-            /**
-             * @brief Adds a new Canvas to the scene.
-             * @param _canvasTag Name of the Canvas
-             * @return Canvas*
-             */
-            Canvas* addNewCanvas(const std::string& _canvasTag);
-
-            /**
-             * @brief Removes a Canvas by its name.
-             * @param _canvasTag Canvas name
-             */
-            void removeCanvas(const std::string& _canvasTag);
-
-            /**
-             * @brief Removes a Canvas by its reference.
-             * @param _canvas Canvas reference
-             */
-            void removeCanvas(Canvas* _canvas);
-
-            /**
-             * @brief Returns all the canvases of the Scene
-             * @return std::vector<Canvas*>&
-             */
-            std::vector<Canvas*>& getCanvases();
 
             /**
              * @brief Returns all of the prefabs IDs

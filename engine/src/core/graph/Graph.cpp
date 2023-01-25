@@ -23,12 +23,15 @@ namespace RDE {
     static void onFixedUpdateDelFoo(NodeContainer&, Delta) {  }
     static void onRenderDelFoo(NodeContainer&) {  }
 
-    Graph::Graph(Scene* _scene, const std::string& _sceneName, bool _isIUI) : isUI(_isIUI) {
+    Graph::Graph(Scene* _scene, const std::string& _sceneName, bool _isUI) {
+
+        renderingTreeData.isUI = _isUI;
+
         scene = _scene;
         name = _sceneName;
         auto _sceneRootID = registry.create();
 
-        if(!_isIUI) {
+        if(!_isUI) {
             registry.emplace<Tag>(_sceneRootID, _sceneRootID, _sceneName);
             registry.emplace<Transform>(_sceneRootID, this).parent = NODE_ID_NULL;
             sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, &registry.get<Transform>(_sceneRootID));
@@ -57,7 +60,7 @@ namespace RDE {
 
         Node* _node = nullptr;
 
-        if(!isUI) {
+        if(!renderingTreeData.isUI) {
             registry.emplace<Tag>(_newNode, _newNode, _tag);
             registry.emplace<Transform>(_newNode, this).parent = _parentRef;
             (&registry.get<Transform>(_parentRef))->children.push_back(&registry.get<Transform>(_newNode));
@@ -79,7 +82,7 @@ namespace RDE {
 
         if(onDataChanged != nullptr) onDataChanged((void*)_newNode);
 
-        isRenderizableTreeDirty = true;
+        renderingTreeData.isRenderizableTreeDirty = true;
 
         return _node;
     }
@@ -120,7 +123,7 @@ namespace RDE {
     void Graph::removeNode(Node* _node) {
         removeNodeInner(_node, true);
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
-        isRenderizableTreeDirty = true;
+        renderingTreeData.isRenderizableTreeDirty = true;
     }
 
     void Graph::removeNode(const std::string& _nodeTagName) {
@@ -175,7 +178,7 @@ namespace RDE {
         _nodeTransform->setLocalMatrix(glm::inverse(_parentTransform->getLocalMatrix()) * _nodeTransform->getLocalMatrix());
 
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
-        isRenderizableTreeDirty = true;
+        renderingTreeData.isRenderizableTreeDirty = true;
     }
 
     void Graph::removeNodeInner(Node* _node, bool _delete) {
@@ -209,7 +212,7 @@ namespace RDE {
         _node->getTransform()->parentTransform = sceneRoot->getTransform();
         sceneRoot->getTransform()->children.push_back(_node->getTransform());
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
-        isRenderizableTreeDirty = true;
+        renderingTreeData.isRenderizableTreeDirty = true;
     }
 
     void Graph::orphan(const std::string& _nodeTagName) {
@@ -224,14 +227,14 @@ namespace RDE {
         if(_active && !registry.any_of<Active>(_node->getID())) {
             registry.emplace<Active>(_node->getID(), _node, &scene->engine->manager, this);
             if(onDataChanged != nullptr) onDataChanged((void*)_node);
-            isRenderizableTreeDirty = true;
+            renderingTreeData.isRenderizableTreeDirty = true;
             return;
         }
 
         if(!_active && registry.any_of<Active>(_node->getID())) {
             registry.remove<Active>(_node->getID());
             if(onDataChanged != nullptr) onDataChanged((void*)_node);
-            isRenderizableTreeDirty = true;
+            renderingTreeData.isRenderizableTreeDirty = true;
         }
     }
 

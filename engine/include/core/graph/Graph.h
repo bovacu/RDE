@@ -46,6 +46,20 @@ namespace RDE {
     struct Node; 
     struct RenderizableInnerData;
 
+    struct RenderingTreeData {
+        std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> sprites;
+        std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> dynamicSprites;
+        std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> particleSystmes;
+        std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> texts;
+
+        std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> uiImages;
+        std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> uiTexts;
+
+        std::vector<Transform*> dirtyTransforms;
+        bool isRenderizableTreeDirty = false;
+        bool isUI = false;
+    };
+
     class Graph {
         friend class Transform;
         friend class UITransform;
@@ -78,11 +92,8 @@ namespace RDE {
             Scene* scene = nullptr;
 
             UniqueDelegate<void(void*)> onDataChanged;
-            bool isUI = false;
 
-            std::vector<std::tuple<RenderizableInnerData*, Transform*, void*>> renderizableTree[2]; // One for sprites and another for UI
-            std::vector<Transform*> dirtyTransforms;
-            bool isRenderizableTreeDirty = false;
+            RenderingTreeData renderingTreeData;
 
         private:
             /**
