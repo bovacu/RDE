@@ -73,7 +73,20 @@ namespace RDE {
     }
 
     void Scene::onInnerUpdateUI(Delta _dt) {
-        
+        for (auto& _it : canvas->uiUpdatables) {
+            switch (_it.updatableData.updatableType) {
+            case UT_NONE:
+                break;
+            case UT_UI_INPUT: {
+                ((UIInput*)_it.updatableData.updatable)->onUpdate(_dt);
+                break;
+            }
+            case UT_UI_SLIDER: {
+                ((UISlider*)_it.updatableData.updatable)->onUpdate(_dt);
+                break;
+            }
+            }
+        }
     }
 
 
@@ -126,15 +139,15 @@ namespace RDE {
 
         CanvasElement _canvasElement { _node };
 
-        if(graph->getNodeContainer().any_of<UIInteractable>(_node->getID())) {
+        if(canvas->graph->getNodeContainer().any_of<UIInteractable>(_node->getID())) {
             _canvasElement.interactable = _node->getComponent<UIInteractable>();
             canvas->uiInteractables.push_back(_canvasElement);
         }
 
-        if(graph->getNodeContainer().any_of<UIText, UIButton, UIImage, UISlider, UIPanel>(_node->getID())) {
+        if(canvas->graph->getNodeContainer().any_of<UIText, UIButton, UIImage, UISlider, UIPanel>(_node->getID())) {
             canvas->getRenderizable(_node, &_canvasElement);
 
-            if(graph->getNodeContainer().any_of<UIMask>(_node->getID()) && _node->getComponent<UIMask>()->isEnabled()) {
+            if(canvas->graph->getNodeContainer().any_of<UIMask>(_node->getID()) && _node->getComponent<UIMask>()->isEnabled()) {
                 _canvasElement.cropping = _node->getTransform()->getEnabledChildrenCount();
             }
 
@@ -143,7 +156,7 @@ namespace RDE {
             }
         }
 
-        if(graph->getNodeContainer().any_of<UISlider, UIInput>(_node->getID())) {
+        if(canvas->graph->getNodeContainer().any_of<UISlider, UIInput>(_node->getID())) {
             canvas->getUpdatable(_node, &_canvasElement);
 
             if(_canvasElement.updatableData.updatable != nullptr) {
@@ -152,7 +165,7 @@ namespace RDE {
         }
 
          for(auto* _child : _node->getTransform()->children) {
-             recalculateRenderizableTree(_child->node);
+             recalculateRenderizableTreeUI(_child->node);
          }
     }
 
@@ -181,12 +194,12 @@ namespace RDE {
     }
 
     void Scene::onInnerLateUpdateUI(Delta _dt) {
-        if(graph->renderingTreeData.isRenderizableTreeDirty) {
-            graph->renderingTreeData.isRenderizableTreeDirty = false;
+        if(canvas->graph->renderingTreeData.isRenderizableTreeDirty) {
+            canvas->graph->renderingTreeData.isRenderizableTreeDirty = false;
             canvas->uiInteractables.clear();
             canvas->uiUpdatables.clear();
             canvas->uiRenderizables.clear();
-            recalculateRenderizableTreeUI(graph->sceneRoot);
+            recalculateRenderizableTreeUI(canvas->graph->sceneRoot);
         }
     }
 
@@ -225,7 +238,7 @@ namespace RDE {
     }
 
     void Scene::onInnerRenderUI(Delta _dt) {
-        auto& _renderManager = graph->scene->engine->manager.renderManager;
+        auto& _renderManager = engine->manager.renderManager;
         _renderManager.beginDraw(canvas->camera, (Transform*)canvas->camera->node->getComponent<UITransform>());
 
         canvas->batches.clear();
@@ -258,10 +271,10 @@ namespace RDE {
     }
 
     void Scene::postRenderSyncUI() {
-        for(auto* _dirtyTransform : graph->renderingTreeData.dirtyTransforms) {
+        for(auto* _dirtyTransform : canvas->graph->renderingTreeData.dirtyTransforms) {
             ((UITransform*)_dirtyTransform)->clearDirty();
         }
-        graph->renderingTreeData.dirtyTransforms.clear();
+        canvas->graph->renderingTreeData.dirtyTransforms.clear();
     }
 
 
@@ -274,7 +287,7 @@ namespace RDE {
     }
 
     void Scene::onInnerDebugRenderUI(Delta _dt) {
-        auto& _registry = graph->getNodeContainer();
+        auto& _registry = canvas->graph->getNodeContainer();
 
         auto& _renderManager = engine->manager.renderManager;
        _renderManager.beginDebugDraw(mainCamera, (Transform*)mainCamera->node->getComponent<UITransform>());

@@ -265,39 +265,44 @@ namespace RDE {
 
     void SpriteBatch::drawUI(std::vector<Batch>& _batches) {
         for(auto& _batch : _batches) {
-            // auto _shaderID = _batch.shader->getShaderID();
-            // if (_batch.vertexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0)
-            //     continue;
+            auto _shaderID = _batch.shader->getShaderID();
+            if (_batch.vertexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0)
+                continue;
 
-            // glUseProgram(_shaderID);
+            glUseProgram(_shaderID);
+            Util::GL::checkError("After glUseProgram UI");
 
-            // GLint location = glGetUniformLocation(_shaderID, "viewProjectionMatrix");
-            // glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
+            GLint location = glGetUniformLocation(_shaderID, "viewProjectionMatrix");
+            Util::GL::checkError("After glGetUniformLocation UI");
+            glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
+            Util::GL::checkError("After glUniformMatrix4fv UI");
 
-            // glActiveTexture(GL_TEXTURE0);
+            glActiveTexture(GL_TEXTURE0);
+            Util::GL::checkError("After glActiveTexture UI");
 
-            // glBindVertexArray(_batch.shader->getDynamicShaderVAO());
+            glBindVertexArray(_batch.shader->getDynamicShaderVAO());
+            Util::GL::checkError("After glBindVertexArray UI");
 
-            // glBindTexture(GL_TEXTURE_2D, _batch.textureID);
+            glBindTexture(GL_TEXTURE_2D, _batch.textureID);
+            Util::GL::checkError("After glBindTexture UI");
 
-            // glBindBuffer(GL_ARRAY_BUFFER, _batch.shader->getDynamicShaderVBO());
-            // glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0]);
+            glBindBuffer(GL_ARRAY_BUFFER, _batch.shader->getDynamicShaderVBO());
+            Util::GL::checkError("After glBindBuffer UI");
+            glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(_batch.shader->getShaderVertexDataSize() * _batch.vertexBuffer.size()), &_batch.vertexBuffer[0]);
+            Util::GL::checkError("After glBufferSubData UI");
 
-            // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _batch.shader->getDynamicShaderIBO());
-            // glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (long)(sizeof(uint32_t) * _batch.indexBuffer.size()), &_batch.indexBuffer[0]);
+            glDrawArrays(GL_TRIANGLES, 0, _batch.vertexBuffer.size());
+            Util::GL::checkError("After glDrawArrays UI");
 
-            // glDrawElements(GL_TRIANGLES, (int)_batch.indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            Util::GL::checkError("After glBindBuffer disable UI");
 
-            // glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+            Util::GL::checkError("After glBindVertexArray disable UI");
 
-            // glBindVertexArray(0);
-
-            // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-            // totalTriangles += (int)_batch.vertexBuffer.size() / 2;
-            // _batch.indexBuffer.clear();
-            // _batch.vertexBuffer.clear();
-            // uiDrawCalls++;
+            totalTriangles += (int)_batch.vertexBuffer.size() / 3;
+            _batch.vertexBuffer.clear();
+            uiDrawCalls++;
         }
     }
 
