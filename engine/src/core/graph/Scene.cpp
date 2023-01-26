@@ -239,6 +239,9 @@ namespace RDE {
 
     void Scene::onInnerRenderUI(Delta _dt) {
         auto& _renderManager = engine->manager.renderManager;
+
+        if(!canvas->camera->node->hasComponent<Active>()) return;
+
         _renderManager.beginDraw(canvas->camera, (Transform*)canvas->camera->node->getComponent<UITransform>());
 
         canvas->batches.clear();
