@@ -32,7 +32,7 @@ namespace RDE {
                 #if IS_WINDOWS()
                 auto* _component = &graph->registry.emplace<Component>(ID, this, manager, graph, _args...);
                 #else
-                auto* _component = &registry.template emplace<Component>(ID, this, manager, graph, _args...);
+                auto* _component = &graph->registry.template emplace<Component>(ID, this, manager, graph, _args...);
                 #endif
                 if(graph->onDataChanged != nullptr) graph->onDataChanged((void*)_component);
                 graph->renderingTreeData.isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
