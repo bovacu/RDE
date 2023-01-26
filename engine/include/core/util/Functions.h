@@ -82,7 +82,7 @@ namespace RDE {
             }
 
             inline uint32_t colorToUint32_t(const Color& _color) {
-                return (int(_color.a) << 24) + (int(_color.r) << 16) + (int(_color.g) << 8) + int(_color.b);
+                return (int(_color.a) << 24) + (int(_color.b) << 16) + (int(_color.g) << 8) + int(_color.r);
             }
         }
         #endif
