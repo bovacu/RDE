@@ -45,6 +45,7 @@
 				<Name>debug:x64</Name>
 				<Defines>
 					<Define>ENGINE_DEBUG</Define>
+					<Define>RENDER_DOC_COMPATIBILITY</Define>
 				</Defines>
 				<ForceIncludes></ForceIncludes>
 			</ConfigAndPlatform>
@@ -54,7 +55,10 @@
 			</Config>
 			<Config>
 				<Name>debug</Name>
-				<Defines></Defines>
+				<Defines>
+					<Define>RENDER_DOC_COMPATIBILITY</Define>
+					<Define>ENGINE_DEBUG</Define>
+				</Defines>
 			</Config>
 			<Platform>
 				<Name>x64</Name>
