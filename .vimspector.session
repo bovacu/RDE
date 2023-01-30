@@ -1,1 +1,0 @@
-{"breakpoints": {"line": {"/home/borja/Documents/GDE/engine/main.cpp": [{"state": "ENABLED", "line": 6, "options": {}}], "/usr/src/debug/gcc/libstdc++-v3/libsupc++/eh_throw.cc": []}, "function": [], "exception": {"filters": ["all"]}}, "session": {"user_choices": {}}, "variables": {"watches": []}}
