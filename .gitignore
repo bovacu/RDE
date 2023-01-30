@@ -483,3 +483,11 @@ cmake-build-rwdilib/.cmake/api/v1/reply/codemodel-v2-50d68631bb48f1633c37.json
 cmake-build-rwdilib/.cmake/api/v1/reply/index-2022-10-20T18-17-49-0067.json
 
 cmake-build-rwdilib/.cmake/api/v1/reply/target-RDE-RelWithDebInfo-acc5bd1b769f2aea4c5c.json
+
+.vimspector.json
+.vimspector.session
+RDE.10x
+RDE.sublime-project
+RDE.sublime-workspace
+compile_commands.json
+valgrind.supp
