@@ -27,14 +27,12 @@ namespace RDE {
 
         ((UITransform*)node->getTransform())->setSize(_config.size == -1 ? data.RenderizableInnerData.texture->getSize() : _config.size);
 
-        imageRenderingType = _config.imageRenderingType;
-        if(imageRenderingType == ImageRenderingType::NINE_SLICE && !data.RenderizableInnerData.texture->nineSlice.isEnabled()) {
+		data.imageRenderingType = _config.imageRenderingType;
+		if(data.imageRenderingType == ImageRenderingType::NINE_SLICE && !data.RenderizableInnerData.texture->nineSlice.isEnabled()) {
             Util::Log::warn("UIImage cannot be rendered as 9Slice as the texture is not configured like so.");
-            imageRenderingType = ImageRenderingType::NORMAL;
+			data.imageRenderingType = ImageRenderingType::NORMAL;
             return;
         }
-
-        data.imageRenderingType = (uint)imageRenderingType;
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();
         calculateGeometryForUIImage(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->mainCamera->getViewport());
@@ -71,19 +69,19 @@ namespace RDE {
             _vertex = {};
         }
 
-        imageRenderingType = _imageRenderingType;
+        data.imageRenderingType = _imageRenderingType;
         data.RenderizableInnerData.dirty = true;
         data.imageRenderingType = (uint)_imageRenderingType;
     }
 
     void UIImage::setPartialRenderingInverted(bool _inverted) {
-        partialRenderingInverted = _inverted;
+        data.partialRenderingInverted = _inverted;
         data.RenderizableInnerData.dirty = true;
     }
 
     void UIImage::setPartialRenderingPercentage(float _percentage) {
         _percentage = Util::Math::clampF(_percentage, 0, 1);
-        partialRenderingPercentage = _percentage;
+		data.partialRenderingPercentage = _percentage;
         data.RenderizableInnerData.dirty = true;
     }
 }

@@ -35,11 +35,6 @@ namespace RDE {
         friend class UICheckbox;
         friend class UISlider;
 
-        private:
-            ImageRenderingType imageRenderingType = ImageRenderingType::NORMAL;
-            bool partialRenderingInverted = false;
-            float partialRenderingPercentage = 1.f;
-
         RENDERIZABLE_UI_BASIC_PROPERTIES()
 
         public:
@@ -87,13 +82,13 @@ namespace RDE {
              * @brief Returns the type of rendering.
              * @return ImageRenderingType
              */
-            [[nodiscard]]ImageRenderingType getImageRenderingType() const { return imageRenderingType; }
+			[[nodiscard]]ImageRenderingType getImageRenderingType() const { return (ImageRenderingType)data.imageRenderingType; }
 
             /**
              * @brief Returns if the rendering is inverted.
              * @return bool
              */
-            [[nodiscard]]bool isPartialRenderingInverted() const { return partialRenderingInverted;}
+			[[nodiscard]]bool isPartialRenderingInverted() const { return data.partialRenderingInverted;}
 
             /**
              * @brief This will invert the regular patter image rendering. Only applied if the rendering type is
@@ -106,7 +101,7 @@ namespace RDE {
              * @brief Returns the amount filled.
              * @return float
              */
-            [[nodiscard]] float getPartialRenderingPercentage() const { return partialRenderingPercentage; }
+			[[nodiscard]] float getPartialRenderingPercentage() const { return data.partialRenderingPercentage; }
 
             /**
              * @brief Sets how much the partial image will be drawn.
