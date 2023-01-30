@@ -13,7 +13,7 @@
 namespace RDE {
 
     UIText::UIText(Node* _node, Scene* _scene, Canvas* _canvas, const UITextConfig& _config) :
-            UIText(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
+            UIText(_node, &_scene->engine->manager, _canvas->graph, _config) {  }
 
     UIText::UIText(Node* _node, Manager* _manager, Graph* _graph, const UITextConfig& _config) {
 

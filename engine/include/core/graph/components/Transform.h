@@ -23,7 +23,7 @@ namespace RDE {
      * @brief Component common to every entity that tells the engine where it is, which scale it has and how much it is rotated.
      */
     class Transform {
-        friend class Graph;
+        friend class Scene;
         friend class Camera;
         friend class SpriteRenderer;
         friend class DynamicSpriteRenderer;

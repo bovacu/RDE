@@ -59,11 +59,6 @@ namespace RDE {
              */
             int layer = 0;
 
-            /**
-             * @brief Inner elements container.
-             */
-            Graph graph;
-
             std::vector<Batch> batches;
             bool dirty = true;
             int maxIndicesPerDrawCall = 1000;
@@ -73,44 +68,21 @@ namespace RDE {
             std::vector<CanvasElement> uiUpdatables;
 
         public:
-            explicit Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag);
-
             /**
              * @brief Returns the inner container Graph
              * @return Graph*
              */
-            Graph* getGraph();
+            Graph* graph;
+
+        public:
+            explicit Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag);
+            ~Canvas();
 
             /**
              * @brief Gets the rendering Camera
              * @return Camera*
              */
             Camera* getCamera();
-
-            /**
-             * @brief Handles the event related to the UI elements.
-             * @param _eventDispatcher Event dispatcher
-             * @param _event Event
-             */
-            void onEvent(Engine* _engine, Event& _event);
-
-            /**
-             * @brief Handles the update of the the UI elements.
-             * @param _dt Delta time
-             */
-            void onUpdate(Delta _dt);
-
-            /**
-             * @brief Handles the rendering of the UI elements.
-             */
-            void onRender();
-
-            /**
-             * @brief Handles the debug rendering of the UI elements.
-             */
-            void onDebugRender();
-
-            void onLateUpdate();
 
             void onResize(uint _width, uint _height);
 
@@ -119,8 +91,6 @@ namespace RDE {
             Vec2I getCanvasResolution();
 
         private:
-            void recalculateRenderizableTree(Node* _node);
-
             void batchTreeElementPre(CanvasElement* _canvasElement, void* _data);
             void batchTreeElementPost(CanvasElement* _canvasElement, void* _data);
 

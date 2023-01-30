@@ -27,8 +27,12 @@ namespace RDE {
         #if !IS_MOBILE()
         glEnable(GL_PROGRAM_POINT_SIZE);
         glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_POINT_SMOOTH);
         glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
-        #endif
+
+		glHint(GL_POINT_SMOOTH, GL_NICEST);
+		glHint(GL_LINE_SMOOTH, GL_NICEST);
+		#endif
 
         int _flags = IMG_INIT_PNG | IMG_INIT_JPG;
         if(auto _returned = IMG_Init(_flags) != _flags) {

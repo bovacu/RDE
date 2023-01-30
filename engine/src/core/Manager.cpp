@@ -14,7 +14,7 @@ namespace RDE {
         engine = _engine;
         shaderManager.init(&fileManager);
         renderManager.init(_engine);
-        inputManager.init(_engine, &_engine->getWindow());
+        inputManager.init(_engine, _engine->getWindow());
         fontManager.init(&fileManager);
         consoleManager.init();
         soundManager.init();

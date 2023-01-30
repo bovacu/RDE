@@ -27,6 +27,7 @@ namespace RDE {
      *
      */
     class UIInteractable {
+        friend class Scene;
         friend class Graph;
         friend class Canvas;
         friend class UIImage;

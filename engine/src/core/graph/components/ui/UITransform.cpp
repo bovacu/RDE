@@ -105,7 +105,7 @@ namespace RDE {
             }
         }
 
-        graph->dirtyTransforms.push_back(this);
+        graph->renderingTreeData.dirtyTransforms.push_back(this);
     }
 
     std::tuple<glm::mat4, bool> UITransform::localToWorld() {

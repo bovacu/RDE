@@ -1,20 +1,19 @@
-#pragma once
-
-#include "core/systems/inputSystem/input/WindowInput.h"
 #ifndef RDE_SCENE_H
 #define RDE_SCENE_H
 
+#include "core/systems/inputSystem/input/WindowInput.h"
 #include "nlohmann/json.hpp"
 #include "core/util/Delta.h"
 #include "core/graph/Graph.h"
 #include "core/graph/components/Components.h"
+#include "core/systems/uiSystem/Canvas.h"
 
 namespace RDE {
 
     class Camera;
     class Window; 
     class Engine;
-    class Canvas;
+    struct RenderizableInnerData;
 
     /**
      * @brief This class represents what is rendered in the window and all its related systems.
@@ -23,27 +22,15 @@ namespace RDE {
         friend class Graph;
         friend class ConfigManager;
         friend class WindowInput;
+        friend class Engine;
+        friend class ImGuiScene;
+        friend class SceneManager;
 
         private:
-            /**
-             * @see Graph
-             */
-            Graph mainGraph;
-
             /**
              * @brief All of the cameras that will render the scene.
              */
             std::vector<Camera*> cameras;
-
-            /**
-             * @brief All of the UI canvases that the scene has.
-             */
-            std::vector<Canvas*> canvases;
-
-            /**
-             * @brief Main camera renderer.
-             */
-            Camera* mainCamera = nullptr;
 
             /**
              * @brief Map PrefabKey -> NodeID.
@@ -61,11 +48,113 @@ namespace RDE {
              */
             Engine* engine = nullptr;
 
+            /**
+             * @brief Graph for entities hierarchy.
+             * @see Graph
+             */
+            Graph* graph = nullptr;
+
+            /**
+             * @brief All of the UI canvases that the scene has.
+             */
+            Canvas* canvas = nullptr;
+
+            /**
+             * @brief Main camera renderer.
+             */
+            Camera* mainCamera = nullptr;
+
         protected:
             /**
              * @brief Callback for the Scene to refresh whatever is needed if the display is changed.
              */
             void onDisplayChanged();
+
+            /**
+             * @brief This function captures all the events that happen inside the application. It captures too mouse, keyboard
+             * and gamepads, but it is not recommended to use this input inside this function. The class InputManager is
+             * the one you are looking for. This is used to manage window related or screen related events mainly.
+             * @param _event the event that was just captured.
+             * @see InputManager
+             */
+            void onInnerEvent(Event& _event) {
+                onInnerEventUI(_event);
+                onInnerEventHierarchy(_event);
+                onEvent(_event);
+            }
+
+            void onInnerEventHierarchy(Event& _event); 
+            void onInnerEventUI(Event& _event);
+
+            /**
+             * @brief This function is executed every frame of the application and here we should update logic and take inputs
+             * to update the logic and components.
+             * @param _dt time that passed between the current frame and the last one.
+             */
+            void onInnerUpdate(Delta _dt) {
+                onInnerUpdateHierarchy(_dt);
+                onInnerUpdateUI(_dt);
+                onUpdate(_dt);
+            }
+            void onInnerUpdateHierarchy(Delta _dt); 
+            void onInnerUpdateUI(Delta _dt);
+
+            /**
+             * @brief This function is called a fixed amount of times per second. By default it is 60 times per second, but it
+             * can be modified with Engine/setFixedDelta. This loop is used to handle physics and things that need a
+             * consistent frame rate to work properly.
+             * @param _dt fixed value initially set at 1/60/
+             */
+            void onInnerFixedUpdate(Delta _dt) {
+                onInnerFixedUpdateHierarchy(_dt);
+                onInnerFixedUpdateUI(_dt);
+                onFixedUpdate(_dt);
+            }
+            void onInnerFixedUpdateHierarchy(Delta _dtt); 
+            void onInnerFixedUpdateUI(Delta _dt);
+
+            /**
+             * @brief This function is called as the last update method, after update and fixedUpdate, which is an ideal place
+             * to remove elements.
+             * @param _dt time that passed between the current frame and the last one.
+             */
+            void onInnerLateUpdate(Delta _dt) {
+                onInnerLateUpdateHierarchy(_dt);
+                onInnerLateUpdateUI(_dt);
+                onLateUpdate(_dt);
+            }
+            void onInnerLateUpdateHierarchy(Delta _dt); 
+            void onInnerLateUpdateUI(Delta _dt);
+            
+            void recalculateRenderizableTree(Node* _node);
+            void recalculateRenderizableTreeUI(Node* _node);
+
+            /**
+             * @brief This function is also called every frame and renders the geometry of the game. It is not virtual because
+             * the main rendering pipeline is handled inside the core of the engine. Users don't need to mess with it.
+             * @param _dt the time that passed between the current frame and the last one.
+             */
+            void onInnerRender(Delta _dt) {
+                onInnerRenderHierarchy(_dt); 
+                onInnerRenderUI(_dt); 
+            }
+            void onInnerRenderHierarchy(Delta _dt); 
+            void onInnerRenderUI(Delta _dt);
+
+            void postRenderSync();
+            void postRenderSyncUI();
+
+            /**
+             * @brief This function is used to drawBatched debugging lines, squares, circles...
+             * @param the time that passed between the current frame and the last one.
+             */
+            void onInnerDebugRender(Delta _dt) {
+                onInnerDebugRenderHierarchy(_dt);
+                onInnerDebugRenderHierarchy(_dt);
+                onDebugRender(_dt);
+            }
+            void onInnerDebugRenderHierarchy(Delta _dt); 
+            void onInnerDebugRenderUI(Delta _dt);
 
         public:
             explicit Scene(Engine* _engine, const std::string& _debugName = "Scene");
@@ -93,14 +182,14 @@ namespace RDE {
              * @param _event the event that was just captured.
              * @see InputManager
              */
-            virtual void onEvent(Event& _event);
+            virtual void onEvent(Event& _event) {  }
 
             /**
              * @brief This function is executed every frame of the application and here we should update logic and take inputs
              * to update the logic and components.
              * @param _dt time that passed between the current frame and the last one.
              */
-            virtual void onUpdate(Delta _dt);
+            virtual void onUpdate(Delta _dt) {  }
 
             /**
              * @brief This function is called a fixed amount of times per second. By default it is 60 times per second, but it
@@ -108,21 +197,14 @@ namespace RDE {
              * consistent frame rate to work properly.
              * @param _dt fixed value initially set at 1/60/
              */
-            virtual void onFixedUpdate(Delta _dt);
+            virtual void onFixedUpdate(Delta _dt) {  }
 
             /**
              * @brief This function is called as the last update method, after update and fixedUpdate, which is an ideal place
              * to remove elements.
              * @param _dt time that passed between the current frame and the last one.
              */
-            virtual void onLateUpdate(Delta _dt);
-
-            /**
-             * @brief This function is also called every frame and renders the geometry of the game. It is not virtual because
-             * the main rendering pipeline is handled inside the core of the engine. Users don't need to mess with it.
-             * @param the time that passed between the current frame and the last one.
-             */
-            void onRender(Delta _dt);
+            virtual void onLateUpdate(Delta _dt) {  }
 
             /**
              * @brief This function is used to render specifically ImGui elements, nothing else.
@@ -134,7 +216,7 @@ namespace RDE {
              * @brief This function is used to drawBatched debugging lines, squares, circles...
              * @param the time that passed between the current frame and the last one.
              */
-            virtual void onDebugRender(Delta _dt);
+            virtual void onDebugRender(Delta _dt) {  }
 
             /**
              * @brief This function is called when unloading the scene and should be used to release any allocated memory or
@@ -143,23 +225,10 @@ namespace RDE {
             virtual void onEnd() {  }
 
             /**
-             * @brief This function returns the graph system of this specific scene, so we can access any entity and it's components,
-             * create new ones or destroy them.
-             * @return the graph of the scene.
-             */
-            Graph* getMainGraph();
-
-            /**
              * @brief Returns all of the cameras used in the scene.
              * @return std::vector<Camera*>&
              */
             std::vector<Camera*>& getCameras();
-
-            /**
-             * @brief Returns the main camera.
-             * @return Camera*
-             */
-            Camera* getMainCamera();
 
             /**
              * @brief Adds a new camera to the scene and returns it to make any modifications needed.
@@ -192,31 +261,6 @@ namespace RDE {
              * @return const std::string&
              */
             [[nodiscard]] const std::string& getName() const { return debugName; }
-
-            /**
-             * @brief Adds a new Canvas to the scene.
-             * @param _canvasTag Name of the Canvas
-             * @return Canvas*
-             */
-            Canvas* addNewCanvas(const std::string& _canvasTag);
-
-            /**
-             * @brief Removes a Canvas by its name.
-             * @param _canvasTag Canvas name
-             */
-            void removeCanvas(const std::string& _canvasTag);
-
-            /**
-             * @brief Removes a Canvas by its reference.
-             * @param _canvas Canvas reference
-             */
-            void removeCanvas(Canvas* _canvas);
-
-            /**
-             * @brief Returns all the canvases of the Scene
-             * @return std::vector<Canvas*>&
-             */
-            std::vector<Canvas*>& getCanvases();
 
             /**
              * @brief Returns all of the prefabs IDs

@@ -104,12 +104,12 @@ namespace RDE {
         #if !IS_MOBILE()
         imGuiLayer->onEvent(_e);
         #endif
-        manager.sceneManager.getDisplayedScene()->onEvent(_e);
+        manager.sceneManager.getDisplayedScene()->onInnerEvent(_e);
     }
 
     void Engine::onUpdate(Delta _dt) {
         manager.physics.update(_dt);
-        manager.sceneManager.getDisplayedScene()->onUpdate(_dt);
+        manager.sceneManager.getDisplayedScene()->onInnerUpdate(_dt);
 
 #if !IS_MOBILE()
         if(manager.inputManager.isKeyJustPressed(KeyCode::Space)) imGuiLayer->show = !imGuiLayer->show;
@@ -117,12 +117,12 @@ namespace RDE {
     }
 
     void Engine::onFixedUpdate(Delta _fixedDt) {
-        manager.sceneManager.getDisplayedScene()->onFixedUpdate(_fixedDt);
+        manager.sceneManager.getDisplayedScene()->onInnerFixedUpdate(_fixedDt);
         manager.physics.step(_fixedDt);
     }
 
     void Engine::onLateUpdate(Delta _dt) {
-        manager.sceneManager.getDisplayedScene()->onLateUpdate(_dt);
+        manager.sceneManager.getDisplayedScene()->onInnerLateUpdate(_dt);
     }
 
     void Engine::onRender(Delta _dt) {
@@ -131,8 +131,9 @@ namespace RDE {
         #endif
 
         manager.renderManager.clear();
-        manager.sceneManager.getDisplayedScene()->onRender(_dt);
-        manager.sceneManager.getDisplayedScene()->onDebugRender(_dt);
+        manager.sceneManager.getDisplayedScene()->onInnerRender(_dt);
+        manager.sceneManager.getDisplayedScene()->onInnerRenderUI(_dt);
+        manager.sceneManager.getDisplayedScene()->onInnerDebugRender(_dt);
 
         #if !IS_MOBILE()
             frameBuffer->unbind();
@@ -166,11 +167,8 @@ namespace RDE {
         #if !IS_MOBILE()
         frameBuffer->resize(_width, _height);
         #endif
-        manager.sceneManager.getDisplayedScene()->getMainCamera()->setCameraSize(_width, _height);
-
-        for(auto* _canvas : manager.sceneManager.getDisplayedScene()->getCanvases()) {
-            _canvas->onResize(_width, _height);
-        }
+        manager.sceneManager.getDisplayedScene()->mainCamera->setCameraSize(_width, _height);
+        manager.sceneManager.getDisplayedScene()->canvas->onResize(_width, _height);
 
         return true;
     }
@@ -210,7 +208,7 @@ namespace RDE {
 
         try {
             auto _scene = manager.sceneManager.getDisplayedScene();
-            _scene->getMainGraph()->setParent(_scene->getMainGraph()->getNode(_a), _scene->getMainGraph()->getNode(_b));
+            _scene->graph->setParent(_scene->graph->getNode(_a), _scene->graph->getNode(_b));
             return {Util::String::appendToString("Set ", _b, " as parent of ", _a) };
         } catch (const std::runtime_error& _e) {
             return {Util::String::appendToString("[error] '", _a, "' or '", _b, "' or both don't exist on the scene!") };

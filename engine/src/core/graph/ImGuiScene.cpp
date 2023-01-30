@@ -91,10 +91,10 @@ namespace RDE {
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
-        auto* window = static_cast<SDL_Window*>(engine->getWindow().getNativeWindow());
+        auto* window = static_cast<SDL_Window*>(engine->getWindow()->getNativeWindow());
 
         // Setup Platform/Renderer bindings
-        ImGui_ImplSDL2_InitForOpenGL(window, engine->getWindow().getContext());
+        ImGui_ImplSDL2_InitForOpenGL(window, engine->getWindow()->getContext());
         ImGui_ImplOpenGL3_Init("#version 410");
 
         for(auto& _state : State::stateToNameDict) {
@@ -127,15 +127,15 @@ namespace RDE {
 
     void ImGuiScene::end() {
         ImGuiIO& io = ImGui::GetIO();
-        io.DisplaySize = ImVec2((float)engine->getWindow().getWidth(), (float)engine->getWindow().getHeight());
+        io.DisplaySize = ImVec2((float)engine->getWindow()->getWidth(), (float)engine->getWindow()->getHeight());
 
         // Rendering
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            SDL_Window* backup_current_window = engine->getWindow().getNativeWindow();
-            SDL_GLContext backup_current_context = engine->getWindow().getContext();
+            SDL_Window* backup_current_window = engine->getWindow()->getNativeWindow();
+            SDL_GLContext backup_current_context = engine->getWindow()->getContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
             SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
@@ -160,16 +160,15 @@ namespace RDE {
         // so I need to split how both are selected and shown and switch between one registry and the other, so that's why there
         // is selectedNode and selectedNodeCanvas, if one is used, the other is set as null, this way just one of the registries
         // is shown and everything works fine, and we reuse all the code just by using 2 switching variables.
-        auto* _mainGraph = _scene->getMainGraph();
+        auto* _mainGraph = _scene->graph;
         hierarchy(_scene);
 
         if(selectedNode != NODE_ID_NULL) nodeComponents(_mainGraph, selectedNode);
 
-        if(selectedNodeCanvas != NODE_ID_NULL)
-            for(auto* _canvas : _scene->getCanvases()) {
-                auto* _graph = _canvas->getGraph();
-                nodeComponents(_graph, selectedNodeCanvas);
-            }
+        if(selectedNodeCanvas != NODE_ID_NULL) {
+            auto* _graph = _scene->canvas->graph;
+            nodeComponents(_graph, selectedNodeCanvas);
+        }
     }
 
     void ImGuiScene::metrics() {
@@ -281,17 +280,26 @@ namespace RDE {
     }
 
     void ImGuiScene::printResolutionFullscreenAndVSync() {
-        static bool _vsync = engine->getWindow().isVSyncActive(), _fullscreen = false;
-        static int _windowRes[2] = {(int) engine->getWindow().getWindowSize().x, (int) engine->getWindow().getWindowSize().y};
+        static bool _vsync = engine->getWindow()->isVSyncActive(), _fullscreen = false, _triangleLines = false;
+        static int _windowRes[2] = {(int) engine->getWindow()->getWindowSize().x, (int) engine->getWindow()->getWindowSize().y};
 
-        std::string _windowResolution = std::to_string(engine->getWindow().getWindowSize().x) + "x" + std::to_string(engine->getWindow().getWindowSize().y);
+        std::string _windowResolution = std::to_string(engine->getWindow()->getWindowSize().x) + "x" + std::to_string(engine->getWindow()->getWindowSize().y);
         static const char* _resSelected = _windowResolution.c_str();
 
         if(ImGui::Checkbox("VSync Active", &_vsync))
-            engine->getWindow().setVSync(_vsync);
+            engine->getWindow()->setVSync(_vsync);
 
         if(ImGui::Checkbox("Fullscreen", &_fullscreen))
-            engine->getWindow().setFullscreen(_fullscreen);
+            engine->getWindow()->setFullscreen(_fullscreen);
+
+		if(ImGui::Checkbox("Show triangle lines", &_triangleLines)) {
+			if(_triangleLines) {
+				glEnable(GL_POLYGON_SMOOTH);
+				glHint(GL_POLYGON_SMOOTH, GL_NICEST);
+			} else {
+				glDisable(GL_POLYGON_SMOOTH);
+			}
+		}
 
         const char* _resolutions[] = { "2560x1440", "1920x1080", "1366x768", "1280x720", "1920x1200", "1680x1050",
                                        "1440x900" ,"1280x800" ,"1024x768" ,"800x600", "800x480","640x480", "320x240"
@@ -305,7 +313,7 @@ namespace RDE {
                 if (ImGui::Selectable(_resolution, is_selected)) {
                     _resSelected = _resolution;
                     charToIntSize(std::string(_resolution), _windowRes);
-                    engine->getWindow().setWindowSize(_windowRes[0], _windowRes[1]);
+                    engine->getWindow()->setWindowSize(_windowRes[0], _windowRes[1]);
                     WindowResizedEvent _e(_windowRes[0], _windowRes[1]);
                     engine->onEvent(_e);
                 }
@@ -453,13 +461,11 @@ namespace RDE {
     void ImGuiScene::hierarchy(Scene* _scene) {
         ImGui::Begin("Hierarchy");
         windowsHovered[1] = checkForFocus();
-        auto* _graph = _scene->getMainGraph();
+        auto* _graph = _scene->graph;
         hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNode);
-        for(auto* _canvas : _scene->getCanvases()) {
-            _graph = _canvas->getGraph();
-            hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNodeCanvas);
-        }
-        showLoadedPrefabs(_scene, _scene->getMainGraph(), _graph->getRoot(), selectedNode);
+        _graph = _scene->canvas->graph;
+        hierarchyRecursionStub(_scene, _graph, _graph->getRoot(), selectedNodeCanvas);
+        showLoadedPrefabs(_scene, _scene->graph, _graph->getRoot(), selectedNode);
         ImGui::End();
     }
 
@@ -469,7 +475,7 @@ namespace RDE {
 
             auto _prefabs = _scene->getPrefabs();
             for(auto& _nodeID : _prefabs) {
-                auto _tag = _graph->getComponent<Tag>(_nodeID);
+                auto _tag = _node->getComponent<Tag>();
                 ImGui::TextColored(ImVec4(0, 1, 0, 1), "%s", _tag->tag.c_str());
             }
 
@@ -501,22 +507,26 @@ namespace RDE {
     }
 
     void ImGuiScene::activeComponent(Graph* _graph, const NodeID _selectedNode) {
-        bool _active = _graph->hasComponent<Active>(_selectedNode);
-        auto _tag = _graph->getComponent<Tag>(_selectedNode)->tag.c_str();
+        auto* _node = _graph->getNode(_selectedNode);
+        
+        bool _active = _node->hasComponent<Active>();
+        auto _tag = _node->getComponent<Tag>()->tag.c_str();
         ImGui::Text("%s", _tag);
         ImGui::SameLine(0, ImGui::GetWindowWidth() - ImGui::CalcTextSize(_tag).x - 40 - ImGui::CalcTextSize("(?)").x);
         ImGui::PushID(createID());
         if(ImGui::Checkbox("###Active", &_active)) {
-            _graph->getComponent<Node>(_selectedNode)->setActive(_active);
+           _node->setActive(_active);
         }
         helpMarker("This will set the Active property to true/false.\n Setting Active to false will make all of DisabledConfig elements to be disabled for the Node and children.");
         ImGui::PopID();
     }
 
     void ImGuiScene::tagComponent(Graph* _graph, const NodeID _selectedNode) {
+        auto* _node = _graph->getNode(_selectedNode);
+
         ImGui::Text("Tag"); ImGui::SameLine();
         char _buffer[256] = { 0 };
-        auto& _tag = _graph->getComponent<Tag>(_selectedNode)->tag;
+        auto& _tag = _node->getComponent<Tag>()->tag;
         #if IS_WINDOWS()
         strcpy_s(_buffer, _tag.c_str());
         #else
@@ -530,9 +540,11 @@ namespace RDE {
     }
 
     void ImGuiScene::transformComponent(Graph* _graph, const NodeID _selectedNode) {
+        auto* _node = _graph->getNode(_selectedNode);
+
         Transform* _transform = nullptr;
-        if(!_graph->hasComponent<Transform>(_selectedNode)) return;
-        _transform = _graph->getComponent<Transform>(_selectedNode);
+        if(!_node->hasComponent<Transform>()) return;
+        _transform = _node->getComponent<Transform>();
 
         CREATE_NON_DISABLEABLE_HEADER("Transform", _transform, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -580,9 +592,11 @@ namespace RDE {
 
 
     void ImGuiScene::cameraComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<Camera>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _camera = _graph->getComponent<Camera>(_selectedNode);
+        if(!_node->hasComponent<Camera>()) return;
+
+        auto _camera = _node->getComponent<Camera>();
 
         CREATE_NON_DISABLEABLE_HEADER("Camera", _camera, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -602,8 +616,8 @@ namespace RDE {
 //                    bool is_selected = (_viewPortSelected == _resolution);
 //                    if (ImGui::Selectable(_resolution, is_selected)) {
 //                        _viewPortSelected = _resolution;
-//                        if(_viewPortSelected == "Free Aspect") _camera->setFreeViewport(engine->getWindow().getWindowSize());
-//                        else _camera->setAdaptiveViewport({1920, 1080}, engine->getWindow().getWindowSize());
+//                        if(_viewPortSelected == "Free Aspect") _camera->setFreeViewport(engine->getWindow()->getWindowSize());
+//                        else _camera->setAdaptiveViewport({1920, 1080}, engine->getWindow()->getWindowSize());
 //                    }
 //                    if (is_selected)
 //                        ImGui::SetItemDefaultFocus();
@@ -627,9 +641,11 @@ namespace RDE {
     }
 
     void ImGuiScene::bodyComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<PhysicsBody>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _body = _graph->getComponent<PhysicsBody>(_selectedNode);
+        if(!_node->hasComponent<PhysicsBody>()) return;
+
+        auto _body = _node->getComponent<PhysicsBody>();
 
         CREATE_DISABLEABLE_HEADER("Physics Body", _body, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -639,9 +655,11 @@ namespace RDE {
     }
 
     void ImGuiScene::spriteComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<SpriteRenderer>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _spriteRenderer = _graph->getComponent<SpriteRenderer>(_selectedNode);
+        if(!_node->hasComponent<SpriteRenderer>()) return;
+
+        auto _spriteRenderer = _node->getComponent<SpriteRenderer>();
 
         CREATE_DISABLEABLE_HEADER("Sprite Renderer", _spriteRenderer, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -656,10 +674,12 @@ namespace RDE {
     }
 
     void ImGuiScene::textComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<TextRenderer>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _text = _graph->getComponent<TextRenderer>(_selectedNode);
-        auto _textTransform = _graph->getComponent<Transform>(_selectedNode);
+        if(!_node->hasComponent<TextRenderer>()) return;
+
+        auto _text = _node->getComponent<TextRenderer>();
+        auto _textTransform = _node->getComponent<Transform>();
 
         CREATE_DISABLEABLE_HEADER("Text Renderer", _text, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -669,9 +689,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiTransformComponent(Graph* _graph, const NodeID _selectedNode) {
+        auto* _node = _graph->getNode(_selectedNode);
+
         UITransform* _transform = nullptr;
-        if(!_graph->hasComponent<UITransform>(_selectedNode)) return;
-        _transform = _graph->getComponent<UITransform>(_selectedNode);
+        if(!_node->hasComponent<UITransform>()) return;
+        _transform = _node->getComponent<UITransform>();
         Anchor _selectedAnchor = _transform->getAnchor();
         Stretch _selectedStretch = _transform->getStretch();
 
@@ -916,9 +938,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiImageComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<UIImage>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _uiImage = _graph->getComponent<UIImage>(_selectedNode);
+        if(!_node->hasComponent<UIImage>()) return;
+
+        auto _uiImage = _node->getComponent<UIImage>();
 
         CREATE_DISABLEABLE_HEADER("UI Image", _uiImage, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -1009,9 +1033,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiTextComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<UIText>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _uiText = _graph->getComponent<UIText>(_selectedNode);
+        if(!_node->hasComponent<UIText>()) return;
+
+        auto _uiText = _node->getComponent<UIText>();
 
         CREATE_DISABLEABLE_HEADER("UI Text", _uiText, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -1035,9 +1061,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiMaskComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<UIMask>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _uiMask = _graph->getComponent<UIMask>(_selectedNode);
+        if(!_node->hasComponent<UIMask>()) return;
+
+        auto _uiMask = _node->getComponent<UIMask>();
 
         CREATE_DISABLEABLE_HEADER("UI Mask", _uiMask, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -1053,9 +1081,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiCanvasStopperComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<CanvasEventStopper>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _canvasStopper = _graph->getComponent<CanvasEventStopper>(_selectedNode);
+        if(!_node->hasComponent<CanvasEventStopper>()) return;
+
+        auto _canvasStopper = _node->getComponent<CanvasEventStopper>();
 
         CREATE_DISABLEABLE_HEADER("Canvas Event Stopper", _canvasStopper, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -1064,9 +1094,11 @@ namespace RDE {
     }
 
     void ImGuiScene::uiButtonComponent(Graph* _graph, const NodeID _selectedNode) {
-        if(!_graph->hasComponent<UIButton>(_selectedNode)) return;
+        auto* _node = _graph->getNode(_selectedNode);
 
-        auto _uiButton = _graph->getComponent<UIButton>(_selectedNode);
+        if(!_node->hasComponent<UIButton>()) return;
+
+        auto _uiButton = _node->getComponent<UIButton>();
 
         CREATE_DISABLEABLE_HEADER("UI Button", _uiButton, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);

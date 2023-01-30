@@ -134,7 +134,6 @@ namespace RDE {
 
     void KeyboardInput::onTextTyped(SDL_Event& _event) {
         TextTypedEvent _e(_event.text.text);
-        Util::Log::info(_e.text);
         window->consumeEvent(_e);
     }
 

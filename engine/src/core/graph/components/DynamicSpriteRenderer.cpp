@@ -12,10 +12,10 @@
 namespace RDE {
 
     DynamicSpriteRenderer::DynamicSpriteRenderer(Node* _node, Scene* _scene, const DynamicSpriteRendererConfig& _config) :
-    DynamicSpriteRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _config) {  }
+    DynamicSpriteRenderer(_node, &_scene->engine->manager, _scene->graph, _config) {  }
 
     DynamicSpriteRenderer::DynamicSpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const DynamicSpriteRendererConfig& _config) :
-    DynamicSpriteRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _config)  {  }
+    DynamicSpriteRenderer(_node, &_scene->engine->manager, _canvas->graph, _config)  {  }
 
     DynamicSpriteRenderer::DynamicSpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const DynamicSpriteRendererConfig& _config) {
 
@@ -30,7 +30,7 @@ namespace RDE {
         }
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();
-        calculateGeometryForSpriteRenderer(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->getMainCamera()->getViewport());
+        calculateGeometryForSpriteRenderer(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->mainCamera->getViewport());
     }
 
     RENDERIZABLE_BASIC_METHODS_IMPL(DynamicSpriteRenderer, (float)data.texture->getSize().x * node->getTransform()->getScale().x, (float)data.texture->getSize().y * node->getTransform()->getScale().y)

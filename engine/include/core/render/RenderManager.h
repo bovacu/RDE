@@ -20,7 +20,7 @@ namespace RDE {
     class Engine;
 
     class RenderManager {
-        friend class Graph;
+        friend class Scene;
         friend class Engine;
         friend class ImGuiScene;
         friend class FrameBuffer;

@@ -51,7 +51,7 @@ namespace Editor {
 
     void Editor::onCollisionEnter(PhysicsBody* _a, PhysicsBody* _b) {
         auto* _box = _a->transform->node->getID() == circleNode->getID() ? _b : _a;
-        getMainGraph()->setParent(_box->transform->node, circleNode);
+        graph->setParent(_box->transform->node, circleNode);
         collisionHappened = true;
     }
 
@@ -59,13 +59,13 @@ namespace Editor {
 //        redirectRenderingDel.bind<&Editor::redirectRendering>(this);
 //        engine->setRenderingRedirectionToImGui(redirectRenderingDel);
 //        localizationTest();
-        Delegate<void(int)> myDelegate;
-        myDelegate.bind<&myFunc>();
-        auto _id = myDelegate.bind<&myFunc2>();
-        myDelegate(0);
-        myDelegate.unbind(_id);
-        myDelegate(1);
-        textStressTest(10);
+        // Delegate<void(int)> myDelegate;
+        // myDelegate.bind<&myFunc>();
+        // auto _id = myDelegate.bind<&myFunc2>();
+        // myDelegate(0);
+        // myDelegate.unbind(_id);
+        // myDelegate(1);
+        //textStressTest(10);
 
 //        {
 //            auto _floorNode = getMainGraph()->createNode("Floor");
@@ -121,18 +121,18 @@ namespace Editor {
 //        _background->node->getTransform()->setScale(35, 21);
 //        _background->setColor(Color::Gray);
 // //
-//        auto _panelNode = getCanvases()[0]->getGraph()->createNode("Panel");
-//        auto* _panel = _panelNode->addComponent<UIPanel>(UIPanelConfig { .size = {256, 256} });
+       auto _panelNode = canvas->graph->createNode("Panel");
+       auto* _panel = _panelNode->addComponent<UIPanel>(UIPanelConfig { .size = {256, 256} });
 // //
 // //
 // //
-//        auto _panelNode2 = getCanvases()[0]->getGraph()->createNode("PanelChild", _panelNode);
+//        auto _panelNode2 = getCanvases()[0]->graph->createNode("PanelChild", _panelNode);
 //        auto* _panel2 = _panelNode2->addComponent<UIPanel>(UIPanelConfig { .size = {64, 64}, .color = Color::Yellow });
 //        _panelNode2->getTransform()->setPosition(-64, 64);
 //        ((UITransform*)_panelNode2->getTransform())->setAnchor(Anchor::LEFT_TOP);
 //        ((UITransform*)_panelNode2->getTransform())->setStretch(Stretch::HORIZONTAL_STRETCH);
 
-//        auto _textNode = getCanvases()[0]->getGraph()->createNode("Text", _panelNode);
+//        auto _textNode = getCanvases()[0]->graph->createNode("Text", _panelNode);
 //        auto* _text = _textNode->addComponent<UIText>(UITextConfig {
 //            .font = engine->manager.fontManager.getDefaultFont("MontserratRegular"),
 //            .text = "Hello World!"
@@ -141,27 +141,24 @@ namespace Editor {
 //        _textNode->getTransform()->setPosition(64, 64);
 //        ((UITransform*)_textNode->getTransform())->setAnchor(Anchor::RIGHT_TOP);
 //
-////        auto _panelNode3 = getCanvases()[0]->getGraph()->createNode("PanelChild2", _panelNode2);
+////        auto _panelNode3 = getCanvases()[0]->graph->createNode("PanelChild2", _panelNode2);
 ////        auto* _panel3 = _panelNode3->addComponent<UIPanel>(UIPanelConfig { .size = {64, 64}, .color = Color::Green });
 ////        ((UITransform*)_panelNode3->getTransform())->setAnchor(Anchor::RIGHT_TOP);
 ////        ((UITransform*)_panelNode3->getTransform())->setStretch(Stretch::NO_STRETCH);
 ////
-       // auto _uiButtonNode = getCanvases()[0]->getGraph()->createNode("UIButton");
+       // auto _uiButtonNode = canvas->graph->createNode("UIButton");
        // UIButtonConfig _uiButtonConfig;
        // _uiButtonConfig.text = "Button";
        // _uiButtonConfig.textColor = Color::Green;
        // auto* _uiButton = _uiButtonNode->addComponent<UIButton>(_uiButtonConfig);
        // _uiButtonNode->getTransform()->setPosition(-140, 0);
-//////        ((UITransform*)_uiButtonNode->getTransform())->setPivot({ 0, 0.5f });
-//////        _uiButton->setInteractable(true);
-//////        getCanvases()[0]->getGraph()->setNodeActive(_uiButtonId, false);
 //
-//        auto _checkboxNode = getCanvases()[0]->getGraph()->createNode("Checkbox");
+//        auto _checkboxNode = getCanvases()[0]->graph->createNode("Checkbox");
 //        auto* _checkbox = _checkboxNode->addComponent<UICheckbox>(UICheckboxConfig {  });
 //        _checkboxNode->getTransform()->setPosition(0, 196);
 ////        _checkbox->setInteractable(false);
 ////
-////        auto _uiButtonNode2 = getCanvases()[0]->getGraph()->createNode("UIButton2");
+////        auto _uiButtonNode2 = getCanvases()[0]->graph->createNode("UIButton2");
 ////        UIButtonConfig _uiButtonConfig2;
 ////        _uiButtonConfig2.text = "Button2";
 ////        auto* _uiButton2 = _uiButtonNode2->addComponent<UIButton>(_uiButtonConfig2);
@@ -169,11 +166,11 @@ namespace Editor {
 //////        _uiButton2->setInteractable(false);
 ////
 //
-       // auto _inputTextNode = getCanvases()[0]->getGraph()->createNode("InputText");
+       // auto _inputTextNode = getCanvases()[0]->graph->createNode("InputText");
        // auto* _input = _inputTextNode->addComponent<UIInput>(UIInputConfig {  });
        // _inputTextNode->getTransform()->setPosition(256, 128);
 
-       // auto _sliderNode = getCanvases()[0]->getGraph()->createNode("Slider");
+       // auto _sliderNode = getCanvases()[0]->graph->createNode("Slider");
        // slider = _sliderNode->addComponent<UISlider>(UISliderConfig {  });
        // _sliderNode->getTransform()->setPosition(-256, 128);
     
@@ -197,7 +194,7 @@ namespace Editor {
         // }
 
         if(engine->manager.inputManager.isKeyJustPressed(KeyCode::S)) {
-            Util::Graphics::takeScreenshot(engine->getWindow(), "C:\\Users\\vazqu\\Documents\\RDE\\screenshot.png");
+            Util::Graphics::takeScreenshot(*engine->getWindow(), "C:\\Users\\vazqu\\Documents\\RDE\\screenshot.png");
         }
 
         static float _timer = 0.f;
@@ -205,7 +202,7 @@ namespace Editor {
         static int _frameCounter = 0;
         if (_timer >= 1.f) {
             _fpsCounter = _frameCounter;
-            engine->getWindow().setTitle("Engine: " + std::to_string(_fpsCounter));
+            engine->getWindow()->setTitle("Engine: " + std::to_string(_fpsCounter));
             _frameCounter = 0;
             _timer = 0;
         }
@@ -250,29 +247,30 @@ namespace Editor {
     void Editor::textStressTest(int _amount) {
         RDE::Random _r;
         auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
-        auto _parentNode = getMainGraph()->createNode("parent");
+        auto _parentNode = graph->createNode("parent");
 
         for(int _i = 0; _i < _amount; _i++) {
-            auto _textNode = getMainGraph()->createNode("Block" + std::to_string(_i));
+            auto _textNode = graph->createNode("Block" + std::to_string(_i));
             nodes.push_back(_textNode->getID());
-            _textNode->getTransform()->setPosition(_r.randomf(-engine->getWindow().getWidth() * 0.5f, engine->getWindow().getWidth() * 0.5f), _r.randomf(-engine->getWindow().getHeight() * 0.5f, engine->getWindow().getHeight() * 0.5f));
+            _textNode->getTransform()->setPosition(_r.randomf(-engine->getWindow()->getWidth() * 0.5f, engine->getWindow()->getWidth() * 0.5f), _r.randomf(-engine->getWindow()->getHeight() * 0.5f, engine->getWindow()->getHeight() * 0.5f));
             _textNode->getTransform()->setRotation(45);
             auto* _sprite = _textNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
-                .texture = _texture
+                .texture = _texture,
+                .color = Color::Yellow
             });
             // auto _pos = _textNode->getTransform()->getPosition();
-            // if((_pos.x > engine->getWindow().getWidth() * 0.5f || _pos.x < -engine->getWindow().getWidth() * 0.5f) ||
-            //    (_pos.y > engine->getWindow().getHeight() * 0.5f || -_pos.y < -engine->getWindow().getHeight() * 0.5f)) {
+            // if((_pos.x > engine->getWindow()->getWidth() * 0.5f || _pos.x < -engine->getWindow()->getWidth() * 0.5f) ||
+            //    (_pos.y > engine->getWindow()->getHeight() * 0.5f || -_pos.y < -engine->getWindow()->getHeight() * 0.5f)) {
             //     _sprite->node->setActive(false);
             // }
-            getMainGraph()->setParent(_textNode, _parentNode);
+            graph->setParent(_textNode, _parentNode);
         }
         
-        // for(auto _y = 0; _y <= engine->getWindow().getHeight() / _texture->getSize().y;  _y++) {
-        //     for(auto _x = 0; _x <= engine->getWindow().getWidth() / _texture->getSize().x;  _x++) {
+        // for(auto _y = 0; _y <= engine->getWindow()->getHeight() / _texture->getSize().y;  _y++) {
+        //     for(auto _x = 0; _x <= engine->getWindow()->getWidth() / _texture->getSize().x;  _x++) {
         //         auto _textNode = getMainGraph()->createNode("Block" + std::to_string(_x + _y));
         //         nodes.push_back(_textNode->getID());
-        //         _textNode->getTransform()->setPosition({-engine->getWindow().getWidth() * 0.5f + _texture->getSize().x * _x, engine->getWindow().getHeight() * 0.5f - _texture->getSize().y *_y});
+        //         _textNode->getTransform()->setPosition({-engine->getWindow()->getWidth() * 0.5f + _texture->getSize().x * _x, engine->getWindow()->getHeight() * 0.5f - _texture->getSize().y *_y});
         //         auto* _sprite = _textNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
         //             .texture = _texture,
         //             .color = Color(_r.randomi(0, 255), _r.randomi(0, 255), _r.randomi(0, 255), 255)
@@ -287,7 +285,7 @@ namespace Editor {
 //        auto* _transformRightWall = getMainGraph()->getComponent<Transform>(getMainGraph()->getNode("RightWall"));
 //        engine->manager.renderManager.drawSquare(_transformRightWall->getModelMatrixPosition(), {8, 8});
 
-//        auto _resolution = getMainCamera()->getViewport()->getDeviceResolution();
+//        auto _resolution = mainCamera->getViewport()->getDeviceResolution();
 //        auto _bottomLeftCorner = Vec2<float> {
 //               (((float)_resolution.x + slider->node->getTransform()->getModelMatrixPosition().x - slider->getSize().x) * 0.5f),
 //                (((float)_resolution.y + slider->node->getTransform()->getModelMatrixPosition().y - slider->getSize().y) * 0.5f)
@@ -415,7 +413,7 @@ namespace Editor {
     }
 
     void Editor::particleSystemTest() {
-        auto _particleSystemNode = getMainGraph()->createNode("ParticleSystem");
+        auto _particleSystemNode = graph->createNode("ParticleSystem");
 
         ParticleSystemConfig _particleSystemConfig {
                 ParticleSystemColorGradientConfig {

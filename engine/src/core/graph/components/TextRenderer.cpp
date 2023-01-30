@@ -17,10 +17,10 @@
 namespace RDE {
 
     TextRenderer::TextRenderer(Node* _node, Scene* _scene, const TextRendererConfig& _config) :
-    TextRenderer(_node, &_scene->engine->manager, _scene->getMainGraph(), _config) {  }
+    TextRenderer(_node, &_scene->engine->manager, _scene->graph, _config) {  }
 
     TextRenderer::TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const TextRendererConfig& _config) :
-    TextRenderer(_node, &_scene->engine->manager, _canvas->getGraph(), _config) {  }
+    TextRenderer(_node, &_scene->engine->manager, _canvas->graph, _config) {  }
 
     TextRenderer::TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const TextRendererConfig& _config) {
         

@@ -134,15 +134,15 @@ namespace RDE {
             for(auto& _node : _nodesJson) {
                 if(_node.contains("components") && _node["components"].contains("camera") && _node["components"]["camera"].contains("is_main") && _node["components"]["camera"]["is_main"].get<bool>()) {
                     auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : Util::String::appendToString("Entity_", _entityCount);
-                    _nodes[_tag] = { _scene->getMainCamera()->node, _node };
-                    _scene->getMainGraph()->getComponent<Tag>(_scene->getMainCamera()->node->getID())->tag = _tag;
+                    _nodes[_tag] = { _scene->mainCamera->node, _node };
+                    _scene->mainCamera->node->getComponent<Tag>()->tag = _tag;
                     _entityCount++;
                     continue;
                 }
 
                 auto _tag = _node.contains("tag") ? _node["tag"].get<std::string>() : Util::String::appendToString("Entity_", _entityCount);
                 ENGINE_ASSERT(_nodes.find(_tag) == _nodes.end(), Util::String::appendToString("Scene CANNOT have repeated 'tag' for different nodes, it is a unique identifier. Another '", _tag, "' prefab key was already defined."))
-                auto _entityNode = _scene->getMainGraph()->createNode(_tag);
+                auto _entityNode = _scene->graph->createNode(_tag);
                 _nodes[_tag] = {_entityNode, _node };
                 _entityCount++;
 
@@ -152,7 +152,7 @@ namespace RDE {
             }
 
             for(auto& _child : _parentingMap) {
-                _scene->getMainGraph()->setParent(_child.first, _nodes[_child.second].node);
+                _scene->graph->setParent(_child.first, _nodes[_child.second].node);
             }
         }
 
@@ -399,11 +399,11 @@ namespace RDE {
         if(_cameraJson.contains("is_main") && _cameraJson["is_main"].get<bool>()) {
 
             if(_cameraJson.contains("zoom")) {
-                _scene->getMainCamera()->setCurrentZoomLevel(_cameraJson["zoom"].get<float>());
+                _scene->mainCamera->setCurrentZoomLevel(_cameraJson["zoom"].get<float>());
             }
 
             if(_cameraJson.contains("zoom_speed")) {
-                _scene->getMainCamera()->setZoomSpeed(_cameraJson["zoom_speed"].get<float>());
+                _scene->mainCamera->setZoomSpeed(_cameraJson["zoom_speed"].get<float>());
             }
 
         } else {

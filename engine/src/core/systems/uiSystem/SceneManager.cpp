@@ -32,19 +32,17 @@ namespace RDE {
             return;
         }
         scenes[_sceneName] = _scene;
-        engine->manager.configManager.loadScene(&engine->manager, _scene, &engine->getWindow(), Util::String::appendToString(SCENES_PATH, _sceneName, ".json"));
+        engine->manager.configManager.loadScene(&engine->manager, _scene, engine->getWindow(), Util::String::appendToString(SCENES_PATH, _sceneName, ".json"));
         Util::Log::debug("Loaded scene '", _sceneName, "'");
     }
 
     void SceneManager::displayScene(const std::string& _sceneName) {
         sceneDisplayed = scenes[_sceneName];
         sceneDisplayed->onInit();
-        auto _windowSize = engine->getWindow().getWindowSize();
+        auto _windowSize = engine->getWindow()->getWindowSize();
 
-        sceneDisplayed->getMainCamera()->onResize(_windowSize.x, _windowSize.y);
-        for(auto& _canvas : sceneDisplayed->getCanvases()) {
-            _canvas->getCamera()->onResize(_windowSize.x, _windowSize.y);
-        }
+        sceneDisplayed->mainCamera->onResize(_windowSize.x, _windowSize.y);
+        sceneDisplayed->canvas->getCamera()->onResize(_windowSize.x, _windowSize.y);
 
         Util::Log::debug("Displayed scene '", _sceneName, "'");
     }

@@ -28,22 +28,44 @@ namespace RDE {
             template<typename Component, typename... Args>
             Component* addComponent(Args... _args) {
                 ENGINE_ASSERT(!hasComponent<Component>(), "A Node cannot have 2 components of the same type!!")
-                return graph->template addComponent<Component>(this, manager, graph, _args...);
+                
+                #if IS_WINDOWS()
+                auto* _component = &graph->registry.emplace<Component>(ID, this, manager, graph, _args...);
+                #else
+                auto* _component = &graph->registry.template emplace<Component>(ID, this, manager, graph, _args...);
+                #endif
+                if(graph->onDataChanged != nullptr) graph->onDataChanged((void*)_component);
+                graph->renderingTreeData.isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
+                return _component;
             }
 
             template<typename Component>
             Component* getComponent() {
-                return graph->template getComponent<Component>(ID);
+                #if IS_WINDOWS()
+                return &graph->registry.get<Component>(ID);
+                #else
+                return &graph->registry.template get<Component>(ID);
+                #endif
             }
 
             template<typename Component>
             void removeComponent() {
-                graph->template removeComponent<Component>(ID);
+                #if IS_WINDOWS()
+                auto _removed = graph->registry.remove<Component>(ID);
+                #else
+                auto _removed = graph->registry.template remove<Component>(ID);
+                #endif
+                if(graph->onDataChanged != nullptr) graph->onDataChanged((void*)_removed);
+                graph->renderingTreeData.isRenderizableTreeDirty |= std::is_same<Component, DisabledForRender>::value;
             }
 
             template<typename Component>
             [[nodiscard]] bool hasComponent() const {
-                return graph->template hasComponent<Component>(ID);
+                #if IS_WINDOWS()
+                return graph->registry.any_of<Component>(ID);
+                #else
+                return graph->registry.template any_of<Component>(ID);
+                #endif
             }
 
             Transform* getTransform() {

@@ -133,7 +133,10 @@ namespace RDE {
                 _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
                 _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _uint32Color });
                 _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
+
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
                 _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
 
                 _x += (float)_chars[_char].advance.x;
             }
@@ -211,7 +214,10 @@ namespace RDE {
                 _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
                 _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _uint32Color });
                 _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
+
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
                 _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color });
+                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
 
                 _x += (float)_chars[_char].advance.x;
             }
@@ -701,7 +707,10 @@ namespace RDE {
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[0]);
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[1]);
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[2]);
+
+        _vertices.emplace_back(_data.RenderizableInnerData.vertices[2]);
         _vertices.emplace_back(_data.RenderizableInnerData.vertices[3]);
+        _vertices.emplace_back(_data.RenderizableInnerData.vertices[0]);
     }
 
     void batch9SliceVertexGeometry(RenderizableInnerDataUI& _data, std::vector<OpenGLVertex>& _vertices) {
@@ -711,7 +720,10 @@ namespace RDE {
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 0]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 1]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 2]);
+
+            _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 2]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 3]);
+            _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 0]);
         }
     }
 
@@ -729,7 +741,10 @@ namespace RDE {
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 0]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 1]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 2]);
+
+            _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 2]);
             _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 3]);
+            _vertices.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 0]);
         }
     }
 

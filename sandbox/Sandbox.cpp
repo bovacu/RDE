@@ -27,7 +27,7 @@ namespace GDE {
     }
 
     void Sandbox::onInit() {
-        engine->getWindow().setVSync(true);
+        engine->getWindow()->setVSync(true);
 
         /*        auto _player = mainScene->createNode("player");
                 auto _sprite = mainScene->addComponent<SpriteRenderer>(_player);
@@ -51,7 +51,7 @@ namespace GDE {
         */
 
         mseDelegate.bind<&Sandbox::onMouseScrolled>(this);
-//        getMainCamera()->setAdaptiveViewport(engine->getWindowSize(), engine->getWindowSize());
+//        mainCamera->setAdaptiveViewport(engine->getWindowSize(), engine->getWindowSize());
 
 //        BodyConfig _bodyConf {
 //            1,
@@ -80,10 +80,10 @@ namespace GDE {
 //        textStressTest();
 
 
-//        auto _uiTest = getCanvases()[0]->getGraph()->createNode("TestUINode");
-//        auto* _transform = getCanvases()[0]->getGraph()->getComponent<Transform>(_uiTest);
+//        auto _uiTest = getCanvases()[0]->graph->createNode("TestUINode");
+//        auto* _transform = getCanvases()[0]->graph->getComponent<Transform>(_uiTest);
 //        _transform->setPosition(-250, 0);
-//        ui = getCanvases()[0]->getGraph()->addComponent<NinePatchSprite>(_uiTest, this, getCanvases()[0],
+//        ui = getCanvases()[0]->graph->addComponent<NinePatchSprite>(_uiTest, this, getCanvases()[0],
 //                                                                                       engine->manager.textureManager.getSubTexture(
 //                                                                                               "ui", "panel0"));
 //        ui->ninePatchSize = {200, 128};
@@ -96,7 +96,7 @@ namespace GDE {
 //        _redirectFunc.bind<&Sandbox::redirectRendering>(this);
 //        engine->setRenderingRedirectionToImGui(_redirectFunc);
 //
-//        getMainCamera()->setFreeViewport(engine->getWindow().getWindowSize());
+//        mainCamera->setFreeViewport(engine->getWindow()->getWindowSize());
 //        getCanvases()[0]->matchMainCameraViewPort();
     }
 
@@ -126,7 +126,7 @@ namespace GDE {
     void Sandbox::onEnd() { Scene::onEnd(); }
 
     bool Sandbox::onMouseScrolled(MouseScrolledEvent &_event) {
-        Camera &_camera = *getMainCamera();
+        Camera &_camera = *mainCamera;
         float _zoom = _camera.getCurrentZoomLevel();
         _zoom -= _event.getScrollY() * _camera.getZoomSpeed();
         _zoom = std::max(_zoom, 0.1f);
@@ -145,10 +145,10 @@ namespace GDE {
     void Sandbox::box2DStressTest() {
         auto _leftWall = getMainGraph()->createNode("LeftWall");
         auto* _leftWallTransform = getMainGraph()->getComponent<Transform>(_leftWall);
-        _leftWallTransform->setPosition(-(float)engine->getWindow().getWindowSize().x / 2.f, 0);
+        _leftWallTransform->setPosition(-(float)engine->getWindow()->getWindowSize().x / 2.f, 0);
         BodyConfig _leftWallConfig {
             .mass = 1,
-            .size = {64, (float)engine->getWindow().getWindowSize().y},
+            .size = {64, (float)engine->getWindow()->getWindowSize().y},
             .restitution = 1.f,
             .mask = 1 << 2,
             .bodyType = BodyType::STATIC,
@@ -159,10 +159,10 @@ namespace GDE {
 
         auto _rightWall = getMainGraph()->createNode("RightWall");
         auto* _rightWallTransform = getMainGraph()->getComponent<Transform>(_rightWall);
-        _rightWallTransform->setPosition((float)engine->getWindow().getWindowSize().x / 2.f, 0);
+        _rightWallTransform->setPosition((float)engine->getWindow()->getWindowSize().x / 2.f, 0);
         BodyConfig _rightWallConfig {
                 .mass = 1,
-                .size = {64, (float)engine->getWindow().getWindowSize().y},
+                .size = {64, (float)engine->getWindow()->getWindowSize().y},
                 .restitution = 1.f,
                 .mask = 1 << 2,
                 .bodyType = BodyType::STATIC,
@@ -173,10 +173,10 @@ namespace GDE {
 
         auto _bottomWall = getMainGraph()->createNode("BottomWall");
         auto* _bottomWallTransform = getMainGraph()->getComponent<Transform>(_bottomWall);
-        _bottomWallTransform->setPosition(0, -(float)engine->getWindow().getWindowSize().y / 2.f);
+        _bottomWallTransform->setPosition(0, -(float)engine->getWindow()->getWindowSize().y / 2.f);
         BodyConfig _bottomWallConfig {
                 .mass = 1,
-                .size = {(float)engine->getWindow().getWindowSize().x, 64},
+                .size = {(float)engine->getWindow()->getWindowSize().x, 64},
                 .restitution = 1.f,
                 .mask = 1 << 2,
                 .bodyType = BodyType::STATIC,
@@ -187,10 +187,10 @@ namespace GDE {
 
         auto _topWall = getMainGraph()->createNode("TopWall");
         auto* _topWallTransform = getMainGraph()->getComponent<Transform>(_topWall);
-        _topWallTransform->setPosition(0, (float)engine->getWindow().getWindowSize().y / 2.f);
+        _topWallTransform->setPosition(0, (float)engine->getWindow()->getWindowSize().y / 2.f);
         BodyConfig _topWallConfig {
                 .mass = 1,
-                .size = {(float)engine->getWindow().getWindowSize().x, 64},
+                .size = {(float)engine->getWindow()->getWindowSize().x, 64},
                 .restitution = 1.f,
                 .mask = 1 << 2,
                 .bodyType = BodyType::STATIC,
@@ -203,8 +203,8 @@ namespace GDE {
         for(int _i = 0; _i < 100; _i++) {
             auto _square = getMainGraph()->createNode("Square" + std::to_string(_i));
             auto* _squareTransform = getMainGraph()->getComponent<Transform>(_square);
-            _squareTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f + 64, (float)engine->getWindow().getWindowSize().x / 2.f - 64),
-                                          _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f + 64, (float)engine->getWindow().getWindowSize().y / 2.f - 64));
+            _squareTransform->setPosition(_r.randomf(-(float)engine->getWindow()->getWindowSize().x / 2.f + 64, (float)engine->getWindow()->getWindowSize().x / 2.f - 64),
+                                          _r.randomf(-(float)engine->getWindow()->getWindowSize().y / 2.f + 64, (float)engine->getWindow()->getWindowSize().y / 2.f - 64));
             _squareTransform->setScale(0.25f, 0.25f);
             BodyConfig _squareWallConfig {
                     .mass = 1,
@@ -227,15 +227,15 @@ namespace GDE {
         for(int _i = 0; _i < 1000; _i++) {
             auto _text = getMainGraph()->createNode("Text" + std::to_string(_i), _parent);
             auto* _textTransform = getMainGraph()->getComponent<Transform>(_text);
-            _textTransform->setPosition(_r.randomf(-(float)engine->getWindow().getWindowSize().x / 2.f + 64, (float)engine->getWindow().getWindowSize().x / 2.f - 64),
-                                        _r.randomf(-(float)engine->getWindow().getWindowSize().y / 2.f + 64, (float)engine->getWindow().getWindowSize().y / 2.f - 64));
+            _textTransform->setPosition(_r.randomf(-(float)engine->getWindow()->getWindowSize().x / 2.f + 64, (float)engine->getWindow()->getWindowSize().x / 2.f - 64),
+                                        _r.randomf(-(float)engine->getWindow()->getWindowSize().y / 2.f + 64, (float)engine->getWindow()->getWindowSize().y / 2.f - 64));
             getMainGraph()->addComponent<TextRenderer>(_text, this, engine->manager.fontManager.getDefaultFont("arial"), "Text" + std::to_string(_i));
         }
     }
 
     bool Sandbox::uiButtonTrigger(NodeID _nodeId, Canvas* _canvas) {
-        auto* _ninePatch = _canvas->getGraph()->getComponent<NinePatchSprite>(_nodeId);
-        auto* _transform = _canvas->getGraph()->getComponent<Transform>(_nodeId);
+        auto* _ninePatch = _canvas->graph->getComponent<NinePatchSprite>(_nodeId);
+        auto* _transform = _canvas->graph->getComponent<Transform>(_nodeId);
         auto _mousePos = engine->manager.inputManager.getMousePosWorldPos();
 
         return _mousePos.isInside(_transform->getPositionWorld(), Vec2F {(float)_ninePatch->ninePatchSize.x, (float)_ninePatch->ninePatchSize.y});
