@@ -280,7 +280,7 @@ namespace RDE {
     }
 
     void ImGuiScene::printResolutionFullscreenAndVSync() {
-        static bool _vsync = engine->getWindow()->isVSyncActive(), _fullscreen = false;
+        static bool _vsync = engine->getWindow()->isVSyncActive(), _fullscreen = false, _triangleLines = false;
         static int _windowRes[2] = {(int) engine->getWindow()->getWindowSize().x, (int) engine->getWindow()->getWindowSize().y};
 
         std::string _windowResolution = std::to_string(engine->getWindow()->getWindowSize().x) + "x" + std::to_string(engine->getWindow()->getWindowSize().y);
@@ -291,6 +291,15 @@ namespace RDE {
 
         if(ImGui::Checkbox("Fullscreen", &_fullscreen))
             engine->getWindow()->setFullscreen(_fullscreen);
+
+		if(ImGui::Checkbox("Show triangle lines", &_triangleLines)) {
+			if(_triangleLines) {
+				glEnable(GL_POLYGON_SMOOTH);
+				glHint(GL_POLYGON_SMOOTH, GL_NICEST);
+			} else {
+				glDisable(GL_POLYGON_SMOOTH);
+			}
+		}
 
         const char* _resolutions[] = { "2560x1440", "1920x1080", "1366x768", "1280x720", "1920x1200", "1680x1050",
                                        "1440x900" ,"1280x800" ,"1024x768" ,"800x600", "800x480","640x480", "320x240"
