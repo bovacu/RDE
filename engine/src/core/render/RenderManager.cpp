@@ -26,24 +26,21 @@ namespace RDE {
 
         #if !IS_MOBILE()
         glEnable(GL_PROGRAM_POINT_SIZE);
+		Util::GL::checkError("Invalid Point size");
         glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_POINT_SMOOTH);
+		Util::GL::checkError("Invalid Line Smooth");
         glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
-
-		glHint(GL_POINT_SMOOTH, GL_NICEST);
-		glHint(GL_LINE_SMOOTH, GL_NICEST);
+		Util::GL::checkError("Invalid Line Smooth Hint -> GL_NICEST");
+		glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+		Util::GL::checkError("Invalid Point Smooth Hint -> GL_NICEST");
 		#endif
 
         int _flags = IMG_INIT_PNG | IMG_INIT_JPG;
-        if(auto _returned = IMG_Init(_flags) != _flags) {
-            if((_returned & IMG_INIT_PNG) != IMG_INIT_PNG) {
-                Util::Log::error("SDL Image loader couldn't initialize all PNG");
-            }
-
-            if((_returned & IMG_INIT_JPG) != IMG_INIT_JPG) {
-                Util::Log::error("SDL Image loader couldn't initialize all JPG");
-            }
-        }
+		auto _returned = IMG_Init(_flags);
+		
+		if(_returned != (IMG_INIT_PNG | IMG_INIT_JPG)){
+			Util::Log::warn(SDL_GetError());
+		}
 
         batch.init(_engine);
         batch.debug.init(&batch);

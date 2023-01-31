@@ -33,6 +33,7 @@ namespace RDE {
 
     void SpriteBatch::configBasicShader() {
         GLsizei _structSize = sizeof(OpenGLVertex);
+		Util::GL::checkError("Error BEFORE ConfigBasicShader");
         engine->manager.shaderManager.loadShaderVertexConfig(SPRITE_RENDERER_SHADER, {
             VertexConfig {
                 0, 2, GL_FLOAT, 0, _structSize
@@ -45,6 +46,7 @@ namespace RDE {
             }
         },
         maxIndicesPerDrawCall);
+		Util::GL::checkError("Error AFTER ConfigBasicShader for sprites");
 
         engine->manager.shaderManager.loadShaderVertexConfig(TEXT_RENDERER_SHADER, {
             VertexConfig {
@@ -58,7 +60,7 @@ namespace RDE {
             }
         },
         maxIndicesPerDrawCall);
-        Util::GL::checkError("SpriteBatch configBasicShader");
+		Util::GL::checkError("Error AFTER ConfigBasicShader for text");
     }
 
     void SpriteBatch::Debug::configDebugShader() {

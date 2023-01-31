@@ -23,6 +23,7 @@ namespace RDE {
 
     bool Shader::initFromString(const std::string& _shaderCode, GLenum _shaderType) {
         GLuint _shaderID = glCreateShader(_shaderType);
+		Util::GL::checkError("Error after init from string");
 
         // Get the char* and length
         const char* _shaderCodePointer = _shaderCode.c_str();
@@ -30,10 +31,14 @@ namespace RDE {
 
         // Set the source code and compile.
         glShaderSource(_shaderID, 1, &_shaderCodePointer, &_shaderCodeLength);
+		Util::GL::checkError("Error after ShaderSource");
+
         glCompileShader(_shaderID);
+		Util::GL::checkError("Error after Compile shader");
 
         GLint _isCompiled;
         glGetShaderiv(_shaderID, GL_COMPILE_STATUS, &_isCompiled);
+		Util::GL::checkError("Error after getShaderiv");
 
         if (!_isCompiled) {
             char _infolog[1024];
@@ -79,10 +84,13 @@ namespace RDE {
         initFromString(_fragment, GL_FRAGMENT_SHADER);
 
         GLuint _shaderID = glCreateProgram();
-        for(auto& _shaderAttached : shadersAttached)
-            glAttachShader(_shaderID, _shaderAttached.second);
+		for(auto& _shaderAttached : shadersAttached) {
+			glAttachShader(_shaderID, _shaderAttached.second);
+			Util::GL::checkError("Error after shaderAttach");
+		}
 
         glLinkProgram(_shaderID);
+		Util::GL::checkError("Error after linkProgram");
         shaderID = _shaderID;
         return _shaderID;
     }
@@ -128,18 +136,25 @@ namespace RDE {
         ENGINE_ASSERT(!_verticesConfig.empty(), "Cannot have a Shader with 0 vertices configs")
         const int NUMBER_OF_VERTICES = 6;
 
+		Util::GL::checkError("Error BEFORE GenVertexArrays");
         glGenVertexArrays(1, &_vao);
+		Util::GL::checkError("Error after GenVertexArrays");
         glBindVertexArray(_vao);
+		Util::GL::checkError("Error after glBindVertexArray");
         glGenBuffers(1, &_vbo);
 
 
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+		Util::GL::checkError("Error after glBindBuffer");
         glBufferData(GL_ARRAY_BUFFER, vertexDataSize * _maxIndicesPerDrawCall * NUMBER_OF_VERTICES, nullptr, _drawType);
-        Util::Log::debug("Shader ", shaderID, " total VB space = ", vertexDataSize * _maxIndicesPerDrawCall * NUMBER_OF_VERTICES);
+		Util::GL::checkError("Error glBufferData");
+		Util::Log::debug("Shader ", shaderID, " total VB space = ", vertexDataSize * _maxIndicesPerDrawCall * NUMBER_OF_VERTICES);
 
         for(auto& _vertexConfig : _verticesConfig) {
             glVertexAttribPointer(_vertexConfig.pointerIndex, _vertexConfig.numberOfElements, _vertexConfig.openglDataType, GL_FALSE, vertexDataSize, reinterpret_cast<const void*>(_vertexConfig.stride));
-            glEnableVertexAttribArray(_vertexConfig.pointerIndex);
+			Util::GL::checkError("Error after glVertexAttribPointer");
+			glEnableVertexAttribArray(_vertexConfig.pointerIndex);
+			Util::GL::checkError("Error glEnableVertexAttribArray");
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
