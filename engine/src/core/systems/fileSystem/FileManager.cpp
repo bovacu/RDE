@@ -230,7 +230,7 @@ namespace RDE {
         #if !IS_MOBILE()
         std::remove(_filePath.c_str());
         #else
-        LOG_W("[NOT IMPLEMENTED] removeFile was called from a mobile target but it is NOT implemented yet")
+        Util::Log::error("[NOT IMPLEMENTED] removeFile was called from a mobile target but it is NOT implemented yet");
         #endif
     }
 
@@ -304,7 +304,7 @@ namespace RDE {
         #if !IS_MOBILE()
         std::rename(_filePath.c_str(), _newPath.c_str());
         #else
-        LOG_W("[NOT IMPLEMENTED] renameFile was called from a mobile target but it is NOT implemented yet")
+        Util::Log::error("[NOT IMPLEMENTED] renameFile was called from a mobile target but it is NOT implemented yet");
         #endif
     }
 

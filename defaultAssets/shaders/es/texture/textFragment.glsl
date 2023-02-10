@@ -11,5 +11,5 @@ out vec4 outColor;
 
 void main(void) {
     vec4 sampled = vec4(1.0, 1.0, 1.0, texture(tex, uv).a);
-    outColor = color * sampled;
+    outColor = sampled * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
 }
