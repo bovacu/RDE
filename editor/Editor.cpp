@@ -184,6 +184,9 @@ namespace Editor {
         // engine->manager.renderManager.drawPointToCPUTexture(_cpuTexture, _cpuTextureNode->getTransform(), {0, 0}, Color::White);
         // _cpuTexture->uploadToGPU();
         // auto* _cpuSprite = _cpuTextureNode->addComponent<SpriteRenderer>(SpriteRendererConfig {.texture = _cpuTexture});
+
+        auto* _textNode = canvas->graph->createNode("TextNode");
+        auto* _text = _textNode->addComponent<UIText>(UITextConfig {});
     }
 
     void Editor::onUpdate(Delta _dt) {
@@ -246,7 +249,7 @@ namespace Editor {
 
     void Editor::textStressTest(int _amount) {
         RDE::Random _r;
-        auto _texture = engine->manager.textureManager.getSubTexture("square", "whiteSquare");
+        auto _texture = engine->manager.textureManager.getSubTexture("defaultAssets", "duck");
         auto _parentNode = graph->createNode("parent");
 
         for(int _i = 0; _i < _amount; _i++) {

@@ -3,7 +3,7 @@
 //
 
 #include "core/render/window/WindowsWindow.h"
-#include "SDL2/SDL_video.h"
+#include "core/platform/PlatformHeaderSDL.h"
 
 #if IS_WINDOWS() && !IS_ANDROID()
 
