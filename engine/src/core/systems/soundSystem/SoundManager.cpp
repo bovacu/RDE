@@ -45,7 +45,12 @@ namespace RDE {
 
     Sfx& SoundManager::loadSfx(const std::string& _sfxPath) {
         Sfx _sfx;
+
+        #if !IS_MOBILE()
         _sfx.sfxID = Mix_LoadWAV(_sfxPath.c_str());
+        #else
+        Util::Log::error("LOAD SFX IS NOT YET IMPLEMENTED FOR MOBILE!!");
+        #endif
 
         if(_sfx.sfxID == nullptr) {
             throw std::runtime_error(Util::String::appendToString("Couldn't load SFX with path ", _sfxPath));
@@ -99,6 +104,7 @@ namespace RDE {
     }
 
     void SoundManager::playSfx(const std::string& _sfxName) {
+        #if !IS_MOBILE()
         if(sfxs.find(_sfxName) == sfxs.end()) {
             throw std::runtime_error(Util::String::appendToString("Couldn't get SFX '", _sfxName, "'"));
         }
@@ -109,6 +115,9 @@ namespace RDE {
         if(sfxs[_sfxName].channel == -1) {
             Util::Log::warn("All of the SFX available channels are in use! SFX may not play correctly");
         }
+        #else
+        Util::Log::error("PLAY SFX IS NOT YET IMPLEMENTED FOR MOBILE!!");
+        #endif
     }
 
     void SoundManager::resumeMusic(const std::string& _musicName) {
