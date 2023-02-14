@@ -41,8 +41,9 @@ find_package(EnTT CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/entt)
 find_package(freetype REQUIRED PATHS vcpkg/installed/x64-osx/share/freetype)
 
 include_directories(engine/include)
-include_directories(nonVcpkgDeps/freetype/include)
 include_directories(nonVcpkgDeps/Chipmunk2D/include)
+include_directories(vcpkg/installed/x64-osx/include)
+include_directories(vcpkg/installed/x64-osx/include/freetype)
 include_directories(editor)
 
 #RDEFirebase
