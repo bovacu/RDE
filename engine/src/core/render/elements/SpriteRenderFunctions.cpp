@@ -64,165 +64,186 @@ namespace RDE {
 
 
     void calculateGeometryForTextRenderer(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
+		auto* _textRenderer = (TextRenderer*)_data.extraInfo;
 
+		auto* _atlas = _textRenderer->getFont();
+		auto _atlasSize = _atlas->getSize();
+
+		float _x = 0;
+		float _y = 0;
+
+		auto* _chars = _atlas->getChars();
+
+		auto [_linesInfo, _, _totalHeight] = _textRenderer->calculateLinesInfo(_chars);
+		const auto _numberOfLines = _linesInfo.size();
+		const auto _percentage = 1.f / (float)_numberOfLines;
+
+		const float _nonUIPivotY = 0.4f;
+		const float _nonUIPivotX = 0.5f;
+
+		auto _index = 0;
+		for(auto& _lineInfo : _linesInfo) {
+
+			// This is to adjust X, so it goes back to the right, and to set the Y to its proper height when in multiline.
+			if(_linesInfo.size() > 1) {
+				auto _amountToAdd = (float)_numberOfLines / 2.f - (float)_index;
+				_y = -(_totalHeight * _textRenderer->getNewLineSize()) * _percentage * _amountToAdd - (_totalHeight / 2.f) + _lineInfo.biggestCharHeight;
+				_index++;
+				_x = 0;
+			}
+
+			for(char _char : _lineInfo.line) {
+				auto _transformCopy = glm::mat4(_transformMatrix);
+
+				float _xPos = (_x - (_textRenderer->getTextSize().x * _nonUIPivotX) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _transform->getModelMatrixScale().x;
+				float _yPos = (_y + (_textRenderer->getTextSize().y * _nonUIPivotY) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;
+
+				float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
+				float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
+
+				auto _screenPos = Util::Math::worldToScreenCoords(_viewport, { _transformCopy[3][0], _transformCopy[3][1] });
+				_transformCopy[3][0] = _screenPos.x;
+				_transformCopy[3][1] = _screenPos.y;
+
+				auto _positionInScreen = Util::Math::worldToScreenSize(_viewport, { _xPos, _yPos });
+				auto _sizeInScreen = Util::Math::worldToScreenSize(_viewport, { _w, _h });
+
+				glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
+				glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };
+				glm::vec4 _topLeftTextureCorner     = { _positionInScreen.x                  , -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
+				glm::vec4 _topRightTextureCorner    = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
+
+				Vec2F _normSize = { (float)_chars[_char].size.x / _atlasSize.x, (float)_chars[_char].size.y / _atlasSize.y };
+
+				glm::vec2 _bottomLeftTextureCoord   = { _chars[_char].offset.x              , _chars[_char].offset.y               };
+				glm::vec2 _bottomRightTextureCoord  = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y               };
+				glm::vec2 _topLeftTextureCoord      = { _chars[_char].offset.x              , _chars[_char].offset.y + _normSize.y };
+				glm::vec2 _topRightTextureCoord     = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y + _normSize.y };
+
+				auto _uint32Color = Util::Math::colorToUint32_t(_data.color);
+
+				_data.vertices.emplace_back(OpenGLVertex { _transformCopy * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
+				_data.vertices.emplace_back(OpenGLVertex { _transformCopy * _bottomRightTextureCorner, _bottomRightTextureCoord  , _uint32Color });
+				_data.vertices.emplace_back(OpenGLVertex { _transformCopy * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
+				_data.vertices.emplace_back(OpenGLVertex { _transformCopy * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color });
+
+				_x += (float)_chars[_char].advance.x;
+			}
+		}
     }
 
     void drawBatchedTextRenderer(RenderizableInnerData& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport) {
-    	auto* _textRenderer = (TextRenderer*)_data.extraInfo;
+		auto* _textRenderer = (TextRenderer*)_data.extraInfo;
 
-    	auto* _atlas = _textRenderer->getFont();
-        auto _atlasSize = _atlas->getSize();
+		auto [_transformMat, _dirty] = _transform->localToWorld();
+		if(_dirty || _data.dirty) {
+			_data.vertices.clear();
+			calculateGeometryForTextRenderer(_data, _transformMat, _transform, _viewport);
+			_data.dirty = false;
+		}
 
-        float _x = 0;
-        float _y = 0;
+			for(auto _i = 0; _i < _textRenderer->getText().size(); _i++) {
+			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 0]);
+			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 1]);
+			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 2]);
 
-        auto* _chars = _atlas->getChars();
-
-        auto [_linesInfo, _, _totalHeight] = _textRenderer->calculateLinesInfo(_chars);
-        const auto _numberOfLines = _linesInfo.size();
-        const auto _percentage = 1.f / (float)_numberOfLines;
-
-        const float _nonUIPivotY = 0.4f;
-        const float _nonUIPivotX = 0.5f;
-
-        auto _index = 0;
-        for(auto& _lineInfo : _linesInfo) {
-
-            // This is to adjust X, so it goes back to the right, and to set the Y to its proper height when in multiline.
-            if(_linesInfo.size() > 1) {
-                auto _amountToAdd = (float)_numberOfLines / 2.f - (float)_index;
-                _y = -(_totalHeight * _textRenderer->getNewLineSize()) * _percentage * _amountToAdd - (_totalHeight / 2.f) + _lineInfo.biggestCharHeight;
-                _index++;
-                _x = 0;
-            }
-
-            for(char _char : _lineInfo.line) {
-                auto _vertexCount = _batch->vertexBuffer.size();
-
-                float _xPos = (_x - (_textRenderer->getTextSize().x * _nonUIPivotX) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _transform->getModelMatrixScale().x;
-                float _yPos = (_y + (_textRenderer->getTextSize().y * _nonUIPivotY) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;
-
-                float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
-                float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
-
-                auto [_transformMat, _dirty] = _transform->localToWorld();
-                if(_dirty || _data.dirty) {
-                    _data.dirty = false;
-                }
-                auto _screenPos = Util::Math::worldToScreenCoords(_viewport, { _transformMat[3][0], _transformMat[3][1] });
-                _transformMat[3][0] = _screenPos.x;
-                _transformMat[3][1] = _screenPos.y;
-
-                auto _positionInScreen = Util::Math::worldToScreenSize(_viewport, { _xPos, _yPos });
-                auto _sizeInScreen = Util::Math::worldToScreenSize(_viewport, { _w, _h });
-
-                glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
-                glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };
-                glm::vec4 _topLeftTextureCorner     = { _positionInScreen.x                  , -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
-                glm::vec4 _topRightTextureCorner    = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
-
-                Vec2F _normSize = { (float)_chars[_char].size.x / _atlasSize.x, (float)_chars[_char].size.y / _atlasSize.y };
-
-                glm::vec2 _bottomLeftTextureCoord   = { _chars[_char].offset.x              , _chars[_char].offset.y               };
-                glm::vec2 _bottomRightTextureCoord  = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y               };
-                glm::vec2 _topLeftTextureCoord      = { _chars[_char].offset.x              , _chars[_char].offset.y + _normSize.y };
-                glm::vec2 _topRightTextureCoord     = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y + _normSize.y };
-
-                auto _uint32Color = Util::Math::colorToUint32_t(_data.color);
-
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _uint32Color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
-
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
-
-                _x += (float)_chars[_char].advance.x;
-            }
-        }
+			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 2]);
+			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 3]);
+			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 0]);
+		}
     }
 
 
 
 
-    void calculateGeometryForUIText(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
+	void calculateGeometryForUIText(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
+		auto* _textRenderer = (UIText*)_data.RenderizableInnerData.extraInfo;
+		auto _originOffset = _data.originOffset;
 
-    }
+		auto* _atlas = _textRenderer->getFont();
+		auto _atlasSize = _atlas->getSize();
 
-    void drawBatchedUIText(RenderizableInnerDataUI& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport) {
-        auto* _textRenderer = (UIText*)_data.RenderizableInnerData.extraInfo;
-        auto _originOffset = _data.originOffset;
+		float _x = 0;
+		float _y = 0;
 
-        auto* _atlas = _textRenderer->getFont();
-        auto _atlasSize = _atlas->getSize();
+		auto* _chars = _atlas->getChars();
 
-        float _x = 0;
-        float _y = 0;
+		auto [_linesInfo, _, _totalHeight] = _textRenderer->calculateLinesInfo(_chars);
+		const auto _numberOfLines = _linesInfo.size();
+		const auto _percentage = 1.f / (float)_numberOfLines;
+		auto _index = 0;
 
-        auto* _chars = _atlas->getChars();
+		for(auto& _lineInfo : _linesInfo) {
 
-        auto [_linesInfo, _, _totalHeight] = _textRenderer->calculateLinesInfo(_chars);
-        const auto _numberOfLines = _linesInfo.size();
-        const auto _percentage = 1.f / (float)_numberOfLines;
-        auto _index = 0;
-        for(auto& _lineInfo : _linesInfo) {
+			// This is to adjust X, so it goes back to the right, and to set the Y to its proper height when in multiline.
+			if(_linesInfo.size() > 1) {
+				auto _amountToAdd = (float)_numberOfLines / 2.f - (float)_index;
+				_y = -(_totalHeight * _textRenderer->getNewLineSize()) * _percentage * _amountToAdd - (_totalHeight / 2.f) + _lineInfo.biggestCharHeight;
+				_index++;
+				_x = 0;
+			}
 
-            // This is to adjust X, so it goes back to the right, and to set the Y to its proper height when in multiline.
-            if(_linesInfo.size() > 1) {
-                auto _amountToAdd = (float)_numberOfLines / 2.f - (float)_index;
-                _y = -(_totalHeight * _textRenderer->getNewLineSize()) * _percentage * _amountToAdd - (_totalHeight / 2.f) + _lineInfo.biggestCharHeight;
-                _index++;
-                _x = 0;
-            }
+			for(char _char : _lineInfo.line) {
+				auto _transformCopy = glm::mat4(_transformMatrix);
 
-            for(char _char : _lineInfo.line) {
-                auto _vertexCount = _batch->vertexBuffer.size();
+				float _xPos = (_x - (_textRenderer->getTextSize().x) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _transform->getModelMatrixScale().x;
+				float _yPos = (_y + (_textRenderer->getTextSize().y * 0.75f) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;
 
-                float _xPos = (_x - (_textRenderer->getTextSize().x) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _transform->getModelMatrixScale().x;
-                float _yPos = (_y + (_textRenderer->getTextSize().y * 0.75f) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;
+				float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
+				float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
 
-                float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
-                float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
+				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformCopy[3][0] + _originOffset.x * _transform->getModelMatrixScale().x,
+				                                                    _transformCopy[3][1] + _originOffset.y * _transform->getModelMatrixScale().y });
+				_transformCopy[3][0] = _screenPos.x;
+				_transformCopy[3][1] = _screenPos.y;
 
-                auto [_transformMat, _dirty] = _transform->localToWorld();
-                if(_dirty || _data.RenderizableInnerData.dirty) {
-                    _data.RenderizableInnerData.dirty = false;
-                }
-                auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMat[3][0] + _originOffset.x * _transform->getModelMatrixScale().x,
-                                                                           _transformMat[3][1] + _originOffset.y  * _transform->getModelMatrixScale().y });
-                _transformMat[3][0] = _screenPos.x;
-                _transformMat[3][1] = _screenPos.y;
+				auto _positionInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _xPos, _yPos });
+				auto _sizeInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _w, _h });
 
-                auto _positionInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _xPos, _yPos });
-                auto _sizeInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _w, _h });
+				glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
+				glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };
+				glm::vec4 _topLeftTextureCorner     = { _positionInScreen.x                  , -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
+				glm::vec4 _topRightTextureCorner    = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
 
-                glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
-                glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };
-                glm::vec4 _topLeftTextureCorner     = { _positionInScreen.x                  , -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
-                glm::vec4 _topRightTextureCorner    = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y - _sizeInScreen.y, 0.0f, 1.0f };
+				Vec2F _normSize = { (float)_chars[_char].size.x / _atlasSize.x, (float)_chars[_char].size.y / _atlasSize.y };
 
-                Vec2F _normSize = { (float)_chars[_char].size.x / _atlasSize.x, (float)_chars[_char].size.y / _atlasSize.y };
+				glm::vec2 _bottomLeftTextureCoord   = { _chars[_char].offset.x              , _chars[_char].offset.y               };
+				glm::vec2 _bottomRightTextureCoord  = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y               };
+				glm::vec2 _topLeftTextureCoord      = { _chars[_char].offset.x              , _chars[_char].offset.y + _normSize.y };
+				glm::vec2 _topRightTextureCoord     = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y + _normSize.y };
 
-                glm::vec2 _bottomLeftTextureCoord   = { _chars[_char].offset.x              , _chars[_char].offset.y               };
-                glm::vec2 _bottomRightTextureCoord  = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y               };
-                glm::vec2 _topLeftTextureCoord      = { _chars[_char].offset.x              , _chars[_char].offset.y + _normSize.y };
-                glm::vec2 _topRightTextureCoord     = { _chars[_char].offset.x + _normSize.x, _chars[_char].offset.y + _normSize.y };
+				auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
 
-                auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
+				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
+				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _bottomRightTextureCorner, _bottomRightTextureCoord  , _uint32Color });
+				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
+				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color });
 
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomRightTextureCorner, _bottomRightTextureCoord  , _uint32Color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
+				_x += (float)_chars[_char].advance.x;
+			}
+		}
+	}
 
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color });
-                _batch->vertexBuffer.emplace_back(OpenGLVertex   {_transformMat * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
+	void drawBatchedUIText(RenderizableInnerDataUI& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport) {
+		auto* _uiTextRenderer = (UIText*)_data.RenderizableInnerData.extraInfo;
 
-                _x += (float)_chars[_char].advance.x;
-            }
-        }
-    }
+		auto [_transformMat, _dirty] = _transform->localToWorld();
+		if(_dirty || _data.RenderizableInnerData.dirty) {
+			_data.RenderizableInnerData.vertices.clear();
+			calculateGeometryForUIText(_data, _transformMat, _transform, _viewport);
+			_data.RenderizableInnerData.dirty = false;
+		}
+
+		for(auto _i = 0; _i < _uiTextRenderer->getText().size(); _i++) {
+			_batch->vertexBuffer.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 0]);
+			_batch->vertexBuffer.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 1]);
+			_batch->vertexBuffer.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 2]);
+
+			_batch->vertexBuffer.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 2]);
+			_batch->vertexBuffer.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 3]);
+			_batch->vertexBuffer.push_back(_data.RenderizableInnerData.vertices[(_i * 4) + 0]);
+		}
+	}
 
 
 

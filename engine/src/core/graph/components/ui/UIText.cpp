@@ -49,6 +49,7 @@ namespace RDE {
     void UIText::recalcTextDimensions(const std::string& _text) {
         auto [_, _totalWidth, _totalHeight] = calculateLinesInfo(font->getChars());
         textSize.set(_totalWidth * 0.5f, _totalHeight * 0.5f);
+		data.RenderizableInnerData.dirty = true;
     }
 
     void UIText::setFontSize(int _fontSize) {

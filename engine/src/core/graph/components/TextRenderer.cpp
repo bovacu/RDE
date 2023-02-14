@@ -60,6 +60,7 @@ namespace RDE {
     void TextRenderer::recalcTextDimensions(const std::string& _text) {
         auto [_, _totalWidth, _totalHeight] = calculateLinesInfo(font->getChars());
         size.set(_totalWidth, _totalHeight);
+		data.dirty = true;
     }
 
     void TextRenderer::setFontSize(int _fontSize) {
