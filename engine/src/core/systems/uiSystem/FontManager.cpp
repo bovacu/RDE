@@ -17,9 +17,10 @@ namespace RDE {
 
         memset(characters, 0, sizeof(characters));
 
+		FT_Int32 load_flags = FT_LOAD_RENDER | FT_LOAD_TARGET_(FT_RENDER_MODE_SDF);
         /* Find minimum size for a texture holding all visible ASCII characters */
         for (int _i = 32; _i < 128; _i++) {
-            if (FT_Load_Char(face, _i, FT_LOAD_RENDER)) {
+			if (FT_Load_Char(face, _i, load_flags)) {
                 Util::Log::error("Loading character", _i, " failed!");
                 continue;
             }
@@ -46,7 +47,7 @@ namespace RDE {
         _rowHeight = 0;
 
         for (int _i = 32; _i < MAX_CHARACTERS; _i++) {
-            if (FT_Load_Char(face, _i, FT_LOAD_RENDER)) {
+			if (FT_Load_Char(face, _i, load_flags)) {
                 Util::Log::error("Loading character", _i, " failed!");
                 continue;
             }
@@ -114,9 +115,9 @@ namespace RDE {
         fileManager = _fileManager;
 
         loadFont(*_fileManager, "defaultAssets/fonts/MontserratRegular.ttf", 54);
-        loadFont(*_fileManager, "defaultAssets/fonts/MontserratItalic.ttf", 54);
-        loadFont(*_fileManager, "defaultAssets/fonts/MontserratBold.ttf", 54);
-        loadFont(*_fileManager, "defaultAssets/fonts/MontserratBoldItalic.ttf", 54);
+        //loadFont(*_fileManager, "defaultAssets/fonts/MontserratItalic.ttf", 54);
+        //loadFont(*_fileManager, "defaultAssets/fonts/MontserratBold.ttf", 54);
+        //loadFont(*_fileManager, "defaultAssets/fonts/MontserratBoldItalic.ttf", 54);
 
         Util::Log::debug("FontManager loaded successfully");
     }

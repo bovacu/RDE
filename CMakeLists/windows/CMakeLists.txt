@@ -25,7 +25,7 @@ find_package(EnTT CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(SDL2_image CONFIG REQUIRED)
 find_package(SDL2_mixer CONFIG REQUIRED)
-find_package(freetype CONFIG REQUIRED)
+find_package(freetype CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/freetype)
 find_package(glad CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/packages/nlohmann-json_x64-linux/share/nlohmann_json)
 find_package(imgui CONFIG REQUIRED)
@@ -46,7 +46,6 @@ include_directories(
 
 include_directories(engine/include)
 include_directories(editor)
-include_directories(nonVcpkgDeps/freetype/include)
 include_directories(nonVcpkgDeps/Chipmunk2D/include)
 include_directories(vcpkg/installed/x64-windows/include)
 
