@@ -26,6 +26,8 @@ set(glad_DIR vcpkg/installed/x64-linux/share/glad)
 set(nlohmann_json_DIR vcpkg/installed/x64-linux/share/nlohmann_json)
 set(imgui_DIR vcpkg/installed/x64-linux/share/imgui)
 set(glm_DIR vcpkg/installed/x64-linux/share/glm)
+set(Ogg_DIR vcpkg/installed/x64-linux/share/libogg)
+set(Vorbis_DIR vcpkg/installed/x64-linux/share/vorbis)
 
 find_package(SDL2 CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/sdl2)
 find_package(SDL2_image CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/sdl2-image)
@@ -35,6 +37,8 @@ find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share
 find_package(imgui CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/imgui)
 find_package(glm CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/glm)
 find_package(EnTT CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/entt)
+find_package(Ogg CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/libogg)
+find_package(Vorbis CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/vorbis)
 
 include_directories(engine/include)
 include_directories(nonVcpkgDeps/freetype/include)
@@ -85,6 +89,10 @@ target_link_libraries(${PROJECT_NAME}
                         nlohmann_json::nlohmann_json
                         imgui::imgui
                         glm::glm
+			Ogg::ogg
+			Vorbis::vorbis
+			Vorbis::vorbisfile
+			Vorbis::vorbisenc
                         ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/freetype/libfreetype.a
                         ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/Chipmunk2D/libs/Linux/libchipmunk.a
                     )
