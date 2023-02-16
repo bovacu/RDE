@@ -52,6 +52,15 @@ namespace RDE {
         int structSize = 0;
     };
 
+	template<typename T>
+	struct UniformConfig {
+		const T* data = nullptr;
+		GLsizei count = 1;
+		GLboolean transpose = GL_FALSE;
+		void (*uniformNonMatrixFunc)(GLint _location, GLsizei _count, const T* _data) = nullptr;
+		void (*uniformMatrixFunc)(GLint _location, GLsizei _count, GLboolean _transpose, const T* _data) = nullptr;
+	};
+
     /**
      * @brief This class represents the Shader program compiled and stored in the GPU.
      */
@@ -62,6 +71,7 @@ namespace RDE {
              * @brief Map with the loaded shaders, as default only Vertex and Fragment shaders.
              */
             std::unordered_map<GLuint, GLuint> shadersAttached;
+			std::unordered_map<const char*, GLint> uniforms;
 
             /**
              * @brief Shader ID in the GPU so the engine can locate it and enable it to render.
@@ -89,7 +99,7 @@ namespace RDE {
              long vertexDataSize;
 
         private:
-            void loadVertexConfigSpecific(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall, GLenum _drawType, GLuint& _vbo, GLuint& _ibo, GLuint& _vao);
+			 void loadVertexConfigSpecific(const std::vector<VertexConfig>& _verticesConfig, const std::vector<const char*> _uniforms, int _maxIndicesPerDrawCall, GLenum _drawType, GLuint& _vbo, GLuint& _ibo, GLuint& _vao);
 
         public:
             Shader();
@@ -114,7 +124,7 @@ namespace RDE {
             /**
              * @brief Loads the data structure that is going to be sent to the GPU. This method MUST be called
              */
-            void loadVertexConfig(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall);
+			void loadVertexConfig(const std::vector<VertexConfig>& _verticesConfig, const std::vector<const char*> _uniforms, int _maxIndicesPerDrawCall);
 
             /**
              * @brief Returns the ID of the Shader on the GPU
@@ -165,6 +175,9 @@ namespace RDE {
              */
             long getShaderVertexDataSize() const;
 
+			template<typename T>
+			void setUniforms(const char* _uniformName, const UniformConfig<T>& _uniformConfig);
+
         private:
             /**
              * @brief Compiles the Shader code and sends it to the GPU. Returns true if compilation is successful.
@@ -174,6 +187,19 @@ namespace RDE {
              */
             bool initFromString(const std::string& _shaderCode, GLenum _shaderType);
     };
+
+	template<typename T>
+	void Shader::setUniforms(const char* _uniformName, const UniformConfig<T>& _uniformConfig) {
+		if(uniforms[_uniformName] != -1) {
+			if(_uniformConfig.uniformMatrixFunc != nullptr) {
+				_uniformConfig.uniformMatrixFunc(uniforms[_uniformName], _uniformConfig.count, _uniformConfig.transpose, _uniformConfig.data);
+			} else if(_uniformConfig.uniformNonMatrixFunc != nullptr) {
+				_uniformConfig.uniformNonMatrixFunc(uniforms[_uniformName], _uniformConfig.count, _uniformConfig.data);
+			}
+		} else {
+			Util::Log::error("Trying to set uniform '", _uniformName, "' but it couldn't be located!");
+		}
+	}
 }
 
 #endif //RDE_SHADER_H

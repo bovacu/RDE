@@ -77,7 +77,7 @@ namespace RDE {
              * @param _vertexConfig List of data for each vertex.
              * @param _maxIndicesPerDrawCall Maximum number of indices per drawBatched call.
              */
-            void loadShaderVertexConfig(const std::string& _shaderName, const std::vector<VertexConfig>& _vertexConfig, int _maxIndicesPerDrawCall);
+            void loadShaderVertexConfig(const std::string& _shaderName, const std::vector<VertexConfig>& _vertexConfig, const std::vector<const char*> _uniforms, int _maxIndicesPerDrawCall);
 
             /**
              * @brief Sets an 'int' uniform for a specific shader

@@ -39,26 +39,39 @@ namespace RDE {
                 0, 2, GL_FLOAT, 0, _structSize
             },
             VertexConfig {
-                1, 4, GL_UNSIGNED_BYTE, 4 * 2, _structSize
+				1, 4, GL_UNSIGNED_BYTE, sizeof(float) * 2, _structSize
             },
             VertexConfig {
-                2, 2, GL_FLOAT, 4 * 2 + 4 * 1, _structSize
+				2, 2, GL_FLOAT, sizeof(float) * 2 + sizeof(unsigned char) * 4, _structSize
             }
         },
+		{
+			"viewProjectionMatrix"
+		},
         maxIndicesPerDrawCall);
 		Util::GL::checkError("Error AFTER ConfigBasicShader for sprites");
 
+		Util::Log::info("Size of OpenGLVertex: ", _structSize);
+
         engine->manager.shaderManager.loadShaderVertexConfig(TEXT_RENDERER_SHADER, {
             VertexConfig {
-                  0, 2, GL_FLOAT, 0, _structSize
+                0, 2, GL_FLOAT, 0, _structSize
             },
             VertexConfig {
-                  1, 4, GL_UNSIGNED_BYTE, 4 * 2, _structSize
+				1, 4, GL_UNSIGNED_BYTE, sizeof(float) * 2, _structSize
             },
             VertexConfig {
-                  2, 2, GL_FLOAT, 4 * 2 + 4 * 1, _structSize
-            }
-        },
+				2, 2, GL_FLOAT, sizeof(float) * 2 + sizeof(unsigned char) * 4, _structSize
+			},
+			//VertexConfig {
+			//	3, 4, GL_FLOAT, sizeof(float) * 2 + sizeof(unsigned char) * 4 + sizeof(float) * 2, _structSize
+			//}
+		},
+		{
+			"viewProjectionMatrix",
+			//"cameraScale",
+			//"atlasResolution"
+		},
         maxIndicesPerDrawCall);
 		Util::GL::checkError("Error AFTER ConfigBasicShader for text");
     }
@@ -67,13 +80,15 @@ namespace RDE {
         GLsizei _structSize = 3 * sizeof(float) + 4 * sizeof(float);
         Debug::batch->engine->manager.shaderManager.loadShaderVertexConfig(DEBUG_SHADER, {
             VertexConfig {
-                  0, 2, GL_FLOAT, 0, _structSize
+                0, 2, GL_FLOAT, 0, _structSize
             },
             VertexConfig {
-                  1, 4, GL_UNSIGNED_BYTE, 2 * sizeof(float), _structSize
+                1, 4, GL_UNSIGNED_BYTE, 2 * sizeof(float), _structSize
             }
-        },
-          Debug::batch->maxIndicesPerDrawCall);
+		},
+		{
+		},
+        Debug::batch->maxIndicesPerDrawCall);
         Util::GL::checkError("SpriteBatch configDebugShader");
     }
 
@@ -229,10 +244,14 @@ namespace RDE {
             glUseProgram(_shaderID);
             Util::GL::checkError("After glUseProgram");
 
-            GLint location = glGetUniformLocation(_shaderID, "viewProjectionMatrix");
-            Util::GL::checkError("After glGetUniformLocation");
-            glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
-            Util::GL::checkError("After glUniformMatrix4fv");
+			_batch.shader->setUniforms("viewProjectionMatrix", 
+                UniformConfig<GLfloat> {
+                    .data = reinterpret_cast<GLfloat*>(glm::value_ptr(viewProjectionMatrix)),
+					.count = 1,
+					.transpose = GL_FALSE,
+					.uniformMatrixFunc = glUniformMatrix4fv
+				}
+			);
 
             glActiveTexture(GL_TEXTURE0);
             Util::GL::checkError("After glActiveTexture");

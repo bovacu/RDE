@@ -175,7 +175,7 @@ namespace RDE {
         #else
         glTexSubImage2D(GL_TEXTURE_2D, 0, _offset.x, _offset.y, _size.x, _size.y, GL_RED, GL_UNSIGNED_BYTE, _data);
         #endif
-        Util::GL::checkError("Texture loadTextSubTextures");
+		Util::GL::checkError(Util::String::appendToString("Texture loadTextSubTextures, _offset: ", _offset, ", _size: ", _size));
         return true;
     }
 

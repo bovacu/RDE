@@ -10,7 +10,7 @@
 #include "core/render/elements/Texture.h"
 #include "core/systems/fileSystem/FileManager.h"
 
-#define MAX_WIDTH 1024
+#define MAX_WIDTH 512
 #define MAX_CHARACTERS 128
 
 namespace RDE {
@@ -36,8 +36,7 @@ namespace RDE {
 
         private:
             Texture texture;
-            int width = -1;
-            int height = -1;
+			Vec2I atlasSize {0, 0};
             int fontSize = -1;
             CharInfo characters[MAX_CHARACTERS];
             std::string fontName;
