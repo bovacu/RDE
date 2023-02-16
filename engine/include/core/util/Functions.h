@@ -325,7 +325,7 @@ namespace RDE {
 
             template <typename Arg1>
             inline void __printer(const char* _init, const char* _end, Arg1&& arg1) {
-                #if IS_MOBILE()
+                #if IS_ANDROID()
                 std::stringstream _stream;
                 _stream << arg1;
 
@@ -338,7 +338,7 @@ namespace RDE {
                 } else if (strcmp("\033[1;32m", _init) == 0) {
                     SDL_Log("%s", _stream.str().c_str());
                 }
-                #elif IS_DESKTOP()
+                #else
                 std::cout << arg1 << _end << std::endl;
                 #endif
             }
@@ -346,7 +346,7 @@ namespace RDE {
 
             template <typename Arg1, typename... Args>
             inline void __printer(const char* _init, const char* _end, Arg1&& arg1, Args&&... args) {
-                #if IS_MOBILE()
+                #if IS_ANDROID()
                 std::stringstream _stream;
                 _stream << arg1;
 
@@ -362,7 +362,7 @@ namespace RDE {
                 } else if (strcmp("\033[1;32m", _init) == 0) {
                     SDL_Log("%s", _stream.str().c_str());
                 }
-                #elif IS_DESKTOP()
+                #else
                 std::cout << arg1;
                 __printer(_init, _end, args...);
                 #endif
@@ -559,7 +559,7 @@ namespace RDE {
              * @param _pathToFile Path to the file.
              * @return SDL_Surface*
              */
-            inline SDL_Surface* getSDLSurface(const std::string& _pathToFile) {
+            inline SDL_Surface* getSDLSurface(const std::string& _pathToFile, int _changeFormat = -1) {
                 SDL_RWops* _imageFile = SDL_RWFromFile(_pathToFile.c_str(), "rb");
 
                 if(_imageFile == nullptr) {
@@ -583,6 +583,10 @@ namespace RDE {
                     _surface = IMG_LoadICO_RW(_imageFile);
 
                 SDL_RWclose(_imageFile);
+
+                if(_changeFormat != -1) {
+                    _surface = SDL_ConvertSurfaceFormat(_surface, (SDL_PixelFormatEnum)_changeFormat, 0);
+                }
 
                 return _surface;
             }
