@@ -20,8 +20,8 @@ namespace RDE {
 		FT_Int32 load_flags = FT_LOAD_RENDER | FT_LOAD_TARGET_(FT_RENDER_MODE_SDF);
         /* Find minimum size for a texture holding all visible ASCII characters */
         for (int _i = 32; _i < 128; _i++) {
-			if (FT_Load_Char(face, _i, load_flags)) {
-                Util::Log::error("Loading character", _i, " failed!");
+			if (auto errorCode = FT_Load_Char(face, _i, load_flags)) {
+                Util::Log::error("Loading character ", (char)_i, " failed! Error code ", errorCode);
                 continue;
             }
             if (_rowWidth + g->bitmap.width + 1 >= MAX_WIDTH) {
@@ -47,8 +47,8 @@ namespace RDE {
         _rowHeight = 0;
 
         for (int _i = 32; _i < MAX_CHARACTERS; _i++) {
-			if (FT_Load_Char(face, _i, load_flags)) {
-                Util::Log::error("Loading character", _i, " failed!");
+			if (auto errorCode = FT_Load_Char(face, _i, load_flags)) {
+                Util::Log::error("Loading character ", (char)_i, " failed! Error code ", errorCode);
                 continue;
             }
 
