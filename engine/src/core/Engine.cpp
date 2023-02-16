@@ -14,6 +14,11 @@ namespace RDE {
     Engine::Engine() {
         manager.configManager.loadRDEConfig(&rdeConfig, manager.fileManager);
         window = platform.createWindow(&rdeConfig);
+        
+        #if IS_MOBILE()
+        rdeConfig.windowData.resolution = window->getWindowSize();
+        #endif
+        
         currentDPI = rdeConfig.windowData.diagonalDpi;
 
         UniqueDelegate<void(Event&)> onEventDelegate;
