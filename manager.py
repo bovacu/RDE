@@ -39,7 +39,7 @@ def buildin_process_windows(args, action):
 
     run_command = "start build\\windows\\{}\\RDE.exe".format(build_type.lower())
 
-    if action == "compile":
+    if action == "build":
         os.system(create_build_folder)
         os.system(create_windows_folder)
         os.system(create_windows_build_folder)
@@ -49,7 +49,7 @@ def buildin_process_windows(args, action):
         os.system(copy_compile_commands)
     elif action == "run":
         os.system(run_command)
-    elif action == "compile-run":
+    elif action == "build-run":
         os.system(create_build_folder)
         os.system(create_windows_folder)
         os.system(create_windows_build_folder)
@@ -81,7 +81,7 @@ def buildin_process_linux(args, action):
 
     run_command = "build/linux/{}/RDE".format(build_type.lower())
 
-    if action == "compile":
+    if action == "build":
         os.system(create_build_folder)
         os.system(create_linux_folder)
         os.system(create_linux_build_folder)
@@ -91,7 +91,7 @@ def buildin_process_linux(args, action):
         os.system(copy_compile_commands)
     elif action == "run":
         os.system(run_command)
-    elif action == "compile-run":
+    elif action == "build-run":
         os.system(create_build_folder)
         os.system(create_linux_folder)
         os.system(create_linux_build_folder)
@@ -125,7 +125,7 @@ def buildin_process_mac(args, action):
 
     run_command = "build/mac/{}/RDE".format(build_type.lower())
 
-    if action == "compile":
+    if action == "build":
         os.system(create_build_folder)
         os.system(create_mac_folder)
         os.system(create_mac_build_folder)
@@ -135,7 +135,7 @@ def buildin_process_mac(args, action):
         os.system(copy_compile_commands)
     elif action == "run":
         os.system(run_command)
-    elif action == "compile-run":
+    elif action == "build-run":
         os.system(create_build_folder)
         os.system(create_mac_folder)
         os.system(create_mac_build_folder)
@@ -155,7 +155,7 @@ def project_lines_number_mac():
 
 def windows(args):
     action = extract_argument(args, "--action", "")
-    if action == "compile" or action == "compile-run" or action == "run":
+    if action == "build" or action == "build-run" or action == "run":
         buildin_process_windows(args, action)
     elif action == "lines":
         project_lines_number_windows()
@@ -163,7 +163,7 @@ def windows(args):
 
 def linux(args):
     action = extract_argument(args, "--action", "")
-    if action == "compile" or action == "compile-run" or action == "run":
+    if action == "build" or action == "build-run" or action == "run":
         buildin_process_linux(args, action)
     elif action == "lines":
         project_lines_number_linux()
@@ -171,7 +171,7 @@ def linux(args):
 
 def mac(args):
     action = extract_argument(args, "--action", "")
-    if action == "compile" or action == "compile-run" or action == "run":
+    if action == "build" or action == "build-run" or action == "run":
         buildin_process_linux(args, action)
     elif action == "lines":
         project_lines_number_mac()
@@ -181,9 +181,9 @@ def help():
     print("======================================= COMPILING AND RUNNING =================================================")
     print("")
     print("In order to compile, run or compile or run --action argument is needed, with the following options:")
-    print("     --action=compile (compiles the project to the current platform)")
+    print("     --action=build (compiles the project to the current platform)")
     print("     --action=run (runs the last generated build)")
-    print("     --action=compile-run (compiles the project to the current platform and runs it)")
+    print("     --action=build-run (compiles the project to the current platform and runs it)")
     print("")
     print("Additionally the following arguments are available:")
     print("   | Argument         |   Options         |    Description")

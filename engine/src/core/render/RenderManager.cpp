@@ -31,8 +31,12 @@ namespace RDE {
 		Util::GL::checkError("Invalid Line Smooth");
         glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
 		Util::GL::checkError("Invalid Line Smooth Hint -> GL_NICEST");
-		glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+		
+        #if !IS_MAC()
+        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 		Util::GL::checkError("Invalid Point Smooth Hint -> GL_NICEST");
+        #endif
+
 		#endif
 
         int _flags = IMG_INIT_PNG | IMG_INIT_JPG;
