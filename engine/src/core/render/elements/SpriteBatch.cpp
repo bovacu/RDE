@@ -87,6 +87,7 @@ namespace RDE {
             }
 		},
 		{
+			"viewProjectionMatrix"
 		},
         Debug::batch->maxIndicesPerDrawCall);
         Util::GL::checkError("SpriteBatch configDebugShader");
@@ -244,14 +245,7 @@ namespace RDE {
             glUseProgram(_shaderID);
             Util::GL::checkError("After glUseProgram");
 
-			_batch.shader->setUniforms("viewProjectionMatrix", 
-                UniformConfig<GLfloat> {
-                    .data = reinterpret_cast<GLfloat*>(glm::value_ptr(viewProjectionMatrix)),
-					.count = 1,
-					.transpose = GL_FALSE,
-					.uniformMatrixFunc = glUniformMatrix4fv
-				}
-			);
+			_batch.shader->setUniformValueFloat("viewProjectionMatrix", RDE_UNIFORM_FV_MATRIX_4, GLM_VEC_MAT_TO_POINTER(GLfloat, viewProjectionMatrix));
 
             glActiveTexture(GL_TEXTURE0);
             Util::GL::checkError("After glActiveTexture");

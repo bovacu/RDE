@@ -233,19 +233,11 @@ namespace RDE {
 			calculateGeometryForUIText(_data, _transformMat, _transform, _viewport);
 
 			//auto _cameraScale = glm::vec1(3.f);
-			//_batch->shader->setUniforms("cameraScale", UniformConfig<GLfloat> {
-			//     .data = reinterpret_cast<float*>(&_cameraScale),
-			//     .count = 1,
-			//     .uniformNonMatrixFunc = glUniform1fv
-			//});
+			//_batch->shader->setUniformValueFloat("cameraScale", RDE_UNIFORM_FV_1, GLM_VEC_MAT_TO_POINTER(GLfloat, &_cameraScale));
 
 			//auto* _font = ((UIText*)_data.RenderizableInnerData.extraInfo)->getFont();
 			//auto _atlasSize = glm::vec2(_font->getSize().x, _font->getSize().y);
-			//_batch->shader->setUniforms("atlasResolution", UniformConfig<GLfloat> {
-			//     .data = reinterpret_cast<float*>(glm::value_ptr(_atlasSize)),
-			//     .count = 1,
-			//     .uniformNonMatrixFunc = glUniform2fv
-			//});
+			//_batch->shader->setUniformValueFloat("atlasResolution", RDE_UNIFORM_FV_2, GLM_VEC_MAT_TO_POINTER(GLfloat, _atlasSize));
 
 			_data.RenderizableInnerData.dirty = false;
 		}
