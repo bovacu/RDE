@@ -9,12 +9,16 @@
 
 namespace RDE {
 
+	#ifndef NUMBER_OF_EXTRA_ELEMENTS
+		#define NUMBER_OF_EXTRA_ELEMENTS 16
+	#endif
+
     /**
      * @brief This is the data that is sent to the GPU when rendering default vertices.
      */
     struct OpenGLVertex {
 
-        /**
+        /*
          * @brief Position in screen coordinates where the vertex should be placed.
          */
         glm::vec2 position {0, 0};
@@ -32,10 +36,15 @@ namespace RDE {
         /**
          * @brief Any other data that end-users would like to pass to the vertex shader.
          */
-        float* extraData = nullptr;
+		float extraData[NUMBER_OF_EXTRA_ELEMENTS] = {0};
 
         OpenGLVertex() {  }
-        OpenGLVertex(const glm::vec2& _position, const glm::vec2& _texCoord, uint32_t _color, float* _extraData = nullptr) : position(_position), color(_color), texCoord(_texCoord), extraData(_extraData) {  }
+        OpenGLVertex(const glm::vec2& _position, const glm::vec2& _texCoord, uint32_t _color) : position(_position), color(_color), texCoord(_texCoord) {  }
+		OpenGLVertex(const glm::vec2& _position, const glm::vec2& _texCoord, uint32_t _color, float* _extraData, size_t _extraDataAmount) : position(_position), color(_color), texCoord(_texCoord) { 
+			for(auto _i = 0; _i < _extraDataAmount; _i++) {
+				extraData[_i] = _extraData[_i];
+			}
+		}
     };
 
     /**

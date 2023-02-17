@@ -11,12 +11,12 @@ namespace RDE {
         #if IS_MOBILE()
         loadShader(SPRITE_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_ES, TEXTURE_FRAGMENT_SHADER_ES);
         loadShader(DEBUG_SHADER, DEBUG_VERTEX_SHADER_ES, DEBUG_FRAGMENT_SHADER_ES);
-        loadShader(TEXT_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_ES, TEXT_FRAGMENT_SHADER_ES);
+        loadShader(TEXT_RENDERER_SHADER, TEXT_VERTEX_SHADER_ES, TEXT_FRAGMENT_SHADER_ES);
         loadShader(FRAMEBUFFER_SHADER, FRAMEBUFFER_VERTEX_SHADER_ES, FRAMEBUFFER_FRAGMENT_SHADER_ES);
         #else
         loadShader(SPRITE_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_CORE, TEXTURE_FRAGMENT_SHADER_CORE);
         loadShader(DEBUG_SHADER, DEBUG_VERTEX_SHADER_CORE, DEBUG_FRAGMENT_SHADER_CORE);
-        loadShader(TEXT_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_CORE, TEXT_FRAGMENT_SHADER_CORE);
+        loadShader(TEXT_RENDERER_SHADER, TEXT_VERTEX_SHADER_CORE, TEXT_FRAGMENT_SHADER_CORE);
         loadShader(FRAMEBUFFER_SHADER, FRAMEBUFFER_VERTEX_SHADER_CORE, FRAMEBUFFER_FRAGMENT_SHADER_CORE);
         #endif
 
@@ -47,8 +47,8 @@ namespace RDE {
         return shadersById[_shaderID];
     }
 
-    void ShaderManager::loadShaderVertexConfig(const std::string& _shaderName,const std::vector<VertexConfig>& _vertexConfig, int _maxIndicesPerDrawCall) {
-        shadersByName[_shaderName]->loadVertexConfig(_vertexConfig, _maxIndicesPerDrawCall);
+    void ShaderManager::loadShaderVertexConfig(const std::string& _shaderName,const std::vector<VertexConfig>& _vertexConfig, const std::vector<const char*> _uniforms, int _maxIndicesPerDrawCall) {
+        shadersByName[_shaderName]->loadVertexConfig(_vertexConfig, _uniforms, _maxIndicesPerDrawCall);
     }
 
     void ShaderManager::destroy() {

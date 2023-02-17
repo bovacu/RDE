@@ -6,10 +6,11 @@ in vec2 uv;
 in vec4 color;
 
 uniform sampler2D tex;
-
-out vec4 outColor;
+out vec4 out_color;
 
 void main(void) {
-    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(tex, uv).a);
-    outColor = sampled * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
+	float d = texture(tex, uv).a;
+	float aaf = fwidth(d);
+	float alpha = smoothstep(0.5 - aaf, 0.5 + aaf, d);
+	out_color = vec4(color.rgb, alpha);
 }

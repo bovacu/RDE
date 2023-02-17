@@ -14,9 +14,11 @@
 #define RML_VERTEX_SHADER_CORE "defaultAssets/shaders/core/texture/rmlVertex.glsl"
 
 #define TEXTURE_VERTEX_SHADER_ES "defaultAssets/shaders/es/texture/vertex.glsl"
+#define TEXT_VERTEX_SHADER_ES "defaultAssets/shaders/es/texture/textVertex.glsl"
 #define DEBUG_VERTEX_SHADER_ES "defaultAssets/shaders/es/debug/debugVertex.glsl"
 
 #define TEXTURE_VERTEX_SHADER_CORE "defaultAssets/shaders/core/texture/vertex.glsl"
+#define TEXT_VERTEX_SHADER_CORE "defaultAssets/shaders/core/texture/textVertex.glsl"
 #define DEBUG_VERTEX_SHADER_CORE "defaultAssets/shaders/core/debug/debugVertex.glsl"
 #define DEBUG_GRID_VERTEX_SHADER_CORE "defaultAssets/shaders/core/debug/gridVertex.glsl"
 #define DEBUG_GRID_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/debug/gridFragment.glsl"

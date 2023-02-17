@@ -8,11 +8,12 @@
 #include "core/render/elements/IRenderizable.h"
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/graph/components/ui/UITransform.h"
+#include "glm/gtc/type_ptr.hpp"
 
 namespace RDE {
 
 	void calculateGeometryForSpriteRenderer(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport)  {
-	    auto _screenPos = Util::Math::worldToScreenCoords(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
+	    auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
 	    _transformMatrix[3][0] = _screenPos.x;
 	    _transformMatrix[3][1] = _screenPos.y;
 
@@ -21,7 +22,7 @@ namespace RDE {
 
 	    Vec2F _textureTileSize = {(float)_data.texture->getRegion().size.x, (float)_data.texture->getRegion().size.y};
 	    Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_data.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)_data.texture->getSpriteSheetSize().y};
-	    auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
+	    auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
 
 	    glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
 	    glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -42,8 +43,6 @@ namespace RDE {
 	}
 
 	void drawBatchedSpriteRenderer(RenderizableInnerData& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport) {
-        auto _vertexCount = _batch->vertexBuffer.size();
-
         auto [_transformMat, _dirty] = _transform->localToWorld();
         if(_dirty || _data.dirty) {
             calculateGeometryForSpriteRenderer(_data, _transformMat, _transform, _viewport);
@@ -101,12 +100,12 @@ namespace RDE {
 				float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
 				float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
 
-				auto _screenPos = Util::Math::worldToScreenCoords(_viewport, { _transformCopy[3][0], _transformCopy[3][1] });
+				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformCopy[3][0], _transformCopy[3][1] });
 				_transformCopy[3][0] = _screenPos.x;
 				_transformCopy[3][1] = _screenPos.y;
 
-				auto _positionInScreen = Util::Math::worldToScreenSize(_viewport, { _xPos, _yPos });
-				auto _sizeInScreen = Util::Math::worldToScreenSize(_viewport, { _w, _h });
+				auto _positionInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _xPos, _yPos });
+				auto _sizeInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _w, _h });
 
 				glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
 				glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };
@@ -214,10 +213,11 @@ namespace RDE {
 
 				auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
 
-				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color });
-				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _bottomRightTextureCorner, _bottomRightTextureCoord  , _uint32Color });
-				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color });
-				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color });
+				//float _extraData[4] = { _chars[_char].offset.x * _atlas->getSize().x, 0.0f, (float)_chars[_char].size.x, (float)_chars[_char].size.y };
+				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _bottomLeftTextureCorner , _bottomLeftTextureCoord   , _uint32Color /*, _extraData, 4 */ });
+				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _bottomRightTextureCorner, _bottomRightTextureCoord  , _uint32Color /*, _extraData, 4 */ });
+				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _topRightTextureCorner   , _topRightTextureCoord     , _uint32Color /*, _extraData, 4 */ });
+				_data.RenderizableInnerData.vertices.emplace_back(OpenGLVertex { _transformCopy * _topLeftTextureCorner    , _topLeftTextureCoord      , _uint32Color /*, _extraData, 4 */ });
 
 				_x += (float)_chars[_char].advance.x;
 			}
@@ -231,6 +231,14 @@ namespace RDE {
 		if(_dirty || _data.RenderizableInnerData.dirty) {
 			_data.RenderizableInnerData.vertices.clear();
 			calculateGeometryForUIText(_data, _transformMat, _transform, _viewport);
+
+			//auto _cameraScale = glm::vec1(3.f);
+			//_batch->shader->setUniformValueFloat("cameraScale", RDE_UNIFORM_FV_1, GLM_VEC_MAT_TO_POINTER(GLfloat, &_cameraScale));
+
+			//auto* _font = ((UIText*)_data.RenderizableInnerData.extraInfo)->getFont();
+			//auto _atlasSize = glm::vec2(_font->getSize().x, _font->getSize().y);
+			//_batch->shader->setUniformValueFloat("atlasResolution", RDE_UNIFORM_FV_2, GLM_VEC_MAT_TO_POINTER(GLfloat, _atlasSize));
+
 			_data.RenderizableInnerData.dirty = false;
 		}
 
@@ -281,10 +289,10 @@ namespace RDE {
 
         auto _uint32Color = Util::Math::colorToUint32_t(_data.RenderizableInnerData.color);
 
-        _data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _uint32Color };
-        _data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _uint32Color };
-        _data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _uint32Color };
-        _data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
+		_data.RenderizableInnerData.vertices[0] = OpenGLVertex {_transformMatrix * _bottomLeftTextureCorner , _bottomLeftTextureCoord , _uint32Color };
+		_data.RenderizableInnerData.vertices[1] = OpenGLVertex {_transformMatrix * _bottomRightTextureCorner, _bottomRightTextureCoord, _uint32Color };
+		_data.RenderizableInnerData.vertices[2] = OpenGLVertex {_transformMatrix * _topRightTextureCorner   , _topRightTextureCoord   , _uint32Color };
+		_data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
     }
 
     void calculate9SliceGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {

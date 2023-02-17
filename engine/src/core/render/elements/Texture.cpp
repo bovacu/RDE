@@ -55,7 +55,12 @@ namespace RDE {
     }
 
     bool Texture::loadFromFile(const char* _path) {
+        
+        #if IS_IOS()
+        auto* _image = Util::Texture::getSDLSurface(_path, (int)SDL_PIXELFORMAT_ABGR8888);
+        #else
         auto* _image = Util::Texture::getSDLSurface(_path);
+        #endif
 
         if(_image == nullptr) {
             Util::Log::error("Format of image '", Util::String::getFileExtension(_path), "' not supported for file ", _path);
@@ -72,11 +77,21 @@ namespace RDE {
 
         GLenum _internalFormat = 0, _dataFormat = 0;
         if (channels == 4) {
+            #if IS_IOS()
+            _internalFormat = GL_RGBA;
+            _dataFormat = GL_RGBA;
+            #else
             _internalFormat = GL_RGBA8;
             _dataFormat = GL_RGBA;
+            #endif
         } else if (channels == 3) {
+            #if IS_IOS()
+            _internalFormat = GL_RGB;
+            _dataFormat = GL_RGB;
+            #else
             _internalFormat = GL_RGB8;
             _dataFormat = GL_RGB;
+            #endif
         } else {
             Util::Log::error("Not supported format image. Channels = ", channels, ", Width = ", textureSize.x, ", Height = ", textureSize.y, ", Path = ", _path);
             Util::Log::warn("If the sprite sheet is exported from TexturePacker remember to set in advanced options PngOpt Level to 0!!");
@@ -88,8 +103,13 @@ namespace RDE {
         glGenTextures(1, &openGLTextureID);
         glBindTexture(GL_TEXTURE_2D, openGLTextureID);
 
+        #if IS_IOS()
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        #else
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        #endif
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -155,7 +175,7 @@ namespace RDE {
         #else
         glTexSubImage2D(GL_TEXTURE_2D, 0, _offset.x, _offset.y, _size.x, _size.y, GL_RED, GL_UNSIGNED_BYTE, _data);
         #endif
-        Util::GL::checkError("Texture loadTextSubTextures");
+		Util::GL::checkError(Util::String::appendToString("Texture loadTextSubTextures, _offset: ", _offset, ", _size: ", _size));
         return true;
     }
 

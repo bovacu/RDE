@@ -15,10 +15,10 @@ namespace RDE {
         glDeleteVertexArrays(1, &vao);
     }
 
-    void Shader::loadVertexConfig(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall) {
+	void Shader::loadVertexConfig(const std::vector<VertexConfig>& _verticesConfig, const std::vector<const char*> _uniforms, int _maxIndicesPerDrawCall) {
         vertexDataSize = _verticesConfig[0].structSize;
-        loadVertexConfigSpecific(_verticesConfig, _maxIndicesPerDrawCall, GL_STATIC_DRAW, vbo, ibo, vao);
-//        loadVertexConfigSpecific(_verticesConfig, _maxIndicesPerDrawCall, GL_STATIC_DRAW, staticVbo, staticIbo, staticVao);
+        loadVertexConfigSpecific(_verticesConfig, _uniforms, _maxIndicesPerDrawCall, GL_STATIC_DRAW, vbo, ibo, vao);
+//        loadVertexConfigSpecific(_verticesConfig, _uniforms, _maxIndicesPerDrawCall, GL_STATIC_DRAW, staticVbo, staticIbo, staticVao);
     }
 
     bool Shader::initFromString(const std::string& _shaderCode, GLenum _shaderType) {
@@ -132,7 +132,7 @@ namespace RDE {
         return staticVbo;
     }
 
-    void Shader::loadVertexConfigSpecific(const std::vector<VertexConfig>& _verticesConfig, int _maxIndicesPerDrawCall, GLenum _drawType, GLuint& _vbo, GLuint& _ibo, GLuint& _vao) {
+	void Shader::loadVertexConfigSpecific(const std::vector<VertexConfig>& _verticesConfig, const std::vector<const char*> _uniforms, int _maxIndicesPerDrawCall, GLenum _drawType, GLuint& _vbo, GLuint& _ibo, GLuint& _vao) {
         ENGINE_ASSERT(!_verticesConfig.empty(), "Cannot have a Shader with 0 vertices configs")
         const int NUMBER_OF_VERTICES = 6;
 
@@ -159,6 +159,65 @@ namespace RDE {
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+
+		glUseProgram(shaderID);
+		for(auto& _uniform : _uniforms) {
+			uniforms[_uniform] = glGetUniformLocation(shaderID, _uniform);
+			if(uniforms[_uniform] == -1) {
+				Util::Log::error("Uniform with name ", _uniform, " couldn't be located!");
+			}
+		}
+		glUseProgram(0);
     }
 
+	void Shader::setUniformValueFloat(const char* _uniformName, RDE_UNIFORM_FV _type, GLfloat* _data, GLboolean _transpose) {
+		if(uniforms[_uniformName] != -1) {
+			auto _location = uniforms[_uniformName];
+			switch(_type) {
+				case RDE_UNIFORM_FV_1 		   : glUniform1fv(_location, 1, _data); break;
+				case RDE_UNIFORM_FV_2 		   : glUniform2fv(_location, 1, _data); break;
+				case RDE_UNIFORM_FV_3 		   : glUniform3fv(_location, 1, _data); break;
+				case RDE_UNIFORM_FV_4 		   : glUniform4fv(_location, 1, _data); break;
+				case RDE_UNIFORM_FV_MATRIX_2   : glUniformMatrix2fv(_location, 1, _transpose, _data); break;
+				case RDE_UNIFORM_FV_MATRIX_3   : glUniformMatrix3fv(_location, 1, _transpose, _data); break;
+				case RDE_UNIFORM_FV_MATRIX_4   : glUniformMatrix4fv(_location, 1, _transpose, _data); break;
+				case RDE_UNIFORM_FV_MATRIX_2x3 : glUniformMatrix2x3fv(_location, 1, _transpose, _data); break;
+				case RDE_UNIFORM_FV_MATRIX_3x2 : glUniformMatrix3x2fv(_location, 1, _transpose, _data); break;
+				case RDE_UNIFORM_FV_MATRIX_3x4 : glUniformMatrix3x4fv(_location, 1, _transpose, _data); break;
+				case RDE_UNIFORM_FV_MATRIX_4x3 : glUniformMatrix4x3fv(_location, 1, _transpose, _data); break;
+				case RDE_UNIFORM_FV_MATRIX_2x4 : glUniformMatrix2x4fv(_location, 1, _transpose, _data); break;
+				case RDE_UNIFORM_FV_MATRIX_4x2 : glUniformMatrix4x2fv(_location, 1, _transpose, _data); break;
+			}
+		} else {
+			Util::Log::error("Trying to set uniform '", _uniformName, "' but it couldn't be located!");
+		}	
+	}
+
+	void Shader::setUniformValueInt(const char* _uniformName, RDE_UNIFORM_IV _type, GLint* _data) {
+		if(uniforms[_uniformName] != -1) {
+			auto _location = uniforms[_uniformName];
+			switch(_type) {
+				case RDE_UNIFORM_IV_1 		   : glUniform1iv(_location, 1, _data); break;
+				case RDE_UNIFORM_IV_2 		   : glUniform2iv(_location, 1, _data); break;
+				case RDE_UNIFORM_IV_3 		   : glUniform3iv(_location, 1, _data); break;
+				case RDE_UNIFORM_IV_4 		   : glUniform4iv(_location, 1, _data); break;
+			}
+		} else {
+			Util::Log::error("Trying to set uniform '", _uniformName, "' but it couldn't be located!");
+		}	
+	}
+
+	void Shader::setUniformValueUInt(const char* _uniformName, RDE_UNIFORM_UIV _type, GLuint* _data) {
+		if(uniforms[_uniformName] != -1) {
+			auto _location = uniforms[_uniformName];
+			switch(_type) {
+				case RDE_UNIFORM_UIV_1 		   : glUniform1uiv(_location, 1, _data); break;
+				case RDE_UNIFORM_UIV_2 		   : glUniform2uiv(_location, 1, _data); break;
+				case RDE_UNIFORM_UIV_3 		   : glUniform3uiv(_location, 1, _data); break;
+				case RDE_UNIFORM_UIV_4 		   : glUniform4uiv(_location, 1, _data); break;
+			}
+		} else {
+			Util::Log::error("Trying to set uniform '", _uniformName, "' but it couldn't be located!");
+		}	
+	}
 }
