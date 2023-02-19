@@ -5,6 +5,7 @@
 #ifndef RDE_CORE_H
 #define RDE_CORE_H
 
+/// \cond DO_NOT_DOCUMENT
 #define FRAMEBUFFER_VERTEX_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferVertex.glsl"
 #define FRAMEBUFFER_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferFragment.glsl"
 #define FRAMEBUFFER_VERTEX_SHADER_CORE "defaultAssets/shaders/core/framebuffer/FrameBufferVertex.glsl"
@@ -48,23 +49,41 @@
 #define FRAMEBUFFER_SHADER "framebuffer"
 
 #define RESOURCES_PATH "assets/"
+/// \endcond
 
+/**
+ * @brief Used for physics calculations.
+*/
 #ifndef EPSILON
 #define EPSILON 0.0001f
 #endif
 
+/**
+ * @brief Used for math calculations.
+*/
 #ifndef PI
 #define PI 3.141592741f
 #endif
 
+/**
+ * @brief Used for UI size calculations.
+*/
 #ifndef BASE_DPI
 #define BASE_DPI 92.5f
 inline float currentDPI = 0;
 #endif
 
+/**
+ * @brief Used for UI size calculations.
+*/
 #define toDPI(x) x * currentDPI / BASE_DPI
+
+/**
+ * @brief Used for UI size calculations.
+*/
 #define toDPI_V(vec) Vec2F {vec.x * currentDPI / BASE_DPI, vec.y * currentDPI / BASE_DPI}
 
+/// \cond DO_NOT_DOCUMENT
 #ifndef NDEBUG
 #define ENGINE_DEBUG
 #endif
@@ -96,6 +115,7 @@ inline float currentDPI = 0;
         #define MAC_PLATFORM
     #endif
 #endif
+/// \endcond
 
 /**
  * @brief Checks if the OS is Mac.
@@ -132,6 +152,8 @@ inline float currentDPI = 0;
 */
 #define IS_MOBILE() (IS_ANDROID() || IS_IOS())
 
+
+/// \cond DO_NOT_DOCUMENT
 #ifdef ENGINE_ENABLE_ASSERTS
     #define ENGINE_ASSERT(x, message) { if(!(x)) { std::cout << (message) << std::endl; ENGINE_DEBUG_BREAK(); } }
 #else
@@ -144,6 +166,7 @@ inline float currentDPI = 0;
     #define RDE_INTERNAL [[gnu::visibility("internal")]]
     #define RDE_DEPRECATED(_explanation) [[gnu::deprecated(_explanation)]]
 #endif
+/// \endcond
 
 
 #if IS_MOBILE() || IS_MAC() || defined(_WIN32)

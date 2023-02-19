@@ -37,17 +37,5 @@ namespace RDE {
         return os;
     }
 }
-#define MOUSE_BUTTON_0      ::engine::Mouse::Button0
-#define MOUSE_BUTTON_1      ::engine::Mouse::Button1
-#define MOUSE_BUTTON_2      ::engine::Mouse::Button2
-#define MOUSE_BUTTON_3      ::engine::Mouse::Button3
-#define MOUSE_BUTTON_4      ::engine::Mouse::Button4
-#define MOUSE_BUTTON_5      ::engine::Mouse::Button5
-#define MOUSE_BUTTON_6      ::engine::Mouse::Button6
-#define MOUSE_BUTTON_7      ::engine::Mouse::Button7
-#define MOUSE_BUTTON_LAST   ::engine::Mouse::ButtonLast
-#define MOUSE_BUTTON_LEFT   ::engine::Mouse::ButtonLeft
-#define MOUSE_BUTTON_RIGHT  ::engine::Mouse::ButtonRight
-#define MOUSE_BUTTON_MIDDLE ::engine::Mouse::ButtonMiddle
 
 #endif // RDE_MOUSE_KEYS_H
