@@ -97,13 +97,39 @@ inline float currentDPI = 0;
     #endif
 #endif
 
+/**
+ * @brief Checks if the OS is Mac.
+*/
 #define IS_MAC() (defined(__APPLE__) && defined(MAC_PLATFORM))
+
+/**
+ * @brief Checks if the OS is Windows.
+*/
 #define IS_WINDOWS() _WIN32
+
+/**
+ * @brief Checks if the OS is Linux.
+*/
 #define IS_LINUX() (defined(__linux__))
+
+/**
+ * @brief Checks if the OS is Mac, Windows or Linux.
+*/
 #define IS_DESKTOP() (IS_LINUX() || IS_MAC() || IS_WINDOWS())
 
+/**
+ * @brief Checks if the OS is iOS.
+*/
 #define IS_IOS() (defined(__APPLE__) && defined(IOS_PLATFORM))
+
+/**
+ * @brief Checks if the OS is Android.
+*/
 #define IS_ANDROID() (defined(__ANDROID__))
+
+/**
+ * @brief Checks if it is Android or iOS
+*/
 #define IS_MOBILE() (IS_ANDROID() || IS_IOS())
 
 #ifdef ENGINE_ENABLE_ASSERTS
@@ -119,11 +145,15 @@ inline float currentDPI = 0;
     #define RDE_DEPRECATED(_explanation) [[gnu::deprecated(_explanation)]]
 #endif
 
+
 #if IS_MOBILE() || IS_MAC() || defined(_WIN32)
 typedef unsigned long ulong;
 typedef unsigned int uint;
 #endif
 
+/**
+ * @brief Makes a class iterable onto some itarable attribute, like a map or a vector.
+*/
 #define MAKE_CLASS_ITERABLE(iteratorType, iterable)                               \
 public:                                                                           \
     iteratorType::iterator begin()                  { return iterable.begin();  } \
@@ -134,39 +164,6 @@ public:                                                                         
     iteratorType::const_iterator cend()             { return iterable.cend();   } \
     iteratorType::const_reverse_iterator crbegin()  { return iterable.crbegin();} \
     iteratorType::const_reverse_iterator crend()    { return iterable.crend();  } \
-
-#ifdef _MSC_VER 
-#else
-#define FE_1_INVOKE(WHAT, X) WHAT(X)
-#define FE_2_INVOKE(WHAT, X, ...) WHAT(X)FE_1_INVOKE(WHAT, __VA_ARGS__)
-#define FE_3_INVOKE(WHAT, X, ...) WHAT(X)FE_2_INVOKE(WHAT, __VA_ARGS__)
-#define FE_4_INVOKE(WHAT, X, ...) WHAT(X)FE_3_INVOKE(WHAT, __VA_ARGS__)
-#define FE_5_INVOKE(WHAT, X, ...) WHAT(X)FE_4_INVOKE(WHAT, __VA_ARGS__)
-
-#define FE_1_DECLARATION(WHAT, X, Y) WHAT Y X
-#define FE_2_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_1_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_3_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_2_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_4_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_3_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_5_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_4_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_6_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_5_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_7_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_6_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_8_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_7_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_9_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_8_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_10_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_9_DECLARATION(WHAT, X, __VA_ARGS__)
-
-#define GET_MACRO(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,NAME, ...) NAME
-#define FOR_EACH_DECLARATION(init, end, ...) \
-  GET_MACRO(__VA_ARGS__,FE_10_DECLARATION,FE_9_DECLARATION,FE_8_DECLARATION,FE_7_DECLARATION,FE_6_DECLARATION,FE_5_DECLARATION,FE_4_DECLARATION,FE_3_DECLARATION,FE_2_DECLARATION,FE_1_DECLARATION)(init, end,__VA_ARGS__)
-
-#define FOR_EACH_INVOKE(action,...) \
-  GET_MACRO(__VA_ARGS__,FE_5_INVOKE,FE_4_INVOKE,FE_3_INVOKE,FE_2_INVOKE,FE_1_INVOKE)(action,__VA_ARGS__)
-
-
-#define FRIEND_CLASS(...) FOR_EACH_DECLARATION(friend class, ;, __VA_ARGS__)
-#define FORWARD_DECLARE_CLASS(...) FOR_EACH_DECLARATION(class, ;, __VA_ARGS__)
-#define FRIEND_STRUCT(...) FOR_EACH_DECLARATION(friend struct, ;, __VA_ARGS__)
-#define FORWARD_DECLARE_STRUCT(...) FOR_EACH_DECLARATION(struct, ;, __VA_ARGS__)
-#endif
 
 #define SAFE_POINTER(_var, _function) if(_var) do { _var->_function; } while(0);
 
