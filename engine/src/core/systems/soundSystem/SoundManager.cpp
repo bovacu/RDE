@@ -49,7 +49,8 @@ namespace RDE {
         #if !IS_MOBILE()
         _sfx.sfxID = Mix_LoadWAV(_sfxPath.c_str());
         #else
-        Util::Log::error("LOAD SFX IS NOT YET IMPLEMENTED FOR MOBILE!!");
+        // 1 on Mix_LoadWAV_RW is for the function to close the SDL_RWops automatically, whether it fails or success.
+        _sfx.sfxID = Mix_LoadWAV_RW(SDL_RWFromFile(_sfxPath.c_str(), "rb"), 1);
         #endif
 
         if(_sfx.sfxID == nullptr) {
@@ -104,20 +105,21 @@ namespace RDE {
     }
 
     void SoundManager::playSfx(const std::string& _sfxName) {
-        #if !IS_MOBILE()
         if(sfxs.find(_sfxName) == sfxs.end()) {
             throw std::runtime_error(Util::String::appendToString("Couldn't get SFX '", _sfxName, "'"));
         }
 
         Sfx _sfx = sfxs[_sfxName];
+
+        #if !IS_MOBILE()
         sfxs[_sfxName].channel = Mix_PlayChannel(sfxs[_sfxName].channel, _sfx.sfxID, _sfx.repeat);
+        #else
+        sfxs[_sfxName].channel = Mix_PlayChannelTimed(sfxs[_sfxName].channel, _sfx.sfxID, _sfx.repeat, -1);
+        #endif
 
         if(sfxs[_sfxName].channel == -1) {
             Util::Log::warn("All of the SFX available channels are in use! SFX may not play correctly");
         }
-        #else
-        Util::Log::error("PLAY SFX IS NOT YET IMPLEMENTED FOR MOBILE!!");
-        #endif
     }
 
     void SoundManager::resumeMusic(const std::string& _musicName) {
