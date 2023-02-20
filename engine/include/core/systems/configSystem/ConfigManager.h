@@ -64,29 +64,74 @@ namespace RDE {
              */
             void instantiatePrefab(Scene* _scene, const nlohmann::json& _json);
 
+            /**
+             * @brief Creates the Nodes using the json of the defined Scene.
+             * @param _scene The scene being loaded
+             * @param _sceneJson The json of the Scene containing all of the information
+             * @return A map containing the key of the Node (tag) and the data as a value.
+            */
             std::unordered_map<std::string, Node_JsonPair> createNodes(Scene* _scene, const nlohmann::json& _sceneJson);
 
+            /**
+             * @brief Loads all of the components that each Node has defined on the json file of the Scene.
+             * @param _scene The scene being loaded
+             * @param _sceneJson The json of the Scene containing all of the information
+             * @param _nodes Map containing the key of the Node (tag) and the data as a value
+            */
             void loadNodes(Scene* _scene, Window* _window, const nlohmann::json& _sceneJson, const std::unordered_map<std::string, Node_JsonPair>& _nodes);
 
             /**
              * @brief Loads all the assets defined in the .json for the Scene.
-             * @param _scene Scene
              * @param _manager Engine Manager
              * @param _json JSON file
-             * @return EntityMap
              */
             void loadAssets(Manager* _manager, const nlohmann::json& _json);
 
+            /**
+             * @brief Loads a component of type Transform into the Node.
+             * @param _scene The Scene being loaded
+             * @param _node The node getting the component
+             * @param _json The json containing the data to fill the Node's component
+             */
             void loadTransformComponent(Scene* _scene, Node* _node, const nlohmann::json& _transformJson);
 
+            /**
+             * @brief Loads a component of type Camera into the Node.
+             * @param _scene The Scene being loaded
+             * @param _node The node getting the component
+             * @param _json The json containing the data to fill the Node's component
+             */
             void loadCameraComponent(Node* _nodeD, Scene* _scene, Window* _window, const nlohmann::json& _cameraJson);
 
+            /**
+             * @brief Loads a component of type SpriteRenderer into the Node.
+             * @param _scene The Scene being loaded
+             * @param _node The node getting the component
+             * @param _json The json containing the data to fill the Node's component
+             */
             void loadSpriteRendererComponent(Node* _node, Scene* _scene, const nlohmann::json& _spriteRendererJson);
 
+            /**
+             * @brief Loads a component of type TextRenderer into the Node.
+             * @param _scene The Scene being loaded
+             * @param _node The node getting the component
+             * @param _json The json containing the data to fill the Node's component
+             */
             void loadTextRendererComponent(Node* _node, Scene* _scene, const nlohmann::json& _textRendererJson);
 
-            void loadBodyComponent(Node* _node, Scene* _scene, const nlohmann::json& _bodyJson);
+            /**
+             * @brief Loads a component of type PhysicsBody into the Node.
+             * @param _scene The Scene being loaded
+             * @param _node The node getting the component
+             * @param _json The json containing the data to fill the Node's component
+             */
+            void loadPhysicsBodyComponent(Node* _node, Scene* _scene, const nlohmann::json& _bodyJson);
 
+            /**
+             * @brief Unloads all the assets of the Scene from memory.
+             * @param _scene The Scene being unloaded
+             * @param _json The json containing all the Scene assets
+            */
             void unloadAssets(Scene* _scene, const nlohmann::json& _sceneJson);
     };
 

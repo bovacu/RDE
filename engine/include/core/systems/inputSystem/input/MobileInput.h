@@ -4,7 +4,7 @@
 #ifndef RDE_MOBILE_INPUT_H
 #define RDE_MOBILE_INPUT_H
 
-#include "Input.h"
+#include "core/systems/inputSystem/input/Input.h"
 
 namespace RDE {
 

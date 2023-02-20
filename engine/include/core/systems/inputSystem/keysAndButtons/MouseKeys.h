@@ -8,13 +8,9 @@
 
 namespace RDE {
 
-    /// -----------------------------------------------------------------
-    /// |			CODES FOR MOUSE BUTTONS, THEY ARE					|
-    /// |			THE SAME AS GLFW'S ONES, BUT NOW ARE				|
-    /// |			PROPERTY OF THE ENGINE AND DON'T RELAY				|
-    /// |			ON GLFW												|
-    /// -----------------------------------------------------------------
-
+    /**
+     * @brief Codes for the buttons of te mouse.
+    */
     typedef enum class MouseCode : uint16_t {
         // From SDL2
         Button0 = SDL_BUTTON_LEFT,

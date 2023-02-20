@@ -8,13 +8,9 @@
 
 namespace RDE {
 
-    /// -----------------------------------------------------------------
-    /// |			CODES FOR GAMEPAD BUTTONS, THEY ARE 				|
-    /// |			THE SAME AS GLFW'S ONES, BUT NOW ARE				|
-    /// |			PROPERTY OF THE ENGINE AND DON'T RELAY				|
-    /// |			ON GLFW												|
-    /// -----------------------------------------------------------------
-
+    /**
+     * @brief Codes for the buttons of a controller.
+    */
     typedef enum class ControllerButtons : uint16_t {
         ButtonA         = SDL_CONTROLLER_BUTTON_A,              // 0
         ButtonB         = SDL_CONTROLLER_BUTTON_B,              // 1
@@ -33,6 +29,9 @@ namespace RDE {
         DPadLeft        = SDL_CONTROLLER_BUTTON_DPAD_LEFT       // 13
     } GamePad;
 
+    /**
+     * @brief Codes for the Axis/Special buttons of a controller.
+    */
     typedef enum class ControllerAxis {
         Left,
         Right,
@@ -40,6 +39,9 @@ namespace RDE {
         RT
     } GamePadA;
 
+    /**
+     * @brief Names of the buttons of a controller.
+    */
     static const char* ControllerKeysStr[] = {
             "A", "B", "X", "Y", "Select", "Guide", "Start", "L3", "R3", "LB", "RB",
             "DUp", "DDown", "DLeft", "DRight", "", "LB", "", "RB"

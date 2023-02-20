@@ -86,6 +86,9 @@ namespace RDE {
             int historyPtr = 0;
 
         public:
+            /**
+             * @brief Logs that specific commands can return.
+            */
             std::vector<std::string> logs;
 
         public:

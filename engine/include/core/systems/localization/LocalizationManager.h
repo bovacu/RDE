@@ -13,10 +13,21 @@
 
 namespace RDE {
 
+    /**
+     * @brief Small data struct to save the information of the current language and to transform it as enum <-> string.
+    */
     struct LocalizationInfo {
+        /**
+         * @brief Available languages by default of the engine.
+        */
         enum Language { EN_US, EN_GB, EN_CA, ES_MX, ES_ES, PT_BR, FR, ZH, RU, DE, IT, JP, MAX };
         Language language;
 
+        /**
+         * @brief Transforms the enum into a string.
+         * @param _language The Language enum
+         * @return A const char* of the Language code
+        */
         static const char* toString(Language _language) {
             switch (_language) {
                 case EN_US: return "en-us";
@@ -35,10 +46,20 @@ namespace RDE {
             }
         }
 
+        /**
+         * @brief Transforms a valid code as char* to an enum.
+         * @param _language A valid language code.
+         * @return Language
+        */
         static Language toEnum(const char* _language) {
             return toEnum(std::string(_language));
         }
 
+        /**
+         * @brief Transforms a valid code as char* to an enum.
+         * @param _language A valid language code.
+         * @return Language
+        */
         static Language toEnum(const std::string& _language) {
             auto _strCpy = _language;
             _strCpy = Util::String::toLower(_strCpy);
@@ -71,9 +92,19 @@ namespace RDE {
         friend class Manager;
 
         private:
+            /**
+             * @brief A map that stores [LocalizationKey] -> (keyWord, TranslationWord).
+            */
             std::unordered_map<LocalizationInfo::Language, std::unordered_map<std::string, std::string>> localizationTable;
+
+            /**
+             * @brief Reference to the Engine.
+            */
             Engine* engine;
 
+            /**
+             * @brief Struct that contains all of the basic types (or the most common ones at least), so we can pass them to the translate function and work with the specific values.
+            */
             struct Any {
                 enum Type { Int, UInt, Long, ULong, Float, Double, String };
 
@@ -113,15 +144,44 @@ namespace RDE {
             LocalizationInfo localizationInfo;
 
         private:
+            /**
+             * @brief Initiates the Localization module.
+            */
             void init(Engine* _engine);
+
+            /**
+             * @brief Substitutes a "key" replacement char with the corresponding value.
+             * @param _string Value to substitute the _replacement, this will be the final value
+             * @param _replacement Value used in the configuration and that will be substituted with _string, this value will be lost
+             * @return The string with the _replacemente replaced by _string
+            */
             std::string localizeSubstitution(const std::string& _string, const std::string& _replacement);
 
         public:
+            /**
+             * @brief Loads all languages configured in the localization.json
+            */
             void loadAllLanguages();
+
+            /**
+             * @brief Loads a specific language configured in the localization.json
+             * @param _language The Language to load
+            */
             void loadLanguage(LocalizationInfo::Language _language);
 
+            /**
+             * @brief Returns the localized value of a key in the localization.json in the current loaded Language.
+             * @param _key The word we want to translate defined in the localization.json
+             * @return A string with the localization in the specific Language loaded
+            */
             std::string localize(const std::string& _key);
 
+            /**
+             * @brief Returns the localized value of a key in the localization.json in the current loaded Language.
+             * @param _key The word we want to translate defined in the localization.json
+             * @param _args A sequence of values that will be substitute in the string value
+             * @return A string with the localization in the specific Language loaded
+            */
             template<typename... Args>
             std::string localize(const std::string& _key, Args&... _args);
     };

@@ -180,7 +180,7 @@ namespace RDE {
                     }
 
                     if(_components.contains("body")) {
-                        loadBodyComponent(_entity, _scene, _components["body"]);
+                        loadPhysicsBodyComponent(_entity, _scene, _components["body"]);
                     }
 
                     if(_components.contains("text_renderer")) {
@@ -242,7 +242,7 @@ namespace RDE {
         }
     }
 
-    void ConfigManager::loadBodyComponent(Node* _node, Scene* _scene, const nlohmann::json& _bodyJson) {
+    void ConfigManager::loadPhysicsBodyComponent(Node* _node, Scene* _scene, const nlohmann::json& _bodyJson) {
         PhysicsBodyConfig _bodyConfig;
         std::vector<ShapeConfig> _shapeConfigs;
 

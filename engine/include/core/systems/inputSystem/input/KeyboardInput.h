@@ -7,8 +7,8 @@
 
 #include "core/util/Util.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
-#include "Input.h"
-#include <SDL_events.h>
+#include "core/systems/inputSystem/input/Input.h"
+#include "core/platform/PlatformHeaderSDL.h"
 
 namespace RDE {
 
@@ -57,6 +57,10 @@ namespace RDE {
              */
             void onKeyUp(SDL_Event& _event);
 
+            /**
+             * @brief Gets the char that was typed.
+             * @param _event Event
+            */
             void onTextTyped(SDL_Event& _event);
     };
 

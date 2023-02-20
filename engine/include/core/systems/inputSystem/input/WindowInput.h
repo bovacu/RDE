@@ -6,7 +6,7 @@
 
 
 #include "core/util/Util.h"
-#include "Input.h"
+#include "core/systems/inputSystem/input/Input.h"
 
 namespace RDE {
 
@@ -22,43 +22,43 @@ namespace RDE {
         private:
             /**
              * @brief Is the Hub for all the sb-events.
-             * @param _event
+             * @param _event SDL_event captured by SDL.
              */
             void onWindowEvent(SDL_Event& _event);
 
             /**
              * @brief Handles when the mouse enters the window.
-             * @param _event Event
+             * @param _event SDL_event captured by SDL.
              */
             void onWindowEnter(SDL_Event& _event);
 
             /**
              * @brief Handles when the mouse leaves the window.
-             * @param _event Event
+             * @param _event SDL_event captured by SDL.
              */
             void onWindowExit(SDL_Event& _event);
 
             /**
              * @brief Handles when the window gains focus.
-             * @param _event Event
+             * @param _event SDL_event captured by SDL.
              */
             void onWindowGainFocus(SDL_Event& _event);
 
             /**
             * @brief Handles when the window looses focus.
-            * @param _event Event
+            * @param _event SDL_event captured by SDL.
             */
             void onWindowLostFocus(SDL_Event& _event);
 
             /**
             * @brief Handles when the window is resized.
-            * @param _event Event
+            * @param _event SDL_event captured by SDL.
             */
             void onWindowResize(SDL_Event& _event);
 
             /**
             * @brief Handles when the window is moved.
-            * @param _event Event
+            * @param _event SDL_event captured by SDL.
             */
             void onWindowMoved(SDL_Event& _event);
 
@@ -71,49 +71,49 @@ namespace RDE {
 
             /**
             * @brief Handles when the window is minimized.
-            * @param _event Event
+            * @param _event SDL_event captured by SDL.
             */
             void onWindowMinimized(SDL_Event& _event);
 
             /**
             * @brief Handles when the window is maximized.
-            * @param _event Event
+            * @param _event SDL_event captured by SDL.
             */
             void onWindowMaximized(SDL_Event& _event);
 
             /**
             * @brief Handles when the window is closed.
-            * @param _event Event
+            * @param _event SDL_event captured by SDL.
             */
             void onQuit(SDL_Event& _event);
 
             /**
              * @brief Handles Mobile application quit.
-             * @param _event Event
+             * @param _event SDL_event captured by SDL.
              */
             void onDestroyApp(SDL_Event& _event);
 
             /**
              * @brief Handles Mobile did enter foreground.
-             * @param _event Event
+             * @param _event SDL_event captured by SDL.
              */
             void onDidEnterForegroundApp(SDL_Event& _event);
 
             /**
              * @brief Handles Mobile did enter background.
-             * @param _event Event
+             * @param _event SDL_event captured by SDL.
              */
             void onDidEnterBackground(SDL_Event& _event);
 
             /**
              * @brief Handles Mobile will enter foreground.
-             * @param _event Event
+             * @param _event SDL_event captured by SDL.
              */
             void onWillEnterForegroundApp(SDL_Event& _event);
 
             /**
              * @brief Handles Mobile will enter background.
-             * @param _event Event
+             * @param _event SDL_event captured by SDL.
              */
             void onWillEnterBackground(SDL_Event& _event);
     };
