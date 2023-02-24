@@ -5,7 +5,7 @@
 #define RDE_ANIMATION_H
 
 
-#include "core/util/Util.h"
+#include <vector>
 #include "core/render/elements/Texture.h"
 
 namespace RDE {

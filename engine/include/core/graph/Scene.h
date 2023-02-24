@@ -1,9 +1,7 @@
 #ifndef RDE_SCENE_H
 #define RDE_SCENE_H
 
-#include "core/systems/inputSystem/input/WindowInput.h"
 #include "nlohmann/json.hpp"
-#include "core/util/Delta.h"
 #include "core/graph/Graph.h"
 #include "core/graph/components/Components.h"
 #include "core/systems/uiSystem/Canvas.h"

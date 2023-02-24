@@ -467,8 +467,8 @@ namespace Editor {
     }
 
     void Editor::localizationTest() {
-		engine->manager.localizationManager.loadLanguage(LocalizationInfo::RDE_LANGUAGE_PT_BR);
-		engine->manager.localizationManager.localizationInfo.language = LocalizationInfo::RDE_LANGUAGE_PT_BR;
+		engine->manager.localizationManager.loadLanguage(RDE_LANGUAGE_PT_BR);
+		engine->manager.localizationManager.localizationInfo.language = RDE_LANGUAGE_PT_BR;
         auto _a = 1;
         auto _b = "MyString";
         auto _c = 3.14f;

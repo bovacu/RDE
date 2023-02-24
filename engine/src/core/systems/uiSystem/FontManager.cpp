@@ -2,6 +2,7 @@
 
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/util/Functions.h"
+#include "core/systems/fileSystem/FileManager.h"
 
 #define FONT_DPI 96
 

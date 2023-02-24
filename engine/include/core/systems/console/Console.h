@@ -5,7 +5,10 @@
 #define RDE_CONSOLE_H
 
 #include "core/Core.h"
-#include "core/util/Util.h"
+#include "core/util/Vec.h"
+#include "core/util/Delegate.h"
+#include <vector>
+#include <unordered_map>
 
 namespace RDE {
 
@@ -47,12 +50,12 @@ namespace RDE {
             /**
              * @brief All the registeredCommands.
              */
-            std::map<std::string, ReturnDelegate<Logs (const std::vector<std::string>&)>> commands;
+			std::unordered_map<std::string, ReturnDelegate<Logs (const std::vector<std::string>&)>> commands;
 
             /**
              * @brief All the descriptions of the commands.
              */
-            std::map<std::string, std::string> commandsAndDescriptions;
+			std::unordered_map<std::string, std::string> commandsAndDescriptions;
 
             /**
              * @brief Internal command 'help'.

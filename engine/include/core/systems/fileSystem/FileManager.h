@@ -80,6 +80,9 @@ namespace RDE {
 
 
     class FileManager {
+
+		friend class ConfigManager;
+
         private:
             /**
              * @brief Checks the file mode and if it doesn't match, it changes it to the expected.

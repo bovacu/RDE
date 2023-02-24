@@ -5,6 +5,7 @@
 #include "core/render/elements/IRenderizable.h"
 #include "core/util/Functions.h"
 #include "core/Engine.h"
+#include "core/graph/Scene.h"
 #include "core/graph/components/Node.h"
 
 namespace RDE {

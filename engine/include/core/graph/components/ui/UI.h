@@ -6,11 +6,11 @@
 #define RDE_UI_H
 
 #include "entt/entity/entity.hpp"
-#include "core/render/elements/IRenderizable.h"
 #include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
 #include "core/Enums.h"
+#include "core/util/Vec.h"
 #include "core/util/Delegate.h"
 
 typedef entt::entity NodeID;
@@ -23,6 +23,7 @@ namespace RDE {
     class Engine;
     class EventDispatcher;
     class Event;
+	class Node;
 
     /**
      * @brief Component that every UI element that wants to interact with events on the screen must include.

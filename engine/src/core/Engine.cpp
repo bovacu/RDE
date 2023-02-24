@@ -16,7 +16,7 @@ namespace RDE {
 
 
     Engine::Engine() {
-        manager.configManager.loadRDEConfig(&rdeConfig, manager.fileManager);
+        manager.configManager.loadRDEConfig(&rdeConfig, &manager.fileManager);
         window = platform.createWindow(&rdeConfig);
         
         #if IS_MOBILE()

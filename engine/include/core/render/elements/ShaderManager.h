@@ -12,7 +12,6 @@
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 #include "glm/ext/matrix_float4x4.hpp"
-#include "core/systems/fileSystem/FileManager.h"
 
 namespace RDE {
 

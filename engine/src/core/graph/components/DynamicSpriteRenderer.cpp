@@ -4,6 +4,7 @@
 
 #include "core/graph/components/DynamicSpriteRenderer.h"
 #include "core/Engine.h"
+#include "core/graph/Scene.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/render/elements/Texture.h"
 #include "core/systems/uiSystem/Canvas.h"

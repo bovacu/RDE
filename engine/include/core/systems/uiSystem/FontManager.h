@@ -4,11 +4,11 @@
 #ifndef RDE_FONT_MANAGER_H
 #define RDE_FONT_MANAGER_H
 
-#include "core/util/Util.h"
+#include "core/util/Vec.h"
 #include <ft2build.h>
 #include "freetype/freetype.h"
 #include "core/render/elements/Texture.h"
-#include "core/systems/fileSystem/FileManager.h"
+#include <unordered_map>
 
 #define MAX_WIDTH 512
 #define MAX_CHARACTERS 128
@@ -26,6 +26,7 @@ namespace RDE {
     };
 
     class FontManager;
+	class FileManager;
 
     /**
      * @brief This struct contains all the information needed to render text with this specific font.

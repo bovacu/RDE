@@ -16,7 +16,7 @@
 
 namespace RDE {
 
-    void ConfigManager::loadRDEConfig(RDEConfig* _config, FileManager& _manager) {
+    void ConfigManager::loadRDEConfig(RDEConfig* _config, FileManager* _manager) {
 
         auto _configPath = "assets/config/desktop.json";
 
@@ -28,9 +28,9 @@ namespace RDE {
         _configPath = "assets/config/ios.json";
         #endif
 
-		auto _fileHandler = _manager.open(_configPath, RDE_FILE_MODE_READ);
-        nlohmann::json _data = nlohmann::json::parse(_manager.readFullFile(_fileHandler).content);
-        _manager.close(_fileHandler);
+		auto _fileHandler = _manager->open(_configPath, RDE_FILE_MODE_READ);
+        nlohmann::json _data = nlohmann::json::parse(_manager->readFullFile(_fileHandler).content);
+		_manager->close(_fileHandler);
 
         _config->windowData.title = _data.contains("title") ? _data["title"].get<std::string>() : "RDEProject";
         _config->windowData.fullScreen = _data.contains("fullscreen") && _data["fullscreen"].get<bool>();

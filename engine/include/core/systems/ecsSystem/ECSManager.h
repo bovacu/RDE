@@ -5,9 +5,8 @@
 #ifndef RDE_SYSTEM_MANAGER_H
 #define RDE_SYSTEM_MANAGER_H
 
-#include "core/util/Util.h"
+#include <vector>
 #include "core/systems/ecsSystem/ECSSystem.h"
-#include "core/graph/Graph.h"
 
 namespace RDE {
 

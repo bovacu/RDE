@@ -5,6 +5,7 @@
 #include "core/systems/eventSystem/WindowEvent.h"
 #include "core/systems/uiSystem/SceneManager.h"
 #include "core/Engine.h"
+#include "core/graph/Scene.h"
 #include "core/platform/PlatformHeaderSDL.h"
 
 namespace RDE {

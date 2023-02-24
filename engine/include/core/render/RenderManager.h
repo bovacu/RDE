@@ -7,9 +7,8 @@
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/Transform.h"
 #include "core/render/elements/IRenderizable.h"
-#include "core/render/elements/Texture.h"
-#include "core/util/Util.h"
 #include "core/render/elements/SpriteBatch.h"
+#include "core/util/Color.h"
 #include "core/util/Vec.h"
 #include <vector>
 

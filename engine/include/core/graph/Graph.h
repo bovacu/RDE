@@ -6,10 +6,9 @@
 
 #include "entt/entt.hpp"
 #include "core/util/Delta.h"
+#include "core/util/Vec.h"
 #include "core/systems/eventSystem/Event.h"
-#include "core/graph/components/Transform.h"
 #include "core/graph/components/Components.h"
-#include "core/graph/components/ui/UITransform.h"
 #include <tuple>
 
 namespace RDE {
@@ -42,6 +41,7 @@ namespace RDE {
     class Engine; 
     class Scene; 
     class Manager;
+	class Transform;
 
     struct Node; 
     struct RenderizableInnerData;

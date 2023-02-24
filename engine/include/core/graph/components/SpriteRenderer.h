@@ -6,11 +6,10 @@
 #define RDE_SPRITE_RENDERER_H
 
 #include "core/render/elements/IRenderizable.h"
-#include "core/render/elements/Texture.h"
 #include "core/render/elements/Vertex.h"
 #include "core/util/Vec.h"
 #include "entt/entity/entity.hpp"
-#include <glm/fwd.hpp>
+#include "glm/fwd.hpp"
 
 typedef entt::entity NodeID;
 

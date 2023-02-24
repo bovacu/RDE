@@ -6,13 +6,15 @@
 #define RDE_CONFIG_LOADER_H
 
 #include "nlohmann/json.hpp"
-#include "core/graph/Scene.h"
-#include "core/systems/fileSystem/FileManager.h"
 
 namespace RDE {
 
     class Window;
     struct RDEConfig;
+	class Manager;
+	class Scene;
+	class Node;
+	class FileManager;
 
     struct Node_JsonPair {
         Node* node;
@@ -54,7 +56,7 @@ namespace RDE {
              * @brief This method allows to load a custom configuration for the engine.
              * @param _config New Configuration for the engine
              */
-            void loadRDEConfig(RDEConfig* _config, FileManager& _manager);
+            void loadRDEConfig(RDEConfig* _config, FileManager* _manager);
 
         private:
             /**

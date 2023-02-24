@@ -5,6 +5,7 @@
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UIText.h"
 #include "core/Engine.h"
+#include "core/graph/Scene.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/render/elements/IRenderizable.h"

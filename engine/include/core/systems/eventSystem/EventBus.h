@@ -3,6 +3,9 @@
 #ifndef RDE_EVENT_BUS
 #define RDE_EVENT_BUS
 
+#include "core/util/Delegate.h"
+#include <map>
+
 /**
  * @brief The Event bus works in the following way:
  *

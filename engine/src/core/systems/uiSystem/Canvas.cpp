@@ -4,6 +4,7 @@
 
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/Engine.h"
+#include "core/graph/Scene.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UICheckbox.h"
