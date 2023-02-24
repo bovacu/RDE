@@ -5,6 +5,9 @@
 
 namespace RDE {
 
+	/**
+	 * @brief Stores information about the battery levels.
+	 */
 	struct BatteryStatus {
 
 		/**
@@ -34,12 +37,22 @@ namespace RDE {
 		RDE_PLATFORM_TYPE_ platform = RDE_PLATFORM_TYPE_UNSUPPORTED;
 	};
 
+	/**
+	 * @brief Contains or gets information about certains parts of the device, such as the battery levels.
+	*/
 	class DeviceInfoProvider {
 		private:
 			Engine* engine;
 
 		public:
+			/**
+			 * @brief Initializes the DeviceInfoProvider to work correctly.
+			 */
 			void init(Engine* _engine);
+
+			/**
+			 * @brief Returns the battery information on the platform the app is running on.
+			 */
 			BatteryStatus getBatteryStatus();
 	};
 

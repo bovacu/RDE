@@ -7,6 +7,10 @@
 #include "core/systems/profiling/Profiler.h"
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/util/Functions.h"
+#include "core/render/elements/FrameBuffer.h"
+#include "core/graph/ImGuiScene.h"
+#include "core/systems/eventSystem/WindowEvent.h"
+#include "core/render/window/Window.h"
 
 namespace RDE {
 

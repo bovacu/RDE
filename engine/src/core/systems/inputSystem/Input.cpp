@@ -11,6 +11,10 @@
 #include "core/render/Camera.h"
 #include "core/graph/components/Node.h"
 
+#if !IS_MOBILE()
+#include "imgui_impl_sdl.h"
+#endif
+
 namespace RDE {
 
     bool Input::pollEvent(SDL_Event& _event) {
