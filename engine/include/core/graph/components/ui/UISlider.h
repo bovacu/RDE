@@ -9,6 +9,7 @@
 #include "core/graph/components/ui/UITransform.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/render/elements/Batch.h"
+#include "core/util/Delta.h"
 
 namespace RDE {
 

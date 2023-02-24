@@ -21,19 +21,19 @@ namespace RDE {
 
             localizationInfo.language = LocalizationInfo::toEnum(Util::String::appendToString(_locales[0].language, _country));
         } else {
-			localizationInfo.language = LocalizationInfo::RDE_LANGUAGE_EN_US;
+			localizationInfo.language = RDE_LANGUAGE_EN_US;
         }
 
         SDL_free(_locales);
     }
 
     void LocalizationManager::loadAllLanguages() {
-		for(auto _i = 0; _i < LocalizationInfo::RDE_LANGUAGE_MAX; _i++) {
-			loadLanguage((LocalizationInfo::RDE_LANGUAGE_)_i);
+		for(auto _i = 0; _i < RDE_LANGUAGE_MAX; _i++) {
+			loadLanguage((RDE_LANGUAGE_)_i);
         }
     }
 
-	void LocalizationManager::loadLanguage(LocalizationInfo::RDE_LANGUAGE_ _language) {
+	void LocalizationManager::loadLanguage(RDE_LANGUAGE_ _language) {
         if(engine->rdeConfig.projectData.localizationConfig.localizationPath.empty()) {
             Util::Log::error("Cannot load localization because the file_path was not provided in the configuration file");
             return;

@@ -10,6 +10,7 @@
 #include "core/Core.h"
 #include "nlohmann/json.hpp"
 #include "core/util/Functions.h"
+#include "core/Enums.h"
 
 namespace RDE {
 
@@ -17,24 +18,6 @@ namespace RDE {
      * @brief Small data struct to save the information of the current language and to transform it as enum <-> string.
     */
     struct LocalizationInfo {
-        /**
-         * @brief Available languages by default of the engine.
-        */
-		enum RDE_LANGUAGE_ { 
-			RDE_LANGUAGE_EN_US, 
-			RDE_LANGUAGE_EN_GB, 
-			RDE_LANGUAGE_EN_CA, 
-			RDE_LANGUAGE_ES_MX, 
-			RDE_LANGUAGE_ES_ES, 
-			RDE_LANGUAGE_PT_BR, 
-			RDE_LANGUAGE_FR, 
-			RDE_LANGUAGE_ZH, 
-			RDE_LANGUAGE_RU, 
-			RDE_LANGUAGE_DE, 
-			RDE_LANGUAGE_IT, 
-			RDE_LANGUAGE_JP, 
-			RDE_LANGUAGE_MAX 
-		};
 		RDE_LANGUAGE_ language;
 
         /**
@@ -109,7 +92,7 @@ namespace RDE {
             /**
              * @brief A map that stores [LocalizationKey] -> (keyWord, TranslationWord).
             */
-			std::unordered_map<LocalizationInfo::RDE_LANGUAGE_, std::unordered_map<std::string, std::string>> localizationTable;
+			std::unordered_map<RDE_LANGUAGE_, std::unordered_map<std::string, std::string>> localizationTable;
 
             /**
              * @brief Reference to the Engine.
@@ -181,7 +164,7 @@ namespace RDE {
              * @brief Loads a specific language configured in the localization.json
              * @param _language The Language to load
             */
-            void loadLanguage(LocalizationInfo::RDE_LANGUAGE_ _language);
+            void loadLanguage(RDE_LANGUAGE_ _language);
 
             /**
              * @brief Returns the localized value of a key in the localization.json in the current loaded Language.

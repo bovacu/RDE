@@ -5,15 +5,15 @@
 
 #include <cstdint>
 #include <ostream>
-#include "core/platform/PlatformHeaderSDL.h"
+#include "SDL2/SDL_scancode.h"
 
 namespace RDE {
 
-    /**
-     * @brief Codes for the keys of the keyboard.
-    */
-    enum RDE_KEYBOARD_KEY_ : uint16_t {
-        // From SDL2
+	/**
+	 * @brief Codes for the keys of the keyboard.
+	*/
+	enum RDE_KEYBOARD_KEY_ : uint16_t {
+		// From SDL2
 		RDE_KEYBOARD_KEY_SPACE = SDL_SCANCODE_SPACE,
 		RDE_KEYBOARD_KEY_APOSTROPHE = SDL_SCANCODE_APOSTROPHE,   /* ' */
 		RDE_KEYBOARD_KEY_COMMA = SDL_SCANCODE_COMMA,             /* , */
@@ -111,7 +111,7 @@ namespace RDE {
 		RDE_KEYBOARD_KEY_F23 = SDL_SCANCODE_F23,
 		RDE_KEYBOARD_KEY_F24 = SDL_SCANCODE_F24,
 
-        /* Keypad */
+		/* Keypad */
 		RDE_KEYBOARD_KEY_KP0 = SDL_SCANCODE_KP_0,
 		RDE_KEYBOARD_KEY_KP1 = SDL_SCANCODE_KP_1,
 		RDE_KEYBOARD_KEY_KP2 = SDL_SCANCODE_KP_2,
@@ -123,13 +123,13 @@ namespace RDE {
 		RDE_KEYBOARD_KEY_KP8 = SDL_SCANCODE_KP_8,
 		RDE_KEYBOARD_KEY_KP9 = SDL_SCANCODE_KP_9,
 
-//        KPDecimal = 330,
-//        KPDivide = 331,
-//        KPMultiply = 332,
-//        KPSubtract = 333,
-//        KPAdd = 334,
-//        KPEnter = 335,
-//        KPEqual = 336,
+		//        KPDecimal = 330,
+		//        KPDivide = 331,
+		//        KPMultiply = 332,
+		//        KPSubtract = 333,
+		//        KPAdd = 334,
+		//        KPEnter = 335,
+		//        KPEqual = 336,
 
 		RDE_KEYBOARD_KEY_LEFT_SHIFT = SDL_SCANCODE_LSHIFT,
 		RDE_KEYBOARD_KEY_LEFT_CTRL = SDL_SCANCODE_LCTRL,
@@ -138,7 +138,7 @@ namespace RDE {
 		RDE_KEYBOARD_KEY_RIGHT_CTRL = SDL_SCANCODE_RCTRL,
 		RDE_KEYBOARD_KEY_RIGHT_ALT = SDL_SCANCODE_RALT,
 		RDE_KEYBOARD_KEY_MENU = SDL_SCANCODE_MENU
-    };
+	};
 
 	inline std::ostream &operator<<(std::ostream &os, RDE_KEYBOARD_KEY_ keyCode) {
         os << static_cast<int32_t>(keyCode);

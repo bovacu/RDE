@@ -4,48 +4,11 @@
 #define RDE_EVENT_H
 
 #include "core/util/Delegate.h"
+#include "core/Enums.h"
 #include <string>
 #include <sstream>
 
 namespace RDE {
-
-    /**
-     * @brief All the different types of events that the engine can manage.
-     */
-    enum RDE_EVENT_TYPE_ : unsigned {
-		RDE_EVENT_TYPE_NONE, RDE_EVENT_TYPE_WINDOW_CLOSED, RDE_EVENT_TYPE_WINDOW_RESIZED, RDE_EVENT_TYPE_WINDOW_MOVED, RDE_EVENT_TYPE_WINDOW_FOCUSED, RDE_EVENT_TYPE_WINDOW_LOST_FOCUS, 
-		
-		RDE_EVENT_TYPE_GAME_FRAME, RDE_EVENT_TYPE_GAME_UPDATE, RDE_EVENT_TYPE_GAME_RENDER,
-		
-		RDE_EVENT_TYPE_KEY_PRESSED, RDE_EVENT_TYPE_KEY_DOWN, RDE_EVENT_TYPE_KEY_RELEASED, RDE_EVENT_TYPE_KEY_TYPED, RDE_EVENT_TYPE_TEXT_TYPED, 
-		
-		RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED, RDE_EVENT_TYPE_MOUSE_BUTTON_DOWN, RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED, RDE_EVENT_TYPE_MOUSE_SCROLLED, RDE_EVENT_TYPE_MOUSE_MOVED,
-		
-		RDE_EVENT_TYPE_WINDOW_MINIMIZED, RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED,
-
-		RDE_EVENT_TYPE_CONTROLLER_AXIS_MOVED, RDE_EVENT_TYPE_CONTROLLER_BUTTON_DOWN, RDE_EVENT_TYPE_CONTROLLER_BUTTON_UP,
-
-		RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN, RDE_EVENT_TYPE_MOBILE_TOUCH_UP, RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED
-    };
-
-    /**
-     * @brief Masking the different categories of the events. This makes really easy to get which event type is each event.
-     * Getting it is as easy as making (EventCategoryXXX & customEventCategoryPassed) == EventCategoryXXX.
-     *
-     * This is, for example, customEventCategoryPassed = 00000110, that means, an event which is both EventCategoryInput
-     * and EventCategoryKeyboard. doing 00000110 & 00000100 and later 00000110 & 00000010 gives as that the current
-     * is both types.
-     */
-    enum RDE_EVENT_CATEGORY_ : unsigned {
-		RDE_EVENT_CATEGORY_NONE,
-		RDE_EVENT_CATEGORY_GAME           		= 1u << 0u, /// 00000001
-		RDE_EVENT_CATEGORY_INPUT          		= 1u << 1u, /// 00000010
-		RDE_EVENT_CATEGORY_KEYBOARD       		= 1u << 2u, /// 00000100
-		RDE_EVENT_CATEGORY_MOUSE          		= 1u << 3u, /// 00001000
-		RDE_EVENT_CATEGORY_MOUSE_BUTTON    		= 1u << 4u, /// 00010000
-		RDE_EVENT_CATEGORY_CONTROLLER_BUTTON    = 1u << 5u,  /// 00100000
-		RDE_EVENT_CATEGORY_MOBILE_INPUT    		= 1u << 6u  /// 00100000
-    };
 
     /**
      * @brief This class is the base for any event and contains the information and methods necessary to capture and control

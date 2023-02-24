@@ -10,6 +10,8 @@
 #include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
+#include "core/Enums.h"
+#include "core/util/Delegate.h"
 
 typedef entt::entity NodeID;
 
@@ -39,14 +41,6 @@ namespace RDE {
         friend class UIText;
 
         private:
-            /**
-             * @brief Status of the mouse entering and exiting.
-             */
-            enum RDE_MOUSE_STATUS_ {
-				RDE_MOUSE_STATUS_ENTERED,
-				RDE_MOUSE_STATUS_EXITED
-            };
-
             /**
              * @brief Current mouse status.
              *

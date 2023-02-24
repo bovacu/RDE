@@ -6,27 +6,9 @@
 #define RDE_UI_TRANSFORM_H
 
 #include "core/graph/components/Transform.h"
+#include "core/Enums.h"
 
 namespace RDE {
-
-    enum RDE_UI_ANCHOR_ {
-		RDE_UI_ANCHOR_MIDDLE              = 1 << 1,
-		RDE_UI_ANCHOR_LEFT                = 1 << 2,
-		RDE_UI_ANCHOR_RIGHT               = 1 << 3,
-		RDE_UI_ANCHOR_TOP                 = 1 << 4,
-		RDE_UI_ANCHOR_BOTTOM              = 1 << 5,
-		RDE_UI_ANCHOR_LEFT_BOTTOM         = 1 << 6,
-		RDE_UI_ANCHOR_LEFT_TOP            = 1 << 7,
-		RDE_UI_ANCHOR_RIGHT_BOTTOM        = 1 << 8,
-		RDE_UI_ANCHOR_RIGHT_TOP           = 1 << 9
-    };
-
-	enum RDE_UI_STRETCH_ {
-		RDE_UI_STRETCH_NO_STRETCH          = 1 << 10,
-		RDE_UI_STRETCH_VERTICAL_STRETCH    = 1 << 11,
-		RDE_UI_STRETCH_HORIZONTAL_STRETCH  = 1 << 12,
-		RDE_UI_STRETCH_FULL_STRETCH        = 1 << 13
-    };
 
     struct UITransform;
 

@@ -7,6 +7,7 @@
 
 #include "core/graph/components/ui/UI.h"
 #include "core/render/elements/IRenderizable.h"
+#include "core/util/Delta.h"
 
 namespace RDE {
 

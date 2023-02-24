@@ -5,10 +5,6 @@
 
 namespace RDE {
 
-	void DeviceInfoProvider::init(Engine* _engine) {
-		engine = _engine;
-	}
-
 	BatteryStatus DeviceInfoProvider::getBatteryStatus() {
 		BatteryStatus _batteryStatus;
 		int _secondsLeft = -1;
@@ -40,7 +36,7 @@ namespace RDE {
 		_batteryStatus.platform = RDE_PLATFORM_TYPE_MAC;
 		#endif
 
-		_batteryStatus.status = (BatteryStatus::RDE_BATTERY_)(int)_powerState;
+		_batteryStatus.status = (RDE_BATTERY_)(int)_powerState;
 		_batteryStatus.secondsLeft = _secondsLeft;
 		_batteryStatus.batteryPercentage = _percentage >= 0 ? (float)_percentage / 100.f : -1.f;
 

@@ -7,12 +7,12 @@
 
 #include "core/Core.h"
 #include "core/render/elements/ShaderManager.h"
-#include "core/render/elements/Batch.h"
 #include "core/graph/components/ComponentBase.h"
 #include "core/util/Color.h"
 #include "core/util/Vec.h"
+#include "core/util/Rect.h"
 #include "core/render/elements/Batch.h"
-
+#include "core/Enums.h"
 #include <vector>
 
 namespace RDE {
@@ -21,14 +21,6 @@ namespace RDE {
     class IViewPort;
     class Transform;
 	class Texture;
-
-    enum RDE_RENDERIZABLE_TYPE_ {
-		RDE_RENDERIZABLE_TYPE_NONE        = 0,
-		RDE_RENDERIZABLE_TYPE_SPRITE      = 1,
-		RDE_RENDERIZABLE_TYPE_TEXT        = 2,
-		RDE_RENDERIZABLE_TYPE_UI_IMAGE    = 3,
-		RDE_RENDERIZABLE_TYPE_UI_TEXT     = 4
-    };
 
     typedef GLuint TextureID;
 

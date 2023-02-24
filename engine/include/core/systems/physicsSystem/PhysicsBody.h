@@ -10,21 +10,11 @@
 #include "chipmunk/chipmunk.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/ComponentBase.h"
+#include "core/Enums.h"
+
+#include <unordered_map>
 
 namespace RDE {
-
-    enum RDE_PHYSICS_BODY_TYPE_ {
-		RDE_PHYSICS_BODY_TYPE_STATIC,
-		RDE_PHYSICS_BODY_TYPE_KINEMATIC,
-		RDE_PHYSICS_BODY_TYPE_DYNAMIC
-    };
-
-	enum RDE_PHYSICS_SHAPE_TYPE_ {
-		RDE_PHYSICS_SHAPE_TYPE_BOX,
-		RDE_PHYSICS_SHAPE_TYPE_CIRCLE,
-		RDE_PHYSICS_SHAPE_TYPE_POLYGON,
-		RDE_PHYSICS_SHAPE_TYPE_SEGMENT
-    };
 
     struct ShapeMaskingConfig {
 

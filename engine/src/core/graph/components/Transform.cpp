@@ -8,6 +8,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include "core/graph/components/Node.h"
 #include "core/graph/components/ui/UI.h"
+#include "core/util/Functions.h"
 
 namespace RDE {
 

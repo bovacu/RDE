@@ -33,7 +33,6 @@ namespace RDE {
     }
 
     void Engine::onInit(Scene* _scene) {
-		devideInfoProvider.init(this);
         wreDel.bind<&Engine::onWindowResized>(this);
 
         #if !IS_MOBILE()

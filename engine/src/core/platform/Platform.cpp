@@ -3,6 +3,7 @@
 
 #include "core/platform/Platform.h"
 #include "core/Core.h"
+#include "core/Engine.h"
 
 #if IS_LINUX() && !IS_ANDROID()
 #include "core/render/window/LinuxWindow.h"

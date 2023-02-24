@@ -91,7 +91,7 @@ namespace RDE {
 		void UICheckbox::onMouseReleased(RDE_MOUSE_BUTTON_ _mouseButton) {
         if(!uiInteractable->interactable) return;
 
-		if(uiInteractable->mouseInnerStatus == UIInteractable::RDE_MOUSE_STATUS_ENTERED) {
+		if(uiInteractable->mouseInnerStatus == RDE_MOUSE_STATUS_ENTERED) {
             setChecked(!checked);
             tickSprite->setEnabled(checked);
         }

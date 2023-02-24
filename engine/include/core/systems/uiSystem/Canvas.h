@@ -10,17 +10,12 @@
 #include "core/render/elements/Batch.h"
 #include "core/graph/components/Node.h"
 #include "core/render/elements/IRenderizable.h"
+#include "core/Enums.h"
 #include <stack>
 
 namespace RDE {
 
     class UIInteractable;
-
-    enum RDE_UI_UPDATABLE_NODE_ {
-		RDE_UI_UPDATABLE_NODE_NONE     = 0,
-		RDE_UI_UPDATABLE_NODE_INPUT    = 1,
-		RDE_UI_UPDATABLE_NODE_SLIDER   = 2
-    };
 
     struct UpdatableData {
 		RDE_UI_UPDATABLE_NODE_ updatableType = RDE_UI_UPDATABLE_NODE_NONE;

@@ -7,9 +7,9 @@
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
-
-#include "core/util/Util.h"
+#include "core/util/Vec.h"
 #include "core/render/window/Window.h"
+#include "core/Enums.h"
 
 #ifndef SDL_JOYSTICK_DISABLED
 #define SDL_JOYSTICK_DISABLED
@@ -17,10 +17,18 @@
 
 namespace RDE {
 
-    /**
-     * @brief All of the events that the input system handles.
-     */
-    enum RDE_SYSTEM_EVENT_ {
+    class Engine; 
+    class Manager;
+    class WindowInput;
+    class KeyboardInput;
+    class MouseInput;
+    class ControllerInput;
+    class MobileInput;
+
+	/**
+	 * @brief All of the events that the input system handles.
+	*/
+	enum RDE_SYSTEM_EVENT_ {
 		RDE_SYSTEM_EVENT_WINDOW_EVENT = SDL_WINDOWEVENT, RDE_SYSTEM_EVENT_QUIT_E = SDL_QUIT, RDE_SYSTEM_EVENT_WINDOW_EXIT_E = SDL_WINDOWEVENT_LEAVE, RDE_SYSTEM_EVENT_WINDOW_RESIZED_E = SDL_WINDOWEVENT_RESIZED,
 		RDE_SYSTEM_EVENT_WINDOW_FOCUS_E = SDL_WINDOWEVENT_FOCUS_GAINED, RDE_SYSTEM_EVENT_WINDOW_LOST_FOCUS_E = SDL_WINDOWEVENT_FOCUS_LOST, RDE_SYSTEM_EVENT_WINDOW_AUDIO_DEVICE_CONNECTED_E = SDL_AUDIODEVICEADDED,
 		RDE_SYSTEM_EVENT_WINDOW_AUDIO_DEVICE_DISCONNECTED_E = SDL_AUDIODEVICEREMOVED,
@@ -44,26 +52,7 @@ namespace RDE {
 		RDE_SYSTEM_EVENT_MOBILE_TOUCH_DOWN_E = SDL_FINGERDOWN, RDE_SYSTEM_EVENT_MOBILE_TOUCH_UP_E = SDL_FINGERUP, RDE_SYSTEM_EVENT_MOBILE_TOUCH_MOVED = SDL_FINGERMOTION,
 
 		RDE_SYSTEM_EVENT_UNKNOWN
-    };
-
-    /**
-     * @brief Different type of inputs depending on the platform.
-     */
-    enum RDE_INPUT_TYPE_ {
-		RDE_INPUT_TYPE_WINDOW,
-		RDE_INPUT_TYPE_MOUSE,
-		RDE_INPUT_TYPE_KEYBOARD,
-		RDE_INPUT_TYPE_CONTROLLER,
-		RDE_INPUT_TYPE_MOBILE
-    };
-
-    class Engine; 
-    class Manager;
-    class WindowInput;
-    class KeyboardInput;
-    class MouseInput;
-    class ControllerInput;
-    class MobileInput;
+	};
 
     /**
      * @brief This class is the base for any input specific class that the engine wants to implement.

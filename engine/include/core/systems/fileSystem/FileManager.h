@@ -4,31 +4,12 @@
 #ifndef RDE_FILES_SYSTEM_H
 #define RDE_FILES_SYSTEM_H
 
-#include "core/util/Util.h"
+#include <vector>
+#include <unordered_map>
+#include "core/Enums.h"
 #include "core/platform/PlatformHeaderSDL.h"
 
 namespace RDE {
-
-    /**
-     * @brief Result of a file operation.
-     */
-    enum RDE_FILE_RESULT_ {
-		RDE_FILE_RESULT_OK,
-		RDE_FILE_RESULT_NOT_FOUND,
-		RDE_FILE_RESULT_LINE_OUT_OF_SCOPE,
-		RDE_FILE_RESULT_NOT_ALL_LINES_IN_SCOPE
-    };
-
-    /**
-     * @brief Different types of file operations.
-     */
-    enum RDE_FILE_MODE_ {
-		RDE_FILE_MODE_READ,
-		RDE_FILE_MODE_WRITE,
-		RDE_FILE_MODE_APPEND,
-		RDE_FILE_MODE_READ_AND_WRITE,
-		RDE_FILE_MODE_READ_AND_APPEND,
-    };
 
     /**
      * @brief This represents the content of a file.

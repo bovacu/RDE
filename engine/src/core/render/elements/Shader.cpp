@@ -1,5 +1,6 @@
 #include "core/render/elements/Shader.h"
 #include <iostream>
+#include "core/util/Functions.h"
 
 namespace RDE {
 

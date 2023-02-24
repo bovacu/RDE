@@ -4,6 +4,7 @@
 #include <iostream>
 #include "core/util/Rect.h"
 #include "core/util/Color.h"
+#include "core/Enums.h"
 
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
@@ -224,15 +225,6 @@ namespace RDE {
              * @return std::string
              */
             [[nodiscard]]std::string getPath();
-    };
-
-    /**
-     * @brief Supported image formats.
-     */
-    enum RDE_IMAGE_EXTENSION_ {
-		RDE_IMAGE_EXTENSION_PNG,
-		RDE_IMAGE_EXTENSION_JPG,
-		RDE_IMAGE_EXTENSION_BMP
     };
 
     /**

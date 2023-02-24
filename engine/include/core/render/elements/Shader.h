@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "core/Core.h"
+#include "core/Enums.h"
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
 #elif IS_IOS()
@@ -23,45 +24,6 @@ namespace RDE {
 	 * @param _glmVecMat A GLM vector or matrix. If just a single value (aka float, int or uint) is passed, use glm::vec1xx and pass it with &.
 	 */
 	#define GLM_VEC_MAT_TO_POINTER(_type, _glmVecMat) reinterpret_cast<_type*>(glm::value_ptr(_glmVecMat))
-
-	/**
-	 * @brief Uniforms that use a GLfloat as a data value.
-	 */
-	enum RDE_UNIFORM_FV_ {
-		RDE_UNIFORM_FV_1,
-		RDE_UNIFORM_FV_2,
-		RDE_UNIFORM_FV_3,
-		RDE_UNIFORM_FV_4,
-		RDE_UNIFORM_FV_MATRIX_2,
-		RDE_UNIFORM_FV_MATRIX_3,
-		RDE_UNIFORM_FV_MATRIX_4,
-		RDE_UNIFORM_FV_MATRIX_2x3,
-		RDE_UNIFORM_FV_MATRIX_3x2,
-		RDE_UNIFORM_FV_MATRIX_4x2,
-		RDE_UNIFORM_FV_MATRIX_2x4,
-		RDE_UNIFORM_FV_MATRIX_4x3,
-		RDE_UNIFORM_FV_MATRIX_3x4
-	};
-
-	/**
-	* @brief Uniforms that use a GLint as a data value.
-	*/
-	enum RDE_UNIFORM_IV_ {
-		RDE_UNIFORM_IV_1,
-		RDE_UNIFORM_IV_2,
-		RDE_UNIFORM_IV_3,
-		RDE_UNIFORM_IV_4
-	};
-
-	/**
-	* @brief Uniforms that use a GLuint as a data value.
-	*/
-	enum RDE_UNIFORM_UIV_ {
-		RDE_UNIFORM_UIV_1,
-		RDE_UNIFORM_UIV_2,
-		RDE_UNIFORM_UIV_3,
-		RDE_UNIFORM_UIV_4
-	};
 
     class LoadVertexConfigNotInvoked : public std::exception {
         public:

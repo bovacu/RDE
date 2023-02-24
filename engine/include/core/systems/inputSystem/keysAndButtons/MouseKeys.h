@@ -4,15 +4,15 @@
 #define RDE_MOUSE_KEYS_H
 
 #include <ostream>
-#include "core/platform/PlatformHeaderSDL.h"
+#include "SDL2/SDL_mouse.h"
 
 namespace RDE {
 
-    /**
-     * @brief Codes for the buttons of te mouse.
-    */
-    enum RDE_MOUSE_BUTTON_ : uint16_t {
-        // From SDL2
+	/**
+	 * @brief Codes for the buttons of te mouse.
+	*/
+	enum RDE_MOUSE_BUTTON_ : uint16_t {
+		// From SDL2
 		RDE_MOUSE_BUTTON_0 = SDL_BUTTON_LEFT,
 		RDE_MOUSE_BUTTON_1 = SDL_BUTTON_MIDDLE,
 		RDE_MOUSE_BUTTON_2 = SDL_BUTTON_RIGHT,
@@ -26,7 +26,7 @@ namespace RDE {
 		RDE_MOUSE_BUTTON_LEFT = RDE_MOUSE_BUTTON_0,
 		RDE_MOUSE_BUTTON_RIGHT = RDE_MOUSE_BUTTON_2,
 		RDE_MOUSE_BUTTON_MIDDLE = RDE_MOUSE_BUTTON_1
-    };
+	};
 
 	inline std::ostream &operator<<(std::ostream &os, RDE_MOUSE_BUTTON_ mouseCode) {
         os << static_cast<int32_t>(mouseCode);

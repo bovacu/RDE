@@ -87,7 +87,7 @@ namespace RDE {
 	void UIButton::onMouseReleased(RDE_MOUSE_BUTTON_ _mouseCode) {
         if(!uiInteractable->interactable) return;
 
-        if(uiInteractable->mouseInnerStatus == UIInteractable::RDE_MOUSE_STATUS_EXITED) {
+        if(uiInteractable->mouseInnerStatus == RDE_MOUSE_STATUS_EXITED) {
             SAFE_POINTER(uiImage, setTexture(statesTextures[0]))
         } else {
             SAFE_POINTER(uiImage, setTexture(statesTextures[1]))

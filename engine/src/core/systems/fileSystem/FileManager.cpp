@@ -1,6 +1,7 @@
 // Created by borja on 14/2/22.
 
 #include "core/systems/fileSystem/FileManager.h"
+#include "core/util/Functions.h"
 
 namespace RDE {
 

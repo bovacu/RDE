@@ -3,6 +3,7 @@
 #include "core/render/elements/ShaderManager.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "core/render/elements/IRenderizable.h"
+#include "core/util/Functions.h"
 
 namespace RDE {
 

@@ -7,19 +7,12 @@
 
 #include "core/graph/components/ui/UI.h"
 #include "core/render/elements/IRenderizable.h"
+#include "core/Enums.h"
 
 namespace RDE {
 
     class Scene;
     class Canvas;
-
-    enum RDE_IMAGE_RENDERING_TYPE_ {
-		RDE_IMAGE_RENDERING_TYPE_NORMAL              = 0,
-		RDE_IMAGE_RENDERING_TYPE_NINE_SLICE          = 1,
-		RDE_IMAGE_RENDERING_TYPE_PARTIAL_VERTICAL    = 2,
-		RDE_IMAGE_RENDERING_TYPE_PARTIAL_HORIZONTAL  = 3,
-		RDE_IMAGE_RENDERING_TYPE_PARTIAL_RADIAL      = 4
-    };
 
     struct UIImageConfig : public CommonUIConfig {
         Vec2F size = { -1, -1 };
