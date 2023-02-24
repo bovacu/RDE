@@ -12,6 +12,7 @@
 #include "core/Manager.h"
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/platform/Platform.h"
+#include "core/DeviceInfoProvider.h"
 
 int main(int argc, char** argv);
 
@@ -114,6 +115,8 @@ namespace RDE {
              */
             RDEConfig rdeConfig {};
 
+            DeviceInfoProvider devideInfoProvider {};
+
         private:
             /**
              * @brief Delta time of the Fixed Update method.
@@ -172,6 +175,12 @@ namespace RDE {
 
         public:
             Engine();
+
+            /**
+             * @brief Returns the platform that the engine is running on.
+             * @return RDE_PLATFORM_TYPE_
+             */
+            RDE_PLATFORM_TYPE_ getPlatform() const;
 
             /**
              * @brief This method provides the number of FPS in any given moment.

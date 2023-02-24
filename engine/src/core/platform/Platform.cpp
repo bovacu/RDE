@@ -26,49 +26,29 @@
 
 namespace RDE {
 
-    PlatformType Platform::getPlatform() {
-
-        #if IS_ANDROID()
-            return PlatformType::ANDROID_;
-        #endif
-
-        #if IS_IOS()
-            return PlatformType::IOS;
-        #endif
-
-        #if IS_LINUX()
-            return PlatformType::LINUX;
-        #endif
-
-        #if IS_WINDOWS()
-            return PlatformType::WINDOWS;
-        #endif
-
-        #if IS_MAC()
-            return PlatformType::MAC;
-        #endif
-
-        return PlatformType::UNSUPPORTED;
-    }
-
     Window* Platform::createWindow(RDEConfig* _config) {
         #if IS_ANDROID()
+			currentPlatform = RDE_PLATFORM_TYPE_ANDROID;
             return new AndroidWindow(_config);
         #endif
 
         #if IS_IOS()
+			currentPlatform = RDE_PLATFORM_TYPE_IOS;
             return new IOSWindow(_config);
         #endif
 
         #if IS_LINUX() && !IS_ANDROID()
+			currentPlatform = RDE_PLATFORM_TYPE_LINUX;
             return new LinuxWindow(_config);
         #endif
 
         #if IS_WINDOWS() && !IS_ANDROID()
+			currentPlatform = RDE_PLATFORM_TYPE_WINDOWS;
             return new WindowsWindow(_config);
         #endif
 
         #if IS_MAC() && !IS_ANDROID()
+			currentPlatform = RDE_PLATFORM_TYPE_MAC;
             return new MacWindow(_config);
         #endif
 

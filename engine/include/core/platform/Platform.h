@@ -7,21 +7,23 @@
 #include "core/systems/inputSystem/input/Input.h"
 namespace RDE {
 
-    enum PlatformType {
-        LINUX,
-        WINDOWS,
-        MAC,
-        ANDROID_,
-        IOS,
-        UNSUPPORTED
+    enum RDE_PLATFORM_TYPE_ {
+		RDE_PLATFORM_TYPE_LINUX,
+		RDE_PLATFORM_TYPE_WINDOWS,
+		RDE_PLATFORM_TYPE_MAC,
+		RDE_PLATFORM_TYPE_ANDROID,
+		RDE_PLATFORM_TYPE_IOS,
+		RDE_PLATFORM_TYPE_UNSUPPORTED
     };
 
     class Platform {
+		friend class Engine;
+
         public:
             Window* createWindow(RDEConfig* _config);
 
         private:
-            PlatformType getPlatform();
+			RDE_PLATFORM_TYPE_ currentPlatform;
     };
 
 }

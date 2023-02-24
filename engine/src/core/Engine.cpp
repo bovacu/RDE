@@ -29,6 +29,7 @@ namespace RDE {
     }
 
     void Engine::onInit(Scene* _scene) {
+		devideInfoProvider.init(this);
         wreDel.bind<&Engine::onWindowResized>(this);
 
         #if !IS_MOBILE()
@@ -241,4 +242,8 @@ namespace RDE {
             frameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
         }
     }
+
+	RDE_PLATFORM_TYPE_ Engine::getPlatform() const {
+		return platform.currentPlatform;
+	}
 }
