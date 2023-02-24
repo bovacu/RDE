@@ -15,7 +15,7 @@ namespace RDE {
     UISlider::UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config) {
         data.RenderizableInnerData.texture = _config.backgroundBarTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "panel") : _config.backgroundBarTexture;
         data.RenderizableInnerData.color = _config.backgroundBarColor;
-        data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
+        data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
 
         node = _node;
 
@@ -40,7 +40,7 @@ namespace RDE {
             .size = _config.barSize,
             .texture = data.RenderizableInnerData.texture,
             .color = _config.backgroundBarColor,
-            .imageRenderingType = ImageRenderingType::NINE_SLICE
+            .imageRenderingType = RDE_IMAGE_RENDERING_TYPE_NINE_SLICE
         });
         backgroundBarSprite->uiInteractable = uiInteractable;
         backgroundBarTransform = (UITransform*)node->getTransform();
@@ -52,12 +52,12 @@ namespace RDE {
             .texture = _config.fillingBarTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "fillAndBgrScrollBarHorizontal") :
                        _config.fillingBarTexture,
             .color = _config.fillingBarColor,
-            .imageRenderingType = ImageRenderingType::NINE_SLICE
+			.imageRenderingType = RDE_IMAGE_RENDERING_TYPE_NINE_SLICE
         });
 
         fillBarTransform = (UITransform*)fillBarNode->getTransform();
-        fillBarTransform->setAnchor(Anchor::LEFT);
-        fillBarTransform->setStretch(Stretch::HORIZONTAL_STRETCH);
+        fillBarTransform->setAnchor(RDE_UI_ANCHOR_LEFT);
+        fillBarTransform->setStretch(RDE_UI_STRETCH_HORIZONTAL_STRETCH);
 
         handleNode = _graph->createNode("Handle", node);
         handleSprite = handleNode->addComponent<UIImage>(UIImageConfig {
@@ -69,7 +69,7 @@ namespace RDE {
         handleTransform->setScale(1.5f * _config.barSize.y / handleSprite->getSize().x, 1.5f * _config.barSize.y / handleSprite->getSize().y);
         handleTransform->setPosition(backgroundBarTransform->getPosition().x - (_config.barSize.x * 0.5f) + _config.barSize.x * _config.percentageFilled,
                                      handleTransform->getPosition().y);
-        handleTransform->setAnchor(Anchor::RIGHT);
+        handleTransform->setAnchor(RDE_UI_ANCHOR_RIGHT);
 
         setFilledPercentage(_config.percentageFilled);
     }
@@ -89,7 +89,7 @@ namespace RDE {
             setFilledPercentage(_distanceFromLowerPoint / getSize().x);
         }
 
-        if(node->manager->inputManager.isMouseJustReleased(MouseCode::ButtonLeft) && mouseDown) {
+		if(node->manager->inputManager.isMouseJustReleased(RDE_MOUSE_BUTTON_LEFT) && mouseDown) {
             mouseDown = false;
         }
     }
@@ -109,11 +109,11 @@ namespace RDE {
         return percentageFilled;
     }
 
-    void UISlider::onMouseClicked(MouseCode _mouseCode) {
+	void UISlider::onMouseClicked(RDE_MOUSE_BUTTON_ _mouseCode) {
         mouseDown = true;
     }
 
-    void UISlider::onMouseReleased(MouseCode _mouseCode) {
+	void UISlider::onMouseReleased(RDE_MOUSE_BUTTON_ _mouseCode) {
         mouseDown = false;
     }
 

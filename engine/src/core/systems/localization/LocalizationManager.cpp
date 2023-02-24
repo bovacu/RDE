@@ -21,26 +21,26 @@ namespace RDE {
 
             localizationInfo.language = LocalizationInfo::toEnum(Util::String::appendToString(_locales[0].language, _country));
         } else {
-            localizationInfo.language = LocalizationInfo::EN_US;
+			localizationInfo.language = LocalizationInfo::RDE_LANGUAGE_EN_US;
         }
 
         SDL_free(_locales);
     }
 
     void LocalizationManager::loadAllLanguages() {
-        for(auto _i = 0; _i < LocalizationInfo::MAX; _i++) {
-            loadLanguage((LocalizationInfo::Language)_i);
+		for(auto _i = 0; _i < LocalizationInfo::RDE_LANGUAGE_MAX; _i++) {
+			loadLanguage((LocalizationInfo::RDE_LANGUAGE_)_i);
         }
     }
 
-    void LocalizationManager::loadLanguage(LocalizationInfo::Language _language) {
+	void LocalizationManager::loadLanguage(LocalizationInfo::RDE_LANGUAGE_ _language) {
         if(engine->rdeConfig.projectData.localizationConfig.localizationPath.empty()) {
             Util::Log::error("Cannot load localization because the file_path was not provided in the configuration file");
             return;
         }
 
         auto* _manager = &engine->manager;
-        auto _fileHandler = _manager->fileManager.open(Util::String::appendToString("assets/", engine->rdeConfig.projectData.localizationConfig.localizationPath), FileMode::READ);
+		auto _fileHandler = _manager->fileManager.open(Util::String::appendToString("assets/", engine->rdeConfig.projectData.localizationConfig.localizationPath), RDE_FILE_MODE_READ);
 
         auto _content = _manager->fileManager.readFullFile(_fileHandler).content;
         nlohmann::json _localizationJson = nlohmann::json::parse(_content);

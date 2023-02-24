@@ -87,10 +87,10 @@ namespace RDE {
         private:
             void onMouseEntered();
             void onMouseExited();
-            void onMouseClicked(MouseCode _mouseCode);
-            void onMouseReleased(MouseCode _mouseCode);
-            void onKeyPressed(KeyCode _keyCode);
-            void onKeyReleased(KeyCode _keyCode);
+			void onMouseClicked(RDE_MOUSE_BUTTON_ _mouseCode);
+			void onMouseReleased(RDE_MOUSE_BUTTON_ _mouseCode);
+            void onKeyPressed(RDE_KEYBOARD_KEY_ _keyCode);
+			void onKeyReleased(RDE_KEYBOARD_KEY_ _keyCode);
             void onTextTyping(const std::string& _text);
             void onUnfocused();
             void updatePlaceholder();

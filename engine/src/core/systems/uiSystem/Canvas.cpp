@@ -44,7 +44,7 @@ namespace RDE {
             auto* _uiSlider = _node->getComponent<UISlider>();
             if(_uiSlider->isEnabled() && _uiSlider->node->isActive()) {
                 _canvasElement->updatableData.updatable = (void*)_node->getComponent<UISlider>();
-                _canvasElement->updatableData.updatableType = UpdatableType::UT_UI_SLIDER;
+				_canvasElement->updatableData.updatableType = RDE_UI_UPDATABLE_NODE_SLIDER;
                 return;
             }
         }
@@ -53,7 +53,7 @@ namespace RDE {
             auto* _uiInput = _node->getComponent<UIInput>();
             if(_uiInput->isEnabled() && _uiInput->node->isActive()) {
                 _canvasElement->updatableData.updatable = (void*)_node->getComponent<UIInput>();
-                _canvasElement->updatableData.updatableType = UpdatableType::UT_UI_INPUT;
+				_canvasElement->updatableData.updatableType = RDE_UI_UPDATABLE_NODE_INPUT;
                 return;                
             }
         }
@@ -107,20 +107,20 @@ namespace RDE {
                 }
 
                 switch (_data.RenderizableInnerData.renderizableType) {
-                    case RT_NONE: {
+                    case RDE_RENDERIZABLE_TYPE_NONE: {
                         Util::Log::debug("In Canvas, an element is trying to be rendered with a value of renerizableType == NONE");
                         break;
                     }
-                    case RT_UI_IMAGE: {
+					case RDE_RENDERIZABLE_TYPE_UI_IMAGE: {
                         drawBatchedUIImage(_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
                         break;
                     }
-                    case RT_UI_TEXT: {
+					case RDE_RENDERIZABLE_TYPE_UI_TEXT: {
                         drawBatchedUIText(_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
                         break;
                     }
-                    case RT_SPRITE:
-                    case RT_TEXT:
+					case RDE_RENDERIZABLE_TYPE_SPRITE:
+					case RDE_RENDERIZABLE_TYPE_TEXT:
                         break;
                 }
 
@@ -144,20 +144,20 @@ namespace RDE {
             }
 
             switch (_data->RenderizableInnerData.renderizableType) {
-                case RT_NONE: {
+				case RDE_RENDERIZABLE_TYPE_NONE: {
                     Util::Log::debug("In Canvas, an element is trying to be rendered with a value of renerizableType == NONE");
                     break;
                 }
-                case RT_UI_IMAGE: {
+				case RDE_RENDERIZABLE_TYPE_UI_IMAGE: {
                     drawBatchedUIImage(*_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
                     break;
                 }
-                case RT_UI_TEXT: {
+				case RDE_RENDERIZABLE_TYPE_UI_TEXT: {
                     drawBatchedUIText(*_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
                     break;
                 }
-                case RT_SPRITE:
-                case RT_TEXT:
+				case RDE_RENDERIZABLE_TYPE_SPRITE:
+				case RDE_RENDERIZABLE_TYPE_TEXT:
                     break;
             }
         }

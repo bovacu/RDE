@@ -78,8 +78,8 @@ namespace RDE {
 
             if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() && !onInnerMouseEntered.isEmpty()) {
                 shouldStopEventPropagation(_event, _node);
-                if(mouseInnerStatus == MouseStatus::MouseExited) {
-                    mouseInnerStatus = MouseStatus::MouseEntered;
+				if(mouseInnerStatus == RDE_MOUSE_STATUS_EXITED) {
+					mouseInnerStatus = RDE_MOUSE_STATUS_ENTERED;
                     onInnerMouseEntered();
                 }
             }
@@ -126,18 +126,18 @@ namespace RDE {
         }
 
         if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() && !_event.handled) {
-            if(mouseInnerStatus == MouseStatus::MouseEntered) {
+			if(mouseInnerStatus == RDE_MOUSE_STATUS_ENTERED) {
                 shouldStopEventPropagation(_event, _node);
                 if(!onInnerMouseExited.isEmpty()) onInnerMouseExited();
-                mouseInnerStatus = MouseStatus::MouseExited;
+				mouseInnerStatus = RDE_MOUSE_STATUS_EXITED;
             }
         }
 
         if(_eventDispatcher.dispatchEvent<MouseMovedEvent>() && !_event.handled) {
-            if(mouseStatus == MouseStatus::MouseEntered) {
+			if(mouseStatus == RDE_MOUSE_STATUS_ENTERED) {
                 shouldStopEventPropagation(_event, _node);
                 if(!onMouseExited.isEmpty()) onMouseExited();
-                mouseStatus = MouseStatus::MouseExited;
+				mouseStatus = RDE_MOUSE_STATUS_EXITED;
             }
         }
     }

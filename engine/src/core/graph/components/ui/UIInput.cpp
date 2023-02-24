@@ -18,7 +18,7 @@ namespace RDE {
     UIInput::UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config) {
         data.RenderizableInnerData.texture = _config.inputBackgroundTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "inputThemeDark") : _config.inputBackgroundTexture;
         data.RenderizableInnerData.color = _config.inputBackgroundColor;
-        data.RenderizableInnerData.renderizableType = RenderizableType::RT_UI_IMAGE;
+        data.RenderizableInnerData.renderizableType = RDE_RENDERIZABLE_TYPE_UI_IMAGE;
 
         node = _node;
 
@@ -53,10 +53,10 @@ namespace RDE {
             .size = getSize(),
             .texture = data.RenderizableInnerData.texture,
             .color = _config.inputBackgroundColor,
-            .imageRenderingType = ImageRenderingType::NINE_SLICE
+            .imageRenderingType = RDE_IMAGE_RENDERING_TYPE_NINE_SLICE
         });
         nineSliceTransform = _node->getTransform();
-        data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
+        data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
         data.RenderizableInnerData.shader = background->getShaderID();
 
         auto _placeholderNode = _graph->createNode("Placeholder", _node);
@@ -66,10 +66,10 @@ namespace RDE {
             .text = _config.placeholderText,
             .textColor = _config.placeholderTextColor
         });
-        placeholderTextRenderer->data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
+        placeholderTextRenderer->data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
         placeholderTextRenderer->setEnabled(_config.showPlaceholderText);
         auto* _placeholderTransform = _placeholderNode->getTransform();
-        ((UITransform*)_placeholderTransform)->setAnchor(Anchor::LEFT);
+        ((UITransform*)_placeholderTransform)->setAnchor(RDE_UI_ANCHOR_LEFT);
         auto _placeholderPosition = _placeholderTransform->getPosition();
         _placeholderTransform->setPosition(_placeholderPosition.x + placeholderTextRenderer->getSize().x * 0.5f - getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
                                            _placeholderPosition.y + _config.textsOffsetFromLeft.y);
@@ -81,10 +81,10 @@ namespace RDE {
                 .text = _config.text,
                 .textColor = _config.textColor
         });
-        textRenderer->data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
+        textRenderer->data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
         textTransform = _textNode->getTransform();
         auto _textPosition = textTransform->getPosition();
-        ((UITransform*)textTransform)->setAnchor(Anchor::LEFT);
+		((UITransform*)textTransform)->setAnchor(RDE_UI_ANCHOR_LEFT);
         textRenderer->setOriginOffset({ textRenderer->getTextSize().x * 0.5f, 0.f });
         textTransform->setPosition(_textPosition.x + textRenderer->getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
                                    _textPosition.y + _config.textsOffsetFromLeft.y);
@@ -96,10 +96,10 @@ namespace RDE {
             .texture = _caretTexture,
             .color = _config.caretColor
         });
-        caretSprite->data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
+        caretSprite->data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
         caretSprite->setEnabled(false);
         caretTransform = _caretNode->getTransform();
-        ((UITransform*)caretTransform)->setAnchor(Anchor::LEFT);
+		((UITransform*)caretTransform)->setAnchor(RDE_UI_ANCHOR_LEFT);
         auto _caretPosition = caretTransform->getPosition();
         caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
                                     _caretPosition.y + _config.textsOffsetFromLeft.y);
@@ -206,7 +206,7 @@ namespace RDE {
         updatePlaceholder();
     }
 
-    void UIInput::onMouseClicked(MouseCode _mouseCode) {
+	void UIInput::onMouseClicked(RDE_MOUSE_BUTTON_ _mouseCode) {
         if(!usable()) return;
 
         SDL_StartTextInput();
@@ -224,7 +224,7 @@ namespace RDE {
         caretSprite->setEnabled(false);
     }
 
-    void UIInput::onMouseReleased(MouseCode _mouseCode) {
+	void UIInput::onMouseReleased(RDE_MOUSE_BUTTON_ _mouseCode) {
         if(!usable()) return;
 
         updatePlaceholder();
@@ -244,21 +244,21 @@ namespace RDE {
     }
 
     // TODO (RDE): caret is not in the right place when the text goes out of scope on the right
-    void UIInput::onKeyPressed(KeyCode _keyCode) {
+    void UIInput::onKeyPressed(RDE_KEYBOARD_KEY_ _keyCode) {
         if(!usable()) return;
 
-        if(_keyCode == KeyCode::Enter || _keyCode == KeyCode::Escape) {
+		if(_keyCode == RDE_KEYBOARD_KEY_ENTER || _keyCode == RDE_KEYBOARD_KEY_ESCAPE) {
             uiInteractable->focused = false;
-        } else if(_keyCode == KeyCode::Left) {
+		} else if(_keyCode == RDE_KEYBOARD_KEY_LEFT) {
             pointer = pointer - 1 > 0 ? pointer - 1 : 0;
             updateCaret();
-        } else if(_keyCode == KeyCode::Right) {
+		} else if(_keyCode == RDE_KEYBOARD_KEY_RIGHT) {
             auto _textLength = textRenderer->getText().size();
             pointer = pointer + 1 < _textLength ? pointer + 1 : (int)_textLength;
             updateCaret();
-        }  else if(_keyCode == KeyCode::Delete) {
+		}  else if(_keyCode == RDE_KEYBOARD_KEY_DELETE) {
             updateCaret();
-        } else if(_keyCode == KeyCode::Backspace) {
+		} else if(_keyCode == RDE_KEYBOARD_KEY_BAKCSPACE) {
             if(pointer - 1 >= 0) {
                 auto _text = textRenderer->getText();
                 _text = _text.erase(pointer - 1, 1);
@@ -273,7 +273,7 @@ namespace RDE {
         updatePlaceholder();
     }
 
-    void UIInput::onKeyReleased(KeyCode _keyCode) {
+	void UIInput::onKeyReleased(RDE_KEYBOARD_KEY_ _keyCode) {
 
     }
 

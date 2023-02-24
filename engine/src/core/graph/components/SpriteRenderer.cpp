@@ -28,10 +28,10 @@ namespace RDE {
 
     SpriteRenderer::SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const SpriteRendererConfig& _config) {
         
-        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(4, SPRITE_RENDERER_SHADER, BatchPriority::SpritePriority)
+        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(4, SPRITE_RENDERER_SHADER, RDE_BATCH_PRIORITY_SPRITE)
 
         data.texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "sprite") : _config.texture;
-        data.renderizableType = RenderizableType::RT_SPRITE;
+        data.renderizableType = RDE_RENDERIZABLE_TYPE_SPRITE;
         
         setColor(_config.color);
 

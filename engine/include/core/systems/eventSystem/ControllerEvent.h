@@ -43,26 +43,26 @@ namespace RDE {
                 return _sst.str();
             }
 
-            static EventType getStaticType() { return EventType::ControllerAxisMoved; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_CONTROLLER_AXIS_MOVED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "JoystickAxisMoved"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryInput | EventCategoryControllerButton; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_CONTROLLER_BUTTON; }
     };
 
 
 
     class ControllerButtonDownEvent : public Event {
         private:
-            ControllerButtons button;
+            RDE_CONTROLLER_BUTTON_ button;
 
         public:
-            explicit ControllerButtonDownEvent(ControllerButtons _button) : button(_button) {  }
+			explicit ControllerButtonDownEvent(RDE_CONTROLLER_BUTTON_ _button) : button(_button) {  }
 
             /**
              * @brief Returns the pressed button.
              * @return GamePadButtons
              */
-            [[nodiscard]] inline ControllerButtons getButton() const { return button; }
+			[[nodiscard]] inline RDE_CONTROLLER_BUTTON_ getButton() const { return button; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
@@ -70,24 +70,24 @@ namespace RDE {
                 return _sst.str();
             }
 
-            static EventType getStaticType() { return EventType::ControllerButtonDown; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_CONTROLLER_BUTTON_DOWN; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "JoystickButtonDown"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryInput | EventCategoryControllerButton; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_CONTROLLER_BUTTON; }
     };
 
     class ControllerButtonUpEvent : public Event {
         private:
-        ControllerButtons button;
+		RDE_CONTROLLER_BUTTON_ button;
 
         public:
-            explicit ControllerButtonUpEvent(ControllerButtons _button) : button(_button) {  }
+			explicit ControllerButtonUpEvent(RDE_CONTROLLER_BUTTON_ _button) : button(_button) {  }
 
             /**
              * @brief Returns the freed button.
              * @return GamePadButtons
              */
-            [[nodiscard]] inline ControllerButtons getButton() const { return button; }
+			[[nodiscard]] inline RDE_CONTROLLER_BUTTON_ getButton() const { return button; }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
@@ -95,10 +95,10 @@ namespace RDE {
                 return _sst.str();
             }
 
-            static EventType getStaticType() { return EventType::ControllerButtonUp; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_CONTROLLER_BUTTON_UP; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "JoystickButtonUp"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryInput | EventCategoryControllerButton; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_CONTROLLER_BUTTON; }
     };
 
 }

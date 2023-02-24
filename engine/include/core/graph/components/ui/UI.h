@@ -42,21 +42,21 @@ namespace RDE {
             /**
              * @brief Status of the mouse entering and exiting.
              */
-            enum MouseStatus {
-                MouseEntered,
-                MouseExited
+            enum RDE_MOUSE_STATUS_ {
+				RDE_MOUSE_STATUS_ENTERED,
+				RDE_MOUSE_STATUS_EXITED
             };
 
             /**
              * @brief Current mouse status.
              *
              */
-            MouseStatus mouseStatus = MouseStatus::MouseExited;
+			RDE_MOUSE_STATUS_ mouseStatus = RDE_MOUSE_STATUS_EXITED;
 
             /**
              * @brief Current inner status of the mouse.
              */
-            MouseStatus mouseInnerStatus = MouseStatus::MouseExited;
+			RDE_MOUSE_STATUS_ mouseInnerStatus = RDE_MOUSE_STATUS_EXITED;
 
             /**
              * @brief Flag that keeps if the Component is or not interactable.
@@ -73,13 +73,13 @@ namespace RDE {
              * @brief Callback triggered when the mouse just got pressed.
              *
              */
-            Delegate<void(MouseCode)> onInnerClicking;
+            Delegate<void(RDE_MOUSE_BUTTON_)> onInnerClicking;
 
             /**
              * @brief Callback triggered when the mouse just got released.
              *
              */
-            Delegate<void(MouseCode)> onInnerClickingReleased;
+			Delegate<void(RDE_MOUSE_BUTTON_)> onInnerClickingReleased;
 
             /**
              * @brief Callback triggered when the mouse has just entered.
@@ -97,7 +97,7 @@ namespace RDE {
              * @brief Callback triggered when a key has just been pressed.
              *
              */
-            Delegate<void(KeyCode)> onInnerKeyPressed;
+            Delegate<void(RDE_KEYBOARD_KEY_)> onInnerKeyPressed;
 
             /**
              * @brief Callback triggered when text editing mode is on and a key is pressed.
@@ -109,7 +109,7 @@ namespace RDE {
              * @brief Callback triggered when a key has just been released.
              *
              */
-            Delegate<void(KeyCode)> onInnerKeyReleased;
+			Delegate<void(RDE_KEYBOARD_KEY_)> onInnerKeyReleased;
 
             /**
              * @brief Callback triggered when an element of the UI has been unfocused.
@@ -124,7 +124,7 @@ namespace RDE {
              * @brief Callback triggered when the mouse is clicked.
              *
              */
-            Delegate<void(MouseCode)> onClick;
+			Delegate<void(RDE_MOUSE_BUTTON_)> onClick;
 
             /**
              * @brief Callback triggered when the mouse has just entered.
@@ -148,13 +148,13 @@ namespace RDE {
              * @brief Callback triggered when a key is pressed.
              *
              */
-            Delegate<void(KeyCode)> onKeyPressed;
+			Delegate<void(RDE_KEYBOARD_KEY_)> onKeyPressed;
 
             /**
              * @brief Callback triggered when a gamepad button is pressed.
              *
              */
-            Delegate<void(ControllerButtons)> onGamepadButtonPressed;
+            Delegate<void(RDE_CONTROLLER_BUTTON_)> onGamepadButtonPressed;
 
             /**
              * @brief Callback triggered when the mobile screen is touched.

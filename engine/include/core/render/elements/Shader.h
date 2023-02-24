@@ -27,7 +27,7 @@ namespace RDE {
 	/**
 	 * @brief Uniforms that use a GLfloat as a data value.
 	 */
-	enum RDE_UNIFORM_FV {
+	enum RDE_UNIFORM_FV_ {
 		RDE_UNIFORM_FV_1,
 		RDE_UNIFORM_FV_2,
 		RDE_UNIFORM_FV_3,
@@ -46,7 +46,7 @@ namespace RDE {
 	/**
 	* @brief Uniforms that use a GLint as a data value.
 	*/
-	enum RDE_UNIFORM_IV {
+	enum RDE_UNIFORM_IV_ {
 		RDE_UNIFORM_IV_1,
 		RDE_UNIFORM_IV_2,
 		RDE_UNIFORM_IV_3,
@@ -56,7 +56,7 @@ namespace RDE {
 	/**
 	* @brief Uniforms that use a GLuint as a data value.
 	*/
-	enum RDE_UNIFORM_UIV {
+	enum RDE_UNIFORM_UIV_ {
 		RDE_UNIFORM_UIV_1,
 		RDE_UNIFORM_UIV_2,
 		RDE_UNIFORM_UIV_3,
@@ -222,7 +222,7 @@ namespace RDE {
 			 * @param _type The type of uniform we are setting, check RDE_UNIFORM_FV enum options
 			 * @param _data The actual data to send
 			 */
-			void setUniformValueFloat(const char* _uniformName, RDE_UNIFORM_FV _type, GLfloat* _data, GLboolean _transpose = GL_FALSE);
+			void setUniformValueFloat(const char* _uniformName, RDE_UNIFORM_FV_ _type, GLfloat* _data, GLboolean _transpose = GL_FALSE);
 			
 			/**
 			* @brief Sets the value of an existing uniform.
@@ -230,7 +230,7 @@ namespace RDE {
 			* @param _type The type of uniform we are setting, check RDE_UNIFORM_IV enum options
 			* @param _data The actual data to send
 			*/
-			void setUniformValueInt(const char* _uniformName, RDE_UNIFORM_IV _type, GLint* _data);
+			void setUniformValueInt(const char* _uniformName, RDE_UNIFORM_IV_ _type, GLint* _data);
 
 			/**
 			* @brief Sets the value of an existing uniform.
@@ -238,7 +238,7 @@ namespace RDE {
 			* @param _type The type of uniform we are setting, check RDE_UNIFORM_UIV enum options
 			* @param _data The actual data to send
 			*/
-			void setUniformValueUInt(const char* _uniformName, RDE_UNIFORM_UIV _type, GLuint* _data);
+			void setUniformValueUInt(const char* _uniformName, RDE_UNIFORM_UIV_ _type, GLuint* _data);
 
         private:
             /**

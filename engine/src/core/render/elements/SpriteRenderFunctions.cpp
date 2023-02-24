@@ -714,18 +714,18 @@ namespace RDE {
     }
 
     void calculateGeometryForUIImage(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
-        switch ((ImageRenderingType)_data.imageRenderingType) {
-                case NORMAL:
-                    calculateNormalGeometry(_data, _transformMatrix, _transform, _viewport); break;
-                case NINE_SLICE:
-                    calculate9SliceGeometry(_data, _transformMatrix, _transform, _viewport); break;
-                case PARTIAL_VERTICAL:
-                    calculatePartialVGeometry(_data, _transformMatrix, _transform, _viewport); break;
-                case PARTIAL_HORIZONTAL:
-                    calculatePartialHGeometry(_data, _transformMatrix, _transform, _viewport); break;
-                case PARTIAL_RADIAL:
-                    calculatePartialRGeometry(_data, _transformMatrix, _transform, _viewport); break;
-            }
+        switch ((RDE_IMAGE_RENDERING_TYPE_)_data.imageRenderingType) {
+			case RDE_IMAGE_RENDERING_TYPE_NORMAL:
+				calculateNormalGeometry(_data, _transformMatrix, _transform, _viewport); break;
+			case RDE_IMAGE_RENDERING_TYPE_NINE_SLICE:
+				calculate9SliceGeometry(_data, _transformMatrix, _transform, _viewport); break;
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_VERTICAL:
+				calculatePartialVGeometry(_data, _transformMatrix, _transform, _viewport); break;
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_HORIZONTAL:
+				calculatePartialHGeometry(_data, _transformMatrix, _transform, _viewport); break;
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_RADIAL:
+				calculatePartialRGeometry(_data, _transformMatrix, _transform, _viewport); break;
+		}
 
     }
 
@@ -781,29 +781,29 @@ namespace RDE {
         auto [_transformMat, _dirty] = _transform->localToWorld();
         if(_dirty || _data.RenderizableInnerData.dirty) {
             switch (_data.imageRenderingType) {
-                case NORMAL:
+				case RDE_IMAGE_RENDERING_TYPE_NORMAL:
                     calculateNormalGeometry(_data, _transformMat, _transform, _viewport); break;
-                case NINE_SLICE:
+				case RDE_IMAGE_RENDERING_TYPE_NINE_SLICE:
                     calculate9SliceGeometry(_data, _transformMat, _transform, _viewport); break;
-                case PARTIAL_VERTICAL:
+				case RDE_IMAGE_RENDERING_TYPE_PARTIAL_VERTICAL:
                     calculatePartialVGeometry(_data, _transformMat, _transform, _viewport); break;
-                case PARTIAL_HORIZONTAL:
+				case RDE_IMAGE_RENDERING_TYPE_PARTIAL_HORIZONTAL:
                     calculatePartialHGeometry(_data, _transformMat, _transform, _viewport); break;
-                case PARTIAL_RADIAL:
+				case RDE_IMAGE_RENDERING_TYPE_PARTIAL_RADIAL:
                     calculatePartialRGeometry(_data, _transformMat, _transform, _viewport); break;
             }
 
             _data.RenderizableInnerData.dirty = false;
         }
 
-        switch ((ImageRenderingType)_data.imageRenderingType) {
-            case NORMAL:
-            case PARTIAL_VERTICAL:
-            case PARTIAL_HORIZONTAL:
+		switch ((RDE_IMAGE_RENDERING_TYPE_)_data.imageRenderingType) {
+			case RDE_IMAGE_RENDERING_TYPE_NORMAL:
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_VERTICAL:
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_HORIZONTAL:
                 batchFourVertexGeometry(_data, _batch->vertexBuffer); break;
-            case NINE_SLICE:
+			case RDE_IMAGE_RENDERING_TYPE_NINE_SLICE:
                 batch9SliceVertexGeometry(_data, _batch->vertexBuffer); break;
-            case PARTIAL_RADIAL:
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_RADIAL:
                 batchPartialCircularVertexGeometry(_data, _batch->vertexBuffer); break;
         }
     }

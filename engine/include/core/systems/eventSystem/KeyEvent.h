@@ -12,19 +12,19 @@ namespace RDE {
     /// Base class for all the key events
     class KeyEvent          : public Event {
         protected:
-            KeyCode keyCode;
+            RDE_KEYBOARD_KEY_ keyCode;
 
         protected:
-            explicit KeyEvent(KeyCode _keyCode) : keyCode(_keyCode) {}
+			explicit KeyEvent(RDE_KEYBOARD_KEY_ _keyCode) : keyCode(_keyCode) {}
 
         public:
             /// Returns the code of the key that has been pressed, typed or released.
             /// @return The code of the key that made the event happened.
-            [[nodiscard]] inline KeyCode getKeyCode() const { return keyCode; }
+			[[nodiscard]] inline RDE_KEYBOARD_KEY_ getKeyCode() const { return keyCode; }
 
             /// Returns the flag with all the categories that the event fills in.
             /// @return The flag with the categories.
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategory::EventCategoryKeyboard | EventCategory::EventCategoryInput; }
+            [[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_KEYBOARD; }
     };
 
 
@@ -36,7 +36,7 @@ namespace RDE {
             int repeatedTimes;
 
         public:
-            KeyPressedEvent(KeyCode _keyCode, int _repeatedTimes) : KeyEvent(_keyCode), repeatedTimes(_repeatedTimes) {}
+			KeyPressedEvent(RDE_KEYBOARD_KEY_ _keyCode, int _repeatedTimes) : KeyEvent(_keyCode), repeatedTimes(_repeatedTimes) {}
 
             /// Returns the number of times in a sequence that the key has been pressed.
             /// @return The number of pressing times.
@@ -49,8 +49,8 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::KeyPressed; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_KEY_PRESSED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "KeyPressed"; }
     };
 
@@ -63,7 +63,7 @@ namespace RDE {
             char typedChar;
 
         public:
-            explicit KeyTypedEvent(KeyCode _keyCode) : KeyEvent(_keyCode), typedChar((char)keyCode) {  }
+			explicit KeyTypedEvent(RDE_KEYBOARD_KEY_ _keyCode) : KeyEvent(_keyCode), typedChar((char)keyCode) {  }
 
             /// Returns the number of times in a sequence that the key has been pressed.
             /// @return The char typed.
@@ -76,8 +76,8 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::KeyTyped; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_KEY_TYPED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "KeyTyped"; }
     };
 
@@ -87,7 +87,7 @@ namespace RDE {
     /// This class represents all of the events that involves releasing a key.
     class KeyReleasedEvent  : public KeyEvent {
         public:
-            explicit KeyReleasedEvent(KeyCode _keyCode) : KeyEvent(_keyCode) {}
+			explicit KeyReleasedEvent(RDE_KEYBOARD_KEY_ _keyCode) : KeyEvent(_keyCode) {}
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
@@ -96,8 +96,8 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()  { return EventType::KeyReleased; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType()  { return RDE_EVENT_TYPE_KEY_RELEASED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "KeyReleased"; }
     };
 
@@ -105,7 +105,7 @@ namespace RDE {
     /// This class represents all of the events that involves releasing a key.
     class TextTypedEvent  : public KeyEvent {
         public:
-            explicit TextTypedEvent(char* _text) : KeyEvent(KeyCode::D0) { text = std::string(_text); }
+			explicit TextTypedEvent(char* _text) : KeyEvent(RDE_KEYBOARD_KEY_D0) { text = std::string(_text); }
 
             std::string text;
 
@@ -116,8 +116,8 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType()  { return EventType::TextTyped; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType()  { return RDE_EVENT_TYPE_TEXT_TYPED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "TextTyped"; }
     };
 

@@ -24,13 +24,13 @@ namespace RDE {
 
     TextRenderer::TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const TextRendererConfig& _config) {
         
-        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(50, TEXT_RENDERER_SHADER, BatchPriority::TextPriority)
+        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(50, TEXT_RENDERER_SHADER, RDE_BATCH_PRIORITY_TEXT)
 
         font = _config.font == nullptr ? _manager->fontManager.getDefaultFont("MontserratRegular") : _config.font;
         innerText = _config.text;
         recalcTextDimensions(innerText);
         data.texture = &font->getTexture();
-        data.renderizableType = RenderizableType::RT_TEXT;
+        data.renderizableType = RDE_RENDERIZABLE_TYPE_TEXT;
         setColor(_config.color);
     }
 

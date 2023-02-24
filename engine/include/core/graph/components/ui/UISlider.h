@@ -64,8 +64,8 @@ namespace RDE {
             Node* getHandleNode();
 
         private:
-            void onMouseClicked(MouseCode _mouseCode);
-            void onMouseReleased(MouseCode _mouseCode);
+			void onMouseClicked(RDE_MOUSE_BUTTON_ _mouseCode);
+			void onMouseReleased(RDE_MOUSE_BUTTON_ _mouseCode);
     };
 
 }

@@ -20,41 +20,41 @@ namespace RDE {
     /**
      * @brief All of the events that the input system handles.
      */
-    enum SystemEventEnum {
-        WINDOW_EVENT = SDL_WINDOWEVENT, QUIT_E = SDL_QUIT, WINDOW_EXIT_E = SDL_WINDOWEVENT_LEAVE, WINDOW_RESIZED_E = SDL_WINDOWEVENT_RESIZED,
-        WINDOW_FOCUS_E = SDL_WINDOWEVENT_FOCUS_GAINED, WINDOW_LOST_FOCUS_E = SDL_WINDOWEVENT_FOCUS_LOST, WINDOW_AUDIO_DEVICE_CONNECTED_E = SDL_AUDIODEVICEADDED,
-        WINDOW_AUDIO_DEVICE_DISCONNECTED_E = SDL_AUDIODEVICEREMOVED,
+    enum RDE_SYSTEM_EVENT_ {
+		RDE_SYSTEM_EVENT_WINDOW_EVENT = SDL_WINDOWEVENT, RDE_SYSTEM_EVENT_QUIT_E = SDL_QUIT, RDE_SYSTEM_EVENT_WINDOW_EXIT_E = SDL_WINDOWEVENT_LEAVE, RDE_SYSTEM_EVENT_WINDOW_RESIZED_E = SDL_WINDOWEVENT_RESIZED,
+		RDE_SYSTEM_EVENT_WINDOW_FOCUS_E = SDL_WINDOWEVENT_FOCUS_GAINED, RDE_SYSTEM_EVENT_WINDOW_LOST_FOCUS_E = SDL_WINDOWEVENT_FOCUS_LOST, RDE_SYSTEM_EVENT_WINDOW_AUDIO_DEVICE_CONNECTED_E = SDL_AUDIODEVICEADDED,
+		RDE_SYSTEM_EVENT_WINDOW_AUDIO_DEVICE_DISCONNECTED_E = SDL_AUDIODEVICEREMOVED,
 
-        APP_ON_DESTROY_E = SDL_APP_TERMINATING, APP_DID_ENTER_BACK_E = SDL_APP_DIDENTERBACKGROUND, APP_DID_ENTER_FOREG_E = SDL_APP_DIDENTERFOREGROUND,
-        APP_WILL_ENTER_BACK_E = SDL_APP_WILLENTERBACKGROUND, APP_WILL_ENTER_FOREG = SDL_APP_WILLENTERFOREGROUND,
+		RDE_SYSTEM_EVENT_APP_ON_DESTROY_E = SDL_APP_TERMINATING, RDE_SYSTEM_EVENT_APP_DID_ENTER_BACK_E = SDL_APP_DIDENTERBACKGROUND, RDE_SYSTEM_EVENT_APP_DID_ENTER_FOREG_E = SDL_APP_DIDENTERFOREGROUND,
+		RDE_SYSTEM_EVENT_APP_WILL_ENTER_BACK_E = SDL_APP_WILLENTERBACKGROUND, RDE_SYSTEM_EVENT_APP_WILL_ENTER_FOREG = SDL_APP_WILLENTERFOREGROUND,
 
-        KEY_DOWN_E = SDL_KEYDOWN, KEY_UP_E = SDL_KEYUP, KEY_MAP_CHANGED_E = SDL_KEYMAPCHANGED, KEY_TEXT_INPUT_E = SDL_TEXTINPUT,
-        KEY_TEXT_EDITING_E = SDL_TEXTEDITING,
+		RDE_SYSTEM_EVENT_KEY_DOWN_E = SDL_KEYDOWN, RDE_SYSTEM_EVENT_KEY_UP_E = SDL_KEYUP, RDE_SYSTEM_EVENT_KEY_MAP_CHANGED_E = SDL_KEYMAPCHANGED, RDE_SYSTEM_EVENT_KEY_TEXT_INPUT_E = SDL_TEXTINPUT,
+		RDE_SYSTEM_EVENT_KEY_TEXT_EDITING_E = SDL_TEXTEDITING,
 
-        MOUSE_MOVED_E = SDL_MOUSEMOTION, MOUSE_DOWN_E = SDL_MOUSEBUTTONDOWN, MOUSE_UP_E = SDL_MOUSEBUTTONUP,
-        MOUSE_SCROLLED_E = SDL_MOUSEWHEEL,
+		RDE_SYSTEM_EVENT_MOUSE_MOVED_E = SDL_MOUSEMOTION, RDE_SYSTEM_EVENT_MOUSE_DOWN_E = SDL_MOUSEBUTTONDOWN, RDE_SYSTEM_EVENT_MOUSE_UP_E = SDL_MOUSEBUTTONUP,
+		RDE_SYSTEM_EVENT_MOUSE_SCROLLED_E = SDL_MOUSEWHEEL,
 
-        GAMEPAD_JOYSTICK = SDL_CONTROLLERAXISMOTION, GAMEPAD_BUTTON_DOWN = SDL_CONTROLLERBUTTONDOWN, GAMEPAD_BUTTON_UP = SDL_CONTROLLERBUTTONUP,
-        GAMEPAD_CONNECTED_E = SDL_CONTROLLERDEVICEADDED, GAMEPAD_DISCONNECTED_E = SDL_CONTROLLERDEVICEREMOVED,
+		RDE_SYSTEM_EVENT_GAMEPAD_JOYSTICK = SDL_CONTROLLERAXISMOTION, RDE_SYSTEM_EVENT_GAMEPAD_BUTTON_DOWN = SDL_CONTROLLERBUTTONDOWN, RDE_SYSTEM_EVENT_GAMEPAD_BUTTON_UP = SDL_CONTROLLERBUTTONUP,
+		RDE_SYSTEM_EVENT_GAMEPAD_CONNECTED_E = SDL_CONTROLLERDEVICEADDED, RDE_SYSTEM_EVENT_GAMEPAD_DISCONNECTED_E = SDL_CONTROLLERDEVICEREMOVED,
 
-        JOYSTICK_HAT_MOTION_E = SDL_JOYHATMOTION, JOYSTICK_BALL_MOTION_E = SDL_JOYBALLMOTION, JOYSTICK_BUTTON_DOWN_E = SDL_JOYBUTTONDOWN,
-        JOYSTICK_BUTTON_UP_E = SDL_JOYBUTTONUP, JOYSTICK_CONNECTED_E = SDL_JOYDEVICEADDED, JOYSTICK_DISCONNECTED_E = SDL_JOYDEVICEREMOVED,
-        JOYSTICK_AXIS_MOTION_E = SDL_JOYAXISMOTION,
+		RDE_SYSTEM_EVENT_JOYSTICK_HAT_MOTION_E = SDL_JOYHATMOTION, RDE_SYSTEM_EVENT_JOYSTICK_BALL_MOTION_E = SDL_JOYBALLMOTION, RDE_SYSTEM_EVENT_JOYSTICK_BUTTON_DOWN_E = SDL_JOYBUTTONDOWN,
+		RDE_SYSTEM_EVENT_JOYSTICK_BUTTON_UP_E = SDL_JOYBUTTONUP, RDE_SYSTEM_EVENT_JOYSTICK_CONNECTED_E = SDL_JOYDEVICEADDED, RDE_SYSTEM_EVENT_JOYSTICK_DISCONNECTED_E = SDL_JOYDEVICEREMOVED,
+		RDE_SYSTEM_EVENT_JOYSTICK_AXIS_MOTION_E = SDL_JOYAXISMOTION,
 
-        MOBILE_TOUCH_DOWN_E = SDL_FINGERDOWN, MOBILE_TOUCH_UP_E = SDL_FINGERUP, MOBILE_TOUCH_MOVED = SDL_FINGERMOTION,
+		RDE_SYSTEM_EVENT_MOBILE_TOUCH_DOWN_E = SDL_FINGERDOWN, RDE_SYSTEM_EVENT_MOBILE_TOUCH_UP_E = SDL_FINGERUP, RDE_SYSTEM_EVENT_MOBILE_TOUCH_MOVED = SDL_FINGERMOTION,
 
-        UNKNOWN
+		RDE_SYSTEM_EVENT_UNKNOWN
     };
 
     /**
      * @brief Different type of inputs depending on the platform.
      */
-    enum InputType {
-        WINDOW,
-        MOUSE,
-        KEYBOARD,
-        CONTROLLER,
-        MOBILE
+    enum RDE_INPUT_TYPE_ {
+		RDE_INPUT_TYPE_WINDOW,
+		RDE_INPUT_TYPE_MOUSE,
+		RDE_INPUT_TYPE_KEYBOARD,
+		RDE_INPUT_TYPE_CONTROLLER,
+		RDE_INPUT_TYPE_MOBILE
     };
 
     class Engine; 
@@ -84,7 +84,7 @@ namespace RDE {
             /**
              * @brief Events that the system doesn't handle on purpose.
              */
-            std::vector<SystemEventEnum> ignoredEvents;
+			std::vector<RDE_SYSTEM_EVENT_> ignoredEvents;
 
             /**
              * @see Engine
@@ -171,28 +171,28 @@ namespace RDE {
              * @param _key Key pressed
              * @return bool
              */
-            bool isKeyJustPressed(KeyCode _key);
+            bool isKeyJustPressed(RDE_KEYBOARD_KEY_ _key);
 
             /**
              * @brief Returns true if the key is released and won't return true until the key is pressed and released again.
              * @param _key Key released
              * @return bool
              */
-            bool isKeyJustReleased(KeyCode _key);
+			bool isKeyJustReleased(RDE_KEYBOARD_KEY_ _key);
 
             /**
              * @brief Returns true while the key is being pressed.
              * @param _key Key pressed
              * @return bool
              */
-            bool isKeyPressed(KeyCode _key);
+			bool isKeyPressed(RDE_KEYBOARD_KEY_ _key);
 
             /**
              * @brief Returns true while the key is not being pressed.
              * @param _key Key released
              * @return bool
              */
-            bool isKeyReleased(KeyCode _key);
+			bool isKeyReleased(RDE_KEYBOARD_KEY_ _key);
 
 
             /**
@@ -200,28 +200,28 @@ namespace RDE {
              * @param _button Mouse button pressed
              * @return bool
              */
-            bool isMouseJustPressed(MouseCode _button);
+            bool isMouseJustPressed(RDE_MOUSE_BUTTON_ _button);
 
             /**
              * @brief Returns true if the button is released and won't return true until the button is pressed and released again.
              * @param _button Mouse button released
              * @return bool
              */
-            bool isMouseJustReleased(MouseCode _button);
+			bool isMouseJustReleased(RDE_MOUSE_BUTTON_ _button);
 
             /**
              * @brief Returns true while the button is being pressed.
              * @param _button Mouse button pressed
              * @return bool
              */
-            bool isMousePressed(MouseCode _button);
+			bool isMousePressed(RDE_MOUSE_BUTTON_ _button);
 
             /**
              * @brief Returns true while the button is not being pressed.
              * @param _button Mouse button released
              * @return bool
              */
-            bool isMouseReleased(MouseCode _button);
+			bool isMouseReleased(RDE_MOUSE_BUTTON_ _button);
 
             /**
              * @brief Returns the mouse position in screen coordinates, so x: [0, WindowWidth], y: [0, WindowHeight].
@@ -256,7 +256,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadButtonJustPressed(ControllerButtons _button, int _controllerID = 0);
+            bool isGamepadButtonJustPressed(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
 
             /**
              * @brief Returns true if the button is released and won't return true until the button is pressed and released again.
@@ -264,7 +264,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadButtonJustReleased(ControllerButtons _button, int _controllerID = 0);
+			bool isGamepadButtonJustReleased(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
 
             /**
              * @brief Returns true while the button is being pressed.
@@ -272,7 +272,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadButtonPressed(ControllerButtons _button, int _controllerID = 0);
+			bool isGamepadButtonPressed(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
 
             /**
              * @brief Returns true while the button is not being pressed.
@@ -280,7 +280,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadButtonReleased(ControllerButtons _button, int _controllerID = 0);
+			bool isGamepadButtonReleased(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
 
             /**
              * @brief Makes the controller vibrate at a specific vibration effect.
@@ -297,7 +297,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadAxisJustPressed(ControllerAxis _axis, int _controllerID = 0);
+            bool isGamepadAxisJustPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
 
             /**
              * @brief Returns true while the axis button is being pressed.
@@ -305,7 +305,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadAxisPressed(ControllerAxis _axis, int _controllerID = 0);
+			bool isGamepadAxisPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
 
             /**
              * @brief Returns true while the axis button is not being pressed.
@@ -313,7 +313,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadAxisReleased(ControllerAxis _axis, int _controllerID = 0);
+			bool isGamepadAxisReleased(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
 
 
             /**
@@ -349,21 +349,21 @@ namespace RDE {
              * @param _inputType Type of input.
              * @return std::vector<SystemEventEnum>
              */
-            std::vector<SystemEventEnum> getEventsIgnored(const InputType& _inputType);
+			std::vector<RDE_SYSTEM_EVENT_> getEventsIgnored(const RDE_INPUT_TYPE_& _inputType);
 
             /**
              * @brief Adds an event as ignored.
              * @param _inputType Input type
              * @param _event Event type
              */
-            void addEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event);
+			void addEventToIgnore(const RDE_INPUT_TYPE_& _inputType, const RDE_SYSTEM_EVENT_& _event);
 
             /**
              * @brief Removes and event as ignored.
              * @param _inputType Input type
              * @param _event Event type
              */
-            void removeEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event);
+			void removeEventToIgnore(const RDE_INPUT_TYPE_& _inputType, const RDE_SYSTEM_EVENT_& _event);
     };
 }
 

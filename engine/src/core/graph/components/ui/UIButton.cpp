@@ -54,11 +54,11 @@ namespace RDE {
             .size = _config.buttonSize,
             .texture = data.RenderizableInnerData.texture,
             .color = _config.buttonColor,
-            .imageRenderingType = ImageRenderingType::NINE_SLICE
+            .imageRenderingType = RDE_IMAGE_RENDERING_TYPE_NINE_SLICE
         });
         uiImage->uiInteractable = uiInteractable;
         data.RenderizableInnerData.shader = uiImage->getShaderID();
-        data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
+        data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
 
         textNode = _graph->createNode("Text", _node);
         textRenderer = textNode->addComponent<UIText>(UITextConfig {
@@ -66,7 +66,7 @@ namespace RDE {
             .text = _config.text,
             .textColor = _config.textColor
         });
-        textRenderer->data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
+		textRenderer->data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
     }
 
     void UIButton::onMouseEntered() {
@@ -79,15 +79,15 @@ namespace RDE {
         SAFE_POINTER(uiImage, setTexture(statesTextures[0]))
     }
 
-    void UIButton::onMouseClicked(MouseCode _mouseCode) {
+	void UIButton::onMouseClicked(RDE_MOUSE_BUTTON_ _mouseCode) {
         if(!uiInteractable->interactable) return;
         SAFE_POINTER(uiImage, setTexture(statesTextures[2]))
     }
 
-    void UIButton::onMouseReleased(MouseCode _mouseCode) {
+	void UIButton::onMouseReleased(RDE_MOUSE_BUTTON_ _mouseCode) {
         if(!uiInteractable->interactable) return;
 
-        if(uiInteractable->mouseInnerStatus == UIInteractable::MouseExited) {
+        if(uiInteractable->mouseInnerStatus == UIInteractable::RDE_MOUSE_STATUS_EXITED) {
             SAFE_POINTER(uiImage, setTexture(statesTextures[0]))
         } else {
             SAFE_POINTER(uiImage, setTexture(statesTextures[1]))
@@ -104,7 +104,7 @@ namespace RDE {
         if(!uiInteractable->interactable) {
             SAFE_POINTER(uiImage, setTexture(statesTextures[3]))
         } else {
-            onMouseReleased(MouseCode::ButtonLeft);
+			onMouseReleased(RDE_MOUSE_BUTTON_LEFT);
         }
     }
 

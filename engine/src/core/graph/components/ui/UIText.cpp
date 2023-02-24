@@ -17,14 +17,14 @@ namespace RDE {
 
     UIText::UIText(Node* _node, Manager* _manager, Graph* _graph, const UITextConfig& _config) {
 
-        RENDERIZABLE_UI_BASIC_PROPERTIES_INITIALIZATION(50, TEXT_RENDERER_SHADER, BatchPriority::TextPriority)
+        RENDERIZABLE_UI_BASIC_PROPERTIES_INITIALIZATION(50, TEXT_RENDERER_SHADER, RDE_BATCH_PRIORITY_TEXT)
 
         font = _config.font == nullptr ? _manager->fontManager.getDefaultFont("MontserratRegular") : _config.font;
         innerText = _config.text;
         recalcTextDimensions(innerText);
         setColor(_config.textColor);
         data.RenderizableInnerData.texture = &font->getTexture();
-        data.RenderizableInnerData.renderizableType = RenderizableType::RT_UI_TEXT;
+        data.RenderizableInnerData.renderizableType = RDE_RENDERIZABLE_TYPE_UI_TEXT;
 
         ((UITransform*)node->getTransform())->setSize(textSize);
     }

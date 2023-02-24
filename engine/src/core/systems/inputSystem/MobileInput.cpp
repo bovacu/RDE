@@ -15,9 +15,9 @@ namespace RDE {
         otuDel.bind<&MobileInput::onTouchUp>(this);
         otmDel.bind<&MobileInput::onTouchMoved>(this);
 
-        events[SystemEventEnum::MOBILE_TOUCH_DOWN_E] = otdDel;
-        events[SystemEventEnum::MOBILE_TOUCH_UP_E] = otuDel;
-        events[SystemEventEnum::MOBILE_TOUCH_MOVED] = otmDel;
+        events[RDE_SYSTEM_EVENT_MOBILE_TOUCH_DOWN_E] = otdDel;
+        events[RDE_SYSTEM_EVENT_MOBILE_TOUCH_UP_E] = otuDel;
+        events[RDE_SYSTEM_EVENT_MOBILE_TOUCH_MOVED] = otmDel;
 
         for(int _i = 0; _i < 20; _i++)
             pressedFingers[_i] = -1;

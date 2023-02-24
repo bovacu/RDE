@@ -4,9 +4,7 @@
 #ifndef RDE_RENDER_MANAGER_H
 #define RDE_RENDER_MANAGER_H
 
-// #include "core/graph/components/DynamicSpriteRenderer.h"
 #include "core/graph/components/SpriteRenderer.h"
-// #include "core/graph/components/TextRenderer.h"
 #include "core/graph/components/Transform.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/render/elements/Texture.h"

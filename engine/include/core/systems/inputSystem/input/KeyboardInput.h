@@ -20,7 +20,7 @@ namespace RDE {
             /**
              * @brief Map KeyCode -> State.
              */
-            std::unordered_map<KeyCode, int>  pressedKeyboardKeys;
+            std::unordered_map<RDE_KEYBOARD_KEY_, int>  pressedKeyboardKeys;
 
         public:
             /**

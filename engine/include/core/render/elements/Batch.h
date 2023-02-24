@@ -14,9 +14,9 @@
 /**
  * @brief This is the order of rendering of different Renderizable elements.
  */
-enum BatchPriority {
-    SpritePriority = 0,
-    TextPriority = 1
+enum RDE_BATCH_PRIORITY_ {
+	RDE_BATCH_PRIORITY_SPRITE = 0,
+	RDE_BATCH_PRIORITY_TEXT = 1
 };
 
 namespace RDE {
@@ -40,7 +40,7 @@ namespace RDE {
             /**
              * @see BatchPriority
              */
-            BatchPriority priority = BatchPriority::SpritePriority;
+			RDE_BATCH_PRIORITY_ priority = RDE_BATCH_PRIORITY_SPRITE;
 
             int ID = -1;
 

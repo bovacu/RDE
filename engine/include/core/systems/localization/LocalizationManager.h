@@ -20,28 +20,42 @@ namespace RDE {
         /**
          * @brief Available languages by default of the engine.
         */
-        enum Language { EN_US, EN_GB, EN_CA, ES_MX, ES_ES, PT_BR, FR, ZH, RU, DE, IT, JP, MAX };
-        Language language;
+		enum RDE_LANGUAGE_ { 
+			RDE_LANGUAGE_EN_US, 
+			RDE_LANGUAGE_EN_GB, 
+			RDE_LANGUAGE_EN_CA, 
+			RDE_LANGUAGE_ES_MX, 
+			RDE_LANGUAGE_ES_ES, 
+			RDE_LANGUAGE_PT_BR, 
+			RDE_LANGUAGE_FR, 
+			RDE_LANGUAGE_ZH, 
+			RDE_LANGUAGE_RU, 
+			RDE_LANGUAGE_DE, 
+			RDE_LANGUAGE_IT, 
+			RDE_LANGUAGE_JP, 
+			RDE_LANGUAGE_MAX 
+		};
+		RDE_LANGUAGE_ language;
 
         /**
          * @brief Transforms the enum into a string.
          * @param _language The Language enum
          * @return A const char* of the Language code
         */
-        static const char* toString(Language _language) {
+		static const char* toString(RDE_LANGUAGE_ _language) {
             switch (_language) {
-                case EN_US: return "en-us";
-                case ES_ES: return "es-es";
-                case PT_BR: return "pt-br";
-                case FR:    return "fr";
-                case EN_GB: return "en-gb";
-                case EN_CA: return "en-ca";
-                case ES_MX: return "es-mx";
-                case ZH:    return "zh";
-                case RU:    return "ru";
-                case DE:    return "de";
-                case IT:    return "it";
-                case JP:    return "jp";
+				case RDE_LANGUAGE_EN_US: return "en-us";
+				case RDE_LANGUAGE_ES_ES: return "es-es";
+				case RDE_LANGUAGE_PT_BR: return "pt-br";
+				case RDE_LANGUAGE_FR:    return "fr";
+				case RDE_LANGUAGE_EN_GB: return "en-gb";
+				case RDE_LANGUAGE_EN_CA: return "en-ca";
+				case RDE_LANGUAGE_ES_MX: return "es-mx";
+				case RDE_LANGUAGE_ZH:    return "zh";
+				case RDE_LANGUAGE_RU:    return "ru";
+				case RDE_LANGUAGE_DE:    return "de";
+				case RDE_LANGUAGE_IT:    return "it";
+				case RDE_LANGUAGE_JP:    return "jp";
                 default:    return "NON_LANGUAGE";
             }
         }
@@ -51,7 +65,7 @@ namespace RDE {
          * @param _language A valid language code.
          * @return Language
         */
-        static Language toEnum(const char* _language) {
+		static RDE_LANGUAGE_ toEnum(const char* _language) {
             return toEnum(std::string(_language));
         }
 
@@ -60,28 +74,28 @@ namespace RDE {
          * @param _language A valid language code.
          * @return Language
         */
-        static Language toEnum(const std::string& _language) {
+		static RDE_LANGUAGE_ toEnum(const std::string& _language) {
             auto _strCpy = _language;
             _strCpy = Util::String::toLower(_strCpy);
 
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "en_us")) return Language::EN_US;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "en"))    return Language::EN_US;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "es"))    return Language::ES_ES;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "es_es")) return Language::ES_ES;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "pt"))    return Language::PT_BR;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "pt_br")) return Language::PT_BR;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "fr"))    return Language::FR;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "en_gb")) return Language::EN_GB;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "en_ca")) return Language::EN_CA;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "es_mx")) return Language::ES_MX;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "zh"))    return Language::ZH;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "ru"))    return Language::RU;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "de"))    return Language::DE;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "it"))    return Language::IT;
-            if(std::equal(_strCpy.begin(), _strCpy.end(), "jp"))    return Language::JP;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "en_us")) return RDE_LANGUAGE_EN_US;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "en"))    return RDE_LANGUAGE_EN_US;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "es"))    return RDE_LANGUAGE_ES_ES;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "es_es")) return RDE_LANGUAGE_ES_ES;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "pt"))    return RDE_LANGUAGE_PT_BR;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "pt_br")) return RDE_LANGUAGE_PT_BR;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "fr"))    return RDE_LANGUAGE_FR;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "en_gb")) return RDE_LANGUAGE_EN_GB;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "en_ca")) return RDE_LANGUAGE_EN_CA;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "es_mx")) return RDE_LANGUAGE_ES_MX;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "zh"))    return RDE_LANGUAGE_ZH;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "ru"))    return RDE_LANGUAGE_RU;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "de"))    return RDE_LANGUAGE_DE;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "it"))    return RDE_LANGUAGE_IT;
+			if(std::equal(_strCpy.begin(), _strCpy.end(), "jp"))    return RDE_LANGUAGE_JP;
 
             Util::Log::warn("Locale: '", _language, "' is not implemented in the engine, defaulting to english");
-            return Language::EN_US;
+			return RDE_LANGUAGE_EN_US;
         }
     };
 
@@ -95,7 +109,7 @@ namespace RDE {
             /**
              * @brief A map that stores [LocalizationKey] -> (keyWord, TranslationWord).
             */
-            std::unordered_map<LocalizationInfo::Language, std::unordered_map<std::string, std::string>> localizationTable;
+			std::unordered_map<LocalizationInfo::RDE_LANGUAGE_, std::unordered_map<std::string, std::string>> localizationTable;
 
             /**
              * @brief Reference to the Engine.
@@ -167,7 +181,7 @@ namespace RDE {
              * @brief Loads a specific language configured in the localization.json
              * @param _language The Language to load
             */
-            void loadLanguage(LocalizationInfo::Language _language);
+            void loadLanguage(LocalizationInfo::RDE_LANGUAGE_ _language);
 
             /**
              * @brief Returns the localized value of a key in the localization.json in the current loaded Language.

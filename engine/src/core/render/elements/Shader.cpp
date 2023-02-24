@@ -59,7 +59,7 @@ namespace RDE {
         std::string _vertexCode;
         std::string _fragmentCode;
         
-        auto* _vertexFile = _fileManager->open(_vertex, FileMode::READ);
+		auto* _vertexFile = _fileManager->open(_vertex, RDE_FILE_MODE_READ);
         if (_vertexFile == nullptr) {
             Util::Log::error("Can't read file: ", _vertex);
             return false;
@@ -67,7 +67,7 @@ namespace RDE {
         _vertexCode = _fileManager->readFullFile(_vertexFile).content;
         _fileManager->close(_vertexFile);
 
-        auto* _fragmentFile = _fileManager->open(_fragment, FileMode::READ);
+		auto* _fragmentFile = _fileManager->open(_fragment, RDE_FILE_MODE_READ);
         if (_fragmentFile == nullptr) {
             Util::Log::info("Can't read file: ", _fragment);
             return false;
@@ -170,7 +170,7 @@ namespace RDE {
 		glUseProgram(0);
     }
 
-	void Shader::setUniformValueFloat(const char* _uniformName, RDE_UNIFORM_FV _type, GLfloat* _data, GLboolean _transpose) {
+	void Shader::setUniformValueFloat(const char* _uniformName, RDE_UNIFORM_FV_ _type, GLfloat* _data, GLboolean _transpose) {
 		if(uniforms[_uniformName] != -1) {
 			auto _location = uniforms[_uniformName];
 			switch(_type) {
@@ -193,7 +193,7 @@ namespace RDE {
 		}	
 	}
 
-	void Shader::setUniformValueInt(const char* _uniformName, RDE_UNIFORM_IV _type, GLint* _data) {
+	void Shader::setUniformValueInt(const char* _uniformName, RDE_UNIFORM_IV_ _type, GLint* _data) {
 		if(uniforms[_uniformName] != -1) {
 			auto _location = uniforms[_uniformName];
 			switch(_type) {
@@ -207,7 +207,7 @@ namespace RDE {
 		}	
 	}
 
-	void Shader::setUniformValueUInt(const char* _uniformName, RDE_UNIFORM_UIV _type, GLuint* _data) {
+	void Shader::setUniformValueUInt(const char* _uniformName, RDE_UNIFORM_UIV_ _type, GLuint* _data) {
 		if(uniforms[_uniformName] != -1) {
 			auto _location = uniforms[_uniformName];
 			switch(_type) {

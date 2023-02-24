@@ -21,12 +21,12 @@ namespace RDE {
     class IViewPort;
     class Transform;
 
-    enum RenderizableType {
-        RT_NONE        = 0,
-        RT_SPRITE      = 1,
-        RT_TEXT        = 2,
-        RT_UI_IMAGE    = 3,
-        RT_UI_TEXT     = 4
+    enum RDE_RENDERIZABLE_TYPE_ {
+		RDE_RENDERIZABLE_TYPE_NONE        = 0,
+		RDE_RENDERIZABLE_TYPE_SPRITE      = 1,
+		RDE_RENDERIZABLE_TYPE_TEXT        = 2,
+		RDE_RENDERIZABLE_TYPE_UI_IMAGE    = 3,
+		RDE_RENDERIZABLE_TYPE_UI_TEXT     = 4
     };
 
     typedef GLuint TextureID;
@@ -45,8 +45,8 @@ namespace RDE {
         int layer = 0;
         std::vector<OpenGLVertex> vertices;
         bool dirty = false;
-        BatchPriority batchPriority = BatchPriority::SpritePriority;
-        RenderizableType renderizableType = RenderizableType::RT_NONE;
+        RDE_BATCH_PRIORITY_ batchPriority = RDE_BATCH_PRIORITY_SPRITE;
+		RDE_RENDERIZABLE_TYPE_ renderizableType = RDE_RENDERIZABLE_TYPE_NONE;
 
         void* extraInfo = nullptr;
     };
@@ -121,26 +121,26 @@ namespace RDE {
 
 
 
-    #define RENDERIZABLE_BASIC_METHODS()                    \
-    friend class Graph;                                     \
-    [[nodiscard]] Texture* getTexture() const;              \
-    void setTexture(Texture* _texture);                     \
-                                                            \
-    [[nodiscard]] Color getColor() const;                   \
-    void setColor(const Color& _color);                     \
-                                                            \
-    [[nodiscard]] ShaderID getShaderID() const;             \
-    void setShaderID(ShaderID _shaderID);                   \
-                                                            \
-    int getLayer() const;                                   \
-    void setLayer(int _layer);                              \
-                                                            \
-    [[nodiscard]] Vec2F getSize() const;                    \
-    [[nodiscard]] FloatRect getRegion() const;              \
-                                                            \
-    [[nodiscard]] BatchPriority getBatchPriority() const;   \
-                                                            \
-    bool isEnabled() const;                                 \
+    #define RENDERIZABLE_BASIC_METHODS()                    		\
+    friend class Graph;                                     		\
+    [[nodiscard]] Texture* getTexture() const;              		\
+    void setTexture(Texture* _texture);                     		\
+                                                            		\
+    [[nodiscard]] Color getColor() const;                   		\
+    void setColor(const Color& _color);                     		\
+                                                            		\
+    [[nodiscard]] ShaderID getShaderID() const;             		\
+    void setShaderID(ShaderID _shaderID);                   		\
+                                                            		\
+    int getLayer() const;                                   		\
+    void setLayer(int _layer);                              		\
+                                                            		\
+    [[nodiscard]] Vec2F getSize() const;                    		\
+    [[nodiscard]] FloatRect getRegion() const;              		\
+                                                            		\
+    [[nodiscard]] RDE_BATCH_PRIORITY_ getBatchPriority() const;   	\
+                                                            		\
+    bool isEnabled() const;                                 		\
     void setEnabled(bool _enabled);
 
 
@@ -162,7 +162,7 @@ namespace RDE {
     Vec2F _className::getSize() const { return { _getSizeX, _getSizeY }; };                             \
     FloatRect _className::getRegion() const { return data.texture->getRegion(); };                      \
                                                                                                         \
-    BatchPriority _className::getBatchPriority() const { return data.batchPriority; }                   \
+    RDE_BATCH_PRIORITY_ _className::getBatchPriority() const { return data.batchPriority; }             \
                                                                                                         \
     bool _className::isEnabled() const { return !node->hasComponent<DisabledForRender>(); }             \
     void _className::setEnabled(bool _enabled) {                                                        \
@@ -252,7 +252,7 @@ namespace RDE {
     Vec2F _className::getSize() const { return { _getSizeX, _getSizeY }; };                                                                     \
     FloatRect _className::getRegion() const { return data.RenderizableInnerData.texture->getRegion(); };                                        \
                                                                                                                                                 \
-    BatchPriority _className::getBatchPriority() const { return data.RenderizableInnerData.batchPriority; }                                     \
+    RDE_BATCH_PRIORITY_ _className::getBatchPriority() const { return data.RenderizableInnerData.batchPriority; }                               \
                                                                                                                                                 \
     ENABLED_DEFAULT_IMPL(_className)                                                                                                            \
                                                                                                                                                 \

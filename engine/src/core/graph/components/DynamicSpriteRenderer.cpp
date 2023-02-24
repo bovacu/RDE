@@ -19,7 +19,7 @@ namespace RDE {
 
     DynamicSpriteRenderer::DynamicSpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const DynamicSpriteRendererConfig& _config) {
 
-        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(4, SPRITE_RENDERER_SHADER, BatchPriority::SpritePriority)
+        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(4, SPRITE_RENDERER_SHADER, RDE_BATCH_PRIORITY_SPRITE)
         
         data.texture = new CPUTexture;
 

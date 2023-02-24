@@ -116,7 +116,7 @@ namespace RDE {
 
     Font* FontManager::loadFont(FileManager& _fileManager, const std::string& _pathToFont, int _fontSize) {
         FT_Face _face;
-        auto _fileHandler = _fileManager.open(_pathToFont, FileMode::READ);
+		auto _fileHandler = _fileManager.open(_pathToFont, RDE_FILE_MODE_READ);
         auto _data = _fileManager.readFullFile(_fileHandler).content;
         FT_Error _error = FT_New_Memory_Face(ftLibrary, reinterpret_cast<const FT_Byte*>(_data.c_str()), _data.size(), 0, &_face);
         _fileManager.close(_fileHandler);

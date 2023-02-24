@@ -20,102 +20,102 @@ namespace RDE {
         kueDel.bind<&KeyboardInput::onKeyUp>(this);
         tteDel.bind<&KeyboardInput::onTextTyped>(this);
 
-        events[SystemEventEnum::KEY_DOWN_E] = kdeDel;
-        events[SystemEventEnum::KEY_UP_E] = kueDel;
-        events[SystemEventEnum::KEY_TEXT_INPUT_E] = tteDel;
+        events[RDE_SYSTEM_EVENT_KEY_DOWN_E] = kdeDel;
+		events[RDE_SYSTEM_EVENT_KEY_UP_E] = kueDel;
+		events[RDE_SYSTEM_EVENT_KEY_TEXT_INPUT_E] = tteDel;
 
         pressedKeyboardKeys = {
-                {KeyCode::LeftControl,  0},
-                {KeyCode::LeftAlt,      0},
-                {KeyCode::Space,        0},
-                {KeyCode::RightAlt,     0},
-                {KeyCode::RightControl, 0},
-                {KeyCode::LeftShift,    0},
-                {KeyCode::Z,            0},
-                {KeyCode::X,            0},
-                {KeyCode::C,            0},
-                {KeyCode::V,            0},
-                {KeyCode::B,            0},
-                {KeyCode::N,            0},
-                {KeyCode::M,            0},
-                {KeyCode::Comma,        0},
-                {KeyCode::Period,       0},
-                {KeyCode::Slash,        0},
-                {KeyCode::RightShift,   0},
-                {KeyCode::CapsLock,     0},
-                {KeyCode::A,            0},
-                {KeyCode::S,            0},
-                {KeyCode::D,            0},
-                {KeyCode::F,            0},
-                {KeyCode::G,            0},
-                {KeyCode::H,            0},
-                {KeyCode::J,            0},
-                {KeyCode::K,            0},
-                {KeyCode::L,            0},
-                {KeyCode::Semicolon,    0},
-                {KeyCode::Apostrophe,   0},
-                {KeyCode::Enter,        0},
-                {KeyCode::Tab,          0},
-                {KeyCode::Q,            0},
-                {KeyCode::W,            0},
-                {KeyCode::E,            0},
-                {KeyCode::R,            0},
-                {KeyCode::T,            0},
-                {KeyCode::Y,            0},
-                {KeyCode::U,            0},
-                {KeyCode::I,            0},
-                {KeyCode::O,            0},
-                {KeyCode::P,            0},
-                {KeyCode::LeftBracket,  0},
-                {KeyCode::RightBracket, 0},
-                {KeyCode::Backslash,    0},
-                {KeyCode::GraveAccent,  0},
-                {KeyCode::D0,           0},
-                {KeyCode::D1,           0},
-                {KeyCode::D2,           0},
-                {KeyCode::D3,           0},
-                {KeyCode::D4,           0},
-                {KeyCode::D5,           0},
-                {KeyCode::D6,           0},
-                {KeyCode::D7,           0},
-                {KeyCode::D8,           0},
-                {KeyCode::D9,           0},
-                {KeyCode::Minus,        0},
-                {KeyCode::Equal,        0},
-                {KeyCode::Backspace,    0},
-                {KeyCode::Escape,       0},
-                {KeyCode::F1,           0},
-                {KeyCode::F2,           0},
-                {KeyCode::F3,           0},
-                {KeyCode::F4,           0},
-                {KeyCode::F5,           0},
-                {KeyCode::F6,           0},
-                {KeyCode::F7,           0},
-                {KeyCode::F8,           0},
-                {KeyCode::F9,           0},
-                {KeyCode::F10,          0},
-                {KeyCode::F11,          0},
-                {KeyCode::F12,          0},
-                {KeyCode::PrintScreen,  0},
-                {KeyCode::ScrollLock,   0},
-                {KeyCode::Insert,       0},
-                {KeyCode::Delete,       0},
-                {KeyCode::Home,         0},
-                {KeyCode::End,          0},
-                {KeyCode::PageUp,       0},
-                {KeyCode::PageDown,     0},
-                {KeyCode::Right,        0},
-                {KeyCode::Left,         0},
-                {KeyCode::Up,           0},
-                {KeyCode::Down,         0},
+			{RDE_KEYBOARD_KEY_LEFT_CTRL,  		0},
+				{RDE_KEYBOARD_KEY_LEFT_ALT,     0},
+				{RDE_KEYBOARD_KEY_SPACE,        0},
+				{RDE_KEYBOARD_KEY_RIGHT_ALT,    0},
+				{RDE_KEYBOARD_KEY_RIGHT_CTRL, 	0},
+				{RDE_KEYBOARD_KEY_LEFT_SHIFT,   0},
+				{RDE_KEYBOARD_KEY_Z,            0},
+				{RDE_KEYBOARD_KEY_X,            0},
+				{RDE_KEYBOARD_KEY_C,            0},
+				{RDE_KEYBOARD_KEY_V,            0},
+				{RDE_KEYBOARD_KEY_B,            0},
+				{RDE_KEYBOARD_KEY_N,            0},
+				{RDE_KEYBOARD_KEY_M,            0},
+				{RDE_KEYBOARD_KEY_COMMA,        0},
+				{RDE_KEYBOARD_KEY_PERIOD,       0},
+				{RDE_KEYBOARD_KEY_SLASH,        0},
+				{RDE_KEYBOARD_KEY_RIGHT_SHIFT,  0},
+				{RDE_KEYBOARD_KEY_CAPS_LOCK,    0},
+				{RDE_KEYBOARD_KEY_A,            0},
+				{RDE_KEYBOARD_KEY_S,            0},
+				{RDE_KEYBOARD_KEY_D,            0},
+				{RDE_KEYBOARD_KEY_F,            0},
+				{RDE_KEYBOARD_KEY_G,            0},
+				{RDE_KEYBOARD_KEY_H,            0},
+				{RDE_KEYBOARD_KEY_J,            0},
+				{RDE_KEYBOARD_KEY_K,            0},
+				{RDE_KEYBOARD_KEY_L,            0},
+				{RDE_KEYBOARD_KEY_SEMICOLON,    0},
+				{RDE_KEYBOARD_KEY_APOSTROPHE,   0},
+				{RDE_KEYBOARD_KEY_ENTER,        0},
+				{RDE_KEYBOARD_KEY_TAB,          0},
+				{RDE_KEYBOARD_KEY_Q,            0},
+				{RDE_KEYBOARD_KEY_W,            0},
+				{RDE_KEYBOARD_KEY_E,            0},
+				{RDE_KEYBOARD_KEY_R,            0},
+				{RDE_KEYBOARD_KEY_T,            0},
+				{RDE_KEYBOARD_KEY_Y,            0},
+				{RDE_KEYBOARD_KEY_U,            0},
+				{RDE_KEYBOARD_KEY_I,            0},
+				{RDE_KEYBOARD_KEY_O,            0},
+				{RDE_KEYBOARD_KEY_P,            0},
+				{RDE_KEYBOARD_KEY_LEFT_BRACKET, 0},
+				{RDE_KEYBOARD_KEY_RIGHT_BRACKET,0},
+				{RDE_KEYBOARD_KEY_BACK_SLASH,   0},
+				{RDE_KEYBOARD_KEY_GRACE_ACCENT, 0},
+				{RDE_KEYBOARD_KEY_D0,           0},
+				{RDE_KEYBOARD_KEY_D1,           0},
+				{RDE_KEYBOARD_KEY_D2,           0},
+				{RDE_KEYBOARD_KEY_D3,           0},
+				{RDE_KEYBOARD_KEY_D4,           0},
+				{RDE_KEYBOARD_KEY_D5,           0},
+				{RDE_KEYBOARD_KEY_D6,           0},
+				{RDE_KEYBOARD_KEY_D7,           0},
+				{RDE_KEYBOARD_KEY_D8,           0},
+				{RDE_KEYBOARD_KEY_D9,           0},
+				{RDE_KEYBOARD_KEY_MINUS,        0},
+				{RDE_KEYBOARD_KEY_EQUAL,        0},
+				{RDE_KEYBOARD_KEY_BAKCSPACE,    0},
+				{RDE_KEYBOARD_KEY_ESCAPE,       0},
+				{RDE_KEYBOARD_KEY_F1,           0},
+				{RDE_KEYBOARD_KEY_F2,           0},
+				{RDE_KEYBOARD_KEY_F3,           0},
+				{RDE_KEYBOARD_KEY_F4,           0},
+				{RDE_KEYBOARD_KEY_F5,           0},
+				{RDE_KEYBOARD_KEY_F6,           0},
+				{RDE_KEYBOARD_KEY_F7,           0},
+				{RDE_KEYBOARD_KEY_F8,           0},
+				{RDE_KEYBOARD_KEY_F9,           0},
+				{RDE_KEYBOARD_KEY_F10,          0},
+				{RDE_KEYBOARD_KEY_F11,          0},
+				{RDE_KEYBOARD_KEY_F12,          0},
+				{RDE_KEYBOARD_KEY_PRINT_SCREEN, 0},
+				{RDE_KEYBOARD_KEY_SCROLL_LOCK,  0},
+				{RDE_KEYBOARD_KEY_INSERT,       0},
+				{RDE_KEYBOARD_KEY_DELETE,       0},
+				{RDE_KEYBOARD_KEY_HOME,         0},
+				{RDE_KEYBOARD_KEY_END,          0},
+				{RDE_KEYBOARD_KEY_PAGE_UP,      0},
+				{RDE_KEYBOARD_KEY_PAGE_DOWN,    0},
+				{RDE_KEYBOARD_KEY_RIGHT,        0},
+				{RDE_KEYBOARD_KEY_LEFT,         0},
+				{RDE_KEYBOARD_KEY_UP,           0},
+				{RDE_KEYBOARD_KEY_DOWN,         0},
 
         };
 
-        ignoredEvents = { KEY_MAP_CHANGED_E, KEY_TEXT_EDITING_E };
+		ignoredEvents = { RDE_SYSTEM_EVENT_KEY_MAP_CHANGED_E, RDE_SYSTEM_EVENT_KEY_TEXT_EDITING_E };
     }
 
     void KeyboardInput::onKeyDown(SDL_Event& _event) {
-        auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
+		auto _key = static_cast<RDE_KEYBOARD_KEY_>(_event.key.keysym.scancode);
 
         KeyPressedEvent _e(_key, 1);
         window->consumeEvent(_e);
@@ -125,7 +125,7 @@ namespace RDE {
     }
 
     void KeyboardInput::onKeyUp(SDL_Event& _event) {
-        auto _key = static_cast<KeyCode>(_event.key.keysym.scancode);
+		auto _key = static_cast<RDE_KEYBOARD_KEY_>(_event.key.keysym.scancode);
         pressedKeyboardKeys[_key] = 0;
 
         KeyReleasedEvent _e(_key);
@@ -138,10 +138,10 @@ namespace RDE {
     }
 
     int KeyboardInput::getState(int _keyOrButton) {
-        return pressedKeyboardKeys[(KeyCode)_keyOrButton];
+        return pressedKeyboardKeys[(RDE_KEYBOARD_KEY_)_keyOrButton];
     }
 
     void KeyboardInput::setState(int _keyOrButton, int _state) {
-        pressedKeyboardKeys[(KeyCode)_keyOrButton] = _state;
+		pressedKeyboardKeys[(RDE_KEYBOARD_KEY_)_keyOrButton] = _state;
     }
 }

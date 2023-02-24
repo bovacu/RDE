@@ -75,13 +75,13 @@ namespace RDE {
     void Scene::onInnerUpdateUI(Delta _dt) {
         for (auto& _it : canvas->uiUpdatables) {
             switch (_it.updatableData.updatableType) {
-            case UT_NONE:
+				case RDE_UI_UPDATABLE_NODE_NONE:
                 break;
-            case UT_UI_INPUT: {
+				case RDE_UI_UPDATABLE_NODE_INPUT: {
                 ((UIInput*)_it.updatableData.updatable)->onUpdate(_dt);
                 break;
             }
-            case UT_UI_SLIDER: {
+				case RDE_UI_UPDATABLE_NODE_SLIDER: {
                 ((UISlider*)_it.updatableData.updatable)->onUpdate(_dt);
                 break;
             }

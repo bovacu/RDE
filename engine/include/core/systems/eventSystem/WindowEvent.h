@@ -30,10 +30,10 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::WindowMoved; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_MOVED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "WindowMoved"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
     };
 
 
@@ -64,10 +64,10 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::WindowResized; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_RESIZED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "WindowResized"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
     };
 
 
@@ -88,10 +88,10 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::WindowDisplayChanged; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "WindowDisplayChanged"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
     };
 
 
@@ -112,10 +112,10 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::WindowMinimized; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_MINIMIZED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "WindowMinimized"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
     };
 
 
@@ -133,10 +133,10 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::WindowClosed; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_CLOSED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "WindowClosed"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
     };
 
 
@@ -152,10 +152,10 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::GameFrame; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_GAME_FRAME; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "GameFrame"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
     };
 
 
@@ -172,10 +172,10 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::GameUpdate; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_GAME_UPDATE; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "GameUpdate"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
     };
 
 
@@ -192,10 +192,10 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::GameRender; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_GAME_RENDER; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "GameRender"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryGame; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
     };
 }
 

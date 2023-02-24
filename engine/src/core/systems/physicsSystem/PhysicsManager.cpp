@@ -98,7 +98,7 @@ namespace RDE {
             for(auto& _physicsShape : _body->physicsShapes) {
 
                 switch (_physicsShape.second.shapeConfig.type) {
-                    case PhysicsShapeType::CIRCLE: {
+					case RDE_PHYSICS_SHAPE_TYPE_CIRCLE: {
                         if(!debugOptions.showCircleLines) return;
 
                         const int _segments = 20;
@@ -131,15 +131,15 @@ namespace RDE {
                         break;
                     }
 
-                    case PhysicsShapeType::BOX: {
+					case RDE_PHYSICS_SHAPE_TYPE_BOX: {
                         drawPolygon(_body, _physicsShape.second.shapeConfig, _renderManager, debugOptions.boxLineColor, debugOptions.boxRadiusColor, debugOptions.showBoxLines, debugOptions.showBoxRadius);
                         break;
                     }
-                    case PhysicsShapeType::POLYGON: {
+					case RDE_PHYSICS_SHAPE_TYPE_POLYGON: {
                         drawPolygon(_body, _physicsShape.second.shapeConfig, _renderManager, debugOptions.polygonLineColor, debugOptions.polygonRadiusColor, debugOptions.showPolygonLines, debugOptions.showPolygonRadius);
                         break;
                     }
-                    case PhysicsShapeType::SEGMENT: {
+					case RDE_PHYSICS_SHAPE_TYPE_SEGMENT: {
                         _renderManager->drawLine({_body->transform->getModelMatrixPosition().x - _physicsShape.second.shapeConfig.size.x / 2.f, _body->transform->getModelMatrixPosition().y},
                                                  {_body->transform->getModelMatrixPosition().x + _physicsShape.second.shapeConfig.size.x / 2.f, _body->transform->getModelMatrixPosition().y},
                                                  Color::Blue);

@@ -15,34 +15,34 @@ namespace RDE {
         auto _parentPosition = _transform->parentTransform->getModelMatrixPosition();
         auto _parentSize = ((UITransform*)_transform->parentTransform->node->getTransform())->getSize();
 
-        if((anchor & ANCHOR_BITS) == Anchor::MIDDLE) {
+		if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_MIDDLE) {
             anchorPosition = _parentPosition;
-        } else if((anchor & ANCHOR_BITS) == Anchor::LEFT) {
+		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_LEFT) {
             anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f) , _parentPosition.y };
-        } else if((anchor & ANCHOR_BITS) == Anchor::RIGHT) {
+		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_RIGHT) {
             anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f) , _parentPosition.y };
-        } else if((anchor & ANCHOR_BITS) == Anchor::TOP) {
+		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_TOP) {
             anchorPosition = { _parentPosition.x, (_parentPosition.y + _parentSize.y * 0.5f) };
-        } else if((anchor & ANCHOR_BITS) == Anchor::BOTTOM) {
+		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_BOTTOM) {
             anchorPosition = { _parentPosition.x, (_parentPosition.y - _parentSize.y * 0.5f) };
-        } else if((anchor & ANCHOR_BITS) == Anchor::LEFT_TOP) {
+		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_LEFT_TOP) {
             anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f), (_parentPosition.y + _parentSize.y * 0.5f) };
-        } else if((anchor & ANCHOR_BITS) == Anchor::LEFT_BOTTOM) {
+		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_LEFT_BOTTOM) {
             anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f), (_parentPosition.y - _parentSize.y * 0.5f) };
-        } else if((anchor & ANCHOR_BITS) == Anchor::RIGHT_TOP) {
+		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_RIGHT_TOP) {
             anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f), (_parentPosition.y + _parentSize.y * 0.5f) };
-        } else if((anchor & ANCHOR_BITS) == Anchor::RIGHT_BOTTOM) {
+		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_RIGHT_BOTTOM) {
             anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f), (_parentPosition.y - _parentSize.y * 0.5f) };
         }
 
 
-        if((anchor & STRETCH_BITS) == Stretch::NO_STRETCH) {
+		if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_NO_STRETCH) {
             anchorSize = Vec2F { 0.f, 0.f };
-        } else if((anchor & STRETCH_BITS) == Stretch::HORIZONTAL_STRETCH) {
+		} else if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_HORIZONTAL_STRETCH) {
             anchorSize.x = _parentSize.x;
-        } else if((anchor & STRETCH_BITS) == Stretch::VERTICAL_STRETCH) {
+		} else if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_VERTICAL_STRETCH) {
             anchorSize.y = _parentSize.y;
-        } else if((anchor & STRETCH_BITS) == Stretch::FULL_STRETCH) {
+		} else if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_FULL_STRETCH) {
             anchorSize = _parentSize;
         }
     }
@@ -51,24 +51,24 @@ namespace RDE {
 
 
     UITransform::UITransform(Graph* _graph) : Transform(_graph) {
-        anchor.anchor = Anchor::MIDDLE | Stretch::NO_STRETCH;
+		anchor.anchor = RDE_UI_ANCHOR_MIDDLE | RDE_UI_STRETCH_NO_STRETCH;
     }
 
-    Anchor UITransform::getAnchor() const {
-        return (Anchor)(anchor.anchor & ANCHOR_BITS);
+	RDE_UI_ANCHOR_ UITransform::getAnchor() const {
+		return (RDE_UI_ANCHOR_)(anchor.anchor & ANCHOR_BITS);
     }
 
-    void UITransform::setAnchor(Anchor _anchor) {
+	void UITransform::setAnchor(RDE_UI_ANCHOR_ _anchor) {
         anchor.anchor = _anchor | (anchor.anchor & STRETCH_BITS);
         anchor.updateAnchor(this);
         setUIDirty();
     }
 
-    Stretch UITransform::getStretch() const {
-        return (Stretch)(anchor.anchor & STRETCH_BITS);
+	RDE_UI_STRETCH_ UITransform::getStretch() const {
+		return (RDE_UI_STRETCH_)(anchor.anchor & STRETCH_BITS);
     }
 
-    void UITransform::setStretch(Stretch _stretch) {
+	void UITransform::setStretch(RDE_UI_STRETCH_ _stretch) {
         anchor.anchor = _stretch | (anchor.anchor & ANCHOR_BITS);
         anchor.updateAnchor(this);
         setUIDirty();
@@ -90,13 +90,13 @@ namespace RDE {
             auto _sizeDiff = _uiTransform->anchor.anchorSize - _lastSize;
             if(_sizeDiff != 0) {
                 _uiTransform->setSize(_uiTransform->getSize() + _sizeDiff);
-                if(((_uiTransform->anchor.anchor & Anchor::RIGHT) == Anchor::RIGHT) || ((_uiTransform->anchor.anchor & Anchor::RIGHT_BOTTOM) == Anchor::RIGHT_BOTTOM) ||
-                        ((_uiTransform->anchor.anchor & Anchor::RIGHT_TOP) == Anchor::RIGHT_TOP)) {
+				if(((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) || ((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_BOTTOM) == RDE_UI_ANCHOR_RIGHT_BOTTOM) ||
+					((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_TOP) == RDE_UI_ANCHOR_RIGHT_TOP)) {
                     _sizeDiff.x = -_sizeDiff.x;
                 }
 
-                if(((_uiTransform->anchor.anchor & Anchor::TOP) == Anchor::TOP) || ((_uiTransform->anchor.anchor & Anchor::RIGHT_TOP) == Anchor::RIGHT_TOP) ||
-                   ((_uiTransform->anchor.anchor & Anchor::LEFT_TOP) == Anchor::LEFT_TOP)) {
+				if(((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_TOP) == RDE_UI_ANCHOR_TOP) || ((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_TOP) == RDE_UI_ANCHOR_RIGHT_TOP) ||
+					((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_LEFT_TOP) == RDE_UI_ANCHOR_LEFT_TOP)) {
                     _sizeDiff.y = -_sizeDiff.y;
                 }
 

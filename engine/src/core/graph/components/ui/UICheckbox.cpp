@@ -45,7 +45,7 @@ namespace RDE {
             .text = _config.text,
             .textColor = _config.textColor
         });
-        textRenderer->data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
+		textRenderer->data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
 
         auto _checkboxBackgroundNode = _graph->createNode("CheckboxBackground", _node);
         checkboxBackgroundSprite = _checkboxBackgroundNode->addComponent<UIImage>(UIImageConfig {
@@ -53,12 +53,12 @@ namespace RDE {
             .color = _config.checkboxColor
         });
         data.RenderizableInnerData.shader = checkboxBackgroundSprite->getShaderID();
-        data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
+        data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
 
         ((UITransform*)node->getTransform())->setSize({ textRenderer->getSize().x + checkboxBackgroundSprite->getSize().x + _config.checkboxTextOffset.x,
                                                         std::max(checkboxBackgroundSprite->getSize().y, textRenderer->getSize().y * 0.5f)});
 
-        ((UITransform*)_checkboxBackgroundNode->getTransform())->setAnchor(Anchor::LEFT);
+        ((UITransform*)_checkboxBackgroundNode->getTransform())->setAnchor(RDE_UI_ANCHOR_LEFT);
         _checkboxBackgroundNode->getTransform()->setMatrixModelPosition({
             _checkboxBackgroundNode->getTransform()->getModelMatrixPosition().x - getSize().x * 0.5f + checkboxBackgroundSprite->getSize().x * 0.5f,
             _checkboxBackgroundNode->getTransform()->getModelMatrixPosition().y
@@ -73,7 +73,7 @@ namespace RDE {
         tickSprite->setEnabled(_config.checked);
 
 
-        ((UITransform*)textNode->getTransform())->setAnchor(Anchor::LEFT);
+		((UITransform*)textNode->getTransform())->setAnchor(RDE_UI_ANCHOR_LEFT);
         textNode->getTransform()->setMatrixModelPosition({
             textNode->getTransform()->getModelMatrixPosition().x - getSize().x * 0.5f +
             checkboxBackgroundSprite->getSize().x + textRenderer->getTextSize().x * 0.5f + _config.checkboxTextOffset.x,
@@ -88,10 +88,10 @@ namespace RDE {
     SIZE_METHODS_DEFAULT_IMPL(UICheckbox)
 
 
-    void UICheckbox::onMouseReleased(MouseCode _mouseButton) {
+		void UICheckbox::onMouseReleased(RDE_MOUSE_BUTTON_ _mouseButton) {
         if(!uiInteractable->interactable) return;
 
-        if(uiInteractable->mouseInnerStatus == UIInteractable::MouseEntered) {
+		if(uiInteractable->mouseInnerStatus == UIInteractable::RDE_MOUSE_STATUS_ENTERED) {
             setChecked(!checked);
             tickSprite->setEnabled(checked);
         }

@@ -14,7 +14,7 @@
 namespace RDE {
 
     bool Input::pollEvent(SDL_Event& _event) {
-        if(events.find((SystemEventEnum)_event.type) == events.end()) {
+        if(events.find((RDE_SYSTEM_EVENT_)_event.type) == events.end()) {
             return false;
         }
 
@@ -76,7 +76,7 @@ namespace RDE {
         }
     }
 
-    bool InputManager::isKeyJustPressed(KeyCode _key) {
+    bool InputManager::isKeyJustPressed(RDE_KEYBOARD_KEY_ _key) {
         auto* _keyboardInput = keyboardInput;
         if(_keyboardInput->getState((int)_key) == 1) {
             _keyboardInput->setState((int)_key, 2);
@@ -86,7 +86,7 @@ namespace RDE {
         return false;
     }
 
-    bool InputManager::isKeyJustReleased(KeyCode _key) {
+	bool InputManager::isKeyJustReleased(RDE_KEYBOARD_KEY_ _key) {
         auto* _keyboardInput = keyboardInput;
         if(_keyboardInput->getState((int)_key) == 0) {
             _keyboardInput->setState((int)_key, 3);
@@ -96,17 +96,17 @@ namespace RDE {
         return false;
     }
 
-    bool InputManager::isKeyPressed(KeyCode _key) {
+	bool InputManager::isKeyPressed(RDE_KEYBOARD_KEY_ _key) {
         return keyboardInput->getState((int)_key) == 1;
     }
 
-    bool InputManager::isKeyReleased(KeyCode _key) {
+	bool InputManager::isKeyReleased(RDE_KEYBOARD_KEY_ _key) {
         return keyboardInput->getState((int)_key) == 0;
     }
 
 
 
-    bool InputManager::isMouseJustPressed(MouseCode _mouseButton) {
+    bool InputManager::isMouseJustPressed(RDE_MOUSE_BUTTON_ _mouseButton) {
         auto* _mouseInput = mouseInput;
         if(_mouseInput->getState((int)_mouseButton) == 1) {
             _mouseInput->setState((int)_mouseButton, 2);
@@ -116,7 +116,7 @@ namespace RDE {
         return false;
     }
 
-    bool InputManager::isMouseJustReleased(MouseCode _button) {
+	bool InputManager::isMouseJustReleased(RDE_MOUSE_BUTTON_ _button) {
         auto* _mouseInput = mouseInput;
         if(_mouseInput->getState((int)_button) == 0) {
             _mouseInput->setState((int)_button, 3);
@@ -126,11 +126,11 @@ namespace RDE {
         return false;
     }
 
-    bool InputManager::isMousePressed(MouseCode _button) {
+	bool InputManager::isMousePressed(RDE_MOUSE_BUTTON_ _button) {
         return mouseInput->getState((int)_button) == 1;
     }
 
-    bool InputManager::isMouseReleased(MouseCode _button) {
+	bool InputManager::isMouseReleased(RDE_MOUSE_BUTTON_ _button) {
         return  mouseInput->getState((int)_button) == 0;
     }
 
@@ -166,7 +166,7 @@ namespace RDE {
         return controllerInput->reassignController(_controllerID, _as);
     }
 
-    bool InputManager::isGamepadButtonJustPressed(ControllerButtons _button, int _controllerID) {
+    bool InputManager::isGamepadButtonJustPressed(RDE_CONTROLLER_BUTTON_ _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
 
@@ -178,7 +178,7 @@ namespace RDE {
         return false;
     }
 
-    bool InputManager::isGamepadButtonJustReleased(ControllerButtons _button, int _controllerID) {
+	bool InputManager::isGamepadButtonJustReleased(RDE_CONTROLLER_BUTTON_ _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) {
             Util::Log::warn("IS FALSE FOR ", _controllerID);
@@ -193,25 +193,25 @@ namespace RDE {
         return false;
     }
 
-    bool InputManager::isGamepadButtonPressed(ControllerButtons _button, int _controllerID) {
+	bool InputManager::isGamepadButtonPressed(RDE_CONTROLLER_BUTTON_ _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
         return _controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1;
     }
 
-    bool InputManager::isGamepadButtonReleased(ControllerButtons _button, int _controllerID) {
+	bool InputManager::isGamepadButtonReleased(RDE_CONTROLLER_BUTTON_ _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
         return _controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
     }
 
-    bool InputManager::isGamepadAxisPressed(ControllerAxis _axis, int _controllerID) {
+    bool InputManager::isGamepadAxisPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
         return _controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
     }
 
-    bool InputManager::isGamepadAxisJustPressed(ControllerAxis _axis, int _controllerID) {
+	bool InputManager::isGamepadAxisJustPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
         if(_controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1) {
@@ -222,7 +222,7 @@ namespace RDE {
         return false;
     }
 
-    bool InputManager::isGamepadAxisReleased(ControllerAxis _axis, int _controllerID) {
+	bool InputManager::isGamepadAxisReleased(RDE_CONTROLLER_AXIS_ _axis, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) return false;
         return _controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
@@ -265,41 +265,41 @@ namespace RDE {
         return mobileInput->getState(_fingerID) == 0;
     }
 
-    std::vector<SystemEventEnum> InputManager::getEventsIgnored(const InputType& _inputType) {
+    std::vector<RDE_SYSTEM_EVENT_> InputManager::getEventsIgnored(const RDE_INPUT_TYPE_& _inputType) {
         switch (_inputType) {
-            case WINDOW: return windowInput->ignoredEvents;
-            case MOUSE: return mouseInput->ignoredEvents;
-            case KEYBOARD: return keyboardInput->ignoredEvents;
-            case CONTROLLER: return controllerInput->ignoredEvents;
-            case MOBILE: return mobileInput->ignoredEvents;
+			case RDE_INPUT_TYPE_WINDOW: return windowInput->ignoredEvents;
+			case RDE_INPUT_TYPE_MOUSE: return mouseInput->ignoredEvents;
+			case RDE_INPUT_TYPE_KEYBOARD: return keyboardInput->ignoredEvents;
+			case RDE_INPUT_TYPE_CONTROLLER: return controllerInput->ignoredEvents;
+			case RDE_INPUT_TYPE_MOBILE: return mobileInput->ignoredEvents;
         }
 
         return {  };
     }
 
-    void InputManager::addEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event) {
+	void InputManager::addEventToIgnore(const RDE_INPUT_TYPE_& _inputType, const RDE_SYSTEM_EVENT_& _event) {
         switch (_inputType) {
-            case WINDOW: {
+			case RDE_INPUT_TYPE_WINDOW: {
                 auto& _v = windowInput->ignoredEvents;
                 if(std::find(_v.begin(), _v.end(), _event) == _v.end())
                     windowInput->ignoredEvents.push_back(_event);
             }
-            case MOUSE: {
+			case RDE_INPUT_TYPE_MOUSE: {
                 auto& _v = mouseInput->ignoredEvents;
                 if(std::find(_v.begin(), _v.end(), _event) == _v.end())
                 mouseInput->ignoredEvents.push_back(_event);
             }
-            case KEYBOARD: {
+			case RDE_INPUT_TYPE_KEYBOARD: {
                 auto& _v = keyboardInput->ignoredEvents;
                 if(std::find(_v.begin(), _v.end(), _event) == _v.end())
                     keyboardInput->ignoredEvents.push_back(_event);
             }
-            case CONTROLLER: {
+			case RDE_INPUT_TYPE_CONTROLLER: {
                 auto& _v = controllerInput->ignoredEvents;
                 if(std::find(_v.begin(), _v.end(), _event) == _v.end())
                     controllerInput->ignoredEvents.push_back(_event);
             }
-            case MOBILE: {
+			case RDE_INPUT_TYPE_MOBILE: {
                 auto& _v = mobileInput->ignoredEvents;
                 if(std::find(_v.begin(), _v.end(), _event) == _v.end())
                     mobileInput->ignoredEvents.push_back(_event);
@@ -307,25 +307,25 @@ namespace RDE {
         }
     }
 
-    void InputManager::removeEventToIgnore(const InputType& _inputType, const SystemEventEnum& _event) {
+    void InputManager::removeEventToIgnore(const RDE_INPUT_TYPE_& _inputType, const RDE_SYSTEM_EVENT_& _event) {
         switch (_inputType) {
-            case WINDOW: {
+			case RDE_INPUT_TYPE_WINDOW: {
                 auto& _v = windowInput->ignoredEvents;
                 _v.erase(std::remove(_v.begin(), _v.end(), _event), _v.end());
             }
-            case MOUSE: {
+			case RDE_INPUT_TYPE_MOUSE: {
                 auto& _v = mouseInput->ignoredEvents;
                 _v.erase(std::remove(_v.begin(), _v.end(), _event), _v.end());
             }
-            case KEYBOARD: {
+			case RDE_INPUT_TYPE_KEYBOARD: {
                 auto& _v = keyboardInput->ignoredEvents;
                 _v.erase(std::remove(_v.begin(), _v.end(), _event), _v.end());
             }
-            case CONTROLLER: {
+			case RDE_INPUT_TYPE_CONTROLLER: {
                 auto& _v = controllerInput->ignoredEvents;
                 _v.erase(std::remove(_v.begin(), _v.end(), _event), _v.end());
             }
-            case MOBILE: {
+			case RDE_INPUT_TYPE_MOBILE: {
                 auto& _v = mobileInput->ignoredEvents;
                 _v.erase(std::remove(_v.begin(), _v.end(), _event), _v.end());
             }

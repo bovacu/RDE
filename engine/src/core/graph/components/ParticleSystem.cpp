@@ -14,7 +14,7 @@ namespace RDE {
 
     ParticleSystem::ParticleSystem(Node* _node, Manager* _manager, Graph* _graph, const ParticleSystemConfig& _particleSystemConfig) {
 
-        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(50, SPRITE_RENDERER_SHADER, BatchPriority::SpritePriority)
+        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(50, SPRITE_RENDERER_SHADER, RDE_BATCH_PRIORITY_SPRITE)
 
         UniqueDelegate<ParticleData()> _allocator;
         _allocator.bind<&ParticleSystem::allocator>(this);
