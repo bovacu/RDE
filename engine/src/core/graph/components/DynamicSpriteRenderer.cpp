@@ -24,9 +24,9 @@ namespace RDE {
         data.texture = new CPUTexture;
 
         if(_config.pixels == nullptr) {
-            ((CPUTexture*)data.texture)->init((int)_config.size.x, (int)_config.size.y, _config.imageType);
+			((CPUTexture*)data.texture)->init((int)_config.size.x, (int)_config.size.y, (RDE_IMAGE_EXTENSION_)_config.imageType);
         } else {
-            ((CPUTexture*)data.texture)->init((int)_config.size.x, (int)_config.size.y, _config.pixels, _config.imageType);
+			((CPUTexture*)data.texture)->init((int)_config.size.x, (int)_config.size.y, _config.pixels, (RDE_IMAGE_EXTENSION_)_config.imageType);
         }
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();

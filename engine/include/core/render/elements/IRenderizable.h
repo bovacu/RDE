@@ -6,20 +6,21 @@
 #define RDE_RENDERIZABLE_H
 
 #include "core/Core.h"
-#include "core/render/elements/Texture.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/render/elements/Batch.h"
 #include "core/graph/components/ComponentBase.h"
 #include "core/util/Color.h"
 #include "core/util/Vec.h"
-#include <vector>
 #include "core/render/elements/Batch.h"
+
+#include <vector>
 
 namespace RDE {
 
     struct OpenGLVertex;
     class IViewPort;
     class Transform;
+	class Texture;
 
     enum RDE_RENDERIZABLE_TYPE_ {
 		RDE_RENDERIZABLE_TYPE_NONE        = 0,

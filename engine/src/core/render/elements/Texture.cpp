@@ -213,7 +213,7 @@ namespace RDE {
     // ------------------------------ IMAGE --------------------------
 
 
-    void CPUTexture::init(int _width, int _height, unsigned char* _pixels, const ImageType& _imageType) {
+	void CPUTexture::init(int _width, int _height, unsigned char* _pixels, const RDE_IMAGE_EXTENSION_& _imageType) {
         textureSize.x = (float)_width;
         textureSize.y = (float)_height;
         pixels = _pixels;
@@ -225,7 +225,7 @@ namespace RDE {
         uploadToGPU();
     }
 
-    void CPUTexture::init(int _width, int _height, const ImageType& _imageType) {
+	void CPUTexture::init(int _width, int _height, const RDE_IMAGE_EXTENSION_& _imageType) {
         textureSize.x = (float)_width;
         textureSize.y = (float)_height;
         channels = getChannels(_imageType);
@@ -278,17 +278,17 @@ namespace RDE {
         SDL_Surface* _surface = nullptr;
 
         switch (imageType) {
-            case PNG: {
+			case RDE_IMAGE_EXTENSION_PNG: {
                 _surface = SDL_CreateRGBSurfaceFrom(pixels, textureSize.x, textureSize.y, 32, 4, rmask, gmask, bmask, amask);
                 IMG_SavePNG(_surface, _pathToSave.c_str());
                 break;
             }
-            case JPG: {
+			case RDE_IMAGE_EXTENSION_JPG: {
                 _surface = SDL_CreateRGBSurfaceFrom(pixels, textureSize.x, textureSize.y, 32, 3, rmask, gmask, bmask, amask);
                 IMG_SaveJPG(_surface, _pathToSave.c_str(), 100);
                 break;
             }
-            case BMP:
+			case RDE_IMAGE_EXTENSION_BMP:
                 _surface = SDL_CreateRGBSurfaceFrom(pixels, textureSize.x, textureSize.y, 32, 3, rmask, gmask, bmask, amask);
                 SDL_SaveBMP(_surface, _pathToSave.c_str());
                 break;
@@ -318,11 +318,11 @@ namespace RDE {
             glDeleteTextures(1, &openGLTextureID);
     }
 
-    int CPUTexture::getChannels(const ImageType& _imageType) {
+	int CPUTexture::getChannels(const RDE_IMAGE_EXTENSION_& _imageType) {
         switch (_imageType) {
-            case PNG:
-            case BMP: return 4;
-            case JPG: return 3;
+			case RDE_IMAGE_EXTENSION_PNG:
+			case RDE_IMAGE_EXTENSION_BMP: return 4;
+			case RDE_IMAGE_EXTENSION_JPG: return 3;
         }
 
         return -1;

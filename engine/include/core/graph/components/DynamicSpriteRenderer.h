@@ -19,7 +19,11 @@ namespace RDE {
     struct DynamicSpriteRendererConfig {
         Vec2<uint> size = { 64, 64 };
         unsigned char* pixels = nullptr;
-        ImageType imageType = ImageType::PNG;
+
+		/**
+		 * @brief Use RDE_IMAGE_EXTENSION_ values.
+		 */
+		uint32_t imageType = 0;
     };
 
     class DynamicSpriteRenderer {

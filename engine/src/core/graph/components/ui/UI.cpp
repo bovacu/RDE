@@ -11,6 +11,7 @@
 #include "core/systems/eventSystem/MobileEvent.h"
 #include "core/Engine.h"
 #include "core/graph/components/Node.h"
+#include "core/render/elements/Texture.h"
 
 namespace RDE {
 

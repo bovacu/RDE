@@ -35,7 +35,7 @@ namespace RDE {
 
     void CellularAutomata::fillData() {
         CPUTexture _image;
-        _image.init(map.settings.size.x, map.settings.size.y, ImageType::PNG);
+		_image.init(map.settings.size.x, map.settings.size.y, RDE_IMAGE_EXTENSION_PNG);
         for(int _y = 0; _y < map.settings.size.y; _y++)
             for(int _x = 0; _x < map.settings.size.x; _x++)
                 map.data[_y][_x] = random.randomf(0.0f, 1.f) > map.settings.fillAmount ? 0 : 1;
