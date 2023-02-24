@@ -10,6 +10,8 @@
 #include "core/util/Vec.h"
 #include "core/render/window/Window.h"
 #include "core/Enums.h"
+#include <vector>
+#include <unordered_map>
 
 #ifndef SDL_JOYSTICK_DISABLED
 #define SDL_JOYSTICK_DISABLED

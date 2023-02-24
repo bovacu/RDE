@@ -3,7 +3,7 @@
     "sprite_sheet_size": [1808, 1040],
     "sprite_sheet_settings": {
         "format": "png",
-        "path": "C:/Users/vazqu/Documents/RDE/defaultAssets/defaultAssets.png"
+        "path": "defaultAssets/defaultAssets.png"
     },
     "sprites" : [
         {

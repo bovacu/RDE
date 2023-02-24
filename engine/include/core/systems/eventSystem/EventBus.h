@@ -5,6 +5,7 @@
 
 #include "core/util/Delegate.h"
 #include <map>
+#include "core/util/Functions.h"
 
 /**
  * @brief The Event bus works in the following way:

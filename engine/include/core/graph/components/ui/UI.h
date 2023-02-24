@@ -24,6 +24,7 @@ namespace RDE {
     class EventDispatcher;
     class Event;
 	class Node;
+    class Graph;
 
     /**
      * @brief Component that every UI element that wants to interact with events on the screen must include.
