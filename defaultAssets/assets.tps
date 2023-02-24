@@ -2,9 +2,9 @@
 <data version="1.0">
     <struct type="Settings">
         <key>fileFormatVersion</key>
-        <int>5</int>
+        <int>6</int>
         <key>texturePackerVersion</key>
-        <string>6.0.2</string>
+        <string>7.0.1</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -127,8 +127,8 @@
                 <filename>defaultAssets.json</filename>
             </struct>
         </map>
-        <key>multiPack</key>
-        <false/>
+        <key>multiPackMode</key>
+        <enum type="SettingsBase::MultiPackMode">MultiPackOff</enum>
         <key>forceIdenticalLayout</key>
         <false/>
         <key>outputFormat</key>
@@ -386,9 +386,9 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>32,35,64,71</rect>
+                <rect>32,32,64,64</rect>
                 <key>scale9Paddings</key>
-                <rect>32,35,64,71</rect>
+                <rect>32,32,64,64</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -754,113 +754,119 @@
                 <false/>
             </struct>
         </map>
-        <key>fileList</key>
-        <array>
-            <filename>sprites/bgrRadiobitton.png</filename>
-            <filename>sprites/bgrToggleButton.png</filename>
-            <filename>sprites/buttonDark.png</filename>
-            <filename>sprites/buttonDarkHighlited.png</filename>
-            <filename>sprites/buttonDarkLock.png</filename>
-            <filename>sprites/buttonDarkPressed.png</filename>
-            <filename>sprites/buttonExit.png</filename>
-            <filename>sprites/buttonGreen Highlighted.png</filename>
-            <filename>sprites/buttonGreen.png</filename>
-            <filename>sprites/buttonGreenLock.png</filename>
-            <filename>sprites/buttonGreenPressed.png</filename>
-            <filename>sprites/buttonNormal.png</filename>
-            <filename>sprites/buttonNormalHighligheted.png</filename>
-            <filename>sprites/buttonNormalLock.png</filename>
-            <filename>sprites/buttonNormalPressed.png</filename>
-            <filename>sprites/buttonOutline.png</filename>
-            <filename>sprites/buttonOutlineHighlighted.png</filename>
-            <filename>sprites/buttonOutlineLock.png</filename>
-            <filename>sprites/buttonOutlinePressed.png</filename>
-            <filename>sprites/buttonPink.png</filename>
-            <filename>sprites/buttonPink2.png</filename>
-            <filename>sprites/buttonPink2Highlighted.png</filename>
-            <filename>sprites/buttonPink2Lock.png</filename>
-            <filename>sprites/buttonPink2Pressed.png</filename>
-            <filename>sprites/buttonPinkHighlighted.png</filename>
-            <filename>sprites/buttonPinkLock.png</filename>
-            <filename>sprites/buttonPinkPressed.png</filename>
-            <filename>sprites/buttonPurple Highlighted.png</filename>
-            <filename>sprites/buttonPurple.png</filename>
-            <filename>sprites/buttonPurple2.png</filename>
-            <filename>sprites/buttonPurple2Highlighted.png</filename>
-            <filename>sprites/buttonPurple2Lock.png</filename>
-            <filename>sprites/buttonPurple2Pressed.png</filename>
-            <filename>sprites/buttonPurpleLock.png</filename>
-            <filename>sprites/buttonPurplePressed.png</filename>
-            <filename>sprites/buttonRed Highlighted.png</filename>
-            <filename>sprites/buttonRed.png</filename>
-            <filename>sprites/buttonRedLock.png</filename>
-            <filename>sprites/buttonRedPressed.png</filename>
-            <filename>sprites/buttonYellow.png</filename>
-            <filename>sprites/buttonYellowHighlighted.png</filename>
-            <filename>sprites/buttonYellowLock.png</filename>
-            <filename>sprites/buttonYellowPressed.png</filename>
-            <filename>sprites/circleLoadingBar.png</filename>
-            <filename>sprites/elipseWithOutline.png</filename>
-            <filename>sprites/emptyLifeBubble.png</filename>
-            <filename>sprites/fillAndBgrScrollBarVertical.png</filename>
-            <filename>sprites/fillAndBgrSliderBar.png</filename>
-            <filename>sprites/fillAndBgrSmallSliderBar.png</filename>
-            <filename>sprites/fillBubble.png</filename>
-            <filename>sprites/fillSliderBar.png</filename>
-            <filename>sprites/fillSmallSliderBar.png</filename>
-            <filename>sprites/handle.png</filename>
-            <filename>sprites/inputSelectedThemeDark.png</filename>
-            <filename>sprites/inputSelectedThemeGreen.png</filename>
-            <filename>sprites/inputSelectedThemePink.png</filename>
-            <filename>sprites/inputSelectedThemePurple.png</filename>
-            <filename>sprites/inputSelectedThemeRed.png</filename>
-            <filename>sprites/inputSelectedThemeYellow.png</filename>
-            <filename>sprites/inputThemeDark.png</filename>
-            <filename>sprites/inputThemeGreen.png</filename>
-            <filename>sprites/inputThemePink.png</filename>
-            <filename>sprites/inputThemePurple.png</filename>
-            <filename>sprites/inputThemeRed.png</filename>
-            <filename>sprites/inputThemeYellow.png</filename>
-            <filename>sprites/line.png</filename>
-            <filename>sprites/outlineBubble.png</filename>
-            <filename>sprites/outlinePanel.png</filename>
-            <filename>sprites/panel.png</filename>
-            <filename>sprites/popUp.png</filename>
-            <filename>sprites/popUp30Corner.png</filename>
-            <filename>sprites/popUp40Corner.png</filename>
-            <filename>sprites/popUp50Corner.png</filename>
-            <filename>sprites/popUp60Corner.png</filename>
-            <filename>sprites/popUp70Corner.png</filename>
-            <filename>sprites/shadow.png</filename>
-            <filename>sprites/sliderBar.png</filename>
-            <filename>sprites/icons/32x32px/arrowDown32x32.png</filename>
-            <filename>sprites/icons/32x32px/arrowLeft32x32.png</filename>
-            <filename>sprites/icons/32x32px/arrowRight32x32.png</filename>
-            <filename>sprites/icons/32x32px/arrowUp32x32.png</filename>
-            <filename>sprites/icons/32x32px/x32x32.png</filename>
-            <filename>sprites/icons/64x64px/x64x64.png</filename>
-            <filename>sprites/sprite.png</filename>
-            <filename>sprites/caret.png</filename>
-            <filename>sprites/checkboxDark.png</filename>
-            <filename>sprites/fillAndBgrScrollBarHorizontal.png</filename>
-            <filename>sprites/icons/32x32px/checkmark.png</filename>
-            <filename>sprites/anchorBottomLeft.png</filename>
-            <filename>sprites/anchorBottomRight.png</filename>
-            <filename>sprites/anchorTopLeft.png</filename>
-            <filename>sprites/anchorTopRight.png</filename>
-            <filename>sprites/anchorBottomMiddle.png</filename>
-            <filename>sprites/anchorMiddleLeft.png</filename>
-            <filename>sprites/anchorMiddleMiddle.png</filename>
-            <filename>sprites/anchorMiddleRight.png</filename>
-            <filename>sprites/anchorTopMiddle.png</filename>
-            <filename>sprites/stretchFull.png</filename>
-            <filename>sprites/stretchHorizontal.png</filename>
-            <filename>sprites/stretchNone.png</filename>
-            <filename>sprites/stretchVertical.png</filename>
-            <filename>sprites/circleUIMask.png</filename>
-            <filename>sprites/rectangleUIMaks.png</filename>
-            <filename>sprites/duck.png</filename>
-        </array>
+        <key>fileLists</key>
+        <map type="SpriteSheetMap">
+            <key>default</key>
+            <struct type="SpriteSheet">
+                <key>files</key>
+                <array>
+                    <filename>sprites/bgrRadiobitton.png</filename>
+                    <filename>sprites/bgrToggleButton.png</filename>
+                    <filename>sprites/buttonDark.png</filename>
+                    <filename>sprites/buttonDarkHighlited.png</filename>
+                    <filename>sprites/buttonDarkLock.png</filename>
+                    <filename>sprites/buttonDarkPressed.png</filename>
+                    <filename>sprites/buttonExit.png</filename>
+                    <filename>sprites/buttonGreen Highlighted.png</filename>
+                    <filename>sprites/buttonGreen.png</filename>
+                    <filename>sprites/buttonGreenLock.png</filename>
+                    <filename>sprites/buttonGreenPressed.png</filename>
+                    <filename>sprites/buttonNormal.png</filename>
+                    <filename>sprites/buttonNormalHighligheted.png</filename>
+                    <filename>sprites/buttonNormalLock.png</filename>
+                    <filename>sprites/buttonNormalPressed.png</filename>
+                    <filename>sprites/buttonOutline.png</filename>
+                    <filename>sprites/buttonOutlineHighlighted.png</filename>
+                    <filename>sprites/buttonOutlineLock.png</filename>
+                    <filename>sprites/buttonOutlinePressed.png</filename>
+                    <filename>sprites/buttonPink.png</filename>
+                    <filename>sprites/buttonPink2.png</filename>
+                    <filename>sprites/buttonPink2Highlighted.png</filename>
+                    <filename>sprites/buttonPink2Lock.png</filename>
+                    <filename>sprites/buttonPink2Pressed.png</filename>
+                    <filename>sprites/buttonPinkHighlighted.png</filename>
+                    <filename>sprites/buttonPinkLock.png</filename>
+                    <filename>sprites/buttonPinkPressed.png</filename>
+                    <filename>sprites/buttonPurple Highlighted.png</filename>
+                    <filename>sprites/buttonPurple.png</filename>
+                    <filename>sprites/buttonPurple2.png</filename>
+                    <filename>sprites/buttonPurple2Highlighted.png</filename>
+                    <filename>sprites/buttonPurple2Lock.png</filename>
+                    <filename>sprites/buttonPurple2Pressed.png</filename>
+                    <filename>sprites/buttonPurpleLock.png</filename>
+                    <filename>sprites/buttonPurplePressed.png</filename>
+                    <filename>sprites/buttonRed Highlighted.png</filename>
+                    <filename>sprites/buttonRed.png</filename>
+                    <filename>sprites/buttonRedLock.png</filename>
+                    <filename>sprites/buttonRedPressed.png</filename>
+                    <filename>sprites/buttonYellow.png</filename>
+                    <filename>sprites/buttonYellowHighlighted.png</filename>
+                    <filename>sprites/buttonYellowLock.png</filename>
+                    <filename>sprites/buttonYellowPressed.png</filename>
+                    <filename>sprites/circleLoadingBar.png</filename>
+                    <filename>sprites/elipseWithOutline.png</filename>
+                    <filename>sprites/emptyLifeBubble.png</filename>
+                    <filename>sprites/fillAndBgrScrollBarVertical.png</filename>
+                    <filename>sprites/fillAndBgrSliderBar.png</filename>
+                    <filename>sprites/fillAndBgrSmallSliderBar.png</filename>
+                    <filename>sprites/fillBubble.png</filename>
+                    <filename>sprites/fillSliderBar.png</filename>
+                    <filename>sprites/fillSmallSliderBar.png</filename>
+                    <filename>sprites/handle.png</filename>
+                    <filename>sprites/inputSelectedThemeDark.png</filename>
+                    <filename>sprites/inputSelectedThemeGreen.png</filename>
+                    <filename>sprites/inputSelectedThemePink.png</filename>
+                    <filename>sprites/inputSelectedThemePurple.png</filename>
+                    <filename>sprites/inputSelectedThemeRed.png</filename>
+                    <filename>sprites/inputSelectedThemeYellow.png</filename>
+                    <filename>sprites/inputThemeDark.png</filename>
+                    <filename>sprites/inputThemeGreen.png</filename>
+                    <filename>sprites/inputThemePink.png</filename>
+                    <filename>sprites/inputThemePurple.png</filename>
+                    <filename>sprites/inputThemeRed.png</filename>
+                    <filename>sprites/inputThemeYellow.png</filename>
+                    <filename>sprites/line.png</filename>
+                    <filename>sprites/outlineBubble.png</filename>
+                    <filename>sprites/outlinePanel.png</filename>
+                    <filename>sprites/panel.png</filename>
+                    <filename>sprites/popUp.png</filename>
+                    <filename>sprites/popUp30Corner.png</filename>
+                    <filename>sprites/popUp40Corner.png</filename>
+                    <filename>sprites/popUp50Corner.png</filename>
+                    <filename>sprites/popUp60Corner.png</filename>
+                    <filename>sprites/popUp70Corner.png</filename>
+                    <filename>sprites/shadow.png</filename>
+                    <filename>sprites/sliderBar.png</filename>
+                    <filename>sprites/icons/32x32px/arrowDown32x32.png</filename>
+                    <filename>sprites/icons/32x32px/arrowLeft32x32.png</filename>
+                    <filename>sprites/icons/32x32px/arrowRight32x32.png</filename>
+                    <filename>sprites/icons/32x32px/arrowUp32x32.png</filename>
+                    <filename>sprites/icons/32x32px/x32x32.png</filename>
+                    <filename>sprites/icons/64x64px/x64x64.png</filename>
+                    <filename>sprites/sprite.png</filename>
+                    <filename>sprites/caret.png</filename>
+                    <filename>sprites/checkboxDark.png</filename>
+                    <filename>sprites/fillAndBgrScrollBarHorizontal.png</filename>
+                    <filename>sprites/icons/32x32px/checkmark.png</filename>
+                    <filename>sprites/anchorBottomLeft.png</filename>
+                    <filename>sprites/anchorBottomRight.png</filename>
+                    <filename>sprites/anchorTopLeft.png</filename>
+                    <filename>sprites/anchorTopRight.png</filename>
+                    <filename>sprites/anchorBottomMiddle.png</filename>
+                    <filename>sprites/anchorMiddleLeft.png</filename>
+                    <filename>sprites/anchorMiddleMiddle.png</filename>
+                    <filename>sprites/anchorMiddleRight.png</filename>
+                    <filename>sprites/anchorTopMiddle.png</filename>
+                    <filename>sprites/stretchFull.png</filename>
+                    <filename>sprites/stretchHorizontal.png</filename>
+                    <filename>sprites/stretchNone.png</filename>
+                    <filename>sprites/stretchVertical.png</filename>
+                    <filename>sprites/circleUIMask.png</filename>
+                    <filename>sprites/rectangleUIMaks.png</filename>
+                    <filename>sprites/duck.png</filename>
+                </array>
+            </struct>
+        </map>
         <key>ignoreFileList</key>
         <array/>
         <key>replaceList</key>
