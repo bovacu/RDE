@@ -11,6 +11,8 @@
 #include "core/graph/ImGuiScene.h"
 #include "core/systems/eventSystem/WindowEvent.h"
 #include "core/render/window/Window.h"
+#include "core/graph/Scene.h"
+#include "core/systems/uiSystem/SceneManager.h"
 
 namespace RDE {
 
