@@ -551,13 +551,13 @@ namespace RDE {
             ImGui::Text("ID: %i", (int)_transform->node->getID());
             ImGui::Text("Position ");
 
-            float _pos[2];
+            int _pos[2];
             _pos[0] = _transform->getPosition().x;
             _pos[1] = _transform->getPosition().y;
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(createID());
-            if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
+            if(ImGui::DragInt2("##myInput", _pos, 0.5f)) {
                 _transform->setPosition(_pos[0], _pos[1]);
             }
             ImGui::PopID();
@@ -890,13 +890,13 @@ namespace RDE {
 
             ImGui::Text("Position ");
 
-            float _pos[2]; 
+            int _pos[2]; 
             _pos[0] = _transform->getPosition().x;
             _pos[1] = _transform->getPosition().y;
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(createID());
-            if(ImGui::DragFloat2("##myInput", _pos, 0.5f)) {
+            if(ImGui::DragInt2("##myInput", _pos, 0.5f)) {
                 _transform->setPosition(_pos[0], _pos[1]);
             }
             ImGui::PopID();

@@ -90,6 +90,7 @@ namespace RDE {
                                    _textPosition.y + _config.textsOffsetFromLeft.y);
 
         auto _caretNode = _graph->createNode("Caret", _node);
+		_caretNode->getTransform()->setScale(2, 1);
         auto* _caretTexture = _config.caretTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "caret") :
                               _config.caretTexture;
         caretSprite = _caretNode->addComponent<UIImage>(UIImageConfig {

@@ -13,7 +13,7 @@
 namespace RDE {
 
 	void calculateGeometryForSpriteRenderer(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport)  {
-	    auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
+		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, {(float)(int)_transformMatrix[3][0], (float)(int)_transformMatrix[3][1]});
 	    _transformMatrix[3][0] = _screenPos.x;
 	    _transformMatrix[3][1] = _screenPos.y;
 
@@ -100,7 +100,7 @@ namespace RDE {
 				float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
 				float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
 
-				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformCopy[3][0], _transformCopy[3][1] });
+				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)_transformCopy[3][0], (float)(int)_transformCopy[3][1] });
 				_transformCopy[3][0] = _screenPos.x;
 				_transformCopy[3][1] = _screenPos.y;
 
@@ -191,8 +191,8 @@ namespace RDE {
 				float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
 				float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
 
-				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformCopy[3][0] + _originOffset.x * _transform->getModelMatrixScale().x,
-				                                                    _transformCopy[3][1] + _originOffset.y * _transform->getModelMatrixScale().y });
+				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformCopy[3][0] + _originOffset.x * _transform->getModelMatrixScale().x),
+				                                                    (float)(int)(_transformCopy[3][1] + _originOffset.y * _transform->getModelMatrixScale().y) });
 				_transformCopy[3][0] = _screenPos.x;
 				_transformCopy[3][1] = _screenPos.y;
 
@@ -260,7 +260,7 @@ namespace RDE {
     void calculateNormalGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)_transform;
         auto _originOffset = _data.originOffset;
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -413,7 +413,7 @@ namespace RDE {
             _current9SliceMat = _transformMatrix * _current9SliceMat;
 
             auto _subTextureReposition = Vec2F { _originOffset.x, _originOffset.y };
-            auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
+			auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
             _current9SliceMat[3][0] = _screenPos.x;
             _current9SliceMat[3][1] = _screenPos.y;
 
@@ -448,7 +448,7 @@ namespace RDE {
     void calculatePartialHGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)_transform;
         auto _originOffset = _data.originOffset;
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -488,7 +488,7 @@ namespace RDE {
     void calculatePartialVGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)_transform;
         auto _originOffset = _data.originOffset;
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -528,7 +528,7 @@ namespace RDE {
     void calculatePartialRGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)_transform;
         auto _originOffset = _data.originOffset;
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
