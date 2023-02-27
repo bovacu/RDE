@@ -8,6 +8,7 @@
 #include "core/render/elements/IRenderizable.h"
 #include "core/util/Vec.h"
 #include "entt/entity/entity.hpp"
+#include "core/systems/uiSystem/FontManager.h"
 
 typedef entt::entity NodeID;
 
@@ -84,7 +85,7 @@ namespace RDE {
 
         // TODO (RDE): this needs a better fix than making it public, the affected part is SpriteBatchRenderFunctions.cpp -> drawBatchedForTextRenderer. 
         public:
-            std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharInfo* _chars) const;
+            std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharMap& _chars) const;
 
         public:
             TextRenderer(Node* _node, Scene* _scene, const TextRendererConfig& _config = {});

@@ -214,6 +214,8 @@ namespace RDE {
         caretSprite->setEnabled(true);
         uiInteractable->focused = true;
         updatePlaceholder();
+		updateText();
+        updateCaret();
         blinkingTimer = 0;
     }
 
@@ -222,6 +224,7 @@ namespace RDE {
 
         SDL_StopTextInput();
         caretSprite->setEnabled(false);
+        updatePlaceholder();
     }
 
 	void UIInput::onMouseReleased(RDE_MOUSE_BUTTON_ _mouseCode) {
@@ -239,6 +242,7 @@ namespace RDE {
             pointer++;
         }
 
+		updateText();
         updateCaret();
 
     }
@@ -257,6 +261,7 @@ namespace RDE {
             pointer = pointer + 1 < _textLength ? pointer + 1 : (int)_textLength;
             updateCaret();
 		}  else if(_keyCode == RDE_KEYBOARD_KEY_DELETE) {
+			updateText();
             updateCaret();
 		} else if(_keyCode == RDE_KEYBOARD_KEY_BAKCSPACE) {
             if(pointer - 1 >= 0) {
@@ -265,6 +270,7 @@ namespace RDE {
                 pointer--;
                 textRenderer->setText(_text);
             }
+			updateText();
             updateCaret();
         }
 
@@ -280,7 +286,7 @@ namespace RDE {
     void UIInput::updatePlaceholder() {
         if(placeholderTextRenderer != nullptr) {
             if(uiInteractable->focused) {
-                placeholderTextRenderer->setEnabled(textRenderer->getText().empty());
+                placeholderTextRenderer->setEnabled(false);
             } else {
                 if(textRenderer != nullptr) {
                     placeholderTextRenderer->setEnabled(textRenderer->getText().empty());
@@ -291,23 +297,33 @@ namespace RDE {
         }
     }
 
+	void UIInput::updateText() {
+		if(!usable()) return;
+
+		float _width = textRenderer->getTextSize().x;
+		if(_width * 0.5f * node->getTransform()->getScale().x + textOffsetFromLeft.x * 2.f >= getSize().x) {
+			textDisplacement = (_width * 0.5f * node->getTransform()->getScale().x + textOffsetFromLeft.x) - getSize().x;
+		} else {
+			textDisplacement = 0;
+		}
+
+		auto _origin = Vec2F { nineSliceTransform->getModelMatrixPosition().x - getSize().x * 0.5f + textOffsetFromLeft.x, nineSliceTransform->getModelMatrixPosition().y };
+		textTransform->setMatrixModelPosition({_origin.x - textDisplacement, _origin.y});
+	}
+
     void UIInput::updateCaret() {
-        if(!usable()) return;
-
-        float _width = textRenderer->getTextSize().x;
-        if(_width * 0.5f * node->getTransform()->getScale().x + textOffsetFromLeft.x * 2.f >= getSize().x) {
-            textDisplacement = (_width * 0.5f * node->getTransform()->getScale().x + textOffsetFromLeft.x) - getSize().x;
-        } else {
-            textDisplacement = 0;
-        }
-
-        auto _origin = Vec2F { nineSliceTransform->getModelMatrixPosition().x - getSize().x * 0.5f + textOffsetFromLeft.x, nineSliceTransform->getModelMatrixPosition().y };
-        textTransform->setMatrixModelPosition({_origin.x - textDisplacement, _origin.y});
-
         if(caretTransform == nullptr) return;
 
+		auto _chars = textRenderer->getFont()->getChars();
+		auto _text = textRenderer->getText();
+
+		auto _displacement = 0.f;
+		for(auto _i = 0; _i < _text.size() - pointer; _i++) {
+			_displacement += _chars[_text[_text.size() - 1 - _i]].advance.x * 0.5f;
+		}
+
         auto _caretPosition = caretTransform->getPosition();
-        caretTransform->setPosition(textTransform->getPosition().x + _width * node->getTransform()->getScale().x, _caretPosition.y);
+		caretTransform->setPosition(textTransform->getPosition().x + (textRenderer->getTextSize().x - _displacement) * node->getTransform()->getScale().x, _caretPosition.y);
 
         caretTransform->setScale(caretTransform->getScale().x, (caretHeight * getSize().y) / caretTexture->getSize().y);
     }

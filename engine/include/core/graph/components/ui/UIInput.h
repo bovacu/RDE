@@ -96,6 +96,7 @@ namespace RDE {
             void onUnfocused();
             void updatePlaceholder();
             void updateCaret();
+			void updateText();
 
             bool usable();
     };

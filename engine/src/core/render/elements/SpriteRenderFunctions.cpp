@@ -71,7 +71,7 @@ namespace RDE {
 		float _x = 0;
 		float _y = 0;
 
-		auto* _chars = _atlas->getChars();
+		auto _chars = _atlas->getChars();
 
 		auto [_linesInfo, _, _totalHeight] = _textRenderer->calculateLinesInfo(_chars);
 		const auto _numberOfLines = _linesInfo.size();
@@ -165,7 +165,7 @@ namespace RDE {
 		float _x = 0;
 		float _y = 0;
 
-		auto* _chars = _atlas->getChars();
+		auto _chars = _atlas->getChars();
 
 		auto [_linesInfo, _, _totalHeight] = _textRenderer->calculateLinesInfo(_chars);
 		const auto _numberOfLines = _linesInfo.size();

@@ -92,7 +92,7 @@ namespace RDE {
         recalcTextDimensions(innerText);
     }
 
-    std::tuple<std::vector<TextRenderer::LineInfo>, float, float> TextRenderer::calculateLinesInfo(CharInfo* _chars) const {
+    std::tuple<std::vector<TextRenderer::LineInfo>, float, float> TextRenderer::calculateLinesInfo(CharMap& _chars) const {
         auto _linesInfo = std::vector<LineInfo> {  };
         auto _ss = std::stringstream { innerText };
 

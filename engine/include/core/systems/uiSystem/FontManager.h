@@ -25,6 +25,8 @@ namespace RDE {
         Vec2F  offset;
     };
 
+	typedef std::unordered_map<char, CharInfo> CharMap;
+
     class FontManager;
 	class FileManager;
 
@@ -39,7 +41,7 @@ namespace RDE {
             Texture texture;
 			Vec2I atlasSize {0, 0};
             int fontSize = -1;
-            CharInfo characters[MAX_CHARACTERS];
+			std::unordered_map<char, CharInfo> characters;
             std::string fontName;
             std::string originalPath;
             float biggestCharHeight = 0;
@@ -65,7 +67,7 @@ namespace RDE {
              * @brief Returns all of the characters information.
              * @return CharInfo*
              */
-            CharInfo* getChars();
+			CharMap& getChars();
 
             /**
              * @brief Returns the font name.

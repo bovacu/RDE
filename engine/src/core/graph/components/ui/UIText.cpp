@@ -73,7 +73,7 @@ namespace RDE {
         recalcTextDimensions(innerText);
     }
 
-    std::tuple<std::vector<UIText::LineInfo>, float, float> UIText::calculateLinesInfo(CharInfo* _chars) const {
+    std::tuple<std::vector<UIText::LineInfo>, float, float> UIText::calculateLinesInfo(CharMap& _chars) const {
         auto _linesInfo = std::vector<LineInfo> {  };
         auto _ss = std::stringstream { innerText };
 
