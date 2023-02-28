@@ -282,18 +282,27 @@ namespace RDE {
 
 
 
+	void Scene::onInnerDebugRender(Delta _dt) {
+		//onInnerDebugRenderHierarchy(_dt);
+		//onInnerDebugRenderUI(_dt);
+		auto& _renderManager = engine->manager.renderManager;
+		_renderManager.beginDebugDraw(mainCamera, mainCamera->node->getTransform());
+		onDebugRender(_dt);
+		_renderManager.endDebugDraw();
+	}
+
     void Scene::onInnerDebugRenderHierarchy(Delta _dt) {
         auto& _renderManager = engine->manager.renderManager;
         _renderManager.beginDebugDraw(mainCamera, mainCamera->node->getComponent<Transform>());
         engine->manager.physics.debugRender(&_renderManager);
-        _renderManager.endDebugDraw();
+		_renderManager.endDebugDraw();
     }
 
     void Scene::onInnerDebugRenderUI(Delta _dt) {
         auto& _registry = canvas->graph->getNodeContainer();
 
         auto& _renderManager = engine->manager.renderManager;
-       _renderManager.beginDebugDraw(mainCamera, (Transform*)mainCamera->node->getComponent<UITransform>());
+		_renderManager.beginDebugDraw(mainCamera, mainCamera->node->getTransform());
 
         _registry.view<UIImage, UITransform, Active>().each([this, &_renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
             DebugShape _shape;
@@ -321,26 +330,26 @@ namespace RDE {
             _renderManager.setPointSize(4);
         });
 
-        _registry.view<UICheckbox, UITransform, Active>().each([this, &_renderManager](const NodeID _nodeID, UICheckbox& _checkbox, UITransform& _transform, Active& _) {
-            DebugShape _shape;
-            Vec2F _pos = _transform.getModelMatrixPosition();
-            Vec2F _size = _checkbox.getSize();
-
-            auto _viewport = mainCamera->getViewport();
-            auto _virtualRes = _viewport->getVirtualResolution();
-            auto _physicalRes = _viewport->getDeviceResolution();
-            auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
-
-            _pos       *= _scale.y;
-            _size      *= _scale.y;
-
-            _shape.makeSquare(_pos, _size);
-            _shape.showOutsideColor(true);
-            _shape.setOutlineColor(Color::Blue);
-            _shape.showInnerColor(false);
-            _shape.setRotation(_transform.getModelMatrixRotation());
-            _renderManager.drawShape(_shape);
-        });
+        //_registry.view<UICheckbox, UITransform, Active>().each([this, &_renderManager](const NodeID _nodeID, UICheckbox& _checkbox, UITransform& _transform, Active& _) {
+        //    DebugShape _shape;
+        //    Vec2F _pos = _transform.getModelMatrixPosition();
+        //    Vec2F _size = _checkbox.getSize();
+//
+        //    auto _viewport = mainCamera->getViewport();
+        //    auto _virtualRes = _viewport->getVirtualResolution();
+        //    auto _physicalRes = _viewport->getDeviceResolution();
+        //    auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
+//
+        //    _pos       *= _scale.y;
+        //    _size      *= _scale.y;
+//
+        //    _shape.makeSquare(_pos, _size);
+        //    _shape.showOutsideColor(true);
+        //    _shape.setOutlineColor(Color::Blue);
+        //    _shape.showInnerColor(false);
+        //    _shape.setRotation(_transform.getModelMatrixRotation());
+        //    _renderManager.drawShape(_shape);
+        //});
 
         _registry.view<UIText, UITransform, Active>().each([this, &_renderManager](const NodeID _nodeID, UIText& _uiText, UITransform& _transform, Active& _) {
             if(!_uiText.isEnabled()) return;

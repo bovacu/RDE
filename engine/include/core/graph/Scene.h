@@ -146,11 +146,7 @@ namespace RDE {
              * @brief This function is used to drawBatched debugging lines, squares, circles...
              * @param the time that passed between the current frame and the last one.
              */
-            void onInnerDebugRender(Delta _dt) {
-                onInnerDebugRenderHierarchy(_dt);
-                onInnerDebugRenderHierarchy(_dt);
-                onDebugRender(_dt);
-            }
+			void onInnerDebugRender(Delta _dt);
             void onInnerDebugRenderHierarchy(Delta _dt); 
             void onInnerDebugRenderUI(Delta _dt);
 
