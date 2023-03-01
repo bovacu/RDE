@@ -74,6 +74,16 @@
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/render/elements/ShaderManager.h"
 #include "core/systems/inputSystem/input/Input.h"
+#include "core/systems/eventSystem/Event.h"
+#include "core/systems/eventSystem/KeyEvent.h"
+
+#if IS_MOBILE()
+#include "core/systems/eventSystem/MobileEvent.h"
+#endif
+
+#include "core/systems/eventSystem/WindowEvent.h"
+#include "core/systems/eventSystem/MouseEvent.h"
+#include "core/systems/eventSystem/ControllerEvent.h"
 
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/systems/fileSystem/FileManager.h"
