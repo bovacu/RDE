@@ -1,6 +1,7 @@
 #include "core/graph/components/TextRenderer.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/graph/components/ui/UIText.h"
+#include "core/graph/components/Node.h"
 #include "core/render/elements/SpriteBatchRenderFunctions.h"
 #include "core/graph/components/Transform.h"
 #include "core/render/elements/ViewPort.h"
@@ -157,6 +158,7 @@ namespace RDE {
 
 	void calculateGeometryForUIText(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
 		auto* _textRenderer = (UIText*)_data.RenderizableInnerData.extraInfo;
+		auto* _uiTransform = (UITransform*)_textRenderer->node->getTransform();
 		auto _originOffset = _data.originOffset;
 
 		auto* _atlas = _textRenderer->getFont();
@@ -186,6 +188,14 @@ namespace RDE {
 				auto _transformCopy = glm::mat4(_transformMatrix);
 
 				float _xPos = (_x - (_textRenderer->getTextSize().x) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _transform->getModelMatrixScale().x;
+				if((_uiTransform->getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
+					_xPos += _textRenderer->getTextSize().x;
+				} else if((_uiTransform->getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
+					_xPos -= _textRenderer->getTextSize().x;
+				} else {
+					Util::Log::info("Anchor: ", _uiTransform->getAnchor(), "Add: ", _textRenderer->getSize().x * 0.5f);
+				}
+				
 				float _yPos = (_y + (_textRenderer->getTextSize().y * 0.75f) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;
 
 				float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
