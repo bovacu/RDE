@@ -123,7 +123,7 @@ namespace RDE {
         manager.sceneManager.getDisplayedScene()->onInnerUpdate(_dt);
 
 #if !IS_MOBILE()
-        if(manager.inputManager.isKeyJustPressed(RDE_KEYBOARD_KEY_SPACE)) imGuiLayer->show = !imGuiLayer->show;
+		if(manager.inputManager.isKeyJustPressed(RDE_KEYBOARD_KEY_GRACE_ACCENT)) imGuiLayer->show = !imGuiLayer->show;
 #endif
     }
 
