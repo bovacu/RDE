@@ -29,7 +29,8 @@ namespace RDE {
         Color textColor = Color::White;
         std::string text = "";
 
-        Vec2F textsOffsetFromLeft = { 5.f, 0 };
+        Vec2F textsOffsetFromLeft = { 5.f, 4.f };
+		float spaceOnTheRightToLimitText = 30.f;
 
         Texture* caretTexture = nullptr;
         Color caretColor = Color::White;
@@ -70,6 +71,7 @@ namespace RDE {
              * @brief This is a % of the height of the input text
              */
             float caretHeight = 0.75;
+			float spaceOnTheRightToLimitText = 0.f;
 
 
         public:
@@ -96,8 +98,7 @@ namespace RDE {
             void onUnfocused();
             void updatePlaceholder();
             void updateCaret();
-			void updateText();
-
+			float getMaximumAllowdWidth();
             bool usable();
     };
 

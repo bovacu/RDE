@@ -59,6 +59,8 @@ namespace RDE {
         data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
         data.RenderizableInnerData.shader = background->getShaderID();
 
+
+
         auto _placeholderNode = _graph->createNode("Placeholder", _node);
         placeholderTextRenderer = _placeholderNode->addComponent<UIText>(UITextConfig {
             .font = _config.font == nullptr ? _manager->fontManager.getSpecificFont("MontserratRegular", 40) :
@@ -71,10 +73,13 @@ namespace RDE {
         auto* _placeholderTransform = _placeholderNode->getTransform();
         ((UITransform*)_placeholderTransform)->setAnchor(RDE_UI_ANCHOR_LEFT);
         auto _placeholderPosition = _placeholderTransform->getPosition();
-        _placeholderTransform->setPosition(_placeholderPosition.x + placeholderTextRenderer->getSize().x * 0.5f - getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
+		_placeholderTransform->setPosition(_placeholderPosition.x + _config.textsOffsetFromLeft.x - getSize().x * 0.5f,
                                            _placeholderPosition.y + _config.textsOffsetFromLeft.y);
 
-        auto _textNode = _graph->createNode("Text", _node);
+        
+		
+		
+		auto _textNode = _graph->createNode("Text", _node);
         textRenderer = _textNode->addComponent<UIText>(UITextConfig {
                 .font = _config.font == nullptr ? _manager->fontManager.getSpecificFont("MontserratRegular", 40) :
                         _config.font,
@@ -85,11 +90,13 @@ namespace RDE {
         textTransform = _textNode->getTransform();
         auto _textPosition = textTransform->getPosition();
 		((UITransform*)textTransform)->setAnchor(RDE_UI_ANCHOR_LEFT);
-        textRenderer->setOriginOffset({ textRenderer->getTextSize().x * 0.5f, 0.f });
-        textTransform->setPosition(_textPosition.x + textRenderer->getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
-                                   _textPosition.y + _config.textsOffsetFromLeft.y);
+        textTransform->setPosition(_textPosition.x + textRenderer->getSize().x * 0.5f + _config.textsOffsetFromLeft.x - getSize().x * 0.5f,
+                                   _placeholderTransform->getPosition().y);
 
-        auto _caretNode = _graph->createNode("Caret", _node);
+        
+		
+		
+		auto _caretNode = _graph->createNode("Caret", _node);
 		_caretNode->getTransform()->setScale(2, 1);
         auto* _caretTexture = _config.caretTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "caret") :
                               _config.caretTexture;
@@ -102,14 +109,18 @@ namespace RDE {
         caretTransform = _caretNode->getTransform();
 		((UITransform*)caretTransform)->setAnchor(RDE_UI_ANCHOR_LEFT);
         auto _caretPosition = caretTransform->getPosition();
-        caretTransform->setPosition(_textPosition.x + textRenderer->getSize().x - getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
-                                    _caretPosition.y + _config.textsOffsetFromLeft.y);
+        caretTransform->setPosition(_textPosition.x - getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
+                                    _caretPosition.y);
 
-        blinkingTimeSeconds = _config.blinkingTimeSeconds;
+        
+		
+		
+		blinkingTimeSeconds = _config.blinkingTimeSeconds;
         showPlaceholderText = _config.showPlaceholderText;
         caretHeight = _config.caretHeight;
         caretTexture = _caretTexture;
         textOffsetFromLeft = _config.textsOffsetFromLeft;
+		spaceOnTheRightToLimitText = _config.spaceOnTheRightToLimitText;
     }
 
 
@@ -215,7 +226,6 @@ namespace RDE {
         caretSprite->setEnabled(true);
         uiInteractable->focused = true;
         updatePlaceholder();
-		updateText();
         updateCaret();
         blinkingTimer = 0;
     }
@@ -243,12 +253,14 @@ namespace RDE {
             pointer++;
         }
 
-		updateText();
         updateCaret();
 
     }
 
-    // TODO (RDE): caret is not in the right place when the text goes out of scope on the right
+	float UIInput::getMaximumAllowdWidth() {
+		return textRenderer->getSize().x * node->getTransform()->getScale().x + spaceOnTheRightToLimitText;
+	}
+
     void UIInput::onKeyPressed(RDE_KEYBOARD_KEY_ _keyCode) {
         if(!usable()) return;
 
@@ -262,7 +274,6 @@ namespace RDE {
             pointer = pointer + 1 < _textLength ? pointer + 1 : (int)_textLength;
             updateCaret();
 		}  else if(_keyCode == RDE_KEYBOARD_KEY_DELETE) {
-			updateText();
             updateCaret();
 		} else if(_keyCode == RDE_KEYBOARD_KEY_BAKCSPACE) {
             if(pointer - 1 >= 0) {
@@ -271,12 +282,18 @@ namespace RDE {
                 pointer--;
                 textRenderer->setText(_text);
             }
-			updateText();
             updateCaret();
         }
 
+		auto _possibleTextDisplacement = getMaximumAllowdWidth();
+		auto _displacement = 0.f;
+//		if(_possibleTextDisplacement >= getSize().x) {
+//			auto _chars = textRenderer->getFont()->getChars();
+//			auto _text = textRenderer->getText();
+//			_displacement = _possibleTextDisplacement - getSize().x;
+//		}
 
-        textRenderer->setOriginOffset({ textRenderer->getTextSize().x * 0.5f, 0.f });
+		textRenderer->setOriginOffset({ -_displacement, 0.f });
         updatePlaceholder();
     }
 
@@ -298,20 +315,6 @@ namespace RDE {
         }
     }
 
-	void UIInput::updateText() {
-		if(!usable()) return;
-
-		float _width = textRenderer->getTextSize().x;
-		if(_width * 0.5f * node->getTransform()->getScale().x + textOffsetFromLeft.x * 2.f >= getSize().x) {
-			textDisplacement = (_width * 0.5f * node->getTransform()->getScale().x + textOffsetFromLeft.x) - getSize().x;
-		} else {
-			textDisplacement = 0;
-		}
-
-		auto _origin = Vec2F { nineSliceTransform->getModelMatrixPosition().x - getSize().x * 0.5f + textOffsetFromLeft.x, nineSliceTransform->getModelMatrixPosition().y };
-		textTransform->setMatrixModelPosition({_origin.x - textDisplacement, _origin.y});
-	}
-
     void UIInput::updateCaret() {
         if(caretTransform == nullptr) return;
 
@@ -323,10 +326,16 @@ namespace RDE {
 			_displacement += _chars[_text[_text.size() - 1 - _i]].advance.x * 0.5f;
 		}
 
-        auto _caretPosition = caretTransform->getPosition();
-		caretTransform->setPosition(textTransform->getPosition().x + (textRenderer->getTextSize().x - _displacement) * node->getTransform()->getScale().x, _caretPosition.y);
+		caretTransform->setScale(caretTransform->getScale().x, (caretHeight * getSize().y) / caretTexture->getSize().y);
 
-        caretTransform->setScale(caretTransform->getScale().x, (caretHeight * getSize().y) / caretTexture->getSize().y);
+        auto _caretPosition = caretTransform->getPosition();
+		int _lastIndex = _text.size() - 1;
+		
+		if(_lastIndex >= 0) {
+			auto _lastChar = _text[_lastIndex];
+			auto _increment = _displacement == 0 ? _chars[_lastChar].advance.x * 0.5f * node->getTransform()->getScale().x : 0.f;
+			caretTransform->translate(_increment - _displacement, _caretPosition.y);
+		}
     }
 
     bool UIInput::usable() {
