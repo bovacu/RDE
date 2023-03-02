@@ -143,7 +143,6 @@ namespace RDE {
 
         manager.renderManager.clear();
         manager.sceneManager.getDisplayedScene()->onInnerRender(_dt);
-        manager.sceneManager.getDisplayedScene()->onInnerRenderUI(_dt);
         manager.sceneManager.getDisplayedScene()->onInnerDebugRender(_dt);
 
         #if !IS_MOBILE()
