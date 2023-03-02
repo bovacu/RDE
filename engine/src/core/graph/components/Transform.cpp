@@ -306,7 +306,7 @@ namespace RDE {
     int Transform::getEnabledAndActiveChildrenCount() {
         int _childrenCount = 0;
         for(auto& _child : children) {
-            if(node->isActive() && !_child->node->hasComponent<DisabledForRender>() && !_child->node->hasComponent<DisabledForUpdate>() &&
+			if(_child->node->isActive() && !_child->node->hasComponent<DisabledForRender>() && !_child->node->hasComponent<DisabledForUpdate>() &&
                !_child->node->hasComponent<DisabledForLateUpdate>() && !_child->node->hasComponent<DisabledForFixedUpdate>()
                && !_child->node->hasComponent<DisabledForLateUpdate>()) {
                 _childrenCount++;
