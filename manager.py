@@ -19,6 +19,8 @@ def extract_argument(args, arg, default):
             return found_arg[0].replace("--action=", "")
         if arg == "--info":
             return ""
+        if arg == "--generate_vs_project":
+            return True
     else:
         return default
 
@@ -28,16 +30,23 @@ def buildin_process_windows(args, action):
     generator = extract_argument(args, "--generator", "Ninja")
     c_compiler = extract_argument(args, "--c_compiler", "clang")
     cxx_compiler = extract_argument(args, "--cpp_compiler", "clang++")
+    generate_vs_project = extract_argument(args, "--generate_vs_project", "")
 
     create_build_folder = "if not exist build mkdir build"
     create_windows_folder = "if not exist build\\windows mkdir build\\windows"
-    create_windows_build_folder = "if not exist build\\windows\\{} mkdir build\\windows\\{}".format( build_type.lower(), build_type.lower())
     cmake_generate = "cd build\\windows\\{_build_type} && cmake -G \"{_generator}\" -DCMAKE_BUILD_TYPE={_build_type} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_C_COMPILER={_c_compiler} -DCMAKE_CXX_COMPILER={_cxx_compiler}  -DCMAKE_TOOLCHAIN_FILE=".format(_generator = generator, _build_type = build_type, _c_compiler = c_compiler, _cxx_compiler = cxx_compiler) + os.getcwd() + "/vcpkg/scripts/buildsystems/vcpkg.cmake ..\\..\\.."
     cmake_build = "cd build\\windows\\{} && cmake --build .".format(build_type.lower())
     delete_compile_commands = "del compile_commands.json"
     copy_compile_commands = "copy build\\windows\\{}\\compile_commands.json .".format(build_type.lower())
 
     run_command = "start build\\windows\\{}\\RDE.exe".format(build_type.lower())
+
+    if generate_vs_project:
+        os.system(create_build_folder)
+        os.system("if not exist build\\windows_vs mkdir build\\windows_vs")
+        os.system("cd build\\windows_vs && cmake -G \"Visual Studio 17 2022\" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake ..\\..")
+        os.system("cd build\\windows_vs && cmake --build .")
+        exit(0)
 
     if action == "build":
         os.system(create_build_folder)
@@ -155,7 +164,8 @@ def project_lines_number_mac():
 
 def windows(args):
     action = extract_argument(args, "--action", "")
-    if action == "build" or action == "build-run" or action == "run":
+    generate_vs_project = extract_argument(args, "--generate_vs_project", "")
+    if action == "build" or action == "build-run" or action == "run" or generate_vs_project:
         buildin_process_windows(args, action)
     elif action == "lines":
         project_lines_number_windows()
