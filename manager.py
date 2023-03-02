@@ -34,6 +34,7 @@ def buildin_process_windows(args, action):
 
     create_build_folder = "if not exist build mkdir build"
     create_windows_folder = "if not exist build\\windows mkdir build\\windows"
+    create_windows_build_folder = "if not exist build\\windows\\{} mkdir build\\windows\\{}".format( build_type.lower(), build_type.lower())
     cmake_generate = "cd build\\windows\\{_build_type} && cmake -G \"{_generator}\" -DCMAKE_BUILD_TYPE={_build_type} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_C_COMPILER={_c_compiler} -DCMAKE_CXX_COMPILER={_cxx_compiler}  -DCMAKE_TOOLCHAIN_FILE=".format(_generator = generator, _build_type = build_type, _c_compiler = c_compiler, _cxx_compiler = cxx_compiler) + os.getcwd() + "/vcpkg/scripts/buildsystems/vcpkg.cmake ..\\..\\.."
     cmake_build = "cd build\\windows\\{} && cmake --build .".format(build_type.lower())
     delete_compile_commands = "del compile_commands.json"
