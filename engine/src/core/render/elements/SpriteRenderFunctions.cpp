@@ -94,12 +94,13 @@ namespace RDE {
 
 			for(char _char : _lineInfo.line) {
 				auto _transformCopy = glm::mat4(_transformMatrix);
+                auto _modelMatrixScale = _transform->getModelMatrixScale();
 
-				float _xPos = (_x - (_textRenderer->getTextSize().x * _nonUIPivotX) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _transform->getModelMatrixScale().x;
-				float _yPos = (_y + (_textRenderer->getTextSize().y * _nonUIPivotY) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;
+				float _xPos = (_x - (_textRenderer->getTextSize().x * _nonUIPivotX) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _modelMatrixScale.x;
+				float _yPos = (_y + (_textRenderer->getTextSize().y * _nonUIPivotY) - (float)_chars[_char].bearing.y) * _modelMatrixScale.x;
 
-				float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
-				float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
+				float _w = (float)_chars[_char].size.x * _modelMatrixScale.x;
+				float _h = (float)_chars[_char].size.y * _modelMatrixScale.x;
 
 				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)_transformCopy[3][0], (float)(int)_transformCopy[3][1] });
 				_transformCopy[3][0] = _screenPos.x;
@@ -186,21 +187,21 @@ namespace RDE {
 
 			for(char _char : _lineInfo.line) {
 				auto _transformCopy = glm::mat4(_transformMatrix);
-
-				float _xPos = (_x - (_textRenderer->getTextSize().x) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _transform->getModelMatrixScale().x;
+                auto _modelMatrixScale = _transform->getModelMatrixScale();
+				float _xPos = (_x - (_textRenderer->getTextSize().x) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _modelMatrixScale.x;
 				if((_uiTransform->getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
 					_xPos += _textRenderer->getTextSize().x;
 				} else if((_uiTransform->getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
 					_xPos -= _textRenderer->getTextSize().x;
 				}
 				
-				float _yPos = (_y + (_textRenderer->getTextSize().y * 0.75f) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;
+				float _yPos = (_y + (_textRenderer->getTextSize().y * 0.75f) - (float)_chars[_char].bearing.y) * _modelMatrixScale.x;
 
-				float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
-				float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
+				float _w = (float)_chars[_char].size.x * _modelMatrixScale.x;
+				float _h = (float)_chars[_char].size.y * _modelMatrixScale.x;
 
-				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformCopy[3][0] + _originOffset.x * _transform->getModelMatrixScale().x),
-				                                                    (float)(int)(_transformCopy[3][1] + _originOffset.y * _transform->getModelMatrixScale().y) });
+				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformCopy[3][0] + _originOffset.x * _modelMatrixScale.x),
+				                                                    (float)(int)(_transformCopy[3][1] + _originOffset.y * _modelMatrixScale.y) });
 				_transformCopy[3][0] = _screenPos.x;
 				_transformCopy[3][1] = _screenPos.y;
 
@@ -239,14 +240,6 @@ namespace RDE {
 		if(_dirty || _data.RenderizableInnerData.dirty) {
 			_data.RenderizableInnerData.vertices.clear();
 			calculateGeometryForUIText(_data, _transformMat, _transform, _viewport);
-
-			//auto _cameraScale = glm::vec1(3.f);
-			//_batch->shader->setUniformValueFloat("cameraScale", RDE_UNIFORM_FV_1, GLM_VEC_MAT_TO_POINTER(GLfloat, &_cameraScale));
-
-			//auto* _font = ((UIText*)_data.RenderizableInnerData.extraInfo)->getFont();
-			//auto _atlasSize = glm::vec2(_font->getSize().x, _font->getSize().y);
-			//_batch->shader->setUniformValueFloat("atlasResolution", RDE_UNIFORM_FV_2, GLM_VEC_MAT_TO_POINTER(GLfloat, _atlasSize));
-
 			_data.RenderizableInnerData.dirty = false;
 		}
 
