@@ -226,7 +226,7 @@ namespace RDE {
         caretSprite->setEnabled(true);
         uiInteractable->focused = true;
         updatePlaceholder();
-        updateCaret();
+        updateCaretOther();
         blinkingTimer = 0;
     }
 
@@ -253,8 +253,8 @@ namespace RDE {
             pointer++;
         }
 
-        updateCaret();
-
+		updateTextOnTextKey();
+		updateCaretOnTextKey();
     }
 
 	float UIInput::getMaximumAllowdWidth() {
@@ -266,15 +266,32 @@ namespace RDE {
 
 		if(_keyCode == RDE_KEYBOARD_KEY_ENTER || _keyCode == RDE_KEYBOARD_KEY_ESCAPE) {
             uiInteractable->focused = false;
-		} else if(_keyCode == RDE_KEYBOARD_KEY_LEFT) {
+		} else if(_keyCode == RDE_KEYBOARD_KEY_LEFT && !textRenderer->getText().empty()) {
+			auto _text = textRenderer->getText();
+			if (_text.empty() || pointer == 0) {
+				return;
+			}
+
             pointer = pointer - 1 > 0 ? pointer - 1 : 0;
-            updateCaret();
+			
+			updateTextOnLeftKey();
+			updateCaretOnLeftKey();
+
 		} else if(_keyCode == RDE_KEYBOARD_KEY_RIGHT) {
+			auto _text = textRenderer->getText();
+
+			if (_text.empty() || pointer == _text.size()) {
+				return;
+			}
+
             auto _textLength = textRenderer->getText().size();
             pointer = pointer + 1 < _textLength ? pointer + 1 : (int)_textLength;
-            updateCaret();
+			
+			updateTextOnRightKey();
+			updateCaretOnRightKey();
+
 		}  else if(_keyCode == RDE_KEYBOARD_KEY_DELETE) {
-            updateCaret();
+            updateCaretOther();
 		} else if(_keyCode == RDE_KEYBOARD_KEY_BAKCSPACE) {
             if(pointer - 1 >= 0) {
                 auto _text = textRenderer->getText();
@@ -282,18 +299,10 @@ namespace RDE {
                 pointer--;
                 textRenderer->setText(_text);
             }
-            updateCaret();
+			updateTextOther();
+            updateCaretOther();
         }
 
-		auto _possibleTextDisplacement = getMaximumAllowdWidth();
-		auto _displacement = 0.f;
-//		if(_possibleTextDisplacement >= getSize().x) {
-//			auto _chars = textRenderer->getFont()->getChars();
-//			auto _text = textRenderer->getText();
-//			_displacement = _possibleTextDisplacement - getSize().x;
-//		}
-
-		textRenderer->setOriginOffset({ -_displacement, 0.f });
         updatePlaceholder();
     }
 
@@ -315,27 +324,110 @@ namespace RDE {
         }
     }
 
-    void UIInput::updateCaret() {
+	void UIInput::updateTextOnLeftKey() {
+		
+	}
+
+	void UIInput::updateTextOnRightKey() {
+		
+	}
+
+	void UIInput::updateTextOnBackspaceKey() {
+		
+	}
+
+	void UIInput::updateTextOnTextKey() {
+		auto _maxAllowed = getSize().x - spaceOnTheRightToLimitText;
+		auto _displacement = 0.f;
+		if(textRenderer->getSize().x > _maxAllowed) {
+			_displacement = _maxAllowed - textRenderer->getSize().x;
+		}
+
+		textRenderer->setOriginOffset({ _displacement, 0.f });
+	}
+
+	void UIInput::updateTextOther() {
+		auto _maxAllowed = getSize().x - spaceOnTheRightToLimitText;
+		auto _displacement = 0.f;
+		if(textRenderer->getSize().x > _maxAllowed) {
+			_displacement = _maxAllowed - textRenderer->getSize().x;
+		}
+
+		textRenderer->setOriginOffset({ _displacement, 0.f });
+	}
+
+
+
+	void UIInput::updateCaretOnLeftKey() {
+		auto _displacement = caretSprite->getOriginOffset();
+
+		auto _font = textRenderer->getFont();
+		auto _chars = _font->getChars();
+		auto _text = textRenderer->getText();
+
+		if(_displacement.x > 0) {
+			auto _delta = Util::Math::clampF(_displacement.x - _chars[_text[pointer]].advance.x * 0.5f, 0, FLT_MAX);
+			caretSprite->setOriginOffset({_delta, _displacement.y});
+		}
+	}
+
+	void UIInput::updateCaretOnRightKey() {
+		auto _maxAllowed = getSize().x - spaceOnTheRightToLimitText;
+		auto _displacement = caretSprite->getOriginOffset();
+		auto _font = textRenderer->getFont();
+		auto _chars = _font->getChars();
+		auto _text = textRenderer->getText();
+			
+		if(_displacement.x != _maxAllowed) {
+			auto _delta = Util::Math::clampF(_displacement.x + _chars[_text[pointer - 1]].advance.x * 0.5f, 0, _maxAllowed);
+			caretSprite->setOriginOffset({_delta, _displacement.y});
+		}
+	}
+
+	void UIInput::updateCaretOnBackspaceKey() {
+		
+	}
+
+	void UIInput::updateCaretOnTextKey() {
+		auto _chars = textRenderer->getFont()->getChars();
+		auto _displacement = caretSprite->getOriginOffset().x;
+		auto _text = textRenderer->getText();
+		
+		if(pointer == _text.size()) {
+			_displacement = textRenderer->getSize().x;
+			auto _maxAllowed = getSize().x - spaceOnTheRightToLimitText;
+			if(_displacement > _maxAllowed) {
+				_displacement = _maxAllowed;
+			}
+		} else {
+			_displacement += _chars[_text[pointer]].advance.x * 0.5f;
+			pointer++;
+		}
+
+		caretTransform->setScale(caretTransform->getScale().x, (caretHeight * getSize().y) / caretTexture->getSize().y);
+		caretSprite->setOriginOffset({ _displacement, 0 });
+	}
+
+    void UIInput::updateCaretOther() {
         if(caretTransform == nullptr) return;
 
 		auto _chars = textRenderer->getFont()->getChars();
 		auto _text = textRenderer->getText();
 
-		auto _displacement = 0.f;
-		for(auto _i = 0; _i < _text.size() - pointer; _i++) {
-			_displacement += _chars[_text[_text.size() - 1 - _i]].advance.x * 0.5f;
+		auto _displacement = caretSprite->getOriginOffset().x;
+		if(!_text.empty()) {
+			_displacement = textRenderer->getSize().x;
+			auto _maxAllowed = getSize().x - spaceOnTheRightToLimitText;
+			if(_displacement > _maxAllowed) {
+				_displacement = _maxAllowed;
+			}
+		} else {
+			_displacement = 0.f;
 		}
 
 		caretTransform->setScale(caretTransform->getScale().x, (caretHeight * getSize().y) / caretTexture->getSize().y);
 
-        auto _caretPosition = caretTransform->getPosition();
-		int _lastIndex = _text.size() - 1;
-		
-		if(_lastIndex >= 0) {
-			auto _lastChar = _text[_lastIndex];
-			auto _increment = _displacement == 0 ? _chars[_lastChar].advance.x * 0.5f * node->getTransform()->getScale().x : 0.f;
-			caretTransform->translate(_increment - _displacement, _caretPosition.y);
-		}
+		caretSprite->setOriginOffset({ _displacement, 0 });
     }
 
     bool UIInput::usable() {

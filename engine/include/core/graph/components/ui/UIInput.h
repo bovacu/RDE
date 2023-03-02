@@ -30,7 +30,7 @@ namespace RDE {
         std::string text = "";
 
         Vec2F textsOffsetFromLeft = { 5.f, 4.f };
-		float spaceOnTheRightToLimitText = 30.f;
+		float spaceOnTheRightToLimitText = 10.f;
 
         Texture* caretTexture = nullptr;
         Color caretColor = Color::White;
@@ -97,7 +97,19 @@ namespace RDE {
             void onTextTyping(const std::string& _text);
             void onUnfocused();
             void updatePlaceholder();
-            void updateCaret();
+
+			void updateCaretOnRightKey();
+			void updateCaretOnLeftKey();
+			void updateCaretOnBackspaceKey();
+			void updateCaretOnTextKey();
+            void updateCaretOther();
+
+			void updateTextOnRightKey();
+			void updateTextOnLeftKey();
+			void updateTextOnBackspaceKey();
+			void updateTextOnTextKey();
+			void updateTextOther();
+
 			float getMaximumAllowdWidth();
             bool usable();
     };
