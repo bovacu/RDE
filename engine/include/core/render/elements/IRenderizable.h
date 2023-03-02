@@ -40,6 +40,7 @@ namespace RDE {
         bool dirty = false;
         RDE_BATCH_PRIORITY_ batchPriority = RDE_BATCH_PRIORITY_SPRITE;
 		RDE_RENDERIZABLE_TYPE_ renderizableType = RDE_RENDERIZABLE_TYPE_NONE;
+		bool draw = true;
 
         void* extraInfo = nullptr;
     };

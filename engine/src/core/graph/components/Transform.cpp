@@ -183,7 +183,7 @@ namespace RDE {
             _child->setDirty(_child);
         }
 
-        graph->renderingTreeData.dirtyTransforms.push_back(_transform);
+        //graph->renderingTreeData.dirtyTransforms.push_back(_transform);
     }
 
     void Transform::setMatrixModelPosition(const Vec2F& _worldPos) {
@@ -317,7 +317,7 @@ namespace RDE {
         return _childrenCount;
     }
 
-    void Transform::clearDirty() {
-        dirty = false;
-    }
+	void Transform::update() {
+		dirty = false;
+	}
 }

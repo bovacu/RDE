@@ -38,8 +38,6 @@ namespace RDE {
         public:
             explicit UITransform(Graph* _graph);
 
-            void clearDirty() override;
-
 			[[nodiscard]] RDE_UI_ANCHOR_ getAnchor() const;
 			void setAnchor(RDE_UI_ANCHOR_ _anchor);
 
@@ -50,6 +48,7 @@ namespace RDE {
             void setSize(const Vec2F& _size);
 
             std::tuple<glm::mat4, bool> localToWorld() override;
+			void update() override;
 
         private:
             void setUIDirty();

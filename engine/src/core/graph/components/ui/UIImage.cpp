@@ -35,8 +35,8 @@ namespace RDE {
             return;
         }
 
-        auto [_transformMat, _] = _node->getTransform()->localToWorld();
-        calculateGeometryForUIImage(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->mainCamera->getViewport());
+        /*auto [_transformMat, _] = _node->getTransform()->localToWorld();
+        calculateGeometryForUIImage(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->mainCamera->getViewport());*/
     }
 
 

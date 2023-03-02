@@ -106,37 +106,39 @@ namespace RDE {
 
     void Scene::recalculateRenderizableTree(Node* _node) {
         auto _id = _node->getID();
+		auto _draw = !_node->hasComponent<DisabledForRender>() && _node->hasComponent<Active>();
 
-        if(!_node->hasComponent<DisabledForRender>() && _node->hasComponent<Active>()) {
+		if(_node->hasComponent<SpriteRenderer>()) {
+			auto* _data = &_node->getComponent<SpriteRenderer>()->data;
+			_data->draw = _draw;
+			graph->renderingTreeData.sprites.emplace_back(_data, _node->getTransform(), nullptr );
+		}
 
-            if(_node->hasComponent<SpriteRenderer>()) {
-                graph->renderingTreeData.sprites.emplace_back(&_node->getComponent<SpriteRenderer>()->data, _node->getTransform(), nullptr );
-            }
+		if(_node->hasComponent<DynamicSpriteRenderer>()) {
+			auto* _data = &_node->getComponent<DynamicSpriteRenderer>()->data;
+			_data->draw = _draw;
+			graph->renderingTreeData.dynamicSprites.emplace_back(_data, _node->getTransform(), nullptr );
+		}
 
-            if(_node->hasComponent<DynamicSpriteRenderer>()) {
-                graph->renderingTreeData.dynamicSprites.emplace_back(&_node->getComponent<DynamicSpriteRenderer>()->data, _node->getTransform(), nullptr );
-            }
+		if(_node->hasComponent<ParticleSystem>()) {
+			auto* _data = &_node->getComponent<ParticleSystem>()->data;
+			_data->draw = _draw;
+			graph->renderingTreeData.particleSystmes.emplace_back(_data, _node->getTransform(), nullptr );
+		}
 
-            if(_node->hasComponent<ParticleSystem>()) {
-                graph->renderingTreeData.particleSystmes.emplace_back(&_node->getComponent<ParticleSystem>()->data, _node->getTransform(), nullptr );
-            }
-
-            if(_node->hasComponent<TextRenderer>()) {
-                auto* _textRenderer = _node->getComponent<TextRenderer>();
-                graph->renderingTreeData.texts.emplace_back( &_textRenderer->data, _node->getTransform(), (void*)_textRenderer );
-            }
-        }
+		if(_node->hasComponent<TextRenderer>()) {
+			auto* _textRenderer = _node->getComponent<TextRenderer>();
+			auto* _data = &_textRenderer->data;
+			_data->draw = _draw;
+			graph->renderingTreeData.texts.emplace_back(_data, _node->getTransform(), (void*)_textRenderer );
+		}
 
         for(auto* _child : _node->getTransform()->children) {
             recalculateRenderizableTree(_child->node);
         }
     }
 
-    void Scene::recalculateRenderizableTreeUI(Node* _node) {
-        if(!_node->isActive()) {
-            return;
-        }
-
+	void Scene::recalculateRenderizableTreeUI(Node* _node) {		
         CanvasElement _canvasElement { _node };
 
         if(canvas->graph->getNodeContainer().any_of<UIInteractable>(_node->getID())) {
@@ -164,9 +166,9 @@ namespace RDE {
             }
         }
 
-         for(auto* _child : _node->getTransform()->children) {
-             recalculateRenderizableTreeUI(_child->node);
-         }
+        for(auto* _child : _node->getTransform()->children) {
+            recalculateRenderizableTreeUI(_child->node);
+        }
     }
 
     void Scene::onInnerLateUpdateHierarchy(Delta _dt) {
@@ -227,14 +229,14 @@ namespace RDE {
             _renderManager.endDraw();
         }
 
-        postRenderSync();
+        //postRenderSync();
     }
 
     void Scene::postRenderSync() {
-        for(auto* _dirtyTransform : graph->renderingTreeData.dirtyTransforms) {
-            _dirtyTransform->clearDirty();
-        }
-        graph->renderingTreeData.dirtyTransforms.clear();
+        //for(auto* _dirtyTransform : graph->renderingTreeData.dirtyTransforms) {
+        //    _dirtyTransform->clearDirty();
+        //}
+        //graph->renderingTreeData.dirtyTransforms.clear();
     }
 
     void Scene::onInnerRenderUI(Delta _dt) {
@@ -270,14 +272,14 @@ namespace RDE {
 
 		_renderManager.endDrawUI(canvas->batches);
 
-        postRenderSyncUI();
+        //postRenderSyncUI();
     }
 
     void Scene::postRenderSyncUI() {
-        for(auto* _dirtyTransform : canvas->graph->renderingTreeData.dirtyTransforms) {
-            ((UITransform*)_dirtyTransform)->clearDirty();
-        }
-        canvas->graph->renderingTreeData.dirtyTransforms.clear();
+        //for(auto* _dirtyTransform : canvas->graph->renderingTreeData.dirtyTransforms) {
+        //    ((UITransform*)_dirtyTransform)->clearDirty();
+        //}
+        //canvas->graph->renderingTreeData.dirtyTransforms.clear();
     }
 
 

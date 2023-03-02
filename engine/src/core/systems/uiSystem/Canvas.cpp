@@ -63,20 +63,20 @@ namespace RDE {
     void Canvas::getRenderizable(Node* _node, CanvasElement* _canvasElement) {
         if(_node->hasComponent<UIImage>()) {
             auto* _uiImage = _node->getComponent<UIImage>();
-            if(_uiImage->isEnabled() && _uiImage->node->isActive()) {
-                _uiImage->data.RenderizableInnerData.extraInfo = (void*)_uiImage;
-                _canvasElement->renderizableInnerData = &_uiImage->data;
-                return;
-            }
+			auto _draw = _uiImage->isEnabled() && _uiImage->node->isActive();
+			_uiImage->data.RenderizableInnerData.extraInfo = (void*)_uiImage;
+			_canvasElement->renderizableInnerData = &_uiImage->data;
+			_canvasElement->renderizableInnerData->RenderizableInnerData.draw = _draw;
+			return;
         }
 
         if(_node->hasComponent<UIText>()) {
             auto* _uiText = _node->getComponent<UIText>();
-            if(_uiText->isEnabled() && _uiText->node->isActive()) {
-                _uiText->data.RenderizableInnerData.extraInfo = (void*)_uiText;
-                _canvasElement->renderizableInnerData = &_uiText->data;
-                return;
-            }
+			auto _draw = _uiText->isEnabled() && _uiText->node->isActive();
+			_uiText->data.RenderizableInnerData.extraInfo = (void*)_uiText;
+			_canvasElement->renderizableInnerData = &_uiText->data;
+			_canvasElement->renderizableInnerData->RenderizableInnerData.draw = _draw;
+			return;
         }
     }
 

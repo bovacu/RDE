@@ -12,6 +12,10 @@
 namespace RDE {
 
     void UIAnchor::updateAnchor(UITransform* _transform) {
+        if (_transform->parentTransform == nullptr) {
+            return;
+        }
+
         auto _parentPosition = _transform->parentTransform->getModelMatrixPosition();
         auto _parentSize = ((UITransform*)_transform->parentTransform->node->getTransform())->getSize();
 
@@ -88,26 +92,28 @@ namespace RDE {
                                                         _uiTransform->anchor.anchorPosition.y - _lastAnchorPos.y});
 
             auto _sizeDiff = _uiTransform->anchor.anchorSize - _lastSize;
-            if(_sizeDiff != 0) {
-                _uiTransform->setSize(_uiTransform->getSize() + _sizeDiff);
-				if(((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) || ((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_BOTTOM) == RDE_UI_ANCHOR_RIGHT_BOTTOM) ||
+			if (_sizeDiff != 0) {
+				_uiTransform->setSize(_uiTransform->getSize() + _sizeDiff);
+				if (((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) || ((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_BOTTOM) == RDE_UI_ANCHOR_RIGHT_BOTTOM) ||
 					((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_TOP) == RDE_UI_ANCHOR_RIGHT_TOP)) {
-                    _sizeDiff.x = -_sizeDiff.x;
-                }
+					_sizeDiff.x = -_sizeDiff.x;
+				}
 
-				if(((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_TOP) == RDE_UI_ANCHOR_TOP) || ((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_TOP) == RDE_UI_ANCHOR_RIGHT_TOP) ||
+				if (((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_TOP) == RDE_UI_ANCHOR_TOP) || ((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_TOP) == RDE_UI_ANCHOR_RIGHT_TOP) ||
 					((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_LEFT_TOP) == RDE_UI_ANCHOR_LEFT_TOP)) {
-                    _sizeDiff.y = -_sizeDiff.y;
-                }
+					_sizeDiff.y = -_sizeDiff.y;
+				}
 
-                // It is half the size because when a change in size happens, it is applied to both sides
-                _uiTransform->translateMatrixModelPosition(_sizeDiff * 0.5f);
-            }
-            graph->renderingTreeData.dirtyTransforms.push_back(_uiTransform);
+				// It is half the size because when a change in size happens, it is applied to both sides
+				_uiTransform->translateMatrixModelPosition(_sizeDiff * 0.5f);
+			}
         }
-
-        graph->renderingTreeData.dirtyTransforms.push_back(this);
     }
+
+	void UITransform::update() {
+		Transform::update();
+		uiDirty = false;
+	}
 
     std::tuple<glm::mat4, bool> UITransform::localToWorld() {
         auto [_mat, _dirty] = Transform::localToWorld();
@@ -124,10 +130,5 @@ namespace RDE {
     void UITransform::setSize(const Vec2F& _size) {
         size = _size;
         setUIDirty();
-    }
-
-    void UITransform::clearDirty() {
-        Transform::clearDirty();
-        uiDirty = false;
     }
 }

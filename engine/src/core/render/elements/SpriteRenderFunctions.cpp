@@ -47,8 +47,13 @@ namespace RDE {
         auto [_transformMat, _dirty] = _transform->localToWorld();
         if(_dirty || _data.dirty) {
             calculateGeometryForSpriteRenderer(_data, _transformMat, _transform, _viewport);
+			_transform->update();
             _data.dirty = false;
         }
+
+		if(!_data.draw) {
+			return;
+		}
 
         _batch->vertexBuffer.emplace_back(_data.vertices[0]);
         _batch->vertexBuffer.emplace_back(_data.vertices[1]);
@@ -140,10 +145,15 @@ namespace RDE {
 		if(_dirty || _data.dirty) {
 			_data.vertices.clear();
 			calculateGeometryForTextRenderer(_data, _transformMat, _transform, _viewport);
+			_transform->update();
 			_data.dirty = false;
 		}
 
-			for(auto _i = 0; _i < _textRenderer->getText().size(); _i++) {
+		if(!_data.draw) {
+			return;
+		}
+
+		for(auto _i = 0; _i < _textRenderer->getText().size(); _i++) {
 			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 0]);
 			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 1]);
 			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 2]);
@@ -240,7 +250,12 @@ namespace RDE {
 		if(_dirty || _data.RenderizableInnerData.dirty) {
 			_data.RenderizableInnerData.vertices.clear();
 			calculateGeometryForUIText(_data, _transformMat, _transform, _viewport);
+			((UITransform*)_transform)->update();
 			_data.RenderizableInnerData.dirty = false;
+		}
+
+		if(!_data.RenderizableInnerData.draw) {
+			return;
 		}
 
 		for(auto _i = 0; _i < _uiTextRenderer->getText().size(); _i++) {
@@ -794,8 +809,13 @@ namespace RDE {
                     calculatePartialRGeometry(_data, _transformMat, _transform, _viewport); break;
             }
 
+			((UITransform*)_transform)->update();
             _data.RenderizableInnerData.dirty = false;
         }
+
+		if(!_data.RenderizableInnerData.draw) {
+			return;
+		}
 
 		switch ((RDE_IMAGE_RENDERING_TYPE_)_data.imageRenderingType) {
 			case RDE_IMAGE_RENDERING_TYPE_NORMAL:

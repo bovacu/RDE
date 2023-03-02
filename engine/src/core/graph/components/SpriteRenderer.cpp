@@ -34,9 +34,6 @@ namespace RDE {
         data.renderizableType = RDE_RENDERIZABLE_TYPE_SPRITE;
         
         setColor(_config.color);
-
-        auto [_transformMat, _] = _node->getTransform()->localToWorld();
-        calculateGeometryForSpriteRenderer(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->mainCamera->getViewport());
     }
 
     RENDERIZABLE_BASIC_METHODS_IMPL(SpriteRenderer, (float)data.texture->getSize().x * node->getTransform()->getScale().x, (float)data.texture->getSize().y * node->getTransform()->getScale().y)
