@@ -103,6 +103,7 @@ namespace RDE {
                 // It is half the size because when a change in size happens, it is applied to both sides
                 _uiTransform->translateMatrixModelPosition(_sizeDiff * 0.5f);
             }
+            graph->renderingTreeData.dirtyTransforms.push_back(_uiTransform);
         }
 
         graph->renderingTreeData.dirtyTransforms.push_back(this);
