@@ -85,8 +85,8 @@ namespace RDE {
         batch.drawTextRenderer(_innerData, _transform);
     }
 
-    void RenderManager::drawUI(std::vector<Batch>& _batches) {
-        batch.drawUI(_batches);
+    void RenderManager::endDrawUI(std::vector<Batch>& _batches) {
+		batch.flushUI(_batches);
     }
 
     void RenderManager::beginDebugDraw(Camera* _camera, Transform* _cameraTransform, float _thickness) {

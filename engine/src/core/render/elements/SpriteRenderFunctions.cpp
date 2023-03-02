@@ -192,8 +192,6 @@ namespace RDE {
 					_xPos += _textRenderer->getTextSize().x;
 				} else if((_uiTransform->getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
 					_xPos -= _textRenderer->getTextSize().x;
-				} else {
-					Util::Log::info("Anchor: ", _uiTransform->getAnchor(), "Add: ", _textRenderer->getSize().x * 0.5f);
 				}
 				
 				float _yPos = (_y + (_textRenderer->getTextSize().y * 0.75f) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;

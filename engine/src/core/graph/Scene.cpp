@@ -268,7 +268,7 @@ namespace RDE {
             if(_it.cropping > 0) _cropList.push_back(_it.cropping);
         }
 
-        _renderManager.drawUI(canvas->batches);
+		_renderManager.endDrawUI(canvas->batches);
 
         postRenderSyncUI();
     }

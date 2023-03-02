@@ -277,7 +277,7 @@ namespace RDE {
         }
     }
 
-    void SpriteBatch::drawUI(std::vector<Batch>& _batches) {
+	void SpriteBatch::flushUI(std::vector<Batch>& _batches) {
         for(auto& _batch : _batches) {
             auto _shaderID = _batch.shader->getShaderID();
             if (_batch.vertexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0)

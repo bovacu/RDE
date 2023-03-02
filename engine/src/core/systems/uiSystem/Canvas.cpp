@@ -174,7 +174,7 @@ namespace RDE {
     void Canvas::forceRender() {
         auto& _renderManager = graph->scene->engine->manager.renderManager;
         _renderManager.beginDraw(camera, nullptr);
-        _renderManager.drawUI(batches);
+        _renderManager.endDrawUI(batches);
 
         batches.clear();
         Batch _batch;
