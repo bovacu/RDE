@@ -62,15 +62,10 @@ namespace RDE {
             },
             VertexConfig {
 				2, 2, GL_FLOAT, sizeof(float) * 2 + sizeof(unsigned char) * 4, _structSize
-			},
-			//VertexConfig {
-			//	3, 4, GL_FLOAT, sizeof(float) * 2 + sizeof(unsigned char) * 4 + sizeof(float) * 2, _structSize
-			//}
+			}
 		},
 		{
-			"viewProjectionMatrix",
-			//"cameraScale",
-			//"atlasResolution"
+			"viewProjectionMatrix"
 		},
         maxIndicesPerDrawCall);
 		Util::GL::checkError("Error AFTER ConfigBasicShader for text");
@@ -244,7 +239,8 @@ namespace RDE {
             glUseProgram(_shaderID);
             Util::GL::checkError("After glUseProgram");
 
-			_batch.shader->setUniformValueFloat("viewProjectionMatrix", RDE_UNIFORM_FV_MATRIX_4, GLM_VEC_MAT_TO_POINTER(GLfloat, viewProjectionMatrix));
+            glUniformMatrix4fv(glGetUniformLocation(_shaderID, "viewProjectionMatrix"), 1, GL_FALSE, GLM_VEC_MAT_TO_POINTER(GLfloat, viewProjectionMatrix));
+			Util::GL::checkError("After setUniformValueFloat");
 
             glActiveTexture(GL_TEXTURE0);
             Util::GL::checkError("After glActiveTexture");
@@ -286,7 +282,7 @@ namespace RDE {
             glUseProgram(_shaderID);
             Util::GL::checkError("After glUseProgram UI");
 
-			_batch.shader->setUniformValueFloat("viewProjectionMatrix", RDE_UNIFORM_FV_MATRIX_4, GLM_VEC_MAT_TO_POINTER(GLfloat, viewProjectionMatrix));
+            glUniformMatrix4fv(glGetUniformLocation(_shaderID, "viewProjectionMatrix"), 1, GL_FALSE, GLM_VEC_MAT_TO_POINTER(GLfloat, viewProjectionMatrix));
             Util::GL::checkError("After glUniformMatrix4fv UI");
 
             glActiveTexture(GL_TEXTURE0);
