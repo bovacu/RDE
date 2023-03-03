@@ -2,6 +2,7 @@
 
 
 #include "core/systems/animationSystem/Animation.h"
+#include <algorithm>
 
 namespace RDE {
 

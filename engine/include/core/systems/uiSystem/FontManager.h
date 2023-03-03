@@ -9,6 +9,7 @@
 #include "freetype/freetype.h"
 #include "core/render/elements/Texture.h"
 #include <unordered_map>
+#include <vector>
 
 #define MAX_WIDTH 512
 #define MAX_CHARACTERS 128
