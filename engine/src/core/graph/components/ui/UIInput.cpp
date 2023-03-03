@@ -69,7 +69,7 @@ namespace RDE {
             .textColor = _config.placeholderTextColor
         });
         placeholderTextRenderer->data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
-        placeholderTextRenderer->setEnabled(_config.showPlaceholderText);
+		placeholderTextRenderer->setEnabled(_config.showPlaceholderText);
         auto* _placeholderTransform = _placeholderNode->getTransform();
         ((UITransform*)_placeholderTransform)->setAnchor(RDE_UI_ANCHOR_LEFT);
         auto _placeholderPosition = _placeholderTransform->getPosition();
@@ -105,12 +105,12 @@ namespace RDE {
             .color = _config.caretColor
         });
         caretSprite->data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
-        caretSprite->setEnabled(false);
         caretTransform = _caretNode->getTransform();
+		auto _caretPosition = caretTransform->getPosition();
 		((UITransform*)caretTransform)->setAnchor(RDE_UI_ANCHOR_LEFT);
-        auto _caretPosition = caretTransform->getPosition();
         caretTransform->setPosition(_textPosition.x - getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
                                     _caretPosition.y);
+		caretSprite->setEnabled(false);
 
         
 		
@@ -198,7 +198,7 @@ namespace RDE {
 
         if(uiInteractable != nullptr && uiInteractable->focused && caretSprite != nullptr) {
             if(blinkingTimer > blinkingTimeSeconds) {
-                caretSprite->setEnabled(!caretSprite->isEnabled());
+				caretSprite->setEnabled(!caretSprite->isEnabled());
                 blinkingTimer = 0;
             }
 
@@ -223,7 +223,7 @@ namespace RDE {
 
         SDL_StartTextInput();
 
-        caretSprite->setEnabled(true);
+		caretSprite->setEnabled(true);
         uiInteractable->focused = true;
         updatePlaceholder();
         updateCaretOther();
@@ -234,7 +234,7 @@ namespace RDE {
         if(!usable()) return;
 
         SDL_StopTextInput();
-        caretSprite->setEnabled(false);
+		caretSprite->setEnabled(false);
         updatePlaceholder();
     }
 
@@ -313,12 +313,12 @@ namespace RDE {
     void UIInput::updatePlaceholder() {
         if(placeholderTextRenderer != nullptr) {
             if(uiInteractable->focused) {
-                placeholderTextRenderer->setEnabled(false);
+				placeholderTextRenderer->setEnabled(false);
             } else {
                 if(textRenderer != nullptr) {
-                    placeholderTextRenderer->setEnabled(textRenderer->getText().empty());
+					placeholderTextRenderer->setEnabled(textRenderer->getText().empty());
                 } else {
-                    placeholderTextRenderer->setEnabled(showPlaceholderText);
+					placeholderTextRenderer->setEnabled(showPlaceholderText);
                 }
             }
         }
@@ -339,8 +339,23 @@ namespace RDE {
 	void UIInput::updateTextOnTextKey() {
 		auto _maxAllowed = getSize().x - spaceOnTheRightToLimitText;
 		auto _displacement = 0.f;
-		if(textRenderer->getSize().x > _maxAllowed) {
+		auto _text = textRenderer->getText();
+
+		if(textRenderer->getSize().x > _maxAllowed && pointer == _text.size()) {
 			_displacement = _maxAllowed - textRenderer->getSize().x;
+		} else if (caretSprite->getOriginOffset().x == _maxAllowed && pointer != _text.size()) {
+			auto _textBehindPointer = _text.substr(0, pointer);
+			auto _font = textRenderer->getFont();
+			auto _chars = _font->getChars();
+
+			auto _subStringSize = 0.f;
+			for(auto _i = 0; _i < _textBehindPointer.size() - 1; _i++) {
+				_subStringSize += _chars[_textBehindPointer[_i]].advance.x * 0.5f;
+			}
+
+			if(_subStringSize > _maxAllowed) {
+				_displacement = _maxAllowed - _subStringSize;
+			}
 		}
 
 		textRenderer->setOriginOffset({ _displacement, 0.f });
@@ -392,10 +407,10 @@ namespace RDE {
 		auto _chars = textRenderer->getFont()->getChars();
 		auto _displacement = caretSprite->getOriginOffset().x;
 		auto _text = textRenderer->getText();
+		auto _maxAllowed = getSize().x - spaceOnTheRightToLimitText;
 		
-		if(pointer == _text.size()) {
+		if(pointer == _text.size() || _displacement > _maxAllowed) {
 			_displacement = textRenderer->getSize().x;
-			auto _maxAllowed = getSize().x - spaceOnTheRightToLimitText;
 			if(_displacement > _maxAllowed) {
 				_displacement = _maxAllowed;
 			}
@@ -410,23 +425,21 @@ namespace RDE {
 
     void UIInput::updateCaretOther() {
         if(caretTransform == nullptr) return;
-
 		auto _chars = textRenderer->getFont()->getChars();
 		auto _text = textRenderer->getText();
 
 		auto _displacement = caretSprite->getOriginOffset().x;
-		if(!_text.empty()) {
-			_displacement = textRenderer->getSize().x;
-			auto _maxAllowed = getSize().x - spaceOnTheRightToLimitText;
-			if(_displacement > _maxAllowed) {
-				_displacement = _maxAllowed;
-			}
-		} else {
+		_displacement = textRenderer->getSize().x;
+		auto _maxAllowed = getSize().x - spaceOnTheRightToLimitText;
+		if(_displacement > _maxAllowed) {
+			_displacement = _maxAllowed;
+		}
+
+		if(_text.empty()) {
 			_displacement = 0.f;
 		}
 
 		caretTransform->setScale(caretTransform->getScale().x, (caretHeight * getSize().y) / caretTexture->getSize().y);
-
 		caretSprite->setOriginOffset({ _displacement, 0 });
     }
 

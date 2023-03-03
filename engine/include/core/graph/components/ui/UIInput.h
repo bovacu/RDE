@@ -58,7 +58,7 @@ namespace RDE {
             Transform* caretTransform = nullptr;
             Transform* textTransform = nullptr;
             Transform* nineSliceTransform = nullptr;
-            Texture* caretTexture;
+            Texture* caretTexture = nullptr;
 
         RENDERIZABLE_UI_BASIC_PROPERTIES()
 
