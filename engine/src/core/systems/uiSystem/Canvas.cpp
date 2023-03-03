@@ -80,7 +80,7 @@ namespace RDE {
         }
     }
 
-    void Canvas::batchTreeElementPre(CanvasElement* _canvasElement, void* _data) {
+    void Canvas::batchTreeElementPre(CanvasElement* _canvasElement, void* _extraData) {
         Batch* _currentBatch = &batches.back();
 
         // This checks if there is a beggining on the Cropping System, for masks.

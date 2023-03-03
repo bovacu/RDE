@@ -150,7 +150,7 @@ namespace RDE {
             canvas->getRenderizable(_node, &_canvasElement);
 
             if(canvas->graph->getNodeContainer().any_of<UIMask>(_node->getID()) && _node->getComponent<UIMask>()->isEnabled()) {
-                _canvasElement.cropping = _node->getTransform()->getEnabledAndActiveChildrenCount();
+                _canvasElement.cropping = _node->getTransform()->getEnabledAndActiveChildrenCount() + 1;
             }
 
             if(_canvasElement.renderizableInnerData != nullptr) {
