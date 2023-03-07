@@ -43,7 +43,6 @@ namespace RDE {
         uiInteractable->onInnerClicking.bind<&UIInput::onMouseClicked>(this);
         uiInteractable->onInnerClickingReleased.bind<&UIInput::onMouseReleased>(this);
         uiInteractable->onInnerKeyPressed.bind<&UIInput::onKeyPressed>(this);
-        uiInteractable->onInnerKeyReleased.bind<&UIInput::onKeyReleased>(this);
         uiInteractable->onInnerTextTyped.bind<&UIInput::onTextTyping>(this);
         uiInteractable->onInnerUnfocused.bind<&UIInput::onUnfocused>(this);
 
@@ -266,33 +265,39 @@ namespace RDE {
 
 		if(_keyCode == RDE_KEYBOARD_KEY_ENTER || _keyCode == RDE_KEYBOARD_KEY_ESCAPE) {
             uiInteractable->focused = false;
-		} else if(_keyCode == RDE_KEYBOARD_KEY_LEFT && !textRenderer->getText().empty()) {
-			auto _text = textRenderer->getText();
-			if (_text.empty() || pointer == 0) {
-				return;
-			}
-
-            pointer = pointer - 1 > 0 ? pointer - 1 : 0;
-			
-			updateTextOnLeftKey();
-			updateCaretOnLeftKey();
-
-		} else if(_keyCode == RDE_KEYBOARD_KEY_RIGHT) {
-			auto _text = textRenderer->getText();
-
-			if (_text.empty() || pointer == _text.size()) {
-				return;
-			}
-
-            auto _textLength = textRenderer->getText().size();
-            pointer = pointer + 1 < _textLength ? pointer + 1 : (int)_textLength;
-			
-			updateTextOnRightKey();
-			updateCaretOnRightKey();
-
-		}  else if(_keyCode == RDE_KEYBOARD_KEY_DELETE) {
-            updateCaretOther();
-		} else if(_keyCode == RDE_KEYBOARD_KEY_BAKCSPACE) {
+		} 
+		
+		//else if(_keyCode == RDE_KEYBOARD_KEY_LEFT && !textRenderer->getText().empty()) {
+		//	auto _text = textRenderer->getText();
+		//	if (_text.empty() || pointer == 0) {
+		//		return;
+		//	}
+//
+  //          pointer = pointer - 1 > 0 ? pointer - 1 : 0;
+		//	
+		//	updateTextOnLeftKey();
+		//	updateCaretOnLeftKey();
+//
+		//} 
+		//else if(_keyCode == RDE_KEYBOARD_KEY_RIGHT) {
+		//	auto _text = textRenderer->getText();
+//
+		//	if (_text.empty() || pointer == _text.size()) {
+		//		return;
+		//	}
+//
+  //          auto _textLength = textRenderer->getText().size();
+  //          pointer = pointer + 1 < _textLength ? pointer + 1 : (int)_textLength;
+		//	
+		//	updateTextOnRightKey();
+		//	updateCaretOnRightKey();
+//
+		//}  
+		//else if(_keyCode == RDE_KEYBOARD_KEY_DELETE) {
+  //          updateCaretOther();
+		//} 
+		
+		else if(_keyCode == RDE_KEYBOARD_KEY_BAKCSPACE) {
             if(pointer - 1 >= 0) {
                 auto _text = textRenderer->getText();
                 _text = _text.erase(pointer - 1, 1);
@@ -304,10 +309,6 @@ namespace RDE {
         }
 
         updatePlaceholder();
-    }
-
-	void UIInput::onKeyReleased(RDE_KEYBOARD_KEY_ _keyCode) {
-
     }
 
     void UIInput::updatePlaceholder() {
