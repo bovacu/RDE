@@ -139,9 +139,6 @@ namespace RDE {
             void onInnerRenderHierarchy(Delta _dt); 
             void onInnerRenderUI(Delta _dt);
 
-            void postRenderSync();
-            void postRenderSyncUI();
-
             /**
              * @brief This function is used to drawBatched debugging lines, squares, circles...
              * @param the time that passed between the current frame and the last one.

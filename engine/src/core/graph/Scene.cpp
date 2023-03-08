@@ -228,15 +228,6 @@ namespace RDE {
 
             _renderManager.endDraw();
         }
-
-        //postRenderSync();
-    }
-
-    void Scene::postRenderSync() {
-        //for(auto* _dirtyTransform : graph->renderingTreeData.dirtyTransforms) {
-        //    _dirtyTransform->clearDirty();
-        //}
-        //graph->renderingTreeData.dirtyTransforms.clear();
     }
 
     void Scene::onInnerRenderUI(Delta _dt) {
@@ -271,15 +262,6 @@ namespace RDE {
         }
 
 		_renderManager.endDrawUI(canvas->batches);
-
-        //postRenderSyncUI();
-    }
-
-    void Scene::postRenderSyncUI() {
-        //for(auto* _dirtyTransform : canvas->graph->renderingTreeData.dirtyTransforms) {
-        //    ((UITransform*)_dirtyTransform)->clearDirty();
-        //}
-        //canvas->graph->renderingTreeData.dirtyTransforms.clear();
     }
 
 
