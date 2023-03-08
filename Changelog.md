@@ -13,7 +13,7 @@
   - Android: own module with its own compilation and exporting script. Working correctly.
   - iOS: own module with its own compilation and exporting script. Now it works with provisioning certificate and needs to be renewed each 7 days, but is working
 - Android ads module implemented and working on the most basic examples and tests. Need to improve a lot the integration and API
-- Documentation of the API on the website (https://bovacu.github.com)
+- Documentation of the API on the website (https://bovacu.github.io)
 - Vcpkg package manager
 - Small Editor ImGui tool inside the running projects
   - Can modify attributes of different components
