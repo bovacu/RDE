@@ -44,6 +44,15 @@ namespace RDE {
         prefabs.clear();
     }
 
+
+
+	void Scene::onInnerEvent(Event& _event) {
+		onInnerEventUI(_event);
+		onInnerEventHierarchy(_event);
+		onEvent(_event);
+	}
+
+
     void Scene::onInnerEventHierarchy(Event& _event) {
         
     }
@@ -58,6 +67,13 @@ namespace RDE {
     }
 
 
+
+
+	void Scene::onInnerUpdate(Delta _dt) {
+		onInnerUpdateHierarchy(_dt);
+		onInnerUpdateUI(_dt);
+		onUpdate(_dt);
+	}
 
     void Scene::onInnerUpdateHierarchy(Delta _dt) {
         auto _animations = graph->registry.view<AnimationSystem, SpriteRenderer, Active>(entt::exclude<DisabledForRender>);
@@ -90,6 +106,14 @@ namespace RDE {
     }
 
 
+
+
+
+	void Scene::onInnerFixedUpdate(Delta _fixedDt) {
+		onInnerFixedUpdateHierarchy(_fixedDt);
+		onInnerFixedUpdateUI(_fixedDt);
+		onFixedUpdate(_fixedDt);
+	}
 
     void Scene::onInnerFixedUpdateHierarchy(Delta _dt) {
         for(auto* _body : engine->manager.physics.bodies) {
@@ -171,6 +195,16 @@ namespace RDE {
         }
     }
 
+
+
+
+
+	void Scene::onInnerLateUpdate(Delta _dt) {
+		onInnerLateUpdateHierarchy(_dt);
+		onInnerLateUpdateUI(_dt);
+		onLateUpdate(_dt);
+	}
+
     void Scene::onInnerLateUpdateHierarchy(Delta _dt) {
         if(graph->renderingTreeData.isRenderizableTreeDirty) {
             // [0] -> SpriteRenderer
@@ -206,6 +240,13 @@ namespace RDE {
     }
 
 
+
+
+
+	void Scene::onInnerRender(Delta _dt) {
+		onInnerRenderHierarchy(_dt); 
+		onInnerRenderUI(_dt); 
+	}
 
     void Scene::onInnerRenderHierarchy(Delta _dt) {
         auto& _renderManager = engine->manager.renderManager;
@@ -267,28 +308,22 @@ namespace RDE {
 
 
 	void Scene::onInnerDebugRender(Delta _dt) {
-		onInnerDebugRenderHierarchy(_dt);
-		onInnerDebugRenderUI(_dt);
 		auto& _renderManager = engine->manager.renderManager;
 		_renderManager.beginDebugDraw(mainCamera, mainCamera->node->getTransform());
-		onDebugRender(_dt);
+		onInnerDebugRenderHierarchy(_dt, &_renderManager);
+		onInnerDebugRenderUI(_dt, &_renderManager);
+		onDebugRender(_dt, &_renderManager);
 		_renderManager.endDebugDraw();
 	}
 
-    void Scene::onInnerDebugRenderHierarchy(Delta _dt) {
-        auto& _renderManager = engine->manager.renderManager;
-        _renderManager.beginDebugDraw(mainCamera, mainCamera->node->getComponent<Transform>());
-        engine->manager.physics.debugRender(&_renderManager);
-		_renderManager.endDebugDraw();
+	void Scene::onInnerDebugRenderHierarchy(Delta _dt, RenderManager* _renderManager) {
+        engine->manager.physics.debugRender(_renderManager);
     }
 
-    void Scene::onInnerDebugRenderUI(Delta _dt) {
-        auto& _registry = canvas->graph->getNodeContainer();
+	void Scene::onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager) {
+		auto& _registry = canvas->graph->getNodeContainer();
 
-        auto& _renderManager = engine->manager.renderManager;
-		_renderManager.beginDebugDraw(mainCamera, mainCamera->node->getTransform());
-
-        _registry.view<UIImage, UITransform, Active>().each([this, &_renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
+        _registry.view<UIImage, UITransform, Active>().each([this, _renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
             Vec2F _size = _uiImage.getSize();
@@ -308,13 +343,13 @@ namespace RDE {
             _shape.setOutlineColor(Color::Blue);
             _shape.showInnerColor(false);
             _shape.setRotation(_transform.getModelMatrixRotation());
-            _renderManager.drawShape(_shape);
+            _renderManager->drawShape(_shape);
 
-            _renderManager.drawSquare(_pos, _pointSize, Color::Blue);
-            _renderManager.setPointSize(4);
+            _renderManager->drawSquare(_pos, _pointSize, Color::Blue);
+            _renderManager->setPointSize(4);
         });
 
-        _registry.view<UICheckbox, UITransform, Active>().each([this, &_renderManager](const NodeID _nodeID, UICheckbox& _checkbox, UITransform& _transform, Active& _) {
+        _registry.view<UICheckbox, UITransform, Active>().each([this, _renderManager](const NodeID _nodeID, UICheckbox& _checkbox, UITransform& _transform, Active& _) {
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
             Vec2F _size = _checkbox.getSize();
@@ -332,10 +367,10 @@ namespace RDE {
             _shape.setOutlineColor(Color::Blue);
             _shape.showInnerColor(false);
             _shape.setRotation(_transform.getModelMatrixRotation());
-            _renderManager.drawShape(_shape);
+            _renderManager->drawShape(_shape);
         });
 
-        _registry.view<UIText, UITransform, Active>().each([this, &_renderManager](const NodeID _nodeID, UIText& _uiText, UITransform& _transform, Active& _) {
+        _registry.view<UIText, UITransform, Active>().each([this, _renderManager](const NodeID _nodeID, UIText& _uiText, UITransform& _transform, Active& _) {
             if(!_uiText.isEnabled()) return;
 
             DebugShape _shape;
@@ -366,14 +401,12 @@ namespace RDE {
             _shape.setOutlineColor(Color::Blue);
             _shape.showInnerColor(false);
             _shape.setRotation(_transform.getModelMatrixRotation());
-            _renderManager.drawShape(_shape);
+            _renderManager->drawShape(_shape);
 
             Vec2F _pointSize = {4, 4};
-			_renderManager.drawSquare(_posPoint, _pointSize, Color::Yellow);
-            _renderManager.setPointSize(4);
+			_renderManager->drawSquare(_posPoint, _pointSize, Color::Yellow);
+            _renderManager->setPointSize(4);
         });
-
-        _renderManager.endDebugDraw();
     }
 
 
