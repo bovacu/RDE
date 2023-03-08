@@ -1,5 +1,6 @@
 # This is the list of things that need to be done, fixed, refactored or improved.
-
+Tasks are writen in no particular order of priority and may be implemented after other important tasks not mentioned here, this is a document
+to not forget about future tasks. A lot of features are already done, but not listed in here. Will try to update always this document.
 
 ## TO DO
 - [ ] Editor
@@ -58,7 +59,7 @@
 - [ ] Two or more Sliders are behaving in a strange way
 - [ ] ImGui for mobile
 - [ ] On mobile, OnMouseClick event is sometimes not recognized as a touch input, fix this on both platforms
-
+- [ ] When exporting the sheets data from TexturePacker, it sets the absolute path, need to fix this to use the relative path to the project
 
 ## TO IMPROVE
 - [ ] UI
@@ -88,6 +89,7 @@
 
 ## TO FURTHER TEST
 - [ ] Transitions between scenes
+- [ ] Controller input
 
 
 ## TO DOCUMENT
