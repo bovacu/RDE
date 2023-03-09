@@ -69,19 +69,19 @@
  * @brief Used for UI size calculations.
 */
 #ifndef BASE_DPI
-#define BASE_DPI 92.5f
+#define BASE_DPI 96.f
 inline float currentDPI = 0;
 #endif
 
 /**
  * @brief Used for UI size calculations.
 */
-#define toDPI(x) x * currentDPI / BASE_DPI
+#define toDPI(x) x * (currentDPI / BASE_DPI)
 
 /**
  * @brief Used for UI size calculations.
 */
-#define toDPI_V(vec) Vec2F {vec.x * currentDPI / BASE_DPI, vec.y * currentDPI / BASE_DPI}
+#define toDPI_V(vec) Vec2F {vec.x * (currentDPI / BASE_DPI), vec.y * (currentDPI / BASE_DPI)}
 
 /// \cond DO_NOT_DOCUMENT
 #ifndef NDEBUG
