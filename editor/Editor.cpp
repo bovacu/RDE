@@ -65,7 +65,7 @@ namespace Editor {
         // myDelegate(0);
         // myDelegate.unbind(_id);
         // myDelegate(1);
-        //textStressTest(10);
+        textStressTest(1);
 
 //        {
 //            auto _floorNode = getMainGraph()->createNode("Floor");
@@ -166,9 +166,9 @@ namespace Editor {
 //////        _uiButton2->setInteractable(false);
 ////
 //
-        auto _inputTextNode = canvas->graph->createNode("InputText");
-        auto* _input = _inputTextNode->addComponent<UIInput>(UIInputConfig {  });
-        _inputTextNode->getTransform()->setPosition(256, 128);
+//        auto _inputTextNode = canvas->graph->createNode("InputText");
+//        auto* _input = _inputTextNode->addComponent<UIInput>(UIInputConfig {  });
+//        _inputTextNode->getTransform()->setPosition(256, 128);
 
        // auto _sliderNode = getCanvases()[0]->graph->createNode("Slider");
        // slider = _sliderNode->addComponent<UISlider>(UISliderConfig {  });
@@ -185,18 +185,29 @@ namespace Editor {
         // _cpuTexture->uploadToGPU();
         // auto* _cpuSprite = _cpuTextureNode->addComponent<SpriteRenderer>(SpriteRendererConfig {.texture = _cpuTexture});
 
-	   	auto* _duckNode = graph->createNode("DuckNode");
-		_duckNode->getTransform()->setPosition(-200, 0);
-		auto* _duck = _duckNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
-			.texture = engine->manager.textureManager.getSubTexture("defaultAssets", "duck")
-		});
-
-		auto* _textNode = canvas->graph->createNode("TextNode");
-        auto* _text = _textNode->addComponent<UIText>(UITextConfig {});
-
-		auto* _textNodeNonUI = graph->createNode("TextNodeNonUI");
-		_textNodeNonUI->getTransform()->setPosition(0, 200);
-		auto* _textNonUI = _textNodeNonUI->addComponent<TextRenderer>(TextRendererConfig {});
+//	   	auto* _duckNode = graph->createNode("DuckNode");
+//		_duckNode->getTransform()->setPosition(-200, 0);
+//		auto* _duck = _duckNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
+//			.texture = engine->manager.textureManager.getSubTexture("defaultAssets", "duck")
+//		});
+//
+//
+//		auto* _duckNodeCornerUI = canvas->graph->createNode("DuckNodeCorner");
+//		_duckNodeCornerUI->getTransform()->setPosition(-engine->getWindow()->getWidth() * 0.5 + _duck->getSize().x * 0.5f,
+//		                                        engine->getWindow()->getHeight() * 0.5 - _duck->getSize().y * 0.5f);
+//		auto* _duckCorner = _duckNodeCornerUI->addComponent<UIImage>(UIImageConfig {
+//			.size = { _duck->getSize().x * 0.5f, _duck->getSize().y * 0.5f },
+//			.texture = engine->manager.textureManager.getSubTexture("defaultAssets", "duck")
+//		});
+//		
+//		((UITransform*)_duckNodeCornerUI->getTransform())->setAnchor(RDE_UI_ANCHOR_LEFT_TOP);
+//
+//		auto* _textNode = canvas->graph->createNode("TextNode");
+//        typedText = _textNode->addComponent<UIText>(UITextConfig {});
+//
+//		auto* _textNodeNonUI = graph->createNode("TextNodeNonUI");
+//		_textNodeNonUI->getTransform()->setPosition(0, 200);
+//		auto* _textNonUI = _textNodeNonUI->addComponent<TextRenderer>(TextRendererConfig {});
     }
 
     void Editor::onUpdate(Delta _dt) {
@@ -206,9 +217,9 @@ namespace Editor {
         //     Util::Graphics::takeScreenshot(engine->getWindow(), {100, -100}, {100, 100}, "C:\\Users\\vazqu\\Documents\\RDE\\screenshot.png");
         // }
 
-        if(engine->manager.inputManager.isKeyJustPressed(RDE_KEYBOARD_KEY_S)) {
-            Util::Graphics::takeScreenshot(*engine->getWindow(), "C:\\Users\\vazqu\\Documents\\RDE\\screenshot.png");
-        }
+        //if(engine->manager.inputManager.isKeyJustPressed(RDE_KEYBOARD_KEY_S)) {
+        //    Util::Graphics::takeScreenshot(*engine->getWindow(), "C:\\Users\\vazqu\\Documents\\RDE\\screenshot.png");
+        //}
 
         static float _timer = 0.f;
         static int _fpsCounter = 0;
@@ -247,6 +258,15 @@ namespace Editor {
 //        }
     }
 
+	void Editor::onEvent(Event& _event) {
+//		if(_event.getEventType() == RDE_EVENT_TYPE_TEXT_TYPED) {
+//			TextTypedEvent* _e = (TextTypedEvent*)&_event;
+//			typedText->setText(Util::String::appendToString(typedText->getText(), _e->text));
+//			auto _pos = typedText->node->getTransform()->getPosition();
+//			typedText->node->getTransform()->setPosition(_pos.x + typedText->getSize().x *0.5f, _pos.y);
+//		}
+	}
+
     void Editor::onLateUpdate(Delta _dt) {
         Scene::onLateUpdate(_dt);
 
@@ -266,16 +286,15 @@ namespace Editor {
             auto _textNode = graph->createNode("Block" + std::to_string(_i));
             nodes.push_back(_textNode->getID());
             _textNode->getTransform()->setPosition(_r.randomf(-engine->getWindow()->getWidth() * 0.5f, engine->getWindow()->getWidth() * 0.5f), _r.randomf(-engine->getWindow()->getHeight() * 0.5f, engine->getWindow()->getHeight() * 0.5f));
-            _textNode->getTransform()->setRotation(45);
+            //_textNode->getTransform()->setRotation(45);
             auto* _sprite = _textNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
-                .texture = _texture,
-                .color = Color::Yellow
+                .texture = _texture
             });
-            // auto _pos = _textNode->getTransform()->getPosition();
-            // if((_pos.x > engine->getWindow()->getWidth() * 0.5f || _pos.x < -engine->getWindow()->getWidth() * 0.5f) ||
-            //    (_pos.y > engine->getWindow()->getHeight() * 0.5f || -_pos.y < -engine->getWindow()->getHeight() * 0.5f)) {
-            //     _sprite->node->setActive(false);
-            // }
+             auto _pos = _textNode->getTransform()->getPosition();
+             if((_pos.x > engine->getWindow()->getWidth() * 0.5f || _pos.x < -engine->getWindow()->getWidth() * 0.5f) ||
+                (_pos.y > engine->getWindow()->getHeight() * 0.5f || -_pos.y < -engine->getWindow()->getHeight() * 0.5f)) {
+                 _sprite->node->setActive(false);
+             }
             graph->setParent(_textNode, _parentNode);
         }
         
@@ -293,8 +312,9 @@ namespace Editor {
         // }
     }
 
-    void Editor::onDebugRender(Delta _dt) {
-        Scene::onDebugRender(_dt);
+    void Editor::onDebugRender(Delta _dt, RenderManager* _renderManager) {
+		Scene::onDebugRender(_dt, _renderManager);
+//		engine->manager.renderManager.drawLine( { 0, 0 }, { 250, 0 }, Color::Yellow);
 //        auto* _transformRightWall = getMainGraph()->getComponent<Transform>(getMainGraph()->getNode("RightWall"));
 //        engine->manager.renderManager.drawSquare(_transformRightWall->getModelMatrixPosition(), {8, 8});
 
