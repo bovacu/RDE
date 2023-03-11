@@ -22,13 +22,15 @@ namespace Editor {
         bool collisionHappened = false;
         UISlider* slider;
         UniqueDelegate<void(FrameBuffer*)> redirectRenderingDel;
+		UIText* typedText = nullptr;
 
         public:
             explicit Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }
             void onInit() override;
-            void onUpdate(Delta _dt) override;
+			void onEvent(Event& _event) override;
+			void onUpdate(Delta _dt) override;
             void onLateUpdate(Delta _dt) override;
-            void onDebugRender(Delta _dt) override;
+            void onDebugRender(Delta _dt, RenderManager* _renderManager) override;
 
         private:
             void redirectRendering(FrameBuffer* _frameBuffer);
