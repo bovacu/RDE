@@ -4,11 +4,17 @@
 #ifndef RDE_FONT_MANAGER_H
 #define RDE_FONT_MANAGER_H
 
-#include "core/util/Util.h"
+#include "core/util/Vec.h"
+#ifndef __EMSCRIPTEN__
 #include <ft2build.h>
 #include "freetype/freetype.h"
+#else
+#include <ft2build.h>
+#include "freetype.h"
+#endif
 #include "core/render/elements/Texture.h"
-#include "core/systems/fileSystem/FileManager.h"
+#include <unordered_map>
+#include <vector>
 
 #define MAX_WIDTH 512
 #define MAX_CHARACTERS 128
