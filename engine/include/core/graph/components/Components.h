@@ -5,7 +5,7 @@
 #define RDE_COMPONENTS_H
 
 
-#include "ComponentBase.h"
+#include "core/graph/components/ComponentBase.h"
 #include "core/Core.h"
 #include "entt/entity/entity.hpp"
 

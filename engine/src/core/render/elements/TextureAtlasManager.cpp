@@ -10,7 +10,7 @@ namespace RDE {
     }
 
     bool TextureAtlasManager::loadSpriteSheet(const std::string& _spriteSheetPath) {
-        auto _handle = fileManager->open(_spriteSheetPath, FileMode::READ);
+		auto _handle = fileManager->open(_spriteSheetPath, RDE_FILE_MODE_READ);
         auto _spriteSheetNode = nlohmann::json::parse(fileManager->readFullFile(_handle).content);
         fileManager->close(_handle);
         auto _pathToTexture = _spriteSheetNode["sprite_sheet_settings"]["path"].get<std::string>();

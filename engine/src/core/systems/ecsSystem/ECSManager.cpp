@@ -4,6 +4,7 @@
 
 #include "core/systems/ecsSystem/ECSManager.h"
 #include "entt/entt.hpp"
+#include "core/util/Functions.h"
 
 namespace RDE {
 

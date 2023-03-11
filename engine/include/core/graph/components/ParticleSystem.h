@@ -8,7 +8,6 @@
 #include "glm/vec3.hpp"
 #include "core/util/Delta.h"
 #include "core/util/Color.h"
-#include "core/graph/Graph.h"
 #include "core/render/elements/Vertex.h"
 #include "core/util/Pool.h"
 #include "core/graph/components/Transform.h"

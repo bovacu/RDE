@@ -78,6 +78,11 @@ namespace RDE {
     void Window::setIcon(const std::string& _path) {
         properties->projectData.iconPath = _path;
         auto* _surface = Util::Texture::getSDLSurface(_path);
+		if(_surface == nullptr) {
+			Util::Log::error("Error loading icon: ", SDL_GetError());
+		} else {
+			Util::Log::debug("Icon loaded successfully from ", _path);
+		}
         SDL_SetWindowIcon(window, _surface);
         SDL_FreeSurface(_surface);
     }

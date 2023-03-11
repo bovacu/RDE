@@ -5,7 +5,7 @@
 #ifndef RDE_VERTEX_H
 #define RDE_VERTEX_H
 
-#include <glm/glm.hpp>
+#include "glm/glm.hpp"
 
 namespace RDE {
 

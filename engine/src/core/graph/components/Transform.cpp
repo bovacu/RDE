@@ -8,6 +8,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include "core/graph/components/Node.h"
 #include "core/graph/components/ui/UI.h"
+#include "core/util/Functions.h"
 
 namespace RDE {
 
@@ -182,7 +183,7 @@ namespace RDE {
             _child->setDirty(_child);
         }
 
-        graph->renderingTreeData.dirtyTransforms.push_back(_transform);
+        //graph->renderingTreeData.dirtyTransforms.push_back(_transform);
     }
 
     void Transform::setMatrixModelPosition(const Vec2F& _worldPos) {
@@ -305,7 +306,7 @@ namespace RDE {
     int Transform::getEnabledAndActiveChildrenCount() {
         int _childrenCount = 0;
         for(auto& _child : children) {
-            if(node->isActive() && !_child->node->hasComponent<DisabledForRender>() && !_child->node->hasComponent<DisabledForUpdate>() &&
+			if(_child->node->isActive() && !_child->node->hasComponent<DisabledForRender>() && !_child->node->hasComponent<DisabledForUpdate>() &&
                !_child->node->hasComponent<DisabledForLateUpdate>() && !_child->node->hasComponent<DisabledForFixedUpdate>()
                && !_child->node->hasComponent<DisabledForLateUpdate>()) {
                 _childrenCount++;
@@ -316,7 +317,7 @@ namespace RDE {
         return _childrenCount;
     }
 
-    void Transform::clearDirty() {
-        dirty = false;
-    }
+	void Transform::update() {
+		dirty = false;
+	}
 }

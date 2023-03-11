@@ -7,7 +7,7 @@
 
 #include "core/util/Util.h"
 #include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
-#include "Input.h"
+#include "core/systems/inputSystem/input/Input.h"
 
 namespace RDE {
 
@@ -16,7 +16,7 @@ namespace RDE {
             /**
              * @brief Map MouseCode -> State.
              */
-            std::unordered_map<MouseCode, int>  pressedMouseButtons;
+            std::unordered_map<RDE_MOUSE_BUTTON_, int>  pressedMouseButtons;
 
             /**
              * @brief Mouse position in screen.

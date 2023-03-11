@@ -143,7 +143,7 @@ namespace RDE::Util::Graphics {
 		return _pixels;
 	}
 
-	CPUTexture* pixelsToCPUTexture(const Vec2I& _size, unsigned char* _pixels, ImageType _imageType = ImageType::PNG) {
+	CPUTexture* pixelsToCPUTexture(const Vec2I& _size, unsigned char* _pixels, RDE_IMAGE_EXTENSION_ _imageType = RDE_IMAGE_EXTENSION_PNG) {
 		auto* _cpuTexture = new CPUTexture();
        _cpuTexture->init(_size.x, _size.y, _pixels, _imageType);
        return _cpuTexture;

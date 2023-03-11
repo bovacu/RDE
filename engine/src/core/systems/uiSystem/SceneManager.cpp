@@ -5,6 +5,7 @@
 #include "core/systems/uiSystem/SceneManager.h"
 #include "core/systems/configSystem/ConfigManager.h"
 #include "core/Engine.h"
+#include "core/graph/Scene.h"
 #include "core/systems/uiSystem/Canvas.h"
 
 namespace RDE {

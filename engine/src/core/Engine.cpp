@@ -7,12 +7,18 @@
 #include "core/systems/profiling/Profiler.h"
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/util/Functions.h"
+#include "core/render/elements/FrameBuffer.h"
+#include "core/graph/ImGuiScene.h"
+#include "core/systems/eventSystem/WindowEvent.h"
+#include "core/render/window/Window.h"
+#include "core/graph/Scene.h"
+#include "core/systems/uiSystem/SceneManager.h"
 
 namespace RDE {
 
 
     Engine::Engine() {
-        manager.configManager.loadRDEConfig(&rdeConfig, manager.fileManager);
+        manager.configManager.loadRDEConfig(&rdeConfig, &manager.fileManager);
         window = platform.createWindow(&rdeConfig);
         
         #if IS_MOBILE()
@@ -117,7 +123,7 @@ namespace RDE {
         manager.sceneManager.getDisplayedScene()->onInnerUpdate(_dt);
 
 #if !IS_MOBILE()
-        if(manager.inputManager.isKeyJustPressed(KeyCode::Space)) imGuiLayer->show = !imGuiLayer->show;
+		if(manager.inputManager.isKeyJustPressed(RDE_KEYBOARD_KEY_GRACE_ACCENT)) imGuiLayer->show = !imGuiLayer->show;
 #endif
     }
 
@@ -137,7 +143,6 @@ namespace RDE {
 
         manager.renderManager.clear();
         manager.sceneManager.getDisplayedScene()->onInnerRender(_dt);
-        manager.sceneManager.getDisplayedScene()->onInnerRenderUI(_dt);
         manager.sceneManager.getDisplayedScene()->onInnerDebugRender(_dt);
 
         #if !IS_MOBILE()
@@ -241,4 +246,8 @@ namespace RDE {
             frameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
         }
     }
+
+	RDE_PLATFORM_TYPE_ Engine::getPlatform() const {
+		return platform.currentPlatform;
+	}
 }

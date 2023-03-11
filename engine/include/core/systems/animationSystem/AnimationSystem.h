@@ -5,8 +5,8 @@
 #define RDE_ANIMATION_SYSTEM_H
 
 
-#include "core/util/Util.h"
-#include "Animation.h"
+#include <vector>
+#include "core/systems/animationSystem/Animation.h"
 #include "core/systems/eventSystem/EventBus.h"
 #include "core/graph/components/SpriteRenderer.h"
 

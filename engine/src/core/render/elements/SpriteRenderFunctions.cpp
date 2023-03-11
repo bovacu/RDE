@@ -1,6 +1,7 @@
 #include "core/graph/components/TextRenderer.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/graph/components/ui/UIText.h"
+#include "core/graph/components/Node.h"
 #include "core/render/elements/SpriteBatchRenderFunctions.h"
 #include "core/graph/components/Transform.h"
 #include "core/render/elements/ViewPort.h"
@@ -13,7 +14,7 @@
 namespace RDE {
 
 	void calculateGeometryForSpriteRenderer(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport)  {
-	    auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, {_transformMatrix[3][0], _transformMatrix[3][1]});
+		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, {(float)(int)_transformMatrix[3][0], (float)(int)_transformMatrix[3][1]});
 	    _transformMatrix[3][0] = _screenPos.x;
 	    _transformMatrix[3][1] = _screenPos.y;
 
@@ -46,8 +47,13 @@ namespace RDE {
         auto [_transformMat, _dirty] = _transform->localToWorld();
         if(_dirty || _data.dirty) {
             calculateGeometryForSpriteRenderer(_data, _transformMat, _transform, _viewport);
+			_transform->update();
             _data.dirty = false;
         }
+
+		if(!_data.draw) {
+			return;
+		}
 
         _batch->vertexBuffer.emplace_back(_data.vertices[0]);
         _batch->vertexBuffer.emplace_back(_data.vertices[1]);
@@ -71,7 +77,7 @@ namespace RDE {
 		float _x = 0;
 		float _y = 0;
 
-		auto* _chars = _atlas->getChars();
+		auto _chars = _atlas->getChars();
 
 		auto [_linesInfo, _, _totalHeight] = _textRenderer->calculateLinesInfo(_chars);
 		const auto _numberOfLines = _linesInfo.size();
@@ -93,14 +99,15 @@ namespace RDE {
 
 			for(char _char : _lineInfo.line) {
 				auto _transformCopy = glm::mat4(_transformMatrix);
+                auto _modelMatrixScale = _transform->getModelMatrixScale();
 
-				float _xPos = (_x - (_textRenderer->getTextSize().x * _nonUIPivotX) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _transform->getModelMatrixScale().x;
-				float _yPos = (_y + (_textRenderer->getTextSize().y * _nonUIPivotY) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;
+				float _xPos = (_x - (_textRenderer->getTextSize().x * _nonUIPivotX) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _modelMatrixScale.x;
+				float _yPos = (_y + (_textRenderer->getTextSize().y * _nonUIPivotY) - (float)_chars[_char].bearing.y) * _modelMatrixScale.x;
 
-				float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
-				float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
+				float _w = (float)_chars[_char].size.x * _modelMatrixScale.x;
+				float _h = (float)_chars[_char].size.y * _modelMatrixScale.x;
 
-				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformCopy[3][0], _transformCopy[3][1] });
+				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)_transformCopy[3][0], (float)(int)_transformCopy[3][1] });
 				_transformCopy[3][0] = _screenPos.x;
 				_transformCopy[3][1] = _screenPos.y;
 
@@ -138,10 +145,15 @@ namespace RDE {
 		if(_dirty || _data.dirty) {
 			_data.vertices.clear();
 			calculateGeometryForTextRenderer(_data, _transformMat, _transform, _viewport);
+			_transform->update();
 			_data.dirty = false;
 		}
 
-			for(auto _i = 0; _i < _textRenderer->getText().size(); _i++) {
+		if(!_data.draw) {
+			return;
+		}
+
+		for(auto _i = 0; _i < _textRenderer->getText().size(); _i++) {
 			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 0]);
 			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 1]);
 			_batch->vertexBuffer.push_back(_data.vertices[(_i * 4) + 2]);
@@ -157,6 +169,7 @@ namespace RDE {
 
 	void calculateGeometryForUIText(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
 		auto* _textRenderer = (UIText*)_data.RenderizableInnerData.extraInfo;
+		auto* _uiTransform = (UITransform*)_textRenderer->node->getTransform();
 		auto _originOffset = _data.originOffset;
 
 		auto* _atlas = _textRenderer->getFont();
@@ -165,7 +178,7 @@ namespace RDE {
 		float _x = 0;
 		float _y = 0;
 
-		auto* _chars = _atlas->getChars();
+		auto _chars = _atlas->getChars();
 
 		auto [_linesInfo, _, _totalHeight] = _textRenderer->calculateLinesInfo(_chars);
 		const auto _numberOfLines = _linesInfo.size();
@@ -184,15 +197,21 @@ namespace RDE {
 
 			for(char _char : _lineInfo.line) {
 				auto _transformCopy = glm::mat4(_transformMatrix);
+                auto _modelMatrixScale = _transform->getModelMatrixScale();
+				float _xPos = (_x - (_textRenderer->getTextSize().x) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _modelMatrixScale.x;
+				if((_uiTransform->getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
+					_xPos += _textRenderer->getTextSize().x;
+				} else if((_uiTransform->getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
+					_xPos -= _textRenderer->getTextSize().x;
+				}
+				
+				float _yPos = (_y + (_textRenderer->getTextSize().y * 0.75f) - (float)_chars[_char].bearing.y) * _modelMatrixScale.x;
 
-				float _xPos = (_x - (_textRenderer->getTextSize().x) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _transform->getModelMatrixScale().x;
-				float _yPos = (_y + (_textRenderer->getTextSize().y * 0.75f) - (float)_chars[_char].bearing.y) * _transform->getModelMatrixScale().x;
+				float _w = (float)_chars[_char].size.x * _modelMatrixScale.x;
+				float _h = (float)_chars[_char].size.y * _modelMatrixScale.x;
 
-				float _w = (float)_chars[_char].size.x * _transform->getModelMatrixScale().x;
-				float _h = (float)_chars[_char].size.y * _transform->getModelMatrixScale().x;
-
-				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformCopy[3][0] + _originOffset.x * _transform->getModelMatrixScale().x,
-				                                                    _transformCopy[3][1] + _originOffset.y * _transform->getModelMatrixScale().y });
+				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformCopy[3][0] + _originOffset.x * _modelMatrixScale.x),
+				                                                    (float)(int)(_transformCopy[3][1] + _originOffset.y * _modelMatrixScale.y) });
 				_transformCopy[3][0] = _screenPos.x;
 				_transformCopy[3][1] = _screenPos.y;
 
@@ -231,15 +250,12 @@ namespace RDE {
 		if(_dirty || _data.RenderizableInnerData.dirty) {
 			_data.RenderizableInnerData.vertices.clear();
 			calculateGeometryForUIText(_data, _transformMat, _transform, _viewport);
-
-			//auto _cameraScale = glm::vec1(3.f);
-			//_batch->shader->setUniformValueFloat("cameraScale", RDE_UNIFORM_FV_1, GLM_VEC_MAT_TO_POINTER(GLfloat, &_cameraScale));
-
-			//auto* _font = ((UIText*)_data.RenderizableInnerData.extraInfo)->getFont();
-			//auto _atlasSize = glm::vec2(_font->getSize().x, _font->getSize().y);
-			//_batch->shader->setUniformValueFloat("atlasResolution", RDE_UNIFORM_FV_2, GLM_VEC_MAT_TO_POINTER(GLfloat, _atlasSize));
-
+			((UITransform*)_transform)->update();
 			_data.RenderizableInnerData.dirty = false;
+		}
+
+		if(!_data.RenderizableInnerData.draw) {
+			return;
 		}
 
 		for(auto _i = 0; _i < _uiTextRenderer->getText().size(); _i++) {
@@ -260,7 +276,7 @@ namespace RDE {
     void calculateNormalGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)_transform;
         auto _originOffset = _data.originOffset;
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -413,7 +429,7 @@ namespace RDE {
             _current9SliceMat = _transformMatrix * _current9SliceMat;
 
             auto _subTextureReposition = Vec2F { _originOffset.x, _originOffset.y };
-            auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
+			auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
             _current9SliceMat[3][0] = _screenPos.x;
             _current9SliceMat[3][1] = _screenPos.y;
 
@@ -448,7 +464,7 @@ namespace RDE {
     void calculatePartialHGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)_transform;
         auto _originOffset = _data.originOffset;
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -488,7 +504,7 @@ namespace RDE {
     void calculatePartialVGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)_transform;
         auto _originOffset = _data.originOffset;
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -528,7 +544,7 @@ namespace RDE {
     void calculatePartialRGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
         auto _uiT = (UITransform*)_transform;
         auto _originOffset = _data.originOffset;
-        auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _transformMatrix[3][0] + _originOffset.x, _transformMatrix[3][1] + _originOffset.y });
+		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -714,18 +730,18 @@ namespace RDE {
     }
 
     void calculateGeometryForUIImage(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
-        switch ((ImageRenderingType)_data.imageRenderingType) {
-                case NORMAL:
-                    calculateNormalGeometry(_data, _transformMatrix, _transform, _viewport); break;
-                case NINE_SLICE:
-                    calculate9SliceGeometry(_data, _transformMatrix, _transform, _viewport); break;
-                case PARTIAL_VERTICAL:
-                    calculatePartialVGeometry(_data, _transformMatrix, _transform, _viewport); break;
-                case PARTIAL_HORIZONTAL:
-                    calculatePartialHGeometry(_data, _transformMatrix, _transform, _viewport); break;
-                case PARTIAL_RADIAL:
-                    calculatePartialRGeometry(_data, _transformMatrix, _transform, _viewport); break;
-            }
+        switch ((RDE_IMAGE_RENDERING_TYPE_)_data.imageRenderingType) {
+			case RDE_IMAGE_RENDERING_TYPE_NORMAL:
+				calculateNormalGeometry(_data, _transformMatrix, _transform, _viewport); break;
+			case RDE_IMAGE_RENDERING_TYPE_NINE_SLICE:
+				calculate9SliceGeometry(_data, _transformMatrix, _transform, _viewport); break;
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_VERTICAL:
+				calculatePartialVGeometry(_data, _transformMatrix, _transform, _viewport); break;
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_HORIZONTAL:
+				calculatePartialHGeometry(_data, _transformMatrix, _transform, _viewport); break;
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_RADIAL:
+				calculatePartialRGeometry(_data, _transformMatrix, _transform, _viewport); break;
+		}
 
     }
 
@@ -781,29 +797,34 @@ namespace RDE {
         auto [_transformMat, _dirty] = _transform->localToWorld();
         if(_dirty || _data.RenderizableInnerData.dirty) {
             switch (_data.imageRenderingType) {
-                case NORMAL:
+				case RDE_IMAGE_RENDERING_TYPE_NORMAL:
                     calculateNormalGeometry(_data, _transformMat, _transform, _viewport); break;
-                case NINE_SLICE:
+				case RDE_IMAGE_RENDERING_TYPE_NINE_SLICE:
                     calculate9SliceGeometry(_data, _transformMat, _transform, _viewport); break;
-                case PARTIAL_VERTICAL:
+				case RDE_IMAGE_RENDERING_TYPE_PARTIAL_VERTICAL:
                     calculatePartialVGeometry(_data, _transformMat, _transform, _viewport); break;
-                case PARTIAL_HORIZONTAL:
+				case RDE_IMAGE_RENDERING_TYPE_PARTIAL_HORIZONTAL:
                     calculatePartialHGeometry(_data, _transformMat, _transform, _viewport); break;
-                case PARTIAL_RADIAL:
+				case RDE_IMAGE_RENDERING_TYPE_PARTIAL_RADIAL:
                     calculatePartialRGeometry(_data, _transformMat, _transform, _viewport); break;
             }
 
+			((UITransform*)_transform)->update();
             _data.RenderizableInnerData.dirty = false;
         }
 
-        switch ((ImageRenderingType)_data.imageRenderingType) {
-            case NORMAL:
-            case PARTIAL_VERTICAL:
-            case PARTIAL_HORIZONTAL:
+		if(!_data.RenderizableInnerData.draw) {
+			return;
+		}
+
+		switch ((RDE_IMAGE_RENDERING_TYPE_)_data.imageRenderingType) {
+			case RDE_IMAGE_RENDERING_TYPE_NORMAL:
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_VERTICAL:
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_HORIZONTAL:
                 batchFourVertexGeometry(_data, _batch->vertexBuffer); break;
-            case NINE_SLICE:
+			case RDE_IMAGE_RENDERING_TYPE_NINE_SLICE:
                 batch9SliceVertexGeometry(_data, _batch->vertexBuffer); break;
-            case PARTIAL_RADIAL:
+			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_RADIAL:
                 batchPartialCircularVertexGeometry(_data, _batch->vertexBuffer); break;
         }
     }

@@ -4,6 +4,7 @@
 #include <iostream>
 #include "core/util/Rect.h"
 #include "core/util/Color.h"
+#include "core/Enums.h"
 
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
@@ -227,15 +228,6 @@ namespace RDE {
     };
 
     /**
-     * @brief Supported image formats.
-     */
-    enum ImageType {
-        PNG,
-        JPG,
-        BMP
-    };
-
-    /**
      * @attention Not recommended to use as hasn't been updated for many versions.
      * @brief This is another type of texture that resides in the CPU also so we can modify its data on runtime more easily.
      */
@@ -254,13 +246,13 @@ namespace RDE {
              * @param _imageType Type of texture.
              * @return int
              */
-            int getChannels(const ImageType& _imageType);
+			int getChannels(const RDE_IMAGE_EXTENSION_& _imageType);
 
         public:
             /**
              * @brief Type of texture.
              */
-            ImageType imageType = ImageType::PNG;
+			RDE_IMAGE_EXTENSION_ imageType = RDE_IMAGE_EXTENSION_PNG;
 
         public:
             CPUTexture() {};
@@ -272,7 +264,7 @@ namespace RDE {
              * @param _pixels Data of the texture.
              * @param _imageType Type of the texture.
              */
-            void init(int _width, int _height, unsigned char* _pixels, const ImageType& _imageType = ImageType::PNG);
+			void init(int _width, int _height, unsigned char* _pixels, const RDE_IMAGE_EXTENSION_& _imageType = RDE_IMAGE_EXTENSION_PNG);
 
             /**
              * @brief Inits a CPU texture given a width, height and type of texture but no information.
@@ -280,7 +272,7 @@ namespace RDE {
              * @param _height Height of the texture.
              * @param _imageType Type of the texture.
              */
-            void init(int _width, int _height, const ImageType& _imageType = ImageType::PNG);
+			void init(int _width, int _height, const RDE_IMAGE_EXTENSION_& _imageType = RDE_IMAGE_EXTENSION_PNG);
 
             /**
              * @brief Sends the data to the GPU.

@@ -15,18 +15,10 @@
 
 namespace RDE {
 
-    static void foo() {
-
-    }
-
-    static void foo2(MouseCode _mouseCode) {
-
-    }
-
     UIPanel::UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config) {
         data.RenderizableInnerData.texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "panel") : _config.texture;
         data.RenderizableInnerData.color = _config.color;
-        data.RenderizableInnerData.batchPriority = BatchPriority::SpritePriority;
+        data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
 
         node = _node;
 
@@ -46,16 +38,11 @@ namespace RDE {
 
         ((UITransform*)_node->getTransform())->setSize(_config.size);
 
-        uiInteractable->onInnerMouseEntered.bind<&foo>();
-        uiInteractable->onInnerMouseExited.bind<&foo>();
-        uiInteractable->onInnerClicking.bind<&foo2>();
-        uiInteractable->onInnerClickingReleased.bind<&foo2>();
-
         uiImage = _node->addComponent<UIImage>(UIImageConfig {
             .size = _config.size,
             .texture = data.RenderizableInnerData.texture,
             .color = _config.color,
-            .imageRenderingType = ImageRenderingType::NINE_SLICE
+            .imageRenderingType = RDE_IMAGE_RENDERING_TYPE_NINE_SLICE
         });
 
         uiImage->uiInteractable = uiInteractable;

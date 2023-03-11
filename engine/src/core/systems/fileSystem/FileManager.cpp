@@ -1,10 +1,11 @@
 // Created by borja on 14/2/22.
 
 #include "core/systems/fileSystem/FileManager.h"
+#include "core/util/Functions.h"
 
 namespace RDE {
 
-    FileHandler* FileManager::open(const std::string& _filePath, const FileMode& _fileMode, bool _silentNotFound) {
+	FileHandler* FileManager::open(const std::string& _filePath, const RDE_FILE_MODE_& _fileMode, bool _silentNotFound) {
         const char* _fm = FileHandler::modeToChar(_fileMode);
         auto* _file = SDL_RWFromFile(_filePath.c_str(), _fm);
         if(_file == nullptr) {
@@ -24,7 +25,7 @@ namespace RDE {
 
     FileStr FileManager::readFullFile(FileHandler* _handler) {
         FileStr _f;
-        checkFileMode(_handler, FileMode::READ);
+        checkFileMode(_handler, RDE_FILE_MODE_READ);
         auto _totalSize = SDL_RWsize(_handler->file);
         long _totalBytesRead = 0;
         long _bytesToReadPerTime = 1;
@@ -45,7 +46,7 @@ namespace RDE {
         std::string _foundLine;
         FileLines _f;
 
-        checkFileMode(_handler, FileMode::READ);
+		checkFileMode(_handler, RDE_FILE_MODE_READ);
         SDL_RWseek(_handler->file, 0, RW_SEEK_END);
         long _contentSize = SDL_RWtell(_handler->file);
         _content.resize(_contentSize);
@@ -74,7 +75,7 @@ namespace RDE {
 
     FileStr FileManager::readChunkFile(FileHandler* _handler, int _initByte, int _endByte) {
         FileStr _f;
-        checkFileMode(_handler, FileMode::READ);
+		checkFileMode(_handler, RDE_FILE_MODE_READ);
         SDL_RWseek(_handler->file, 0, RW_SEEK_END);
         _f.content.resize((_endByte + 1) - _initByte);
         SDL_RWseek(_handler->file, _initByte, RW_SEEK_SET);
@@ -90,7 +91,7 @@ namespace RDE {
         FileStr _f;
         bool _lineFound;
 
-        checkFileMode(_handler, FileMode::READ);
+		checkFileMode(_handler, RDE_FILE_MODE_READ);
         SDL_RWseek(_handler->file, 0, RW_SEEK_END);
         long _contentSize = SDL_RWtell(_handler->file);
         _content.resize(_contentSize);
@@ -109,7 +110,7 @@ namespace RDE {
             if(_content[_i] == '\n') _currentLine++;
         }
 
-        _f.result = _lineFound ? _f.result : FileResult::FILE_LINE_OUT_OF_SCOPE;
+        _f.result = _lineFound ? _f.result : RDE_FILE_RESULT_LINE_OUT_OF_SCOPE;
         return _f;
     }
 
@@ -120,7 +121,7 @@ namespace RDE {
         std::string _foundLine;
         FileLines _f;
 
-        checkFileMode(_handler, FileMode::READ);
+		checkFileMode(_handler, RDE_FILE_MODE_READ);
 
         SDL_RWseek(_handler->file, 0, RW_SEEK_END);
         long _contentSize = SDL_RWtell(_handler->file);
@@ -152,24 +153,24 @@ namespace RDE {
         }
 
         if(!_foundLine.empty()) _f.content.push_back(_foundLine);
-        _f.result = _lines.size() != _f.content.size() ? FileResult::FILE_NOT_ALL_LINES_IN_SCOPE : _f.result;
+		_f.result = _lines.size() != _f.content.size() ? RDE_FILE_RESULT_NOT_ALL_LINES_IN_SCOPE : _f.result;
         return _f;
     }
 
 
 
     void FileManager::writeChunkToFile(FileHandler* _handler, const char* _content, size_t _size) {
-        checkFileMode(_handler, FileMode::WRITE);
+		checkFileMode(_handler, RDE_FILE_MODE_WRITE);
         SDL_RWwrite(_handler->file, _content, 1, _size);
     }
 
     void FileManager::writeChunkToFile(FileHandler* _handler, const std::string& _content) {
-        checkFileMode(_handler, FileMode::WRITE);
+		checkFileMode(_handler, RDE_FILE_MODE_WRITE);
         writeChunkToFile(_handler, _content.c_str(), SDL_strlen(_content.c_str()));
     }
 
     void FileManager::appendChunkToFileAtEnd(FileHandler* _handler, const char* _content, size_t _size) {
-        checkFileMode(_handler, FileMode::APPEND);
+		checkFileMode(_handler, RDE_FILE_MODE_APPEND);
         SDL_RWwrite(_handler->file, _content, 1, _size);
     }
 
@@ -178,13 +179,13 @@ namespace RDE {
     }
 
     void FileManager::appendChunkToFile(FileHandler* _handler, const char* _content, size_t _size, int _where) {
-        checkFileMode(_handler, READ_AND_WRITE);
+		checkFileMode(_handler, RDE_FILE_MODE_READ_AND_WRITE);
         auto _f = readFullFile(_handler);
 
         auto _init = _f.content.substr(0, _where);
         writeChunkToFile(_handler, _init.c_str(), SDL_strlen(_init.c_str()));
 
-        checkFileMode(_handler, APPEND);
+		checkFileMode(_handler, RDE_FILE_MODE_APPEND);
         appendChunkToFileAtEnd(_handler, _content, _size);
         auto _end = _f.content.substr(_where, _f.content.size());
         appendChunkToFileAtEnd(_handler, _end.c_str(), SDL_strlen(_end.c_str()));
@@ -195,12 +196,12 @@ namespace RDE {
     }
 
     void FileManager::appendChunkInLineToFile(FileHandler* _handler, const char* _content, size_t _size, int _line) {
-        checkFileMode(_handler, FileMode::READ);
+		checkFileMode(_handler, RDE_FILE_MODE_READ);
         auto _f = readAllLinesFile(_handler);
 
         clearFile(_handler);
 
-        checkFileMode(_handler, FileMode::APPEND);
+		checkFileMode(_handler, RDE_FILE_MODE_APPEND);
         int _currentLine = 0;
         for(auto& _l : _f.content) {
             if(_currentLine == _line) {
@@ -220,7 +221,7 @@ namespace RDE {
 
 
     void FileManager::replaceChunkInFile(FileHandler* _handler, const std::string& _old, const std::string& _new) {
-        checkFileMode(_handler, FileMode::READ_AND_WRITE);
+		checkFileMode(_handler, RDE_FILE_MODE_READ_AND_WRITE);
         auto _f = readFullFile(_handler);
         Util::String::replaceAll(_f.content, _old, _new);
         writeChunkToFile(_handler, _f.content);
@@ -235,12 +236,12 @@ namespace RDE {
     }
 
     void FileManager::removeChunkLineInFile(FileHandler* _handler, int _line) {
-        checkFileMode(_handler, FileMode::READ);
+		checkFileMode(_handler, RDE_FILE_MODE_READ);
         auto _f = readAllLinesFile(_handler);
 
         clearFile(_handler);
 
-        checkFileMode(_handler, FileMode::APPEND);
+		checkFileMode(_handler, RDE_FILE_MODE_APPEND);
         int _currentLine = 0;
         for(auto& _l : _f.content) {
             if(_currentLine == _line) {
@@ -254,14 +255,14 @@ namespace RDE {
     }
 
     void FileManager::removeChunkLinesInFile(FileHandler* _handler, std::vector<int>& _lines) {
-        checkFileMode(_handler, FileMode::READ);
+		checkFileMode(_handler, RDE_FILE_MODE_READ);
         auto _f = readAllLinesFile(_handler);
 
         clearFile(_handler);
 
         std::sort(_lines.begin(), _lines.end());
 
-        checkFileMode(_handler, FileMode::APPEND);
+		checkFileMode(_handler, RDE_FILE_MODE_APPEND);
         int _currentLine = 0;
         for(auto& _l : _f.content) {
             if(std::find(_lines.begin(), _lines.end(), _currentLine) != _lines.end()) {
@@ -276,7 +277,7 @@ namespace RDE {
     }
 
     void FileManager::removeChunk(FileHandler* _handler, int _initByte, int _endByte) {
-        checkFileMode(_handler, READ_AND_WRITE);
+		checkFileMode(_handler, RDE_FILE_MODE_READ_AND_WRITE);
         auto _f = readFullFile(_handler);
 
         if(_initByte < 0 || _endByte > _f.content.size()) {
@@ -289,7 +290,7 @@ namespace RDE {
         auto _init = _f.content.substr(0, _initByte);
         writeChunkToFile(_handler, _init.c_str(), SDL_strlen(_init.c_str()));
 
-        checkFileMode(_handler, APPEND);
+		checkFileMode(_handler, RDE_FILE_MODE_APPEND);
         auto _end = _f.content.substr(_endByte, _f.content.size());
         appendChunkToFileAtEnd(_handler, _end.c_str(), SDL_strlen(_end.c_str()));
     }
@@ -297,7 +298,7 @@ namespace RDE {
 
 
     FileHandler* FileManager::createFile(const std::string& _filePath) {
-        return new FileHandler(SDL_RWFromFile(_filePath.c_str(), "w"), FileMode::WRITE, _filePath);
+        return new FileHandler(SDL_RWFromFile(_filePath.c_str(), "w"), RDE_FILE_MODE_WRITE, _filePath);
     }
 
     void FileManager::moveOrRenameFile(const std::string& _filePath, const std::string& _newPath) {
@@ -309,11 +310,11 @@ namespace RDE {
     }
 
     void FileManager::clearFile(FileHandler* _handler) {
-        checkFileMode(_handler, FileMode::WRITE);
+		checkFileMode(_handler, RDE_FILE_MODE_WRITE);
         writeChunkToFile(_handler, "");
     }
 
-    void FileManager::checkFileMode(FileHandler* _handler, const FileMode& _expected) {
+    void FileManager::checkFileMode(FileHandler* _handler, const RDE_FILE_MODE_& _expected) {
         if(_handler->mode == _expected) return;
         SDL_RWclose(_handler->file);
         _handler->file = SDL_RWFromFile(_handler->originalPath.c_str(), FileHandler::modeToChar(_expected));
@@ -321,19 +322,19 @@ namespace RDE {
     }
 
     bool FileManager::fileExists(const std::string& _pathToFile) {
-        auto* _file = open(_pathToFile, FileMode::READ, true);
+		auto* _file = open(_pathToFile, RDE_FILE_MODE_READ, true);
         if(_file == nullptr) return false;
         close(_file);
         return true;
     }
 
     void FileManager::appendChunkAtEndOfLine(FileHandler* _handler, const char* _content, size_t _size, int _line) {
-        checkFileMode(_handler, FileMode::READ);
+		checkFileMode(_handler, RDE_FILE_MODE_READ);
         auto _f = readAllLinesFile(_handler);
 
         clearFile(_handler);
 
-        checkFileMode(_handler, FileMode::APPEND);
+		checkFileMode(_handler, RDE_FILE_MODE_APPEND);
         int _currentLine = 0;
         for(auto& _l : _f.content) {
             if(_currentLine == _line) _l.append(_content);

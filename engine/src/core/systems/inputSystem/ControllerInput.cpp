@@ -55,28 +55,28 @@ namespace RDE {
     Controller::Controller(int _controllerID) : ID(_controllerID) {
 
         pressedGamepadButtons = {
-                {ControllerButtons::ButtonA,       -1},
-                {ControllerButtons::ButtonB,       -1},
-                {ControllerButtons::ButtonX,       -1},
-                {ControllerButtons::ButtonY,       -1},
-                {ControllerButtons::DPadDown,      -1},
-                {ControllerButtons::DPadLeft,      -1},
-                {ControllerButtons::DPadRight,     -1},
-                {ControllerButtons::DPadUp,        -1},
-                {ControllerButtons::Guide,         -1},
-                {ControllerButtons::LB,            -1},
-                {ControllerButtons::RB,            -1},
-                {ControllerButtons::LeftJoystick,  -1},
-                {ControllerButtons::RightJoystick, -1},
-                {ControllerButtons::Select,        -1},
-                {ControllerButtons::Start,         -1},
+                {RDE_CONTROLLER_BUTTON_A,       	-1},
+                {RDE_CONTROLLER_BUTTON_B,       	-1},
+                {RDE_CONTROLLER_BUTTON_X,       	-1},
+                {RDE_CONTROLLER_BUTTON_Y,       	-1},
+                {RDE_CONTROLLER_BUTTON_DPAD_DOWN,   -1},
+                {RDE_CONTROLLER_BUTTON_DPAD_LEFT,   -1},
+                {RDE_CONTROLLER_BUTTON_DPAD_RIGHT,  -1},
+                {RDE_CONTROLLER_BUTTON_DPAD_UP,     -1},
+                {RDE_CONTROLLER_BUTTON_GUIDE,       -1},
+                {RDE_CONTROLLER_BUTTON_LB,          -1},
+                {RDE_CONTROLLER_BUTTON_RB,          -1},
+                {RDE_CONTROLLER_BUTTON_L_JOY,  		-1},
+                {RDE_CONTROLLER_BUTTON_R_JOY, 		-1},
+                {RDE_CONTROLLER_BUTTON_SELECT,      -1},
+                {RDE_CONTROLLER_BUTTON_START,       -1},
         };
 
         pressedGamepadAxis = {
-                {ControllerAxis::Right, -1},
-                {ControllerAxis::Left,  -1},
-                {ControllerAxis::RT,    -1},
-                {ControllerAxis::LT,    -1},
+                {RDE_CONTROLLER_AXIS_RIGHT, -1},
+                {RDE_CONTROLLER_AXIS_LEFT,  -1},
+                {RDE_CONTROLLER_AXIS_RT,    -1},
+                {RDE_CONTROLLER_AXIS_LT,    -1},
         };
     }
 
@@ -91,14 +91,14 @@ namespace RDE {
         _gpC.bind<&ControllerInput::onControllerConnected>(this);
         _gpD.bind<&ControllerInput::onControllerDisconnected>(this);
 
-        events[SystemEventEnum::GAMEPAD_JOYSTICK] = _gpJ;
-        events[SystemEventEnum::GAMEPAD_BUTTON_DOWN] = _gpBD;
-        events[SystemEventEnum::GAMEPAD_BUTTON_UP] = _gpBU;
-        events[SystemEventEnum::GAMEPAD_CONNECTED_E] = _gpC;
-        events[SystemEventEnum::GAMEPAD_DISCONNECTED_E] = _gpD;
+        events[RDE_SYSTEM_EVENT_GAMEPAD_JOYSTICK] = _gpJ;
+        events[RDE_SYSTEM_EVENT_GAMEPAD_BUTTON_DOWN] = _gpBD;
+        events[RDE_SYSTEM_EVENT_GAMEPAD_BUTTON_UP] = _gpBU;
+        events[RDE_SYSTEM_EVENT_GAMEPAD_CONNECTED_E] = _gpC;
+        events[RDE_SYSTEM_EVENT_GAMEPAD_DISCONNECTED_E] = _gpD;
 
-        ignoredEvents = { JOYSTICK_HAT_MOTION_E, JOYSTICK_BALL_MOTION_E, JOYSTICK_BUTTON_DOWN_E, JOYSTICK_BUTTON_UP_E, JOYSTICK_CONNECTED_E,
-                        JOYSTICK_DISCONNECTED_E, JOYSTICK_AXIS_MOTION_E };
+		ignoredEvents = { RDE_SYSTEM_EVENT_JOYSTICK_HAT_MOTION_E, RDE_SYSTEM_EVENT_JOYSTICK_BALL_MOTION_E, RDE_SYSTEM_EVENT_JOYSTICK_BUTTON_DOWN_E, RDE_SYSTEM_EVENT_JOYSTICK_BUTTON_UP_E, RDE_SYSTEM_EVENT_JOYSTICK_CONNECTED_E,
+			RDE_SYSTEM_EVENT_JOYSTICK_DISCONNECTED_E, RDE_SYSTEM_EVENT_JOYSTICK_AXIS_MOTION_E };
 
         engine->manager.controllerVibrationManager.init(&controllers);
     }
@@ -159,28 +159,28 @@ namespace RDE {
         float _epsilon = 0.001f;
 
         if(std::abs(_left.x) <= _epsilon && std::abs(_left.y) <= _epsilon)
-            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Left] = 0;
-        else if(controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Left] != 2)
-            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Left] = 1;
+            controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_LEFT] = 0;
+		else if(controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_LEFT] != 2)
+			controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_LEFT] = 1;
 
         if(std::abs(_right.x) <= _epsilon && std::abs(_right.y) <= _epsilon)
-            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Right] = 0;
-        else if(controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Right] != 2)
-            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::Right] = 1;
+			controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_RIGHT] = 0;
+		else if(controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_RIGHT] != 2)
+			controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_RIGHT] = 1;
 
         if(std::abs(_back.x) <= _epsilon)
-            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::LT] = 0;
-        else if(controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::LT] != 2)
-            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::LT] = 1;
+			controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_LT] = 0;
+		else if(controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_LT] != 2)
+			controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_LT] = 1;
 
         if(std::abs(_back.y) <= _epsilon)
-            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::RT] = 0;
-        else if(controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::RT] != 2)
-            controllers[_controllerID]->pressedGamepadAxis[ControllerAxis::RT] = 1;
+			controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_RT] = 0;
+		else if(controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_RT] != 2)
+			controllers[_controllerID]->pressedGamepadAxis[RDE_CONTROLLER_AXIS_RT] = 1;
     }
 
     void ControllerInput::onControllerButtonDown(SDL_Event& _event) {
-        auto _key = static_cast<ControllerButtons>(_event.cbutton.button);
+        auto _key = static_cast<RDE_CONTROLLER_BUTTON_>(_event.cbutton.button);
 
         ControllerButtonDownEvent _e(_key);
         window->consumeEvent(_e);
@@ -191,7 +191,7 @@ namespace RDE {
     }
 
     void ControllerInput::onControllerButtonUp(SDL_Event& _event) {
-        auto _key = static_cast<ControllerButtons>(_event.cbutton.button);
+		auto _key = static_cast<RDE_CONTROLLER_BUTTON_>(_event.cbutton.button);
         int _controllerID = _event.cdevice.which;
         controllers[_controllerID]->pressedGamepadButtons[_key] = 0;
 
@@ -222,30 +222,30 @@ namespace RDE {
 
     int ControllerInput::getButtonState(int _keyOrButton, int _controllerID) {
         if(_controllerID == -1) return -1;
-        return controllers[_controllerID]->pressedGamepadButtons[(ControllerButtons)_keyOrButton];
+		return controllers[_controllerID]->pressedGamepadButtons[(RDE_CONTROLLER_BUTTON_)_keyOrButton];
     }
 
     void ControllerInput::setButtonState(int _keyOrButton, int _state, int _controllerID) {
         if(_controllerID == -1) return;
-        controllers[_controllerID]->pressedGamepadButtons[(ControllerButtons)_keyOrButton] = _state;
+		controllers[_controllerID]->pressedGamepadButtons[(RDE_CONTROLLER_BUTTON_)_keyOrButton] = _state;
     }
 
     int ControllerInput::getAxisState(int _keyOrButton, int _controllerID) {
         if(_controllerID == -1) return -1;
-        return controllers[_controllerID]->pressedGamepadAxis[(ControllerAxis)_keyOrButton];
+		return controllers[_controllerID]->pressedGamepadAxis[(RDE_CONTROLLER_AXIS_)_keyOrButton];
     }
 
     void ControllerInput::setAxisState(int _keyOrButton, int _state, int _controllerID) {
         if(_controllerID == -1) return;
-        controllers[_controllerID]->pressedGamepadAxis[(ControllerAxis)_keyOrButton] = _state;
+		controllers[_controllerID]->pressedGamepadAxis[(RDE_CONTROLLER_AXIS_)_keyOrButton] = _state;
     }
 
-    Vec2F ControllerInput::getAxisValue(const ControllerAxis& _axis, int _controllerID) {
+	Vec2F ControllerInput::getAxisValue(const RDE_CONTROLLER_AXIS_& _axis, int _controllerID) {
         switch (_axis) {
-            case ControllerAxis::Left: return controllers[_controllerID]->leftJoystickValue;
-            case ControllerAxis::Right: return controllers[_controllerID]->rightJoystickValue;
-            case ControllerAxis::LT: return {controllers[_controllerID]->backButtonsValue.x, 0.f};
-            case ControllerAxis::RT: return {controllers[_controllerID]->backButtonsValue.y, 0.f};
+			case RDE_CONTROLLER_AXIS_LEFT: return controllers[_controllerID]->leftJoystickValue;
+			case RDE_CONTROLLER_AXIS_RIGHT: return controllers[_controllerID]->rightJoystickValue;
+			case RDE_CONTROLLER_AXIS_LT: return {controllers[_controllerID]->backButtonsValue.x, 0.f};
+			case RDE_CONTROLLER_AXIS_RT: return {controllers[_controllerID]->backButtonsValue.y, 0.f};
         }
 
         return { -1, -1 };

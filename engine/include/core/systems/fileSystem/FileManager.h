@@ -4,31 +4,12 @@
 #ifndef RDE_FILES_SYSTEM_H
 #define RDE_FILES_SYSTEM_H
 
-#include "core/util/Util.h"
+#include <vector>
+#include <unordered_map>
+#include "core/Enums.h"
 #include "core/platform/PlatformHeaderSDL.h"
 
 namespace RDE {
-
-    /**
-     * @brief Result of a file operation.
-     */
-    enum FileResult {
-        FILE_OK,
-        FILE_NOT_FOUND,
-        FILE_LINE_OUT_OF_SCOPE,
-        FILE_NOT_ALL_LINES_IN_SCOPE
-    };
-
-    /**
-     * @brief Different types of file operations.
-     */
-    enum FileMode {
-        READ,
-        WRITE,
-        APPEND,
-        READ_AND_WRITE,
-        READ_AND_APPEND,
-    };
 
     /**
      * @brief This represents the content of a file.
@@ -44,7 +25,7 @@ namespace RDE {
         /**
          * @brief Result of the operation.
          */
-        FileResult result = FileResult::FILE_OK;
+		RDE_FILE_RESULT_ result = RDE_FILE_RESULT_OK;
     };
     typedef File<std::string> FileStr;
     typedef File<std::vector<std::string>> FileLines;
@@ -67,7 +48,7 @@ namespace RDE {
             /**
              * @brief Operations that it will work with.
              */
-            FileMode mode;
+			RDE_FILE_MODE_ mode;
 
             /**
              * @brief Path to the file.
@@ -75,20 +56,20 @@ namespace RDE {
             std::string originalPath;
 
         private:
-            FileHandler(SDL_RWops* _file, const FileMode& _mode, const std::string& _originalPath) : file(_file), mode(_mode), originalPath(_originalPath) {}
+			FileHandler(SDL_RWops* _file, const RDE_FILE_MODE_& _mode, const std::string& _originalPath) : file(_file), mode(_mode), originalPath(_originalPath) {}
 
             /**
              * @brief Converts engine's file mode to SDL file mode.
              * @param _mode
              * @return const char*
              */
-            static const char* modeToChar(const FileMode& _mode) {
+			static const char* modeToChar(const RDE_FILE_MODE_& _mode) {
                 switch (_mode) {
-                    case READ: return "rb";
-                    case WRITE: return "w";
-                    case APPEND: return "a";
-                    case READ_AND_WRITE: return "r+";
-                    case READ_AND_APPEND: return "a+";
+					case RDE_FILE_MODE_READ: return "rb";
+					case RDE_FILE_MODE_WRITE: return "w";
+					case RDE_FILE_MODE_APPEND: return "a";
+					case RDE_FILE_MODE_READ_AND_WRITE: return "r+";
+					case RDE_FILE_MODE_READ_AND_APPEND: return "a+";
                 }
 
                 return "rb";
@@ -99,13 +80,16 @@ namespace RDE {
 
 
     class FileManager {
+
+		friend class ConfigManager;
+
         private:
             /**
              * @brief Checks the file mode and if it doesn't match, it changes it to the expected.
              * @param _handler File handler
              * @param _expected Expected file mode
              */
-            void checkFileMode(FileHandler* _handler, const FileMode& _expected);
+			void checkFileMode(FileHandler* _handler, const RDE_FILE_MODE_& _expected);
 
         public:
 
@@ -116,7 +100,7 @@ namespace RDE {
              * @param _silentNotFound Don't shout if there is an error
              * @return FileHandler*
              */
-            FileHandler* open(const std::string& _filePath, const FileMode& _fileMode, bool _silentNotFound = false);
+			FileHandler* open(const std::string& _filePath, const RDE_FILE_MODE_& _fileMode, bool _silentNotFound = false);
 
             /**
              * @brief Closes a file.

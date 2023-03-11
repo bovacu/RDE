@@ -4,20 +4,19 @@
 #ifndef RDE_ENGINE_H
 #define RDE_ENGINE_H
 
-
-#include "core/render/window/Window.h"
 #include "core/systems/eventSystem/WindowEvent.h"
-#include "core/graph/ImGuiScene.h"
-#include "core/render/elements/FrameBuffer.h"
 #include "core/Manager.h"
-#include "core/systems/configSystem/ConfigManager.h"
 #include "core/platform/Platform.h"
+#include "core/DeviceInfoProvider.h"
 
 int main(int argc, char** argv);
 
 namespace RDE {
 
     class Scene;
+    class FrameBuffer;
+    class ImGuiScene;
+    class Window;
 
     struct LocalizationConfig {
         /**
@@ -114,6 +113,11 @@ namespace RDE {
              */
             RDEConfig rdeConfig {};
 
+            /**
+             * @see DeviceInfoProvider
+            */
+            DeviceInfoProvider devideInfoProvider {};
+
         private:
             /**
              * @brief Delta time of the Fixed Update method.
@@ -172,6 +176,12 @@ namespace RDE {
 
         public:
             Engine();
+
+            /**
+             * @brief Returns the platform that the engine is running on.
+             * @return RDE_PLATFORM_TYPE_
+             */
+            RDE_PLATFORM_TYPE_ getPlatform() const;
 
             /**
              * @brief This method provides the number of FPS in any given moment.
@@ -290,6 +300,9 @@ namespace RDE {
             Logs componentsCommands(const std::vector<std::string>& _args);
     };
 
+    /**
+     * @brief Externed function that must be implemented for the Engine to work.
+     */
     Engine* createEngine(int _argc, char** _argv);
 }
 

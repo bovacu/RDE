@@ -7,25 +7,18 @@
 
 #include "core/graph/components/ui/UI.h"
 #include "core/render/elements/IRenderizable.h"
+#include "core/Enums.h"
 
 namespace RDE {
 
     class Scene;
     class Canvas;
 
-    enum ImageRenderingType {
-        NORMAL              = 0,
-        NINE_SLICE          = 1,
-        PARTIAL_VERTICAL    = 2,
-        PARTIAL_HORIZONTAL  = 3,
-        PARTIAL_RADIAL      = 4
-    };
-
     struct UIImageConfig : public CommonUIConfig {
         Vec2F size = { -1, -1 };
         Texture* texture = nullptr;
         Color color = Color::White;
-        ImageRenderingType imageRenderingType = ImageRenderingType::NORMAL;
+		RDE_IMAGE_RENDERING_TYPE_ imageRenderingType = RDE_IMAGE_RENDERING_TYPE_NORMAL;
     };
 
     class UIImage {
@@ -76,13 +69,13 @@ namespace RDE {
              * will be shown.
              * @param _imageRenderingType ImageRenderingType
              */
-            void setImageRenderingType(ImageRenderingType _imageRenderingType);
+			void setImageRenderingType(RDE_IMAGE_RENDERING_TYPE_ _imageRenderingType);
 
             /**
              * @brief Returns the type of rendering.
              * @return ImageRenderingType
              */
-			[[nodiscard]]ImageRenderingType getImageRenderingType() const { return (ImageRenderingType)data.imageRenderingType; }
+			[[nodiscard]]RDE_IMAGE_RENDERING_TYPE_ getImageRenderingType() const { return (RDE_IMAGE_RENDERING_TYPE_)data.imageRenderingType; }
 
             /**
              * @brief Returns if the rendering is inverted.

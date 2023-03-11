@@ -39,7 +39,7 @@ namespace Editor {
             std::vector<NodeID> nodes;
 
 
-            void onMouseClick(MouseCode _mouseCode);
+			void onMouseClick(RDE_MOUSE_BUTTON_ _mouseCode);
             void onMouseEntered();
             void onMouseExited();
 

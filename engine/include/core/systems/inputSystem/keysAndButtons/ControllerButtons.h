@@ -4,65 +4,48 @@
 #define RDE_GAMEPAD_KEYS_H
 
 #include <cstdint>
-#include "core/platform/PlatformHeaderSDL.h"
+#include "SDL2/SDL_gamecontroller.h"
 
 namespace RDE {
 
-    /// -----------------------------------------------------------------
-    /// |			CODES FOR GAMEPAD BUTTONS, THEY ARE 				|
-    /// |			THE SAME AS GLFW'S ONES, BUT NOW ARE				|
-    /// |			PROPERTY OF THE ENGINE AND DON'T RELAY				|
-    /// |			ON GLFW												|
-    /// -----------------------------------------------------------------
+	/**
+	* @brief Codes for the buttons of a controller.
+	*/
+	enum RDE_CONTROLLER_BUTTON_ : uint16_t {
+		RDE_CONTROLLER_BUTTON_A            = SDL_CONTROLLER_BUTTON_A,              // 0
+		RDE_CONTROLLER_BUTTON_B            = SDL_CONTROLLER_BUTTON_B,              // 1
+		RDE_CONTROLLER_BUTTON_X            = SDL_CONTROLLER_BUTTON_X,              // 2
+		RDE_CONTROLLER_BUTTON_Y            = SDL_CONTROLLER_BUTTON_Y,              // 3
+		RDE_CONTROLLER_BUTTON_LB           = SDL_CONTROLLER_BUTTON_LEFTSHOULDER,   // 9
+		RDE_CONTROLLER_BUTTON_RB           = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,  // 10
+		RDE_CONTROLLER_BUTTON_GUIDE        = SDL_CONTROLLER_BUTTON_GUIDE,          // 5
+		RDE_CONTROLLER_BUTTON_START        = SDL_CONTROLLER_BUTTON_START,          // 6
+		RDE_CONTROLLER_BUTTON_SELECT       = SDL_CONTROLLER_BUTTON_BACK,           // 4
+		RDE_CONTROLLER_BUTTON_R_JOY   	   = SDL_CONTROLLER_BUTTON_RIGHTSTICK,     // 8
+		RDE_CONTROLLER_BUTTON_L_JOY    	   = SDL_CONTROLLER_BUTTON_LEFTSTICK,      // 7
+		RDE_CONTROLLER_BUTTON_DPAD_UP      = SDL_CONTROLLER_BUTTON_DPAD_UP,        // 11
+		RDE_CONTROLLER_BUTTON_DPAD_RIGHT   = SDL_CONTROLLER_BUTTON_DPAD_RIGHT,     // 14
+		RDE_CONTROLLER_BUTTON_DPAD_DOWN    = SDL_CONTROLLER_BUTTON_DPAD_DOWN,      // 12
+		RDE_CONTROLLER_BUTTON_DPAD_LEFT    = SDL_CONTROLLER_BUTTON_DPAD_LEFT       // 13
+	};
 
-    typedef enum class ControllerButtons : uint16_t {
-        ButtonA         = SDL_CONTROLLER_BUTTON_A,              // 0
-        ButtonB         = SDL_CONTROLLER_BUTTON_B,              // 1
-        ButtonX         = SDL_CONTROLLER_BUTTON_X,              // 2
-        ButtonY         = SDL_CONTROLLER_BUTTON_Y,              // 3
-        LB              = SDL_CONTROLLER_BUTTON_LEFTSHOULDER,   // 9
-        RB              = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,  // 10
-        Guide           = SDL_CONTROLLER_BUTTON_GUIDE,          // 5
-        Start           = SDL_CONTROLLER_BUTTON_START,          // 6
-        Select          = SDL_CONTROLLER_BUTTON_BACK,           // 4
-        RightJoystick   = SDL_CONTROLLER_BUTTON_RIGHTSTICK,     // 8
-        LeftJoystick    = SDL_CONTROLLER_BUTTON_LEFTSTICK,      // 7
-        DPadUp          = SDL_CONTROLLER_BUTTON_DPAD_UP,        // 11
-        DPadRight       = SDL_CONTROLLER_BUTTON_DPAD_RIGHT,     // 14
-        DPadDown        = SDL_CONTROLLER_BUTTON_DPAD_DOWN,      // 12
-        DPadLeft        = SDL_CONTROLLER_BUTTON_DPAD_LEFT       // 13
-    } GamePad;
+	/**
+	 * @brief Codes for the Axis/Special buttons of a controller.
+	*/
+	enum RDE_CONTROLLER_AXIS_ {
+		RDE_CONTROLLER_AXIS_LEFT,
+		RDE_CONTROLLER_AXIS_RIGHT,
+		RDE_CONTROLLER_AXIS_LT,
+		RDE_CONTROLLER_AXIS_RT
+	};
 
-    typedef enum class ControllerAxis {
-        Left,
-        Right,
-        LT,
-        RT
-    } GamePadA;
-
+    /**
+     * @brief Names of the buttons of a controller.
+    */
     static const char* ControllerKeysStr[] = {
             "A", "B", "X", "Y", "Select", "Guide", "Start", "L3", "R3", "LB", "RB",
             "DUp", "DDown", "DLeft", "DRight", "", "LB", "", "RB"
     };
 }
-
-//    #define GAMEPAD_BUTTON_0                ::engine::GamePad::Button0          // square
-//    #define GAMEPAD_BUTTON_1                ::engine::GamePad::Button1          // X
-//    #define GAMEPAD_BUTTON_2                ::engine::GamePad::Button2          // circle
-//    #define GAMEPAD_BUTTON_3                ::engine::GamePad::Button3          // triangle
-//    #define GAMEPAD_BUTTON_4                ::engine::GamePad::Button4          // R1
-//    #define GAMEPAD_BUTTON_5                ::engine::GamePad::Button5          // L1
-//    #define GAMEPAD_BUTTON_6                ::engine::GamePad::Button6          // R2
-//    #define GAMEPAD_BUTTON_7                ::engine::GamePad::Button7          // L2
-//    #define GAMEPAD_BUTTON_8                ::engine::GamePad::Button8          // R3
-//    #define GAMEPAD_BUTTON_9                ::engine::GamePad::Button9          // L3
-//    #define GAMEPAD_BUTTON_START            ::engine::GamePad::Start            // Start
-//    #define GAMEPAD_BUTTON_SELECT           ::engine::GamePad::Select           // Select
-//    #define GAMEPAD_BUTTON_RIGHT_JOYSTICK   ::engine::GamePad::RightJoystick    // Right joystick
-//    #define GAMEPAD_BUTTON_LEFT_JOYSTICK    ::engine::GamePad::LeftJoystick     // Left joystick
-//    #define GAMEPAD_BUTTON_DPAD_UP          ::engine::GamePad::DPadUp
-//    #define GAMEPAD_BUTTON_DPAD_RIGHT       ::engine::GamePad::DPadRight
-//    #define GAMEPAD_BUTTON_DPAD_DOWN        ::engine::GamePad::DPadDown
-//    #define GAMEPAD_BUTTON_DPAD_LEFT        ::engine::GamePad::DPadLeft
 
 #endif // RDE_GAMEPAD_KEYS_H

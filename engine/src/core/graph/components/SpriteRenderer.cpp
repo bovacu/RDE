@@ -28,15 +28,12 @@ namespace RDE {
 
     SpriteRenderer::SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const SpriteRendererConfig& _config) {
         
-        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(4, SPRITE_RENDERER_SHADER, BatchPriority::SpritePriority)
+        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(4, SPRITE_RENDERER_SHADER, RDE_BATCH_PRIORITY_SPRITE)
 
         data.texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "sprite") : _config.texture;
-        data.renderizableType = RenderizableType::RT_SPRITE;
+        data.renderizableType = RDE_RENDERIZABLE_TYPE_SPRITE;
         
         setColor(_config.color);
-
-        auto [_transformMat, _] = _node->getTransform()->localToWorld();
-        calculateGeometryForSpriteRenderer(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->mainCamera->getViewport());
     }
 
     RENDERIZABLE_BASIC_METHODS_IMPL(SpriteRenderer, (float)data.texture->getSize().x * node->getTransform()->getScale().x, (float)data.texture->getSize().y * node->getTransform()->getScale().y)

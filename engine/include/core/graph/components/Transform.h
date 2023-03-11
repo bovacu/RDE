@@ -48,7 +48,6 @@ namespace RDE {
         protected:
             glm::mat4 recalculateCachedMatrix();
             void setDirty(Transform* _transform);
-            virtual void clearDirty();
             glm::mat4 worldPointToLocalPosition(const Vec2F& _position);
             glm::mat4 worldPointToLocalRotation(float _rotation);
 
@@ -225,6 +224,8 @@ namespace RDE {
 
             glm::mat4 getLocalMatrix() const;
             void setLocalMatrix(const glm::mat4& _matrix);
+
+			virtual void update();
     };
 }
 

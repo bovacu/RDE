@@ -2,6 +2,7 @@
 
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/util/Functions.h"
+#include "core/systems/fileSystem/FileManager.h"
 
 #define FONT_DPI 96
 
@@ -20,7 +21,7 @@ namespace RDE {
         atlasSize.y = 0;
         fontSize = _fontSize;
 
-        memset(characters, 0, sizeof(characters));
+        //memset(characters, 0, sizeof(characters));
 
 		FT_Int32 load_flags = FT_LOAD_RENDER | FT_LOAD_TARGET_(FT_RENDER_MODE_SDF);
         /* Find minimum size for a texture holding all visible ASCII characters */
@@ -52,16 +53,16 @@ namespace RDE {
 
             texture.loadTextSubTextures({_ox, 0}, {(int)g->bitmap.width, (int)g->bitmap.rows}, g->bitmap.buffer);
 
-            characters[_i].advance.x = (int)g->advance.x >> 6;
-            characters[_i].size      = { static_cast<int>(face->glyph->bitmap.width), static_cast<int>(face->glyph->bitmap.rows) };
-            characters[_i].bearing   = { face->glyph->bitmap_left, face->glyph->bitmap_top };
-            characters[_i].offset    = { (float)_ox / (float)atlasSize.x, (float)_oy / (float)atlasSize.y };
-            characters[_i].advance.y = characters[_i].size.y;
+            characters[(char)_i].advance.x = (int)g->advance.x >> 6;
+			characters[(char)_i].size      = { static_cast<int>(face->glyph->bitmap.width), static_cast<int>(face->glyph->bitmap.rows) };
+			characters[(char)_i].bearing   = { face->glyph->bitmap_left, face->glyph->bitmap_top };
+			characters[(char)_i].offset    = { (float)_ox / (float)atlasSize.x, (float)_oy / (float)atlasSize.y };
+			characters[(char)_i].advance.y = characters[(char)_i].size.y;
 
             _rowHeight = _rowHeight > g->bitmap.rows ? (int)_rowHeight : (int)g->bitmap.rows;
             _ox += (int)g->bitmap.width;
 
-            biggestCharHeight = biggestCharHeight < characters[_i].size.y ? characters[_i].size.y : biggestCharHeight;
+			biggestCharHeight = biggestCharHeight < characters[(char)_i].size.y ? characters[(char)_i].size.y : biggestCharHeight;
         }
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
@@ -71,7 +72,7 @@ namespace RDE {
         return texture;
     }
 
-    CharInfo* Font::getChars() {
+	CharMap& Font::getChars() {
         return characters;
     }
 
@@ -116,7 +117,7 @@ namespace RDE {
 
     Font* FontManager::loadFont(FileManager& _fileManager, const std::string& _pathToFont, int _fontSize) {
         FT_Face _face;
-        auto _fileHandler = _fileManager.open(_pathToFont, FileMode::READ);
+		auto _fileHandler = _fileManager.open(_pathToFont, RDE_FILE_MODE_READ);
         auto _data = _fileManager.readFullFile(_fileHandler).content;
         FT_Error _error = FT_New_Memory_Face(ftLibrary, reinterpret_cast<const FT_Byte*>(_data.c_str()), _data.size(), 0, &_face);
         _fileManager.close(_fileHandler);

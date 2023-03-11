@@ -5,6 +5,7 @@
 #ifndef RDE_CORE_H
 #define RDE_CORE_H
 
+/// \cond DO_NOT_DOCUMENT
 #define FRAMEBUFFER_VERTEX_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferVertex.glsl"
 #define FRAMEBUFFER_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferFragment.glsl"
 #define FRAMEBUFFER_VERTEX_SHADER_CORE "defaultAssets/shaders/core/framebuffer/FrameBufferVertex.glsl"
@@ -48,23 +49,41 @@
 #define FRAMEBUFFER_SHADER "framebuffer"
 
 #define RESOURCES_PATH "assets/"
+/// \endcond
 
+/**
+ * @brief Used for physics calculations.
+*/
 #ifndef EPSILON
 #define EPSILON 0.0001f
 #endif
 
+/**
+ * @brief Used for math calculations.
+*/
 #ifndef PI
 #define PI 3.141592741f
 #endif
 
+/**
+ * @brief Used for UI size calculations.
+*/
 #ifndef BASE_DPI
-#define BASE_DPI 92.5f
+#define BASE_DPI 96.f
 inline float currentDPI = 0;
 #endif
 
-#define toDPI(x) x * currentDPI / BASE_DPI
-#define toDPI_V(vec) Vec2F {vec.x * currentDPI / BASE_DPI, vec.y * currentDPI / BASE_DPI}
+/**
+ * @brief Used for UI size calculations.
+*/
+#define toDPI(x) x * (currentDPI / BASE_DPI)
 
+/**
+ * @brief Used for UI size calculations.
+*/
+#define toDPI_V(vec) Vec2F {vec.x * (currentDPI / BASE_DPI), vec.y * (currentDPI / BASE_DPI)}
+
+/// \cond DO_NOT_DOCUMENT
 #ifndef NDEBUG
 #define ENGINE_DEBUG
 #endif
@@ -96,16 +115,45 @@ inline float currentDPI = 0;
         #define MAC_PLATFORM
     #endif
 #endif
+/// \endcond
 
+/**
+ * @brief Checks if the OS is Mac.
+*/
 #define IS_MAC() (defined(__APPLE__) && defined(MAC_PLATFORM))
+
+/**
+ * @brief Checks if the OS is Windows.
+*/
 #define IS_WINDOWS() _WIN32
+
+/**
+ * @brief Checks if the OS is Linux.
+*/
 #define IS_LINUX() (defined(__linux__))
+
+/**
+ * @brief Checks if the OS is Mac, Windows or Linux.
+*/
 #define IS_DESKTOP() (IS_LINUX() || IS_MAC() || IS_WINDOWS())
 
+/**
+ * @brief Checks if the OS is iOS.
+*/
 #define IS_IOS() (defined(__APPLE__) && defined(IOS_PLATFORM))
+
+/**
+ * @brief Checks if the OS is Android.
+*/
 #define IS_ANDROID() (defined(__ANDROID__))
+
+/**
+ * @brief Checks if it is Android or iOS
+*/
 #define IS_MOBILE() (IS_ANDROID() || IS_IOS())
 
+
+/// \cond DO_NOT_DOCUMENT
 #ifdef ENGINE_ENABLE_ASSERTS
     #define ENGINE_ASSERT(x, message) { if(!(x)) { std::cout << (message) << std::endl; ENGINE_DEBUG_BREAK(); } }
 #else
@@ -118,12 +166,17 @@ inline float currentDPI = 0;
     #define RDE_INTERNAL [[gnu::visibility("internal")]]
     #define RDE_DEPRECATED(_explanation) [[gnu::deprecated(_explanation)]]
 #endif
+/// \endcond
+
 
 #if IS_MOBILE() || IS_MAC() || defined(_WIN32)
 typedef unsigned long ulong;
 typedef unsigned int uint;
 #endif
 
+/**
+ * @brief Makes a class iterable onto some itarable attribute, like a map or a vector.
+*/
 #define MAKE_CLASS_ITERABLE(iteratorType, iterable)                               \
 public:                                                                           \
     iteratorType::iterator begin()                  { return iterable.begin();  } \
@@ -134,39 +187,6 @@ public:                                                                         
     iteratorType::const_iterator cend()             { return iterable.cend();   } \
     iteratorType::const_reverse_iterator crbegin()  { return iterable.crbegin();} \
     iteratorType::const_reverse_iterator crend()    { return iterable.crend();  } \
-
-#ifdef _MSC_VER 
-#else
-#define FE_1_INVOKE(WHAT, X) WHAT(X)
-#define FE_2_INVOKE(WHAT, X, ...) WHAT(X)FE_1_INVOKE(WHAT, __VA_ARGS__)
-#define FE_3_INVOKE(WHAT, X, ...) WHAT(X)FE_2_INVOKE(WHAT, __VA_ARGS__)
-#define FE_4_INVOKE(WHAT, X, ...) WHAT(X)FE_3_INVOKE(WHAT, __VA_ARGS__)
-#define FE_5_INVOKE(WHAT, X, ...) WHAT(X)FE_4_INVOKE(WHAT, __VA_ARGS__)
-
-#define FE_1_DECLARATION(WHAT, X, Y) WHAT Y X
-#define FE_2_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_1_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_3_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_2_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_4_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_3_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_5_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_4_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_6_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_5_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_7_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_6_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_8_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_7_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_9_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_8_DECLARATION(WHAT, X, __VA_ARGS__)
-#define FE_10_DECLARATION(WHAT, X, Y, ...) WHAT Y X FE_9_DECLARATION(WHAT, X, __VA_ARGS__)
-
-#define GET_MACRO(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,NAME, ...) NAME
-#define FOR_EACH_DECLARATION(init, end, ...) \
-  GET_MACRO(__VA_ARGS__,FE_10_DECLARATION,FE_9_DECLARATION,FE_8_DECLARATION,FE_7_DECLARATION,FE_6_DECLARATION,FE_5_DECLARATION,FE_4_DECLARATION,FE_3_DECLARATION,FE_2_DECLARATION,FE_1_DECLARATION)(init, end,__VA_ARGS__)
-
-#define FOR_EACH_INVOKE(action,...) \
-  GET_MACRO(__VA_ARGS__,FE_5_INVOKE,FE_4_INVOKE,FE_3_INVOKE,FE_2_INVOKE,FE_1_INVOKE)(action,__VA_ARGS__)
-
-
-#define FRIEND_CLASS(...) FOR_EACH_DECLARATION(friend class, ;, __VA_ARGS__)
-#define FORWARD_DECLARE_CLASS(...) FOR_EACH_DECLARATION(class, ;, __VA_ARGS__)
-#define FRIEND_STRUCT(...) FOR_EACH_DECLARATION(friend struct, ;, __VA_ARGS__)
-#define FORWARD_DECLARE_STRUCT(...) FOR_EACH_DECLARATION(struct, ;, __VA_ARGS__)
-#endif
 
 #define SAFE_POINTER(_var, _function) if(_var) do { _var->_function; } while(0);
 

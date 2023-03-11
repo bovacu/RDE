@@ -225,7 +225,7 @@ namespace RDE {
              * This method is used to drawBatched anything that extends IRenderizable and that is UI.
              * @param _batches Static batches to render the UI.
              */
-            void drawUI(std::vector<Batch>& _batches);
+            void flushUI(std::vector<Batch>& _batches);
 
             /**
              * @brief This method sends all of the geometry to the GPU and ends a Draw Call.

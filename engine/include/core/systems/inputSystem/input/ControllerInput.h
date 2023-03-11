@@ -7,7 +7,7 @@
 
 #include "core/util/Util.h"
 #include "core/systems/inputSystem/keysAndButtons/ControllerButtons.h"
-#include "Input.h"
+#include "core/systems/inputSystem/input/Input.h"
 
 namespace RDE {
 
@@ -129,12 +129,12 @@ namespace RDE {
             /**
              * @brief Map ControllerButton -> State.
              */
-            std::unordered_map<ControllerButtons, int>  pressedGamepadButtons;
+            std::unordered_map<RDE_CONTROLLER_BUTTON_, int>  pressedGamepadButtons;
 
             /**
              * @brief Map ControllerAxis -> State.
              */
-            std::unordered_map<ControllerAxis, int>  pressedGamepadAxis;
+            std::unordered_map<RDE_CONTROLLER_AXIS_, int>  pressedGamepadAxis;
 
             /**
              * @brief Left joystick value
@@ -235,7 +235,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return VecF
              */
-            Vec2F getAxisValue(const ControllerAxis& _axis, int _controllerID = 0);
+            Vec2F getAxisValue(const RDE_CONTROLLER_AXIS_& _axis, int _controllerID = 0);
 
             /**
              * @brief Reassigns a controller to another one. (Change order)

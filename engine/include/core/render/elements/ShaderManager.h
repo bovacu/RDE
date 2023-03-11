@@ -5,13 +5,13 @@
 #define RDE_SHADER_MANAGER_H
 
 
-#include "core/util/Util.h"
+#include <vector>
+#include <unordered_map>
 #include "Shader.h"
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 #include "glm/ext/matrix_float4x4.hpp"
-#include "core/systems/fileSystem/FileManager.h"
 
 namespace RDE {
 

@@ -4,42 +4,11 @@
 #define RDE_EVENT_H
 
 #include "core/util/Delegate.h"
+#include "core/Enums.h"
 #include <string>
 #include <sstream>
 
 namespace RDE {
-
-    /**
-     * @brief All the different types of events that the engine can manage.
-     */
-    enum class EventType : unsigned {
-        None, WindowClosed, WindowResized, WindowMoved, WindowFocused, WindowLostFocus, GameFrame, GameUpdate,
-        GameRender, KeyPressed, KeyDown, KeyReleased, KeyTyped, TextTyped, MouseButtonPressed, MouseButtonDown, MouseButtonReleased,
-        MouseScrolled, MouseMoved, WindowMinimized, WindowDisplayChanged,
-
-        ControllerAxisMoved, ControllerButtonDown, ControllerButtonUp,
-
-        MobileTouchDown, MobileTouchUp, MobileTouchMoved
-    };
-
-    /**
-     * @brief Masking the different categories of the events. This makes really easy to get which event type is each event.
-     * Getting it is as easy as making (EventCategoryXXX & customEventCategoryPassed) == EventCategoryXXX.
-     *
-     * This is, for example, customEventCategoryPassed = 00000110, that means, an event which is both EventCategoryInput
-     * and EventCategoryKeyboard. doing 00000110 & 00000100 and later 00000110 & 00000010 gives as that the current
-     * is both types.
-     */
-    enum EventCategory : unsigned {
-        None,
-        EventCategoryGame           = 1u << 0u, /// 00000001
-        EventCategoryInput          = 1u << 1u, /// 00000010
-        EventCategoryKeyboard       = 1u << 2u, /// 00000100
-        EventCategoryMouse          = 1u << 3u, /// 00001000
-        EventCategoryMouseButton    = 1u << 4u, /// 00010000
-        EventCategoryControllerButton    = 1u << 5u,  /// 00100000
-        EventCategoryMobileInput    = 1u << 6u  /// 00100000
-    };
 
     /**
      * @brief This class is the base for any event and contains the information and methods necessary to capture and control
@@ -58,13 +27,13 @@ namespace RDE {
              * @brief Returns the type of an event in a static way.
              * @return EventType
              */
-            static EventType getStaticType() { return EventType::None; }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_NONE; }
 
             /**
              * @brief Returns the event type from the current object.
              * @return EventType
              */
-            [[nodiscard]] virtual EventType getEventType() const = 0;
+			[[nodiscard]] virtual RDE_EVENT_TYPE_ getEventType() const = 0;
 
             /**
              * @brief Returns the event name.
@@ -89,7 +58,7 @@ namespace RDE {
              * @param _category Category to check
              * @return bool
              */
-            [[nodiscard]] inline bool isInCategory(EventCategory _category) const { return (unsigned)getCategoryFlags() & _category; }
+			[[nodiscard]] inline bool isInCategory(RDE_EVENT_CATEGORY_ _category) const { return (unsigned)getCategoryFlags() & _category; }
     };
 
     class EventDispatcher {

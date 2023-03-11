@@ -44,6 +44,15 @@ namespace RDE {
         prefabs.clear();
     }
 
+
+
+	void Scene::onInnerEvent(Event& _event) {
+		onInnerEventUI(_event);
+		onInnerEventHierarchy(_event);
+		onEvent(_event);
+	}
+
+
     void Scene::onInnerEventHierarchy(Event& _event) {
         
     }
@@ -58,6 +67,13 @@ namespace RDE {
     }
 
 
+
+
+	void Scene::onInnerUpdate(Delta _dt) {
+		onInnerUpdateHierarchy(_dt);
+		onInnerUpdateUI(_dt);
+		onUpdate(_dt);
+	}
 
     void Scene::onInnerUpdateHierarchy(Delta _dt) {
         auto _animations = graph->registry.view<AnimationSystem, SpriteRenderer, Active>(entt::exclude<DisabledForRender>);
@@ -75,13 +91,13 @@ namespace RDE {
     void Scene::onInnerUpdateUI(Delta _dt) {
         for (auto& _it : canvas->uiUpdatables) {
             switch (_it.updatableData.updatableType) {
-            case UT_NONE:
+				case RDE_UI_UPDATABLE_NODE_NONE:
                 break;
-            case UT_UI_INPUT: {
+				case RDE_UI_UPDATABLE_NODE_INPUT: {
                 ((UIInput*)_it.updatableData.updatable)->onUpdate(_dt);
                 break;
             }
-            case UT_UI_SLIDER: {
+				case RDE_UI_UPDATABLE_NODE_SLIDER: {
                 ((UISlider*)_it.updatableData.updatable)->onUpdate(_dt);
                 break;
             }
@@ -90,6 +106,14 @@ namespace RDE {
     }
 
 
+
+
+
+	void Scene::onInnerFixedUpdate(Delta _fixedDt) {
+		onInnerFixedUpdateHierarchy(_fixedDt);
+		onInnerFixedUpdateUI(_fixedDt);
+		onFixedUpdate(_fixedDt);
+	}
 
     void Scene::onInnerFixedUpdateHierarchy(Delta _dt) {
         for(auto* _body : engine->manager.physics.bodies) {
@@ -106,37 +130,39 @@ namespace RDE {
 
     void Scene::recalculateRenderizableTree(Node* _node) {
         auto _id = _node->getID();
+		auto _draw = !_node->hasComponent<DisabledForRender>() && _node->hasComponent<Active>();
 
-        if(!_node->hasComponent<DisabledForRender>() && _node->hasComponent<Active>()) {
+		if(_node->hasComponent<SpriteRenderer>()) {
+			auto* _data = &_node->getComponent<SpriteRenderer>()->data;
+			_data->draw = _draw;
+			graph->renderingTreeData.sprites.emplace_back(_data, _node->getTransform(), nullptr );
+		}
 
-            if(_node->hasComponent<SpriteRenderer>()) {
-                graph->renderingTreeData.sprites.emplace_back(&_node->getComponent<SpriteRenderer>()->data, _node->getTransform(), nullptr );
-            }
+		if(_node->hasComponent<DynamicSpriteRenderer>()) {
+			auto* _data = &_node->getComponent<DynamicSpriteRenderer>()->data;
+			_data->draw = _draw;
+			graph->renderingTreeData.dynamicSprites.emplace_back(_data, _node->getTransform(), nullptr );
+		}
 
-            if(_node->hasComponent<DynamicSpriteRenderer>()) {
-                graph->renderingTreeData.dynamicSprites.emplace_back(&_node->getComponent<DynamicSpriteRenderer>()->data, _node->getTransform(), nullptr );
-            }
+		if(_node->hasComponent<ParticleSystem>()) {
+			auto* _data = &_node->getComponent<ParticleSystem>()->data;
+			_data->draw = _draw;
+			graph->renderingTreeData.particleSystmes.emplace_back(_data, _node->getTransform(), nullptr );
+		}
 
-            if(_node->hasComponent<ParticleSystem>()) {
-                graph->renderingTreeData.particleSystmes.emplace_back(&_node->getComponent<ParticleSystem>()->data, _node->getTransform(), nullptr );
-            }
-
-            if(_node->hasComponent<TextRenderer>()) {
-                auto* _textRenderer = _node->getComponent<TextRenderer>();
-                graph->renderingTreeData.texts.emplace_back( &_textRenderer->data, _node->getTransform(), (void*)_textRenderer );
-            }
-        }
+		if(_node->hasComponent<TextRenderer>()) {
+			auto* _textRenderer = _node->getComponent<TextRenderer>();
+			auto* _data = &_textRenderer->data;
+			_data->draw = _draw;
+			graph->renderingTreeData.texts.emplace_back(_data, _node->getTransform(), (void*)_textRenderer );
+		}
 
         for(auto* _child : _node->getTransform()->children) {
             recalculateRenderizableTree(_child->node);
         }
     }
 
-    void Scene::recalculateRenderizableTreeUI(Node* _node) {
-        if(!_node->isActive()) {
-            return;
-        }
-
+	void Scene::recalculateRenderizableTreeUI(Node* _node) {		
         CanvasElement _canvasElement { _node };
 
         if(canvas->graph->getNodeContainer().any_of<UIInteractable>(_node->getID())) {
@@ -148,7 +174,7 @@ namespace RDE {
             canvas->getRenderizable(_node, &_canvasElement);
 
             if(canvas->graph->getNodeContainer().any_of<UIMask>(_node->getID()) && _node->getComponent<UIMask>()->isEnabled()) {
-                _canvasElement.cropping = _node->getTransform()->getEnabledChildrenCount();
+                _canvasElement.cropping = _node->getTransform()->getEnabledAndActiveChildrenCount() + 1;
             }
 
             if(_canvasElement.renderizableInnerData != nullptr) {
@@ -164,10 +190,20 @@ namespace RDE {
             }
         }
 
-         for(auto* _child : _node->getTransform()->children) {
-             recalculateRenderizableTreeUI(_child->node);
-         }
+        for(auto* _child : _node->getTransform()->children) {
+            recalculateRenderizableTreeUI(_child->node);
+        }
     }
+
+
+
+
+
+	void Scene::onInnerLateUpdate(Delta _dt) {
+		onInnerLateUpdateHierarchy(_dt);
+		onInnerLateUpdateUI(_dt);
+		onLateUpdate(_dt);
+	}
 
     void Scene::onInnerLateUpdateHierarchy(Delta _dt) {
         if(graph->renderingTreeData.isRenderizableTreeDirty) {
@@ -205,6 +241,13 @@ namespace RDE {
 
 
 
+
+
+	void Scene::onInnerRender(Delta _dt) {
+		onInnerRenderHierarchy(_dt); 
+		onInnerRenderUI(_dt); 
+	}
+
     void Scene::onInnerRenderHierarchy(Delta _dt) {
         auto& _renderManager = engine->manager.renderManager;
 
@@ -226,15 +269,6 @@ namespace RDE {
 
             _renderManager.endDraw();
         }
-
-        postRenderSync();
-    }
-
-    void Scene::postRenderSync() {
-        for(auto* _dirtyTransform : graph->renderingTreeData.dirtyTransforms) {
-            _dirtyTransform->clearDirty();
-        }
-        graph->renderingTreeData.dirtyTransforms.clear();
     }
 
     void Scene::onInnerRenderUI(Delta _dt) {
@@ -268,34 +302,28 @@ namespace RDE {
             if(_it.cropping > 0) _cropList.push_back(_it.cropping);
         }
 
-        _renderManager.drawUI(canvas->batches);
-
-        postRenderSyncUI();
-    }
-
-    void Scene::postRenderSyncUI() {
-        for(auto* _dirtyTransform : canvas->graph->renderingTreeData.dirtyTransforms) {
-            ((UITransform*)_dirtyTransform)->clearDirty();
-        }
-        canvas->graph->renderingTreeData.dirtyTransforms.clear();
+		_renderManager.endDrawUI(canvas->batches);
     }
 
 
 
-    void Scene::onInnerDebugRenderHierarchy(Delta _dt) {
-        auto& _renderManager = engine->manager.renderManager;
-        _renderManager.beginDebugDraw(mainCamera, mainCamera->node->getComponent<Transform>());
-        engine->manager.physics.debugRender(&_renderManager);
-        _renderManager.endDebugDraw();
+	void Scene::onInnerDebugRender(Delta _dt) {
+		auto& _renderManager = engine->manager.renderManager;
+		_renderManager.beginDebugDraw(mainCamera, mainCamera->node->getTransform());
+		onInnerDebugRenderHierarchy(_dt, &_renderManager);
+		onInnerDebugRenderUI(_dt, &_renderManager);
+		onDebugRender(_dt, &_renderManager);
+		_renderManager.endDebugDraw();
+	}
+
+	void Scene::onInnerDebugRenderHierarchy(Delta _dt, RenderManager* _renderManager) {
+        engine->manager.physics.debugRender(_renderManager);
     }
 
-    void Scene::onInnerDebugRenderUI(Delta _dt) {
-        auto& _registry = canvas->graph->getNodeContainer();
+	void Scene::onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager) {
+		auto& _registry = canvas->graph->getNodeContainer();
 
-        auto& _renderManager = engine->manager.renderManager;
-       _renderManager.beginDebugDraw(mainCamera, (Transform*)mainCamera->node->getComponent<UITransform>());
-
-        _registry.view<UIImage, UITransform, Active>().each([this, &_renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
+        _registry.view<UIImage, UITransform, Active>().each([this, _renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
             Vec2F _size = _uiImage.getSize();
@@ -315,13 +343,13 @@ namespace RDE {
             _shape.setOutlineColor(Color::Blue);
             _shape.showInnerColor(false);
             _shape.setRotation(_transform.getModelMatrixRotation());
-            _renderManager.drawShape(_shape);
+            _renderManager->drawShape(_shape);
 
-            _renderManager.drawSquare(_pos, _pointSize, Color::Blue);
-            _renderManager.setPointSize(4);
+            _renderManager->drawSquare(_pos, _pointSize, Color::Blue);
+            _renderManager->setPointSize(4);
         });
 
-        _registry.view<UICheckbox, UITransform, Active>().each([this, &_renderManager](const NodeID _nodeID, UICheckbox& _checkbox, UITransform& _transform, Active& _) {
+        _registry.view<UICheckbox, UITransform, Active>().each([this, _renderManager](const NodeID _nodeID, UICheckbox& _checkbox, UITransform& _transform, Active& _) {
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
             Vec2F _size = _checkbox.getSize();
@@ -339,37 +367,46 @@ namespace RDE {
             _shape.setOutlineColor(Color::Blue);
             _shape.showInnerColor(false);
             _shape.setRotation(_transform.getModelMatrixRotation());
-            _renderManager.drawShape(_shape);
+            _renderManager->drawShape(_shape);
         });
 
-        _registry.view<UIText, UITransform, Active>().each([this, &_renderManager](const NodeID _nodeID, UIText& _uiText, UITransform& _transform, Active& _) {
+        _registry.view<UIText, UITransform, Active>().each([this, _renderManager](const NodeID _nodeID, UIText& _uiText, UITransform& _transform, Active& _) {
             if(!_uiText.isEnabled()) return;
 
             DebugShape _shape;
-            Vec2F _pos = _transform.getModelMatrixPosition();
+            Vec2F _posRect = _transform.getModelMatrixPosition();
+            Vec2F _posPoint = _transform.getModelMatrixPosition();
             Vec2F _size = _uiText.getSize();
+
+			if((_transform.getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
+				_posRect.x += _size.x * 0.5f;
+			} else if((_transform.getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
+				_posRect.x -= _size.x * 0.5f;
+			} else if((_transform.getAnchor() & RDE_UI_ANCHOR_TOP) == RDE_UI_ANCHOR_TOP) {
+				_posRect.y += _size.y * 0.5f;
+			} else if((_transform.getAnchor() & RDE_UI_ANCHOR_BOTTOM) == RDE_UI_ANCHOR_BOTTOM) {
+				_posRect.y -= _size.y * 0.5f;
+			}
 
             auto _viewport = mainCamera->getViewport();
             auto _virtualRes = _viewport->getVirtualResolution();
             auto _physicalRes = _viewport->getDeviceResolution();
             auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
 
-            _pos       *= _scale.y;
+			_posRect   *= _scale.y;
             _size      *= _scale.y;
 
-            _shape.makeSquare(_pos, _size);
+			_shape.makeSquare(_posRect, _size);
             _shape.showOutsideColor(true);
             _shape.setOutlineColor(Color::Blue);
             _shape.showInnerColor(false);
             _shape.setRotation(_transform.getModelMatrixRotation());
-            _renderManager.drawShape(_shape);
+            _renderManager->drawShape(_shape);
 
             Vec2F _pointSize = {4, 4};
-            _renderManager.drawSquare(_pos, _pointSize, Color::Yellow);
-            _renderManager.setPointSize(4);
+			_renderManager->drawSquare(_posPoint, _pointSize, Color::Yellow);
+            _renderManager->setPointSize(4);
         });
-
-        _renderManager.endDebugDraw();
     }
 
 

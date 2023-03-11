@@ -26,6 +26,6 @@
         #define SDL_DISABLE_IMMINTRIN_H
     #endif 
 #endif
-#include "SDL.h"
+#include "SDL2/SDL.h"
 
 #endif //RDE_PLATFORM_HEADER_SDL_H

@@ -4,6 +4,7 @@
 
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/Engine.h"
+#include "core/graph/Scene.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UICheckbox.h"
@@ -44,7 +45,7 @@ namespace RDE {
             auto* _uiSlider = _node->getComponent<UISlider>();
             if(_uiSlider->isEnabled() && _uiSlider->node->isActive()) {
                 _canvasElement->updatableData.updatable = (void*)_node->getComponent<UISlider>();
-                _canvasElement->updatableData.updatableType = UpdatableType::UT_UI_SLIDER;
+				_canvasElement->updatableData.updatableType = RDE_UI_UPDATABLE_NODE_SLIDER;
                 return;
             }
         }
@@ -53,7 +54,7 @@ namespace RDE {
             auto* _uiInput = _node->getComponent<UIInput>();
             if(_uiInput->isEnabled() && _uiInput->node->isActive()) {
                 _canvasElement->updatableData.updatable = (void*)_node->getComponent<UIInput>();
-                _canvasElement->updatableData.updatableType = UpdatableType::UT_UI_INPUT;
+				_canvasElement->updatableData.updatableType = RDE_UI_UPDATABLE_NODE_INPUT;
                 return;                
             }
         }
@@ -62,24 +63,24 @@ namespace RDE {
     void Canvas::getRenderizable(Node* _node, CanvasElement* _canvasElement) {
         if(_node->hasComponent<UIImage>()) {
             auto* _uiImage = _node->getComponent<UIImage>();
-            if(_uiImage->isEnabled() && _uiImage->node->isActive()) {
-                _uiImage->data.RenderizableInnerData.extraInfo = (void*)_uiImage;
-                _canvasElement->renderizableInnerData = &_uiImage->data;
-                return;
-            }
+			auto _draw = _uiImage->isEnabled() && _uiImage->node->isActive();
+			_uiImage->data.RenderizableInnerData.extraInfo = (void*)_uiImage;
+			_canvasElement->renderizableInnerData = &_uiImage->data;
+			_canvasElement->renderizableInnerData->RenderizableInnerData.draw = _draw;
+			return;
         }
 
         if(_node->hasComponent<UIText>()) {
             auto* _uiText = _node->getComponent<UIText>();
-            if(_uiText->isEnabled() && _uiText->node->isActive()) {
-                _uiText->data.RenderizableInnerData.extraInfo = (void*)_uiText;
-                _canvasElement->renderizableInnerData = &_uiText->data;
-                return;
-            }
+			auto _draw = _uiText->isEnabled() && _uiText->node->isActive();
+			_uiText->data.RenderizableInnerData.extraInfo = (void*)_uiText;
+			_canvasElement->renderizableInnerData = &_uiText->data;
+			_canvasElement->renderizableInnerData->RenderizableInnerData.draw = _draw;
+			return;
         }
     }
 
-    void Canvas::batchTreeElementPre(CanvasElement* _canvasElement, void* _data) {
+    void Canvas::batchTreeElementPre(CanvasElement* _canvasElement, void* _extraData) {
         Batch* _currentBatch = &batches.back();
 
         // This checks if there is a beggining on the Cropping System, for masks.
@@ -107,20 +108,20 @@ namespace RDE {
                 }
 
                 switch (_data.RenderizableInnerData.renderizableType) {
-                    case RT_NONE: {
+                    case RDE_RENDERIZABLE_TYPE_NONE: {
                         Util::Log::debug("In Canvas, an element is trying to be rendered with a value of renerizableType == NONE");
                         break;
                     }
-                    case RT_UI_IMAGE: {
+					case RDE_RENDERIZABLE_TYPE_UI_IMAGE: {
                         drawBatchedUIImage(_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
                         break;
                     }
-                    case RT_UI_TEXT: {
+					case RDE_RENDERIZABLE_TYPE_UI_TEXT: {
                         drawBatchedUIText(_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
                         break;
                     }
-                    case RT_SPRITE:
-                    case RT_TEXT:
+					case RDE_RENDERIZABLE_TYPE_SPRITE:
+					case RDE_RENDERIZABLE_TYPE_TEXT:
                         break;
                 }
 
@@ -144,20 +145,20 @@ namespace RDE {
             }
 
             switch (_data->RenderizableInnerData.renderizableType) {
-                case RT_NONE: {
+				case RDE_RENDERIZABLE_TYPE_NONE: {
                     Util::Log::debug("In Canvas, an element is trying to be rendered with a value of renerizableType == NONE");
                     break;
                 }
-                case RT_UI_IMAGE: {
+				case RDE_RENDERIZABLE_TYPE_UI_IMAGE: {
                     drawBatchedUIImage(*_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
                     break;
                 }
-                case RT_UI_TEXT: {
+				case RDE_RENDERIZABLE_TYPE_UI_TEXT: {
                     drawBatchedUIText(*_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
                     break;
                 }
-                case RT_SPRITE:
-                case RT_TEXT:
+				case RDE_RENDERIZABLE_TYPE_SPRITE:
+				case RDE_RENDERIZABLE_TYPE_TEXT:
                     break;
             }
         }
@@ -173,7 +174,7 @@ namespace RDE {
     void Canvas::forceRender() {
         auto& _renderManager = graph->scene->engine->manager.renderManager;
         _renderManager.beginDraw(camera, nullptr);
-        _renderManager.drawUI(batches);
+        _renderManager.endDrawUI(batches);
 
         batches.clear();
         Batch _batch;

@@ -32,10 +32,10 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::MouseMoved; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOUSE_MOVED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "MouseMoved"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryInput | EventCategoryMouse; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_MOUSE; }
     };
 
 
@@ -64,10 +64,10 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::MouseScrolled; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOUSE_SCROLLED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "MouseScrolled"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryInput | EventCategoryMouse; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_MOUSE; }
     };
 
 
@@ -76,16 +76,16 @@ namespace RDE {
     /// This class represents all of the events that involves doing stuff with the mouse buttons.
     class MouseButtonEvent          : public Event {
         protected:
-            MouseCode mouseButton;
+            RDE_MOUSE_BUTTON_ mouseButton;
 
         protected:
-            explicit MouseButtonEvent(MouseCode _mouseButton) : mouseButton(_mouseButton) {  }
+			explicit MouseButtonEvent(RDE_MOUSE_BUTTON_ _mouseButton) : mouseButton(_mouseButton) {  }
 
         public:
             /// Returns the button that made the event happen.
             /// @return The code of the button that triggered the event.
-            [[nodiscard]] inline MouseCode getMouseButton() const { return mouseButton; }
-            [[nodiscard]] int getCategoryFlags() const override  { return EventCategoryMouseButton | EventCategoryInput; }
+			[[nodiscard]] inline RDE_MOUSE_BUTTON_ getMouseButton() const { return mouseButton; }
+			[[nodiscard]] int getCategoryFlags() const override  { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_MOUSE_BUTTON; }
     };
 
 
@@ -97,7 +97,7 @@ namespace RDE {
             int repeatedTimes = 1;
 
         public:
-            explicit MouseButtonPressedEvent(MouseCode _mouseButton) : MouseButtonEvent(_mouseButton) {  }
+			explicit MouseButtonPressedEvent(RDE_MOUSE_BUTTON_ _mouseButton) : MouseButtonEvent(_mouseButton) {  }
             [[nodiscard]] inline int getRepeatedTimes() const { return repeatedTimes; }
 
             [[nodiscard]] std::string toString() const override {
@@ -107,8 +107,8 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::MouseButtonPressed; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "MouseButtonPressed"; }
     };
 
@@ -118,7 +118,7 @@ namespace RDE {
     /// This class represents all of the events that involves releasing the mouse buttons.
     class MouseButtonReleasedEvent  : public MouseButtonEvent {
         public:
-            explicit MouseButtonReleasedEvent(MouseCode _mouseButton) : MouseButtonEvent(_mouseButton) {  }
+		explicit MouseButtonReleasedEvent(RDE_MOUSE_BUTTON_ _mouseButton) : MouseButtonEvent(_mouseButton) {  }
 
             [[nodiscard]] std::string toString() const override {
                 std::stringstream _sst;
@@ -127,8 +127,8 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-            static EventType getStaticType() { return EventType::MouseButtonReleased; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "MouseButtonReleased"; }
     };
 

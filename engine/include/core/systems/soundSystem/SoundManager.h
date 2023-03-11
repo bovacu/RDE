@@ -4,9 +4,8 @@
 #ifndef RDE_SOUND_MANAGER_H
 #define RDE_SOUND_MANAGER_H
 
-
-#include "core/util/Util.h"
 #include "core/platform/PlatformHeaderSDLMixer.h"
+#include <unordered_map>
 
 namespace RDE {
 

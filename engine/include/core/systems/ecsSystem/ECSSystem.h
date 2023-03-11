@@ -5,7 +5,7 @@
 #ifndef RDE_SYSTEM_H
 #define RDE_SYSTEM_H
 
-#include "core/util/Util.h"
+#include "core/util/Delta.h"
 #include "core/graph/Graph.h"
 #include <type_traits>
 

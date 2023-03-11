@@ -5,6 +5,7 @@
 #include "core/systems/eventSystem/WindowEvent.h"
 #include "core/systems/uiSystem/SceneManager.h"
 #include "core/Engine.h"
+#include "core/graph/Scene.h"
 #include "core/platform/PlatformHeaderSDL.h"
 
 namespace RDE {
@@ -21,14 +22,14 @@ namespace RDE {
         wwebeDel.bind<&WindowInput::onWillEnterBackground>(this);
         wwefeDel.bind<&WindowInput::onWillEnterForegroundApp>(this);
 
-        events[(int)SystemEventEnum::WINDOW_EVENT] = weDel;
-        events[(int)SystemEventEnum::APP_ON_DESTROY_E] = wdeDel;
-        events[(int)SystemEventEnum::APP_DID_ENTER_BACK_E] = wdebeDel;
-        events[(int)SystemEventEnum::APP_DID_ENTER_FOREG_E] = wdefeDel;
-        events[(int)SystemEventEnum::APP_WILL_ENTER_BACK_E] = wwebeDel;
-        events[(int)SystemEventEnum::APP_WILL_ENTER_FOREG] = wwefeDel;
+        events[(int)RDE_SYSTEM_EVENT_WINDOW_EVENT] = weDel;
+        events[(int)RDE_SYSTEM_EVENT_APP_ON_DESTROY_E] = wdeDel;
+        events[(int)RDE_SYSTEM_EVENT_APP_DID_ENTER_BACK_E] = wdebeDel;
+        events[(int)RDE_SYSTEM_EVENT_APP_DID_ENTER_FOREG_E] = wdefeDel;
+        events[(int)RDE_SYSTEM_EVENT_APP_WILL_ENTER_BACK_E] = wwebeDel;
+        events[(int)RDE_SYSTEM_EVENT_APP_WILL_ENTER_FOREG] = wwefeDel;
 
-        ignoredEvents = { WINDOW_AUDIO_DEVICE_CONNECTED_E, WINDOW_AUDIO_DEVICE_DISCONNECTED_E };
+		ignoredEvents = { RDE_SYSTEM_EVENT_WINDOW_AUDIO_DEVICE_CONNECTED_E, RDE_SYSTEM_EVENT_WINDOW_AUDIO_DEVICE_DISCONNECTED_E };
     }
 
     void WindowInput::onWindowEvent(SDL_Event& _event) {

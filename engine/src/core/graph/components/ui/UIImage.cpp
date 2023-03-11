@@ -5,6 +5,7 @@
 #include "core/graph/components/ui/UIImage.h"
 #include "core/graph/components/ui/UITransform.h"
 #include "core/Engine.h"
+#include "core/graph/Scene.h"
 #include "core/render/elements/Batch.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/graph/components/Node.h"
@@ -19,23 +20,23 @@ namespace RDE {
 
     UIImage::UIImage(Node* _node, Manager* _manager, Graph* _graph, const UIImageConfig& _config) {
 
-        RENDERIZABLE_UI_BASIC_PROPERTIES_INITIALIZATION(36, SPRITE_RENDERER_SHADER, BatchPriority::SpritePriority)
+        RENDERIZABLE_UI_BASIC_PROPERTIES_INITIALIZATION(36, SPRITE_RENDERER_SHADER, RDE_BATCH_PRIORITY_SPRITE)
 
         data.RenderizableInnerData.texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "sprite") : _config.texture;
-        data.RenderizableInnerData.renderizableType = RenderizableType::RT_UI_IMAGE;
+        data.RenderizableInnerData.renderizableType = RDE_RENDERIZABLE_TYPE_UI_IMAGE;
         setColor(_config.color);
 
         ((UITransform*)node->getTransform())->setSize(_config.size == -1 ? data.RenderizableInnerData.texture->getSize() : _config.size);
 
 		data.imageRenderingType = _config.imageRenderingType;
-		if(data.imageRenderingType == ImageRenderingType::NINE_SLICE && !data.RenderizableInnerData.texture->nineSlice.isEnabled()) {
+		if(data.imageRenderingType == RDE_IMAGE_RENDERING_TYPE_NINE_SLICE && !data.RenderizableInnerData.texture->nineSlice.isEnabled()) {
             Util::Log::warn("UIImage cannot be rendered as 9Slice as the texture is not configured like so.");
-			data.imageRenderingType = ImageRenderingType::NORMAL;
+			data.imageRenderingType = RDE_IMAGE_RENDERING_TYPE_NORMAL;
             return;
         }
 
-        auto [_transformMat, _] = _node->getTransform()->localToWorld();
-        calculateGeometryForUIImage(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->mainCamera->getViewport());
+        /*auto [_transformMat, _] = _node->getTransform()->localToWorld();
+        calculateGeometryForUIImage(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->mainCamera->getViewport());*/
     }
 
 
@@ -59,8 +60,8 @@ namespace RDE {
         return Util::String::getFileExtension(data.RenderizableInnerData.texture->getPath());
     }
 
-    void UIImage::setImageRenderingType(ImageRenderingType _imageRenderingType) {
-        if(_imageRenderingType == ImageRenderingType::NINE_SLICE && !data.RenderizableInnerData.texture->nineSlice.isEnabled()) {
+	void UIImage::setImageRenderingType(RDE_IMAGE_RENDERING_TYPE_ _imageRenderingType) {
+		if(_imageRenderingType == RDE_IMAGE_RENDERING_TYPE_NINE_SLICE && !data.RenderizableInnerData.texture->nineSlice.isEnabled()) {
             Util::Log::warn("UIImage cannot be rendered as 9Slice as the texture is not configured like so.");
             return;
         }

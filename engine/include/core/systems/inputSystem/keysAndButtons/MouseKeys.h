@@ -4,50 +4,34 @@
 #define RDE_MOUSE_KEYS_H
 
 #include <ostream>
-#include "core/platform/PlatformHeaderSDL.h"
+#include "SDL2/SDL_mouse.h"
 
 namespace RDE {
 
-    /// -----------------------------------------------------------------
-    /// |			CODES FOR MOUSE BUTTONS, THEY ARE					|
-    /// |			THE SAME AS GLFW'S ONES, BUT NOW ARE				|
-    /// |			PROPERTY OF THE ENGINE AND DON'T RELAY				|
-    /// |			ON GLFW												|
-    /// -----------------------------------------------------------------
+	/**
+	 * @brief Codes for the buttons of te mouse.
+	*/
+	enum RDE_MOUSE_BUTTON_ : uint16_t {
+		// From SDL2
+		RDE_MOUSE_BUTTON_0 = SDL_BUTTON_LEFT,
+		RDE_MOUSE_BUTTON_1 = SDL_BUTTON_MIDDLE,
+		RDE_MOUSE_BUTTON_2 = SDL_BUTTON_RIGHT,
+		RDE_MOUSE_BUTTON_3 = 3,
+		RDE_MOUSE_BUTTON_4 = 4,
+		RDE_MOUSE_BUTTON_5 = 5,
+		RDE_MOUSE_BUTTON_6 = 6,
+		RDE_MOUSE_BUTTON_7 = 7,
 
-    typedef enum class MouseCode : uint16_t {
-        // From SDL2
-        Button0 = SDL_BUTTON_LEFT,
-        Button1 = SDL_BUTTON_MIDDLE,
-        Button2 = SDL_BUTTON_RIGHT,
-        Button3 = 3,
-        Button4 = 4,
-        Button5 = 5,
-        Button6 = 6,
-        Button7 = 7,
+		RDE_MOUSE_BUTTON_LAST = RDE_MOUSE_BUTTON_7,
+		RDE_MOUSE_BUTTON_LEFT = RDE_MOUSE_BUTTON_0,
+		RDE_MOUSE_BUTTON_RIGHT = RDE_MOUSE_BUTTON_2,
+		RDE_MOUSE_BUTTON_MIDDLE = RDE_MOUSE_BUTTON_1
+	};
 
-        ButtonLast = Button7,
-        ButtonLeft = Button0,
-        ButtonRight = Button2,
-        ButtonMiddle = Button1
-    } Mouse;
-
-    inline std::ostream &operator<<(std::ostream &os, MouseCode mouseCode) {
+	inline std::ostream &operator<<(std::ostream &os, RDE_MOUSE_BUTTON_ mouseCode) {
         os << static_cast<int32_t>(mouseCode);
         return os;
     }
 }
-#define MOUSE_BUTTON_0      ::engine::Mouse::Button0
-#define MOUSE_BUTTON_1      ::engine::Mouse::Button1
-#define MOUSE_BUTTON_2      ::engine::Mouse::Button2
-#define MOUSE_BUTTON_3      ::engine::Mouse::Button3
-#define MOUSE_BUTTON_4      ::engine::Mouse::Button4
-#define MOUSE_BUTTON_5      ::engine::Mouse::Button5
-#define MOUSE_BUTTON_6      ::engine::Mouse::Button6
-#define MOUSE_BUTTON_7      ::engine::Mouse::Button7
-#define MOUSE_BUTTON_LAST   ::engine::Mouse::ButtonLast
-#define MOUSE_BUTTON_LEFT   ::engine::Mouse::ButtonLeft
-#define MOUSE_BUTTON_RIGHT  ::engine::Mouse::ButtonRight
-#define MOUSE_BUTTON_MIDDLE ::engine::Mouse::ButtonMiddle
 
 #endif // RDE_MOUSE_KEYS_H

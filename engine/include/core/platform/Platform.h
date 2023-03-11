@@ -4,24 +4,21 @@
 #ifndef RDE_PLATFORM_H
 #define RDE_PLATFORM_H
 
-#include "core/systems/inputSystem/input/Input.h"
+#include "core/Enums.h"
+
 namespace RDE {
 
-    enum PlatformType {
-        LINUX,
-        WINDOWS,
-        MAC,
-        ANDROID_,
-        IOS,
-        UNSUPPORTED
-    };
+	struct RDEConfig;
+	class Window;
 
     class Platform {
+		friend class Engine;
+
         public:
             Window* createWindow(RDEConfig* _config);
 
         private:
-            PlatformType getPlatform();
+			RDE_PLATFORM_TYPE_ currentPlatform;
     };
 
 }

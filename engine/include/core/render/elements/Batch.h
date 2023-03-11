@@ -9,15 +9,7 @@
 #include "core/render/elements/Vertex.h"
 #include "core/render/elements/Shader.h"
 #include "core/graph/components/Transform.h"
-
-
-/**
- * @brief This is the order of rendering of different Renderizable elements.
- */
-enum BatchPriority {
-    SpritePriority = 0,
-    TextPriority = 1
-};
+#include "core/Enums.h"
 
 namespace RDE {
 
@@ -40,7 +32,7 @@ namespace RDE {
             /**
              * @see BatchPriority
              */
-            BatchPriority priority = BatchPriority::SpritePriority;
+			RDE_BATCH_PRIORITY_ priority = RDE_BATCH_PRIORITY_SPRITE;
 
             int ID = -1;
 

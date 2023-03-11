@@ -1,9 +1,7 @@
 #ifndef RDE_SCENE_H
 #define RDE_SCENE_H
 
-#include "core/systems/inputSystem/input/WindowInput.h"
 #include "nlohmann/json.hpp"
-#include "core/util/Delta.h"
 #include "core/graph/Graph.h"
 #include "core/graph/components/Components.h"
 #include "core/systems/uiSystem/Canvas.h"
@@ -14,6 +12,7 @@ namespace RDE {
     class Window; 
     class Engine;
     struct RenderizableInnerData;
+	class RenderManager;
 
     /**
      * @brief This class represents what is rendered in the window and all its related systems.
@@ -77,12 +76,7 @@ namespace RDE {
              * @param _event the event that was just captured.
              * @see InputManager
              */
-            void onInnerEvent(Event& _event) {
-                onInnerEventUI(_event);
-                onInnerEventHierarchy(_event);
-                onEvent(_event);
-            }
-
+			void onInnerEvent(Event& _event);
             void onInnerEventHierarchy(Event& _event); 
             void onInnerEventUI(Event& _event);
 
@@ -91,11 +85,7 @@ namespace RDE {
              * to update the logic and components.
              * @param _dt time that passed between the current frame and the last one.
              */
-            void onInnerUpdate(Delta _dt) {
-                onInnerUpdateHierarchy(_dt);
-                onInnerUpdateUI(_dt);
-                onUpdate(_dt);
-            }
+			void onInnerUpdate(Delta _dt);
             void onInnerUpdateHierarchy(Delta _dt); 
             void onInnerUpdateUI(Delta _dt);
 
@@ -105,11 +95,7 @@ namespace RDE {
              * consistent frame rate to work properly.
              * @param _dt fixed value initially set at 1/60/
              */
-            void onInnerFixedUpdate(Delta _dt) {
-                onInnerFixedUpdateHierarchy(_dt);
-                onInnerFixedUpdateUI(_dt);
-                onFixedUpdate(_dt);
-            }
+			void onInnerFixedUpdate(Delta _dt);
             void onInnerFixedUpdateHierarchy(Delta _dtt); 
             void onInnerFixedUpdateUI(Delta _dt);
 
@@ -118,11 +104,7 @@ namespace RDE {
              * to remove elements.
              * @param _dt time that passed between the current frame and the last one.
              */
-            void onInnerLateUpdate(Delta _dt) {
-                onInnerLateUpdateHierarchy(_dt);
-                onInnerLateUpdateUI(_dt);
-                onLateUpdate(_dt);
-            }
+			void onInnerLateUpdate(Delta _dt);
             void onInnerLateUpdateHierarchy(Delta _dt); 
             void onInnerLateUpdateUI(Delta _dt);
             
@@ -134,27 +116,17 @@ namespace RDE {
              * the main rendering pipeline is handled inside the core of the engine. Users don't need to mess with it.
              * @param _dt the time that passed between the current frame and the last one.
              */
-            void onInnerRender(Delta _dt) {
-                onInnerRenderHierarchy(_dt); 
-                onInnerRenderUI(_dt); 
-            }
+			void onInnerRender(Delta _dt);
             void onInnerRenderHierarchy(Delta _dt); 
             void onInnerRenderUI(Delta _dt);
-
-            void postRenderSync();
-            void postRenderSyncUI();
 
             /**
              * @brief This function is used to drawBatched debugging lines, squares, circles...
              * @param the time that passed between the current frame and the last one.
              */
-            void onInnerDebugRender(Delta _dt) {
-                onInnerDebugRenderHierarchy(_dt);
-                onInnerDebugRenderHierarchy(_dt);
-                onDebugRender(_dt);
-            }
-            void onInnerDebugRenderHierarchy(Delta _dt); 
-            void onInnerDebugRenderUI(Delta _dt);
+			void onInnerDebugRender(Delta _dt);
+			void onInnerDebugRenderHierarchy(Delta _dt, RenderManager* _renderManager); 
+			void onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager);
 
         public:
             explicit Scene(Engine* _engine, const std::string& _debugName = "Scene");
@@ -216,7 +188,7 @@ namespace RDE {
              * @brief This function is used to drawBatched debugging lines, squares, circles...
              * @param the time that passed between the current frame and the last one.
              */
-            virtual void onDebugRender(Delta _dt) {  }
+			virtual void onDebugRender(Delta _dt, RenderManager* _renderManager) {  }
 
             /**
              * @brief This function is called when unloading the scene and should be used to release any allocated memory or

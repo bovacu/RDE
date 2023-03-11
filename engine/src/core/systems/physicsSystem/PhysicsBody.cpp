@@ -14,16 +14,16 @@ namespace RDE {
         transform = _node->getTransform();
 
         switch (_bodyConfig.shapeConfig.type) {
-            case PhysicsShapeType::CIRCLE:
+            case RDE_PHYSICS_SHAPE_TYPE_CIRCLE:
                 calculateDataForCircle(_bodyConfig.shapeConfig, _bodyConfig.mass, _bodyConfig.physicsBodyType);
                 break;
-            case PhysicsShapeType::POLYGON:
+			case RDE_PHYSICS_SHAPE_TYPE_POLYGON:
                 calculateDataForPolygon(_bodyConfig.shapeConfig, _bodyConfig.mass, _bodyConfig.physicsBodyType);
                 break;
-            case PhysicsShapeType::BOX:
+			case RDE_PHYSICS_SHAPE_TYPE_BOX:
                 calculateDataForBox(_bodyConfig.shapeConfig, _bodyConfig.mass, _bodyConfig.physicsBodyType);
                 break;
-            case PhysicsShapeType::SEGMENT:
+			case RDE_PHYSICS_SHAPE_TYPE_SEGMENT:
                 calculateDataForSegment(_bodyConfig.shapeConfig, _bodyConfig.mass, _bodyConfig.physicsBodyType);
                 break;
         }
@@ -33,15 +33,15 @@ namespace RDE {
 
     }
 
-    void PhysicsBody::createBody(ShapeConfig& _shapeConfig, float _moment, float _bodyMass, PhysicsBodyType _bodyType) {
+	void PhysicsBody::createBody(ShapeConfig& _shapeConfig, float _moment, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType) {
         switch (_bodyType) {
-            case STATIC:
+			case RDE_PHYSICS_BODY_TYPE_STATIC:
                 body = cpBodyNewStatic();
                 break;
-            case KINEMATIC:
+			case RDE_PHYSICS_BODY_TYPE_KINEMATIC:
                 body = cpBodyNewKinematic();
                 break;
-            case DYNAMIC:
+			case RDE_PHYSICS_BODY_TYPE_DYNAMIC:
                 body = cpBodyNew(_bodyMass, _moment);
                 break;
         }
@@ -68,7 +68,7 @@ namespace RDE {
         }
     }
 
-    void PhysicsBody::calculateDataForBox(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType) {
+	void PhysicsBody::calculateDataForBox(ShapeConfig& _shapeConfig, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType) {
         auto _size = Vec2F { _shapeConfig.size.x * transform->getModelMatrixScale().x, _shapeConfig.size.y * transform->getModelMatrixScale().y };
 
         _shapeConfig.vertices.emplace_back( -_size.x / 2.f, -_size.y / 2.f);
@@ -88,7 +88,7 @@ namespace RDE {
         keyCounter++;
     }
 
-    void PhysicsBody::calculateDataForCircle(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType) {
+	void PhysicsBody::calculateDataForCircle(ShapeConfig& _shapeConfig, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType) {
         if(body == nullptr) {
             auto _moment = (float)cpMomentForCircle(_bodyMass, 0, _shapeConfig.size.x * transform->getModelMatrixScale().x, cpvzero);
             createBody(_shapeConfig, _moment, _bodyMass, _bodyType);
@@ -99,7 +99,7 @@ namespace RDE {
         keyCounter++;
     }
 
-    void PhysicsBody::calculateDataForPolygon(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType) {
+	void PhysicsBody::calculateDataForPolygon(ShapeConfig& _shapeConfig, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType) {
         // TODO (RDE): If physics act weird or stop working check this.
         const auto _numOfVertices = _shapeConfig.vertices.size();
         std::vector<cpVect> _vertices;
@@ -120,7 +120,7 @@ namespace RDE {
         keyCounter++;
     }
 
-    void PhysicsBody::calculateDataForSegment(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType) {
+	void PhysicsBody::calculateDataForSegment(ShapeConfig& _shapeConfig, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType) {
         auto _halfWidth = _shapeConfig.size.x / 2.f * transform->getModelMatrixScale().x;
         auto _a = cpVect { -_halfWidth, 0 };
         auto _b = cpVect { _halfWidth, 0 };
@@ -151,16 +151,16 @@ namespace RDE {
 
     PhysicsShapeId PhysicsBody::addShape(ShapeConfig& _shapeConfig, const Vec2F& _position, float _rotation) {
         switch (_shapeConfig.type) {
-            case PhysicsShapeType::CIRCLE:
+			case RDE_PHYSICS_SHAPE_TYPE_CIRCLE:
                 calculateDataForCircle(_shapeConfig, getMass(), getBodyType());
                 break;
-            case PhysicsShapeType::POLYGON:
+			case RDE_PHYSICS_SHAPE_TYPE_POLYGON:
                 calculateDataForPolygon(_shapeConfig, getMass(), getBodyType());
                 break;
-            case PhysicsShapeType::BOX:
+			case RDE_PHYSICS_SHAPE_TYPE_BOX:
                 calculateDataForBox(_shapeConfig, getMass(), getBodyType());
                 break;
-            case PhysicsShapeType::SEGMENT:
+			case RDE_PHYSICS_SHAPE_TYPE_SEGMENT:
                 calculateDataForSegment(_shapeConfig, getMass(), getBodyType());
                 break;
         }
@@ -270,35 +270,35 @@ namespace RDE {
         }
     }
 
-    void PhysicsBody::setBodyType(const PhysicsBodyType& _physicsBodyType) {
+	void PhysicsBody::setBodyType(const RDE_PHYSICS_BODY_TYPE_& _physicsBodyType) {
         if(getBodyType() == _physicsBodyType) {
             return;
         }
 
         switch (_physicsBodyType) {
-            case STATIC:
+			case RDE_PHYSICS_BODY_TYPE_STATIC:
                 cpBodySetType(body, cpBodyType::CP_BODY_TYPE_STATIC);
                 break;
-            case KINEMATIC:
+			case RDE_PHYSICS_BODY_TYPE_KINEMATIC:
                 cpBodySetType(body, cpBodyType::CP_BODY_TYPE_KINEMATIC);
                 break;
-            case DYNAMIC:
+			case RDE_PHYSICS_BODY_TYPE_DYNAMIC:
                 cpBodySetType(body, cpBodyType::CP_BODY_TYPE_DYNAMIC);
                 break;
         }
     }
 
-    PhysicsBodyType PhysicsBody::getBodyType() {
+    RDE_PHYSICS_BODY_TYPE_ PhysicsBody::getBodyType() {
         switch (cpBodyGetType(body)) {
             case cpBodyType::CP_BODY_TYPE_STATIC:
-                return PhysicsBodyType::STATIC;
+				return RDE_PHYSICS_BODY_TYPE_STATIC;
             case cpBodyType::CP_BODY_TYPE_KINEMATIC:
-                return PhysicsBodyType::KINEMATIC;
+				return RDE_PHYSICS_BODY_TYPE_KINEMATIC;
             case cpBodyType::CP_BODY_TYPE_DYNAMIC:
-                return PhysicsBodyType::DYNAMIC;
+				return RDE_PHYSICS_BODY_TYPE_DYNAMIC;
         }
 
-        return PhysicsBodyType::STATIC;
+		return RDE_PHYSICS_BODY_TYPE_STATIC;
     }
 
     void PhysicsBody::setMass(float _mass) {

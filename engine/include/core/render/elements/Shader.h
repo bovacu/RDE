@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "core/Core.h"
+#include "core/Enums.h"
 #if IS_ANDROID()
     #include <GLES3/gl32.h>
 #elif IS_IOS()
@@ -23,45 +24,6 @@ namespace RDE {
 	 * @param _glmVecMat A GLM vector or matrix. If just a single value (aka float, int or uint) is passed, use glm::vec1xx and pass it with &.
 	 */
 	#define GLM_VEC_MAT_TO_POINTER(_type, _glmVecMat) reinterpret_cast<_type*>(glm::value_ptr(_glmVecMat))
-
-	/**
-	 * @brief Uniforms that use a GLfloat as a data value.
-	 */
-	enum RDE_UNIFORM_FV {
-		RDE_UNIFORM_FV_1,
-		RDE_UNIFORM_FV_2,
-		RDE_UNIFORM_FV_3,
-		RDE_UNIFORM_FV_4,
-		RDE_UNIFORM_FV_MATRIX_2,
-		RDE_UNIFORM_FV_MATRIX_3,
-		RDE_UNIFORM_FV_MATRIX_4,
-		RDE_UNIFORM_FV_MATRIX_2x3,
-		RDE_UNIFORM_FV_MATRIX_3x2,
-		RDE_UNIFORM_FV_MATRIX_4x2,
-		RDE_UNIFORM_FV_MATRIX_2x4,
-		RDE_UNIFORM_FV_MATRIX_4x3,
-		RDE_UNIFORM_FV_MATRIX_3x4
-	};
-
-	/**
-	* @brief Uniforms that use a GLint as a data value.
-	*/
-	enum RDE_UNIFORM_IV {
-		RDE_UNIFORM_IV_1,
-		RDE_UNIFORM_IV_2,
-		RDE_UNIFORM_IV_3,
-		RDE_UNIFORM_IV_4
-	};
-
-	/**
-	* @brief Uniforms that use a GLuint as a data value.
-	*/
-	enum RDE_UNIFORM_UIV {
-		RDE_UNIFORM_UIV_1,
-		RDE_UNIFORM_UIV_2,
-		RDE_UNIFORM_UIV_3,
-		RDE_UNIFORM_UIV_4
-	};
 
     class LoadVertexConfigNotInvoked : public std::exception {
         public:
@@ -222,7 +184,7 @@ namespace RDE {
 			 * @param _type The type of uniform we are setting, check RDE_UNIFORM_FV enum options
 			 * @param _data The actual data to send
 			 */
-			void setUniformValueFloat(const char* _uniformName, RDE_UNIFORM_FV _type, GLfloat* _data, GLboolean _transpose = GL_FALSE);
+			void setUniformValueFloat(const char* _uniformName, RDE_UNIFORM_FV_ _type, GLfloat* _data, GLboolean _transpose = GL_FALSE);
 			
 			/**
 			* @brief Sets the value of an existing uniform.
@@ -230,7 +192,7 @@ namespace RDE {
 			* @param _type The type of uniform we are setting, check RDE_UNIFORM_IV enum options
 			* @param _data The actual data to send
 			*/
-			void setUniformValueInt(const char* _uniformName, RDE_UNIFORM_IV _type, GLint* _data);
+			void setUniformValueInt(const char* _uniformName, RDE_UNIFORM_IV_ _type, GLint* _data);
 
 			/**
 			* @brief Sets the value of an existing uniform.
@@ -238,7 +200,7 @@ namespace RDE {
 			* @param _type The type of uniform we are setting, check RDE_UNIFORM_UIV enum options
 			* @param _data The actual data to send
 			*/
-			void setUniformValueUInt(const char* _uniformName, RDE_UNIFORM_UIV _type, GLuint* _data);
+			void setUniformValueUInt(const char* _uniformName, RDE_UNIFORM_UIV_ _type, GLuint* _data);
 
         private:
             /**

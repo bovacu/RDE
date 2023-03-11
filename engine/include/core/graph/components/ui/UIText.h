@@ -71,7 +71,7 @@ namespace RDE {
                 std::string line;
                 float biggestCharHeight;
             };
-            std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharInfo* _chars) const;
+            std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharMap& _chars) const;
 
         public:
             UIText(Node* _node, Scene* _scene, Canvas* _canvas, const UITextConfig& _config);

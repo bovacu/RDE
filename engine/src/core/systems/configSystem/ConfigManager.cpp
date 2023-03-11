@@ -16,7 +16,7 @@
 
 namespace RDE {
 
-    void ConfigManager::loadRDEConfig(RDEConfig* _config, FileManager& _manager) {
+    void ConfigManager::loadRDEConfig(RDEConfig* _config, FileManager* _manager) {
 
         auto _configPath = "assets/config/desktop.json";
 
@@ -28,9 +28,9 @@ namespace RDE {
         _configPath = "assets/config/ios.json";
         #endif
 
-        auto _fileHandler = _manager.open(_configPath, FileMode::READ);
-        nlohmann::json _data = nlohmann::json::parse(_manager.readFullFile(_fileHandler).content);
-        _manager.close(_fileHandler);
+		auto _fileHandler = _manager->open(_configPath, RDE_FILE_MODE_READ);
+        nlohmann::json _data = nlohmann::json::parse(_manager->readFullFile(_fileHandler).content);
+		_manager->close(_fileHandler);
 
         _config->windowData.title = _data.contains("title") ? _data["title"].get<std::string>() : "RDEProject";
         _config->windowData.fullScreen = _data.contains("fullscreen") && _data["fullscreen"].get<bool>();
@@ -54,7 +54,7 @@ namespace RDE {
             return;
         }
 
-        auto _fileHandler = _manager->fileManager.open(Util::String::appendToString("assets/", _rdeConfig->projectData.resourcesPath), FileMode::READ);
+		auto _fileHandler = _manager->fileManager.open(Util::String::appendToString("assets/", _rdeConfig->projectData.resourcesPath), RDE_FILE_MODE_READ);
 
         if(_fileHandler == nullptr) {
             Util::Log::warn("Resources path was set in the config.json, but the file couldn't be loaded!");
@@ -73,7 +73,7 @@ namespace RDE {
     }
 
     void ConfigManager::loadScene(Manager* _manager, Scene* _scene, Window* _window, const std::string& _configFilePath) {
-        auto _fileHandler = _manager->fileManager.open(_configFilePath, FileMode::READ);
+		auto _fileHandler = _manager->fileManager.open(_configFilePath, RDE_FILE_MODE_READ);
 
         if(_fileHandler == nullptr) {
             Util::Log::warn("JSON file for scene ", _scene->debugName, " was not found, so a DefaultScene is being created for it.");
@@ -180,7 +180,7 @@ namespace RDE {
                     }
 
                     if(_components.contains("body")) {
-                        loadBodyComponent(_entity, _scene, _components["body"]);
+                        loadPhysicsBodyComponent(_entity, _scene, _components["body"]);
                     }
 
                     if(_components.contains("text_renderer")) {
@@ -242,7 +242,7 @@ namespace RDE {
         }
     }
 
-    void ConfigManager::loadBodyComponent(Node* _node, Scene* _scene, const nlohmann::json& _bodyJson) {
+    void ConfigManager::loadPhysicsBodyComponent(Node* _node, Scene* _scene, const nlohmann::json& _bodyJson) {
         PhysicsBodyConfig _bodyConfig;
         std::vector<ShapeConfig> _shapeConfigs;
 
@@ -252,16 +252,16 @@ namespace RDE {
             _bodyType = Util::String::toLower(_bodyType);
 
             if(std::equal(_bodyType.begin(), _bodyType.end(), "static")) {
-                _bodyConfig.physicsBodyType = _bodyConfig.physicsBodyType = PhysicsBodyType::STATIC;
+                _bodyConfig.physicsBodyType = _bodyConfig.physicsBodyType = RDE_PHYSICS_BODY_TYPE_STATIC;
             } else if(std::equal(_bodyType.begin(), _bodyType.end(), "dynamic")) {
-                _bodyConfig.physicsBodyType = _bodyConfig.physicsBodyType = PhysicsBodyType::DYNAMIC;
+				_bodyConfig.physicsBodyType = _bodyConfig.physicsBodyType = RDE_PHYSICS_BODY_TYPE_DYNAMIC;
             } else if(std::equal(_bodyType.begin(), _bodyType.end(), "kinematic")) {
-                _bodyConfig.physicsBodyType = _bodyConfig.physicsBodyType = PhysicsBodyType::KINEMATIC;
+				_bodyConfig.physicsBodyType = _bodyConfig.physicsBodyType = RDE_PHYSICS_BODY_TYPE_KINEMATIC;
             } else {
                 throw std::runtime_error(Util::String::appendToString("Chosen PhysicsBodyType '", _bodyType, "' is not a known type for a PhysicsBody"));
             }
         } else {
-            _bodyConfig.physicsBodyType = PhysicsBodyType::DYNAMIC;
+			_bodyConfig.physicsBodyType = RDE_PHYSICS_BODY_TYPE_DYNAMIC;
         }
 
         if(_bodyJson.contains("mass")) {
@@ -284,21 +284,21 @@ namespace RDE {
                 }
 
                 if(std::equal(_type.begin(), _type.end(), "box")) {
-                    _shapeConfig.type = PhysicsShapeType::BOX;
+					_shapeConfig.type = RDE_PHYSICS_SHAPE_TYPE_BOX;
                     ENGINE_ASSERT(_shapeJson.contains("size"), "PhysicsShape of type BOX must have field 'size' with a Vec2F: \"size\", Ex: [32, 32]")
                     _shapeConfig.size = { _shapeJson["size"][0].get<float>(), _shapeJson["size"][1].get<float>() };
                 } else if(std::equal(_type.begin(), _type.end(), "circle")) {
-                    _shapeConfig.type = PhysicsShapeType::CIRCLE;
+					_shapeConfig.type = RDE_PHYSICS_SHAPE_TYPE_CIRCLE;
                     ENGINE_ASSERT(_shapeJson.contains("size"), "PhysicsShape of type CIRCLE must have field 'size' with a Vec2F. X is the radius of the circle, Y is ignored, Ex: \\\"size\\\": [16, 0]\"")
                     _shapeConfig.size = { _shapeJson["size"][0].get<float>(), 0.f };
                 } else if(std::equal(_type.begin(), _type.end(), "polygon")) {
-                    _shapeConfig.type = PhysicsShapeType::POLYGON;
+					_shapeConfig.type = RDE_PHYSICS_SHAPE_TYPE_POLYGON;
                     ENGINE_ASSERT(_shapeJson.contains("vertices") && _shapeJson["vertices"].size() >= 3, "PhysicsShape of type POLYGON must have field 'vertices' with an array of Vec2F and a minimum of 3 vertices, Ex: \"vertices\": [{-5,-5}, {5,-5}, {0,5}")
                     for(auto& _vertex : _shapeJson["vertices"]) {
                         _shapeConfig.vertices.emplace_back(_vertex[0].get<float>(), _vertex[1].get<float>());
                     }
                 } else if(std::equal(_type.begin(), _type.end(), "segment")) {
-                    _shapeConfig.type = PhysicsShapeType::SEGMENT;
+					_shapeConfig.type = RDE_PHYSICS_SHAPE_TYPE_SEGMENT;
                     if(_shapeJson.contains("vertices") && !_shapeJson["vertices"].empty()) {
                         ENGINE_ASSERT(_shapeJson.contains("vertices") && _shapeJson["vertices"].size() == 2, "PhysicsShape of type SEGMENT must have field 'vertices' with an array of exactly 2 Vec2F, Ex: \"vertices\": [{-5,0}, {5,0}")
                         for(auto& _vertex : _shapeJson["vertices"]) {
@@ -491,7 +491,7 @@ namespace RDE {
     }
 
     void ConfigManager::unloadScene(Manager* _manager, Scene* _scene, const std::string& _configFilePath) {
-        auto _fileHandler = _manager->fileManager.open(_configFilePath, FileMode::READ);
+		auto _fileHandler = _manager->fileManager.open(_configFilePath, RDE_FILE_MODE_READ);
 
         auto _content = _manager->fileManager.readFullFile(_fileHandler).content;
         nlohmann::json _sceneJson = nlohmann::json::parse(_content);

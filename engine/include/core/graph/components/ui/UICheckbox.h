@@ -74,12 +74,12 @@ namespace RDE {
             /**
             * @brief Function that executes and makes internal calculations when mouse enters, clicks and then is released the UITransform::size area.
             */
-            void onMouseReleased(MouseCode _mouseButton);
+            void onMouseReleased(RDE_MOUSE_BUTTON_ _mouseButton);
 
             /**
             * @brief Function that executes and makes internal calculations when mouse enters and clicks the UITransform::size area.
             */
-            void onMouseClicked(MouseCode _mouseButton) {  }
+			void onMouseClicked(RDE_MOUSE_BUTTON_ _mouseButton) {  }
 
             /**
             * @brief Function that executes and makes internal calculations when mouse exits the UITransform::size area.

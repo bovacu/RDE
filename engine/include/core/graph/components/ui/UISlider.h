@@ -9,6 +9,7 @@
 #include "core/graph/components/ui/UITransform.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/render/elements/Batch.h"
+#include "core/util/Delta.h"
 
 namespace RDE {
 
@@ -64,8 +65,8 @@ namespace RDE {
             Node* getHandleNode();
 
         private:
-            void onMouseClicked(MouseCode _mouseCode);
-            void onMouseReleased(MouseCode _mouseCode);
+			void onMouseClicked(RDE_MOUSE_BUTTON_ _mouseCode);
+			void onMouseReleased(RDE_MOUSE_BUTTON_ _mouseCode);
     };
 
 }

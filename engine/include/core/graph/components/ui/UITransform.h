@@ -6,27 +6,9 @@
 #define RDE_UI_TRANSFORM_H
 
 #include "core/graph/components/Transform.h"
+#include "core/Enums.h"
 
 namespace RDE {
-
-    enum Anchor {
-        MIDDLE              = 1 << 1,
-        LEFT                = 1 << 2,
-        RIGHT               = 1 << 3,
-        TOP                 = 1 << 4,
-        BOTTOM              = 1 << 5,
-        LEFT_BOTTOM         = 1 << 6,
-        LEFT_TOP            = 1 << 7,
-        RIGHT_BOTTOM        = 1 << 8,
-        RIGHT_TOP           = 1 << 9
-    };
-
-    enum Stretch {
-        NO_STRETCH          = 1 << 10,
-        VERTICAL_STRETCH    = 1 << 11,
-        HORIZONTAL_STRETCH  = 1 << 12,
-        FULL_STRETCH        = 1 << 13
-    };
 
     struct UITransform;
 
@@ -34,7 +16,7 @@ namespace RDE {
         friend class UITransform;
         friend class UIImage;
 
-        uint16_t anchor = Anchor::MIDDLE | Stretch::NO_STRETCH;
+		uint16_t anchor = RDE_UI_ANCHOR_MIDDLE | RDE_UI_STRETCH_NO_STRETCH;
         Vec2F anchorPosition;
         Vec2F anchorSize;
 
@@ -56,18 +38,17 @@ namespace RDE {
         public:
             explicit UITransform(Graph* _graph);
 
-            void clearDirty() override;
+			[[nodiscard]] RDE_UI_ANCHOR_ getAnchor() const;
+			void setAnchor(RDE_UI_ANCHOR_ _anchor);
 
-            [[nodiscard]] Anchor getAnchor() const;
-            void setAnchor(Anchor _anchor);
-
-            [[nodiscard]] Stretch getStretch() const;
-            void setStretch(Stretch _stretch);
+			[[nodiscard]] RDE_UI_STRETCH_ getStretch() const;
+			void setStretch(RDE_UI_STRETCH_ _stretch);
 
             Vec2F getSize();
             void setSize(const Vec2F& _size);
 
             std::tuple<glm::mat4, bool> localToWorld() override;
+			void update() override;
 
         private:
             void setUIDirty();

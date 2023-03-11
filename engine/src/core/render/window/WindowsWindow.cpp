@@ -55,8 +55,8 @@ namespace RDE {
 
         SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         SDL_SetWindowResizable(window, SDL_TRUE);
-
-        if(!properties->projectData.iconPath.empty()) setIcon(properties->projectData.iconPath);
+		
+        setIcon(properties->projectData.iconPath);
 
         currentDisplayIndex = SDL_GetWindowDisplayIndex(window);
 

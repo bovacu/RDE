@@ -4,14 +4,11 @@
 #ifndef RDE_RENDER_MANAGER_H
 #define RDE_RENDER_MANAGER_H
 
-// #include "core/graph/components/DynamicSpriteRenderer.h"
 #include "core/graph/components/SpriteRenderer.h"
-// #include "core/graph/components/TextRenderer.h"
 #include "core/graph/components/Transform.h"
 #include "core/render/elements/IRenderizable.h"
-#include "core/render/elements/Texture.h"
-#include "core/util/Util.h"
 #include "core/render/elements/SpriteBatch.h"
+#include "core/util/Color.h"
 #include "core/util/Vec.h"
 #include <vector>
 
@@ -99,7 +96,7 @@ namespace RDE {
              * @brief Renders an IRenderizable immediately with no batching. MUST BE CALLED INSIDE A BLOCK OF beginDraw/endDraw.
              * @param _batches Static batches to render.
              */
-            void drawUI(std::vector<Batch>& _batches);
+            void endDrawUI(std::vector<Batch>& _batches);
 
             /**
              * @brief Sends the data batched to the GPU, must be called after beginDraw and what we want to render.

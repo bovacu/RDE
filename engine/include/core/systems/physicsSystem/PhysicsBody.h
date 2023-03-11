@@ -10,21 +10,11 @@
 #include "chipmunk/chipmunk.h"
 #include "core/graph/components/Transform.h"
 #include "core/graph/components/ComponentBase.h"
+#include "core/Enums.h"
+
+#include <unordered_map>
 
 namespace RDE {
-
-    enum PhysicsBodyType {
-        STATIC,
-        KINEMATIC,
-        DYNAMIC
-    };
-
-    enum PhysicsShapeType {
-        BOX,
-        CIRCLE,
-        POLYGON,
-        SEGMENT
-    };
 
     struct ShapeMaskingConfig {
 
@@ -46,7 +36,7 @@ namespace RDE {
 
     struct ShapeConfig {
         ShapeMaskingConfig shapeMaskingConfig;
-        PhysicsShapeType type = PhysicsShapeType::BOX;
+		RDE_PHYSICS_SHAPE_TYPE_ type = RDE_PHYSICS_SHAPE_TYPE_BOX;
         Vec2F offset = { 0.f, 0.f };
         Vec2F size = { 32, 32 };
         std::vector<Vec2F> vertices {  };
@@ -65,7 +55,7 @@ namespace RDE {
     struct PhysicsBodyConfig {
         ShapeConfig shapeConfig {  };
         float mass = 1.0f;
-        PhysicsBodyType physicsBodyType = PhysicsBodyType::DYNAMIC;
+		RDE_PHYSICS_BODY_TYPE_ physicsBodyType = RDE_PHYSICS_BODY_TYPE_DYNAMIC;
     };
 
     class Scene;
@@ -83,17 +73,17 @@ namespace RDE {
             ulong keyCounter = 0;
             cpBody* body = nullptr;
             cpSpace* space = nullptr;
-            std::unordered_map<PhysicsShapeId, PhysicsShape> physicsShapes;
+			std::unordered_map<PhysicsShapeId, PhysicsShape> physicsShapes;
 
         public:
             Transform* transform = nullptr;
 
         private:
-            void calculateDataForBox(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType);
-            void calculateDataForCircle(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType);
-            void calculateDataForPolygon(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType);
-            void calculateDataForSegment(ShapeConfig& _shapeConfig, float _bodyMass, PhysicsBodyType _bodyType);
-            void createBody(ShapeConfig& _shapeConfig, float _moment, float _bodyMass, PhysicsBodyType _bodyType);
+			void calculateDataForBox(ShapeConfig& _shapeConfig, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType);
+			void calculateDataForCircle(ShapeConfig& _shapeConfig, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType);
+			void calculateDataForPolygon(ShapeConfig& _shapeConfig, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType);
+			void calculateDataForSegment(ShapeConfig& _shapeConfig, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType);
+			void createBody(ShapeConfig& _shapeConfig, float _moment, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType);
             void setupShape(ShapeConfig& _shapeConfig);
 
         public:
@@ -121,8 +111,8 @@ namespace RDE {
             uint getGroups(PhysicsShapeId _shapeID);
             uint getToCollideWiths(PhysicsShapeId _shapeID);
 
-            void setBodyType(const PhysicsBodyType& _physicsBodyType);
-            PhysicsBodyType getBodyType();
+			void setBodyType(const RDE_PHYSICS_BODY_TYPE_& _physicsBodyType);
+			RDE_PHYSICS_BODY_TYPE_ getBodyType();
 
             void setMass(float _mass);
             float getMass();

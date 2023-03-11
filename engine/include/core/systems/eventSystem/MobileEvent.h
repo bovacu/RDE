@@ -55,10 +55,10 @@ namespace RDE {
                 return _sst.str();
             }
 
-            static EventType getStaticType() { return EventType::MobileTouchDown; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "MobileTouchDown"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryInput | EventCategoryMobileInput; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_MOBILE_INPUT; }
     };
 
     // With a combination of this event and the touchDown we can get the distance traveled and how much did it take
@@ -96,10 +96,10 @@ namespace RDE {
                 return _sst.str();
             }
 
-            static EventType getStaticType() { return EventType::MobileTouchUp; }
-            [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOBILE_TOUCH_UP; }
+			[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
             [[nodiscard]] const char* getName() const override { return "MobileTouchUp"; }
-            [[nodiscard]] int getCategoryFlags() const override { return EventCategoryInput | EventCategoryMobileInput; }
+			[[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_MOBILE_INPUT; }
     };
 
     // This gives various points from the start of the touch until up, may be used to create trails
@@ -128,10 +128,10 @@ namespace RDE {
             return _sst.str();
         }
 
-        static EventType getStaticType() { return EventType::MobileTouchMoved; }
-        [[nodiscard]] EventType getEventType() const override { return getStaticType(); }
+		static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED; }
+		[[nodiscard]] RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
         [[nodiscard]] const char* getName() const override { return "MobileTouchMoved"; }
-        [[nodiscard]] int getCategoryFlags() const override { return EventCategoryInput | EventCategoryMobileInput; }
+        [[nodiscard]] int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_MOBILE_INPUT; }
     };
 
 }

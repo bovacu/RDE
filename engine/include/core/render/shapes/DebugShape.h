@@ -4,7 +4,9 @@
 #ifndef RDE_DEBUGSHAPE_H
 #define RDE_DEBUGSHAPE_H
 
-#include "core/util/Util.h"
+#include "core/util/Color.h"
+#include "core/util/Vec.h"
+#include <vector>
 
 namespace RDE {
 

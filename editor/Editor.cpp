@@ -166,9 +166,9 @@ namespace Editor {
 //////        _uiButton2->setInteractable(false);
 ////
 //
-       // auto _inputTextNode = getCanvases()[0]->graph->createNode("InputText");
-       // auto* _input = _inputTextNode->addComponent<UIInput>(UIInputConfig {  });
-       // _inputTextNode->getTransform()->setPosition(256, 128);
+        auto _inputTextNode = canvas->graph->createNode("InputText");
+        auto* _input = _inputTextNode->addComponent<UIInput>(UIInputConfig {  });
+        _inputTextNode->getTransform()->setPosition(256, 128);
 
        // auto _sliderNode = getCanvases()[0]->graph->createNode("Slider");
        // slider = _sliderNode->addComponent<UISlider>(UISliderConfig {  });
@@ -185,8 +185,18 @@ namespace Editor {
         // _cpuTexture->uploadToGPU();
         // auto* _cpuSprite = _cpuTextureNode->addComponent<SpriteRenderer>(SpriteRendererConfig {.texture = _cpuTexture});
 
-        auto* _textNode = canvas->graph->createNode("TextNode");
+	   	auto* _duckNode = graph->createNode("DuckNode");
+		_duckNode->getTransform()->setPosition(-200, 0);
+		auto* _duck = _duckNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
+			.texture = engine->manager.textureManager.getSubTexture("defaultAssets", "duck")
+		});
+
+		auto* _textNode = canvas->graph->createNode("TextNode");
         auto* _text = _textNode->addComponent<UIText>(UITextConfig {});
+
+		auto* _textNodeNonUI = graph->createNode("TextNodeNonUI");
+		_textNodeNonUI->getTransform()->setPosition(0, 200);
+		auto* _textNonUI = _textNodeNonUI->addComponent<TextRenderer>(TextRendererConfig {});
     }
 
     void Editor::onUpdate(Delta _dt) {
@@ -196,7 +206,7 @@ namespace Editor {
         //     Util::Graphics::takeScreenshot(engine->getWindow(), {100, -100}, {100, 100}, "C:\\Users\\vazqu\\Documents\\RDE\\screenshot.png");
         // }
 
-        if(engine->manager.inputManager.isKeyJustPressed(KeyCode::S)) {
+        if(engine->manager.inputManager.isKeyJustPressed(RDE_KEYBOARD_KEY_S)) {
             Util::Graphics::takeScreenshot(*engine->getWindow(), "C:\\Users\\vazqu\\Documents\\RDE\\screenshot.png");
         }
 
@@ -440,7 +450,7 @@ namespace Editor {
         _particleSystem->play();
     }
 
-    void Editor::onMouseClick(MouseCode _mouseCode) {
+	void Editor::onMouseClick(RDE_MOUSE_BUTTON_ _mouseCode) {
         Util::Log::info("I'm inside the UI sprite!!");
     }
 
@@ -457,8 +467,8 @@ namespace Editor {
     }
 
     void Editor::localizationTest() {
-        engine->manager.localizationManager.loadLanguage(LocalizationInfo::PT_BR);
-        engine->manager.localizationManager.localizationInfo.language = LocalizationInfo::PT_BR;
+		engine->manager.localizationManager.loadLanguage(RDE_LANGUAGE_PT_BR);
+		engine->manager.localizationManager.localizationInfo.language = RDE_LANGUAGE_PT_BR;
         auto _a = 1;
         auto _b = "MyString";
         auto _c = 3.14f;

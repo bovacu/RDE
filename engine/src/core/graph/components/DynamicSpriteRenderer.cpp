@@ -4,6 +4,7 @@
 
 #include "core/graph/components/DynamicSpriteRenderer.h"
 #include "core/Engine.h"
+#include "core/graph/Scene.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/render/elements/Texture.h"
 #include "core/systems/uiSystem/Canvas.h"
@@ -19,14 +20,14 @@ namespace RDE {
 
     DynamicSpriteRenderer::DynamicSpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const DynamicSpriteRendererConfig& _config) {
 
-        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(4, SPRITE_RENDERER_SHADER, BatchPriority::SpritePriority)
+        RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(4, SPRITE_RENDERER_SHADER, RDE_BATCH_PRIORITY_SPRITE)
         
         data.texture = new CPUTexture;
 
         if(_config.pixels == nullptr) {
-            ((CPUTexture*)data.texture)->init((int)_config.size.x, (int)_config.size.y, _config.imageType);
+			((CPUTexture*)data.texture)->init((int)_config.size.x, (int)_config.size.y, (RDE_IMAGE_EXTENSION_)_config.imageType);
         } else {
-            ((CPUTexture*)data.texture)->init((int)_config.size.x, (int)_config.size.y, _config.pixels, _config.imageType);
+			((CPUTexture*)data.texture)->init((int)_config.size.x, (int)_config.size.y, _config.pixels, (RDE_IMAGE_EXTENSION_)_config.imageType);
         }
 
         auto [_transformMat, _] = _node->getTransform()->localToWorld();

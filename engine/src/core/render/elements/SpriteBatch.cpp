@@ -62,22 +62,17 @@ namespace RDE {
             },
             VertexConfig {
 				2, 2, GL_FLOAT, sizeof(float) * 2 + sizeof(unsigned char) * 4, _structSize
-			},
-			//VertexConfig {
-			//	3, 4, GL_FLOAT, sizeof(float) * 2 + sizeof(unsigned char) * 4 + sizeof(float) * 2, _structSize
-			//}
+			}
 		},
 		{
-			"viewProjectionMatrix",
-			//"cameraScale",
-			//"atlasResolution"
+			"viewProjectionMatrix"
 		},
         maxIndicesPerDrawCall);
 		Util::GL::checkError("Error AFTER ConfigBasicShader for text");
     }
 
     void SpriteBatch::Debug::configDebugShader() {
-        GLsizei _structSize = 3 * sizeof(float) + 4 * sizeof(float);
+		GLsizei _structSize = sizeof(OpenGLVertexDebug);
         Debug::batch->engine->manager.shaderManager.loadShaderVertexConfig(DEBUG_SHADER, {
             VertexConfig {
                 0, 2, GL_FLOAT, 0, _structSize
@@ -105,13 +100,12 @@ namespace RDE {
             flushDebug();
 
         auto _uint32Color = Util::Math::colorToUint32_t(_color);
-        auto _screenPos = Util::Math::worldToScreenSize(batch->viewport, _position);
-        auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x, _screenPos.y, 1.f));
-        vertexDebugBufferPoints.emplace_back(_transformMat * glm::vec4 {_screenPos.x, _screenPos.y, 0.0f, 1.0f}, _uint32Color);
+        auto _screenPos = Util::Math::worldToScreenCoords(batch->viewport, _position);
+        auto _transformMat = glm::translate(glm::mat4(1.f),glm::vec3 (_screenPos.x, _screenPos.y, 0.f));
+		vertexDebugBufferPoints.emplace_back(glm::vec2{_transformMat[3][0], _transformMat[3][1]}, _uint32Color);
     }
 
     void SpriteBatch::Debug::drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color) {
-        glm::vec4 _colorVec4 = {(float)_color.r / 255.f, (float)_color.g/ 255.f,(float)_color.b/ 255.f, (float)_color.a/ 255.f};
         auto _screenPos0 = Util::Math::worldToScreenCoords(batch->viewport, _p0);
         auto _screenPos1 = Util::Math::worldToScreenCoords(batch->viewport, _p1);
 
@@ -126,8 +120,8 @@ namespace RDE {
 
         auto _uint32Color = Util::Math::colorToUint32_t(_color);
 
-        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat0[3][0], _transformMat0[3][1], 1.0f}, _uint32Color);
-        vertexDebugBufferLines.emplace_back(glm::vec3 {_transformMat1[3][0], _transformMat1[3][1], 1.0f}, _uint32Color);
+        vertexDebugBufferLines.emplace_back(glm::vec2 {_transformMat0[3][0], _transformMat0[3][1]}, _uint32Color);
+        vertexDebugBufferLines.emplace_back(glm::vec2 {_transformMat1[3][0], _transformMat1[3][1]}, _uint32Color);
     }
 
     void SpriteBatch::Debug::drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color, float _rotation) {
@@ -245,7 +239,8 @@ namespace RDE {
             glUseProgram(_shaderID);
             Util::GL::checkError("After glUseProgram");
 
-			_batch.shader->setUniformValueFloat("viewProjectionMatrix", RDE_UNIFORM_FV_MATRIX_4, GLM_VEC_MAT_TO_POINTER(GLfloat, viewProjectionMatrix));
+            glUniformMatrix4fv(glGetUniformLocation(_shaderID, "viewProjectionMatrix"), 1, GL_FALSE, GLM_VEC_MAT_TO_POINTER(GLfloat, viewProjectionMatrix));
+			Util::GL::checkError("After setUniformValueFloat");
 
             glActiveTexture(GL_TEXTURE0);
             Util::GL::checkError("After glActiveTexture");
@@ -278,7 +273,7 @@ namespace RDE {
         }
     }
 
-    void SpriteBatch::drawUI(std::vector<Batch>& _batches) {
+	void SpriteBatch::flushUI(std::vector<Batch>& _batches) {
         for(auto& _batch : _batches) {
             auto _shaderID = _batch.shader->getShaderID();
             if (_batch.vertexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0)
@@ -287,9 +282,7 @@ namespace RDE {
             glUseProgram(_shaderID);
             Util::GL::checkError("After glUseProgram UI");
 
-            GLint location = glGetUniformLocation(_shaderID, "viewProjectionMatrix");
-            Util::GL::checkError("After glGetUniformLocation UI");
-            glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(viewProjectionMatrix)));
+            glUniformMatrix4fv(glGetUniformLocation(_shaderID, "viewProjectionMatrix"), 1, GL_FALSE, GLM_VEC_MAT_TO_POINTER(GLfloat, viewProjectionMatrix));
             Util::GL::checkError("After glUniformMatrix4fv UI");
 
             glActiveTexture(GL_TEXTURE0);
@@ -327,14 +320,12 @@ namespace RDE {
         glBindVertexArray(_shader->getDynamicShaderVAO());
         glUseProgram(_shader->getShaderID());
 
-        GLint location = glGetUniformLocation(_shader->getShaderID(), "viewProjectionMatrix");
-        glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(glm::value_ptr(batch->viewProjectionMatrix)));
+		_shader->setUniformValueFloat("viewProjectionMatrix", RDE_UNIFORM_FV_MATRIX_4, GLM_VEC_MAT_TO_POINTER(GLfloat, batch->viewProjectionMatrix));
 
         if(!vertexDebugBufferGeometrics.empty()) {
             glBindBuffer(GL_ARRAY_BUFFER, _shader->getDynamicShaderVBO());
             glBufferData(GL_ARRAY_BUFFER, (long)(_shader->getShaderVertexDataSize() * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
-
             glDrawArrays(GL_TRIANGLES, 0, (int)vertexDebugBufferGeometrics.size());
         }
 
@@ -342,7 +333,6 @@ namespace RDE {
             glBindBuffer(GL_ARRAY_BUFFER, _shader->getDynamicShaderVBO());
             glBufferData(GL_ARRAY_BUFFER, (long) (_shader->getShaderVertexDataSize() * vertexDebugBufferLines.size()), &vertexDebugBufferLines[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
-
             glDrawArrays(GL_LINES, 0, (int) vertexDebugBufferLines.size());
         }
 
@@ -350,7 +340,6 @@ namespace RDE {
             glBindBuffer(GL_ARRAY_BUFFER, _shader->getDynamicShaderVBO());
             glBufferData(GL_ARRAY_BUFFER, (long) (_shader->getShaderVertexDataSize() * vertexDebugBufferPoints.size()), &vertexDebugBufferPoints[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
-
             glDrawArrays(GL_POINTS, 0, (int) vertexDebugBufferPoints.size());
         }
 

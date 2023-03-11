@@ -563,7 +563,7 @@ namespace RDE {
                 SDL_RWops* _imageFile = SDL_RWFromFile(_pathToFile.c_str(), "rb");
 
                 if(_imageFile == nullptr) {
-                    Util::Log::error("Couldn't load ", _pathToFile);
+                    Util::Log::error("Couldn't load SDLSurface at path: ", _pathToFile);
                     return nullptr;
                 }
 

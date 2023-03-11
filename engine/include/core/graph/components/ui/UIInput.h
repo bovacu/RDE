@@ -7,6 +7,7 @@
 
 #include "core/graph/components/ui/UI.h"
 #include "core/render/elements/IRenderizable.h"
+#include "core/util/Delta.h"
 
 namespace RDE {
 
@@ -28,7 +29,8 @@ namespace RDE {
         Color textColor = Color::White;
         std::string text = "";
 
-        Vec2F textsOffsetFromLeft = { 5.f, 0 };
+        Vec2F textsOffsetFromLeft = { 5.f, 4.f };
+		float spaceOnTheRightToLimitText = 10.f;
 
         Texture* caretTexture = nullptr;
         Color caretColor = Color::White;
@@ -56,7 +58,7 @@ namespace RDE {
             Transform* caretTransform = nullptr;
             Transform* textTransform = nullptr;
             Transform* nineSliceTransform = nullptr;
-            Texture* caretTexture;
+            Texture* caretTexture = nullptr;
 
         RENDERIZABLE_UI_BASIC_PROPERTIES()
 
@@ -69,6 +71,7 @@ namespace RDE {
              * @brief This is a % of the height of the input text
              */
             float caretHeight = 0.75;
+			float spaceOnTheRightToLimitText = 0.f;
 
 
         public:
@@ -87,15 +90,26 @@ namespace RDE {
         private:
             void onMouseEntered();
             void onMouseExited();
-            void onMouseClicked(MouseCode _mouseCode);
-            void onMouseReleased(MouseCode _mouseCode);
-            void onKeyPressed(KeyCode _keyCode);
-            void onKeyReleased(KeyCode _keyCode);
+			void onMouseClicked(RDE_MOUSE_BUTTON_ _mouseCode);
+			void onMouseReleased(RDE_MOUSE_BUTTON_ _mouseCode);
+            void onKeyPressed(RDE_KEYBOARD_KEY_ _keyCode);
             void onTextTyping(const std::string& _text);
             void onUnfocused();
             void updatePlaceholder();
-            void updateCaret();
 
+			void updateCaretOnRightKey();
+			void updateCaretOnLeftKey();
+			void updateCaretOnBackspaceKey();
+			void updateCaretOnTextKey();
+            void updateCaretOther();
+
+			void updateTextOnRightKey();
+			void updateTextOnLeftKey();
+			void updateTextOnBackspaceKey();
+			void updateTextOnTextKey();
+			void updateTextOther();
+
+			float getMaximumAllowdWidth();
             bool usable();
     };
 

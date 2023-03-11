@@ -5,25 +5,18 @@
 #ifndef RDE_CANVAS_H
 #define RDE_CANVAS_H
 
-#include "core/graph/Graph.h"
-#include "core/render/Camera.h"
 #include "core/render/elements/Batch.h"
 #include "core/graph/components/Node.h"
 #include "core/render/elements/IRenderizable.h"
+#include "core/Enums.h"
 #include <stack>
 
 namespace RDE {
 
     class UIInteractable;
 
-    enum UpdatableType {
-        UT_NONE        = 0,
-        UT_UI_INPUT    = 1,
-        UT_UI_SLIDER   = 2
-    };
-
     struct UpdatableData {
-        UpdatableType updatableType = UpdatableType::UT_NONE;
+		RDE_UI_UPDATABLE_NODE_ updatableType = RDE_UI_UPDATABLE_NODE_NONE;
         void* updatable = nullptr;
     };
 
@@ -34,6 +27,9 @@ namespace RDE {
         int cropping = 0;
         UpdatableData updatableData;
     };
+
+	class Graph;
+	class Camera;
 
     /**
      * @brief This class represents a container for elements related to the UI and it is in charge of render them, update them...

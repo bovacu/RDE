@@ -1,0 +1,50 @@
+# This is the changelog of the engine (created the 07/03/2023 dd/mm/yyyy) and I will be posting in here the updates to have a clear vision on the additions and improvements of the engine
+
+### Changelog 0.1.0 (07/03/2023) This is the first changelog and I will add some of the features, not all.
+- Project compiling on:
+  - Windows: Clang and Visual Studio
+  - Mac: G++ and Clang
+  - Linux: G++ and Clang
+- Project exports correctly and working to Windows, Mac, Linux, Android and iOS
+- Python script to compile and run the project on any desktop plaform
+- TexturePacker (Free Edition) exporting tool to create the neccessary files to load SpriteSheets
+- Default assets for the engine to load in case of no Texture inputs
+- Separated modules for non-desktop platforms:
+  - Android: own module with its own compilation and exporting script. Working correctly.
+  - iOS: own module with its own compilation and exporting script. Now it works with provisioning certificate and needs to be renewed each 7 days, but is working
+- Android ads module implemented and working on the most basic examples and tests. Need to improve a lot the integration and API
+- Documentation of the API on the website (https://bovacu.github.io)
+- Vcpkg package manager
+- Small Editor ImGui tool inside the running projects
+  - Can modify attributes of different components
+  - Show statistics of the engine
+  - Enable or disable some features (mostly debugging)
+  - Small and simple console (will be improved a lot)
+- Spritebatching system for better and more efficent 2D rendering
+- System to integrate and use your own Shaders. Needs better API and also documentation
+- Basic sound system working on all platforms
+- Physics system integrated thanks to Chipmunk2D
+- Basic animation system, but needs a rework
+- Delegate function system with low overhead
+- Set of basic UI system and elements working with responsive callbacks for the main events
+- Hierarchy tree based on nodes (allows parents and children)
+- Auto inclusion of main function entry, no need to add one
+- Template of how a new project should look like
+- Logging system
+- Util functions for rendering, math, easing...
+- File system to create, delete, read or write to or from files. Not all functions working on mobile plaforms (basically create new files)
+- Localization system. Need to add documentation on how to use
+- The engine innerly uses EnTT to process as fast as efficently as possible all the inner systems
+- There is an option to create your own ECS systems and use them in your game.
+- Input supporting
+  - Keyboard
+  - Mouse
+  - Mobile Input
+  - Controller Input
+- Scene system where you can load and unload as many scenes as needed (each one with its own functionality and resources). Need to add documentation on how to properly use
+- Multiple camera support
+- Font rendering using SDF. Need to fix bad looking small text
+- Font manager, to load or unload fonts
+- TextureAtlas manager, to load and unload spritesheets
+- Basic Framebuffer for post-processing effects
+- Editor in development process

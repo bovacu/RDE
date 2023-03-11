@@ -1,12 +1,10 @@
-#pragma once
-
-#include "core/util/Delegate.h"
 #ifndef RDE_WINDOW_H
 #define RDE_WINDOW_H
 
 #include "core/util/Vec.h"
 #include "core/systems/eventSystem/Event.h"
 #include "core/platform/PlatformHeaderSDL.h"
+#include "core/util/Delegate.h"
 
 namespace RDE {
 
