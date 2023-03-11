@@ -5,13 +5,8 @@
 #define RDE_FONT_MANAGER_H
 
 #include "core/util/Vec.h"
-#ifndef __EMSCRIPTEN__
 #include <ft2build.h>
 #include "freetype/freetype.h"
-#else
-#include <ft2build.h>
-#include "freetype.h"
-#endif
 #include "core/render/elements/Texture.h"
 #include <unordered_map>
 #include <vector>
@@ -31,7 +26,10 @@ namespace RDE {
         Vec2F  offset;
     };
 
+    typedef std::unordered_map<char, CharInfo> CharMap;
+
     class FontManager;
+    class FileManager;
 
     /**
      * @brief This struct contains all the information needed to render text with this specific font.
@@ -42,9 +40,9 @@ namespace RDE {
 
         private:
             Texture texture;
-			Vec2I atlasSize {0, 0};
+            Vec2I atlasSize {0, 0};
             int fontSize = -1;
-            CharInfo characters[MAX_CHARACTERS];
+            std::unordered_map<char, CharInfo> characters;
             std::string fontName;
             std::string originalPath;
             float biggestCharHeight = 0;
@@ -70,7 +68,7 @@ namespace RDE {
              * @brief Returns all of the characters information.
              * @return CharInfo*
              */
-            CharInfo* getChars();
+            CharMap& getChars();
 
             /**
              * @brief Returns the font name.
