@@ -7,7 +7,7 @@
 #include <ostream>
 #include "core/Core.h"
 
-#if defined(_WIN32)
+#if defined(_WIN32) || __EMSCRIPTEN__
     typedef unsigned int uint;
 #endif
 

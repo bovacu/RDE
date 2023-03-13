@@ -174,6 +174,11 @@ typedef unsigned long ulong;
 typedef unsigned int uint;
 #endif
 
+#ifdef __EMSCRIPTEN__
+typedef unsigned long ulong;
+typedef unsigned int uint;
+#endif
+
 /**
  * @brief Makes a class iterable onto some itarable attribute, like a map or a vector.
 */

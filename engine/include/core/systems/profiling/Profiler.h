@@ -16,6 +16,10 @@
     typedef unsigned long u_long;
 #endif
 
+#ifdef __EMSCRIPTEN__
+    typedef unsigned long u_long;
+#endif
+
 #if IS_LINUX()
 #include "sys/types.h"
 #include "sys/sysinfo.h"

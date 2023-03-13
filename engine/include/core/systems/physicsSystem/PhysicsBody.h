@@ -16,6 +16,10 @@
 
 namespace RDE {
 
+    #ifdef __EMSCRIPTEN__
+    typedef unsigned long ulong;
+    #endif
+
     struct ShapeMaskingConfig {
 
         /**

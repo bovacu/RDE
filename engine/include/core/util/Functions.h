@@ -576,7 +576,11 @@ namespace RDE {
                 else if(strcmp(_extension.c_str(), "jpg") == 0 || strcmp(_extension.c_str(), "jpeg") == 0)
                     _surface = IMG_LoadJPG_RW(_imageFile);
                 else if(strcmp(_extension.c_str(), "svg") == 0)
+                    #ifndef __EMSCRIPTEN__
                     _surface = IMG_LoadSVG_RW(_imageFile);
+                    #else
+                    Util::Log::error("SVG file format not supported yet in WASM");
+                    #endif
                 else if(strcmp(_extension.c_str(), "bmp") == 0)
                     _surface = IMG_LoadBMP_RW(_imageFile);
                 else if(strcmp(_extension.c_str(), "ico") == 0)

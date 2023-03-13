@@ -14,6 +14,10 @@
 #include "core/graph/Scene.h"
 #include "core/systems/uiSystem/SceneManager.h"
 
+#ifdef __EMSCRIPTEN__
+#include "emscripten.h"
+#endif
+
 namespace RDE {
 
 
@@ -60,39 +64,34 @@ namespace RDE {
         manager.sceneManager.displayScene(_scene->getName());
     }
 
-    void Engine::onRun() {
-        float _accumulator = 0;
-
-        Delta _dt = 0;
-
-        while (window->isRunning()) {
-            Uint64 _start = SDL_GetPerformanceCounter();
-            _accumulator += _dt;
+    void Engine::loopCode() {
+        Uint64 _start = SDL_GetPerformanceCounter();
+            accumulator += dt;
 
             if(manager.sceneManager.getDisplayedScene() == nullptr) return;
 
-            Profiler::beginFrame(_dt);
+            Profiler::beginFrame(dt);
             manager.inputManager.pollEvents();
 
             if (window->shouldUpdateWindow()) {
                 Profiler::begin(ProfilerState::UPDATE);
-                onUpdate(_dt);
+                onUpdate(dt);
                 Profiler::end(ProfilerState::UPDATE);
 
                 Profiler::begin(ProfilerState::FIXED_UPDATE);
-                while (_accumulator >= fixedDelta) {
-                    _accumulator -= fixedDelta;
+                while (accumulator >= fixedDelta) {
+                    accumulator -= fixedDelta;
                     onFixedUpdate(fixedDelta);
                 }
                 Profiler::end(ProfilerState::FIXED_UPDATE);
 
 
                 Profiler::begin(ProfilerState::LATE_UPDATE);
-                onLateUpdate(_dt);
+                onLateUpdate(dt);
                 Profiler::end(ProfilerState::LATE_UPDATE);
 
                 Profiler::begin(ProfilerState::RENDERING);
-                onRender(_dt);
+                onRender(dt);
                 Profiler::end(ProfilerState::RENDERING);
 
                 Profiler::begin(ProfilerState::INPUT);
@@ -105,8 +104,20 @@ namespace RDE {
 
             Uint64 _end = SDL_GetPerformanceCounter();
             float _elapsedMS = (float)(_end - _start) / (float)SDL_GetPerformanceFrequency();
-            _dt = _elapsedMS;
+            dt = _elapsedMS;
+    }
+
+    void Engine::onRun() {
+        accumulator = 0;
+        dt = 0;
+
+        #ifdef __EMSCRIPTEN__
+            loopCode();
+        #else
+        while (window->isRunning()) {
+            loopCode();
         }
+        #endif
     }
 
     void Engine::onEvent(Event& _e) {
@@ -193,6 +204,11 @@ namespace RDE {
     }
 
     void Engine::destroy() {
+
+        #ifdef __EMSCRIPTEN__
+        emscripten_cancel_main_loop();
+        #endif
+
         manager.destroy();
 
         #if !IS_MOBILE()

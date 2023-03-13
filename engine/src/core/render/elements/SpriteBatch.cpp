@@ -5,7 +5,9 @@
 #include "core/render/elements/IRenderizable.h"
 #include "core/render/elements/SpriteBatchRenderFunctions.h"
 
-#if IS_ANDROID()
+#ifdef __EMSCRIPTEN__
+    #include <GLES3/gl32.h>
+#elif IS_ANDROID()
     #include <GLES3/gl32.h>
 #elif IS_IOS()
     #include <OpenGLES/ES3/gl.h>
@@ -356,7 +358,9 @@ namespace RDE {
 
     void SpriteBatch::Debug::setPointSize(float _size) {
     #if !IS_MOBILE()
-        glPointSize(_size);
+        #ifndef __EMSCRIPTEN__
+            glPointSize(_size);
+        #endif
     #endif
     }
 
