@@ -9,7 +9,7 @@ namespace RDE {
 
     void ShaderManager::init(FileManager* _fileManager) {
         fileManager = _fileManager;
-        #if IS_MOBILE()
+        #if IS_MOBILE() || defined(__EMSCRIPTEN__)
         loadShader(SPRITE_RENDERER_SHADER, TEXTURE_VERTEX_SHADER_ES, TEXTURE_FRAGMENT_SHADER_ES);
         loadShader(DEBUG_SHADER, DEBUG_VERTEX_SHADER_ES, DEBUG_FRAGMENT_SHADER_ES);
         loadShader(TEXT_RENDERER_SHADER, TEXT_VERTEX_SHADER_ES, TEXT_FRAGMENT_SHADER_ES);

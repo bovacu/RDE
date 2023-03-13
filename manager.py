@@ -129,7 +129,7 @@ def buildin_process_mac(args, action):
     create_mac_folder = "mkdir -p build/mac"
     create_mac_build_folder = "mkdir -p build/mac/{}".format(build_type.lower())
     cmake_generate = "cd build/mac/{_build_type} && cmake -G \"{_generator}\" -DCMAKE_BUILD_TYPE={_build_type} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_C_COMPILER={_c_compiler} -DCMAKE_CXX_COMPILER={_cxx_compiler}  -DCMAKE_TOOLCHAIN_FILE=".format(_generator = generator, _build_type = build_type, _c_compiler = c_compiler, _cxx_compiler = cxx_compiler) + os.getcwd() + "/vcpkg/scripts/buildsystems/vcpkg.cmake ../../.."
-    cmake_build = "cd build/mac/{} && cmake --build -j3 .".format(build_type.lower())
+    cmake_build = "cd build/mac/{} && cmake --build .".format(build_type.lower())
     delete_compile_commands = "rm compile_commands.json"
     copy_compile_commands = "cp build/mac/{}/compile_commands.json .".format(build_type.lower())
 
@@ -183,7 +183,7 @@ def linux(args):
 def mac(args):
     action = extract_argument(args, "--action", "")
     if action == "build" or action == "build-run" or action == "run":
-        buildin_process_linux(args, action)
+        buildin_process_mac(args, action)
     elif action == "lines":
         project_lines_number_mac()
 

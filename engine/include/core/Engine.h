@@ -271,6 +271,16 @@ namespace RDE {
              * @param _redirectionFunc FrameBuffer
              */
             void setRenderingRedirectionToImGui(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc);
+            
+            /**
+             * @brief Returns the path to the assets folder, that may vary between platforms, with this you jus need to append the files or dirs inside the assets folder.
+             */ 
+            std::string getAssetsFolderPath();
+
+            /**
+             * @brief Returns the path to the defaultAssets folder, that may vary between platforms, with this you jus need to append the files or dirs inside the defaultAssets folder.
+             */ 
+            std::string getDefaultAssetsFolderPath();
 
         private:
             /**

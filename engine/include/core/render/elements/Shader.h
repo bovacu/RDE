@@ -6,13 +6,13 @@
 
 #include "core/Core.h"
 #ifdef __EMSCRIPTEN__
-    #include <GLES3/gl32.h>
+#include <GLES3/gl32.h>
 #elif IS_ANDROID()
-    #include <GLES3/gl32.h>
+#include <GLES3/gl32.h>
 #elif IS_IOS()
-    #include <OpenGLES/ES3/gl.h>
+#include <OpenGLES/ES3/gl.h>
 #else
-    #include "glad/glad.h"
+#include "glad/glad.h"
 #endif
 
 #include "core/systems/fileSystem/FileManager.h"

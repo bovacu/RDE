@@ -6,7 +6,11 @@
 namespace RDE {
 
     void TextureAtlasManager::init(FileManager* _fileManager) {
+        #ifndef __EMSCRIPTEN__
         loadSpriteSheet("defaultAssets/defaultAssets.json");
+        #else
+        loadSpriteSheet("wasmAssets/defaultAssets/defaultAssets.json");
+        #endif
     }
 
     bool TextureAtlasManager::loadSpriteSheet(const std::string& _spriteSheetPath) {

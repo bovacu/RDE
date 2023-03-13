@@ -10,7 +10,7 @@
 #include "core/platform/PlatformHeaderSDLImage.h"
 
 #ifdef __EMSCRIPTEN__
-    #include <GLES3/gl32.h>
+#include <GLES3/gl32.h>
 #elif IS_ANDROID()
 #include <GLES3/gl32.h>
 #elif IS_IOS()
