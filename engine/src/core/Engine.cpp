@@ -266,20 +266,4 @@ namespace RDE {
 	RDE_PLATFORM_TYPE_ Engine::getPlatform() const {
 		return platform.currentPlatform;
 	}
-
-    std::string Engine::getAssetsFolderPath() {
-        #ifdef __EMSCRIPTEN__
-        return "wasmAssets/assets/";
-        #else
-        return "assets/";
-        #endif
-    }
-
-    std::string Engine::getDefaultAssetsFolderPath() {
-        #ifdef __EMSCRIPTEN__
-        return "wasmAssets/defaultAssets/";
-        #else
-        return "defaultAssets/";
-        #endif
-    }
 }

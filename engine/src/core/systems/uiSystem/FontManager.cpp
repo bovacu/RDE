@@ -107,17 +107,10 @@ namespace RDE {
 
         fileManager = _fileManager;
 
-        #ifndef __EMSCRIPTEN__
-        loadFont(*_fileManager, "defaultAssets/fonts/MontserratRegular.ttf", 54);
+        // loadFont(*_fileManager, "defaultAssets/fonts/MontserratRegular.ttf", 54);
         //loadFont(*_fileManager, "defaultAssets/fonts/MontserratItalic.ttf", 54);
         //loadFont(*_fileManager, "defaultAssets/fonts/MontserratBold.ttf", 54);
         //loadFont(*_fileManager, "defaultAssets/fonts/MontserratBoldItalic.ttf", 54);
-        #else
-        loadFont(*_fileManager, "wasmAssets/defaultAssets/fonts/MontserratRegular.ttf", 54);
-        //loadFont(*_fileManager, "wasmAssets/defaultAssets/fonts/MontserratItalic.ttf", 54);
-        //loadFont(*_fileManager, "wasmAssets/defaultAssets/fonts/MontserratBold.ttf", 54);
-        //loadFont(*_fileManager, "wasmAssets/defaultAssets/fonts/MontserratBoldItalic.ttf", 54);
-        #endif
 
         Util::Log::debug("FontManager loaded successfully, atlas size: ", getDefaultFont("MontserratRegular")->getSize());
     }

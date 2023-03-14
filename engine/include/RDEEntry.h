@@ -40,6 +40,7 @@ int main(int _argc, char** _argv) {
     #endif
 
     _e = RDE::createEngine(_argc, _argv);
+    RDE::Util::Debug("Setting emscripten_set_main_loop");
     emscripten_set_main_loop(mainLoop, -1, 1);
     _e->destroy();
 

@@ -17,12 +17,7 @@
 namespace RDE {
 
     void ConfigManager::loadRDEConfig(RDEConfig* _config, FileManager* _manager) {
-
-        #ifdef __EMSCRIPTEN__
-        auto _configPath = "wasmAssets/assets/config/desktop.json";
-        #else
         auto _configPath = "assets/config/desktop.json";
-        #endif
 
         #if IS_ANDROID()
         _configPath = "assets/config/android.json";
@@ -48,12 +43,7 @@ namespace RDE {
         _config->windowData.size = _data.contains("resolution") ? Vec2I { _data["resolution"][0].get<int>(),_data["resolution"][1].get<int>() } : _config->windowData.size;
         #endif
 
-        _config->projectData.iconPath = _data.contains("icon") ? _data["icon"].get<std::string>() : 
-        #ifndef __EMSCRIPTEN__
-        "defaultAssets/logo.ico";
-        #else
-         "wasmAssets/defaultAssets/logo.ico";
-        #endif
+        _config->projectData.iconPath = _data.contains("icon") ? _data["icon"].get<std::string>() : "defaultAssets/logo.ico";
         _config->projectData.resourcesPath = _data.contains("resources_path") ?  _data["resources_path"].get<std::string>() : "";
         _config->projectData.localizationConfig.localizationPath = _data.contains("localization_path") ? _data["localization_path"].get<std::string>() : "";
     }

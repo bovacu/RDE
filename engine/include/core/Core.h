@@ -6,7 +6,6 @@
 #define RDE_CORE_H
 
 /// \cond DO_NOT_DOCUMENT
-#ifndef __EMSCRIPTEN__
 #define FRAMEBUFFER_VERTEX_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferVertex.glsl"
 #define FRAMEBUFFER_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferFragment.glsl"
 #define FRAMEBUFFER_VERTEX_SHADER_CORE "defaultAssets/shaders/core/framebuffer/FrameBufferVertex.glsl"
@@ -39,42 +38,6 @@
 #define BLOOM_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/bloomFragment.glsl"
 #define BLUR_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/blurFragment.glsl"
 #define DEBUG_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/debug/debugFragment.glsl"
-
-#else
-
-#define FRAMEBUFFER_VERTEX_SHADER_ES "wasmAssets/defaultAssets/shaders/es/framebuffer/FrameBufferVertex.glsl"
-#define FRAMEBUFFER_FRAGMENT_SHADER_ES "wasmAssets/defaultAssets/shaders/es/framebuffer/FrameBufferFragment.glsl"
-#define FRAMEBUFFER_VERTEX_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/framebuffer/FrameBufferVertex.glsl"
-#define FRAMEBUFFER_FRAGMENT_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/framebuffer/FrameBufferFragment.glsl"
-
-#define TEXTURE_VERTEX_SHADER_ES "wasmAssets/defaultAssets/shaders/es/texture/vertex.glsl"
-#define TEXT_VERTEX_SHADER_ES "wasmAssets/defaultAssets/shaders/es/texture/textVertex.glsl"
-#define DEBUG_VERTEX_SHADER_ES "wasmAssets/defaultAssets/shaders/es/debug/debugVertex.glsl"
-
-#define TEXTURE_VERTEX_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/texture/vertex.glsl"
-#define TEXT_VERTEX_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/texture/textVertex.glsl"
-#define DEBUG_VERTEX_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/debug/debugVertex.glsl"
-#define DEBUG_GRID_VERTEX_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/debug/gridVertex.glsl"
-#define DEBUG_GRID_FRAGMENT_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/debug/gridFragment.glsl"
-
-#define TEXTURE_FRAGMENT_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/texture/fragment.glsl"
-#define MIRROR_FRAGMENT_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/texture/mirrorFragment.glsl"
-#define MIRROR_VERTEX_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/texture/mirrorVertex.glsl"
-#define TEXT_FRAGMENT_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/texture/textFragment.glsl"
-#define OUTLINE_FRAGMENT_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/texture/outlineFragment.glsl"
-#define NEON_FRAGMENT_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/texture/glowFragment.glsl"
-#define BLOOM_FRAGMENT_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/texture/bloomFragment.glsl"
-#define BLUR_FRAGMENT_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/texture/blurFragment.glsl"
-#define DEBUG_FRAGMENT_SHADER_CORE "wasmAssets/defaultAssets/shaders/core/debug/debugFragment.glsl"
-
-#define TEXTURE_FRAGMENT_SHADER_ES "wasmAssets/defaultAssets/shaders/es/texture/fragment.glsl"
-#define TEXT_FRAGMENT_SHADER_ES "wasmAssets/defaultAssets/shaders/es/texture/textFragment.glsl"
-#define OUTLINE_FRAGMENT_SHADER_ES "wasmAssets/defaultAssets/shaders/es/texture/outlineFragment.glsl"
-#define NEON_FRAGMENT_SHADER_ES "wasmAssets/defaultAssets/shaders/es/texture/glowFragment.glsl"
-#define BLOOM_FRAGMENT_SHADER_ES "wasmAssets/defaultAssets/shaders/es/texture/bloomFragment.glsl"
-#define BLUR_FRAGMENT_SHADER_ES "wasmAssets/defaultAssets/shaders/es/texture/blurFragment.glsl"
-#define DEBUG_FRAGMENT_SHADER_ES "wasmAssets/defaultAssets/shaders/es/debug/debugFragment.glsl"
-#endif
 
 
 #define SPRITE_RENDERER_SHADER "basic"

@@ -6,11 +6,7 @@
 namespace RDE {
 
     void TextureAtlasManager::init(FileManager* _fileManager) {
-        #ifndef __EMSCRIPTEN__
         loadSpriteSheet("defaultAssets/defaultAssets.json");
-        #else
-        loadSpriteSheet("wasmAssets/defaultAssets/defaultAssets.json");
-        #endif
     }
 
     bool TextureAtlasManager::loadSpriteSheet(const std::string& _spriteSheetPath) {
@@ -27,7 +23,7 @@ namespace RDE {
 
         auto* _atlas = new Atlas;
         if(!_atlas->texture->loadFromFile(_pathToTexture.c_str())) {
-            Util::Log::error("Atlas '", _pathToTexture, "' could not be loaded");;
+            Util::Log::error("Atlas '", _pathToTexture, "' could not be loaded");
             return false;
         }
 

@@ -70,7 +70,10 @@ namespace RDE {
 
     void ImGuiScene::onInit() {
         // Setup Dear ImGui context
+        #ifndef __EMSCRIPTEN__
         IMGUI_CHECKVERSION();
+        #endif
+
         i_Context = ImGui::CreateContext();
 //        p_Context = ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -95,7 +98,12 @@ namespace RDE {
 
         // Setup Platform/Renderer bindings
         ImGui_ImplSDL2_InitForOpenGL(window, engine->getWindow()->getContext());
+        
+        #ifdef __EMSCRIPTEN__
+        ImGui_ImplOpenGL3_Init("#version 300 es");
+        #else
         ImGui_ImplOpenGL3_Init("#version 410");
+        #endif
 
         for(auto& _state : State::stateToNameDict) {
             plotBuffers[_state.first] = {};
