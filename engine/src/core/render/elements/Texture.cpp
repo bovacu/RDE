@@ -147,12 +147,13 @@ namespace RDE {
         glGenTextures(1, &openGLTextureID);
         glBindTexture(GL_TEXTURE_2D, openGLTextureID);
 
-        #if IS_MOBILE()
+        #if IS_MOBILE() || defined(__EMSCRIPTEN__)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, textureSize.x, textureSize.y, 0, GL_ALPHA, GL_UNSIGNED_BYTE, nullptr);
         #else
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, _width, _height, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
         #endif
         
+        Util::GL::checkError("Texture loadTextTexture glTextImage2D");
         /* We require 1 byte alignment when uploading texture data */
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         Util::GL::checkError("Texture loadTextTexture UNPACK");
@@ -170,7 +171,7 @@ namespace RDE {
     }
 
     bool Texture::loadTextSubTextures(Vec2I _offset, Vec2I _size, const void* _data) {
-        #if IS_MOBILE()
+        #if IS_MOBILE() || defined(__EMSCRIPTEN__)
         glTexSubImage2D(GL_TEXTURE_2D, 0, _offset.x, _offset.y, _size.x, _size.y, GL_ALPHA, GL_UNSIGNED_BYTE, _data);
         #else
         glTexSubImage2D(GL_TEXTURE_2D, 0, _offset.x, _offset.y, _size.x, _size.y, GL_RED, GL_UNSIGNED_BYTE, _data);

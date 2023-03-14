@@ -107,7 +107,7 @@ namespace RDE {
 
         fileManager = _fileManager;
 
-        // loadFont(*_fileManager, "defaultAssets/fonts/MontserratRegular.ttf", 54);
+        loadFont(*_fileManager, "defaultAssets/fonts/MontserratRegular.ttf", 54);
         //loadFont(*_fileManager, "defaultAssets/fonts/MontserratItalic.ttf", 54);
         //loadFont(*_fileManager, "defaultAssets/fonts/MontserratBold.ttf", 54);
         //loadFont(*_fileManager, "defaultAssets/fonts/MontserratBoldItalic.ttf", 54);
