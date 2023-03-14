@@ -5,6 +5,7 @@
 #include "core/systems/fileSystem/FileManager.h"
 
 #define FONT_DPI 96
+#define BASE_FONT_SIZE 64
 
 namespace RDE {
 
@@ -12,7 +13,7 @@ namespace RDE {
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         //FT_Set_Pixel_Sizes(face, 0, _fontSize);
-		FT_Set_Char_Size(face, 0, _fontSize * 64, FONT_DPI, FONT_DPI);
+		FT_Set_Char_Size(face, 0, _fontSize * BASE_FONT_SIZE, FONT_DPI, FONT_DPI);
         FT_GlyphSlot g = face->glyph;
 
         int _rowWidth = 0;
