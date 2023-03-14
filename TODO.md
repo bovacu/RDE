@@ -60,11 +60,15 @@ to not forget about future tasks. A lot of features are already done, but not li
 - [ ] ImGui for mobile
 - [ ] On mobile, OnMouseClick event is sometimes not recognized as a touch input, fix this on both platforms
 - [ ] When exporting the sheets data from TexturePacker, it sets the absolute path, need to fix this to use the relative path to the project
+- [ ] Framebuffer
+  - [ ] Android
+  - [ ] iOS
+  - [ ] WASM 
 
 ## TO IMPROVE
 - [ ] UI
   - [ ] UIInput
-    - [ ] Add right and left key movement
+   - [ ] Add right and left key movement
 
 - [ ] Particle System
   - [ ] More customization
@@ -81,8 +85,8 @@ to not forget about future tasks. A lot of features are already done, but not li
   - [ ] Idea: Make each Renderizable component have a pointer to its OpenGLVertex. This 
         pointers will be stored in the vector of renderizables, so any change can be applied direclty without needing to recalculate the whole tree. Problem
   - [ ] Problems:
-    - [ ] If a layer is changed, then we need to check how to recalculate the tree.
-    - [ ] If an element is destroyed, we need to check how to recalculate the tree (Maybe just remove the index on the vector? Need to store that index too in the Renderizable then)
+   - [ ] If a layer is changed, then we need to check how to recalculate the tree.
+   - [ ] If an element is destroyed, we need to check how to recalculate the tree (Maybe just remove the index on the vector? Need to store that index too in the Renderizable then)
 
 - [ ] Animation System
 
