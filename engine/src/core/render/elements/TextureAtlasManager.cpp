@@ -23,7 +23,7 @@ namespace RDE {
 
         auto* _atlas = new Atlas;
         if(!_atlas->texture->loadFromFile(_pathToTexture.c_str())) {
-            Util::Log::error("Atlas '", _pathToTexture, "' could not be loaded");;
+            Util::Log::error("Atlas '", _pathToTexture, "' could not be loaded");
             return false;
         }
 

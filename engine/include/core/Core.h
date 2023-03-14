@@ -10,9 +10,6 @@
 #define FRAMEBUFFER_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferFragment.glsl"
 #define FRAMEBUFFER_VERTEX_SHADER_CORE "defaultAssets/shaders/core/framebuffer/FrameBufferVertex.glsl"
 #define FRAMEBUFFER_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/framebuffer/FrameBufferFragment.glsl"
-#define RML_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/rmlFragment.glsl"
-#define RML_FRAGMENT_COLOR_ONLY_SHADER_CORE "defaultAssets/shaders/core/texture/rmlFragmentColorOnly.glsl"
-#define RML_VERTEX_SHADER_CORE "defaultAssets/shaders/core/texture/rmlVertex.glsl"
 
 #define TEXTURE_VERTEX_SHADER_ES "defaultAssets/shaders/es/texture/vertex.glsl"
 #define TEXT_VERTEX_SHADER_ES "defaultAssets/shaders/es/texture/textVertex.glsl"
@@ -170,6 +167,11 @@ inline float currentDPI = 0;
 
 
 #if IS_MOBILE() || IS_MAC() || defined(_WIN32)
+typedef unsigned long ulong;
+typedef unsigned int uint;
+#endif
+
+#ifdef __EMSCRIPTEN__
 typedef unsigned long ulong;
 typedef unsigned int uint;
 #endif

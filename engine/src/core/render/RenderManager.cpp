@@ -24,18 +24,22 @@ namespace RDE {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        #if !IS_MOBILE()
-        glEnable(GL_PROGRAM_POINT_SIZE);
-		Util::GL::checkError("Invalid Point size");
-        glEnable(GL_LINE_SMOOTH);
-		Util::GL::checkError("Invalid Line Smooth");
-        glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
-		Util::GL::checkError("Invalid Line Smooth Hint -> GL_NICEST");
+        #if !IS_MOBILE() 
+            #ifndef __EMSCRIPTEN__
+                glEnable(GL_PROGRAM_POINT_SIZE);
+        		Util::GL::checkError("Invalid Point size");
+                glEnable(GL_LINE_SMOOTH);
+        		Util::GL::checkError("Invalid Line Smooth");
+                glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
+        		Util::GL::checkError("Invalid Line Smooth Hint -> GL_NICEST");
+            #endif
 		
-        #if !IS_MAC()
-        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-		Util::GL::checkError("Invalid Point Smooth Hint -> GL_NICEST");
-        #endif
+            #if !IS_MAC()
+                #ifndef __EMSCRIPTEN__
+                    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+                    Util::GL::checkError("Invalid Point Smooth Hint -> GL_NICEST");
+                #endif
+            #endif
 
 		#endif
 

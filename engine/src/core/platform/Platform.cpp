@@ -5,6 +5,10 @@
 #include "core/Core.h"
 #include "core/Engine.h"
 
+#ifdef __EMSCRIPTEN__
+#include "core/render/window/EmscriptenWindow.h"
+#endif
+
 #if IS_LINUX() && !IS_ANDROID()
 #include "core/render/window/LinuxWindow.h"
 #endif
@@ -28,6 +32,11 @@
 namespace RDE {
 
     Window* Platform::createWindow(RDEConfig* _config) {
+        #ifdef __EMSCRIPTEN__
+            currentPlatform = RDE_PLATFORM_TYPE_ANDROID;
+            return new EmscriptenWindow(_config);
+        #endif
+
         #if IS_ANDROID()
 			currentPlatform = RDE_PLATFORM_TYPE_ANDROID;
             return new AndroidWindow(_config);

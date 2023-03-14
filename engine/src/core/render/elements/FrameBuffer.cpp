@@ -5,7 +5,9 @@
 #include "core/Manager.h"
 #include "core/render/RenderManager.h"
 
-#if IS_ANDROID()
+#ifdef __EMSCRIPTEN__
+    #include <GLES3/gl32.h>
+#elif IS_ANDROID()
     #include <GLES3/gl32.h>
 #elif IS_IOS()
     #include <OpenGLES/ES3/gl.h>

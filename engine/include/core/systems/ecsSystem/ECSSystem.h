@@ -45,7 +45,7 @@ namespace RDE {
      */
 
 
-    typedef unsigned int SystemRef;
+    typedef int SystemRef;
 
     /**
      * @brief Interface that EVERY user-defined ECS system MUST follow.
@@ -58,7 +58,7 @@ namespace RDE {
             /**
              * @brief It sets the order of updating the system.
              */
-            uint updateOrder = -1;
+            int updateOrder = -1;
 
             /**
              * @brief Reference of the system.

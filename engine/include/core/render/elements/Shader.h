@@ -5,13 +5,14 @@
 #include <unordered_map>
 
 #include "core/Core.h"
-#include "core/Enums.h"
-#if IS_ANDROID()
-    #include <GLES3/gl32.h>
+#ifdef __EMSCRIPTEN__
+#include <GLES3/gl32.h>
+#elif IS_ANDROID()
+#include <GLES3/gl32.h>
 #elif IS_IOS()
-    #include <OpenGLES/ES3/gl.h>
+#include <OpenGLES/ES3/gl.h>
 #else
-    #include "glad/glad.h"
+#include "glad/glad.h"
 #endif
 
 #include "core/systems/fileSystem/FileManager.h"

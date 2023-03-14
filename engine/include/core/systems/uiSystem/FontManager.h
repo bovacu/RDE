@@ -26,10 +26,10 @@ namespace RDE {
         Vec2F  offset;
     };
 
-	typedef std::unordered_map<char, CharInfo> CharMap;
+    typedef std::unordered_map<char, CharInfo> CharMap;
 
     class FontManager;
-	class FileManager;
+    class FileManager;
 
     /**
      * @brief This struct contains all the information needed to render text with this specific font.
@@ -40,9 +40,9 @@ namespace RDE {
 
         private:
             Texture texture;
-			Vec2I atlasSize {0, 0};
+            Vec2I atlasSize {0, 0};
             int fontSize = -1;
-			std::unordered_map<char, CharInfo> characters;
+            std::unordered_map<char, CharInfo> characters;
             std::string fontName;
             std::string originalPath;
             float biggestCharHeight = 0;
@@ -68,7 +68,7 @@ namespace RDE {
              * @brief Returns all of the characters information.
              * @return CharInfo*
              */
-			CharMap& getChars();
+            CharMap& getChars();
 
             /**
              * @brief Returns the font name.

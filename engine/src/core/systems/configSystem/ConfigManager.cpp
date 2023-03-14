@@ -17,7 +17,6 @@
 namespace RDE {
 
     void ConfigManager::loadRDEConfig(RDEConfig* _config, FileManager* _manager) {
-
         auto _configPath = "assets/config/desktop.json";
 
         #if IS_ANDROID()

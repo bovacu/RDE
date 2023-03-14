@@ -7,7 +7,9 @@
 #include <SDL_mouse.h>
 #include <SDL_stdinc.h>
 
-#if IS_ANDROID()
+#ifdef __EMSCRIPTEN__
+    #include <GLES3/gl32.h>
+#elif IS_ANDROID()
     #include <GLES3/gl32.h>
 #elif IS_IOS()
     #include <OpenGLES/ES3/gl.h>
@@ -28,10 +30,15 @@ namespace RDE {
         Util::Log::debug("Creating window ", _config->windowData.title, " (", _config->windowData.size.x, _config->windowData.size.y, ")");
         #endif
 
+        #ifndef __EMSCRIPTEN__
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
             Util::Log::error("At least one module of SDL couldn't be initialized, so can't start the engine: ", SDL_GetError());
-            return;
         }
+        #else
+        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_EVENTS) < 0) {
+            Util::Log::error("At least one module of SDL couldn't be initialized, so can't start the engine: ", SDL_GetError());
+        }
+        #endif
 
         SDL_version compiled;
         SDL_version linked;

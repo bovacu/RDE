@@ -70,7 +70,10 @@ namespace RDE {
 
     void ImGuiScene::onInit() {
         // Setup Dear ImGui context
+        #ifndef __EMSCRIPTEN__
         IMGUI_CHECKVERSION();
+        #endif
+
         i_Context = ImGui::CreateContext();
 //        p_Context = ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -95,7 +98,12 @@ namespace RDE {
 
         // Setup Platform/Renderer bindings
         ImGui_ImplSDL2_InitForOpenGL(window, engine->getWindow()->getContext());
+        
+        #ifdef __EMSCRIPTEN__
+        ImGui_ImplOpenGL3_Init("#version 300 es");
+        #else
         ImGui_ImplOpenGL3_Init("#version 410");
+        #endif
 
         for(auto& _state : State::stateToNameDict) {
             plotBuffers[_state.first] = {};
@@ -292,14 +300,16 @@ namespace RDE {
         if(ImGui::Checkbox("Fullscreen", &_fullscreen))
             engine->getWindow()->setFullscreen(_fullscreen);
 
-		if(ImGui::Checkbox("Show triangle lines", &_triangleLines)) {
-			if(_triangleLines) {
-				glEnable(GL_POLYGON_SMOOTH);
-				glHint(GL_POLYGON_SMOOTH, GL_NICEST);
-			} else {
-				glDisable(GL_POLYGON_SMOOTH);
-			}
-		}
+		#ifndef __EMSCRIPTEN__
+        if(ImGui::Checkbox("Show triangle lines", &_triangleLines)) {
+            if(_triangleLines) {
+                glEnable(GL_POLYGON_SMOOTH);
+                glHint(GL_POLYGON_SMOOTH, GL_NICEST);
+            } else {
+                glDisable(GL_POLYGON_SMOOTH);
+            }
+        }
+        #endif
 
         const char* _resolutions[] = { "2560x1440", "1920x1080", "1366x768", "1280x720", "1920x1200", "1680x1050",
                                        "1440x900" ,"1280x800" ,"1024x768" ,"800x600", "800x480","640x480", "320x240"

@@ -439,7 +439,7 @@ namespace RDE {
 
             template <typename Arg1, typename... Args>
             void info(Arg1&& _arg1, Args&&... args) {
-                #if IS_WINDOWS() || IS_MOBILE()
+                #if IS_WINDOWS() || IS_MOBILE() || defined(__EMSCRIPTEN__)
                 std::cout << "[INFO] ";
                 __printer("", "", _arg1, args...);
                 #else
@@ -449,7 +449,7 @@ namespace RDE {
 
             template <typename Arg1, typename... Args>
             void warn(Arg1&& _arg1, Args&&... args) {
-                #if IS_WINDOWS() || IS_MOBILE()
+                #if IS_WINDOWS() || IS_MOBILE() || defined(__EMSCRIPTEN__)
                 std::cout << "[WARN] ";
                 __printer("", "", _arg1, args...);
                 #else
@@ -459,7 +459,7 @@ namespace RDE {
 
             template <typename Arg1, typename... Args>
             void error(Arg1&& _arg1, Args&&... args) {
-                #if IS_WINDOWS() || IS_MOBILE()
+                #if IS_WINDOWS() || IS_MOBILE() || defined(__EMSCRIPTEN__)
                 std::cout << "[ERROR] ";
                 __printer("", "", _arg1, args...);
                 #else
@@ -469,7 +469,7 @@ namespace RDE {
 
             template <typename Arg1, typename... Args>
             void success(Arg1&& _arg1, Args&&... args) {
-                #if IS_WINDOWS() || IS_MOBILE()
+                #if IS_WINDOWS() || IS_MOBILE() || defined(__EMSCRIPTEN__)
                 std::cout << "[SUCCESS] ";
                 __printer("", "", _arg1, args...);
                 #else
@@ -480,7 +480,7 @@ namespace RDE {
 
             template <typename Arg1, typename... Args>
             void debug(Arg1&& _arg1, Args&&... args) {
-                #if IS_WINDOWS() || IS_MOBILE()
+                #if IS_WINDOWS() || IS_MOBILE() || defined(__EMSCRIPTEN__)
                 std::cout << "[DEBUG] ";
                 __printer("", "", _arg1, args...);
                 #else
@@ -576,7 +576,11 @@ namespace RDE {
                 else if(strcmp(_extension.c_str(), "jpg") == 0 || strcmp(_extension.c_str(), "jpeg") == 0)
                     _surface = IMG_LoadJPG_RW(_imageFile);
                 else if(strcmp(_extension.c_str(), "svg") == 0)
+                    #ifndef __EMSCRIPTEN__
                     _surface = IMG_LoadSVG_RW(_imageFile);
+                    #else
+                    Util::Log::error("SVG file format not supported yet in WASM");
+                    #endif
                 else if(strcmp(_extension.c_str(), "bmp") == 0)
                     _surface = IMG_LoadBMP_RW(_imageFile);
                 else if(strcmp(_extension.c_str(), "ico") == 0)

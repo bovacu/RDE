@@ -14,6 +14,10 @@
 #include "core/graph/Scene.h"
 #include "core/systems/uiSystem/SceneManager.h"
 
+#ifdef __EMSCRIPTEN__
+#include "emscripten.h"
+#endif
+
 namespace RDE {
 
 
@@ -46,7 +50,7 @@ namespace RDE {
         window->setVSync(true);
         manager.renderManager.setClearColor(backgroundColor);
 
-        #if !IS_MOBILE()
+        #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
         FrameBufferSpecification _specs = {(uint32_t)window->getWindowSize().x,(uint32_t)window->getWindowSize().y};
         frameBuffer = new FrameBuffer(_specs, &manager);
         #endif
@@ -60,53 +64,60 @@ namespace RDE {
         manager.sceneManager.displayScene(_scene->getName());
     }
 
-    void Engine::onRun() {
-        float _accumulator = 0;
+    void Engine::loopCode() {
+        Uint64 _start = SDL_GetPerformanceCounter();
+        accumulator += dt;
 
-        Delta _dt = 0;
+        if(manager.sceneManager.getDisplayedScene() == nullptr) return;
 
-        while (window->isRunning()) {
-            Uint64 _start = SDL_GetPerformanceCounter();
-            _accumulator += _dt;
+        Profiler::beginFrame(dt);
+        manager.inputManager.pollEvents();
 
-            if(manager.sceneManager.getDisplayedScene() == nullptr) return;
+        if (window->shouldUpdateWindow()) {
+            Profiler::begin(ProfilerState::UPDATE);
+            onUpdate(dt);
+            Profiler::end(ProfilerState::UPDATE);
 
-            Profiler::beginFrame(_dt);
-            manager.inputManager.pollEvents();
-
-            if (window->shouldUpdateWindow()) {
-                Profiler::begin(ProfilerState::UPDATE);
-                onUpdate(_dt);
-                Profiler::end(ProfilerState::UPDATE);
-
-                Profiler::begin(ProfilerState::FIXED_UPDATE);
-                while (_accumulator >= fixedDelta) {
-                    _accumulator -= fixedDelta;
-                    onFixedUpdate(fixedDelta);
-                }
-                Profiler::end(ProfilerState::FIXED_UPDATE);
-
-
-                Profiler::begin(ProfilerState::LATE_UPDATE);
-                onLateUpdate(_dt);
-                Profiler::end(ProfilerState::LATE_UPDATE);
-
-                Profiler::begin(ProfilerState::RENDERING);
-                onRender(_dt);
-                Profiler::end(ProfilerState::RENDERING);
-
-                Profiler::begin(ProfilerState::INPUT);
-                window->update();
-                Profiler::end(ProfilerState::INPUT);
+            Profiler::begin(ProfilerState::FIXED_UPDATE);
+            while (accumulator >= fixedDelta) {
+                accumulator -= fixedDelta;
+                onFixedUpdate(fixedDelta);
             }
+            Profiler::end(ProfilerState::FIXED_UPDATE);
 
-            Profiler::endFrame();
-            manager.renderManager.resetDebugInfo();
 
-            Uint64 _end = SDL_GetPerformanceCounter();
-            float _elapsedMS = (float)(_end - _start) / (float)SDL_GetPerformanceFrequency();
-            _dt = _elapsedMS;
+            Profiler::begin(ProfilerState::LATE_UPDATE);
+            onLateUpdate(dt);
+            Profiler::end(ProfilerState::LATE_UPDATE);
+
+            Profiler::begin(ProfilerState::RENDERING);
+            onRender(dt);
+            Profiler::end(ProfilerState::RENDERING);
+
+            Profiler::begin(ProfilerState::INPUT);
+            window->update();
+            Profiler::end(ProfilerState::INPUT);
         }
+
+        Profiler::endFrame();
+        manager.renderManager.resetDebugInfo();
+
+        Uint64 _end = SDL_GetPerformanceCounter();
+        float _elapsedMS = (float)(_end - _start) / (float)SDL_GetPerformanceFrequency();
+        dt = _elapsedMS;
+    }
+
+    void Engine::onRun() {
+        accumulator = 0;
+        dt = 0;
+
+        #ifdef __EMSCRIPTEN__
+            loopCode();
+        #else
+        while (window->isRunning()) {
+            loopCode();
+        }
+        #endif
     }
 
     void Engine::onEvent(Event& _e) {
@@ -137,7 +148,7 @@ namespace RDE {
     }
 
     void Engine::onRender(Delta _dt) {
-        #if !IS_MOBILE()
+        #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
             frameBuffer->bind();
         #endif
 
@@ -145,7 +156,7 @@ namespace RDE {
         manager.sceneManager.getDisplayedScene()->onInnerRender(_dt);
         manager.sceneManager.getDisplayedScene()->onInnerDebugRender(_dt);
 
-        #if !IS_MOBILE()
+        #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
             frameBuffer->unbind();
         #endif
 
@@ -174,7 +185,7 @@ namespace RDE {
         int _width, _height;
         SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
 
-        #if !IS_MOBILE()
+        #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
         frameBuffer->resize(_width, _height);
         #endif
         manager.sceneManager.getDisplayedScene()->mainCamera->setCameraSize(_width, _height);
@@ -193,9 +204,14 @@ namespace RDE {
     }
 
     void Engine::destroy() {
+
+        #ifdef __EMSCRIPTEN__
+        emscripten_cancel_main_loop();
+        #endif
+
         manager.destroy();
 
-        #if !IS_MOBILE()
+        #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
         delete frameBuffer;
         delete imGuiLayer;
         delete window;

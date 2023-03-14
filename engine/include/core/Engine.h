@@ -9,7 +9,7 @@
 #include "core/platform/Platform.h"
 #include "core/DeviceInfoProvider.h"
 
-int main(int argc, char** argv);
+// int main(int argc, char** argv);
 
 namespace RDE {
 
@@ -174,6 +174,9 @@ namespace RDE {
 
             Platform platform;
 
+            Delta dt {};
+            int accumulator = 0;
+
         public:
             Engine();
 
@@ -298,6 +301,11 @@ namespace RDE {
              * @return Logs
              */
             Logs componentsCommands(const std::vector<std::string>& _args);
+
+            /**
+             * @brief This function will contain the code of the inner main loop without the while, so it can also be passed to Emscripten 
+             */
+            void loopCode();
     };
 
     /**
