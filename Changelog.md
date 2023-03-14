@@ -1,5 +1,12 @@
 # This is the changelog of the engine (created the 07/03/2023 dd/mm/yyyy) and I will be posting in here the updates to have a clear vision on the additions and improvements of the engine
 
+## Changelog 0.1.5 (14/03/2023) Basic module for WASM platform
+- Almost all funcionality that mobile and desktop have.
+- Space is not recognize as a character in WASM (TO FIX).
+- Need to improve performance.
+- Need to make a better compiling script with more options as in desktop and mobile.
+- ImGui is working correctly.
+
 ### Changelog 0.1.0 (07/03/2023) This is the first changelog and I will add some of the features, not all.
 - Project compiling on:
   - Windows: Clang and Visual Studio
