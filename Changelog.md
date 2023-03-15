@@ -1,5 +1,10 @@
 # This is the changelog of the engine (created the 07/03/2023 dd/mm/yyyy) and I will be posting in here the updates to have a clear vision on the additions and improvements of the engine
 
+## Changelog 0.1.5.1 (15/03/2023) Bug fixing
+- Text (UI and non UI) can now change font and it resizes correctly
+- UI camera now applies correct transformations
+- Found big error on Inputs where check functions changed the state of the Input, so that check could only be done once per frame. Now this is fixed except for the ControllerInput
+
 ## Changelog 0.1.5 (14/03/2023) Basic module for WASM platform
 - Almost all funcionality that mobile and desktop have.
 - Space is not recognize as a character in WASM (TO FIX).
