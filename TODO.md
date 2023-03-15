@@ -24,7 +24,8 @@ to not forget about future tasks. A lot of features are already done, but not li
   - [ ] Sub-Canvases
   - [ ] UIImage partial radial rendering inverse (not implemented yet and is the last one)
   - [ ] Focus from one focusable UI element to another with 'Tab'
-  - [ ] Make SDF font rendering to render also small text (maybe for smaller texts just use non-SDF rendering, will see)
+  - [x] Make SDF font rendering to render also small text (maybe for smaller texts just use non-SDF rendering, will see)
+  - [x] Change size of text on runtime 
 
 - [ ] Prefabs
   - [ ] Definition and configuration
@@ -57,6 +58,8 @@ to not forget about future tasks. A lot of features are already done, but not li
 
 ## TO FIX
 - [ ] Two or more Sliders are behaving in a strange way
+- [ ] Slider not stretching on vertical
+- [ ] UIButton text not expanding correctly to anchor-stretch
 - [ ] ImGui for mobile
 - [ ] On mobile, OnMouseClick event is sometimes not recognized as a touch input, fix this on both platforms
 - [ ] When exporting the sheets data from TexturePacker, it sets the absolute path, need to fix this to use the relative path to the project
@@ -69,6 +72,7 @@ to not forget about future tasks. A lot of features are already done, but not li
 - [ ] UI
   - [ ] UIInput
    - [ ] Add right and left key movement
+  - [ ] Make size of text different from the size of the string text 
 
 - [ ] Particle System
   - [ ] More customization
