@@ -129,12 +129,12 @@ namespace RDE {
             /**
              * @brief Map ControllerButton -> State.
              */
-            std::unordered_map<RDE_CONTROLLER_BUTTON_, int>  pressedGamepadButtons;
+            std::unordered_map<RDE_CONTROLLER_BUTTON_, RDE_INPUT_STATUS_>  pressedGamepadButtons;
 
             /**
              * @brief Map ControllerAxis -> State.
              */
-            std::unordered_map<RDE_CONTROLLER_AXIS_, int>  pressedGamepadAxis;
+			std::unordered_map<RDE_CONTROLLER_AXIS_, RDE_INPUT_STATUS_>  pressedGamepadAxis;
 
             /**
              * @brief Left joystick value
@@ -187,35 +187,35 @@ namespace RDE {
 
             /**
              * @brief Returns the state of a button.
-             * @param _keyOrButton Controller button
+			 * @param _button RDE_CONTROLLER_BUTTON_
              * @param _controllerID Controller ID
-             * @return int
+			 * @return RDE_INPUT_STATUS_
              */
-            int getButtonState(int _keyOrButton, int _controllerID = 0);
+			RDE_INPUT_STATUS_ getButtonState(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
 
             /**
              * @brief Sets the state of a button.
-             * @param _keyOrButton Controller button.
-             * @param _state State
+			 * @param _button RDE_CONTROLLER_BUTTON_
+			 * @param _state RDE_INPUT_STATUS_
              * @param _controllerID Controller ID
              */
-            void setButtonState(int _keyOrButton, int _state, int _controllerID = 0);
+			void setButtonState(RDE_CONTROLLER_BUTTON_ _button, RDE_INPUT_STATUS_ _state, int _controllerID = 0);
 
             /**
              * @brief Returns the state of an axis.
-             * @param _keyOrButton Controller axis
+			 * @param _axis RDE_CONTROLLER_AXIS_
              * @param _controllerID Controller ID
-             * @return int
+			 * @return RDE_INPUT_STATUS_
              */
-            int getAxisState(int _keyOrButton, int _controllerID = 0);
+			RDE_INPUT_STATUS_ getAxisState(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
 
             /**
              * @brief Sets the state of an axis.
-             * @param _keyOrButton Controller axis.
-             * @param _state State
+			 * @param _axis RDE_CONTROLLER_AXIS_.
+			 * @param _state RDE_INPUT_STATUS_
              * @param _controllerID Controller ID
              */
-            void setAxisState(int _keyOrButton, int _state, int _controllerID = 0);
+			void setAxisState(RDE_CONTROLLER_AXIS_ _axis, RDE_INPUT_STATUS_ _state, int _controllerID = 0);
 
             /**
              * @brief Makes the controller vibrate.

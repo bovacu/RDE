@@ -296,6 +296,15 @@ namespace RDE {
              */
             bool isGamepadAxisJustPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
 
+			
+			/**
+			 * @brief  Returns true if the axis button is released and won't return true until the axis button is pressed and released again.
+			 * @param _axis Controller axis
+			 * @param _controllerID Controller ID
+			 * @return bool
+			 */
+			bool isGamepadAxisJustReleased(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
+
             /**
              * @brief Returns true while the axis button is being pressed.
              * @param _axis Controller Axis

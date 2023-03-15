@@ -23,6 +23,12 @@ namespace RDE {
 	std::vector<RDE_KEYBOARD_KEY_> justPressedKeys;
 	std::vector<RDE_KEYBOARD_KEY_> justReleasedKeys;
 
+	std::vector<RDE_CONTROLLER_BUTTON_> justPressedControllerButtons;
+	std::vector<RDE_CONTROLLER_BUTTON_> justReleasedControllerButtons;
+
+	std::vector<RDE_CONTROLLER_AXIS_> justPressedControllerAxis;
+	std::vector<RDE_CONTROLLER_AXIS_> justReleasedControllerAxis;
+
 	std::vector<int> justPressedFingers;
 	std::vector<int> justReleasedFingers;
 
@@ -181,64 +187,90 @@ namespace RDE {
 
     bool InputManager::isGamepadButtonJustPressed(RDE_CONTROLLER_BUTTON_ _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
-        if(!_controllerInput->hasController(_controllerID)) return false;
+        if(!_controllerInput->hasController(_controllerID)) {
+			return false;
+		}
 
-        if(_controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1) {
-            _controllerInput->setButtonState((int)_button, 2, _controllerInput->playerIndexToInnerControllerID(_controllerID));
-            return true;
-        }
+		if(_controllerInput->getButtonState(_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == RDE_INPUT_STATUS_JUST_PRESSED) {
+			justPressedControllerButtons.emplace_back(_button);
+			return true;
+		}
 
-        return false;
+		return false;
     }
 
 	bool InputManager::isGamepadButtonJustReleased(RDE_CONTROLLER_BUTTON_ _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) {
-            Util::Log::warn("IS FALSE FOR ", _controllerID);
             return false;
         }
 
-        if(_controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0) {
-            _controllerInput->setButtonState((int)_button, 3, _controllerInput->playerIndexToInnerControllerID(_controllerID));
-            return true;
-        }
+		if(_controllerInput->getButtonState(_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == RDE_INPUT_STATUS_JUST_RELEASED) {
+			justReleasedControllerButtons.emplace_back(_button);
+			return true;
+		}
 
-        return false;
+		return false;
     }
 
 	bool InputManager::isGamepadButtonPressed(RDE_CONTROLLER_BUTTON_ _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
-        if(!_controllerInput->hasController(_controllerID)) return false;
-        return _controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1;
+		if(!_controllerInput->hasController(_controllerID)) {
+			return false;
+		}
+		return _controllerInput->getButtonState(_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == RDE_INPUT_STATUS_KEEP_PRESSED;
     }
 
 	bool InputManager::isGamepadButtonReleased(RDE_CONTROLLER_BUTTON_ _button, int _controllerID) {
         auto* _controllerInput = controllerInput;
-        if(!_controllerInput->hasController(_controllerID)) return false;
-        return _controllerInput->getButtonState((int)_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
-    }
-
-    bool InputManager::isGamepadAxisPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID) {
-        auto* _controllerInput = controllerInput;
-        if(!_controllerInput->hasController(_controllerID)) return false;
-        return _controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
+		if(!_controllerInput->hasController(_controllerID)) {
+			return false;
+		}
+		return _controllerInput->getButtonState(_button, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == RDE_INPUT_STATUS_KEEP_RELEASED;
     }
 
 	bool InputManager::isGamepadAxisJustPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID) {
         auto* _controllerInput = controllerInput;
-        if(!_controllerInput->hasController(_controllerID)) return false;
-        if(_controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 1) {
-            _controllerInput->setAxisState((int)_axis, 2, _controllerInput->playerIndexToInnerControllerID(_controllerID));
-            return true;
-        }
+		if(!_controllerInput->hasController(_controllerID)) {
+			return false;
+		}
+        
+		if(_controllerInput->getAxisState(_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == RDE_INPUT_STATUS_JUST_PRESSED) {
+			justPressedControllerAxis.emplace_back(_axis);
+			return true;
+		}
 
-        return false;
+		return false;
     }
+
+	bool InputManager::isGamepadAxisJustReleased(RDE_CONTROLLER_AXIS_ _axis, int _controllerID) {
+		auto* _controllerInput = controllerInput;
+		if(!_controllerInput->hasController(_controllerID)) {
+			return false;
+		}
+        
+		if(_controllerInput->getAxisState(_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == RDE_INPUT_STATUS_JUST_RELEASED) {
+			justReleasedControllerAxis.emplace_back(_axis);
+			return true;
+		}
+
+		return false;
+	}
+
+	bool InputManager::isGamepadAxisPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID) {
+		auto* _controllerInput = controllerInput;
+		if (!_controllerInput->hasController(_controllerID)) {
+			return false;
+		}
+		return _controllerInput->getAxisState(_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == RDE_INPUT_STATUS_KEEP_PRESSED;
+	}
 
 	bool InputManager::isGamepadAxisReleased(RDE_CONTROLLER_AXIS_ _axis, int _controllerID) {
         auto* _controllerInput = controllerInput;
-        if(!_controllerInput->hasController(_controllerID)) return false;
-        return _controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
+        if(!_controllerInput->hasController(_controllerID)) {
+			return false;
+		}
+		return _controllerInput->getAxisState(_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == RDE_INPUT_STATUS_KEEP_RELEASED;
     }
 
 	bool InputManager::gamepadVibrate(int _controllerID, const std::string& _vibrationEffectName) {
@@ -379,6 +411,28 @@ namespace RDE {
 			mobileInput->setState(justReleasedFingers[_i], RDE_INPUT_STATUS_KEEP_RELEASED);
 		}
 		justReleasedFingers.clear();
+
+
+
+		for(auto _i = 0; _i < justPressedControllerButtons.size(); _i++) {
+			controllerInput->setButtonState(justPressedControllerButtons[_i], RDE_INPUT_STATUS_KEEP_PRESSED);
+		}
+		justPressedControllerButtons.clear();
+
+		for(auto _i = 0; _i < justReleasedControllerButtons.size(); _i++) {
+			controllerInput->setButtonState(justReleasedControllerButtons[_i], RDE_INPUT_STATUS_KEEP_RELEASED);
+		}
+		justReleasedControllerButtons.clear();
+
+		for(auto _i = 0; _i < justPressedControllerAxis.size(); _i++) {
+			controllerInput->setAxisState(justPressedControllerAxis[_i], RDE_INPUT_STATUS_KEEP_PRESSED);
+		}
+		justPressedControllerAxis.clear();
+
+		for(auto _i = 0; _i < justReleasedControllerAxis.size(); _i++) {
+			controllerInput->setAxisState(justReleasedControllerAxis[_i], RDE_INPUT_STATUS_KEEP_RELEASED);
+		}
+		justReleasedControllerAxis.clear();
 	}
 
     void InputManager::destroy() {
