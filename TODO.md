@@ -43,7 +43,7 @@ to not forget about future tasks. A lot of features are already done, but not li
 - [ ] Coroutines
 - [ ] Implement algorithms for terrain generation (Cellular Automata and Wave Function Collapse) 
 - [ ] Engine and project manager to not use Python so it does not depend on it to build (maybe, let's see how much effort is this)
-- [ ] WASM port
+- [x] WASM port
 - [ ] Switch port
 - [ ] 2D lights
 - [ ] Networking layer
