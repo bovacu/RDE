@@ -68,6 +68,8 @@ namespace RDE {
 
             bool dirty = false;
 
+			bool enabled = true;
+
         public:
             Node* node;
 

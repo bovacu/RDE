@@ -252,7 +252,7 @@ namespace RDE {
         auto& _renderManager = engine->manager.renderManager;
 
         for(auto* _camera : cameras) {
-            if(!_camera->node->hasComponent<Active>()) continue;
+            if(!_camera->node->hasComponent<Active>() && _camera->isEnabled()) continue;
 
             _renderManager.beginDraw(_camera, _camera->node->getComponent<Transform>());
             _camera->update();
@@ -274,8 +274,8 @@ namespace RDE {
     void Scene::onInnerRenderUI(Delta _dt) {
         auto& _renderManager = engine->manager.renderManager;
 
-        if(!canvas->camera->node->hasComponent<Active>()) return;
-
+		if(!canvas->camera->node->hasComponent<Active>() && canvas->camera->isEnabled()) return;
+		canvas->camera->update();
         _renderManager.beginDraw(canvas->camera, (Transform*)canvas->camera->node->getComponent<UITransform>());
 
         canvas->batches.clear();
