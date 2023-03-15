@@ -57,7 +57,7 @@ to not forget about future tasks. A lot of features are already done, but not li
 
 
 ## TO FIX
-- [ ] Two or more Sliders are behaving in a strange way
+- [x] Two or more Sliders are behaving in a strange way
 - [ ] Slider not stretching on vertical
 - [ ] UIButton text not expanding correctly to anchor-stretch
 - [ ] ImGui for mobile
@@ -67,6 +67,7 @@ to not forget about future tasks. A lot of features are already done, but not li
   - [ ] Android
   - [ ] iOS
   - [ ] WASM 
+- [ ] Fix ControllerInput the same way as the other controllers
 
 ## TO IMPROVE
 - [ ] UI
