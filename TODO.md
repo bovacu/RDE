@@ -58,6 +58,8 @@ to not forget about future tasks. A lot of features are already done, but not li
 
 ## TO FIX
 - [ ] Two or more Sliders are behaving in a strange way
+- [ ] Slider not stretching on vertical
+- [ ] UIButton text not expanding correctly to anchor-stretch
 - [ ] ImGui for mobile
 - [ ] On mobile, OnMouseClick event is sometimes not recognized as a touch input, fix this on both platforms
 - [ ] When exporting the sheets data from TexturePacker, it sets the absolute path, need to fix this to use the relative path to the project
