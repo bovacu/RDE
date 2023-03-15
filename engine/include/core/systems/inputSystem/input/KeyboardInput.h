@@ -20,7 +20,7 @@ namespace RDE {
             /**
              * @brief Map KeyCode -> State.
              */
-            std::unordered_map<RDE_KEYBOARD_KEY_, int>  pressedKeyboardKeys;
+			std::unordered_map<RDE_KEYBOARD_KEY_, RDE_INPUT_STATUS_>  pressedKeyboardKeys;
 
         public:
             /**
@@ -32,17 +32,17 @@ namespace RDE {
 
             /**
              * @brief Returns the state of a key.
-             * @param _keyOrButton Key
-             * @return int
+			 * @param _keyOrButton RDE_KEYBOARD_KEY_
+			 * @return RDE_INPUT_STATUS_
              */
-            int getState(int _keyOrButton);
+			RDE_INPUT_STATUS_ getState(RDE_KEYBOARD_KEY_ _key);
 
             /**
              * @brief Sets the state of a key.
-             * @param _keyOrButton Key
-             * @param _state State
+			 * @param _keyOrButton RDE_KEYBOARD_KEY_
+		     * @param _state RDE_INPUT_STATUS_
              */
-            void setState(int _keyOrButton, int _state);
+			void setState(RDE_KEYBOARD_KEY_ _key, RDE_INPUT_STATUS_ _state);
 
         private:
             /**

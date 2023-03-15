@@ -18,7 +18,7 @@ namespace RDE {
             /**
              * @brief Map FingerID -> State.
              */
-            std::unordered_map<int, int> pressedFingers;
+			std::unordered_map<int, RDE_INPUT_STATUS_> pressedFingers;
 
             /**
              * @brief Pressure used on the clicks.
@@ -61,16 +61,16 @@ namespace RDE {
             /**
              * @brief Gets the state of a finger.
              * @param _keyOrButton Finger
-             * @return int
+			 * @return RDE_INPUT_STATUS_
              */
-            int getState(int _keyOrButton);
+			RDE_INPUT_STATUS_ getState(int _finger);
 
             /**
              * @brief Sets the state of a finger.
              * @param _keyOrButton Finger
-             * @param _state State
+			 * @param _state RDE_INPUT_STATUS_
              */
-            void setState(int _keyOrButton, int _state);
+			void setState(int _finger, RDE_INPUT_STATUS_ _state);
 
         private:
             /**

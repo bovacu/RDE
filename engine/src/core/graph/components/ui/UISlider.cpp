@@ -88,8 +88,8 @@ namespace RDE {
             auto _distanceFromLowerPoint = _posX - _limits.v[0];
             setFilledPercentage(_distanceFromLowerPoint / getSize().x);
         }
-
-		if(node->manager->inputManager.isMouseJustReleased(RDE_MOUSE_BUTTON_LEFT) && mouseDown) {
+		
+		if(mouseDown && node->manager->inputManager.isMouseJustReleased(RDE_MOUSE_BUTTON_LEFT)) {
             mouseDown = false;
         }
     }

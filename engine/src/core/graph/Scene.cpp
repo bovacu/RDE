@@ -94,13 +94,13 @@ namespace RDE {
 				case RDE_UI_UPDATABLE_NODE_NONE:
                 break;
 				case RDE_UI_UPDATABLE_NODE_INPUT: {
-                ((UIInput*)_it.updatableData.updatable)->onUpdate(_dt);
-                break;
-            }
+					((UIInput*)_it.updatableData.updatable)->onUpdate(_dt);
+					break;
+				}
 				case RDE_UI_UPDATABLE_NODE_SLIDER: {
-                ((UISlider*)_it.updatableData.updatable)->onUpdate(_dt);
-                break;
-            }
+					((UISlider*)_it.updatableData.updatable)->onUpdate(_dt);
+					break;
+            	}
             }
         }
     }

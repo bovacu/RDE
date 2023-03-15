@@ -4,6 +4,14 @@
 
 namespace RDE {
 
+	enum RDE_INPUT_STATUS_ {
+		RDE_INPUT_STATUS_UNINITIALIZED 	= 0,
+		RDE_INPUT_STATUS_JUST_PRESSED 	= 1,
+		RDE_INPUT_STATUS_KEEP_PRESSED 	= 2,
+		RDE_INPUT_STATUS_JUST_RELEASED 	= 3,
+		RDE_INPUT_STATUS_KEEP_RELEASED 	= 4,
+	};
+
 	/**
 	 * @brief Status of the mouse entering and exiting.
 	*/

@@ -156,6 +156,12 @@ namespace RDE {
              */
             void pollEvents();
 
+			/**
+			* @attention This is not meant to be called by end-users.
+			* @brief Loops over all the captured events by SDL on a frame and handles them.
+			*/
+			void syncEvents();
+
         public:
             /**
              * @brief Returns true if the key is pressed and won't return true until the key is released and pressed again.

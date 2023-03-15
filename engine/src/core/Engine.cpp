@@ -94,6 +94,8 @@ namespace RDE {
             onRender(dt);
             Profiler::end(ProfilerState::RENDERING);
 
+			manager.inputManager.syncEvents();
+
             Profiler::begin(ProfilerState::INPUT);
             window->update();
             Profiler::end(ProfilerState::INPUT);

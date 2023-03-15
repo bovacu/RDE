@@ -23,18 +23,18 @@ namespace RDE {
         events[RDE_SYSTEM_EVENT_MOUSE_SCROLLED_E] = mseDel;
 
         pressedMouseButtons = {
-			{RDE_MOUSE_BUTTON_0,        -1},
-			{RDE_MOUSE_BUTTON_1,        -1},
-			{RDE_MOUSE_BUTTON_2,        -1},
-			{RDE_MOUSE_BUTTON_3,        -1},
-			{RDE_MOUSE_BUTTON_4,        -1},
-			{RDE_MOUSE_BUTTON_5,        -1},
-			{RDE_MOUSE_BUTTON_6,        -1},
-			{RDE_MOUSE_BUTTON_7,        -1},
-			{RDE_MOUSE_BUTTON_LAST,     -1},
-			{RDE_MOUSE_BUTTON_LEFT,     -1},
-			{RDE_MOUSE_BUTTON_MIDDLE,   -1},
-			{RDE_MOUSE_BUTTON_RIGHT,    -1},
+			{ RDE_MOUSE_BUTTON_0,        RDE_INPUT_STATUS_KEEP_RELEASED },
+			{ RDE_MOUSE_BUTTON_1,        RDE_INPUT_STATUS_KEEP_RELEASED },
+			{ RDE_MOUSE_BUTTON_2,        RDE_INPUT_STATUS_KEEP_RELEASED },
+			{ RDE_MOUSE_BUTTON_3,        RDE_INPUT_STATUS_KEEP_RELEASED },
+			{ RDE_MOUSE_BUTTON_4,        RDE_INPUT_STATUS_KEEP_RELEASED },
+			{ RDE_MOUSE_BUTTON_5,        RDE_INPUT_STATUS_KEEP_RELEASED },
+			{ RDE_MOUSE_BUTTON_6,        RDE_INPUT_STATUS_KEEP_RELEASED },
+			{ RDE_MOUSE_BUTTON_7,        RDE_INPUT_STATUS_KEEP_RELEASED },
+			{ RDE_MOUSE_BUTTON_LAST,     RDE_INPUT_STATUS_KEEP_RELEASED },
+			{ RDE_MOUSE_BUTTON_LEFT,     RDE_INPUT_STATUS_KEEP_RELEASED },
+			{ RDE_MOUSE_BUTTON_MIDDLE,   RDE_INPUT_STATUS_KEEP_RELEASED },
+			{ RDE_MOUSE_BUTTON_RIGHT,    RDE_INPUT_STATUS_KEEP_RELEASED },
         };
     }
 
@@ -47,20 +47,19 @@ namespace RDE {
     void MouseInput::onMouseDown(SDL_Event& _event) {
 		auto _key = static_cast<RDE_MOUSE_BUTTON_>(_event.button.button);
 
+		pressedMouseButtons[_key] = RDE_INPUT_STATUS_JUST_PRESSED;
+
         MouseButtonPressedEvent _e(_key);
         window->consumeEvent(_e);
-
-        if(pressedMouseButtons[_key] == 2) return;
-        pressedMouseButtons[_key] = 1;
     }
 
     void MouseInput::onMouseUp(SDL_Event& _event) {
 		auto _key = static_cast<RDE_MOUSE_BUTTON_>(_event.button.button);
 
+		pressedMouseButtons[_key] = RDE_INPUT_STATUS_JUST_RELEASED;
+
         MouseButtonReleasedEvent _e(_key);
         window->consumeEvent(_e);
-
-        pressedMouseButtons[_key] = 0;
     }
 
     void MouseInput::onMouseScroll(SDL_Event& _event) {
@@ -68,12 +67,12 @@ namespace RDE {
         window->consumeEvent(_e);
     }
 
-    int MouseInput::getState(int _keyOrButton) {
-		return pressedMouseButtons[(RDE_MOUSE_BUTTON_)_keyOrButton];
+	RDE_INPUT_STATUS_ MouseInput::getState(RDE_MOUSE_BUTTON_ _keyOrButton) {
+		return pressedMouseButtons[_keyOrButton];
     }
 
-    void MouseInput::setState(int _keyOrButton, int _state) {
-		pressedMouseButtons[(RDE_MOUSE_BUTTON_)_keyOrButton] = _state;
+	void MouseInput::setState(RDE_MOUSE_BUTTON_ _keyOrButton, RDE_INPUT_STATUS_ _state) {
+		pressedMouseButtons[_keyOrButton] = _state;
     }
 
     Vec2F MouseInput::getMousePosition() const {

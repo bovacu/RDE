@@ -17,6 +17,15 @@
 
 namespace RDE {
 
+	std::vector<RDE_MOUSE_BUTTON_> justClickedButtons;
+	std::vector<RDE_MOUSE_BUTTON_> justReleasedButtons;
+
+	std::vector<RDE_KEYBOARD_KEY_> justPressedKeys;
+	std::vector<RDE_KEYBOARD_KEY_> justReleasedKeys;
+
+	std::vector<int> justPressedFingers;
+	std::vector<int> justReleasedFingers;
+
     bool Input::pollEvent(SDL_Event& _event) {
         if(events.find((RDE_SYSTEM_EVENT_)_event.type) == events.end()) {
             return false;
@@ -81,61 +90,58 @@ namespace RDE {
     }
 
     bool InputManager::isKeyJustPressed(RDE_KEYBOARD_KEY_ _key) {
-        auto* _keyboardInput = keyboardInput;
-        if(_keyboardInput->getState((int)_key) == 1) {
-            _keyboardInput->setState((int)_key, 2);
-            return true;
-        }
+		if(keyboardInput->getState(_key) == RDE_INPUT_STATUS_JUST_PRESSED) {
+			justPressedKeys.emplace_back(_key);
+			return true;
+		}
 
-        return false;
+		return false;
     }
 
 	bool InputManager::isKeyJustReleased(RDE_KEYBOARD_KEY_ _key) {
-        auto* _keyboardInput = keyboardInput;
-        if(_keyboardInput->getState((int)_key) == 0) {
-            _keyboardInput->setState((int)_key, 3);
-            return true;
-        }
+		if(keyboardInput->getState(_key) == RDE_INPUT_STATUS_JUST_RELEASED) {
+			justReleasedKeys.emplace_back(_key);
+			return true;
+		}
 
-        return false;
+		return false;
     }
 
 	bool InputManager::isKeyPressed(RDE_KEYBOARD_KEY_ _key) {
-        return keyboardInput->getState((int)_key) == 1;
+		return keyboardInput->getState(_key) == RDE_INPUT_STATUS_KEEP_PRESSED;
     }
 
 	bool InputManager::isKeyReleased(RDE_KEYBOARD_KEY_ _key) {
-        return keyboardInput->getState((int)_key) == 0;
+		return keyboardInput->getState(_key) == RDE_INPUT_STATUS_KEEP_RELEASED;
     }
+
 
 
 
     bool InputManager::isMouseJustPressed(RDE_MOUSE_BUTTON_ _mouseButton) {
-        auto* _mouseInput = mouseInput;
-        if(_mouseInput->getState((int)_mouseButton) == 1) {
-            _mouseInput->setState((int)_mouseButton, 2);
-            return true;
-        }
+		if(mouseInput->getState(_mouseButton) == RDE_INPUT_STATUS_JUST_PRESSED) {
+			justClickedButtons.emplace_back(_mouseButton);
+			return true;
+		}
 
-        return false;
+		return false;
     }
 
-	bool InputManager::isMouseJustReleased(RDE_MOUSE_BUTTON_ _button) {
-        auto* _mouseInput = mouseInput;
-        if(_mouseInput->getState((int)_button) == 0) {
-            _mouseInput->setState((int)_button, 3);
-            return true;
-        }
+	bool InputManager::isMouseJustReleased(RDE_MOUSE_BUTTON_ _mouseButton) {
+		if(mouseInput->getState(_mouseButton) == RDE_INPUT_STATUS_JUST_RELEASED) {
+			justReleasedButtons.emplace_back(_mouseButton);
+			return true;
+		}
 
-        return false;
+		return false;
     }
 
-	bool InputManager::isMousePressed(RDE_MOUSE_BUTTON_ _button) {
-        return mouseInput->getState((int)_button) == 1;
+	bool InputManager::isMousePressed(RDE_MOUSE_BUTTON_ _mouseButton) {
+		return mouseInput->getState(_mouseButton) == RDE_INPUT_STATUS_KEEP_PRESSED;
     }
 
-	bool InputManager::isMouseReleased(RDE_MOUSE_BUTTON_ _button) {
-        return  mouseInput->getState((int)_button) == 0;
+	bool InputManager::isMouseReleased(RDE_MOUSE_BUTTON_ _mouseButton) {
+		return mouseInput->getState(_mouseButton) == RDE_INPUT_STATUS_KEEP_RELEASED;
     }
 
     Vec2F InputManager::getMousePosScreenCoords(bool _centeredMiddleScreen) {
@@ -165,6 +171,9 @@ namespace RDE {
         float _y = _mousePos.y - (float)_wi->window->getWindowSize().y / 2.f + _camera.node->getTransform()->getPosition().y;
         return {_x, - _y};
     }
+
+
+
 
     bool InputManager::reassignController(int _controllerID, int _as) {
         return controllerInput->reassignController(_controllerID, _as);
@@ -232,41 +241,41 @@ namespace RDE {
         return _controllerInput->getAxisState((int)_axis, _controllerInput->playerIndexToInnerControllerID(_controllerID)) == 0;
     }
 
+	bool InputManager::gamepadVibrate(int _controllerID, const std::string& _vibrationEffectName) {
+		auto* _controllerInput = controllerInput;
+		if(!_controllerInput->hasController(_controllerID)) return false;
+		_controllerInput->vibrate(_vibrationEffectName, _controllerID);
+		return true;
+	}
+
+
+
+
+
     bool InputManager::isMobileScreenJustPressed(int _fingerID) {
-        auto* _mobileInput = mobileInput;
-        if(_mobileInput->getState(_fingerID) == 1) {
-            _mobileInput->setState(_fingerID, 2);
-            return true;
-        }
+		if(mobileInput->getState(_fingerID) == RDE_INPUT_STATUS_JUST_PRESSED) {
+			justPressedFingers.emplace_back(_fingerID);
+			return true;
+		}
 
-        return false;
+		return false;
     }
-
-    bool InputManager::gamepadVibrate(int _controllerID, const std::string& _vibrationEffectName) {
-        auto* _controllerInput = controllerInput;
-        if(!_controllerInput->hasController(_controllerID)) return false;
-        _controllerInput->vibrate(_vibrationEffectName, _controllerID);
-        return true;
-    }
-
-
-
 
     bool InputManager::isMobileScreenJustReleased(int _fingerID) {
-        auto* _mobileInput = mobileInput;
-        if(_mobileInput->getState(_fingerID) == 0) {
-            _mobileInput->setState(_fingerID, 3);
-            return true;
-        }
-        return false;
+		if(mobileInput->getState(_fingerID) == RDE_INPUT_STATUS_JUST_RELEASED) {
+			justReleasedFingers.emplace_back(_fingerID);
+			return true;
+		}
+
+		return false;
     }
 
     bool InputManager::isMobileScreenPressed(int _fingerID) {
-        return mobileInput->getState(_fingerID) == 1;
+		return mobileInput->getState(_fingerID) == RDE_INPUT_STATUS_KEEP_PRESSED;
     }
 
     bool InputManager::isMobileScreenRelease(int _fingerID) {
-        return mobileInput->getState(_fingerID) == 0;
+		return mobileInput->getState(_fingerID) == RDE_INPUT_STATUS_KEEP_RELEASED;
     }
 
     std::vector<RDE_SYSTEM_EVENT_> InputManager::getEventsIgnored(const RDE_INPUT_TYPE_& _inputType) {
@@ -335,6 +344,42 @@ namespace RDE {
             }
         }
     }
+
+	void InputManager::syncEvents() {
+		for(auto _i = 0; _i < justClickedButtons.size(); _i++) {
+			mouseInput->setState(justClickedButtons[_i], RDE_INPUT_STATUS_KEEP_PRESSED);
+		}
+		justClickedButtons.clear();
+
+		for(auto _i = 0; _i < justReleasedButtons.size(); _i++) {
+			mouseInput->setState(justReleasedButtons[_i], RDE_INPUT_STATUS_KEEP_RELEASED);
+		}
+		justReleasedButtons.clear();
+
+
+
+		for(auto _i = 0; _i < justPressedKeys.size(); _i++) {
+			keyboardInput->setState(justPressedKeys[_i], RDE_INPUT_STATUS_KEEP_PRESSED);
+		}
+		justPressedKeys.clear();
+
+		for(auto _i = 0; _i < justReleasedKeys.size(); _i++) {
+			keyboardInput->setState(justReleasedKeys[_i], RDE_INPUT_STATUS_KEEP_RELEASED);
+		}
+		justReleasedKeys.clear();
+
+
+
+		for(auto _i = 0; _i < justPressedFingers.size(); _i++) {
+			mobileInput->setState(justPressedFingers[_i], RDE_INPUT_STATUS_KEEP_PRESSED);
+		}
+		justPressedFingers.clear();
+
+		for(auto _i = 0; _i < justReleasedFingers.size(); _i++) {
+			mobileInput->setState(justReleasedFingers[_i], RDE_INPUT_STATUS_KEEP_RELEASED);
+		}
+		justReleasedFingers.clear();
+	}
 
     void InputManager::destroy() {
         delete windowInput;

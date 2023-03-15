@@ -16,7 +16,7 @@ namespace RDE {
             /**
              * @brief Map MouseCode -> State.
              */
-            std::unordered_map<RDE_MOUSE_BUTTON_, int>  pressedMouseButtons;
+			std::unordered_map<RDE_MOUSE_BUTTON_, RDE_INPUT_STATUS_>  pressedMouseButtons;
 
             /**
              * @brief Mouse position in screen.
@@ -33,17 +33,17 @@ namespace RDE {
 
             /**
              * @brief Gets the state of a button.
-             * @param _keyOrButton Button
-             * @return int
+			 * @param _keyOrButton RDE_MOUSE_BUTTON_
+			 * @return RDE_MOUSE_BUTTON_STATUS_
              */
-            int getState(int _keyOrButton);
+			RDE_INPUT_STATUS_ getState(RDE_MOUSE_BUTTON_ _mouseButton);
 
             /**
              * @brief Sets the state of a button.
-             * @param _keyOrButton Button
-             * @param _state State
+			 * @param _keyOrButton RDE_MOUSE_BUTTON_
+			 * @param _state RDE_MOUSE_BUTTON_STATUS_
              */
-            void setState(int _keyOrButton, int _state);
+			void setState(RDE_MOUSE_BUTTON_ _mouseButton, RDE_INPUT_STATUS_ _state);
 
             /**
              * @brief Gets the position of the mouse in World Coordinates.
