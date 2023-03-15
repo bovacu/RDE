@@ -24,7 +24,8 @@ to not forget about future tasks. A lot of features are already done, but not li
   - [ ] Sub-Canvases
   - [ ] UIImage partial radial rendering inverse (not implemented yet and is the last one)
   - [ ] Focus from one focusable UI element to another with 'Tab'
-  - [ ] Make SDF font rendering to render also small text (maybe for smaller texts just use non-SDF rendering, will see)
+  - [x] Make SDF font rendering to render also small text (maybe for smaller texts just use non-SDF rendering, will see)
+  - [x] Change size of text on runtime 
 
 - [ ] Prefabs
   - [ ] Definition and configuration
