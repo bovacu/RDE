@@ -13,6 +13,7 @@
 
 #define MAX_WIDTH 512
 #define MAX_CHARACTERS 128
+#define DEFAULT_FONT_SIZE 36
 
 namespace RDE {
 
@@ -102,15 +103,6 @@ namespace RDE {
      * @brief This class manages all the fonts of the applications. It loads, unloads and gets the fonts of memory.
      */
     class FontManager {
-
-        /**
-         * @brief Data struct containing a Font and it's size.
-         */
-        struct FontHandler {
-            Font* font = nullptr;
-            int fontSize = -1;
-        };
-
         private:
             /**
              * @brief Freetype library.
@@ -121,7 +113,7 @@ namespace RDE {
             /**
              * @brief Map FontName -> std::vector<FontHandler> because a font can have many sub-fonts with different sizes.
              */
-            std::unordered_map<std::string, std::vector<FontHandler>> fonts;
+            std::unordered_map<std::string, Font*> fonts;
 
         public:
             /**
@@ -145,43 +137,24 @@ namespace RDE {
             void destroy();
 
             /**
-             * @brief This function loads a font with a default font size of 24.
-             * @param _pathToFont Path to font file
-             * @param _fontSize Font size
+             * @brief This function loads a font at _pathFont.
+             * @param _pathToFont Path to font 
              * @return Font*
              */
-            Font* loadFont(FileManager& _fileManager, const std::string& _pathToFont, int _fontSize = 24);
+            Font* loadFont(FileManager& _fileManager, const std::string& _pathToFont);
 
             /**
-             * @brief Returns the font with the initialized font size
+             * @brief Returns the font with the specified name.
              * @param _fontName Font name
              * @return Font*
              */
-            Font* getDefaultFont(const std::string& _fontName);
-
-            /**
-             * @brief his function tries to return the font with the specific font size. If the font size is near enough to
-             * one already loaded, it will return it. Otherwise it will create a new font with the desired size because
-             * if using one too far from the loaded fonts sizes, it will be blurry and bad rendered.
-             * @param _fontName Font name
-             * @param _fontSize font size
-             * @return Font*
-             */
-            Font* getSpecificFont(const std::string& _fontName, int _fontSize);
+            Font* getFont(const std::string& _fontName);
 
             /**
              * @brief This function unloads a font with all the sub-fonts created by size.
              * @param _fontName Font name
              */
-            void unloadFullFont(const std::string& _fontName);
-
-            /**
-             * @brief This function unloads a specific font size of the full font. If no fonts sizes left when this is called,
-             * it will remove the full font from memory.
-             * @param _fontName Font name
-             * @param _fontSize Font size
-             */
-            void unloadSpecificFont(const std::string& _fontName, int _fontSize);
+            void unloadFont(const std::string& _fontName);
 
             /**
              * @brief Returns all of the fonts loaded in memory.

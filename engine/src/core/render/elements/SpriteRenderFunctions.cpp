@@ -86,6 +86,7 @@ namespace RDE {
 		const float _nonUIPivotY = 0.4f;
 		const float _nonUIPivotX = 0.5f;
 
+		auto _fontSizeScale = _textRenderer->getFontSize() / (float)DEFAULT_FONT_SIZE;
 		auto _index = 0;
 		for(auto& _lineInfo : _linesInfo) {
 
@@ -101,11 +102,11 @@ namespace RDE {
 				auto _transformCopy = glm::mat4(_transformMatrix);
                 auto _modelMatrixScale = _transform->getModelMatrixScale();
 
-				float _xPos = (_x - (_textRenderer->getTextSize().x * _nonUIPivotX) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _modelMatrixScale.x;
-				float _yPos = (_y + (_textRenderer->getTextSize().y * _nonUIPivotY) - (float)_chars[_char].bearing.y) * _modelMatrixScale.x;
+				float _xPos = (_x * _fontSizeScale - (_textRenderer->getTextSize().x * _nonUIPivotX) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _modelMatrixScale.x;
+				float _yPos = (_y + (_textRenderer->getTextSize().y * _nonUIPivotY) - (float)_chars[_char].bearing.y * _fontSizeScale) * _modelMatrixScale.y;
 
-				float _w = (float)_chars[_char].size.x * _modelMatrixScale.x;
-				float _h = (float)_chars[_char].size.y * _modelMatrixScale.x;
+				float _w = (float)_chars[_char].size.x * _modelMatrixScale.x * _fontSizeScale;
+				float _h = (float)_chars[_char].size.y * _modelMatrixScale.y * _fontSizeScale;
 
 				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)_transformCopy[3][0], (float)(int)_transformCopy[3][1] });
 				_transformCopy[3][0] = _screenPos.x;
@@ -185,6 +186,8 @@ namespace RDE {
 		const auto _percentage = 1.f / (float)_numberOfLines;
 		auto _index = 0;
 
+		auto _fontSizeScale = _textRenderer->getFontSize() / (float)DEFAULT_FONT_SIZE;
+
 		for(auto& _lineInfo : _linesInfo) {
 
 			// This is to adjust X, so it goes back to the right, and to set the Y to its proper height when in multiline.
@@ -198,20 +201,19 @@ namespace RDE {
 			for(char _char : _lineInfo.line) {
 				auto _transformCopy = glm::mat4(_transformMatrix);
                 auto _modelMatrixScale = _transform->getModelMatrixScale();
-				float _xPos = (_x - (_textRenderer->getTextSize().x) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _modelMatrixScale.x;
+				float _xPos = (_x * _fontSizeScale - (_textRenderer->getTextSize().x) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _modelMatrixScale.x;
 				if((_uiTransform->getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
 					_xPos += _textRenderer->getTextSize().x;
 				} else if((_uiTransform->getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
 					_xPos -= _textRenderer->getTextSize().x;
 				}
-				
-				float _yPos = (_y + (_textRenderer->getTextSize().y * 0.75f) - (float)_chars[_char].bearing.y) * _modelMatrixScale.x;
 
-				float _w = (float)_chars[_char].size.x * _modelMatrixScale.x;
-				float _h = (float)_chars[_char].size.y * _modelMatrixScale.x;
+				float _yPos = (_y + (_textRenderer->getTextSize().y * 0.75) - (float)_chars[_char].bearing.y * _fontSizeScale) * _modelMatrixScale.y;
+				float _w = (float)_chars[_char].size.x * _modelMatrixScale.x * _fontSizeScale;
+				float _h = (float)_chars[_char].size.y * _modelMatrixScale.y * _fontSizeScale;
 
-				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformCopy[3][0] + _originOffset.x * _modelMatrixScale.x),
-				                                                    (float)(int)(_transformCopy[3][1] + _originOffset.y * _modelMatrixScale.y) });
+				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformCopy[3][0] + _originOffset.x * _modelMatrixScale.x * _fontSizeScale),
+				                                                    (float)(int)(_transformCopy[3][1] + _originOffset.y * _modelMatrixScale.y * _fontSizeScale) });
 				_transformCopy[3][0] = _screenPos.x;
 				_transformCopy[3][1] = _screenPos.y;
 

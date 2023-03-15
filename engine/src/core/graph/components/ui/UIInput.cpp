@@ -62,7 +62,7 @@ namespace RDE {
 
         auto _placeholderNode = _graph->createNode("Placeholder", _node);
         placeholderTextRenderer = _placeholderNode->addComponent<UIText>(UITextConfig {
-            .font = _config.font == nullptr ? _manager->fontManager.getSpecificFont("MontserratRegular", 40) :
+            .font = _config.font == nullptr ? _manager->fontManager.getFont("MontserratRegular") :
                     _config.font,
             .text = _config.placeholderText,
             .textColor = _config.placeholderTextColor
@@ -80,7 +80,7 @@ namespace RDE {
 		
 		auto _textNode = _graph->createNode("Text", _node);
         textRenderer = _textNode->addComponent<UIText>(UITextConfig {
-                .font = _config.font == nullptr ? _manager->fontManager.getSpecificFont("MontserratRegular", 40) :
+                .font = _config.font == nullptr ? _manager->fontManager.getFont("MontserratRegular") :
                         _config.font,
                 .text = _config.text,
                 .textColor = _config.textColor

@@ -376,7 +376,7 @@ namespace RDE {
             DebugShape _shape;
             Vec2F _posRect = _transform.getModelMatrixPosition();
             Vec2F _posPoint = _transform.getModelMatrixPosition();
-            Vec2F _size = _uiText.getSize();
+			Vec2F _size = _uiText.getSize();
 
 			if((_transform.getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
 				_posRect.x += _size.x * 0.5f;

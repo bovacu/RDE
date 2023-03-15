@@ -18,6 +18,7 @@ namespace RDE {
         Font* font = nullptr;
         std::string text = "Hello Duck!";
         Color textColor = Color::White;
+		uint32_t fontSize = DEFAULT_FONT_SIZE;
     };
 
     class UIText {

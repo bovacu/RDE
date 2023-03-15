@@ -693,7 +693,15 @@ namespace RDE {
 
         CREATE_DISABLEABLE_HEADER("Text Renderer", _text, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
-
+			ImGui::Text("Font size ");
+			int _fontSize = _text->getFontSize();
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(100);
+			ImGui::PushID(createID());
+			if (ImGui::DragInt("##myInput", &_fontSize, 1, 0, 512)) {
+				_text->setFontSize(_fontSize);
+			}
+			ImGui::PopID();
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         })
     }
@@ -1051,8 +1059,8 @@ namespace RDE {
 
         CREATE_DISABLEABLE_HEADER("UI Text", _uiText, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
-
-            {
+            
+			{
                 ImGui::Text("Origin Offset ");
                 float _originOffset[2];
                 _originOffset[0] = _uiText->getOriginOffset().x;
@@ -1063,8 +1071,20 @@ namespace RDE {
                 if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
                     _uiText->setOriginOffset({Util::Math::clampF(_originOffset[0], -FLT_MAX, FLT_MAX), Util::Math::clampF(_originOffset[1], -FLT_MAX, FLT_MAX) });
                 }
+				ImGui::PopID();
+
+				ImGui::NewLine();
+
+				ImGui::Text("Font size ");
+				int _fontSize = _uiText->getFontSize();
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(100);
+				ImGui::PushID(createID());
+				if (ImGui::DragInt("##myInput", &_fontSize, 1, 0, 512)) {
+					_uiText->setFontSize(_fontSize);
+				}
+				ImGui::PopID();
             }
-            ImGui::PopID();
 
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         })

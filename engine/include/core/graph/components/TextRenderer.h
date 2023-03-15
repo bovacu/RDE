@@ -25,6 +25,7 @@ namespace RDE {
         std::string text = "Hello Duck!";
         Font* font = nullptr;
         Color color = Color::White;
+		uint32_t fontSize = DEFAULT_FONT_SIZE;
     };
 
     /**

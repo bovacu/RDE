@@ -104,7 +104,7 @@ namespace RDE {
             auto& _fontsNodes = _assets["fonts"];
             for (const auto& _font : _fontsNodes) {
                 for(auto _i = 0; _i < _font["sizes"].size(); _i++)
-                    _manager->fontManager.loadFont(_manager->fileManager, Util::String::appendToString("assets/", _font["path"].get<std::string>()), _font["sizes"][_i].get<int>());
+                    _manager->fontManager.loadFont(_manager->fileManager, Util::String::appendToString("assets/", _font["path"].get<std::string>()));
             }
         }
 
@@ -434,7 +434,7 @@ namespace RDE {
 
         auto* _textRenderer = _node->addComponent<TextRenderer>(TextRendererConfig {
             .text = _textRendererJson["text"].get<std::string>(),
-            .font = _scene->engine->manager.fontManager.getSpecificFont(_textRendererJson["font"].get<std::string>(), _fontSize)
+            .font = _scene->engine->manager.fontManager.getFont(_textRendererJson["font"].get<std::string>())
         });
 
         if(_textRendererJson.contains("color")) {
@@ -469,8 +469,7 @@ namespace RDE {
         if(_assets.contains("fonts")) {
             auto& _fontsNodes = _assets["fonts"];
             for (const auto& _font : _fontsNodes) {
-                for(auto _i = 0; _i < _font["sizes"].size(); _i++)
-                    _scene->engine->manager.fontManager.unloadFullFont(Util::String::getFileNameFromPath(_font["path"].get<std::string>()));
+				_scene->engine->manager.fontManager.unloadFont(Util::String::getFileNameFromPath(_font["path"].get<std::string>()));
             }
         }
 

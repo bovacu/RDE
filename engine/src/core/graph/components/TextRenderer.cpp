@@ -26,8 +26,9 @@ namespace RDE {
         
         RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(50, TEXT_RENDERER_SHADER, RDE_BATCH_PRIORITY_TEXT)
 
-        font = _config.font == nullptr ? _manager->fontManager.getDefaultFont("MontserratRegular") : _config.font;
+        font = _config.font == nullptr ? _manager->fontManager.getFont("MontserratRegular") : _config.font;
         innerText = _config.text;
+		fontSize = _config.fontSize;
         recalcTextDimensions(innerText);
         data.texture = &font->getTexture();
         data.renderizableType = RDE_RENDERIZABLE_TYPE_TEXT;
@@ -64,10 +65,8 @@ namespace RDE {
     }
 
     void TextRenderer::setFontSize(int _fontSize) {
-        Util::Log::warn("Set font size not working!!");
-//        fontSize = _fontSize;
-//        font = FontManager::get().getSpecificFont(font->getFontName(), _fontSize);
-//        recalcTextDimensions(innerText);
+		fontSize = _fontSize;
+		recalcTextDimensions(innerText);
     }
 
     int TextRenderer::getFontSize() const {
@@ -98,26 +97,29 @@ namespace RDE {
 
         auto _totalHeight = 0.0f;
         auto _totalWidth = 0.0f;
+		auto _fontScale = fontSize / (float)DEFAULT_FONT_SIZE;
         for (std::string _line; std::getline(_ss, _line, '\n');) {
             LineInfo _lineInfo {
                     .line = _line
             };
 
-            float _biggestHeight = font->getBiggestCharHeight();
+			float _biggestHeight = 0.f;
             float _biggestWidth = 0.f;
             if(!_line.empty()) {
                 for(auto _char : _line) {
-                    _biggestWidth += (float)_chars[_char].advance.x;
+					_biggestWidth += (float)_chars[_char].advance.x - (float)_chars[_char].offset.x;
+					auto _currentHeight = (float)_chars[_char].size.y * _fontScale;
+					_biggestHeight = _currentHeight > _biggestHeight ? _currentHeight : _biggestHeight;
                 }
             }
 
             _lineInfo.biggestCharHeight = _biggestHeight;
             _linesInfo.push_back(_lineInfo);
             _totalHeight += _biggestHeight;
-            _totalWidth = std::max(_totalWidth, _biggestWidth);
+			_totalWidth = std::max(_totalWidth, _biggestWidth * _fontScale);
         }
 
-        return std::tuple {_linesInfo, _totalWidth, _totalHeight};
+		return std::tuple { _linesInfo, _totalWidth, _totalHeight };
     }
 
 }

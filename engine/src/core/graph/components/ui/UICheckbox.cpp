@@ -40,7 +40,7 @@ namespace RDE {
 
         textNode = _graph->createNode("Text", _node);
         textRenderer = textNode->addComponent<UIText>(UITextConfig {
-            .font = _config.font == nullptr ? _manager->fontManager.getDefaultFont("MontserratRegular") :
+            .font = _config.font == nullptr ? _manager->fontManager.getFont("MontserratRegular") :
                     _config.font,
             .text = _config.text,
             .textColor = _config.textColor
