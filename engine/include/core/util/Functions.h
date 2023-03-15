@@ -9,6 +9,7 @@
 #include "core/util/Vec.h"
 #include "core/platform/PlatformHeaderSDL.h"
 #include "core/platform/PlatformHeaderSDLImage.h"
+#include "entt/entity/entity.hpp"
 
 #include <sstream>
 #include <chrono>
@@ -23,6 +24,10 @@ namespace RDE {
     class ViewPort;
 
     namespace Util {
+
+		inline std::ostream& operator<<(std::ostream& _out, entt::entity _nodeID){
+			return _out << (int)_nodeID;
+		}
 
         #ifndef UTIL_MATH
         #define UTIL_MATH
