@@ -70,6 +70,7 @@ to not forget about future tasks. A lot of features are already done, but not li
 - [ ] UI
   - [ ] UIInput
    - [ ] Add right and left key movement
+  - [ ] Make size of text different from the size of the string text 
 
 - [ ] Particle System
   - [ ] More customization
