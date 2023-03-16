@@ -11,7 +11,7 @@
 #include "core/graph/components/Node.h"
 #include "core/systems/uiSystem/Canvas.h"
 
-#define STARTING_VERTEX_SIZE 50;
+#define STARTING_VERTEX_SIZE 50
 
 namespace RDE {
 
