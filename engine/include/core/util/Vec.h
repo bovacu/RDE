@@ -133,6 +133,13 @@ namespace RDE {
                 return { -x, -y };
             }
 
+			Vec2<T> operator*( const Vec2<T> _other) const {
+				return Vec2<T>( x * _other.x, y * _other.y );
+			}
+
+			Vec2<T> operator/( const Vec2<T> _other) const {
+				return Vec2<T>( x / _other.x, y / _other.y );
+			}
 
             Vec2<T> operator*( float _scalar ) const {
                 return Vec2<T>( x * _scalar, y * _scalar );
