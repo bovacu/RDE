@@ -58,7 +58,7 @@ to not forget about future tasks. A lot of features are already done, but not li
 
 ## TO FIX
 - [x] Two or more Sliders are behaving in a strange way
-- [ ] Slider not stretching on vertical
+- [x] Slider not stretching on vertical
 - [ ] UIButton text not expanding correctly to anchor-stretch
 - [ ] ImGui for mobile
 - [ ] On mobile, OnMouseClick event is sometimes not recognized as a touch input, fix this on both platforms
