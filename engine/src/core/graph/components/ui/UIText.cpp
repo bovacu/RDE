@@ -11,6 +11,8 @@
 #include "core/graph/components/Node.h"
 #include "core/systems/uiSystem/Canvas.h"
 
+#define STARTING_VERTEX_SIZE = 50;
+
 namespace RDE {
 
     UIText::UIText(Node* _node, Scene* _scene, Canvas* _canvas, const UITextConfig& _config) :
@@ -18,7 +20,7 @@ namespace RDE {
 
     UIText::UIText(Node* _node, Manager* _manager, Graph* _graph, const UITextConfig& _config) {
 
-        RENDERIZABLE_UI_BASIC_PROPERTIES_INITIALIZATION(50, TEXT_RENDERER_SHADER, RDE_BATCH_PRIORITY_TEXT)
+		RENDERIZABLE_UI_BASIC_PROPERTIES_INITIALIZATION(STARTING_VERTEX_SIZE, TEXT_RENDERER_SHADER, RDE_BATCH_PRIORITY_TEXT)
 
         font = _config.font == nullptr ? _manager->fontManager.getFont("MontserratRegular") : _config.font;
         innerText = _config.text;

@@ -12,6 +12,8 @@
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/render/elements/SpriteBatchRenderFunctions.h"
 
+#define FIXED_VERTEX_SIZE = 36;
+
 namespace RDE {
 
 
@@ -20,7 +22,7 @@ namespace RDE {
 
     UIImage::UIImage(Node* _node, Manager* _manager, Graph* _graph, const UIImageConfig& _config) {
 
-        RENDERIZABLE_UI_BASIC_PROPERTIES_INITIALIZATION(36, SPRITE_RENDERER_SHADER, RDE_BATCH_PRIORITY_SPRITE)
+		RENDERIZABLE_UI_BASIC_PROPERTIES_INITIALIZATION(FIXED_VERTEX_SIZE, SPRITE_RENDERER_SHADER, RDE_BATCH_PRIORITY_SPRITE)
 
         data.RenderizableInnerData.texture = _config.texture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "sprite") : _config.texture;
         data.RenderizableInnerData.renderizableType = RDE_RENDERIZABLE_TYPE_UI_IMAGE;
@@ -34,9 +36,6 @@ namespace RDE {
 			data.imageRenderingType = RDE_IMAGE_RENDERING_TYPE_NORMAL;
             return;
         }
-
-        /*auto [_transformMat, _] = _node->getTransform()->localToWorld();
-        calculateGeometryForUIImage(data, _transformMat, _node->getTransform(), _manager->sceneManager.getDisplayedScene()->mainCamera->getViewport());*/
     }
 
 
