@@ -12,7 +12,7 @@
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/render/elements/SpriteBatchRenderFunctions.h"
 
-#define FIXED_VERTEX_SIZE = 36;
+#define FIXED_VERTEX_SIZE 36;
 
 namespace RDE {
 
