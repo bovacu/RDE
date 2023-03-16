@@ -87,11 +87,12 @@ namespace RDE {
             auto _lastAnchorPos = _uiTransform->anchor.anchorPosition;
             auto _lastSize = _uiTransform->anchor.anchorSize;
 
-            _uiTransform->anchor.updateAnchor(_uiTransform);
-            _uiTransform->translateMatrixModelPosition({_uiTransform->anchor.anchorPosition.x - _lastAnchorPos.x,
-                                                        _uiTransform->anchor.anchorPosition.y - _lastAnchorPos.y});
+			_uiTransform->anchor.updateAnchor(_uiTransform);
+			auto _sizeDiff = _uiTransform->anchor.anchorSize - _lastSize;
 
-            auto _sizeDiff = _uiTransform->anchor.anchorSize - _lastSize;
+			_uiTransform->translateMatrixModelPosition({_uiTransform->anchor.anchorPosition.x - _lastAnchorPos.x - _sizeDiff.x * 0.5f,
+                                                        _uiTransform->anchor.anchorPosition.y - _lastAnchorPos.y - _sizeDiff.y * 0.5f});
+
 			if (_sizeDiff != 0) {
 				_uiTransform->setSize(_uiTransform->getSize() + _sizeDiff);
 				if (((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) || ((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_BOTTOM) == RDE_UI_ANCHOR_RIGHT_BOTTOM) ||
