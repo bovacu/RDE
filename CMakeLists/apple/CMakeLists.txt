@@ -28,6 +28,7 @@ set(freetype_DIR vcpkg/installed/x64-osx/share/freetype)
 set(glad_DIR vcpkg/installed/x64-osx/share/glad)
 set(nlohmann_json_DIR vcpkg/installed/x64-osx/share/nlohmann_json)
 set(imgui_DIR vcpkg/installed/x64-osx/share/imgui)
+set(imgui_DIR vcpkg/installed/x64-osx/share/imguizmo)
 set(glm_DIR vcpkg/installed/x64-osx/share/glm)
 
 find_package(SDL2 CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/sdl2)
@@ -36,6 +37,7 @@ find_package(SDL2_mixer CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/SDL2
 find_package(glad CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/glad)
 find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/nlohmann_json)
 find_package(imgui CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/imgui)
+find_package(imguizmo CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/imguizmo)
 find_package(glm CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/glm)
 find_package(EnTT CONFIG REQUIRED PATHS vcpkg/installed/x64-osx/share/entt)
 find_package(freetype REQUIRED PATHS vcpkg/installed/x64-osx/share/freetype)
@@ -88,5 +90,6 @@ target_link_libraries(${PROJECT_NAME}
                         EnTT::EnTT
                         nlohmann_json::nlohmann_json
                         imgui::imgui
+						imguizmo::imguizmo
                         glm::glm
                     )

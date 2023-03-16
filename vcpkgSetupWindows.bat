@@ -14,5 +14,6 @@ vcpkg.exe install sdl2-image[libjpeg-turbo]:x64-windows
 vcpkg.exe install sdl2-mixer:x64-windows
 vcpkg.exe install glad:x64-windows
 vcpkg.exe install imgui[docking-experimental,opengl3-binding,sdl2-binding]:x64-windows
+vcpkg.exe install imguizmo:x64-windows
 vcpkg.exe install glm:x64-windows
 vcpkg.exe install nlohmann-json:x64-windows

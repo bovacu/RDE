@@ -29,6 +29,7 @@ find_package(freetype CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/fr
 find_package(glad CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/packages/nlohmann-json_x64-linux/share/nlohmann_json)
 find_package(imgui CONFIG REQUIRED)
+find_package(imguizmo CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
 include_directories(
@@ -41,6 +42,7 @@ include_directories(
         ${ENTT_INCLUDE_DIR}
         ${JSON_INCLUDE_DIR}
         ${IMGUI_INCLUDE_DIR}
+		${IMGUIZMO_INCLUDE_DIR}
         ${GLM_INCLUDE_DIR}
 )
 
@@ -90,6 +92,7 @@ target_link_libraries(${PROJECT_NAME}
         EnTT::EnTT
         nlohmann_json::nlohmann_json
         imgui::imgui
+		imguizmo::imguizmo
         glm::glm
         ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/Chipmunk2D/libs/Windows/chipmunk.lib
         )

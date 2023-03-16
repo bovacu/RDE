@@ -15,5 +15,6 @@ cd vcpkg
 ./vcpkg install sdl2-mixer[core,mpg123,libvorbis]:x64-linux
 ./vcpkg install glad:x64-linux
 ./vcpkg install imgui[docking-experimental,opengl3-binding,sdl2-binding]:x64-linux
+./vcpkg install imguizmo:x64-linux
 ./vcpkg install glm:x64-linux
 ./vcpkg install nlohmann-json:x64-linux

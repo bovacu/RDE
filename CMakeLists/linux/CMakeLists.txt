@@ -25,6 +25,7 @@ set(freetype_DIR vcpkg/installed/x64-linux/share/freetype)
 set(glad_DIR vcpkg/installed/x64-linux/share/glad)
 set(nlohmann_json_DIR vcpkg/installed/x64-linux/share/nlohmann_json)
 set(imgui_DIR vcpkg/installed/x64-linux/share/imgui)
+set(imguizmo_DIR vcpkg/installed/x64-linux/share/imguizmo)
 set(glm_DIR vcpkg/installed/x64-linux/share/glm)
 set(Ogg_DIR vcpkg/installed/x64-linux/share/libogg)
 set(Vorbis_DIR vcpkg/installed/x64-linux/share/vorbis)
@@ -35,6 +36,7 @@ find_package(SDL2_mixer CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/SD
 find_package(glad CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/glad)
 find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/nlohmann_json)
 find_package(imgui CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/imgui)
+find_package(imguizmo CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/imguizmo)
 find_package(glm CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/glm)
 find_package(EnTT CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/entt)
 find_package(Ogg CONFIG REQUIRED PATHS vcpkg/installed/x64-linux/share/libogg)
@@ -88,6 +90,7 @@ target_link_libraries(${PROJECT_NAME}
                         EnTT::EnTT
                         nlohmann_json::nlohmann_json
                         imgui::imgui
+						imguizmo::imguizmo
                         glm::glm
 			Ogg::ogg
 			Vorbis::vorbis
