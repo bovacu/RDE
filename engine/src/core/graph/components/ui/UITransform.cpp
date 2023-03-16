@@ -89,25 +89,11 @@ namespace RDE {
 
 			_uiTransform->anchor.updateAnchor(_uiTransform);
 			auto _sizeDiff = _uiTransform->anchor.anchorSize - _lastSize;
+			auto _posDiff = _uiTransform->anchor.anchorPosition - _lastAnchorPos;
+			auto _position = Vec2F { _posDiff.x + _sizeDiff.x * 0.5f, _posDiff.y };
 
-			_uiTransform->translateMatrixModelPosition({_uiTransform->anchor.anchorPosition.x - _lastAnchorPos.x - _sizeDiff.x * 0.5f,
-                                                        _uiTransform->anchor.anchorPosition.y - _lastAnchorPos.y - _sizeDiff.y * 0.5f});
-
-			if (_sizeDiff != 0) {
-				_uiTransform->setSize(_uiTransform->getSize() + _sizeDiff);
-				if (((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) || ((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_BOTTOM) == RDE_UI_ANCHOR_RIGHT_BOTTOM) ||
-					((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_TOP) == RDE_UI_ANCHOR_RIGHT_TOP)) {
-					_sizeDiff.x = -_sizeDiff.x;
-				}
-
-				if (((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_TOP) == RDE_UI_ANCHOR_TOP) || ((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_RIGHT_TOP) == RDE_UI_ANCHOR_RIGHT_TOP) ||
-					((_uiTransform->anchor.anchor & RDE_UI_ANCHOR_LEFT_TOP) == RDE_UI_ANCHOR_LEFT_TOP)) {
-					_sizeDiff.y = -_sizeDiff.y;
-				}
-
-				// It is half the size because when a change in size happens, it is applied to both sides
-				_uiTransform->translateMatrixModelPosition(_sizeDiff * 0.5f);
-			}
+			_uiTransform->translateMatrixModelPosition(_position);
+			_uiTransform->setSize(_uiTransform->getSize() + _sizeDiff);
         }
     }
 

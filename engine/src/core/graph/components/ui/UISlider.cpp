@@ -57,7 +57,7 @@ namespace RDE {
 
         fillBarTransform = (UITransform*)fillBarNode->getTransform();
         fillBarTransform->setAnchor(RDE_UI_ANCHOR_LEFT);
-        fillBarTransform->setStretch(RDE_UI_STRETCH_HORIZONTAL_STRETCH);
+        fillBarTransform->setStretch(RDE_UI_STRETCH_FULL_STRETCH);
 
         handleNode = _graph->createNode("Handle", node);
         handleSprite = handleNode->addComponent<UIImage>(UIImageConfig {
@@ -66,10 +66,11 @@ namespace RDE {
            .color = _config.handleColor
         });
         handleTransform = (UITransform*)handleNode->getTransform();
-        handleTransform->setScale(1.5f * _config.barSize.y / handleSprite->getSize().x, 1.5f * _config.barSize.y / handleSprite->getSize().y);
+		handleTransform->setSize({handleTransform->getSize().x * 1.5f * _config.barSize.y / handleSprite->getSize().x, handleTransform->getSize().y * 1.5f * _config.barSize.y / handleSprite->getSize().y});
         handleTransform->setPosition(backgroundBarTransform->getPosition().x - (_config.barSize.x * 0.5f) + _config.barSize.x * _config.percentageFilled,
                                      handleTransform->getPosition().y);
         handleTransform->setAnchor(RDE_UI_ANCHOR_RIGHT);
+        handleTransform->setStretch(RDE_UI_STRETCH_VERTICAL_STRETCH);
 
         setFilledPercentage(_config.percentageFilled);
     }
