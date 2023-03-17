@@ -12,7 +12,7 @@
 
 namespace RDE {
 
-    Transform::Transform(Graph* _graph) : graph(_graph) {
+    Transform::Transform(Graph* _graph) {
         worldMatrixCache = recalculateCachedMatrix();
     }
 
@@ -182,8 +182,6 @@ namespace RDE {
         for(auto* _child : children) {
             _child->setDirty(_child);
         }
-
-        //graph->renderingTreeData.dirtyTransforms.push_back(_transform);
     }
 
     void Transform::setMatrixModelPosition(const Vec2F& _worldPos) {

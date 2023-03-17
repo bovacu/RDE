@@ -4,7 +4,7 @@
 
 #include "core/graph/components/ui/UIPanel.h"
 #include "core/Engine.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/render/elements/Batch.h"
 #include "core/render/elements/IRenderizable.h"
@@ -36,7 +36,8 @@ namespace RDE {
             }
         }
 
-        ((UITransform*)_node->getTransform())->setSize(_config.size);
+		anchoring = node->getComponent<UIAnchoring>();
+        anchoring->setSize(_config.size);
 
         uiImage = _node->addComponent<UIImage>(UIImageConfig {
             .size = _config.size,

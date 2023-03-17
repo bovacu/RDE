@@ -6,7 +6,7 @@
 #define RDE_UI_SLIDER_H
 
 #include "core/graph/components/ui/UI.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/render/elements/Batch.h"
 #include "core/util/Delta.h"
@@ -42,9 +42,14 @@ namespace RDE {
             UIImage* handleSprite = nullptr;
             Node* handleNode = nullptr;
 
-            UITransform* backgroundBarTransform = nullptr;
-            UITransform* fillBarTransform = nullptr;
-            UITransform* handleTransform = nullptr;
+            Transform* backgroundBarTransform = nullptr;
+			UIAnchoring* backgroundAnchoring = nullptr;
+
+			Transform* fillBarTransform = nullptr;
+			UIAnchoring* fillBarAnchoring = nullptr;
+
+			Transform* handleTransform = nullptr;
+			UIAnchoring* handleAnchoring = nullptr;
 
             float percentageFilled = 0.f;
 

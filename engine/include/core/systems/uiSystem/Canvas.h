@@ -8,6 +8,7 @@
 #include "core/render/elements/Batch.h"
 #include "core/graph/components/Node.h"
 #include "core/render/elements/IRenderizable.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/Enums.h"
 #include <stack>
 
@@ -22,6 +23,7 @@ namespace RDE {
 
     struct CanvasElement {
         Node* node = nullptr;
+		UIAnchoring* anchoring;
         RenderizableInnerDataUI* renderizableInnerData;
         UIInteractable* interactable = nullptr;
         int cropping = 0;

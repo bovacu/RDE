@@ -77,13 +77,14 @@ namespace RDE {
 
 
 
-    #define RENDERIZABLE_UI_BASIC_PROPERTIES()  \
-    friend class Canvas;                        \
-    public:                                     \
-        Node* node = nullptr;                   \
-    private:                                    \
-        RenderizableInnerDataUI data;           \
-        UIInteractable* uiInteractable = nullptr;
+    #define RENDERIZABLE_UI_BASIC_PROPERTIES()  	\
+    friend class Canvas;                        	\
+    public:                                     	\
+        Node* node = nullptr;                   	\
+    private:                                    	\
+        RenderizableInnerDataUI data;           	\
+        UIInteractable* uiInteractable = nullptr;	\
+		UIAnchoring* anchoring = nullptr;
 
 
 
@@ -109,6 +110,7 @@ namespace RDE {
     data.RenderizableInnerData.batchPriority = _batchPriority;                                              \
                                                                                                             \
     data.RenderizableInnerData.vertices.resize(_verticesSize);                                              \
+	anchoring = node->getComponent<UIAnchoring>();															\
 
 
 
@@ -220,11 +222,11 @@ namespace RDE {
 
     #define SIZE_METHODS_DEFAULT_IMPL(_className)                                                                                               \
     Vec2F _className::getSize() const {                                                                                                         \
-        return ((UITransform*)node->getTransform())->getSize();                                                                                 \
+        return anchoring->getSize();                                                                                 \
     }                                                                                                                                           \
                                                                                                                                                 \
     void _className::setSize(const Vec2F &_size) {                                                                                              \
-        ((UITransform*)node->getTransform())->setSize(_size);                                                                                   \
+        anchoring->setSize(_size);                                                                                   \
     }
 
 
@@ -258,8 +260,8 @@ namespace RDE {
     INTERACTABLE_DEFAULT_IMPL(_className)                                                                                                       \
                                                                                                                                                 \
     void _className::setOriginOffset(const Vec2F& _offset) {                                                                                    \
-        data.originOffset = _offset;                                                                                                            \
-        ((UITransform*)node->getTransform())->setUIDirty();                                                                                     \
+        data.originOffset = _offset;																											\
+		data.RenderizableInnerData.dirty = true;																								\
     }                                                                                                                                           \
     Vec2F _className::getOriginOffset() const {                                                                                                 \
         return data.originOffset;                                                                                                               \

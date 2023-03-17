@@ -62,6 +62,7 @@ namespace RDE {
 
         manager.sceneManager.loadScene(_scene, _scene->getName());
         manager.sceneManager.displayScene(_scene->getName());
+		imGuiLayer->show = true;
     }
 
     void Engine::loopCode() {

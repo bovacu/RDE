@@ -13,7 +13,7 @@
 #include "core/graph/components/ui/UICheckbox.h"
 #include "core/graph/components/ui/UIInput.h"
 #include "core/graph/components/ui/UISlider.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/graph/components/ui/UIMask.h"
@@ -163,7 +163,7 @@ namespace RDE {
     }
 
 	void Scene::recalculateRenderizableTreeUI(Node* _node) {		
-        CanvasElement _canvasElement { _node };
+        CanvasElement _canvasElement { _node, _node->getComponent<UIAnchoring>() };
 
         if(canvas->graph->getNodeContainer().any_of<UIInteractable>(_node->getID())) {
             _canvasElement.interactable = _node->getComponent<UIInteractable>();
@@ -276,7 +276,7 @@ namespace RDE {
 
 		if(!canvas->camera->node->hasComponent<Active>() && canvas->camera->isEnabled()) return;
 		canvas->camera->update();
-        _renderManager.beginDraw(canvas->camera, (Transform*)canvas->camera->node->getComponent<UITransform>());
+        _renderManager.beginDraw(canvas->camera, (Transform*)canvas->camera->node->getComponent<Transform>());
 
         canvas->batches.clear();
         Batch _batch;
@@ -311,8 +311,11 @@ namespace RDE {
 		auto& _renderManager = engine->manager.renderManager;
 		_renderManager.beginDebugDraw(mainCamera, mainCamera->node->getTransform());
 		onInnerDebugRenderHierarchy(_dt, &_renderManager);
-		onInnerDebugRenderUI(_dt, &_renderManager);
 		onDebugRender(_dt, &_renderManager);
+		_renderManager.endDebugDraw();
+
+		_renderManager.beginDebugDraw(canvas->camera, canvas->camera->node->getTransform());
+		onInnerDebugRenderUI(_dt, &_renderManager);
 		_renderManager.endDebugDraw();
 	}
 
@@ -323,7 +326,7 @@ namespace RDE {
 	void Scene::onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager) {
 		auto& _registry = canvas->graph->getNodeContainer();
 
-        _registry.view<UIImage, UITransform, Active>().each([this, _renderManager](const auto _entity, UIImage& _uiImage, UITransform& _transform, const Active& _) {
+        _registry.view<UIImage, Transform, Active>().each([this, _renderManager](const auto _entity, UIImage& _uiImage, Transform& _transform, const Active& _) {
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
             Vec2F _size = _uiImage.getSize();
@@ -349,7 +352,7 @@ namespace RDE {
             _renderManager->setPointSize(4);
         });
 
-        _registry.view<UICheckbox, UITransform, Active>().each([this, _renderManager](const NodeID _nodeID, UICheckbox& _checkbox, UITransform& _transform, Active& _) {
+        _registry.view<UICheckbox, Transform, Active>().each([this, _renderManager](const NodeID _nodeID, UICheckbox& _checkbox, Transform& _transform, Active& _) {
             DebugShape _shape;
             Vec2F _pos = _transform.getModelMatrixPosition();
             Vec2F _size = _checkbox.getSize();
@@ -370,7 +373,7 @@ namespace RDE {
             _renderManager->drawShape(_shape);
         });
 
-        _registry.view<UIText, UITransform, Active>().each([this, _renderManager](const NodeID _nodeID, UIText& _uiText, UITransform& _transform, Active& _) {
+        _registry.view<UIText, Transform, UIAnchoring, Active>().each([this, _renderManager](const NodeID _nodeID, UIText& _uiText, Transform& _transform, UIAnchoring& _anchoring, Active& _) {
             if(!_uiText.isEnabled()) return;
 
             DebugShape _shape;
@@ -378,13 +381,13 @@ namespace RDE {
             Vec2F _posPoint = _transform.getModelMatrixPosition();
 			Vec2F _size = _uiText.getSize();
 
-			if((_transform.getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
+			if((_anchoring.getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
 				_posRect.x += _size.x * 0.5f;
-			} else if((_transform.getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
+			} else if((_anchoring.getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
 				_posRect.x -= _size.x * 0.5f;
-			} else if((_transform.getAnchor() & RDE_UI_ANCHOR_TOP) == RDE_UI_ANCHOR_TOP) {
+			} else if((_anchoring.getAnchor() & RDE_UI_ANCHOR_TOP) == RDE_UI_ANCHOR_TOP) {
 				_posRect.y += _size.y * 0.5f;
-			} else if((_transform.getAnchor() & RDE_UI_ANCHOR_BOTTOM) == RDE_UI_ANCHOR_BOTTOM) {
+			} else if((_anchoring.getAnchor() & RDE_UI_ANCHOR_BOTTOM) == RDE_UI_ANCHOR_BOTTOM) {
 				_posRect.y -= _size.y * 0.5f;
 			}
 

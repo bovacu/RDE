@@ -14,7 +14,7 @@
 #include "core/graph/components/ui/UIButton.h"
 #include "core/graph/components/ui/UIPanel.h"
 #include "core/graph/components/ui/UIText.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/graph/components/ui/UIMask.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/graph/components/ComponentBase.h"
@@ -766,11 +766,12 @@ namespace RDE {
     void ImGuiScene::uiTransformComponent(Graph* _graph, const NodeID _selectedNode) {
         auto* _node = _graph->getNode(_selectedNode);
 
-        UITransform* _transform = nullptr;
-        if(!_node->hasComponent<UITransform>()) return;
-        _transform = _node->getComponent<UITransform>();
-        RDE_UI_ANCHOR_ _selectedAnchor = _transform->getAnchor();
-        RDE_UI_STRETCH_ _selectedStretch = _transform->getStretch();
+        Transform* _transform = nullptr;
+		UIAnchoring* _anchoring = nullptr;
+        _transform = _node->getComponent<Transform>();
+		_anchoring = _node->getComponent<UIAnchoring>();
+		RDE_UI_ANCHOR_ _selectedAnchor = _anchoring->getAnchor();
+		RDE_UI_STRETCH_ _selectedStretch = _anchoring->getStretch();
 
         CREATE_NON_DISABLEABLE_HEADER("UITransform", _transform, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
@@ -814,21 +815,21 @@ namespace RDE {
             ImGui::PushID(createID());
             if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_topLeft->getGLTexture()), ImVec2(16, 16), {_topLeftInit.x, _topLeftInit.y}, {_topLeftEnd.x, _topLeftEnd.y}, 0, (_selectedAnchor == RDE_UI_ANCHOR_LEFT_TOP ? _selectedColor : _noSelectedColor))) {
 				_selectedAnchor = RDE_UI_ANCHOR_LEFT_TOP;
-                _transform->setAnchor(_selectedAnchor);
+				_anchoring->setAnchor(_selectedAnchor);
             }
             ImGui::PopID();
             ImGui::SameLine();
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_topMiddle->getGLTexture()), ImVec2(16, 16), {_topMiddleInit.x, _topMiddleInit.y}, {_topMiddleEnd.x, _topMiddleEnd.y}, 0, (_selectedAnchor == RDE_UI_ANCHOR_TOP ? _selectedColor : _noSelectedColor))) {
 				_selectedAnchor = RDE_UI_ANCHOR_TOP;
-                _transform->setAnchor(_selectedAnchor);
+				_anchoring->setAnchor(_selectedAnchor);
             }
             ImGui::PopID();
             ImGui::SameLine();
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_topRight->getGLTexture()), ImVec2(16, 16), {_topRightInit.x, _topRightInit.y}, {_topRightEnd.x, _topRightEnd.y}, 0, (_selectedAnchor == RDE_UI_ANCHOR_RIGHT_TOP ? _selectedColor : _noSelectedColor))) {
 				_selectedAnchor = RDE_UI_ANCHOR_RIGHT_TOP;
-                _transform->setAnchor(_selectedAnchor);
+				_anchoring->setAnchor(_selectedAnchor);
             }
             ImGui::PopID();
 
@@ -844,14 +845,14 @@ namespace RDE {
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchNone->getGLTexture()), ImVec2(16, 16), {_stretchNoneInit.x, _stretchNoneInit.y}, {_stretchNoneEnd.x, _stretchNoneEnd.y}, 0, (_selectedStretch == RDE_UI_STRETCH_NO_STRETCH ? _selectedColor : _noSelectedColor))) {
                 _selectedStretch = RDE_UI_STRETCH_NO_STRETCH;
-                _transform->setStretch(_selectedStretch);
+				_anchoring->setStretch(_selectedStretch);
             }
             ImGui::PopID();
             ImGui::SameLine();
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchFull->getGLTexture()), ImVec2(16, 16), {_stretchFullInit.x, _stretchFullInit.y}, {_stretchFullEnd.x, _stretchFullEnd.y}, 0, (_selectedStretch == RDE_UI_STRETCH_FULL_STRETCH ? _selectedColor : _noSelectedColor))) {
 				_selectedStretch = RDE_UI_STRETCH_FULL_STRETCH;
-                _transform->setStretch(_selectedStretch);
+				_anchoring->setStretch(_selectedStretch);
             }
             ImGui::PopID();
 
@@ -869,21 +870,21 @@ namespace RDE {
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_middleLeft->getGLTexture()), ImVec2(16, 16), {_middleLeftInit.x, _middleLeftInit.y}, {_middleLeftEnd.x, _middleLeftEnd.y}, 0, (_selectedAnchor == RDE_UI_ANCHOR_LEFT ? _selectedColor : _noSelectedColor))) {
                 _selectedAnchor = RDE_UI_ANCHOR_LEFT;
-                _transform->setAnchor(_selectedAnchor);
+				_anchoring->setAnchor(_selectedAnchor);
             }
             ImGui::PopID();
             ImGui::SameLine();
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_middle->getGLTexture()), ImVec2(16, 16),   {_middleMiddleInit.x, _middleMiddleInit.y}, {_middleMiddleEnd.x, _middleMiddleEnd.y}, 0, (_selectedAnchor == RDE_UI_ANCHOR_MIDDLE ? _selectedColor : _noSelectedColor))) {
 				_selectedAnchor = RDE_UI_ANCHOR_MIDDLE;
-                _transform->setAnchor(_selectedAnchor);
+				_anchoring->setAnchor(_selectedAnchor);
             }
             ImGui::PopID();
             ImGui::SameLine();
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_middleRight->getGLTexture()), ImVec2(16, 16), {_middleRightInit.x, _middleRightInit.y}, {_middleRightEnd.x, _middleRightEnd.y}, 0, (_selectedAnchor == RDE_UI_ANCHOR_RIGHT ? _selectedColor : _noSelectedColor))) {
 				_selectedAnchor = RDE_UI_ANCHOR_RIGHT;
-                _transform->setAnchor(_selectedAnchor);
+				_anchoring->setAnchor(_selectedAnchor);
             }
             ImGui::PopID();
 
@@ -900,14 +901,14 @@ namespace RDE {
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchHorizontal->getGLTexture()), ImVec2(16, 16), {_stretchHorInit.x, _stretchHorInit.y}, {_stretchHorEnd.x, _stretchHorEnd.y}, 0, (_selectedStretch == RDE_UI_STRETCH_HORIZONTAL_STRETCH ? _selectedColor : _noSelectedColor))) {
 				_selectedStretch = RDE_UI_STRETCH_HORIZONTAL_STRETCH;
-                _transform->setStretch(_selectedStretch);
+				_anchoring->setStretch(_selectedStretch);
             }
             ImGui::PopID();
             ImGui::SameLine();
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_stretchVertical->getGLTexture()), ImVec2(16, 16), {_stretchVertInit.x, _stretchVertInit.y}, {_stretchVertEnd.x, _stretchVertEnd.y}, 0, (_selectedStretch == RDE_UI_STRETCH_VERTICAL_STRETCH ? _selectedColor : _noSelectedColor))) {
 				_selectedStretch = RDE_UI_STRETCH_VERTICAL_STRETCH;
-                _transform->setStretch(_selectedStretch);
+				_anchoring->setStretch(_selectedStretch);
             }
             ImGui::PopID();
 
@@ -926,21 +927,21 @@ namespace RDE {
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_bottomLeft->getGLTexture()), ImVec2(16, 16),   {_bottomLeftInit.x, _bottomLeftInit.y}, {_bottomLeftEnd.x, _bottomLeftEnd.y}, 0, (_selectedAnchor == RDE_UI_ANCHOR_LEFT_BOTTOM ? _selectedColor : _noSelectedColor))) {
 				_selectedAnchor = RDE_UI_ANCHOR_LEFT_BOTTOM;
-                _transform->setAnchor(_selectedAnchor);
+				_anchoring->setAnchor(_selectedAnchor);
             }
             ImGui::PopID();
             ImGui::SameLine();
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_bottomMiddle->getGLTexture()), ImVec2(16, 16), {_bottomMiddleInit.x, _bottomMiddleInit.y}, {_bottomMiddleEnd.x, _bottomMiddleEnd.y}, 0, (_selectedAnchor == RDE_UI_ANCHOR_BOTTOM ? _selectedColor : _noSelectedColor))) {
 				_selectedAnchor = RDE_UI_ANCHOR_BOTTOM;
-                _transform->setAnchor(_selectedAnchor);
+				_anchoring->setAnchor(_selectedAnchor);
             }
             ImGui::PopID();
             ImGui::SameLine();
             ImGui::PushID(createID());
 			if(ImGui::ImageButton(reinterpret_cast<ImTextureID>(_bottomRight->getGLTexture()), ImVec2(16, 16),  {_bottomRightInit.x, _bottomRightInit.y}, {_bottomRightEnd.x, _bottomRightEnd.y}, 0, (_selectedAnchor == RDE_UI_ANCHOR_RIGHT_BOTTOM ? _selectedColor : _noSelectedColor))) {
 				_selectedAnchor = RDE_UI_ANCHOR_RIGHT_BOTTOM;
-                _transform->setAnchor(_selectedAnchor);
+				_anchoring->setAnchor(_selectedAnchor);
             }
             ImGui::PopID();
 
@@ -949,13 +950,13 @@ namespace RDE {
             ImGui::NewLine();
             ImGui::Text("Size ");
             float _size[2];
-            _size[0] = _transform->getSize().x;
-            _size[1] = _transform->getSize().y;
+			_size[0] = _anchoring->getSize().x;
+			_size[1] = _anchoring->getSize().y;
             ImGui::SameLine(0, 35);
             ImGui::SetNextItemWidth(100);
             ImGui::PushID(createID());
             if (ImGui::DragFloat2("##myInput", _size, 1.f)) {
-                _transform->setSize({ Util::Math::clampF(_size[0], 0.f, FLT_MAX), Util::Math::clampF(_size[1], 0.f, FLT_MAX) });
+				_anchoring->setSize({ Util::Math::clampF(_size[0], 0.f, FLT_MAX), Util::Math::clampF(_size[1], 0.f, FLT_MAX) });
             }
             ImGui::PopID();
 

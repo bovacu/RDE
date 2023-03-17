@@ -8,12 +8,13 @@
 #include "core/util/Functions.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/systems/uiSystem/FontManager.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "glm/gtc/type_ptr.hpp"
 
 namespace RDE {
 
 	void calculateGeometryForSpriteRenderer(RenderizableInnerData& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport)  {
+		// The (float)(int) is to first transform the position to a fixed int and the the function needs a float as parameter. This is to avoid jittering while rendering on non .0 values.
 		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, {(float)(int)_transformMatrix[3][0], (float)(int)_transformMatrix[3][1]});
 	    _transformMatrix[3][0] = _screenPos.x;
 	    _transformMatrix[3][1] = _screenPos.y;
@@ -168,9 +169,8 @@ namespace RDE {
 
 
 
-	void calculateGeometryForUIText(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
+	void calculateGeometryForUIText(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
 		auto* _textRenderer = (UIText*)_data.RenderizableInnerData.extraInfo;
-		auto* _uiTransform = (UITransform*)_textRenderer->node->getTransform();
 		auto _originOffset = _data.originOffset;
 
 		auto* _atlas = _textRenderer->getFont();
@@ -202,9 +202,9 @@ namespace RDE {
 				auto _transformCopy = glm::mat4(_transformMatrix);
                 auto _modelMatrixScale = _transform->getModelMatrixScale();
 				float _xPos = (_x * _fontSizeScale - (_textRenderer->getTextSize().x) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _modelMatrixScale.x;
-				if((_uiTransform->getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
+				if((_anchoring->getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
 					_xPos += _textRenderer->getTextSize().x;
-				} else if((_uiTransform->getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
+				} else if((_anchoring->getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
 					_xPos -= _textRenderer->getTextSize().x;
 				}
 
@@ -245,14 +245,15 @@ namespace RDE {
 		}
 	}
 
-	void drawBatchedUIText(RenderizableInnerDataUI& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport) {
+	void drawBatchedUIText(RenderizableInnerDataUI& _data, Batch* _batch, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
 		auto* _uiTextRenderer = (UIText*)_data.RenderizableInnerData.extraInfo;
 
 		auto [_transformMat, _dirty] = _transform->localToWorld();
-		if(_dirty || _data.RenderizableInnerData.dirty) {
+		if(_dirty || _data.RenderizableInnerData.dirty || _anchoring->dirty) {
 			_data.RenderizableInnerData.vertices.clear();
-			calculateGeometryForUIText(_data, _transformMat, _transform, _viewport);
-			((UITransform*)_transform)->update();
+			_anchoring->dirty = false;
+			calculateGeometryForUIText(_data, _transformMat, _anchoring, _transform, _viewport);
+			_transform->update();
 			_data.RenderizableInnerData.dirty = false;
 		}
 
@@ -275,15 +276,14 @@ namespace RDE {
 
 
 
-    void calculateNormalGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
-        auto _uiT = (UITransform*)_transform;
+	void calculateNormalGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         auto _originOffset = _data.originOffset;
 		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
-        auto _uiSizeScale = Vec2F { _uiT->getSize().x / _data.RenderizableInnerData.texture->getSize().x, _uiT->getSize().y / _data.RenderizableInnerData.texture->getSize().y };
+		auto _uiSizeScale = Vec2F { _anchoring->getSize().x / _data.RenderizableInnerData.texture->getSize().x, _anchoring->getSize().y / _data.RenderizableInnerData.texture->getSize().y };
         _transformMatrix[0][0] *= _uiSizeScale.x;
         _transformMatrix[1][1] *= _uiSizeScale.y;
 
@@ -313,11 +313,11 @@ namespace RDE {
 		_data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
     }
 
-    void calculate9SliceGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
+	void calculate9SliceGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         // TODO (RDE): this calculations are an absolute mess, I need to clean this up, rename variables, make it clearer and remove redundant operations, but I'm scared.
         auto _rectsAmount = sizeof(_data.RenderizableInnerData.texture->nineSlice.subRects) / sizeof(IntRect);
         auto _originOffset = _data.originOffset;
-        auto _uiSize = ((UITransform*)_transform)->getSize();
+		auto _uiSize = _anchoring->getSize();
 
         for(auto _i = 0; _i < _rectsAmount; _i++) {
             auto& _subTextureRegion = _data.RenderizableInnerData.texture->nineSlice.subRects[_i];
@@ -463,15 +463,14 @@ namespace RDE {
         }
     }
 
-    void calculatePartialHGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
-        auto _uiT = (UITransform*)_transform;
+	void calculatePartialHGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         auto _originOffset = _data.originOffset;
 		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
-        auto _uiSizeScale = Vec2F { _uiT->getSize().x / _data.RenderizableInnerData.texture->getSize().x, _uiT->getSize().y / _data.RenderizableInnerData.texture->getSize().y };
+		auto _uiSizeScale = Vec2F { _anchoring->getSize().x / _data.RenderizableInnerData.texture->getSize().x, _anchoring->getSize().y / _data.RenderizableInnerData.texture->getSize().y };
         _transformMatrix[0][0] *= _uiSizeScale.x;
         _transformMatrix[1][1] *= _uiSizeScale.y;
 
@@ -503,15 +502,14 @@ namespace RDE {
         _data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
 	}
 
-    void calculatePartialVGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
-        auto _uiT = (UITransform*)_transform;
+	void calculatePartialVGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         auto _originOffset = _data.originOffset;
 		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
-        auto _uiSizeScale = Vec2F { _uiT->getSize().x / _data.RenderizableInnerData.texture->getSize().x, _uiT->getSize().y / _data.RenderizableInnerData.texture->getSize().y };
+		auto _uiSizeScale = Vec2F { _anchoring->getSize().x / _data.RenderizableInnerData.texture->getSize().x, _anchoring->getSize().y / _data.RenderizableInnerData.texture->getSize().y };
         _transformMatrix[0][0] *= _uiSizeScale.x;
         _transformMatrix[1][1] *= _uiSizeScale.y;
 
@@ -543,15 +541,14 @@ namespace RDE {
         _data.RenderizableInnerData.vertices[3] = OpenGLVertex {_transformMatrix * _topLeftTextureCorner    , _topLeftTextureCoord    , _uint32Color };
 	}
 
-    void calculatePartialRGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
-        auto _uiT = (UITransform*)_transform;
+	void calculatePartialRGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         auto _originOffset = _data.originOffset;
 		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
-        auto _uiSizeScale = Vec2F { _uiT->getSize().x / _data.RenderizableInnerData.texture->getSize().x, _uiT->getSize().y / _data.RenderizableInnerData.texture->getSize().y };
+		auto _uiSizeScale = Vec2F { _anchoring->getSize().x / _data.RenderizableInnerData.texture->getSize().x, _anchoring->getSize().y / _data.RenderizableInnerData.texture->getSize().y };
         _transformMatrix[0][0] *= _uiSizeScale.x;
         _transformMatrix[1][1] *= _uiSizeScale.y;
 
@@ -731,18 +728,18 @@ namespace RDE {
         }
     }
 
-    void calculateGeometryForUIImage(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, Transform* _transform, const ViewPort* _viewport) {
+	void calculateGeometryForUIImage(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         switch ((RDE_IMAGE_RENDERING_TYPE_)_data.imageRenderingType) {
 			case RDE_IMAGE_RENDERING_TYPE_NORMAL:
-				calculateNormalGeometry(_data, _transformMatrix, _transform, _viewport); break;
+				calculateNormalGeometry(_data, _transformMatrix, _anchoring, _transform, _viewport); break;
 			case RDE_IMAGE_RENDERING_TYPE_NINE_SLICE:
-				calculate9SliceGeometry(_data, _transformMatrix, _transform, _viewport); break;
+				calculate9SliceGeometry(_data, _transformMatrix, _anchoring, _transform, _viewport); break;
 			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_VERTICAL:
-				calculatePartialVGeometry(_data, _transformMatrix, _transform, _viewport); break;
+				calculatePartialVGeometry(_data, _transformMatrix, _anchoring, _transform, _viewport); break;
 			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_HORIZONTAL:
-				calculatePartialHGeometry(_data, _transformMatrix, _transform, _viewport); break;
+				calculatePartialHGeometry(_data, _transformMatrix, _anchoring, _transform, _viewport); break;
 			case RDE_IMAGE_RENDERING_TYPE_PARTIAL_RADIAL:
-				calculatePartialRGeometry(_data, _transformMatrix, _transform, _viewport); break;
+				calculatePartialRGeometry(_data, _transformMatrix, _anchoring, _transform, _viewport); break;
 		}
 
     }
@@ -795,24 +792,25 @@ namespace RDE {
         }
     }
 
-    void drawBatchedUIImage(RenderizableInnerDataUI& _data, Batch* _batch, Transform* _transform, const ViewPort* _viewport) {
+	void drawBatchedUIImage(RenderizableInnerDataUI& _data, Batch* _batch, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         auto [_transformMat, _dirty] = _transform->localToWorld();
-        if(_dirty || _data.RenderizableInnerData.dirty) {
+        if(_dirty || _data.RenderizableInnerData.dirty || _anchoring->dirty) {
             switch (_data.imageRenderingType) {
 				case RDE_IMAGE_RENDERING_TYPE_NORMAL:
-                    calculateNormalGeometry(_data, _transformMat, _transform, _viewport); break;
+					calculateNormalGeometry(_data, _transformMat, _anchoring, _transform, _viewport); break;
 				case RDE_IMAGE_RENDERING_TYPE_NINE_SLICE:
-                    calculate9SliceGeometry(_data, _transformMat, _transform, _viewport); break;
+					calculate9SliceGeometry(_data, _transformMat, _anchoring, _transform, _viewport); break;
 				case RDE_IMAGE_RENDERING_TYPE_PARTIAL_VERTICAL:
-                    calculatePartialVGeometry(_data, _transformMat, _transform, _viewport); break;
+					calculatePartialVGeometry(_data, _transformMat, _anchoring, _transform, _viewport); break;
 				case RDE_IMAGE_RENDERING_TYPE_PARTIAL_HORIZONTAL:
-                    calculatePartialHGeometry(_data, _transformMat, _transform, _viewport); break;
+					calculatePartialHGeometry(_data, _transformMat, _anchoring, _transform, _viewport); break;
 				case RDE_IMAGE_RENDERING_TYPE_PARTIAL_RADIAL:
-                    calculatePartialRGeometry(_data, _transformMat, _transform, _viewport); break;
+					calculatePartialRGeometry(_data, _transformMat, _anchoring, _transform, _viewport); break;
             }
 
-			((UITransform*)_transform)->update();
+			_transform->update();
             _data.RenderizableInnerData.dirty = false;
+			_anchoring->dirty = false;
         }
 
 		if(!_data.RenderizableInnerData.draw) {

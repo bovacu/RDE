@@ -4,7 +4,7 @@
 
 #include "core/graph/components/ui/UIInput.h"
 #include "core/Engine.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UIMask.h"
 #include "core/graph/components/ui/UIImage.h"
@@ -36,7 +36,8 @@ namespace RDE {
             }
         }
 
-        ((UITransform*)node->getTransform())->setSize({ _config.inputSize.x, _config.inputSize.y });
+		anchoring = node->getComponent<UIAnchoring>();	
+        anchoring->setSize({ _config.inputSize.x, _config.inputSize.y });
 
         uiInteractable->onInnerMouseEntered.bind<&UIInput::onMouseEntered>(this);
         uiInteractable->onInnerMouseExited.bind<&UIInput::onMouseExited>(this);
@@ -70,7 +71,7 @@ namespace RDE {
         placeholderTextRenderer->data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
 		placeholderTextRenderer->setEnabled(_config.showPlaceholderText);
         auto* _placeholderTransform = _placeholderNode->getTransform();
-        ((UITransform*)_placeholderTransform)->setAnchor(RDE_UI_ANCHOR_LEFT);
+        _placeholderNode->getComponent<UIAnchoring>()->setAnchor(RDE_UI_ANCHOR_LEFT);
         auto _placeholderPosition = _placeholderTransform->getPosition();
 		_placeholderTransform->setPosition(_placeholderPosition.x + _config.textsOffsetFromLeft.x - getSize().x * 0.5f,
                                            _placeholderPosition.y + _config.textsOffsetFromLeft.y);
@@ -88,7 +89,7 @@ namespace RDE {
         textRenderer->data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
         textTransform = _textNode->getTransform();
         auto _textPosition = textTransform->getPosition();
-		((UITransform*)textTransform)->setAnchor(RDE_UI_ANCHOR_LEFT);
+		_textNode->getComponent<UIAnchoring>()->setAnchor(RDE_UI_ANCHOR_LEFT);
         textTransform->setPosition(_textPosition.x + textRenderer->getSize().x * 0.5f + _config.textsOffsetFromLeft.x - getSize().x * 0.5f,
                                    _placeholderTransform->getPosition().y);
 
@@ -106,7 +107,7 @@ namespace RDE {
         caretSprite->data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
         caretTransform = _caretNode->getTransform();
 		auto _caretPosition = caretTransform->getPosition();
-		((UITransform*)caretTransform)->setAnchor(RDE_UI_ANCHOR_LEFT);
+		_caretNode->getComponent<UIAnchoring>()->setAnchor(RDE_UI_ANCHOR_LEFT);
         caretTransform->setPosition(_textPosition.x - getSize().x * 0.5f + _config.textsOffsetFromLeft.x,
                                     _caretPosition.y);
 		caretSprite->setEnabled(false);

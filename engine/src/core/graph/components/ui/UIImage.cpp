@@ -3,7 +3,7 @@
 //
 
 #include "core/graph/components/ui/UIImage.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/Engine.h"
 #include "core/graph/Scene.h"
 #include "core/render/elements/Batch.h"
@@ -28,7 +28,7 @@ namespace RDE {
         data.RenderizableInnerData.renderizableType = RDE_RENDERIZABLE_TYPE_UI_IMAGE;
         setColor(_config.color);
 
-        ((UITransform*)node->getTransform())->setSize(_config.size == -1 ? data.RenderizableInnerData.texture->getSize() : _config.size);
+        node->getComponent<UIAnchoring>()->setSize(_config.size == -1 ? data.RenderizableInnerData.texture->getSize() : _config.size);
 
 		data.imageRenderingType = _config.imageRenderingType;
 		if(data.imageRenderingType == RDE_IMAGE_RENDERING_TYPE_NINE_SLICE && !data.RenderizableInnerData.texture->nineSlice.isEnabled()) {
@@ -40,10 +40,10 @@ namespace RDE {
 
 
     RENDERIZABLE_UI_BASIC_METHODS_IMPL(UIImage, 
-        ((UITransform*)node->getTransform())->getSize().x * ((UITransform*)node->getTransform())->getScale().x, 
-        ((UITransform*)node->getTransform())->getSize().y * ((UITransform*)node->getTransform())->getScale().y,
+        anchoring->getSize().x * node->getTransform()->getScale().x, 
+ 		anchoring->getSize().y * node->getTransform()->getScale().y,
         {
-            ((UITransform*)node->getTransform())->setSize({ Util::Math::clampF(_size.x, 0, FLT_MAX), Util::Math::clampF(_size.y, 0, FLT_MAX) });
+			anchoring->setSize({ Util::Math::clampF(_size.x, 0, FLT_MAX), Util::Math::clampF(_size.y, 0, FLT_MAX) });
         })
 
 

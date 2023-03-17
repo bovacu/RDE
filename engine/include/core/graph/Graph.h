@@ -62,7 +62,6 @@ namespace RDE {
 
     class Graph {
         friend class Transform;
-        friend class UITransform;
         friend class Scene;
         friend class Canvas;
         friend class Node;

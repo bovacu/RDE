@@ -5,7 +5,7 @@
 #include "core/graph/components/ui/UISlider.h"
 #include "core/graph/components/Components.h"
 #include "core/Engine.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/graph/components/Node.h"
@@ -33,6 +33,8 @@ namespace RDE {
             }
         }
 
+		anchoring = node->getComponent<UIAnchoring>();	
+
         uiInteractable->onInnerClicking.bind<&UISlider::onMouseClicked>(this);
         uiInteractable->onInnerClickingReleased.bind<&UISlider::onMouseReleased>(this);
 
@@ -43,21 +45,23 @@ namespace RDE {
             .imageRenderingType = RDE_IMAGE_RENDERING_TYPE_NINE_SLICE
         });
         backgroundBarSprite->uiInteractable = uiInteractable;
-        backgroundBarTransform = (UITransform*)node->getTransform();
+        backgroundBarTransform = node->getTransform();
+		backgroundAnchoring = node->getComponent<UIAnchoring>();
         data.RenderizableInnerData.shader = backgroundBarSprite->getShaderID();
 
         fillBarNode = _graph->createNode("Fill", node);
         fillBarSprite = fillBarNode->addComponent<UIImage>(UIImageConfig {
-            .size = backgroundBarTransform->getSize(),
+			.size = backgroundAnchoring->getSize(),
             .texture = _config.fillingBarTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "fillAndBgrScrollBarHorizontal") :
                        _config.fillingBarTexture,
             .color = _config.fillingBarColor,
 			.imageRenderingType = RDE_IMAGE_RENDERING_TYPE_NINE_SLICE
         });
 
-        fillBarTransform = (UITransform*)fillBarNode->getTransform();
-        fillBarTransform->setAnchor(RDE_UI_ANCHOR_LEFT);
-        fillBarTransform->setStretch(RDE_UI_STRETCH_FULL_STRETCH);
+        fillBarTransform = fillBarNode->getTransform();
+		fillBarAnchoring = fillBarNode->getComponent<UIAnchoring>();
+		fillBarAnchoring->setAnchor(RDE_UI_ANCHOR_LEFT);
+		fillBarAnchoring->setStretch(RDE_UI_STRETCH_FULL_STRETCH);
 
         handleNode = _graph->createNode("Handle", node);
         handleSprite = handleNode->addComponent<UIImage>(UIImageConfig {
@@ -65,12 +69,13 @@ namespace RDE {
                       _config.handleTexture,
            .color = _config.handleColor
         });
-        handleTransform = (UITransform*)handleNode->getTransform();
-		handleTransform->setSize({handleTransform->getSize().x * 1.5f * _config.barSize.y / handleSprite->getSize().x, handleTransform->getSize().y * 1.5f * _config.barSize.y / handleSprite->getSize().y});
+        handleTransform = handleNode->getTransform();
+		handleAnchoring = handleNode->getComponent<UIAnchoring>();
+		handleAnchoring->setSize({handleAnchoring->getSize().x * 1.5f * _config.barSize.y / handleSprite->getSize().x, handleAnchoring->getSize().y * 1.5f * _config.barSize.y / handleSprite->getSize().y});
         handleTransform->setPosition(backgroundBarTransform->getPosition().x - (_config.barSize.x * 0.5f) + _config.barSize.x * _config.percentageFilled,
                                      handleTransform->getPosition().y);
-        handleTransform->setAnchor(RDE_UI_ANCHOR_RIGHT);
-        handleTransform->setStretch(RDE_UI_STRETCH_VERTICAL_STRETCH);
+		handleAnchoring->setAnchor(RDE_UI_ANCHOR_RIGHT);
+		handleAnchoring->setStretch(RDE_UI_STRETCH_VERTICAL_STRETCH);
 
         setFilledPercentage(_config.percentageFilled);
     }
@@ -98,7 +103,7 @@ namespace RDE {
     void UISlider::setFilledPercentage(float _percentage) {
         percentageFilled = Util::Math::clampF(_percentage, 0.f, 1.f);
 
-        auto _width = ((UITransform*)node->getTransform())->getSize().x;
+        auto _width = anchoring->getSize().x;
         auto _leftPos = node->getTransform()->getModelMatrixPosition().x - _width * 0.5f;
         handleTransform->setMatrixModelPosition({ _leftPos + percentageFilled * _width, handleTransform->getModelMatrixPosition().y});
 
