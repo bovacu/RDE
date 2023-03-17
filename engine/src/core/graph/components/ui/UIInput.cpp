@@ -266,6 +266,7 @@ namespace RDE {
 
 		if(_keyCode == RDE_KEYBOARD_KEY_ENTER || _keyCode == RDE_KEYBOARD_KEY_ESCAPE) {
             uiInteractable->focused = false;
+			onUnfocused();
 		} else if(_keyCode == RDE_KEYBOARD_KEY_BAKCSPACE) {
             if(pointer - 1 >= 0) {
                 auto _text = textRenderer->getText();
