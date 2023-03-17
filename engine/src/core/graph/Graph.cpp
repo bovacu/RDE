@@ -10,7 +10,7 @@
 #include "core/systems/animationSystem/AnimationSystem.h"
 #include "core/graph/Scene.h"
 #include "core/Engine.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/graph/components/DynamicSpriteRenderer.h"
 #include "core/graph/components/ui/UI.h"
 #include "core/graph/components/Node.h"
@@ -31,24 +31,19 @@ namespace RDE {
         name = _sceneName;
         auto _sceneRootID = registry.create();
 
-        if(!_isUI) {
-            registry.emplace<Tag>(_sceneRootID, _sceneRootID, _sceneName);
-            registry.emplace<Transform>(_sceneRootID, this).parent = NODE_ID_NULL;
-            sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, &registry.get<Transform>(_sceneRootID));
-            registry.get<Transform>(_sceneRootID).parentTransform = nullptr;
-            registry.get<Transform>(_sceneRootID).node = sceneRoot;
-            registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
-        } else {
-            registry.emplace<Tag>(_sceneRootID, _sceneRootID, _sceneName);
-            registry.emplace<UITransform>(_sceneRootID, this).parent = NODE_ID_NULL;
-            sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, (Transform*)&registry.get<UITransform>(_sceneRootID));
-            registry.get<UITransform>(_sceneRootID).parentTransform = nullptr;
-            registry.get<UITransform>(_sceneRootID).node = sceneRoot;
-            registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
+		registry.emplace<Tag>(_sceneRootID, _sceneRootID, _sceneName);
+		registry.emplace<Transform>(_sceneRootID, this).parent = NODE_ID_NULL;
+		sceneRoot = &registry.emplace<Node>(_sceneRootID, _sceneRootID, this, &_scene->engine->manager, &registry.get<Transform>(_sceneRootID));
+		registry.get<Transform>(_sceneRootID).parentTransform = nullptr;
+		registry.get<Transform>(_sceneRootID).node = sceneRoot;
+		registry.emplace<Active>(_sceneRootID, sceneRoot, &_scene->engine->manager, this);
 
-            auto* _interactable = &registry.emplace<UIInteractable>(_sceneRootID, sceneRoot, &scene->engine->manager, this);
-            _interactable->interactable = false;
-            _interactable->focused = false;
+        if(_isUI) {
+			registry.emplace<UIAnchoring>(_sceneRootID, sceneRoot, &scene->engine->manager, this, UIAnchoringConfig {});
+
+			auto* _interactable = &registry.emplace<UIInteractable>(_sceneRootID, sceneRoot, &scene->engine->manager, this);
+			_interactable->interactable = false;
+			_interactable->focused = false;   
         }
     }
 
@@ -59,25 +54,18 @@ namespace RDE {
 
         Node* _node = nullptr;
 
-        if(!renderingTreeData.isUI) {
-            registry.emplace<Tag>(_newNode, _newNode, _tag);
-            registry.emplace<Transform>(_newNode, this).parent = _parentRef;
-            (&registry.get<Transform>(_parentRef))->children.push_back(&registry.get<Transform>(_newNode));
-            (&registry.get<Transform>(_newNode))->parentTransform = (&registry.get<Transform>(_parentRef));
+		registry.emplace<Tag>(_newNode, _newNode, _tag);
+		registry.emplace<Transform>(_newNode, this).parent = _parentRef;
+		(&registry.get<Transform>(_parentRef))->children.push_back(&registry.get<Transform>(_newNode));
+		(&registry.get<Transform>(_newNode))->parentTransform = (&registry.get<Transform>(_parentRef));
 
-            _node = &registry.emplace<Node>(_newNode, _newNode, this, &scene->engine->manager, &registry.get<Transform>(_newNode));
-            registry.get<Transform>(_newNode).node = _node;
-            registry.emplace<Active>(_newNode, _node, &scene->engine->manager, this);
-        } else {
-            registry.emplace<Tag>(_newNode, _newNode, _tag);
-            registry.emplace<UITransform>(_newNode, this).parent = _parentRef;
-            (&registry.get<UITransform>(_parentRef))->children.push_back(&registry.get<UITransform>(_newNode));
-            (&registry.get<UITransform>(_newNode))->parentTransform = (&registry.get<UITransform>(_parentRef));
+		_node = &registry.emplace<Node>(_newNode, _newNode, this, &scene->engine->manager, &registry.get<Transform>(_newNode));
+		registry.get<Transform>(_newNode).node = _node;
+		registry.emplace<Active>(_newNode, _node, &scene->engine->manager, this);
 
-            _node = &registry.emplace<Node>(_newNode, _newNode, this, &scene->engine->manager, (Transform*)&registry.get<UITransform>(_newNode));
-            registry.get<UITransform>(_newNode).node = _node;
-            registry.emplace<Active>(_newNode, _node, &scene->engine->manager, this);
-        }
+		if(renderingTreeData.isUI) {
+			registry.emplace<UIAnchoring>(_newNode, _node, &scene->engine->manager, this, UIAnchoringConfig {});
+		}
 
         if(onDataChanged != nullptr) onDataChanged((void*)_newNode);
 

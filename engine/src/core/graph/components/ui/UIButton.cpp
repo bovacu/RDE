@@ -6,7 +6,7 @@
 #include "core/graph/components/ui/UIText.h"
 #include "core/Engine.h"
 #include "core/graph/Scene.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/graph/components/Node.h"
@@ -49,7 +49,8 @@ namespace RDE {
         uiInteractable->onInnerClicking.bind<&UIButton::onMouseClicked>(this);
         uiInteractable->onInnerClickingReleased.bind<&UIButton::onMouseReleased>(this);
 
-        ((UITransform*)node->getTransform())->setSize(_config.buttonSize);
+		anchoring = node->getComponent<UIAnchoring>();
+        anchoring->setSize(_config.buttonSize);
 
         uiImage = _node->addComponent<UIImage>(UIImageConfig {
             .size = _config.buttonSize,

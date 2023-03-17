@@ -2,22 +2,24 @@
 // Created by borja on 10/26/22.
 //
 
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/graph/components/ui/UI.h"
 #include "core/graph/components/Node.h"
+#include "core/graph/Scene.h"
+#include "core/Engine.h"
 
 #define ANCHOR_BITS  0b0000001111111110
 #define STRETCH_BITS 0b0011110000000000
 
 namespace RDE {
 
-    void UIAnchor::updateAnchor(UITransform* _transform) {
+    void UIAnchor::updateAnchor(UIAnchoring* _anchoring, Transform* _transform) {
         if (_transform->parentTransform == nullptr) {
             return;
         }
 
         auto _parentPosition = _transform->parentTransform->getModelMatrixPosition();
-        auto _parentSize = ((UITransform*)_transform->parentTransform->node->getTransform())->getSize();
+        auto _parentSize = _transform->parentTransform->node->getComponent<UIAnchoring>()->getSize();
 
 		if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_MIDDLE) {
             anchorPosition = _parentPosition;
@@ -54,68 +56,71 @@ namespace RDE {
 
 
 
-    UITransform::UITransform(Graph* _graph) : Transform(_graph) {
-		anchor.anchor = RDE_UI_ANCHOR_MIDDLE | RDE_UI_STRETCH_NO_STRETCH;
-    }
+	UIAnchoring::UIAnchoring(Node* _node, Scene* _scene, const UIAnchoringConfig& _config) :
+		UIAnchoring(_node, &_scene->engine->manager, _scene->graph, _config) {
+	
+	}
+	
+	UIAnchoring::UIAnchoring(Node* _node, Scene* _scene, Canvas* _canvas, const UIAnchoringConfig& _config) :
+		UIAnchoring(_node, &_scene->engine->manager, _canvas->graph, _config) {
+	
+	}
+	
+	UIAnchoring::UIAnchoring(Node* _node, Manager* _manager, Graph* _graph, const UIAnchoringConfig& _config) {
+		transform = _node->getTransform();
+		anchor.anchor = _config.anchor | _config.stretch;
+		setSize(_config.size);
+	}
 
-	RDE_UI_ANCHOR_ UITransform::getAnchor() const {
+	RDE_UI_ANCHOR_ UIAnchoring::getAnchor() const {
 		return (RDE_UI_ANCHOR_)(anchor.anchor & ANCHOR_BITS);
     }
 
-	void UITransform::setAnchor(RDE_UI_ANCHOR_ _anchor) {
+	void UIAnchoring::setAnchor(RDE_UI_ANCHOR_ _anchor) {
         anchor.anchor = _anchor | (anchor.anchor & STRETCH_BITS);
-        anchor.updateAnchor(this);
         setUIDirty();
     }
 
-	RDE_UI_STRETCH_ UITransform::getStretch() const {
+	RDE_UI_STRETCH_ UIAnchoring::getStretch() const {
 		return (RDE_UI_STRETCH_)(anchor.anchor & STRETCH_BITS);
     }
 
-	void UITransform::setStretch(RDE_UI_STRETCH_ _stretch) {
+	void UIAnchoring::setStretch(RDE_UI_STRETCH_ _stretch) {
         anchor.anchor = _stretch | (anchor.anchor & ANCHOR_BITS);
-        anchor.updateAnchor(this);
         setUIDirty();
     }
 
-    void UITransform::setUIDirty() {
-        uiDirty = true;
-
-        for(auto* _t : children) {
-            auto _uiTransform = (UITransform*)_t;
-            _uiTransform->uiDirty = true;
-            auto _lastAnchorPos = _uiTransform->anchor.anchorPosition;
-            auto _lastSize = _uiTransform->anchor.anchorSize;
-
-			_uiTransform->anchor.updateAnchor(_uiTransform);
-			auto _sizeDiff = _uiTransform->anchor.anchorSize - _lastSize;
-			auto _posDiff = _uiTransform->anchor.anchorPosition - _lastAnchorPos;
-			auto _position = Vec2F { _posDiff.x + _sizeDiff.x * 0.5f, _posDiff.y };
-
-			_uiTransform->translateMatrixModelPosition(_position);
-			_uiTransform->setSize(_uiTransform->getSize() + _sizeDiff);
-        }
-    }
-
-	void UITransform::update() {
-		Transform::update();
-		uiDirty = false;
+	void UIAnchoring::setSize(const Vec2F& _size) {
+		size = _size;
+		setUIDirty();
 	}
 
-    std::tuple<glm::mat4, bool> UITransform::localToWorld() {
-        auto [_mat, _dirty] = Transform::localToWorld();
-        if(_dirty) {
-            anchor.updateAnchor(this);
+	Vec2F UIAnchoring::getSize() {
+		return size;
+	}
+
+	void UIAnchoring::update() {
+		anchor.updateAnchor(this, transform);
+		dirty = false;
+	}
+
+	void UIAnchoring::setUIDirty() {
+        dirty = true;
+		anchor.updateAnchor(this, transform);
+
+        for(auto* _t : transform->children) {
+			auto* _anchoring = _t->node->getComponent<UIAnchoring>();
+			_anchoring->dirty = true;
+			auto _lastAnchorPos = _anchoring->anchor.anchorPosition;
+			auto _lastSize = _anchoring->anchor.anchorSize;
+
+			_anchoring->anchor.updateAnchor(_anchoring, _t);
+			auto _sizeDiff = _anchoring->anchor.anchorSize - _lastSize;
+			auto _posDiff = _anchoring->anchor.anchorPosition - _lastAnchorPos;
+			auto _position = Vec2F { _posDiff.x + _sizeDiff.x * 0.5f, _posDiff.y };
+
+			_t->translateMatrixModelPosition(_position);
+			_anchoring->setSize(_anchoring->getSize() + _sizeDiff);
         }
-        return { _mat, (_dirty || uiDirty) };
-    }
-
-    Vec2F UITransform::getSize() {
-        return size;
-    }
-
-    void UITransform::setSize(const Vec2F& _size) {
-        size = _size;
-        setUIDirty();
     }
 }

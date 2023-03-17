@@ -8,6 +8,7 @@
 #include "core/graph/components/ui/UI.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/systems/uiSystem/FontManager.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 
 namespace RDE {
 

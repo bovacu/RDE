@@ -4,7 +4,7 @@
 
 #include "core/Core.h"
 #include "core/graph/components/ui/UI.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/systems/eventSystem/MouseEvent.h"
 #include "core/systems/eventSystem/KeyEvent.h"
 #include "core/systems/eventSystem/ControllerEvent.h"
@@ -18,11 +18,11 @@ namespace RDE {
     UIInteractable::UIInteractable(Node* _node, Manager* _manager, Graph* _graph) {}
 
     static bool trigger(Node* _node, Engine* _engine) {
-        auto* _uiTransform = _node->getComponent<UITransform>();
         auto* _transform = _node->getTransform();
         auto _mousePos = _engine->manager.inputManager.getMousePosWorldPos();
+		auto* _anchoring = _node->getComponent<UIAnchoring>();
 
-        return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_uiTransform->getSize().x, (float)_uiTransform->getSize().y});
+		return _mousePos.isInside(_transform->getPosition(), Vec2F {(float)_anchoring->getSize().x, (float)_anchoring->getSize().y});
     }
 
     static void shouldStopEventPropagation(Event& _event, Node* _node, bool _forceStop = false) {

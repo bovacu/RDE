@@ -10,7 +10,7 @@
 #include "core/graph/components/ui/UICheckbox.h"
 #include "core/graph/components/ui/UIInput.h"
 #include "core/graph/components/ui/UISlider.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/graph/components/ui/UIMask.h"
@@ -113,11 +113,11 @@ namespace RDE {
                         break;
                     }
 					case RDE_RENDERIZABLE_TYPE_UI_IMAGE: {
-                        drawBatchedUIImage(_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
+                        drawBatchedUIImage(_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), camera->getViewport());
                         break;
                     }
 					case RDE_RENDERIZABLE_TYPE_UI_TEXT: {
-                        drawBatchedUIText(_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
+						drawBatchedUIText(_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), camera->getViewport());
                         break;
                     }
 					case RDE_RENDERIZABLE_TYPE_SPRITE:
@@ -150,11 +150,11 @@ namespace RDE {
                     break;
                 }
 				case RDE_RENDERIZABLE_TYPE_UI_IMAGE: {
-                    drawBatchedUIImage(*_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
+					drawBatchedUIImage(*_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), camera->getViewport());
                     break;
                 }
 				case RDE_RENDERIZABLE_TYPE_UI_TEXT: {
-                    drawBatchedUIText(*_data, _currentBatch, _canvasElement->node->getTransform(), camera->getViewport());
+                    drawBatchedUIText(*_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), camera->getViewport());
                     break;
                 }
 				case RDE_RENDERIZABLE_TYPE_SPRITE:
@@ -188,7 +188,7 @@ namespace RDE {
     }
 
     void Canvas::onResize(uint _width, uint _height) {
-        ((UITransform*)graph->sceneRoot->getTransform())->setSize({ (float)_width, (float)_height });
+        graph->sceneRoot->getComponent<UIAnchoring>()->setSize({ (float)_width, (float)_height });
         camera->setCameraSize((int)_width, (int)_height);
     }
 

@@ -5,7 +5,7 @@
 #include "core/graph/components/ui/UICheckbox.h"
 #include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UIImage.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/Engine.h"
 #include "core/render/elements/Batch.h"
 #include "core/render/elements/IRenderizable.h"
@@ -55,10 +55,10 @@ namespace RDE {
         data.RenderizableInnerData.shader = checkboxBackgroundSprite->getShaderID();
         data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
 
-        ((UITransform*)node->getTransform())->setSize({ textRenderer->getSize().x + checkboxBackgroundSprite->getSize().x + _config.checkboxTextOffset.x,
+        node->getComponent<UIAnchoring>()->setSize({ textRenderer->getSize().x + checkboxBackgroundSprite->getSize().x + _config.checkboxTextOffset.x,
                                                         std::max(checkboxBackgroundSprite->getSize().y, textRenderer->getSize().y * 0.5f)});
 
-        ((UITransform*)_checkboxBackgroundNode->getTransform())->setAnchor(RDE_UI_ANCHOR_LEFT);
+        _checkboxBackgroundNode->getComponent<UIAnchoring>()->setAnchor(RDE_UI_ANCHOR_LEFT);
         _checkboxBackgroundNode->getTransform()->setMatrixModelPosition({
             _checkboxBackgroundNode->getTransform()->getModelMatrixPosition().x - getSize().x * 0.5f + checkboxBackgroundSprite->getSize().x * 0.5f,
             _checkboxBackgroundNode->getTransform()->getModelMatrixPosition().y
@@ -73,7 +73,7 @@ namespace RDE {
         tickSprite->setEnabled(_config.checked);
 
 
-		((UITransform*)textNode->getTransform())->setAnchor(RDE_UI_ANCHOR_LEFT);
+		textNode->getComponent<UIAnchoring>()->setAnchor(RDE_UI_ANCHOR_LEFT);
         textNode->getTransform()->setMatrixModelPosition({
             textNode->getTransform()->getModelMatrixPosition().x - getSize().x * 0.5f +
             checkboxBackgroundSprite->getSize().x + textRenderer->getTextSize().x * 0.5f + _config.checkboxTextOffset.x,

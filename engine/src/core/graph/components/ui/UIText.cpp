@@ -5,7 +5,7 @@
 #include "core/graph/components/ui/UIText.h"
 #include "core/Engine.h"
 #include "core/graph/Scene.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/render/elements/Batch.h"
 #include "core/render/elements/IRenderizable.h"
 #include "core/graph/components/Node.h"
@@ -30,7 +30,7 @@ namespace RDE {
         data.RenderizableInnerData.texture = &font->getTexture();
         data.RenderizableInnerData.renderizableType = RDE_RENDERIZABLE_TYPE_UI_TEXT;
 
-        ((UITransform*)node->getTransform())->setSize(textSize);
+        node->getComponent<UIAnchoring>()->setSize(textSize);
     }
 
     void UIText::setText(const std::string& _text) {

@@ -101,7 +101,7 @@
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/DynamicSpriteRenderer.h"
 #include "core/graph/components/TextRenderer.h"
-#include "core/graph/components/ui/UITransform.h"
+#include "core/graph/components/ui/UIAnchoring.h"
 #include "core/graph/components/ui/UIText.h"
 #include "core/graph/components/ui/UIImage.h"
 #include "core/graph/components/ui/UIButton.h"

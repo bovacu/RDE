@@ -43,8 +43,6 @@ namespace RDE {
             glm::mat4 worldMatrixCache { 1.0f };
             bool dirty = false;
 
-            Graph* graph;
-
         protected:
             glm::mat4 recalculateCachedMatrix();
             void setDirty(Transform* _transform);
@@ -219,13 +217,13 @@ namespace RDE {
 
             [[nodiscard]] glm::mat4 localToParent() const;
             [[nodiscard]] glm::mat4 parentToLocal() const;
-            [[nodiscard]] virtual std::tuple<glm::mat4, bool> localToWorld();
+            [[nodiscard]] std::tuple<glm::mat4, bool> localToWorld();
             [[nodiscard]] glm::mat4 worldToLocal() const;
 
             glm::mat4 getLocalMatrix() const;
             void setLocalMatrix(const glm::mat4& _matrix);
 
-			virtual void update();
+			void update();
     };
 }
 
