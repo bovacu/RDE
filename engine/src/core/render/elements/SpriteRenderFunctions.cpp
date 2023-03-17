@@ -250,8 +250,8 @@ namespace RDE {
 
 		auto [_transformMat, _dirty] = _transform->localToWorld();
 		if(_dirty || _data.RenderizableInnerData.dirty || _anchoring->dirty) {
+			_anchoring->update();
 			_data.RenderizableInnerData.vertices.clear();
-			_anchoring->dirty = false;
 			calculateGeometryForUIText(_data, _transformMat, _anchoring, _transform, _viewport);
 			_transform->update();
 			_data.RenderizableInnerData.dirty = false;
@@ -795,6 +795,9 @@ namespace RDE {
 	void drawBatchedUIImage(RenderizableInnerDataUI& _data, Batch* _batch, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         auto [_transformMat, _dirty] = _transform->localToWorld();
         if(_dirty || _data.RenderizableInnerData.dirty || _anchoring->dirty) {
+
+			_anchoring->update();
+
             switch (_data.imageRenderingType) {
 				case RDE_IMAGE_RENDERING_TYPE_NORMAL:
 					calculateNormalGeometry(_data, _transformMat, _anchoring, _transform, _viewport); break;
@@ -810,7 +813,6 @@ namespace RDE {
 
 			_transform->update();
             _data.RenderizableInnerData.dirty = false;
-			_anchoring->dirty = false;
         }
 
 		if(!_data.RenderizableInnerData.draw) {

@@ -19,7 +19,7 @@ namespace RDE {
         }
 
         auto _parentPosition = _transform->parentTransform->getModelMatrixPosition();
-        auto _parentSize = _anchoring->getSize();
+        auto _parentSize = _transform->parentTransform->node->getComponent<UIAnchoring>()->getSize();
 
 		if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_MIDDLE) {
             anchorPosition = _parentPosition;
@@ -99,6 +99,11 @@ namespace RDE {
 		return size;
 	}
 
+	void UIAnchoring::update() {
+		anchor.updateAnchor(this, transform);
+		dirty = false;
+	}
+
 	void UIAnchoring::setUIDirty() {
         dirty = true;
 		anchor.updateAnchor(this, transform);
@@ -113,8 +118,6 @@ namespace RDE {
 			auto _sizeDiff = _anchoring->anchor.anchorSize - _lastSize;
 			auto _posDiff = _anchoring->anchor.anchorPosition - _lastAnchorPos;
 			auto _position = Vec2F { _posDiff.x + _sizeDiff.x * 0.5f, _posDiff.y };
-
-			Util::Log::info("Diff for ", _t->node->getID(), ", ", _posDiff);
 
 			_t->translateMatrixModelPosition(_position);
 			_anchoring->setSize(_anchoring->getSize() + _sizeDiff);
