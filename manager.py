@@ -34,11 +34,16 @@ def buildin_process_windows(args, action):
 
     create_build_folder = "if not exist build mkdir build"
     create_windows_folder = "if not exist build\\windows mkdir build\\windows"
+    create_windows_lib_folder = "if not exist build\\windows\\lib mkdir build\\windows\\lib"
     create_windows_build_folder = "if not exist build\\windows\\{} mkdir build\\windows\\{}".format( build_type.lower(), build_type.lower())
+    create_windows_lib_build_folder = "if not exist build\\windows\\lib\\{} mkdir build\\windows\\lib\\{}".format( build_type.lower(), build_type.lower())
     cmake_generate = "cd build\\windows\\{_build_type} && cmake -G \"{_generator}\" -DCMAKE_BUILD_TYPE={_build_type} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_C_COMPILER={_c_compiler} -DCMAKE_CXX_COMPILER={_cxx_compiler}  -DCMAKE_TOOLCHAIN_FILE=".format(_generator = generator, _build_type = build_type, _c_compiler = c_compiler, _cxx_compiler = cxx_compiler) + os.getcwd() + "/vcpkg/scripts/buildsystems/vcpkg.cmake ..\\..\\.."
+    cmake_generate_lib = "cd build\\windows\\lib\\{_build_type} && cmake -G \"{_generator}\" -DRDE_LIBRARY=ON -DCMAKE_BUILD_TYPE={_build_type} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_C_COMPILER={_c_compiler} -DCMAKE_CXX_COMPILER={_cxx_compiler}  -DCMAKE_TOOLCHAIN_FILE=".format(_generator = generator, _build_type = build_type, _c_compiler = c_compiler, _cxx_compiler = cxx_compiler) + os.getcwd() + "/vcpkg/scripts/buildsystems/vcpkg.cmake ..\\..\\..\\.."
     cmake_build = "cd build\\windows\\{} && cmake --build .".format(build_type.lower())
+    cmake_build_lib = "cd build\\windows\\lib\\{} && cmake --build .".format(build_type.lower())
     delete_compile_commands = "del compile_commands.json"
     copy_compile_commands = "copy build\\windows\\{}\\compile_commands.json .".format(build_type.lower())
+    copy_compile_commands_lib = "copy build\\windows\\lib\\{}\\compile_commands.json .".format(build_type.lower())
 
     run_command = "start build\\windows\\{}\\RDE.exe".format(build_type.lower())
 
@@ -49,7 +54,16 @@ def buildin_process_windows(args, action):
         os.system("cd build\\windows_vs && cmake --build .")
         exit(0)
 
-    if action == "build":
+    if action == "build-lib":
+        os.system(create_build_folder)
+        os.system(create_windows_folder)
+        os.system(create_windows_lib_folder)
+        os.system(create_windows_lib_build_folder)
+        os.system(cmake_generate_lib)
+        os.system(cmake_build_lib)
+        os.system(delete_compile_commands)
+        os.system(copy_compile_commands_lib)
+    elif action == "build":
         os.system(create_build_folder)
         os.system(create_windows_folder)
         os.system(create_windows_build_folder)
@@ -166,7 +180,7 @@ def project_lines_number_mac():
 def windows(args):
     action = extract_argument(args, "--action", "")
     generate_vs_project = extract_argument(args, "--generate_vs_project", "")
-    if action == "build" or action == "build-run" or action == "run" or generate_vs_project:
+    if action == "build" or action == "build-run" or action == "run" or generate_vs_project or action == "build-lib":
         buildin_process_windows(args, action)
     elif action == "lines":
         project_lines_number_windows()

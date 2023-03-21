@@ -178,43 +178,43 @@ namespace RDE {
             int accumulator = 0;
 
         public:
-            Engine();
+            RDE_FUNC Engine();
 
             /**
              * @brief Returns the platform that the engine is running on.
              * @return RDE_PLATFORM_TYPE_
              */
-            RDE_PLATFORM_TYPE_ getPlatform() const;
+            RDE_FUNC RDE_PLATFORM_TYPE_ getPlatform() const;
 
             /**
              * @brief This method provides the number of FPS in any given moment.
              * @return the number of FPS
              */
-            [[nodiscard]] int getFps() const;
+            RDE_FUNC_ND int getFps() const;
 
             /**
              * @brief Returns the delta used in the FixedUpdate method
              * @return The FPS as milliseconds.
              */
-            [[nodiscard]] float geFixedDelta() const;
+            RDE_FUNC_ND float geFixedDelta() const;
 
             /**
              * @brief Sets the delta to use in the FixedUpdate method, usually 1/60, 1/50 or 1/30
              */
-            void setFixedDelta(float _fixedDelta);
+            RDE_FUNC void setFixedDelta(float _fixedDelta);
 
             /**
              * @brief This initiates some crucial parts of the engine and also the main scene.
              * @param _scene Main scene
              * @see Scene
              */
-            void onInit(Scene* _scene);
+            RDE_FUNC void onInit(Scene* _scene);
 
             /**
              * @brief This method is the main loop of the game, runs until the window is closed or running attribute is set
              * to false. Runs with an independent frame rate loop.
              */
-            void onRun();
+            RDE_FUNC void onRun();
 
             /**
              * @brief This methods handles all the events that can't be handle in any given moment, such as resizing the
@@ -222,55 +222,55 @@ namespace RDE {
              * @param The Event to be handled
              * @see Event
              */
-            void onEvent(Event& _event);
+            RDE_FUNC void onEvent(Event& _event);
 
             /**
              * @brief This method handles the non-physics based updates of the game and also is used to capture all the inputs.
              * @param _dt The amount of time passed from the previous frame to this current one.
              */
-            void onUpdate(Delta _dt);
+            RDE_FUNC void onUpdate(Delta _dt);
 
             /**
              * @brief This method is like onUpdate, but this one handles the physics-based updates.
              * @param _fixedDt Fixed value to multiply the physics movements, by default 1 / 60.
              */
-            void onFixedUpdate(Delta _fixedDt);
+            RDE_FUNC void onFixedUpdate(Delta _fixedDt);
 
             /**
              * @brief This method is called once onUpdate and onFixedUpdate are finished, but before onRender. This is
              * the perfect place to remove elements from collections used in onUpdate or onFixedUpdate.
              * @param _dt The amount of time passed from the previous frame to this current one.
              */
-            void onLateUpdate(Delta _dt);
+            RDE_FUNC void onLateUpdate(Delta _dt);
 
             /**
              * @brief This method is used to render everything in our game, renderization shouldn't be done other method.
              * @param _dt The amount of time passed from the previous frame to this current one.
              */
-            void onRender(Delta _dt);
+            RDE_FUNC void onRender(Delta _dt);
 
             /**
              * @brief Frees all memory and resources allocated
              */
-            void destroy();
+            RDE_FUNC void destroy();
 
             /**
              * @brief Returns the Window instance.
              * @return The main window.
              */
-            Window* getWindow() { return window; }
+            RDE_FUNC Window* getWindow() { return window; }
 
             /**
              * @brief Allows the end-user to render to something different than the default window.
              * @param _redirectionFunc FrameBuffer
              */
-            void setRenderingRedirection(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc);
+            RDE_FUNC void setRenderingRedirection(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc);
 
             /**
              * @brief Allows the end-user to render to ImGui specifically.
              * @param _redirectionFunc FrameBuffer
              */
-            void setRenderingRedirectionToImGui(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc);
+            RDE_FUNC void setRenderingRedirectionToImGui(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc);
 
         private:
             /**
@@ -311,7 +311,7 @@ namespace RDE {
     /**
      * @brief Externed function that must be implemented for the Engine to work.
      */
-    Engine* createEngine(int _argc, char** _argv);
+    extern "C" RDE_FUNC Engine* createEngine(int _argc, char** _argv);
 }
 
 
