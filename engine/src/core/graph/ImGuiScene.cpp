@@ -766,6 +766,8 @@ namespace RDE {
     void ImGuiScene::uiTransformComponent(Graph* _graph, const NodeID _selectedNode) {
         auto* _node = _graph->getNode(_selectedNode);
 
+		if(!_node->hasComponent<UIAnchoring>()) return;
+
         Transform* _transform = nullptr;
 		UIAnchoring* _anchoring = nullptr;
         _transform = _node->getComponent<Transform>();
