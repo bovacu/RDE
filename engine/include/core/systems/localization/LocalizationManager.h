@@ -25,7 +25,7 @@ namespace RDE {
          * @param _language The Language enum
          * @return A const char* of the Language code
         */
-		RDE_FUNC_ND static const char* toString(RDE_LANGUAGE_ _language) {
+		RDE_FUNC_ND_STATIC const char* toString(RDE_LANGUAGE_ _language) {
             switch (_language) {
 				case RDE_LANGUAGE_EN_US: return "en-us";
 				case RDE_LANGUAGE_ES_ES: return "es-es";
@@ -48,7 +48,7 @@ namespace RDE {
          * @param _language A valid language code.
          * @return Language
         */
-		RDE_FUNC_ND static RDE_LANGUAGE_ toEnum(const char* _language) {
+		RDE_FUNC_ND_STATIC RDE_LANGUAGE_ toEnum(const char* _language) {
             return toEnum(std::string(_language));
         }
 
@@ -57,7 +57,7 @@ namespace RDE {
          * @param _language A valid language code.
          * @return Language
         */
-		RDE_FUNC_ND static RDE_LANGUAGE_ toEnum(const std::string& _language) {
+		RDE_FUNC_ND_STATIC RDE_LANGUAGE_ toEnum(const std::string& _language) {
             auto _strCpy = _language;
             _strCpy = Util::String::toLower(_strCpy);
 

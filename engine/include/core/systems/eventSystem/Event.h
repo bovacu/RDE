@@ -27,7 +27,7 @@ namespace RDE {
              * @brief Returns the type of an event in a static way.
              * @return EventType
              */
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_NONE; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_NONE; }
 
             /**
              * @brief Returns the event type from the current object.

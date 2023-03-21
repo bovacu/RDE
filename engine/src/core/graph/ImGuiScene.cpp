@@ -323,7 +323,7 @@ namespace RDE {
 
         float _totalFontsSize = 0;
         for(auto& _font : engine->manager.fontManager.getAllFonts())
-            _totalFontsSize += _font->getTexture().getKb();
+            _totalFontsSize += _font->getTexture()->getKb();
 
         ImGui::Separator();
         _child++;
@@ -331,8 +331,8 @@ namespace RDE {
         if(ImGui::TreeNode((void*)(intptr_t)_child, "Fonts -> %.2f KBs", _totalFontsSize)) {
             for(auto& _font : engine->manager.fontManager.getAllFonts()) {
                 if(ImGui::TreeNode((void*)(intptr_t)_child, "%s(font size %d)", _font->getFontName().c_str(), _font->getFontSize())) {
-                    ImGui::Text("Kb: %.2f", _font->getTexture().getKb());
-                    ImGui::Text("Texture size: %fx%f", _font->getTexture().getSize().x, _font->getTexture().getSize().y);
+                    ImGui::Text("Kb: %.2f", _font->getTexture()->getKb());
+                    ImGui::Text("Texture size: %fx%f", _font->getTexture()->getSize().x, _font->getTexture()->getSize().y);
                     _child++;
                     ImGui::TreePop();
                 }

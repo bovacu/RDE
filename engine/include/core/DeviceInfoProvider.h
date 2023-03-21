@@ -2,6 +2,7 @@
 #define RDE_DEVICE_INFO_PROVIDER_H
 
 #include "core/Enums.h"
+#include "core/Core.h"
 
 namespace RDE {
 
@@ -33,7 +34,7 @@ namespace RDE {
 			/**
 			 * @brief Returns the battery information on the platform the app is running on.
 			 */
-			BatteryStatus getBatteryStatus();
+			RDE_FUNC_ND BatteryStatus getBatteryStatus();
 	};
 
 }

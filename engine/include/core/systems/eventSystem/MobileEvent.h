@@ -55,7 +55,7 @@ namespace RDE {
                 return _sst.str();
             }
 
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "MobileTouchDown"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_MOBILE_INPUT; }
@@ -96,7 +96,7 @@ namespace RDE {
                 return _sst.str();
             }
 
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOBILE_TOUCH_UP; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOBILE_TOUCH_UP; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "MobileTouchUp"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_MOBILE_INPUT; }
@@ -128,7 +128,7 @@ namespace RDE {
         	    return _sst.str();
         	}
 
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "MobileTouchMoved"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_MOBILE_INPUT; }

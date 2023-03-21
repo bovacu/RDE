@@ -49,7 +49,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_KEY_PRESSED; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_KEY_PRESSED; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "KeyPressed"; }
     };
@@ -76,7 +76,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_KEY_TYPED; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_KEY_TYPED; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "KeyTyped"; }
     };
@@ -96,7 +96,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType()  { return RDE_EVENT_TYPE_KEY_RELEASED; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType()  { return RDE_EVENT_TYPE_KEY_RELEASED; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "KeyReleased"; }
     };
@@ -116,7 +116,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType()  { return RDE_EVENT_TYPE_TEXT_TYPED; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType()  { return RDE_EVENT_TYPE_TEXT_TYPED; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "TextTyped"; }
     };

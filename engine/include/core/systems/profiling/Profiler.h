@@ -90,9 +90,9 @@ namespace RDE {
 			RDE_FUNC_STATIC void begin(ProfilerState _state);
 			RDE_FUNC_STATIC void end(ProfilerState _state);
 			RDE_FUNC_STATIC void endFrame();
-			RDE_FUNC_ND static std::unordered_map<ProfilerState, State>& getStates();
+			RDE_FUNC_ND_STATIC std::unordered_map<ProfilerState, State>& getStates();
 
-			RDE_FUNC_ND static u_long* getTotalVirtualMemory();
+			RDE_FUNC_ND_STATIC u_long* getTotalVirtualMemory();
     };
 
 }

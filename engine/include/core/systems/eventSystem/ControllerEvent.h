@@ -43,7 +43,7 @@ namespace RDE {
                 return _sst.str();
             }
 
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_CONTROLLER_AXIS_MOVED; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_CONTROLLER_AXIS_MOVED; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "JoystickAxisMoved"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_CONTROLLER_BUTTON; }
@@ -70,7 +70,7 @@ namespace RDE {
                 return _sst.str();
             }
 
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_CONTROLLER_BUTTON_DOWN; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_CONTROLLER_BUTTON_DOWN; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "JoystickButtonDown"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_CONTROLLER_BUTTON; }
@@ -95,7 +95,7 @@ namespace RDE {
                 return _sst.str();
             }
 
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_CONTROLLER_BUTTON_UP; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_CONTROLLER_BUTTON_UP; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "JoystickButtonUp"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_INPUT | RDE_EVENT_CATEGORY_CONTROLLER_BUTTON; }

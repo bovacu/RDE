@@ -27,7 +27,7 @@ namespace RDE {
 		fontSize = _config.fontSize;
         recalcTextDimensions(innerText);
         setColor(_config.textColor);
-        data.RenderizableInnerData.texture = &font->getTexture();
+        data.RenderizableInnerData.texture = font->getTexture();
         data.RenderizableInnerData.renderizableType = RDE_RENDERIZABLE_TYPE_UI_TEXT;
 
         node->getComponent<UIAnchoring>()->setSize(textSize);

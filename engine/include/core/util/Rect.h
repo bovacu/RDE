@@ -17,7 +17,7 @@ namespace RDE {
     typedef Rect<Vec2F> FloatRect;
     typedef Rect<Vec2I> IntRect;
 
-    inline std::ostream& operator<<(std::ostream& _os, const IntRect& _rect){
+	RDE_FUNC inline std::ostream& operator<<(std::ostream& _os, const IntRect& _rect){
         _os << "(bottomLeft: [" << _rect.bottomLeftCorner.x << ", " << _rect.bottomLeftCorner.y << "], size: [" << _rect.size.x << ", " << _rect.size.y << ')';
         return _os;
     }

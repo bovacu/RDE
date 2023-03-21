@@ -16,8 +16,8 @@ namespace RDE {
     struct Color {
         unsigned char r, g, b, a;
 
-        Color() : r(0), g(0), b(0), a(0) {  }
-        Color(unsigned char _r, unsigned char _g, unsigned char _b, unsigned char _a = 255) : r(_r), g(_g), b(_b), a(_a) {  }
+		RDE_FUNC Color() : r(0), g(0), b(0), a(0) {  }
+		RDE_FUNC Color(unsigned char _r, unsigned char _g, unsigned char _b, unsigned char _a = 255) : r(_r), g(_g), b(_b), a(_a) {  }
 
         static const Color White;
         static const Color Black;
@@ -36,12 +36,12 @@ namespace RDE {
         static const Color NO_COLOR;
     };
 
-    inline std::ostream& operator<<(std::ostream& _os, const Color& _color){
+	RDE_FUNC inline std::ostream& operator<<(std::ostream& _os, const Color& _color){
         _os << '(' << (uint)_color.r << ", " << (uint)_color.g << ", " << (uint)_color.b << ", " << (uint)_color.a << ')';
         return _os;
     }
 
-    inline bool operator==(const Color& _c0, const Color& _c1) {
+	RDE_FUNC inline bool operator==(const Color& _c0, const Color& _c1) {
         return _c0.r == _c1.r && _c0.g == _c1.g && _c0.b == _c1.b && _c0.a == _c1.a;
     }
 

@@ -30,7 +30,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_MOVED; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_MOVED; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "WindowMoved"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
@@ -64,7 +64,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_RESIZED; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_RESIZED; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "WindowResized"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
@@ -88,7 +88,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "WindowDisplayChanged"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
@@ -112,7 +112,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_MINIMIZED; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_MINIMIZED; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "WindowMinimized"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
@@ -132,7 +132,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_CLOSED; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_WINDOW_CLOSED; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "WindowClosed"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
@@ -151,7 +151,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_GAME_FRAME; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_GAME_FRAME; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "GameFrame"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
@@ -171,7 +171,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_GAME_UPDATE; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_GAME_UPDATE; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "GameUpdate"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }
@@ -191,7 +191,7 @@ namespace RDE {
             }
 
             /// Implementation of the rest of the static and virtual methods.
-			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_GAME_RENDER; }
+			RDE_FUNC_ND_STATIC RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_GAME_RENDER; }
 			RDE_FUNC_ND RDE_EVENT_TYPE_ getEventType() const override { return getStaticType(); }
 			RDE_FUNC_ND const char* getName() const override { return "GameRender"; }
 			RDE_FUNC_ND int getCategoryFlags() const override { return RDE_EVENT_CATEGORY_GAME; }

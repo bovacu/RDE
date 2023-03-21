@@ -30,7 +30,7 @@ namespace RDE {
         innerText = _config.text;
 		fontSize = _config.fontSize;
         recalcTextDimensions(innerText);
-        data.texture = &font->getTexture();
+        data.texture = font->getTexture();
         data.renderizableType = RDE_RENDERIZABLE_TYPE_TEXT;
         setColor(_config.color);
     }

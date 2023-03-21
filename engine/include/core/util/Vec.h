@@ -25,56 +25,56 @@ namespace RDE {
         };
 
         public:
-            Vec2() {
+			RDE_FUNC Vec2() {
                 x = 0;
                 y = 0;
             }
 
-            Vec2(T _x, T _y) {
+			RDE_FUNC Vec2(T _x, T _y) {
                 x = _x;
                 y = _y;
             }
 
-            void set(T _x, T _y) {
+			RDE_FUNC void set(T _x, T _y) {
                 x = _x;
                 y = _y;
             }
 
-            void set(const Vec2<T>& _vec) {
+			RDE_FUNC void set(const Vec2<T>& _vec) {
                 x = _vec.x;
                 y = _vec.y;
             }
 
-            [[nodiscard]] float dotProduct(const Vec2<T>& _p) const {
+			RDE_FUNC_ND float dotProduct(const Vec2<T>& _p) const {
                 return x * _p.x + y * _p.y;
             }
 
-            [[nodiscard]] Vec2<T> crossProduct(float _scalar) const {
+			RDE_FUNC_ND Vec2<T> crossProduct(float _scalar) const {
                 return { -_scalar * y, _scalar * x };
             }
 
-            [[nodiscard]] float crossProduct(const Vec2<T> _vec) const {
+			RDE_FUNC_ND float crossProduct(const Vec2<T> _vec) const {
                 return x * _vec.y - y * _vec.x;
             }
 
-            [[nodiscard]] float distance(const Vec2<T>& _p) const {
+			RDE_FUNC_ND float distance(const Vec2<T>& _p) const {
                 return std::sqrt((_p.x - x) * (_p.x - x) + (_p.y - y) * (_p.y - y));
             }
 
-            [[nodiscard]] float distanceSqr(const Vec2<T>& _p) const {
+			RDE_FUNC_ND float distanceSqr(const Vec2<T>& _p) const {
                 Vec2<T> c = *this - _p;
                 return c.dotProduct(c);
             }
 
-            [[nodiscard]] float magnitude() const {
+			RDE_FUNC_ND float magnitude() const {
                 return std::sqrt(x * x + y * y);
             }
 
-            [[nodiscard]] float magnitudeSqr() const {
+			RDE_FUNC_ND float magnitudeSqr() const {
                 return x * x + y * y;
             }
 
-            void normalize() {
+			RDE_FUNC void normalize() {
                 float _magnitude = magnitude();
 
                 if(_magnitude > EPSILON) {
@@ -84,7 +84,7 @@ namespace RDE {
                 }
             }
 
-            void rotate(float _degrees) {
+			RDE_FUNC void rotate(float _degrees) {
                 auto _radians = glm::radians(_degrees);
                 float _c = std::cos(_radians);
                 float _s = std::sin(_radians);
@@ -96,154 +96,154 @@ namespace RDE {
                 y = _yRotated;
             }
 
-            bool isInside(const Vec2<T>& _rectCenter, const Vec2<T>& _rectSize) {
+			RDE_FUNC_ND bool isInside(const Vec2<T>& _rectCenter, const Vec2<T>& _rectSize) {
                 return x >= _rectCenter.x - _rectSize.x / 2.f && x <= _rectCenter.x + _rectSize.x / 2.f &&
                        y >= _rectCenter.y - _rectSize.y / 2.f && y <= _rectCenter.y + _rectSize.y / 2.f;
             }
 
-            Vec2<T> operator+(const Vec2<T>& _rhs) const {
+			RDE_FUNC Vec2<T> operator+(const Vec2<T>& _rhs) const {
                 return Vec2( x + _rhs.x, y + _rhs.y );
             }
 
-            Vec2<T> operator+(float _s) const {
+			RDE_FUNC Vec2<T> operator+(float _s) const {
                 return Vec2( x + _s, y + _s );
             }
 
-            void operator+=(const Vec2& _rhs) {
+			RDE_FUNC void operator+=(const Vec2& _rhs) {
                 x += _rhs.x;
                 y += _rhs.y;
             }
 
 
 
-            Vec2<T> operator-(const Vec2<T>& _rhs) const {
+			RDE_FUNC Vec2<T> operator-(const Vec2<T>& _rhs) const {
                 return Vec2( x - _rhs.x, y - _rhs.y );
             }
 
-            Vec2<T> operator-(float _s) const {
+			RDE_FUNC Vec2<T> operator-(float _s) const {
                 return Vec2( x - _s, y - _s );
             }
 
-            void operator-=(const Vec2<T>& _rhs) {
+			RDE_FUNC void operator-=(const Vec2<T>& _rhs) {
                 x -= _rhs.x;
                 y -= _rhs.y;
             }
 
-            Vec2<T> operator -() const {
+			RDE_FUNC Vec2<T> operator -() const {
                 return { -x, -y };
             }
 
-			Vec2<T> operator*( const Vec2<T> _other) const {
+			RDE_FUNC Vec2<T> operator*( const Vec2<T> _other) const {
 				return Vec2<T>( x * _other.x, y * _other.y );
 			}
 
-			Vec2<T> operator/( const Vec2<T> _other) const {
+			RDE_FUNC Vec2<T> operator/( const Vec2<T> _other) const {
 				return Vec2<T>( x / _other.x, y / _other.y );
 			}
 
-            Vec2<T> operator*( float _scalar ) const {
+			RDE_FUNC Vec2<T> operator*( float _scalar ) const {
                 return Vec2<T>( x * _scalar, y * _scalar );
             }
 
-            void operator *=(float _scalar) {
+			RDE_FUNC void operator *=(float _scalar) {
                 x *= _scalar;
                 y *= _scalar;
             }
 
 
-            Vec2<T> operator/( float _scalar ) const {
+			RDE_FUNC Vec2<T> operator/( float _scalar ) const {
                 return Vec2<T>(x / _scalar, y / _scalar);
             }
 
-            void operator /=(float _scalar) {
+			RDE_FUNC void operator /=(float _scalar) {
                 x /= _scalar;
                 y /= _scalar;
             }
 
-            bool operator ==(const Vec2<T>& _rhs) {
+			RDE_FUNC bool operator ==(const Vec2<T>& _rhs) {
                 return x == _rhs.x && y == _rhs.y;
             }
     };
 
-    inline Vec2<float> operator*(float _scalar, const Vec2<float>& _vec) {
+	RDE_FUNC inline Vec2<float> operator*(float _scalar, const Vec2<float>& _vec) {
         return { _scalar * _vec.x, _scalar * _vec.y };
     }
 
-    inline Vec2<int> operator*(float _scalar, const Vec2<int>& _vec) {
+	RDE_FUNC inline Vec2<int> operator*(float _scalar, const Vec2<int>& _vec) {
         return { (int)(_scalar * (float)_vec.x), (int)(_scalar * (float)_vec.y) };
     }
 
-    inline Vec2<double> operator*(float _scalar, const Vec2<double>& _vec) {
+	RDE_FUNC inline Vec2<double> operator*(float _scalar, const Vec2<double>& _vec) {
         return { _scalar * _vec.x, _scalar * _vec.y };
     }
 
-    inline Vec2<long> operator*(float _scalar, const Vec2<long>& _vec) {
+	RDE_FUNC inline Vec2<long> operator*(float _scalar, const Vec2<long>& _vec) {
         return { (long)(_scalar * (float)_vec.x), (long)(_scalar * (float)_vec.y) };
     }
 
     typedef Vec2<int> Vec2I;
     typedef Vec2<float> Vec2F;
 
-    inline std::ostream& operator<<(std::ostream& _os, const Vec2I& _vec){
+	RDE_FUNC inline std::ostream& operator<<(std::ostream& _os, const Vec2I& _vec){
         _os << '(' << _vec.x << ", " << _vec.y << ')';
         return _os;
     }
 
-    inline std::ostream& operator<<(std::ostream& _os, const Vec2F& _vec){
+	RDE_FUNC inline std::ostream& operator<<(std::ostream& _os, const Vec2F& _vec){
         _os << '(' << _vec.x << ", " << _vec.y << ')';
         return _os;
     }
 
-    inline bool operator==(const Vec2F & _v0, int _num) {
+	RDE_FUNC inline bool operator==(const Vec2F & _v0, int _num) {
         return _v0.x == (float)_num && _v0.y == (float)_num;
     }
 
-    inline bool operator==(const Vec2F & _v0, float _num) {
+	RDE_FUNC inline bool operator==(const Vec2F & _v0, float _num) {
         return _v0.x == _num && _v0.y == _num;
     }
 
-    inline bool operator<(const Vec2F & _v0, float _num) {
+	RDE_FUNC inline bool operator<(const Vec2F & _v0, float _num) {
         return _v0.x < _num || _v0.y < _num;
     }
 
-    inline bool operator<=(const Vec2F & _v0, float _num) {
+	RDE_FUNC inline bool operator<=(const Vec2F & _v0, float _num) {
         return _v0.x <= _num || _v0.y <= _num;
     }
 
-    inline bool operator>(const Vec2F & _v0, float _num) {
+	RDE_FUNC inline bool operator>(const Vec2F & _v0, float _num) {
         return _v0.x > _num || _v0.y > _num;
     }
 
-    inline bool operator>=(const Vec2F & _v0, float _num) {
+	RDE_FUNC inline bool operator>=(const Vec2F & _v0, float _num) {
         return _v0.x >= _num || _v0.y >= _num;
     }
 
-    inline bool operator!=(const Vec2F & _v0, const Vec2F & _v1) {
+	RDE_FUNC inline bool operator!=(const Vec2F & _v0, const Vec2F & _v1) {
         return _v0.x != _v1.x || _v0.y != _v1.y;
     }
 
-    inline bool operator==(const Vec2I & _v0, int _num) {
+	RDE_FUNC inline bool operator==(const Vec2I & _v0, int _num) {
         return _v0.x == _num && _v0.y == _num;
     }
 
-    inline bool operator==(const Vec2I & _v0, float _num) {
+	RDE_FUNC inline bool operator==(const Vec2I & _v0, float _num) {
         return _v0.x == _num && _v0.y == _num;
     }
 
 
-    inline bool operator!=(const Vec2F & _v0, int _num) {
+	RDE_FUNC inline bool operator!=(const Vec2F & _v0, int _num) {
         return !(_v0 == (float)_num);
     }
 
-    inline bool operator!=(const Vec2F & _v0, float _num) {
+	RDE_FUNC inline bool operator!=(const Vec2F & _v0, float _num) {
         return !(_v0 == _num);
     }
 
-    inline bool operator!=(const Vec2I & _v0, int _num) {
+	RDE_FUNC inline bool operator!=(const Vec2I & _v0, int _num) {
         return !(_v0 == _num);
     }
 
-    inline bool operator!=(const Vec2I & _v0, float _num) {
+	RDE_FUNC inline bool operator!=(const Vec2I & _v0, float _num) {
         return !(_v0 == _num);
     }
 
