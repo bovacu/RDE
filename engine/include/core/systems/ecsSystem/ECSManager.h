@@ -15,7 +15,7 @@ namespace RDE {
      */
     class BadECSSystemSwap : public std::exception {
         public:
-            [[nodiscard]] auto what() const noexcept -> const char* override {
+			RDE_FUNC_ND auto what() const noexcept -> const char* override {
                 return "Error while swapping ECS systems, one or both of them couldn't be found";
             }
     };
@@ -36,33 +36,33 @@ namespace RDE {
              * @param _system User-defined ECS system
              * @return SystemRef
              */
-            SystemRef addSystem(ECSSystem* _system);
+			RDE_FUNC SystemRef addSystem(ECSSystem* _system);
 
             /**
              * @brief This function removes a system from the application.
              * @param _systemRef Ref to the system to delete
              */
-            void removeSystem(SystemRef _systemRef);
+			RDE_FUNC void removeSystem(SystemRef _systemRef);
 
             /**
              * @brief This function changes the updating order of two systems.
              * @param _systemRef0 System 0
              * @param _systemRef1 System 1
              */
-            void swapOrderOfUpdate(SystemRef _systemRef0, SystemRef _systemRef1);
+			RDE_FUNC void swapOrderOfUpdate(SystemRef _systemRef0, SystemRef _systemRef1);
 
             /**
              * @brief This function should not be called by end users.
              * @param _dt Delta time
              * @param _graph Scene Graph
              */
-            void update(Delta _dt, Graph* _graph);
+			RDE_FUNC void update(Delta _dt, Graph* _graph);
 
             /**
              * @attention This is not meant to be called by end-users.
              * @brief Destroys all of the ECS systems defined by the user.
              */
-            void destroy();
+			RDE_FUNC void destroy();
     };
 
 }

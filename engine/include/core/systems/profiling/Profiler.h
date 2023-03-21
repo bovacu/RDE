@@ -44,14 +44,14 @@ namespace RDE {
         ProfilerState state;
         bool active = false;
 
-        [[nodiscard]] std::string toString() const {
+		RDE_FUNC_ND std::string toString() const {
             auto _diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - init);
             std::string _toString = State::stateToNameDict[state] + ": " + std::to_string(_diff.count());
             return _toString;
         }
     };
 
-    inline std::ostream& operator<<(std::ostream & _ostream, const State& _state) {
+	RDE_FUNC inline std::ostream& operator<<(std::ostream & _ostream, const State& _state) {
         auto _diff = std::chrono::duration_cast<std::chrono::milliseconds>(_state.end - _state.init);
         _ostream << State::stateToNameDict[_state.state] << ": " << std::to_string(_diff.count());
         return _ostream;
@@ -86,13 +86,13 @@ namespace RDE {
             static int getValue();
 
         public:
-            static void beginFrame(float _dt);
-            static void begin(ProfilerState _state);
-            static void end(ProfilerState _state);
-            static void endFrame();
-            static std::unordered_map<ProfilerState, State>& getStates();
+			RDE_FUNC_STATIC void beginFrame(float _dt);
+			RDE_FUNC_STATIC void begin(ProfilerState _state);
+			RDE_FUNC_STATIC void end(ProfilerState _state);
+			RDE_FUNC_STATIC void endFrame();
+			RDE_FUNC_ND static std::unordered_map<ProfilerState, State>& getStates();
 
-            static u_long* getTotalVirtualMemory();
+			RDE_FUNC_ND static u_long* getTotalVirtualMemory();
     };
 
 }

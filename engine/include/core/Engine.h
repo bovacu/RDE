@@ -102,6 +102,8 @@ namespace RDE {
     };
 
     class Engine {
+        friend class Window;
+
         public:
             /**
              * @see Manager

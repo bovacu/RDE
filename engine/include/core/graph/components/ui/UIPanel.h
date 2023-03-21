@@ -26,7 +26,7 @@ namespace RDE {
         public:
             UIImage* uiImage = nullptr;
 
-            UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config = {});
+			RDE_FUNC UIPanel(Node* _node, Manager* _manager, Graph* _graph, const UIPanelConfig& _config = {});
 
             RENDERIZABLE_UI_BASIC_METHODS()
 

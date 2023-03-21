@@ -119,25 +119,25 @@ namespace RDE {
 
     #define RENDERIZABLE_BASIC_METHODS()                    		\
     friend class Graph;                                     		\
-    [[nodiscard]] Texture* getTexture() const;              		\
-    void setTexture(Texture* _texture);                     		\
+	RDE_FUNC_ND Texture* getTexture() const;              			\
+	RDE_FUNC void setTexture(Texture* _texture);                    \
                                                             		\
-    [[nodiscard]] Color getColor() const;                   		\
-    void setColor(const Color& _color);                     		\
+	RDE_FUNC_ND Color getColor() const;                   			\
+	RDE_FUNC void setColor(const Color& _color);                    \
                                                             		\
-    [[nodiscard]] ShaderID getShaderID() const;             		\
-    void setShaderID(ShaderID _shaderID);                   		\
+	RDE_FUNC_ND ShaderID getShaderID() const;             			\
+	RDE_FUNC void setShaderID(ShaderID _shaderID);                  \
                                                             		\
-    int getLayer() const;                                   		\
-    void setLayer(int _layer);                              		\
+	RDE_FUNC_ND int getLayer() const;                               \
+	RDE_FUNC void setLayer(int _layer);                             \
                                                             		\
-    [[nodiscard]] Vec2F getSize() const;                    		\
-    [[nodiscard]] FloatRect getRegion() const;              		\
+	RDE_FUNC_ND Vec2F getSize() const;                    			\
+	RDE_FUNC_ND FloatRect getRegion() const;              			\
                                                             		\
-    [[nodiscard]] RDE_BATCH_PRIORITY_ getBatchPriority() const;   	\
+	RDE_FUNC_ND RDE_BATCH_PRIORITY_ getBatchPriority() const;   	\
                                                             		\
-    bool isEnabled() const;                                 		\
-    void setEnabled(bool _enabled);
+	RDE_FUNC_ND bool isEnabled() const;                             \
+	RDE_FUNC void setEnabled(bool _enabled);
 
 
 
@@ -177,16 +177,16 @@ namespace RDE {
 
 
 
-    #define RENDERIZABLE_UI_BASIC_METHODS()     \
-    RENDERIZABLE_BASIC_METHODS()                \
-                                                \
-    void setSize(const Vec2F& _size);           \
-                                                \
-    bool isInteractable() const;                \
-    void setInteractable(bool _interactable);   \
-                                                \
-    void setOriginOffset(const Vec2F& _offset); \
-    Vec2F getOriginOffset() const;              
+    #define RENDERIZABLE_UI_BASIC_METHODS()     			\
+    RENDERIZABLE_BASIC_METHODS()                			\
+                                                			\
+	RDE_FUNC void setSize(const Vec2F& _size);           	\
+                                                			\
+	RDE_FUNC_ND bool isInteractable() const;                \
+	RDE_FUNC void setInteractable(bool _interactable);   	\
+                                                			\
+	RDE_FUNC void setOriginOffset(const Vec2F& _offset); 	\
+	RDE_FUNC_ND Vec2F getOriginOffset() const;              
 
 
 

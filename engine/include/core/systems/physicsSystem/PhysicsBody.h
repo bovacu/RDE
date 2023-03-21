@@ -91,62 +91,62 @@ namespace RDE {
             void setupShape(ShapeConfig& _shapeConfig);
 
         public:
-            PhysicsBody(Node* _node, Manager* _manager, Graph* _graph, PhysicsBodyConfig& _bodyConfig);
-            ~PhysicsBody();
-            void update();
+			RDE_FUNC PhysicsBody(Node* _node, Manager* _manager, Graph* _graph, PhysicsBodyConfig& _bodyConfig);
+			RDE_FUNC ~PhysicsBody();
+			RDE_FUNC void update();
 
-            PhysicsShapeId addShape(ShapeConfig& _shapeConfig, const Vec2F& _position = {0.f, 0.f}, float _rotation = 0.f);
-            bool removeShape(PhysicsShapeId _id);
+			RDE_FUNC PhysicsShapeId addShape(ShapeConfig& _shapeConfig, const Vec2F& _position = {0.f, 0.f}, float _rotation = 0.f);
+			RDE_FUNC bool removeShape(PhysicsShapeId _id);
 
-            void setGroup(PhysicsShapeId _shapeID, uint _group);
-            void removeGroup(PhysicsShapeId _shapeID);
+			RDE_FUNC void setGroup(PhysicsShapeId _shapeID, uint _group);
+			RDE_FUNC void removeGroup(PhysicsShapeId _shapeID);
 
-            void setMask(PhysicsShapeId _shapeID, uint _mask);
-            void removeMask(PhysicsShapeId _shapeID);
+			RDE_FUNC void setMask(PhysicsShapeId _shapeID, uint _mask);
+			RDE_FUNC void removeMask(PhysicsShapeId _shapeID);
 
-            void setToCollideWiths(PhysicsShapeId _shapeID, uint _toCollideWiths);
-            void removeToCollideWiths(PhysicsShapeId _shapeID);
+			RDE_FUNC void setToCollideWiths(PhysicsShapeId _shapeID, uint _toCollideWiths);
+			RDE_FUNC void removeToCollideWiths(PhysicsShapeId _shapeID);
 
-            void addMaskFilter(PhysicsShapeId _shapeID, uint _masksToAdd);
-            void removeMaskFilter(PhysicsShapeId _shapeID, uint _masksToRemove);
-            void resetMaskFilter(PhysicsShapeId _shapeID);
+			RDE_FUNC void addMaskFilter(PhysicsShapeId _shapeID, uint _masksToAdd);
+			RDE_FUNC void removeMaskFilter(PhysicsShapeId _shapeID, uint _masksToRemove);
+			RDE_FUNC void resetMaskFilter(PhysicsShapeId _shapeID);
 
-            uint getMasks(PhysicsShapeId _shapeID);
-            uint getGroups(PhysicsShapeId _shapeID);
-            uint getToCollideWiths(PhysicsShapeId _shapeID);
+			RDE_FUNC_ND uint getMasks(PhysicsShapeId _shapeID);
+			RDE_FUNC_ND uint getGroups(PhysicsShapeId _shapeID);
+			RDE_FUNC_ND uint getToCollideWiths(PhysicsShapeId _shapeID);
 
-			void setBodyType(const RDE_PHYSICS_BODY_TYPE_& _physicsBodyType);
-			RDE_PHYSICS_BODY_TYPE_ getBodyType();
+			RDE_FUNC void setBodyType(const RDE_PHYSICS_BODY_TYPE_& _physicsBodyType);
+			RDE_FUNC_ND RDE_PHYSICS_BODY_TYPE_ getBodyType();
 
-            void setMass(float _mass);
-            float getMass();
+			RDE_FUNC void setMass(float _mass);
+			RDE_FUNC_ND float getMass();
 
-            void setFriction(PhysicsShapeId _shapeID, float _friction);
-            float getFriction(PhysicsShapeId _shapeID);
+			RDE_FUNC void setFriction(PhysicsShapeId _shapeID, float _friction);
+			RDE_FUNC_ND float getFriction(PhysicsShapeId _shapeID);
 
-            void setRestitution(PhysicsShapeId _shapeID, float _restitution);
-            float getRestitution(PhysicsShapeId _shapeID);
+			RDE_FUNC void setRestitution(PhysicsShapeId _shapeID, float _restitution);
+			RDE_FUNC_ND float getRestitution(PhysicsShapeId _shapeID);
 
-            void setLinearVelocity(const Vec2F& _linearVelocity);
-            Vec2F getLinearVelocity();
+			RDE_FUNC void setLinearVelocity(const Vec2F& _linearVelocity);
+			RDE_FUNC_ND Vec2F getLinearVelocity();
 
-            void setAngularLinearVelocity(float _linearAngularVelocity);
-            float getAngularLinearVelocity();
+			RDE_FUNC void setAngularLinearVelocity(float _linearAngularVelocity);
+			RDE_FUNC_ND float getAngularLinearVelocity();
 
-            void setCenterOfGravity(const Vec2F& _centerOfGravity);
-            Vec2F getCenterOfGravity();
+			RDE_FUNC void setCenterOfGravity(const Vec2F& _centerOfGravity);
+			RDE_FUNC_ND Vec2F getCenterOfGravity();
 
-            void setGhost(PhysicsShapeId _shapeID, bool _ghost);
-            bool isGhost(PhysicsShapeId _shapeID);
+			RDE_FUNC void setGhost(PhysicsShapeId _shapeID, bool _ghost);
+			RDE_FUNC_ND bool isGhost(PhysicsShapeId _shapeID);
 
-            void applyImpulseLocal(const Vec2F& _impulse, const Vec2F& _where);
-            void applyImpulseWorld(const Vec2F& _impulse, const Vec2F& _where);
+			RDE_FUNC void applyImpulseLocal(const Vec2F& _impulse, const Vec2F& _where);
+			RDE_FUNC void applyImpulseWorld(const Vec2F& _impulse, const Vec2F& _where);
 
-            void applyForceLocal(const Vec2F& _force, const Vec2F& _where);
-            void applyForceWorld(const Vec2F& _force, const Vec2F& _where);
+			RDE_FUNC void applyForceLocal(const Vec2F& _force, const Vec2F& _where);
+			RDE_FUNC void applyForceWorld(const Vec2F& _force, const Vec2F& _where);
 
-            void setEnabled(bool _enabled) override;
-            bool isEnabled() override;
+			RDE_FUNC void setEnabled(bool _enabled) override;
+			RDE_FUNC_ND bool isEnabled() override;
     };
 
 }

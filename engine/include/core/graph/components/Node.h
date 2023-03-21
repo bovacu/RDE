@@ -23,10 +23,10 @@ namespace RDE {
             Transform* transform = nullptr;
 
         public:
-            Node(const NodeID& _nodeID, Graph* _graph, Manager* _manager, Transform* _transform) : ID(_nodeID), graph(_graph), transform(_transform), manager(_manager) {  }
+			RDE_FUNC Node(const NodeID& _nodeID, Graph* _graph, Manager* _manager, Transform* _transform) : ID(_nodeID), graph(_graph), transform(_transform), manager(_manager) {  }
 
             template<typename Component, typename... Args>
-            Component* addComponent(Args... _args) {
+			RDE_FUNC Component* addComponent(Args... _args) {
                 ENGINE_ASSERT(!hasComponent<Component>(), "A Node cannot have 2 components of the same type!!")
                 
                 #if IS_WINDOWS()
@@ -40,7 +40,7 @@ namespace RDE {
             }
 
             template<typename Component>
-            Component* getComponent() {
+			RDE_FUNC_ND Component* getComponent() {
                 #if IS_WINDOWS()
                 return &graph->registry.get<Component>(ID);
                 #else
@@ -49,7 +49,7 @@ namespace RDE {
             }
 
             template<typename Component>
-            void removeComponent() {
+			RDE_FUNC void removeComponent() {
                 #if IS_WINDOWS()
                 auto _removed = graph->registry.remove<Component>(ID);
                 #else
@@ -60,7 +60,7 @@ namespace RDE {
             }
 
             template<typename Component>
-            [[nodiscard]] bool hasComponent() const {
+			RDE_FUNC_ND bool hasComponent() const {
                 #if IS_WINDOWS()
                 return graph->registry.any_of<Component>(ID);
                 #else
@@ -68,23 +68,23 @@ namespace RDE {
                 #endif
             }
 
-            Transform* getTransform() {
+			RDE_FUNC_ND Transform* getTransform() {
                 return transform;
             }
 
-            NodeID getID() {
+			RDE_FUNC_ND NodeID getID() {
                 return ID;
             }
 
-            void setParent(Node* _parent) {
+			RDE_FUNC void setParent(Node* _parent) {
                 graph->setParent(this, _parent);
             }
 
-            bool isActive() {
+			RDE_FUNC_ND bool isActive() {
                 return graph->isNodeActive(this);
             }
 
-            void setActive(bool _active) {
+			RDE_FUNC void setActive(bool _active) {
                 return graph->setNodeActive(this, _active);
             }
     };

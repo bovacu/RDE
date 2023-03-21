@@ -113,20 +113,20 @@ namespace RDE {
              * @brief Sets the color to paint the background.
              * @param _color Color to paint the background
              */
-            void setClearColor(const Color& _color);
+			RDE_FUNC void setClearColor(const Color& _color);
 
             /**
              * @brief Returns the current clear color.
              * @return Color
              */
-            Color getClearColor();
+			RDE_FUNC_ND Color getClearColor();
 
             /**
                  * @brief Draws a point at _position. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
                  * @param _position Position.
                  * @param _color Color of the line.
                  */
-            void drawPoint(const Vec2F& _position, const Color& _color = Color::White);
+			RDE_FUNC void drawPoint(const Vec2F& _position, const Color& _color = Color::White);
 
             /**
              * @brief Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
@@ -135,7 +135,7 @@ namespace RDE {
              * @param _color Color of the line.
              * @param _thickness Thickness of the line.
              */
-            void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::White);
+			RDE_FUNC void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::White);
 
             /**
              * @brief Draws a line form P0 to P1. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
@@ -144,38 +144,38 @@ namespace RDE {
              * @param _color Color of the line.
              * @param _rotation Rotation of the square.
              */
-            void drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color = Color::White, float _rotation = 0.f);
+			RDE_FUNC void drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color = Color::White, float _rotation = 0.f);
 
             /**
              * @brief Draws a shape. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.
              * @param _shape Complex shape
              */
-            void drawShape(DebugShape& _shape);
+			RDE_FUNC void drawShape(DebugShape& _shape);
 
             /**
              * @brief Draws a grid on the screen.
              * @param _color Color of the grid
              */
-            void drawGrid(const Color& _color = Color::White);
+			RDE_FUNC void drawGrid(const Color& _color = Color::White);
 
             /**
              * @brief Sets line thickness.
              * @param _thickness Line thickness
              */
-            void setLineThickness(float _thickness);
+			RDE_FUNC void setLineThickness(float _thickness);
 
             /**
              * @brief Sets point size.
              * @param _size Point size
              */
-            void setPointSize(float _size);
+			RDE_FUNC void setPointSize(float _size);
 
             /**
              * @brief Fills the whole CPUTexture with a specific color.
              * @param _cpuTexture The CPUTexutre to modify.
              * @param _color      Color to fill the whole CPUTexture.
              */
-            void fillBackgroundCPUTexture(CPUTexture* _cpuTexture, const Color& _color);
+			RDE_FUNC void fillBackgroundCPUTexture(CPUTexture* _cpuTexture, const Color& _color);
 
             /**
              * @brief Draws a point on the CPUTexture.
@@ -184,7 +184,7 @@ namespace RDE {
              * @param _color      Color to draw the point.
              * @param _size       Size of the point. Minimum is 1, this means that the pixel according to position will be filled and also 1 unit to each side.
              */
-            void drawPointToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _position, const Color& _color = Color::Blue, int _size = 1);
+			RDE_FUNC void drawPointToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _position, const Color& _color = Color::Blue, int _size = 1);
 
             /**
              * @brief Draws a line on the CPUTexure.
@@ -194,7 +194,7 @@ namespace RDE {
              * @param _color      Color to draw the line.
              * @param _thickness  Thickness of the line.
              */
-            void drawLineToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Blue, int _thickness = 1);
+			RDE_FUNC void drawLineToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Blue, int _thickness = 1);
 
             /**
              * @brief Draws a rectangle on the CPUTexture.
@@ -203,7 +203,7 @@ namespace RDE {
              * @param _size       Size of the rectangle. It will expando half of the size to each side from _position.
              * @param _color      Color to draw the rectangle.
              */
-            void drawRectangleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _position, const Vec2F& _size, const Color& _color = Color::Blue);
+			RDE_FUNC void drawRectangleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _position, const Vec2F& _size, const Color& _color = Color::Blue);
 
             /**
              * @brief Draws a filled circle on the CPUTexture.
@@ -212,7 +212,7 @@ namespace RDE {
              * @param _radius     Radius of the circle
              * @param _color      Color to draw the circle.
              */
-            void drawFilledCircleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _center, float _radius, const Color& _color = Color::Blue);
+			RDE_FUNC void drawFilledCircleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _center, float _radius, const Color& _color = Color::Blue);
 
             /**
              * @brief Draws the outline of a circle on the CPUTexture.
@@ -222,7 +222,7 @@ namespace RDE {
              * @param _color      Color to draw the outline of the circle.
              * @param _thickness  Thickness of the outline of the circle.
              */
-            void drawLinedCircleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _center, float _radius, const Color& _color = Color::Blue, int _thickness = 1);
+			RDE_FUNC void drawLinedCircleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _center, float _radius, const Color& _color = Color::Blue, int _thickness = 1);
 
             /**
              * @brief Draws a triangle on the CPUTexture.
@@ -232,7 +232,7 @@ namespace RDE {
              * @param _p2         Third vertex of the triangle.
              * @param _color      Color to draw the triangle.
              */
-            void drawTriangleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _p0, const Vec2F& _p1, const Vec2F& _p2, const Color& _color = Color::Blue);
+			RDE_FUNC void drawTriangleToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _p0, const Vec2F& _p1, const Vec2F& _p2, const Color& _color = Color::Blue);
 
             /**
              * @brief Draws a shape on the CPUTexture.
@@ -240,7 +240,7 @@ namespace RDE {
              * @param _points     List of the vertices of the shape.
              * @param _color      Color to draw the shape.
              */
-            void drawShapeToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, std::vector<Vec2F> _points, const Color& _color = Color::Blue);
+			RDE_FUNC void drawShapeToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, std::vector<Vec2F> _points, const Color& _color = Color::Blue);
     };
 }
 

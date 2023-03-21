@@ -33,10 +33,10 @@ namespace RDE {
         RENDERIZABLE_BASIC_PROPERTIES()
 
         public:
-            DynamicSpriteRenderer(Node* _node, Scene* _scene, const DynamicSpriteRendererConfig& _config = {});
-            DynamicSpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const DynamicSpriteRendererConfig& _config = {});
-            DynamicSpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const DynamicSpriteRendererConfig& _config = {});
-            ~DynamicSpriteRenderer();
+            RDE_FUNC DynamicSpriteRenderer(Node* _node, Scene* _scene, const DynamicSpriteRendererConfig& _config = {});
+			RDE_FUNC DynamicSpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const DynamicSpriteRendererConfig& _config = {});
+			RDE_FUNC DynamicSpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const DynamicSpriteRendererConfig& _config = {});
+			RDE_FUNC ~DynamicSpriteRenderer();
 
             RENDERIZABLE_BASIC_METHODS()
 
@@ -46,7 +46,7 @@ namespace RDE {
              * @param _y Y coord.
              * @param _color Color to set.
              */
-            void setPixel(int _x, int _y, const Color& _color);
+			RDE_FUNC void setPixel(int _x, int _y, const Color& _color);
 
             /**
              * @brief Gets the color of a pixel, coordinate system starts at bottom-left.
@@ -54,28 +54,28 @@ namespace RDE {
              * @param _y Y coord.
              * @return Color
              */
-            Color getPixel(int _x, int _y);
+			RDE_FUNC_ND Color getPixel(int _x, int _y);
 
 
-            void resizeImage(const Vec2<uint>& _newSize);
+			RDE_FUNC void resizeImage(const Vec2<uint>& _newSize);
 
             /**
              * @brief Gets the path where the SpriteSheet is stored.
              * @return std::string
              */
-            [[nodiscard]] std::string getTexturePath();
+			RDE_FUNC_ND std::string getTexturePath();
 
             /**
              * @brief Gets the name of the file od the SpriteSheet without the extension.
              * @return std::string
              */
-            [[nodiscard]] std::string getTextureName();
+			RDE_FUNC_ND std::string getTextureName();
 
             /**
              * @brief Gets the extension of the file of the SpriteSheet.
              * @return std::string
              */
-            [[nodiscard]] std::string getTextureExtension();
+			RDE_FUNC_ND std::string getTextureExtension();
     };
 
 } // RDE

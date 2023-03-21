@@ -77,15 +77,15 @@ namespace RDE {
             class HandlerId {
                 friend class EventBus<AssociatedFunctionArgs...>;
                 public:
-                    HandlerId() : valid(false) {  }
+					RDE_FUNC HandlerId() : valid(false) {  }
                     size_t id{};
-                    explicit HandlerId(size_t _id) : id(_id), valid(true) {  }
+					RDE_FUNC_EXPLICIT HandlerId(size_t _id) : id(_id), valid(true) {  }
                     bool valid;
             };
 
             // register to be notified
             template<auto Func, typename Class>
-            HandlerId subscribe(const Event& _key, Class* _class) {
+			RDE_FUNC HandlerId subscribe(const Event& _key, Class* _class) {
                 if (Func) {
                     #if IS_WINDOWS()
                     handlers[_key].bind<Func>(_class);
@@ -97,7 +97,7 @@ namespace RDE {
                 return HandlerId();
             }
 
-            void unsubscribe(const Event& _type, HandlerId& _handlerId) {
+			RDE_FUNC void unsubscribe(const Event& _type, HandlerId& _handlerId) {
                 if(!hasType(_type)) {
                     Util::Log::warn("Tried to unsubscribe Type ", typeid(_type).name(), " but it wasn't subscribed!");
                     return;
@@ -109,7 +109,7 @@ namespace RDE {
                     Util::Log::warn("Tried to unsubscribe an event", typeid(_type).name()," that wasn't subscribed yet!");
             }
 
-            bool dispatch(const Event& _type, AssociatedFunctionArgs... _args) {
+			RDE_FUNC bool dispatch(const Event& _type, AssociatedFunctionArgs... _args) {
                 if(!hasType(_type)) {
                     return false;
                 }
@@ -118,7 +118,7 @@ namespace RDE {
                 return std::all_of(_results.begin(), _results.end(), [](bool v) { return v; });
             }
 
-            bool isSubscribed(const Event& _type) {
+			RDE_FUNC_ND bool isSubscribed(const Event& _type) {
                 return hasType(_type);
             }
 

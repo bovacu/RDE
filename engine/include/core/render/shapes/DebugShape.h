@@ -58,7 +58,7 @@ namespace RDE {
              * @brief Returns the inner color.
              * @return Color
              */
-            Color& getInnerColor() {
+			RDE_FUNC_ND Color& getInnerColor() {
                 return innerColor;
             }
 
@@ -66,7 +66,7 @@ namespace RDE {
             * @brief Returns the outline color.
             * @return Color
             */
-            Color& getOuterColor() {
+			RDE_FUNC_ND Color& getOuterColor() {
                 return outerColor;
             }
 
@@ -74,7 +74,7 @@ namespace RDE {
             * @brief Returns the shape data.
             * @return std::vector<Vec2F>&
             */
-            std::vector<Vec2F>& getPoints() {
+			RDE_FUNC_ND std::vector<Vec2F>& getPoints() {
                 return points;
             }
 
@@ -82,7 +82,7 @@ namespace RDE {
              * @brief Adds a new point to the geometry.
              * @param _point New point
              */
-            void addPoint(const Vec2F& _point) {
+			RDE_FUNC void addPoint(const Vec2F& _point) {
                 points.emplace_back(_point);
             }
 
@@ -90,7 +90,7 @@ namespace RDE {
              * @brief Removes a point from the geometry.
              * @param _vertex Point to remove
              */
-            void removePoint(int _vertex) {
+			RDE_FUNC void removePoint(int _vertex) {
                 points.erase(points.begin() + _vertex);
             }
 
@@ -98,7 +98,7 @@ namespace RDE {
              * @brief Sets the outline color.
              * @param _color Outline Color
              */
-            void setOutlineColor(const Color& _color) {
+			RDE_FUNC void setOutlineColor(const Color& _color) {
                 outerColor = _color;
             }
 
@@ -106,7 +106,7 @@ namespace RDE {
              * @brief Sets the inner color.
              * @param _color Inner color
              */
-            void setInnerColor(const Color& _color) {
+			RDE_FUNC void setInnerColor(const Color& _color) {
                 innerColor = _color;
             }
 
@@ -114,7 +114,7 @@ namespace RDE {
              * @brief Sets if the outline is shown or not.
              * @param _show Enable or disable the color
              */
-            void showOutsideColor(bool _show) {
+			RDE_FUNC void showOutsideColor(bool _show) {
                 showOuter = _show;
             }
 
@@ -122,7 +122,7 @@ namespace RDE {
              * @brief Sets if the inner is shown or not.
              * @param _show Enable or disable the color
              */
-            void showInnerColor(bool _show) {
+			RDE_FUNC void showInnerColor(bool _show) {
                 showInner = _show;
             }
 
@@ -130,7 +130,7 @@ namespace RDE {
              * @brief Sets the position of the complex shape.
              * @param _position New position
              */
-            void setPosition(const Vec2F& _position) {
+			RDE_FUNC void setPosition(const Vec2F& _position) {
 //                transform.setPosition(_position);
             }
 
@@ -138,7 +138,7 @@ namespace RDE {
              * @brief Returns the position of the complex shape.
              * @return Vec2F
              */
-            Vec2F getPosition() {
+			RDE_FUNC_ND Vec2F getPosition() {
 //                return transform.getPositionLocal();
                 return {};
             }
@@ -147,7 +147,7 @@ namespace RDE {
              * @brief Sets the rotation of the complex shape.
              * @param _rotation Rotation
              */
-            void setRotation(float _rotation) {
+			RDE_FUNC void setRotation(float _rotation) {
                 rotation = _rotation;
             }
 
@@ -155,7 +155,7 @@ namespace RDE {
              * @brief Gets the rotation of the complex shape.
              * @return float
              */
-            float getRotation() {
+			RDE_FUNC_ND float getRotation() {
 //                return transform.getRotationLocal();
                 return {};
             }
@@ -164,7 +164,7 @@ namespace RDE {
              * @brief Returns if the inner color is drawn or not.
              * @return bool
              */
-            bool isInnerShown() {
+			RDE_FUNC_ND bool isInnerShown() {
                 return showInner;
             }
 
@@ -172,7 +172,7 @@ namespace RDE {
              * @brief Returns if the outline color is drawn or not.
              * @return bool
              */
-            bool isOuterShown() {
+			RDE_FUNC_ND bool isOuterShown() {
                 return showOuter;
             }
 
@@ -182,7 +182,7 @@ namespace RDE {
              * @param _radius Radius of the circle
              * @param _precision How pretty the circle should be, the prettier, the more expensive in computing work
              */
-            void makeCircle(const Vec2F& _center, float _radius, int _precision = 50) {
+			RDE_FUNC void makeCircle(const Vec2F& _center, float _radius, int _precision = 50) {
                 for (int _i = 0; _i < _precision; _i++)   {
                     float _theta = 2.0f * 3.1415926f * float(_i) / float(_precision);
                     float _x = _radius * cosf(_theta);
@@ -198,7 +198,7 @@ namespace RDE {
              * @param _position Position of the square
              * @param _size Size of the square
              */
-            void makeSquare(const Vec2F& _position, const Vec2F& _size) {
+			RDE_FUNC void makeSquare(const Vec2F& _position, const Vec2F& _size) {
                 points.emplace_back(Vec2F{_position.x - _size.x / 2.f, _position.y - _size.y / 2.f});
                 points.emplace_back(Vec2F{_position.x + _size.x / 2.f, _position.y - _size.y / 2.f});
                 points.emplace_back(Vec2F{_position.x + _size.x / 2.f, _position.y + _size.y / 2.f});

@@ -10,7 +10,7 @@
 
 namespace RDE {
 
-    EmscriptenWindow::EmscriptenWindow(RDEConfig* _config) : Window(_config) {
+	EmscriptenWindow::EmscriptenWindow(Engine* _engine, RDEConfig* _config) : Window(_engine, _config) {
         Util::Log::debug("Platform: Emscripten");
         Util::Log::debug("OpenGL Version: 3.2");
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);

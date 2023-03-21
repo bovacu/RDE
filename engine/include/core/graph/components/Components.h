@@ -32,9 +32,9 @@ namespace RDE {
             */
             std::string tag;
 
-            Tag() {};
-            Tag(const Tag& _tag) = default;
-            Tag(const NodeID& _nodeId, const std::string& _tag) : tag(_tag) {  }
+			RDE_FUNC Tag() {};
+			RDE_FUNC Tag(const Tag& _tag) = default;
+			RDE_FUNC Tag(const NodeID& _nodeId, const std::string& _tag) : tag(_tag) {  }
 
             explicit operator std::string& () { return tag; }
     };
@@ -43,7 +43,7 @@ namespace RDE {
      * @brief Component that tells the internal ECS system if an entity should or not be updated in the different systems.
      */
     struct Active {
-        explicit Active(Node* _node, Manager* _manager, Graph* _graph) {  }
+		RDE_FUNC_EXPLICIT Active(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
@@ -54,7 +54,7 @@ namespace RDE {
 
 
     struct DisabledForRender {
-        explicit DisabledForRender(Node* _node, Manager* _manager, Graph* _graph) {  }
+		RDE_FUNC_EXPLICIT DisabledForRender(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
@@ -64,7 +64,7 @@ namespace RDE {
     };
 
     struct DisabledForEvent {
-        explicit DisabledForEvent(Node* _node, Manager* _manager, Graph* _graph) {  }
+		RDE_FUNC_EXPLICIT DisabledForEvent(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
@@ -74,7 +74,7 @@ namespace RDE {
     };
 
     struct DisabledForUpdate {
-        explicit DisabledForUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
+		RDE_FUNC_EXPLICIT DisabledForUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
@@ -84,7 +84,7 @@ namespace RDE {
     };
 
     struct DisabledForFixedUpdate {
-        explicit DisabledForFixedUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
+		RDE_FUNC_EXPLICIT DisabledForFixedUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
@@ -94,7 +94,7 @@ namespace RDE {
     };
 
     struct DisabledForLateUpdate {
-        explicit DisabledForLateUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
+		RDE_FUNC_EXPLICIT DisabledForLateUpdate(Node* _node, Manager* _manager, Graph* _graph) {  }
 
         private:
             /**
@@ -109,13 +109,13 @@ namespace RDE {
      * 
      */
     struct CanvasEventStopper : public ComponentBase {
-        explicit CanvasEventStopper(Node* _node, Manager* _manager, Graph* _graph) {  }
+		RDE_FUNC_EXPLICIT CanvasEventStopper(Node* _node, Manager* _manager, Graph* _graph) {  }
 
-        void setEnabled(bool _enabled) override {
+        RDE_FUNC void setEnabled(bool _enabled) override {
             enabled = _enabled;
         }
 
-        bool isEnabled() override {
+        RDE_FUNC_ND bool isEnabled() override {
             return enabled;
         }
 

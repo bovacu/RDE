@@ -55,23 +55,23 @@ namespace RDE {
             DebugOptions debugOptions;
 
         public:
-            void init();
-            void destroy();
+			RDE_FUNC void init();
+			RDE_FUNC void destroy();
 
-            void update(Delta _dt);
-            void step(Delta _fxDt);
-            void add(PhysicsBody* _physicsBody);
-            void remove(PhysicsBody* _physicsBody);
-            void debugRender(RenderManager* _renderManager);
+			RDE_FUNC void update(Delta _dt);
+			RDE_FUNC void step(Delta _fxDt);
+			RDE_FUNC void add(PhysicsBody* _physicsBody);
+			RDE_FUNC void remove(PhysicsBody* _physicsBody);
+			RDE_FUNC void debugRender(RenderManager* _renderManager);
 
-            void addCollisionCallbacks(uint _maskA, uint _maskB, PhysicsCollisionCallbacks _callbacks);
-            PhysicsCollisionCallbacks& getCollisionCallbacks(uint _maskA, uint _maskB);
+			RDE_FUNC void addCollisionCallbacks(uint _maskA, uint _maskB, PhysicsCollisionCallbacks _callbacks);
+			RDE_FUNC_ND PhysicsCollisionCallbacks& getCollisionCallbacks(uint _maskA, uint _maskB);
 
-            void setGravity(const Vec2F& _gravity);
-            Vec2F getGravity();
+			RDE_FUNC void setGravity(const Vec2F& _gravity);
+			RDE_FUNC_ND Vec2F getGravity();
 
-            int getStepIterations();
-            void setStepIterations(int _iterations);
+			RDE_FUNC_ND int getStepIterations();
+			RDE_FUNC void setStepIterations(int _iterations);
 
         private:
             void drawPolygon(PhysicsBody* _physicsBody, const ShapeConfig& _shapeConfig, RenderManager* _renderManager, const Color& _lineColor, const Color& _radiusColor, bool _showLines, bool _showRadius);

@@ -88,14 +88,14 @@ namespace RDE {
              * @param _event SDL event
              * @return bool
              */
-            bool pollEvent(SDL_Event& _event);
+			RDE_FUNC bool pollEvent(SDL_Event& _event);
 
             /**
              * @brief Checks if an specific event must or not be ignored.
              * @param _eventType Event type
              * @return bool
              */
-            bool ignoreEvent(const SDL_EventType& _eventType);
+			RDE_FUNC bool ignoreEvent(const SDL_EventType& _eventType);
     };
 
     /**
@@ -142,25 +142,25 @@ namespace RDE {
              * @param _engine Engine
              * @param _window Window
              */
-            void init(Engine* _engine, Window* _window);
+			RDE_FUNC void init(Engine* _engine, Window* _window);
 
             /**
              * @attention This is not meant to be called by end-users.
              * @brief Destroys all input system elements.
              */
-            void destroy();
+			RDE_FUNC void destroy();
 
             /**
              * @attention This is not meant to be called by end-users.
              * @brief Loops over all the captured events by SDL on a frame and handles them.
              */
-            void pollEvents();
+			RDE_FUNC void pollEvents();
 
 			/**
 			* @attention This is not meant to be called by end-users.
 			* @brief Loops over all the captured events by SDL on a frame and handles them.
 			*/
-			void syncEvents();
+			RDE_FUNC void syncEvents();
 
         public:
             /**
@@ -168,28 +168,28 @@ namespace RDE {
              * @param _key Key pressed
              * @return bool
              */
-            bool isKeyJustPressed(RDE_KEYBOARD_KEY_ _key);
+			RDE_FUNC_ND bool isKeyJustPressed(RDE_KEYBOARD_KEY_ _key);
 
             /**
              * @brief Returns true if the key is released and won't return true until the key is pressed and released again.
              * @param _key Key released
              * @return bool
              */
-			bool isKeyJustReleased(RDE_KEYBOARD_KEY_ _key);
+			RDE_FUNC_ND bool isKeyJustReleased(RDE_KEYBOARD_KEY_ _key);
 
             /**
              * @brief Returns true while the key is being pressed.
              * @param _key Key pressed
              * @return bool
              */
-			bool isKeyPressed(RDE_KEYBOARD_KEY_ _key);
+			RDE_FUNC_ND bool isKeyPressed(RDE_KEYBOARD_KEY_ _key);
 
             /**
              * @brief Returns true while the key is not being pressed.
              * @param _key Key released
              * @return bool
              */
-			bool isKeyReleased(RDE_KEYBOARD_KEY_ _key);
+			RDE_FUNC_ND bool isKeyReleased(RDE_KEYBOARD_KEY_ _key);
 
 
             /**
@@ -197,47 +197,47 @@ namespace RDE {
              * @param _button Mouse button pressed
              * @return bool
              */
-            bool isMouseJustPressed(RDE_MOUSE_BUTTON_ _button);
+			RDE_FUNC_ND bool isMouseJustPressed(RDE_MOUSE_BUTTON_ _button);
 
             /**
              * @brief Returns true if the button is released and won't return true until the button is pressed and released again.
              * @param _button Mouse button released
              * @return bool
              */
-			bool isMouseJustReleased(RDE_MOUSE_BUTTON_ _button);
+			RDE_FUNC_ND bool isMouseJustReleased(RDE_MOUSE_BUTTON_ _button);
 
             /**
              * @brief Returns true while the button is being pressed.
              * @param _button Mouse button pressed
              * @return bool
              */
-			bool isMousePressed(RDE_MOUSE_BUTTON_ _button);
+			RDE_FUNC_ND bool isMousePressed(RDE_MOUSE_BUTTON_ _button);
 
             /**
              * @brief Returns true while the button is not being pressed.
              * @param _button Mouse button released
              * @return bool
              */
-			bool isMouseReleased(RDE_MOUSE_BUTTON_ _button);
+			RDE_FUNC_ND bool isMouseReleased(RDE_MOUSE_BUTTON_ _button);
 
             /**
              * @brief Returns the mouse position in screen coordinates, so x: [0, WindowWidth], y: [0, WindowHeight].
              * @param _centeredMiddleScreen Centered on screen center or left-bottom corner
              * @return Vec2F
              */
-            Vec2F getMousePosScreenCoords(bool _centeredMiddleScreen = true);
+			RDE_FUNC_ND Vec2F getMousePosScreenCoords(bool _centeredMiddleScreen = true);
 
             /**
              * @brief Returns the mouse position inside the world coordinates system.
              * @return Vec2F
              */
-            Vec2F getMousePosWorldPos();
+			RDE_FUNC_ND Vec2F getMousePosWorldPos();
 
             /**
              * @brief Returns mouse position with Canvas camera zoom.
              * @return Vec2f
              */
-            Vec2F getMousePosCanvas();
+			RDE_FUNC_ND Vec2F getMousePosCanvas();
 
             /**
              * @brief This function changes the order of the controllers (use to set who is player1, for example).
@@ -245,7 +245,7 @@ namespace RDE {
              * @param _as New ID
              * @return bool
              */
-            bool reassignController(int _controllerID, int _as);
+			RDE_FUNC_ND bool reassignController(int _controllerID, int _as);
 
             /**
              * @brief Returns true if the button is pressed and won't return true until the button is released and pressed again.
@@ -253,7 +253,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadButtonJustPressed(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
+			RDE_FUNC_ND bool isGamepadButtonJustPressed(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
 
             /**
              * @brief Returns true if the button is released and won't return true until the button is pressed and released again.
@@ -261,7 +261,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-			bool isGamepadButtonJustReleased(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
+			RDE_FUNC_ND bool isGamepadButtonJustReleased(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
 
             /**
              * @brief Returns true while the button is being pressed.
@@ -269,7 +269,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-			bool isGamepadButtonPressed(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
+			RDE_FUNC_ND bool isGamepadButtonPressed(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
 
             /**
              * @brief Returns true while the button is not being pressed.
@@ -277,7 +277,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-			bool isGamepadButtonReleased(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
+			RDE_FUNC_ND bool isGamepadButtonReleased(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
 
             /**
              * @brief Makes the controller vibrate at a specific vibration effect.
@@ -285,7 +285,7 @@ namespace RDE {
              * @param _vibrationEffectName Vibration effect
              * @return bool
              */
-            bool gamepadVibrate(int _controllerID = 0, const std::string& _vibrationEffectName = "default");
+			RDE_FUNC_ND bool gamepadVibrate(int _controllerID = 0, const std::string& _vibrationEffectName = "default");
 
 
             /**
@@ -294,7 +294,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-            bool isGamepadAxisJustPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
+			RDE_FUNC_ND bool isGamepadAxisJustPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
 
 			
 			/**
@@ -303,7 +303,7 @@ namespace RDE {
 			 * @param _controllerID Controller ID
 			 * @return bool
 			 */
-			bool isGamepadAxisJustReleased(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
+			RDE_FUNC_ND bool isGamepadAxisJustReleased(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
 
             /**
              * @brief Returns true while the axis button is being pressed.
@@ -311,7 +311,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-			bool isGamepadAxisPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
+			RDE_FUNC_ND bool isGamepadAxisPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
 
             /**
              * @brief Returns true while the axis button is not being pressed.
@@ -319,7 +319,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return bool
              */
-			bool isGamepadAxisReleased(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
+			RDE_FUNC_ND bool isGamepadAxisReleased(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
 
 
             /**
@@ -327,49 +327,49 @@ namespace RDE {
              * @param _fingerID Finger ID
              * @return bool
              */
-            bool isMobileScreenJustPressed(int _fingerID);
+			RDE_FUNC_ND bool isMobileScreenJustPressed(int _fingerID);
 
             /**
              * @brief Returns true if the screen is released and won't return true until the button is screen and released again.
              * @param _fingerID Finger ID
              * @return bool
              */
-            bool isMobileScreenJustReleased(int _fingerID);
+			RDE_FUNC_ND bool isMobileScreenJustReleased(int _fingerID);
 
             /**
              * @brief Returns true while the screen is being pressed.
              * @param _fingerID Finger ID
              * @returnbool
              */
-            bool isMobileScreenPressed(int _fingerID);
+			RDE_FUNC_ND bool isMobileScreenPressed(int _fingerID);
 
             /**
              * @brief Returns true while the screen is not being pressed.
              * @param _fingerID Finger ID
              * @return bool
              */
-            bool isMobileScreenRelease(int _fingerID);
+			RDE_FUNC_ND bool isMobileScreenRelease(int _fingerID);
 
             /**
              * @brief Returns the list of ignored events for a platform.
              * @param _inputType Type of input.
              * @return std::vector<SystemEventEnum>
              */
-			std::vector<RDE_SYSTEM_EVENT_> getEventsIgnored(const RDE_INPUT_TYPE_& _inputType);
+			RDE_FUNC_ND std::vector<RDE_SYSTEM_EVENT_> getEventsIgnored(const RDE_INPUT_TYPE_& _inputType);
 
             /**
              * @brief Adds an event as ignored.
              * @param _inputType Input type
              * @param _event Event type
              */
-			void addEventToIgnore(const RDE_INPUT_TYPE_& _inputType, const RDE_SYSTEM_EVENT_& _event);
+			RDE_FUNC void addEventToIgnore(const RDE_INPUT_TYPE_& _inputType, const RDE_SYSTEM_EVENT_& _event);
 
             /**
              * @brief Removes and event as ignored.
              * @param _inputType Input type
              * @param _event Event type
              */
-			void removeEventToIgnore(const RDE_INPUT_TYPE_& _inputType, const RDE_SYSTEM_EVENT_& _event);
+			RDE_FUNC void removeEventToIgnore(const RDE_INPUT_TYPE_& _inputType, const RDE_SYSTEM_EVENT_& _event);
     };
 }
 

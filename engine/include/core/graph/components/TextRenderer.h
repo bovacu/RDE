@@ -89,10 +89,10 @@ namespace RDE {
             std::tuple<std::vector<LineInfo>, float, float> calculateLinesInfo(CharMap& _chars) const;
 
         public:
-            TextRenderer(Node* _node, Scene* _scene, const TextRendererConfig& _config = {});
-            TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const TextRendererConfig& _config = {});
-            TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const TextRendererConfig& _config = {});
-            ~TextRenderer() {  }
+			RDE_FUNC TextRenderer(Node* _node, Scene* _scene, const TextRendererConfig& _config = {});
+			RDE_FUNC TextRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const TextRendererConfig& _config = {});
+			RDE_FUNC TextRenderer(Node* _node, Manager* _manager, Graph* _graph, const TextRendererConfig& _config = {});
+			RDE_FUNC ~TextRenderer() {  }
 
             RENDERIZABLE_BASIC_METHODS()
 
@@ -100,60 +100,60 @@ namespace RDE {
              * @brief Sets the text to be rendered.
              * @param _text The text to render.
              */
-            void setText(const std::string& _text);
+			RDE_FUNC void setText(const std::string& _text);
 
             /**
              * @brief Returns the size of the text.
              * @return Vec2F
              */
-            [[nodiscard]] Vec2F getTextSize() const;
+			RDE_FUNC_ND Vec2F getTextSize() const;
 
             /**
              * @brief Sets the font.
              * @param _font The font.
              */
-            void setFont(Font* _font);
+			RDE_FUNC void setFont(Font* _font);
 
             /**
              * @brief Get sthe font.
              * @return Font*
              */
-            [[nodiscard]] Font* getFont() const;
+			RDE_FUNC_ND Font* getFont() const;
 
             /**
              * @brief Gets the rendered text
              * @return const std::string&
              */
-            [[nodiscard]] const std::string& getText() const;
+			RDE_FUNC_ND const std::string& getText() const;
 
             /**
              * @brief Sets the font size.
              * @param _fontSize Size of the font.
              */
-            void setFontSize(int _fontSize);
+			RDE_FUNC void setFontSize(int _fontSize);
 
             /**
              * @brief Gets the font size.
              * @return int
              */
-            [[nodiscard]] int getFontSize() const;
+			RDE_FUNC_ND int getFontSize() const;
 
             /**
              * @brief Gets the space between characters.
              * @return float
              */
-            [[nodiscard]] float getSpacesBetweenChars() const;
+			RDE_FUNC_ND float getSpacesBetweenChars() const;
 
 
-            void setNewLineSize(float _newLineSize);
-            [[nodiscard]] float getNewLineSize() const;
+			RDE_FUNC void setNewLineSize(float _newLineSize);
+			RDE_FUNC_ND float getNewLineSize() const;
 
 
             /**
              * @brief Sets the spaces between characters.
              * @param _spaceBetweenChars Space between characters.
              */
-            void setSpacesBetweenChars(float _spaceBetweenChars);
+			RDE_FUNC void setSpacesBetweenChars(float _spaceBetweenChars);
     };
 
 }

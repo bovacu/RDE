@@ -56,21 +56,21 @@ namespace RDE {
              * @param _engine Engine
              * @param _window Window
              */
-            void init(Engine* _engine, Window* _window);
+			RDE_FUNC void init(Engine* _engine, Window* _window);
 
             /**
              * @brief Gets the state of a finger.
              * @param _keyOrButton Finger
 			 * @return RDE_INPUT_STATUS_
              */
-			RDE_INPUT_STATUS_ getState(int _finger);
+			RDE_FUNC_ND RDE_INPUT_STATUS_ getState(int _finger);
 
             /**
              * @brief Sets the state of a finger.
              * @param _keyOrButton Finger
 			 * @param _state RDE_INPUT_STATUS_
              */
-			void setState(int _finger, RDE_INPUT_STATUS_ _state);
+			RDE_FUNC void setState(int _finger, RDE_INPUT_STATUS_ _state);
 
         private:
             /**

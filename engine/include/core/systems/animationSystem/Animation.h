@@ -18,21 +18,21 @@ namespace RDE {
             bool canPlay = false;
 
         public:
-            Animation() {}
-            bool addFrame(Texture* _texture);
-            bool removeFrame(Texture* _texture);
-            bool removeFrame(int _index);
+			RDE_FUNC Animation() {}
+			RDE_FUNC bool addFrame(Texture* _texture);
+			RDE_FUNC bool removeFrame(Texture* _texture);
+			RDE_FUNC bool removeFrame(int _index);
 
-            void setTimeBetweenFrames(float _timeBetweenFrames);
-            float getTimeBetweenFrames() const;
+			RDE_FUNC void setTimeBetweenFrames(float _timeBetweenFrames);
+			RDE_FUNC_ND float getTimeBetweenFrames() const;
 
-            void play();
-            void pause();
-            void stop();
-            void restart();
+			RDE_FUNC void play();
+			RDE_FUNC void pause();
+			RDE_FUNC void stop();
+			RDE_FUNC void restart();
 
-            void update(float _dt);
-            Texture* getCurrentFrame();
+			RDE_FUNC void update(float _dt);
+			RDE_FUNC_ND Texture* getCurrentFrame();
     };
 
 }

@@ -73,20 +73,20 @@ namespace RDE {
                  * @brief Sets the inner SpriteBatch reference.
                  * @param _batch SpriteBatch
                  */
-                void init(SpriteBatch* _batch);
+				RDE_FUNC void init(SpriteBatch* _batch);
 
                 /**
                  * @brief Draws a grid on the screen.
                  * @param _color Color of the grid
                  */
-                void drawGrid(const Color& _color);
+				RDE_FUNC void drawGrid(const Color& _color);
 
                 /**
                  * @brief Draws a point at _position on _color.
                  * @param _position Position
                  * @param _color Color of the line
                  */
-                void drawPoint(const Vec2F& _position, const Color& _color = Color::Green);
+				RDE_FUNC void drawPoint(const Vec2F& _position, const Color& _color = Color::Green);
 
                 /**
                  * @brief Draws a line from _p0 to _p1 on _color
@@ -94,7 +94,7 @@ namespace RDE {
                  * @param _p1 End point
                  * @param _color Color of the line
                  */
-                void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Green);
+				RDE_FUNC void drawLine(const Vec2F& _p0, const Vec2F& _p1, const Color& _color = Color::Green);
 
                 /**
                  * @brief Draws a square at _position, with _size, on _color and _rotation. The center of the square is the middle of the square.
@@ -103,32 +103,32 @@ namespace RDE {
                  * @param _color Color of the square
                  * @param _rotation Rotation of the square
                  */
-                void drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color = Color::Green, float _rotation = 0.f);
+				RDE_FUNC void drawSquare(const Vec2F& _position, const Vec2F& _size, const Color& _color = Color::Green, float _rotation = 0.f);
 
                 /**
                  * @brief Draws a complex shape.
                  * @param _shape Shape to drawBatched
                  * @see Shape
                  */
-                void drawShape(DebugShape& _shape);
+				RDE_FUNC void drawShape(DebugShape& _shape);
 
                 /**
                  * @attention This is not meant to be called by end-users.
                  * @brief Sends the data to the GPU, this is a Draw Call.
                  */
-                void flushDebug();
+				RDE_FUNC void flushDebug();
 
                 /**
                  * @brief Sets the lines thickness.
                  * @param _thickness Line thickness
                  */
-                void setLinesThickness(float _thickness);
+				RDE_FUNC void setLinesThickness(float _thickness);
 
                 /**
                  * @brief Sets the point size.
                  * @param _size Point size
                  */
-                void setPointSize(float _size);
+				RDE_FUNC void setPointSize(float _size);
         };
 
         public:
@@ -198,39 +198,39 @@ namespace RDE {
             void orderBatches();
 
         public:
-            ~SpriteBatch();
+			RDE_FUNC ~SpriteBatch();
 
             /**
              * @brief Initiates all of the crucial elements of the SpriteBatch.
              * @param _engine Engine
              */
-            void init(Engine* _engine);
+			RDE_FUNC void init(Engine* _engine);
 
             /**
              * @brief This marks the beginning of a new Draw Call.
              * @param _camera Camera that will render the Draw Call
              * @param _cameraTransform Cameras position to be combined with the View Projection Matrix.
              */
-            void beginDraw(Camera* _camera, Transform* _cameraTransform);
+			RDE_FUNC void beginDraw(Camera* _camera, Transform* _cameraTransform);
 
             /**
              * This method is used to drawBatched anything that extends IRenderizable.
              * @param _renderizable An IRenderizable instance.
              * @param _transform Transform of the IRenderizable.
              */
-            void drawSpriteRenderer(RenderizableInnerData& _innerData, Transform* _transform);
-            void drawTextRenderer(RenderizableInnerData& _innerData, Transform* _transform);
+			RDE_FUNC void drawSpriteRenderer(RenderizableInnerData& _innerData, Transform* _transform);
+			RDE_FUNC void drawTextRenderer(RenderizableInnerData& _innerData, Transform* _transform);
 
             /**
              * This method is used to drawBatched anything that extends IRenderizable and that is UI.
              * @param _batches Static batches to render the UI.
              */
-            void flushUI(std::vector<Batch>& _batches);
+			RDE_FUNC void flushUI(std::vector<Batch>& _batches);
 
             /**
              * @brief This method sends all of the geometry to the GPU and ends a Draw Call.
              */
-            void flush();
+			RDE_FUNC void flush();
 
         private:
             /**

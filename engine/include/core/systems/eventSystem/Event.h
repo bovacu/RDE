@@ -27,38 +27,38 @@ namespace RDE {
              * @brief Returns the type of an event in a static way.
              * @return EventType
              */
-			static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_NONE; }
+			RDE_FUNC_ND static RDE_EVENT_TYPE_ getStaticType() { return RDE_EVENT_TYPE_NONE; }
 
             /**
              * @brief Returns the event type from the current object.
              * @return EventType
              */
-			[[nodiscard]] virtual RDE_EVENT_TYPE_ getEventType() const = 0;
+			RDE_FUNC_ND virtual RDE_EVENT_TYPE_ getEventType() const = 0;
 
             /**
              * @brief Returns the event name.
              * @return const char*
              */
-            [[nodiscard]] virtual const char* getName() const = 0;
+			RDE_FUNC_ND virtual const char* getName() const = 0;
 
             /**
              * @brief Returns the categories of an event condensed on a single int.
              * @return int
              */
-            [[nodiscard]] virtual int getCategoryFlags() const = 0;
+			RDE_FUNC_ND virtual int getCategoryFlags() const = 0;
 
             /**
              * @brief Returns all the event in form of string.
              * @return std::string
              */
-            [[nodiscard]] virtual std::string toString() const { return "Not defined in specific class"; };
+			RDE_FUNC_ND virtual std::string toString() const { return "Not defined in specific class"; };
 
             /**
              * @brief Checks if an event fits in a specific category.
              * @param _category Category to check
              * @return bool
              */
-			[[nodiscard]] inline bool isInCategory(RDE_EVENT_CATEGORY_ _category) const { return (unsigned)getCategoryFlags() & _category; }
+			RDE_FUNC_ND bool isInCategory(RDE_EVENT_CATEGORY_ _category) const { return (unsigned)getCategoryFlags() & _category; }
     };
 
     class EventDispatcher {
@@ -77,7 +77,7 @@ namespace RDE {
         Event& event;
 
     public:
-        explicit EventDispatcher(Event& _event) : event(_event) {}
+		RDE_FUNC_EXPLICIT EventDispatcher(Event& _event) : event(_event) {}
 
         /**
          * @brief This method is used to handle internally the event (apart from the handling in the EventFunction callback).
@@ -85,7 +85,7 @@ namespace RDE {
          * @return bool
          */
         template<typename T>
-        bool dispatchEvent(const UniqueDelegate<bool(T&)>& _delegate) {
+		RDE_FUNC bool dispatchEvent(const UniqueDelegate<bool(T&)>& _delegate) {
             if(event.handled) return false;
             /// This is why we needed the static version of getType.
             if (event.getEventType() == T::getStaticType()) {
@@ -103,7 +103,7 @@ namespace RDE {
          * @return bool
          */
         template<typename T>
-        bool dispatchEvent() {
+		RDE_FUNC bool dispatchEvent() {
             if(event.handled) return false;
             return event.getEventType() == T::getStaticType();
         }

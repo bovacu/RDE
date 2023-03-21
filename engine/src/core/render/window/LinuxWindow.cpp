@@ -9,7 +9,7 @@
 
 namespace RDE {
 
-    LinuxWindow::LinuxWindow(RDEConfig* _config) : Window(_config) {
+	LinuxWindow::LinuxWindow(Engine* _engine, RDEConfig* _config) : Window(_engine, _config) {
 
         Util::Log::info("Platform: Linux");
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);

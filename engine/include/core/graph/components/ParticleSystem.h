@@ -85,9 +85,9 @@ namespace RDE {
         RENDERIZABLE_BASIC_PROPERTIES()
 
         public:
-            ParticleSystem(Node* _node, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig);
-            ParticleSystem(Node* _node, Manager* _manager, Graph* _graph, const ParticleSystemConfig& _particleSystemConfig);
-            void update(Delta dt);
+			RDE_FUNC ParticleSystem(Node* _node, Scene* _scene, const ParticleSystemConfig& _particleSystemConfig);
+			RDE_FUNC ParticleSystem(Node* _node, Manager* _manager, Graph* _graph, const ParticleSystemConfig& _particleSystemConfig);
+			RDE_FUNC void update(Delta dt);
 
 
             RENDERIZABLE_BASIC_METHODS()
@@ -95,24 +95,24 @@ namespace RDE {
             /**
              * @brief Starts the particle system. By default the particle system won't start until this method is called.
              */
-            void play();
+			RDE_FUNC void play();
 
             /**
              * @brief Pauses the emission of particles, but the current emitted particles will continue their life cycle.
              */
-            void pause();
+			RDE_FUNC void pause();
 
             /**
              * @brief Pauses the emission of particles, removing all particles and resetting the particle system to config values.
              */
-            void stop();
+			RDE_FUNC void stop();
 
             /**
              * @brief Resets the particle system to config values, but does not stop the emission.
              */
-            void reset();
+			RDE_FUNC void reset();
 
-            void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform* _transform, const ViewPort* _viewport);
+			RDE_FUNC void drawBatched(std::vector<OpenGLVertex>& _vertices, std::vector<uint32_t>& _indices, Transform* _transform, const ViewPort* _viewport);
 
         private:
             /**

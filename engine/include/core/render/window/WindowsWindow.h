@@ -14,7 +14,7 @@ namespace RDE {
 
     class WindowsWindow : public Window {
         public:
-            explicit WindowsWindow(RDEConfig* _config);
+			RDE_FUNC_EXPLICIT WindowsWindow(Engine* _engine, RDEConfig* _config);
     };
 
 }

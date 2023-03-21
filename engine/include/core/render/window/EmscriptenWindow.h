@@ -13,7 +13,7 @@
 namespace RDE {
     class EmscriptenWindow : public Window {
         public:
-            explicit EmscriptenWindow(RDEConfig* _config);
+			explicit EmscriptenWindow(Engine* _engine, RDEConfig* _config);
     };
 
 }

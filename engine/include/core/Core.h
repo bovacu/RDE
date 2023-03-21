@@ -193,16 +193,21 @@ public:                                                                         
 #define SAFE_POINTER(_var, _function) if(_var) do { _var->_function; } while(0);
 
 #if IS_WINDOWS()
-#ifdef RDE_LIBRARY
+//#ifdef RDE_LIBRARY
 #define RDE_FUNC __declspec(dllexport)
 #define RDE_FUNC_ND [[nodiscard]] __declspec(dllexport)
-#else
-#define RDE_FUNC __declspec(dllimport)
-#define RDE_FUNC_ND [[nodiscard]] __declspec(dllimport)
-#endif
+#define RDE_FUNC_EXPLICIT __declspec(dllexport) explicit
+#define RDE_FUNC_STATIC __declspec(dllexport) static
+#define RDE_FUNC_ND_STATIC [[nodiscard]] __declspec(dllexport) static
+//#else
+//#define RDE_FUNC __declspec(dllimport)
+//#define RDE_FUNC_ND [[nodiscard]] __declspec(dllimport)
+//#define RDE_FUNC_EXPLICIT __declspec(dllimport) explicit
+//#endif
 #else
 #define RDE_FUNC 
 #define RDE_FUNC_ND
+#define RDE_FUNC_EXPLICIT
 #endif
 
 #endif //RDE_CORE_H
