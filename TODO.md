@@ -68,6 +68,7 @@ to not forget about future tasks. A lot of features are already done, but not li
   - [ ] iOS
   - [ ] WASM 
 - [ ] Fix ControllerInput the same way as the other controllers
+- [ ] When window size changes, recalculate render tree
 
 ## TO IMPROVE
 - [ ] UI
