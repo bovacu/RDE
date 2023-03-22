@@ -1,5 +1,8 @@
 # This is the changelog of the engine (created the 07/03/2023 dd/mm/yyyy) and I will be posting in here the updates to have a clear vision on the additions and improvements of the engine
 
+## Changelog 0.1.5.5 (22/03/2023) Bug fixing
+- Building manager now exports a ready-to-use package for the Windows library.
+
 ## Changelog 0.1.5.1 (15/03/2023) Bug fixing
 - Text (UI and non UI) can now change font and it resizes correctly
 - UI camera now applies correct transformations
