@@ -23,7 +23,7 @@ namespace RDE {
         return true;
     }
 
-    Window::Window(RDEConfig* _config) : window(nullptr) {
+    Window::Window(Engine* _engine, RDEConfig* _config) : window(nullptr) {
         properties = _config;
 
         #ifdef ENGINE_DEBUG
@@ -48,6 +48,7 @@ namespace RDE {
         Util::Log::debug("We compiled against SDL version ", (int)compiled.major, ".", (int)compiled.minor, ".", (int)compiled.patch, " and linking to ", (int)linked.major, ".", (int)linked.minor, ".", (int)linked.patch);
 
         shouldUpdateWindow.bind<shouldUpdateWindowDefault>();
+		engine = _engine;
     }
 
     Window::~Window() {
@@ -76,6 +77,9 @@ namespace RDE {
     void Window::setFullscreen(bool _fullscreen) {
         properties->windowData.fullScreen = _fullscreen;
         SDL_SetWindowFullscreen(window, _fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
+		WindowResizedEvent _e(0, 0);
+		// The size doesn't matter, onWindowResize takes the values from the SDL window
+		engine->onWindowResized(_e);
     }
 
     bool Window::isFullscreen() const {

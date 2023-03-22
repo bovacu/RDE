@@ -5,6 +5,7 @@
 
 #include <ostream>
 #include "SDL2/SDL_mouse.h"
+#include "core/Core.h"
 
 namespace RDE {
 
@@ -28,7 +29,7 @@ namespace RDE {
 		RDE_MOUSE_BUTTON_MIDDLE = RDE_MOUSE_BUTTON_1
 	};
 
-	inline std::ostream &operator<<(std::ostream &os, RDE_MOUSE_BUTTON_ mouseCode) {
+	RDE_FUNC inline std::ostream &operator<<(std::ostream &os, RDE_MOUSE_BUTTON_ mouseCode) {
         os << static_cast<int32_t>(mouseCode);
         return os;
     }

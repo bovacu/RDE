@@ -76,15 +76,15 @@ namespace RDE {
 
 
         public:
-            UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config = {});
+			RDE_FUNC UIInput(Node* _node, Manager* _manager, Graph* _graph, const UIInputConfig& _config = {});
 
             RENDERIZABLE_UI_BASIC_METHODS()
 
-            void onUpdate(Delta _dt);
+			RDE_FUNC void onUpdate(Delta _dt);
 
-            Node* getTextNode();
-            Node* getTextPlaceholderNode();
-            Node* getCaretNode();
+			RDE_FUNC_ND Node* getTextNode();
+			RDE_FUNC_ND Node* getTextPlaceholderNode();
+			RDE_FUNC_ND Node* getCaretNode();
 
             ~UIInput() {  }
 

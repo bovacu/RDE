@@ -31,35 +31,35 @@
 
 namespace RDE {
 
-    Window* Platform::createWindow(RDEConfig* _config) {
+	Window* Platform::createWindow(Engine* _engine, RDEConfig* _config) {
         #ifdef __EMSCRIPTEN__
             currentPlatform = RDE_PLATFORM_TYPE_ANDROID;
-            return new EmscriptenWindow(_config);
+            return new EmscriptenWindow(_engine, _config);
         #endif
 
         #if IS_ANDROID()
 			currentPlatform = RDE_PLATFORM_TYPE_ANDROID;
-            return new AndroidWindow(_config);
+			return new AndroidWindow(_engine, _config);
         #endif
 
         #if IS_IOS()
 			currentPlatform = RDE_PLATFORM_TYPE_IOS;
-            return new IOSWindow(_config);
+			return new IOSWindow(_engine, _config);
         #endif
 
         #if IS_LINUX() && !IS_ANDROID()
 			currentPlatform = RDE_PLATFORM_TYPE_LINUX;
-            return new LinuxWindow(_config);
+			return new LinuxWindow(_engine, _config);
         #endif
 
         #if IS_WINDOWS() && !IS_ANDROID()
 			currentPlatform = RDE_PLATFORM_TYPE_WINDOWS;
-            return new WindowsWindow(_config);
+			return new WindowsWindow(_engine, _config);
         #endif
 
         #if IS_MAC() && !IS_ANDROID()
 			currentPlatform = RDE_PLATFORM_TYPE_MAC;
-            return new MacWindow(_config);
+			return new MacWindow(_engine, _config);
         #endif
 
         return nullptr;

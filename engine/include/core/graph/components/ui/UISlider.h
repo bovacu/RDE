@@ -56,18 +56,18 @@ namespace RDE {
         RENDERIZABLE_UI_BASIC_PROPERTIES()
 
         public:
-            UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config = {});
-            ~UISlider() {  }
+			RDE_FUNC UISlider(Node* _node, Manager* _manager, Graph* _graph, const UISliderConfig& _config = {});
+			RDE_FUNC ~UISlider() {  }
 
             RENDERIZABLE_UI_BASIC_METHODS()
 
-            void onUpdate(Delta _dt);
+			RDE_FUNC void onUpdate(Delta _dt);
 
-            void setFilledPercentage(float _percentage);
-            float getFilledPercentage() const;
+			RDE_FUNC void setFilledPercentage(float _percentage);
+			RDE_FUNC_ND float getFilledPercentage() const;
 
-            Node* getFillBarNode();
-            Node* getHandleNode();
+			RDE_FUNC_ND Node* getFillBarNode();
+			RDE_FUNC_ND Node* getHandleNode();
 
         private:
 			void onMouseClicked(RDE_MOUSE_BUTTON_ _mouseCode);

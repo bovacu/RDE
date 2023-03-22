@@ -39,51 +39,51 @@ namespace RDE {
             * @brief Updates the device resolution.
             * @param _deviceSize Device resolution
             */
-            virtual void update(const Vec2I& _deviceSize);
+			RDE_FUNC void update(const Vec2I& _deviceSize);
 
         public:
-            ViewPort(const Vec2I& _deviceSize, const Vec2I& _resolutionSize);
+			RDE_FUNC ViewPort(const Vec2I& _deviceSize, const Vec2I& _resolutionSize);
 
             /**
              * @brief Returns the virtual resolution.
              * @return Vec2I
              */
-            [[nodiscard]] Vec2I getVirtualResolution() const;
+			RDE_FUNC_ND Vec2I getVirtualResolution() const;
 
             /**
              * @brief Returns the aspect ratio we want to keep rewarding the physical screen size.
              * @return float
              */
-            [[nodiscard]] float getVirtualAspectRatio() const;
+			RDE_FUNC_ND float getVirtualAspectRatio() const;
 
             /**
              * @brief Returns the aspect ratio of the physical screen.
              * @return float
              */
-            [[nodiscard]] float getPhysicalAspectRatio() const;
+			RDE_FUNC_ND float getPhysicalAspectRatio() const;
 
             /**
              * @brief Returns the device resolution.
              * @return Vec2I
              */
-            [[nodiscard]] Vec2I getDeviceResolution() const;
+			RDE_FUNC_ND Vec2I getDeviceResolution() const;
 
             /**
              * Sets if the UI scales towards width screen changes, height screen changes or both.
              * @param _width Value between 1f and 0f.
              * @param _height The complement of _width to add up to 1f.
              */
-            void setUIScaleWeightsForWidthAndHeight(float _width, float _height);
+			RDE_FUNC void setUIScaleWeightsForWidthAndHeight(float _width, float _height);
 
             /**
              * Returns the values set in setUIScaleWeightsForWidthAndHeight.
              * @return Vec2F
              */
-            Vec2F getUIScaleWeights() const;
+			RDE_FUNC_ND Vec2F getUIScaleWeights() const;
 
-            bool isLandscape() const { return landscape; }
+			RDE_FUNC_ND bool isLandscape() const { return landscape; }
 
-            virtual ~ViewPort() {};
+			RDE_FUNC virtual ~ViewPort() {};
     };
 }
 

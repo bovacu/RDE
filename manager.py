@@ -1,6 +1,7 @@
 from sys import platform
 import sys
 import os
+import shutil 
 
 
 def extract_argument(args, arg, default):
@@ -25,6 +26,45 @@ def extract_argument(args, arg, default):
         return default
 
 
+def generate_windows_lib_package(args):
+    manager_parent_path = os.path.abspath(os.path.dirname(__file__))
+    build_type = extract_argument(args, "--build_type", "debug")
+    os.system("if exist {}\\build\\windows\\lib\\{}\\RDE rmdir /s /q {}\\build\\windows\\lib\\{}\\RDE".format(manager_parent_path, build_type.lower(), manager_parent_path, build_type.lower()))
+    os.system("if not exist {}\\build\\windows\\lib\\{}\\RDE mkdir {}\\build\\windows\\lib\\{}\\RDE".format(manager_parent_path, build_type.lower(), manager_parent_path, build_type.lower()))
+    os.system("mkdir {}\\build\\windows\\lib\\{}\\RDE\\libs".format(manager_parent_path, build_type.lower()))
+    os.system("mkdir {}\\build\\windows\\lib\\{}\\RDE\\libs\\lib".format(manager_parent_path, build_type.lower()))
+    os.system("mkdir {}\\build\\windows\\lib\\{}\\RDE\\libs\\dll".format(manager_parent_path, build_type.lower()))
+    os.system("mkdir {}\\build\\windows\\lib\\{}\\RDE\\include".format(manager_parent_path, build_type.lower()))
+    os.system("mkdir {}\\build\\windows\\lib\\{}\\RDE\\include\\third-party".format(manager_parent_path, build_type.lower()))
+
+    build_dir = "{}/build/windows/lib/{}".format(manager_parent_path, build_type.lower())
+    for root, dir, files in os.walk(build_dir):
+        for ffile in files:
+            if os.path.splitext(ffile)[1] in ('.dll') and not os.path.splitext(ffile)[0].startswith('.'):
+                if os.path.isfile("{}/build/windows/lib/{}/RDE/libs/dll/{}".format(manager_parent_path, build_type.lower(), ffile)):
+                    continue
+                src = os.path.join(root, ffile)
+                shutil.copy(src, "{}/build/windows/lib/{}/RDE/libs/dll".format(manager_parent_path, build_type.lower()))
+
+    shutil.copy("{}/build/windows/lib/{}/RDE.lib".format(manager_parent_path, build_type.lower()), "{}/build/windows/lib/{}/RDE/libs/lib".format(manager_parent_path, build_type.lower()))
+    shutil.copy("{}/nonVcpkgDeps/Chipmunk2D/libs/Windows/chipmunk.lib".format(manager_parent_path, build_type.lower()), "{}/build/windows/lib/{}/RDE/libs/lib".format(manager_parent_path, build_type.lower()))
+    shutil.copy("{}/nonVcpkgDeps/Chipmunk2D/libs/Windows/chipmunk.dll".format(manager_parent_path, build_type.lower()), "{}/build/windows/lib/{}/RDE/libs/dll".format(manager_parent_path, build_type.lower()))
+
+    vcpkg_dir = "{}/vcpkg/installed/x64-windows/lib".format(manager_parent_path)
+    for root, dir, files in os.walk(vcpkg_dir):
+        for ffile in files:
+            if os.path.splitext(ffile)[1] in ('.lib') and not os.path.splitext(ffile)[0].startswith('.'):
+                if os.path.isfile("{}/build/windows/lib/{}/RDE/libs/lib/{}".format(manager_parent_path, build_type.lower(), ffile)):
+                    continue
+                src = os.path.join(root, ffile)
+                shutil.copy(src, "{}/build/windows/lib/{}/RDE/libs/lib".format(manager_parent_path, build_type.lower()))
+
+    shutil.copytree("{}/engine/include".format(manager_parent_path), "{}/build/windows/lib/{}/RDE/include/RDE/".format(manager_parent_path, build_type.lower()))
+    shutil.copytree("{}/nonVcpkgDeps/Chipmunk2D/include".format(manager_parent_path), "{}/build/windows/lib/{}/RDE/include/third-party/Chipmunk2D".format(manager_parent_path, build_type.lower()))
+    shutil.copytree("{}/vcpkg/installed/x64-windows/include".format(manager_parent_path), "{}/build/windows/lib/{}/RDE/include/third-party/vcpkg".format(manager_parent_path, build_type.lower()))
+
+
+
 def buildin_process_windows(args, action):
     build_type = extract_argument(args, "--build_type", "debug")
     generator = extract_argument(args, "--generator", "Ninja")
@@ -34,11 +74,16 @@ def buildin_process_windows(args, action):
 
     create_build_folder = "if not exist build mkdir build"
     create_windows_folder = "if not exist build\\windows mkdir build\\windows"
+    create_windows_lib_folder = "if not exist build\\windows\\lib mkdir build\\windows\\lib"
     create_windows_build_folder = "if not exist build\\windows\\{} mkdir build\\windows\\{}".format( build_type.lower(), build_type.lower())
+    create_windows_lib_build_folder = "if not exist build\\windows\\lib\\{} mkdir build\\windows\\lib\\{}".format( build_type.lower(), build_type.lower())
     cmake_generate = "cd build\\windows\\{_build_type} && cmake -G \"{_generator}\" -DCMAKE_BUILD_TYPE={_build_type} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_C_COMPILER={_c_compiler} -DCMAKE_CXX_COMPILER={_cxx_compiler}  -DCMAKE_TOOLCHAIN_FILE=".format(_generator = generator, _build_type = build_type, _c_compiler = c_compiler, _cxx_compiler = cxx_compiler) + os.getcwd() + "/vcpkg/scripts/buildsystems/vcpkg.cmake ..\\..\\.."
+    cmake_generate_lib = "cd build\\windows\\lib\\{_build_type} && cmake -G \"{_generator}\" -DRDE_LIBRARY=ON -DCMAKE_BUILD_TYPE={_build_type} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_C_COMPILER={_c_compiler} -DCMAKE_CXX_COMPILER={_cxx_compiler}  -DCMAKE_TOOLCHAIN_FILE=".format(_generator = generator, _build_type = build_type, _c_compiler = c_compiler, _cxx_compiler = cxx_compiler) + os.getcwd() + "/vcpkg/scripts/buildsystems/vcpkg.cmake ..\\..\\..\\.."
     cmake_build = "cd build\\windows\\{} && cmake --build .".format(build_type.lower())
+    cmake_build_lib = "cd build\\windows\\lib\\{} && cmake --build .".format(build_type.lower())
     delete_compile_commands = "del compile_commands.json"
     copy_compile_commands = "copy build\\windows\\{}\\compile_commands.json .".format(build_type.lower())
+    copy_compile_commands_lib = "copy build\\windows\\lib\\{}\\compile_commands.json .".format(build_type.lower())
 
     run_command = "start build\\windows\\{}\\RDE.exe".format(build_type.lower())
 
@@ -49,7 +94,17 @@ def buildin_process_windows(args, action):
         os.system("cd build\\windows_vs && cmake --build .")
         exit(0)
 
-    if action == "build":
+    if action == "build-lib":
+        os.system(create_build_folder)
+        os.system(create_windows_folder)
+        os.system(create_windows_lib_folder)
+        os.system(create_windows_lib_build_folder)
+        os.system(cmake_generate_lib)
+        os.system(cmake_build_lib)
+        os.system(delete_compile_commands)
+        os.system(copy_compile_commands_lib)
+        generate_windows_lib_package(args)
+    elif action == "build":
         os.system(create_build_folder)
         os.system(create_windows_folder)
         os.system(create_windows_build_folder)
@@ -166,7 +221,7 @@ def project_lines_number_mac():
 def windows(args):
     action = extract_argument(args, "--action", "")
     generate_vs_project = extract_argument(args, "--generate_vs_project", "")
-    if action == "build" or action == "build-run" or action == "run" or generate_vs_project:
+    if action == "build" or action == "build-run" or action == "run" or generate_vs_project or action == "build-lib":
         buildin_process_windows(args, action)
     elif action == "lines":
         project_lines_number_windows()

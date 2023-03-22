@@ -100,130 +100,130 @@ namespace RDE {
              * @attention This function should not be called by end users.
              * @brief Initiates the sound system.
              */
-            void init();
+			RDE_FUNC void init();
 
             /**
              * @attention This function should not be called by end users.
              * @brief Destroys the sound system and all loaded sounds.
              */
-            void destroy();
+			RDE_FUNC void destroy();
 
             /**
              * @brief Loads a background music.
              * @param _musicPath File path
              * @return Music&
              */
-            Music& loadMusic(const std::string& _musicPath);
+			RDE_FUNC Music& loadMusic(const std::string& _musicPath);
 
             /**
              * @brief Loads a sound effect.
              * @param _sfxPath File path
              * @return Sfx&
              */
-            Sfx& loadSfx(const std::string& _sfxPath);
+			RDE_FUNC Sfx& loadSfx(const std::string& _sfxPath);
 
             /**
              * @brief Unloads a background music.
              * @param _musicName Music name
              */
-            void unloadMusic(const std::string& _musicName);
+			RDE_FUNC void unloadMusic(const std::string& _musicName);
 
             /**
              * @brief Unloads a sound effect.
              * @param _sfxName Sound effect name
              */
-            void unloadSfx(const std::string& _sfxName);
+			RDE_FUNC void unloadSfx(const std::string& _sfxName);
 
             /**
              * @brief Gets a background music.
              * @param _musicName Music name
              * @return Music&
              */
-            Music& getMusic(const std::string& _musicName);
+			RDE_FUNC_ND Music& getMusic(const std::string& _musicName);
 
             /**
              * @brief Gets a sound effect.
              * @param _sfxName Sound effect name
              * @return Sfx&
              */
-            Sfx& getSfx(const std::string& _sfxName);
+			RDE_FUNC_ND Sfx& getSfx(const std::string& _sfxName);
 
             /**
              * @brief Plays a background music, only one can be played at a time.
              * @param _musicName Music name
              */
-            void playMusic(const std::string& _musicName);
+			RDE_FUNC void playMusic(const std::string& _musicName);
 
             /**
              * @brief Plays a sound effect, multiple sounds effects can be played at a time.
              * @param _sfxName Sound effect name.
              */
-            void playSfx(const std::string& _sfxName);
+			RDE_FUNC void playSfx(const std::string& _sfxName);
 
             /**
              * @brief Pauses a background music.
              * @param _musicName Music name
              */
-            void pauseMusic(const std::string& _musicName);
+			RDE_FUNC void pauseMusic(const std::string& _musicName);
 
             /**
              * @brief Pauses a sound effect.
              * @param _sfxName Sound effect name
              */
-            void pauseSfx(const std::string& _sfxName);
+			RDE_FUNC void pauseSfx(const std::string& _sfxName);
 
             /**
              * @brief Continues a paused background music.
              * @param _musicName Music name
              */
-            void resumeMusic(const std::string& _musicName);
+			RDE_FUNC void resumeMusic(const std::string& _musicName);
 
             /**
              * @brief Continues a paused sound effect.
              * @param _sfxName Sound effect name
              */
-            void resumeSfx(const std::string& _sfxName);
+			RDE_FUNC void resumeSfx(const std::string& _sfxName);
 
             /**
              * @brief Stops and sets to its beginning a background music.
              * @param _musicName Music name
              */
-            void stopMusic(const std::string& _musicName);
+			RDE_FUNC void stopMusic(const std::string& _musicName);
 
             /**
              * @brief Stops and sets to its beginning a sound effect.
              * @param _sfxName Sound effect name
              */
-            void stopSfx(const std::string& _sfxName);
+			RDE_FUNC void stopSfx(const std::string& _sfxName);
 
             /**
              * @brief Sets the volume of a background music.
              * @param _volume Volume value
              */
-            void setMusicVolume(int _volume);
+			RDE_FUNC void setMusicVolume(int _volume);
 
             /**
              * @brief Sets the volume of a sound effect.
              * @param _volume Volume value
              */
-            void setSfxVolume(int _volume);
+			RDE_FUNC void setSfxVolume(int _volume);
 
             /**
              * @brief Pauses all of the sounds.
              */
-            void pauseAll();
+			RDE_FUNC void pauseAll();
 
             /**
              * @brief Stops and sets to its beginning all of the sounds.
              */
-            void stopAll();
+			RDE_FUNC void stopAll();
 
             /**
              * @brief Continues all of the paused sounds.
              */
-            void resumeAll();
+			RDE_FUNC void resumeAll();
 
-            SoundManager() {}
+			RDE_FUNC_ND SoundManager() {}
     };
 
 }

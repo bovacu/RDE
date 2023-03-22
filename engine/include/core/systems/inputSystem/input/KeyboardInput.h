@@ -28,21 +28,21 @@ namespace RDE {
              * @param _engine Engine
              * @param _window Window
              */
-            void init(Engine* _engine, Window* _window);
+			RDE_FUNC void init(Engine* _engine, Window* _window);
 
             /**
              * @brief Returns the state of a key.
 			 * @param _keyOrButton RDE_KEYBOARD_KEY_
 			 * @return RDE_INPUT_STATUS_
              */
-			RDE_INPUT_STATUS_ getState(RDE_KEYBOARD_KEY_ _key);
+			RDE_FUNC_ND RDE_INPUT_STATUS_ getState(RDE_KEYBOARD_KEY_ _key);
 
             /**
              * @brief Sets the state of a key.
 			 * @param _keyOrButton RDE_KEYBOARD_KEY_
 		     * @param _state RDE_INPUT_STATUS_
              */
-			void setState(RDE_KEYBOARD_KEY_ _key, RDE_INPUT_STATUS_ _state);
+			RDE_FUNC void setState(RDE_KEYBOARD_KEY_ _key, RDE_INPUT_STATUS_ _state);
 
         private:
             /**

@@ -49,46 +49,46 @@ namespace RDE {
              * @brief Initiates the system.
              * @param _engine Engine
              */
-            void init(Engine* _engine);
+			RDE_FUNC void init(Engine* _engine);
 
             /**
              * @brief Loads a scene in memory, but it not shows it yet.
              * @param _scene Scene to load
              * @param _sceneName Scene name
              */
-            void loadScene(Scene* _scene, const std::string& _sceneName);
+			RDE_FUNC void loadScene(Scene* _scene, const std::string& _sceneName);
 
             /**
              * @brief Renders a scene that has been loaded previously.
              * @param _sceneName Scene name
              */
-            void displayScene(const std::string& _sceneName);
+			RDE_FUNC void displayScene(const std::string& _sceneName);
 
             /**
              * @brief Returns an specific scene by name.
              * @param _sceneName Scene name
              * @return Scene*
              */
-            Scene* getScene(const std::string& _sceneName);
+			RDE_FUNC_ND Scene* getScene(const std::string& _sceneName);
 
             /**
              * @brief Returns the current displayed scene.
              * @return Scene*
              */
-            Scene* getDisplayedScene();
+			RDE_FUNC_ND Scene* getDisplayedScene();
 
             /**
              * @brief Unloads from memory an specific scene. If the displayed scene is unloaded, a default one will be displayed
              * until displayScene is called again on another loaded scene.
              * @param _sceneName Scene name
              */
-            void unloadScene(const std::string& _sceneName);
+			RDE_FUNC void unloadScene(const std::string& _sceneName);
 
             /**
              * @attention This function should not be called by end users.
              * @brief Destroys the system and all the loaded scenes.
              */
-            void destroy();
+			RDE_FUNC void destroy();
     };
 
 }

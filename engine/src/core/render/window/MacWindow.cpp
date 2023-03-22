@@ -10,7 +10,7 @@
 
 namespace RDE {
 
-    MacWindow::MacWindow(RDEConfig* _config) : Window(_config) {
+	MacWindow::MacWindow(Engine* _engine, RDEConfig* _config) : Window(_engine, _config) {
         Util::Log::debug("Platform: MacOS");
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);

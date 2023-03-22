@@ -44,21 +44,21 @@ namespace RDE {
 			bool dirty = false;
 
         public:
-			UIAnchoring(Node* _node, Scene* _scene, const UIAnchoringConfig& _config = {});
-			UIAnchoring(Node* _node, Scene* _scene, Canvas* _canvas, const UIAnchoringConfig& _config = {});
-			UIAnchoring(Node* _node, Manager* _manager, Graph* _graph, const UIAnchoringConfig& _config = {});
+			RDE_FUNC UIAnchoring(Node* _node, Scene* _scene, const UIAnchoringConfig& _config = {});
+			RDE_FUNC UIAnchoring(Node* _node, Scene* _scene, Canvas* _canvas, const UIAnchoringConfig& _config = {});
+			RDE_FUNC UIAnchoring(Node* _node, Manager* _manager, Graph* _graph, const UIAnchoringConfig& _config = {});
 
-			[[nodiscard]] RDE_UI_ANCHOR_ getAnchor() const;
-			void setAnchor(RDE_UI_ANCHOR_ _anchor);
+			RDE_FUNC_ND RDE_UI_ANCHOR_ getAnchor() const;
+			RDE_FUNC void setAnchor(RDE_UI_ANCHOR_ _anchor);
 
-			[[nodiscard]] RDE_UI_STRETCH_ getStretch() const;
-			void setStretch(RDE_UI_STRETCH_ _stretch);
+			RDE_FUNC_ND RDE_UI_STRETCH_ getStretch() const;
+			RDE_FUNC void setStretch(RDE_UI_STRETCH_ _stretch);
 
-            Vec2F getSize();
-            void setSize(const Vec2F& _size);
+			RDE_FUNC_ND Vec2F getSize();
+			RDE_FUNC void setSize(const Vec2F& _size);
 
-			bool isDirty();
-			void update();
+			RDE_FUNC_ND bool isDirty();
+			RDE_FUNC void update();
 
         private:
             void setUIDirty();

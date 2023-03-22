@@ -68,8 +68,8 @@ namespace RDE {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
     }
 
-    Texture& Font::getTexture() {
-        return texture;
+    Texture* Font::getTexture() {
+        return &texture;
     }
 
     CharMap& Font::getChars() {

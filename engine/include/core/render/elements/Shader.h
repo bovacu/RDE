@@ -28,9 +28,9 @@ namespace RDE {
 
     class LoadVertexConfigNotInvoked : public std::exception {
         public:
-        [[nodiscard]] auto what() const noexcept -> const char* override {
-            return "Load vertex config function was not called for shader, so the shader won't work.";
-        }
+			RDE_FUNC_ND auto what() const noexcept -> const char* override {
+				return "Load vertex config function was not called for shader, so the shader won't work.";
+			}
     };
 
     struct VertexConfig {
@@ -106,8 +106,8 @@ namespace RDE {
 			 void loadVertexConfigSpecific(const std::vector<VertexConfig>& _verticesConfig, const std::vector<const char*> _uniforms, int _maxIndicesPerDrawCall, GLenum _drawType, GLuint& _vbo, GLuint& _ibo, GLuint& _vao);
 
         public:
-            Shader();
-            ~Shader();
+			RDE_FUNC Shader();
+			RDE_FUNC ~Shader();
 
             /**
              * @brief Loads a Shader from a file.
@@ -115,7 +115,7 @@ namespace RDE {
              * @param _fragment Fragment Shader
              * @return ID of the Shader on the GPU
              */
-            GLuint loadFromFiles(const std::string& _vertex, const std::string& _fragment, FileManager* _fileManager);
+			RDE_FUNC GLuint loadFromFiles(const std::string& _vertex, const std::string& _fragment, FileManager* _fileManager);
 
             /**
              * @brief Loads a Shader from a string.
@@ -123,61 +123,61 @@ namespace RDE {
              * @param _fragment Fragment Shader
              * @return ID of the Shader on the GPU
              */
-            GLuint loadFromStrings(const std::string& _vertex, const std::string& _fragment);
+			RDE_FUNC GLuint loadFromStrings(const std::string& _vertex, const std::string& _fragment);
 
             /**
              * @brief Loads the data structure that is going to be sent to the GPU. This method MUST be called
              */
-			void loadVertexConfig(const std::vector<VertexConfig>& _verticesConfig, const std::vector<const char*> _uniforms, int _maxIndicesPerDrawCall);
+			RDE_FUNC void loadVertexConfig(const std::vector<VertexConfig>& _verticesConfig, const std::vector<const char*> _uniforms, int _maxIndicesPerDrawCall);
 
             /**
              * @brief Returns the ID of the Shader on the GPU
              * @return uint
              */
-            GLuint getShaderID() const;
+			RDE_FUNC_ND GLuint getShaderID() const;
 
             /**
              * @brief Returns the ID of the dynamic drawing VAO on the GPU
              * @return uint
              */
-            GLuint getDynamicShaderVAO() const;
+			RDE_FUNC_ND GLuint getDynamicShaderVAO() const;
 
             /**
             * @brief Returns the ID of the dynamic drawing IBO on the GPU
             * @return uint
             */
-            GLuint getDynamicShaderIBO() const;
+			RDE_FUNC_ND GLuint getDynamicShaderIBO() const;
 
             /**
              * @brief Returns the ID of the dynamic drawing VBO on the GPU
              * @return uint
              */
-            GLuint getDynamicShaderVBO() const;
+			RDE_FUNC_ND GLuint getDynamicShaderVBO() const;
 
             /**
              * @brief Returns the ID of the static drawing VAO on the GPU
              * @return uint
              */
-            GLuint getStaticShaderVAO() const;
+			RDE_FUNC_ND GLuint getStaticShaderVAO() const;
 
             /**
             * @brief Returns the ID of the static drawing IBO on the GPU
             * @return uint
             */
-            GLuint getStaticShaderIBO() const;
+			RDE_FUNC_ND GLuint getStaticShaderIBO() const;
 
             /**
              * @brief Returns the ID of the static drawing VBO on the GPU
              * @return uint
              */
-            GLuint getStaticShaderVBO() const;
+			RDE_FUNC_ND GLuint getStaticShaderVBO() const;
 
 
             /**
              * @brief Returns the size of the VertexData structure in bytes.
              * @return long
              */
-            long getShaderVertexDataSize() const;
+			RDE_FUNC_ND long getShaderVertexDataSize() const;
 
 			/**
 			 * @brief Sets the value of an existing uniform.
@@ -185,7 +185,7 @@ namespace RDE {
 			 * @param _type The type of uniform we are setting, check RDE_UNIFORM_FV enum options
 			 * @param _data The actual data to send
 			 */
-			void setUniformValueFloat(const char* _uniformName, RDE_UNIFORM_FV_ _type, GLfloat* _data, GLboolean _transpose = GL_FALSE);
+			RDE_FUNC void setUniformValueFloat(const char* _uniformName, RDE_UNIFORM_FV_ _type, GLfloat* _data, GLboolean _transpose = GL_FALSE);
 			
 			/**
 			* @brief Sets the value of an existing uniform.
@@ -193,7 +193,7 @@ namespace RDE {
 			* @param _type The type of uniform we are setting, check RDE_UNIFORM_IV enum options
 			* @param _data The actual data to send
 			*/
-			void setUniformValueInt(const char* _uniformName, RDE_UNIFORM_IV_ _type, GLint* _data);
+			RDE_FUNC void setUniformValueInt(const char* _uniformName, RDE_UNIFORM_IV_ _type, GLint* _data);
 
 			/**
 			* @brief Sets the value of an existing uniform.
@@ -201,7 +201,7 @@ namespace RDE {
 			* @param _type The type of uniform we are setting, check RDE_UNIFORM_UIV enum options
 			* @param _data The actual data to send
 			*/
-			void setUniformValueUInt(const char* _uniformName, RDE_UNIFORM_UIV_ _type, GLuint* _data);
+			RDE_FUNC void setUniformValueUInt(const char* _uniformName, RDE_UNIFORM_UIV_ _type, GLuint* _data);
 
         private:
             /**

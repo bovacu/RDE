@@ -114,7 +114,7 @@ namespace RDE {
             Delegate<void()> onInnerUnfocused;
 
         public:
-            UIInteractable(Node* _node, Manager* _manager, Graph* _graph);
+            RDE_FUNC UIInteractable(Node* _node, Manager* _manager, Graph* _graph);
 
             /**
              * @brief Callback triggered when the mouse is clicked.

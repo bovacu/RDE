@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <ostream>
 #include "SDL2/SDL_scancode.h"
+#include "core/Core.h"
 
 namespace RDE {
 
@@ -140,7 +141,7 @@ namespace RDE {
 		RDE_KEYBOARD_KEY_MENU = SDL_SCANCODE_MENU
 	};
 
-	inline std::ostream &operator<<(std::ostream &os, RDE_KEYBOARD_KEY_ keyCode) {
+	RDE_FUNC inline std::ostream &operator<<(std::ostream &os, RDE_KEYBOARD_KEY_ keyCode) {
         os << static_cast<int32_t>(keyCode);
         return os;
     }

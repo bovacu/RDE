@@ -34,12 +34,12 @@ namespace RDE {
 
         public:
             template<typename T>
-            void setValue(T& _value) {
+			RDE_FUNC void setValue(T& _value) {
                 whatEver = &_value;
             }
 
             template<typename T>
-            T& getValue() {
+			RDE_FUNC_ND T& getValue() {
                 ENGINE_ASSERT(whatEver, "There are no transition parameters, but you are trying to get them!")
                 return *(T*)whatEver;
             }
@@ -55,25 +55,25 @@ namespace RDE {
             Manager* manager;
 
         public:
-            explicit AnimationSystem(Manager* _manager);
-            Animation* createAnimation(const std::string& _animName, const std::string& _atlas, const std::vector<int>& _indices);
+			RDE_FUNC_EXPLICIT AnimationSystem(Manager* _manager);
+			RDE_FUNC_ND Animation* createAnimation(const std::string& _animName, const std::string& _atlas, const std::vector<int>& _indices);
 
-            void setAnimationTimeBetweenFrames(const std::string& _animation, float _timeBetweenFrames);
-            float getAnimationTimeBetweenFrames(const std::string& _animation);
+			RDE_FUNC void setAnimationTimeBetweenFrames(const std::string& _animation, float _timeBetweenFrames);
+			RDE_FUNC_ND float getAnimationTimeBetweenFrames(const std::string& _animation);
 
-            void setInitialAnimation(const std::string& _animationName);
+			RDE_FUNC void setInitialAnimation(const std::string& _animationName);
 
             template<auto TransitionFunc, typename Class>
-            void createTransition(const std::string& _initialAnimation, const std::string& _finalAnimation, Class* _class);
+			RDE_FUNC void createTransition(const std::string& _initialAnimation, const std::string& _finalAnimation, Class* _class);
 
-            AnimationNode* getCurrentAnimation();
+			RDE_FUNC_ND AnimationNode* getCurrentAnimation();
 
-            void start();
-            void pause();
-            void stop();
-            void restart();
+			RDE_FUNC void start();
+			RDE_FUNC void pause();
+			RDE_FUNC void stop();
+			RDE_FUNC void restart();
 
-            void update(float _dt, SpriteRenderer* _spriteRenderer, TransitionParams _params = {});
+			RDE_FUNC void update(float _dt, SpriteRenderer* _spriteRenderer, TransitionParams _params = {});
     };
 
     template<auto TransitionFunc, typename Class>

@@ -15,7 +15,7 @@ namespace RDE {
 
     class AndroidWindow : public Window {
     public:
-        explicit AndroidWindow(RDEConfig* _config);
+		explicit AndroidWindow(Engine* _engine, RDEConfig* _config);
     };
 }
 

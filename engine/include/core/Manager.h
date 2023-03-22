@@ -28,7 +28,7 @@ namespace RDE {
     class Manager {
 
         public:
-            explicit Manager();
+			RDE_FUNC_EXPLICIT Manager();
 
             Engine* engine;
             /**
@@ -107,13 +107,13 @@ namespace RDE {
              * @brief Initiates all of the managers.
              * @param _engine Reference to the engine.
              */
-            void init(Engine* _engine);
+			 RDE_FUNC void init(Engine* _engine);
 
             /**
              * @attention This function should not be called by end users.
              * @brief Destroys all of the managers.
              */
-            void destroy();
+			 RDE_FUNC void destroy();
     };
 
 }

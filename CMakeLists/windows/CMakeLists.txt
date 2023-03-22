@@ -15,7 +15,7 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 
-file(GLOB_RECURSE RDE_CPP_HEADERS engine/include/*.h*)
+file(GLOB_RECURSE RDE_CPP_HEADERS engine/include/*.h)
 file(GLOB_RECURSE RDE_CPP_SOURCES engine/src/*.cpp )
 
 set(CPP_HEADERS)
@@ -55,17 +55,16 @@ include_directories(vcpkg/installed/x64-windows/include)
 
 option(RDE_LIBRARY "Build library instead of executable" OFF)
 if(RDE_LIBRARY)
+	add_definitions(-DRDE_LIBRARY)
     message("Building lib")
-    add_library(${PROJECT_NAME} STATIC
+    add_library(${PROJECT_NAME} SHARED
             ${RDE_CPP_HEADERS}
             ${RDE_CPP_SOURCES}
 
             ${CPP_SOURCES}
             ${CPP_HEADERS}
             )
-    target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES})
-
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND bash -c "./postLibraryBuildingProcess.sh" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES} RDE_LIBRARY=1)
 
 else()
     message("Building executable")

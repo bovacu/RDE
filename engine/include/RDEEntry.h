@@ -68,7 +68,6 @@ int main(int _argc, char** _argv) {
     auto* _e = RDE::createEngine(_argc, _argv);
     _e->onRun();
     _e->destroy();
-    delete _e;
 
     return EXIT_SUCCESS;
 }

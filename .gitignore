@@ -498,3 +498,4 @@ RDE.sublime-workspace
 compile_commands.json
 
 valgrind.supp
+rdbg.rdbg

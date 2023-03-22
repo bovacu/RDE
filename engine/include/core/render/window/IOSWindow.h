@@ -15,7 +15,7 @@ namespace RDE {
 
     class IOSWindow : public Window {
         public:
-            explicit IOSWindow(RDEConfig* _config);
+			explicit IOSWindow(Engine* _engine, RDEConfig* _config);
     };
 }
 

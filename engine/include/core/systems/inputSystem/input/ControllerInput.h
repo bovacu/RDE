@@ -93,27 +93,27 @@ namespace RDE {
             void destroy();
 
         public:
-            ControllerVibrationManager() = default;
+			RDE_FUNC ControllerVibrationManager() = default;
 
             /**
              * @brief Binds an specific vibration effect to a controller.
              * @param _effectName Effect name
              * @param _controllerID Controller ID
              */
-            void assignVibrationEffectToController(const std::string& _effectName, int _controllerID);
+			RDE_FUNC void assignVibrationEffectToController(const std::string& _effectName, int _controllerID);
 
             /**
              * @brief Adds a new vibration effect given a config.
              * @param _effectName Vibration effect name
              * @param _config Vibration effect configuration
              */
-            void addVibrationEffect(const std::string& _effectName, const VibrationConfig& _config);
+			RDE_FUNC void addVibrationEffect(const std::string& _effectName, const VibrationConfig& _config);
 
             /**
              * @brief Deletes a vibration effect from the system.
              * @param _effectName Vibration effect name to remove
              */
-            void removeVibrationEffect(const std::string& _effectName);
+			RDE_FUNC void removeVibrationEffect(const std::string& _effectName);
     };
 
     struct Controller {
@@ -183,7 +183,7 @@ namespace RDE {
              * @param _engine Engine
              * @param _window Window
              */
-            void init(Engine* _engine, Window* _window);
+			RDE_FUNC void init(Engine* _engine, Window* _window);
 
             /**
              * @brief Returns the state of a button.
@@ -191,7 +191,7 @@ namespace RDE {
              * @param _controllerID Controller ID
 			 * @return RDE_INPUT_STATUS_
              */
-			RDE_INPUT_STATUS_ getButtonState(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
+			RDE_FUNC_ND RDE_INPUT_STATUS_ getButtonState(RDE_CONTROLLER_BUTTON_ _button, int _controllerID = 0);
 
             /**
              * @brief Sets the state of a button.
@@ -199,7 +199,7 @@ namespace RDE {
 			 * @param _state RDE_INPUT_STATUS_
              * @param _controllerID Controller ID
              */
-			void setButtonState(RDE_CONTROLLER_BUTTON_ _button, RDE_INPUT_STATUS_ _state, int _controllerID = 0);
+			RDE_FUNC void setButtonState(RDE_CONTROLLER_BUTTON_ _button, RDE_INPUT_STATUS_ _state, int _controllerID = 0);
 
             /**
              * @brief Returns the state of an axis.
@@ -207,7 +207,7 @@ namespace RDE {
              * @param _controllerID Controller ID
 			 * @return RDE_INPUT_STATUS_
              */
-			RDE_INPUT_STATUS_ getAxisState(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
+			RDE_FUNC_ND RDE_INPUT_STATUS_ getAxisState(RDE_CONTROLLER_AXIS_ _axis, int _controllerID = 0);
 
             /**
              * @brief Sets the state of an axis.
@@ -215,19 +215,19 @@ namespace RDE {
 			 * @param _state RDE_INPUT_STATUS_
              * @param _controllerID Controller ID
              */
-			void setAxisState(RDE_CONTROLLER_AXIS_ _axis, RDE_INPUT_STATUS_ _state, int _controllerID = 0);
+			RDE_FUNC void setAxisState(RDE_CONTROLLER_AXIS_ _axis, RDE_INPUT_STATUS_ _state, int _controllerID = 0);
 
             /**
              * @brief Makes the controller vibrate.
              * @param _vibrateEffect Vibration effect name
              * @param _controllerID Controller ID
              */
-            void vibrate(const std::string& _vibrateEffect, int _controllerID = 0);
+			RDE_FUNC void vibrate(const std::string& _vibrateEffect, int _controllerID = 0);
 
             /**
              * @brief Initiates the connected controllers.
              */
-            void initControllers();
+			RDE_FUNC void initControllers();
 
             /**
              * @brief Returns the value of an axis.
@@ -235,7 +235,7 @@ namespace RDE {
              * @param _controllerID Controller ID
              * @return VecF
              */
-            Vec2F getAxisValue(const RDE_CONTROLLER_AXIS_& _axis, int _controllerID = 0);
+			RDE_FUNC_ND Vec2F getAxisValue(const RDE_CONTROLLER_AXIS_& _axis, int _controllerID = 0);
 
             /**
              * @brief Reassigns a controller to another one. (Change order)
@@ -243,26 +243,26 @@ namespace RDE {
              * @param _as New Controller value
              * @return bool
              */
-            bool reassignController(int _controllerID, int _as);
+			RDE_FUNC bool reassignController(int _controllerID, int _as);
 
             /**
              * @brief Returns if a controller is connected.
              * @param _id Controller ID
              * @return bool
              */
-            bool hasController(int _id);
+			RDE_FUNC_ND bool hasController(int _id);
 
             /**
              * @brief Internal conversion method
              * @param _playerIndex Player index
              * @return int
              */
-            int playerIndexToInnerControllerID(int _playerIndex);
+			RDE_FUNC_ND int playerIndexToInnerControllerID(int _playerIndex);
 
             /**
              * @brief Destroys and frees all allocated controllers.
              */
-            void destroy();
+			RDE_FUNC void destroy();
 
         private:
             /**

@@ -6,6 +6,7 @@
 #define RDE_RANDOM_H
 
 #include <random>
+#include "core/Core.h"
 
 namespace RDE {
 
@@ -20,16 +21,16 @@ namespace RDE {
             std::mt19937 mt;
 
         public:
-            explicit Random(long _seed = -1) : mt(rd()) {
+			RDE_FUNC_EXPLICIT Random(long _seed = -1) : mt(rd()) {
                 seedRandom(_seed);
             };
 
-            void seedRandom(long _seed) {
+			RDE_FUNC void seedRandom(long _seed) {
                 if(_seed == -1) mt.seed(rd());
                 else mt.seed(_seed);
             }
 
-            int randomi(int _min, int _max) {
+			RDE_FUNC_ND int randomi(int _min, int _max) {
                 if(_min > _max) {
                     int _aux = _min;
                     _min = _max;
@@ -39,7 +40,7 @@ namespace RDE {
                 return _dist(mt);
             }
 
-            float randomf(float _min, float _max) {
+			RDE_FUNC_ND float randomf(float _min, float _max) {
                 if(_min > _max) {
                     float _aux = _min;
                     _min = _max;
@@ -49,7 +50,7 @@ namespace RDE {
                 return _dist(mt);
             }
 
-            Probability probability(float _chanceToHappen) {
+			RDE_FUNC_ND Probability probability(float _chanceToHappen) {
                 if(_chanceToHappen > 1.0f) _chanceToHappen = 1.0f;
                 if(_chanceToHappen < 0.0f) _chanceToHappen = 0.0f;
 
@@ -60,7 +61,7 @@ namespace RDE {
                 return _p;
             }
 
-            Probability probability(int _chanceToHappen) {
+			RDE_FUNC_ND Probability probability(int _chanceToHappen) {
                 if(_chanceToHappen > 100)   _chanceToHappen = 100;
                 if(_chanceToHappen < 0)     _chanceToHappen = 0;
                 return probability((float)_chanceToHappen / 100.f);

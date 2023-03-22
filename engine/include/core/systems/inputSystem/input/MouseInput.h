@@ -29,27 +29,27 @@ namespace RDE {
              * @param _engine Engine
              * @param _window Window
              */
-            void init(Engine* _engine, Window* _window);
+			RDE_FUNC void init(Engine* _engine, Window* _window);
 
             /**
              * @brief Gets the state of a button.
 			 * @param _keyOrButton RDE_MOUSE_BUTTON_
 			 * @return RDE_MOUSE_BUTTON_STATUS_
              */
-			RDE_INPUT_STATUS_ getState(RDE_MOUSE_BUTTON_ _mouseButton);
+			RDE_FUNC_ND RDE_INPUT_STATUS_ getState(RDE_MOUSE_BUTTON_ _mouseButton);
 
             /**
              * @brief Sets the state of a button.
 			 * @param _keyOrButton RDE_MOUSE_BUTTON_
 			 * @param _state RDE_MOUSE_BUTTON_STATUS_
              */
-			void setState(RDE_MOUSE_BUTTON_ _mouseButton, RDE_INPUT_STATUS_ _state);
+			RDE_FUNC void setState(RDE_MOUSE_BUTTON_ _mouseButton, RDE_INPUT_STATUS_ _state);
 
             /**
              * @brief Gets the position of the mouse in World Coordinates.
              * @return Vec2F
              */
-            Vec2F getMousePosition() const;
+			RDE_FUNC_ND Vec2F getMousePosition() const;
 
         private:
             /**

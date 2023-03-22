@@ -5,6 +5,7 @@
 #define RDE_PLATFORM_H
 
 #include "core/Enums.h"
+#include "core/Core.h"
 
 namespace RDE {
 
@@ -15,7 +16,7 @@ namespace RDE {
 		friend class Engine;
 
         public:
-            Window* createWindow(RDEConfig* _config);
+			RDE_FUNC Window* createWindow(Engine* _engine, RDEConfig* _config);
 
         private:
 			RDE_PLATFORM_TYPE_ currentPlatform;

@@ -25,7 +25,7 @@ namespace RDE {
          * @param _language The Language enum
          * @return A const char* of the Language code
         */
-		static const char* toString(RDE_LANGUAGE_ _language) {
+		RDE_FUNC_ND_STATIC const char* toString(RDE_LANGUAGE_ _language) {
             switch (_language) {
 				case RDE_LANGUAGE_EN_US: return "en-us";
 				case RDE_LANGUAGE_ES_ES: return "es-es";
@@ -48,7 +48,7 @@ namespace RDE {
          * @param _language A valid language code.
          * @return Language
         */
-		static RDE_LANGUAGE_ toEnum(const char* _language) {
+		RDE_FUNC_ND_STATIC RDE_LANGUAGE_ toEnum(const char* _language) {
             return toEnum(std::string(_language));
         }
 
@@ -57,7 +57,7 @@ namespace RDE {
          * @param _language A valid language code.
          * @return Language
         */
-		static RDE_LANGUAGE_ toEnum(const std::string& _language) {
+		RDE_FUNC_ND_STATIC RDE_LANGUAGE_ toEnum(const std::string& _language) {
             auto _strCpy = _language;
             _strCpy = Util::String::toLower(_strCpy);
 
@@ -119,22 +119,22 @@ namespace RDE {
 
                 public:
                     // DO NOT SET HERE explicit ON CONSTRUCTORS
-                    Any(int   _e)   { data.INT    = _e; type = Int;     }
-                    Any(uint   _e)  { data.UINT   = _e; type = UInt;    }
-                    Any(long   _e)  { data.LONG   = _e; type = Long;    }
-                    Any(ulong   _e) { data.ULONG  = _e; type = ULong;   }
-                    Any(float _e)   { data.FLOAT  = _e; type = Float;   }
-                    Any(double _e)  { data.DOUBLE = _e; type = Double;  }
-                    Any(const char* _e)   { data.STRING = _e; type = String;  }
-                    Any(const std::string &_e)   { data.STRING = _e.c_str(); type = String;  }
-                    [[nodiscard]] Type getType()    const { return type;        }
-                    [[nodiscard]] int getInt()      const { return data.INT;    }
-                    [[nodiscard]] float getFloat()  const { return data.FLOAT;  }
-                    [[nodiscard]] double getDouble()  const { return data.DOUBLE;  }
-                    [[nodiscard]] const char* getString() const { return data.STRING; }
-                    [[nodiscard]] uint getUInt()    const { return data.UINT;   }
-                    [[nodiscard]] long getLong()    const { return data.LONG;   }
-                    [[nodiscard]] ulong getULong()  const { return data.ULONG;  }
+					RDE_FUNC Any(int   _e)   { data.INT    = _e; type = Int;     }
+					RDE_FUNC Any(uint   _e)  { data.UINT   = _e; type = UInt;    }
+					RDE_FUNC Any(long   _e)  { data.LONG   = _e; type = Long;    }
+					RDE_FUNC Any(ulong   _e) { data.ULONG  = _e; type = ULong;   }
+					RDE_FUNC Any(float _e)   { data.FLOAT  = _e; type = Float;   }
+					RDE_FUNC Any(double _e)  { data.DOUBLE = _e; type = Double;  }
+					RDE_FUNC Any(const char* _e)   { data.STRING = _e; type = String;  }
+					RDE_FUNC Any(const std::string &_e)   { data.STRING = _e.c_str(); type = String;  }
+					RDE_FUNC_ND Type getType()    const { return type;        }
+					RDE_FUNC_ND int getInt()      const { return data.INT;    }
+					RDE_FUNC_ND float getFloat()  const { return data.FLOAT;  }
+					RDE_FUNC_ND double getDouble()  const { return data.DOUBLE;  }
+					RDE_FUNC_ND const char* getString() const { return data.STRING; }
+					RDE_FUNC_ND uint getUInt()    const { return data.UINT;   }
+					RDE_FUNC_ND long getLong()    const { return data.LONG;   }
+					RDE_FUNC_ND ulong getULong()  const { return data.ULONG;  }
             };
 
         public:
@@ -158,20 +158,20 @@ namespace RDE {
             /**
              * @brief Loads all languages configured in the localization.json
             */
-            void loadAllLanguages();
+			RDE_FUNC void loadAllLanguages();
 
             /**
              * @brief Loads a specific language configured in the localization.json
              * @param _language The Language to load
             */
-            void loadLanguage(RDE_LANGUAGE_ _language);
+			RDE_FUNC void loadLanguage(RDE_LANGUAGE_ _language);
 
             /**
              * @brief Returns the localized value of a key in the localization.json in the current loaded Language.
              * @param _key The word we want to translate defined in the localization.json
              * @return A string with the localization in the specific Language loaded
             */
-            std::string localize(const std::string& _key);
+			RDE_FUNC_ND std::string localize(const std::string& _key);
 
             /**
              * @brief Returns the localized value of a key in the localization.json in the current loaded Language.
@@ -180,7 +180,7 @@ namespace RDE {
              * @return A string with the localization in the specific Language loaded
             */
             template<typename... Args>
-            std::string localize(const std::string& _key, Args&... _args);
+			RDE_FUNC_ND std::string localize(const std::string& _key, Args&... _args);
     };
 
     template<typename... Args>

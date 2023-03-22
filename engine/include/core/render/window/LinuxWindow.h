@@ -15,7 +15,7 @@ namespace RDE {
 
     class LinuxWindow : public Window {
         public:
-            explicit LinuxWindow(RDEConfig* _config);
+			explicit LinuxWindow(Engine* _engine, RDEConfig* _config);
     };
 
 }

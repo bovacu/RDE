@@ -116,93 +116,93 @@ namespace RDE {
             UniqueDelegate<void(NodeContainer&, Event&)> onEventDel;
 
         public:
-            Graph(Scene* _scene, const std::string& _sceneName, bool _isUI = false);
-            ~Graph() {};
+			RDE_FUNC Graph(Scene* _scene, const std::string& _sceneName, bool _isUI = false);
+			RDE_FUNC ~Graph() {};
 
             /** This function creates and adds a new Node to the world. It is really recommended to add a tag value,
              * as there is a way to retrieve a Node by it's tag name.
              * @param _tag the name to reference if the ID is not provided.
              * @param _parent the NodeID of the Node we want to be the parent of the creating Node.
              */
-            Node* createNode(const std::string& _tag = "", Node* _parent = nullptr);
+			RDE_FUNC_ND Node* createNode(const std::string& _tag = "", Node* _parent = nullptr);
 
             /**
              * @brief Creates an independent copy of a loaded prefab.
              * @param _prefab Prefab NodeID
              * @return NodeID
              */
-            Node* instantiatePrefab(Node* _prefab, const Vec2F& _position, Node* _parent = nullptr);
+			RDE_FUNC_ND Node* instantiatePrefab(Node* _prefab, const Vec2F& _position, Node* _parent = nullptr);
 
             /**
              * @brief Removes a node and all of it's children.
              * @param _node Id of the node to remove
              */
-            void removeNode(Node* _node);
+			RDE_FUNC void removeNode(Node* _node);
 
             /**
              * @brief Removes a node and all of it's children.
              * @param _nodeTagName Name of the node to remove
              */
-            void removeNode(const std::string& _nodeTagName);
+			RDE_FUNC void removeNode(const std::string& _nodeTagName);
 
             /**
              * @brief Makes the Node to loose it's parent and to be reassigned to the root Node.
              * @param _node Id of the node to orphan
              */
-            void orphan(Node* _node);
+			RDE_FUNC void orphan(Node* _node);
 
             /**
              * @brief Makes the Node to loose it's parent and to be reassigned to the root Node.
              * @param _nodeTagName Name of the node to orphan
              */
-            void orphan(const std::string& _nodeTagName);
+			RDE_FUNC void orphan(const std::string& _nodeTagName);
 
             /**
              * @brief Returns the Node* by it's tag name.
              * @param _tagName Name of the node
              * @return Node*
              */
-            Node* getNode(const std::string& _tagName);
+			RDE_FUNC_ND Node* getNode(const std::string& _tagName);
 
             /**
              * @brief Returns the Node* by it's NodeID.
              * @param _nodeID Name of the node
              * @return Node*
              */
-            Node* getNode(const NodeID& _nodeID);
+			RDE_FUNC_ND Node* getNode(const NodeID& _nodeID);
 
             /**
              * @brief Changes the parent of the Node to another one.
              * @param _node Id of the child
              * @param _parent Id of the parent
              */
-            void setParent(Node* _node, Node* _parent);
+			RDE_FUNC void setParent(Node* _node, Node* _parent);
 
             /**
              * @brief This function returns the graph tree as a string.
              * @return std::string
              */
-            std::string toString();
+			RDE_FUNC_ND std::string toString();
 
             /**
              * @brief Returns the Id of the root.
              * @return NodeID
              */
-            Node* getRoot();
+			RDE_FUNC_ND Node* getRoot();
 
             /**
              * @brief Enables or disables a node.
              * @param _node Node to be enabled or disabled.
              * @param _active If is enabled or disabled.
              */
-            void setNodeActive(Node* _node, bool _active);
+			RDE_FUNC void setNodeActive(Node* _node, bool _active);
 
             /**
              * @brief Returns if the node is active or not.
              * @param _node Node to check if is active.
              * @return bool
              */
-            bool isNodeActive(Node* _node);
+			RDE_FUNC_ND bool isNodeActive(Node* _node);
 
             /**
              * @brief This is used to create the custom ECS work flow, more information on ECSManager.
@@ -210,13 +210,13 @@ namespace RDE {
              * @return A entt query
              */
             template<typename... Archetype>
-            auto query();
+			RDE_FUNC_ND auto query();
 
             /**
              * @brief Returns the registry of EnTT that contains the Nodes. This is almost 100% sure NOT needed by end users.
              * @return NodeContainer
              */
-            NodeContainer& getNodeContainer();
+			RDE_FUNC_ND NodeContainer& getNodeContainer();
     };
 
     template<typename... Archetype>

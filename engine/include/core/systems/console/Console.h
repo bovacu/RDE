@@ -99,7 +99,7 @@ namespace RDE {
              * @attention This function should not be called by end users.
              * @brief Initiates all the crucial elements of the Console.
              */
-            void init();
+			RDE_FUNC void init();
 
             /**
              * @brief This function allows to create a custom command.
@@ -109,7 +109,7 @@ namespace RDE {
              * @param _argumentsDescription the arguments that should be passed that will be displayed if 'help' is called.
              */
             template<auto Func, typename Class>
-            void addCommand(const std::string& _commandName, const std::string& _description, Class* _class = nullptr, const std::string& _argumentsDescription = "") {
+			RDE_FUNC void addCommand(const std::string& _commandName, const std::string& _description, Class* _class = nullptr, const std::string& _argumentsDescription = "") {
                 #if IS_WINDOWS()
                 commands[_commandName].bind<Func>(_class);
                 #else
@@ -122,7 +122,7 @@ namespace RDE {
              * @brief Deletes a before created command.
              * @param _commandName Command to remove from the registry
              */
-            void deleteCommand(const std::string& _commandName);
+			RDE_FUNC void deleteCommand(const std::string& _commandName);
 
             /**
              * @attention This function should not be called by end users.
@@ -130,28 +130,28 @@ namespace RDE {
              * @param _command Commadn name
              * @return Logs
              */
-            Logs call(const Command& _command);
+			RDE_FUNC_ND Logs call(const Command& _command);
 
             /**
              * @attention This function should not be called by end users.
              * @brief Gets the logs of a command call
              * @param _log Logs
              */
-            void collectLogs(const Logs& _log);
+			RDE_FUNC void collectLogs(const Logs& _log);
 
             /**
              * @attention This function should not be called by end users.
              * @brief Gets the upper command of the historyPtr.
              * @return std::string
              */
-            std::string getUpCommand();
+			RDE_FUNC_ND std::string getUpCommand();
 
             /**
              * @attention This function should not be called by end users.
              * @brief Gets the lower command of the historyPtr.
              * @return std::string
              */
-            std::string getDownCommand();
+			RDE_FUNC_ND std::string getDownCommand();
     };
 
 }

@@ -42,19 +42,19 @@ namespace RDE {
              * @brief Gets the path where the SpriteSheet is stored.
              * @return std::string
              */
-            [[nodiscard]] std::string getTexturePath();
+			RDE_FUNC_ND std::string getTexturePath();
 
             /**
              * @brief Gets the name of the file od the SpriteSheet without the extension.
              * @return std::string
              */
-            [[nodiscard]] std::string getTextureName();
+			RDE_FUNC_ND std::string getTextureName();
 
             /**
              * @brief Gets the extension of the file of the SpriteSheet.
              * @return std::string
              */
-            [[nodiscard]] std::string getTextureExtension();
+			RDE_FUNC_ND std::string getTextureExtension();
 
             /**
              * @brief Sets the rendering type of the UIImage. Can be any element of 'ImageRenderingType'.
@@ -70,38 +70,38 @@ namespace RDE {
              * will be shown.
              * @param _imageRenderingType ImageRenderingType
              */
-			void setImageRenderingType(RDE_IMAGE_RENDERING_TYPE_ _imageRenderingType);
+			RDE_FUNC void setImageRenderingType(RDE_IMAGE_RENDERING_TYPE_ _imageRenderingType);
 
             /**
              * @brief Returns the type of rendering.
              * @return ImageRenderingType
              */
-			[[nodiscard]]RDE_IMAGE_RENDERING_TYPE_ getImageRenderingType() const { return (RDE_IMAGE_RENDERING_TYPE_)data.imageRenderingType; }
+			RDE_FUNC_ND RDE_IMAGE_RENDERING_TYPE_ getImageRenderingType() const { return (RDE_IMAGE_RENDERING_TYPE_)data.imageRenderingType; }
 
             /**
              * @brief Returns if the rendering is inverted.
              * @return bool
              */
-			[[nodiscard]]bool isPartialRenderingInverted() const { return data.partialRenderingInverted;}
+			RDE_FUNC_ND bool isPartialRenderingInverted() const { return data.partialRenderingInverted;}
 
             /**
              * @brief This will invert the regular patter image rendering. Only applied if the rendering type is
              * PartialVertical, PartialHorizontal or PartialRadial.
              * @param _inverted True/False
              */
-            void setPartialRenderingInverted(bool _inverted);
+			RDE_FUNC void setPartialRenderingInverted(bool _inverted);
 
             /**
              * @brief Returns the amount filled.
              * @return float
              */
-			[[nodiscard]] float getPartialRenderingPercentage() const { return data.partialRenderingPercentage; }
+			RDE_FUNC_ND float getPartialRenderingPercentage() const { return data.partialRenderingPercentage; }
 
             /**
              * @brief Sets how much the partial image will be drawn.
              * @param _percentage Percentage [0f, 1f]
              */
-            void setPartialRenderingPercentage(float _percentage);
+			RDE_FUNC void setPartialRenderingPercentage(float _percentage);
     };
 
 }

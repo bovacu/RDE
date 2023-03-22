@@ -129,8 +129,8 @@ namespace RDE {
 			void onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager);
 
         public:
-            explicit Scene(Engine* _engine, const std::string& _debugName = "Scene");
-            virtual ~Scene();
+			RDE_FUNC_EXPLICIT Scene(Engine* _engine, const std::string& _debugName = "Scene");
+			RDE_FUNC ~Scene();
 
             /**
              * @brief This function is called when loading the scene from the configuration, it is used to make a custom loading
@@ -139,13 +139,13 @@ namespace RDE {
              * @param _window the window of the application
              * @param _sceneJson the configuration of the .yaml file used to load the scene
              */
-            virtual void preInit(Manager* _manager, Window* _window, const nlohmann::json& _sceneJson) {  }
+			RDE_FUNC virtual void preInit(Manager* _manager, Window* _window, const nlohmann::json& _sceneJson) {  }
 
             /**
              * @brief This function is called only once and when the SceneManager/displayScene is invoked. It is used to
              * initialized any needed values of the scene.
              */
-            virtual void onInit() {  }
+			RDE_FUNC virtual void onInit() {  }
 
             /**
              * @brief This function captures all the events that happen inside the application. It captures too mouse, keyboard
@@ -154,14 +154,14 @@ namespace RDE {
              * @param _event the event that was just captured.
              * @see InputManager
              */
-            virtual void onEvent(Event& _event) {  }
+			RDE_FUNC virtual void onEvent(Event& _event) {  }
 
             /**
              * @brief This function is executed every frame of the application and here we should update logic and take inputs
              * to update the logic and components.
              * @param _dt time that passed between the current frame and the last one.
              */
-            virtual void onUpdate(Delta _dt) {  }
+			RDE_FUNC virtual void onUpdate(Delta _dt) {  }
 
             /**
              * @brief This function is called a fixed amount of times per second. By default it is 60 times per second, but it
@@ -169,83 +169,83 @@ namespace RDE {
              * consistent frame rate to work properly.
              * @param _dt fixed value initially set at 1/60/
              */
-            virtual void onFixedUpdate(Delta _dt) {  }
+			RDE_FUNC virtual void onFixedUpdate(Delta _dt) {  }
 
             /**
              * @brief This function is called as the last update method, after update and fixedUpdate, which is an ideal place
              * to remove elements.
              * @param _dt time that passed between the current frame and the last one.
              */
-            virtual void onLateUpdate(Delta _dt) {  }
+			RDE_FUNC virtual void onLateUpdate(Delta _dt) {  }
 
             /**
              * @brief This function is used to render specifically ImGui elements, nothing else.
              * @param the time that passed between the current frame and the last one.
              */
-            virtual void onImGuiRender(Delta _dt) {  }
+			RDE_FUNC virtual void onImGuiRender(Delta _dt) {  }
 
             /**
              * @brief This function is used to drawBatched debugging lines, squares, circles...
              * @param the time that passed between the current frame and the last one.
              */
-			virtual void onDebugRender(Delta _dt, RenderManager* _renderManager) {  }
+			RDE_FUNC virtual void onDebugRender(Delta _dt, RenderManager* _renderManager) {  }
 
             /**
              * @brief This function is called when unloading the scene and should be used to release any allocated memory or
              * resources.
              */
-            virtual void onEnd() {  }
+			RDE_FUNC virtual void onEnd() {  }
 
             /**
              * @brief Returns all of the cameras used in the scene.
              * @return std::vector<Camera*>&
              */
-            std::vector<Camera*>& getCameras();
+			RDE_FUNC_ND std::vector<Camera*>& getCameras();
 
             /**
              * @brief Adds a new camera to the scene and returns it to make any modifications needed.
              * @param window Window
              * @return Camera*
              */
-            Camera* addCamera(Window* window);
+			RDE_FUNC_ND Camera* addCamera(Window* window);
 
             /**
              * @brief Activates or deactivates any given camera. If it is disabled, it won't render anything.
              * @param _cameraID Camera to enable or disable
              * @param _enable If the camera gets enabled or disabled
              */
-            void enableCamera(Node* _camera, bool _enable);
+			RDE_FUNC void enableCamera(Node* _camera, bool _enable);
 
             /**
              * @brief Destroys a specific camera of the scene.
              * @param _cameraID Camera to be destroyed
              */
-            void removeCamera(Node* _camera);
+			RDE_FUNC void removeCamera(Node* _camera);
 
             /**
              * @brief Sets an specific camera as the main one.
              * @param _camera Camera to be set as main
              */
-            void switchMainCamera(Node* _camera);
+			RDE_FUNC void switchMainCamera(Node* _camera);
 
             /**
              * @brief Returns the name of the scene.
              * @return const std::string&
              */
-            [[nodiscard]] const std::string& getName() const { return debugName; }
+			RDE_FUNC_ND const std::string& getName() const { return debugName; }
 
             /**
              * @brief Returns all of the prefabs IDs
              * @return std::vector<NodeID>
              */
-            std::vector<NodeID> getPrefabs();
+			RDE_FUNC_ND std::vector<NodeID> getPrefabs();
 
             /**
              * @brief Returns a prefab by its key.
              * @param _prefabKey Prefab key
              * @return NodeID
              */
-            NodeID getPrefab(const std::string& _prefabKey);
+			RDE_FUNC_ND NodeID getPrefab(const std::string& _prefabKey);
     };
 
 }

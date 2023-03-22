@@ -72,7 +72,7 @@ namespace RDE {
          * @return true 
          * @return false 
          */
-        [[nodiscard]] bool isEnabled() const {
+		RDE_FUNC_ND bool isEnabled() const {
             return left != -1 && top != -1 && right != -1 && bottom != -1;
         }
 
@@ -144,35 +144,35 @@ namespace RDE {
             NineSlice nineSlice;
 
         public:
-            Texture() {};
-            explicit Texture(char* filePath);
-            Texture(Atlas* _spriteSheet, const FloatRect& _region);
-            virtual ~Texture();
+			RDE_FUNC Texture() {};
+			RDE_FUNC_EXPLICIT Texture(char* filePath);
+			RDE_FUNC Texture(Atlas* _spriteSheet, const FloatRect& _region);
+			RDE_FUNC virtual ~Texture();
 
             /**
              * @brief Returns the ID of the texture in the GPU. This is probably of no-use for end-users.
              * @return uint
              */
-            [[nodiscard]] GLuint getGLTexture() const;
+			RDE_FUNC_ND GLuint getGLTexture() const;
 
             /**
              * @brief Returns the size of the region to be rendered, not the size of the SpriteSheet, except if this is the
              * SpriteSheet itself.
              * @return Vec2I
              */
-            [[nodiscard]] Vec2F getSize() const;
+			RDE_FUNC_ND Vec2F getSize() const;
 
             /**
              * @brief Returns the size of the SpriteSheet where this sub-texture comes from.
              * @return Vec2I
              */
-            [[nodiscard]] Vec2I getSpriteSheetSize() const;
+			RDE_FUNC_ND Vec2I getSpriteSheetSize() const;
 
             /**
              * @brief Returns the size in Kb of the SpriteSheet.
              * @return float
              */
-            [[nodiscard]] float getKb() const;
+			RDE_FUNC_ND float getKb() const;
 
             /**
              * @attention This is not meant to be called by end-users.
@@ -180,7 +180,7 @@ namespace RDE {
              * @param _path Path where the SpriteSheet is located.
              * @return bool
              */
-            bool loadFromFile(const char* _path);
+			RDE_FUNC bool loadFromFile(const char* _path);
 
             /**
              * @attention This is not meant to be called by end-users.
@@ -189,7 +189,7 @@ namespace RDE {
              * @param _height Height of the resulting texture.
              * @return
              */
-            bool loadTextTexture(int _width, int _height);
+			RDE_FUNC bool loadTextTexture(int _width, int _height);
 
             /**
              * @attention This is not meant to be called by end-users.
@@ -199,7 +199,7 @@ namespace RDE {
              * @param _data Data generated at runtime.
              * @return
              */
-            bool loadTextureFromMemory(int _width, int _height, const unsigned char* _data);
+			RDE_FUNC bool loadTextureFromMemory(int _width, int _height, const unsigned char* _data);
 
             /**
              * @attention This is not meant to be called by end-users.
@@ -209,24 +209,24 @@ namespace RDE {
              * @param _data Data needed to generate the texture.
              * @return bool
              */
-            bool loadTextSubTextures(Vec2I _offset, Vec2I _size, const void* _data);
+			RDE_FUNC bool loadTextSubTextures(Vec2I _offset, Vec2I _size, const void* _data);
 
             /**
              * @brief Returns the portion of the SpriteSheet that will be rendered.
              * @return FloatRect&
              */
-            FloatRect& getRegion();
+			RDE_FUNC_ND FloatRect& getRegion();
 
             /**
              * @brief Sets the portion of the SpriteSheet that will be rendered.
              */
-            void setRegion(const FloatRect& _region);
+			RDE_FUNC void setRegion(const FloatRect& _region);
 
             /**
              * @brief Returns the path to the location of the SpriteSheet.
              * @return std::string
              */
-            [[nodiscard]]std::string getPath();
+			RDE_FUNC_ND std::string getPath();
     };
 
     /**
@@ -257,7 +257,7 @@ namespace RDE {
 			RDE_IMAGE_EXTENSION_ imageType = RDE_IMAGE_EXTENSION_PNG;
 
         public:
-            CPUTexture() {};
+			RDE_FUNC CPUTexture() {};
 
             /**
              * @brief Inits a CPU texture given a width, height, data of the texture and type of texture.
@@ -266,7 +266,7 @@ namespace RDE {
              * @param _pixels Data of the texture.
              * @param _imageType Type of the texture.
              */
-			void init(int _width, int _height, unsigned char* _pixels, const RDE_IMAGE_EXTENSION_& _imageType = RDE_IMAGE_EXTENSION_PNG);
+			RDE_FUNC void init(int _width, int _height, unsigned char* _pixels, const RDE_IMAGE_EXTENSION_& _imageType = RDE_IMAGE_EXTENSION_PNG);
 
             /**
              * @brief Inits a CPU texture given a width, height and type of texture but no information.
@@ -274,18 +274,18 @@ namespace RDE {
              * @param _height Height of the texture.
              * @param _imageType Type of the texture.
              */
-			void init(int _width, int _height, const RDE_IMAGE_EXTENSION_& _imageType = RDE_IMAGE_EXTENSION_PNG);
+			RDE_FUNC void init(int _width, int _height, const RDE_IMAGE_EXTENSION_& _imageType = RDE_IMAGE_EXTENSION_PNG);
 
             /**
              * @brief Sends the data to the GPU.
              */
-            void uploadToGPU();
+			RDE_FUNC void uploadToGPU();
 
             /**
              * @brief Saves a copy of the texture to the file system.
              * @param _pathToSave Path to save the texture.
              */
-            void saveAs(const std::string& _pathToSave);
+			RDE_FUNC void saveAs(const std::string& _pathToSave);
 
             /**
              * @brief Allows to set a specific pixel of the texture.
@@ -293,7 +293,7 @@ namespace RDE {
              * @param _y Y position in the texture starting on the left-bottom corner.
              * @param _color The color to paint the pixel.
              */
-            void setPixel(int _x, int _y, const Color& _color);
+			RDE_FUNC void setPixel(int _x, int _y, const Color& _color);
 
             /**
              * @brief Returns the color of a specific pixel
@@ -301,11 +301,11 @@ namespace RDE {
              * @param _y Y position in the texture starting on the left-bottom corner.
              * @return
              */
-            Color getPixel(int _x, int _y);
+			RDE_FUNC_ND Color getPixel(int _x, int _y);
 
-            void resizeImage(const Vec2<uint>& _newSize);
+			RDE_FUNC void resizeImage(const Vec2<uint>& _newSize);
 
-            ~CPUTexture();
+			RDE_FUNC ~CPUTexture();
     };
 }
 

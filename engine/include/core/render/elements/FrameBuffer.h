@@ -85,24 +85,24 @@ namespace RDE {
             Manager* manager;
 
         public:
-            explicit FrameBuffer(const FrameBufferSpecification& _specs, Manager* _manager);
-            ~FrameBuffer();
+			RDE_FUNC_EXPLICIT FrameBuffer(const FrameBufferSpecification& _specs, Manager* _manager);
+			RDE_FUNC ~FrameBuffer();
 
             /**
              * @brief This method checks if there's a valid FrameBuffer already in memory, in that case it removes it and
              * creates a new one with a custom FrameBufferSpecification.
              */
-            void invalidate();
+			RDE_FUNC void invalidate();
 
             /**
              * @brief Binds the FrameBuffer, it will render the whole scene as its shader dictates.
              */
-            void bind() const;
+			RDE_FUNC void bind() const;
 
             /**
              * @brief Unbinds the FrameBuffer, so the scene can be rendered as it would normally do.
              */
-            void unbind() const;
+			RDE_FUNC void unbind() const;
 
             /**
              * @attention This is not meant to be called by end-users.
@@ -110,19 +110,19 @@ namespace RDE {
              * @param _width Width of the Window
              * @param _height Height of the Window
              */
-            void resize(uint32_t _width, uint32_t _height);
+			RDE_FUNC void resize(uint32_t _width, uint32_t _height);
 
             /**
              * @brief Returns the ID of the Color Attachment Buffer.
              * @return uint32_t
              */
-            [[nodiscard]] uint32_t getColorAttachmentRendererID() const { return frameBufferTexureForColorAttachment; }
+			RDE_FUNC_ND uint32_t getColorAttachmentRendererID() const { return frameBufferTexureForColorAttachment; }
 
             /**
              * @see FrameBufferSpecification
              * @return FrameBufferSpecification&
              */
-            [[nodiscard]] const FrameBufferSpecification& getSpecification() const { return specs; }
+			RDE_FUNC_ND const FrameBufferSpecification& getSpecification() const { return specs; }
     };
 
 }

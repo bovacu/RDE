@@ -50,7 +50,7 @@ namespace RDE {
             glm::mat4 worldPointToLocalRotation(float _rotation);
 
         public:
-            explicit Transform(Graph* _graph);
+			RDE_FUNC_EXPLICIT Transform(Graph* _graph);
             Node* node;
 
             /**
@@ -74,156 +74,156 @@ namespace RDE {
              * @brief Returns the total number of children, from all of the generations.
              * @return int
              */
-            int getChildrenCount();
+			RDE_FUNC_ND int getChildrenCount();
 
             /**
              * @brief Returns the total number of children, from all of the generations, that are active.
              * @return int
              */
-            int getActiveChildrenCount();
+			RDE_FUNC_ND int getActiveChildrenCount();
 
             /**
              * @brief Returns the total number of children, from all of the generations, that are enabled.
              * @return int
              */
-            int getEnabledChildrenCount();
+			RDE_FUNC_ND int getEnabledChildrenCount();
 
             /**
              * @brief Returns the total number of children, from all of the generations, that are enabled and active.
              * @return int
              */
-            int getEnabledAndActiveChildrenCount();
+			RDE_FUNC_ND int getEnabledAndActiveChildrenCount();
 
             /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
              * @param _position Vector with position.
              */
-            void setPosition(const Vec2F& _position);
+			RDE_FUNC void setPosition(const Vec2F& _position);
 
             /**
              * @brief Sets the position of the object in Local Coordintes, so relative to its parent.
              * @param _x Position x
              * @param _y Position y
              */
-            void setPosition(float _x, float _y);
+			RDE_FUNC void setPosition(float _x, float _y);
 
             /**
              * @brief Returns the position relative to its parent.
              * @return Vec2F
              */
-            [[nodiscard]] Vec2F getPosition() const;
+			RDE_FUNC_ND Vec2F getPosition() const;
 
             /**
              * @brief Translates the current position by an amount. It is not the same as setPosition.
              * @param _direction The direction it is moving to.
              */
-            void translate(const Vec2F& _direction);
+			RDE_FUNC void translate(const Vec2F& _direction);
 
             /**
              * @brief Translates the current position by an amount. It is not the same as setPosition.
              * @param _x Direction in x it is moving to
              * @param _y Direction in y it is moving to
              */
-            void translate(float _x, float _y);
+			RDE_FUNC void translate(float _x, float _y);
 
             /**
              * @brief Sets the rotation of the entity in Local value.
              * @param _rotation Degrees of rotation.
              */
-            void setRotation(float _rotation);
+			RDE_FUNC void setRotation(float _rotation);
 
             /**
              * @brief Returns the rotation relative to its parent.
              * @return float
              */
-            [[nodiscard]] float getRotation() const;
+			RDE_FUNC_ND float getRotation() const;
 
             /**
              * @brief Rotates the entity by an amount of degrees. It is not the same as setRotation.
              * @param _amount Amount of degrees to rotate.
              */
-            void rotate(float _amount);
+			RDE_FUNC void rotate(float _amount);
 
             /**
              * @brief Sets the scale of the entity in Local value.
              * @param _scale Scale of the entity.
              */
-            void setScale(const Vec2F& _scale);
+			RDE_FUNC void setScale(const Vec2F& _scale);
 
             /**
              * @brief Sets the scale of the entity in Local value.
              * @param _x Scale in x
              * @param _y Scale in y
              */
-            void setScale(float _x, float _y);
+			RDE_FUNC void setScale(float _x, float _y);
 
             /**
              * @brief Returns the scale relative to its parent.
              * @return Vec2F
              */
-            [[nodiscard]] Vec2F getScale() const;
+			RDE_FUNC_ND Vec2F getScale() const;
 
             /**
              * @brief Adds an amount to the current scale. It is not the same as setScale.
              * @param _scale The amount to increase or decrease the scale.
              */
-            void scale(const Vec2F& _scale);
+			RDE_FUNC void scale(const Vec2F& _scale);
 
             /**
              * @brief Adds an amount to the current scale. It is not the same as setScale.
              * @param _x The amount to increase/decrease the scale in x
              * @param _y The amount to increase/decrease the scale in y
              */
-            void scale(float _x, float _y);
+			RDE_FUNC void scale(float _x, float _y);
 
             /**
              * @brief Returns the position of the Node in world coordinates. This is useful when the Node you need the position is a child of other Node and you need
              * the position relative to the world and not the parent (which getPosition() gives).
              * @return Vec2F
              */
-            [[nodiscard]] Vec2F getModelMatrixPosition();
+			RDE_FUNC_ND Vec2F getModelMatrixPosition();
 
             /**
              * @brief Returns the scale of the Node in world units. This is useful when the Node you need the scale is a child of other Node and you need
              * the scale relative to the world and not the parent (which getScale() gives).
              * @return Vec2F
              */
-            [[nodiscard]] Vec2F getModelMatrixScale();
+			RDE_FUNC_ND Vec2F getModelMatrixScale();
 
             /**
              * @brief Returns the rotation of the Node in world degrees units. This is useful when the Node you need the rotation is a child of other Node and you need
              * the rotation relative to the world and not the parent (which getRotation() gives).
              * @return Vec2F
              */
-            [[nodiscard]] float getModelMatrixRotation();
+			RDE_FUNC_ND float getModelMatrixRotation();
 
             /**
              * @brief Sets the position of the Node in world coordinates.
              * @param _worldPos Position in world coordinates.
              */
-            void setMatrixModelPosition(const Vec2F& _worldPos);
+			RDE_FUNC void setMatrixModelPosition(const Vec2F& _worldPos);
 
             /**
              * @brief Translates the position of the Node in world coordinates units.
              * @param _worldPos Amount to translate.
              */
-            void translateMatrixModelPosition(const Vec2F& _worldPos);
+			RDE_FUNC void translateMatrixModelPosition(const Vec2F& _worldPos);
 
             /**
              * @brief Sets the rotation of the Node in world degrees.
              * @param _rotation Rotation in world degree units.
              */
-            void setMatrixModelRotation(float _rotation);
+			RDE_FUNC void setMatrixModelRotation(float _rotation);
 
-            [[nodiscard]] glm::mat4 localToParent() const;
-            [[nodiscard]] glm::mat4 parentToLocal() const;
-            [[nodiscard]] std::tuple<glm::mat4, bool> localToWorld();
-            [[nodiscard]] glm::mat4 worldToLocal() const;
+			RDE_FUNC_ND glm::mat4 localToParent() const;
+			RDE_FUNC_ND glm::mat4 parentToLocal() const;
+			RDE_FUNC_ND std::tuple<glm::mat4, bool> localToWorld();
+			RDE_FUNC_ND glm::mat4 worldToLocal() const;
 
-            glm::mat4 getLocalMatrix() const;
-            void setLocalMatrix(const glm::mat4& _matrix);
+			RDE_FUNC_ND glm::mat4 getLocalMatrix() const;
+			RDE_FUNC void setLocalMatrix(const glm::mat4& _matrix);
 
-			void update();
+			RDE_FUNC void update();
     };
 }
 

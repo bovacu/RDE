@@ -25,10 +25,10 @@ namespace RDE {
             UniqueDelegate<T()> allocator {};
 
         public:
-            void init(UniqueDelegate<T()> _allocator, int _initialNumberOfElements = 100, int _numberOfNewElementsToCreateIfNotEnough = 25, int _maxNumberOfElements = 1000);
-            T* getElement();
-            void returnElement(T* _element);
-            void clear();
+			RDE_FUNC void init(UniqueDelegate<T()> _allocator, int _initialNumberOfElements = 100, int _numberOfNewElementsToCreateIfNotEnough = 25, int _maxNumberOfElements = 1000);
+			RDE_FUNC_ND T* getElement();
+			RDE_FUNC void returnElement(T* _element);
+			RDE_FUNC void clear();
     };
 
     template<class T>

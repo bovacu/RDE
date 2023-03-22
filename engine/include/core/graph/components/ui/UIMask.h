@@ -23,14 +23,14 @@ namespace RDE {
             bool inverted = false;
 
         public:
-            UIMask(Node* _node, Manager* _manager, Graph* _graph) : node(_node) {  }
-            ~UIMask() {  }
+			RDE_FUNC UIMask(Node* _node, Manager* _manager, Graph* _graph) : node(_node) {  }
+			RDE_FUNC ~UIMask() {  }
 
-            bool isEnabled() {
+			RDE_FUNC_ND bool isEnabled() {
                 return !node->hasComponent<DisabledForRender>();
             }
 
-            void setEnabled(bool _enabled) {
+			RDE_FUNC void setEnabled(bool _enabled) {
                 if(_enabled && node->hasComponent<DisabledForRender>()) {
                     node->removeComponent<DisabledForRender>();
                     return;

@@ -73,97 +73,97 @@ namespace RDE {
         public:
             Node* node;
 
-            Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window);
-            ~Camera();
+            RDE_FUNC Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window);
+			RDE_FUNC ~Camera();
 
             /**
              * @brief Handles events that concerns the camera.
              * @param _event Event to be handled
              */
-            void onEvent(Event& _event);
+			RDE_FUNC void onEvent(Event& _event);
 
             /**
              * @brief Handles the event of mouse scrolling.
              * @param _event Event to be handled
              * @return bool
              */
-            bool onMouseScrolled(MouseScrolledEvent& _event);
+			RDE_FUNC_ND bool onMouseScrolled(MouseScrolledEvent& _event);
 
             /**
              * @brief Resizes the camera components depending on the Window size.
              * @param _width Window's width
              * @param _height Window's height
              */
-            void onResize(int _width, int _height);
+			RDE_FUNC void onResize(int _width, int _height);
 
             /**
              * @brief Returns the Projection Matrix.
              * @return glm::mat4&
              */
-            glm::mat4& getProjectionMatrix();
+			RDE_FUNC_ND glm::mat4& getProjectionMatrix();
 
             /**
              * @brief Returns the View Matrix.
              * @return glm::mat4&
              */
-            glm::mat4& getViewMatrix();
+			RDE_FUNC_ND glm::mat4& getViewMatrix();
 
             /**
              * @brief Returns the View Projection Matrix.
              * @return glm::mat4&
              */
-            glm::mat4& getViewProjectionMatrix();
+			RDE_FUNC_ND glm::mat4& getViewProjectionMatrix();
 
             /**
              * @brief Sets the rectangle view size of the camera.
              * @param _cameraSize Size of the rectangle view of the camera
              */
-            void setCameraSize(const Vec2I& _cameraSize);
+			RDE_FUNC void setCameraSize(const Vec2I& _cameraSize);
 
             /**
              * @brief Sets the rectangle view size of the camera.
              * @param _width Width of the rectangle view of the camera
              * @param _height Height of the rectangle view of the camera
              */
-            void setCameraSize(int _width, int _height);
+			RDE_FUNC void setCameraSize(int _width, int _height);
 
             /**
              * @brief Returns the camera size.
              * @return Vec2I
              */
-            Vec2I getCameraSize();
+			RDE_FUNC_ND Vec2I getCameraSize();
 
             /**
              * @brief Returns the aspect ratio of the Window.
              * @return float
              */
-            [[nodiscard]] float getAspectRatio() const;
+			RDE_FUNC_ND float getAspectRatio() const;
 
             /**
              * @brief Returns the current level of zoom of the camera.
              * @return float
              */
-            [[nodiscard]] float getCurrentZoomLevel() const;
+			RDE_FUNC_ND float getCurrentZoomLevel() const;
 
             /**
              * @brief Sets the current level of zoom of the camera.
              * @param _zoomLevel Zoom to set
              */
-            void setCurrentZoomLevel(float _zoomLevel);
+			RDE_FUNC void setCurrentZoomLevel(float _zoomLevel);
 
             /**
              * @brief Gets the speed of camera's zooming.
              * @return float
              */
-            [[nodiscard]] float getZoomSpeed() const;
+			RDE_FUNC_ND float getZoomSpeed() const;
 
             /**
              * @brief Sets the speed of camera's zooming.
              * @param _zoomSpeed Camera's zooming speed
              */
-            void setZoomSpeed(float _zoomSpeed);
+			RDE_FUNC void setZoomSpeed(float _zoomSpeed);
 
-            glm::mat4& operator() (const Camera& _camera) {
+			RDE_FUNC_ND glm::mat4& operator() (const Camera& _camera) {
                 return projectionMatrix;
             }
 
@@ -171,20 +171,20 @@ namespace RDE {
              * @brief Returns the viewport.
              * @return IViewPort*
              */
-            [[nodiscard]] ViewPort* getViewport() const;
+			RDE_FUNC_ND ViewPort* getViewport() const;
 
-            bool isLandscape();
+			RDE_FUNC_ND bool isLandscape();
 
             /**
              * @brief Returns if an element is inside the camera boundaries.
              * @return bool.
              */
-            bool isElementInside(Transform* _transform, const Vec2F& _size) const;
+			RDE_FUNC_ND bool isElementInside(Transform* _transform, const Vec2F& _size) const;
 
-            void update();
+			RDE_FUNC void update();
 
-            void setEnabled(bool _enabled) override;
-            bool isEnabled() override;
+			RDE_FUNC void setEnabled(bool _enabled) override;
+			RDE_FUNC_ND bool isEnabled() override;
 
         private:
             /**

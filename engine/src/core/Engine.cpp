@@ -23,7 +23,7 @@ namespace RDE {
 
     Engine::Engine() {
         manager.configManager.loadRDEConfig(&rdeConfig, &manager.fileManager);
-        window = platform.createWindow(&rdeConfig);
+        window = platform.createWindow(this, &rdeConfig);
         
         #if IS_MOBILE()
         rdeConfig.windowData.resolution = window->getWindowSize();

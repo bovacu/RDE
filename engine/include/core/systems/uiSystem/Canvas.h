@@ -73,20 +73,20 @@ namespace RDE {
             Graph* graph;
 
         public:
-            explicit Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag);
-            ~Canvas();
+			RDE_FUNC_EXPLICIT Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag);
+			RDE_FUNC ~Canvas();
 
             /**
              * @brief Gets the rendering Camera
              * @return Camera*
              */
-            Camera* getCamera();
+			RDE_FUNC_ND Camera* getCamera();
 
-            void onResize(uint _width, uint _height);
+			RDE_FUNC void onResize(uint _width, uint _height);
 
-            void setCanvasResolution(const Vec2I& _resolution);
+			RDE_FUNC void setCanvasResolution(const Vec2I& _resolution);
 
-            Vec2I getCanvasResolution();
+			RDE_FUNC_ND Vec2I getCanvasResolution();
 
         private:
             void batchTreeElementPre(CanvasElement* _canvasElement, void* _data);

@@ -41,10 +41,10 @@ namespace RDE {
         RENDERIZABLE_BASIC_PROPERTIES()
 
         public:
-            SpriteRenderer(Node* _node, Scene* _scene, const SpriteRendererConfig& _config = {});
-            SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const SpriteRendererConfig& _config = {});
-            SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const SpriteRendererConfig& _config = {});
-            ~SpriteRenderer() {  }
+			RDE_FUNC SpriteRenderer(Node* _node, Scene* _scene, const SpriteRendererConfig& _config = {});
+			RDE_FUNC SpriteRenderer(Node* _node, Scene* _scene, Canvas* _canvas, const SpriteRendererConfig& _config = {});
+			RDE_FUNC SpriteRenderer(Node* _node, Manager* _manager, Graph* _graph, const SpriteRendererConfig& _config = {});
+			RDE_FUNC ~SpriteRenderer() {  }
 
             RENDERIZABLE_BASIC_METHODS()
 
@@ -52,19 +52,19 @@ namespace RDE {
              * @brief Gets the path where the SpriteSheet is stored.
              * @return std::string
              */
-            [[nodiscard]] std::string getTexturePath();
+			RDE_FUNC_ND  std::string getTexturePath();
 
             /**
              * @brief Gets the name of the file od the SpriteSheet without the extension.
              * @return std::string
              */
-            [[nodiscard]] std::string getTextureName();
+			RDE_FUNC_ND std::string getTextureName();
 
             /**
              * @brief Gets the extension of the file of the SpriteSheet.
              * @return std::string
              */
-            [[nodiscard]] std::string getTextureExtension();
+			RDE_FUNC_ND std::string getTextureExtension();
     };
 
 }

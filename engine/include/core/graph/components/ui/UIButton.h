@@ -48,12 +48,12 @@ namespace RDE {
         RENDERIZABLE_UI_BASIC_PROPERTIES()
 
         public:
-            UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config = {});
-            UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config = {});
+			RDE_FUNC UIButton(Node* _node, Scene* _scene, Canvas* _canvas, const UIButtonConfig& _config = {});
+			RDE_FUNC UIButton(Node* _node, Manager* _manager, Graph* _graph, const UIButtonConfig& _config = {});
 
             RENDERIZABLE_UI_BASIC_METHODS()
 
-            Node* getTextNode();
+			RDE_FUNC Node* getTextNode();
 
             ~UIButton() {  }
 

@@ -50,8 +50,8 @@ namespace RDE {
             
 
         public:
-            UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config = {});
-            ~UICheckbox() {  }
+			RDE_FUNC UICheckbox(Node* _node, Manager* _manager, Graph* _graph, const UICheckboxConfig& _config = {});
+			RDE_FUNC ~UICheckbox() {  }
 
             
             RENDERIZABLE_UI_BASIC_METHODS()
@@ -60,16 +60,16 @@ namespace RDE {
              * @brief Sets the inner state as checked/unchecked, changes the tick sprite and fires 'onClickedCheckbox' callback.
              * @param _checked True/False
              */
-            void setChecked(bool _checked);
+			RDE_FUNC void setChecked(bool _checked);
 
             /**
              * @brief Returns if the Checkbox is checked or unchecked.
              * @return
              */
-            [[nodiscard]] bool isChecked() const;
+			RDE_FUNC_ND bool isChecked() const;
 
-            Node* getTickNode();
-            Node* getTextNode();
+			RDE_FUNC_ND Node* getTickNode();
+			RDE_FUNC_ND Node* getTextNode();
 
         private:
             /**

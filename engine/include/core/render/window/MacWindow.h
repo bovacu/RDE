@@ -13,7 +13,7 @@
 namespace RDE {
     class MacWindow : public Window {
         public:
-            explicit MacWindow(RDEConfig* _config);
+			explicit MacWindow(Engine* _engine, RDEConfig* _config);
     };
 
 }

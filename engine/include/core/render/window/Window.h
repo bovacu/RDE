@@ -12,6 +12,7 @@ namespace RDE {
      * @brief This class represents the window of the application and has methods to modify its components and get its data.
      */
     struct RDEConfig;
+	class Engine;
 
     class Window {
 
@@ -55,6 +56,8 @@ namespace RDE {
             bool running = true;
 
             int currentDisplayIndex = -1;
+
+			Engine* engine = nullptr;
 
         public:
             /**
@@ -100,34 +103,34 @@ namespace RDE {
             Delegate<void()> onWindowUnfocusedCallback;
 
         protected:
-            explicit Window(RDEConfig* _props);
+			RDE_FUNC_EXPLICIT Window(Engine* _engine, RDEConfig* _props);
 
         public:
-            ~Window() ;
+			RDE_FUNC ~Window() ;
 
             /**
              * @brief This method is used to update the window, poll the events and
              * swap the buffers.
              */
-            void update();
+			RDE_FUNC void update();
 
             /**
              * @brief Handles an specific event.
              * @param _e Event to be handled
              */
-            void consumeEvent(Event& _e) const { eventCallback(_e); }
+			RDE_FUNC void consumeEvent(Event& _e) const { eventCallback(_e); }
 
             /**
              * @brief Returns the width of the window.
              * @return int
              */
-            [[nodiscard]] int getWidth() const;
+			RDE_FUNC_ND int getWidth() const;
 
             /**
              * @brief Returns the height of the window.
              * @return int
              */
-            [[nodiscard]] int getHeight() const;
+			RDE_FUNC_ND int getHeight() const;
 
             /**
              * @brief Returns the title of the window.
@@ -139,120 +142,120 @@ namespace RDE {
              * @brief Sets the new title of the window.
              * @param _title Title of the window.
              */
-            void setTitle(const std::string& _title);
+			RDE_FUNC void setTitle(const std::string& _title);
 
             /**
              * @brief Sets the new size of the window.
              * @param _width New width of the window.
              * @param _height New height of the window.
              */
-            void setWindowSize(int _width, int _height) ;
+			RDE_FUNC void setWindowSize(int _width, int _height) ;
 
             /**
              * @brief Returns the size of the window.
              * @return Vec2I
              */
-            [[nodiscard]] Vec2I getWindowSize() const;
+			RDE_FUNC_ND Vec2I getWindowSize() const;
 
             /**
              * @brief Gets the size of the full display, which might be different from the size of the window.
              * @return Vec2I 
              */
-            [[nodiscard]] Vec2I getDisplaySize() const;
+			RDE_FUNC_ND Vec2I getDisplaySize() const;
 
             /**
              * @brief Enables or disables fullscreen mode.
              * @param _fullscreen True or false to enable/disable.
              */
-            void setFullscreen(bool _fullscreen);
+			RDE_FUNC void setFullscreen(bool _fullscreen);
 
             /**
              * @brief Returns if screen is fullscreen or not.
              * @return bool
              */
-            [[nodiscard]] bool isFullscreen() const;
+			RDE_FUNC_ND bool isFullscreen() const;
 
             /**
              * @brief Sets the method that will be executed when a polled event triggers.
              * @param _callback A void method with an Event& as parameter.
              */
-            void setEventCallback(const UniqueDelegate<void(Event&)>& _callback);
+			RDE_FUNC void setEventCallback(const UniqueDelegate<void(Event&)>& _callback);
 
             /**
              * @brief Enables or disables VSync.
              * @param _enable True/false to enable/disable.
              */
-            void setVSync(bool _enable);
+			RDE_FUNC void setVSync(bool _enable);
 
             /**
              * @brief Returns if the VSync is enabled.
              * @return bool
              */
-            [[nodiscard]] bool isVSyncActive() const;
+			RDE_FUNC_ND bool isVSyncActive() const;
 
             /**
              * @brief Returns a raw pointer to one of the Window subclasses.
              * @return SDL_Window*
              */
-            [[nodiscard]] SDL_Window* getNativeWindow() const;
+			RDE_FUNC_ND SDL_Window* getNativeWindow() const;
 
             /**
              * @brief Returns the context of the Window.
              * @return SDL_GLContext&
              */
-            [[nodiscard]] SDL_GLContext& getContext();
+			RDE_FUNC_ND SDL_GLContext& getContext();
 
             /**
              * @brief Returns the position of the window.
              * @return Vec2I
              */
-            [[nodiscard]] Vec2I getPosition() const;
+			RDE_FUNC_ND Vec2I getPosition() const;
 
             /**
              * @brief Sets the new position of the window.
              * @param _position Vec2I with the new [x,y]
              */
-            void setPosition(const Vec2I& _position);
+			RDE_FUNC void setPosition(const Vec2I& _position);
 
             /**
              * @brief Sets the icon of the window.
              * @param _path Path to the icon, it can be png, jpg, jpeg, ico...
              */
-            void setIcon(const std::string& _path);
+			RDE_FUNC void setIcon(const std::string& _path);
 
             /**
              * @brief Returns if the window is minimized or not.
              * @return bool
              */
-            bool isMinimized();
+			RDE_FUNC_ND bool isMinimized();
 
             /**
              * @brief Returns if the Window is running or not.
              * @return bool
              */
-            bool isRunning();
+			RDE_FUNC_ND bool isRunning();
 
             /**
              * @brief Returns if the Window is focused or not.
              * @return bool
              */
-            bool isFocused();
+			RDE_FUNC_ND bool isFocused();
 
             /**
              * @brief Makes the window to close and the application to exit.
              */
-            void stop();
+			RDE_FUNC void stop();
 
             /**
              * @brief Refresh inner calculations for new DPIs on the screen.
              */
-            void refreshDpi();
+			RDE_FUNC void refreshDpi();
 
             /**
              * @brief Traps the mouse inside the window or allows it to move outside.
              * @param _allow If true, mouse will be able to leave the window, otherwise it won't.
              */
-            void allowMouseToMoveOutOfWindow(bool _allow);
+			RDE_FUNC void allowMouseToMoveOutOfWindow(bool _allow);
     };
 
 }

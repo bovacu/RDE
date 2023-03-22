@@ -70,22 +70,22 @@ namespace RDE {
             /**
              * @brief Called only once, when the system is created.
              */
-            virtual void onCreate() {  };
+			RDE_FUNC virtual void onCreate() {  };
 
             /**
              * @brief Called every frame, in Graph::update(_dt)
              * @param _dt Delta time
              * @param _graph Scene Graph
              */
-            virtual void onUpdate(Delta _dt, Graph* _graph) = 0;
+			RDE_FUNC virtual void onUpdate(Delta _dt, Graph* _graph) = 0;
 
             /**
              * @brief Called only once, when the system is destroyed.
              */
-            virtual void onDestroy() {  };
+			RDE_FUNC virtual void onDestroy() {  };
 
 
-            virtual ~ECSSystem() {  }
+			RDE_FUNC virtual ~ECSSystem() {  }
     };
 }
 

@@ -6,6 +6,7 @@
 #define RDE_CONFIG_LOADER_H
 
 #include "nlohmann/json.hpp"
+#include "core/Core.h"
 
 namespace RDE {
 
@@ -32,7 +33,7 @@ namespace RDE {
              * @param _rdeConfig Configuration of RDE
              * @param _manager Manager
              */
-            void loadResources(RDEConfig* _rdeConfig, Manager* _manager);
+			RDE_FUNC void loadResources(RDEConfig* _rdeConfig, Manager* _manager);
 
             /**
              * @brief This method allows the user to load a Scene through its configuration file (Must be a .json).
@@ -41,7 +42,7 @@ namespace RDE {
              * @param _window Window
              * @param _configFilePath Path to the .yaml file that defines the Scene
              */
-            void loadScene(Manager* _manager, Scene* _scene, Window* _window, const std::string& _configFilePath);
+			RDE_FUNC void loadScene(Manager* _manager, Scene* _scene, Window* _window, const std::string& _configFilePath);
 
             /**
              * @brief This method allows the user to unload a Scene through its configuration file (Must be a .json).
@@ -50,13 +51,15 @@ namespace RDE {
              * @param _window Window
              * @param _configFilePath Path to the .yaml file that defines the Scene
              */
-            void unloadScene(Manager* _manager, Scene* _scene, const std::string& _configFilePath);
+			RDE_FUNC void unloadScene(Manager* _manager, Scene* _scene, const std::string& _configFilePath);
 
             /**
              * @brief This method allows to load a custom configuration for the engine.
              * @param _config New Configuration for the engine
              */
-            void loadRDEConfig(RDEConfig* _config, FileManager* _manager);
+			RDE_FUNC void loadRDEConfig(RDEConfig* _config, FileManager* _manager);
+
+			RDE_FUNC ~ConfigManager() {  }
 
         private:
             /**

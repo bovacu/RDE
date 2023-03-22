@@ -57,45 +57,45 @@ namespace RDE {
              * @param face FreeTypeFont
              * @param _fontSize Font size
              */
-            void init(FT_Face face, int _fontSize);
+			RDE_FUNC void init(FT_Face face, int _fontSize);
 
             /**
              * @brief Returns the texture where the font is loaded.
              * @return Texture&
              */
-            Texture& getTexture();
+			RDE_FUNC_ND Texture* getTexture();
 
             /**
              * @brief Returns all of the characters information.
              * @return CharInfo*
              */
-            CharMap& getChars();
+			RDE_FUNC_ND CharMap& getChars();
 
             /**
              * @brief Returns the font name.
              * @return std::string&
              */
-            std::string& getFontName();
+			RDE_FUNC_ND std::string& getFontName();
 
             /**
              * @brief Returns where the font is stored.
              * @return std::string&
              */
-            std::string& getPath();
+			RDE_FUNC_ND std::string& getPath();
 
             /**
              * @brief Returns the size of the texture.
              * @return Vec2F
              */
-            [[nodiscard]] Vec2F getSize() const;
+			RDE_FUNC_ND Vec2F getSize() const;
 
             /**
              * @brief Returns the size of the font.
              * @return int
              */
-            [[nodiscard]] int getFontSize() const;
+			RDE_FUNC_ND int getFontSize() const;
 
-            float getBiggestCharHeight() const;
+			RDE_FUNC_ND float getBiggestCharHeight() const;
     };
 
     /**
@@ -122,45 +122,45 @@ namespace RDE {
             int maxDifferenceBetweenFontSizesBeforeCreatingANewOne = 5;
 
         public:
-            FontManager() {}
+			RDE_FUNC FontManager() {}
 
             /**
              * @attention This function should not be called by the end users.
              * @brief Initiates the system.
              */
-            void init(FileManager* _fileManager);
+			RDE_FUNC void init(FileManager* _fileManager);
 
             /**
              * @attention This function should not be called by the end users.
              * @brief Destroys the system and all loaded fonts.
              */
-            void destroy();
+			RDE_FUNC void destroy();
 
             /**
              * @brief This function loads a font at _pathFont.
              * @param _pathToFont Path to font 
              * @return Font*
              */
-            Font* loadFont(FileManager& _fileManager, const std::string& _pathToFont);
+			RDE_FUNC Font* loadFont(FileManager& _fileManager, const std::string& _pathToFont);
 
             /**
              * @brief Returns the font with the specified name.
              * @param _fontName Font name
              * @return Font*
              */
-            Font* getFont(const std::string& _fontName);
+			RDE_FUNC_ND Font* getFont(const std::string& _fontName);
 
             /**
              * @brief This function unloads a font with all the sub-fonts created by size.
              * @param _fontName Font name
              */
-            void unloadFont(const std::string& _fontName);
+			RDE_FUNC void unloadFont(const std::string& _fontName);
 
             /**
              * @brief Returns all of the fonts loaded in memory.
              * @return  std::vector<Font*>
              */
-            std::vector<Font*> getAllFonts();
+			RDE_FUNC_ND std::vector<Font*> getAllFonts();
     };
 
 }

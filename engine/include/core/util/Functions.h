@@ -25,7 +25,7 @@ namespace RDE {
 
     namespace Util {
 
-		inline std::ostream& operator<<(std::ostream& _out, entt::entity _nodeID){
+		RDE_FUNC inline std::ostream& operator<<(std::ostream& _out, entt::entity _nodeID){
 			return _out << (int)_nodeID;
 		}
 
@@ -33,60 +33,60 @@ namespace RDE {
         #define UTIL_MATH
         namespace Math {
 
-            Vec2F worldToScreenCoords(const ViewPort* _viewport, const Vec2F& _position);
-            Vec2F screenToWorldCoords(const ViewPort* _viewport, const Vec2F& _position);
-            Vec2F worldToScreenSize(const ViewPort* _viewport, const Vec2F& _size);
-            Vec2F worldToScreenCoordsUI(const ViewPort* _viewport, const Vec2F& _position);
-            Vec2F worldToScreenSizeUI(const ViewPort* _viewport, const Vec2F& _size);
-            void worldToScreenSize(const ViewPort* _viewport, float& _x, float& _y);
-            void screenToWorldCoords(const ViewPort* _viewport, float& _x, float& _y);
+			RDE_FUNC_ND Vec2F worldToScreenCoords(const ViewPort* _viewport, const Vec2F& _position);
+			RDE_FUNC_ND Vec2F screenToWorldCoords(const ViewPort* _viewport, const Vec2F& _position);
+			RDE_FUNC_ND Vec2F worldToScreenSize(const ViewPort* _viewport, const Vec2F& _size);
+			RDE_FUNC_ND Vec2F worldToScreenCoordsUI(const ViewPort* _viewport, const Vec2F& _position);
+			RDE_FUNC_ND Vec2F worldToScreenSizeUI(const ViewPort* _viewport, const Vec2F& _size);
+			RDE_FUNC void worldToScreenSize(const ViewPort* _viewport, float& _x, float& _y);
+			RDE_FUNC void screenToWorldCoords(const ViewPort* _viewport, float& _x, float& _y);
 
             template<typename T>
-            inline T clamp(T _value, T _minValue, T _maxValue) {
+			RDE_FUNC_ND inline T clamp(T _value, T _minValue, T _maxValue) {
                 return (_value < _minValue) ? _minValue : (_value > _maxValue) ? _maxValue : _value;
             }
 
-            inline int clampI(int _value, int _min, int _max) {
+			RDE_FUNC_ND inline int clampI(int _value, int _min, int _max) {
                 return clamp<int>(_value, _min, _max);
             }
 
-            inline float clampF(float _value, float _min, float _max) {
+			RDE_FUNC_ND inline float clampF(float _value, float _min, float _max) {
                 return clamp<float>(_value, _min, _max);
             }
 
-            inline double clampD(double _value, double _min, double _max) {
+			RDE_FUNC_ND inline double clampD(double _value, double _min, double _max) {
                 return clamp<double>(_value, _min, _max);
             }
 
-            inline long clampL(long _value, long _min, long _max) {
+			RDE_FUNC_ND inline long clampL(long _value, long _min, long _max) {
                 return clamp<long>(_value, _min, _max);
             }
 
-            inline bool approximatelyEqual(float _a, float _b) {
+			RDE_FUNC_ND inline bool approximatelyEqual(float _a, float _b) {
                 return std::abs( _a - _b ) <= EPSILON;
             }
 
-            inline bool approximatelyEqual(float _a, float _b, float _epsilon) {
+			RDE_FUNC_ND inline bool approximatelyEqual(float _a, float _b, float _epsilon) {
                 return std::abs( _a - _b ) <= _epsilon;
             }
 
-            inline bool approximatelyEqual(const Vec2F& _a, const Vec2F &_b) {
+			RDE_FUNC_ND inline bool approximatelyEqual(const Vec2F& _a, const Vec2F &_b) {
                 return std::abs( _a.x - _b.x ) <= EPSILON && std::abs(_a.y - _b.y) <= EPSILON;
             }
 
-            inline bool approximatelyEqual(const Vec2F& _a, const Vec2F &_b, float _epsilon) {
+			RDE_FUNC_ND inline bool approximatelyEqual(const Vec2F& _a, const Vec2F &_b, float _epsilon) {
                 return std::abs( _a.x - _b.x ) <= _epsilon && std::abs(_a.y - _b.y) <= _epsilon;
             }
 
-            inline float radiansToDegrees(float _radians) {
+			RDE_FUNC_ND inline float radiansToDegrees(float _radians) {
                 return _radians * (180.f / PI);
             }
 
-            inline float degreesToRadians(float _degrees) {
+			RDE_FUNC_ND inline float degreesToRadians(float _degrees) {
                 return _degrees * (PI / 180.0f);
             }
 
-            inline uint32_t colorToUint32_t(const Color& _color) {
+			RDE_FUNC_ND inline uint32_t colorToUint32_t(const Color& _color) {
                 return (int(_color.a) << 24) + (int(_color.b) << 16) + (int(_color.g) << 8) + int(_color.r);
             }
         }
@@ -96,22 +96,22 @@ namespace RDE {
         #define UTIL_EASING
         namespace Easing {
             /// Linear
-            inline float inLinear(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inLinear(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 return _changeInValue * _currentTime / _duration + _startValue;
             }
 
             /// Quadratic
-            inline float inQuadratic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inQuadratic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration;
                 return _changeInValue * _currentTime * _currentTime + _startValue;
             }
 
-            inline float outQuadratic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float outQuadratic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration;
                 return -_changeInValue * _currentTime * (_currentTime - 2) + _startValue;
             }
 
-            inline float inOutQuadratic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inOutQuadratic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration / 2;
                 if (_currentTime < 1) return _changeInValue / 2 * _currentTime * _currentTime + _startValue;
                 _currentTime--;
@@ -119,18 +119,18 @@ namespace RDE {
             }
 
             /// Cubic
-            inline float inCubic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inCubic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration;
                 return _changeInValue * _currentTime * _currentTime * _currentTime + _startValue;
             }
 
-            inline float outCubic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float outCubic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration;
                 _currentTime--;
                 return _changeInValue * (_currentTime * _currentTime * _currentTime + 1) + _startValue;
             }
 
-            inline float inOutCubic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inOutCubic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration / 2;
                 if (_currentTime < 1) return _changeInValue / 2 * _currentTime * _currentTime * _currentTime + _startValue;
                 _currentTime -= 2;
@@ -138,18 +138,18 @@ namespace RDE {
             }
 
             /// Quartic
-            inline float inQuartic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inQuartic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration;
                 return _changeInValue * _currentTime * _currentTime * _currentTime * _currentTime + _startValue;
             }
 
-            inline float outQuartic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float outQuartic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration;
                 _currentTime--;
                 return -_changeInValue * (_currentTime * _currentTime * _currentTime * _currentTime - 1) + _startValue;
             }
 
-            inline float inOutQuartic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inOutQuartic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration / 2;
                 if (_currentTime < 1)
                     return _changeInValue / 2 * _currentTime * _currentTime * _currentTime * _currentTime + _startValue;
@@ -158,19 +158,19 @@ namespace RDE {
             }
 
             /// Quintic
-            inline float inQuintic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inQuintic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration;
                 return _changeInValue * _currentTime * _currentTime * _currentTime * _currentTime * _currentTime + _startValue;
             }
 
-            inline float outQuintic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float outQuintic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration;
                 _currentTime--;
                 return _changeInValue * (_currentTime * _currentTime * _currentTime * _currentTime * _currentTime + 1) +
                        _startValue;
             }
 
-            inline float inOutQuintic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inOutQuintic(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration / 2;
                 if (_currentTime < 1)
                     return _changeInValue / 2 * _currentTime * _currentTime * _currentTime * _currentTime * _currentTime +
@@ -181,28 +181,28 @@ namespace RDE {
             }
 
             /// Sinusoidal
-            inline float inSine(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inSine(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 return -_changeInValue * (float) std::cos(_currentTime / _duration * (PI / 2)) + _changeInValue + _startValue;
             }
 
-            inline float outSine(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float outSine(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 return _changeInValue * (float) std::sin(_currentTime / _duration * (PI / 2)) + _startValue;
             }
 
-            inline float inOutSine(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inOutSine(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 return -_changeInValue / 2 * ((float) std::cos(PI * _currentTime / _duration) - 1) + _startValue;
             }
 
             /// Exponential
-            inline float inExponential(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inExponential(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 return _changeInValue * (float) std::pow(2, 10 * (_currentTime / _duration - 1)) + _startValue;
             }
 
-            inline float outExponential(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float outExponential(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 return _changeInValue * (-(float) std::pow(2, -10 * _currentTime / _duration) + 1) + _startValue;
             }
 
-            inline float inOutExponential(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inOutExponential(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration / 2;
                 if (_currentTime < 1) return _changeInValue / 2 * (float) std::pow(2, 10 * (_currentTime - 1)) + _startValue;
                 _currentTime--;
@@ -210,18 +210,18 @@ namespace RDE {
             }
 
             /// Exponential
-            inline float inCircular(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inCircular(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration;
                 return -_currentTime * ((float) std::sqrt(1 - _currentTime * _currentTime) - 1) + _startValue;
             }
 
-            inline float outCircular(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float outCircular(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration;
                 _currentTime--;
                 return _changeInValue * (float) std::sqrt(1 - _currentTime * _currentTime) + _startValue;
             }
 
-            inline float inOutCircular(float _currentTime, float _startValue, float _changeInValue, float _duration) {
+			RDE_FUNC_ND inline float inOutCircular(float _currentTime, float _startValue, float _changeInValue, float _duration) {
                 _currentTime /= _duration / 2;
                 if (_currentTime < 1)
                     return -_changeInValue / 2 * ((float) std::sqrt(1 - _currentTime * _currentTime) - 1) + _startValue;
@@ -234,32 +234,32 @@ namespace RDE {
         #ifndef UTIL_STRING
         #define UTIL_STRING
         namespace String {
-            inline std::string getFileNameFromPath(const std::string& _path) {
+			RDE_FUNC_ND inline std::string getFileNameFromPath(const std::string& _path) {
                 std::string base_filename = _path.substr(_path.find_last_of("/\\") + 1);
                 std::string::size_type const p(base_filename.find_last_of('.'));
                 return base_filename.substr(0, p);
             }
 
-            inline std::string getPathFromFilePath(const std::string& _path) {
+			RDE_FUNC_ND inline std::string getPathFromFilePath(const std::string& _path) {
                 return _path.substr(0, _path.find_last_of("/\\") + 1);
             }
 
-            inline std::string getFileExtension(const std::string& _path) {
+			RDE_FUNC_ND inline std::string getFileExtension(const std::string& _path) {
                 std::string base_filename = _path.substr(_path.find_last_of("/\\") + 1);
                 return base_filename.substr(base_filename.find_last_of('.') + 1, base_filename.size());
             }
 
-            inline std::string& toLower(std::string& _string) {
+			RDE_FUNC_ND inline std::string& toLower(std::string& _string) {
                 std::transform(_string.begin(), _string.end(), _string.begin(), [](unsigned char c){ return std::tolower(c); });
                 return _string;
             }
 
-            inline std::string& toUpper(std::string& _string) {
+			RDE_FUNC_ND inline std::string& toUpper(std::string& _string) {
                 std::transform(_string.begin(), _string.end(), _string.begin(), [](unsigned char c){ return std::toupper(c); });
                 return _string;
             }
 
-            inline std::vector<std::string> split(const std::string& _str, const std::string& _delimiter) {
+			RDE_FUNC_ND inline std::vector<std::string> split(const std::string& _str, const std::string& _delimiter) {
                 size_t pos = 0;
                 std::string token;
                 std::string _cpyStr = _str;
@@ -275,11 +275,11 @@ namespace RDE {
                 return _splits;
             }
 
-            inline std::string splitGetIndex(const std::string& _str, const std::string& _delimiter, int _index) {
+			RDE_FUNC_ND inline std::string splitGetIndex(const std::string& _str, const std::string& _delimiter, int _index) {
                 return split(_str, _delimiter)[_index];
             }
 
-            inline void replaceAll( std::string& _str, const std::string& _search, const std::string& _replace) {
+			RDE_FUNC inline void replaceAll( std::string& _str, const std::string& _search, const std::string& _replace) {
                 for( size_t pos = 0; ; pos += _replace.length() ) {
                     pos = _str.find( _search, pos );
                     if( pos == std::string::npos ) break;
@@ -302,7 +302,7 @@ namespace RDE {
             }
 
             template <typename Arg1, typename... Args>
-            inline std::string appendToString(Arg1&& arg1, Args&&... args) {
+			RDE_FUNC_ND inline std::string appendToString(Arg1&& arg1, Args&&... args) {
                 std::stringstream _ss;
                 return __append(_ss, arg1, args...);
             }
@@ -375,7 +375,7 @@ namespace RDE {
 
 
 
-            inline void printTimed(const char* _init, const char* _end) {
+			inline void printTimed(const char* _init, const char* _end) {
                 #ifdef ENGINE_DEBUG
                     std::time_t t = std::time(nullptr);   // get time now
 
@@ -394,7 +394,7 @@ namespace RDE {
             }
 
             template <typename Arg1>
-            inline void printerd(const char* _init, const char* _end, Arg1&& arg1) {
+			inline void printerd(const char* _init, const char* _end, Arg1&& arg1) {
                 #ifdef ENGINE_DEBUG
                     #if IS_MOBILE()
                     std::stringstream _stream;
@@ -417,7 +417,7 @@ namespace RDE {
 
 
             template <typename Arg1, typename... Args>
-            inline void printerd(const char* _init, const char* _end, Arg1&& arg1, Args&&... args) {
+			inline void printerd(const char* _init, const char* _end, Arg1&& arg1, Args&&... args) {
                 #ifdef ENGINE_DEBUG
                 #if IS_MOBILE()
                 std::stringstream _stream;
@@ -443,7 +443,7 @@ namespace RDE {
             }
 
             template <typename Arg1, typename... Args>
-            void info(Arg1&& _arg1, Args&&... args) {
+			RDE_FUNC void info(Arg1&& _arg1, Args&&... args) {
                 #if IS_WINDOWS() || IS_MOBILE() || defined(__EMSCRIPTEN__)
                 std::cout << "[INFO] ";
                 __printer("", "", _arg1, args...);
@@ -453,7 +453,7 @@ namespace RDE {
             }
 
             template <typename Arg1, typename... Args>
-            void warn(Arg1&& _arg1, Args&&... args) {
+			RDE_FUNC void warn(Arg1&& _arg1, Args&&... args) {
                 #if IS_WINDOWS() || IS_MOBILE() || defined(__EMSCRIPTEN__)
                 std::cout << "[WARN] ";
                 __printer("", "", _arg1, args...);
@@ -463,7 +463,7 @@ namespace RDE {
             }
 
             template <typename Arg1, typename... Args>
-            void error(Arg1&& _arg1, Args&&... args) {
+			RDE_FUNC void error(Arg1&& _arg1, Args&&... args) {
                 #if IS_WINDOWS() || IS_MOBILE() || defined(__EMSCRIPTEN__)
                 std::cout << "[ERROR] ";
                 __printer("", "", _arg1, args...);
@@ -473,7 +473,7 @@ namespace RDE {
             }
 
             template <typename Arg1, typename... Args>
-            void success(Arg1&& _arg1, Args&&... args) {
+			RDE_FUNC void success(Arg1&& _arg1, Args&&... args) {
                 #if IS_WINDOWS() || IS_MOBILE() || defined(__EMSCRIPTEN__)
                 std::cout << "[SUCCESS] ";
                 __printer("", "", _arg1, args...);
@@ -484,7 +484,7 @@ namespace RDE {
             }
 
             template <typename Arg1, typename... Args>
-            void debug(Arg1&& _arg1, Args&&... args) {
+			RDE_FUNC void debug(Arg1&& _arg1, Args&&... args) {
                 #if IS_WINDOWS() || IS_MOBILE() || defined(__EMSCRIPTEN__)
                 std::cout << "[DEBUG] ";
                 __printer("", "", _arg1, args...);
@@ -503,7 +503,7 @@ namespace RDE {
              * @param surface SDL2 surface needed to load the texture.
              * @return int
              */
-            inline int invertSDLSurface(SDL_Surface* surface) {
+			RDE_FUNC inline int invertSDLSurface(SDL_Surface* surface) {
                 #define SDL_LOCKIFMUST(s) (SDL_MUSTLOCK(s) ? SDL_LockSurface(s) : 0)
                 #define SDL_UNLOCKIFMUST(s) { if(SDL_MUSTLOCK(s)) SDL_UnlockSurface(s); }
 
@@ -564,7 +564,7 @@ namespace RDE {
              * @param _pathToFile Path to the file.
              * @return SDL_Surface*
              */
-            inline SDL_Surface* getSDLSurface(const std::string& _pathToFile, int _changeFormat = -1) {
+			RDE_FUNC_ND inline SDL_Surface* getSDLSurface(const std::string& _pathToFile, int _changeFormat = -1) {
                 SDL_RWops* _imageFile = SDL_RWFromFile(_pathToFile.c_str(), "rb");
 
                 if(_imageFile == nullptr) {
@@ -605,7 +605,7 @@ namespace RDE {
         #ifndef UTIL_GL
         #define UTIL_GL
         namespace GL {
-            void checkError(const std::string& _message);
+			RDE_FUNC void checkError(const std::string& _message);
         }
         #endif
 
@@ -619,7 +619,7 @@ namespace RDE {
              * @param  _window Windows of the application
              * @return unsigned char*
              */
-            unsigned char* getScreenPixels(Window& _window);
+			RDE_FUNC_ND unsigned char* getScreenPixels(Window& _window);
 
             /**
              * @brief Returns the pixels of a specific are of the current drawn screen.
@@ -629,14 +629,14 @@ namespace RDE {
              * @param _size     Size of the screenshoot, it will be x/2 to each X-axis side and y/2 to each Y-axis side.
              * @return unsigned char*
              */
-            unsigned char* getAreaOfScreenPixels(Window& _window, const Vec2I& _position, const Vec2I& _size);
+			RDE_FUNC_ND unsigned char* getAreaOfScreenPixels(Window& _window, const Vec2I& _position, const Vec2I& _size);
 
             /**
              * @brief Takes a screenshot of the whole application window and saves it to a path. The name and extension of the screenshot has to be provided.
              * @param _window   The application Window.
              * @param _path     Full path to where the image is saved including the name and extension of the file. Supported extensions [png, jpg, jpeg, bmp].
              */
-            void takeScreenshot(Window& _window, const std::string& _path);
+			RDE_FUNC void takeScreenshot(Window& _window, const std::string& _path);
 
             /**
              * @brief Takes a screenshot of an area of window and saves it to a path. The name and extension of the screenshot has to be provided.
@@ -645,7 +645,7 @@ namespace RDE {
              * @param _size     Size of the screenshoot, it will be x/2 to each X-axis side and y/2 to each Y-axis side.
              * @param _path     Full path to where the image is saved including the name and extension of the file. Supported extensions [png, jpg, jpeg, bmp].
              */
-            void takeScreenshot(Window& _window, const Vec2I& _position, const Vec2I& _size, const std::string& _path);
+			RDE_FUNC void takeScreenshot(Window& _window, const Vec2I& _position, const Vec2I& _size, const std::string& _path);
 
             /**
              * @brief Transforms an array of pixels into a CPUTexture so they can be manipulated and rendered easier.
@@ -655,7 +655,7 @@ namespace RDE {
              * @warn  If the CPUTexture is not going to be attached to a renderer component, user need to manually free it. If attached to an IRenderizable, the engine
              *        will destroy it automatically.
              */
-            CPUTexture* pixelsToCPUTexture(const Vec2I& _size, unsigned char* _pixels);
+			RDE_FUNC_ND CPUTexture* pixelsToCPUTexture(const Vec2I& _size, unsigned char* _pixels);
 
         }
         #endif
