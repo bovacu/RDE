@@ -59,6 +59,8 @@ namespace RDE {
              */
 			RDE_FUNC void loadRDEConfig(RDEConfig* _config, FileManager* _manager);
 
+			RDE_FUNC ~ConfigManager() {  }
+
         private:
             /**
              * @brief Instantiates a previously loaded prefab.

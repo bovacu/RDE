@@ -37,7 +37,7 @@ namespace RDE {
 
         public:
             ImGuiScene(Engine* _engine);
-            ~ImGuiScene() override {};
+            ~ImGuiScene() {};
 
             void onInit() override;
             void onEvent(Event& _e) override;

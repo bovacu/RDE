@@ -313,7 +313,7 @@ namespace RDE {
     /**
      * @brief Externed function that must be implemented for the Engine to work.
      */
-    extern "C" RDE_FUNC Engine* createEngine(int _argc, char** _argv);
+    RDE_FUNC_ENGINE Engine* createEngine(int _argc, char** _argv);
 }
 
 

@@ -1,6 +1,7 @@
 from sys import platform
 import sys
 import os
+import shutil 
 
 
 def extract_argument(args, arg, default):
@@ -23,6 +24,45 @@ def extract_argument(args, arg, default):
             return True
     else:
         return default
+
+
+def generate_windows_lib_package(args):
+    manager_parent_path = os.path.abspath(os.path.dirname(__file__))
+    build_type = extract_argument(args, "--build_type", "debug")
+    os.system("if exist {}\\build\\windows\\lib\\{}\\RDE rmdir /s /q {}\\build\\windows\\lib\\{}\\RDE".format(manager_parent_path, build_type.lower(), manager_parent_path, build_type.lower()))
+    os.system("if not exist {}\\build\\windows\\lib\\{}\\RDE mkdir {}\\build\\windows\\lib\\{}\\RDE".format(manager_parent_path, build_type.lower(), manager_parent_path, build_type.lower()))
+    os.system("mkdir {}\\build\\windows\\lib\\{}\\RDE\\libs".format(manager_parent_path, build_type.lower()))
+    os.system("mkdir {}\\build\\windows\\lib\\{}\\RDE\\libs\\lib".format(manager_parent_path, build_type.lower()))
+    os.system("mkdir {}\\build\\windows\\lib\\{}\\RDE\\libs\\dll".format(manager_parent_path, build_type.lower()))
+    os.system("mkdir {}\\build\\windows\\lib\\{}\\RDE\\include".format(manager_parent_path, build_type.lower()))
+    os.system("mkdir {}\\build\\windows\\lib\\{}\\RDE\\include\\third-party".format(manager_parent_path, build_type.lower()))
+
+    build_dir = "{}/build/windows/lib/{}".format(manager_parent_path, build_type.lower())
+    for root, dir, files in os.walk(build_dir):
+        for ffile in files:
+            if os.path.splitext(ffile)[1] in ('.dll') and not os.path.splitext(ffile)[0].startswith('.'):
+                if os.path.isfile("{}/build/windows/lib/{}/RDE/libs/dll/{}".format(manager_parent_path, build_type.lower(), ffile)):
+                    continue
+                src = os.path.join(root, ffile)
+                shutil.copy(src, "{}/build/windows/lib/{}/RDE/libs/dll".format(manager_parent_path, build_type.lower()))
+
+    shutil.copy("{}/build/windows/lib/{}/RDE.lib".format(manager_parent_path, build_type.lower()), "{}/build/windows/lib/{}/RDE/libs/lib".format(manager_parent_path, build_type.lower()))
+    shutil.copy("{}/nonVcpkgDeps/Chipmunk2D/libs/Windows/chipmunk.lib".format(manager_parent_path, build_type.lower()), "{}/build/windows/lib/{}/RDE/libs/lib".format(manager_parent_path, build_type.lower()))
+    shutil.copy("{}/nonVcpkgDeps/Chipmunk2D/libs/Windows/chipmunk.dll".format(manager_parent_path, build_type.lower()), "{}/build/windows/lib/{}/RDE/libs/dll".format(manager_parent_path, build_type.lower()))
+
+    vcpkg_dir = "{}/vcpkg/installed/x64-windows/lib".format(manager_parent_path)
+    for root, dir, files in os.walk(vcpkg_dir):
+        for ffile in files:
+            if os.path.splitext(ffile)[1] in ('.lib') and not os.path.splitext(ffile)[0].startswith('.'):
+                if os.path.isfile("{}/build/windows/lib/{}/RDE/libs/lib/{}".format(manager_parent_path, build_type.lower(), ffile)):
+                    continue
+                src = os.path.join(root, ffile)
+                shutil.copy(src, "{}/build/windows/lib/{}/RDE/libs/lib".format(manager_parent_path, build_type.lower()))
+
+    shutil.copytree("{}/engine/include".format(manager_parent_path), "{}/build/windows/lib/{}/RDE/include/RDE/".format(manager_parent_path, build_type.lower()))
+    shutil.copytree("{}/nonVcpkgDeps/Chipmunk2D/include".format(manager_parent_path), "{}/build/windows/lib/{}/RDE/include/third-party/Chipmunk2D".format(manager_parent_path, build_type.lower()))
+    shutil.copytree("{}/vcpkg/installed/x64-windows/include".format(manager_parent_path), "{}/build/windows/lib/{}/RDE/include/third-party/vcpkg".format(manager_parent_path, build_type.lower()))
+
 
 
 def buildin_process_windows(args, action):
@@ -63,6 +103,7 @@ def buildin_process_windows(args, action):
         os.system(cmake_build_lib)
         os.system(delete_compile_commands)
         os.system(copy_compile_commands_lib)
+        generate_windows_lib_package(args)
     elif action == "build":
         os.system(create_build_folder)
         os.system(create_windows_folder)

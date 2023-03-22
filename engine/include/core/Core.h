@@ -199,6 +199,7 @@ public:                                                                         
 #define RDE_FUNC_EXPLICIT __declspec(dllexport) explicit
 #define RDE_FUNC_STATIC __declspec(dllexport) static
 #define RDE_FUNC_ND_STATIC [[nodiscard]] __declspec(dllexport) static
+#define RDE_FUNC_ENGINE extern "C" RDE_FUNC
 //#else
 //#define RDE_FUNC __declspec(dllimport)
 //#define RDE_FUNC_ND [[nodiscard]] __declspec(dllimport)
@@ -208,6 +209,7 @@ public:                                                                         
 #define RDE_FUNC 
 #define RDE_FUNC_ND
 #define RDE_FUNC_EXPLICIT
+#define RDE_FUNC_ENGINE
 #endif
 
 #endif //RDE_CORE_H

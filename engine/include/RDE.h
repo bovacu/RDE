@@ -70,6 +70,8 @@
 #include "core/Core.h"
 #include "core/util/Util.h"
 
+#include "core/graph/Scene.h"
+
 #include "core/render/RenderManager.h"
 #include "core/render/elements/TextureAtlasManager.h"
 #include "core/render/elements/ShaderManager.h"

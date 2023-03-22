@@ -129,8 +129,8 @@ namespace RDE {
 			void onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager);
 
         public:
-			RDE_FUNC explicit Scene(Engine* _engine, const std::string& _debugName = "Scene");
-			RDE_FUNC virtual ~Scene();
+			RDE_FUNC_EXPLICIT Scene(Engine* _engine, const std::string& _debugName = "Scene");
+			RDE_FUNC ~Scene();
 
             /**
              * @brief This function is called when loading the scene from the configuration, it is used to make a custom loading
