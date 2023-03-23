@@ -21,35 +21,39 @@ namespace RDE {
         auto _parentPosition = _transform->parentTransform->getModelMatrixPosition();
         auto _parentSize = _transform->parentTransform->node->getComponent<UIAnchoring>()->getSize();
 
+		Vec2F _stretchAdjuster = { 1.f, 1.f };
+
+		if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_NO_STRETCH) {
+			anchorSize = Vec2F { 0.f, 0.f };
+		} else if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_HORIZONTAL_STRETCH) {
+			anchorSize.x = _parentSize.x;
+			_stretchAdjuster.x = 0.0f;
+		} else if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_VERTICAL_STRETCH) {
+			anchorSize.y = _parentSize.y;
+			_stretchAdjuster.y = 0.0f;
+		} else if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_FULL_STRETCH) {
+			anchorSize = _parentSize;
+			_stretchAdjuster.set(0.0f, 0.0f);
+		}
+
 		if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_MIDDLE) {
             anchorPosition = _parentPosition;
 		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_LEFT) {
-            anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f) , _parentPosition.y };
+			anchorPosition = { _parentPosition.x - _parentSize.x * 0.5f * _stretchAdjuster.x , _parentPosition.y };
 		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_RIGHT) {
-            anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f) , _parentPosition.y };
+			anchorPosition = { _parentPosition.x + _parentSize.x * 0.5f * _stretchAdjuster.x , _parentPosition.y };
 		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_TOP) {
-            anchorPosition = { _parentPosition.x, (_parentPosition.y + _parentSize.y * 0.5f) };
+			anchorPosition = { _parentPosition.x, _parentPosition.y + _parentSize.y * 0.5f * _stretchAdjuster.y };
 		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_BOTTOM) {
-            anchorPosition = { _parentPosition.x, (_parentPosition.y - _parentSize.y * 0.5f) };
+			anchorPosition = { _parentPosition.x, _parentPosition.y - _parentSize.y * 0.5f * _stretchAdjuster.y };
 		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_LEFT_TOP) {
-            anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f), (_parentPosition.y + _parentSize.y * 0.5f) };
+			anchorPosition = { _parentPosition.x - _parentSize.x * 0.5f * _stretchAdjuster.x, _parentPosition.y + _parentSize.y * 0.5f * _stretchAdjuster.y };
 		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_LEFT_BOTTOM) {
-            anchorPosition = { (_parentPosition.x - _parentSize.x * 0.5f), (_parentPosition.y - _parentSize.y * 0.5f) };
+			anchorPosition = { _parentPosition.x - _parentSize.x * 0.5f * _stretchAdjuster.x, _parentPosition.y - _parentSize.y * 0.5f * _stretchAdjuster.y };
 		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_RIGHT_TOP) {
-            anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f), (_parentPosition.y + _parentSize.y * 0.5f) };
+			anchorPosition = { _parentPosition.x + _parentSize.x * 0.5f * _stretchAdjuster.x, _parentPosition.y + _parentSize.y * 0.5f * _stretchAdjuster.y };
 		} else if((anchor & ANCHOR_BITS) == RDE_UI_ANCHOR_RIGHT_BOTTOM) {
-            anchorPosition = { (_parentPosition.x + _parentSize.x * 0.5f), (_parentPosition.y - _parentSize.y * 0.5f) };
-        }
-
-
-		if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_NO_STRETCH) {
-            anchorSize = Vec2F { 0.f, 0.f };
-		} else if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_HORIZONTAL_STRETCH) {
-            anchorSize.x = _parentSize.x;
-		} else if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_VERTICAL_STRETCH) {
-            anchorSize.y = _parentSize.y;
-		} else if((anchor & STRETCH_BITS) == RDE_UI_STRETCH_FULL_STRETCH) {
-            anchorSize = _parentSize;
+			anchorPosition = { _parentPosition.x + _parentSize.x * 0.5f * _stretchAdjuster.x, _parentPosition.y - _parentSize.y * 0.5f * _stretchAdjuster.y };
         }
     }
 
@@ -117,7 +121,7 @@ namespace RDE {
 			_anchoring->anchor.updateAnchor(_anchoring, _t);
 			auto _sizeDiff = _anchoring->anchor.anchorSize - _lastSize;
 			auto _posDiff = _anchoring->anchor.anchorPosition - _lastAnchorPos;
-			auto _position = Vec2F { _posDiff.x + _sizeDiff.x * 0.5f, _posDiff.y };
+			auto _position = Vec2F { _posDiff.x, _posDiff.y };
 
 			_t->translateMatrixModelPosition(_position);
 			_anchoring->setSize(_anchoring->getSize() + _sizeDiff);
