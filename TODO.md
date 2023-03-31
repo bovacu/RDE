@@ -69,7 +69,7 @@ to not forget about future tasks. A lot of features are already done, but not li
   - [ ] WASM 
 - [ ] Fix ControllerInput the same way as the other controllers
 - [x] When window size changes, recalculate render tree
-- [ ] Anchors on window resize are not working correctly
+- [x] Anchors on window resize are not working correctly
 
 ## TO IMPROVE
 - [ ] UI
