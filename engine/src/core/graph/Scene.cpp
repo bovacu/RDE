@@ -128,25 +128,28 @@ namespace RDE {
 
 
 
-    void Scene::recalculateRenderizableTree(Node* _node) {
+    void Scene::recalculateRenderizableTree(Node* _node, bool _force) {
         auto _id = _node->getID();
 		auto _draw = !_node->hasComponent<DisabledForRender>() && _node->hasComponent<Active>();
 
 		if(_node->hasComponent<SpriteRenderer>()) {
 			auto* _data = &_node->getComponent<SpriteRenderer>()->data;
 			_data->draw = _draw;
+			_data->dirty |= _force;
 			graph->renderingTreeData.sprites.emplace_back(_data, _node->getTransform(), nullptr );
 		}
 
 		if(_node->hasComponent<DynamicSpriteRenderer>()) {
 			auto* _data = &_node->getComponent<DynamicSpriteRenderer>()->data;
 			_data->draw = _draw;
+			_data->dirty |= _force;
 			graph->renderingTreeData.dynamicSprites.emplace_back(_data, _node->getTransform(), nullptr );
 		}
 
 		if(_node->hasComponent<ParticleSystem>()) {
 			auto* _data = &_node->getComponent<ParticleSystem>()->data;
 			_data->draw = _draw;
+			_data->dirty |= _force;
 			graph->renderingTreeData.particleSystmes.emplace_back(_data, _node->getTransform(), nullptr );
 		}
 
@@ -154,15 +157,16 @@ namespace RDE {
 			auto* _textRenderer = _node->getComponent<TextRenderer>();
 			auto* _data = &_textRenderer->data;
 			_data->draw = _draw;
+			_data->dirty |= _force;
 			graph->renderingTreeData.texts.emplace_back(_data, _node->getTransform(), (void*)_textRenderer );
 		}
 
         for(auto* _child : _node->getTransform()->children) {
-            recalculateRenderizableTree(_child->node);
+            recalculateRenderizableTree(_child->node, _force);
         }
     }
 
-	void Scene::recalculateRenderizableTreeUI(Node* _node) {		
+	void Scene::recalculateRenderizableTreeUI(Node* _node, bool _force) {		
         CanvasElement _canvasElement { _node, _node->getComponent<UIAnchoring>() };
 
         if(canvas->graph->getNodeContainer().any_of<UIInteractable>(_node->getID())) {
@@ -178,6 +182,7 @@ namespace RDE {
             }
 
             if(_canvasElement.renderizableInnerData != nullptr) {
+				_canvasElement.renderizableInnerData->RenderizableInnerData.dirty |= _force;
                 canvas->uiRenderizables.push_back(_canvasElement);
             }
         }
@@ -205,20 +210,24 @@ namespace RDE {
 		onLateUpdate(_dt);
 	}
 
+	void Scene::updateRenderTree(bool _force) {
+		// [0] -> SpriteRenderer
+		// [1] -> DynamicSpriteRenderer
+		// [2] -> ParticleSystem
+		// [3] -> TextRenderer
+		const int RENDERIZABLES_COUNT = 4;
+
+		graph->renderingTreeData.sprites.clear();
+		graph->renderingTreeData.dynamicSprites.clear();
+		graph->renderingTreeData.particleSystmes.clear();
+		graph->renderingTreeData.texts.clear();
+
+		recalculateRenderizableTree(graph->getRoot(), _force);
+	}
+
     void Scene::onInnerLateUpdateHierarchy(Delta _dt) {
         if(graph->renderingTreeData.isRenderizableTreeDirty) {
-            // [0] -> SpriteRenderer
-            // [1] -> DynamicSpriteRenderer
-            // [2] -> ParticleSystem
-            // [3] -> TextRenderer
-            const int RENDERIZABLES_COUNT = 4;
-
-            graph->renderingTreeData.sprites.clear();
-            graph->renderingTreeData.dynamicSprites.clear();
-            graph->renderingTreeData.particleSystmes.clear();
-            graph->renderingTreeData.texts.clear();
-
-            recalculateRenderizableTree(graph->getRoot());
+			updateRenderTree();
             graph->renderingTreeData.isRenderizableTreeDirty = false;
         }
 

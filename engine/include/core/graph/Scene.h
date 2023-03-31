@@ -108,8 +108,8 @@ namespace RDE {
             void onInnerLateUpdateHierarchy(Delta _dt); 
             void onInnerLateUpdateUI(Delta _dt);
             
-            void recalculateRenderizableTree(Node* _node);
-            void recalculateRenderizableTreeUI(Node* _node);
+            void recalculateRenderizableTree(Node* _node, bool _force = false);
+            void recalculateRenderizableTreeUI(Node* _node, bool _force = false);
 
             /**
              * @brief This function is also called every frame and renders the geometry of the game. It is not virtual because
@@ -127,6 +127,8 @@ namespace RDE {
 			void onInnerDebugRender(Delta _dt);
 			void onInnerDebugRenderHierarchy(Delta _dt, RenderManager* _renderManager); 
 			void onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager);
+
+			void updateRenderTree(bool _force = false);
 
         public:
 			RDE_FUNC_EXPLICIT Scene(Engine* _engine, const std::string& _debugName = "Scene");
