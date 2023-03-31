@@ -68,7 +68,7 @@ to not forget about future tasks. A lot of features are already done, but not li
   - [ ] iOS
   - [ ] WASM 
 - [ ] Fix ControllerInput the same way as the other controllers
-- [ ] When window size changes, recalculate render tree
+- [x] When window size changes, recalculate render tree
 - [ ] Anchors on window resize are not working correctly
 
 ## TO IMPROVE
