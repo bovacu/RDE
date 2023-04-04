@@ -68,8 +68,8 @@ to not forget about future tasks. A lot of features are already done, but not li
   - [ ] iOS
   - [ ] WASM 
 - [ ] Fix ControllerInput the same way as the other controllers
-- [ ] When window size changes, recalculate render tree
-- [ ] Anchors on window resize are not working correctly
+- [x] When window size changes, recalculate render tree
+- [x] Anchors on window resize are not working correctly
 
 ## TO IMPROVE
 - [ ] UI
@@ -80,6 +80,7 @@ to not forget about future tasks. A lot of features are already done, but not li
 - [ ] Particle System
   - [ ] More customization
   - [ ] Better and easier API
+  - [ ] Geometry Shader PointSize sprite rendering
 
 - [ ] Renderizable tree for the UI, now it makes too many drawcalls as the algorithm is very simple and it is only grouping contiguous elements of the same type
 - [ ] Debug vertices sent CPU -> GPU, as some games may use the line or points drawing (Like a sand falling simulator)
