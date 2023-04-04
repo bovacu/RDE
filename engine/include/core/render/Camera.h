@@ -70,6 +70,8 @@ namespace RDE {
 
 			bool enabled = true;
 
+			const Window* window = nullptr;
+
         public:
             Node* node;
 
@@ -95,6 +97,7 @@ namespace RDE {
              * @param _height Window's height
              */
 			RDE_FUNC void onResize(int _width, int _height);
+			RDE_FUNC void onResize(const Vec2I& _size);
 
             /**
              * @brief Returns the Projection Matrix.

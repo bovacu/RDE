@@ -11,6 +11,7 @@ namespace RDE {
 
     Camera::Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window) : node(_node) {
         viewport = new ViewPort(_window->getWindowSize(), _manager->engine->rdeConfig.windowData.resolution);
+		window = _window;
         onResize(_window->getWidth(), _window->getHeight());
     }
 
@@ -23,6 +24,12 @@ namespace RDE {
         size = {_width, _height};
         dirty = true;
     }
+
+	void Camera::onResize(const Vec2I& _size) {
+		onResize(_size.x, _size.y);
+	}
+
+
 
     glm::mat4& Camera::getProjectionMatrix() {
         return projectionMatrix;
@@ -38,6 +45,11 @@ namespace RDE {
             viewMatrix = glm::inverse(_mat);
             viewProjectionMatrix = projectionMatrix * viewMatrix;
             dirty = false;
+
+			glScissor((window->getWidth() - size.x) * 0.5f + node->getTransform()->getPosition().x, 
+			          (window->getHeight() - size.y) * 0.5f + node->getTransform()->getPosition().y, size.x,
+			          size.y);
+			glEnable(GL_SCISSOR_TEST);
         }
     }
 
@@ -98,8 +110,8 @@ namespace RDE {
     }
 
     void Camera::setCameraSize(int _width, int _height) {
-        onResize(_width, _height);
-        dirty = true;
+		size = {_width, _height};
+		dirty = true;
     }
 
     Vec2I Camera::getCameraSize() {

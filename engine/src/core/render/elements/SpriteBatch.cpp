@@ -197,7 +197,7 @@ namespace RDE {
                 _innerData.layer                    == _batch.layer &&
                 _innerData.shader                   == _batch.shader->getShaderID() &&
                 _innerData.batchPriority            == _batch.priority &&
-                _batch.vertexBuffer.size()          < maxIndicesPerDrawCall * 6) {
+                _batch.vertexBuffer.size()          < maxIndicesPerDrawCall * 4) {
                 return &_batch;
             }
         }
@@ -206,7 +206,7 @@ namespace RDE {
         Batch _batch;
         _batch.ID = batches.size();
         _batch.layer = _innerData.layer;
-        _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 6);
+        _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 4);
         _batch.textureID = _innerData.texture->getGLTexture();
         _batch.priority = _innerData.batchPriority;
         _batch.shader = engine->manager.shaderManager.getShader(_innerData.shader);

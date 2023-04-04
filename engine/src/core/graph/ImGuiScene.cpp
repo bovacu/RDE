@@ -667,41 +667,27 @@ namespace RDE {
 
         CREATE_NON_DISABLEABLE_HEADER("Camera", _camera, {
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
-
-//            const char* _viewports[] = { "Free Aspect", "Adaptative Aspect"};
-//
-//            std::string _viewPortSelected;
-//
-//            if(dynamic_cast< FreeViewPort* >(_camera->getViewport())) _viewPortSelected = "Free Aspect";
-//            else _viewPortSelected = "Adaptative Aspect";
-//
-//            ImGui::PushID(createID());
-//            ImGui::Text("ViewPort"); ImGui::SameLine();
-//            ImGui::SetNextItemWidth(175);
-//            if (ImGui::BeginCombo("##combo", _viewPortSelected.c_str())){ // The second parameter is the label previewed before opening the combo. {
-//                for (auto & _resolution : _viewports) {
-//                    bool is_selected = (_viewPortSelected == _resolution);
-//                    if (ImGui::Selectable(_resolution, is_selected)) {
-//                        _viewPortSelected = _resolution;
-//                        if(_viewPortSelected == "Free Aspect") _camera->setFreeViewport(engine->getWindow()->getWindowSize());
-//                        else _camera->setAdaptiveViewport({1920, 1080}, engine->getWindow()->getWindowSize());
-//                    }
-//                    if (is_selected)
-//                        ImGui::SetItemDefaultFocus();
-//                }
-//                ImGui::EndCombo();
-//            }
-//            ImGui::PopID();
-
-            ImGui::Text("Zoom Level");
-            float _zoomLevel = _camera->getCurrentZoomLevel();
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(100);
-            ImGui::PushID(createID());
-            if(ImGui::DragFloat("##myInput", &_zoomLevel, 0.1f)) {
-                _camera->setCurrentZoomLevel(_zoomLevel);
+				ImGui::Text("Zoom Level");
+				float _zoomLevel = _camera->getCurrentZoomLevel();
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(100);
+				ImGui::PushID(createID());
+				if(ImGui::DragFloat("##myInput", &_zoomLevel, 0.1f)) {
+					_camera->setCurrentZoomLevel(_zoomLevel);
             }
             ImGui::PopID();
+
+			ImGui::Text("Size ");
+			int _size[2];
+			_size[0] = _camera->getCameraSize().x;
+			_size[1] = _camera->getCameraSize().y;
+			ImGui::SameLine(0, 35);
+			ImGui::SetNextItemWidth(100);
+			ImGui::PushID(createID());
+			if (ImGui::DragInt2("##myInput", _size, 1, 0)) {
+				_camera->setCameraSize(_size[0], _size[1]);
+			}
+			ImGui::PopID();
 
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         })
