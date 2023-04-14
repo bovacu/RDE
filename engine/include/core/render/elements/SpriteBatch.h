@@ -179,6 +179,8 @@ namespace RDE {
              */
             std::vector<Batch> batches {};
 
+			Camera* overwriteCamera = nullptr;
+
             SpriteBatch() {  }
 
         private:
@@ -205,6 +207,8 @@ namespace RDE {
              * @param _engine Engine
              */
 			RDE_FUNC void init(Engine* _engine);
+
+			RDE_FUNC void overwriteRenderingCamera(Camera* _camera);
 
             /**
              * @brief This marks the beginning of a new Draw Call.

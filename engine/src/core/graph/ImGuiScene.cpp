@@ -175,7 +175,7 @@ namespace RDE {
         EventDispatcher dispatcher(_e);
         dispatcher.dispatchEvent<MouseScrolledEvent>(mseDel);
         dispatcher.dispatchEvent<MouseButtonPressedEvent>(mbpeDel);
-//        dispatcher.dispatchEvent<MouseMovedEvent>(mmeDel);
+        dispatcher.dispatchEvent<MouseMovedEvent>(mmeDel);
     }
 
     void ImGuiScene::onEnd() {

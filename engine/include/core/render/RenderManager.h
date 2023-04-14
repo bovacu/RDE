@@ -109,6 +109,8 @@ namespace RDE {
             void endDebugDraw();
 
         public:
+			RDE_FUNC void overwriteRenderingCamera(Camera* _camera);
+
             /**
              * @brief Sets the color to paint the background.
              * @param _color Color to paint the background

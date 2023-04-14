@@ -98,6 +98,7 @@ namespace RDE {
              */
 			RDE_FUNC void onResize(int _width, int _height);
 			RDE_FUNC void onResize(const Vec2I& _size);
+			RDE_FUNC void onResize(const Vec2I& _size, float _aspectRatio);
 
             /**
              * @brief Returns the Projection Matrix.

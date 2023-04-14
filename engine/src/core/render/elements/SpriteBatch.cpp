@@ -92,9 +92,15 @@ namespace RDE {
 
     SpriteBatch::~SpriteBatch() {};
 
+	void SpriteBatch::overwriteRenderingCamera(Camera* _camera) {
+		overwriteCamera = _camera;
+	}
+
     void SpriteBatch::beginDraw(Camera* _camera, Transform* _cameraTransform) {
-        viewProjectionMatrix = _camera->getViewProjectionMatrix();
-        viewport = _camera->getViewport();
+		auto* _cam = overwriteCamera != nullptr ? overwriteCamera : _camera;
+
+		viewProjectionMatrix = _cam->getViewProjectionMatrix();
+		viewport = _cam->getViewport();
     }
 
     void SpriteBatch::Debug::drawPoint(const Vec2F& _position, const Color& _color) {
