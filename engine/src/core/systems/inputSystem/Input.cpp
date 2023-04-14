@@ -72,9 +72,9 @@ namespace RDE {
 
             bool _eventImplemented = false;
 
-            //#if !IS_MOBILE()
-            //ImGui_ImplSDL2_ProcessEvent(&_event);
-            //#endif
+            #if !IS_MOBILE()
+            ImGui_ImplSDL2_ProcessEvent(&_event);
+            #endif
 
             _eventImplemented |= windowInput->pollEvent(_event);
             _eventImplemented |= keyboardInput->pollEvent(_event);
