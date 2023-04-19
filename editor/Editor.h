@@ -25,6 +25,7 @@ namespace Editor {
 		UIText* typedText = nullptr;
 		Camera* editorCamera;
 		UniqueDelegate<bool(MouseScrolledEvent&)> mseDel;
+		Vec2F lastClickOrMovedMousePosition;
 
         public:
             explicit Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }
@@ -36,6 +37,7 @@ namespace Editor {
 
 		private:
 			bool mouseScrolled(MouseScrolledEvent& _event);
+			void mouseHandler();
 
 
         private:

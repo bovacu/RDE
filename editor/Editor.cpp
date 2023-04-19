@@ -81,6 +81,8 @@ namespace Editor {
         }
         ++_frameCounter;
         _timer += _dt;
+
+		mouseHandler();
     }
 
 	void Editor::onEvent(Event& _event) {
@@ -103,5 +105,18 @@ namespace Editor {
 	bool Editor::mouseScrolled(MouseScrolledEvent& _event) {
 		editorCamera->setCurrentZoomLevel(editorCamera->getCurrentZoomLevel() + _event.getScrollY() * 0.1f);
 		return true;
+	}
+
+	void Editor::mouseHandler() {
+		
+		if(engine->manager.inputManager.isMouseJustPressed(RDE_MOUSE_BUTTON_1)) {
+			lastClickOrMovedMousePosition = engine->manager.inputManager.getMousePosScreenCoords();
+		} else if(engine->manager.inputManager.isMousePressed(RDE_MOUSE_BUTTON_1)) {
+			auto _current = engine->manager.inputManager.getMousePosScreenCoords();
+			auto _diff = _current - lastClickOrMovedMousePosition;
+			lastClickOrMovedMousePosition = _current;
+			editorCamera->node->getTransform()->translate(_diff * -editorCamera->getCurrentZoomLevel());
+		}
+
 	}
 }
