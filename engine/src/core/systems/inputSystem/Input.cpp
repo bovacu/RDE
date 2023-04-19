@@ -114,10 +114,12 @@ namespace RDE {
     }
 
 	bool InputManager::isKeyPressed(RDE_KEYBOARD_KEY_ _key) {
+		auto _ = isKeyJustPressed(_key);
 		return keyboardInput->getState(_key) == RDE_INPUT_STATUS_KEEP_PRESSED;
     }
 
 	bool InputManager::isKeyReleased(RDE_KEYBOARD_KEY_ _key) {
+		auto _ = isKeyJustReleased(_key);
 		return keyboardInput->getState(_key) == RDE_INPUT_STATUS_KEEP_RELEASED;
     }
 
@@ -143,10 +145,12 @@ namespace RDE {
     }
 
 	bool InputManager::isMousePressed(RDE_MOUSE_BUTTON_ _mouseButton) {
+		auto _ = isMouseJustPressed(_mouseButton);
 		return mouseInput->getState(_mouseButton) == RDE_INPUT_STATUS_KEEP_PRESSED;
     }
 
 	bool InputManager::isMouseReleased(RDE_MOUSE_BUTTON_ _mouseButton) {
+		auto _ = isMouseJustReleased(_mouseButton);
 		return mouseInput->getState(_mouseButton) == RDE_INPUT_STATUS_KEEP_RELEASED;
     }
 
@@ -214,6 +218,7 @@ namespace RDE {
     }
 
 	bool InputManager::isGamepadButtonPressed(RDE_CONTROLLER_BUTTON_ _button, int _controllerID) {
+		auto _ = isGamepadButtonJustPressed(_button, _controllerID);
         auto* _controllerInput = controllerInput;
 		if(!_controllerInput->hasController(_controllerID)) {
 			return false;
@@ -222,6 +227,7 @@ namespace RDE {
     }
 
 	bool InputManager::isGamepadButtonReleased(RDE_CONTROLLER_BUTTON_ _button, int _controllerID) {
+		auto _ = isGamepadButtonJustReleased(_button, _controllerID);
         auto* _controllerInput = controllerInput;
 		if(!_controllerInput->hasController(_controllerID)) {
 			return false;
@@ -258,6 +264,7 @@ namespace RDE {
 	}
 
 	bool InputManager::isGamepadAxisPressed(RDE_CONTROLLER_AXIS_ _axis, int _controllerID) {
+		auto _ = isGamepadAxisJustPressed(_axis, _controllerID);
 		auto* _controllerInput = controllerInput;
 		if (!_controllerInput->hasController(_controllerID)) {
 			return false;
@@ -266,6 +273,7 @@ namespace RDE {
 	}
 
 	bool InputManager::isGamepadAxisReleased(RDE_CONTROLLER_AXIS_ _axis, int _controllerID) {
+		auto _ = isGamepadAxisJustReleased(_axis, _controllerID);
         auto* _controllerInput = controllerInput;
         if(!_controllerInput->hasController(_controllerID)) {
 			return false;
@@ -303,10 +311,12 @@ namespace RDE {
     }
 
     bool InputManager::isMobileScreenPressed(int _fingerID) {
+		auto _ = isMobileScreenJustPressed(_fingerID);
 		return mobileInput->getState(_fingerID) == RDE_INPUT_STATUS_KEEP_PRESSED;
     }
 
     bool InputManager::isMobileScreenRelease(int _fingerID) {
+		auto _ = isMobileScreenJustReleased(_fingerID);
 		return mobileInput->getState(_fingerID) == RDE_INPUT_STATUS_KEEP_RELEASED;
     }
 
@@ -391,6 +401,7 @@ namespace RDE {
 
 
 		for(auto _i = 0; _i < justPressedKeys.size(); _i++) {
+			Util::Log::info("Set ", justPressedKeys[_i], " as keep pressed");
 			keyboardInput->setState(justPressedKeys[_i], RDE_INPUT_STATUS_KEEP_PRESSED);
 		}
 		justPressedKeys.clear();

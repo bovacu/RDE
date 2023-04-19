@@ -5,7 +5,7 @@
 #include "core/systems/eventSystem/KeyEvent.h"
 #include "core/systems/inputSystem/input/Input.h"
 #include "core/util/Functions.h"
-#include <SDL_events.h>
+#include "core/platform/PlatformHeaderSDL.h"
 #include <stdio.h>
 
 namespace RDE {
@@ -116,6 +116,11 @@ namespace RDE {
 
     void KeyboardInput::onKeyDown(SDL_Event& _event) {
 		auto _key = static_cast<RDE_KEYBOARD_KEY_>(_event.key.keysym.scancode);
+
+		auto _currentState = pressedKeyboardKeys[_key];
+		if(_currentState == RDE_INPUT_STATUS_JUST_PRESSED || _currentState == RDE_INPUT_STATUS_KEEP_PRESSED) {
+			return;
+		}
 
 		pressedKeyboardKeys[_key] = RDE_INPUT_STATUS_JUST_PRESSED;
 

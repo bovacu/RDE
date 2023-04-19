@@ -191,7 +191,7 @@ namespace RDE {
         #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
         frameBuffer->resize(_width, _height);
         #endif
-        manager.sceneManager.getDisplayedScene()->mainCamera->setCameraSize(_width, _height);
+        manager.sceneManager.getDisplayedScene()->mainCamera->onResize(_width, _height);
 		manager.sceneManager.getDisplayedScene()->updateRenderTree(true);
         manager.sceneManager.getDisplayedScene()->canvas->onResize(_width, _height);
 

@@ -92,9 +92,15 @@ namespace RDE {
 
     SpriteBatch::~SpriteBatch() {};
 
+	void SpriteBatch::overwriteRenderingCamera(Camera* _camera) {
+		overwriteCamera = _camera;
+	}
+
     void SpriteBatch::beginDraw(Camera* _camera, Transform* _cameraTransform) {
-        viewProjectionMatrix = _camera->getViewProjectionMatrix();
-        viewport = _camera->getViewport();
+		auto* _cam = overwriteCamera != nullptr ? overwriteCamera : _camera;
+
+		viewProjectionMatrix = _cam->getViewProjectionMatrix();
+		viewport = _cam->getViewport();
     }
 
     void SpriteBatch::Debug::drawPoint(const Vec2F& _position, const Color& _color) {
@@ -197,7 +203,7 @@ namespace RDE {
                 _innerData.layer                    == _batch.layer &&
                 _innerData.shader                   == _batch.shader->getShaderID() &&
                 _innerData.batchPriority            == _batch.priority &&
-                _batch.vertexBuffer.size()          < maxIndicesPerDrawCall * 6) {
+                _batch.vertexBuffer.size()          < maxIndicesPerDrawCall * 4) {
                 return &_batch;
             }
         }
@@ -206,7 +212,7 @@ namespace RDE {
         Batch _batch;
         _batch.ID = batches.size();
         _batch.layer = _innerData.layer;
-        _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 6);
+        _batch.vertexBuffer.reserve(maxIndicesPerDrawCall * 4);
         _batch.textureID = _innerData.texture->getGLTexture();
         _batch.priority = _innerData.batchPriority;
         _batch.shader = engine->manager.shaderManager.getShader(_innerData.shader);

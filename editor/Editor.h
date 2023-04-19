@@ -23,6 +23,9 @@ namespace Editor {
         UISlider* slider;
         UniqueDelegate<void(FrameBuffer*)> redirectRenderingDel;
 		UIText* typedText = nullptr;
+		Camera* editorCamera;
+		UniqueDelegate<bool(MouseScrolledEvent&)> mseDel;
+		Vec2F lastClickOrMovedMousePosition;
 
         public:
             explicit Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }
@@ -31,6 +34,11 @@ namespace Editor {
 			void onUpdate(Delta _dt) override;
             void onLateUpdate(Delta _dt) override;
             void onDebugRender(Delta _dt, RenderManager* _renderManager) override;
+
+		private:
+			bool mouseScrolled(MouseScrolledEvent& _event);
+			void mouseHandler();
+
 
         private:
             void redirectRendering(FrameBuffer* _frameBuffer);

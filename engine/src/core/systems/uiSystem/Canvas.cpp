@@ -33,7 +33,7 @@ namespace RDE {
         scene = _scene;
         auto* _cameraNode = graph->createNode("CanvasCamera");
         camera = _cameraNode->addComponent<Camera>(scene->engine->getWindow());
-        camera->setCameraSize(scene->engine->getWindow()->getWindowSize());
+        camera->onResize(scene->engine->getWindow()->getWindowSize());
     }
 
     Canvas::~Canvas() {
@@ -189,7 +189,7 @@ namespace RDE {
 
     void Canvas::onResize(uint _width, uint _height) {
         graph->sceneRoot->getComponent<UIAnchoring>()->setSize({ (float)_width, (float)_height });
-        camera->setCameraSize((int)_width, (int)_height);
+        camera->onResize((int)_width, (int)_height);
     }
 
     void Canvas::setCanvasResolution(const Vec2I& _resolution) {

@@ -156,7 +156,7 @@ namespace RDE {
              * @brief Maximum number of indices that can be accumulated in a single Draw Call, if it is exceeded, an
              * automatic Draw Call will be called to free the buffer.
              */
-            const int maxIndicesPerDrawCall = 120000; // Between 35.000 and 50.000 should be a good range
+            const int maxIndicesPerDrawCall = 20000; // Between 35.000 and 50.000 should be a good range
 
         private:
             /**
@@ -178,6 +178,8 @@ namespace RDE {
              * @brief All the batches to be drawn.
              */
             std::vector<Batch> batches {};
+
+			Camera* overwriteCamera = nullptr;
 
             SpriteBatch() {  }
 
@@ -205,6 +207,8 @@ namespace RDE {
              * @param _engine Engine
              */
 			RDE_FUNC void init(Engine* _engine);
+
+			RDE_FUNC void overwriteRenderingCamera(Camera* _camera);
 
             /**
              * @brief This marks the beginning of a new Draw Call.
