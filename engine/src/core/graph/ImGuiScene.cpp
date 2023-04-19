@@ -210,30 +210,30 @@ namespace RDE {
     }
 
     void ImGuiScene::drawDebugInfo(Scene* _scene) {
-        if(!show) return;
-        ImGui::Begin("Debugging");
-        windowsHovered[0] = checkForFocus();
-        printResolutionFullscreenAndVSync();
-        ImGui::Separator();
-        printAtlases();
-        printFPSDrawCallsAndRAM();
-        showFileExplorer();
-        ImGui::End();
-        console();
-
-        // This part is a bit messy for the moment. Scene elements and canvas are separated in two different EnTT registries,
-        // so I need to split how both are selected and shown and switch between one registry and the other, so that's why there
-        // is selectedNode and selectedNodeCanvas, if one is used, the other is set as null, this way just one of the registries
-        // is shown and everything works fine, and we reuse all the code just by using 2 switching variables.
-        auto* _mainGraph = _scene->graph;
-        hierarchy(_scene);
-
-        if(selectedNode != NODE_ID_NULL) nodeComponents(_mainGraph, selectedNode);
-
-        if(selectedNodeCanvas != NODE_ID_NULL) {
-            auto* _graph = _scene->canvas->graph;
-            nodeComponents(_graph, selectedNodeCanvas);
-        }
+        //if(!show) return;
+        //ImGui::Begin("Debugging");
+        //windowsHovered[0] = checkForFocus();
+        //printResolutionFullscreenAndVSync();
+        //ImGui::Separator();
+        //printAtlases();
+        //printFPSDrawCallsAndRAM();
+        //showFileExplorer();
+        //ImGui::End();
+        //console();
+//
+        //// This part is a bit messy for the moment. Scene elements and canvas are separated in two different EnTT registries,
+        //// so I need to split how both are selected and shown and switch between one registry and the other, so that's why there
+        //// is selectedNode and selectedNodeCanvas, if one is used, the other is set as null, this way just one of the registries
+        //// is shown and everything works fine, and we reuse all the code just by using 2 switching variables.
+        //auto* _mainGraph = _scene->graph;
+        //hierarchy(_scene);
+//
+        //if(selectedNode != NODE_ID_NULL) nodeComponents(_mainGraph, selectedNode);
+//
+        //if(selectedNodeCanvas != NODE_ID_NULL) {
+        //    auto* _graph = _scene->canvas->graph;
+        //    nodeComponents(_graph, selectedNodeCanvas);
+        //}
     }
 
     void ImGuiScene::metrics() {

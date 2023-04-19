@@ -6,7 +6,7 @@
 #include "RDEEntry.h"
 #include "Editor.h"
 
-namespace Editor {
+namespace RDEEditor {
 
     class EditorEntry : public RDE::Engine {
         public:
@@ -21,5 +21,5 @@ namespace Editor {
 }
 
 RDE::Engine* RDE::createEngine(int _argc, char** _argv) {
-    return new Editor::EditorEntry();
+	return new RDEEditor::EditorEntry();
 }

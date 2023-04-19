@@ -13,42 +13,18 @@
 #include "imgui.h"
 #endif
 
-static void myFunc(int _a) {
-    Util::Log::warn("Int: ", _a);
-}
+#include "EditorDockingspaceModule.cpp"
+#include "EditorSceneViewModule.cpp"
+#include "EditorHierarchyModule.cpp"
+#include "EditorComponentsModule.cpp"
+#include "EditorConsoleModule.cpp"
 
-static void myFunc2(int _a) {
-    Util::Log::warn("Int2: ", _a);
-}
-
-namespace Editor {
+namespace RDEEditor {
 
     void Editor::redirectRendering(FrameBuffer* _frameBuffer) {
-		static bool _firstEntry = true;
-        #if !IS_MOBILE()
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-            ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-            ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-            auto viewportSize = Vec2F{ viewportPanelSize.x, viewportPanelSize.y };
-			if(_firstEntry) {
-				Vec2I _windowSize = engine->getWindow()->getWindowSize();
-				Vec2F _initPos = { 
-					-(-_windowSize.x * 0.5f + viewportPanelSize.x * 0.5f), 
-					-(_windowSize.y * 0.5f - viewportPanelSize.y * 0.5f), 
-				};
-				editorCamera->node->getTransform()->setPosition(_initPos);
-				_firstEntry = false;
-			}
-
-            uint32_t textureID = _frameBuffer->getColorAttachmentRendererID();
-			editorCamera->update();
-			ImGui::Image((void*)(intptr_t)textureID, ImVec2{ 1280, 720 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-            ImGui::End();
-            ImGui::PopStyleVar();
-        #endif
+		sceneView(this, _frameBuffer);
     }
 
-    
     void Editor::onInit() {
 		auto* _editorCameraNode = new Node((NodeID)0, nullptr, &engine->manager, new Transform(nullptr));
 		editorCamera = new Camera(_editorCameraNode, &engine->manager, nullptr, engine->getWindow());
@@ -95,20 +71,46 @@ namespace Editor {
 		engine->manager.renderManager.overwriteRenderingCamera(editorCamera);
     }
 
+	void Editor::onImGuiRender(Delta _dt) {
+		dockingSpaceView(this);
+		hierarchyView(this);
+		componentsView(this);
+		consoleView(this);
+	}
+
     void Editor::onDebugRender(Delta _dt, RenderManager* _renderManager) {
 		Scene::onDebugRender(_dt, _renderManager);
 		auto _windowSize = engine->getWindow()->getWindowSize();
 		engine->manager.renderManager.drawLine( { 0, -(float)_windowSize.y }, { 0, (float)_windowSize.y }, Color::Blue);
 		engine->manager.renderManager.drawLine( { -(float)_windowSize.x, 0 }, { (float)_windowSize.x, 0 }, Color::Blue);
+
+		auto _mainCameraSize = mainCamera->getCameraSize();
+		auto _mainCameraPos = mainCamera->node->getTransform()->getPosition();
+		auto _mainCameraRot = mainCamera->node->getTransform()->getRotation();
+
+		DebugShape _cameraShape;
+		_cameraShape.makeSquare(_mainCameraPos, { (float)_mainCameraSize.x, (float)_mainCameraSize.y });
+		_cameraShape.showOutsideColor(true);
+		_cameraShape.setOutlineColor(Color::White);
+		_cameraShape.showInnerColor(false);
+		_cameraShape.setRotation(_mainCameraRot);
+		engine->manager.renderManager.drawShape(_cameraShape);
     }
 
 	bool Editor::mouseScrolled(MouseScrolledEvent& _event) {
+		if(!editorFlags.isSceneViewHovered) {
+			return true;
+		}
+
 		editorCamera->setCurrentZoomLevel(editorCamera->getCurrentZoomLevel() + _event.getScrollY() * 0.1f);
 		return true;
 	}
 
 	void Editor::mouseHandler() {
-		
+		if(!editorFlags.isSceneViewHovered) {
+			return;
+		}
+
 		if(engine->manager.inputManager.isMouseJustPressed(RDE_MOUSE_BUTTON_1)) {
 			lastClickOrMovedMousePosition = engine->manager.inputManager.getMousePosScreenCoords();
 		} else if(engine->manager.inputManager.isMousePressed(RDE_MOUSE_BUTTON_1)) {

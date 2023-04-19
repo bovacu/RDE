@@ -13,19 +13,27 @@
 
 using namespace RDE;
 
-namespace Editor {
+namespace RDEEditor {
+
+	struct EditorFlags {
+		bool isSceneViewActive = false;
+		bool isSceneViewHovered = false;
+	};
 
     class Editor : public Scene {
 
-        PhysicsBody* body;
-        Node* circleNode;
-        bool collisionHappened = false;
-        UISlider* slider;
+        //PhysicsBody* body;
+        //Node* circleNode;
+        //bool collisionHappened = false;
+        //UISlider* slider;
         UniqueDelegate<void(FrameBuffer*)> redirectRenderingDel;
 		UIText* typedText = nullptr;
-		Camera* editorCamera;
 		UniqueDelegate<bool(MouseScrolledEvent&)> mseDel;
-		Vec2F lastClickOrMovedMousePosition;
+
+		public:
+			EditorFlags editorFlags;
+			Camera* editorCamera;
+			Vec2F lastClickOrMovedMousePosition;
 
         public:
             explicit Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }
@@ -34,6 +42,7 @@ namespace Editor {
 			void onUpdate(Delta _dt) override;
             void onLateUpdate(Delta _dt) override;
             void onDebugRender(Delta _dt, RenderManager* _renderManager) override;
+			void onImGuiRender(Delta _dt) override;
 
 		private:
 			bool mouseScrolled(MouseScrolledEvent& _event);

@@ -120,6 +120,11 @@ namespace RDE {
             */
             DeviceInfoProvider devideInfoProvider {};
 
+            /**
+            * @see FrameBuffer
+            */
+            FrameBuffer* frameBuffer = nullptr;
+
         private:
             /**
              * @brief Delta time of the Fixed Update method.
@@ -140,11 +145,6 @@ namespace RDE {
              * @brief Color of the background.
              */
             Color backgroundColor = Color::Red;
-
-            /**
-             * @see FrameBuffer
-             */
-            FrameBuffer* frameBuffer = nullptr;
 
             /**
              * @brief Function to render in a custom way.
