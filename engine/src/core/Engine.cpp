@@ -195,7 +195,7 @@ namespace RDE {
 		manager.sceneManager.getDisplayedScene()->updateRenderTree(true);
         manager.sceneManager.getDisplayedScene()->canvas->onResize(_width, _height);
 
-        return true;
+        return false;
     }
 
     int Engine::getFps() const { return (int)fpsCounter; }

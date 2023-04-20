@@ -29,6 +29,7 @@ namespace RDEEditor {
         UniqueDelegate<void(FrameBuffer*)> redirectRenderingDel;
 		UIText* typedText = nullptr;
 		UniqueDelegate<bool(MouseScrolledEvent&)> mseDel;
+		UniqueDelegate<bool(WindowResizedEvent&)> wreDel;
 
 		public:
 			EditorFlags editorFlags;
@@ -46,11 +47,11 @@ namespace RDEEditor {
 
 		private:
 			bool mouseScrolled(MouseScrolledEvent& _event);
+			bool windowResized(WindowResizedEvent& _event);
 			void mouseHandler();
 
 
         private:
-            void redirectRendering(FrameBuffer* _frameBuffer);
             void textStressTest(int _amount);
             void physicsTest();
             void particleSystemTest();

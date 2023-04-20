@@ -21,16 +21,12 @@
 
 namespace RDEEditor {
 
-    void Editor::redirectRendering(FrameBuffer* _frameBuffer) {
-		sceneView(this, _frameBuffer);
-    }
-
     void Editor::onInit() {
+		engine->manager.renderManager.setClearColor(Color { 76, 76, 76, 255 });
+		//engine->manager.shaderManager.loadShader("gridShader", "editor/assets/shaders/gridVertex.glsl", "editor/assets/shaders/gridFragment.glsl");
+
 		auto* _editorCameraNode = new Node((NodeID)0, nullptr, &engine->manager, new Transform(nullptr));
 		editorCamera = new Camera(_editorCameraNode, &engine->manager, nullptr, engine->getWindow());
-
-        redirectRenderingDel.bind<&Editor::redirectRendering>(this);
-        engine->setRenderingRedirectionToImGui(redirectRenderingDel);
 
 		auto _textNode = graph->createNode("Duck");
 		nodes.push_back(_textNode->getID());
@@ -41,6 +37,7 @@ namespace RDEEditor {
 		});
 
 		mseDel.bind<&Editor::mouseScrolled>(this);
+		wreDel.bind<&Editor::windowResized>(this);
     }
 
     void Editor::onUpdate(Delta _dt) {
@@ -64,6 +61,7 @@ namespace RDEEditor {
 	void Editor::onEvent(Event& _event) {
 		EventDispatcher dispatcher(_event);
 		dispatcher.dispatchEvent<MouseScrolledEvent>(mseDel);
+		dispatcher.dispatchEvent<WindowResizedEvent>(wreDel);
 	}
 
     void Editor::onLateUpdate(Delta _dt) {
@@ -73,6 +71,7 @@ namespace RDEEditor {
 
 	void Editor::onImGuiRender(Delta _dt) {
 		dockingSpaceView(this);
+		sceneView(this, engine->frameBuffer);
 		hierarchyView(this);
 		componentsView(this);
 		consoleView(this);
@@ -84,17 +83,19 @@ namespace RDEEditor {
 		engine->manager.renderManager.drawLine( { 0, -(float)_windowSize.y }, { 0, (float)_windowSize.y }, Color::Blue);
 		engine->manager.renderManager.drawLine( { -(float)_windowSize.x, 0 }, { (float)_windowSize.x, 0 }, Color::Blue);
 
-		auto _mainCameraSize = mainCamera->getCameraSize();
-		auto _mainCameraPos = mainCamera->node->getTransform()->getPosition();
-		auto _mainCameraRot = mainCamera->node->getTransform()->getRotation();
+		for(auto* _camera : getCameras()) { 
+			auto _cameraSize = mainCamera->getCameraSize();
+			auto _cameraPos = mainCamera->node->getTransform()->getPosition();
+			auto _cameraRot = mainCamera->node->getTransform()->getRotation();
 
-		DebugShape _cameraShape;
-		_cameraShape.makeSquare(_mainCameraPos, { (float)_mainCameraSize.x, (float)_mainCameraSize.y });
-		_cameraShape.showOutsideColor(true);
-		_cameraShape.setOutlineColor(Color::White);
-		_cameraShape.showInnerColor(false);
-		_cameraShape.setRotation(_mainCameraRot);
-		engine->manager.renderManager.drawShape(_cameraShape);
+			DebugShape _cameraShape;
+			_cameraShape.makeSquare(_cameraPos, { (float)_cameraSize.x, (float)_cameraSize.y });
+			_cameraShape.showOutsideColor(true);
+			_cameraShape.setOutlineColor(Color::White);
+			_cameraShape.showInnerColor(false);
+			_cameraShape.setRotation(_cameraRot);
+			engine->manager.renderManager.drawShape(_cameraShape);
+		}
     }
 
 	bool Editor::mouseScrolled(MouseScrolledEvent& _event) {
@@ -103,6 +104,12 @@ namespace RDEEditor {
 		}
 
 		editorCamera->setCurrentZoomLevel(editorCamera->getCurrentZoomLevel() + _event.getScrollY() * 0.1f);
+		return true;
+	}
+
+	bool Editor::windowResized(WindowResizedEvent& _event) {
+		Util::Log::info("Hello");
+		editorCamera->onResize(_event.getWidth(), _event.getHeight());
 		return true;
 	}
 

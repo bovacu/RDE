@@ -38,10 +38,10 @@ namespace RDE {
              */
             SpriteBatch batch;
 
-            /**
+			/**
              * @brief Color to paint the background.
              */
-            Color clearColor = Color::Red;
+			Color clearColor = Color { 59 ,59 ,61 , 255 };
 
             /**
              * @brief Engine reference.
