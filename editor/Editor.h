@@ -21,15 +21,15 @@ namespace RDEEditor {
 	};
 
     class Editor : public Scene {
-
-        //PhysicsBody* body;
-        //Node* circleNode;
-        //bool collisionHappened = false;
-        //UISlider* slider;
         UniqueDelegate<void(FrameBuffer*)> redirectRenderingDel;
 		UIText* typedText = nullptr;
 		UniqueDelegate<bool(MouseScrolledEvent&)> mseDel;
 		UniqueDelegate<bool(WindowResizedEvent&)> wreDel;
+		Texture gridTexture;
+		SpriteRenderer* gridSprite = nullptr;
+		ShaderID gridShaderID;
+		Color backgroundColor = { 76, 76, 76, 255 };
+		Vec2F sceneViewOffset;
 
 		public:
 			EditorFlags editorFlags;

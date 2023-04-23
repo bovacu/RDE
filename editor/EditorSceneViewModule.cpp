@@ -1,7 +1,7 @@
 using namespace RDE;
 using namespace RDEEditor;
 
-void sceneView(Editor* _editor, FrameBuffer* _frameBuffer) {
+void sceneView(Editor* _editor, FrameBuffer* _frameBuffer, Vec2F* _sceneViewOffset) {
 	static bool _firstEntry = true;
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 	ImGui::Begin("Scene View", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -23,6 +23,10 @@ void sceneView(Editor* _editor, FrameBuffer* _frameBuffer) {
 
 	_editor->editorFlags.isSceneViewActive = ImGui::IsWindowFocused();
 	_editor->editorFlags.isSceneViewHovered = ImGui::IsWindowHovered();
+
+	*_sceneViewOffset = { (_editor->engine->getWindow()->getWidth() - ImGui::GetWindowSize().x) * 0.5f, 
+						  (_editor->engine->getWindow()->getHeight() - ImGui::GetWindowSize().y) * 0.5f };
+
 	ImGui::End();
 	ImGui::PopStyleVar();
 }

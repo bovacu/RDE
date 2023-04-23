@@ -401,7 +401,6 @@ namespace RDE {
 
 
 		for(auto _i = 0; _i < justPressedKeys.size(); _i++) {
-			Util::Log::info("Set ", justPressedKeys[_i], " as keep pressed");
 			keyboardInput->setState(justPressedKeys[_i], RDE_INPUT_STATUS_KEEP_PRESSED);
 		}
 		justPressedKeys.clear();

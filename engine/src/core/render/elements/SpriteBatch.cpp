@@ -186,10 +186,6 @@ namespace RDE {
     void SpriteBatch::orderBatches() {
         std::sort(batches.begin(), batches.end(), [&](const Batch& a_batch, const Batch& b_batch) {
             if(a_batch.priority == b_batch.priority) {
-                if (a_batch.layer == b_batch.layer) {
-                    return a_batch.textureID < b_batch.textureID;
-                }
-
                 return a_batch.layer < b_batch.layer;
             }
 

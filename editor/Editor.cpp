@@ -22,11 +22,44 @@
 namespace RDEEditor {
 
     void Editor::onInit() {
-		engine->manager.renderManager.setClearColor(Color { 76, 76, 76, 255 });
-		//engine->manager.shaderManager.loadShader("gridShader", "editor/assets/shaders/gridVertex.glsl", "editor/assets/shaders/gridFragment.glsl");
+		engine->manager.renderManager.setClearColor(backgroundColor);
+		gridShaderID = engine->manager.shaderManager.loadShader("gridShader", "editor/assets/shaders/gridVertex.glsl", "editor/assets/shaders/gridFragment.glsl");
+		GLsizei _structSize = sizeof(OpenGLVertex);
+		Util::GL::checkError("Error BEFORE ConfigBasicShader");
+		engine->manager.shaderManager.loadShaderVertexConfig("gridShader", {
+			VertexConfig {
+			0, 2, GL_FLOAT, 0, _structSize
+			},
+			VertexConfig {
+				1, 4, GL_UNSIGNED_BYTE, sizeof(float) * 2, _structSize
+			},
+			VertexConfig {
+				2, 2, GL_FLOAT, sizeof(float) * 2 + sizeof(unsigned char) * 4, _structSize
+			}
+		},
+		{
+			"viewProjectionMatrix"
+		},
+		10);
+
+		auto _size = 1920 * 1080 * 4;
+		unsigned char* _data = new unsigned char[_size];
+		for(auto _i = 0; _i < _size;) {
+			_data[_i + 0] = 255;
+			_data[_i + 1] = 255;
+			_data[_i + 2] = 255;
+			_data[_i + 3] = 255;
+			_i += 4;
+		}
 
 		auto* _editorCameraNode = new Node((NodeID)0, nullptr, &engine->manager, new Transform(nullptr));
 		editorCamera = new Camera(_editorCameraNode, &engine->manager, nullptr, engine->getWindow());
+
+		gridTexture.loadTextureFromMemory(1920, 1080, _data);
+		gridSprite = graph->createNode("Grid")->addComponent<SpriteRenderer>(SpriteRendererConfig {
+			.texture = &gridTexture
+		});
+		gridSprite->setShaderID(gridShaderID);
 
 		auto _textNode = graph->createNode("Duck");
 		nodes.push_back(_textNode->getID());
@@ -38,6 +71,8 @@ namespace RDEEditor {
 
 		mseDel.bind<&Editor::mouseScrolled>(this);
 		wreDel.bind<&Editor::windowResized>(this);
+
+		delete [] _data;
     }
 
     void Editor::onUpdate(Delta _dt) {
@@ -56,6 +91,10 @@ namespace RDEEditor {
         _timer += _dt;
 
 		mouseHandler();
+
+		if(engine->manager.inputManager.isKeyJustPressed(RDE_KEYBOARD_KEY_O)) {
+			editorCamera->node->getTransform()->setPosition(sceneViewOffset.x, -sceneViewOffset.y);
+		}
     }
 
 	void Editor::onEvent(Event& _event) {
@@ -67,11 +106,21 @@ namespace RDEEditor {
     void Editor::onLateUpdate(Delta _dt) {
         Scene::onLateUpdate(_dt);
 		engine->manager.renderManager.overwriteRenderingCamera(editorCamera);
+
+		engine->manager.shaderManager.setFloat4(gridShaderID, "backgroundColor", glm::vec4{ backgroundColor.r / 255.f, backgroundColor.g / 255.f, backgroundColor.b / 255.f, backgroundColor.a / 255.f });
+		engine->manager.shaderManager.setFloat(gridShaderID, "zoom", editorCamera->getCurrentZoomLevel());
+		engine->manager.shaderManager.setFloat2(gridShaderID, "resolution", glm::vec2 { (float)engine->getWindow()->getWidth(), (float)engine->getWindow()->getHeight() });
+		
+		auto _cameraPos = editorCamera->node->getTransform()->getPosition();
+		engine->manager.shaderManager.setFloat2(gridShaderID, "cameraDisplacement", glm::vec2 { _cameraPos.x, _cameraPos.y });
+
+		auto _zoom = editorCamera->getCurrentZoomLevel();
+		gridSprite->node->getTransform()->setScale(_zoom + std::abs(_cameraPos.x), _zoom + std::abs(_cameraPos.x));
     }
 
 	void Editor::onImGuiRender(Delta _dt) {
 		dockingSpaceView(this);
-		sceneView(this, engine->frameBuffer);
+		sceneView(this, engine->frameBuffer, &sceneViewOffset);
 		hierarchyView(this);
 		componentsView(this);
 		consoleView(this);
@@ -79,9 +128,6 @@ namespace RDEEditor {
 
     void Editor::onDebugRender(Delta _dt, RenderManager* _renderManager) {
 		Scene::onDebugRender(_dt, _renderManager);
-		auto _windowSize = engine->getWindow()->getWindowSize();
-		engine->manager.renderManager.drawLine( { 0, -(float)_windowSize.y }, { 0, (float)_windowSize.y }, Color::Blue);
-		engine->manager.renderManager.drawLine( { -(float)_windowSize.x, 0 }, { (float)_windowSize.x, 0 }, Color::Blue);
 
 		for(auto* _camera : getCameras()) { 
 			auto _cameraSize = mainCamera->getCameraSize();
