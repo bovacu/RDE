@@ -49,6 +49,7 @@ namespace RDEEditor {
 			bool mouseScrolled(MouseScrolledEvent& _event);
 			bool windowResized(WindowResizedEvent& _event);
 			void mouseHandler();
+			void centerCamera();
 
 
         private:

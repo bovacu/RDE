@@ -93,7 +93,7 @@ namespace RDEEditor {
 		mouseHandler();
 
 		if(engine->manager.inputManager.isKeyJustPressed(RDE_KEYBOARD_KEY_O)) {
-			editorCamera->node->getTransform()->setPosition(sceneViewOffset.x, -sceneViewOffset.y);
+			centerCamera();
 		}
     }
 
@@ -173,5 +173,9 @@ namespace RDEEditor {
 			editorCamera->node->getTransform()->translate(_diff * -editorCamera->getCurrentZoomLevel());
 		}
 
+	}
+
+	void Editor::centerCamera() {
+		editorCamera->node->getTransform()->setPosition(sceneViewOffset.x, -sceneViewOffset.y);
 	}
 }
