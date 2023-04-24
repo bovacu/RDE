@@ -70,19 +70,6 @@ namespace RDE {
         return viewProjectionMatrix;
     }
 
-    void Camera::onEvent(Event& _event) {
-
-    }
-
-    bool Camera::onMouseScrolled(MouseScrolledEvent& _event) {
-        zoom -= _event.getScrollY() * 0.1f;
-        zoom = std::max(zoom, 0.5f);
-        float _aspectRatio = viewport->getPhysicalAspectRatio();
-        projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
-        dirty = true;
-        return false;
-    }
-
     float Camera::getAspectRatio() const {
         return viewport->getVirtualAspectRatio();
     }
@@ -93,7 +80,7 @@ namespace RDE {
 
     void Camera::setCurrentZoomLevel(float _zoomLevel) {
         zoom = _zoomLevel;
-        float _aspectRatio = viewport->getVirtualAspectRatio();
+        float _aspectRatio = viewport->getPhysicalAspectRatio();
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
         dirty = true;
     }

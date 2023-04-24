@@ -79,19 +79,6 @@ namespace RDE {
 			RDE_FUNC ~Camera();
 
             /**
-             * @brief Handles events that concerns the camera.
-             * @param _event Event to be handled
-             */
-			RDE_FUNC void onEvent(Event& _event);
-
-            /**
-             * @brief Handles the event of mouse scrolling.
-             * @param _event Event to be handled
-             * @return bool
-             */
-			RDE_FUNC_ND bool onMouseScrolled(MouseScrolledEvent& _event);
-
-            /**
              * @brief Resizes the camera components depending on the Window size.
              * @param _width Window's width
              * @param _height Window's height

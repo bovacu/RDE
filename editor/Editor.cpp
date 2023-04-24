@@ -173,13 +173,14 @@ namespace RDEEditor {
 		}
 
 		editorCamera->setCurrentZoomLevel(editorCamera->getCurrentZoomLevel() + _event.getScrollY() * 0.1f);
+		editorCamera->recalculateViewProjectionMatrix();
 		return true;
 	}
 
 	bool Editor::windowResized(WindowResizedEvent& _event) {
 		editorCamera->onResize(_event.getWidth(), _event.getHeight());
 		editorCamera->recalculateViewProjectionMatrix();
-		generateGridTexture();
+		//generateGridTexture();
 		return true;
 	}
 
