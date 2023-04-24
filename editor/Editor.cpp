@@ -19,6 +19,8 @@
 #include "EditorComponentsModule.cpp"
 #include "EditorConsoleModule.cpp"
 
+#define GRID_TEXTURE_SIZE 2500
+
 namespace RDEEditor {
 
     void Editor::onInit() {
@@ -55,7 +57,7 @@ namespace RDEEditor {
 		auto* _editorCameraNode = new Node((NodeID)0, nullptr, &engine->manager, new Transform(nullptr));
 		editorCamera = new Camera(_editorCameraNode, &engine->manager, nullptr, engine->getWindow());
 
-		gridTexture.loadTextureFromMemory(1920, 1080, _data);
+		generateGridTexture();
 		gridSprite = graph->createNode("Grid")->addComponent<SpriteRenderer>(SpriteRendererConfig {
 			.texture = &gridTexture
 		});
@@ -74,6 +76,23 @@ namespace RDEEditor {
 
 		delete [] _data;
     }
+
+	void Editor::generateGridTexture() {
+		auto _windowSize = engine->getWindow()->getWindowSize();
+		auto _size = _windowSize.x * _windowSize.y * 4;
+		unsigned char* _data = new unsigned char[_size];
+		for(auto _i = 0; _i < _size;) {
+			_data[_i + 0] = 255;
+			_data[_i + 1] = 255;
+			_data[_i + 2] = 255;
+			_data[_i + 3] = 255;
+			_i += 4;
+		}
+
+		gridTexture.loadTextureFromMemory(_windowSize.x, _windowSize.y, _data);
+
+		delete [] _data;
+	}
 
     void Editor::onUpdate(Delta _dt) {
         Scene::onUpdate(_dt);
@@ -156,6 +175,7 @@ namespace RDEEditor {
 	bool Editor::windowResized(WindowResizedEvent& _event) {
 		editorCamera->onResize(_event.getWidth(), _event.getHeight());
 		editorCamera->recalculateViewProjectionMatrix();
+		generateGridTexture();
 		return true;
 	}
 

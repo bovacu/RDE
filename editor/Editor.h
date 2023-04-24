@@ -52,6 +52,7 @@ namespace RDEEditor {
 			bool windowResized(WindowResizedEvent& _event);
 			void mouseHandler();
 			void centerCamera();
+			void generateGridTexture();
 
 
         private:
