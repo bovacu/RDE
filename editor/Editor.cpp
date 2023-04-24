@@ -61,11 +61,11 @@ namespace RDEEditor {
 		});
 		gridSprite->setShaderID(gridShaderID);
 
-		auto _textNode = graph->createNode("Duck");
-		nodes.push_back(_textNode->getID());
-		_textNode->getTransform()->setPosition(0, 0);
+		duckNode = graph->createNode("Duck");
+		nodes.push_back(duckNode->getID());
+		duckNode->getTransform()->setPosition(0, 0);
 		auto _texture = engine->manager.textureManager.getSubTexture("defaultAssets", "duck");
-		auto* _sprite = _textNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
+		auto* _sprite = duckNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
 			.texture = _texture
 		});
 
@@ -107,7 +107,7 @@ namespace RDEEditor {
         Scene::onLateUpdate(_dt);
 		engine->manager.renderManager.overwriteRenderingCamera(editorCamera);
 
-		engine->manager.shaderManager.setFloat4(gridShaderID, "backgroundColor", glm::vec4{ backgroundColor.r / 255.f, backgroundColor.g / 255.f, backgroundColor.b / 255.f, backgroundColor.a / 255.f });
+		engine->manager.shaderManager.setFloat4(gridShaderID, "gridColor", glm::vec4{ gridColor.r / 255.f, gridColor.g / 255.f, gridColor.b / 255.f, gridColor.a / 255.f });
 		engine->manager.shaderManager.setFloat(gridShaderID, "zoom", editorCamera->getCurrentZoomLevel());
 		engine->manager.shaderManager.setFloat2(gridShaderID, "resolution", glm::vec2 { (float)engine->getWindow()->getWidth(), (float)engine->getWindow()->getHeight() });
 		
@@ -115,8 +115,8 @@ namespace RDEEditor {
 		engine->manager.shaderManager.setFloat2(gridShaderID, "cameraDisplacement", glm::vec2 { _cameraPos.x, _cameraPos.y });
 
 		auto _zoom = editorCamera->getCurrentZoomLevel();
-		gridSprite->node->getTransform()->setScale(_zoom + std::abs(_cameraPos.x), _zoom + std::abs(_cameraPos.x));
-    }
+		gridSprite->node->getTransform()->setScale(_zoom + std::abs(_cameraPos.x), _zoom + std::abs(_cameraPos.x));    
+	}
 
 	void Editor::onImGuiRender(Delta _dt) {
 		dockingSpaceView(this);
@@ -130,9 +130,9 @@ namespace RDEEditor {
 		Scene::onDebugRender(_dt, _renderManager);
 
 		for(auto* _camera : getCameras()) { 
-			auto _cameraSize = mainCamera->getCameraSize();
-			auto _cameraPos = mainCamera->node->getTransform()->getPosition();
-			auto _cameraRot = mainCamera->node->getTransform()->getRotation();
+			auto _cameraSize = _camera->getCameraSize();
+			auto _cameraPos = _camera->node->getTransform()->getPosition();
+			auto _cameraRot = _camera->node->getTransform()->getRotation();
 
 			DebugShape _cameraShape;
 			_cameraShape.makeSquare(_cameraPos, { (float)_cameraSize.x, (float)_cameraSize.y });
@@ -154,8 +154,8 @@ namespace RDEEditor {
 	}
 
 	bool Editor::windowResized(WindowResizedEvent& _event) {
-		Util::Log::info("Hello");
 		editorCamera->onResize(_event.getWidth(), _event.getHeight());
+		editorCamera->recalculateViewProjectionMatrix();
 		return true;
 	}
 
@@ -176,6 +176,7 @@ namespace RDEEditor {
 	}
 
 	void Editor::centerCamera() {
-		editorCamera->node->getTransform()->setPosition(sceneViewOffset.x, -sceneViewOffset.y);
+		auto _zoom = editorCamera->getCurrentZoomLevel();
+		editorCamera->node->getTransform()->setPosition(sceneViewOffset.x * _zoom, -sceneViewOffset.y * _zoom);
 	}
 }

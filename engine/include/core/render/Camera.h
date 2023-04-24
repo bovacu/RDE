@@ -190,11 +190,10 @@ namespace RDE {
 			RDE_FUNC void setEnabled(bool _enabled) override;
 			RDE_FUNC_ND bool isEnabled() override;
 
-        private:
             /**
              * @brief Computes the View Matrix of the camera.
              */
-            void recalculateViewMatrix();
+			RDE_FUNC void recalculateViewProjectionMatrix();
     };
 
 }

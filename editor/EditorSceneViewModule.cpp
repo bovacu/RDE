@@ -19,7 +19,8 @@ void sceneView(Editor* _editor, FrameBuffer* _frameBuffer, Vec2F* _sceneViewOffs
 
 	uint32_t textureID = _frameBuffer->getColorAttachmentRendererID();
 	_editor->editorCamera->update();
-	ImGui::Image((void*)(intptr_t)textureID, ImVec2{ 1280, 720 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+	auto _windowSize = _editor->engine->getWindow()->getWindowSize();
+	ImGui::Image((void*)(intptr_t)textureID, ImVec2{ (float)_windowSize.x, (float)_windowSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 	_editor->editorFlags.isSceneViewActive = ImGui::IsWindowFocused();
 	_editor->editorFlags.isSceneViewHovered = ImGui::IsWindowHovered();

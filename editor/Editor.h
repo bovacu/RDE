@@ -27,8 +27,10 @@ namespace RDEEditor {
 		UniqueDelegate<bool(WindowResizedEvent&)> wreDel;
 		Texture gridTexture;
 		SpriteRenderer* gridSprite = nullptr;
+		Node* duckNode = nullptr;
 		ShaderID gridShaderID;
 		Color backgroundColor = { 76, 76, 76, 255 };
+		Color gridColor = { 63, 63, 63, 255 };
 		Vec2F sceneViewOffset;
 
 		public:
