@@ -1,5 +1,3 @@
-using namespace RDE;
-using namespace RDEEditor;
 
 void sceneView(Editor* _editor, FrameBuffer* _frameBuffer, Vec2F* _sceneViewOffset) {
 	static bool _firstEntry = true;

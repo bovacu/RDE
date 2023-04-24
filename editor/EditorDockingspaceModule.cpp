@@ -1,5 +1,3 @@
-using namespace RDEEditor;
-
 #include "EditorMenuBarModule.cpp"
 
 void dockingSpaceView(Editor* _editor) {
@@ -19,4 +17,12 @@ void dockingSpaceView(Editor* _editor) {
 	ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 	menuBarView(_editor);
 	ImGui::End();
+}
+
+int createID(Editor* _editor) {
+	return _editor->editorData.idIndex++;
+}
+
+void resetID(Editor* _editor) {
+	_editor->editorData.idIndex = 0;
 }

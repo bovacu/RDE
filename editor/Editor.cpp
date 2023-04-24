@@ -13,15 +13,17 @@
 #include "imgui.h"
 #endif
 
-#include "EditorDockingspaceModule.cpp"
-#include "EditorSceneViewModule.cpp"
-#include "EditorHierarchyModule.cpp"
-#include "EditorComponentsModule.cpp"
-#include "EditorConsoleModule.cpp"
+
 
 #define GRID_TEXTURE_SIZE 2500
 
 namespace RDEEditor {
+
+	#include "EditorDockingspaceModule.cpp"
+	#include "EditorSceneViewModule.cpp"
+	#include "EditorHierarchyModule.cpp"
+	#include "EditorComponentsModule.cpp"
+	#include "EditorConsoleModule.cpp"
 
     void Editor::onInit() {
 		engine->manager.renderManager.setClearColor(backgroundColor);
@@ -143,6 +145,8 @@ namespace RDEEditor {
 		hierarchyView(this);
 		componentsView(this);
 		consoleView(this);
+
+		resetID(this);
 	}
 
     void Editor::onDebugRender(Delta _dt, RenderManager* _renderManager) {
@@ -196,6 +200,10 @@ namespace RDEEditor {
 	}
 
 	void Editor::centerCamera() {
+		if(!editorFlags.isSceneViewHovered || !editorFlags.isSceneViewActive) {
+			return;
+		}
+
 		auto _zoom = editorCamera->getCurrentZoomLevel();
 		editorCamera->node->getTransform()->setPosition(sceneViewOffset.x * _zoom, -sceneViewOffset.y * _zoom);
 	}

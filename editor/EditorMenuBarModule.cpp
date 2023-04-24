@@ -1,4 +1,3 @@
-using namespace RDEEditor;
 
 void menuBarView(Editor* _editor) {
 	if (ImGui::BeginMenuBar()) {

@@ -18,6 +18,15 @@ namespace RDEEditor {
 	struct EditorFlags {
 		bool isSceneViewActive = false;
 		bool isSceneViewHovered = false;
+
+		bool isConsoleViewActive = false;
+		bool isConsoleViewHovered = false;
+	};
+
+	struct EditorData {
+		NodeID selectedNode = NODE_ID_NULL;
+		NodeID selectedNodeCanvas = NODE_ID_NULL;	
+		int idIndex = 0;
 	};
 
     class Editor : public Scene {
@@ -35,6 +44,7 @@ namespace RDEEditor {
 
 		public:
 			EditorFlags editorFlags;
+			EditorData editorData;
 			Camera* editorCamera;
 			Vec2F lastClickOrMovedMousePosition;
 
