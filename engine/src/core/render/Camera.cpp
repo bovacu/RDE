@@ -20,17 +20,15 @@ namespace RDE {
         glViewport(0, 0, _size.x, _size.y);
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
-        size = _size;
         dirty = true;
     }
 
 	void Camera::onResize(int _width, int _height) {
 		viewport->update({_width, _height});
-		float _aspectRatio = viewport->getPhysicalAspectRatio();
+		float _aspectRatio = viewport->getDeviceAspectRatio();
 		glViewport(0, 0, _width, _height);
 		projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
 		viewProjectionMatrix = projectionMatrix * viewMatrix;
-		size = { _width, _height };
 		dirty = true;
 	}
 
@@ -54,11 +52,6 @@ namespace RDE {
             viewMatrix = glm::inverse(_mat);
             viewProjectionMatrix = projectionMatrix * viewMatrix;
             dirty = false;
-
-//			glScissor((window->getWidth() - size.x) * 0.5f + node->getTransform()->getPosition().x, 
-//			          (window->getHeight() - size.y) * 0.5f + node->getTransform()->getPosition().y, size.x,
-//			          size.y);
-//			glEnable(GL_SCISSOR_TEST);
         }
     }
 
@@ -80,7 +73,7 @@ namespace RDE {
 
     void Camera::setCurrentZoomLevel(float _zoomLevel) {
         zoom = _zoomLevel;
-        float _aspectRatio = viewport->getPhysicalAspectRatio();
+        float _aspectRatio = viewport->getDeviceAspectRatio();
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
         dirty = true;
     }
@@ -101,19 +94,6 @@ namespace RDE {
         return viewport;
     }
 
-    void Camera::setCameraSize(const Vec2I& _cameraSize) {
-        setCameraSize(_cameraSize.x, _cameraSize.y);
-    }
-
-    void Camera::setCameraSize(int _width, int _height) {
-		size = {_width, _height};
-		dirty = true;
-    }
-
-    Vec2I Camera::getCameraSize() {
-        return size;
-    }
-
     bool Camera::isElementInside(Transform* _transform, const Vec2F& _size) const {
         auto _elementTopLeft = _transform->getModelMatrixPosition();
         auto _elementBottomRight = _elementTopLeft;
@@ -122,8 +102,9 @@ namespace RDE {
 
         auto _cameraTopLeft = node->getTransform()->getModelMatrixPosition();
         auto _cameraBottomRight = node->getTransform()->getModelMatrixPosition();
-        _cameraTopLeft += { -(float)size.x / 2.f * zoom, (float)size.y / 2.f * zoom };
-        _cameraBottomRight += { (float)size.x / 2.f * zoom, -(float)size.y / 2.f * zoom };
+		auto _viewportVRes = viewport->getVirtualResolution();
+		_cameraTopLeft += { -(float)_viewportVRes.x / 2.f * zoom, (float)_viewportVRes.y / 2.f * zoom };
+		_cameraBottomRight += { (float)_viewportVRes.x / 2.f * zoom, -(float)_viewportVRes.y / 2.f * zoom };
 
         if (_elementTopLeft.x == _elementBottomRight.x || _elementTopLeft.y == _elementBottomRight.y || _cameraBottomRight.x == _cameraTopLeft.x || _cameraTopLeft.y == _cameraBottomRight.y) return false;
         if(_elementTopLeft.x > _cameraBottomRight.x || _cameraTopLeft.x > _elementBottomRight.x) return false;

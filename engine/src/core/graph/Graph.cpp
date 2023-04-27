@@ -225,6 +225,10 @@ namespace RDE {
         }
     }
 
+	bool Graph::isCanvasCamera() {
+		return renderingTreeData.isUI;
+	}
+
     bool Graph::isNodeActive(Node* _node) {
         return registry.any_of<Active>(_node->getID());
     }

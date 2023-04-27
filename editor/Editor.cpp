@@ -137,6 +137,8 @@ namespace RDEEditor {
 
 		auto _zoom = editorCamera->getCurrentZoomLevel();
 		gridSprite->node->getTransform()->setScale(_zoom + std::abs(_cameraPos.x), _zoom + std::abs(_cameraPos.x));    
+
+		editorCamera->recalculateViewProjectionMatrix();
 	}
 
 	void Editor::onImGuiRender(Delta _dt) {
@@ -153,7 +155,7 @@ namespace RDEEditor {
 		Scene::onDebugRender(_dt, _renderManager);
 
 		for(auto* _camera : getCameras()) { 
-			auto _cameraSize = _camera->getCameraSize();
+			auto _cameraSize = _camera->getViewport()->getVirtualResolution();
 			auto _cameraPos = _camera->node->getTransform()->getPosition();
 			auto _cameraRot = _camera->node->getTransform()->getRotation();
 
@@ -165,6 +167,18 @@ namespace RDEEditor {
 			_cameraShape.setRotation(_cameraRot);
 			engine->manager.renderManager.drawShape(_cameraShape);
 		}
+
+		auto _canvasSize = canvas->getCamera()->getViewport()->getVirtualResolution();
+		auto _canvasPos = canvas->graph->getRoot()->getTransform()->getPosition();
+		auto _canvasRot = canvas->graph->getRoot()->getTransform()->getRotation();
+
+		DebugShape _canvasCamera;
+		_canvasCamera.makeSquare(_canvasPos, { (float)_canvasSize.x, (float)_canvasSize.y });
+		_canvasCamera.showOutsideColor(true);
+		_canvasCamera.setOutlineColor(Color::Orange);
+		_canvasCamera.showInnerColor(false);
+		_canvasCamera.setRotation(_canvasRot);
+		engine->manager.renderManager.drawShape(_canvasCamera);
     }
 
 	bool Editor::mouseScrolled(MouseScrolledEvent& _event) {
@@ -173,14 +187,13 @@ namespace RDEEditor {
 		}
 
 		editorCamera->setCurrentZoomLevel(editorCamera->getCurrentZoomLevel() + _event.getScrollY() * 0.1f);
-		editorCamera->recalculateViewProjectionMatrix();
 		return true;
 	}
 
 	bool Editor::windowResized(WindowResizedEvent& _event) {
 		editorCamera->onResize(_event.getWidth(), _event.getHeight());
-		editorCamera->recalculateViewProjectionMatrix();
-		//generateGridTexture();
+		generateGridTexture();
+		editorCamera->getViewport()->matchVirtualResolutionToDeviceResolution();
 		return true;
 	}
 
@@ -201,7 +214,7 @@ namespace RDEEditor {
 	}
 
 	void Editor::centerCamera() {
-		if(!editorFlags.isSceneViewHovered || !editorFlags.isSceneViewActive) {
+		if(!editorFlags.isSceneViewHovered && !editorFlags.isSceneViewActive) {
 			return;
 		}
 

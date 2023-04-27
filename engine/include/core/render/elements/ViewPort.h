@@ -60,13 +60,15 @@ namespace RDE {
              * @brief Returns the aspect ratio of the physical screen.
              * @return float
              */
-			RDE_FUNC_ND float getPhysicalAspectRatio() const;
+			RDE_FUNC_ND float getDeviceAspectRatio() const;
 
             /**
              * @brief Returns the device resolution.
              * @return Vec2I
              */
 			RDE_FUNC_ND Vec2I getDeviceResolution() const;
+
+			RDE_FUNC void setVirtualResolutionTarget(const Vec2I& _targetVirtualRes);
 
             /**
              * Sets if the UI scales towards width screen changes, height screen changes or both.
@@ -82,6 +84,8 @@ namespace RDE {
 			RDE_FUNC_ND Vec2F getUIScaleWeights() const;
 
 			RDE_FUNC_ND bool isLandscape() const { return landscape; }
+
+			RDE_FUNC void matchVirtualResolutionToDeviceResolution();
 
 			RDE_FUNC virtual ~ViewPort() {};
     };

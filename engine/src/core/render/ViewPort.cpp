@@ -20,7 +20,7 @@ namespace RDE {
         return (float)virtualResolution.x / (float)virtualResolution.y;
     }
 
-    float ViewPort::getPhysicalAspectRatio() const {
+    float ViewPort::getDeviceAspectRatio() const {
         return (float)deviceResolution.x / (float)deviceResolution.y;
     }
 
@@ -32,6 +32,10 @@ namespace RDE {
         deviceResolution = _deviceSize;
     }
 
+	void ViewPort::setVirtualResolutionTarget(const Vec2I& _targetVirtualRes) {
+		virtualResolution = _targetVirtualRes;
+	}
+
     void ViewPort::setUIScaleWeightsForWidthAndHeight(float _width, float _height) {
         if(_width > 1.f || _width < 0.f || _height > 1.f || _height < 0.f || _height + _width != 1.f) {
             Util::Log::warn("Input values for setting UI scale are ", Vec2F { _width, _height }, " but in some way they don't add up to 1! Not changing values.");
@@ -40,6 +44,11 @@ namespace RDE {
 
         scaleWithWidth = _width;
     }
+
+	void ViewPort::matchVirtualResolutionToDeviceResolution() {
+		virtualResolution = deviceResolution;
+		landscape = virtualResolution.x > virtualResolution.y;
+	}
 
     Vec2F ViewPort::getUIScaleWeights() const {
         return { scaleWithWidth, 1.f - scaleWithWidth };

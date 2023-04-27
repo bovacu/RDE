@@ -677,18 +677,6 @@ namespace RDE {
             }
             ImGui::PopID();
 
-			ImGui::Text("Size ");
-			int _size[2];
-			_size[0] = _camera->getCameraSize().x;
-			_size[1] = _camera->getCameraSize().y;
-			ImGui::SameLine(0, 35);
-			ImGui::SetNextItemWidth(100);
-			ImGui::PushID(createID());
-			if (ImGui::DragInt2("##myInput", _size, 1, 0)) {
-				_camera->setCameraSize(_size[0], _size[1]);
-			}
-			ImGui::PopID();
-
             if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
         })
     }

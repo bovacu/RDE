@@ -204,6 +204,8 @@ namespace RDE {
              */
 			RDE_FUNC_ND bool isNodeActive(Node* _node);
 
+			RDE_FUNC_ND bool isCanvasCamera();
+
             /**
              * @brief This is used to create the custom ECS work flow, more information on ECSManager.
              * @tparam Archetype The Components that the query must look for

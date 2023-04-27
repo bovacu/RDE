@@ -32,11 +32,6 @@ namespace RDE {
 
         private:
             /**
-             * @brief Size of the camera, as a rectangle.
-             */
-            Vec2I size;
-
-            /**
              * @brief Zoom of the camera.
              */
             float zoom = 1;
@@ -104,25 +99,6 @@ namespace RDE {
              * @return glm::mat4&
              */
 			RDE_FUNC_ND glm::mat4& getViewProjectionMatrix();
-
-            /**
-             * @brief Sets the rectangle view size of the camera.
-             * @param _cameraSize Size of the rectangle view of the camera
-             */
-			RDE_FUNC void setCameraSize(const Vec2I& _cameraSize);
-
-            /**
-             * @brief Sets the rectangle view size of the camera.
-             * @param _width Width of the rectangle view of the camera
-             * @param _height Height of the rectangle view of the camera
-             */
-			RDE_FUNC void setCameraSize(int _width, int _height);
-
-            /**
-             * @brief Returns the camera size.
-             * @return Vec2I
-             */
-			RDE_FUNC_ND Vec2I getCameraSize();
 
             /**
              * @brief Returns the aspect ratio of the Window.
