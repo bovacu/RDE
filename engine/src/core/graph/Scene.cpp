@@ -269,10 +269,16 @@ namespace RDE {
             _camera->update();
             {
                 for(auto [_innerData, _transform, _extraData] : graph->renderingTreeData.sprites) {
+					auto _renderFbID = _innerData->framebufferToRenderTo;
+					auto _fbID = _framebuffer->getID();
+					if ((_renderFbID & _fbID) != _fbID) continue;
                     _renderManager.drawSpriteRenderer(*_innerData, _transform);
                 }
 
                 for(auto [_innerData, _transform, _extraData] : graph->renderingTreeData.texts) {
+					auto _renderFbID = _innerData->framebufferToRenderTo;
+					auto _fbID = _framebuffer->getID();
+					if ((_renderFbID & _fbID) != _fbID) continue;
                     _innerData->extraInfo = _extraData;
                     _renderManager.drawTextRenderer(*_innerData, _transform);
                 }
@@ -304,7 +310,11 @@ namespace RDE {
         std::vector<int> _cropList;
 
         for(auto& _it : canvas->uiRenderizables) {
-            canvas->batchTreeElementPre(&_it, nullptr);
+			auto _renderFbID = _it.renderizableInnerData->RenderizableInnerData.framebufferToRenderTo;;
+			auto _fbID = _framebuffer->getID();
+			if ((_renderFbID & _fbID) != _fbID) continue;
+
+            canvas->batchTreeElementPre(&_it, nullptr, _framebuffer);
 
             for(auto& _crop : _cropList) {
                 _crop--;

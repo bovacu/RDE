@@ -76,7 +76,7 @@ namespace RDE {
         }
     }
 
-    void Canvas::batchTreeElementPre(CanvasElement* _canvasElement, void* _extraData) {
+    void Canvas::batchTreeElementPre(CanvasElement* _canvasElement, void* _extraData, FrameBuffer* _framebuffer) {
         Batch* _currentBatch = &batches.back();
 		auto* _camera = scene->mainCamera;
 

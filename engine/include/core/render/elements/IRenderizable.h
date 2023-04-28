@@ -15,6 +15,8 @@
 #include "core/Enums.h"
 #include <vector>
 
+typedef uint32_t FramebufferID;
+
 namespace RDE {
 
     struct OpenGLVertex;
@@ -41,7 +43,7 @@ namespace RDE {
         RDE_BATCH_PRIORITY_ batchPriority = RDE_BATCH_PRIORITY_SPRITE;
 		RDE_RENDERIZABLE_TYPE_ renderizableType = RDE_RENDERIZABLE_TYPE_NONE;
 		bool draw = true;
-
+		FramebufferID framebufferToRenderTo = 1;
         void* extraInfo = nullptr;
     };
 
@@ -71,6 +73,7 @@ namespace RDE {
     #define RENDERIZABLE_BASIC_PROPERTIES_INITIALIZATION(_verticesSize, _shaderName, _batchPriority)    \
     node = _node;                                                                                       \
     data.shader = _manager->shaderManager.getShader(_shaderName)->getShaderID();                        \
+	data.framebufferToRenderTo = _manager->renderManager.getDefaultFramebufferID();                     \
     data.batchPriority = _batchPriority;                                                                \
     data.vertices.resize(_verticesSize);                                                                
 
@@ -137,7 +140,10 @@ namespace RDE {
 	RDE_FUNC_ND RDE_BATCH_PRIORITY_ getBatchPriority() const;   	\
                                                             		\
 	RDE_FUNC_ND bool isEnabled() const;                             \
-	RDE_FUNC void setEnabled(bool _enabled);
+	RDE_FUNC void setEnabled(bool _enabled);						\
+																	\
+	RDE_FUNC_ND FramebufferID getFramebuffer() const;				\
+	RDE_FUNC void setFramebuffer(FramebufferID _id);
 
 
 
@@ -172,7 +178,9 @@ namespace RDE {
             node->addComponent<DisabledForRender>();                                                    \
             data.dirty = true;                                                                          \
         }                                                                                               \
-    }
+    }																									\
+	FramebufferID _className::getFramebuffer() const { return data.framebufferToRenderTo; }				\
+	void _className::setFramebuffer(FramebufferID _framebuffer) { data.framebufferToRenderTo = _framebuffer; data.dirty = true; }
 
 
 

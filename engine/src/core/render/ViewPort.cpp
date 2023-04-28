@@ -27,12 +27,12 @@ namespace RDE {
     }
 
     void ViewPort::update() {
-		auto _zoom = 1.f / camera->getCurrentZoomLevel();
+		auto _zoom = camera->getCurrentZoomLevel();
 
 		glDisable(GL_SCISSOR_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		glViewport(0, 0, window->getWidth() * _zoom, window->getHeight() * _zoom);
+		glViewport(0, 0, window->getWidth(), window->getHeight());
 //		glScissor(position.x * _zoom, 
 //		          position.y * _zoom, 
 //		          size.x * _zoom, 

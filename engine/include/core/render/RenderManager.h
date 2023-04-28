@@ -54,6 +54,7 @@ namespace RDE {
             Engine* engine = nullptr;
 
 			FramebufferID defaultFramebufferID = 0;
+			std::unordered_map<uint32_t, uint32_t> framebufferIdConversionTable;
 
 
         private:
@@ -128,7 +129,6 @@ namespace RDE {
 			RDE_FUNC void setClearColor(const Color& _color);
 
 			RDE_FUNC_ND FramebufferID createFrameBuffer(const FrameBufferSpecification& _spec);
-			RDE_FUNC void addFrameBuffer(FrameBuffer* _framebuffer);
 			RDE_FUNC void removeFrameBuffer(FramebufferID _id);
 			RDE_FUNC_ND FrameBuffer* getFramebuffer(FramebufferID _id);
 

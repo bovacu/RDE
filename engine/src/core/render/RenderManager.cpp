@@ -72,27 +72,26 @@ namespace RDE {
 		auto* _fb = new FrameBuffer(_specs, &engine->manager);
 		defaultFramebufferID = _fb->getID();
 		framebuffers[_fb->getID()] = _fb;
+		framebufferIdConversionTable[1 << framebufferIdConversionTable.size()] = _fb->getID();
     }
 
 	FramebufferID RenderManager::createFrameBuffer(const FrameBufferSpecification& _specs) {
 		auto* _fb = new FrameBuffer(_specs, &engine->manager);
 		framebuffers[_fb->getID()] = _fb;
-		return _fb->getID();
+		auto _externalValue = 1 << framebufferIdConversionTable.size();
+		framebufferIdConversionTable[_externalValue] = _fb->getID();
+		return _externalValue;
 	}
 
 	void RenderManager::removeFrameBuffer(FramebufferID _id) {
-		auto _it = framebuffers.find(_id);
+		auto _it = framebuffers.find(framebufferIdConversionTable[_id]);
 		if(_it != framebuffers.end()) {
 			framebuffers.erase(_it);
 		}
 	}
 
-	void RenderManager::addFrameBuffer(FrameBuffer* _framebuffer) {
-		framebuffers[_framebuffer->getID()] = _framebuffer;
-	}
-
 	FrameBuffer* RenderManager::getFramebuffer(FramebufferID _id) {
-		return framebuffers[_id];
+		return framebuffers[framebufferIdConversionTable[_id]];
 	}
 
 	void RenderManager::onResize(uint32_t _width, uint32_t _height) {

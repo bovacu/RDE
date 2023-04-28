@@ -32,6 +32,7 @@ namespace RDE {
 
 	class Graph;
 	class Camera;
+	class FrameBuffer;
 
     /**
      * @brief This class represents a container for elements related to the UI and it is in charge of render them, update them...
@@ -83,7 +84,7 @@ namespace RDE {
 			RDE_FUNC_ND Vec2I getCanvasResolution();
 
         private:
-            void batchTreeElementPre(CanvasElement* _canvasElement, void* _data);
+            void batchTreeElementPre(CanvasElement* _canvasElement, void* _data, FrameBuffer* _framebuffer);
             void batchTreeElementPost(CanvasElement* _canvasElement, void* _data);
 
             void getRenderizable(Node* _node, CanvasElement* _canvasElement);

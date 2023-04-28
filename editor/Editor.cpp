@@ -81,6 +81,8 @@ namespace RDEEditor {
 		delete [] _data;
 
 		addCamera(editorCamera);
+
+		FrameBufferSpecification _specs = {(uint32_t)engine->getWindow()->getWindowSize().x,(uint32_t)engine->getWindow()->getWindowSize().y};
 		removeCamera(getCameras()[0]->node);
     }
 
