@@ -144,10 +144,14 @@ namespace RDE {
     }
 
     void Engine::onRender(Delta _dt) {
-        manager.renderManager.clear();
-        manager.sceneManager.getDisplayedScene()->onInnerRender(_dt);
-        manager.sceneManager.getDisplayedScene()->onInnerDebugRender(_dt);
-		manager.renderManager.flushFramebuffers();
+		for(auto& _pair : manager.renderManager.framebuffers) {
+			_pair.second->bind();
+			manager.renderManager.clear();
+			manager.sceneManager.getDisplayedScene()->onInnerRender(_dt, _pair.second);
+			manager.sceneManager.getDisplayedScene()->onInnerDebugRender(_dt, _pair.second);
+			_pair.second->unbind();
+		}
+		//manager.renderManager.flushFramebuffers();
 
         Profiler::begin(ProfilerState::IMGUI);
         #if !IS_MOBILE()

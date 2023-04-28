@@ -89,16 +89,16 @@ namespace RDE {
 
     void FrameBuffer::bind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, fboID);
-		manager->renderManager.clear();
         Util::GL::checkError("FrameBuffer bindFrameBuffer");
     }
 
     void FrameBuffer::unbind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         Util::GL::checkError("FrameBuffer unbind");
+		flush();
     }
 
-	void FrameBuffer::flush() {
+	void FrameBuffer::flush() const {
 		if(specs.renderToWindow) {
 			glBindVertexArray(vao);
 			{

@@ -28,7 +28,6 @@ namespace RDEEditor {
 	#include "EditorGamePreview.cpp"
 
     void Editor::onInit() {
-		Util::GL::checkError("OnInit Begin");
 		engine->manager.renderManager.setClearColor(backgroundColor);
 		gridShaderID = engine->manager.shaderManager.loadShader("gridShader", "editor/assets/shaders/gridVertex.glsl", "editor/assets/shaders/gridFragment.glsl");
 		GLsizei _structSize = sizeof(OpenGLVertex);
@@ -48,7 +47,6 @@ namespace RDEEditor {
 			"viewProjectionMatrix"
 		},
 		10);
-		Util::GL::checkError("OnInit 2");
 
 		auto _size = 1920 * 1080 * 4;
 		unsigned char* _data = new unsigned char[_size];
@@ -68,7 +66,6 @@ namespace RDEEditor {
 			.texture = &gridTexture
 		});
 		gridSprite->setShaderID(gridShaderID);
-		Util::GL::checkError("OnInit 3");
 
 		duckNode = graph->createNode("Duck");
 		nodes.push_back(duckNode->getID());
@@ -85,8 +82,6 @@ namespace RDEEditor {
 
 		addCamera(editorCamera);
 		removeCamera(getCameras()[0]->node);
-
-		Util::GL::checkError("OnInit 4");
     }
 
 	void Editor::generateGridTexture() {
@@ -152,14 +147,14 @@ namespace RDEEditor {
 	}
 
 	void Editor::onImGuiRender(Delta _dt) {
-		//dockingSpaceView(this);
+		dockingSpaceView(this);
 		//gameView(this, engine->mainFrameBuffer);
-		//sceneView(this, &sceneViewOffset);
-		//hierarchyView(this);
-		//componentsView(this);
-		//consoleView(this);
-//
-		//resetID(this);
+		sceneView(this, &sceneViewOffset);
+		hierarchyView(this);
+		componentsView(this);
+		consoleView(this);
+
+		resetID(this);
 	}
 
     void Editor::onDebugRender(Delta _dt, RenderManager* _renderManager) {
@@ -198,9 +193,9 @@ namespace RDEEditor {
 	}
 
 	void Editor::mouseHandler() {
-		//if(!editorFlags.isSceneViewHovered) {
-		//	return;
-		//}
+		if(!editorFlags.isSceneViewHovered) {
+			return;
+		}
 
 		if(engine->manager.inputManager.isMouseJustPressed(RDE_MOUSE_BUTTON_1)) {
 			lastClickOrMovedMousePosition = engine->manager.inputManager.getMousePosScreenCoords();
@@ -214,9 +209,9 @@ namespace RDEEditor {
 	}
 
 	void Editor::centerCamera() {
-		//if(!editorFlags.isSceneViewHovered && !editorFlags.isSceneViewActive) {
-		//	return;
-		//}
+		if(!editorFlags.isSceneViewHovered && !editorFlags.isSceneViewActive) {
+			return;
+		}
 
 		auto _zoom = editorCamera->getCurrentZoomLevel();
 		editorCamera->node->getTransform()->setPosition(sceneViewOffset.x * _zoom, -sceneViewOffset.y * _zoom);

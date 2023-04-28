@@ -10,7 +10,10 @@
 #include "core/render/elements/SpriteBatch.h"
 #include "core/util/Color.h"
 #include "core/util/Vec.h"
+#include "core/render/elements/FrameBuffer.h"
 #include <vector>
+
+typedef uint32_t FramebufferID;
 
 namespace RDE {
 
@@ -33,8 +36,7 @@ namespace RDE {
             int getTotalTriangles();
             std::tuple<int, int> getDrawCalls();
 
-			std::unordered_map<uint32_t, FrameBuffer*> framebuffers;
-
+			std::unordered_map<FramebufferID, FrameBuffer*> framebuffers;
         private:
             /**
              * @see SpriteBatch
@@ -51,7 +53,8 @@ namespace RDE {
              */
             Engine* engine = nullptr;
 
-			uint32_t defaultFramebufferID = 0;
+			FramebufferID defaultFramebufferID = 0;
+
 
         private:
             /**
@@ -123,6 +126,11 @@ namespace RDE {
              * @param _color Color to paint the background
              */
 			RDE_FUNC void setClearColor(const Color& _color);
+
+			RDE_FUNC_ND FramebufferID createFrameBuffer(const FrameBufferSpecification& _spec);
+			RDE_FUNC void addFrameBuffer(FrameBuffer* _framebuffer);
+			RDE_FUNC void removeFrameBuffer(FramebufferID _id);
+			RDE_FUNC_ND FrameBuffer* getFramebuffer(FramebufferID _id);
 
             /**
              * @brief Returns the current clear color.

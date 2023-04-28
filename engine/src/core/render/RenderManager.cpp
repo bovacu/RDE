@@ -10,7 +10,6 @@
 #include "core/render/elements/IRenderizable.h"
 #include "core/util/Functions.h"
 #include "core/util/Vec.h"
-#include "core/render/elements/FrameBuffer.h"
 
 namespace RDE {
 
@@ -74,6 +73,27 @@ namespace RDE {
 		defaultFramebufferID = _fb->getID();
 		framebuffers[_fb->getID()] = _fb;
     }
+
+	FramebufferID RenderManager::createFrameBuffer(const FrameBufferSpecification& _specs) {
+		auto* _fb = new FrameBuffer(_specs, &engine->manager);
+		framebuffers[_fb->getID()] = _fb;
+		return _fb->getID();
+	}
+
+	void RenderManager::removeFrameBuffer(FramebufferID _id) {
+		auto _it = framebuffers.find(_id);
+		if(_it != framebuffers.end()) {
+			framebuffers.erase(_it);
+		}
+	}
+
+	void RenderManager::addFrameBuffer(FrameBuffer* _framebuffer) {
+		framebuffers[_framebuffer->getID()] = _framebuffer;
+	}
+
+	FrameBuffer* RenderManager::getFramebuffer(FramebufferID _id) {
+		return framebuffers[_id];
+	}
 
 	void RenderManager::onResize(uint32_t _width, uint32_t _height) {
 		for(auto& _pair : framebuffers) {

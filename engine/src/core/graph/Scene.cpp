@@ -253,18 +253,18 @@ namespace RDE {
 
 
 
-	void Scene::onInnerRender(Delta _dt) {
-		onInnerRenderHierarchy(_dt); 
-		onInnerRenderUI(_dt); 
+	void Scene::onInnerRender(Delta _dt, FrameBuffer* _framebuffer) {
+		onInnerRenderHierarchy(_dt, _framebuffer); 
+		onInnerRenderUI(_dt, _framebuffer); 
 	}
 
-    void Scene::onInnerRenderHierarchy(Delta _dt) {
+	void Scene::onInnerRenderHierarchy(Delta _dt, FrameBuffer* _framebuffer) {
         auto& _renderManager = engine->manager.renderManager;
 
         for(auto* _camera : cameras) {
             if(!_camera->node->hasComponent<Active>() && _camera->isEnabled()) continue;
+			if (_camera->framebufferID != _framebuffer->getID()) continue;
 
-			_renderManager.framebuffers[_camera->framebufferID]->bind();
             _renderManager.beginDraw(_camera, _camera->node->getComponent<Transform>());
             _camera->update();
             {
@@ -279,17 +279,15 @@ namespace RDE {
             }
 
             _renderManager.endDraw();
-
-			_renderManager.framebuffers[_camera->framebufferID]->unbind();
         }
     }
 
-    void Scene::onInnerRenderUI(Delta _dt) {
+	void Scene::onInnerRenderUI(Delta _dt, FrameBuffer* _framebuffer) {
         auto& _renderManager = engine->manager.renderManager;
 
 		if(!mainCamera->node->hasComponent<Active>() && mainCamera->isEnabled()) return;
+		if (mainCamera->framebufferID != _framebuffer->getID()) return;
 
-		//_renderManager.framebuffers[mainCamera->framebufferID]->bind();
         _renderManager.beginDraw(mainCamera, (Transform*)mainCamera->node->getComponent<Transform>());
 
         canvas->batches.clear();
@@ -317,28 +315,30 @@ namespace RDE {
         }
 
 		_renderManager.endDrawUI(canvas->batches);
-		//_renderManager.framebuffers[mainCamera->framebufferID]->unbind();
     }
 
 
 
-	void Scene::onInnerDebugRender(Delta _dt) {
+	void Scene::onInnerDebugRender(Delta _dt, FrameBuffer* _framebuffer) {
 		auto& _renderManager = engine->manager.renderManager;
+
+		if (mainCamera->framebufferID != _framebuffer->getID()) return;
+
 		_renderManager.beginDebugDraw(mainCamera, mainCamera->node->getTransform());
-		onInnerDebugRenderHierarchy(_dt, &_renderManager);
+		onInnerDebugRenderHierarchy(_dt, &_renderManager, _framebuffer);
 		onDebugRender(_dt, &_renderManager);
 		_renderManager.endDebugDraw();
 
 		_renderManager.beginDebugDraw(mainCamera, mainCamera->node->getTransform());
-		onInnerDebugRenderUI(_dt, &_renderManager);
+		onInnerDebugRenderUI(_dt, &_renderManager, _framebuffer);
 		_renderManager.endDebugDraw();
 	}
 
-	void Scene::onInnerDebugRenderHierarchy(Delta _dt, RenderManager* _renderManager) {
+	void Scene::onInnerDebugRenderHierarchy(Delta _dt, RenderManager* _renderManager, FrameBuffer* _framebuffer) {
         engine->manager.physics.debugRender(_renderManager);
     }
 
-	void Scene::onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager) {
+	void Scene::onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager, FrameBuffer* _framebuffer) {
 		auto& _registry = canvas->graph->getNodeContainer();
 
         _registry.view<UIImage, Transform, Active>().each([this, _renderManager](const auto _entity, UIImage& _uiImage, Transform& _transform, const Active& _) {

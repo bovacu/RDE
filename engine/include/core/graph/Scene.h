@@ -13,6 +13,7 @@ namespace RDE {
     class Engine;
     struct RenderizableInnerData;
 	class RenderManager;
+	class FrameBuffer;
 
     /**
      * @brief This class represents what is rendered in the window and all its related systems.
@@ -116,17 +117,17 @@ namespace RDE {
              * the main rendering pipeline is handled inside the core of the engine. Users don't need to mess with it.
              * @param _dt the time that passed between the current frame and the last one.
              */
-			void onInnerRender(Delta _dt);
-            void onInnerRenderHierarchy(Delta _dt); 
-            void onInnerRenderUI(Delta _dt);
+			void onInnerRender(Delta _dt, FrameBuffer* _framebuffer);
+			void onInnerRenderHierarchy(Delta _dt, FrameBuffer* _framebuffer); 
+			void onInnerRenderUI(Delta _dt, FrameBuffer* _framebuffer);
 
             /**
              * @brief This function is used to drawBatched debugging lines, squares, circles...
              * @param the time that passed between the current frame and the last one.
              */
-			void onInnerDebugRender(Delta _dt);
-			void onInnerDebugRenderHierarchy(Delta _dt, RenderManager* _renderManager); 
-			void onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager);
+			void onInnerDebugRender(Delta _dt, FrameBuffer* _framebuffer);
+			void onInnerDebugRenderHierarchy(Delta _dt, RenderManager* _renderManager, FrameBuffer* _framebuffer); 
+			void onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager, FrameBuffer* _framebuffer);
 
 			void updateRenderTree(bool _force = false);
 

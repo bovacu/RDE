@@ -104,7 +104,7 @@ namespace RDE {
              */
 			RDE_FUNC void unbind() const;
 
-			RDE_FUNC void flush();
+			RDE_FUNC void flush() const;
 
             /**
              * @attention This is not meant to be called by end-users.
