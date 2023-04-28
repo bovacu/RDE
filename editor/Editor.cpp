@@ -19,11 +19,13 @@
 
 namespace RDEEditor {
 
+	#include "NodeCreator.cpp"
 	#include "EditorDockingspaceModule.cpp"
 	#include "EditorSceneViewModule.cpp"
 	#include "EditorHierarchyModule.cpp"
 	#include "EditorComponentsModule.cpp"
 	#include "EditorConsoleModule.cpp"
+	#include "EditorGamePreview.cpp"
 
     void Editor::onInit() {
 		engine->manager.renderManager.setClearColor(backgroundColor);
@@ -56,7 +58,7 @@ namespace RDEEditor {
 			_i += 4;
 		}
 
-		auto* _editorCameraNode = new Node((NodeID)0, nullptr, &engine->manager, new Transform(nullptr));
+		auto* _editorCameraNode = new Node((NodeID)0, graph, &engine->manager, new Transform(nullptr));
 		editorCamera = new Camera(_editorCameraNode, &engine->manager, nullptr, engine->getWindow());
 
 		generateGridTexture();
@@ -77,6 +79,8 @@ namespace RDEEditor {
 		wreDel.bind<&Editor::windowResized>(this);
 
 		delete [] _data;
+
+		addCamera(editorCamera);
     }
 
 	void Editor::generateGridTexture() {
@@ -126,7 +130,6 @@ namespace RDEEditor {
 
     void Editor::onLateUpdate(Delta _dt) {
         Scene::onLateUpdate(_dt);
-		engine->manager.renderManager.overwriteRenderingCamera(editorCamera);
 
 		engine->manager.shaderManager.setFloat4(gridShaderID, "gridColor", glm::vec4{ gridColor.r / 255.f, gridColor.g / 255.f, gridColor.b / 255.f, gridColor.a / 255.f });
 		engine->manager.shaderManager.setFloat(gridShaderID, "zoom", editorCamera->getCurrentZoomLevel());
@@ -139,11 +142,13 @@ namespace RDEEditor {
 		gridSprite->node->getTransform()->setScale(_zoom + std::abs(_cameraPos.x), _zoom + std::abs(_cameraPos.x));    
 
 		editorCamera->recalculateViewProjectionMatrix();
+		canvas->getCamera()->recalculateViewProjectionMatrix();
 	}
 
 	void Editor::onImGuiRender(Delta _dt) {
 		dockingSpaceView(this);
-		sceneView(this, engine->frameBuffer, &sceneViewOffset);
+		//gameView(this, engine->mainFrameBuffer);
+		sceneView(this, engine->mainFrameBuffer, &sceneViewOffset);
 		hierarchyView(this);
 		componentsView(this);
 		consoleView(this);
@@ -155,7 +160,7 @@ namespace RDEEditor {
 		Scene::onDebugRender(_dt, _renderManager);
 
 		for(auto* _camera : getCameras()) { 
-			auto _cameraSize = _camera->getViewport()->getVirtualResolution();
+			auto _cameraSize = _camera->getViewport()->getSize();
 			auto _cameraPos = _camera->node->getTransform()->getPosition();
 			auto _cameraRot = _camera->node->getTransform()->getRotation();
 
@@ -167,18 +172,6 @@ namespace RDEEditor {
 			_cameraShape.setRotation(_cameraRot);
 			engine->manager.renderManager.drawShape(_cameraShape);
 		}
-
-		auto _canvasSize = canvas->getCamera()->getViewport()->getVirtualResolution();
-		auto _canvasPos = canvas->graph->getRoot()->getTransform()->getPosition();
-		auto _canvasRot = canvas->graph->getRoot()->getTransform()->getRotation();
-
-		DebugShape _canvasCamera;
-		_canvasCamera.makeSquare(_canvasPos, { (float)_canvasSize.x, (float)_canvasSize.y });
-		_canvasCamera.showOutsideColor(true);
-		_canvasCamera.setOutlineColor(Color::Orange);
-		_canvasCamera.showInnerColor(false);
-		_canvasCamera.setRotation(_canvasRot);
-		engine->manager.renderManager.drawShape(_canvasCamera);
     }
 
 	bool Editor::mouseScrolled(MouseScrolledEvent& _event) {
@@ -194,6 +187,7 @@ namespace RDEEditor {
 		editorCamera->onResize(_event.getWidth(), _event.getHeight());
 		generateGridTexture();
 		editorCamera->getViewport()->matchVirtualResolutionToDeviceResolution();
+		canvas->setCanvasResolution( { (int)_event.getWidth(), (int)_event.getHeight() });
 		return true;
 	}
 

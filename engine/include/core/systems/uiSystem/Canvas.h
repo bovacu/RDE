@@ -48,17 +48,11 @@ namespace RDE {
             Scene* scene;
 
             /**
-             * @brief Camera that renders the Canvas elements.
-             */
-            Camera* camera = nullptr;
-
-            /**
              * @brief Layer of the canvas.
              */
             int layer = 0;
 
             std::vector<Batch> batches;
-            bool dirty = true;
             int maxIndicesPerDrawCall = 1000;
 
             std::vector<CanvasElement> uiRenderizables;

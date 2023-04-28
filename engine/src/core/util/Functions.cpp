@@ -21,30 +21,30 @@
 
 namespace RDE::Util::Math {
 	Vec2F worldToScreenCoords(const ViewPort* _viewport, const Vec2F& _position) {
-        auto _windowSize = _viewport->getDeviceResolution();
-        return {_position.x * _viewport->getDeviceAspectRatio() / ((float)_windowSize.x * 0.5f), _position.y / ((float)_windowSize.y * 0.5f) };
+        auto _windowSize = _viewport->getSize();
+        return {_position.x * _viewport->getAspectRatio() / ((float)_windowSize.x * 0.5f), _position.y / ((float)_windowSize.y * 0.5f) };
     }
 
     Vec2F screenToWorldCoords(const ViewPort* _viewport, const Vec2F& _position) {
-        auto _windowSize = _viewport->getVirtualResolution();
-        return {_position.x / _viewport->getVirtualAspectRatio() * ((float)_windowSize.x * 0.5f),
+		auto _windowSize = _viewport->getSize();
+		return {_position.x / _viewport->getAspectRatio() * ((float)_windowSize.x * 0.5f),
                 _position.y * ((float)_windowSize.y * 0.5f) };
     }
 
     Vec2F worldToScreenSize(const ViewPort* _viewport, const Vec2F& _size) {
-        auto _virtualRes = _viewport->getDeviceResolution();
-        return {_size.x * _viewport->getDeviceAspectRatio() / ((float)_virtualRes.x),
+		auto _virtualRes = _viewport->getSize();
+		return {_size.x * _viewport->getAspectRatio() / ((float)_virtualRes.x),
                 _size.y / ((float)_virtualRes.y) };
     }
 
     Vec2F worldToScreenCoordsUI(const ViewPort* _viewport, const Vec2F& _position) {
-        auto _physicalRes = _viewport->getVirtualResolution();
-        return {_position.x * _viewport->getVirtualAspectRatio() / ((float)_physicalRes.x * 0.5f), _position.y / ((float)_physicalRes.y * 0.5f) };
+		auto _physicalRes = _viewport->getSize();
+		return {_position.x * _viewport->getAspectRatio() / ((float)_physicalRes.x * 0.5f), _position.y / ((float)_physicalRes.y * 0.5f) };
     }
 
     Vec2F worldToScreenSizeUI(const ViewPort* _viewport, const Vec2F& _size) {
-		auto _physicalRes = _viewport->getVirtualResolution();
-		return {_size.x * _viewport->getVirtualAspectRatio() / ((float)_physicalRes.x), _size.y / ((float)_physicalRes.y) };
+		auto _physicalRes = _viewport->getSize();
+		return {_size.x * _viewport->getAspectRatio() / ((float)_physicalRes.x), _size.y / ((float)_physicalRes.y) };
     }
 
     void worldToScreenSize(const ViewPort* _viewport, float& _x, float& _y) {

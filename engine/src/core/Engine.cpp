@@ -52,7 +52,7 @@ namespace RDE {
 
         #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
         FrameBufferSpecification _specs = {(uint32_t)window->getWindowSize().x,(uint32_t)window->getWindowSize().y};
-        frameBuffer = new FrameBuffer(_specs, &manager);
+        mainFrameBuffer = new FrameBuffer(_specs, &manager);
         #endif
 
         manager.configManager.loadResources(&rdeConfig, &manager);
@@ -152,7 +152,7 @@ namespace RDE {
 
     void Engine::onRender(Delta _dt) {
         #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
-            frameBuffer->bind();
+            mainFrameBuffer->bind();
         #endif
 
         manager.renderManager.clear();
@@ -160,7 +160,7 @@ namespace RDE {
         manager.sceneManager.getDisplayedScene()->onInnerDebugRender(_dt);
 
         #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
-            frameBuffer->unbind();
+            mainFrameBuffer->unbind();
         #endif
 
         Profiler::begin(ProfilerState::IMGUI);
@@ -168,7 +168,7 @@ namespace RDE {
         imGuiLayer->begin();
 
         if (imGuiRedirectionFunc != nullptr) {
-            imGuiRedirectionFunc(frameBuffer);
+            imGuiRedirectionFunc(mainFrameBuffer);
         }
 
         manager.sceneManager.getDisplayedScene()->onImGuiRender(_dt);
@@ -180,7 +180,7 @@ namespace RDE {
         Profiler::end(ProfilerState::IMGUI);
 
         if (redirectionFunc != nullptr) {
-            redirectionFunc(frameBuffer);
+            redirectionFunc(mainFrameBuffer);
         }
     }
 
@@ -189,11 +189,13 @@ namespace RDE {
         SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
 
         #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
-        frameBuffer->resize(_width, _height);
+        mainFrameBuffer->resize(_width, _height);
         #endif
-        manager.sceneManager.getDisplayedScene()->mainCamera->onResize(_width, _height);
+        
+		manager.sceneManager.getDisplayedScene()->mainCamera->onResize(_width, _height);
 		manager.sceneManager.getDisplayedScene()->updateRenderTree(true);
-        manager.sceneManager.getDisplayedScene()->canvas->onResize(_width, _height);
+		manager.sceneManager.getDisplayedScene()->canvas->onResize(_width, _height);
+		manager.sceneManager.getDisplayedScene()->canvas->setCanvasResolution( { _width, _height });
 
         return false;
     }
@@ -216,7 +218,7 @@ namespace RDE {
         manager.destroy();
 
         #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
-        delete frameBuffer;
+        delete mainFrameBuffer;
         delete imGuiLayer;
         delete window;
         #endif
@@ -255,15 +257,15 @@ namespace RDE {
 
     void Engine::setRenderingRedirection(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc) {
         redirectionFunc = _redirectionFunc;
-        if(frameBuffer) {
-            frameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
+        if(mainFrameBuffer) {
+            mainFrameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
         }
     }
 
     void Engine::setRenderingRedirectionToImGui(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc) {
         imGuiRedirectionFunc = _redirectionFunc;
-        if(frameBuffer) {
-            frameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
+        if(mainFrameBuffer) {
+            mainFrameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
         }
     }
 

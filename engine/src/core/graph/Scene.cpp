@@ -35,7 +35,7 @@ namespace RDE {
         mainCamera = _camera;
 
         canvas = new Canvas(this, _engine->getWindow(), "Canvas");
-        canvas->onResize(_engine->getWindow()->getWidth(), _engine->getWindow()->getHeight());
+        // canvas->onResize(_engine->getWindow()->getWidth(), _engine->getWindow()->getHeight());
     }
 
     Scene::~Scene() {
@@ -261,6 +261,10 @@ namespace RDE {
         auto& _renderManager = engine->manager.renderManager;
 
         for(auto* _camera : cameras) {
+			if(_camera->node == nullptr) {
+				Util::Log::info("fuck");
+			}
+
             if(!_camera->node->hasComponent<Active>() && _camera->isEnabled()) continue;
 
             _renderManager.beginDraw(_camera, _camera->node->getComponent<Transform>());
@@ -283,9 +287,8 @@ namespace RDE {
     void Scene::onInnerRenderUI(Delta _dt) {
         auto& _renderManager = engine->manager.renderManager;
 
-		if(!canvas->camera->node->hasComponent<Active>() && canvas->camera->isEnabled()) return;
-		canvas->camera->update();
-        _renderManager.beginDraw(canvas->camera, (Transform*)canvas->camera->node->getComponent<Transform>());
+		if(!mainCamera->node->hasComponent<Active>() && mainCamera->isEnabled()) return;
+        _renderManager.beginDraw(mainCamera, (Transform*)mainCamera->node->getComponent<Transform>());
 
         canvas->batches.clear();
         Batch _batch;
@@ -323,7 +326,7 @@ namespace RDE {
 		onDebugRender(_dt, &_renderManager);
 		_renderManager.endDebugDraw();
 
-		_renderManager.beginDebugDraw(canvas->camera, canvas->camera->node->getTransform());
+		_renderManager.beginDebugDraw(mainCamera, mainCamera->node->getTransform());
 		onInnerDebugRenderUI(_dt, &_renderManager);
 		_renderManager.endDebugDraw();
 	}
@@ -342,8 +345,8 @@ namespace RDE {
             Vec2F _pointSize = {4, 4};
 
             auto _viewport = mainCamera->getViewport();
-            auto _virtualRes = _viewport->getVirtualResolution();
-            auto _physicalRes = _viewport->getDeviceResolution();
+            auto _virtualRes = _viewport->getSize();
+			auto _physicalRes = _viewport->getSize();
             auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
 
             _pos       *= _scale.y;
@@ -367,8 +370,8 @@ namespace RDE {
             Vec2F _size = _checkbox.getSize();
 
             auto _viewport = mainCamera->getViewport();
-            auto _virtualRes = _viewport->getVirtualResolution();
-            auto _physicalRes = _viewport->getDeviceResolution();
+            auto _virtualRes = _viewport->getSize();
+            auto _physicalRes = _viewport->getSize();
             auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
 
             _pos       *= _scale.y;
@@ -401,8 +404,8 @@ namespace RDE {
 			}
 
             auto _viewport = mainCamera->getViewport();
-            auto _virtualRes = _viewport->getVirtualResolution();
-            auto _physicalRes = _viewport->getDeviceResolution();
+            auto _virtualRes = _viewport->getSize();
+            auto _physicalRes = _viewport->getSize();
             auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
 
 			_posRect   *= _scale.y;
@@ -423,16 +426,20 @@ namespace RDE {
 
 
 
-    void Scene::switchMainCamera(Node* _camera) {
-        mainCamera = _camera->getComponent<Camera>();
+    void Scene::switchMainCamera(Camera* _camera) {
+        mainCamera = _camera;
     }
 
-    Camera* Scene::addCamera(Window* window) {
+    Camera* Scene::addCamera(Window* _window) {
         auto _newCameraNode = graph->createNode(Util::String::appendToString("Camera", cameras.size()));
-        auto* _camera = _newCameraNode->addComponent<Camera>(window);
+        auto* _camera = _newCameraNode->addComponent<Camera>(_window);
         cameras.push_back(_camera);
         return cameras.back();
     }
+
+	void Scene::addCamera(Camera* _camera) {
+		cameras.push_back(_camera);
+	}
 
     void Scene::enableCamera(Node* _camera, bool _enable) {
         if(_enable) {

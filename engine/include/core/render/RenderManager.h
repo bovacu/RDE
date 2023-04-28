@@ -32,6 +32,8 @@ namespace RDE {
             int getTotalTriangles();
             std::tuple<int, int> getDrawCalls();
 
+			std::unordered_map<GLuint, FrameBuffer> framebuffers;
+
         private:
             /**
              * @see SpriteBatch
@@ -47,6 +49,8 @@ namespace RDE {
              * @brief Engine reference.
              */
             Engine* engine = nullptr;
+
+			Camera* overwritingCamera = nullptr;
 
         private:
             /**
@@ -109,8 +113,6 @@ namespace RDE {
             void endDebugDraw();
 
         public:
-			RDE_FUNC void overwriteRenderingCamera(Camera* _camera);
-
             /**
              * @brief Sets the color to paint the background.
              * @param _color Color to paint the background

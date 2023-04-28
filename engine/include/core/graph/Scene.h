@@ -209,7 +209,9 @@ namespace RDE {
              * @param window Window
              * @return Camera*
              */
-			RDE_FUNC_ND Camera* addCamera(Window* window);
+			RDE_FUNC_ND Camera* addCamera(Window* _window);
+
+			RDE_FUNC void addCamera(Camera* _window);
 
             /**
              * @brief Activates or deactivates any given camera. If it is disabled, it won't render anything.
@@ -228,7 +230,7 @@ namespace RDE {
              * @brief Sets an specific camera as the main one.
              * @param _camera Camera to be set as main
              */
-			RDE_FUNC void switchMainCamera(Node* _camera);
+			RDE_FUNC void switchMainCamera(Camera* _camera);
 
             /**
              * @brief Returns the name of the scene.

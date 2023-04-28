@@ -29,11 +29,7 @@ namespace RDE {
 
     Canvas::Canvas(Scene* _scene, const Window* _window, const std::string& _canvasTag) {
         graph = new Graph(_scene, _canvasTag, true);
-
         scene = _scene;
-        auto* _cameraNode = graph->createNode("CanvasCamera");
-        camera = _cameraNode->addComponent<Camera>(scene->engine->getWindow());
-        camera->onResize(scene->engine->getWindow()->getWindowSize());
     }
 
     Canvas::~Canvas() {
@@ -82,6 +78,7 @@ namespace RDE {
 
     void Canvas::batchTreeElementPre(CanvasElement* _canvasElement, void* _extraData) {
         Batch* _currentBatch = &batches.back();
+		auto* _camera = scene->mainCamera;
 
         // This checks if there is a beggining on the Cropping System, for masks.
         if(_canvasElement->cropping > 0) {
@@ -113,11 +110,11 @@ namespace RDE {
                         break;
                     }
 					case RDE_RENDERIZABLE_TYPE_UI_IMAGE: {
-                        drawBatchedUIImage(_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), camera->getViewport());
+                        drawBatchedUIImage(_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), _camera->getViewport());
                         break;
                     }
 					case RDE_RENDERIZABLE_TYPE_UI_TEXT: {
-						drawBatchedUIText(_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), camera->getViewport());
+						drawBatchedUIText(_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), _camera->getViewport());
                         break;
                     }
 					case RDE_RENDERIZABLE_TYPE_SPRITE:
@@ -150,11 +147,11 @@ namespace RDE {
                     break;
                 }
 				case RDE_RENDERIZABLE_TYPE_UI_IMAGE: {
-					drawBatchedUIImage(*_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), camera->getViewport());
+					drawBatchedUIImage(*_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), _camera->getViewport());
                     break;
                 }
 				case RDE_RENDERIZABLE_TYPE_UI_TEXT: {
-                    drawBatchedUIText(*_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), camera->getViewport());
+                    drawBatchedUIText(*_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), _camera->getViewport());
                     break;
                 }
 				case RDE_RENDERIZABLE_TYPE_SPRITE:
@@ -173,7 +170,7 @@ namespace RDE {
 
     void Canvas::forceRender() {
         auto& _renderManager = graph->scene->engine->manager.renderManager;
-        _renderManager.beginDraw(camera, nullptr);
+		_renderManager.beginDraw(scene->mainCamera, nullptr);
         _renderManager.endDrawUI(batches);
 
         batches.clear();
@@ -184,19 +181,23 @@ namespace RDE {
     }
 
     Camera* Canvas::getCamera() {
-        return camera;
+        return scene->mainCamera;
     }
 
     void Canvas::onResize(uint _width, uint _height) {
+		auto* _camera = scene->mainCamera;
         graph->sceneRoot->getComponent<UIAnchoring>()->setSize({ (float)_width, (float)_height });
-        camera->onResize((int)_width, (int)_height);
+        _camera->onResize((int)_width, (int)_height);
     }
 
     void Canvas::setCanvasResolution(const Vec2I& _resolution) {
-        camera->getViewport()->virtualResolution = _resolution;
+		//auto* _camera = scene->mainCamera;
+  //      _camera->getViewport()->virtualResolution = _resolution;
+		//graph->renderingTreeData.isRenderizableTreeDirty = true;
+		//graph->sceneRoot->getComponent<UIAnchoring>()->setSize({ (float)_resolution.x, (float)_resolution.y });
     }
 
     Vec2I Canvas::getCanvasResolution() {
-        return camera->getViewport()->virtualResolution;
+        return scene->mainCamera->getViewport()->getSize();
     }
 }

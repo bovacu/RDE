@@ -134,11 +134,37 @@ void cameraComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNode)
 		if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 		ImGui::Text("Zoom Level");
 		float _zoomLevel = _camera->getCurrentZoomLevel();
-		ImGui::SameLine(0, 33);
+		ImGui::SameLine(0, 56);
 		ImGui::SetNextItemWidth(50);
 		ImGui::PushID(createID(_editor));
 		if(ImGui::DragFloat("##myInput", &_zoomLevel, 0.1f)) {
 			_camera->setCurrentZoomLevel(_zoomLevel);
+		}
+		ImGui::PopID();
+
+		auto* _viewport = _camera->getViewport();
+
+		ImGui::Text("Viewport Size ");
+		int _size[2];
+		_size[0] = _viewport->getSize().x;
+		_size[1] = _viewport->getSize().y;
+		ImGui::SameLine(0, 28);
+		ImGui::SetNextItemWidth(100);
+		ImGui::PushID(createID(_editor));
+		if (ImGui::DragInt2("##myInput", _size, 1, 0)) {
+			_viewport->setSize({ _size[0], _size[1] });
+		}
+		ImGui::PopID();
+
+		ImGui::Text("Viewport Position ");
+		int _position[2];
+		_position[0] = _viewport->getPosition().x;
+		_position[1] = _viewport->getPosition().y;
+		ImGui::SameLine(0, 0);
+		ImGui::SetNextItemWidth(100);
+		ImGui::PushID(createID(_editor));
+		if (ImGui::DragInt2("##myInput", _position, 1, 0)) {
+			_viewport->setPosition({ _position[0], _position[1] });
 		}
 		ImGui::PopID();
 
@@ -650,29 +676,6 @@ void uiButtonComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNod
 	})
 }
 
-void uiCanvasComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNode) {
-	auto* _node = _graph->getNode(_selectedNode);
-
-	if(_node != _graph->getRoot()) return;
-
-	auto _canvas = _editor->canvas;
-
-	bool _opened = ImGui::CollapsingHeader("Canvas", ImGuiTreeNodeFlags_DefaultOpen);
-	if(_opened) {
-		ImGui::Text("Size ");
-		int _size[2];
-		_size[0] = _canvas->getCanvasResolution().x;
-		_size[1] = _canvas->getCanvasResolution().y;
-		ImGui::SameLine(0, 35);
-		ImGui::SetNextItemWidth(100);
-		ImGui::PushID(createID(_editor));
-		if (ImGui::DragInt2("##myInput", _size, 1, 0)) {
-			_canvas->setCanvasResolution({ _size[0], _size[1] });
-		}
-		ImGui::PopID();
-	}
-}
-
 void nodeComponents(Editor* _editor, Graph* _graph, const NodeID _selectedNode) {
 	if(_selectedNode == NODE_ID_NULL) return;
 
@@ -690,7 +693,6 @@ void nodeComponents(Editor* _editor, Graph* _graph, const NodeID _selectedNode) 
 	uiTextComponent(_editor, _graph, _selectedNode);
 	uiMaskComponent(_editor, _graph, _selectedNode);
 	uiCanvasStopperComponent(_editor, _graph, _selectedNode);
-	uiCanvasComponent(_editor, _graph, _selectedNode);
 }
 
 void componentsView(Editor* _editor) {

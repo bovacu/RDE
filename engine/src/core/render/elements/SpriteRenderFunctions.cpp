@@ -212,13 +212,13 @@ namespace RDE {
 				float _w = (float)_chars[_char].size.x * _modelMatrixScale.x * _fontSizeScale;
 				float _h = (float)_chars[_char].size.y * _modelMatrixScale.y * _fontSizeScale;
 
-				auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformCopy[3][0] + _originOffset.x * _modelMatrixScale.x * _fontSizeScale),
+				auto _screenPos = Util::Math::worldToScreenCoords(_viewport, { (float)(int)(_transformCopy[3][0] + _originOffset.x * _modelMatrixScale.x * _fontSizeScale),
 				                                                    (float)(int)(_transformCopy[3][1] + _originOffset.y * _modelMatrixScale.y * _fontSizeScale) });
 				_transformCopy[3][0] = _screenPos.x;
 				_transformCopy[3][1] = _screenPos.y;
 
-				auto _positionInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _xPos, _yPos });
-				auto _sizeInScreen = Util::Math::worldToScreenSizeUI(_viewport, { _w, _h });
+				auto _positionInScreen = Util::Math::worldToScreenSize(_viewport, { _xPos, _yPos });
+				auto _sizeInScreen = Util::Math::worldToScreenSize(_viewport, { _w, _h });
 
 				glm::vec4 _bottomLeftTextureCorner  = { _positionInScreen.x                  , -_positionInScreen.y                  , 0.0f, 1.0f };
 				glm::vec4 _bottomRightTextureCorner = { _positionInScreen.x + _sizeInScreen.x, -_positionInScreen.y                  , 0.0f, 1.0f };
@@ -278,8 +278,8 @@ namespace RDE {
 
 	void calculateNormalGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         auto _originOffset = _data.originOffset;
-		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
-
+		auto _screenPos = Util::Math::worldToScreenCoords(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
+		
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
 
@@ -292,7 +292,7 @@ namespace RDE {
 
         Vec2F _textureTileSize = {(float)_data.RenderizableInnerData.texture->getRegion().size.x, (float)_data.RenderizableInnerData.texture->getRegion().size.y};
         Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().y};
-        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
 
 
         glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -431,8 +431,9 @@ namespace RDE {
             _current9SliceMat = _transformMatrix * _current9SliceMat;
 
             auto _subTextureReposition = Vec2F { _originOffset.x, _originOffset.y };
-			auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
-            _current9SliceMat[3][0] = _screenPos.x;
+			auto _screenPos = Util::Math::worldToScreenCoords(_viewport, { _current9SliceMat[3][0] + _subTextureReposition.x, _current9SliceMat[3][1] + _subTextureReposition.y });
+			
+			_current9SliceMat[3][0] = _screenPos.x;
             _current9SliceMat[3][1] = _screenPos.y;
 
 
@@ -441,7 +442,7 @@ namespace RDE {
 
             Vec2F _textureTileSize = {(float)_subTextureRegion.size.x, (float)_subTextureRegion.size.y};
             Vec2F _textureTileSizeNorm = {_textureTileSize.x / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().y};
-            auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+            auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
 
             glm::vec4 _bottomLeftTextureCorner  = { -_textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
             glm::vec4 _bottomRightTextureCorner = {  _textureTileSizeOnScreen.x, -_textureTileSizeOnScreen.y, 0.0f, 1.0f };
@@ -465,7 +466,7 @@ namespace RDE {
 
 	void calculatePartialHGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         auto _originOffset = _data.originOffset;
-		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
+		auto _screenPos = Util::Math::worldToScreenCoords(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -479,7 +480,7 @@ namespace RDE {
 
         Vec2F _textureTileSize = {(float)_data.RenderizableInnerData.texture->getRegion().size.x, (float)_data.RenderizableInnerData.texture->getRegion().size.y};
         Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().y };
-        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
 
         auto _partialRenderCorner = _textureTileSizeOnScreen.x * (1.f - _data.partialRenderingPercentage) * 2.f;
         auto _inv = _data.partialRenderingInverted;
@@ -504,7 +505,7 @@ namespace RDE {
 
 	void calculatePartialVGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         auto _originOffset = _data.originOffset;
-		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
+		auto _screenPos = Util::Math::worldToScreenCoords(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -518,7 +519,7 @@ namespace RDE {
 
         Vec2F _textureTileSize = {(float)_data.RenderizableInnerData.texture->getRegion().size.x, (float)_data.RenderizableInnerData.texture->getRegion().size.y};
         Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().y };
-        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
 
         auto _partialRenderCorner = _textureTileSizeOnScreen.y * (1.f - _data.partialRenderingPercentage) * 2.f;
         auto _inv = _data.partialRenderingInverted;
@@ -543,7 +544,7 @@ namespace RDE {
 
 	void calculatePartialRGeometry(RenderizableInnerDataUI& _data, glm::mat4& _transformMatrix, UIAnchoring* _anchoring, Transform* _transform, const ViewPort* _viewport) {
         auto _originOffset = _data.originOffset;
-		auto _screenPos = Util::Math::worldToScreenCoordsUI(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
+		auto _screenPos = Util::Math::worldToScreenCoords(_viewport, { (float)(int)(_transformMatrix[3][0] + _originOffset.x), (float)(int)(_transformMatrix[3][1] + _originOffset.y) });
 
         _transformMatrix[3][0] = _screenPos.x;
         _transformMatrix[3][1] = _screenPos.y;
@@ -557,7 +558,7 @@ namespace RDE {
 
         Vec2F _textureTileSize = {(float)_data.RenderizableInnerData.texture->getRegion().size.x, (float)_data.RenderizableInnerData.texture->getRegion().size.y};
         Vec2F _textureTileSizeNorm = { _textureTileSize.x / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureTileSize.y / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().y };
-        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSizeUI(_viewport, _textureTileSize);
+        auto _textureTileSizeOnScreen = Util::Math::worldToScreenSize(_viewport, _textureTileSize);
 
         // Bottom-Right square
         if(_data.partialRenderingPercentage > .75f) {

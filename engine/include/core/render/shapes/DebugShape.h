@@ -140,7 +140,7 @@ namespace RDE {
              */
 			RDE_FUNC_ND Vec2F getPosition() {
 //                return transform.getPositionLocal();
-                return {};
+                return center;
             }
 
             /**
@@ -203,7 +203,8 @@ namespace RDE {
                 points.emplace_back(Vec2F{_position.x + _size.x / 2.f, _position.y - _size.y / 2.f});
                 points.emplace_back(Vec2F{_position.x + _size.x / 2.f, _position.y + _size.y / 2.f});
                 points.emplace_back(Vec2F{_position.x - _size.x / 2.f, _position.y + _size.y / 2.f});
-            }
+				center = _position;
+			}
     };
 }
 

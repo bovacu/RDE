@@ -123,7 +123,7 @@ namespace RDE {
             /**
             * @see FrameBuffer
             */
-            FrameBuffer* frameBuffer = nullptr;
+            FrameBuffer* mainFrameBuffer = nullptr;
 
         private:
             /**

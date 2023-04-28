@@ -29,6 +29,7 @@ namespace RDE {
      */
     class Camera : public ComponentBase {
         friend class Scene;
+		friend class ViewPort;
 
         private:
             /**
@@ -69,6 +70,7 @@ namespace RDE {
 
         public:
             Node* node;
+			GLuint renderPass = 0;
 
             RDE_FUNC Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window);
 			RDE_FUNC ~Camera();

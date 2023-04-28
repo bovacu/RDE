@@ -10,23 +10,21 @@
 namespace RDE {
 
     Camera::Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window) : node(_node) {
-        viewport = new ViewPort(_window->getWindowSize(), _manager->engine->rdeConfig.windowData.resolution);
+		viewport = new ViewPort({ (int)_window->getWindowSize().x, (int)_window->getWindowSize().y }, this, _window);
 		window = _window;
         onResize(_window->getWidth(), _window->getHeight());
     }
 
 	void Camera::onResize(const Vec2I& _size, float _aspectRatio) {
-        viewport->update(_size);
-        glViewport(0, 0, _size.x, _size.y);
+		viewport->setSize(_size);
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
         dirty = true;
     }
 
 	void Camera::onResize(int _width, int _height) {
-		viewport->update({_width, _height});
-		float _aspectRatio = viewport->getDeviceAspectRatio();
-		glViewport(0, 0, _width, _height);
+		viewport->setSize({_width, _height});
+		float _aspectRatio = viewport->getAspectRatio();
 		projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
 		viewProjectionMatrix = projectionMatrix * viewMatrix;
 		dirty = true;
@@ -46,7 +44,7 @@ namespace RDE {
         auto [_mat, _dirty] = node->getTransform()->localToWorld();
 
         if(_dirty || dirty) {
-            auto _screenCoords = Util::Math::worldToScreenCoordsUI(viewport, {_mat[3][0], _mat[3][1]});
+            auto _screenCoords = Util::Math::worldToScreenCoords(viewport, {_mat[3][0], _mat[3][1]});
             _mat[3][0] = _screenCoords.x;
             _mat[3][1] = _screenCoords.y;
             viewMatrix = glm::inverse(_mat);
@@ -64,7 +62,7 @@ namespace RDE {
     }
 
     float Camera::getAspectRatio() const {
-        return viewport->getVirtualAspectRatio();
+        return viewport->getAspectRatio();
     }
 
     float Camera::getCurrentZoomLevel() const {
@@ -73,7 +71,7 @@ namespace RDE {
 
     void Camera::setCurrentZoomLevel(float _zoomLevel) {
         zoom = _zoomLevel;
-        float _aspectRatio = viewport->getDeviceAspectRatio();
+        float _aspectRatio = viewport->getAspectRatio();
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -1.f, 1.f);
         dirty = true;
     }
@@ -102,7 +100,7 @@ namespace RDE {
 
         auto _cameraTopLeft = node->getTransform()->getModelMatrixPosition();
         auto _cameraBottomRight = node->getTransform()->getModelMatrixPosition();
-		auto _viewportVRes = viewport->getVirtualResolution();
+		auto _viewportVRes = viewport->getSize();
 		_cameraTopLeft += { -(float)_viewportVRes.x / 2.f * zoom, (float)_viewportVRes.y / 2.f * zoom };
 		_cameraBottomRight += { (float)_viewportVRes.x / 2.f * zoom, -(float)_viewportVRes.y / 2.f * zoom };
 

@@ -69,10 +69,10 @@ namespace RDE {
              */
             ShaderID framebufferShader = -1;
 
-            /**
+			/**
              * @brief ColorAttachment buffer ID on the GPU
              */
-            uint32_t frameBufferTexureForColorAttachment = -1;
+			GLuint frameBufferTexureForColorAttachment[2] = { 0, 0 };
 
             /**
              * @see FrameBufferSpecification
@@ -116,7 +116,7 @@ namespace RDE {
              * @brief Returns the ID of the Color Attachment Buffer.
              * @return uint32_t
              */
-			RDE_FUNC_ND uint32_t getColorAttachmentRendererID() const { return frameBufferTexureForColorAttachment; }
+			RDE_FUNC_ND uint32_t getColorAttachmentRendererID(size_t _layer = 0) const { return frameBufferTexureForColorAttachment[_layer]; }
 
             /**
              * @see FrameBufferSpecification
