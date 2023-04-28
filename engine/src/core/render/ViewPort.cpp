@@ -33,11 +33,11 @@ namespace RDE {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		glViewport(0, 0, window->getWidth() * _zoom, window->getHeight() * _zoom);
-		glScissor(position.x * _zoom, 
-		          position.y * _zoom, 
-		          size.x * _zoom, 
-		          size.y * _zoom);
-		glEnable(GL_SCISSOR_TEST);
+//		glScissor(position.x * _zoom, 
+//		          position.y * _zoom, 
+//		          size.x * _zoom, 
+//		          size.y * _zoom);
+//		glEnable(GL_SCISSOR_TEST);
 
     }
 

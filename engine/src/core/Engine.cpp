@@ -49,12 +49,7 @@ namespace RDE {
         fixedDelta = 1.0f / 60.f;
         window->setVSync(true);
         manager.renderManager.setClearColor(backgroundColor);
-
-        #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
-        FrameBufferSpecification _specs = {(uint32_t)window->getWindowSize().x,(uint32_t)window->getWindowSize().y};
-        mainFrameBuffer = new FrameBuffer(_specs, &manager);
-        #endif
-
+		
         manager.configManager.loadResources(&rdeConfig, &manager);
 
         manager.consoleManager.addCommand<&Engine::changeColorConsoleCommand>("background_color"," Changes background color 0 <= r,b,g,a <= 255", this, "r g b a");
@@ -70,7 +65,6 @@ namespace RDE {
         accumulator += dt;
 
         if(manager.sceneManager.getDisplayedScene() == nullptr) return;
-
         Profiler::beginFrame(dt);
         manager.inputManager.pollEvents();
 
@@ -113,7 +107,6 @@ namespace RDE {
     void Engine::onRun() {
         accumulator = 0;
         dt = 0;
-
         #ifdef __EMSCRIPTEN__
             loopCode();
         #else
@@ -151,25 +144,14 @@ namespace RDE {
     }
 
     void Engine::onRender(Delta _dt) {
-        #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
-            mainFrameBuffer->bind();
-        #endif
-
         manager.renderManager.clear();
         manager.sceneManager.getDisplayedScene()->onInnerRender(_dt);
         manager.sceneManager.getDisplayedScene()->onInnerDebugRender(_dt);
-
-        #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
-            mainFrameBuffer->unbind();
-        #endif
+		manager.renderManager.flushFramebuffers();
 
         Profiler::begin(ProfilerState::IMGUI);
         #if !IS_MOBILE()
         imGuiLayer->begin();
-
-        if (imGuiRedirectionFunc != nullptr) {
-            imGuiRedirectionFunc(mainFrameBuffer);
-        }
 
         manager.sceneManager.getDisplayedScene()->onImGuiRender(_dt);
         imGuiLayer->drawDebugInfo(manager.sceneManager.getDisplayedScene());
@@ -178,20 +160,13 @@ namespace RDE {
 
         #endif
         Profiler::end(ProfilerState::IMGUI);
-
-        if (redirectionFunc != nullptr) {
-            redirectionFunc(mainFrameBuffer);
-        }
     }
 
     bool Engine::onWindowResized(WindowResizedEvent &_e) {
         int _width, _height;
         SDL_GL_GetDrawableSize(window->getNativeWindow(), &_width, &_height);
 
-        #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
-        mainFrameBuffer->resize(_width, _height);
-        #endif
-        
+		manager.renderManager.onResize(_width, _height);
 		manager.sceneManager.getDisplayedScene()->mainCamera->onResize(_width, _height);
 		manager.sceneManager.getDisplayedScene()->updateRenderTree(true);
 		manager.sceneManager.getDisplayedScene()->canvas->onResize(_width, _height);
@@ -218,7 +193,6 @@ namespace RDE {
         manager.destroy();
 
         #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
-        delete mainFrameBuffer;
         delete imGuiLayer;
         delete window;
         #endif
@@ -257,16 +231,10 @@ namespace RDE {
 
     void Engine::setRenderingRedirection(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc) {
         redirectionFunc = _redirectionFunc;
-        if(mainFrameBuffer) {
-            mainFrameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
-        }
     }
 
     void Engine::setRenderingRedirectionToImGui(UniqueDelegate<void(FrameBuffer*)>& _redirectionFunc) {
         imGuiRedirectionFunc = _redirectionFunc;
-        if(mainFrameBuffer) {
-            mainFrameBuffer->specs.renderToWindow = !(_redirectionFunc != nullptr);
-        }
     }
 
 	RDE_PLATFORM_TYPE_ Engine::getPlatform() const {

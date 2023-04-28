@@ -120,11 +120,6 @@ namespace RDE {
             */
             DeviceInfoProvider devideInfoProvider {};
 
-            /**
-            * @see FrameBuffer
-            */
-            FrameBuffer* mainFrameBuffer = nullptr;
-
         private:
             /**
              * @brief Delta time of the Fixed Update method.

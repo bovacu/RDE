@@ -1,5 +1,5 @@
 
-void sceneView(Editor* _editor, FrameBuffer* _frameBuffer, Vec2F* _sceneViewOffset) {
+void sceneView(Editor* _editor, Vec2F* _sceneViewOffset) {
 	static bool _firstEntry = true;
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 	ImGui::Begin("Scene View", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -14,8 +14,8 @@ void sceneView(Editor* _editor, FrameBuffer* _frameBuffer, Vec2F* _sceneViewOffs
 		_editor->editorCamera->node->getTransform()->setPosition(_initPos);
 		_firstEntry = false;
 	}
-
-	uint32_t textureID = _frameBuffer->getColorAttachmentRendererID();
+	auto& _renderManager = _editor->engine->manager.renderManager;
+	uint32_t textureID = _renderManager.framebuffers[_renderManager.getDefaultFramebufferID()]->getColorAttachmentRendererID();
 	_editor->editorCamera->update();
 	auto _windowSize = _editor->engine->getWindow()->getWindowSize();
 	ImGui::Image((void*)(intptr_t)textureID, ImVec2{ (float)_windowSize.x, (float)_windowSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });

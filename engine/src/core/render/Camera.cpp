@@ -13,6 +13,8 @@ namespace RDE {
 		viewport = new ViewPort({ (int)_window->getWindowSize().x, (int)_window->getWindowSize().y }, this, _window);
 		window = _window;
         onResize(_window->getWidth(), _window->getHeight());
+
+		framebufferID = _manager->renderManager.getDefaultFramebufferID();
     }
 
 	void Camera::onResize(const Vec2I& _size, float _aspectRatio) {

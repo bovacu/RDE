@@ -3,6 +3,7 @@
 #include "core/graph/Scene.h"
 #include "core/render/Camera.h"
 #include "core/Engine.h"
+#include "core/render/elements/FrameBuffer.h"
 #include "core/graph/components/Transform.h"
 #include "core/systems/uiSystem/Canvas.h"
 #include "core/util/Functions.h"
@@ -261,12 +262,9 @@ namespace RDE {
         auto& _renderManager = engine->manager.renderManager;
 
         for(auto* _camera : cameras) {
-			if(_camera->node == nullptr) {
-				Util::Log::info("fuck");
-			}
-
             if(!_camera->node->hasComponent<Active>() && _camera->isEnabled()) continue;
 
+			_renderManager.framebuffers[_camera->framebufferID]->bind();
             _renderManager.beginDraw(_camera, _camera->node->getComponent<Transform>());
             _camera->update();
             {
@@ -281,6 +279,8 @@ namespace RDE {
             }
 
             _renderManager.endDraw();
+
+			_renderManager.framebuffers[_camera->framebufferID]->unbind();
         }
     }
 
@@ -288,6 +288,8 @@ namespace RDE {
         auto& _renderManager = engine->manager.renderManager;
 
 		if(!mainCamera->node->hasComponent<Active>() && mainCamera->isEnabled()) return;
+
+		//_renderManager.framebuffers[mainCamera->framebufferID]->bind();
         _renderManager.beginDraw(mainCamera, (Transform*)mainCamera->node->getComponent<Transform>());
 
         canvas->batches.clear();
@@ -315,6 +317,7 @@ namespace RDE {
         }
 
 		_renderManager.endDrawUI(canvas->batches);
+		//_renderManager.framebuffers[mainCamera->framebufferID]->unbind();
     }
 
 

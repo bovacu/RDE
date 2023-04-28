@@ -70,7 +70,7 @@ namespace RDE {
 
         public:
             Node* node;
-			GLuint renderPass = 0;
+			uint32_t framebufferID = 0;
 
             RDE_FUNC Camera(Node* _node, Manager* _manager, Graph* _graph, const Window* _window);
 			RDE_FUNC ~Camera();

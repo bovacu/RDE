@@ -27,12 +27,13 @@ namespace RDE {
         // Debug
         public:
             RenderManager() {  }
+			~RenderManager();
 
             void resetDebugInfo();
             int getTotalTriangles();
             std::tuple<int, int> getDrawCalls();
 
-			std::unordered_map<GLuint, FrameBuffer> framebuffers;
+			std::unordered_map<uint32_t, FrameBuffer*> framebuffers;
 
         private:
             /**
@@ -50,7 +51,7 @@ namespace RDE {
              */
             Engine* engine = nullptr;
 
-			Camera* overwritingCamera = nullptr;
+			uint32_t defaultFramebufferID = 0;
 
         private:
             /**
@@ -64,6 +65,8 @@ namespace RDE {
              * @brief Destroys all related data to the GPU.
              */
             void destroy();
+
+			void onResize(uint32_t _width, uint32_t _height);
 
             /**
              * @brief This must be called before any drawBatched call on every frame (in main loop).
@@ -112,6 +115,8 @@ namespace RDE {
              */
             void endDebugDraw();
 
+			RDE_FUNC void flushFramebuffers();
+
         public:
             /**
              * @brief Sets the color to paint the background.
@@ -124,6 +129,8 @@ namespace RDE {
              * @return Color
              */
 			RDE_FUNC_ND Color getClearColor();
+
+			RDE_FUNC_ND uint32_t getDefaultFramebufferID() { return defaultFramebufferID; }
 
             /**
                  * @brief Draws a point at _position. MUST BE CALLED INSIDE A BLOCK OF beginDebugDraw/endDraw.

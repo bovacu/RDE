@@ -10,6 +10,7 @@
 #include "core/render/elements/IRenderizable.h"
 #include "core/util/Functions.h"
 #include "core/util/Vec.h"
+#include "core/render/elements/FrameBuffer.h"
 
 namespace RDE {
 
@@ -53,7 +54,32 @@ namespace RDE {
         batch.init(_engine);
         batch.debug.init(&batch);
         Util::GL::checkError("RenderManager Initialization");
+
+		engine->manager.shaderManager.loadShaderVertexConfig(FRAMEBUFFER_SHADER, {
+			VertexConfig {
+				0, 2, GL_FLOAT, 0, sizeof(glm::vec2) * 2
+			},
+			VertexConfig {
+				1, 2, GL_FLOAT, sizeof(float) * 2, sizeof(glm::vec2) * 2
+			}
+		},
+		{
+			"viewProjectionMatrix"
+		},
+		1);
+		Util::GL::checkError("FrameBuffer LoadConfig");
+
+		FrameBufferSpecification _specs = {(uint32_t)engine->getWindow()->getWindowSize().x,(uint32_t)engine->getWindow()->getWindowSize().y};
+		auto* _fb = new FrameBuffer(_specs, &engine->manager);
+		defaultFramebufferID = _fb->getID();
+		framebuffers[_fb->getID()] = _fb;
     }
+
+	void RenderManager::onResize(uint32_t _width, uint32_t _height) {
+		for(auto& _pair : framebuffers) {
+			_pair.second->resize(_width, _height);
+		}
+	}
 
     void RenderManager::clear() {
         glClearColor((float)clearColor.r / 255.f, (float)clearColor.g / 255.f, (float)clearColor.b / 255.f, (float)clearColor.a / 255.f);
@@ -80,6 +106,12 @@ namespace RDE {
     void RenderManager::endDraw() {
         batch.flush();
     }
+
+	void RenderManager::flushFramebuffers() {
+		for(auto& _frameBufferKeyPair : framebuffers) {
+			_frameBufferKeyPair.second->flush();
+		}
+	}
 
     void RenderManager::drawSpriteRenderer(RenderizableInnerData& _innerData, Transform* _transform) {
         batch.drawSpriteRenderer(_innerData, _transform);
@@ -188,4 +220,10 @@ namespace RDE {
             }
         }
     }
+
+	RenderManager::~RenderManager() {
+		for(auto& _pair : framebuffers) {
+			delete _pair.second;
+		}
+	}
 }
