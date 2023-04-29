@@ -55,6 +55,7 @@ namespace RDE {
 
 			FramebufferID defaultFramebufferID = 0;
 			std::unordered_map<uint32_t, uint32_t> framebufferIdConversionTable;
+            size_t framebufferCounter = 0;
 
 
         private:

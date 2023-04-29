@@ -72,13 +72,13 @@ namespace RDE {
 		auto* _fb = new FrameBuffer(_specs, &engine->manager);
 		defaultFramebufferID = _fb->getID();
 		framebuffers[_fb->getID()] = _fb;
-		framebufferIdConversionTable[1 << framebufferIdConversionTable.size()] = _fb->getID();
+		framebufferIdConversionTable[1 << framebufferCounter++] = _fb->getID();
     }
 
 	FramebufferID RenderManager::createFrameBuffer(const FrameBufferSpecification& _specs) {
 		auto* _fb = new FrameBuffer(_specs, &engine->manager);
 		framebuffers[_fb->getID()] = _fb;
-		auto _externalValue = 1 << framebufferIdConversionTable.size();
+		auto _externalValue = 1 << framebufferCounter++;
 		framebufferIdConversionTable[_externalValue] = _fb->getID();
 		return _externalValue;
 	}
