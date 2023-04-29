@@ -9,11 +9,14 @@ SpriteRenderer* createSpriteRendererNode(Editor* _editor) {
 		.texture = _texture
 	});
 
+	_sprite->setFramebuffer(_editor->editorData.gameViewFramebufferID | _editor->editorData.sceneViewFramebufferID);
 	return _sprite;
 }
 
 
 UIPanel* createPanelNode(Editor* _editor) {
 	auto _panelNode = _editor->canvas->graph->createNode(Util::String::appendToString("Panel_", _editor->graph->getNodeContainer().size()));
-	return _panelNode->addComponent<UIPanel>(UIPanelConfig { .size = {256, 256} });
+	auto* _panel = _panelNode->addComponent<UIPanel>(UIPanelConfig { .size = {256, 256} });
+	_panel->setFramebuffer(_editor->editorData.gameViewFramebufferID | _editor->editorData.sceneViewFramebufferID);
+	return _panel;
 }

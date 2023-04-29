@@ -27,6 +27,9 @@ namespace RDEEditor {
 		NodeID selectedNode = NODE_ID_NULL;
 		NodeID selectedNodeCanvas = NODE_ID_NULL;	
 		int idIndex = 0;
+
+		uint32_t sceneViewFramebufferID = 0;
+		uint32_t gameViewFramebufferID = 0;
 	};
 
     class Editor : public Scene {

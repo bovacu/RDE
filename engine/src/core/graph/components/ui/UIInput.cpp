@@ -126,6 +126,7 @@ namespace RDE {
 
     ENABLED_DEFAULT_IMPL(UIInput)
     SIZE_METHODS_DEFAULT_IMPL(UIInput)
+    FRAMEBUFFER_METHODS_DEFAULT_IMPL(UIInput)
 
 
     void UIInput::setInteractable(bool _interactable) {

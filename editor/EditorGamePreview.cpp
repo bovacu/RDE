@@ -42,7 +42,7 @@ void gameView(Editor* _editor) {
 	ImVec2 _position = ImVec2 { ImGui::GetWindowSize().x - _imageSize.x, ImGui::GetWindowSize().y - _imageSize.y };
 	ImGui::SetCursorPos(ImVec2 { _position.x * 0.5f, _position.y * 0.5f });
 
-	uint32_t _textureID = _editor->engine->manager.renderManager.getFramebuffer(2)->getColorAttachmentRendererID();
+	uint32_t _textureID = _editor->engine->manager.renderManager.getFramebuffer(_editor->editorData.gameViewFramebufferID)->getColorAttachmentRendererID();
 	ImGui::Image((void*)(intptr_t)_textureID, _imageSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 	ImGui::End();

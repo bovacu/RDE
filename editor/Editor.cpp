@@ -76,8 +76,6 @@ namespace RDEEditor {
 			.texture = _texture
 		});
 
-		_sprite->setFramebuffer(1 | 2);
-
 		mseDel.bind<&Editor::mouseScrolled>(this);
 		wreDel.bind<&Editor::windowResized>(this);
 
@@ -90,6 +88,11 @@ namespace RDEEditor {
 		auto _fbID = engine->manager.renderManager.createFrameBuffer(_specs);
 		getCameras()[0]->framebufferID = _fbID;
 		getCameras()[0]->getViewport()->autoResizeWhenWindowSizeChanges = false;
+
+		editorData.sceneViewFramebufferID = editorCamera->framebufferID;
+		editorData.gameViewFramebufferID = getCameras()[0]->framebufferID;
+
+		_sprite->setFramebuffer(editorData.gameViewFramebufferID | editorData.sceneViewFramebufferID);
     }
 
 	void Editor::generateGridTexture() {

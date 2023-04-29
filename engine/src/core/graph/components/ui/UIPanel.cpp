@@ -54,6 +54,7 @@ namespace RDE {
     SIZE_METHODS_DEFAULT_IMPL(UIPanel)
     INTERACTABLE_DEFAULT_IMPL(UIPanel)
     ENABLED_DEFAULT_IMPL(UIPanel)
+    FRAMEBUFFER_METHODS_DEFAULT_IMPL(UIPanel)
 
 
     void UIPanel::setColor(const Color& _color) {

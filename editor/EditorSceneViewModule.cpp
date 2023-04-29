@@ -15,7 +15,7 @@ void sceneView(Editor* _editor, Vec2F* _sceneViewOffset) {
 		_firstEntry = false;
 	}
 	auto& _renderManager = _editor->engine->manager.renderManager;
-	uint32_t textureID = _renderManager.getFramebuffer(_renderManager.getDefaultFramebufferID())->getColorAttachmentRendererID();
+	uint32_t textureID = _renderManager.getFramebuffer(_editor->editorData.sceneViewFramebufferID)->getColorAttachmentRendererID();
 	_editor->editorCamera->update();
 	auto _windowSize = _editor->engine->getWindow()->getWindowSize();
 	ImGui::Image((void*)(intptr_t)textureID, ImVec2{ (float)_windowSize.x, (float)_windowSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });

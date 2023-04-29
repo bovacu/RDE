@@ -71,6 +71,8 @@ namespace RDE {
 		textRenderer->data.RenderizableInnerData.batchPriority = RDE_BATCH_PRIORITY_SPRITE;
     }
 
+    FRAMEBUFFER_METHODS_DEFAULT_IMPL(UIButton)
+
     void UIButton::onMouseEntered() {
         if(!uiInteractable->interactable) return;
         SAFE_POINTER(uiImage, setTexture(statesTextures[1]))

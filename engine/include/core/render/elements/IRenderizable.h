@@ -230,14 +230,17 @@ namespace RDE {
 
     #define SIZE_METHODS_DEFAULT_IMPL(_className)                                                                                               \
     Vec2F _className::getSize() const {                                                                                                         \
-        return anchoring->getSize();                                                                                 \
+        return anchoring->getSize();                                                                                                            \
     }                                                                                                                                           \
                                                                                                                                                 \
     void _className::setSize(const Vec2F &_size) {                                                                                              \
-        anchoring->setSize(_size);                                                                                   \
+        anchoring->setSize(_size);                                                                                                              \
     }
 
 
+    #define FRAMEBUFFER_METHODS_DEFAULT_IMPL(_className)                                                                                        \
+    FramebufferID _className::getFramebuffer() const { return data.RenderizableInnerData.framebufferToRenderTo; }				                \
+	void _className::setFramebuffer(FramebufferID _framebuffer) { data.RenderizableInnerData.framebufferToRenderTo = _framebuffer; data.RenderizableInnerData.dirty = true; }
 
 
     #define RENDERIZABLE_UI_BASIC_METHODS_IMPL(_className, _getSizeX, _getSizeY, _setSizeCode)                                                  \
@@ -273,7 +276,7 @@ namespace RDE {
     }                                                                                                                                           \
     Vec2F _className::getOriginOffset() const {                                                                                                 \
         return data.originOffset;                                                                                                               \
-    }              
+    }
 }
 
 #endif //RDE_RENDERIZABLE_H

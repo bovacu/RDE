@@ -86,9 +86,10 @@ namespace RDE {
 
 
     SIZE_METHODS_DEFAULT_IMPL(UICheckbox)
+    FRAMEBUFFER_METHODS_DEFAULT_IMPL(UICheckbox)
 
 
-		void UICheckbox::onMouseReleased(RDE_MOUSE_BUTTON_ _mouseButton) {
+    void UICheckbox::onMouseReleased(RDE_MOUSE_BUTTON_ _mouseButton) {
         if(!uiInteractable->interactable) return;
 
 		if(uiInteractable->mouseInnerStatus == RDE_MOUSE_STATUS_ENTERED) {

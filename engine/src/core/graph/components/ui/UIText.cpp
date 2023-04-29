@@ -115,4 +115,5 @@ namespace RDE {
 
 
     RENDERIZABLE_UI_BASIC_METHODS_IMPL(UIText, textSize.x, textSize.y, {})
+    FRAMEBUFFER_METHODS_DEFAULT_IMPL(UIText)
 }

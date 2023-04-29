@@ -291,40 +291,43 @@ namespace RDE {
 	void Scene::onInnerRenderUI(Delta _dt, FrameBuffer* _framebuffer) {
         auto& _renderManager = engine->manager.renderManager;
 
-		if(!mainCamera->node->hasComponent<Active>() || !mainCamera->isEnabled()) return;
-		if (mainCamera->framebufferID != _framebuffer->getID()) return;
+        for(auto* _camera : cameras) {
+            if(!_camera->node->hasComponent<Active>() || !_camera->isEnabled()) continue;
+            if (_camera->framebufferID != _framebuffer->getID()) continue;
 
-        _renderManager.beginDraw(mainCamera, (Transform*)mainCamera->node->getTransform());
+            _renderManager.beginDraw(_camera, (Transform*)_camera->node->getTransform());
 
-        canvas->batches.clear();
-        Batch _batch;
-        _batch.shader = engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
-        _batch.textureID = engine->manager.textureManager.getSubTexture("defaultAssets", "buttonDark")->getGLTexture();
-        canvas->batches.emplace_back(_batch);
+            canvas->batches.clear();
+            Batch _batch;
+            _batch.shader = engine->manager.shaderManager.getShader(SPRITE_RENDERER_SHADER);
+            _batch.textureID = engine->manager.textureManager.getSubTexture("defaultAssets", "buttonDark")->getGLTexture();
+            canvas->batches.emplace_back(_batch);
 
-        // Depending on the element, we will need to restrict the area that can be rendered. In that case and as we
-        // precalculate a list in the correct order of rendering, we need to know when to begin the cropping and when to
-        // finish it, in this case we create a list of root elements that need to be cropped. We store how many children
-        // the root cropped element has, and we simply make a countdown until all children have been drawn, then we apply
-        // the crop.
-        std::vector<int> _cropList;
+            // Depending on the element, we will need to restrict the area that can be rendered. In that case and as we
+            // precalculate a list in the correct order of rendering, we need to know when to begin the cropping and when to
+            // finish it, in this case we create a list of root elements that need to be cropped. We store how many children
+            // the root cropped element has, and we simply make a countdown until all children have been drawn, then we apply
+            // the crop.
+            std::vector<int> _cropList;
 
-        for(auto& _it : canvas->uiRenderizables) {
-			auto _renderFbID = _it.renderizableInnerData->RenderizableInnerData.framebufferToRenderTo;;
-			auto _fbID = _framebuffer->getID();
-			if ((_renderFbID & _fbID) != _fbID) continue;
+            for(auto& _it : canvas->uiRenderizables) {
+                auto _renderFbID = _it.renderizableInnerData->RenderizableInnerData.framebufferToRenderTo;;
+                auto _fbID = _framebuffer->getID();
+                if ((_renderFbID & _fbID) != _fbID) continue;
 
-            canvas->batchTreeElementPre(&_it, nullptr, _framebuffer);
+                canvas->batchTreeElementPre(&_it, nullptr, _framebuffer);
 
-            for(auto& _crop : _cropList) {
-                _crop--;
-                if(_crop == 0) canvas->batchTreeElementPost(&_it, nullptr);
+                for(auto& _crop : _cropList) {
+                    _crop--;
+                    if(_crop == 0) canvas->batchTreeElementPost(&_it, nullptr);
+                }
+
+                if(_it.cropping > 0) _cropList.push_back(_it.cropping);
             }
 
-            if(_it.cropping > 0) _cropList.push_back(_it.cropping);
+            _renderManager.endDrawUI(canvas->batches);
         }
 
-		_renderManager.endDrawUI(canvas->batches);
     }
 
 

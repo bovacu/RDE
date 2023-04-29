@@ -46,6 +46,7 @@ namespace RDE {
 			anchoring->setSize({ Util::Math::clampF(_size.x, 0, FLT_MAX), Util::Math::clampF(_size.y, 0, FLT_MAX) });
         })
 
+    FRAMEBUFFER_METHODS_DEFAULT_IMPL(UIImage)
 
     std::string UIImage::getTexturePath() {
         return data.RenderizableInnerData.texture->getPath();

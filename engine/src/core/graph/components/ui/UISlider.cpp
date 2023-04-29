@@ -83,6 +83,7 @@ namespace RDE {
     ENABLED_DEFAULT_IMPL(UISlider)
     SIZE_METHODS_DEFAULT_IMPL(UISlider)
     INTERACTABLE_DEFAULT_IMPL(UISlider)
+    FRAMEBUFFER_METHODS_DEFAULT_IMPL(UISlider)
 
     void UISlider::onUpdate(Delta _dt) {
         if(mouseDown) {
