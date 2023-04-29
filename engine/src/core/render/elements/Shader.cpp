@@ -165,7 +165,7 @@ namespace RDE {
 		for(auto& _uniform : _uniforms) {
 			uniforms[_uniform] = glGetUniformLocation(shaderID, _uniform);
 			if(uniforms[_uniform] == -1) {
-				Util::Log::error("Uniform with name ", _uniform, " couldn't be located!");
+				Util::Log::error("Uniform with name ", _uniform, " couldn't be located in shader ", shaderID,"!");
 			}
 		}
 		glUseProgram(0);

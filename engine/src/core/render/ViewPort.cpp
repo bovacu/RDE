@@ -32,7 +32,6 @@ namespace RDE {
 
 		glDisable(GL_SCISSOR_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		Util::Log::info(camera->node->getComponent<Tag>()->tag, " -> ", size);
 		glViewport(position.x, position.y, size.x, size.y);
 //		glScissor(position.x * _zoom, 
 //		          position.y * _zoom, 

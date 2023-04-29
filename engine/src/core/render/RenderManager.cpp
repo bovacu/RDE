@@ -61,10 +61,9 @@ namespace RDE {
 			VertexConfig {
 				1, 2, GL_FLOAT, sizeof(float) * 2, sizeof(glm::vec2) * 2
 			}
-		},
-		{
-			"viewProjectionMatrix"
-		},
+		},{
+
+        },
 		1);
 		Util::GL::checkError("FrameBuffer LoadConfig");
 

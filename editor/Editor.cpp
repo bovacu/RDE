@@ -17,6 +17,8 @@
 
 #define GRID_TEXTURE_SIZE 2500
 
+// TODO (Borja): Create an ImGui graph/tree/thing showing which Framebuffer is being rendered and which cameras are rendering to it and which IRenderizables are being rendered by those cameras.
+
 namespace RDEEditor {
 
 	#include "NodeCreator.cpp"
@@ -58,10 +60,8 @@ namespace RDEEditor {
 			_i += 4;
 		}
 
-
 		auto* _editorCameraNode = new Node((NodeID)0, graph, &engine->manager, new Transform(nullptr));
 		editorCamera = new Camera(_editorCameraNode, &engine->manager, nullptr, engine->getWindow());
-
 		generateGridTexture();
 		gridSprite = graph->createNode("Grid")->addComponent<SpriteRenderer>(SpriteRendererConfig {
 			.texture = &gridTexture
@@ -90,7 +90,6 @@ namespace RDEEditor {
 		auto _fbID = engine->manager.renderManager.createFrameBuffer(_specs);
 		getCameras()[0]->framebufferID = _fbID;
 		getCameras()[0]->getViewport()->autoResizeWhenWindowSizeChanges = false;
-		// removeCamera(getCameras()[0]->node);
     }
 
 	void Editor::generateGridTexture() {
@@ -151,8 +150,9 @@ namespace RDEEditor {
 		auto _zoom = editorCamera->getCurrentZoomLevel();
 		gridSprite->node->getTransform()->setScale(_zoom + std::abs(_cameraPos.x), _zoom + std::abs(_cameraPos.x));    
 
-		// editorCamera->recalculateViewProjectionMatrix();
-		// canvas->getCamera()->recalculateViewProjectionMatrix();
+		for(auto* _camera : getCameras()) {
+			_camera->recalculateViewProjectionMatrix();
+		}
 	}
 
 	void Editor::onImGuiRender(Delta _dt) {
@@ -196,7 +196,10 @@ namespace RDEEditor {
 	}
 
 	bool Editor::windowResized(WindowResizedEvent& _event) {
-		editorCamera->onResize(_event.getWidth(), _event.getHeight());
+		for(auto* _camera : getCameras()) {
+			_camera->onResize(_event.getWidth(), _event.getHeight());
+		}
+
 		generateGridTexture();
 		editorCamera->getViewport()->matchVirtualResolutionToDeviceResolution();
 		canvas->setCanvasResolution( { (int)_event.getWidth(), (int)_event.getHeight() });
