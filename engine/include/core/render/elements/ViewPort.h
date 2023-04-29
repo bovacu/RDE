@@ -5,6 +5,7 @@
 #define RDE_VIEWPORT_H
 
 #include "core/util/Vec.h"
+#include <stdint.h>
 
 namespace RDE {
 
@@ -30,8 +31,12 @@ namespace RDE {
 			const Window* window = nullptr;
 			Camera* camera = nullptr;
 
+        public:
+            bool autoResizeWhenWindowSizeChanges = true;
+
         protected:
 			RDE_FUNC void update();
+            RDE_FUNC void onResize(uint32_t _width, uint32_t _height);
 
         public:
 			RDE_FUNC ViewPort(const Vec2I& _deviceSize, Camera* _camera, const Window* _window);

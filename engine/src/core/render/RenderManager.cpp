@@ -100,6 +100,10 @@ namespace RDE {
 		}
 	}
 
+	void RenderManager::clearBatches() {
+		batch.clearBatches();
+	}
+
     void RenderManager::clear() {
         glClearColor((float)clearColor.r / 255.f, (float)clearColor.g / 255.f, (float)clearColor.b / 255.f, (float)clearColor.a / 255.f);
         Util::GL::checkError("RenderManager Clear");

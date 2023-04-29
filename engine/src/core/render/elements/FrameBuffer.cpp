@@ -37,7 +37,6 @@ namespace RDE {
         if (fboID) {
             glDeleteFramebuffers(1, &fboID);
 			glDeleteTextures(1, &frameBufferTexureForColorAttachment);
-            glDeleteBuffers(1, &vboID);
             glDeleteRenderbuffers(1, &rboID);
         }
 

@@ -185,9 +185,7 @@ namespace RDE {
     }
 
     void Canvas::onResize(uint _width, uint _height) {
-		auto* _camera = scene->mainCamera;
         graph->sceneRoot->getComponent<UIAnchoring>()->setSize({ (float)_width, (float)_height });
-        _camera->onResize((int)_width, (int)_height);
     }
 
     void Canvas::setCanvasResolution(const Vec2I& _resolution) {

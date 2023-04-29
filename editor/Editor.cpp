@@ -58,6 +58,7 @@ namespace RDEEditor {
 			_i += 4;
 		}
 
+
 		auto* _editorCameraNode = new Node((NodeID)0, graph, &engine->manager, new Transform(nullptr));
 		editorCamera = new Camera(_editorCameraNode, &engine->manager, nullptr, engine->getWindow());
 
@@ -75,6 +76,8 @@ namespace RDEEditor {
 			.texture = _texture
 		});
 
+		_sprite->setFramebuffer(1 | 2);
+
 		mseDel.bind<&Editor::mouseScrolled>(this);
 		wreDel.bind<&Editor::windowResized>(this);
 
@@ -83,7 +86,11 @@ namespace RDEEditor {
 		addCamera(editorCamera);
 
 		FrameBufferSpecification _specs = {(uint32_t)engine->getWindow()->getWindowSize().x,(uint32_t)engine->getWindow()->getWindowSize().y};
-		removeCamera(getCameras()[0]->node);
+		_specs.drawDebug = false;
+		auto _fbID = engine->manager.renderManager.createFrameBuffer(_specs);
+		getCameras()[0]->framebufferID = _fbID;
+		getCameras()[0]->getViewport()->autoResizeWhenWindowSizeChanges = false;
+		// removeCamera(getCameras()[0]->node);
     }
 
 	void Editor::generateGridTexture() {
@@ -144,13 +151,13 @@ namespace RDEEditor {
 		auto _zoom = editorCamera->getCurrentZoomLevel();
 		gridSprite->node->getTransform()->setScale(_zoom + std::abs(_cameraPos.x), _zoom + std::abs(_cameraPos.x));    
 
-		editorCamera->recalculateViewProjectionMatrix();
-		canvas->getCamera()->recalculateViewProjectionMatrix();
+		// editorCamera->recalculateViewProjectionMatrix();
+		// canvas->getCamera()->recalculateViewProjectionMatrix();
 	}
 
 	void Editor::onImGuiRender(Delta _dt) {
 		dockingSpaceView(this);
-		//gameView(this, engine->mainFrameBuffer);
+		gameView(this);
 		sceneView(this, &sceneViewOffset);
 		hierarchyView(this);
 		componentsView(this);
@@ -162,13 +169,15 @@ namespace RDEEditor {
     void Editor::onDebugRender(Delta _dt, RenderManager* _renderManager) {
 		Scene::onDebugRender(_dt, _renderManager);
 
-		for(auto* _camera : getCameras()) { 
+		for(auto* _camera : getCameras()) {
+			if(_camera == editorCamera) continue;
+
 			auto _cameraSize = _camera->getViewport()->getSize();
 			auto _cameraPos = _camera->node->getTransform()->getPosition();
 			auto _cameraRot = _camera->node->getTransform()->getRotation();
 
 			DebugShape _cameraShape;
-			_cameraShape.makeSquare(_cameraPos, { (float)_cameraSize.x, (float)_cameraSize.y });
+			_cameraShape.makeSquare(-_cameraPos, { (float)_cameraSize.x, (float)_cameraSize.y });
 			_cameraShape.showOutsideColor(true);
 			_cameraShape.setOutlineColor(Color::White);
 			_cameraShape.showInnerColor(false);

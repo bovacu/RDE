@@ -25,7 +25,6 @@ void sceneView(Editor* _editor, Vec2F* _sceneViewOffset) {
 
 	*_sceneViewOffset = { (_editor->engine->getWindow()->getWidth() - ImGui::GetWindowSize().x) * 0.5f, 
 						  (_editor->engine->getWindow()->getHeight() - ImGui::GetWindowSize().y) * 0.5f };
-
 	ImGui::End();
 	ImGui::PopStyleVar();
 }

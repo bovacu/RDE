@@ -1,6 +1,7 @@
 // Created by borja on 30/12/21.
 
 
+#include "core/util/Functions.h"
 #include "glm/ext/matrix_clip_space.hpp"
 #include "core/render/Camera.h"
 #include "core/graph/components/Transform.h"
@@ -18,14 +19,14 @@ namespace RDE {
     }
 
 	void Camera::onResize(const Vec2I& _size, float _aspectRatio) {
-		viewport->setSize(_size);
+		viewport->onResize(_size.x, _size.y);
         projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
         dirty = true;
     }
 
 	void Camera::onResize(int _width, int _height) {
-		viewport->setSize({_width, _height});
+		viewport->onResize(_width, _height);
 		float _aspectRatio = viewport->getAspectRatio();
 		projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
 		viewProjectionMatrix = projectionMatrix * viewMatrix;
@@ -52,6 +53,7 @@ namespace RDE {
             viewMatrix = glm::inverse(_mat);
             viewProjectionMatrix = projectionMatrix * viewMatrix;
             dirty = false;
+            node->getTransform()->update();
         }
     }
 
@@ -115,6 +117,7 @@ namespace RDE {
 
     void Camera::update() {
         recalculateViewProjectionMatrix();
+        viewport->update();
     }
 
     bool Camera::isLandscape() {

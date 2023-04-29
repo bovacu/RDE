@@ -234,7 +234,7 @@ namespace RDE {
         for(auto& _batch : batches) {
             auto _shaderID = _batch.shader->getShaderID();
             if (_batch.vertexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0) {
-                Util::Log::warn("Batch: ", _batch.ID, " was skipped, data - VB size: ", _batch.vertexBuffer.size(), ", Texture: ", _batch.textureID, ", Shader: ", _shaderID);
+                // Util::Log::warn("Batch: ", _batch.ID, " was skipped, data - VB size: ", _batch.vertexBuffer.size(), ", Texture: ", _batch.textureID, ", Shader: ", _shaderID);
                 continue;
             }
             
@@ -363,6 +363,13 @@ namespace RDE {
         #endif
     #endif
     }
+
+	void SpriteBatch::clearBatches() {
+		for(auto& _batch : batches) {
+			_batch.vertexBuffer.clear();
+			_batch.vertexCount = 0;
+		}
+	}
 
 
     SpriteBatch* SpriteBatch::Debug::batch;

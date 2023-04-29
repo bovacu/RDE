@@ -236,6 +236,8 @@ namespace RDE {
              */
 			RDE_FUNC void flush();
 
+			RDE_FUNC void clearBatches();
+
         private:
             /**
              * @brief This method initiates the VertexBuffer on the GPU.

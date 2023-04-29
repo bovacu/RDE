@@ -33,6 +33,8 @@ namespace RDE {
          * @brief Render to window
          */
         bool renderToWindow = true;
+
+        bool drawDebug = true;
     };
 
     class Manager;

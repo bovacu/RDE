@@ -114,6 +114,8 @@ namespace RDE {
              */
             void endDraw();
 
+			void clearBatches();
+
             /**
              * @brief Sends the debug data batched to the GPU, must be called after beginDebugDraw and what we want to render.
              */

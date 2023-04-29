@@ -4,6 +4,7 @@
 #include "core/util/Functions.h"
 #include "core/render/window/Window.h"
 #include "core/render/Camera.h"
+#include "core/graph/components/Node.h"
 
 #ifdef __EMSCRIPTEN__
 #include <GLES3/gl32.h>
@@ -31,8 +32,8 @@ namespace RDE {
 
 		glDisable(GL_SCISSOR_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-		glViewport(0, 0, window->getWidth(), window->getHeight());
+		Util::Log::info(camera->node->getComponent<Tag>()->tag, " -> ", size);
+		glViewport(position.x, position.y, size.x, size.y);
 //		glScissor(position.x * _zoom, 
 //		          position.y * _zoom, 
 //		          size.x * _zoom, 
@@ -48,6 +49,12 @@ namespace RDE {
 	void ViewPort::setSize(const Vec2I& _size) {
 		size = _size;
 		update();
+	}
+
+	void ViewPort::onResize(uint32_t _width, uint32_t _height) {
+		if(autoResizeWhenWindowSizeChanges) {
+			setSize({ (int)_width, (int)_height });
+		}
 	}
 
 	Vec2I ViewPort::getPosition() {

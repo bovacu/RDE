@@ -151,7 +151,8 @@ namespace RDE {
 			manager.sceneManager.getDisplayedScene()->onInnerDebugRender(_dt, _pair.second);
 			_pair.second->unbind();
 		}
-		//manager.renderManager.flushFramebuffers();
+
+		manager.renderManager.clearBatches();
 
         Profiler::begin(ProfilerState::IMGUI);
         #if !IS_MOBILE()
