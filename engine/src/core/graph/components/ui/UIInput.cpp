@@ -128,6 +128,14 @@ namespace RDE {
     SIZE_METHODS_DEFAULT_IMPL(UIInput)
     FRAMEBUFFER_METHODS_DEFAULT_IMPL(UIInput)
 
+	void UIInput::setFramebuffer(FramebufferID _framebuffer) {
+		data.RenderizableInnerData.framebufferToRenderTo = _framebuffer;
+		SAFE_POINTER(background, setFramebuffer(_framebuffer))
+		SAFE_POINTER(placeholderTextRenderer, setFramebuffer(_framebuffer))
+		SAFE_POINTER(textRenderer, setFramebuffer(_framebuffer))
+		SAFE_POINTER(caretSprite, setFramebuffer(_framebuffer))
+	}
+
 
     void UIInput::setInteractable(bool _interactable) {
         uiInteractable->interactable = _interactable;

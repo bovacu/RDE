@@ -73,6 +73,12 @@ namespace RDE {
 
     FRAMEBUFFER_METHODS_DEFAULT_IMPL(UIButton)
 
+	void UIButton::setFramebuffer(FramebufferID _framebuffer) {
+		data.RenderizableInnerData.framebufferToRenderTo = _framebuffer;
+		SAFE_POINTER(uiImage, setFramebuffer(_framebuffer))
+		SAFE_POINTER(textRenderer, setFramebuffer(_framebuffer))
+	}
+
     void UIButton::onMouseEntered() {
         if(!uiInteractable->interactable) return;
         SAFE_POINTER(uiImage, setTexture(statesTextures[1]))

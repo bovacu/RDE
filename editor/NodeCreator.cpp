@@ -18,5 +18,6 @@ UIPanel* createPanelNode(Editor* _editor) {
 	auto _panelNode = _editor->canvas->graph->createNode(Util::String::appendToString("Panel_", _editor->graph->getNodeContainer().size()));
 	auto* _panel = _panelNode->addComponent<UIPanel>(UIPanelConfig { .size = {256, 256} });
 	_panel->setFramebuffer(_editor->editorData.gameViewFramebufferID | _editor->editorData.sceneViewFramebufferID);
+	Util::Log::info("FB: ", _panel->getFramebuffer());
 	return _panel;
 }

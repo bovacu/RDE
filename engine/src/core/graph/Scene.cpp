@@ -36,7 +36,7 @@ namespace RDE {
         mainCamera = _camera;
 
         canvas = new Canvas(this, _engine->getWindow(), "Canvas");
-        // canvas->onResize(_engine->getWindow()->getWidth(), _engine->getWindow()->getHeight());
+        canvas->onResize(_engine->getWindow()->getWidth(), _engine->getWindow()->getHeight());
     }
 
     Scene::~Scene() {
@@ -292,8 +292,13 @@ namespace RDE {
         auto& _renderManager = engine->manager.renderManager;
 
         for(auto* _camera : cameras) {
+
+			auto _cameraFB = _camera->framebufferID;
+			auto _framebufferID = _framebuffer->getID();
+
             if(!_camera->node->hasComponent<Active>() || !_camera->isEnabled()) continue;
-            if (_camera->framebufferID != _framebuffer->getID()) continue;
+            if (_cameraFB != _framebufferID) continue;
+			if (canvas->uiRenderizables.empty()) continue;
 
             _renderManager.beginDraw(_camera, (Transform*)_camera->node->getTransform());
 
@@ -311,7 +316,7 @@ namespace RDE {
             std::vector<int> _cropList;
 
             for(auto& _it : canvas->uiRenderizables) {
-                auto _renderFbID = _it.renderizableInnerData->RenderizableInnerData.framebufferToRenderTo;;
+                auto _renderFbID = _it.renderizableInnerData->RenderizableInnerData.framebufferToRenderTo;
                 auto _fbID = _framebuffer->getID();
                 if ((_renderFbID & _fbID) != _fbID) continue;
 

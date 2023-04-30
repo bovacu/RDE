@@ -48,6 +48,10 @@ namespace RDE {
 
     FRAMEBUFFER_METHODS_DEFAULT_IMPL(UIImage)
 
+	void UIImage::setFramebuffer(FramebufferID _framebuffer) {
+		data.RenderizableInnerData.framebufferToRenderTo = _framebuffer;
+	}
+
     std::string UIImage::getTexturePath() {
         return data.RenderizableInnerData.texture->getPath();
     }

@@ -50,10 +50,14 @@ namespace RDE {
             auto _screenCoords = Util::Math::worldToScreenCoords(viewport, {_mat[3][0], _mat[3][1]});
             _mat[3][0] = _screenCoords.x;
             _mat[3][1] = _screenCoords.y;
+
+			float _aspectRatio = viewport->getAspectRatio();
+			projectionMatrix = glm::ortho(-_aspectRatio * zoom, _aspectRatio * zoom, -zoom, zoom, -zoom, zoom);
+
             viewMatrix = glm::inverse(_mat);
             viewProjectionMatrix = projectionMatrix * viewMatrix;
             dirty = false;
-            node->getTransform()->update();
+            //node->getTransform()->update();
         }
     }
 

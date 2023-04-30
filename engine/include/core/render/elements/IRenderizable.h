@@ -239,9 +239,7 @@ namespace RDE {
 
 
     #define FRAMEBUFFER_METHODS_DEFAULT_IMPL(_className)                                                                                        \
-    FramebufferID _className::getFramebuffer() const { return data.RenderizableInnerData.framebufferToRenderTo; }				                \
-	void _className::setFramebuffer(FramebufferID _framebuffer) { data.RenderizableInnerData.framebufferToRenderTo = _framebuffer; data.RenderizableInnerData.dirty = true; }
-
+    FramebufferID _className::getFramebuffer() const { return data.RenderizableInnerData.framebufferToRenderTo; }				                
 
     #define RENDERIZABLE_UI_BASIC_METHODS_IMPL(_className, _getSizeX, _getSizeY, _setSizeCode)                                                  \
     Texture* _className::getTexture() const { return data.RenderizableInnerData.texture; };                                                     \

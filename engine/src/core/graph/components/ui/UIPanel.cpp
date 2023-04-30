@@ -56,6 +56,11 @@ namespace RDE {
     ENABLED_DEFAULT_IMPL(UIPanel)
     FRAMEBUFFER_METHODS_DEFAULT_IMPL(UIPanel)
 
+	void UIPanel::setFramebuffer(FramebufferID _framebuffer) {
+		data.RenderizableInnerData.framebufferToRenderTo = _framebuffer;
+		SAFE_POINTER(uiImage, setFramebuffer(_framebuffer))
+	}
+
 
     void UIPanel::setColor(const Color& _color) {
         SAFE_POINTER(uiImage, setColor(_color))

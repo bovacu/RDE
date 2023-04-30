@@ -56,24 +56,36 @@ namespace RDE {
         }
     }
 
-    void Canvas::getRenderizable(Node* _node, CanvasElement* _canvasElement) {
-        if(_node->hasComponent<UIImage>()) {
-            auto* _uiImage = _node->getComponent<UIImage>();
-			auto _draw = _uiImage->isEnabled() && _uiImage->node->isActive();
-			_uiImage->data.RenderizableInnerData.extraInfo = (void*)_uiImage;
-			_canvasElement->renderizableInnerData = &_uiImage->data;
-			_canvasElement->renderizableInnerData->RenderizableInnerData.draw = _draw;
-			return;
-        }
+	#define SET_FRAMEBUFFER_DATA(_type, _node, _data)								\
+	if(_node->hasComponent<_type>()) {												\
+	auto _t = _node->getComponent<_type>();											\
+		if(_data == nullptr) {														\
+			_data = &_t->data;														\
+		}																			\
+		_data->RenderizableInnerData.framebufferToRenderTo = _t->getFramebuffer();	\
+	}
 
-        if(_node->hasComponent<UIText>()) {
-            auto* _uiText = _node->getComponent<UIText>();
-			auto _draw = _uiText->isEnabled() && _uiText->node->isActive();
-			_uiText->data.RenderizableInnerData.extraInfo = (void*)_uiText;
-			_canvasElement->renderizableInnerData = &_uiText->data;
-			_canvasElement->renderizableInnerData->RenderizableInnerData.draw = _draw;
-			return;
-        }
+	#define SET_BASIC_UI_DRAWABLE_INFO(_type, _node, _data)					\
+	if (_node->hasComponent<UIImage>()) { 									\
+		auto* _t = _node->getComponent<_type>();							\
+		auto _draw = _t->isEnabled() && _t->node->isActive();				\
+		_t->data.RenderizableInnerData.extraInfo = (void*)_t;				\
+		_data = &_t->data;													\
+		_data->RenderizableInnerData.draw = _draw;							\
+		SET_FRAMEBUFFER_DATA(_type, _node, _data)							\
+		return;																\
+	}
+	
+
+    void Canvas::getRenderizable(Node* _node, CanvasElement* _canvasElement) {
+		SET_FRAMEBUFFER_DATA(UIPanel, _node, _canvasElement->renderizableInnerData)
+		SET_FRAMEBUFFER_DATA(UISlider, _node, _canvasElement->renderizableInnerData)
+		SET_FRAMEBUFFER_DATA(UIInput, _node, _canvasElement->renderizableInnerData)
+		SET_FRAMEBUFFER_DATA(UIButton, _node, _canvasElement->renderizableInnerData)
+		SET_FRAMEBUFFER_DATA(UICheckbox, _node, _canvasElement->renderizableInnerData)
+
+		SET_BASIC_UI_DRAWABLE_INFO(UIImage, _node, _canvasElement->renderizableInnerData)
+		SET_BASIC_UI_DRAWABLE_INFO(UIText, _node, _canvasElement->renderizableInnerData)
     }
 
     void Canvas::batchTreeElementPre(CanvasElement* _canvasElement, void* _extraData, FrameBuffer* _framebuffer) {
@@ -110,10 +122,16 @@ namespace RDE {
                         break;
                     }
 					case RDE_RENDERIZABLE_TYPE_UI_IMAGE: {
+						auto _renderFbID = _data.RenderizableInnerData.framebufferToRenderTo;
+						auto _fbID = _framebuffer->getID();
+						if ((_renderFbID & _fbID) != _fbID) return;
                         drawBatchedUIImage(_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), _camera->getViewport());
                         break;
                     }
 					case RDE_RENDERIZABLE_TYPE_UI_TEXT: {
+						auto _renderFbID = _data.RenderizableInnerData.framebufferToRenderTo;
+						auto _fbID = _framebuffer->getID();
+						if ((_renderFbID & _fbID) != _fbID) return;
 						drawBatchedUIText(_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), _camera->getViewport());
                         break;
                     }
@@ -147,10 +165,20 @@ namespace RDE {
                     break;
                 }
 				case RDE_RENDERIZABLE_TYPE_UI_IMAGE: {
+					auto _renderFbID = _data->RenderizableInnerData.framebufferToRenderTo;
+					auto _fbID = _framebuffer->getID();
+					if ((_renderFbID & _fbID) != _fbID) {
+						return;
+					}
 					drawBatchedUIImage(*_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), _camera->getViewport());
                     break;
                 }
 				case RDE_RENDERIZABLE_TYPE_UI_TEXT: {
+					auto _renderFbID = _data->RenderizableInnerData.framebufferToRenderTo;
+					auto _fbID = _framebuffer->getID();
+					if ((_renderFbID & _fbID) != _fbID) {
+						return;
+					}
                     drawBatchedUIText(*_data, _currentBatch, _canvasElement->anchoring, _canvasElement->node->getTransform(), _camera->getViewport());
                     break;
                 }

@@ -85,6 +85,13 @@ namespace RDE {
     INTERACTABLE_DEFAULT_IMPL(UISlider)
     FRAMEBUFFER_METHODS_DEFAULT_IMPL(UISlider)
 
+	void UISlider::setFramebuffer(FramebufferID _framebuffer) {
+		data.RenderizableInnerData.framebufferToRenderTo = _framebuffer;
+		SAFE_POINTER(backgroundBarSprite, setFramebuffer(_framebuffer))
+		SAFE_POINTER(fillBarSprite, setFramebuffer(_framebuffer))
+		SAFE_POINTER(handleSprite, setFramebuffer(_framebuffer))
+	}
+
     void UISlider::onUpdate(Delta _dt) {
         if(mouseDown) {
             auto _size = Vec2F { getSize().x, getSize().y };

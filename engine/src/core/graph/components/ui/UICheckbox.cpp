@@ -88,6 +88,13 @@ namespace RDE {
     SIZE_METHODS_DEFAULT_IMPL(UICheckbox)
     FRAMEBUFFER_METHODS_DEFAULT_IMPL(UICheckbox)
 
+	void UICheckbox::setFramebuffer(FramebufferID _framebuffer) {
+		data.RenderizableInnerData.framebufferToRenderTo = _framebuffer;
+		SAFE_POINTER(checkboxBackgroundSprite, setFramebuffer(_framebuffer))
+		SAFE_POINTER(tickSprite, setFramebuffer(_framebuffer))
+		SAFE_POINTER(textRenderer, setFramebuffer(_framebuffer))
+	}
+
 
     void UICheckbox::onMouseReleased(RDE_MOUSE_BUTTON_ _mouseButton) {
         if(!uiInteractable->interactable) return;

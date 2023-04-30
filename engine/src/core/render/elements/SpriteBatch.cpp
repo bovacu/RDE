@@ -278,8 +278,9 @@ namespace RDE {
 	void SpriteBatch::flushUI(std::vector<Batch>& _batches) {
         for(auto& _batch : _batches) {
             auto _shaderID = _batch.shader->getShaderID();
-            if (_batch.vertexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0)
+            if (_batch.vertexBuffer.empty() || _batch.textureID < 0 || _shaderID < 0) {
                 continue;
+			}
 
             glUseProgram(_shaderID);
             Util::GL::checkError("After glUseProgram UI");
