@@ -28,7 +28,7 @@ void gameView(Editor* _editor) {
 		_finalImGuiViewSize.x = _viewportSize.x;
 		auto _i = 1;
 		while(_i <= _finalImGuiViewSize.y) {
-			if(approximateValue(_viewport->getAspectRatio(), (float)_finalImGuiViewSize.x / (float)_i, getEpsilon((float)_viewportSize.x, (float)_viewport->getSize().x))) {
+			if(approximateValue(_editor->editorCamera->getViewport()->getAspectRatio(), (float)_finalImGuiViewSize.x / (float)_i, getEpsilon((float)_viewportSize.x, (float)_viewport->getSize().x))) {
 				_finalImGuiViewSize.y = _i;
 				break;
 			}
