@@ -38,8 +38,6 @@ namespace RDE {
         atlasSize.y = 0;
         fontSize = _fontSize;
 
-        //memset(characters, 0, sizeof(characters));
-
         FT_Int32 load_flags = FT_LOAD_RENDER | FT_LOAD_TARGET_(FT_RENDER_MODE_SDF);
         /* Find minimum size for a texture holding all visible ASCII characters */
         for (int _i = CHARACTERS_START_OFFSET; _i < MAX_CHARACTERS; _i++) {
