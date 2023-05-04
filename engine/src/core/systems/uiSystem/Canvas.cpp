@@ -66,7 +66,7 @@ namespace RDE {
 	}
 
 	#define SET_BASIC_UI_DRAWABLE_INFO(_type, _node, _data)					\
-	if (_node->hasComponent<UIImage>()) { 									\
+	if (_node->hasComponent<_type>()) { 									\
 		auto* _t = _node->getComponent<_type>();							\
 		auto _draw = _t->isEnabled() && _t->node->isActive();				\
 		_t->data.RenderizableInnerData.extraInfo = (void*)_t;				\
