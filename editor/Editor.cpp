@@ -96,6 +96,8 @@ namespace RDEEditor {
 		editorData.gameViewFramebufferID = getCameras()[0]->framebufferID;
 
 		_sprite->setFramebuffer(editorData.gameViewFramebufferID | editorData.sceneViewFramebufferID);
+		
+		generateTranslationGuizmo();
     }
 
 	void Editor::generateGridTexture() {
@@ -138,8 +140,6 @@ namespace RDEEditor {
 		
 		selectNodeWithClick();
 		editModeInputHandler();
-		
-		generateTranslationGuizmo(editorData.sceneViewSelectedNode);
     }
 
     bool isPointInside(const Vec2F& _rectangleSize, const Transform* _rectangleTransform, const Vec2F& _pointPos) {
@@ -233,14 +233,10 @@ namespace RDEEditor {
 		}
     }
 
-    void Editor::generateTranslationGuizmo(const Node* _node) {
-		if(_node == nullptr) return;
-		auto _pos = _node->getTransform()->getPosition();
-		auto _rot = _node->getTransform()->getRotation();
-
+    void Editor::generateTranslationGuizmo() {
 		DebugShape _arrowUp;
-		_arrowUp.setPosition(_pos);
-		_arrowUp.setRotation(_rot);
+		_arrowUp.setPosition({0, 0});
+		_arrowUp.setRotation(0);
 		_arrowUp.addPoint({ 4, 0});
 		_arrowUp.addPoint({ 4, 128});
 		_arrowUp.addPoint({ 8, 128});
@@ -255,12 +251,13 @@ namespace RDEEditor {
 		_arrowUp.addPoint({ 8, -128});
 		_arrowUp.addPoint({ 4, -128});
 		
-		_arrowUp.showInnerColor(false);
+		_arrowUp.setOutlineColor(Color::Black);
+		_arrowUp.setInnerColor(Color::Blue);
 		editorData.gizmos.translationY = _arrowUp;
 
 		DebugShape _arrowRight;
-		_arrowRight.setPosition(_pos);
-		_arrowRight.setRotation(_rot);
+		_arrowRight.setPosition({0, 0});
+		_arrowRight.setRotation(0);
 		_arrowRight.addPoint({0,   4});
 		_arrowRight.addPoint({128, 4});
 		_arrowRight.addPoint({128, 8});
@@ -275,15 +272,14 @@ namespace RDEEditor {
 		_arrowRight.addPoint({-128,  8});
 		_arrowRight.addPoint({-128,  4});
 		
-		_arrowRight.showInnerColor(false);
-		_arrowRight.setOutlineColor(Color::Green);
-		_arrowRight.setRotation(_rot);
+		_arrowRight.setInnerColor(Color::Green);
+		_arrowRight.setOutlineColor(Color::Black);
+		_arrowRight.setRotation(0);
 		editorData.gizmos.translationX = _arrowRight;
 
 		DebugShape _intersection;
-		_intersection.makeSquare(_pos, {16, 16});
-		// _intersection.showInnerColor(false);
-		_intersection.setOutlineColor(Color::Gray);
+		_intersection.makeSquare({0, 0}, {16, 16});
+		_intersection.setOutlineColor(Color::Black);
 		_intersection.setInnerColor(Color::Gray);
 		editorData.gizmos.translationXY = _intersection;
 	}
@@ -335,6 +331,20 @@ namespace RDEEditor {
 			_diff.x = editorFlags.editModeAxis == EditModeAxis::Y ? 0.f : _diff.x;
 			
 			editorData.sceneViewSelectedNode->getTransform()->translate(_diff * editorCamera->getCurrentZoomLevel());
+		}
+		
+		if(editorData.sceneViewSelectedNode != nullptr) {
+			auto _pos = editorData.sceneViewSelectedNode->getTransform()->getPosition();
+			auto _rot = editorData.sceneViewSelectedNode->getTransform()->getRotation();
+			
+			editorData.gizmos.translationX.setPosition(_pos);
+			editorData.gizmos.translationX.setRotation(_rot);
+			
+			editorData.gizmos.translationY.setPosition(_pos);
+			editorData.gizmos.translationY.setRotation(_rot);
+			
+			editorData.gizmos.translationXY.setPosition(_pos);
+			editorData.gizmos.translationXY.setRotation(_rot);
 		}
 	}
 	

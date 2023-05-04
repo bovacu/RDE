@@ -104,7 +104,7 @@ namespace RDEEditor {
             void localizationTest();
             std::vector<NodeID> nodes;
 
-			void generateTranslationGuizmo(const Node* _node);
+			void generateTranslationGuizmo();
 			void selectNodeWithClick();
 			void editModeInputHandler();
 			void editModeTranslationInputHandler();
