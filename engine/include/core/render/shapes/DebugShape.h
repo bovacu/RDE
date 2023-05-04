@@ -8,8 +8,10 @@
 #include "core/util/Functions.h"
 #include "core/util/Rect.h"
 #include "core/util/Vec.h"
+#include "core/util/Earcut.h"
 #include <float.h>
-#include <valarray>
+#include <stdint.h>
+#include <array>
 #include <vector>
 
 namespace RDE {
@@ -19,6 +21,8 @@ namespace RDE {
      */
     class DebugShape {
 
+        friend class SpriteBatch;
+        
         protected:
             /**
              * @brief Color of the inner part of the Shape.
@@ -50,6 +54,25 @@ namespace RDE {
              */
             Vec2F center {};
             Vec2F size {};
+            
+            std::vector<uint32_t> indicesForNonConvexPolygons;
+            
+            void calculateSubConvexShapes() {
+                indicesForNonConvexPolygons.clear();
+                
+                using Point = std::array<float, 2>;
+                
+                std::vector<std::vector<Point>> polygon;
+                std::vector<Point> _points;
+                
+                for(auto& _point : points) {
+                    Point _p = { _point.x, _point.y };
+                    _points.emplace_back(_p);
+                }
+                
+                polygon.push_back(_points);
+                indicesForNonConvexPolygons = mapbox::earcut<uint32_t>(polygon);
+            }
 
             void recalculateBoundingBox() {
                 if(points.size() < 4) {
@@ -57,6 +80,10 @@ namespace RDE {
                     return;
                 }
 
+                if(!isConvex()) {
+                    calculateSubConvexShapes();
+                }
+                
                 Vec2F _bottomestLeftPoint { FLT_MAX, FLT_MAX };
                 Vec2F _topestRightPoint { FLT_MIN, FLT_MIN };
 
@@ -70,6 +97,14 @@ namespace RDE {
 
                 size = { std::abs(_topestRightPoint.x) + std::abs(_bottomestLeftPoint.x), std::abs(_topestRightPoint.y) + std::abs(_bottomestLeftPoint.y) };
             }
+            
+            int calc(int _ax, int _ay, int _bx, int _by, int _cx, int _cy){
+                int _BAx = _ax - _bx;
+                int _BAy = _ay - _by;
+                int _BCx = _cx - _bx;
+                int _BCy = _cy - _by;
+                return (_BAx * _BCy - _BAy * _BCx);
+            }
 
         public:
             /**
@@ -79,6 +114,26 @@ namespace RDE {
 
         public:
 
+            RDE_FUNC_ND std::vector<uint32_t> getSubConvexPolygonsIndices() const {
+                return indicesForNonConvexPolygons;
+            }
+            
+            RDE_FUNC_ND bool isConvex() {
+                bool _neg = false;
+                bool _pos = false;
+                int _n = points.size();
+                for(int _i = 0; _i < _n; _i++){
+                    int _a = _i;
+                    int _b = (_i + 1) % _n;
+                    int _c = (_i + 2) % _n;
+                    int _crossProduct = calc(points[_a].x, points[_a].y, points[_b].x, points[_b].y, points[_c].x, points[_c].y);
+                    if(_crossProduct < 0) _neg = true;
+                    else if(_crossProduct > 0) _pos = true;
+                    if(_neg && _pos) return false;
+                }
+                return true;
+            }
+            
             RDE_FUNC_ND Vec2F getSize() const {
                 return size;
             }
@@ -119,6 +174,7 @@ namespace RDE {
 			RDE_FUNC void addPoint(const Vec2F& _point) {
                 points.emplace_back(_point);
                 recalculateBoundingBox();
+                calculateSubConvexShapes();
             }
 
             /**
@@ -127,6 +183,7 @@ namespace RDE {
              */
 			RDE_FUNC void removePoint(int _vertex) {
                 points.erase(points.begin() + _vertex);
+                calculateSubConvexShapes();
             }
 
             /**

@@ -161,14 +161,28 @@ namespace RDE {
             drawLine(_shape.getPoints()[0], _shape.getPoints()[1], _shape.getOuterColor());
         } else {
             if(_shape.isInnerShown()) {
-                // Making the shape triangles
-                for(int _i = 0; _i < _shape.getPoints().size() - 2; _i++) {
-                    auto _size0 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[0]) * -2.f;
-                    auto _size1 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 1]) * -2.f;
-                    auto _size2 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 2]) * -2.f;
-                    vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size0.x, _size0.y, 0.0f, 1.f}, _innerColor);
-                    vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size1.x, _size1.y, 0.0f, 1.f}, _innerColor);
-                    vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size2.x, _size2.y, 0.0f, 1.f}, _innerColor);
+                if(_shape.isConvex()) {
+                    // Making the shape triangles
+                    for(int _i = 0; _i < _shape.getPoints().size() - 2; _i++) {
+                        auto _size0 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[0]) * -2.f;
+                        auto _size1 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 1]) * -2.f;
+                        auto _size2 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 2]) * -2.f;
+                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size0.x, _size0.y, 0.0f, 1.f}, _innerColor);
+                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size1.x, _size1.y, 0.0f, 1.f}, _innerColor);
+                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size2.x, _size2.y, 0.0f, 1.f}, _innerColor);
+                    }
+                } else {
+                    auto _subTriangles = _shape.getSubConvexPolygonsIndices();
+                    for(int _i = 0; _i < _subTriangles.size();) {
+                        auto _size0 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_subTriangles[_i]]) * -2.f;
+                        auto _size1 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_subTriangles[_i + 1]]) * -2.f;
+                        auto _size2 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_subTriangles[_i + 2]]) * -2.f;
+                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size0.x, _size0.y, 0.0f, 1.f}, _innerColor);
+                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size1.x, _size1.y, 0.0f, 1.f}, _innerColor);
+                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size2.x, _size2.y, 0.0f, 1.f}, _innerColor);
+                        
+                        _i += 3;
+                    }
                 }
             }
 
