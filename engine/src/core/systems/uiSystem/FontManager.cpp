@@ -3,18 +3,35 @@
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/util/Functions.h"
 #include "core/systems/fileSystem/FileManager.h"
+#include <chrono>
+#include <ctime>  
+#include <stdint.h>
+#include <vcruntime_string.h>
 
 #define FONT_DPI 96
 #define BASE_FONT_SIZE_FOR_CHAR_SIZE 64
+#define CHARACTERS_START_OFFSET 32
 
 namespace RDE {
+    
+    struct InnerBitmapData {
+        uint32_t width;
+        uint32_t rows;
+        FT_Int bitmap_top;
+        FT_Int bitmap_left;
+        
+        unsigned char* buffer;
+        FT_Vector advance;
+    };
 
     void Font::init(FT_Face face, int _fontSize)  {
+        auto start = std::chrono::system_clock::now();
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		FT_Set_Char_Size(face, 0, _fontSize * BASE_FONT_SIZE_FOR_CHAR_SIZE, FONT_DPI, FONT_DPI);
-        FT_GlyphSlot g = face->glyph;
 
+        InnerBitmapData _glyphs[128 - CHARACTERS_START_OFFSET];
+        
         int _rowWidth = 0;
         int _rowHeight = 0;
         atlasSize.x = 0;
@@ -25,13 +42,26 @@ namespace RDE {
 
         FT_Int32 load_flags = FT_LOAD_RENDER | FT_LOAD_TARGET_(FT_RENDER_MODE_SDF);
         /* Find minimum size for a texture holding all visible ASCII characters */
-        for (int _i = 32; _i < 128; _i++) {
+        for (int _i = CHARACTERS_START_OFFSET; _i < MAX_CHARACTERS; _i++) {
             if (auto errorCode = FT_Load_Char(face, _i, load_flags)) {
                 Util::Log::error("Loading character ", (char)_i, " failed! Error code ", errorCode);
                 continue;
             }
+            
+            _glyphs[_i - CHARACTERS_START_OFFSET] = {
+                    .width = face->glyph->bitmap.width,
+                    .rows = face->glyph->bitmap.rows,
+                    .bitmap_top = face->glyph->bitmap_top,
+                    .bitmap_left = face->glyph->bitmap_left,
+                    .advance = face->glyph->advance
+            };
+            
+            auto _glyph = _glyphs[_i - CHARACTERS_START_OFFSET];
+            _glyphs[_i - CHARACTERS_START_OFFSET].buffer = new unsigned char[_glyph.width * _glyph.rows];
+            memcpy(_glyphs[_i - CHARACTERS_START_OFFSET].buffer, face->glyph->bitmap.buffer, _glyph.width * _glyph.rows);
+            
             atlasSize.x += face->glyph->bitmap.width;
-            _rowHeight = _rowHeight > g->bitmap.rows ? _rowHeight : (int)g->bitmap.rows;
+            _rowHeight = _rowHeight > _glyph.rows ? _rowHeight : (int)_glyph.rows;
         }
 
         atlasSize.y += _rowHeight;
@@ -45,27 +75,29 @@ namespace RDE {
 
         _rowHeight = 0;
 
-        for (int _i = 32; _i < MAX_CHARACTERS; _i++) {
-            if (auto errorCode = FT_Load_Char(face, _i, load_flags)) {
-                Util::Log::error("Loading character ", (char)_i, " failed! Error code ", errorCode);
-                continue;
-            }
+        for (int _i = CHARACTERS_START_OFFSET; _i < MAX_CHARACTERS; _i++) {
+            
+            auto _glyph = _glyphs[_i - CHARACTERS_START_OFFSET];
+            
+            texture.loadTextSubTextures({_ox, 0}, {(int)_glyph.width, (int)_glyph.rows}, _glyph.buffer);
 
-            texture.loadTextSubTextures({_ox, 0}, {(int)g->bitmap.width, (int)g->bitmap.rows}, g->bitmap.buffer);
-
-            characters[(char)_i].advance.x = (int)g->advance.x >> 6;
-            characters[(char)_i].size      = { static_cast<int>(face->glyph->bitmap.width), static_cast<int>(face->glyph->bitmap.rows) };
-            characters[(char)_i].bearing   = { face->glyph->bitmap_left, face->glyph->bitmap_top };
+            characters[(char)_i].advance.x = (int)_glyph.advance.x >> 6;
+            characters[(char)_i].size      = { static_cast<int>(_glyph.width), static_cast<int>(_glyph.rows) };
+            characters[(char)_i].bearing   = { _glyph.bitmap_left, _glyph.bitmap_top };
             characters[(char)_i].offset    = { (float)_ox / (float)atlasSize.x, (float)_oy / (float)atlasSize.y };
             characters[(char)_i].advance.y = characters[(char)_i].size.y;
 
-            _rowHeight = _rowHeight > g->bitmap.rows ? (int)_rowHeight : (int)g->bitmap.rows;
-            _ox += (int)g->bitmap.width;
+            _rowHeight = _rowHeight > _glyph.rows ? (int)_rowHeight : (int)_glyph.rows;
+            _ox += (int)_glyph.width;
 
             biggestCharHeight = biggestCharHeight < characters[(char)_i].size.y ? characters[(char)_i].size.y : biggestCharHeight;
         }
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        
+        for(auto& _glyp : _glyphs) {
+            delete [] _glyp.buffer;
+        }
     }
 
     Texture* Font::getTexture() {
