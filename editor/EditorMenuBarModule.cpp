@@ -35,7 +35,7 @@ void createUINodeSubMenu(Editor* _editor) {
 	}
 
 	if(ImGui::MenuItem("Text Node")) {
-		
+		createUITextNode(_editor);
 	}
 }
 
