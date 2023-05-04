@@ -21,10 +21,11 @@ void main() {
 	float halfHeight = resolution.y / 2.0;
 	float halfWidth = resolution.x / 2.0;
 	
-	if(coord.y >= (-cameraDisplacement.y * zoomInverse + halfHeight) - 1 && coord.y <= (-cameraDisplacement.y * zoomInverse + halfHeight) + 1 || 
-		coord.x >= (-cameraDisplacement.x * zoomInverse + halfWidth) - 1 && coord.x <= (-cameraDisplacement.x * zoomInverse + halfWidth) + 1) {
-		out_color = gridColor;
-	} 
+	if(coord.y >= (-cameraDisplacement.y * zoomInverse + halfHeight) - 1 && coord.y <= (-cameraDisplacement.y * zoomInverse + halfHeight) + 1) {
+		out_color = vec4(0, 1.0, 0, 1.0);
+	} else if( coord.x >= (-cameraDisplacement.x * zoomInverse + halfWidth) - 1 && coord.x <= (-cameraDisplacement.x * zoomInverse + halfWidth) + 1) {
+		out_color = vec4(0, 0, 1.0, 1.0);
+	}
 	//else if(int(ceil(coord.x - yDisplacement * gridSize + cameraDisplacement.x * zoomInverse)) % gridSize == 0) {
 	//	out_color = vec4(200.0 / 255.0, 200.0 / 255.0, 200.0 / 255.0, 0.75);
 	//}
