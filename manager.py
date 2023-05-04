@@ -119,10 +119,11 @@ def buildin_process_windows(args, action):
         os.system(create_windows_folder)
         os.system(create_windows_build_folder)
         os.system(cmake_generate)
-        os.system(cmake_build)
-        os.system(delete_compile_commands)
-        os.system(copy_compile_commands)
-        os.system(run_command)
+        compilation = os.system(cmake_build)
+        if compilation == 0:
+            os.system(delete_compile_commands)
+            os.system(copy_compile_commands)
+            os.system(run_command)
 
 
 def project_lines_number_windows():
@@ -161,10 +162,11 @@ def buildin_process_linux(args, action):
         os.system(create_linux_folder)
         os.system(create_linux_build_folder)
         os.system(cmake_generate)
-        os.system(cmake_build)
-        os.system(delete_compile_commands)
-        os.system(copy_compile_commands)
-        os.system(run_command)
+        compilation = os.system(cmake_build)
+        if compilation == 0:
+            os.system(delete_compile_commands)
+            os.system(copy_compile_commands)
+            os.system(run_command)
 
 
 def project_lines_number_linux():
@@ -205,10 +207,11 @@ def buildin_process_mac(args, action):
         os.system(create_mac_folder)
         os.system(create_mac_build_folder)
         os.system(cmake_generate)
-        os.system(cmake_build)
-        os.system(delete_compile_commands)
-        os.system(copy_compile_commands)
-        os.system(run_command)
+        compilation = os.system(cmake_build)
+        if compilation == 0:
+            os.system(delete_compile_commands)
+            os.system(copy_compile_commands)
+            os.system(run_command)
 
 
 def project_lines_number_mac():
