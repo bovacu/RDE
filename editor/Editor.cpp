@@ -160,14 +160,18 @@ namespace RDEEditor {
 					_transforms.push_back(&_transform);
 				}
 			});
-
+			
 			if(_transforms.empty()) {
 				editModeInputHandler();
 				if(editorFlags.editModeAxis == EditModeAxis::None) {
 					editorData.sceneViewSelectedNode = nullptr;
+					editorData.selectedNode = NODE_ID_NULL;
 				}
 			} else {
-				editorData.sceneViewSelectedNode = !_transforms.empty() ? _transforms[0]->node : nullptr;
+				if(editorFlags.editModeAxis == EditModeAxis::None) {
+					editorData.sceneViewSelectedNode = _transforms[0]->node;
+					editorData.selectedNode = editorData.sceneViewSelectedNode->getID();
+				}
 			}
 		}
 	}
@@ -238,41 +242,45 @@ namespace RDEEditor {
 		_arrowUp.setPosition({0, 0});
 		_arrowUp.setRotation(0);
 		_arrowUp.addPoint({ 4, 0});
-		_arrowUp.addPoint({ 4, 128});
-		_arrowUp.addPoint({ 8, 128});
-		_arrowUp.addPoint({ 0, 160});
-		_arrowUp.addPoint({-8, 128});
-		_arrowUp.addPoint({-4, 128});
+		_arrowUp.addPoint({ 4, 48});
+		_arrowUp.addPoint({ 16, 48});
+		_arrowUp.addPoint({ 0, 80});
+		_arrowUp.addPoint({-16, 48});
+		_arrowUp.addPoint({-4, 48});
 		_arrowUp.addPoint({-4, 0});
 		
-		_arrowUp.addPoint({-4, -128});
-		_arrowUp.addPoint({-8, -128});
-		_arrowUp.addPoint({ 0, -160});
-		_arrowUp.addPoint({ 8, -128});
-		_arrowUp.addPoint({ 4, -128});
+		_arrowUp.addPoint({-4, -48});
+		_arrowUp.addPoint({-16, -48});
+		_arrowUp.addPoint({ 0, -80});
+		_arrowUp.addPoint({ 16, -48});
+		_arrowUp.addPoint({ 4, -48});
 		
+		auto _color = Color::Blue;
+		_color.a = 110;
 		_arrowUp.setOutlineColor(Color::Black);
-		_arrowUp.setInnerColor(Color::Blue);
+		_arrowUp.setInnerColor(_color);
 		editorData.gizmos.translationY = _arrowUp;
 
 		DebugShape _arrowRight;
 		_arrowRight.setPosition({0, 0});
 		_arrowRight.setRotation(0);
 		_arrowRight.addPoint({0,   4});
-		_arrowRight.addPoint({128, 4});
-		_arrowRight.addPoint({128, 8});
-		_arrowRight.addPoint({160, 0});
-		_arrowRight.addPoint({128, -8});
-		_arrowRight.addPoint({128, -4});
+		_arrowRight.addPoint({48, 4});
+		_arrowRight.addPoint({48, 16});
+		_arrowRight.addPoint({80, 0});
+		_arrowRight.addPoint({48, -16});
+		_arrowRight.addPoint({48, -4});
 		_arrowRight.addPoint({0,   -4});
 		
-		_arrowRight.addPoint({-128, -4});
-		_arrowRight.addPoint({-128, -8});
-		_arrowRight.addPoint({-160, -0});
-		_arrowRight.addPoint({-128,  8});
-		_arrowRight.addPoint({-128,  4});
+		_arrowRight.addPoint({-48, -4});
+		_arrowRight.addPoint({-48, -16});
+		_arrowRight.addPoint({-80, -0});
+		_arrowRight.addPoint({-48,  16});
+		_arrowRight.addPoint({-48,  4});
 		
-		_arrowRight.setInnerColor(Color::Green);
+		_color = Color::Green;
+		_color.a = 110;
+		_arrowRight.setInnerColor(_color);
 		_arrowRight.setOutlineColor(Color::Black);
 		_arrowRight.setRotation(0);
 		editorData.gizmos.translationX = _arrowRight;
@@ -349,7 +357,7 @@ namespace RDEEditor {
 	}
 	
 	void Editor::editModeInputHandler() {
-		if(!editorFlags.isSceneViewHovered || editorData.sceneViewSelectedNode == nullptr) {
+		if(editorData.sceneViewSelectedNode == nullptr) {
 			return;
 		}
 
