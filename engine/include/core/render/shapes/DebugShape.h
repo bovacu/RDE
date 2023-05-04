@@ -68,7 +68,7 @@ namespace RDE {
                     _topestRightPoint.y = _point.y > _topestRightPoint.y ? _point.y : _topestRightPoint.y;
                 }
 
-                size = { std::abs(_topestRightPoint.x - _bottomestLeftPoint.x), std::abs(_topestRightPoint.y - _bottomestLeftPoint.y) };
+                size = { std::abs(_topestRightPoint.x) + std::abs(_bottomestLeftPoint.x), std::abs(_topestRightPoint.y) + std::abs(_bottomestLeftPoint.y) };
             }
 
         public:
@@ -127,7 +127,6 @@ namespace RDE {
              */
 			RDE_FUNC void removePoint(int _vertex) {
                 points.erase(points.begin() + _vertex);
-                recalculateBoundingBox();
             }
 
             /**
@@ -167,7 +166,8 @@ namespace RDE {
              * @param _position New position
              */
 			RDE_FUNC void setPosition(const Vec2F& _position) {
-//                transform.setPosition(_position);
+                center = _position;
+                recalculateBoundingBox();
             }
 
             /**
@@ -223,7 +223,7 @@ namespace RDE {
                     float _theta = 2.0f * 3.1415926f * float(_i) / float(_precision);
                     float _x = _radius * cosf(_theta);
                     float _y = _radius * sinf(_theta);
-                    points.emplace_back(_x + _center.x, _y + _center.y);
+                    points.emplace_back(_x, _y);
                 }
 
                 center = _center;
@@ -236,10 +236,10 @@ namespace RDE {
              * @param _size Size of the square
              */
 			RDE_FUNC void makeSquare(const Vec2F& _position, const Vec2F& _size) {
-                points.emplace_back(Vec2F{_position.x - _size.x / 2.f, _position.y - _size.y / 2.f});
-                points.emplace_back(Vec2F{_position.x + _size.x / 2.f, _position.y - _size.y / 2.f});
-                points.emplace_back(Vec2F{_position.x + _size.x / 2.f, _position.y + _size.y / 2.f});
-                points.emplace_back(Vec2F{_position.x - _size.x / 2.f, _position.y + _size.y / 2.f});
+                points.emplace_back(Vec2F{-_size.x / 2.f, -_size.y / 2.f});
+                points.emplace_back(Vec2F{ _size.x / 2.f, -_size.y / 2.f});
+                points.emplace_back(Vec2F{ _size.x / 2.f,  _size.y / 2.f});
+                points.emplace_back(Vec2F{-_size.x / 2.f,  _size.y / 2.f});
 				center = _position;
                 size = _size;
 			}

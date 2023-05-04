@@ -135,9 +135,11 @@ namespace RDEEditor {
 		if(engine->manager.inputManager.isKeyJustPressed(RDE_KEYBOARD_KEY_O)) {
 			centerCamera();
 		}
-
+		
 		selectNodeWithClick();
-
+		editModeInputHandler();
+		
+		generateTranslationGuizmo(editorData.sceneViewSelectedNode);
     }
 
     bool isPointInside(const Vec2F& _rectangleSize, const Transform* _rectangleTransform, const Vec2F& _pointPos) {
@@ -159,7 +161,14 @@ namespace RDEEditor {
 				}
 			});
 
-			editorData.sceneViewSelectedNode = !_transforms.empty() ? _transforms[0]->node : nullptr;
+			if(_transforms.empty()) {
+				editModeInputHandler();
+				if(editorFlags.editModeAxis == EditModeAxis::None) {
+					editorData.sceneViewSelectedNode = nullptr;
+				}
+			} else {
+				editorData.sceneViewSelectedNode = !_transforms.empty() ? _transforms[0]->node : nullptr;
+			}
 		}
 	}
 
@@ -217,59 +226,66 @@ namespace RDEEditor {
 			engine->manager.renderManager.drawShape(_cameraShape);
 		}
 
-		drawTranslationGuizmo(editorData.sceneViewSelectedNode);
+		if(editorData.sceneViewSelectedNode != nullptr && editorFlags.editMode == EditMode::Move) {
+			engine->manager.renderManager.drawShape(editorData.gizmos.translationX);
+			engine->manager.renderManager.drawShape(editorData.gizmos.translationY);
+			engine->manager.renderManager.drawShape(editorData.gizmos.translationXY);
+		}
     }
 
-    void Editor::drawTranslationGuizmo(const Node* _node) {
+    void Editor::generateTranslationGuizmo(const Node* _node) {
 		if(_node == nullptr) return;
 		auto _pos = _node->getTransform()->getPosition();
 		auto _rot = _node->getTransform()->getRotation();
 
 		DebugShape _arrowUp;
-		_arrowUp.addPoint({_pos.x +  0, _pos.y + 0});
-		_arrowUp.addPoint({_pos.x +  4, _pos.y + 0});
-		_arrowUp.addPoint({_pos.x +  4, _pos.y + 128});
-		_arrowUp.addPoint({_pos.x +  8, _pos.y + 128});
-		_arrowUp.addPoint({_pos.x +  0, _pos.y + 160});
-		_arrowUp.addPoint({_pos.x + -8, _pos.y + 128});
-		_arrowUp.addPoint({_pos.x + -4, _pos.y + 128});
-		_arrowUp.addPoint({_pos.x + -4, _pos.y + 0});
-		_arrowUp.showInnerColor(false);
+		_arrowUp.setPosition(_pos);
 		_arrowUp.setRotation(_rot);
+		_arrowUp.addPoint({ 4, 0});
+		_arrowUp.addPoint({ 4, 128});
+		_arrowUp.addPoint({ 8, 128});
+		_arrowUp.addPoint({ 0, 160});
+		_arrowUp.addPoint({-8, 128});
+		_arrowUp.addPoint({-4, 128});
+		_arrowUp.addPoint({-4, 0});
+		
+		_arrowUp.addPoint({-4, -128});
+		_arrowUp.addPoint({-8, -128});
+		_arrowUp.addPoint({ 0, -160});
+		_arrowUp.addPoint({ 8, -128});
+		_arrowUp.addPoint({ 4, -128});
+		
+		_arrowUp.showInnerColor(false);
+		editorData.gizmos.translationY = _arrowUp;
 
 		DebugShape _arrowRight;
-		_arrowRight.addPoint({_pos.x + 0,   _pos.y + 0});
-		_arrowRight.addPoint({_pos.x + 0,   _pos.y + 4});
-		_arrowRight.addPoint({_pos.x + 128, _pos.y + 4});
-		_arrowRight.addPoint({_pos.x + 128, _pos.y + 8});
-		_arrowRight.addPoint({_pos.x + 160, _pos.y + 0});
-		_arrowRight.addPoint({_pos.x + 128, _pos.y + -8});
-		_arrowRight.addPoint({_pos.x + 128, _pos.y + -4});
-		_arrowRight.addPoint({_pos.x + 0,   _pos.y + -4});
+		_arrowRight.setPosition(_pos);
+		_arrowRight.setRotation(_rot);
+		_arrowRight.addPoint({0,   4});
+		_arrowRight.addPoint({128, 4});
+		_arrowRight.addPoint({128, 8});
+		_arrowRight.addPoint({160, 0});
+		_arrowRight.addPoint({128, -8});
+		_arrowRight.addPoint({128, -4});
+		_arrowRight.addPoint({0,   -4});
+		
+		_arrowRight.addPoint({-128, -4});
+		_arrowRight.addPoint({-128, -8});
+		_arrowRight.addPoint({-160, -0});
+		_arrowRight.addPoint({-128,  8});
+		_arrowRight.addPoint({-128,  4});
+		
 		_arrowRight.showInnerColor(false);
 		_arrowRight.setOutlineColor(Color::Green);
 		_arrowRight.setRotation(_rot);
+		editorData.gizmos.translationX = _arrowRight;
 
 		DebugShape _intersection;
 		_intersection.makeSquare(_pos, {16, 16});
-		_intersection.showInnerColor(false);
+		// _intersection.showInnerColor(false);
 		_intersection.setOutlineColor(Color::Gray);
-
-		if(_intersection.isPointInside(_pos, editorData.mousePositionOnSceneView)) {
-			Util::Log::info("Inside intersection ", time(0));
-		} else {
-			if(_arrowRight.isPointInside({ _pos.x + _arrowRight.getSize().x * 0.5f, _pos.y }, editorData.mousePositionOnSceneView)) {
-				Util::Log::info("Inside arrow right ", time(0));
-			}
-
-			if(_arrowUp.isPointInside({_pos.x, _pos.y + _arrowUp.getSize().y * 0.5f }, editorData.mousePositionOnSceneView)) {
-				Util::Log::info("Inside arrow up ", time(0));
-			}
-		}
-
-		engine->manager.renderManager.drawShape(_arrowRight);
-		engine->manager.renderManager.drawShape(_arrowUp);
-		engine->manager.renderManager.drawShape(_intersection);
+		_intersection.setInnerColor(Color::Gray);
+		editorData.gizmos.translationXY = _intersection;
 	}
 
 	bool Editor::mouseScrolled(MouseScrolledEvent& _event) {
@@ -291,6 +307,52 @@ namespace RDEEditor {
 		canvas->setCanvasResolution( { (int)_event.getWidth(), (int)_event.getHeight() });
 		return true;
 	}
+	
+	void Editor::editModeTranslationInputHandler() {
+		if(engine->manager.inputManager.isMouseJustPressed(RDE::RDE_MOUSE_BUTTON_0)) {
+			editorFlags.editModeAxis = EditModeAxis::None;
+			editorData.gizmos.lastClickOrMovedMousePositionForTranslation = engine->manager.inputManager.getMousePosScreenCoords();
+			
+			if(editorData.gizmos.translationXY.isPointInside(editorData.sceneViewSelectedNode->getTransform()->getPosition(), editorData.mousePositionOnSceneView)) {
+				editorFlags.editModeAxis = EditModeAxis::X | EditModeAxis::Y;
+			} else {
+				if(editorData.gizmos.translationX.isPointInside(editorData.sceneViewSelectedNode->getTransform()->getPosition(), editorData.mousePositionOnSceneView)) {
+					editorFlags.editModeAxis = EditModeAxis::X;
+				} else if(editorData.gizmos.translationY.isPointInside(editorData.sceneViewSelectedNode->getTransform()->getPosition(), editorData.mousePositionOnSceneView)) {
+					editorFlags.editModeAxis = EditModeAxis::Y;
+				}
+			}
+		} else if(engine->manager.inputManager.isMouseJustReleased(RDE::RDE_MOUSE_BUTTON_0)) {
+			editorFlags.editModeAxis = EditModeAxis::None;
+		}
+		
+		if(engine->manager.inputManager.isMousePressed(RDE_MOUSE_BUTTON_0) && editorFlags.editModeAxis != EditModeAxis::None) {
+			auto _current = engine->manager.inputManager.getMousePosScreenCoords();
+			auto _diff = _current - editorData.gizmos.lastClickOrMovedMousePositionForTranslation;
+			editorData.gizmos.lastClickOrMovedMousePositionForTranslation = _current;
+			
+			_diff.y = editorFlags.editModeAxis == EditModeAxis::X ? 0.f : _diff.y;
+			_diff.x = editorFlags.editModeAxis == EditModeAxis::Y ? 0.f : _diff.x;
+			
+			editorData.sceneViewSelectedNode->getTransform()->translate(_diff * editorCamera->getCurrentZoomLevel());
+		}
+	}
+	
+	void Editor::editModeInputHandler() {
+		if(!editorFlags.isSceneViewHovered || editorData.sceneViewSelectedNode == nullptr) {
+			return;
+		}
+
+		switch (editorFlags.editMode) {
+			case Move: {
+				editModeTranslationInputHandler();
+				break;
+			}
+			case Rotate:
+			case Scale:
+				break;
+        }
+	}
 
 	void Editor::mouseHandler() {
 		if(!editorFlags.isSceneViewHovered) {
@@ -305,7 +367,6 @@ namespace RDEEditor {
 			lastClickOrMovedMousePosition = _current;
 			editorCamera->node->getTransform()->translate(_diff * -editorCamera->getCurrentZoomLevel());
 		}
-
 	}
 
 	void Editor::centerCamera() {

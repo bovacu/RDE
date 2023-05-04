@@ -161,6 +161,7 @@ namespace RDE {
     }
 
     void RenderManager::drawShape(DebugShape& _shape) {
+        if(_shape.getPoints().empty()) return;
         batch.debug.drawShape(_shape);
     }
 

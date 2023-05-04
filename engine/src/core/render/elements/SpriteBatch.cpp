@@ -152,8 +152,8 @@ namespace RDE {
     }
 
     void SpriteBatch::Debug::drawShape(DebugShape& _shape) {
-        // auto _screenPos = Util::Math::worldToScreenCoords(batch->viewport, {(float)(int)_shape.getPosition().x, (float)(int)_shape.getPosition().y});
-        auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x, _shape.getPosition().y, 1.f));
+        auto _screenPos = Util::Math::worldToScreenCoords(batch->viewport, {(float)(int)_shape.getPosition().x, (float)(int)_shape.getPosition().y});
+        auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_screenPos.x, _screenPos.y, 1.f));
 
         auto _innerColor = Util::Math::colorToUint32_t(_shape.getInnerColor());
 
@@ -164,8 +164,8 @@ namespace RDE {
                 // Making the shape triangles
                 for(int _i = 0; _i < _shape.getPoints().size() - 2; _i++) {
                     auto _size0 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[0]) * -2.f;
-                    auto _size1 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 1] * -2.f);
-                    auto _size2 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 2] * -2.f);
+                    auto _size1 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 1]) * -2.f;
+                    auto _size2 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 2]) * -2.f;
                     vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size0.x, _size0.y, 0.0f, 1.f}, _innerColor);
                     vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size1.x, _size1.y, 0.0f, 1.f}, _innerColor);
                     vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size2.x, _size2.y, 0.0f, 1.f}, _innerColor);
@@ -179,7 +179,7 @@ namespace RDE {
                     int _next = _i + 1;
                     if(_next == _shape.getPoints().size())
                         _next = 0;
-                    drawLine(_rotMatrix * _shape.getPoints()[_i], _rotMatrix * _shape.getPoints()[_next], _shape.getOuterColor());
+                    drawLine(_rotMatrix * (_shape.getPoints()[_i] + _shape.getPosition()), _rotMatrix * (_shape.getPoints()[_next] + _shape.getPosition()), _shape.getOuterColor());
                 }
             }
         }

@@ -9,6 +9,7 @@
 #include "core/graph/Scene.h"
 #include "core/graph/components/Transform.h"
 #include "core/render/elements/FrameBuffer.h"
+#include "core/render/shapes/DebugShape.h"
 #include "core/util/Delta.h"
 #include "core/util/Vec.h"
 #include <vector>
@@ -17,12 +18,31 @@ using namespace RDE;
 
 namespace RDEEditor {
 
+	enum EditMode {
+		Move,
+		Rotate,
+		Scale
+	};
+	
+	enum EditModeAxis {
+		None,
+		X, Y, Z
+	};
+	
+	struct Gizmos {
+		DebugShape translationX, translationY, translationXY;
+		Vec2F lastClickOrMovedMousePositionForTranslation;
+	};
+	
 	struct EditorFlags {
 		bool isSceneViewActive = false;
 		bool isSceneViewHovered = false;
 
 		bool isConsoleViewActive = false;
 		bool isConsoleViewHovered = false;
+		
+		EditMode editMode = EditMode::Move;
+		uint32_t editModeAxis = EditModeAxis::None;
 	};
 
 	struct EditorData {
@@ -37,6 +57,8 @@ namespace RDEEditor {
 		Vec2F sizeOfSceneView {0, 0};
 		Vec2F mousePositionOnSceneView {0, 0};
 		float menuBarHeight = 0.f;
+		
+		Gizmos gizmos;
 	};
 
     class Editor : public Scene {
@@ -82,8 +104,10 @@ namespace RDEEditor {
             void localizationTest();
             std::vector<NodeID> nodes;
 
-			void drawTranslationGuizmo(const Node* _node);
+			void generateTranslationGuizmo(const Node* _node);
 			void selectNodeWithClick();
+			void editModeInputHandler();
+			void editModeTranslationInputHandler();
 
 
 			void onMouseClick(RDE_MOUSE_BUTTON_ _mouseCode);
