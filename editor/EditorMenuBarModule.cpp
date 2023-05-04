@@ -57,6 +57,9 @@ void nodesSubMenu(Editor* _editor) {
 
 void menuBarView(Editor* _editor) {
 	if (ImGui::BeginMenuBar()) {
+
+		_editor->editorData.menuBarHeight = ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetFontSize();
+
 		if (ImGui::BeginMenu("File")) {
 			ImGui::EndMenu();
 		}

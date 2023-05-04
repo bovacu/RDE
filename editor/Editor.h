@@ -7,8 +7,10 @@
 
 #include "RDE.h"
 #include "core/graph/Scene.h"
+#include "core/graph/components/Transform.h"
 #include "core/render/elements/FrameBuffer.h"
 #include "core/util/Delta.h"
+#include "core/util/Vec.h"
 #include <vector>
 
 using namespace RDE;
@@ -30,6 +32,11 @@ namespace RDEEditor {
 
 		uint32_t sceneViewFramebufferID = 0;
 		uint32_t gameViewFramebufferID = 0;
+
+		Node* sceneViewSelectedNode = nullptr;
+		Vec2F sizeOfSceneView {0, 0};
+		Vec2F mousePositionOnSceneView {0, 0};
+		float menuBarHeight = 0.f;
 	};
 
     class Editor : public Scene {
@@ -43,13 +50,13 @@ namespace RDEEditor {
 		ShaderID gridShaderID;
 		Color backgroundColor = { 76, 76, 76, 255 };
 		Color gridColor = { 63, 63, 63, 255 };
-		Vec2F sceneViewOffset;
 
 		public:
 			EditorFlags editorFlags;
 			EditorData editorData;
 			Camera* editorCamera;
 			Vec2F lastClickOrMovedMousePosition;
+			Vec2F sceneViewOffset;
 
         public:
             explicit Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }
@@ -74,6 +81,9 @@ namespace RDEEditor {
             void particleSystemTest();
             void localizationTest();
             std::vector<NodeID> nodes;
+
+			void drawTranslationGuizmo(const Node* _node);
+			void selectNodeWithClick();
 
 
 			void onMouseClick(RDE_MOUSE_BUTTON_ _mouseCode);

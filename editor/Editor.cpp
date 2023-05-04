@@ -5,9 +5,12 @@
 #include "Editor.h"
 #include "core/graph/Scene.h"
 #include "core/graph/components/SpriteRenderer.h"
+#include "core/graph/components/Transform.h"
 #include "core/render/elements/Texture.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
+#include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
 #include "core/util/Functions.h"
+#include "core/util/Vec.h"
 
 #if !IS_MOBILE()
 #include "imgui.h"
@@ -132,7 +135,33 @@ namespace RDEEditor {
 		if(engine->manager.inputManager.isKeyJustPressed(RDE_KEYBOARD_KEY_O)) {
 			centerCamera();
 		}
+
+		selectNodeWithClick();
+
     }
+
+    bool isPointInside(const Vec2F& _rectangleSize, const Transform* _rectangleTransform, const Vec2F& _pointPos) {
+		auto _rectPos =_rectangleTransform->getPosition();
+		Util::Log::info("PP: ", _pointPos.x, ", RP: ", _rectPos.x, ", RS: ", _rectangleSize.x);
+		return  _pointPos.x >= _rectPos.x - _rectangleSize.x * 0.5f && _pointPos.x <= _rectPos.x + _rectangleSize.x * 0.5f;
+	}
+
+    void Editor::selectNodeWithClick() {
+		if(!editorFlags.isSceneViewActive && !editorFlags.isSceneViewHovered) return;
+
+		if(engine->manager.inputManager.isMouseJustPressed(RDE::RDE_MOUSE_BUTTON_0)) {
+			auto& _nodes = graph->getNodeContainer();
+
+			std::vector<Transform*> _transforms;
+			_nodes.view<SpriteRenderer, Transform>().each([this, &_transforms](const auto _entity, SpriteRenderer& _sprite, Transform& _transform) {
+				if(isPointInside(_sprite.getSize(), &_transform, editorData.mousePositionOnSceneView) && &_sprite != gridSprite) {
+					_transforms.push_back(&_transform);
+				}
+			});
+
+			editorData.sceneViewSelectedNode = !_transforms.empty() ? _transforms[0]->node : nullptr;
+		}
+	}
 
 	void Editor::onEvent(Event& _event) {
 		EventDispatcher dispatcher(_event);
@@ -187,7 +216,49 @@ namespace RDEEditor {
 			_cameraShape.setRotation(_cameraRot);
 			engine->manager.renderManager.drawShape(_cameraShape);
 		}
+
+		drawTranslationGuizmo(editorData.sceneViewSelectedNode);
     }
+
+    void Editor::drawTranslationGuizmo(const Node* _node) {
+		if(_node == nullptr) return;
+		auto _pos = _node->getTransform()->getPosition();
+		auto _rot = _node->getTransform()->getRotation();
+
+		DebugShape _arrowUp;
+		_arrowUp.addPoint({_pos.x +  0, _pos.y + 0});
+		_arrowUp.addPoint({_pos.x +  4, _pos.y + 0});
+		_arrowUp.addPoint({_pos.x +  4, _pos.y + 128});
+		_arrowUp.addPoint({_pos.x +  8, _pos.y + 128});
+		_arrowUp.addPoint({_pos.x +  0, _pos.y + 160});
+		_arrowUp.addPoint({_pos.x + -8, _pos.y + 128});
+		_arrowUp.addPoint({_pos.x + -4, _pos.y + 128});
+		_arrowUp.addPoint({_pos.x + -4, _pos.y + 0});
+		_arrowUp.showInnerColor(false);
+		_arrowUp.setRotation(_rot);
+
+		DebugShape _arrowRight;
+		_arrowRight.addPoint({_pos.x + 0,   _pos.y + 0});
+		_arrowRight.addPoint({_pos.x + 0,   _pos.y + 4});
+		_arrowRight.addPoint({_pos.x + 128, _pos.y + 4});
+		_arrowRight.addPoint({_pos.x + 128, _pos.y + 8});
+		_arrowRight.addPoint({_pos.x + 160, _pos.y + 0});
+		_arrowRight.addPoint({_pos.x + 128, _pos.y + -8});
+		_arrowRight.addPoint({_pos.x + 128, _pos.y + -4});
+		_arrowRight.addPoint({_pos.x + 0,   _pos.y + -4});
+		_arrowRight.showInnerColor(false);
+		_arrowRight.setOutlineColor(Color::Green);
+		_arrowRight.setRotation(_rot);
+
+		DebugShape _intersection;
+		_intersection.makeSquare(_pos, {16, 16});
+		_intersection.showInnerColor(false);
+		_intersection.setOutlineColor(Color::Gray);
+
+		engine->manager.renderManager.drawShape(_arrowRight);
+		engine->manager.renderManager.drawShape(_arrowUp);
+		engine->manager.renderManager.drawShape(_intersection);
+	}
 
 	bool Editor::mouseScrolled(MouseScrolledEvent& _event) {
 		if(!editorFlags.isSceneViewHovered) {

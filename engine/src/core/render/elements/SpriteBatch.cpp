@@ -152,6 +152,7 @@ namespace RDE {
     }
 
     void SpriteBatch::Debug::drawShape(DebugShape& _shape) {
+        // auto _screenPos = Util::Math::worldToScreenCoords(batch->viewport, {(float)(int)_shape.getPosition().x, (float)(int)_shape.getPosition().y});
         auto _transformMat = glm::translate(glm::mat4(1.f), glm::vec3 (_shape.getPosition().x, _shape.getPosition().y, 1.f));
 
         auto _innerColor = Util::Math::colorToUint32_t(_shape.getInnerColor());
@@ -162,9 +163,12 @@ namespace RDE {
             if(_shape.isInnerShown()) {
                 // Making the shape triangles
                 for(int _i = 0; _i < _shape.getPoints().size() - 2; _i++) {
-                    vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_shape.getPoints()[0].x, _shape.getPoints()[0].y, 0.0f, 1.f}, _innerColor);
-                    vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_shape.getPoints()[_i + 1].x, _shape.getPoints()[_i + 1].y, 0.0f, 1.f}, _innerColor);
-                    vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_shape.getPoints()[_i + 2].x, _shape.getPoints()[_i + 2].y, 0.0f, 1.f}, _innerColor);
+                    auto _size0 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[0]) * -2.f;
+                    auto _size1 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 1] * -2.f);
+                    auto _size2 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 2] * -2.f);
+                    vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size0.x, _size0.y, 0.0f, 1.f}, _innerColor);
+                    vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size1.x, _size1.y, 0.0f, 1.f}, _innerColor);
+                    vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size2.x, _size2.y, 0.0f, 1.f}, _innerColor);
                 }
             }
 
@@ -325,13 +329,6 @@ namespace RDE {
 
 		_shader->setUniformValueFloat("viewProjectionMatrix", RDE_UNIFORM_FV_MATRIX_4, GLM_VEC_MAT_TO_POINTER(GLfloat, batch->viewProjectionMatrix));
 
-        if(!vertexDebugBufferGeometrics.empty()) {
-            glBindBuffer(GL_ARRAY_BUFFER, _shader->getDynamicShaderVBO());
-            glBufferData(GL_ARRAY_BUFFER, (long)(_shader->getShaderVertexDataSize() * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glDrawArrays(GL_TRIANGLES, 0, (int)vertexDebugBufferGeometrics.size());
-        }
-
         if(!vertexDebugBufferLines.empty()) {
             glBindBuffer(GL_ARRAY_BUFFER, _shader->getDynamicShaderVBO());
             glBufferData(GL_ARRAY_BUFFER, (long) (_shader->getShaderVertexDataSize() * vertexDebugBufferLines.size()), &vertexDebugBufferLines[0], GL_STATIC_DRAW);
@@ -344,6 +341,13 @@ namespace RDE {
             glBufferData(GL_ARRAY_BUFFER, (long) (_shader->getShaderVertexDataSize() * vertexDebugBufferPoints.size()), &vertexDebugBufferPoints[0], GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glDrawArrays(GL_POINTS, 0, (int) vertexDebugBufferPoints.size());
+        }
+
+        if(!vertexDebugBufferGeometrics.empty()) {
+            glBindBuffer(GL_ARRAY_BUFFER, _shader->getDynamicShaderVBO());
+            glBufferData(GL_ARRAY_BUFFER, (long)(_shader->getShaderVertexDataSize() * vertexDebugBufferGeometrics.size()), &vertexDebugBufferGeometrics[0], GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glDrawArrays(GL_TRIANGLES, 0, (int)vertexDebugBufferGeometrics.size());
         }
 
         glBindVertexArray(0);
