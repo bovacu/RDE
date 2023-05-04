@@ -5,7 +5,11 @@
 #define RDE_DEBUGSHAPE_H
 
 #include "core/util/Color.h"
+#include "core/util/Functions.h"
+#include "core/util/Rect.h"
 #include "core/util/Vec.h"
+#include <float.h>
+#include <valarray>
 #include <vector>
 
 namespace RDE {
@@ -45,6 +49,27 @@ namespace RDE {
              * @brief Center of the complex shape.
              */
             Vec2F center {};
+            Vec2F size {};
+
+            void recalculateBoundingBox() {
+                if(points.size() < 4) {
+                    size = { 0, 0 };
+                    return;
+                }
+
+                Vec2F _bottomestLeftPoint { FLT_MAX, FLT_MAX };
+                Vec2F _topestRightPoint { FLT_MIN, FLT_MIN };
+
+                for(auto& _point : points) {
+                    _bottomestLeftPoint.x = _point.x < _bottomestLeftPoint.x ? _point.x : _bottomestLeftPoint.x;
+                    _bottomestLeftPoint.y = _point.y < _bottomestLeftPoint.y ? _point.y : _bottomestLeftPoint.y;
+
+                    _topestRightPoint.x = _point.x > _topestRightPoint.x ? _point.x : _topestRightPoint.x;
+                    _topestRightPoint.y = _point.y > _topestRightPoint.y ? _point.y : _topestRightPoint.y;
+                }
+
+                size = { std::abs(_topestRightPoint.x - _bottomestLeftPoint.x), std::abs(_topestRightPoint.y - _bottomestLeftPoint.y) };
+            }
 
         public:
             /**
@@ -53,6 +78,15 @@ namespace RDE {
             float rotation = 0.f;
 
         public:
+
+            RDE_FUNC_ND Vec2F getSize() const {
+                return size;
+            }
+
+            RDE_FUNC_ND bool isPointInside(const Vec2F& _shapeOrigin, const Vec2F& _point) {
+                return  _point.x >= _shapeOrigin.x - size.x * 0.5f && _point.x <= _shapeOrigin.x + size.x * 0.5f &&
+                        _point.y >= _shapeOrigin.y - size.y * 0.5f && _point.y <= _shapeOrigin.y + size.y * 0.5f;
+            }
 
             /**
              * @brief Returns the inner color.
@@ -84,6 +118,7 @@ namespace RDE {
              */
 			RDE_FUNC void addPoint(const Vec2F& _point) {
                 points.emplace_back(_point);
+                recalculateBoundingBox();
             }
 
             /**
@@ -92,6 +127,7 @@ namespace RDE {
              */
 			RDE_FUNC void removePoint(int _vertex) {
                 points.erase(points.begin() + _vertex);
+                recalculateBoundingBox();
             }
 
             /**
@@ -191,6 +227,7 @@ namespace RDE {
                 }
 
                 center = _center;
+                size = { _radius, _radius };
             }
 
             /**
@@ -204,6 +241,7 @@ namespace RDE {
                 points.emplace_back(Vec2F{_position.x + _size.x / 2.f, _position.y + _size.y / 2.f});
                 points.emplace_back(Vec2F{_position.x - _size.x / 2.f, _position.y + _size.y / 2.f});
 				center = _position;
+                size = _size;
 			}
     };
 }

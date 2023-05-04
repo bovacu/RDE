@@ -142,8 +142,8 @@ namespace RDEEditor {
 
     bool isPointInside(const Vec2F& _rectangleSize, const Transform* _rectangleTransform, const Vec2F& _pointPos) {
 		auto _rectPos =_rectangleTransform->getPosition();
-		Util::Log::info("PP: ", _pointPos.x, ", RP: ", _rectPos.x, ", RS: ", _rectangleSize.x);
-		return  _pointPos.x >= _rectPos.x - _rectangleSize.x * 0.5f && _pointPos.x <= _rectPos.x + _rectangleSize.x * 0.5f;
+		return  _pointPos.x >= _rectPos.x - _rectangleSize.x * 0.5f && _pointPos.x <= _rectPos.x + _rectangleSize.x * 0.5f &&
+				_pointPos.y >= _rectPos.y - _rectangleSize.y * 0.5f && _pointPos.y <= _rectPos.y + _rectangleSize.y * 0.5f;
 	}
 
     void Editor::selectNodeWithClick() {
@@ -254,6 +254,18 @@ namespace RDEEditor {
 		_intersection.makeSquare(_pos, {16, 16});
 		_intersection.showInnerColor(false);
 		_intersection.setOutlineColor(Color::Gray);
+
+		if(_intersection.isPointInside(_pos, editorData.mousePositionOnSceneView)) {
+			Util::Log::info("Inside intersection ", time(0));
+		} else {
+			if(_arrowRight.isPointInside({ _pos.x + _arrowRight.getSize().x * 0.5f, _pos.y }, editorData.mousePositionOnSceneView)) {
+				Util::Log::info("Inside arrow right ", time(0));
+			}
+
+			if(_arrowUp.isPointInside({_pos.x, _pos.y + _arrowUp.getSize().y * 0.5f }, editorData.mousePositionOnSceneView)) {
+				Util::Log::info("Inside arrow up ", time(0));
+			}
+		}
 
 		engine->manager.renderManager.drawShape(_arrowRight);
 		engine->manager.renderManager.drawShape(_arrowUp);
