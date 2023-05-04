@@ -68,7 +68,7 @@ namespace RDE {
                 #endif
             }
 
-			RDE_FUNC_ND Transform* getTransform() {
+			RDE_FUNC_ND Transform* getTransform() const {
                 return transform;
             }
 
