@@ -16,7 +16,6 @@ namespace RDE {
     class UIText;
     class Font;
     class UIImage;
-    class UITransform;
 
     struct UICheckboxConfig : public CommonUIConfig {
         std::string text = "Checkbox text";
