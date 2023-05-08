@@ -161,15 +161,16 @@ namespace RDE {
             drawLine(_shape.getPoints()[0], _shape.getPoints()[1], _shape.getOuterColor());
         } else {
             if(_shape.isInnerShown()) {
+                auto _t = glm::rotate(_transformMat, glm::radians(_shape.getRotation()), { 0.0f, 0.0f, 1.0f });
                 if(_shape.isConvex()) {
                     // Making the shape triangles
                     for(int _i = 0; _i < _shape.getPoints().size() - 2; _i++) {
                         auto _size0 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[0]) * -2.f;
                         auto _size1 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 1]) * -2.f;
                         auto _size2 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_i + 2]) * -2.f;
-                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size0.x, _size0.y, 0.0f, 1.f}, _innerColor);
-                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size1.x, _size1.y, 0.0f, 1.f}, _innerColor);
-                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size2.x, _size2.y, 0.0f, 1.f}, _innerColor);
+                        vertexDebugBufferGeometrics.emplace_back(_t * glm::vec4{-_size0.x, _size0.y, 0.0f, 1.f}, _innerColor);
+                        vertexDebugBufferGeometrics.emplace_back(_t * glm::vec4{-_size1.x, _size1.y, 0.0f, 1.f}, _innerColor);
+                        vertexDebugBufferGeometrics.emplace_back(_t * glm::vec4{-_size2.x, _size2.y, 0.0f, 1.f}, _innerColor);
                     }
                 } else {
                     auto _subTriangles = _shape.getSubConvexPolygonsIndices();
@@ -177,9 +178,9 @@ namespace RDE {
                         auto _size0 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_subTriangles[_i]]) * -2.f;
                         auto _size1 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_subTriangles[_i + 1]]) * -2.f;
                         auto _size2 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_subTriangles[_i + 2]]) * -2.f;
-                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size0.x, _size0.y, 0.0f, 1.f}, _innerColor);
-                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size1.x, _size1.y, 0.0f, 1.f}, _innerColor);
-                        vertexDebugBufferGeometrics.emplace_back(_transformMat * glm::vec4{-_size2.x, _size2.y, 0.0f, 1.f}, _innerColor);
+                        vertexDebugBufferGeometrics.emplace_back(_t * glm::vec4{-_size0.x, _size0.y, 0.0f, 1.f}, _innerColor);
+                        vertexDebugBufferGeometrics.emplace_back(_t * glm::vec4{-_size1.x, _size1.y, 0.0f, 1.f}, _innerColor);
+                        vertexDebugBufferGeometrics.emplace_back(_t * glm::vec4{-_size2.x, _size2.y, 0.0f, 1.f}, _innerColor);
                         
                         _i += 3;
                     }
@@ -187,13 +188,14 @@ namespace RDE {
             }
 
             if(_shape.isOuterShown()) {
-                Mat2 _rotMatrix(1, _transformMat[3][0], 0, _transformMat[3][1]);
-                _rotMatrix.rotate(_shape.rotation);
+                Mat2 _rotMatrix(1, _transformMat[3][0], 
+                                0, _transformMat[3][1]);
+                _rotMatrix.rotate(_shape.getRotation());
                 for(int _i = 0; _i < _shape.getPoints().size(); _i++) {
                     int _next = _i + 1;
                     if(_next == _shape.getPoints().size())
                         _next = 0;
-                    drawLine(_rotMatrix * (_shape.getPoints()[_i] + _shape.getPosition()), _rotMatrix * (_shape.getPoints()[_next] + _shape.getPosition()), _shape.getOuterColor());
+                    drawLine(_rotMatrix * _shape.getPoints()[_i] + _shape.getPosition(), _rotMatrix * _shape.getPoints()[_next] + _shape.getPosition(), _shape.getOuterColor());
                 }
             }
         }

@@ -10,6 +10,7 @@
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
 #include "core/util/Functions.h"
+#include "core/util/Mat2.h"
 #include "core/util/Vec.h"
 
 #if !IS_MOBILE()
@@ -164,8 +165,10 @@ namespace RDEEditor {
 			if(_transforms.empty()) {
 				editModeInputHandler();
 				if(editorFlags.editModeAxis == EditModeAxis::None) {
-					editorData.sceneViewSelectedNode = nullptr;
-					editorData.selectedNode = NODE_ID_NULL;
+					if(editorFlags.isSceneViewHovered) {
+						editorData.sceneViewSelectedNode = nullptr;
+						editorData.selectedNode = NODE_ID_NULL;
+					}
 				}
 			} else {
 				if(editorFlags.editModeAxis == EditModeAxis::None) {
@@ -338,7 +341,13 @@ namespace RDEEditor {
 			_diff.y = editorFlags.editModeAxis == EditModeAxis::X ? 0.f : _diff.y;
 			_diff.x = editorFlags.editModeAxis == EditModeAxis::Y ? 0.f : _diff.x;
 			
-			editorData.sceneViewSelectedNode->getTransform()->translate(_diff * editorCamera->getCurrentZoomLevel());
+			auto _rot = editorData.sceneViewSelectedNode->getTransform()->getRotation();
+			auto _pos = editorData.sceneViewSelectedNode->getTransform()->getPosition();
+			auto _newPos = _diff * editorCamera->getCurrentZoomLevel();
+			Mat2 _rotMatrix(1, _pos.x, 0, _pos.y);
+			_rotMatrix.rotate(editorFlags.editModeAxis == EditModeAxis::X || editorFlags.editModeAxis == EditModeAxis::Y ? _rot : 0.f);
+			
+			editorData.sceneViewSelectedNode->getTransform()->translate(_rotMatrix * _newPos);
 		}
 		
 		if(editorData.sceneViewSelectedNode != nullptr) {

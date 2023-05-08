@@ -9,6 +9,7 @@
 #include "core/util/Rect.h"
 #include "core/util/Vec.h"
 #include "core/util/Earcut.h"
+#include "core/util/Mat2.h"
 #include <float.h>
 #include <stdint.h>
 #include <array>
@@ -55,6 +56,10 @@ namespace RDE {
             Vec2F center {};
             Vec2F size {};
             
+        public:
+                Vec2F boundingBox[4];
+            
+        protected:
             std::vector<uint32_t> indicesForNonConvexPolygons;
             
             void calculateSubConvexShapes() {
@@ -94,7 +99,16 @@ namespace RDE {
                     _topestRightPoint.x = _point.x > _topestRightPoint.x ? _point.x : _topestRightPoint.x;
                     _topestRightPoint.y = _point.y > _topestRightPoint.y ? _point.y : _topestRightPoint.y;
                 }
-
+                
+                 Mat2 _rotMatrix(1, center.x,
+                                0, center.y);
+                _rotMatrix.rotate(rotation);
+                
+                boundingBox[0] = _rotMatrix * _bottomestLeftPoint;
+                boundingBox[1] = _rotMatrix * Vec2F { _topestRightPoint.x, _bottomestLeftPoint.y };
+                boundingBox[2] = _rotMatrix * _topestRightPoint;
+                boundingBox[3] = _rotMatrix * Vec2F { _bottomestLeftPoint.x, _topestRightPoint.y };
+                
                 size = { std::abs(_topestRightPoint.x) + std::abs(_bottomestLeftPoint.x), std::abs(_topestRightPoint.y) + std::abs(_bottomestLeftPoint.y) };
             }
             
@@ -137,12 +151,25 @@ namespace RDE {
             RDE_FUNC_ND Vec2F getSize() const {
                 return size;
             }
-
-            RDE_FUNC_ND bool isPointInside(const Vec2F& _shapeOrigin, const Vec2F& _point) {
-                return  _point.x >= _shapeOrigin.x - size.x * 0.5f && _point.x <= _shapeOrigin.x + size.x * 0.5f &&
-                        _point.y >= _shapeOrigin.y - size.y * 0.5f && _point.y <= _shapeOrigin.y + size.y * 0.5f;
+            
+            float threePointArea(const Vec2F& _a, const Vec2F& _b, const Vec2F& _c) {
+                return std::abs((_a.x * (_b.y - _c.y) + _b.x * (_c.y - _a.y) + _c.x * (_a.y - _b.y)) / 2.0); 
             }
 
+            RDE_FUNC_ND bool isPointInside(const Vec2F& _shapeOrigin, const Vec2F& _point) {
+                auto _blCorner = boundingBox[0] + _shapeOrigin;
+                auto _brCorner = boundingBox[1] + _shapeOrigin;
+                auto _trCorner = boundingBox[2] + _shapeOrigin;
+                auto _tlCorner = boundingBox[3] + _shapeOrigin;
+                
+                int _rectArea = (int)(threePointArea(_blCorner, _brCorner, _trCorner) + threePointArea(_trCorner, _tlCorner, _blCorner));
+                
+                int _trianglesFullArea = (int)(threePointArea(_blCorner, _brCorner, _point) + threePointArea(_brCorner, _trCorner, _point) + 
+                threePointArea(_trCorner, _tlCorner, _point) + threePointArea(_tlCorner, _blCorner, _point));
+                
+                return std::abs(_rectArea - _trianglesFullArea) <= 1;
+            }
+            
             /**
              * @brief Returns the inner color.
              * @return Color
@@ -232,7 +259,6 @@ namespace RDE {
              * @return Vec2F
              */
 			RDE_FUNC_ND Vec2F getPosition() {
-//                return transform.getPositionLocal();
                 return center;
             }
 
@@ -242,6 +268,7 @@ namespace RDE {
              */
 			RDE_FUNC void setRotation(float _rotation) {
                 rotation = _rotation;
+                recalculateBoundingBox();
             }
 
             /**
@@ -249,8 +276,7 @@ namespace RDE {
              * @return float
              */
 			RDE_FUNC_ND float getRotation() {
-//                return transform.getRotationLocal();
-                return {};
+                return rotation;
             }
 
             /**
@@ -285,6 +311,7 @@ namespace RDE {
 
                 center = _center;
                 size = { _radius, _radius };
+                recalculateBoundingBox();
             }
 
             /**
@@ -299,6 +326,7 @@ namespace RDE {
                 points.emplace_back(Vec2F{-_size.x / 2.f,  _size.y / 2.f});
 				center = _position;
                 size = _size;
+                recalculateBoundingBox();
 			}
     };
 }
