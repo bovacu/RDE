@@ -6,6 +6,10 @@
 #include "core/graph/Scene.h"
 #include "core/graph/components/SpriteRenderer.h"
 #include "core/graph/components/Transform.h"
+#include "core/graph/components/ui/UICheckbox.h"
+#include "core/graph/components/ui/UIImage.h"
+#include "core/graph/components/ui/UIPanel.h"
+#include "core/graph/components/ui/UIText.h"
 #include "core/render/elements/Texture.h"
 #include "core/systems/inputSystem/keysAndButtons/KeyboardKeys.h"
 #include "core/systems/inputSystem/keysAndButtons/MouseKeys.h"
@@ -149,20 +153,42 @@ namespace RDEEditor {
 				_pointPos.y >= _rectPos.y - _rectangleSize.y * 0.5f && _pointPos.y <= _rectPos.y + _rectangleSize.y * 0.5f;
 	}
 
+	// TODO (Borja): When stacking nodes are selected, create a small list to select wich one we really want to select.
     void Editor::selectNodeWithClick() {
 		if(!editorFlags.isSceneViewActive && !editorFlags.isSceneViewHovered) return;
 
 		if(engine->manager.inputManager.isMouseJustPressed(RDE::RDE_MOUSE_BUTTON_0)) {
 			auto& _nodes = graph->getNodeContainer();
-
 			std::vector<Transform*> _transforms;
+			
+			auto& _canvasNodes = canvas->graph->getNodeContainer();
+			std::vector<Transform*> _uiTransforms;
+			
 			_nodes.view<SpriteRenderer, Transform>().each([this, &_transforms](const auto _entity, SpriteRenderer& _sprite, Transform& _transform) {
 				if(isPointInside(_sprite.getSize(), &_transform, editorData.mousePositionOnSceneView) && &_sprite != gridSprite) {
 					_transforms.push_back(&_transform);
 				}
 			});
 			
-			if(_transforms.empty()) {
+			_canvasNodes.view<UIText, Transform>().each([this, &_uiTransforms](const auto _entity, UIText& _uiText, Transform& _transform) {
+				if(isPointInside(_uiText.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
+					_uiTransforms.push_back(&_transform);
+				}
+			});
+			
+			_canvasNodes.view<UIImage, Transform>().each([this, &_uiTransforms](const auto _entity, UIImage& _uiImage, Transform& _transform) {
+				if(isPointInside(_uiImage.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
+					_uiTransforms.push_back(&_transform);
+				}
+			});
+			
+			_canvasNodes.view<UIPanel, Transform>().each([this, &_uiTransforms](const auto _entity, UIPanel& _uiPanel, Transform& _transform) {
+				if(isPointInside(_uiPanel.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
+					_uiTransforms.push_back(&_transform);
+				}
+			});
+			
+			if(_transforms.empty() && _uiTransforms.empty()) {
 				editModeInputHandler();
 				if(editorFlags.editModeAxis == EditModeAxis::None) {
 					if(editorFlags.isSceneViewHovered) {
@@ -172,7 +198,7 @@ namespace RDEEditor {
 				}
 			} else {
 				if(editorFlags.editModeAxis == EditModeAxis::None) {
-					editorData.sceneViewSelectedNode = _transforms[0]->node;
+					editorData.sceneViewSelectedNode = !_transforms.empty() ? _transforms[0]->node : _uiTransforms[0]->node;
 					editorData.selectedNode = editorData.sceneViewSelectedNode->getID();
 				}
 			}
