@@ -154,6 +154,7 @@ namespace RDEEditor {
 	}
 
 	// TODO (Borja): When stacking nodes are selected, create a small list to select wich one we really want to select.
+	// TODO (Borja): Fix, separate selectedNonUI from selected UI as when Node is selected in view, components are mixed between nonUI and UI, a chaos.
     void Editor::selectNodeWithClick() {
 		if(!editorFlags.isSceneViewActive && !editorFlags.isSceneViewHovered) return;
 

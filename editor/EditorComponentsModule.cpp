@@ -228,7 +228,7 @@ void textComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNode) {
 	})
 }
 
-void uiTransformComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNode) {
+void anchorComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNode) {
 	auto* _node = _graph->getNode(_selectedNode);
 
 	if(!_node->hasComponent<UIAnchoring>()) return;
@@ -240,7 +240,7 @@ void uiTransformComponent(Editor* _editor, Graph* _graph, const NodeID _selected
 	RDE_UI_ANCHOR_ _selectedAnchor = _anchoring->getAnchor();
 	RDE_UI_STRETCH_ _selectedStretch = _anchoring->getStretch();
 
-	CREATE_NON_DISABLEABLE_HEADER("UITransform", _transform, {
+	CREATE_NON_DISABLEABLE_HEADER("UIAnchoring", _transform, {
 		if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
 		ImGui::Text("ID: %i", (int)_transform->node->getID());
@@ -428,45 +428,6 @@ void uiTransformComponent(Editor* _editor, Graph* _graph, const NodeID _selected
 		ImGui::PopID();
 
 		if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
-
-		ImGui::NewLine();
-
-		ImGui::Text("Position ");
-
-		int _pos[2]; 
-		_pos[0] = _transform->getPosition().x;
-		_pos[1] = _transform->getPosition().y;
-		ImGui::SameLine();
-		ImGui::SetNextItemWidth(100);
-		ImGui::PushID(createID(_editor));
-		if(ImGui::DragInt2("##myInput", _pos, 0.5f)) {
-			_transform->setPosition(_pos[0], _pos[1]);
-		}
-		ImGui::PopID();
-
-
-		ImGui::Text("Rotation ");
-
-		float _angle = _transform->getRotation();
-		ImGui::SameLine();
-		ImGui::SetNextItemWidth(50);
-		ImGui::PushID(createID(_editor));
-		if(ImGui::DragFloat("##myInput", &_angle, 0.1f))
-			_transform->setRotation(_angle);
-		ImGui::PopID();
-
-
-		ImGui::Text("Scale ");
-
-		float _scale[2];
-		_scale[0] = _transform->getScale().x;
-		_scale[1] = _transform->getScale().y;
-		ImGui::SameLine(0, 30);
-		ImGui::SetNextItemWidth(100);
-		ImGui::PushID(createID(_editor));
-		if(ImGui::DragFloat2("##myInput", _scale, 0.05))
-			_transform->setScale(_scale[0], _scale[1]);
-		ImGui::PopID();
 	})
 }
 
@@ -687,7 +648,7 @@ void nodeComponents(Editor* _editor, Graph* _graph, const NodeID _selectedNode) 
 	bodyComponent(_editor, _graph, _selectedNode);
 	textComponent(_editor, _graph, _selectedNode);
 
-	uiTransformComponent(_editor, _graph, _selectedNode);
+	anchorComponent(_editor, _graph, _selectedNode);
 	uiButtonComponent(_editor, _graph, _selectedNode);
 	uiImageComponent(_editor, _graph, _selectedNode);
 	uiTextComponent(_editor, _graph, _selectedNode);
