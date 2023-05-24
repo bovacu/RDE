@@ -11,6 +11,7 @@ namespace RDE {
 
 	struct RDEConfig;
 	class Window;
+    class Engine;
 
     class Platform {
 		friend class Engine;

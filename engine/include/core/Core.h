@@ -207,9 +207,11 @@ public:                                                                         
 //#endif
 #else
 #define RDE_FUNC 
-#define RDE_FUNC_ND
-#define RDE_FUNC_EXPLICIT
+#define RDE_FUNC_ND [[nodiscard]]
+#define RDE_FUNC_STATIC static
+#define RDE_FUNC_EXPLICIT explicit
 #define RDE_FUNC_ENGINE
+#define RDE_FUNC_ND_STATIC [[nodiscard]] static
 #endif
 
 #endif //RDE_CORE_H

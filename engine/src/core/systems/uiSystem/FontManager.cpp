@@ -3,10 +3,6 @@
 #include "core/systems/uiSystem/FontManager.h"
 #include "core/util/Functions.h"
 #include "core/systems/fileSystem/FileManager.h"
-#include <chrono>
-#include <ctime>  
-#include <stdint.h>
-#include <vcruntime_string.h>
 
 #define FONT_DPI 96
 #define BASE_FONT_SIZE_FOR_CHAR_SIZE 64
@@ -25,7 +21,6 @@ namespace RDE {
     };
 
     void Font::init(FT_Face face, int _fontSize)  {
-        auto start = std::chrono::system_clock::now();
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		FT_Set_Char_Size(face, 0, _fontSize * BASE_FONT_SIZE_FOR_CHAR_SIZE, FONT_DPI, FONT_DPI);

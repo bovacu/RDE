@@ -28,6 +28,7 @@ namespace RDE {
 	};
 
 	class Manager;
+    class Canvas;
 
     struct UIAnchoring {
         friend class Canvas;

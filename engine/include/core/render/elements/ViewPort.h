@@ -16,6 +16,7 @@ namespace RDE {
      */
 
 	class Window;
+    class Camera;
     class ViewPort {
 
         friend class Camera;
