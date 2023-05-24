@@ -66,7 +66,6 @@ namespace RDE {
             return false;
         }
         _vertexCode = _fileManager->readFullFile(_vertexFile).content;
-        Util::Log::info(_vertexCode);
         _fileManager->close(_vertexFile);
 
 		auto* _fragmentFile = _fileManager->open(_fragment, RDE_FILE_MODE_READ);
@@ -76,7 +75,6 @@ namespace RDE {
         }
 
         _fragmentCode = _fileManager->readFullFile(_fragmentFile).content;
-        Util::Log::info(_fragmentCode);
         _fileManager->close(_fragmentFile);
 
         return loadFromStrings(_vertexCode, _fragmentCode);
