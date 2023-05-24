@@ -153,6 +153,14 @@ namespace RDE {
         return minimized;
     }
 
+	void Window::minimizeWindow() {
+		SDL_MinimizeWindow(window);
+	}
+
+	void Window::maximizeWindow() {
+		SDL_MaximizeWindow(window);
+	}
+
     bool Window::isRunning() {
         return running;
     }

@@ -229,6 +229,16 @@ namespace RDE {
              */
 			RDE_FUNC_ND bool isMinimized();
 
+			/**
+			 * @brief Minimizes the window.
+			 */
+			RDE_FUNC void minimizeWindow();
+			
+			/**
+			 * @brief Maximizes the window.
+			 */
+			RDE_FUNC void maximizeWindow();
+
             /**
              * @brief Returns if the Window is running or not.
              * @return bool
