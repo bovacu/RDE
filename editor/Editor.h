@@ -28,6 +28,19 @@ namespace RDEEditor {
 		None,
 		X, Y, Z
 	};
+
+	enum EditorTheme {
+		Cherry,
+		Dark,
+		DarkRed,
+		DarkRuda,
+		DeepDark,
+		Dracula,
+		Green,
+		Gold,
+		MaterialFlat,
+		PsycoLight
+	};
 	
 	struct Gizmos {
 		DebugShape translationX, translationY, translationXY;
@@ -43,6 +56,8 @@ namespace RDEEditor {
 		
 		EditMode editMode = EditMode::Move;
 		uint32_t editModeAxis = EditModeAxis::None;
+
+		EditorTheme theme = EditorTheme::DarkRuda;
 	};
 
 	struct EditorData {

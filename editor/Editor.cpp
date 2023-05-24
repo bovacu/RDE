@@ -29,6 +29,7 @@
 
 namespace RDEEditor {
 
+	#include "EditorThemesModule.cpp"
 	#include "NodeCreator.cpp"
 	#include "EditorDockingspaceModule.cpp"
 	#include "EditorSceneViewModule.cpp"
@@ -38,6 +39,7 @@ namespace RDEEditor {
 	#include "EditorGamePreview.cpp"
 
     void Editor::onInit() {
+		
 		engine->manager.renderManager.setClearColor(backgroundColor);
 		gridShaderID = engine->manager.shaderManager.loadShader("gridShader", "editor/assets/shaders/gridVertex.glsl", "editor/assets/shaders/gridFragment.glsl");
 		GLsizei _structSize = sizeof(OpenGLVertex);
@@ -104,6 +106,7 @@ namespace RDEEditor {
 		
 		generateTranslationGuizmo();
 
+		setTheme(editorFlags.theme);
 		engine->getWindow()->maximizeWindow();
     }
 
