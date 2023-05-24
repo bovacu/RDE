@@ -105,10 +105,10 @@ namespace RDE {
                                 0, center.y);
                 _rotMatrix.rotate(rotation);
                 
-                boundingBox[0] = _rotMatrix * _bottomestLeftPoint;
-                boundingBox[1] = _rotMatrix * Vec2F { _topestRightPoint.x, _bottomestLeftPoint.y };
-                boundingBox[2] = _rotMatrix * _topestRightPoint;
-                boundingBox[3] = _rotMatrix * Vec2F { _bottomestLeftPoint.x, _topestRightPoint.y };
+                boundingBox[0] = _rotMatrix * _bottomestLeftPoint * scale;
+				boundingBox[1] = _rotMatrix * Vec2F { _topestRightPoint.x, _bottomestLeftPoint.y } * scale;
+				boundingBox[2] = _rotMatrix * _topestRightPoint * scale;
+				boundingBox[3] = _rotMatrix * Vec2F { _bottomestLeftPoint.x, _topestRightPoint.y } * scale;
                 
                 size = { std::abs(_topestRightPoint.x) + std::abs(_bottomestLeftPoint.x), std::abs(_topestRightPoint.y) + std::abs(_bottomestLeftPoint.y) };
             }
@@ -158,10 +158,10 @@ namespace RDE {
             }
 
             RDE_FUNC_ND bool isPointInside(const Vec2F& _point) {
-                auto _blCorner = boundingBox[0] * scale + center;
-                auto _brCorner = boundingBox[1] * scale + center;
-                auto _trCorner = boundingBox[2] * scale + center;
-                auto _tlCorner = boundingBox[3] * scale + center;
+                auto _blCorner = boundingBox[0] + center;
+                auto _brCorner = boundingBox[1] + center;
+                auto _trCorner = boundingBox[2] + center;
+                auto _tlCorner = boundingBox[3] + center;
                 
                 int _rectArea = (int)(threePointArea(_blCorner, _brCorner, _trCorner) + threePointArea(_trCorner, _tlCorner, _blCorner));
                 
@@ -294,6 +294,7 @@ namespace RDE {
 			*/
 			RDE_FUNC void setScale(const Vec2F& _scale) {
 				scale = _scale;
+				recalculateBoundingBox();
 			}
 
             /**
