@@ -29,18 +29,17 @@ void sceneView(Editor* _editor, Vec2F* _sceneViewOffset) {
 
 	_editor->editorData.sizeOfSceneView = viewportSize;
 
-	// TODO (Borja): Zoom not working, fix this.
+	auto _zoom = _editor->editorCamera->getCurrentZoomLevel();
+
 	auto _mousePos = ImGui::GetIO().MousePos;
 	auto _titleHeight = ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetFontSize();
 	auto _windowHalfHeight = viewportSize.y * 0.5f - _titleHeight;
 
-	auto _zoom = 1.f / _editor->editorCamera->getCurrentZoomLevel();
 	auto _cameraOffset = _editor->editorCamera->node->getTransform()->getPosition();
-	auto _mouseY = _mousePos.y - (ImGui::GetWindowPos().y + _editor->sceneViewOffset.y + _cameraOffset.y) - _titleHeight;
+	auto _mouseY = _mousePos.y * _zoom - ((ImGui::GetWindowPos().y + _editor->sceneViewOffset.y) * _zoom + _cameraOffset.y) - _titleHeight * _zoom;
+	auto _mouseX = _mousePos.x * _zoom - ((ImGui::GetWindowPos().x + _editor->sceneViewOffset.x) * _zoom - _cameraOffset.x);
 
-	_editor->editorData.mousePositionOnSceneView = Vec2F { _mousePos.x - (ImGui::GetWindowPos().x + _editor->sceneViewOffset.x - _cameraOffset.x) - viewportSize.x * 0.5f, _windowHalfHeight - _mouseY + _titleHeight * 1.5f };
-	// Util::Log::info((_editor->sceneViewOffset.x - _cameraOffset.x) * _zoom);
-
+	_editor->editorData.mousePositionOnSceneView = Vec2F { _mouseX - viewportSize.x * 0.5f * _zoom, _windowHalfHeight * _zoom - _mouseY + _titleHeight * 1.5f * _zoom };
 	ImGui::End();
 	ImGui::PopStyleVar();
 }

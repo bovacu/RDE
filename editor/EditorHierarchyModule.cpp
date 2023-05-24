@@ -27,9 +27,12 @@ void hierarchyRecursionStub(Editor* _scene, Graph* _graph, Node* _node, NodeID& 
 
 			if(ImGui::IsItemClicked()) {
 				_selectedNode = _node->getID();
-				_scene->editorData.sceneViewSelectedNode = _node;
-				if(&_scene->editorData.selectedNode == &_selectedNode) _scene->editorData.selectedNodeCanvas = NODE_ID_NULL;
-				else _scene->editorData.selectedNode = NODE_ID_NULL;
+				if(&_scene->editorData.selectedNode == &_selectedNode) {
+					_scene->editorData.selectedNodeCanvas = NODE_ID_NULL;
+					_scene->editorData.sceneViewSelectedNode = _node;
+				} else {
+					_scene->editorData.selectedNode = NODE_ID_NULL;
+				}
 			}
 
 			for(auto _child : _transform->children) {
@@ -41,9 +44,12 @@ void hierarchyRecursionStub(Editor* _scene, Graph* _graph, Node* _node, NodeID& 
 	} else {
 		if (ImGui::Selectable(_tag->tag.c_str(), _selectedNode == _node->getID())) {
 			_selectedNode = _node->getID();
-			_scene->editorData.sceneViewSelectedNode = _node;
-			if(&_scene->editorData.selectedNode == &_selectedNode) _scene->editorData.selectedNodeCanvas = NODE_ID_NULL;
-			else _scene->editorData.selectedNode = NODE_ID_NULL;
+			if(&_scene->editorData.selectedNode == &_selectedNode) {
+				_scene->editorData.selectedNodeCanvas = NODE_ID_NULL;
+				_scene->editorData.sceneViewSelectedNode = _node;
+			} else {
+				_scene->editorData.selectedNode = NODE_ID_NULL;
+			}
 		}
 	}
 }

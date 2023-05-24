@@ -103,6 +103,8 @@ namespace RDEEditor {
 		_sprite->setFramebuffer(editorData.gameViewFramebufferID | editorData.sceneViewFramebufferID);
 		
 		generateTranslationGuizmo();
+
+		engine->getWindow()->maximizeWindow();
     }
 
 	void Editor::generateGridTexture() {
@@ -328,6 +330,12 @@ namespace RDEEditor {
 		}
 
 		editorCamera->setCurrentZoomLevel(editorCamera->getCurrentZoomLevel() + _event.getScrollY() * 0.1f);
+
+		auto _zoom = editorCamera->getCurrentZoomLevel();
+		editorData.gizmos.translationX.setScale({_zoom, _zoom});
+		editorData.gizmos.translationY.setScale({_zoom, _zoom});
+		editorData.gizmos.translationXY.setScale({_zoom, _zoom});
+		
 		return true;
 	}
 
@@ -347,12 +355,12 @@ namespace RDEEditor {
 			editorFlags.editModeAxis = EditModeAxis::None;
 			editorData.gizmos.lastClickOrMovedMousePositionForTranslation = engine->manager.inputManager.getMousePosScreenCoords();
 			
-			if(editorData.gizmos.translationXY.isPointInside(editorData.sceneViewSelectedNode->getTransform()->getPosition(), editorData.mousePositionOnSceneView)) {
+			if(editorData.gizmos.translationXY.isPointInside(editorData.mousePositionOnSceneView)) {
 				editorFlags.editModeAxis = EditModeAxis::X | EditModeAxis::Y;
 			} else {
-				if(editorData.gizmos.translationX.isPointInside(editorData.sceneViewSelectedNode->getTransform()->getPosition(), editorData.mousePositionOnSceneView)) {
+				if(editorData.gizmos.translationX.isPointInside(editorData.mousePositionOnSceneView)) {
 					editorFlags.editModeAxis = EditModeAxis::X;
-				} else if(editorData.gizmos.translationY.isPointInside(editorData.sceneViewSelectedNode->getTransform()->getPosition(), editorData.mousePositionOnSceneView)) {
+				} else if(editorData.gizmos.translationY.isPointInside(editorData.mousePositionOnSceneView)) {
 					editorFlags.editModeAxis = EditModeAxis::Y;
 				}
 			}
