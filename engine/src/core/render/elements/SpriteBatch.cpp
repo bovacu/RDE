@@ -162,6 +162,7 @@ namespace RDE {
         } else {
             if(_shape.isInnerShown()) {
                 auto _t = glm::rotate(_transformMat, glm::radians(_shape.getRotation()), { 0.0f, 0.0f, 1.0f });
+				_t = glm::scale(_t, glm::vec3(_shape.getScale().x, _shape.getScale().y, 1.f));
                 if(_shape.isConvex()) {
                     // Making the shape triangles
                     for(int _i = 0; _i < _shape.getPoints().size() - 2; _i++) {
@@ -176,8 +177,8 @@ namespace RDE {
                     auto _subTriangles = _shape.getSubConvexPolygonsIndices();
                     for(int _i = 0; _i < _subTriangles.size();) {
                         auto _size0 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_subTriangles[_i]]) * -2.f;
-                        auto _size1 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_subTriangles[_i + 1]]) * -2.f;
-                        auto _size2 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_subTriangles[_i + 2]]) * -2.f;
+						auto _size1 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_subTriangles[_i + 1]]) * -2.f;
+						auto _size2 = Util::Math::worldToScreenSize(batch->viewport, _shape.getPoints()[_subTriangles[_i + 2]]) * -2.f;
                         vertexDebugBufferGeometrics.emplace_back(_t * glm::vec4{-_size0.x, _size0.y, 0.0f, 1.f}, _innerColor);
                         vertexDebugBufferGeometrics.emplace_back(_t * glm::vec4{-_size1.x, _size1.y, 0.0f, 1.f}, _innerColor);
                         vertexDebugBufferGeometrics.emplace_back(_t * glm::vec4{-_size2.x, _size2.y, 0.0f, 1.f}, _innerColor);
@@ -195,7 +196,7 @@ namespace RDE {
                     int _next = _i + 1;
                     if(_next == _shape.getPoints().size())
                         _next = 0;
-                    drawLine(_rotMatrix * _shape.getPoints()[_i] + _shape.getPosition(), _rotMatrix * _shape.getPoints()[_next] + _shape.getPosition(), _shape.getOuterColor());
+					drawLine(_rotMatrix * _shape.getPoints()[_i] * _shape.getScale() + _shape.getPosition(), _rotMatrix * _shape.getPoints()[_next] * _shape.getScale() + _shape.getPosition(), _shape.getOuterColor());
                 }
             }
         }

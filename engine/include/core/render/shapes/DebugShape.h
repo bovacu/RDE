@@ -55,6 +55,7 @@ namespace RDE {
              */
             Vec2F center {};
             Vec2F size {};
+			Vec2F scale { 1.f, 1.f };
             
         public:
                 Vec2F boundingBox[4];
@@ -156,11 +157,11 @@ namespace RDE {
                 return std::abs((_a.x * (_b.y - _c.y) + _b.x * (_c.y - _a.y) + _c.x * (_a.y - _b.y)) / 2.0); 
             }
 
-            RDE_FUNC_ND bool isPointInside(const Vec2F& _shapeOrigin, const Vec2F& _point) {
-                auto _blCorner = boundingBox[0] + _shapeOrigin;
-                auto _brCorner = boundingBox[1] + _shapeOrigin;
-                auto _trCorner = boundingBox[2] + _shapeOrigin;
-                auto _tlCorner = boundingBox[3] + _shapeOrigin;
+            RDE_FUNC_ND bool isPointInside(const Vec2F& _point) {
+                auto _blCorner = boundingBox[0] * scale + center;
+                auto _brCorner = boundingBox[1] * scale + center;
+                auto _trCorner = boundingBox[2] * scale + center;
+                auto _tlCorner = boundingBox[3] * scale + center;
                 
                 int _rectArea = (int)(threePointArea(_blCorner, _brCorner, _trCorner) + threePointArea(_trCorner, _tlCorner, _blCorner));
                 
@@ -278,6 +279,22 @@ namespace RDE {
 			RDE_FUNC_ND float getRotation() {
                 return rotation;
             }
+
+			/**
+			 * @brief Gets the scale of the complex shape.
+			 * @return Vec2F
+			*/
+			RDE_FUNC_ND Vec2F getScale() {
+				return scale;
+			}
+
+			/**
+			 * @brief Sets the scale of the complex shape.
+			 * @param _scale Vec2F
+			*/
+			RDE_FUNC void setScale(const Vec2F& _scale) {
+				scale = _scale;
+			}
 
             /**
              * @brief Returns if the inner color is drawn or not.
