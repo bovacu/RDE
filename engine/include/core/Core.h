@@ -139,6 +139,8 @@ inline float currentDPI = 0;
 */
 #define IS_IOS() (defined(__APPLE__) && defined(IOS_PLATFORM))
 
+#define IS_APPLE() (IS_MAC() || IS_IOS())
+
 /**
  * @brief Checks if the OS is Android.
 */

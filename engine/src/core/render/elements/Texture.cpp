@@ -55,8 +55,8 @@ namespace RDE {
     }
 
     bool Texture::loadFromFile(const char* _path) {
-        
-        #if IS_IOS()
+
+        #if IS_APPLE()
         auto* _image = Util::Texture::getSDLSurface(_path, (int)SDL_PIXELFORMAT_ABGR8888);
         #else
         auto* _image = Util::Texture::getSDLSurface(_path);
