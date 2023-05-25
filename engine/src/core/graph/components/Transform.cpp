@@ -81,7 +81,7 @@ namespace RDE {
         setDirty(this);
     }
 
-    Vec2F Transform::getModelMatrixPosition() {
+    Vec2F Transform::getModelMatrixPosition() const{
         glm::vec3 scale;
         glm::quat rotation;
         glm::vec3 translation;
@@ -92,7 +92,7 @@ namespace RDE {
         return { translation.x, translation.y };
     }
 
-    Vec2F Transform::getModelMatrixScale() {
+    Vec2F Transform::getModelMatrixScale() const{
         glm::vec3 scale;
         glm::quat rotation;
         glm::vec3 translation;
@@ -103,7 +103,7 @@ namespace RDE {
         return { scale.x, scale.y };
     }
 
-    float Transform::getModelMatrixRotation() {
+    float Transform::getModelMatrixRotation() const{
         glm::vec3 scale;
         glm::quat rotation;
         glm::vec3 translation;
@@ -155,7 +155,7 @@ namespace RDE {
                 );
     }
 
-    std::tuple<glm::mat4, bool> Transform::localToWorld() {
+    std::tuple<glm::mat4, bool> Transform::localToWorld() const{
         return { worldMatrixCache, dirty };
     }
 
