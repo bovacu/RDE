@@ -182,39 +182,39 @@ namespace RDE {
              * the position relative to the world and not the parent (which getPosition() gives).
              * @return Vec2F
              */
-			RDE_FUNC_ND Vec2F getModelMatrixPosition() const;
+			RDE_FUNC_ND Vec2F getWorldPosition() const;
 
             /**
              * @brief Returns the scale of the Node in world units. This is useful when the Node you need the scale is a child of other Node and you need
              * the scale relative to the world and not the parent (which getScale() gives).
              * @return Vec2F
              */
-			RDE_FUNC_ND Vec2F getModelMatrixScale() const;
+			RDE_FUNC_ND Vec2F getWordlScale() const;
 
             /**
              * @brief Returns the rotation of the Node in world degrees units. This is useful when the Node you need the rotation is a child of other Node and you need
              * the rotation relative to the world and not the parent (which getRotation() gives).
              * @return Vec2F
              */
-			RDE_FUNC_ND float getModelMatrixRotation() const;
+			RDE_FUNC_ND float getWorldRotation() const;
 
             /**
              * @brief Sets the position of the Node in world coordinates.
              * @param _worldPos Position in world coordinates.
              */
-			RDE_FUNC void setMatrixModelPosition(const Vec2F& _worldPos);
+			RDE_FUNC void setWordlPosition(const Vec2F& _worldPos);
 
             /**
              * @brief Translates the position of the Node in world coordinates units.
              * @param _worldPos Amount to translate.
              */
-			RDE_FUNC void translateMatrixModelPosition(const Vec2F& _worldPos);
+			RDE_FUNC void translateWordlPosition(const Vec2F& _worldPos);
 
             /**
              * @brief Sets the rotation of the Node in world degrees.
              * @param _rotation Rotation in world degree units.
              */
-			RDE_FUNC void setMatrixModelRotation(float _rotation);
+			RDE_FUNC void setWorldRotation(float _rotation);
 
 			RDE_FUNC_ND glm::mat4 localToParent() const;
 			RDE_FUNC_ND glm::mat4 parentToLocal() const;

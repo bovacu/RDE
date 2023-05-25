@@ -81,7 +81,7 @@ namespace RDE {
         setDirty(this);
     }
 
-    Vec2F Transform::getModelMatrixPosition() const{
+    Vec2F Transform::getWorldPosition() const{
         glm::vec3 scale;
         glm::quat rotation;
         glm::vec3 translation;
@@ -92,7 +92,7 @@ namespace RDE {
         return { translation.x, translation.y };
     }
 
-    Vec2F Transform::getModelMatrixScale() const{
+    Vec2F Transform::getWordlScale() const{
         glm::vec3 scale;
         glm::quat rotation;
         glm::vec3 translation;
@@ -103,7 +103,7 @@ namespace RDE {
         return { scale.x, scale.y };
     }
 
-    float Transform::getModelMatrixRotation() const{
+    float Transform::getWorldRotation() const{
         glm::vec3 scale;
         glm::quat rotation;
         glm::vec3 translation;
@@ -184,21 +184,21 @@ namespace RDE {
         }
     }
 
-    void Transform::setMatrixModelPosition(const Vec2F& _worldPos) {
+    void Transform::setWordlPosition(const Vec2F& _worldPos) {
         worldMatrixCache[3][0] = _worldPos.x;
         worldMatrixCache[3][1] = _worldPos.y;
         setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
         dirty = true;
     }
 
-    void Transform::translateMatrixModelPosition(const Vec2F& _worldPos) {
+    void Transform::translateWordlPosition(const Vec2F& _worldPos) {
         worldMatrixCache[3][0] += _worldPos.x;
         worldMatrixCache[3][1] += _worldPos.y;
         setLocalMatrix(glm::inverse(parentTransform->worldMatrixCache) * worldMatrixCache);
         dirty = true;
     }
 
-    void Transform::setMatrixModelRotation(float _rotation) {
+    void Transform::setWorldRotation(float _rotation) {
         glm::vec3 _scale;
         glm::quat _rot;
         glm::vec3 _translation;

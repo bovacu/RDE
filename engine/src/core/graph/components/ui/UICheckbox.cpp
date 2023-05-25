@@ -59,9 +59,9 @@ namespace RDE {
                                                         std::max(checkboxBackgroundSprite->getSize().y, textRenderer->getSize().y * 0.5f)});
 
         _checkboxBackgroundNode->getComponent<UIAnchoring>()->setAnchor(RDE_UI_ANCHOR_LEFT);
-        _checkboxBackgroundNode->getTransform()->setMatrixModelPosition({
-            _checkboxBackgroundNode->getTransform()->getModelMatrixPosition().x - getSize().x * 0.5f + checkboxBackgroundSprite->getSize().x * 0.5f,
-            _checkboxBackgroundNode->getTransform()->getModelMatrixPosition().y
+        _checkboxBackgroundNode->getTransform()->setWordlPosition({
+            _checkboxBackgroundNode->getTransform()->getWorldPosition().x - getSize().x * 0.5f + checkboxBackgroundSprite->getSize().x * 0.5f,
+            _checkboxBackgroundNode->getTransform()->getWorldPosition().y
         });
 
         tickNode = _graph->createNode("CheckboxTick", _checkboxBackgroundNode);
@@ -74,10 +74,10 @@ namespace RDE {
 
 
 		textNode->getComponent<UIAnchoring>()->setAnchor(RDE_UI_ANCHOR_LEFT);
-        textNode->getTransform()->setMatrixModelPosition({
-            textNode->getTransform()->getModelMatrixPosition().x - getSize().x * 0.5f +
+        textNode->getTransform()->setWordlPosition({
+            textNode->getTransform()->getWorldPosition().x - getSize().x * 0.5f +
             checkboxBackgroundSprite->getSize().x + textRenderer->getTextSize().x * 0.5f + _config.checkboxTextOffset.x,
-            textNode->getTransform()->getModelMatrixPosition().y
+            textNode->getTransform()->getWorldPosition().y
         });
 
         checked = _config.checked;

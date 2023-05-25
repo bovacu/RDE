@@ -101,13 +101,13 @@ namespace RDE {
     }
 
     bool Camera::isElementInside(Transform* _transform, const Vec2F& _size) const {
-        auto _elementTopLeft = _transform->getModelMatrixPosition();
+        auto _elementTopLeft = _transform->getWorldPosition();
         auto _elementBottomRight = _elementTopLeft;
         _elementTopLeft += { -_size.x / 2.f, _size.y / 2.f };
         _elementBottomRight += { _size.x / 2.f, -_size.y / 2.f };
 
-        auto _cameraTopLeft = node->getTransform()->getModelMatrixPosition();
-        auto _cameraBottomRight = node->getTransform()->getModelMatrixPosition();
+        auto _cameraTopLeft = node->getTransform()->getWorldPosition();
+        auto _cameraBottomRight = node->getTransform()->getWorldPosition();
 		auto _viewportVRes = viewport->getSize();
 		_cameraTopLeft += { -(float)_viewportVRes.x / 2.f * zoom, (float)_viewportVRes.y / 2.f * zoom };
 		_cameraBottomRight += { (float)_viewportVRes.x / 2.f * zoom, -(float)_viewportVRes.y / 2.f * zoom };

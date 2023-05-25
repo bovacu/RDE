@@ -101,7 +101,7 @@ namespace RDE {
 
 			for(char _char : _lineInfo.line) {
 				auto _transformCopy = glm::mat4(_transformMatrix);
-                auto _modelMatrixScale = _transform->getModelMatrixScale();
+                auto _modelMatrixScale = _transform->getWordlScale();
 
 				float _xPos = (_x * _fontSizeScale - (_textRenderer->getTextSize().x * _nonUIPivotX) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _modelMatrixScale.x;
 				float _yPos = (_y + (_textRenderer->getTextSize().y * _nonUIPivotY) - (float)_chars[_char].bearing.y * _fontSizeScale) * _modelMatrixScale.y;
@@ -200,7 +200,7 @@ namespace RDE {
 
 			for(char _char : _lineInfo.line) {
 				auto _transformCopy = glm::mat4(_transformMatrix);
-                auto _modelMatrixScale = _transform->getModelMatrixScale();
+                auto _modelMatrixScale = _transform->getWordlScale();
 				float _xPos = (_x * _fontSizeScale - (_textRenderer->getTextSize().x) + (float)_chars[_char].bearing.x + _textRenderer->getSpacesBetweenChars()) * _modelMatrixScale.x;
 				if((_anchoring->getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
 					_xPos += _textRenderer->getTextSize().x;

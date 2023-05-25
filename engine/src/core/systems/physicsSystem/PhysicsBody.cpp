@@ -46,8 +46,8 @@ namespace RDE {
                 break;
         }
 
-        cpBodySetPosition(body, { transform->getModelMatrixPosition().x, transform->getModelMatrixPosition().y });
-        auto _rotation = transform->getModelMatrixRotation();
+        cpBodySetPosition(body, { transform->getWorldPosition().x, transform->getWorldPosition().y });
+        auto _rotation = transform->getWorldRotation();
         auto _radians = Util::Math::degreesToRadians(_rotation);
         cpBodySetAngle(body, _radians);
         cpSpaceReindexShapesForBody(space, body);
@@ -69,7 +69,7 @@ namespace RDE {
     }
 
 	void PhysicsBody::calculateDataForBox(ShapeConfig& _shapeConfig, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType) {
-        auto _size = Vec2F { _shapeConfig.size.x * transform->getModelMatrixScale().x, _shapeConfig.size.y * transform->getModelMatrixScale().y };
+        auto _size = Vec2F { _shapeConfig.size.x * transform->getWordlScale().x, _shapeConfig.size.y * transform->getWordlScale().y };
 
         _shapeConfig.vertices.emplace_back( -_size.x / 2.f, -_size.y / 2.f);
         _shapeConfig.vertices.emplace_back(  _size.x / 2.f, -_size.y / 2.f);
@@ -90,7 +90,7 @@ namespace RDE {
 
 	void PhysicsBody::calculateDataForCircle(ShapeConfig& _shapeConfig, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType) {
         if(body == nullptr) {
-            auto _moment = (float)cpMomentForCircle(_bodyMass, 0, _shapeConfig.size.x * transform->getModelMatrixScale().x, cpvzero);
+            auto _moment = (float)cpMomentForCircle(_bodyMass, 0, _shapeConfig.size.x * transform->getWordlScale().x, cpvzero);
             createBody(_shapeConfig, _moment, _bodyMass, _bodyType);
         }
 
@@ -107,7 +107,7 @@ namespace RDE {
 
         for(auto _i = 0; _i < _numOfVertices; _i++) {
             auto& _vertex = _shapeConfig.vertices[_i];
-            _vertices[_i] = { _vertex.x * transform->getModelMatrixScale().x, _vertex.y * transform->getModelMatrixScale().y };
+            _vertices[_i] = { _vertex.x * transform->getWordlScale().x, _vertex.y * transform->getWordlScale().y };
         }
 
         if(body == nullptr) {
@@ -121,7 +121,7 @@ namespace RDE {
     }
 
 	void PhysicsBody::calculateDataForSegment(ShapeConfig& _shapeConfig, float _bodyMass, RDE_PHYSICS_BODY_TYPE_ _bodyType) {
-        auto _halfWidth = _shapeConfig.size.x / 2.f * transform->getModelMatrixScale().x;
+        auto _halfWidth = _shapeConfig.size.x / 2.f * transform->getWordlScale().x;
         auto _a = cpVect { -_halfWidth, 0 };
         auto _b = cpVect { _halfWidth, 0 };
 
@@ -247,8 +247,8 @@ namespace RDE {
     }
 
     void PhysicsBody::update() {
-        Vec2F _transformPos = transform->getModelMatrixPosition();
-        float _transformRot = transform->getModelMatrixRotation();
+        Vec2F _transformPos = transform->getWorldPosition();
+        float _transformRot = transform->getWorldRotation();
 
         Vec2F _bodyPosition = { (float)cpBodyGetPosition(body).x, (float)cpBodyGetPosition(body).y };
         float _bodyRot = Util::Math::radiansToDegrees(cpBodyGetAngle(body));

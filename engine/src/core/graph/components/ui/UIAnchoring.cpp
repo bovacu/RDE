@@ -18,7 +18,7 @@ namespace RDE {
             return;
         }
 
-        auto _parentPosition = _transform->parentTransform->getModelMatrixPosition();
+        auto _parentPosition = _transform->parentTransform->getWorldPosition();
         auto _parentSize = _transform->parentTransform->node->getComponent<UIAnchoring>()->getSize();
 
 		Vec2F _stretchAdjuster = { 1.f, 1.f };
@@ -123,7 +123,7 @@ namespace RDE {
 			auto _posDiff = _anchoring->anchor.anchorPosition - _lastAnchorPos;
 			auto _position = Vec2F { _posDiff.x, _posDiff.y };
 
-			_t->translateMatrixModelPosition(_position);
+			_t->translateWordlPosition(_position);
 			_anchoring->setSize(_anchoring->getSize() + _sizeDiff);
         }
     }

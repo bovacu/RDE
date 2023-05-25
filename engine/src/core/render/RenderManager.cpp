@@ -216,7 +216,7 @@ namespace RDE {
 
     void RenderManager::drawPointToCPUTexture(CPUTexture* _cpuTexture, Transform* _cpuTextureTransform, const Vec2F& _position, const Color& _color, int _size) {
         auto _halfTextureSize = _cpuTexture->getSize() / 2;
-        auto _nodePos = _cpuTextureTransform->getModelMatrixPosition();
+        auto _nodePos = _cpuTextureTransform->getWorldPosition();
 
         for(int _y = -_size / 2; _y < _size; _y++) {
             for(int _x = -_size / 2; _x < _size; _x++) {

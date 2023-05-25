@@ -27,15 +27,15 @@ namespace RDE {
             auto _cpPos = cpBodyGetPosition(_body->body);
             auto _bodyPos = Vec2F { (float)_cpPos.x, (float)_cpPos.y };
             auto _bodyAngle = Util::Math::radiansToDegrees(cpBodyGetAngle(_body->body));
-            auto _transformPos = _body->transform->getModelMatrixPosition();
-            auto _transformRot = _body->transform->getModelMatrixRotation();
+            auto _transformPos = _body->transform->getWorldPosition();
+            auto _transformRot = _body->transform->getWorldRotation();
 
             if(!Util::Math::approximatelyEqual(_transformPos, _bodyPos)) {
-                _body->transform->setMatrixModelPosition({(float)_bodyPos.x, (float)_bodyPos.y});
+                _body->transform->setWordlPosition({(float)_bodyPos.x, (float)_bodyPos.y});
             }
 
             if(!Util::Math::approximatelyEqual(_transformRot, (float)_bodyAngle)) {
-                _body->transform->setMatrixModelRotation((float)_bodyAngle);
+                _body->transform->setWorldRotation((float)_bodyAngle);
             }
         }
     }
@@ -66,7 +66,7 @@ namespace RDE {
     void PhysicsManager::drawPolygon(PhysicsBody* _physicsBody, const ShapeConfig& _shapeConfig, RenderManager* _renderManager, const Color& _lineColor, const Color& _radiusColor, bool _showLines, bool _showRadius) {
         if(!_showLines) return;
 
-        Mat2 _rotMatrix(1, _physicsBody->transform->getModelMatrixPosition().x, 0, _physicsBody->transform->getModelMatrixPosition().y);
+        Mat2 _rotMatrix(1, _physicsBody->transform->getWorldPosition().x, 0, _physicsBody->transform->getWorldPosition().y);
         _rotMatrix.rotate(Util::Math::radiansToDegrees(cpBodyGetAngle(_physicsBody->body)));
 
         for (auto _i = 0; _i < _shapeConfig.vertices.size(); _i++) {
@@ -75,16 +75,16 @@ namespace RDE {
             if(_next == _shapeConfig.vertices.size())
                 _next = 0;
 
-            Vec2F _p0 = _physicsBody->transform->getModelMatrixPosition() + _rotMatrix * _shapeConfig.vertices[_i];
-            Vec2F _p1 = _physicsBody->transform->getModelMatrixPosition() + _rotMatrix * _shapeConfig.vertices[_next];
+            Vec2F _p0 = _physicsBody->transform->getWorldPosition() + _rotMatrix * _shapeConfig.vertices[_i];
+            Vec2F _p1 = _physicsBody->transform->getWorldPosition() + _rotMatrix * _shapeConfig.vertices[_next];
 
             _renderManager->drawLine(_p0, _p1, _lineColor);
         }
 
         if(!_showRadius || _shapeConfig.vertices.empty()) return;
 
-        _renderManager->drawLine(_physicsBody->transform->getModelMatrixPosition(),
-                                 _physicsBody->transform->getModelMatrixPosition() + _rotMatrix * _shapeConfig.vertices[0],
+        _renderManager->drawLine(_physicsBody->transform->getWorldPosition(),
+                                 _physicsBody->transform->getWorldPosition() + _rotMatrix * _shapeConfig.vertices[0],
                                  _radiusColor);
     }
 
@@ -110,7 +110,7 @@ namespace RDE {
                             _theta += _inc;
                             Vec2F _p(std::cos(_theta), std::sin(_theta) );
                             _p *= _physicsShape.second.shapeConfig.size.x;
-                            _p += _body->transform->getModelMatrixPosition();
+                            _p += _body->transform->getWorldPosition();
                             _point = _p;
                         }
 
@@ -126,7 +126,7 @@ namespace RDE {
                         }
 
                         if(!debugOptions.showCircleRadius) return;
-                        _renderManager->drawLine(_body->transform->getModelMatrixPosition(), _points[0], debugOptions.circleRadiusColor);
+                        _renderManager->drawLine(_body->transform->getWorldPosition(), _points[0], debugOptions.circleRadiusColor);
 
                         break;
                     }
@@ -140,8 +140,8 @@ namespace RDE {
                         break;
                     }
 					case RDE_PHYSICS_SHAPE_TYPE_SEGMENT: {
-                        _renderManager->drawLine({_body->transform->getModelMatrixPosition().x - _physicsShape.second.shapeConfig.size.x / 2.f, _body->transform->getModelMatrixPosition().y},
-                                                 {_body->transform->getModelMatrixPosition().x + _physicsShape.second.shapeConfig.size.x / 2.f, _body->transform->getModelMatrixPosition().y},
+                        _renderManager->drawLine({_body->transform->getWorldPosition().x - _physicsShape.second.shapeConfig.size.x / 2.f, _body->transform->getWorldPosition().y},
+                                                 {_body->transform->getWorldPosition().x + _physicsShape.second.shapeConfig.size.x / 2.f, _body->transform->getWorldPosition().y},
                                                  Color::Blue);
                         break;
                     }

@@ -156,7 +156,7 @@ namespace RDEEditor {
     }
 
     bool isPointInside(const Vec2F& _rectangleSize, const Transform* _rectangleTransform, const Vec2F& _pointPos) {
-		auto _rectPos =_rectangleTransform->getModelMatrixPosition();
+		auto _rectPos =_rectangleTransform->getWorldPosition();
 		return  _pointPos.x >= _rectPos.x - _rectangleSize.x * 0.5f && _pointPos.x <= _rectPos.x + _rectangleSize.x * 0.5f &&
 				_pointPos.y >= _rectPos.y - _rectangleSize.y * 0.5f && _pointPos.y <= _rectPos.y + _rectangleSize.y * 0.5f;
 	}
@@ -430,8 +430,8 @@ namespace RDEEditor {
 			_diff.y = editorFlags.editModeAxis == EditModeAxis::X ? 0.f : _diff.y;
 			_diff.x = editorFlags.editModeAxis == EditModeAxis::Y ? 0.f : _diff.x;
 			
-			auto _rot = editorData.selectedNode.node->getTransform()->getModelMatrixRotation();
-			auto _pos = editorData.selectedNode.node->getTransform()->getModelMatrixPosition();
+			auto _rot = editorData.selectedNode.node->getTransform()->getWorldRotation();
+			auto _pos = editorData.selectedNode.node->getTransform()->getWorldPosition();
 			auto _newPos = _diff * editorCamera->getCurrentZoomLevel();
 			Mat2 _rotMatrix(1, _pos.x, 0, _pos.y);
 			_rotMatrix.rotate(editorFlags.editModeAxis == EditModeAxis::X || editorFlags.editModeAxis == EditModeAxis::Y ? _rot : 0.f);
@@ -440,8 +440,8 @@ namespace RDEEditor {
 		}
 		
 		if(editorData.selectedNode.node != nullptr) {
-			auto _pos = editorData.selectedNode.node->getTransform()->getModelMatrixPosition();
-			auto _rot = editorData.selectedNode.node->getTransform()->getModelMatrixRotation();
+			auto _pos = editorData.selectedNode.node->getTransform()->getWorldPosition();
+			auto _rot = editorData.selectedNode.node->getTransform()->getWorldRotation();
 			
 			editorData.gizmos.translationX.setPosition(_pos);
 			editorData.gizmos.translationX.setRotation(_rot);

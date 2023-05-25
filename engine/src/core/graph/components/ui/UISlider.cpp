@@ -95,8 +95,8 @@ namespace RDE {
     void UISlider::onUpdate(Delta _dt) {
         if(mouseDown) {
             auto _size = Vec2F { getSize().x, getSize().y };
-            Vec2F _limits = { backgroundBarTransform->getModelMatrixPosition().x - _size.x * 0.5f,
-                                 backgroundBarTransform->getModelMatrixPosition().x + _size.x * 0.5f };
+            Vec2F _limits = { backgroundBarTransform->getWorldPosition().x - _size.x * 0.5f,
+                                 backgroundBarTransform->getWorldPosition().x + _size.x * 0.5f };
             auto _posX = Util::Math::clampF(node->manager->inputManager.getMousePosWorldPos().x, _limits.v[0], _limits.v[1]);
 
             auto _distanceFromLowerPoint = _posX - _limits.v[0];
@@ -112,8 +112,8 @@ namespace RDE {
         percentageFilled = Util::Math::clampF(_percentage, 0.f, 1.f);
 
         auto _width = anchoring->getSize().x;
-        auto _leftPos = node->getTransform()->getModelMatrixPosition().x - _width * 0.5f;
-        handleTransform->setMatrixModelPosition({ _leftPos + percentageFilled * _width, handleTransform->getModelMatrixPosition().y});
+        auto _leftPos = node->getTransform()->getWorldPosition().x - _width * 0.5f;
+        handleTransform->setWordlPosition({ _leftPos + percentageFilled * _width, handleTransform->getWorldPosition().y});
 
         fillBarSprite->setSize({ getSize().x * percentageFilled, getSize().y });
         fillBarTransform->setPosition({handleTransform->getPosition().x - fillBarSprite->getSize().x * 0.5f, fillBarTransform->getPosition().y});
