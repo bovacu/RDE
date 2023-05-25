@@ -661,9 +661,7 @@ void componentsView(Editor* _editor) {
 	auto* _mainGraph = _editor->graph;
 	if(_editor->editorData.selectedNode.node != nullptr && _editor->editorData.selectedNode.graph == _mainGraph) {
 		nodeComponents(_editor, _mainGraph, _editor->editorData.selectedNode.node->getID());
-	}
-	
-	if(_editor->editorData.selectedNode.node != nullptr && _editor->editorData.selectedNode.graph == _editor->canvas->graph) {
+	} else if(_editor->editorData.selectedNode.node != nullptr && _editor->editorData.selectedNode.graph == _editor->canvas->graph) {
 	    auto* _graph = _editor->canvas->graph;
 		nodeComponents(_editor, _graph, _editor->editorData.selectedNode.node->getID());
 	}

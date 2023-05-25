@@ -8,6 +8,11 @@ void overlappingSelectionWindow(Editor* _editor) {
 
 	if (!_showOverlap) return;
 
+	if(_editor->editorFlags.editModeAxis != EditModeAxis::None) {
+		_editor->editorData.overlappedNodesSceneSelection.clear();
+		return;
+	}
+
 	if(!overlappingPopupOpened) {
 		overlappingPopupOpened = true;
 		ImGui::OpenPopup("NodeSelection");

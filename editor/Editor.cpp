@@ -166,7 +166,7 @@ namespace RDEEditor {
     void Editor::selectNodeWithClick() {
 		if(!editorFlags.isSceneViewActive && !editorFlags.isSceneViewHovered) return;
 
-		if(engine->manager.inputManager.isMouseJustReleased(RDE::RDE_MOUSE_BUTTON_0)) {
+		if(engine->manager.inputManager.isMouseJustReleased(RDE::RDE_MOUSE_BUTTON_0) && editorFlags.editModeAxis == EditModeAxis::None) {
 			auto& _nodes = graph->getNodeContainer();
 			auto& _canvasNodes = canvas->graph->getNodeContainer();
 			editorData.overlappedNodesSceneSelection.clear();
@@ -215,6 +215,7 @@ namespace RDEEditor {
 					auto _graph = editorData.overlappedNodesSceneSelection.begin();
 					if(_graph->second.size() == 1) {
 						editorData.selectedNode.node = _graph->second[0]->node;
+						editorData.selectedNode.graph = _graph->second[0]->graph;
 					}
 				}
 			}
