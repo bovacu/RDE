@@ -60,20 +60,25 @@ namespace RDEEditor {
 		EditorTheme theme = EditorTheme::DarkRuda;
 	};
 
+	struct SelectedNode {
+		Node* node = nullptr;
+		Graph* graph = nullptr;
+	};
+
+	class Editor;
 	struct EditorData {
-		NodeID selectedNode = NODE_ID_NULL;
-		NodeID selectedNodeCanvas = NODE_ID_NULL;	
+		SelectedNode selectedNode;
 		int idIndex = 0;
 
 		uint32_t sceneViewFramebufferID = 0;
 		uint32_t gameViewFramebufferID = 0;
 
-		Node* sceneViewSelectedNode = nullptr;
 		Vec2F sizeOfSceneView {0, 0};
 		Vec2F mousePositionOnSceneView {0, 0};
 		float menuBarHeight = 0.f;
 		
 		Gizmos gizmos;
+		Delegate<void(Editor*, Node*, Graph*)> onHierarchyElementClicked;
 	};
 
     class Editor : public Scene {

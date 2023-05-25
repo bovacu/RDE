@@ -659,11 +659,13 @@ void nodeComponents(Editor* _editor, Graph* _graph, const NodeID _selectedNode) 
 void componentsView(Editor* _editor) {
 	ImGui::Begin("Components");
 	auto* _mainGraph = _editor->graph;
-	if(_editor->editorData.selectedNode != NODE_ID_NULL) nodeComponents(_editor, _mainGraph, _editor->editorData.selectedNode);
+	if(_editor->editorData.selectedNode.node != nullptr && _editor->editorData.selectedNode.graph == _mainGraph) {
+		nodeComponents(_editor, _mainGraph, _editor->editorData.selectedNode.node->getID());
+	}
 	
-	if(_editor->editorData.selectedNodeCanvas != NODE_ID_NULL) {
+	if(_editor->editorData.selectedNode.node != nullptr && _editor->editorData.selectedNode.graph == _editor->canvas->graph) {
 	    auto* _graph = _editor->canvas->graph;
-		nodeComponents(_editor, _graph, _editor->editorData.selectedNodeCanvas);
+		nodeComponents(_editor, _graph, _editor->editorData.selectedNode.node->getID());
 	}
 	ImGui::End();
 }

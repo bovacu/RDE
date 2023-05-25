@@ -108,6 +108,8 @@ namespace RDEEditor {
 
 		setTheme(editorFlags.theme);
 		engine->getWindow()->maximizeWindow();
+
+		editorData.onHierarchyElementClicked.bind<onHierarchyElementClicked>();
     }
 
 	void Editor::generateGridTexture() {
@@ -163,7 +165,7 @@ namespace RDEEditor {
     void Editor::selectNodeWithClick() {
 		if(!editorFlags.isSceneViewActive && !editorFlags.isSceneViewHovered) return;
 
-		if(engine->manager.inputManager.isMouseJustPressed(RDE::RDE_MOUSE_BUTTON_0)) {
+		if(engine->manager.inputManager.isMouseJustReleased(RDE::RDE_MOUSE_BUTTON_0)) {
 			auto& _nodes = graph->getNodeContainer();
 			std::vector<Transform*> _transforms;
 			
@@ -198,14 +200,12 @@ namespace RDEEditor {
 				editModeInputHandler();
 				if(editorFlags.editModeAxis == EditModeAxis::None) {
 					if(editorFlags.isSceneViewHovered) {
-						editorData.sceneViewSelectedNode = nullptr;
-						editorData.selectedNode = NODE_ID_NULL;
+						editorData.selectedNode.node = nullptr;
 					}
 				}
 			} else {
 				if(editorFlags.editModeAxis == EditModeAxis::None) {
-					editorData.sceneViewSelectedNode = !_transforms.empty() ? _transforms[0]->node : _uiTransforms[0]->node;
-					editorData.selectedNode = editorData.sceneViewSelectedNode->getID();
+					editorData.selectedNode.node = !_transforms.empty() ? _transforms[0]->node : _uiTransforms[0]->node;
 				}
 			}
 		}
@@ -265,10 +265,13 @@ namespace RDEEditor {
 			engine->manager.renderManager.drawShape(_cameraShape);
 		}
 
-		if(editorData.sceneViewSelectedNode != nullptr && editorFlags.editMode == EditMode::Move) {
-			engine->manager.renderManager.drawShape(editorData.gizmos.translationX);
-			engine->manager.renderManager.drawShape(editorData.gizmos.translationY);
-			engine->manager.renderManager.drawShape(editorData.gizmos.translationXY);
+		if(editorData.selectedNode.node != nullptr && editorFlags.editMode == EditMode::Move) {
+			auto _isRootNode = editorData.selectedNode.node == graph->getRoot() || editorData.selectedNode.node == canvas->graph->getRoot();
+			if(!_isRootNode) {
+				engine->manager.renderManager.drawShape(editorData.gizmos.translationX);
+				engine->manager.renderManager.drawShape(editorData.gizmos.translationY);
+				engine->manager.renderManager.drawShape(editorData.gizmos.translationXY);
+			}
 		}
     }
 
@@ -354,6 +357,9 @@ namespace RDEEditor {
 	}
 	
 	void Editor::editModeTranslationInputHandler() {
+		if(editorData.selectedNode.node == graph->getRoot() || 
+			editorData.selectedNode.node == canvas->graph->getRoot()) return;
+
 		if(engine->manager.inputManager.isMouseJustPressed(RDE::RDE_MOUSE_BUTTON_0)) {
 			editorFlags.editModeAxis = EditModeAxis::None;
 			editorData.gizmos.lastClickOrMovedMousePositionForTranslation = engine->manager.inputManager.getMousePosScreenCoords();
@@ -379,18 +385,18 @@ namespace RDEEditor {
 			_diff.y = editorFlags.editModeAxis == EditModeAxis::X ? 0.f : _diff.y;
 			_diff.x = editorFlags.editModeAxis == EditModeAxis::Y ? 0.f : _diff.x;
 			
-			auto _rot = editorData.sceneViewSelectedNode->getTransform()->getRotation();
-			auto _pos = editorData.sceneViewSelectedNode->getTransform()->getPosition();
+			auto _rot = editorData.selectedNode.node->getTransform()->getRotation();
+			auto _pos = editorData.selectedNode.node->getTransform()->getPosition();
 			auto _newPos = _diff * editorCamera->getCurrentZoomLevel();
 			Mat2 _rotMatrix(1, _pos.x, 0, _pos.y);
 			_rotMatrix.rotate(editorFlags.editModeAxis == EditModeAxis::X || editorFlags.editModeAxis == EditModeAxis::Y ? _rot : 0.f);
 			
-			editorData.sceneViewSelectedNode->getTransform()->translate(_rotMatrix * _newPos);
+			editorData.selectedNode.node->getTransform()->translate(_rotMatrix * _newPos);
 		}
 		
-		if(editorData.sceneViewSelectedNode != nullptr) {
-			auto _pos = editorData.sceneViewSelectedNode->getTransform()->getPosition();
-			auto _rot = editorData.sceneViewSelectedNode->getTransform()->getRotation();
+		if(editorData.selectedNode.node != nullptr) {
+			auto _pos = editorData.selectedNode.node->getTransform()->getPosition();
+			auto _rot = editorData.selectedNode.node->getTransform()->getRotation();
 			
 			editorData.gizmos.translationX.setPosition(_pos);
 			editorData.gizmos.translationX.setRotation(_rot);
@@ -404,7 +410,7 @@ namespace RDEEditor {
 	}
 	
 	void Editor::editModeInputHandler() {
-		if(editorData.sceneViewSelectedNode == nullptr) {
+		if(editorData.selectedNode.node == nullptr) {
 			return;
 		}
 
@@ -424,7 +430,7 @@ namespace RDEEditor {
 			return;
 		}
 
-		if(engine->manager.inputManager.isMouseJustPressed(RDE_MOUSE_BUTTON_1)) {
+		if(engine->manager.inputManager.isMouseJustReleased(RDE_MOUSE_BUTTON_1)) {
 			lastClickOrMovedMousePosition = engine->manager.inputManager.getMousePosScreenCoords();
 		} else if(engine->manager.inputManager.isMousePressed(RDE_MOUSE_BUTTON_1)) {
 			auto _current = engine->manager.inputManager.getMousePosScreenCoords();
