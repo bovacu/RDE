@@ -80,7 +80,9 @@ void transformComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNo
 
 	CREATE_NON_DISABLEABLE_HEADER("Transform", _transform, {
 		if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+		#ifdef ENGINE_DEBUG
 		ImGui::Text("ID: %i", (int)_transform->node->getID());
+		#endif
 		ImGui::Text("Position ");
 
 		int _pos[2];
@@ -243,7 +245,9 @@ void anchorComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNode)
 	CREATE_NON_DISABLEABLE_HEADER("UIAnchoring", _transform, {
 		if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
+		#ifdef ENGINE_DEBUG
 		ImGui::Text("ID: %i", (int)_transform->node->getID());
+		#endif
 
 		ImGui::Text("Anchor "); ImGui::SameLine(0, 20);
 		ImGui::Text("Stretch ");

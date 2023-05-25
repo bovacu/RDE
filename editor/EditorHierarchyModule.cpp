@@ -19,6 +19,8 @@ void onHierarchyElementClicked(Editor* _editor, Node* _node, Graph* _graph) {
 }
 
 void hierarchyRecursionStub(Editor* _scene, Graph* _graph, Node* _node, bool* _invalidClick) {
+	if (_node == _scene->gridSprite->node) return;
+
 	auto _prefabs = _scene->getPrefabs();
 	if(std::find(_prefabs.begin(), _prefabs.end(), _node->getID()) != _prefabs.end()) return;
 

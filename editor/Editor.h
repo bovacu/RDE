@@ -88,7 +88,6 @@ namespace RDEEditor {
 		UniqueDelegate<bool(MouseScrolledEvent&)> mseDel;
 		UniqueDelegate<bool(WindowResizedEvent&)> wreDel;
 		Texture gridTexture;
-		SpriteRenderer* gridSprite = nullptr;
 		Node* duckNode = nullptr;
 		ShaderID gridShaderID;
 		Color backgroundColor = { 76, 76, 76, 255 };
@@ -100,6 +99,7 @@ namespace RDEEditor {
 			Camera* editorCamera;
 			Vec2F lastClickOrMovedMousePosition;
 			Vec2F sceneViewOffset;
+			SpriteRenderer* gridSprite = nullptr;
 
         public:
             explicit Editor(Engine* _engine, const std::string& _debugName = "Editor") : Scene(_engine, _debugName) {  }
