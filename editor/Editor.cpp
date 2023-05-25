@@ -156,7 +156,7 @@ namespace RDEEditor {
     }
 
     bool isPointInside(const Vec2F& _rectangleSize, const Transform* _rectangleTransform, const Vec2F& _pointPos) {
-		auto _rectPos =_rectangleTransform->getPosition();
+		auto _rectPos =_rectangleTransform->getModelMatrixPosition();
 		return  _pointPos.x >= _rectPos.x - _rectangleSize.x * 0.5f && _pointPos.x <= _rectPos.x + _rectangleSize.x * 0.5f &&
 				_pointPos.y >= _rectPos.y - _rectangleSize.y * 0.5f && _pointPos.y <= _rectPos.y + _rectangleSize.y * 0.5f;
 	}
@@ -186,9 +186,42 @@ namespace RDEEditor {
 					}
 				}
 			});
+
+			_canvasNodes.view<UISlider, Transform>().each([this](const auto _entity, UISlider& _uiSlider, Transform& _transform) {
+				if(isPointInside(_uiSlider.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
+					if(std::find(editorData.overlappedNodesSceneSelection[1].begin(), editorData.overlappedNodesSceneSelection[1].end(), &_transform) == editorData.overlappedNodesSceneSelection[1].end()) {
+						editorData.overlappedNodesSceneSelection[1].push_back(&_transform);
+					}
+				}
+			});
+
+
+			_canvasNodes.view<UIButton, Transform>().each([this](const auto _entity, UIButton& _uiButton, Transform& _transform) {
+				if(isPointInside(_uiButton.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
+					if(std::find(editorData.overlappedNodesSceneSelection[1].begin(), editorData.overlappedNodesSceneSelection[1].end(), &_transform) == editorData.overlappedNodesSceneSelection[1].end()) {
+						editorData.overlappedNodesSceneSelection[1].push_back(&_transform);
+					}
+				}
+			});
 			
 			_canvasNodes.view<UIText, Transform>().each([this](const auto _entity, UIText& _uiText, Transform& _transform) {
 				if(isPointInside(_uiText.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
+					if(std::find(editorData.overlappedNodesSceneSelection[1].begin(), editorData.overlappedNodesSceneSelection[1].end(), &_transform) == editorData.overlappedNodesSceneSelection[1].end()) {
+						editorData.overlappedNodesSceneSelection[1].push_back(&_transform);
+					}
+				}
+			});
+
+			_canvasNodes.view<UIInput, Transform>().each([this](const auto _entity, UIInput& _uiInput, Transform& _transform) {
+				if(isPointInside(_uiInput.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
+					if(std::find(editorData.overlappedNodesSceneSelection[1].begin(), editorData.overlappedNodesSceneSelection[1].end(), &_transform) == editorData.overlappedNodesSceneSelection[1].end()) {
+						editorData.overlappedNodesSceneSelection[1].push_back(&_transform);
+					}
+				}
+			});
+
+			_canvasNodes.view<UICheckbox, Transform>().each([this](const auto _entity, UICheckbox& _uiCheckbox, Transform& _transform) {
+				if(isPointInside(_uiCheckbox.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
 					if(std::find(editorData.overlappedNodesSceneSelection[1].begin(), editorData.overlappedNodesSceneSelection[1].end(), &_transform) == editorData.overlappedNodesSceneSelection[1].end()) {
 						editorData.overlappedNodesSceneSelection[1].push_back(&_transform);
 					}
@@ -397,8 +430,8 @@ namespace RDEEditor {
 			_diff.y = editorFlags.editModeAxis == EditModeAxis::X ? 0.f : _diff.y;
 			_diff.x = editorFlags.editModeAxis == EditModeAxis::Y ? 0.f : _diff.x;
 			
-			auto _rot = editorData.selectedNode.node->getTransform()->getRotation();
-			auto _pos = editorData.selectedNode.node->getTransform()->getPosition();
+			auto _rot = editorData.selectedNode.node->getTransform()->getModelMatrixRotation();
+			auto _pos = editorData.selectedNode.node->getTransform()->getModelMatrixPosition();
 			auto _newPos = _diff * editorCamera->getCurrentZoomLevel();
 			Mat2 _rotMatrix(1, _pos.x, 0, _pos.y);
 			_rotMatrix.rotate(editorFlags.editModeAxis == EditModeAxis::X || editorFlags.editModeAxis == EditModeAxis::Y ? _rot : 0.f);
