@@ -12,7 +12,7 @@
 
 namespace RDE {
 
-    Transform::Transform(Graph* _graph) {
+    Transform::Transform(Graph* _graph) : graph(_graph) {
         worldMatrixCache = recalculateCachedMatrix();
     }
 

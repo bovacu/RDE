@@ -68,6 +68,7 @@ namespace RDEEditor {
 	class Editor;
 	struct EditorData {
 		SelectedNode selectedNode;
+		std::map<int, std::vector<Transform*>> overlappedNodesSceneSelection;
 		int idIndex = 0;
 
 		uint32_t sceneViewFramebufferID = 0;

@@ -52,6 +52,7 @@ namespace RDE {
         public:
 			RDE_FUNC_EXPLICIT Transform(Graph* _graph);
             Node* node;
+			Graph* graph;
 
             /**
              * @brief ID of the direct parent.

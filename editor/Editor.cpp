@@ -37,6 +37,7 @@ namespace RDEEditor {
 	#include "EditorComponentsModule.cpp"
 	#include "EditorConsoleModule.cpp"
 	#include "EditorGamePreview.cpp"
+	#include "EditorOverlappingSelectionModule.cpp"
 
     void Editor::onInit() {
 		
@@ -167,36 +168,42 @@ namespace RDEEditor {
 
 		if(engine->manager.inputManager.isMouseJustReleased(RDE::RDE_MOUSE_BUTTON_0)) {
 			auto& _nodes = graph->getNodeContainer();
-			std::vector<Transform*> _transforms;
-			
 			auto& _canvasNodes = canvas->graph->getNodeContainer();
-			std::vector<Transform*> _uiTransforms;
+			editorData.overlappedNodesSceneSelection.clear();
 			
-			_nodes.view<SpriteRenderer, Transform>().each([this, &_transforms](const auto _entity, SpriteRenderer& _sprite, Transform& _transform) {
+			_nodes.view<SpriteRenderer, Transform>().each([this](const auto _entity, SpriteRenderer& _sprite, Transform& _transform) {
 				if(isPointInside(_sprite.getSize(), &_transform, editorData.mousePositionOnSceneView) && &_sprite != gridSprite) {
-					_transforms.push_back(&_transform);
+					if(std::find(editorData.overlappedNodesSceneSelection[0].begin(), editorData.overlappedNodesSceneSelection[0].end(), &_transform) == editorData.overlappedNodesSceneSelection[0].end()) {
+						editorData.overlappedNodesSceneSelection[0].push_back(&_transform);
+					}
 				}
 			});
-			
-			_canvasNodes.view<UIText, Transform>().each([this, &_uiTransforms](const auto _entity, UIText& _uiText, Transform& _transform) {
-				if(isPointInside(_uiText.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
-					_uiTransforms.push_back(&_transform);
-				}
-			});
-			
-			_canvasNodes.view<UIImage, Transform>().each([this, &_uiTransforms](const auto _entity, UIImage& _uiImage, Transform& _transform) {
-				if(isPointInside(_uiImage.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
-					_uiTransforms.push_back(&_transform);
-				}
-			});
-			
-			_canvasNodes.view<UIPanel, Transform>().each([this, &_uiTransforms](const auto _entity, UIPanel& _uiPanel, Transform& _transform) {
+
+			_canvasNodes.view<UIPanel, Transform>().each([this](const auto _entity, UIPanel& _uiPanel, Transform& _transform) {
 				if(isPointInside(_uiPanel.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
-					_uiTransforms.push_back(&_transform);
+					if(std::find(editorData.overlappedNodesSceneSelection[1].begin(), editorData.overlappedNodesSceneSelection[1].end(), &_transform) == editorData.overlappedNodesSceneSelection[1].end()) {
+						editorData.overlappedNodesSceneSelection[1].push_back(&_transform);
+					}
 				}
 			});
 			
-			if(_transforms.empty() && _uiTransforms.empty()) {
+			_canvasNodes.view<UIText, Transform>().each([this](const auto _entity, UIText& _uiText, Transform& _transform) {
+				if(isPointInside(_uiText.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
+					if(std::find(editorData.overlappedNodesSceneSelection[1].begin(), editorData.overlappedNodesSceneSelection[1].end(), &_transform) == editorData.overlappedNodesSceneSelection[1].end()) {
+						editorData.overlappedNodesSceneSelection[1].push_back(&_transform);
+					}
+				}
+			});
+			
+			_canvasNodes.view<UIImage, Transform>().each([this](const auto _entity, UIImage& _uiImage, Transform& _transform) {
+				if(isPointInside(_uiImage.getSize(), &_transform, editorData.mousePositionOnSceneView)) {
+				    if(std::find(editorData.overlappedNodesSceneSelection[1].begin(), editorData.overlappedNodesSceneSelection[1].end(), &_transform) == editorData.overlappedNodesSceneSelection[1].end()) {
+				        editorData.overlappedNodesSceneSelection[1].push_back(&_transform);
+					}
+				}
+			});
+			
+			if(editorData.overlappedNodesSceneSelection.empty()) {
 				editModeInputHandler();
 				if(editorFlags.editModeAxis == EditModeAxis::None) {
 					if(editorFlags.isSceneViewHovered) {
@@ -204,8 +211,11 @@ namespace RDEEditor {
 					}
 				}
 			} else {
-				if(editorFlags.editModeAxis == EditModeAxis::None) {
-					editorData.selectedNode.node = !_transforms.empty() ? _transforms[0]->node : _uiTransforms[0]->node;
+				if(editorFlags.editModeAxis == EditModeAxis::None && editorData.overlappedNodesSceneSelection.size() == 1) {
+					auto _graph = editorData.overlappedNodesSceneSelection.begin();
+					if(_graph->second.size() == 1) {
+						editorData.selectedNode.node = _graph->second[0]->node;
+					}
 				}
 			}
 		}
@@ -242,6 +252,7 @@ namespace RDEEditor {
 		hierarchyView(this);
 		componentsView(this);
 		consoleView(this);
+		overlappingSelectionWindow(this);
 
 		resetID(this);
 	}
@@ -430,7 +441,7 @@ namespace RDEEditor {
 			return;
 		}
 
-		if(engine->manager.inputManager.isMouseJustReleased(RDE_MOUSE_BUTTON_1)) {
+		if(engine->manager.inputManager.isMouseJustPressed(RDE_MOUSE_BUTTON_1)) {
 			lastClickOrMovedMousePosition = engine->manager.inputManager.getMousePosScreenCoords();
 		} else if(engine->manager.inputManager.isMousePressed(RDE_MOUSE_BUTTON_1)) {
 			auto _current = engine->manager.inputManager.getMousePosScreenCoords();
