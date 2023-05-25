@@ -16,7 +16,7 @@ void createUINodeSubMenu(Editor* _editor) {
 	}
 
 	if(ImGui::MenuItem("Button Node")) {
-		
+		createUIButtonNode(_editor);
 	}
 
 	if(ImGui::MenuItem("Image Node")) {
@@ -24,7 +24,7 @@ void createUINodeSubMenu(Editor* _editor) {
 	}
 
 	if(ImGui::MenuItem("InputText Node")) {
-		
+		createUIInputNode(_editor);
 	}
 
 	if(ImGui::MenuItem("Panel Node")) {
@@ -32,7 +32,7 @@ void createUINodeSubMenu(Editor* _editor) {
 	}
 
 	if(ImGui::MenuItem("Slider Node")) {
-		
+		createUISliderNode(_editor);
 	}
 
 	if(ImGui::MenuItem("Text Node")) {

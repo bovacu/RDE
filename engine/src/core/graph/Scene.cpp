@@ -360,92 +360,92 @@ namespace RDE {
     }
 
 	void Scene::onInnerDebugRenderUI(Delta _dt, RenderManager* _renderManager, FrameBuffer* _framebuffer) {
-		auto& _registry = canvas->graph->getNodeContainer();
-
-        _registry.view<UIImage, Transform, Active>().each([this, _renderManager](const auto _entity, UIImage& _uiImage, Transform& _transform, const Active& _) {
-            DebugShape _shape;
-            Vec2F _pos = _transform.getModelMatrixPosition();
-            Vec2F _size = _uiImage.getSize();
-            Vec2F _pointSize = {4, 4};
-
-            auto _viewport = mainCamera->getViewport();
-            auto _virtualRes = _viewport->getSize();
-			auto _physicalRes = _viewport->getSize();
-            auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
-
-            _pos       *= _scale.y;
-            _size      *= _scale.y;
-            _pointSize *= _scale.y;
-
-            _shape.makeSquare(_pos, _size);
-            _shape.showOutsideColor(true);
-            _shape.setOutlineColor(Color::Blue);
-            _shape.showInnerColor(false);
-            _shape.setRotation(_transform.getModelMatrixRotation());
-            _renderManager->drawShape(_shape);
-
-            _renderManager->drawSquare(_pos, _pointSize, Color::Blue);
-            _renderManager->setPointSize(4);
-        });
-
-        _registry.view<UICheckbox, Transform, Active>().each([this, _renderManager](const NodeID _nodeID, UICheckbox& _checkbox, Transform& _transform, Active& _) {
-            DebugShape _shape;
-            Vec2F _pos = _transform.getModelMatrixPosition();
-            Vec2F _size = _checkbox.getSize();
-
-            auto _viewport = mainCamera->getViewport();
-            auto _virtualRes = _viewport->getSize();
-            auto _physicalRes = _viewport->getSize();
-            auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
-
-            _pos       *= _scale.y;
-            _size      *= _scale.y;
-
-            _shape.makeSquare(_pos, _size);
-            _shape.showOutsideColor(true);
-            _shape.setOutlineColor(Color::Blue);
-            _shape.showInnerColor(false);
-            _shape.setRotation(_transform.getModelMatrixRotation());
-            _renderManager->drawShape(_shape);
-        });
-
-        _registry.view<UIText, Transform, UIAnchoring, Active>().each([this, _renderManager](const NodeID _nodeID, UIText& _uiText, Transform& _transform, UIAnchoring& _anchoring, Active& _) {
-            if(!_uiText.isEnabled()) return;
-
-            DebugShape _shape;
-            Vec2F _posRect = _transform.getModelMatrixPosition();
-            Vec2F _posPoint = _transform.getModelMatrixPosition();
-			Vec2F _size = _uiText.getSize();
-
-			if((_anchoring.getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
-				_posRect.x += _size.x * 0.5f;
-			} else if((_anchoring.getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
-				_posRect.x -= _size.x * 0.5f;
-			} else if((_anchoring.getAnchor() & RDE_UI_ANCHOR_TOP) == RDE_UI_ANCHOR_TOP) {
-				_posRect.y += _size.y * 0.5f;
-			} else if((_anchoring.getAnchor() & RDE_UI_ANCHOR_BOTTOM) == RDE_UI_ANCHOR_BOTTOM) {
-				_posRect.y -= _size.y * 0.5f;
-			}
-
-            auto _viewport = mainCamera->getViewport();
-            auto _virtualRes = _viewport->getSize();
-            auto _physicalRes = _viewport->getSize();
-            auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
-
-			_posRect   *= _scale.y;
-            _size      *= _scale.y;
-
-			_shape.makeSquare(_posRect, _size);
-            _shape.showOutsideColor(true);
-            _shape.setOutlineColor(Color::Blue);
-            _shape.showInnerColor(false);
-            _shape.setRotation(_transform.getModelMatrixRotation());
-            _renderManager->drawShape(_shape);
-
-            Vec2F _pointSize = {4, 4};
-			_renderManager->drawSquare(_posPoint, _pointSize, Color::Yellow);
-            _renderManager->setPointSize(4);
-        });
+		//auto& _registry = canvas->graph->getNodeContainer();
+//
+  //      _registry.view<UIImage, Transform, Active>().each([this, _renderManager](const auto _entity, UIImage& _uiImage, Transform& _transform, const Active& _) {
+  //          DebugShape _shape;
+  //          Vec2F _pos = _transform.getModelMatrixPosition();
+  //          Vec2F _size = _uiImage.getSize();
+  //          Vec2F _pointSize = {4, 4};
+//
+  //          auto _viewport = mainCamera->getViewport();
+  //          auto _virtualRes = _viewport->getSize();
+		//	auto _physicalRes = _viewport->getSize();
+  //          auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
+//
+  //          _pos       *= _scale.y;
+  //          _size      *= _scale.y;
+  //          _pointSize *= _scale.y;
+//
+  //          _shape.makeSquare(_pos, _size);
+  //          _shape.showOutsideColor(true);
+  //          _shape.setOutlineColor(Color::Blue);
+  //          _shape.showInnerColor(false);
+  //          _shape.setRotation(_transform.getModelMatrixRotation());
+  //          _renderManager->drawShape(_shape);
+//
+  //          _renderManager->drawSquare(_pos, _pointSize, Color::Blue);
+  //          _renderManager->setPointSize(4);
+  //      });
+//
+  //      _registry.view<UICheckbox, Transform, Active>().each([this, _renderManager](const NodeID _nodeID, UICheckbox& _checkbox, Transform& _transform, Active& _) {
+  //          DebugShape _shape;
+  //          Vec2F _pos = _transform.getModelMatrixPosition();
+  //          Vec2F _size = _checkbox.getSize();
+//
+  //          auto _viewport = mainCamera->getViewport();
+  //          auto _virtualRes = _viewport->getSize();
+  //          auto _physicalRes = _viewport->getSize();
+  //          auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
+//
+  //          _pos       *= _scale.y;
+  //          _size      *= _scale.y;
+//
+  //          _shape.makeSquare(_pos, _size);
+  //          _shape.showOutsideColor(true);
+  //          _shape.setOutlineColor(Color::Blue);
+  //          _shape.showInnerColor(false);
+  //          _shape.setRotation(_transform.getModelMatrixRotation());
+  //          _renderManager->drawShape(_shape);
+  //      });
+//
+  //      _registry.view<UIText, Transform, UIAnchoring, Active>().each([this, _renderManager](const NodeID _nodeID, UIText& _uiText, Transform& _transform, UIAnchoring& _anchoring, Active& _) {
+  //          if(!_uiText.isEnabled()) return;
+//
+  //          DebugShape _shape;
+  //          Vec2F _posRect = _transform.getModelMatrixPosition();
+  //          Vec2F _posPoint = _transform.getModelMatrixPosition();
+		//	Vec2F _size = _uiText.getSize();
+//
+		//	if((_anchoring.getAnchor() & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
+		//		_posRect.x += _size.x * 0.5f;
+		//	} else if((_anchoring.getAnchor() & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT) {
+		//		_posRect.x -= _size.x * 0.5f;
+		//	} else if((_anchoring.getAnchor() & RDE_UI_ANCHOR_TOP) == RDE_UI_ANCHOR_TOP) {
+		//		_posRect.y += _size.y * 0.5f;
+		//	} else if((_anchoring.getAnchor() & RDE_UI_ANCHOR_BOTTOM) == RDE_UI_ANCHOR_BOTTOM) {
+		//		_posRect.y -= _size.y * 0.5f;
+		//	}
+//
+  //          auto _viewport = mainCamera->getViewport();
+  //          auto _virtualRes = _viewport->getSize();
+  //          auto _physicalRes = _viewport->getSize();
+  //          auto _scale = Vec2F { (float)_virtualRes.x / (float)_physicalRes.x, (float)_virtualRes.y / (float)_physicalRes.y };
+//
+		//	_posRect   *= _scale.y;
+  //          _size      *= _scale.y;
+//
+		//	_shape.makeSquare(_posRect, _size);
+  //          _shape.showOutsideColor(true);
+  //          _shape.setOutlineColor(Color::Blue);
+  //          _shape.showInnerColor(false);
+  //          _shape.setRotation(_transform.getModelMatrixRotation());
+  //          _renderManager->drawShape(_shape);
+//
+  //          Vec2F _pointSize = {4, 4};
+		//	_renderManager->drawSquare(_posPoint, _pointSize, Color::Yellow);
+  //          _renderManager->setPointSize(4);
+  //      });
     }
 
 

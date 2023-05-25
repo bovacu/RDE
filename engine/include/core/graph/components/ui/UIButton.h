@@ -19,7 +19,7 @@ namespace RDE {
     class UIImage;
 
     struct UIButtonConfig : CommonUIConfig {
-        std::string text = "Button Text";
+        std::string text = "Button";
         Texture* idleTexture = nullptr;
         Texture* selectedTexture = nullptr;
         Texture* clickedTexture = nullptr;

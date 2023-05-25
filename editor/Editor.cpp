@@ -407,8 +407,8 @@ namespace RDEEditor {
 		}
 		
 		if(editorData.selectedNode.node != nullptr) {
-			auto _pos = editorData.selectedNode.node->getTransform()->getPosition();
-			auto _rot = editorData.selectedNode.node->getTransform()->getRotation();
+			auto _pos = editorData.selectedNode.node->getTransform()->getModelMatrixPosition();
+			auto _rot = editorData.selectedNode.node->getTransform()->getModelMatrixRotation();
 			
 			editorData.gizmos.translationX.setPosition(_pos);
 			editorData.gizmos.translationX.setRotation(_rot);
