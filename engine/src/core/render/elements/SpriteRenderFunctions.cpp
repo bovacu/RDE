@@ -284,8 +284,7 @@ namespace RDE {
         _transformMatrix[3][1] = _screenPos.y;
 
 		auto _uiSizeScale = Vec2F { _anchoring->getSize().x / _data.RenderizableInnerData.texture->getSize().x, _anchoring->getSize().y / _data.RenderizableInnerData.texture->getSize().y };
-        _transformMatrix[0][0] *= _uiSizeScale.x;
-        _transformMatrix[1][1] *= _uiSizeScale.y;
+		_transformMatrix = glm::scale(_transformMatrix, glm::vec3 { _uiSizeScale.x, _uiSizeScale.y, 1.f });
 
         Vec2F _textureOrigin = {(float)_data.RenderizableInnerData.texture->getRegion().bottomLeftCorner.x, (float)_data.RenderizableInnerData.texture->getRegion().bottomLeftCorner.y};
         Vec2F _textureOriginNorm = {_textureOrigin.x / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().x, _textureOrigin.y / (float)_data.RenderizableInnerData.texture->getSpriteSheetSize().y};
