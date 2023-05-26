@@ -95,7 +95,7 @@ namespace RDE {
         // This checks if there is a beggining on the Cropping System, for masks.
         if(_canvasElement->cropping > 0) {
             if(_canvasElement->node->hasComponent<UIImage>() && _canvasElement->renderizableInnerData != nullptr) {
-                forceRender();
+				forceRender(_framebuffer);
                 auto* _mask = _canvasElement->node->getComponent<UIMask>();
 
                 _currentBatch = &batches.back();
@@ -140,7 +140,7 @@ namespace RDE {
                         break;
                 }
 
-                forceRender();
+				forceRender(_framebuffer);
 
                 glColorMask( GL_TRUE , GL_TRUE , GL_TRUE , GL_TRUE);
                 glStencilFunc( GL_EQUAL , _mask->inverted ? 0 : 2 , _mask->inverted ? 0xFF : ~0);
@@ -189,17 +189,26 @@ namespace RDE {
         }
     }
 
-    void Canvas::batchTreeElementPost(CanvasElement* _canvasElement, void* _data) {
+    void Canvas::batchTreeElementPost(CanvasElement* _canvasElement, void* _data, FrameBuffer* _framebuffer) {
         if(_canvasElement->cropping == 0) {
-            forceRender();
+            forceRender(_framebuffer);
             glDisable(GL_STENCIL_TEST);
         }
     }
 
-    void Canvas::forceRender() {
+    void Canvas::forceRender(FrameBuffer* _framebuffer) {
         auto& _renderManager = graph->scene->engine->manager.renderManager;
-		_renderManager.beginDraw(scene->mainCamera, nullptr);
-        _renderManager.endDrawUI(batches);
+		
+		for(auto* _camera : scene->getCameras()) {
+			auto _cameraFB = _camera->framebufferID;
+			auto _framebufferID = _framebuffer->getID();
+
+			if(!_camera->node->hasComponent<Active>() || !_camera->isEnabled()) continue;
+			if (_cameraFB != _framebufferID) continue;
+
+			_renderManager.beginDraw(_camera, _camera->node->getTransform());
+			_renderManager.endDrawUI(batches);
+		}
 
         batches.clear();
         Batch _batch;

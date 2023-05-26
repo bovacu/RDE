@@ -85,12 +85,12 @@ namespace RDE {
 
         private:
             void batchTreeElementPre(CanvasElement* _canvasElement, void* _data, FrameBuffer* _framebuffer);
-            void batchTreeElementPost(CanvasElement* _canvasElement, void* _data);
+            void batchTreeElementPost(CanvasElement* _canvasElement, void* _data, FrameBuffer* _framebuffer);
 
             void getRenderizable(Node* _node, CanvasElement* _canvasElement);
             void getUpdatable(Node* _node, CanvasElement* _canvasElement);
 
-            void forceRender();
+            void forceRender(FrameBuffer* _framebuffer);
 
             void postRenderSync();
     };

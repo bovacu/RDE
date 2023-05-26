@@ -324,7 +324,7 @@ namespace RDE {
 
                 for(auto& _crop : _cropList) {
                     _crop--;
-                    if(_crop == 0) canvas->batchTreeElementPost(&_it, nullptr);
+					if(_crop == 0) canvas->batchTreeElementPost(&_it, nullptr, _framebuffer);
                 }
 
                 if(_it.cropping > 0) _cropList.push_back(_it.cropping);
