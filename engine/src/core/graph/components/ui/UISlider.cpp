@@ -40,7 +40,8 @@ namespace RDE {
 
         backgroundBarSprite = node->addComponent<UIImage>(UIImageConfig {
             .size = _config.barSize,
-            .texture = data.RenderizableInnerData.texture,
+            .texture = _config.backgroundBarTexture == nullptr ? _manager->textureManager.getSubTexture("defaultAssets", "fillAndBgrScrollBarHorizontal") :
+					   _config.backgroundBarTexture,
             .color = _config.backgroundBarColor,
             .imageRenderingType = RDE_IMAGE_RENDERING_TYPE_NINE_SLICE
         });
