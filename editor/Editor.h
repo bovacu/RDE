@@ -81,7 +81,9 @@ namespace RDEEditor {
 		float bottomBarWidth = 45.f;
 		
 		Gizmos gizmos;
-		Delegate<void(Editor*, Node*, Graph*)> onHierarchyElementClicked;
+		Delegate<void(Editor*, Node*, Graph*)> onHierarchyElementLeftClicked;
+		Delegate<void(Editor*, Node*, Graph*)> onHierarchyElementRightClicked;
+		Delegate<void(Editor*, Node*, Graph*)> onHierarchyElementMiddleClicked;
 	};
 
     class Editor : public Scene {

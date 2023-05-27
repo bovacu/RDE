@@ -29,6 +29,10 @@
 
 namespace RDEEditor {
 
+	void onHierarchyNodeLeftClicked(Editor*, Node*, Graph*);
+	void onHierarchyNodeRightClicked(Editor*, Node*, Graph*);
+
+
 	#define HINT(_text) 																					\
 		if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled | ImGuiHoveredFlags_DelayNormal)) {	\
 			ImGui::BeginTooltip();																			\
@@ -48,6 +52,7 @@ namespace RDEEditor {
 	#include "EditorGamePreview.cpp"
 	#include "EditorOverlappingSelectionModule.cpp"
 	#include "EditorToolBarModule.cpp"
+	#include "EditorNodeContextMenuModule.cpp"
 
     void Editor::onInit() {
 		
@@ -120,8 +125,6 @@ namespace RDEEditor {
 
 		setTheme(editorFlags.theme);
 		engine->getWindow()->maximizeWindow();
-
-		editorData.onHierarchyElementClicked.bind<onHierarchyElementClicked>();
     }
 
 	void Editor::generateGridTexture() {
@@ -296,6 +299,7 @@ namespace RDEEditor {
 		componentsView(this);
 		consoleView(this);
 		overlappingSelectionWindow(this);
+		nodeRighClickContextMenu(this);
 		
 		toolBar(this);
 
@@ -631,5 +635,13 @@ namespace RDEEditor {
 
 		auto _zoom = editorCamera->getCurrentZoomLevel();
 		editorCamera->node->getTransform()->setPosition(sceneViewOffset.x * _zoom, -sceneViewOffset.y * _zoom);
+	}
+
+	void onHierarchyNodeLeftClicked(Editor* _editor, Node* _node, Graph* _graph) {
+		editorHierarchyModuleNodeLeftClicked(_editor, _node, _graph);
+	}
+
+	void onHierarchyNodeRightClicked(Editor* _editor, Node* _node, Graph* _graph) {
+		editorContextMenuNodeRightClicked(_editor, _node, _graph);
 	}
 }
