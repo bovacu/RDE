@@ -77,6 +77,7 @@ namespace RDEEditor {
 		Vec2F sizeOfSceneView {0, 0};
 		Vec2F mousePositionOnSceneView {0, 0};
 		float menuBarHeight = 0.f;
+		float bottomBarWidth = 35.f;
 		
 		Gizmos gizmos;
 		Delegate<void(Editor*, Node*, Graph*)> onHierarchyElementClicked;

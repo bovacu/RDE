@@ -38,6 +38,7 @@ namespace RDEEditor {
 	#include "EditorConsoleModule.cpp"
 	#include "EditorGamePreview.cpp"
 	#include "EditorOverlappingSelectionModule.cpp"
+	#include "EditorBottomBarModule.cpp"
 
     void Editor::onInit() {
 		
@@ -287,6 +288,8 @@ namespace RDEEditor {
 		componentsView(this);
 		consoleView(this);
 		overlappingSelectionWindow(this);
+		
+		bottomBar(this);
 
 		resetID(this);
 	}

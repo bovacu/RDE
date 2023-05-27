@@ -3,8 +3,8 @@
 void dockingSpaceView(Editor* _editor) {
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->WorkPos);
-	ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGui::SetNextWindowPos(ImVec2 { _editor->editorData.bottomBarWidth, viewport->WorkPos.y });
+	ImGui::SetNextWindowSize(ImVec2 { viewport->WorkSize.x - _editor->editorData.bottomBarWidth, viewport->WorkSize.y });
 	ImGui::SetNextWindowViewport(viewport->ID);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
