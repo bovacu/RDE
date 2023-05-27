@@ -380,6 +380,27 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">sprites/compileIcon.png</key>
+            <key type="filename">sprites/icons/32x32px/arrowDown32x32.png</key>
+            <key type="filename">sprites/icons/32x32px/arrowLeft32x32.png</key>
+            <key type="filename">sprites/icons/32x32px/arrowRight32x32.png</key>
+            <key type="filename">sprites/icons/32x32px/arrowUp32x32.png</key>
+            <key type="filename">sprites/icons/32x32px/x32x32.png</key>
+            <key type="filename">sprites/playIcon.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,8,16,16</rect>
+                <key>scale9Paddings</key>
+                <rect>8,8,16,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">sprites/duck.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -527,25 +548,6 @@
                 <rect>15,15,31,31</rect>
                 <key>scale9Paddings</key>
                 <rect>15,15,31,31</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">sprites/icons/32x32px/arrowDown32x32.png</key>
-            <key type="filename">sprites/icons/32x32px/arrowLeft32x32.png</key>
-            <key type="filename">sprites/icons/32x32px/arrowRight32x32.png</key>
-            <key type="filename">sprites/icons/32x32px/arrowUp32x32.png</key>
-            <key type="filename">sprites/icons/32x32px/x32x32.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>spriteScale</key>
-                <double>1</double>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>8,8,16,16</rect>
-                <key>scale9Paddings</key>
-                <rect>8,8,16,16</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -870,6 +872,8 @@
                     <filename>sprites/rotateIcon.png</filename>
                     <filename>sprites/scaleIcon.png</filename>
                     <filename>sprites/translateIcon.png</filename>
+                    <filename>sprites/compileIcon.png</filename>
+                    <filename>sprites/playIcon.png</filename>
                 </array>
             </struct>
         </map>

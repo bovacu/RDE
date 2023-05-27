@@ -29,6 +29,15 @@
 
 namespace RDEEditor {
 
+	#define HINT(_text) 																					\
+		if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled | ImGuiHoveredFlags_DelayNormal)) {	\
+			ImGui::BeginTooltip();																			\
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);											\
+			ImGui::TextUnformatted(_text);																	\
+			ImGui::PopTextWrapPos();																		\
+			ImGui::EndTooltip();																			\
+		}
+
 	#include "EditorThemesModule.cpp"
 	#include "NodeCreator.cpp"
 	#include "EditorDockingspaceModule.cpp"
