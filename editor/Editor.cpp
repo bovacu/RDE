@@ -38,7 +38,7 @@ namespace RDEEditor {
 	#include "EditorConsoleModule.cpp"
 	#include "EditorGamePreview.cpp"
 	#include "EditorOverlappingSelectionModule.cpp"
-	#include "EditorBottomBarModule.cpp"
+	#include "EditorToolBarModule.cpp"
 
     void Editor::onInit() {
 		
@@ -107,6 +107,7 @@ namespace RDEEditor {
 		_sprite->setFramebuffer(editorData.gameViewFramebufferID | editorData.sceneViewFramebufferID);
 		
 		generateTranslationGuizmo();
+		generateScaleGuizmo();
 
 		setTheme(editorFlags.theme);
 		engine->getWindow()->maximizeWindow();
@@ -162,8 +163,6 @@ namespace RDEEditor {
 				_pointPos.y >= _rectPos.y - _rectangleSize.y * 0.5f && _pointPos.y <= _rectPos.y + _rectangleSize.y * 0.5f;
 	}
 
-	// TODO (Borja): When stacking nodes are selected, create a small list to select wich one we really want to select.
-	// TODO (Borja): Fix, separate selectedNonUI from selected UI as when Node is selected in view, components are mixed between nonUI and UI, a chaos.
     void Editor::selectNodeWithClick() {
 		if(!editorFlags.isSceneViewActive && !editorFlags.isSceneViewHovered) return;
 
@@ -289,7 +288,7 @@ namespace RDEEditor {
 		consoleView(this);
 		overlappingSelectionWindow(this);
 		
-		bottomBar(this);
+		toolBar(this);
 
 		resetID(this);
 	}
@@ -313,12 +312,22 @@ namespace RDEEditor {
 			engine->manager.renderManager.drawShape(_cameraShape);
 		}
 
-		if(editorData.selectedNode.node != nullptr && editorFlags.editMode == EditMode::Move) {
-			auto _isRootNode = editorData.selectedNode.node == graph->getRoot() || editorData.selectedNode.node == canvas->graph->getRoot();
-			if(!_isRootNode) {
-				engine->manager.renderManager.drawShape(editorData.gizmos.translationX);
-				engine->manager.renderManager.drawShape(editorData.gizmos.translationY);
-				engine->manager.renderManager.drawShape(editorData.gizmos.translationXY);
+		if(editorData.selectedNode.node != nullptr) {
+
+			if (editorFlags.editMode == EditMode::Move) {
+				auto _isRootNode = editorData.selectedNode.node == graph->getRoot() || editorData.selectedNode.node == canvas->graph->getRoot();
+				if (!_isRootNode) {
+					engine->manager.renderManager.drawShape(editorData.gizmos.translationX);
+					engine->manager.renderManager.drawShape(editorData.gizmos.translationY);
+					engine->manager.renderManager.drawShape(editorData.gizmos.translationXY);
+				}
+			} else if(editorFlags.editMode == EditMode::Scale) {
+				auto _isRootNode = editorData.selectedNode.node == graph->getRoot() || editorData.selectedNode.node == canvas->graph->getRoot();
+				if (!_isRootNode) {
+					engine->manager.renderManager.drawShape(editorData.gizmos.scaleX);
+					engine->manager.renderManager.drawShape(editorData.gizmos.scaleY);
+					engine->manager.renderManager.drawShape(editorData.gizmos.scaleXY);
+				}
 			}
 		}
     }
@@ -378,6 +387,65 @@ namespace RDEEditor {
 		editorData.gizmos.translationXY = _intersection;
 	}
 
+	void Editor::generateScaleGuizmo() {
+		DebugShape _arrowUp;
+		_arrowUp.setPosition({0, 0});
+		_arrowUp.setRotation(0);
+		_arrowUp.addPoint({ 4, 0});
+		_arrowUp.addPoint({ 4, 48});
+		_arrowUp.addPoint({ 16, 48});
+		_arrowUp.addPoint({ 16, 64});
+		_arrowUp.addPoint({-16, 64});
+		_arrowUp.addPoint({-16, 48});
+		_arrowUp.addPoint({-4, 48});
+		_arrowUp.addPoint({-4, 0});
+		
+		_arrowUp.addPoint({-4, -48});
+		_arrowUp.addPoint({-16, -48});
+		_arrowUp.addPoint({-16, -64});
+		_arrowUp.addPoint({ 16, -64});
+		_arrowUp.addPoint({ 16, -48});
+		_arrowUp.addPoint({ 4, -48});
+		
+		auto _color = Color::Blue;
+		_color.a = 110;
+		_arrowUp.setOutlineColor(Color::Black);
+		_arrowUp.setInnerColor(_color);
+		editorData.gizmos.scaleY = _arrowUp;
+
+		DebugShape _arrowRight;
+		_arrowRight.setPosition({0, 0});
+		_arrowRight.setRotation(0);
+		_arrowRight.addPoint({0,   4});
+		_arrowRight.addPoint({48, 4});
+		_arrowRight.addPoint({48, 16});
+		_arrowRight.addPoint({64, 16});
+		_arrowRight.addPoint({64, -16});
+		_arrowRight.addPoint({48, -16});
+		_arrowRight.addPoint({48, -4});
+		_arrowRight.addPoint({0,   -4});
+		
+		_arrowRight.addPoint({-48, -4});
+		_arrowRight.addPoint({-48, -16});
+		_arrowRight.addPoint({-64, -16});
+		_arrowRight.addPoint({-64,  16});
+		_arrowRight.addPoint({-48,  16});
+		_arrowRight.addPoint({-48,  4});
+		
+		_color = Color::Green;
+		_color.a = 110;
+		_arrowRight.setInnerColor(_color);
+		_arrowRight.setOutlineColor(Color::Black);
+		_arrowRight.setRotation(0);
+		editorData.gizmos.scaleX = _arrowRight;
+
+		DebugShape _intersection;
+		_intersection.makeSquare({0, 0}, {16, 16});
+		_intersection.setOutlineColor(Color::Black);
+		_intersection.setInnerColor(Color::Gray);
+		editorData.gizmos.scaleXY = _intersection;
+	}
+
 	bool Editor::mouseScrolled(MouseScrolledEvent& _event) {
 		if(!editorFlags.isSceneViewHovered) {
 			return true;
@@ -410,7 +478,7 @@ namespace RDEEditor {
 
 		if(engine->manager.inputManager.isMouseJustPressed(RDE::RDE_MOUSE_BUTTON_0)) {
 			editorFlags.editModeAxis = EditModeAxis::None;
-			editorData.gizmos.lastClickOrMovedMousePositionForTranslation = engine->manager.inputManager.getMousePosScreenCoords();
+			editorData.gizmos.lastClickOrMovedMousePosition = engine->manager.inputManager.getMousePosScreenCoords();
 			
 			if(editorData.gizmos.translationXY.isPointInside(editorData.mousePositionOnSceneView)) {
 				editorFlags.editModeAxis = EditModeAxis::X | EditModeAxis::Y;
@@ -427,8 +495,8 @@ namespace RDEEditor {
 		
 		if(engine->manager.inputManager.isMousePressed(RDE_MOUSE_BUTTON_0) && editorFlags.editModeAxis != EditModeAxis::None) {
 			auto _current = engine->manager.inputManager.getMousePosScreenCoords();
-			auto _diff = _current - editorData.gizmos.lastClickOrMovedMousePositionForTranslation;
-			editorData.gizmos.lastClickOrMovedMousePositionForTranslation = _current;
+			auto _diff = _current - editorData.gizmos.lastClickOrMovedMousePosition;
+			editorData.gizmos.lastClickOrMovedMousePosition = _current;
 			
 			_diff.y = editorFlags.editModeAxis == EditModeAxis::X ? 0.f : _diff.y;
 			_diff.x = editorFlags.editModeAxis == EditModeAxis::Y ? 0.f : _diff.x;
@@ -457,6 +525,62 @@ namespace RDEEditor {
 		}
 	}
 	
+	void Editor::editModeScaleInputHandler() {
+		if(editorData.selectedNode.node == graph->getRoot() || 
+			editorData.selectedNode.node == canvas->graph->getRoot()) return;
+
+		if(engine->manager.inputManager.isMouseJustPressed(RDE::RDE_MOUSE_BUTTON_0)) {
+			editorFlags.editModeAxis = EditModeAxis::None;
+			editorData.gizmos.lastClickOrMovedMousePosition = engine->manager.inputManager.getMousePosScreenCoords();
+			
+			if(editorData.gizmos.scaleXY.isPointInside(editorData.mousePositionOnSceneView)) {
+				editorFlags.editModeAxis = EditModeAxis::X | EditModeAxis::Y;
+			} else {
+				if(editorData.gizmos.scaleX.isPointInside(editorData.mousePositionOnSceneView)) {
+					editorFlags.editModeAxis = EditModeAxis::X;
+				} else if(editorData.gizmos.scaleY.isPointInside(editorData.mousePositionOnSceneView)) {
+					editorFlags.editModeAxis = EditModeAxis::Y;
+				}
+			}
+		} else if(engine->manager.inputManager.isMouseJustReleased(RDE::RDE_MOUSE_BUTTON_0)) {
+			editorFlags.editModeAxis = EditModeAxis::None;
+		}
+		
+		if(engine->manager.inputManager.isMousePressed(RDE_MOUSE_BUTTON_0) && editorFlags.editModeAxis != EditModeAxis::None) {
+			auto _current = engine->manager.inputManager.getMousePosScreenCoords();
+			auto _diff = _current - editorData.gizmos.lastClickOrMovedMousePosition;
+			editorData.gizmos.lastClickOrMovedMousePosition = _current;
+			
+			if((EditModeAxis::X | EditModeAxis::Y) == editorFlags.editModeAxis) {
+				_diff.x = _diff.x >= 0 ? std::max(_diff.x, std::abs(_diff.y)) : std::min(_diff.x, -std::abs(_diff.y));
+				_diff.y = _diff.x;
+			} else {
+				_diff.y = editorFlags.editModeAxis == EditModeAxis::X ? 0.f : _diff.y;
+				_diff.x = editorFlags.editModeAxis == EditModeAxis::Y ? 0.f : _diff.x;
+			}
+			
+			auto _rot = editorData.selectedNode.node->getTransform()->getWorldRotation();
+			auto _pos = editorData.selectedNode.node->getTransform()->getWorldPosition();
+			auto _newScale = 0.1f * _diff * editorCamera->getCurrentZoomLevel();
+			
+			editorData.selectedNode.node->getTransform()->scale(_newScale);
+		}
+		
+		if(editorData.selectedNode.node != nullptr) {
+			auto _pos = editorData.selectedNode.node->getTransform()->getWorldPosition();
+			auto _rot = editorData.selectedNode.node->getTransform()->getWorldRotation();
+			
+			editorData.gizmos.scaleX.setPosition(_pos);
+			editorData.gizmos.scaleX.setRotation(_rot);
+			
+			editorData.gizmos.scaleY.setPosition(_pos);
+			editorData.gizmos.scaleY.setRotation(_rot);
+			
+			editorData.gizmos.scaleXY.setPosition(_pos);
+			editorData.gizmos.scaleXY.setRotation(_rot);
+		}
+	}
+
 	void Editor::editModeInputHandler() {
 		if(editorData.selectedNode.node == nullptr) {
 			return;
@@ -468,8 +592,11 @@ namespace RDEEditor {
 				break;
 			}
 			case Rotate:
-			case Scale:
 				break;
+			case Scale: {
+				editModeScaleInputHandler();
+				break;
+			}
         }
 	}
 

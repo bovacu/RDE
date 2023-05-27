@@ -44,7 +44,8 @@ namespace RDEEditor {
 	
 	struct Gizmos {
 		DebugShape translationX, translationY, translationXY;
-		Vec2F lastClickOrMovedMousePositionForTranslation;
+		DebugShape scaleX, scaleY, scaleXY;
+		Vec2F lastClickOrMovedMousePosition;
 	};
 	
 	struct EditorFlags {
@@ -127,9 +128,11 @@ namespace RDEEditor {
             std::vector<NodeID> nodes;
 
 			void generateTranslationGuizmo();
+			void generateScaleGuizmo();
 			void selectNodeWithClick();
 			void editModeInputHandler();
 			void editModeTranslationInputHandler();
+			void editModeScaleInputHandler();
 
 
 			void onMouseClick(RDE_MOUSE_BUTTON_ _mouseCode);
