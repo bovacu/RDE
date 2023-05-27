@@ -1347,6 +1347,26 @@
             "scaling_factor": 1
         }, 
         {
+            "name": "rotateIcon",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1600, 1010],
+            "origin_in_uv": [0.8849557522123894, 0.9711538461538461],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "scaleIcon",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1503, 260],
+            "origin_in_uv": [0.8313053097345132, 0.25],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
             "name": "shadow",
             "size": [1355, 96],
             "size_in_uv": [0.7494469026548672, 0.09230769230769231],
@@ -1386,8 +1406,8 @@
             "name": "stretchFull",
             "size": [16, 16],
             "size_in_uv": [0.008849557522123894, 0.015384615384615385],
-            "origin": [1600, 1010],
-            "origin_in_uv": [0.8849557522123894, 0.9711538461538461],
+            "origin": [1666, 977],
+            "origin_in_uv": [0.9214601769911505, 0.9394230769230769],
             "origin_offset": [0, 0],
             "center_pivot": [8, 8],
             "scaling_factor": 1
@@ -1396,8 +1416,8 @@
             "name": "stretchHorizontal",
             "size": [16, 16],
             "size_in_uv": [0.008849557522123894, 0.015384615384615385],
-            "origin": [1503, 260],
-            "origin_in_uv": [0.8313053097345132, 0.25],
+            "origin": [1637, 294],
+            "origin_in_uv": [0.9054203539823009, 0.2826923076923077],
             "origin_offset": [0, 0],
             "center_pivot": [8, 8],
             "scaling_factor": 1
@@ -1406,8 +1426,8 @@
             "name": "stretchNone",
             "size": [16, 16],
             "size_in_uv": [0.008849557522123894, 0.015384615384615385],
-            "origin": [1666, 977],
-            "origin_in_uv": [0.9214601769911505, 0.9394230769230769],
+            "origin": [1752, 394],
+            "origin_in_uv": [0.9690265486725663, 0.37884615384615383],
             "origin_offset": [0, 0],
             "center_pivot": [8, 8],
             "scaling_factor": 1
@@ -1416,8 +1436,18 @@
             "name": "stretchVertical",
             "size": [16, 16],
             "size_in_uv": [0.008849557522123894, 0.015384615384615385],
-            "origin": [1637, 294],
-            "origin_in_uv": [0.9054203539823009, 0.2826923076923077],
+            "origin": [1259, 680],
+            "origin_in_uv": [0.6963495575221239, 0.6538461538461539],
+            "origin_offset": [0, 0],
+            "center_pivot": [8, 8],
+            "scaling_factor": 1
+        }, 
+        {
+            "name": "translateIcon",
+            "size": [16, 16],
+            "size_in_uv": [0.008849557522123894, 0.015384615384615385],
+            "origin": [1676, 155],
+            "origin_in_uv": [0.9269911504424779, 0.14903846153846154],
             "origin_offset": [0, 0],
             "center_pivot": [8, 8],
             "scaling_factor": 1

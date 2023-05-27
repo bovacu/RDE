@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>6</int>
         <key>texturePackerVersion</key>
-        <string>7.0.1</string>
+        <string>7.0.3</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -183,10 +183,13 @@
             <key type="filename">sprites/anchorTopMiddle.png</key>
             <key type="filename">sprites/anchorTopRight.png</key>
             <key type="filename">sprites/icons/32x32px/checkmark.png</key>
+            <key type="filename">sprites/rotateIcon.png</key>
+            <key type="filename">sprites/scaleIcon.png</key>
             <key type="filename">sprites/stretchFull.png</key>
             <key type="filename">sprites/stretchHorizontal.png</key>
             <key type="filename">sprites/stretchNone.png</key>
             <key type="filename">sprites/stretchVertical.png</key>
+            <key type="filename">sprites/translateIcon.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -864,6 +867,9 @@
                     <filename>sprites/circleUIMask.png</filename>
                     <filename>sprites/rectangleUIMaks.png</filename>
                     <filename>sprites/duck.png</filename>
+                    <filename>sprites/rotateIcon.png</filename>
+                    <filename>sprites/scaleIcon.png</filename>
+                    <filename>sprites/translateIcon.png</filename>
                 </array>
             </struct>
         </map>
