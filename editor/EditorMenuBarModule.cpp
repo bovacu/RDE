@@ -20,7 +20,7 @@ void createUINodeSubMenu(Editor* _editor) {
 	}
 
 	if(ImGui::MenuItem("Image Node")) {
-		
+		createUIImageNode(_editor);
 	}
 
 	if(ImGui::MenuItem("InputText Node")) {

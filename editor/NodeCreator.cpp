@@ -48,3 +48,10 @@ UISlider* createUISliderNode(Editor* _editor) {
 	_slider->setFramebuffer(_editor->editorData.gameViewFramebufferID | _editor->editorData.sceneViewFramebufferID);
 	return _slider;
 }
+
+UIImage* createUIImageNode(Editor* _editor) {
+	auto _uiImageNode = _editor->canvas->graph->createNode(Util::String::appendToString("UIImage_", _editor->canvas->graph->getNodeContainer().size() - 1));
+	auto* _image = _uiImageNode->addComponent<UIImage>(UIImageConfig { .texture = _editor->engine->manager.textureManager.getSubTexture("defaultAssets", "duck") });
+	_image->setFramebuffer(_editor->editorData.gameViewFramebufferID | _editor->editorData.sceneViewFramebufferID);
+	return _image;
+}
