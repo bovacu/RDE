@@ -35,7 +35,14 @@ namespace RDE {
 
         FT_Int32 load_flags = FT_LOAD_RENDER | FT_LOAD_TARGET_(FT_RENDER_MODE_SDF);
         /* Find minimum size for a texture holding all visible ASCII characters */
-        for (int _i = CHARACTERS_START_OFFSET; _i < MAX_CHARACTERS; _i++) {
+
+		#if IS_WINDOWS()
+		auto _loopStarte = CHARACTERS_START_OFFSET;
+		#elif
+		auto _loopStarte = CHARACTERS_START_OFFSET + 1;
+		#endif
+
+		for (int _i = _loopStarte; _i < MAX_CHARACTERS; _i++) {
             if (auto errorCode = FT_Load_Char(face, _i, load_flags)) {
                 Util::Log::error("Loading character ", (char)_i, " failed! Error code ", errorCode);
                 continue;
@@ -68,7 +75,7 @@ namespace RDE {
 
         _rowHeight = 0;
 
-        for (int _i = CHARACTERS_START_OFFSET; _i < MAX_CHARACTERS; _i++) {
+		for (int _i = _loopStarte; _i < MAX_CHARACTERS; _i++) {
             
             auto _glyph = _glyphs[_i - CHARACTERS_START_OFFSET];
             
