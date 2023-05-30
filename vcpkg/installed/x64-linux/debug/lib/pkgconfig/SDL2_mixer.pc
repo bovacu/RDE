@@ -8,5 +8,5 @@ Description: mixer library for Simple DirectMedia Layer
 Version: 2.6.3
 
 Libs: "-L${libdir}" -lSDL2_mixer
-Requires: sdl2 >= 2.0.9 vorbisfile libmpg123
+Requires: sdl2 >= 2.0.9 vorbisfile flac libmpg123
 Cflags: "-I${includedir}/SDL2"

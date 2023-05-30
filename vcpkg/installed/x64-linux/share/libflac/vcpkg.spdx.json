@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/sdl2-mixer-x64-linux-2.6.3#1-3bf0665d-e891-4302-bfa8-8d4f69f0bd66",
-  "name": "sdl2-mixer:x64-linux@2.6.3#1 aaa8fe1594756dcb7e8783ff52e2b7030ac6d9fed72b21aa6cfae388c79f06ec",
+  "documentNamespace": "https://spdx.org/spdxdocs/libflac-x64-linux-1.4.2-e9263c18-150f-42b0-90e4-efdfc1a4e15f",
+  "name": "libflac:x64-linux@1.4.2 373cfab94d475d53dba471162118c3e46afcc8f4843ba5eac05b1c4129fa0b41",
   "creationInfo": {
     "creators": [
       "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2023-05-30T12:16:08Z"
+    "created": "2023-05-30T12:15:16Z"
   },
   "relationships": [
     {
@@ -43,11 +43,6 @@
       "relatedSpdxElement": "SPDXRef-file-4"
     },
     {
-      "spdxElementId": "SPDXRef-port",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-file-5"
-    },
-    {
       "spdxElementId": "SPDXRef-binary",
       "relationshipType": "GENERATED_FROM",
       "relatedSpdxElement": "SPDXRef-port"
@@ -78,86 +73,57 @@
       "relatedSpdxElement": "SPDXRef-port"
     },
     {
-      "spdxElementId": "SPDXRef-file-5",
-      "relationshipType": "CONTAINED_BY",
-      "relatedSpdxElement": "SPDXRef-port"
-    },
-    {
-      "spdxElementId": "SPDXRef-file-5",
+      "spdxElementId": "SPDXRef-file-4",
       "relationshipType": "DEPENDENCY_MANIFEST_OF",
       "relatedSpdxElement": "SPDXRef-port"
     }
   ],
   "packages": [
     {
-      "name": "sdl2-mixer",
+      "name": "libflac",
       "SPDXID": "SPDXRef-port",
-      "versionInfo": "2.6.3#1",
-      "downloadLocation": "git+https://github.com/Microsoft/vcpkg#ports/sdl2-mixer",
-      "homepage": "https://github.com/libsdl-org/SDL_mixer",
-      "licenseConcluded": "Zlib",
+      "versionInfo": "1.4.2",
+      "downloadLocation": "git+https://github.com/Microsoft/vcpkg#ports/libflac",
+      "homepage": "https://xiph.org/flac/",
+      "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "description": "Multi-channel audio mixer library for SDL.",
+      "description": "Library for manipulating FLAC files",
       "comment": "This is the port (recipe) consumed by vcpkg."
     },
     {
-      "name": "sdl2-mixer:x64-linux",
+      "name": "libflac:x64-linux",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "aaa8fe1594756dcb7e8783ff52e2b7030ac6d9fed72b21aa6cfae388c79f06ec",
+      "versionInfo": "373cfab94d475d53dba471162118c3e46afcc8f4843ba5eac05b1c4129fa0b41",
       "downloadLocation": "NONE",
-      "licenseConcluded": "Zlib",
+      "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "comment": "This is a binary package built by vcpkg."
     },
     {
       "SPDXID": "SPDXRef-resource-1",
-      "name": "libsdl-org/SDL_mixer",
-      "downloadLocation": "git+https://github.com/libsdl-org/SDL_mixer@release-${VERSION}",
+      "name": "xiph/flac",
+      "downloadLocation": "git+https://github.com/xiph/flac@${VERSION}",
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "74c2b449e8a9928679d42e25bd7a5967e41fe9d51732f26197c6bbe1db9170be784125b7f268476050017f3dc970497e09a0409d50731026a18355375d0369ce"
+          "checksumValue": "1b4992024dffe83916f0da8726f73bf932a52d8c3346c35ab1ee81b82d68ff01faa8c477aa29d7099a09611664dee723db5be3087f709218c33e564f77810013"
         }
       ]
     }
   ],
   "files": [
     {
-      "fileName": "./fix-deps-targets.patch",
+      "fileName": "./fix-compile-options.patch",
       "SPDXID": "SPDXRef-file-0",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "5f152f36c4d627c5177b20400202e9766e94f115cc6946c8f90c730aa487cf12"
-        }
-      ],
-      "licenseConcluded": "NOASSERTION",
-      "copyrightText": "NOASSERTION"
-    },
-    {
-      "fileName": "./fix-pkg-prefix.patch",
-      "SPDXID": "SPDXRef-file-1",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "0ff10db1302b8223fc5d4bce74fd5f0b0111c6935587c300fdca5d5045922516"
-        }
-      ],
-      "licenseConcluded": "NOASSERTION",
-      "copyrightText": "NOASSERTION"
-    },
-    {
-      "fileName": "./fix-pkgconfig.patch",
-      "SPDXID": "SPDXRef-file-2",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "5999197fae098c2c2b7837e75f6fb7b67d219a4e098865264be42dbd69e2bf53"
+          "checksumValue": "02e10f5f2ac9f3ed601c8ca74454b33cccabdc833e4f72ec2a73887e3d066873"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -165,11 +131,11 @@
     },
     {
       "fileName": "./portfile.cmake",
-      "SPDXID": "SPDXRef-file-3",
+      "SPDXID": "SPDXRef-file-1",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "14851fe5baee6c9772ce57aa9659c7e0004186d6a3422ab945abb780e0336323"
+          "checksumValue": "86b7cd24ce56150e837f16bb81a20844da8904dd434e9b50e953cd3d27875f6d"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -177,11 +143,23 @@
     },
     {
       "fileName": "./usage",
-      "SPDXID": "SPDXRef-file-4",
+      "SPDXID": "SPDXRef-file-2",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "03cd8f41347811ffd68422887573aaac82c130d058db4c2f494e5e0c46af5c7b"
+          "checksumValue": "89fa7950a9e5c2a1c2183605f5e9be620b5e6c0a9e981ac172687b4a10bb112a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./uwp-library-console.patch",
+      "SPDXID": "SPDXRef-file-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ea99f21e55b15e9cdf24a40236ebe94e1a018b6bc767e7a329799cb59691232c"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -189,11 +167,11 @@
     },
     {
       "fileName": "./vcpkg.json",
-      "SPDXID": "SPDXRef-file-5",
+      "SPDXID": "SPDXRef-file-4",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "12fedc7f0caabcfaf3fc3d585e987a28e24e8432893af210515d9d377d38ae02"
+          "checksumValue": "5b79d7c27f3418ff7e9b0c86344a1e4d9fe739d360f4ca775f9b4c4373084460"
         }
       ],
       "licenseConcluded": "NOASSERTION",

@@ -19,7 +19,7 @@ set(CMAKE_IMPORT_FILE_VERSION 1)
 set(_cmake_targets_defined "")
 set(_cmake_targets_not_defined "")
 set(_cmake_expected_targets "")
-foreach(_cmake_expected_target IN ITEMS SDL2_mixer::SDL2_mixer-static)
+foreach(_cmake_expected_target IN ITEMS FLAC::FLAC FLAC::FLAC++)
   list(APPEND _cmake_expected_targets "${_cmake_expected_target}")
   if(TARGET "${_cmake_expected_target}")
     list(APPEND _cmake_targets_defined "${_cmake_expected_target}")
@@ -54,12 +54,22 @@ if(_IMPORT_PREFIX STREQUAL "/")
   set(_IMPORT_PREFIX "")
 endif()
 
-# Create imported target SDL2_mixer::SDL2_mixer-static
-add_library(SDL2_mixer::SDL2_mixer-static STATIC IMPORTED)
+# Create imported target FLAC::FLAC
+add_library(FLAC::FLAC STATIC IMPORTED)
 
-set_target_properties(SDL2_mixer::SDL2_mixer-static PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include/SDL2"
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:>;\$<LINK_ONLY:Vorbis::vorbisfile>;\$<LINK_ONLY:FLAC::FLAC>;\$<LINK_ONLY:MPG123::libmpg123>"
+set_target_properties(FLAC::FLAC PROPERTIES
+  INTERFACE_COMPILE_DEFINITIONS "\$<\$<NOT:\$<BOOL:OFF>>:FLAC__NO_DLL>"
+  INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
+  INTERFACE_LINK_LIBRARIES "\$<\$<BOOL:1>:m>;Ogg::ogg"
+)
+
+# Create imported target FLAC::FLAC++
+add_library(FLAC::FLAC++ STATIC IMPORTED)
+
+set_target_properties(FLAC::FLAC++ PROPERTIES
+  INTERFACE_COMPILE_DEFINITIONS "\$<\$<NOT:\$<BOOL:OFF>>:FLAC__NO_DLL>"
+  INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
+  INTERFACE_LINK_LIBRARIES "FLAC::FLAC"
 )
 
 if(CMAKE_VERSION VERSION_LESS 2.8.12)
@@ -67,7 +77,7 @@ if(CMAKE_VERSION VERSION_LESS 2.8.12)
 endif()
 
 # Load information for each installed configuration.
-file(GLOB _cmake_config_files "${CMAKE_CURRENT_LIST_DIR}/SDL2_mixer-static-targets-*.cmake")
+file(GLOB _cmake_config_files "${CMAKE_CURRENT_LIST_DIR}/targets-*.cmake")
 foreach(_cmake_config_file IN LISTS _cmake_config_files)
   include("${_cmake_config_file}")
 endforeach()

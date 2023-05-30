@@ -12,7 +12,7 @@ set(SDL2MIXER_VENDORED              OFF)
 
 set(SDL2MIXER_CMD                   ON)
 
-set(SDL2MIXER_FLAC_LIBFLAC          OFF)
+set(SDL2MIXER_FLAC_LIBFLAC          ON)
 set(SDL2MIXER_FLAC_DRFLAC           OFF)
 
 set(SDL2MIXER_MOD                   OFF)
