@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/mpg123-x64-linux-1.31.3-eb137eee-cdd3-4ee1-af7c-afb2391a2bdb",
-  "name": "mpg123:x64-linux@1.31.3 0802fa31b848baae78c9bc8d2eb04948a8336561df73d89bda6b689e735dc21f",
+  "documentNamespace": "https://spdx.org/spdxdocs/mpg123-x64-linux-1.31.3-26f8ff62-1f55-4b12-82de-ce8f7a99f608",
+  "name": "mpg123:x64-linux@1.31.3 fccfa4870802b883b89b0c6b3bb2b2d4d3d1d7ba3dc9ca65dfbff10cc50cd317",
   "creationInfo": {
     "creators": [
       "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2023-05-30T01:55:06Z"
+    "created": "2023-05-30T15:39:13Z"
   },
   "relationships": [
     {
@@ -84,7 +84,7 @@
     {
       "name": "mpg123:x64-linux",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "0802fa31b848baae78c9bc8d2eb04948a8336561df73d89bda6b689e735dc21f",
+      "versionInfo": "fccfa4870802b883b89b0c6b3bb2b2d4d3d1d7ba3dc9ca65dfbff10cc50cd317",
       "downloadLocation": "NONE",
       "licenseConcluded": "LGPL-2.1-or-later",
       "licenseDeclared": "NOASSERTION",
@@ -109,24 +109,24 @@
   ],
   "files": [
     {
-      "fileName": "./fix-m1-build.patch",
+      "fileName": "./fix-modulejack.patch",
       "SPDXID": "SPDXRef-file-0",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "95bc594037f888b34ac13017b957e5014a9653f62259fa4351a41ad35e00c0ef"
+          "checksumValue": "46edf5b094919852541d5e7e54ed5ee1cfb9daffe43437cf86c80041b41d7f39"
         }
       ],
       "licenseConcluded": "NOASSERTION",
       "copyrightText": "NOASSERTION"
     },
     {
-      "fileName": "./fix-modulejack.patch",
+      "fileName": "./fix-m1-build.patch",
       "SPDXID": "SPDXRef-file-1",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "46edf5b094919852541d5e7e54ed5ee1cfb9daffe43437cf86c80041b41d7f39"
+          "checksumValue": "95bc594037f888b34ac13017b957e5014a9653f62259fa4351a41ad35e00c0ef"
         }
       ],
       "licenseConcluded": "NOASSERTION",

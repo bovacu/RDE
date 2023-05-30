@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/zlib-x64-linux-1.2.13-d5a06973-70c2-4001-bff2-cf4feaace3af",
-  "name": "zlib:x64-linux@1.2.13 2c1ba6099d8a31c92b6eff52e22e7ff40654a39ab095686b73854f37f946f9bf",
+  "documentNamespace": "https://spdx.org/spdxdocs/zlib-x64-linux-1.2.13-1f48f49b-f4b9-4951-a26a-429ed0e68681",
+  "name": "zlib:x64-linux@1.2.13 0e82764df608553471c3f672c5abccea5652fa7593302b622a6d9b39cdd119fd",
   "creationInfo": {
     "creators": [
       "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2023-05-30T01:46:58Z"
+    "created": "2023-05-30T15:26:34Z"
   },
   "relationships": [
     {
@@ -124,7 +124,7 @@
     {
       "name": "zlib:x64-linux",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "2c1ba6099d8a31c92b6eff52e22e7ff40654a39ab095686b73854f37f946f9bf",
+      "versionInfo": "0e82764df608553471c3f672c5abccea5652fa7593302b622a6d9b39cdd119fd",
       "downloadLocation": "NONE",
       "licenseConcluded": "Zlib",
       "licenseDeclared": "NOASSERTION",
@@ -148,12 +148,12 @@
   ],
   "files": [
     {
-      "fileName": "./0001-Prevent-invalid-inclusions-when-HAVE_-is-set-to-0.patch",
+      "fileName": "./0003-build-static-or-shared-not-both.patch",
       "SPDXID": "SPDXRef-file-0",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "750b9542cb55e6328cca01d3ca997f1373b9530afa95e04213168676936e7bfa"
+          "checksumValue": "d6026271dcb3d8fc74b41e235620ae31576a798e77aa411c3af8cd9e948c02b1"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -172,12 +172,24 @@
       "copyrightText": "NOASSERTION"
     },
     {
-      "fileName": "./0003-build-static-or-shared-not-both.patch",
+      "fileName": "./vcpkg-cmake-wrapper.cmake",
       "SPDXID": "SPDXRef-file-2",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "d6026271dcb3d8fc74b41e235620ae31576a798e77aa411c3af8cd9e948c02b1"
+          "checksumValue": "5d49ef2ee6448479c2aad0e5f732e2676eaba0411860f9bebabe6002d66f57d1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./0001-Prevent-invalid-inclusions-when-HAVE_-is-set-to-0.patch",
+      "SPDXID": "SPDXRef-file-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "750b9542cb55e6328cca01d3ca997f1373b9530afa95e04213168676936e7bfa"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -185,23 +197,11 @@
     },
     {
       "fileName": "./0004-android-and-mingw-fixes.patch",
-      "SPDXID": "SPDXRef-file-3",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "37a43eddbcb1b7dde49e7659ae895dfd0ff1df66666c1371ba7d5bfc49d8b438"
-        }
-      ],
-      "licenseConcluded": "NOASSERTION",
-      "copyrightText": "NOASSERTION"
-    },
-    {
-      "fileName": "./portfile.cmake",
       "SPDXID": "SPDXRef-file-4",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "ac63047b644fa758860dd7ba48ff9a13b058c6f240b8e8d675b8fbba035976be"
+          "checksumValue": "37a43eddbcb1b7dde49e7659ae895dfd0ff1df66666c1371ba7d5bfc49d8b438"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -220,12 +220,12 @@
       "copyrightText": "NOASSERTION"
     },
     {
-      "fileName": "./vcpkg-cmake-wrapper.cmake",
+      "fileName": "./portfile.cmake",
       "SPDXID": "SPDXRef-file-6",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "5d49ef2ee6448479c2aad0e5f732e2676eaba0411860f9bebabe6002d66f57d1"
+          "checksumValue": "ac63047b644fa758860dd7ba48ff9a13b058c6f240b8e8d675b8fbba035976be"
         }
       ],
       "licenseConcluded": "NOASSERTION",

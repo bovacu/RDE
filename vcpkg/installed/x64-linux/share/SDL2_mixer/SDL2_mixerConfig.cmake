@@ -15,8 +15,8 @@ set(SDL2MIXER_CMD                   ON)
 set(SDL2MIXER_FLAC_LIBFLAC          ON)
 set(SDL2MIXER_FLAC_DRFLAC           OFF)
 
-set(SDL2MIXER_MOD                   OFF)
-set(SDL2MIXER_MOD_MODPLUG           OFF)
+set(SDL2MIXER_MOD                   ON)
+set(SDL2MIXER_MOD_MODPLUG           ON)
 set(SDL2MIXER_MOD_XMP               OFF)
 set(SDL2MIXER_MOD_XMP_LITE          OFF)
 
@@ -24,12 +24,12 @@ set(SDL2MIXER_MP3                   ON)
 set(SDL2MIXER_MP3_DRMP3             OFF)
 set(SDL2MIXER_MP3_MPG123            ON)
 
-set(SDL2MIXER_MIDI                  OFF)
-set(SDL2MIXER_MIDI_FLUIDSYNTH       OFF)
+set(SDL2MIXER_MIDI                  ON)
+set(SDL2MIXER_MIDI_FLUIDSYNTH       ON)
 set(SDL2MIXER_MIDI_NATIVE           OFF)
 set(SDL2MIXER_MIDI_TIMIDITY         OFF)
 
-set(SDL2MIXER_OPUS                  OFF)
+set(SDL2MIXER_OPUS                  ON)
 
 set(SDL2MIXER_VORBIS                VORBISFILE)
 set(SDL2MIXER_VORBIS_STB            OFF)

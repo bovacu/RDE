@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/sdl2-x64-linux-2.26.5-fd590d12-f4ba-4353-a281-89d951a1b9cf",
-  "name": "sdl2:x64-linux@2.26.5 2109c8012e28fedc89a96e69428dc44ec7aa8163fb4c1de2ba7916ffda7d01a9",
+  "documentNamespace": "https://spdx.org/spdxdocs/sdl2-x64-linux-2.26.5-14b8012d-6f98-470c-ac01-50c895a6798d",
+  "name": "sdl2:x64-linux@2.26.5 ea15447f0a7b9c9447e19c148b15d23e6806d3caaad5ddd7b9d51b44ec1246e1",
   "creationInfo": {
     "creators": [
       "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2023-05-30T02:04:28Z"
+    "created": "2023-05-30T15:37:17Z"
   },
   "relationships": [
     {
@@ -84,7 +84,7 @@
     {
       "name": "sdl2:x64-linux",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "2109c8012e28fedc89a96e69428dc44ec7aa8163fb4c1de2ba7916ffda7d01a9",
+      "versionInfo": "ea15447f0a7b9c9447e19c148b15d23e6806d3caaad5ddd7b9d51b44ec1246e1",
       "downloadLocation": "NONE",
       "licenseConcluded": "Zlib",
       "licenseDeclared": "NOASSERTION",
@@ -108,8 +108,20 @@
   ],
   "files": [
     {
-      "fileName": "./deps.patch",
+      "fileName": "./usage",
       "SPDXID": "SPDXRef-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "aabdfa919705cdcc06a6ed59ef2dce9a9425d32661bc498980ff521b27cf674d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./deps.patch",
+      "SPDXID": "SPDXRef-file-1",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -121,23 +133,11 @@
     },
     {
       "fileName": "./portfile.cmake",
-      "SPDXID": "SPDXRef-file-1",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "313c0effeb541e63690c320a4b816669e144670e2cbf29e302c263ccfff8405c"
-        }
-      ],
-      "licenseConcluded": "NOASSERTION",
-      "copyrightText": "NOASSERTION"
-    },
-    {
-      "fileName": "./usage",
       "SPDXID": "SPDXRef-file-2",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "aabdfa919705cdcc06a6ed59ef2dce9a9425d32661bc498980ff521b27cf674d"
+          "checksumValue": "313c0effeb541e63690c320a4b816669e144670e2cbf29e302c263ccfff8405c"
         }
       ],
       "licenseConcluded": "NOASSERTION",
