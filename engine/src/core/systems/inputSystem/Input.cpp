@@ -12,7 +12,7 @@
 #include "core/graph/components/Node.h"
 
 #if !IS_MOBILE()
-#include "imgui_impl_sdl.h"
+#include "imgui_impl_sdl2.h"
 #endif
 
 namespace RDE {

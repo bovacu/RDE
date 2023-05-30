@@ -59,7 +59,13 @@ targets/
 
 output/
 
-vcpkg
+vcpkg/buildtrees
+vcpkg/ports
+vcpkg/downloads
+vcpkg/docs
+vcpkg/packages
+vcpkg/.git
+vcpkg/.github
 
 cmake-build-debug-mingw_clang/.cmake/api/v1/query/cache-v2
 
