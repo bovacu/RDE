@@ -57,7 +57,7 @@ submodules/SDL_net
 
 targets/
 
-output/
+
 
 vcpkg/buildtrees
 vcpkg/ports
