@@ -1,0 +1,7 @@
+Package: sdl2-mixer
+Feature: mpg123
+Depends: mpg123
+Architecture: x64-linux
+Multi-Arch: same
+Description: Use mpg123 to play MP3 audio format.
+Status: install ok installed
