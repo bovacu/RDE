@@ -34,7 +34,7 @@ namespace RDE {
         		Util::GL::checkError("Invalid Line Smooth Hint -> GL_NICEST");
             #endif
 		
-            #if !IS_MAC()
+            #if !IS_MAC() && !IS_LINUX()
                 #ifndef __EMSCRIPTEN__
                     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
                     Util::GL::checkError("Invalid Point Smooth Hint -> GL_NICEST");

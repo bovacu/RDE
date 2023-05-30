@@ -38,7 +38,7 @@ namespace RDE {
 
 		#if IS_WINDOWS()
 		auto _loopStarte = CHARACTERS_START_OFFSET;
-		#elif
+		#else
 		auto _loopStarte = CHARACTERS_START_OFFSET + 1;
 		#endif
 
