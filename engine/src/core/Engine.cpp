@@ -196,10 +196,9 @@ namespace RDE {
         #endif
 
         manager.destroy();
-
         #if !IS_MOBILE() && !defined(__EMSCRIPTEN__)
         delete imGuiLayer;
-        delete window;
+        window->destroy();
         #endif
     }
 

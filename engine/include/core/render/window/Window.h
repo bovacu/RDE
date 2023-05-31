@@ -106,7 +106,7 @@ namespace RDE {
 			RDE_FUNC_EXPLICIT Window(Engine* _engine, RDEConfig* _props);
 
         public:
-			RDE_FUNC ~Window() ;
+			RDE_FUNC void destroy() ;
 
             /**
              * @brief This method is used to update the window, poll the events and

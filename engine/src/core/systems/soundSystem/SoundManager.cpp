@@ -181,7 +181,11 @@ namespace RDE {
             Mix_FreeChunk(_sfx.second.sfxID);
         }
 
+        // TODO (Borja): Go back on this as it is hanging the application on close.
+        #if !IS_LINUX()
         Mix_CloseAudio();
+        #endif
+
         Mix_Quit();
     }
 }

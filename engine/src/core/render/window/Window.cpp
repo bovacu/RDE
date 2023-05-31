@@ -51,11 +51,15 @@ namespace RDE {
 		engine = _engine;
     }
 
-    Window::~Window() {
+    void Window::destroy() {
         SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
+
+        // TODO (Borja): Go back on this as it is hanging the application on close.
+        #if !IS_LINUX()
         SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
         SDL_Quit();
+        #endif
     }
 
     void Window::setWindowSize(int _width, int _height) {
