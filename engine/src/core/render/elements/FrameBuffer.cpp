@@ -48,6 +48,10 @@ namespace RDE {
 		glGenFramebuffers(1, &fboID);
 		glGenRenderbuffers(1, &rboID);
 
+        if(external_fbID == 0) {
+            external_fbID = fboID;
+        }
+
 		glBindFramebuffer(GL_FRAMEBUFFER, fboID);
 
         float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.

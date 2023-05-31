@@ -66,6 +66,8 @@ namespace RDE {
              */
             uint32_t vao = -1;
 
+            uint32_t external_fbID = 0;
+
             /**
              *
              */
@@ -122,7 +124,7 @@ namespace RDE {
              */
 			RDE_FUNC_ND uint32_t getColorAttachmentRendererID() const { return frameBufferTexureForColorAttachment; }
 
-			RDE_FUNC_ND uint32_t getID() { return fboID; }
+			RDE_FUNC_ND uint32_t getID() { return external_fbID; }
 
             /**
              * @see FrameBufferSpecification
