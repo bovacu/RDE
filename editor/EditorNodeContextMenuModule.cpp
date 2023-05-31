@@ -1,20 +1,48 @@
 static Node* nodeRighClickContextMenuNode = nullptr;
+static Graph* nodeRightClickGraph = nullptr;
+static bool nodeContextMenuOpened = false;
 
 void editorContextMenuNodeRightClicked(Editor* _editor, Node* _node, Graph* _graph) {
 	if (nodeRighClickContextMenuNode != nullptr) return;
+	onHierarchyNodeLeftClicked(_editor, _node, _graph);
 	nodeRighClickContextMenuNode = _node;
-	
-	ImGui::OpenPopup("NodeContextMenu");
+	nodeRightClickGraph = _graph;
 }
 
 void nodeRighClickContextMenu(Editor* _editor) {
-	ImGui::SetNextWindowSize(ImVec2 { 200, 200 });
-	if (ImGui::BeginPopup("NodeContextMenu", ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar)) {
-		
-		ImGui::Text("Hello");
-		
+	if(!nodeContextMenuOpened && nodeRighClickContextMenuNode != nullptr) {
+		ImGui::OpenPopup("NodeContextMenu");
+		nodeContextMenuOpened = true;
+	}
+
+	if (ImGui::BeginPopup("NodeContextMenu", ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysAutoResize)) {
+		if (ImGui::BeginMenu("Add Child")) {
+			
+			if(_editor->graph == nodeRightClickGraph) {
+				if(ImGui::BeginMenu("Node")) {
+					createNodeSubMenu(_editor, nodeRighClickContextMenuNode);
+					ImGui::EndMenu();
+				}
+			} else {
+				if(ImGui::BeginMenu("UI Node")) {
+					createUINodeSubMenu(_editor, nodeRighClickContextMenuNode);
+					ImGui::EndMenu();
+				}
+			}
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::Selectable("Remove node")) {
+			nodeRightClickGraph->removeNode(nodeRighClickContextMenuNode);
+			nodeRighClickContextMenuNode = nullptr;
+			nodeContextMenuOpened = false;
+			_editor->editorData.selectedNode.node = nullptr;
+			_editor->editorData.selectedNode.graph = nullptr;
+		}
+
 		ImGui::EndPopup();
 	} else {
 		nodeRighClickContextMenuNode = nullptr;
+		nodeContextMenuOpened = false;
 	}
 }

@@ -1,42 +1,42 @@
 #include "EditorViewSubmenuModule.cpp"
 
-void createNodeSubMenu(Editor* _editor) {
+void createNodeSubMenu(Editor* _editor, Node* _parent = nullptr) {
 	if(ImGui::MenuItem("Empty Node")) {
-		createEmptyNode(_editor);
+		createEmptyNode(_editor, _parent);
 	}
 
 	if(ImGui::MenuItem("Sprite Renderer Node")) {
-		createSpriteRendererNode(_editor);
+		createSpriteRendererNode(_editor, _parent);
 	}
 }
 
-void createUINodeSubMenu(Editor* _editor) {
+void createUINodeSubMenu(Editor* _editor, Node* _parent = nullptr) {
 	if(ImGui::MenuItem("Empty Node")) {
 		
 	}
 
 	if(ImGui::MenuItem("Button Node")) {
-		createUIButtonNode(_editor);
+		createUIButtonNode(_editor, _parent);
 	}
 
 	if(ImGui::MenuItem("Image Node")) {
-		createUIImageNode(_editor);
+		createUIImageNode(_editor, _parent);
 	}
 
 	if(ImGui::MenuItem("InputText Node")) {
-		createUIInputNode(_editor);
+		createUIInputNode(_editor, _parent);
 	}
 
 	if(ImGui::MenuItem("Panel Node")) {
-		createPanelNode(_editor);
+		createPanelNode(_editor, _parent);
 	}
 
 	if(ImGui::MenuItem("Slider Node")) {
-		createUISliderNode(_editor);
+		createUISliderNode(_editor, _parent);
 	}
 
 	if(ImGui::MenuItem("Text Node")) {
-		createUITextNode(_editor);
+		createUITextNode(_editor, _parent);
 	}
 }
 

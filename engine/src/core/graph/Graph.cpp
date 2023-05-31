@@ -108,6 +108,15 @@ namespace RDE {
     }
 
     void Graph::removeNode(Node* _node) {
+		auto* _nodeTransform = _node->getTransform();
+
+		if(_nodeTransform->parent != NODE_ID_NULL) {
+			auto* _parentTransform = &registry.get<Transform>(_nodeTransform->parent);
+			auto _toRemove = std::remove_if(_parentTransform->children.begin(), _parentTransform->children.end(), [&](Transform* _transform) {
+			                                return _transform->node->getID() == _node->getID();
+			});
+			_parentTransform->children.erase(_toRemove);
+		}
         removeNodeInner(_node, true);
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
         renderingTreeData.isRenderizableTreeDirty = true;
@@ -169,19 +178,12 @@ namespace RDE {
     }
 
     void Graph::removeNodeInner(Node* _node, bool _delete) {
-        auto* _nodeTransform = _node->getTransform();
-
-        if(_nodeTransform->parent != NODE_ID_NULL) {
-            auto* _parentTransform = &registry.get<Transform>(_nodeTransform->parent);
-            auto _toRemove = std::remove_if(_parentTransform->children.begin(), _parentTransform->children.end(), [&](Transform* _transform) {
-                return _transform->node->getID() == _node->getID();
-            });
-            _parentTransform->children.erase(_toRemove);
-        }
-
         if(_delete) {
-            for(auto _it = _nodeTransform->children.rbegin(); _it < _nodeTransform->children.rend(); _it++) {
-                removeNodeInner((*_it)->node, _delete);
+			// This extraction of _children is needed, otherwise the for loop creates a copy each time it is 
+			// returned back from the recursion and generates incompatible iterators (as the copies are wrong).
+			auto& _children = _node->getTransform()->children;
+			for(auto* _child : _children) {
+                removeNodeInner(_child->node, _delete);
             }
 
             if(_node->hasComponent<PhysicsBody>()) {
