@@ -32,12 +32,19 @@ void nodeRighClickContextMenu(Editor* _editor) {
 
 			ImGui::EndMenu();
 		}
+
 		if (ImGui::Selectable("Remove node")) {
 			nodeRightClickGraph->removeNode(nodeRighClickContextMenuNode);
 			nodeRighClickContextMenuNode = nullptr;
 			nodeContextMenuOpened = false;
 			_editor->editorData.selectedNode.node = nullptr;
 			_editor->editorData.selectedNode.graph = nullptr;
+		}
+
+		if (ImGui::Selectable("Set parent to root")) {
+			nodeRightClickGraph->setParent(nodeRighClickContextMenuNode, nodeRightClickGraph->getRoot());
+			nodeRighClickContextMenuNode = nullptr;
+			nodeContextMenuOpened = false;
 		}
 
 		ImGui::EndPopup();

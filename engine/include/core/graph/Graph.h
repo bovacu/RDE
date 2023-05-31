@@ -107,7 +107,9 @@ namespace RDE {
              * @param _node Node to remove components
              * @param _delete If also has to be destroyed from the scene
              */
-            void removeNodeInner(Node* _node, bool _delete = true);
+            void removeNodeInner(Node* _node);
+
+			void unparentNodeInner(Node* _node);
 
         public:
             /**
