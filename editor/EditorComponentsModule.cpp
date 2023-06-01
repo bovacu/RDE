@@ -197,11 +197,30 @@ void spriteComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNode)
 
 	CREATE_DISABLEABLE_HEADER("Sprite Renderer", _spriteRenderer, {
 		if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
-		ImGui::Text("Texture"); ImGui::SameLine();
-		auto _texturePath = _spriteRenderer->getTexturePath();
+		ImGui::Text("Texture"); ImGui::SameLine(0, 30);
+		auto _texturePath = Util::String::appendToString(Util::String::getFilePathWithoutExtension(_spriteRenderer->getTexturePath()), " [", _spriteRenderer->getTexture()->getName(), "]");
+		auto* _cTexturePath = _texturePath.c_str();
+
+		const int EXTRA_OFFSET = 8;
+		auto _width = ImGui::CalcTextSize(_cTexturePath).x + EXTRA_OFFSET;
+		ImGui::SetNextItemWidth(_width);
 		ImGui::BeginDisabled(true);
 		ImGui::InputText("###texture", const_cast<char*>(_texturePath.c_str()), _texturePath.size());
 		ImGui::EndDisabled();
+		
+		if(ImGui::CalcItemWidth() < _width - EXTRA_OFFSET) {
+			HINT(_cTexturePath)
+		}
+
+		ImGui::PushID(createID(_editor));
+		auto _spriteColor = _spriteRenderer->getColor();
+		static ImVec4 _color = ImVec4(_spriteColor.r / 255.0f, _spriteColor.g / 255.0f, _spriteColor.a / 255.0f, _spriteColor.a / 255.0f);
+		
+		ImGui::Text("Tint Color"); ImGui::SameLine();
+		if(ImGui::ColorEdit4("MyColor##3", (float*)&_color, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreview)) {
+			_spriteRenderer->setColor({ (unsigned char)(_color.x * 255), (unsigned char)(_color.y * 255), (unsigned char)(_color.z * 255), (unsigned char)(_color.w * 255) });
+		}
+		ImGui::PopID();
 
 		if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
 	})
@@ -217,6 +236,45 @@ void textComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNode) {
 
 	CREATE_DISABLEABLE_HEADER("Text Renderer", _text, {
 		if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+		ImGui::Text("Texture"); ImGui::SameLine(0, 20);
+		auto _fontName = _text->getFont()->getFontName();
+		auto* _cFontName = _fontName.c_str();
+		
+		const int EXTRA_OFFSET = 8;
+		auto _width = ImGui::CalcTextSize(_cFontName).x + EXTRA_OFFSET;
+		ImGui::SetNextItemWidth(_width);
+		ImGui::BeginDisabled(true);
+		ImGui::InputText("###font", const_cast<char*>(_fontName.c_str()), _fontName.size());
+		ImGui::EndDisabled();
+		               
+		if(ImGui::CalcItemWidth() < _width - EXTRA_OFFSET) {
+			HINT(_cFontName)
+		}
+		
+		ImGui::PushID(createID(_editor));
+		auto _spriteColor = _text->getColor();
+		static ImVec4 _color = ImVec4(_spriteColor.r / 255.0f, _spriteColor.g / 255.0f, _spriteColor.a / 255.0f, _spriteColor.a / 255.0f);
+		               
+		ImGui::Text("Tint Color"); ImGui::SameLine();
+		if(ImGui::ColorEdit4("MyColor##3", (float*)&_color, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreview)) {
+			_text->setColor({ (unsigned char)(_color.x * 255), (unsigned char)(_color.y * 255), (unsigned char)(_color.z * 255), (unsigned char)(_color.w * 255) });
+		}
+		ImGui::PopID();
+		
+		ImGui::PushID(createID(_editor));
+		auto _textContent = _text->getText();
+
+		const int BUFFER_SIZE = 1024;
+		char _buffer[BUFFER_SIZE];
+
+		memset(_buffer, '\0', sizeof(_buffer));
+		memcpy(_buffer, _textContent.c_str(), _textContent.size());
+
+		if(ImGui::InputTextMultiline("###textcontent", _buffer, BUFFER_SIZE)) {
+			_text->setText(std::string(_buffer));
+		}
+		ImGui::PopID();
+		
 		ImGui::Text("Font size ");
 		int _fontSize = _text->getFontSize();
 		ImGui::SameLine();
@@ -455,6 +513,31 @@ void uiImageComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNode
 	CREATE_DISABLEABLE_HEADER("UI Image", _uiImage, {
 		if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
 
+		ImGui::Text("Texture"); ImGui::SameLine(0, 30);
+		auto _texturePath = Util::String::appendToString(Util::String::getFilePathWithoutExtension(_uiImage->getTexturePath()), " [", _uiImage->getTexture()->getName(), "]");
+		auto* _cTexturePath = _texturePath.c_str();
+
+		const int EXTRA_OFFSET = 8;
+		auto _width = ImGui::CalcTextSize(_cTexturePath).x + EXTRA_OFFSET;
+		ImGui::SetNextItemWidth(_width);
+		ImGui::BeginDisabled(true);
+		ImGui::InputText("###texture", const_cast<char*>(_texturePath.c_str()), _texturePath.size());
+		ImGui::EndDisabled();
+		
+		if(ImGui::CalcItemWidth() < _width - EXTRA_OFFSET) {
+			HINT(_cTexturePath)
+		}
+
+		ImGui::PushID(createID(_editor));
+		auto _spriteColor = _uiImage->getColor();
+		static ImVec4 _color = ImVec4(_spriteColor.r / 255.0f, _spriteColor.g / 255.0f, _spriteColor.a / 255.0f, _spriteColor.a / 255.0f);
+		
+		ImGui::Text("Tint Color"); ImGui::SameLine();
+		if(ImGui::ColorEdit4("MyColor##3", (float*)&_color, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreview)) {
+			_uiImage->setColor({ (unsigned char)(_color.x * 255), (unsigned char)(_color.y * 255), (unsigned char)(_color.z * 255), (unsigned char)(_color.w * 255) });
+		}
+		ImGui::PopID();
+
 		ImGui::Text("Origin Offset ");
 		float _originOffset[2];
 		_originOffset[0] = _uiImage->getOriginOffset().x;
@@ -548,34 +631,55 @@ void uiTextComponent(Editor* _editor, Graph* _graph, const NodeID _selectedNode)
 	auto _uiText = _node->getComponent<UIText>();
 
 	CREATE_DISABLEABLE_HEADER("UI Text", _uiText, {
-		if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
-
-		{
-			ImGui::Text("Origin Offset ");
-			float _originOffset[2];
-			_originOffset[0] = _uiText->getOriginOffset().x;
-			_originOffset[1] = _uiText->getOriginOffset().y;
-			ImGui::SameLine();
-			ImGui::SetNextItemWidth(100);
-			ImGui::PushID(createID(_editor));
-			if (ImGui::DragFloat2("##myInput", _originOffset, 1.f)) {
-				_uiText->setOriginOffset({Util::Math::clampF(_originOffset[0], -FLT_MAX, FLT_MAX), Util::Math::clampF(_originOffset[1], -FLT_MAX, FLT_MAX) });
-			}
-			ImGui::PopID();
-
-			ImGui::NewLine();
-
-			ImGui::Text("Font size ");
-			int _fontSize = _uiText->getFontSize();
-			ImGui::SameLine();
-			ImGui::SetNextItemWidth(100);
-			ImGui::PushID(createID(_editor));
-			if (ImGui::DragInt("##myInput", &_fontSize, 1, 0, 512)) {
-				_uiText->setFontSize(_fontSize);
-			}
-			ImGui::PopID();
+	   	if(_selectedNode == _graph->getRoot()->getID()) ImGui::BeginDisabled(true);
+		ImGui::Text("Texture"); ImGui::SameLine(0, 20);
+		auto _fontName = _uiText->getFont()->getFontName();
+		auto* _cFontName = _fontName.c_str();
+		
+		const int EXTRA_OFFSET = 8;
+		auto _width = ImGui::CalcTextSize(_cFontName).x + EXTRA_OFFSET;
+		ImGui::SetNextItemWidth(_width);
+		ImGui::BeginDisabled(true);
+		ImGui::InputText("###font", const_cast<char*>(_fontName.c_str()), _fontName.size());
+		ImGui::EndDisabled();
+		               
+		if(ImGui::CalcItemWidth() < _width - EXTRA_OFFSET) {
+	 		HINT(_cFontName)
 		}
+		
+		ImGui::PushID(createID(_editor));
+		auto _spriteColor = _uiText->getColor();
+		static ImVec4 _color = ImVec4(_spriteColor.r / 255.0f, _spriteColor.g / 255.0f, _spriteColor.a / 255.0f, _spriteColor.a / 255.0f);
+		               
+		ImGui::Text("Tint Color"); ImGui::SameLine();
+		if(ImGui::ColorEdit4("MyColor##3", (float*)&_color, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreview)) {
+	  		_uiText->setColor({ (unsigned char)(_color.x * 255), (unsigned char)(_color.y * 255), (unsigned char)(_color.z * 255), (unsigned char)(_color.w * 255) });
+		}
+		ImGui::PopID();
+		
+		ImGui::PushID(createID(_editor));
+		auto _textContent = _uiText->getText();
 
+		const int BUFFER_SIZE = 1024;
+		char _buffer[BUFFER_SIZE];
+
+		memset(_buffer, '\0', sizeof(_buffer));
+		memcpy(_buffer, _textContent.c_str(), _textContent.size());
+
+		if(ImGui::InputTextMultiline("###textcontent", _buffer, BUFFER_SIZE)) {
+			_uiText->setText(std::string(_buffer));
+		}
+		ImGui::PopID();
+		
+		ImGui::Text("Font size ");
+		int _fontSize = _uiText->getFontSize();
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(100);
+		ImGui::PushID(createID(_editor));
+		if (ImGui::DragInt("##myInput", &_fontSize, 1, 0, 512)) {
+			_uiText->setFontSize(_fontSize);
+		}
+		ImGui::PopID();
 		if(_selectedNode == _graph->getRoot()->getID()) ImGui::EndDisabled();
 	})
 }

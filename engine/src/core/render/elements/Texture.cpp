@@ -28,6 +28,8 @@ namespace RDE {
     }
 
     Texture::Texture(Atlas* _spriteSheet, const FloatRect& _region) {
+		path = _spriteSheet->texture->path;
+
         openGLTextureID = _spriteSheet->texture->openGLTextureID;
         region = _region;
         textureSize = _region.size;
@@ -62,6 +64,8 @@ namespace RDE {
         auto* _image = Util::Texture::getSDLSurface(_path);
         #endif
 
+		path = std::string(_path);
+		
         if(_image == nullptr) {
             Util::Log::error("Format of image '", Util::String::getFileExtension(_path), "' not supported for file ", _path);
             return false;
@@ -205,6 +209,10 @@ namespace RDE {
     std::string Texture::getPath() {
         return path;
     }
+
+	std::string Texture::getName() {
+		return name;
+	}
 
     void Texture::setRegion(const FloatRect& _region) {
         region = _region;

@@ -89,6 +89,8 @@ namespace RDE {
      * @brief This class represents a SpriteSheet or a simple Sprite that will be uploaded to the GPU.
      */
     class Texture {
+		friend class TextureAtlasManager;
+
         protected:
             /**
              * @brief This is the reference that OpenGL gives us when we upload the texture data to the GPU.
@@ -136,6 +138,8 @@ namespace RDE {
              * @brief Where the SpriteSheet is located.
              */
             std::string path;
+
+			std::string name;
 
         public:
             /**
@@ -227,6 +231,8 @@ namespace RDE {
              * @return std::string
              */
 			RDE_FUNC_ND std::string getPath();
+
+			RDE_FUNC_ND std::string getName();
     };
 
     /**

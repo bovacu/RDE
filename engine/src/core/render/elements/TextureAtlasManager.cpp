@@ -33,6 +33,7 @@ namespace RDE {
 
         cropTextures(*_atlas, _spriteSheetNode["sprites"]);
         atlases[_name] = _atlas;
+
         return true;
     }
 
@@ -47,7 +48,9 @@ namespace RDE {
             return nullptr;
         }
 
-        return atlases[_atlasName]->subTextures[_textureName];
+		auto* _texture = atlases[_atlasName]->subTextures[_textureName];
+		_texture->name = _textureName;
+        return _texture;
     }
 
     void TextureAtlasManager::cropTextures(Atlas& _atlas, const nlohmann::json& _spritesNode) {

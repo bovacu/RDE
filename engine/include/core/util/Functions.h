@@ -249,6 +249,10 @@ namespace RDE {
                 return base_filename.substr(base_filename.find_last_of('.') + 1, base_filename.size());
             }
 
+			RDE_FUNC_ND inline std::string getFilePathWithoutExtension(const std::string& _path) {
+				return getPathFromFilePath(_path) + getFileNameFromPath(_path);
+			}
+
 			RDE_FUNC_ND inline std::string& toLower(std::string& _string) {
                 std::transform(_string.begin(), _string.end(), _string.begin(), [](unsigned char c){ return std::tolower(c); });
                 return _string;
