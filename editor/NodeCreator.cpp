@@ -1,5 +1,5 @@
-Node* createEmptyNode(Editor* _editor, Node* _parent = nullptr) {
-	return _editor->graph->createNode(Util::String::appendToString("EmptyNode_", _editor->graph->getNodeContainer().size()), _parent);
+Node* createEmptyNode(Editor* _editor, Graph* _graph, Node* _parent = nullptr) {
+	return _graph->createNode(Util::String::appendToString("EmptyNode_", _graph->getNodeContainer().size()), _parent);
 }
 
 SpriteRenderer* createSpriteRendererNode(Editor* _editor, Node* _parent = nullptr) {

@@ -2,7 +2,7 @@
 
 void createNodeSubMenu(Editor* _editor, Node* _parent = nullptr) {
 	if(ImGui::MenuItem("Empty Node")) {
-		createEmptyNode(_editor, _parent);
+		createEmptyNode(_editor, _editor->graph, _parent);
 	}
 
 	if(ImGui::MenuItem("Sprite Renderer Node")) {
@@ -12,7 +12,7 @@ void createNodeSubMenu(Editor* _editor, Node* _parent = nullptr) {
 
 void createUINodeSubMenu(Editor* _editor, Node* _parent = nullptr) {
 	if(ImGui::MenuItem("Empty Node")) {
-		
+		createEmptyNode(_editor, _editor->canvas->graph, _parent);
 	}
 
 	if(ImGui::MenuItem("Button Node")) {
