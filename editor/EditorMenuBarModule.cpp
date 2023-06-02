@@ -1,4 +1,5 @@
 #include "EditorViewSubmenuModule.cpp"
+#include <filesystem>
 
 void createNodeSubMenu(Editor* _editor, Node* _parent = nullptr) {
 	if(ImGui::MenuItem("Empty Node")) {
@@ -85,6 +86,7 @@ void menuBarView(Editor* _editor) {
 
 
 		if (ImGui::BeginMenu("Tools")) {
+			toolsMenu(_editor);
 			ImGui::EndMenu();
 		}
 

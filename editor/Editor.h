@@ -54,6 +54,9 @@ namespace RDEEditor {
 
 		bool isConsoleViewActive = false;
 		bool isConsoleViewHovered = false;
+
+		bool compiling = false;
+		bool compilingPopupOpened = false;
 		
 		EditMode editMode = EditMode::Move;
 		uint32_t editModeAxis = EditModeAxis::None;
@@ -80,6 +83,9 @@ namespace RDEEditor {
 		float menuBarHeight = 0.f;
 		float bottomBarWidth = 45.f;
 		
+		Vec2F lastClickOrMovedMousePosition;
+		Vec2F sceneViewOffset;
+
 		Gizmos gizmos;
 		Delegate<void(Editor*, Node*, Graph*)> onHierarchyElementLeftClicked;
 		Delegate<void(Editor*, Node*, Graph*)> onHierarchyElementRightClicked;
@@ -88,11 +94,9 @@ namespace RDEEditor {
 
     class Editor : public Scene {
         UniqueDelegate<void(FrameBuffer*)> redirectRenderingDel;
-		UIText* typedText = nullptr;
 		UniqueDelegate<bool(MouseScrolledEvent&)> mseDel;
 		UniqueDelegate<bool(WindowResizedEvent&)> wreDel;
 		Texture gridTexture;
-		Node* duckNode = nullptr;
 		ShaderID gridShaderID;
 		Color backgroundColor = { 76, 76, 76, 255 };
 		Color gridColor = { 63, 63, 63, 255 };
@@ -101,8 +105,6 @@ namespace RDEEditor {
 			EditorFlags editorFlags;
 			EditorData editorData;
 			Camera* editorCamera;
-			Vec2F lastClickOrMovedMousePosition;
-			Vec2F sceneViewOffset;
 			SpriteRenderer* gridSprite = nullptr;
 
         public:
@@ -127,7 +129,6 @@ namespace RDEEditor {
             void physicsTest();
             void particleSystemTest();
             void localizationTest();
-            std::vector<NodeID> nodes;
 
 			void generateTranslationGuizmo();
 			void generateScaleGuizmo();

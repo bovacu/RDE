@@ -17,10 +17,6 @@
 #include "core/util/Mat2.h"
 #include "core/util/Vec.h"
 
-#if !IS_MOBILE()
-#include "imgui.h"
-#endif
-
 
 
 #define GRID_TEXTURE_SIZE 2500
@@ -42,8 +38,42 @@ namespace RDEEditor {
 			ImGui::EndTooltip();																			\
 		}
 
+	#include <cstdio>
+	#include <iostream>
+	#include <memory>
+	#include <stdexcept>
+	#include <string>
+	#include <array>
+	
+	void exec(const char* _cmd, std::string& _output) {
+		std::array<char, 2048> buffer;
+
+		Util::Log::info("Started to compile...");
+
+		#if IS_LINUX() || IS_MAC()
+		std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(_cmd, "r"), pclose);
+		#else
+		std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(_cmd, "r"), _pclose);
+		#endif
+	
+		if (!pipe) {
+			throw std::runtime_error("popen() failed!");
+		}
+		while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+			_output += buffer.data();
+		}
+	}
+	
+	// Here is used std::functional and not a function pointer so the assigned lambda can use capture flags.
+//	void runCmd(const char* _cmd, std::function<void(const std::string&)> _callback) { 
+//		std::string _output;
+//		auto cmdLambda = [_cmd, &_output] { exec(_cmd, _output); };
+//		auto _ = std::async([cmdLambda, _callback, &_output] { cmdLambda(); _callback(_output); });
+//	}
+
 	#include "EditorThemesModule.cpp"
 	#include "NodeCreator.cpp"
+	#include "EditorToolsMenuModule.cpp"
 	#include "EditorDockingspaceModule.cpp"
 	#include "EditorSceneViewModule.cpp"
 	#include "EditorHierarchyModule.cpp"
@@ -53,6 +83,16 @@ namespace RDEEditor {
 	#include "EditorOverlappingSelectionModule.cpp"
 	#include "EditorToolBarModule.cpp"
 	#include "EditorNodeContextMenuModule.cpp"
+	
+	void createDataForEmptyProject(Editor* _editor) {
+		auto* _duckNode = _editor->graph->createNode("Duck");
+		_duckNode->getTransform()->setPosition(0, 0);
+		auto _texture = _editor->engine->manager.textureManager.getSubTexture("defaultAssets", "duck");
+		auto* _sprite = _duckNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
+			.texture = _texture
+		});
+		_sprite->setFramebuffer(_editor->editorData.gameViewFramebufferID | _editor->editorData.sceneViewFramebufferID);
+	}
 
     void Editor::onInit() {
 		
@@ -94,14 +134,6 @@ namespace RDEEditor {
 		});
 		gridSprite->setShaderID(gridShaderID);
 
-		duckNode = graph->createNode("Duck");
-		nodes.push_back(duckNode->getID());
-		duckNode->getTransform()->setPosition(0, 0);
-		auto _texture = engine->manager.textureManager.getSubTexture("defaultAssets", "duck");
-		auto* _sprite = duckNode->addComponent<SpriteRenderer>(SpriteRendererConfig {
-			.texture = _texture
-		});
-
 		mseDel.bind<&Editor::mouseScrolled>(this);
 		wreDel.bind<&Editor::windowResized>(this);
 
@@ -117,14 +149,16 @@ namespace RDEEditor {
 
 		editorData.sceneViewFramebufferID = editorCamera->framebufferID;
 		editorData.gameViewFramebufferID = getCameras()[0]->framebufferID;
-
-		_sprite->setFramebuffer(editorData.gameViewFramebufferID | editorData.sceneViewFramebufferID);
 		
+		createDataForEmptyProject(this);
+
 		generateTranslationGuizmo();
 		generateScaleGuizmo();
 
 		setTheme(editorFlags.theme);
 		engine->getWindow()->maximizeWindow();
+
+		engine->manager.physics.simulate = false;
     }
 
 	void Editor::generateGridTexture() {
@@ -294,7 +328,7 @@ namespace RDEEditor {
 	void Editor::onImGuiRender(Delta _dt) {
 		dockingSpaceView(this);
 		gameView(this);
-		sceneView(this, &sceneViewOffset);
+		sceneView(this, &editorData.sceneViewOffset);
 		hierarchyView(this);
 		componentsView(this);
 		consoleView(this);
@@ -302,6 +336,8 @@ namespace RDEEditor {
 		nodeRighClickContextMenu(this);
 		
 		toolBar(this);
+
+		compilePopup(this);
 
 		resetID(this);
 	}
@@ -619,11 +655,11 @@ namespace RDEEditor {
 		}
 
 		if(engine->manager.inputManager.isMouseJustPressed(RDE_MOUSE_BUTTON_1)) {
-			lastClickOrMovedMousePosition = engine->manager.inputManager.getMousePosScreenCoords();
+			editorData.lastClickOrMovedMousePosition = engine->manager.inputManager.getMousePosScreenCoords();
 		} else if(engine->manager.inputManager.isMousePressed(RDE_MOUSE_BUTTON_1)) {
 			auto _current = engine->manager.inputManager.getMousePosScreenCoords();
-			auto _diff = _current - lastClickOrMovedMousePosition;
-			lastClickOrMovedMousePosition = _current;
+			auto _diff = _current - editorData.lastClickOrMovedMousePosition;
+			editorData.lastClickOrMovedMousePosition = _current;
 			editorCamera->node->getTransform()->translate(_diff * -editorCamera->getCurrentZoomLevel());
 		}
 	}
@@ -634,7 +670,7 @@ namespace RDEEditor {
 		}
 
 		auto _zoom = editorCamera->getCurrentZoomLevel();
-		editorCamera->node->getTransform()->setPosition(sceneViewOffset.x * _zoom, -sceneViewOffset.y * _zoom);
+		editorCamera->node->getTransform()->setPosition(editorData.sceneViewOffset.x * _zoom, -editorData.sceneViewOffset.y * _zoom);
 	}
 
 	void onHierarchyNodeLeftClicked(Editor* _editor, Node* _node, Graph* _graph) {

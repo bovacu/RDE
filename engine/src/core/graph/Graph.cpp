@@ -108,6 +108,10 @@ namespace RDE {
     }
 
     void Graph::removeNode(Node* _node) {
+		if(_node == getRoot()) {
+			return;
+		}
+
 		unparentNodeInner(_node);
         removeNodeInner(_node);
         if(onDataChanged != nullptr) onDataChanged((void*)_node);
@@ -144,6 +148,10 @@ namespace RDE {
     }
 
     void Graph::setParent(Node* _node, Node* _parent) {
+		if(_node == getRoot()) {
+			return;
+		}
+
         auto* _nodeTransform = _node->getTransform();
 
         if(_nodeTransform->parent == _parent->getID()) {
@@ -197,6 +205,10 @@ namespace RDE {
 	}
 
     void Graph::orphan(Node* _node) {
+		if(_node == getRoot()) {
+			return;
+		}
+
         unparentNodeInner(_node);
         _node->getTransform()->parent = sceneRoot->getID();
         _node->getTransform()->parentTransform = sceneRoot->getTransform();

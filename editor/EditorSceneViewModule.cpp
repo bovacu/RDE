@@ -36,8 +36,8 @@ void sceneView(Editor* _editor, Vec2F* _sceneViewOffset) {
 	auto _windowHalfHeight = viewportSize.y * 0.5f - _titleHeight;
 
 	auto _cameraOffset = _editor->editorCamera->node->getTransform()->getPosition();
-	auto _mouseY = _mousePos.y * _zoom - ((ImGui::GetWindowPos().y + _editor->sceneViewOffset.y) * _zoom + _cameraOffset.y) - _titleHeight * _zoom;
-	auto _mouseX = _mousePos.x * _zoom - ((ImGui::GetWindowPos().x + _editor->sceneViewOffset.x) * _zoom - _cameraOffset.x);
+	auto _mouseY = _mousePos.y * _zoom - ((ImGui::GetWindowPos().y + _editor->editorData.sceneViewOffset.y) * _zoom + _cameraOffset.y) - _titleHeight * _zoom;
+	auto _mouseX = _mousePos.x * _zoom - ((ImGui::GetWindowPos().x + _editor->editorData.sceneViewOffset.x) * _zoom - _cameraOffset.x);
 
 	_editor->editorData.mousePositionOnSceneView = Vec2F { _mouseX - viewportSize.x * 0.5f * _zoom, _windowHalfHeight * _zoom - _mouseY + _titleHeight * 1.5f * _zoom };
 	ImGui::End();

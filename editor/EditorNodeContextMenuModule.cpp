@@ -33,6 +33,15 @@ void nodeRighClickContextMenu(Editor* _editor) {
 			ImGui::EndMenu();
 		}
 
+		if(nodeRighClickContextMenuNode == nodeRightClickGraph->getRoot()) { ImGui::BeginDisabled(true); }
+		if (ImGui::Selectable("Set parent to root")) {
+			nodeRightClickGraph->setParent(nodeRighClickContextMenuNode, nodeRightClickGraph->getRoot());
+			nodeRighClickContextMenuNode = nullptr;
+			nodeContextMenuOpened = false;
+		}
+		if(nodeRighClickContextMenuNode == nodeRightClickGraph->getRoot()) { ImGui::EndDisabled(); }
+
+		if(nodeRighClickContextMenuNode == nodeRightClickGraph->getRoot()) { ImGui::BeginDisabled(true); }
 		if (ImGui::Selectable("Remove node")) {
 			nodeRightClickGraph->removeNode(nodeRighClickContextMenuNode);
 			nodeRighClickContextMenuNode = nullptr;
@@ -40,12 +49,7 @@ void nodeRighClickContextMenu(Editor* _editor) {
 			_editor->editorData.selectedNode.node = nullptr;
 			_editor->editorData.selectedNode.graph = nullptr;
 		}
-
-		if (ImGui::Selectable("Set parent to root")) {
-			nodeRightClickGraph->setParent(nodeRighClickContextMenuNode, nodeRightClickGraph->getRoot());
-			nodeRighClickContextMenuNode = nullptr;
-			nodeContextMenuOpened = false;
-		}
+		if(nodeRighClickContextMenuNode == nodeRightClickGraph->getRoot()) { ImGui::EndDisabled(); }
 
 		ImGui::EndPopup();
 	} else {
