@@ -17,7 +17,9 @@
 #include "core/util/Mat2.h"
 #include "core/util/Vec.h"
 
-
+#if !IS_MOBILE()
+#include "core/graph/ImGuiCore.h"
+#endif
 
 #define GRID_TEXTURE_SIZE 2500
 
