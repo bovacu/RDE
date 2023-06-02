@@ -16,7 +16,7 @@ namespace RDE {
         FT_Int bitmap_top;
         FT_Int bitmap_left;
         
-        unsigned char* buffer;
+        unsigned char* buffer = nullptr;
         FT_Vector advance;
     };
 
