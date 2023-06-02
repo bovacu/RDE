@@ -7,7 +7,7 @@
 #include "core/Core.h"
 
 #if !IS_MOBILE()
-#include "imgui.h"
+#include "imgui_impl_sdl2.h"
 #endif
 
 #endif //RDE_IMGUI_CORE_H
