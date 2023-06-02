@@ -9,5 +9,5 @@ Description: A free, high-quality, and portable font engine.
 Version: 24.3.18
 
 Libs: "-L${libdir}" -lfreetype
-Requires:  
+Requires: zlib 
 Cflags: "-I${includedir}"

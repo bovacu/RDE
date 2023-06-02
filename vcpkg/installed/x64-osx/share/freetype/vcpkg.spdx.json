@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/freetype-x64-osx-2.12.1#3-02ca7c00-b3f5-4a13-b14f-57bf133f972c",
-  "name": "freetype:x64-osx@2.12.1#3 dd397b187e77d9f03ee5bf4472828e314acf3ea3d47a1751e20fb535cbcf9d45",
+  "documentNamespace": "https://spdx.org/spdxdocs/freetype-x64-osx-2.12.1#3-4bc68549-4b98-49b3-8440-8c041dca5a0c",
+  "name": "freetype:x64-osx@2.12.1#3 79316207d1ae360e77f0f8641dee54903cf5816ea86911d1c2817b027bf85770",
   "creationInfo": {
     "creators": [
       "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2023-06-02T16:00:27Z"
+    "created": "2023-06-02T16:37:15Z"
   },
   "relationships": [
     {
@@ -134,7 +134,7 @@
     {
       "name": "freetype:x64-osx",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "dd397b187e77d9f03ee5bf4472828e314acf3ea3d47a1751e20fb535cbcf9d45",
+      "versionInfo": "79316207d1ae360e77f0f8641dee54903cf5816ea86911d1c2817b027bf85770",
       "downloadLocation": "NONE",
       "licenseConcluded": "FTL OR GPL-2.0-or-later",
       "licenseDeclared": "NOASSERTION",

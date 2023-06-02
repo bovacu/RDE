@@ -20,7 +20,7 @@ file(GLOB_RECURSE RDE_CPP_SOURCES engine/src/*.cpp )
 set(CPP_HEADERS)
 set(CPP_SOURCES)
 
-set(SDL2_DIR vcpkg/installed/x64-linux/share/sdl2)
+set(SDL2_DIR vcpkg/installed/x64-osx/share/sdl2)
 set(EnTT_DIR vcpkg/installed/x64-osx/share/entt)
 set(sdl2_image_DIR vcpkg/installed/x64-osx/share/sdl2-image)
 set(SDL2_mixer_DIR vcpkg/installed/x64-osx/share/SDL2_mixer)
@@ -79,8 +79,8 @@ unset(RDE_LIBRARY CACHE)
 
 target_link_libraries(${PROJECT_NAME}
                         PRIVATE
-                        SDL2::SDL2 SDL2::SDL2main SDL2::SDL2-static
-                        ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/installed/x64-osx/lib/libSDL2_image.a
+                        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2main,SDL2::SDL2-static>
+                        $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
                         $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
                         freetype
                         ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/installed/x64-osx/lib/libglad.a
