@@ -2,23 +2,23 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 	<Type Name="entt::basic_registry&lt;*&gt;">
 		<Intrinsic Name="pools_size" Expression="pools.packed.first_base::value.size()"/>
-		<Intrinsic Name="vars_size" Expression="vars.data.packed.first_base::value.size()"/>
+		<Intrinsic Name="vars_size" Expression="vars.ctx.packed.first_base::value.size()"/>
 		<Intrinsic Name="to_entity" Expression="*((entity_traits::entity_type *)&amp;entity) &amp; entity_traits::entity_mask">
 			<Parameter Name="entity" Type="entity_traits::value_type &amp;"/>
 		</Intrinsic>
-		<DisplayString>{{ size={ entities.size() } }}</DisplayString>
+		<DisplayString>{{ size={ epool.size() } }}</DisplayString>
 		<Expand>
-			<Item IncludeView="simple" Name="[entities]">entities,view(simple)nr</Item>
-			<Synthetic Name="[entities]" ExcludeView="simple">
-				<DisplayString>{ entities.size() }</DisplayString>
+			<Item IncludeView="simple" Name="[epool]">epool,view(simple)nr</Item>
+			<Synthetic Name="[epool]" ExcludeView="simple">
+				<DisplayString>{ epool.size() }</DisplayString>
 				<Expand>
 					<CustomListItems>
 						<Variable Name="pos" InitialValue="0" />
-						<Variable Name="last" InitialValue="entities.size()"/>
+						<Variable Name="last" InitialValue="epool.size()"/>
 						<Loop>
 							<Break Condition="pos == last"/>
-							<If Condition="to_entity(entities[pos]) == pos">
-								<Item Name="[{ pos }]">entities[pos]</Item>
+							<If Condition="to_entity(epool[pos]) == pos">
+								<Item Name="[{ pos }]">epool[pos]</Item>
 							</If>
 							<Exec>++pos</Exec>
 						</Loop>
@@ -32,8 +32,8 @@
 						<Variable Name="it" InitialValue="to_entity(free_list)" />
 						<Loop>
 							<Break Condition="it == entity_traits::entity_mask"/>
-							<Item Name="[{ it }]">entities[it]</Item>
-							<Exec>it = to_entity(entities[it])</Exec>
+							<Item Name="[{ it }]">epool[it]</Item>
+							<Exec>it = to_entity(epool[it])</Exec>
 						</Loop>
 					</CustomListItems>
 				</Expand>
@@ -57,7 +57,7 @@
 				<Expand>
 					<IndexListItems>
 						<Size>vars_size()</Size>
-						<ValueNode>vars.data.packed.first_base::value[$i].element.second</ValueNode>
+						<ValueNode>vars.ctx.packed.first_base::value[$i].element.second</ValueNode>
 					</IndexListItems>
 				</Expand>
 			</Synthetic>
@@ -122,7 +122,7 @@
 				<Loop>
 					<Break Condition="pos == last"/>
 					<If Condition="*((base_type::entity_traits::entity_type *)&amp;base_type::packed[pos]) &lt; ~base_type::entity_traits::entity_mask">
-						<Item Name="[{ pos }]">packed.first_base::value[pos / comp_traits::page_size][pos &amp; (comp_traits::page_size - 1)]</Item>
+						<Item Name="[{ pos }:{ base_type::packed[pos] }]">packed.first_base::value[pos / comp_traits::page_size][pos &amp; (comp_traits::page_size - 1)]</Item>
 					</If>
 					<Exec>++pos</Exec>
 				</Loop>
@@ -131,6 +131,14 @@
 	</Type>
 	<Type Name="entt::basic_view&lt;*&gt;">
 		<DisplayString>{{ size_hint={ view->packed.size() } }}</DisplayString>
+		<Expand>
+			<Item Name="[pools]">pools,na</Item>
+			<Item Name="[filter]">filter,na</Item>
+		</Expand>
+	</Type>
+	<Type Name="entt::basic_runtime_view&lt;*&gt;">
+		<DisplayString Condition="pools.size() != 0u">{{ size_hint={ pools[0]->packed.size() } }}</DisplayString>
+		<DisplayString>{{ size_hint=0 }}</DisplayString>
 		<Expand>
 			<Item Name="[pools]">pools,na</Item>
 			<Item Name="[filter]">filter,na</Item>

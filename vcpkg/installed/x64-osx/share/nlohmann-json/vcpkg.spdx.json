@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/nlohmann-json-x64-osx-3.11.2-0c3624d4-e40b-43f0-8665-ae6258f3623f",
-  "name": "nlohmann-json:x64-osx@3.11.2 c7278ec20a3638129afaeea5cecf80929152599d6f7c02e6129f82af4d7c753a",
+  "documentNamespace": "https://spdx.org/spdxdocs/nlohmann-json-x64-osx-3.11.2-a11be5f6-61aa-4e8b-82d2-d719c7d2ef3f",
+  "name": "nlohmann-json:x64-osx@3.11.2 ef37ec6601386810a94d3f4fec6164bce097581424092388e46f3b457af3da65",
   "creationInfo": {
     "creators": [
-      "Tool: vcpkg-522aa94e9d261c7d7b2f079bf2591ca62df5c714"
+      "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2022-10-04T17:03:03Z"
+    "created": "2023-06-02T16:02:54Z"
   },
   "relationships": [
     {
@@ -74,7 +74,7 @@
     {
       "name": "nlohmann-json:x64-osx",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "c7278ec20a3638129afaeea5cecf80929152599d6f7c02e6129f82af4d7c753a",
+      "versionInfo": "ef37ec6601386810a94d3f4fec6164bce097581424092388e46f3b457af3da65",
       "downloadLocation": "NONE",
       "licenseConcluded": "MIT",
       "licenseDeclared": "NOASSERTION",

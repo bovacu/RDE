@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/libpng-x64-osx-1.6.37#19-81cd991d-aa13-4503-b297-1bfcb45a8f85",
-  "name": "libpng:x64-osx@1.6.37#19 96571fb2c5e166b38cb726306abae03950aa6ac0521421a469ed339bdf6b20a9",
+  "documentNamespace": "https://spdx.org/spdxdocs/libpng-x64-osx-1.6.39#1-10d0716d-cc12-4d6f-a542-f2d3482dcec4",
+  "name": "libpng:x64-osx@1.6.39#1 c213439361a517dc620dc8c6886d662a8b0b1ed3ee3c2d19b5169f581c75ca7e",
   "creationInfo": {
     "creators": [
-      "Tool: vcpkg-522aa94e9d261c7d7b2f079bf2591ca62df5c714"
+      "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2022-10-04T16:58:20Z"
+    "created": "2023-06-02T15:57:49Z"
   },
   "relationships": [
     {
@@ -58,16 +58,6 @@
       "relatedSpdxElement": "SPDXRef-file-7"
     },
     {
-      "spdxElementId": "SPDXRef-port",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-file-8"
-    },
-    {
-      "spdxElementId": "SPDXRef-port",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-file-9"
-    },
-    {
       "spdxElementId": "SPDXRef-binary",
       "relationshipType": "GENERATED_FROM",
       "relatedSpdxElement": "SPDXRef-port"
@@ -98,6 +88,11 @@
       "relatedSpdxElement": "SPDXRef-port"
     },
     {
+      "spdxElementId": "SPDXRef-file-4",
+      "relationshipType": "DEPENDENCY_MANIFEST_OF",
+      "relatedSpdxElement": "SPDXRef-port"
+    },
+    {
       "spdxElementId": "SPDXRef-file-5",
       "relationshipType": "CONTAINED_BY",
       "relatedSpdxElement": "SPDXRef-port"
@@ -108,22 +103,7 @@
       "relatedSpdxElement": "SPDXRef-port"
     },
     {
-      "spdxElementId": "SPDXRef-file-6",
-      "relationshipType": "DEPENDENCY_MANIFEST_OF",
-      "relatedSpdxElement": "SPDXRef-port"
-    },
-    {
       "spdxElementId": "SPDXRef-file-7",
-      "relationshipType": "CONTAINED_BY",
-      "relatedSpdxElement": "SPDXRef-port"
-    },
-    {
-      "spdxElementId": "SPDXRef-file-8",
-      "relationshipType": "CONTAINED_BY",
-      "relatedSpdxElement": "SPDXRef-port"
-    },
-    {
-      "spdxElementId": "SPDXRef-file-9",
       "relationshipType": "CONTAINED_BY",
       "relatedSpdxElement": "SPDXRef-port"
     }
@@ -132,7 +112,7 @@
     {
       "name": "libpng",
       "SPDXID": "SPDXRef-port",
-      "versionInfo": "1.6.37#19",
+      "versionInfo": "1.6.39#1",
       "downloadLocation": "git+https://github.com/Microsoft/vcpkg#ports/libpng",
       "homepage": "https://github.com/glennrp/libpng",
       "licenseConcluded": "libpng-2.0",
@@ -144,7 +124,7 @@
     {
       "name": "libpng:x64-osx",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "96571fb2c5e166b38cb726306abae03950aa6ac0521421a469ed339bdf6b20a9",
+      "versionInfo": "c213439361a517dc620dc8c6886d662a8b0b1ed3ee3c2d19b5169f581c75ca7e",
       "downloadLocation": "NONE",
       "licenseConcluded": "libpng-2.0",
       "licenseDeclared": "NOASSERTION",
@@ -154,14 +134,14 @@
     {
       "SPDXID": "SPDXRef-resource-1",
       "name": "glennrp/libpng",
-      "downloadLocation": "git+https://github.com/glennrp/libpng@v${LIBPNG_VER}",
+      "downloadLocation": "git+https://github.com/glennrp/libpng@v${VERSION}",
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "ccb3705c23b2724e86d072e2ac8cfc380f41fadfd6977a248d588a8ad57b6abe0e4155e525243011f245e98d9b7afbe2e8cc7fd4ff7d82fcefb40c0f48f88918"
+          "checksumValue": "d61408cee5850582baa57166547ccab6cc171bc809076e53494ace26157fd7787c3209e3b757fd68c541bfb95afe309745d887fb5cd2005b2024af7355c809a0"
         }
       ]
     },
@@ -169,38 +149,26 @@
       "SPDXID": "SPDXRef-resource-2",
       "name": "${LIBPNG_APNG_PATCH_NAME}.gz",
       "packageFileName": "${LIBPNG_APNG_PATCH_NAME}.gz",
-      "downloadLocation": "https://downloads.sourceforge.net/project/libpng-apng/libpng16/${LIBPNG_VER}/${LIBPNG_APNG_PATCH_NAME}.gz",
+      "downloadLocation": "https://downloads.sourceforge.net/project/libpng-apng/libpng16/${VERSION}/${LIBPNG_APNG_PATCH_NAME}.gz",
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "226adcb3a8c60f2267fe2976ab531329ae43c2603dab4d0cf8f16217d64069936b879f3d6516b75d259c47d6f5c5b1f24f887602206c8e46abde0fb7f5c7946b"
+          "checksumValue": "97a182da0b3b54aecf735e3655d8e8f1a569ae957b23fc3d7a9c8cc65dcdd26f34f173ce9f60af99b01d5347267b2afefaf787c500ce1005e86bf2810b3d0738"
         }
       ]
     }
   ],
   "files": [
     {
-      "fileName": "./macos-arch-fix.patch",
+      "fileName": "./fix-msa-support-for-mips.patch",
       "SPDXID": "SPDXRef-file-0",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "108a26b1fa3bb600fe6dbc2295ab9c84c294ef1870530658a9879a3fe7f1c94b"
-        }
-      ],
-      "licenseConcluded": "NOASSERTION",
-      "copyrightText": "NOASSERTION"
-    },
-    {
-      "fileName": "./fix-msa-support-for-mips.patch",
-      "SPDXID": "SPDXRef-file-1",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "64a50f01212936030cd7fd507c9f10ac8f520e94da476bf64b3272d1e0c14e5a"
+          "checksumValue": "ffb6fa8a946160d912310d1d106cea7d921ea639ba49190ea4d82b54017b4912"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -208,23 +176,11 @@
     },
     {
       "fileName": "./cmake.patch",
-      "SPDXID": "SPDXRef-file-2",
+      "SPDXID": "SPDXRef-file-1",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "e7704273444d2e5088b12dde455f9d69c2c4f789bd81867e258740648cac4d63"
-        }
-      ],
-      "licenseConcluded": "NOASSERTION",
-      "copyrightText": "NOASSERTION"
-    },
-    {
-      "fileName": "./use_abort.patch",
-      "SPDXID": "SPDXRef-file-3",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "06cc06ddee37a5f999bfde2eb31913a1c544357c04dda297b10e33b7f0cae8eb"
+          "checksumValue": "c9932c4c8eb4da89e6a6bb4c278f1c34d8f5373daf40969b157c8eb41ba4b983"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -232,7 +188,7 @@
     },
     {
       "fileName": "./usage",
-      "SPDXID": "SPDXRef-file-4",
+      "SPDXID": "SPDXRef-file-2",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -244,11 +200,11 @@
     },
     {
       "fileName": "./portfile.cmake",
-      "SPDXID": "SPDXRef-file-5",
+      "SPDXID": "SPDXRef-file-3",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "3b8e3a08bc1c350a733a26bd929f1fdeb5a1b5f8a1faa04df93f100ed3b5f6df"
+          "checksumValue": "c2390173de2e912b3206a1f38c5a5ab3508e779f938aa2d804246db7f18a9f0e"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -256,11 +212,11 @@
     },
     {
       "fileName": "./vcpkg.json",
-      "SPDXID": "SPDXRef-file-6",
+      "SPDXID": "SPDXRef-file-4",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "06ad0c640eaa3b2059c053bfddaf90735a1370bc2c0af3c76529cc486d0a5cfa"
+          "checksumValue": "1be3ab2a12d4f3d4bac144a6ed899d86430c31d5157618eb890019cf93c3d27b"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -268,11 +224,11 @@
     },
     {
       "fileName": "./pkgconfig.patch",
-      "SPDXID": "SPDXRef-file-7",
+      "SPDXID": "SPDXRef-file-5",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "2a330965f9ecab1679817690aa3ab39acdde2450b700da91f2b60764d6c20d13"
+          "checksumValue": "ed14a745045bcda01d1fad05760047dc686c500958de12e2438a297d0d65af4b"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -280,11 +236,11 @@
     },
     {
       "fileName": "./fix-export-targets.patch",
-      "SPDXID": "SPDXRef-file-8",
+      "SPDXID": "SPDXRef-file-6",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "119cf29dab0b9e60d9abdda395b39cab5e12624c4f33916283cc839e882242bd"
+          "checksumValue": "a531ab5c8bcc2b76a1dbe5a47e27b2307c380226dc78936c582aaa3fb47726bd"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -292,7 +248,7 @@
     },
     {
       "fileName": "./vcpkg-cmake-wrapper.cmake",
-      "SPDXID": "SPDXRef-file-9",
+      "SPDXID": "SPDXRef-file-7",
       "checksums": [
         {
           "algorithm": "SHA256",

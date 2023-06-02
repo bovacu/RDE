@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/sdl2-image-x64-osx-2.0.5#7-1715ead3-4332-48f9-9c46-cf0065131290",
-  "name": "sdl2-image:x64-osx@2.0.5#7 5eca045783fb0eddc9a94bd3a569dc643128abe26be58bd7006e7630e9121494",
+  "documentNamespace": "https://spdx.org/spdxdocs/sdl2-image-x64-osx-2.6.3-039a4c6f-d935-493c-8df1-4e65259176df",
+  "name": "sdl2-image:x64-osx@2.6.3 a35d588623ad6da6d8f9e61dd6574e2e5084ea3f4746b56984d77f2b453f681b",
   "creationInfo": {
     "creators": [
-      "Tool: vcpkg-522aa94e9d261c7d7b2f079bf2591ca62df5c714"
+      "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2022-10-04T17:01:56Z"
+    "created": "2023-06-02T16:09:18Z"
   },
   "relationships": [
     {
@@ -68,13 +68,13 @@
       "relatedSpdxElement": "SPDXRef-port"
     },
     {
-      "spdxElementId": "SPDXRef-file-4",
-      "relationshipType": "CONTAINED_BY",
+      "spdxElementId": "SPDXRef-file-3",
+      "relationshipType": "DEPENDENCY_MANIFEST_OF",
       "relatedSpdxElement": "SPDXRef-port"
     },
     {
       "spdxElementId": "SPDXRef-file-4",
-      "relationshipType": "DEPENDENCY_MANIFEST_OF",
+      "relationshipType": "CONTAINED_BY",
       "relatedSpdxElement": "SPDXRef-port"
     }
   ],
@@ -82,9 +82,9 @@
     {
       "name": "sdl2-image",
       "SPDXID": "SPDXRef-port",
-      "versionInfo": "2.0.5#7",
+      "versionInfo": "2.6.3",
       "downloadLocation": "git+https://github.com/Microsoft/vcpkg#ports/sdl2-image",
-      "homepage": "https://www.libsdl.org/projects/SDL_image",
+      "homepage": "https://github.com/libsdl-org/SDL_image",
       "licenseConcluded": "Zlib",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
@@ -94,7 +94,7 @@
     {
       "name": "sdl2-image:x64-osx",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "5eca045783fb0eddc9a94bd3a569dc643128abe26be58bd7006e7630e9121494",
+      "versionInfo": "a35d588623ad6da6d8f9e61dd6574e2e5084ea3f4746b56984d77f2b453f681b",
       "downloadLocation": "NONE",
       "licenseConcluded": "Zlib",
       "licenseDeclared": "NOASSERTION",
@@ -103,40 +103,39 @@
     },
     {
       "SPDXID": "SPDXRef-resource-1",
-      "name": "SDL2_image-${SDL2_IMAGE_VERSION}.zip",
-      "packageFileName": "SDL2_image-${SDL2_IMAGE_VERSION}.zip",
-      "downloadLocation": "https://www.libsdl.org/projects/SDL_image/release/SDL2_image-${SDL2_IMAGE_VERSION}.zip",
+      "name": "libsdl-org/SDL_image",
+      "downloadLocation": "git+https://github.com/libsdl-org/SDL_image@release-${VERSION}",
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "c10e28a0d50fb7a6c985ffe8904370ab4faeb9bbed6f2ffbc81536422e8f8bb66eddbf69b12423082216c2bcfcb617cba4c5970f63fe75bfacccd9f99f02a6a2"
+          "checksumValue": "ffd0f838525e17a43d03ea5d4a094b0c79b2627bdbfb4589645abfb606c594773d60184de31bda45999421da75a69f1987ed696b255991212e498161102972b1"
         }
       ]
     }
   ],
   "files": [
     {
-      "fileName": "./CMakeLists.txt",
+      "fileName": "./fix-findwebp.patch",
       "SPDXID": "SPDXRef-file-0",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "800108c03717144b1a565db4b18cfd3ef742a01af554cb0740f96ebad5f132f3"
+          "checksumValue": "e0d39a18bf09e06c9a433ae9a28a4bdff30be16181691c818cda0241bc5519e5"
         }
       ],
       "licenseConcluded": "NOASSERTION",
       "copyrightText": "NOASSERTION"
     },
     {
-      "fileName": "./0001-sdl2-image-potentially-uninitialized_local-pointer-variable-start.patch",
+      "fileName": "./usage",
       "SPDXID": "SPDXRef-file-1",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "9f8d49655412882c0aab5d88d8d406cdbc8ce0e720bec16ddb22e905bec8c2d7"
+          "checksumValue": "d78ce4ac61e158f4a5056753dd2bd7e3b11e7ded1f10a36c8e749029940e651f"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -148,19 +147,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "97aee7e598f7847e05f9c72b661b86a000fbc911ab62090da056a651259b014e"
-        }
-      ],
-      "licenseConcluded": "NOASSERTION",
-      "copyrightText": "NOASSERTION"
-    },
-    {
-      "fileName": "./sdl2-image-config.cmake.in",
-      "SPDXID": "SPDXRef-file-3",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "3cc87ab71caf71721a49fc7f1fcd2d3cc003213467e30bdb3d8b52429f504efe"
+          "checksumValue": "127717de2300c28cd32fe362e46b7c0be95f4e5908706f95a07204a6e33843af"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -168,11 +155,23 @@
     },
     {
       "fileName": "./vcpkg.json",
+      "SPDXID": "SPDXRef-file-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ada95c89b47456a245c147722dbaeb93fb0916b9a7e73e9bdc886ad3d8b1a926"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./fix-pkgconfig.patch",
       "SPDXID": "SPDXRef-file-4",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "a0844083451cf9331f964d1b9bb292921e9c253f730b25960f907344f4f28d46"
+          "checksumValue": "691bac91e7992bc8d3679bfff58f78c726734ef3bb01b47f89ec95c26545f4cf"
         }
       ],
       "licenseConcluded": "NOASSERTION",

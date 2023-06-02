@@ -12,29 +12,29 @@ set(SDL2MIXER_VENDORED              OFF)
 
 set(SDL2MIXER_CMD                   OFF)
 
-set(SDL2MIXER_FLAC_LIBFLAC          OFF)
-set(SDL2MIXER_FLAC_DRFLAC           ON)
+set(SDL2MIXER_FLAC_LIBFLAC          ON)
+set(SDL2MIXER_FLAC_DRFLAC           OFF)
 
 set(SDL2MIXER_MOD                   ON)
-set(SDL2MIXER_MOD_MODPLUG           OFF)
+set(SDL2MIXER_MOD_MODPLUG           ON)
 set(SDL2MIXER_MOD_XMP               OFF)
 set(SDL2MIXER_MOD_XMP_LITE          OFF)
 
 set(SDL2MIXER_MP3                   ON)
-set(SDL2MIXER_MP3_DRMP3             ON)
+set(SDL2MIXER_MP3_DRMP3             OFF)
 set(SDL2MIXER_MP3_MPG123            ON)
 
 set(SDL2MIXER_MIDI                  ON)
-set(SDL2MIXER_MIDI_FLUIDSYNTH       OFF)
-set(SDL2MIXER_MIDI_NATIVE           ON)
-set(SDL2MIXER_MIDI_TIMIDITY         ON)
+set(SDL2MIXER_MIDI_FLUIDSYNTH       ON)
+set(SDL2MIXER_MIDI_NATIVE           OFF)
+set(SDL2MIXER_MIDI_TIMIDITY         OFF)
 
-set(SDL2MIXER_OPUS                  OFF)
+set(SDL2MIXER_OPUS                  ON)
 
-set(SDL2MIXER_VORBIS                STB)
-set(SDL2MIXER_VORBIS_STB            ON)
+set(SDL2MIXER_VORBIS                VORBISFILE)
+set(SDL2MIXER_VORBIS_STB            OFF)
 set(SDL2MIXER_VORBIS_TREMOR         OFF)
-set(SDL2MIXER_VORBIS_VORBISFILE     OFF)
+set(SDL2MIXER_VORBIS_VORBISFILE     ON)
 
 set(SDL2MIXER_WAVE                  ON)
 
@@ -54,7 +54,7 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/SDL2_mixer-static-targets.cmake")
 
 include(CMakeFindDependencyMacro)
     if(SDL2MIXER_FLAC_LIBFLAC AND NOT SDL2MIXER_VENDORED AND NOT TARGET FLAC::FLAC)
-        find_dependency(FLAC)
+        find_dependency(FLAC CONFIG)
     endif()
 
     if(SDL2MIXER_MOD_MODPLUG AND NOT SDL2MIXER_VENDORED AND NOT TARGET modplug::modplug)
@@ -69,20 +69,23 @@ include(CMakeFindDependencyMacro)
         find_dependency(libxmp-lite)
     endif()
 
-    if(SDL2MIXER_MP3_MPG123 AND NOT SDL2MIXER_VENDORED AND NOT TARGET MPG123::mpg123)
-        find_dependency(MPG123)
+    if(SDL2MIXER_MP3_MPG123 AND NOT SDL2MIXER_VENDORED AND NOT TARGET MPG123::libmpg123)
+        find_dependency(MPG123 CONFIG)
     endif()
 
-    if(SDL2MIXER_MIDI_FLUIDSYNTH AND NOT SDL2MIXER_VENDORED AND NOT TARGET FluidSynth::FluidSynth)
-        find_dependency(FluidSynth)
+    if(SDL2MIXER_MIDI_FLUIDSYNTH AND NOT SDL2MIXER_VENDORED AND NOT TARGET FluidSynth::libfluidsynth)
+        find_dependency(FluidSynth CONFIG)
     endif()
 
     if(SDL2MIXER_VORBIS_TREMOR AND NOT SDL2MIXER_VENDORED AND NOT TARGET tremor::tremor)
         find_dependency(tremor)
     endif()
 
-    if(SDL2MIXER_VORBIS_VORBISFILE AND NOT SDL2MIXER_VENDORED AND NOT TARGET vorbisfile::vorbisfile)
-        find_dependency(vorbisfile)
+    if(SDL2MIXER_VORBIS_VORBISFILE AND NOT SDL2MIXER_VENDORED AND NOT TARGET Vorbis::vorbisfile)
+        find_dependency(Vorbis CONFIG)
+    endif()
+    if(SDL2MIXER_OPUS AND NOT SDL2MIXER_VENDORED AND NOT TARGET OpusFile::opusfile)
+        find_dependency(OpusFile CONFIG)
     endif()
 
     if((NOT SDL2MIXER_VENDORED AND SDL2MIXER_MOD_MODPLUG) OR (HAIKU AND SDL2MIXER_MIDI_NATIVE))

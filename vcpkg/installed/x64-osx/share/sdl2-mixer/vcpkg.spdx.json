@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/sdl2-mixer-x64-osx-2.6.1#1-6618eb8c-2b4a-40b6-bf37-678fa3dc3796",
-  "name": "sdl2-mixer:x64-osx@2.6.1#1 4ede9ec9c4c7c0eb570c3171eb1cb4d8fddecf35bce9a1dc1cea9405f520c851",
+  "documentNamespace": "https://spdx.org/spdxdocs/sdl2-mixer-x64-osx-2.6.3#1-c309ca39-f268-4773-b442-f3370ce754a5",
+  "name": "sdl2-mixer:x64-osx@2.6.3#1 8b24bd140eacdf36acb5b8b3975bed46e7daf57a17aa0287c95dcb841f3dce9b",
   "creationInfo": {
     "creators": [
-      "Tool: vcpkg-522aa94e9d261c7d7b2f079bf2591ca62df5c714"
+      "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2022-10-04T17:02:13Z"
+    "created": "2023-06-02T16:19:42Z"
   },
   "relationships": [
     {
@@ -41,6 +41,11 @@
       "spdxElementId": "SPDXRef-port",
       "relationshipType": "CONTAINS",
       "relatedSpdxElement": "SPDXRef-file-4"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-5"
     },
     {
       "spdxElementId": "SPDXRef-binary",
@@ -76,13 +81,18 @@
       "spdxElementId": "SPDXRef-file-4",
       "relationshipType": "CONTAINED_BY",
       "relatedSpdxElement": "SPDXRef-port"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-5",
+      "relationshipType": "CONTAINED_BY",
+      "relatedSpdxElement": "SPDXRef-port"
     }
   ],
   "packages": [
     {
       "name": "sdl2-mixer",
       "SPDXID": "SPDXRef-port",
-      "versionInfo": "2.6.1#1",
+      "versionInfo": "2.6.3#1",
       "downloadLocation": "git+https://github.com/Microsoft/vcpkg#ports/sdl2-mixer",
       "homepage": "https://github.com/libsdl-org/SDL_mixer",
       "licenseConcluded": "Zlib",
@@ -94,7 +104,7 @@
     {
       "name": "sdl2-mixer:x64-osx",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "4ede9ec9c4c7c0eb570c3171eb1cb4d8fddecf35bce9a1dc1cea9405f520c851",
+      "versionInfo": "8b24bd140eacdf36acb5b8b3975bed46e7daf57a17aa0287c95dcb841f3dce9b",
       "downloadLocation": "NONE",
       "licenseConcluded": "Zlib",
       "licenseDeclared": "NOASSERTION",
@@ -104,14 +114,14 @@
     {
       "SPDXID": "SPDXRef-resource-1",
       "name": "libsdl-org/SDL_mixer",
-      "downloadLocation": "git+https://github.com/libsdl-org/SDL_mixer@1cf51b6e16552e4118d90799ef752f7644efb9fd",
+      "downloadLocation": "git+https://github.com/libsdl-org/SDL_mixer@release-${VERSION}",
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "c18c5d374ba1db8b07c796be5acae3e82b2191c43f9e1156b86f5ce6a088bd8200d9b7feee36de88d518f1ee2a6ff7410e911d37ac641ee4b46f7b098bf916fe"
+          "checksumValue": "74c2b449e8a9928679d42e25bd7a5967e41fe9d51732f26197c6bbe1db9170be784125b7f268476050017f3dc970497e09a0409d50731026a18355375d0369ce"
         }
       ]
     }
@@ -147,7 +157,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "0aba02d1baa5d0e55876245fdd29fbd076f0356467c9704b187623be190aa915"
+          "checksumValue": "14851fe5baee6c9772ce57aa9659c7e0004186d6a3422ab945abb780e0336323"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -159,7 +169,19 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "972f62f7a8976ec2417bc855a701dfe24e94dfa97b990c3b520ba356b196e738"
+          "checksumValue": "12fedc7f0caabcfaf3fc3d585e987a28e24e8432893af210515d9d377d38ae02"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./fix-deps-targets.patch",
+      "SPDXID": "SPDXRef-file-4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5f152f36c4d627c5177b20400202e9766e94f115cc6946c8f90c730aa487cf12"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -167,7 +189,7 @@
     },
     {
       "fileName": "./fix-pkgconfig.patch",
-      "SPDXID": "SPDXRef-file-4",
+      "SPDXID": "SPDXRef-file-5",
       "checksums": [
         {
           "algorithm": "SHA256",

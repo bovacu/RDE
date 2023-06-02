@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2022 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -72,6 +72,7 @@
 #define HAVE_STRING_H 1
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_WCHAR_H 1
+/* #undef HAVE_LINUX_INPUT_H */
 /* #undef HAVE_PTHREAD_NP_H */
 #define HAVE_LIBUNWIND_H 1
 
@@ -139,6 +140,7 @@
 #define HAVE_STRCASECMP 1
 /* #undef HAVE__STRNICMP */
 #define HAVE_STRNCASECMP 1
+#define HAVE_STRCASESTR 1
 #define HAVE_SSCANF 1
 #define HAVE_VSSCANF 1
 #define HAVE_VSNPRINTF 1
@@ -198,7 +200,7 @@
 /* #undef HAVE_GETPAGESIZE */
 #define HAVE_MPROTECT 1
 #define HAVE_ICONV 1
-/* #undef HAVE_PTHREAD_SETNAME_NP */
+#define HAVE_PTHREAD_SETNAME_NP 1
 /* #undef HAVE_PTHREAD_SET_NAME_NP */
 /* #undef HAVE_SEM_TIMEDWAIT */
 /* #undef HAVE_GETAUXVAL */
@@ -206,14 +208,11 @@
 #define HAVE_POLL 1
 #define HAVE__EXIT 1
 
-#elif defined(__WIN32__)
+#else
 #define HAVE_STDARG_H 1
 #define HAVE_STDDEF_H 1
+#define HAVE_STDINT_H 1
 #define HAVE_FLOAT_H 1
-
-#else
-/* We may need some replacement for stdarg.h here */
-#include <stdarg.h>
 #endif /* HAVE_LIBC */
 
 /* #undef HAVE_ALTIVEC_H */
@@ -224,6 +223,7 @@
 /* #undef HAVE_INOTIFY_INIT */
 /* #undef HAVE_INOTIFY_INIT1 */
 /* #undef HAVE_INOTIFY */
+/* #undef HAVE_LIBUSB */
 #define HAVE_O_CLOEXEC 1
 
 /* Apple platforms might be building universal binaries, where Intel builds
@@ -311,7 +311,6 @@
 /* #undef SDL_AUDIO_DRIVER_NAS_DYNAMIC */
 /* #undef SDL_AUDIO_DRIVER_NETBSD */
 /* #undef SDL_AUDIO_DRIVER_OSS */
-/* #undef SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H */
 /* #undef SDL_AUDIO_DRIVER_PAUDIO */
 /* #undef SDL_AUDIO_DRIVER_PIPEWIRE */
 /* #undef SDL_AUDIO_DRIVER_PIPEWIRE_DYNAMIC */
@@ -327,6 +326,7 @@
 /* #undef SDL_AUDIO_DRIVER_VITA */
 /* #undef SDL_AUDIO_DRIVER_PSP */
 /* #undef SDL_AUDIO_DRIVER_PS2 */
+/* #undef SDL_AUDIO_DRIVER_N3DS */
 
 /* Enable various input drivers */
 /* #undef SDL_INPUT_LINUXEV */
@@ -351,6 +351,7 @@
 /* #undef SDL_JOYSTICK_VITA */
 /* #undef SDL_JOYSTICK_PSP */
 /* #undef SDL_JOYSTICK_PS2 */
+/* #undef SDL_JOYSTICK_N3DS */
 /* #undef SDL_HAPTIC_DUMMY */
 /* #undef SDL_HAPTIC_LINUX */
 #define SDL_HAPTIC_IOKIT 1
@@ -365,6 +366,7 @@
 /* #undef SDL_SENSOR_WINDOWS */
 #define SDL_SENSOR_DUMMY 1
 /* #undef SDL_SENSOR_VITA */
+/* #undef SDL_SENSOR_N3DS */
 
 /* Enable various shared object loading systems */
 #define SDL_LOADSO_DLOPEN 1
@@ -383,6 +385,7 @@
 /* #undef SDL_THREAD_VITA */
 /* #undef SDL_THREAD_PSP */
 /* #undef SDL_THREAD_PS2 */
+/* #undef SDL_THREAD_N3DS */
 
 /* Enable various timer systems */
 /* #undef SDL_TIMER_HAIKU */
@@ -393,6 +396,7 @@
 /* #undef SDL_TIMER_VITA */
 /* #undef SDL_TIMER_PSP */
 /* #undef SDL_TIMER_PS2 */
+/* #undef SDL_TIMER_N3DS */
 
 /* Enable various video drivers */
 /* #undef SDL_VIDEO_DRIVER_ANDROID */
@@ -403,7 +407,7 @@
 /* #undef SDL_VIDEO_DRIVER_DIRECTFB */
 /* #undef SDL_VIDEO_DRIVER_DIRECTFB_DYNAMIC */
 #define SDL_VIDEO_DRIVER_DUMMY 1
-/* #undef SDL_VIDEO_DRIVER_OFFSCREEN */
+#define SDL_VIDEO_DRIVER_OFFSCREEN 1
 /* #undef SDL_VIDEO_DRIVER_WINDOWS */
 /* #undef SDL_VIDEO_DRIVER_WINRT */
 /* #undef SDL_VIDEO_DRIVER_WAYLAND */
@@ -446,6 +450,7 @@
 /* #undef SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS */
 /* #undef SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM */
 /* #undef SDL_VIDEO_DRIVER_VITA */
+/* #undef SDL_VIDEO_DRIVER_N3DS */
 
 /* #undef SDL_VIDEO_RENDER_D3D */
 /* #undef SDL_VIDEO_RENDER_D3D11 */
@@ -489,6 +494,7 @@
 /* #undef SDL_POWER_HARDWIRED */
 /* #undef SDL_POWER_VITA */
 /* #undef SDL_POWER_PSP */
+/* #undef SDL_POWER_N3DS */
 
 /* Enable system filesystem support */
 /* #undef SDL_FILESYSTEM_ANDROID */
@@ -503,6 +509,7 @@
 /* #undef SDL_FILESYSTEM_VITA */
 /* #undef SDL_FILESYSTEM_PSP */
 /* #undef SDL_FILESYSTEM_PS2 */
+/* #undef SDL_FILESYSTEM_N3DS */
 
 /* Enable misc subsystem */
 /* #undef SDL_MISC_DUMMY */
@@ -532,24 +539,9 @@
 /* #undef SDL_VIDEO_VITA_PVR */
 /* #undef SDL_VIDEO_VITA_PVR_OGL */
 
-#if !defined(__WIN32__) && !defined(__WINRT__)
-#  if !defined(_STDINT_H_) && !defined(_STDINT_H) && !defined(HAVE_STDINT_H) && !defined(_HAVE_STDINT_H)
-typedef unsigned int size_t;
-typedef signed char int8_t;
-typedef unsigned char uint8_t;
-typedef signed short int16_t;
-typedef unsigned short uint16_t;
-typedef signed int int32_t;
-typedef unsigned int uint32_t;
-typedef signed long long int64_t;
-typedef unsigned long long uint64_t;
-typedef unsigned long uintptr_t;
-#  endif /* if (stdint.h isn't available) */
-#else /* __WIN32__ */
-#  if !defined(_STDINT_H_) && !defined(HAVE_STDINT_H) && !defined(_HAVE_STDINT_H)
-#    if defined(__GNUC__) || defined(__DMC__) || defined(__WATCOMC__) || defined(__BORLANDC__) || defined(__CODEGEARC__)
-#define HAVE_STDINT_H	1
-#    elif defined(_MSC_VER)
+#if !defined(HAVE_STDINT_H) && !defined(_STDINT_H_)
+/* Most everything except Visual Studio 2008 and earlier has stdint.h now */
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
 typedef signed __int8 int8_t;
 typedef unsigned __int8 uint8_t;
 typedef signed __int16 int16_t;
@@ -558,37 +550,15 @@ typedef signed __int32 int32_t;
 typedef unsigned __int32 uint32_t;
 typedef signed __int64 int64_t;
 typedef unsigned __int64 uint64_t;
-#      ifndef _UINTPTR_T_DEFINED
-#        ifdef  _WIN64
+#ifndef _UINTPTR_T_DEFINED
+#ifdef  _WIN64
 typedef unsigned __int64 uintptr_t;
-#          else
+#else
 typedef unsigned int uintptr_t;
-#        endif
+#endif
 #define _UINTPTR_T_DEFINED
-#      endif
-/* Older Visual C++ headers don't have the Win64-compatible typedefs... */
-#      if ((_MSC_VER <= 1200) && (!defined(DWORD_PTR)))
-#define DWORD_PTR DWORD
-#      endif
-#      if ((_MSC_VER <= 1200) && (!defined(LONG_PTR)))
-#define LONG_PTR LONG
-#      endif
-#    else /* !__GNUC__ && !_MSC_VER */
-typedef signed char int8_t;
-typedef unsigned char uint8_t;
-typedef signed short int16_t;
-typedef unsigned short uint16_t;
-typedef signed int int32_t;
-typedef unsigned int uint32_t;
-typedef signed long long int64_t;
-typedef unsigned long long uint64_t;
-#      ifndef _SIZE_T_DEFINED_
-#define _SIZE_T_DEFINED_
-typedef unsigned int size_t;
-#      endif
-typedef unsigned int uintptr_t;
-#    endif /* __GNUC__ || _MSC_VER */
-#  endif /* !_STDINT_H_ && !HAVE_STDINT_H */
-#endif /* __WIN32__ */
+#endif
+#endif /* Visual Studio 2008 */
+#endif /* !_STDINT_H_ && !HAVE_STDINT_H */
 
 #endif /* SDL_config_h_ */

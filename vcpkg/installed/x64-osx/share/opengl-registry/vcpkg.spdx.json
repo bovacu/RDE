@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/opengl-registry-x64-osx-2021-11-17-29f3a026-8c38-46c6-b051-9751afe4d9a5",
-  "name": "opengl-registry:x64-osx@2021-11-17 ebcbd8904e1a43e276a3acf7469f01b30c63086acb4976e39b31ff8e4e018479",
+  "documentNamespace": "https://spdx.org/spdxdocs/opengl-registry-x64-osx-2022-09-29#1-f4a9dfc8-c837-4efa-864f-902ad6c85dd0",
+  "name": "opengl-registry:x64-osx@2022-09-29#1 167a9f10bce5abc4df4c0b535a6aa41ccaec8ec44ea46731c357b54ac5eb9ff9",
   "creationInfo": {
     "creators": [
-      "Tool: vcpkg-a0e87e227afb536c62188c11ad029954f28fdb22"
+      "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2022-08-13T17:40:43Z"
+    "created": "2023-06-02T16:02:11Z"
   },
   "relationships": [
     {
@@ -52,7 +52,7 @@
     {
       "name": "opengl-registry",
       "SPDXID": "SPDXRef-port",
-      "versionInfo": "2021-11-17",
+      "versionInfo": "2022-09-29#1",
       "downloadLocation": "git+https://github.com/Microsoft/vcpkg#ports/opengl-registry",
       "homepage": "https://github.com/KhronosGroup/OpenGL-Registry",
       "licenseConcluded": "NOASSERTION",
@@ -64,7 +64,7 @@
     {
       "name": "opengl-registry:x64-osx",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "ebcbd8904e1a43e276a3acf7469f01b30c63086acb4976e39b31ff8e4e018479",
+      "versionInfo": "167a9f10bce5abc4df4c0b535a6aa41ccaec8ec44ea46731c357b54ac5eb9ff9",
       "downloadLocation": "NONE",
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
@@ -74,14 +74,14 @@
     {
       "SPDXID": "SPDXRef-resource-1",
       "name": "KhronosGroup/OpenGL-Registry",
-      "downloadLocation": "git+https://github.com/KhronosGroup/OpenGL-Registry@a48c224a2db6edc4f4c610025b529d1c31ee9445",
+      "downloadLocation": "git+https://github.com/KhronosGroup/OpenGL-Registry@5bae8738b23d06968e7c3a41308568120943ae77",
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "30cfb1f8979676298e72604898879dae31953839acffc203027165fc131e74dafcf827fdeb07e64021fb8e8318bca38fa4d8656d8248f7bfba76e01d24895818"
+          "checksumValue": "3f8c58474627ded85d95f8a4d86329ec4f55b179eb2df393983462d42088e9496eef1a5980481f4b085e6ffb749cd5dd3b312a1e2b7b8189d9723a673ec65b0d"
         }
       ]
     }
@@ -93,7 +93,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "b733b3baed6860464ea6e1773ee348d2e7e88e7e65b7a8a0539703f216777a30"
+          "checksumValue": "36daba38de28b8fecd57f96ce43cc97df0c02c3d3aa8451db7aeadfa3e766324"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -105,7 +105,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "89162578a8754afae5eee0e2df7a17913f6e974bc9cd1be413476a02ab12bb67"
+          "checksumValue": "48b852891aadefbf39efb494414e356c9c7b4bf23a3723b7714af923c1f0cbab"
         }
       ],
       "licenseConcluded": "NOASSERTION",

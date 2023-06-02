@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/freetype-x64-osx-2.12.1#2-51a4099a-1f10-47c7-b183-9a9de3d0756c",
-  "name": "freetype:x64-osx@2.12.1#2 4b141f3160dec0d4e9fc1428121459f9f57f101f2d5f3abd1b2ba9b35085d420",
+  "documentNamespace": "https://spdx.org/spdxdocs/freetype-x64-osx-2.12.1#3-02ca7c00-b3f5-4a13-b14f-57bf133f972c",
+  "name": "freetype:x64-osx@2.12.1#3 dd397b187e77d9f03ee5bf4472828e314acf3ea3d47a1751e20fb535cbcf9d45",
   "creationInfo": {
     "creators": [
-      "Tool: vcpkg-522aa94e9d261c7d7b2f079bf2591ca62df5c714"
+      "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2022-10-04T17:00:14Z"
+    "created": "2023-06-02T16:00:27Z"
   },
   "relationships": [
     {
@@ -58,6 +58,11 @@
       "relatedSpdxElement": "SPDXRef-file-7"
     },
     {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-8"
+    },
+    {
       "spdxElementId": "SPDXRef-binary",
       "relationshipType": "GENERATED_FROM",
       "relatedSpdxElement": "SPDXRef-port"
@@ -83,13 +88,13 @@
       "relatedSpdxElement": "SPDXRef-port"
     },
     {
-      "spdxElementId": "SPDXRef-file-3",
-      "relationshipType": "DEPENDENCY_MANIFEST_OF",
+      "spdxElementId": "SPDXRef-file-4",
+      "relationshipType": "CONTAINED_BY",
       "relatedSpdxElement": "SPDXRef-port"
     },
     {
       "spdxElementId": "SPDXRef-file-4",
-      "relationshipType": "CONTAINED_BY",
+      "relationshipType": "DEPENDENCY_MANIFEST_OF",
       "relatedSpdxElement": "SPDXRef-port"
     },
     {
@@ -106,13 +111,18 @@
       "spdxElementId": "SPDXRef-file-7",
       "relationshipType": "CONTAINED_BY",
       "relatedSpdxElement": "SPDXRef-port"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-8",
+      "relationshipType": "CONTAINED_BY",
+      "relatedSpdxElement": "SPDXRef-port"
     }
   ],
   "packages": [
     {
       "name": "freetype",
       "SPDXID": "SPDXRef-port",
-      "versionInfo": "2.12.1#2",
+      "versionInfo": "2.12.1#3",
       "downloadLocation": "git+https://github.com/Microsoft/vcpkg#ports/freetype",
       "homepage": "https://www.freetype.org/",
       "licenseConcluded": "FTL OR GPL-2.0-or-later",
@@ -124,7 +134,7 @@
     {
       "name": "freetype:x64-osx",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "4b141f3160dec0d4e9fc1428121459f9f57f101f2d5f3abd1b2ba9b35085d420",
+      "versionInfo": "dd397b187e77d9f03ee5bf4472828e314acf3ea3d47a1751e20fb535cbcf9d45",
       "downloadLocation": "NONE",
       "licenseConcluded": "FTL OR GPL-2.0-or-later",
       "licenseDeclared": "NOASSERTION",
@@ -161,8 +171,20 @@
       "copyrightText": "NOASSERTION"
     },
     {
-      "fileName": "./fix-exports.patch",
+      "fileName": "./usage",
       "SPDXID": "SPDXRef-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c577198dfb4d9afc3a18d2fac2bd2c006eaf0db611fef82dd55b1eb229bc0f51"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./fix-exports.patch",
+      "SPDXID": "SPDXRef-file-2",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -174,11 +196,11 @@
     },
     {
       "fileName": "./portfile.cmake",
-      "SPDXID": "SPDXRef-file-2",
+      "SPDXID": "SPDXRef-file-3",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "8bc0e5ad7f1a647b116487b6fdbd1082602c71c033b08484d4200d10d49ad1a6"
+          "checksumValue": "1d2f66d50648bd1bab9872d6cb624de925b003e73a1e8fbc57f00c87447d449a"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -186,11 +208,11 @@
     },
     {
       "fileName": "./vcpkg.json",
-      "SPDXID": "SPDXRef-file-3",
+      "SPDXID": "SPDXRef-file-4",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "ec7ad81bddfdbdf182c670603d5c1097a48206ee230fafec93505835df2af00e"
+          "checksumValue": "f03f62175fa68c04891cdeee43d3edc113448ebc617433bb338c5f6e0b8d50c8"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -198,7 +220,7 @@
     },
     {
       "fileName": "./bzip2.patch",
-      "SPDXID": "SPDXRef-file-4",
+      "SPDXID": "SPDXRef-file-5",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -210,11 +232,11 @@
     },
     {
       "fileName": "./brotli-static.patch",
-      "SPDXID": "SPDXRef-file-5",
+      "SPDXID": "SPDXRef-file-6",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "85dda99fb90d919f6039ec02ed5b8fa163c92164ee2470c17bb07d0c0c4af89e"
+          "checksumValue": "88c2afd4e3d8dddc26d9542c671514fba1cf7b457d39566b77acd684df3008b2"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -222,7 +244,7 @@
     },
     {
       "fileName": "./0003-Fix-UWP.patch",
-      "SPDXID": "SPDXRef-file-6",
+      "SPDXID": "SPDXRef-file-7",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -234,7 +256,7 @@
     },
     {
       "fileName": "./vcpkg-cmake-wrapper.cmake",
-      "SPDXID": "SPDXRef-file-7",
+      "SPDXID": "SPDXRef-file-8",
       "checksums": [
         {
           "algorithm": "SHA256",

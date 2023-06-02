@@ -1,13 +1,13 @@
 prefix=${pcfiledir}/../..
-
 exec_prefix=${prefix}
-libdir=${prefix}/lib
+libdir=${exec_prefix}/lib
 includedir=${prefix}/../include
 
 Name: SDL2_image
 Description: image loading library for Simple DirectMedia Layer
-Version: 2.0.5
+Version: 2.6.3
 
-Libs: -L"${libdir}" -lSDL2_image
-Requires: sdl2 >= 0.0
-Cflags: -I"${includedir}/SDL2"
+
+Libs: "-L${libdir}" -lSDL2_image
+Requires: sdl2 >= 2.0.9 libjpeg libpng
+Cflags: "-I${includedir}/SDL2"

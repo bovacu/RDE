@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/sdl2-x64-osx-2.24.0-7a424689-abb7-4112-86f4-1396c3b37edb",
-  "name": "sdl2:x64-osx@2.24.0 9556ed5bc50f51d61c327dfcf10e68185428b28906ecbd45bfc89e886effbd3f",
+  "documentNamespace": "https://spdx.org/spdxdocs/sdl2-x64-osx-2.26.5-581a24a2-0419-4a8a-b818-15a65020962d",
+  "name": "sdl2:x64-osx@2.26.5 aa724a33347a65bd16ee722a376e4616dfc0cc6cab1d97bb5cdbb9a204568088",
   "creationInfo": {
     "creators": [
-      "Tool: vcpkg-522aa94e9d261c7d7b2f079bf2591ca62df5c714"
+      "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2022-10-04T17:01:37Z"
+    "created": "2023-06-02T16:09:10Z"
   },
   "relationships": [
     {
@@ -72,7 +72,7 @@
     {
       "name": "sdl2",
       "SPDXID": "SPDXRef-port",
-      "versionInfo": "2.24.0",
+      "versionInfo": "2.26.5",
       "downloadLocation": "git+https://github.com/Microsoft/vcpkg#ports/sdl2",
       "homepage": "https://www.libsdl.org/download-2.0.php",
       "licenseConcluded": "Zlib",
@@ -84,7 +84,7 @@
     {
       "name": "sdl2:x64-osx",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "9556ed5bc50f51d61c327dfcf10e68185428b28906ecbd45bfc89e886effbd3f",
+      "versionInfo": "aa724a33347a65bd16ee722a376e4616dfc0cc6cab1d97bb5cdbb9a204568088",
       "downloadLocation": "NONE",
       "licenseConcluded": "Zlib",
       "licenseDeclared": "NOASSERTION",
@@ -94,38 +94,38 @@
     {
       "SPDXID": "SPDXRef-resource-1",
       "name": "libsdl-org/SDL",
-      "downloadLocation": "git+https://github.com/libsdl-org/SDL@8c9beb0c873f6ca5efbd88f1ad2648bfc793b2ac",
+      "downloadLocation": "git+https://github.com/libsdl-org/SDL@release-${VERSION}",
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "7936fc3de9920eafe399f5b2af7bf87d479d4ba8c4a7957da90f3a90316dc7a6b8619ffd7a2c198d298d390e1235e00f9bd36fe3f04102bdff351b96c2ade59e"
+          "checksumValue": "90858ae8c5fdddd5e13724e05ad0970e11bbab1df8a0201c3f4ce354dc6018e5d4ab7279402a263c716aacdaa52745f78531dc225d48d790ee9307e2f6198695"
         }
       ]
     }
   ],
   "files": [
     {
-      "fileName": "./0001-sdl2-Enable-creation-of-pkg-cfg-file-on-windows.patch",
+      "fileName": "./deps.patch",
       "SPDXID": "SPDXRef-file-0",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "e34dbf9e67013faa00d92aad3671ba37390e3bc93838965e958c17d44bd2d0ed"
+          "checksumValue": "d429bf68ebd9ebe26a86b1e52406caae8866b7453b8682bacb7de91d22e56d32"
         }
       ],
       "licenseConcluded": "NOASSERTION",
       "copyrightText": "NOASSERTION"
     },
     {
-      "fileName": "./0002-sdl2-skip-ibus-on-linux.patch",
+      "fileName": "./usage",
       "SPDXID": "SPDXRef-file-1",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "5c771d05004c7deb6523cdf1c1a26c3c59c9690e17a3afde09edd940d0056bbe"
+          "checksumValue": "aabdfa919705cdcc06a6ed59ef2dce9a9425d32661bc498980ff521b27cf674d"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -137,7 +137,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "5e78b4e475539f1f095379f0c3574dae5587520dfdff890fc624a0b754948e94"
+          "checksumValue": "313c0effeb541e63690c320a4b816669e144670e2cbf29e302c263ccfff8405c"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -149,7 +149,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "eac331820ebbcf7dd30e4fe81549fc7b2ea89c8f7a6c7cf370fca6e07f19ba3f"
+          "checksumValue": "074ee6bc552576a2ef7be39af566d75e02250b0072dcb495c7d06d3c2353977d"
         }
       ],
       "licenseConcluded": "NOASSERTION",

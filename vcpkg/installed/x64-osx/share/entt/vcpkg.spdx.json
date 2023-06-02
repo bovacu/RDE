@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/entt-x64-osx-3.10.1#1-8da2b231-fa56-440d-9ed4-53a2a844cb6b",
-  "name": "entt:x64-osx@3.10.1#1 f59cc861711083d78351034b8f2c509b9341e60ff7db2843253142a9bd253762",
+  "documentNamespace": "https://spdx.org/spdxdocs/entt-x64-osx-3.11.1-098ad7a3-cc60-4a17-b9f4-1d311b9d8f83",
+  "name": "entt:x64-osx@3.11.1 61da8316ac472ac51f1e02467c09a5d49fd9e7da35819d8458a00da0c19b96a6",
   "creationInfo": {
     "creators": [
-      "Tool: vcpkg-522aa94e9d261c7d7b2f079bf2591ca62df5c714"
+      "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2022-10-04T16:59:50Z"
+    "created": "2023-06-02T16:00:13Z"
   },
   "relationships": [
     {
@@ -52,7 +52,7 @@
     {
       "name": "entt",
       "SPDXID": "SPDXRef-port",
-      "versionInfo": "3.10.1#1",
+      "versionInfo": "3.11.1",
       "downloadLocation": "git+https://github.com/Microsoft/vcpkg#ports/entt",
       "homepage": "https://github.com/skypjack/entt",
       "licenseConcluded": "MIT",
@@ -64,7 +64,7 @@
     {
       "name": "entt:x64-osx",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "f59cc861711083d78351034b8f2c509b9341e60ff7db2843253142a9bd253762",
+      "versionInfo": "61da8316ac472ac51f1e02467c09a5d49fd9e7da35819d8458a00da0c19b96a6",
       "downloadLocation": "NONE",
       "licenseConcluded": "MIT",
       "licenseDeclared": "NOASSERTION",
@@ -87,7 +87,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "c7f4c3f9a8c5793560888b2bb8f27cd3127adf8db0f8813651325d3991a5a45b"
+          "checksumValue": "b139f3a9265a3966ea95c00e5043c82c1f47dc4b1377ea560e3712d7478a22e7"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -99,7 +99,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "3552294b84389b1ee2e0699773c5167bb9e06af06b51206b51aa44892e425e27"
+          "checksumValue": "f2bfa033cda5d23552bc2a8b263823011152ad6a14ee6d98629c0db7917758fb"
         }
       ],
       "licenseConcluded": "NOASSERTION",

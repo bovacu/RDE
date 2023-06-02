@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/libjpeg-turbo-x64-osx-2.1.4-b2fbbe91-50d9-4b8f-b9c3-8c2c03a1783c",
-  "name": "libjpeg-turbo:x64-osx@2.1.4 b91d5037457faae9769eafbcb1b53335dc54f41dfd89781e96869c0835bcdaae",
+  "documentNamespace": "https://spdx.org/spdxdocs/libjpeg-turbo-x64-osx-2.1.5.1#1-dc7d1eb7-db99-4f22-bcae-1202f41a2415",
+  "name": "libjpeg-turbo:x64-osx@2.1.5.1#1 b669589e9e7bfdf5b70c47d856c6582c287f985563ad146ce3c702ebc41e408b",
   "creationInfo": {
     "creators": [
-      "Tool: vcpkg-522aa94e9d261c7d7b2f079bf2591ca62df5c714"
+      "Tool: vcpkg-bedcba5172f5e4b91caac660ab7afe92c27a9895"
     ],
-    "created": "2022-10-04T16:58:46Z"
+    "created": "2023-06-02T15:58:38Z"
   },
   "relationships": [
     {
@@ -92,7 +92,7 @@
     {
       "name": "libjpeg-turbo",
       "SPDXID": "SPDXRef-port",
-      "versionInfo": "2.1.4",
+      "versionInfo": "2.1.5.1#1",
       "downloadLocation": "git+https://github.com/Microsoft/vcpkg#ports/libjpeg-turbo",
       "homepage": "https://github.com/libjpeg-turbo/libjpeg-turbo",
       "licenseConcluded": "BSD-3-Clause",
@@ -104,7 +104,7 @@
     {
       "name": "libjpeg-turbo:x64-osx",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "b91d5037457faae9769eafbcb1b53335dc54f41dfd89781e96869c0835bcdaae",
+      "versionInfo": "b669589e9e7bfdf5b70c47d856c6582c287f985563ad146ce3c702ebc41e408b",
       "downloadLocation": "NONE",
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "NOASSERTION",
@@ -114,14 +114,14 @@
     {
       "SPDXID": "SPDXRef-resource-1",
       "name": "libjpeg-turbo/libjpeg-turbo",
-      "downloadLocation": "git+https://github.com/libjpeg-turbo/libjpeg-turbo@2.1.4",
+      "downloadLocation": "git+https://github.com/libjpeg-turbo/libjpeg-turbo@${VERSION}",
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "d3e92d614168355827e0ed884ff847cc7df8f6f1fb7b673c6c99afdf61fdfc0372afe5d30fdbf5e743335e2a7a27ca9f510c67d213e5cb2315a8d946e9414575"
+          "checksumValue": "bcd946eed0fb3712eae2485d300d5e2b84596b1c8cfd4e944902bb141125d411b727024f054e2ad6c23855d06a02dcb926696f05cb107869a7b81814d4cfcaeb"
         }
       ]
     }
@@ -133,7 +133,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "8c5a4b0af430bd3d4ae08106707916069059e1a9aab835ffb0839c900f73208f"
+          "checksumValue": "1b12b2c9525621d3e199d086373f1ba6c002bb544ead9d6e22cee6a84e5f3b19"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -145,7 +145,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "78e2731ad82e1eac0fa1e3b414301b00ca622c39852d32813cb0e0ddb53836e7"
+          "checksumValue": "99378f41a1f50dc45967068b2d5c72abbc86285aae2f90c2d8be5061831724aa"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -157,7 +157,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "364e038d9d160deb2aeb6d38aa4f9b69044680a4d6af5bdd5dc4929082ef4416"
+          "checksumValue": "8583a72d485699fb2fb95be594538cbeea4f3c61e9d8bd56817f77418abe76b3"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -169,7 +169,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "1dfbc21d853ce6ce856f4e52fc3c3438b4626d90f9d2d39da125a04d83db9cca"
+          "checksumValue": "2f434caf71aa433416d3e42941452c4f80bfea478f1ab392fcbde6d96ea0f149"
         }
       ],
       "licenseConcluded": "NOASSERTION",
@@ -181,7 +181,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "1aeed99e66fb2a89d442b3abee274697271f3bcb5629a28557367a9ce7c2694e"
+          "checksumValue": "7d8fa543cef5d1a8c7b2a2c9e94d94564c0de4e97e0b418ed65c9693d9ac2cc5"
         }
       ],
       "licenseConcluded": "NOASSERTION",

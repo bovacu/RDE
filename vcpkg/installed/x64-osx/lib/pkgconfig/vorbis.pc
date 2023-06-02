@@ -9,6 +9,7 @@ Name: vorbis
 Description: vorbis is the primary Ogg Vorbis library
 Version: 1.3.7
 Conflicts:
-Libs: -L"${libdir}" -lvorbis  -lm
+
+Libs: "-L${libdir}" -lvorbis -lm
 Requires: ogg
-Cflags: -I"${includedir}"
+Cflags: "-I${includedir}"
