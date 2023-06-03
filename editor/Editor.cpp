@@ -515,10 +515,10 @@ namespace RDEEditor {
 	bool Editor::windowResized(WindowResizedEvent& _event) {
 		for(auto* _camera : getCameras()) {
 			_camera->onResize(_event.getWidth(), _event.getHeight());
+			_camera->getViewport()->matchVirtualResolutionToDeviceResolution();
 		}
 
 		generateGridTexture();
-		editorCamera->getViewport()->matchVirtualResolutionToDeviceResolution();
 		canvas->setCanvasResolution( { (int)_event.getWidth(), (int)_event.getHeight() });
 		return true;
 	}
