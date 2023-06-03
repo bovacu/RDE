@@ -81,7 +81,6 @@ namespace RDEEditor {
 	#include "EditorHierarchyModule.cpp"
 	#include "EditorComponentsModule.cpp"
 	#include "EditorConsoleModule.cpp"
-	#include "EditorGamePreview.cpp"
 	#include "EditorOverlappingSelectionModule.cpp"
 	#include "EditorToolBarModule.cpp"
 	#include "EditorNodeContextMenuModule.cpp"
@@ -329,7 +328,6 @@ namespace RDEEditor {
 
 	void Editor::onImGuiRender(Delta _dt) {
 		dockingSpaceView(this);
-		gameView(this);
 		sceneView(this, &editorData.sceneViewOffset);
 		hierarchyView(this);
 		componentsView(this);
@@ -513,12 +511,8 @@ namespace RDEEditor {
 	}
 
 	bool Editor::windowResized(WindowResizedEvent& _event) {
-		for(auto* _camera : getCameras()) {
-			_camera->onResize(_event.getWidth(), _event.getHeight());
-			_camera->getViewport()->matchVirtualResolutionToDeviceResolution();
-		}
-
 		generateGridTexture();
+		editorCamera->getViewport()->matchVirtualResolutionToDeviceResolution();
 		canvas->setCanvasResolution( { (int)_event.getWidth(), (int)_event.getHeight() });
 		return true;
 	}
