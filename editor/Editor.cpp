@@ -147,6 +147,7 @@ namespace RDEEditor {
 		auto _fbID = engine->manager.renderManager.createFrameBuffer(_specs);
 		getCameras()[0]->framebufferID = _fbID;
 		getCameras()[0]->getViewport()->autoResizeWhenWindowSizeChanges = false;
+		editorCamera->getViewport()->autoResizeWhenWindowSizeChanges = false;
 
 		editorData.sceneViewFramebufferID = editorCamera->framebufferID;
 		editorData.gameViewFramebufferID = getCameras()[0]->framebufferID;
@@ -163,7 +164,7 @@ namespace RDEEditor {
     }
 
 	void Editor::generateGridTexture() {
-		auto _windowSize = engine->getWindow()->getWindowSize();
+		auto _windowSize = getCameras()[0]->getViewport()->getSize();
 		auto _size = _windowSize.x * _windowSize.y * 4;
 		unsigned char* _data = new unsigned char[_size];
 		for(auto _i = 0; _i < _size;) {
@@ -313,7 +314,7 @@ namespace RDEEditor {
 
 		engine->manager.shaderManager.setFloat4(gridShaderID, "gridColor", glm::vec4{ gridColor.r / 255.f, gridColor.g / 255.f, gridColor.b / 255.f, gridColor.a / 255.f });
 		engine->manager.shaderManager.setFloat(gridShaderID, "zoom", editorCamera->getCurrentZoomLevel());
-		engine->manager.shaderManager.setFloat2(gridShaderID, "resolution", glm::vec2 { (float)engine->getWindow()->getWidth(), (float)engine->getWindow()->getHeight() });
+		engine->manager.shaderManager.setFloat2(gridShaderID, "resolution", glm::vec2 { (float)getCameras()[0]->getViewport()->getSize().x, (float)getCameras()[0]->getViewport()->getSize().y });
 		
 		auto _cameraPos = editorCamera->node->getTransform()->getPosition();
 		engine->manager.shaderManager.setFloat2(gridShaderID, "cameraDisplacement", glm::vec2 { _cameraPos.x, _cameraPos.y });
@@ -512,8 +513,8 @@ namespace RDEEditor {
 
 	bool Editor::windowResized(WindowResizedEvent& _event) {
 		generateGridTexture();
-		editorCamera->getViewport()->matchVirtualResolutionToDeviceResolution();
-		canvas->setCanvasResolution( { (int)_event.getWidth(), (int)_event.getHeight() });
+		// editorCamera->getViewport()->matchVirtualResolutionToDeviceResolution();
+		// canvas->setCanvasResolution( { (int)_event.getWidth(), (int)_event.getHeight() });
 		return true;
 	}
 	
