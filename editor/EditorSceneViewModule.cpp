@@ -1,7 +1,6 @@
 
 void sceneView(Editor* _editor, Vec2F* _sceneViewOffset) {
 	static bool _firstEntry = true;
-	static Vec2I _firstWindowSize = _editor->engine->getWindow()->getWindowSize();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 	ImGui::Begin("Scene View", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -34,7 +33,7 @@ void sceneView(Editor* _editor, Vec2F* _sceneViewOffset) {
 	auto _zoom = _editor->editorCamera->getCurrentZoomLevel();
 
 	auto _mousePos = ImGui::GetIO().MousePos;
-	auto _titleHeight = (ImGui::GetStyle().FramePadding.y + ImGui::GetFontSize() * 0.5f) * 0.5f * _zoom;
+	auto _titleHeight = (ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetFontSize()) * 1.5f * _zoom;
 
 	// This calcultion I'm not really sure why is needed, because X axis does not need it, but it seems that the change of the window in the Y axis creates an ugly offset that gets fixed by adding
 	// this _windowResizedOffsetY

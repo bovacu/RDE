@@ -73,6 +73,8 @@ namespace RDEEditor {
 //		auto _ = std::async([cmdLambda, _callback, &_output] { cmdLambda(); _callback(_output); });
 //	}
 
+	static Vec2I _firstWindowSize;
+
 	#include "EditorThemesModule.cpp"
 	#include "NodeCreator.cpp"
 	#include "EditorToolsMenuModule.cpp"
@@ -158,6 +160,8 @@ namespace RDEEditor {
 		generateScaleGuizmo();
 
 		setTheme(editorFlags.theme);
+
+		_firstWindowSize = engine->getWindow()->getWindowSize();
 		engine->getWindow()->maximizeWindow();
 
 		engine->manager.physics.simulate = false;
