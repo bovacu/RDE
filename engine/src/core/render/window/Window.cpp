@@ -62,6 +62,7 @@ namespace RDE {
         #endif
     }
 
+    // TODO (Borja): create a WindowResizeEvent when this is called. 
     void Window::setWindowSize(int _width, int _height) {
         SDL_SetWindowSize(window, _width, _height);
     }
