@@ -57,6 +57,60 @@ void nodesSubMenu(Editor* _editor) {
 	}
 }
 
+
+void addComponentSubMenu(Editor* _editor, Node* _node) {
+	auto _hasSpriteRenderer = _node->hasComponent<SpriteRenderer>();
+	auto _hasTextRenderer = _node->hasComponent<TextRenderer>();
+
+	if (_hasSpriteRenderer) { ImGui::BeginDisabled(true); }
+	if(ImGui::MenuItem("Sprite Renderer")) {
+		addSpriteRenderer(_editor, _node);
+	}
+	if (_hasSpriteRenderer) { ImGui::EndDisabled(); }
+
+
+	if (_hasTextRenderer) { ImGui::BeginDisabled(true); }
+	if(ImGui::MenuItem("Text Renderer")) {
+		addTextRenderer(_editor, _node);
+	}
+	if (_hasTextRenderer) { ImGui::EndDisabled(); }
+}
+
+void addComponentUISubMenu(Editor* _editor, Node* _node) {
+	auto _hasUIImage = _node->hasComponent<UIImage>();
+	auto _hasUIText = _node->hasComponent<UIText>();
+
+	if (_hasUIImage) { ImGui::BeginDisabled(true); }
+	if(ImGui::MenuItem("UI Image")) {
+		addUIImage(_editor, _editor->editorData.selectedNode.node);
+	}
+	if (_hasUIImage) { ImGui::EndDisabled(); }
+
+
+	if (_hasUIText) { ImGui::BeginDisabled(true); }
+	if(ImGui::MenuItem("UI Text")) {
+		addUIText(_editor, _editor->editorData.selectedNode.node);
+	}
+	if (_hasUIText) { ImGui::EndDisabled(); }
+}
+
+void componentsSubMenu(Editor* _editor) {
+	if(ImGui::BeginMenu("Add Component")) {
+		if(ImGui::BeginMenu("Node")) {
+			addComponentSubMenu(_editor, _editor->editorData.selectedNode.node);
+			ImGui::EndMenu();
+		}
+
+		if(ImGui::BeginMenu("UI Node")) {
+			addComponentUISubMenu(_editor, _editor->editorData.selectedNode.node);
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMenu();
+	}
+}
+
+
 void menuBarView(Editor* _editor) {
 	if (ImGui::BeginMenuBar()) {
 
@@ -79,6 +133,12 @@ void menuBarView(Editor* _editor) {
 			nodesSubMenu(_editor);
 			ImGui::EndMenu();
 		}
+
+		if (_editor->editorData.selectedNode.node == nullptr) { ImGui::BeginDisabled(true); }
+		if(ImGui::BeginMenu("Selected Node")) {
+			componentsSubMenu(_editor);
+		}
+		if(_editor->editorData.selectedNode.node == nullptr) { ImGui::EndDisabled(); }
 
 		if (ImGui::BeginMenu("Windows")) {
 			ImGui::EndMenu();

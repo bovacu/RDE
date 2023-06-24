@@ -18,8 +18,9 @@ void gameView(Editor* _editor) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 	ImGui::Begin("Game Preview", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
-	auto* _viewport = _editor->mainCamera->getViewport();
+	auto* _viewport = _editor->editorCamera->getViewport();
 	ImVec2 _viewportPanelSize = ImGui::GetContentRegionAvail();
+	auto* _window = _editor->engine->getWindow();
 
 	Vec2I _viewportSize = { (int)_viewportPanelSize.x, (int)_viewportPanelSize.y };
 	Vec2I _finalImGuiViewSize = { _viewport->getSize().x, _viewport->getSize().y };
@@ -28,7 +29,7 @@ void gameView(Editor* _editor) {
 		_finalImGuiViewSize.x = _viewportSize.x;
 		auto _i = 1;
 		while(_i <= _finalImGuiViewSize.y) {
-			if(approximateValue(_editor->editorCamera->getViewport()->getAspectRatio(), (float)_finalImGuiViewSize.x / (float)_i, getEpsilon((float)_viewportSize.x, (float)_viewport->getSize().x))) {
+			if(approximateValue(_viewport->getAspectRatio(), (float)_finalImGuiViewSize.x / (float)_i, getEpsilon((float)_viewportSize.x, (float)_viewport->getSize().x))) {
 				_finalImGuiViewSize.y = _i;
 				break;
 			}

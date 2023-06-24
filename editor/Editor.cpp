@@ -77,6 +77,7 @@ namespace RDEEditor {
 
 	#include "EditorThemesModule.cpp"
 	#include "NodeCreator.cpp"
+	#include "ComponentHandler.cpp"
 	#include "EditorToolsMenuModule.cpp"
 	#include "EditorDockingspaceModule.cpp"
 	#include "EditorSceneViewModule.cpp"

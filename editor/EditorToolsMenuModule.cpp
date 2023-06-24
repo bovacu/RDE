@@ -39,20 +39,20 @@ void toolsMenu(Editor* _editor) {
 		HINT("To compile Android you need RDE Android module at same dir level as RDE")
 	}
 
-	if(!_isMacPlatform && !_hasiOSModule) { ImGui::BeginDisabled(true); }
+	if(!_isMacPlatform || !_hasiOSModule) { ImGui::BeginDisabled(true); }
 	if(ImGui::MenuItem("Compile iOS")) {
 
 	}
-	if(!_isMacPlatform && !_hasiOSModule) { 
+	if(!_isMacPlatform || !_hasiOSModule) { 
 		ImGui::EndDisabled(); 
 		HINT("To compile iOS you need Mac host and RDE iOS module at same dir level as RDE")
 	}
 
-	if(!_hasWASMModule && !(_isMacPlatform || _isLinuxPlatform)) { ImGui::BeginDisabled(true); }
+	if(!_hasWASMModule || (!_isMacPlatform && !_isLinuxPlatform)) { ImGui::BeginDisabled(true); }
 	if(ImGui::MenuItem("Compile WASM")) {
 
 	}
-	if(!_hasWASMModule && !(_isMacPlatform || _isLinuxPlatform)) { 
+	if(!_hasWASMModule || (!_isMacPlatform && !_isLinuxPlatform)) { 
 		ImGui::EndDisabled(); 
 		HINT("To compile WASM you need to be on Linux or Mac Platforms and have RDE WASM module at same dir level as RDE")
 	}

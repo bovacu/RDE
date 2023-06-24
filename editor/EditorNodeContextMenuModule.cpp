@@ -51,6 +51,16 @@ void nodeRighClickContextMenu(Editor* _editor) {
 		}
 		if(nodeRighClickContextMenuNode == nodeRightClickGraph->getRoot()) { ImGui::EndDisabled(); }
 
+		if (ImGui::BeginMenu("Add Component")) {
+			if(_editor->graph == nodeRightClickGraph) {
+				addComponentSubMenu(_editor, nodeRighClickContextMenuNode);
+			} else {
+				addComponentUISubMenu(_editor, nodeRighClickContextMenuNode);
+			}
+
+			ImGui::EndMenu();
+		}
+
 		ImGui::EndPopup();
 	} else {
 		nodeRighClickContextMenuNode = nullptr;
