@@ -1,9 +1,0 @@
-{
-  "resolution" : [1080, 1920],
-  "vsync" : true,
-  "resources_path" : "config/resources.json",
-  "localization_path" : "localization.json",
-  "fullscreen" : false,
-  "icon" : "",
-  "title" : "Engine"
-}

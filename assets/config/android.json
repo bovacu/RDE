@@ -1,8 +1,0 @@
-{
-  "resolution" : [1080, 1920],
-  "vsync" : true,
-  "main_scene" : "assets/scenes/Editor.json",
-  "fullscreen" : false,
-  "icon" : "",
-  "title" : "Engine"
-}
