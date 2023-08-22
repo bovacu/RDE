@@ -12,7 +12,7 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# add_compile_options("-Werror")
+add_compile_options("-Werror")
 
 set(GL_PROFILES "GL_PROFILE_GL3")
 
@@ -60,11 +60,13 @@ if(RDE_LIBRARY)
             ${CPP_HEADERS}
             )
     target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES} RDE_LIBRARY=1)
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror)
 
 else()
     message("Building executable")
     add_executable(${PROJECT_NAME} WIN32
-            main.cpp
+            engine/main.cpp
+			test/test.cpp
 
             ${RDE_CPP_HEADERS}
             ${RDE_CPP_SOURCES}
@@ -73,6 +75,7 @@ else()
             ${CPP_HEADERS}
             )
     target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES})
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror)
 endif()
 unset(RDE_LIBRARY CACHE)
 

@@ -1,6 +1,7 @@
 // Created by borja on 24/12/21.
 
 #include <iostream>
+#include <assert.h>
 
 #ifndef RDE_CORE_H
 #define RDE_CORE_H
@@ -18,11 +19,6 @@ SPECIALIZED_VEC2(float, 		rde_vec2F);
 SPECIALIZED_VEC2(double,		rde_vec2D);
 SPECIALIZED_VEC2(long,			rde_vec2L);
 SPECIALIZED_VEC2(unsigned long, rde_vec2UL);
-
-
-typedef struct rde_engine rde_engine;
-typedef struct rde_window rde_window;
-typedef struct rde_scene rde_scene;
 
 /// \cond DO_NOT_DOCUMENT
 #define FRAMEBUFFER_VERTEX_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferVertex.glsl"
@@ -134,40 +130,40 @@ typedef struct rde_scene rde_scene;
 /// \endcond
 
 /**
-	* @brief Checks if the OS is Mac.
-	*/
+ * @brief Checks if the OS is Mac.
+ */
 #define IS_MAC() (defined(__APPLE__) && defined(MAC_PLATFORM))
 
 /**
-	* @brief Checks if the OS is Windows.
-	*/
+ * @brief Checks if the OS is Windows.
+ */
 #define IS_WINDOWS() _WIN32
 
 /**
-	* @brief Checks if the OS is Linux.
-	*/
+ * @brief Checks if the OS is Linux.
+ */
 #define IS_LINUX() (defined(__linux__))
 
 /**
-	* @brief Checks if the OS is Mac, Windows or Linux.
-	*/
+ * @brief Checks if the OS is Mac, Windows or Linux.
+ */
 #define IS_DESKTOP() (IS_LINUX() || IS_MAC() || IS_WINDOWS())
 
 /**
-	* @brief Checks if the OS is iOS.
-	*/
+ * @brief Checks if the OS is iOS.
+ */
 #define IS_IOS() (defined(__APPLE__) && defined(IOS_PLATFORM))
 
 #define IS_APPLE() (IS_MAC() || IS_IOS())
 
 /**
-	* @brief Checks if the OS is Android.
-	*/
+ * @brief Checks if the OS is Android.
+ */
 #define IS_ANDROID() (defined(__ANDROID__))
 
 /**
-	* @brief Checks if it is Android or iOS
-	*/
+ * @brief Checks if it is Android or iOS
+ */
 #define IS_MOBILE() (IS_ANDROID() || IS_IOS())
 
 #define SAFE_FUNC_POINTER(_func) if (_func != nullptr) (*_func)()
@@ -238,5 +234,25 @@ typedef unsigned int uint;
 #define RDE_FUNC_ENGINE
 #define RDE_FUNC_ND_STATIC [[nodiscard]] static
 #endif
+
+#define STRINGIZE(x) STRINGIZE2(x)
+#define STRINGIZE2(x) #x
+
+#define LINE_STRING STRINGIZE(__LINE__)
+#define FUNC_STRING STRINGIZE(__func__)
+#define FILE_STRING STRINGIZE(__FILE__)
+
+#define UNUSED(_x) (void)_x;
+#define UNIMPLEMENTED(_message) {						\
+	std::string _full_message = "[UNIMPLEMENTED - "; 	\
+	_full_message += "[UNIMPLEMENTED - File ";			\
+	_full_message += FILE_STRING;						\
+	_full_message += " - Func ";						\
+	_full_message += FUNC_STRING;						\
+	_full_message += " - Line "; 						\
+	_full_message += LINE_STRING;						\
+	_full_message += "] -> ";							\
+	_full_message += _message;							\
+}
 
 #endif //RDE_CORE_H

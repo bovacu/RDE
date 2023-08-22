@@ -1,3 +1,5 @@
+#include "core.h"
+
 #if IS_MOBILE()
 
 #include "mobile/mobile_events.h"

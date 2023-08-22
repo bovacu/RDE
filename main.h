@@ -1,4 +1,4 @@
-#include "engine/include/engine/engine.h"
+#include "engine/engine.h"
 #include "SDL2/SDL.h"
 
 #if IS_WINDOWS()
@@ -8,8 +8,13 @@
 #endif
 
 #define ENGINE_DEBUG
+#include "core.h"
 
 int main(int _argc, char** _argv){
+	UNUSED(_argc)
+	UNUSED(_argv)
+
+
 	#if IS_WINDOWS()
 		#ifdef ENGINE_DEBUG
 			if(AllocConsole())
@@ -22,7 +27,6 @@ int main(int _argc, char** _argv){
 	#endif
 
 	rde_engine* _engine = rde_engine_create_engine(0, nullptr);
-
 	rde_engine_on_run(_engine);
 
 	return 0;

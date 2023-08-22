@@ -1,9 +1,10 @@
 #include "engine/engine.h"
-#include "window/event.h"
-#include "structs.h"
+#include "events/event_structs.h"
 #include "SDL2/SDL.h"
 #include "window/window.h"
-#include "mobile/mobile_events.h"
+#include "events/mobile_events.h"
+#include "private_structs.h"
+#include "../src/engine/sdl_to_engine_helper.cpp"
 
 void rde_engine_on_event(rde_engine* _engine);
 void rde_engine_on_update(rde_engine* _engine, float _dt);
@@ -13,16 +14,18 @@ void rde_engine_on_render(rde_engine* _engine, float _dt);
 void rde_engine_sync_events(rde_engine* _engine);
 
 
-#ifdef DEFAULT_IMPLEMENTATION
 rde_engine* rde_engine_create_engine(int _argc, char** _argv) {
-	rde_engine* _engine = new rde_engine;
+	rde_engine* _engine = new rde_engine {  };
 	rde_window* _default_window = rde_window_create_window(_engine);
+
+	memset(_engine->engine_windows, 0, RDE_MAX_NUMBER_OF_WINDOWS);
+
 	_engine->engine_windows[0] = _default_window;
+
+	rde_engine_entry_point(_argc, _argv, _engine);
 
 	return _engine;
 }
-#endif
-
 
 RDE_PLATFORM_TYPE_ rde_engine_get_platform(rde_engine* _engine) {
 	return _engine->platform_type;
@@ -33,11 +36,13 @@ float rde_engine_get_fixed_delta(rde_engine* _engine) {
 }
 
 void rde_engine_set_fixed_delta(rde_engine* _engine, float _delta_time) {
-	
+	UNUSED(_engine)
+	UNUSED(_delta_time)
 }
 
 void rde_engine_set_current_scene(rde_engine* _engine, rde_scene* _scene) {
-	
+	UNUSED(_engine)
+	UNUSED(_scene)
 }
 
 void rde_engine_on_run(rde_engine* _engine) {
@@ -74,14 +79,16 @@ void rde_engine_on_run(rde_engine* _engine) {
 }
 
 void rde_engine_init_imgui_layer(rde_engine* _engine) {
-
+	UNUSED(_engine)
 }
 
 void rde_engine_end_imgui_layer(rde_engine* _engine) {
-
+	UNUSED(_engine)
 }
 
 rde_window* rde_engine_get_window(rde_engine* _engine, int _index) {
+	UNUSED(_engine)
+	UNUSED(_index)
 	return nullptr;
 }
 
@@ -95,6 +102,7 @@ void rde_engine_set_running(rde_engine* _engine, bool _running) {
 }
 
 rde_vec2I rde_engine_get_display_size(rde_engine* _engine) {
+	UNUSED(_engine)
 	SDL_DisplayMode _displayMode;
 	SDL_GetCurrentDisplayMode(0, &_displayMode);
 	return { _displayMode.w, _displayMode.h };
@@ -113,7 +121,7 @@ rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 
 	switch(_sdl_event->type) {
 		case SDL_WINDOWEVENT:
-		case SDL_DISPLAYEVENT: rde_window_transform_sdl_event_to_rde_event(_sdl_event, &_event); break;
+		case SDL_DISPLAYEVENT: rde_sdl_to_rde_helper_transform_window_event(_sdl_event, &_event); break;
 	}
 
 	return _event;
@@ -135,21 +143,36 @@ void rde_engine_on_event(rde_engine* _engine) {
 }
 
 void rde_engine_on_update(rde_engine* _engine, float _dt) {
-	
+	UNUSED(_engine)
+	UNUSED(_dt)
 }
 
 void rde_engine_on_fixed_update(rde_engine* _engine, float _fixed_dt) {
-
+	UNUSED(_engine)
+	UNUSED(_fixed_dt)
 }
 
 void rde_engine_on_late_update(rde_engine* _engine, float _dt) {
-
+	UNUSED(_engine)
+	UNUSED(_dt)
 }
 
 void rde_engine_on_render(rde_engine* _engine, float _dt) {
-	
+	UNUSED(_engine)
+	UNUSED(_dt)
 }
 
 void rde_engine_sync_events(rde_engine* _engine) {
-	
+	UNUSED(_engine)
+}
+
+rde_display_info* rde_engine_get_available_displays() {
+	UNIMPLEMENTED("Not implemented");
+	return nullptr;
+}
+
+void rde_engine_switch_window_display(rde_window* _window, size_t _new_display) {
+	UNUSED(_window)
+	UNUSED(_new_display)
+	UNIMPLEMENTED("Not implemented");
 }

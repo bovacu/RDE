@@ -3,9 +3,22 @@
 
 #include "core.h"
 #include "enums/generic_enums.h"
-#include "SDL2/SDL.h"
+#include "SDL2/SDL_Video.h"
 
-struct SDL_Window;
+/**
+ * Structs defined as 'typedef struct X X' do have fields data inside, but it is data
+ * that should not be modified by hand, but using the functions that the library offers.
+ * 
+ * An incorrect manual modification of some of those values can create unexpected behaviour.
+ *
+ * But in case you now what you are doing and want access to everything just use:
+ * #include "private_structs.h"
+*/
+typedef struct rde_engine rde_engine;
+typedef struct rde_window rde_window;
+typedef struct rde_scene rde_scene;
+
+struct rde_event;
 
 struct rde_window_callback {
 	bool block_engine_default_implementation = false;
@@ -31,30 +44,14 @@ struct rde_display_callbacks {
 	rde_window_callback on_display_changed_orientation = {0};
 };
 
-struct rde_window {
-	SDL_Window* sdl_window;
-	SDL_GLContext sdl_gl_context;
-
-	int display_of_window;
-
-	rde_window_callbacks window_callbacks;
-	rde_display_callbacks display_callbacks;
-};
-
-struct rde_engine {
-	float delta_time;
-	float fixed_delta_time;
-
-	float fixed_time_step_accumulator;
-	RDE_PLATFORM_TYPE_ platform_type;
-
-	bool running;
-
-	rde_window* engine_windows[10];
-};
-
-struct rde_scene {
+struct rde_display_info {
+	/**
+	* This value is read-only, if modified by hand not only won't take effect
+	* but also may produced unexpected behaviour (nothing good man).
+	*/
+	int index = -1;
 	
+	// TODO: bounds
 };
 
 #endif
