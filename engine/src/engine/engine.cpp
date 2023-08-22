@@ -3,8 +3,9 @@
 #include "structs.h"
 #include "SDL2/SDL.h"
 #include "window/window.h"
+#include "mobile/mobile_events.h"
 
-void rde_engine_on_event(rde_engine* _engine, rde_event* _event);
+void rde_engine_on_event(rde_engine* _engine);
 void rde_engine_on_update(rde_engine* _engine, float _dt);
 void rde_engine_on_fixed_update(rde_engine* _engine, float _fixed_dt);
 void rde_engine_on_late_update(rde_engine* _engine, float _dt);
@@ -40,11 +41,16 @@ void rde_engine_set_current_scene(rde_engine* _engine, rde_scene* _scene) {
 }
 
 void rde_engine_on_run(rde_engine* _engine) {
+
+	#if IS_MOBILE()
+	SDL_SetEventFilter(rde_mobile_system_events, _engine);
+	#endif
+
 	while(_engine->running) {
 		Uint64 _start = SDL_GetPerformanceCounter();
 		_engine->fixed_time_step_accumulator += _engine->delta_time;
 
-		rde_engine_on_event(_engine, nullptr);
+		rde_engine_on_event(_engine);
 
 		rde_engine_on_update(_engine, _engine->delta_time);
 
@@ -63,6 +69,8 @@ void rde_engine_on_run(rde_engine* _engine) {
 		float _elapsedMS = (float)(_end - _start) / (float)SDL_GetPerformanceFrequency();
 		_engine->delta_time = _elapsedMS;
 	}
+
+	rde_engine_destroy_engine(_engine);
 }
 
 void rde_engine_init_imgui_layer(rde_engine* _engine) {
@@ -87,25 +95,47 @@ void rde_engine_set_running(rde_engine* _engine, bool _running) {
 }
 
 rde_vec2I rde_engine_get_display_size(rde_engine* _engine) {
-	//SDL_DisplayMode _displayMode;
-	//SDL_GetCurrentDisplayMode(0, &_displayMode);
-	//return { _displayMode.w, _displayMode.h };
-	return { 0, 0 };
+	SDL_DisplayMode _displayMode;
+	SDL_GetCurrentDisplayMode(0, &_displayMode);
+	return { _displayMode.w, _displayMode.h };
 }
 
 void rde_engine_destroy_engine(rde_engine* _engine) {
-	
+	SDL_GL_DeleteContext(_engine->engine_windows[0]->sdl_gl_context);
+	SDL_DestroyWindow(_engine->engine_windows[0]->sdl_window);
+	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
+	SDL_Quit();
 }
 
+rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 
+	rde_event _event;
 
+	switch(_sdl_event->type) {
+		case SDL_WINDOWEVENT:
+		case SDL_DISPLAYEVENT: rde_window_transform_sdl_event_to_rde_event(_sdl_event, &_event); break;
+	}
 
-void rde_engine_on_event(rde_engine* _engine, rde_event* _event) {
+	return _event;
+}
 
+void rde_engine_on_event(rde_engine* _engine) {
+	SDL_Event _event;
+        
+	SDL_PumpEvents();
+	
+	// TODO: this now handles only one possible window, to manage multiple window events
+	// a window must now its SDL window id and each event gives you which windowID the event
+	// has happened on.
+
+	while (SDL_PollEvent(&_event)) {
+		rde_event _rde_event = rde_engine_sdl_event_to_rde_event(&_event);
+		rde_window_consume_event(_engine, _engine->engine_windows[0], &_rde_event);
+	}
 }
 
 void rde_engine_on_update(rde_engine* _engine, float _dt) {
-
+	
 }
 
 void rde_engine_on_fixed_update(rde_engine* _engine, float _fixed_dt) {
@@ -117,9 +147,9 @@ void rde_engine_on_late_update(rde_engine* _engine, float _dt) {
 }
 
 void rde_engine_on_render(rde_engine* _engine, float _dt) {
-
+	
 }
 
 void rde_engine_sync_events(rde_engine* _engine) {
-
+	
 }

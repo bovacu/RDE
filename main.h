@@ -22,6 +22,7 @@ int main(int _argc, char** _argv){
 	#endif
 
 	rde_engine* _engine = rde_engine_create_engine(0, nullptr);
+
 	rde_engine_on_run(_engine);
 
 	return 0;

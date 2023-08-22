@@ -22,7 +22,6 @@ file(GLOB_RECURSE RDE_CPP_SOURCES engine/src/*.cpp )
 set(CPP_HEADERS)
 set(CPP_SOURCES)
 
-find_package(EnTT CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/entt)
 find_package(SDL2 CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/SDL2)
 find_package(SDL2_image CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/SDL2_image)
 find_package(SDL2_mixer CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/SDL2_mixer)
@@ -39,15 +38,12 @@ include_directories(
         ${SDL2_MIXER_INCLUDE_DIR}
         ${FREETYPE_INCLUDE_DIR}
         ${GLAD_INCLUDE_DIR}
-        ${ENTT_INCLUDE_DIR}
         ${JSON_INCLUDE_DIR}
         ${IMGUI_INCLUDE_DIR}
         ${GLM_INCLUDE_DIR}
 )
 
 include_directories(engine/include)
-include_directories(editor)
-include_directories(nonVcpkgDeps/Chipmunk2D/include)
 include_directories(vcpkg/installed/x64-windows/include)
 
 #RDEFirebase
@@ -87,9 +83,7 @@ target_link_libraries(${PROJECT_NAME}
         $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
         freetype
         glad::glad
-        EnTT::EnTT
         nlohmann_json::nlohmann_json
         imgui::imgui
         glm::glm
-        ${CMAKE_CURRENT_SOURCE_DIR}/nonVcpkgDeps/Chipmunk2D/libs/Windows/chipmunk.lib
         )

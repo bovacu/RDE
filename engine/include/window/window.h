@@ -2,11 +2,18 @@
 #define RDE_WINDOW_H
 
 #include "core.h"
+#include "event.h"
+#include "structs.h"
+#include "SDL2/SDL_Events.h"
+
 
 RDE_FUNC_ND rde_window*		rde_window_create_window(rde_engine* _engine);
 
-//RDE_FUNC	void 			rde_window_consume_event(rde_window* _window, rde_event* _event);
-//
+RDE_FUNC	void 			rde_window_consume_event(rde_engine* _engine, rde_window* _window, rde_event* _event);
+RDE_FUNC	void 			rde_window_transform_sdl_event_to_rde_event(SDL_Event* _sdl_event, rde_event* _rde_event);
+
+RDE_FUNC	void			rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbacks);
+
 //RDE_FUNC_ND Vec2I			rde_window_get_window_size(rde_window* _window);
 //RDE_FUNC	void			rde_window_set_window_size(rde_window* _window, const Vec2I& _size);
 //

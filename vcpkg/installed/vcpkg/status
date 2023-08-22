@@ -1,0 +1,579 @@
+Package: vcpkg-cmake
+Version: 2022-12-22
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 9613f19a87b18dcbf2ce1da4f5afbacfde6a5bb1a9200cd99662ff9eacd505d5
+Status: install ok installed
+
+Package: zlib
+Version: 1.2.13
+Depends: vcpkg-cmake
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 791db0a37fbc8210b7b2339868168cdc9e90c81dbf8528e53c497c8a6a854c4b
+Description: A compression library
+Status: install ok installed
+
+Package: vcpkg-cmake-config
+Version: 2022-02-06
+Port-Version: 1
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 647886eb2fcc8cb68d2e09c2136ebb33041437ee5893715cc2f83191747d133b
+Status: install ok installed
+
+Package: libpng
+Version: 1.6.39
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config, zlib
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 11db89076c7b6dd8cad2c366fb058787b2fce42d8f62eedb923b7e99d7374dfe
+Description: libpng is a library implementing an interface for reading and writing PNG (Portable Network Graphics) format files
+Status: install ok installed
+
+Package: libjpeg-turbo
+Version: 2.1.5.1
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: ff15714635a6d942576cfba82800191716ae5bbd69edfcb192e2919bb06f2935
+Description: libjpeg-turbo is a JPEG image codec that uses SIMD instructions (MMX, SSE2, NEON, AltiVec) to accelerate baseline JPEG compression and decompression on x86, x86-64, ARM, and PowerPC systems.
+Status: install ok installed
+
+Package: libogg
+Version: 1.3.5
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 22b655ba71d7f64a3f59da56e87473dfd37d6e30997624475ac5da8ca0c8a28f
+Description: Ogg is a multimedia container format, and the native file and stream format for the Xiph.org multimedia codecs.
+Status: install ok installed
+
+Package: libvorbis
+Version: 1.3.7
+Port-Version: 2
+Depends: libogg, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 686e5fca4180ad3dad129c9ab63b56d5519445dfb1449208fcee9f6c2177d8e1
+Description: Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free, general-purpose compressed audio format
+Status: install ok installed
+
+Package: yasm
+Version: 1.3.0
+Port-Version: 5
+Depends: vcpkg-cmake, vcpkg-cmake-config, yasm
+Architecture: x64-windows
+Multi-Arch: same
+Abi: be8ff3a34aa5dfda16adfcdb7c6932755d9eb3b460a32f656c9587c6360fc9a4
+Description: Yasm is a complete rewrite of the NASM assembler under the new BSD License.
+Status: install ok installed
+
+Package: yasm
+Feature: tools
+Architecture: x64-windows
+Multi-Arch: same
+Description: Build yasm tools
+Status: install ok installed
+
+Package: yasm-tool-helper
+Version: 2020-03-11
+Port-Version: 1
+Depends: yasm
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 23747d9ae7464c3dc985b9203b6cae987f55967eb04b6476c5be87ed5d33e104
+Description: Backfill that depends on yasm:host
+Status: install ok installed
+
+Package: mpg123
+Version: 1.31.3
+Depends: vcpkg-cmake, vcpkg-cmake-config, yasm-tool-helper
+Architecture: x64-windows
+Multi-Arch: same
+Abi: ecbbf235928e1ba15cea4286d15de20ba659c0024bc888801b020cb0f1b6b2a3
+Description: mpg123 is a real time MPEG 1.0/2.0/2.5 audio player/decoder for layers 1, 2 and 3 (MPEG 1.0 layer 3 also known as MP3).
+Status: install ok installed
+
+Package: entt
+Version: 3.11.1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 512d44f70f4fbed84baf9160714adf6985b045408c881954d411f92b1dd6f1cd
+Description: Gaming meets modern C++ - a fast and reliable entity-component system and much more
+Status: install ok installed
+
+Package: chipmunk
+Version: 7.0.3
+Port-Version: 4
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 8c64a42ce04d7456c2215ad7400aaecce7041b2c30722c5301860cb14f642a9b
+Description: A fast and lightweight 2D game physics library.
+Status: install ok installed
+
+Package: brotli
+Version: 1.0.9
+Port-Version: 5
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: ad99b25400dfb07957886ad1e3e2cf4250ab028782c7c85f6edb3658fe6d95fd
+Description: a generic-purpose lossless compression algorithm that compresses data using a combination of a modern variant of the LZ77 algorithm, Huffman coding and 2nd order context modeling.
+Status: install ok installed
+
+Package: bzip2
+Version: 1.0.8
+Port-Version: 4
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 128bb93566e8a1275f818109ac9c58620c90125787327cf0bc605351881c64cb
+Description: bzip2 is a freely available, patent free, high-quality data compressor. It typically compresses files to within 10% to 15% of the best available techniques (the PPM family of statistical compressors), whilst being around twice as fast at compression and six times faster at decompression.
+Default-Features: tool
+Status: install ok installed
+
+Package: bzip2
+Feature: tool
+Architecture: x64-windows
+Multi-Arch: same
+Description: Builds bzip2 executable
+Status: install ok installed
+
+Package: freetype
+Version: 2.12.1
+Port-Version: 3
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 653a0f984a351bc6660c07b41025b51bb9e3fe58dbe2778974417df4a92571fb
+Description: A library to render fonts.
+Default-Features: brotli, bzip2, png, zlib
+Status: install ok installed
+
+Package: freetype
+Feature: brotli
+Depends: brotli
+Architecture: x64-windows
+Multi-Arch: same
+Description: Support decompression of WOFF2 streams
+Status: install ok installed
+
+Package: freetype
+Feature: bzip2
+Depends: bzip2
+Architecture: x64-windows
+Multi-Arch: same
+Description: Support bzip2 compressed fonts.
+Status: install ok installed
+
+Package: freetype
+Feature: png
+Depends: libpng
+Architecture: x64-windows
+Multi-Arch: same
+Description: Support PNG compressed OpenType embedded bitmaps.
+Status: install ok installed
+
+Package: freetype
+Feature: zlib
+Depends: zlib
+Architecture: x64-windows
+Multi-Arch: same
+Description: Use zlib instead of internal library for DEFLATE
+Status: install ok installed
+
+Package: sdl2
+Version: 2.26.5
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 8ec261112e8c0321e7ffc1e6eb209bfd1ef7e14c6f90f2f44586fd74d2ad2d44
+Description: Simple DirectMedia Layer is a cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL and Direct3D.
+Default-Features: base
+Status: install ok installed
+
+Package: sdl2
+Feature: base
+Architecture: x64-windows
+Multi-Arch: same
+Description: Base functionality for SDL
+Status: install ok installed
+
+Package: sdl2-image
+Version: 2.6.3
+Depends: libpng, sdl2, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: c848dfebc05dba5b38473be593624b09cdae4823177a7481895cc094c4ce7052
+Description: SDL_image is an image file loading library. It loads images as SDL surfaces and textures, and supports the following formats: BMP, GIF, JPEG, LBM, PCX, PNG, PNM, TGA, TIFF, WEBP, XCF, XPM, XV
+Status: install ok installed
+
+Package: sdl2-image
+Feature: libjpeg-turbo
+Depends: libjpeg-turbo
+Architecture: x64-windows
+Multi-Arch: same
+Description: Support for JPEG image format
+Status: install ok installed
+
+Package: sdl2-mixer
+Version: 2.6.3
+Port-Version: 1
+Depends: libvorbis, sdl2, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 87e5a759e4abd4ddaeae6e638ed3b789f7c3497570f6c5715a06ba0fda25bcf6
+Description: Multi-channel audio mixer library for SDL.
+Status: install ok installed
+
+Package: egl-registry
+Version: 2022-09-20
+Architecture: x64-windows
+Multi-Arch: same
+Abi: b3cf8f57daace3adb65239b95fda37beee661ff976a8429031242bf2713e481d
+Description: the EGL API and Extension Registry
+Status: install ok installed
+
+Package: opengl-registry
+Version: 2022-09-29
+Port-Version: 1
+Depends: egl-registry
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 17db5b2ad37feaf1b2ebdb37f2497b7a266310280bd025ad478e03ef4f134b35
+Description: the API and Extension registries for the OpenGL family APIs
+Status: install ok installed
+
+Package: glad
+Version: 0.1.36
+Depends: egl-registry, opengl-registry, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 8af673093747df87a15f5e17dbaf32a6fd89f1ac90c0000f28bbf83dcb8a2d56
+Description: Multi-Language Vulkan/GL/GLES/EGL/GLX/WGL Loader-Generator based on the official specs.
+Default-Features: loader
+Status: install ok installed
+
+Package: glad
+Feature: loader
+Architecture: x64-windows
+Multi-Arch: same
+Description: Generate loader logic.
+Status: install ok installed
+
+Package: imgui
+Version: 1.89.4
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 0b2683520f5c424dff3e292d125cdd736732ef714c75787ce65685ca997fd8db
+Description: Bloat-free Immediate Mode Graphical User interface for C++ with minimal dependencies.
+Status: install ok installed
+
+Package: imgui
+Feature: docking-experimental
+Architecture: x64-windows
+Multi-Arch: same
+Description: Build with docking support
+Status: install ok installed
+
+Package: imgui
+Feature: opengl3-binding
+Architecture: x64-windows
+Multi-Arch: same
+Description: Make available OpenGL3/ES/ES2 (modern) binding
+Status: install ok installed
+
+Package: imgui
+Feature: sdl2-binding
+Depends: sdl2
+Architecture: x64-windows
+Multi-Arch: same
+Description: Make available SDL2 binding
+Status: install ok installed
+
+Package: glm
+Version: 0.9.9.8
+Port-Version: 2
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 86fb59d5f43c12e27fef205b9a5f706e539a56e696921d3e74a2de9747acd1df
+Description: OpenGL Mathematics (GLM)
+Status: install ok installed
+
+Package: nlohmann-json
+Version: 3.11.2
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: bb19f7e178850087564eca7103c9164f806200b82a0e3c35101f229ace8f4992
+Description: JSON for Modern C++
+Status: install ok installed
+
+Package: vcpkg-cmake
+Version: 2022-12-22
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 5a1a8ec6fb7e164719235340365a3e03d1c11b4df7910f2c06c2720df450f2ea
+Status: install ok installed
+
+Package: zlib
+Version: 1.2.13
+Depends: vcpkg-cmake
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 2c1ba6099d8a31c92b6eff52e22e7ff40654a39ab095686b73854f37f946f9bf
+Description: A compression library
+Status: install ok installed
+
+Package: vcpkg-cmake-config
+Version: 2022-02-06
+Port-Version: 1
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 6b53fa1b49629103bbdf1d589391cfc29eb27875853ff455fa0b33baa40744d5
+Status: install ok installed
+
+Package: libpng
+Version: 1.6.39
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config, zlib
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 51c2bcbcb601865ee074b3810b95295d5e44707565526292c1aedd936254142f
+Description: libpng is a library implementing an interface for reading and writing PNG (Portable Network Graphics) format files
+Status: install ok installed
+
+Package: libjpeg-turbo
+Version: 2.1.5.1
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 309613e582af29fdbfb60c4b5c6e654e96fdc0366a33dca8128aed347c132be6
+Description: libjpeg-turbo is a JPEG image codec that uses SIMD instructions (MMX, SSE2, NEON, AltiVec) to accelerate baseline JPEG compression and decompression on x86, x86-64, ARM, and PowerPC systems.
+Status: install ok installed
+
+Package: libogg
+Version: 1.3.5
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 962f945c154b1bd26045065c37c520133e0935bc9c6217c0052451d9c1f291e7
+Description: Ogg is a multimedia container format, and the native file and stream format for the Xiph.org multimedia codecs.
+Status: install ok installed
+
+Package: libvorbis
+Version: 1.3.7
+Port-Version: 2
+Depends: libogg, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 230dd30ceb39d0015cded6eeb844f375e2d0968333586fc82f8451f2c101d514
+Description: Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free, general-purpose compressed audio format
+Status: install ok installed
+
+Package: mpg123
+Version: 1.31.3
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 0802fa31b848baae78c9bc8d2eb04948a8336561df73d89bda6b689e735dc21f
+Description: mpg123 is a real time MPEG 1.0/2.0/2.5 audio player/decoder for layers 1, 2 and 3 (MPEG 1.0 layer 3 also known as MP3).
+Status: install ok installed
+
+Package: entt
+Version: 3.11.1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 8320cbe4719211534df87e33457a8fd3188cfee5f271e7c4fc9749e477319e5d
+Description: Gaming meets modern C++ - a fast and reliable entity-component system and much more
+Status: install ok installed
+
+Package: sdl2
+Version: 2.26.5
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 2109c8012e28fedc89a96e69428dc44ec7aa8163fb4c1de2ba7916ffda7d01a9
+Description: Simple DirectMedia Layer is a cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL and Direct3D.
+Default-Features: base
+Status: install ok installed
+
+Package: sdl2
+Feature: base
+Depends: sdl2
+Architecture: x64-linux
+Multi-Arch: same
+Description: Base functionality for SDL
+Status: install ok installed
+
+Package: sdl2
+Feature: ibus
+Architecture: x64-linux
+Multi-Arch: same
+Description: Build with ibus IME support
+Status: install ok installed
+
+Package: sdl2
+Feature: wayland
+Architecture: x64-linux
+Multi-Arch: same
+Description: Build with Wayland support
+Status: install ok installed
+
+Package: sdl2
+Feature: x11
+Architecture: x64-linux
+Multi-Arch: same
+Description: Build with X11 support
+Status: install ok installed
+
+Package: sdl2-image
+Version: 2.6.3
+Depends: libpng, sdl2, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: fcee72380843b80b6b5ff6f0c499e40c8e1deb49126bb547a26e12ba8e369340
+Description: SDL_image is an image file loading library. It loads images as SDL surfaces and textures, and supports the following formats: BMP, GIF, JPEG, LBM, PCX, PNG, PNM, TGA, TIFF, WEBP, XCF, XPM, XV
+Status: purge ok half-installed
+
+Package: sdl2-image
+Feature: libjpeg-turbo
+Depends: libjpeg-turbo
+Architecture: x64-linux
+Multi-Arch: same
+Description: Support for JPEG image format
+Status: install ok installed
+
+Package: egl-registry
+Version: 2022-09-20
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 45710c8473e0563485b0a9fbfa167210492c8a9862ba18f8682214c2f7120dbb
+Description: the EGL API and Extension Registry
+Status: install ok installed
+
+Package: opengl-registry
+Version: 2022-09-29
+Port-Version: 1
+Depends: egl-registry
+Architecture: x64-linux
+Multi-Arch: same
+Abi: de02b5cde6cc2534db0a378d6d567f3479d338f26bbe8cd02114569d85b664c6
+Description: the API and Extension registries for the OpenGL family APIs
+Status: install ok installed
+
+Package: glad
+Version: 0.1.36
+Depends: egl-registry, opengl-registry, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: c3e74c50fce305b4487e29473edcadf477d3d17afdc79d756b2df8c0c9790127
+Description: Multi-Language Vulkan/GL/GLES/EGL/GLX/WGL Loader-Generator based on the official specs.
+Default-Features: loader
+Status: install ok installed
+
+Package: glad
+Feature: loader
+Architecture: x64-linux
+Multi-Arch: same
+Description: Generate loader logic.
+Status: install ok installed
+
+Package: imgui
+Version: 1.89.4
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 26a20253fcc49047f019584985b2488c91ad50b49bdb9818346e47afab1a0c90
+Description: Bloat-free Immediate Mode Graphical User interface for C++ with minimal dependencies.
+Status: purge ok not-installed
+
+Package: imgui
+Feature: docking-experimental
+Architecture: x64-linux
+Multi-Arch: same
+Description: Build with docking support
+Status: purge ok not-installed
+
+Package: imgui
+Feature: opengl3-binding
+Architecture: x64-linux
+Multi-Arch: same
+Description: Make available OpenGL3/ES/ES2 (modern) binding
+Status: purge ok not-installed
+
+Package: imgui
+Feature: sdl2-binding
+Depends: sdl2
+Architecture: x64-linux
+Multi-Arch: same
+Description: Make available SDL2 binding
+Status: purge ok not-installed
+
+Package: glm
+Version: 0.9.9.8
+Port-Version: 2
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 30c759ffcd6d670811f6b17bfced064957d7d8b47d395518ad1599353081fe78
+Description: OpenGL Mathematics (GLM)
+Status: install ok installed
+
+Package: nlohmann-json
+Version: 3.11.2
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: ba13e5b0c89444e4c2197d64b85aed127705f468cc10064d79a5944e174310a3
+Description: JSON for Modern C++
+Status: install ok installed
+
+Package: sdl2-mixer
+Version: 2.6.3
+Port-Version: 1
+Depends: libvorbis, sdl2, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 94e949c4c6a40181fbd3fe329603ca8bb558caaf6b117a57a766d14bb5bab69a
+Description: Multi-channel audio mixer library for SDL.
+Status: install ok installed
+
+Package: sdl2-mixer
+Feature: mpg123
+Depends: mpg123
+Architecture: x64-linux
+Multi-Arch: same
+Description: Use mpg123 to play MP3 audio format.
+Status: install ok installed
+
+Package: libflac
+Version: 1.4.2
+Depends: libogg, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: aade3096ccbd77c8cda26fa5d257143574303c3ce13c1c2136c0182a0b7e5f49
+Description: Library for manipulating FLAC files
+Status: install ok installed
+
+Package: sdl2-mixer
+Feature: libflac
+Depends: libflac
+Architecture: x64-linux
+Multi-Arch: same
+Description: Use libflac to play FLAC audio format.
+Status: install ok installed
+

@@ -17,6 +17,11 @@ struct rde_event_window {
 	bool maximized = false;
 };
 
+struct rde_event_display {
+	int orientation = -1;
+	int display_index = -1;
+};
+
 struct rde_event_key {
 	RDE_KEYBOARD_KEY_ key = RDE_KEYBOARD_KEY_NONE;
 
@@ -71,6 +76,7 @@ struct rde_event_data {
 	rde_event_mouse mouse_event_data;
 	rde_event_controller controller_event_data;
 	rde_event_mobile mobile_event_data;
+	rde_event_display display_event_data;
 };
 
 struct rde_event {
