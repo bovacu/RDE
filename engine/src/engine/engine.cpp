@@ -4,7 +4,7 @@
 #include "window/window.h"
 #include "events/mobile_events.h"
 #include "private_structs.h"
-#include "../src/engine/sdl_to_engine_helper.cpp"
+#include "engine/sdl_to_engine_helper.h"
 
 void rde_engine_on_event(rde_engine* _engine);
 void rde_engine_on_update(rde_engine* _engine, float _dt);
@@ -38,11 +38,13 @@ float rde_engine_get_fixed_delta(rde_engine* _engine) {
 void rde_engine_set_fixed_delta(rde_engine* _engine, float _delta_time) {
 	UNUSED(_engine)
 	UNUSED(_delta_time)
+	UNIMPLEMENTED("Not implemented")
 }
 
 void rde_engine_set_current_scene(rde_engine* _engine, rde_scene* _scene) {
 	UNUSED(_engine)
 	UNUSED(_scene)
+	UNIMPLEMENTED("Not implemented")
 }
 
 void rde_engine_on_run(rde_engine* _engine) {
@@ -80,16 +82,16 @@ void rde_engine_on_run(rde_engine* _engine) {
 
 void rde_engine_init_imgui_layer(rde_engine* _engine) {
 	UNUSED(_engine)
+	UNIMPLEMENTED("Not implemented")
 }
 
 void rde_engine_end_imgui_layer(rde_engine* _engine) {
 	UNUSED(_engine)
+	UNIMPLEMENTED("Not implemented")
 }
 
 rde_window* rde_engine_get_window(rde_engine* _engine, int _index) {
-	UNUSED(_engine)
-	UNUSED(_index)
-	return nullptr;
+	return _engine->engine_windows[_index];
 }
 
 

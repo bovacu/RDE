@@ -1,7 +1,29 @@
 #ifndef RDE_PRIVATE_STRUCTS_H
 #define RDE_PRIVATE_STRUCTS_H
 
+/**
+ * ==================================================
+ * =				READ PLEASE						=
+ * ==================================================
+ * 
+ * This header file should not be included in the projects developed by RDE,
+ * there are some data inside the structs that should not be modify by hand by 
+ * the end-user, because when being modified, some systems or other structs have to
+ * know there's been a change. This header file is included on the source files that
+ * make the correct changes and notify every element that needs to be notified.
+ * 
+ * In general, I do not recommend to add this file as an #include, because every
+ * of information that those structs contains, can be accessed from methods given
+ * by RDE's API.
+ * 
+ * That being said, if you know what you are doing, then feel free to add this
+ * anywhere you want, modify whatever you want and handle yourself everything, 
+ * but have in mind that unexpected behaviours may happen.
+ */
+
+
 #include "structs.h"
+#include "SDL2/SDL_Video.h"
 
 #define RDE_MAX_NUMBER_OF_WINDOWS 10
 

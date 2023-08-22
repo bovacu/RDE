@@ -3,7 +3,6 @@
 
 #include "core.h"
 #include "enums/generic_enums.h"
-#include "SDL2/SDL_Video.h"
 
 /**
  * Structs defined as 'typedef struct X X' do have fields data inside, but it is data

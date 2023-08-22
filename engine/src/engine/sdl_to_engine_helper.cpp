@@ -1,4 +1,4 @@
-#include "SDL2/SDL_Events.h"
+#include "engine/sdl_to_engine_helper.h"
 
 void rde_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
 	switch (_sdl_event->window.event) {

@@ -253,6 +253,7 @@ typedef unsigned int uint;
 	_full_message += LINE_STRING;						\
 	_full_message += "] -> ";							\
 	_full_message += _message;							\
+	assert(false && _full_message.c_str());				\
 }
 
 #endif //RDE_CORE_H
