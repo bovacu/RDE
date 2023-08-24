@@ -834,7 +834,7 @@ struct rde_display_info {
 };
 
 // TODO: this include is absolutely temporary
-#include <SDL2/SDL_Video.h>
+#include "SDL2/SDL_video.h"
 struct rde_window {
 	SDL_Window* sdl_window = nullptr;
 	SDL_GLContext sdl_gl_context;

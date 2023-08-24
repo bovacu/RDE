@@ -1,7 +1,0 @@
-prefix=${pcfiledir}/../..
-Name: alsa-topology
-Description: Advanced Linux Sound Architecture (ALSA) - Topology Library
-Version: 1.2.8
-
-Libs: -latopology
-Requires: alsa >= 1.2.8

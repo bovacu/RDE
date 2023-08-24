@@ -1,50 +1,33 @@
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 cmake_minimum_required(VERSION 3.18.1)
 
 set(PROJECT_NAME RDE)
 project(${PROJECT_NAME})
 
-if(MSVC)
-    set(CMAKE_CXX_STANDARD 20)
-else()
-    set(CMAKE_CXX_STANDARD 17)
-endif()
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
-add_compile_options("-Werror")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(GL_PROFILES "GL_PROFILE_GL3")
-
-file(GLOB_RECURSE RDE_CPP_HEADERS engine/include/*.h)
-file(GLOB_RECURSE RDE_CPP_SOURCES engine/src/*.cpp )
 
 set(CPP_HEADERS)
 set(CPP_SOURCES)
 
-find_package(SDL2 CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/SDL2)
-find_package(SDL2_image CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/SDL2_image)
-find_package(SDL2_mixer CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/SDL2_mixer)
-find_package(freetype CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/freetype)
-find_package(glad CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/glad)
-find_package(nlohmann_json CONFIG REQUIRED PATHS vcpkg/packages/nlohmann-json_x64-linux/share/nlohmann_json)
-find_package(imgui CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/imgui)
-find_package(glm CONFIG REQUIRED PATHS vcpkg/installed/x64-windows/share/glm)
+set(OS)
 
-include_directories(
-        ${SDL2_INCLUDE_DIR}
-        ${SDL2_INCLUDE_DIR}/SDL2
-        ${SDL2_IMAGE_INCLUDE_DIR}
-        ${SDL2_MIXER_INCLUDE_DIR}
-        ${FREETYPE_INCLUDE_DIR}
-        ${GLAD_INCLUDE_DIR}
-        ${JSON_INCLUDE_DIR}
-        ${IMGUI_INCLUDE_DIR}
-        ${GLM_INCLUDE_DIR}
-)
+if(WIN32)
+    set(OS "windows")
+endif()
 
+if(APPLE)
+    set(OS "osx")
+endif()
+
+if(UNIX AND NOT APPLE)
+    set(OS "linux")
+endif()
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/include)
 include_directories(engine/include)
-include_directories(vcpkg/installed/x64-windows/include)
 
 #RDEFirebase
 
@@ -53,8 +36,8 @@ if(RDE_LIBRARY)
 	add_definitions(-DRDE_LIBRARY)
     message("Building lib")
     add_library(${PROJECT_NAME} SHARED
-            ${RDE_CPP_HEADERS}
-            ${RDE_CPP_SOURCES}
+            ${CMAKE_CURRENT_SOURCE_DIR}/engine/include/rde.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/engine/src/rde.cpp
 
             ${CPP_SOURCES}
             ${CPP_HEADERS}
@@ -65,11 +48,10 @@ if(RDE_LIBRARY)
 else()
     message("Building executable")
     add_executable(${PROJECT_NAME} WIN32
-            engine/main.cpp
-			test/test.cpp
-
-            ${RDE_CPP_HEADERS}
-            ${RDE_CPP_SOURCES}
+			${CMAKE_CURRENT_SOURCE_DIR}/engine/include/rde.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/engine/src/rde.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/engine/main.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp
 
             ${CPP_SOURCES}
             ${CPP_HEADERS}
@@ -81,11 +63,11 @@ unset(RDE_LIBRARY CACHE)
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
-        SDL2::SDL2main SDL2::SDL2
-        $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
-        $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
-        freetype
-        glad::glad
-        imgui::imgui
-        glm::glm
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/manual-link/SDL2main.lib
+		${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/SDL2.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/SDL2_image.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/SDL2_mixer.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/freetype.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/glad.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/imgui.lib
         )
