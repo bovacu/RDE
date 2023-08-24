@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "rde.h"
+#include "SDL2/SDL.h"
 
 #ifdef __EMSCRIPTEN__
 #include <GLES3/gl32.h>
@@ -43,6 +44,11 @@ void rde_engine_on_fixed_update(rde_engine* _engine, float _fixed_dt);
 void rde_engine_on_late_update(rde_engine* _engine, float _dt);
 void rde_engine_on_render(rde_engine* _engine, float _dt);
 void rde_engine_sync_events(rde_engine* _engine);
+
+static rde_engine_user_side_loop_func	rde_engine_user_on_update = nullptr;
+static rde_engine_user_side_loop_func	rde_engine_user_on_fixed_update = nullptr;
+static rde_engine_user_side_loop_func	rde_engine_user_on_late_update = nullptr;
+static rde_engine_user_side_loop_func	rde_engine_user_on_render = nullptr;
 
 
 
@@ -124,6 +130,9 @@ void rde_sdl_to_rde_helper_transform_display_event(SDL_Event* _sdl_event, rde_ev
 /// ============================ ENGINE =====================================
 
 rde_engine* rde_engine_create_engine(int _argc, char** _argv) {
+	UNUSED(_argc)
+	UNUSED(_argv)
+
 	rde_engine* _engine = new rde_engine {  };
 	rde_window* _default_window = rde_window_create_window(_engine);
 
@@ -133,9 +142,14 @@ rde_engine* rde_engine_create_engine(int _argc, char** _argv) {
 	rde_events_window_create_events();
 	rde_events_display_create_events();
 
-	rde_engine_entry_point(_argc, _argv, _engine, _default_window);
-
 	return _engine;
+}
+
+void rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks) {
+	rde_engine_user_on_update = _end_user_callbacks.on_update;
+	rde_engine_user_on_fixed_update = _end_user_callbacks.on_fixed_update;
+	rde_engine_user_on_late_update = _end_user_callbacks.on_late_update;
+	rde_engine_user_on_render = _end_user_callbacks.on_render;
 }
 
 RDE_PLATFORM_TYPE_ rde_engine_get_platform(rde_engine* _engine) {
@@ -148,15 +162,20 @@ float rde_engine_get_fixed_delta(rde_engine* _engine) {
 
 void rde_engine_set_fixed_delta(rde_engine* _engine, float _delta_time) {
 	UNUSED(_engine)
-		UNUSED(_delta_time)
-		UNIMPLEMENTED("Not implemented")
+	UNUSED(_delta_time)
+	UNIMPLEMENTED("Not implemented")
 }
 
 void rde_engine_on_run(rde_engine* _engine) {
 
-#if IS_MOBILE()
+	assert(rde_engine_user_on_update != nullptr && "User-End callback 'rde_engine_user_on_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	assert(rde_engine_user_on_fixed_update != nullptr && "User-End callback 'rde_engine_user_on_fixed_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	assert(rde_engine_user_on_late_update != nullptr && "User-End callback 'rde_engine_user_on_late_upadte' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	assert(rde_engine_user_on_render != nullptr && "User-End callback 'rde_engine_user_on_render' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+
+	#if IS_MOBILE()
 	SDL_SetEventFilter(rde_mobile_consume_events, _engine);
-#endif
+	#endif
 
 	while(_engine->running) {
 		Uint64 _start = SDL_GetPerformanceCounter();
@@ -174,7 +193,7 @@ void rde_engine_on_run(rde_engine* _engine) {
 		}
 
 		rde_engine_on_late_update(_engine, _engine->delta_time);
-		rde_engine_user_on_late_upadte(_engine->delta_time);
+		rde_engine_user_on_late_update(_engine->delta_time);
 
 		rde_engine_on_render(_engine, _engine->delta_time);
 		rde_engine_user_on_render(_engine->delta_time);
@@ -363,7 +382,57 @@ rde_window* rde_window_create_mac_window(rde_engine* _engine) {
 
 #if IS_LINUX()
 rde_window* rde_window_create_linux_window(rde_engine* _engine) {
-	UNIMPLEMENTED("Mac linux creation is not implemented yet");
+	UNUSED(_engine);
+
+	rde_window* _window = new rde_window {  };
+
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+		
+#ifdef RENDER_DOC_COMPATIBILITY
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+#else
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
+
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	_window->sdl_window = SDL_CreateWindow("Title", 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+
+	if(_window->sdl_window == nullptr) {
+		std::cout << "SDL window creation failed: " << SDL_GetError() << std::endl;
+		exit(-1);
+	}
+	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
+
+	if(_window->sdl_gl_context == nullptr) {
+		std::cout << "OpenGL context couldn't initialize -> " << SDL_GetError() << std::endl;
+		exit(-1);
+	}
+
+	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
+
+	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		exit(-1);
+	}
+	std::cout << "GLAD and SDL2 loaded successfully" << std::endl;
+
+	SDL_GL_SetSwapInterval(1);
+
+	SDL_SetWindowPosition(_window->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowResizable(_window->sdl_window, SDL_TRUE);
+
+	_window->display_info.index = SDL_GetWindowDisplayIndex(_window->sdl_window);
+
+	return _window;
+	//setIcon(properties->projectData.iconPath);
+
+	//refreshDpi();
 }
 #endif
 
@@ -387,7 +456,11 @@ rde_window* rde_window_create_wasm_window(rde_engine* _engine) {
 
 rde_window* rde_window_create_window(rde_engine* _engine) {
 	// TODO: create window depending on platform
+#if IS_WINDOWS()
 	return rde_window_create_windows_window(_engine);
+#elif IS_LINUX()
+	return rde_window_create_linux_window(_engine);
+#endif
 }
 
 void rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbacks) {

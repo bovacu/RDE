@@ -51,7 +51,6 @@
 
 
 #include <assert.h>
-#include "SDL2/SDL.h"
 
 /// *************************************************************************************************
 /// *                                		DEFINES                         						*
@@ -164,7 +163,7 @@
 	#define RDE_DEPRECATED(_explanation) [[gnu::deprecated(_explanation)]]
 #endif
 
-#if IS_WINDOWS() && !defined(ONLY_EXECUTABLE)
+#if IS_WINDOWS()
 	#define RDE_FUNC __declspec(dllexport)
 	#define RDE_FUNC_STATIC __declspec(dllexport) static
 	#define RDE_FUNC_EXTERNAL extern "C" RDE_FUNC
@@ -174,7 +173,18 @@
 	#define RDE_FUNC_EXTERNAL
 #endif
 
+#if IS_WINDOWS()
+	#include <io.h>
+	#include <fcntl.h>
+	#include <windows.h>
+#endif			 
 
+#define RDE_SHOW_WINDOWS_CONSOLE 							\
+	if(AllocConsole()) {									\
+		freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);	\
+		freopen_s((FILE**)stdin, "CONIN$", "r", stdin);		\
+		std::ios::sync_with_stdio(1);						\
+	}
 
 /// ============================== UTIL ====================================
 
@@ -780,6 +790,7 @@ struct rde_event;
 
 typedef void (*rde_event_func_inner)(rde_event*);
 typedef void (*rde_event_func_outer)(rde_engine*, rde_window*, rde_event*);
+typedef void (*rde_engine_user_side_loop_func)(float);
 
 struct rde_event_callback {
 	bool block_engine_default_implementation = false;
@@ -787,45 +798,50 @@ struct rde_event_callback {
 };
 
 struct rde_window_callbacks {
-	rde_event_callback on_window_resize = {0};
-	rde_event_callback on_window_focused_by_mouse = {0};
-	rde_event_callback on_window_unfocused_by_mouse = {0};
-	rde_event_callback on_window_focused_by_keyboard = {0};
-	rde_event_callback on_window_unfocused_by_keyboard = {0};
-	rde_event_callback on_window_moved = {0};
-	rde_event_callback on_window_minimized = {0};
-	rde_event_callback on_window_maximized = {0};
-	rde_event_callback on_window_closed = {0};
-	rde_event_callback on_window_display_changed = {0};
+	rde_event_callback on_window_resize = {  };
+	rde_event_callback on_window_focused_by_mouse = {  };
+	rde_event_callback on_window_unfocused_by_mouse = {  };
+	rde_event_callback on_window_focused_by_keyboard = {  };
+	rde_event_callback on_window_unfocused_by_keyboard = {  };
+	rde_event_callback on_window_moved = {  };
+	rde_event_callback on_window_minimized = {  };
+	rde_event_callback on_window_maximized = {  };
+	rde_event_callback on_window_closed = {  };
+	rde_event_callback on_window_display_changed = {  };
 };
 
 struct rde_display_callbacks {
-	rde_event_callback on_display_connected = {0};
-	rde_event_callback on_display_disconnected = {0};
-	rde_event_callback on_display_changed_orientation = {0};
+	rde_event_callback on_display_connected = {  };
+	rde_event_callback on_display_disconnected = {  };
+	rde_event_callback on_display_changed_orientation = {  };
 };
 
 struct rde_mobile_callbacks {
-	rde_event_callback on_app_terminating = {0}; 			/// Android -> onDestroy(), iOS -> applicationWillTerminate()
-	rde_event_callback on_app_low_memory = {0}; 			/// Android -> onLowMemory(), iOS -> applicationDidReceiveMemoryWarning()
-	rde_event_callback on_app_will_enter_background = {0}; 	/// Android -> onPause(), iOS -> applicationWillResignActive()
-	rde_event_callback on_app_did_enter_background = {0}; 	/// Android -> onPause(), iOS -> applicationDidEnterBackground()
-	rde_event_callback on_app_will_enter_foreground = {0}; 	/// Android -> onResume(), iOS -> applicationWillEnterForeground()
-	rde_event_callback on_app_did_enter_foreground = {0}; 	/// Android -> onResume(), iOS -> applicationDidBecomeActive()
+	rde_event_callback on_app_terminating = {  }; 			/// Android -> onDestroy(), iOS -> applicationWillTerminate()
+	rde_event_callback on_app_low_memory = {  }; 			/// Android -> onLowMemory(), iOS -> applicationDidReceiveMemoryWarning()
+	rde_event_callback on_app_will_enter_background = {  }; 	/// Android -> onPause(), iOS -> applicationWillResignActive()
+	rde_event_callback on_app_did_enter_background = {  }; 	/// Android -> onPause(), iOS -> applicationDidEnterBackground()
+	rde_event_callback on_app_will_enter_foreground = {  }; 	/// Android -> onResume(), iOS -> applicationWillEnterForeground()
+	rde_event_callback on_app_did_enter_foreground = {  }; 	/// Android -> onResume(), iOS -> applicationDidBecomeActive()
 };
 
 struct rde_controller_callbacks {
-	rde_event_callback on_controller_added = {0};
-	rde_event_callback on_controller_removed = {0};
-	rde_event_callback on_controller_reassigned = {0};
+	rde_event_callback on_controller_added = {  };
+	rde_event_callback on_controller_removed = {  };
+	rde_event_callback on_controller_reassigned = {  };
 };
 
 struct rde_drag_and_drop_callbacks {
-	rde_event_callback on_drag_and_drop_begin = {0};
-	rde_event_callback on_drag_and_drop_end = {0};
+	rde_event_callback on_drag_and_drop_begin = {  };
+	rde_event_callback on_drag_and_drop_end = {  };
 };
 
-
+struct rde_end_user_mandatory_callbacks {
+	rde_engine_user_side_loop_func on_update = nullptr;
+	rde_engine_user_side_loop_func on_fixed_update = nullptr;
+	rde_engine_user_side_loop_func on_late_update = nullptr;
+	rde_engine_user_side_loop_func on_render = nullptr;
+};
 
 /// ============================== ENGINE ===================================
 
@@ -1032,14 +1048,9 @@ struct rde_batch_3d {
 
 /// ============================ ENGINE =====================================
 
-RDE_FUNC_EXTERNAL void				rde_engine_entry_point(int _argc, char** _argv, rde_engine* _engine, rde_window* _window);
-RDE_FUNC_EXTERNAL void				rde_engine_user_on_update(float _dt);
-RDE_FUNC_EXTERNAL void				rde_engine_user_on_fixed_update(float _dt);
-RDE_FUNC_EXTERNAL void				rde_engine_user_on_late_upadte(float _dt);
-RDE_FUNC_EXTERNAL void				rde_engine_user_on_render(float _dt);
-
 
 RDE_FUNC 		rde_engine*			rde_engine_create_engine(int _argc, char** _argv);
+RDE_FUNC		void				rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks);
 
 RDE_FUNC 		RDE_PLATFORM_TYPE_ 	rde_engine_get_platform(rde_engine* _engine);
 
@@ -1155,6 +1166,5 @@ const rde_color RDE_COLOR_PLACEHOLDER_TEXT	= { 220, 220, 220, 128 };
 const rde_color RDE_COLOR_RDE_DUCK_YELLOW	= { 255, 213,  81, 255 };
 const rde_color RDE_COLOR_GOLD				= { 255, 213,  81, 255 };
 const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
-
 
 #endif
