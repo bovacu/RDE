@@ -86,7 +86,6 @@ target_link_libraries(${PROJECT_NAME}
         $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
         freetype
         glad::glad
-        nlohmann_json::nlohmann_json
         imgui::imgui
         glm::glm
         )

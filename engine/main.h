@@ -1,5 +1,5 @@
-#include "engine/engine.h"
-#include "SDL2/SDL.h"
+#include "rde.h"
+#include <iostream>
 
 #if IS_WINDOWS()
 #include <io.h>
@@ -8,7 +8,6 @@
 #endif
 
 #define ENGINE_DEBUG
-#include "core.h"
 
 int main(int _argc, char** _argv){
 	UNUSED(_argc)
