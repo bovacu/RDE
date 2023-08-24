@@ -1,0 +1,16 @@
+prefix=${pcfiledir}/../..
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+bindir=${prefix}/bin
+glib_genmarshal=${prefix}/tools/glib/glib-genmarshal
+gobject_query=${prefix}/tools/glib/gobject-query
+glib_mkenums=${prefix}/tools/glib/glib-mkenums
+
+Name: GLib
+Description: C Utility Library
+Version: 2.76.2
+
+Libs: -L${libdir} -lglib-2.0 -lintl -liconv -lintl -lm -framework Foundation -framework CoreFoundation -framework AppKit -framework Carbon
+Requires: libpcre2-8 >= 10.32
+Cflags: -I${includedir}/glib-2.0 -I${prefix}/include -I${libdir}/glib-2.0/include
