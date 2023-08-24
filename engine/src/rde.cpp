@@ -51,6 +51,10 @@ static rde_engine_user_side_loop_func	rde_engine_user_on_late_update = nullptr;
 static rde_engine_user_side_loop_func	rde_engine_user_on_render = nullptr;
 
 
+struct rde_inner_window_info {
+	SDL_Window* sdl_window = nullptr;
+	SDL_GLContext sdl_gl_context;
+};
 
 
 /// ============================ MATH =======================================
@@ -239,8 +243,8 @@ rde_vec_2I rde_engine_get_display_size(rde_engine* _engine) {
 }
 
 void rde_engine_destroy_engine(rde_engine* _engine) {
-	SDL_GL_DeleteContext(_engine->engine_windows[0]->sdl_gl_context);
-	SDL_DestroyWindow(_engine->engine_windows[0]->sdl_window);
+	SDL_GL_DeleteContext(_engine->engine_windows[0]->inner_info->sdl_gl_context);
+	SDL_DestroyWindow(_engine->engine_windows[0]->inner_info->sdl_window);
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
 }
@@ -323,6 +327,7 @@ rde_window* rde_window_create_windows_window(rde_engine* _engine) {
 	UNUSED(_engine);
 
 	rde_window* _window = new rde_window {  };
+	_window->inner_info = new rde_inner_window_info {  };
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -339,20 +344,20 @@ rde_window* rde_window_create_windows_window(rde_engine* _engine) {
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	_window->sdl_window = SDL_CreateWindow("Title", 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	_window->inner_info->sdl_window = SDL_CreateWindow("Title", 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
-	if(_window->sdl_window == nullptr) {
+	if(_window->inner_info->sdl_window == nullptr) {
 		std::cout << "SDL window creation failed: " << SDL_GetError() << std::endl;
 		exit(-1);
 	}
-	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
+	_window->inner_info->sdl_gl_context = SDL_GL_CreateContext(_window->inner_info->sdl_window);
 
-	if(_window->sdl_gl_context == nullptr) {
+	if(_window->inner_info->sdl_gl_context == nullptr) {
 		std::cout << "OpenGL context couldn't initialize -> " << SDL_GetError() << std::endl;
 		exit(-1);
 	}
 
-	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
+	SDL_GL_MakeCurrent(_window->inner_info->sdl_window, _window->inner_info->sdl_gl_context);
 
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
@@ -362,10 +367,10 @@ rde_window* rde_window_create_windows_window(rde_engine* _engine) {
 
 	SDL_GL_SetSwapInterval(1);
 
-	SDL_SetWindowPosition(_window->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	SDL_SetWindowResizable(_window->sdl_window, SDL_TRUE);
+	SDL_SetWindowPosition(_window->inner_info->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowResizable(_window->inner_info->sdl_window, SDL_TRUE);
 
-	_window->display_info.index = SDL_GetWindowDisplayIndex(_window->sdl_window);
+	_window->display_info.index = SDL_GetWindowDisplayIndex(_window->inner_info->sdl_window);
 
 	return _window;
 	//setIcon(properties->projectData.iconPath);
@@ -385,6 +390,7 @@ rde_window* rde_window_create_linux_window(rde_engine* _engine) {
 	UNUSED(_engine);
 
 	rde_window* _window = new rde_window {  };
+	_window->inner_info = new rde_inner_window_info {  };
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -401,20 +407,20 @@ rde_window* rde_window_create_linux_window(rde_engine* _engine) {
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	_window->sdl_window = SDL_CreateWindow("Title", 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	_window->inner_info->sdl_window = SDL_CreateWindow("Title", 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
-	if(_window->sdl_window == nullptr) {
+	if(_window->inner_info->sdl_window == nullptr) {
 		std::cout << "SDL window creation failed: " << SDL_GetError() << std::endl;
 		exit(-1);
 	}
-	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
+	_window->inner_info->sdl_gl_context = SDL_GL_CreateContext(_window->inner_info->sdl_window);
 
-	if(_window->sdl_gl_context == nullptr) {
+	if(_window->inner_info->sdl_gl_context == nullptr) {
 		std::cout << "OpenGL context couldn't initialize -> " << SDL_GetError() << std::endl;
 		exit(-1);
 	}
 
-	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
+	SDL_GL_MakeCurrent(_window->inner_info->sdl_window, _window->inner_info->sdl_gl_context);
 
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
@@ -424,10 +430,10 @@ rde_window* rde_window_create_linux_window(rde_engine* _engine) {
 
 	SDL_GL_SetSwapInterval(1);
 
-	SDL_SetWindowPosition(_window->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	SDL_SetWindowResizable(_window->sdl_window, SDL_TRUE);
+	SDL_SetWindowPosition(_window->inner_info->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowResizable(_window->inner_info->sdl_window, SDL_TRUE);
 
-	_window->display_info.index = SDL_GetWindowDisplayIndex(_window->sdl_window);
+	_window->display_info.index = SDL_GetWindowDisplayIndex(_window->inner_info->sdl_window);
 
 	return _window;
 	//setIcon(properties->projectData.iconPath);

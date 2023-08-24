@@ -792,6 +792,8 @@ typedef void (*rde_event_func_inner)(rde_event*);
 typedef void (*rde_event_func_outer)(rde_engine*, rde_window*, rde_event*);
 typedef void (*rde_engine_user_side_loop_func)(float);
 
+typedef struct rde_inner_window_info rde_inner_window_info;
+
 struct rde_event_callback {
 	bool block_engine_default_implementation = false;
 	rde_event_func_inner _callback = nullptr;
@@ -849,11 +851,8 @@ struct rde_display_info {
 	int index = -1;
 };
 
-// TODO: this include is absolutely temporary
-#include "SDL2/SDL_video.h"
 struct rde_window {
-	SDL_Window* sdl_window = nullptr;
-	SDL_GLContext sdl_gl_context;
+	rde_inner_window_info* inner_info;
 	rde_display_info display_info;
 };
 
@@ -947,7 +946,7 @@ struct rde_event_data {
 
 struct rde_event {
 	RDE_EVENT_TYPE_ type = RDE_EVENT_TYPE_NONE;
-	uint32_t time_stamp = 0;
+	ulong time_stamp = 0;
 	bool handled = false;
 	rde_event_data data {  };
 
