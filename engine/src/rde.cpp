@@ -13,6 +13,26 @@
 #include "glad/glad.h"
 #endif
 
+
+struct rde_engine {
+	bool instantiated = false;
+
+	float delta_time = 0.0f;
+	float fixed_delta_time = 0.016f;
+
+	float fixed_time_step_accumulator = 0.0f;
+	RDE_PLATFORM_TYPE_ platform_type = RDE_PLATFORM_TYPE_UNSUPPORTED;
+
+	bool running = true;
+	bool use_rde_batching_system = true;
+
+	rde_display_callbacks display_callbacks;
+	rde_window_callbacks window_callbacks;
+};
+
+static rde_engine ENGINE;
+
+
 // This inner structure defined here complements rde_window. In fact, this is not defined
 // in the header file so the header file is 100% free of any external dependencies, which
 // means no anoying linking problems.
@@ -46,7 +66,7 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_closed, window_callbacks, on_win
 		}
 	}
 
-	_engine->running = false;
+	ENGINE.running = false;
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_display_changed, window_callbacks, on_window_moved, {})
 
@@ -59,12 +79,12 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_disconnected, display_callbacks
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_changed_orientation, display_callbacks, on_display_changed_orientation, {})
 
 
-void rde_engine_on_event(rde_engine* _engine);
-void rde_engine_on_update(rde_engine* _engine, float _dt);
-void rde_engine_on_fixed_update(rde_engine* _engine, float _fixed_dt);
-void rde_engine_on_late_update(rde_engine* _engine, float _dt);
-void rde_engine_on_render(rde_engine* _engine, float _dt);
-void rde_engine_sync_events(rde_engine* _engine);
+void rde_engine_on_event();
+void rde_engine_on_update(float _dt);
+void rde_engine_on_fixed_update(float _fixed_dt);
+void rde_engine_on_late_update(float _dt);
+void rde_engine_on_render(float _dt);
+void rde_engine_sync_events();
 
 static rde_engine_user_side_loop_func	rde_engine_user_on_update = nullptr;
 static rde_engine_user_side_loop_func	rde_engine_user_on_fixed_update = nullptr;
@@ -85,7 +105,7 @@ static rde_engine_user_side_loop_func	rde_engine_user_on_render = nullptr;
 
 void rde_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
 	_rde_event->time_stamp = _sdl_event->window.timestamp;
-	_rde_event->data.window_event_data.window_id = _sdl_event->window.windowID;
+	_rde_event->window_id = _sdl_event->window.windowID;
 
 	switch (_sdl_event->window.event) {
 		case SDL_WINDOWEVENT_RESIZED: {
@@ -148,20 +168,22 @@ void rde_sdl_to_rde_helper_transform_display_event(SDL_Event* _sdl_event, rde_ev
 
 /// ============================ ENGINE =====================================
 
-rde_engine* rde_engine_create_engine(int _argc, char** _argv) {
+rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 	UNUSED(_argc)
 	UNUSED(_argv)
+	
+	if(ENGINE.instantiated) {
+		assert(false && "[ERROR]: Only one engine can be created");
+		exit(-1);
+	}
 
-	rde_engine* _engine = new rde_engine {  };
+	ENGINE.instantiated = true;
 	rde_window* _default_window = rde_window_create_window();
-
-	memset(_engine->engine_windows, 0, RDE_MAX_NUMBER_OF_WINDOWS);
-	_engine->engine_windows[0] = _default_window;
 
 	rde_events_window_create_events();
 	rde_events_display_create_events();
 
-	return _engine;
+	return _default_window;
 }
 
 void rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks) {
@@ -171,21 +193,20 @@ void rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_cal
 	rde_engine_user_on_render = _end_user_callbacks.on_render;
 }
 
-RDE_PLATFORM_TYPE_ rde_engine_get_platform(rde_engine* _engine) {
-	return _engine->platform_type;
+RDE_PLATFORM_TYPE_ rde_engine_get_platform() {
+	return ENGINE.platform_type;
 }
 
-float rde_engine_get_fixed_delta(rde_engine* _engine) {
-	return _engine->fixed_delta_time;
+float rde_engine_get_fixed_delta() {
+	return ENGINE.fixed_delta_time;
 }
 
-void rde_engine_set_fixed_delta(rde_engine* _engine, float _delta_time) {
-	UNUSED(_engine)
+void rde_engine_set_fixed_delta(float _delta_time) {
 	UNUSED(_delta_time)
 	UNIMPLEMENTED("Not implemented")
 }
 
-void rde_engine_on_run(rde_engine* _engine) {
+void rde_engine_on_run() {
 
 	assert(rde_engine_user_on_update != nullptr && "User-End callback 'rde_engine_user_on_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
 	assert(rde_engine_user_on_fixed_update != nullptr && "User-End callback 'rde_engine_user_on_fixed_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
@@ -193,72 +214,64 @@ void rde_engine_on_run(rde_engine* _engine) {
 	assert(rde_engine_user_on_render != nullptr && "User-End callback 'rde_engine_user_on_render' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
 
 	#if IS_MOBILE()
-	SDL_SetEventFilter(rde_mobile_consume_events, _engine);
+	SDL_SetEventFilter(rde_mobile_consume_events);
 	#endif
 
-	while(_engine->running) {
+	while(ENGINE.running) {
 		Uint64 _start = SDL_GetPerformanceCounter();
-		_engine->fixed_time_step_accumulator += _engine->delta_time;
+		ENGINE.fixed_time_step_accumulator += ENGINE.delta_time;
 
-		rde_engine_on_event(_engine);
+		rde_engine_on_event();
 
-		rde_engine_on_update(_engine, _engine->delta_time);
-		rde_engine_user_on_update(_engine->delta_time);
+		rde_engine_on_update(ENGINE.delta_time);
+		rde_engine_user_on_update(ENGINE.delta_time);
 
-		while (_engine->fixed_time_step_accumulator >= _engine->fixed_delta_time) {
-			_engine->fixed_time_step_accumulator -= _engine->fixed_delta_time;
-			rde_engine_on_fixed_update(_engine, _engine->fixed_delta_time);
-			rde_engine_user_on_fixed_update(_engine->fixed_delta_time);
+		while (ENGINE.fixed_time_step_accumulator >= ENGINE.fixed_delta_time) {
+			ENGINE.fixed_time_step_accumulator -= ENGINE.fixed_delta_time;
+			rde_engine_on_fixed_update(ENGINE.fixed_delta_time);
+			rde_engine_user_on_fixed_update(ENGINE.fixed_delta_time);
 		}
 
-		rde_engine_on_late_update(_engine, _engine->delta_time);
-		rde_engine_user_on_late_update(_engine->delta_time);
+		rde_engine_on_late_update(ENGINE.delta_time);
+		rde_engine_user_on_late_update(ENGINE.delta_time);
 
-		rde_engine_on_render(_engine, _engine->delta_time);
-		rde_engine_user_on_render(_engine->delta_time);
+		rde_engine_on_render(ENGINE.delta_time);
+		rde_engine_user_on_render(ENGINE.delta_time);
 
-		rde_engine_sync_events(_engine);
+		rde_engine_sync_events();
 
 		Uint64 _end = SDL_GetPerformanceCounter();
 		float _elapsedMS = (float)(_end - _start) / (float)SDL_GetPerformanceFrequency();
-		_engine->delta_time = _elapsedMS;
+		ENGINE.delta_time = _elapsedMS;
 	}
 
-	rde_engine_destroy_engine(_engine);
+	rde_engine_destroy_engine();
 }
 
-void rde_engine_init_imgui_layer(rde_engine* _engine) {
-	UNUSED(_engine)
+void rde_engine_init_imgui_layer() {
 	UNIMPLEMENTED("Not implemented")
 }
 
-void rde_engine_end_imgui_layer(rde_engine* _engine) {
-	UNUSED(_engine)
+void rde_engine_end_imgui_layer() {
 	UNIMPLEMENTED("Not implemented")
 }
 
-rde_window* rde_engine_get_window(rde_engine* _engine, int _index) {
-	return _engine->engine_windows[_index];
+bool rde_engine_is_running() {
+	return ENGINE.running;
 }
 
-
-bool rde_engine_is_running(rde_engine* _engine) {
-	return _engine->running;
+void rde_engine_set_running(bool _running) {
+	ENGINE.running = _running;
 }
 
-void rde_engine_set_running(rde_engine* _engine, bool _running) {
-	_engine->running = _running;
-}
-
-rde_vec_2I rde_engine_get_display_size(rde_engine* _engine) {
-	UNUSED(_engine)
+rde_vec_2I rde_engine_get_display_size() {
+	
 	SDL_DisplayMode _displayMode;
 	SDL_GetCurrentDisplayMode(0, &_displayMode);
 	return { _displayMode.w, _displayMode.h };
 }
 
-void rde_engine_destroy_engine(rde_engine* _engine) {
-	
+void rde_engine_destroy_engine() {
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
 		if(inner_window_info_array[_i].self_pointer == nullptr) {
 			continue;
@@ -269,8 +282,6 @@ void rde_engine_destroy_engine(rde_engine* _engine) {
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
-
-	delete _engine;
 }
 
 rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
@@ -285,8 +296,8 @@ rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 	return _event;
 }
 
-void rde_engine_on_event(rde_engine* _engine) {
-	UNUSED(_engine);
+void rde_engine_on_event() {
+	;
 
 	SDL_Event _event;
         
@@ -319,43 +330,39 @@ void rde_engine_on_event(rde_engine* _engine) {
 			//			- SDL_AudioDeviceEvent
 			switch(_event.type) {
 				case SDL_WINDOWEVENT:	{
-					if(SDL_GetWindowID(_window_info->sdl_window) != _rde_event.data.window_event_data.window_id) {
+					if(SDL_GetWindowID(_window_info->sdl_window) != _rde_event.window_id) {
 						continue;
 					}
-					rde_events_window_consume_events(_engine, _window_info->self_pointer, &_rde_event);
+					rde_events_window_consume_events(_window_info->self_pointer, &_rde_event);
 				} break;
-				case SDL_DISPLAYEVENT: 	rde_events_display_consume_events(_engine, _window_info->self_pointer, &_rde_event); break;
+				case SDL_DISPLAYEVENT: 	rde_events_display_consume_events(_window_info->self_pointer, &_rde_event); break;
 			}
 		}
 	}
 }
 
-void rde_engine_on_update(rde_engine* _engine, float _dt) {
-	UNUSED(_engine)
+void rde_engine_on_update(float _dt) {
 	UNUSED(_dt)
 }
 
-void rde_engine_on_fixed_update(rde_engine* _engine, float _fixed_dt) {
-	UNUSED(_engine)
+void rde_engine_on_fixed_update(float _fixed_dt) {
 	UNUSED(_fixed_dt)
 }
 
-void rde_engine_on_late_update(rde_engine* _engine, float _dt) {
-	UNUSED(_engine)
+void rde_engine_on_late_update(float _dt) {
 		UNUSED(_dt)
 }
 
-void rde_engine_on_render(rde_engine* _engine, float _dt) {
-	UNUSED(_engine)
+void rde_engine_on_render(float _dt) {
 	UNUSED(_dt)
 	
-	if (!_engine->use_rde_batching_system) {
+	if (!ENGINE.use_rde_batching_system) {
 		return;
 	}
 }
 
-void rde_engine_sync_events(rde_engine* _engine) {
-	UNUSED(_engine)
+void rde_engine_sync_events() {
+	
 }
 
 rde_display_info* rde_engine_get_available_displays() {
@@ -445,7 +452,7 @@ rde_window* rde_window_create_windows_window(size_t _free_window_index) {
 #endif
 
 #if IS_MAC()
-rde_window* rde_window_create_mac_window(rde_engine* _engine) {
+rde_window* rde_window_create_mac_window() {
 	UNIMPLEMENTED("Mac window creation is not implemented yet");
 }
 #endif
@@ -510,19 +517,19 @@ rde_window* rde_window_create_linux_window(size_t _free_window_index) {
 #endif
 
 #if IS_ANDROID()
-rde_window* rde_window_create_android_window(rde_engine* _engine, size_t _free_window_index) {
+rde_window* rde_window_create_android_window(size_t _free_window_index) {
 	UNIMPLEMENTED("Mac android creation is not implemented yet");
 }
 #endif
 
 #if IS_IOS()
-rde_window* rde_window_create_ios_window(rde_engine* _engine, size_t _free_window_index) {
+rde_window* rde_window_create_ios_window(size_t _free_window_index) {
 	UNIMPLEMENTED("Mac ios creation is not implemented yet");
 }
 #endif
 
 #if 0
-rde_window* rde_window_create_wasm_window(rde_engine* _engine, size_t _free_window_index) {
+rde_window* rde_window_create_wasm_window(size_t _free_window_index) {
 	UNIMPLEMENTED("Mac WASM creation is not implemented yet");
 }
 #endif
@@ -625,11 +632,11 @@ void rde_events_window_create_events() {
 	window_events[RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED - WIN_EVENT_INIT] 		= &window_display_changed;
 }
 
-void rde_events_window_consume_events(rde_engine* _engine, rde_window* _window, rde_event* _event) {
+void rde_events_window_consume_events(rde_window* _window, rde_event* _event) {
 	size_t _event_index = _event->type - WIN_EVENT_INIT;
 
 	if(_event_index >= 0 && _event_index < WIN_EVENT_COUNT) {
-		window_events[_event_index](_engine, _window, _event);
+		window_events[_event_index](_window, _event);
 	} else {
 		std::cout << "Window Event: " << _event->type << ", not handled" << std::endl;
 	}
@@ -641,11 +648,11 @@ void rde_events_display_create_events() {
 	display_events[RDE_EVENT_TYPE_DISPLAY_CHANGED_ORIENTATION - DISPLAY_EVENT_INIT] = &display_changed_orientation;
 }
 
-void rde_events_display_consume_events(rde_engine* _engine, rde_window* _window, rde_event* _event) {
+void rde_events_display_consume_events(rde_window* _window, rde_event* _event) {
 	size_t _event_index = _event->type - DISPLAY_EVENT_INIT;
 
 	if(_event_index >= 0 && _event_index < DISPLAY_EVENT_COUNT) {
-		display_events[_event_index](_engine, _window, _event);
+		display_events[_event_index](_window, _event);
 	} else {
 		std::cout << "Display Event: " << _event->type << ", not handled" << std::endl;
 	}

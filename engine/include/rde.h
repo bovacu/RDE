@@ -287,14 +287,14 @@
 	};
 
 #define COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(_func_name, _callback_type, _callback_name, _extra_code) 	\
-	void _func_name(rde_engine* _engine, rde_window* _window, rde_event* _event) {					\
+	void _func_name(rde_window* _window, rde_event* _event) {					\
 		UNUSED(_window);																					\
-		if(!_engine->_callback_type._callback_name.block_engine_default_implementation) {					\
+		if(!ENGINE._callback_type._callback_name.block_engine_default_implementation) {					\
 			_extra_code																						\
 		}																									\
 																											\
-		if(_engine->_callback_type._callback_name._callback != nullptr) {									\
-			_engine->_callback_type._callback_name._callback(_event);										\
+		if(ENGINE._callback_type._callback_name._callback != nullptr) {									\
+			ENGINE._callback_type._callback_name._callback(_event);										\
 		}																									\
 	}
 
@@ -789,7 +789,7 @@ struct rde_window;
 struct rde_event;
 
 typedef void (*rde_event_func_inner)(rde_event*);
-typedef void (*rde_event_func_outer)(rde_engine*, rde_window*, rde_event*);
+typedef void (*rde_event_func_outer)(rde_window*, rde_event*);
 typedef void (*rde_engine_user_side_loop_func)(float);
 
 typedef struct rde_inner_window_info rde_inner_window_info;
@@ -855,23 +855,6 @@ struct rde_window {
 	size_t id;
 };
 
-struct rde_engine {
-	float delta_time = 0.0f;
-	float fixed_delta_time = 0.016f;
-
-	float fixed_time_step_accumulator = 0.0f;
-	RDE_PLATFORM_TYPE_ platform_type = RDE_PLATFORM_TYPE_UNSUPPORTED;
-
-	bool running = true;
-	bool use_rde_batching_system = true;
-
-	rde_window* engine_windows[RDE_MAX_NUMBER_OF_WINDOWS];
-
-	rde_display_callbacks display_callbacks;
-	rde_window_callbacks window_callbacks;
-};
-
-
 
 /// ============================== EVENTS ===================================
 
@@ -883,8 +866,6 @@ struct rde_event_window {
 
 	bool minimized = false;
 	bool maximized = false;
-
-	uint window_id = 0;
 };
 
 struct rde_event_display {
@@ -948,6 +929,7 @@ struct rde_event_data {
 struct rde_event {
 	RDE_EVENT_TYPE_ type = RDE_EVENT_TYPE_NONE;
 	ulong time_stamp = 0;
+	uint window_id = 0;
 	bool handled = false;
 	rde_event_data data {  };
 
@@ -1049,32 +1031,30 @@ struct rde_batch_3d {
 /// ============================ ENGINE =====================================
 
 
-RDE_FUNC 		rde_engine*			rde_engine_create_engine(int _argc, char** _argv);
+RDE_FUNC 		rde_window*			rde_engine_create_engine(int _argc, char** _argv);
 RDE_FUNC		void				rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks);
 
-RDE_FUNC 		RDE_PLATFORM_TYPE_ 	rde_engine_get_platform(rde_engine* _engine);
+RDE_FUNC 		RDE_PLATFORM_TYPE_ 	rde_engine_get_platform();
 
-RDE_FUNC 		float 				rde_engine_get_fixed_delta(rde_engine* _engine);
-RDE_FUNC 		void 				rde_engine_set_fixed_delta(rde_engine* _engine, float _fixed_dt);
+RDE_FUNC 		float 				rde_engine_get_fixed_delta();
+RDE_FUNC 		void 				rde_engine_set_fixed_delta(float _fixed_dt);
 
-RDE_FUNC		void				rde_engine_on_run(rde_engine* _engine);
+RDE_FUNC		void				rde_engine_on_run();
 
-RDE_FUNC		void				rde_engine_init_imgui_layer(rde_engine* _engine);
-RDE_FUNC		void				rde_engine_end_imgui_layer(rde_engine* _engine);
+RDE_FUNC		void				rde_engine_init_imgui_layer();
+RDE_FUNC		void				rde_engine_end_imgui_layer();
 
-RDE_FUNC		rde_window*			rde_engine_get_window(rde_engine* _engine, int _index);
+RDE_FUNC		bool				rde_engine_is_running();
+RDE_FUNC		void				rde_engine_set_running(bool _running);
 
-RDE_FUNC		bool				rde_engine_is_running(rde_engine* _engine);
-RDE_FUNC		void				rde_engine_set_running(rde_engine* _engine, bool _running);
-
-RDE_FUNC		rde_vec_2I			rde_engine_get_display_size(rde_engine* _engine);
+RDE_FUNC		rde_vec_2I			rde_engine_get_display_size();
 
 RDE_FUNC 		rde_display_info*	rde_engine_get_available_displays();
 RDE_FUNC 		void				rde_engine_switch_window_display(rde_window* _window, size_t _new_display);
 
 RDE_FUNC		rde_window*			rde_engine_get_focused_window();
 
-RDE_FUNC		void				rde_engine_destroy_engine(rde_engine* _engine);
+RDE_FUNC		void				rde_engine_destroy_engine();
 
 
 /// ============================ WINDOW =====================================
@@ -1119,8 +1099,8 @@ RDE_FUNC	void 			rde_window_destroy_window(rde_window* _window);
 
 /// ============================ EVENTS =====================================
 
-RDE_FUNC void rde_events_window_consume_events(rde_engine* _engine, rde_window* _window, rde_event* _event);
-RDE_FUNC void rde_events_display_consume_events(rde_engine* _engine, rde_window* _window, rde_event* _event);
+RDE_FUNC void rde_events_window_consume_events(rde_window* _window, rde_event* _event);
+RDE_FUNC void rde_events_display_consume_events(rde_window* _window, rde_event* _event);
 
 #if IS_MOBILE()
 RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _event);
