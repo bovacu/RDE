@@ -46,7 +46,7 @@ include_directories(engine/include)
 
 #RDEFirebase
 
-option(RDE_LIBRARY "Build library instead of executable" OFF)
+option(RDE_LIBRARY "Build library instead of executable" ON)
 if(RDE_LIBRARY)
 	add_definitions(-DRDE_LIBRARY)
     message("Building lib")
