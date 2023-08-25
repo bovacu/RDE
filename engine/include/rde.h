@@ -852,8 +852,7 @@ struct rde_display_info {
 };
 
 struct rde_window {
-	rde_inner_window_info* inner_info;
-	rde_display_info display_info;
+	size_t id;
 };
 
 struct rde_engine {
@@ -884,6 +883,8 @@ struct rde_event_window {
 
 	bool minimized = false;
 	bool maximized = false;
+
+	uint window_id = 0;
 };
 
 struct rde_event_display {
@@ -1071,15 +1072,17 @@ RDE_FUNC		rde_vec_2I			rde_engine_get_display_size(rde_engine* _engine);
 RDE_FUNC 		rde_display_info*	rde_engine_get_available_displays();
 RDE_FUNC 		void				rde_engine_switch_window_display(rde_window* _window, size_t _new_display);
 
+RDE_FUNC		rde_window*			rde_engine_get_focused_window();
+
 RDE_FUNC		void				rde_engine_destroy_engine(rde_engine* _engine);
 
 
 /// ============================ WINDOW =====================================
 
-RDE_FUNC rde_window*		rde_window_create_window(rde_engine* _engine);
+RDE_FUNC rde_window*		rde_window_create_window();
 RDE_FUNC	void			rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbacks);
 
-//RDE_FUNC_ND Vec2I			rde_window_get_window_size(rde_window* _window);
+RDE_FUNC rde_vec_2I			rde_window_get_window_size(rde_window* _window);
 //RDE_FUNC	void			rde_window_set_window_size(rde_window* _window, const Vec2I& _size);
 //
 //RDE_FUNC_ND Vec2I			rde_window_get_position(rde_window* _window);
@@ -1112,7 +1115,7 @@ RDE_FUNC	void			rde_window_set_callbacks(rde_window* _window, rde_window_callbac
 //
 //RDE_FUNC	void			rde_window_refresh_dpi(rde_window* _window);
 //
-//RDE_FUNC	void 			rde_window_destroy_window(Engine* _engine, rde_window _window);
+RDE_FUNC	void 			rde_window_destroy_window(rde_window* _window);
 
 /// ============================ EVENTS =====================================
 

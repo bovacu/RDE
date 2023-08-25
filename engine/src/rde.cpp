@@ -13,6 +13,18 @@
 #include "glad/glad.h"
 #endif
 
+// This inner structure defined here complements rde_window. In fact, this is not defined
+// in the header file so the header file is 100% free of any external dependencies, which
+// means no anoying linking problems.
+
+struct rde_inner_window_info {
+	SDL_Window* sdl_window = nullptr;
+	SDL_GLContext sdl_gl_context;
+	rde_window* self_pointer = nullptr;
+};
+
+rde_inner_window_info inner_window_info_array[RDE_MAX_NUMBER_OF_WINDOWS];
+
 
 void rde_events_window_create_events();
 #define WIN_EVENT_INIT (RDE_EVENT_TYPE_WINDOW_BEGIN + 1)
@@ -26,8 +38,17 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_unfocused_by_keyboard, window_ca
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_moved, window_callbacks, on_window_moved, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_minimized, window_callbacks, on_window_minimized, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_maximized, window_callbacks, on_window_maximized, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_closed, window_callbacks, on_window_closed, { _engine->running = false; })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_display_changed, window_callbacks, on_window_moved, { _window->display_info.index = _event->data.window_event_data.display_index; })
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_closed, window_callbacks, on_window_closed, { 
+	rde_window_destroy_window(_window); 
+	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+		if(inner_window_info_array[_i].self_pointer != nullptr) {
+			return;
+		}
+	}
+
+	_engine->running = false;
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_display_changed, window_callbacks, on_window_moved, {})
 
 void rde_events_display_create_events();
 #define DISPLAY_EVENT_INIT (RDE_EVENT_TYPE_DISPLAY_BEGIN + 1)
@@ -50,13 +71,6 @@ static rde_engine_user_side_loop_func	rde_engine_user_on_fixed_update = nullptr;
 static rde_engine_user_side_loop_func	rde_engine_user_on_late_update = nullptr;
 static rde_engine_user_side_loop_func	rde_engine_user_on_render = nullptr;
 
-
-struct rde_inner_window_info {
-	SDL_Window* sdl_window = nullptr;
-	SDL_GLContext sdl_gl_context;
-};
-
-
 /// ============================ MATH =======================================
 
 
@@ -71,6 +85,7 @@ struct rde_inner_window_info {
 
 void rde_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
 	_rde_event->time_stamp = _sdl_event->window.timestamp;
+	_rde_event->data.window_event_data.window_id = _sdl_event->window.windowID;
 
 	switch (_sdl_event->window.event) {
 		case SDL_WINDOWEVENT_RESIZED: {
@@ -138,7 +153,7 @@ rde_engine* rde_engine_create_engine(int _argc, char** _argv) {
 	UNUSED(_argv)
 
 	rde_engine* _engine = new rde_engine {  };
-	rde_window* _default_window = rde_window_create_window(_engine);
+	rde_window* _default_window = rde_window_create_window();
 
 	memset(_engine->engine_windows, 0, RDE_MAX_NUMBER_OF_WINDOWS);
 	_engine->engine_windows[0] = _default_window;
@@ -243,10 +258,19 @@ rde_vec_2I rde_engine_get_display_size(rde_engine* _engine) {
 }
 
 void rde_engine_destroy_engine(rde_engine* _engine) {
-	SDL_GL_DeleteContext(_engine->engine_windows[0]->inner_info->sdl_gl_context);
-	SDL_DestroyWindow(_engine->engine_windows[0]->inner_info->sdl_window);
+	
+	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+		if(inner_window_info_array[_i].self_pointer == nullptr) {
+			continue;
+		}
+
+		rde_window_destroy_window(inner_window_info_array[_i].self_pointer);
+	}
+
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
+
+	delete _engine;
 }
 
 rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
@@ -262,20 +286,46 @@ rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 }
 
 void rde_engine_on_event(rde_engine* _engine) {
+	UNUSED(_engine);
+
 	SDL_Event _event;
         
 	SDL_PumpEvents();
-	
-	// TODO: this now handles only one possible window, to manage multiple window events
-	// a window must now its SDL window id and each event gives you which windowID the event
-	// has happened on.
 
 	while (SDL_PollEvent(&_event)) {
 		rde_event _rde_event = rde_engine_sdl_event_to_rde_event(&_event);
+			
+		for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+			rde_inner_window_info* _window_info = &inner_window_info_array[_i];
 
-		switch(_event.type) {
-			case SDL_WINDOWEVENT:	rde_events_window_consume_events(_engine, _engine->engine_windows[0], &_rde_event); break;
-			case SDL_DISPLAYEVENT: 	rde_events_display_consume_events(_engine, _engine->engine_windows[0], &_rde_event); break;
+			if(_window_info->self_pointer == nullptr) {
+				continue;
+			}
+
+			// TODO: Use the if statement on the following event types:
+			//			- SDL_KeyboardEvent
+			//			- SDL_TextEditingEvent
+			//			- SDL_TextInputEvent
+			//			- SDL_MouseMotionEvent
+			//			- SDL_MouseButtonEvent
+			//			- SDL_MouseWheelEvent
+			//			- SDL_TouchFingerEvent
+			//			- SDL_DropEvent
+			//
+			//		Also, but without the if, still need to implement:
+			//			- SDL_ControllerAxisEvent
+			//			- SDL_ControllerButtonEvent
+			//			- SDL_ControllerDeviceEvent
+			//			- SDL_AudioDeviceEvent
+			switch(_event.type) {
+				case SDL_WINDOWEVENT:	{
+					if(SDL_GetWindowID(_window_info->sdl_window) != _rde_event.data.window_event_data.window_id) {
+						continue;
+					}
+					rde_events_window_consume_events(_engine, _window_info->self_pointer, &_rde_event);
+				} break;
+				case SDL_DISPLAYEVENT: 	rde_events_display_consume_events(_engine, _window_info->self_pointer, &_rde_event); break;
+			}
 		}
 	}
 }
@@ -319,15 +369,29 @@ void rde_engine_switch_window_display(rde_window* _window, size_t _new_display) 
 	UNIMPLEMENTED("Not implemented");
 }
 
+rde_window* rde_engine_get_focused_window() {
+	SDL_Window* _window = SDL_GetMouseFocus();
+
+	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+		rde_inner_window_info* _info = &inner_window_info_array[_i];
+		
+		if(_info->sdl_window == _window) {
+			return _info->self_pointer;
+		}
+	}
+
+	return nullptr;
+}
 
 /// ============================ WINDOW =====================================
 
 #if IS_WINDOWS()
-rde_window* rde_window_create_windows_window(rde_engine* _engine) {
-	UNUSED(_engine);
-
+rde_window* rde_window_create_windows_window(size_t _free_window_index) {
 	rde_window* _window = new rde_window {  };
-	_window->inner_info = new rde_inner_window_info {  };
+	_window->id = _free_window_index;
+
+	rde_inner_window_info* _window_info = &inner_window_info_array[_free_window_index];
+	_window_info->self_pointer = _window;
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -344,20 +408,23 @@ rde_window* rde_window_create_windows_window(rde_engine* _engine) {
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	_window->inner_info->sdl_window = SDL_CreateWindow("Title", 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
-	if(_window->inner_info->sdl_window == nullptr) {
+	char _title[16];
+	snprintf(_title, 10, "%d", (int)_free_window_index);
+	_window_info->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+
+	if(_window_info->sdl_window == nullptr) {
 		std::cout << "SDL window creation failed: " << SDL_GetError() << std::endl;
 		exit(-1);
 	}
-	_window->inner_info->sdl_gl_context = SDL_GL_CreateContext(_window->inner_info->sdl_window);
+	_window_info->sdl_gl_context = SDL_GL_CreateContext(_window_info->sdl_window);
 
-	if(_window->inner_info->sdl_gl_context == nullptr) {
+	if(_window_info->sdl_gl_context == nullptr) {
 		std::cout << "OpenGL context couldn't initialize -> " << SDL_GetError() << std::endl;
 		exit(-1);
 	}
 
-	SDL_GL_MakeCurrent(_window->inner_info->sdl_window, _window->inner_info->sdl_gl_context);
+	SDL_GL_MakeCurrent(_window_info->sdl_window, _window_info->sdl_gl_context);
 
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
@@ -367,10 +434,8 @@ rde_window* rde_window_create_windows_window(rde_engine* _engine) {
 
 	SDL_GL_SetSwapInterval(1);
 
-	SDL_SetWindowPosition(_window->inner_info->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	SDL_SetWindowResizable(_window->inner_info->sdl_window, SDL_TRUE);
-
-	_window->display_info.index = SDL_GetWindowDisplayIndex(_window->inner_info->sdl_window);
+	SDL_SetWindowPosition(_window_info->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowResizable(_window_info->sdl_window, SDL_TRUE);
 
 	return _window;
 	//setIcon(properties->projectData.iconPath);
@@ -386,11 +451,12 @@ rde_window* rde_window_create_mac_window(rde_engine* _engine) {
 #endif
 
 #if IS_LINUX()
-rde_window* rde_window_create_linux_window(rde_engine* _engine) {
-	UNUSED(_engine);
-
+rde_window* rde_window_create_linux_window(size_t _free_window_index) {
 	rde_window* _window = new rde_window {  };
-	_window->inner_info = new rde_inner_window_info {  };
+	_window->id = _free_window_index;
+
+	rde_inner_window_info* _window_info = &inner_window_info_array[_free_window_index];
+	_window_info->self_pointer = _window;
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -407,20 +473,23 @@ rde_window* rde_window_create_linux_window(rde_engine* _engine) {
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	_window->inner_info->sdl_window = SDL_CreateWindow("Title", 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
-	if(_window->inner_info->sdl_window == nullptr) {
+	char _title[16];
+	snprintf(_title, 10, "%d", (int)_free_window_index);
+	_window_info->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+
+	if(_window_info->sdl_window == nullptr) {
 		std::cout << "SDL window creation failed: " << SDL_GetError() << std::endl;
 		exit(-1);
 	}
-	_window->inner_info->sdl_gl_context = SDL_GL_CreateContext(_window->inner_info->sdl_window);
+	_window_info->sdl_gl_context = SDL_GL_CreateContext(_window_info->sdl_window);
 
-	if(_window->inner_info->sdl_gl_context == nullptr) {
+	if(_window_info->sdl_gl_context == nullptr) {
 		std::cout << "OpenGL context couldn't initialize -> " << SDL_GetError() << std::endl;
 		exit(-1);
 	}
 
-	SDL_GL_MakeCurrent(_window->inner_info->sdl_window, _window->inner_info->sdl_gl_context);
+	SDL_GL_MakeCurrent(_window_info->sdl_window, _window_info->sdl_gl_context);
 
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
@@ -430,10 +499,8 @@ rde_window* rde_window_create_linux_window(rde_engine* _engine) {
 
 	SDL_GL_SetSwapInterval(1);
 
-	SDL_SetWindowPosition(_window->inner_info->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	SDL_SetWindowResizable(_window->inner_info->sdl_window, SDL_TRUE);
-
-	_window->display_info.index = SDL_GetWindowDisplayIndex(_window->inner_info->sdl_window);
+	SDL_SetWindowPosition(_window_info->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowResizable(_window_info->sdl_window, SDL_TRUE);
 
 	return _window;
 	//setIcon(properties->projectData.iconPath);
@@ -443,29 +510,48 @@ rde_window* rde_window_create_linux_window(rde_engine* _engine) {
 #endif
 
 #if IS_ANDROID()
-rde_window* rde_window_create_android_window(rde_engine* _engine) {
+rde_window* rde_window_create_android_window(rde_engine* _engine, size_t _free_window_index) {
 	UNIMPLEMENTED("Mac android creation is not implemented yet");
 }
 #endif
 
 #if IS_IOS()
-rde_window* rde_window_create_ios_window(rde_engine* _engine) {
+rde_window* rde_window_create_ios_window(rde_engine* _engine, size_t _free_window_index) {
 	UNIMPLEMENTED("Mac ios creation is not implemented yet");
 }
 #endif
 
 #if 0
-rde_window* rde_window_create_wasm_window(rde_engine* _engine) {
+rde_window* rde_window_create_wasm_window(rde_engine* _engine, size_t _free_window_index) {
 	UNIMPLEMENTED("Mac WASM creation is not implemented yet");
 }
 #endif
 
-rde_window* rde_window_create_window(rde_engine* _engine) {
+rde_window* rde_window_create_window() {
+
+	size_t _free_window_index = 0;
+
+	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+		if(inner_window_info_array[_i].self_pointer != nullptr) {
+
+			if(_i == RDE_MAX_NUMBER_OF_WINDOWS - 1) {
+				assert(false && "[ERROR]: Tried to create a new window but the limit of simultaneous windows has been reached.");
+			}
+
+			continue;
+		}
+
+		_free_window_index = _i;
+		break;
+	}
+
 	// TODO: create window depending on platform
 #if IS_WINDOWS()
-	return rde_window_create_windows_window(_engine);
+	return rde_window_create_windows_window(_free_window_index);
 #elif IS_LINUX()
-	return rde_window_create_linux_window(_engine);
+	return rde_window_create_linux_window(_free_window_index);
+#else
+	assert(false && "[Error]: Unsupported or unimplemented platform");
 #endif
 }
 
@@ -474,7 +560,11 @@ void rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbac
 	UNUSED(_callbacks)
 }
 
-//RDE_FUNC_ND Vec2I			rde_window_get_window_size(rde_window* _window);
+rde_vec_2I rde_window_get_window_size(rde_window* _window) {
+	rde_vec_2I _size {  };
+	SDL_GetWindowSize(inner_window_info_array[_window->id].sdl_window, &_size.x, &_size.y);
+	return _size;
+}
 //RDE_FUNC	void			rde_window_set_window_size(rde_window* _window, const Vec2I& _size);
 //
 //RDE_FUNC_ND Vec2I			rde_window_get_position(rde_window* _window);
@@ -507,7 +597,18 @@ void rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbac
 //
 //RDE_FUNC	void			rde_window_refresh_dpi(rde_window* _window);
 //
-//RDE_FUNC	void 			rde_window_destroy_window(Engine* _engine, rde_window _window);
+void rde_window_destroy_window(rde_window* _window) {
+	rde_inner_window_info* _info = &inner_window_info_array[_window->id];
+
+	SDL_GL_DeleteContext(_info->sdl_gl_context);
+	SDL_DestroyWindow(_info->sdl_window);
+
+	_info->sdl_window = nullptr;
+	_info->sdl_gl_context = {};
+	delete _info->self_pointer;
+	_info->self_pointer = nullptr;
+}
+
 
 /// ============================ EVENTS =====================================
 
