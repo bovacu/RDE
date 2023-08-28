@@ -42,7 +42,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/stb)
 include_directories(engine/include)
 
 #RDEFirebase
