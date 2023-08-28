@@ -13,6 +13,61 @@
 #include "glad/glad.h"
 #endif
 
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_NO_PNM
+#define STBI_NO_TGA
+#define STBI_NO_PNM
+#define STBI_NO_HDR
+#define STBI_MAX_DIMENSIONS (1 << 13)
+#include "stb/stb_image.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#if IS_WINDOWS()
+#define STBIW_WINDOWS_UTF8
+#endif
+#include "stb/stb_image_write.h"
+
+#include "glm/glm.hpp"
+
+#ifdef RDE_AUDIO_MODULE
+#include "SDL2/SDL_mixer.h"
+#endif
+
+// TODO: Not to forget
+// 		- Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
+//		  the format is BGRA instead of RGBA (problem solved by first method) and the second fixes
+//		  an error that the first method can generate on some images.
+//
+//		- 2D rendering:
+//			- Camera system
+//			- Texture rendering
+//			- Debug and non debug geometry rendering
+//			- Spritebatch
+//			- Text
+//
+//		- Basic 3D:
+//			- Camera system
+//			- 3D mathematical operations
+//			- Renderer
+//			- Mesh creation and loading
+//			- Model loading
+//			- Texturing and materials
+//			- Instancing
+//			- Lighting
+//			- Model animations
+//			- Text
+//
+//		- Other:
+//			- Render Textures
+//			- Particles
+//
+//		- TOOL: command line atlas packing tool for textures.
+//				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
+//				- https://www.david-colson.com/2020/03/10/exploring-rect-packing.html
+//
+//		- TOOL: command line font atlas creator.
+//
+//		- TOOL: command line project creation, compilation and export.
 
 struct rde_engine {
 	bool instantiated = false;
@@ -24,7 +79,7 @@ struct rde_engine {
 	RDE_PLATFORM_TYPE_ platform_type = RDE_PLATFORM_TYPE_UNSUPPORTED;
 
 	bool running = true;
-	bool use_rde_batching_system = true;
+	bool use_rde_2d_physics_system = true;
 
 	rde_display_callbacks display_callbacks;
 	rde_window_callbacks window_callbacks;
@@ -79,6 +134,7 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_disconnected, display_callbacks
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_changed_orientation, display_callbacks, on_display_changed_orientation, {})
 
 
+
 void rde_engine_on_event();
 void rde_engine_on_update(float _dt);
 void rde_engine_on_fixed_update(float _fixed_dt);
@@ -102,6 +158,41 @@ static rde_engine_user_side_loop_func	rde_engine_user_on_render = nullptr;
 
 
 /// ============================ UTIL =======================================
+
+void rde_util_check_opengl_error(const char* _message) {
+	GLenum _err;
+	while((_err = glGetError()) != GL_NO_ERROR){
+		switch(_err) {
+			case GL_NO_ERROR:
+				std::cout << "GL_ERROR " << "GL_NO_ERROR: No error has been recorded. The value of this symbolic constant is guaranteed to be 0. " << " | " << _message << " -> " << _err << std::endl;
+				break;
+			case GL_INVALID_ENUM:
+				std::cout << "GL_ERROR " << "GL_INVALID_ENUM: An unacceptable value is specified for an enumerated argument. The offending command is ignored and has no other side effect than to set the error flag.  " << " | " << _message << " -> " << _err << std::endl;
+				break;
+			case GL_INVALID_VALUE:
+				std::cout << "GL_ERROR " << "GL_INVALID_VALUE: A numeric argument is out of range. The offending command is ignored and has no other side effect than to set the error flag.  " << " | " << _message << " -> " << _err << std::endl;
+				break;
+			case GL_INVALID_OPERATION:
+				std::cout << "GL_ERROR " << "GL_INVALID_OPERATION: The specified operation is not allowed in the current state. The offending command is ignored and has no other side effect than to set the error flag.  " << " | " << _message << " -> " << _err << std::endl;
+				break;
+			case GL_INVALID_FRAMEBUFFER_OPERATION:
+				std::cout << "GL_ERROR " << "GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete." << " | " << _message << " -> " << _err << std::endl;
+				break;
+			case GL_OUT_OF_MEMORY:
+				std::cout << "GL_ERROR " << "GL_OUT_OF_MEMORY: There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded. . " << " | " << _message << " -> " << _err << std::endl;
+				break;
+			case GL_STACK_UNDERFLOW:
+				std::cout << "GL_ERROR " << "GL_STACK_UNDERFLOW: An attempt has been made to perform an operation that would cause an internal stack to underflow. " << " | " << _message << " -> " << _err << std::endl;
+				break;
+			case GL_STACK_OVERFLOW:
+				std::cout << "GL_ERROR " << "GL_STACK_OVERFLOW: An attempt has been made to perform an operation that would cause an internal stack to overflow. " << " | " << _message << " -> " << _err << std::endl;
+				break;
+			default:
+				std::cout << "GL_ERROR " << "No description. " << " | " << _message << " -> " << _err << std::endl;
+				break;
+		}
+	}
+}
 
 void rde_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
 	_rde_event->time_stamp = _sdl_event->window.timestamp;
@@ -168,6 +259,34 @@ void rde_sdl_to_rde_helper_transform_display_event(SDL_Event* _sdl_event, rde_ev
 
 /// ============================ ENGINE =====================================
 
+void rde_rendering_set_rendering_configuration() {
+#if !IS_MOBILE()
+	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << ", Vendor: " << glGetString(GL_VENDOR) << ", GPU: " << glGetString(GL_RENDERER) << std::endl;
+#endif
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+#if !IS_MOBILE() 
+	#ifndef __EMSCRIPTEN__
+		glEnable(GL_PROGRAM_POINT_SIZE);
+		rde_util_check_opengl_error("Invalid Point size");
+		glEnable(GL_LINE_SMOOTH);
+		rde_util_check_opengl_error("Invalid Line Smooth");
+		glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
+		rde_util_check_opengl_error("Invalid Line Smooth Hint -> GL_NICEST");
+	#endif
+		
+	#if !IS_MAC() && !IS_LINUX()
+		#ifndef __EMSCRIPTEN__
+			glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+			rde_util_check_opengl_error("Invalid Point Smooth Hint -> GL_NICEST");
+		#endif
+	#endif
+
+#endif
+}
+
 rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 	UNUSED(_argc)
 	UNUSED(_argv)
@@ -182,6 +301,8 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 
 	rde_events_window_create_events();
 	rde_events_display_create_events();
+
+	rde_rendering_set_rendering_configuration();
 
 	return _default_window;
 }
@@ -271,6 +392,18 @@ rde_vec_2I rde_engine_get_display_size() {
 	return { _displayMode.w, _displayMode.h };
 }
 
+void rde_engine_use_rde_2d_physics_system(bool _use) {
+	ENGINE.use_rde_2d_physics_system = _use;
+}
+
+bool rde_engine_is_vsync_active() {
+	return SDL_GL_GetSwapInterval() == 1;
+}
+
+void rde_engine_set_vsync_active(bool _vsync) {
+	SDL_GL_SetSwapInterval(_vsync ? 1 : 0);
+}
+
 void rde_engine_destroy_engine() {
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
 		if(inner_window_info_array[_i].self_pointer == nullptr) {
@@ -350,15 +483,11 @@ void rde_engine_on_fixed_update(float _fixed_dt) {
 }
 
 void rde_engine_on_late_update(float _dt) {
-		UNUSED(_dt)
+	UNUSED(_dt)
 }
 
 void rde_engine_on_render(float _dt) {
 	UNUSED(_dt)
-	
-	if (!ENGINE.use_rde_batching_system) {
-		return;
-	}
 }
 
 void rde_engine_sync_events() {
@@ -572,22 +701,31 @@ rde_vec_2I rde_window_get_window_size(rde_window* _window) {
 	SDL_GetWindowSize(inner_window_info_array[_window->id].sdl_window, &_size.x, &_size.y);
 	return _size;
 }
-//RDE_FUNC	void			rde_window_set_window_size(rde_window* _window, const Vec2I& _size);
-//
-//RDE_FUNC_ND Vec2I			rde_window_get_position(rde_window* _window);
-//RDE_FUNC_ND void			rde_window_set_position(rde_window* _window, const Vec2I& _position);
-//
-//RDE_FUNC_ND std::string 	rde_window_get_title(rde_window* _window);
-//RDE_FUNC	void			rde_window_set_title(rde_window* _window, const std::string& _name);
+void rde_window_set_window_size(rde_window* _window, const rde_vec_2I _size) {
+	SDL_SetWindowSize(inner_window_info_array[_window->id].sdl_window, _size.x, _size.y);
+}
+
+rde_vec_2I rde_window_get_position(rde_window* _window) {
+	rde_vec_2I _position = {  };
+	SDL_GetWindowPosition(inner_window_info_array[_window->id].sdl_window, &_position.x, &_position.y);
+	return _position;
+}
+
+void rde_window_set_position(rde_window* _window, const rde_vec_2I _position) {
+	SDL_SetWindowPosition(inner_window_info_array[_window->id].sdl_window, _position.x, _position.y);
+}
+
+const char* rde_window_get_title(rde_window* _window) {
+	return SDL_GetWindowTitle(inner_window_info_array[_window->id].sdl_window);
+}
+
+void rde_window_set_title(rde_window* _window, const char* _title) {
+	SDL_SetWindowTitle(inner_window_info_array[_window->id].sdl_window, _title);
+}
+
 //
 //RDE_FUNC_ND bool			rde_window_is_fullscreen(rde_window* _window);
 //RDE_FUNC 	void			rde_window_set_fullscreen(rde_window* _window, bool _fullscreen);
-//
-//RDE_FUNC_ND bool			rde_window_is_vsync_active(rde_window* _window);
-//RDE_FUNC 	void			rde_window_set_vsync_active(rde_window* _window, bool _vsync);
-//
-//RDE_FUNC_ND SDL_Window* 	rde_window_get_native_sdl_window(rde_window* _window);
-//RDE_FUNC_ND SDL_GLContext* 	rde_window_get_native_sdl_gl_window(rde_window* _window);
 //
 //RDE_FUNC	void			rde_window_set_icon(const std::string& _path_to_icon);
 //
@@ -698,16 +836,139 @@ int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _event) {
 /// ============================ RENDERING ==================================
 
 
+rde_texture* rde_rendering_load_texture(const char* _file_path) {
+	UNUSED(_file_path);
+	UNIMPLEMENTED("rde_rendering_load_texture")
+	return nullptr;
+}
 
+void rde_rendering_unload_texture(rde_texture* _texture) {
+	UNUSED(_texture);
+	UNIMPLEMENTED("rde_rendering_unload_texture")
+}
+
+rde_texture* rde_rendering_load_atlas(const char* _file_path) {
+	UNUSED(_file_path);
+	UNIMPLEMENTED("rde_rendering_load_atlas")
+	return nullptr;
+}
+
+void rde_rendering_unload_atlas(rde_atlas* _atlas) {
+	UNUSED(_atlas);
+	UNIMPLEMENTED("rde_rendering_unload_atlas")
+}
+
+rde_texture* rde_rendering_create_cpu_texture(const rde_vec_2UI _texture_size) {
+	UNUSED(_texture_size);
+	UNIMPLEMENTED("rde_rendering_create_cpu_texture")
+	return nullptr;
+}
+
+void rde_rendering_destroy_cpu_texture(rde_cpu_texture* _cpu_texture) {
+	UNUSED(_cpu_texture);
+	UNIMPLEMENTED("rde_rendering_destroy_cpu_texture")
+}
+
+void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_texture) {
+	UNUSED(_cpu_texture);
+	UNIMPLEMENTED("rde_rendering_upload_cpu_texture_to_gpu")
+}
+
+rde_font* rde_rendering_load_font(const char* _file_path) {
+	UNUSED(_file_path);
+	UNIMPLEMENTED("rde_rendering_load_font")
+	return nullptr;
+}
+
+void rde_rendering_unload_font(rde_font* _font) {
+	UNUSED(_font);
+	UNIMPLEMENTED("rde_rendering_unload_font")
+}
+
+rde_texture* rde_rendering_get_atlas_sub_texture(const char* _texture_name){
+	UNUSED(_texture_name);
+	UNIMPLEMENTED("rde_rendering_get_atlas_sub_texture")
+	return nullptr;
+}
+
+
+
+void rde_rendering_start_drawing_2d(rde_camera* _camera) {
+	UNUSED(_camera);
+	UNIMPLEMENTED("rde_rendering_start_drawing_2d")
+}
+
+void rde_rendering_start_drawing_3d(rde_camera* _camera) {
+	UNUSED(_camera);
+	UNIMPLEMENTED("rde_rendering_start_drawing_3d")
+}
+
+void rde_rendering_draw_point_2d(const rde_vec_2F _position, const rde_color _color) {
+	UNUSED(_position);
+	UNUSED(_color);
+	UNIMPLEMENTED("rde_rendering_draw_point_2d")
+}
+
+void rde_rendering_draw_point_3d(const rde_vec_3F _position, const rde_color _color) {
+	UNUSED(_position);
+	UNUSED(_color);
+	UNIMPLEMENTED("rde_rendering_draw_point_3d")
+}
+
+void rde_rendering_draw_line_2d(const rde_vec_2F _init, const rde_vec_2F _end, const rde_color _color) {
+	UNUSED(_init);
+	UNUSED(_end);
+	UNUSED(_color);
+	UNIMPLEMENTED("rde_rendering_draw_line_2d")
+}
+
+void rde_rendering_draw_triangle_2d(const rde_vec_2F _vertex_a, const rde_vec_2F _vertex_b, const rde_vec_2F _vertex_c, const rde_color _color) {
+	UNUSED(_vertex_a);
+	UNUSED(_vertex_b);
+	UNUSED(_vertex_c);
+	UNUSED(_color);
+	UNIMPLEMENTED("rde_rendering_draw_triangle_2d")
+}
+
+void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color) {
+	UNUSED(_bottom_left);
+	UNUSED(_top_right);
+	UNUSED(_color);
+	UNIMPLEMENTED("rde_rendering_draw_rectangle_2d")
+}
+
+void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color) {
+	UNUSED(_position);
+	UNUSED(_radius);
+	UNUSED(_color);
+	UNIMPLEMENTED("rde_rendering_draw_circle_2d")
+}
+
+void rde_rendering_draw_line_3d(const rde_vec_3F _init, const rde_vec_3F _end, const rde_color _color) {
+	UNUSED(_init);
+	UNUSED(_end);
+	UNUSED(_color);
+	UNIMPLEMENTED("rde_rendering_draw_line_3d")
+}
+
+void rde_rendering_end_drawing_2d() {
+	UNIMPLEMENTED("rde_rendering_end_drawing_2d")
+}
+
+void rde_rendering_end_drawing_3d() {
+	UNIMPLEMENTED("rde_rendering_end_drawing_3d")
+}
 
 /// ============================ AUDIO ======================================
 
+#ifdef RDE_AUDIO_MODULE
 
-
+#endif
 
 /// ============================ PHYSICS ====================================
 
+#ifdef RDE_PHYSICS_MODULE
 
-
+#endif
 
 /// ============================ FILE SYSTEM ================================

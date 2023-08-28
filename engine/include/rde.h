@@ -186,6 +186,19 @@
 		std::ios::sync_with_stdio(1);						\
 	}
 
+#ifndef RDE_NO_PHYSICS_MODULE
+	#define RDE_PHYSICS_MODULE
+#endif
+
+#ifndef RDE_NO_AUDIO_MODULE
+#define RDE_AUDIO_MODULE
+#endif
+
+#ifndef RDE_NO_IMGUI_MODULE
+#define RDE_IMGUI_MODULE
+#include "imgui.h"
+#endif
+
 /// ============================== UTIL ====================================
 
 #define STRINGIZE(x) STRINGIZE2(x)
@@ -647,7 +660,10 @@ enum RDE_UNIFORM_UIV_ {
 	RDE_UNIFORM_UIV_4
 };
 
-
+enum RDE_CAMERA_TYPE_ {
+	RDE_CAMERA_TYPE_PERSPECTIVE,
+	RDE_CAMERA_TYPE_ORTHOGRAPHIC
+};
 
 /// ============================= FILE SYSTEM ===============================
 
@@ -935,7 +951,13 @@ struct rde_event {
 
 };
 
+struct rde_transform {
+	rde_vec_3F position;
+	rde_vec_3F rotation;
+	rde_vec_3F scale;
 
+	rde_transform* parent;
+};
 
 /// ============================ RENDERING ==================================
 
@@ -944,6 +966,10 @@ struct rde_color {
 };
 
 struct rde_texture {
+	UNIMPLEMENTED_STRUCT()
+};
+
+struct rde_atlas {
 	UNIMPLEMENTED_STRUCT()
 };
 
@@ -1006,6 +1032,45 @@ struct rde_batch_3d {
 	UNIMPLEMENTED_STRUCT()
 };
 
+struct rde_viewport {
+	UNIMPLEMENTED_STRUCT()
+};
+
+struct rde_camera {
+	size_t id = 0;
+	float zoom = 1.f;
+	rde_transform transform = {  };
+	RDE_CAMERA_TYPE_ camera_type = RDE_CAMERA_TYPE_ORTHOGRAPHIC;
+	bool enabled = true;
+};
+
+struct rde_font {
+	rde_vec_2I position;
+	rde_vec_2I size;
+};
+
+/// *************************************************************************************************
+/// *                                GLOBAL VARIABLES                         						*
+/// *************************************************************************************************
+
+const rde_color RDE_COLOR_WHITE 			= { 255, 255, 255, 255 };
+const rde_color RDE_COLOR_BLACK 			= {   0,   0,   0, 255 };
+const rde_color RDE_COLOR_BLUE 				= {   0,   0, 255, 255 };
+const rde_color RDE_COLOR_RED 				= { 255,   0,   0, 255 };
+const rde_color RDE_COLOR_YELLOW			= { 255, 255,   0, 255 };
+const rde_color RDE_COLOR_MAGENTA			= { 255,   0, 255, 255 };
+const rde_color RDE_COLOR_ORANGE 			= { 255,  69,   0, 255 };
+const rde_color RDE_COLOR_GREEN 			= {   0, 255,   0, 255 };
+const rde_color RDE_COLOR_BROWN 			= { 139,  69,  19, 255 };
+const rde_color RDE_COLOR_PURPLE 			= { 128,   0, 128, 255 };
+const rde_color RDE_COLOR_GRAY				= { 128, 128, 128, 255 };
+const rde_color RDE_COLOR_TRANSPARENT		= {   0,   0,   0,   0 };
+const rde_color RDE_COLOR_DISABLED_GRAY		= { 220, 220, 220, 255 };
+const rde_color RDE_COLOR_PLACEHOLDER_TEXT	= { 220, 220, 220, 128 };
+const rde_color RDE_COLOR_RDE_DUCK_YELLOW	= { 255, 213,  81, 255 };
+const rde_color RDE_COLOR_GOLD				= { 255, 213,  81, 255 };
+const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
+
 
 
 
@@ -1024,8 +1089,6 @@ struct rde_batch_3d {
 
 
 /// ============================ UTIL =======================================
-
-
 
 
 /// ============================ ENGINE =====================================
@@ -1054,31 +1117,30 @@ RDE_FUNC 		void				rde_engine_switch_window_display(rde_window* _window, size_t 
 
 RDE_FUNC		rde_window*			rde_engine_get_focused_window();
 
+RDE_FUNC		void				rde_engine_use_rde_2d_physics_system(bool _use);
+
+RDE_FUNC 		bool				rde_engine_is_vsync_active();
+RDE_FUNC 		void				rde_engine_set_vsync_active(bool _vsync);
+
 RDE_FUNC		void				rde_engine_destroy_engine();
 
 
 /// ============================ WINDOW =====================================
 
-RDE_FUNC rde_window*		rde_window_create_window();
+RDE_FUNC 	rde_window*		rde_window_create_window();
 RDE_FUNC	void			rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbacks);
 
-RDE_FUNC rde_vec_2I			rde_window_get_window_size(rde_window* _window);
-//RDE_FUNC	void			rde_window_set_window_size(rde_window* _window, const Vec2I& _size);
-//
-//RDE_FUNC_ND Vec2I			rde_window_get_position(rde_window* _window);
-//RDE_FUNC_ND void			rde_window_set_position(rde_window* _window, const Vec2I& _position);
-//
-//RDE_FUNC_ND std::string 	rde_window_get_title(rde_window* _window);
-//RDE_FUNC	void			rde_window_set_title(rde_window* _window, const std::string& _name);
+RDE_FUNC 	rde_vec_2I		rde_window_get_window_size(rde_window* _window);
+RDE_FUNC	void			rde_window_set_window_size(rde_window* _window, const rde_vec_2I _size);
+
+RDE_FUNC 	rde_vec_2I		rde_window_get_position(rde_window* _window);
+RDE_FUNC 	void			rde_window_set_position(rde_window* _window, const rde_vec_2I _position);
+
+RDE_FUNC 	const char* 	rde_window_get_title(rde_window* _window);
+RDE_FUNC	void			rde_window_set_title(rde_window* _window, const char* _title);
 //
 //RDE_FUNC_ND bool			rde_window_is_fullscreen(rde_window* _window);
 //RDE_FUNC 	void			rde_window_set_fullscreen(rde_window* _window, bool _fullscreen);
-//
-//RDE_FUNC_ND bool			rde_window_is_vsync_active(rde_window* _window);
-//RDE_FUNC 	void			rde_window_set_vsync_active(rde_window* _window, bool _vsync);
-//
-//RDE_FUNC_ND SDL_Window* 	rde_window_get_native_sdl_window(rde_window* _window);
-//RDE_FUNC_ND SDL_GLContext* 	rde_window_get_native_sdl_gl_window(rde_window* _window);
 //
 //RDE_FUNC	void			rde_window_set_icon(const std::string& _path_to_icon);
 //
@@ -1108,45 +1170,50 @@ RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _even
 
 /// ============================ RENDERING ==================================
 
-RDE_FUNC void rde_rendering_draw_point_2d(const rde_vec_2F _position, const rde_color _color);
+RDE_FUNC rde_texture* rde_rendering_load_texture(const char* _file_path);
+RDE_FUNC void rde_rendering_unload_texture(rde_texture* _texture);
 
+RDE_FUNC rde_texture* rde_rendering_load_atlas(const char* _file_path);
+RDE_FUNC void rde_rendering_unload_atlas(rde_atlas* _atlas);
+
+RDE_FUNC rde_texture* rde_rendering_create_cpu_texture(const rde_vec_2UI _texture_size);
+RDE_FUNC void rde_rendering_destroy_cpu_texture(rde_cpu_texture* _cpu_texture);
+RDE_FUNC void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_texture);
+
+RDE_FUNC rde_font* rde_rendering_load_font(const char* _file_path);
+RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
+
+RDE_FUNC rde_texture* rde_rendering_get_atlas_sub_texture(const char* _texture_name);
+
+
+RDE_FUNC void rde_rendering_begin_drawing_2d(rde_camera* _camera);
+RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera);
+
+RDE_FUNC void rde_rendering_draw_point_2d(const rde_vec_2F _position, const rde_color _color);
+RDE_FUNC void rde_rendering_draw_point_3d(const rde_vec_3F _position, const rde_color _color);
+
+RDE_FUNC void rde_rendering_draw_line_2d(const rde_vec_2F _init, const rde_vec_2F _end, const rde_color _color);
+RDE_FUNC void rde_rendering_draw_line_3d(const rde_vec_3F _init, const rde_vec_3F _end, const rde_color _color);
+
+RDE_FUNC void rde_rendering_draw_triangle_2d(const rde_vec_2F _verte_a, const rde_vec_2F _vertex_b, const rde_vec_2F _vertex_c, const rde_color _color);
+RDE_FUNC void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color);
+RDE_FUNC void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color);
+
+RDE_FUNC void rde_rendering_end_drawing_2d();
+RDE_FUNC void rde_rendering_end_drawing_3d();
 
 /// ============================ AUDIO ======================================
 
+#ifdef RDE_AUDIO_MODULE
 
-
+#endif
 
 /// ============================ PHYSICS ====================================
 
+#ifdef RDE_PHYSICS_MODULE
 
-
+#endif
 
 /// ============================ FILE SYSTEM ================================
-
-
-
-
-
-/// *************************************************************************************************
-/// *                                GLOBAL VARIABLES                         						*
-/// *************************************************************************************************
-
-const rde_color RDE_COLOR_WHITE 			= { 255, 255, 255, 255 };
-const rde_color RDE_COLOR_BLACK 			= {   0,   0,   0, 255 };
-const rde_color RDE_COLOR_BLUE 				= {   0,   0, 255, 255 };
-const rde_color RDE_COLOR_RED 				= { 255,   0,   0, 255 };
-const rde_color RDE_COLOR_YELLOW			= { 255, 255,   0, 255 };
-const rde_color RDE_COLOR_MAGENTA			= { 255,   0, 255, 255 };
-const rde_color RDE_COLOR_ORANGE 			= { 255,  69,   0, 255 };
-const rde_color RDE_COLOR_GREEN 			= {   0, 255,   0, 255 };
-const rde_color RDE_COLOR_BROWN 			= { 139,  69,  19, 255 };
-const rde_color RDE_COLOR_PURPLE 			= { 128,   0, 128, 255 };
-const rde_color RDE_COLOR_GRAY				= { 128, 128, 128, 255 };
-const rde_color RDE_COLOR_TRANSPARENT		= {   0,   0,   0,   0 };
-const rde_color RDE_COLOR_DISABLED_GRAY		= { 220, 220, 220, 255 };
-const rde_color RDE_COLOR_PLACEHOLDER_TEXT	= { 220, 220, 220, 128 };
-const rde_color RDE_COLOR_RDE_DUCK_YELLOW	= { 255, 213,  81, 255 };
-const rde_color RDE_COLOR_GOLD				= { 255, 213,  81, 255 };
-const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
 
 #endif

@@ -42,6 +42,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/include)
 include_directories(engine/include)
 
 #RDEFirebase
@@ -57,7 +58,7 @@ if(RDE_LIBRARY)
             ${CPP_HEADERS}
             )
     target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES} RDE_LIBRARY=1)
-	target_compile_options(${PROJECT_NAME} PRIVATE)
+	target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
 
 else()
     message("Building executable")
@@ -69,7 +70,7 @@ else()
             ${CPP_HEADERS}
             )
     target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES})
-	target_compile_options(${PROJECT_NAME} PRIVATE)
+	target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
 endif()
 unset(RDE_LIBRARY CACHE)
 
