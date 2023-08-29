@@ -29,7 +29,7 @@
 
 #include "glm/glm.hpp"
 
-#ifdef RDE_AUDIO_MODULE
+#if RDE_AUDIO_MODULE
 #include "SDL2/SDL_mixer.h"
 #endif
 
@@ -358,6 +358,8 @@ void rde_engine_on_run() {
 
 		rde_engine_on_render(ENGINE.delta_time);
 		rde_engine_user_on_render(ENGINE.delta_time);
+
+		SDL_GL_SwapWindow(inner_window_info_array[0].sdl_window);
 
 		rde_engine_sync_events();
 
@@ -892,6 +894,9 @@ rde_texture* rde_rendering_get_atlas_sub_texture(const char* _texture_name){
 }
 
 
+void rde_rendering_set_background_color(const rde_color _color) {
+	glClearColor((float)_color.r / 255.f, (float)_color.g / 255.f, (float)_color.b / 255.f, (float)_color.a / 255.f);
+}
 
 void rde_rendering_start_drawing_2d(rde_camera* _camera) {
 	UNUSED(_camera);

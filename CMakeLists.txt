@@ -15,66 +15,67 @@ set(CPP_SOURCES)
 if(WIN32)
     set(OS "windows")
 	set(LIB_TYPE SHARED)
-	set(LIBS 
-		${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/manual-link/SDL2main.lib
-		${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/SDL2.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/SDL2_image.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/SDL2_mixer.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/freetype.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/glad.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/imgui.lib)
+	set(LIB_EXT "lib")
 endif()
 
 if(APPLE)
     set(OS "osx")
 	set(LIB_TYPE)
+	set(LIB_EXT "a")
 endif()
 
 if(UNIX AND NOT APPLE)
     set(OS "linux")
 	set(LIB_TYPE)
-	set(LIBS 
-		${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/libSDL2.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/libSDL2_image.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/libSDL2_mixer.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/libglad.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/libimgui.a)
+	set(LIB_EXT "a")
 endif()
 
+set(LIBS)
+
+if(WIN32)
+    list(APPEND LIBS ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/manual-link/SDL2main.${LIB_EXT})
+endif()
+
+list(APPEND LIBS ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/SDL2.${LIB_EXT})
+list(APPEND LIBS ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/SDL2_image.${LIB_EXT})
+list(APPEND LIBS ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/glad.${LIB_EXT})
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/stb)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external)
+
 include_directories(engine/include)
+
+option(RDE_IMGUI_MODULE "Enables ImGui for the End-User" ON)
+if(RDE_IMGUI_MODULE)
+    add_definitions(-DRDE_IMGUI_MODULE)
+endif(RDE_IMGUI_MODULE)
+
+option(RDE_AUDIO_MODULE "Enables Audio for the End-User" ON)
+if(RDE_AUDIO_MODULE)
+	list(APPEND LIBS ${CMAKE_CURRENT_SOURCE_DIR}/external/${OS}/lib/SDL2_mixer.${LIB_EXT})
+	add_definitions(-DRDE_AUDIO_MODULE)
+endif(RDE_AUDIO_MODULE)
+
+option(RDE_PHYSICS_MODULE "Enables Physics for the End-User" ON)
+if(RDE_PHYSICS_MODULE)
+	add_definitions(-DRDE_PHYSICS_MODULE)
+endif(RDE_PHYSICS_MODULE)
 
 #RDEFirebase
 
-option(RDE_LIBRARY "Build library instead of executable" ON)
-if(RDE_LIBRARY)
-	add_definitions(-DRDE_LIBRARY)
-    message("Building lib")
-    add_library(${PROJECT_NAME} ${LIB_TYPE}
-            ${CMAKE_CURRENT_SOURCE_DIR}/engine/src/rde.cpp
+get_directory_property( DirDefs DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITIONS )
+foreach( d ${DirDefs} )
+    message( STATUS "Found Define: " ${d} )
+endforeach()
 
-            ${CPP_SOURCES}
-            ${CPP_HEADERS}
-            )
-    target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES} RDE_LIBRARY=1)
-	target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
+add_library(${PROJECT_NAME} ${LIB_TYPE}
+${CMAKE_CURRENT_SOURCE_DIR}/engine/include/rde.h
+		${CMAKE_CURRENT_SOURCE_DIR}/engine/src/rde.cpp
 
-else()
-    message("Building executable")
-    add_executable(${PROJECT_NAME} WIN32
-            ${CMAKE_CURRENT_SOURCE_DIR}/engine/src/rde.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp
+		${CPP_SOURCES}
+		${CPP_HEADERS}
+		)
+target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES})
+target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
 
-            ${CPP_SOURCES}
-            ${CPP_HEADERS}
-            )
-    target_compile_definitions(${PROJECT_NAME} PRIVATE ${GL_PROFILES})
-	target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
-endif()
-unset(RDE_LIBRARY CACHE)
-
-target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-        	${LIBS}
-        )
+target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBS})

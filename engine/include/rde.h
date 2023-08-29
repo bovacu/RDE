@@ -186,17 +186,9 @@
 		std::ios::sync_with_stdio(1);						\
 	}
 
-#ifndef RDE_NO_PHYSICS_MODULE
-	#define RDE_PHYSICS_MODULE
-#endif
-
-#ifndef RDE_NO_AUDIO_MODULE
-#define RDE_AUDIO_MODULE
-#endif
-
-#ifndef RDE_NO_IMGUI_MODULE
-#define RDE_IMGUI_MODULE
-#include "imgui.h"
+#ifdef RDE_INCLUDE_IMGUI_MODULE
+#define IMGUI_IMPLEMENTATION
+#include "imgui/imgui_single_file.h"
 #endif
 
 /// ============================== UTIL ====================================
@@ -213,18 +205,6 @@
 /// ======================= WARNING SILENCER ===============================
 
 #define UNUSED(_x) (void)_x;
-//#define UNIMPLEMENTED(_message) {						\
-//	std::string _full_message = "[UNIMPLEMENTED - "; 	\
-//	_full_message += "[UNIMPLEMENTED - File ";			\
-//	_full_message += FILE_STRING;						\
-//	_full_message += " - Func ";						\
-//	_full_message += FUNC_STRING;						\
-//	_full_message += " - Line "; 						\
-//	_full_message += LINE_STRING;						\
-//	_full_message += "] -> ";							\
-//	_full_message += _message;							\
-//	assert(false && _full_message.c_str());				\
-//	}
 
 #define UNIMPLEMENTED(_message) {				\
 		assert(false);							\
@@ -1185,6 +1165,7 @@ RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
 
 RDE_FUNC rde_texture* rde_rendering_get_atlas_sub_texture(const char* _texture_name);
 
+RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 
 RDE_FUNC void rde_rendering_begin_drawing_2d(rde_camera* _camera);
 RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera);
@@ -1204,13 +1185,13 @@ RDE_FUNC void rde_rendering_end_drawing_3d();
 
 /// ============================ AUDIO ======================================
 
-#ifdef RDE_AUDIO_MODULE
+#ifdef RDE_INCLUDE_AUDIO_MODULE
 
 #endif
 
 /// ============================ PHYSICS ====================================
 
-#ifdef RDE_PHYSICS_MODULE
+#ifdef RDE_INCLUDE_PHYSICS_MODULE
 
 #endif
 
