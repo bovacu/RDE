@@ -62,50 +62,217 @@
 #define RDE_PI 3.141592741f
 
 #define RDE_MAX_NUMBER_OF_WINDOWS 10
-
 #define RDE_MAX_VERTICES_PER_BATCH 50000
+#define RDE_MAX_LOADABLE_SHADERS 256
 
 /// ============================== SHADERS =================================
 
-#define FRAMEBUFFER_VERTEX_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferVertex.glsl"
-#define FRAMEBUFFER_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/framebuffer/FrameBufferFragment.glsl"
-#define FRAMEBUFFER_VERTEX_SHADER_CORE "defaultAssets/shaders/core/framebuffer/FrameBufferVertex.glsl"
-#define FRAMEBUFFER_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/framebuffer/FrameBufferFragment.glsl"
+#define RDE_COLOR_VERTEX_SHADER_2D R"(
+	#version 330 core
 
-#define TEXTURE_VERTEX_SHADER_ES "defaultAssets/shaders/es/texture/vertex.glsl"
-#define TEXT_VERTEX_SHADER_ES "defaultAssets/shaders/es/texture/textVertex.glsl"
-#define DEBUG_VERTEX_SHADER_ES "defaultAssets/shaders/es/debug/debugVertex.glsl"
+	layout(location = 0) in vec2 in_position;
+	layout(location = 1) in vec4 in_color;
+	out vec4 color;
 
-#define TEXTURE_VERTEX_SHADER_CORE "defaultAssets/shaders/core/texture/vertex.glsl"
-#define TEXT_VERTEX_SHADER_CORE "defaultAssets/shaders/core/texture/textVertex.glsl"
-#define DEBUG_VERTEX_SHADER_CORE "defaultAssets/shaders/core/debug/debugVertex.glsl"
-#define DEBUG_GRID_VERTEX_SHADER_CORE "defaultAssets/shaders/core/debug/gridVertex.glsl"
-#define DEBUG_GRID_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/debug/gridFragment.glsl"
+	uniform mat4 view_projection_matrix;
 
-#define TEXTURE_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/fragment.glsl"
-#define MIRROR_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/mirrorFragment.glsl"
-#define MIRROR_VERTEX_SHADER_CORE "defaultAssets/shaders/core/texture/mirrorVertex.glsl"
-#define TEXT_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/textFragment.glsl"
-#define OUTLINE_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/outlineFragment.glsl"
-#define NEON_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/glowFragment.glsl"
-#define BLOOM_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/bloomFragment.glsl"
-#define BLUR_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/texture/blurFragment.glsl"
-#define DEBUG_FRAGMENT_SHADER_CORE "defaultAssets/shaders/core/debug/debugFragment.glsl"
+	void main() {
+		gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);
+		color = in_color;
+	}
+)"
+#define RDE_COLOR_FRAGMENT_SHADER_2D R"(
+	#version 330 core
 
-#define TEXTURE_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/fragment.glsl"
-#define TEXT_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/textFragment.glsl"
-#define OUTLINE_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/outlineFragment.glsl"
-#define NEON_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/glowFragment.glsl"
-#define BLOOM_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/bloomFragment.glsl"
-#define BLUR_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/texture/blurFragment.glsl"
-#define DEBUG_FRAGMENT_SHADER_ES "defaultAssets/shaders/es/debug/debugFragment.glsl"
+	in vec4 color;
+	out vec4 out_color;
 
-#define SPRITE_RENDERER_SHADER "basic"
-#define TEXT_RENDERER_SHADER "basicText"
-#define DEBUG_SHADER "debug"
-#define FRAMEBUFFER_SHADER "framebuffer"
+	void main() {
+		out_color = vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
+	}
+)"
 
+#define RDE_TEXTURE_VERTEX_SHADER_2D R"(
+	#version 330 core
+	
+	layout(location = 0) in vec2 in_position;
+	layout(location = 1) in vec4 in_color;
+	layout(location = 2) in vec2 in_uv;
+	
+	uniform mat4 view_projection_matrix;
+	
+	out vec2 uv;
+	out vec4 color;
+	
+	void main(void) {
+		uv = in_uv;
+		color = in_color;
+		gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);
+	}
+)"
+#define RDE_TEXTURE_FRAGMENT_SHADER_2D R"(
+	#version 330 core
 
+	in vec2 uv;
+	in vec4 color;
+
+	uniform sampler2D tex;
+	layout(location = 0) out vec4 out_color;
+
+	void main(void) {
+		out_color = texture(tex, uv) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
+	}
+)"
+
+#define RDE_TEXT_VERTEX_SHADER_2D R"(
+	#version 330 core
+
+	layout(location = 0) in vec2 in_position;
+	layout(location = 1) in vec4 in_color;
+	layout(location = 2) in vec2 in_uv;
+
+	uniform mat4 view_projection_matrix;
+
+	out vec2 uv;
+	out vec4 color;
+
+	void main(void) {
+		uv = in_uv;
+		color = in_color;
+		gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);
+	}
+)"
+#define RDE_TEXT_FRAGMENT_SHADER_2D R"(
+	#version 330 core
+
+	in vec2 uv;
+	in vec4 color;
+
+	uniform sampler2D tex;
+	out vec4 out_color;
+
+	void main(void) {
+		float d = texture(tex, uv).r;
+		float aaf = fwidth(d);
+		float alpha = smoothstep(0.5 - aaf, 0.5 + aaf, d);
+		out_color = vec4(color.rgb, alpha);
+	}
+)"
+
+#define RDE_FRAME_BUFFER_VERTEX_SHADER R"(
+	#version 330 core
+	layout (location = 0) in vec2 in_pos;
+	layout (location = 1) in vec2 in_tex_coords;
+
+	out vec2 tex_coords;
+	uniform mat4 view_projection_matrix;
+
+	void main() {
+		gl_Position = vec4(in_pos.x, in_pos.y, 0.0, 1.0);
+		tex_coords = in_tex_coords;
+	}	
+)"
+#define RDE_FRAME_BUFFER_FRAGMENT_SHADER R"(
+	#version 330 core
+
+	in vec2 tex_coords;
+
+	uniform sampler2D screen_texture;
+	layout(location = 0) out vec4 out_color;
+
+	void main() {
+		out_color = texture(screen_texture, tex_coords);
+	}
+)"
+
+#define RDE_COLOR_VERTEX_SHADER_2D_ES R"(
+	#version 300 es
+
+	layout(location = 0) in vec2 position;
+	layout(location = 1) in vec4 color;
+	out vec4 color_from_vshader;
+
+	uniform mat4 view_projection_matrix;
+
+	void main() {
+		gl_Position = view_projection_matrix * vec4(position, 0.0, 1.0);
+		color_from_vshader = color;
+	}	
+)"
+#define RDE_COLOR_FRAGMENT_SHADER_2D_ES R"(
+	#version 300 es
+
+	precision mediump float;
+
+	in vec4 color_from_vshader;
+	out vec4 out_color;
+
+	void main() {
+		out_color = color_from_vshader;
+	}	
+)"
+
+#define RDE_TEXTURE_VERTEX_SHADER_2D_ES R"(
+	#version 300 es
+
+	layout(location = 0) in vec2 in_position;
+	layout(location = 1) in vec4 in_color;
+	layout(location = 2) in vec2 in_uv;
+
+	uniform mat4 view_projection_matrix;
+
+	out vec2 uv;
+	out vec4 color;
+
+	void main(void) {
+		uv = in_uv;
+		color = in_color;
+	gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);
+	}
+)"
+#define RDE_TEXTURE_FRAGMENT_SHADER_2D_ES R"(
+	#version 300 es
+
+	precision mediump float;
+
+	in vec2 uv;
+	in vec4 color;
+
+	uniform sampler2D tex;
+
+	out vec4 out_color;
+
+	void main(void) {
+		out_color = texture(tex, uv) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
+	}	
+)"
+
+#define RDE_FRAME_BUFFER_VERTEX_SHADER_ES R"(
+	#version 300 es
+	layout (location = 10) in vec2 in_pos;
+	layout (location = 11) in vec2 in_tex_coords;
+
+	out vec2 tex_coords;
+
+	void main() {
+		gl_Position = vec4(in_pos.x, in_pos.y, 0.0, 1.0);
+		tex_coords = in_tex_coords;
+	}	
+)"
+#define RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES R"(
+	#version 300 es
+
+	precision mediump float;
+
+	in vec2 tex_coords;
+	out vec4 out_color;
+
+	uniform sampler2D screen_texture;
+
+	void main() {
+		out_color = texture(screen_texture, tex_coords);
+	}
+)"
 
 /// ====================== COMPILATION AND EXPORT ==========================
 
@@ -143,6 +310,7 @@
 
 #define IS_MAC() (defined(__APPLE__) && defined(MAC_PLATFORM))
 #define IS_WINDOWS() _WIN32
+#define IS_WASM() __EMSCRIPTEN__
 #define IS_LINUX() (defined(__linux__))
 #define IS_DESKTOP() (IS_LINUX() || IS_MAC() || IS_WINDOWS())
 #define IS_IOS() (defined(__APPLE__) && defined(IOS_PLATFORM))
@@ -185,11 +353,6 @@
 		freopen_s((FILE**)stdin, "CONIN$", "r", stdin);		\
 		std::ios::sync_with_stdio(1);						\
 	}
-
-#ifdef RDE_INCLUDE_IMGUI_MODULE
-#define IMGUI_IMPLEMENTATION
-#include "imgui/imgui_single_file.h"
-#endif
 
 /// ============================== UTIL ====================================
 
@@ -788,7 +951,7 @@ typedef void (*rde_event_func_inner)(rde_event*);
 typedef void (*rde_event_func_outer)(rde_window*, rde_event*);
 typedef void (*rde_engine_user_side_loop_func)(float);
 
-typedef struct rde_inner_window_info rde_inner_window_info;
+typedef struct rde_inner_window_data rde_inner_window_info;
 
 struct rde_event_callback {
 	bool block_engine_default_implementation = false;
@@ -970,7 +1133,7 @@ struct rde_mesh {
 };
 
 struct rde_shader {
-	UNIMPLEMENTED_STRUCT()
+	size_t id = 0;
 };
 
 struct rde_material_map {
@@ -1074,50 +1237,47 @@ const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
 /// ============================ ENGINE =====================================
 
 
-RDE_FUNC 		rde_window*			rde_engine_create_engine(int _argc, char** _argv);
-RDE_FUNC		void				rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks);
+RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv);
+RDE_FUNC void rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks);
 
-RDE_FUNC 		RDE_PLATFORM_TYPE_ 	rde_engine_get_platform();
+RDE_FUNC RDE_PLATFORM_TYPE_ rde_engine_get_platform();
 
-RDE_FUNC 		float 				rde_engine_get_fixed_delta();
-RDE_FUNC 		void 				rde_engine_set_fixed_delta(float _fixed_dt);
+RDE_FUNC float rde_engine_get_fixed_delta();
+RDE_FUNC void rde_engine_set_fixed_delta(float _fixed_dt);
 
-RDE_FUNC		void				rde_engine_on_run();
+RDE_FUNC void rde_engine_on_run();
 
-RDE_FUNC		void				rde_engine_init_imgui_layer();
-RDE_FUNC		void				rde_engine_end_imgui_layer();
+RDE_FUNC bool rde_engine_is_running();
+RDE_FUNC void rde_engine_set_running(bool _running);
 
-RDE_FUNC		bool				rde_engine_is_running();
-RDE_FUNC		void				rde_engine_set_running(bool _running);
+RDE_FUNC rde_vec_2I rde_engine_get_display_size();
 
-RDE_FUNC		rde_vec_2I			rde_engine_get_display_size();
+RDE_FUNC rde_display_info* rde_engine_get_available_displays();
+RDE_FUNC void rde_engine_switch_window_display(rde_window* _window, size_t _new_display);
 
-RDE_FUNC 		rde_display_info*	rde_engine_get_available_displays();
-RDE_FUNC 		void				rde_engine_switch_window_display(rde_window* _window, size_t _new_display);
+RDE_FUNC rde_window* rde_engine_get_focused_window();
 
-RDE_FUNC		rde_window*			rde_engine_get_focused_window();
+RDE_FUNC void rde_engine_use_rde_2d_physics_system(bool _use);
 
-RDE_FUNC		void				rde_engine_use_rde_2d_physics_system(bool _use);
+RDE_FUNC bool rde_engine_is_vsync_active();
+RDE_FUNC void rde_engine_set_vsync_active(bool _vsync);
 
-RDE_FUNC 		bool				rde_engine_is_vsync_active();
-RDE_FUNC 		void				rde_engine_set_vsync_active(bool _vsync);
-
-RDE_FUNC		void				rde_engine_destroy_engine();
+RDE_FUNC void rde_engine_destroy_engine();
 
 
 /// ============================ WINDOW =====================================
 
-RDE_FUNC 	rde_window*		rde_window_create_window();
-RDE_FUNC	void			rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbacks);
+RDE_FUNC rde_window* rde_window_create_window();
+RDE_FUNC void rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbacks);
 
-RDE_FUNC 	rde_vec_2I		rde_window_get_window_size(rde_window* _window);
-RDE_FUNC	void			rde_window_set_window_size(rde_window* _window, const rde_vec_2I _size);
+RDE_FUNC rde_vec_2I	rde_window_get_window_size(rde_window* _window);
+RDE_FUNC void rde_window_set_window_size(rde_window* _window, const rde_vec_2I _size);
 
-RDE_FUNC 	rde_vec_2I		rde_window_get_position(rde_window* _window);
-RDE_FUNC 	void			rde_window_set_position(rde_window* _window, const rde_vec_2I _position);
+RDE_FUNC rde_vec_2I	rde_window_get_position(rde_window* _window);
+RDE_FUNC void rde_window_set_position(rde_window* _window, const rde_vec_2I _position);
 
-RDE_FUNC 	const char* 	rde_window_get_title(rde_window* _window);
-RDE_FUNC	void			rde_window_set_title(rde_window* _window, const char* _title);
+RDE_FUNC const char* rde_window_get_title(rde_window* _window);
+RDE_FUNC void rde_window_set_title(rde_window* _window, const char* _title);
 //
 //RDE_FUNC_ND bool			rde_window_is_fullscreen(rde_window* _window);
 //RDE_FUNC 	void			rde_window_set_fullscreen(rde_window* _window, bool _fullscreen);
@@ -1136,8 +1296,11 @@ RDE_FUNC	void			rde_window_set_title(rde_window* _window, const char* _title);
 //RDE_FUNC 	void			rde_window_allow_mouse_out_of_window(rde_window* _window, bool _allow_mouse_out_of_window);
 //
 //RDE_FUNC	void			rde_window_refresh_dpi(rde_window* _window);
-//
-RDE_FUNC	void 			rde_window_destroy_window(rde_window* _window);
+
+RDE_FUNC void* rde_window_get_native_sdl_window_handle(rde_window* _window);
+RDE_FUNC void* rde_window_get_native_sdl_gl_context_handle(rde_window* _window);
+
+RDE_FUNC void rde_window_destroy_window(rde_window* _window);
 
 /// ============================ EVENTS =====================================
 
@@ -1149,6 +1312,10 @@ RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _even
 #endif
 
 /// ============================ RENDERING ==================================
+
+RDE_FUNC int rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code);
+
+RDE_FUNC void rde_rendering_unload_shader(size_t _shader_id);
 
 RDE_FUNC rde_texture* rde_rendering_load_texture(const char* _file_path);
 RDE_FUNC void rde_rendering_unload_texture(rde_texture* _texture);
@@ -1169,6 +1336,7 @@ RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 
 RDE_FUNC void rde_rendering_begin_drawing_2d(rde_camera* _camera);
 RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera);
+RDE_FUNC void rde_rendering_begin_drawing_imgui();
 
 RDE_FUNC void rde_rendering_draw_point_2d(const rde_vec_2F _position, const rde_color _color);
 RDE_FUNC void rde_rendering_draw_point_3d(const rde_vec_3F _position, const rde_color _color);
@@ -1182,6 +1350,7 @@ RDE_FUNC void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _ra
 
 RDE_FUNC void rde_rendering_end_drawing_2d();
 RDE_FUNC void rde_rendering_end_drawing_3d();
+RDE_FUNC void rde_rendering_end_drawing_imgui();
 
 /// ============================ AUDIO ======================================
 

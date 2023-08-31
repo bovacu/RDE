@@ -29,9 +29,15 @@
 
 #include "glm/glm.hpp"
 
-#if RDE_AUDIO_MODULE
+#ifdef RDE_AUDIO_MODULE
 #include "SDL2/SDL_mixer.h"
 #endif
+
+#define WIN_EVENT_INIT (RDE_EVENT_TYPE_WINDOW_BEGIN + 1)
+#define WIN_EVENT_COUNT (RDE_EVENT_TYPE_WINDOW_END - RDE_EVENT_TYPE_WINDOW_BEGIN)
+
+#define DISPLAY_EVENT_INIT (RDE_EVENT_TYPE_DISPLAY_BEGIN + 1)
+#define DISPLAY_EVENT_COUNT (RDE_EVENT_TYPE_DISPLAY_END - RDE_EVENT_TYPE_DISPLAY_BEGIN)
 
 // TODO: Not to forget
 // 		- Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
@@ -92,19 +98,17 @@ static rde_engine ENGINE;
 // in the header file so the header file is 100% free of any external dependencies, which
 // means no anoying linking problems.
 
-struct rde_inner_window_info {
+struct rde_inner_window_data {
 	SDL_Window* sdl_window = nullptr;
 	SDL_GLContext sdl_gl_context;
 	rde_window* self_pointer = nullptr;
 };
 
-rde_inner_window_info inner_window_info_array[RDE_MAX_NUMBER_OF_WINDOWS];
-
+rde_inner_window_data inner_window_info_array[RDE_MAX_NUMBER_OF_WINDOWS];
+rde_event_func_outer window_events[WIN_EVENT_COUNT];
+rde_event_func_outer display_events[DISPLAY_EVENT_COUNT];
 
 void rde_events_window_create_events();
-#define WIN_EVENT_INIT (RDE_EVENT_TYPE_WINDOW_BEGIN + 1)
-#define WIN_EVENT_COUNT (RDE_EVENT_TYPE_WINDOW_END - RDE_EVENT_TYPE_WINDOW_BEGIN)
-rde_event_func_outer window_events[WIN_EVENT_COUNT];
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_resize, window_callbacks, on_window_resize, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_focused_by_mouse, window_callbacks, on_window_focused_by_mouse, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_unfocused_by_mouse, window_callbacks, on_window_unfocused_by_mouse, {})
@@ -126,9 +130,6 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_closed, window_callbacks, on_win
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_display_changed, window_callbacks, on_window_moved, {})
 
 void rde_events_display_create_events();
-#define DISPLAY_EVENT_INIT (RDE_EVENT_TYPE_DISPLAY_BEGIN + 1)
-#define DISPLAY_EVENT_COUNT (RDE_EVENT_TYPE_DISPLAY_END - RDE_EVENT_TYPE_DISPLAY_BEGIN)
-rde_event_func_outer display_events[DISPLAY_EVENT_COUNT];
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_connected, display_callbacks, on_display_connected, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_disconnected, display_callbacks, on_display_disconnected, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_changed_orientation, display_callbacks, on_display_changed_orientation, {})
@@ -142,10 +143,29 @@ void rde_engine_on_late_update(float _dt);
 void rde_engine_on_render(float _dt);
 void rde_engine_sync_events();
 
-static rde_engine_user_side_loop_func	rde_engine_user_on_update = nullptr;
-static rde_engine_user_side_loop_func	rde_engine_user_on_fixed_update = nullptr;
-static rde_engine_user_side_loop_func	rde_engine_user_on_late_update = nullptr;
-static rde_engine_user_side_loop_func	rde_engine_user_on_render = nullptr;
+rde_engine_user_side_loop_func	rde_engine_user_on_update = nullptr;
+rde_engine_user_side_loop_func	rde_engine_user_on_fixed_update = nullptr;
+rde_engine_user_side_loop_func	rde_engine_user_on_late_update = nullptr;
+rde_engine_user_side_loop_func	rde_engine_user_on_render = nullptr;
+
+struct rde_inner_shader_data {
+	GLuint vertex_program_id = 0;
+	GLuint fragment_program_id = 0;
+	int compiled_program_id = -1;
+
+	GLuint vertex_buffer_object = 0;
+	GLuint index_buffer_object = 0;
+	GLuint vertex_array_object = 0;
+};
+
+size_t current_shader_index = 0;
+
+size_t color_shader_2d_index = 0;
+size_t texture_shader_2d_index = 0;
+size_t text_shader_2d_index = 0;
+size_t frame_buffer_shader_index = 0;
+
+rde_inner_shader_data shaders[RDE_MAX_LOADABLE_SHADERS];
 
 /// ============================ MATH =======================================
 
@@ -268,7 +288,7 @@ void rde_rendering_set_rendering_configuration() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 #if !IS_MOBILE() 
-	#ifndef __EMSCRIPTEN__
+	#if !IS_WASM()
 		glEnable(GL_PROGRAM_POINT_SIZE);
 		rde_util_check_opengl_error("Invalid Point size");
 		glEnable(GL_LINE_SMOOTH);
@@ -278,13 +298,25 @@ void rde_rendering_set_rendering_configuration() {
 	#endif
 		
 	#if !IS_MAC() && !IS_LINUX()
-		#ifndef __EMSCRIPTEN__
+		#if !IS_WASM()
 			glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 			rde_util_check_opengl_error("Invalid Point Smooth Hint -> GL_NICEST");
 		#endif
 	#endif
-
 #endif
+
+#if !IS_MOBILE() && !IS_WASM()
+	color_shader_2d_index = rde_rendering_load_shader(RDE_COLOR_VERTEX_SHADER_2D, RDE_COLOR_FRAGMENT_SHADER_2D);
+	texture_shader_2d_index = rde_rendering_load_shader(RDE_TEXTURE_VERTEX_SHADER_2D, RDE_TEXTURE_FRAGMENT_SHADER_2D);
+	text_shader_2d_index = rde_rendering_load_shader(RDE_TEXT_VERTEX_SHADER_2D, RDE_TEXT_FRAGMENT_SHADER_2D);
+	frame_buffer_shader_index = rde_rendering_load_shader(RDE_FRAME_BUFFER_VERTEX_SHADER, RDE_FRAME_BUFFER_FRAGMENT_SHADER);
+#else
+	color_shader_2d_index = rde_rendering_load_shader(RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
+	texture_shader_2d_index = rde_rendering_load_shader(RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
+	text_shader_2d_index = rde_rendering_load_shader(RDE_TEXT_VERTEX_SHADER_2D_ES, RDE_TEXT_FRAGMENT_SHADER_2D_ES);
+	frame_buffer_shader_index = rde_rendering_load_shader(RDE_FRAME_BUFFER_VERTEX_SHADER_ES, RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES);
+#endif
+	
 }
 
 rde_window* rde_engine_create_engine(int _argc, char** _argv) {
@@ -301,7 +333,6 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 
 	rde_events_window_create_events();
 	rde_events_display_create_events();
-
 	rde_rendering_set_rendering_configuration();
 
 	return _default_window;
@@ -343,6 +374,7 @@ void rde_engine_on_run() {
 		ENGINE.fixed_time_step_accumulator += ENGINE.delta_time;
 
 		rde_engine_on_event();
+		if (!ENGINE.running) return;
 
 		rde_engine_on_update(ENGINE.delta_time);
 		rde_engine_user_on_update(ENGINE.delta_time);
@@ -369,14 +401,6 @@ void rde_engine_on_run() {
 	}
 
 	rde_engine_destroy_engine();
-}
-
-void rde_engine_init_imgui_layer() {
-	UNIMPLEMENTED("Not implemented")
-}
-
-void rde_engine_end_imgui_layer() {
-	UNIMPLEMENTED("Not implemented")
 }
 
 bool rde_engine_is_running() {
@@ -432,17 +456,17 @@ rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 }
 
 void rde_engine_on_event() {
-	;
 
 	SDL_Event _event;
         
 	SDL_PumpEvents();
 
 	while (SDL_PollEvent(&_event)) {
+
 		rde_event _rde_event = rde_engine_sdl_event_to_rde_event(&_event);
 			
 		for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
-			rde_inner_window_info* _window_info = &inner_window_info_array[_i];
+			rde_inner_window_data* _window_info = &inner_window_info_array[_i];
 
 			if(_window_info->self_pointer == nullptr) {
 				continue;
@@ -511,7 +535,7 @@ rde_window* rde_engine_get_focused_window() {
 	SDL_Window* _window = SDL_GetMouseFocus();
 
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
-		rde_inner_window_info* _info = &inner_window_info_array[_i];
+		rde_inner_window_data* _info = &inner_window_info_array[_i];
 		
 		if(_info->sdl_window == _window) {
 			return _info->self_pointer;
@@ -528,7 +552,7 @@ rde_window* rde_window_create_windows_window(size_t _free_window_index) {
 	rde_window* _window = new rde_window {  };
 	_window->id = _free_window_index;
 
-	rde_inner_window_info* _window_info = &inner_window_info_array[_free_window_index];
+	rde_inner_window_data* _window_info = &inner_window_info_array[_free_window_index];
 	_window_info->self_pointer = _window;
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -593,7 +617,7 @@ rde_window* rde_window_create_linux_window(size_t _free_window_index) {
 	rde_window* _window = new rde_window {  };
 	_window->id = _free_window_index;
 
-	rde_inner_window_info* _window_info = &inner_window_info_array[_free_window_index];
+	rde_inner_window_data* _window_info = &inner_window_info_array[_free_window_index];
 	_window_info->self_pointer = _window;
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -668,6 +692,7 @@ rde_window* rde_window_create_wasm_window(size_t _free_window_index) {
 rde_window* rde_window_create_window() {
 
 	size_t _free_window_index = 0;
+	rde_window* _window = nullptr;
 
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
 		if(inner_window_info_array[_i].self_pointer != nullptr) {
@@ -684,13 +709,15 @@ rde_window* rde_window_create_window() {
 	}
 
 	// TODO: create window depending on platform
-#if IS_WINDOWS()
-	return rde_window_create_windows_window(_free_window_index);
-#elif IS_LINUX()
-	return rde_window_create_linux_window(_free_window_index);
-#else
-	assert(false && "[Error]: Unsupported or unimplemented platform");
-#endif
+	#if IS_WINDOWS()
+		_window = rde_window_create_windows_window(_free_window_index);
+	#elif IS_LINUX()
+		_window = rde_window_create_linux_window(_free_window_index);
+	#else
+		assert(false && "[Error]: Unsupported or unimplemented platform");
+	#endif
+	
+	return _window;
 }
 
 void rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbacks) {
@@ -743,9 +770,17 @@ void rde_window_set_title(rde_window* _window, const char* _title) {
 //RDE_FUNC 	void			rde_window_allow_mouse_out_of_window(rde_window* _window, bool _allow_mouse_out_of_window);
 //
 //RDE_FUNC	void			rde_window_refresh_dpi(rde_window* _window);
-//
+
+void* rde_window_get_native_sdl_window_handle(rde_window* _window) {
+	return inner_window_info_array[_window->id].sdl_window;
+}
+
+void* rde_window_get_native_sdl_gl_context_handle(rde_window* _window) {
+	return &inner_window_info_array[_window->id].sdl_gl_context;
+}
+
 void rde_window_destroy_window(rde_window* _window) {
-	rde_inner_window_info* _info = &inner_window_info_array[_window->id];
+	rde_inner_window_data* _info = &inner_window_info_array[_window->id];
 
 	SDL_GL_DeleteContext(_info->sdl_gl_context);
 	SDL_DestroyWindow(_info->sdl_window);
@@ -837,6 +872,80 @@ int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _event) {
 
 /// ============================ RENDERING ==================================
 
+#define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled)					\
+	if(!_compiled) {																\
+		char _infolog[1024];														\
+		glGetShaderInfoLog(_program_id, 1024, nullptr, _infolog);					\
+		std::cout << "Shader compile failed with error: " << _infolog << std::endl;	\
+		glDeleteShader(_program_id);												\
+		return -1;																	\
+	}
+
+int rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code) {
+	GLuint _vertex_program_id = glCreateShader(GL_VERTEX_SHADER);
+	rde_util_check_opengl_error("vertex program creation");
+	GLuint _fragment_program_id = glCreateShader(GL_FRAGMENT_SHADER);
+	rde_util_check_opengl_error("fragment program creation");
+	
+	GLint _vertex_source_size = strlen(_vertex_code);
+	GLint _fragment_source_size = strlen(_fragment_code);
+
+	glShaderSource(_vertex_program_id, 1, &_vertex_code, &_vertex_source_size);
+	rde_util_check_opengl_error("vertex source attachment before compilation");
+	glShaderSource(_fragment_program_id, 1, &_fragment_code, &_fragment_source_size);
+	rde_util_check_opengl_error("fragment source attachment before compilation");
+
+	glCompileShader(_vertex_program_id);
+	rde_util_check_opengl_error("vertex compilation");
+	glCompileShader(_fragment_program_id);
+	rde_util_check_opengl_error("fragment compilation");
+
+	GLint _is_vertex_compiled, _is_fragment_compiled;
+	glGetShaderiv(_vertex_program_id, GL_COMPILE_STATUS, &_is_vertex_compiled);
+	glGetShaderiv(_fragment_program_id, GL_COMPILE_STATUS, &_is_fragment_compiled);
+
+	RDE_CHECK_SHADER_COMPILATION_STATUS(_vertex_program_id, _is_vertex_compiled)
+	RDE_CHECK_SHADER_COMPILATION_STATUS(_fragment_program_id, _is_fragment_compiled)
+
+	GLuint _program_id = glCreateProgram();
+	rde_util_check_opengl_error("program creation");
+	glAttachShader(_program_id, _vertex_program_id);
+	rde_util_check_opengl_error("vertex attached to program");
+	glAttachShader(_program_id, _fragment_program_id);
+	rde_util_check_opengl_error("fragment attached to program");
+
+	glLinkProgram(_program_id);
+	rde_util_check_opengl_error("vertex and fragment linking");
+
+	for (size_t _i = 0; _i < RDE_MAX_LOADABLE_SHADERS; _i++) {
+		if (shaders[_i].compiled_program_id != -1) {
+			continue;
+		}
+
+		rde_inner_shader_data* _shader = &shaders[_i];
+		_shader->vertex_program_id = _vertex_program_id;
+		_shader->fragment_program_id = _fragment_program_id;
+		_shader->compiled_program_id = _program_id;
+
+		return _i;
+	}
+
+	assert(false && "Maximum number of shaders loaded reached!");
+	return -1;
+}
+
+void rde_rendering_unload_shader(size_t _shader_id) {
+	rde_inner_shader_data* _shader = &shaders[_shader_id];
+	glDeleteShader(_shader->vertex_program_id);
+	glDeleteShader(_shader->fragment_program_id);
+	glDeleteProgram(_shader->compiled_program_id);
+
+	glDeleteBuffers(1, &_shader->vertex_buffer_object);
+	glDeleteBuffers(1, &_shader->index_buffer_object);
+	glDeleteVertexArrays(1, &_shader->vertex_array_object);
+
+	_shader->compiled_program_id = -1;
+}
 
 rde_texture* rde_rendering_load_texture(const char* _file_path) {
 	UNUSED(_file_path);
@@ -896,6 +1005,7 @@ rde_texture* rde_rendering_get_atlas_sub_texture(const char* _texture_name){
 
 void rde_rendering_set_background_color(const rde_color _color) {
 	glClearColor((float)_color.r / 255.f, (float)_color.g / 255.f, (float)_color.b / 255.f, (float)_color.a / 255.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void rde_rendering_start_drawing_2d(rde_camera* _camera) {
