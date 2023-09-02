@@ -76,6 +76,21 @@
 //
 //		- TOOL: command line project creation, compilation and export.
 
+struct rde_window {
+	SDL_Window* sdl_window = nullptr;
+	SDL_GLContext sdl_gl_context;
+};
+
+struct rde_shader {
+	GLuint vertex_program_id = 0;
+	GLuint fragment_program_id = 0;
+	int compiled_program_id = -1;
+
+	GLuint vertex_buffer_object = 0;
+	GLuint index_buffer_object = 0;
+	GLuint vertex_array_object = 0;
+};
+
 struct rde_engine {
 	bool instantiated = false;
 
@@ -90,24 +105,24 @@ struct rde_engine {
 
 	rde_display_callbacks display_callbacks;
 	rde_window_callbacks window_callbacks;
+	rde_end_user_mandatory_callbacks mandatory_callbacks;
+
+	rde_shader* color_shader_2d = nullptr;
+	rde_shader* texture_shader_2d = nullptr;
+	rde_shader* text_shader_2d = nullptr;
+	rde_shader* frame_buffer_shader = nullptr;
+
+	rde_shader shaders[RDE_MAX_LOADABLE_SHADERS];
+	rde_window windows[RDE_MAX_NUMBER_OF_WINDOWS];
+	rde_event_func_outer window_events[WIN_EVENT_COUNT];
+	rde_event_func_outer display_events[DISPLAY_EVENT_COUNT];
 };
 
 static rde_engine ENGINE;
 
-
 // This inner structure defined here complements rde_window. In fact, this is not defined
 // in the header file so the header file is 100% free of any external dependencies, which
 // means no anoying linking problems.
-
-struct rde_inner_window_data {
-	SDL_Window* sdl_window = nullptr;
-	SDL_GLContext sdl_gl_context;
-	rde_window* self_pointer = nullptr;
-};
-
-rde_inner_window_data inner_window_info_array[RDE_MAX_NUMBER_OF_WINDOWS];
-rde_event_func_outer window_events[WIN_EVENT_COUNT];
-rde_event_func_outer display_events[DISPLAY_EVENT_COUNT];
 
 void rde_events_window_create_events();
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_resize, window_callbacks, on_window_resize, {})
@@ -121,7 +136,7 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_maximized, window_callbacks, on_
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_closed, window_callbacks, on_window_closed, { 
 	rde_window_destroy_window(_window); 
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
-		if(inner_window_info_array[_i].self_pointer != nullptr) {
+		if(_window->sdl_window != nullptr) {
 			return;
 		}
 	}
@@ -136,37 +151,12 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_disconnected, display_callbacks
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_changed_orientation, display_callbacks, on_display_changed_orientation, {})
 
 
-
 void rde_engine_on_event();
 void rde_engine_on_update(float _dt);
 void rde_engine_on_fixed_update(float _fixed_dt);
 void rde_engine_on_late_update(float _dt);
 void rde_engine_on_render(float _dt);
 void rde_engine_sync_events();
-
-rde_engine_user_side_loop_func	rde_engine_user_on_update = nullptr;
-rde_engine_user_side_loop_func	rde_engine_user_on_fixed_update = nullptr;
-rde_engine_user_side_loop_func	rde_engine_user_on_late_update = nullptr;
-rde_engine_user_side_loop_func	rde_engine_user_on_render = nullptr;
-
-struct rde_inner_shader_data {
-	GLuint vertex_program_id = 0;
-	GLuint fragment_program_id = 0;
-	int compiled_program_id = -1;
-
-	GLuint vertex_buffer_object = 0;
-	GLuint index_buffer_object = 0;
-	GLuint vertex_array_object = 0;
-};
-
-size_t current_shader_index = 0;
-
-size_t color_shader_2d_index = 0;
-size_t texture_shader_2d_index = 0;
-size_t text_shader_2d_index = 0;
-size_t frame_buffer_shader_index = 0;
-
-rde_inner_shader_data shaders[RDE_MAX_LOADABLE_SHADERS];
 
 /// ============================ MATH =======================================
 
@@ -180,39 +170,45 @@ rde_inner_shader_data shaders[RDE_MAX_LOADABLE_SHADERS];
 
 /// ============================ UTIL =======================================
 
-void rde_util_check_opengl_error(const char* _message) {
+uint32_t knuth_hash(uint32_t _v) {
+	return _v * UINT32_C(2654435761);
+}
+
+bool rde_util_check_opengl_error(const char* _message) {
 	GLenum _err;
 	while((_err = glGetError()) != GL_NO_ERROR){
 		switch(_err) {
 			case GL_NO_ERROR:
 				printf("GL_NO_ERROR: No error has been recorded. The value of this symbolic constant is guaranteed to be 0. | %s -> %u \n",  _message, _err);
-				break;
+				return true;
 			case GL_INVALID_ENUM:
 				printf("GL_INVALID_ENUM: An unacceptable value is specified for an enumerated argument. The offending command is ignored and has no other side effect than to set the error flag. | %s -> %u \n",  _message, _err);
-				break;
+				return true;
 			case GL_INVALID_VALUE:
 				printf("GL_INVALID_VALUE: A numeric argument is out of range. The offending command is ignored and has no other side effect than to set the error flag. | %s -> %u \n",  _message, _err);
-				break;
+				return true;
 			case GL_INVALID_OPERATION:
 				printf("GL_INVALID_OPERATION: The specified operation is not allowed in the current state. The offending command is ignored and has no other side effect than to set the error flag. | %s -> %u \n",  _message, _err);
-				break;
+				return true;
 			case GL_INVALID_FRAMEBUFFER_OPERATION:
 				printf("GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete. | %s -> %u \n",  _message, _err);
-				break;
+				return true;
 			case GL_OUT_OF_MEMORY:
 				printf("GL_OUT_OF_MEMORY: There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded. | %s -> %u \n",  _message, _err);
-				break;
+				return true;
 			case GL_STACK_UNDERFLOW:
 				printf("GL_STACK_UNDERFLOW: An attempt has been made to perform an operation that would cause an internal stack to underflow. | %s -> %u \n",  _message, _err);
-				break;
+				return true;
 			case GL_STACK_OVERFLOW:
 				printf("GL_STACK_OVERFLOW: An attempt has been made to perform an operation that would cause an internal stack to overflow. | %s -> %u \n",  _message, _err);
-				break;
+				return true;
 			default:
 				printf("No description. | %s -> %u \n",  _message, _err);
-				break;
+				return true;
 		}
 	}
+
+	return false;
 }
 
 void rde_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
@@ -307,15 +303,15 @@ void rde_rendering_set_rendering_configuration() {
 #endif
 
 #if !IS_MOBILE() && !IS_WASM()
-	color_shader_2d_index = rde_rendering_load_shader(RDE_COLOR_VERTEX_SHADER_2D, RDE_COLOR_FRAGMENT_SHADER_2D);
-	texture_shader_2d_index = rde_rendering_load_shader(RDE_TEXTURE_VERTEX_SHADER_2D, RDE_TEXTURE_FRAGMENT_SHADER_2D);
-	text_shader_2d_index = rde_rendering_load_shader(RDE_TEXT_VERTEX_SHADER_2D, RDE_TEXT_FRAGMENT_SHADER_2D);
-	frame_buffer_shader_index = rde_rendering_load_shader(RDE_FRAME_BUFFER_VERTEX_SHADER, RDE_FRAME_BUFFER_FRAGMENT_SHADER);
+	ENGINE.color_shader_2d = rde_rendering_load_shader(RDE_COLOR_VERTEX_SHADER_2D, RDE_COLOR_FRAGMENT_SHADER_2D);
+	ENGINE.texture_shader_2d = rde_rendering_load_shader(RDE_TEXTURE_VERTEX_SHADER_2D, RDE_TEXTURE_FRAGMENT_SHADER_2D);
+	ENGINE.text_shader_2d = rde_rendering_load_shader(RDE_TEXT_VERTEX_SHADER_2D, RDE_TEXT_FRAGMENT_SHADER_2D);
+	ENGINE.frame_buffer_shader = rde_rendering_load_shader(RDE_FRAME_BUFFER_VERTEX_SHADER, RDE_FRAME_BUFFER_FRAGMENT_SHADER);
 #else
-	color_shader_2d_index = rde_rendering_load_shader(RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
-	texture_shader_2d_index = rde_rendering_load_shader(RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
-	text_shader_2d_index = rde_rendering_load_shader(RDE_TEXT_VERTEX_SHADER_2D_ES, RDE_TEXT_FRAGMENT_SHADER_2D_ES);
-	frame_buffer_shader_index = rde_rendering_load_shader(RDE_FRAME_BUFFER_VERTEX_SHADER_ES, RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES);
+	ENGINE.color_shader_2d = rde_rendering_load_shader(RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
+	ENGINE.texture_shader_2d = rde_rendering_load_shader(RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
+	ENGINE.text_shader_2d = rde_rendering_load_shader(RDE_TEXT_VERTEX_SHADER_2D_ES, RDE_TEXT_FRAGMENT_SHADER_2D_ES);
+	ENGINE.frame_buffer_shader = rde_rendering_load_shader(RDE_FRAME_BUFFER_VERTEX_SHADER_ES, RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES);
 #endif
 	
 }
@@ -340,10 +336,10 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 }
 
 void rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks) {
-	rde_engine_user_on_update = _end_user_callbacks.on_update;
-	rde_engine_user_on_fixed_update = _end_user_callbacks.on_fixed_update;
-	rde_engine_user_on_late_update = _end_user_callbacks.on_late_update;
-	rde_engine_user_on_render = _end_user_callbacks.on_render;
+	ENGINE.mandatory_callbacks.on_update = _end_user_callbacks.on_update;
+	ENGINE.mandatory_callbacks.on_fixed_update = _end_user_callbacks.on_fixed_update;
+	ENGINE.mandatory_callbacks.on_late_update = _end_user_callbacks.on_late_update;
+	ENGINE.mandatory_callbacks.on_render = _end_user_callbacks.on_render;
 }
 
 RDE_PLATFORM_TYPE_ rde_engine_get_platform() {
@@ -361,10 +357,10 @@ void rde_engine_set_fixed_delta(float _delta_time) {
 
 void rde_engine_on_run() {
 
-	assert(rde_engine_user_on_update != nullptr && "User-End callback 'rde_engine_user_on_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
-	assert(rde_engine_user_on_fixed_update != nullptr && "User-End callback 'rde_engine_user_on_fixed_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
-	assert(rde_engine_user_on_late_update != nullptr && "User-End callback 'rde_engine_user_on_late_upadte' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
-	assert(rde_engine_user_on_render != nullptr && "User-End callback 'rde_engine_user_on_render' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	assert(ENGINE.mandatory_callbacks.on_update != nullptr && "User-End callback 'rde_engine_user_on_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	assert(ENGINE.mandatory_callbacks.on_fixed_update != nullptr && "User-End callback 'rde_engine_user_on_fixed_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	assert(ENGINE.mandatory_callbacks.on_late_update != nullptr && "User-End callback 'rde_engine_user_on_late_upadte' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	assert(ENGINE.mandatory_callbacks.on_render != nullptr && "User-End callback 'rde_engine_user_on_render' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
 
 	#if IS_MOBILE()
 	SDL_SetEventFilter(rde_mobile_consume_events);
@@ -378,21 +374,21 @@ void rde_engine_on_run() {
 		if (!ENGINE.running) return;
 
 		rde_engine_on_update(ENGINE.delta_time);
-		rde_engine_user_on_update(ENGINE.delta_time);
+		ENGINE.mandatory_callbacks.on_update(ENGINE.delta_time);
 
 		while (ENGINE.fixed_time_step_accumulator >= ENGINE.fixed_delta_time) {
 			ENGINE.fixed_time_step_accumulator -= ENGINE.fixed_delta_time;
 			rde_engine_on_fixed_update(ENGINE.fixed_delta_time);
-			rde_engine_user_on_fixed_update(ENGINE.fixed_delta_time);
+			ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
 		}
 
 		rde_engine_on_late_update(ENGINE.delta_time);
-		rde_engine_user_on_late_update(ENGINE.delta_time);
+		ENGINE.mandatory_callbacks.on_late_update(ENGINE.delta_time);
 
 		rde_engine_on_render(ENGINE.delta_time);
-		rde_engine_user_on_render(ENGINE.delta_time);
+		ENGINE.mandatory_callbacks.on_render(ENGINE.delta_time);
 
-		SDL_GL_SwapWindow(inner_window_info_array[0].sdl_window);
+		SDL_GL_SwapWindow(ENGINE.windows[0].sdl_window);
 
 		rde_engine_sync_events();
 
@@ -433,11 +429,11 @@ void rde_engine_set_vsync_active(bool _vsync) {
 
 void rde_engine_destroy_engine() {
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
-		if(inner_window_info_array[_i].self_pointer == nullptr) {
+		if(ENGINE.windows[_i].sdl_window == nullptr) {
 			continue;
 		}
 
-		rde_window_destroy_window(inner_window_info_array[_i].self_pointer);
+		rde_window_destroy_window(&ENGINE.windows[_i]);
 	}
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
@@ -467,9 +463,9 @@ void rde_engine_on_event() {
 		rde_event _rde_event = rde_engine_sdl_event_to_rde_event(&_event);
 			
 		for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
-			rde_inner_window_data* _window_info = &inner_window_info_array[_i];
+			rde_window* _window = &ENGINE.windows[_i];
 
-			if(_window_info->self_pointer == nullptr) {
+			if(_window->sdl_window == nullptr) {
 				continue;
 			}
 
@@ -490,12 +486,12 @@ void rde_engine_on_event() {
 			//			- SDL_AudioDeviceEvent
 			switch(_event.type) {
 				case SDL_WINDOWEVENT:	{
-					if(SDL_GetWindowID(_window_info->sdl_window) != _rde_event.window_id) {
+					if(SDL_GetWindowID(_window->sdl_window) != _rde_event.window_id) {
 						continue;
 					}
-					rde_events_window_consume_events(_window_info->self_pointer, &_rde_event);
+					rde_events_window_consume_events(_window, &_rde_event);
 				} break;
-				case SDL_DISPLAYEVENT: 	rde_events_display_consume_events(_window_info->self_pointer, &_rde_event); break;
+				case SDL_DISPLAYEVENT: 	rde_events_display_consume_events(_window, &_rde_event); break;
 			}
 		}
 	}
@@ -536,10 +532,10 @@ rde_window* rde_engine_get_focused_window() {
 	SDL_Window* _window = SDL_GetMouseFocus();
 
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
-		rde_inner_window_data* _info = &inner_window_info_array[_i];
+		rde_window* _w = &ENGINE.windows[_i];
 		
-		if(_info->sdl_window == _window) {
-			return _info->self_pointer;
+		if(_w->sdl_window == _window) {
+			return _w;
 		}
 	}
 
@@ -550,11 +546,7 @@ rde_window* rde_engine_get_focused_window() {
 
 #if IS_WINDOWS()
 rde_window* rde_window_create_windows_window(size_t _free_window_index) {
-	rde_window* _window = (rde_window*)malloc(sizeof(rde_window));
-	_window->id = _free_window_index;
-
-	rde_inner_window_data* _window_info = &inner_window_info_array[_free_window_index];
-	_window_info->self_pointer = _window;
+	rde_window* _window = &ENGINE.windows[_free_window_index];
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -574,20 +566,20 @@ rde_window* rde_window_create_windows_window(size_t _free_window_index) {
 
 	char _title[16];
 	snprintf(_title, 10, "%d", (int)_free_window_index);
-	_window_info->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	_window->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
-	if(_window_info->sdl_window == nullptr) {
+	if(_window->sdl_window == nullptr) {
 		printf("SDL window creation failed: %s \n", SDL_GetError());
 		exit(-1);
 	}
-	_window_info->sdl_gl_context = SDL_GL_CreateContext(_window_info->sdl_window);
+	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
 
-	if(_window_info->sdl_gl_context == nullptr) {
+	if(_window->sdl_gl_context == nullptr) {
 		printf("OpenGL context couldn't initialize -> %s \n", SDL_GetError());
 		exit(-1);
 	}
 
-	SDL_GL_MakeCurrent(_window_info->sdl_window, _window_info->sdl_gl_context);
+	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
 
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
 		printf("Failed to initialize GLAD \n");
@@ -598,13 +590,10 @@ rde_window* rde_window_create_windows_window(size_t _free_window_index) {
 
 	SDL_GL_SetSwapInterval(1);
 
-	SDL_SetWindowPosition(_window_info->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	SDL_SetWindowResizable(_window_info->sdl_window, SDL_TRUE);
+	SDL_SetWindowPosition(_window->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowResizable(_window->sdl_window, SDL_TRUE);
 
 	return _window;
-	//setIcon(properties->projectData.iconPath);
-
-	//refreshDpi();
 }
 #endif
 
@@ -616,11 +605,7 @@ rde_window* rde_window_create_mac_window() {
 
 #if IS_LINUX()
 rde_window* rde_window_create_linux_window(size_t _free_window_index) {
-	rde_window* _window = (rde_window*)malloc(sizeof(rde_window));
-	_window->id = _free_window_index;
-
-	rde_inner_window_data* _window_info = &inner_window_info_array[_free_window_index];
-	_window_info->self_pointer = _window;
+	rde_window* _window = &ENGINE.windows[_free_window_index];
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -640,20 +625,20 @@ rde_window* rde_window_create_linux_window(size_t _free_window_index) {
 
 	char _title[16];
 	snprintf(_title, 10, "%d", (int)_free_window_index);
-	_window_info->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	_window->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
-	if(_window_info->sdl_window == nullptr) {
+	if(_window->sdl_window == nullptr) {
 		printf("OpenGL context couldn't initialize -> %s \n", SDL_GetError());
 		exit(-1);
 	}
-	_window_info->sdl_gl_context = SDL_GL_CreateContext(_window_info->sdl_window);
+	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
 
-	if(_window_info->sdl_gl_context == nullptr) {
+	if(_window->sdl_gl_context == nullptr) {
 		printf("OpenGL context couldn't initialize -> %s \n", SDL_GetError());
 		exit(-1);
 	}
 
-	SDL_GL_MakeCurrent(_window_info->sdl_window, _window_info->sdl_gl_context);
+	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
 
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
 		printf("Failed to initialize GLAD \n");
@@ -663,13 +648,10 @@ rde_window* rde_window_create_linux_window(size_t _free_window_index) {
 
 	SDL_GL_SetSwapInterval(1);
 
-	SDL_SetWindowPosition(_window_info->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	SDL_SetWindowResizable(_window_info->sdl_window, SDL_TRUE);
+	SDL_SetWindowPosition(_window->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowResizable(_window->sdl_window, SDL_TRUE);
 
 	return _window;
-	//setIcon(properties->projectData.iconPath);
-
-	//refreshDpi();
 }
 #endif
 
@@ -697,7 +679,7 @@ rde_window* rde_window_create_window() {
 	rde_window* _window = nullptr;
 
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
-		if(inner_window_info_array[_i].self_pointer != nullptr) {
+		if(ENGINE.windows[_i].sdl_window != nullptr) {
 
 			if(_i == RDE_MAX_NUMBER_OF_WINDOWS - 1) {
 				assert(false && "[ERROR]: Tried to create a new window but the limit of simultaneous windows has been reached.");
@@ -729,29 +711,29 @@ void rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbac
 
 rde_vec_2I rde_window_get_window_size(rde_window* _window) {
 	rde_vec_2I _size {  };
-	SDL_GetWindowSize(inner_window_info_array[_window->id].sdl_window, &_size.x, &_size.y);
+	SDL_GetWindowSize(_window->sdl_window, &_size.x, &_size.y);
 	return _size;
 }
 void rde_window_set_window_size(rde_window* _window, const rde_vec_2I _size) {
-	SDL_SetWindowSize(inner_window_info_array[_window->id].sdl_window, _size.x, _size.y);
+	SDL_SetWindowSize(_window->sdl_window, _size.x, _size.y);
 }
 
 rde_vec_2I rde_window_get_position(rde_window* _window) {
 	rde_vec_2I _position = {  };
-	SDL_GetWindowPosition(inner_window_info_array[_window->id].sdl_window, &_position.x, &_position.y);
+	SDL_GetWindowPosition(_window->sdl_window, &_position.x, &_position.y);
 	return _position;
 }
 
 void rde_window_set_position(rde_window* _window, const rde_vec_2I _position) {
-	SDL_SetWindowPosition(inner_window_info_array[_window->id].sdl_window, _position.x, _position.y);
+	SDL_SetWindowPosition(_window->sdl_window, _position.x, _position.y);
 }
 
 const char* rde_window_get_title(rde_window* _window) {
-	return SDL_GetWindowTitle(inner_window_info_array[_window->id].sdl_window);
+	return SDL_GetWindowTitle(_window->sdl_window);
 }
 
 void rde_window_set_title(rde_window* _window, const char* _title) {
-	SDL_SetWindowTitle(inner_window_info_array[_window->id].sdl_window, _title);
+	SDL_SetWindowTitle(_window->sdl_window, _title);
 }
 
 //
@@ -774,62 +756,58 @@ void rde_window_set_title(rde_window* _window, const char* _title) {
 //RDE_FUNC	void			rde_window_refresh_dpi(rde_window* _window);
 
 void* rde_window_get_native_sdl_window_handle(rde_window* _window) {
-	return inner_window_info_array[_window->id].sdl_window;
+	return _window->sdl_window;
 }
 
 void* rde_window_get_native_sdl_gl_context_handle(rde_window* _window) {
-	return &inner_window_info_array[_window->id].sdl_gl_context;
+	return &_window->sdl_gl_context;
 }
 
 void rde_window_destroy_window(rde_window* _window) {
-	rde_inner_window_data* _info = &inner_window_info_array[_window->id];
+	SDL_GL_DeleteContext(_window->sdl_gl_context);
+	SDL_DestroyWindow(_window->sdl_window);
 
-	SDL_GL_DeleteContext(_info->sdl_gl_context);
-	SDL_DestroyWindow(_info->sdl_window);
-
-	_info->sdl_window = nullptr;
-	_info->sdl_gl_context = {};
-	free(_info->self_pointer);
-	_info->self_pointer = nullptr;
+	_window->sdl_window = nullptr;
+	_window->sdl_gl_context = {};
 }
 
 
 /// ============================ EVENTS =====================================
 
 void rde_events_window_create_events() {
-	window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - WIN_EVENT_INIT] 				= &window_resize;
-	window_events[RDE_EVENT_TYPE_WINDOW_MOUSE_FOCUSED - WIN_EVENT_INIT] 		= &window_focused_by_mouse;
-	window_events[RDE_EVENT_TYPE_WINDOW_MOUSE_UNFOCUSED - WIN_EVENT_INIT] 		= &window_unfocused_by_mouse;
-	window_events[RDE_EVENT_TYPE_WINDOW_KEYBOARD_FOCUSED - WIN_EVENT_INIT] 		= &window_focused_by_keyboard;
-	window_events[RDE_EVENT_TYPE_WINDOW_KEYBOARD_UNFOCUSED - WIN_EVENT_INIT]	= &window_unfocused_by_keyboard;
-	window_events[RDE_EVENT_TYPE_WINDOW_MOVED - WIN_EVENT_INIT] 				= &window_moved;
-	window_events[RDE_EVENT_TYPE_WINDOW_MINIMIZED - WIN_EVENT_INIT] 			= &window_minimized;
-	window_events[RDE_EVENT_TYPE_WINDOW_MAXIMIZED - WIN_EVENT_INIT] 			= &window_maximized;
-	window_events[RDE_EVENT_TYPE_WINDOW_CLOSED - WIN_EVENT_INIT] 				= &window_closed;
-	window_events[RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED - WIN_EVENT_INIT] 		= &window_display_changed;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - WIN_EVENT_INIT] 				= &window_resize;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOUSE_FOCUSED - WIN_EVENT_INIT] 		= &window_focused_by_mouse;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOUSE_UNFOCUSED - WIN_EVENT_INIT] 		= &window_unfocused_by_mouse;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_KEYBOARD_FOCUSED - WIN_EVENT_INIT] 		= &window_focused_by_keyboard;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_KEYBOARD_UNFOCUSED - WIN_EVENT_INIT]	= &window_unfocused_by_keyboard;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOVED - WIN_EVENT_INIT] 				= &window_moved;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MINIMIZED - WIN_EVENT_INIT] 			= &window_minimized;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MAXIMIZED - WIN_EVENT_INIT] 			= &window_maximized;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_CLOSED - WIN_EVENT_INIT] 				= &window_closed;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED - WIN_EVENT_INIT] 		= &window_display_changed;
 }
 
 void rde_events_window_consume_events(rde_window* _window, rde_event* _event) {
 	size_t _event_index = _event->type - WIN_EVENT_INIT;
 
 	if(_event_index >= 0 && _event_index < WIN_EVENT_COUNT) {
-		window_events[_event_index](_window, _event);
+		ENGINE.window_events[_event_index](_window, _event);
 	} else {
 		printf("Window Event: %i, not handled \n", _event->type);
 	}
 }
 
 void rde_events_display_create_events() {
-	display_events[RDE_EVENT_TYPE_DISPLAY_CONNECTED - DISPLAY_EVENT_INIT] 			= &display_connected;
-	display_events[RDE_EVENT_TYPE_DISPLAY_DISCONNECTED - DISPLAY_EVENT_INIT] 		= &display_disconnected;
-	display_events[RDE_EVENT_TYPE_DISPLAY_CHANGED_ORIENTATION - DISPLAY_EVENT_INIT] = &display_changed_orientation;
+	ENGINE.display_events[RDE_EVENT_TYPE_DISPLAY_CONNECTED - DISPLAY_EVENT_INIT] 			= &display_connected;
+	ENGINE.display_events[RDE_EVENT_TYPE_DISPLAY_DISCONNECTED - DISPLAY_EVENT_INIT] 		= &display_disconnected;
+	ENGINE.display_events[RDE_EVENT_TYPE_DISPLAY_CHANGED_ORIENTATION - DISPLAY_EVENT_INIT] = &display_changed_orientation;
 }
 
 void rde_events_display_consume_events(rde_window* _window, rde_event* _event) {
 	size_t _event_index = _event->type - DISPLAY_EVENT_INIT;
 
 	if(_event_index >= 0 && _event_index < DISPLAY_EVENT_COUNT) {
-		display_events[_event_index](_window, _event);
+		ENGINE.display_events[_event_index](_window, _event);
 	} else {
 		printf("Display Event: %i, not handled \n", _event->type);
 	}
@@ -880,27 +858,29 @@ int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _event) {
 		glGetShaderInfoLog(_program_id, 1024, nullptr, _infolog);					\
 		printf("Shader compile failed with error: %s \n", _infolog);				\
 		glDeleteShader(_program_id);												\
-		return -1;																	\
+		return nullptr;																	\
 	}
 
-int rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code) {
+rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code) {
+	bool _error = false;
+	
 	GLuint _vertex_program_id = glCreateShader(GL_VERTEX_SHADER);
-	rde_util_check_opengl_error("vertex program creation");
+	_error |= rde_util_check_opengl_error("vertex program creation");
 	GLuint _fragment_program_id = glCreateShader(GL_FRAGMENT_SHADER);
-	rde_util_check_opengl_error("fragment program creation");
+	_error |= rde_util_check_opengl_error("fragment program creation");
 	
 	GLint _vertex_source_size = strlen(_vertex_code);
 	GLint _fragment_source_size = strlen(_fragment_code);
 
 	glShaderSource(_vertex_program_id, 1, &_vertex_code, &_vertex_source_size);
-	rde_util_check_opengl_error("vertex source attachment before compilation");
+	_error |= rde_util_check_opengl_error("vertex source attachment before compilation");
 	glShaderSource(_fragment_program_id, 1, &_fragment_code, &_fragment_source_size);
-	rde_util_check_opengl_error("fragment source attachment before compilation");
+	_error |= rde_util_check_opengl_error("fragment source attachment before compilation");
 
 	glCompileShader(_vertex_program_id);
-	rde_util_check_opengl_error("vertex compilation");
+	_error |= rde_util_check_opengl_error("vertex compilation");
 	glCompileShader(_fragment_program_id);
-	rde_util_check_opengl_error("fragment compilation");
+	_error |= rde_util_check_opengl_error("fragment compilation");
 
 	GLint _is_vertex_compiled, _is_fragment_compiled;
 	glGetShaderiv(_vertex_program_id, GL_COMPILE_STATUS, &_is_vertex_compiled);
@@ -910,34 +890,39 @@ int rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_co
 	RDE_CHECK_SHADER_COMPILATION_STATUS(_fragment_program_id, _is_fragment_compiled)
 
 	GLuint _program_id = glCreateProgram();
-	rde_util_check_opengl_error("program creation");
+	_error |= rde_util_check_opengl_error("program creation");
 	glAttachShader(_program_id, _vertex_program_id);
-	rde_util_check_opengl_error("vertex attached to program");
+	_error |= rde_util_check_opengl_error("vertex attached to program");
 	glAttachShader(_program_id, _fragment_program_id);
-	rde_util_check_opengl_error("fragment attached to program");
+	_error |= rde_util_check_opengl_error("fragment attached to program");
 
 	glLinkProgram(_program_id);
-	rde_util_check_opengl_error("vertex and fragment linking");
+	_error |= rde_util_check_opengl_error("vertex and fragment linking");
+
+	if (_error) {
+		return nullptr;
+	}
 
 	for (size_t _i = 0; _i < RDE_MAX_LOADABLE_SHADERS; _i++) {
-		if (shaders[_i].compiled_program_id != -1) {
+		if (ENGINE.shaders[_i].compiled_program_id != -1) {
 			continue;
 		}
 
-		rde_inner_shader_data* _shader = &shaders[_i];
+		rde_shader* _shader = &ENGINE.shaders[_i];
 		_shader->vertex_program_id = _vertex_program_id;
 		_shader->fragment_program_id = _fragment_program_id;
 		_shader->compiled_program_id = _program_id;
 
-		return _i;
+		return _shader;
 	}
 
 	assert(false && "Maximum number of shaders loaded reached!");
-	return -1;
+	return nullptr;
 }
 
-void rde_rendering_unload_shader(size_t _shader_id) {
-	rde_inner_shader_data* _shader = &shaders[_shader_id];
+void rde_rendering_unload_shader(rde_shader* _shader) {
+	assert(_shader != nullptr && "Tried to unload a nullptr shader");
+
 	glDeleteShader(_shader->vertex_program_id);
 	glDeleteShader(_shader->fragment_program_id);
 	glDeleteProgram(_shader->compiled_program_id);

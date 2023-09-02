@@ -996,9 +996,7 @@ struct rde_display_info {
 	int index = -1;
 };
 
-struct rde_window {
-	size_t id;
-};
+typedef struct rde_window rde_window;
 
 
 /// ============================== EVENTS ===================================
@@ -1090,6 +1088,8 @@ struct rde_transform {
 
 /// ============================ RENDERING ==================================
 
+typedef struct rde_shader rde_shader;
+
 struct rde_color {
 	unsigned char r, g, b, a;
 };
@@ -1116,10 +1116,6 @@ struct rde_polygon {
 
 struct rde_mesh {
 	UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_shader {
-	size_t id = 0;
 };
 
 struct rde_material_map {
@@ -1299,9 +1295,9 @@ RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _even
 
 /// ============================ RENDERING ==================================
 
-RDE_FUNC int rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code);
+RDE_FUNC rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code);
 
-RDE_FUNC void rde_rendering_unload_shader(size_t _shader_id);
+RDE_FUNC void rde_rendering_unload_shader(rde_shader* _shader);
 
 RDE_FUNC rde_texture* rde_rendering_load_texture(const char* _file_path);
 RDE_FUNC void rde_rendering_unload_texture(rde_texture* _texture);
