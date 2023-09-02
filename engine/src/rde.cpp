@@ -76,7 +76,12 @@ struct rde_shader {
 };
 
 struct rde_texture {
-	UNIMPLEMENTED_STRUCT()
+	int opengl_texture_id = -1;
+	rde_vec_2UI size = { 0, 0 };
+	int channels = 0;
+	GLenum internal_format = 0;
+	GLenum data_format = 0;
+	const char* file_path = nullptr;
 };
 
 struct rde_cpu_texture {
@@ -126,6 +131,8 @@ struct rde_engine {
 
 	rde_shader shaders[RDE_MAX_LOADABLE_SHADERS];
 	rde_window windows[RDE_MAX_NUMBER_OF_WINDOWS];
+	rde_texture textures[RDE_MAX_LOADABLE_TEXTURES];
+
 	rde_event_func_outer window_events[WIN_EVENT_COUNT];
 	rde_event_func_outer display_events[DISPLAY_EVENT_COUNT];
 };

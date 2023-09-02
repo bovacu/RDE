@@ -262,14 +262,83 @@ void rde_rendering_unload_shader(rde_shader* _shader) {
 }
 
 rde_texture* rde_rendering_load_texture(const char* _file_path) {
-	UNUSED(_file_path);
-	UNIMPLEMENTED("rde_rendering_load_texture")
-	return nullptr;
+	rde_texture* _texture = nullptr;
+
+	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_TEXTURES; _i++) {
+		if(ENGINE.textures[_i].opengl_texture_id >= 0) {
+			continue;
+		}
+
+		_texture = &ENGINE.textures[_i];
+	}
+
+	assert(_texture != nullptr && "Max number of loaded textures reached");
+
+	int _width, _height, _channels;
+	stbi_set_flip_vertically_on_load(1);
+
+	#if IS_IOS()
+	stbi_convert_iphone_png_to_rgb(1); 
+	stbi_set_unpremultiply_on_load(1);
+	#endif
+
+	stbi_uc* _data = nullptr;
+	_data = stbi_load(_file_path, &_width, &_height, &_channels, 0);
+
+	if(_data == nullptr) {
+		printf("Error while loading texture at '%s' \n", _file_path);
+		return nullptr;
+	}
+
+	GLenum _internal_format = 0;
+	GLenum _data_format = 0;
+	if (_channels == 4) {
+		_internal_format = GL_RGBA8;
+		_data_format = GL_RGBA;
+	}
+	else if (_channels == 3) {
+		_internal_format = GL_RGB8;
+		_data_format = GL_RGB;
+	}
+
+	GLuint _texture_id;
+	glCreateTextures(GL_TEXTURE_2D, 1, &_texture_id);
+	glBindTexture(GL_TEXTURE_2D, _texture_id);
+	glTextureStorage2D(_texture_id, 1, _internal_format, _width, _height);
+
+	#if IS_IOS()
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	#else
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	#endif
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTextureSubImage2D(_texture_id, 0, 0, 0, _width, _height, _data_format, GL_UNSIGNED_BYTE, _data);
+
+	stbi_image_free(_data);
+
+	_texture->opengl_texture_id = _texture_id;
+	_texture->size = { (uint)_width, (uint)_height };
+	_texture->channels = _channels;
+	_texture->internal_format = _internal_format;
+	_texture->data_format = _data_format;
+	_texture->file_path = _file_path;
+
+	return _texture;
 }
 
 void rde_rendering_unload_texture(rde_texture* _texture) {
-	UNUSED(_texture);
-	UNIMPLEMENTED("rde_rendering_unload_texture")
+	assert(_texture != nullptr && "Error: Tried to unload a nullptr texture");
+	glDeleteTextures(1, &_texture->opengl_texture_id);
+	_texture->opengl_texture_id = -1;
+	_texture->size = { 0, 0 };
+	_texture->channels = 0;
+	_texture->internal_format = 0;
+	_texture->data_format = 0;
+	_texture->file_path = nullptr;
 }
 
 rde_texture* rde_rendering_load_atlas(const char* _file_path) {
@@ -455,8 +524,6 @@ void rde_rendering_end_drawing_2d() {
 	rde_rendering_flush_batch_2d();
 	rde_rendering_reset_batch_2d();
 	current_drawing_camera = nullptr;
-	printf("DrawCalls: %zu \n", statistics.number_of_drawcalls);
-
 	statistics.number_of_drawcalls = 0;
 }
 

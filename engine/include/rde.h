@@ -64,6 +64,7 @@
 #define RDE_MAX_NUMBER_OF_WINDOWS 10
 #define RDE_MAX_VERTICES_PER_BATCH 50000
 #define RDE_MAX_LOADABLE_SHADERS 256
+#define RDE_MAX_LOADABLE_TEXTURES 512
 
 /// ============================== SHADERS =================================
 
