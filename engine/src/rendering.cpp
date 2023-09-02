@@ -1,3 +1,19 @@
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_NO_PNM
+#define STBI_NO_TGA
+#define STBI_NO_PNM
+#define STBI_NO_HDR
+#define STBI_MAX_DIMENSIONS (1 << 13)
+#include "stb/stb_image.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#if IS_WINDOWS()
+#define STBIW_WINDOWS_UTF8
+#endif
+#include "stb/stb_image_write.h"
+
+#include "glm/glm.hpp"
+
 bool rde_util_check_opengl_error(const char* _message) {
 	GLenum _err;
 	while((_err = glGetError()) != GL_NO_ERROR){

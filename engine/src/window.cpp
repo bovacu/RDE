@@ -1,3 +1,13 @@
+#ifdef __EMSCRIPTEN__
+#include <GLES3/gl32.h>
+#elif IS_ANDROID()
+#include <GLES3/gl32.h>
+#elif IS_IOS()
+#include <OpenGLES/ES3/gl.h>
+#else
+#include "glad/glad.h"
+#endif
+
 #if IS_WINDOWS()
 rde_window* rde_inner_window_create_windows_window(size_t _free_window_index) {
 	rde_window* _window = &ENGINE.windows[_free_window_index];
