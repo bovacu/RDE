@@ -381,11 +381,58 @@ void rde_rendering_draw_triangle_2d(const rde_vec_2F _vertex_a, const rde_vec_2F
 }
 
 void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color, rde_shader* _shader) {
-	UNUSED(_bottom_left);
-	UNUSED(_top_right);
-	UNUSED(_color);
-	UNUSED(_shader);
-	UNIMPLEMENTED("rde_rendering_draw_rectangle_2d")
+	const size_t _triangle_vertex_count = 6;
+	
+	rde_shader* _drawing_shader = _shader == nullptr ? ENGINE.color_shader_2d : _shader;
+	rde_rendering_try_create_batch_2d(_drawing_shader);
+	rde_rendering_try_flush_batch_2d(_drawing_shader, _triangle_vertex_count);
+
+	// * 2
+	// |\
+	// | \
+	// *--*
+	// 0   1
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+		.position = { _bottom_left.x, _bottom_left.y, 0.f },
+		.color = RDE_COLOR_TO_HEX_COLOR(_color),
+		.texture_coordinates = { 0.f, 0.f }
+	};
+
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+		.position = { _top_right.x, _bottom_left.y, 0.f },
+		.color = RDE_COLOR_TO_HEX_COLOR(_color),
+		.texture_coordinates = { 0.f, 0.f }
+	};
+
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+		.position = { _bottom_left.x, _top_right.y, 0.f },
+		.color = RDE_COLOR_TO_HEX_COLOR(_color),
+		.texture_coordinates = { 0.f, 0.f }
+	};
+
+	// 2   1
+	// *--*
+	//  \ |
+	//   \|
+	//    *
+	//    0
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+		.position = { _top_right.x, _bottom_left.y, 0.f },
+		.color = RDE_COLOR_TO_HEX_COLOR(_color),
+		.texture_coordinates = { 0.f, 0.f }
+	};
+
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+		.position = { _top_right.x, _top_right.y, 0.f },
+		.color = RDE_COLOR_TO_HEX_COLOR(_color),
+		.texture_coordinates = { 0.f, 0.f }
+	};
+
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+		.position = { _bottom_left.x, _top_right.y, 0.f },
+		.color = RDE_COLOR_TO_HEX_COLOR(_color),
+		.texture_coordinates = { 0.f, 0.f }
+	};
 }
 
 void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color, rde_shader* _shader) {
