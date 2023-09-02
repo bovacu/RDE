@@ -1,4 +1,5 @@
-#include <iostream>
+#include <stdio.h>
+#include <stdarg.h>
 
 #include "rde.h"
 #include "SDL2/SDL.h"
@@ -184,31 +185,31 @@ void rde_util_check_opengl_error(const char* _message) {
 	while((_err = glGetError()) != GL_NO_ERROR){
 		switch(_err) {
 			case GL_NO_ERROR:
-				std::cout << "GL_ERROR " << "GL_NO_ERROR: No error has been recorded. The value of this symbolic constant is guaranteed to be 0. " << " | " << _message << " -> " << _err << std::endl;
+				printf("GL_NO_ERROR: No error has been recorded. The value of this symbolic constant is guaranteed to be 0. | %s -> %u \n",  _message, _err);
 				break;
 			case GL_INVALID_ENUM:
-				std::cout << "GL_ERROR " << "GL_INVALID_ENUM: An unacceptable value is specified for an enumerated argument. The offending command is ignored and has no other side effect than to set the error flag.  " << " | " << _message << " -> " << _err << std::endl;
+				printf("GL_INVALID_ENUM: An unacceptable value is specified for an enumerated argument. The offending command is ignored and has no other side effect than to set the error flag. | %s -> %u \n",  _message, _err);
 				break;
 			case GL_INVALID_VALUE:
-				std::cout << "GL_ERROR " << "GL_INVALID_VALUE: A numeric argument is out of range. The offending command is ignored and has no other side effect than to set the error flag.  " << " | " << _message << " -> " << _err << std::endl;
+				printf("GL_INVALID_VALUE: A numeric argument is out of range. The offending command is ignored and has no other side effect than to set the error flag. | %s -> %u \n",  _message, _err);
 				break;
 			case GL_INVALID_OPERATION:
-				std::cout << "GL_ERROR " << "GL_INVALID_OPERATION: The specified operation is not allowed in the current state. The offending command is ignored and has no other side effect than to set the error flag.  " << " | " << _message << " -> " << _err << std::endl;
+				printf("GL_INVALID_OPERATION: The specified operation is not allowed in the current state. The offending command is ignored and has no other side effect than to set the error flag. | %s -> %u \n",  _message, _err);
 				break;
 			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				std::cout << "GL_ERROR " << "GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete." << " | " << _message << " -> " << _err << std::endl;
+				printf("GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete. | %s -> %u \n",  _message, _err);
 				break;
 			case GL_OUT_OF_MEMORY:
-				std::cout << "GL_ERROR " << "GL_OUT_OF_MEMORY: There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded. . " << " | " << _message << " -> " << _err << std::endl;
+				printf("GL_OUT_OF_MEMORY: There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded. | %s -> %u \n",  _message, _err);
 				break;
 			case GL_STACK_UNDERFLOW:
-				std::cout << "GL_ERROR " << "GL_STACK_UNDERFLOW: An attempt has been made to perform an operation that would cause an internal stack to underflow. " << " | " << _message << " -> " << _err << std::endl;
+				printf("GL_STACK_UNDERFLOW: An attempt has been made to perform an operation that would cause an internal stack to underflow. | %s -> %u \n",  _message, _err);
 				break;
 			case GL_STACK_OVERFLOW:
-				std::cout << "GL_ERROR " << "GL_STACK_OVERFLOW: An attempt has been made to perform an operation that would cause an internal stack to overflow. " << " | " << _message << " -> " << _err << std::endl;
+				printf("GL_STACK_OVERFLOW: An attempt has been made to perform an operation that would cause an internal stack to overflow. | %s -> %u \n",  _message, _err);
 				break;
 			default:
-				std::cout << "GL_ERROR " << "No description. " << " | " << _message << " -> " << _err << std::endl;
+				printf("No description. | %s -> %u \n",  _message, _err);
 				break;
 		}
 	}
@@ -281,7 +282,7 @@ void rde_sdl_to_rde_helper_transform_display_event(SDL_Event* _sdl_event, rde_ev
 
 void rde_rendering_set_rendering_configuration() {
 #if !IS_MOBILE()
-	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << ", Vendor: " << glGetString(GL_VENDOR) << ", GPU: " << glGetString(GL_RENDERER) << std::endl;
+	printf("OpenGL Version: %s, Vendor: %s, GPU: %s \n", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER));
 #endif
 
 	glEnable(GL_BLEND);
@@ -549,7 +550,7 @@ rde_window* rde_engine_get_focused_window() {
 
 #if IS_WINDOWS()
 rde_window* rde_window_create_windows_window(size_t _free_window_index) {
-	rde_window* _window = new rde_window {  };
+	rde_window* _window = (rde_window*)malloc(sizeof(rde_window));
 	_window->id = _free_window_index;
 
 	rde_inner_window_data* _window_info = &inner_window_info_array[_free_window_index];
@@ -576,23 +577,24 @@ rde_window* rde_window_create_windows_window(size_t _free_window_index) {
 	_window_info->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
 	if(_window_info->sdl_window == nullptr) {
-		std::cout << "SDL window creation failed: " << SDL_GetError() << std::endl;
+		printf("SDL window creation failed: %s \n", SDL_GetError());
 		exit(-1);
 	}
 	_window_info->sdl_gl_context = SDL_GL_CreateContext(_window_info->sdl_window);
 
 	if(_window_info->sdl_gl_context == nullptr) {
-		std::cout << "OpenGL context couldn't initialize -> " << SDL_GetError() << std::endl;
+		printf("OpenGL context couldn't initialize -> %s \n", SDL_GetError());
 		exit(-1);
 	}
 
 	SDL_GL_MakeCurrent(_window_info->sdl_window, _window_info->sdl_gl_context);
 
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl;
+		printf("Failed to initialize GLAD \n");
 		exit(-1);
 	}
-	std::cout << "GLAD and SDL2 loaded successfully" << std::endl;
+	
+	printf("GLAD and SDL2 loaded successfully \n");
 
 	SDL_GL_SetSwapInterval(1);
 
@@ -614,7 +616,7 @@ rde_window* rde_window_create_mac_window() {
 
 #if IS_LINUX()
 rde_window* rde_window_create_linux_window(size_t _free_window_index) {
-	rde_window* _window = new rde_window {  };
+	rde_window* _window = (rde_window*)malloc(sizeof(rde_window));
 	_window->id = _free_window_index;
 
 	rde_inner_window_data* _window_info = &inner_window_info_array[_free_window_index];
@@ -641,23 +643,23 @@ rde_window* rde_window_create_linux_window(size_t _free_window_index) {
 	_window_info->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
 	if(_window_info->sdl_window == nullptr) {
-		std::cout << "SDL window creation failed: " << SDL_GetError() << std::endl;
+		printf("OpenGL context couldn't initialize -> %s \n", SDL_GetError());
 		exit(-1);
 	}
 	_window_info->sdl_gl_context = SDL_GL_CreateContext(_window_info->sdl_window);
 
 	if(_window_info->sdl_gl_context == nullptr) {
-		std::cout << "OpenGL context couldn't initialize -> " << SDL_GetError() << std::endl;
+		printf("OpenGL context couldn't initialize -> %s \n", SDL_GetError());
 		exit(-1);
 	}
 
 	SDL_GL_MakeCurrent(_window_info->sdl_window, _window_info->sdl_gl_context);
 
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl;
+		printf("Failed to initialize GLAD \n");
 		exit(-1);
 	}
-	std::cout << "GLAD and SDL2 loaded successfully" << std::endl;
+	printf("GLAD and SDL2 loaded successfully \n");
 
 	SDL_GL_SetSwapInterval(1);
 
@@ -787,7 +789,7 @@ void rde_window_destroy_window(rde_window* _window) {
 
 	_info->sdl_window = nullptr;
 	_info->sdl_gl_context = {};
-	delete _info->self_pointer;
+	free(_info->self_pointer);
 	_info->self_pointer = nullptr;
 }
 
@@ -813,7 +815,7 @@ void rde_events_window_consume_events(rde_window* _window, rde_event* _event) {
 	if(_event_index >= 0 && _event_index < WIN_EVENT_COUNT) {
 		window_events[_event_index](_window, _event);
 	} else {
-		std::cout << "Window Event: " << _event->type << ", not handled" << std::endl;
+		printf("Window Event: %i, not handled \n", _event->type);
 	}
 }
 
@@ -829,7 +831,7 @@ void rde_events_display_consume_events(rde_window* _window, rde_event* _event) {
 	if(_event_index >= 0 && _event_index < DISPLAY_EVENT_COUNT) {
 		display_events[_event_index](_window, _event);
 	} else {
-		std::cout << "Display Event: " << _event->type << ", not handled" << std::endl;
+		printf("Display Event: %i, not handled \n", _event->type);
 	}
 }
 
@@ -876,7 +878,7 @@ int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _event) {
 	if(!_compiled) {																\
 		char _infolog[1024];														\
 		glGetShaderInfoLog(_program_id, 1024, nullptr, _infolog);					\
-		std::cout << "Shader compile failed with error: " << _infolog << std::endl;	\
+		printf("Shader compile failed with error: %s \n", _infolog);				\
 		glDeleteShader(_program_id);												\
 		return -1;																	\
 	}

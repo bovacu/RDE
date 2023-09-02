@@ -67,212 +67,205 @@
 
 /// ============================== SHADERS =================================
 
-#define RDE_COLOR_VERTEX_SHADER_2D R"(
-	#version 330 core
+#define RDE_COLOR_VERTEX_SHADER_2D "" \
+	"#version 330 core\n" \
+	"\n" \
+	"layout(location = 0) in vec2 in_position;\n" \
+	"layout(location = 1) in vec4 in_color;\n" \
+	"out vec4 color;\n" \
+	"\n" \
+	"uniform mat4 view_projection_matrix;\n" \
+	"\n" \
+	"void main() {\n" \
+	"	gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);\n" \
+	"	color = in_color;\n" \
+	"}\n"
 
-	layout(location = 0) in vec2 in_position;
-	layout(location = 1) in vec4 in_color;
-	out vec4 color;
+#define RDE_COLOR_FRAGMENT_SHADER_2D "" \
+	"#version 330 core\n" \
+	"\n" \
+	"in vec4 color;\n" \
+	"out vec4 out_color;\n" \
+	"\n" \
+	"void main() {\n" \
+	"	out_color = vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);\n" \
+	"}\n" 
 
-	uniform mat4 view_projection_matrix;
+#define RDE_TEXTURE_VERTEX_SHADER_2D "" \
+	"#version 330 core\n" \
+	"\n" \
+	"layout(location = 0) in vec2 in_position;\n" \
+	"layout(location = 1) in vec4 in_color;\n" \
+	"layout(location = 2) in vec2 in_uv;\n" \
+	"\n" \
+	"uniform mat4 view_projection_matrix;\n" \
+	"\n" \
+	"out vec2 uv;\n" \
+	"out vec4 color;\n" \
+	"\n" \
+	"void main(void) {\n" \
+	"	uv = in_uv;\n" \
+	"	color = in_color;\n" \
+	"	gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);\n" \
+	"}\n" 
 
-	void main() {
-		gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);
-		color = in_color;
-	}
-)"
-#define RDE_COLOR_FRAGMENT_SHADER_2D R"(
-	#version 330 core
+#define RDE_TEXTURE_FRAGMENT_SHADER_2D "" \
+	"#version 330 core\n" \
+	"\n" \
+	"in vec2 uv;\n" \
+	"in vec4 color;\n" \
+	"\n" \
+	"uniform sampler2D tex;\n" \
+	"layout(location = 0) out vec4 out_color;\n" \
+	"\n" \
+	"void main(void) {\n" \
+	"	out_color = texture(tex, uv) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);\n" \
+	"}\n" 
 
-	in vec4 color;
-	out vec4 out_color;
+#define RDE_TEXT_VERTEX_SHADER_2D "" \
+	"#version 330 core\n" \
+	"\n" \
+	"layout(location = 0) in vec2 in_position;\n" \
+	"layout(location = 1) in vec4 in_color;\n" \
+	"layout(location = 2) in vec2 in_uv;\n" \
+	"\n" \
+	"uniform mat4 view_projection_matrix;\n" \
+	"\n" \
+	"out vec2 uv;\n" \
+	"out vec4 color;\n" \
+	"\n" \
+	"void main(void) {\n" \
+	"	uv = in_uv;\n" \
+	"	color = in_color;\n" \
+	"	gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);\n" \
+	"}\n"
 
-	void main() {
-		out_color = vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
-	}
-)"
+#define RDE_TEXT_FRAGMENT_SHADER_2D "" \
+	"#version 330 core\n" \
+	"\n" \
+	"in vec2 uv;\n" \
+	"in vec4 color;\n" \
+	"\n" \
+	"uniform sampler2D tex;\n" \
+	"out vec4 out_color;\n" \
+	"\n" \
+	"void main(void) {\n" \
+	"	float d = texture(tex, uv).r;\n" \
+	"	float aaf = fwidth(d);\n" \
+	"	float alpha = smoothstep(0.5 - aaf, 0.5 + aaf, d);\n" \
+	"	out_color = vec4(color.rgb, alpha);\n" \
+	"}\n"
 
-#define RDE_TEXTURE_VERTEX_SHADER_2D R"(
-	#version 330 core
-	
-	layout(location = 0) in vec2 in_position;
-	layout(location = 1) in vec4 in_color;
-	layout(location = 2) in vec2 in_uv;
-	
-	uniform mat4 view_projection_matrix;
-	
-	out vec2 uv;
-	out vec4 color;
-	
-	void main(void) {
-		uv = in_uv;
-		color = in_color;
-		gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);
-	}
-)"
-#define RDE_TEXTURE_FRAGMENT_SHADER_2D R"(
-	#version 330 core
+#define RDE_FRAME_BUFFER_VERTEX_SHADER "" \
+	"#version 330 core\n" \
+	"layout (location = 0) in vec2 in_pos;\n" \
+	"layout (location = 1) in vec2 in_tex_coords;\n" \
+	"\n" \
+	"out vec2 tex_coords;\n" \
+	"uniform mat4 view_projection_matrix;\n" \
+	"\n" \
+	"void main() {\n" \
+	"	gl_Position = vec4(in_pos.x, in_pos.y, 0.0, 1.0);\n" \
+	"	tex_coords = in_tex_coords;\n" \
+	"}\n"
 
-	in vec2 uv;
-	in vec4 color;
+#define RDE_FRAME_BUFFER_FRAGMENT_SHADER "" \
+	"#version 330 core\n" \
+	"\n" \
+	"in vec2 tex_coords;\n" \
+	"\n" \
+	"uniform sampler2D screen_texture;\n" \
+	"layout(location = 0) out vec4 out_color;\n" \
+	"\n" \
+	"void main() {\n" \
+	"	out_color = texture(screen_texture, tex_coords);\n" \
+	"}\n"
 
-	uniform sampler2D tex;
-	layout(location = 0) out vec4 out_color;
+#define RDE_COLOR_VERTEX_SHADER_2D_ES "" \
+	"#version 300 es\n" \
+	"\n" \
+	"layout(location = 0) in vec2 position;\n" \
+	"layout(location = 1) in vec4 color;\n" \
+	"out vec4 color_from_vshader;\n" \
+	"\n" \
+	"uniform mat4 view_projection_matrix;\n" \
+	"\n" \
+	"void main() {\n" \
+	"	gl_Position = view_projection_matrix * vec4(position, 0.0, 1.0);\n" \
+	"	color_from_vshader = color;\n" \
+	"}\n"
 
-	void main(void) {
-		out_color = texture(tex, uv) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
-	}
-)"
+#define RDE_COLOR_FRAGMENT_SHADER_2D_ES "" \
+	"#version 300 es\n" \
+	"\n" \
+	"precision mediump float;\n" \
+	"\n" \
+	"in vec4 color_from_vshader;\n" \
+	"out vec4 out_color;\n" \
+	"\n" \
+	"void main() {\n" \
+	"	out_color = color_from_vshader;\n" \
+	"}\n"
 
-#define RDE_TEXT_VERTEX_SHADER_2D R"(
-	#version 330 core
+#define RDE_TEXTURE_VERTEX_SHADER_2D_ES "" \
+	"#version 300 es\n" \
+	"\n" \
+	"layout(location = 0) in vec2 in_position;\n" \
+	"layout(location = 1) in vec4 in_color;\n" \
+	"layout(location = 2) in vec2 in_uv;\n" \
+	"\n" \
+	"uniform mat4 view_projection_matrix;\n" \
+	"\n" \
+	"out vec2 uv;\n" \
+	"out vec4 color;\n" \
+	"\n" \
+	"void main(void) {\n" \
+	"	uv = in_uv;\n" \
+	"	color = in_color;\n" \
+	"	gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);\n" \
+	"}\n"
 
-	layout(location = 0) in vec2 in_position;
-	layout(location = 1) in vec4 in_color;
-	layout(location = 2) in vec2 in_uv;
+#define RDE_TEXTURE_FRAGMENT_SHADER_2D_ES "" \
+	"#version 300 es\n" \
+	"\n" \
+	"precision mediump float;\n" \
+	"\n" \
+	"in vec2 uv;\n" \
+	"in vec4 color;\n" \
+	"\n" \
+	"uniform sampler2D tex;\n" \
+	"\n" \
+	"out vec4 out_color;\n" \
+	"\n" \
+	"void main(void) {\n" \
+	"	out_color = texture(tex, uv) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);\n" \
+	"}\n"
 
-	uniform mat4 view_projection_matrix;
+#define RDE_FRAME_BUFFER_VERTEX_SHADER_ES "" \
+	"#version 300 es\n" \
+	"layout (location = 10) in vec2 in_pos;\n" \
+	"layout (location = 11) in vec2 in_tex_coords;\n" \
+	"\n" \
+	"out vec2 tex_coords;\n" \
+	"\n" \
+	"void main() {\n" \
+	"	gl_Position = vec4(in_pos.x, in_pos.y, 0.0, 1.0);\n" \
+	"	tex_coords = in_tex_coords;\n" \
+	"}\n"
 
-	out vec2 uv;
-	out vec4 color;
-
-	void main(void) {
-		uv = in_uv;
-		color = in_color;
-		gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);
-	}
-)"
-#define RDE_TEXT_FRAGMENT_SHADER_2D R"(
-	#version 330 core
-
-	in vec2 uv;
-	in vec4 color;
-
-	uniform sampler2D tex;
-	out vec4 out_color;
-
-	void main(void) {
-		float d = texture(tex, uv).r;
-		float aaf = fwidth(d);
-		float alpha = smoothstep(0.5 - aaf, 0.5 + aaf, d);
-		out_color = vec4(color.rgb, alpha);
-	}
-)"
-
-#define RDE_FRAME_BUFFER_VERTEX_SHADER R"(
-	#version 330 core
-	layout (location = 0) in vec2 in_pos;
-	layout (location = 1) in vec2 in_tex_coords;
-
-	out vec2 tex_coords;
-	uniform mat4 view_projection_matrix;
-
-	void main() {
-		gl_Position = vec4(in_pos.x, in_pos.y, 0.0, 1.0);
-		tex_coords = in_tex_coords;
-	}	
-)"
-#define RDE_FRAME_BUFFER_FRAGMENT_SHADER R"(
-	#version 330 core
-
-	in vec2 tex_coords;
-
-	uniform sampler2D screen_texture;
-	layout(location = 0) out vec4 out_color;
-
-	void main() {
-		out_color = texture(screen_texture, tex_coords);
-	}
-)"
-
-#define RDE_COLOR_VERTEX_SHADER_2D_ES R"(
-	#version 300 es
-
-	layout(location = 0) in vec2 position;
-	layout(location = 1) in vec4 color;
-	out vec4 color_from_vshader;
-
-	uniform mat4 view_projection_matrix;
-
-	void main() {
-		gl_Position = view_projection_matrix * vec4(position, 0.0, 1.0);
-		color_from_vshader = color;
-	}	
-)"
-#define RDE_COLOR_FRAGMENT_SHADER_2D_ES R"(
-	#version 300 es
-
-	precision mediump float;
-
-	in vec4 color_from_vshader;
-	out vec4 out_color;
-
-	void main() {
-		out_color = color_from_vshader;
-	}	
-)"
-
-#define RDE_TEXTURE_VERTEX_SHADER_2D_ES R"(
-	#version 300 es
-
-	layout(location = 0) in vec2 in_position;
-	layout(location = 1) in vec4 in_color;
-	layout(location = 2) in vec2 in_uv;
-
-	uniform mat4 view_projection_matrix;
-
-	out vec2 uv;
-	out vec4 color;
-
-	void main(void) {
-		uv = in_uv;
-		color = in_color;
-	gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);
-	}
-)"
-#define RDE_TEXTURE_FRAGMENT_SHADER_2D_ES R"(
-	#version 300 es
-
-	precision mediump float;
-
-	in vec2 uv;
-	in vec4 color;
-
-	uniform sampler2D tex;
-
-	out vec4 out_color;
-
-	void main(void) {
-		out_color = texture(tex, uv) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
-	}	
-)"
-
-#define RDE_FRAME_BUFFER_VERTEX_SHADER_ES R"(
-	#version 300 es
-	layout (location = 10) in vec2 in_pos;
-	layout (location = 11) in vec2 in_tex_coords;
-
-	out vec2 tex_coords;
-
-	void main() {
-		gl_Position = vec4(in_pos.x, in_pos.y, 0.0, 1.0);
-		tex_coords = in_tex_coords;
-	}	
-)"
-#define RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES R"(
-	#version 300 es
-
-	precision mediump float;
-
-	in vec2 tex_coords;
-	out vec4 out_color;
-
-	uniform sampler2D screen_texture;
-
-	void main() {
-		out_color = texture(screen_texture, tex_coords);
-	}
-)"
+#define RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES "" \
+	"#version 300 es\n" \
+	"\n" \
+	"precision mediump float;\n" \
+	"\n" \
+	"in vec2 tex_coords;\n" \
+	"out vec4 out_color;\n" \
+	"\n" \
+	"uniform sampler2D screen_texture;\n" \
+	"\n" \
+	"void main() {\n" \
+	"	out_color = texture(screen_texture, tex_coords);\n" \
+	"}\n"
 
 /// ====================== COMPILATION AND EXPORT ==========================
 
@@ -458,15 +451,8 @@
 
 /// ====================== PLATFORM SPECIFIC TYPES ==========================
 
-#if IS_MOBILE() || IS_MAC() || defined(_WIN32)
-	typedef unsigned long ulong;
-	typedef unsigned int uint;
-#endif
-
-#ifdef __EMSCRIPTEN__
-	typedef unsigned long ulong;
-	typedef unsigned int uint;
-#endif
+typedef unsigned long ulong;
+typedef unsigned int uint;
 
 
 

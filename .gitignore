@@ -4,4 +4,4 @@ build/
 
 test/
 
-build.bat
+build_copy_deps.bat
