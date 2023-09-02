@@ -20,6 +20,9 @@
 static rde_camera* current_drawing_camera = nullptr;
 static rde_batch_2d current_batch_2d;
 
+struct rde_rendering_statistics {
+	size_t number_of_drawcalls = 0;
+} statistics;
 
 bool rde_util_check_opengl_error(const char* _message) {
 	GLenum _err;
@@ -116,6 +119,8 @@ void rde_rendering_flush_batch_2d() {
 
 	rde_rendering_reset_batch_2d();
 	rde_util_check_opengl_error("ERROR: 1");
+
+	statistics.number_of_drawcalls++;
 }
 
 void rde_rendering_try_flush_batch_2d(rde_shader* _shader, size_t _extra_vertices) {
@@ -403,6 +408,9 @@ void rde_rendering_end_drawing_2d() {
 	rde_rendering_flush_batch_2d();
 	rde_rendering_reset_batch_2d();
 	current_drawing_camera = nullptr;
+	printf("DrawCalls: %zu \n", statistics.number_of_drawcalls);
+
+	statistics.number_of_drawcalls = 0;
 }
 
 void rde_rendering_end_drawing_3d() {
