@@ -75,6 +75,34 @@ struct rde_shader {
 	GLuint vertex_array_object = 0;
 };
 
+struct rde_texture {
+	UNIMPLEMENTED_STRUCT()
+};
+
+struct rde_cpu_texture {
+	UNIMPLEMENTED_STRUCT()
+};
+
+struct rde_render_texture {
+	UNIMPLEMENTED_STRUCT()
+};
+
+struct rde_atlas {
+	UNIMPLEMENTED_STRUCT()
+};
+
+struct rde_batch_2d {
+	rde_shader* shader = nullptr;
+	rde_vertex_2d vertices[RDE_MAX_VERTICES_PER_BATCH];
+	size_t amount_of_vertices = 0;
+	int texture_id = -1;
+};
+
+struct rde_batch_3d {
+	UNIMPLEMENTED_STRUCT()
+};
+
+
 struct rde_engine {
 	bool instantiated = false;
 
@@ -177,6 +205,8 @@ void rde_engine_on_late_update(float _dt) {
 
 void rde_engine_on_render(float _dt) {
 	UNUSED(_dt)
+	rde_vec_2I _window_size = rde_window_get_window_size(&ENGINE.windows[0]);
+	glViewport(0, 0, _window_size.x, _window_size.y);
 }
 
 void rde_engine_sync_events() {

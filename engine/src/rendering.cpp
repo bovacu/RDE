@@ -13,6 +13,13 @@
 #include "stb/stb_image_write.h"
 
 #include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
+#define RDE_GLM_VEC_MAT_TO_POINTER(_type, _glmVecMat) reinterpret_cast<_type*>(glm::value_ptr(_glmVecMat))
+
+static rde_camera* current_drawing_camera = nullptr;
+static rde_batch_2d current_batch_2d;
+
 
 bool rde_util_check_opengl_error(const char* _message) {
 	GLenum _err;
@@ -49,6 +56,75 @@ bool rde_util_check_opengl_error(const char* _message) {
 	}
 
 	return false;
+}
+
+
+void rde_rendering_generate_gl_vertex_config_for_shader(rde_shader* _shader) {
+	glGenVertexArrays(1, &_shader->vertex_array_object);
+	glBindVertexArray(_shader->vertex_array_object);
+	
+	glGenBuffers(1, &_shader->vertex_buffer_object);
+	glBindBuffer(GL_ARRAY_BUFFER, _shader->vertex_buffer_object);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rde_vertex_2d) * RDE_MAX_VERTICES_PER_BATCH, nullptr, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), reinterpret_cast<const void*>(0));
+	glEnableVertexAttribArray(0);
+	
+	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(rde_vertex_2d), reinterpret_cast<const void*>(sizeof(float) * 3));
+	glEnableVertexAttribArray(1);
+	
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), reinterpret_cast<const void*>(sizeof(float) * 3 + sizeof(unsigned char) * 4));
+	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	rde_util_check_opengl_error("ERROR: 0");
+}
+
+void rde_rendering_reset_batch_2d() {
+	memset(current_batch_2d.vertices, 0, RDE_MAX_VERTICES_PER_BATCH);
+	current_batch_2d.shader = nullptr;
+	current_batch_2d.amount_of_vertices = 0;
+	current_batch_2d.texture_id = -1;
+}
+
+void rde_rendering_try_create_batch_2d(rde_shader* _shader) {
+	if(current_batch_2d.shader == nullptr) {
+		current_batch_2d.shader = _shader;
+	}
+}
+
+void rde_rendering_flush_batch_2d() {
+	glUseProgram(current_batch_2d.shader->compiled_program_id);
+	//glUniformMatrix4fv(glGetUniformLocation(ENGINE.color_shader_2d->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, RDE_GLM_VEC_MAT_TO_POINTER(GLfloat, _view_projection_matrix));
+	
+	glBindVertexArray(current_batch_2d.shader->vertex_array_object);
+
+	if(current_batch_2d.texture_id >= 0) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, current_batch_2d.texture_id);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, current_batch_2d.shader->vertex_buffer_object);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(sizeof(rde_vertex_2d) * current_batch_2d.amount_of_vertices), &current_batch_2d.vertices);
+
+	glDrawArrays(GL_TRIANGLES, 0, current_batch_2d.amount_of_vertices);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	rde_rendering_reset_batch_2d();
+	rde_util_check_opengl_error("ERROR: 1");
+}
+
+void rde_rendering_try_flush_batch_2d(rde_shader* _shader, size_t _extra_vertices) {
+	if(current_batch_2d.amount_of_vertices + _extra_vertices <= RDE_MAX_VERTICES_PER_BATCH &&
+		current_batch_2d.shader == _shader) {
+		return;
+	}
+
+	rde_rendering_flush_batch_2d();
 }
 
 void rde_rendering_set_rendering_configuration() {
@@ -100,7 +176,7 @@ void rde_rendering_set_rendering_configuration() {
 		return nullptr;																\
 	}
 
-
+#define RDE_COLOR_TO_HEX_COLOR(_color) (int(_color.a) << 24) + (int(_color.b) << 16) + (int(_color.g) << 8) + int(_color.r)
 
 // ======================= API ===========================
 
@@ -130,9 +206,9 @@ rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fra
 	glGetShaderiv(_fragment_program_id, GL_COMPILE_STATUS, &_is_fragment_compiled);
 
 	RDE_CHECK_SHADER_COMPILATION_STATUS(_vertex_program_id, _is_vertex_compiled)
-		RDE_CHECK_SHADER_COMPILATION_STATUS(_fragment_program_id, _is_fragment_compiled)
+	RDE_CHECK_SHADER_COMPILATION_STATUS(_fragment_program_id, _is_fragment_compiled)
 
-		GLuint _program_id = glCreateProgram();
+	GLuint _program_id = glCreateProgram();
 	_error |= rde_util_check_opengl_error("program creation");
 	glAttachShader(_program_id, _vertex_program_id);
 	_error |= rde_util_check_opengl_error("vertex attached to program");
@@ -143,6 +219,7 @@ rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fra
 	_error |= rde_util_check_opengl_error("vertex and fragment linking");
 
 	if (_error) {
+		printf("%s \n\n %s", _vertex_code, _fragment_code);
 		return nullptr;
 	}
 
@@ -155,6 +232,8 @@ rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fra
 		_shader->vertex_program_id = _vertex_program_id;
 		_shader->fragment_program_id = _fragment_program_id;
 		_shader->compiled_program_id = _program_id;
+
+		rde_rendering_generate_gl_vertex_config_for_shader(_shader);
 
 		return _shader;
 	}
@@ -180,7 +259,7 @@ void rde_rendering_unload_shader(rde_shader* _shader) {
 rde_texture* rde_rendering_load_texture(const char* _file_path) {
 	UNUSED(_file_path);
 	UNIMPLEMENTED("rde_rendering_load_texture")
-		return nullptr;
+	return nullptr;
 }
 
 void rde_rendering_unload_texture(rde_texture* _texture) {
@@ -191,7 +270,7 @@ void rde_rendering_unload_texture(rde_texture* _texture) {
 rde_texture* rde_rendering_load_atlas(const char* _file_path) {
 	UNUSED(_file_path);
 	UNIMPLEMENTED("rde_rendering_load_atlas")
-		return nullptr;
+	return nullptr;
 }
 
 void rde_rendering_unload_atlas(rde_atlas* _atlas) {
@@ -202,7 +281,7 @@ void rde_rendering_unload_atlas(rde_atlas* _atlas) {
 rde_texture* rde_rendering_create_cpu_texture(const rde_vec_2UI _texture_size) {
 	UNUSED(_texture_size);
 	UNIMPLEMENTED("rde_rendering_create_cpu_texture")
-		return nullptr;
+	return nullptr;
 }
 
 void rde_rendering_destroy_cpu_texture(rde_cpu_texture* _cpu_texture) {
@@ -218,7 +297,7 @@ void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_texture) {
 rde_font* rde_rendering_load_font(const char* _file_path) {
 	UNUSED(_file_path);
 	UNIMPLEMENTED("rde_rendering_load_font")
-		return nullptr;
+	return nullptr;
 }
 
 void rde_rendering_unload_font(rde_font* _font) {
@@ -229,7 +308,7 @@ void rde_rendering_unload_font(rde_font* _font) {
 rde_texture* rde_rendering_get_atlas_sub_texture(const char* _texture_name){
 	UNUSED(_texture_name);
 	UNIMPLEMENTED("rde_rendering_get_atlas_sub_texture")
-		return nullptr;
+	return nullptr;
 }
 
 
@@ -238,66 +317,92 @@ void rde_rendering_set_background_color(const rde_color _color) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-void rde_rendering_start_drawing_2d(rde_camera* _camera) {
-	UNUSED(_camera);
-	UNIMPLEMENTED("rde_rendering_start_drawing_2d")
+void rde_rendering_begin_drawing_2d(rde_camera* _camera) {
+	//assert(current_drawing_camera == nullptr && "Tried to begin drawing again before ending the previous one");
+	current_drawing_camera = _camera;
 }
 
-void rde_rendering_start_drawing_3d(rde_camera* _camera) {
+void rde_rendering_begin_drawing_3d(rde_camera* _camera) {
 	UNUSED(_camera);
 	UNIMPLEMENTED("rde_rendering_start_drawing_3d")
 }
 
-void rde_rendering_draw_point_2d(const rde_vec_2F _position, const rde_color _color) {
+void rde_rendering_draw_point_2d(const rde_vec_2F _position, const rde_color _color, rde_shader* _shader) {
 	UNUSED(_position);
 	UNUSED(_color);
+	UNUSED(_shader);
 	UNIMPLEMENTED("rde_rendering_draw_point_2d")
 }
 
-void rde_rendering_draw_point_3d(const rde_vec_3F _position, const rde_color _color) {
+void rde_rendering_draw_point_3d(const rde_vec_3F _position, const rde_color _color, rde_shader* _shader) {
 	UNUSED(_position);
 	UNUSED(_color);
+	UNUSED(_shader);
 	UNIMPLEMENTED("rde_rendering_draw_point_3d")
 }
 
-void rde_rendering_draw_line_2d(const rde_vec_2F _init, const rde_vec_2F _end, const rde_color _color) {
+void rde_rendering_draw_line_2d(const rde_vec_2F _init, const rde_vec_2F _end, const rde_color _color, rde_shader* _shader) {
 	UNUSED(_init);
 	UNUSED(_end);
 	UNUSED(_color);
+	UNUSED(_shader);
 	UNIMPLEMENTED("rde_rendering_draw_line_2d")
 }
 
-void rde_rendering_draw_triangle_2d(const rde_vec_2F _vertex_a, const rde_vec_2F _vertex_b, const rde_vec_2F _vertex_c, const rde_color _color) {
-	UNUSED(_vertex_a);
-	UNUSED(_vertex_b);
-	UNUSED(_vertex_c);
-	UNUSED(_color);
-	UNIMPLEMENTED("rde_rendering_draw_triangle_2d")
+void rde_rendering_draw_triangle_2d(const rde_vec_2F _vertex_a, const rde_vec_2F _vertex_b, const rde_vec_2F _vertex_c, const rde_color _color, rde_shader* _shader) {
+	const size_t _triangle_vertex_count = 3;
+	
+	rde_shader* _drawing_shader = _shader == nullptr ? ENGINE.color_shader_2d : _shader;
+	rde_rendering_try_create_batch_2d(_drawing_shader);
+	rde_rendering_try_flush_batch_2d(_drawing_shader, _triangle_vertex_count);
+
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+		.position = { _vertex_a.x, _vertex_a.y, 0.f },
+		.color = RDE_COLOR_TO_HEX_COLOR(_color),
+		.texture_coordinates = { 0.f, 0.f }
+	};
+
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+		.position = { _vertex_b.x, _vertex_b.y, 0.f },
+		.color = RDE_COLOR_TO_HEX_COLOR(_color),
+		.texture_coordinates = { 0.f, 0.f }
+	};
+
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+		.position = { _vertex_c.x, _vertex_c.y, 0.f },
+		.color = RDE_COLOR_TO_HEX_COLOR(_color),
+		.texture_coordinates = { 0.f, 0.f }
+	};
 }
 
-void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color) {
+void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color, rde_shader* _shader) {
 	UNUSED(_bottom_left);
 	UNUSED(_top_right);
 	UNUSED(_color);
+	UNUSED(_shader);
 	UNIMPLEMENTED("rde_rendering_draw_rectangle_2d")
 }
 
-void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color) {
+void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color, rde_shader* _shader) {
 	UNUSED(_position);
 	UNUSED(_radius);
 	UNUSED(_color);
+	UNUSED(_shader);
 	UNIMPLEMENTED("rde_rendering_draw_circle_2d")
 }
 
-void rde_rendering_draw_line_3d(const rde_vec_3F _init, const rde_vec_3F _end, const rde_color _color) {
+void rde_rendering_draw_line_3d(const rde_vec_3F _init, const rde_vec_3F _end, const rde_color _color, rde_shader* _shader) {
 	UNUSED(_init);
 	UNUSED(_end);
 	UNUSED(_color);
+	UNUSED(_shader);
 	UNIMPLEMENTED("rde_rendering_draw_line_3d")
 }
 
 void rde_rendering_end_drawing_2d() {
-	UNIMPLEMENTED("rde_rendering_end_drawing_2d")
+	rde_rendering_flush_batch_2d();
+	rde_rendering_reset_batch_2d();
+	current_drawing_camera = nullptr;
 }
 
 void rde_rendering_end_drawing_3d() {

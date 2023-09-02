@@ -72,12 +72,13 @@
 	"\n" \
 	"layout(location = 0) in vec2 in_position;\n" \
 	"layout(location = 1) in vec4 in_color;\n" \
+	"layout(location = 2) in vec2 in_uv;\n" \
 	"out vec4 color;\n" \
 	"\n" \
 	"uniform mat4 view_projection_matrix;\n" \
 	"\n" \
 	"void main() {\n" \
-	"	gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);\n" \
+	"	gl_Position = vec4(in_position, 0.0, 1.0);\n" \
 	"	color = in_color;\n" \
 	"}\n"
 
@@ -1089,29 +1090,13 @@ struct rde_transform {
 /// ============================ RENDERING ==================================
 
 typedef struct rde_shader rde_shader;
+typedef struct rde_texture rde_texture;
+typedef struct rde_cpu_texture rde_cpu_texture;
+typedef struct rde_render_texture rde_render_texture;
+typedef struct rde_atlas rde_atlas;
 
 struct rde_color {
 	unsigned char r, g, b, a;
-};
-
-struct rde_texture {
-	UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_atlas {
-	UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_cpu_texture {
-	UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_render_texture {
-	UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_polygon {
-	UNIMPLEMENTED_STRUCT()
 };
 
 struct rde_mesh {
@@ -1140,21 +1125,8 @@ struct rde_model_animation {
 
 struct rde_vertex_2d {
 	rde_vec_3F position { 0.f, 0.f, 0.f };
-	size_t color = 0xFFFFFF;
+	int color = 0xFFFFFF;
 	rde_vec_2F texture_coordinates = { 0.f, 0.f };
-};
-
-struct rde_batch_2d {
-	RDE_BATCH_PRIORITY_ priority = RDE_BATCH_PRIORITY_NONE;
-	size_t id = 0;
-	size_t layer = 0;
-	rde_shader* shader = nullptr;
-	rde_vertex_2d vertices[RDE_MAX_VERTICES_PER_BATCH];
-	size_t texture_id = 0;
-};
-
-struct rde_batch_3d {
-	UNIMPLEMENTED_STRUCT()
 };
 
 struct rde_viewport {
@@ -1318,21 +1290,19 @@ RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 
 RDE_FUNC void rde_rendering_begin_drawing_2d(rde_camera* _camera);
 RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera);
-RDE_FUNC void rde_rendering_begin_drawing_imgui();
 
-RDE_FUNC void rde_rendering_draw_point_2d(const rde_vec_2F _position, const rde_color _color);
-RDE_FUNC void rde_rendering_draw_point_3d(const rde_vec_3F _position, const rde_color _color);
+RDE_FUNC void rde_rendering_draw_point_2d(const rde_vec_2F _position, const rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_point_3d(const rde_vec_3F _position, const rde_color _color, rde_shader* _shader = nullptr);
 
-RDE_FUNC void rde_rendering_draw_line_2d(const rde_vec_2F _init, const rde_vec_2F _end, const rde_color _color);
-RDE_FUNC void rde_rendering_draw_line_3d(const rde_vec_3F _init, const rde_vec_3F _end, const rde_color _color);
+RDE_FUNC void rde_rendering_draw_line_2d(const rde_vec_2F _init, const rde_vec_2F _end, const rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_line_3d(const rde_vec_3F _init, const rde_vec_3F _end, const rde_color _color, rde_shader* _shader = nullptr);
 
-RDE_FUNC void rde_rendering_draw_triangle_2d(const rde_vec_2F _verte_a, const rde_vec_2F _vertex_b, const rde_vec_2F _vertex_c, const rde_color _color);
-RDE_FUNC void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color);
-RDE_FUNC void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color);
+RDE_FUNC void rde_rendering_draw_triangle_2d(const rde_vec_2F _verte_a, const rde_vec_2F _vertex_b, const rde_vec_2F _vertex_c, const rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color, rde_shader* _shader = nullptr);
 
 RDE_FUNC void rde_rendering_end_drawing_2d();
 RDE_FUNC void rde_rendering_end_drawing_3d();
-RDE_FUNC void rde_rendering_end_drawing_imgui();
 
 /// ============================ AUDIO ======================================
 
