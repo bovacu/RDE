@@ -113,6 +113,9 @@ void rde_rendering_try_create_batch_2d(rde_shader* _shader) {
 }
 
 void rde_rendering_flush_batch_2d() {
+	if(current_batch_2d.shader == nullptr) {
+		return;
+	}
 	glUseProgram(current_batch_2d.shader->compiled_program_id);
 	//glUniformMatrix4fv(glGetUniformLocation(ENGINE.color_shader_2d->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, RDE_GLM_VEC_MAT_TO_POINTER(GLfloat, _view_projection_matrix));
 	
