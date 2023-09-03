@@ -68,6 +68,7 @@
 
 /// ============================== SHADERS =================================
 
+// TODO: multiply by view_projection_matrix
 #define RDE_COLOR_VERTEX_SHADER_2D "" \
 	"#version 330 core\n" \
 	"\n" \
@@ -93,6 +94,7 @@
 	"	out_color = vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);\n" \
 	"}\n" 
 
+// TODO: multiply by view_projection_matrix
 #define RDE_TEXTURE_VERTEX_SHADER_2D "" \
 	"#version 330 core\n" \
 	"\n" \
@@ -108,7 +110,7 @@
 	"void main(void) {\n" \
 	"	uv = in_uv;\n" \
 	"	color = in_color;\n" \
-	"	gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);\n" \
+	"	gl_Position = vec4(in_position, 0.0, 1.0);\n" \
 	"}\n" 
 
 #define RDE_TEXTURE_FRAGMENT_SHADER_2D "" \
@@ -1091,9 +1093,9 @@ struct rde_event {
 };
 
 struct rde_transform {
-	rde_vec_3F position;
-	rde_vec_3F rotation;
-	rde_vec_3F scale;
+	rde_vec_3F position = { 0.f, 0.f, 0.f };
+	rde_vec_3F rotation = { 0.f, 0.f, 0.f };
+	rde_vec_3F scale = { 1.f, 1.f, 1.f };
 
 	rde_transform* parent;
 };
@@ -1311,6 +1313,8 @@ RDE_FUNC void rde_rendering_draw_line_3d(const rde_vec_3F _init, const rde_vec_3
 RDE_FUNC void rde_rendering_draw_triangle_2d(const rde_vec_2F _verte_a, const rde_vec_2F _vertex_b, const rde_vec_2F _vertex_c, const rde_color _color, rde_shader* _shader = nullptr);
 RDE_FUNC void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color, rde_shader* _shader = nullptr);
 RDE_FUNC void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color, rde_shader* _shader = nullptr);
+
+RDE_FUNC void rde_rendering_draw_texture(rde_transform* _transform, rde_texture* _texture, const rde_color _tintColor = RDE_COLOR_WHITE, rde_shader* _shader = nullptr);
 
 RDE_FUNC void rde_rendering_end_drawing_2d();
 RDE_FUNC void rde_rendering_end_drawing_3d();
