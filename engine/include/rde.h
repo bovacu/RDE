@@ -449,7 +449,16 @@
 		}																									\
 	}
 
-
+#define RDE_LOG_B_BLACK() printf("\033[0;30m");
+#define RDE_LOG_B_RED() printf("\033[0;31m");
+#define RDE_LOG_B_GREEN() printf("\033[0;32m");
+#define RDE_LOG_B_YELLOW() printf("\033[0;33m");
+#define RDE_LOG_B_BLUE() printf("\033[0;34m");
+#define RDE_LOG_B_PURPLE() printf("\033[0;35m");
+#define RDE_LOG_B_CYAN() printf("\033[0;36m");
+#define RDE_LOG_B_WHITE() printf("\033[0;37m");
+#define RDE_LOG_E() printf("\033[0m");
+#define RDE_LOG_E_NL() printf("\033[0m \n");
 
 /// ====================== PLATFORM SPECIFIC TYPES ==========================
 
