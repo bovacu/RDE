@@ -210,9 +210,9 @@ void rde_engine_on_late_update(float _dt) {
 	UNUSED(_dt)
 }
 
-void rde_engine_on_render(float _dt) {
+void rde_engine_on_render(float _dt, rde_window* _window) {
 	UNUSED(_dt)
-	rde_vec_2I _window_size = rde_window_get_window_size(&ENGINE.windows[0]);
+	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	glViewport(0, 0, _window_size.x, _window_size.y);
 }
 
@@ -296,10 +296,18 @@ void rde_engine_on_run() {
 		rde_engine_on_late_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_late_update(ENGINE.delta_time);
 
-		rde_engine_on_render(ENGINE.delta_time);
-		ENGINE.mandatory_callbacks.on_render(ENGINE.delta_time);
+		for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+			rde_window* _window = &ENGINE.windows[_i];
 
-		SDL_GL_SwapWindow(ENGINE.windows[0].sdl_window);
+			if(_window->sdl_window == nullptr) {
+				continue;
+			}
+
+			rde_engine_on_render(ENGINE.delta_time, _window);
+			ENGINE.mandatory_callbacks.on_render(ENGINE.delta_time, _window);
+
+			SDL_GL_SwapWindow(_window->sdl_window);
+		}
 
 		rde_engine_sync_events();
 

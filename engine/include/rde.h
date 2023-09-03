@@ -938,6 +938,7 @@ struct rde_event;
 typedef void (*rde_event_func_inner)(rde_event*);
 typedef void (*rde_event_func_outer)(rde_window*, rde_event*);
 typedef void (*rde_engine_user_side_loop_func)(float);
+typedef void (*rde_engine_user_side_loop_func_2)(float, rde_window*);
 
 typedef struct rde_inner_window_data rde_inner_window_info;
 
@@ -989,7 +990,7 @@ struct rde_end_user_mandatory_callbacks {
 	rde_engine_user_side_loop_func on_update = nullptr;
 	rde_engine_user_side_loop_func on_fixed_update = nullptr;
 	rde_engine_user_side_loop_func on_late_update = nullptr;
-	rde_engine_user_side_loop_func on_render = nullptr;
+	rde_engine_user_side_loop_func_2 on_render = nullptr;
 };
 
 /// ============================== ENGINE ===================================
@@ -1289,8 +1290,8 @@ RDE_FUNC rde_texture* rde_rendering_get_atlas_sub_texture(const char* _texture_n
 
 RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 
-RDE_FUNC void rde_rendering_begin_drawing_2d(rde_camera* _camera);
-RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera);
+RDE_FUNC void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window);
+RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window);
 
 RDE_FUNC void rde_rendering_draw_point_2d(const rde_vec_2F _position, const rde_color _color, rde_shader* _shader = nullptr);
 RDE_FUNC void rde_rendering_draw_point_3d(const rde_vec_3F _position, const rde_color _color, rde_shader* _shader = nullptr);

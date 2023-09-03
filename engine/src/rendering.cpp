@@ -19,10 +19,24 @@
 
 static rde_camera* current_drawing_camera = nullptr;
 static rde_batch_2d current_batch_2d;
+static rde_window* current_drawing_window = nullptr;
 
 struct rde_rendering_statistics {
 	size_t number_of_drawcalls = 0;
 } statistics;
+
+rde_vec_2F rde_rendering_get_aspect_ratio() {
+	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
+	bool _is_horizontal = _window_size.x >= _window_size.y;
+	float _aspect_ratio = _window_size.x / (float)_window_size.y;
+	return { _is_horizontal ? 1.f : _aspect_ratio, _is_horizontal ? _aspect_ratio : 1.f	};
+}
+
+void rde_rendering_convert_to_screen_coordinates(rde_vec_3F* _vec) {
+	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
+	_vec->x = (_vec->x / (_window_size.x * 0.5f));
+	_vec->y = (_vec->y / (_window_size.y * 0.5f));
+}
 
 bool rde_util_check_opengl_error(const char* _message) {
 	GLenum _err;
@@ -332,7 +346,8 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 
 void rde_rendering_unload_texture(rde_texture* _texture) {
 	assert(_texture != nullptr && "Error: Tried to unload a nullptr texture");
-	glDeleteTextures(1, &_texture->opengl_texture_id);
+	GLuint _id = (GLuint)_texture->opengl_texture_id;
+	glDeleteTextures(1, &_id);
 	_texture->opengl_texture_id = -1;
 	_texture->size = { 0, 0 };
 	_texture->channels = 0;
@@ -391,13 +406,15 @@ void rde_rendering_set_background_color(const rde_color _color) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-void rde_rendering_begin_drawing_2d(rde_camera* _camera) {
-	//assert(current_drawing_camera == nullptr && "Tried to begin drawing again before ending the previous one");
+void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
+	//assert(current_drawing_camera == nullptr || _window == nullptr && "Tried to begin drawing again before ending the previous one");
 	current_drawing_camera = _camera;
+	current_drawing_window = _window;
 }
 
-void rde_rendering_begin_drawing_3d(rde_camera* _camera) {
+void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window) {
 	UNUSED(_camera);
+	UNUSED(_window);
 	UNIMPLEMENTED("rde_rendering_start_drawing_3d")
 }
 
@@ -430,23 +447,34 @@ void rde_rendering_draw_triangle_2d(const rde_vec_2F _vertex_a, const rde_vec_2F
 	rde_rendering_try_create_batch_2d(_drawing_shader);
 	rde_rendering_try_flush_batch_2d(_drawing_shader, _triangle_vertex_count);
 
-	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+	// * 2
+	// |\
+	// | \
+	// *--*
+	// 0   1
+	rde_vertex_2d _vertex_0 {
 		.position = { _vertex_a.x, _vertex_a.y, 0.f },
 		.color = RDE_COLOR_TO_HEX_COLOR(_color),
 		.texture_coordinates = { 0.f, 0.f }
 	};
+	rde_rendering_convert_to_screen_coordinates(&_vertex_0.position);
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0;
 
-	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+	rde_vertex_2d _vertex_1 {
 		.position = { _vertex_b.x, _vertex_b.y, 0.f },
 		.color = RDE_COLOR_TO_HEX_COLOR(_color),
 		.texture_coordinates = { 0.f, 0.f }
 	};
+	rde_rendering_convert_to_screen_coordinates(&_vertex_1.position);
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1;
 
-	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+	rde_vertex_2d _vertex_2 {
 		.position = { _vertex_c.x, _vertex_c.y, 0.f },
 		.color = RDE_COLOR_TO_HEX_COLOR(_color),
 		.texture_coordinates = { 0.f, 0.f }
 	};
+	rde_rendering_convert_to_screen_coordinates(&_vertex_2.position);
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_2;
 }
 
 void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color, rde_shader* _shader) {
@@ -461,23 +489,29 @@ void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_ve
 	// | \
 	// *--*
 	// 0   1
-	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+	rde_vertex_2d _vertex_0_0 {
 		.position = { _bottom_left.x, _bottom_left.y, 0.f },
 		.color = RDE_COLOR_TO_HEX_COLOR(_color),
 		.texture_coordinates = { 0.f, 0.f }
 	};
+	rde_rendering_convert_to_screen_coordinates(&_vertex_0_0.position);
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_0;
 
-	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+	rde_vertex_2d _vertex_0_1{
 		.position = { _top_right.x, _bottom_left.y, 0.f },
 		.color = RDE_COLOR_TO_HEX_COLOR(_color),
 		.texture_coordinates = { 0.f, 0.f }
 	};
+	rde_rendering_convert_to_screen_coordinates(&_vertex_0_1.position);
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_1;
 
-	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+	rde_vertex_2d _vertex_0_2 {
 		.position = { _bottom_left.x, _top_right.y, 0.f },
 		.color = RDE_COLOR_TO_HEX_COLOR(_color),
 		.texture_coordinates = { 0.f, 0.f }
 	};
+	rde_rendering_convert_to_screen_coordinates(&_vertex_0_2.position);
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_2;
 
 	// 2   1
 	// *--*
@@ -485,23 +519,30 @@ void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_ve
 	//   \|
 	//    *
 	//    0
-	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+
+	rde_vertex_2d _vertex_1_0 {
 		.position = { _top_right.x, _bottom_left.y, 0.f },
 		.color = RDE_COLOR_TO_HEX_COLOR(_color),
 		.texture_coordinates = { 0.f, 0.f }
 	};
+	rde_rendering_convert_to_screen_coordinates(&_vertex_1_0.position);
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_0;
 
-	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+	rde_vertex_2d _vertex_1_1 {
 		.position = { _top_right.x, _top_right.y, 0.f },
 		.color = RDE_COLOR_TO_HEX_COLOR(_color),
 		.texture_coordinates = { 0.f, 0.f }
 	};
+	rde_rendering_convert_to_screen_coordinates(&_vertex_1_1.position);
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_1;
 
-	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = rde_vertex_2d {
+	rde_vertex_2d _vertex_1_2 {
 		.position = { _bottom_left.x, _top_right.y, 0.f },
 		.color = RDE_COLOR_TO_HEX_COLOR(_color),
 		.texture_coordinates = { 0.f, 0.f }
 	};
+	rde_rendering_convert_to_screen_coordinates(&_vertex_1_2.position);
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
 
 void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color, rde_shader* _shader) {
@@ -524,6 +565,7 @@ void rde_rendering_end_drawing_2d() {
 	rde_rendering_flush_batch_2d();
 	rde_rendering_reset_batch_2d();
 	current_drawing_camera = nullptr;
+	current_drawing_window = nullptr;
 	statistics.number_of_drawcalls = 0;
 }
 
