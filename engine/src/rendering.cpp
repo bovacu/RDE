@@ -116,20 +116,30 @@ void rde_rendering_flush_batch_2d() {
 	if(current_batch_2d.shader == nullptr) {
 		return;
 	}
+
+	rde_util_check_opengl_error("Before UseProgram");
 	glUseProgram(current_batch_2d.shader->compiled_program_id);
 	//glUniformMatrix4fv(glGetUniformLocation(ENGINE.color_shader_2d->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, RDE_GLM_VEC_MAT_TO_POINTER(GLfloat, _view_projection_matrix));
-	
+	if(rde_util_check_opengl_error("After UseProgram")) {
+		printf("		%d \n", current_batch_2d.shader->compiled_program_id);
+	}
+
 	glBindVertexArray(current_batch_2d.shader->vertex_array_object);
+	rde_util_check_opengl_error("After glBindVertexArray");
 
 	if(current_batch_2d.texture_id >= 0) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, current_batch_2d.texture_id);
+		rde_util_check_opengl_error("After glBindTexture");
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, current_batch_2d.shader->vertex_buffer_object);
+	rde_util_check_opengl_error("After glBindBuffer");
 	glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(sizeof(rde_vertex_2d) * current_batch_2d.amount_of_vertices), &current_batch_2d.vertices);
+	rde_util_check_opengl_error("After glBufferSubData");
 
 	glDrawArrays(GL_TRIANGLES, 0, current_batch_2d.amount_of_vertices);
+	rde_util_check_opengl_error("After glDrawArrays");
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -150,6 +160,8 @@ void rde_rendering_try_flush_batch_2d(rde_shader* _shader, size_t _extra_vertice
 }
 
 void rde_rendering_set_rendering_configuration() {
+
+
 #if !IS_MOBILE()
 	printf("OpenGL Version: %s, Vendor: %s, GPU: %s \n", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER));
 #endif

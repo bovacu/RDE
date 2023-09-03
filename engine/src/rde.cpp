@@ -25,7 +25,7 @@
 #define DISPLAY_EVENT_COUNT (RDE_EVENT_TYPE_DISPLAY_END - RDE_EVENT_TYPE_DISPLAY_BEGIN)
 
 // TODO: Not to forget
-// 		- Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
+// 		- [DONE] Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
 //		  the format is BGRA instead of RGBA (problem solved by first method) and the second fixes
 //		  an error that the first method can generate on some images.
 //
@@ -51,6 +51,7 @@
 //		- Other:
 //			- Render Textures
 //			- Particles
+//			- Multiple window rendering is not working properly
 //
 //		- TOOL: command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
@@ -212,6 +213,7 @@ void rde_engine_on_late_update(float _dt) {
 
 void rde_engine_on_render(float _dt, rde_window* _window) {
 	UNUSED(_dt)
+	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	glViewport(0, 0, _window_size.x, _window_size.y);
 }
@@ -236,12 +238,13 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 		exit(-1);
 	}
 
-	ENGINE.instantiated = true;
 	rde_window* _default_window = rde_window_create_window();
 
 	rde_events_window_create_events();
 	rde_events_display_create_events();
 	rde_rendering_set_rendering_configuration();
+
+	ENGINE.instantiated = true;
 
 	return _default_window;
 }
@@ -328,7 +331,6 @@ void rde_engine_set_running(bool _running) {
 }
 
 rde_vec_2I rde_engine_get_display_size() {
-	
 	SDL_DisplayMode _displayMode;
 	SDL_GetCurrentDisplayMode(0, &_displayMode);
 	return { _displayMode.w, _displayMode.h };
