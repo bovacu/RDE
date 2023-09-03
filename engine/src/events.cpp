@@ -11,7 +11,7 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_maximized, window_callbacks, on_
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_closed, window_callbacks, on_window_closed, { 
 	rde_window_destroy_window(_window); 
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
-		if(_window->sdl_window != nullptr) {
+		if(ENGINE.windows[_i].sdl_window != nullptr) {
 			return;
 		}
 	}
