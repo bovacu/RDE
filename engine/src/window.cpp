@@ -209,6 +209,19 @@ bool rde_window_orientation_is_horizontal(rde_window* _window) {
 	return _window_size.x >= _window_size.y;
 }
 
+void rde_window_take_screen_shot(rde_window* _window, const rde_vec_2I _position, const rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension) {
+	UNUSED(_window)
+	UNUSED(_position)
+	UNUSED(_size_of_rectangle)
+	UNUSED(_file_name_with_extension)
+	UNIMPLEMENTED("rde_window_take_screen_shot")
+}
+
+float rde_window_get_aspect_ratio(rde_window* _window) {
+	rde_vec_2I _window_size = rde_window_get_window_size(_window);
+	return _window_size.x / (float)_window_size.y;
+}
+
 //
 //RDE_FUNC_ND bool			rde_window_is_fullscreen(rde_window* _window);
 //RDE_FUNC 	void			rde_window_set_fullscreen(rde_window* _window, bool _fullscreen);

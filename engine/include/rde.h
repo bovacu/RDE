@@ -51,6 +51,7 @@
 
 
 #include <assert.h>
+#include <float.h>
 
 /// *************************************************************************************************
 /// *                                		DEFINES                         						*
@@ -880,6 +881,8 @@ enum RDE_LANGUAGE_ {
 
 /// ================================= MATH ==================================
 
+typedef struct rde_random rde_random;
+
 SPECIALIZED_VEC2(int, 			rde_vec_2I);
 SPECIALIZED_VEC2(unsigned int, 	rde_vec_2UI);
 SPECIALIZED_VEC2(float, 		rde_vec_2F);
@@ -938,7 +941,10 @@ struct rde_bouding_box {
 	UNIMPLEMENTED_STRUCT()
 };
 
-
+struct rde_probability {
+	float probability_rolled = 0.f;
+	bool happened = false;
+};
 
 /// ================== CALLBACKS AND FUNCTION POINTERS ======================
 
@@ -1188,18 +1194,16 @@ const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
 /// *                                		FUNCTIONS                         						*
 /// *************************************************************************************************
 
-/// ============================ MATH =======================================
-
-
-
-
-/// ============================ LOGGING ====================================
-
-
-
-
 /// ============================ UTIL =======================================
 
+
+/// ============================ MATH =======================================
+
+RDE_FUNC rde_random* rde_math_create_random(long _seed = -1);
+RDE_FUNC void rde_math_set_random_seed(long _seed);
+RDE_FUNC int rde_math_get_random_int(int _min_included = INT_MIN, int _max_not_included = INT_MAX);
+RDE_FUNC float rde_math_get_random_float(float _min_included = FLT_MIN, float _max_not_included = FLT_MAX);
+RDE_FUNC rde_probability rde_math_get_probability(float _normalized_chance_to_happen);
 
 /// ============================ ENGINE =====================================
 
@@ -1247,6 +1251,10 @@ RDE_FUNC const char* rde_window_get_title(rde_window* _window);
 RDE_FUNC void rde_window_set_title(rde_window* _window, const char* _title);
 
 RDE_FUNC bool rde_window_orientation_is_horizontal(rde_window* _window);
+
+RDE_FUNC void rde_window_take_screen_shot(rde_window* _window, const rde_vec_2I _position, const rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension);
+
+RDE_FUNC float rde_window_get_aspect_ratio(rde_window* _window);
 
 //RDE_FUNC_ND bool			rde_window_is_fullscreen(rde_window* _window);
 //RDE_FUNC 	void			rde_window_set_fullscreen(rde_window* _window, bool _fullscreen);

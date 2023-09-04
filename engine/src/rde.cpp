@@ -110,7 +110,6 @@ struct rde_batch_3d {
 	UNIMPLEMENTED_STRUCT()
 };
 
-
 struct rde_engine {
 	bool instantiated = false;
 
@@ -122,6 +121,8 @@ struct rde_engine {
 
 	bool running = true;
 	bool use_rde_2d_physics_system = true;
+
+	rde_random* random;
 
 	rde_display_callbacks display_callbacks;
 	rde_window_callbacks window_callbacks;
@@ -142,6 +143,8 @@ struct rde_engine {
 
 rde_engine ENGINE;
 
+#include "math.cpp"
+#include "util.cpp"
 #include "events.cpp"
 #include "window.cpp"
 #include "rendering.cpp"
@@ -245,6 +248,9 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 	rde_events_window_create_events();
 	rde_events_display_create_events();
 	rde_rendering_set_rendering_configuration();
+
+	ENGINE.random = (rde_random*)malloc(sizeof(rde_random));
+	ENGINE.random->mt.seed(ENGINE.random->rd());
 
 	ENGINE.instantiated = true;
 
@@ -358,6 +364,8 @@ void rde_engine_destroy_engine() {
 
 		rde_window_destroy_window(&ENGINE.windows[_i]);
 	}
+
+	free(ENGINE.random);
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
