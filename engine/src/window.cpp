@@ -204,6 +204,11 @@ void rde_window_set_title(rde_window* _window, const char* _title) {
 	SDL_SetWindowTitle(_window->sdl_window, _title);
 }
 
+bool rde_window_orientation_is_horizontal(rde_window* _window) {
+	rde_vec_2I _window_size = rde_window_get_window_size(_window);
+	return _window_size.x >= _window_size.y;
+}
+
 //
 //RDE_FUNC_ND bool			rde_window_is_fullscreen(rde_window* _window);
 //RDE_FUNC 	void			rde_window_set_fullscreen(rde_window* _window, bool _fullscreen);

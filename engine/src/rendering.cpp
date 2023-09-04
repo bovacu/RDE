@@ -18,7 +18,8 @@
 #define RDE_GLM_VEC_MAT_TO_POINTER(_type, _glmVecMat) reinterpret_cast<_type*>(glm::value_ptr(_glmVecMat))
 
 static rde_camera* current_drawing_camera = nullptr;
-static rde_batch_2d current_batch_2d;
+static rde_batch_2d current_batch_2d = {  };
+static glm::mat4 projection_matrix;
 
 struct rde_rendering_statistics {
 	size_t number_of_drawcalls = 0;
@@ -26,7 +27,7 @@ struct rde_rendering_statistics {
 
 rde_vec_2F rde_rendering_get_aspect_ratio() {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_batch_2d.window);
-	bool _is_horizontal = _window_size.x >= _window_size.y;
+	bool _is_horizontal = rde_window_orientation_is_horizontal(current_batch_2d.window);
 	float _aspect_ratio = _window_size.x / (float)_window_size.y;
 	return { _is_horizontal ? 1.f : _aspect_ratio, _is_horizontal ? _aspect_ratio : 1.f	};
 }
@@ -48,6 +49,13 @@ void rde_rendering_convert_to_screen_size(rde_vec_2F* _vec) {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_batch_2d.window);
 	_vec->x = (_vec->x / (_window_size.x));
 	_vec->y = (_vec->y / (_window_size.y));
+}
+
+glm::mat4 rde_rendering_transform_to_glm_mat4(const rde_transform* _transform) {
+	glm::mat4 _transformation_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(_transform->position.x, _transform->position.y, _transform->position.z));
+	_transformation_matrix *= glm::rotate(glm::mat4(1.0f), glm::radians(_transform->rotation.z), { 0.0f, 0.0f, 1.0f });
+	_transformation_matrix *= glm::scale(glm::mat4(1.0f), glm::vec3(_transform->scale.x, _transform->scale.y, _transform->scale.z));
+	return _transformation_matrix;
 }
 
 bool rde_util_check_opengl_error(const char* _message) {
@@ -135,7 +143,9 @@ void rde_rendering_flush_batch_2d() {
 
 	rde_util_check_opengl_error("Before UseProgram");
 	glUseProgram(current_batch_2d.shader->compiled_program_id);
-	//glUniformMatrix4fv(glGetUniformLocation(ENGINE.color_shader_2d->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, RDE_GLM_VEC_MAT_TO_POINTER(GLfloat, _view_projection_matrix));
+
+	glm::mat4 _view_projection_matrix = projection_matrix * glm::inverse(rde_rendering_transform_to_glm_mat4(&current_drawing_camera->transform));
+	glUniformMatrix4fv(glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, RDE_GLM_VEC_MAT_TO_POINTER(GLfloat, _view_projection_matrix));
 	rde_util_check_opengl_error("After UseProgram");
 
 	glBindVertexArray(current_batch_2d.shader->vertex_array_object);
@@ -294,7 +304,7 @@ rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fra
 	return nullptr;
 }
 
-void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose = false) {
+void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose) {
 	GLint _location = glGetUniformLocation((GLuint)_shader->compiled_program_id, _uniform_name);
 	if(_location >= 0) {
 		switch(_type) {
@@ -516,6 +526,19 @@ void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
 	//assert(current_drawing_camera == nullptr || _window == nullptr && "Tried to begin drawing again before ending the previous one");
 	current_drawing_camera = _camera;
 	current_batch_2d.window = _window;
+
+	switch(_camera->camera_type) {
+		case RDE_CAMERA_TYPE_PERSPECTIVE : {
+		
+		};break;
+
+		case RDE_CAMERA_TYPE_ORTHOGRAPHIC : {
+			rde_vec_2F _aspect_ratios = rde_rendering_get_aspect_ratio();
+			float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.x : _aspect_ratios.y;
+			float _zoom = _camera->zoom;
+			projection_matrix = glm::ortho(-_aspect_ratio * _zoom, _aspect_ratio * _zoom, -_zoom, _zoom, -_zoom, _zoom);
+		} break;
+	}
 }
 
 void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window) {
@@ -679,11 +702,7 @@ void rde_rendering_draw_texture(rde_transform* _transform, rde_texture* _texture
 	rde_vec_2F _texture_tile_size_on_screen = _texture_tile_size;
 	rde_rendering_convert_to_screen_size(&_texture_tile_size_on_screen);
 
-	glm::mat4 _transformation_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(_transform->position.x, _transform->position.y, _transform->position.z));
-	if(_transform->rotation.z != 0) {
-		_transformation_matrix *= glm::rotate(glm::mat4(1.0f), glm::radians(_transform->rotation.z), { 0.0f, 0.0f, 1.0f });
-	}
-	_transformation_matrix *= glm::scale(glm::mat4(1.0f), glm::vec3(_transform->scale.x, _transform->scale.y, _transform->scale.z));
+	glm::mat4 _transformation_matrix = rde_rendering_transform_to_glm_mat4(_transform);
 
 	glm::vec4 _bottom_left_texture_position  = { -_texture_tile_size_on_screen.x, -_texture_tile_size_on_screen.y, 0.0f, 1.0f };
 	glm::vec4 _bottom_right_texture_position = {  _texture_tile_size_on_screen.x, -_texture_tile_size_on_screen.y, 0.0f, 1.0f };

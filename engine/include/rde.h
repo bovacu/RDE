@@ -80,7 +80,7 @@
 	"uniform mat4 view_projection_matrix;\n" \
 	"\n" \
 	"void main() {\n" \
-	"	gl_Position = vec4(in_position, 0.0, 1.0);\n" \
+	"	gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);\n" \
 	"	color = in_color;\n" \
 	"}\n"
 
@@ -110,7 +110,7 @@
 	"void main(void) {\n" \
 	"	uv = in_uv;\n" \
 	"	color = in_color;\n" \
-	"	gl_Position = vec4(in_position, 0.0, 1.0);\n" \
+	"	gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);\n" \
 	"}\n" 
 
 #define RDE_TEXTURE_FRAGMENT_SHADER_2D "" \
@@ -1245,7 +1245,9 @@ RDE_FUNC void rde_window_set_position(rde_window* _window, const rde_vec_2I _pos
 
 RDE_FUNC const char* rde_window_get_title(rde_window* _window);
 RDE_FUNC void rde_window_set_title(rde_window* _window, const char* _title);
-//
+
+RDE_FUNC bool rde_window_orientation_is_horizontal(rde_window* _window);
+
 //RDE_FUNC_ND bool			rde_window_is_fullscreen(rde_window* _window);
 //RDE_FUNC 	void			rde_window_set_fullscreen(rde_window* _window, bool _fullscreen);
 //
@@ -1281,9 +1283,9 @@ RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _even
 /// ============================ RENDERING ==================================
 
 RDE_FUNC rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code);
-RDE_FUNC void rde_rendering_set_shader_uniform_value_float(const char* _uniformName, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose = false);
-RDE_FUNC void rde_rendering_set_shader_uniform_value_int(const char* _uniformName, RDE_UNIFORM_UIV_ _type, int* _data);
-RDE_FUNC void rde_rendering_set_shader_uniform_value_uint(const char* _uniformName, RDE_UNIFORM_UIV_ _type, uint* _data);
+RDE_FUNC void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose = false);
+RDE_FUNC void rde_rendering_set_shader_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_UIV_ _type, int* _data);
+RDE_FUNC void rde_rendering_set_shader_uniform_value_uint(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_UIV_ _type, uint* _data);
 RDE_FUNC void rde_rendering_unload_shader(rde_shader* _shader);
 
 RDE_FUNC rde_texture* rde_rendering_load_texture(const char* _file_path);
