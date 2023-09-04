@@ -298,6 +298,72 @@ rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fra
 	return nullptr;
 }
 
+void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose = false) {
+	GLint _location = glGetUniformLocation((GLuint)_shader->compiled_program_id, _uniform_name);
+	if(_location >= 0) {
+		switch(_type) {
+			case RDE_UNIFORM_FV_1 		   : glUniform1fv(_location, 1, _data); break;
+			case RDE_UNIFORM_FV_2 		   : glUniform2fv(_location, 1, _data); break;
+			case RDE_UNIFORM_FV_3 		   : glUniform3fv(_location, 1, _data); break;
+			case RDE_UNIFORM_FV_4 		   : glUniform4fv(_location, 1, _data); break;
+			case RDE_UNIFORM_FV_MATRIX_2   : glUniformMatrix2fv(_location, 1, _transpose, _data); break;
+			case RDE_UNIFORM_FV_MATRIX_3   : glUniformMatrix3fv(_location, 1, _transpose, _data); break;
+			case RDE_UNIFORM_FV_MATRIX_4   : glUniformMatrix4fv(_location, 1, _transpose, _data); break;
+				
+			#if !IS_WASM()
+			case RDE_UNIFORM_FV_MATRIX_2x3 : glUniformMatrix2x3fv(_location, 1, _transpose, _data); break;
+			case RDE_UNIFORM_FV_MATRIX_3x2 : glUniformMatrix3x2fv(_location, 1, _transpose, _data); break;
+			case RDE_UNIFORM_FV_MATRIX_3x4 : glUniformMatrix3x4fv(_location, 1, _transpose, _data); break;
+			case RDE_UNIFORM_FV_MATRIX_4x3 : glUniformMatrix4x3fv(_location, 1, _transpose, _data); break;
+			case RDE_UNIFORM_FV_MATRIX_2x4 : glUniformMatrix2x4fv(_location, 1, _transpose, _data); break;
+			case RDE_UNIFORM_FV_MATRIX_4x2 : glUniformMatrix4x2fv(_location, 1, _transpose, _data); break;
+			#else
+			default: {
+				RDE_LOG_B_RED()
+				printf("ERROR: Tried to set uniform '%s' of type '%d' in WASM and is not supported", _uniform_name, (int)_type);
+				RDE_LOG_E_NL()
+			}
+			#endif
+		}
+	} else {
+		RDE_LOG_B_RED()
+		printf("ERROR: Tried to set uniform '%s', but it could not be located", _uniform_name);
+		RDE_LOG_E_NL()
+	}
+}
+
+void rde_rendering_set_shader_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_IV_ _type, int* _data) {
+	GLint _location = glGetUniformLocation((GLuint)_shader->compiled_program_id, _uniform_name);
+	if(_location >= 0) {
+		switch(_type) {
+			case RDE_UNIFORM_IV_1 : glUniform1iv(_location, 1, _data); break;
+			case RDE_UNIFORM_IV_2 : glUniform2iv(_location, 1, _data); break;
+			case RDE_UNIFORM_IV_3 : glUniform3iv(_location, 1, _data); break;
+			case RDE_UNIFORM_IV_4 : glUniform4iv(_location, 1, _data); break;
+		}
+	} else {
+		RDE_LOG_B_RED()
+		printf("ERROR: Tried to set uniform '%s', but it could not be located", _uniform_name);
+		RDE_LOG_E_NL()
+	}
+}
+
+void rde_rendering_set_shader_uniform_value_uint(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_UIV_ _type, uint* _data) {
+	GLint _location = glGetUniformLocation((GLuint)_shader->compiled_program_id, _uniform_name);
+	if(_location >= 0) {
+		switch(_type) {
+			case RDE_UNIFORM_UIV_1 : glUniform1uiv(_location, 1, _data); break;
+			case RDE_UNIFORM_UIV_2 : glUniform2uiv(_location, 1, _data); break;
+			case RDE_UNIFORM_UIV_3 : glUniform3uiv(_location, 1, _data); break;
+			case RDE_UNIFORM_UIV_4 : glUniform4uiv(_location, 1, _data); break;
+		}
+	} else {
+		RDE_LOG_B_RED()
+		printf("ERROR: Tried to set uniform '%s', but it could not be located", _uniform_name);
+		RDE_LOG_E_NL()
+	}
+}
+
 void rde_rendering_unload_shader(rde_shader* _shader) {
 	assert(_shader != nullptr && "Tried to unload a nullptr shader");
 

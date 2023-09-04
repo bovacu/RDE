@@ -1281,7 +1281,9 @@ RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _even
 /// ============================ RENDERING ==================================
 
 RDE_FUNC rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code);
-
+RDE_FUNC void rde_rendering_set_shader_uniform_value_float(const char* _uniformName, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose = false);
+RDE_FUNC void rde_rendering_set_shader_uniform_value_int(const char* _uniformName, RDE_UNIFORM_UIV_ _type, int* _data);
+RDE_FUNC void rde_rendering_set_shader_uniform_value_uint(const char* _uniformName, RDE_UNIFORM_UIV_ _type, uint* _data);
 RDE_FUNC void rde_rendering_unload_shader(rde_shader* _shader);
 
 RDE_FUNC rde_texture* rde_rendering_load_texture(const char* _file_path);
