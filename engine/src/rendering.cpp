@@ -19,22 +19,20 @@
 
 static rde_camera* current_drawing_camera = nullptr;
 static rde_batch_2d current_batch_2d;
-static rde_window* current_drawing_window = nullptr;
-static rde_texture* current_drawing_texture = nullptr;
 
 struct rde_rendering_statistics {
 	size_t number_of_drawcalls = 0;
 } statistics;
 
 rde_vec_2F rde_rendering_get_aspect_ratio() {
-	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
+	rde_vec_2I _window_size = rde_window_get_window_size(current_batch_2d.window);
 	bool _is_horizontal = _window_size.x >= _window_size.y;
 	float _aspect_ratio = _window_size.x / (float)_window_size.y;
 	return { _is_horizontal ? 1.f : _aspect_ratio, _is_horizontal ? _aspect_ratio : 1.f	};
 }
 
 void rde_rendering_convert_to_screen_coordinates(rde_vec_3F* _vec) {
-	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
+	rde_vec_2I _window_size = rde_window_get_window_size(current_batch_2d.window);
 	_vec->x = (_vec->x / (_window_size.x * 0.5f));
 	_vec->y = (_vec->y / (_window_size.y * 0.5f));
 }
@@ -47,7 +45,7 @@ void rde_rendering_convert_to_screen_coordinates(rde_vec_2F* _vec) {
 }
 
 void rde_rendering_convert_to_screen_size(rde_vec_2F* _vec) {
-	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
+	rde_vec_2I _window_size = rde_window_get_window_size(current_batch_2d.window);
 	_vec->x = (_vec->x / (_window_size.x));
 	_vec->y = (_vec->y / (_window_size.y));
 }
@@ -114,11 +112,10 @@ void rde_rendering_generate_gl_vertex_config_for_shader(rde_shader* _shader) {
 }
 
 void rde_rendering_reset_batch_2d() {
-	memset(current_batch_2d.vertices, 0, RDE_MAX_VERTICES_PER_BATCH);
 	current_batch_2d.shader = nullptr;
+	current_batch_2d.texture = nullptr;
+	memset(current_batch_2d.vertices, 0, RDE_MAX_VERTICES_PER_BATCH);
 	current_batch_2d.amount_of_vertices = 0;
-	current_batch_2d.texture_id = -1;
-	current_drawing_texture = nullptr;
 }
 
 void rde_rendering_try_create_batch_2d(rde_shader* _shader, rde_texture* _texture) {
@@ -127,8 +124,7 @@ void rde_rendering_try_create_batch_2d(rde_shader* _shader, rde_texture* _textur
 	}
 
 	if(_texture != nullptr) {
-		current_drawing_texture = _texture;
-		current_batch_2d.texture_id = _texture->opengl_texture_id;
+		current_batch_2d.texture = _texture;
 	}
 }
 
@@ -145,9 +141,9 @@ void rde_rendering_flush_batch_2d() {
 	glBindVertexArray(current_batch_2d.shader->vertex_array_object);
 	rde_util_check_opengl_error("After glBindVertexArray");
 
-	if(current_batch_2d.texture_id >= 0) {
+	if(current_batch_2d.texture != nullptr) {
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, current_batch_2d.texture_id);
+		glBindTexture(GL_TEXTURE_2D, current_batch_2d.texture->opengl_texture_id);
 		rde_util_check_opengl_error("After glBindTexture");
 	}
 
@@ -171,7 +167,7 @@ void rde_rendering_flush_batch_2d() {
 void rde_rendering_try_flush_batch_2d(rde_shader* _shader, rde_texture* _texture, size_t _extra_vertices) {
 	bool _vertex_ok = current_batch_2d.amount_of_vertices + _extra_vertices <= RDE_MAX_VERTICES_PER_BATCH;
 	bool _shader_ok = current_batch_2d.shader == _shader;
-	bool _texture_ok = _texture == nullptr || current_batch_2d.texture_id == _texture->opengl_texture_id;
+	bool _texture_ok = _texture == nullptr || current_batch_2d.texture->opengl_texture_id == _texture->opengl_texture_id;
 	if(_vertex_ok && _shader_ok && _texture_ok) {
 		return;
 	}
@@ -519,7 +515,7 @@ void rde_rendering_set_background_color(const rde_color _color) {
 void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
 	//assert(current_drawing_camera == nullptr || _window == nullptr && "Tried to begin drawing again before ending the previous one");
 	current_drawing_camera = _camera;
-	current_drawing_window = _window;
+	current_batch_2d.window = _window;
 }
 
 void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window) {
@@ -773,7 +769,7 @@ void rde_rendering_end_drawing_2d() {
 	rde_rendering_flush_batch_2d();
 	rde_rendering_reset_batch_2d();
 	current_drawing_camera = nullptr;
-	current_drawing_window = nullptr;
+	current_batch_2d.window = nullptr;
 	statistics.number_of_drawcalls = 0;
 }
 

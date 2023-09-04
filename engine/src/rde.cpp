@@ -99,9 +99,11 @@ struct rde_atlas {
 
 struct rde_batch_2d {
 	rde_shader* shader = nullptr;
+	rde_window* window = nullptr;
+	rde_texture* texture = nullptr;
+
 	rde_vertex_2d vertices[RDE_MAX_VERTICES_PER_BATCH];
 	size_t amount_of_vertices = 0;
-	int texture_id = -1;
 };
 
 struct rde_batch_3d {
