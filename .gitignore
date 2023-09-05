@@ -5,3 +5,7 @@ build/
 test/
 
 build_copy_deps.bat
+
+tools/atlas_generator/test_dir/
+tools/atlas_generator/test_dir_2/
+tools/atlas_generator/test_dir_2/*.png

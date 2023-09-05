@@ -1,0 +1,410 @@
+"test_dir_2" [
+	"circleLoadingBar" [
+		"position" [0, 0],
+		"size" [938, 939]
+	],
+	"outlineBubble" [
+		"position" [940, 0],
+		"size" [279, 279]
+	],
+	"fillBubble" [
+		"position" [1221, 0],
+		"size" [273, 273]
+	],
+	"emptyLifeBubble" [
+		"position" [1496, 0],
+		"size" [192, 192]
+	],
+	"popUp70Corner" [
+		"position" [1690, 0],
+		"size" [160, 160]
+	],
+	"popUp" [
+		"position" [1852, 0],
+		"size" [190, 142]
+	],
+	"popUp60Corner" [
+		"position" [0, 941],
+		"size" [140, 140]
+	],
+	"fillAndBgrScrollBarVertical" [
+		"position" [142, 941],
+		"size" [15, 132]
+	],
+	"duck" [
+		"position" [159, 941],
+		"size" [128, 128]
+	],
+	"popUp50Corner" [
+		"position" [289, 941],
+		"size" [120, 120]
+	],
+	"popUp40Corner" [
+		"position" [411, 941],
+		"size" [100, 100]
+	],
+	"shadow" [
+		"position" [513, 941],
+		"size" [1355, 96]
+	],
+	"inputThemeDark" [
+		"position" [1870, 941],
+		"size" [92, 92]
+	],
+	"inputSelectedThemeYellow" [
+		"position" [0, 1083],
+		"size" [92, 92]
+	],
+	"inputSelectedThemeRed" [
+		"position" [94, 1083],
+		"size" [92, 92]
+	],
+	"inputSelectedThemePurple" [
+		"position" [188, 1083],
+		"size" [92, 92]
+	],
+	"inputSelectedThemePink" [
+		"position" [282, 1083],
+		"size" [92, 92]
+	],
+	"inputSelectedThemeGreen" [
+		"position" [376, 1083],
+		"size" [92, 92]
+	],
+	"inputSelectedThemeDark" [
+		"position" [470, 1083],
+		"size" [92, 92]
+	],
+	"inputThemePurple" [
+		"position" [564, 1083],
+		"size" [92, 92]
+	],
+	"inputThemeGreen" [
+		"position" [658, 1083],
+		"size" [92, 92]
+	],
+	"inputThemePink" [
+		"position" [752, 1083],
+		"size" [92, 92]
+	],
+	"inputThemeRed" [
+		"position" [846, 1083],
+		"size" [92, 92]
+	],
+	"inputThemeYellow" [
+		"position" [940, 1083],
+		"size" [92, 92]
+	],
+	"outlinePanel" [
+		"position" [1034, 1083],
+		"size" [92, 92]
+	],
+	"panel" [
+		"position" [1128, 1083],
+		"size" [92, 92]
+	],
+	"buttonPurpleLock" [
+		"position" [1222, 1083],
+		"size" [90, 88]
+	],
+	"buttonYellowLock" [
+		"position" [1314, 1083],
+		"size" [90, 88]
+	],
+	"buttonGreenPressed" [
+		"position" [1406, 1083],
+		"size" [90, 88]
+	],
+	"buttonPurplePressed" [
+		"position" [1498, 1083],
+		"size" [90, 88]
+	],
+	"buttonRedPressed" [
+		"position" [1590, 1083],
+		"size" [90, 88]
+	],
+	"buttonYellowPressed" [
+		"position" [1682, 1083],
+		"size" [90, 88]
+	],
+	"buttonRedLock" [
+		"position" [1774, 1083],
+		"size" [90, 88]
+	],
+	"buttonPinkLock" [
+		"position" [1866, 1083],
+		"size" [90, 88]
+	],
+	"buttonPinkPressed" [
+		"position" [1958, 1083],
+		"size" [90, 88]
+	],
+	"buttonGreenLock" [
+		"position" [0, 1177],
+		"size" [90, 88]
+	],
+	"buttonPink" [
+		"position" [92, 1177],
+		"size" [83, 85]
+	],
+	"buttonPink2" [
+		"position" [177, 1177],
+		"size" [83, 85]
+	],
+	"buttonPink2Highlighted" [
+		"position" [262, 1177],
+		"size" [87, 85]
+	],
+	"buttonPink2Lock" [
+		"position" [351, 1177],
+		"size" [87, 85]
+	],
+	"buttonPink2Pressed" [
+		"position" [440, 1177],
+		"size" [87, 85]
+	],
+	"buttonPinkHighlighted" [
+		"position" [529, 1177],
+		"size" [87, 85]
+	],
+	"buttonPurple Highlighted" [
+		"position" [618, 1177],
+		"size" [87, 85]
+	],
+	"buttonPurple" [
+		"position" [707, 1177],
+		"size" [83, 85]
+	],
+	"buttonPurple2" [
+		"position" [792, 1177],
+		"size" [83, 85]
+	],
+	"buttonPurple2Lock" [
+		"position" [877, 1177],
+		"size" [87, 85]
+	],
+	"buttonPurple2Pressed" [
+		"position" [966, 1177],
+		"size" [87, 85]
+	],
+	"buttonRed Highlighted" [
+		"position" [1055, 1177],
+		"size" [87, 85]
+	],
+	"buttonRed" [
+		"position" [1144, 1177],
+		"size" [83, 85]
+	],
+	"buttonYellow" [
+		"position" [1229, 1177],
+		"size" [83, 85]
+	],
+	"buttonYellowHighlighted" [
+		"position" [1314, 1177],
+		"size" [87, 85]
+	],
+	"buttonOutline" [
+		"position" [1403, 1177],
+		"size" [83, 85]
+	],
+	"buttonDarkHighlited" [
+		"position" [1488, 1177],
+		"size" [87, 85]
+	],
+	"buttonDark" [
+		"position" [1577, 1177],
+		"size" [83, 85]
+	],
+	"buttonDarkLock" [
+		"position" [1662, 1177],
+		"size" [87, 85]
+	],
+	"buttonDarkPressed" [
+		"position" [1751, 1177],
+		"size" [87, 85]
+	],
+	"buttonGreen Highlighted" [
+		"position" [1840, 1177],
+		"size" [87, 85]
+	],
+	"buttonGreen" [
+		"position" [1929, 1177],
+		"size" [83, 85]
+	],
+	"buttonNormal" [
+		"position" [0, 1267],
+		"size" [87, 85]
+	],
+	"buttonNormalHighligheted" [
+		"position" [89, 1267],
+		"size" [87, 85]
+	],
+	"buttonNormalLock" [
+		"position" [178, 1267],
+		"size" [87, 85]
+	],
+	"buttonNormalPressed" [
+		"position" [267, 1267],
+		"size" [83, 85]
+	],
+	"buttonOutlineHighlighted" [
+		"position" [352, 1267],
+		"size" [87, 85]
+	],
+	"buttonPurple2Highlighted" [
+		"position" [441, 1267],
+		"size" [87, 85]
+	],
+	"buttonOutlineLock" [
+		"position" [530, 1267],
+		"size" [87, 85]
+	],
+	"buttonOutlinePressed" [
+		"position" [619, 1267],
+		"size" [87, 85]
+	],
+	"popUp30Corner" [
+		"position" [708, 1267],
+		"size" [80, 80]
+	],
+	"buttonExit" [
+		"position" [790, 1267],
+		"size" [64, 64]
+	],
+	"rectangleUIMaks" [
+		"position" [856, 1267],
+		"size" [64, 64]
+	],
+	"circleUIMask" [
+		"position" [922, 1267],
+		"size" [64, 64]
+	],
+	"bgrToggleButton" [
+		"position" [988, 1267],
+		"size" [153, 63]
+	],
+	"handle" [
+		"position" [1143, 1267],
+		"size" [61, 61]
+	],
+	"elipseWithOutline" [
+		"position" [1206, 1267],
+		"size" [57, 57]
+	],
+	"bgrRadiobitton" [
+		"position" [1265, 1267],
+		"size" [57, 57]
+	],
+	"fillSliderBar" [
+		"position" [1324, 1267],
+		"size" [61, 39]
+	],
+	"fillAndBgrSliderBar" [
+		"position" [1387, 1267],
+		"size" [102, 39]
+	],
+	"playIcon" [
+		"position" [1491, 1267],
+		"size" [32, 32]
+	],
+	"sprite" [
+		"position" [1525, 1267],
+		"size" [32, 32]
+	],
+	"caret" [
+		"position" [1559, 1267],
+		"size" [1, 32]
+	],
+	"compileIcon" [
+		"position" [1562, 1267],
+		"size" [32, 32]
+	],
+	"checkboxDark" [
+		"position" [1596, 1267],
+		"size" [24, 24]
+	],
+	"fillAndBgrSmallSliderBar" [
+		"position" [1622, 1267],
+		"size" [102, 23]
+	],
+	"fillSmallSliderBar" [
+		"position" [1726, 1267],
+		"size" [61, 23]
+	],
+	"anchorTopMiddle" [
+		"position" [1789, 1267],
+		"size" [16, 16]
+	],
+	"anchorTopLeft" [
+		"position" [1807, 1267],
+		"size" [16, 16]
+	],
+	"anchorMiddleRight" [
+		"position" [1825, 1267],
+		"size" [16, 16]
+	],
+	"anchorBottomLeft" [
+		"position" [1843, 1267],
+		"size" [16, 16]
+	],
+	"anchorBottomMiddle" [
+		"position" [1861, 1267],
+		"size" [16, 16]
+	],
+	"anchorTopRight" [
+		"position" [1879, 1267],
+		"size" [16, 16]
+	],
+	"anchorBottomRight" [
+		"position" [1897, 1267],
+		"size" [16, 16]
+	],
+	"rotateIcon" [
+		"position" [1915, 1267],
+		"size" [16, 16]
+	],
+	"scaleIcon" [
+		"position" [1933, 1267],
+		"size" [16, 16]
+	],
+	"anchorMiddleLeft" [
+		"position" [1951, 1267],
+		"size" [16, 16]
+	],
+	"sliderBar" [
+		"position" [0, 1354],
+		"size" [690, 16]
+	],
+	"anchorMiddleMiddle" [
+		"position" [692, 1354],
+		"size" [16, 16]
+	],
+	"stretchFull" [
+		"position" [710, 1354],
+		"size" [16, 16]
+	],
+	"stretchHorizontal" [
+		"position" [728, 1354],
+		"size" [16, 16]
+	],
+	"stretchNone" [
+		"position" [746, 1354],
+		"size" [16, 16]
+	],
+	"stretchVertical" [
+		"position" [764, 1354],
+		"size" [16, 16]
+	],
+	"translateIcon" [
+		"position" [782, 1354],
+		"size" [16, 16]
+	],
+	"fillAndBgrScrollBarHorizontal" [
+		"position" [800, 1354],
+		"size" [132, 15]
+	],
+	"line" [
+		"position" [0, 1372],
+		"size" [1291, 1]
+	]
+]
