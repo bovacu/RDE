@@ -15,7 +15,8 @@
 #endif
 
 #ifdef RDE_AUDIO_MODULE
-#include "SDL2/SDL_mixer.h"
+#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio/miniaudio.h"
 #endif
 
 #define WIN_EVENT_INIT (RDE_EVENT_TYPE_WINDOW_BEGIN + 1)
