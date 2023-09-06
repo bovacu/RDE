@@ -68,22 +68,25 @@ void dump_atlas_to_final_texture(std::vector<rde_atlas_rect>& _rects, const char
 	stbi_write_png(_full_name, _max_image_size, _max_image_size, 4, _atlas_pixels, sizeof(stbi_uc) * _max_image_size * 4);
 }
 
-#define QUOTED_NL(_x) "\"" + std::string(_x) + "\" [\n"
-#define QUOTED(_x) "\"" + std::string(_x) + "\" ["
+#define QUOTED(_x) "\"" + std::string(_x) + "\": "
+#define QUOTED_BRACE_NL(_x) "\"" + std::string(_x) + "\": {\n"
+#define QUOTED_BRACE(_x) "\"" + std::string(_x) + "\": {"
+#define QUOTED_BRACKETS(_x) "\"" + std::string(_x) + "\": ["
+#define QUOTED_BRACKETS_NL(_x) "\"" + std::string(_x) + "\": [\n"
 
 void dump_atlas_to_config_file(std::vector<rde_atlas_rect>& _rects, const char* _atlas_name) {
-	std::string _data = QUOTED_NL(_atlas_name);
+	std::string _data = std::string("{\n");
 
 	for(size_t _i = 0; _i < _rects.size(); _i++) {
 		rde_atlas_rect* _rect = &_rects[_i];
 		_rect->name[strlen(_rect->name) - 4] = 0;
-		_data += std::string("\t") + QUOTED_NL(_rect->name);
-		_data += std::string("\t\t") + QUOTED("position") + std::to_string(_rect->x) + ", " + std::to_string(_rect->y) + "],\n";
-		_data += std::string("\t\t") + QUOTED("size") + std::to_string(_rect->w) + ", " + std::to_string(_rect->h) + "]\n";
-		_data += std::string("\t") + (_i == _rects.size() - 1 ? "]\n" : "],\n");
+		_data += std::string("\t") + QUOTED_BRACE_NL(_rect->name);
+		_data += std::string("\t\t") + QUOTED_BRACKETS("position") + std::to_string(_rect->x) + ", " + std::to_string(_rect->y) + "],\n";
+		_data += std::string("\t\t") + QUOTED_BRACKETS("size") + std::to_string(_rect->w) + ", " + std::to_string(_rect->h) + "]\n";
+		_data += std::string("\t") + (_i == _rects.size() - 1 ? "}\n" : "},\n");
 	}
 
-	_data += "]";
+	_data += "\n}";
 
 	char _full_name[256] = { 0 };
 	snprintf(_full_name, 256, "%s.rde_atlas", _atlas_name);
