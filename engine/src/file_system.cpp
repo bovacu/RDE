@@ -38,5 +38,7 @@ rde_atlas_sub_textures rde_file_system_read_atlas_config(const char* _config_rde
 		};
 	}
 
+	free(_text);
+
 	return _atlas_sub_textures;
 }
