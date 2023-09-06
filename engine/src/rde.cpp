@@ -108,7 +108,7 @@ struct rde_atlas_sub_texture_data {
 typedef std::unordered_map<std::string, rde_texture> rde_atlas_sub_textures;
 struct rde_atlas {
 	rde_texture* texture;
-	rde_atlas_sub_textures data;
+	rde_atlas_sub_textures sub_textures;
 };
 
 struct rde_batch_2d {
