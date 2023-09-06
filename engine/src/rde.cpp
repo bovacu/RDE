@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdarg.h>
+#include <unordered_map>
 
 #include "rde.h"
 #include "SDL2/SDL.h"
@@ -18,6 +19,9 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio/miniaudio.h"
 #endif
+
+#include "json/json_fwd.hpp"
+#include "json/json.hpp"
 
 #define WIN_EVENT_INIT (RDE_EVENT_TYPE_WINDOW_BEGIN + 1)
 #define WIN_EVENT_COUNT (RDE_EVENT_TYPE_WINDOW_END - RDE_EVENT_TYPE_WINDOW_BEGIN)
@@ -80,6 +84,7 @@ struct rde_shader {
 struct rde_texture {
 	int opengl_texture_id = -1;
 	rde_vec_2UI size = { 0, 0 };
+	rde_vec_2UI position = { 0, 0 }; // This is only used for atlases
 	int channels = 0;
 	GLenum internal_format = 0;
 	GLenum data_format = 0;
@@ -94,8 +99,16 @@ struct rde_render_texture {
 	UNIMPLEMENTED_STRUCT()
 };
 
+struct rde_atlas_sub_texture_data {
+	rde_vec_2I position;
+	rde_vec_2I size;
+
+};
+
+typedef std::unordered_map<std::string, rde_texture> rde_atlas_sub_textures;
 struct rde_atlas {
-	UNIMPLEMENTED_STRUCT()
+	rde_texture* texture;
+	rde_atlas_sub_textures data;
 };
 
 struct rde_batch_2d {
@@ -137,6 +150,7 @@ struct rde_engine {
 	rde_shader shaders[RDE_MAX_LOADABLE_SHADERS];
 	rde_window windows[RDE_MAX_NUMBER_OF_WINDOWS];
 	rde_texture textures[RDE_MAX_LOADABLE_TEXTURES];
+	rde_atlas atlases[RDE_MAX_LOADABLE_ATLASES];
 
 	rde_event_func_outer window_events[WIN_EVENT_COUNT];
 	rde_event_func_outer display_events[DISPLAY_EVENT_COUNT];
@@ -146,12 +160,12 @@ rde_engine ENGINE;
 
 #include "math.cpp"
 #include "util.cpp"
+#include "file_system.cpp"
 #include "events.cpp"
 #include "window.cpp"
 #include "rendering.cpp"
 #include "physics.cpp"
 #include "audio.cpp"
-#include "file_system.cpp"
 
 void rde_engine_on_event();
 void rde_engine_on_update(float _dt);

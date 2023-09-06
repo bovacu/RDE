@@ -66,6 +66,7 @@
 #define RDE_MAX_VERTICES_PER_BATCH 50000
 #define RDE_MAX_LOADABLE_SHADERS 256
 #define RDE_MAX_LOADABLE_TEXTURES 512
+#define RDE_MAX_LOADABLE_ATLASES 512
 
 /// ============================== SHADERS =================================
 
@@ -1299,7 +1300,8 @@ RDE_FUNC void rde_rendering_unload_shader(rde_shader* _shader);
 RDE_FUNC rde_texture* rde_rendering_load_texture(const char* _file_path);
 RDE_FUNC void rde_rendering_unload_texture(rde_texture* _texture);
 
-RDE_FUNC rde_texture* rde_rendering_load_atlas(const char* _file_path);
+RDE_FUNC rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _config_path);
+RDE_FUNC rde_texture* rde_rendering_get_atlas_sub_texture(rde_atlas* _atlas, const char* _texture_name);
 RDE_FUNC void rde_rendering_unload_atlas(rde_atlas* _atlas);
 
 RDE_FUNC rde_texture* rde_rendering_create_cpu_texture(const rde_vec_2UI _texture_size);
@@ -1308,8 +1310,6 @@ RDE_FUNC void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_text
 
 RDE_FUNC rde_font* rde_rendering_load_font(const char* _file_path);
 RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
-
-RDE_FUNC rde_texture* rde_rendering_get_atlas_sub_texture(const char* _texture_name);
 
 RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 

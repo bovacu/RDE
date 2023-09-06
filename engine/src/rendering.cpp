@@ -472,15 +472,40 @@ void rde_rendering_unload_texture(rde_texture* _texture) {
 	_texture->file_path = nullptr;
 }
 
-rde_texture* rde_rendering_load_atlas(const char* _file_path) {
-	UNUSED(_file_path);
-	UNIMPLEMENTED("rde_rendering_load_atlas")
+rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _config_path) {
+	rde_texture* _texture = rde_rendering_load_texture(_texture_path);
+	rde_atlas_sub_textures _atlas_sub_textures = rde_file_system_read_atlas_config(_config_path, _texture);
+
+	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_ATLASES; _i++) {
+		rde_atlas* _atlas = &ENGINE.atlases[_i];
+		if(_atlas->texture != nullptr) {
+			continue;
+		}
+
+		_atlas->texture = _texture;
+		_atlas->data = _atlas_sub_textures;
+		return _atlas;
+	}
+
+	assert(_texture != nullptr && "Max number of loaded atlases reached");
 	return nullptr;
 }
 
+rde_texture* rde_rendering_get_atlas_sub_texture(rde_atlas* _atlas, const char* _texture_name) {
+	bool _exists = _atlas->data.find(_texture_name) != _atlas->data.end();
+	if(!_exists) {
+		printf("Error: could not load sub texture %s for atlas at %s \n", _texture_name, _atlas->texture->file_path);
+		assert(false && "Tried to load an inexsitent sub texture in an atlas, check logs");
+	}
+
+	return &_atlas->data[_texture_name];
+}
+
 void rde_rendering_unload_atlas(rde_atlas* _atlas) {
-	UNUSED(_atlas);
-	UNIMPLEMENTED("rde_rendering_unload_atlas")
+	assert(_atlas != nullptr && "Tried to unload a null atlas");
+	_atlas->data = rde_atlas_sub_textures {};
+	rde_rendering_unload_texture(_atlas->texture);
+	_atlas->texture = nullptr;
 }
 
 rde_texture* rde_rendering_create_cpu_texture(const rde_vec_2UI _texture_size) {
@@ -509,13 +534,6 @@ void rde_rendering_unload_font(rde_font* _font) {
 	UNUSED(_font);
 	UNIMPLEMENTED("rde_rendering_unload_font")
 }
-
-rde_texture* rde_rendering_get_atlas_sub_texture(const char* _texture_name){
-	UNUSED(_texture_name);
-	UNIMPLEMENTED("rde_rendering_get_atlas_sub_texture")
-	return nullptr;
-}
-
 
 void rde_rendering_set_background_color(const rde_color _color) {
 	glClearColor((float)_color.r / 255.f, (float)_color.g / 255.f, (float)_color.b / 255.f, (float)_color.a / 255.f);
