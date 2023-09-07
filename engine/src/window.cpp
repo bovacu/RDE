@@ -217,6 +217,15 @@ void rde_window_take_screen_shot(rde_window* _window, const rde_vec_2I _position
 	UNIMPLEMENTED("rde_window_take_screen_shot")
 }
 
+unsigned char* getAreaOfScreenPixels(rde_window* _window, const rde_vec_2I _position, const rde_vec_2I _size) {
+	rde_vec_2I _window_size = rde_window_get_window_size(_window);
+	auto* _pixels = new unsigned char[4 * _window_size.x * _window_size.y];
+	memset(_pixels, 0, 4 * _window_size.x * _window_size.y);
+	glReadPixels((int)(_window_size.x * 0.5f + _position.x - _size.x * 0.5f ), (int)(_window_size.y * 0.5f + _position.y - _size.y * 0.5f),
+	             _size.x, _size.y, GL_RGBA, GL_UNSIGNED_BYTE, _pixels);
+	return _pixels;
+}
+
 float rde_window_get_aspect_ratio(rde_window* _window) {
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	return _window_size.x / (float)_window_size.y;

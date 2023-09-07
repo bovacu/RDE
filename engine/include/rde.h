@@ -1119,6 +1119,11 @@ struct rde_color {
 	unsigned char r, g, b, a;
 };
 
+struct rde_polygon {
+	rde_vec_2I* vertices = nullptr;
+	size_t vertices_count = 0;
+};
+
 struct rde_mesh {
 	UNIMPLEMENTED_STRUCT()
 };
@@ -1206,6 +1211,49 @@ RDE_FUNC int rde_math_get_random_int(int _min_included = INT_MIN, int _max_not_i
 RDE_FUNC float rde_math_get_random_float(float _min_included = FLT_MIN, float _max_not_included = FLT_MAX);
 RDE_FUNC rde_probability rde_math_get_probability(float _normalized_chance_to_happen);
 
+RDE_FUNC void rde_math_convert_world_position_to_screen_coordinates(rde_window* _window, rde_vec_3F* _vec);
+RDE_FUNC void rde_math_convert_world_position_to_screen_coordinates(rde_window* _window, rde_vec_2F* _vec);
+RDE_FUNC void rde_math_convert_world_size_to_screen_size(rde_window* _window, rde_vec_2F* _vec);
+
+#define RDE_DECLARE_CLAMP_FUNCS(_type) \
+RDE_FUNC inline _type rde_math_clamp_##type(_type _value, _type _min, _type _max);
+
+RDE_DECLARE_CLAMP_FUNCS(int)
+RDE_DECLARE_CLAMP_FUNCS(uint)
+RDE_DECLARE_CLAMP_FUNCS(float)
+RDE_DECLARE_CLAMP_FUNCS(double)
+RDE_DECLARE_CLAMP_FUNCS(long)
+RDE_DECLARE_CLAMP_FUNCS(size_t)
+
+RDE_FUNC inline float rde_radians_to_degrees(float _radians);
+RDE_FUNC inline float rde_degrees_to_radians(float _degrees);
+
+#define RDE_DECLARE_EASING_FUNCS(_form, _type) \
+	RDE_FUNC inline float rde_easing_##_form##_##_type(float _current_time, float _start_value, float _change_in_value, float _duration);
+
+RDE_DECLARE_EASING_FUNCS(in, linear)
+RDE_DECLARE_EASING_FUNCS(in, quadratic)
+RDE_DECLARE_EASING_FUNCS(out, quadratic)
+RDE_DECLARE_EASING_FUNCS(in_out, quadratic)
+RDE_DECLARE_EASING_FUNCS(in, cubic)
+RDE_DECLARE_EASING_FUNCS(out, cubic)
+RDE_DECLARE_EASING_FUNCS(in_out, cubic)
+RDE_DECLARE_EASING_FUNCS(in, quartic)
+RDE_DECLARE_EASING_FUNCS(out, quartic)
+RDE_DECLARE_EASING_FUNCS(in_out, quartic)
+RDE_DECLARE_EASING_FUNCS(in, quintic)
+RDE_DECLARE_EASING_FUNCS(out, quintic)
+RDE_DECLARE_EASING_FUNCS(in_out, quintic)
+RDE_DECLARE_EASING_FUNCS(in, sine)
+RDE_DECLARE_EASING_FUNCS(out, sine)
+RDE_DECLARE_EASING_FUNCS(in_out, sine)
+RDE_DECLARE_EASING_FUNCS(in, exponential)
+RDE_DECLARE_EASING_FUNCS(out, exponential)
+RDE_DECLARE_EASING_FUNCS(in_out, exponential)
+RDE_DECLARE_EASING_FUNCS(in, circular)
+RDE_DECLARE_EASING_FUNCS(out, circular)
+RDE_DECLARE_EASING_FUNCS(in_out, circular)
+
 /// ============================ ENGINE =====================================
 
 
@@ -1254,6 +1302,7 @@ RDE_FUNC void rde_window_set_title(rde_window* _window, const char* _title);
 RDE_FUNC bool rde_window_orientation_is_horizontal(rde_window* _window);
 
 RDE_FUNC void rde_window_take_screen_shot(rde_window* _window, const rde_vec_2I _position, const rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension);
+RDE_FUNC unsigned char* getAreaOfScreenPixels(rde_window* _window, const rde_vec_2I _position, const rde_vec_2I _size);
 
 RDE_FUNC float rde_window_get_aspect_ratio(rde_window* _window);
 
@@ -1325,6 +1374,7 @@ RDE_FUNC void rde_rendering_draw_line_3d(const rde_vec_3F _init, const rde_vec_3
 RDE_FUNC void rde_rendering_draw_triangle_2d(const rde_vec_2F _verte_a, const rde_vec_2F _vertex_b, const rde_vec_2F _vertex_c, const rde_color _color, rde_shader* _shader = nullptr);
 RDE_FUNC void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color, rde_shader* _shader = nullptr);
 RDE_FUNC void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_polygon* _polygon, const rde_color _color, const rde_shader* _shader = nullptr);
 
 RDE_FUNC void rde_rendering_draw_texture(rde_transform* _transform, rde_texture* _texture, const rde_color _tintColor = RDE_COLOR_WHITE, rde_shader* _shader = nullptr);
 
