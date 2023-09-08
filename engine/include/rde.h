@@ -890,6 +890,7 @@ SPECIALIZED_VEC2(float, 		rde_vec_2F);
 SPECIALIZED_VEC2(double,		rde_vec_2D);
 SPECIALIZED_VEC2(long,			rde_vec_2L);
 SPECIALIZED_VEC2(unsigned long, rde_vec_2UL);
+SPECIALIZED_VEC2(size_t, 		rde_vec_2ST);
 
 SPECIALIZED_VEC3(int, 			rde_vec_3I);
 SPECIALIZED_VEC3(unsigned int, 	rde_vec_3UI);
@@ -897,6 +898,7 @@ SPECIALIZED_VEC3(float, 		rde_vec_3F);
 SPECIALIZED_VEC3(double,		rde_vec_3D);
 SPECIALIZED_VEC3(long,			rde_vec_3L);
 SPECIALIZED_VEC3(unsigned long, rde_vec_3UL);
+SPECIALIZED_VEC3(size_t, 		rde_vec_3ST);
 
 SPECIALIZED_VEC4(int, 			rde_vec_4I);
 SPECIALIZED_VEC4(unsigned int, 	rde_vec_4UI);
@@ -904,6 +906,7 @@ SPECIALIZED_VEC4(float, 		rde_vec_4F);
 SPECIALIZED_VEC4(double,		rde_vec_4D);
 SPECIALIZED_VEC4(long,			rde_vec_4L);
 SPECIALIZED_VEC4(unsigned long, rde_vec_4UL);
+SPECIALIZED_VEC4(size_t, 		rde_vec_4ST);
 
 SPECIALIZED_MAT2(int, 			rde_mat_2I);
 SPECIALIZED_MAT2(unsigned int, 	rde_mat_2UI);
@@ -911,6 +914,7 @@ SPECIALIZED_MAT2(float, 		rde_mat_2F);
 SPECIALIZED_MAT2(double,		rde_mat_2D);
 SPECIALIZED_MAT2(long,			rde_mat_2L);
 SPECIALIZED_MAT2(unsigned long, rde_mat_2UL);
+SPECIALIZED_MAT2(size_t, 		rde_mat_2ST);
 
 SPECIALIZED_MAT3(int, 			rde_mat_3I);
 SPECIALIZED_MAT3(unsigned int, 	rde_mat_3UI);
@@ -918,6 +922,7 @@ SPECIALIZED_MAT3(float, 		rde_mat_3F);
 SPECIALIZED_MAT3(double,		rde_mat_3D);
 SPECIALIZED_MAT3(long,			rde_mat_3L);
 SPECIALIZED_MAT3(unsigned long, rde_mat_3UL);
+SPECIALIZED_MAT3(size_t, 		rde_mat_3ST);
 
 SPECIALIZED_MAT4(int, 			rde_mat_4I);
 SPECIALIZED_MAT4(unsigned int, 	rde_mat_4UI);
@@ -925,6 +930,7 @@ SPECIALIZED_MAT4(float, 		rde_mat_4F);
 SPECIALIZED_MAT4(double,		rde_mat_4D);
 SPECIALIZED_MAT4(long,			rde_mat_4L);
 SPECIALIZED_MAT4(unsigned long, rde_mat_4UL);
+SPECIALIZED_MAT4(size_t, 		rde_mat_4ST);
 
 struct rde_line {
 	UNIMPLEMENTED_STRUCT()
@@ -1223,6 +1229,7 @@ RDE_DECLARE_CLAMP_FUNCS(uint)
 RDE_DECLARE_CLAMP_FUNCS(float)
 RDE_DECLARE_CLAMP_FUNCS(double)
 RDE_DECLARE_CLAMP_FUNCS(long)
+RDE_DECLARE_CLAMP_FUNCS(ulong)
 RDE_DECLARE_CLAMP_FUNCS(size_t)
 
 RDE_FUNC inline float rde_radians_to_degrees(float _radians);
@@ -1291,18 +1298,18 @@ RDE_FUNC rde_window* rde_window_create_window();
 RDE_FUNC void rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbacks);
 
 RDE_FUNC rde_vec_2I	rde_window_get_window_size(rde_window* _window);
-RDE_FUNC void rde_window_set_window_size(rde_window* _window, const rde_vec_2I _size);
+RDE_FUNC void rde_window_set_window_size(rde_window* _window, rde_vec_2I _size);
 
 RDE_FUNC rde_vec_2I	rde_window_get_position(rde_window* _window);
-RDE_FUNC void rde_window_set_position(rde_window* _window, const rde_vec_2I _position);
+RDE_FUNC void rde_window_set_position(rde_window* _window, rde_vec_2I _position);
 
 RDE_FUNC const char* rde_window_get_title(rde_window* _window);
 RDE_FUNC void rde_window_set_title(rde_window* _window, const char* _title);
 
 RDE_FUNC bool rde_window_orientation_is_horizontal(rde_window* _window);
 
-RDE_FUNC void rde_window_take_screen_shot(rde_window* _window, const rde_vec_2I _position, const rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension);
-RDE_FUNC unsigned char* getAreaOfScreenPixels(rde_window* _window, const rde_vec_2I _position, const rde_vec_2I _size);
+RDE_FUNC void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension);
+RDE_FUNC unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size);
 
 RDE_FUNC float rde_window_get_aspect_ratio(rde_window* _window);
 
@@ -1353,7 +1360,7 @@ RDE_FUNC rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const ch
 RDE_FUNC rde_texture* rde_rendering_get_atlas_sub_texture(rde_atlas* _atlas, const char* _texture_name);
 RDE_FUNC void rde_rendering_unload_atlas(rde_atlas* _atlas);
 
-RDE_FUNC rde_texture* rde_rendering_create_cpu_texture(const rde_vec_2UI _texture_size);
+RDE_FUNC rde_texture* rde_rendering_create_cpu_texture(rde_vec_2UI _texture_size);
 RDE_FUNC void rde_rendering_destroy_cpu_texture(rde_cpu_texture* _cpu_texture);
 RDE_FUNC void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_texture);
 
@@ -1365,18 +1372,18 @@ RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 RDE_FUNC void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window);
 RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window);
 
-RDE_FUNC void rde_rendering_draw_point_2d(const rde_vec_2F _position, const rde_color _color, rde_shader* _shader = nullptr);
-RDE_FUNC void rde_rendering_draw_point_3d(const rde_vec_3F _position, const rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_point_2d(rde_vec_2F _position, rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader = nullptr);
 
-RDE_FUNC void rde_rendering_draw_line_2d(const rde_vec_2F _init, const rde_vec_2F _end, const rde_color _color, rde_shader* _shader = nullptr);
-RDE_FUNC void rde_rendering_draw_line_3d(const rde_vec_3F _init, const rde_vec_3F _end, const rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_line_2d(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader = nullptr);
 
-RDE_FUNC void rde_rendering_draw_triangle_2d(const rde_vec_2F _verte_a, const rde_vec_2F _vertex_b, const rde_vec_2F _vertex_c, const rde_color _color, rde_shader* _shader = nullptr);
-RDE_FUNC void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color, rde_shader* _shader = nullptr);
-RDE_FUNC void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color, rde_shader* _shader = nullptr);
-RDE_FUNC void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_polygon* _polygon, const rde_color _color, const rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_triangle_2d(rde_vec_2F _verte_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_circle_2d(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader = nullptr);
 
-RDE_FUNC void rde_rendering_draw_texture(rde_transform* _transform, rde_texture* _texture, const rde_color _tintColor = RDE_COLOR_WHITE, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_texture(const rde_transform* _transform, rde_texture* _texture, rde_color _tintColor = RDE_COLOR_WHITE, rde_shader* _shader = nullptr);
 
 RDE_FUNC void rde_rendering_end_drawing_2d();
 RDE_FUNC void rde_rendering_end_drawing_3d();

@@ -15,10 +15,10 @@
 #include "glad/glad.h"
 #endif
 
-#ifdef RDE_AUDIO_MODULE
-#define MINIAUDIO_IMPLEMENTATION
-#include "miniaudio/miniaudio.h"
-#endif
+//#ifdef RDE_AUDIO_MODULE
+//#define MINIAUDIO_IMPLEMENTATION
+//#include "miniaudio/miniaudio.h"
+//#endif
 
 #include "json/json_fwd.hpp"
 #include "json/json.hpp"
@@ -89,6 +89,7 @@ struct rde_texture {
 	GLenum internal_format = 0;
 	GLenum data_format = 0;
 	const char* file_path = nullptr;
+	rde_texture* atlas_texture = nullptr;
 };
 
 struct rde_cpu_texture {

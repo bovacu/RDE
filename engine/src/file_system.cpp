@@ -1,28 +1,15 @@
+#include <fstream>
+
 rde_atlas_sub_textures rde_file_system_read_atlas_config(const char* _config_rde_path, rde_texture* _atlas) {
-	FILE* _file = nullptr;
-	char* _text = nullptr;
-
-	#if IS_WINDOWS()
-	errno_t _err = fopen_s(&_file, _config_rde_path, "r");
-	assert(_err == 0 && "File could not be opened");
-	#else
-	_file = fopen(_config_rde_path, "r");
-	assert(_file != nullptr && "File could not be opened");
-	#endif
-
-	long _length = 0;
-	fseek(_file, 0, SEEK_END);
-	_length = ftell(_file);
-	fseek(_file, 0, SEEK_SET);
-	_text = (char*)malloc(sizeof(char) * _length);
-	assert(_text != nullptr && "Could not allocate memory for reading the config file");
-	fread(_text, 1, _length, _file);
-
-	fclose(_file);
+	std::ifstream _stream(_config_rde_path);
+	_stream.seekg(0, std::ios::end);
+	size_t _size = _stream.tellg();
+	std::string _buffer(_size, ' ');
+	_stream.seekg(0);
+	_stream.read(&_buffer[0], _size); 
 
 	rde_atlas_sub_textures _atlas_sub_textures;
-	nlohmann::json _atlas_json = nlohmann::json::parse(_text);
-
+	nlohmann::json _atlas_json = nlohmann::json::parse(_buffer);
 	for (nlohmann::json::iterator _it = _atlas_json.begin(); _it != _atlas_json.end(); _it++) {
 		nlohmann::json _position = _it.value()["position"];
 		nlohmann::json _size = _it.value()["size"];
@@ -35,10 +22,9 @@ rde_atlas_sub_textures rde_file_system_read_atlas_config(const char* _config_rde
 			.internal_format = _atlas->internal_format,
 			.data_format = _atlas->data_format,
 			.file_path = _atlas->file_path,
+			.atlas_texture = _atlas
 		};
 	}
-
-	free(_text);
 
 	return _atlas_sub_textures;
 }

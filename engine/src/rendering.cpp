@@ -489,7 +489,7 @@ void rde_rendering_unload_atlas(rde_atlas* _atlas) {
 	_atlas->texture = nullptr;
 }
 
-rde_texture* rde_rendering_create_cpu_texture(const rde_vec_2UI _texture_size) {
+rde_texture* rde_rendering_create_cpu_texture(rde_vec_2UI _texture_size) {
 	UNUSED(_texture_size);
 	UNIMPLEMENTED("rde_rendering_create_cpu_texture")
 	return nullptr;
@@ -516,7 +516,7 @@ void rde_rendering_unload_font(rde_font* _font) {
 	UNIMPLEMENTED("rde_rendering_unload_font")
 }
 
-void rde_rendering_set_background_color(const rde_color _color) {
+void rde_rendering_set_background_color(rde_color _color) {
 	glClearColor((float)_color.r / 255.f, (float)_color.g / 255.f, (float)_color.b / 255.f, (float)_color.a / 255.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
@@ -546,21 +546,21 @@ void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window) {
 	UNIMPLEMENTED("rde_rendering_start_drawing_3d")
 }
 
-void rde_rendering_draw_point_2d(const rde_vec_2F _position, const rde_color _color, rde_shader* _shader) {
+void rde_rendering_draw_point_2d(rde_vec_2F _position, rde_color _color, rde_shader* _shader) {
 	UNUSED(_position);
 	UNUSED(_color);
 	UNUSED(_shader);
 	UNIMPLEMENTED("rde_rendering_draw_point_2d")
 }
 
-void rde_rendering_draw_point_3d(const rde_vec_3F _position, const rde_color _color, rde_shader* _shader) {
+void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader) {
 	UNUSED(_position);
 	UNUSED(_color);
 	UNUSED(_shader);
 	UNIMPLEMENTED("rde_rendering_draw_point_3d")
 }
 
-void rde_rendering_draw_line_2d(const rde_vec_2F _init, const rde_vec_2F _end, const rde_color _color, rde_shader* _shader) {
+void rde_rendering_draw_line_2d(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader) {
 	UNUSED(_init);
 	UNUSED(_end);
 	UNUSED(_color);
@@ -568,7 +568,7 @@ void rde_rendering_draw_line_2d(const rde_vec_2F _init, const rde_vec_2F _end, c
 	UNIMPLEMENTED("rde_rendering_draw_line_2d")
 }
 
-void rde_rendering_draw_triangle_2d(const rde_vec_2F _vertex_a, const rde_vec_2F _vertex_b, const rde_vec_2F _vertex_c, const rde_color _color, rde_shader* _shader) {
+void rde_rendering_draw_triangle_2d(rde_vec_2F _vertex_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader) {
 	const size_t _triangle_vertex_count = 3;
 	
 	rde_shader* _drawing_shader = _shader == nullptr ? ENGINE.color_shader_2d : _shader;
@@ -605,7 +605,7 @@ void rde_rendering_draw_triangle_2d(const rde_vec_2F _vertex_a, const rde_vec_2F
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_2;
 }
 
-void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_vec_2F _top_right, const rde_color _color, rde_shader* _shader) {
+void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader) {
 	const size_t _triangle_vertex_count = 6;
 	
 	rde_shader* _drawing_shader = _shader == nullptr ? ENGINE.color_shader_2d : _shader;
@@ -675,7 +675,7 @@ void rde_rendering_draw_rectangle_2d(const rde_vec_2F _bottom_left, const rde_ve
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
 
-void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, const rde_color _color, rde_shader* _shader) {
+void rde_rendering_draw_circle_2d(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader) {
 	UNUSED(_position);
 	UNUSED(_radius);
 	UNUSED(_color);
@@ -683,7 +683,7 @@ void rde_rendering_draw_circle_2d(const rde_vec_2F _position, float _radius, con
 	UNIMPLEMENTED("rde_rendering_draw_circle_2d")
 }
 
-void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_polygon* _polygon, const rde_color _color, const rde_shader* _shader) {
+void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader) {
 	UNUSED(_transform)
 	UNUSED(_polygon)
 	UNUSED(_color)
@@ -692,35 +692,46 @@ void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_po
 	UNIMPLEMENTED("rde_rendering_draw_polygon_2d")
 }
 
-void rde_rendering_draw_texture(rde_transform* _transform, rde_texture* _texture, const rde_color _tintColor, rde_shader* _shader) {
+void rde_rendering_draw_texture(const rde_transform* _transform, rde_texture* _texture, rde_color _tintColor, rde_shader* _shader) {
 	const size_t _triangle_vertex_count = 6;
-	
+
+	glm::mat4 _transformation_matrix = rde_rendering_transform_to_glm_mat4(_transform);
+
 	rde_shader* _drawing_shader = _shader == nullptr ? ENGINE.texture_shader_2d : _shader;
 	rde_rendering_try_create_batch_2d(_drawing_shader, _texture);
 	rde_rendering_try_flush_batch_2d(_drawing_shader, _texture, _triangle_vertex_count);
 	
 	rde_vec_2F _screen_pos { _transform->position.x, _transform->position.y };
 	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_screen_pos);
+	_transformation_matrix[3][0] = _screen_pos.x;
+	_transformation_matrix[3][1] = _screen_pos.y;
 
-	//rde_vec_2F _texture_origin = { 0.f, 0.f };
 	rde_vec_2F _texture_origin_norm = { 0.f, 0.f };
-
-	rde_vec_2F _texture_tile_size = { (float)_texture->size.x, (float)_texture->size.y };
 	rde_vec_2F _texture_tile_size_norm = { 1.f, 1.f };
+	rde_vec_2F _texture_tile_size = { (float)_texture->size.x, (float)_texture->size.y };
+
+	if(_texture->atlas_texture != nullptr) {
+		_texture_origin_norm.x = _texture->position.x / (float)_texture->atlas_texture->size.x;
+		_texture_origin_norm.y = _texture->position.y / (float)_texture->atlas_texture->size.y;
+	
+		_texture_tile_size_norm.x = _texture_tile_size.x / (float)_texture->atlas_texture->size.x;
+		_texture_tile_size_norm.y = _texture_tile_size.y / (float)_texture->atlas_texture->size.y;
+	}
+
 	rde_vec_2F _texture_tile_size_on_screen = _texture_tile_size;
 	rde_math_convert_world_size_to_screen_size(current_batch_2d.window, &_texture_tile_size_on_screen);
-
-	glm::mat4 _transformation_matrix = rde_rendering_transform_to_glm_mat4(_transform);
 
 	glm::vec4 _bottom_left_texture_position  = { -_texture_tile_size_on_screen.x, -_texture_tile_size_on_screen.y, 0.0f, 1.0f };
 	glm::vec4 _bottom_right_texture_position = {  _texture_tile_size_on_screen.x, -_texture_tile_size_on_screen.y, 0.0f, 1.0f };
 	glm::vec4 _top_right_texture_position    = {  _texture_tile_size_on_screen.x,  _texture_tile_size_on_screen.y, 0.0f, 1.0f };
 	glm::vec4 _top_left_texture_position     = { -_texture_tile_size_on_screen.x,  _texture_tile_size_on_screen.y, 0.0f, 1.0f };
 
-	glm::vec2 _bottom_left_texture_uv_coord   = { _texture_origin_norm.x                            , _texture_origin_norm.y };
-	glm::vec2 _bottom_right_texture_uv_coord  = { _texture_origin_norm.x + _texture_tile_size_norm.x, _texture_origin_norm.y };
-	glm::vec2 _top_right_texture_uv_coord     = { _texture_origin_norm.x + _texture_tile_size_norm.x, _texture_origin_norm.y + _texture_tile_size_norm.y };
-	glm::vec2 _top_left_texture_uv_coord      = { _texture_origin_norm.x                         	  , _texture_origin_norm.y + _texture_tile_size_norm.y };
+	// The 1.f - xxx is needed as we need to invert the coordinates on the Y axis, the exported atlas (by RDE tool) assumes (0, 0)
+	// on top-left, but OpenGL coords for UV origin is bottom-left.
+	glm::vec2 _top_left_texture_uv_coord   	 = { _texture_origin_norm.x                            , 1.f - _texture_origin_norm.y };
+	glm::vec2 _top_right_texture_uv_coord  	 = { _texture_origin_norm.x + _texture_tile_size_norm.x, 1.f - _texture_origin_norm.y };
+	glm::vec2 _bottom_right_texture_uv_coord = { _texture_origin_norm.x + _texture_tile_size_norm.x, 1.f - (_texture_origin_norm.y + _texture_tile_size_norm.y) };
+	glm::vec2 _bottom_left_texture_uv_coord  = { _texture_origin_norm.x                            , 1.f - (_texture_origin_norm.y + _texture_tile_size_norm.y) };
 
 	auto _color = RDE_COLOR_TO_HEX_COLOR(_tintColor);
 
@@ -784,7 +795,7 @@ void rde_rendering_draw_texture(rde_transform* _transform, rde_texture* _texture
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
 
-void rde_rendering_draw_line_3d(const rde_vec_3F _init, const rde_vec_3F _end, const rde_color _color, rde_shader* _shader) {
+void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader) {
 	UNUSED(_init);
 	UNUSED(_end);
 	UNUSED(_color);

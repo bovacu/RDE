@@ -182,7 +182,7 @@ rde_vec_2I rde_window_get_window_size(rde_window* _window) {
 	SDL_GetWindowSize(_window->sdl_window, &_size.x, &_size.y);
 	return _size;
 }
-void rde_window_set_window_size(rde_window* _window, const rde_vec_2I _size) {
+void rde_window_set_window_size(rde_window* _window, rde_vec_2I _size) {
 	SDL_SetWindowSize(_window->sdl_window, _size.x, _size.y);
 }
 
@@ -192,7 +192,7 @@ rde_vec_2I rde_window_get_position(rde_window* _window) {
 	return _position;
 }
 
-void rde_window_set_position(rde_window* _window, const rde_vec_2I _position) {
+void rde_window_set_position(rde_window* _window, rde_vec_2I _position) {
 	SDL_SetWindowPosition(_window->sdl_window, _position.x, _position.y);
 }
 
@@ -209,7 +209,7 @@ bool rde_window_orientation_is_horizontal(rde_window* _window) {
 	return _window_size.x >= _window_size.y;
 }
 
-void rde_window_take_screen_shot(rde_window* _window, const rde_vec_2I _position, const rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension) {
+void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension) {
 	UNUSED(_window)
 	UNUSED(_position)
 	UNUSED(_size_of_rectangle)
@@ -217,7 +217,7 @@ void rde_window_take_screen_shot(rde_window* _window, const rde_vec_2I _position
 	UNIMPLEMENTED("rde_window_take_screen_shot")
 }
 
-unsigned char* getAreaOfScreenPixels(rde_window* _window, const rde_vec_2I _position, const rde_vec_2I _size) {
+unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size) {
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	auto* _pixels = new unsigned char[4 * _window_size.x * _window_size.y];
 	memset(_pixels, 0, 4 * _window_size.x * _window_size.y);
