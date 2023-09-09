@@ -2,12 +2,27 @@
 void rde_events_window_create_events();
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_resize, window_callbacks, on_window_resize, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_focused_by_mouse, window_callbacks, on_window_focused_by_mouse, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_unfocused_by_mouse, window_callbacks, on_window_unfocused_by_mouse, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_unfocused_by_mouse, window_callbacks, on_window_unfocused_by_mouse, {
+    memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
+	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_focused_by_keyboard, window_callbacks, on_window_focused_by_keyboard, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_unfocused_by_keyboard, window_callbacks, on_window_unfocused_by_keyboard, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_moved, window_callbacks, on_window_moved, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_minimized, window_callbacks, on_window_minimized, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_maximized, window_callbacks, on_window_maximized, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_unfocused_by_keyboard, window_callbacks, on_window_unfocused_by_keyboard, {
+	memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
+	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_moved, window_callbacks, on_window_moved, {
+    memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
+	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_minimized, window_callbacks, on_window_minimized, {
+    memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
+	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_maximized, window_callbacks, on_window_maximized, {
+    memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
+	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_closed, window_callbacks, on_window_closed, { 
 	rde_window_destroy_window(_window); 
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
@@ -25,23 +40,45 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_connected, display_callbacks, o
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_disconnected, display_callbacks, on_display_disconnected, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_changed_orientation, display_callbacks, on_display_changed_orientation, {})
 
+void rde_events_key_create_events();
+void rde_events_on_key_pressed_event(rde_window* _window, rde_event* _event) {
+	if(_window->key_states[_event->data.key_event_data.key] == RDE_INPUT_STATUS_UNINITIALIZED || _window->key_states[_event->data.key_event_data.key] == RDE_INPUT_STATUS_JUST_RELEASED) {
+		_window->key_states[_event->data.key_event_data.key] = RDE_INPUT_STATUS_JUST_PRESSED;
+	} else if(_window->key_states[_event->data.key_event_data.key] == RDE_INPUT_STATUS_JUST_PRESSED) {
+		_window->key_states[_event->data.key_event_data.key] = RDE_INPUT_STATUS_KEEP_PRESSED;
+	}
+}
+
+void rde_events_on_key_released_event(rde_window* _window, rde_event* _event) {
+	_window->key_states[_event->data.key_event_data.key] = RDE_INPUT_STATUS_JUST_RELEASED;
+}
+
+
 void rde_events_window_create_events() {
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - WIN_EVENT_INIT] 				= &window_resize;
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOUSE_FOCUSED - WIN_EVENT_INIT] 		= &window_focused_by_mouse;
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOUSE_UNFOCUSED - WIN_EVENT_INIT] 		= &window_unfocused_by_mouse;
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_KEYBOARD_FOCUSED - WIN_EVENT_INIT] 		= &window_focused_by_keyboard;
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_KEYBOARD_UNFOCUSED - WIN_EVENT_INIT]	= &window_unfocused_by_keyboard;
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOVED - WIN_EVENT_INIT] 				= &window_moved;
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MINIMIZED - WIN_EVENT_INIT] 			= &window_minimized;
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MAXIMIZED - WIN_EVENT_INIT] 			= &window_maximized;
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_CLOSED - WIN_EVENT_INIT] 				= &window_closed;
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED - WIN_EVENT_INIT] 		= &window_display_changed;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - RDE_WIN_EVENT_INIT] = &window_resize;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOUSE_FOCUSED - RDE_WIN_EVENT_INIT] = &window_focused_by_mouse;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOUSE_UNFOCUSED - RDE_WIN_EVENT_INIT] = &window_unfocused_by_mouse;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_KEYBOARD_FOCUSED - RDE_WIN_EVENT_INIT] = &window_focused_by_keyboard;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_KEYBOARD_UNFOCUSED - RDE_WIN_EVENT_INIT]	= &window_unfocused_by_keyboard;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOVED - RDE_WIN_EVENT_INIT] = &window_moved;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MINIMIZED - RDE_WIN_EVENT_INIT] = &window_minimized;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MAXIMIZED - RDE_WIN_EVENT_INIT] = &window_maximized;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_CLOSED - RDE_WIN_EVENT_INIT] = &window_closed;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED - RDE_WIN_EVENT_INIT] = &window_display_changed;
 }
 
 void rde_events_display_create_events() {
-	ENGINE.display_events[RDE_EVENT_TYPE_DISPLAY_CONNECTED - DISPLAY_EVENT_INIT] 			= &display_connected;
-	ENGINE.display_events[RDE_EVENT_TYPE_DISPLAY_DISCONNECTED - DISPLAY_EVENT_INIT] 		= &display_disconnected;
-	ENGINE.display_events[RDE_EVENT_TYPE_DISPLAY_CHANGED_ORIENTATION - DISPLAY_EVENT_INIT] = &display_changed_orientation;
+	ENGINE.display_events[RDE_EVENT_TYPE_DISPLAY_CONNECTED - RDE_DISPLAY_EVENT_INIT] = &display_connected;
+	ENGINE.display_events[RDE_EVENT_TYPE_DISPLAY_DISCONNECTED - RDE_DISPLAY_EVENT_INIT] = &display_disconnected;
+	ENGINE.display_events[RDE_EVENT_TYPE_DISPLAY_CHANGED_ORIENTATION - RDE_DISPLAY_EVENT_INIT] = &display_changed_orientation;
+}
+
+void rde_events_key_create_events() {
+	ENGINE.key_events[RDE_EVENT_TYPE_KEY_PRESSED - RDE_KEY_EVENT_INIT] = &rde_events_on_key_pressed_event;
+	ENGINE.key_events[RDE_EVENT_TYPE_KEY_RELEASED - RDE_KEY_EVENT_INIT] = &rde_events_on_key_released_event;
+	// TODO: implement the other ones:
+	//		- RDE_EVENT_TYPE_KEY_TYPED
+	//		- RDE_EVENT_TYPE_TEXT_TYPED
 }
 
 void rde_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
@@ -106,26 +143,45 @@ void rde_sdl_to_rde_helper_transform_display_event(SDL_Event* _sdl_event, rde_ev
 	}
 }
 
+void rde_sdl_to_rde_helper_transform_keyboard_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
+	_rde_event->time_stamp = _sdl_event->display.timestamp;
+	_rde_event->window_id = _sdl_event->window.windowID;
+
+	switch (_sdl_event->key.state) {
+		case SDL_PRESSED : {
+			_rde_event->type = RDE_EVENT_TYPE_KEY_PRESSED;
+		} break;
+
+		case SDL_RELEASED: {
+			_rde_event->type = RDE_EVENT_TYPE_KEY_RELEASED;
+		} break;
+	}
+
+	_rde_event->data.key_event_data.key = (RDE_KEYBOARD_KEY_)_sdl_event->key.keysym.scancode;
+}
+
 rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 
 	rde_event _event;
 
 	switch(_sdl_event->type) {
 		case SDL_WINDOWEVENT:	rde_sdl_to_rde_helper_transform_window_event(_sdl_event, &_event); break;
+		
 		case SDL_DISPLAYEVENT:  rde_sdl_to_rde_helper_transform_display_event(_sdl_event, &_event); break;
+		
+		case SDL_KEYDOWN:
+		case SDL_KEYUP: rde_sdl_to_rde_helper_transform_keyboard_event(_sdl_event, &_event); break;
 	}
 
 	return _event;
 }
 
-
-
 // ======================= API ===========================
 
 void rde_events_window_consume_events(rde_window* _window, rde_event* _event) {
-	size_t _event_index = _event->type - WIN_EVENT_INIT;
+	size_t _event_index = _event->type - RDE_WIN_EVENT_INIT;
 
-	if(_event_index >= 0 && _event_index < WIN_EVENT_COUNT) {
+	if(_event_index >= 0 && _event_index < RDE_WIN_EVENT_COUNT) {
 		ENGINE.window_events[_event_index](_window, _event);
 	} else {
 		printf("Window Event: %i, not handled \n", _event->type);
@@ -134,12 +190,22 @@ void rde_events_window_consume_events(rde_window* _window, rde_event* _event) {
 
 
 void rde_events_display_consume_events(rde_window* _window, rde_event* _event) {
-	size_t _event_index = _event->type - DISPLAY_EVENT_INIT;
+	size_t _event_index = _event->type - RDE_DISPLAY_EVENT_INIT;
 
-	if(_event_index >= 0 && _event_index < DISPLAY_EVENT_COUNT) {
+	if(_event_index >= 0 && _event_index < RDE_DISPLAY_EVENT_COUNT) {
 		ENGINE.display_events[_event_index](_window, _event);
 	} else {
 		printf("Display Event: %i, not handled \n", _event->type);
+	}
+}
+
+void rde_events_keyboard_consume_events(rde_window* _window, rde_event* _event) {
+	size_t _event_index = _event->type - RDE_KEY_EVENT_INIT;
+
+	if(_event_index >= 0 && _event_index < RDE_KEY_EVENT_INIT) {
+		ENGINE.key_events[_event_index](_window, _event);
+	} else {
+		printf("Key Event: %i, not handled \n", _event->type);
 	}
 }
 
@@ -179,3 +245,25 @@ int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _event) {
 	return 1;
 }
 #endif
+
+bool rde_events_is_key_just_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key) {
+	if(_window->key_states[_key] == RDE_INPUT_STATUS_JUST_PRESSED) {
+		_window->key_states[_key] = RDE_INPUT_STATUS_KEEP_PRESSED;
+		return true;
+	}
+
+	return false;
+}
+
+bool rde_events_is_key_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key) {
+	return _window->key_states[_key] == RDE_INPUT_STATUS_KEEP_PRESSED || _window->key_states[_key] == RDE_INPUT_STATUS_JUST_PRESSED;
+}
+
+bool rde_events_is_key_just_released(rde_window* _window, RDE_KEYBOARD_KEY_ _key) {
+	if(_window->key_states[_key] == RDE_INPUT_STATUS_JUST_RELEASED) {
+		_window->key_states[_key] = RDE_INPUT_STATUS_UNINITIALIZED;
+		return true;
+	}
+
+	return false;
+}

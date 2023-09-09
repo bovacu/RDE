@@ -1340,6 +1340,11 @@ RDE_FUNC void rde_window_destroy_window(rde_window* _window);
 
 RDE_FUNC void rde_events_window_consume_events(rde_window* _window, rde_event* _event);
 RDE_FUNC void rde_events_display_consume_events(rde_window* _window, rde_event* _event);
+RDE_FUNC void rde_events_keyboard_consume_events(rde_window* _window, rde_event* _event);
+
+RDE_FUNC bool rde_events_is_key_just_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
+RDE_FUNC bool rde_events_is_key_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
+RDE_FUNC bool rde_events_is_key_just_released(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
 
 #if IS_MOBILE()
 RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _event);

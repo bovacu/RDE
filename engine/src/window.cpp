@@ -169,6 +169,9 @@ rde_window* rde_window_create_window() {
 	assert(false && "[Error]: Unsupported or unimplemented platform");
 	#endif
 	
+	memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
+	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+
 	return _window;
 }
 
@@ -261,6 +264,9 @@ void* rde_window_get_native_sdl_gl_context_handle(rde_window* _window) {
 void rde_window_destroy_window(rde_window* _window) {
 	SDL_GL_DeleteContext(_window->sdl_gl_context);
 	SDL_DestroyWindow(_window->sdl_window);
+
+	memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
+	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
 
 	_window->sdl_window = nullptr;
 	_window->sdl_gl_context = {};

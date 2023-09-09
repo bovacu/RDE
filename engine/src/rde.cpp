@@ -23,11 +23,17 @@
 #include "json/json_fwd.hpp"
 #include "json/json.hpp"
 
-#define WIN_EVENT_INIT (RDE_EVENT_TYPE_WINDOW_BEGIN + 1)
-#define WIN_EVENT_COUNT (RDE_EVENT_TYPE_WINDOW_END - RDE_EVENT_TYPE_WINDOW_BEGIN)
+#define RDE_WIN_EVENT_INIT (RDE_EVENT_TYPE_WINDOW_BEGIN + 1)
+#define RDE_WIN_EVENT_COUNT (RDE_EVENT_TYPE_WINDOW_END - RDE_EVENT_TYPE_WINDOW_BEGIN)
 
-#define DISPLAY_EVENT_INIT (RDE_EVENT_TYPE_DISPLAY_BEGIN + 1)
-#define DISPLAY_EVENT_COUNT (RDE_EVENT_TYPE_DISPLAY_END - RDE_EVENT_TYPE_DISPLAY_BEGIN)
+#define RDE_DISPLAY_EVENT_INIT (RDE_EVENT_TYPE_DISPLAY_BEGIN + 1)
+#define RDE_DISPLAY_EVENT_COUNT (RDE_EVENT_TYPE_DISPLAY_END - RDE_EVENT_TYPE_DISPLAY_BEGIN)
+
+#define RDE_KEY_EVENT_INIT (RDE_EVENT_TYPE_KEY_BEGIN + 1)
+#define RDE_KEY_EVENT_COUNT (RDE_EVENT_TYPE_KEY_END - RDE_EVENT_TYPE_KEY_BEGIN)
+
+#define RDE_AMOUNT_OF_KEYS 256
+#define RDE_AMOUNT_OF_MOUSE_BUTTONS 16
 
 // TODO: Not to forget
 // 		- [DONE] Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
@@ -69,6 +75,8 @@
 struct rde_window {
 	SDL_Window* sdl_window = nullptr;
 	SDL_GLContext sdl_gl_context;
+	RDE_INPUT_STATUS_ key_states[RDE_AMOUNT_OF_KEYS];
+	RDE_INPUT_STATUS_ mouse_states[RDE_AMOUNT_OF_MOUSE_BUTTONS];
 };
 
 struct rde_shader {
@@ -153,8 +161,9 @@ struct rde_engine {
 	rde_texture textures[RDE_MAX_LOADABLE_TEXTURES];
 	rde_atlas atlases[RDE_MAX_LOADABLE_ATLASES];
 
-	rde_event_func_outer window_events[WIN_EVENT_COUNT];
-	rde_event_func_outer display_events[DISPLAY_EVENT_COUNT];
+	rde_event_func_outer window_events[RDE_WIN_EVENT_COUNT];
+	rde_event_func_outer display_events[RDE_DISPLAY_EVENT_COUNT];
+	rde_event_func_outer key_events[RDE_KEY_EVENT_COUNT];
 };
 
 rde_engine ENGINE;
@@ -207,6 +216,7 @@ void rde_engine_on_event() {
 			//			- SDL_ControllerButtonEvent
 			//			- SDL_ControllerDeviceEvent
 			//			- SDL_AudioDeviceEvent
+			
 			switch(_event.type) {
 				case SDL_WINDOWEVENT:	{
 					if(SDL_GetWindowID(_window->sdl_window) != _rde_event.window_id) {
@@ -214,7 +224,16 @@ void rde_engine_on_event() {
 					}
 					rde_events_window_consume_events(_window, &_rde_event);
 				} break;
+				
 				case SDL_DISPLAYEVENT: 	rde_events_display_consume_events(_window, &_rde_event); break;
+				
+				case SDL_KEYDOWN:
+				case SDL_KEYUP: {
+					if(SDL_GetWindowID(_window->sdl_window) != _rde_event.window_id) {
+						continue;
+					}
+					rde_events_keyboard_consume_events(_window, &_rde_event);
+				} break;
 			}
 		}
 	}
@@ -263,6 +282,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 
 	rde_events_window_create_events();
 	rde_events_display_create_events();
+	rde_events_key_create_events();
 	rde_rendering_set_rendering_configuration();
 
 	ENGINE.random = (rde_random*)malloc(sizeof(rde_random));

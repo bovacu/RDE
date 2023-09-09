@@ -726,7 +726,7 @@ void rde_rendering_draw_texture(const rde_transform* _transform, rde_texture* _t
 	glm::vec4 _top_right_texture_position    = {  _texture_tile_size_on_screen.x,  _texture_tile_size_on_screen.y, 0.0f, 1.0f };
 	glm::vec4 _top_left_texture_position     = { -_texture_tile_size_on_screen.x,  _texture_tile_size_on_screen.y, 0.0f, 1.0f };
 
-	// The 1.f - xxx is needed as we need to invert the coordinates on the Y axis, the exported atlas (by RDE tool) assumes (0, 0)
+	// The (1.f - _texture_origin_norm.y) is needed as we need to invert the coordinates on the Y axis, the exported atlas (by RDE tool) assumes (0, 0)
 	// on top-left, but OpenGL coords for UV origin is bottom-left.
 	glm::vec2 _top_left_texture_uv_coord   	 = { _texture_origin_norm.x                            , 1.f - _texture_origin_norm.y };
 	glm::vec2 _top_right_texture_uv_coord  	 = { _texture_origin_norm.x + _texture_tile_size_norm.x, 1.f - _texture_origin_norm.y };
