@@ -32,6 +32,9 @@
 #define RDE_KEY_EVENT_INIT (RDE_EVENT_TYPE_KEY_BEGIN + 1)
 #define RDE_KEY_EVENT_COUNT (RDE_EVENT_TYPE_KEY_END - RDE_EVENT_TYPE_KEY_BEGIN)
 
+#define RDE_MOUSE_EVENT_INIT (RDE_EVENT_TYPE_MOUSE_BEGIN + 1)
+#define RDE_MOUSE_EVENT_COUNT (RDE_EVENT_TYPE_MOUSE_END - RDE_EVENT_TYPE_MOUSE_BEGIN)
+
 #define RDE_AMOUNT_OF_KEYS 256
 #define RDE_AMOUNT_OF_MOUSE_BUTTONS 16
 
@@ -164,6 +167,7 @@ struct rde_engine {
 	rde_event_func_outer window_events[RDE_WIN_EVENT_COUNT];
 	rde_event_func_outer display_events[RDE_DISPLAY_EVENT_COUNT];
 	rde_event_func_outer key_events[RDE_KEY_EVENT_COUNT];
+	rde_event_func_outer mouse_events[RDE_MOUSE_EVENT_COUNT];
 };
 
 rde_engine ENGINE;
@@ -202,11 +206,9 @@ void rde_engine_on_event() {
 			}
 
 			// TODO: Use the if statement on the following event types:
-			//			- SDL_KeyboardEvent
 			//			- SDL_TextEditingEvent
 			//			- SDL_TextInputEvent
 			//			- SDL_MouseMotionEvent
-			//			- SDL_MouseButtonEvent
 			//			- SDL_MouseWheelEvent
 			//			- SDL_TouchFingerEvent
 			//			- SDL_DropEvent
@@ -225,7 +227,7 @@ void rde_engine_on_event() {
 					rde_events_window_consume_events(_window, &_rde_event);
 				} break;
 				
-				case SDL_DISPLAYEVENT: 	rde_events_display_consume_events(_window, &_rde_event); break;
+				case SDL_DISPLAYEVENT: rde_events_display_consume_events(_window, &_rde_event); break;
 				
 				case SDL_KEYDOWN:
 				case SDL_KEYUP: {
@@ -233,6 +235,14 @@ void rde_engine_on_event() {
 						continue;
 					}
 					rde_events_keyboard_consume_events(_window, &_rde_event);
+				} break;
+
+				case SDL_MOUSEBUTTONDOWN:
+				case SDL_MOUSEBUTTONUP: {
+					if(SDL_GetWindowID(_window->sdl_window) != _rde_event.window_id) {
+						continue;
+					}
+					rde_events_mouse_consume_events(_window, &_rde_event);
 				} break;
 			}
 		}
@@ -283,6 +293,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 	rde_events_window_create_events();
 	rde_events_display_create_events();
 	rde_events_key_create_events();
+	rde_events_mouse_button_create_events();
 	rde_rendering_set_rendering_configuration();
 
 	ENGINE.random = (rde_random*)malloc(sizeof(rde_random));

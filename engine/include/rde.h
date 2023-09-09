@@ -515,11 +515,11 @@ enum RDE_EVENT_TYPE_ {
 	RDE_EVENT_TYPE_GAME_FRAME_END,	
 
 	RDE_EVENT_TYPE_KEY_BEGIN,
-	RDE_EVENT_TYPE_KEY_PRESSED, RDE_EVENT_TYPE_KEY_DOWN, RDE_EVENT_TYPE_KEY_RELEASED, RDE_EVENT_TYPE_KEY_TYPED, RDE_EVENT_TYPE_TEXT_TYPED, 
+	RDE_EVENT_TYPE_KEY_PRESSED, RDE_EVENT_TYPE_KEY_RELEASED, RDE_EVENT_TYPE_KEY_TYPED, RDE_EVENT_TYPE_TEXT_TYPED, 
 	RDE_EVENT_TYPE_KEY_END,	
 
 	RDE_EVENT_TYPE_MOUSE_BEGIN,
-	RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED, RDE_EVENT_TYPE_MOUSE_BUTTON_DOWN, RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED, RDE_EVENT_TYPE_MOUSE_SCROLLED, RDE_EVENT_TYPE_MOUSE_MOVED,
+	RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED, RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED, RDE_EVENT_TYPE_MOUSE_SCROLLED, RDE_EVENT_TYPE_MOUSE_MOVED,
 	RDE_EVENT_TYPE_MOUSE_END,
 
 	RDE_EVENT_TYPE_CONTROLLER_AXIS_MOVED, RDE_EVENT_TYPE_CONTROLLER_BUTTON_DOWN, RDE_EVENT_TYPE_CONTROLLER_BUTTON_UP,
@@ -1341,10 +1341,15 @@ RDE_FUNC void rde_window_destroy_window(rde_window* _window);
 RDE_FUNC void rde_events_window_consume_events(rde_window* _window, rde_event* _event);
 RDE_FUNC void rde_events_display_consume_events(rde_window* _window, rde_event* _event);
 RDE_FUNC void rde_events_keyboard_consume_events(rde_window* _window, rde_event* _event);
+RDE_FUNC void rde_events_mouse_consume_events(rde_window* _window, rde_event* _event);
 
 RDE_FUNC bool rde_events_is_key_just_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
 RDE_FUNC bool rde_events_is_key_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
 RDE_FUNC bool rde_events_is_key_just_released(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
+
+RDE_FUNC bool rde_events_is_mouse_button_just_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _button);
+RDE_FUNC bool rde_events_is_mouse_button_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _button);
+RDE_FUNC bool rde_events_is_mouse_button_just_released(rde_window* _window, RDE_MOUSE_BUTTON_ _button);
 
 #if IS_MOBILE()
 RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _event);

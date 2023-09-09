@@ -53,6 +53,19 @@ void rde_events_on_key_released_event(rde_window* _window, rde_event* _event) {
 	_window->key_states[_event->data.key_event_data.key] = RDE_INPUT_STATUS_JUST_RELEASED;
 }
 
+void rde_events_mouse_button_create_events();
+void rde_events_on_mouse_button_pressed_event(rde_window* _window, rde_event* _event) {
+	if(_window->mouse_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_UNINITIALIZED || _window->mouse_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_JUST_RELEASED) {
+		_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_JUST_PRESSED;
+	} else if(_window->key_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_JUST_PRESSED) {
+		_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_KEEP_PRESSED;
+	}
+}
+
+void rde_events_on_mouse_button_released_event(rde_window* _window, rde_event* _event) {
+	_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_JUST_RELEASED;
+}
+
 
 void rde_events_window_create_events() {
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - RDE_WIN_EVENT_INIT] = &window_resize;
@@ -79,6 +92,11 @@ void rde_events_key_create_events() {
 	// TODO: implement the other ones:
 	//		- RDE_EVENT_TYPE_KEY_TYPED
 	//		- RDE_EVENT_TYPE_TEXT_TYPED
+}
+
+void rde_events_mouse_button_create_events() {
+	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_button_pressed_event;
+	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_button_released_event;
 }
 
 void rde_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
@@ -160,6 +178,23 @@ void rde_sdl_to_rde_helper_transform_keyboard_event(SDL_Event* _sdl_event, rde_e
 	_rde_event->data.key_event_data.key = (RDE_KEYBOARD_KEY_)_sdl_event->key.keysym.scancode;
 }
 
+void rde_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
+	_rde_event->time_stamp = _sdl_event->display.timestamp;
+	_rde_event->window_id = _sdl_event->window.windowID;
+
+	switch (_sdl_event->button.state) {
+		case SDL_PRESSED : {
+			_rde_event->type = RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED;
+		} break;
+
+		case SDL_RELEASED: {
+			_rde_event->type = RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED;
+		} break;
+	}
+
+	_rde_event->data.mouse_event_data.button = (RDE_MOUSE_BUTTON_)_sdl_event->button.button;
+}
+
 rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 
 	rde_event _event;
@@ -171,6 +206,9 @@ rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 		
 		case SDL_KEYDOWN:
 		case SDL_KEYUP: rde_sdl_to_rde_helper_transform_keyboard_event(_sdl_event, &_event); break;
+
+		case SDL_MOUSEBUTTONDOWN:
+		case SDL_MOUSEBUTTONUP: rde_sdl_to_rde_helper_transform_mouse_button_event(_sdl_event, &_event); break;
 	}
 
 	return _event;
@@ -206,6 +244,16 @@ void rde_events_keyboard_consume_events(rde_window* _window, rde_event* _event) 
 		ENGINE.key_events[_event_index](_window, _event);
 	} else {
 		printf("Key Event: %i, not handled \n", _event->type);
+	}
+}
+
+void rde_events_mouse_consume_events(rde_window* _window, rde_event* _event) {
+	size_t _event_index = _event->type - RDE_MOUSE_EVENT_INIT;
+
+	if(_event_index >= 0 && _event_index < RDE_MOUSE_EVENT_INIT) {
+		ENGINE.mouse_events[_event_index](_window, _event);
+	} else {
+		printf("Mouse Event: %i, not handled \n", _event->type);
 	}
 }
 
@@ -262,6 +310,28 @@ bool rde_events_is_key_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key) {
 bool rde_events_is_key_just_released(rde_window* _window, RDE_KEYBOARD_KEY_ _key) {
 	if(_window->key_states[_key] == RDE_INPUT_STATUS_JUST_RELEASED) {
 		_window->key_states[_key] = RDE_INPUT_STATUS_UNINITIALIZED;
+		return true;
+	}
+
+	return false;
+}
+
+bool rde_events_is_mouse_button_just_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _button) {
+	if(_window->mouse_states[_button] == RDE_INPUT_STATUS_JUST_PRESSED) {
+		_window->mouse_states[_button] = RDE_INPUT_STATUS_KEEP_PRESSED;
+		return true;
+	}
+
+	return false;
+}
+
+bool rde_events_is_mouse_button_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _button) {
+	return _window->mouse_states[_button] == RDE_INPUT_STATUS_KEEP_PRESSED || _window->mouse_states[_button] == RDE_INPUT_STATUS_JUST_PRESSED;
+}
+
+bool rde_events_is_mouse_button_just_released(rde_window* _window, RDE_MOUSE_BUTTON_ _button) {
+	if(_window->mouse_states[_button] == RDE_INPUT_STATUS_JUST_RELEASED) {
+		_window->mouse_states[_button] = RDE_INPUT_STATUS_UNINITIALIZED;
 		return true;
 	}
 
