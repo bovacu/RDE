@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <unordered_map>
+#include <string>
 
 #include "rde.h"
 #include "SDL2/SDL.h"
@@ -20,8 +21,13 @@
 //#include "miniaudio/miniaudio.h"
 //#endif
 
-#include "json/json_fwd.hpp"
-#include "json/json.hpp"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#include "json/cJSON.c"
+#pragma GCC diagnostic pop
+#pragma clang diagnostic pop
 
 #define RDE_WIN_EVENT_INIT (RDE_EVENT_TYPE_WINDOW_BEGIN + 1)
 #define RDE_WIN_EVENT_COUNT (RDE_EVENT_TYPE_WINDOW_END - RDE_EVENT_TYPE_WINDOW_BEGIN)
