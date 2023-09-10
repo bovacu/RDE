@@ -528,7 +528,9 @@ void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
 
 	switch(_camera->camera_type) {
 		case RDE_CAMERA_TYPE_PERSPECTIVE : {
-		
+			rde_vec_2F _aspect_ratios = rde_rendering_get_aspect_ratio();
+			float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.x : _aspect_ratios.y;
+			projection_matrix = glm::perspective(glm::radians(45.f), _aspect_ratio, 0.1f, 100.f);
 		};break;
 
 		case RDE_CAMERA_TYPE_ORTHOGRAPHIC : {
