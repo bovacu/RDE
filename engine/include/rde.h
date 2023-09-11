@@ -344,6 +344,7 @@
 	#include <io.h>
 	#include <fcntl.h>
 	#include <windows.h>
+	#include <iostream>
 #endif			 
 
 #define RDE_SHOW_WINDOWS_CONSOLE 							\
@@ -1313,21 +1314,16 @@ RDE_FUNC unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _p
 
 RDE_FUNC float rde_window_get_aspect_ratio(rde_window* _window);
 
+RDE_FUNC bool rde_window_is_mouse_out_of_window_allowed();
+RDE_FUNC void rde_window_allow_mouse_out_of_window(bool _allow_mouse_out_of_window);
+
+RDE_FUNC void rde_window_set_icon(rde_window* _window, const char* _path_to_icon);
+
 //RDE_FUNC_ND bool			rde_window_is_fullscreen(rde_window* _window);
 //RDE_FUNC 	void			rde_window_set_fullscreen(rde_window* _window, bool _fullscreen);
 //
-//RDE_FUNC	void			rde_window_set_icon(const std::string& _path_to_icon);
-//
-//RDE_FUNC_ND bool			rde_window_is_minimize(rde_window* _window);
-//RDE_FUNC 	void			rde_window_minimize(rde_window* _window, bool _minimize);
-//
-//RDE_FUNC_ND bool			rde_window_is_maximized(rde_window* _window);
-//RDE_FUNC 	void			rde_window_maximized(rde_window* _window, bool _maximized);
 //
 //RDE_FUNC_ND bool			rde_window_is_focused(rde_window* _window);
-//
-//RDE_FUNC_ND bool			rde_window_is_mouse_out_of_window_allowed(rde_window* _window);
-//RDE_FUNC 	void			rde_window_allow_mouse_out_of_window(rde_window* _window, bool _allow_mouse_out_of_window);
 //
 //RDE_FUNC	void			rde_window_refresh_dpi(rde_window* _window);
 

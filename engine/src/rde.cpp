@@ -16,6 +16,28 @@
 #include "glad/glad.h"
 #endif
 
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_NO_PNM
+#define STBI_NO_TGA
+#define STBI_NO_PNM
+#define STBI_NO_HDR
+#define STBI_MAX_DIMENSIONS (1 << 13)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-function"
+#include "stb/stb_image.h"
+#pragma GCC diagnostic pop
+#pragma clang diagnostic pop
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#if IS_WINDOWS()
+#define STBIW_WINDOWS_UTF8
+#endif
+#include "stb/stb_image_write.h"
+
 //#ifdef RDE_AUDIO_MODULE
 //#define MINIAUDIO_IMPLEMENTATION
 //#include "miniaudio/miniaudio.h"
@@ -302,7 +324,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 	rde_events_mouse_button_create_events();
 	rde_rendering_set_rendering_configuration();
 
-	ENGINE.random = (rde_random*)malloc(sizeof(rde_random));
+	ENGINE.random = (rde_random*)calloc(1, sizeof(rde_random));
 	ENGINE.random->mt.seed(ENGINE.random->rd());
 
 	ENGINE.instantiated = true;

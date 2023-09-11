@@ -234,24 +234,45 @@ float rde_window_get_aspect_ratio(rde_window* _window) {
 	return _window_size.x / (float)_window_size.y;
 }
 
-//
-//RDE_FUNC_ND bool			rde_window_is_fullscreen(rde_window* _window);
-//RDE_FUNC 	void			rde_window_set_fullscreen(rde_window* _window, bool _fullscreen);
-//
-//RDE_FUNC	void			rde_window_set_icon(const std::string& _path_to_icon);
-//
-//RDE_FUNC_ND bool			rde_window_is_minimize(rde_window* _window);
-//RDE_FUNC 	void			rde_window_minimize(rde_window* _window, bool _minimize);
-//
-//RDE_FUNC_ND bool			rde_window_is_maximized(rde_window* _window);
-//RDE_FUNC 	void			rde_window_maximized(rde_window* _window, bool _maximized);
-//
-//RDE_FUNC_ND bool			rde_window_is_focused(rde_window* _window);
-//
-//RDE_FUNC_ND bool			rde_window_is_mouse_out_of_window_allowed(rde_window* _window);
-//RDE_FUNC 	void			rde_window_allow_mouse_out_of_window(rde_window* _window, bool _allow_mouse_out_of_window);
-//
-//RDE_FUNC	void			rde_window_refresh_dpi(rde_window* _window);
+bool rde_window_is_mouse_out_of_window_allowed() {
+	return SDL_GetRelativeMouseMode();
+}
+
+void rde_window_allow_mouse_out_of_window(bool _allow_mouse_out_of_window) {
+	SDL_SetRelativeMouseMode(_allow_mouse_out_of_window ? SDL_FALSE : SDL_TRUE);
+}
+
+void rde_window_set_icon(rde_window* _window, const char* _path_to_icon) {
+	int _width, _height, _channels;
+
+	stbi_set_flip_vertically_on_load(0);
+	stbi_uc* _data = stbi_load(_path_to_icon, &_width, &_height, &_channels, 0);
+	if(_data == nullptr) {
+		printf("Error while loading icon at '%s' \n", _path_to_icon);
+		return;
+	}
+	
+	Uint32 _rmask, _gmask, _bmask, _amask;
+	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	int _shift = (_channels == 3) ? 8 : 0;
+	_rmask = 0xff000000 >> _shift;
+	_gmask = 0x00ff0000 >> _shift;
+	_bmask = 0x0000ff00 >> _shift;
+	_amask = 0x000000ff >> _shift;
+	#else
+	_rmask = 0x000000ff;
+	_gmask = 0x0000ff00;
+	_bmask = 0x00ff0000;
+	_amask = (_channels == 3) ? 0 : 0xff000000;
+	#endif
+
+	SDL_Surface* _surface = SDL_CreateRGBSurfaceFrom((void*)_data, _width, _height, 
+		_channels * 8, _channels * _width, _rmask, _gmask, _bmask, _amask);
+
+
+	SDL_SetWindowIcon(_window->sdl_window, _surface);
+	SDL_FreeSurface(_surface);
+}
 
 void* rde_window_get_native_sdl_window_handle(rde_window* _window) {
 	return _window->sdl_window;
