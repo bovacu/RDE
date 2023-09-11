@@ -1232,11 +1232,11 @@ RDE_DECLARE_CLAMP_FUNCS(long)
 RDE_DECLARE_CLAMP_FUNCS(ulong)
 RDE_DECLARE_CLAMP_FUNCS(size_t)
 
-RDE_FUNC inline float rde_radians_to_degrees(float _radians);
-RDE_FUNC inline float rde_degrees_to_radians(float _degrees);
+RDE_FUNC inline float rde_math_radians_to_degrees(float _radians);
+RDE_FUNC inline float rde_math_degrees_to_radians(float _degrees);
 
 #define RDE_DECLARE_EASING_FUNCS(_form, _type) \
-	RDE_FUNC inline float rde_easing_##_form##_##_type(float _current_time, float _start_value, float _change_in_value, float _duration);
+	RDE_FUNC inline float rde_math_easing_##_form##_##_type(float _current_time, float _start_value, float _change_in_value, float _duration);
 
 RDE_DECLARE_EASING_FUNCS(in, linear)
 RDE_DECLARE_EASING_FUNCS(in, quadratic)

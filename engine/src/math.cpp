@@ -72,65 +72,65 @@ RDE_IMPLEMENT_CLAMP_FUNCS(long)
 RDE_IMPLEMENT_CLAMP_FUNCS(ulong)
 RDE_IMPLEMENT_CLAMP_FUNCS(size_t)
 
-float rde_radians_to_degrees(float _radians) {
+float rde_math_radians_to_degrees(float _radians) {
 	return _radians * (180.f / RDE_PI);
 }
 
-float rde_degrees_to_radians(float _degrees) {
+float rde_math_degrees_to_radians(float _degrees) {
 	return _degrees * (RDE_PI / 180.0f);
 }
 
-float rde_easing_in_linear(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_linear(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	return _change_in_value * _current_time / _duration + _start_value;
 }
 
-float rde_easing_in_quadratic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_quadratic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration;
 	return _change_in_value * _current_time * _current_time + _start_value;
 }
 
-float rde_easing_out_quadratic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_out_quadratic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration;
 	return -_change_in_value * _current_time * (_current_time - 2) + _start_value;
 }
 
-float rde_easing_in_out_quadratic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_out_quadratic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration / 2;
 	if (_current_time < 1) return _change_in_value / 2 * _current_time * _current_time + _start_value;
 	_current_time--;
 	return -_change_in_value / 2 * (_current_time * (_current_time - 2) - 1) + _start_value;
 }
 
-float rde_easing_in_cubic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_cubic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration;
 	return _change_in_value * _current_time * _current_time * _current_time + _start_value;
 }
 
-float rde_easing_out_cubic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_out_cubic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration;
 	_current_time--;
 	return _change_in_value * (_current_time * _current_time * _current_time + 1) + _start_value;
 }
 
-float rde_easing_in_out_cubic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_out_cubic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration / 2;
 	if (_current_time < 1) return _change_in_value / 2 * _current_time * _current_time * _current_time + _start_value;
 	_current_time -= 2;
 	return _change_in_value / 2 * (_current_time * _current_time * _current_time + 2) + _start_value;
 }
 
-float rde_easing_in_quartic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_quartic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration;
 	return _change_in_value * _current_time * _current_time * _current_time * _current_time + _start_value;
 }
 
-float rde_easing_out_quartic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_out_quartic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration;
 	_current_time--;
 	return -_change_in_value * (_current_time * _current_time * _current_time * _current_time - 1) + _start_value;
 }
 
-float rde_easing_in_out_quartic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_out_quartic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration / 2;
 	if (_current_time < 1)
 		return _change_in_value / 2 * _current_time * _current_time * _current_time * _current_time + _start_value;
@@ -138,18 +138,18 @@ float rde_easing_in_out_quartic(float _current_time, float _start_value, float _
 	return -_change_in_value / 2 * (_current_time * _current_time * _current_time * _current_time - 2) + -_start_value;
 }
 
-float rde_easing_in_quintic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_quintic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration;
 	return _change_in_value * _current_time * _current_time * _current_time * _current_time * _current_time + _start_value;
 }
 
-float rde_easing_out_quintic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_out_quintic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration;
 	_current_time--;
 	return _change_in_value * (_current_time * _current_time * _current_time * _current_time * _current_time + 1) + _start_value;
 }
 
-float rde_easing_in_out_quintic(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_out_quintic(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration / 2;
 	if (_current_time < 1)
 		return _change_in_value / 2 * _current_time * _current_time * _current_time * _current_time * _current_time + _start_value;
@@ -157,45 +157,45 @@ float rde_easing_in_out_quintic(float _current_time, float _start_value, float _
 	return _change_in_value / 2 * (_current_time * _current_time * _current_time * _current_time * _current_time + 2) + _start_value;
 }
 
-float rde_easing_in_sine(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_sine(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	return -_change_in_value * (float) std::cos(_current_time / _duration * (RDE_PI / 2)) + _change_in_value + _start_value;
 }
 
-float rde_easing_out_sine(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_out_sine(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	return _change_in_value * (float) std::sin(_current_time / _duration * (RDE_PI / 2)) + _start_value;
 }
 
-float rde_easing_in_out_sine(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_out_sine(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	return -_change_in_value / 2 * ((float) std::cos(RDE_PI * _current_time / _duration) - 1) + _start_value;
 }
 
-float rde_easing_in_exponential(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_exponential(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	return _change_in_value * (float) std::pow(2, 10 * (_current_time / _duration - 1)) + _start_value;
 }
 
-float rde_easing_out_exponential(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_out_exponential(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	return _change_in_value * (-(float) std::pow(2, -10 * _current_time / _duration) + 1) + _start_value;
 }
 
-float rde_easing_in_out_exponential(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_out_exponential(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration / 2;
 	if (_current_time < 1) return _change_in_value / 2 * (float) std::pow(2, 10 * (_current_time - 1)) + _start_value;
 	_current_time--;
 	return _change_in_value / 2 * (-(float) std::pow(2, -10 * _current_time) + 2) + _start_value;
 }
 
-float rde_easing_in_circular(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_circular(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration;
 	return -_change_in_value * ((float) std::sqrt(1 - _current_time * _current_time) - 1) + _start_value;
 }
 
-float rde_easing_out_circular(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_out_circular(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration;
 	_current_time--;
 	return _change_in_value * (float) std::sqrt(1 - _current_time * _current_time) + _start_value;
 }
 
-float rde_easing_in_out_circular(float _current_time, float _start_value, float _change_in_value, float _duration) {
+float rde_math_easing_in_out_circular(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	_current_time /= _duration / 2;
 	if (_current_time < 1)
 		return -_change_in_value / 2 * ((float) std::sqrt(1 - _current_time * _current_time) - 1) + _start_value;
