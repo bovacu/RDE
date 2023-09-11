@@ -33,9 +33,12 @@ rde_vec_2F rde_rendering_get_aspect_ratio() {
 }
 
 glm::mat4 rde_rendering_transform_to_glm_mat4(const rde_transform* _transform) {
-	glm::mat4 _transformation_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(_transform->position.x, _transform->position.y, _transform->position.z));
-	_transformation_matrix *= glm::rotate(glm::mat4(1.0f), glm::radians(_transform->rotation.z), { 0.0f, 0.0f, 1.0f });
-	_transformation_matrix *= glm::scale(glm::mat4(1.0f), glm::vec3(_transform->scale.x, _transform->scale.y, _transform->scale.z));
+	rde_vec_2F _screen_pos { _transform->position.x, _transform->position.y };
+	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_screen_pos);
+	rde_vec_2I _window_size = rde_window_get_window_size(current_batch_2d.window);
+	glm::mat4 _transformation_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(_screen_pos.x, _screen_pos.y, _transform->position.z));
+	_transformation_matrix = glm::rotate(_transformation_matrix, glm::radians(_transform->rotation.z), { 0.0f, 0.0f, 1.0f });
+	_transformation_matrix = glm::scale(_transformation_matrix, glm::vec3(_transform->scale.x, _transform->scale.y / (_window_size.x / (float)_window_size.y), _transform->scale.z));
 	return _transformation_matrix;
 }
 
@@ -410,13 +413,8 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
 	glTextureStorage2D(_texture_id, 1, _internal_format, _width, _height);
 
-	#if IS_IOS()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	#else
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	#endif
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -543,6 +541,7 @@ void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
 }
 
 void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window) {
+	glEnable(GL_DEPTH_TEST);
 	UNUSED(_camera);
 	UNUSED(_window);
 	UNIMPLEMENTED("rde_rendering_start_drawing_3d")
@@ -702,11 +701,6 @@ void rde_rendering_draw_texture(const rde_transform* _transform, rde_texture* _t
 	rde_shader* _drawing_shader = _shader == nullptr ? ENGINE.texture_shader_2d : _shader;
 	rde_rendering_try_create_batch_2d(_drawing_shader, _texture);
 	rde_rendering_try_flush_batch_2d(_drawing_shader, _texture, _triangle_vertex_count);
-	
-	rde_vec_2F _screen_pos { _transform->position.x, _transform->position.y };
-	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_screen_pos);
-	_transformation_matrix[3][0] = _screen_pos.x;
-	_transformation_matrix[3][1] = _screen_pos.y;
 
 	rde_vec_2F _texture_origin_norm = { 0.f, 0.f };
 	rde_vec_2F _texture_tile_size_norm = { 1.f, 1.f };
@@ -723,10 +717,10 @@ void rde_rendering_draw_texture(const rde_transform* _transform, rde_texture* _t
 	rde_vec_2F _texture_tile_size_on_screen = _texture_tile_size;
 	rde_math_convert_world_size_to_screen_size(current_batch_2d.window, &_texture_tile_size_on_screen);
 
-	glm::vec4 _bottom_left_texture_position  = { -_texture_tile_size_on_screen.x, -_texture_tile_size_on_screen.y, 0.0f, 1.0f };
-	glm::vec4 _bottom_right_texture_position = {  _texture_tile_size_on_screen.x, -_texture_tile_size_on_screen.y, 0.0f, 1.0f };
-	glm::vec4 _top_right_texture_position    = {  _texture_tile_size_on_screen.x,  _texture_tile_size_on_screen.y, 0.0f, 1.0f };
-	glm::vec4 _top_left_texture_position     = { -_texture_tile_size_on_screen.x,  _texture_tile_size_on_screen.y, 0.0f, 1.0f };
+	glm::vec4 _bottom_left_texture_position  = _transformation_matrix * glm::vec4 { -_texture_tile_size_on_screen.x, -_texture_tile_size_on_screen.y, 0.0f, 1.0f };
+	glm::vec4 _bottom_right_texture_position = _transformation_matrix * glm::vec4 {  _texture_tile_size_on_screen.x, -_texture_tile_size_on_screen.y, 0.0f, 1.0f };
+	glm::vec4 _top_right_texture_position    = _transformation_matrix * glm::vec4 {  _texture_tile_size_on_screen.x,  _texture_tile_size_on_screen.y, 0.0f, 1.0f };
+	glm::vec4 _top_left_texture_position     = _transformation_matrix * glm::vec4 { -_texture_tile_size_on_screen.x,  _texture_tile_size_on_screen.y, 0.0f, 1.0f };
 
 	// The (1.f - _texture_origin_norm.y) is needed as we need to invert the coordinates on the Y axis, the exported atlas (by RDE tool) assumes (0, 0)
 	// on top-left, but OpenGL coords for UV origin is bottom-left.
@@ -736,11 +730,6 @@ void rde_rendering_draw_texture(const rde_transform* _transform, rde_texture* _t
 	glm::vec2 _bottom_left_texture_uv_coord  = { _texture_origin_norm.x                            , 1.f - (_texture_origin_norm.y + _texture_tile_size_norm.y) };
 
 	auto _color = RDE_COLOR_TO_HEX_COLOR(_tintColor);
-
-	_bottom_left_texture_position = _transformation_matrix * _bottom_left_texture_position;
-	_bottom_right_texture_position = _transformation_matrix * _bottom_right_texture_position;
-	_top_right_texture_position = _transformation_matrix * _top_right_texture_position;
-	_top_left_texture_position = _transformation_matrix * _top_left_texture_position;
 
 	// * 2
 	// |\
@@ -815,4 +804,5 @@ void rde_rendering_end_drawing_2d() {
 
 void rde_rendering_end_drawing_3d() {
 	UNIMPLEMENTED("rde_rendering_end_drawing_3d")
+	glDisable(GL_DEPTH_TEST);
 }
