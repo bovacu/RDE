@@ -51,6 +51,7 @@
 
 
 #include <assert.h>
+#include <limits.h>
 #include <float.h>
 
 /// *************************************************************************************************
@@ -1231,7 +1232,6 @@ RDE_DECLARE_CLAMP_FUNCS(float)
 RDE_DECLARE_CLAMP_FUNCS(double)
 RDE_DECLARE_CLAMP_FUNCS(long)
 RDE_DECLARE_CLAMP_FUNCS(ulong)
-RDE_DECLARE_CLAMP_FUNCS(size_t)
 
 RDE_FUNC inline float rde_math_radians_to_degrees(float _radians);
 RDE_FUNC inline float rde_math_degrees_to_radians(float _degrees);

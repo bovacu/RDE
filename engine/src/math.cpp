@@ -70,7 +70,6 @@ RDE_IMPLEMENT_CLAMP_FUNCS(float)
 RDE_IMPLEMENT_CLAMP_FUNCS(double)
 RDE_IMPLEMENT_CLAMP_FUNCS(long)
 RDE_IMPLEMENT_CLAMP_FUNCS(ulong)
-RDE_IMPLEMENT_CLAMP_FUNCS(size_t)
 
 float rde_math_radians_to_degrees(float _radians) {
 	return _radians * (180.f / RDE_PI);

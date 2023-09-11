@@ -6,7 +6,7 @@ rde_atlas_sub_textures rde_file_system_read_atlas_config(const char* _atlas_path
 		errno_t _err = fopen_s(&_file, _atlas_path, "r");
 		assert(_err == 0 && "File could not be opened");
 	#else
-		_file = fopen(_config_rde_path, "r");
+		_file = fopen(_atlas_path, "r");
 		assert(_file != nullptr && "File could not be opened");
 	#endif
 
