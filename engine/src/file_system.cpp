@@ -34,16 +34,16 @@ rde_atlas_sub_textures rde_file_system_read_atlas_config(const char* _atlas_path
 		cJSON* _position = cJSON_GetObjectItemCaseSensitive(_sub_texture_json, "position");
 		cJSON* _size = cJSON_GetObjectItemCaseSensitive(_sub_texture_json, "size");
 
-		_atlas_sub_textures[std::string(_sub_texture_json->string)] = rde_texture {
-			.opengl_texture_id = _atlas->opengl_texture_id,
-			.size = rde_vec_2UI { (uint)cJSON_GetArrayItem(_size, 0)->valueint, (uint)cJSON_GetArrayItem(_size, 1)->valueint },
-			.position = rde_vec_2UI { (uint)cJSON_GetArrayItem(_position, 0)->valueint, (uint)cJSON_GetArrayItem(_position, 1)->valueint },
-			.channels = _atlas->channels,
-			.internal_format = _atlas->internal_format,
-			.data_format = _atlas->data_format,
-			.file_path = _atlas->file_path,
-			.atlas_texture = _atlas
-		};
+		rde_texture _texture;
+		_texture.opengl_texture_id = _atlas->opengl_texture_id;
+		_texture.size = rde_vec_2UI { (uint)cJSON_GetArrayItem(_size, 0)->valueint, (uint)cJSON_GetArrayItem(_size, 1)->valueint };
+		_texture.position = rde_vec_2UI { (uint)cJSON_GetArrayItem(_position, 0)->valueint, (uint)cJSON_GetArrayItem(_position, 1)->valueint };
+		_texture.channels = _atlas->channels;
+		_texture.internal_format = _atlas->internal_format;
+		_texture.data_format = _atlas->data_format;
+		_texture.file_path = _atlas->file_path;
+		_texture.atlas_texture = _atlas;
+		_atlas_sub_textures[std::string(_sub_texture_json->string)] = _texture;
 
 		cJSON_free(_position);
 		cJSON_free(_size);

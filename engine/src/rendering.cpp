@@ -567,27 +567,24 @@ void rde_rendering_draw_triangle_2d(rde_vec_2F _vertex_a, rde_vec_2F _vertex_b, 
 	// | \
 	// *--*
 	// 0   1
-	rde_vertex_2d _vertex_0 {
-		.position = { _vertex_a.x, _vertex_a.y, 0.f },
-		.color = RDE_COLOR_TO_HEX_COLOR(_color),
-		.texture_coordinates = { 0.f, 0.f }
-	};
+	rde_vertex_2d _vertex_0;
+	_vertex_0.position = { _vertex_a.x, _vertex_a.y, 0.f };
+	_vertex_0.color = RDE_COLOR_TO_HEX_COLOR(_color);
+	_vertex_0.texture_coordinates = { 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_vertex_0.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0;
 
-	rde_vertex_2d _vertex_1 {
-		.position = { _vertex_b.x, _vertex_b.y, 0.f },
-		.color = RDE_COLOR_TO_HEX_COLOR(_color),
-		.texture_coordinates = { 0.f, 0.f }
-	};
+	rde_vertex_2d _vertex_1;
+	_vertex_1.position = { _vertex_b.x, _vertex_b.y, 0.f };
+	_vertex_1.color = RDE_COLOR_TO_HEX_COLOR(_color);
+	_vertex_1.texture_coordinates = { 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_vertex_1.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1;
 
-	rde_vertex_2d _vertex_2 {
-		.position = { _vertex_c.x, _vertex_c.y, 0.f },
-		.color = RDE_COLOR_TO_HEX_COLOR(_color),
-		.texture_coordinates = { 0.f, 0.f }
-	};
+	rde_vertex_2d _vertex_2;
+	_vertex_2.position = { _vertex_c.x, _vertex_c.y, 0.f };
+	_vertex_2.color = RDE_COLOR_TO_HEX_COLOR(_color);
+	_vertex_2.texture_coordinates = { 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_vertex_2.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_2;
 }
@@ -606,27 +603,24 @@ void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_ri
 	// | \
 	// *--*
 	// 0   1
-	rde_vertex_2d _vertex_0_0 {
-		.position = { _bottom_left.x, _bottom_left.y, 0.f },
-		.color = _c,
-		.texture_coordinates = { 0.f, 0.f }
-	};
+	rde_vertex_2d _vertex_0_0;
+	_vertex_0_0.position = { _bottom_left.x, _bottom_left.y, 0.f };
+	_vertex_0_0.color = _c;
+	_vertex_0_0.texture_coordinates = { 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_vertex_0_0.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_0;
 
-	rde_vertex_2d _vertex_0_1{
-		.position = { _top_right.x, _bottom_left.y, 0.f },
-		.color = _c,
-		.texture_coordinates = { 0.f, 0.f }
-	};
+	rde_vertex_2d _vertex_0_1;
+	_vertex_0_1.position = { _top_right.x, _bottom_left.y, 0.f };
+	_vertex_0_1.color = _c;
+	_vertex_0_1.texture_coordinates = { 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_vertex_0_1.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_1;
 
-	rde_vertex_2d _vertex_0_2 {
-		.position = { _bottom_left.x, _top_right.y, 0.f },
-		.color = _c,
-		.texture_coordinates = { 0.f, 0.f }
-	};
+	rde_vertex_2d _vertex_0_2;
+	_vertex_0_2.position = { _bottom_left.x, _top_right.y, 0.f };
+	_vertex_0_2.color = _c;
+	_vertex_0_2.texture_coordinates = { 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_vertex_0_2.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_2;
 
@@ -637,27 +631,24 @@ void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_ri
 	//    *
 	//    0
 
-	rde_vertex_2d _vertex_1_0 {
-		.position = { _top_right.x, _bottom_left.y, 0.f },
-		.color = _c,
-		.texture_coordinates = { 0.f, 0.f }
-	};
+	rde_vertex_2d _vertex_1_0;
+	_vertex_1_0.position = { _top_right.x, _bottom_left.y, 0.f };
+	_vertex_1_0.color = _c;
+	_vertex_1_0.texture_coordinates = { 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_vertex_1_0.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_0;
 
-	rde_vertex_2d _vertex_1_1 {
-		.position = { _top_right.x, _top_right.y, 0.f },
-		.color = _c,
-		.texture_coordinates = { 0.f, 0.f }
-	};
+	rde_vertex_2d _vertex_1_1;
+	_vertex_1_1.position = { _top_right.x, _top_right.y, 0.f };
+	_vertex_1_1.color = _c;
+	_vertex_1_1.texture_coordinates = { 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_vertex_1_1.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_1;
 
-	rde_vertex_2d _vertex_1_2 {
-		.position = { _bottom_left.x, _top_right.y, 0.f },
-		.color = _c,
-		.texture_coordinates = { 0.f, 0.f }
-	};
+	rde_vertex_2d _vertex_1_2;
+	_vertex_1_2.position = { _bottom_left.x, _top_right.y, 0.f };
+	_vertex_1_2.color = _c;
+	_vertex_1_2.texture_coordinates = { 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates(current_batch_2d.window, &_vertex_1_2.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
@@ -722,25 +713,22 @@ void rde_rendering_draw_texture(const rde_transform* _transform, rde_texture* _t
 	// | \
 	// *--*
 	// 0   1
-	rde_vertex_2d _vertex_0_0 {
-		.position = { _bottom_left_texture_position.x, _bottom_left_texture_position.y, 0.f },
-		.color = _color,
-		.texture_coordinates = { _bottom_left_texture_uv_coord.x, _bottom_left_texture_uv_coord.y }
-	};
+	rde_vertex_2d _vertex_0_0;
+	_vertex_0_0.position = { _bottom_left_texture_position.x, _bottom_left_texture_position.y, 0.f };
+	_vertex_0_0.color = _color;
+	_vertex_0_0.texture_coordinates = { _bottom_left_texture_uv_coord.x, _bottom_left_texture_uv_coord.y };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_0;
 
-	rde_vertex_2d _vertex_0_1{
-		.position = { _bottom_right_texture_position.x, _bottom_right_texture_position.y, 0.f },
-		.color = _color,
-		.texture_coordinates = { _bottom_right_texture_uv_coord.x, _bottom_right_texture_uv_coord.y }
-	};
+	rde_vertex_2d _vertex_0_1;
+	_vertex_0_1.position = { _bottom_right_texture_position.x, _bottom_right_texture_position.y, 0.f };
+	_vertex_0_1.color = _color;
+	_vertex_0_1.texture_coordinates = { _bottom_right_texture_uv_coord.x, _bottom_right_texture_uv_coord.y };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_1;
 
-	rde_vertex_2d _vertex_0_2 {
-		.position = { _top_left_texture_position.x, _top_left_texture_position.y, 0.f },
-		.color = _color,
-		.texture_coordinates = { _top_left_texture_uv_coord.x, _top_left_texture_uv_coord.y }
-	};
+	rde_vertex_2d _vertex_0_2;
+	_vertex_0_2.position = { _top_left_texture_position.x, _top_left_texture_position.y, 0.f };
+	_vertex_0_2.color = _color;
+	_vertex_0_2.texture_coordinates = { _top_left_texture_uv_coord.x, _top_left_texture_uv_coord.y };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_2;
 
 	// 2   1
@@ -750,25 +738,22 @@ void rde_rendering_draw_texture(const rde_transform* _transform, rde_texture* _t
 	//    *
 	//    0
 
-	rde_vertex_2d _vertex_1_0 {
-		.position = { _bottom_right_texture_position.x, _bottom_right_texture_position.y, 0.f },
-		.color = _color,
-		.texture_coordinates = { _bottom_right_texture_uv_coord.x, _bottom_right_texture_uv_coord.y }
-	};
+	rde_vertex_2d _vertex_1_0;
+	_vertex_1_0.position = { _bottom_right_texture_position.x, _bottom_right_texture_position.y, 0.f };
+	_vertex_1_0.color = _color;
+	_vertex_1_0.texture_coordinates = { _bottom_right_texture_uv_coord.x, _bottom_right_texture_uv_coord.y };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_0;
 
-	rde_vertex_2d _vertex_1_1 {
-		.position = { _top_right_texture_position.x, _top_right_texture_position.y, 0.f },
-		.color = _color,
-		.texture_coordinates = { _top_right_texture_uv_coord.x, _top_right_texture_uv_coord.y }
-	};
+	rde_vertex_2d _vertex_1_1;
+	_vertex_1_1.position = { _top_right_texture_position.x, _top_right_texture_position.y, 0.f };
+	_vertex_1_1.color = _color;
+	_vertex_1_1.texture_coordinates = { _top_right_texture_uv_coord.x, _top_right_texture_uv_coord.y };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_1;
 
-	rde_vertex_2d _vertex_1_2 {
-		.position = { _top_left_texture_position.x, _top_left_texture_position.y, 0.f },
-		.color = _color,
-		.texture_coordinates = { _top_left_texture_uv_coord.x, _top_left_texture_uv_coord.y }
-	};
+	rde_vertex_2d _vertex_1_2;
+	_vertex_1_2.position = { _top_left_texture_position.x, _top_left_texture_position.y, 0.f };
+	_vertex_1_2.color = _color;
+	_vertex_1_2.texture_coordinates = { _top_left_texture_uv_coord.x, _top_left_texture_uv_coord.y };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
 

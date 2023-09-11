@@ -34,9 +34,11 @@ rde_probability rde_math_get_probability(float _normalized_chance_to_happen) {
 	if(_normalized_chance_to_happen < 0.0f) _normalized_chance_to_happen = 0.0f;
 
 	float _chance = 1.f - _normalized_chance_to_happen;
-	float _leftProbability = rde_math_get_random_float(0.0f, 1.0f);
+	float _left_probability = rde_math_get_random_float(0.0f, 1.0f);
 
-	rde_probability _p {_leftProbability, _leftProbability >= _chance};
+	rde_probability _p;
+	_p.probability_rolled = _left_probability;
+	_p.happened = _chance;
 	return _p;
 }
 

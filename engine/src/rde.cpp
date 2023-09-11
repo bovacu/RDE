@@ -16,27 +16,33 @@
 #include "glad/glad.h"
 #endif
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_NO_PNM
-#define STBI_NO_TGA
-#define STBI_NO_PNM
-#define STBI_NO_HDR
-#define STBI_MAX_DIMENSIONS (1 << 13)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-function"
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_NO_PNM
+#define STBI_NO_TGA
+#define STBI_NO_PNM
+#define STBI_NO_HDR
+#define STBI_MAX_DIMENSIONS (1 << 13)
 #include "stb/stb_image.h"
 #pragma GCC diagnostic pop
 #pragma clang diagnostic pop
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #if IS_WINDOWS()
 #define STBIW_WINDOWS_UTF8
 #endif
 #include "stb/stb_image_write.h"
+#pragma GCC diagnostic pop
+#pragma clang diagnostic pop
 
 //#ifdef RDE_AUDIO_MODULE
 //#define MINIAUDIO_IMPLEMENTATION

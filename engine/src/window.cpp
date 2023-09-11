@@ -62,8 +62,49 @@ rde_window* rde_inner_window_create_windows_window(size_t _free_window_index) {
 #endif
 
 #if IS_MAC()
-rde_window* rde_window_create_mac_window() {
-	UNIMPLEMENTED("Mac window creation is not implemented yet");
+rde_window* rde_inner_window_create_mac_window(size_t _free_window_index) {
+	rde_window* _window = &ENGINE.windows[_free_window_index];
+
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+		
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+	char _title[16];
+	snprintf(_title, 10, "%d", (int)_free_window_index);
+	_window->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+
+	if(_window->sdl_window == nullptr) {
+		printf("SDL window creation failed: %s \n", SDL_GetError());
+		exit(-1);
+	}
+	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
+
+	if(_window->sdl_gl_context == nullptr) {
+		printf("OpenGL context couldn't initialize -> %s \n", SDL_GetError());
+		exit(-1);
+	}
+
+	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
+
+	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+		printf("Failed to initialize GLAD \n");
+		exit(-1);
+	}
+	
+	printf("GLAD and SDL2 loaded successfully \n");
+
+	SDL_GL_SetSwapInterval(1);
+
+	SDL_SetWindowPosition(_window->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowResizable(_window->sdl_window, SDL_TRUE);
+
+	return _window;
 }
 #endif
 
@@ -165,8 +206,10 @@ rde_window* rde_window_create_window() {
 		_window = rde_inner_window_create_windows_window(_free_window_index);
 	#elif IS_LINUX()
 		_window = rde_inner_window_create_linux_window(_free_window_index);
+	#elif IS_MAC()
+		_window = rde_inner_window_create_mac_window(_free_window_index);
 	#else
-	assert(false && "[Error]: Unsupported or unimplemented platform");
+		assert(false && "[Error]: Unsupported or unimplemented platform");
 	#endif
 	
 	memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
