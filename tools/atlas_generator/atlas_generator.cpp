@@ -11,11 +11,17 @@
 #include <dirent.h>
 #endif
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
+#pragma GCC diagnostic pop
+#pragma clang diagnostic pop
 
 union rde_atlas_element {
 	int i_value;
@@ -26,6 +32,11 @@ union rde_atlas_element {
 
 struct rde_atlas_config {
 	std::unordered_map<const char*, rde_atlas_element> data;
+};
+
+struct rde_point {
+	int x = 0;
+	int y = 0;
 };
 
 
@@ -54,8 +65,13 @@ void dump_atlas_to_final_texture(std::vector<rde_atlas_rect>& _rects, const char
 	// NOTE: origin is top left (0, 0), being bottom right the (_max_image_size - 1, _max_image_size - 1)
 
 	for(size_t _i = 0; _i < _rects.size(); _i++) {
+		rde_atlas_rect* _rect = &_rects[_i];		
+		
+		if(!_rect->was_packed) {
+			printf("Warning: texture %s was not packed \n", _rect->name);
+			continue;
+		}
 
-		rde_atlas_rect* _rect = &_rects[_i];
 		for (int _py = 0; _py < _rect->h; _py++) {
 			int _height_offset = _max_image_size * _py * 4;
 			
@@ -65,7 +81,10 @@ void dump_atlas_to_final_texture(std::vector<rde_atlas_rect>& _rects, const char
 		}
 	}
 
-	stbi_write_png(_full_name, _max_image_size, _max_image_size, 4, _atlas_pixels, sizeof(stbi_uc) * _max_image_size * 4);
+	if(stbi_write_png(_full_name, _max_image_size, _max_image_size, 4, _atlas_pixels, sizeof(stbi_uc) * _max_image_size * 4) == 0) {
+		printf("Error writting atlas png \n");
+		exit(-1);
+	}
 }
 
 #define QUOTED(_x) "\"" + std::string(_x) + "\": "
@@ -115,36 +134,129 @@ void dump_atlas_to_config_file(std::vector<rde_atlas_rect>& _rects, const char* 
 	#endif
 }
 
+bool valueInRange(int value, int min, int max) { 
+	return (value >= min) && (value <= max); 
+}
+
 bool generate_atlas_data(std::vector<rde_atlas_rect>& _rects, int _max_image_size, int _pixels_of_separation) {
+
 	std::sort(_rects.begin(), _rects.end(), [](const rde_atlas_rect& _r_0, const rde_atlas_rect& _r_1) {
 		return _r_0.h > _r_1.h;
 	});
 
-	int x_pos = 0;
-	int y_pos = 0;
-	int largest_h_this_row = 0;
+	std::vector<rde_point> _available_points;
+	rde_point _origin = { 0, 0 };
+	_available_points.push_back(_origin);
 
-	for (rde_atlas_rect& _rect : _rects) {
-		if ((x_pos + _rect.w) > _max_image_size) {
-			y_pos += largest_h_this_row;
-			x_pos = 0;
-			largest_h_this_row = 0;
+	std::vector<rde_atlas_rect> _rects_cpy = _rects;
+	std::vector<rde_atlas_rect> _packed_rects;
+	_packed_rects.reserve(_rects.size());
+
+	while(_packed_rects.size() != _rects.size()) {
+
+		bool _rect_found = false;
+
+		rde_atlas_rect _selected_rect;
+		rde_point _selected_point;
+
+		if(_available_points.empty()) {
+			printf("Available points is empty :/ \n");
 		}
-		
-		if ((y_pos + _rect.h) > _max_image_size){
+
+		for(auto& _point : _available_points) {
+			for (rde_atlas_rect& _rect : _rects_cpy) {
+				if ((_point.x + _rect.w) > _max_image_size || (_point.y + _rect.h) > _max_image_size) {
+					continue;
+				}
+				
+				bool _good_to_pack = true;
+				for(auto& _packed_rect : _packed_rects) {
+					if(strcmp(_rect.name, _packed_rect.name) == 0 && _rect.w == _packed_rect.w && _rect.h == _packed_rect.h) {
+						break;
+					}
+
+					rde_atlas_rect _rec_0 = _packed_rect;
+					rde_atlas_rect _rec_1;
+					_rec_1.x = _point.x;
+					_rec_1.y = _point.y;
+					_rec_1.w = _rect.w;
+					_rec_1.h = _rect.h;
+
+					bool _x_overlap = (_rec_1.x >= _rec_0.x && _rec_1.x <= _rec_0.x + _rec_0.w) || ((_rec_1.x + _rec_1.w >= _rec_0.x && _rec_1.x + _rec_1.w <= _rec_0.x + _rec_0.w));
+					bool _y_overlap = (_rec_1.y >= _rec_0.y && _rec_1.y <= _rec_0.y + _rec_0.h) || ((_rec_1.y + _rec_1.h >= _rec_0.y && _rec_1.y + _rec_1.h <= _rec_0.y + _rec_0.h));
+
+					bool _x_overlap_reverse = (_rec_0.x >= _rec_1.x && _rec_0.x <= _rec_1.x + _rec_1.w) || ((_rec_0.x + _rec_0.w >= _rec_1.x && _rec_0.x + _rec_0.w <= _rec_1.x + _rec_1.w));
+					bool _y_overlap_reverse = (_rec_0.y >= _rec_1.y && _rec_0.y <= _rec_1.y + _rec_1.h) || ((_rec_0.y + _rec_0.h >= _rec_1.y && _rec_0.y + _rec_0.h <= _rec_1.y + _rec_1.h));
+				
+					bool _overlap_x = _x_overlap || _x_overlap_reverse;
+					bool _overlap_y = _y_overlap || _y_overlap_reverse;
+
+					if(_overlap_x && _overlap_y) {
+						_good_to_pack = false;
+						break;
+					}
+				}
+
+				if(!_good_to_pack) {
+					continue;
+				}
+
+				_selected_rect = _rect;
+				_selected_point = _point;
+				_rect_found = true;
+				break;		
+			}
+
+			if(_rect_found) {
+				break;
+			}
+		}
+
+		if(!_rect_found) {
 			return false;
 		}
-		
-		_rect.x = x_pos;
-		_rect.y = y_pos;
-		
-		x_pos += _rect.w + _pixels_of_separation;
-    	
-		if (_rect.h > largest_h_this_row){
-			largest_h_this_row = _rect.h + _pixels_of_separation;
+
+		_rects_cpy.erase(std::find_if(_rects_cpy.begin(), _rects_cpy.end(), [_selected_rect](const rde_atlas_rect& _r) {
+		    return _selected_rect.x == _r.x && _selected_rect.y == _r.y && _selected_rect.w == _r.w && _selected_rect.h == _r.h;
+		}));
+
+		_selected_rect.x = _selected_point.x;
+		_selected_rect.y = _selected_point.y;
+		_selected_rect.was_packed = true;
+
+		_packed_rects.push_back(_selected_rect);
+
+		rde_point _bottom_left_point = { _selected_rect.x + _pixels_of_separation, _selected_rect.y + _selected_rect.h + _pixels_of_separation };
+		rde_point _bottom_right_point = { _selected_rect.x + _selected_rect.w + _pixels_of_separation, _selected_rect.y + _selected_rect.h + _pixels_of_separation };
+		rde_point _top_right_point = { _selected_rect.x + _selected_rect.w + _pixels_of_separation, _selected_rect.y + _pixels_of_separation };
+
+		_available_points.erase(std::find_if(_available_points.begin(), _available_points.end(), [_selected_point](const rde_point& _p) {
+			return _selected_point.x == _p.x && _selected_point.y == _p.y;
+		}));
+
+		_available_points.push_back(_bottom_left_point);
+		_available_points.push_back(_bottom_right_point);
+		_available_points.push_back(_top_right_point);
+
+		std::sort(_available_points.begin(), _available_points.end(), [](const rde_point& _p_0, const rde_point& _p_1) {
+			return (_p_0.y == _p_1.y) ? _p_0.x < _p_1.x : _p_0.y < _p_1.y;
+		});
+
+		for(auto& _packed_rect : _packed_rects) {
+			for(int _i = _available_points.size() - 1; _i >= 0; _i--) {
+				rde_point _p = _available_points[_i];
+				if(_p.x > _packed_rect.x && _p.x < _packed_rect.x + _packed_rect.w &&
+					_p.y > _packed_rect.y && _p.y < _packed_rect.y + _packed_rect.h) {
+					_available_points.erase(_available_points.begin() + _i);
+				}
+			}
 		}
-    	  
-		_rect.was_packed = true;		
+	}
+
+	_rects.clear();
+
+	for(auto& _rec : _packed_rects) {
+		_rects.push_back(_rec);
 	}
 
 	return true;
@@ -179,6 +291,9 @@ std::vector<rde_atlas_rect> load_all_textures_of_atlas(const char* _dir_path) {
             	_rect.pixels = _texture;
             	_rect.w = _width;
             	_rect.h = _height;
+				_rect.x = 0;
+				_rect.y = 0;
+
             	memset(_rect.name, 0, 256);
 				#if _WIN32
 				strcpy_s(_rect.name, _file_name);
@@ -220,12 +335,13 @@ int main(int _argc, char** _argv) {
 
 	std::vector<rde_atlas_rect> _rects = load_all_textures_of_atlas(_dir_path);
 	
-	bool _success = generate_atlas_data(_rects, _max_image_size, _pixels_of_separation);
-	while(!_success) {
-		printf("Warning: Could not fit everything in a %dx%d atlas, so trying on a %dx%d \n", _max_image_size, _max_image_size, _max_image_size << 1, _max_image_size << 1);
-		_max_image_size = _max_image_size << 1;
-		_success = generate_atlas_data(_rects, _max_image_size, _pixels_of_separation);
-	}
+	generate_atlas_data(_rects, _max_image_size, _pixels_of_separation);
+	 bool _success = generate_atlas_data(_rects, _max_image_size, _pixels_of_separation);
+	 while(!_success) {
+	 	printf("Warning: Could not fit everything in a %dx%d atlas, so trying on a %dx%d \n", _max_image_size, _max_image_size, _max_image_size << 1, _max_image_size << 1);
+	 	_max_image_size = _max_image_size << 1;
+	 	_success = generate_atlas_data(_rects, _max_image_size, _pixels_of_separation);
+	 }
 
 	dump_atlas_to_final_texture(_rects, _atlas_name, _max_image_size);
 	dump_atlas_to_config_file(_rects, _atlas_name);

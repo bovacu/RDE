@@ -1,1 +1,1 @@
-clang++ atlas_generator.cpp -I../../external/stb -Werror -Wall -Wextra -o bin/atlas_generator.exe
+clang++ -g -O0 atlas_generator.cpp -I../../external/stb -Werror -Wall -Wextra -o bin/atlas_generator.exe

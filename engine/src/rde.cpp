@@ -105,7 +105,8 @@
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
 //				- https://www.david-colson.com/2020/03/10/exploring-rect-packing.html
 //
-//		- TOOL: command line font atlas creator.
+//		- TOOL: [DONE] Command line font atlas creator.
+//				- [DONE] Improve algorithm to use most part of space
 //
 //		- TOOL: command line project creation, compilation and export.
 
