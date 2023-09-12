@@ -159,10 +159,6 @@ bool generate_atlas_data(std::vector<rde_atlas_rect>& _rects, int _max_image_siz
 		rde_atlas_rect _selected_rect;
 		rde_point _selected_point;
 
-		if(_available_points.empty()) {
-			printf("Available points is empty :/ \n");
-		}
-
 		for(auto& _point : _available_points) {
 			for (rde_atlas_rect& _rect : _rects_cpy) {
 				if ((_point.x + _rect.w) > _max_image_size || (_point.y + _rect.h) > _max_image_size) {
@@ -171,10 +167,6 @@ bool generate_atlas_data(std::vector<rde_atlas_rect>& _rects, int _max_image_siz
 				
 				bool _good_to_pack = true;
 				for(auto& _packed_rect : _packed_rects) {
-					if(strcmp(_rect.name, _packed_rect.name) == 0 && _rect.w == _packed_rect.w && _rect.h == _packed_rect.h) {
-						break;
-					}
-
 					rde_atlas_rect _rec_0 = _packed_rect;
 					rde_atlas_rect _rec_1;
 					_rec_1.x = _point.x;
