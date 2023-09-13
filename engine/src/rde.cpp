@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdarg.h>
-#include <unordered_map>
-#include <string>
+#include <time.h>
 
 #include "rde.h"
 #include "SDL2/SDL.h"
@@ -41,6 +40,17 @@
 #define STBIW_WINDOWS_UTF8
 #endif
 #include "stb/stb_image_write.h"
+#pragma GCC diagnostic pop
+#pragma clang diagnostic pop
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#define STB_DS_IMPLEMENTATION
+#define STBDS_NO_SHORT_NAMES
+#define STBDS_SIPHASH_2_4
+#include "stb/stb_ds.h"
 #pragma GCC diagnostic pop
 #pragma clang diagnostic pop
 
@@ -152,10 +162,14 @@ struct rde_atlas_sub_texture_data {
 
 };
 
-typedef std::unordered_map<std::string, rde_texture> rde_atlas_sub_textures;
+struct rde_atlas_sub_textures {
+	char* key;
+	rde_texture value;
+};
+
 struct rde_atlas {
 	rde_texture* texture;
-	rde_atlas_sub_textures sub_textures;
+	rde_atlas_sub_textures* sub_textures = nullptr;
 };
 
 struct rde_batch_2d {
@@ -322,6 +336,8 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 		assert(false && "[ERROR]: Only one engine can be created");
 		exit(-1);
 	}
+
+	stbds_rand_seed(time(nullptr));
 
 	rde_window* _default_window = rde_window_create_window();
 

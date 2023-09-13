@@ -1,4 +1,4 @@
-rde_atlas_sub_textures rde_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas) {
+rde_atlas_sub_textures* rde_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas) {
 	FILE* _file = nullptr;
 	char* _text = nullptr;
 
@@ -20,7 +20,7 @@ rde_atlas_sub_textures rde_file_system_read_atlas_config(const char* _atlas_path
 	fread(_text, sizeof(char), _num_bytes, _file);
 
 
-	rde_atlas_sub_textures _atlas_sub_textures;
+	rde_atlas_sub_textures* hash = nullptr;
 	cJSON* _atlas_json = cJSON_Parse(_text);
 
 	if(_atlas_json == nullptr) {
@@ -43,7 +43,7 @@ rde_atlas_sub_textures rde_file_system_read_atlas_config(const char* _atlas_path
 		_texture.data_format = _atlas->data_format;
 		_texture.file_path = _atlas->file_path;
 		_texture.atlas_texture = _atlas;
-		_atlas_sub_textures[std::string(_sub_texture_json->string)] = _texture;
+		stbds_shput(hash, _sub_texture_json->string, _texture);
 
 		cJSON_free(_position);
 		cJSON_free(_size);
@@ -54,5 +54,5 @@ rde_atlas_sub_textures rde_file_system_read_atlas_config(const char* _atlas_path
 	fclose(_file);
 	free(_text);
 
-	return _atlas_sub_textures;
+	return hash;
 }

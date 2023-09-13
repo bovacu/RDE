@@ -439,7 +439,7 @@ void rde_rendering_unload_texture(rde_texture* _texture) {
 
 rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _config_path) {
 	rde_texture* _texture = rde_rendering_load_texture(_texture_path);
-	rde_atlas_sub_textures _atlas_sub_textures = rde_file_system_read_atlas_config(_config_path, _texture);
+	rde_atlas_sub_textures* _atlas_sub_textures = rde_file_system_read_atlas_config(_config_path, _texture);
 
 	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_ATLASES; _i++) {
 		rde_atlas* _atlas = &ENGINE.atlases[_i];
@@ -457,18 +457,18 @@ rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _conf
 }
 
 rde_texture* rde_rendering_get_atlas_sub_texture(rde_atlas* _atlas, const char* _texture_name) {
-	bool _exists = _atlas->sub_textures.find(_texture_name) != _atlas->sub_textures.end();
+	bool _exists = stbds_shgeti(_atlas->sub_textures, _texture_name) != -1;
 	if(!_exists) {
 		printf("Error: could not load sub texture %s for atlas at %s \n", _texture_name, _atlas->texture->file_path);
 		assert(false && "Tried to load an inexsitent sub texture in an atlas, check logs");
 	}
 
-	return &_atlas->sub_textures[_texture_name];
+	return &stbds_shget(_atlas->sub_textures, _texture_name);
 }
 
 void rde_rendering_unload_atlas(rde_atlas* _atlas) {
 	assert(_atlas != nullptr && "Tried to unload a null atlas");
-	_atlas->sub_textures = rde_atlas_sub_textures {};
+	_atlas->sub_textures = nullptr;
 	rde_rendering_unload_texture(_atlas->texture);
 	_atlas->texture = nullptr;
 }
