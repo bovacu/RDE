@@ -268,6 +268,23 @@ rde_engine rde_struct_create_engine() {
 	_e.texture_shader_2d = NULL;
 	_e.text_shader_2d = NULL;
 	_e.frame_buffer_shader = NULL;
+
+	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_SHADERS; _i++) {
+		_e.shaders[_i] = rde_struct_create_shader();
+	}
+
+	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+		_e.windows[_i] = rde_struct_create_window();
+	}
+
+	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_TEXTURES; _i++) {
+		_e.textures[_i] = rde_struct_create_texture();
+	}
+
+	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_ATLASES; _i++) {
+		_e.atlases[_i] = rde_struct_create_atlas();
+	}
+
 	memset(_e.window_events, 0, RDE_WIN_EVENT_COUNT);
 	memset(_e.display_events, 0, RDE_DISPLAY_EVENT_COUNT);
 	memset(_e.key_events, 0, RDE_KEY_EVENT_COUNT);

@@ -1465,7 +1465,7 @@ RDE_DECLARE_EASING_FUNCS(in_out, circular)
 
 
 RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv);
-RDE_FUNC void rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks);
+RDE_FUNC void rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks); /// Setsup some basic info the engine needs, call this BEFORE rde_engine_create_engine
 
 RDE_FUNC RDE_PLATFORM_TYPE_ rde_engine_get_platform();
 
