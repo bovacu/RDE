@@ -1,6 +1,10 @@
 #ifndef RDE_H
 #define RDE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Index Begin
 //
 //		Defines:
@@ -53,6 +57,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <float.h>
+#include <stdbool.h>
 
 /// *************************************************************************************************
 /// *                                		DEFINES                         						*
@@ -68,6 +73,17 @@
 #define RDE_MAX_LOADABLE_SHADERS 256
 #define RDE_MAX_LOADABLE_TEXTURES 512
 #define RDE_MAX_LOADABLE_ATLASES 512
+
+#define RDE_INT_MAX 2147483647
+#define RDE_INT_MIN (-2147483647 - 1)
+#define RDE_LONG_MAX 2147483647
+#define RDE_LONG_MIN (-2147483647 - 1)
+#define RDE_FLOAT_MAX 3.402823466 E + 38
+#define RDE_FLOAT_MIN 1.175494351 E - 38
+#define RDE_DOUBLE_MAX 1.7976931348623158 E + 308
+#define RDE_DOUBLE_MIN 2.2250738585072014 E - 308
+#define RDE_UINT_MAX 4294967295
+#define RDE_ULONG_MAX 4294967295
 
 /// ============================== SHADERS =================================
 
@@ -345,7 +361,6 @@
 	#include <io.h>
 	#include <fcntl.h>
 	#include <windows.h>
-	#include <iostream>
 #endif			 
 
 #define RDE_SHOW_WINDOWS_CONSOLE 							\
@@ -381,28 +396,28 @@
 /// ==================== GENERIC FUNCS AND STRUCTS ==========================
 
 #define SPECIALIZED_VEC2(_type, _name) 	\
-	struct _name {						\
+	typedef struct {					\
 		_type x;						\
 		_type y;						\
-	};
+	} _name;
 
 #define SPECIALIZED_VEC3(_type, _name) 	\
-	struct _name {						\
+	typedef struct {					\
 		_type x;						\
 		_type y;						\
 		_type z;						\
-	};
+	} _name;
 
 #define SPECIALIZED_VEC4(_type, _name) 	\
-	struct _name {						\
+	typedef struct {					\
 		_type x;						\
 		_type y;						\
 		_type z;						\
 		_type w;						\
-	};
+	} _name;
 
 #define SPECIALIZED_MAT2(_type, _name) 	\
-	struct _name {						\
+	typedef struct {					\
 		union {							\
 			struct {					\
 				float m00, m01;			\
@@ -412,10 +427,10 @@
 			float m[2][2];				\
 			float v[4];					\
 		};								\
-	};
+	} _name;
 
 #define SPECIALIZED_MAT3(_type, _name) 	\
-	struct _name {						\
+	typedef struct {					\
 		union {							\
 			struct {					\
 				float m00, m01, m02;	\
@@ -426,10 +441,10 @@
 			float m[3][3];				\
 			float v[9];					\
 		};								\
-	};
+	} _name;
 
 #define SPECIALIZED_MAT4(_type, _name) 		\
-	struct _name {							\
+	typedef struct {						\
 		union {								\
 			struct {						\
 				float m00, m01, m02, m03;	\
@@ -441,7 +456,7 @@
 			float m[4][4];					\
 			float v[16];					\
 		};									\
-	};
+	} _name;
 
 #define COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(_func_name, _callback_type, _callback_name, _extra_code) 	\
 	void _func_name(rde_window* _window, rde_event* _event) {					\
@@ -450,7 +465,7 @@
 			_extra_code																						\
 		}																									\
 																											\
-		if(ENGINE._callback_type._callback_name._callback != nullptr) {									\
+		if(ENGINE._callback_type._callback_name._callback != NULL) {									\
 			ENGINE._callback_type._callback_name._callback(_event);										\
 		}																									\
 	}
@@ -482,25 +497,25 @@ typedef unsigned int uint;
 
 /// ================================= STATE =================================
 
-enum RDE_INPUT_STATUS_ {
+typedef enum {
 	RDE_INPUT_STATUS_ERROR 			=-1,
 	RDE_INPUT_STATUS_UNINITIALIZED 	= 0,
 	RDE_INPUT_STATUS_JUST_PRESSED 	= 1,
 	RDE_INPUT_STATUS_KEEP_PRESSED 	= 2,
 	RDE_INPUT_STATUS_JUST_RELEASED 	= 3,
 	RDE_INPUT_STATUS_KEEP_RELEASED 	= 4,
-};
+} RDE_INPUT_STATUS_;
 
-enum RDE_MOUSE_STATUS_ {
+typedef enum {
 	RDE_MOUSE_STATUS_ENTERED,
 	RDE_MOUSE_STATUS_EXITED
-};
+} RDE_MOUSE_STATUS_;
 
 
 
 /// ================================ EVENTS ================================
 
-enum RDE_EVENT_TYPE_ {
+typedef enum {
 	RDE_EVENT_TYPE_NONE, 
 	
 	RDE_EVENT_TYPE_WINDOW_BEGIN,
@@ -527,13 +542,13 @@ enum RDE_EVENT_TYPE_ {
 	RDE_EVENT_TYPE_CONTROLLER_AXIS_MOVED, RDE_EVENT_TYPE_CONTROLLER_BUTTON_DOWN, RDE_EVENT_TYPE_CONTROLLER_BUTTON_UP,
 
 	RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN, RDE_EVENT_TYPE_MOBILE_TOUCH_UP, RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED
-};
+} RDE_EVENT_TYPE_;
 
 
 
 /// =============================== KEYBOARD ================================
 
-enum RDE_KEYBOARD_KEY_ {
+typedef enum {
 	// From SDL2
 	RDE_KEYBOARD_KEY_SPACE = 44,
 	RDE_KEYBOARD_KEY_APOSTROPHE = 52,
@@ -652,13 +667,13 @@ enum RDE_KEYBOARD_KEY_ {
 	RDE_KEYBOARD_KEY_RIGHT_ALT = 230,
 	RDE_KEYBOARD_KEY_MENU = 118,
 	RDE_KEYBOARD_KEY_NONE = 0xFFFF
-};
+} RDE_KEYBOARD_KEY_;
 
 
 
 /// ================================ MOUSE ==================================
 
-enum RDE_MOUSE_BUTTON_ {
+typedef enum {
 	// From SDL2
 	RDE_MOUSE_BUTTON_0 = 1,
 	RDE_MOUSE_BUTTON_1 = 2,
@@ -674,13 +689,13 @@ enum RDE_MOUSE_BUTTON_ {
 	RDE_MOUSE_BUTTON_RIGHT = RDE_MOUSE_BUTTON_2,
 	RDE_MOUSE_BUTTON_MIDDLE = RDE_MOUSE_BUTTON_1,
 	RDE_MOUSE_BUTTON_NONE = 0xFFFF
-};
+} RDE_MOUSE_BUTTON_;
 
 
 
 /// ============================== CONTROLLER ===============================
 
-enum RDE_CONTROLLER_BUTTON_ {
+typedef enum {
 	RDE_CONTROLLER_BUTTON_A            = 0,             
 	RDE_CONTROLLER_BUTTON_B            = 1,             
 	RDE_CONTROLLER_BUTTON_X            = 2,             
@@ -697,21 +712,21 @@ enum RDE_CONTROLLER_BUTTON_ {
 	RDE_CONTROLLER_BUTTON_DPAD_DOWN    = 12,      
 	RDE_CONTROLLER_BUTTON_DPAD_LEFT    = 13,      
 	RDE_CONTROLLER_BUTTON_NONE		   = 0xFFFF
-};
+} RDE_CONTROLLER_BUTTON_;
 
-enum RDE_CONTROLLER_AXIS_ {
+typedef enum {
 	RDE_CONTROLLER_AXIS_LEFT,
 	RDE_CONTROLLER_AXIS_RIGHT,
 	RDE_CONTROLLER_AXIS_LT,
 	RDE_CONTROLLER_AXIS_RT,
 	RDE_CONTROLLER_AXIS_NONE
-};
+} RDE_CONTROLLER_AXIS_;
 
 
 
 /// =============================== PLATFORM ================================
 
-enum RDE_PLATFORM_TYPE_ {
+typedef enum {
 	RDE_PLATFORM_TYPE_LINUX,
 	RDE_PLATFORM_TYPE_WINDOWS,
 	RDE_PLATFORM_TYPE_MAC,
@@ -719,29 +734,29 @@ enum RDE_PLATFORM_TYPE_ {
 	RDE_PLATFORM_TYPE_IOS,
 	RDE_PLATFORM_TYPE_EMSCRIPTEN,
 	RDE_PLATFORM_TYPE_UNSUPPORTED
-};
+} RDE_PLATFORM_TYPE_;
 
-enum RDE_INPUT_TYPE_ {
+typedef enum {
 	RDE_INPUT_TYPE_WINDOW,
 	RDE_INPUT_TYPE_MOUSE,
 	RDE_INPUT_TYPE_KEYBOARD,
 	RDE_INPUT_TYPE_CONTROLLER,
 	RDE_INPUT_TYPE_MOBILE
-};
+} RDE_INPUT_TYPE_;
 
-enum RDE_BATTERY_ {
+typedef enum {
 	RDE_BATTERY_UKNOWN,
 	RDE_BATTERY_ON_BATTERY,
 	RDE_BATTERY_NO_BATTERY,
 	RDE_BATTERY_CHARGING,
 	RDE_BATTERY_CHARGED
-};
+} RDE_BATTERY_;
 
 
 
 /// ============================== RENDERING ================================
 
-enum RDE_UI_ANCHOR_ {
+typedef enum {
 	RDE_UI_ANCHOR_MIDDLE              = 1 << 1,
 	RDE_UI_ANCHOR_LEFT                = 1 << 2,
 	RDE_UI_ANCHOR_RIGHT               = 1 << 3,
@@ -751,30 +766,30 @@ enum RDE_UI_ANCHOR_ {
 	RDE_UI_ANCHOR_LEFT_TOP            = 1 << 7,
 	RDE_UI_ANCHOR_RIGHT_BOTTOM        = 1 << 8,
 	RDE_UI_ANCHOR_RIGHT_TOP           = 1 << 9
-};
+} RDE_UI_ANCHOR_;
 
-enum RDE_UI_STRETCH_ {
+typedef enum {
 	RDE_UI_STRETCH_NO_STRETCH          = 1 << 10,
 	RDE_UI_STRETCH_VERTICAL_STRETCH    = 1 << 11,
 	RDE_UI_STRETCH_HORIZONTAL_STRETCH  = 1 << 12,
 	RDE_UI_STRETCH_FULL_STRETCH        = 1 << 13
-};
+} RDE_UI_STRETCH_;
 
-enum RDE_BATCH_PRIORITY_ {
+typedef enum {
 	RDE_BATCH_PRIORITY_SPRITE = 0,
 	RDE_BATCH_PRIORITY_TEXT = 1,
 	RDE_BATCH_PRIORITY_NONE = 2,
-};
+} RDE_BATCH_PRIORITY_;
 
-enum RDE_RENDERIZABLE_TYPE_ {
+typedef enum {
 	RDE_RENDERIZABLE_TYPE_NONE        = 0,
 	RDE_RENDERIZABLE_TYPE_SPRITE      = 1,
 	RDE_RENDERIZABLE_TYPE_TEXT        = 2,
 	RDE_RENDERIZABLE_TYPE_UI_IMAGE    = 3,
 	RDE_RENDERIZABLE_TYPE_UI_TEXT     = 4
-};
+} RDE_RENDERIZABLE_TYPE_;
 
-enum RDE_UNIFORM_FV_ {
+typedef enum {
 	RDE_UNIFORM_FV_1,
 	RDE_UNIFORM_FV_2,
 	RDE_UNIFORM_FV_3,
@@ -790,73 +805,73 @@ enum RDE_UNIFORM_FV_ {
 	RDE_UNIFORM_FV_MATRIX_4x3,
 	RDE_UNIFORM_FV_MATRIX_3x4
 #endif
-};
+} RDE_UNIFORM_FV_;
 
-enum RDE_UNIFORM_IV_ {
+typedef enum {
 	RDE_UNIFORM_IV_1,
 	RDE_UNIFORM_IV_2,
 	RDE_UNIFORM_IV_3,
 	RDE_UNIFORM_IV_4
-};
+} RDE_UNIFORM_IV_;
 
-enum RDE_UNIFORM_UIV_ {
+typedef enum {
 	RDE_UNIFORM_UIV_1,
 	RDE_UNIFORM_UIV_2,
 	RDE_UNIFORM_UIV_3,
 	RDE_UNIFORM_UIV_4
-};
+} RDE_UNIFORM_UIV_;
 
-enum RDE_CAMERA_TYPE_ {
+typedef enum {
 	RDE_CAMERA_TYPE_PERSPECTIVE,
 	RDE_CAMERA_TYPE_ORTHOGRAPHIC
-};
+} RDE_CAMERA_TYPE_;
 
 /// ============================= FILE SYSTEM ===============================
 
-enum RDE_IMAGE_EXTENSION_ {
+typedef enum {
 	RDE_IMAGE_EXTENSION_PNG,
 	RDE_IMAGE_EXTENSION_JPG,
 	RDE_IMAGE_EXTENSION_BMP,
 	RDE_IMAGE_EXTENSION_SVG
-};
+} RDE_IMAGE_EXTENSION_;
 
-enum RDE_FILE_RESULT_ {
+typedef enum {
 	RDE_FILE_RESULT_OK,
 	RDE_FILE_RESULT_NOT_FOUND,
 	RDE_FILE_RESULT_LINE_OUT_OF_SCOPE,
 	RDE_FILE_RESULT_NOT_ALL_LINES_IN_SCOPE
-};
+} RDE_FILE_RESULT_;
 
-enum RDE_FILE_MODE_ {
+typedef enum {
 	RDE_FILE_MODE_READ,
 	RDE_FILE_MODE_WRITE,
 	RDE_FILE_MODE_APPEND,
 	RDE_FILE_MODE_READ_AND_WRITE,
 	RDE_FILE_MODE_READ_AND_APPEND,
-};
+} RDE_FILE_MODE_;
 
 
 
 /// =============================== PHYSICS =================================
 
-enum RDE_PHYSICS_BODY_TYPE_ {
+typedef enum {
 	RDE_PHYSICS_BODY_TYPE_STATIC,
 	RDE_PHYSICS_BODY_TYPE_KINEMATIC,
 	RDE_PHYSICS_BODY_TYPE_DYNAMIC
-};
+} RDE_PHYSICS_BODY_TYPE_;
 
-enum RDE_PHYSICS_SHAPE_TYPE_ {
+typedef enum {
 	RDE_PHYSICS_SHAPE_TYPE_BOX,
 	RDE_PHYSICS_SHAPE_TYPE_CIRCLE,
 	RDE_PHYSICS_SHAPE_TYPE_POLYGON,
 	RDE_PHYSICS_SHAPE_TYPE_SEGMENT
-};
+} RDE_PHYSICS_SHAPE_TYPE_;
 
 
 
 /// =============================== LOCALIZATION ============================
 
-enum RDE_LANGUAGE_ { 
+typedef enum { 
 	RDE_LANGUAGE_EN_US, 
 	RDE_LANGUAGE_EN_GB, 
 	RDE_LANGUAGE_EN_CA, 
@@ -870,7 +885,7 @@ enum RDE_LANGUAGE_ {
 	RDE_LANGUAGE_IT, 
 	RDE_LANGUAGE_JP, 
 	RDE_LANGUAGE_MAX 
-};
+} RDE_LANGUAGE_;
 
 
 
@@ -950,16 +965,22 @@ struct rde_bouding_box {
 	UNIMPLEMENTED_STRUCT()
 };
 
-struct rde_probability {
-	float probability_rolled = 0.f;
-	bool happened = false;
-};
+typedef struct {
+	float probability_rolled;
+	bool happened;
+} rde_probability;
+rde_probability rde_struct_create_probability() {
+	rde_probability _p;
+	_p.probability_rolled = 0.f;
+	_p.happened = false;
+	return _p;
+}
 
 /// ================== CALLBACKS AND FUNCTION POINTERS ======================
 
-struct rde_engine;
-struct rde_window;
-struct rde_event;
+typedef struct rde_engine rde_engine;
+typedef struct rde_window rde_window;
+typedef struct rde_event rde_event;
 
 typedef void (*rde_event_func_inner)(rde_event*);
 typedef void (*rde_event_func_outer)(rde_window*, rde_event*);
@@ -968,152 +989,296 @@ typedef void (*rde_engine_user_side_loop_func_2)(float, rde_window*);
 
 typedef struct rde_inner_window_data rde_inner_window_info;
 
-struct rde_event_callback {
-	bool block_engine_default_implementation = false;
-	rde_event_func_inner _callback = nullptr;
-};
+typedef struct {
+	bool block_engine_default_implementation;
+	rde_event_func_inner _callback;
+} rde_event_callback;
+rde_event_callback rde_struct_create_event_callback() {
+	rde_event_callback _c;
+	_c.block_engine_default_implementation = false;
+	_c._callback = NULL;
+	return _c;
+}
 
-struct rde_window_callbacks {
-	rde_event_callback on_window_resize = {  };
-	rde_event_callback on_window_focused_by_mouse = {  };
-	rde_event_callback on_window_unfocused_by_mouse = {  };
-	rde_event_callback on_window_focused_by_keyboard = {  };
-	rde_event_callback on_window_unfocused_by_keyboard = {  };
-	rde_event_callback on_window_moved = {  };
-	rde_event_callback on_window_minimized = {  };
-	rde_event_callback on_window_maximized = {  };
-	rde_event_callback on_window_closed = {  };
-	rde_event_callback on_window_display_changed = {  };
-};
+typedef struct {
+	rde_event_callback on_window_resize;
+	rde_event_callback on_window_focused_by_mouse;
+	rde_event_callback on_window_unfocused_by_mouse;
+	rde_event_callback on_window_focused_by_keyboard;
+	rde_event_callback on_window_unfocused_by_keyboard;
+	rde_event_callback on_window_moved;
+	rde_event_callback on_window_minimized;
+	rde_event_callback on_window_maximized;
+	rde_event_callback on_window_closed;
+	rde_event_callback on_window_display_changed;
+} rde_window_callbacks;
+rde_window_callbacks rde_struct_create_window_callbacks() {
+	rde_window_callbacks _w;
+	_w.on_window_resize = rde_struct_create_event_callback();
+	_w.on_window_focused_by_mouse = rde_struct_create_event_callback();
+	_w.on_window_unfocused_by_mouse = rde_struct_create_event_callback();
+	_w.on_window_focused_by_keyboard = rde_struct_create_event_callback();
+	_w.on_window_unfocused_by_keyboard = rde_struct_create_event_callback();
+	_w.on_window_moved = rde_struct_create_event_callback();
+	_w.on_window_minimized = rde_struct_create_event_callback();
+	_w.on_window_maximized = rde_struct_create_event_callback();
+	_w.on_window_closed = rde_struct_create_event_callback();
+	_w.on_window_display_changed = rde_struct_create_event_callback();
+	return _w;
+}
 
-struct rde_display_callbacks {
-	rde_event_callback on_display_connected = {  };
-	rde_event_callback on_display_disconnected = {  };
-	rde_event_callback on_display_changed_orientation = {  };
-};
+typedef struct {
+	rde_event_callback on_display_connected;
+	rde_event_callback on_display_disconnected;
+	rde_event_callback on_display_changed_orientation;
+} rde_display_callbacks;
+rde_display_callbacks rde_struct_create_display_callbacks() {
+	rde_display_callbacks _d;
+	_d.on_display_connected = rde_struct_create_event_callback();
+	_d.on_display_disconnected = rde_struct_create_event_callback();
+	_d.on_display_changed_orientation = rde_struct_create_event_callback();
+	return _d;
+}
 
-struct rde_mobile_callbacks {
-	rde_event_callback on_app_terminating = {  }; 			/// Android -> onDestroy(), iOS -> applicationWillTerminate()
-	rde_event_callback on_app_low_memory = {  }; 			/// Android -> onLowMemory(), iOS -> applicationDidReceiveMemoryWarning()
-	rde_event_callback on_app_will_enter_background = {  }; 	/// Android -> onPause(), iOS -> applicationWillResignActive()
-	rde_event_callback on_app_did_enter_background = {  }; 	/// Android -> onPause(), iOS -> applicationDidEnterBackground()
-	rde_event_callback on_app_will_enter_foreground = {  }; 	/// Android -> onResume(), iOS -> applicationWillEnterForeground()
-	rde_event_callback on_app_did_enter_foreground = {  }; 	/// Android -> onResume(), iOS -> applicationDidBecomeActive()
-};
+typedef struct {
+	rde_event_callback on_app_terminating; 				/// Android -> onDestroy(), iOS -> applicationWillTerminate()
+	rde_event_callback on_app_low_memory; 				/// Android -> onLowMemory(), iOS -> applicationDidReceiveMemoryWarning()
+	rde_event_callback on_app_will_enter_background; 	/// Android -> onPause(), iOS -> applicationWillResignActive()
+	rde_event_callback on_app_did_enter_background; 	/// Android -> onPause(), iOS -> applicationDidEnterBackground()
+	rde_event_callback on_app_will_enter_foreground; 	/// Android -> onResume(), iOS -> applicationWillEnterForeground()
+	rde_event_callback on_app_did_enter_foreground; 	/// Android -> onResume(), iOS -> applicationDidBecomeActive()
+} rde_mobile_callbacks;
+rde_mobile_callbacks rde_struct_create_mobile_callbacks() {
+	rde_mobile_callbacks _m;
+	_m.on_app_terminating = rde_struct_create_event_callback();
+	_m.on_app_low_memory = rde_struct_create_event_callback();
+	_m.on_app_will_enter_background = rde_struct_create_event_callback();
+	_m.on_app_did_enter_background = rde_struct_create_event_callback();
+	_m.on_app_will_enter_foreground = rde_struct_create_event_callback();
+	_m.on_app_did_enter_foreground = rde_struct_create_event_callback();
+	return _m;
+}
 
-struct rde_controller_callbacks {
-	rde_event_callback on_controller_added = {  };
-	rde_event_callback on_controller_removed = {  };
-	rde_event_callback on_controller_reassigned = {  };
-};
+typedef struct {
+	rde_event_callback on_controller_added;
+	rde_event_callback on_controller_removed;
+	rde_event_callback on_controller_reassigned;
+} rde_controller_callbacks;
+rde_controller_callbacks rde_struct_create_controller_callbacks() {
+	rde_controller_callbacks _c;
+	_c.on_controller_added = rde_struct_create_event_callback();
+	_c.on_controller_removed = rde_struct_create_event_callback();
+	_c.on_controller_reassigned = rde_struct_create_event_callback();
+	return _c;
+}
 
-struct rde_drag_and_drop_callbacks {
-	rde_event_callback on_drag_and_drop_begin = {  };
-	rde_event_callback on_drag_and_drop_end = {  };
-};
+typedef struct {
+	rde_event_callback on_drag_and_drop_begin;
+	rde_event_callback on_drag_and_drop_end;
+} rde_drag_and_drop_callbacks;
+rde_drag_and_drop_callbacks rde_struct_create_drag_and_drop_callbacks() {
+	rde_drag_and_drop_callbacks _d;
+	_d.on_drag_and_drop_begin = rde_struct_create_event_callback();
+	_d.on_drag_and_drop_end = rde_struct_create_event_callback();
+	return _d;
+}
 
-struct rde_end_user_mandatory_callbacks {
-	rde_engine_user_side_loop_func on_update = nullptr;
-	rde_engine_user_side_loop_func on_fixed_update = nullptr;
-	rde_engine_user_side_loop_func on_late_update = nullptr;
-	rde_engine_user_side_loop_func_2 on_render = nullptr;
-};
+typedef struct {
+	rde_engine_user_side_loop_func on_update;
+	rde_engine_user_side_loop_func on_fixed_update;
+	rde_engine_user_side_loop_func on_late_update;
+	rde_engine_user_side_loop_func_2 on_render;
+} rde_end_user_mandatory_callbacks;
+rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks() {
+	rde_end_user_mandatory_callbacks _e;
+	_e.on_update = NULL;
+	_e.on_fixed_update = NULL;
+	_e.on_late_update = NULL;
+	_e.on_render = NULL;
+	return _e;
+}
 
 /// ============================== ENGINE ===================================
 
-struct rde_display_info {
-	int index = -1;
-};
-
-typedef struct rde_window rde_window;
+typedef struct {
+	int index;
+} rde_display_info;
+rde_display_info rde_struct_create_display_info() {
+	rde_display_info _d;
+	_d.index = -1;
+	return _d;
+}
 
 
 /// ============================== EVENTS ===================================
 
-struct rde_event_window {
-	rde_vec_2I position { -1, -1 };
-	rde_vec_2I size { -1, -1 };
+typedef struct {
+	rde_vec_2I position;
+	rde_vec_2I size;
+	int display_index;
+	bool minimized;
+	bool maximized;
+} rde_event_window;
+rde_event_window rde_struct_create_event_window() {
+	rde_event_window _e;
+	_e.position.x = -1;
+	_e.position.y = -1;
+	_e.size.x = -1;
+	_e.size.y = -1;
+	_e.display_index = -1;
+	_e.minimized = false;
+	_e.maximized = false;
+	return _e;
+}
 
-	int display_index = -1;
+typedef struct {
+	int orientation;
+	int display_index;
+} rde_event_display;
+rde_event_display rde_struct_create_event_display() {
+	rde_event_display _e;
+	_e.orientation = -1;
+	_e.display_index = -1;
+	return _e;
+}
 
-	bool minimized = false;
-	bool maximized = false;
-};
+typedef struct {
+	RDE_KEYBOARD_KEY_ key;
+	char typed_char;
+	const char* typed_text;
+	int amount_of_times_pressed;
+} rde_event_key;
+rde_event_key rde_struct_create_event_key() {
+	rde_event_key _e;
+	_e.key = RDE_KEYBOARD_KEY_NONE;
+	_e.typed_char = '\0';
+	_e.amount_of_times_pressed = -1;
+	return _e;
+}
 
-struct rde_event_display {
-	int orientation = -1;
-	int display_index = -1;
-};
+typedef struct {
+	rde_vec_2I position;
+	rde_vec_2F scrolled;
+	RDE_MOUSE_BUTTON_ button;
+	int amount_of_times_pressed;
+} rde_event_mouse;
+rde_event_mouse rde_struct_create_event_mouse() {
+	rde_event_mouse _e;
+	_e.button = RDE_MOUSE_BUTTON_NONE;
+	_e.position.x = -1;
+	_e.position.y = -1;
+	_e.scrolled.x = -1.f;
+	_e.scrolled.y = -1.f;
+	return _e;
+}
 
-struct rde_event_key {
-	RDE_KEYBOARD_KEY_ key = RDE_KEYBOARD_KEY_NONE;
-
-	char typed_char = '\0';
-
-	const char* typed_text = nullptr;
-
-	int amount_of_times_pressed = -1;
-};
-
-struct rde_event_mouse {
-	rde_vec_2I position { -1, -1 };
-	rde_vec_2F scrolled { -1.f, -1.f };
-
-	RDE_MOUSE_BUTTON_ button = RDE_MOUSE_BUTTON_NONE;
-
-	int amount_of_times_pressed = -1;
-};
-
-struct rde_event_controller {
+typedef struct {
 	size_t controller_id;
+	rde_vec_2F left_joystick;
+	rde_vec_2F right_joystick;
+	rde_vec_2F back_buttons;
+	RDE_CONTROLLER_BUTTON_ button;
+	RDE_CONTROLLER_AXIS_ axis;
+} rde_event_controller;
+rde_event_controller rde_struct_create_event_controller() {
+	rde_event_controller _e;
+	_e.controller_id = -1;
+	_e.left_joystick.x = -1.f;
+	_e.left_joystick.y = -1.f;
+	_e.right_joystick.x = -1.f;
+	_e.right_joystick.y = -1.f;
+	_e.back_buttons.x = -1.f;
+	_e.back_buttons.y = -1.f;
+	_e.button = RDE_CONTROLLER_BUTTON_NONE;
+	_e.axis = RDE_CONTROLLER_AXIS_NONE;
+	return _e;
+}
 
-	rde_vec_2F left_joystick { -1.f, -1.f };
-	rde_vec_2F right_joystick { -1.f, -1.f };
-	rde_vec_2F back_buttons { -1.f, -1.f };
+typedef struct {
+	rde_vec_2I init_touch_position;
+	rde_vec_2I end_touch_position;
+	float pressure;
+	int finger_id;
+} rde_event_mobile;
+rde_event_mobile rde_struct_create_event_mobile() {
+	rde_event_mobile _e;
+	_e.init_touch_position.x = -1;
+	_e.init_touch_position.y = -1;
+	_e.end_touch_position.x = -1;
+	_e.end_touch_position.y = -1;
+	_e.pressure = -1.f;
+	_e.finger_id = -1;
+	return _e;
+}
 
-	RDE_CONTROLLER_BUTTON_ button = RDE_CONTROLLER_BUTTON_NONE;
-	RDE_CONTROLLER_AXIS_ axis = RDE_CONTROLLER_AXIS_NONE;
-};
+typedef struct {
+	size_t window_id;
+	char* file_path;
+} rde_event_drag_and_drop;
+rde_event_drag_and_drop rde_struct_create_event_drag_and_drop() {
+	rde_event_drag_and_drop _e;
+	_e.window_id = 0;
+	_e.file_path = NULL;
+	return _e;
+}
 
-struct rde_event_mobile {
-	rde_vec_2I init_touch_position { -1, -1 };
-	rde_vec_2I end_touch_position { -1, -1 };
-
-	float pressure = -1.f;
-
-	int finger_id = -1;
-};
-
-struct rde_event_drag_and_drop {
-	size_t window_id = 0;
-	char* file_path = nullptr;
-};
-
-struct rde_event_data {
-	rde_event_window window_event_data {  };
-	rde_event_key key_event_data {  };
-	rde_event_mouse mouse_event_data {  };
-	rde_event_controller controller_event_data {  };
-	rde_event_mobile mobile_event_data {  };
-	rde_event_display display_event_data {  };
-};
+typedef struct {
+	rde_event_window window_event_data;
+	rde_event_key key_event_data;
+	rde_event_mouse mouse_event_data;
+	rde_event_controller controller_event_data;
+	rde_event_mobile mobile_event_data;
+	rde_event_display display_event_data;
+} rde_event_data;
+rde_event_data rde_struct_create_event_data() {
+	rde_event_data _e;
+	_e.window_event_data = rde_struct_create_event_window();
+	_e.key_event_data = rde_struct_create_event_key();
+	_e.mouse_event_data = rde_struct_create_event_mouse();
+	_e.controller_event_data = rde_struct_create_event_controller();
+	_e.mobile_event_data = rde_struct_create_event_mobile();
+	_e.display_event_data = rde_struct_create_event_display();
+	return _e;
+}
 
 struct rde_event {
-	RDE_EVENT_TYPE_ type = RDE_EVENT_TYPE_NONE;
-	ulong time_stamp = 0;
-	uint window_id = 0;
-	bool handled = false;
-	rde_event_data data {  };
-
+	RDE_EVENT_TYPE_ type;
+	ulong time_stamp;
+	uint window_id;
+	bool handled;
+	rde_event_data data;
 };
+rde_event rde_struct_create_event() {
+	rde_event _e;
+	_e.type = RDE_EVENT_TYPE_NONE;
+	_e.time_stamp = 0;
+	_e.window_id = 0;
+	_e.handled = false;
+	_e.data = rde_struct_create_event_data();
+	return _e;
+}
 
+typedef struct rde_transform rde_transform;
 struct rde_transform {
-	rde_vec_3F position = { 0.f, 0.f, 0.f };
-	rde_vec_3F rotation = { 0.f, 0.f, 0.f };
-	rde_vec_3F scale = { 1.f, 1.f, 1.f };
-
+	rde_vec_3F position;
+	rde_vec_3F rotation;
+	rde_vec_3F scale;
 	rde_transform* parent;
 };
+rde_transform rde_struct_create_transform() {
+	rde_transform _t;
+	_t.position.x = 0.f;
+	_t.position.y = 0.f;
+	_t.position.z = 0.f;
+	_t.rotation.x = 0.f;
+	_t.rotation.y = 0.f;
+	_t.rotation.z = 0.f;
+	_t.scale.x = 0.f;
+	_t.scale.y = 0.f;
+	_t.scale.z = 0.f;
+	_t.parent = NULL;
+	return _t;
+}
 
 /// ============================ RENDERING ==================================
 
@@ -1123,14 +1288,31 @@ typedef struct rde_cpu_texture rde_cpu_texture;
 typedef struct rde_render_texture rde_render_texture;
 typedef struct rde_atlas rde_atlas;
 
-struct rde_color {
-	unsigned char r, g, b, a;
-};
+typedef struct {
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+	unsigned char a;
+} rde_color;
+rde_color rde_struct_create_color() {
+	rde_color _c;
+	_c.r = 255;
+	_c.g = 255;
+	_c.b = 255;
+	_c.a = 255;
+	return _c;
+}
 
-struct rde_polygon {
-	rde_vec_2I* vertices = nullptr;
-	size_t vertices_count = 0;
-};
+typedef struct {
+	rde_vec_2I* vertices;
+	size_t vertices_count;
+} rde_polygon;
+rde_polygon rde_struct_create_polygon() {
+	rde_polygon _p;
+	_p.vertices = NULL;
+	_p.vertices_count = 0;
+	return _p;
+}
 
 struct rde_mesh {
 	UNIMPLEMENTED_STRUCT()
@@ -1156,27 +1338,45 @@ struct rde_model_animation {
 	UNIMPLEMENTED_STRUCT()
 };
 
-struct rde_vertex_2d {
-	rde_vec_3F position { 0.f, 0.f, 0.f };
-	int color = 0xFFFFFF;
-	rde_vec_2F texture_coordinates = { 0.f, 0.f };
-};
+typedef struct {
+	rde_vec_3F position;
+	int color;
+	rde_vec_2F texture_coordinates;
+} rde_vertex_2d;
+rde_vertex_2d rde_struct_create_vertex_2d() {
+	rde_vertex_2d _v;
+	_v.position.x = 0.f;
+	_v.position.y = 0.f;
+	_v.position.z = 0.f;
+	_v.texture_coordinates.x = 0.f;
+	_v.texture_coordinates.y = 0.f;
+	_v.color = 0xFFFFFF;
+	return _v;
+}
 
 struct rde_viewport {
 	UNIMPLEMENTED_STRUCT()
 };
 
-struct rde_camera {
-	size_t id = 0;
-	float zoom = 1.f;
-	rde_transform transform = {  };
-	RDE_CAMERA_TYPE_ camera_type = RDE_CAMERA_TYPE_ORTHOGRAPHIC;
-	bool enabled = true;
-};
+typedef struct {
+	size_t id;
+	float zoom;
+	rde_transform transform;
+	RDE_CAMERA_TYPE_ camera_type;
+	bool enabled;
+} rde_camera;
+rde_camera rde_struct_create_camera() {
+	rde_camera _c;
+	_c.id = 0;
+	_c.zoom = 1.f;
+	_c.transform = rde_struct_create_transform();
+	_c.camera_type = RDE_CAMERA_TYPE_ORTHOGRAPHIC;
+	_c.enabled = true;
+	return _c;
+}
 
 struct rde_font {
-	rde_vec_2I position;
-	rde_vec_2I size;
+	UNIMPLEMENTED_STRUCT()
 };
 
 /// *************************************************************************************************
@@ -1213,18 +1413,17 @@ const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
 
 /// ============================ MATH =======================================
 
-RDE_FUNC rde_random* rde_math_create_random(long _seed = -1);
-RDE_FUNC void rde_math_set_random_seed(long _seed);
-RDE_FUNC int rde_math_get_random_int(int _min_included = INT_MIN, int _max_not_included = INT_MAX);
-RDE_FUNC float rde_math_get_random_float(float _min_included = FLT_MIN, float _max_not_included = FLT_MAX);
+RDE_FUNC void rde_math_set_random_seed(long _seed); /// Sets the seed for the random math module, -1 will not set it to the current time
+RDE_FUNC int rde_math_get_random_int(int _min_included, int _max_not_included);
+RDE_FUNC float rde_math_get_random_float(float _min_included, float _max_not_included);
 RDE_FUNC rde_probability rde_math_get_probability(float _normalized_chance_to_happen);
 
-RDE_FUNC void rde_math_convert_world_position_to_screen_coordinates(rde_window* _window, rde_vec_3F* _vec);
-RDE_FUNC void rde_math_convert_world_position_to_screen_coordinates(rde_window* _window, rde_vec_2F* _vec);
+RDE_FUNC void rde_math_convert_world_position_to_screen_coordinates_3d(rde_window* _window, rde_vec_3F* _vec);
+RDE_FUNC void rde_math_convert_world_position_to_screen_coordinates_2d(rde_window* _window, rde_vec_2F* _vec);
 RDE_FUNC void rde_math_convert_world_size_to_screen_size(rde_window* _window, rde_vec_2F* _vec);
 
 #define RDE_DECLARE_CLAMP_FUNCS(_type) \
-RDE_FUNC inline _type rde_math_clamp_##type(_type _value, _type _min, _type _max);
+	RDE_FUNC inline _type rde_math_clamp_##_type(_type _value, _type _min, _type _max);
 
 RDE_DECLARE_CLAMP_FUNCS(int)
 RDE_DECLARE_CLAMP_FUNCS(uint)
@@ -1354,8 +1553,8 @@ RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _even
 /// ============================ RENDERING ==================================
 
 RDE_FUNC rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code);
-RDE_FUNC void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose = false);
-RDE_FUNC void rde_rendering_set_shader_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_UIV_ _type, int* _data);
+RDE_FUNC void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose);
+RDE_FUNC void rde_rendering_set_shader_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_IV_ _type, int* _data);
 RDE_FUNC void rde_rendering_set_shader_uniform_value_uint(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_UIV_ _type, uint* _data);
 RDE_FUNC void rde_rendering_unload_shader(rde_shader* _shader);
 
@@ -1370,26 +1569,26 @@ RDE_FUNC rde_texture* rde_rendering_create_cpu_texture(rde_vec_2UI _texture_size
 RDE_FUNC void rde_rendering_destroy_cpu_texture(rde_cpu_texture* _cpu_texture);
 RDE_FUNC void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_texture);
 
-RDE_FUNC rde_font* rde_rendering_load_font(const char* _file_path);
-RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
+//RDE_FUNC rde_font* rde_rendering_load_font(const char* _file_path);
+//RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
 
 RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 
 RDE_FUNC void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window);
 RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window);
 
-RDE_FUNC void rde_rendering_draw_point_2d(rde_vec_2F _position, rde_color _color, rde_shader* _shader = nullptr);
-RDE_FUNC void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_point_2d(rde_vec_2F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 3D space, pass NULL on the _shader for the default shader
 
-RDE_FUNC void rde_rendering_draw_line_2d(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader = nullptr);
-RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_line_2d(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
 
-RDE_FUNC void rde_rendering_draw_triangle_2d(rde_vec_2F _verte_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader = nullptr);
-RDE_FUNC void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader = nullptr);
-RDE_FUNC void rde_rendering_draw_circle_2d(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader = nullptr);
-RDE_FUNC void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_triangle_2d(rde_vec_2F _verte_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader); /// Draws a batched triangle in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader); /// Draws a batched rectangle in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_draw_circle_2d(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader); /// Draws a batched circle in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader);  /// Draws a batched polygon in 2D space, pass NULL on the _shader for the default shader
 
-RDE_FUNC void rde_rendering_draw_texture(const rde_transform* _transform, rde_texture* _texture, rde_color _tintColor = RDE_COLOR_WHITE, rde_shader* _shader = nullptr);
+RDE_FUNC void rde_rendering_draw_texture(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
 
 RDE_FUNC void rde_rendering_end_drawing_2d();
 RDE_FUNC void rde_rendering_end_drawing_3d();
@@ -1408,4 +1607,8 @@ RDE_FUNC void rde_rendering_end_drawing_3d();
 
 /// ============================ FILE SYSTEM ================================
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
