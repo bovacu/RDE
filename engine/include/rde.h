@@ -1,6 +1,8 @@
 #ifndef RDE_H
 #define RDE_H
 
+// This is needed because of C++ name mangling, if this lib is linked to a C++ project and is compiled,
+// without extern "C" won't work.
 #ifdef __cplusplus
 extern "C" {
 #endif
