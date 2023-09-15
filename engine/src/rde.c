@@ -424,9 +424,6 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 	rde_events_mouse_button_create_events();
 	rde_rendering_set_rendering_configuration();
 
-//	ENGINE.random = (rde_random*)calloc(1, sizeof(rde_random));
-//	ENGINE.random->mt.seed(ENGINE.random->rd());
-
 	_instantiated = true;
 
 	return _default_window;

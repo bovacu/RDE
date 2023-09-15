@@ -1273,9 +1273,9 @@ rde_transform rde_struct_create_transform() {
 	_t.rotation.x = 0.f;
 	_t.rotation.y = 0.f;
 	_t.rotation.z = 0.f;
-	_t.scale.x = 0.f;
-	_t.scale.y = 0.f;
-	_t.scale.z = 0.f;
+	_t.scale.x = 1.f;
+	_t.scale.y = 1.f;
+	_t.scale.z = 1.f;
 	_t.parent = NULL;
 	return _t;
 }
