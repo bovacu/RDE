@@ -1416,8 +1416,8 @@ const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
 /// ============================ MATH =======================================
 
 RDE_FUNC void rde_math_set_random_seed(long _seed); /// Sets the seed for the random math module, -1 will not set it to the current time
-RDE_FUNC int rde_math_get_random_int(int _min_included, int _max_not_included);
-RDE_FUNC float rde_math_get_random_float(float _min_included, float _max_not_included);
+RDE_FUNC int rde_math_get_random_int(int _min_included, int _max_included);
+RDE_FUNC float rde_math_get_random_float(float _min_included, float _max_included);
 RDE_FUNC rde_probability rde_math_get_probability(float _normalized_chance_to_happen);
 
 RDE_FUNC void rde_math_convert_world_position_to_screen_coordinates_3d(rde_window* _window, rde_vec_3F* _vec);

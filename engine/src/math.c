@@ -1,61 +1,28 @@
-//#include <random>
-//
-//struct rde_random {
-//	std::random_device rd;
-//	std::mt19937 mt;
-//};
-
 #include <math.h>
 
 void rde_math_set_random_seed(long _seed) {
-	UNUSED(_seed)
-	UNIMPLEMENTED("rde_math_set_random_seed")
-	//ENGINE.random->mt.seed(_seed);
+	srand(_seed);
 }
 
-int rde_math_get_random_int(int _min_included, int _max_not_included) {
-	UNUSED(_min_included)
-	UNUSED(_max_not_included)
-	//if(_min_included > _max_not_included) {
-	//	int _aux = _min_included;
-	//	_min_included = _max_not_included;
-	//	_min_included = _aux;
-	//}
-	//std::uniform_int_distribution<int> _dist(_min_included, _max_not_included);
-	//return _dist(ENGINE.random->mt);
-	UNIMPLEMENTED("rde_math_get_random_int")
-	return -1;
+int rde_math_get_random_int(int _min_included, int _max_included) {
+	return (rand() % (_max_included - _min_included + 1)) + _min_included;
 }
 
-float rde_math_get_random_float(float _min_included, float _max_not_included) {
-	UNUSED(_min_included)
-	UNUSED(_max_not_included)
-//	if(_min_included > _max_not_included) {
-//		float _aux = _min_included;
-//		_min_included = _max_not_included;
-//		_max_not_included = _aux;
-//	}
-//	std::uniform_real_distribution<float> _dist(_min_included, _max_not_included);
-//	return _dist(ENGINE.random->mt);
-	UNIMPLEMENTED("rde_math_get_random_float")
-	return -1;
+float rde_math_get_random_float(float _min_included, float _max_included) {
+	float _scale = rand() / (float) RAND_MAX;
+	return _min_included + _scale * (_max_included - _min_included);
 }
 
 rde_probability rde_math_get_probability(float _normalized_chance_to_happen) {
 	UNUSED(_normalized_chance_to_happen)
-//	if(_normalized_chance_to_happen > 1.0f) _normalized_chance_to_happen = 1.0f;
-//	if(_normalized_chance_to_happen < 0.0f) _normalized_chance_to_happen = 0.0f;
-//
-//	float _chance = 1.f - _normalized_chance_to_happen;
-//	float _left_probability = rde_math_get_random_float(0.0f, 1.0f);
-//	rde_probability _p;
-//	_p.probability_rolled = _left_probability;
-//	_p.happened = _chance;
-//	return _p;
-	UNIMPLEMENTED("rde_math_get_probability")
+	if(_normalized_chance_to_happen > 1.0f) _normalized_chance_to_happen = 1.0f;
+	if(_normalized_chance_to_happen < 0.0f) _normalized_chance_to_happen = 0.0f;
+
+	float _chance = 1.f - _normalized_chance_to_happen;
+	float _left_probability = rde_math_get_random_float(0.0f, 1.0f);
 	rde_probability _p;
-	_p.probability_rolled = 0.f;
-	_p.happened = false;
+	_p.probability_rolled = _left_probability;
+	_p.happened = _chance;
 	return _p;
 }
 
