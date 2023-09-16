@@ -307,7 +307,7 @@ extern "C" {
 		#define ENGINE_DEBUG_BREAK() __debugbreak()
 		#define ENGINE_ENABLE_ASSERTS
 	#elif defined(__linux__)
-		#include <csignal>
+		#include <signal.h>
 		#define ENGINE_DEBUG_BREAK() raise(SIGTRAP)
 		#define ENGINE_ENABLE_ASSERTS
 	#else
