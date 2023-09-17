@@ -16,10 +16,10 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "stb/stb_image.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "stb/stb_image_write.h"
 #pragma GCC diagnostic pop
 #pragma clang diagnostic pop
 
@@ -307,9 +307,6 @@ std::vector<rde_atlas_rect> load_all_textures_of_atlas(const char* _dir_path) {
 }
 
 int main(int _argc, char** _argv) {
-	(void)_argv;
-	(void)_argc;
-
 	if(_argc != 5) {
 		printf("Error: need argument 0 = path to the directory with all the textures to be packed, argument 1 = name of the atlas, argument 2 = max image size, argument 3 = pixels of separation between textures");
 		exit(-1);
