@@ -247,10 +247,15 @@ struct rde_engine {
 	rde_window windows[RDE_MAX_NUMBER_OF_WINDOWS];
 	rde_texture textures[RDE_MAX_LOADABLE_TEXTURES];
 	rde_atlas atlases[RDE_MAX_LOADABLE_ATLASES];
+	rde_font fonts[RDE_MAX_LOADABLE_FONTS];
 	rde_event_func_outer window_events[RDE_WIN_EVENT_COUNT];
 	rde_event_func_outer display_events[RDE_DISPLAY_EVENT_COUNT];
 	rde_event_func_outer key_events[RDE_KEY_EVENT_COUNT];
 	rde_event_func_outer mouse_events[RDE_MOUSE_EVENT_COUNT];
+
+	#if IS_WINDOWS()
+	HANDLE console_handle;
+	#endif
 };
 rde_engine rde_struct_create_engine() {
 	rde_engine _e;
@@ -289,6 +294,11 @@ rde_engine rde_struct_create_engine() {
 	memset(_e.display_events, 0, RDE_DISPLAY_EVENT_COUNT);
 	memset(_e.key_events, 0, RDE_KEY_EVENT_COUNT);
 	memset(_e.mouse_events, 0, RDE_MOUSE_EVENT_COUNT);
+
+	#if IS_WINDOWS()
+	_e.console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	#endif
+
 	return _e;
 }
 
@@ -302,6 +312,83 @@ rde_engine ENGINE;
 #include "rendering.c"
 #include "physics.c"
 #include "audio.c"
+
+void rde_log_color_begin(RDE_LOG_COLOR_ _color) {
+	switch(_color) {
+		case RDE_LOG_COLOR_RED: {
+		#if IS_WINDOWS()
+		SetConsoleTextAttribute(ENGINE.console_handle, 12);
+		#else
+		printf("\033[0;31m");
+		#endif
+		} break;
+		
+		case RDE_LOG_COLOR_GREEN:  {
+		#if IS_WINDOWS()
+		SetConsoleTextAttribute(ENGINE.console_handle, 10);
+		#else
+		printf("\033[0;32m");	
+		#endif
+		} break;
+		
+		case RDE_LOG_COLOR_YELLOW:  {
+		#if IS_WINDOWS()
+		SetConsoleTextAttribute(ENGINE.console_handle, 6);
+		#else
+		printf("\033[0;33m");	
+		#endif
+		} break;
+		
+		case RDE_LOG_COLOR_BLUE:  {
+		#if IS_WINDOWS()
+		SetConsoleTextAttribute(ENGINE.console_handle, 9);
+		#else
+		printf("\033[0;34m");		
+		#endif
+		} break;
+		
+		case RDE_LOG_COLOR_PURPLE:  {
+		#if IS_WINDOWS()
+		SetConsoleTextAttribute(ENGINE.console_handle, 5);
+		#else
+		printf("\033[0;35m");
+		#endif
+		} break;
+		
+		case RDE_LOG_COLOR_CYAN:  {
+		#if IS_WINDOWS()
+		SetConsoleTextAttribute(ENGINE.console_handle, 11);
+		#else
+		printf("\033[0;36m");
+		#endif
+		} break;
+		
+		case RDE_LOG_COLOR_WHITE:  {
+		#if IS_WINDOWS()
+		SetConsoleTextAttribute(ENGINE.console_handle, 15);
+		#else
+		printf("\033[0;37m");
+		#endif
+		} break;
+	}
+}
+
+void rde_log_color_end() {
+	#if IS_WINDOWS()
+	SetConsoleTextAttribute(ENGINE.console_handle, 7);	
+	#else
+	printf("\033[0m");		
+	#endif
+}
+
+void rde_log_color_end_nl() {
+	#if IS_WINDOWS()
+	SetConsoleTextAttribute(ENGINE.console_handle, 7);
+	printf("\n");
+	#else
+	printf("\033[0m \n");	
+	#endif
+}
 
 void rde_engine_on_event();
 void rde_engine_on_update(float _dt);

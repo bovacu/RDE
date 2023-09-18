@@ -36,6 +36,18 @@ void rde_rendering_transform_to_glm_mat4(const rde_transform* _transform, mat4 _
 	glm_mat4_copy(_transformation_matrix, _mat);
 }
 
+void rde_util_assert(bool _assert, bool _crash, const char* _message) {
+	if(!_assert) {
+		rde_log_color_begin(RDE_LOG_COLOR_RED);
+		printf("ERROR: '%s' %s \n", _message, _crash ? "exiting application" : "");
+		if(_crash) {
+			rde_log_color_end();
+			assert(false && _message);
+		}
+		rde_log_color_end_nl();
+	}
+}
+
 bool rde_util_check_opengl_error(const char* _message) {
 	GLenum _err;
 	while((_err = glGetError()) != GL_NO_ERROR){
@@ -309,16 +321,16 @@ void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const cha
 			case RDE_UNIFORM_FV_MATRIX_4x2 : glUniformMatrix4x2fv(_location, 1, _transpose, _data); break;
 			#else
 			default: {
-				RDE_LOG_B_RED()
+				rde_log_color_begin(RDE_LOG_COLOR_RED);
 				printf("ERROR: Tried to set uniform '%s' of type '%d' in WASM and is not supported", _uniform_name, (int)_type);
-				RDE_LOG_E_NL()
+				rde_log_color_end_nl();
 			}
 			#endif
 		}
 	} else {
-		RDE_LOG_B_RED()
+		rde_log_color_begin(RDE_LOG_COLOR_RED);
 		printf("ERROR: Tried to set uniform '%s', but it could not be located", _uniform_name);
-		RDE_LOG_E_NL()
+		rde_log_color_end_nl();
 	}
 }
 
@@ -332,9 +344,9 @@ void rde_rendering_set_shader_uniform_value_int(rde_shader* _shader, const char*
 			case RDE_UNIFORM_IV_4 : glUniform4iv(_location, 1, _data); break;
 		}
 	} else {
-		RDE_LOG_B_RED()
+		rde_log_color_begin(RDE_LOG_COLOR_RED);
 		printf("ERROR: Tried to set uniform '%s', but it could not be located", _uniform_name);
-		RDE_LOG_E_NL()
+		rde_log_color_end_nl();
 	}
 }
 
@@ -348,9 +360,9 @@ void rde_rendering_set_shader_uniform_value_uint(rde_shader* _shader, const char
 			case RDE_UNIFORM_UIV_4 : glUniform4uiv(_location, 1, _data); break;
 		}
 	} else {
-		RDE_LOG_B_RED()
+		rde_log_color_begin(RDE_LOG_COLOR_RED);
 		printf("ERROR: Tried to set uniform '%s', but it could not be located", _uniform_name);
-		RDE_LOG_E_NL()
+		rde_log_color_end_nl();
 	}
 }
 
@@ -429,7 +441,15 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 	_texture->data_format = _data_format;
 	_texture->file_path = _file_path;
 
-	RDE_LOG_B_GREEN()
+	rde_log_color_begin(RDE_LOG_COLOR_GREEN);
+	printf("Texture at '%s' loaded correctly: \n", _file_path);
+	printf("	- Size: %dx%d: \n", _width, _height);
+	printf("	- Channels: %d: \n", _channels);
+	printf("	- OpenGL ID: %u: \n", _texture_id);
+	rde_log_color_end_nl();
+	
+	return _texture;
+}
 	printf("Texture at '%s' loaded correctly: \n", _file_path);
 	printf("	- Size: %dx%d: \n", _width, _height);
 	printf("	- Channels: %d: \n", _channels);
