@@ -901,8 +901,6 @@ typedef enum {
 
 /// ================================= MATH ==================================
 
-typedef struct rde_random rde_random;
-
 SPECIALIZED_VEC2(int, 			rde_vec_2I);
 SPECIALIZED_VEC2(unsigned int, 	rde_vec_2UI);
 SPECIALIZED_VEC2(float, 		rde_vec_2F);

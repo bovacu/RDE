@@ -265,7 +265,6 @@ struct rde_engine {
 	RDE_PLATFORM_TYPE_ platform_type;
 	bool running;
 	bool use_rde_2d_physics_system;
-	rde_random* random;
 	rde_display_callbacks display_callbacks;
 	rde_window_callbacks window_callbacks;
 	rde_end_user_mandatory_callbacks mandatory_callbacks;
@@ -295,7 +294,6 @@ rde_engine rde_struct_create_engine() {
 	_e.platform_type = RDE_PLATFORM_TYPE_UNSUPPORTED;
 	_e.running = true;
 	_e.use_rde_2d_physics_system = true;
-	_e.random = NULL;
 	_e.display_callbacks = rde_struct_create_display_callbacks();
 	_e.window_callbacks = rde_struct_create_window_callbacks();
 	_e.mandatory_callbacks = rde_struct_create_end_user_mandatory_callbacks();
@@ -653,6 +651,31 @@ void rde_engine_set_vsync_active(bool _vsync) {
 }
 
 void rde_engine_destroy_engine() {
+
+	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_ATLASES; _i++) {
+		if(ENGINE.atlases[_i].texture == NULL) {
+			continue;
+		}
+
+		rde_rendering_unload_atlas(&ENGINE.atlases[_i]);
+	}
+
+	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_FONTS; _i++) {
+		if(ENGINE.fonts[_i].texture == NULL) {
+			continue;
+		}
+
+		rde_rendering_unload_font(&ENGINE.fonts[_i]);
+	}
+
+	for (size_t _i = 0; _i < RDE_MAX_LOADABLE_TEXTURES; _i++) {
+		if (ENGINE.textures[_i].opengl_texture_id != -1) {
+			continue;
+		}
+
+		rde_rendering_unload_texture(&ENGINE.textures[_i]);
+	}
+
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
 		if(ENGINE.windows[_i].sdl_window == NULL) {
 			continue;
@@ -660,8 +683,6 @@ void rde_engine_destroy_engine() {
 
 		rde_window_destroy_window(&ENGINE.windows[_i]);
 	}
-
-	free(ENGINE.random);
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
