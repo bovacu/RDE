@@ -54,8 +54,6 @@ struct rde_atlas_data {
 };
 
 void dump_atlas_to_final_texture(std::vector<rde_atlas_rect>& _rects, const char* _atlas_name, int _max_image_size) {
-	(void)_rects;
-	(void)_atlas_name;
 	stbi_uc* _atlas_pixels = (stbi_uc*)malloc(sizeof(stbi_uc) * _max_image_size * _max_image_size * 4);
 	memset(_atlas_pixels, 0, _max_image_size * _max_image_size * 4);
 
@@ -82,9 +80,12 @@ void dump_atlas_to_final_texture(std::vector<rde_atlas_rect>& _rects, const char
 	}
 
 	if(stbi_write_png(_full_name, _max_image_size, _max_image_size, 4, _atlas_pixels, sizeof(stbi_uc) * _max_image_size * 4) == 0) {
+		free(_atlas_pixels);
 		printf("Error writting atlas png \n");
 		exit(-1);
 	}
+
+	free(_atlas_pixels);
 }
 
 #define QUOTED(_x) "\"" + std::string(_x) + "\": "
