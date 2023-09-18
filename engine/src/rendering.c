@@ -389,9 +389,10 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 		}
 
 		_texture = &ENGINE.textures[_i];
+		break;
 	}
 
-	assert(_texture != NULL && "Max number of loaded textures reached");
+	rde_util_assert(_texture != NULL, true, "Max number of loaded textures reached");
 
 	int _width, _height, _channels;
 	stbi_set_flip_vertically_on_load(1);
@@ -450,12 +451,76 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 	
 	return _texture;
 }
+
+rde_texture* rde_rendering_load_text_texture(const char* _file_path) {
+	rde_texture* _texture = NULL;
+
+	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_TEXTURES; _i++) {
+		if(ENGINE.textures[_i].opengl_texture_id >= 0) {
+			continue;
+		}
+
+		_texture = &ENGINE.textures[_i];
+		break;
+	}
+
+	assert(_texture != NULL && "Max number of loaded textures reached");
+
+	int _width, _height, _channels;
+	stbi_set_flip_vertically_on_load(1);
+	rde_util_check_opengl_error("1");
+
+#if IS_IOS()
+	stbi_convert_iphone_png_to_rgb(1); 
+	stbi_set_unpremultiply_on_load(1);
+#endif
+
+	stbi_uc* _data = NULL;
+	_data = stbi_load(_file_path, &_width, &_height, &_channels, 0);
+	rde_util_check_opengl_error("2");
+
+	if(_data == NULL) {
+		printf("Error while loading texture at '%s' \n", _file_path);
+		return NULL;
+	}
+
+	GLuint _texture_id;
+	glCreateTextures(GL_TEXTURE_2D, 1, &_texture_id);
+	rde_util_check_opengl_error("3");
+	glBindTexture(GL_TEXTURE_2D, _texture_id);
+	rde_util_check_opengl_error("4");
+	#if IS_MOBILE() || defined(__EMSCRIPTEN__)
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, _width, _height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, _data);
+	_texture->internal_format = GL_ALPHA;
+	_texture->data_format = GL_ALPHA;
+	#else
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, _width, _height, 0, GL_RED, GL_UNSIGNED_BYTE, _data);
+	_texture->internal_format = GL_RED;
+	_texture->data_format = GL_RED;
+	#endif
+	rde_util_check_opengl_error("5");
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	rde_util_check_opengl_error("6");
+
+	stbi_image_free(_data);
+	rde_util_check_opengl_error("8");
+
+	_texture->opengl_texture_id = _texture_id;
+	_texture->size = (rde_vec_2UI){ (uint)_width, (uint)_height };
+	_texture->channels = _channels;
+	_texture->file_path = _file_path;
+
+	rde_log_color_begin(RDE_LOG_COLOR_GREEN);
 	printf("Texture at '%s' loaded correctly: \n", _file_path);
 	printf("	- Size: %dx%d: \n", _width, _height);
 	printf("	- Channels: %d: \n", _channels);
 	printf("	- OpenGL ID: %u: \n", _texture_id);
-	RDE_LOG_E_NL()
-
+	rde_log_color_end_nl();
+	
 	return _texture;
 }
 
@@ -524,16 +589,32 @@ void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_texture) {
 	UNIMPLEMENTED("rde_rendering_upload_cpu_texture_to_gpu")
 }
 
-//rde_font* rde_rendering_load_font(const char* _file_path) {
-//	UNUSED(_file_path);
-//	UNIMPLEMENTED("rde_rendering_load_font")
-//	return NULL;
-//}
-//
-//void rde_rendering_unload_font(rde_font* _font) {
-//	UNUSED(_font);
-//	UNIMPLEMENTED("rde_rendering_unload_font")
-//}
+rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path) {
+	rde_texture* _texture = rde_rendering_load_text_texture(_font_path);
+	rde_font_char_info_map* _char_map = rde_file_system_read_font_config(_font_config_path);
+
+	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_FONTS; _i++) {
+		rde_font* _font = &ENGINE.fonts[_i];
+		if(_font->texture != NULL) {
+			continue;
+		}
+
+		_font->texture = _texture;
+		_font->char_map = _char_map;
+		return _font;
+	}
+
+	assert(_texture != NULL && "Max number of loaded fonts reached");
+	return NULL;
+}
+
+void rde_rendering_unload_font(rde_font* _font) {
+	assert(_font != NULL && "Tried to unload a null font");
+	stbds_shfree(_font->char_map);
+	_font->char_map = NULL;
+	rde_rendering_unload_texture(_font->texture);
+	_font->texture = NULL;
+}
 
 void rde_rendering_set_background_color(rde_color _color) {
 	glClearColor((float)_color.r / 255.f, (float)_color.g / 255.f, (float)_color.b / 255.f, (float)_color.a / 255.f);

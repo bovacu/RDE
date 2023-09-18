@@ -75,6 +75,7 @@ extern "C" {
 #define RDE_MAX_LOADABLE_SHADERS 256
 #define RDE_MAX_LOADABLE_TEXTURES 512
 #define RDE_MAX_LOADABLE_ATLASES 512
+#define RDE_MAX_LOADABLE_FONTS 512
 
 #define RDE_INT_MAX 2147483647
 #define RDE_INT_MIN (-2147483647 - 1)
@@ -1288,6 +1289,7 @@ typedef struct rde_texture rde_texture;
 typedef struct rde_cpu_texture rde_cpu_texture;
 typedef struct rde_render_texture rde_render_texture;
 typedef struct rde_atlas rde_atlas;
+typedef struct rde_font rde_font;
 
 typedef struct {
 	unsigned char r;
@@ -1375,10 +1377,6 @@ rde_camera rde_struct_create_camera() {
 	_c.enabled = true;
 	return _c;
 }
-
-struct rde_font {
-	UNIMPLEMENTED_STRUCT()
-};
 
 /// *************************************************************************************************
 /// *                                GLOBAL VARIABLES                         						*
@@ -1566,6 +1564,7 @@ RDE_FUNC void rde_rendering_set_shader_uniform_value_uint(rde_shader* _shader, c
 RDE_FUNC void rde_rendering_unload_shader(rde_shader* _shader);
 
 RDE_FUNC rde_texture* rde_rendering_load_texture(const char* _file_path);
+RDE_FUNC rde_texture* rde_rendering_load_text_texture(const char* _file_path);
 RDE_FUNC void rde_rendering_unload_texture(rde_texture* _texture);
 
 RDE_FUNC rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _config_path);
@@ -1576,8 +1575,8 @@ RDE_FUNC rde_texture* rde_rendering_create_cpu_texture(rde_vec_2UI _texture_size
 RDE_FUNC void rde_rendering_destroy_cpu_texture(rde_cpu_texture* _cpu_texture);
 RDE_FUNC void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_texture);
 
-//RDE_FUNC rde_font* rde_rendering_load_font(const char* _file_path);
-//RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
+RDE_FUNC rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path);
+RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
 
 RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 

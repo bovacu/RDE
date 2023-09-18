@@ -91,7 +91,7 @@
 //			- Camera system
 //			- Texture rendering
 //			- Debug and non debug geometry rendering
-//			- Spritebatch
+//			- [DONE] Spritebatch
 //			- Text
 //
 //		- Basic 3D:
@@ -208,6 +208,36 @@ rde_atlas rde_struct_create_atlas() {
 }
 
 typedef struct {
+	rde_vec_2I advance;
+	rde_vec_2I bearing;
+	rde_vec_2I size;
+	rde_vec_2F offset; // [0, 1] position on the atlas already normilized
+} rde_font_char_info;
+rde_font_char_info rde_struct_create_font_char_info() {
+	rde_font_char_info _f;
+	_f.advance = (rde_vec_2I) { 0, 0 };
+	_f.bearing = (rde_vec_2I) { 0, 0 };
+	_f.size = (rde_vec_2I) { 0, 0 };
+	_f.offset = (rde_vec_2F) { 0.0f, 0.0f };
+	return _f;
+}
+
+typedef struct {
+	char* key;
+	rde_font_char_info value;
+} rde_font_char_info_map;
+struct rde_font {
+	rde_texture* texture;
+	rde_font_char_info_map* char_map;
+};
+rde_font rde_struct_create_font() {
+	rde_font _f;
+	_f.texture = NULL;
+	_f.char_map = NULL;
+	return _f;
+}
+
+typedef struct {
 	rde_shader* shader;
 	rde_window* window;
 	rde_texture* texture;
@@ -289,6 +319,11 @@ rde_engine rde_struct_create_engine() {
 	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_ATLASES; _i++) {
 		_e.atlases[_i] = rde_struct_create_atlas();
 	}
+
+	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_FONTS; _i++) {
+		_e.fonts[_i] = rde_struct_create_font();
+	}
+
 
 	memset(_e.window_events, 0, RDE_WIN_EVENT_COUNT);
 	memset(_e.display_events, 0, RDE_DISPLAY_EVENT_COUNT);

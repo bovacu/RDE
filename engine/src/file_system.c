@@ -58,3 +58,62 @@ rde_atlas_sub_textures* rde_file_system_read_atlas_config(const char* _atlas_pat
 
 	return hash;
 }
+
+rde_font_char_info_map* rde_file_system_read_font_config(const char* _font_path) {
+	FILE* _file = NULL;
+	char* _text = NULL;
+
+	#if IS_WINDOWS()
+	errno_t _err = fopen_s(&_file, _font_path, "r");
+	assert(_err == 0 && "File could not be opened");
+	#else
+	_file = fopen(_font_path, "r");
+	assert(_file != NULL && "File could not be opened");
+	#endif
+
+	long _num_bytes = 0;
+	fseek(_file, 0L, SEEK_END);
+	_num_bytes = ftell(_file);
+	fseek(_file, 0L, SEEK_SET);
+
+	_text = (char*)calloc(_num_bytes, sizeof(char));
+	assert(_text != NULL && "Could not allocate memory for reading the config file");
+	fread(_text, sizeof(char), _num_bytes, _file);
+
+
+	rde_font_char_info_map* hash = NULL;
+	cJSON* _font_json = cJSON_Parse(_text);
+
+	if(_font_json == NULL) {
+		const char* _error_ptr = cJSON_GetErrorPtr();
+		printf("Error: Could not load JSON from file '%s' due to error '%s' \n", _font_path, _error_ptr);
+		exit(-1);
+	}
+
+	cJSON* _char_info_json = NULL;
+	cJSON_ArrayForEach(_char_info_json, _font_json) {
+		cJSON* _advance = cJSON_GetObjectItemCaseSensitive(_char_info_json, "advance");
+		cJSON* _size = cJSON_GetObjectItemCaseSensitive(_char_info_json, "size");
+		cJSON* _bearing = cJSON_GetObjectItemCaseSensitive(_char_info_json, "bearing");
+		cJSON* _offset = cJSON_GetObjectItemCaseSensitive(_char_info_json, "offset");
+
+		rde_font_char_info _char_info = rde_struct_create_font_char_info();
+		_char_info.advance = (rde_vec_2I) { (int)cJSON_GetArrayItem(_advance, 0)->valueint, (int)cJSON_GetArrayItem(_advance, 0)->valueint };
+		_char_info.size = (rde_vec_2I) { (int)cJSON_GetArrayItem(_size, 0)->valueint, (int)cJSON_GetArrayItem(_size, 0)->valueint };
+		_char_info.bearing = (rde_vec_2I) { (int)cJSON_GetArrayItem(_bearing, 0)->valueint, (int)cJSON_GetArrayItem(_bearing, 0)->valueint };
+		_char_info.offset = (rde_vec_2F) { (float)cJSON_GetArrayItem(_offset, 0)->valuedouble, (float)cJSON_GetArrayItem(_offset, 0)->valuedouble };
+		stbds_shput(hash, _char_info_json->string, _char_info);
+
+		cJSON_free(_advance);
+		cJSON_free(_size);
+		cJSON_free(_bearing);
+		cJSON_free(_offset);
+	}
+
+	cJSON_free(_font_json);
+
+	fclose(_file);
+	free(_text);
+
+	return hash;
+}
