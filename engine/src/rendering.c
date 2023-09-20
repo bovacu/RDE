@@ -38,13 +38,10 @@ void rde_rendering_transform_to_glm_mat4(const rde_transform* _transform, mat4 _
 
 void rde_util_assert(bool _assert, bool _crash, const char* _message) {
 	if(!_assert) {
-		rde_log_color_begin(RDE_LOG_COLOR_RED);
-		printf("ERROR: '%s' %s \n", _message, _crash ? "exiting application" : "");
+		rde_log_level(RDE_LOG_LEVEL_ERROR, " '%s' %s \n", _message, _crash ? "exiting application" : "");
 		if(_crash) {
-			rde_log_color_end();
 			assert(false && _message);
 		}
-		rde_log_color_end_nl();
 	}
 }
 
@@ -321,16 +318,12 @@ void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const cha
 			case RDE_UNIFORM_FV_MATRIX_4x2 : glUniformMatrix4x2fv(_location, 1, _transpose, _data); break;
 			#else
 			default: {
-				rde_log_color_begin(RDE_LOG_COLOR_RED);
-				printf("ERROR: Tried to set uniform '%s' of type '%d' in WASM and is not supported", _uniform_name, (int)_type);
-				rde_log_color_end_nl();
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Tried to set uniform '%s' of type '%d' in WASM and is not supported", _uniform_name, (int)_type);
 			}
 			#endif
 		}
 	} else {
-		rde_log_color_begin(RDE_LOG_COLOR_RED);
-		printf("ERROR: Tried to set uniform '%s', but it could not be located", _uniform_name);
-		rde_log_color_end_nl();
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Tried to set uniform '%s', but it could not be located", _uniform_name);
 	}
 }
 
@@ -344,9 +337,7 @@ void rde_rendering_set_shader_uniform_value_int(rde_shader* _shader, const char*
 			case RDE_UNIFORM_IV_4 : glUniform4iv(_location, 1, _data); break;
 		}
 	} else {
-		rde_log_color_begin(RDE_LOG_COLOR_RED);
-		printf("ERROR: Tried to set uniform '%s', but it could not be located", _uniform_name);
-		rde_log_color_end_nl();
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Tried to set uniform '%s', but it could not be located", _uniform_name);
 	}
 }
 
@@ -360,9 +351,7 @@ void rde_rendering_set_shader_uniform_value_uint(rde_shader* _shader, const char
 			case RDE_UNIFORM_UIV_4 : glUniform4uiv(_location, 1, _data); break;
 		}
 	} else {
-		rde_log_color_begin(RDE_LOG_COLOR_RED);
-		printf("ERROR: Tried to set uniform '%s', but it could not be located", _uniform_name);
-		rde_log_color_end_nl();
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Tried to set uniform '%s', but it could not be located", _uniform_name);
 	}
 }
 
@@ -442,12 +431,10 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 	_texture->data_format = _data_format;
 	_texture->file_path = _file_path;
 
-	rde_log_color_begin(RDE_LOG_COLOR_GREEN);
-	printf("Texture at '%s' loaded correctly: \n", _file_path);
-	printf("	- Size: %dx%d: \n", _width, _height);
-	printf("	- Channels: %d: \n", _channels);
-	printf("	- OpenGL ID: %u: \n", _texture_id);
-	rde_log_color_end_nl();
+	rde_log_color(RDE_LOG_COLOR_GREEN, "Texture at '%s' loaded correctly: ", _file_path);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Size: %dx%d: ", _width, _height);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Channels: %d: ", _channels);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- OpenGL ID: %u: ", _texture_id);
 	
 	return _texture;
 }
@@ -514,12 +501,10 @@ rde_texture* rde_rendering_load_text_texture(const char* _file_path) {
 	_texture->channels = _channels;
 	_texture->file_path = _file_path;
 
-	rde_log_color_begin(RDE_LOG_COLOR_GREEN);
-	printf("Texture at '%s' loaded correctly: \n", _file_path);
-	printf("	- Size: %dx%d: \n", _width, _height);
-	printf("	- Channels: %d: \n", _channels);
-	printf("	- OpenGL ID: %u: \n", _texture_id);
-	rde_log_color_end_nl();
+	rde_log_color(RDE_LOG_COLOR_GREEN, "Texture at '%s' loaded correctly: ", _file_path);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Size: %dx%d: ", _width, _height);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Channels: %d: ", _channels);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- OpenGL ID: %u: ", _texture_id);
 	
 	return _texture;
 }
@@ -786,7 +771,7 @@ void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_po
 	UNIMPLEMENTED("rde_rendering_draw_polygon_2d")
 }
 
-void rde_rendering_draw_texture(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
+void rde_rendering_draw_texture_2d(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
 	const size_t _triangle_vertex_count = 6;
 
 	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
