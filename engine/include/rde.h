@@ -892,7 +892,12 @@ typedef enum {
 	RDE_LOG_COLOR_WHITE
 } RDE_LOG_COLOR_;
 
-
+typedef enum { 
+	RDE_LOG_LEVEL_DEBUG,
+	RDE_LOG_LEVEL_INFO,
+	RDE_LOG_LEVEL_WARNING,
+	RDE_LOG_LEVEL_ERROR
+} RDE_LOG_LEVEL_;
 
 /// *************************************************************************************************
 /// *                                		STRUCSTS                         						*
@@ -1407,9 +1412,8 @@ const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
 
 /// ============================ LOG ========================================
 
-RDE_FUNC void rde_log_color_begin(RDE_LOG_COLOR_ _color);
-RDE_FUNC void rde_log_color_end();
-RDE_FUNC void rde_log_color_end_nl();
+RDE_FUNC void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...);
+RDE_FUNC void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 
 /// ============================ UTIL =======================================
 
