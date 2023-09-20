@@ -864,6 +864,15 @@ void rde_rendering_draw_texture_2d(const rde_transform* _transform, rde_texture*
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
 
+void rde_rendering_draw_text_2d(const rde_transform* _transform, rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader) {
+	UNUSED(_transform)
+	UNUSED(_font)
+	UNUSED(_text)
+	UNUSED(_tint_color)
+	UNUSED(_shader)
+	UNIMPLEMENTED("rde_rendering_draw_texture")
+}
+
 void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader) {
 	UNUSED(_init);
 	UNUSED(_end);
