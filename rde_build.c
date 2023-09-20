@@ -54,6 +54,11 @@ typedef enum {
 	RDE_LOG_LEVEL_ERROR
 } RDE_LOG_LEVEL_;
 
+char platform[64];
+char build_type[64];
+char lib_type[64];
+char build[64];
+char output[MAX_PATH];
 
 char this_file_full_path[MAX_PATH];
 
@@ -80,6 +85,10 @@ bool compile_android();
 bool compile_ios();
 bool compile_wasm();
 
+bool compile_test();
+bool run_test();
+
+void print_help();
 void parse_arguments(int _argc, char** _argv);
 
 void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
@@ -341,8 +350,9 @@ bool run_command(rde_command _command) {
 
 	for(int _i = 0; _i < arrlen(_command); _i++) {
 		strcat(_command_flat, _command[_i]);
-		strcat(_command_flat, " ");
 	}
+
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Executing command: %s", _command_flat);
 
 	#ifdef _WIN32
     STARTUPINFO siStartInfo;
@@ -422,7 +432,11 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 	if(_needs_recompile) {
 		// First we move the current executable to trash
 		
+		#if _WIN32
 		const char _delimiter = '\\';
+		#else
+		const char _delimiter = '/';
+		#endif
 		// Be careful, if no delimter is found, then _just_binary_name will be NULL and we will use _binary_path directly
 		char* _just_binary_name = strrchr(_binary_path, _delimiter);
 
@@ -463,9 +477,9 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		// Then we recompile it
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Recompiling %s first", _just_binary_name != NULL ? _just_binary_name : _binary_path);
 		rde_command _recompile_command = NULL;
-		arrput(_recompile_command, "clang");
+		arrput(_recompile_command, "clang ");
 		arrput(_recompile_command, __FILE__);
-		arrput(_recompile_command, "-o");
+		arrput(_recompile_command, " -o ");
 		
 		if(_just_binary_name != NULL) {
 			arrput(_recompile_command, _just_binary_name);
@@ -491,6 +505,7 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		rde_command _redirect_original_command = NULL;
 		arrput(_redirect_original_command, _binary_path);
 		for(int _i = 1; _i < _argc; _i++) {
+			arrput(_redirect_original_command, " ");
 			arrput(_redirect_original_command, _argv[_i]);
 		}
 		run_command(_redirect_original_command);
@@ -632,8 +647,107 @@ bool remove_dir_recursively_if_exists(const char* _file_path) {
 
 bool compile_windows() {
 	errno = 0;
-	assert(false && "compile_windows not implemented");
-	return false;
+	if(!make_dir_if_not_exists("build")) {
+		exit(-1);
+	}
+	
+	if(!make_dir_if_not_exists("build\\windows")) {
+		exit(-1);
+	}
+
+	if(strlen(build_type) == 0) {
+		strcat(build_type, "debug");
+	}
+
+	if(strlen(output) == 0) {
+		strcat(output, this_file_full_path);
+		
+		if(strcmp(build_type, "debug") == 0) {
+			if(!make_dir_if_not_exists("build\\windows\\debug")) {
+				exit(-1);
+			}
+			strcat(output, "build\\windows\\debug\\");
+		} else {
+			if(!make_dir_if_not_exists("build\\windows\\release")) {
+				exit(-1);
+			}
+			strcat(output, "build\\windows\\release\\");
+		}
+	}
+
+	strcat(output, "RDE.dll");
+
+	if(strlen(build) == 0) {
+		strcat(build, "all");
+	}
+
+	rde_command _build_command = NULL;
+	
+	#define BUILD_ENGINE() 																					\
+	do {																									\
+		arrput(_build_command, "clang ");																	\
+																											\
+		if(strcmp(build_type, "debug") == 0) {																\
+			arrput(_build_command, "-g -O0 ");																\
+		} else {																							\
+			arrput(_build_command, "-O3 ");																	\
+		}																									\
+																											\
+		arrput(_build_command, "-std=c99 ");																\
+																											\
+		arrput(_build_command, this_file_full_path);														\
+		arrput(_build_command, "engine\\src\\rde.c ");														\
+																											\
+		arrput(_build_command, "-shared ");																	\
+																											\
+		arrput(_build_command, "-I ");																		\
+		arrput(_build_command, this_file_full_path);														\
+		arrput(_build_command, "engine\\include ");															\
+																											\
+		arrput(_build_command, "-I ");																		\
+		arrput(_build_command, this_file_full_path);														\
+		arrput(_build_command, "engine\\src ");																\
+																											\
+		arrput(_build_command, "-I ");																		\
+		arrput(_build_command, this_file_full_path);														\
+		arrput(_build_command, "external\\include ");														\
+																											\
+		arrput(_build_command, "-L ");																		\
+		arrput(_build_command, this_file_full_path);														\
+		arrput(_build_command, "external\\libs\\windows ");													\
+																											\
+		arrput(_build_command, "-L ");																		\
+		arrput(_build_command, this_file_full_path);														\
+		arrput(_build_command, "external\\libs\\windows\\manual-link ");									\
+																											\
+		arrput(_build_command, "-lSDL2main -lSDL2 -lglad -lcglm ");											\
+		arrput(_build_command, "-Werror -Wall -Wextra -Wno-tautological-constant-out-of-range-compare ");	\
+																											\
+		arrput(_build_command, "-o ");																		\
+		arrput(_build_command, output);																		\
+																											\
+		if(!run_command(_build_command)) {																	\
+			exit(-1);																						\
+		}																									\
+	} while(0);
+
+	#define BUILD_TOOLS()
+
+	#define BUILD_EXAMPLES()
+
+	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
+		BUILD_ENGINE()
+	}
+
+	if(strcmp(build, "tools") == 0 || strcmp(build, "all") == 0) {
+		BUILD_TOOLS()
+	}
+
+	if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
+		BUILD_EXAMPLES()
+	}
+
+	return true;
 }
 
 bool compile_osx() {
@@ -666,8 +780,122 @@ bool compile_wasm() {
 	return false;
 }
 
+void print_help() {
+	const char* _help_message = "RDE's command line utility help manual. \n"
+	"This tool allows to build the main engine, tests and tool's suite. \n"
+	"IMPORTANT: No upper-cases are used, the builder program is case sensitive, for options and program keywords use lower-case, for the values "
+	"passed to the options use whatever is needed. \n"
+	"\n"
+	"--- PLATFORM SETTINGS --- \n"
+	"To build for a specific platform, use --platform= (or -p=) and select a platform between: [windows, linux, osx, android, ios, wasm] \n"
+	"If you are on a specific platform and select another one, an error will be prompted, only a platform can build another platform, except for \n"
+	"ios an android. ios can be only built on an osx platform and android can be built on windows, osx and linux if the RDE's Android module \n"
+	"is linked and the proper flags are set (check both ios and android sections for more information). \n"
+	"If no platform is set, it will be assumed as the same as the OS.\n"
+	"\n"
+	"--- BUILD TYPES --- \n"
+	"Builds of the library can be both [debug, release] and [static, shared] (each group can be combined as needed, no combinations of the same group). \n"
+	"To set the build type use --build_type= (or -bt=) and one option between [debug, release]. \n"
+	"To set the library type use --lib_type= (or -lt=) and one option between [static, shared]. Note that on windows this option is omitted as a .lib and .dll will be created. \n"
+	"If no options are passed, it will be assumed -bt=debug and -lt=shared. \n"
+	"\n"
+	"-- OUTPUT LOCATION -- \n"
+	"To set where do you want the resulting files, use --output= (or -o=) followed by the path to the desired directory. If the directory does not exist, will be created. \n"
+	"If no option is passed, it will be assumed -o=cwd (current working directory). \n"
+	"\n"
+	"-- BUILDING ---"
+	"To build anything, use the option --build= (or -b=) and an action between [engine, tools, all, examples]. \n"
+	"engine will compile the engine (only). tools will compile atlas_generator and font_generator (only). test will compile the examples and the engine (only). all will compile everything. \n"
+	"If no option is passed, it will be assumed -b=all. \n";
+
+	printf("%s", _help_message);
+}
+
 void parse_arguments(int _argc, char** _argv) {
-	
+
+	if(_argc < 2) {
+		print_help();
+		exit(0);
+	}
+
+	const char* _delimiter = "=";
+	const char _delimiter_2 = '=';
+	for(int _i = 1; _i < _argc; _i++) {
+		char _command_copy[256];
+		memset(_command_copy, 0, 256);
+		strcpy(_command_copy, _argv[_i]);
+		char* _command = strtok(_command_copy, _delimiter);
+		
+		// TODO: change atoi for strtol
+		if(strcmp(_command, "-b") == 0 || strcmp(_command, "--build") == 0) {
+			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			memset(build, 0 , 64);
+
+			if(_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for -b or --build incorrect\n");
+				exit(-1);
+			}
+
+			_value++;
+			strcat(build, _value);
+		} else if(strcmp(_command, "-bt") == 0 || strcmp(_command, "--build_type") == 0) {
+			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			memset(build_type, 0 , 64);
+
+			if(_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for -bt or --build_type incorrect\n");
+				exit(-1);
+			}
+
+			_value++;
+			strcat(build_type, _value);
+		} else if(strcmp(_command, "-s") == 0 || strcmp(_command, "--font_size") == 0) {
+			// const char* _value = strrchr(_argv[_i], _delimiter_2);
+			// font_size = atoi((_value + 1));
+		} else if(strcmp(_command, "-d") == 0 || strcmp(_command, "--font_dpi") == 0) {
+			// const char* _value = strrchr(_argv[_i], _delimiter_2);
+			// font_dpi = atoi((_value + 1));
+		} else if(strcmp(_command, "-o") == 0 || strcmp(_command, "--font_char_offset") == 0) {
+			// const char* _value = strrchr(_argv[_i], _delimiter_2);
+			// font_char_start_offset = atoi((_value + 1));
+		} else if(strcmp(_command, "-h") == 0 || strcmp(_command, "--help") == 0) {
+			print_help();
+			exit(0);
+		}
+	}
+
+	if(strlen(platform) == 0) {
+		#if _WIN32
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to windows");
+		strcat(platform, "windows");
+		#elif (defined(__APPLE__) && defined(MAC_PLATFORM))
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to osx");
+		strcat(platform, "osx");
+		#elif (defined(__linux__))
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to linux");
+		strcat(platform, "linux");
+		#elif (defined(__ANDROID__))
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to android");
+		strcat(platform, "android");
+		#elif (defined(__APPLE__) && defined(IOS_PLATFORM))
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to ios");
+		strcat(platform, "ios");
+		#elif __EMSCRIPTEN__
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to wasm");
+		strcat(platform, "wasm");
+		#else
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Tried to compile from an unsupported platfom");
+		exit(-1);
+		#endif
+	}
+}
+
+bool compile_test() {
+	return false;
+}
+
+bool run_test() {
+	return false;
 }
 
 int main(int _argc, char** _argv) {
@@ -678,17 +906,43 @@ int main(int _argc, char** _argv) {
 	const char _delimiter = '\\';
 	const char* _value = strrchr(_temp, _delimiter);
 	strncpy(this_file_full_path, _temp, strlen(_temp) - strlen(_value));
+	strcat(this_file_full_path, "\\");
 	#else
 	char* _temp = realpath(__FILE__, NULL);
-	const char _delimiter = '\\';
+	const char _delimiter = '/';
 	const char* _value = strrchr(_temp, _delimiter);
 	strncpy(this_file_full_path, _temp, strlen(_temp) - strlen(_value));
+	strcat(this_file_full_path, "/");
 	#endif
 
-	(void)_argc;
-	(void)_argv;
 	try_recompile_and_redirect_execution(_argc, _argv);
-	rde_log_level(RDE_LOG_LEVEL_INFO, "So this worked 17 times!!!");
+
+	memset(platform, 0, 64);
+	memset(build_type, 0, 64);
+	memset(lib_type, 0, 64);
+	memset(build, 0, 64);
+	memset(output, 0, MAX_PATH);
+
+	parse_arguments(_argc, _argv);
+
+	if(strcmp(platform, "windows") == 0) {
+		if(compile_windows()) {
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Build finished successfully. \n");
+		}
+	} else if(strcmp(platform, "osx") == 0) {
+		compile_osx();
+	} else if(strcmp(platform, "linux") == 0) {
+		compile_linux();
+	} else if(strcmp(platform, "android") == 0) {
+		compile_android();
+	} else if(strcmp(platform, "ios") == 0) {
+		compile_ios();
+	} else if(strcmp(platform, "wasm") == 0) {
+		compile_wasm();
+	} else {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Selected platform is not supported '%s', exiting.", platform);
+		exit(-1);
+	}
 
 	return 0;
 }
