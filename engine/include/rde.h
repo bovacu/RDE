@@ -1525,14 +1525,6 @@ RDE_FUNC void rde_window_allow_mouse_out_of_window(bool _allow_mouse_out_of_wind
 
 RDE_FUNC void rde_window_set_icon(rde_window* _window, const char* _path_to_icon);
 
-//RDE_FUNC_ND bool			rde_window_is_fullscreen(rde_window* _window);
-//RDE_FUNC 	void			rde_window_set_fullscreen(rde_window* _window, bool _fullscreen);
-//
-//
-//RDE_FUNC_ND bool			rde_window_is_focused(rde_window* _window);
-//
-//RDE_FUNC	void			rde_window_refresh_dpi(rde_window* _window);
-
 RDE_FUNC void* rde_window_get_native_sdl_window_handle(rde_window* _window);
 RDE_FUNC void* rde_window_get_native_sdl_gl_context_handle(rde_window* _window);
 
