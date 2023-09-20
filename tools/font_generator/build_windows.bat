@@ -1,1 +1,0 @@
-clang -g -O0 font_generator.c -I./external/include -L./external/libs -lfreetype -Werror -Wall -Wextra -o bin/font_generator.exe
