@@ -83,6 +83,8 @@ char* read_full_file_if_exists(const char* _file_path); // You are responsible f
 bool write_to_file_if_exists(const char* _file_path, const char* _contents);
 char* replace_string(const char* str, const char* from, const char* to); // This function is greacefully stolen from https://creativeandcritical.net/str-replace-c, so thank you so much
 
+bool copy_file_if_exists(const char* _file_path, const char* _new_path);
+
 bool compile_windows();
 bool compile_osx();
 bool compile_linux();
@@ -774,6 +776,49 @@ end_repl_str:
 	free(pos_cache);
 	return ret;
 }
+
+bool copy_file_if_exists(const char* _file_path, const char* _new_path) {
+	#if _WIN32
+	if(CopyFile(_file_path, _new_path, FALSE) == 0) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not copy %s into %s. (err_msg) -> %s.", _file_path, _new_path, GetLastError());
+		return false;
+	}
+	#else
+	char _buf;
+	FILE* _fd_0 = NULL;
+	FILE* _fd_1 = NULL;
+
+	_fd_0 = fopen(_file_path, "r");
+
+	if (_fd_0 == NULL) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not open file %s. (err_msg) -> File could not be found.", _file_name);
+		fclose(_fd_0);
+		return false;
+	}
+
+	_fd_1 = fopen(_new_path, "w+");
+	if (_fd_1 == NULL) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not create file %s.", _new_path);
+		fclose(_fd_1);
+		return false;
+	}
+
+	while(fread(_fd_0, &_buf, 1)) {
+		fwrite(_fd_1, &_buf, 1);
+	}
+
+	close(_fd_0);
+	close_(_fd_1);
+	#endif
+
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Copied file %s to %s.", _file_path, _new_path);
+	return true;
+}
+
+
+
+
+
 
 bool compile_windows() {
 	errno = 0;
