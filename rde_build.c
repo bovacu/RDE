@@ -59,7 +59,6 @@ char platform[MAX_SIZE_FOR_OPTIONS];
 char build_type[MAX_SIZE_FOR_OPTIONS];
 char lib_type[MAX_SIZE_FOR_OPTIONS];
 char build[MAX_SIZE_FOR_OPTIONS];
-char output[MAX_PATH];
 
 char this_file_full_path[MAX_PATH];
 
@@ -1036,10 +1035,6 @@ void print_help() {
 	"To set the library type use --lib_type= (or -lt=) and one option between [static, shared]. Note that on windows this option is omitted as a .lib and .dll will be created. \n"
 	"If no options are passed, it will be assumed -bt=debug and -lt=shared. \n"
 	"\n"
-	"-- OUTPUT LOCATION -- \n"
-	"To set where do you want the resulting files, use --output= (or -o=) followed by the path to the desired directory. If the directory does not exist, will be created. \n"
-	"If no option is passed, it will be assumed -o=cwd (current working directory). \n"
-	"\n"
 	"-- BUILDING ---"
 	"To build anything, use the option --build= (or -b=) and an action between [engine, tools, all, examples]. \n"
 	"engine will compile the engine (only). tools will compile atlas_generator and font_generator (only). test will compile the examples and the engine (only). all will compile everything. \n"
@@ -1085,17 +1080,6 @@ void parse_arguments(int _argc, char** _argv) {
 
 			_value++;
 			strcat(build_type, _value);
-		} else if(strcmp(_command, "-o") == 0 || strcmp(_command, "--output") == 0) {
-			const char* _value = strrchr(_argv[_i], _delimiter_2);
-			memset(output, 0 , MAX_PATH);
-
-			if(_value == NULL) {
-				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for -o or --output incorrect\n");
-				exit(-1);
-			}
-
-			_value++;
-			strcat(output, _value);
 		} else if(strcmp(_command, "-h") == 0 || strcmp(_command, "--help") == 0) {
 			print_help();
 			exit(0);
@@ -1159,7 +1143,6 @@ int main(int _argc, char** _argv) {
 	memset(build_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(lib_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(build, 0, MAX_SIZE_FOR_OPTIONS);
-	memset(output, 0, MAX_PATH);
 
 	parse_arguments(_argc, _argv);
 
