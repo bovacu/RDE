@@ -54,10 +54,11 @@ typedef enum {
 	RDE_LOG_LEVEL_ERROR
 } RDE_LOG_LEVEL_;
 
-char platform[64];
-char build_type[64];
-char lib_type[64];
-char build[64];
+#define MAX_SIZE_FOR_OPTIONS 64
+char platform[MAX_SIZE_FOR_OPTIONS];
+char build_type[MAX_SIZE_FOR_OPTIONS];
+char lib_type[MAX_SIZE_FOR_OPTIONS];
+char build[MAX_SIZE_FOR_OPTIONS];
 char output[MAX_PATH];
 
 char this_file_full_path[MAX_PATH];
@@ -65,7 +66,7 @@ char this_file_full_path[MAX_PATH];
 void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...);
 void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 
-const char *get_filename_ext(const char* _file_name);
+const char* get_filename_extension(const char* _file_name);
 
 bool pid_wait(rde_proc _pid);
 bool run_command(rde_command _command);
@@ -77,6 +78,10 @@ bool create_file_if_not_exists(const char* _file_path);
 bool rename_file_if_exists(const char* _file, const char* _new_name);
 bool remove_file_if_exists(const char* _file_path);
 bool remove_dir_recursively_if_exists(const char* _file_path);
+
+char* read_full_file_if_exists(const char* _file_path); // You are responsible for deallocating the returned memory
+bool write_to_file_if_exists(const char* _file_path, const char* _contents);
+char* replace_string(const char* str, const char* from, const char* to); // This function is greacefully stolen from https://creativeandcritical.net/str-replace-c, so thank you so much
 
 bool compile_windows();
 bool compile_osx();
@@ -213,7 +218,7 @@ void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 	#endif
 }
 
-const char *get_filename_ext(const char* _file_name) {
+const char* get_filename_extension(const char* _file_name) {
     const char* _dot = strrchr(_file_name, '.');
     if(!_dot || _dot == _file_name) return "";
     return _dot;
@@ -415,7 +420,7 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 
 	#if _WIN32
 	// In windows we can execute a exe without using .exe in the name. This program assumes that it will always contains .exe so if it does not have it, it is added.
-	if(strlen(get_filename_ext(_argv[0])) == 0) {
+	if(strlen(get_filename_extension(_argv[0])) == 0) {
 		strcat(_binary_path, _argv[0]);
 		strcat(_binary_path, ".exe");	
 	} else {
@@ -646,6 +651,130 @@ bool remove_dir_recursively_if_exists(const char* _file_path) {
    return _r == 0;
 }
 
+char* read_full_file_if_exists(const char* _file_path) {
+	FILE* _file = NULL;
+	char* _text = NULL;
+
+	_file = fopen(_file_path, "r");
+	if(_file == NULL) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not read file %s. (err_msg) -> File could not be found", _file_path);
+		return false;
+	}
+
+	long _num_bytes = 0;
+	fseek(_file, 0L, SEEK_END);
+	_num_bytes = ftell(_file);
+	fseek(_file, 0L, SEEK_SET);
+
+	_text = (char*)calloc(_num_bytes, sizeof(char));
+	assert(_text != NULL && "Could not allocate memory for reading the config file");
+	fread(_text, sizeof(char), _num_bytes, _file);
+
+	return _text;
+}
+
+bool write_to_file_if_exists(const char* _file_path, const char* _contents) {
+	FILE* _file = fopen(_file_path, "w");
+	if(_file == NULL) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not read file %s. (err_msg) -> File could not be found", _file_path);
+		return false;
+	}
+
+	size_t _contents_size = strlen(_contents);
+	size_t _total_writen = fwrite(_contents, 1, _contents_size, _file);
+	fclose(_file);
+
+	if(_total_writen != _contents_size) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "The amount of bytes (%zu) written to %s differs from the size of the contents (%zu) \n", _total_writen, _file_path, _contents_size);
+		return false;
+	}
+
+	return true;
+}
+
+char* replace_string(const char* str, const char* from, const char* to) {
+
+	/* Adjust each of the below values to suit your needs. */
+
+	/* Increment positions cache size initially by this number. */
+	size_t cache_sz_inc = 16;
+	/* Thereafter, each time capacity needs to be increased,
+	 * multiply the increment by this factor. */
+	const size_t cache_sz_inc_factor = 3;
+	/* But never increment capacity by more than this number. */
+	const size_t cache_sz_inc_max = 1048576;
+
+	char *pret, *ret = NULL;
+	const char *pstr2, *pstr = str;
+	size_t i, count = 0;
+	#if (__STDC_VERSION__ >= 199901L)
+	uintptr_t *pos_cache_tmp, *pos_cache = NULL;
+	#else
+	ptrdiff_t *pos_cache_tmp, *pos_cache = NULL;
+	#endif
+	size_t cache_sz = 0;
+	size_t cpylen, orglen, retlen, tolen, fromlen = strlen(from);
+
+	/* Find all matches and cache their positions. */
+	while ((pstr2 = strstr(pstr, from)) != NULL) {
+		count++;
+
+		/* Increase the cache size when necessary. */
+		if (cache_sz < count) {
+			cache_sz += cache_sz_inc;
+			pos_cache_tmp = realloc(pos_cache, sizeof(*pos_cache) * cache_sz);
+			if (pos_cache_tmp == NULL) {
+				goto end_repl_str;
+			} else pos_cache = pos_cache_tmp;
+			cache_sz_inc *= cache_sz_inc_factor;
+			if (cache_sz_inc > cache_sz_inc_max) {
+				cache_sz_inc = cache_sz_inc_max;
+			}
+		}
+
+		pos_cache[count-1] = pstr2 - str;
+		pstr = pstr2 + fromlen;
+	}
+
+	orglen = pstr - str + strlen(pstr);
+
+	/* Allocate memory for the post-replacement string. */
+	if (count > 0) {
+		tolen = strlen(to);
+		retlen = orglen + (tolen - fromlen) * count;
+	} else	retlen = orglen;
+	ret = malloc(retlen + 1);
+	if (ret == NULL) {
+		goto end_repl_str;
+	}
+
+	if (count == 0) {
+		/* If no matches, then just duplicate the string. */
+		strcpy(ret, str);
+	} else {
+		/* Otherwise, duplicate the string whilst performing
+		 * the replacements using the position cache. */
+		pret = ret;
+		memcpy(pret, str, pos_cache[0]);
+		pret += pos_cache[0];
+		for (i = 0; i < count; i++) {
+			memcpy(pret, to, tolen);
+			pret += tolen;
+			pstr = str + pos_cache[i] + fromlen;
+			cpylen = (i == count-1 ? orglen : pos_cache[i+1]) - pos_cache[i] - fromlen;
+			memcpy(pret, pstr, cpylen);
+			pret += cpylen;
+		}
+		ret[retlen] = '\0';
+	}
+
+end_repl_str:
+	/* Free the cache and return the post-replacement string,
+	 * which will be NULL in the event of an error. */
+	free(pos_cache);
+	return ret;
+}
+
 bool compile_windows() {
 	errno = 0;
 	if(!make_dir_if_not_exists("build")) {
@@ -841,7 +970,10 @@ bool compile_wasm() {
 }
 
 void print_help() {
-	const char* _help_message = "RDE's command line utility help manual. \n"
+	const char* _help_message = 
+	"\n******************************************\n"
+	"* RDE's command line utility help manual *\n"
+	 "******************************************\n\n"
 	"This tool allows to build the main engine, tests and tool's suite. \n"
 	"IMPORTANT: No upper-cases are used, the builder program is case sensitive, for options and program keywords use lower-case, for the values "
 	"passed to the options use whatever is needed. \n"
@@ -886,10 +1018,9 @@ void parse_arguments(int _argc, char** _argv) {
 		strcpy(_command_copy, _argv[_i]);
 		char* _command = strtok(_command_copy, _delimiter);
 		
-		// TODO: change atoi for strtol
 		if(strcmp(_command, "-b") == 0 || strcmp(_command, "--build") == 0) {
 			const char* _value = strrchr(_argv[_i], _delimiter_2);
-			memset(build, 0 , 64);
+			memset(build, 0 , MAX_SIZE_FOR_OPTIONS);
 
 			if(_value == NULL) {
 				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for -b or --build incorrect\n");
@@ -900,7 +1031,7 @@ void parse_arguments(int _argc, char** _argv) {
 			strcat(build, _value);
 		} else if(strcmp(_command, "-bt") == 0 || strcmp(_command, "--build_type") == 0) {
 			const char* _value = strrchr(_argv[_i], _delimiter_2);
-			memset(build_type, 0 , 64);
+			memset(build_type, 0 , MAX_SIZE_FOR_OPTIONS);
 
 			if(_value == NULL) {
 				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for -bt or --build_type incorrect\n");
@@ -909,15 +1040,17 @@ void parse_arguments(int _argc, char** _argv) {
 
 			_value++;
 			strcat(build_type, _value);
-		} else if(strcmp(_command, "-s") == 0 || strcmp(_command, "--font_size") == 0) {
-			// const char* _value = strrchr(_argv[_i], _delimiter_2);
-			// font_size = atoi((_value + 1));
-		} else if(strcmp(_command, "-d") == 0 || strcmp(_command, "--font_dpi") == 0) {
-			// const char* _value = strrchr(_argv[_i], _delimiter_2);
-			// font_dpi = atoi((_value + 1));
-		} else if(strcmp(_command, "-o") == 0 || strcmp(_command, "--font_char_offset") == 0) {
-			// const char* _value = strrchr(_argv[_i], _delimiter_2);
-			// font_char_start_offset = atoi((_value + 1));
+		} else if(strcmp(_command, "-o") == 0 || strcmp(_command, "--output") == 0) {
+			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			memset(output, 0 , MAX_PATH);
+
+			if(_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for -o or --output incorrect\n");
+				exit(-1);
+			}
+
+			_value++;
+			strcat(output, _value);
 		} else if(strcmp(_command, "-h") == 0 || strcmp(_command, "--help") == 0) {
 			print_help();
 			exit(0);
@@ -977,10 +1110,10 @@ int main(int _argc, char** _argv) {
 
 	try_recompile_and_redirect_execution(_argc, _argv);
 
-	memset(platform, 0, 64);
-	memset(build_type, 0, 64);
-	memset(lib_type, 0, 64);
-	memset(build, 0, 64);
+	memset(platform, 0, MAX_SIZE_FOR_OPTIONS);
+	memset(build_type, 0, MAX_SIZE_FOR_OPTIONS);
+	memset(lib_type, 0, MAX_SIZE_FOR_OPTIONS);
+	memset(build, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(output, 0, MAX_PATH);
 
 	parse_arguments(_argc, _argv);
