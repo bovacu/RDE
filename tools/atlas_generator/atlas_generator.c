@@ -59,7 +59,7 @@ void dump_atlas_to_final_texture(rde_atlas_rect* _rects, const char* _atlas_name
 
 	// NOTE: origin is top left (0, 0), being bottom right the (_max_image_size - 1, _max_image_size - 1)
 
-	for(size_t _i = 0; _i < arrlen(_rects); _i++) {
+	for(size_t _i = 0; _i < arrlenu(_rects); _i++) {
 		rde_atlas_rect* _rect = &_rects[_i];		
 		
 		if(!_rect->was_packed) {
@@ -99,14 +99,14 @@ void dump_atlas_to_config_file(rde_atlas_rect* _rects, const char* _atlas_name) 
 	memset(_data, 0, _data_size);
 	strcat(_data, "{\n");
 
-	for(size_t _i = 0; _i < arrlen(_rects); _i++) {
+	for(size_t _i = 0; _i < arrlenu(_rects); _i++) {
 		rde_atlas_rect* _rect = &_rects[_i];
 		_rect->name[strlen(_rect->name) - 4] = 0;
 		strcat(_data, "\t\""); strcat(_data, _rect->name); strcat(_data, "\": {\n");
 		strcat(_data, "\t\t\""); strcat(_data, "position\": ["); CONCAT_INT(_data, _rect->x); strcat(_data, ", "); CONCAT_INT(_data, _rect->y); strcat(_data, "],\n");
 		strcat(_data, "\t\t\""); strcat(_data, "size\": ["); CONCAT_INT(_data, _rect->w); strcat(_data, ", "); CONCAT_INT(_data, _rect->h); strcat(_data, "]\n");
 		strcat(_data, "\t");
-		if(_i == arrlen(_rects) - 1) {
+		if(_i == arrlenu(_rects) - 1) {
 			strcat(_data, "}\n");
 		} else {
 			strcat(_data, "},\n");
@@ -372,7 +372,7 @@ int main(int _argc, char** _argv) {
 	dump_atlas_to_config_file(_rects, _atlas_name);
 	printf("Successfully generated atlas data file. \n");
 
-	for(size_t _i = 0; _i < arrlen(_rects); _i++) {
+	for(size_t _i = 0; _i < arrlenu(_rects); _i++) {
 		stbi_image_free(_rects[_i].pixels);
 	}
 

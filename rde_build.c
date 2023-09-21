@@ -933,12 +933,12 @@ bool compile_windows() {
 		memset(output_atlas, 0, MAX_PATH);																							\
 		strcat(output_atlas, _output_a);																							\
 		strcat(output_atlas, "atlas_generator.exe");																				\
-		arrput(_build_command, "clang++ ");																							\
+		arrput(_build_command, "clang ");																							\
 		arrput(_build_command, "-O3 ");																								\
-		arrput(_build_command, "-std=c++17 ");																						\
+		arrput(_build_command, "-std=c99 ");																						\
 																																	\
 		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\atlas_generator\\atlas_generator.cpp ");														\
+		arrput(_build_command, "tools\\atlas_generator\\atlas_generator.c ");														\
 																																	\
 		arrput(_build_command, "-I ");																								\
 		arrput(_build_command, this_file_full_path);																				\
