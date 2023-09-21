@@ -1,1 +1,0 @@
-clang++ atlas_generator.cpp -I./external/include -Werror -Wall -Wextra -o bin/atlas_generator
