@@ -831,21 +831,12 @@ bool compile_windows() {
 
 	if(strlen(build_type) == 0) {
 		strcat(build_type, "debug");
-	}
-
-	if(strlen(output) == 0) {
-		strcat(output, this_file_full_path);
-		
-		if(strcmp(build_type, "debug") == 0) {
-			if(!make_dir_if_not_exists("build\\windows\\debug")) {
-				exit(-1);
-			}
-			strcat(output, "build\\windows\\debug\\");
-		} else {
-			if(!make_dir_if_not_exists("build\\windows\\release")) {
-				exit(-1);
-			}
-			strcat(output, "build\\windows\\release\\");
+		if(!make_dir_if_not_exists("build\\windows\\debug")) {
+			exit(-1);
+		}
+	} else {
+		if(!make_dir_if_not_exists("build\\windows\\release")) {
+			exit(-1);
 		}
 	}
 
@@ -857,9 +848,25 @@ bool compile_windows() {
 	
 	#define BUILD_ENGINE() 																					\
 	do {																									\
+		char _output[256];																					\
+		memset(_output, 0, 256);																			\
+		strcat(_output, this_file_full_path);																\
+																											\
+		if(strcmp(build_type, "debug") == 0) {																\
+			if(!make_dir_if_not_exists("build\\windows\\debug\\engine")) {									\
+				exit(-1);																					\
+			}																								\
+			strcat(_output, "build\\windows\\debug\\engine\\");												\
+		} else {																							\
+			if(!make_dir_if_not_exists("build\\windows\\release\\engine")) {								\
+				exit(-1);																					\
+			}																								\
+			strcat(_output, "build\\windows\\release\\engine\\");											\
+		}																									\
+																											\
 		char output_engine[MAX_PATH];																		\
 		memset(output_engine, 0, MAX_PATH);																	\
-		strcat(output_engine, output);																		\
+		strcat(output_engine, _output);																		\
 		strcat(output_engine, "RDE.dll");																	\
 		arrput(_build_command, "clang ");																	\
 																											\
@@ -907,77 +914,197 @@ bool compile_windows() {
 		}																									\
 	} while(0);
 
-	#define BUILD_TOOLS()																					\
-	do {																									\
-		_build_command = NULL;																				\
-		char output_atlas[MAX_PATH];																		\
-		memset(output_atlas, 0, MAX_PATH);																	\
-		strcat(output_atlas, output);																		\
-		strcat(output_atlas, "atlas_generator.exe");														\
-		arrput(_build_command, "clang++ ");																	\
-		arrput(_build_command, "-O3 ");																		\
-		arrput(_build_command, "-std=c++17 ");																\
-																											\
-		arrput(_build_command, this_file_full_path);														\
-		arrput(_build_command, "tools\\atlas_generator\\atlas_generator.cpp ");								\
-																											\
-		arrput(_build_command, "-I ");																		\
-		arrput(_build_command, this_file_full_path);														\
-		arrput(_build_command, "tools\\atlas_generator\\external\\include ");								\
-																											\
-		arrput(_build_command, "-Werror -Wall -Wextra ");													\
-																											\
-		arrput(_build_command, "-o ");																		\
-		arrput(_build_command, output_atlas);																\
-																											\
-		if(!run_command(_build_command)) {																	\
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");								\
-			exit(-1);																						\
-		}																									\
-																											\
-		_build_command = NULL;																				\
-		char output_fonts[MAX_PATH];																		\
-		memset(output_fonts, 0, MAX_PATH);																	\
-		strcat(output_fonts, output);																		\
-		strcat(output_fonts, "font_generator.exe");															\
-		arrput(_build_command, "clang ");																	\
-		arrput(_build_command, "-O3 ");																		\
-		arrput(_build_command, "-std=c99 ");																\
-																											\
-		arrput(_build_command, this_file_full_path);														\
-		arrput(_build_command, "tools\\font_generator\\font_generator.c ");									\
-																											\
-		arrput(_build_command, "-I ");																		\
-		arrput(_build_command, this_file_full_path);														\
-		arrput(_build_command, "tools\\font_generator\\external\\include ");								\
-																											\
-		arrput(_build_command, "-L ");																		\
-		arrput(_build_command, this_file_full_path);														\
-		arrput(_build_command, "tools\\font_generator\\external\\libs ");									\
-																											\
-		arrput(_build_command, "-lfreetype ");																\
-		arrput(_build_command, "-Werror -Wall -Wextra ");													\
-																											\
-		arrput(_build_command, "-o ");																		\
-		arrput(_build_command, output_fonts);																\
-																											\
-		if(!run_command(_build_command)) {																	\
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");								\
-			exit(-1);																						\
-		}																									\
-																											\
+	#define BUILD_TOOLS()																											\
+	do {																															\
+		char _output_a[256];																										\
+		memset(_output_a, 0, 256);																									\
+		strcat(_output_a, this_file_full_path);																						\
+																																	\
+		if(!make_dir_if_not_exists("build\\windows\\tools")) {																		\
+				exit(-1);																											\
+		}																															\
+		if(!make_dir_if_not_exists("build\\windows\\tools\\atlas_generator")) {														\
+				exit(-1);																											\
+		}																															\
+		strcat(_output_a, "build\\windows\\tools\\atlas_generator\\");																\
+																																	\
+		_build_command = NULL;																										\
+		char output_atlas[MAX_PATH];																								\
+		memset(output_atlas, 0, MAX_PATH);																							\
+		strcat(output_atlas, _output_a);																							\
+		strcat(output_atlas, "atlas_generator.exe");																				\
+		arrput(_build_command, "clang++ ");																							\
+		arrput(_build_command, "-O3 ");																								\
+		arrput(_build_command, "-std=c++17 ");																						\
+																																	\
+		arrput(_build_command, this_file_full_path);																				\
+		arrput(_build_command, "tools\\atlas_generator\\atlas_generator.cpp ");														\
+																																	\
+		arrput(_build_command, "-I ");																								\
+		arrput(_build_command, this_file_full_path);																				\
+		arrput(_build_command, "tools\\atlas_generator\\external\\include ");														\
+																																	\
+		arrput(_build_command, "-Werror -Wall -Wextra ");																			\
+																																	\
+		arrput(_build_command, "-o ");																								\
+		arrput(_build_command, output_atlas);																						\
+																																	\
+		if(!run_command(_build_command)) {																							\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");														\
+			exit(-1);																												\
+		}																															\
+																																	\
+		_build_command = NULL;																										\
+		char _output_f[256];																										\
+		memset(_output_f, 0, 256);																									\
+		strcat(_output_f, this_file_full_path);																						\
+																																	\
+		if(!make_dir_if_not_exists("build\\windows\\tools")) {																		\
+				exit(-1);																											\
+		}																															\
+		if(!make_dir_if_not_exists("build\\windows\\tools\\font_generator")) {														\
+				exit(-1);																											\
+		}																															\
+		strcat(_output_f, "build\\windows\\tools\\font_generator\\");																\
+																																	\
+		char output_fonts[MAX_PATH];																								\
+		memset(output_fonts, 0, MAX_PATH);																							\
+		strcat(output_fonts, _output_f);																							\
+		strcat(output_fonts, "font_generator.exe");																					\
+		arrput(_build_command, "clang ");																							\
+		arrput(_build_command, "-O3 ");																								\
+		arrput(_build_command, "-std=c99 ");																						\
+																																	\
+		arrput(_build_command, this_file_full_path);																				\
+		arrput(_build_command, "tools\\font_generator\\font_generator.c ");															\
+																																	\
+		arrput(_build_command, "-I ");																								\
+		arrput(_build_command, this_file_full_path);																				\
+		arrput(_build_command, "tools\\font_generator\\external\\include ");														\
+																																	\
+		arrput(_build_command, "-L ");																								\
+		arrput(_build_command, this_file_full_path);																				\
+		arrput(_build_command, "tools\\font_generator\\external\\libs ");															\
+																																	\
+		arrput(_build_command, "-lfreetype ");																						\
+		arrput(_build_command, "-Werror -Wall -Wextra ");																			\
+																																	\
+		arrput(_build_command, "-o ");																								\
+		arrput(_build_command, output_fonts);																						\
+																																	\
+		if(!run_command(_build_command)) {																							\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");														\
+			exit(-1);																												\
+		}																															\
+																																	\
+		copy_file_if_exists("external\\libs\\windows\\zlib1.dll", "build\\windows\\tools\\font_generator\\zlib1.dll"); 				\
+		copy_file_if_exists("external\\libs\\windows\\brotlicommon.dll", "build\\windows\\tools\\font_generator\\brotlicommon.dll");\
+		copy_file_if_exists("external\\libs\\windows\\brotlidec.dll", "build\\windows\\tools\\font_generator\\brotlidec.dll"); 		\
+		copy_file_if_exists("external\\libs\\windows\\brotlienc.dll", "build\\windows\\tools\\font_generator\\brotlienc.dll"); 		\
+		copy_file_if_exists("external\\libs\\windows\\bz2.dll", "build\\windows\\tools\\font_generator\\bz2.dll"); 					\
+		copy_file_if_exists("external\\libs\\windows\\freetype.dll", "build\\windows\\tools\\font_generator\\freetype.dll"); 		\
+		copy_file_if_exists("external\\libs\\windows\\libpng16.dll", "build\\windows\\tools\\font_generator\\libpng16.dll"); 		\
+	} while(0);
+
+	#define BUILD_EXAMPLES()																						\
+	do {																											\
+		char _output[256];																							\
+		memset(_output, 0, 256);																					\
+		strcat(_output, this_file_full_path);																		\
+																													\
+		if(strcmp(build_type, "debug") == 0) {																		\
+			if(!make_dir_if_not_exists("build\\windows\\debug\\examples")) {										\
+				exit(-1);																							\
+			}																										\
+			strcat(_output, "build\\windows\\debug\\examples\\");													\
+		} else {																									\
+			if(!make_dir_if_not_exists("build\\windows\\release\\examples")) {										\
+				exit(-1);																							\
+			}																										\
+			strcat(_output, "build\\windows\\release\\examples\\");													\
+		}																											\
+																													\
+		_build_command = NULL;																						\
+		char output_atlas[MAX_PATH];																				\
+		memset(output_atlas, 0, MAX_PATH);																			\
+		strcat(output_atlas, _output);																				\
+		strcat(output_atlas, "test.exe");																			\
+		arrput(_build_command, "clang ");																			\
+		arrput(_build_command, "-g -O0 ");																			\
+		arrput(_build_command, "-std=c99 ");																		\
+																													\
+		arrput(_build_command, this_file_full_path);																\
+		arrput(_build_command, "test\\test.c ");																	\
+																													\
+		arrput(_build_command, "-I ");																				\
+		arrput(_build_command, this_file_full_path);																\
+		arrput(_build_command, "external\\include ");																\
+																													\
+		arrput(_build_command, "-I ");																				\
+		arrput(_build_command, this_file_full_path);																\
+		arrput(_build_command, "engine\\include ");																	\
+																													\
+		arrput(_build_command, "-L ");																				\
+		arrput(_build_command, this_file_full_path);																\
+		arrput(_build_command, "build\\");																			\
+		arrput(_build_command, platform);																			\
+		arrput(_build_command, "\\");																				\
+		arrput(_build_command, build_type);																			\
+		arrput(_build_command, "\\engine ");																		\
+																													\
+		arrput(_build_command, "-Werror -Wall -Wextra ");															\
+		arrput(_build_command, "-lRDE -lwinmm -lgdi32 ");															\
+																													\
+		arrput(_build_command, "-o ");																				\
+		arrput(_build_command, output_atlas);																		\
+																													\
+		if(!run_command(_build_command)) {																			\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");										\
+			exit(-1);																								\
+		}																											\
+																													\
+		char _rde_lib_path[256];																					\
+		memset(_rde_lib_path, 0, 256);																				\
+		char _example_path_sdl[256];																				\
+		char _example_path_rde[256];																				\
+		char _example_path_glad[256];																				\
+		memset(_example_path_sdl, 0, 256);																			\
+		memset(_example_path_rde, 0, 256);																			\
+		memset(_example_path_glad, 0, 256);																			\
+																													\
+		if(strcmp(build_type, "debug") == 0) {																		\
+			strcat(_rde_lib_path, "build\\windows\\debug\\engine\\RDE.dll");										\
+			strcat(_example_path_sdl, "build\\windows\\debug\\examples\\SDL2.dll");									\
+			strcat(_example_path_glad, "build\\windows\\debug\\examples\\glad.dll");								\
+			strcat(_example_path_rde, "build\\windows\\debug\\examples\\RDE.dll");									\
+		} else {																									\
+			strcat(_rde_lib_path, "build\\windows\\release\\engine\\RDE.dll");										\
+			strcat(_example_path_sdl, "build\\windows\\release\\examples\\SDL2.dll");								\
+			strcat(_example_path_glad, "build\\windows\\release\\examples\\glad.dll");								\
+			strcat(_example_path_rde, "build\\windows\\release\\examples\\RDE.dll");								\
+		}																											\
+																													\
+		copy_file_if_exists("external\\libs\\windows\\SDL2.dll", _example_path_sdl);								\
+		copy_file_if_exists("external\\libs\\windows\\glad.dll", _example_path_glad);								\
+		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
 	} while(0);
 
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
+		printf("\n");
+		printf("--- BUILDING ENGINE --- \n");
 		BUILD_ENGINE()
 	}
 
 	if(strcmp(build, "tools") == 0 || strcmp(build, "all") == 0) {
+		printf("\n");
+		printf("--- BUILDING TOOLS --- \n");
 		BUILD_TOOLS()
 	}
 
 	if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
-		//BUILD_EXAMPLES()
+		printf("\n");
+		printf("--- BUILDING EXAMPLES --- \n");
+		BUILD_EXAMPLES()
 	}
 
 	return true;
