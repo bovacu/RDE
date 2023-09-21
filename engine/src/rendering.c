@@ -225,7 +225,7 @@ void rde_rendering_set_rendering_configuration() {
 #define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled)					\
 	if(!_compiled) {																\
 		char _infolog[1024];														\
-		glGetShaderInfoLog(_program_id, 1024, NULL, _infolog);					\
+		glGetShaderInfoLog(_program_id, 1024, NULL, _infolog);						\
 		printf("Shader compile failed with error: %s \n", _infolog);				\
 		glDeleteShader(_program_id);												\
 		return NULL;																\
