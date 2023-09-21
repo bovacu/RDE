@@ -1,4 +1,5 @@
 
+
 void rde_events_window_create_events();
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_resize, window_callbacks, on_window_resize, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_focused_by_mouse, window_callbacks, on_window_focused_by_mouse, {})
@@ -297,12 +298,7 @@ int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _event) {
 #endif
 
 bool rde_events_is_key_just_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key) {
-	if(_window->key_states[_key] == RDE_INPUT_STATUS_JUST_PRESSED) {
-		_window->key_states[_key] = RDE_INPUT_STATUS_KEEP_PRESSED;
-		return true;
-	}
-
-	return false;
+	return _window->key_states[_key] == RDE_INPUT_STATUS_JUST_PRESSED;
 }
 
 bool rde_events_is_key_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key) {
@@ -310,21 +306,11 @@ bool rde_events_is_key_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key) {
 }
 
 bool rde_events_is_key_just_released(rde_window* _window, RDE_KEYBOARD_KEY_ _key) {
-	if(_window->key_states[_key] == RDE_INPUT_STATUS_JUST_RELEASED) {
-		_window->key_states[_key] = RDE_INPUT_STATUS_UNINITIALIZED;
-		return true;
-	}
-
-	return false;
+	return _window->key_states[_key] == RDE_INPUT_STATUS_JUST_RELEASED;
 }
 
 bool rde_events_is_mouse_button_just_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _button) {
-	if(_window->mouse_states[_button] == RDE_INPUT_STATUS_JUST_PRESSED) {
-		_window->mouse_states[_button] = RDE_INPUT_STATUS_KEEP_PRESSED;
-		return true;
-	}
-
-	return false;
+	return _window->mouse_states[_button] == RDE_INPUT_STATUS_JUST_PRESSED;
 }
 
 bool rde_events_is_mouse_button_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _button) {
@@ -332,10 +318,27 @@ bool rde_events_is_mouse_button_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _
 }
 
 bool rde_events_is_mouse_button_just_released(rde_window* _window, RDE_MOUSE_BUTTON_ _button) {
-	if(_window->mouse_states[_button] == RDE_INPUT_STATUS_JUST_RELEASED) {
-		_window->mouse_states[_button] = RDE_INPUT_STATUS_UNINITIALIZED;
-		return true;
+	return _window->mouse_states[_button] == RDE_INPUT_STATUS_JUST_RELEASED;
+}
+
+void rde_events_sync_events(rde_window* _window) {
+	for(int _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+		if(_window->mouse_states[_i] == RDE_INPUT_STATUS_JUST_PRESSED) {
+			_window->mouse_states[_i] = RDE_INPUT_STATUS_KEEP_PRESSED;
+		}
+
+		if(_window->mouse_states[_i] == RDE_INPUT_STATUS_JUST_RELEASED) {
+			_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+		}
 	}
 
-	return false;
+	for(int _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+		if(_window->key_states[_i] == RDE_INPUT_STATUS_JUST_PRESSED) {
+			_window->key_states[_i] = RDE_INPUT_STATUS_KEEP_PRESSED;
+		}
+
+		if(_window->key_states[_i] == RDE_INPUT_STATUS_JUST_RELEASED) {
+			_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+		}
+	}
 }

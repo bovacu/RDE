@@ -1417,6 +1417,7 @@ RDE_FUNC void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 
 /// ============================ UTIL =======================================
 
+RDE_FUNC const char* rde_util_get_file_name_extension(const char* _file_name);
 
 /// ============================ MATH =======================================
 

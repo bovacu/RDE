@@ -69,6 +69,8 @@
 #define RDE_AMOUNT_OF_KEYS 256
 #define RDE_AMOUNT_OF_MOUSE_BUTTONS 16
 
+size_t current_frame = 0;
+
 // TODO: Not to forget
 // 		- [DONE] Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
 //		  the format is BGRA instead of RGBA (problem solved by first method) and the second fixes
@@ -333,128 +335,6 @@ rde_engine ENGINE;
 #include "physics.c"
 #include "audio.c"
 
-void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
-	switch(_color) {
-		case RDE_LOG_COLOR_RED: {
-			#if _WIN32
-			SetConsoleTextAttribute(ENGINE.console_handle, 12);
-			#else
-			fprintf("\033[0;31m");
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_GREEN:  {
-			#if _WIN32
-			SetConsoleTextAttribute(ENGINE.console_handle, 10);
-			#else
-			fprintf("\033[0;32m");	
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_YELLOW:  {
-			#if _WIN32
-			SetConsoleTextAttribute(ENGINE.console_handle, 6);
-			#else
-			fprintf("\033[0;33m");	
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_BLUE:  {
-			#if _WIN32
-			SetConsoleTextAttribute(ENGINE.console_handle, 9);
-			#else
-			fprintf("\033[0;34m");		
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_PURPLE:  {
-			#if _WIN32
-			SetConsoleTextAttribute(ENGINE.console_handle, 5);
-			#else
-			fprintf("\033[0;35m");
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_CYAN:  {
-			#if _WIN32
-			SetConsoleTextAttribute(ENGINE.console_handle, 11);
-			#else
-			fprintf("\033[0;36m");
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_WHITE:  {
-			#if _WIN32
-			SetConsoleTextAttribute(ENGINE.console_handle, 15);
-			#else
-			fprintf("\033[0;37m");
-			#endif
-		} break;
-	}
-
-	va_list _args;
-	va_start(_args, _fmt);
-	vfprintf(stdout, _fmt, _args);
-	va_end(_args);
-
-	#if _WIN32
-	SetConsoleTextAttribute(ENGINE.console_handle, 7);
-	fprintf(stdout, "\n");
-	#else
-	fprintf(stdout, "\033[0m \n");
-	#endif
-}
-
-void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
-	switch(_level) {
-		case RDE_LOG_LEVEL_ERROR: {
-			#if _WIN32
-			SetConsoleTextAttribute(ENGINE.console_handle, 12);
-			#else
-			fprintf("\033[0;31m");
-			#endif
-			fprintf(stdout, "[ERROR] ");
-		} break;
-		
-		case RDE_LOG_LEVEL_WARNING:  {
-			#if _WIN32
-			SetConsoleTextAttribute(ENGINE.console_handle, 6);
-			#else
-			fprintf("\033[0;33m");	
-			#endif
-			fprintf(stdout, "[WARNING] ");
-		} break;
-		
-		case RDE_LOG_LEVEL_DEBUG:  {
-			#if _WIN32
-			SetConsoleTextAttribute(ENGINE.console_handle, 11);
-			#else
-			fprintf("\033[0;36m");
-			#endif
-			fprintf(stdout, "[DEBUG] ");
-		} break;
-
-		case RDE_LOG_LEVEL_INFO:  {
-			#if _WIN32
-			SetConsoleTextAttribute(ENGINE.console_handle, 7);
-			#endif
-			fprintf(stdout, "[INFO] ");
-		} break;
-	}
-
-	va_list _args;
-	va_start(_args, _fmt);
-	vfprintf(stdout, _fmt, _args);
-	va_end(_args);
-	
-	#if _WIN32
-	SetConsoleTextAttribute(ENGINE.console_handle, 7);
-	fprintf(stdout, "\n");
-	#else
-	fprintf(stdout, "\033[0m \n");
-	#endif
-}
-
 void rde_engine_on_event();
 void rde_engine_on_update(float _dt);
 void rde_engine_on_fixed_update(float _fixed_dt);
@@ -540,10 +420,6 @@ void rde_engine_on_render(float _dt, rde_window* _window) {
 	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	glViewport(0, 0, _window_size.x, _window_size.y);
-}
-
-void rde_engine_sync_events() {
-	
 }
 
 rde_display_info* rde_engine_get_available_displays() {
@@ -643,14 +519,19 @@ void rde_engine_on_run() {
 			rde_engine_on_render(ENGINE.delta_time, _window);
 			ENGINE.mandatory_callbacks.on_render(ENGINE.delta_time, _window);
 
+			rde_events_sync_events(_window);
+
 			SDL_GL_SwapWindow(_window->sdl_window);
 		}
-
-		rde_engine_sync_events();
 
 		Uint64 _end = SDL_GetPerformanceCounter();
 		float _elapsedMS = (float)(_end - _start) / (float)SDL_GetPerformanceFrequency();
 		ENGINE.delta_time = _elapsedMS;
+
+		current_frame++;
+		if(current_frame + 1 > RDE_INT_MAX) {
+			current_frame = 0;
+		}
 	}
 
 	rde_engine_destroy_engine();
