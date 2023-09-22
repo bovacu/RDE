@@ -576,7 +576,7 @@ void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_texture) {
 
 rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path) {
 	rde_texture* _texture = rde_rendering_load_text_texture(_font_path);
-	rde_font_char_info_map* _char_map = rde_file_system_read_font_config(_font_config_path);
+	rde_font_char_info* _chars = rde_file_system_read_font_config(_font_config_path);
 
 	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_FONTS; _i++) {
 		rde_font* _font = &ENGINE.fonts[_i];
@@ -585,7 +585,7 @@ rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_conf
 		}
 
 		_font->texture = _texture;
-		_font->char_map = _char_map;
+		_font->chars = _chars;
 		return _font;
 	}
 
@@ -595,8 +595,8 @@ rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_conf
 
 void rde_rendering_unload_font(rde_font* _font) {
 	assert(_font != NULL && "Tried to unload a null font");
-	stbds_shfree(_font->char_map);
-	_font->char_map = NULL;
+	stbds_arrfree(_font->chars);
+	_font->chars = NULL;
 	rde_rendering_unload_texture(_font->texture);
 	_font->texture = NULL;
 }

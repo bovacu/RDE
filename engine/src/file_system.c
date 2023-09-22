@@ -59,7 +59,7 @@ rde_atlas_sub_textures* rde_file_system_read_atlas_config(const char* _atlas_pat
 	return hash;
 }
 
-rde_font_char_info_map* rde_file_system_read_font_config(const char* _font_path) {
+rde_font_char_info* rde_file_system_read_font_config(const char* _font_path) {
 	FILE* _file = NULL;
 	char* _text = NULL;
 
@@ -81,7 +81,7 @@ rde_font_char_info_map* rde_file_system_read_font_config(const char* _font_path)
 	fread(_text, sizeof(char), _num_bytes, _file);
 
 
-	rde_font_char_info_map* hash = NULL;
+	rde_font_char_info* _chars = NULL;
 	cJSON* _font_json = cJSON_Parse(_text);
 
 	if(_font_json == NULL) {
@@ -91,7 +91,16 @@ rde_font_char_info_map* rde_file_system_read_font_config(const char* _font_path)
 	}
 
 	cJSON* _char_info_json = NULL;
-	cJSON_ArrayForEach(_char_info_json, _font_json) {
+	rde_font_char_info _fci_default = rde_struct_create_font_char_info();
+	cJSON* _extra_data = cJSON_GetObjectItemCaseSensitive(_font_json, "extra_data");
+	cJSON* _offset_from_start = cJSON_GetObjectItemCaseSensitive(_extra_data, "offset_from_start");
+	for(int _i = 0; _i < _offset_from_start->valueint; _i++) {
+		stbds_arrput(_chars, _fci_default);
+	}
+
+	cJSON* _characters = cJSON_GetObjectItemCaseSensitive(_font_json, "characters");
+
+	cJSON_ArrayForEach(_char_info_json, _characters) {
 		cJSON* _advance = cJSON_GetObjectItemCaseSensitive(_char_info_json, "advance");
 		cJSON* _size = cJSON_GetObjectItemCaseSensitive(_char_info_json, "size");
 		cJSON* _bearing = cJSON_GetObjectItemCaseSensitive(_char_info_json, "bearing");
@@ -102,7 +111,7 @@ rde_font_char_info_map* rde_file_system_read_font_config(const char* _font_path)
 		_char_info.size = (rde_vec_2I) { (int)cJSON_GetArrayItem(_size, 0)->valueint, (int)cJSON_GetArrayItem(_size, 1)->valueint };
 		_char_info.bearing = (rde_vec_2I) { (int)cJSON_GetArrayItem(_bearing, 0)->valueint, (int)cJSON_GetArrayItem(_bearing, 1)->valueint };
 		_char_info.offset = (rde_vec_2F) { (float)cJSON_GetArrayItem(_offset, 0)->valuedouble, (float)cJSON_GetArrayItem(_offset, 1)->valuedouble };
-		stbds_shput(hash, _char_info_json->string, _char_info);
+		stbds_arrput(_chars, _char_info);
 
 		cJSON_free(_advance);
 		cJSON_free(_size);
@@ -115,5 +124,5 @@ rde_font_char_info_map* rde_file_system_read_font_config(const char* _font_path)
 	fclose(_file);
 	free(_text);
 
-	return hash;
+	return _chars;
 }

@@ -211,18 +211,14 @@ rde_font_char_info rde_struct_create_font_char_info() {
 	return _f;
 }
 
-typedef struct {
-	char* key;
-	rde_font_char_info value;
-} rde_font_char_info_map;
 struct rde_font {
 	rde_texture* texture;
-	rde_font_char_info_map* char_map;
+	rde_font_char_info* chars;
 };
 rde_font rde_struct_create_font() {
 	rde_font _f;
 	_f.texture = NULL;
-	_f.char_map = NULL;
+	_f.chars = NULL;
 	return _f;
 }
 
