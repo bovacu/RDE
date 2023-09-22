@@ -246,6 +246,12 @@ void export_font_atlas_data() {
 	int _oy = 0;
 	int _row_height;
 
+	cJSON* _extra_data = cJSON_CreateObject();
+	cJSON* _characters = cJSON_CreateObject();
+
+	cJSON* _offset_from_start = cJSON_CreateNumber(font_char_start_offset);
+	cJSON_AddItemToObject(_extra_data, "offset_from_start", _offset_from_start);
+
 	for (int _i = loop_start; _i < number_of_characters; _i++) {
 		inner_bitmap_data* _glyph = &_glyphs[_i - font_char_start_offset];
 
@@ -288,11 +294,14 @@ void export_font_atlas_data() {
 		cJSON_AddItemToObject(_character_json, "offset", _offset_json);
 		cJSON_AddItemToObject(_character_json, "size", _size_json);
 
-		cJSON_AddItemToObject(_font_atlas_json, _char_value, _character_json);
+		cJSON_AddItemToObject(_characters, _char_value, _character_json);
 
 		_ox += (int)_glyph->width;
 		_row_height = _row_height > _glyph->rows ? _row_height : (int)_glyph->rows;
 	}
+
+	cJSON_AddItemToObject(_font_atlas_json, "extra_data", _extra_data);
+	cJSON_AddItemToObject(_font_atlas_json, "characters", _characters);
 
 	const char* _stringify_json = cJSON_Print(_font_atlas_json);
 	
