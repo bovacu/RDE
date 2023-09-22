@@ -98,10 +98,10 @@ rde_font_char_info_map* rde_file_system_read_font_config(const char* _font_path)
 		cJSON* _offset = cJSON_GetObjectItemCaseSensitive(_char_info_json, "offset");
 
 		rde_font_char_info _char_info = rde_struct_create_font_char_info();
-		_char_info.advance = (rde_vec_2I) { (int)cJSON_GetArrayItem(_advance, 0)->valueint, (int)cJSON_GetArrayItem(_advance, 0)->valueint };
-		_char_info.size = (rde_vec_2I) { (int)cJSON_GetArrayItem(_size, 0)->valueint, (int)cJSON_GetArrayItem(_size, 0)->valueint };
-		_char_info.bearing = (rde_vec_2I) { (int)cJSON_GetArrayItem(_bearing, 0)->valueint, (int)cJSON_GetArrayItem(_bearing, 0)->valueint };
-		_char_info.offset = (rde_vec_2F) { (float)cJSON_GetArrayItem(_offset, 0)->valuedouble, (float)cJSON_GetArrayItem(_offset, 0)->valuedouble };
+		_char_info.advance = (rde_vec_2I) { (int)cJSON_GetArrayItem(_advance, 0)->valueint, (int)cJSON_GetArrayItem(_advance, 1)->valueint };
+		_char_info.size = (rde_vec_2I) { (int)cJSON_GetArrayItem(_size, 0)->valueint, (int)cJSON_GetArrayItem(_size, 1)->valueint };
+		_char_info.bearing = (rde_vec_2I) { (int)cJSON_GetArrayItem(_bearing, 0)->valueint, (int)cJSON_GetArrayItem(_bearing, 1)->valueint };
+		_char_info.offset = (rde_vec_2F) { (float)cJSON_GetArrayItem(_offset, 0)->valuedouble, (float)cJSON_GetArrayItem(_offset, 1)->valuedouble };
 		stbds_shput(hash, _char_info_json->string, _char_info);
 
 		cJSON_free(_advance);
