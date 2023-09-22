@@ -414,7 +414,10 @@ bool run_command(rde_command _command) {
 
 void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 	errno = 0;
-	const char* _source_path = __FILE__;
+	char* _source_path = (char*)malloc(MAX_PATH);
+	memset(_source_path, 0, MAX_PATH);
+	strcat(_source_path, this_file_full_path);
+	strcat(_source_path, "rde_build.c");
 
 	char _binary_path[MAX_PATH];
 	memset(_binary_path, 0, MAX_PATH);
@@ -431,7 +434,8 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 	#else
 	strcat(_binary_path, _argv[0]);
 	#endif
-	int _needs_recompile = needs_recompile(_binary_path, &_source_path, 1);
+	int _needs_recompile = needs_recompile(_binary_path, (const char**)(&_source_path), 1);
+	free(_source_path);
 	if(_needs_recompile < 0) {
 		exit(-1);
 	}
@@ -464,7 +468,6 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		strcat(_to_trash, "C:\\$Recycle.Bin\\");
 		
 		if(_just_binary_name != NULL) {
-			_just_binary_name++;
 			strcat(_to_trash, _just_binary_name);
 		} else {
 			strcat(_to_trash, _binary_path);
@@ -481,12 +484,15 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		}
 		#endif
 
+
 		// Then we recompile it
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Recompiling %s first", _just_binary_name != NULL ? _just_binary_name : _binary_path);
 		rde_command _recompile_command = NULL;
 		arrput(_recompile_command, "clang -g -O0 ");
-		arrput(_recompile_command, __FILE__);
+		arrput(_recompile_command, this_file_full_path);
+		arrput(_recompile_command, "\\rde_build.c");
 		arrput(_recompile_command, " -o ");
+		arrput(_recompile_command, this_file_full_path);
 		
 		if(_just_binary_name != NULL) {
 			arrput(_recompile_command, _just_binary_name);
@@ -495,8 +501,12 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		}
 
 		char _old_binary_path[MAX_PATH];
+		strcat(_old_binary_path, this_file_full_path);
+		strcat(_old_binary_path, "\\");
 		strcat(_old_binary_path, _binary_path);
 		strcat(_old_binary_path, ".old");
+
+
 		if(!run_command(_recompile_command)) {
 			if(!rename_file_if_exists(_old_binary_path, _just_binary_name != NULL ? _just_binary_name : _binary_path)) {
 				exit(-1);
@@ -821,21 +831,30 @@ bool copy_file_if_exists(const char* _file_path, const char* _new_path) {
 
 bool compile_windows() {
 	errno = 0;
-	if(!make_dir_if_not_exists("build")) {
+
+	char _path[MAX_PATH];
+	memset(_path, 0, MAX_PATH);
+	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build");
+	if(!make_dir_if_not_exists(_path)) {
 		exit(-1);
 	}
 	
-	if(!make_dir_if_not_exists("build\\windows")) {
+	memset(_path, 0, MAX_PATH);
+	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows");
+	if(!make_dir_if_not_exists(_path)) {
 		exit(-1);
 	}
 
+	memset(_path, 0, MAX_PATH);
 	if(strlen(build_type) == 0) {
 		strcat(build_type, "debug");
-		if(!make_dir_if_not_exists("build\\windows\\debug")) {
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\debug");
+		if(!make_dir_if_not_exists(_path)) {
 			exit(-1);
 		}
 	} else {
-		if(!make_dir_if_not_exists("build\\windows\\release")) {
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\release");
+		if(!make_dir_if_not_exists(_path)) {
 			exit(-1);
 		}
 	}
@@ -853,12 +872,16 @@ bool compile_windows() {
 		strcat(_output, this_file_full_path);																\
 																											\
 		if(strcmp(build_type, "debug") == 0) {																\
-			if(!make_dir_if_not_exists("build\\windows\\debug\\engine")) {									\
+			memset(_path, 0, MAX_PATH);																		\
+			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\debug\\engine");		\
+			if(!make_dir_if_not_exists(_path)) {															\
 				exit(-1);																					\
 			}																								\
 			strcat(_output, "build\\windows\\debug\\engine\\");												\
 		} else {																							\
-			if(!make_dir_if_not_exists("build\\windows\\release\\engine")) {								\
+			memset(_path, 0, MAX_PATH);																		\
+			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\release\\engine");		\
+			if(!make_dir_if_not_exists(_path)) {															\
 				exit(-1);																					\
 			}																								\
 			strcat(_output, "build\\windows\\release\\engine\\");											\
@@ -920,10 +943,14 @@ bool compile_windows() {
 		memset(_output_a, 0, 256);																									\
 		strcat(_output_a, this_file_full_path);																						\
 																																	\
-		if(!make_dir_if_not_exists("build\\windows\\tools")) {																		\
+		memset(_path, 0, MAX_PATH);																									\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools");											\
+		if(!make_dir_if_not_exists(_path)) {																						\
 				exit(-1);																											\
 		}																															\
-		if(!make_dir_if_not_exists("build\\windows\\tools\\atlas_generator")) {														\
+		memset(_path, 0, MAX_PATH);																									\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\atlas_generator");							\
+		if(!make_dir_if_not_exists(_path)) {																						\
 				exit(-1);																											\
 		}																															\
 		strcat(_output_a, "build\\windows\\tools\\atlas_generator\\");																\
@@ -959,10 +986,9 @@ bool compile_windows() {
 		memset(_output_f, 0, 256);																									\
 		strcat(_output_f, this_file_full_path);																						\
 																																	\
-		if(!make_dir_if_not_exists("build\\windows\\tools")) {																		\
-				exit(-1);																											\
-		}																															\
-		if(!make_dir_if_not_exists("build\\windows\\tools\\font_generator")) {														\
+		memset(_path, 0, MAX_PATH);																									\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator");							\
+		if(!make_dir_if_not_exists(_path)) {																						\
 				exit(-1);																											\
 		}																															\
 		strcat(_output_f, "build\\windows\\tools\\font_generator\\");																\
@@ -997,13 +1023,43 @@ bool compile_windows() {
 			exit(-1);																												\
 		}																															\
 																																	\
-		copy_file_if_exists("external\\libs\\windows\\zlib1.dll", "build\\windows\\tools\\font_generator\\zlib1.dll"); 				\
-		copy_file_if_exists("external\\libs\\windows\\brotlicommon.dll", "build\\windows\\tools\\font_generator\\brotlicommon.dll");\
-		copy_file_if_exists("external\\libs\\windows\\brotlidec.dll", "build\\windows\\tools\\font_generator\\brotlidec.dll"); 		\
-		copy_file_if_exists("external\\libs\\windows\\brotlienc.dll", "build\\windows\\tools\\font_generator\\brotlienc.dll"); 		\
-		copy_file_if_exists("external\\libs\\windows\\bz2.dll", "build\\windows\\tools\\font_generator\\bz2.dll"); 					\
-		copy_file_if_exists("external\\libs\\windows\\freetype.dll", "build\\windows\\tools\\font_generator\\freetype.dll"); 		\
-		copy_file_if_exists("external\\libs\\windows\\libpng16.dll", "build\\windows\\tools\\font_generator\\libpng16.dll"); 		\
+		char _p_0[MAX_PATH];																										\
+		char _p_1[MAX_PATH];																										\
+		memset(_p_0, 0, MAX_PATH);																									\
+		memset(_p_1, 0, MAX_PATH);																									\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\zlib1.dll");								\
+		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\zlib1.dll");					\
+		copy_file_if_exists(_p_0, _p_1); 																							\
+		memset(_p_0, 0, MAX_PATH);																									\
+		memset(_p_1, 0, MAX_PATH);																									\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\brotlicommon.dll");							\
+		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\brotlicommon.dll");			\
+		copy_file_if_exists(_p_0, _p_1);																							\
+		memset(_p_0, 0, MAX_PATH);																									\
+		memset(_p_1, 0, MAX_PATH);																									\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\brotlidec.dll");							\
+		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\brotlidec.dll");				\
+		copy_file_if_exists(_p_0, _p_1);																							\
+		memset(_p_0, 0, MAX_PATH);																									\
+		memset(_p_1, 0, MAX_PATH);																									\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\brotlienc.dll");							\
+		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\brotlienc.dll");				\
+		copy_file_if_exists(_p_0, _p_1);																							\
+		memset(_p_0, 0, MAX_PATH);																									\
+		memset(_p_1, 0, MAX_PATH);																									\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\bz2.dll");									\
+		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\bz2.dll");					\
+		copy_file_if_exists(_p_0, _p_1);																							\
+		memset(_p_0, 0, MAX_PATH);																									\
+		memset(_p_1, 0, MAX_PATH);																									\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\freetype.dll");								\
+		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\freetype.dll");				\
+		copy_file_if_exists(_p_0, _p_1);																							\
+		memset(_p_0, 0, MAX_PATH);																									\
+		memset(_p_1, 0, MAX_PATH);																									\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\libpng16.dll");								\
+		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\libpng16.dll");				\
+		copy_file_if_exists(_p_0, _p_1);																							\
 	} while(0);
 
 	#define BUILD_EXAMPLES()																						\
@@ -1012,13 +1068,16 @@ bool compile_windows() {
 		memset(_output, 0, 256);																					\
 		strcat(_output, this_file_full_path);																		\
 																													\
+		memset(_path, 0, MAX_PATH);																					\
 		if(strcmp(build_type, "debug") == 0) {																		\
-			if(!make_dir_if_not_exists("build\\windows\\debug\\examples")) {										\
+			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\debug\\examples");				\
+			if(!make_dir_if_not_exists(_path)) {																	\
 				exit(-1);																							\
 			}																										\
 			strcat(_output, "build\\windows\\debug\\examples\\");													\
 		} else {																									\
-			if(!make_dir_if_not_exists("build\\windows\\release\\examples")) {										\
+			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\release\\examples");			\
+			if(!make_dir_if_not_exists(_path)) {																	\
 				exit(-1);																							\
 			}																										\
 			strcat(_output, "build\\windows\\release\\examples\\");													\
@@ -1065,12 +1124,16 @@ bool compile_windows() {
 																													\
 		char _rde_lib_path[256];																					\
 		memset(_rde_lib_path, 0, 256);																				\
+		strcat(_rde_lib_path, this_file_full_path);																	\
 		char _example_path_sdl[256];																				\
 		char _example_path_rde[256];																				\
 		char _example_path_glad[256];																				\
 		memset(_example_path_sdl, 0, 256);																			\
 		memset(_example_path_rde, 0, 256);																			\
 		memset(_example_path_glad, 0, 256);																			\
+		strcat(_example_path_sdl, this_file_full_path);																\
+		strcat(_example_path_glad, this_file_full_path);															\
+		strcat(_example_path_rde, this_file_full_path);																\
 																													\
 		if(strcmp(build_type, "debug") == 0) {																		\
 			strcat(_rde_lib_path, "build\\windows\\debug\\engine\\RDE.dll");										\
@@ -1084,8 +1147,12 @@ bool compile_windows() {
 			strcat(_example_path_rde, "build\\windows\\release\\examples\\RDE.dll");								\
 		}																											\
 																													\
-		copy_file_if_exists("external\\libs\\windows\\SDL2.dll", _example_path_sdl);								\
-		copy_file_if_exists("external\\libs\\windows\\glad.dll", _example_path_glad);								\
+		memset(_path, 0, MAX_PATH);																					\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\SDL2.dll");				\
+		copy_file_if_exists(_path, _example_path_sdl);																\
+		memset(_path, 0, MAX_PATH);																					\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\glad.dll");				\
+		copy_file_if_exists(_path, _example_path_glad);																\
 		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
 	} while(0);
 
@@ -1248,14 +1315,21 @@ bool run_test() {
 }
 
 int main(int _argc, char** _argv) {
+	memset(this_file_full_path, 0, MAX_PATH);
+
 	#if _WIN32
 	console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	char _temp[MAX_PATH];
-	_fullpath(_temp, __FILE__, _MAX_PATH);
+	memset(_temp, 0, MAX_PATH);
+	strcat(_temp, _argv[0]);
 	const char _delimiter = '\\';
-	const char* _value = strrchr(_temp, _delimiter);
-	strncpy(this_file_full_path, _temp, strlen(_temp) - strlen(_value));
-	strcat(this_file_full_path, "\\");
+	const char* _value = strrchr(_argv[0], _delimiter);
+	if(_value != NULL) {
+		strncpy(this_file_full_path, _temp, strlen(_temp) - strlen(_value));
+		strcat(this_file_full_path, "\\");
+	} else {
+		strcat(this_file_full_path, ".\\");
+	}
 	#else
 	char* _temp = realpath(__FILE__, NULL);
 	const char _delimiter = '/';
