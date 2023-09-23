@@ -871,13 +871,26 @@ void rde_rendering_draw_texture_2d(const rde_transform* _transform, const rde_te
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
 
-void rde_rendering_draw_text_2d(const rde_transform* _transform, rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader) {
-	UNUSED(_transform)
-	UNUSED(_font)
-	UNUSED(_text)
-	UNUSED(_tint_color)
-	UNUSED(_shader)
-	UNIMPLEMENTED("rde_rendering_draw_texture")
+void rde_rendering_draw_text_2d(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader) {
+	int _text_size = strlen(_text);
+
+	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.text_shader_2d : _shader;
+	rde_transform _t = *_transform;
+
+	int _next_pos_x = 0;
+	//int _next_pos_y = 0;
+	for(int _i = 0; _i < _text_size; _i++) {
+		int _key = (int)_text[_i];
+		rde_font_char_info _char_info = _font->chars[_key];
+		_t.position.x = _next_pos_x + _char_info.bearing.x;
+		//_t.position.y = -(_char_info.size.y - _char_info.bearing.y);
+		//rde_rendering_draw_rectangle_2d((rde_vec_2F) { -(_char_info.advance.x >> 6) * 0.5f, -_char_info.bearing.y * 0.5f },
+		//(rde_vec_2F) { (_char_info.advance.x >> 6) * 0.5f, _char_info.bearing.y * 0.5f }, RDE_COLOR_BLACK, NULL);
+		//printf("p: (%f, %f) \n", _t.position.x, _t.position.y);
+		rde_rendering_draw_texture_2d(&_t, &_char_info.texture, _tint_color, _drawing_shader);
+		_next_pos_x += _char_info.advance.x >> 6; // /64.f
+		//_next_pos_y += _char_info.advance.y >> 6; // /64.f
+	}
 }
 
 void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader) {
