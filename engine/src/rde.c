@@ -200,14 +200,16 @@ typedef struct {
 	rde_vec_2I advance;
 	rde_vec_2I bearing;
 	rde_vec_2I size;
-	rde_vec_2F offset; // [0, 1] position on the atlas already normilized
+	rde_vec_2I offset;
+	rde_texture texture;
 } rde_font_char_info;
 rde_font_char_info rde_struct_create_font_char_info() {
 	rde_font_char_info _f;
 	_f.advance = (rde_vec_2I) { 0, 0 };
 	_f.bearing = (rde_vec_2I) { 0, 0 };
 	_f.size = (rde_vec_2I) { 0, 0 };
-	_f.offset = (rde_vec_2F) { 0.0f, 0.0f };
+	_f.offset = (rde_vec_2I) { 0.0f, 0.0f };
+	_f.texture = rde_struct_create_texture();
 	return _f;
 }
 
@@ -225,7 +227,7 @@ rde_font rde_struct_create_font() {
 typedef struct {
 	rde_shader* shader;
 	rde_window* window;
-	rde_texture* texture;
+	rde_texture texture;
 	rde_vertex_2d vertices[RDE_MAX_VERTICES_PER_BATCH];
 	size_t amount_of_vertices;
 } rde_batch_2d;
@@ -233,7 +235,7 @@ rde_batch_2d rde_struct_create_2d_batch() {
 	rde_batch_2d _b;
 	_b.shader = NULL;
 	_b.window = NULL;
-	_b.texture = NULL;
+	_b.texture = rde_struct_create_texture();
 	memset(_b.vertices, 0, RDE_MAX_VERTICES_PER_BATCH);
 	_b.amount_of_vertices = 0;
 	return _b;

@@ -59,7 +59,7 @@ rde_atlas_sub_textures* rde_file_system_read_atlas_config(const char* _atlas_pat
 	return hash;
 }
 
-rde_font_char_info* rde_file_system_read_font_config(const char* _font_path) {
+rde_font_char_info* rde_file_system_read_font_config(const char* _font_path, rde_texture* _atlas) {
 	FILE* _file = NULL;
 	char* _text = NULL;
 
@@ -107,10 +107,24 @@ rde_font_char_info* rde_file_system_read_font_config(const char* _font_path) {
 		cJSON* _offset = cJSON_GetObjectItemCaseSensitive(_char_info_json, "offset");
 
 		rde_font_char_info _char_info = rde_struct_create_font_char_info();
-		_char_info.advance = (rde_vec_2I) { (int)cJSON_GetArrayItem(_advance, 0)->valueint, (int)cJSON_GetArrayItem(_advance, 1)->valueint };
-		_char_info.size = (rde_vec_2I) { (int)cJSON_GetArrayItem(_size, 0)->valueint, (int)cJSON_GetArrayItem(_size, 1)->valueint };
-		_char_info.bearing = (rde_vec_2I) { (int)cJSON_GetArrayItem(_bearing, 0)->valueint, (int)cJSON_GetArrayItem(_bearing, 1)->valueint };
-		_char_info.offset = (rde_vec_2F) { (float)cJSON_GetArrayItem(_offset, 0)->valuedouble, (float)cJSON_GetArrayItem(_offset, 1)->valuedouble };
+		_char_info.advance = (rde_vec_2I) { cJSON_GetArrayItem(_advance, 0)->valueint, cJSON_GetArrayItem(_advance, 1)->valueint };
+		_char_info.size = (rde_vec_2I) { cJSON_GetArrayItem(_size, 0)->valueint, cJSON_GetArrayItem(_size, 1)->valueint };
+		_char_info.bearing = (rde_vec_2I) { cJSON_GetArrayItem(_bearing, 0)->valueint, cJSON_GetArrayItem(_bearing, 1)->valueint };
+		_char_info.offset = (rde_vec_2I) { cJSON_GetArrayItem(_offset, 0)->valueint, cJSON_GetArrayItem(_offset, 1)->valueint };
+
+		rde_texture _texture;
+		_texture.opengl_texture_id = _atlas->opengl_texture_id;
+		_texture.size.x = _char_info.size.x;
+		_texture.size.y = _char_info.size.y;
+		_texture.position.x = _char_info.offset.x;
+		_texture.position.y = _char_info.offset.y;
+		_texture.channels = _atlas->channels;
+		_texture.internal_format = _atlas->internal_format;
+		_texture.data_format = _atlas->data_format;
+		_texture.file_path = _atlas->file_path;
+		_texture.atlas_texture = _atlas;
+		_char_info.texture = _texture;
+
 		stbds_arrput(_chars, _char_info);
 
 		cJSON_free(_advance);

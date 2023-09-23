@@ -21,18 +21,18 @@ rde_vec_2F rde_rendering_get_aspect_ratio() {
 }
 
 void rde_rendering_transform_to_glm_mat4(const rde_transform* _transform, mat4 _mat) {
+	rde_vec_2I _window_size = rde_window_get_window_size(current_batch_2d.window);
+	float _aspect_ratio = (float)_window_size.x / (float)_window_size.y;
 	rde_vec_2F _screen_pos;
 	_screen_pos.x = _transform->position.x;
-	_screen_pos.y = _transform->position.y;
+	_screen_pos.y = _transform->position.y / _aspect_ratio;
 	rde_math_convert_world_position_to_screen_coordinates_2d(current_batch_2d.window, &_screen_pos);
-	rde_vec_2I _window_size = rde_window_get_window_size(current_batch_2d.window);
 
 	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
 
-
 	glm_translate(_transformation_matrix, (vec3) { _screen_pos.x, _screen_pos.y, _transform->position.z });
 	glm_rotate(_transformation_matrix, glm_rad(_transform->rotation.z), (vec3){ 0.0f, 0.0f, 1.0f });
-	glm_scale(_transformation_matrix, (vec3) { _transform->scale.x, _transform->scale.y / (_window_size.x / (float)_window_size.y), _transform->scale.z });
+	glm_scale(_transformation_matrix, (vec3) { _transform->scale.x, _transform->scale.y / _aspect_ratio, _transform->scale.z });
 	glm_mat4_copy(_transformation_matrix, _mat);
 }
 
@@ -108,7 +108,7 @@ void rde_rendering_generate_gl_vertex_config_for_shader(rde_shader* _shader) {
 
 void rde_rendering_reset_batch_2d() {
 	current_batch_2d.shader = NULL;
-	current_batch_2d.texture = NULL;
+	current_batch_2d.texture = rde_struct_create_texture();
 	memset(current_batch_2d.vertices, 0, RDE_MAX_VERTICES_PER_BATCH);
 	current_batch_2d.amount_of_vertices = 0;
 }
@@ -118,8 +118,8 @@ void rde_rendering_try_create_batch_2d(rde_shader* _shader, const rde_texture* _
 		current_batch_2d.shader = _shader;
 	}
 
-	if(_texture != NULL) {
-		current_batch_2d.texture = _texture;
+	if(current_batch_2d.texture.opengl_texture_id == -1 && _texture != NULL) {
+		current_batch_2d.texture = *_texture;
 	}
 }
 
@@ -144,9 +144,9 @@ void rde_rendering_flush_batch_2d() {
 	glBindVertexArray(current_batch_2d.shader->vertex_array_object);
 	rde_util_check_opengl_error("After glBindVertexArray");
 
-	if(current_batch_2d.texture != NULL) {
+	if(current_batch_2d.texture.opengl_texture_id >= 0) {
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, current_batch_2d.texture->opengl_texture_id);
+		glBindTexture(GL_TEXTURE_2D, current_batch_2d.texture.opengl_texture_id);
 		rde_util_check_opengl_error("After glBindTexture");
 	}
 
@@ -170,7 +170,7 @@ void rde_rendering_flush_batch_2d() {
 void rde_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _texture, size_t _extra_vertices) {
 	bool _vertex_ok = current_batch_2d.amount_of_vertices + _extra_vertices <= RDE_MAX_VERTICES_PER_BATCH;
 	bool _shader_ok = current_batch_2d.shader == _shader;
-	bool _texture_ok = _texture == NULL || current_batch_2d.texture->opengl_texture_id == _texture->opengl_texture_id;
+	bool _texture_ok = _texture == NULL || current_batch_2d.texture.opengl_texture_id == _texture->opengl_texture_id;
 	if(_vertex_ok && _shader_ok && _texture_ok) {
 		return;
 	}
@@ -576,7 +576,7 @@ void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_texture) {
 
 rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path) {
 	rde_texture* _texture = rde_rendering_load_text_texture(_font_path);
-	rde_font_char_info* _chars = rde_file_system_read_font_config(_font_config_path);
+	rde_font_char_info* _chars = rde_file_system_read_font_config(_font_config_path, _texture);
 
 	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_FONTS; _i++) {
 		rde_font* _font = &ENGINE.fonts[_i];
@@ -610,6 +610,7 @@ void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
 	assert(current_drawing_camera == NULL || _window == NULL && "Tried to begin drawing again before ending the previous one or provided _camera or _window = NULL");
 	current_drawing_camera = _camera;
 	current_batch_2d.window = _window;
+	current_batch_2d.texture = rde_struct_create_texture();
 
 	switch(_camera->camera_type) {
 		case RDE_CAMERA_TYPE_PERSPECTIVE : {
@@ -663,28 +664,32 @@ void rde_rendering_draw_triangle_2d(rde_vec_2F _vertex_a, rde_vec_2F _vertex_b, 
 	rde_rendering_try_create_batch_2d(_drawing_shader, NULL);
 	rde_rendering_try_flush_batch_2d(_drawing_shader, NULL, _triangle_vertex_count);
 
+	int _c = RDE_COLOR_TO_HEX_COLOR(_color);
+	rde_vec_2I _window_size = rde_window_get_window_size(current_batch_2d.window);
+	float _aspect_ratio = (float)_window_size.x / (float)_window_size.y;
+
 	// * 2
 	// |\
 	// | \
 	// *--*
 	// 0   1
 	rde_vertex_2d _vertex_0;
-	_vertex_0.position = (rde_vec_3F){ _vertex_a.x, _vertex_a.y, 0.f };
-	_vertex_0.color = RDE_COLOR_TO_HEX_COLOR(_color);
+	_vertex_0.position = (rde_vec_3F){ _vertex_a.x, _vertex_a.y / _aspect_ratio, 0.f };
+	_vertex_0.color = _c;
 	_vertex_0.texture_coordinates = (rde_vec_2F){ 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates_3d(current_batch_2d.window, &_vertex_0.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0;
 
 	rde_vertex_2d _vertex_1;
-	_vertex_1.position = (rde_vec_3F){ _vertex_b.x, _vertex_b.y, 0.f };
-	_vertex_1.color = RDE_COLOR_TO_HEX_COLOR(_color);
+	_vertex_1.position = (rde_vec_3F){ _vertex_b.x, _vertex_b.y / _aspect_ratio, 0.f };
+	_vertex_1.color = _c;
 	_vertex_1.texture_coordinates = (rde_vec_2F){ 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates_3d(current_batch_2d.window, &_vertex_1.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1;
 
 	rde_vertex_2d _vertex_2;
-	_vertex_2.position = (rde_vec_3F){ _vertex_c.x, _vertex_c.y, 0.f };
-	_vertex_2.color = RDE_COLOR_TO_HEX_COLOR(_color);
+	_vertex_2.position = (rde_vec_3F){ _vertex_c.x, _vertex_c.y / _aspect_ratio, 0.f };
+	_vertex_2.color = _c;
 	_vertex_2.texture_coordinates = (rde_vec_2F){ 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates_3d(current_batch_2d.window, &_vertex_2.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_2;
@@ -698,6 +703,8 @@ void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_ri
 	rde_rendering_try_flush_batch_2d(_drawing_shader, NULL, _triangle_vertex_count);
 
 	int _c = RDE_COLOR_TO_HEX_COLOR(_color);
+	rde_vec_2I _window_size = rde_window_get_window_size(current_batch_2d.window);
+	float _aspect_ratio = (float)_window_size.x / (float)_window_size.y;
 
 	// * 2
 	// |\
@@ -705,21 +712,21 @@ void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_ri
 	// *--*
 	// 0   1
 	rde_vertex_2d _vertex_0_0;
-	_vertex_0_0.position = (rde_vec_3F){ _bottom_left.x, _bottom_left.y, 0.f };
+	_vertex_0_0.position = (rde_vec_3F){ _bottom_left.x, _bottom_left.y / _aspect_ratio, 0.f };
 	_vertex_0_0.color = _c;
 	_vertex_0_0.texture_coordinates = (rde_vec_2F){ 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates_3d(current_batch_2d.window, &_vertex_0_0.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_0;
 
 	rde_vertex_2d _vertex_0_1;
-	_vertex_0_1.position = (rde_vec_3F){ _top_right.x, _bottom_left.y, 0.f };
+	_vertex_0_1.position = (rde_vec_3F){ _top_right.x, _bottom_left.y / _aspect_ratio, 0.f };
 	_vertex_0_1.color = _c;
 	_vertex_0_1.texture_coordinates = (rde_vec_2F){ 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates_3d(current_batch_2d.window, &_vertex_0_1.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_1;
 
 	rde_vertex_2d _vertex_0_2;
-	_vertex_0_2.position = (rde_vec_3F){ _bottom_left.x, _top_right.y, 0.f };
+	_vertex_0_2.position = (rde_vec_3F){ _bottom_left.x, _top_right.y / _aspect_ratio, 0.f };
 	_vertex_0_2.color = _c;
 	_vertex_0_2.texture_coordinates = (rde_vec_2F){ 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates_3d(current_batch_2d.window, &_vertex_0_2.position);
@@ -733,21 +740,21 @@ void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_ri
 	//    0
 
 	rde_vertex_2d _vertex_1_0;
-	_vertex_1_0.position = (rde_vec_3F){ _top_right.x, _bottom_left.y, 0.f };
+	_vertex_1_0.position = (rde_vec_3F){ _top_right.x, _bottom_left.y / _aspect_ratio, 0.f };
 	_vertex_1_0.color = _c;
 	_vertex_1_0.texture_coordinates = (rde_vec_2F){ 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates_3d(current_batch_2d.window, &_vertex_1_0.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_0;
 
 	rde_vertex_2d _vertex_1_1;
-	_vertex_1_1.position = (rde_vec_3F){ _top_right.x, _top_right.y, 0.f };
+	_vertex_1_1.position = (rde_vec_3F){ _top_right.x, _top_right.y / _aspect_ratio, 0.f };
 	_vertex_1_1.color = _c;
 	_vertex_1_1.texture_coordinates = (rde_vec_2F){ 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates_3d(current_batch_2d.window, &_vertex_1_1.position);
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_1;
 
 	rde_vertex_2d _vertex_1_2;
-	_vertex_1_2.position = (rde_vec_3F){ _bottom_left.x, _top_right.y, 0.f };
+	_vertex_1_2.position = (rde_vec_3F){ _bottom_left.x, _top_right.y / _aspect_ratio, 0.f };
 	_vertex_1_2.color = _c;
 	_vertex_1_2.texture_coordinates = (rde_vec_2F){ 0.f, 0.f };
 	rde_math_convert_world_position_to_screen_coordinates_3d(current_batch_2d.window, &_vertex_1_2.position);
@@ -771,7 +778,7 @@ void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_po
 	UNIMPLEMENTED("rde_rendering_draw_polygon_2d")
 }
 
-void rde_rendering_draw_texture_2d(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
+void rde_rendering_draw_texture_2d(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
 	const size_t _triangle_vertex_count = 6;
 
 	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
