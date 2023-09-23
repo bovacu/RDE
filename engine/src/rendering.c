@@ -113,7 +113,7 @@ void rde_rendering_reset_batch_2d() {
 	current_batch_2d.amount_of_vertices = 0;
 }
 
-void rde_rendering_try_create_batch_2d(rde_shader* _shader, rde_texture* _texture) {
+void rde_rendering_try_create_batch_2d(rde_shader* _shader, const rde_texture* _texture) {
 	if(current_batch_2d.shader == NULL) {
 		current_batch_2d.shader = _shader;
 	}
@@ -167,7 +167,7 @@ void rde_rendering_flush_batch_2d() {
 	statistics.number_of_drawcalls++;
 }
 
-void rde_rendering_try_flush_batch_2d(rde_shader* _shader, rde_texture* _texture, size_t _extra_vertices) {
+void rde_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _texture, size_t _extra_vertices) {
 	bool _vertex_ok = current_batch_2d.amount_of_vertices + _extra_vertices <= RDE_MAX_VERTICES_PER_BATCH;
 	bool _shader_ok = current_batch_2d.shader == _shader;
 	bool _texture_ok = _texture == NULL || current_batch_2d.texture->opengl_texture_id == _texture->opengl_texture_id;
