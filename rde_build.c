@@ -501,6 +501,7 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		}
 
 		char _old_binary_path[MAX_PATH];
+		memset(_old_binary_path, 0, MAX_PATH);
 		strcat(_old_binary_path, this_file_full_path);
 		strcat(_old_binary_path, "\\");
 		strcat(_old_binary_path, _binary_path);
