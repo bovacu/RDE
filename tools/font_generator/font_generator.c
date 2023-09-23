@@ -55,7 +55,7 @@ typedef struct {
 	int pitch;
 } inner_bitmap_data;
 
-inner_bitmap_data* _glyphs;
+inner_bitmap_data* glyphs;
 
 void print_help() {
 	char* _help_message = "This command line program transforms a font file into a usable font atlas for the RDE engine. \n"
@@ -102,6 +102,11 @@ void process_command_line_arguments(int _argc, char** _argv) {
 		} else if(strcmp(_command, "-o") == 0 || strcmp(_command, "--font_char_offset") == 0) {
 			const char* _value = strrchr(_argv[_i], _delimiter_2);
 			font_char_start_offset = atoi((_value + 1));
+			#if _WIN32
+			loop_start = font_char_start_offset;
+			#else
+			loop_start = font_char_start_offset + 1;
+			#endif
 		} else if(strcmp(_command, "-h") == 0 || strcmp(_command, "--help") == 0) {
 			print_help();
 			exit(0);
@@ -166,18 +171,18 @@ void load_glyps() {
 			continue;
 		}
             
-		_glyphs[_i - CHARACTERS_START_OFFSET] = (inner_bitmap_data) {
+		glyphs[_i] = (inner_bitmap_data) {
 			ft_face->glyph->bitmap.width,
 			ft_face->glyph->bitmap.rows,
 			ft_face->glyph->bitmap_top,
 			ft_face->glyph->bitmap_left,
 			NULL,
 			ft_face->glyph->advance,
-			(char)(_i - CHARACTERS_START_OFFSET),
+			(char)_i,
 			ft_face->glyph->bitmap.pitch
 		};
             
-		inner_bitmap_data* _glyph = &_glyphs[_i - font_char_start_offset];
+		inner_bitmap_data* _glyph = &glyphs[_i];
 		_glyph->buffer = (unsigned char*)malloc(sizeof(unsigned char) * (_glyph->width * _glyph->rows));
 
 		if(_glyph->buffer == NULL) {
@@ -190,6 +195,8 @@ void load_glyps() {
             
 		atlas_width += ft_face->glyph->bitmap.width;
 		_row_height = _row_height > _glyph->rows ? _row_height : (int)_glyph->rows;
+//		printf("%c - %d -> s:(%d, %d), b:(%d, %d), a: %lu \n", (char)_i, _i, ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows,
+//		       ft_face->glyph->bitmap_left, ft_face->glyph->bitmap_top, ft_face->glyph->advance.x);
 	}
 
 	atlas_height += _row_height;
@@ -210,7 +217,7 @@ void export_font_atlas_texture() {
 	int _row_height = 0;
 
 	for (int _i = loop_start; _i < number_of_characters; _i++) {
-		inner_bitmap_data* _glyph = &_glyphs[_i - font_char_start_offset];
+		inner_bitmap_data* _glyph = &glyphs[_i];
 		
 		if(_ox + _glyph->width > atlas_width) {
 			_oy += _row_height;
@@ -251,15 +258,17 @@ void export_font_atlas_data() {
 
 	cJSON* _offset_from_start = cJSON_CreateNumber(font_char_start_offset);
 	cJSON_AddItemToObject(_extra_data, "offset_from_start", _offset_from_start);
-
 	for (int _i = loop_start; _i < number_of_characters; _i++) {
-		inner_bitmap_data* _glyph = &_glyphs[_i - font_char_start_offset];
+		inner_bitmap_data* _glyph = &glyphs[_i];
 
 		if(_ox + _glyph->width > atlas_width) {
 			_oy += _row_height;
 			_ox = 0;
 			_row_height = 0;
 		}
+
+//		printf("%c - %d -> s:(%d, %d), b:(%d, %d), a: %lu \n", (char)_i, _i, _glyph->width, _glyph->rows,
+//		       _glyph->bitmap_left, _glyph->bitmap_top, _glyph->advance.x);
 
 		cJSON* _character_json = cJSON_CreateObject();
 		char _char_value[8];
@@ -278,14 +287,14 @@ void export_font_atlas_data() {
 		cJSON_AddItemToArray(_bearing_json, _bearing_json_y);
 
 		cJSON* _offset_json = cJSON_CreateArray();
-		cJSON* _offset_json_x = cJSON_CreateNumber((double)((float)_ox / (float)atlas_width));
-		cJSON* _offset_json_y = cJSON_CreateNumber((double)((float)_oy / (float)atlas_height));
+		cJSON* _offset_json_x = cJSON_CreateNumber((double)_ox);
+		cJSON* _offset_json_y = cJSON_CreateNumber((double)_oy);
 		cJSON_AddItemToArray(_offset_json, _offset_json_x);
 		cJSON_AddItemToArray(_offset_json, _offset_json_y);
 
 		cJSON* _advance_json = cJSON_CreateArray();
-		cJSON* _advance_json_x = cJSON_CreateNumber((double)((int)_glyph->advance.x >> 6));
-		cJSON* _advance_json_y = cJSON_CreateNumber((double)((double)_glyph->rows));
+		cJSON* _advance_json_x = cJSON_CreateNumber((double)_glyph->advance.x);
+		cJSON* _advance_json_y = cJSON_CreateNumber((double)((double)_glyph->advance.y));
 		cJSON_AddItemToArray(_advance_json, _advance_json_x);
 		cJSON_AddItemToArray(_advance_json, _advance_json_y);
 
@@ -342,7 +351,7 @@ int main(int _argc, char** _argv) {
 	// Multiply by BASE_FONT_SIZE_FOR_CHAR_SIZE is needed as sizes on FreeType are on a 1/64 base.
 	FT_Set_Char_Size(ft_face, 0, font_size * BASE_FONT_SIZE_FOR_CHAR_SIZE, font_dpi, font_dpi);
 	
-	_glyphs = (inner_bitmap_data*)malloc(sizeof(inner_bitmap_data) * (number_of_characters - font_char_start_offset));
+	glyphs = (inner_bitmap_data*)malloc(sizeof(inner_bitmap_data) * (number_of_characters));
 	load_glyps();
 
 	size_t _atlas_area = atlas_width * atlas_height;
@@ -358,7 +367,7 @@ int main(int _argc, char** _argv) {
 	export_font_atlas_texture();
 	export_font_atlas_data();
 
-	free(_glyphs);
+	free(glyphs);
 
 	printf("Generated atlas texture and data file correctly!");
 }
