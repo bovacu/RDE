@@ -1,1 +1,0 @@
-clang -g -O0 -std=c99 engine/src/rde.c -shared -fPIC -DRDE_AUDIO_MODULE -DRDE_PHYSICS_MODULE -I./engine/include -I./engine/src -I./external/include -L./external/libs/linux -ldl -lm -lpthread -lSDL2 -lglad -lcglm -Werror -Wall -Wextra -Wno-tautological-constant-out-of-range-compare -o build/libRDE.so
