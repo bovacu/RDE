@@ -8,6 +8,14 @@
 #include <ctype.h>
 #include <limits.h>
 
+#if !_WIN32
+#define MAX_PATH 2048
+#include <stdint.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+#endif
+
 // Fuck Windows deprecations
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -23,7 +31,7 @@
 	#include "external/include/dirent.h"
 	HANDLE console_handle;
 	typedef HANDLE rde_proc;
-	#define rde_proc_invalid INVALID_HANDLE_VALUE;
+	#define rde_proc_invalid INVALID_HANDLE_VALUE
 #else
 	#include <sys/types.h>
 	#include <sys/wait.h>
@@ -32,7 +40,7 @@
 	#include <fcntl.h>
 	#include <dirent.h>
 	typedef int rde_proc;
-	#define rde_proc_invalid (-1);
+	#define rde_proc_invalid (-1)
 #endif
 
 typedef char** rde_command;
@@ -103,7 +111,7 @@ void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 			#if _WIN32
 			SetConsoleTextAttribute(console_handle, 12);
 			#else
-			fprintf("\033[0;31m");
+			fprintf(stdout, "\033[0;31m");
 			#endif
 		} break;
 		
@@ -111,7 +119,7 @@ void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 			#if _WIN32
 			SetConsoleTextAttribute(console_handle, 10);
 			#else
-			fprintf("\033[0;32m");	
+			fprintf(stdout, "\033[0;32m");	
 			#endif
 		} break;
 		
@@ -119,7 +127,7 @@ void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 			#if _WIN32
 			SetConsoleTextAttribute(console_handle, 6);
 			#else
-			fprintf("\033[0;33m");	
+			fprintf(stdout, "\033[0;33m");	
 			#endif
 		} break;
 		
@@ -127,7 +135,7 @@ void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 			#if _WIN32
 			SetConsoleTextAttribute(console_handle, 9);
 			#else
-			fprintf("\033[0;34m");		
+			fprintf(stdout, "\033[0;34m");		
 			#endif
 		} break;
 		
@@ -135,7 +143,7 @@ void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 			#if _WIN32
 			SetConsoleTextAttribute(console_handle, 5);
 			#else
-			fprintf("\033[0;35m");
+			fprintf(stdout, "\033[0;35m");
 			#endif
 		} break;
 		
@@ -143,7 +151,7 @@ void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 			#if _WIN32
 			SetConsoleTextAttribute(console_handle, 11);
 			#else
-			fprintf("\033[0;36m");
+			fprintf(stdout, "\033[0;36m");
 			#endif
 		} break;
 		
@@ -151,7 +159,7 @@ void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 			#if _WIN32
 			SetConsoleTextAttribute(console_handle, 15);
 			#else
-			fprintf("\033[0;37m");
+			fprintf(stdout, "\033[0;37m");
 			#endif
 		} break;
 	}
@@ -175,7 +183,7 @@ void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 			#if _WIN32
 			SetConsoleTextAttribute(console_handle, 12);
 			#else
-			fprintf("\033[0;31m");
+			fprintf(stdout, "\033[0;31m");
 			#endif
 			fprintf(stdout, "[ERROR] ");
 		} break;
@@ -184,7 +192,7 @@ void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 			#if _WIN32
 			SetConsoleTextAttribute(console_handle, 6);
 			#else
-			fprintf("\033[0;33m");	
+			fprintf(stdout, "\033[0;33m");	
 			#endif
 			fprintf(stdout, "[WARNING] ");
 		} break;
@@ -193,7 +201,7 @@ void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 			#if _WIN32
 			SetConsoleTextAttribute(console_handle, 11);
 			#else
-			fprintf("\033[0;36m");
+			fprintf(stdout, "\033[0;36m");
 			#endif
 			fprintf(stdout, "[DEBUG] ");
 		} break;
@@ -293,7 +301,7 @@ int needs_recompile(const char* _output_path, const char** _input_paths, size_t 
 
 bool pid_wait(rde_proc _pid) {
 	errno = 0;
-    if (_pid == INVALID_HANDLE_VALUE) {
+    if (_pid == rde_proc_invalid) {
 		exit(-1);
 	}
 
@@ -327,8 +335,8 @@ bool pid_wait(rde_proc _pid) {
 			return false;
         }
 
-        if (WIFEXITED(wstatus)) {
-            int _exit_status = WEXITSTATUS(wstatus);
+        if (WIFEXITED(_wstatus)) {
+            int _exit_status = WEXITSTATUS(_wstatus);
             if (_exit_status != 0) {
                 rde_log_level(RDE_LOG_LEVEL_ERROR, "command exited with exit code %d", _exit_status);
             }
@@ -344,6 +352,22 @@ bool pid_wait(rde_proc _pid) {
 	#endif
 }
 
+char* ltrim(char* _s) {
+    while(isspace(*_s)) _s++;
+    return _s;
+}
+
+char* rtrim(char* _s) {
+    char* _back = _s + strlen(_s);
+    while(isspace(*--_back));
+    *(_back+1) = '\0';
+    return _s;
+}
+
+char* trim(char* _s) {
+    return rtrim(ltrim(_s)); 
+}
+
 bool run_command(rde_command _command) {
 	errno = 0;
     if (arrlen(_command) < 1) {
@@ -351,17 +375,31 @@ bool run_command(rde_command _command) {
         return false;
     }
 
+#if _WIN32
     char* _command_flat = (char*)malloc(sizeof(char) * 2048);
 	memset(_command_flat, 0, 2048);
 
 	for(int _i = 0; _i < arrlen(_command); _i++) {
 		strcat(_command_flat, _command[_i]);
+		strcat(_command_flat, " ");
 	}
-	
+
 	printf("\n");
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Executing command: %s", _command_flat);
+#else
+	int _total_args = arrlen(_command) + 1;
+	char* _argument_list[32];
 
-	#ifdef _WIN32
+	printf("[INFO] ");
+	for(int _i = 0; _i < _total_args - 1; _i++) {
+		_argument_list[_i] = _command[_i];
+		printf("%s ", _argument_list[_i]);
+	}
+	printf("\n"); 
+	_argument_list[_total_args - 1] = NULL; 
+#endif
+
+#ifdef _WIN32
     STARTUPINFO siStartInfo;
     ZeroMemory(&siStartInfo, sizeof(siStartInfo));
     siStartInfo.cb = sizeof(STARTUPINFO);
@@ -387,29 +425,28 @@ bool run_command(rde_command _command) {
     CloseHandle(piProcInfo.hThread);
 
     return pid_wait(piProcInfo.hProcess);
-
-	#else
+#else
     pid_t _pid = fork();
     if (_pid < 0) {
         rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not fork child process: %s", strerror(errno));
-		free(_command_flat);
 		arrfree(_command);
-        return false;
+		// free(_argument_list);
+        return false; 
     }
 
     if (_pid == 0) {
-        if (execvp(_command_flat[0], (char * const*)_command_flat) < 0) {
+        if (execvp(_argument_list[0], _argument_list) < 0) {
             rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not exec child process: %s", strerror(errno));
-			free(_command_flat);
 			arrfree(_command);
+			// free(_argument_list);
             return false;
         }
-		free(_command_flat);
 		arrfree(_command);
+		// free(_argument_list);
     }
 	
 	return pid_wait(_pid);
-	#endif
+#endif
 }
 
 void try_recompile_and_redirect_execution(int _argc, char** _argv) {
@@ -443,11 +480,11 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 	if(_needs_recompile) {
 		// First we move the current executable to trash
 		
-		#if _WIN32
+#if _WIN32
 		const char _delimiter = '\\';
-		#else
+#else
 		const char _delimiter = '/';
-		#endif
+#endif
 		// Be careful, if no delimter is found, then _just_binary_name will be NULL and we will use _binary_path directly
 		char* _just_binary_name = strrchr(_binary_path, _delimiter);
 
@@ -461,7 +498,7 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		}
 		strcat(_to_old, ".old");
 
-		#if _WIN32
+#if _WIN32
 		char _to_trash[MAX_PATH];
 		memset(_to_trash, 0, MAX_PATH);
 		// This is the way of deleting the old exe in Windows
@@ -478,35 +515,80 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		if(!rename_file_if_exists(_binary_path, _to_old)) {
 			exit(-1);
 		}
-		#else
+#else
+		struct passwd* _pw = getpwuid(getuid());
+		const char* _homedir = _pw->pw_dir;
+
+		char _to_trash[MAX_PATH];
+		memset(_to_trash, 0, MAX_PATH);
+		strcat(_to_trash, _homedir);
+		strcat(_to_trash, "/.Tr/");
+		
+		if(!make_dir_if_not_exists(_to_trash)) {
+			exit(-1);
+		}
+
+		if(_just_binary_name != NULL) {
+			strcat(_to_trash, _just_binary_name);
+		} else {
+			strcat(_to_trash, _binary_path);
+		}
+		strcat(_to_trash, ".old");
+
 		if(!rename_file_if_exists(_binary_path, _to_old)) {
 			exit(-1);
 		}
-		#endif
+#endif
 
 
 		// Then we recompile it
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Recompiling %s first", _just_binary_name != NULL ? _just_binary_name : _binary_path);
 		rde_command _recompile_command = NULL;
-		arrput(_recompile_command, "clang -g -O0 ");
-		arrput(_recompile_command, this_file_full_path);
-		arrput(_recompile_command, "\\rde_build.c");
-		arrput(_recompile_command, " -o ");
-		arrput(_recompile_command, this_file_full_path);
+		arrput(_recompile_command, "clang");
+		arrput(_recompile_command, "-g");
+		arrput(_recompile_command, "-O0");
 		
+		char _source_path[MAX_PATH];
+		memset(_source_path, 0, MAX_PATH);
+#if _WIN32
+		snprintf(_source_path, MAX_PATH, "%s\\rde_build.c", this_file_full_path);
+		arrput(_recompile_command, _source_path);
+#else
+		snprintf(_source_path, MAX_PATH, "%srde_build.c", this_file_full_path);
+		arrput(_recompile_command, _source_path);
+#endif
+
+		arrput(_recompile_command, "-o");
+
+		char _out_path[MAX_PATH];
+		memset(_out_path, 0, MAX_PATH);
+		
+#if _WIN32
 		if(_just_binary_name != NULL) {
-			arrput(_recompile_command, _just_binary_name);
+			snprintf(_out_path, MAX_PATH, "%s\\%s", this_file_full_path, _just_binary_name);
 		} else {
-			arrput(_recompile_command, _binary_path);
+			snprintf(_out_path, MAX_PATH, "%s\\%s", this_file_full_path, _binary_path);
 		}
+#else
+		if(_just_binary_name != NULL) {
+			snprintf(_out_path, MAX_PATH, "%s%s", this_file_full_path, _just_binary_name);
+		} else {
+			snprintf(_out_path, MAX_PATH, "%s%s", this_file_full_path, _binary_path);
+		}
+#endif
+
+		arrput(_recompile_command, _out_path);
 
 		char _old_binary_path[MAX_PATH];
 		memset(_old_binary_path, 0, MAX_PATH);
-		strcat(_old_binary_path, this_file_full_path);
+		
+#if _WIN32
 		strcat(_old_binary_path, "\\");
+		strcat(_old_binary_path, this_file_full_path);
+#endif
+
 		strcat(_old_binary_path, _binary_path);
 		strcat(_old_binary_path, ".old");
-
 
 		if(!run_command(_recompile_command)) {
 			if(!rename_file_if_exists(_old_binary_path, _just_binary_name != NULL ? _just_binary_name : _binary_path)) {
@@ -514,6 +596,7 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 			}
 			exit(-1);
 		} else {
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Compiled successfully.");
 			if(!rename_file_if_exists(_old_binary_path, _to_trash)) {
 				exit(-1);
 			}
@@ -523,10 +606,12 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		rde_command _redirect_original_command = NULL;
 		arrput(_redirect_original_command, _binary_path);
 		for(int _i = 1; _i < _argc; _i++) {
-			arrput(_redirect_original_command, " ");
 			arrput(_redirect_original_command, _argv[_i]);
 		}
-		run_command(_redirect_original_command);
+
+		if(!run_command(_redirect_original_command)) {
+			exit(-1);
+		}
 
 		exit(0);
 	}
@@ -545,7 +630,7 @@ bool make_dir_if_not_exists(const char* _dir_path) {
 			rde_log_level(RDE_LOG_LEVEL_WARNING, "directory '%s' exists", _dir_path);
             return true;
         }
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "failed to create directory '%s'. (err_msg) -> %s", _dir_path, strerror(errno));
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "failed to create directory '%s'. (err_msg %d) -> %s", _dir_path, strerror(errno));
         return false;
     }
 
@@ -576,7 +661,7 @@ bool rename_file_if_exists(const char* _file, const char* _new_name) {
 		return false;
 	}
 	#else
-	rename(_file, _new_name)
+	rename(_file, _new_name);
 	if (errno != 0) {
 		rde_log_level(RDE_LOG_LEVEL_ERROR, "could not rename %s to %s: %s", _file, _new_name, strerror(errno));
 		return false;
@@ -636,7 +721,7 @@ bool remove_dir_recursively_if_exists(const char* _file_path) {
 						#if _WIN32
 						_r2 = RemoveDirectoryA(_buf) ? 0 : -1;
 						#else
-						_r2 = remove_directory(_buf);
+						_r2 = remove(_buf);
 						#endif
 					}
 					else{
@@ -801,7 +886,7 @@ bool copy_file_if_exists(const char* _file_path, const char* _new_path) {
 	_fd_0 = fopen(_file_path, "r");
 
 	if (_fd_0 == NULL) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not open file %s. (err_msg) -> File could not be found.", _file_name);
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not open file %s. (err_msg) -> File could not be found.", _file_path);
 		fclose(_fd_0);
 		return false;
 	}
@@ -813,12 +898,17 @@ bool copy_file_if_exists(const char* _file_path, const char* _new_path) {
 		return false;
 	}
 
-	while(fread(_fd_0, &_buf, 1)) {
-		fwrite(_fd_1, &_buf, 1);
+	long _num_bytes = 0;
+	fseek(_fd_0, 0L, SEEK_END);
+	_num_bytes = ftell(_fd_0);
+	fseek(_fd_0, 0L, SEEK_SET);
+
+	while(fread(&_buf, _num_bytes, 1, _fd_0)) {
+		fwrite(&_buf, _num_bytes, 1, _fd_1);
 	}
 
-	close(_fd_0);
-	close_(_fd_1);
+	fclose(_fd_0);
+	fclose(_fd_1);
 	#endif
 
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Copied file %s to %s.", _file_path, _new_path);
@@ -1356,6 +1446,7 @@ int main(int _argc, char** _argv) {
 	} else if(strcmp(platform, "osx") == 0) {
 		compile_osx();
 	} else if(strcmp(platform, "linux") == 0) {
+		printf("Linux baby\n");
 		compile_linux();
 	} else if(strcmp(platform, "android") == 0) {
 		compile_android();
