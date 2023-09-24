@@ -1459,36 +1459,45 @@ bool compile_linux() {
 		strcat(_output_a, this_file_full_path);																						\
 																																	\
 		memset(_path, 0, MAX_PATH);																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools");											\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/tools");												\
 		if(!make_dir_if_not_exists(_path)) {																						\
 				exit(-1);																											\
 		}																															\
 		memset(_path, 0, MAX_PATH);																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\atlas_generator");							\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/tools/atlas_generator");								\
 		if(!make_dir_if_not_exists(_path)) {																						\
 				exit(-1);																											\
 		}																															\
-		strcat(_output_a, "build\\windows\\tools\\atlas_generator\\");																\
+		strcat(_output_a, "build/linux/tools/atlas_generator/");																	\
 																																	\
 		_build_command = NULL;																										\
 		char output_atlas[MAX_PATH];																								\
 		memset(output_atlas, 0, MAX_PATH);																							\
 		strcat(output_atlas, _output_a);																							\
-		strcat(output_atlas, "atlas_generator.exe");																				\
-		arrput(_build_command, "clang ");																							\
-		arrput(_build_command, "-O3 ");																								\
-		arrput(_build_command, "-std=c99 ");																						\
+		strcat(output_atlas, "atlas_generator");																					\
+		arrput(_build_command, "clang");																							\
+		arrput(_build_command, "-O3");																								\
+		arrput(_build_command, "-std=c99");																							\
+		arrput(_build_command, "-D_DEFAULT_SOURCE");																				\
 																																	\
-		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\atlas_generator\\atlas_generator.c ");														\
+		char _ag_source_path[MAX_PATH];																								\
+		memset(_ag_source_path, 0, MAX_PATH);																						\
+		snprintf(_ag_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools/atlas_generator/atlas_generator.c");				\
+		arrput(_build_command, _ag_source_path);																					\
 																																	\
-		arrput(_build_command, "-I ");																								\
-		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\atlas_generator\\external\\include ");														\
+		arrput(_build_command, "-I");																								\
+		char _ag_include_path[MAX_PATH];																							\
+		memset(_ag_include_path, 0, MAX_PATH);																						\
+		snprintf(_ag_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools/atlas_generator/external/include");				\
+		arrput(_build_command, _ag_include_path);																					\
 																																	\
-		arrput(_build_command, "-Werror -Wall -Wextra ");																			\
+		arrput(_build_command, "-Werror");																							\
+		arrput(_build_command, "-Wall");																							\
+		arrput(_build_command, "-Wextra");																							\
 																																	\
-		arrput(_build_command, "-o ");																								\
+		arrput(_build_command, "-lm");																								\
+																																	\
+		arrput(_build_command, "-o");																								\
 		arrput(_build_command, output_atlas);																						\
 																																	\
 		if(!run_command(_build_command)) {																							\

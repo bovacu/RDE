@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #if _WIN32
-#include "dirent.h"
+#include "dirent/dirent.h"
 #else
 #include <dirent.h>
 #endif
@@ -344,7 +344,7 @@ rde_atlas_rect* load_all_textures_of_atlas(const char* _dir_path) {
 
 int main(int _argc, char** _argv) {
 	if(_argc != 5) {
-		printf("Error: need argument 0 = path to the directory with all the textures to be packed, argument 1 = name of the atlas, argument 2 = max image size, argument 3 = pixels of separation between textures");
+		printf("Error: need argument 0 = path to the directory with all the textures to be packed, argument 1 = name of the atlas, argument 2 = max image size, argument 3 = pixels of separation between textures \n");
 		exit(-1);
 	}
 
