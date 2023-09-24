@@ -492,9 +492,9 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		memset(_to_old, 0, MAX_PATH);
 		if(_just_binary_name != NULL) {
 			_just_binary_name++;
-			strcat(_to_old, _just_binary_name);
+			snprintf(_to_old, MAX_PATH, "%s%s", this_file_full_path, _just_binary_name);
 		} else {
-			strcat(_to_old, _binary_path);
+			snprintf(_to_old, MAX_PATH, "%s%s", this_file_full_path, _binary_path);
 		}
 		strcat(_to_old, ".old");
 
@@ -551,10 +551,10 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		char _source_path[MAX_PATH];
 		memset(_source_path, 0, MAX_PATH);
 #if _WIN32
-		snprintf(_source_path, MAX_PATH, "%s\\rde_build.c", this_file_full_path);
+		snprintf(_source_path, MAX_PATH, "%s""rde_build.c", this_file_full_path);
 		arrput(_recompile_command, _source_path);
 #else
-		snprintf(_source_path, MAX_PATH, "%srde_build.c", this_file_full_path);
+		snprintf(_source_path, MAX_PATH, "%s/rde_build.c", this_file_full_path);
 		arrput(_recompile_command, _source_path);
 #endif
 
@@ -565,9 +565,9 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		
 #if _WIN32
 		if(_just_binary_name != NULL) {
-			snprintf(_out_path, MAX_PATH, "%s\\%s", this_file_full_path, _just_binary_name);
+			snprintf(_out_path, MAX_PATH, "%s\%s", this_file_full_path, _just_binary_name);
 		} else {
-			snprintf(_out_path, MAX_PATH, "%s\\%s", this_file_full_path, _binary_path);
+			snprintf(_out_path, MAX_PATH, "%s\%s", this_file_full_path, _binary_path);
 		}
 #else
 		if(_just_binary_name != NULL) {
@@ -583,8 +583,8 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		memset(_old_binary_path, 0, MAX_PATH);
 		
 #if _WIN32
-		strcat(_old_binary_path, "\\");
-		strcat(_old_binary_path, this_file_full_path);
+//		strcat(_old_binary_path, "\\");
+		//strcat(_old_binary_path, this_file_full_path);
 #endif
 
 		strcat(_old_binary_path, _binary_path);
@@ -985,42 +985,61 @@ bool compile_windows() {
 		arrput(_build_command, "clang ");																	\
 																											\
 		if(strcmp(build_type, "debug") == 0) {																\
-			arrput(_build_command, "-g -O0 ");																\
+			arrput(_build_command, "-g");																	\
+			arrput(_build_command, "-O0");																	\
 		} else {																							\
-			arrput(_build_command, "-O3 ");																	\
+			arrput(_build_command, "-O3");																	\
 		}																									\
 																											\
-		arrput(_build_command, "-std=c99 ");																\
+		arrput(_build_command, "-std=c99");																	\
 																											\
-		arrput(_build_command, this_file_full_path);														\
-		arrput(_build_command, "engine\\src\\rde.c ");														\
+		char _temp_path_0[MAX_PATH];																		\
+		memset(_temp_path_0, 0, MAX_PATH);																	\
+		snprintf(_temp_path_0, MAX_PATH, "%s%s", this_file_full_path, "engine\\src\\rde.c");				\
+		arrput(_build_command, _temp_path_0);																\
 																											\
-		arrput(_build_command, "-shared ");																	\
+		arrput(_build_command, "-shared");																	\
 																											\
-		arrput(_build_command, "-I ");																		\
-		arrput(_build_command, this_file_full_path);														\
-		arrput(_build_command, "engine\\include ");															\
+		arrput(_build_command, "-I");																		\
+		char _temp_path_1[MAX_PATH];																		\
+		memset(_temp_path_1, 0, MAX_PATH);																	\
+		snprintf(_temp_path_1, MAX_PATH, "%s%s", this_file_full_path, "engine\\include");					\
+		arrput(_build_command, _temp_path_1);																\
 																											\
-		arrput(_build_command, "-I ");																		\
-		arrput(_build_command, this_file_full_path);														\
-		arrput(_build_command, "engine\\src ");																\
+		char _temp_path_2[MAX_PATH];																		\
+		arrput(_build_command, "-I");																		\
+		memset(_temp_path_2, 0, MAX_PATH);																	\
+		snprintf(_temp_path_2, MAX_PATH, "%s%s", this_file_full_path, "engine\\src");						\
+		arrput(_build_command, _temp_path_2);																\
 																											\
-		arrput(_build_command, "-I ");																		\
-		arrput(_build_command, this_file_full_path);														\
-		arrput(_build_command, "external\\include ");														\
+		arrput(_build_command, "-I");																		\
+		char _temp_path_3[MAX_PATH];																		\
+		memset(_temp_path_3, 0, MAX_PATH);																	\
+		snprintf(_temp_path_3, MAX_PATH, "%s%s", this_file_full_path, "external\\include");					\
+		arrput(_build_command, _temp_path_3);																\
 																											\
-		arrput(_build_command, "-L ");																		\
-		arrput(_build_command, this_file_full_path);														\
-		arrput(_build_command, "external\\libs\\windows ");													\
+		arrput(_build_command, "-L");																		\
+		char _temp_path_4[MAX_PATH];																		\
+		memset(_temp_path_4, 0, MAX_PATH);																	\
+		snprintf(_temp_path_4, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows");			\
+		arrput(_build_command, _temp_path_4);																\
 																											\
-		arrput(_build_command, "-L ");																		\
-		arrput(_build_command, this_file_full_path);														\
-		arrput(_build_command, "external\\libs\\windows\\manual-link ");									\
+		arrput(_build_command, "-L");																		\
+		char _temp_path_5[MAX_PATH];																		\
+		memset(_temp_path_5, 0, MAX_PATH);																	\
+		snprintf(_temp_path_5, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\manual-link");\
+		arrput(_build_command, _temp_path_5);																\
 																											\
-		arrput(_build_command, "-lSDL2main -lSDL2 -lglad -lcglm ");											\
-		arrput(_build_command, "-Werror -Wall -Wextra -Wno-tautological-constant-out-of-range-compare ");	\
+		arrput(_build_command, "-lSDL2main");																\
+		arrput(_build_command, "-lSDL2");																	\
+		arrput(_build_command, "-lglad");																	\
+		arrput(_build_command, "-lcglm");																	\
+		arrput(_build_command, "-Werror");																	\
+		arrput(_build_command, "-Wall");																	\
+		arrput(_build_command, "-Wextra");																	\
+		arrput(_build_command, "-Wno-tautological-constant-out-of-range-compare");							\
 																											\
-		arrput(_build_command, "-o ");																		\
+		arrput(_build_command, "-o");																		\
 		arrput(_build_command, output_engine);																\
 																											\
 		if(!run_command(_build_command)) {																	\
