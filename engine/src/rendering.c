@@ -904,9 +904,6 @@ void rde_rendering_draw_text_2d(const rde_transform* _transform, const rde_font*
 			_texture_tile_size_norm.y = _char_info.size.y / (float)_char_info.texture.atlas_texture->size.y;
 		}
 
-		rde_vec_2F _texture_tile_position_on_screen = (rde_vec_2F) { _t.position.x, _t.position.y };
-		rde_math_convert_world_size_to_screen_size(current_batch_2d.window, &_texture_tile_position_on_screen);
-
 		rde_vec_2F _texture_tile_size_on_screen = _texture_tile_size;
 		rde_math_convert_world_size_to_screen_size(current_batch_2d.window, &_texture_tile_size_on_screen);
 
