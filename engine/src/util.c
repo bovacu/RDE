@@ -126,3 +126,16 @@ void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 	fprintf(stdout, "\033[0m \n");
 	#endif
 }
+
+size_t rde_util_get_string_width(const char* _string, const rde_font* _font) {
+	int _text_size = strlen(_string);
+
+	size_t _size = 0;
+	for (int _i = 0; _i < _text_size; _i++) {
+		int _key = (int)_string[_i];
+		rde_font_char_info _char_info = _font->chars[_key];
+		_size += (_char_info.advance.x >> 6); // /64.f
+	}
+
+	return _size;
+}
