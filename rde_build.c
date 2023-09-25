@@ -1558,100 +1558,6 @@ bool compile_linux() {
 																																	\
 	} while(0);
 
-	#define BUILD_EXAMPLES()																						\
-	do {																											\
-		char _output[256];																							\
-		memset(_output, 0, 256);																					\
-		strcat(_output, this_file_full_path);																		\
-																													\
-		memset(_path, 0, MAX_PATH);																					\
-		if(strcmp(build_type, "debug") == 0) {																		\
-			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\debug\\examples");				\
-			if(!make_dir_if_not_exists(_path)) {																	\
-				exit(-1);																							\
-			}																										\
-			strcat(_output, "build\\windows\\debug\\examples\\");													\
-		} else {																									\
-			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\release\\examples");			\
-			if(!make_dir_if_not_exists(_path)) {																	\
-				exit(-1);																							\
-			}																										\
-			strcat(_output, "build\\windows\\release\\examples\\");													\
-		}																											\
-																													\
-		_build_command = NULL;																						\
-		char output_atlas[MAX_PATH];																				\
-		memset(output_atlas, 0, MAX_PATH);																			\
-		strcat(output_atlas, _output);																				\
-		strcat(output_atlas, "test.exe");																			\
-		arrput(_build_command, "clang ");																			\
-		arrput(_build_command, "-g -O0 ");																			\
-		arrput(_build_command, "-std=c99 ");																		\
-																													\
-		arrput(_build_command, this_file_full_path);																\
-		arrput(_build_command, "test\\test.c ");																	\
-																													\
-		arrput(_build_command, "-I ");																				\
-		arrput(_build_command, this_file_full_path);																\
-		arrput(_build_command, "external\\include ");																\
-																													\
-		arrput(_build_command, "-I ");																				\
-		arrput(_build_command, this_file_full_path);																\
-		arrput(_build_command, "engine\\include ");																	\
-																													\
-		arrput(_build_command, "-L ");																				\
-		arrput(_build_command, this_file_full_path);																\
-		arrput(_build_command, "build\\");																			\
-		arrput(_build_command, platform);																			\
-		arrput(_build_command, "\\");																				\
-		arrput(_build_command, build_type);																			\
-		arrput(_build_command, "\\engine ");																		\
-																													\
-		arrput(_build_command, "-Werror -Wall -Wextra ");															\
-		arrput(_build_command, "-lRDE -lwinmm -lgdi32 ");															\
-																													\
-		arrput(_build_command, "-o ");																				\
-		arrput(_build_command, output_atlas);																		\
-																													\
-		if(!run_command(_build_command)) {																			\
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");										\
-			exit(-1);																								\
-		}																											\
-																													\
-		char _rde_lib_path[256];																					\
-		memset(_rde_lib_path, 0, 256);																				\
-		strcat(_rde_lib_path, this_file_full_path);																	\
-		char _example_path_sdl[256];																				\
-		char _example_path_rde[256];																				\
-		char _example_path_glad[256];																				\
-		memset(_example_path_sdl, 0, 256);																			\
-		memset(_example_path_rde, 0, 256);																			\
-		memset(_example_path_glad, 0, 256);																			\
-		strcat(_example_path_sdl, this_file_full_path);																\
-		strcat(_example_path_glad, this_file_full_path);															\
-		strcat(_example_path_rde, this_file_full_path);																\
-																													\
-		if(strcmp(build_type, "debug") == 0) {																		\
-			strcat(_rde_lib_path, "build\\windows\\debug\\engine\\RDE.dll");										\
-			strcat(_example_path_sdl, "build\\windows\\debug\\examples\\SDL2.dll");									\
-			strcat(_example_path_glad, "build\\windows\\debug\\examples\\glad.dll");								\
-			strcat(_example_path_rde, "build\\windows\\debug\\examples\\RDE.dll");									\
-		} else {																									\
-			strcat(_rde_lib_path, "build\\windows\\release\\engine\\RDE.dll");										\
-			strcat(_example_path_sdl, "build\\windows\\release\\examples\\SDL2.dll");								\
-			strcat(_example_path_glad, "build\\windows\\release\\examples\\glad.dll");								\
-			strcat(_example_path_rde, "build\\windows\\release\\examples\\RDE.dll");								\
-		}																											\
-																													\
-		memset(_path, 0, MAX_PATH);																					\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\SDL2.dll");				\
-		copy_file_if_exists(_path, _example_path_sdl);																\
-		memset(_path, 0, MAX_PATH);																					\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\glad.dll");				\
-		copy_file_if_exists(_path, _example_path_glad);																\
-		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
-	} while(0);
-
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
 		printf("\n");
 		printf("--- BUILDING ENGINE --- \n");
@@ -1664,13 +1570,6 @@ bool compile_linux() {
 		BUILD_TOOLS()
 	}
 
-	if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
-		printf("\n");
-		printf("--- BUILDING EXAMPLES --- \n");
-		BUILD_EXAMPLES()
-	}
-
-	#undef BUILD_EXAMPLES
 	#undef BUILD_ENGINE
 	#undef BUILD_TOOLS
 
