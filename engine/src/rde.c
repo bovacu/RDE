@@ -201,6 +201,7 @@ typedef struct {
 	rde_vec_2I bearing;
 	rde_vec_2I size;
 	rde_vec_2I offset;
+	rde_vec_2I metrics;
 	rde_texture texture;
 } rde_font_char_info;
 rde_font_char_info rde_struct_create_font_char_info() {
