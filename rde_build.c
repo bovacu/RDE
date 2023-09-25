@@ -919,7 +919,7 @@ bool copy_file_if_exists(const char* _file_path, const char* _new_path) {
 
 
 
-
+#if _WIN32
 bool compile_windows() {
 	errno = 0;
 
@@ -1211,33 +1211,41 @@ bool compile_windows() {
 		memset(output_atlas, 0, MAX_PATH);																			\
 		strcat(output_atlas, _output);																				\
 		strcat(output_atlas, "test.exe");																			\
-		arrput(_build_command, "clang ");																			\
-		arrput(_build_command, "-g -O0 ");																			\
-		arrput(_build_command, "-std=c99 ");																		\
+		arrput(_build_command, "clang");																			\
+		arrput(_build_command, "-g -O0");																			\
+		arrput(_build_command, "-std=c99");																			\
 																													\
-		arrput(_build_command, this_file_full_path);																\
-		arrput(_build_command, "test\\test.c ");																	\
+		char _t_source_path[MAX_PATH];																				\
+		memset(_t_source_path, 0, MAX_PATH);																		\
+		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "test\\test.c");							\
+		arrput(_build_command, _t_source_path);																		\
 																													\
-		arrput(_build_command, "-I ");																				\
-		arrput(_build_command, this_file_full_path);																\
-		arrput(_build_command, "external\\include ");																\
+		arrput(_build_command, "-I");																				\
+		char _t_include_path_0[MAX_PATH];																			\
+		memset(_t_include_path_0, 0, MAX_PATH);																		\
+		snprintf(_t_include_path_0, MAX_PATH, "%s%s", this_file_full_path, "external\\include\\");					\
+		arrput(_build_command, _t_include_path_0);																	\
 																													\
-		arrput(_build_command, "-I ");																				\
-		arrput(_build_command, this_file_full_path);																\
-		arrput(_build_command, "engine\\include ");																	\
+		arrput(_build_command, "-I");																				\
+		char _t_include_path_1[MAX_PATH];																			\
+		memset(_t_include_path_1, 0, MAX_PATH);																		\
+		snprintf(_t_include_path_1, MAX_PATH, "%s%s", this_file_full_path, "engine\\include\\");					\
+		arrput(_build_command, _t_include_path_1);																	\
 																													\
-		arrput(_build_command, "-L ");																				\
-		arrput(_build_command, this_file_full_path);																\
-		arrput(_build_command, "build\\");																			\
-		arrput(_build_command, platform);																			\
-		arrput(_build_command, "\\");																				\
-		arrput(_build_command, build_type);																			\
-		arrput(_build_command, "\\engine ");																		\
+		arrput(_build_command, "-L");																				\
+		char _t_libs_path[MAX_PATH];																				\
+		memset(_t_libs_path, 0, MAX_PATH);																			\
+		snprintf(_t_libs_path, MAX_PATH, "%s""build\\%s\\%s\\engine", this_file_full_path, platform, build_type);	\
+		arrput(_build_command, _t_libs_path);																		\
 																													\
-		arrput(_build_command, "-Werror -Wall -Wextra ");															\
-		arrput(_build_command, "-lRDE -lwinmm -lgdi32 ");															\
+		arrput(_build_command, "-Werror");																			\
+		arrput(_build_command, "-Wall");																			\
+		arrput(_build_command, "-Wextra");																			\
+		arrput(_build_command, "-lRDE");																			\
+		arrput(_build_command, "-lwinmm");																			\
+		arrput(_build_command, "-lgdi32");																			\
 																													\
-		arrput(_build_command, "-o ");																				\
+		arrput(_build_command, "-o");																				\
 		arrput(_build_command, output_atlas);																		\
 																													\
 		if(!run_command(_build_command)) {																			\
@@ -1303,7 +1311,9 @@ bool compile_windows() {
 
 	return true;
 }
+#endif
 
+#if __APPLE__
 bool compile_osx() {
 	errno = 0;
 
@@ -1604,7 +1614,9 @@ bool compile_osx() {
 
 	return true;
 }
+#endif
 
+#if defined(__linux__)
 bool compile_linux() {
 	errno = 0;
 
@@ -1883,6 +1895,7 @@ bool compile_linux() {
 
 	return true;
 }
+#endif
 
 bool compile_android() {
 	errno = 0;
@@ -2078,15 +2091,17 @@ int main(int _argc, char** _argv) {
 	parse_arguments(_argc, _argv);
 
 	if(strcmp(platform, "windows") == 0) {
-		if(compile_windows()) {
-			printf("\n");
-			rde_log_level(RDE_LOG_LEVEL_INFO, "Build finished successfully. \n");
-		}
+		#if _WIN32
+		compile_windows();
+		#endif
 	} else if(strcmp(platform, "osx") == 0) {
+		#if __APPLE__
 		compile_osx();
+		#endif
 	} else if(strcmp(platform, "linux") == 0) {
-		printf("Linux baby\n");
+		#if defined(__linux__)
 		compile_linux();
+		#endif
 	} else if(strcmp(platform, "android") == 0) {
 		compile_android();
 	} else if(strcmp(platform, "ios") == 0) {
@@ -2098,6 +2113,8 @@ int main(int _argc, char** _argv) {
 		exit(-1);
 	}
 
+	printf("\n");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Build finished successfully. \n");
 	return 0;
 }
 
