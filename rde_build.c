@@ -1119,7 +1119,7 @@ bool compile_windows() {
 																																	\
 		arrput(_build_command, "-L ");																								\
 		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\font_generator\\external\\libs ");															\
+		arrput(_build_command, "tools\\font_generator\\external\\libs\\windows ");													\
 																																	\
 		arrput(_build_command, "-lfreetype ");																						\
 		arrput(_build_command, "-Werror -Wall -Wextra ");																			\
@@ -1136,37 +1136,37 @@ bool compile_windows() {
 		char _p_1[MAX_PATH];																										\
 		memset(_p_0, 0, MAX_PATH);																									\
 		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\zlib1.dll");								\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "tools\\font_generator\\external\\libs\\windows\\zlib1.dll");			\
 		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\zlib1.dll");					\
 		copy_file_if_exists(_p_0, _p_1); 																							\
 		memset(_p_0, 0, MAX_PATH);																									\
 		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\brotlicommon.dll");							\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "tools\\font_generator\\external\\libs\\windows\\brotlicommon.dll");	\
 		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\brotlicommon.dll");			\
 		copy_file_if_exists(_p_0, _p_1);																							\
 		memset(_p_0, 0, MAX_PATH);																									\
 		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\brotlidec.dll");							\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "tools\\font_generator\\external\\libs\\windows\\brotlidec.dll");		\
 		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\brotlidec.dll");				\
 		copy_file_if_exists(_p_0, _p_1);																							\
 		memset(_p_0, 0, MAX_PATH);																									\
 		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\brotlienc.dll");							\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "tools\\font_generator\\external\\libs\\windows\\brotlienc.dll");		\
 		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\brotlienc.dll");				\
 		copy_file_if_exists(_p_0, _p_1);																							\
 		memset(_p_0, 0, MAX_PATH);																									\
 		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\bz2.dll");									\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "tools\\font_generator\\external\\libs\\windows\\bz2.dll");			\
 		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\bz2.dll");					\
 		copy_file_if_exists(_p_0, _p_1);																							\
 		memset(_p_0, 0, MAX_PATH);																									\
 		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\freetype.dll");								\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "tools\\font_generator\\external\\libs\\windows\\freetype.dll");		\
 		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\freetype.dll");				\
 		copy_file_if_exists(_p_0, _p_1);																							\
 		memset(_p_0, 0, MAX_PATH);																									\
 		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\libpng16.dll");								\
+		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "tools\\font_generator\\external\\libs\\windows\\libpng16.dll");		\
 		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\libpng16.dll");				\
 		copy_file_if_exists(_p_0, _p_1);																							\
 	} while(0);
@@ -1511,35 +1511,44 @@ bool compile_linux() {
 		strcat(_output_f, this_file_full_path);																						\
 																																	\
 		memset(_path, 0, MAX_PATH);																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator");							\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/tools/font_generator");									\
 		if(!make_dir_if_not_exists(_path)) {																						\
 				exit(-1);																											\
 		}																															\
-		strcat(_output_f, "build\\windows\\tools\\font_generator\\");																\
+		strcat(_output_f, "build/linux/tools/font_generator/");																		\
 																																	\
 		char output_fonts[MAX_PATH];																								\
 		memset(output_fonts, 0, MAX_PATH);																							\
 		strcat(output_fonts, _output_f);																							\
-		strcat(output_fonts, "font_generator.exe");																					\
-		arrput(_build_command, "clang ");																							\
-		arrput(_build_command, "-O3 ");																								\
-		arrput(_build_command, "-std=c99 ");																						\
+		strcat(output_fonts, "font_generator");																						\
+		arrput(_build_command, "clang");																							\
+		arrput(_build_command, "-O3");																								\
+		arrput(_build_command, "-std=c99");																							\
 																																	\
-		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\font_generator\\font_generator.c ");															\
+		char _fg_source_path[MAX_PATH];																								\
+		memset(_fg_source_path, 0, MAX_PATH);																						\
+		snprintf(_fg_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools/font_generator/font_generator.c");					\
+		arrput(_build_command, _fg_source_path);																					\
 																																	\
-		arrput(_build_command, "-I ");																								\
-		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\font_generator\\external\\include ");														\
+		arrput(_build_command, "-I");																								\
+		char _include_path[MAX_PATH];																								\
+		memset(_include_path, 0, MAX_PATH);																							\
+		snprintf(_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools/font_generator/external/include");					\
+		arrput(_build_command, _include_path);																						\
 																																	\
-		arrput(_build_command, "-L ");																								\
-		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\font_generator\\external\\libs ");															\
+		arrput(_build_command, "-L");																								\
+		char _lib_path[MAX_PATH];																									\
+		memset(_lib_path, 0, MAX_PATH);																								\
+		snprintf(_lib_path, MAX_PATH, "%s%s", this_file_full_path, "tools/font_generator/external/libs/linux");						\
+		arrput(_build_command, _lib_path);																							\
 																																	\
-		arrput(_build_command, "-lfreetype ");																						\
-		arrput(_build_command, "-Werror -Wall -Wextra ");																			\
+		arrput(_build_command, "-lfreetype");																						\
+		arrput(_build_command, "-lz");																								\
+		arrput(_build_command, "-Werror");																							\
+		arrput(_build_command, "-Wall");																							\
+		arrput(_build_command, "-Wextra");																							\
 																																	\
-		arrput(_build_command, "-o ");																								\
+		arrput(_build_command, "-o");																								\
 		arrput(_build_command, output_fonts);																						\
 																																	\
 		if(!run_command(_build_command)) {																							\
@@ -1547,43 +1556,6 @@ bool compile_linux() {
 			exit(-1);																												\
 		}																															\
 																																	\
-		char _p_0[MAX_PATH];																										\
-		char _p_1[MAX_PATH];																										\
-		memset(_p_0, 0, MAX_PATH);																									\
-		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\zlib1.dll");								\
-		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\zlib1.dll");					\
-		copy_file_if_exists(_p_0, _p_1); 																							\
-		memset(_p_0, 0, MAX_PATH);																									\
-		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\brotlicommon.dll");							\
-		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\brotlicommon.dll");			\
-		copy_file_if_exists(_p_0, _p_1);																							\
-		memset(_p_0, 0, MAX_PATH);																									\
-		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\brotlidec.dll");							\
-		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\brotlidec.dll");				\
-		copy_file_if_exists(_p_0, _p_1);																							\
-		memset(_p_0, 0, MAX_PATH);																									\
-		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\brotlienc.dll");							\
-		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\brotlienc.dll");				\
-		copy_file_if_exists(_p_0, _p_1);																							\
-		memset(_p_0, 0, MAX_PATH);																									\
-		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\bz2.dll");									\
-		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\bz2.dll");					\
-		copy_file_if_exists(_p_0, _p_1);																							\
-		memset(_p_0, 0, MAX_PATH);																									\
-		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\freetype.dll");								\
-		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\freetype.dll");				\
-		copy_file_if_exists(_p_0, _p_1);																							\
-		memset(_p_0, 0, MAX_PATH);																									\
-		memset(_p_1, 0, MAX_PATH);																									\
-		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\libpng16.dll");								\
-		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\libpng16.dll");				\
-		copy_file_if_exists(_p_0, _p_1);																							\
 	} while(0);
 
 	#define BUILD_EXAMPLES()																						\
@@ -1697,6 +1669,10 @@ bool compile_linux() {
 		printf("--- BUILDING EXAMPLES --- \n");
 		BUILD_EXAMPLES()
 	}
+
+	#undef BUILD_EXAMPLES
+	#undef BUILD_ENGINE
+	#undef BUILD_TOOLS
 
 	return true;
 }
