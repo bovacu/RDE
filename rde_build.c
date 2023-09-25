@@ -875,7 +875,7 @@ end_repl_str:
 bool copy_file_if_exists(const char* _file_path, const char* _new_path) {
 	#if _WIN32
 	if(CopyFile(_file_path, _new_path, FALSE) == 0) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not copy %s into %s. (err_msg) -> %s.", _file_path, _new_path, GetLastError());
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not copy %s into %s. (err_msg) -> %lu.", _file_path, _new_path, GetLastError());
 		return false;
 	}
 	#else
@@ -1069,20 +1069,26 @@ bool compile_windows() {
 		memset(output_atlas, 0, MAX_PATH);																							\
 		strcat(output_atlas, _output_a);																							\
 		strcat(output_atlas, "atlas_generator.exe");																				\
-		arrput(_build_command, "clang ");																							\
-		arrput(_build_command, "-O3 ");																								\
-		arrput(_build_command, "-std=c99 ");																						\
+		arrput(_build_command, "clang");																							\
+		arrput(_build_command, "-O3");																								\
+		arrput(_build_command, "-std=c99");																							\
 																																	\
-		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\atlas_generator\\atlas_generator.c ");														\
+		char _ag_source_path[MAX_PATH];																								\
+		memset(_ag_source_path, 0, MAX_PATH);																						\
+		snprintf(_ag_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools\\atlas_generator\\atlas_generator.c");				\
+		arrput(_build_command, _ag_source_path);																					\
 																																	\
-		arrput(_build_command, "-I ");																								\
-		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\atlas_generator\\external\\include ");														\
+		arrput(_build_command, "-I");																								\
+		char _ag_include_path[MAX_PATH];																							\
+		memset(_ag_include_path, 0, MAX_PATH);																						\
+		snprintf(_ag_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools\\atlas_generator\\external\\include");				\
+		arrput(_build_command, _ag_include_path);																					\
 																																	\
-		arrput(_build_command, "-Werror -Wall -Wextra ");																			\
+		arrput(_build_command, "-Werror");																							\
+		arrput(_build_command, "-Wall");																							\
+		arrput(_build_command, "-Wextra");																							\
 																																	\
-		arrput(_build_command, "-o ");																								\
+		arrput(_build_command, "-o");																								\
 		arrput(_build_command, output_atlas);																						\
 																																	\
 		if(!run_command(_build_command)) {																							\
@@ -1106,25 +1112,33 @@ bool compile_windows() {
 		memset(output_fonts, 0, MAX_PATH);																							\
 		strcat(output_fonts, _output_f);																							\
 		strcat(output_fonts, "font_generator.exe");																					\
-		arrput(_build_command, "clang ");																							\
-		arrput(_build_command, "-O3 ");																								\
-		arrput(_build_command, "-std=c99 ");																						\
+		arrput(_build_command, "clang");																							\
+		arrput(_build_command, "-O3");																								\
+		arrput(_build_command, "-std=c99");																							\
 																																	\
-		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\font_generator\\font_generator.c ");															\
+		char _fg_source_path[MAX_PATH];																								\
+		memset(_fg_source_path, 0, MAX_PATH);																						\
+		snprintf(_fg_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools\\font_generator\\font_generator.c");				\
+		arrput(_build_command, _fg_source_path);																					\
 																																	\
-		arrput(_build_command, "-I ");																								\
-		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\font_generator\\external\\include ");														\
+		arrput(_build_command, "-I");																								\
+		char _fg_include_path[MAX_PATH];																							\
+		memset(_fg_include_path, 0, MAX_PATH);																						\
+		snprintf(_fg_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools\\font_generator\\external\\include");				\
+		arrput(_build_command, _fg_include_path);																					\
 																																	\
-		arrput(_build_command, "-L ");																								\
-		arrput(_build_command, this_file_full_path);																				\
-		arrput(_build_command, "tools\\font_generator\\external\\libs\\windows ");													\
+		arrput(_build_command, "-L");																								\
+		char _fg_libs_path[MAX_PATH];																								\
+		memset(_fg_libs_path, 0, MAX_PATH);																							\
+		snprintf(_fg_libs_path, MAX_PATH, "%s%s", this_file_full_path, "tools\\font_generator\\external\\libs\\windows");			\
+		arrput(_build_command, _fg_libs_path);																						\
 																																	\
-		arrput(_build_command, "-lfreetype ");																						\
-		arrput(_build_command, "-Werror -Wall -Wextra ");																			\
+		arrput(_build_command, "-lfreetype");																						\
+		arrput(_build_command, "-Werror");																							\
+		arrput(_build_command, "-Wall");																							\
+		arrput(_build_command, "-Wextra");																							\
 																																	\
-		arrput(_build_command, "-o ");																								\
+		arrput(_build_command, "-o");																								\
 		arrput(_build_command, output_fonts);																						\
 																																	\
 		if(!run_command(_build_command)) {																							\
