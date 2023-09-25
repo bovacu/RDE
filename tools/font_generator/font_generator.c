@@ -53,6 +53,8 @@ typedef struct {
 	FT_Vector advance;
 	char char_name;
 	int pitch;
+	int metricW;
+	int metricH;
 } inner_bitmap_data;
 
 inner_bitmap_data* glyphs;
@@ -179,7 +181,9 @@ void load_glyps() {
 			NULL,
 			ft_face->glyph->advance,
 			(char)_i,
-			ft_face->glyph->bitmap.pitch
+			ft_face->glyph->bitmap.pitch,
+			ft_face->glyph->metrics.width,
+			ft_face->glyph->metrics.height
 		};
             
 		inner_bitmap_data* _glyph = &glyphs[_i];
@@ -298,10 +302,17 @@ void export_font_atlas_data() {
 		cJSON_AddItemToArray(_advance_json, _advance_json_x);
 		cJSON_AddItemToArray(_advance_json, _advance_json_y);
 
+		cJSON* _metrics_json = cJSON_CreateArray();
+		cJSON* _metrics_json_w = cJSON_CreateNumber((double)(_glyph->metricW >> 6));
+		cJSON* _metrics_json_h = cJSON_CreateNumber((double)((double)(_glyph->metricH >> 6)));
+		cJSON_AddItemToArray(_metrics_json, _metrics_json_w);
+		cJSON_AddItemToArray(_metrics_json, _metrics_json_h);
+
 		cJSON_AddItemToObject(_character_json, "advance", _advance_json);
 		cJSON_AddItemToObject(_character_json, "bearing", _bearing_json);
 		cJSON_AddItemToObject(_character_json, "offset", _offset_json);
 		cJSON_AddItemToObject(_character_json, "size", _size_json);
+		cJSON_AddItemToObject(_character_json, "metrics", _metrics_json);
 
 		cJSON_AddItemToObject(_characters, _char_value, _character_json);
 
