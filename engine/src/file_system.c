@@ -105,12 +105,14 @@ rde_font_char_info* rde_file_system_read_font_config(const char* _font_path, rde
 		cJSON* _size = cJSON_GetObjectItemCaseSensitive(_char_info_json, "size");
 		cJSON* _bearing = cJSON_GetObjectItemCaseSensitive(_char_info_json, "bearing");
 		cJSON* _offset = cJSON_GetObjectItemCaseSensitive(_char_info_json, "offset");
+		cJSON* _metrics = cJSON_GetObjectItemCaseSensitive(_char_info_json, "metrics");
 
 		rde_font_char_info _char_info = rde_struct_create_font_char_info();
 		_char_info.advance = (rde_vec_2I) { cJSON_GetArrayItem(_advance, 0)->valueint, cJSON_GetArrayItem(_advance, 1)->valueint };
 		_char_info.size = (rde_vec_2I) { cJSON_GetArrayItem(_size, 0)->valueint, cJSON_GetArrayItem(_size, 1)->valueint };
 		_char_info.bearing = (rde_vec_2I) { cJSON_GetArrayItem(_bearing, 0)->valueint, cJSON_GetArrayItem(_bearing, 1)->valueint };
 		_char_info.offset = (rde_vec_2I) { cJSON_GetArrayItem(_offset, 0)->valueint, cJSON_GetArrayItem(_offset, 1)->valueint };
+		_char_info.metrics = (rde_vec_2I) { cJSON_GetArrayItem(_metrics, 0)->valueint, cJSON_GetArrayItem(_metrics, 1)->valueint };
 
 		rde_texture _texture;
 		_texture.opengl_texture_id = _atlas->opengl_texture_id;
