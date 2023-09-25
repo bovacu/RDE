@@ -875,21 +875,112 @@ void rde_rendering_draw_text_2d(const rde_transform* _transform, const rde_font*
 	int _text_size = strlen(_text);
 
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.text_shader_2d : _shader;
-	rde_transform _t = *_transform;
 
 	int _next_pos_x = 0;
-	//int _next_pos_y = 0;
-	for(int _i = 0; _i < _text_size; _i++) {
+	for (int _i = 0; _i < _text_size; _i++) {
+		rde_transform _t = *_transform;
 		int _key = (int)_text[_i];
 		rde_font_char_info _char_info = _font->chars[_key];
-		_t.position.x = _next_pos_x + _char_info.bearing.x;
-		//_t.position.y = -(_char_info.size.y - _char_info.bearing.y);
-		//rde_rendering_draw_rectangle_2d((rde_vec_2F) { -(_char_info.advance.x >> 6) * 0.5f, -_char_info.bearing.y * 0.5f },
-		//(rde_vec_2F) { (_char_info.advance.x >> 6) * 0.5f, _char_info.bearing.y * 0.5f }, RDE_COLOR_BLACK, NULL);
-		//printf("p: (%f, %f) \n", _t.position.x, _t.position.y);
-		rde_rendering_draw_texture_2d(&_t, &_char_info.texture, _tint_color, _drawing_shader);
-		_next_pos_x += _char_info.advance.x >> 6; // /64.f
-		//_next_pos_y += _char_info.advance.y >> 6; // /64.f
+		_t.position.x += _next_pos_x + _char_info.bearing.x * _t.scale.x;
+		_t.position.y -= (_char_info.size.y * 0.5f - _char_info.bearing.y) * _t.scale.y;
+
+		const size_t _triangle_vertex_count = 6;
+
+		mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
+		rde_rendering_transform_to_glm_mat4(&_t, _transformation_matrix);
+
+		rde_rendering_try_create_batch_2d(_drawing_shader, _char_info.texture.atlas_texture);
+		rde_rendering_try_flush_batch_2d(_drawing_shader, _char_info.texture.atlas_texture, _triangle_vertex_count);
+
+		rde_vec_2F _texture_origin_norm = (rde_vec_2F){ 0.f, 0.f };
+		rde_vec_2F _texture_tile_size_norm = (rde_vec_2F){ 1.f, 1.f };
+		rde_vec_2F _texture_tile_size = (rde_vec_2F){ (float)_char_info.size.x, (float)_char_info.size.y };
+
+		if(_char_info.texture.atlas_texture != NULL) {
+			_texture_origin_norm.x = _char_info.offset.x / (float)_char_info.texture.atlas_texture->size.x;
+			_texture_origin_norm.y = _char_info.offset.y / (float)_char_info.texture.atlas_texture->size.y;
+	
+			_texture_tile_size_norm.x = _char_info.size.x / (float)_char_info.texture.atlas_texture->size.x;
+			_texture_tile_size_norm.y = _char_info.size.y / (float)_char_info.texture.atlas_texture->size.y;
+		}
+
+		rde_vec_2F _texture_tile_position_on_screen = (rde_vec_2F) { _t.position.x, _t.position.y };
+		rde_math_convert_world_size_to_screen_size(current_batch_2d.window, &_texture_tile_position_on_screen);
+
+		rde_vec_2F _texture_tile_size_on_screen = _texture_tile_size;
+		rde_math_convert_world_size_to_screen_size(current_batch_2d.window, &_texture_tile_size_on_screen);
+
+		rde_vec_2F _size_in_screen = (rde_vec_2F) { (float)(_char_info.advance.x >> 6) - _char_info.bearing.x, 0.f};
+		rde_math_convert_world_size_to_screen_size(current_batch_2d.window, &_size_in_screen);
+
+		vec4 _bottom_left_texture_position = GLM_VEC4_ONE_INIT;
+		vec4 _bottom_right_texture_position = GLM_VEC4_ONE_INIT;
+		vec4 _top_right_texture_position = GLM_VEC4_ONE_INIT;
+		vec4 _top_left_texture_position = GLM_VEC4_ONE_INIT;
+
+		glm_mat4_mulv(_transformation_matrix, (vec4) { -_texture_tile_size_on_screen.x + _size_in_screen.x, -_texture_tile_size_on_screen.y, 0.0f, 1.0f }, _bottom_left_texture_position);
+		glm_mat4_mulv(_transformation_matrix, (vec4) { _texture_tile_size_on_screen.x  + _size_in_screen.x, -_texture_tile_size_on_screen.y, 0.0f, 1.0f }, _bottom_right_texture_position);
+		glm_mat4_mulv(_transformation_matrix, (vec4) { _texture_tile_size_on_screen.x  + _size_in_screen.x,  _texture_tile_size_on_screen.y, 0.0f, 1.0f }, _top_right_texture_position);
+		glm_mat4_mulv(_transformation_matrix, (vec4) { -_texture_tile_size_on_screen.x + _size_in_screen.x,  _texture_tile_size_on_screen.y, 0.0f, 1.0f }, _top_left_texture_position);
+
+		// The (1.f - _texture_origin_norm.y) is needed as we need to invert the coordinates on the Y axis, the exported atlas (by RDE tool) assumes (0, 0)
+		// on top-left, but OpenGL coords for UV origin is bottom-left.
+		vec2 _top_left_texture_uv_coord   	 = (vec2){ _texture_origin_norm.x                            , 1.f - _texture_origin_norm.y };
+		vec2 _top_right_texture_uv_coord  	 = (vec2){ _texture_origin_norm.x + _texture_tile_size_norm.x, 1.f - _texture_origin_norm.y };
+		vec2 _bottom_right_texture_uv_coord  = (vec2){ _texture_origin_norm.x + _texture_tile_size_norm.x, 1.f - (_texture_origin_norm.y + _texture_tile_size_norm.y) };
+		vec2 _bottom_left_texture_uv_coord   = (vec2){ _texture_origin_norm.x                            , 1.f - (_texture_origin_norm.y + _texture_tile_size_norm.y) };
+
+		int _color = RDE_COLOR_TO_HEX_COLOR(_tint_color);
+
+		// * 2
+		// |\
+		// | \
+		// *--*
+		// 0   1
+		rde_vertex_2d _vertex_0_0;
+		_vertex_0_0.position = (rde_vec_3F){ _bottom_left_texture_position[0], _bottom_left_texture_position[1], 0.f };
+		_vertex_0_0.color = _color;
+		_vertex_0_0.texture_coordinates = (rde_vec_2F){ _bottom_left_texture_uv_coord[0], _bottom_left_texture_uv_coord[1] };
+		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_0;
+
+		rde_vertex_2d _vertex_0_1;
+		_vertex_0_1.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
+		_vertex_0_1.color = _color;
+		_vertex_0_1.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_1;
+
+		rde_vertex_2d _vertex_0_2;
+		_vertex_0_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
+		_vertex_0_2.color = _color;
+		_vertex_0_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_2;
+
+		// 2   1
+		// *--*
+		//  \ |
+		//   \|
+		//    *
+		//    0
+
+		rde_vertex_2d _vertex_1_0;
+		_vertex_1_0.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
+		_vertex_1_0.color = _color;
+		_vertex_1_0.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_0;
+
+		rde_vertex_2d _vertex_1_1;
+		_vertex_1_1.position = (rde_vec_3F){ _top_right_texture_position[0], _top_right_texture_position[1], 0.f };
+		_vertex_1_1.color = _color;
+		_vertex_1_1.texture_coordinates = (rde_vec_2F){ _top_right_texture_uv_coord[0], _top_right_texture_uv_coord[1] };
+		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_1;
+
+		rde_vertex_2d _vertex_1_2;
+		_vertex_1_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
+		_vertex_1_2.color = _color;
+		_vertex_1_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
+
+		_next_pos_x += (_char_info.advance.x >> 6) * _t.scale.x; // /64.f
 	}
 }
 
