@@ -269,6 +269,7 @@ void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_
 unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size) {
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	unsigned char* _pixels = (unsigned char*)malloc(sizeof(unsigned char) * (4 * _window_size.x * _window_size.y));
+	assert(_pixels != NULL && "Could not allocate enough memory for pixels array for a screenshot");
 	memset(_pixels, 0, 4 * _window_size.x * _window_size.y);
 	glReadPixels((int)(_window_size.x * 0.5f + _position.x - _size.x * 0.5f ), (int)(_window_size.y * 0.5f + _position.y - _size.y * 0.5f),
 	             _size.x, _size.y, GL_RGBA, GL_UNSIGNED_BYTE, _pixels);

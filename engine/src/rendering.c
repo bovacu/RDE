@@ -13,9 +13,7 @@ rde_rendering_statistics statistics;
 void rde_rendering_init() {
 	current_batch_2d = rde_struct_create_2d_batch();
 	current_batch_2d.vertices = (rde_vertex_2d*)malloc(sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
-	//for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_vertices_per_batch; _i++) {
-	//	current_batch_2d.vertices[_i] = rde_struct_create_vertex_2d();
-	//}
+	assert(current_batch_2d.vertices != NULL && "Could not allocate enough memory for batch 2d vertices array");
 }
 
 void rde_rendering_end() {
@@ -536,6 +534,7 @@ rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, 
 	assert(_texture != NULL && "Tried to get a texture, but all are already used");
 
 	_texture->pixels = (unsigned char*)malloc(_width * _height * _channels);
+	assert(_texture->pixels != NULL && "Could not allocate enough memory for memory texture pixels array");
 	memset(_texture->pixels, 0, _width * _height * _channels);
 	_texture->size = (rde_vec_2UI) { _width, _height };
 	_texture->channels = _channels;

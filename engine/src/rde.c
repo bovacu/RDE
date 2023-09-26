@@ -298,18 +298,21 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	assert(_e.heap_allocs_config.max_number_of_shaders > 0 && "Heap Allocs Congig -> number of shaders cannot be <= 0");
 	_e.shaders = (rde_shader*)malloc(sizeof(rde_shader) * _e.heap_allocs_config.max_number_of_shaders);
+	assert(_e.shaders != NULL && "Could not allocate enough memory for shaders array");
 	for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_shaders; _i++) {
 		_e.shaders[_i] = rde_struct_create_shader();
 	}
 
 	assert(_e.heap_allocs_config.max_number_of_windows > 0 && "Heap Allocs Congig -> number of windows cannot be <= 0");
 	_e.windows = (rde_window*)malloc(sizeof(rde_window) * _e.heap_allocs_config.max_number_of_windows);
+	assert(_e.windows != NULL && "Could not allocate enough memory for windows array");
 	for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_windows; _i++) {
 		_e.windows[_i] = rde_struct_create_window();
 	}
 
 	if (_e.heap_allocs_config.max_number_of_atlases > 0) {
 		_e.textures = (rde_texture*)malloc(sizeof(rde_texture) * _e.heap_allocs_config.max_number_of_textures);
+		assert(_e.textures != NULL && "Could not allocate enough memory for textures array");
 		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_textures; _i++) {
 			_e.textures[_i] = rde_struct_create_texture();
 		}
@@ -319,6 +322,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	if(_e.heap_allocs_config.max_number_of_atlases > 0) {
 		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_atlases);
+		assert(_e.shaders != NULL && "Could not allocate enough memory for atlases array");
 		for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_atlases; _i++) {
 			_e.atlases[_i] = rde_struct_create_atlas();
 		}
@@ -328,6 +332,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	if (_e.heap_allocs_config.max_number_of_fonts > 0) {
 		_e.fonts = (rde_font*)malloc(sizeof(rde_font) * _e.heap_allocs_config.max_number_of_fonts);
+		assert(_e.shaders != NULL && "Could not allocate enough memory for fonts array");
 		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_fonts; _i++) {
 			_e.fonts[_i] = rde_struct_create_font();
 		}
