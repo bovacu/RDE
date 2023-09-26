@@ -1265,7 +1265,12 @@ bool compile_windows() {
 		strcat(output_atlas, _output);																				\
 		strcat(output_atlas, "test.exe");																			\
 		arrput(_build_command, "clang");																			\
-		arrput(_build_command, "-g -O0");																			\
+		if(strcmp(build_type, "debug") == 0) {																		\
+			arrput(_build_command, "-g");																			\
+			arrput(_build_command, "-O0");																			\
+		} else {																									\
+			arrput(_build_command, "-O3");																			\
+		}																											\
 		arrput(_build_command, "-std=c99");																			\
 																													\
 		char _t_source_path[MAX_PATH];																				\
