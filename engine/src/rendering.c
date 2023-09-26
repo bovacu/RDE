@@ -509,6 +509,61 @@ rde_texture* rde_rendering_load_text_texture(const char* _file_path) {
 	return _texture;
 }
 
+rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, int _channels) {
+	rde_texture* _texture = NULL;
+
+	for(int _i = 0; _i < RDE_MAX_LOADABLE_TEXTURES; _i++) {
+		if(ENGINE.textures[_i].opengl_texture_id != -1) {
+			continue;
+		}
+
+		_texture = &ENGINE.textures[_i];
+		break;
+	}
+
+	assert(_texture != NULL && "Tried to get a texture, but all are already used");
+
+	_texture->pixels = (unsigned char*)malloc(_width * _height * _channels);
+	memset(_texture->pixels, 0, _width * _height * _channels);
+	_texture->size = (rde_vec_2UI) { _width, _height };
+	_texture->channels = _channels;
+
+	return _texture;
+}
+
+void rde_rendering_memory_texture_set_pixel(rde_texture* _memory_texture, rde_vec_2I _position, rde_color _color) {
+	assert(_memory_texture != NULL && _memory_texture->pixels != NULL && "Tried to set a pixel on a NULL memory texture or NULL pixel array");
+
+	rde_vec_2UI _t_size = _memory_texture->size;
+	int _channels = _memory_texture->channels;
+	_memory_texture->pixels[_position.x * _channels + _position.y * _t_size.x * _channels + 0] = _color.r;
+	_memory_texture->pixels[_position.x * _channels + _position.y * _t_size.x * _channels + 1] = _color.g;
+	_memory_texture->pixels[_position.x * _channels + _position.y * _t_size.x * _channels + 2] = _color.b;
+	
+	if(_channels == 4) {
+		_memory_texture->pixels[_position.x * _channels + _position.y * _t_size.x * _channels + 3] = _color.a;
+	}
+
+	_memory_texture->pixels_changed = true;
+}
+
+rde_color rde_rendering_memory_texture_get_pixel(rde_texture* _memory_texture, rde_vec_2I _position) {
+	assert(_memory_texture != NULL && _memory_texture->pixels && "Tried to get a pixel on a NULL memory texture");
+
+	rde_vec_2UI _t_size = _memory_texture->size;
+	int _channels = _memory_texture->channels;
+	rde_color _color;
+	_color.r = _memory_texture->pixels[_position.x * _channels + _position.y * _t_size.x * _channels + 0];
+	_color.g = _memory_texture->pixels[_position.x * _channels + _position.y * _t_size.x * _channels + 1];
+	_color.b = _memory_texture->pixels[_position.x * _channels + _position.y * _t_size.x * _channels + 2];
+	
+	if(_channels == 4) {
+		_color.a = _memory_texture->pixels[_position.x * _channels + _position.y * _t_size.x * _channels + 3];
+	}
+
+	return _color;
+}
+
 void rde_rendering_unload_texture(rde_texture* _texture) {
 	assert(_texture != NULL && "Error: Tried to unload a NULL texture");
 	GLuint _id = (GLuint)_texture->opengl_texture_id;
@@ -558,20 +613,14 @@ void rde_rendering_unload_atlas(rde_atlas* _atlas) {
 	_atlas->texture = NULL;
 }
 
-rde_texture* rde_rendering_create_cpu_texture(rde_vec_2UI _texture_size) {
-	UNUSED(_texture_size);
-	UNIMPLEMENTED("rde_rendering_create_cpu_texture")
-	return NULL;
-}
-
-void rde_rendering_destroy_cpu_texture(rde_cpu_texture* _cpu_texture) {
-	UNUSED(_cpu_texture);
-	UNIMPLEMENTED("rde_rendering_destroy_cpu_texture")
-}
-
-void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_texture) {
-	UNUSED(_cpu_texture);
-	UNIMPLEMENTED("rde_rendering_upload_cpu_texture_to_gpu")
+void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture) {
+	assert(_memory_texture != NULL && "Tried to free a NULL memory texture");
+	free(_memory_texture->pixels);
+	_memory_texture->pixels = NULL;
+	_memory_texture->pixels_changed = false;
+	if(_memory_texture->opengl_texture_id != -1) {
+		rde_rendering_unload_texture(_memory_texture);
+	}
 }
 
 rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path) {
@@ -869,6 +918,43 @@ void rde_rendering_draw_texture_2d(const rde_transform* _transform, const rde_te
 	_vertex_1_2.color = _color;
 	_vertex_1_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
+}
+
+void rde_rendering_draw_memory_texture_2d(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
+	if(_texture->opengl_texture_id == -1) {
+		GLenum _internal_format = 0, _data_format = 0;
+		if (_texture->channels == 4) {
+			_internal_format = GL_RGBA8;
+			_data_format = GL_RGBA;
+		} else if (_texture->channels == 3) {
+			_internal_format = GL_RGB8;
+			_data_format = GL_RGB;
+		}
+
+		_texture->internal_format = _internal_format;
+		_texture->data_format = _data_format;
+		
+		GLuint _id;
+		glGenTextures(1, &_id);
+
+		_texture->opengl_texture_id = _id;
+		glBindTexture(GL_TEXTURE_2D, _texture->opengl_texture_id);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, (int)_texture->internal_format, _texture->size.x, _texture->size.y, 0, _texture->data_format, GL_UNSIGNED_BYTE, _texture->pixels);
+	} else {
+		if(_texture->pixels_changed) {
+			glBindTexture(GL_TEXTURE_2D, _texture->opengl_texture_id);
+			glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, _texture->size.x, _texture->size.y, _texture->data_format, GL_UNSIGNED_BYTE, _texture->pixels);
+			_texture->pixels_changed = false;
+		}
+	}
+
+	rde_rendering_draw_texture_2d(_transform, _texture, _tint_color, _shader);
 }
 
 void rde_rendering_draw_text_2d(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader) {

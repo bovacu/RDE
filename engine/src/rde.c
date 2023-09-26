@@ -152,6 +152,8 @@ struct rde_texture {
 	GLenum data_format;
 	const char* file_path;
 	rde_texture* atlas_texture;
+	unsigned char* pixels;
+	bool pixels_changed;
 };
 rde_texture rde_struct_create_texture() {
 	rde_texture _t;
@@ -165,12 +167,10 @@ rde_texture rde_struct_create_texture() {
 	_t.data_format = 0;
 	_t.file_path = NULL;
 	_t.atlas_texture = NULL;
+	_t.pixels = NULL;
+	_t.pixels_changed = false;
 	return _t;
 }
-
-struct rde_cpu_texture {
-	UNIMPLEMENTED_STRUCT()
-};
 
 struct rde_render_texture {
 	UNIMPLEMENTED_STRUCT()
@@ -586,7 +586,11 @@ void rde_engine_destroy_engine() {
 			continue;
 		}
 
-		rde_rendering_unload_texture(&ENGINE.textures[_i]);
+		if(ENGINE.textures[_i].pixels != NULL) {
+			rde_rendering_destroy_memory_texture(&ENGINE.textures[_i]);
+		} else {
+			rde_rendering_unload_texture(&ENGINE.textures[_i]);
+		}
 	}
 
 	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
@@ -599,6 +603,7 @@ void rde_engine_destroy_engine() {
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Exited cleanly");
 }
 
 void rde_engine_switch_window_display(rde_window* _window, size_t _new_display) {

@@ -74,6 +74,7 @@ extern "C" {
 #define RDE_MAX_VERTICES_PER_BATCH 50000
 #define RDE_MAX_LOADABLE_SHADERS 256
 #define RDE_MAX_LOADABLE_TEXTURES 512
+#define RDE_MAX_LOADABLE_CPU_TEXTURES 512
 #define RDE_MAX_LOADABLE_ATLASES 512
 #define RDE_MAX_LOADABLE_FONTS 512
 
@@ -1289,7 +1290,6 @@ rde_transform rde_struct_create_transform() {
 
 typedef struct rde_shader rde_shader;
 typedef struct rde_texture rde_texture;
-typedef struct rde_cpu_texture rde_cpu_texture;
 typedef struct rde_render_texture rde_render_texture;
 typedef struct rde_atlas rde_atlas;
 typedef struct rde_font rde_font;
@@ -1568,9 +1568,10 @@ RDE_FUNC rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const ch
 RDE_FUNC rde_texture* rde_rendering_get_atlas_sub_texture(rde_atlas* _atlas, const char* _texture_name);
 RDE_FUNC void rde_rendering_unload_atlas(rde_atlas* _atlas);
 
-RDE_FUNC rde_texture* rde_rendering_create_cpu_texture(rde_vec_2UI _texture_size);
-RDE_FUNC void rde_rendering_destroy_cpu_texture(rde_cpu_texture* _cpu_texture);
-RDE_FUNC void rde_rendering_upload_cpu_texture_to_gpu(rde_cpu_texture* _cpu_texture);
+RDE_FUNC rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, int _channels);
+RDE_FUNC void rde_rendering_memory_texture_set_pixel(rde_texture* _memory_texture, rde_vec_2I _position, rde_color _color);
+RDE_FUNC rde_color rde_rendering_memory_texture_get_pixel(rde_texture* _memory_texture, rde_vec_2I _position);
+RDE_FUNC void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture);
 
 RDE_FUNC rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path);
 RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
@@ -1592,6 +1593,7 @@ RDE_FUNC void rde_rendering_draw_circle_2d(rde_vec_2F _position, float _radius, 
 RDE_FUNC void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader);  /// Draws a batched polygon in 2D space, pass NULL on the _shader for the default shader
 
 RDE_FUNC void rde_rendering_draw_texture_2d(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_draw_memory_texture_2d(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
 
 RDE_FUNC void rde_rendering_draw_text_2d(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader); /// Draws a batched group of quads representing the _text in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
 
