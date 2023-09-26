@@ -262,10 +262,10 @@ struct rde_engine {
 	rde_shader* text_shader_2d;
 	rde_shader* frame_buffer_shader;
 	rde_shader* shaders;
-	rde_window windows[RDE_MAX_NUMBER_OF_WINDOWS];
-	rde_texture textures[RDE_MAX_LOADABLE_TEXTURES];
-	rde_atlas atlases[RDE_MAX_LOADABLE_ATLASES];
-	rde_font fonts[RDE_MAX_LOADABLE_FONTS];
+	rde_window* windows;
+	rde_texture* textures;
+	rde_atlas* atlases;
+	rde_font* fonts;
 	rde_event_func_outer window_events[RDE_WIN_EVENT_COUNT];
 	rde_event_func_outer display_events[RDE_DISPLAY_EVENT_COUNT];
 	rde_event_func_outer key_events[RDE_KEY_EVENT_COUNT];
@@ -302,20 +302,37 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 		_e.shaders[_i] = rde_struct_create_shader();
 	}
 
-	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+	assert(_e.heap_allocs_config.max_number_of_windows > 0 && "Heap Allocs Congig -> number of windows cannot be <= 0");
+	_e.windows = (rde_window*)malloc(sizeof(rde_window) * _e.heap_allocs_config.max_number_of_windows);
+	for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_windows; _i++) {
 		_e.windows[_i] = rde_struct_create_window();
 	}
 
-	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_TEXTURES; _i++) {
-		_e.textures[_i] = rde_struct_create_texture();
+	if (_e.heap_allocs_config.max_number_of_atlases > 0) {
+		_e.textures = (rde_texture*)malloc(sizeof(rde_texture) * _e.heap_allocs_config.max_number_of_textures);
+		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_textures; _i++) {
+			_e.textures[_i] = rde_struct_create_texture();
+		}
+	} else {
+		_e.textures = NULL;
 	}
 
-	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_ATLASES; _i++) {
-		_e.atlases[_i] = rde_struct_create_atlas();
+	if(_e.heap_allocs_config.max_number_of_atlases > 0) {
+		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_atlases);
+		for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_atlases; _i++) {
+			_e.atlases[_i] = rde_struct_create_atlas();
+		}
+	} else {
+		_e.atlases = NULL;
 	}
 
-	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_FONTS; _i++) {
-		_e.fonts[_i] = rde_struct_create_font();
+	if (_e.heap_allocs_config.max_number_of_fonts > 0) {
+		_e.fonts = (rde_font*)malloc(sizeof(rde_font) * _e.heap_allocs_config.max_number_of_fonts);
+		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_fonts; _i++) {
+			_e.fonts[_i] = rde_struct_create_font();
+		}
+	} else {
+		_e.fonts = NULL;
 	}
 
 
@@ -359,7 +376,7 @@ void rde_engine_on_event() {
 
 		rde_event _rde_event = rde_engine_sdl_event_to_rde_event(&_event);
 			
-		for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+		for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
 			rde_window* _window = &ENGINE.windows[_i];
 
 			if(_window->sdl_window == NULL) {
@@ -516,7 +533,7 @@ void rde_engine_on_run() {
 		rde_engine_on_late_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_late_update(ENGINE.delta_time);
 
-		for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+		for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
 			rde_window* _window = &ENGINE.windows[_i];
 
 			if(_window->sdl_window == NULL) {
@@ -572,23 +589,25 @@ void rde_engine_set_vsync_active(bool _vsync) {
 
 void rde_engine_destroy_engine() {
 
-	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_ATLASES; _i++) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_atlases; _i++) {
 		if(ENGINE.atlases[_i].texture == NULL) {
 			continue;
 		}
 
 		rde_rendering_unload_atlas(&ENGINE.atlases[_i]);
 	}
+	free(ENGINE.atlases);
 
-	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_FONTS; _i++) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_fonts; _i++) {
 		if(ENGINE.fonts[_i].texture == NULL) {
 			continue;
 		}
 
 		rde_rendering_unload_font(&ENGINE.fonts[_i]);
 	}
+	free(ENGINE.fonts);
 
-	for (size_t _i = 0; _i < RDE_MAX_LOADABLE_TEXTURES; _i++) {
+	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_textures; _i++) {
 		if (ENGINE.textures[_i].opengl_texture_id != -1) {
 			continue;
 		}
@@ -599,14 +618,7 @@ void rde_engine_destroy_engine() {
 			rde_rendering_unload_texture(&ENGINE.textures[_i]);
 		}
 	}
-
-	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
-		if(ENGINE.windows[_i].sdl_window == NULL) {
-			continue;
-		}
-
-		rde_window_destroy_window(&ENGINE.windows[_i]);
-	}
+	free(ENGINE.textures);
 
 	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_shaders; _i++) {
 		if(ENGINE.shaders[_i].compiled_program_id == -1) {
@@ -616,6 +628,15 @@ void rde_engine_destroy_engine() {
 		rde_rendering_unload_shader(&ENGINE.shaders[_i]);
 	}
 	free(ENGINE.shaders);
+
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
+		if(ENGINE.windows[_i].sdl_window == NULL) {
+			continue;
+		}
+
+		rde_window_destroy_window(&ENGINE.windows[_i]);
+	}
+	free(ENGINE.windows);
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
@@ -631,7 +652,7 @@ void rde_engine_switch_window_display(rde_window* _window, size_t _new_display) 
 rde_window* rde_engine_get_focused_window() {
 	SDL_Window* _window = SDL_GetMouseFocus();
 
-	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
 		rde_window* _w = &ENGINE.windows[_i];
 		
 		if(_w->sdl_window == _window) {

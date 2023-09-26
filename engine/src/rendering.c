@@ -372,7 +372,7 @@ void rde_rendering_unload_shader(rde_shader* _shader) {
 rde_texture* rde_rendering_load_texture(const char* _file_path) {
 	rde_texture* _texture = NULL;
 
-	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_TEXTURES; _i++) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_textures; _i++) {
 		if(ENGINE.textures[_i].opengl_texture_id >= 0) {
 			continue;
 		}
@@ -442,7 +442,7 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 rde_texture* rde_rendering_load_text_texture(const char* _file_path) {
 	rde_texture* _texture = NULL;
 
-	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_TEXTURES; _i++) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_textures; _i++) {
 		if(ENGINE.textures[_i].opengl_texture_id >= 0) {
 			continue;
 		}
@@ -512,7 +512,7 @@ rde_texture* rde_rendering_load_text_texture(const char* _file_path) {
 rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, int _channels) {
 	rde_texture* _texture = NULL;
 
-	for(int _i = 0; _i < RDE_MAX_LOADABLE_TEXTURES; _i++) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_textures; _i++) {
 		if(ENGINE.textures[_i].opengl_texture_id != -1) {
 			continue;
 		}
@@ -585,7 +585,7 @@ rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _conf
 	rde_texture* _texture = rde_rendering_load_texture(_texture_path);
 	rde_atlas_sub_textures* _atlas_sub_textures = rde_file_system_read_atlas_config(_config_path, _texture);
 
-	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_ATLASES; _i++) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_atlases; _i++) {
 		rde_atlas* _atlas = &ENGINE.atlases[_i];
 		if(_atlas->texture != NULL) {
 			continue;
@@ -632,7 +632,7 @@ rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_conf
 	rde_texture* _texture = rde_rendering_load_text_texture(_font_path);
 	rde_font_char_info* _chars = rde_file_system_read_font_config(_font_config_path, _texture);
 
-	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_FONTS; _i++) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_fonts; _i++) {
 		rde_font* _font = &ENGINE.fonts[_i];
 		if(_font->texture != NULL) {
 			continue;

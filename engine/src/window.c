@@ -190,10 +190,10 @@ rde_window* rde_window_create_window() {
 	size_t _free_window_index = 0;
 	rde_window* _window = NULL;
 
-	for(size_t _i = 0; _i < RDE_MAX_NUMBER_OF_WINDOWS; _i++) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
 		if(ENGINE.windows[_i].sdl_window != NULL) {
 
-			if(_i == RDE_MAX_NUMBER_OF_WINDOWS - 1) {
+			if(_i == ENGINE.heap_allocs_config.max_number_of_windows - 1) {
 				assert(false && "[ERROR]: Tried to create a new window but the limit of simultaneous windows has been reached.");
 			}
 
