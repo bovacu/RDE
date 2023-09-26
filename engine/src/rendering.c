@@ -695,6 +695,7 @@ void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
 
 void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window) {
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 	UNUSED(_camera);
 	UNUSED(_window);
 	UNIMPLEMENTED("rde_rendering_start_drawing_3d")
