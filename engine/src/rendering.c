@@ -10,6 +10,18 @@ typedef struct {
 
 rde_rendering_statistics statistics;
 
+void rde_rendering_init() {
+	current_batch_2d = rde_struct_create_2d_batch();
+	current_batch_2d.vertices = (rde_vertex_2d*)malloc(sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
+	//for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_vertices_per_batch; _i++) {
+	//	current_batch_2d.vertices[_i] = rde_struct_create_vertex_2d();
+	//}
+}
+
+void rde_rendering_end() {
+	free(current_batch_2d.vertices);
+}
+
 rde_vec_2F rde_rendering_get_aspect_ratio() {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_batch_2d.window);
 	bool _is_horizontal = rde_window_orientation_is_horizontal(current_batch_2d.window);
@@ -89,7 +101,7 @@ void rde_rendering_generate_gl_vertex_config_for_shader(rde_shader* _shader) {
 	
 	glGenBuffers(1, &_shader->vertex_buffer_object);
 	glBindBuffer(GL_ARRAY_BUFFER, _shader->vertex_buffer_object);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(rde_vertex_2d) * RDE_MAX_VERTICES_PER_BATCH, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch, NULL, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)0);
 	glEnableVertexAttribArray(0);
@@ -109,7 +121,7 @@ void rde_rendering_generate_gl_vertex_config_for_shader(rde_shader* _shader) {
 void rde_rendering_reset_batch_2d() {
 	current_batch_2d.shader = NULL;
 	current_batch_2d.texture = rde_struct_create_texture();
-	memset(current_batch_2d.vertices, 0, RDE_MAX_VERTICES_PER_BATCH);
+	//memset(current_batch_2d.vertices, 0, ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
 	current_batch_2d.amount_of_vertices = 0;
 }
 
@@ -152,7 +164,7 @@ void rde_rendering_flush_batch_2d() {
 
 	glBindBuffer(GL_ARRAY_BUFFER, current_batch_2d.shader->vertex_buffer_object);
 	rde_util_check_opengl_error("After glBindBuffer");
-	glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(sizeof(rde_vertex_2d) * current_batch_2d.amount_of_vertices), &current_batch_2d.vertices);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(sizeof(rde_vertex_2d) * current_batch_2d.amount_of_vertices), current_batch_2d.vertices);
 	rde_util_check_opengl_error("After glBufferSubData");
 
 	glDrawArrays(GL_TRIANGLES, 0, current_batch_2d.amount_of_vertices);
@@ -168,7 +180,7 @@ void rde_rendering_flush_batch_2d() {
 }
 
 void rde_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _texture, size_t _extra_vertices) {
-	bool _vertex_ok = current_batch_2d.amount_of_vertices + _extra_vertices <= RDE_MAX_VERTICES_PER_BATCH;
+	bool _vertex_ok = current_batch_2d.amount_of_vertices + _extra_vertices <= ENGINE.heap_allocs_config.max_number_of_vertices_per_batch;
 	bool _shader_ok = current_batch_2d.shader == _shader;
 	bool _texture_ok = _texture == NULL || current_batch_2d.texture.opengl_texture_id == _texture->opengl_texture_id;
 	if(_vertex_ok && _shader_ok && _texture_ok) {

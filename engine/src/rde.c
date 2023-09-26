@@ -230,7 +230,7 @@ typedef struct {
 	rde_shader* shader;
 	rde_window* window;
 	rde_texture texture;
-	rde_vertex_2d vertices[RDE_MAX_VERTICES_PER_BATCH];
+	rde_vertex_2d* vertices;
 	size_t amount_of_vertices;
 } rde_batch_2d;
 rde_batch_2d rde_struct_create_2d_batch() {
@@ -238,7 +238,7 @@ rde_batch_2d rde_struct_create_2d_batch() {
 	_b.shader = NULL;
 	_b.window = NULL;
 	_b.texture = rde_struct_create_texture();
-	memset(_b.vertices, 0, RDE_MAX_VERTICES_PER_BATCH);
+	_b.vertices = NULL;
 	_b.amount_of_vertices = 0;
 	return _b;
 }
@@ -514,6 +514,8 @@ void rde_engine_on_run() {
 	SDL_SetEventFilter(rde_mobile_consume_events);
 	#endif
 
+	rde_rendering_init();
+
 	while(ENGINE.running) {
 		Uint64 _start = SDL_GetPerformanceCounter();
 		ENGINE.fixed_time_step_accumulator += ENGINE.delta_time;
@@ -558,6 +560,7 @@ void rde_engine_on_run() {
 		}
 	}
 
+	rde_rendering_end();
 	rde_engine_destroy_engine();
 }
 
