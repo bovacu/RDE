@@ -139,3 +139,21 @@ size_t rde_util_get_string_width(const char* _string, const rde_font* _font) {
 
 	return _size;
 }
+
+rde_vec_2I rde_util_get_string_size(const char* _string, const rde_font* _font) {
+	int _text_size = strlen(_string);
+
+	int _width = 0;
+	int _height = 0;
+	for (int _i = 0; _i < _text_size; _i++) {
+		int _key = (int)_string[_i];
+		rde_font_char_info _char_info = _font->chars[_key];
+		_width += (_char_info.advance.x >> 6);
+
+		if(_char_info.size.y > _height) {
+			_height = _char_info.size.y;
+		}
+	}
+
+	return (rde_vec_2I) { _width, _height };
+}
