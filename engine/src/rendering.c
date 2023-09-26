@@ -99,7 +99,7 @@ void rde_rendering_generate_gl_vertex_config_for_shader(rde_shader* _shader) {
 	
 	glGenBuffers(1, &_shader->vertex_buffer_object);
 	glBindBuffer(GL_ARRAY_BUFFER, _shader->vertex_buffer_object);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch, NULL, GL_DYNAMIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)0);
 	glEnableVertexAttribArray(0);
