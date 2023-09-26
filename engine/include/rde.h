@@ -74,7 +74,6 @@ extern "C" {
 #define RDE_MAX_VERTICES_PER_BATCH 50000
 #define RDE_MAX_LOADABLE_SHADERS 256
 #define RDE_MAX_LOADABLE_TEXTURES 512
-#define RDE_MAX_LOADABLE_CPU_TEXTURES 512
 #define RDE_MAX_LOADABLE_ATLASES 512
 #define RDE_MAX_LOADABLE_FONTS 512
 
@@ -371,7 +370,6 @@ extern "C" {
 	if(AllocConsole()) {									\
 		freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);	\
 		freopen_s((FILE**)stdin, "CONIN$", "r", stdin);		\
-		std::ios::sync_with_stdio(1);						\
 	}
 
 /// ============================== UTIL ====================================
@@ -398,6 +396,36 @@ extern "C" {
 
 
 /// ==================== GENERIC FUNCS AND STRUCTS ==========================
+
+#if IS_WINDOWS()
+#define RDE_MAIN(_window, _heap_allocs_config, _mandatory_callbacks, _init_func)\
+	int main(int _argc, char** _argv) {											\
+		RDE_SHOW_WINDOWS_CONSOLE												\
+																				\
+		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);	\
+		rde_setup_initial_info(_mandatory_callbacks);							\
+																				\
+		init_func(_argc, _argv);												\
+																				\
+		rde_engine_on_run();													\
+		rde_engine_destroy_engine();											\
+																				\
+		return 0;																\
+	}
+#else
+#define RDE_MAIN(_window, _heap_allocs_config, _mandatory_callbacks, _init_func)\
+	int main(int _argc, char** _argv) {											\
+		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);	\
+		rde_setup_initial_info(_mandatory_callbacks);							\
+																				\
+		init_func(_argc, _argv);												\
+																				\
+		rde_engine_on_run();													\
+		rde_engine_destroy_engine();											\
+																				\
+		return 0;																\
+	}
+#endif
 
 #define SPECIALIZED_VEC2(_type, _name) 	\
 	typedef struct {					\
