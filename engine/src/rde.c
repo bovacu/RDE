@@ -78,10 +78,11 @@ size_t current_frame = 0;
 //
 //		- 2D rendering:
 //			- Camera system
-//			- Texture rendering
+//			- [DONE] Texture rendering
 //			- Debug and non debug geometry rendering
 //			- [DONE] Spritebatch
-//			- Text
+//			- [DONE] Text
+//			- CPU Textures
 //
 //		- Basic 3D:
 //			- Camera system
@@ -100,7 +101,7 @@ size_t current_frame = 0;
 //			- Particles
 //			- Multiple window rendering is not working properly
 //
-//		- TOOL: command line atlas packing tool for textures.
+//		- TOOL: [DONE] command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
 //				- https://www.david-colson.com/2020/03/10/exploring-rect-packing.html
 //
