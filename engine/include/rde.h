@@ -74,7 +74,6 @@ extern "C" {
 #define RDE_MAX_VERTICES_PER_BATCH 50000
 #define RDE_MAX_LOADABLE_SHADERS 256
 #define RDE_MAX_LOADABLE_TEXTURES 512
-#define RDE_MAX_LOADABLE_ATLASES 512
 #define RDE_MAX_LOADABLE_FONTS 512
 
 #define RDE_INT_MAX 2147483647
@@ -1148,7 +1147,6 @@ typedef struct {
 	size_t max_number_of_vertices_per_batch;
 	size_t max_number_of_shaders;
 	size_t max_number_of_textures;
-	size_t max_number_of_atlases;
 	size_t max_number_of_fonts;
 } rde_engine_heap_allocs_config;
 
@@ -1444,7 +1442,6 @@ const rde_engine_heap_allocs_config RDE_DEFAULT_HEAP_ALLOCS_CONFIG = {
 	RDE_MAX_VERTICES_PER_BATCH,
 	RDE_MAX_LOADABLE_SHADERS,
 	RDE_MAX_LOADABLE_TEXTURES,
-	RDE_MAX_LOADABLE_ATLASES,
 	RDE_MAX_LOADABLE_FONTS
 };
 

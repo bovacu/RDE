@@ -596,7 +596,7 @@ rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _conf
 	rde_texture* _texture = rde_rendering_load_texture(_texture_path);
 	rde_atlas_sub_textures* _atlas_sub_textures = rde_file_system_read_atlas_config(_config_path, _texture);
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_atlases; _i++) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_textures; _i++) {
 		rde_atlas* _atlas = &ENGINE.atlases[_i];
 		if(_atlas->texture != NULL) {
 			continue;

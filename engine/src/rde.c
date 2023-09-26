@@ -310,7 +310,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 		_e.windows[_i] = rde_struct_create_window();
 	}
 
-	if (_e.heap_allocs_config.max_number_of_atlases > 0) {
+	if (_e.heap_allocs_config.max_number_of_textures > 0) {
 		_e.textures = (rde_texture*)malloc(sizeof(rde_texture) * _e.heap_allocs_config.max_number_of_textures);
 		assert(_e.textures != NULL && "Could not allocate enough memory for textures array");
 		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_textures; _i++) {
@@ -320,10 +320,10 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 		_e.textures = NULL;
 	}
 
-	if(_e.heap_allocs_config.max_number_of_atlases > 0) {
-		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_atlases);
+	if(_e.heap_allocs_config.max_number_of_textures > 0) {
+		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_textures);
 		assert(_e.shaders != NULL && "Could not allocate enough memory for atlases array");
-		for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_atlases; _i++) {
+		for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_textures; _i++) {
 			_e.atlases[_i] = rde_struct_create_atlas();
 		}
 	} else {
@@ -340,6 +340,8 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 		_e.fonts = NULL;
 	}
 
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Allocations -> Windows: %d, Textures: %d, Fonts: %d, Shaders: %d", _e.heap_allocs_config.max_number_of_windows,
+	              _e.heap_allocs_config.max_number_of_textures, _e.heap_allocs_config.max_number_of_fonts, _e.heap_allocs_config.max_number_of_shaders);
 
 	memset(_e.window_events, 0, RDE_WIN_EVENT_COUNT);
 	memset(_e.display_events, 0, RDE_DISPLAY_EVENT_COUNT);
@@ -597,7 +599,7 @@ void rde_engine_set_vsync_active(bool _vsync) {
 
 void rde_engine_destroy_engine() {
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_atlases; _i++) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_textures; _i++) {
 		if(ENGINE.atlases[_i].texture == NULL) {
 			continue;
 		}
