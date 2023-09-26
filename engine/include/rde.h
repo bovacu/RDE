@@ -1571,6 +1571,7 @@ RDE_FUNC void rde_rendering_unload_atlas(rde_atlas* _atlas);
 RDE_FUNC rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, int _channels);
 RDE_FUNC void rde_rendering_memory_texture_set_pixel(rde_texture* _memory_texture, rde_vec_2I _position, rde_color _color);
 RDE_FUNC rde_color rde_rendering_memory_texture_get_pixel(rde_texture* _memory_texture, rde_vec_2I _position);
+RDE_FUNC unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_texture);
 RDE_FUNC void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture);
 
 RDE_FUNC rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path);

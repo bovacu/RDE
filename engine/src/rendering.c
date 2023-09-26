@@ -564,6 +564,11 @@ rde_color rde_rendering_memory_texture_get_pixel(rde_texture* _memory_texture, r
 	return _color;
 }
 
+unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_texture) {
+	assert(_memory_texture != NULL && _memory_texture->pixels && "Tried to get a pixel on a NULL memory texture");
+	return _memory_texture->pixels;
+}
+
 void rde_rendering_unload_texture(rde_texture* _texture) {
 	assert(_texture != NULL && "Error: Tried to unload a NULL texture");
 	GLuint _id = (GLuint)_texture->opengl_texture_id;
