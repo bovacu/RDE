@@ -1146,6 +1146,7 @@ bool compile_windows() {
 			exit(-1);																												\
 		}																															\
 																																	\
+																																	\
 		char _p_0[MAX_PATH];																										\
 		char _p_1[MAX_PATH];																										\
 		memset(_p_0, 0, MAX_PATH);																									\
@@ -1183,6 +1184,58 @@ bool compile_windows() {
 		snprintf(_p_0, MAX_PATH, "%s%s", this_file_full_path, "tools\\font_generator\\external\\libs\\windows\\libpng16.dll");		\
 		snprintf(_p_1, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\font_generator\\libpng16.dll");				\
 		copy_file_if_exists(_p_0, _p_1);																							\
+																																	\
+																																	\
+		_build_command = NULL;																										\
+		char _output_p[256];																										\
+		memset(_output_p, 0, 256);																									\
+		strcat(_output_p, this_file_full_path);																						\
+																																	\
+		memset(_path, 0, MAX_PATH);																									\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\project_generator");							\
+		if(!make_dir_if_not_exists(_path)) {																						\
+					exit(-1);																										\
+		}																															\
+		strcat(_output_f, "build\\windows\\tools\\project_generator\\");															\
+																																	\
+		char output_project[MAX_PATH];																								\
+		memset(output_project, 0, MAX_PATH);																						\
+		strcat(output_project, _output_p);																							\
+		strcat(output_project, "project_generator.exe");																			\
+		arrput(_build_command, "clang");																							\
+		arrput(_build_command, "-O3");																								\
+		arrput(_build_command, "-std=c99");																							\
+																																	\
+		char _pg_source_path[MAX_PATH];																								\
+		memset(_pg_source_path, 0, MAX_PATH);																						\
+		snprintf(_pg_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools\\project_generator\\project_generator.c");			\
+		arrput(_build_command, _pg_source_path);																					\
+																																	\
+		arrput(_build_command, "-I");																								\
+		char _pg_include_path[MAX_PATH];																							\
+		memset(_pg_include_path, 0, MAX_PATH);																						\
+		snprintf(_pg_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools\\project_generator\\external\\include");			\
+		arrput(_build_command, _pg_include_path);																					\
+																																	\
+		arrput(_build_command, "-Werror");																							\
+		arrput(_build_command, "-Wall");																							\
+		arrput(_build_command, "-Wextra");																							\
+																																	\
+		arrput(_build_command, "-o");																								\
+		arrput(_build_command, output_project);																						\
+																																	\
+		if(!run_command(_build_command)) {																							\
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");															\
+		exit(-1);																													\
+		}																															\
+																																	\
+		char _duck_img_src[MAX_PATH];																								\
+		char _duck_img_dst[MAX_PATH];																								\
+		memset(_duck_img_src, 0, MAX_PATH);																							\
+		memset(_duck_img_dst, 0, MAX_PATH);																							\
+		snprintf(_duck_img_src, MAX_PATH, "%s%s", this_file_full_path, "tools\\project_generator\\duck_logo.png");					\
+		snprintf(_duck_img_dst, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\tools\\project_generator\\duck_logo.png");	\
+		copy_file_if_exists(_duck_img_src, _duck_img_dst); 																			\
 	} while(0);
 
 	#define BUILD_EXAMPLES()																						\
@@ -1544,6 +1597,7 @@ bool compile_osx() {
 			exit(-1);																												\
 		}																															\
 																																	\
+																																	\
 		_build_command = NULL;																										\
 		char _output_f[256];																										\
 		memset(_output_f, 0, 256);																									\
@@ -1595,6 +1649,57 @@ bool compile_osx() {
 			exit(-1);																												\
 		}																															\
 																																	\
+																																	\
+		_build_command = NULL;																										\
+		char _output_p[256];																										\
+		memset(_output_p, 0, 256);																									\
+		strcat(_output_p, this_file_full_path);																						\
+																																	\
+		memset(_path, 0, MAX_PATH);																									\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/tools/project_generator");								\
+		if(!make_dir_if_not_exists(_path)) {																						\
+		exit(-1);																													\
+		}																															\
+		strcat(_output_f, "build/osx/tools/project_generator/");																	\
+																																	\
+		char output_project[MAX_PATH];																								\
+		memset(output_project, 0, MAX_PATH);																						\
+		strcat(output_project, _output_p);																							\
+		strcat(output_project, "project_generator");																				\
+		arrput(_build_command, "clang");																							\
+		arrput(_build_command, "-O3");																								\
+		arrput(_build_command, "-std=c99");																							\
+																																	\
+		char _pg_source_path[MAX_PATH];																								\
+		memset(_pg_source_path, 0, MAX_PATH);																						\
+		snprintf(_pg_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/project_generator.c");			\
+		arrput(_build_command, _pg_source_path);																					\
+																																	\
+		arrput(_build_command, "-I");																								\
+		char _pg_include_path[MAX_PATH];																							\
+		memset(_pg_include_path, 0, MAX_PATH);																						\
+		snprintf(_pg_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/external/include");				\
+		arrput(_build_command, _pg_include_path);																					\
+																																	\
+		arrput(_build_command, "-Werror");																							\
+		arrput(_build_command, "-Wall");																							\
+		arrput(_build_command, "-Wextra");																							\
+																																	\
+		arrput(_build_command, "-o");																								\
+		arrput(_build_command, output_project);																						\
+																																	\
+		if(!run_command(_build_command)) {																							\
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");															\
+		exit(-1);																													\
+		}																															\
+																																	\
+		char _duck_img_src[MAX_PATH];																								\
+		char _duck_img_dst[MAX_PATH];																								\
+		memset(_duck_img_src, 0, MAX_PATH);																							\
+		memset(_duck_img_dst, 0, MAX_PATH);																							\
+		snprintf(_duck_img_src, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/duck_logo.png");					\
+		snprintf(_duck_img_dst, MAX_PATH, "%s%s", this_file_full_path, "build/osx/tools/project_generator/duck_logo.png");			\
+		copy_file_if_exists(_duck_img_src, _duck_img_dst); 																			\
 	} while(0);
 
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
@@ -1837,6 +1942,7 @@ bool compile_linux() {
 		}																															\
 		strcat(_output_f, "build/linux/tools/font_generator/");																		\
 																																	\
+																																	\
 		char output_fonts[MAX_PATH];																								\
 		memset(output_fonts, 0, MAX_PATH);																							\
 		strcat(output_fonts, _output_f);																							\
@@ -1876,6 +1982,57 @@ bool compile_linux() {
 			exit(-1);																												\
 		}																															\
 																																	\
+																																	\
+		_build_command = NULL;																										\
+		char _output_p[256];																										\
+		memset(_output_p, 0, 256);																									\
+		strcat(_output_p, this_file_full_path);																						\
+																																	\
+		memset(_path, 0, MAX_PATH);																									\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/tools/project_generator");								\
+		if(!make_dir_if_not_exists(_path)) {																						\
+		exit(-1);																													\
+		}																															\
+		strcat(_output_f, "build/linux/tools/project_generator/");																	\
+																																	\
+		char output_project[MAX_PATH];																								\
+		memset(output_project, 0, MAX_PATH);																						\
+		strcat(output_project, _output_p);																							\
+		strcat(output_project, "project_generator");																				\
+		arrput(_build_command, "clang");																							\
+		arrput(_build_command, "-O3");																								\
+		arrput(_build_command, "-std=c99");																							\
+																																	\
+		char _pg_source_path[MAX_PATH];																								\
+		memset(_pg_source_path, 0, MAX_PATH);																						\
+		snprintf(_pg_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/project_generator.c");			\
+		arrput(_build_command, _pg_source_path);																					\
+																																	\
+		arrput(_build_command, "-I");																								\
+		char _pg_include_path[MAX_PATH];																							\
+		memset(_pg_include_path, 0, MAX_PATH);																						\
+		snprintf(_pg_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/external/include");				\
+		arrput(_build_command, _pg_include_path);																					\
+																																	\
+		arrput(_build_command, "-Werror");																							\
+		arrput(_build_command, "-Wall");																							\
+		arrput(_build_command, "-Wextra");																							\
+																																	\
+		arrput(_build_command, "-o");																								\
+		arrput(_build_command, output_project);																						\
+																																	\
+		if(!run_command(_build_command)) {																							\
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");															\
+		exit(-1);																													\
+		}																															\
+																																	\
+		char _duck_img_src[MAX_PATH];																								\
+		char _duck_img_dst[MAX_PATH];																								\
+		memset(_duck_img_src, 0, MAX_PATH);																							\
+		memset(_duck_img_dst, 0, MAX_PATH);																							\
+		snprintf(_duck_img_src, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/duck_logo.png");					\
+		snprintf(_duck_img_dst, MAX_PATH, "%s%s", this_file_full_path, "build/linux/tools/project_generator/duck_logo.png");		\
+		copy_file_if_exists(_duck_img_src, _duck_img_dst); 																			\
 	} while(0);
 
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
