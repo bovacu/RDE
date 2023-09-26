@@ -278,7 +278,7 @@ rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fra
 		return NULL;
 	}
 
-	for (size_t _i = 0; _i < RDE_MAX_LOADABLE_SHADERS; _i++) {
+	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_shaders; _i++) {
 		if (ENGINE.shaders[_i].compiled_program_id != -1) {
 			continue;
 		}

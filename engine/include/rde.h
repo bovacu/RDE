@@ -1143,6 +1143,14 @@ rde_display_info rde_struct_create_display_info() {
 	return _d;
 }
 
+typedef struct {
+	size_t max_number_of_windows;
+	size_t max_number_of_vertices_per_batch;
+	size_t max_number_of_shaders;
+	size_t max_number_of_textures;
+	size_t max_number_of_atlases;
+	size_t max_number_of_fonts;
+} rde_engine_heap_allocs_config;
 
 /// ============================== EVENTS ===================================
 
@@ -1431,7 +1439,14 @@ const rde_color RDE_COLOR_RDE_DUCK_YELLOW	= { 255, 213,  81, 255 };
 const rde_color RDE_COLOR_GOLD				= { 255, 213,  81, 255 };
 const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
 
-
+const rde_engine_heap_allocs_config RDE_DEFAULT_HEAP_ALLOCS_CONFIG = {
+	RDE_MAX_NUMBER_OF_WINDOWS,
+	RDE_MAX_VERTICES_PER_BATCH,
+	RDE_MAX_LOADABLE_SHADERS,
+	RDE_MAX_LOADABLE_TEXTURES,
+	RDE_MAX_LOADABLE_ATLASES,
+	RDE_MAX_LOADABLE_FONTS
+};
 
 
 /// *************************************************************************************************
@@ -1502,7 +1517,7 @@ RDE_DECLARE_EASING_FUNCS(in_out, circular)
 /// ============================ ENGINE =====================================
 
 
-RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv);
+RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_allocs_config _heap_allocs_config);
 RDE_FUNC void rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks); /// Setsup some basic info the engine needs, call this BEFORE rde_engine_create_engine
 
 RDE_FUNC RDE_PLATFORM_TYPE_ rde_engine_get_platform();

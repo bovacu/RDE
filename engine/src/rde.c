@@ -261,7 +261,7 @@ struct rde_engine {
 	rde_shader* texture_shader_2d;
 	rde_shader* text_shader_2d;
 	rde_shader* frame_buffer_shader;
-	rde_shader shaders[RDE_MAX_LOADABLE_SHADERS];
+	rde_shader* shaders;
 	rde_window windows[RDE_MAX_NUMBER_OF_WINDOWS];
 	rde_texture textures[RDE_MAX_LOADABLE_TEXTURES];
 	rde_atlas atlases[RDE_MAX_LOADABLE_ATLASES];
@@ -271,12 +271,17 @@ struct rde_engine {
 	rde_event_func_outer key_events[RDE_KEY_EVENT_COUNT];
 	rde_event_func_outer mouse_events[RDE_MOUSE_EVENT_COUNT];
 
+	rde_engine_heap_allocs_config heap_allocs_config;
+
 	#if IS_WINDOWS()
 	HANDLE console_handle;
 	#endif
 };
-rde_engine rde_struct_create_engine() {
+rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_config) {
 	rde_engine _e;
+
+	_e.heap_allocs_config = _heap_allocs_config;
+
 	_e.delta_time = 0.f;
 	_e.fixed_delta_time = 1.f / 60.f;
 	_e.fixed_time_step_accumulator = 0.f;
@@ -291,7 +296,9 @@ rde_engine rde_struct_create_engine() {
 	_e.text_shader_2d = NULL;
 	_e.frame_buffer_shader = NULL;
 
-	for(size_t _i = 0; _i < RDE_MAX_LOADABLE_SHADERS; _i++) {
+	assert(_e.heap_allocs_config.max_number_of_shaders > 0 && "Heap Allocs Congig -> number of shaders cannot be <= 0");
+	_e.shaders = (rde_shader*)malloc(sizeof(rde_shader) * _e.heap_allocs_config.max_number_of_shaders);
+	for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_shaders; _i++) {
 		_e.shaders[_i] = rde_struct_create_shader();
 	}
 
@@ -429,7 +436,7 @@ rde_display_info* rde_engine_get_available_displays() {
 
 // ======================= API ===========================
 
-rde_window* rde_engine_create_engine(int _argc, char** _argv) {
+rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_allocs_config _heap_allocs_config) {
 	static bool _instantiated = false;
 	
 	UNUSED(_argc)
@@ -440,7 +447,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv) {
 		exit(-1);
 	}
 
-	ENGINE = rde_struct_create_engine();
+	ENGINE = rde_struct_create_engine(_heap_allocs_config);
 
 	stbds_rand_seed(time(NULL));
 
@@ -600,6 +607,15 @@ void rde_engine_destroy_engine() {
 
 		rde_window_destroy_window(&ENGINE.windows[_i]);
 	}
+
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_shaders; _i++) {
+		if(ENGINE.shaders[_i].compiled_program_id == -1) {
+			continue;
+		}
+
+		rde_rendering_unload_shader(&ENGINE.shaders[_i]);
+	}
+	free(ENGINE.shaders);
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
