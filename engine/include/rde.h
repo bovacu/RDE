@@ -1354,9 +1354,20 @@ rde_polygon rde_struct_create_polygon() {
 	return _p;
 }
 
-struct rde_mesh {
-	UNIMPLEMENTED_STRUCT()
-};
+typedef struct {
+	size_t vertex_count;
+
+	rde_vec_3F* vertices;
+	rde_vec_3F* normals;
+
+	unsigned int* vertex_colors;
+	unsigned int* indices;
+
+	unsigned int vao;
+	unsigned int vbo[2];
+	unsigned int vio;
+} rde_mesh;
+rde_mesh rde_struct_create_mesh(int _vertex_count, rde_vec_3F* _vertices, unsigned int* _colors, int _index_count);
 
 struct rde_material_map {
 	UNIMPLEMENTED_STRUCT()

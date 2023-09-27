@@ -92,6 +92,39 @@ bool rde_util_check_opengl_error(const char* _message) {
 	return false;
 }
 
+rde_mesh rde_struct_create_mesh(int _vertex_count, rde_vec_3F* _vertices, unsigned int* _colors, int _index_count) {
+	rde_mesh _mesh;
+	(void)_index_count;
+
+	_mesh.vertex_count = _vertex_count;
+
+	glGenVertexArrays(1, &_mesh.vao);
+	glBindVertexArray(_mesh.vao);
+	
+	glGenBuffers(1, &_mesh.vbo[0]); // vertices
+	glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rde_vec_3F) * _vertex_count, _vertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void*)0);
+
+	glGenBuffers(1, &_mesh.vbo[1]); // colors
+	glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rde_vec_3F) * _vertex_count, &_colors[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, (const void*)0);
+
+	//glGenBuffers(1, &_shader->index_buffer_object);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _shader->index_buffer_object);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * (ENGINE.heap_allocs_config.max_number_of_vertices_per_batch / 4) * 6, &current_batch_2d.indices[0], GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	rde_util_check_opengl_error("ERROR: 0");
+
+	return _mesh;
+}
 
 void rde_rendering_generate_gl_vertex_config_for_shader(rde_shader* _shader) {
 	glGenVertexArrays(1, &_shader->vertex_array_object);
@@ -145,6 +178,7 @@ void rde_rendering_flush_batch_2d() {
 	mat4 _view_matrix_inv = GLM_MAT4_IDENTITY_INIT;
 
 	rde_rendering_transform_to_glm_mat4(&current_drawing_camera->transform, _view_matrix);
+	//glm_lookat((vec3){ 4, 3, -3 }, (vec3){ 0, 0, 0 }, (vec3){ 0, 1, 0 }, _view_matrix);
 	glm_mat4_inv(_view_matrix, _view_matrix_inv);
 	glm_mat4_mul(projection_matrix, _view_matrix_inv, _view_projection_matrix);
 
@@ -677,28 +711,23 @@ void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
 	current_batch_2d.window = _window;
 	current_batch_2d.texture = rde_struct_create_texture();
 
-	switch(_camera->camera_type) {
-		case RDE_CAMERA_TYPE_PERSPECTIVE : {
-			rde_vec_2F _aspect_ratios = rde_rendering_get_aspect_ratio();
-			float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.x : _aspect_ratios.y;
-			glm_perspective(glm_rad(45.f), _aspect_ratio, 0.1f, 100.f, projection_matrix);
-		};break;
-
-		case RDE_CAMERA_TYPE_ORTHOGRAPHIC : {
-			rde_vec_2F _aspect_ratios = rde_rendering_get_aspect_ratio();
-			float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.x : _aspect_ratios.y;
-			float _zoom = _camera->zoom;
-			glm_ortho(-_aspect_ratio * _zoom, _aspect_ratio * _zoom, -_zoom, _zoom, -_zoom, _zoom, projection_matrix);
-		} break;
-	}
+	rde_vec_2F _aspect_ratios = rde_rendering_get_aspect_ratio();
+	float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.x : _aspect_ratios.y;
+	float _zoom = _camera->zoom;
+	glm_ortho(-_aspect_ratio * _zoom, _aspect_ratio * _zoom, -_zoom, _zoom, -_zoom, _zoom, projection_matrix);
 }
 
 void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	UNUSED(_camera);
+
+	current_drawing_camera = _camera;
+
+	rde_vec_2F _aspect_ratios = rde_rendering_get_aspect_ratio();
+	float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.y : _aspect_ratios.x;
+	glm_perspective(glm_rad(45.f), _aspect_ratio, 0.1f, 100.f, projection_matrix);
+
 	UNUSED(_window);
-	UNIMPLEMENTED("rde_rendering_start_drawing_3d")
 }
 
 void rde_rendering_draw_point_2d(rde_vec_2F _position, rde_color _color, rde_shader* _shader) {
@@ -1101,6 +1130,6 @@ void rde_rendering_end_drawing_2d() {
 }
 
 void rde_rendering_end_drawing_3d() {
-	UNIMPLEMENTED("rde_rendering_end_drawing_3d")
 	glDisable(GL_DEPTH_TEST);
+	current_drawing_camera = NULL;
 }
