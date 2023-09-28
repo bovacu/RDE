@@ -67,6 +67,9 @@ void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
 	current_drawing_camera = _camera;
 	current_drawing_window = _window;
 
@@ -113,5 +116,6 @@ void rde_rendering_draw_mesh_3d(const rde_transform* _transform, const rde_mesh*
 
 void rde_rendering_end_drawing_3d() {
 	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
 	current_drawing_camera = NULL;
 }
