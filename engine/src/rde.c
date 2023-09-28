@@ -128,18 +128,12 @@ struct rde_shader {
 	GLuint vertex_program_id;
 	GLuint fragment_program_id;
 	int compiled_program_id;
-	GLuint vertex_buffer_object;
-	GLuint index_buffer_object;
-	GLuint vertex_array_object;
 };
 rde_shader rde_struct_create_shader() {
 	rde_shader _s;
 	_s.vertex_program_id = 0;
 	_s.fragment_program_id = 0;
 	_s.compiled_program_id = -1;
-	_s.vertex_buffer_object = 0;
-	_s.vertex_array_object = 0;
-	_s.index_buffer_object = 0;
 	return _s;
 }
 
@@ -228,18 +222,22 @@ rde_font rde_struct_create_font() {
 
 typedef struct {
 	rde_shader* shader;
-	rde_window* window;
 	rde_texture texture;
 	rde_vertex_2d* vertices;
 	size_t amount_of_vertices;
+	GLuint vertex_buffer_object;
+	GLuint index_buffer_object;
+	GLuint vertex_array_object;
 } rde_batch_2d;
 rde_batch_2d rde_struct_create_2d_batch() {
 	rde_batch_2d _b;
 	_b.shader = NULL;
-	_b.window = NULL;
 	_b.texture = rde_struct_create_texture();
 	_b.vertices = NULL;
 	_b.amount_of_vertices = 0;
+	_b.vertex_buffer_object = 0;
+	_b.vertex_array_object = 0;
+	_b.index_buffer_object = 0;
 	return _b;
 }
 
@@ -261,6 +259,7 @@ struct rde_engine {
 	rde_shader* texture_shader_2d;
 	rde_shader* text_shader_2d;
 	rde_shader* frame_buffer_shader;
+	rde_shader* mesh_shader;
 	rde_shader* shaders;
 	rde_window* windows;
 	rde_texture* textures;
@@ -362,7 +361,9 @@ rde_engine ENGINE;
 #include "file_system.c"
 #include "events.c"
 #include "window.c"
-#include "rendering.c"
+#include "rendering_common.c"
+#include "rendering_2d.c"
+#include "rendering_3d.c"
 #include "physics.c"
 #include "audio.c"
 
@@ -521,7 +522,7 @@ void rde_engine_on_run() {
 	SDL_SetEventFilter(rde_mobile_consume_events);
 	#endif
 
-	rde_rendering_init();
+	rde_rendering_init_2d();
 
 	while(ENGINE.running) {
 		Uint64 _start = SDL_GetPerformanceCounter();
@@ -567,7 +568,7 @@ void rde_engine_on_run() {
 		}
 	}
 
-	rde_rendering_end();
+	rde_rendering_end_2d();
 	rde_engine_destroy_engine();
 }
 

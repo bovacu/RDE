@@ -206,6 +206,32 @@ extern "C" {
 	"	out_color = texture(screen_texture, tex_coords);\n" \
 	"}\n"
 
+#define RDE_MESH_VERTEX_SHADER "" \
+	"#version 330 core\n" \
+	"\n" \
+	"layout(location = 0) in vec3 in_pos;\n" \
+	"layout(location = 1) in vec4 in_color;\n" \
+	"\n" \
+	"out vec4 color;\n" \
+	"uniform mat4 view_projection_matrix;\n" \
+	"\n" \
+	"void main(){	\n" \
+	"	gl_Position =  view_projection_matrix * vec4(in_pos, 1);\n" \
+	"	color = in_color;\n" \
+	"}"
+
+#define RDE_MESH_VERTEX_FRAGMENT "" \
+	"#version 330 core\n" \
+	"\n" \
+	"in vec4 color;\n" \
+	"\n" \
+	"out vec4 out_color;\n" \
+	"\n" \
+	"void main(){\n" \
+	"	gl_FragColor = vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);\n" \
+	"}"
+
+
 #define RDE_COLOR_VERTEX_SHADER_2D_ES "" \
 	"#version 300 es\n" \
 	"\n" \
@@ -380,7 +406,7 @@ extern "C" {
 #define FUNC_STRING STRINGIZE(__func__)
 #define FILE_STRING STRINGIZE(__FILE__)
 
-
+#define RDE_COLOR_TO_HEX_COLOR(_color) (((int)_color.a) << 24) + (((int)_color.b) << 16) + (((int)_color.g) << 8) + ((int)_color.r)
 
 /// ======================= WARNING SILENCER ===============================
 
@@ -1356,18 +1382,18 @@ rde_polygon rde_struct_create_polygon() {
 
 typedef struct {
 	size_t vertex_count;
+	size_t indices_count;
 
-	rde_vec_3F* vertices;
-	rde_vec_3F* normals;
-
+	float* vertices;
+	float* normals;
 	unsigned int* vertex_colors;
 	unsigned int* indices;
 
 	unsigned int vao;
 	unsigned int vbo[2];
-	unsigned int vio;
+	unsigned int ibo;
 } rde_mesh;
-rde_mesh rde_struct_create_mesh(int _vertex_count, rde_vec_3F* _vertices, unsigned int* _colors, int _index_count);
+RDE_FUNC rde_mesh rde_struct_create_mesh(size_t _vertex_count, float* _vertices, unsigned int* _colors, size_t _indices_count, unsigned int* _indices);
 
 struct rde_material_map {
 	UNIMPLEMENTED_STRUCT()
@@ -1648,6 +1674,8 @@ RDE_FUNC void rde_rendering_draw_texture_2d(const rde_transform* _transform, con
 RDE_FUNC void rde_rendering_draw_memory_texture_2d(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
 
 RDE_FUNC void rde_rendering_draw_text_2d(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader); /// Draws a batched group of quads representing the _text in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
+
+RDE_FUNC void rde_rendering_draw_mesh_3d(const rde_transform* _transform, const rde_mesh* _mesh, rde_shader* _shader);
 
 RDE_FUNC void rde_rendering_end_drawing_2d();
 RDE_FUNC void rde_rendering_end_drawing_3d();
