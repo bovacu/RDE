@@ -91,7 +91,7 @@ size_t current_frame = 0;
 //			- Mesh creation and loading
 //			- Model loading
 //			- Texturing and materials
-//			- Instancing
+//			- Instancing (3d batching)
 //			- Lighting
 //			- Model animations
 //			- Text
@@ -245,26 +245,46 @@ struct rde_batch_3d {
 	UNIMPLEMENTED_STRUCT()
 };
 
+#ifdef RDE_INCLUDE_AUDIO_MODULE
+struct rde_sound {
+	UNIMPLEMENTED_STRUCT()
+};
+rde_sound rde_struct_create_sound() {
+	rde_sound _s;
+	return _s;
+}
+#endif
+
 struct rde_engine {
 	float delta_time;
 	float fixed_delta_time;
 	float fixed_time_step_accumulator;
+	
 	RDE_PLATFORM_TYPE_ platform_type;
+	
 	bool running;
 	bool use_rde_2d_physics_system;
+	
 	rde_display_callbacks display_callbacks;
 	rde_window_callbacks window_callbacks;
 	rde_end_user_mandatory_callbacks mandatory_callbacks;
+	
 	rde_shader* color_shader_2d;
 	rde_shader* texture_shader_2d;
 	rde_shader* text_shader_2d;
 	rde_shader* frame_buffer_shader;
 	rde_shader* mesh_shader;
 	rde_shader* shaders;
+
 	rde_window* windows;
 	rde_texture* textures;
 	rde_atlas* atlases;
 	rde_font* fonts;
+
+#ifdef RDE_INCLUDE_AUDIO_MODULE
+	rde_sound* sounds;
+#endif
+	
 	rde_event_func_outer window_events[RDE_WIN_EVENT_COUNT];
 	rde_event_func_outer display_events[RDE_DISPLAY_EVENT_COUNT];
 	rde_event_func_outer key_events[RDE_KEY_EVENT_COUNT];
@@ -321,7 +341,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	if(_e.heap_allocs_config.max_number_of_textures > 0) {
 		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_textures);
-		assert(_e.shaders != NULL && "Could not allocate enough memory for atlases array");
+		assert(_e.atlases != NULL && "Could not allocate enough memory for atlases array");
 		for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_textures; _i++) {
 			_e.atlases[_i] = rde_struct_create_atlas();
 		}
@@ -331,13 +351,25 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	if (_e.heap_allocs_config.max_number_of_fonts > 0) {
 		_e.fonts = (rde_font*)malloc(sizeof(rde_font) * _e.heap_allocs_config.max_number_of_fonts);
-		assert(_e.shaders != NULL && "Could not allocate enough memory for fonts array");
+		assert(_e.fonts != NULL && "Could not allocate enough memory for fonts array");
 		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_fonts; _i++) {
 			_e.fonts[_i] = rde_struct_create_font();
 		}
 	} else {
 		_e.fonts = NULL;
 	}
+
+#ifdef RDE_INCLUDE_AUDIO_MODULE
+	if (_e.heap_allocs_config.max_number_of_sounds > 0) {
+		_e.sounds = (rde_sound*)malloc(sizeof(rde_sound) * _e.heap_allocs_config.max_number_of_sounds);
+		assert(_e.sounds != NULL && "Could not allocate enough memory for sounds array");
+		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_sounds; _i++) {
+			_e.sounds[_i] = rde_struct_create_sound();
+		}
+	} else {
+		_e.sounds = NULL;
+	}
+#endif
 
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Allocations -> Windows: %d, Textures: %d, Fonts: %d, Shaders: %d", _e.heap_allocs_config.max_number_of_windows,
 	              _e.heap_allocs_config.max_number_of_textures, _e.heap_allocs_config.max_number_of_fonts, _e.heap_allocs_config.max_number_of_shaders);
@@ -648,6 +680,17 @@ void rde_engine_destroy_engine() {
 		rde_window_destroy_window(&ENGINE.windows[_i]);
 	}
 	free(ENGINE.windows);
+
+#ifdef RDE_INCLUDE_AUDIO_MODULE
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_sounds; _i++) {
+		//if(ENGINE.windows[_i].sdl_window == NULL) {
+		//	continue;
+		//}
+
+		rde_audio_unload_sound(&ENGINE.sounds[_i]);
+	}
+	free(ENGINE.sounds);
+#endif
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
