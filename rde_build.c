@@ -63,6 +63,37 @@ typedef enum {
 } RDE_LOG_LEVEL_;
 
 #define MAX_SIZE_FOR_OPTIONS 64
+#define MAX_SIZE_FOR_MODULES 256
+#define MAX_MODULES 6
+
+typedef enum {
+	RDE_MODULES_NONE = 0,
+	RDE_MODULES_AUDIO = 1,
+	RDE_MODULES_PHYSICS_2D = 2,
+	RDE_MODULES_PHYSICS_3D = 4,
+	RDE_MODULES_RENDERING_2D = 8,
+	RDE_MODULES_RENDERING_3D = 16,
+	RDE_MODULES_UI = 32
+} RDE_MODULES_;
+
+const char* MODULES_STR[MAX_MODULES] = {
+	"audio",
+	"physics_2d",
+	"pyhisics_3d",
+	"rendering_2d",
+	"rendering_3d",
+	"ui"
+};
+char* MODULES_DEFINES[MAX_MODULES] = {
+	"-DRDE_AUDIO_MODULE",
+	"-DRDE_PHYSICS_2D_MODULE",
+	"-DRDE_PHYSICS_3D_MODULE",
+	"-DRDE_RENDERING_2D_MODULE",
+	"-DRDE_RENDERING_3D_MODULE",
+	"-DRDE_UI_MODULE"
+};
+RDE_MODULES_ modules;
+
 char platform[MAX_SIZE_FOR_OPTIONS];
 char build_type[MAX_SIZE_FOR_OPTIONS];
 char lib_type[MAX_SIZE_FOR_OPTIONS];
@@ -981,7 +1012,15 @@ bool compile_windows() {
 		memset(output_engine, 0, MAX_PATH);																	\
 		strcat(output_engine, _output);																		\
 		strcat(output_engine, "RDE.dll");																	\
-		arrput(_build_command, "clang ");																	\
+		arrput(_build_command, "clang");																	\
+																											\
+		unsigned int _module = 1;																			\
+		for(int _i = 0; _i < MAX_MODULES; _i++) {															\
+			if((modules & _module) == _module) {															\
+				arrput(_build_command, MODULES_DEFINES[_i]);												\
+			}																								\
+			_module = _module << 1;																			\
+		}																									\
 																											\
 		if(strcmp(build_type, "debug") == 0) {																\
 			arrput(_build_command, "-g");																	\
@@ -1435,6 +1474,14 @@ bool compile_osx() {
 																											\
 		arrput(_build_command, "clang");																	\
 																											\
+		unsigned int _module = 1;																			\
+		for(int _i = 0; _i < MAX_MODULES; _i++) {															\
+			if((modules & _module) == _module) {															\
+						arrput(_build_command, MODULES_DEFINES[_i]);										\
+			}																								\
+			_module = _module << 1;																			\
+		}																									\
+																											\
 		if(strcmp(build_type, "debug") == 0) {																\
 			arrput(_build_command, "-g");																	\
 			arrput(_build_command, "-O0");																	\
@@ -1790,6 +1837,14 @@ bool compile_linux() {
 																											\
 		arrput(_build_command, "clang");																	\
 																											\
+		unsigned int _module = 1;																			\
+		for(int _i = 0; _i < MAX_MODULES; _i++) {															\
+			if((modules & _module) == _module) {															\
+				arrput(_build_command, MODULES_DEFINES[_i]);												\
+			}																								\
+			_module = _module << 1;																			\
+		}																									\
+																											\
 		if(strcmp(build_type, "debug") == 0) {																\
 			arrput(_build_command, "-g");																	\
 			arrput(_build_command, "-O0");																	\
@@ -2102,7 +2157,23 @@ void print_help() {
 	"-- BUILDING ---"
 	"To build anything, use the option --build= (or -b=) and an action between [engine, tools, all, examples]. \n"
 	"engine will compile the engine (only). tools will compile atlas_generator and font_generator (only). test will compile the examples and the engine (only). all will compile everything. \n"
-	"If no option is passed, it will be assumed -b=all. \n";
+	"If no option is passed, it will be assumed -b=all. \n"
+	"\n"
+	"-- MODULES ---\n"
+	"RDE is composed of several modules, which are completely optional to use and include in your library. Those modules are: \n"
+	"	- audio\n"
+	"	- physics_2d\n"
+	"	- physics_3d\n"
+	"	- rendering_2d\n"
+	"	- rendering_3d\n"
+	"	- ui\n"
+	"Each of them can be added to your library. Have in mind that adding 'physics_3d' will add Jolt Physics Engine to your depenency list, in case \n"
+	"you are building a static lib, you will probably have to add the Jolt lib to your build system.\n"
+	"To add any of the modules use --modules= (or -m=) followed by an array of the included modules, for example:\n"
+	"	--modules=\"[rendering_2d,rendering_3d,audio]\" \n\n"
+	"Have in mind that the only module added by default to the library is 'rendering_2d'. If you specify --module option and you still \n"
+	"want 'rendering_2d', you MUST include it in the modules list.\n"
+	"\n\n";
 
 	printf("%s", _help_message);
 }
@@ -2155,6 +2226,49 @@ void parse_arguments(int _argc, char** _argv) {
 
 			_value++;
 			strcat(lib_type, _value);
+		} else if(strcmp(_command, "-m") == 0 || strcmp(_command, "--modules") == 0) {
+			char* _value = strrchr(_argv[_i], _delimiter_2);
+			modules = RDE_MODULES_NONE;
+
+			if(_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for -m or --module incorrect\n");
+				exit(-1);
+			}
+
+			_value += 1; // remove = chars
+			if(_value[0] != '[' || _value[strlen(_value) - 1] != ']' ) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for -m or --module must be a list like this '[module_0,module_1,...] must start with '[' and end with ']''\n");
+				exit(-1);
+			}
+
+			_value += 1; // remove [ char
+			_value[strlen(_value) - 1] = 0; // remove ] last character 
+
+			char _modules_str[256];
+			memset(_modules_str, 0, 256);
+			strcat(_modules_str, _value);
+
+			char* _module = strtok(_modules_str, ",");
+			while( _module != NULL ) {
+				const char* _trimed_module = trim(_module);
+				
+				RDE_MODULES_ _current_modules = modules;
+				unsigned _m = 1;
+				for(int _i = 0; _i < MAX_MODULES; _i++) {
+					if(strcmp(MODULES_STR[_i], _trimed_module) == 0) {
+						modules |= (RDE_MODULES_)_m;
+						rde_log_level(RDE_LOG_LEVEL_INFO, "Added module '%s'", _trimed_module);
+						break;
+					}
+					_m = _m << 1;
+				}
+
+				if(_current_modules == modules) {
+					rde_log_level(RDE_LOG_LEVEL_WARNING, "Module '%s' not recognized, so ignoring it", _trimed_module);
+				}
+				
+				_module = strtok(NULL, ",");
+			}
 		} else if(strcmp(_command, "-h") == 0 || strcmp(_command, "--help") == 0) {
 			print_help();
 			exit(0);
@@ -2249,6 +2363,7 @@ int main(int _argc, char** _argv) {
 	memset(build_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(lib_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(build, 0, MAX_SIZE_FOR_OPTIONS);
+	modules = RDE_MODULES_RENDERING_2D;
 
 	parse_arguments(_argc, _argv);
 
