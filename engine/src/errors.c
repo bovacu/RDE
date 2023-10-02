@@ -19,58 +19,15 @@
 #define RDE_ERROR_MA_DEVICE_START "Could not start the audio device to play sounds. Error code for MiniAudio %d"
 #define RDE_ERROR_MA_FILE_NOT_FOUND "Could not load sound '%s'. error code for MiniAudio %d."
 
-void rde_critical_error(bool _condition, const char* _fmt, ...) {
-	
-	if(!_condition) {
-		return;
-	}
-
-#ifdef RDE_DEBUG
-	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check 'rde_crash_logs.txt'");
-#else
-	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check below");
-#endif
-
-	FILE* _f = NULL;
-	
-#if IS_WINDOWS()
-	fopen_s(&_f, "rde_crash_logs.txt", "w");
-#else
-	_f = fopen("rde_crash_logs.txt", "w");
-#endif
-
-	va_list _args;
-	va_start(_args, _fmt);
-	
-#ifdef RDE_DEBUG
-	vfprintf(stdout, _fmt, _args);
-#else
-	vfprintf(_f, _fmt, _args);
-#endif
-	va_end(_args);
-	fclose(_f);
-	
-	rde_engine_destroy_engine();
-
-#ifdef RDE_DEBUG
-	assert(false);
-#else
-	exit(-1);
-#endif
-}
-
-
 #ifdef RDE_ERROR_MODULE
 
 #include <signal.h>
 
 #define RDE_MAX_STACK 100
 
-// TODO: send the stack trace and error to the log error file also.
-
 #if IS_WINDOWS()
 #include <dbghelp.h>
-void rde_print_stack_trace() {
+void rde_print_stack_trace(FILE* _f) {
 	void* _stack[RDE_MAX_STACK];
 	HANDLE _process = GetCurrentProcess();
 
@@ -88,7 +45,12 @@ void rde_print_stack_trace() {
 		SymFromAddr(_process, (DWORD64)(_stack[_i] ), 0, _symbol);
 		DWORD _dwDisplacement;
 		SymGetLineFromAddr(_process, (DWORD64)(_stack[_i]), &_dwDisplacement, _line);
-		printf("%i: func -> %s, line -> %lu, file -> %s, addr -> 0x%0llX\n", _frames - _i - 1, _symbol->Name, _line->LineNumber, _line->FileName, _symbol->Address);
+
+		if(strstr(_line->FileName, "errors.c") != NULL) {
+			continue;
+		}
+
+		fprintf(_f, "%i: %s:%s:%lu - 0x%0llX\n", _frames - _i - 1, _line->FileName, _symbol->Name, _line->LineNumber, _symbol->Address);
 	}
 
 	free(_symbol);
@@ -135,7 +97,19 @@ LONG WINAPI rde_error_sig_handler(PEXCEPTION_POINTERS _sigfault_info) {
 		} break;
 	}
 
-	rde_print_stack_trace();
+	#ifdef RDE_DEBUG
+		rde_print_stack_trace(stdout);
+	#else
+		FILE* _f = NULL;
+		#if IS_WINDOWS()
+			fopen_s(&_f, "rde_crash_logs.txt", "w");
+		#else
+			_f = fopen("rde_crash_logs.txt", "w");
+		#endif
+		rde_print_stack_trace(_f);
+		fclose(_f);
+
+	#endif
 
 	rde_engine_destroy_engine();
 	exit(-1);
@@ -143,6 +117,51 @@ LONG WINAPI rde_error_sig_handler(PEXCEPTION_POINTERS _sigfault_info) {
 	return EXCEPTION_CONTINUE_SEARCH;
 }
 #else
+
+// TODO: Implement for Mac/Linux
+
 #endif
 
 #endif
+
+void rde_critical_error(bool _condition, const char* _fmt, ...) {
+	
+	if(!_condition) {
+		return;
+	}
+
+#ifdef RDE_DEBUG
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check 'rde_crash_logs.txt'");
+#else
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check below");
+#endif
+
+	FILE* _f = NULL;
+	
+#if IS_WINDOWS()
+	fopen_s(&_f, "rde_crash_logs.txt", "w");
+#else
+	_f = fopen("rde_crash_logs.txt", "w");
+#endif
+
+	va_list _args;
+	va_start(_args, _fmt);
+	
+#ifdef RDE_DEBUG
+	vfprintf(stdout, _fmt, _args);
+	rde_print_stack_trace(stdout);
+#else
+	vfprintf(_f, _fmt, _args);
+	rde_print_stack_trace(_f);
+#endif
+	va_end(_args);
+	fclose(_f);
+	
+	rde_engine_destroy_engine();
+
+#ifdef RDE_DEBUG
+	assert(false);
+#else
+	exit(-1);
+#endif
+}
