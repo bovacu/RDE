@@ -76,7 +76,7 @@ extern "C" {
 #define RDE_MAX_LOADABLE_TEXTURES 512
 #define RDE_MAX_LOADABLE_FONTS 512
 
-#ifdef	RDE_INCLUDE_AUDIO_MODULE
+#ifdef	RDE_AUDIO_MODULE
 #define RDE_MAX_LOADABLE_SOUNDS 128
 #endif
 
@@ -1179,7 +1179,7 @@ typedef struct {
 	size_t max_number_of_textures;
 	size_t max_number_of_fonts;
 
-#ifdef RDE_INCLUDE_AUDIO_MODULE
+#ifdef RDE_AUDIO_MODULE
 	size_t max_number_of_sounds;
 #endif
 
@@ -1494,7 +1494,7 @@ const rde_engine_heap_allocs_config RDE_DEFAULT_HEAP_ALLOCS_CONFIG = {
 	RDE_MAX_LOADABLE_TEXTURES,
 	RDE_MAX_LOADABLE_FONTS,
 
-#ifdef RDE_INCLUDE_AUDIO_MODULE
+#ifdef RDE_AUDIO_MODULE
 	RDE_MAX_LOADABLE_SOUNDS
 #endif
 };
@@ -1701,6 +1701,8 @@ RDE_FUNC void rde_rendering_end_drawing_3d();
 
 #ifdef RDE_AUDIO_MODULE
 
+RDE_FUNC void rde_audio_init(rde_sound_config _config);
+
 RDE_FUNC rde_sound* rde_audio_load_sound(const char* _sound_path);
 RDE_FUNC void rde_audio_unload_sound(rde_sound* _sound);
 
@@ -1712,6 +1714,8 @@ RDE_FUNC void rde_audio_restart_sound(rde_sound* _sound);
 RDE_FUNC bool rde_audio_is_sound_playing(rde_sound* _sound);
 
 RDE_FUNC bool rde_audio_set_sound_volume(rde_sound* _sound, float _volume);
+
+RDE_FUNC void rde_audio_end();
 
 #endif
 
