@@ -194,7 +194,7 @@ rde_window* rde_window_create_window() {
 		if(ENGINE.windows[_i].sdl_window != NULL) {
 
 			if(_i == ENGINE.heap_allocs_config.max_number_of_windows - 1) {
-				assert(false && "[ERROR]: Tried to create a new window but the limit of simultaneous windows has been reached.");
+				rde_critical_error(true, -1, "Max number of loaded windows (%d) reached", ENGINE.heap_allocs_config.max_number_of_windows);
 			}
 
 			continue;
@@ -212,7 +212,7 @@ rde_window* rde_window_create_window() {
 	#elif IS_MAC()
 		_window = rde_inner_window_create_mac_window(_free_window_index);
 	#else
-		assert(false && "[Error]: Unsupported or unimplemented platform");
+		rde_critical_error(true, -1, "Unsupported or unimplemented platform");
 	#endif
 	
 	memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
@@ -269,7 +269,7 @@ void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_
 unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size) {
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	unsigned char* _pixels = (unsigned char*)malloc(sizeof(unsigned char) * (4 * _window_size.x * _window_size.y));
-	assert(_pixels != NULL && "Could not allocate enough memory for pixels array for a screenshot");
+	rde_critical_error(_pixels == NULL, -1, "Could not allocate enought memory (%d bytes) for pixels array for screenshot", 4 * _window_size.x * _window_size.y);
 	memset(_pixels, 0, 4 * _window_size.x * _window_size.y);
 	glReadPixels((int)(_window_size.x * 0.5f + _position.x - _size.x * 0.5f ), (int)(_window_size.y * 0.5f + _position.y - _size.y * 0.5f),
 	             _size.x, _size.y, GL_RGBA, GL_UNSIGNED_BYTE, _pixels);

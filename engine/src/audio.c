@@ -86,7 +86,7 @@ rde_sound* rde_audio_load_sound(const char* _sound_path) {
 		}
 	}
 
-	assert(_sound != NULL && "Max number of loaded sounds reached");
+	rde_critical_error(_sound == NULL, -1, "Max number of loaded sounds (%d) reached", ENGINE.heap_allocs_config.max_number_of_sounds);
 	ma_decoder_config _decoder_config = ma_decoder_config_init(DEFAULT_FORMAT, 
 	                                                           ENGINE.device_config.channels, 
 	                                                           ENGINE.device_config.rate);
@@ -102,13 +102,13 @@ rde_sound* rde_audio_load_sound(const char* _sound_path) {
 }
 
 void rde_audio_unload_sound(rde_sound* _sound) {
-	assert(_sound != NULL && "Tried to unload a NULL sound");
+	rde_critical_error(_sound == NULL, -1, "Tried to unload a NULL sound");
 	ma_decoder_uninit(&_sound->miniaudio_decoder);
 	_sound->used = false;
 }
 
 void rde_audio_play_sound(rde_sound* _sound) {
-	assert(_sound != NULL && "Tried to play a NULL sound");
+	rde_critical_error(_sound == NULL, -1, "Tried to play a NULL sound");
 
 	_sound->playing = true;
 	_sound->paused = false;

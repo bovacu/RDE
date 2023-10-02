@@ -399,23 +399,23 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.text_shader_2d = NULL;
 	_e.frame_buffer_shader = NULL;
 
-	assert(_e.heap_allocs_config.max_number_of_shaders > 0 && "Heap Allocs Congig -> number of shaders cannot be <= 0");
+	rde_critical_error(_e.heap_allocs_config.max_number_of_shaders <= 0, -1, "Heap Allocs Congig -> number of shaders cannot be <= 0 and %d was provided", _e.heap_allocs_config.max_number_of_shaders);
 	_e.shaders = (rde_shader*)malloc(sizeof(rde_shader) * _e.heap_allocs_config.max_number_of_shaders);
-	assert(_e.shaders != NULL && "Could not allocate enough memory for shaders array");
+	rde_critical_error(_e.shaders == NULL, -1, "Could not allocate enought memory (%d bytes) for shaders", sizeof(rde_shader) * _e.heap_allocs_config.max_number_of_shaders);
 	for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_shaders; _i++) {
 		_e.shaders[_i] = rde_struct_create_shader();
 	}
 
-	assert(_e.heap_allocs_config.max_number_of_windows > 0 && "Heap Allocs Congig -> number of windows cannot be <= 0");
+	rde_critical_error(_e.heap_allocs_config.max_number_of_windows <= 0, -1, "Heap Allocs Congig -> number of windows cannot be <= 0 and %d was provided", _e.heap_allocs_config.max_number_of_windows);
 	_e.windows = (rde_window*)malloc(sizeof(rde_window) * _e.heap_allocs_config.max_number_of_windows);
-	assert(_e.windows != NULL && "Could not allocate enough memory for windows array");
+	rde_critical_error(_e.windows == NULL, -1, "Could not allocate enought memory (%d bytes) for windows", sizeof(rde_window) * _e.heap_allocs_config.max_number_of_windows);
 	for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_windows; _i++) {
 		_e.windows[_i] = rde_struct_create_window();
 	}
 
 	if (_e.heap_allocs_config.max_number_of_textures > 0) {
 		_e.textures = (rde_texture*)malloc(sizeof(rde_texture) * _e.heap_allocs_config.max_number_of_textures);
-		assert(_e.textures != NULL && "Could not allocate enough memory for textures array");
+		rde_critical_error(_e.textures == NULL, -1, "Could not allocate enought memory (%d bytes) for textures", sizeof(rde_texture) * _e.heap_allocs_config.max_number_of_textures);
 		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_textures; _i++) {
 			_e.textures[_i] = rde_struct_create_texture();
 		}
@@ -425,7 +425,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	if(_e.heap_allocs_config.max_number_of_textures > 0) {
 		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_textures);
-		assert(_e.atlases != NULL && "Could not allocate enough memory for atlases array");
+		rde_critical_error(_e.atlases == NULL, -1, "Could not allocate enought memory (%d bytes) for atlases", sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_textures);
 		for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_textures; _i++) {
 			_e.atlases[_i] = rde_struct_create_atlas();
 		}
@@ -435,7 +435,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	if (_e.heap_allocs_config.max_number_of_fonts > 0) {
 		_e.fonts = (rde_font*)malloc(sizeof(rde_font) * _e.heap_allocs_config.max_number_of_fonts);
-		assert(_e.fonts != NULL && "Could not allocate enough memory for fonts array");
+		rde_critical_error(_e.fonts == NULL, -1, "Could not allocate enought memory (%d bytes) for fonts", sizeof(rde_font) * _e.heap_allocs_config.max_number_of_fonts);
 		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_fonts; _i++) {
 			_e.fonts[_i] = rde_struct_create_font();
 		}
@@ -446,7 +446,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 #ifdef RDE_AUDIO_MODULE
 	if (_e.heap_allocs_config.max_number_of_sounds > 0) {
 		_e.sounds = (rde_sound*)malloc(sizeof(rde_sound) * _e.heap_allocs_config.max_number_of_sounds);
-		assert(_e.sounds != NULL && "Could not allocate enough memory for sounds array");
+		rde_critical_error(_e.sounds == NULL, -1, "Could not allocate enought memory (%d bytes) for audio", sizeof(rde_font) * _e.heap_allocs_config.max_number_of_sounds);
 		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_sounds; _i++) {
 			_e.sounds[_i] = rde_struct_create_sound();
 		}
@@ -587,7 +587,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	UNUSED(_argv)
 	
 	if(_instantiated) {
-		assert(false && "[ERROR]: Only one engine can be created");
+		rde_critical_error(true, -1, "Only one engine can be created");
 		exit(-1);
 	}
 
@@ -632,10 +632,10 @@ void rde_engine_set_fixed_delta(float _delta_time) {
 
 void rde_engine_on_run() {
 
-	assert(ENGINE.mandatory_callbacks.on_update != NULL && "User-End callback 'rde_engine_user_on_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
-	assert(ENGINE.mandatory_callbacks.on_fixed_update != NULL && "User-End callback 'rde_engine_user_on_fixed_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
-	assert(ENGINE.mandatory_callbacks.on_late_update != NULL && "User-End callback 'rde_engine_user_on_late_upadte' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
-	assert(ENGINE.mandatory_callbacks.on_render != NULL && "User-End callback 'rde_engine_user_on_render' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	rde_critical_error(ENGINE.mandatory_callbacks.on_update == NULL, -1, "User-End callback 'rde_engine_user_on_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	rde_critical_error(ENGINE.mandatory_callbacks.on_fixed_update == NULL, -1, "User-End callback 'rde_engine_user_on_fixed_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	rde_critical_error(ENGINE.mandatory_callbacks.on_late_update == NULL, -1, "User-End callback 'rde_engine_user_on_late_upadte' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	rde_critical_error(ENGINE.mandatory_callbacks.on_render == NULL, -1, "User-End callback 'rde_engine_user_on_render' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
 
 	#if IS_MOBILE()
 	SDL_SetEventFilter(rde_mobile_consume_events);

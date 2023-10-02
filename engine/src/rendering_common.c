@@ -23,15 +23,6 @@ rde_vec_2F rde_rendering_get_aspect_ratio() {
 	return _aspect_ratios;
 }
 
-void rde_util_assert(bool _assert, bool _crash, const char* _message) {
-	if(!_assert) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, " '%s' %s \n", _message, _crash ? "exiting application" : "");
-		if(_crash) {
-			assert(false && _message);
-		}
-	}
-}
-
 bool rde_util_check_opengl_error(const char* _message) {
 	GLenum _err;
 	while((_err = glGetError()) != GL_NO_ERROR){
@@ -180,7 +171,7 @@ rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fra
 		return _shader;
 	}
 
-	assert(false && "Maximum number of shaders loaded reached!");
+	rde_critical_error(true, -1, "Maximum number of shaders (%d) loaded reached!", ENGINE.heap_allocs_config.max_number_of_shaders);
 	return NULL;
 }
 
@@ -243,7 +234,7 @@ void rde_rendering_set_shader_uniform_value_uint(rde_shader* _shader, const char
 }
 
 void rde_rendering_unload_shader(rde_shader* _shader) {
-	assert(_shader != NULL && "Tried to unload a NULL shader");
+	rde_critical_error(_shader == NULL, -1, "Tried to unload a NULL shader");
 
 	glDeleteShader(_shader->vertex_program_id);
 	glDeleteShader(_shader->fragment_program_id);
@@ -264,7 +255,7 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 		break;
 	}
 
-	rde_util_assert(_texture != NULL, true, "Max number of loaded textures reached");
+	rde_critical_error(_texture == NULL, -1, "Max number of loaded textures (%d) reached", ENGINE.heap_allocs_config.max_number_of_textures);
 
 	int _width, _height, _channels;
 	stbi_set_flip_vertically_on_load(1);
@@ -334,7 +325,7 @@ rde_texture* rde_rendering_load_text_texture(const char* _file_path) {
 		break;
 	}
 
-	assert(_texture != NULL && "Max number of loaded textures reached");
+	rde_critical_error(_texture == NULL, -1, "Max number of loaded textures (%d) reached", ENGINE.heap_allocs_config.max_number_of_textures);
 
 	int _width, _height, _channels;
 	stbi_set_flip_vertically_on_load(1);
@@ -404,10 +395,10 @@ rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, 
 		break;
 	}
 
-	assert(_texture != NULL && "Tried to get a texture, but all are already used");
+	rde_critical_error(_texture == NULL, -1, "Max number of loaded textures (%d) reached", ENGINE.heap_allocs_config.max_number_of_textures);
 
 	_texture->pixels = (unsigned char*)malloc(_width * _height * _channels);
-	assert(_texture->pixels != NULL && "Could not allocate enough memory for memory texture pixels array");
+	rde_critical_error(_texture->pixels == NULL, -1, "Could not allocate enought memory (%d bytes) for texture pixels array", _width * _height * _channels);
 	memset(_texture->pixels, 0, _width * _height * _channels);
 	_texture->size = (rde_vec_2UI) { _width, _height };
 	_texture->channels = _channels;
@@ -416,7 +407,7 @@ rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, 
 }
 
 void rde_rendering_memory_texture_set_pixel(rde_texture* _memory_texture, rde_vec_2I _position, rde_color _color) {
-	assert(_memory_texture != NULL && _memory_texture->pixels != NULL && "Tried to set a pixel on a NULL memory texture or NULL pixel array");
+	rde_critical_error(_memory_texture == NULL || _memory_texture->pixels == NULL, -1, "Tried to set a pixel on a NULL memory texture or NULL pixel array");
 
 	rde_vec_2UI _t_size = _memory_texture->size;
 	int _channels = _memory_texture->channels;
@@ -432,7 +423,7 @@ void rde_rendering_memory_texture_set_pixel(rde_texture* _memory_texture, rde_ve
 }
 
 rde_color rde_rendering_memory_texture_get_pixel(rde_texture* _memory_texture, rde_vec_2I _position) {
-	assert(_memory_texture != NULL && _memory_texture->pixels && "Tried to get a pixel on a NULL memory texture");
+	rde_critical_error(_memory_texture == NULL || _memory_texture->pixels == NULL, -1, "Tried to get a pixel on a NULL memory texture");
 
 	rde_vec_2UI _t_size = _memory_texture->size;
 	int _channels = _memory_texture->channels;
@@ -449,12 +440,12 @@ rde_color rde_rendering_memory_texture_get_pixel(rde_texture* _memory_texture, r
 }
 
 unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_texture) {
-	assert(_memory_texture != NULL && _memory_texture->pixels && "Tried to get a pixel on a NULL memory texture");
+	rde_critical_error(_memory_texture == NULL || _memory_texture->pixels == NULL, -1, "Tried to get a pixel on a NULL memory texture");
 	return _memory_texture->pixels;
 }
 
 void rde_rendering_unload_texture(rde_texture* _texture) {
-	assert(_texture != NULL && "Error: Tried to unload a NULL texture");
+	rde_critical_error(_texture == NULL, -1, "Error: Tried to unload a NULL texture");
 	GLuint _id = (GLuint)_texture->opengl_texture_id;
 	glDeleteTextures(1, &_id);
 	_texture->opengl_texture_id = -1;
@@ -480,7 +471,7 @@ rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _conf
 		return _atlas;
 	}
 
-	assert(_texture != NULL && "Max number of loaded atlases reached");
+	rde_critical_error(_texture == NULL, -1, "Max number of loaded atlases (%d) reached", ENGINE.heap_allocs_config.max_number_of_textures);
 	return NULL;
 }
 
@@ -488,14 +479,14 @@ rde_texture* rde_rendering_get_atlas_sub_texture(rde_atlas* _atlas, const char* 
 	bool _exists = stbds_shgeti(_atlas->sub_textures, _texture_name) != -1;
 	if(!_exists) {
 		printf("Error: could not load sub texture %s for atlas at %s \n", _texture_name, _atlas->texture->file_path);
-		assert(false && "Tried to load an inexsitent sub texture in an atlas, check logs");
+		rde_critical_error(true, -1, "Tried to load an inexsitent sub texture in an atlas, check logs");
 	}
 
 	return &stbds_shget(_atlas->sub_textures, _texture_name);
 }
 
 void rde_rendering_unload_atlas(rde_atlas* _atlas) {
-	assert(_atlas != NULL && "Tried to unload a null atlas");
+	rde_critical_error(_atlas == NULL, -1, "Tried to unload a null atlas");
 	stbds_shfree(_atlas->sub_textures);
 	_atlas->sub_textures = NULL;
 	rde_rendering_unload_texture(_atlas->texture);
@@ -503,7 +494,7 @@ void rde_rendering_unload_atlas(rde_atlas* _atlas) {
 }
 
 void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture) {
-	assert(_memory_texture != NULL && "Tried to free a NULL memory texture");
+	rde_critical_error(_memory_texture == NULL, -1, "Tried to free a NULL memory texture");
 	free(_memory_texture->pixels);
 	_memory_texture->pixels = NULL;
 	_memory_texture->pixels_changed = false;
@@ -527,12 +518,12 @@ rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_conf
 		return _font;
 	}
 
-	assert(_texture != NULL && "Max number of loaded fonts reached");
+	rde_critical_error(_texture == NULL, -1, "Max number of loaded fonts (%d) reached", ENGINE.heap_allocs_config.max_number_of_fonts);
 	return NULL;
 }
 
 void rde_rendering_unload_font(rde_font* _font) {
-	assert(_font != NULL && "Tried to unload a null font");
+	rde_critical_error(_font == NULL, -1, "Tried to unload a null font");
 	stbds_arrfree(_font->chars);
 	_font->chars = NULL;
 	rde_rendering_unload_texture(_font->texture);

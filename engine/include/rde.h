@@ -1,6 +1,11 @@
 #ifndef RDE_H
 #define RDE_H
 
+//#define MINIAUDIO_IMPLEMENTATION
+//#include "miniaudio/miniaudio.h"
+//#include <stdlib.h>
+//#include <stdio.h>
+
 // This is needed because of C++ name mangling, if this lib is linked to a C++ project and is compiled,
 // without extern "C" won't work.
 #ifdef __cplusplus
@@ -334,27 +339,6 @@ extern "C" {
 
 /// ====================== COMPILATION AND EXPORT ==========================
 
-#ifndef NDEBUG
-#define ENGINE_DEBUG
-#endif
-
-#ifdef FORCE_DEBUG
-	#define ENGINE_DEBUG
-#endif
-
-#ifdef ENGINE_DEBUG
-	#if defined(_WIN32)
-		#define ENGINE_DEBUG_BREAK() __debugbreak()
-		#define ENGINE_ENABLE_ASSERTS
-	#elif defined(__linux__)
-		#include <signal.h>
-		#define ENGINE_DEBUG_BREAK() raise(SIGTRAP)
-		#define ENGINE_ENABLE_ASSERTS
-	#else
-		#define ENGINE_DEBUGBREAK()
-	#endif
-#endif
-
 #if defined(__APPLE__)
 	#include "TargetConditionals.h"
 	#if TARGET_OS_IPHONE
@@ -375,12 +359,6 @@ extern "C" {
 #define IS_APPLE() (IS_MAC() || IS_IOS())
 #define IS_ANDROID() (defined(__ANDROID__))
 #define IS_MOBILE() (IS_ANDROID() || IS_IOS())
-
-#ifdef ENGINE_ENABLE_ASSERTS
-	#define ENGINE_ASSERT(x, message) { if(!(x)) { std::cout << (message) << std::endl; ENGINE_DEBUG_BREAK(); } }
-#else
-	#define ENGINE_ASSERT(x, message)
-#endif
 
 #ifdef RDE_EXPORT
 	#define RDE_API [[gnu::visibility("default")]]
@@ -1623,7 +1601,7 @@ RDE_FUNC void rde_window_set_title(rde_window* _window, const char* _title);
 RDE_FUNC bool rde_window_orientation_is_horizontal(rde_window* _window);
 
 RDE_FUNC void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension);
-RDE_FUNC unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size);
+RDE_FUNC unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size); // returns a dynamic array of the pixels in a RGBA format (so 4 elements per pixel). User MUST free the returned array.
 
 RDE_FUNC float rde_window_get_aspect_ratio(rde_window* _window);
 
@@ -1699,7 +1677,7 @@ RDE_FUNC void rde_rendering_end_drawing_2d();
 
 #ifdef RDE_RENDERING_3D_MODULE
 RDE_FUNC rde_mesh* rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices.
-RDE_FUNC void rde_rendering_mesh_set_vertex_positions(rde_mesh* _mesh, float* _positions, bool _free_positons_on_destroy); // sets the position of the vertices, each position must have 3 floats (x, y, z)
+RDE_FUNC void rde_rendering_mesh_set_vertex_positions(rde_mesh* _mesh, float* _positions, bool _free_positions_on_destroy); // sets the position of the vertices, each position must have 3 floats (x, y, z)
 RDE_FUNC void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _indices, bool _free_indices_on_destroy); // sets the indices of the mesh, a quad should have 6 indices
 RDE_FUNC void rde_rendering_mesh_set_vertex_colors(rde_mesh* _mesh, unsigned int* _colors, bool _free_colors_on_destroy); // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example)
 RDE_FUNC void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, bool _free_normals_on_destroy); // sets the normals of the vertices, each position must have 3 floats (x, y, z)

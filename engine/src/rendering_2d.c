@@ -7,7 +7,7 @@ void rde_rendering_init_2d() {
 	rde_rendering_generate_gl_vertex_config_for_quad_2d(&current_batch_2d);
 
 	current_batch_2d.vertices = (rde_vertex_2d*)malloc(sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
-	assert(current_batch_2d.vertices != NULL && "Could not allocate enough memory for batch 2d vertices array");
+	rde_critical_error(current_batch_2d.vertices == NULL, -1, "Could not allocate enought memory (%d bytes) for batch 2d vertices", sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
 }
 
 void rde_rendering_end_2d() {
@@ -88,7 +88,6 @@ void rde_rendering_flush_batch_2d() {
 	glm_mat4_inv(_view_matrix, _view_matrix_inv);
 	glm_mat4_mul(projection_matrix, _view_matrix_inv, _view_projection_matrix);
 
-	rde_log_level(RDE_LOG_LEVEL_INFO, "%d \n", glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"));
 	glUniformMatrix4fv(glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 	rde_util_check_opengl_error("After UseProgram");
 
@@ -132,7 +131,7 @@ void rde_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _t
 }
 
 void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
-	assert(current_drawing_camera == NULL || _window == NULL && "Tried to begin drawing again before ending the previous one or provided _camera or _window = NULL");
+	rde_critical_error(_camera == NULL || _window == NULL, -1, "Tried to begin drawing again before ending the previous one or provided _camera or _window = NULL");
 	current_drawing_camera = _camera;
 	current_drawing_window = _window;
 	current_batch_2d.texture = rde_struct_create_texture();
@@ -390,6 +389,8 @@ void rde_rendering_draw_texture_2d(const rde_transform* _transform, const rde_te
 }
 
 void rde_rendering_draw_memory_texture_2d(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
+	rde_log_level(RDE_LOG_LEVEL_WARNING, "THIS FUNCTION IS CORRPUTING 3D MESHES TEXTURE. To reproduce just draw a memory texture and then a 3d mesh");
+	
 	if(_texture->opengl_texture_id == -1) {
 		GLenum _internal_format = 0, _data_format = 0;
 		if (_texture->channels == 4) {
