@@ -2174,12 +2174,21 @@ void print_help() {
 	"	- rendering_2d\n"
 	"	- rendering_3d\n"
 	"	- ui\n"
+	"	- error\n"
 	"Each of them can be added to your library. Have in mind that adding 'physics_3d' will add Jolt Physics Engine to your depenency list, in case \n"
 	"you are building a static lib, you will probably have to add the Jolt lib to your build system.\n"
 	"To add any of the modules use --modules= (or -m=) followed by an array of the included modules, for example:\n"
 	"	--modules=\"[rendering_2d,rendering_3d,audio]\" \n\n"
 	"Have in mind that the only module added by default to the library is 'rendering_2d'. If you specify --module option and you still \n"
 	"want 'rendering_2d', you MUST include it in the modules list.\n"
+	"Modules Description:"
+	"	- audio: adds basic audio control, such as loading/unloading sounds, mixing them, play/pause/stop sounds, modify volume, pitches...\n"
+	"	- physics_2d: basic 2D physics engine, with collisions, rigidbodies, handlers...\n"
+	"	- physics_3d: 3d physics engine with jolt.\n"
+	"	- rendering_2d: adds 2D rendering for 2D textures in a batched mode.\n"
+	"	- rendering_3d: adds 3D rendering for custom meshes, models and basic lighting.\n"
+	"	- ui: adds custom inmediate mode UI.\n"
+	"	- error: adds handling for the most common error crashes and prints the stacktrace of the crash to the logs of the console (in debug) and to a error log file (in release).\n"
 	"\n\n";
 
 	printf("%s", _help_message);
