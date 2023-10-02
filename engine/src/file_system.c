@@ -4,10 +4,10 @@ rde_atlas_sub_textures* rde_file_system_read_atlas_config(const char* _atlas_pat
 
 	#if IS_WINDOWS()
 		errno_t _err = fopen_s(&_file, _atlas_path, "r");
-		rde_critical_error(_err != 0, -1, "File '%s' could not be opened", _atlas_path);
+		rde_critical_error(_err != 0, RDE_ERROR_FILE_NOT_FOUND, _atlas_path);
 	#else
 		_file = fopen(_atlas_path, "r");
-		rde_critical_error(_file == NULL, -1, "File '%s' could not be opened", _atlas_path);
+		rde_critical_error(_file == NULL, RDE_ERROR_FILE_NOT_FOUND, _atlas_path);
 	#endif
 
 	long _num_bytes = 0;
@@ -16,7 +16,7 @@ rde_atlas_sub_textures* rde_file_system_read_atlas_config(const char* _atlas_pat
 	fseek(_file, 0L, SEEK_SET);
 
 	_text = (char*)calloc(_num_bytes, sizeof(char));
-	rde_critical_error(_text == NULL, -1, "Could not allocate enought memory (%d bytes) for reading the config file", _num_bytes);
+	rde_critical_error(_text == NULL, RDE_ERROR_NO_MEMORY, _num_bytes, "config file");
 	fread(_text, sizeof(char), _num_bytes, _file);
 
 
@@ -25,8 +25,7 @@ rde_atlas_sub_textures* rde_file_system_read_atlas_config(const char* _atlas_pat
 
 	if(_atlas_json == NULL) {
 		const char* _error_ptr = cJSON_GetErrorPtr();
-		printf("Error: Could not load JSON from file '%s' due to error '%s' \n", _atlas_path, _error_ptr);
-		exit(-1);
+		rde_critical_error(true, RDE_ERROR_JSON, _atlas_path, _error_ptr);
 	}
 
 	cJSON* _sub_texture_json = NULL;
@@ -65,10 +64,10 @@ rde_font_char_info* rde_file_system_read_font_config(const char* _font_path, rde
 
 	#if IS_WINDOWS()
 	errno_t _err = fopen_s(&_file, _font_path, "r");
-	rde_critical_error(_err != 0, -1, "File '%s' could not be opened", _font_path);
+	rde_critical_error(_err != 0, RDE_ERROR_FILE_NOT_FOUND, _font_path);
 	#else
 	_file = fopen(_font_path, "r");
-	rde_critical_error(_file == NULL, -1, "File '%s' could not be opened", _font_path);
+	rde_critical_error(_file == NULL, RDE_ERROR_FILE_NOT_FOUND, _font_path);
 	#endif
 
 	long _num_bytes = 0;
@@ -77,7 +76,7 @@ rde_font_char_info* rde_file_system_read_font_config(const char* _font_path, rde
 	fseek(_file, 0L, SEEK_SET);
 
 	_text = (char*)calloc(_num_bytes, sizeof(char));
-	rde_critical_error(_text == NULL, -1, "Could not allocate enought memory (%d bytes) for reading the config file", _num_bytes);
+	rde_critical_error(_text == NULL, RDE_ERROR_NO_MEMORY, _num_bytes, "config file");
 	fread(_text, sizeof(char), _num_bytes, _file);
 
 
@@ -86,8 +85,7 @@ rde_font_char_info* rde_file_system_read_font_config(const char* _font_path, rde
 
 	if(_font_json == NULL) {
 		const char* _error_ptr = cJSON_GetErrorPtr();
-		printf("Error: Could not load JSON from file '%s' due to error '%s' \n", _font_path, _error_ptr);
-		exit(-1);
+		rde_critical_error(true, RDE_ERROR_JSON, _font_path, _error_ptr);
 	}
 
 	cJSON* _char_info_json = NULL;

@@ -27,7 +27,7 @@ void rde_rendering_transform_to_glm_mat4_3d(const rde_transform* _transform, mat
 }
 
 rde_mesh* rde_struct_create_mesh(size_t _vertex_count, size_t _index_count) {
-	rde_critical_error(_vertex_count <= 3 || _index_count <= 3, -1, "Error while creating mesh, _vertex_count = %d and _index_count = %d. _vertex_count must be >= 3 and _index_count >= 3", _vertex_count, _index_count);
+	rde_critical_error(_vertex_count <= 3 || _index_count <= 3, RDE_ERROR_BAD_MESH_DATA, _vertex_count, _index_count);
 
 	rde_mesh* _mesh = (rde_mesh*)malloc(sizeof(rde_mesh));
 	glGenVertexArrays(1, &_mesh->vao);
@@ -60,8 +60,8 @@ rde_mesh* rde_struct_create_mesh(size_t _vertex_count, size_t _index_count) {
 }
 
 void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _indices, bool _free_indices_on_destroy) {
-	rde_critical_error(_mesh == NULL, -1, "Tried to set indices data on a NULL mesh");
-	rde_critical_error(_indices == NULL, -1, "Tried to set NULL indices data on a mesh");
+	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
+	rde_critical_error(_indices == NULL, RDE_ERROR_NO_NULL_ALLOWED, "indices");
 	
 	size_t _indices_size = sizeof(unsigned int) * _mesh->index_count;
 	glBindVertexArray(_mesh->vao);
@@ -82,8 +82,8 @@ void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _indices, boo
 }
 
 void rde_rendering_mesh_set_vertex_positions(rde_mesh* _mesh, float* _positions, bool _free_positions_on_destroy) {
-	rde_critical_error(_mesh == NULL, -1, "Tried to set positions data on a NULL mesh");
-	rde_critical_error(_positions == NULL, -1, "Tried to set NULL positions data on a mesh");
+	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
+	rde_critical_error(_positions == NULL, RDE_ERROR_NO_NULL_ALLOWED, "positions");
 
 	size_t _positions_size = sizeof(float) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION;
 	glBindVertexArray(_mesh->vao);
@@ -106,8 +106,8 @@ void rde_rendering_mesh_set_vertex_positions(rde_mesh* _mesh, float* _positions,
 }
 
 void rde_rendering_mesh_set_vertex_colors(rde_mesh* _mesh, unsigned int* _colors, bool _free_colors_on_destroy) {
-	rde_critical_error(_mesh == NULL, -1, "Tried to set colors data on a NULL mesh");
-	rde_critical_error(_colors == NULL, -1, "Tried to set NULL colors data on a mesh");
+	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
+	rde_critical_error(_colors == NULL, RDE_ERROR_NO_NULL_ALLOWED, "colors");
 
 	size_t _colors_size = sizeof(unsigned int) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_COLOR;
 	glBindVertexArray(_mesh->vao);
@@ -130,8 +130,8 @@ void rde_rendering_mesh_set_vertex_colors(rde_mesh* _mesh, unsigned int* _colors
 }
 
 void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, bool _free_normals_on_destroy) {
-	rde_critical_error(_mesh == NULL, -1, "Tried to set normals data on a NULL mesh");
-	rde_critical_error(_normals == NULL, -1, "Tried to set NULL normals data on a mesh");
+	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
+	rde_critical_error(_normals == NULL, RDE_ERROR_NO_NULL_ALLOWED, "normals");
 
 	size_t _normals_size = sizeof(float) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL;
 	glBindVertexArray(_mesh->vao);
@@ -154,9 +154,9 @@ void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, boo
 }
 
 void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, float* _texture_coords, rde_texture* _texture, bool _free_texture_coords_on_destroy) {
-	rde_critical_error(_mesh == NULL, -1, "Tried to set texture data on a NULL mesh");
-	rde_critical_error(_texture_coords == NULL, -1, "Tried to set NULL texture coordinates data on a mesh");
-	rde_critical_error(_texture == NULL, -1, "Tried to set NULL texture data on a mesh");
+	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
+	rde_critical_error(_texture_coords == NULL, RDE_ERROR_NO_NULL_ALLOWED, "texture coordinates");
+	rde_critical_error(_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "texture");
 
 	size_t _texture_coords_size = sizeof(unsigned int) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD;
 	glBindVertexArray(_mesh->vao);
@@ -204,7 +204,7 @@ bool rde_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 }
 
 void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
-	rde_critical_error(_mesh == NULL, -1, "Tried to set texture data on a NULL mesh");
+	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
 
 	glDeleteBuffers(1, &_mesh->vbo[0]);
 	glDeleteBuffers(1, &_mesh->vbo[1]);
@@ -238,6 +238,8 @@ void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
 
 
 void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window) {
+	rde_critical_error(_camera == NULL || _window == NULL, RDE_ERROR_BEGIN_RENDER);
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 

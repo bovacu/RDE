@@ -31,27 +31,18 @@ rde_window* rde_inner_window_create_windows_window(size_t _free_window_index) {
 
 	char _title[16];
 	snprintf(_title, 10, "%d", (int)_free_window_index);
+
 	_window->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	rde_critical_error(_window->sdl_window == NULL, RDE_ERROR_SDL_WINDOW, SDL_GetError());
 
-	if(_window->sdl_window == NULL) {
-		printf("SDL window creation failed: %s \n", SDL_GetError());
-		exit(-1);
-	}
 	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
-
-	if(_window->sdl_gl_context == NULL) {
-		printf("OpenGL context couldn't initialize -> %s \n", SDL_GetError());
-		exit(-1);
-	}
+	rde_critical_error(_window->sdl_gl_context == NULL, RDE_ERROR_SDL_OPENGL, SDL_GetError());
 
 	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
 
-	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-		printf("Failed to initialize GLAD \n");
-		exit(-1);
-	}
+	rde_critical_error(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), RDE_ERROR_GLAD_INIT);
 	
-	printf("GLAD and SDL2 loaded successfully \n");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "GLAD and SDL2 loaded successfully");
 
 	SDL_GL_SetSwapInterval(1);
 
@@ -80,26 +71,16 @@ rde_window* rde_inner_window_create_mac_window(size_t _free_window_index) {
 	char _title[16];
 	snprintf(_title, 10, "%d", (int)_free_window_index);
 	_window->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	rde_critical_error(_window->sdl_window == NULL, RDE_ERROR_SDL_WINDOW, SDL_GetError());
 
-	if(_window->sdl_window == NULL) {
-		printf("SDL window creation failed: %s \n", SDL_GetError());
-		exit(-1);
-	}
 	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
-
-	if(_window->sdl_gl_context == NULL) {
-		printf("OpenGL context couldn't initialize -> %s \n", SDL_GetError());
-		exit(-1);
-	}
+	rde_critical_error(_window->sdl_gl_context == NULL, RDE_ERROR_SDL_OPENGL, SDL_GetError());
 
 	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
 
-	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-		printf("Failed to initialize GLAD \n");
-		exit(-1);
-	}
+	rde_critical_error(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), RDE_ERROR_GLAD_INIT);
 	
-	printf("GLAD and SDL2 loaded successfully \n");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "GLAD and SDL2 loaded successfully");
 
 	SDL_GL_SetSwapInterval(1);
 
@@ -134,25 +115,16 @@ rde_window* rde_inner_window_create_linux_window(size_t _free_window_index) {
 	char _title[16];
 	snprintf(_title, 10, "%d", (int)_free_window_index);
 	_window->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	rde_critical_error(_window->sdl_window == NULL, RDE_ERROR_SDL_WINDOW, SDL_GetError());
 
-	if(_window->sdl_window == NULL) {
-		printf("OpenGL context couldn't initialize -> %s \n", SDL_GetError());
-		exit(-1);
-	}
 	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
-
-	if(_window->sdl_gl_context == NULL) {
-		printf("OpenGL context couldn't initialize -> %s \n", SDL_GetError());
-		exit(-1);
-	}
+	rde_critical_error(_window->sdl_gl_context == NULL, RDE_ERROR_SDL_OPENGL, SDL_GetError());
 
 	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
 
-	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-		printf("Failed to initialize GLAD \n");
-		exit(-1);
-	}
-	printf("GLAD and SDL2 loaded successfully \n");
+	rde_critical_error(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), RDE_ERROR_GLAD_INIT);
+	
+	rde_log_level(RDE_LOG_LEVEL_INFO, "GLAD and SDL2 loaded successfully");
 
 	SDL_GL_SetSwapInterval(1);
 
@@ -194,7 +166,7 @@ rde_window* rde_window_create_window() {
 		if(ENGINE.windows[_i].sdl_window != NULL) {
 
 			if(_i == ENGINE.heap_allocs_config.max_number_of_windows - 1) {
-				rde_critical_error(true, -1, "Max number of loaded windows (%d) reached", ENGINE.heap_allocs_config.max_number_of_windows);
+				rde_critical_error(true, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "windows", ENGINE.heap_allocs_config.max_number_of_windows);
 			}
 
 			continue;
@@ -212,7 +184,7 @@ rde_window* rde_window_create_window() {
 	#elif IS_MAC()
 		_window = rde_inner_window_create_mac_window(_free_window_index);
 	#else
-		rde_critical_error(true, -1, "Unsupported or unimplemented platform");
+		rde_critical_error(true, RDE_ERROR_UNSUPPORTED_PLATFORM);
 	#endif
 	
 	memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
@@ -269,7 +241,7 @@ void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_
 unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size) {
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	unsigned char* _pixels = (unsigned char*)malloc(sizeof(unsigned char) * (4 * _window_size.x * _window_size.y));
-	rde_critical_error(_pixels == NULL, -1, "Could not allocate enought memory (%d bytes) for pixels array for screenshot", 4 * _window_size.x * _window_size.y);
+	rde_critical_error(_pixels == NULL, RDE_ERROR_NO_MEMORY, 4 * _window_size.x * _window_size.y, "pixels array for screenshot");
 	memset(_pixels, 0, 4 * _window_size.x * _window_size.y);
 	glReadPixels((int)(_window_size.x * 0.5f + _position.x - _size.x * 0.5f ), (int)(_window_size.y * 0.5f + _position.y - _size.y * 0.5f),
 	             _size.x, _size.y, GL_RGBA, GL_UNSIGNED_BYTE, _pixels);
@@ -295,7 +267,7 @@ void rde_window_set_icon(rde_window* _window, const char* _path_to_icon) {
 	stbi_set_flip_vertically_on_load(0);
 	stbi_uc* _data = stbi_load(_path_to_icon, &_width, &_height, &_channels, 0);
 	if(_data == NULL) {
-		printf("Error while loading icon at '%s' \n", _path_to_icon);
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Error while loading icon at '%s'", _path_to_icon);
 		return;
 	}
 	

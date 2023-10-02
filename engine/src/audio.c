@@ -23,50 +23,31 @@ void data_callback(ma_device* _device, void* _output, const void* _input, ma_uin
 // ======================= API ===========================
 
 void rde_audio_init(rde_sound_config _config) {
-	ma_result result;
-	ma_context context;
-	ma_device_info* pPlaybackDeviceInfos;
-	ma_uint32 playbackDeviceCount;
-	ma_device_info* pCaptureDeviceInfos;
-	ma_uint32 captureDeviceCount;
-	ma_uint32 iDevice;
+	ma_context _context;
+	ma_device_info* _playback_devices_info;
+	ma_uint32 _playback_device_count;
+	ma_device_info* _capture_device_infos;
+	ma_uint32 _capture_device_count;
+	// ma_uint32 iDevice;
 
-	if (ma_context_init(NULL, 0, NULL, &context) != MA_SUCCESS) {
-		printf("Failed to initialize context.\n");
-		exit(-1);
-	}
+	rde_critical_error(ma_context_init(NULL, 0, NULL, &_context) != MA_SUCCESS, RDE_ERROR_MA_CONTEXT);
+	rde_critical_error(ma_context_get_devices(&_context, &_playback_devices_info, &_playback_device_count, &_capture_device_infos, &_capture_device_count) != MA_SUCCESS, RDE_ERROR_MA_DEVICE_INFO);
 
-	result = ma_context_get_devices(&context, &pPlaybackDeviceInfos, &playbackDeviceCount, &pCaptureDeviceInfos, &captureDeviceCount);
-	if (result != MA_SUCCESS) {
-		printf("Failed to retrieve device information.\n");
-		exit(-1);
-	}
-
-	printf("Playback Devices\n");
-	for (iDevice = 0; iDevice < playbackDeviceCount; ++iDevice) {
-		printf("    %u: %s\n", iDevice, pPlaybackDeviceInfos[iDevice].name);
-	}
+	// printf("Playback Devices\n");
+	// for (iDevice = 0; iDevice < _playback_device_count; ++iDevice) {
+	// 	printf("    %u: %s\n", iDevice, _playback_devices_info[iDevice].name);
+	// }
 
 	ma_device_config _device_config = ma_device_config_init(ma_device_type_playback);
 	_device_config.playback.format = DEFAULT_FORMAT;
 	_device_config.playback.channels = _config.channels;
-	//_device_config.playback.pDeviceID = &pPlaybackDeviceInfos[2].id;
+	//_device_config.playback.pDeviceID = &_playback_devices_info[2].id;
 	_device_config.sampleRate = _config.rate;
 	_device_config.dataCallback = data_callback;
 	_device_config.pUserData = NULL;
 
-	ma_result _result = ma_device_init(NULL, &_device_config, &ENGINE.miniaudio_device);
-	if(_result != MA_SUCCESS) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not init audio module -> error code for MiniAudio %d", _result);
-		exit(-1);
-	}
-
-	_result = ma_device_start(&ENGINE.miniaudio_device) != MA_SUCCESS;
-	if(_result != MA_SUCCESS) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not start the audio module to play sounds -> error code for MiniAudio %d", _result);
-		rde_audio_end();
-		exit(-1);
-	}
+	rde_critical_error(ma_device_init(NULL, &_device_config, &ENGINE.miniaudio_device) != MA_SUCCESS, RDE_ERROR_MA_DEVICE_INIT);
+	rde_critical_error(ma_device_start(&ENGINE.miniaudio_device) != MA_SUCCESS, RDE_ERROR_MA_DEVICE_START);
 
 	is_miniaudio_initialized = true;
 	ENGINE.device_config = _config;
@@ -86,29 +67,26 @@ rde_sound* rde_audio_load_sound(const char* _sound_path) {
 		}
 	}
 
-	rde_critical_error(_sound == NULL, -1, "Max number of loaded sounds (%d) reached", ENGINE.heap_allocs_config.max_number_of_sounds);
+	rde_critical_error(_sound == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "sounds", ENGINE.heap_allocs_config.max_number_of_sounds);
 	ma_decoder_config _decoder_config = ma_decoder_config_init(DEFAULT_FORMAT, 
 	                                                           ENGINE.device_config.channels, 
 	                                                           ENGINE.device_config.rate);
-	ma_result _result = ma_decoder_init_file(_sound_path, &_decoder_config, &_sound->miniaudio_decoder);
 
-	if(_result != MA_SUCCESS) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not load sound '%s' -> error code for MiniAudio %d", _sound_path, _result);
-		exit(-1);
-	}
+	ma_result _result = ma_decoder_init_file(_sound_path, &_decoder_config, &_sound->miniaudio_decoder);
+	rde_critical_error(_result != MA_SUCCESS, RDE_ERROR_MA_FILE_NOT_FOUND, _sound_path, _result);
 
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Loaded sound '%s' correctly", _sound_path);
 	return _sound;
 }
 
 void rde_audio_unload_sound(rde_sound* _sound) {
-	rde_critical_error(_sound == NULL, -1, "Tried to unload a NULL sound");
+	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
 	ma_decoder_uninit(&_sound->miniaudio_decoder);
 	_sound->used = false;
 }
 
 void rde_audio_play_sound(rde_sound* _sound) {
-	rde_critical_error(_sound == NULL, -1, "Tried to play a NULL sound");
+	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
 
 	_sound->playing = true;
 	_sound->paused = false;

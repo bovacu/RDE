@@ -1,3 +1,65 @@
+#define RDE_ERROR_NO_MEMORY "Could not allocate enought memory (%d bytes) for %s."
+#define RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED "Max number of loaded %s (%d) reached."
+#define RDE_ERROR_NO_NULL_ALLOWED "Tried to use a NULL %s."
+#define RDE_ERROR_FILE_NOT_FOUND "File '%s' not found or could not open it."
+#define RDE_ERROR_JSON "Could not load JSON from file '%s' due to error '%s'."
+#define RDE_ERROR_HEAP_ALLOC_BAD_VALUE "Heap Allocs Congig -> number of %s cannot be <= 0 and %d was provided."
+#define RDE_ERROR_MULTIPLE_ENGINE "Only one engine can be created."
+#define RDE_ERROR_NULL_MANDATORY_CALLBACK "User-End callback %s' is not defined, before creating the engine call 'rde_setup_initial_info(...)'."
+#define RDE_ERROR_UNSUPPORTED_PLATFORM "Unsupported or unimplemented platform."
+#define RDE_ERROR_ATLAS_SUB_TEXTURE "Could not load sub texture %s for atlas at %s."
+#define RDE_ERROR_BEGIN_RENDER "Tried to begin drawing again before ending the previous one or provided 'camera' or 'window' = NULL."
+#define RDE_ERROR_BAD_MESH_DATA "Error while creating mesh, _vertex_count = %d and _index_count = %d. _vertex_count must be >= 3 and _index_count >= 3."
+#define RDE_ERROR_SDL_WINDOW "SDL window creation failed: %s."
+#define RDE_ERROR_SDL_OPENGL "OpenGL context couldn't initialize: %s."
+#define RDE_ERROR_GLAD_INIT "Failed to initialize GLAD."
+#define RDE_ERROR_MA_CONTEXT "Failed to initialize context."
+#define RDE_ERROR_MA_DEVICE_INFO "Failed to retrieve device information."
+#define RDE_ERROR_MA_DEVICE_INIT "Could not init audio device. Error code for MiniAudio %d"
+#define RDE_ERROR_MA_DEVICE_START "Could not start the audio device to play sounds. Error code for MiniAudio %d"
+#define RDE_ERROR_MA_FILE_NOT_FOUND "Could not load sound '%s'. error code for MiniAudio %d."
+
+void rde_critical_error(bool _condition, const char* _fmt, ...) {
+	
+	if(!_condition) {
+		return;
+	}
+
+#ifdef RDE_DEBUG
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check 'rde_crash_logs.txt'");
+#else
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check below");
+#endif
+
+	FILE* _f = NULL;
+	
+#if IS_WINDOWS()
+	fopen_s(&_f, "rde_crash_logs.txt", "w");
+#else
+	_f = fopen("rde_crash_logs.txt", "w");
+#endif
+
+	va_list _args;
+	va_start(_args, _fmt);
+	
+#ifdef RDE_DEBUG
+	vfprintf(stdout, _fmt, _args);
+#else
+	vfprintf(_f, _fmt, _args);
+#endif
+	va_end(_args);
+	fclose(_f);
+	
+	rde_engine_destroy_engine();
+
+#ifdef RDE_DEBUG
+	assert(false);
+#else
+	exit(-1);
+#endif
+}
+
+
 #ifdef RDE_ERROR_MODULE
 
 #include <signal.h>

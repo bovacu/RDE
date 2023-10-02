@@ -17,48 +17,6 @@
 
 #include "errors.c"
 
-void rde_critical_error(bool _condition, int _error_code, const char* _fmt, ...) {
-	
-	if(!_condition) {
-		return;
-	}
-
-#ifdef RDE_DEBUG
-	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check 'rde_crash_logs.txt'");
-#else
-	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check below");
-#endif
-
-	FILE* _f = NULL;
-	
-#if IS_WINDOWS()
-	fopen_s(&_f, "rde_crash_logs.txt", "w");
-#else
-	_f = fopen("rde_crash_logs.txt", "w");
-#endif
-
-	va_list _args;
-	va_start(_args, _fmt);
-	
-#ifdef RDE_DEBUG
-	vfprintf(stdout, _fmt, _args);
-	fprintf(stdout, "\n\nExit code: %d", _error_code);
-#else
-	vfprintf(_f, _fmt, _args);
-	fprintf(_f, "\n\nExit code: %d", _error_code);
-#endif
-	va_end(_args);
-	fclose(_f);
-	
-	rde_engine_destroy_engine();
-
-#ifdef RDE_DEBUG
-	assert(false);
-#else
-	exit(_error_code);
-#endif
-}
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -399,23 +357,23 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.text_shader_2d = NULL;
 	_e.frame_buffer_shader = NULL;
 
-	rde_critical_error(_e.heap_allocs_config.max_number_of_shaders <= 0, -1, "Heap Allocs Congig -> number of shaders cannot be <= 0 and %d was provided", _e.heap_allocs_config.max_number_of_shaders);
+	rde_critical_error(_e.heap_allocs_config.max_number_of_shaders <= 0, RDE_ERROR_HEAP_ALLOC_BAD_VALUE, "shaders", _e.heap_allocs_config.max_number_of_shaders);
 	_e.shaders = (rde_shader*)malloc(sizeof(rde_shader) * _e.heap_allocs_config.max_number_of_shaders);
-	rde_critical_error(_e.shaders == NULL, -1, "Could not allocate enought memory (%d bytes) for shaders", sizeof(rde_shader) * _e.heap_allocs_config.max_number_of_shaders);
+	rde_critical_error(_e.shaders == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_shader) * _e.heap_allocs_config.max_number_of_shaders, "shaders");
 	for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_shaders; _i++) {
 		_e.shaders[_i] = rde_struct_create_shader();
 	}
 
-	rde_critical_error(_e.heap_allocs_config.max_number_of_windows <= 0, -1, "Heap Allocs Congig -> number of windows cannot be <= 0 and %d was provided", _e.heap_allocs_config.max_number_of_windows);
+	rde_critical_error(_e.heap_allocs_config.max_number_of_windows <= 0, RDE_ERROR_HEAP_ALLOC_BAD_VALUE, "windows", _e.heap_allocs_config.max_number_of_windows);
 	_e.windows = (rde_window*)malloc(sizeof(rde_window) * _e.heap_allocs_config.max_number_of_windows);
-	rde_critical_error(_e.windows == NULL, -1, "Could not allocate enought memory (%d bytes) for windows", sizeof(rde_window) * _e.heap_allocs_config.max_number_of_windows);
+	rde_critical_error(_e.windows == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_window) * _e.heap_allocs_config.max_number_of_windows, "windows");
 	for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_windows; _i++) {
 		_e.windows[_i] = rde_struct_create_window();
 	}
 
 	if (_e.heap_allocs_config.max_number_of_textures > 0) {
 		_e.textures = (rde_texture*)malloc(sizeof(rde_texture) * _e.heap_allocs_config.max_number_of_textures);
-		rde_critical_error(_e.textures == NULL, -1, "Could not allocate enought memory (%d bytes) for textures", sizeof(rde_texture) * _e.heap_allocs_config.max_number_of_textures);
+		rde_critical_error(_e.textures == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_texture) * _e.heap_allocs_config.max_number_of_textures, "textures");
 		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_textures; _i++) {
 			_e.textures[_i] = rde_struct_create_texture();
 		}
@@ -425,7 +383,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	if(_e.heap_allocs_config.max_number_of_textures > 0) {
 		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_textures);
-		rde_critical_error(_e.atlases == NULL, -1, "Could not allocate enought memory (%d bytes) for atlases", sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_textures);
+		rde_critical_error(_e.atlases == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_textures, "atlases");
 		for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_textures; _i++) {
 			_e.atlases[_i] = rde_struct_create_atlas();
 		}
@@ -435,7 +393,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	if (_e.heap_allocs_config.max_number_of_fonts > 0) {
 		_e.fonts = (rde_font*)malloc(sizeof(rde_font) * _e.heap_allocs_config.max_number_of_fonts);
-		rde_critical_error(_e.fonts == NULL, -1, "Could not allocate enought memory (%d bytes) for fonts", sizeof(rde_font) * _e.heap_allocs_config.max_number_of_fonts);
+		rde_critical_error(_e.fonts == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_font) * _e.heap_allocs_config.max_number_of_fonts, "fonts");
 		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_fonts; _i++) {
 			_e.fonts[_i] = rde_struct_create_font();
 		}
@@ -446,7 +404,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 #ifdef RDE_AUDIO_MODULE
 	if (_e.heap_allocs_config.max_number_of_sounds > 0) {
 		_e.sounds = (rde_sound*)malloc(sizeof(rde_sound) * _e.heap_allocs_config.max_number_of_sounds);
-		rde_critical_error(_e.sounds == NULL, -1, "Could not allocate enought memory (%d bytes) for audio", sizeof(rde_font) * _e.heap_allocs_config.max_number_of_sounds);
+		rde_critical_error(_e.sounds == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_font) * _e.heap_allocs_config.max_number_of_sounds, "audio");
 		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_sounds; _i++) {
 			_e.sounds[_i] = rde_struct_create_sound();
 		}
@@ -586,11 +544,8 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	UNUSED(_argc)
 	UNUSED(_argv)
 	
-	if(_instantiated) {
-		rde_critical_error(true, -1, "Only one engine can be created");
-		exit(-1);
-	}
-
+	rde_critical_error(_instantiated, RDE_ERROR_MULTIPLE_ENGINE);
+	
 	ENGINE = rde_struct_create_engine(_heap_allocs_config);
 
 	stbds_rand_seed(time(NULL));
@@ -632,10 +587,10 @@ void rde_engine_set_fixed_delta(float _delta_time) {
 
 void rde_engine_on_run() {
 
-	rde_critical_error(ENGINE.mandatory_callbacks.on_update == NULL, -1, "User-End callback 'rde_engine_user_on_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
-	rde_critical_error(ENGINE.mandatory_callbacks.on_fixed_update == NULL, -1, "User-End callback 'rde_engine_user_on_fixed_update' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
-	rde_critical_error(ENGINE.mandatory_callbacks.on_late_update == NULL, -1, "User-End callback 'rde_engine_user_on_late_upadte' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
-	rde_critical_error(ENGINE.mandatory_callbacks.on_render == NULL, -1, "User-End callback 'rde_engine_user_on_render' is not defined, before creating the engine call 'rde_setup_initial_info(...)'");
+	rde_critical_error(ENGINE.mandatory_callbacks.on_update == NULL, RDE_ERROR_NULL_MANDATORY_CALLBACK, "rde_engine_user_on_update");
+	rde_critical_error(ENGINE.mandatory_callbacks.on_fixed_update == NULL, RDE_ERROR_NULL_MANDATORY_CALLBACK, "rde_engine_user_on_fixed_update");
+	rde_critical_error(ENGINE.mandatory_callbacks.on_late_update == NULL, RDE_ERROR_NULL_MANDATORY_CALLBACK, "rde_engine_user_on_late_upadte");
+	rde_critical_error(ENGINE.mandatory_callbacks.on_render == NULL, RDE_ERROR_NULL_MANDATORY_CALLBACK, "rde_engine_user_on_render");
 
 	#if IS_MOBILE()
 	SDL_SetEventFilter(rde_mobile_consume_events);

@@ -7,7 +7,7 @@ void rde_rendering_init_2d() {
 	rde_rendering_generate_gl_vertex_config_for_quad_2d(&current_batch_2d);
 
 	current_batch_2d.vertices = (rde_vertex_2d*)malloc(sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
-	rde_critical_error(current_batch_2d.vertices == NULL, -1, "Could not allocate enought memory (%d bytes) for batch 2d vertices", sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
+	rde_critical_error(current_batch_2d.vertices == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch, "2d batch vertices");
 }
 
 void rde_rendering_end_2d() {
@@ -131,7 +131,7 @@ void rde_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _t
 }
 
 void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
-	rde_critical_error(_camera == NULL || _window == NULL, -1, "Tried to begin drawing again before ending the previous one or provided _camera or _window = NULL");
+	rde_critical_error(_camera == NULL || _window == NULL, RDE_ERROR_BEGIN_RENDER);
 	current_drawing_camera = _camera;
 	current_drawing_window = _window;
 	current_batch_2d.texture = rde_struct_create_texture();
