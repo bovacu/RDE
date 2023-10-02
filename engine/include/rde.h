@@ -215,24 +215,34 @@ extern "C" {
 	"\n" \
 	"layout(location = 0) in vec3 in_pos;\n" \
 	"layout(location = 1) in vec4 in_color;\n" \
+	"layout(location = 2) in vec3 in_normal;\n" \
+	"layout(location = 3) in vec2 in_text_coord;\n" \
 	"\n" \
 	"out vec4 color;\n" \
+	"out vec3 normal;\n" \
+	"out vec2 text_coord;\n" \
 	"uniform mat4 view_projection_matrix;\n" \
 	"\n" \
 	"void main(){	\n" \
 	"	gl_Position =  view_projection_matrix * vec4(in_pos, 1);\n" \
 	"	color = in_color;\n" \
+	"	normal = in_normal;\n" \
+	"	text_coord = in_text_coord;\n" \
 	"}"
 
 #define RDE_MESH_VERTEX_FRAGMENT "" \
 	"#version 330 core\n" \
 	"\n" \
 	"in vec4 color;\n" \
+	"in vec3 normal;\n" \
+	"in vec2 text_coord;\n" \
+	"\n" \
+	"uniform sampler2D tex;\n" \
 	"\n" \
 	"out vec4 out_color;\n" \
 	"\n" \
 	"void main(){\n" \
-	"	gl_FragColor = vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);\n" \
+	"	gl_FragColor = texture(tex, text_coord) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);\n" \
 	"}"
 
 
@@ -427,32 +437,34 @@ extern "C" {
 /// ==================== GENERIC FUNCS AND STRUCTS ==========================
 
 #if IS_WINDOWS()
-#define RDE_MAIN(_window, _heap_allocs_config, _mandatory_callbacks, _init_func)\
-	int main(int _argc, char** _argv) {											\
-		RDE_SHOW_WINDOWS_CONSOLE												\
-																				\
-		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);	\
-		rde_setup_initial_info(_mandatory_callbacks);							\
-																				\
-		init_func(_argc, _argv);												\
-																				\
-		rde_engine_on_run();													\
-		rde_engine_destroy_engine();											\
-																				\
-		return 0;																\
+#define RDE_MAIN(_window, _heap_allocs_config, _mandatory_callbacks, _init_func, _end_func)	\
+	int main(int _argc, char** _argv) {														\
+		RDE_SHOW_WINDOWS_CONSOLE															\
+																							\
+		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);				\
+		rde_setup_initial_info(_mandatory_callbacks);										\
+																							\
+		_init_func(_argc, _argv);															\
+																							\
+		rde_engine_on_run();																\
+		_end_func();																		\
+		rde_engine_destroy_engine();														\
+																							\
+		return 0;																			\
 	}
 #else
-#define RDE_MAIN(_window, _heap_allocs_config, _mandatory_callbacks, _init_func)\
-	int main(int _argc, char** _argv) {											\
-		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);	\
-		rde_setup_initial_info(_mandatory_callbacks);							\
-																				\
-		init_func(_argc, _argv);												\
-																				\
-		rde_engine_on_run();													\
-		rde_engine_destroy_engine();											\
-																				\
-		return 0;																\
+#define RDE_MAIN(_window, _heap_allocs_config, _mandatory_callbacks, _init_func, _end_func)	\
+	int main(int _argc, char** _argv) {														\
+		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);				\
+		rde_setup_initial_info(_mandatory_callbacks);										\
+																							\
+		_init_func(_argc, _argv);															\
+																							\
+		rde_engine_on_run();																\
+		_end_func();																		\
+		rde_engine_destroy_engine();														\
+																							\
+		return 0;																			\
 	}
 #endif
 
@@ -1362,6 +1374,7 @@ typedef struct rde_texture rde_texture;
 typedef struct rde_render_texture rde_render_texture;
 typedef struct rde_atlas rde_atlas;
 typedef struct rde_font rde_font;
+typedef struct rde_mesh rde_mesh;
 
 typedef struct {
 	unsigned char r;
@@ -1388,21 +1401,6 @@ rde_polygon rde_struct_create_polygon() {
 	_p.vertices_count = 0;
 	return _p;
 }
-
-typedef struct {
-	size_t vertex_count;
-	size_t indices_count;
-
-	float* vertices;
-	float* normals;
-	unsigned int* vertex_colors;
-	unsigned int* indices;
-
-	unsigned int vao;
-	unsigned int vbo[2];
-	unsigned int ibo;
-} rde_mesh;
-RDE_FUNC rde_mesh rde_struct_create_mesh(size_t _vertex_count, float* _vertices, unsigned int* _colors, size_t _indices_count, unsigned int* _indices);
 
 struct rde_material_map {
 	UNIMPLEMENTED_STRUCT()
@@ -1464,6 +1462,18 @@ rde_camera rde_struct_create_camera() {
 /// ============================ AUDIO ==================================
 
 typedef struct rde_sound rde_sound;
+typedef struct {
+	void* user_data;
+	unsigned short channels;
+	unsigned int rate;
+} rde_sound_config;
+rde_sound_config rde_struct_create_audio_config() {
+	rde_sound_config _s;
+	_s.user_data = NULL;
+	_s.channels = 2;
+	_s.rate = 48000;
+	return _s;
+}
 
 /// *************************************************************************************************
 /// *                                GLOBAL VARIABLES                         						*
@@ -1673,29 +1683,35 @@ RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
 
 RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 
+#ifdef RDE_RENDERING_2D_MODULE
 RDE_FUNC void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window);
-RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window);
-
 RDE_FUNC void rde_rendering_draw_point_2d(rde_vec_2F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 3D space, pass NULL on the _shader for the default shader
-
 RDE_FUNC void rde_rendering_draw_line_2d(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
-
 RDE_FUNC void rde_rendering_draw_triangle_2d(rde_vec_2F _verte_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader); /// Draws a batched triangle in 2D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader); /// Draws a batched rectangle in 2D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_circle_2d(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader); /// Draws a batched circle in 2D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader);  /// Draws a batched polygon in 2D space, pass NULL on the _shader for the default shader
-
 RDE_FUNC void rde_rendering_draw_texture_2d(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_memory_texture_2d(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
-
 RDE_FUNC void rde_rendering_draw_text_2d(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader); /// Draws a batched group of quads representing the _text in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
-
-RDE_FUNC void rde_rendering_draw_mesh_3d(const rde_transform* _transform, const rde_mesh* _mesh, rde_shader* _shader);
-
 RDE_FUNC void rde_rendering_end_drawing_2d();
+#endif
+
+#ifdef RDE_RENDERING_3D_MODULE
+RDE_FUNC rde_mesh* rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices.
+RDE_FUNC void rde_rendering_mesh_set_vertex_positions(rde_mesh* _mesh, float* _positions, bool _free_positons_on_destroy); // sets the position of the vertices, each position must have 3 floats (x, y, z)
+RDE_FUNC void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _indices, bool _free_indices_on_destroy); // sets the indices of the mesh, a quad should have 6 indices
+RDE_FUNC void rde_rendering_mesh_set_vertex_colors(rde_mesh* _mesh, unsigned int* _colors, bool _free_colors_on_destroy); // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example)
+RDE_FUNC void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, bool _free_normals_on_destroy); // sets the normals of the vertices, each position must have 3 floats (x, y, z)
+RDE_FUNC void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, float* _texture_coords, rde_texture* _texture, bool _free_texture_coords_on_destroy); // sets the data to draw a mesh with a texture. each text_coord has 2 floats (x, y) and neither text_coords nor texture can be NULL // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example)
+RDE_FUNC void rde_rendering_destroy_mesh(rde_mesh* _mesh);
+
+RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window);
+RDE_FUNC void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 3D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader);
 RDE_FUNC void rde_rendering_end_drawing_3d();
+#endif
 
 /// ============================ AUDIO ======================================
 

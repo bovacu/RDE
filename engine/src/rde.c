@@ -15,6 +15,50 @@
 #include "glad/glad.h"
 #endif
 
+#include "errors.c"
+
+void rde_critical_error(bool _condition, int _error_code, const char* _fmt, ...) {
+	
+	if(!_condition) {
+		return;
+	}
+
+#ifdef RDE_DEBUG
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check 'rde_crash_logs.txt'");
+#else
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check below");
+#endif
+
+	FILE* _f = NULL;
+	
+#if IS_WINDOWS()
+	fopen_s(&_f, "rde_crash_logs.txt", "w");
+#else
+	_f = fopen("rde_crash_logs.txt", "w");
+#endif
+
+	va_list _args;
+	va_start(_args, _fmt);
+	
+#ifdef RDE_DEBUG
+	vfprintf(stdout, _fmt, _args);
+	fprintf(stdout, "\n\nExit code: %d", _error_code);
+#else
+	vfprintf(_f, _fmt, _args);
+	fprintf(_f, "\n\nExit code: %d", _error_code);
+#endif
+	va_end(_args);
+	fclose(_f);
+	
+	rde_engine_destroy_engine();
+
+#ifdef RDE_DEBUG
+	assert(false);
+#else
+	exit(_error_code);
+#endif
+}
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -419,9 +463,12 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	memset(_e.key_events, 0, RDE_KEY_EVENT_COUNT);
 	memset(_e.mouse_events, 0, RDE_MOUSE_EVENT_COUNT);
 
-	#if IS_WINDOWS()
+#if IS_WINDOWS()
 	_e.console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	#ifdef RDE_ERROR_MODULE
+	SetUnhandledExceptionFilter(rde_error_sig_handler);
 	#endif
+#endif
 
 	return _e;
 }

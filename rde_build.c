@@ -64,7 +64,7 @@ typedef enum {
 
 #define MAX_SIZE_FOR_OPTIONS 64
 #define MAX_SIZE_FOR_MODULES 256
-#define MAX_MODULES 6
+#define MAX_MODULES 7
 
 typedef enum {
 	RDE_MODULES_NONE = 0,
@@ -73,7 +73,8 @@ typedef enum {
 	RDE_MODULES_PHYSICS_3D = 4,
 	RDE_MODULES_RENDERING_2D = 8,
 	RDE_MODULES_RENDERING_3D = 16,
-	RDE_MODULES_UI = 32
+	RDE_MODULES_UI = 32,
+	RDE_MODULES_ERROR = 64
 } RDE_MODULES_;
 
 const char* MODULES_STR[MAX_MODULES] = {
@@ -82,7 +83,8 @@ const char* MODULES_STR[MAX_MODULES] = {
 	"pyhisics_3d",
 	"rendering_2d",
 	"rendering_3d",
-	"ui"
+	"ui",
+	"error"
 };
 char* MODULES_DEFINES[MAX_MODULES] = {
 	"-DRDE_AUDIO_MODULE",
@@ -90,7 +92,8 @@ char* MODULES_DEFINES[MAX_MODULES] = {
 	"-DRDE_PHYSICS_3D_MODULE",
 	"-DRDE_RENDERING_2D_MODULE",
 	"-DRDE_RENDERING_3D_MODULE",
-	"-DRDE_UI_MODULE"
+	"-DRDE_UI_MODULE",
+	"-DRDE_ERROR_MODULE"
 };
 RDE_MODULES_ modules;
 
@@ -1025,6 +1028,7 @@ bool compile_windows() {
 		if(strcmp(build_type, "debug") == 0) {																\
 			arrput(_build_command, "-g");																	\
 			arrput(_build_command, "-O0");																	\
+			arrput(_build_command, "-DRDE_DEBUG");															\
 		} else {																							\
 			arrput(_build_command, "-O3");																	\
 		}																									\
@@ -1072,6 +1076,7 @@ bool compile_windows() {
 		arrput(_build_command, "-lSDL2");																	\
 		arrput(_build_command, "-lglad");																	\
 		arrput(_build_command, "-lcglm");																	\
+		arrput(_build_command, "-ldbghelp");																	\
 		arrput(_build_command, "-Werror");																	\
 		arrput(_build_command, "-Wall");																	\
 		arrput(_build_command, "-Wextra");																	\
@@ -1485,6 +1490,7 @@ bool compile_osx() {
 		if(strcmp(build_type, "debug") == 0) {																\
 			arrput(_build_command, "-g");																	\
 			arrput(_build_command, "-O0");																	\
+			arrput(_build_command, "-DRDE_DEBUG");															\
 		} else {																							\
 			arrput(_build_command, "-O3");																	\
 		}																									\
@@ -1848,6 +1854,7 @@ bool compile_linux() {
 		if(strcmp(build_type, "debug") == 0) {																\
 			arrput(_build_command, "-g");																	\
 			arrput(_build_command, "-O0");																	\
+			arrput(_build_command, "-DRDE_DEBUG");															\
 		} else {																							\
 			arrput(_build_command, "-O3");																	\
 		}																									\
