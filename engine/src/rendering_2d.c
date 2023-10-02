@@ -1,3 +1,5 @@
+#ifdef RDE_RENDERING_2D_MODULE
+
 static rde_batch_2d current_batch_2d;
 
 void rde_rendering_init_2d() {
@@ -541,3 +543,5 @@ void rde_rendering_end_drawing_2d() {
 	current_drawing_window = NULL;
 	statistics.number_of_drawcalls = 0;
 }
+
+#endif

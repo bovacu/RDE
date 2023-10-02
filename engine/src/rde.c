@@ -44,10 +44,10 @@
 #include "stb/stb_ds.h"
 #pragma clang diagnostic pop
 
-//#ifdef RDE_AUDIO_MODULE
-//#define MINIAUDIO_IMPLEMENTATION
-//#include "miniaudio/miniaudio.h"
-//#endif
+#ifdef RDE_AUDIO_MODULE
+#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio/miniaudio.h"
+#endif
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -245,12 +245,50 @@ struct rde_batch_3d {
 	UNIMPLEMENTED_STRUCT()
 };
 
-#ifdef RDE_INCLUDE_AUDIO_MODULE
+struct rde_mesh {
+	size_t vertex_count;
+	size_t index_count;
+
+	float* vertex_positions;
+	float* vertex_normals;
+	float* vertex_texture_coordinates;
+	unsigned int* vertex_colors;
+
+	rde_texture* texture;
+
+	unsigned int* indices;
+
+	unsigned int vao;
+	unsigned int vbo[4]; // 0 -> positions, 1 -> colors, 2 -> normals, 3 -> texture coords
+	unsigned int ibo;
+
+	bool free_vertex_positions_on_end;
+	bool free_vertex_colors_on_end;
+	bool free_vertex_normals_on_end;
+	bool free_vertex_texture_coordinates_on_end;
+	bool free_vertex_texture_on_end;
+	bool free_indices_on_end;
+};
+
+#ifdef RDE_AUDIO_MODULE
 struct rde_sound {
-	UNIMPLEMENTED_STRUCT()
+	bool used;
+	
+	bool playing;
+	bool paused;
+	bool looping;
+
+	size_t played_frame;
+
+	ma_decoder miniaudio_decoder;
 };
 rde_sound rde_struct_create_sound() {
 	rde_sound _s;
+	_s.used = false;
+	_s.playing = false;
+	_s.paused = false;
+	_s.looping = false;
+	_s.played_frame = 0;
 	return _s;
 }
 #endif
@@ -281,8 +319,10 @@ struct rde_engine {
 	rde_atlas* atlases;
 	rde_font* fonts;
 
-#ifdef RDE_INCLUDE_AUDIO_MODULE
+#ifdef RDE_AUDIO_MODULE
 	rde_sound* sounds;
+	ma_device miniaudio_device;
+	rde_sound_config device_config;
 #endif
 	
 	rde_event_func_outer window_events[RDE_WIN_EVENT_COUNT];
@@ -359,7 +399,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 		_e.fonts = NULL;
 	}
 
-#ifdef RDE_INCLUDE_AUDIO_MODULE
+#ifdef RDE_AUDIO_MODULE
 	if (_e.heap_allocs_config.max_number_of_sounds > 0) {
 		_e.sounds = (rde_sound*)malloc(sizeof(rde_sound) * _e.heap_allocs_config.max_number_of_sounds);
 		assert(_e.sounds != NULL && "Could not allocate enough memory for sounds array");
@@ -554,7 +594,9 @@ void rde_engine_on_run() {
 	SDL_SetEventFilter(rde_mobile_consume_events);
 	#endif
 
+#ifdef RDE_RENDERING_2D_MODULE
 	rde_rendering_init_2d();
+#endif
 
 	while(ENGINE.running) {
 		Uint64 _start = SDL_GetPerformanceCounter();
@@ -600,7 +642,9 @@ void rde_engine_on_run() {
 		}
 	}
 
+#ifdef RDE_RENDERING_2D_MODULE
 	rde_rendering_end_2d();
+#endif
 	rde_engine_destroy_engine();
 }
 
@@ -681,15 +725,10 @@ void rde_engine_destroy_engine() {
 	}
 	free(ENGINE.windows);
 
-#ifdef RDE_INCLUDE_AUDIO_MODULE
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_sounds; _i++) {
-		//if(ENGINE.windows[_i].sdl_window == NULL) {
-		//	continue;
-		//}
-
-		rde_audio_unload_sound(&ENGINE.sounds[_i]);
-	}
+#ifdef RDE_AUDIO_MODULE
+	rde_audio_end();
 	free(ENGINE.sounds);
+	
 #endif
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
