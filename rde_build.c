@@ -1076,7 +1076,7 @@ bool compile_windows() {
 		arrput(_build_command, "-lSDL2");																	\
 		arrput(_build_command, "-lglad");																	\
 		arrput(_build_command, "-lcglm");																	\
-		arrput(_build_command, "-ldbghelp");																	\
+		arrput(_build_command, "-ldbghelp");																\
 		arrput(_build_command, "-Werror");																	\
 		arrput(_build_command, "-Wall");																	\
 		arrput(_build_command, "-Wextra");																	\
