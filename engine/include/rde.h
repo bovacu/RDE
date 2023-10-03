@@ -1424,6 +1424,9 @@ typedef struct {
 	size_t id;
 	float zoom;
 	rde_transform transform;
+	rde_vec_3F direction;
+	rde_vec_3F up;
+	rde_vec_2F near_far;
 	RDE_CAMERA_TYPE_ camera_type;
 	bool enabled;
 } rde_camera;
@@ -1434,6 +1437,9 @@ rde_camera rde_struct_create_camera() {
 	_c.transform = rde_struct_create_transform();
 	_c.camera_type = RDE_CAMERA_TYPE_ORTHOGRAPHIC;
 	_c.enabled = true;
+	_c.direction = (rde_vec_3F) { 0.0f, 0.0f, -1.0f };
+	_c.up = (rde_vec_3F) { 0.0f, 1.0f, 0.0f };
+	_c.near_far = (rde_vec_2F) { 0.1f, 100.f };
 	return _c;
 }
 

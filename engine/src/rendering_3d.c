@@ -280,8 +280,13 @@ void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh
 
 	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
 	rde_vec_3F _cam_pos = current_drawing_camera->transform.position;
-	glm_lookat((vec3) {_cam_pos.x, _cam_pos.y + 2, _cam_pos.z}, 
-			   (vec3) {_cam_pos.x + 0, _cam_pos.y + 0, _cam_pos.z - 4}, (vec3) {0, 1, 0}, _view_matrix);
+	rde_vec_3F _cam_direction = current_drawing_camera->direction;
+	rde_vec_3F _cam_up = current_drawing_camera->up;
+	glm_lookat((vec3) { _cam_pos.x, _cam_pos.y, _cam_pos.z },
+			   (vec3) { _cam_pos.x + _cam_direction.x, _cam_pos.y + _cam_direction.y, _cam_pos.z + _cam_direction.z },
+			   (vec3) { _cam_up.x, _cam_up.y, _cam_up.z },
+			   _view_matrix
+	);
 
 	glm_mat4_mul(projection_matrix, _view_matrix, _model_view_projection_matrix);
 	glm_mat4_mul(_model_view_projection_matrix, _model_matrix, _model_view_projection_matrix);
