@@ -118,11 +118,13 @@ struct rde_window {
 	RDE_INPUT_STATUS_ key_states[RDE_AMOUNT_OF_KEYS];
 	RDE_INPUT_STATUS_ mouse_states[RDE_AMOUNT_OF_MOUSE_BUTTONS];
 	rde_vec_2I mouse_position;
+	rde_vec_2F mouse_scroll;
 };
 rde_window rde_struct_create_window() {
 	rde_window _w;
 	_w.sdl_window = NULL;
 	_w.mouse_position = (rde_vec_2I) { 0, 0 };
+	_w.mouse_scroll = (rde_vec_2F) { 0.0f, 0.0f };
 	memset(_w.key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
 	memset(_w.mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
 	return _w;

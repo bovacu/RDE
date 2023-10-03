@@ -71,6 +71,10 @@ void rde_events_on_mouse_moved_event(rde_window* _window, rde_event* _event) {
 	_window->mouse_position = _event->data.mouse_event_data.position;
 }
 
+void rde_events_on_mouse_scrolled_event(rde_window* _window, rde_event* _event) {
+	_window->mouse_scroll = _event->data.mouse_event_data.scrolled;
+}
+
 
 void rde_events_window_create_events() {
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - RDE_WIN_EVENT_INIT] = &window_resize;
@@ -103,6 +107,7 @@ void rde_events_mouse_button_create_events() {
 	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_button_pressed_event;
 	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_button_released_event;
 	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_MOVED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_moved_event;
+	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_SCROLLED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_scrolled_event;
 }
 
 void rde_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
@@ -209,7 +214,12 @@ void rde_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _sdl_event, r
 		case SDL_MOUSEMOTION: {
 			_rde_event->type = RDE_EVENT_TYPE_MOUSE_MOVED;
 			_rde_event->data.mouse_event_data.position = (rde_vec_2I) { _sdl_event->motion.x, _sdl_event->motion.y };
-		};
+		} break;
+
+		case SDL_MOUSEWHEEL: {
+			_rde_event->type = RDE_EVENT_TYPE_MOUSE_SCROLLED;
+			_rde_event->data.mouse_event_data.scrolled = (rde_vec_2F) { (float)_sdl_event->wheel.x, (float)_sdl_event->wheel.y };
+		} break;
 	}
 }
 
@@ -341,6 +351,12 @@ bool rde_events_is_mouse_button_just_released(rde_window* _window, RDE_MOUSE_BUT
 rde_vec_2I rde_events_mouse_get_position(rde_window* _window) {
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	return (rde_vec_2I) { _window->mouse_position.x - _window_size.x * 0.5f, _window->mouse_position.y - _window_size.y * 0.5f };
+}
+
+rde_vec_2F rde_events_mouse_get_scrolled(rde_window* _window) {
+	rde_vec_2F _scrolled = _window->mouse_scroll;
+	_window->mouse_scroll = (rde_vec_2F) { 0.f, 0.f };
+	return _scrolled;
 }
 
 void rde_events_sync_events(rde_window* _window) {
