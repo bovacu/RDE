@@ -2,7 +2,7 @@
 const char* rde_util_get_file_name_extension(const char* _file_name) {
 	const char* _dot = strrchr(_file_name, '.');
 	if(!_dot || _dot == _file_name) return "";
-	return _dot;
+	return _dot + 1;
 }
 
 void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
