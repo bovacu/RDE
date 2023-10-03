@@ -67,6 +67,10 @@ void rde_events_on_mouse_button_released_event(rde_window* _window, rde_event* _
 	_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_JUST_RELEASED;
 }
 
+void rde_events_on_mouse_moved_event(rde_window* _window, rde_event* _event) {
+	_window->mouse_position = _event->data.mouse_event_data.position;
+}
+
 
 void rde_events_window_create_events() {
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - RDE_WIN_EVENT_INIT] = &window_resize;
@@ -98,6 +102,7 @@ void rde_events_key_create_events() {
 void rde_events_mouse_button_create_events() {
 	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_button_pressed_event;
 	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_button_released_event;
+	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_MOVED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_moved_event;
 }
 
 void rde_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
@@ -185,17 +190,27 @@ void rde_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _sdl_event, r
 	_rde_event->time_stamp = _sdl_event->display.timestamp;
 	_rde_event->window_id = _sdl_event->window.windowID;
 
-	switch (_sdl_event->button.state) {
-		case SDL_PRESSED : {
-			_rde_event->type = RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED;
+	switch(_sdl_event->type) {
+		case SDL_MOUSEBUTTONDOWN:
+		case SDL_MOUSEBUTTONUP: {
+			switch (_sdl_event->button.state) {
+				case SDL_PRESSED : {
+					_rde_event->type = RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED;
+				} break;
+
+				case SDL_RELEASED: {
+					_rde_event->type = RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED;
+				} break;
+			}
+
+			_rde_event->data.mouse_event_data.button = (RDE_MOUSE_BUTTON_)_sdl_event->button.button;
 		} break;
 
-		case SDL_RELEASED: {
-			_rde_event->type = RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED;
-		} break;
+		case SDL_MOUSEMOTION: {
+			_rde_event->type = RDE_EVENT_TYPE_MOUSE_MOVED;
+			_rde_event->data.mouse_event_data.position = (rde_vec_2I) { _sdl_event->motion.x, _sdl_event->motion.y };
+		};
 	}
-
-	_rde_event->data.mouse_event_data.button = (RDE_MOUSE_BUTTON_)_sdl_event->button.button;
 }
 
 rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
@@ -209,7 +224,9 @@ rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 		
 		case SDL_KEYDOWN:
 		case SDL_KEYUP: rde_sdl_to_rde_helper_transform_keyboard_event(_sdl_event, &_event); break;
-
+		
+		case SDL_MOUSEMOTION:
+		case SDL_MOUSEWHEEL:
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP: rde_sdl_to_rde_helper_transform_mouse_button_event(_sdl_event, &_event); break;
 	}
@@ -319,6 +336,11 @@ bool rde_events_is_mouse_button_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _
 
 bool rde_events_is_mouse_button_just_released(rde_window* _window, RDE_MOUSE_BUTTON_ _button) {
 	return _window->mouse_states[_button] == RDE_INPUT_STATUS_JUST_RELEASED;
+}
+
+rde_vec_2I rde_events_mouse_get_position(rde_window* _window) {
+	rde_vec_2I _window_size = rde_window_get_window_size(_window);
+	return (rde_vec_2I) { _window->mouse_position.x - _window_size.x * 0.5f, _window->mouse_position.y - _window_size.y * 0.5f };
 }
 
 void rde_events_sync_events(rde_window* _window) {

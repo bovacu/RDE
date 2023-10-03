@@ -1629,6 +1629,7 @@ RDE_FUNC bool rde_events_is_key_just_released(rde_window* _window, RDE_KEYBOARD_
 RDE_FUNC bool rde_events_is_mouse_button_just_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _button);
 RDE_FUNC bool rde_events_is_mouse_button_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _button);
 RDE_FUNC bool rde_events_is_mouse_button_just_released(rde_window* _window, RDE_MOUSE_BUTTON_ _button);
+RDE_FUNC rde_vec_2I rde_events_mouse_get_position(rde_window* _window);
 
 #if IS_MOBILE()
 RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _event);

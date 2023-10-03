@@ -117,10 +117,12 @@ struct rde_window {
 	SDL_GLContext sdl_gl_context;
 	RDE_INPUT_STATUS_ key_states[RDE_AMOUNT_OF_KEYS];
 	RDE_INPUT_STATUS_ mouse_states[RDE_AMOUNT_OF_MOUSE_BUTTONS];
+	rde_vec_2I mouse_position;
 };
 rde_window rde_struct_create_window() {
 	rde_window _w;
 	_w.sdl_window = NULL;
+	_w.mouse_position = (rde_vec_2I) { 0, 0 };
 	memset(_w.key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
 	memset(_w.mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
 	return _w;
@@ -500,6 +502,8 @@ void rde_engine_on_event() {
 					rde_events_keyboard_consume_events(_window, &_rde_event);
 				} break;
 
+				case SDL_MOUSEMOTION:
+				case SDL_MOUSEWHEEL:
 				case SDL_MOUSEBUTTONDOWN:
 				case SDL_MOUSEBUTTONUP: {
 					if(SDL_GetWindowID(_window->sdl_window) != _rde_event.window_id) {
