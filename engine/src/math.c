@@ -1,4 +1,5 @@
 #include <math.h>
+#include "cglm/call.h"
 
 void rde_math_set_random_seed(long _seed) {
 	srand(_seed);
@@ -186,4 +187,18 @@ float rde_math_easing_in_out_circular(float _current_time, float _start_value, f
 		return -_change_in_value / 2 * ((float) sqrt(1 - _current_time * _current_time) - 1) + _start_value;
 	_current_time -= 2;
 	return _change_in_value / 2 * ((float) sqrt(1 - _current_time * _current_time) + 1) + _start_value;
+}
+
+rde_vec_3F rde_math_cross_product(rde_vec_3F _vec_0, rde_vec_3F _vec_1) {
+	vec3 _cp = GLM_VEC3_ZERO;
+	glm_cross((vec3) { _vec_0.x, _vec_0.y, _vec_0.z }, (vec3) { _vec_1.x, _vec_1.y, _vec_1.z }, _cp);
+	return (rde_vec_3F) { _cp[0], _cp[1], _cp[2] };
+}
+
+void rde_math_normalize(rde_vec_3F* _vec) {
+	vec3 _norm = (vec3) { _vec->x, _vec->y, _vec->z };
+	glm_normalize(_norm);
+	_vec->x = _norm[0];
+	_vec->y = _norm[1];
+	_vec->z = _norm[2];
 }

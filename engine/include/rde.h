@@ -1514,6 +1514,9 @@ RDE_FUNC void rde_math_convert_world_position_to_screen_coordinates_3d(rde_windo
 RDE_FUNC void rde_math_convert_world_position_to_screen_coordinates_2d(rde_window* _window, rde_vec_2F* _vec);
 RDE_FUNC void rde_math_convert_world_size_to_screen_size(rde_window* _window, rde_vec_2F* _vec);
 
+RDE_FUNC rde_vec_3F rde_math_cross_product(rde_vec_3F _vec_0, rde_vec_3F _vec_1);
+RDE_FUNC void rde_math_normalize(rde_vec_3F* _vec);
+
 #define RDE_DECLARE_CLAMP_FUNCS(_type) \
 	RDE_FUNC inline _type rde_math_clamp_##_type(_type _value, _type _min, _type _max);
 

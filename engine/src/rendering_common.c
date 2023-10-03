@@ -1,5 +1,3 @@
-#include <cglm/call.h>
-
 static rde_camera* current_drawing_camera = NULL;
 static rde_window* current_drawing_window = NULL;
 static mat4 projection_matrix;
