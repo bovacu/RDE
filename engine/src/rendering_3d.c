@@ -26,6 +26,55 @@ void rde_rendering_transform_to_glm_mat4_3d(const rde_transform* _transform, mat
 	glm_mat4_copy(_transformation_matrix, _mat);
 }
 
+float* rde_rendering_mesh_calculate_normals(float* _vertex_positions, unsigned int _indices_count, unsigned int* _indices) {
+	size_t _normals_size = _indices_count * 2;
+	float* _normals = (float*)malloc(sizeof(float) * _normals_size);
+	memset(_normals, 0, _normals_size);
+
+	for(unsigned int _i = 0; _i < _indices_count; _i += 3) {
+		vec3 _a = (vec3) { _vertex_positions[_indices[_i + 0] + 0], _vertex_positions[_indices[_i + 0] + 1], _vertex_positions[_indices[_i + 0] + 2] };
+		vec3 _b = (vec3) { _vertex_positions[_indices[_i + 1] + 0], _vertex_positions[_indices[_i + 1] + 1], _vertex_positions[_indices[_i + 1] + 2] };
+		vec3 _c = (vec3) { _vertex_positions[_indices[_i + 2] + 0], _vertex_positions[_indices[_i + 2] + 1], _vertex_positions[_indices[_i + 2] + 2] };
+
+		vec3 _c_b = (vec3) { _c[0] - _b[0], _c[1] - _b[1], _c[2] - _b[2] };
+		vec3 _a_b = (vec3) { _a[0] - _b[0], _a[1] - _b[1], _a[2] - _b[2] };
+
+		vec3 _cross_product = GLM_VEC3_ZERO;
+		glm_cross(_c_b, _a_b, _cross_product);
+		glm_normalize(_cross_product);
+
+		_normals[_indices[_i + 0] + 0] += _cross_product[0];
+		_normals[_indices[_i + 0] + 1] += _cross_product[1];
+		_normals[_indices[_i + 0] + 2] += _cross_product[2];
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Normal for %d (%f, %f, %f)", _indices[_i + 0], _normals[_indices[_i + 0] + 0], _normals[_indices[_i + 0] + 1], _normals[_indices[_i + 0] + 2]);
+
+		_normals[_indices[_i + 1] + 0] += _cross_product[0];
+		_normals[_indices[_i + 1] + 1] += _cross_product[1];
+		_normals[_indices[_i + 1] + 2] += _cross_product[2];
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Normal for %d (%f, %f, %f)", _indices[_i + 1], _normals[_indices[_i + 1] + 0], _normals[_indices[_i + 1] + 1], _normals[_indices[_i + 1] + 2]);
+
+		_normals[_indices[_i + 2] + 0] += _cross_product[0];
+		_normals[_indices[_i + 2] + 1] += _cross_product[1];
+		_normals[_indices[_i + 2] + 2] += _cross_product[2];
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Normal for %d (%f, %f, %f)", _indices[_i + 2], _normals[_indices[_i + 2] + 0], _normals[_indices[_i + 2] + 1], _normals[_indices[_i + 2] + 2]);
+
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Doing triangle of indices (%d, %d, %d)", _indices[_i + 0], _indices[_i + 1], _indices[_i + 2]);
+	}
+
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Indices: %d", _indices_count);
+	for(unsigned int _i = 0; _i < _indices_count; _i ++) {
+		vec3 _normal = (vec3) { _normals[_indices[_i] + 0], _normals[_indices[_i] + 1], _normals[_indices[_i] + 2] };
+		glm_normalize(_normal);
+		_normals[_indices[_i] + 0] = _normal[0];
+		_normals[_indices[_i] + 1] = _normal[1];
+		_normals[_indices[_i] + 2] = _normal[2];
+
+		rde_log_level(RDE_LOG_LEVEL_INFO, "vertex index: %d, normal(%f, %f, %f)", _i, _normal[0], _normal[1], _normal[2]);
+	}
+
+	return _normals;
+}
+
 rde_mesh* rde_struct_create_mesh(size_t _vertex_count, size_t _index_count) {
 	rde_critical_error(_vertex_count <= 3 || _index_count <= 3, RDE_ERROR_BAD_MESH_DATA, _vertex_count, _index_count);
 
@@ -198,6 +247,11 @@ bool rde_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 			_colors[_i] = RDE_COLOR_TO_HEX_COLOR(RDE_COLOR_WHITE);
 		}
 		rde_rendering_mesh_set_vertex_colors(_mesh, _colors, true);
+	}
+
+	if(_mesh->vertex_normals == NULL) {
+		float* _normals = rde_rendering_mesh_calculate_normals(_mesh->vertex_positions, _mesh->index_count, _mesh->indices);
+		rde_rendering_mesh_set_vertex_normals(_mesh, _normals, true);
 	}
 
 	return true;
