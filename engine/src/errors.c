@@ -13,14 +13,22 @@
 #define RDE_ERROR_SDL_WINDOW "SDL window creation failed: %s."
 #define RDE_ERROR_SDL_OPENGL "OpenGL context couldn't initialize: %s."
 #define RDE_ERROR_GLAD_INIT "Failed to initialize GLAD."
+
+#ifdef RDE_AUDIO_MODULE
 #define RDE_ERROR_MA_CONTEXT "Failed to initialize context."
 #define RDE_ERROR_MA_DEVICE_INFO "Failed to retrieve device information."
 #define RDE_ERROR_MA_DEVICE_INIT "Could not init audio device. Error code for MiniAudio %d"
 #define RDE_ERROR_MA_DEVICE_START "Could not start the audio device to play sounds. Error code for MiniAudio %d"
 #define RDE_ERROR_MA_FILE_NOT_FOUND "Could not load sound '%s'. error code for MiniAudio %d."
+#endif
+
+#ifdef RDE_FBX_MODULE
+#define RDE_ERROR_FBX_COULD_NOT_LOAD "Could not load fbx file at '%s' due to error %s"
+#define RDE_ERROR_FBX_MODEL_FACE_INDICES "Model '%s' has a face with a different amount of indices of 3 or 4, '%u'"
+#endif
+
 
 #ifdef RDE_ERROR_MODULE
-
 #include <signal.h>
 
 #define RDE_MAX_STACK 100

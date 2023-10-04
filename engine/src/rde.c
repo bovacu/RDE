@@ -276,6 +276,11 @@ struct rde_mesh {
 	bool free_indices_on_end;
 };
 
+struct rde_model {
+	rde_mesh** mesh_array;
+	unsigned int mesh_array_size;
+};
+
 #ifdef RDE_AUDIO_MODULE
 struct rde_sound {
 	bool used;
@@ -444,6 +449,7 @@ rde_engine ENGINE;
 #include "window.c"
 #include "rendering_common.c"
 #include "rendering_2d.c"
+#include "fbx_importer.c"
 #include "rendering_3d.c"
 #include "physics.c"
 #include "audio.c"
@@ -606,6 +612,10 @@ void rde_engine_on_run() {
 	rde_rendering_init_2d();
 #endif
 
+#ifdef RDE_RENDERING_3D_MODULE
+	rde_rendering_init_3d();
+#endif
+
 	while(ENGINE.running) {
 		Uint64 _start = SDL_GetPerformanceCounter();
 		ENGINE.fixed_time_step_accumulator += ENGINE.delta_time;
@@ -653,6 +663,11 @@ void rde_engine_on_run() {
 #ifdef RDE_RENDERING_2D_MODULE
 	rde_rendering_end_2d();
 #endif
+
+#ifdef RDE_RENDERING_3D_MODULE
+	rde_rendering_end_3d();
+#endif
+
 	rde_engine_destroy_engine();
 }
 

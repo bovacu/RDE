@@ -5,6 +5,26 @@
 #define RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL 3
 #define RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD 2
 
+#define RDE_DEFAULT_TEXTURE_SIZE 64
+#define RDE_DEFAULT_TEXTURE_CHANNELS 3
+static rde_texture* DEFAULT_TEXTURE;
+
+void rde_rendering_init_3d() {
+	DEFAULT_TEXTURE = rde_rendering_create_memory_texture(RDE_DEFAULT_TEXTURE_SIZE, RDE_DEFAULT_TEXTURE_SIZE, RDE_DEFAULT_TEXTURE_CHANNELS);
+	
+	for(int _y = 0; _y < RDE_DEFAULT_TEXTURE_SIZE; _y++) {
+		for(int _x = 0; _x < RDE_DEFAULT_TEXTURE_SIZE; _x++) {
+			rde_rendering_memory_texture_set_pixel(DEFAULT_TEXTURE, (rde_vec_2I) {_x, _y}, RDE_COLOR_WHITE);
+		}
+	}
+
+	rde_rendering_memory_texture_gpu_upload(DEFAULT_TEXTURE);
+}
+
+void rde_rendering_end_3d() {
+	rde_rendering_destroy_memory_texture(DEFAULT_TEXTURE);
+}
+
 void rde_rendering_transform_to_glm_mat4_3d(const rde_transform* _transform, mat4 _mat) {
 	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
 
@@ -46,22 +66,22 @@ float* rde_rendering_mesh_calculate_normals(float* _vertex_positions, unsigned i
 		_normals[_indices[_i + 0] + 0] += _cross_product[0];
 		_normals[_indices[_i + 0] + 1] += _cross_product[1];
 		_normals[_indices[_i + 0] + 2] += _cross_product[2];
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Normal for %d (%f, %f, %f)", _indices[_i + 0], _normals[_indices[_i + 0] + 0], _normals[_indices[_i + 0] + 1], _normals[_indices[_i + 0] + 2]);
+		// rde_log_level(RDE_LOG_LEVEL_INFO, "Normal for %d (%f, %f, %f)", _indices[_i + 0], _normals[_indices[_i + 0] + 0], _normals[_indices[_i + 0] + 1], _normals[_indices[_i + 0] + 2]);
 
 		_normals[_indices[_i + 1] + 0] += _cross_product[0];
 		_normals[_indices[_i + 1] + 1] += _cross_product[1];
 		_normals[_indices[_i + 1] + 2] += _cross_product[2];
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Normal for %d (%f, %f, %f)", _indices[_i + 1], _normals[_indices[_i + 1] + 0], _normals[_indices[_i + 1] + 1], _normals[_indices[_i + 1] + 2]);
+		// rde_log_level(RDE_LOG_LEVEL_INFO, "Normal for %d (%f, %f, %f)", _indices[_i + 1], _normals[_indices[_i + 1] + 0], _normals[_indices[_i + 1] + 1], _normals[_indices[_i + 1] + 2]);
 
 		_normals[_indices[_i + 2] + 0] += _cross_product[0];
 		_normals[_indices[_i + 2] + 1] += _cross_product[1];
 		_normals[_indices[_i + 2] + 2] += _cross_product[2];
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Normal for %d (%f, %f, %f)", _indices[_i + 2], _normals[_indices[_i + 2] + 0], _normals[_indices[_i + 2] + 1], _normals[_indices[_i + 2] + 2]);
+		// rde_log_level(RDE_LOG_LEVEL_INFO, "Normal for %d (%f, %f, %f)", _indices[_i + 2], _normals[_indices[_i + 2] + 0], _normals[_indices[_i + 2] + 1], _normals[_indices[_i + 2] + 2]);
 
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Doing triangle of indices (%d, %d, %d)", _indices[_i + 0], _indices[_i + 1], _indices[_i + 2]);
+		// rde_log_level(RDE_LOG_LEVEL_INFO, "Doing triangle of indices (%d, %d, %d)", _indices[_i + 0], _indices[_i + 1], _indices[_i + 2]);
 	}
 
-	rde_log_level(RDE_LOG_LEVEL_INFO, "Indices: %d", _indices_count);
+	// rde_log_level(RDE_LOG_LEVEL_INFO, "Indices: %d", _indices_count);
 	for(unsigned int _i = 0; _i < _indices_count; _i ++) {
 		vec3 _normal = (vec3) { _normals[_indices[_i] + 0], _normals[_indices[_i] + 1], _normals[_indices[_i] + 2] };
 		glm_normalize(_normal);
@@ -69,7 +89,7 @@ float* rde_rendering_mesh_calculate_normals(float* _vertex_positions, unsigned i
 		_normals[_indices[_i] + 1] = _normal[1];
 		_normals[_indices[_i] + 2] = _normal[2];
 
-		rde_log_level(RDE_LOG_LEVEL_INFO, "vertex index: %d, normal(%f, %f, %f)", _i, _normal[0], _normal[1], _normal[2]);
+		// rde_log_level(RDE_LOG_LEVEL_INFO, "vertex index: %d, normal(%f, %f, %f)", _i, _normal[0], _normal[1], _normal[2]);
 	}
 
 	return _normals;
@@ -202,23 +222,23 @@ void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, boo
 	_mesh->free_vertex_normals_on_end = _free_normals_on_destroy;
 }
 
-void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, float* _texture_coords, rde_texture* _texture, bool _free_texture_coords_on_destroy) {
+void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, unsigned int _texture_coords_size, float* _texture_coords, rde_texture* _texture, bool _free_texture_coords_on_destroy) {
 	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
 	rde_critical_error(_texture_coords == NULL, RDE_ERROR_NO_NULL_ALLOWED, "texture coordinates");
 	rde_critical_error(_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "texture");
 
-	size_t _texture_coords_size = sizeof(unsigned int) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD;
+	size_t _texture_coords_array_size = sizeof(unsigned int) * _texture_coords_size * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD;
 	glBindVertexArray(_mesh->vao);
 	if(_mesh->vbo[3] == RDE_UINT_MAX) {
 		glGenBuffers(1, &_mesh->vbo[3]);
 		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[3]);
-		glBufferData(GL_ARRAY_BUFFER, _texture_coords_size, _texture_coords, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, _texture_coords_array_size, _texture_coords, GL_DYNAMIC_DRAW);
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	} else {
 		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[3]);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, _texture_coords_size, _texture_coords);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, _texture_coords_array_size, _texture_coords);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 	glBindVertexArray(0);
@@ -250,8 +270,8 @@ bool rde_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 	}
 
 	if(_mesh->vertex_normals == NULL) {
-		float* _normals = rde_rendering_mesh_calculate_normals(_mesh->vertex_positions, _mesh->index_count, _mesh->indices);
-		rde_rendering_mesh_set_vertex_normals(_mesh, _normals, true);
+		//float* _normals = rde_rendering_mesh_calculate_normals(_mesh->vertex_positions, _mesh->index_count, _mesh->indices);
+		//rde_rendering_mesh_set_vertex_normals(_mesh, _normals, true);
 	}
 
 	return true;
@@ -345,11 +365,10 @@ void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh
 	glm_mat4_mul(projection_matrix, _view_matrix, _model_view_projection_matrix);
 	glm_mat4_mul(_model_view_projection_matrix, _model_matrix, _model_view_projection_matrix);
 
-	if(_mesh->texture != NULL && _mesh->texture->opengl_texture_id >= 0) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, _mesh->texture->opengl_texture_id);
-		rde_util_check_opengl_error("After glBindTexture");
-	}
+	rde_texture* _texture_to_draw = _mesh->texture != NULL ? _mesh->texture : DEFAULT_TEXTURE;
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, _texture_to_draw->opengl_texture_id);
+	rde_util_check_opengl_error("After glBindTexture");
 
 	glUniformMatrix4fv(glGetUniformLocation(_drawing_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_model_view_projection_matrix);
 	rde_util_check_opengl_error("After UseProgram");
@@ -359,6 +378,18 @@ void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->ibo);
 	glDrawElements(GL_TRIANGLES, _mesh->index_count, GL_UNSIGNED_INT, 0);
+}
+
+void rde_rendering_draw_model_3d(const rde_transform* _transform, rde_model* _model, rde_shader* _shader) {
+	for(uint _i = 0; _i < _model->mesh_array_size; _i++) {
+		rde_mesh* _mesh = _model->mesh_array[_i];
+
+		if(_mesh == NULL) {
+			continue;
+		}
+
+		rde_rendering_draw_mesh_3d(_transform, _mesh, _shader);
+	}
 }
 
 void rde_rendering_end_drawing_3d() {

@@ -1353,6 +1353,7 @@ typedef struct rde_render_texture rde_render_texture;
 typedef struct rde_atlas rde_atlas;
 typedef struct rde_font rde_font;
 typedef struct rde_mesh rde_mesh;
+typedef struct rde_model rde_model;
 
 typedef struct {
 	unsigned char r;
@@ -1389,10 +1390,6 @@ struct rde_material {
 };
 
 struct rde_model_bone {
-	UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_model {
 	UNIMPLEMENTED_STRUCT()
 };
 
@@ -1664,6 +1661,7 @@ RDE_FUNC void rde_rendering_unload_atlas(rde_atlas* _atlas);
 RDE_FUNC rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, int _channels);
 RDE_FUNC void rde_rendering_memory_texture_set_pixel(rde_texture* _memory_texture, rde_vec_2I _position, rde_color _color);
 RDE_FUNC rde_color rde_rendering_memory_texture_get_pixel(rde_texture* _memory_texture, rde_vec_2I _position);
+RDE_FUNC void rde_rendering_memory_texture_gpu_upload(rde_texture* _memory_texture);
 RDE_FUNC unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_texture);
 RDE_FUNC void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture);
 
@@ -1692,13 +1690,19 @@ RDE_FUNC void rde_rendering_mesh_set_vertex_positions(rde_mesh* _mesh, float* _p
 RDE_FUNC void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _indices, bool _free_indices_on_destroy); // sets the indices of the mesh, a quad should have 6 indices
 RDE_FUNC void rde_rendering_mesh_set_vertex_colors(rde_mesh* _mesh, unsigned int* _colors, bool _free_colors_on_destroy); // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example)
 RDE_FUNC void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, bool _free_normals_on_destroy); // sets the normals of the vertices, each position must have 3 floats (x, y, z)
-RDE_FUNC void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, float* _texture_coords, rde_texture* _texture, bool _free_texture_coords_on_destroy); // sets the data to draw a mesh with a texture. each text_coord has 2 floats (x, y) and neither text_coords nor texture can be NULL // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example)
+RDE_FUNC void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, unsigned int _texture_coords_size, float* _texture_coords, rde_texture* _texture, bool _free_texture_coords_on_destroy); // sets the data to draw a mesh with a texture. each text_coord has 2 floats (x, y) and neither text_coords nor texture can be NULL // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example)
 RDE_FUNC void rde_rendering_destroy_mesh(rde_mesh* _mesh);
+
+#ifdef RDE_FBX_MODULE
+RDE_FUNC rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const char* _texture_path);
+RDE_FUNC void rde_rendering_unload_fbx_model(rde_model* _model);
+#endif
 
 RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window);
 RDE_FUNC void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 3D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader);
+RDE_FUNC void rde_rendering_draw_model_3d(const rde_transform* _transform, rde_model* _model, rde_shader* _shader);
 RDE_FUNC void rde_rendering_end_drawing_3d();
 #endif
 

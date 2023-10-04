@@ -390,40 +390,7 @@ void rde_rendering_draw_texture_2d(const rde_transform* _transform, const rde_te
 
 void rde_rendering_draw_memory_texture_2d(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
 	rde_log_level(RDE_LOG_LEVEL_WARNING, "THIS FUNCTION IS CORRPUTING 3D MESHES TEXTURE. To reproduce just draw a memory texture and then a 3d mesh");
-	
-	if(_texture->opengl_texture_id == -1) {
-		GLenum _internal_format = 0, _data_format = 0;
-		if (_texture->channels == 4) {
-			_internal_format = GL_RGBA8;
-			_data_format = GL_RGBA;
-		} else if (_texture->channels == 3) {
-			_internal_format = GL_RGB8;
-			_data_format = GL_RGB;
-		}
-
-		_texture->internal_format = _internal_format;
-		_texture->data_format = _data_format;
-		
-		GLuint _id;
-		glGenTextures(1, &_id);
-
-		_texture->opengl_texture_id = _id;
-		glBindTexture(GL_TEXTURE_2D, _texture->opengl_texture_id);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, (int)_texture->internal_format, _texture->size.x, _texture->size.y, 0, _texture->data_format, GL_UNSIGNED_BYTE, _texture->pixels);
-	} else {
-		if(_texture->pixels_changed) {
-			glBindTexture(GL_TEXTURE_2D, _texture->opengl_texture_id);
-			glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, _texture->size.x, _texture->size.y, _texture->data_format, GL_UNSIGNED_BYTE, _texture->pixels);
-			_texture->pixels_changed = false;
-		}
-	}
-
+	rde_rendering_memory_texture_gpu_upload(_texture);
 	rde_rendering_draw_texture_2d(_transform, _texture, _tint_color, _shader);
 }
 

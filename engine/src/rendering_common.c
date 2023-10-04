@@ -307,6 +307,7 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Size: %dx%d: ", _width, _height);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Channels: %d: ", _channels);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- OpenGL ID: %u: ", _texture_id);
+	printf("\n");
 
 	return _texture;
 }
@@ -377,6 +378,7 @@ rde_texture* rde_rendering_load_text_texture(const char* _file_path) {
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Size: %dx%d: ", _width, _height);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Channels: %d: ", _channels);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- OpenGL ID: %u: ", _texture_id);
+	printf("\n");
 
 	return _texture;
 }
@@ -435,6 +437,41 @@ rde_color rde_rendering_memory_texture_get_pixel(rde_texture* _memory_texture, r
 	}
 
 	return _color;
+}
+
+void rde_rendering_memory_texture_gpu_upload(rde_texture* _memory_texture) {
+	if(_memory_texture->opengl_texture_id == -1) {
+		GLenum _internal_format = 0, _data_format = 0;
+		if (_memory_texture->channels == 4) {
+			_internal_format = GL_RGBA8;
+			_data_format = GL_RGBA;
+		} else if (_memory_texture->channels == 3) {
+			_internal_format = GL_RGB8;
+			_data_format = GL_RGB;
+		}
+
+		_memory_texture->internal_format = _internal_format;
+		_memory_texture->data_format = _data_format;
+		
+		GLuint _id;
+		glGenTextures(1, &_id);
+
+		_memory_texture->opengl_texture_id = _id;
+		glBindTexture(GL_TEXTURE_2D, _memory_texture->opengl_texture_id);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, (int)_memory_texture->internal_format, _memory_texture->size.x, _memory_texture->size.y, 0, _memory_texture->data_format, GL_UNSIGNED_BYTE, _memory_texture->pixels);
+	} else {
+		if(_memory_texture->pixels_changed) {
+			glBindTexture(GL_TEXTURE_2D, _memory_texture->opengl_texture_id);
+			glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, _memory_texture->size.x, _memory_texture->size.y, _memory_texture->data_format, GL_UNSIGNED_BYTE, _memory_texture->pixels);
+			_memory_texture->pixels_changed = false;
+		}
+	}
 }
 
 unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_texture) {
