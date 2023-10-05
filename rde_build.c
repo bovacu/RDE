@@ -64,7 +64,7 @@ typedef enum {
 
 #define MAX_SIZE_FOR_OPTIONS 64
 #define MAX_SIZE_FOR_MODULES 256
-#define MAX_MODULES 8
+#define MAX_MODULES 9
 
 typedef enum {
 	RDE_MODULES_NONE = 0,
@@ -74,8 +74,9 @@ typedef enum {
 	RDE_MODULES_RENDERING_2D = 8,
 	RDE_MODULES_RENDERING_3D = 16,
 	RDE_MODULES_FBX = 32,
-	RDE_MODULES_UI = 64,
-	RDE_MODULES_ERROR = 128
+	RDE_MODULES_OBJ = 64,
+	RDE_MODULES_UI = 128,
+	RDE_MODULES_ERROR = 256
 } RDE_MODULES_;
 
 const char* MODULES_STR[MAX_MODULES] = {
@@ -85,6 +86,7 @@ const char* MODULES_STR[MAX_MODULES] = {
 	"rendering_2d",
 	"rendering_3d",
 	"fbx",
+	"obj",
 	"ui",
 	"error"
 };
@@ -95,6 +97,7 @@ char* MODULES_DEFINES[MAX_MODULES] = {
 	"-DRDE_RENDERING_2D_MODULE",
 	"-DRDE_RENDERING_3D_MODULE",
 	"-DRDE_FBX_MODULE",
+	"-DRDE_OBJ_MODULE",
 	"-DRDE_UI_MODULE",
 	"-DRDE_ERROR_MODULE"
 };

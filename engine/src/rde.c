@@ -450,6 +450,7 @@ rde_engine ENGINE;
 #include "rendering_common.c"
 #include "rendering_2d.c"
 #include "fbx_importer.c"
+#include "obj_importer.c"
 #include "rendering_3d.c"
 #include "physics.c"
 #include "audio.c"

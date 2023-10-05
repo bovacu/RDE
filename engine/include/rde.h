@@ -1698,6 +1698,11 @@ RDE_FUNC rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const ch
 RDE_FUNC void rde_rendering_unload_fbx_model(rde_model* _model);
 #endif
 
+#ifdef RDE_OBJ_MODULE
+RDE_FUNC rde_model* rde_rendering_load_obj_model(const char* _obj_path);
+RDE_FUNC void rde_rendering_unload_obj_model(rde_model* _model);
+#endif
+
 RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window);
 RDE_FUNC void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 3D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader

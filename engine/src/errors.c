@@ -27,6 +27,9 @@
 #define RDE_ERROR_FBX_MODEL_FACE_INDICES "Model '%s' has a face with a different amount of indices of 3 or 4, '%u'"
 #endif
 
+#ifdef RDE_OBJ_MODULE
+#define RDE_ERROR_OBJ_COULD_NOT_LOAD "Could not load obj file at '%s', file not found"
+#endif
 
 #ifdef RDE_ERROR_MODULE
 #include <signal.h>
