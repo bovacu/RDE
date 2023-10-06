@@ -91,84 +91,12 @@ void read_file_and_fill_data(const char* _obj_path,
 	fclose(_fp);
 }
 
-void parse_3_vertices_face(unsigned int _i, unsigned int* _mesh_indices, float* _mesh_positions, float* _mesh_texcoords, obj_face* _face, 
+void parse_3_vertices_face(unsigned int _i, unsigned int _v, unsigned int* _mesh_indices, float* _mesh_positions, float* _mesh_texcoords, obj_face* _face, 
 							unsigned int* _indices_pointer, unsigned int* _positions_pointer, unsigned int* _texcoords_pointer,
 							float* _positions, float* _texcoords) {
 	_mesh_indices[*_indices_pointer + 0] = 3 * _i + 0;
 	_mesh_indices[*_indices_pointer + 1] = 3 * _i + 1;
 	_mesh_indices[*_indices_pointer + 2] = 3 * _i + 2;
-
-	_mesh_positions[*_positions_pointer + 0] = _positions[_face->indices[0 * 3] * 3 + 0];
-	_mesh_positions[*_positions_pointer + 1] = _positions[_face->indices[0 * 3] * 3 + 1];
-	_mesh_positions[*_positions_pointer + 2] = _positions[_face->indices[0 * 3] * 3 + 2];
-	_mesh_texcoords[*_texcoords_pointer + 0] = _texcoords[_face->indices[0 * 3 + 1] * 2 + 0];
-	_mesh_texcoords[*_texcoords_pointer + 1] = _texcoords[_face->indices[0 * 3 + 1] * 2 + 1];
-
-	_mesh_positions[*_positions_pointer + 3] = _positions[_face->indices[1 * 3] * 3 + 0];
-	_mesh_positions[*_positions_pointer + 4] = _positions[_face->indices[1 * 3] * 3 + 1];
-	_mesh_positions[*_positions_pointer + 5] = _positions[_face->indices[1 * 3] * 3 + 2];
-	_mesh_texcoords[*_texcoords_pointer + 2] = _texcoords[_face->indices[1 * 3 + 1] * 2 + 0];
-	_mesh_texcoords[*_texcoords_pointer + 3] = _texcoords[_face->indices[1 * 3 + 1] * 2 + 1];
-	
-	_mesh_positions[*_positions_pointer + 6] = _positions[_face->indices[2 * 3] * 3 + 0];
-	_mesh_positions[*_positions_pointer + 7] = _positions[_face->indices[2 * 3] * 3 + 1];
-	_mesh_positions[*_positions_pointer + 8] = _positions[_face->indices[2 * 3] * 3 + 2];
-	_mesh_texcoords[*_texcoords_pointer + 4] = _texcoords[_face->indices[2 * 3 + 1] * 2 + 0];
-	_mesh_texcoords[*_texcoords_pointer + 5] = _texcoords[_face->indices[2 * 3 + 1] * 2 + 1];
-
-	*_indices_pointer += 3;
-	*_positions_pointer += 9;
-	*_texcoords_pointer += 6;
-}
-
-void parse_4_vertices_face(unsigned int _i, unsigned int* _mesh_indices, float* _mesh_positions, float* _mesh_texcoords, obj_face* _face, 
-							unsigned int* _indices_pointer, unsigned int* _positions_pointer, unsigned int* _texcoords_pointer,
-							float* _positions, float* _texcoords) {
-	_mesh_indices[*_indices_pointer + 0] = 4 * _i + 0; // This gets the 1st element of each group of indices values 
-	_mesh_indices[*_indices_pointer + 1] = 4 * _i + 1;
-	_mesh_indices[*_indices_pointer + 2] = 4 * _i + 2;
-	_mesh_indices[*_indices_pointer + 3] = 4 * _i + 2;
-	_mesh_indices[*_indices_pointer + 4] = 4 * _i + 3;
-	_mesh_indices[*_indices_pointer + 5] = 4 * _i + 0;
-
-	_mesh_positions[*_positions_pointer + 0] = _positions[_face->indices[0 * 3] * 3 + 0];
-	_mesh_positions[*_positions_pointer + 1] = _positions[_face->indices[0 * 3] * 3 + 1];
-	_mesh_positions[*_positions_pointer + 2] = _positions[_face->indices[0 * 3] * 3 + 2];
-	_mesh_texcoords[*_texcoords_pointer + 0] = _texcoords[_face->indices[0 * 3 + 1] * 2 + 0];
-	_mesh_texcoords[*_texcoords_pointer + 1] = _texcoords[_face->indices[0 * 3 + 1] * 2 + 1];
-
-	_mesh_positions[*_positions_pointer + 3] = _positions[_face->indices[1 * 3] * 3 + 0];
-	_mesh_positions[*_positions_pointer + 4] = _positions[_face->indices[1 * 3] * 3 + 1];
-	_mesh_positions[*_positions_pointer + 5] = _positions[_face->indices[1 * 3] * 3 + 2];
-	_mesh_texcoords[*_texcoords_pointer + 2] = _texcoords[_face->indices[1 * 3 + 1] * 2 + 0];
-	_mesh_texcoords[*_texcoords_pointer + 3] = _texcoords[_face->indices[1 * 3 + 1] * 2 + 1];
-	
-	_mesh_positions[*_positions_pointer + 6] = _positions[_face->indices[2 * 3] * 3 + 0];
-	_mesh_positions[*_positions_pointer + 7] = _positions[_face->indices[2 * 3] * 3 + 1];
-	_mesh_positions[*_positions_pointer + 8] = _positions[_face->indices[2 * 3] * 3 + 2];
-	_mesh_texcoords[*_texcoords_pointer + 4] = _texcoords[_face->indices[2 * 3 + 1] * 2 + 0];
-	_mesh_texcoords[*_texcoords_pointer + 5] = _texcoords[_face->indices[2 * 3 + 1] * 2 + 1];
-
-	_mesh_positions[*_positions_pointer + 9]  = _positions[_face->indices[3 * 3] * 3 + 0];
-	_mesh_positions[*_positions_pointer + 10] = _positions[_face->indices[3 * 3] * 3 + 1];
-	_mesh_positions[*_positions_pointer + 11] = _positions[_face->indices[3 * 3] * 3 + 2];
-	_mesh_texcoords[*_texcoords_pointer + 6]  = _texcoords[_face->indices[3 * 3 + 1] * 2 + 0];
-	_mesh_texcoords[*_texcoords_pointer + 7]  = _texcoords[_face->indices[3 * 3 + 1] * 2 + 1];
-
-	*_indices_pointer += 6;
-	*_positions_pointer += 12;
-	*_texcoords_pointer += 8;
-}
-
-void parse_4_vertices_face_for_face_with_more_than_4_vertices(unsigned int _i, unsigned int _v, unsigned int* _mesh_indices, float* _mesh_positions, float* _mesh_texcoords, obj_face* _face, 
-							unsigned int* _indices_pointer, unsigned int* _positions_pointer, unsigned int* _texcoords_pointer,
-							float* _positions, float* _texcoords) {
-	_mesh_indices[*_indices_pointer + 0] = 4 * _i + 0; // This gets the 1st element of each group of indices values 
-	_mesh_indices[*_indices_pointer + 1] = 4 * _i + 1;
-	_mesh_indices[*_indices_pointer + 2] = 4 * _i + 2;
-	_mesh_indices[*_indices_pointer + 3] = 4 * _i + 2;
-	_mesh_indices[*_indices_pointer + 4] = 4 * _i + 3;
-	_mesh_indices[*_indices_pointer + 5] = 4 * _i + 0;
 
 	_mesh_positions[*_positions_pointer + 0] = _positions[_face->indices[0 * 3] * 3 + 0];
 	_mesh_positions[*_positions_pointer + 1] = _positions[_face->indices[0 * 3] * 3 + 1];
@@ -188,35 +116,9 @@ void parse_4_vertices_face_for_face_with_more_than_4_vertices(unsigned int _i, u
 	_mesh_texcoords[*_texcoords_pointer + 4] = _texcoords[_face->indices[(_v + 2) * 3 + 1] * 2 + 0];
 	_mesh_texcoords[*_texcoords_pointer + 5] = _texcoords[_face->indices[(_v + 2) * 3 + 1] * 2 + 1];
 
-	_mesh_positions[*_positions_pointer + 9]  = _positions[_face->indices[(_v + 3) * 3] * 3 + 0];
-	_mesh_positions[*_positions_pointer + 10] = _positions[_face->indices[(_v + 3) * 3] * 3 + 1];
-	_mesh_positions[*_positions_pointer + 11] = _positions[_face->indices[(_v + 3) * 3] * 3 + 2];
-	_mesh_texcoords[*_texcoords_pointer + 6]  = _texcoords[_face->indices[(_v + 3) * 3 + 1] * 2 + 0];
-	_mesh_texcoords[*_texcoords_pointer + 7]  = _texcoords[_face->indices[(_v + 3) * 3 + 1] * 2 + 1];
-
-	*_indices_pointer += 6;
-	*_positions_pointer += 12;
-	*_texcoords_pointer += 8;
-}
-
-void parse_more_than_4_vertices_face(unsigned int* _mesh_indices, float* _mesh_positions, float* _mesh_texcoords, obj_face* _face, 
-							unsigned int* _indices_pointer, unsigned int* _positions_pointer, unsigned int* _texcoords_pointer,
-							float* _positions, float* _texcoords) {
-	int _indices_in_face = _face->vertices_count;
-			
-	unsigned int _mod = _indices_in_face % 4;
-	if(_mod == 0) {
-		_mod = _indices_in_face / 4;
-	}
-
-	for(unsigned int _v = 0; _v < _mod + (_mod % 2 == 0 ? 0 : 1); _v++) {
-		parse_4_vertices_face_for_face_with_more_than_4_vertices(*_indices_pointer / 6, 
-																	_v * 2, 
-																	_mesh_indices, _mesh_positions, _mesh_texcoords, 
-																	_face,
-																	_indices_pointer, _positions_pointer, _texcoords_pointer, 
-																	_positions, _texcoords);
-	}
+	*_indices_pointer += 3;
+	*_positions_pointer += 9;
+	*_texcoords_pointer += 6;
 }
 
 rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
@@ -311,39 +213,26 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	unsigned int _positions_pointer = 0;
 	unsigned int _texcoords_pointer = 0;
 
-	// rde_texture* _texture = rde_rendering_load_texture("textures/octopus.png");
+	rde_texture* _texture = rde_rendering_load_texture("textures/octopus.png");
 
 	for(size_t _i = 0; _i < _faces_size; _i++) {
 		obj_face* _face = &_faces[_i];
 
 		if (_face->vertices_count == 3) {
-			parse_3_vertices_face(_indices_pointer / 3, 
+			parse_3_vertices_face(_indices_pointer / 3, 0,
 								  _mesh_indices, _mesh_positions, _mesh_texcoords, 
 								  _face, 
 								  &_indices_pointer, &_positions_pointer, &_texcoords_pointer, 
 								  _positions, _texcoords);
 		} else {
-			for(size_t _v = 0; _v < ; _v++) {
-				parse_3_vertices_face(_indices_pointer / 3, 
+			for(size_t _v = 0; _v < _face->vertices_count - 2; _v++) {
+				parse_3_vertices_face(_indices_pointer / 3, _v,
 								  _mesh_indices, _mesh_positions, _mesh_texcoords, 
 								  _face, 
 								  &_indices_pointer, &_positions_pointer, &_texcoords_pointer, 
 								  _positions, _texcoords);
 			}
 		}
-		
-		// else if(_face->vertices_count == 4) {
-		// 	parse_4_vertices_face(_indices_pointer / 6, 
-		// 						  _mesh_indices, _mesh_positions, _mesh_texcoords, 
-		// 						  _face, 
-		// 						  &_indices_pointer, &_positions_pointer, &_texcoords_pointer, 
-		// 						  _positions, _texcoords);
-		// } else {
-		// 	parse_more_than_4_vertices_face(_mesh_indices, _mesh_positions, _mesh_texcoords, 
-		// 									_face, 
-		// 									&_indices_pointer, &_positions_pointer, &_texcoords_pointer, 
-		// 									_positions, _texcoords);
-		// }
 	}
 
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- vertices: %u, indices: %u, texcoords: %u \n", _mesh_positions_size, _mesh_indices_size, _mesh_texcoords_size);
@@ -352,7 +241,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	rde_mesh* _mesh = rde_struct_create_mesh(_mesh_positions_size, _mesh_indices_size);
 	rde_rendering_mesh_set_vertex_positions(_mesh, _mesh_positions, true);
 	rde_rendering_mesh_set_indices(_mesh, _mesh_indices, true);
-	// rde_rendering_mesh_set_vertex_texture_data(_mesh, _mesh_texcoords_size, _mesh_texcoords, _texture, true);
+	rde_rendering_mesh_set_vertex_texture_data(_mesh, _mesh_texcoords_size, _mesh_texcoords, _texture, true);
 
 	stbds_arrput(_model->mesh_array, _mesh);
 
