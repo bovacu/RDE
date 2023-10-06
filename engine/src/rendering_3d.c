@@ -316,6 +316,7 @@ void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window) {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	// glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
