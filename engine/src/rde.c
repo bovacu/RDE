@@ -276,14 +276,28 @@ struct rde_mesh {
 	bool free_indices_on_end;
 };
 
+typedef struct {
+	rde_texture* texture;
+} rde_model_material;
+rde_model_material rde_struct_create_model_material() {
+	rde_model_material _m;
+	_m.texture = NULL;
+	return _m;
+}
+
 struct rde_model {
 	rde_mesh** mesh_array;
 	unsigned int mesh_array_size;
+
+	rde_model_material* material_array;
+	unsigned int material_array_size;
 };
 rde_model rde_struct_create_model() {
 	rde_model _m;
 	_m.mesh_array = NULL;
 	_m.mesh_array_size = 0;
+	_m.material_array = NULL;
+	_m.material_array_size = 0;
 	return _m;
 }
 

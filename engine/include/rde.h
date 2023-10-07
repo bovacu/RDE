@@ -1729,7 +1729,7 @@ RDE_FUNC rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const ch
 #endif
 
 #ifdef RDE_OBJ_MODULE
-RDE_FUNC rde_model* rde_rendering_load_obj_model(const char* _obj_path, bool _free_buffers_after_load);
+RDE_FUNC rde_model* rde_rendering_load_obj_model(const char* _obj_path);
 #endif
 
 #if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)
