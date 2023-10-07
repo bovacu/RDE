@@ -1532,6 +1532,7 @@ RDE_FUNC void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 RDE_FUNC const char* rde_util_get_file_name_extension(const char* _file_name);
 RDE_FUNC size_t rde_util_get_string_width(const char* _string, const rde_font* _font);
 RDE_FUNC rde_vec_2I rde_util_get_string_size(const char* _string, const rde_font* _font);
+RDE_FUNC char* rde_util_string_trim(char* _s);
 
 /// ============================ MATH =======================================
 

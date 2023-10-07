@@ -157,3 +157,19 @@ rde_vec_2I rde_util_get_string_size(const char* _string, const rde_font* _font) 
 
 	return (rde_vec_2I) { _width, _height };
 }
+
+char* ltrim(char* _s) {
+	while(isspace(*_s)) _s++;
+	return _s;
+}
+
+char* rtrim(char* _s) {
+	char* _back = _s + strlen(_s);
+	while(isspace(*--_back));
+	*(_back+1) = '\0';
+	return _s;
+}
+
+char* rde_util_string_trim(char* _s) {
+	return rtrim(ltrim(_s)); 
+}
