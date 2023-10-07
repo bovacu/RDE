@@ -39,16 +39,22 @@ void separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size) {
 	obj_face _face = { NULL, 0 };
 
 	while(_face_ptr != NULL) {
+		rde_util_string_trim(_face_ptr);
 		_face_ptr[strcspn(_face_ptr, "\r\n")] = 0;
+
+		if(_face_ptr != NULL && strlen(_face_ptr) > 0) {
+			_face.vertices_count++;
+		}
+
 		char* _indices_ptr = strtok_rde(_face_ptr, "/", &_inner_saveptr);
 		while(_indices_ptr != NULL) {
 			_indices_ptr[strcspn(_indices_ptr, "\r\n")] = 0;
-			stbds_arrput(_face.indices, strtol(_indices_ptr, NULL, 10) - 1);
+			long _value = strtol(_indices_ptr, NULL, 10) - 1;
+			stbds_arrput(_face.indices, _value);
 			_indices_ptr = strtok_rde(NULL, "/", &_inner_saveptr);
 		}
 		
 		_face_ptr = strtok_rde(NULL, " ", &_outer_saveptr);
-		_face.vertices_count++;
 	}
 
 	stbds_arrput(*_arr, _face);
@@ -207,6 +213,39 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	                        &_texcoords_size, &_texcoords, 
 	                        &_faces_size, &_faces,
 	                        _material_path);
+
+#if 0
+	printf("Positions: %zu \n", _positions_size);
+	for(size_t _i = 0; _i < _positions_size; _i += 3) {
+		printf("(%f, %f, %f) \n", _positions[_i + 0], _positions[_i + 1], _positions[_i + 2]);
+	}
+
+	printf("Normals: %zu \n", _normals_size);
+	for(size_t _i = 0; _i < _normals_size; _i += 3) {
+		printf("(%f, %f, %f) \n", _normals[_i + 0], _normals[_i + 1], _normals[_i + 2]);
+	}
+
+	printf("Texcoords: %zu \n", _texcoords_size);
+	for(size_t _i = 0; _i < _texcoords_size; _i += 2) {
+		printf("(%f, %f) \n", _texcoords[_i + 0], _texcoords[_i + 1]);
+	}
+
+	printf("Face vertices: %zu \n", _faces_size);
+	for(size_t _i = 0; _i < _faces_size; _i++) {
+		printf("%u vertices ", _faces[_i].vertices_count);
+		for(size_t _j = 0; _j < _faces[_i].vertices_count; _j++) {
+			printf("(v:%u, t:%u, n:%u) ", _faces[_i].indices[_j * 3 + 0], _faces[_i].indices[_j * 3 + 1], _faces[_i].indices[_j * 3 + 2]);
+		}
+		printf("\n");
+
+		for(size_t _k = 0; _k < _faces[_i].vertices_count * 3; _k++) {
+			printf("%u ", _faces[_i].indices[_k]);
+		}
+		printf("\n");
+	}
+#endif
+
+
 
 	uint _mesh_indices_size = 0;
 	size_t _mesh_positions_size = 0;
