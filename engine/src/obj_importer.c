@@ -11,18 +11,26 @@ typedef struct {
 	unsigned int vertices_count;
 } obj_face;
 
-void separate_into_floats(char* _buffer, float** _arr, size_t* _size) {
+void separate_into_floats(char* _buffer, float** _arr, size_t* _size, const char* _path, const char* _where, int _line) {
 	char* _ptr = strtok(_buffer, " ");
 	_ptr = strtok(NULL, " "); // remove 'v', 'vt' or 'vn'
 	while(_ptr != NULL) {
 		_ptr[strcspn(_ptr, "\r\n")] = 0;
-		stbds_arrput(*_arr, strtof(_ptr, NULL));
+
+		char* _end_ptr;
+		float _value = strtof(_ptr, &_end_ptr);
+		
+		if(*_end_ptr != '\0') {
+			rde_critical_error(true, RDE_ERROR_OBJ_INVALID_DATA, _path, _where, _line + 1);
+		}
+
+		stbds_arrput(*_arr, _value);
 		_ptr = strtok(NULL, " ");
 		(*_size)++;
 	}
 }
 
-void separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size) {
+void separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const char* _path, const char* _where, int _line) {
 
 #if IS_WINDOWS()
 	#define strtok_rde strtok_s
@@ -49,7 +57,14 @@ void separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size) {
 		char* _indices_ptr = strtok_rde(_face_ptr, "/", &_inner_saveptr);
 		while(_indices_ptr != NULL) {
 			_indices_ptr[strcspn(_indices_ptr, "\r\n")] = 0;
-			long _value = strtol(_indices_ptr, NULL, 10) - 1;
+
+			char* _end_ptr;
+			long _value = strtol(_indices_ptr, &_end_ptr, 10) - 1;
+
+			if(*_end_ptr != '\0') {
+				rde_critical_error(true, RDE_ERROR_OBJ_INVALID_DATA, _path, _where, _line + 1);
+			}
+
 			stbds_arrput(_face.indices, _value);
 			_indices_ptr = strtok_rde(NULL, "/", &_inner_saveptr);
 		}
@@ -80,26 +95,33 @@ void read_file_and_fill_data(const char* _obj_path,
 	rde_critical_error(_fp == NULL, RDE_ERROR_OBJ_COULD_NOT_LOAD, _obj_path);
 #endif
 
+	const char* _where_faces = "faces";
+	const char* _where_texcoords = "texture coordinates";
+	const char* _where_positions = "positions";
+	const char* _where_normals = "normals";
+	size_t _file_line = 0;
+
 	while(fgets(_buffer, len, _fp)) {
 		if(_buffer[0] == 'v') {
 			if(_buffer[1] == ' ') {
-				separate_into_floats(_buffer, _positions, _positions_size);
+				separate_into_floats(_buffer, _positions, _positions_size, _obj_path, _where_positions, _file_line);
 			} else {
 				if(_buffer[1] == 'n') {
-					separate_into_floats(_buffer, _normals, _normals_size);
+					separate_into_floats(_buffer, _normals, _normals_size, _obj_path, _where_normals, _file_line);
 				} else if(_buffer[1] == 't') {
-					separate_into_floats(_buffer, _texcoords, _texcoords_size);
+					separate_into_floats(_buffer, _texcoords, _texcoords_size, _obj_path, _where_texcoords, _file_line);
 				}
 			}
 		} else if(_buffer[0] == 'f') {
-			separate_into_faces(_buffer, _faces, _faces_size);
+			separate_into_faces(_buffer, _faces, _faces_size, _obj_path, _where_faces, _file_line);
 		} else if(strncmp(_buffer, "mtllib", strlen("mtllib")) == 0) {
 			char* _ptr = strtok(_buffer, " ");
 			_ptr = strtok(NULL, " "); // remove 'mtllib'
 			_ptr[strcspn(_ptr, "\r\n")] = 0;
 			strcat(_material_path, _ptr);
-			printf("%s \n", _material_path);
 		}
+
+		_file_line++;
 	}
 
 	fclose(_fp);

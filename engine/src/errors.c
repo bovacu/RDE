@@ -1,35 +1,36 @@
-#define RDE_ERROR_NO_MEMORY "Could not allocate enought memory (%d bytes) for %s."
-#define RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED "Max number of loaded %s (%d) reached."
-#define RDE_ERROR_NO_NULL_ALLOWED "Tried to use a NULL %s."
-#define RDE_ERROR_FILE_NOT_FOUND "File '%s' not found or could not open it."
-#define RDE_ERROR_JSON "Could not load JSON from file '%s' due to error '%s'."
-#define RDE_ERROR_HEAP_ALLOC_BAD_VALUE "Heap Allocs Congig -> number of %s cannot be <= 0 and %d was provided."
-#define RDE_ERROR_MULTIPLE_ENGINE "Only one engine can be created."
-#define RDE_ERROR_NULL_MANDATORY_CALLBACK "User-End callback %s' is not defined, before creating the engine call 'rde_setup_initial_info(...)'."
-#define RDE_ERROR_UNSUPPORTED_PLATFORM "Unsupported or unimplemented platform."
-#define RDE_ERROR_ATLAS_SUB_TEXTURE "Could not load sub texture %s for atlas at %s."
-#define RDE_ERROR_BEGIN_RENDER "Tried to begin drawing again before ending the previous one or provided 'camera' or 'window' = NULL."
-#define RDE_ERROR_BAD_MESH_DATA "Error while creating mesh, _vertex_count = %d and _index_count = %d. _vertex_count must be >= 3 and _index_count >= 3."
-#define RDE_ERROR_SDL_WINDOW "SDL window creation failed: %s."
-#define RDE_ERROR_SDL_OPENGL "OpenGL context couldn't initialize: %s."
-#define RDE_ERROR_GLAD_INIT "Failed to initialize GLAD."
+#define RDE_ERROR_NO_MEMORY "Could not allocate enought memory (%d bytes) for %s.\n"
+#define RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED "Max number of loaded %s (%d) reached.\n"
+#define RDE_ERROR_NO_NULL_ALLOWED "Tried to use a NULL %s.\n"
+#define RDE_ERROR_FILE_NOT_FOUND "File '%s' not found or could not open it.\n"
+#define RDE_ERROR_JSON "Could not load JSON from file '%s' due to error '%s'.\n"
+#define RDE_ERROR_HEAP_ALLOC_BAD_VALUE "Heap Allocs Congig -> number of %s cannot be <= 0 and %d was provided.\n"
+#define RDE_ERROR_MULTIPLE_ENGINE "Only one engine can be created.\n"
+#define RDE_ERROR_NULL_MANDATORY_CALLBACK "User-End callback %s' is not defined, before creating the engine call 'rde_setup_initial_info(...)'.\n"
+#define RDE_ERROR_UNSUPPORTED_PLATFORM "Unsupported or unimplemented platform.\n"
+#define RDE_ERROR_ATLAS_SUB_TEXTURE "Could not load sub texture %s for atlas at %s.\n"
+#define RDE_ERROR_BEGIN_RENDER "Tried to begin drawing again before ending the previous one or provided 'camera' or 'window' = NULL.\n"
+#define RDE_ERROR_BAD_MESH_DATA "Error while creating mesh, _vertex_count = %d and _index_count = %d. _vertex_count must be >= 3 and _index_count >= 3.\n"
+#define RDE_ERROR_SDL_WINDOW "SDL window creation failed: %s.\n"
+#define RDE_ERROR_SDL_OPENGL "OpenGL context couldn't initialize: %s.\n"
+#define RDE_ERROR_GLAD_INIT "Failed to initialize GLAD.\n"
 
 #ifdef RDE_AUDIO_MODULE
-#define RDE_ERROR_MA_CONTEXT "Failed to initialize context."
-#define RDE_ERROR_MA_DEVICE_INFO "Failed to retrieve device information."
-#define RDE_ERROR_MA_DEVICE_INIT "Could not init audio device. Error code for MiniAudio %d"
-#define RDE_ERROR_MA_DEVICE_START "Could not start the audio device to play sounds. Error code for MiniAudio %d"
-#define RDE_ERROR_MA_FILE_NOT_FOUND "Could not load sound '%s'. error code for MiniAudio %d."
+#define RDE_ERROR_MA_CONTEXT "Failed to initialize context.\n"
+#define RDE_ERROR_MA_DEVICE_INFO "Failed to retrieve device information.\n"
+#define RDE_ERROR_MA_DEVICE_INIT "Could not init audio device. Error code for MiniAudio %d\n"
+#define RDE_ERROR_MA_DEVICE_START "Could not start the audio device to play sounds. Error code for MiniAudio %d\n"
+#define RDE_ERROR_MA_FILE_NOT_FOUND "Could not load sound '%s'. error code for MiniAudio %d.\n"
 #endif
 
 #ifdef RDE_FBX_MODULE
-#define RDE_ERROR_FBX_COULD_NOT_LOAD "Could not load fbx file at '%s' due to error %s"
-#define RDE_ERROR_FBX_MODEL_FACE_INDICES "Model '%s' has a face with a different amount of indices of 3 or 4, '%u'"
+#define RDE_ERROR_FBX_COULD_NOT_LOAD "Could not load fbx file at '%s' due to error %s\n"
+#define RDE_ERROR_FBX_MODEL_FACE_INDICES "Model '%s' has a face with a different amount of indices of 3 or 4, '%u'\n"
 #endif
 
 #ifdef RDE_OBJ_MODULE
-#define RDE_ERROR_OBJ_COULD_NOT_LOAD "Could not load obj file at '%s', file not found"
-#define RDE_ERROR_OBJ_MATERIAL_COULD_NOT_LOAD "Could not load obj material file at '%s', file not found"
+#define RDE_ERROR_OBJ_COULD_NOT_LOAD "Could not load obj file at '%s', file not found\n"
+#define RDE_ERROR_OBJ_MATERIAL_COULD_NOT_LOAD "Could not load obj material file at '%s', file not found\n"
+#define RDE_ERROR_OBJ_INVALID_DATA "Some data in '%s' could not be parsed correctly, failed to parse %s at line %lu \n"
 #endif
 
 #ifdef RDE_ERROR_MODULE
