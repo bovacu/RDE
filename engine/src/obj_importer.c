@@ -123,7 +123,21 @@ void parse_3_vertices_face(unsigned int _i, unsigned int _v, unsigned int* _mesh
 
 rde_model* rde_rendering_load_obj_model(const char* _obj_path, bool _free_buffers_after_load) {
 	rde_log_color(RDE_LOG_COLOR_GREEN, "Loading OBJ '%s':", _obj_path);
-	rde_model* _model = (rde_model*)malloc(sizeof(rde_model));
+
+	rde_model* _model = NULL;
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_models; _i++) {
+		rde_model* _m = &ENGINE.models[_i];
+
+		if(_m->mesh_array != NULL) {
+			continue;
+		}
+
+		_model = _m;
+		break;
+	}
+
+	rde_critical_error(_model == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "models", ENGINE.heap_allocs_config.max_number_of_models);
+
 	_model->mesh_array = NULL;
 	_model->mesh_array_size = 1;
 
