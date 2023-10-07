@@ -308,6 +308,10 @@ void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
 	if(_mesh->free_indices_on_end) {
 		free(_mesh->indices);
 	}
+
+	if(_mesh->texture != NULL) {
+		rde_rendering_unload_texture(_mesh->texture);
+	}
 }
 
 
@@ -397,6 +401,19 @@ void rde_rendering_end_drawing_3d() {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 	current_drawing_camera = NULL;
+}
+
+void rde_rendering_unload_model(rde_model* _model) {
+	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "obj model");
+
+	for(size_t _c = 0; _c < stbds_arrlenu(_model->mesh_array); _c++) {
+		rde_mesh* _mesh = _model->mesh_array[_c];
+		rde_rendering_destroy_mesh(_mesh);
+	}
+
+	stbds_arrfree(_model->mesh_array);
+	_model->mesh_array = NULL;
+	_model->mesh_array_size = 0;
 }
 
 #endif

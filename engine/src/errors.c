@@ -160,10 +160,14 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	
 #ifdef RDE_DEBUG
 	vfprintf(stdout, _fmt, _args);
+	#ifdef RDE_ERROR_MODULE
 	rde_print_stack_trace(stdout);
+	#endif
 #else
 	vfprintf(_f, _fmt, _args);
+	#ifdef RDE_ERROR_MODULE
 	rde_print_stack_trace(_f);
+	#endif
 #endif
 	va_end(_args);
 	fclose(_f);

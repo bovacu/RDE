@@ -1,4 +1,4 @@
-#ifdef RDE_FBX_MODULE
+#if defined(RDE_FBX_MODULE) && defined(RDE_RENDERING_3D_MODULE)
 
 #include "ufbx/ufbx.c"
 
@@ -32,7 +32,8 @@ rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const char* _text
         if (node->mesh) {
 			ufbx_mesh* _mesh = node->mesh;
 			
-			float* _positions = (float*)malloc(sizeof(ufbx_vec3) * _mesh->vertex_position.values.count);
+			size_t _positions_size = _mesh->vertex_position.values.count;
+			float* _positions = (float*)malloc(sizeof(float) * _positions_size * 3);
 			
 			uint _indices_size = 0;
 			for(size_t _v = 0; _v < _mesh->faces.count; _v++) {
@@ -59,14 +60,25 @@ rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const char* _text
 			rde_log_color(RDE_LOG_COLOR_GREEN, "	- Object: %s, vertices: %u, indices: %u", node->name.data, _mesh->vertex_position.values.count, _indices_size);
 			unsigned int* _indices = (unsigned int*)malloc(sizeof(unsigned int) * _indices_size);
 
-			for(size_t _v = 0; _v < _mesh->vertex_position.values.count; _v++) {
+			printf("UVs: %zu, Indices: %zu \n", _mesh->vertex_uv.values.count, _mesh->vertex_uv.indices.count);
+			size_t _uvs_size = _mesh->vertex_position.values.count * 2;
+			float* _uvs = (float*)malloc(sizeof(float) * _uvs_size);
+
+			for(size_t _v = 0; _v < _positions_size; _v++) {
 				_positions[_v * 3 + 0] = _mesh->vertex_position.values.data[_v].x;
 				_positions[_v * 3 + 1] = _mesh->vertex_position.values.data[_v].y;
 				_positions[_v * 3 + 2] = _mesh->vertex_position.values.data[_v].z;
+
+				
+
+				// printf("Position(%f, %f, %f), Uv(%f, %f) \n", _positions[_v * 3 + 0], _positions[_v * 3 + 1], _positions[_v * 3 + 2], _uvs[_v * 2 + 0], _uvs[_v * 2 + 1]);
 			}
 
-			printf("UVs: %zu, Indices: %zu \n", _mesh->vertex_uv.values.count, _mesh->vertex_uv.indices.count);
-			float* _uvs = (float*)malloc(sizeof(ufbx_vec2) * _indices_size);
+			for(size_t _v = 0; _v < _mesh->vertex_uv.values.count; _v++) {
+				_uvs[_v * 2 + 0] = _mesh->vertex_uv.values.data[_mesh->vertex_position.indices.data[_v]].x;
+				_uvs[_v * 2 + 1] = _mesh->vertex_uv.values.data[_mesh->vertex_position.indices.data[_v]].y;
+				printf("Position(%f, %f, %f), Uv(%f, %f) \n", _positions[_v * 3 + 0], _positions[_v * 3 + 1], _positions[_v * 3 + 2], _uvs[_v * 2 + 0], _uvs[_v * 2 + 1]);
+			}
 
 			uint _indices_pointer = 0;
 			// uint _uv_pointer = 0;
@@ -100,49 +112,25 @@ rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const char* _text
 				}
 			}
 
-			printf("\n");
-			for(size_t _v = 0; _v < _indices_size; _v++) { 
-				printf("%u \n", _indices[_v]);
-			}
-			printf("\n");
+			// printf("\n");
+			// for(size_t _v = 0; _v < _mesh->vertex_position.values.count; _v += 4) {
+			// 	_uvs[(_v + 0) * 2 + 0] = _mesh->vertex_uv.values.data[_v + 0].x;
+			// 	_uvs[(_v + 0) * 2 + 1] = _mesh->vertex_uv.values.data[_v + 0].y;
+			// 	printf("(%f, %f) \n", _uvs[(_v + 0) * 2 + 0], _uvs[(_v + 0) * 2 + 1]);
 
-			#define set_uv(_index) \
-				_uvs[(_v + _index) * 2 + 0] = _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v + _index]].x; \
-				_uvs[(_v + _index) * 2 + 1] = _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v + _index]].y; \
-				printf("uv index %u (%f, %f) \n", _mesh->vertex_uv.indices.data[_v + _index], _uvs[(_v + _index) * 2 + 0], _uvs[(_v + _index) * 2 + 1]);
+			// 	_uvs[(_v + 1) * 2 + 0] = _mesh->vertex_uv.values.data[_v + 1].x;
+			// 	_uvs[(_v + 1) * 2 + 1] = _mesh->vertex_uv.values.data[_v + 1].y;
+			// 	printf("(%f, %f) \n", _uvs[(_v + 1) * 2 + 0], _uvs[(_v + 1) * 2 + 1]);
 
-			printf("FBX UVs: %zu, _uvs: %llu \n", _mesh->vertex_uv.indices.count, _mesh->vertex_uv.values.count * 2);
-			for(size_t _v = 0; _v < _mesh->vertex_uv.values.count; _v += 4) {
+			// 	_uvs[(_v + 2) * 2 + 0] = _mesh->vertex_uv.values.data[_v + 2].x;
+			// 	_uvs[(_v + 2) * 2 + 1] = _mesh->vertex_uv.values.data[_v + 2].y;
+			// 	printf("(%f, %f) \n", _uvs[(_v + 2) * 2 + 0], _uvs[(_v + 2) * 2 + 1]);
 
-				uint _index = (_mesh->vertex_uv.values.count - 1 - (_v + 3)) * 2;
-				_uvs[_index + 0] = _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v + 0]].x;
-				_uvs[_index + 1] = _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v + 0]].y;
-				printf("uv index %u (%f, %f) \n", _mesh->vertex_uv.indices.data[_v + 3], _uvs[_index + 0], _uvs[_index + 1]);
-
-				_index = (_mesh->vertex_uv.values.count - 1 - (_v + 2)) * 2;
-				_uvs[_index + 0] = _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v + 1]].x;
-				_uvs[_index + 1] = _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v + 1]].y;
-				printf("uv index %u (%f, %f) \n", _mesh->vertex_uv.indices.data[_v + 2], _uvs[_index + 0], _uvs[_index + 1]);
-
-				_index = (_mesh->vertex_uv.values.count - 1 - (_v + 0)) * 2;
-				_uvs[_index + 0] = _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v + 2]].x;
-				_uvs[_index + 1] = _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v + 2]].y;
-				printf("uv index %u (%f, %f) \n", _mesh->vertex_uv.indices.data[_v + 0], _uvs[_index + 0], _uvs[_index + 1]);
-
-				_index = (_mesh->vertex_uv.values.count - 1 - (_v + 1)) * 2;
-				_uvs[_index + 0] = _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v + 3]].x;
-				_uvs[_index + 1] = _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v + 3]].y;
-				printf("uv index %u (%f, %f) \n", _mesh->vertex_uv.indices.data[_v + 1], _uvs[_index + 0], _uvs[_index + 1]);
-			}
-			printf("\n");
-			for(size_t _v = 0; _v < _mesh->vertex_uv.values.count; _v++) { 
-				printf("%u - (%f, %f) \n", _mesh->vertex_position.indices.data[_v], _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v]].x, _mesh->vertex_uv.values.data[_mesh->vertex_uv.indices.data[_v]].y);
-			}
-
-			printf("\n");
-			for(size_t _v = 0; _v < _mesh->vertex_uv.values.count; _v++) { 
-				printf("%u - (%f, %f) \n", _mesh->vertex_position.indices.data[_v], _uvs[_v * 2 + 0], _uvs[_v * 2 + 1]);
-			}
+			// 	_uvs[(_v + 3) * 2 + 0] = _mesh->vertex_uv.values.data[_v + 3].x;
+			// 	_uvs[(_v + 3) * 2 + 1] = _mesh->vertex_uv.values.data[_v + 3].y;
+			// 	printf("(%f, %f) \n", _uvs[(_v + 3) * 2 + 0], _uvs[(_v + 3) * 2 + 1]);
+			// 	// printf("(%f, %f, %f) \n", _mesh->vertex_position.values.data[_v].x, _mesh->vertex_position.values.data[_v].y, _mesh->vertex_position.values.data[_v].z);
+			// }
 			
 			rde_mesh* _m = rde_struct_create_mesh(_mesh->vertex_position.values.count, _indices_size);
 			rde_rendering_mesh_set_vertex_positions(_m, _positions, true);
@@ -156,10 +144,6 @@ rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const char* _text
 	printf("\n");
     ufbx_free_scene(_scene);
 	return _model;
-}
-
-void rde_rendering_unload_fbx_model(rde_model* _model) {
-    (void)_model;
 }
 
 #endif

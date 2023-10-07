@@ -1,4 +1,4 @@
-#ifdef RDE_OBJ_MODULE
+#if defined(RDE_OBJ_MODULE) && defined(RDE_RENDERING_3D_MODULE)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
@@ -121,7 +121,7 @@ void parse_3_vertices_face(unsigned int _i, unsigned int _v, unsigned int* _mesh
 	*_texcoords_pointer += 6;
 }
 
-rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
+rde_model* rde_rendering_load_obj_model(const char* _obj_path, bool _free_buffers_after_load) {
 	rde_log_color(RDE_LOG_COLOR_GREEN, "Loading OBJ '%s':", _obj_path);
 	rde_model* _model = (rde_model*)malloc(sizeof(rde_model));
 	_model->mesh_array = NULL;
@@ -145,44 +145,9 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	                        &_texcoords_size, &_texcoords, 
 	                        &_faces_size, &_faces);
 
-#if 0
-	printf("Positions: %zu \n", _positions_size);
-	for(size_t _i = 0; _i < _positions_size; _i += 3) {
-		printf("(%f, %f, %f) \n", _positions[_i + 0], _positions[_i + 1], _positions[_i + 2]);
-	}
-
-	printf("Normals: %zu \n", _normals_size);
-	for(size_t _i = 0; _i < _normals_size; _i += 3) {
-		printf("(%f, %f, %f) \n", _normals[_i + 0], _normals[_i + 1], _normals[_i + 2]);
-	}
-
-	printf("Texcoords: %zu \n", _texcoords_size);
-	for(size_t _i = 0; _i < _texcoords_size; _i += 2) {
-		printf("(%f, %f) \n", _texcoords[_i + 0], _texcoords[_i + 1]);
-	}
-
-	printf("Face vertices: %zu \n", _faces_size);
-	for(size_t _i = 0; _i < _faces_size; _i++) {
-		printf("%u vertices ", _faces[_i].vertices_count);
-		for(size_t _j = 0; _j < _faces[_i].vertices_count; _j++) {
-			printf("(v:%u, t:%u, n:%u) ", _faces[_i].indices[_j * 3 + 0], _faces[_i].indices[_j * 3 + 1], _faces[_i].indices[_j * 3 + 2]);
-		}
-		printf("\n");
-
-		for(size_t _k = 0; _k < _faces[_i].vertices_count * 3; _k++) {
-			printf("%u ", _faces[_i].indices[_k]);
-		}
-		printf("\n");
-	}
-#endif
-
 	uint _mesh_indices_size = 0;
 	size_t _mesh_positions_size = 0;
 	unsigned int _mesh_texcoords_size = 0;
-
-	unsigned int _number_of_3_vertices_faces = 0;
-	unsigned int _number_of_4_vertices_faces = 0;
-	unsigned int _number_of_X_vertices_faces = 0;
 
 	for(size_t _i = 0; _i < _faces_size; _i++) {
 		obj_face* _face = &_faces[_i];
@@ -190,11 +155,9 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 			_mesh_indices_size += 3;
 			_mesh_positions_size += 3;
 			_mesh_texcoords_size += 3;
-			_number_of_3_vertices_faces++;
 		} else {
 			int _indices_in_face = _face->vertices_count;
 			int _moving_pointer = 1;
-			_number_of_X_vertices_faces++;
 					
 			while(_moving_pointer != _indices_in_face) {
 				_mesh_indices_size += 6;
@@ -236,7 +199,6 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	}
 
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- vertices: %u, indices: %u, texcoords: %u \n", _mesh_positions_size, _mesh_indices_size, _mesh_texcoords_size);
-	rde_log_color(RDE_LOG_COLOR_GREEN, "	- 3 vertices faces: %u, 4 vertices faces: %u, X vertices faces: %u \n", _number_of_3_vertices_faces, _number_of_4_vertices_faces, _number_of_X_vertices_faces);
 
 	rde_mesh* _mesh = rde_struct_create_mesh(_mesh_positions_size, _mesh_indices_size);
 	rde_rendering_mesh_set_vertex_positions(_mesh, _mesh_positions, true);
@@ -245,19 +207,31 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 
 	stbds_arrput(_model->mesh_array, _mesh);
 
-
-
 	stbds_arrfree(_positions);
 	stbds_arrfree(_normals);
 	stbds_arrfree(_texcoords);
 	stbds_arrfree(_faces->indices);
 	stbds_arrfree(_faces);
 
-	return _model;
-}
+	if(_free_buffers_after_load) {
+		for(size_t _c = 0; _c < stbds_arrlenu(_model->mesh_array); _c++) {
+			rde_mesh* _mesh = _model->mesh_array[_c];
 
-void rde_rendering_unload_obj_model(rde_model* _model) {
-	UNUSED(_model);
+			free(_mesh->vertex_positions);
+			_mesh->vertex_positions = NULL;
+
+			free(_mesh->vertex_texture_coordinates);
+			_mesh->vertex_texture_coordinates = NULL;
+
+			free(_mesh->vertex_normals);
+			_mesh->vertex_normals = NULL;
+
+			free(_mesh->indices);
+			_mesh->indices = NULL;
+		}
+	}
+
+	return _model;
 }
 
 #pragma clang diagnostic pop

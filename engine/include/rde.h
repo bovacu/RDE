@@ -78,8 +78,17 @@ extern "C" {
 #define RDE_MAX_NUMBER_OF_WINDOWS 10
 #define RDE_MAX_VERTICES_PER_BATCH 50000
 #define RDE_MAX_LOADABLE_SHADERS 256
+
+#ifdef RDE_RENDERING_2D_MODULE
 #define RDE_MAX_LOADABLE_TEXTURES 512
+#define RDE_MAX_LOADABLE_ATLASES 512
 #define RDE_MAX_LOADABLE_FONTS 512
+#endif
+
+#ifdef RDE_RENDERING_3D_MODULE
+#define RDE_MAX_LOADABLE_MODELS 512
+#define RDE_MAX_LOADABLE_MODELS_TEXTURES 512
+#endif
 
 #ifdef	RDE_AUDIO_MODULE
 #define RDE_MAX_LOADABLE_SOUNDS 128
@@ -1166,8 +1175,17 @@ typedef struct {
 	size_t max_number_of_windows;
 	size_t max_number_of_vertices_per_batch;
 	size_t max_number_of_shaders;
+	
+#ifdef RDE_RENDERING_2D_MODULE
 	size_t max_number_of_textures;
+	size_t max_number_of_atlases;
 	size_t max_number_of_fonts;
+#endif
+
+#ifdef RDE_RENDERING_3D_MODULE
+	size_t max_number_of_models;
+	size_t max_number_of_models_textures;
+#endif
 
 #ifdef RDE_AUDIO_MODULE
 	size_t max_number_of_sounds;
@@ -1482,8 +1500,17 @@ const rde_engine_heap_allocs_config RDE_DEFAULT_HEAP_ALLOCS_CONFIG = {
 	RDE_MAX_NUMBER_OF_WINDOWS,
 	RDE_MAX_VERTICES_PER_BATCH,
 	RDE_MAX_LOADABLE_SHADERS,
+
+#ifdef RDE_RENDERING_2D_MODULE
 	RDE_MAX_LOADABLE_TEXTURES,
+	RDE_MAX_LOADABLE_ATLASES,
 	RDE_MAX_LOADABLE_FONTS,
+#endif
+
+#ifdef RDE_RENDERING_3D_MODULE
+	RDE_MAX_LOADABLE_MODELS,
+	RDE_MAX_LOADABLE_MODELS_TEXTURES,
+#endif
 
 #ifdef RDE_AUDIO_MODULE
 	RDE_MAX_LOADABLE_SOUNDS
@@ -1654,9 +1681,11 @@ RDE_FUNC rde_texture* rde_rendering_load_texture(const char* _file_path);
 RDE_FUNC rde_texture* rde_rendering_load_text_texture(const char* _file_path);
 RDE_FUNC void rde_rendering_unload_texture(rde_texture* _texture);
 
+#ifdef RDE_RENDERING_2D_MODULE
 RDE_FUNC rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _config_path);
 RDE_FUNC rde_texture* rde_rendering_get_atlas_sub_texture(rde_atlas* _atlas, const char* _texture_name);
 RDE_FUNC void rde_rendering_unload_atlas(rde_atlas* _atlas);
+#endif
 
 RDE_FUNC rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, int _channels);
 RDE_FUNC void rde_rendering_memory_texture_set_pixel(rde_texture* _memory_texture, rde_vec_2I _position, rde_color _color);
@@ -1665,8 +1694,10 @@ RDE_FUNC void rde_rendering_memory_texture_gpu_upload(rde_texture* _memory_textu
 RDE_FUNC unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_texture);
 RDE_FUNC void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture);
 
+#if defined(RDE_RENDERING_2D_MODULE) || defined(RDE_RENDERING_3D_MODULE)
 RDE_FUNC rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path);
 RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
+#endif
 
 RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 
@@ -1695,12 +1726,14 @@ RDE_FUNC void rde_rendering_destroy_mesh(rde_mesh* _mesh);
 
 #ifdef RDE_FBX_MODULE
 RDE_FUNC rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const char* _texture_path);
-RDE_FUNC void rde_rendering_unload_fbx_model(rde_model* _model);
 #endif
 
 #ifdef RDE_OBJ_MODULE
-RDE_FUNC rde_model* rde_rendering_load_obj_model(const char* _obj_path);
-RDE_FUNC void rde_rendering_unload_obj_model(rde_model* _model);
+RDE_FUNC rde_model* rde_rendering_load_obj_model(const char* _obj_path, bool _free_buffers_after_load);
+#endif
+
+#if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)
+RDE_FUNC void rde_rendering_unload_model(rde_model* _model);
 #endif
 
 RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window);
