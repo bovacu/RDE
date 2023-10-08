@@ -13,6 +13,7 @@
 #define RDE_ERROR_SDL_WINDOW "SDL window creation failed: %s.\n"
 #define RDE_ERROR_SDL_OPENGL "OpenGL context couldn't initialize: %s.\n"
 #define RDE_ERROR_GLAD_INIT "Failed to initialize GLAD.\n"
+#define RDE_ERROR_SANITIZATION_PATH "Path '%s' is greater than the output sanitized buffer size '%u'\n"
 
 #ifdef RDE_AUDIO_MODULE
 #define RDE_ERROR_MA_CONTEXT "Failed to initialize context.\n"

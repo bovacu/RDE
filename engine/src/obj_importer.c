@@ -94,8 +94,8 @@ void read_file_and_fill_data(const char* _obj_path,
                              size_t* _faces_size, obj_face** _faces,
                              char* _material_path) {
 	FILE* _fp;
-	char _buffer[512];
-	size_t len = 512;
+	char _buffer[RDE_MAX_PATH];
+	size_t len = RDE_MAX_PATH;
 
 #if IS_WINDOWS()
 	rde_critical_error(fopen_s(&_fp, _obj_path, "r") != 0, RDE_ERROR_OBJ_COULD_NOT_LOAD, _obj_path);
@@ -186,8 +186,8 @@ rde_model_material load_obj_material(const char* _obj_path) {
 	}
 
 	FILE* _fp;
-	char _buffer[512];
-	size_t len = 512;
+	char _buffer[RDE_MAX_PATH];
+	size_t len = RDE_MAX_PATH;
 
 #if IS_WINDOWS()
 	rde_critical_error(fopen_s(&_fp, _obj_path, "r") != 0, RDE_ERROR_OBJ_MATERIAL_COULD_NOT_LOAD, _obj_path);
@@ -204,8 +204,8 @@ rde_model_material load_obj_material(const char* _obj_path) {
 			_ptr[strcspn(_ptr, "\r\n")] = 0;
 
 			char* _last = strrchr(_obj_path, '/');
-			char _full_path[256];
-			memset(_full_path, 0, 256);
+			char _full_path[RDE_MAX_PATH];
+			memset(_full_path, 0, RDE_MAX_PATH);
 
 			if (_last != NULL) {
 				strncat(_full_path, _obj_path, _last - _obj_path);
@@ -254,48 +254,21 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	obj_face* _faces = NULL; 
 	size_t _faces_size = 0;
 
-	char _material_path[512];
-	memset(_material_path, 0, 512);
+	char _material_path[RDE_MAX_PATH];
+	memset(_material_path, 0, RDE_MAX_PATH);
 
-	read_file_and_fill_data(_obj_path, 
+	char _obj_path_s[RDE_MAX_PATH]; 
+	rde_util_sanitaize_path(_obj_path, _obj_path_s, RDE_MAX_PATH);
+
+	read_file_and_fill_data(_obj_path_s, 
 	                        &_positions_size, &_positions, 
 	                        &_normals_size, &_normals, 
 	                        &_texcoords_size, &_texcoords, 
 	                        &_faces_size, &_faces,
 	                        _material_path);
 
-#if 0
-	printf("Positions: %zu \n", _positions_size);
-	for(size_t _i = 0; _i < _positions_size; _i += 3) {
-		printf("(%f, %f, %f) \n", _positions[_i + 0], _positions[_i + 1], _positions[_i + 2]);
-	}
-
-	printf("Normals: %zu \n", _normals_size);
-	for(size_t _i = 0; _i < _normals_size; _i += 3) {
-		printf("(%f, %f, %f) \n", _normals[_i + 0], _normals[_i + 1], _normals[_i + 2]);
-	}
-
-	printf("Texcoords: %zu \n", _texcoords_size);
-	for(size_t _i = 0; _i < _texcoords_size; _i += 2) {
-		printf("(%f, %f) \n", _texcoords[_i + 0], _texcoords[_i + 1]);
-	}
-
-	printf("Face vertices: %zu \n", _faces_size);
-	for(size_t _i = 0; _i < _faces_size; _i++) {
-		printf("%u vertices ", _faces[_i].vertices_count);
-		for(size_t _j = 0; _j < _faces[_i].vertices_count; _j++) {
-			printf("(v:%u, t:%u, n:%u) ", _faces[_i].indices[_j * 3 + 0], _faces[_i].indices[_j * 3 + 1], _faces[_i].indices[_j * 3 + 2]);
-		}
-		printf("\n");
-
-		for(size_t _k = 0; _k < _faces[_i].vertices_count * 3; _k++) {
-			printf("%u ", _faces[_i].indices[_k]);
-		}
-		printf("\n");
-	}
-#endif
-
-
+	char _material_path_s[RDE_MAX_PATH]; 
+	rde_util_sanitaize_path(_material_path, _material_path_s, RDE_MAX_PATH);
 
 	uint _mesh_indices_size = 0;
 	size_t _mesh_positions_size = 0;
@@ -320,7 +293,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 		}
 	}
 
-	rde_model_material _model_material = load_obj_material(_material_path);
+	rde_model_material _model_material = load_obj_material(_material_path_s);
 
 	unsigned int* _mesh_indices = (unsigned int*)malloc(sizeof(unsigned int) * _mesh_indices_size * 1);
 	float* _mesh_positions = (float*)malloc(sizeof(float) * _mesh_positions_size * 3);

@@ -71,6 +71,8 @@
 #define RDE_AMOUNT_OF_KEYS 256
 #define RDE_AMOUNT_OF_MOUSE_BUTTONS 16
 
+#define RDE_MAX_PATH 2048
+
 size_t current_frame = 0;
 
 // TODO: Not to forget
