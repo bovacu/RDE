@@ -1,3 +1,17 @@
+void rde_util_sanitaize_path(const char* _path, char* _sanitized, size_t _sanitized_size) {
+	rde_critical_error(strlen(_path) > _sanitized_size, RDE_ERROR_SANITIZATION_PATH, _path, _sanitized_size);
+	memset(_sanitized, 0, _sanitized_size);
+
+	char _fucking_windows_backslash = '\\';
+	char _lovely_unix_slash = '/';
+	
+	for(size_t _i = 0; _i < strlen(_path); _i++) {
+		_sanitized[_i] = _path[_i];
+		if(_sanitized[_i] == _fucking_windows_backslash) {
+			_sanitized[_i] = _lovely_unix_slash;
+		}
+	}
+}
 
 const char* rde_util_get_file_name_extension(const char* _file_name) {
 	const char* _dot = strrchr(_file_name, '.');
