@@ -31,6 +31,7 @@
 #define RDE_ERROR_OBJ_COULD_NOT_LOAD "Could not load obj file at '%s', file not found\n"
 #define RDE_ERROR_OBJ_MATERIAL_COULD_NOT_LOAD "Could not load obj material file at '%s', file not found\n"
 #define RDE_ERROR_OBJ_INVALID_DATA "Some data in '%s' could not be parsed correctly, failed to parse %s at line %lu \n"
+#define RDE_WARNING_OBJ_VERTEX_INCLUDES_COLORS "Model '%s' includes vertex colors in 'v' and this is still not supported so it will be ignored \n"
 #endif
 
 #ifdef RDE_ERROR_MODULE

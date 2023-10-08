@@ -14,7 +14,15 @@ typedef struct {
 void separate_into_floats(char* _buffer, float** _arr, size_t* _size, const char* _path, const char* _where, int _line) {
 	char* _ptr = strtok(_buffer, " ");
 	_ptr = strtok(NULL, " "); // remove 'v', 'vt' or 'vn'
+
+	short _amount_read = 0;
+
 	while(_ptr != NULL) {
+		if(_amount_read >= 3) {
+			rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_WARNING_OBJ_VERTEX_INCLUDES_COLORS, _path);
+			break;
+		}
+
 		_ptr[strcspn(_ptr, "\r\n")] = 0;
 
 		char* _end_ptr;
@@ -27,6 +35,7 @@ void separate_into_floats(char* _buffer, float** _arr, size_t* _size, const char
 		stbds_arrput(*_arr, _value);
 		_ptr = strtok(NULL, " ");
 		(*_size)++;
+		_amount_read++;
 	}
 }
 
@@ -118,6 +127,14 @@ void read_file_and_fill_data(const char* _obj_path,
 			char* _ptr = strtok(_buffer, " ");
 			_ptr = strtok(NULL, " "); // remove 'mtllib'
 			_ptr[strcspn(_ptr, "\r\n")] = 0;
+			
+			char* _last = strrchr(_obj_path, '/');
+
+			if (_last != NULL) {
+				strncat(_material_path, _obj_path, _last - _obj_path);
+				strcat(_material_path, "/");
+			}
+
 			strcat(_material_path, _ptr);
 		}
 
@@ -185,7 +202,18 @@ rde_model_material load_obj_material(const char* _obj_path) {
 			char* _ptr = strtok(_buffer, " ");
 			_ptr = strtok(NULL, " "); // remove 'map_Kd'
 			_ptr[strcspn(_ptr, "\r\n")] = 0;
-			_material.texture = rde_rendering_load_texture(_ptr);
+
+			char* _last = strrchr(_obj_path, '/');
+			char _full_path[256];
+			memset(_full_path, 0, 256);
+
+			if (_last != NULL) {
+				strncat(_full_path, _obj_path, _last - _obj_path);
+				strcat(_full_path, "/");
+			}
+			strcat(_full_path, _ptr);
+
+			_material.texture = rde_rendering_load_texture(_full_path);
 		}
 	}
 
