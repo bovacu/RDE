@@ -101,13 +101,13 @@ void rde_rendering_set_rendering_configuration() {
 	
 }
 
-#define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled)					\
-	if(!_compiled) {																\
-		char _infolog[1024];														\
-		glGetShaderInfoLog(_program_id, 1024, NULL, _infolog);						\
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Shader compile failed with error: %s \n", _infolog);				\
-		glDeleteShader(_program_id);												\
-		return NULL;																\
+#define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled)						\
+	if(!_compiled) {																	\
+		char _infolog[1024];															\
+		glGetShaderInfoLog(_program_id, 1024, NULL, _infolog);							\
+		glDeleteShader(_program_id);													\
+		rde_critical_error(true, "Shader compile failed with error: %s \n", _infolog);	\
+		return NULL;																	\
 	}
 
 	// ======================= API ===========================
@@ -138,9 +138,9 @@ rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fra
 	glGetShaderiv(_fragment_program_id, GL_COMPILE_STATUS, &_is_fragment_compiled);
 
 	RDE_CHECK_SHADER_COMPILATION_STATUS(_vertex_program_id, _is_vertex_compiled)
-		RDE_CHECK_SHADER_COMPILATION_STATUS(_fragment_program_id, _is_fragment_compiled)
+	RDE_CHECK_SHADER_COMPILATION_STATUS(_fragment_program_id, _is_fragment_compiled)
 
-		GLuint _program_id = glCreateProgram();
+	GLuint _program_id = glCreateProgram();
 	_error |= rde_util_check_opengl_error("program creation");
 	glAttachShader(_program_id, _vertex_program_id);
 	_error |= rde_util_check_opengl_error("vertex attached to program");
