@@ -144,7 +144,7 @@ void read_file_and_fill_data(const char* _obj_path,
 	fclose(_fp);
 }
 
-void parse_3_vertices_face(unsigned int _i, unsigned int _v, unsigned int* _mesh_indices, float* _mesh_positions, float* _mesh_texcoords, obj_face* _face, 
+void parse_3_vertices_face_obj(unsigned int _i, unsigned int _v, unsigned int* _mesh_indices, float* _mesh_positions, float* _mesh_texcoords, obj_face* _face, 
 							unsigned int* _indices_pointer, unsigned int* _positions_pointer, unsigned int* _texcoords_pointer,
 							float* _positions, float* _texcoords) {
 	_mesh_indices[*_indices_pointer + 0] = 3 * _i + 0;
@@ -284,10 +284,10 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 			int _indices_in_face = _face->vertices_count;
 			int _moving_pointer = 1;
 					
-			while(_moving_pointer != _indices_in_face) {
-				_mesh_indices_size += 6;
-				_mesh_positions_size += 6;
-				_mesh_texcoords_size += 6;
+			while(_moving_pointer != _indices_in_face - 1) {
+				_mesh_indices_size += 3;
+				_mesh_positions_size += 3;
+				_mesh_texcoords_size += 3;
 				_moving_pointer++;
 			}
 		}
@@ -311,14 +311,14 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 		obj_face* _face = &_faces[_i];
 
 		if (_face->vertices_count == 3) {
-			parse_3_vertices_face(_indices_pointer / 3, 0,
+			parse_3_vertices_face_obj(_indices_pointer / 3, 0,
 								  _mesh_indices, _mesh_positions, _mesh_texcoords, 
 								  _face, 
 								  &_indices_pointer, &_positions_pointer, &_texcoords_pointer, 
 								  _positions, _texcoords);
 		} else {
 			for(size_t _v = 0; _v < _face->vertices_count - 2; _v++) {
-				parse_3_vertices_face(_indices_pointer / 3, _v,
+				parse_3_vertices_face_obj(_indices_pointer / 3, _v,
 								  _mesh_indices, _mesh_positions, _mesh_texcoords, 
 								  _face, 
 								  &_indices_pointer, &_positions_pointer, &_texcoords_pointer, 
