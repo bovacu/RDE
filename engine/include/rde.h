@@ -235,12 +235,14 @@ extern "C" {
 	"out vec4 color;\n" \
 	"out vec3 normal;\n" \
 	"out vec2 text_coord;\n" \
+	"out vec3 frag_pos;\n" \
 	"uniform mat4 view_projection_matrix;\n" \
 	"\n" \
 	"void main(){	\n" \
 	"	gl_Position =  view_projection_matrix * vec4(in_pos, 1);\n" \
 	"	color = in_color;\n" \
 	"	normal = in_normal;\n" \
+	"	frag_pos = in_pos;\n" \
 	"	text_coord = in_text_coord;\n" \
 	"}"
 
@@ -250,13 +252,22 @@ extern "C" {
 	"in vec4 color;\n" \
 	"in vec3 normal;\n" \
 	"in vec2 text_coord;\n" \
+	"in vec3 frag_pos;\n" \
 	"\n" \
 	"uniform sampler2D tex;\n" \
 	"\n" \
 	"out vec4 out_color;\n" \
+	"vec3 lightColor = vec3(1.0, 1.0, 1.0);\n" \
+	"vec3 lightPos = vec3(7.361173, 6.458405, 13.681020);\n" \
+	"float ambientStrength = 0.6;\n" \
+    "vec3 ambient = ambientStrength * lightColor;\n"\
 	"\n" \
 	"void main(){\n" \
-	"	gl_FragColor = texture(tex, text_coord) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);\n" \
+	"	vec3 _norm = normalize(normal);\n" \
+	"	vec3 lightDir = normalize(lightPos - frag_pos);\n" \
+	"	float diff = max(dot(_norm, lightDir), 0.0);\n" \
+	"	vec3 diffuse = diff * lightColor;\n" \
+	"	gl_FragColor = texture(tex, text_coord) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f) * vec4(ambient + diffuse, 1.0);\n" \
 	"}"
 
 

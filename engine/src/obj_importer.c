@@ -144,9 +144,11 @@ void read_file_and_fill_data(const char* _obj_path,
 	fclose(_fp);
 }
 
-void parse_3_vertices_face_obj(unsigned int _i, unsigned int _v, unsigned int* _mesh_indices, float* _mesh_positions, float* _mesh_texcoords, obj_face* _face, 
-							unsigned int* _indices_pointer, unsigned int* _positions_pointer, unsigned int* _texcoords_pointer,
-							float* _positions, float* _texcoords) {
+void parse_3_vertices_face_obj(unsigned int _i, unsigned int _v, 
+                               unsigned int* _mesh_indices, float* _mesh_positions, float* _mesh_texcoords, float* _mesh_normals,
+                               obj_face* _face, 
+                               unsigned int* _indices_pointer, unsigned int* _positions_pointer, unsigned int* _texcoords_pointer, unsigned int* _normals_pointer,
+                               float* _positions, float* _texcoords, float* _normals) {
 	_mesh_indices[*_indices_pointer + 0] = 3 * _i + 0;
 	_mesh_indices[*_indices_pointer + 1] = 3 * _i + 1;
 	_mesh_indices[*_indices_pointer + 2] = 3 * _i + 2;
@@ -174,9 +176,22 @@ void parse_3_vertices_face_obj(unsigned int _i, unsigned int _v, unsigned int* _
 		_mesh_texcoords[*_texcoords_pointer + 5] = _texcoords[_face->indices[(_v + 2) * 3 + 1] * 2 + 1];
 	}
 
+	_mesh_normals[*_normals_pointer + 0] = _normals[_face->indices[0 * 3 + 2] * 3 + 0];
+	_mesh_normals[*_normals_pointer + 1] = _normals[_face->indices[0 * 3 + 2] * 3 + 1];
+	_mesh_normals[*_normals_pointer + 2] = _normals[_face->indices[0 * 3 + 2] * 3 + 2];
+
+	_mesh_normals[*_normals_pointer + 3] = _normals[_face->indices[(_v + 1) * 3 + 2] * 3 + 0];
+	_mesh_normals[*_normals_pointer + 4] = _normals[_face->indices[(_v + 1) * 3 + 2] * 3 + 1];
+	_mesh_normals[*_normals_pointer + 5] = _normals[_face->indices[(_v + 1) * 3 + 2] * 3 + 2];
+	
+	_mesh_normals[*_normals_pointer + 6] = _normals[_face->indices[(_v + 2) * 3 + 2] * 3 + 0];
+	_mesh_normals[*_normals_pointer + 7] = _normals[_face->indices[(_v + 2) * 3 + 2] * 3 + 1];
+	_mesh_normals[*_normals_pointer + 8] = _normals[_face->indices[(_v + 2) * 3 + 2] * 3 + 2];
+
 	*_indices_pointer += 3;
-	*_positions_pointer += 9;
 	*_texcoords_pointer += 6;
+	*_positions_pointer += 9;
+	*_normals_pointer += 9;
 }
 
 rde_model_material load_obj_material(const char* _obj_path) {
@@ -273,6 +288,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	uint _mesh_indices_size = 0;
 	size_t _mesh_positions_size = 0;
 	unsigned int _mesh_texcoords_size = 0;
+	size_t _mesh_normals_size = 0;
 
 	for(size_t _i = 0; _i < _faces_size; _i++) {
 		obj_face* _face = &_faces[_i];
@@ -280,6 +296,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 			_mesh_indices_size += 3;
 			_mesh_positions_size += 3;
 			_mesh_texcoords_size += 3;
+			_mesh_normals_size += 3;
 		} else {
 			int _indices_in_face = _face->vertices_count;
 			int _moving_pointer = 1;
@@ -288,6 +305,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 				_mesh_indices_size += 3;
 				_mesh_positions_size += 3;
 				_mesh_texcoords_size += 3;
+				_mesh_normals_size += 3;
 				_moving_pointer++;
 			}
 		}
@@ -303,26 +321,29 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 		_mesh_texcoords = (float*)malloc(sizeof(float) * _mesh_texcoords_size * 2);
 	}
 
+	float* _mesh_normals = (float*)malloc(sizeof(float) * _mesh_normals_size * 3);
+
 	unsigned int _indices_pointer = 0;
 	unsigned int _positions_pointer = 0;
 	unsigned int _texcoords_pointer = 0;
+	unsigned int _normals_pointer = 0;
 
 	for(size_t _i = 0; _i < _faces_size; _i++) {
 		obj_face* _face = &_faces[_i];
 
 		if (_face->vertices_count == 3) {
 			parse_3_vertices_face_obj(_indices_pointer / 3, 0,
-								  _mesh_indices, _mesh_positions, _mesh_texcoords, 
+								  _mesh_indices, _mesh_positions, _mesh_texcoords, _mesh_normals,
 								  _face, 
-								  &_indices_pointer, &_positions_pointer, &_texcoords_pointer, 
-								  _positions, _texcoords);
+								  &_indices_pointer, &_positions_pointer, &_texcoords_pointer, &_normals_pointer,
+								  _positions, _texcoords, _normals);
 		} else {
 			for(size_t _v = 0; _v < _face->vertices_count - 2; _v++) {
 				parse_3_vertices_face_obj(_indices_pointer / 3, _v,
-								  _mesh_indices, _mesh_positions, _mesh_texcoords, 
+								  _mesh_indices, _mesh_positions, _mesh_texcoords, _mesh_normals,
 								  _face, 
-								  &_indices_pointer, &_positions_pointer, &_texcoords_pointer, 
-								  _positions, _texcoords);
+								  &_indices_pointer, &_positions_pointer, &_texcoords_pointer, &_normals_pointer,
+								  _positions, _texcoords, _normals);
 			}
 		}
 	}
@@ -336,6 +357,8 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	if(_model_material.texture != NULL) {
 		rde_rendering_mesh_set_vertex_texture_data(_mesh, _mesh_texcoords_size, _mesh_texcoords, _model_material.texture, true);
 	}
+	
+	rde_rendering_mesh_set_vertex_normals(&_mesh, _mesh_normals, true);
 
 	stbds_arrput(_model->mesh_array, _mesh);
 	stbds_arrput(_model->material_array, _model_material);
