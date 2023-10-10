@@ -147,7 +147,7 @@ void read_file_and_fill_data(const char* _obj_path,
 void parse_3_vertices_face_obj(unsigned int _i, unsigned int _v, 
                                unsigned int* _mesh_indices, float* _mesh_positions, float* _mesh_texcoords, float* _mesh_normals,
                                obj_face* _face, 
-                               unsigned int* _indices_pointer, unsigned int* _positions_pointer, unsigned int* _texcoords_pointer, unsigned int* _normals_pointer,
+                               size_t* _indices_pointer, size_t* _positions_pointer, size_t* _texcoords_pointer, size_t* _normals_pointer,
                                float* _positions, float* _texcoords, float* _normals) {
 	_mesh_indices[*_indices_pointer + 0] = 3 * _i + 0;
 	_mesh_indices[*_indices_pointer + 1] = 3 * _i + 1;
@@ -285,9 +285,9 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	char _material_path_s[RDE_MAX_PATH]; 
 	rde_util_sanitaize_path(_material_path, _material_path_s, RDE_MAX_PATH);
 
-	uint _mesh_indices_size = 0;
+	size_t _mesh_indices_size = 0;
 	size_t _mesh_positions_size = 0;
-	unsigned int _mesh_texcoords_size = 0;
+	size_t _mesh_texcoords_size = 0;
 	size_t _mesh_normals_size = 0;
 
 	for(size_t _i = 0; _i < _faces_size; _i++) {
@@ -323,10 +323,10 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 
 	float* _mesh_normals = (float*)malloc(sizeof(float) * _mesh_normals_size * 3);
 
-	unsigned int _indices_pointer = 0;
-	unsigned int _positions_pointer = 0;
-	unsigned int _texcoords_pointer = 0;
-	unsigned int _normals_pointer = 0;
+	size_t _indices_pointer = 0;
+	size_t _positions_pointer = 0;
+	size_t _texcoords_pointer = 0;
+	size_t _normals_pointer = 0;
 
 	for(size_t _i = 0; _i < _faces_size; _i++) {
 		obj_face* _face = &_faces[_i];
