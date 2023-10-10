@@ -347,16 +347,8 @@ rde_texture* rde_rendering_load_text_texture(const char* _file_path) {
 }
 
 rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, int _channels) {
-	rde_texture* _texture = NULL;
-
-	for(size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
-		if(ENGINE.textures[_i].opengl_texture_id != -1) {
-			continue;
-		}
-
-		_texture = &ENGINE.textures[_i];
-		break;
-	}
+	rde_texture* _texture = (rde_texture*)malloc(sizeof(rde_texture));
+	rde_struct_init_alloc_ptr_texture(_texture);
 
 	rde_critical_error(_texture == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "textures", ENGINE.total_amount_of_textures);
 
@@ -500,6 +492,9 @@ void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture) {
 	if(_memory_texture->opengl_texture_id != -1) {
 		rde_rendering_unload_texture(_memory_texture);
 	}
+
+	free(_memory_texture);
+	_memory_texture = NULL;
 }
 
 #if defined(RDE_RENDERING_2D_MODULE) || defined(RDE_RENDERING_3D_MODULE)

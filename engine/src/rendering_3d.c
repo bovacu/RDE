@@ -95,10 +95,11 @@ float* rde_rendering_mesh_calculate_normals(float* _vertex_positions, unsigned i
 	return _normals;
 }
 
-rde_mesh* rde_struct_create_mesh(size_t _vertex_count, size_t _index_count) {
+rde_mesh* rde_struct_create_memory_mesh(size_t _vertex_count, size_t _index_count) {
 	rde_critical_error(_vertex_count <= 3 || _index_count <= 3, RDE_ERROR_BAD_MESH_DATA, _vertex_count, _index_count);
 
 	rde_mesh* _mesh = (rde_mesh*)malloc(sizeof(rde_mesh));
+
 	glGenVertexArrays(1, &_mesh->vao);
 	rde_util_check_opengl_error("ERROR: Creating mesh");
 
@@ -312,6 +313,9 @@ void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
 	if(_mesh->texture != NULL) {
 		rde_rendering_unload_texture(_mesh->texture);
 	}
+
+	free(_mesh);
+	_mesh = NULL;
 }
 
 
@@ -387,12 +391,7 @@ void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh
 
 void rde_rendering_draw_model_3d(const rde_transform* _transform, rde_model* _model, rde_shader* _shader) {
 	for(uint _i = 0; _i < _model->mesh_array_size; _i++) {
-		rde_mesh* _mesh = _model->mesh_array[_i];
-
-		if(_mesh == NULL) {
-			continue;
-		}
-
+		rde_mesh* _mesh = &_model->mesh_array[_i];
 		rde_rendering_draw_mesh_3d(_transform, _mesh, _shader);
 	}
 }
@@ -407,7 +406,7 @@ void rde_rendering_unload_model(rde_model* _model) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "obj model");
 
 	for(size_t _c = 0; _c < stbds_arrlenu(_model->mesh_array); _c++) {
-		rde_mesh* _mesh = _model->mesh_array[_c];
+		rde_mesh* _mesh = &_model->mesh_array[_c];
 		rde_rendering_destroy_mesh(_mesh);
 	}
 
