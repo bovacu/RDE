@@ -210,6 +210,20 @@ rde_texture rde_struct_create_texture() {
 	_t.pixels_changed = false;
 	return _t;
 }
+void rde_struct_init_alloc_ptr_texture(rde_texture* _t) {
+	_t->opengl_texture_id = -1;
+	_t->size.x = 0;
+	_t->size.y = 0;
+	_t->position.x = 0;
+	_t->position.y = 0;
+	_t->channels = 0;
+	_t->internal_format = 0;
+	_t->data_format = 0;
+	_t->file_path = NULL;
+	_t->atlas_texture = NULL;
+	_t->pixels = NULL;
+	_t->pixels_changed = false;
+}
 
 struct rde_render_texture {
 	UNIMPLEMENTED_STRUCT()
@@ -314,6 +328,37 @@ struct rde_mesh {
 	bool free_vertex_texture_on_end;
 	bool free_indices_on_end;
 };
+rde_mesh rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count) {
+	rde_mesh _mesh;
+
+	glGenVertexArrays(1, &_mesh.vao);
+	rde_util_check_opengl_error("ERROR: Creating mesh");
+
+	_mesh.vertex_count = _vertex_count;
+	_mesh.vertex_positions = NULL;
+	_mesh.vertex_colors = NULL;
+	_mesh.index_count = _indices_count;
+	_mesh.vertex_normals = NULL;
+	_mesh.vertex_texture_coordinates = NULL;
+	_mesh.indices = NULL;
+	_mesh.texture = NULL;
+
+	_mesh.vbo[0] = RDE_UINT_MAX;
+	_mesh.vbo[1] = RDE_UINT_MAX;
+	_mesh.vbo[2] = RDE_UINT_MAX;
+	_mesh.vbo[3] = RDE_UINT_MAX;
+
+	_mesh.ibo = RDE_UINT_MAX;
+
+	_mesh.free_vertex_positions_on_end = false;
+	_mesh.free_vertex_colors_on_end = false;
+	_mesh.free_vertex_normals_on_end = false;
+	_mesh.free_vertex_texture_coordinates_on_end = false;
+	_mesh.free_vertex_texture_on_end = false;
+	_mesh.free_indices_on_end = false;
+
+	return _mesh;
+}
 
 typedef struct {
 	rde_texture* texture;
@@ -325,7 +370,7 @@ rde_model_material rde_struct_create_model_material() {
 }
 
 struct rde_model {
-	rde_mesh** mesh_array;
+	rde_mesh* mesh_array;
 	unsigned int mesh_array_size;
 
 	rde_model_material* material_array;
@@ -386,10 +431,20 @@ struct rde_engine {
 
 	size_t total_amount_of_textures;
 	rde_window* windows;
+	
+#if defined(RDE_RENDERING_2D_MODULE) || defined(RDE_RENDERING_3D_MODULE)
 	rde_texture* textures;
+#endif
+
+#ifdef RDE_RENDERING_2D_MODULE
 	rde_atlas* atlases;
 	rde_font* fonts;
+#endif
+
+#ifdef RDE_RENDERING_3D_MODULE
+	rde_mesh* meshes;
 	rde_model* models;
+#endif
 
 #ifdef RDE_AUDIO_MODULE
 	rde_sound* sounds;
