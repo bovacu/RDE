@@ -9,6 +9,15 @@
 #define RDE_DEFAULT_TEXTURE_CHANNELS 3
 static rde_texture* DEFAULT_TEXTURE;
 
+#define RDE_MAX_MODELS_PER_DRAW 100
+
+static rde_batch_3d current_batch_3d;
+
+void rde_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh, size_t _extra_floats);
+void rde_rendering_try_create_batch_3d(rde_shader* _shader, rde_mesh* _mesh);
+void rde_rendering_flush_batch_3d();
+void rde_rendering_reset_batch_3d();
+
 void rde_rendering_init_3d() {
 	DEFAULT_TEXTURE = rde_rendering_create_memory_texture(RDE_DEFAULT_TEXTURE_SIZE, RDE_DEFAULT_TEXTURE_SIZE, RDE_DEFAULT_TEXTURE_CHANNELS);
 	
@@ -19,6 +28,12 @@ void rde_rendering_init_3d() {
 	}
 
 	rde_rendering_memory_texture_gpu_upload(DEFAULT_TEXTURE);
+	rde_util_check_opengl_error("ERROR: Creating default texture");
+
+	current_batch_3d.mesh = NULL;
+	current_batch_3d.shader = NULL;
+	current_batch_3d.amount_of_models_per_draw = 0;
+
 }
 
 void rde_rendering_end_3d() {
@@ -95,13 +110,51 @@ float* rde_rendering_mesh_calculate_normals(float* _vertex_positions, unsigned i
 	return _normals;
 }
 
+rde_mesh rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count) {
+	rde_mesh _mesh;
+	_mesh.vao = 0;
+	
+	GLuint _vao = 0;
+	glGenVertexArrays(1, &_vao);
+	rde_util_check_opengl_error("ERROR: Creating mesh");
+
+	_mesh.vertex_count = _vertex_count;
+	_mesh.vertex_positions = NULL;
+	_mesh.vertex_colors = NULL;
+	_mesh.index_count = _indices_count;
+	_mesh.vertex_normals = NULL;
+	_mesh.vertex_texture_coordinates = NULL;
+	_mesh.indices = NULL;
+	_mesh.texture = NULL;
+	_mesh.transforms = NULL;
+	_mesh.transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW );
+	memset(_mesh.transforms, 0, RDE_MAX_MODELS_PER_DRAW);
+
+	_mesh.vbo[0] = RDE_UINT_MAX;
+	_mesh.vbo[1] = RDE_UINT_MAX;
+	_mesh.vbo[2] = RDE_UINT_MAX;
+	_mesh.vbo[3] = RDE_UINT_MAX;
+
+	_mesh.ibo = RDE_UINT_MAX;
+
+	_mesh.free_vertex_positions_on_end = false;
+	_mesh.free_vertex_colors_on_end = false;
+	_mesh.free_vertex_normals_on_end = false;
+	_mesh.free_vertex_texture_coordinates_on_end = false;
+	_mesh.free_vertex_texture_on_end = false;
+	_mesh.free_indices_on_end = false;
+
+	return _mesh;
+}
+
 rde_mesh* rde_struct_create_memory_mesh(size_t _vertex_count, size_t _index_count) {
 	rde_critical_error(_vertex_count <= 3 || _index_count <= 3, RDE_ERROR_BAD_MESH_DATA, _vertex_count, _index_count);
 
 	rde_mesh* _mesh = (rde_mesh*)malloc(sizeof(rde_mesh));
+	_mesh->vao = 0;
 
 	glGenVertexArrays(1, &_mesh->vao);
-	rde_util_check_opengl_error("ERROR: Creating mesh");
+	rde_util_check_opengl_error("ERROR: Creating mesh Ptr");
 
 	_mesh->vertex_count = _vertex_count;
 	_mesh->vertex_positions = NULL;
@@ -111,6 +164,8 @@ rde_mesh* rde_struct_create_memory_mesh(size_t _vertex_count, size_t _index_coun
 	_mesh->vertex_texture_coordinates = NULL;
 	_mesh->indices = NULL;
 	_mesh->texture = NULL;
+	_mesh->transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW);
+	memset(_mesh->transforms, 0, RDE_MAX_MODELS_PER_DRAW);
 
 	_mesh->vbo[0] = RDE_UINT_MAX;
 	_mesh->vbo[1] = RDE_UINT_MAX;
@@ -345,47 +400,90 @@ void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _co
 	UNIMPLEMENTED("rde_rendering_draw_line_3d")
 }
 
-void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader) {
-	(void)_transform;
+void rde_rendering_reset_batch_3d() {
+	current_batch_3d.shader = NULL;
 
-	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.mesh_shader : _shader;
+	memset(current_batch_3d.mesh->transforms, 0, current_batch_3d.amount_of_models_per_draw);
+
+	current_batch_3d.mesh = NULL;
+	current_batch_3d.amount_of_models_per_draw = 0;
+}
+
+void rde_rendering_try_create_batch_3d(rde_shader* _shader, rde_mesh* _mesh) {
+	if(current_batch_3d.shader == NULL) {
+		current_batch_3d.shader = _shader;
+	}
+
+	if(current_batch_3d.mesh == NULL && _mesh != NULL) {
+		current_batch_3d.mesh = _mesh;
+	}
+}
+
+void rde_rendering_flush_batch_3d() {
+	if(current_batch_3d.shader == NULL || current_batch_3d.mesh == NULL) {
+		return;
+	}
+
+	rde_mesh* _mesh = current_batch_3d.mesh;
+	rde_shader* _shader = current_batch_3d.shader;
 
 	if(!rde_rendering_is_mesh_ok_to_render(_mesh)) {
 		return;
 	}
 
-	glUseProgram(_drawing_shader->compiled_program_id);
+	glUseProgram(current_batch_3d.shader->compiled_program_id);
 
 	mat4 _model_view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
-	mat4 _model_matrix = GLM_MAT4_IDENTITY_INIT;
-	rde_rendering_transform_to_glm_mat4_3d(_transform, _model_matrix);
 
 	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
 	rde_vec_3F _cam_pos = current_drawing_camera->transform.position;
 	rde_vec_3F _cam_direction = current_drawing_camera->direction;
 	rde_vec_3F _cam_up = current_drawing_camera->up;
-	glm_lookat((vec3) { _cam_pos.x, _cam_pos.y, _cam_pos.z },
-			   (vec3) { _cam_pos.x + _cam_direction.x, _cam_pos.y + _cam_direction.y, _cam_pos.z + _cam_direction.z },
-			   (vec3) { _cam_up.x, _cam_up.y, _cam_up.z },
-			   _view_matrix
+	glm_lookat( (vec3) { _cam_pos.x, _cam_pos.y, _cam_pos.z },
+				(vec3) { _cam_pos.x + _cam_direction.x, _cam_pos.y + _cam_direction.y, _cam_pos.z + _cam_direction.z },
+				(vec3) { _cam_up.x, _cam_up.y, _cam_up.z },
+				_view_matrix
 	);
 
 	glm_mat4_mul(projection_matrix, _view_matrix, _model_view_projection_matrix);
-	glm_mat4_mul(_model_view_projection_matrix, _model_matrix, _model_view_projection_matrix);
 
 	rde_texture* _texture_to_draw = _mesh->texture != NULL ? _mesh->texture : DEFAULT_TEXTURE;
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, _texture_to_draw->opengl_texture_id);
 	rde_util_check_opengl_error("After glBindTexture");
 
-	glUniformMatrix4fv(glGetUniformLocation(_drawing_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_model_view_projection_matrix);
+	glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_model_view_projection_matrix);
 	rde_util_check_opengl_error("After UseProgram");
+
+	char _models_uniform[64];
+	for(size_t _i = 0; _i < current_batch_3d.amount_of_models_per_draw; _i++) {
+		memset(_models_uniform, 0, 64);
+		snprintf(_models_uniform, 64, "models[%zu]", _i);
+		glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, _models_uniform), 1, GL_FALSE, (const void*)_mesh->transforms[_i]);
+		rde_util_check_opengl_error("After UseProgram");
+	}
 
 	glBindVertexArray(_mesh->vao);
 	rde_util_check_opengl_error("After glBindVertexArray");
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->ibo);
-	glDrawElements(GL_TRIANGLES, _mesh->index_count, GL_UNSIGNED_INT, 0);
+
+	glDrawElementsInstanced(GL_TRIANGLES, _mesh->index_count, GL_UNSIGNED_INT, 0, current_batch_3d.amount_of_models_per_draw);
+}
+
+void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader) {
+	const size_t _floats_per_matrix = 1;
+	
+	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.mesh_shader : _shader;
+	rde_rendering_try_create_batch_3d(_drawing_shader, _mesh);
+	rde_rendering_try_flush_batch_3d(_drawing_shader, _mesh, _floats_per_matrix);
+	
+	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
+
+	rde_rendering_transform_to_glm_mat4_3d(_transform, _transformation_matrix);
+
+	glm_mat4_copy(_transformation_matrix, _mesh->transforms[current_batch_3d.amount_of_models_per_draw]);
+	current_batch_3d.amount_of_models_per_draw++;
 }
 
 void rde_rendering_draw_model_3d(const rde_transform* _transform, rde_model* _model, rde_shader* _shader) {
@@ -395,7 +493,22 @@ void rde_rendering_draw_model_3d(const rde_transform* _transform, rde_model* _mo
 	}
 }
 
+void rde_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh, size_t _extra_floats) {
+	bool _models_ok = current_batch_3d.amount_of_models_per_draw + 1 <= RDE_MAX_MODELS_PER_DRAW;
+	bool _shader_ok = current_batch_3d.shader == _shader;
+	bool _transforms_ok = current_batch_3d.amount_of_models_per_draw * _extra_floats + _extra_floats <= RDE_MAX_MODELS_PER_DRAW * _extra_floats;
+	if(_models_ok && _shader_ok && _transforms_ok) {
+		return;
+	}
+
+	rde_rendering_flush_batch_3d();
+	rde_rendering_reset_batch_3d();
+	rde_rendering_try_create_batch_3d(_shader, _mesh);
+}
+
 void rde_rendering_end_drawing_3d() {
+	rde_rendering_flush_batch_3d();
+	rde_rendering_reset_batch_3d();
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 	current_drawing_camera = NULL;

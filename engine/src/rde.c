@@ -303,9 +303,11 @@ rde_batch_2d rde_struct_create_2d_batch() {
 	return _b;
 }
 
-struct rde_batch_3d {
-	UNIMPLEMENTED_STRUCT()
-};
+typedef struct {
+	rde_mesh* mesh;
+	rde_shader* shader;
+	size_t amount_of_models_per_draw;
+} rde_batch_3d;
 
 struct rde_mesh {
 	size_t vertex_count;
@@ -315,13 +317,14 @@ struct rde_mesh {
 	float* vertex_normals;
 	float* vertex_texture_coordinates;
 	unsigned int* vertex_colors;
+	mat4* transforms;
 
 	rde_texture* texture;
 
 	unsigned int* indices;
 
 	unsigned int vao;
-	unsigned int vbo[4]; // 0 -> positions, 1 -> colors, 2 -> normals, 3 -> texture coords
+	unsigned int vbo[4]; // 0 -> positions (static), 1 -> colors (static), 2 -> normals (static), 3 -> texture coords (static)
 	unsigned int ibo;
 
 	bool free_vertex_positions_on_end;
@@ -331,37 +334,6 @@ struct rde_mesh {
 	bool free_vertex_texture_on_end;
 	bool free_indices_on_end;
 };
-rde_mesh rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count) {
-	rde_mesh _mesh;
-
-	glGenVertexArrays(1, &_mesh.vao);
-	rde_util_check_opengl_error("ERROR: Creating mesh");
-
-	_mesh.vertex_count = _vertex_count;
-	_mesh.vertex_positions = NULL;
-	_mesh.vertex_colors = NULL;
-	_mesh.index_count = _indices_count;
-	_mesh.vertex_normals = NULL;
-	_mesh.vertex_texture_coordinates = NULL;
-	_mesh.indices = NULL;
-	_mesh.texture = NULL;
-
-	_mesh.vbo[0] = RDE_UINT_MAX;
-	_mesh.vbo[1] = RDE_UINT_MAX;
-	_mesh.vbo[2] = RDE_UINT_MAX;
-	_mesh.vbo[3] = RDE_UINT_MAX;
-
-	_mesh.ibo = RDE_UINT_MAX;
-
-	_mesh.free_vertex_positions_on_end = false;
-	_mesh.free_vertex_colors_on_end = false;
-	_mesh.free_vertex_normals_on_end = false;
-	_mesh.free_vertex_texture_coordinates_on_end = false;
-	_mesh.free_vertex_texture_on_end = false;
-	_mesh.free_indices_on_end = false;
-
-	return _mesh;
-}
 
 typedef struct {
 	rde_texture* texture;
@@ -593,9 +565,9 @@ rde_engine ENGINE;
 #include "window.c"
 #include "rendering_common.c"
 #include "rendering_2d.c"
+#include "rendering_3d.c"
 #include "fbx_importer.c"
 #include "obj_importer.c"
-#include "rendering_3d.c"
 #include "physics.c"
 #include "audio.c"
 
