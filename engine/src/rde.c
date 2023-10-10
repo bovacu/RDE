@@ -17,6 +17,9 @@
 
 #include "errors.c"
 
+#include <math.h>
+#include "cglm/call.h"
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wunused-function"

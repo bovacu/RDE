@@ -1,6 +1,3 @@
-#include <math.h>
-#include "cglm/call.h"
-
 void rde_math_set_random_seed(long _seed) {
 	srand(_seed);
 }
