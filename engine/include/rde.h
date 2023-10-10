@@ -236,39 +236,72 @@ extern "C" {
 	"out vec3 normal;\n" \
 	"out vec2 text_coord;\n" \
 	"out vec3 frag_pos;\n" \
+	"out mat4 model_matrix;\n" \
 	"uniform mat4 view_projection_matrix;\n" \
+	"uniform mat4 models[100];\n" \
 	"\n" \
 	"void main(){	\n" \
-	"	gl_Position =  view_projection_matrix * vec4(in_pos, 1);\n" \
+	"	mat4 _model = models[gl_InstanceID];\n" \
+	"	gl_Position = view_projection_matrix * _model * vec4(in_pos, 1);\n" \
 	"	color = in_color;\n" \
 	"	normal = in_normal;\n" \
 	"	frag_pos = in_pos;\n" \
 	"	text_coord = in_text_coord;\n" \
+	"	model_matrix = _model;\n" \
 	"}"
 
-#define RDE_MESH_VERTEX_FRAGMENT "" \
+#define RDE_MESH_FRAGMENT_SHADER "" \
 	"#version 330 core\n" \
 	"\n" \
 	"in vec4 color;\n" \
 	"in vec3 normal;\n" \
 	"in vec2 text_coord;\n" \
 	"in vec3 frag_pos;\n" \
+	"in mat4 model_matrix;\n" \
 	"\n" \
 	"uniform sampler2D tex;\n" \
 	"\n" \
 	"out vec4 out_color;\n" \
 	"vec3 lightColor = vec3(1.0, 1.0, 1.0);\n" \
 	"vec3 lightPos = vec3(7.361173, 6.458405, 13.681020);\n" \
-	"float ambientStrength = 0.6;\n" \
-    "vec3 ambient = ambientStrength * lightColor;\n"\
+	"float ambientStrength = 1.0;\n" \
+	"vec3 ambient = ambientStrength * lightColor;\n"\
 	"\n" \
 	"void main(){\n" \
-	"	vec3 _norm = normalize(normal);\n" \
-	"	vec3 lightDir = normalize(lightPos - frag_pos);\n" \
-	"	float diff = max(dot(_norm, lightDir), 0.0);\n" \
-	"	vec3 diffuse = diff * lightColor;\n" \
-	"	gl_FragColor = texture(tex, text_coord) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f) * vec4(ambient + diffuse, 1.0);\n" \
+	"	mat3 normalMatrix = transpose(inverse(mat3(model_matrix))); \n" \
+	"	vec3 normal = normalize(normalMatrix * normal); \n" \
+	"	vec3 fragPosition = vec3(model_matrix * vec4(frag_pos, 1)); \n" \
+	"	vec3 surfaceToLight = lightPos - fragPosition; \n" \
+	"	float brightness = dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal)); \n" \
+	"	brightness = clamp(brightness, 0, 1) * ambientStrength; \n" \
+	"	vec4 surfaceColor = texture(tex, text_coord); \n" \
+	"	vec4 color_norm = vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f); \n" \
+	"	gl_FragColor = vec4(brightness * lightColor * surfaceColor.rgb * color_norm.rgb, surfaceColor.a * color_norm.a) ;\n" \
 	"}"
+
+//#define RDE_MESH_FRAGMENT_SHADER "" \
+//	"#version 330 core\n" \
+//	"\n" \
+//	"in vec4 color;\n" \
+//	"in vec3 normal;\n" \
+//	"in vec2 text_coord;\n" \
+//	"in vec3 frag_pos;\n" \
+//	"\n" \
+//	"uniform sampler2D tex;\n" \
+//	"\n" \
+//	"out vec4 out_color;\n" \
+//	"vec3 lightColor = vec3(1.0, 1.0, 1.0);\n" \
+//	"vec3 lightPos = vec3(7.361173, 6.458405, 13.681020);\n" \
+//	"float ambientStrength = 0.6;\n" \
+//    "vec3 ambient = ambientStrength * lightColor;\n"\
+//	"\n" \
+//	"void main(){\n" \
+//	"	vec3 _norm = normalize(normal);\n" \
+//	"	vec3 lightDir = normalize(lightPos - frag_pos);\n" \
+//	"	float diff = max(dot(_norm, lightDir), 0.0);\n" \
+//	"	vec3 diffuse = diff * lightColor;\n" \
+//	"	gl_FragColor = texture(tex, text_coord) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f) * vec4(ambient + diffuse, 1.0);\n" \
+//	"}"
 
 
 #define RDE_COLOR_VERTEX_SHADER_2D_ES "" \
