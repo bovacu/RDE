@@ -474,7 +474,7 @@ void rde_rendering_flush_batch_3d() {
 void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader) {
 	const size_t _floats_per_matrix = 1;
 	
-	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.mesh_shader : _shader;
+	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.mesh_shader_diffuse : _shader;
 	rde_rendering_try_create_batch_3d(_drawing_shader, _mesh);
 	rde_rendering_try_flush_batch_3d(_drawing_shader, _mesh, _floats_per_matrix);
 	

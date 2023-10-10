@@ -383,6 +383,7 @@ rde_sound rde_struct_create_sound() {
 }
 #endif
 
+#define RDE_DEFAULT_SHADERS_AMOUNT 6
 struct rde_engine {
 	float delta_time;
 	float fixed_delta_time;
@@ -401,7 +402,8 @@ struct rde_engine {
 	rde_shader* texture_shader_2d;
 	rde_shader* text_shader_2d;
 	rde_shader* frame_buffer_shader;
-	rde_shader* mesh_shader;
+	rde_shader* mesh_shader_phong;
+	rde_shader* mesh_shader_diffuse;
 	rde_shader* shaders;
 
 	size_t total_amount_of_textures;
@@ -442,6 +444,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	rde_engine _e;
 
 	_e.heap_allocs_config = _heap_allocs_config;
+	_e.heap_allocs_config.max_number_of_shaders += RDE_DEFAULT_SHADERS_AMOUNT;
 	_e.total_amount_of_textures = 0;
 	
 #ifdef RDE_RENDERING_2D_MODULE
