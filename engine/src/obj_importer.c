@@ -64,6 +64,7 @@ void separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const ch
 		}
 
 		char* _indices_ptr = strtok_rde(_face_ptr, "/", &_inner_saveptr);
+		short _index = 0;
 		while(_indices_ptr != NULL) {
 			_indices_ptr[strcspn(_indices_ptr, "\r\n")] = 0;
 
@@ -76,6 +77,12 @@ void separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const ch
 
 			stbds_arrput(_face.indices, _value);
 			_indices_ptr = strtok_rde(NULL, "/", &_inner_saveptr);
+
+			_index++;
+		}
+
+		for(short _i = _index; _i < 3; _i++) {
+			stbds_arrput(_face.indices, RDE_UINT_MAX);
 		}
 		
 		_face_ptr = strtok_rde(NULL, " ", &_outer_saveptr);
@@ -153,40 +160,51 @@ void parse_3_vertices_face_obj(unsigned int _i, unsigned int _v,
 	_mesh_indices[*_indices_pointer + 1] = 3 * _i + 1;
 	_mesh_indices[*_indices_pointer + 2] = 3 * _i + 2;
 
-	_mesh_positions[*_positions_pointer + 0] = _positions[_face->indices[0 * 3] * 3 + 0];
-	_mesh_positions[*_positions_pointer + 1] = _positions[_face->indices[0 * 3] * 3 + 1];
-	_mesh_positions[*_positions_pointer + 2] = _positions[_face->indices[0 * 3] * 3 + 2];
+	unsigned int _face_index = _face->indices[0 * 3];
+	_mesh_positions[*_positions_pointer + 0] = _positions[_face_index * 3 + 0];
+	_mesh_positions[*_positions_pointer + 1] = _positions[_face_index * 3 + 1];
+	_mesh_positions[*_positions_pointer + 2] = _positions[_face_index * 3 + 2];
 
-	_mesh_positions[*_positions_pointer + 3] = _positions[_face->indices[(_v + 1) * 3] * 3 + 0];
-	_mesh_positions[*_positions_pointer + 4] = _positions[_face->indices[(_v + 1) * 3] * 3 + 1];
-	_mesh_positions[*_positions_pointer + 5] = _positions[_face->indices[(_v + 1) * 3] * 3 + 2];
+	_face_index = _face->indices[(_v + 1) * 3];
+	_mesh_positions[*_positions_pointer + 3] = _positions[_face_index * 3 + 0];
+	_mesh_positions[*_positions_pointer + 4] = _positions[_face_index * 3 + 1];
+	_mesh_positions[*_positions_pointer + 5] = _positions[_face_index * 3 + 2];
 	
-	_mesh_positions[*_positions_pointer + 6] = _positions[_face->indices[(_v + 2) * 3] * 3 + 0];
-	_mesh_positions[*_positions_pointer + 7] = _positions[_face->indices[(_v + 2) * 3] * 3 + 1];
-	_mesh_positions[*_positions_pointer + 8] = _positions[_face->indices[(_v + 2) * 3] * 3 + 2];
+	_face_index = _face->indices[(_v + 2) * 3];
+	_mesh_positions[*_positions_pointer + 6] = _positions[_face_index * 3 + 0];
+	_mesh_positions[*_positions_pointer + 7] = _positions[_face_index * 3 + 1];
+	_mesh_positions[*_positions_pointer + 8] = _positions[_face_index * 3 + 2];
 
-	if(_mesh_texcoords != NULL) {
+	_face_index = _face->indices[0 * 3 + 1];
+	if(_mesh_texcoords != NULL && _face_index != RDE_UINT_MAX) {
 		_mesh_texcoords[*_texcoords_pointer + 0] = _texcoords[_face->indices[0 * 3 + 1] * 2 + 0];
 		_mesh_texcoords[*_texcoords_pointer + 1] = _texcoords[_face->indices[0 * 3 + 1] * 2 + 1];
 
+		_face_index = _face->indices[(_v + 1) * 3 + 1];
 		_mesh_texcoords[*_texcoords_pointer + 2] = _texcoords[_face->indices[(_v + 1) * 3 + 1] * 2 + 0];
 		_mesh_texcoords[*_texcoords_pointer + 3] = _texcoords[_face->indices[(_v + 1) * 3 + 1] * 2 + 1];
 
+		_face_index = _face->indices[(_v + 2) * 3 + 1];
 		_mesh_texcoords[*_texcoords_pointer + 4] = _texcoords[_face->indices[(_v + 2) * 3 + 1] * 2 + 0];
 		_mesh_texcoords[*_texcoords_pointer + 5] = _texcoords[_face->indices[(_v + 2) * 3 + 1] * 2 + 1];
 	}
 
-	_mesh_normals[*_normals_pointer + 0] = _normals[_face->indices[0 * 3 + 2] * 3 + 0];
-	_mesh_normals[*_normals_pointer + 1] = _normals[_face->indices[0 * 3 + 2] * 3 + 1];
-	_mesh_normals[*_normals_pointer + 2] = _normals[_face->indices[0 * 3 + 2] * 3 + 2];
+	_face_index = _face->indices[0 * 3 + 2];
+	if(_mesh_normals != NULL && _face_index != RDE_UINT_MAX) {
+		_mesh_normals[*_normals_pointer + 0] = _normals[_face->indices[0 * 3 + 2] * 3 + 0];
+		_mesh_normals[*_normals_pointer + 1] = _normals[_face->indices[0 * 3 + 2] * 3 + 1];
+		_mesh_normals[*_normals_pointer + 2] = _normals[_face->indices[0 * 3 + 2] * 3 + 2];
 
-	_mesh_normals[*_normals_pointer + 3] = _normals[_face->indices[(_v + 1) * 3 + 2] * 3 + 0];
-	_mesh_normals[*_normals_pointer + 4] = _normals[_face->indices[(_v + 1) * 3 + 2] * 3 + 1];
-	_mesh_normals[*_normals_pointer + 5] = _normals[_face->indices[(_v + 1) * 3 + 2] * 3 + 2];
-	
-	_mesh_normals[*_normals_pointer + 6] = _normals[_face->indices[(_v + 2) * 3 + 2] * 3 + 0];
-	_mesh_normals[*_normals_pointer + 7] = _normals[_face->indices[(_v + 2) * 3 + 2] * 3 + 1];
-	_mesh_normals[*_normals_pointer + 8] = _normals[_face->indices[(_v + 2) * 3 + 2] * 3 + 2];
+		_face_index = _face->indices[(_v + 1) * 3 + 2];
+		_mesh_normals[*_normals_pointer + 3] = _normals[_face->indices[(_v + 1) * 3 + 2] * 3 + 0];
+		_mesh_normals[*_normals_pointer + 4] = _normals[_face->indices[(_v + 1) * 3 + 2] * 3 + 1];
+		_mesh_normals[*_normals_pointer + 5] = _normals[_face->indices[(_v + 1) * 3 + 2] * 3 + 2];
+		
+		_face_index = _face->indices[(_v + 2) * 3 + 2];
+		_mesh_normals[*_normals_pointer + 6] = _normals[_face->indices[(_v + 2) * 3 + 2] * 3 + 0];
+		_mesh_normals[*_normals_pointer + 7] = _normals[_face->indices[(_v + 2) * 3 + 2] * 3 + 1];
+		_mesh_normals[*_normals_pointer + 8] = _normals[_face->indices[(_v + 2) * 3 + 2] * 3 + 2];
+	}
 
 	*_indices_pointer += 3;
 	*_texcoords_pointer += 6;
