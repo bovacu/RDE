@@ -492,9 +492,6 @@ void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture) {
 	if(_memory_texture->opengl_texture_id != -1) {
 		rde_rendering_unload_texture(_memory_texture);
 	}
-
-	free(_memory_texture);
-	_memory_texture = NULL;
 }
 
 #if defined(RDE_RENDERING_2D_MODULE) || defined(RDE_RENDERING_3D_MODULE)

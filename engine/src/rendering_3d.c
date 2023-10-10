@@ -314,8 +314,7 @@ void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
 		rde_rendering_unload_texture(_mesh->texture);
 	}
 
-	free(_mesh);
-	_mesh = NULL;
+	free(_mesh->transforms);
 }
 
 
