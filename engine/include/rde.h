@@ -1377,12 +1377,55 @@ rde_transform rde_struct_create_transform() {
 /// ============================ RENDERING ==================================
 
 typedef struct rde_shader rde_shader;
-typedef struct rde_texture rde_texture;
 typedef struct rde_render_texture rde_render_texture;
+
+#if defined(RDE_RENDERING_2D_MODULE) || defined(RDE_RENDERING_3D_MODULE)
+typedef struct rde_texture rde_texture;
+#endif
+
+#if defined(RDE_RENDERING_2D_MODULE)
 typedef struct rde_atlas rde_atlas;
 typedef struct rde_font rde_font;
+
+typedef struct {
+	rde_vec_3F position;
+	int color;
+	rde_vec_2F texture_coordinates;
+} rde_vertex_2d;
+rde_vertex_2d rde_struct_create_vertex_2d() {
+	rde_vertex_2d _v;
+	_v.position.x = 0.f;
+	_v.position.y = 0.f;
+	_v.position.z = 0.f;
+	_v.texture_coordinates.x = 0.f;
+	_v.texture_coordinates.y = 0.f;
+	_v.color = 0xFFFFFF;
+	return _v;
+}
+
+#endif 
+
+#if defined(RDE_RENDERING_3D_MODULE)
 typedef struct rde_mesh rde_mesh;
 typedef struct rde_model rde_model;
+
+struct rde_material_map {
+	UNIMPLEMENTED_STRUCT()
+};
+
+struct rde_material {
+	UNIMPLEMENTED_STRUCT()
+};
+
+struct rde_model_bone {
+	UNIMPLEMENTED_STRUCT()
+};
+
+struct rde_model_animation {
+	UNIMPLEMENTED_STRUCT()
+};
+
+#endif
 
 typedef struct {
 	unsigned char r;
@@ -1408,38 +1451,6 @@ rde_polygon rde_struct_create_polygon() {
 	_p.vertices = NULL;
 	_p.vertices_count = 0;
 	return _p;
-}
-
-struct rde_material_map {
-	UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_material {
-	UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_model_bone {
-	UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_model_animation {
-	UNIMPLEMENTED_STRUCT()
-};
-
-typedef struct {
-	rde_vec_3F position;
-	int color;
-	rde_vec_2F texture_coordinates;
-} rde_vertex_2d;
-rde_vertex_2d rde_struct_create_vertex_2d() {
-	rde_vertex_2d _v;
-	_v.position.x = 0.f;
-	_v.position.y = 0.f;
-	_v.position.z = 0.f;
-	_v.texture_coordinates.x = 0.f;
-	_v.texture_coordinates.y = 0.f;
-	_v.color = 0xFFFFFF;
-	return _v;
 }
 
 struct rde_viewport {
@@ -1471,6 +1482,7 @@ rde_camera rde_struct_create_camera() {
 
 /// ============================ AUDIO ==================================
 
+#ifdef RDE_AUDIO_MODULE
 typedef struct rde_sound rde_sound;
 typedef struct {
 	void* user_data;
@@ -1484,6 +1496,7 @@ rde_sound_config rde_struct_create_audio_config() {
 	_s.rate = 48000;
 	return _s;
 }
+#endif
 
 /// *************************************************************************************************
 /// *                                GLOBAL VARIABLES                         						*
