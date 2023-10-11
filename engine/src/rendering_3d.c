@@ -61,8 +61,8 @@ void rde_rendering_transform_to_glm_mat4_3d(const rde_transform* _transform, mat
 	glm_mat4_copy(_transformation_matrix, _mat);
 }
 
-float* rde_rendering_mesh_calculate_normals(float* _vertex_positions, unsigned int _indices_count, unsigned int* _indices) {
-	size_t _normals_size = _indices_count * 2;
+float* rde_rendering_mesh_calculate_normals(float* _vertex_positions, size_t _indices_count, size_t _vertex_count, unsigned int* _indices) {
+	size_t _normals_size = _vertex_count * 3;
 	float* _normals = (float*)malloc(sizeof(float) * _normals_size);
 	memset(_normals, 0, _normals_size);
 
@@ -97,7 +97,7 @@ float* rde_rendering_mesh_calculate_normals(float* _vertex_positions, unsigned i
 	}
 
 	// rde_log_level(RDE_LOG_LEVEL_INFO, "Indices: %d", _indices_count);
-	for(unsigned int _i = 0; _i < _indices_count; _i ++) {
+	for(unsigned int _i = 0; _i < _indices_count; _i++) {
 		vec3 _normal = (vec3) { _normals[_indices[_i] + 0], _normals[_indices[_i] + 1], _normals[_indices[_i] + 2] };
 		glm_normalize(_normal);
 		_normals[_indices[_i] + 0] = _normal[0];
@@ -193,7 +193,7 @@ void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _indices, boo
 	if(_mesh->ibo == RDE_UINT_MAX) {
 		glGenBuffers(1, &_mesh->ibo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->ibo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices_size, _indices, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices_size, _indices, GL_STATIC_DRAW);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	} else {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->ibo);
@@ -215,7 +215,7 @@ void rde_rendering_mesh_set_vertex_positions(rde_mesh* _mesh, float* _positions,
 	if(_mesh->vbo[0] == RDE_UINT_MAX) {
 		glGenBuffers(1, &_mesh->vbo[0]);
 		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[0]);
-		glBufferData(GL_ARRAY_BUFFER, _positions_size, _positions, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, _positions_size, _positions, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -239,7 +239,7 @@ void rde_rendering_mesh_set_vertex_colors(rde_mesh* _mesh, unsigned int* _colors
 	if(_mesh->vbo[1] == RDE_UINT_MAX) {
 		glGenBuffers(1, &_mesh->vbo[1]);
 		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[1]);
-		glBufferData(GL_ARRAY_BUFFER, _colors_size, _colors, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, _colors_size, _colors, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -260,10 +260,14 @@ void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, boo
 
 	size_t _normals_size = sizeof(float) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL;
 	glBindVertexArray(_mesh->vao);
+	rde_util_check_opengl_error("rde_rendering_mesh_set_vertex_normals: VAO");
 	if(_mesh->vbo[2] == RDE_UINT_MAX) {
 		glGenBuffers(1, &_mesh->vbo[2]);
+		rde_util_check_opengl_error("rde_rendering_mesh_set_vertex_normals: VBO");
 		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[2]);
-		glBufferData(GL_ARRAY_BUFFER, _normals_size, _normals, GL_DYNAMIC_DRAW);
+		rde_util_check_opengl_error("rde_rendering_mesh_set_vertex_normals: BIND VBO");
+		glBufferData(GL_ARRAY_BUFFER, _normals_size, _normals, GL_STATIC_DRAW);
+		rde_util_check_opengl_error("rde_rendering_mesh_set_vertex_normals: BUFFER DATA VBO");
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -288,7 +292,7 @@ void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, unsigned int _t
 	if(_mesh->vbo[3] == RDE_UINT_MAX) {
 		glGenBuffers(1, &_mesh->vbo[3]);
 		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[3]);
-		glBufferData(GL_ARRAY_BUFFER, _texture_coords_array_size, _texture_coords, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, _texture_coords_array_size, _texture_coords, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -325,10 +329,10 @@ bool rde_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 		rde_rendering_mesh_set_vertex_colors(_mesh, _colors, true);
 	}
 
-	if(_mesh->vertex_normals == NULL) {
-		//float* _normals = rde_rendering_mesh_calculate_normals(_mesh->vertex_positions, _mesh->index_count, _mesh->indices);
-		//rde_rendering_mesh_set_vertex_normals(_mesh, _normals, true);
-	}
+	// if(_mesh->vertex_normals == NULL) {
+	// 	float* _normals = rde_rendering_mesh_calculate_normals(_mesh->vertex_positions, _mesh->index_count, _mesh->vertex_count, _mesh->indices);
+	// 	rde_rendering_mesh_set_vertex_normals(_mesh, _normals, true);
+	// }
 
 	return true;
 }
