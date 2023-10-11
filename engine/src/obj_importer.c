@@ -12,6 +12,9 @@ typedef struct {
 	unsigned int vertices_count;
 } obj_face;
 
+const int NO_VERTEX_UVS = 0b00000001;
+const int NO_VERTEX_NORMALS = 0b00000010;
+
 void separate_into_floats(char* _buffer, float** _arr, size_t* _size, const char* _path, const char* _where, int _line) {
 	char* _ptr = strtok(_buffer, " ");
 	_ptr = strtok(NULL, " "); // remove 'v', 'vt' or 'vn'
@@ -40,7 +43,7 @@ void separate_into_floats(char* _buffer, float** _arr, size_t* _size, const char
 	}
 }
 
-void separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const char* _path, const char* _where, int _line) {
+int separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const char* _path, const char* _where, int _line) {
 
 #if IS_WINDOWS()
 	#define strtok_rde strtok_s
@@ -49,12 +52,14 @@ void separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const ch
 #endif
 
 	char* _outer_saveptr = NULL;
-	char* _inner_saveptr = NULL;
+	// char* _inner_saveptr = NULL;
 
 	char* _face_ptr = strtok_rde(_buffer, " ", &_outer_saveptr);
 	_face_ptr = strtok_rde(NULL, " ", &_outer_saveptr); // remove 'f'
 
 	obj_face _face = { NULL, 0 };
+
+	int _lacking_face_data = 0;
 
 	while(_face_ptr != NULL) {
 		rde_util_string_trim(_face_ptr);
@@ -64,22 +69,29 @@ void separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const ch
 			_face.vertices_count++;
 		}
 
-		char* _indices_ptr = strtok_rde(_face_ptr, "/", &_inner_saveptr);
-		short _index = 0;
-		while(_indices_ptr != NULL) {
-			_indices_ptr[strcspn(_indices_ptr, "\r\n")] = 0;
+		int _index = 0;
+		char* _end = "/";
+		for (const char* _p = _face_ptr; *_end == '/'; _p = _end + 1) {
+			long _value = strtol(_p, &_end, 10) - 1;
+			
+			if (_end == _p) {
+				stbds_arrput(_face.indices, RDE_UINT_MAX);
+				_lacking_face_data |= NO_VERTEX_UVS;
+				_index++;
+				continue;
+			}
 
-			char* _end_ptr;
-			long _value = strtol(_indices_ptr, &_end_ptr, 10) - 1;
-
-			if(*_end_ptr != '\0') {
+			if(_end == NULL) {
 				rde_critical_error(true, RDE_ERROR_OBJ_INVALID_DATA, _path, _where, _line + 1);
 			}
 
 			stbds_arrput(_face.indices, _value);
-			_indices_ptr = strtok_rde(NULL, "/", &_inner_saveptr);
 
 			_index++;
+		}
+
+		if(_index == 1 || _index == 2) {
+			_lacking_face_data |= NO_VERTEX_NORMALS;
 		}
 
 		for(short _i = _index; _i < 3; _i++) {
@@ -93,9 +105,11 @@ void separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const ch
 	(*_size)++;
 
 #undef strtok_rde
+
+	return _lacking_face_data;
 }
 
-void read_file_and_fill_data(const char* _obj_path, 
+int read_file_and_fill_data(const char* _obj_path, 
                              size_t* _positions_size, float** _positions,
                              size_t* _normals_size, float** _normals, 
                              size_t* _texcoords_size, float** _texcoords, 
@@ -118,6 +132,8 @@ void read_file_and_fill_data(const char* _obj_path,
 	const char* _where_normals = "normals";
 	size_t _file_line = 0;
 
+	int _lacking_face_data = 0;
+
 	while(fgets(_buffer, len, _fp)) {
 		if(_buffer[0] == 'v') {
 			if(_buffer[1] == ' ') {
@@ -130,7 +146,7 @@ void read_file_and_fill_data(const char* _obj_path,
 				}
 			}
 		} else if(_buffer[0] == 'f') {
-			separate_into_faces(_buffer, _faces, _faces_size, _obj_path, _where_faces, _file_line);
+			_lacking_face_data = separate_into_faces(_buffer, _faces, _faces_size, _obj_path, _where_faces, _file_line);
 		} else if(strncmp(_buffer, "mtllib", strlen("mtllib")) == 0) {
 			char* _ptr = strtok(_buffer, " ");
 			_ptr = strtok(NULL, " "); // remove 'mtllib'
@@ -150,6 +166,8 @@ void read_file_and_fill_data(const char* _obj_path,
 	}
 
 	fclose(_fp);
+
+	return _lacking_face_data;
 }
 
 void parse_3_vertices_face_obj(unsigned int _i, unsigned int _v, 
@@ -297,7 +315,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	char _obj_path_s[RDE_MAX_PATH]; 
 	rde_util_sanitaize_path(_obj_path, _obj_path_s, RDE_MAX_PATH);
 
-	read_file_and_fill_data(_obj_path_s, 
+	int _lacking_face_data = read_file_and_fill_data(_obj_path_s, 
 	                        &_positions_size, &_positions, 
 	                        &_normals_size, &_normals, 
 	                        &_texcoords_size, &_texcoords, 
@@ -338,12 +356,19 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	unsigned int* _mesh_indices = (unsigned int*)malloc(sizeof(unsigned int) * _mesh_indices_size * 1);
 	float* _mesh_positions = (float*)malloc(sizeof(float) * _mesh_positions_size * 3);
 	float* _mesh_texcoords = NULL;
+	float* _mesh_normals = NULL;
 
-	if(_model_material.texture != NULL) {
+	if(_model_material.texture != NULL && (_lacking_face_data & NO_VERTEX_UVS) == 0) {
 		_mesh_texcoords = (float*)malloc(sizeof(float) * _mesh_texcoords_size * 2);
+	} else {
+		_mesh_texcoords_size = 0;
 	}
 
-	float* _mesh_normals = (float*)malloc(sizeof(float) * _mesh_normals_size * 3);
+	if((_lacking_face_data & NO_VERTEX_NORMALS) == 0) {
+		_mesh_normals = (float*)malloc(sizeof(float) * _mesh_normals_size * 3);
+	} else {
+		_mesh_normals_size = 0;
+	}
 
 	size_t _indices_pointer = 0;
 	size_t _positions_pointer = 0;
@@ -370,17 +395,17 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 		}
 	}
 
-	rde_log_color(RDE_LOG_COLOR_GREEN, "	- vertices: %u, indices: %u, texcoords: %u \n", _mesh_positions_size, _mesh_indices_size, _mesh_texcoords_size);
-
 	rde_mesh _mesh = rde_struct_create_mesh(_mesh_positions_size, _mesh_positions_size);
 	rde_rendering_mesh_set_vertex_positions(&_mesh, _mesh_positions, true);
 	rde_rendering_mesh_set_indices(&_mesh, _mesh_indices, true);
 	
-	if(_model_material.texture != NULL) {
+	if(_model_material.texture != NULL && (_lacking_face_data & NO_VERTEX_UVS) == 0) {
 		rde_rendering_mesh_set_vertex_texture_data(&_mesh, _mesh_texcoords_size, _mesh_texcoords, _model_material.texture, true);
 	}
 	
-	rde_rendering_mesh_set_vertex_normals(&_mesh, _mesh_normals, true);
+	if((_lacking_face_data & NO_VERTEX_NORMALS) == 0) {
+		rde_rendering_mesh_set_vertex_normals(&_mesh, _mesh_normals, true);
+	}
 
 	stbds_arrput(_model->mesh_array, _mesh);
 	stbds_arrput(_model->material_array, _model_material);
