@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 typedef struct {
 	unsigned int* indices;	// contains X pairs of 3 uints each, first uint is the index of the position in the array of positions, 
@@ -256,6 +257,9 @@ rde_model_material load_obj_material(const char* _obj_path) {
 }
 
 rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
+	clock_t _t_start, _t_end;
+    _t_start = clock();
+
 	rde_log_color(RDE_LOG_COLOR_GREEN, "Loading OBJ '%s':", _obj_path);
 
 	rde_model* _model = NULL;
@@ -386,6 +390,11 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	stbds_arrfree(_texcoords);
 	stbds_arrfree(_faces->indices);
 	stbds_arrfree(_faces);
+
+	_t_end = clock();
+
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- vertices: %u, indices: %u, texcoords: %u, normals: %u \n", _mesh_positions_size, _mesh_indices_size, _mesh_texcoords_size, _mesh_normals_size);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- took %.3fms \n", (double)(_t_end - _t_start) / CLOCKS_PER_SEC);
 
 	return _model;
 }
