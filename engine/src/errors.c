@@ -36,107 +36,312 @@
 #endif
 
 #ifdef RDE_ERROR_MODULE
-#include <signal.h>
+	#include <signal.h>
 
-#define RDE_MAX_STACK 100
+	#define RDE_MAX_STACK 100
 
-#if IS_WINDOWS()
-#include <dbghelp.h>
-void rde_print_stack_trace(FILE* _f) {
-	void* _stack[RDE_MAX_STACK];
-	HANDLE _process = GetCurrentProcess();
+	#if IS_WINDOWS()
+	#include <dbghelp.h>
+	void rde_print_stack_trace(FILE* _f) {
+		void* _stack[RDE_MAX_STACK];
+		HANDLE _process = GetCurrentProcess();
 
-	SymInitialize(_process, NULL, TRUE);
+		SymInitialize(_process, NULL, TRUE);
 
-	unsigned short _frames = CaptureStackBackTrace(0, RDE_MAX_STACK, _stack, NULL);
-	SYMBOL_INFO* _symbol = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
-	IMAGEHLP_LINE* _line = (IMAGEHLP_LINE *)malloc(sizeof(IMAGEHLP_LINE));
-	_line->SizeOfStruct = sizeof(IMAGEHLP_LINE);
+		unsigned short _frames = CaptureStackBackTrace(0, RDE_MAX_STACK, _stack, NULL);
+		SYMBOL_INFO* _symbol = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
+		IMAGEHLP_LINE* _line = (IMAGEHLP_LINE *)malloc(sizeof(IMAGEHLP_LINE));
+		_line->SizeOfStruct = sizeof(IMAGEHLP_LINE);
 
-	_symbol->MaxNameLen = 255;
-	_symbol->SizeOfStruct = sizeof( SYMBOL_INFO );
+		_symbol->MaxNameLen = 255;
+		_symbol->SizeOfStruct = sizeof( SYMBOL_INFO );
 
-	for(int _i = 0; _i < _frames; _i++) {
-		SymFromAddr(_process, (DWORD64)(_stack[_i] ), 0, _symbol);
-		DWORD _dwDisplacement;
-		SymGetLineFromAddr(_process, (DWORD64)(_stack[_i]), &_dwDisplacement, _line);
+		for(int _i = 0; _i < _frames; _i++) {
+			SymFromAddr(_process, (DWORD64)(_stack[_i] ), 0, _symbol);
+			DWORD _dwDisplacement;
+			SymGetLineFromAddr(_process, (DWORD64)(_stack[_i]), &_dwDisplacement, _line);
 
-		if(strstr(_line->FileName, "errors.c") != NULL) {
-			continue;
+			if(strstr(_line->FileName, "errors.c") != NULL) {
+				continue;
+			}
+
+			fprintf(_f, "%i: %s:%s:%lu - 0x%0llX\n", _frames - _i - 1, _line->FileName, _symbol->Name, _line->LineNumber, _symbol->Address);
 		}
 
-		fprintf(_f, "%i: %s:%s:%lu - 0x%0llX\n", _frames - _i - 1, _line->FileName, _symbol->Name, _line->LineNumber, _symbol->Address);
+		free(_symbol);
+		free(_line);
 	}
 
-	free(_symbol);
-	free(_line);
-}
+	LONG WINAPI rde_error_sig_handler(PEXCEPTION_POINTERS _sigfault_info) {
+		printf("\n\n");
+		switch(_sigfault_info->ExceptionRecord->ExceptionCode) {
+			case EXCEPTION_ACCESS_VIOLATION: {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_ACCESS_VIOLATION ERROR:The thread tried to read from or write to a virtual address for which it does not have the appropriate access.");
+			} break;
+			
+			case EXCEPTION_ARRAY_BOUNDS_EXCEEDED: {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_ARRAY_BOUNDS_EXCEEDED ERROR: The thread tried to access an array element that is out of bounds and the underlying hardware supports bounds checking.");
+			} break;
 
-LONG WINAPI rde_error_sig_handler(PEXCEPTION_POINTERS _sigfault_info) {
-	printf("\n\n");
-	switch(_sigfault_info->ExceptionRecord->ExceptionCode) {
-		case EXCEPTION_ACCESS_VIOLATION: {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_ACCESS_VIOLATION ERROR:The thread tried to read from or write to a virtual address for which it does not have the appropriate access.");
-		} break;
-		
-		case EXCEPTION_ARRAY_BOUNDS_EXCEEDED: {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_ARRAY_BOUNDS_EXCEEDED ERROR: The thread tried to access an array element that is out of bounds and the underlying hardware supports bounds checking.");
-		} break;
+			case EXCEPTION_ILLEGAL_INSTRUCTION: {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_ILLEGAL_INSTRUCTION ERROR: The thread tried to execute an invalid instruction. ");
+			} break;
 
-		case EXCEPTION_ILLEGAL_INSTRUCTION: {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_ILLEGAL_INSTRUCTION ERROR: The thread tried to execute an invalid instruction. ");
-		} break;
+			case EXCEPTION_STACK_OVERFLOW: {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_STACK_OVERFLOW ERROR: The thread used up its stack.");
+			} break;
 
-		case EXCEPTION_STACK_OVERFLOW: {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_STACK_OVERFLOW ERROR: The thread used up its stack.");
-		} break;
+			case EXCEPTION_FLT_DIVIDE_BY_ZERO: {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_FLT_DIVIDE_BY_ZERO ERROR: The thread tried to divide a floating-point value by a floating-point divisor of zero.");
+			} break;
 
-		case EXCEPTION_FLT_DIVIDE_BY_ZERO: {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_FLT_DIVIDE_BY_ZERO ERROR: The thread tried to divide a floating-point value by a floating-point divisor of zero.");
-		} break;
+			case EXCEPTION_FLT_OVERFLOW: {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_FLT_OVERFLOW ERROR: The exponent of a floating-point operation is greater than the magnitude allowed by the corresponding type.");
+			} break;
 
-		case EXCEPTION_FLT_OVERFLOW: {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_FLT_OVERFLOW ERROR: The exponent of a floating-point operation is greater than the magnitude allowed by the corresponding type.");
-		} break;
+			case EXCEPTION_INT_DIVIDE_BY_ZERO: {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_INT_DIVIDE_BY_ZERO ERROR: The thread tried to divide an integer value by an integer divisor of zero.");
+			} break;
 
-		case EXCEPTION_INT_DIVIDE_BY_ZERO: {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_INT_DIVIDE_BY_ZERO ERROR: The thread tried to divide an integer value by an integer divisor of zero.");
-		} break;
+			case EXCEPTION_INT_OVERFLOW: {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_INT_OVERFLOW ERROR: The result of an integer operation caused a carry out of the most significant bit of the result.");
+			} break;
 
-		case EXCEPTION_INT_OVERFLOW: {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "EXCEPTION_INT_OVERFLOW ERROR: The result of an integer operation caused a carry out of the most significant bit of the result.");
-		} break;
+			default: {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "UNHANDLED ERROR: Got an unhadled signal with value %lu", _sigfault_info->ExceptionRecord->ExceptionCode);
+			} break;
+		}
 
-		default: {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "UNHANDLED ERROR: Got an unhadled signal with value %lu", _sigfault_info->ExceptionRecord->ExceptionCode);
-		} break;
-	}
-
-	#ifdef RDE_DEBUG
-		rde_print_stack_trace(stdout);
-	#else
-		FILE* _f = NULL;
-		#if IS_WINDOWS()
-			fopen_s(&_f, "rde_crash_logs.txt", "w");
+		#ifdef RDE_DEBUG
+			rde_print_stack_trace(stdout);
 		#else
-			_f = fopen("rde_crash_logs.txt", "w");
-		#endif
-		rde_print_stack_trace(_f);
-		fclose(_f);
+			FILE* _f = NULL;
+			#if IS_WINDOWS()
+				fopen_s(&_f, "rde_crash_logs.txt", "w");
+			#else
+				_f = fopen("rde_crash_logs.txt", "w");
+			#endif
+			rde_print_stack_trace(_f);
+			fclose(_f);
 
+		#endif
+
+		rde_engine_destroy_engine();
+		exit(-1);
+
+		return EXCEPTION_CONTINUE_SEARCH;
+	}
+	#else
+	#define RDE_STACKTRACE_MAX_DEPTH 1024
+	// Same value as SIGSTKSZ
+	#define RDE_STACKTRACE_BUFF_SIZE 13504
+	#define RDE_STACKTRACE_PRINT_BUFF_SIZE 1024
+	#define RDE_STACKTRACE_PRINT_LINE_BUFF_SIZE 2048
+
+	#include <execinfo.h>
+	#include <dlfcn.h>
+	#include <err.h>
+
+	typedef struct {
+	    char* buf;
+	    int pos;
+	    int size;
+	} rde_print_buf;
+
+	typedef struct rde_posix_stacktrace {
+	    void* trace[RDE_STACKTRACE_MAX_DEPTH];
+	    int trace_size;
+	} rde_posix_stacktrace;
+
+	static void rde_buf_printf(FILE* _f, const char* _fmt, ...) {
+	    va_list _args;
+	    va_start(_args, _fmt);
+	    vfprintf(_f, _fmt, _args);
+	    va_end(_args);
+	}
+
+	void rde_print_stack_trace(FILE* _f) {
+		rde_posix_stacktrace* _ret = (rde_posix_stacktrace*)malloc(sizeof(rde_posix_stacktrace));
+	    _ret->trace_size = backtrace(_ret->trace, RDE_STACKTRACE_MAX_DEPTH);
+	    const rde_posix_stacktrace* _stacktrace = (rde_posix_stacktrace*)(_ret);
+
+	    char** _messages = backtrace_symbols(_stacktrace->trace, _stacktrace->trace_size);
+	    rde_print_buf _out = { (char*) malloc(RDE_STACKTRACE_PRINT_BUFF_SIZE), 0, RDE_STACKTRACE_PRINT_BUFF_SIZE };
+
+	    for (int i = 0; i < _stacktrace->trace_size; ++i) {
+	        void* _tracei = _stacktrace->trace[i];
+	        char* _msg = _messages[i];
+
+	        /* calculate load offset */
+	        Dl_info _info;
+	        dladdr(_tracei, &_info);
+	        if (_info.dli_fbase == (void*)0x400000) {
+	            /* address from executable, so don't offset */
+	            _info.dli_fbase = NULL;
+	        }
+
+	        while (*_msg && *_msg != '(') {
+	        	 ++_msg;
+	        }
+
+	        *_msg = 0;
+	        char _cmd[RDE_STACKTRACE_PRINT_BUFF_SIZE];
+	        char _line[RDE_STACKTRACE_PRINT_LINE_BUFF_SIZE];
+
+	        FILE* _fp;
+	        snprintf(_cmd, RDE_STACKTRACE_PRINT_BUFF_SIZE, "addr2line -e %s -f -C -p %p 2>/dev/null", _messages[i], (void*)((char*)_tracei - (char*)_info.dli_fbase));
+
+	        _fp = popen(_cmd, "r");
+	        if (!_fp) {
+	            rde_buf_printf(_f, "Failed to generate trace further...\n");
+	            break;
+	        }
+
+	        while (fgets(_line, sizeof(_line), _fp)) {
+	            rde_buf_printf(_f, "%s: ", _messages[i]);
+	            if (strstr(_line, "?? ")) {
+	                /* just output address if nothing can be found */
+	                rde_buf_printf(_f, "%p\n", _tracei);
+	            }
+	            else {
+	                rde_buf_printf(_f, "%s", _line);
+	            }
+	        }
+
+	        pclose(_fp);
+	    }
+
+	    free(_messages);
+	    free(_ret);
+
+	    printf("%s \n", _out.buf);
+	}
+
+	void posix_signal_handler(int _sig, siginfo_t* _sig_info, void* _context) {
+		(void)_context;
+
+		FILE* _f = NULL;
+	#ifdef RDE_DEBUG
+	  	_f = stdout;
+	#else
+		_f = fopen("rde_crash_logs.txt", "w");
+	#endif
+	  
+		switch(_sig) {
+			case SIGSEGV:
+				fprintf(_f, "Caught SIGSEGV: Segmentation Fault\n");
+				break;
+			case SIGINT:
+				fprintf(_f, "stderr, Caught SIGINT: Interactive attention signal, (usually ctrl+c)\n");
+				break;
+			case SIGFPE:
+				switch(_sig_info->si_code) {
+					case FPE_INTDIV:
+						fprintf(_f, "Caught SIGFPE: (integer divide by zero)\n");
+						break;
+					case FPE_INTOVF:
+						fprintf(_f, "Caught SIGFPE: (integer overflow)\n");
+						break;
+					case FPE_FLTDIV:
+						fprintf(_f, "Caught SIGFPE: (floating-point divide by zero)\n");
+						break;
+					case FPE_FLTOVF:
+						fprintf(_f, "Caught SIGFPE: (floating-point overflow)\n");
+						break;
+					case FPE_FLTUND:
+						fprintf(_f, "Caught SIGFPE: (floating-point underflow)\n");
+						break;
+					case FPE_FLTRES:
+						fprintf(_f, "Caught SIGFPE: (floating-point inexact result)\n");
+						break;
+					case FPE_FLTINV:
+						fprintf(_f, "Caught SIGFPE: (floating-point invalid operation)\n");
+						break;
+					case FPE_FLTSUB:
+						fprintf(_f, "Caught SIGFPE: (subscript out of range)\n");
+						break;
+					default:
+						fprintf(_f, "Caught SIGFPE: Arithmetic Exception\n");
+						break;
+				}
+			case SIGILL:
+				switch(_sig_info->si_code) {
+					case ILL_ILLOPC:
+						fprintf(_f, "Caught SIGILL: (illegal opcode)\n");
+						break;
+					case ILL_ILLOPN:
+						fprintf(_f, "Caught SIGILL: (illegal operand)\n");
+						break;
+					case ILL_ILLADR:
+						fprintf(_f, "Caught SIGILL: (illegal addressing mode)\n");
+						break;
+					case ILL_ILLTRP:
+						fprintf(_f, "Caught SIGILL: (illegal trap)\n");
+						break;
+					case ILL_PRVOPC:
+						fprintf(_f, "Caught SIGILL: (privileged opcode)\n");
+						break;
+					case ILL_PRVREG:
+						fprintf(_f, "Caught SIGILL: (privileged register)\n");
+						break;
+					case ILL_COPROC:
+						fprintf(_f, "Caught SIGILL: (coprocessor error)\n");
+						break;
+					case ILL_BADSTK:
+						fprintf(_f, "Caught SIGILL: (internal stack error)\n");
+						break;
+					default:
+						fprintf(_f, "Caught SIGILL: Illegal Instruction\n");
+						break;
+				}
+				break;
+			case SIGTERM:
+				fprintf(_f, "Caught SIGTERM: a termination request was sent to the program\n");
+				break;
+			case SIGABRT:
+				fprintf(_f, "Caught SIGABRT: usually caused by an abort() or assert()\n");
+				break;
+			default:
+				break;
+		}
+
+	  	rde_print_stack_trace(_f);
+
+	#ifndef RDE_DEBUG
+		fclose(_f);
 	#endif
 
-	rde_engine_destroy_engine();
-	exit(-1);
+	  exit(-1);
+	}
 
-	return EXCEPTION_CONTINUE_SEARCH;
-}
-#else
+	void rde_set_posix_signal_handler() {
+		stack_t _ss = {};
+		uint8_t* _alternate_stack = (uint8_t*)malloc(sizeof(uint8_t) * RDE_STACKTRACE_BUFF_SIZE);
+		_ss.ss_sp = (void*)_alternate_stack;
+		_ss.ss_size = RDE_STACKTRACE_BUFF_SIZE;
+		_ss.ss_flags = 0;
 
-// TODO: Implement for Mac/Linux
+		if (sigaltstack(&_ss, NULL) != 0) { err(1, "sigaltstack"); }
 
-#endif
 
+		struct sigaction _sig_action = {};
+		_sig_action.sa_sigaction = posix_signal_handler;
+		sigemptyset(&_sig_action.sa_mask);
+
+		#ifdef __APPLE__
+		    _sig_action.sa_flags = SA_SIGINFO;
+		#else
+		    _sig_action.sa_flags = SA_SIGINFO | SA_ONSTACK;
+		#endif
+
+		if (sigaction(SIGSEGV, &_sig_action, NULL) != 0) { err(1, "sigaction"); }
+		if (sigaction(SIGFPE,  &_sig_action, NULL) != 0) { err(1, "sigaction"); }
+		if (sigaction(SIGINT,  &_sig_action, NULL) != 0) { err(1, "sigaction"); }
+		if (sigaction(SIGILL,  &_sig_action, NULL) != 0) { err(1, "sigaction"); }
+		if (sigaction(SIGTERM, &_sig_action, NULL) != 0) { err(1, "sigaction"); }
+		if (sigaction(SIGABRT, &_sig_action, NULL) != 0) { err(1, "sigaction"); }
+	}
+	#endif
 #endif
 
 void rde_critical_error(bool _condition, const char* _fmt, ...) {

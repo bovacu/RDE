@@ -48,14 +48,11 @@ int separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const cha
 #if IS_WINDOWS()
 	#define strtok_rde strtok_s
 #else
-	#define strtok_rde strtok_r
+	#define strtok_rde strtok
 #endif
 
-	char* _outer_saveptr = NULL;
-	// char* _inner_saveptr = NULL;
-
-	char* _face_ptr = strtok_rde(_buffer, " ", &_outer_saveptr);
-	_face_ptr = strtok_rde(NULL, " ", &_outer_saveptr); // remove 'f'
+	char* _face_ptr = strtok_rde(_buffer, " ");
+	_face_ptr = strtok_rde(NULL, " "); // remove 'f'
 
 	obj_face _face = { NULL, 0 };
 
@@ -98,7 +95,7 @@ int separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const cha
 			stbds_arrput(_face.indices, RDE_UINT_MAX);
 		}
 		
-		_face_ptr = strtok_rde(NULL, " ", &_outer_saveptr);
+		_face_ptr = strtok_rde(NULL, " ");
 	}
 
 	stbds_arrput(*_arr, _face);

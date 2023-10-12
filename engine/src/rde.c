@@ -554,6 +554,8 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	#ifdef RDE_ERROR_MODULE
 	SetUnhandledExceptionFilter(rde_error_sig_handler);
 	#endif
+#else
+	rde_set_posix_signal_handler();
 #endif
 
 	return _e;

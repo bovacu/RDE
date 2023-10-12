@@ -428,7 +428,7 @@ bool run_command(rde_command _command) {
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Executing command: %s", _command_flat);
 #else
 	int _total_args = arrlen(_command) + 1;
-	char* _argument_list[32];
+	char* _argument_list[2048];
 
 	printf("[INFO] ");
 	for(int _i = 0; _i < _total_args - 1; _i++) {
@@ -1849,13 +1849,6 @@ bool compile_linux() {
 																											\
 		arrput(_build_command, "clang");																	\
 																											\
-		unsigned int _module = 1;																			\
-		for(int _i = 0; _i < MAX_MODULES; _i++) {															\
-			if((modules & _module) == _module) {															\
-				arrput(_build_command, MODULES_DEFINES[_i]);												\
-			}																								\
-			_module = _module << 1;																			\
-		}																									\
 																											\
 		if(strcmp(build_type, "debug") == 0) {																\
 			arrput(_build_command, "-g");																	\
@@ -1866,6 +1859,20 @@ bool compile_linux() {
 		}																									\
 																											\
 		arrput(_build_command, "-std=c99");																	\
+																											\
+		unsigned int _module = 1;																			\
+		for(int _i = 0; _i < MAX_MODULES; _i++) {															\
+			if((modules & _module) == _module) {															\
+				arrput(_build_command, MODULES_DEFINES[_i]);												\
+			}																								\
+			_module = _module << 1;																			\
+		}																									\
+																											\
+		if((modules & RDE_MODULES_ERROR) == RDE_MODULES_ERROR) {											\
+			arrput(_build_command, "-D_POSIX_C_SOURCE=200809L");											\
+			arrput(_build_command, "-D_XOPEN_SOURCE=500");													\
+			arrput(_build_command, "-D_GNU_SOURCE=1");														\
+		}																									\
 																											\
 		if(strcmp(lib_type, "shared") == 0) {																\
 			strcat(_output_engine, "libRDE.so");															\
