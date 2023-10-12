@@ -1,4 +1,6 @@
 #if defined(RDE_OBJ_MODULE) && defined(RDE_RENDERING_3D_MODULE)
+
+// TODO: remove this diagnostics, basically change strtok for strtok_s on Windows
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
@@ -44,15 +46,8 @@ void separate_into_floats(char* _buffer, float** _arr, size_t* _size, const char
 }
 
 int separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const char* _path, const char* _where, int _line) {
-
-#if IS_WINDOWS()
-	#define strtok_rde strtok_s
-#else
-	#define strtok_rde strtok
-#endif
-
-	char* _face_ptr = strtok_rde(_buffer, " ");
-	_face_ptr = strtok_rde(NULL, " "); // remove 'f'
+	char* _face_ptr = strtok(_buffer, " ");
+	_face_ptr = strtok(NULL, " "); // remove 'f'
 
 	obj_face _face = { NULL, 0 };
 
@@ -95,13 +90,11 @@ int separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const cha
 			stbds_arrput(_face.indices, RDE_UINT_MAX);
 		}
 		
-		_face_ptr = strtok_rde(NULL, " ");
+		_face_ptr = strtok(NULL, " ");
 	}
 
 	stbds_arrput(*_arr, _face);
 	(*_size)++;
-
-#undef strtok_rde
 
 	return _lacking_face_data;
 }
