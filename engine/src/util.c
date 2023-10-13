@@ -13,135 +13,100 @@ void rde_util_sanitaize_path(const char* _path, char* _sanitized, size_t _saniti
 	}
 }
 
-const char* rde_util_get_file_name_extension(const char* _file_name) {
+const char* rde_util_file_get_name_extension(const char* _file_name) {
 	const char* _dot = strrchr(_file_name, '.');
 	if(!_dot || _dot == _file_name) return "";
 	return _dot + 1;
 }
 
-void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
-	switch(_color) {
-		case RDE_LOG_COLOR_RED: {
-			#if IS_WINDOWS()
-			SetConsoleTextAttribute(ENGINE.console_handle, 12);
-			#else
-			fprintf(stdout, "\033[0;31m");
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_GREEN:  {
-			#if IS_WINDOWS()
-			SetConsoleTextAttribute(ENGINE.console_handle, 10);
-			#else
-			fprintf(stdout, "\033[0;32m");	
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_YELLOW:  {
-			#if IS_WINDOWS()
-			SetConsoleTextAttribute(ENGINE.console_handle, 6);
-			#else
-			fprintf(stdout, "\033[0;33m");	
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_BLUE:  {
-			#if IS_WINDOWS()
-			SetConsoleTextAttribute(ENGINE.console_handle, 9);
-			#else
-			fprintf(stdout, "\033[0;34m");		
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_PURPLE:  {
-			#if IS_WINDOWS()
-			SetConsoleTextAttribute(ENGINE.console_handle, 5);
-			#else
-			fprintf(stdout, "\033[0;35m");
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_CYAN:  {
-			#if IS_WINDOWS()
-			SetConsoleTextAttribute(ENGINE.console_handle, 11);
-			#else
-			fprintf(stdout, "\033[0;36m");
-			#endif
-		} break;
-		
-		case RDE_LOG_COLOR_WHITE:  {
-			#if IS_WINDOWS()
-			SetConsoleTextAttribute(ENGINE.console_handle, 15);
-			#else
-			fprintf(stdout, "\033[0;37m");
-			#endif
-		} break;
-	}
-
-	va_list _args;
-	va_start(_args, _fmt);
-	vfprintf(stdout, _fmt, _args);
-	va_end(_args);
-
-	#if IS_WINDOWS()
-	SetConsoleTextAttribute(ENGINE.console_handle, 7);
-	fprintf(stdout, "\n");
-	#else
-	fprintf(stdout, "\033[0m \n");
-	#endif
+rde_file_handler* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode) {
+	UNUSED(_file_path)
+	UNUSED(_file_mode)
+	UNIMPLEMENTED("rde_file_open")
+	return NULL;
 }
 
-void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
-	switch(_level) {
-		case RDE_LOG_LEVEL_ERROR: {
-			#if IS_WINDOWS()
-			SetConsoleTextAttribute(ENGINE.console_handle, 12);
-			#else
-			fprintf(stdout, "\033[0;31m");
-			#endif
-			fprintf(stdout, "[ERROR] ");
-		} break;
-		
-		case RDE_LOG_LEVEL_WARNING:  {
-			#if IS_WINDOWS()
-			SetConsoleTextAttribute(ENGINE.console_handle, 6);
-			#else
-			fprintf(stdout, "\033[0;33m");	
-			#endif
-			fprintf(stdout, "[WARNING] ");
-		} break;
-		
-		case RDE_LOG_LEVEL_DEBUG:  {
-			#if IS_WINDOWS()
-			SetConsoleTextAttribute(ENGINE.console_handle, 11);
-			#else
-			fprintf(stdout, "\033[0;36m");
-			#endif
-			fprintf(stdout, "[DEBUG] ");
-		} break;
-
-		case RDE_LOG_LEVEL_INFO:  {
-			#if IS_WINDOWS()
-			SetConsoleTextAttribute(ENGINE.console_handle, 7);
-			#endif
-			fprintf(stdout, "[INFO] ");
-		} break;
-	}
-
-	va_list _args;
-	va_start(_args, _fmt);
-	vfprintf(stdout, _fmt, _args);
-	va_end(_args);
-	
-	#if IS_WINDOWS()
-	SetConsoleTextAttribute(ENGINE.console_handle, 7);
-	fprintf(stdout, "\n");
-	#else
-	fprintf(stdout, "\033[0m \n");
-	#endif
+rde_file_handler* rde_file_open_or_create(const char* _file_path, RDE_FILE_MODE_ _file_mode) {
+	UNUSED(_file_path)
+	UNUSED(_file_mode)
+	UNIMPLEMENTED("rde_file_open_or_create")
+	return NULL;
 }
 
-size_t rde_util_get_string_width(const char* _string, const rde_font* _font) {
+char* rde_file_read_full_file(rde_file_handler* _file_handler) {
+	UNUSED(_file_handler)
+	UNIMPLEMENTED("rde_file_read_full_file")
+	return NULL;
+}
+
+char* rde_file_read_line(rde_file_handler* _file_handler, size_t _line) {
+	UNUSED(_file_handler)
+	UNUSED(_line)
+	UNIMPLEMENTED("rde_file_read_line")
+	return NULL;
+}
+
+char* rde_file_read_chunk(rde_file_handler* _file_handler, size_t _begin_byte, size_t _end_byte) {
+	UNUSED(_file_handler)
+	UNUSED(_begin_byte)
+	UNUSED(_end_byte)
+	UNIMPLEMENTED("rde_file_read_chunk")
+	return NULL;
+}
+
+void rde_file_write(rde_file_handler* _file_handler, size_t _bytes, const char* _data) {
+	UNUSED(_file_handler)
+	UNUSED(_bytes)
+	UNUSED(_data)
+	UNIMPLEMENTED("rde_file_write")
+}
+
+void rde_file_write_to_line(rde_file_handler* _file_handler, size_t _bytes, const char* _data, size_t _line) {
+	UNUSED(_file_handler)
+	UNUSED(_bytes)
+	UNUSED(_data)
+	UNUSED(_line)
+	UNIMPLEMENTED("rde_file_write_to_line")
+}
+
+void rde_file_append(rde_file_handler* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line) {
+	UNUSED(_file_handler)
+	UNUSED(_append_byte)
+	UNUSED(_bytes)
+	UNUSED(_data)
+	UNUSED(_line)
+	UNIMPLEMENTED("rde_file_append")
+}
+
+void rde_file_clear_content(rde_file_handler* _file_handler) {
+	UNUSED(_file_handler)
+	UNIMPLEMENTED("rde_file_clear_content")
+}
+
+bool rde_file_exists(const char* _file_path) {
+	UNUSED(_file_path)
+	UNIMPLEMENTED("rde_file_exists")
+	return false;
+}
+
+void rde_file_delete(const char* _file_path) {
+	UNUSED(_file_path)
+	UNIMPLEMENTED("rde_file_delete")
+}
+
+void rde_file_move(const char* _file_path, const char* _new_file_path) {
+	UNUSED(_file_path)
+	UNUSED(_new_file_path)
+	UNIMPLEMENTED("rde_file_move")
+}
+
+void rde_file_close(rde_file_handler* _file_handler) {
+	UNUSED(_file_handler)
+	UNIMPLEMENTED("rde_file_close")
+}
+
+
+size_t rde_util_font_get_string_width(const char* _string, const rde_font* _font) {
 	int _text_size = strlen(_string);
 
 	size_t _size = 0;
@@ -154,7 +119,7 @@ size_t rde_util_get_string_width(const char* _string, const rde_font* _font) {
 	return _size;
 }
 
-rde_vec_2I rde_util_get_string_size(const char* _string, const rde_font* _font) {
+rde_vec_2I rde_util_font_get_string_size(const char* _string, const rde_font* _font) {
 	int _text_size = strlen(_string);
 
 	int _width = 0;
@@ -186,4 +151,239 @@ char* rtrim(char* _s) {
 
 char* rde_util_string_trim(char* _s) {
 	return rtrim(ltrim(_s)); 
+}
+
+bool rde_util_string_starts_with(const char* _string, const char* _prefix) {
+	return strncmp(_string, _prefix, strlen(_prefix)) == 0;
+}
+
+bool rde_util_string_ends_with(const char* _string, const char* _suffix) {
+	size_t _suffix_size = strlen(_suffix);
+	size_t _string_size = strlen(_string);
+	return strncmp(_string + (_string_size - _suffix_size), _suffix, _suffix_size) == 0;
+}
+
+bool rde_util_string_contains_substring(const char* _string, const char* _substring, bool _case_sensitive) {
+	if(!_case_sensitive) {
+		return strstr(_string, _substring) != NULL;
+	} else {
+#if IS_WINDOWS()
+		return StrStrA(_string, _substring) != NULL;
+#else
+		return strcasestr(_string, _substring) != NULL;
+#endif
+	}
+	return false;
+}
+
+size_t rde_util_string_char_appearences(const char* _string, char _char) {
+	size_t _amount = 0;
+	size_t _string_size = strlen(_string);
+	for(size_t _i = 0; _i < _string_size; _i++) {
+		if(_string[_i] == _char) {
+			_amount++;
+		}
+	}
+
+	return _amount;
+}
+
+void rde_util_string_concat(char* _string, size_t _size, const char* _fmt, ...) {
+	va_list _args;
+	va_start(_args, _fmt);
+	vsnprintf(_string, _size, _fmt, _args);
+	va_end(_args);
+}
+
+void rde_util_string_to_lower(char* _destination, const char* _string) {
+	size_t _string_size = strlen(_string);
+	for(size_t _i = 0; _i < _string_size; _i++){
+		_destination[_i] = tolower(_string[_i]);
+	}
+}
+
+void rde_util_string_to_lower_itself(char* _string) {
+	size_t _string_size = strlen(_string);
+	for(size_t _i = 0; _i < _string_size; _i++){
+		_string[_i] = tolower(_string[_i]);
+	}
+}
+
+void rde_util_string_to_upper(char* _destination, const char* _string) {
+	size_t _string_size = strlen(_string);
+	for(size_t _i = 0; _i < _string_size; _i++){
+		_destination[_i] = toupper(_string[_i]);
+	}
+}
+
+void rde_util_string_to_upper_itself(char* _string) {
+	size_t _string_size = strlen(_string);
+	for(size_t _i = 0; _i < _string_size; _i++){
+		_string[_i] = toupper(_string[_i]);
+	}
+}
+
+void rde_util_string_replace_char(char* _string, char _old, char _new) {
+	size_t _string_size = strlen(_string);
+	for(size_t _i = 0; _i < _string_size; _i++) {
+		if(_string[_i] == _old) {
+			_string[_i] = _new;
+			break;
+		}
+	}
+}
+
+void rde_util_string_replace_chars_all(char* _string, char _old, char _new) {
+	size_t _string_size = strlen(_string);
+	for(size_t _i = 0; _i < _string_size; _i++) {
+		if(_string[_i] == _old) {
+			_string[_i] = _new;
+		}
+	}
+}
+
+size_t rde_util_string_split(char* _string, char** _split_array, const char* _split_mark) {
+	size_t _amount = 0;
+	
+#if IS_WINDOWS()
+	char* _string_ptr = strtok_s(_string, _split_mark, NULL);
+#else
+	char* _string_ptr = strtok(_string, _split_mark);
+#endif
+
+	while(_string_ptr != NULL) {
+#if IS_WINDOWS()
+		size_t _string_ptr_size = strlen(_string_ptr);
+		strcat_s(_split_array[_amount], _string_ptr_size, _string_ptr);
+		_string_ptr = strtok_s(NULL, _split_mark, NULL);
+#else
+		strcat(_split_array[_amount], _string_ptr);
+		_string_ptr = strtok(NULL, _split_mark);
+#endif
+		_amount++;
+	}
+
+	return _amount;
+}
+
+void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
+	switch(_color) {
+		case RDE_LOG_COLOR_RED: {
+#if IS_WINDOWS()
+			SetConsoleTextAttribute(ENGINE.console_handle, 12);
+#else
+			fprintf(stdout, "\033[0;31m");
+#endif
+		} break;
+		
+		case RDE_LOG_COLOR_GREEN:  {
+#if IS_WINDOWS()
+			SetConsoleTextAttribute(ENGINE.console_handle, 10);
+#else
+			fprintf(stdout, "\033[0;32m");	
+#endif
+		} break;
+		
+		case RDE_LOG_COLOR_YELLOW:  {
+#if IS_WINDOWS()
+			SetConsoleTextAttribute(ENGINE.console_handle, 6);
+#else
+			fprintf(stdout, "\033[0;33m");	
+#endif
+		} break;
+		
+		case RDE_LOG_COLOR_BLUE:  {
+#if IS_WINDOWS()
+			SetConsoleTextAttribute(ENGINE.console_handle, 9);
+#else
+			fprintf(stdout, "\033[0;34m");		
+#endif
+		} break;
+		
+		case RDE_LOG_COLOR_PURPLE:  {
+#if IS_WINDOWS()
+			SetConsoleTextAttribute(ENGINE.console_handle, 5);
+#else
+			fprintf(stdout, "\033[0;35m");
+#endif
+		} break;
+		
+		case RDE_LOG_COLOR_CYAN:  {
+#if IS_WINDOWS()
+			SetConsoleTextAttribute(ENGINE.console_handle, 11);
+#else
+			fprintf(stdout, "\033[0;36m");
+#endif
+		} break;
+		
+		case RDE_LOG_COLOR_WHITE:  {
+#if IS_WINDOWS()
+			SetConsoleTextAttribute(ENGINE.console_handle, 15);
+#else
+			fprintf(stdout, "\033[0;37m");
+#endif
+		} break;
+	}
+
+	va_list _args;
+	va_start(_args, _fmt);
+	vfprintf(stdout, _fmt, _args);
+	va_end(_args);
+
+#if IS_WINDOWS()
+	SetConsoleTextAttribute(ENGINE.console_handle, 7);
+	fprintf(stdout, "\n");
+#else
+	fprintf(stdout, "\033[0m \n");
+#endif
+}
+
+void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
+	switch(_level) {
+		case RDE_LOG_LEVEL_ERROR: {
+#if IS_WINDOWS()
+			SetConsoleTextAttribute(ENGINE.console_handle, 12);
+#else
+			fprintf(stdout, "\033[0;31m");
+#endif
+			fprintf(stdout, "[ERROR] ");
+		} break;
+		
+		case RDE_LOG_LEVEL_WARNING:  {
+#if IS_WINDOWS()
+			SetConsoleTextAttribute(ENGINE.console_handle, 6);
+#else
+			fprintf(stdout, "\033[0;33m");	
+#endif
+			fprintf(stdout, "[WARNING] ");
+		} break;
+		
+		case RDE_LOG_LEVEL_DEBUG:  {
+#if IS_WINDOWS()
+			SetConsoleTextAttribute(ENGINE.console_handle, 11);
+#else
+			fprintf(stdout, "\033[0;36m");
+#endif
+			fprintf(stdout, "[DEBUG] ");
+		} break;
+
+		case RDE_LOG_LEVEL_INFO:  {
+#if IS_WINDOWS()
+			SetConsoleTextAttribute(ENGINE.console_handle, 7);
+#endif
+			fprintf(stdout, "[INFO] ");
+		} break;
+	}
+
+	va_list _args;
+	va_start(_args, _fmt);
+	vfprintf(stdout, _fmt, _args);
+	va_end(_args);
+	
+#if IS_WINDOWS()
+	SetConsoleTextAttribute(ENGINE.console_handle, 7);
+	fprintf(stdout, "\n");
+#else
+	fprintf(stdout, "\033[0m \n");
+#endif
 }

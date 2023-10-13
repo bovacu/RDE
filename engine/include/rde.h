@@ -434,6 +434,7 @@ extern "C" {
 	#include <io.h>
 	#include <fcntl.h>
 	#include <windows.h>
+	#include <shlwapi.h>
 #endif			 
 
 #define RDE_SHOW_WINDOWS_CONSOLE 							\
@@ -1206,6 +1207,8 @@ rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks(
 
 /// ============================== ENGINE ===================================
 
+typedef struct rde_file_handler rde_file_handler;
+
 typedef struct {
 	int index;
 } rde_display_info;
@@ -1586,10 +1589,37 @@ RDE_FUNC void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 
 /// ============================ UTIL =======================================
 
-RDE_FUNC const char* rde_util_get_file_name_extension(const char* _file_name);
-RDE_FUNC size_t rde_util_get_string_width(const char* _string, const rde_font* _font);
-RDE_FUNC rde_vec_2I rde_util_get_string_size(const char* _string, const rde_font* _font);
+RDE_FUNC const char* rde_util_file_get_name_extension(const char* _file_name);
+RDE_FUNC rde_file_handler* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode);
+RDE_FUNC rde_file_handler* rde_file_open_or_create(const char* _file_path, RDE_FILE_MODE_ _file_mode);
+RDE_FUNC char* rde_file_read_full_file(rde_file_handler* _file_handler);
+RDE_FUNC char* rde_file_read_line(rde_file_handler* _file_handler, size_t _line);
+RDE_FUNC char* rde_file_read_chunk(rde_file_handler* _file_handler, size_t _begin_byte, size_t _end_byte);
+RDE_FUNC void rde_file_write(rde_file_handler* _file_handler, size_t _bytes, const char* _data);
+RDE_FUNC void rde_file_write_to_line(rde_file_handler* _file_handler, size_t _bytes, const char* _data, size_t _line);
+RDE_FUNC void rde_file_append(rde_file_handler* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line); // Appends some data at a specific point in the file. -1 as begin means EOF.
+RDE_FUNC void rde_file_clear_content(rde_file_handler* _file_handler);
+RDE_FUNC bool rde_file_exists(const char* _file_path);
+RDE_FUNC void rde_file_delete(const char* _file_path);
+RDE_FUNC void rde_file_move(const char* _file_path, const char* _new_file_path);
+RDE_FUNC void rde_file_close(rde_file_handler* _file_handler);
+
+RDE_FUNC size_t rde_util_font_get_string_width(const char* _string, const rde_font* _font);
+RDE_FUNC rde_vec_2I rde_util_font_get_string_size(const char* _string, const rde_font* _font);
+
 RDE_FUNC char* rde_util_string_trim(char* _s);
+RDE_FUNC bool rde_util_string_starts_with(const char* _string, const char* _prefix);
+RDE_FUNC bool rde_util_string_ends_with(const char* _string, const char* _suffix);
+RDE_FUNC bool rde_util_string_contains_substring(const char* _string, const char* _substring, bool _case_sensitive);
+RDE_FUNC size_t rde_util_string_char_appearences(const char* _string, char _char);
+RDE_FUNC void rde_util_string_concat(char* _string, size_t _size, const char* _fmt, ...);
+RDE_FUNC void rde_util_string_to_lower(char* _destination, const char* _string);
+RDE_FUNC void rde_util_string_to_lower_itself(char* _string);
+RDE_FUNC void rde_util_string_to_upper(char* _destination, const char* _string);
+RDE_FUNC void rde_util_string_to_upper_itself(char* _string);
+RDE_FUNC void rde_util_string_replace_char(char* _string, char _old, char _new);
+RDE_FUNC void rde_util_string_replace_chars_all(char* _string, char _old, char _new);
+RDE_FUNC size_t rde_util_string_split(char* _string, char** _split_array, const char* _split_mark);
 
 /// ============================ MATH =======================================
 
