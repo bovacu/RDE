@@ -18,3 +18,8 @@ tools/atlas_generator/test_dir_2/*.png
 
 *.exe
 */*.exe
+
+tests/*.dll
+tests/*.exe
+tests/*.exp
+tests/*.lib

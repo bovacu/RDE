@@ -1402,7 +1402,114 @@ bool compile_windows() {
 		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
 	} while(0);
 
-	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
+#define BUILD_TESTS()																								\
+	do {																											\
+	char _output[256];																								\
+	memset(_output, 0, 256);																						\
+	strcat(_output, this_file_full_path);																			\
+																													\
+	memset(_path, 0, MAX_PATH);																						\
+	if(strcmp(build_type, "debug") == 0) {																			\
+	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\debug\\unit_tests");					\
+	if(!make_dir_if_not_exists(_path)) {																			\
+				exit(-1);																							\
+	}																												\
+	strcat(_output, "build\\windows\\debug\\unit_tests\\");															\
+	} else {																										\
+	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\release\\unit_tests");					\
+	if(!make_dir_if_not_exists(_path)) {																			\
+				exit(-1);																							\
+	}																												\
+	strcat(_output, "build\\windows\\release\\unit_tests\\");														\
+	}																												\
+																													\
+	_build_command = NULL;																							\
+	char output_atlas[MAX_PATH];																					\
+	memset(output_atlas, 0, MAX_PATH);																				\
+	strcat(output_atlas, _output);																					\
+	strcat(output_atlas, "run_tests.exe");																			\
+	arrput(_build_command, "clang");																				\
+	if(strcmp(build_type, "debug") == 0) {																			\
+	arrput(_build_command, "-g");																					\
+	arrput(_build_command, "-O0");																					\
+	} else {																										\
+	arrput(_build_command, "-O3");																					\
+	}																												\
+	arrput(_build_command, "-std=c99");																				\
+																													\
+	char _t_source_path[MAX_PATH];																					\
+	memset(_t_source_path, 0, MAX_PATH);																			\
+	snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "tests\\test_run.c");							\
+	arrput(_build_command, _t_source_path);																			\
+																													\
+	arrput(_build_command, "-I");																					\
+	char _t_include_path_0[MAX_PATH];																				\
+	memset(_t_include_path_0, 0, MAX_PATH);																			\
+	snprintf(_t_include_path_0, MAX_PATH, "%s%s", this_file_full_path, "external\\include\\");						\
+	arrput(_build_command, _t_include_path_0);																		\
+																													\
+	arrput(_build_command, "-I");																					\
+	char _t_include_path_1[MAX_PATH];																				\
+	memset(_t_include_path_1, 0, MAX_PATH);																			\
+	snprintf(_t_include_path_1, MAX_PATH, "%s%s", this_file_full_path, "engine\\include\\");						\
+	arrput(_build_command, _t_include_path_1);																		\
+																													\
+	arrput(_build_command, "-L");																					\
+	char _t_libs_path[MAX_PATH];																					\
+	memset(_t_libs_path, 0, MAX_PATH);																				\
+	snprintf(_t_libs_path, MAX_PATH, "%s""build\\%s\\%s\\engine", this_file_full_path, platform, build_type);		\
+	arrput(_build_command, _t_libs_path);																			\
+																													\
+	arrput(_build_command, "-Werror");																				\
+	arrput(_build_command, "-Wall");																				\
+	arrput(_build_command, "-Wextra");																				\
+	arrput(_build_command, "-lRDE");																				\
+	arrput(_build_command, "-lwinmm");																				\
+	arrput(_build_command, "-lgdi32");																				\
+																													\
+	arrput(_build_command, "-o");																					\
+	arrput(_build_command, output_atlas);																			\
+																													\
+	if(!run_command(_build_command)) {																				\
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");												\
+	exit(-1);																										\
+	}																												\
+																													\
+	char _rde_lib_path[256];																						\
+	memset(_rde_lib_path, 0, 256);																					\
+	strcat(_rde_lib_path, this_file_full_path);																		\
+	char _example_path_sdl[256];																					\
+	char _example_path_rde[256];																					\
+	char _example_path_glad[256];																					\
+	memset(_example_path_sdl, 0, 256);																				\
+	memset(_example_path_rde, 0, 256);																				\
+	memset(_example_path_glad, 0, 256);																				\
+	strcat(_example_path_sdl, this_file_full_path);																	\
+	strcat(_example_path_glad, this_file_full_path);																\
+	strcat(_example_path_rde, this_file_full_path);																	\
+																													\
+	if(strcmp(build_type, "debug") == 0) {																			\
+	strcat(_rde_lib_path, "build\\windows\\debug\\engine\\RDE.dll");												\
+	strcat(_example_path_sdl, "build\\windows\\debug\\unit_tests\\SDL2.dll");										\
+	strcat(_example_path_glad, "build\\windows\\debug\\unit_tests\\glad.dll");										\
+	strcat(_example_path_rde, "build\\windows\\debug\\unit_tests\\RDE.dll");										\
+	} else {																										\
+	strcat(_rde_lib_path, "build\\windows\\release\\engine\\RDE.dll");												\
+	strcat(_example_path_sdl, "build\\windows\\release\\unit_tests\\SDL2.dll");										\
+	strcat(_example_path_glad, "build\\windows\\release\\unit_tests\\glad.dll");									\
+	strcat(_example_path_rde, "build\\windows\\release\\unit_tests\\RDE.dll");										\
+	}																												\
+																													\
+	memset(_path, 0, MAX_PATH);																						\
+	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\SDL2.dll");					\
+	copy_file_if_exists(_path, _example_path_sdl);																	\
+	memset(_path, 0, MAX_PATH);																						\
+	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\glad.dll");					\
+	copy_file_if_exists(_path, _example_path_glad);																	\
+	copy_file_if_exists(_rde_lib_path, _example_path_rde); 															\
+	} while(0);
+
+	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0 || strcmp(build, "tests") == 0) {
 		printf("\n");
 		printf("--- BUILDING ENGINE --- \n");
 		BUILD_ENGINE()
@@ -1420,9 +1527,16 @@ bool compile_windows() {
 		BUILD_EXAMPLES()
 	}
 
+	if(strcmp(build, "tests") == 0 || strcmp(build, "all") == 0) {
+		printf("\n");
+		printf("--- BUILDING TESTS --- \n");
+		BUILD_TESTS()
+	}
+
 	#undef BUILD_EXAMPLES
 	#undef BUILD_ENGINE
 	#undef BUILD_TOOLS
+	#undef BUILD_TESTS
 
 	return true;
 }
@@ -2233,6 +2347,24 @@ void parse_arguments(int _argc, char** _argv) {
 
 			if(_value == NULL) {
 				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for -b or --build incorrect\n");
+				exit(-1);
+			}
+
+			bool _valid_option = false;
+			for(size_t _i = 0; _i < MAX_BUILD_OPTIONS; _i++) {
+				if(strcmp(_value + 1, BUILD_OPTIONS_STR[_i]) == 0) {
+					_valid_option = true;
+					break;
+				}
+			}
+
+			if(!_valid_option) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument value for -b or --build is not valid '%s'. Valid options are:", _value);
+				printf("\t[");
+				for(size_t _i = 0; _i < MAX_BUILD_OPTIONS; _i++) {
+					printf("%s, ", BUILD_OPTIONS_STR[_i]);
+				}
+				printf("]\n");
 				exit(-1);
 			}
 
