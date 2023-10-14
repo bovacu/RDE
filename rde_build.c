@@ -62,29 +62,36 @@ typedef enum {
 	RDE_LOG_LEVEL_ERROR
 } RDE_LOG_LEVEL_;
 
+#define MAX_BUILD_OPTIONS 5
+const char* BUILD_OPTIONS_STR[MAX_BUILD_OPTIONS] = {
+	"engine",
+	"tools",
+	"examples",
+	"tests",
+	"all"
+};
+
 #define MAX_SIZE_FOR_OPTIONS 64
 #define MAX_SIZE_FOR_MODULES 256
-#define MAX_MODULES 9
+#define MAX_MODULES 8
 
 typedef enum {
 	RDE_MODULES_NONE = 0,
 	RDE_MODULES_AUDIO = 1,
 	RDE_MODULES_PHYSICS_2D = 2,
 	RDE_MODULES_PHYSICS_3D = 4,
-	RDE_MODULES_RENDERING_2D = 8,
-	RDE_MODULES_RENDERING_3D = 16,
-	RDE_MODULES_FBX = 32,
-	RDE_MODULES_OBJ = 64,
-	RDE_MODULES_UI = 128,
-	RDE_MODULES_ERROR = 256
+	RDE_MODULES_RENDERING = 8,
+	RDE_MODULES_FBX = 16,
+	RDE_MODULES_OBJ = 32,
+	RDE_MODULES_UI = 64,
+	RDE_MODULES_ERROR = 128
 } RDE_MODULES_;
 
 const char* MODULES_STR[MAX_MODULES] = {
 	"audio",
 	"physics_2d",
 	"pyhisics_3d",
-	"rendering_2d",
-	"rendering_3d",
+	"rendering",
 	"fbx",
 	"obj",
 	"ui",
@@ -94,8 +101,7 @@ char* MODULES_DEFINES[MAX_MODULES] = {
 	"-DRDE_AUDIO_MODULE",
 	"-DRDE_PHYSICS_2D_MODULE",
 	"-DRDE_PHYSICS_3D_MODULE",
-	"-DRDE_RENDERING_2D_MODULE",
-	"-DRDE_RENDERING_3D_MODULE",
+	"-DRDE_RENDERING_MODULE",
 	"-DRDE_FBX_MODULE",
 	"-DRDE_OBJ_MODULE",
 	"-DRDE_UI_MODULE",
@@ -2176,7 +2182,7 @@ void print_help() {
 	"If no options are passed, it will be assumed -bt=debug and -lt=shared. \n"
 	"\n"
 	"-- BUILDING ---"
-	"To build anything, use the option --build= (or -b=) and an action between [engine, tools, all, examples]. \n"
+	"To build anything, use the option --build= (or -b=) and an action between [engine, tools, examples, tests, all]. \n"
 	"engine will compile the engine (only). tools will compile atlas_generator and font_generator (only). test will compile the examples and the engine (only). all will compile everything. \n"
 	"If no option is passed, it will be assumed -b=all. \n"
 	"\n"
@@ -2185,22 +2191,20 @@ void print_help() {
 	"	- audio\n"
 	"	- physics_2d\n"
 	"	- physics_3d\n"
-	"	- rendering_2d\n"
-	"	- rendering_3d\n"
+	"	- rendering\n"
 	"	- ui\n"
 	"	- error\n"
 	"Each of them can be added to your library. Have in mind that adding 'physics_3d' will add Jolt Physics Engine to your depenency list, in case \n"
 	"you are building a static lib, you will probably have to add the Jolt lib to your build system.\n"
 	"To add any of the modules use --modules= (or -m=) followed by an array of the included modules, for example:\n"
-	"	--modules=\"[rendering_2d,rendering_3d,audio]\" \n\n"
-	"Have in mind that the only module added by default to the library is 'rendering_2d'. If you specify --module option and you still \n"
-	"want 'rendering_2d', you MUST include it in the modules list.\n"
+	"	--modules=\"[rendering,audio]\" \n\n"
+	"Have in mind that the only module added by default to the library is 'rendering'. If you specify --module option and you still \n"
+	"want 'rendering', you MUST include it in the modules list.\n"
 	"Modules Description:"
 	"	- audio: adds basic audio control, such as loading/unloading sounds, mixing them, play/pause/stop sounds, modify volume, pitches...\n"
 	"	- physics_2d: basic 2D physics engine, with collisions, rigidbodies, handlers...\n"
 	"	- physics_3d: 3d physics engine with jolt.\n"
-	"	- rendering_2d: adds 2D rendering for 2D textures in a batched mode.\n"
-	"	- rendering_3d: adds 3D rendering for custom meshes, models and basic lighting.\n"
+	"	- rendering: adds 2D rendering for 2D textures in a batched mode and also 3D batched drawing.\n"
 	"	- ui: adds custom inmediate mode UI.\n"
 	"	- error: adds handling for the most common error crashes and prints the stacktrace of the crash to the logs of the console (in debug) and to a error log file (in release).\n"
 	"\n\n";
@@ -2393,7 +2397,7 @@ int main(int _argc, char** _argv) {
 	memset(build_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(lib_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(build, 0, MAX_SIZE_FOR_OPTIONS);
-	modules = RDE_MODULES_RENDERING_2D;
+	modules = RDE_MODULES_RENDERING;
 
 	parse_arguments(_argc, _argv);
 

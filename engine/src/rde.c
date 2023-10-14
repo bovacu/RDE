@@ -409,16 +409,10 @@ struct rde_engine {
 	size_t total_amount_of_textures;
 	rde_window* windows;
 	
-#if defined(RDE_RENDERING_2D_MODULE) || defined(RDE_RENDERING_3D_MODULE)
+#ifdef RDE_RENDERING_MODULE
 	rde_texture* textures;
-#endif
-
-#ifdef RDE_RENDERING_2D_MODULE
 	rde_atlas* atlases;
 	rde_font* fonts;
-#endif
-
-#ifdef RDE_RENDERING_3D_MODULE
 	rde_mesh* meshes;
 	rde_model* models;
 #endif
@@ -447,13 +441,10 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.heap_allocs_config.max_number_of_shaders += RDE_DEFAULT_SHADERS_AMOUNT;
 	_e.total_amount_of_textures = 0;
 	
-#ifdef RDE_RENDERING_2D_MODULE
+#ifdef RDE_RENDERING_MODULE
 	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_textures;
 	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_fonts;
 	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_atlases;
-#endif
-
-#ifdef RDE_RENDERING_3D_MODULE
 	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_models_textures;
 #endif
 
@@ -486,7 +477,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 		_e.windows[_i] = rde_struct_create_window();
 	}
 
-#if defined(RDE_RENDERING_2D_MODULE) || defined(RDE_RENDERING_3D_MODULE)
+#ifdef RDE_RENDERING_MODULE
 	if (_e.total_amount_of_textures > 0) {
 		_e.textures = (rde_texture*)malloc(sizeof(rde_texture) * _e.total_amount_of_textures);
 		rde_critical_error(_e.textures == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_texture) * _e.total_amount_of_textures, "textures");
@@ -496,9 +487,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	} else {
 		_e.textures = NULL;
 	}
-#endif
 
-#ifdef RDE_RENDERING_2D_MODULE
 	if(_e.heap_allocs_config.max_number_of_atlases > 0) {
 		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_atlases);
 		rde_critical_error(_e.atlases == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_atlases, "atlases");
@@ -518,9 +507,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	} else {
 		_e.fonts = NULL;
 	}
-#endif
 
-#ifdef RDE_RENDERING_3D_MODULE
 	if(_e.heap_allocs_config.max_number_of_models > 0) {
 		_e.models = (rde_model*)malloc(sizeof(rde_model) * _e.heap_allocs_config.max_number_of_models);
 		rde_critical_error(_e.models == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_models, "atlases");
@@ -730,11 +717,8 @@ void rde_engine_on_run() {
 	SDL_SetEventFilter(rde_mobile_consume_events);
 	#endif
 
-#ifdef RDE_RENDERING_2D_MODULE
+#ifdef RDE_RENDERING_MODULE
 	rde_rendering_init_2d();
-#endif
-
-#ifdef RDE_RENDERING_3D_MODULE
 	rde_rendering_init_3d();
 #endif
 
@@ -782,11 +766,8 @@ void rde_engine_on_run() {
 		}
 	}
 
-#ifdef RDE_RENDERING_2D_MODULE
+#ifdef RDE_RENDERING_MODULE
 	rde_rendering_end_2d();
-#endif
-
-#ifdef RDE_RENDERING_3D_MODULE
 	rde_rendering_end_3d();
 #endif
 
@@ -821,7 +802,7 @@ void rde_engine_set_vsync_active(bool _vsync) {
 
 void rde_engine_destroy_engine() {
 
-#ifdef RDE_RENDERING_2D_MODULE
+#ifdef RDE_RENDERING_MODULE
 	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_atlases; _i++) {
 		if(ENGINE.atlases[_i].texture == NULL) {
 			continue;
@@ -839,9 +820,7 @@ void rde_engine_destroy_engine() {
 		rde_rendering_unload_font(&ENGINE.fonts[_i]);
 	}
 	free(ENGINE.fonts);
-#endif
 
-#if defined(RDE_RENDERING_2D_MODULE) || defined(RDE_RENDERING_3D_MODULE)
 	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
 		if (ENGINE.textures[_i].opengl_texture_id == -1) {
 			continue;
@@ -854,9 +833,7 @@ void rde_engine_destroy_engine() {
 		}
 	}
 	free(ENGINE.textures);
-#endif
 
-#if RDE_RENDERING_3D_MODULE
 	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_models; _i++) {
 		if (ENGINE.models[_i].mesh_array == NULL) {
 			continue;

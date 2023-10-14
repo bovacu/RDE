@@ -1,4 +1,4 @@
-#if defined(RDE_FBX_MODULE) && defined(RDE_RENDERING_3D_MODULE)
+#if defined(RDE_FBX_MODULE) && defined(RDE_RENDERING_MODULE)
 
 #include "ufbx/ufbx.c"
 

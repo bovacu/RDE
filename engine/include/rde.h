@@ -79,13 +79,10 @@ extern "C" {
 #define RDE_MAX_VERTICES_PER_BATCH 50000
 #define RDE_MAX_LOADABLE_SHADERS 256
 
-#ifdef RDE_RENDERING_2D_MODULE
+#ifdef RDE_RENDERING_MODULE
 #define RDE_MAX_LOADABLE_TEXTURES 512
 #define RDE_MAX_LOADABLE_ATLASES 512
 #define RDE_MAX_LOADABLE_FONTS 512
-#endif
-
-#ifdef RDE_RENDERING_3D_MODULE
 #define RDE_MAX_LOADABLE_MODELS 512
 #define RDE_MAX_LOADABLE_MODELS_TEXTURES 512
 #endif
@@ -1223,13 +1220,10 @@ typedef struct {
 	size_t max_number_of_vertices_per_batch;
 	size_t max_number_of_shaders;
 	
-#ifdef RDE_RENDERING_2D_MODULE
+#ifdef RDE_RENDERING_MODULE
 	size_t max_number_of_textures;
 	size_t max_number_of_atlases;
 	size_t max_number_of_fonts;
-#endif
-
-#ifdef RDE_RENDERING_3D_MODULE
 	size_t max_number_of_models;
 	size_t max_number_of_models_textures;
 #endif
@@ -1415,11 +1409,8 @@ rde_transform rde_struct_create_transform() {
 typedef struct rde_shader rde_shader;
 typedef struct rde_render_texture rde_render_texture;
 
-#if defined(RDE_RENDERING_2D_MODULE) || defined(RDE_RENDERING_3D_MODULE)
+#ifdef RDE_RENDERING_MODULE
 typedef struct rde_texture rde_texture;
-#endif
-
-#if defined(RDE_RENDERING_2D_MODULE)
 typedef struct rde_atlas rde_atlas;
 typedef struct rde_font rde_font;
 
@@ -1439,9 +1430,6 @@ rde_vertex_2d rde_struct_create_vertex_2d() {
 	return _v;
 }
 
-#endif 
-
-#if defined(RDE_RENDERING_3D_MODULE)
 typedef struct rde_mesh rde_mesh;
 typedef struct rde_model rde_model;
 
@@ -1561,13 +1549,10 @@ const rde_engine_heap_allocs_config RDE_DEFAULT_HEAP_ALLOCS_CONFIG = {
 	RDE_MAX_VERTICES_PER_BATCH,
 	RDE_MAX_LOADABLE_SHADERS,
 
-#ifdef RDE_RENDERING_2D_MODULE
+#ifdef RDE_RENDERING_MODULE
 	RDE_MAX_LOADABLE_TEXTURES,
 	RDE_MAX_LOADABLE_ATLASES,
 	RDE_MAX_LOADABLE_FONTS,
-#endif
-
-#ifdef RDE_RENDERING_3D_MODULE
 	RDE_MAX_LOADABLE_MODELS,
 	RDE_MAX_LOADABLE_MODELS_TEXTURES,
 #endif
@@ -1604,8 +1589,10 @@ RDE_FUNC void rde_file_delete(const char* _file_path);
 RDE_FUNC void rde_file_move(const char* _file_path, const char* _new_file_path);
 RDE_FUNC void rde_file_close(rde_file_handler* _file_handler);
 
+#ifdef RDE_RENDERING_MODULE
 RDE_FUNC size_t rde_util_font_get_string_width(const char* _string, const rde_font* _font);
 RDE_FUNC rde_vec_2I rde_util_font_get_string_size(const char* _string, const rde_font* _font);
+#endif
 
 RDE_FUNC char* rde_util_string_trim(char* _s);
 RDE_FUNC bool rde_util_string_starts_with(const char* _string, const char* _prefix);
@@ -1759,6 +1746,7 @@ RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _even
 
 /// ============================ RENDERING ==================================
 
+#ifdef RDE_RENDERING_MODULE
 RDE_FUNC rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code);
 RDE_FUNC void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose);
 RDE_FUNC void rde_rendering_set_shader_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_IV_ _type, int* _data);
@@ -1769,11 +1757,9 @@ RDE_FUNC rde_texture* rde_rendering_load_texture(const char* _file_path);
 RDE_FUNC rde_texture* rde_rendering_load_text_texture(const char* _file_path);
 RDE_FUNC void rde_rendering_unload_texture(rde_texture* _texture);
 
-#ifdef RDE_RENDERING_2D_MODULE
 RDE_FUNC rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _config_path);
 RDE_FUNC rde_texture* rde_rendering_get_atlas_sub_texture(rde_atlas* _atlas, const char* _texture_name);
 RDE_FUNC void rde_rendering_unload_atlas(rde_atlas* _atlas);
-#endif
 
 RDE_FUNC rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, int _channels);
 RDE_FUNC void rde_rendering_memory_texture_set_pixel(rde_texture* _memory_texture, rde_vec_2I _position, rde_color _color);
@@ -1782,14 +1768,11 @@ RDE_FUNC void rde_rendering_memory_texture_gpu_upload(rde_texture* _memory_textu
 RDE_FUNC unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_texture);
 RDE_FUNC void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture);
 
-#if defined(RDE_RENDERING_2D_MODULE) || defined(RDE_RENDERING_3D_MODULE)
 RDE_FUNC rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path);
 RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
-#endif
 
 RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 
-#ifdef RDE_RENDERING_2D_MODULE
 RDE_FUNC void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window);
 RDE_FUNC void rde_rendering_draw_point_2d(rde_vec_2F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 2D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_line_2d(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
@@ -1801,9 +1784,7 @@ RDE_FUNC void rde_rendering_draw_texture_2d(const rde_transform* _transform, con
 RDE_FUNC void rde_rendering_draw_memory_texture_2d(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_text_2d(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader); /// Draws a batched group of quads representing the _text in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_end_drawing_2d();
-#endif
 
-#ifdef RDE_RENDERING_3D_MODULE
 RDE_FUNC rde_mesh* rde_struct_create_memory_mesh(size_t _vertex_count, size_t _indices_count); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
 RDE_FUNC void rde_rendering_mesh_set_vertex_positions(rde_mesh* _mesh, float* _positions, bool _free_positions_on_destroy); // sets the position of the vertices, each position must have 3 floats (x, y, z) and uploads to GPU
 RDE_FUNC void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _indices, bool _free_indices_on_destroy); // sets the indices of the mesh, a quad should have 6 indices and uploads to GPU

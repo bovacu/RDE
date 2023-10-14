@@ -1,4 +1,4 @@
-#ifdef RDE_RENDERING_2D_MODULE
+#ifdef RDE_RENDERING_MODULE
 
 static rde_batch_2d current_batch_2d;
 

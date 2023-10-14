@@ -1,4 +1,4 @@
-#if defined(RDE_OBJ_MODULE) && defined(RDE_RENDERING_3D_MODULE)
+#if defined(RDE_OBJ_MODULE) && defined(RDE_RENDERING_MODULE)
 
 // TODO: remove this diagnostics, basically change strtok for strtok_s on Windows
 #pragma clang diagnostic push
@@ -54,7 +54,7 @@ int separate_into_faces(char* _buffer, obj_face** _arr, size_t* _size, const cha
 	int _lacking_face_data = 0;
 
 	while(_face_ptr != NULL) {
-		rde_util_string_trim(_face_ptr);
+		_face_ptr = rde_util_string_trim(_face_ptr);
 		_face_ptr[strcspn(_face_ptr, "\r\n")] = 0;
 
 		if(_face_ptr != NULL && strlen(_face_ptr) > 0) {

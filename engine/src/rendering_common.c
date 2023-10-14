@@ -447,7 +447,7 @@ void rde_rendering_unload_texture(rde_texture* _texture) {
 	_texture->file_path = NULL;
 }
 
-#ifdef RDE_RENDERING_2D_MODULE
+#ifdef RDE_RENDERING_MODULE
 rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _config_path) {
 	rde_texture* _texture = rde_rendering_load_texture(_texture_path);
 	rde_atlas_sub_textures* _atlas_sub_textures = rde_file_system_read_atlas_config(_config_path, _texture);
@@ -495,7 +495,7 @@ void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture) {
 	}
 }
 
-#if defined(RDE_RENDERING_2D_MODULE) || defined(RDE_RENDERING_3D_MODULE)
+#ifdef RDE_RENDERING_MODULE
 rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path) {
 	rde_texture* _texture = rde_rendering_load_text_texture(_font_path);
 	rde_font_char_info* _chars = rde_file_system_read_font_config(_font_config_path, _texture);
