@@ -150,25 +150,49 @@ char* rtrim(char* _s) {
 }
 
 char* rde_util_string_trim(char* _s) {
-	return rtrim(ltrim(_s)); 
+	char* _end;
+
+	while(isspace((unsigned char)*_s)) _s++;
+
+	if(*_s == 0) {
+		return _s;
+	}
+
+	_end = _s + strlen(_s) - 1;
+	while(_end > _s && isspace((unsigned char)*_end)) _end--;
+
+	_end[1] = '\0';
+
+	return _s;
 }
 
 bool rde_util_string_starts_with(const char* _string, const char* _prefix) {
+	if(_string == NULL || _prefix == NULL) {
+		return false;
+	}
 	return strncmp(_string, _prefix, strlen(_prefix)) == 0;
 }
 
 bool rde_util_string_ends_with(const char* _string, const char* _suffix) {
+	if(_string == NULL || _suffix == NULL) {
+		return false;
+	}
+
 	size_t _suffix_size = strlen(_suffix);
 	size_t _string_size = strlen(_string);
 	return strncmp(_string + (_string_size - _suffix_size), _suffix, _suffix_size) == 0;
 }
 
 bool rde_util_string_contains_substring(const char* _string, const char* _substring, bool _case_sensitive) {
-	if(!_case_sensitive) {
+	if(_string == NULL || _substring == NULL) {
+		return false;
+	}
+
+	if(_case_sensitive) {
 		return strstr(_string, _substring) != NULL;
 	} else {
 #if IS_WINDOWS()
-		return StrStrA(_string, _substring) != NULL;
+		return StrStrI(_string, _substring) != NULL;
 #else
 		return strcasestr(_string, _substring) != NULL;
 #endif
@@ -177,6 +201,10 @@ bool rde_util_string_contains_substring(const char* _string, const char* _substr
 }
 
 size_t rde_util_string_char_appearences(const char* _string, char _char) {
+	if(_string == NULL) {
+		return 0;
+	}
+
 	size_t _amount = 0;
 	size_t _string_size = strlen(_string);
 	for(size_t _i = 0; _i < _string_size; _i++) {
@@ -189,6 +217,10 @@ size_t rde_util_string_char_appearences(const char* _string, char _char) {
 }
 
 void rde_util_string_concat(char* _string, size_t _size, const char* _fmt, ...) {
+	if(_string == NULL) {
+		return;
+	}
+
 	va_list _args;
 	va_start(_args, _fmt);
 	vsnprintf(_string, _size, _fmt, _args);
@@ -196,6 +228,10 @@ void rde_util_string_concat(char* _string, size_t _size, const char* _fmt, ...) 
 }
 
 void rde_util_string_to_lower(char* _destination, const char* _string) {
+	if(_string == NULL || _destination == NULL) {
+		return;
+	}
+
 	size_t _string_size = strlen(_string);
 	for(size_t _i = 0; _i < _string_size; _i++){
 		_destination[_i] = tolower(_string[_i]);
@@ -203,6 +239,10 @@ void rde_util_string_to_lower(char* _destination, const char* _string) {
 }
 
 void rde_util_string_to_lower_itself(char* _string) {
+	if(_string == NULL) {
+		return;
+	}
+
 	size_t _string_size = strlen(_string);
 	for(size_t _i = 0; _i < _string_size; _i++){
 		_string[_i] = tolower(_string[_i]);
@@ -210,6 +250,10 @@ void rde_util_string_to_lower_itself(char* _string) {
 }
 
 void rde_util_string_to_upper(char* _destination, const char* _string) {
+	if(_string == NULL || _destination == NULL) {
+		return;
+	}
+
 	size_t _string_size = strlen(_string);
 	for(size_t _i = 0; _i < _string_size; _i++){
 		_destination[_i] = toupper(_string[_i]);
@@ -217,6 +261,10 @@ void rde_util_string_to_upper(char* _destination, const char* _string) {
 }
 
 void rde_util_string_to_upper_itself(char* _string) {
+	if(_string == NULL) {
+		return;
+	}
+
 	size_t _string_size = strlen(_string);
 	for(size_t _i = 0; _i < _string_size; _i++){
 		_string[_i] = toupper(_string[_i]);
@@ -224,6 +272,10 @@ void rde_util_string_to_upper_itself(char* _string) {
 }
 
 void rde_util_string_replace_char(char* _string, char _old, char _new) {
+	if(_string == NULL) {
+		return;
+	}
+
 	size_t _string_size = strlen(_string);
 	for(size_t _i = 0; _i < _string_size; _i++) {
 		if(_string[_i] == _old) {
@@ -234,6 +286,10 @@ void rde_util_string_replace_char(char* _string, char _old, char _new) {
 }
 
 void rde_util_string_replace_chars_all(char* _string, char _old, char _new) {
+	if(_string == NULL) {
+		return;
+	}
+
 	size_t _string_size = strlen(_string);
 	for(size_t _i = 0; _i < _string_size; _i++) {
 		if(_string[_i] == _old) {
@@ -243,6 +299,10 @@ void rde_util_string_replace_chars_all(char* _string, char _old, char _new) {
 }
 
 size_t rde_util_string_split(char* _string, char** _split_array, const char* _split_mark) {
+	if(_string == NULL || _split_array == NULL || _split_mark == NULL) {
+		return 0;
+	}
+
 	size_t _amount = 0;
 	
 #if IS_WINDOWS()
