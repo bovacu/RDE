@@ -54,8 +54,7 @@ void rde_rendering_set_rendering_configuration() {
 	ENGINE.texture_shader_2d = rde_rendering_load_shader(RDE_TEXTURE_VERTEX_SHADER_2D, RDE_TEXTURE_FRAGMENT_SHADER_2D);
 	ENGINE.text_shader_2d = rde_rendering_load_shader(RDE_TEXT_VERTEX_SHADER_2D, RDE_TEXT_FRAGMENT_SHADER_2D);
 	ENGINE.frame_buffer_shader = rde_rendering_load_shader(RDE_FRAME_BUFFER_VERTEX_SHADER, RDE_FRAME_BUFFER_FRAGMENT_SHADER);
-	ENGINE.mesh_shader_phong = rde_rendering_load_shader(RDE_MESH_VERTEX_SHADER, RDE_MESH_FRAGMENT_PHONG_SHADER);
-	ENGINE.mesh_shader_diffuse = rde_rendering_load_shader(RDE_MESH_VERTEX_SHADER, RDE_MESH_FRAGMENT_DIFFUSE_SHADER);
+	ENGINE.mesh_shader = rde_rendering_load_shader(RDE_MESH_VERTEX_SHADER, RDE_MESH_FRAGMENT_SHADER);
 #else
 	ENGINE.color_shader_2d = rde_rendering_load_shader(RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
 	ENGINE.texture_shader_2d = rde_rendering_load_shader(RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
