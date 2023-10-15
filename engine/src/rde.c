@@ -132,10 +132,10 @@ bool rde_util_check_opengl_error(const char* _message) {
 //			- Camera system
 //			- 3D mathematical operations
 //			- Renderer
-//			- Mesh creation and loading
-//			- Model loading
+//			- [DONE] Mesh creation and loading
+//			- [DONE] Model loading
 //			- Texturing and materials
-//			- Instancing (3d batching)
+//			- [DONE] Instancing (3d batching)
 //			- Lighting
 //			- Model animations
 //			- Text
@@ -424,6 +424,7 @@ struct rde_engine {
 	rde_display_callbacks display_callbacks;
 	rde_window_callbacks window_callbacks;
 	rde_end_user_mandatory_callbacks mandatory_callbacks;
+	rde_engine_user_side_loop_func_3 user_event_callback;
 	
 	rde_shader* color_shader_2d;
 	rde_shader* texture_shader_2d;
@@ -476,7 +477,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_models_textures;
 #endif
 
-
+	_e.user_event_callback = NULL;
 	_e.delta_time = 0.f;
 	_e.fixed_delta_time = 1.f / 60.f;
 	_e.fixed_time_step_accumulator = 0.f;
@@ -610,7 +611,8 @@ void rde_engine_on_event() {
 	while (SDL_PollEvent(&_event)) {
 
 		rde_event _rde_event = rde_engine_sdl_event_to_rde_event(&_event);
-			
+		_rde_event.native_event = (void*)&_event;
+		
 		for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
 			rde_window* _window = &ENGINE.windows[_i];
 
@@ -659,6 +661,11 @@ void rde_engine_on_event() {
 					}
 					rde_events_mouse_consume_events(_window, &_rde_event);
 				} break;
+			if(SDL_GetWindowID(_window->sdl_window) != _rde_event.window_id) {
+				continue;
+			}
+			if(ENGINE.user_event_callback != NULL) {
+				ENGINE.user_event_callback(&_rde_event, _window);
 			}
 		}
 	}
@@ -722,6 +729,10 @@ void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks
 	ENGINE.mandatory_callbacks.on_fixed_update = _end_user_callbacks.on_fixed_update;
 	ENGINE.mandatory_callbacks.on_late_update = _end_user_callbacks.on_late_update;
 	ENGINE.mandatory_callbacks.on_render = _end_user_callbacks.on_render;
+}
+
+void rde_engine_set_event_user_callback(rde_engine_user_side_loop_func_3 _user_event_callback) {
+	ENGINE.user_event_callback = _user_event_callback;
 }
 
 RDE_PLATFORM_TYPE_ rde_engine_get_platform() {

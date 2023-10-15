@@ -1074,6 +1074,7 @@ typedef void (*rde_event_func_inner)(rde_event*);
 typedef void (*rde_event_func_outer)(rde_window*, rde_event*);
 typedef void (*rde_engine_user_side_loop_func)(float);
 typedef void (*rde_engine_user_side_loop_func_2)(float, rde_window*);
+typedef void (*rde_engine_user_side_loop_func_3)(rde_event*, rde_window*);
 
 typedef struct rde_inner_window_data rde_inner_window_info;
 
@@ -1355,6 +1356,7 @@ struct rde_event {
 	uint window_id;
 	bool handled;
 	rde_event_data data;
+	void* native_event;
 };
 rde_event rde_struct_create_event() {
 	rde_event _e;
@@ -1363,6 +1365,7 @@ rde_event rde_struct_create_event() {
 	_e.window_id = 0;
 	_e.handled = false;
 	_e.data = rde_struct_create_event_data();
+	_e.native_event = NULL;
 	return _e;
 }
 
@@ -1647,7 +1650,9 @@ RDE_DECLARE_EASING_FUNCS(in_out, circular)
 
 
 RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_allocs_config _heap_allocs_config);
-RDE_FUNC void rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks); /// Setsup some basic info the engine needs, call this BEFORE rde_engine_create_engine
+RDE_FUNC void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks); /// Sets up some basic info the engine needs, call this BEFORE rde_engine_create_engine
+
+RDE_FUNC void rde_engine_set_event_user_callback(rde_engine_user_side_loop_func_3 _user_event_callback);
 
 RDE_FUNC RDE_PLATFORM_TYPE_ rde_engine_get_platform();
 
