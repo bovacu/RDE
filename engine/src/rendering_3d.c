@@ -459,6 +459,22 @@ void rde_rendering_flush_batch_3d() {
 	glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_model_view_projection_matrix);
 	rde_util_check_opengl_error("After UseProgram");
 
+	rde_vec_3F _camera_pos = current_drawing_camera->transform.position;
+	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "camera_pos"), _camera_pos.x, _camera_pos.y, _camera_pos.z);
+	
+	rde_vec_3F _dl_direction = ENGINE.directional_light.direction;
+	rde_vec_3F _dl_ambient = ENGINE.directional_light.ambient_color;
+	rde_vec_3F _dl_diffuse = ENGINE.directional_light.diffuse_color;
+	rde_vec_3F _dl_specular = ENGINE.directional_light.specular_color;
+
+	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.direction"), _dl_direction.x, _dl_direction.y, _dl_direction.z);
+	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.ambient_color"), _dl_ambient.x, _dl_ambient.y, _dl_ambient.z);
+	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.diffuse_color"), _dl_diffuse.x, _dl_diffuse.y, _dl_diffuse.z);
+	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.specular_color"), _dl_specular.x, _dl_specular.y, _dl_specular.z);
+
+	rde_material _material = rde_struct_create_material();
+	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.shininess"), _material.shininess);
+
 	char _models_uniform[64];
 	for(size_t _i = 0; _i < current_batch_3d.amount_of_models_per_draw; _i++) {
 		memset(_models_uniform, 0, 64);
@@ -478,7 +494,7 @@ void rde_rendering_flush_batch_3d() {
 void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader) {
 	const size_t _floats_per_matrix = 1;
 	
-	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.mesh_shader_diffuse : _shader;
+	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.mesh_shader : _shader;
 	rde_rendering_try_create_batch_3d(_drawing_shader, _mesh);
 	rde_rendering_try_flush_batch_3d(_drawing_shader, _mesh, _floats_per_matrix);
 	
@@ -516,6 +532,44 @@ void rde_rendering_end_drawing_3d() {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 	current_drawing_camera = NULL;
+}
+
+void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction) {
+	ENGINE.directional_light.direction = _direction;
+}
+
+void rde_rendering_lighting_set_directional_light_ambient_color(rde_color _ambient_color) {
+	ENGINE.directional_light.ambient_color = (rde_vec_3F) { _ambient_color.r / 255.f,
+															_ambient_color.g / 255.f,
+															_ambient_color.a / 255.f
+	};
+}
+
+void rde_rendering_lighting_set_directional_light_ambient_color_f(rde_vec_3F _ambient_color) {
+	ENGINE.directional_light.ambient_color = _ambient_color;
+}
+
+void rde_rendering_lighting_set_directional_light_diffuse_color(rde_color _diffuse_color) {
+	ENGINE.directional_light.diffuse_color = (rde_vec_3F) { _diffuse_color.r / 255.f,
+															_diffuse_color.g / 255.f,
+															_diffuse_color.a / 255.f
+	};
+}
+
+void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_vec_3F _diffuse_color) {
+	ENGINE.directional_light.diffuse_color = _diffuse_color;
+}
+
+
+void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color) {
+	ENGINE.directional_light.specular_color = (rde_vec_3F) { _specular_color.r / 255.f,
+															 _specular_color.g / 255.f,
+															 _specular_color.a / 255.f
+	};
+}
+
+void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color) {
+	ENGINE.directional_light.specular_color = _specular_color;
 }
 
 void rde_rendering_unload_model(rde_model* _model) {

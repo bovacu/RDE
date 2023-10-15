@@ -172,6 +172,7 @@ rde_window rde_struct_create_window() {
 	return _w;
 }
 
+#ifdef RDE_RENDERING_MODULE
 struct rde_shader {
 	GLuint vertex_program_id;
 	GLuint fragment_program_id;
@@ -360,6 +361,32 @@ rde_model rde_struct_create_model() {
 	return _m;
 }
 
+struct rde_directional_light {
+	rde_vec_3F direction;
+	rde_vec_3F ambient_color;
+	rde_vec_3F diffuse_color;
+	rde_vec_3F specular_color;
+};
+rde_directional_light rde_struct_create_directional_light() {
+	rde_directional_light _d;
+	_d.direction = (rde_vec_3F) { -0.2f, -1.0f, -0.3f };
+	_d.ambient_color = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
+	_d.diffuse_color = (rde_vec_3F) { 0.5f, 0.5f, 0.5f };
+	_d.specular_color = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+	return _d;
+}
+
+struct rde_material {
+	float shininess;
+};
+rde_material rde_struct_create_material() {
+	rde_material _m;
+	_m.shininess = 1.0f;
+	return _m;
+}
+
+#endif
+
 #ifdef RDE_AUDIO_MODULE
 struct rde_sound {
 	bool used;
@@ -402,8 +429,7 @@ struct rde_engine {
 	rde_shader* texture_shader_2d;
 	rde_shader* text_shader_2d;
 	rde_shader* frame_buffer_shader;
-	rde_shader* mesh_shader_phong;
-	rde_shader* mesh_shader_diffuse;
+	rde_shader* mesh_shader;
 	rde_shader* shaders;
 
 	size_t total_amount_of_textures;
@@ -415,6 +441,8 @@ struct rde_engine {
 	rde_font* fonts;
 	rde_mesh* meshes;
 	rde_model* models;
+
+	rde_directional_light directional_light;
 #endif
 
 #ifdef RDE_AUDIO_MODULE
@@ -458,6 +486,10 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.display_callbacks = rde_struct_create_display_callbacks();
 	_e.window_callbacks = rde_struct_create_window_callbacks();
 	_e.mandatory_callbacks = rde_struct_create_end_user_mandatory_callbacks();
+
+#ifdef RDE_RENDERING_MODULE
+	_e.directional_light = rde_struct_create_directional_light();
+
 	_e.color_shader_2d = NULL;
 	_e.texture_shader_2d = NULL;
 	_e.text_shader_2d = NULL;
@@ -477,7 +509,6 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 		_e.windows[_i] = rde_struct_create_window();
 	}
 
-#ifdef RDE_RENDERING_MODULE
 	if (_e.total_amount_of_textures > 0) {
 		_e.textures = (rde_texture*)malloc(sizeof(rde_texture) * _e.total_amount_of_textures);
 		rde_critical_error(_e.textures == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_texture) * _e.total_amount_of_textures, "textures");
@@ -686,7 +717,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	return _default_window;
 }
 
-void rde_setup_initial_info(const rde_end_user_mandatory_callbacks _end_user_callbacks) {
+void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks) {
 	ENGINE.mandatory_callbacks.on_update = _end_user_callbacks.on_update;
 	ENGINE.mandatory_callbacks.on_fixed_update = _end_user_callbacks.on_fixed_update;
 	ENGINE.mandatory_callbacks.on_late_update = _end_user_callbacks.on_late_update;

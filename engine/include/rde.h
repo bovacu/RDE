@@ -246,59 +246,43 @@ extern "C" {
 	"	model_matrix = _model;\n" \
 	"}"
 
-#define RDE_MESH_FRAGMENT_DIFFUSE_SHADER "" \
+#define RDE_MESH_FRAGMENT_SHADER "" \
 	"#version 330 core\n" \
+	"\n" \
+	"struct rde_material {\n" \
+	"	float shininess;\n" \
+	"};\n" \
+	"struct rde_directional_light {\n" \
+	"	vec3 direction;\n" \
+	"	vec3 ambient_color;\n" \
+	"	vec3 diffuse_color;\n" \
+	"	vec3 specular_color;\n" \
+	"};\n" \
 	"\n" \
 	"in vec4 color;\n" \
 	"in vec3 normal;\n" \
 	"in vec2 text_coord;\n" \
 	"in vec3 frag_pos;\n" \
-	"in mat4 model_matrix;\n" \
 	"\n" \
 	"uniform sampler2D tex;\n" \
-	"\n" \
-	"out vec4 out_color;\n" \
-	"vec3 lightColor = vec3(1.0, 1.0, 1.0);\n" \
-	"vec3 lightPos = vec3(7.361173, 6.458405, 13.681020);\n" \
-	"float ambientStrength = 0.6;\n" \
-   "vec3 ambient = ambientStrength * lightColor;\n"\
+	"uniform vec3 camera_pos;\n" \
+	"uniform rde_directional_light directional_light;\n" \
+	"uniform rde_material material;\n" \
 	"\n" \
 	"void main(){\n" \
-	"	vec3 _norm = mat3(transpose(inverse(model_matrix))) * normal;\n" \
-	"	vec3 lightDir = normalize(lightPos - frag_pos);\n" \
-	"	float diff = max(dot(_norm, lightDir), 0.0);\n" \
-	"	vec3 diffuse = diff * lightColor;\n" \
-	"	gl_FragColor = texture(tex, text_coord) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f) * vec4(ambient + diffuse, 1.0);\n" \
-	"}"
-
-
-#define RDE_MESH_FRAGMENT_PHONG_SHADER "" \
-	"#version 330 core\n" \
-	"\n" \
-	"in vec4 color;\n" \
-	"in vec3 normal;\n" \
-	"in vec2 text_coord;\n" \
-	"in vec3 frag_pos;\n" \
-	"in mat4 model_matrix;\n" \
-	"\n" \
-	"uniform sampler2D tex;\n" \
-	"\n" \
-	"out vec4 out_color;\n" \
-	"vec3 lightColor = vec3(1.0, 1.0, 1.0);\n" \
-	"vec3 lightPos = vec3(7.361173, 6.458405, 13.681020);\n" \
-	"float ambientStrength = 1.0;\n" \
-	"vec3 ambient = ambientStrength * lightColor;\n"\
-	"\n" \
-	"void main(){\n" \
-	"	mat3 normalMatrix = transpose(inverse(mat3(model_matrix))); \n" \
-	"	vec3 normal = normalize(normalMatrix * normal); \n" \
-	"	vec3 fragPosition = vec3(model_matrix * vec4(frag_pos, 1)); \n" \
-	"	vec3 surfaceToLight = lightPos - fragPosition; \n" \
-	"	float brightness = dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal)); \n" \
-	"	brightness = clamp(brightness, 0, 1) * ambientStrength; \n" \
-	"	vec4 surfaceColor = texture(tex, text_coord); \n" \
-	"	vec4 color_norm = vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f); \n" \
-	"	gl_FragColor = vec4(brightness * lightColor * surfaceColor.rgb * color_norm.rgb, surfaceColor.a * color_norm.a) ;\n" \
+	"	vec3 _ambient = directional_light.ambient_color * texture(tex, text_coord).rgb;\n" \
+	"	\n" \
+	"	vec3 _norm = normalize(normal);\n" \
+	"	vec3 _light_dir = normalize(-directional_light.direction);\n" \
+	"	float _diff = max(dot(_norm, _light_dir), 0.0);\n" \
+	"	vec3 _diffuse = directional_light.diffuse_color * _diff * texture(tex, text_coord).rgb;\n" \
+	"	\n" \
+	"	vec3 _view_dir = normalize(camera_pos - frag_pos);\n" \
+	"	vec3 _reflect_dir = reflect(-_light_dir, _norm);\n" \
+	"	float _spec = pow(max(dot(_view_dir, _reflect_dir), 0.0), material.shininess);\n" \
+	"	vec3 _specular = directional_light.specular_color * _spec * texture(tex, text_coord).rgb;\n" \
+	"	vec3 _final_light = _ambient + _diffuse + _specular;\n" \
+	"	gl_FragColor = vec4(_final_light, 1.0);\n" \
 	"}"
 
 #define RDE_COLOR_VERTEX_SHADER_2D_ES "" \
@@ -1406,13 +1390,18 @@ rde_transform rde_struct_create_transform() {
 
 /// ============================ RENDERING ==================================
 
+#ifdef RDE_RENDERING_MODULE
 typedef struct rde_shader rde_shader;
 typedef struct rde_render_texture rde_render_texture;
-
-#ifdef RDE_RENDERING_MODULE
 typedef struct rde_texture rde_texture;
 typedef struct rde_atlas rde_atlas;
 typedef struct rde_font rde_font;
+typedef struct rde_directional_light rde_directional_light;
+typedef struct rde_point_light rde_point_light;
+typedef struct rde_spot_light rde_spot_light;
+typedef struct rde_mesh rde_mesh;
+typedef struct rde_model rde_model;
+typedef struct rde_material rde_material;
 
 typedef struct {
 	rde_vec_3F position;
@@ -1430,14 +1419,7 @@ rde_vertex_2d rde_struct_create_vertex_2d() {
 	return _v;
 }
 
-typedef struct rde_mesh rde_mesh;
-typedef struct rde_model rde_model;
-
 struct rde_material_map {
-	UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_material {
 	UNIMPLEMENTED_STRUCT()
 };
 
@@ -1811,6 +1793,15 @@ RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_
 RDE_FUNC void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader);
 RDE_FUNC void rde_rendering_draw_model_3d(const rde_transform* _transform, rde_model* _model, rde_shader* _shader);
 RDE_FUNC void rde_rendering_end_drawing_3d();
+
+RDE_FUNC void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction);
+RDE_FUNC void rde_rendering_lighting_set_directional_light_ambient_color(rde_color _ambient_color);
+RDE_FUNC void rde_rendering_lighting_set_directional_light_ambient_color_f(rde_vec_3F _ambient_color);
+RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color(rde_color _diffuse_color);
+RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_vec_3F _diffuse_color);
+RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color);
+RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color);
+
 #endif
 
 /// ============================ AUDIO ======================================
