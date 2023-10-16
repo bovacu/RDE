@@ -71,6 +71,9 @@
 #define RDE_MOUSE_EVENT_INIT (RDE_EVENT_TYPE_MOUSE_BEGIN + 1)
 #define RDE_MOUSE_EVENT_COUNT (RDE_EVENT_TYPE_MOUSE_END - RDE_EVENT_TYPE_MOUSE_BEGIN)
 
+#define RDE_DRAG_AND_DROP_EVENT_INIT (RDE_EVENT_TYPE_DRAG_AND_DROP_BEGIN + 1)
+#define RDE_DRAG_AND_DROP_EVENT_COUNT (RDE_EVENT_TYPE_DRAG_AND_DROP_END - RDE_EVENT_TYPE_DRAG_AND_DROP_BEGIN)
+
 #define RDE_AMOUNT_OF_KEYS 256
 #define RDE_AMOUNT_OF_MOUSE_BUTTONS 16
 
@@ -421,8 +424,6 @@ struct rde_engine {
 	bool running;
 	bool use_rde_2d_physics_system;
 	
-	rde_display_callbacks display_callbacks;
-	rde_window_callbacks window_callbacks;
 	rde_end_user_mandatory_callbacks mandatory_callbacks;
 	rde_engine_user_side_loop_func_3 user_event_callback;
 	
@@ -456,6 +457,7 @@ struct rde_engine {
 	rde_event_func_outer display_events[RDE_DISPLAY_EVENT_COUNT];
 	rde_event_func_outer key_events[RDE_KEY_EVENT_COUNT];
 	rde_event_func_outer mouse_events[RDE_MOUSE_EVENT_COUNT];
+	rde_event_func_outer drag_and_drop_events[RDE_DRAG_AND_DROP_EVENT_COUNT];
 
 	rde_engine_heap_allocs_config heap_allocs_config;
 
@@ -484,8 +486,6 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.platform_type = RDE_PLATFORM_TYPE_UNSUPPORTED;
 	_e.running = true;
 	_e.use_rde_2d_physics_system = true;
-	_e.display_callbacks = rde_struct_create_display_callbacks();
-	_e.window_callbacks = rde_struct_create_window_callbacks();
 	_e.mandatory_callbacks = rde_struct_create_end_user_mandatory_callbacks();
 
 #ifdef RDE_RENDERING_MODULE
@@ -567,6 +567,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	memset(_e.display_events, 0, RDE_DISPLAY_EVENT_COUNT);
 	memset(_e.key_events, 0, RDE_KEY_EVENT_COUNT);
 	memset(_e.mouse_events, 0, RDE_MOUSE_EVENT_COUNT);
+	memset(_e.drag_and_drop_events, 0, RDE_DRAG_AND_DROP_EVENT_COUNT);
 
 #if IS_WINDOWS()
 	_e.console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -633,10 +634,10 @@ void rde_engine_on_event() {
 			//			- SDL_ControllerButtonEvent
 			//			- SDL_ControllerDeviceEvent
 			//			- SDL_AudioDeviceEvent
-			
 			switch(_event.type) {
 				case SDL_WINDOWEVENT:	{
-					if(SDL_GetWindowID(_window->sdl_window) != _rde_event.window_id) {
+					size_t _window_id = SDL_GetWindowID(_window->sdl_window);
+					if(_window_id != _rde_event.window_id) {
 						continue;
 					}
 					rde_events_window_consume_events(_window, &_rde_event);
@@ -646,7 +647,8 @@ void rde_engine_on_event() {
 				
 				case SDL_KEYDOWN:
 				case SDL_KEYUP: {
-					if(SDL_GetWindowID(_window->sdl_window) != _rde_event.window_id) {
+					size_t _window_id = SDL_GetWindowID(_window->sdl_window);
+					if(_window_id != _rde_event.window_id) {
 						continue;
 					}
 					rde_events_keyboard_consume_events(_window, &_rde_event);
@@ -656,16 +658,33 @@ void rde_engine_on_event() {
 				case SDL_MOUSEWHEEL:
 				case SDL_MOUSEBUTTONDOWN:
 				case SDL_MOUSEBUTTONUP: {
-					if(SDL_GetWindowID(_window->sdl_window) != _rde_event.window_id) {
+					size_t _window_id = SDL_GetWindowID(_window->sdl_window);
+					if(_window_id != _rde_event.window_id) {
 						continue;
 					}
 					rde_events_mouse_consume_events(_window, &_rde_event);
 				} break;
-			if(SDL_GetWindowID(_window->sdl_window) != _rde_event.window_id) {
+
+				case SDL_DROPFILE: {
+					size_t _window_id = SDL_GetWindowID(_window->sdl_window);
+					if(_window_id != _rde_event.window_id) {
+						continue;
+					}
+					rde_events_drag_and_drop_consume_events(_window, &_rde_event);
+				} break;
+			}
+
+			size_t _window_id = SDL_GetWindowID(_window->sdl_window);
+			if(_window_id != _rde_event.window_id) {
 				continue;
 			}
+
 			if(ENGINE.user_event_callback != NULL) {
 				ENGINE.user_event_callback(&_rde_event, _window);
+			}
+
+			if(_rde_event.type == RDE_EVENT_TYPE_DRAG_AND_DROP_FILE && ((SDL_Event*)(_rde_event.native_event))->drop.file != NULL) {
+				SDL_free(((SDL_Event*)(_rde_event.native_event))->drop.file);
 			}
 		}
 	}
@@ -715,6 +734,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	rde_events_display_create_events();
 	rde_events_key_create_events();
 	rde_events_mouse_button_create_events();
+	rde_events_drag_and_drop_create_events();
 	rde_rendering_set_rendering_configuration();
 
 	srand(time(NULL));

@@ -193,11 +193,6 @@ rde_window* rde_window_create_window() {
 	return _window;
 }
 
-void rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbacks) {
-	UNUSED(_window)
-	UNUSED(_callbacks)
-}
-
 rde_vec_2I rde_window_get_window_size(rde_window* _window) {
 	rde_vec_2I _size;
 	SDL_GetWindowSize(_window->sdl_window, &_size.x, &_size.y);

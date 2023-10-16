@@ -1,30 +1,28 @@
-
-
 void rde_events_window_create_events();
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_resize, window_callbacks, on_window_resize, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_focused_by_mouse, window_callbacks, on_window_focused_by_mouse, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_unfocused_by_mouse, window_callbacks, on_window_unfocused_by_mouse, {
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_resize, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_focused_by_mouse, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_unfocused_by_mouse, {
     memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
 	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_focused_by_keyboard, window_callbacks, on_window_focused_by_keyboard, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_unfocused_by_keyboard, window_callbacks, on_window_unfocused_by_keyboard, {
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_focused_by_keyboard, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_unfocused_by_keyboard, {
 	memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
 	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_moved, window_callbacks, on_window_moved, {
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_moved, {
     memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
 	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_minimized, window_callbacks, on_window_minimized, {
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_minimized, {
     memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
 	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_maximized, window_callbacks, on_window_maximized, {
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_maximized, {
     memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
 	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_closed, window_callbacks, on_window_closed, { 
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_closed, { 
 	rde_window_destroy_window(_window); 
 	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
 		if(ENGINE.windows[_i].sdl_window != NULL) {
@@ -34,47 +32,53 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_closed, window_callbacks, on_win
 
 	ENGINE.running = false;
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_display_changed, window_callbacks, on_window_moved, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_display_changed, {})
+
+
 
 void rde_events_display_create_events();
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_connected, display_callbacks, on_display_connected, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_disconnected, display_callbacks, on_display_disconnected, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_changed_orientation, display_callbacks, on_display_changed_orientation, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_connected, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_disconnected, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_changed_orientation, {})
+
+
 
 void rde_events_key_create_events();
-void rde_events_on_key_pressed_event(rde_window* _window, rde_event* _event) {
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(key_pressed, {
 	if(_window->key_states[_event->data.key_event_data.key] == RDE_INPUT_STATUS_UNINITIALIZED || _window->key_states[_event->data.key_event_data.key] == RDE_INPUT_STATUS_JUST_RELEASED) {
 		_window->key_states[_event->data.key_event_data.key] = RDE_INPUT_STATUS_JUST_PRESSED;
 	} else if(_window->key_states[_event->data.key_event_data.key] == RDE_INPUT_STATUS_JUST_PRESSED) {
 		_window->key_states[_event->data.key_event_data.key] = RDE_INPUT_STATUS_KEEP_PRESSED;
 	}
-}
-
-void rde_events_on_key_released_event(rde_window* _window, rde_event* _event) {
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(key_released, {
 	_window->key_states[_event->data.key_event_data.key] = RDE_INPUT_STATUS_JUST_RELEASED;
-}
+})
+
+
 
 void rde_events_mouse_button_create_events();
-void rde_events_on_mouse_button_pressed_event(rde_window* _window, rde_event* _event) {
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_pressed, {
 	if(_window->mouse_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_UNINITIALIZED || _window->mouse_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_JUST_RELEASED) {
 		_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_JUST_PRESSED;
 	} else if(_window->key_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_JUST_PRESSED) {
 		_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_KEEP_PRESSED;
 	}
-}
-
-void rde_events_on_mouse_button_released_event(rde_window* _window, rde_event* _event) {
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_released, {
 	_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_JUST_RELEASED;
-}
-
-void rde_events_on_mouse_moved_event(rde_window* _window, rde_event* _event) {
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_moved, {
 	_window->mouse_position = _event->data.mouse_event_data.position;
-}
-
-void rde_events_on_mouse_scrolled_event(rde_window* _window, rde_event* _event) {
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_scrolled, {
 	_window->mouse_scroll = _event->data.mouse_event_data.scrolled;
-}
+})
 
+
+
+void rde_events_drag_and_drop_create_events();
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(drop_file, {})
 
 void rde_events_window_create_events() {
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - RDE_WIN_EVENT_INIT] = &window_resize;
@@ -96,18 +100,22 @@ void rde_events_display_create_events() {
 }
 
 void rde_events_key_create_events() {
-	ENGINE.key_events[RDE_EVENT_TYPE_KEY_PRESSED - RDE_KEY_EVENT_INIT] = &rde_events_on_key_pressed_event;
-	ENGINE.key_events[RDE_EVENT_TYPE_KEY_RELEASED - RDE_KEY_EVENT_INIT] = &rde_events_on_key_released_event;
+	ENGINE.key_events[RDE_EVENT_TYPE_KEY_PRESSED - RDE_KEY_EVENT_INIT] = &key_pressed;
+	ENGINE.key_events[RDE_EVENT_TYPE_KEY_RELEASED - RDE_KEY_EVENT_INIT] = &key_released;
 	// TODO: implement the other ones:
 	//		- RDE_EVENT_TYPE_KEY_TYPED
 	//		- RDE_EVENT_TYPE_TEXT_TYPED
 }
 
 void rde_events_mouse_button_create_events() {
-	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_button_pressed_event;
-	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_button_released_event;
-	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_MOVED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_moved_event;
-	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_SCROLLED - RDE_MOUSE_EVENT_INIT] = &rde_events_on_mouse_scrolled_event;
+	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED - RDE_MOUSE_EVENT_INIT] = &mouse_pressed;
+	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED - RDE_MOUSE_EVENT_INIT] = &mouse_released;
+	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_MOVED - RDE_MOUSE_EVENT_INIT] = &mouse_moved;
+	ENGINE.mouse_events[RDE_EVENT_TYPE_MOUSE_SCROLLED - RDE_MOUSE_EVENT_INIT] = &mouse_scrolled;
+}
+
+void rde_events_drag_and_drop_create_events() {
+	ENGINE.drag_and_drop_events[RDE_EVENT_TYPE_DRAG_AND_DROP_FILE - RDE_DRAG_AND_DROP_EVENT_INIT] = &drop_file;
 }
 
 void rde_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
@@ -175,8 +183,8 @@ void rde_sdl_to_rde_helper_transform_display_event(SDL_Event* _sdl_event, rde_ev
 }
 
 void rde_sdl_to_rde_helper_transform_keyboard_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
-	_rde_event->time_stamp = _sdl_event->display.timestamp;
-	_rde_event->window_id = _sdl_event->window.windowID;
+	_rde_event->time_stamp = _sdl_event->key.timestamp;
+	_rde_event->window_id = _sdl_event->key.windowID;
 
 	switch (_sdl_event->key.state) {
 		case SDL_PRESSED : {
@@ -192,12 +200,12 @@ void rde_sdl_to_rde_helper_transform_keyboard_event(SDL_Event* _sdl_event, rde_e
 }
 
 void rde_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
-	_rde_event->time_stamp = _sdl_event->display.timestamp;
-	_rde_event->window_id = _sdl_event->window.windowID;
-
 	switch(_sdl_event->type) {
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP: {
+			_rde_event->time_stamp = _sdl_event->button.timestamp;
+			_rde_event->window_id = _sdl_event->button.windowID;
+
 			switch (_sdl_event->button.state) {
 				case SDL_PRESSED : {
 					_rde_event->type = RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED;
@@ -212,20 +220,36 @@ void rde_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _sdl_event, r
 		} break;
 
 		case SDL_MOUSEMOTION: {
+			_rde_event->time_stamp = _sdl_event->motion.timestamp;
+			_rde_event->window_id = _sdl_event->motion.windowID;
 			_rde_event->type = RDE_EVENT_TYPE_MOUSE_MOVED;
 			_rde_event->data.mouse_event_data.position = (rde_vec_2I) { _sdl_event->motion.x, _sdl_event->motion.y };
 		} break;
 
 		case SDL_MOUSEWHEEL: {
+			_rde_event->time_stamp = _sdl_event->wheel.timestamp;
+			_rde_event->window_id = _sdl_event->wheel.windowID;
 			_rde_event->type = RDE_EVENT_TYPE_MOUSE_SCROLLED;
 			_rde_event->data.mouse_event_data.scrolled = (rde_vec_2F) { (float)_sdl_event->wheel.x, (float)_sdl_event->wheel.y };
 		} break;
 	}
 }
 
+void rde_sdl_to_rde_helper_transform_drop_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
+	_rde_event->time_stamp = _sdl_event->drop.timestamp;
+	_rde_event->window_id = _sdl_event->drop.windowID;
+
+	switch(_sdl_event->type) {
+		case SDL_DROPFILE: {
+			_rde_event->type = RDE_EVENT_TYPE_DRAG_AND_DROP_FILE;
+			_rde_event->data.drag_and_drop_data.file_path = _sdl_event->drop.file;
+		}
+	}
+}
+
 rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 
-	rde_event _event;
+	rde_event _event = rde_struct_create_event();
 
 	switch(_sdl_event->type) {
 		case SDL_WINDOWEVENT:	rde_sdl_to_rde_helper_transform_window_event(_sdl_event, &_event); break;
@@ -239,6 +263,8 @@ rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 		case SDL_MOUSEWHEEL:
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP: rde_sdl_to_rde_helper_transform_mouse_button_event(_sdl_event, &_event); break;
+
+		case SDL_DROPFILE: rde_sdl_to_rde_helper_transform_drop_event(_sdl_event, &_event); break;
 	}
 
 	return _event;
@@ -284,6 +310,16 @@ void rde_events_mouse_consume_events(rde_window* _window, rde_event* _event) {
 		ENGINE.mouse_events[_event_index](_window, _event);
 	} else {
 		printf("Mouse Event: %i, not handled \n", _event->type);
+	}
+}
+
+void rde_events_drag_and_drop_consume_events(rde_window* _window, rde_event* _event) {
+	size_t _event_index = _event->type - RDE_DRAG_AND_DROP_EVENT_INIT;
+
+	if(_event_index >= 0 && _event_index < RDE_DRAG_AND_DROP_EVENT_INIT) {
+		ENGINE.drag_and_drop_events[_event_index](_window, _event);
+	} else {
+		printf("Drag N Drop Event: %i, not handled \n", _event->type);
 	}
 }
 

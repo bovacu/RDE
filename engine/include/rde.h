@@ -544,16 +544,11 @@ extern "C" {
 		};									\
 	} _name;
 
-#define COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(_func_name, _callback_type, _callback_name, _extra_code) 	\
-	void _func_name(rde_window* _window, rde_event* _event) {					\
-		UNUSED(_window);																					\
-		if(!ENGINE._callback_type._callback_name.block_engine_default_implementation) {					\
-			_extra_code																						\
-		}																									\
-																											\
-		if(ENGINE._callback_type._callback_name._callback != NULL) {									\
-			ENGINE._callback_type._callback_name._callback(_event);										\
-		}																									\
+#define COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(_func_name, _extra_code) 	\
+	void _func_name(rde_window* _window, rde_event* _event) {				\
+		UNUSED(_window);													\
+		UNUSED(_event);														\
+		_extra_code															\
 	}
 
 /// ====================== PLATFORM SPECIFIC TYPES ==========================
@@ -614,9 +609,14 @@ typedef enum {
 	RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED, RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED, RDE_EVENT_TYPE_MOUSE_SCROLLED, RDE_EVENT_TYPE_MOUSE_MOVED,
 	RDE_EVENT_TYPE_MOUSE_END,
 
+	RDE_EVENT_TYPE_DRAG_AND_DROP_BEGIN,
+	RDE_EVENT_TYPE_DRAG_AND_DROP_FILE,
+	RDE_EVENT_TYPE_DRAG_AND_DROP_END,
+
 	RDE_EVENT_TYPE_CONTROLLER_AXIS_MOVED, RDE_EVENT_TYPE_CONTROLLER_BUTTON_DOWN, RDE_EVENT_TYPE_CONTROLLER_BUTTON_UP,
 
 	RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN, RDE_EVENT_TYPE_MOBILE_TOUCH_UP, RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED
+
 } RDE_EVENT_TYPE_;
 
 
@@ -1079,100 +1079,6 @@ typedef void (*rde_engine_user_side_loop_func_3)(rde_event*, rde_window*);
 typedef struct rde_inner_window_data rde_inner_window_info;
 
 typedef struct {
-	bool block_engine_default_implementation;
-	rde_event_func_inner _callback;
-} rde_event_callback;
-rde_event_callback rde_struct_create_event_callback() {
-	rde_event_callback _c;
-	_c.block_engine_default_implementation = false;
-	_c._callback = NULL;
-	return _c;
-}
-
-typedef struct {
-	rde_event_callback on_window_resize;
-	rde_event_callback on_window_focused_by_mouse;
-	rde_event_callback on_window_unfocused_by_mouse;
-	rde_event_callback on_window_focused_by_keyboard;
-	rde_event_callback on_window_unfocused_by_keyboard;
-	rde_event_callback on_window_moved;
-	rde_event_callback on_window_minimized;
-	rde_event_callback on_window_maximized;
-	rde_event_callback on_window_closed;
-	rde_event_callback on_window_display_changed;
-} rde_window_callbacks;
-rde_window_callbacks rde_struct_create_window_callbacks() {
-	rde_window_callbacks _w;
-	_w.on_window_resize = rde_struct_create_event_callback();
-	_w.on_window_focused_by_mouse = rde_struct_create_event_callback();
-	_w.on_window_unfocused_by_mouse = rde_struct_create_event_callback();
-	_w.on_window_focused_by_keyboard = rde_struct_create_event_callback();
-	_w.on_window_unfocused_by_keyboard = rde_struct_create_event_callback();
-	_w.on_window_moved = rde_struct_create_event_callback();
-	_w.on_window_minimized = rde_struct_create_event_callback();
-	_w.on_window_maximized = rde_struct_create_event_callback();
-	_w.on_window_closed = rde_struct_create_event_callback();
-	_w.on_window_display_changed = rde_struct_create_event_callback();
-	return _w;
-}
-
-typedef struct {
-	rde_event_callback on_display_connected;
-	rde_event_callback on_display_disconnected;
-	rde_event_callback on_display_changed_orientation;
-} rde_display_callbacks;
-rde_display_callbacks rde_struct_create_display_callbacks() {
-	rde_display_callbacks _d;
-	_d.on_display_connected = rde_struct_create_event_callback();
-	_d.on_display_disconnected = rde_struct_create_event_callback();
-	_d.on_display_changed_orientation = rde_struct_create_event_callback();
-	return _d;
-}
-
-typedef struct {
-	rde_event_callback on_app_terminating; 				/// Android -> onDestroy(), iOS -> applicationWillTerminate()
-	rde_event_callback on_app_low_memory; 				/// Android -> onLowMemory(), iOS -> applicationDidReceiveMemoryWarning()
-	rde_event_callback on_app_will_enter_background; 	/// Android -> onPause(), iOS -> applicationWillResignActive()
-	rde_event_callback on_app_did_enter_background; 	/// Android -> onPause(), iOS -> applicationDidEnterBackground()
-	rde_event_callback on_app_will_enter_foreground; 	/// Android -> onResume(), iOS -> applicationWillEnterForeground()
-	rde_event_callback on_app_did_enter_foreground; 	/// Android -> onResume(), iOS -> applicationDidBecomeActive()
-} rde_mobile_callbacks;
-rde_mobile_callbacks rde_struct_create_mobile_callbacks() {
-	rde_mobile_callbacks _m;
-	_m.on_app_terminating = rde_struct_create_event_callback();
-	_m.on_app_low_memory = rde_struct_create_event_callback();
-	_m.on_app_will_enter_background = rde_struct_create_event_callback();
-	_m.on_app_did_enter_background = rde_struct_create_event_callback();
-	_m.on_app_will_enter_foreground = rde_struct_create_event_callback();
-	_m.on_app_did_enter_foreground = rde_struct_create_event_callback();
-	return _m;
-}
-
-typedef struct {
-	rde_event_callback on_controller_added;
-	rde_event_callback on_controller_removed;
-	rde_event_callback on_controller_reassigned;
-} rde_controller_callbacks;
-rde_controller_callbacks rde_struct_create_controller_callbacks() {
-	rde_controller_callbacks _c;
-	_c.on_controller_added = rde_struct_create_event_callback();
-	_c.on_controller_removed = rde_struct_create_event_callback();
-	_c.on_controller_reassigned = rde_struct_create_event_callback();
-	return _c;
-}
-
-typedef struct {
-	rde_event_callback on_drag_and_drop_begin;
-	rde_event_callback on_drag_and_drop_end;
-} rde_drag_and_drop_callbacks;
-rde_drag_and_drop_callbacks rde_struct_create_drag_and_drop_callbacks() {
-	rde_drag_and_drop_callbacks _d;
-	_d.on_drag_and_drop_begin = rde_struct_create_event_callback();
-	_d.on_drag_and_drop_end = rde_struct_create_event_callback();
-	return _d;
-}
-
-typedef struct {
 	rde_engine_user_side_loop_func on_update;
 	rde_engine_user_side_loop_func on_fixed_update;
 	rde_engine_user_side_loop_func on_late_update;
@@ -1338,6 +1244,7 @@ typedef struct {
 	rde_event_controller controller_event_data;
 	rde_event_mobile mobile_event_data;
 	rde_event_display display_event_data;
+	rde_event_drag_and_drop drag_and_drop_data;
 } rde_event_data;
 rde_event_data rde_struct_create_event_data() {
 	rde_event_data _e;
@@ -1347,6 +1254,7 @@ rde_event_data rde_struct_create_event_data() {
 	_e.controller_event_data = rde_struct_create_event_controller();
 	_e.mobile_event_data = rde_struct_create_event_mobile();
 	_e.display_event_data = rde_struct_create_event_display();
+	_e.drag_and_drop_data = rde_struct_create_event_drag_and_drop();
 	return _e;
 }
 
@@ -1682,7 +1590,6 @@ RDE_FUNC void rde_engine_destroy_engine();
 /// ============================ WINDOW =====================================
 
 RDE_FUNC rde_window* rde_window_create_window();
-RDE_FUNC void rde_window_set_callbacks(rde_window* _window, rde_window_callbacks _callbacks);
 
 RDE_FUNC rde_vec_2I	rde_window_get_window_size(rde_window* _window);
 RDE_FUNC void rde_window_set_window_size(rde_window* _window, rde_vec_2I _size);
@@ -1716,6 +1623,7 @@ RDE_FUNC void rde_events_window_consume_events(rde_window* _window, rde_event* _
 RDE_FUNC void rde_events_display_consume_events(rde_window* _window, rde_event* _event);
 RDE_FUNC void rde_events_keyboard_consume_events(rde_window* _window, rde_event* _event);
 RDE_FUNC void rde_events_mouse_consume_events(rde_window* _window, rde_event* _event);
+RDE_FUNC void rde_events_drag_and_drop_consume_events(rde_window* _window, rde_event* _event);
 
 RDE_FUNC bool rde_events_is_key_just_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
 RDE_FUNC bool rde_events_is_key_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
