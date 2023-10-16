@@ -423,6 +423,7 @@ struct rde_engine {
 	
 	bool running;
 	bool use_rde_2d_physics_system;
+	bool supress_engine_logs;
 	
 	rde_end_user_mandatory_callbacks mandatory_callbacks;
 	rde_engine_user_side_loop_func_3 user_event_callback;
@@ -486,6 +487,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.platform_type = RDE_PLATFORM_TYPE_UNSUPPORTED;
 	_e.running = true;
 	_e.use_rde_2d_physics_system = true;
+	_e.supress_engine_logs = false;
 	_e.mandatory_callbacks = rde_struct_create_end_user_mandatory_callbacks();
 
 #ifdef RDE_RENDERING_MODULE
@@ -753,6 +755,14 @@ void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks
 
 void rde_engine_set_event_user_callback(rde_engine_user_side_loop_func_3 _user_event_callback) {
 	ENGINE.user_event_callback = _user_event_callback;
+}
+
+bool rde_engine_logs_supressed() {
+	return ENGINE.supress_engine_logs;	
+}
+
+void rde_engine_supress_logs(bool _supress) {
+	ENGINE.supress_engine_logs = _supress;
 }
 
 RDE_PLATFORM_TYPE_ rde_engine_get_platform() {

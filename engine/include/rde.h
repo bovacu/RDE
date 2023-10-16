@@ -551,6 +551,36 @@ extern "C" {
 		_extra_code															\
 	}
 
+#define rde_log_level(_level, _fmt, ...) do { 		\
+	if(rde_engine_logs_supressed()) {				\
+		break;										\
+	}												\
+	rde_log_level_inner(_level, _fmt, __VA_ARGS__);	\
+	printf("\n");									\
+} while(0);
+
+#define rde_log_color(_color, _fmt, ...) do { 		\
+	if(rde_engine_logs_supressed()) {				\
+		break;										\
+	}												\
+	rde_log_color_inner(_color, _fmt, __VA_ARGS__);	\
+	printf("\n");									\
+} while(0);
+
+#define rde_log_level_sl(_level, _fmt, ...) do { 	\
+	if(rde_engine_logs_supressed()) {				\
+		break;										\
+	}												\
+	rde_log_level_inner(_level, _fmt, __VA_ARGS__);	\
+} while(0);
+
+#define rde_log_color_sl(_color, _fmt, ...) do { 	\
+	if(rde_engine_logs_supressed()) {				\
+		break;										\
+	}												\
+	rde_log_color_inner(_color, _fmt, __VA_ARGS__);	\
+} while(0);
+
 /// ====================== PLATFORM SPECIFIC TYPES ==========================
 
 typedef unsigned long ulong;
@@ -1462,8 +1492,8 @@ const rde_engine_heap_allocs_config RDE_DEFAULT_HEAP_ALLOCS_CONFIG = {
 
 /// ============================ LOG ========================================
 
-RDE_FUNC void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...);
-RDE_FUNC void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
+RDE_FUNC void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...);
+RDE_FUNC void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 
 /// ============================ UTIL =======================================
 
@@ -1560,7 +1590,10 @@ RDE_DECLARE_EASING_FUNCS(in_out, circular)
 RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_allocs_config _heap_allocs_config);
 RDE_FUNC void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks); /// Sets up some basic info the engine needs, call this BEFORE rde_engine_create_engine
 
-RDE_FUNC void rde_engine_set_event_user_callback(rde_engine_user_side_loop_func_3 _user_event_callback);
+RDE_FUNC void rde_engine_set_event_user_callback(rde_event_func _user_event_callback);
+
+RDE_FUNC bool rde_engine_logs_supressed();
+RDE_FUNC void rde_engine_supress_logs(bool _supress);
 
 RDE_FUNC RDE_PLATFORM_TYPE_ rde_engine_get_platform();
 
