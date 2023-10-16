@@ -545,7 +545,7 @@ extern "C" {
 	} _name;
 
 #define COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(_func_name, _extra_code) 	\
-	void _func_name(rde_window* _window, rde_event* _event) {				\
+	void _func_name(rde_event* _event, rde_window* _window) {				\
 		UNUSED(_window);													\
 		UNUSED(_event);														\
 		_extra_code															\
@@ -1100,11 +1100,9 @@ typedef struct rde_engine rde_engine;
 typedef struct rde_window rde_window;
 typedef struct rde_event rde_event;
 
-typedef void (*rde_event_func_inner)(rde_event*);
-typedef void (*rde_event_func_outer)(rde_window*, rde_event*);
+typedef void (*rde_event_func)(rde_event*, rde_window*);
 typedef void (*rde_engine_user_side_loop_func)(float);
 typedef void (*rde_engine_user_side_loop_func_2)(float, rde_window*);
-typedef void (*rde_engine_user_side_loop_func_3)(rde_event*, rde_window*);
 
 typedef struct rde_inner_window_data rde_inner_window_info;
 
@@ -1652,11 +1650,11 @@ RDE_FUNC void rde_window_destroy_window(rde_window* _window);
 
 /// ============================ EVENTS =====================================
 
-RDE_FUNC void rde_events_window_consume_events(rde_window* _window, rde_event* _event);
-RDE_FUNC void rde_events_display_consume_events(rde_window* _window, rde_event* _event);
-RDE_FUNC void rde_events_keyboard_consume_events(rde_window* _window, rde_event* _event);
-RDE_FUNC void rde_events_mouse_consume_events(rde_window* _window, rde_event* _event);
-RDE_FUNC void rde_events_drag_and_drop_consume_events(rde_window* _window, rde_event* _event);
+RDE_FUNC void rde_events_window_consume_events(rde_event* _event, rde_window* _window);
+RDE_FUNC void rde_events_display_consume_events(rde_event* _event, rde_window* _window);
+RDE_FUNC void rde_events_keyboard_consume_events(rde_event* _event, rde_window* _window);
+RDE_FUNC void rde_events_mouse_consume_events(rde_event* _event, rde_window* _window);
+RDE_FUNC void rde_events_drag_and_drop_consume_events(rde_event* _event, rde_window* _window);
 
 RDE_FUNC bool rde_events_is_key_just_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
 RDE_FUNC bool rde_events_is_key_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);

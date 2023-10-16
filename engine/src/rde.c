@@ -426,7 +426,7 @@ struct rde_engine {
 	bool supress_engine_logs;
 	
 	rde_end_user_mandatory_callbacks mandatory_callbacks;
-	rde_engine_user_side_loop_func_3 user_event_callback;
+	rde_event_func user_event_callback;
 	
 	rde_shader* color_shader_2d;
 	rde_shader* texture_shader_2d;
@@ -454,11 +454,11 @@ struct rde_engine {
 	rde_sound_config device_config;
 #endif
 	
-	rde_event_func_outer window_events[RDE_WIN_EVENT_COUNT];
-	rde_event_func_outer display_events[RDE_DISPLAY_EVENT_COUNT];
-	rde_event_func_outer key_events[RDE_KEY_EVENT_COUNT];
-	rde_event_func_outer mouse_events[RDE_MOUSE_EVENT_COUNT];
-	rde_event_func_outer drag_and_drop_events[RDE_DRAG_AND_DROP_EVENT_COUNT];
+	rde_event_func window_events[RDE_WIN_EVENT_COUNT];
+	rde_event_func display_events[RDE_DISPLAY_EVENT_COUNT];
+	rde_event_func key_events[RDE_KEY_EVENT_COUNT];
+	rde_event_func mouse_events[RDE_MOUSE_EVENT_COUNT];
+	rde_event_func drag_and_drop_events[RDE_DRAG_AND_DROP_EVENT_COUNT];
 
 	rde_engine_heap_allocs_config heap_allocs_config;
 
@@ -642,10 +642,10 @@ void rde_engine_on_event() {
 					if(_window_id != _rde_event.window_id) {
 						continue;
 					}
-					rde_events_window_consume_events(_window, &_rde_event);
+					rde_events_window_consume_events(&_rde_event, _window);
 				} break;
 				
-				case SDL_DISPLAYEVENT: rde_events_display_consume_events(_window, &_rde_event); break;
+				case SDL_DISPLAYEVENT: rde_events_display_consume_events(&_rde_event, _window); break;
 				
 				case SDL_KEYDOWN:
 				case SDL_KEYUP: {
@@ -653,7 +653,7 @@ void rde_engine_on_event() {
 					if(_window_id != _rde_event.window_id) {
 						continue;
 					}
-					rde_events_keyboard_consume_events(_window, &_rde_event);
+					rde_events_keyboard_consume_events(&_rde_event, _window);
 				} break;
 
 				case SDL_MOUSEMOTION:
@@ -664,7 +664,7 @@ void rde_engine_on_event() {
 					if(_window_id != _rde_event.window_id) {
 						continue;
 					}
-					rde_events_mouse_consume_events(_window, &_rde_event);
+					rde_events_mouse_consume_events(&_rde_event, _window);
 				} break;
 
 				case SDL_DROPFILE: {
@@ -672,7 +672,7 @@ void rde_engine_on_event() {
 					if(_window_id != _rde_event.window_id) {
 						continue;
 					}
-					rde_events_drag_and_drop_consume_events(_window, &_rde_event);
+					rde_events_drag_and_drop_consume_events(&_rde_event, _window);
 				} break;
 			}
 
@@ -753,7 +753,7 @@ void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks
 	ENGINE.mandatory_callbacks.on_render = _end_user_callbacks.on_render;
 }
 
-void rde_engine_set_event_user_callback(rde_engine_user_side_loop_func_3 _user_event_callback) {
+void rde_engine_set_event_user_callback(rde_event_func _user_event_callback) {
 	ENGINE.user_event_callback = _user_event_callback;
 }
 

@@ -326,7 +326,7 @@ size_t rde_util_string_split(char* _string, char** _split_array, const char* _sp
 	return _amount;
 }
 
-void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
+void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 	switch(_color) {
 		case RDE_LOG_COLOR_RED: {
 #if IS_WINDOWS()
@@ -392,13 +392,12 @@ void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 
 #if IS_WINDOWS()
 	SetConsoleTextAttribute(ENGINE.console_handle, 7);
-	fprintf(stdout, "\n");
 #else
-	fprintf(stdout, "\033[0m \n");
+	fprintf(stdout, "\033[0m");
 #endif
 }
 
-void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
+void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 	switch(_level) {
 		case RDE_LOG_LEVEL_ERROR: {
 #if IS_WINDOWS()
@@ -442,8 +441,7 @@ void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 	
 #if IS_WINDOWS()
 	SetConsoleTextAttribute(ENGINE.console_handle, 7);
-	fprintf(stdout, "\n");
 #else
-	fprintf(stdout, "\033[0m \n");
+	fprintf(stdout, "\033[0m");
 #endif
 }

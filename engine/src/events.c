@@ -276,52 +276,52 @@ rde_event rde_engine_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 
 // ======================= API ===========================
 
-void rde_events_window_consume_events(rde_window* _window, rde_event* _event) {
+void rde_events_window_consume_events(rde_event* _event, rde_window* _window) {
 	size_t _event_index = _event->type - RDE_WIN_EVENT_INIT;
 
 	if(_event_index >= 0 && _event_index < RDE_WIN_EVENT_COUNT) {
-		ENGINE.window_events[_event_index](_window, _event);
+		ENGINE.window_events[_event_index](_event, _window);
 	} else {
 		printf("Window Event: %i, not handled \n", _event->type);
 	}
 }
 
 
-void rde_events_display_consume_events(rde_window* _window, rde_event* _event) {
+void rde_events_display_consume_events(rde_event* _event, rde_window* _window) {
 	size_t _event_index = _event->type - RDE_DISPLAY_EVENT_INIT;
 
 	if(_event_index >= 0 && _event_index < RDE_DISPLAY_EVENT_COUNT) {
-		ENGINE.display_events[_event_index](_window, _event);
+		ENGINE.display_events[_event_index](_event, _window);
 	} else {
 		printf("Display Event: %i, not handled \n", _event->type);
 	}
 }
 
-void rde_events_keyboard_consume_events(rde_window* _window, rde_event* _event) {
+void rde_events_keyboard_consume_events(rde_event* _event, rde_window* _window) {
 	size_t _event_index = _event->type - RDE_KEY_EVENT_INIT;
 
 	if(_event_index >= 0 && _event_index < RDE_KEY_EVENT_INIT) {
-		ENGINE.key_events[_event_index](_window, _event);
+		ENGINE.key_events[_event_index](_event, _window);
 	} else {
 		printf("Key Event: %i, not handled \n", _event->type);
 	}
 }
 
-void rde_events_mouse_consume_events(rde_window* _window, rde_event* _event) {
+void rde_events_mouse_consume_events(rde_event* _event, rde_window* _window) {
 	size_t _event_index = _event->type - RDE_MOUSE_EVENT_INIT;
 
 	if(_event_index >= 0 && _event_index < RDE_MOUSE_EVENT_INIT) {
-		ENGINE.mouse_events[_event_index](_window, _event);
+		ENGINE.mouse_events[_event_index](_event, _window);
 	} else {
 		printf("Mouse Event: %i, not handled \n", _event->type);
 	}
 }
 
-void rde_events_drag_and_drop_consume_events(rde_window* _window, rde_event* _event) {
+void rde_events_drag_and_drop_consume_events(rde_event* _event, rde_window* _window) {
 	size_t _event_index = _event->type - RDE_DRAG_AND_DROP_EVENT_INIT;
 
 	if(_event_index >= 0 && _event_index < RDE_DRAG_AND_DROP_EVENT_INIT) {
-		ENGINE.drag_and_drop_events[_event_index](_window, _event);
+		ENGINE.drag_and_drop_events[_event_index](_event, _window);
 	} else {
 		printf("Drag N Drop Event: %i, not handled \n", _event->type);
 	}
