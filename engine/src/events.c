@@ -23,14 +23,18 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_maximized, {
 	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_closed, { 
-	rde_window_destroy_window(_window); 
+	size_t _existing_non_destroyed_windows = 0;
 	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
-		if(ENGINE.windows[_i].sdl_window != NULL) {
-			return;
+		if(&ENGINE.windows[_i] != _window && ENGINE.windows[_i].sdl_window != NULL) {
+			_existing_non_destroyed_windows++;
 		}
 	}
 
-	ENGINE.running = false;
+	if(_existing_non_destroyed_windows > 0) {
+		rde_window_destroy_window(_window);
+	}
+
+	ENGINE.running = _existing_non_destroyed_windows > 0;
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_display_changed, {})
 

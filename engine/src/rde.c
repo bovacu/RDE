@@ -832,8 +832,6 @@ void rde_engine_on_run() {
 	rde_rendering_end_2d();
 	rde_rendering_end_3d();
 #endif
-
-	rde_engine_destroy_engine();
 }
 
 bool rde_engine_is_running() {

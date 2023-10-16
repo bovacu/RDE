@@ -293,7 +293,7 @@ void* rde_window_get_native_sdl_window_handle(rde_window* _window) {
 }
 
 void* rde_window_get_native_sdl_gl_context_handle(rde_window* _window) {
-	return &_window->sdl_gl_context;
+	return _window->sdl_gl_context;
 }
 
 void rde_window_destroy_window(rde_window* _window) {
