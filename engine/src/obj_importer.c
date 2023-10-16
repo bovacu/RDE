@@ -268,7 +268,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	clock_t _t_start, _t_end;
 	_t_start = clock();
 
-	rde_log_color(RDE_LOG_COLOR_GREEN, "Loading OBJ '%s':", _obj_path);
+	rde_log_color_sl(RDE_LOG_COLOR_GREEN, "Loading OBJ '%s':", _obj_path);
 
 	rde_model* _model = NULL;
 	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_models; _i++) {
@@ -344,7 +344,9 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 		}
 	}
 
+	rde_engine_supress_logs(true);
 	rde_model_material _model_material = load_obj_material(_material_path_s);
+	rde_engine_supress_logs(false);
 
 	unsigned int* _mesh_indices = (unsigned int*)malloc(sizeof(unsigned int) * _mesh_indices_size * 1);
 	float* _mesh_positions = (float*)malloc(sizeof(float) * _mesh_positions_size * 3);
@@ -418,9 +420,16 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 
 	_t_end = clock();
 
-	rde_log_color(RDE_LOG_COLOR_GREEN, "	- vertices: %u, indices: %u, texcoords: %u, normals: %u \n", _mesh_positions_size, _mesh_indices_size, _mesh_texcoords_size, _mesh_normals_size);
-	rde_log_color(RDE_LOG_COLOR_GREEN, "	- VAO: %u, VBO:[ (p):%u, (c):%u, (n):%u, (uv):%u], IBO: %u, textureId: %d \n", _mesh.vao, _mesh.vbo[0], _mesh.vbo[1], _mesh.vbo[2], _mesh.vbo[3], _mesh.ibo, (_model_material.texture != NULL ? _model_material.texture->opengl_texture_id : -1));
-	rde_log_color(RDE_LOG_COLOR_GREEN, "	- took %.3fms \n", (double)(_t_end - _t_start) / CLOCKS_PER_SEC);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Vertices: %u, Indices: %u, Texcoords: %u, Normals: %u", _mesh_positions_size, _mesh_indices_size, _mesh_texcoords_size, _mesh_normals_size);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- VAO: %u, VBO:[ (p):%u, (c):%u, (n):%u, (uv):%u], IBO: %u, TextureId: %d", _mesh.vao, _mesh.vbo[0], _mesh.vbo[1], _mesh.vbo[2], _mesh.vbo[3], _mesh.ibo, (_model_material.texture != NULL ? _model_material.texture->opengl_texture_id : -1));
+	if(_model_material.texture != NULL && (_lacking_face_data & NO_VERTEX_UVS) == 0) {
+		rde_log_color(RDE_LOG_COLOR_GREEN, "	- Texture: %s", _model_material.texture->file_path);
+		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Size: %ux%u", _model_material.texture->size.x, _model_material.texture->size.y);
+		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Channels: %d", _model_material.texture->channels);
+		rde_log_color(RDE_LOG_COLOR_GREEN, "		- OpenGL ID: %d", _model_material.texture->opengl_texture_id);
+	}
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- took %.3fms", (double)(_t_end - _t_start) / CLOCKS_PER_SEC);
+	printf("\n");
 
 	return _model;
 }
