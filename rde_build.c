@@ -1321,7 +1321,7 @@ bool compile_windows() {
 		char output_atlas[MAX_PATH];																				\
 		memset(output_atlas, 0, MAX_PATH);																			\
 		strcat(output_atlas, _output);																				\
-		strcat(output_atlas, "test.exe");																			\
+		strcat(output_atlas, "model_viewer.exe");																	\
 		arrput(_build_command, "clang++");																			\
 		if(strcmp(build_type, "debug") == 0) {																		\
 			arrput(_build_command, "-g");																			\
@@ -1333,7 +1333,7 @@ bool compile_windows() {
 																													\
 		char _t_source_path[MAX_PATH];																				\
 		memset(_t_source_path, 0, MAX_PATH);																		\
-		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "test\\test.cpp");							\
+		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples\\model_viewer.cpp");				\
 		arrput(_build_command, _t_source_path);																		\
 																													\
 		arrput(_build_command, "-I");																				\
@@ -1363,7 +1363,7 @@ bool compile_windows() {
 		arrput(_build_command, "-L");																				\
 		char _t_libs_path_1[MAX_PATH];																				\
 		memset(_t_libs_path_1, 0, MAX_PATH);																		\
-		snprintf(_t_libs_path_1, MAX_PATH, "%s""test\\libs\\", this_file_full_path);								\
+		snprintf(_t_libs_path_1, MAX_PATH, "%s""examples\\libs\\", this_file_full_path);							\
 		arrput(_build_command, _t_libs_path_1);																		\
 																													\
 		arrput(_build_command, "-Werror");																			\
@@ -1374,9 +1374,9 @@ bool compile_windows() {
 		arrput(_build_command, "-lgdi32");																			\
 		arrput(_build_command, "-lmsvcrt");																			\
 		arrput(_build_command, "-Xlinker");																			\
-		arrput(_build_command, "/nodefaultlib:msvcrt");															\
-	arrput(_build_command, "-Xlinker");																			\
-		arrput(_build_command, "/nodefaultlib:libcmt");															\
+		arrput(_build_command, "/nodefaultlib:msvcrt");																\
+		arrput(_build_command, "-Xlinker");																			\
+		arrput(_build_command, "/nodefaultlib:libcmt");																\
 		arrput(_build_command, "-limgui");																			\
 		arrput(_build_command, "-lSDL2");																			\
 																													\
