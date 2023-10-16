@@ -22,7 +22,7 @@ rde_vec_2F rde_rendering_get_aspect_ratio() {
 }
 
 void rde_rendering_set_rendering_configuration() {
-
+	// During init, enable debug output
 
 #if !IS_MOBILE()
 	printf("OpenGL Version: %s, Vendor: %s, GPU: %s \n", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER));
@@ -437,6 +437,11 @@ unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_text
 void rde_rendering_unload_texture(rde_texture* _texture) {
 	rde_critical_error(_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "texture");
 	GLuint _id = (GLuint)_texture->opengl_texture_id;
+
+	if(_id < 0) {
+		return;
+	}
+
 	glDeleteTextures(1, &_id);
 	_texture->opengl_texture_id = -1;
 	_texture->size = (rde_vec_2UI){ 0, 0 };

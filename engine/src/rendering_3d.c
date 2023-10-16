@@ -118,6 +118,7 @@ rde_mesh rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count) {
 	glGenVertexArrays(1, &_vao);
 	rde_util_check_opengl_error("ERROR: Creating mesh");
 
+	_mesh.vao = _vao;
 	_mesh.vertex_count = _vertex_count;
 	_mesh.vertex_positions = NULL;
 	_mesh.vertex_colors = NULL;
@@ -340,10 +341,25 @@ bool rde_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
 	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
 
-	glDeleteBuffers(1, &_mesh->vbo[0]);
-	glDeleteBuffers(1, &_mesh->vbo[1]);
-	glDeleteBuffers(1, &_mesh->vbo[2]);
-	glDeleteBuffers(1, &_mesh->vbo[3]);
+	if(_mesh->vbo[0] != RDE_UINT_MAX) {
+		glDeleteBuffers(1, &_mesh->vbo[0]);
+		_mesh->vbo[0] = RDE_UINT_MAX;
+	}
+	
+	if(_mesh->vbo[1] != RDE_UINT_MAX) {
+		glDeleteBuffers(1, &_mesh->vbo[1]);
+		_mesh->vbo[1] = RDE_UINT_MAX;
+	}
+
+	if(_mesh->vbo[2] != RDE_UINT_MAX) {
+		glDeleteBuffers(1, &_mesh->vbo[2]);
+		_mesh->vbo[2] = RDE_UINT_MAX;
+	}
+	
+	if(_mesh->vbo[3] != RDE_UINT_MAX) {
+		glDeleteBuffers(1, &_mesh->vbo[3]);
+		_mesh->vbo[3] = RDE_UINT_MAX;
+	}
 
 	glDeleteBuffers(1, &_mesh->ibo);
 
@@ -351,29 +367,36 @@ void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
 	
 	if(_mesh->free_vertex_positions_on_end) {
 		free(_mesh->vertex_positions);
+		_mesh->vertex_positions = NULL;
 	}
 
 	if(_mesh->free_vertex_colors_on_end) {
 		free(_mesh->vertex_colors);
+		_mesh->vertex_colors = NULL;
 	}
 
 	if(_mesh->free_vertex_normals_on_end) {
 		free(_mesh->vertex_normals);
+		_mesh->vertex_normals = NULL;
 	}
 
 	if(_mesh->free_vertex_texture_coordinates_on_end) {
 		free(_mesh->vertex_texture_coordinates);
+		_mesh->vertex_texture_coordinates = NULL;
 	}
 
 	if(_mesh->free_indices_on_end) {
 		free(_mesh->indices);
+		_mesh->indices = NULL;
 	}
 
-	if(_mesh->texture != NULL) {
+	if(_mesh->texture != NULL && _mesh->texture != DEFAULT_TEXTURE) {
 		rde_rendering_unload_texture(_mesh->texture);
+		_mesh->texture = NULL;
 	}
 
 	free(_mesh->transforms);
+	_mesh->transforms = NULL;
 }
 
 
@@ -583,6 +606,12 @@ void rde_rendering_unload_model(rde_model* _model) {
 	stbds_arrfree(_model->mesh_array);
 	_model->mesh_array = NULL;
 	_model->mesh_array_size = 0;
+
+	if(_model->material_array != NULL) {
+		stbds_arrfree(_model->material_array);
+		_model->material_array = NULL;
+		_model->material_array_size = 0;
+	}
 }
 
 #endif
