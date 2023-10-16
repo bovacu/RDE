@@ -227,6 +227,7 @@ extern "C" {
 	"layout(location = 1) in vec4 in_color;\n" \
 	"layout(location = 2) in vec3 in_normal;\n" \
 	"layout(location = 3) in vec2 in_text_coord;\n" \
+	"layout(location = 4) in mat4 in_model;\n" \
 	"\n" \
 	"out vec4 color;\n" \
 	"out vec3 normal;\n" \
@@ -234,10 +235,9 @@ extern "C" {
 	"out vec3 frag_pos;\n" \
 	"out mat4 model_matrix;\n" \
 	"uniform mat4 view_projection_matrix;\n" \
-	"uniform mat4 models[100];\n" \
 	"\n" \
 	"void main(){	\n" \
-	"	mat4 _model = models[gl_InstanceID];\n" \
+	"	mat4 _model = in_model;\n" \
 	"	gl_Position = view_projection_matrix * _model * vec4(in_pos, 1);\n" \
 	"	color = in_color;\n" \
 	"	normal = in_normal;\n" \

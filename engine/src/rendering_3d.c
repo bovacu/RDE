@@ -9,7 +9,7 @@
 #define RDE_DEFAULT_TEXTURE_CHANNELS 3
 static rde_texture* DEFAULT_TEXTURE;
 
-#define RDE_MAX_MODELS_PER_DRAW 100
+#define RDE_MAX_MODELS_PER_DRAW 1000
 
 static rde_batch_3d current_batch_3d;
 
@@ -144,6 +144,27 @@ rde_mesh rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count) {
 	_mesh.free_vertex_texture_coordinates_on_end = false;
 	_mesh.free_vertex_texture_on_end = false;
 	_mesh.free_indices_on_end = false;
+
+	glBindVertexArray(_mesh.vao);
+	glGenBuffers(1, &_mesh.vbo[4]);
+	glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[4]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)0);
+	glEnableVertexAttribArray(5);
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
+	glEnableVertexAttribArray(6);
+	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 8));
+	glEnableVertexAttribArray(7);
+	glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 12));
+
+	glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);
+    glVertexAttribDivisor(7, 1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 
 	return _mesh;
 }
@@ -361,6 +382,11 @@ void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
 		_mesh->vbo[3] = RDE_UINT_MAX;
 	}
 
+	if(_mesh->vbo[4] != RDE_UINT_MAX) {
+		glDeleteBuffers(1, &_mesh->vbo[4]);
+		_mesh->vbo[4] = RDE_UINT_MAX;
+	}
+
 	glDeleteBuffers(1, &_mesh->ibo);
 
 	glDeleteVertexArrays(1, &_mesh->vao);
@@ -447,9 +473,11 @@ void rde_rendering_try_create_batch_3d(rde_shader* _shader, rde_mesh* _mesh) {
 }
 
 void rde_rendering_flush_batch_3d() {
-	if(current_batch_3d.shader == NULL || current_batch_3d.mesh == NULL) {
+	if(current_batch_3d.shader == NULL || current_batch_3d.mesh == NULL || current_batch_3d.amount_of_models_per_draw == 0) {
 		return;
 	}
+
+	rde_util_check_opengl_error("GL Error Before Flush3D");
 
 	rde_mesh* _mesh = current_batch_3d.mesh;
 	rde_shader* _shader = current_batch_3d.shader;
@@ -459,6 +487,7 @@ void rde_rendering_flush_batch_3d() {
 	}
 
 	glUseProgram(current_batch_3d.shader->compiled_program_id);
+	rde_util_check_opengl_error("After glUseProgram");
 
 	mat4 _model_view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
@@ -480,7 +509,7 @@ void rde_rendering_flush_batch_3d() {
 	rde_util_check_opengl_error("After glBindTexture");
 
 	glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_model_view_projection_matrix);
-	rde_util_check_opengl_error("After UseProgram");
+	rde_util_check_opengl_error("After Set Model Matrix Unform");
 
 	rde_vec_3F _camera_pos = current_drawing_camera->transform.position;
 	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "camera_pos"), _camera_pos.x, _camera_pos.y, _camera_pos.z);
@@ -498,16 +527,11 @@ void rde_rendering_flush_batch_3d() {
 	rde_material _material = rde_struct_create_material();
 	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.shininess"), _material.shininess);
 
-	char _models_uniform[64];
-	for(size_t _i = 0; _i < current_batch_3d.amount_of_models_per_draw; _i++) {
-		memset(_models_uniform, 0, 64);
-		snprintf(_models_uniform, 64, "models[%zu]", _i);
-		glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, _models_uniform), 1, GL_FALSE, (const void*)_mesh->transforms[_i]);
-		rde_util_check_opengl_error("After UseProgram");
-	}
-
 	glBindVertexArray(_mesh->vao);
 	rde_util_check_opengl_error("After glBindVertexArray");
+
+	glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[4]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, current_batch_3d.amount_of_models_per_draw * (sizeof(float) * 16), _mesh->transforms);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->ibo);
 
