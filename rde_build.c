@@ -1295,6 +1295,7 @@ bool compile_windows() {
 		copy_file_if_exists(_duck_img_src, _duck_img_dst); 																			\
 	} while(0);
 
+	// On some Windows OS the entry point not define error is solved by adding '-Xlinker /subsystem:console -lShell32' to the flags
 	#define BUILD_EXAMPLES()																						\
 	do {																											\
 		char _output[256];																							\
@@ -1321,18 +1322,18 @@ bool compile_windows() {
 		memset(output_atlas, 0, MAX_PATH);																			\
 		strcat(output_atlas, _output);																				\
 		strcat(output_atlas, "test.exe");																			\
-		arrput(_build_command, "clang");																			\
+		arrput(_build_command, "clang++");																			\
 		if(strcmp(build_type, "debug") == 0) {																		\
 			arrput(_build_command, "-g");																			\
 			arrput(_build_command, "-O0");																			\
 		} else {																									\
 			arrput(_build_command, "-O3");																			\
 		}																											\
-		arrput(_build_command, "-std=c99");																			\
+		arrput(_build_command, "-std=c++11");																		\
 																													\
 		char _t_source_path[MAX_PATH];																				\
 		memset(_t_source_path, 0, MAX_PATH);																		\
-		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "test\\test.c");							\
+		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "test\\test.cpp");							\
 		arrput(_build_command, _t_source_path);																		\
 																													\
 		arrput(_build_command, "-I");																				\
@@ -1344,8 +1345,14 @@ bool compile_windows() {
 		arrput(_build_command, "-I");																				\
 		char _t_include_path_1[MAX_PATH];																			\
 		memset(_t_include_path_1, 0, MAX_PATH);																		\
-		snprintf(_t_include_path_1, MAX_PATH, "%s%s", this_file_full_path, "engine\\include\\");					\
+		snprintf(_t_include_path_1, MAX_PATH, "%s%s", this_file_full_path, "external\\include\\imgui\\");			\
 		arrput(_build_command, _t_include_path_1);																	\
+																													\
+		arrput(_build_command, "-I");																				\
+		char _t_include_path_2[MAX_PATH];																			\
+		memset(_t_include_path_2, 0, MAX_PATH);																		\
+		snprintf(_t_include_path_2, MAX_PATH, "%s%s", this_file_full_path, "engine\\include\\");					\
+		arrput(_build_command, _t_include_path_2);																	\
 																													\
 		arrput(_build_command, "-L");																				\
 		char _t_libs_path[MAX_PATH];																				\
@@ -1353,12 +1360,25 @@ bool compile_windows() {
 		snprintf(_t_libs_path, MAX_PATH, "%s""build\\%s\\%s\\engine", this_file_full_path, platform, build_type);	\
 		arrput(_build_command, _t_libs_path);																		\
 																													\
+		arrput(_build_command, "-L");																				\
+		char _t_libs_path_1[MAX_PATH];																				\
+		memset(_t_libs_path_1, 0, MAX_PATH);																		\
+		snprintf(_t_libs_path_1, MAX_PATH, "%s""test\\libs\\", this_file_full_path);								\
+		arrput(_build_command, _t_libs_path_1);																		\
+																													\
 		arrput(_build_command, "-Werror");																			\
 		arrput(_build_command, "-Wall");																			\
 		arrput(_build_command, "-Wextra");																			\
 		arrput(_build_command, "-lRDE");																			\
 		arrput(_build_command, "-lwinmm");																			\
 		arrput(_build_command, "-lgdi32");																			\
+		arrput(_build_command, "-lmsvcrt");																			\
+		arrput(_build_command, "-Xlinker");																			\
+		arrput(_build_command, "/nodefaultlib:msvcrt");															\
+	arrput(_build_command, "-Xlinker");																			\
+		arrput(_build_command, "/nodefaultlib:libcmt");															\
+		arrput(_build_command, "-limgui");																			\
+		arrput(_build_command, "-lSDL2");																			\
 																													\
 		arrput(_build_command, "-o");																				\
 		arrput(_build_command, output_atlas);																		\
