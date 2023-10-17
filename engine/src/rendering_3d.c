@@ -13,6 +13,8 @@ static rde_texture* DEFAULT_TEXTURE;
 
 static rde_batch_3d current_batch_3d;
 
+#include "rendering_3d_default_meshes.c"
+
 void rde_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh, size_t _extra_floats);
 void rde_rendering_try_create_batch_3d(rde_shader* _shader, rde_mesh* _mesh);
 void rde_rendering_flush_batch_3d();
