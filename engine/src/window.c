@@ -194,33 +194,40 @@ rde_window* rde_window_create_window() {
 }
 
 rde_vec_2I rde_window_get_window_size(rde_window* _window) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	rde_vec_2I _size;
 	SDL_GetWindowSize(_window->sdl_window, &_size.x, &_size.y);
 	return _size;
 }
 void rde_window_set_window_size(rde_window* _window, rde_vec_2I _size) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	SDL_SetWindowSize(_window->sdl_window, _size.x, _size.y);
 }
 
 rde_vec_2I rde_window_get_position(rde_window* _window) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	rde_vec_2I _position = {  };
 	SDL_GetWindowPosition(_window->sdl_window, &_position.x, &_position.y);
 	return _position;
 }
 
 void rde_window_set_position(rde_window* _window, rde_vec_2I _position) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	SDL_SetWindowPosition(_window->sdl_window, _position.x, _position.y);
 }
 
 const char* rde_window_get_title(rde_window* _window) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	return SDL_GetWindowTitle(_window->sdl_window);
 }
 
 void rde_window_set_title(rde_window* _window, const char* _title) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	SDL_SetWindowTitle(_window->sdl_window, _title);
 }
 
 bool rde_window_orientation_is_horizontal(rde_window* _window) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	return _window_size.x >= _window_size.y;
 }
@@ -234,6 +241,7 @@ void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_
 }
 
 unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	unsigned char* _pixels = (unsigned char*)malloc(sizeof(unsigned char) * (4 * _window_size.x * _window_size.y));
 	rde_critical_error(_pixels == NULL, RDE_ERROR_NO_MEMORY, 4 * _window_size.x * _window_size.y, "pixels array for screenshot");
@@ -244,6 +252,7 @@ unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, 
 }
 
 float rde_window_get_aspect_ratio(rde_window* _window) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	return _window_size.x / (float)_window_size.y;
 }
@@ -257,12 +266,13 @@ void rde_window_allow_mouse_out_of_window(bool _allow_mouse_out_of_window) {
 }
 
 void rde_window_set_icon(rde_window* _window, const char* _path_to_icon) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	int _width, _height, _channels;
 
 	stbi_set_flip_vertically_on_load(0);
 	stbi_uc* _data = stbi_load(_path_to_icon, &_width, &_height, &_channels, 0);
 	if(_data == NULL) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Error while loading icon at '%s'", _path_to_icon);
+		rde_critical_error(true, RDE_ERROR_FILE_NOT_FOUND, _path_to_icon);
 		return;
 	}
 	
@@ -289,16 +299,25 @@ void rde_window_set_icon(rde_window* _window, const char* _path_to_icon) {
 }
 
 void* rde_window_get_native_sdl_window_handle(rde_window* _window) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	return _window->sdl_window;
 }
 
 void* rde_window_get_native_sdl_gl_context_handle(rde_window* _window) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	return _window->sdl_gl_context;
 }
 
 void rde_window_destroy_window(rde_window* _window) {
-	SDL_GL_DeleteContext(_window->sdl_gl_context);
-	SDL_DestroyWindow(_window->sdl_window);
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
+
+	if(_window->sdl_gl_context != NULL) {
+		SDL_GL_DeleteContext(_window->sdl_gl_context);
+	}
+
+	if(_window->sdl_window != NULL) {
+		SDL_DestroyWindow(_window->sdl_window);
+	}
 
 	memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
 	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);

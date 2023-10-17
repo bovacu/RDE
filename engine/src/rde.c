@@ -942,6 +942,12 @@ void rde_engine_destroy_engine() {
 	}
 	free(ENGINE.shaders);
 
+#ifdef RDE_AUDIO_MODULE
+	rde_audio_end();
+	free(ENGINE.sounds);
+	
+#endif
+
 	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
 		if(ENGINE.windows[_i].sdl_window == NULL) {
 			continue;
@@ -950,12 +956,6 @@ void rde_engine_destroy_engine() {
 		rde_window_destroy_window(&ENGINE.windows[_i]);
 	}
 	free(ENGINE.windows);
-
-#ifdef RDE_AUDIO_MODULE
-	rde_audio_end();
-	free(ENGINE.sounds);
-	
-#endif
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
