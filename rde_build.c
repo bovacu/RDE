@@ -1321,7 +1321,7 @@ bool compile_windows() {
 		char output_atlas[MAX_PATH];																				\
 		memset(output_atlas, 0, MAX_PATH);																			\
 		strcat(output_atlas, _output);																				\
-		strcat(output_atlas, "model_viewer.exe");																	\
+		strcat(output_atlas, "hub.exe");																			\
 		arrput(_build_command, "clang++");																			\
 		if(strcmp(build_type, "debug") == 0) {																		\
 			arrput(_build_command, "-g");																			\
@@ -1333,7 +1333,7 @@ bool compile_windows() {
 																													\
 		char _t_source_path[MAX_PATH];																				\
 		memset(_t_source_path, 0, MAX_PATH);																		\
-		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples\\model_viewer.cpp");				\
+		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples\\hub.cpp");						\
 		arrput(_build_command, _t_source_path);																		\
 																													\
 		arrput(_build_command, "-I");																				\
