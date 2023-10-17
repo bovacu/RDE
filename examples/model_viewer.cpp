@@ -1,5 +1,6 @@
 rde_camera model_viewer_camera;
 rde_model* model_viewer_model = NULL;
+rde_transform model_viewer_transform;
 
 float model_viewer_yaw = -90.0f;
 bool model_viewer_first_mouse = true;
@@ -144,17 +145,15 @@ void model_viewer_on_late_update(float _dt) {
 void model_viewer_draw_3d(rde_window* _window, float _dt) {
 	UNUSED(_dt)
 
-	rde_transform _t = rde_struct_create_transform();
-	_t.position.z = -5;
 	if(model_viewer_model != NULL) {
 		rde_rendering_begin_drawing_3d(&model_viewer_camera, _window);
-		rde_rendering_draw_model_3d(&_t, model_viewer_model, NULL);
+		rde_rendering_draw_model_3d(&model_viewer_transform, model_viewer_model, NULL);
 		rde_rendering_end_drawing_3d();
 	}
 }
 
 void model_viewer_draw_imgui() {
-	ImGui::Begin("Directional Light");
+	ImGui::Begin("Directional Light", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
 	float _vec[3] = { model_viewer_directional_light_direction.x, model_viewer_directional_light_direction.y, model_viewer_directional_light_direction.z };
 	if(ImGui::DragFloat3("Direction", _vec, 0.25f)) {
@@ -188,6 +187,62 @@ void model_viewer_draw_imgui() {
 		rde_rendering_lighting_set_directional_light_specular_color_f(model_viewer_directional_light_specular_color);
 	}
 	ImGui::End();
+
+	ImGui::Begin("Model Transform", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	float _position[3] = { model_viewer_transform.position.x, model_viewer_transform.position.y, model_viewer_transform.position.z };
+	if(ImGui::DragFloat3("Position", _position, 1.f)) {
+		model_viewer_transform.position.x = _position[0];
+		model_viewer_transform.position.y = _position[1];
+		model_viewer_transform.position.z = _position[2];
+	}
+
+	ImGui::Separator();
+	float _radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.x);
+
+	if(ImGui::SliderAngle("Rotation X", &_radians)) {
+		model_viewer_transform.rotation.x = rde_math_radians_to_degrees(_radians);
+	}
+
+	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.y);
+	if(ImGui::SliderAngle("Rotation Y", &_radians)) {
+		model_viewer_transform.rotation.y = rde_math_radians_to_degrees(_radians);
+	}
+
+	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.z);
+	if(ImGui::SliderAngle("Rotation Z", &_radians)) {
+		model_viewer_transform.rotation.z = rde_math_radians_to_degrees(_radians);
+	}
+
+	ImGui::Separator();
+	static bool _proportional_scale = true;
+
+	if(!_proportional_scale) {
+		float _scale[3] = { model_viewer_transform.scale.x, model_viewer_transform.scale.y, model_viewer_transform.scale.z };
+		if(ImGui::DragFloat3("Scale", &model_viewer_transform.scale.x, 0.25f)) {
+			model_viewer_transform.scale.x = _scale[0];
+			model_viewer_transform.scale.y = _scale[1];
+			model_viewer_transform.scale.z = _scale[2];
+		}
+	} else {
+		if(ImGui::DragFloat("Scale", &model_viewer_transform.scale.x, 0.25f)) {
+			model_viewer_transform.scale.x = model_viewer_transform.scale.x;
+			model_viewer_transform.scale.y = model_viewer_transform.scale.x;
+			model_viewer_transform.scale.z = model_viewer_transform.scale.x;
+		}
+	}
+
+	ImGui::Checkbox("Proportional Scale", &_proportional_scale);
+	ImGui::End();
+
+	ImGui::Begin("Camera Options", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::DragFloat("FOV", &model_viewer_camera.fov, 1, 0, 180);
+
+	float _near_far[2] = { model_viewer_camera.near_far.x, model_viewer_camera.near_far.y };
+	if(ImGui::DragFloat2("Near/Far", _near_far, 1, 0, 10000)) {
+		model_viewer_camera.near_far.x = _near_far[0];
+		model_viewer_camera.near_far.y = _near_far[1];
+	}
+	ImGui::End();
 }
 
 void model_viewer_on_render(float _dt, rde_window* _window) {
@@ -214,6 +269,8 @@ void model_viewer_unload() {
 void model_viewer_init() {
 	model_viewer_camera = rde_struct_create_camera();
 	model_viewer_camera.transform.position = (rde_vec_3F) { -3.0, 8.0f, 14.0f };
+
+	model_viewer_transform = rde_struct_create_transform();
 
 	events_callback = &model_viewer_on_event;
 	update_callback = &model_viewer_on_update;
