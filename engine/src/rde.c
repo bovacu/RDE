@@ -680,11 +680,6 @@ void rde_engine_on_event() {
 				} break;
 			}
 
-			size_t _window_id = SDL_GetWindowID(_window->sdl_window);
-			if(_window_id != _rde_event.window_id) {
-				continue;
-			}
-
 			if(ENGINE.user_event_callback != NULL) {
 				ENGINE.user_event_callback(&_rde_event, _window);
 			}
