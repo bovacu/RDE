@@ -14,6 +14,7 @@
 #define RDE_ERROR_SDL_OPENGL "OpenGL context couldn't initialize: %s.\n"
 #define RDE_ERROR_GLAD_INIT "Failed to initialize GLAD.\n"
 #define RDE_ERROR_SANITIZATION_PATH "Path '%s' is greater than the output sanitized buffer size '%u'\n"
+#define RDE_ERROR_MESSAGE_BOX "Only 'RDE_LOG_LEVEL_INFO', 'RDE_LOG_LEVEL_WARNING', 'RDE_LOG_LEVEL_ERROR' work on rde_engine_show_message_box. Defaulting to 'RDE_LOG_LEVEL_INFO'"
 
 #ifdef RDE_AUDIO_MODULE
 #define RDE_ERROR_MA_CONTEXT "Failed to initialize context.\n"
