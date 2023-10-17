@@ -421,7 +421,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	_t_end = clock();
 
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Vertices: %u, Indices: %u, Texcoords: %u, Normals: %u", _mesh_positions_size, _mesh_indices_size, _mesh_texcoords_size, _mesh_normals_size);
-	rde_log_color(RDE_LOG_COLOR_GREEN, "	- VAO: %u, VBO:[ (p):%u, (c):%u, (n):%u, (uv):%u], IBO: %u, TextureId: %d", _mesh.vao, _mesh.vbo[0], _mesh.vbo[1], _mesh.vbo[2], _mesh.vbo[3], _mesh.ibo, (_model_material.texture != NULL ? _model_material.texture->opengl_texture_id : -1));
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- VAO: %u, VBO:[(p):%u, (c):%u, (n):%u, (uv):%u], IBO: %u, TextureId: %d", _mesh.vao, _mesh.vbo[0], _mesh.vbo[1], _mesh.vbo[2], _mesh.vbo[3], _mesh.ibo, (_model_material.texture != NULL ? _model_material.texture->opengl_texture_id : -1));
 	if(_model_material.texture != NULL && (_lacking_face_data & NO_VERTEX_UVS) == 0) {
 		rde_log_color(RDE_LOG_COLOR_GREEN, "	- Texture: %s", _model_material.texture->file_path);
 		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Size: %ux%u", _model_material.texture->size.x, _model_material.texture->size.y);
