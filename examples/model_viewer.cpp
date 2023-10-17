@@ -122,24 +122,12 @@ void model_viewer_on_event(rde_event* _event, rde_window* _window) {
 }
 
 void model_viewer_on_update(float _dt) {
-	static float _second = 1.f;
-
 	rde_vec_2F _scrolled = rde_events_mouse_get_scrolled(current_window);
 	if(_scrolled.x != 0.f || _scrolled.y != 0.f) {
 		model_viewer_camera.transform.position.x += model_viewer_camera_front.x * 10 * _dt * (_scrolled.y * 3);
 		model_viewer_camera.transform.position.y += model_viewer_camera_front.y * 10 * _dt * (_scrolled.y * 3);
 		model_viewer_camera.transform.position.z += model_viewer_camera_front.z * 10 * _dt * (_scrolled.y * 3);
 	}
-
-	if(_second >= 1.f) {
-		char _title[16];
-		memset(_title, 0, 16);
-		snprintf(_title, 16, "FPS: %d", (int)(1.f / _dt));
-		rde_window_set_title(current_window, _title);
-		_second = 0.f;
-	}
-
-	_second += _dt;
 
 	model_viewer_mouse_controller(_dt);
 	model_viewer_keyboard_controller(_dt);
@@ -157,16 +145,8 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 	UNUSED(_dt)
 
 	rde_transform _t = rde_struct_create_transform();
-	_t.position.x = -10;
-	_t.position.y = 0;
-
-	rde_transform _t2 = rde_struct_create_transform();
-	_t2.position.x = 5;
-	_t2.position.y = 0;
-	_t2.position.z = -9;
-
+	_t.position.z = -5;
 	if(model_viewer_model != NULL) {
-		_t.position.z = -5;
 		rde_rendering_begin_drawing_3d(&model_viewer_camera, _window);
 		rde_rendering_draw_model_3d(&_t, model_viewer_model, NULL);
 		rde_rendering_end_drawing_3d();

@@ -27,6 +27,7 @@ unload_func unload_callback = NULL;
 rde_window* current_window = NULL;
 
 #include "model_viewer.cpp"
+#include "performance_test.cpp"
 
 void on_event(rde_event* _event, rde_window* _window);
 void on_update(float _dt);
@@ -63,6 +64,21 @@ void on_event(rde_event* _event, rde_window* _window) {
 }
 
 void on_update(float _dt) {
+	static float _second = 1.f;
+
+	if(_second >= 1.f) {
+		char _title[64];
+		memset(_title, 0, 64);
+#ifdef RDE_DEBUG
+		snprintf(_title, 64, "Debug - FPS: %d", (int)(1.f / _dt));
+#else
+		snprintf(_title, 64, "Release - FPS: %d", (int)(1.f / _dt));
+#endif
+		rde_window_set_title(current_window, _title);
+		_second = 0.f;
+	}
+
+	_second += _dt;
 
 	if(update_callback != NULL) {
 		update_callback(_dt);
@@ -91,14 +107,14 @@ void on_imgui_hub_menu() {
 			if(unload_callback != NULL) {
 				unload_callback();
 			}
-
 			model_viewer_init();
 		}
 		
-		if(ImGui::RadioButton("Performance Test", &_option, 1)) {
+		if(ImGui::RadioButton("Performance Test 3D", &_option, 1)) {
 			if(unload_callback != NULL) {
 				unload_callback();
 			}
+			performance_test_3d_init();
 		}
 		ImGui::End();
 	}

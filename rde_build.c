@@ -1326,6 +1326,7 @@ bool compile_windows() {
 		if(strcmp(build_type, "debug") == 0) {																		\
 			arrput(_build_command, "-g");																			\
 			arrput(_build_command, "-O0");																			\
+			arrput(_build_command, "-DRDE_DEBUG");																	\
 		} else {																									\
 			arrput(_build_command, "-O3");																			\
 		}																											\

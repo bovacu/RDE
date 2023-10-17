@@ -619,6 +619,20 @@ void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _s
 	ENGINE.directional_light.specular_color = _specular_color;
 }
 
+size_t rde_rendering_get_mesh_vertices_count(rde_mesh* _mesh) {
+	return _mesh->vertex_count;
+}
+
+size_t rde_rendering_get_model_vertices_count(rde_model* _model) {
+	size_t _total_vertices = 0;
+	
+	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
+		_total_vertices += rde_rendering_get_mesh_vertices_count(&_model->mesh_array[_i]);
+	}
+
+	return _total_vertices;
+}
+
 void rde_rendering_unload_model(rde_model* _model) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "obj model");
 

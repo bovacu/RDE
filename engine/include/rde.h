@@ -1731,6 +1731,8 @@ RDE_FUNC rde_model* rde_rendering_load_obj_model(const char* _obj_path);
 #endif
 
 #if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)
+RDE_FUNC size_t rde_rendering_get_mesh_vertices_count(rde_mesh* _mesh);
+RDE_FUNC size_t rde_rendering_get_model_vertices_count(rde_model* _model);
 RDE_FUNC void rde_rendering_unload_model(rde_model* _model);
 #endif
 
