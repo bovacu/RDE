@@ -442,7 +442,7 @@ void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window) {
 
 	rde_vec_2F _aspect_ratios = rde_rendering_get_aspect_ratio();
 	float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.y : _aspect_ratios.x;
-	glm_perspective(45.f, _aspect_ratio, _camera->near_far.x, _camera->near_far.y, projection_matrix);
+	glm_perspective(_camera->fov, _aspect_ratio, _camera->near_far.x, _camera->near_far.y, projection_matrix);
 }
 
 void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader) {

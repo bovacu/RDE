@@ -1406,6 +1406,7 @@ struct rde_viewport {
 typedef struct {
 	size_t id;
 	float zoom;
+	float fov;
 	rde_transform transform;
 	rde_vec_3F direction;
 	rde_vec_3F up;
@@ -1417,6 +1418,7 @@ rde_camera rde_struct_create_camera() {
 	rde_camera _c;
 	_c.id = 0;
 	_c.zoom = 1.f;
+	_c.fov = 45.f;
 	_c.transform = rde_struct_create_transform();
 	_c.camera_type = RDE_CAMERA_TYPE_ORTHOGRAPHIC;
 	_c.enabled = true;
