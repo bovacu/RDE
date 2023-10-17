@@ -6,7 +6,7 @@
 //#include <stdlib.h>
 //#include <stdio.h>
 
-// This is needed because of C++ name mangling, if this lib is linked to a C++ project and is compiled,
+// This is needed because of C++ name mangling, if this lib is linked to a C++ project and is compiled
 // without extern "C" won't work.
 #ifdef __cplusplus
 extern "C" {
