@@ -65,6 +65,7 @@ extern "C" {
 #include <limits.h>
 #include <float.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 /// *************************************************************************************************
 /// *                                		DEFINES                         						*
@@ -1614,6 +1615,8 @@ RDE_FUNC void rde_engine_use_rde_2d_physics_system(bool _use);
 
 RDE_FUNC bool rde_engine_is_vsync_active();
 RDE_FUNC void rde_engine_set_vsync_active(bool _vsync);
+
+RDE_FUNC void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _title, const char* _content, rde_window* _window);
 
 RDE_FUNC void rde_engine_destroy_engine();
 

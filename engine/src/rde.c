@@ -874,6 +874,21 @@ void rde_engine_set_vsync_active(bool _vsync) {
 	SDL_GL_SetSwapInterval(_vsync ? 1 : 0);
 }
 
+void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _title, const char* _content, rde_window* _window) {
+	Uint32 _sdl_level = SDL_MESSAGEBOX_INFORMATION;
+
+	switch(_level) {
+		case RDE_LOG_LEVEL_INFO: _sdl_level = SDL_MESSAGEBOX_INFORMATION; break;
+		case RDE_LOG_LEVEL_WARNING: _sdl_level = SDL_MESSAGEBOX_WARNING; break;
+		case RDE_LOG_LEVEL_ERROR: _sdl_level = SDL_MESSAGEBOX_ERROR; break;
+		default: {
+			rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_ERROR_MESSAGE_BOX);
+		}
+	}
+
+	SDL_ShowSimpleMessageBox(_sdl_level, _title, _content, _window->sdl_window);
+}
+
 void rde_engine_destroy_engine() {
 
 #ifdef RDE_RENDERING_MODULE
