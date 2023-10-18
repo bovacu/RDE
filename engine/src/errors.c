@@ -322,8 +322,9 @@
 		_ss.ss_size = RDE_STACKTRACE_BUFF_SIZE;
 		_ss.ss_flags = 0;
 
-		if (sigaltstack(&_ss, NULL) != 0) { err(1, "sigaltstack"); }
-
+		#if !IS_MAC()
+			if (sigaltstack(&_ss, NULL) != 0) { err(1, "sigaltstack"); }
+		#endif
 
 		struct sigaction _sig_action = {};
 		_sig_action.sa_sigaction = posix_signal_handler;

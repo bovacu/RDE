@@ -1570,7 +1570,26 @@ bool compile_windows() {
 }
 #endif
 
+
 #if __APPLE__
+void get_mac_version(char* _buf) {
+	FILE* _min_version_pipe = popen("sw_vers -productVersion","r");																	
+    if (_min_version_pipe != NULL ) {
+    	int _i = 0;																					
+        while (!feof(_min_version_pipe) && (_i < 256) ) {											
+            fread(&_buf[_i++], 1, 1, _min_version_pipe);											
+        }																							
+        _buf[_i] = 0;																				
+        _buf[_i - 1] = 0;																			
+        _buf[_i - 2] = 0;																			
+        pclose(_min_version_pipe);																	
+    }																								
+    else {																							
+    	rde_log_level(RDE_LOG_LEVEL_ERROR, "Error getting the min macOS version");					
+		exit(-1);																					
+    }																								
+}
+
 bool compile_osx() {
 	errno = 0;
 
@@ -1651,26 +1670,12 @@ bool compile_osx() {
 		}																									\
 																											\
 		arrput(_build_command, "-std=c99");																	\
-		FILE* _min_version_pipe = popen("sw_vers -productVersion","r");										\
-	    char _buf[256];																						\
-	    memset(_buf, 0, 256);																				\
-	    if (_min_version_pipe != NULL ) {																	\
-	    	int _i = 0;																						\
-	        while (!feof(_min_version_pipe) && (_i < 256) ) {												\
-	            fread(&_buf[_i++], 1, 1, _min_version_pipe);												\
-	        }																								\
-	        _buf[_i] = 0;																					\
-	        _buf[_i - 1] = 0;																				\
-	        _buf[_i - 2] = 0;																				\
-	        pclose(_min_version_pipe);																		\
-	    }																									\
-	    else {																								\
-	    	rde_log_level(RDE_LOG_LEVEL_ERROR, "Error getting the min macOS version");						\
-			exit(-1);																						\
-	    }																									\
+		char _mac_version_buf[256];																			\
+    	memset(_mac_version_buf, 0, 256);																	\
+    	get_mac_version(_mac_version_buf);																	\
 	    char _min_version[MAX_PATH];																		\
 		memset(_min_version, 0, MAX_PATH);																	\
-		snprintf(_min_version, MAX_PATH, "-mmacosx-version-min=%s", _buf);									\
+		snprintf(_min_version, MAX_PATH, "-mmacosx-version-min=%s", _mac_version_buf);						\
 		arrput(_build_command, _min_version);																\
 																											\
 		if(strcmp(lib_type, "shared") == 0) {																\
@@ -1715,10 +1720,10 @@ bool compile_osx() {
 			arrput(_build_command, "-ldl");																	\
 			arrput(_build_command, "-lm");																	\
 			arrput(_build_command, "-lpthread");															\
-			arrput(_build_command, "-lSDL2main");															\
-			arrput(_build_command, "-lSDL2");																\
-			arrput(_build_command, "-lglad");																\
-			arrput(_build_command, "-lcglm");																\
+			arrput(_build_command, "-lSDL2main_rde");														\
+			arrput(_build_command, "-lSDL2_rde");															\
+			arrput(_build_command, "-lglad_rde");															\
+			arrput(_build_command, "-lcglm_rde");															\
 		}																									\
 		arrput(_build_command, "-Werror");																	\
 		arrput(_build_command, "-Wall");																	\
@@ -1951,6 +1956,13 @@ bool compile_osx() {
 		}																											\
 		arrput(_build_command, "-std=c++11");																		\
 																													\
+		char _mac_version_buf[256];																					\
+    	memset(_mac_version_buf, 0, 256);																			\
+		get_mac_version(_mac_version_buf);																			\
+	    char _min_version[MAX_PATH];																				\
+		memset(_min_version, 0, MAX_PATH);																			\
+		snprintf(_min_version, MAX_PATH, "-mmacosx-version-min=%s", _mac_version_buf);								\
+		arrput(_build_command, _min_version);																		\
 		char _t_source_path[MAX_PATH];																				\
 		memset(_t_source_path, 0, MAX_PATH);																		\
 		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples/hub.cpp");						\
@@ -1983,8 +1995,14 @@ bool compile_osx() {
 		arrput(_build_command, "-L");																				\
 		char _t_libs_path_1[MAX_PATH];																				\
 		memset(_t_libs_path_1, 0, MAX_PATH);																		\
-		snprintf(_t_libs_path_1, MAX_PATH, "%s""examples/libs/", this_file_full_path);							    \
+		snprintf(_t_libs_path_1, MAX_PATH, "%s""examples/libs/osx/", this_file_full_path);							\
 		arrput(_build_command, _t_libs_path_1);																		\
+																													\
+		arrput(_build_command, "-L");																				\
+		char _t_libs_path_2[MAX_PATH];																				\
+		memset(_t_libs_path_2, 0, MAX_PATH);																		\
+		snprintf(_t_libs_path_2, MAX_PATH, "%s""external/libs/osx_x86_64/", this_file_full_path);					\
+		arrput(_build_command, _t_libs_path_2);																		\
 																													\
 		arrput(_build_command, "-Werror");																			\
 		arrput(_build_command, "-Wall");																			\
