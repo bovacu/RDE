@@ -1907,6 +1907,124 @@ bool compile_osx() {
 		copy_file_if_exists(_duck_img_src, _duck_img_dst); 																			\
 	} while(0);
 
+	#define BUILD_EXAMPLES()																						\
+	do {																											\
+		char _output[256];																							\
+		memset(_output, 0, 256);																					\
+		strcat(_output, this_file_full_path);																		\
+																													\
+		memset(_path, 0, MAX_PATH);																					\
+		if(strcmp(build_type, "debug") == 0) {																		\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/debug/examples");				    		\
+		if(!make_dir_if_not_exists(_path)) {																		\
+					exit(-1);																						\
+		}																											\
+		strcat(_output, "build/osx/debug/examples/");													        	\
+		} else {																									\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/release/examples");			        	\
+		if(!make_dir_if_not_exists(_path)) {																		\
+					exit(-1);																						\
+		}																											\
+		strcat(_output, "build/osx/release/examples/");													    		\
+		}																											\
+																													\
+		_build_command = NULL;																						\
+		char output_atlas[MAX_PATH];																				\
+		memset(output_atlas, 0, MAX_PATH);																			\
+		strcat(output_atlas, _output);																				\
+		strcat(output_atlas, "hub");																			    \
+		arrput(_build_command, "clang++");																			\
+		if(strcmp(build_type, "debug") == 0) {																		\
+		arrput(_build_command, "-g");																				\
+		arrput(_build_command, "-O0");																				\
+		arrput(_build_command, "-DRDE_DEBUG");																		\
+		} else {																									\
+		arrput(_build_command, "-O3");																				\
+		}																											\
+		arrput(_build_command, "-std=c++11");																		\
+																													\
+		char _t_source_path[MAX_PATH];																				\
+		memset(_t_source_path, 0, MAX_PATH);																		\
+		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples/hub.cpp");						\
+		arrput(_build_command, _t_source_path);																		\
+																													\
+		arrput(_build_command, "-I");																				\
+		char _t_include_path_0[MAX_PATH];																			\
+		memset(_t_include_path_0, 0, MAX_PATH);																		\
+		snprintf(_t_include_path_0, MAX_PATH, "%s%s", this_file_full_path, "external/include/");					\
+		arrput(_build_command, _t_include_path_0);																	\
+																													\
+		arrput(_build_command, "-I");																				\
+		char _t_include_path_1[MAX_PATH];																			\
+		memset(_t_include_path_1, 0, MAX_PATH);																		\
+		snprintf(_t_include_path_1, MAX_PATH, "%s%s", this_file_full_path, "external/include/imgui/");			    \
+		arrput(_build_command, _t_include_path_1);																	\
+																													\
+		arrput(_build_command, "-I");																				\
+		char _t_include_path_2[MAX_PATH];																			\
+		memset(_t_include_path_2, 0, MAX_PATH);																		\
+		snprintf(_t_include_path_2, MAX_PATH, "%s%s", this_file_full_path, "engine/include/");					    \
+		arrput(_build_command, _t_include_path_2);																	\
+																													\
+		arrput(_build_command, "-L");																				\
+		char _t_libs_path[MAX_PATH];																				\
+		memset(_t_libs_path, 0, MAX_PATH);																			\
+		snprintf(_t_libs_path, MAX_PATH, "%s""build/%s/%s/engine", this_file_full_path, platform, build_type);		\
+		arrput(_build_command, _t_libs_path);																		\
+																													\
+		arrput(_build_command, "-L");																				\
+		char _t_libs_path_1[MAX_PATH];																				\
+		memset(_t_libs_path_1, 0, MAX_PATH);																		\
+		snprintf(_t_libs_path_1, MAX_PATH, "%s""examples/libs/", this_file_full_path);							    \
+		arrput(_build_command, _t_libs_path_1);																		\
+																													\
+		arrput(_build_command, "-Werror");																			\
+		arrput(_build_command, "-Wall");																			\
+		arrput(_build_command, "-Wextra");																			\
+		arrput(_build_command, "-lRDE");																			\
+		arrput(_build_command, "-limgui");																			\
+																													\
+		arrput(_build_command, "-o");																				\
+		arrput(_build_command, output_atlas);																		\
+																													\
+		if(!run_command(_build_command)) {																			\
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");											\
+		exit(-1);																									\
+		}																											\
+																													\
+		char _rde_lib_path[256];																					\
+		memset(_rde_lib_path, 0, 256);																				\
+		strcat(_rde_lib_path, this_file_full_path);																	\
+		char _example_path_sdl[256];																				\
+		char _example_path_rde[256];																				\
+		char _example_path_glad[256];																				\
+		memset(_example_path_sdl, 0, 256);																			\
+		memset(_example_path_rde, 0, 256);																			\
+		memset(_example_path_glad, 0, 256);																			\
+		strcat(_example_path_sdl, this_file_full_path);																\
+		strcat(_example_path_glad, this_file_full_path);															\
+		strcat(_example_path_rde, this_file_full_path); 															\
+																													\
+		if (strcmp(lib_type, "shared") == 0) { 																		\
+			if (strcmp(build_type, "debug") == 0) { 																\
+				strcat(_rde_lib_path, "build/osx/debug/engine/libRDE.dylib");										\
+				strcat(_example_path_rde, "build/osx/debug/examples/libRDE.dylib"); 								\
+			} else { 																								\
+				strcat(_rde_lib_path, "build/osx/release/engine/libRDE.dylib"); 									\
+				strcat(_example_path_rde, "build/osx/release/examples/libRDE.dylib"); 								\
+			}																										\
+		}																											\
+		char _assets_path[1024];																					\
+		memset(_assets_path, 0, 1024);																				\
+		snprintf(_assets_path, 1024, "%s%s", this_file_full_path, "examples/hub_assets");							\
+		char _examples_assets_path[1024];																			\
+		memset(_examples_assets_path, 0, 1024);																		\
+		snprintf(_examples_assets_path, 1024, "%s%s%s%s", this_file_full_path, "build/osx/", 						\
+				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/hub_assets");					\
+		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
+		copy_folder_if_exists(_assets_path, _examples_assets_path);													\
+	} while (0);
+
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
 		printf("\n");
 		printf("--- BUILDING ENGINE --- \n");
@@ -1919,8 +2037,15 @@ bool compile_osx() {
 		BUILD_TOOLS()
 	}
 
+	if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
+		printf("\n");
+		printf("--- BUILDING EXAMPLES --- \n");
+		BUILD_EXAMPLES()
+	}
+
 	#undef BUILD_ENGINE
 	#undef BUILD_TOOLS
+	#undef BUILD_EXAMPLES
 
 	return true;
 }
@@ -2396,6 +2521,7 @@ bool compile_linux() {
 
 	#undef BUILD_ENGINE
 	#undef BUILD_TOOLS
+	#undef BUILD_EXAMPLES
 
 	return true;
 }
