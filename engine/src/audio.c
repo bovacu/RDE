@@ -51,7 +51,7 @@ void rde_audio_init(rde_sound_config _config) {
 
 	is_miniaudio_initialized = true;
 	ENGINE.device_config = _config;
-	rde_log_level(RDE_LOG_LEVEL_INFO, "Initiated audio module correctly");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "Initiated audio module correctly");
 }
 
 rde_sound* rde_audio_load_sound(const char* _sound_path) {

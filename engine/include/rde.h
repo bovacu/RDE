@@ -552,6 +552,8 @@ extern "C" {
 		_extra_code															\
 	}
 
+#define is_empty(...) ( sizeof( (char[]){#__VA_ARGS__} ) == 1 )
+
 #define rde_log_level(_level, _fmt, ...) do { 		\
 	if(rde_engine_logs_supressed()) {				\
 		break;										\
@@ -1547,7 +1549,7 @@ RDE_FUNC rde_vec_3F rde_math_cross_product(rde_vec_3F _vec_0, rde_vec_3F _vec_1)
 RDE_FUNC void rde_math_normalize(rde_vec_3F* _vec);
 
 #define RDE_DECLARE_CLAMP_FUNCS(_type) \
-	RDE_FUNC inline _type rde_math_clamp_##_type(_type _value, _type _min, _type _max);
+	RDE_FUNC _type rde_math_clamp_##_type(_type _value, _type _min, _type _max);
 
 RDE_DECLARE_CLAMP_FUNCS(int)
 RDE_DECLARE_CLAMP_FUNCS(uint)
@@ -1556,11 +1558,11 @@ RDE_DECLARE_CLAMP_FUNCS(double)
 RDE_DECLARE_CLAMP_FUNCS(long)
 RDE_DECLARE_CLAMP_FUNCS(ulong)
 
-RDE_FUNC inline float rde_math_radians_to_degrees(float _radians);
-RDE_FUNC inline float rde_math_degrees_to_radians(float _degrees);
+RDE_FUNC float rde_math_radians_to_degrees(float _radians);
+RDE_FUNC float rde_math_degrees_to_radians(float _degrees);
 
 #define RDE_DECLARE_EASING_FUNCS(_form, _type) \
-	RDE_FUNC inline float rde_math_easing_##_form##_##_type(float _current_time, float _start_value, float _change_in_value, float _duration);
+	RDE_FUNC float rde_math_easing_##_form##_##_type(float _current_time, float _start_value, float _change_in_value, float _duration);
 
 RDE_DECLARE_EASING_FUNCS(in, linear)
 RDE_DECLARE_EASING_FUNCS(in, quadratic)

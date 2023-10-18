@@ -107,7 +107,7 @@ void model_viewer_on_event(rde_event* _event, rde_window* _window) {
 
 	if(_event->type == RDE_EVENT_TYPE_DRAG_AND_DROP_FILE) {
 		if(strcmp(rde_util_file_get_name_extension(_event->data.drag_and_drop_data.file_path), "obj") != 0) {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Only obj can be loaded at the time");
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "Only obj can be loaded at the time");
 			rde_engine_show_message_box(RDE_LOG_LEVEL_ERROR, 
 			                         "Wrong Format", 
 			                         "Model Viewer can only render OBJ files", 

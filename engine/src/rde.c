@@ -877,7 +877,7 @@ void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _title, cons
 		case RDE_LOG_LEVEL_WARNING: _sdl_level = SDL_MESSAGEBOX_WARNING; break;
 		case RDE_LOG_LEVEL_ERROR: _sdl_level = SDL_MESSAGEBOX_ERROR; break;
 		default: {
-			rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_ERROR_MESSAGE_BOX);
+			rde_log_level(RDE_LOG_LEVEL_WARNING, "%s", RDE_ERROR_MESSAGE_BOX);
 		}
 	}
 
@@ -954,7 +954,7 @@ void rde_engine_destroy_engine() {
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
-	rde_log_level(RDE_LOG_LEVEL_INFO, "Exited cleanly");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "Exited cleanly");
 }
 
 void rde_engine_switch_window_display(rde_window* _window, size_t _new_display) {

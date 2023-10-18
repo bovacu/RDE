@@ -42,7 +42,7 @@ rde_window* rde_inner_window_create_windows_window(size_t _free_window_index) {
 
 	rde_critical_error(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), RDE_ERROR_GLAD_INIT);
 	
-	rde_log_level(RDE_LOG_LEVEL_INFO, "GLAD and SDL2 loaded successfully");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "GLAD and SDL2 loaded successfully");
 
 	SDL_GL_SetSwapInterval(1);
 
@@ -80,7 +80,7 @@ rde_window* rde_inner_window_create_mac_window(size_t _free_window_index) {
 
 	rde_critical_error(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), RDE_ERROR_GLAD_INIT);
 	
-	rde_log_level(RDE_LOG_LEVEL_INFO, "GLAD and SDL2 loaded successfully");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "GLAD and SDL2 loaded successfully");
 
 	SDL_GL_SetSwapInterval(1);
 
@@ -124,7 +124,7 @@ rde_window* rde_inner_window_create_linux_window(size_t _free_window_index) {
 
 	rde_critical_error(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), RDE_ERROR_GLAD_INIT);
 	
-	rde_log_level(RDE_LOG_LEVEL_INFO, "GLAD and SDL2 loaded successfully");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "GLAD and SDL2 loaded successfully");
 
 	SDL_GL_SetSwapInterval(1);
 

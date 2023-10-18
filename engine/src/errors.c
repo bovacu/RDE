@@ -352,9 +352,9 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	}
 
 #ifdef RDE_DEBUG
-	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check 'rde_crash_logs.txt'");
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "An error made the program crash, check 'rde_crash_logs.txt'");
 #else
-	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check below");
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "An error made the program crash, check below");
 #endif
 
 	FILE* _f = NULL;

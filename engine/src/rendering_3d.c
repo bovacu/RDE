@@ -335,12 +335,12 @@ void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, unsigned int _t
 
 bool rde_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 	if(_mesh->indices == NULL) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Tried to render a mesh without vertex positions, skipping rendering for this mesh");
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "Tried to render a mesh without vertex positions, skipping rendering for this mesh");
 		return false;
 	}
 
 	if(_mesh->vertex_positions == NULL) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Tried to render a mesh without indices, skipping rendering for this mesh");
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "Tried to render a mesh without indices, skipping rendering for this mesh");
 		return false;
 	}
 
