@@ -64,13 +64,13 @@ void rde_rendering_set_rendering_configuration() {
 	
 }
 
-#define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled)						\
-	if(!_compiled) {																	\
-		char _infolog[1024];															\
-		glGetShaderInfoLog(_program_id, 1024, NULL, _infolog);							\
-		glDeleteShader(_program_id);													\
-		rde_critical_error(true, "Shader compile failed with error: %s \n", _infolog);	\
-		return NULL;																	\
+#define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled)											\
+	if(!_compiled) {																						\
+		char _infolog[1024];																				\
+		glGetShaderInfoLog(_program_id, 1024, NULL, _infolog);												\
+		glDeleteShader(_program_id);																		\
+		rde_critical_error(true, "Shader(%d) compile failed with error: \n%s \n", _program_id, _infolog);	\
+		return NULL;																						\
 	}
 
 	// ======================= API ===========================
@@ -100,7 +100,7 @@ rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fra
 	glGetShaderiv(_vertex_program_id, GL_COMPILE_STATUS, &_is_vertex_compiled);
 	glGetShaderiv(_fragment_program_id, GL_COMPILE_STATUS, &_is_fragment_compiled);
 
-	RDE_CHECK_SHADER_COMPILATION_STATUS(_vertex_program_id, _is_vertex_compiled)
+	RDE_CHECK_SHADER_COMPILATION_STATUS( _vertex_program_id, _is_vertex_compiled)
 	RDE_CHECK_SHADER_COMPILATION_STATUS(_fragment_program_id, _is_fragment_compiled)
 
 	GLuint _program_id = glCreateProgram();
@@ -246,8 +246,21 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 	}
 
 	GLuint _texture_id;
+	#if IS_MAC() || IS_IOS()
+	glGenTextures(1, &_texture_id);
+	#else
 	glCreateTextures(GL_TEXTURE_2D, 1, &_texture_id);
+	#endif
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
+
+	#if IS_MAC() || IS_IOS()
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
+	#else
 	glTextureStorage2D(_texture_id, 1, _internal_format, _width, _height);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -256,6 +269,7 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glTextureSubImage2D(_texture_id, 0, 0, 0, _width, _height, _data_format, GL_UNSIGNED_BYTE, _data);
+	#endif
 
 	stbi_image_free(_data);
 
@@ -308,7 +322,11 @@ rde_texture* rde_rendering_load_text_texture(const char* _file_path) {
 	}
 
 	GLuint _texture_id;
+	#if IS_MAC() || IS_IOS()
+	glGenTextures(1, &_texture_id);
+	#else
 	glCreateTextures(GL_TEXTURE_2D, 1, &_texture_id);
+	#endif
 	rde_util_check_opengl_error("3");
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
 	rde_util_check_opengl_error("4");

@@ -5,12 +5,19 @@
 #include "rde.h"
 #include "SDL2/SDL.h"
 
+#if IS_MAC()
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #ifdef __EMSCRIPTEN__
 #include <GLES3/gl32.h>
 #elif IS_ANDROID()
 #include <GLES3/gl32.h>
 #elif IS_IOS()
 #include <OpenGLES/ES3/gl.h>
+#elif IS_MAC()
+#include <OpenGL/gl3.h>
 #else
 #include "glad/glad.h"
 #endif
@@ -103,12 +110,14 @@ bool rde_util_check_opengl_error(const char* _message) {
 			case GL_OUT_OF_MEMORY:
 				printf("GL_OUT_OF_MEMORY: There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded. | %s -> %u \n",  _message, _err);
 				return true;
-			case GL_STACK_UNDERFLOW:
+			#if !IS_MAC()
+				case GL_STACK_UNDERFLOW:
 				printf("GL_STACK_UNDERFLOW: An attempt has been made to perform an operation that would cause an internal stack to underflow. | %s -> %u \n",  _message, _err);
 				return true;
 			case GL_STACK_OVERFLOW:
 				printf("GL_STACK_OVERFLOW: An attempt has been made to perform an operation that would cause an internal stack to overflow. | %s -> %u \n",  _message, _err);
 				return true;
+			#endif
 			default:
 				printf("No description. | %s -> %u \n",  _message, _err);
 				return true;
@@ -976,3 +985,7 @@ rde_window* rde_engine_get_focused_window() {
 
 	return NULL;
 }
+
+#if IS_MAC()
+#pragma clang diagnostic pop
+#endif

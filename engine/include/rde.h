@@ -269,6 +269,7 @@ extern "C" {
 	"uniform vec3 camera_pos;\n" \
 	"uniform rde_directional_light directional_light;\n" \
 	"uniform rde_material material;\n" \
+	"out vec4 color_out;\n" \
 	"\n" \
 	"void main(){\n" \
 	"	vec3 _ambient = directional_light.ambient_color * texture(tex, text_coord).rgb;\n" \
@@ -283,7 +284,7 @@ extern "C" {
 	"	float _spec = pow(max(dot(_view_dir, _reflect_dir), 0.0), material.shininess);\n" \
 	"	vec3 _specular = directional_light.specular_color * _spec * texture(tex, text_coord).rgb;\n" \
 	"	vec3 _final_light = _ambient + _diffuse + _specular;\n" \
-	"	gl_FragColor = vec4(_final_light, 1.0);\n" \
+	"	color_out = vec4(_final_light, 1.0);\n" \
 	"}"
 
 #define RDE_COLOR_VERTEX_SHADER_2D_ES "" \

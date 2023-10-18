@@ -4,6 +4,8 @@
 #include <GLES3/gl32.h>
 #elif IS_IOS()
 #include <OpenGLES/ES3/gl.h>
+#elif IS_MAC()
+#include <OpenGL/gl3.h>
 #else
 #include "glad/glad.h"
 #endif
@@ -42,7 +44,7 @@ rde_window* rde_inner_window_create_windows_window(size_t _free_window_index) {
 
 	rde_critical_error(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), RDE_ERROR_GLAD_INIT);
 	
-	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "GLAD and SDL2 loaded successfully");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "GLAD and SDL2 loaded successfully for windows");
 
 	SDL_GL_SetSwapInterval(1);
 
@@ -58,35 +60,55 @@ rde_window* rde_inner_window_create_mac_window(size_t _free_window_index) {
 	ENGINE.windows[_free_window_index] = rde_struct_create_window();
 	rde_window* _window = &ENGINE.windows[_free_window_index];
 
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-		
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
 	char _title[16];
 	snprintf(_title, 10, "%d", (int)_free_window_index);
 	_window->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 	rde_critical_error(_window->sdl_window == NULL, RDE_ERROR_SDL_WINDOW, SDL_GetError());
 
+	  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+	  // set multi sampling else we get really bad graphics that alias
+	  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,4);
+	  // Turn on double buffering with a 24bit Z buffer.
+	  // You may need to change this to 16 or 32 for your system
+	  // on mac up to 32 will work but under linux centos build only 16
+	  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	  // enable double buffering (should be on by default)
+	  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	  SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
 	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
 	rde_critical_error(_window->sdl_gl_context == NULL, RDE_ERROR_SDL_OPENGL, SDL_GetError());
 
 	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
-
-	rde_critical_error(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), RDE_ERROR_GLAD_INIT);
 	
-	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "GLAD and SDL2 loaded successfully");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "GLAD and SDL2 loaded successfully for mac");
 
 	SDL_GL_SetSwapInterval(1);
 
 	SDL_SetWindowPosition(_window->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	SDL_SetWindowResizable(_window->sdl_window, SDL_TRUE);
 
+	int _major = 0;
+	if(SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &_major) != 0) {
+		exit(-1);
+	}
+	printf("Major: %d\n", _major);
+
+	int _minor = 0;
+	if(SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &_minor) != 0) {
+		exit(-1);
+	}
+	printf("Minor: %d\n", _minor);
+
+	int _context = 0;
+	if(SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &_context) != 0) {
+		exit(-1);
+	}
+	printf("Context: %d\n", _context);
 	return _window;
 }
 #endif
@@ -124,7 +146,7 @@ rde_window* rde_inner_window_create_linux_window(size_t _free_window_index) {
 
 	rde_critical_error(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), RDE_ERROR_GLAD_INIT);
 	
-	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "GLAD and SDL2 loaded successfully");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "GLAD and SDL2 loaded successfully for linux");
 
 	SDL_GL_SetSwapInterval(1);
 

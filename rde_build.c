@@ -2010,6 +2010,7 @@ bool compile_osx() {
 		arrput(_build_command, "-Wextra");																			\
 		arrput(_build_command, "-lRDE");																			\
 		arrput(_build_command, "-limgui");																			\
+		arrput(_build_command, "-lSDL2_rde");																		\
 																													\
 		arrput(_build_command, "-o");																				\
 		arrput(_build_command, output_atlas);																		\
