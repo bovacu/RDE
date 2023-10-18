@@ -157,7 +157,7 @@ void init_func(int _argc, char** _argv) {
 	                             rde_window_get_native_sdl_gl_context_handle(current_window));
 	ImGui_ImplOpenGL3_Init();
 
-	rde_window_set_icon(current_window, "logo.ico");
+	// rde_window_set_icon(current_window, "logo.ico");
 }
 
 void end_func() {

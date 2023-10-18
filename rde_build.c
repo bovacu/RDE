@@ -137,6 +137,9 @@ bool write_to_file_if_exists(const char* _file_path, const char* _contents);
 char* replace_string(const char* str, const char* from, const char* to); // This function is greacefully stolen from https://creativeandcritical.net/str-replace-c, so thank you so much
 
 bool copy_file_if_exists(const char* _file_path, const char* _new_path);
+bool copy_folder_if_exists(const char* _folder_path, const char* _new_path);
+
+bool dir_exists(const char* _dir_path);
 
 bool compile_windows();
 bool compile_osx();
@@ -925,43 +928,39 @@ bool copy_file_if_exists(const char* _file_path, const char* _new_path) {
 		return false;
 	}
 	#else
-	char _buf;
-	FILE* _fd_0 = NULL;
-	FILE* _fd_1 = NULL;
-
-	_fd_0 = fopen(_file_path, "r");
-
-	if (_fd_0 == NULL) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not open file %s. (err_msg) -> File could not be found.", _file_path);
-		fclose(_fd_0);
-		return false;
-	}
-
-	_fd_1 = fopen(_new_path, "w+");
-	if (_fd_1 == NULL) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not create file %s.", _new_path);
-		fclose(_fd_1);
-		return false;
-	}
-
-	long _num_bytes = 0;
-	fseek(_fd_0, 0L, SEEK_END);
-	_num_bytes = ftell(_fd_0);
-	fseek(_fd_0, 0L, SEEK_SET);
-
-	while(fread(&_buf, _num_bytes, 1, _fd_0)) {
-		fwrite(&_buf, _num_bytes, 1, _fd_1);
-	}
-
-	fclose(_fd_0);
-	fclose(_fd_1);
+	rde_command _command = NULL;
+	arrput(_command, "cp");
+	arrput(_command, (char*)_file_path);
+	arrput(_command, (char*)_new_path);
+	run_command(_command);
 	#endif
-
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Copied file %s to %s.", _file_path, _new_path);
 	return true;
 }
 
+bool copy_folder_if_exists(const char* _folder_path, const char* _new_path) {
 
+	if(!dir_exists(_folder_path)) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not copy %s into %s. %s does not exist.", _folder_path, _new_path);
+		return false;
+	}
+
+	rde_command _command = NULL;
+	arrput(_command, "cp");
+	arrput(_command, "-r");
+	arrput(_command, (char*)_folder_path);
+	arrput(_command, (char*)_new_path);
+	run_command(_command);
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Copied folder %s to %s.", _folder_path, _new_path);
+	return true;
+}
+
+bool dir_exists(const char* _dir_path) {
+	DIR* _dir = opendir(_dir_path);
+	bool _exists = _dir != NULL;
+	closedir(_dir);
+	return _exists;
+}
 
 
 
@@ -2256,6 +2255,126 @@ bool compile_linux() {
 		snprintf(_duck_img_dst, MAX_PATH, "%s%s", this_file_full_path, "build/linux/tools/project_generator/duck_logo.png");		\
 		copy_file_if_exists(_duck_img_src, _duck_img_dst); 																			\
 	} while(0);
+    
+   	#define BUILD_EXAMPLES()																						\
+	do {																											\
+		char _output[256];																							\
+		memset(_output, 0, 256);																					\
+		strcat(_output, this_file_full_path);																		\
+																													\
+		memset(_path, 0, MAX_PATH);																					\
+		if(strcmp(build_type, "debug") == 0) {																		\
+			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/debug/examples");				    \
+			if(!make_dir_if_not_exists(_path)) {																	\
+				exit(-1);																							\
+			}																										\
+			strcat(_output, "build/linux/debug/examples/");													        \
+		} else {																									\
+			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/release/examples");			        \
+			if(!make_dir_if_not_exists(_path)) {																	\
+				exit(-1);																							\
+			}																										\
+			strcat(_output, "build/linux/release/examples/");													    \
+		}																											\
+																													\
+		_build_command = NULL;																						\
+		char output_atlas[MAX_PATH];																				\
+		memset(output_atlas, 0, MAX_PATH);																			\
+		strcat(output_atlas, _output);																				\
+		strcat(output_atlas, "hub");																			    \
+		arrput(_build_command, "clang++");																			\
+		if(strcmp(build_type, "debug") == 0) {																		\
+			arrput(_build_command, "-g");																			\
+			arrput(_build_command, "-O0");																			\
+			arrput(_build_command, "-DRDE_DEBUG");																	\
+		} else {																									\
+			arrput(_build_command, "-O3");																			\
+		}																											\
+		arrput(_build_command, "-std=c++11");																		\
+																													\
+		char _t_source_path[MAX_PATH];																				\
+		memset(_t_source_path, 0, MAX_PATH);																		\
+		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples/hub.cpp");						\
+		arrput(_build_command, _t_source_path);																		\
+																													\
+		arrput(_build_command, "-I");																				\
+		char _t_include_path_0[MAX_PATH];																			\
+		memset(_t_include_path_0, 0, MAX_PATH);																		\
+		snprintf(_t_include_path_0, MAX_PATH, "%s%s", this_file_full_path, "external/include/");					\
+		arrput(_build_command, _t_include_path_0);																	\
+																													\
+		arrput(_build_command, "-I");																				\
+		char _t_include_path_1[MAX_PATH];																			\
+		memset(_t_include_path_1, 0, MAX_PATH);																		\
+		snprintf(_t_include_path_1, MAX_PATH, "%s%s", this_file_full_path, "external/include/imgui/");			    \
+		arrput(_build_command, _t_include_path_1);																	\
+																													\
+		arrput(_build_command, "-I");																				\
+		char _t_include_path_2[MAX_PATH];																			\
+		memset(_t_include_path_2, 0, MAX_PATH);																		\
+		snprintf(_t_include_path_2, MAX_PATH, "%s%s", this_file_full_path, "engine/include/");					    \
+		arrput(_build_command, _t_include_path_2);																	\
+																													\
+		arrput(_build_command, "-L");																				\
+		char _t_libs_path[MAX_PATH];																				\
+		memset(_t_libs_path, 0, MAX_PATH);																			\
+		snprintf(_t_libs_path, MAX_PATH, "%s""build/%s/%s/engine", this_file_full_path, platform, build_type);	\
+		arrput(_build_command, _t_libs_path);																		\
+																													\
+		arrput(_build_command, "-L");																				\
+		char _t_libs_path_1[MAX_PATH];																				\
+		memset(_t_libs_path_1, 0, MAX_PATH);																		\
+		snprintf(_t_libs_path_1, MAX_PATH, "%s""examples/libs/", this_file_full_path);							    \
+		arrput(_build_command, _t_libs_path_1);																		\
+																													\
+		arrput(_build_command, "-Werror");																			\
+		arrput(_build_command, "-Wall");																			\
+		arrput(_build_command, "-Wextra");																			\
+		arrput(_build_command, "-lRDE");																			\
+		arrput(_build_command, "-limgui");																			\
+																													\
+		arrput(_build_command, "-o");																				\
+		arrput(_build_command, output_atlas);																		\
+																													\
+		if(!run_command(_build_command)) {																			\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");										\
+			exit(-1);																								\
+		}																											\
+																													\
+		char _rde_lib_path[256];																					\
+		memset(_rde_lib_path, 0, 256);																				\
+		strcat(_rde_lib_path, this_file_full_path);																	\
+		char _example_path_sdl[256];																				\
+		char _example_path_rde[256];																				\
+		char _example_path_glad[256];																				\
+		memset(_example_path_sdl, 0, 256);																			\
+		memset(_example_path_rde, 0, 256);																			\
+		memset(_example_path_glad, 0, 256);																			\
+		strcat(_example_path_sdl, this_file_full_path);																\
+		strcat(_example_path_glad, this_file_full_path);															\
+		strcat(_example_path_rde, this_file_full_path);																\
+		                                                                                                            \
+        if(strcmp(lib_type, "shared") == 0) {                                                                     	\
+		    if(strcmp(build_type, "debug") == 0) {																	\
+			    strcat(_rde_lib_path, "build/linux/debug/engine/libRDE.so");       									\
+			    strcat(_example_path_rde, "build/linux/debug/examples/libRDE.so");									\
+		    } else {																								\
+			    strcat(_rde_lib_path, "build/linux/release/engine/libRDE.so");										\
+			    strcat(_example_path_rde, "build/linux/release/examples/libRDE.so");								\
+		    }																										\
+        																											\
+        	char _assets_path[1024];																				\
+			memset(_assets_path, 0, 1024);																			\
+			snprintf(_assets_path, 1024, "%s%s", this_file_full_path, "examples/hub_assets");						\
+			char _examples_assets_path[1024];																		\
+			memset(_examples_assets_path, 0, 1024);																	\
+			snprintf(_examples_assets_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 					\
+				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/hub_assets");					\
+			copy_file_if_exists(_rde_lib_path, _example_path_rde); 													\
+			copy_folder_if_exists(_assets_path, _examples_assets_path);												\
+        }																											\
+	} while(0);
+   
 
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
 		printf("\n");
@@ -2268,6 +2387,12 @@ bool compile_linux() {
 		printf("--- BUILDING TOOLS --- \n");
 		BUILD_TOOLS()
 	}
+
+    if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
+        printf("\n");
+        printf("--- BUILDING EXAMPLES --- \n");
+        BUILD_EXAMPLES();
+    }
 
 	#undef BUILD_ENGINE
 	#undef BUILD_TOOLS
