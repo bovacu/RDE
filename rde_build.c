@@ -1420,6 +1420,14 @@ bool compile_windows() {
 		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\glad.dll");				\
 		copy_file_if_exists(_path, _example_path_glad);																\
 		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
+		char _assets_path[1024];																					\
+		memset(_assets_path, 0, 1024);																				\
+		snprintf(_assets_path, 1024, "%s%s", this_file_full_path, "examples\\hub_assets");							\
+		char _examples_assets_path[1024];																			\
+		memset(_examples_assets_path, 0, 1024);																		\
+		snprintf(_examples_assets_path, 1024, "%s%s%s%s", this_file_full_path, "build\\windows\\", 					\
+				(strcmp(build_type, "debug") == 0 ? "debug\\" : "release\\"), "examples\\hub_assets");				\
+		copy_folder_if_exists(_assets_path, _examples_assets_path);													\
 	} while(0);
 
 #define BUILD_TESTS()																								\
