@@ -1722,7 +1722,8 @@ bool compile_osx() {
 			arrput(_build_command, "-lpthread");															\
 			arrput(_build_command, "-lSDL2main_rde");														\
 			arrput(_build_command, "-lSDL2_rde");															\
-			arrput(_build_command, "-lglad_rde");															\
+			arrput(_build_command, "-framework");															\
+			arrput(_build_command, "OpenGL");																\
 			arrput(_build_command, "-lcglm_rde");															\
 		}																									\
 		arrput(_build_command, "-Werror");																	\
@@ -2022,23 +2023,30 @@ bool compile_osx() {
 		memset(_rde_lib_path, 0, 256);																				\
 		strcat(_rde_lib_path, this_file_full_path);																	\
 		char _example_path_sdl[256];																				\
+		char _original_path_sdl[256];																				\
 		char _example_path_rde[256];																				\
 		char _example_path_glad[256];																				\
 		memset(_example_path_sdl, 0, 256);																			\
+		memset(_original_path_sdl, 0, 256);																			\
 		memset(_example_path_rde, 0, 256);																			\
 		memset(_example_path_glad, 0, 256);																			\
 		strcat(_example_path_sdl, this_file_full_path);																\
+		strcat(_original_path_sdl, this_file_full_path);															\
 		strcat(_example_path_glad, this_file_full_path);															\
 		strcat(_example_path_rde, this_file_full_path); 															\
+		strcat(_original_path_sdl, "external/libs/osx_x86_64/libSDL2_rde.dylib"); 									\
 																													\
 		if (strcmp(lib_type, "shared") == 0) { 																		\
 			if (strcmp(build_type, "debug") == 0) { 																\
 				strcat(_rde_lib_path, "build/osx/debug/engine/libRDE.dylib");										\
 				strcat(_example_path_rde, "build/osx/debug/examples/libRDE.dylib"); 								\
+				strcat(_example_path_sdl, "build/osx/debug/examples/libSDL2_rde.dylib"); 							\
 			} else { 																								\
 				strcat(_rde_lib_path, "build/osx/release/engine/libRDE.dylib"); 									\
 				strcat(_example_path_rde, "build/osx/release/examples/libRDE.dylib"); 								\
+				strcat(_example_path_sdl, "build/osx/release/examples/libSDL2_rde.dylib"); 							\
 			}																										\
+			copy_file_if_exists(_original_path_sdl, _example_path_sdl); 											\
 		}																											\
 		char _assets_path[1024];																					\
 		memset(_assets_path, 0, 1024);																				\
