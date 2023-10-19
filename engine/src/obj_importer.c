@@ -256,7 +256,7 @@ rde_material load_obj_material(const char* _obj_path) {
 			}
 			strcat(_full_path, _ptr);
 
-			_material.texture = rde_rendering_load_texture(_full_path);
+			_material.texture = rde_rendering_texture_load(_full_path);
 		} else if(strncmp(_buffer, "Ka", strlen("Ka")) == 0) {
 			char* _ptr = strtok(_buffer, " ");
 			_ptr = strtok(NULL, " "); // remove 'Ka'

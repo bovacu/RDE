@@ -130,7 +130,7 @@ void rde_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _t
 	rde_rendering_try_create_batch_2d(_shader, _texture);
 }
 
-void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
+void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window) {
 	rde_critical_error(_camera == NULL || _window == NULL, RDE_ERROR_BEGIN_RENDER);
 	current_drawing_camera = _camera;
 	current_drawing_window = _window;
@@ -152,29 +152,29 @@ void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window) {
 	}
 }
 
-void rde_rendering_draw_point_2d(rde_vec_2F _position, rde_color _color, rde_shader* _shader) {
+void rde_rendering_2d_draw_point(rde_vec_2F _position, rde_color _color, rde_shader* _shader) {
 	UNUSED(_position);
 	UNUSED(_color);
 	UNUSED(_shader);
-	UNIMPLEMENTED("rde_rendering_draw_point_2d")
+	UNIMPLEMENTED("rde_rendering_2d_draw_point")
 }
 
-void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader) {
+void rde_rendering_3d_draw_point(rde_vec_3F _position, rde_color _color, rde_shader* _shader) {
 	UNUSED(_position);
 	UNUSED(_color);
 	UNUSED(_shader);
-	UNIMPLEMENTED("rde_rendering_draw_point_3d")
+	UNIMPLEMENTED("rde_rendering_3d_draw_point")
 }
 
-void rde_rendering_draw_line_2d(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader) {
+void rde_rendering_2d_draw_line(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader) {
 	UNUSED(_init);
 	UNUSED(_end);
 	UNUSED(_color);
 	UNUSED(_shader);
-	UNIMPLEMENTED("rde_rendering_draw_line_2d")
+	UNIMPLEMENTED("rde_rendering_2d_draw_line")
 }
 
-void rde_rendering_draw_triangle_2d(rde_vec_2F _vertex_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader) {
+void rde_rendering_2d_draw_triangle(rde_vec_2F _vertex_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader) {
 	const size_t _triangle_vertex_count = 3;
 	
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.color_shader_2d : _shader;
@@ -212,7 +212,7 @@ void rde_rendering_draw_triangle_2d(rde_vec_2F _vertex_a, rde_vec_2F _vertex_b, 
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_2;
 }
 
-void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader) {
+void rde_rendering_2d_draw_rectangle(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader) {
 	const size_t _triangle_vertex_count = 6;
 	
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.color_shader_2d : _shader;
@@ -278,24 +278,24 @@ void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_ri
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
 
-void rde_rendering_draw_circle_2d(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader) {
+void rde_rendering_2d_draw_circle(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader) {
 	UNUSED(_position);
 	UNUSED(_radius);
 	UNUSED(_color);
 	UNUSED(_shader);
-	UNIMPLEMENTED("rde_rendering_draw_circle_2d")
+	UNIMPLEMENTED("rde_rendering_2d_draw_circle")
 }
 
-void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader) {
+void rde_rendering_2d_draw_polygon(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader) {
 	UNUSED(_transform)
 	UNUSED(_polygon)
 	UNUSED(_color)
 	UNUSED(_color)
 	UNUSED(_shader)
-	UNIMPLEMENTED("rde_rendering_draw_polygon_2d")
+	UNIMPLEMENTED("rde_rendering_2d_draw_polygon")
 }
 
-void rde_rendering_draw_texture_2d(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
+void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
 	const size_t _triangle_vertex_count = 6;
 
 	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
@@ -388,13 +388,13 @@ void rde_rendering_draw_texture_2d(const rde_transform* _transform, const rde_te
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
 
-void rde_rendering_draw_memory_texture_2d(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
+void rde_rendering_2d_draw_memory_texture(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
 	rde_log_level(RDE_LOG_LEVEL_WARNING, "%s", "THIS FUNCTION IS CORRPUTING 3D MESHES TEXTURE. To reproduce just draw a memory texture and then a 3d mesh");
 	rde_rendering_memory_texture_gpu_upload(_texture);
-	rde_rendering_draw_texture_2d(_transform, _texture, _tint_color, _shader);
+	rde_rendering_2d_draw_texture(_transform, _texture, _tint_color, _shader);
 }
 
-void rde_rendering_draw_text_2d(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader) {
+void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader) {
 	int _text_size = strlen(_text);
 
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.text_shader_2d : _shader;
@@ -504,7 +504,7 @@ void rde_rendering_draw_text_2d(const rde_transform* _transform, const rde_font*
 	}
 }
 
-void rde_rendering_end_drawing_2d() {
+void rde_rendering_2d_end_drawing() {
 	rde_rendering_flush_batch_2d();
 	rde_rendering_reset_batch_2d();
 	current_drawing_camera = NULL;

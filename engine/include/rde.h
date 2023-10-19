@@ -1361,15 +1361,38 @@ rde_transform rde_struct_create_transform() {
 
 #ifdef RDE_RENDERING_MODULE
 typedef struct rde_shader rde_shader;
+typedef struct {
+	unsigned int vertex_program_id;
+	unsigned int fragment_program_id;
+	int compiled_program_id;
+} rde_shader_data;
+
 typedef struct rde_render_texture rde_render_texture;
+
 typedef struct rde_texture rde_texture;
+typedef struct {
+	int opengl_texture_id;
+	rde_vec_2UI size;
+	rde_vec_2UI position;
+	int channels;
+	const char* file_path;
+	int atlas_texture_id;
+} rde_texture_data;
+
 typedef struct rde_atlas rde_atlas;
+typedef struct {
+	int opengl_texture_id;
+	int amount_of_subtextures;
+} rde_atlas_data;
+
 typedef struct rde_font rde_font;
-typedef struct rde_directional_light rde_directional_light;
+typedef struct {
+	int opengl_texture_id;
+	int amount_of_chars;
+} rde_font_data;
+
 typedef struct rde_point_light rde_point_light;
 typedef struct rde_spot_light rde_spot_light;
-typedef struct rde_mesh rde_mesh;
-typedef struct rde_model rde_model;
 
 typedef struct {
 	float shininess;
@@ -1384,6 +1407,44 @@ rde_material_light_data rde_struct_create_material_light_data() {
 	_m.kd = 1.0f;
 	_m.ks = 1.0f;
 	return _m;
+}
+
+typedef struct rde_material rde_material;
+typedef struct {
+	int opengl_texture_id;
+	rde_material_light_data material_light;
+} rde_material_data;
+
+typedef struct rde_mesh rde_mesh;
+typedef struct {
+	int amount_of_vertices;
+	int vertex_buffer_objects[4];	// 0 -> positions (static), 
+									// 1 -> colors (static), 
+									// 2 -> normals (static), 
+									// 3 -> texture coords (static)
+									// 4 -> transforms to render (dynamic)
+	unsigned int ibo;
+	int amount_of_materials;
+} rde_mesh_data;
+
+typedef struct rde_model rde_model;
+typedef struct {
+	int amount_of_meshes;
+} rde_model_data;
+
+typedef struct {
+	rde_vec_3F direction;
+	rde_vec_3F ambient_color;
+	rde_vec_3F diffuse_color;
+	rde_vec_3F specular_color;
+} rde_directional_light;
+rde_directional_light rde_struct_create_directional_light() {
+	rde_directional_light _d;
+	_d.direction = (rde_vec_3F) { -0.2f, -1.0f, -0.3f };
+	_d.ambient_color = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
+	_d.diffuse_color = (rde_vec_3F) { 0.5f, 0.5f, 0.5f };
+	_d.specular_color = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+	return _d;
 }
 
 struct rde_material_map {
@@ -1705,51 +1766,52 @@ RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _even
 /// ============================ RENDERING ==================================
 
 #ifdef RDE_RENDERING_MODULE
-RDE_FUNC rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code);
-RDE_FUNC void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose);
-RDE_FUNC void rde_rendering_set_shader_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_IV_ _type, int* _data);
-RDE_FUNC void rde_rendering_set_shader_uniform_value_uint(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_UIV_ _type, uint* _data);
-RDE_FUNC void rde_rendering_unload_shader(rde_shader* _shader);
+RDE_FUNC rde_shader* rde_rendering_shader_load(const char* _vertex_code, const char* _fragment_code);
+RDE_FUNC void rde_rendering_shader_set_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose);
+RDE_FUNC void rde_rendering_shader_set_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_IV_ _type, int* _data);
+RDE_FUNC void rde_rendering_shader_set_uniform_value_uint(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_UIV_ _type, uint* _data);
+RDE_FUNC rde_shader_data rde_rendering_shader_get_data(rde_shader* _shader);
+RDE_FUNC void rde_rendering_shader_unload(rde_shader* _shader);
 
-RDE_FUNC rde_texture* rde_rendering_load_texture(const char* _file_path);
-RDE_FUNC rde_texture* rde_rendering_load_text_texture(const char* _file_path);
-RDE_FUNC void rde_rendering_unload_texture(rde_texture* _texture);
+RDE_FUNC rde_texture* rde_rendering_texture_load(const char* _file_path);
+RDE_FUNC rde_texture* rde_rendering_texture_text_load(const char* _file_path);
+RDE_FUNC void rde_rendering_texture_unload(rde_texture* _texture);
 
-RDE_FUNC rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _config_path);
-RDE_FUNC rde_texture* rde_rendering_get_atlas_sub_texture(rde_atlas* _atlas, const char* _texture_name);
-RDE_FUNC void rde_rendering_unload_atlas(rde_atlas* _atlas);
+RDE_FUNC rde_atlas* rde_rendering_atlas_load(const char* _texture_path, const char* _config_path);
+RDE_FUNC rde_texture* rde_rendering_atlas_get_subtexture(rde_atlas* _atlas, const char* _texture_name);
+RDE_FUNC void rde_rendering_atlas_unload(rde_atlas* _atlas);
 
-RDE_FUNC rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, int _channels);
+RDE_FUNC rde_texture* rde_rendering_memory_texture_create(size_t _width, size_t _height, int _channels);
 RDE_FUNC void rde_rendering_memory_texture_set_pixel(rde_texture* _memory_texture, rde_vec_2I _position, rde_color _color);
 RDE_FUNC rde_color rde_rendering_memory_texture_get_pixel(rde_texture* _memory_texture, rde_vec_2I _position);
 RDE_FUNC void rde_rendering_memory_texture_gpu_upload(rde_texture* _memory_texture);
 RDE_FUNC unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_texture);
-RDE_FUNC void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture);
+RDE_FUNC void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture);
 
-RDE_FUNC rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path);
-RDE_FUNC void rde_rendering_unload_font(rde_font* _font);
+RDE_FUNC rde_font* rde_rendering_font_load(const char* _font_path, const char* _font_config_path);
+RDE_FUNC void rde_rendering_font_unload(rde_font* _font);
 
 RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 
-RDE_FUNC void rde_rendering_begin_drawing_2d(rde_camera* _camera, rde_window* _window);
-RDE_FUNC void rde_rendering_draw_point_2d(rde_vec_2F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_line_2d(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_triangle_2d(rde_vec_2F _verte_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader); /// Draws a batched triangle in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_rectangle_2d(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader); /// Draws a batched rectangle in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_circle_2d(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader); /// Draws a batched circle in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_polygon_2d(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader);  /// Draws a batched polygon in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_texture_2d(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_memory_texture_2d(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_text_2d(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader); /// Draws a batched group of quads representing the _text in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_end_drawing_2d();
+RDE_FUNC void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window);
+RDE_FUNC void rde_rendering_2d_draw_point(rde_vec_2F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_2d_draw_line(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_2d_draw_triangle(rde_vec_2F _verte_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader); /// Draws a batched triangle in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_2d_draw_rectangle(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader); /// Draws a batched rectangle in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_2d_draw_circle(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader); /// Draws a batched circle in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_2d_draw_polygon(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader);  /// Draws a batched polygon in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_2d_draw_memory_texture(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader); /// Draws a batched group of quads representing the _text in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_2d_end_drawing();
 
-RDE_FUNC rde_mesh* rde_struct_create_memory_mesh(size_t _vertex_count, size_t _indices_count); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
+RDE_FUNC rde_mesh* rde_struct_memory_mesh_create(size_t _vertex_count, size_t _indices_count); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
 RDE_FUNC void rde_rendering_mesh_set_vertex_positions(rde_mesh* _mesh, float* _positions, bool _free_positions_on_destroy); // sets the position of the vertices, each position must have 3 floats (x, y, z) and uploads to GPU
 RDE_FUNC void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _indices, bool _free_indices_on_destroy); // sets the indices of the mesh, a quad should have 6 indices and uploads to GPU
 RDE_FUNC void rde_rendering_mesh_set_vertex_colors(rde_mesh* _mesh, unsigned int* _colors, bool _free_colors_on_destroy); // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example) and uploads to GPU
 RDE_FUNC void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, bool _free_normals_on_destroy); // sets the normals of the vertices, each position must have 3 floats (x, y, z) and uploads to GPU
 RDE_FUNC void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, unsigned int _texture_coords_size, float* _texture_coords, rde_texture* _texture, bool _free_texture_coords_on_destroy); // sets the data to draw a mesh with a texture. each text_coord has 2 floats (x, y) and neither text_coords nor texture can be NULL // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example)
-RDE_FUNC void rde_rendering_destroy_mesh(rde_mesh* _mesh);
+RDE_FUNC void rde_rendering_mesh_destroy(rde_mesh* _mesh);
 
 #ifdef RDE_FBX_MODULE
 RDE_FUNC rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const char* _texture_path);
@@ -1760,19 +1822,19 @@ RDE_FUNC rde_model* rde_rendering_load_obj_model(const char* _obj_path);
 #endif
 
 #if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)
-RDE_FUNC size_t rde_rendering_get_mesh_vertices_count(rde_mesh* _mesh);
-RDE_FUNC size_t rde_rendering_get_model_vertices_count(rde_model* _model);
+RDE_FUNC size_t rde_rendering_mesh_get_vertices_count(rde_mesh* _mesh);
+RDE_FUNC size_t rde_rendering_model_get_vertices_count(rde_model* _model);
 RDE_FUNC void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data);
 RDE_FUNC rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model);
-RDE_FUNC void rde_rendering_unload_model(rde_model* _model);
+RDE_FUNC void rde_rendering_model_unload(rde_model* _model);
 #endif
 
-RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window, bool _draw_wireframe_over_mesh);
-RDE_FUNC void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 3D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, unsigned short _thickness, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader);
-RDE_FUNC void rde_rendering_draw_model_3d(const rde_transform* _transform, rde_model* _model, rde_shader* _shader);
-RDE_FUNC void rde_rendering_end_drawing_3d();
+RDE_FUNC void rde_rendering_3d_begin_drawing(rde_camera* _camera, rde_window* _window, bool _draw_wireframe_over_mesh);
+RDE_FUNC void rde_rendering_3d_draw_point(rde_vec_3F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 3D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_3d_draw_line(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, unsigned short _thickness, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader);
+RDE_FUNC void rde_rendering_3d_draw_model(const rde_transform* _transform, rde_model* _model, rde_shader* _shader);
+RDE_FUNC void rde_rendering_3d_end_drawing();
 
 RDE_FUNC void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_ambient_color(rde_color _ambient_color);
@@ -1781,6 +1843,7 @@ RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color(rde_col
 RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_vec_3F _diffuse_color);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color);
+RDE_FUNC rde_directional_light rde_rendering_lighting_get_directional_light();
 
 #endif
 

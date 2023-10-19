@@ -384,10 +384,10 @@ rde_batch_3d rde_struct_create_batch_3d() {
 	return _b;
 }
 
-typedef struct {
+struct rde_material {
 	rde_texture* texture;
 	rde_material_light_data material_light_data;
-} rde_material;
+};
 rde_material rde_struct_create_material() {
 	rde_material _m;
 	_m.texture = NULL;
@@ -437,21 +437,6 @@ rde_model rde_struct_create_model() {
 	_m.mesh_array = NULL;
 	_m.mesh_array_size = 0;
 	return _m;
-}
-
-struct rde_directional_light {
-	rde_vec_3F direction;
-	rde_vec_3F ambient_color;
-	rde_vec_3F diffuse_color;
-	rde_vec_3F specular_color;
-};
-rde_directional_light rde_struct_create_directional_light() {
-	rde_directional_light _d;
-	_d.direction = (rde_vec_3F) { -0.2f, -1.0f, -0.3f };
-	_d.ambient_color = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
-	_d.diffuse_color = (rde_vec_3F) { 0.5f, 0.5f, 0.5f };
-	_d.specular_color = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
-	return _d;
 }
 
 #endif
@@ -956,7 +941,7 @@ void rde_engine_destroy_engine() {
 			continue;
 		}
 
-		rde_rendering_unload_atlas(&ENGINE.atlases[_i]);
+		rde_rendering_atlas_unload(&ENGINE.atlases[_i]);
 	}
 	free(ENGINE.atlases);
 
@@ -965,7 +950,7 @@ void rde_engine_destroy_engine() {
 			continue;
 		}
 
-		rde_rendering_unload_font(&ENGINE.fonts[_i]);
+		rde_rendering_font_unload(&ENGINE.fonts[_i]);
 	}
 	free(ENGINE.fonts);
 
@@ -975,9 +960,9 @@ void rde_engine_destroy_engine() {
 		}
 
 		if(ENGINE.textures[_i].pixels != NULL) {
-			rde_rendering_destroy_memory_texture(&ENGINE.textures[_i]);
+			rde_rendering_memory_texture_destroy(&ENGINE.textures[_i]);
 		} else {
-			rde_rendering_unload_texture(&ENGINE.textures[_i]);
+			rde_rendering_texture_unload(&ENGINE.textures[_i]);
 		}
 	}
 	free(ENGINE.textures);
@@ -987,7 +972,7 @@ void rde_engine_destroy_engine() {
 			continue;
 		}
 
-		rde_rendering_unload_model(&ENGINE.models[_i]);
+		rde_rendering_model_unload(&ENGINE.models[_i]);
 	}
 	free(ENGINE.models);
 #endif
@@ -997,7 +982,7 @@ void rde_engine_destroy_engine() {
 			continue;
 		}
 
-		rde_rendering_unload_shader(&ENGINE.shaders[_i]);
+		rde_rendering_shader_unload(&ENGINE.shaders[_i]);
 	}
 	free(ENGINE.shaders);
 

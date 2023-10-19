@@ -54,7 +54,7 @@ void rde_destroy_line_batch_buffers() {
 }
 
 void rde_rendering_init_3d() {
-	DEFAULT_TEXTURE = rde_rendering_create_memory_texture(RDE_DEFAULT_TEXTURE_SIZE, RDE_DEFAULT_TEXTURE_SIZE, RDE_DEFAULT_TEXTURE_CHANNELS);
+	DEFAULT_TEXTURE = rde_rendering_memory_texture_create(RDE_DEFAULT_TEXTURE_SIZE, RDE_DEFAULT_TEXTURE_SIZE, RDE_DEFAULT_TEXTURE_CHANNELS);
 	
 	for(int _y = 0; _y < RDE_DEFAULT_TEXTURE_SIZE; _y++) {
 		for(int _x = 0; _x < RDE_DEFAULT_TEXTURE_SIZE; _x++) {
@@ -71,7 +71,7 @@ void rde_rendering_init_3d() {
 }
 
 void rde_rendering_end_3d() {
-	rde_rendering_destroy_memory_texture(DEFAULT_TEXTURE);
+	rde_rendering_memory_texture_destroy(DEFAULT_TEXTURE);
 	rde_destroy_line_batch_buffers();
 }
 
@@ -207,7 +207,7 @@ rde_mesh rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count) {
 	return _mesh;
 }
 
-rde_mesh* rde_struct_create_memory_mesh(size_t _vertex_count, size_t _index_count) {
+rde_mesh* rde_struct_memory_mesh_create(size_t _vertex_count, size_t _index_count) {
 	rde_critical_error(_vertex_count <= 3 || _index_count <= 3, RDE_ERROR_BAD_MESH_DATA, _vertex_count, _index_count);
 
 	rde_mesh* _mesh = (rde_mesh*)malloc(sizeof(rde_mesh));
@@ -400,7 +400,7 @@ bool rde_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 	return true;
 }
 
-void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
+void rde_rendering_mesh_destroy(rde_mesh* _mesh) {
 	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
 
 	if(_mesh->vbo[0] != RDE_UINT_MAX) {
@@ -458,7 +458,7 @@ void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
 	}
 
 	if(_mesh->texture != NULL && _mesh->texture != DEFAULT_TEXTURE) {
-		rde_rendering_unload_texture(_mesh->texture);
+		rde_rendering_texture_unload(_mesh->texture);
 		_mesh->texture = NULL;
 	}
 
@@ -473,7 +473,7 @@ void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
 }
 
 
-void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window, bool _draw_wireframe_over_mesh) {
+void rde_rendering_3d_begin_drawing(rde_camera* _camera, rde_window* _window, bool _draw_wireframe_over_mesh) {
 	rde_critical_error(_camera == NULL || _window == NULL, RDE_ERROR_BEGIN_RENDER);
 
 	glEnable(GL_DEPTH_TEST);
@@ -493,7 +493,7 @@ void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window, bo
 	current_batch_3d.draw_mesh_wireframe = _draw_wireframe_over_mesh;
 }
 
-void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, unsigned short _thickness, rde_shader* _shader) {
+void rde_rendering_3d_draw_line(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, unsigned short _thickness, rde_shader* _shader) {
 	const size_t _line_vertex_count = 2;
 
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.line_shader : _shader;
@@ -660,7 +660,7 @@ void rde_rendering_flush_batch_3d() {
 	glDrawElementsInstanced(GL_TRIANGLES, _mesh->index_count, GL_UNSIGNED_INT, 0, current_batch_3d.amount_of_models_per_draw);
 }
 
-void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader) {
+void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader) {
 	const size_t _floats_per_matrix = 1;
 	
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.mesh_shader : _shader;
@@ -675,10 +675,10 @@ void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh
 	current_batch_3d.amount_of_models_per_draw++;
 }
 
-void rde_rendering_draw_model_3d(const rde_transform* _transform, rde_model* _model, rde_shader* _shader) {
+void rde_rendering_3d_draw_model(const rde_transform* _transform, rde_model* _model, rde_shader* _shader) {
 	for(uint _i = 0; _i < _model->mesh_array_size; _i++) {
 		rde_mesh* _mesh = &_model->mesh_array[_i];
-		rde_rendering_draw_mesh_3d(_transform, _mesh, _shader);
+		rde_rendering_3d_draw_mesh(_transform, _mesh, _shader);
 	}
 }
 
@@ -714,7 +714,7 @@ void rde_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh, size
 	rde_rendering_try_create_batch_3d(_shader, _mesh);
 }
 
-void rde_rendering_end_drawing_3d() {
+void rde_rendering_3d_end_drawing() {
 	
 	if(current_batch_3d.draw_mesh_wireframe) {
 		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -770,15 +770,19 @@ void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _s
 	ENGINE.directional_light.specular_color = _specular_color;
 }
 
-size_t rde_rendering_get_mesh_vertices_count(rde_mesh* _mesh) {
+rde_directional_light rde_rendering_lighting_get_directional_light() {
+	return ENGINE.directional_light;
+}
+
+size_t rde_rendering_mesh_get_vertices_count(rde_mesh* _mesh) {
 	return _mesh->vertex_count;
 }
 
-size_t rde_rendering_get_model_vertices_count(rde_model* _model) {
+size_t rde_rendering_model_get_vertices_count(rde_model* _model) {
 	size_t _total_vertices = 0;
 	
 	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
-		_total_vertices += rde_rendering_get_mesh_vertices_count(&_model->mesh_array[_i]);
+		_total_vertices += rde_rendering_mesh_get_vertices_count(&_model->mesh_array[_i]);
 	}
 
 	return _total_vertices;
@@ -797,12 +801,12 @@ rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model) {
 
 
 
-void rde_rendering_unload_model(rde_model* _model) {
+void rde_rendering_model_unload(rde_model* _model) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "obj model");
 
 	for(size_t _c = 0; _c < stbds_arrlenu(_model->mesh_array); _c++) {
 		rde_mesh* _mesh = &_model->mesh_array[_c];
-		rde_rendering_destroy_mesh(_mesh);
+		rde_rendering_mesh_destroy(_mesh);
 	}
 
 	stbds_arrfree(_model->mesh_array);

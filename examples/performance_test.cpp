@@ -129,20 +129,20 @@ void performance_test_3d_on_late_update(float _dt) {
 void performance_test_3d_draw_3d(rde_window* _window, float _dt) {
 	UNUSED(_dt)
 	if(performance_test_3d_model != NULL) {
-		rde_rendering_begin_drawing_3d(&performance_test_3d_camera, _window, false);
+		rde_rendering_3d_begin_drawing(&performance_test_3d_camera, _window, false);
 		
 		for(int _i = 0; _i < performance_test_3d_amount_to_show; _i++) {
-			rde_rendering_draw_model_3d(&performance_test_3d_transforms[_i], performance_test_3d_model, NULL);
+			rde_rendering_3d_draw_model(&performance_test_3d_transforms[_i], performance_test_3d_model, NULL);
 		}
 
-		rde_rendering_end_drawing_3d();
+		rde_rendering_3d_end_drawing();
 	}
 }
 
 void performance_test_3d_draw_imgui() {
 	ImGui::Begin("Performance Control", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::DragInt("Amount To Render", &performance_test_3d_amount_to_show, 1, 0, performance_test_3d_MAX_3D);
-	unsigned int _total_vertices = rde_rendering_get_model_vertices_count(performance_test_3d_model);
+	unsigned int _total_vertices = rde_rendering_model_get_vertices_count(performance_test_3d_model);
 	ImGui::Text("Total Vertices: %u", _total_vertices * performance_test_3d_amount_to_show);
 	ImGui::Text("Total Triangles: %u", (_total_vertices / 3) * performance_test_3d_amount_to_show);
 	ImGui::End();
@@ -156,7 +156,7 @@ void performance_test_3d_on_render(float _dt, rde_window* _window) {
 
 void performance_test_3d_unload() {
 	if(performance_test_3d_model != NULL) {
-		rde_rendering_unload_model(performance_test_3d_model);
+		rde_rendering_model_unload(performance_test_3d_model);
 	}
 
 	performance_test_3d_model = NULL;

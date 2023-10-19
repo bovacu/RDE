@@ -50,17 +50,17 @@ void rde_rendering_set_rendering_configuration() {
 #endif
 
 #if !IS_MOBILE() && !IS_WASM()
-	ENGINE.line_shader = rde_rendering_load_shader(RDE_LINE_VERTEX_SHADER, RDE_LINE_FRAGMENT_SHADER);
-	ENGINE.color_shader_2d = rde_rendering_load_shader(RDE_COLOR_VERTEX_SHADER_2D, RDE_COLOR_FRAGMENT_SHADER_2D);
-	ENGINE.texture_shader_2d = rde_rendering_load_shader(RDE_TEXTURE_VERTEX_SHADER_2D, RDE_TEXTURE_FRAGMENT_SHADER_2D);
-	ENGINE.text_shader_2d = rde_rendering_load_shader(RDE_TEXT_VERTEX_SHADER_2D, RDE_TEXT_FRAGMENT_SHADER_2D);
-	ENGINE.frame_buffer_shader = rde_rendering_load_shader(RDE_FRAME_BUFFER_VERTEX_SHADER, RDE_FRAME_BUFFER_FRAGMENT_SHADER);
-	ENGINE.mesh_shader = rde_rendering_load_shader(RDE_MESH_VERTEX_SHADER, RDE_MESH_FRAGMENT_SHADER);
+	ENGINE.line_shader = rde_rendering_shader_load(RDE_LINE_VERTEX_SHADER, RDE_LINE_FRAGMENT_SHADER);
+	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_COLOR_VERTEX_SHADER_2D, RDE_COLOR_FRAGMENT_SHADER_2D);
+	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_TEXTURE_VERTEX_SHADER_2D, RDE_TEXTURE_FRAGMENT_SHADER_2D);
+	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_TEXT_VERTEX_SHADER_2D, RDE_TEXT_FRAGMENT_SHADER_2D);
+	ENGINE.frame_buffer_shader = rde_rendering_shader_load(RDE_FRAME_BUFFER_VERTEX_SHADER, RDE_FRAME_BUFFER_FRAGMENT_SHADER);
+	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_MESH_VERTEX_SHADER, RDE_MESH_FRAGMENT_SHADER);
 #else
-	ENGINE.color_shader_2d = rde_rendering_load_shader(RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
-	ENGINE.texture_shader_2d = rde_rendering_load_shader(RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
-	ENGINE.text_shader_2d = rde_rendering_load_shader(RDE_TEXT_VERTEX_SHADER_2D_ES, RDE_TEXT_FRAGMENT_SHADER_2D_ES);
-	ENGINE.frame_buffer_shader = rde_rendering_load_shader(RDE_FRAME_BUFFER_VERTEX_SHADER_ES, RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES);
+	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
+	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
+	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_TEXT_VERTEX_SHADER_2D_ES, RDE_TEXT_FRAGMENT_SHADER_2D_ES);
+	ENGINE.frame_buffer_shader = rde_rendering_shader_load(RDE_FRAME_BUFFER_VERTEX_SHADER_ES, RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES);
 #endif
 	
 }
@@ -76,7 +76,7 @@ void rde_rendering_set_rendering_configuration() {
 
 	// ======================= API ===========================
 
-rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fragment_code) {
+rde_shader* rde_rendering_shader_load(const char* _vertex_code, const char* _fragment_code) {
 	bool _error = false;
 
 	GLuint _vertex_program_id = glCreateShader(GL_VERTEX_SHADER);
@@ -137,7 +137,7 @@ rde_shader* rde_rendering_load_shader(const char* _vertex_code, const char* _fra
 	return NULL;
 }
 
-void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose) {
+void rde_rendering_shader_set_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose) {
 	GLint _location = glGetUniformLocation((GLuint)_shader->compiled_program_id, _uniform_name);
 	if(_location >= 0) {
 		switch(_type) {
@@ -167,7 +167,7 @@ void rde_rendering_set_shader_uniform_value_float(rde_shader* _shader, const cha
 	}
 }
 
-void rde_rendering_set_shader_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_IV_ _type, int* _data) {
+void rde_rendering_shader_set_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_IV_ _type, int* _data) {
 	GLint _location = glGetUniformLocation((GLuint)_shader->compiled_program_id, _uniform_name);
 	if(_location >= 0) {
 		switch(_type) {
@@ -181,7 +181,7 @@ void rde_rendering_set_shader_uniform_value_int(rde_shader* _shader, const char*
 	}
 }
 
-void rde_rendering_set_shader_uniform_value_uint(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_UIV_ _type, uint* _data) {
+void rde_rendering_shader_set_uniform_value_uint(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_UIV_ _type, uint* _data) {
 	GLint _location = glGetUniformLocation((GLuint)_shader->compiled_program_id, _uniform_name);
 	if(_location >= 0) {
 		switch(_type) {
@@ -195,7 +195,16 @@ void rde_rendering_set_shader_uniform_value_uint(rde_shader* _shader, const char
 	}
 }
 
-void rde_rendering_unload_shader(rde_shader* _shader) {
+rde_shader_data rde_rendering_shader_get_data(rde_shader* _shader) {
+	rde_critical_error(_shader == NULL, RDE_ERROR_NO_NULL_ALLOWED, "shader");
+	return (rde_shader_data) {
+		.vertex_program_id = _shader->vertex_program_id,
+		.fragment_program_id = _shader->fragment_program_id,
+		.compiled_program_id = _shader->compiled_program_id
+	};
+}
+
+void rde_rendering_shader_unload(rde_shader* _shader) {
 	rde_critical_error(_shader == NULL, RDE_ERROR_NO_NULL_ALLOWED, "shader");
 
 	glDeleteShader(_shader->vertex_program_id);
@@ -205,7 +214,7 @@ void rde_rendering_unload_shader(rde_shader* _shader) {
 	_shader->compiled_program_id = -1;
 }
 
-rde_texture* rde_rendering_load_texture(const char* _file_path) {
+rde_texture* rde_rendering_texture_load(const char* _file_path) {
 	rde_texture* _texture = NULL;
 
 	for(size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
@@ -290,7 +299,7 @@ rde_texture* rde_rendering_load_texture(const char* _file_path) {
 	return _texture;
 }
 
-rde_texture* rde_rendering_load_text_texture(const char* _file_path) {
+rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 	rde_texture* _texture = NULL;
 
 	for(size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
@@ -365,7 +374,7 @@ rde_texture* rde_rendering_load_text_texture(const char* _file_path) {
 	return _texture;
 }
 
-rde_texture* rde_rendering_create_memory_texture(size_t _width, size_t _height, int _channels) {
+rde_texture* rde_rendering_memory_texture_create(size_t _width, size_t _height, int _channels) {
 	rde_texture* _texture = (rde_texture*)malloc(sizeof(rde_texture));
 	rde_struct_init_alloc_ptr_texture(_texture);
 
@@ -453,7 +462,7 @@ unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_text
 	return _memory_texture->pixels;
 }
 
-void rde_rendering_unload_texture(rde_texture* _texture) {
+void rde_rendering_texture_unload(rde_texture* _texture) {
 	rde_critical_error(_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "texture");
 	GLuint _id = (GLuint)_texture->opengl_texture_id;
 
@@ -471,8 +480,8 @@ void rde_rendering_unload_texture(rde_texture* _texture) {
 }
 
 #ifdef RDE_RENDERING_MODULE
-rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _config_path) {
-	rde_texture* _texture = rde_rendering_load_texture(_texture_path);
+rde_atlas* rde_rendering_atlas_load(const char* _texture_path, const char* _config_path) {
+	rde_texture* _texture = rde_rendering_texture_load(_texture_path);
 	rde_atlas_sub_textures* _atlas_sub_textures = rde_file_system_read_atlas_config(_config_path, _texture);
 
 	for(size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
@@ -490,7 +499,7 @@ rde_atlas* rde_rendering_load_atlas(const char* _texture_path, const char* _conf
 	return NULL;
 }
 
-rde_texture* rde_rendering_get_atlas_sub_texture(rde_atlas* _atlas, const char* _texture_name) {
+rde_texture* rde_rendering_atlas_get_subtexture(rde_atlas* _atlas, const char* _texture_name) {
 	bool _exists = stbds_shgeti(_atlas->sub_textures, _texture_name) != -1;
 	if(!_exists) {
 		rde_critical_error(true, RDE_ERROR_ATLAS_SUB_TEXTURE, _texture_name, _atlas->texture->file_path);
@@ -499,28 +508,28 @@ rde_texture* rde_rendering_get_atlas_sub_texture(rde_atlas* _atlas, const char* 
 	return &stbds_shget(_atlas->sub_textures, _texture_name);
 }
 
-void rde_rendering_unload_atlas(rde_atlas* _atlas) {
+void rde_rendering_atlas_unload(rde_atlas* _atlas) {
 	rde_critical_error(_atlas == NULL, RDE_ERROR_NO_NULL_ALLOWED, "atlas");
 	stbds_shfree(_atlas->sub_textures);
 	_atlas->sub_textures = NULL;
-	rde_rendering_unload_texture(_atlas->texture);
+	rde_rendering_texture_unload(_atlas->texture);
 	_atlas->texture = NULL;
 }
 #endif
 
-void rde_rendering_destroy_memory_texture(rde_texture* _memory_texture) {
+void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture) {
 	rde_critical_error(_memory_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "memory texture");
 	free(_memory_texture->pixels);
 	_memory_texture->pixels = NULL;
 	_memory_texture->pixels_changed = false;
 	if(_memory_texture->opengl_texture_id != -1) {
-		rde_rendering_unload_texture(_memory_texture);
+		rde_rendering_texture_unload(_memory_texture);
 	}
 }
 
 #ifdef RDE_RENDERING_MODULE
-rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_config_path) {
-	rde_texture* _texture = rde_rendering_load_text_texture(_font_path);
+rde_font* rde_rendering_font_load(const char* _font_path, const char* _font_config_path) {
+	rde_texture* _texture = rde_rendering_texture_text_load(_font_path);
 	rde_font_char_info* _chars = rde_file_system_read_font_config(_font_config_path, _texture);
 
 	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_fonts; _i++) {
@@ -538,11 +547,11 @@ rde_font* rde_rendering_load_font(const char* _font_path, const char* _font_conf
 	return NULL;
 }
 
-void rde_rendering_unload_font(rde_font* _font) {
+void rde_rendering_font_unload(rde_font* _font) {
 	rde_critical_error(_font == NULL, RDE_ERROR_NO_NULL_ALLOWED, "font");
 	stbds_arrfree(_font->chars);
 	_font->chars = NULL;
-	rde_rendering_unload_texture(_font->texture);
+	rde_rendering_texture_unload(_font->texture);
 	_font->texture = NULL;
 }
 #endif

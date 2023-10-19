@@ -117,7 +117,7 @@ void model_viewer_on_event(rde_event* _event, rde_window* _window) {
 			);
 		} else {
 			if(model_viewer_model != NULL) {
-				rde_rendering_unload_model(model_viewer_model);
+				rde_rendering_model_unload(model_viewer_model);
 			}
 			model_viewer_model = rde_rendering_load_obj_model(_event->data.drag_and_drop_data.file_path);
 		}
@@ -148,9 +148,9 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 	UNUSED(_dt)
 
 	if(model_viewer_model != NULL) {
-		rde_rendering_begin_drawing_3d(&model_viewer_camera, _window, model_viewer_draw_wireframe);
-		rde_rendering_draw_model_3d(&model_viewer_transform, model_viewer_model, NULL);
-		rde_rendering_end_drawing_3d();
+		rde_rendering_3d_begin_drawing(&model_viewer_camera, _window, model_viewer_draw_wireframe);
+		rde_rendering_3d_draw_model(&model_viewer_transform, model_viewer_model, NULL);
+		rde_rendering_3d_end_drawing();
 	}
 }
 
@@ -273,7 +273,7 @@ void model_viewer_on_render(float _dt, rde_window* _window) {
 
 void model_viewer_unload() {
 	if(model_viewer_model != NULL) {
-		rde_rendering_unload_model(model_viewer_model);
+		rde_rendering_model_unload(model_viewer_model);
 	}
 
 	model_viewer_model = NULL;
