@@ -28,7 +28,7 @@ rde_window* current_window = NULL;
 
 void model_viewer_draw_grid(rde_camera* _camera, rde_window* _window) {
 	const size_t _line_thickness = 1;
-	rde_rendering_begin_drawing_3d(_camera, _window);
+	rde_rendering_begin_drawing_3d(_camera, _window, false);
 	rde_rendering_draw_line_3d((rde_vec_3F) {-1000, 0, 0}, (rde_vec_3F) {1000, 0, 0}, RDE_COLOR_RED, _line_thickness, NULL);
 	rde_rendering_draw_line_3d((rde_vec_3F) {0, -1000, 0}, (rde_vec_3F) {0, 1000, 0}, RDE_COLOR_GREEN, _line_thickness, NULL);
 	rde_rendering_draw_line_3d((rde_vec_3F) {0, 0, -1000}, (rde_vec_3F) {0, 0, 1000}, RDE_COLOR_BLUE, _line_thickness, NULL);

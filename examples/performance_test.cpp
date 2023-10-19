@@ -129,7 +129,7 @@ void performance_test_3d_on_late_update(float _dt) {
 void performance_test_3d_draw_3d(rde_window* _window, float _dt) {
 	UNUSED(_dt)
 	if(performance_test_3d_model != NULL) {
-		rde_rendering_begin_drawing_3d(&performance_test_3d_camera, _window);
+		rde_rendering_begin_drawing_3d(&performance_test_3d_camera, _window, false);
 		
 		for(int _i = 0; _i < performance_test_3d_amount_to_show; _i++) {
 			rde_rendering_draw_model_3d(&performance_test_3d_transforms[_i], performance_test_3d_model, NULL);

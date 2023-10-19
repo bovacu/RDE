@@ -372,6 +372,7 @@ typedef struct {
 	rde_shader* shader;
 	size_t amount_of_models_per_draw;
 	rde_line_batch line_batch;
+	bool draw_mesh_wireframe;
 } rde_batch_3d;
 rde_batch_3d rde_struct_create_batch_3d() {
 	rde_batch_3d _b;
@@ -379,6 +380,7 @@ rde_batch_3d rde_struct_create_batch_3d() {
 	_b.shader = NULL;
 	_b.amount_of_models_per_draw = 0;
 	_b.line_batch = rde_struct_create_line_batch();
+	_b.draw_mesh_wireframe = false;
 	return _b;
 }
 

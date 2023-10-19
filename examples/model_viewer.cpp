@@ -2,6 +2,8 @@ rde_camera model_viewer_camera;
 rde_model* model_viewer_model = NULL;
 rde_transform model_viewer_transform;
 
+bool model_viewer_draw_wireframe = false;
+
 float model_viewer_yaw = -90.0f;
 bool model_viewer_first_mouse = true;
 float model_viewer_pitch =  0.0f;
@@ -146,7 +148,7 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 	UNUSED(_dt)
 
 	if(model_viewer_model != NULL) {
-		rde_rendering_begin_drawing_3d(&model_viewer_camera, _window);
+		rde_rendering_begin_drawing_3d(&model_viewer_camera, _window, model_viewer_draw_wireframe);
 		rde_rendering_draw_model_3d(&model_viewer_transform, model_viewer_model, NULL);
 		rde_rendering_end_drawing_3d();
 	}
@@ -248,6 +250,7 @@ void model_viewer_draw_imgui() {
 			rde_rendering_model_set_light_data(model_viewer_model, _new_light);
 		}
 	}
+	ImGui::Checkbox("Wireframe", &model_viewer_draw_wireframe);
 	ImGui::End();
 
 	ImGui::Begin("Camera Options", NULL, ImGuiWindowFlags_AlwaysAutoResize);

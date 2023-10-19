@@ -1767,7 +1767,7 @@ RDE_FUNC rde_material_light_data rde_rendering_model_get_light_data(rde_model* _
 RDE_FUNC void rde_rendering_unload_model(rde_model* _model);
 #endif
 
-RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window);
+RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window, bool _draw_wireframe_over_mesh);
 RDE_FUNC void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 3D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, unsigned short _thickness, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader);
