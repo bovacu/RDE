@@ -172,7 +172,7 @@ void performance_test_3d_unload() {
 }
 
 void performance_test_3d_init() {
-	performance_test_3d_camera = rde_struct_create_camera();
+	performance_test_3d_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
 	performance_test_3d_camera.transform.position = (rde_vec_3F) { -3.0, 8.0f, 14.0f };
 
 	update_callback = &performance_test_3d_on_update;

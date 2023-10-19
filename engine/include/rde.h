@@ -1516,13 +1516,14 @@ typedef struct {
 	RDE_CAMERA_TYPE_ camera_type;
 	bool enabled;
 } rde_camera;
-rde_camera rde_struct_create_camera() {
+rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type) {
+	static size_t _camera_counter = 0;
 	rde_camera _c;
-	_c.id = 0;
+	_c.id = _camera_counter++;
 	_c.zoom = 1.f;
 	_c.fov = 45.f;
 	_c.transform = rde_struct_create_transform();
-	_c.camera_type = RDE_CAMERA_TYPE_ORTHOGRAPHIC;
+	_c.camera_type = _camera_type;
 	_c.enabled = true;
 	_c.direction = (rde_vec_3F) { 0.0f, 0.0f, -1.0f };
 	_c.up = (rde_vec_3F) { 0.0f, 1.0f, 0.0f };
@@ -1810,7 +1811,7 @@ RDE_FUNC void rde_rendering_font_unload(rde_font* _font);
 
 RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 
-RDE_FUNC void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window);
+RDE_FUNC void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window, bool _is_hud);
 RDE_FUNC void rde_rendering_2d_draw_point(rde_vec_2F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 2D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_2d_draw_line(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_2d_draw_triangle(rde_vec_2F _verte_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader); /// Draws a batched triangle in 2D space, pass NULL on the _shader for the default shader

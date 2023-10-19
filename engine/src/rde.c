@@ -324,6 +324,8 @@ typedef struct {
 	GLuint vertex_buffer_object;
 	GLuint index_buffer_object;
 	GLuint vertex_array_object;
+	mat4 mvp;
+	bool is_hud;
 } rde_batch_2d;
 rde_batch_2d rde_struct_create_2d_batch() {
 	rde_batch_2d _b;
@@ -334,6 +336,8 @@ rde_batch_2d rde_struct_create_2d_batch() {
 	_b.vertex_buffer_object = 0;
 	_b.vertex_array_object = 0;
 	_b.index_buffer_object = 0;
+	glm_mat4_copy(GLM_MAT4_IDENTITY, _b.mvp);
+	_b.is_hud = false;
 	return _b;
 }
 

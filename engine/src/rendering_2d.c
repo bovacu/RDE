@@ -21,15 +21,28 @@ void rde_rendering_transform_to_glm_mat4_2d(const rde_transform* _transform, mat
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
 	float _aspect_ratio = (float)_window_size.x / (float)_window_size.y;
 	rde_vec_2F _screen_pos;
-	_screen_pos.x = _transform->position.x;
-	_screen_pos.y = _transform->position.y / _aspect_ratio;
-	rde_math_convert_world_position_to_screen_coordinates_2d(current_drawing_window, &_screen_pos);
+	
+	if(current_drawing_camera->camera_type == RDE_CAMERA_TYPE_ORTHOGRAPHIC) {
+		_screen_pos.x = _transform->position.x;
+		_screen_pos.y = _transform->position.y / _aspect_ratio;
+		rde_math_convert_world_position_to_screen_coordinates_2d(current_drawing_window, &_screen_pos);
+	} else {
+		bool _is_hud = current_batch_2d.is_hud;
+		_screen_pos.x = _transform->position.x - (_is_hud ? 0.f : current_drawing_camera->transform.position.x);
+		_screen_pos.y = _transform->position.y - (_is_hud ? 0.f : current_drawing_camera->transform.position.y);
+	}
 
 	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
 
-	glm_translate(_transformation_matrix, (vec3) { _screen_pos.x, _screen_pos.y, _transform->position.z });
+	glm_translate(_transformation_matrix, (vec3) { _screen_pos.x, _screen_pos.y, 0.f });
 	glm_rotate(_transformation_matrix, glm_rad(_transform->rotation.z), (vec3){ 0.0f, 0.0f, 1.0f });
-	glm_scale(_transformation_matrix, (vec3) { _transform->scale.x, _transform->scale.y / _aspect_ratio, _transform->scale.z });
+	
+	if(current_drawing_camera->camera_type == RDE_CAMERA_TYPE_ORTHOGRAPHIC) {
+		glm_scale(_transformation_matrix, (vec3) { _transform->scale.x, _transform->scale.y / _aspect_ratio, _transform->scale.z });
+	} else {
+		glm_scale(_transformation_matrix, (vec3) { _transform->scale.x, _transform->scale.y, _transform->scale.z });
+	}
+
 	glm_mat4_copy(_transformation_matrix, _mat);
 }
 
@@ -59,7 +72,7 @@ void rde_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch) {
 void rde_rendering_reset_batch_2d() {
 	current_batch_2d.shader = NULL;
 	current_batch_2d.texture = rde_struct_create_texture();
-	//memset(current_batch_2d.vertices, 0, ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
+	memset(current_batch_2d.vertices, 0, ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
 	current_batch_2d.amount_of_vertices = 0;
 }
 
@@ -80,15 +93,8 @@ void rde_rendering_flush_batch_2d() {
 
 	rde_util_check_opengl_error("Before UseProgram");
 	glUseProgram(current_batch_2d.shader->compiled_program_id);
-	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
-	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
-	mat4 _view_matrix_inv = GLM_MAT4_IDENTITY_INIT;
 
-	rde_rendering_transform_to_glm_mat4_2d(&current_drawing_camera->transform, _view_matrix);
-	glm_mat4_inv(_view_matrix, _view_matrix_inv);
-	glm_mat4_mul(projection_matrix, _view_matrix_inv, _view_projection_matrix);
-
-	glUniformMatrix4fv(glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
+	glUniformMatrix4fv(glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)current_batch_2d.mvp);
 	rde_util_check_opengl_error("After UseProgram");
 
 	glBindVertexArray(current_batch_2d.vertex_array_object);
@@ -130,26 +136,30 @@ void rde_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _t
 	rde_rendering_try_create_batch_2d(_shader, _texture);
 }
 
-void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window) {
+void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window, bool _is_hud) {
 	rde_critical_error(_camera == NULL || _window == NULL, RDE_ERROR_BEGIN_RENDER);
 	current_drawing_camera = _camera;
 	current_drawing_window = _window;
 	current_batch_2d.texture = rde_struct_create_texture();
 
-	switch (_camera->camera_type) {
-		case RDE_CAMERA_TYPE_PERSPECTIVE : {
-			rde_vec_2F _aspect_ratios = rde_rendering_get_aspect_ratio();
-			float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.x : _aspect_ratios.y;
-			glm_perspective(glm_rad(45.f), _aspect_ratio, 0.1f, 100.f, projection_matrix);
-		}; break;
+	rde_vec_2F _aspect_ratios = rde_rendering_get_aspect_ratio();
+	float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.x : _aspect_ratios.y;
+	float _zoom = _camera->zoom;
+	glm_ortho(-_aspect_ratio * _zoom, _aspect_ratio * _zoom, -_zoom, _zoom, -_zoom, _zoom, projection_matrix);
 
-		case RDE_CAMERA_TYPE_ORTHOGRAPHIC : {
-			rde_vec_2F _aspect_ratios = rde_rendering_get_aspect_ratio();
-			float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.x : _aspect_ratios.y;
-			float _zoom = _camera->zoom;
-			glm_ortho(-_aspect_ratio * _zoom, _aspect_ratio * _zoom, -_zoom, _zoom, -_zoom, _zoom, projection_matrix);
-		}; break;
+	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
+	mat4 _view_matrix_inv = GLM_MAT4_IDENTITY_INIT;
+
+	current_batch_2d.is_hud = _is_hud;
+
+	rde_rendering_transform_to_glm_mat4_2d(&current_drawing_camera->transform, _view_matrix);
+	if(_is_hud) {
+		_view_matrix[3][0] = 0;
+		_view_matrix[3][1] = 0;
 	}
+
+	glm_mat4_inv(_view_matrix, _view_matrix_inv);
+	glm_mat4_mul(projection_matrix, _view_matrix_inv, current_batch_2d.mvp);
 }
 
 void rde_rendering_2d_draw_point(rde_vec_2F _position, rde_color _color, rde_shader* _shader) {
