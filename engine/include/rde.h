@@ -1,16 +1,30 @@
 #ifndef RDE_H
 #define RDE_H
 
-//#define MINIAUDIO_IMPLEMENTATION
-//#include "miniaudio/miniaudio.h"
-//#include <stdlib.h>
-//#include <stdio.h>
-
 // This is needed because of C++ name mangling, if this lib is linked to a C++ project and is compiled
 // without extern "C" won't work.
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// **************************************************************************************
+// *							GENERAL INFO ABOUT THE ENGINE							*
+// **************************************************************************************
+// 
+// - Most types exposed to the user are defined in the source file, and for the user they
+//	 are just pointers that can be used to operate on those structures, and this has a reason.
+//	 Some fields on the structs could be modified by end-user wihtout side-effects, but others
+//	 may cause serious problem, unexpected behaviour or even crash the application, and this is
+//	 why they are hidden from the end-user, that being said, there are some data that it is still
+//	 relevant for the user. For those cases, every 'typedef struct my_hidden_struct my_hidden_struct'
+//	 has an associeted a 'my_hidden_struct_data' which contains all the relevant information that 
+//	 the end-user could need.
+//
+// - API "namespaces". As C has no namespaces, the API of the engine uses a naming convention that
+//   mimics namespaces. Everything on the engine starts with 'rde_'. Then the next namespace, for
+//	 example 'rde_window', 'rde_rendering', 'rde_util'... It can have many "namespaces" levels, such 
+//	 us 'rde_rendering_model', whit would be rde::rendering::model and then all methods related to 
+//	 models, such as 'rde_rendering_model_load' or 'rde_rendering_model_unload'
 
 // Index Begin
 //
