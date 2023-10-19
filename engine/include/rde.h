@@ -105,7 +105,29 @@ extern "C" {
 
 /// ============================== SHADERS =================================
 
-// TODO: multiply by view_projection_matrix
+#define RDE_LINE_VERTEX_SHADER "" \
+	"#version 330 core\n" \
+	"\n" \
+	"layout(location = 0) in vec3 in_position;\n" \
+	"layout(location = 1) in vec4 in_color;\n" \
+	"out vec4 color;\n" \
+	"\n" \
+	"uniform mat4 view_projection_matrix;\n" \
+	"\n" \
+	"void main() {\n" \
+	"	gl_Position = view_projection_matrix * vec4(in_position, 1.0);\n" \
+	"	color = in_color;\n" \
+	"}\n"
+#define RDE_LINE_FRAGMENT_SHADER "" \
+	"#version 330 core\n" \
+	"\n" \
+	"in vec4 color;\n" \
+	"out vec4 out_color;\n" \
+	"\n" \
+	"void main() {\n" \
+	"	out_color = vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);\n" \
+	"}\n" 
+
 #define RDE_COLOR_VERTEX_SHADER_2D "" \
 	"#version 330 core\n" \
 	"\n" \
@@ -1727,7 +1749,7 @@ RDE_FUNC void rde_rendering_unload_model(rde_model* _model);
 
 RDE_FUNC void rde_rendering_begin_drawing_3d(rde_camera* _camera, rde_window* _window);
 RDE_FUNC void rde_rendering_draw_point_3d(rde_vec_3F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 3D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_draw_line_3d(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, unsigned short _thickness, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_draw_mesh_3d(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader);
 RDE_FUNC void rde_rendering_draw_model_3d(const rde_transform* _transform, rde_model* _model, rde_shader* _shader);
 RDE_FUNC void rde_rendering_end_drawing_3d();

@@ -333,10 +333,49 @@ rde_batch_2d rde_struct_create_2d_batch() {
 }
 
 typedef struct {
+	rde_vec_3F position;
+	unsigned int color;
+} rde_line_vertex;
+rde_line_vertex rde_struct_create_line_vertex() {
+	rde_line_vertex _l;
+	_l.position = (rde_vec_3F) { 0, 0, 0 };
+	_l.color = 0xFFFFFFFF;
+	return _l;
+}
+
+typedef struct {
+	rde_line_vertex* vertices;
+	size_t amount_of_vertices;
+	GLuint vertex_buffer_object;
+	GLuint vertex_array_object;
+	unsigned short thickness;
+	rde_shader* shader;
+} rde_line_batch;
+rde_line_batch rde_struct_create_line_batch() {
+	rde_line_batch _b;
+	_b.vertices = NULL;
+	_b.amount_of_vertices = 0;
+	_b.thickness = 0;
+	_b.vertex_buffer_object = RDE_UINT_MAX;
+	_b.vertex_array_object = RDE_UINT_MAX;
+	_b.shader = NULL;
+	return _b;
+}
+
+typedef struct {
 	rde_mesh* mesh;
 	rde_shader* shader;
 	size_t amount_of_models_per_draw;
+	rde_line_batch line_batch;
 } rde_batch_3d;
+rde_batch_3d rde_struct_create_batch_3d() {
+	rde_batch_3d _b;
+	_b.mesh = NULL;
+	_b.shader = NULL;
+	_b.amount_of_models_per_draw = 0;
+	_b.line_batch = rde_struct_create_line_batch();
+	return _b;
+}
 
 struct rde_mesh {
 	size_t vertex_count;
@@ -457,6 +496,7 @@ struct rde_engine {
 	rde_end_user_mandatory_callbacks mandatory_callbacks;
 	rde_event_func user_event_callback;
 	
+	rde_shader* line_shader;
 	rde_shader* color_shader_2d;
 	rde_shader* texture_shader_2d;
 	rde_shader* text_shader_2d;
@@ -522,6 +562,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 #ifdef RDE_RENDERING_MODULE
 	_e.directional_light = rde_struct_create_directional_light();
 
+	_e.line_shader = NULL;
 	_e.color_shader_2d = NULL;
 	_e.texture_shader_2d = NULL;
 	_e.text_shader_2d = NULL;
