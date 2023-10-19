@@ -1432,12 +1432,12 @@ typedef struct {
 typedef struct rde_mesh rde_mesh;
 typedef struct {
 	int amount_of_vertices;
-	int vertex_buffer_objects[4];	// 0 -> positions (static), 
-									// 1 -> colors (static), 
-									// 2 -> normals (static), 
-									// 3 -> texture coords (static)
-									// 4 -> transforms to render (dynamic)
-	unsigned int ibo;
+	int vertex_buffer_objects_ids[4];	// 0 -> positions (static), 
+										// 1 -> colors (static), 
+										// 2 -> normals (static), 
+										// 3 -> texture coords (static)
+										// 4 -> transforms to render (dynamic)
+	unsigned int index_buffer_object_id;
 	int amount_of_materials;
 } rde_mesh_data;
 
@@ -1789,10 +1789,12 @@ RDE_FUNC void rde_rendering_shader_unload(rde_shader* _shader);
 
 RDE_FUNC rde_texture* rde_rendering_texture_load(const char* _file_path);
 RDE_FUNC rde_texture* rde_rendering_texture_text_load(const char* _file_path);
+RDE_FUNC rde_texture_data rde_rendering_texture_get_data(rde_texture* _texture);
 RDE_FUNC void rde_rendering_texture_unload(rde_texture* _texture);
 
 RDE_FUNC rde_atlas* rde_rendering_atlas_load(const char* _texture_path, const char* _config_path);
 RDE_FUNC rde_texture* rde_rendering_atlas_get_subtexture(rde_atlas* _atlas, const char* _texture_name);
+RDE_FUNC rde_atlas_data rde_rendering_atlas_get_data(rde_atlas* _atlas);
 RDE_FUNC void rde_rendering_atlas_unload(rde_atlas* _atlas);
 
 RDE_FUNC rde_texture* rde_rendering_memory_texture_create(size_t _width, size_t _height, int _channels);
@@ -1803,6 +1805,7 @@ RDE_FUNC unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _me
 RDE_FUNC void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture);
 
 RDE_FUNC rde_font* rde_rendering_font_load(const char* _font_path, const char* _font_config_path);
+RDE_FUNC rde_font_data rde_rendering_font_get_data(rde_font* _font);
 RDE_FUNC void rde_rendering_font_unload(rde_font* _font);
 
 RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
@@ -1825,7 +1828,7 @@ RDE_FUNC void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _ind
 RDE_FUNC void rde_rendering_mesh_set_vertex_colors(rde_mesh* _mesh, unsigned int* _colors, bool _free_colors_on_destroy); // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example) and uploads to GPU
 RDE_FUNC void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, bool _free_normals_on_destroy); // sets the normals of the vertices, each position must have 3 floats (x, y, z) and uploads to GPU
 RDE_FUNC void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, unsigned int _texture_coords_size, float* _texture_coords, rde_texture* _texture, bool _free_texture_coords_on_destroy); // sets the data to draw a mesh with a texture. each text_coord has 2 floats (x, y) and neither text_coords nor texture can be NULL // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example)
-RDE_FUNC size_t rde_rendering_mesh_get_vertices_count(rde_mesh* _mesh);
+RDE_FUNC rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh);
 RDE_FUNC void rde_rendering_mesh_destroy(rde_mesh* _mesh);
 
 #if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)

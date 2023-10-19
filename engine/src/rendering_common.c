@@ -374,6 +374,18 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 	return _texture;
 }
 
+rde_texture_data rde_rendering_texture_get_data(rde_texture* _texture) {
+	rde_critical_error(_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "texture");
+	return (rde_texture_data) {
+		.opengl_texture_id = _texture->opengl_texture_id,
+		.size = _texture->size,
+		.position = _texture->position,
+		.channels = _texture->channels,
+		.file_path = _texture->file_path,
+		.atlas_texture_id = _texture->atlas_texture->opengl_texture_id
+	};
+}
+
 rde_texture* rde_rendering_memory_texture_create(size_t _width, size_t _height, int _channels) {
 	rde_texture* _texture = (rde_texture*)malloc(sizeof(rde_texture));
 	rde_struct_init_alloc_ptr_texture(_texture);
@@ -508,6 +520,14 @@ rde_texture* rde_rendering_atlas_get_subtexture(rde_atlas* _atlas, const char* _
 	return &stbds_shget(_atlas->sub_textures, _texture_name);
 }
 
+rde_atlas_data rde_rendering_atlas_get_data(rde_atlas* _atlas) {
+	rde_critical_error(_atlas == NULL, RDE_ERROR_NO_NULL_ALLOWED, "atlas");
+	return (rde_atlas_data) {
+		.opengl_texture_id = _atlas->texture->opengl_texture_id,
+		.amount_of_subtextures = stbds_arrlenu(_atlas->sub_textures)
+	};
+}
+
 void rde_rendering_atlas_unload(rde_atlas* _atlas) {
 	rde_critical_error(_atlas == NULL, RDE_ERROR_NO_NULL_ALLOWED, "atlas");
 	stbds_shfree(_atlas->sub_textures);
@@ -545,6 +565,14 @@ rde_font* rde_rendering_font_load(const char* _font_path, const char* _font_conf
 
 	rde_critical_error(_texture == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "fonts", ENGINE.heap_allocs_config.max_number_of_fonts);
 	return NULL;
+}
+
+rde_font_data rde_rendering_font_get_data(rde_font* _font) {
+	rde_critical_error(_font == NULL, RDE_ERROR_NO_NULL_ALLOWED, "font");
+	return (rde_font_data) {
+		.opengl_texture_id = _font->texture->opengl_texture_id,
+		.amount_of_chars = stbds_arrlenu(_font->chars)
+	};
 }
 
 void rde_rendering_font_unload(rde_font* _font) {

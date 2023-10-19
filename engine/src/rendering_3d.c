@@ -802,15 +802,21 @@ rde_directional_light rde_rendering_lighting_get_directional_light() {
 	return ENGINE.directional_light;
 }
 
-size_t rde_rendering_mesh_get_vertices_count(rde_mesh* _mesh) {
-	return _mesh->vertex_count;
+rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh) {
+	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
+	return (rde_mesh_data) {
+		.amount_of_vertices = _mesh->vertex_count,
+		.vertex_buffer_objects_ids = { _mesh->vbo[0],_mesh->vbo[1], _mesh->vbo[2], _mesh->vbo[3] },
+		.index_buffer_object_id = _mesh->ibo,
+		.amount_of_materials = stbds_arrlenu(_mesh->material_array)
+	};
 }
 
 size_t rde_rendering_model_get_vertices_count(rde_model* _model) {
 	size_t _total_vertices = 0;
 	
 	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
-		_total_vertices += rde_rendering_mesh_get_vertices_count(&_model->mesh_array[_i]);
+		_total_vertices += rde_rendering_mesh_get_data(&_model->mesh_array[_i]).amount_of_vertices;
 	}
 
 	return _total_vertices;
