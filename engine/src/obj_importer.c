@@ -221,10 +221,10 @@ void parse_3_vertices_face_obj(unsigned int _i, unsigned int _v,
 	*_normals_pointer += 9;
 }
 
-rde_model_material load_obj_material(const char* _obj_path) {
+rde_material load_obj_material(const char* _obj_path) {
 
 	if(_obj_path == NULL || strlen(_obj_path) == 0) {
-		return rde_struct_create_model_material();
+		return rde_struct_create_material();
 	}
 
 	FILE* _fp;
@@ -238,7 +238,8 @@ rde_model_material load_obj_material(const char* _obj_path) {
 	rde_critical_error(_fp == NULL, RDE_ERROR_OBJ_MATERIAL_COULD_NOT_LOAD, _obj_path);
 #endif
 
-	rde_model_material _material = rde_struct_create_model_material();
+	size_t _line = 0;
+	rde_material _material = rde_struct_create_material();
 	while(fgets(_buffer, len, _fp)) {
 		if(strncmp(_buffer, "map_Kd", strlen("map_Kd")) == 0) {
 			char* _ptr = strtok(_buffer, " ");
@@ -256,7 +257,48 @@ rde_model_material load_obj_material(const char* _obj_path) {
 			strcat(_full_path, _ptr);
 
 			_material.texture = rde_rendering_load_texture(_full_path);
+		} else if(strncmp(_buffer, "Ka", strlen("Ka")) == 0) {
+			char* _ptr = strtok(_buffer, " ");
+			_ptr = strtok(NULL, " "); // remove 'Ka'
+			_ptr[strcspn(_ptr, "\r\n")] = 0;
+			char* _end_ptr;
+			float _value = strtof(_ptr, &_end_ptr);
+			if(*_end_ptr != '\0') {
+				rde_critical_error(true, RDE_ERROR_OBJ_INVALID_MATERIAL_DATA, "Ka", _ptr, _obj_path, "Ka", _line + 1);
+			}
+			_material.material_light_data.ka = _value;
+		} else if(strncmp(_buffer, "Kd", strlen("Kd")) == 0) {
+			char* _ptr = strtok(_buffer, " ");
+			_ptr = strtok(NULL, " "); // remove 'Kd'
+			_ptr[strcspn(_ptr, "\r\n")] = 0;
+			char* _end_ptr;
+			float _value = strtof(_ptr, &_end_ptr);
+			if(*_end_ptr != '\0') {
+				rde_critical_error(true, RDE_ERROR_OBJ_INVALID_MATERIAL_DATA, "Kd", _ptr, _obj_path, "Kd", _line + 1);
+			}
+			_material.material_light_data.kd = _value;
+		} else if(strncmp(_buffer, "Ks", strlen("Ks")) == 0) {
+			char* _ptr = strtok(_buffer, " ");
+			_ptr = strtok(NULL, " "); // remove 'Ks'
+			_ptr[strcspn(_ptr, "\r\n")] = 0;
+			char* _end_ptr;
+			float _value = strtof(_ptr, &_end_ptr);
+			if(*_end_ptr != '\0') {
+				rde_critical_error(true, RDE_ERROR_OBJ_INVALID_MATERIAL_DATA, "Ks", _ptr, _obj_path, "Ks", _line + 1);
+			}
+			_material.material_light_data.ks = _value;
+		} else if(strncmp(_buffer, "Ke", strlen("Ke")) == 0) {
+			char* _ptr = strtok(_buffer, " ");
+			_ptr = strtok(NULL, " "); // remove 'Ke'
+			_ptr[strcspn(_ptr, "\r\n")] = 0;
+			char* _end_ptr;
+			float _value = strtof(_ptr, &_end_ptr);
+			if(*_end_ptr != '\0') {
+				rde_critical_error(true, RDE_ERROR_OBJ_INVALID_MATERIAL_DATA, "Ke", _ptr, _obj_path, "Ke", _line + 1);
+			}
+			_material.material_light_data.shininess = _value;
 		}
+		_line++;
 	}
 
 	fclose(_fp);
@@ -286,9 +328,6 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 
 	_model->mesh_array = NULL;
 	_model->mesh_array_size = 1;
-
-	_model->material_array = NULL;
-	_model->material_array_size = 1;
 
 	float* _positions = NULL;
 	size_t _positions_size = 0;
@@ -345,7 +384,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	}
 
 	rde_engine_supress_logs(true);
-	rde_model_material _model_material = load_obj_material(_material_path_s);
+	rde_material _material = load_obj_material(_material_path_s);
 	rde_engine_supress_logs(false);
 
 	unsigned int* _mesh_indices = (unsigned int*)malloc(sizeof(unsigned int) * _mesh_indices_size * 1);
@@ -353,7 +392,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	float* _mesh_texcoords = NULL;
 	float* _mesh_normals = NULL;
 
-	if (_model_material.texture != NULL && (_lacking_face_data & NO_VERTEX_UVS) == 0) {
+	if (_material.texture != NULL && (_lacking_face_data & NO_VERTEX_UVS) == 0) {
 		_mesh_texcoords = (float*)malloc(sizeof(float) * _mesh_texcoords_size * 2);
 	} else {
 		_mesh_texcoords_size = 0;
@@ -391,11 +430,14 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	}
 
 	rde_mesh _mesh = rde_struct_create_mesh(_mesh_positions_size, _mesh_positions_size);
+	stbds_arrput(_mesh.material_array, _material);
+	_mesh.material_array_size++;
+
 	rde_rendering_mesh_set_vertex_positions(&_mesh, _mesh_positions, true);
 	rde_rendering_mesh_set_indices(&_mesh, _mesh_indices, true);
 	
-	if (_model_material.texture != NULL && (_lacking_face_data & NO_VERTEX_UVS) == 0) {
-		rde_rendering_mesh_set_vertex_texture_data(&_mesh, _mesh_texcoords_size, _mesh_texcoords, _model_material.texture, true);
+	if (_material.texture != NULL && (_lacking_face_data & NO_VERTEX_UVS) == 0) {
+		rde_rendering_mesh_set_vertex_texture_data(&_mesh, _mesh_texcoords_size, _mesh_texcoords, _material.texture, true);
 	}
 	
 	if ((_lacking_face_data & NO_VERTEX_NORMALS) == 0) {
@@ -403,7 +445,6 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	}
 
 	stbds_arrput(_model->mesh_array, _mesh);
-	stbds_arrput(_model->material_array, _model_material);
 
 	stbds_arrfree(_positions);
 	
@@ -421,12 +462,12 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	_t_end = clock();
 
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Vertices: %u, Indices: %u, Texcoords: %u, Normals: %u", _mesh_positions_size, _mesh_indices_size, _mesh_texcoords_size, _mesh_normals_size);
-	rde_log_color(RDE_LOG_COLOR_GREEN, "	- VAO: %u, VBO:[(p):%u, (c):%u, (n):%u, (uv):%u], IBO: %u, TextureId: %d", _mesh.vao, _mesh.vbo[0], _mesh.vbo[1], _mesh.vbo[2], _mesh.vbo[3], _mesh.ibo, (_model_material.texture != NULL ? _model_material.texture->opengl_texture_id : -1));
-	if(_model_material.texture != NULL && (_lacking_face_data & NO_VERTEX_UVS) == 0) {
-		rde_log_color(RDE_LOG_COLOR_GREEN, "	- Texture: %s", _model_material.texture->file_path);
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Size: %ux%u", _model_material.texture->size.x, _model_material.texture->size.y);
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Channels: %d", _model_material.texture->channels);
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- OpenGL ID: %d", _model_material.texture->opengl_texture_id);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- VAO: %u, VBO:[(p):%u, (c):%u, (n):%u, (uv):%u], IBO: %u, TextureId: %d", _mesh.vao, _mesh.vbo[0], _mesh.vbo[1], _mesh.vbo[2], _mesh.vbo[3], _mesh.ibo, (_material.texture != NULL ? _material.texture->opengl_texture_id : -1));
+	if(_material.texture != NULL && (_lacking_face_data & NO_VERTEX_UVS) == 0) {
+		rde_log_color(RDE_LOG_COLOR_GREEN, "	- Texture: %s", _material.texture->file_path);
+		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Size: %ux%u", _material.texture->size.x, _material.texture->size.y);
+		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Channels: %d", _material.texture->channels);
+		rde_log_color(RDE_LOG_COLOR_GREEN, "		- OpenGL ID: %d", _material.texture->opengl_texture_id);
 	}
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- took %.3fms", (double)(_t_end - _t_start) / CLOCKS_PER_SEC);
 	printf("\n");

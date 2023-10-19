@@ -32,24 +32,25 @@ void rde_rendering_set_rendering_configuration() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 #if !IS_MOBILE() 
-#if !IS_WASM()
-	glEnable(GL_PROGRAM_POINT_SIZE);
-	rde_util_check_opengl_error("Invalid Point size");
-	glEnable(GL_LINE_SMOOTH);
-	rde_util_check_opengl_error("Invalid Line Smooth");
-	glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
-	rde_util_check_opengl_error("Invalid Line Smooth Hint -> GL_NICEST");
-#endif
-		
-#if !IS_MAC() && !IS_LINUX()
-#if !IS_WASM()
-	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-	rde_util_check_opengl_error("Invalid Point Smooth Hint -> GL_NICEST");
-#endif
-#endif
+	#if !IS_WASM()
+		glEnable(GL_PROGRAM_POINT_SIZE);
+		rde_util_check_opengl_error("Invalid Point size");
+		glEnable(GL_LINE_SMOOTH);
+		rde_util_check_opengl_error("Invalid Line Smooth");
+		glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
+		rde_util_check_opengl_error("Invalid Line Smooth Hint -> GL_NICEST");
+	#endif
+			
+	#if !IS_MAC() && !IS_LINUX()
+		#if !IS_WASM()
+			glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+			rde_util_check_opengl_error("Invalid Point Smooth Hint -> GL_NICEST");
+		#endif
+	#endif
 #endif
 
 #if !IS_MOBILE() && !IS_WASM()
+	ENGINE.line_shader = rde_rendering_load_shader(RDE_LINE_VERTEX_SHADER, RDE_LINE_FRAGMENT_SHADER);
 	ENGINE.color_shader_2d = rde_rendering_load_shader(RDE_COLOR_VERTEX_SHADER_2D, RDE_COLOR_FRAGMENT_SHADER_2D);
 	ENGINE.texture_shader_2d = rde_rendering_load_shader(RDE_TEXTURE_VERTEX_SHADER_2D, RDE_TEXTURE_FRAGMENT_SHADER_2D);
 	ENGINE.text_shader_2d = rde_rendering_load_shader(RDE_TEXT_VERTEX_SHADER_2D, RDE_TEXT_FRAGMENT_SHADER_2D);

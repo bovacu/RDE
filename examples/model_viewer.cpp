@@ -199,17 +199,17 @@ void model_viewer_draw_imgui() {
 	ImGui::Separator();
 	float _radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.x);
 
-	if(ImGui::SliderAngle("Rotation X", &_radians)) {
+	if(ImGui::SliderAngle("Rotation X", &_radians, 0, 360)) {
 		model_viewer_transform.rotation.x = rde_math_radians_to_degrees(_radians);
 	}
 
 	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.y);
-	if(ImGui::SliderAngle("Rotation Y", &_radians)) {
+	if(ImGui::SliderAngle("Rotation Y", &_radians, 0, 360)) {
 		model_viewer_transform.rotation.y = rde_math_radians_to_degrees(_radians);
 	}
 
 	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.z);
-	if(ImGui::SliderAngle("Rotation Z", &_radians)) {
+	if(ImGui::SliderAngle("Rotation Z", &_radians, 0, 360)) {
 		model_viewer_transform.rotation.z = rde_math_radians_to_degrees(_radians);
 	}
 
@@ -232,6 +232,22 @@ void model_viewer_draw_imgui() {
 	}
 
 	ImGui::Checkbox("Proportional Scale", &_proportional_scale);
+	ImGui::End();
+
+	ImGui::Begin("Model Material", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	rde_material_light_data _light = model_viewer_model != NULL ? rde_rendering_model_get_light_data(model_viewer_model) : rde_struct_create_material_light_data();
+	float _vec_4[4] = { _light.ka, _light.kd, _light.ks, _light.shininess };
+	if(ImGui::DragFloat4("K Indices", _vec_4, 0.0005f, 0.0f, 1.0f)) {
+		rde_material_light_data _new_light {
+			.shininess = _vec_4[3],
+			.ka = _vec_4[0],
+			.kd = _vec_4[1],
+			.ks = _vec_4[2]
+		};
+		if(model_viewer_model != NULL) {
+			rde_rendering_model_set_light_data(model_viewer_model, _new_light);
+		}
+	}
 	ImGui::End();
 
 	ImGui::Begin("Camera Options", NULL, ImGuiWindowFlags_AlwaysAutoResize);

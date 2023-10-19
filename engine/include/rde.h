@@ -274,6 +274,9 @@ extern "C" {
 	"\n" \
 	"struct rde_material {\n" \
 	"	float shininess;\n" \
+	"	float Ka;\n" \
+	"	float Kd;\n" \
+	"	float Ks;\n" \
 	"};\n" \
 	"struct rde_directional_light {\n" \
 	"	vec3 direction;\n" \
@@ -294,20 +297,21 @@ extern "C" {
 	"out vec4 color_out;\n" \
 	"\n" \
 	"void main(){\n" \
-	"	vec3 _ambient = directional_light.ambient_color * texture(tex, text_coord).rgb;\n" \
+	"	vec3 _ambient = material.Ka * directional_light.ambient_color * texture(tex, text_coord).rgb;\n" \
 	"	\n" \
 	"	vec3 _norm = normalize(normal);\n" \
 	"	vec3 _light_dir = normalize(-directional_light.direction);\n" \
 	"	float _diff = max(dot(_norm, _light_dir), 0.0);\n" \
-	"	vec3 _diffuse = directional_light.diffuse_color * _diff * texture(tex, text_coord).rgb;\n" \
+	"	vec3 _diffuse = material.Kd * directional_light.diffuse_color * _diff * texture(tex, text_coord).rgb;\n" \
 	"	\n" \
-	"	vec3 _view_dir = normalize(camera_pos - frag_pos);\n" \
+	"	vec3 _view_dir = normalize(camera_pos + frag_pos);\n" \
 	"	vec3 _reflect_dir = reflect(-_light_dir, _norm);\n" \
 	"	float _spec = pow(max(dot(_view_dir, _reflect_dir), 0.0), material.shininess);\n" \
-	"	vec3 _specular = directional_light.specular_color * _spec * texture(tex, text_coord).rgb;\n" \
+	"	vec3 _specular = material.Ks * directional_light.specular_color * _spec * texture(tex, text_coord).rgb;\n" \
 	"	vec3 _final_light = _ambient + _diffuse + _specular;\n" \
 	"	color_out = vec4(_final_light, 1.0);\n" \
 	"}"
+
 
 #define RDE_COLOR_VERTEX_SHADER_2D_ES "" \
 	"#version 300 es\n" \
@@ -1366,7 +1370,21 @@ typedef struct rde_point_light rde_point_light;
 typedef struct rde_spot_light rde_spot_light;
 typedef struct rde_mesh rde_mesh;
 typedef struct rde_model rde_model;
-typedef struct rde_material rde_material;
+
+typedef struct {
+	float shininess;
+	float ka;
+	float kd;
+	float ks;
+} rde_material_light_data;
+rde_material_light_data rde_struct_create_material_light_data() {
+	rde_material_light_data _m;
+	_m.shininess = 1.0f;
+	_m.ka = 1.0f;
+	_m.kd = 1.0f;
+	_m.ks = 1.0f;
+	return _m;
+}
 
 struct rde_material_map {
 	UNIMPLEMENTED_STRUCT()
@@ -1744,6 +1762,8 @@ RDE_FUNC rde_model* rde_rendering_load_obj_model(const char* _obj_path);
 #if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)
 RDE_FUNC size_t rde_rendering_get_mesh_vertices_count(rde_mesh* _mesh);
 RDE_FUNC size_t rde_rendering_get_model_vertices_count(rde_model* _model);
+RDE_FUNC void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data);
+RDE_FUNC rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model);
 RDE_FUNC void rde_rendering_unload_model(rde_model* _model);
 #endif
 

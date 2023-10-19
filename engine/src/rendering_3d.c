@@ -201,6 +201,9 @@ rde_mesh rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
+	_mesh.material_array = NULL;
+	_mesh.material_array_size = 0;
+
 	return _mesh;
 }
 
@@ -237,6 +240,9 @@ rde_mesh* rde_struct_create_memory_mesh(size_t _vertex_count, size_t _index_coun
 	_mesh->free_vertex_texture_coordinates_on_end = false;
 	_mesh->free_vertex_texture_on_end = false;
 	_mesh->free_indices_on_end = false;
+
+	_mesh->material_array = NULL;
+	_mesh->material_array_size = 0;
 
 	return _mesh;
 }
@@ -458,6 +464,12 @@ void rde_rendering_destroy_mesh(rde_mesh* _mesh) {
 
 	free(_mesh->transforms);
 	_mesh->transforms = NULL;
+
+	if(_mesh->material_array != NULL) {
+		stbds_arrfree(_mesh->material_array);
+		_mesh->material_array = NULL;
+		_mesh->material_array_size = 0;
+	}
 }
 
 
@@ -629,8 +641,12 @@ void rde_rendering_flush_batch_3d() {
 	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.diffuse_color"), _dl_diffuse.x, _dl_diffuse.y, _dl_diffuse.z);
 	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.specular_color"), _dl_specular.x, _dl_specular.y, _dl_specular.z);
 
-	rde_material _material = rde_struct_create_material();
+	rde_material_light_data _material = _mesh->material_array[0].material_light_data;
 	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.shininess"), _material.shininess);
+	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.Ka"), _material.ka);
+	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.Kd"), _material.kd);
+	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.Ks"), _material.ks);
+	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.Ke"), _material.shininess);
 
 	glBindVertexArray(_mesh->vao);
 	rde_util_check_opengl_error("After glBindVertexArray");
@@ -753,6 +769,19 @@ size_t rde_rendering_get_model_vertices_count(rde_model* _model) {
 	return _total_vertices;
 }
 
+void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data) {
+	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "model");
+	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
+		_model->mesh_array[_i].material_array[0].material_light_data = _light_data;
+	}
+}
+rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model) {
+	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "model");
+	return _model->mesh_array[0].material_array[0].material_light_data;
+}
+
+
+
 void rde_rendering_unload_model(rde_model* _model) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "obj model");
 
@@ -764,12 +793,6 @@ void rde_rendering_unload_model(rde_model* _model) {
 	stbds_arrfree(_model->mesh_array);
 	_model->mesh_array = NULL;
 	_model->mesh_array_size = 0;
-
-	if(_model->material_array != NULL) {
-		stbds_arrfree(_model->material_array);
-		_model->material_array = NULL;
-		_model->material_array_size = 0;
-	}
 }
 
 #endif

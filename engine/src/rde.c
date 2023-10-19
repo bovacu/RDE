@@ -133,7 +133,7 @@ bool rde_util_check_opengl_error(const char* _message) {
 //		  an error that the first method can generate on some images.
 //
 //		- 2D rendering:
-//			- Camera system
+//			- [DONE] Camera system
 //			- [DONE] Texture rendering
 //			- Debug and non debug geometry rendering
 //			- [DONE] Spritebatch
@@ -141,16 +141,21 @@ bool rde_util_check_opengl_error(const char* _message) {
 //			- CPU Textures
 //
 //		- Basic 3D:
-//			- Camera system
-//			- 3D mathematical operations
-//			- Renderer
+//			- [DONE] Camera system
+//			- [DONE] 3D mathematical operations
+//			- [DONE] Renderer
 //			- [DONE] Mesh creation and loading
-//			- [DONE] Model loading
-//			- Texturing and materials
+//			- [DONE(obj), NOT DONE(glft)] Model loading
+//			- [DONE] Texturing and [NOT COMPLETELY DONE] materials
 //			- [DONE] Instancing (3d batching)
 //			- Lighting
+//				- [DONE] Directional
+//				- Point
+//				- Spot
+//				- Shadows
 //			- Model animations
 //			- Text
+//			- [DONE] Line rendering
 //
 //		- Other:
 //			- Render Textures
@@ -377,6 +382,17 @@ rde_batch_3d rde_struct_create_batch_3d() {
 	return _b;
 }
 
+typedef struct {
+	rde_texture* texture;
+	rde_material_light_data material_light_data;
+} rde_material;
+rde_material rde_struct_create_material() {
+	rde_material _m;
+	_m.texture = NULL;
+	_m.material_light_data = rde_struct_create_material_light_data();
+	return _m;
+}
+
 struct rde_mesh {
 	size_t vertex_count;
 	size_t index_count;
@@ -405,30 +421,19 @@ struct rde_mesh {
 	bool free_vertex_texture_coordinates_on_end;
 	bool free_vertex_texture_on_end;
 	bool free_indices_on_end;
-};
 
-typedef struct {
-	rde_texture* texture;
-} rde_model_material;
-rde_model_material rde_struct_create_model_material() {
-	rde_model_material _m;
-	_m.texture = NULL;
-	return _m;
-}
+	rde_material* material_array;
+	unsigned int material_array_size;
+};
 
 struct rde_model {
 	rde_mesh* mesh_array;
 	unsigned int mesh_array_size;
-
-	rde_model_material* material_array;
-	unsigned int material_array_size;
 };
 rde_model rde_struct_create_model() {
 	rde_model _m;
 	_m.mesh_array = NULL;
 	_m.mesh_array_size = 0;
-	_m.material_array = NULL;
-	_m.material_array_size = 0;
 	return _m;
 }
 
@@ -445,15 +450,6 @@ rde_directional_light rde_struct_create_directional_light() {
 	_d.diffuse_color = (rde_vec_3F) { 0.5f, 0.5f, 0.5f };
 	_d.specular_color = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
 	return _d;
-}
-
-struct rde_material {
-	float shininess;
-};
-rde_material rde_struct_create_material() {
-	rde_material _m;
-	_m.shininess = 1.0f;
-	return _m;
 }
 
 #endif
