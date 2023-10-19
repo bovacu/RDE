@@ -296,6 +296,22 @@ rde_font rde_struct_create_font() {
 }
 
 typedef struct {
+	rde_vec_3F position;
+	int color;
+	rde_vec_2F texture_coordinates;
+} rde_vertex_2d;
+rde_vertex_2d rde_struct_create_vertex_2d() {
+	rde_vertex_2d _v;
+	_v.position.x = 0.f;
+	_v.position.y = 0.f;
+	_v.position.z = 0.f;
+	_v.texture_coordinates.x = 0.f;
+	_v.texture_coordinates.y = 0.f;
+	_v.color = 0xFFFFFF;
+	return _v;
+}
+
+typedef struct {
 	rde_shader* shader;
 	rde_texture texture;
 	rde_vertex_2d* vertices;
