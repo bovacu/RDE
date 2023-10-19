@@ -188,5 +188,11 @@ void performance_test_3d_init() {
 	}
 
 	performance_test_3d_model = rde_rendering_load_obj_model("hub_assets/performance_test/pumpkin_orange_jackolantern.obj");
+	rde_rendering_model_set_light_data(performance_test_3d_model, (rde_material_light_data) {
+	                                   .shininess = 1.f,
+	                                   .ka = 1.f,
+	                                   .kd = 1.f,
+	                                   .ks = 1.f,
+	});
 	performance_test_3d_amount_to_show = 1;
 }
