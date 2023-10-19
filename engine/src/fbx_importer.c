@@ -1,6 +1,7 @@
 #if defined(RDE_FBX_MODULE) && defined(RDE_RENDERING_MODULE)
 
 #include "ufbx/ufbx.c"
+rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const char* _texture_path);
 
 void parse_3_vertices_face_fbx(unsigned int _i, unsigned int _v, unsigned int* _mesh_indices, 
                                float* _mesh_positions, float* _mesh_texcoords, ufbx_face* _face, ufbx_mesh* _mesh,

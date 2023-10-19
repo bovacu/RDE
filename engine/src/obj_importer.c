@@ -17,6 +17,8 @@ typedef struct {
 const int NO_VERTEX_UVS = 0b00000001;
 const int NO_VERTEX_NORMALS = 0b00000010;
 
+rde_model* rde_rendering_load_obj_model(const char* _obj_path);
+
 void separate_into_floats(char* _buffer, float** _arr, size_t* _size, const char* _path, const char* _where, int _line) {
 	char* _ptr = strtok(_buffer, " ");
 	_ptr = strtok(NULL, " "); // remove 'v', 'vt' or 'vn'

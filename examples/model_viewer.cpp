@@ -119,7 +119,7 @@ void model_viewer_on_event(rde_event* _event, rde_window* _window) {
 			if(model_viewer_model != NULL) {
 				rde_rendering_model_unload(model_viewer_model);
 			}
-			model_viewer_model = rde_rendering_load_obj_model(_event->data.drag_and_drop_data.file_path);
+			model_viewer_model = rde_rendering_model_load(_event->data.drag_and_drop_data.file_path);
 		}
 	}
 }

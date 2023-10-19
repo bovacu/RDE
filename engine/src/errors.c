@@ -15,6 +15,7 @@
 #define RDE_ERROR_GLAD_INIT "Failed to initialize GLAD.\n"
 #define RDE_ERROR_SANITIZATION_PATH "Path '%s' is greater than the output sanitized buffer size '%u'\n"
 #define RDE_ERROR_MESSAGE_BOX "Only 'RDE_LOG_LEVEL_INFO', 'RDE_LOG_LEVEL_WARNING', 'RDE_LOG_LEVEL_ERROR' work on rde_engine_show_message_box. Defaulting to 'RDE_LOG_LEVEL_INFO'"
+#define RDE_ERROR_FEATURE_NOT_SUPPORTED_YET "Feature '%s' is not supported or implemented yet."
 
 #ifdef RDE_AUDIO_MODULE
 #define RDE_ERROR_MA_CONTEXT "Failed to initialize context.\n"
@@ -22,6 +23,11 @@
 #define RDE_ERROR_MA_DEVICE_INIT "Could not init audio device. Error code for MiniAudio %d\n"
 #define RDE_ERROR_MA_DEVICE_START "Could not start the audio device to play sounds. Error code for MiniAudio %d\n"
 #define RDE_ERROR_MA_FILE_NOT_FOUND "Could not load sound '%s'. error code for MiniAudio %d.\n"
+#endif
+
+#ifdef RDE_RENDERING_MODULE
+#define RDE_ERROR_RENDERING_MODEL_MODULE_FORMAT_NOT_COMPILED "Tried to load model '%s' format that was not compiled as a module in RDE, to fix this error change to another format or compile RDE with module '%s'."
+#define RDE_ERROR_RENDERING_MODEL_UNSUPPORTED_FORMAT "Tried to load model '%s' which has an unsupported format '%s'."
 #endif
 
 #ifdef RDE_FBX_MODULE

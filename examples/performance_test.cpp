@@ -187,7 +187,7 @@ void performance_test_3d_init() {
 		performance_test_3d_transforms[_i].position = (rde_vec_3F) { (float)rde_math_get_random_int(-10, 10), (float)rde_math_get_random_int(-10, 10), (float)rde_math_get_random_int(-50, 0) };
 	}
 
-	performance_test_3d_model = rde_rendering_load_obj_model("hub_assets/performance_test/pumpkin_orange_jackolantern.obj");
+	performance_test_3d_model = rde_rendering_model_load("hub_assets/performance_test/pumpkin_orange_jackolantern.obj");
 	rde_rendering_model_set_light_data(performance_test_3d_model, (rde_material_light_data) {
 	                                   .shininess = 1.f,
 	                                   .ka = 1.f,

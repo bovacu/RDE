@@ -1811,18 +1811,11 @@ RDE_FUNC void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _ind
 RDE_FUNC void rde_rendering_mesh_set_vertex_colors(rde_mesh* _mesh, unsigned int* _colors, bool _free_colors_on_destroy); // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example) and uploads to GPU
 RDE_FUNC void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, bool _free_normals_on_destroy); // sets the normals of the vertices, each position must have 3 floats (x, y, z) and uploads to GPU
 RDE_FUNC void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, unsigned int _texture_coords_size, float* _texture_coords, rde_texture* _texture, bool _free_texture_coords_on_destroy); // sets the data to draw a mesh with a texture. each text_coord has 2 floats (x, y) and neither text_coords nor texture can be NULL // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example)
+RDE_FUNC size_t rde_rendering_mesh_get_vertices_count(rde_mesh* _mesh);
 RDE_FUNC void rde_rendering_mesh_destroy(rde_mesh* _mesh);
 
-#ifdef RDE_FBX_MODULE
-RDE_FUNC rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const char* _texture_path);
-#endif
-
-#ifdef RDE_OBJ_MODULE
-RDE_FUNC rde_model* rde_rendering_load_obj_model(const char* _obj_path);
-#endif
-
 #if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)
-RDE_FUNC size_t rde_rendering_mesh_get_vertices_count(rde_mesh* _mesh);
+RDE_FUNC rde_model* rde_rendering_model_load(const char* _model_path);
 RDE_FUNC size_t rde_rendering_model_get_vertices_count(rde_model* _model);
 RDE_FUNC void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data);
 RDE_FUNC rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model);

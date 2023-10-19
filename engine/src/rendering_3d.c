@@ -12,6 +12,10 @@ static rde_texture* DEFAULT_TEXTURE;
 #define RDE_MAX_MODELS_PER_DRAW 1000
 #define RDE_MAX_LINES_PER_DRAW 10000
 
+#define RDE_OBJ_EXTENSION "obj"
+#define RDE_FBX_EXTENSION "fbx"
+#define RDE_GLTF_EXTENSION "gltf"
+
 static rde_batch_3d current_batch_3d;
 
 #include "rendering_3d_default_meshes.c"
@@ -24,6 +28,10 @@ void rde_rendering_flush_batch_3d();
 void rde_rendering_flush_line_batch();
 void rde_rendering_reset_batch_3d();
 void rde_rendering_reset_line_batch();
+rde_mesh rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count);
+
+#include "fbx_importer.c"
+#include "obj_importer.c"
 
 void rde_create_line_batch_buffers() {
 	glGenVertexArrays(1, &current_batch_3d.line_batch.vertex_array_object);
@@ -245,6 +253,26 @@ rde_mesh* rde_struct_memory_mesh_create(size_t _vertex_count, size_t _index_coun
 	_mesh->material_array_size = 0;
 
 	return _mesh;
+}
+
+rde_model* rde_rendering_model_load(const char* _model_path) {
+	const char* _extension = rde_util_file_get_name_extension(_model_path);
+
+	if(strcmp(_extension, RDE_FBX_EXTENSION) == 0) {
+		rde_critical_error(true, RDE_ERROR_FEATURE_NOT_SUPPORTED_YET, "rde_rendering_model_load for GLTF");
+	} else if(strcmp(_extension, RDE_OBJ_EXTENSION) == 0) {
+#if defined(RDE_OBJ_MODULE) && defined(RDE_RENDERING_MODULE)
+		return rde_rendering_load_obj_model(_model_path);
+#else
+		rde_critical_error(true, RDE_ERROR_RENDERING_MODEL_MODULE_FORMAT_NOT_COMPILED, _model_path, _extension);
+#endif
+	} else if(strcmp(_extension, RDE_GLTF_EXTENSION) == 0) {
+		rde_critical_error(true, RDE_ERROR_FEATURE_NOT_SUPPORTED_YET, "rde_rendering_model_load for GLTF");
+	} else {
+		rde_critical_error(true, RDE_ERROR_RENDERING_MODEL_UNSUPPORTED_FORMAT, _model_path, _extension);
+	}
+
+	return NULL;
 }
 
 void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _indices, bool _free_indices_on_destroy) {
