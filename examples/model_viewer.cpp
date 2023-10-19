@@ -247,6 +247,7 @@ void model_viewer_draw_imgui() {
 
 void model_viewer_on_render(float _dt, rde_window* _window) {
 	UNUSED(_dt)
+	model_viewer_draw_grid(&model_viewer_camera, _window);
 	model_viewer_draw_3d(_window, _dt);
 	model_viewer_draw_imgui();
 }
