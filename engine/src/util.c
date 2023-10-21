@@ -1,3 +1,28 @@
+#define RDE_IMPLEMENT_SAFE_ARR_ACCESS(_type)																								\
+_type rde_arr_s_get_##_type(unsigned int _index, _type* _arr, size_t _arr_size, const char* _error) {										\
+	rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu' in '%s'.\n", _index, _arr_size, _error);	\
+	return _arr[_index];																													\
+}
+#define RDE_IMPLEMENT_SAFE_ARR_SET(_type)																									\
+void rde_arr_s_set_##_type(unsigned int _index, _type _value, _type* _arr, size_t _arr_size, const char* _error) {							\
+	rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu' in '%s'.\n", _index, _arr_size, _error);	\
+	_arr[_index] = _value;																													\
+}
+
+RDE_IMPLEMENT_SAFE_ARR_ACCESS(int)
+RDE_IMPLEMENT_SAFE_ARR_ACCESS(uint)
+RDE_IMPLEMENT_SAFE_ARR_ACCESS(size_t)
+RDE_IMPLEMENT_SAFE_ARR_ACCESS(short)
+RDE_IMPLEMENT_SAFE_ARR_ACCESS(float)
+RDE_IMPLEMENT_SAFE_ARR_ACCESS(double)
+
+RDE_IMPLEMENT_SAFE_ARR_SET(int)
+RDE_IMPLEMENT_SAFE_ARR_SET(uint)
+RDE_IMPLEMENT_SAFE_ARR_SET(size_t)
+RDE_IMPLEMENT_SAFE_ARR_SET(short)
+RDE_IMPLEMENT_SAFE_ARR_SET(float)
+RDE_IMPLEMENT_SAFE_ARR_SET(double)
+
 void rde_util_sanitaize_path(const char* _path, char* _sanitized, size_t _sanitized_size) {
 	rde_critical_error(strlen(_path) > _sanitized_size, RDE_ERROR_SANITIZATION_PATH, _path, _sanitized_size);
 	memset(_sanitized, 0, _sanitized_size);

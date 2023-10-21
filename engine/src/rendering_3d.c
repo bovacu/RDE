@@ -20,6 +20,25 @@ static rde_batch_3d current_batch_3d;
 
 #include "rendering_3d_default_meshes.c"
 
+typedef struct {
+	float* positions;
+	size_t positions_size;
+
+	uint* indices;
+	size_t indices_size; 
+	
+	float* texcoords;
+	size_t texcoords_size;
+	
+	uint* colors;
+	size_t colors_size;
+
+	float* normals;
+	size_t normals_size;
+
+	rde_texture* texture;
+} rde_mesh_gen_data;
+
 void rde_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh, size_t _extra_floats);
 void rde_rendering_try_flush_line_batch(rde_shader* _shader, unsigned short _thickness, size_t _extra_floats);
 void rde_rendering_try_create_batch_3d(rde_shader* _shader, rde_mesh* _mesh);
@@ -28,7 +47,7 @@ void rde_rendering_flush_batch_3d();
 void rde_rendering_flush_line_batch();
 void rde_rendering_reset_batch_3d();
 void rde_rendering_reset_line_batch();
-rde_mesh rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count);
+rde_mesh rde_struct_create_mesh(rde_mesh_gen_data* _data);
 
 #include "fbx_importer.c"
 #include "obj_importer.c"
@@ -54,6 +73,9 @@ void rde_create_line_batch_buffers() {
 }
 
 void rde_destroy_line_batch_buffers() {
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 	glDeleteBuffers(1, &current_batch_3d.line_batch.vertex_buffer_object);
 	glDeleteVertexArrays(1, &current_batch_3d.line_batch.vertex_array_object);
 
@@ -153,64 +175,156 @@ float* rde_rendering_mesh_calculate_normals(float* _vertex_positions, size_t _in
 	return _normals;
 }
 
-rde_mesh rde_struct_create_mesh(size_t _vertex_count, size_t _indices_count) {
+rde_mesh rde_struct_create_mesh(rde_mesh_gen_data* _data) {
 	rde_mesh _mesh;
 	_mesh.vao = 0;
 	
+	rde_util_check_opengl_error("ERROR: MESH - Start");
+
 	GLuint _vao = 0;
+	printf("Start mesh generation\n");
 	glGenVertexArrays(1, &_vao);
-	rde_util_check_opengl_error("ERROR: Creating mesh");
+	printf("Mesh VAO: %u\n", _vao);
+	rde_util_check_opengl_error("ERROR: MESH - VAO");
 
 	_mesh.vao = _vao;
-	_mesh.vertex_count = _vertex_count;
-	_mesh.vertex_positions = NULL;
-	_mesh.vertex_colors = NULL;
-	_mesh.index_count = _indices_count;
-	_mesh.vertex_normals = NULL;
-	_mesh.vertex_texture_coordinates = NULL;
-	_mesh.indices = NULL;
-	_mesh.texture = NULL;
+	_mesh.vertex_count = _data->positions_size;
+	_mesh.vertex_positions = _data->positions;
+	_mesh.vertex_colors = _data->colors;
+	_mesh.vertex_normals = _data->normals;
+	_mesh.vertex_texcoords = _data->texcoords;
+
+	_mesh.index_count = _data->indices_size;
+	_mesh.indices = _data->indices;
+	
+	_mesh.texture = _data->texture;
+
 	_mesh.transforms = NULL;
 	_mesh.transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW );
 	memset(_mesh.transforms, 0, RDE_MAX_MODELS_PER_DRAW);
 
-	_mesh.vbo[0] = RDE_UINT_MAX;
-	_mesh.vbo[1] = RDE_UINT_MAX;
-	_mesh.vbo[2] = RDE_UINT_MAX;
-	_mesh.vbo[3] = RDE_UINT_MAX;
-
-	_mesh.ibo = RDE_UINT_MAX;
-
-	_mesh.free_vertex_positions_on_end = false;
-	_mesh.free_vertex_colors_on_end = false;
-	_mesh.free_vertex_normals_on_end = false;
-	_mesh.free_vertex_texture_coordinates_on_end = false;
-	_mesh.free_vertex_texture_on_end = false;
-	_mesh.free_indices_on_end = false;
-
 	glBindVertexArray(_mesh.vao);
+	rde_util_check_opengl_error("ERROR: MESH - Bind VAO");
+
+	size_t _indices_size = sizeof(unsigned int) * _mesh.index_count;
+	printf("Start indices: %zu\n", _indices_size / sizeof(unsigned int));
+	glGenBuffers(1, &_mesh.ibo);
+	rde_util_check_opengl_error("ERROR: MESH - Gen VBO Indices");
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh.ibo);
+	rde_util_check_opengl_error("ERROR: MESH - Bind VBO Indices");
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices_size, _mesh.indices, GL_STATIC_DRAW);
+	rde_util_check_opengl_error("ERROR: MESH - Indices VBO Set Data");
+	printf("Ended indices\n");
+	
+	size_t _positions_size = sizeof(float) * _mesh.vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION;
+	printf("Start positions: %zu\n", _positions_size / sizeof(float));
+	glGenBuffers(1, &_mesh.vbo[0]);
+	rde_util_check_opengl_error("ERROR: MESH - Gen VBO Positions");
+	glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[0]);
+	rde_util_check_opengl_error("ERROR: MESH - Bind VBO Positions");
+	glBufferData(GL_ARRAY_BUFFER, _positions_size, _mesh.vertex_positions, GL_STATIC_DRAW);
+	rde_util_check_opengl_error("ERROR: MESH - Positions VBO Set Data");
+	glEnableVertexAttribArray(0);
+	rde_util_check_opengl_error("ERROR: MESH - Positions VBO Enable Attrib");
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	rde_util_check_opengl_error("ERROR: MESH - Positions VBO Set Attrib Data");
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	printf("Ended positions\n");
+
+	size_t _colors_size = sizeof(unsigned int) * _mesh.vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_COLOR;
+	printf("Start colors: %zu\n", _colors_size / sizeof(unsigned int));
+	glGenBuffers(1, &_mesh.vbo[1]);
+	rde_util_check_opengl_error("ERROR: MESH - Gen VBO Color");
+	glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[1]);
+	rde_util_check_opengl_error("ERROR: MESH - Bind VBO Color");
+	glBufferData(GL_ARRAY_BUFFER, _colors_size, _mesh.vertex_colors, GL_STATIC_DRAW);
+	rde_util_check_opengl_error("ERROR: MESH - Color VBO Set Data");
+	glEnableVertexAttribArray(1);
+	rde_util_check_opengl_error("ERROR: MESH - Color VBO Enable Attrib");
+	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, 0);
+	rde_util_check_opengl_error("ERROR: MESH - Color VBO Set Attrib Data");
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	printf("Ended indices\n");
+
+	if(_data->normals != NULL && _data->normals_size > 0) {
+		size_t _normals_size = sizeof(float) * _mesh.vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL;
+		printf("Start normals: %zu\n", _normals_size / sizeof(float));
+		glGenBuffers(1, &_mesh.vbo[2]);
+		rde_util_check_opengl_error("ERROR: MESH - Gen VBO Normal");
+		glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[2]);
+		rde_util_check_opengl_error("ERROR: MESH - Bind VBO Normal");
+		glBufferData(GL_ARRAY_BUFFER, _normals_size, _mesh.vertex_normals, GL_STATIC_DRAW);
+		rde_util_check_opengl_error("ERROR: MESH - Normal VBO Set Data");
+		glEnableVertexAttribArray(2);
+		rde_util_check_opengl_error("ERROR: MESH - Normal VBO Enable Attrib");
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		rde_util_check_opengl_error("ERROR: MESH - Normal VBO Set Attrib Data");
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		printf("Ended normals\n");
+	}
+
+	if(_data->texcoords != NULL && _data->texcoords_size > 0) {
+		size_t _texcoords_size = sizeof(float) * _mesh.vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD;
+		printf("Start texcoords: %zu\n", _texcoords_size / sizeof(float));
+		glGenBuffers(1, &_mesh.vbo[3]);
+		rde_util_check_opengl_error("ERROR: MESH - Gen VBO Texcoords");
+		glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[3]);
+		rde_util_check_opengl_error("ERROR: MESH - Bind VBO Texcoords");
+		glBufferData(GL_ARRAY_BUFFER, _texcoords_size, _mesh.vertex_texcoords, GL_STATIC_DRAW);
+		rde_util_check_opengl_error("ERROR: MESH - Texcoords VBO Set Data");
+		glEnableVertexAttribArray(3);
+		rde_util_check_opengl_error("ERROR: MESH - Texcoords VBO Enable Attrib");
+		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		rde_util_check_opengl_error("ERROR: MESH - Texcoords VBO Set Attrib Data");
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		printf("Ended texcoords\n");
+	}
+
+	printf("Start transforms: %d\n", RDE_MAX_MODELS_PER_DRAW);
 	glGenBuffers(1, &_mesh.vbo[4]);
+	rde_util_check_opengl_error("ERROR: MESH - Gen VBO Transform");
 	glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[4]);
+	rde_util_check_opengl_error("ERROR: MESH - Bind VBO Transform");
 	glBufferData(GL_ARRAY_BUFFER, sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW, NULL, GL_DYNAMIC_DRAW);
+	rde_util_check_opengl_error("ERROR: MESH - VBO Transform Set Data");
+	
 	glEnableVertexAttribArray(4);
+	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 4");
 	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)0);
+	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 4");
+
 	glEnableVertexAttribArray(5);
+	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 5");
 	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
+	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 5");
+
 	glEnableVertexAttribArray(6);
+	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 6");
 	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 8));
+	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 6");
+
 	glEnableVertexAttribArray(7);
+	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 7");
 	glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 12));
+	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 7");
 
 	glVertexAttribDivisor(4, 1);
+	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 4");
     glVertexAttribDivisor(5, 1);
+	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 5");
     glVertexAttribDivisor(6, 1);
+	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 6");
     glVertexAttribDivisor(7, 1);
-
+	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 7");
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	printf("Ended transforms\n");
 
-	_mesh.material_array = NULL;
-	_mesh.material_array_size = 0;
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	_mesh.material = rde_struct_create_material();
+
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Created mesh with %zu vertices and %zu indices. VAO: %u\n", _mesh.vertex_count, _mesh.index_count, _vao);
 
 	return _mesh;
 }
@@ -229,7 +343,7 @@ rde_mesh* rde_struct_memory_mesh_create(size_t _vertex_count, size_t _index_coun
 	_mesh->vertex_colors = NULL;
 	_mesh->index_count = _index_count;
 	_mesh->vertex_normals = NULL;
-	_mesh->vertex_texture_coordinates = NULL;
+	_mesh->vertex_texcoords = NULL;
 	_mesh->indices = NULL;
 	_mesh->texture = NULL;
 	_mesh->transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW);
@@ -245,12 +359,11 @@ rde_mesh* rde_struct_memory_mesh_create(size_t _vertex_count, size_t _index_coun
 	_mesh->free_vertex_positions_on_end = false;
 	_mesh->free_vertex_colors_on_end = false;
 	_mesh->free_vertex_normals_on_end = false;
-	_mesh->free_vertex_texture_coordinates_on_end = false;
+	_mesh->free_vertex_texcoords_on_end = false;
 	_mesh->free_vertex_texture_on_end = false;
 	_mesh->free_indices_on_end = false;
 
-	_mesh->material_array = NULL;
-	_mesh->material_array_size = 0;
+	_mesh->material = rde_struct_create_material();
 
 	return _mesh;
 }
@@ -275,131 +388,6 @@ rde_model* rde_rendering_model_load(const char* _model_path) {
 	return NULL;
 }
 
-void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _indices, bool _free_indices_on_destroy) {
-	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
-	rde_critical_error(_indices == NULL, RDE_ERROR_NO_NULL_ALLOWED, "indices");
-	
-	size_t _indices_size = sizeof(unsigned int) * _mesh->index_count;
-	glBindVertexArray(_mesh->vao);
-	if(_mesh->ibo == RDE_UINT_MAX) {
-		glGenBuffers(1, &_mesh->ibo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->ibo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices_size, _indices, GL_STATIC_DRAW);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	} else {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->ibo);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, _indices_size, _indices);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	}
-	glBindVertexArray(0);
-
-	_mesh->indices = _indices;
-	_mesh->free_indices_on_end = _free_indices_on_destroy;
-}
-
-void rde_rendering_mesh_set_vertex_positions(rde_mesh* _mesh, float* _positions, bool _free_positions_on_destroy) {
-	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
-	rde_critical_error(_positions == NULL, RDE_ERROR_NO_NULL_ALLOWED, "positions");
-
-	size_t _positions_size = sizeof(float) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION;
-	glBindVertexArray(_mesh->vao);
-	if(_mesh->vbo[0] == RDE_UINT_MAX) {
-		glGenBuffers(1, &_mesh->vbo[0]);
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[0]);
-		glBufferData(GL_ARRAY_BUFFER, _positions_size, _positions, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	} else {
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[0]);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, _positions_size, _positions);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-	glBindVertexArray(0);
-
-	_mesh->vertex_positions = _positions;
-	_mesh->free_vertex_positions_on_end = _free_positions_on_destroy;
-}
-
-void rde_rendering_mesh_set_vertex_colors(rde_mesh* _mesh, unsigned int* _colors, bool _free_colors_on_destroy) {
-	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
-	rde_critical_error(_colors == NULL, RDE_ERROR_NO_NULL_ALLOWED, "colors");
-
-	size_t _colors_size = sizeof(unsigned int) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_COLOR;
-	glBindVertexArray(_mesh->vao);
-	if(_mesh->vbo[1] == RDE_UINT_MAX) {
-		glGenBuffers(1, &_mesh->vbo[1]);
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[1]);
-		glBufferData(GL_ARRAY_BUFFER, _colors_size, _colors, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	} else {
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[1]);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, _colors_size, _colors);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-	glBindVertexArray(0);
-
-	_mesh->vertex_colors = _colors;
-	_mesh->free_vertex_colors_on_end = _free_colors_on_destroy;
-}
-
-void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, bool _free_normals_on_destroy) {
-	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
-	rde_critical_error(_normals == NULL, RDE_ERROR_NO_NULL_ALLOWED, "normals");
-
-	size_t _normals_size = sizeof(float) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL;
-	glBindVertexArray(_mesh->vao);
-	rde_util_check_opengl_error("rde_rendering_mesh_set_vertex_normals: VAO");
-	if(_mesh->vbo[2] == RDE_UINT_MAX) {
-		glGenBuffers(1, &_mesh->vbo[2]);
-		rde_util_check_opengl_error("rde_rendering_mesh_set_vertex_normals: VBO");
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[2]);
-		rde_util_check_opengl_error("rde_rendering_mesh_set_vertex_normals: BIND VBO");
-		glBufferData(GL_ARRAY_BUFFER, _normals_size, _normals, GL_STATIC_DRAW);
-		rde_util_check_opengl_error("rde_rendering_mesh_set_vertex_normals: BUFFER DATA VBO");
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	} else {
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[2]);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, _normals_size, _normals);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-	glBindVertexArray(0);
-
-	_mesh->vertex_normals = _normals;
-	_mesh->free_vertex_normals_on_end = _free_normals_on_destroy;
-}
-
-void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, unsigned int _texture_coords_size, float* _texture_coords, rde_texture* _texture, bool _free_texture_coords_on_destroy) {
-	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
-	rde_critical_error(_texture_coords == NULL, RDE_ERROR_NO_NULL_ALLOWED, "texture coordinates");
-	rde_critical_error(_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "texture");
-
-	size_t _texture_coords_array_size = sizeof(unsigned int) * _texture_coords_size * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD;
-	glBindVertexArray(_mesh->vao);
-	if(_mesh->vbo[3] == RDE_UINT_MAX) {
-		glGenBuffers(1, &_mesh->vbo[3]);
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[3]);
-		glBufferData(GL_ARRAY_BUFFER, _texture_coords_array_size, _texture_coords, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	} else {
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[3]);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, _texture_coords_array_size, _texture_coords);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-	glBindVertexArray(0);
-
-	_mesh->vertex_texture_coordinates = _texture_coords;
-	_mesh->texture = _texture;
-
-	_mesh->free_vertex_texture_coordinates_on_end = _free_texture_coords_on_destroy;
-}
-
 bool rde_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 	if(_mesh->indices == NULL) {
 		rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "Tried to render a mesh without vertex positions, skipping rendering for this mesh");
@@ -411,25 +399,15 @@ bool rde_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 		return false;
 	}
 
-	if(_mesh->vertex_colors == NULL) {
-		size_t _colors_size = sizeof(unsigned int) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_COLOR;
-		unsigned int* _colors = (unsigned int*)malloc(_colors_size);
-		for(size_t _i = 0; _i < _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_COLOR; _i++) {
-			_colors[_i] = RDE_COLOR_TO_HEX_COLOR(RDE_COLOR_WHITE);
-		}
-		rde_rendering_mesh_set_vertex_colors(_mesh, _colors, true);
-	}
-
-	// if(_mesh->vertex_normals == NULL) {
-	// 	float* _normals = rde_rendering_mesh_calculate_normals(_mesh->vertex_positions, _mesh->index_count, _mesh->vertex_count, _mesh->indices);
-	// 	rde_rendering_mesh_set_vertex_normals(_mesh, _normals, true);
-	// }
-
 	return true;
 }
 
 void rde_rendering_mesh_destroy(rde_mesh* _mesh) {
 	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 
 	if(_mesh->vbo[0] != RDE_UINT_MAX) {
 		glDeleteBuffers(1, &_mesh->vbo[0]);
@@ -457,35 +435,27 @@ void rde_rendering_mesh_destroy(rde_mesh* _mesh) {
 	}
 
 	glDeleteBuffers(1, &_mesh->ibo);
+	_mesh->ibo = RDE_UINT_MAX;
 
 	glDeleteVertexArrays(1, &_mesh->vao);
+	_mesh->vao = RDE_UINT_MAX;
 	
-	if(_mesh->free_vertex_positions_on_end) {
-		free(_mesh->vertex_positions);
-		_mesh->vertex_positions = NULL;
-	}
+	free(_mesh->vertex_positions);
+	_mesh->vertex_positions = NULL;
 
-	if(_mesh->free_vertex_colors_on_end) {
-		free(_mesh->vertex_colors);
-		_mesh->vertex_colors = NULL;
-	}
+	free(_mesh->vertex_colors);
+	_mesh->vertex_colors = NULL;
 
-	if(_mesh->free_vertex_normals_on_end) {
-		free(_mesh->vertex_normals);
-		_mesh->vertex_normals = NULL;
-	}
+	free(_mesh->vertex_normals);
+	_mesh->vertex_normals = NULL;
 
-	if(_mesh->free_vertex_texture_coordinates_on_end) {
-		free(_mesh->vertex_texture_coordinates);
-		_mesh->vertex_texture_coordinates = NULL;
-	}
+	free(_mesh->vertex_texcoords);
+	_mesh->vertex_texcoords = NULL;
 
-	if(_mesh->free_indices_on_end) {
-		free(_mesh->indices);
-		_mesh->indices = NULL;
-	}
+	free(_mesh->indices);
+	_mesh->indices = NULL;
 
-	if(_mesh->texture != NULL && _mesh->texture != DEFAULT_TEXTURE) {
+	if(_mesh->texture != NULL) {
 		rde_rendering_texture_unload(_mesh->texture);
 		_mesh->texture = NULL;
 	}
@@ -493,11 +463,7 @@ void rde_rendering_mesh_destroy(rde_mesh* _mesh) {
 	free(_mesh->transforms);
 	_mesh->transforms = NULL;
 
-	if(_mesh->material_array != NULL) {
-		stbds_arrfree(_mesh->material_array);
-		_mesh->material_array = NULL;
-		_mesh->material_array_size = 0;
-	}
+	_mesh->material = rde_struct_create_material();
 }
 
 
@@ -670,7 +636,7 @@ void rde_rendering_flush_batch_3d() {
 	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.diffuse_color"), _dl_diffuse.x, _dl_diffuse.y, _dl_diffuse.z);
 	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.specular_color"), _dl_specular.x, _dl_specular.y, _dl_specular.z);
 
-	rde_material_light_data _material = _mesh->material_array[0].material_light_data;
+	rde_material_light_data _material = _mesh->material.material_light_data;
 	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.shininess"), _material.shininess);
 	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.Ka"), _material.ka);
 	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.Kd"), _material.kd);
@@ -726,8 +692,9 @@ void rde_rendering_try_flush_line_batch(rde_shader* _shader, unsigned short _thi
 void rde_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh, size_t _extra_floats) {
 	bool _models_ok = current_batch_3d.amount_of_models_per_draw + 1 <= RDE_MAX_MODELS_PER_DRAW;
 	bool _shader_ok = current_batch_3d.shader == _shader;
+	bool _mesh_ok = current_batch_3d.mesh == _mesh;
 	bool _transforms_ok = current_batch_3d.amount_of_models_per_draw * _extra_floats + _extra_floats <= RDE_MAX_MODELS_PER_DRAW * _extra_floats;
-	if(_models_ok && _shader_ok && _transforms_ok) {
+	if(_models_ok && _shader_ok && _transforms_ok && _mesh_ok) {
 		return;
 	}
 
@@ -807,8 +774,7 @@ rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh) {
 	return (rde_mesh_data) {
 		.amount_of_vertices = _mesh->vertex_count,
 		.vertex_buffer_objects_ids = { _mesh->vbo[0],_mesh->vbo[1], _mesh->vbo[2], _mesh->vbo[3] },
-		.index_buffer_object_id = _mesh->ibo,
-		.amount_of_materials = stbds_arrlenu(_mesh->material_array)
+		.index_buffer_object_id = _mesh->ibo
 	};
 }
 
@@ -825,12 +791,12 @@ size_t rde_rendering_model_get_vertices_count(rde_model* _model) {
 void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "model");
 	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
-		_model->mesh_array[_i].material_array[0].material_light_data = _light_data;
+		_model->mesh_array[_i].material.material_light_data = _light_data;
 	}
 }
 rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "model");
-	return _model->mesh_array[0].material_array[0].material_light_data;
+	return _model->mesh_array[0].material.material_light_data;
 }
 
 

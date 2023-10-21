@@ -316,7 +316,8 @@ extern "C" {
 	"	vec3 _norm = normalize(normal);\n" \
 	"	vec3 _light_dir = normalize(-directional_light.direction);\n" \
 	"	float _diff = max(dot(_norm, _light_dir), 0.0);\n" \
-	"	vec3 _diffuse = material.Kd * directional_light.diffuse_color * _diff * texture(tex, text_coord).rgb;\n" \
+	"	vec3 _color_norm = vec3(color.r / 255f, color.g / 255f, color.b / 255f);\n" \
+	"	vec3 _diffuse = _color_norm * directional_light.diffuse_color * _diff * texture(tex, text_coord).rgb;\n" \
 	"	\n" \
 	"	vec3 _view_dir = normalize(camera_pos + frag_pos);\n" \
 	"	vec3 _reflect_dir = reflect(-_light_dir, _norm);\n" \
@@ -465,6 +466,11 @@ extern "C" {
 		freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);	\
 		freopen_s((FILE**)stdin, "CONIN$", "r", stdin);		\
 	}
+
+/// ====================== PLATFORM SPECIFIC TYPES ==========================
+
+typedef unsigned long ulong;
+typedef unsigned int uint;
 
 /// ============================== UTIL ====================================
 
@@ -625,14 +631,8 @@ extern "C" {
 	rde_log_color_inner(_color, _fmt, __VA_ARGS__);	\
 } while(0);
 
-/// ====================== PLATFORM SPECIFIC TYPES ==========================
-
-typedef unsigned long ulong;
-typedef unsigned int uint;
-
-
-
-
+#define RDE_SAFE_ARR_ACCESS(_type) RDE_FUNC _type rde_arr_s_get_##_type(unsigned int _index, _type* _arr, size_t _arr_size, const char* _error);
+#define RDE_SAFE_ARR_SET(_type) RDE_FUNC void rde_arr_s_set_##_type(unsigned int _index, _type _value, _type* _arr, size_t _arr_size, const char* _error);
 
 
 /// *************************************************************************************************
@@ -1060,6 +1060,21 @@ typedef enum {
 /// *                                		STRUCSTS                         						*
 /// *************************************************************************************************
 
+/// ================================= UTIL ==================================
+
+RDE_SAFE_ARR_ACCESS(int)
+RDE_SAFE_ARR_ACCESS(uint)
+RDE_SAFE_ARR_ACCESS(size_t)
+RDE_SAFE_ARR_ACCESS(short)
+RDE_SAFE_ARR_ACCESS(float)
+RDE_SAFE_ARR_ACCESS(double)
+
+RDE_SAFE_ARR_SET(int)
+RDE_SAFE_ARR_SET(uint)
+RDE_SAFE_ARR_SET(size_t)
+RDE_SAFE_ARR_SET(short)
+RDE_SAFE_ARR_SET(float)
+RDE_SAFE_ARR_SET(double)
 
 /// ================================= MATH ==================================
 
@@ -1438,7 +1453,6 @@ typedef struct {
 										// 3 -> texture coords (static)
 										// 4 -> transforms to render (dynamic)
 	unsigned int index_buffer_object_id;
-	int amount_of_materials;
 } rde_mesh_data;
 
 typedef struct rde_model rde_model;
@@ -1824,11 +1838,6 @@ RDE_FUNC void rde_rendering_2d_draw_text(const rde_transform* _transform, const 
 RDE_FUNC void rde_rendering_2d_end_drawing();
 
 RDE_FUNC rde_mesh* rde_struct_memory_mesh_create(size_t _vertex_count, size_t _indices_count); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
-RDE_FUNC void rde_rendering_mesh_set_vertex_positions(rde_mesh* _mesh, float* _positions, bool _free_positions_on_destroy); // sets the position of the vertices, each position must have 3 floats (x, y, z) and uploads to GPU
-RDE_FUNC void rde_rendering_mesh_set_indices(rde_mesh* _mesh, unsigned int* _indices, bool _free_indices_on_destroy); // sets the indices of the mesh, a quad should have 6 indices and uploads to GPU
-RDE_FUNC void rde_rendering_mesh_set_vertex_colors(rde_mesh* _mesh, unsigned int* _colors, bool _free_colors_on_destroy); // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example) and uploads to GPU
-RDE_FUNC void rde_rendering_mesh_set_vertex_normals(rde_mesh* _mesh, float* _normals, bool _free_normals_on_destroy); // sets the normals of the vertices, each position must have 3 floats (x, y, z) and uploads to GPU
-RDE_FUNC void rde_rendering_mesh_set_vertex_texture_data(rde_mesh* _mesh, unsigned int _texture_coords_size, float* _texture_coords, rde_texture* _texture, bool _free_texture_coords_on_destroy); // sets the data to draw a mesh with a texture. each text_coord has 2 floats (x, y) and neither text_coords nor texture can be NULL // sets the colors of the vertices, 1 usigned int for each vertex (0xFF0000FF is red, for example)
 RDE_FUNC rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh);
 RDE_FUNC void rde_rendering_mesh_destroy(rde_mesh* _mesh);
 

@@ -11,6 +11,9 @@ void rde_rendering_init_2d() {
 }
 
 void rde_rendering_end_2d() {
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 	glDeleteBuffers(1, &current_batch_2d.vertex_buffer_object);
 	glDeleteBuffers(1, &current_batch_2d.index_buffer_object);
 	glDeleteVertexArrays(1, &current_batch_2d.vertex_array_object);

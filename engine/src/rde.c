@@ -89,7 +89,7 @@
 size_t current_frame = 0;
 
 bool rde_util_check_opengl_error(const char* _message) {
-	GLenum _err;
+	GLenum _err = GL_NO_ERROR;
 	while((_err = glGetError()) != GL_NO_ERROR){
 		switch(_err) {
 			case GL_NO_ERROR:
@@ -405,7 +405,7 @@ struct rde_mesh {
 
 	float* vertex_positions;
 	float* vertex_normals;
-	float* vertex_texture_coordinates;
+	float* vertex_texcoords;
 	unsigned int* vertex_colors;
 	mat4* transforms;
 
@@ -424,12 +424,11 @@ struct rde_mesh {
 	bool free_vertex_positions_on_end;
 	bool free_vertex_colors_on_end;
 	bool free_vertex_normals_on_end;
-	bool free_vertex_texture_coordinates_on_end;
+	bool free_vertex_texcoords_on_end;
 	bool free_vertex_texture_on_end;
 	bool free_indices_on_end;
 
-	rde_material* material_array;
-	unsigned int material_array_size;
+	rde_material material;
 };
 
 struct rde_model {
@@ -887,11 +886,6 @@ void rde_engine_on_run() {
 			current_frame = 0;
 		}
 	}
-
-#ifdef RDE_RENDERING_MODULE
-	rde_rendering_end_2d();
-	rde_rendering_end_3d();
-#endif
 }
 
 bool rde_engine_is_running() {
@@ -938,6 +932,9 @@ void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _title, cons
 void rde_engine_destroy_engine() {
 
 #ifdef RDE_RENDERING_MODULE
+	rde_rendering_end_2d();
+	rde_rendering_end_3d();
+
 	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_atlases; _i++) {
 		if(ENGINE.atlases[_i].texture == NULL) {
 			continue;
@@ -991,7 +988,6 @@ void rde_engine_destroy_engine() {
 #ifdef RDE_AUDIO_MODULE
 	rde_audio_end();
 	free(ENGINE.sounds);
-	
 #endif
 
 	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
