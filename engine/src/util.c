@@ -1,11 +1,25 @@
 #define RDE_IMPLEMENT_SAFE_ARR_ACCESS(_type)																								\
-_type rde_arr_s_get_##_type(unsigned int _index, _type* _arr, size_t _arr_size, const char* _error) {										\
-	rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu' in '%s'.\n", _index, _arr_size, _error);	\
+_type rde_arr_s_get_##_type(unsigned int _index, _type* _arr, size_t _arr_size, char* _fmt, ...) {											\
+	if(_index >= _arr_size) {																												\
+		va_list _args;																														\
+		va_start(_args, _fmt);																												\
+		vfprintf(stdout, _fmt, _args);																										\
+		va_end(_args);																														\
+		printf("\n");																														\
+	}																																		\
+	rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu' in '%s'.\n", _index, _arr_size);			\
 	return _arr[_index];																													\
 }
 #define RDE_IMPLEMENT_SAFE_ARR_SET(_type)																									\
-void rde_arr_s_set_##_type(unsigned int _index, _type _value, _type* _arr, size_t _arr_size, const char* _error) {							\
-	rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu' in '%s'.\n", _index, _arr_size, _error);	\
+void rde_arr_s_set_##_type(unsigned int _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...) {								\
+	if(_index >= _arr_size) {																												\
+		va_list _args;																														\
+		va_start(_args, _fmt);																												\
+		vfprintf(stdout, _fmt, _args);																										\
+		va_end(_args);																														\
+		printf("\n");																														\
+	}																																		\
+	rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu''.\n", _index, _arr_size);				\
 	_arr[_index] = _value;																													\
 }
 

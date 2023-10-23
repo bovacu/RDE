@@ -304,25 +304,29 @@ extern "C" {
 	"in vec2 text_coord;\n" \
 	"in vec3 frag_pos;\n" \
 	"\n" \
-	"uniform sampler2D tex;\n" \
+	"uniform sampler2D tex_ka;\n" \
+	"uniform sampler2D tex_kd;\n" \
+	"uniform sampler2D tex_ks;\n" \
+	"uniform sampler2D tex_bump;\n" \
 	"uniform vec3 camera_pos;\n" \
 	"uniform rde_directional_light directional_light;\n" \
 	"uniform rde_material material;\n" \
 	"out vec4 color_out;\n" \
 	"\n" \
 	"void main(){\n" \
-	"	vec3 _ambient = material.Ka * directional_light.ambient_color * texture(tex, text_coord).rgb;\n" \
+	"	vec3 _ambient = material.Ka * directional_light.ambient_color * texture(tex_ka, text_coord).rgb;\n" \
 	"	\n" \
 	"	vec3 _norm = normalize(normal);\n" \
 	"	vec3 _light_dir = normalize(-directional_light.direction);\n" \
 	"	float _diff = max(dot(_norm, _light_dir), 0.0);\n" \
-	"	vec3 _color_norm = vec3(color.r / 255f, color.g / 255f, color.b / 255f);\n" \
-	"	vec3 _diffuse = _color_norm * directional_light.diffuse_color * _diff * texture(tex, text_coord).rgb;\n" \
+	"	//vec3 _color_norm = vec3(color.r / 255f, color.g / 255f, color.b / 255f);\n" \
+	"	vec3 _color_norm = vec3(1, 1, 1);\n" \
+	"	vec3 _diffuse = _color_norm * directional_light.diffuse_color * _diff * texture(tex_kd, text_coord).rgb;\n" \
 	"	\n" \
 	"	vec3 _view_dir = normalize(camera_pos + frag_pos);\n" \
 	"	vec3 _reflect_dir = reflect(-_light_dir, _norm);\n" \
 	"	float _spec = pow(max(dot(_view_dir, _reflect_dir), 0.0), material.shininess);\n" \
-	"	vec3 _specular = material.Ks * directional_light.specular_color * _spec * texture(tex, text_coord).rgb;\n" \
+	"	vec3 _specular = material.Ks * directional_light.specular_color * _spec * texture(tex_ks, text_coord).rgb;\n" \
 	"	vec3 _final_light = _ambient + _diffuse + _specular;\n" \
 	"	color_out = vec4(_final_light, 1.0);\n" \
 	"}"
@@ -631,8 +635,8 @@ typedef unsigned int uint;
 	rde_log_color_inner(_color, _fmt, __VA_ARGS__);	\
 } while(0);
 
-#define RDE_SAFE_ARR_ACCESS(_type) RDE_FUNC _type rde_arr_s_get_##_type(unsigned int _index, _type* _arr, size_t _arr_size, const char* _error);
-#define RDE_SAFE_ARR_SET(_type) RDE_FUNC void rde_arr_s_set_##_type(unsigned int _index, _type _value, _type* _arr, size_t _arr_size, const char* _error);
+#define RDE_SAFE_ARR_ACCESS(_type) RDE_FUNC _type rde_arr_s_get_##_type(unsigned int _index, _type* _arr, size_t _arr_size, char* _fmt, ...);
+#define RDE_SAFE_ARR_SET(_type) RDE_FUNC void rde_arr_s_set_##_type(unsigned int _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...);
 
 
 /// *************************************************************************************************
@@ -1452,7 +1456,6 @@ typedef struct {
 										// 2 -> normals (static), 
 										// 3 -> texture coords (static)
 										// 4 -> transforms to render (dynamic)
-	unsigned int index_buffer_object_id;
 } rde_mesh_data;
 
 typedef struct rde_model rde_model;

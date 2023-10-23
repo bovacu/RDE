@@ -389,19 +389,24 @@ rde_batch_3d rde_struct_create_batch_3d() {
 }
 
 struct rde_material {
-	rde_texture* texture;
+	rde_texture* map_ka;
+	rde_texture* map_kd;
+	rde_texture* map_ks;
+	rde_texture* map_bump;
 	rde_material_light_data material_light_data;
 };
 rde_material rde_struct_create_material() {
 	rde_material _m;
-	_m.texture = NULL;
+	_m.map_ka = NULL;
+	_m.map_kd = NULL;
+	_m.map_ks = NULL;
+	_m.map_bump = NULL;
 	_m.material_light_data = rde_struct_create_material_light_data();
 	return _m;
 }
 
 struct rde_mesh {
 	size_t vertex_count;
-	size_t index_count;
 
 	float* vertex_positions;
 	float* vertex_normals;
@@ -409,17 +414,12 @@ struct rde_mesh {
 	unsigned int* vertex_colors;
 	mat4* transforms;
 
-	rde_texture* texture;
-
-	unsigned int* indices;
-
 	unsigned int vao;
 	unsigned int vbo[5]; // 0 -> positions (static), 
 						 // 1 -> colors (static), 
 						 // 2 -> normals (static), 
 						 // 3 -> texture coords (static)
 						 // 4 -> transforms to render (dynamic)
-	unsigned int ibo;
 
 	bool free_vertex_positions_on_end;
 	bool free_vertex_colors_on_end;

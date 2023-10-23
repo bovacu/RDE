@@ -154,121 +154,121 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 	}
 }
 
-void model_viewer_draw_imgui() {
-	ImGui::Begin("Directional Light", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+ void model_viewer_draw_imgui() {
+ 	ImGui::Begin("Directional Light", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
-	float _vec[3] = { model_viewer_directional_light_direction.x, model_viewer_directional_light_direction.y, model_viewer_directional_light_direction.z };
-	if(ImGui::DragFloat3("Direction", _vec, 0.25f)) {
-		model_viewer_directional_light_direction.x = _vec[0];
-		model_viewer_directional_light_direction.y = _vec[1];
-		model_viewer_directional_light_direction.z = _vec[2];
-		rde_rendering_lighting_set_directional_light_direction(model_viewer_directional_light_direction);
-	}
+ 	float _vec[3] = { model_viewer_directional_light_direction.x, model_viewer_directional_light_direction.y, model_viewer_directional_light_direction.z };
+ 	if(ImGui::DragFloat3("Direction", _vec, 0.25f)) {
+ 		model_viewer_directional_light_direction.x = _vec[0];
+ 		model_viewer_directional_light_direction.y = _vec[1];
+ 		model_viewer_directional_light_direction.z = _vec[2];
+ 		rde_rendering_lighting_set_directional_light_direction(model_viewer_directional_light_direction);
+ 	}
 
-	float _vec_1[3] = { model_viewer_directional_light_ambient_color.x, model_viewer_directional_light_ambient_color.y, model_viewer_directional_light_ambient_color.z };
-	if(ImGui::DragFloat3("Ambient Color", _vec_1, 0.005f, 0.0f, 1.0f)) {
-		model_viewer_directional_light_ambient_color.x = _vec_1[0];
-		model_viewer_directional_light_ambient_color.y = _vec_1[1];
-		model_viewer_directional_light_ambient_color.z = _vec_1[2];
-		rde_rendering_lighting_set_directional_light_ambient_color_f(model_viewer_directional_light_ambient_color);
-	}
+ 	float _vec_1[3] = { model_viewer_directional_light_ambient_color.x, model_viewer_directional_light_ambient_color.y, model_viewer_directional_light_ambient_color.z };
+ 	if(ImGui::DragFloat3("Ambient Color", _vec_1, 0.005f, 0.0f, 1.0f)) {
+ 		model_viewer_directional_light_ambient_color.x = _vec_1[0];
+ 		model_viewer_directional_light_ambient_color.y = _vec_1[1];
+ 		model_viewer_directional_light_ambient_color.z = _vec_1[2];
+ 		rde_rendering_lighting_set_directional_light_ambient_color_f(model_viewer_directional_light_ambient_color);
+ 	}
 
-	float _vec_2[3] = { model_viewer_directional_light_diffuse_color.x, model_viewer_directional_light_diffuse_color.y, model_viewer_directional_light_diffuse_color.z };
-	if(ImGui::DragFloat3("Diffuse Color", _vec_2, 0.005f, 0.0f, 1.0f)) {
-		model_viewer_directional_light_diffuse_color.x = _vec_2[0];
-		model_viewer_directional_light_diffuse_color.y = _vec_2[1];
-		model_viewer_directional_light_diffuse_color.z = _vec_2[2];
-		rde_rendering_lighting_set_directional_light_diffuse_color_f(model_viewer_directional_light_diffuse_color);
-	}
+ 	float _vec_2[3] = { model_viewer_directional_light_diffuse_color.x, model_viewer_directional_light_diffuse_color.y, model_viewer_directional_light_diffuse_color.z };
+ 	if(ImGui::DragFloat3("Diffuse Color", _vec_2, 0.005f, 0.0f, 1.0f)) {
+ 		model_viewer_directional_light_diffuse_color.x = _vec_2[0];
+ 		model_viewer_directional_light_diffuse_color.y = _vec_2[1];
+ 		model_viewer_directional_light_diffuse_color.z = _vec_2[2];
+ 		rde_rendering_lighting_set_directional_light_diffuse_color_f(model_viewer_directional_light_diffuse_color);
+ 	}
 
-	float _vec_3[3] = { model_viewer_directional_light_specular_color.x, model_viewer_directional_light_specular_color.y, model_viewer_directional_light_specular_color.z };
-	if(ImGui::DragFloat3("Specular color", _vec_3, 0.005f, 0.0f, 1.0f)) {
-		model_viewer_directional_light_specular_color.x = _vec_3[0];
-		model_viewer_directional_light_specular_color.y = _vec_3[1];
-		model_viewer_directional_light_specular_color.z = _vec_3[2];
-		rde_rendering_lighting_set_directional_light_specular_color_f(model_viewer_directional_light_specular_color);
-	}
-	ImGui::End();
+ 	float _vec_3[3] = { model_viewer_directional_light_specular_color.x, model_viewer_directional_light_specular_color.y, model_viewer_directional_light_specular_color.z };
+ 	if(ImGui::DragFloat3("Specular color", _vec_3, 0.005f, 0.0f, 1.0f)) {
+ 		model_viewer_directional_light_specular_color.x = _vec_3[0];
+ 		model_viewer_directional_light_specular_color.y = _vec_3[1];
+ 		model_viewer_directional_light_specular_color.z = _vec_3[2];
+ 		rde_rendering_lighting_set_directional_light_specular_color_f(model_viewer_directional_light_specular_color);
+ 	}
+ 	ImGui::End();
 
-	ImGui::Begin("Model Transform", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-	float _position[3] = { model_viewer_transform.position.x, model_viewer_transform.position.y, model_viewer_transform.position.z };
-	if(ImGui::DragFloat3("Position", _position, 1.f)) {
-		model_viewer_transform.position.x = _position[0];
-		model_viewer_transform.position.y = _position[1];
-		model_viewer_transform.position.z = _position[2];
-	}
+ 	ImGui::Begin("Model Transform", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+ 	float _position[3] = { model_viewer_transform.position.x, model_viewer_transform.position.y, model_viewer_transform.position.z };
+ 	if(ImGui::DragFloat3("Position", _position, 1.f)) {
+ 		model_viewer_transform.position.x = _position[0];
+ 		model_viewer_transform.position.y = _position[1];
+ 		model_viewer_transform.position.z = _position[2];
+ 	}
 
-	ImGui::Separator();
-	float _radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.x);
+ 	ImGui::Separator();
+ 	float _radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.x);
 
-	if(ImGui::SliderAngle("Rotation X", &_radians, 0, 360)) {
-		model_viewer_transform.rotation.x = rde_math_radians_to_degrees(_radians);
-	}
+ 	if(ImGui::SliderAngle("Rotation X", &_radians, 0, 360)) {
+ 		model_viewer_transform.rotation.x = rde_math_radians_to_degrees(_radians);
+ 	}
 
-	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.y);
-	if(ImGui::SliderAngle("Rotation Y", &_radians, 0, 360)) {
-		model_viewer_transform.rotation.y = rde_math_radians_to_degrees(_radians);
-	}
+ 	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.y);
+ 	if(ImGui::SliderAngle("Rotation Y", &_radians, 0, 360)) {
+ 		model_viewer_transform.rotation.y = rde_math_radians_to_degrees(_radians);
+ 	}
 
-	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.z);
-	if(ImGui::SliderAngle("Rotation Z", &_radians, 0, 360)) {
-		model_viewer_transform.rotation.z = rde_math_radians_to_degrees(_radians);
-	}
+ 	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.z);
+ 	if(ImGui::SliderAngle("Rotation Z", &_radians, 0, 360)) {
+ 		model_viewer_transform.rotation.z = rde_math_radians_to_degrees(_radians);
+ 	}
 
-	ImGui::Separator();
-	static bool _proportional_scale = true;
+ 	ImGui::Separator();
+ 	static bool _proportional_scale = true;
 
-	if(!_proportional_scale) {
-		float _scale[3] = { model_viewer_transform.scale.x, model_viewer_transform.scale.y, model_viewer_transform.scale.z };
-		if(ImGui::DragFloat3("Scale", &model_viewer_transform.scale.x, 0.25f)) {
-			model_viewer_transform.scale.x = _scale[0];
-			model_viewer_transform.scale.y = _scale[1];
-			model_viewer_transform.scale.z = _scale[2];
-		}
-	} else {
-		if(ImGui::DragFloat("Scale", &model_viewer_transform.scale.x, 0.25f)) {
-			model_viewer_transform.scale.x = model_viewer_transform.scale.x;
-			model_viewer_transform.scale.y = model_viewer_transform.scale.x;
-			model_viewer_transform.scale.z = model_viewer_transform.scale.x;
-		}
-	}
+ 	if(!_proportional_scale) {
+ 		float _scale[3] = { model_viewer_transform.scale.x, model_viewer_transform.scale.y, model_viewer_transform.scale.z };
+ 		if(ImGui::DragFloat3("Scale", &model_viewer_transform.scale.x, 0.25f)) {
+ 			model_viewer_transform.scale.x = _scale[0];
+ 			model_viewer_transform.scale.y = _scale[1];
+ 			model_viewer_transform.scale.z = _scale[2];
+ 		}
+ 	} else {
+ 		if(ImGui::DragFloat("Scale", &model_viewer_transform.scale.x, 0.25f)) {
+ 			model_viewer_transform.scale.x = model_viewer_transform.scale.x;
+ 			model_viewer_transform.scale.y = model_viewer_transform.scale.x;
+ 			model_viewer_transform.scale.z = model_viewer_transform.scale.x;
+ 		}
+ 	}
 
-	ImGui::Checkbox("Proportional Scale", &_proportional_scale);
-	ImGui::End();
+ 	ImGui::Checkbox("Proportional Scale", &_proportional_scale);
+ 	ImGui::End();
 
-	ImGui::Begin("Model Material", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-	rde_material_light_data _light = model_viewer_model != NULL ? rde_rendering_model_get_light_data(model_viewer_model) : rde_struct_create_material_light_data();
-	float _vec_4[4] = { _light.ka, _light.kd, _light.ks, _light.shininess };
-	if(ImGui::DragFloat4("K Indices", _vec_4, 0.0005f, 0.0f, 1.0f)) {
-		rde_material_light_data _new_light {
-			.shininess = _vec_4[3],
-			.ka = _vec_4[0],
-			.kd = _vec_4[1],
-			.ks = _vec_4[2]
-		};
-		if(model_viewer_model != NULL) {
-			rde_rendering_model_set_light_data(model_viewer_model, _new_light);
-		}
-	}
-	ImGui::Checkbox("Wireframe", &model_viewer_draw_wireframe);
-	ImGui::End();
+ 	ImGui::Begin("Model Material", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+ 	rde_material_light_data _light = model_viewer_model != NULL ? rde_rendering_model_get_light_data(model_viewer_model) : rde_struct_create_material_light_data();
+ 	float _vec_4[4] = { _light.ka, _light.kd, _light.ks, _light.shininess };
+ 	if(ImGui::DragFloat4("K Indices", _vec_4, 0.0005f, 0.0f, 1.0f)) {
+ 		rde_material_light_data _new_light {
+ 			.shininess = _vec_4[3],
+ 			.ka = _vec_4[0],
+ 			.kd = _vec_4[1],
+ 			.ks = _vec_4[2]
+ 		};
+ 		if(model_viewer_model != NULL) {
+ 			rde_rendering_model_set_light_data(model_viewer_model, _new_light);
+ 		}
+ 	}
+ 	ImGui::Checkbox("Wireframe", &model_viewer_draw_wireframe);
+ 	ImGui::End();
 
-	ImGui::Begin("Camera Options", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-	ImGui::DragFloat("FOV", &model_viewer_camera.fov, 1, 0, 180);
+ 	ImGui::Begin("Camera Options", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+ 	ImGui::DragFloat("FOV", &model_viewer_camera.fov, 1, 0, 180);
 
-	float _near_far[2] = { model_viewer_camera.near_far.x, model_viewer_camera.near_far.y };
-	if(ImGui::DragFloat2("Near/Far", _near_far, 1, 0, 10000)) {
-		model_viewer_camera.near_far.x = _near_far[0];
-		model_viewer_camera.near_far.y = _near_far[1];
-	}
-	ImGui::End();
-}
+ 	float _near_far[2] = { model_viewer_camera.near_far.x, model_viewer_camera.near_far.y };
+ 	if(ImGui::DragFloat2("Near/Far", _near_far, 1, 0, 10000)) {
+ 		model_viewer_camera.near_far.x = _near_far[0];
+ 		model_viewer_camera.near_far.y = _near_far[1];
+ 	}
+ 	ImGui::End();
+ }
 
 void model_viewer_on_render(float _dt, rde_window* _window) {
 	UNUSED(_dt)
 	model_viewer_draw_grid(&model_viewer_camera, _window);
 	model_viewer_draw_3d(_window, _dt);
-	model_viewer_draw_imgui();
+ 	model_viewer_draw_imgui();
 }
 
 void model_viewer_unload() {
