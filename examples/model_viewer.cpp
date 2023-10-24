@@ -237,19 +237,19 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
  	ImGui::End();
 
  	ImGui::Begin("Model Material", NULL, ImGuiWindowFlags_AlwaysAutoResize);
- 	rde_material_light_data _light = model_viewer_model != NULL ? rde_rendering_model_get_light_data(model_viewer_model) : rde_struct_create_material_light_data();
- 	float _vec_4[4] = { _light.ka, _light.kd, _light.ks, _light.shininess };
- 	if(ImGui::DragFloat4("K Indices", _vec_4, 0.0005f, 0.0f, 1.0f)) {
- 		rde_material_light_data _new_light {
- 			.shininess = _vec_4[3],
- 			.ka = _vec_4[0],
- 			.kd = _vec_4[1],
- 			.ks = _vec_4[2]
- 		};
- 		if(model_viewer_model != NULL) {
- 			rde_rendering_model_set_light_data(model_viewer_model, _new_light);
- 		}
- 	}
+ 	// rde_material_light_data _light = model_viewer_model != NULL ? rde_rendering_model_get_light_data(model_viewer_model) : rde_struct_create_material_light_data();
+ 	// float _vec_4[4] = { _light.ka, _light.kd, _light.ks, _light.shininess };
+ 	// if(ImGui::DragFloat4("K Indices", _vec_4, 0.0005f, 0.0f, 1.0f)) {
+ 	// 	rde_material_light_data _new_light {
+ 	// 		.shininess = _vec_4[3],
+ 	// 		.ka = _vec_4[0],
+ 	// 		.kd = _vec_4[1],
+ 	// 		.ks = _vec_4[2]
+ 	// 	};
+ 	// 	if(model_viewer_model != NULL) {
+ 	// 		rde_rendering_model_set_light_data(model_viewer_model, _new_light);
+ 	// 	}
+ 	// }
  	ImGui::Checkbox("Wireframe", &model_viewer_draw_wireframe);
  	ImGui::End();
 

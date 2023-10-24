@@ -21,11 +21,10 @@ static rde_batch_3d current_batch_3d;
 #include "rendering_3d_default_meshes.c"
 
 typedef struct {
+	size_t vertex_count;
+
 	float* positions;
 	size_t positions_size;
-
-	uint* indices;
-	size_t indices_size; 
 	
 	float* texcoords;
 	size_t texcoords_size;
@@ -36,10 +35,7 @@ typedef struct {
 	float* normals;
 	size_t normals_size;
 
-	rde_texture* map_ka;
-	rde_texture* map_kd;
-	rde_texture* map_ks;
-	rde_texture* map_bump;
+	rde_material material;
 } rde_mesh_gen_data;
 
 void rde_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh, size_t _extra_floats);
@@ -50,7 +46,7 @@ void rde_rendering_flush_batch_3d();
 void rde_rendering_flush_line_batch();
 void rde_rendering_reset_batch_3d();
 void rde_rendering_reset_line_batch();
-rde_mesh rde_struct_create_mesh(uint _vertex_count, rde_mesh_gen_data* _data);
+rde_mesh rde_struct_create_mesh(rde_mesh_gen_data* _data);
 
 #include "fbx_importer.c"
 #include "obj_importer.c"
@@ -180,30 +176,23 @@ float* rde_rendering_mesh_calculate_normals(float* _vertex_positions, size_t _in
 	return _normals;
 }
 
-rde_mesh rde_struct_create_mesh(uint _vertex_count, rde_mesh_gen_data* _data) {
+rde_mesh rde_struct_create_mesh(rde_mesh_gen_data* _data) {
 	rde_mesh _mesh;
 	_mesh.vao = 0;
 	
 	rde_util_check_opengl_error("ERROR: MESH - Start");
 
 	GLuint _vao = 0;
-	printf("Start mesh generation\n");
 	glGenVertexArrays(1, &_vao);
-	printf("Mesh VAO: %u\n", _vao);
 	rde_util_check_opengl_error("ERROR: MESH - VAO");
 
 	_mesh.vao = _vao;
-	_mesh.vertex_count = _vertex_count;
+	_mesh.vertex_count = _data->vertex_count;
 	_mesh.vertex_positions = _data->positions;
 	_mesh.vertex_colors = _data->colors;
 	_mesh.vertex_normals = _data->normals;
 	_mesh.vertex_texcoords = _data->texcoords;
 	
-	_mesh.material.map_ka = _data->map_ka;
-	_mesh.material.map_kd = _data->map_kd;
-	_mesh.material.map_ks = _data->map_ks;
-	_mesh.material.map_bump = _data->map_bump;
-
 	_mesh.transforms = NULL;
 	_mesh.transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW );
 	memset(_mesh.transforms, 0, RDE_MAX_MODELS_PER_DRAW);
@@ -308,6 +297,12 @@ rde_mesh rde_struct_create_mesh(uint _vertex_count, rde_mesh_gen_data* _data) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	_mesh.material = rde_struct_create_material();
+	_mesh.material.map_ka = _data->material.map_ka;
+	_mesh.material.map_kd = _data->material.map_kd;
+	_mesh.material.map_ks = _data->material.map_ks;
+	_mesh.material.map_bump = _data->material.map_bump;
+	_mesh.material.material_light_data = _data->material.material_light_data;
+
 
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Created mesh with %zu vertices. VAO: %u\n", _mesh.vertex_count, _vao);
 
@@ -599,18 +594,26 @@ void rde_rendering_flush_batch_3d() {
 	rde_texture* _ka_texture = _mesh->material.map_ka != NULL ? _mesh->material.map_ka : DEFAULT_TEXTURE;
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, _ka_texture->opengl_texture_id);
+	GLint _ka_location = glGetUniformLocation(_shader->compiled_program_id, "tex_ka");
+	glUniform1i(_ka_location, 1);
 
 	rde_texture* _kd_texture = _mesh->material.map_kd != NULL ? _mesh->material.map_kd : DEFAULT_TEXTURE;
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, _kd_texture->opengl_texture_id);
+	GLint _kd_location = glGetUniformLocation(_shader->compiled_program_id, "tex_kd");
+	glUniform1i(_kd_location, 1);
 
 	rde_texture* _ks_texture = _mesh->material.map_ks != NULL ? _mesh->material.map_ks : DEFAULT_TEXTURE;
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, _ks_texture->opengl_texture_id);
+	GLint _ks_location = glGetUniformLocation(_shader->compiled_program_id, "tex_ks");
+	glUniform1i(_ks_location, 1);
 
 	rde_texture* _bump_texture = _mesh->material.map_bump != NULL ? _mesh->material.map_bump : DEFAULT_TEXTURE;
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, _bump_texture->opengl_texture_id);
+	GLint _bump_location = glGetUniformLocation(_shader->compiled_program_id, "tex_bump");
+	glUniform1i(_bump_location, 1);
 
 	rde_util_check_opengl_error("After glBindTexture");
 
@@ -632,10 +635,9 @@ void rde_rendering_flush_batch_3d() {
 
 	rde_material_light_data _material = _mesh->material.material_light_data;
 	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.shininess"), _material.shininess);
-	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.Ka"), _material.ka);
-	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.Kd"), _material.kd);
-	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.Ks"), _material.ks);
-	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.Ke"), _material.shininess);
+	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "material.Ka"), _material.ka.x, _material.ka.y, _material.ka.z);
+	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "material.Kd"), _material.kd.x, _material.kd.y, _material.kd.z);
+	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "material.Ks"), _material.ks.x, _material.ks.y, _material.ks.z);
 
 	glBindVertexArray(_mesh->vao);
 	rde_util_check_opengl_error("After glBindVertexArray");
@@ -790,7 +792,12 @@ rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model) {
 	return _model->mesh_array[0].material.material_light_data;
 }
 
-
+rde_model_data rde_rendering_model_get_data(rde_model* _model) {
+	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "model");
+	return (rde_model_data) {
+		.amount_of_meshes = _model->mesh_array_size
+	};
+}
 
 void rde_rendering_model_unload(rde_model* _model) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "obj model");

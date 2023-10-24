@@ -288,9 +288,9 @@ extern "C" {
 	"\n" \
 	"struct rde_material {\n" \
 	"	float shininess;\n" \
-	"	float Ka;\n" \
-	"	float Kd;\n" \
-	"	float Ks;\n" \
+	"	vec3 Ka;\n" \
+	"	vec3 Kd;\n" \
+	"	vec3 Ks;\n" \
 	"};\n" \
 	"struct rde_directional_light {\n" \
 	"	vec3 direction;\n" \
@@ -319,9 +319,7 @@ extern "C" {
 	"	vec3 _norm = normalize(normal);\n" \
 	"	vec3 _light_dir = normalize(-directional_light.direction);\n" \
 	"	float _diff = max(dot(_norm, _light_dir), 0.0);\n" \
-	"	//vec3 _color_norm = vec3(color.r / 255f, color.g / 255f, color.b / 255f);\n" \
-	"	vec3 _color_norm = vec3(1, 1, 1);\n" \
-	"	vec3 _diffuse = _color_norm * directional_light.diffuse_color * _diff * texture(tex_kd, text_coord).rgb;\n" \
+	"	vec3 _diffuse = material.Kd * directional_light.diffuse_color * _diff * texture(tex_kd, text_coord).rgb;\n" \
 	"	\n" \
 	"	vec3 _view_dir = normalize(camera_pos + frag_pos);\n" \
 	"	vec3 _reflect_dir = reflect(-_light_dir, _norm);\n" \
@@ -1429,16 +1427,16 @@ typedef struct rde_spot_light rde_spot_light;
 
 typedef struct {
 	float shininess;
-	float ka;
-	float kd;
-	float ks;
+	rde_vec_3F ka;
+	rde_vec_3F kd;
+	rde_vec_3F ks;
 } rde_material_light_data;
 rde_material_light_data rde_struct_create_material_light_data() {
 	rde_material_light_data _m;
 	_m.shininess = 1.0f;
-	_m.ka = 1.0f;
-	_m.kd = 1.0f;
-	_m.ks = 1.0f;
+	_m.ka = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+	_m.kd = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+	_m.ks = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
 	return _m;
 }
 
@@ -1849,6 +1847,7 @@ RDE_FUNC rde_model* rde_rendering_model_load(const char* _model_path);
 RDE_FUNC size_t rde_rendering_model_get_vertices_count(rde_model* _model);
 RDE_FUNC void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data);
 RDE_FUNC rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model);
+RDE_FUNC rde_model_data rde_rendering_model_get_data(rde_model* _model);
 RDE_FUNC void rde_rendering_model_unload(rde_model* _model);
 #endif
 

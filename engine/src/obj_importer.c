@@ -11,6 +11,8 @@
 #include "fast_obj/fast_obj.c"
 
 typedef struct {
+	size_t vertex_count;
+
 	float* positions;
 	size_t positions_size;
 	size_t positions_pointer;
@@ -35,6 +37,7 @@ typedef struct {
 } rde_obj_mesh_data;
 rde_obj_mesh_data rde_struct_create_obj_mesh_data() {
 	rde_obj_mesh_data _o;
+	_o.vertex_count = 0;
 	_o.material = NULL;
 
 	_o.positions_size = 0;
@@ -46,7 +49,7 @@ rde_obj_mesh_data rde_struct_create_obj_mesh_data() {
 	_o.texcoords_pointer = 0;
 
 	_o.normals = NULL;
-	_o.normals = 0;
+	_o.normals_size = 0;
 	_o.normals_pointer = 0;
 
 	_o.colors = NULL;
@@ -60,23 +63,27 @@ rde_obj_mesh_data rde_struct_create_obj_mesh_data() {
 
 	return _o;
 }
-void rde_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjMaterial* _material, size_t _vertices_size, bool _has_t, bool _has_n) {
+void rde_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjMaterial* _material, bool _has_t, bool _has_n) {
 	_data->material = _material;
 
-	_data->positions_size = _vertices_size * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION;
+	_data->positions_size = _data->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION;
 	_data->positions = (float*)malloc(sizeof(float) * _data->positions_size);
 
 	if(_has_t) {
-		_data->texcoords_size = _vertices_size * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD;
+		_data->texcoords_size = _data->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD;
 		_data->texcoords = (float*)malloc(sizeof(float) * _data->texcoords_size);
 	}
 
 	if(_has_n) {
-		_data->normals_size = _vertices_size * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL;
+		_data->normals_size = _data->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL;
 		_data->normals = (float*)malloc(sizeof(float) * _data->normals_size);
 	}
 
 	_data->material = _material;
+
+	if(_material != NULL) {
+		
+	}
 
 	if(_material != NULL && _material->map_Ka.path != NULL && strlen(_material->map_Ka.path) > 0) {
 		_data->map_ka = rde_rendering_texture_load(_material->map_Ka.path);
@@ -207,8 +214,9 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 //	printf("# of faces = %d\n", (int)_mesh->face_count);
 //	printf("# of indices = %d\n", (int)_mesh->index_count);
 
-	rde_obj_mesh_data* _obj = (rde_obj_mesh_data*)malloc(sizeof(rde_obj_mesh_data) * (_mesh->material_count + 1));
-	for(size_t _i = 0; _i < _mesh->material_count + 1; _i++) {
+	size_t _material_count = _mesh->material_count == 0 ? 1 : _mesh->material_count;
+	rde_obj_mesh_data* _obj = (rde_obj_mesh_data*)malloc(sizeof(rde_obj_mesh_data) * _material_count);
+	for(size_t _i = 0; _i < _material_count; _i++) {
 		_obj[_i] = rde_struct_create_obj_mesh_data();
 	}
 
@@ -221,41 +229,26 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 
 	rde_critical_error(_mesh->objects[0].name != NULL && _mesh->groups[0].name != NULL, ".obj with both objects and groups.\n");
 
-
 	for(size_t _i = 0; _i < _group_or_object_count; _i++) {
-		fastObjGroup* _o_or_g = &_group_or_obj[_i];
-		fastObjMaterial* _face_material = &_mesh->materials[_mesh->face_materials[_o_or_g->face_offset + 0]];
-		int _material_key = _mesh->face_materials[_o_or_g->face_offset + 0];
 		rde_obj_mesh_data* _obj_mesh_data = NULL;
-
-		size_t _vertices_size = 0;
-
-		for(size_t _j = 0; _j < _group_or_object_count; _j++) {
-			fastObjGroup* _o_or_g_inner = &_group_or_obj[_j];
-			fastObjMaterial* _face_material_inner = &_mesh->materials[_mesh->face_materials[_o_or_g_inner->face_offset + 0]];
-			if(_face_material_inner == NULL || strcmp(_face_material_inner->name, _face_material->name) == 0) {
-				for (size_t _k = 0; _k < _o_or_g_inner->face_count; _k++) {
-					uint _amount_of_elements_on_face_vertex = _mesh->face_vertices[_o_or_g_inner->face_offset + _k];
-					if (_amount_of_elements_on_face_vertex == 3) {
-						_vertices_size += 3;
-					} else {
-						for (size_t _v = 0; _v < _amount_of_elements_on_face_vertex - 2; _v++) {
-							_vertices_size += 3;
-						}
-					}
+		fastObjGroup* _o_or_g_inner = &_group_or_obj[_i];
+		for (size_t _j = 0; _j < _o_or_g_inner->face_count; _j++) {
+			uint _material_key = _mesh->face_materials[_o_or_g_inner->face_offset + _j];
+			_obj_mesh_data = &_obj[_material_key];
+			
+			uint _amount_of_elements_on_face_vertex = _mesh->face_vertices[_o_or_g_inner->face_offset + _j];
+			if (_amount_of_elements_on_face_vertex == 3) {
+				_obj_mesh_data->vertex_count += 3;
+			} else {
+				for (size_t _v = 0; _v < _amount_of_elements_on_face_vertex - 2; _v++) {
+					_obj_mesh_data->vertex_count += 3;
 				}
 			}
 		}
+	}
 
-		_obj_mesh_data = &_obj[_material_key];
-		if(_obj_mesh_data->positions == NULL) {
-			fastObjIndex _index = _mesh->indices[_o_or_g->index_offset + 0];
-			rde_fill_obj_mesh_data(_obj_mesh_data, 
-			                        _face_material, 
-									_vertices_size,
-									_index.t != 0,
-									_index.n != 0);
-		}
+	for(size_t _i = 0; _i < _group_or_object_count; _i++) {
+		fastObjGroup* _o_or_g = &_group_or_obj[_i];
 
 //		printf("%s:\n", _o_or_g->name);
 //		printf("	face_count: %u\n", _o_or_g->face_count);
@@ -263,19 +256,36 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 //		printf("	index_offset: %u\n", _o_or_g->index_offset);
 
 		uint _offset = 0;
-		for (size_t _i = 0; _i < _o_or_g->face_count; _i++) {
-			uint _amount_of_elements_on_face_vertex = _mesh->face_vertices[_o_or_g->face_offset + _i];
+		for (size_t _j = 0; _j < _o_or_g->face_count; _j++) {
+			uint _material_key = _mesh->face_materials[_o_or_g->face_offset + _j];
+			rde_obj_mesh_data* _obj_mesh_data = NULL;
+
+			_obj_mesh_data = &_obj[_material_key];
+			if(_obj_mesh_data->positions == NULL) {
+				printf("creating new mesh with material key %u\n", _material_key);
+				fastObjIndex _index = _mesh->indices[_o_or_g->index_offset + _j];
+				rde_fill_obj_mesh_data(_obj_mesh_data, 
+				                       &_mesh->materials[_material_key], 
+				                       _index.t != 0,
+				                       _index.n != 0);
+			}
+
+			uint _amount_of_elements_on_face_vertex = _mesh->face_vertices[_o_or_g->face_offset + _j];
 			if (_amount_of_elements_on_face_vertex == 3) {
-				parse_3_vertices_face_obj(0, _offset, _mesh, _obj_mesh_data);
+				parse_3_vertices_face_obj(0, _offset, _mesh, &_obj[_material_key]);
 			} else {
 				for (size_t _v = 0; _v < _amount_of_elements_on_face_vertex - 2; _v++) {
-					parse_3_vertices_face_obj(_v, _offset, _mesh, _obj_mesh_data);
+					parse_3_vertices_face_obj(_v, _offset, _mesh, &_obj[_material_key]);
 				}
 			}
 			_offset += _amount_of_elements_on_face_vertex;
 		}
-		
+	}
+
+	for(size_t _i = 0; _i < _material_count; _i++) {
+		rde_obj_mesh_data* _obj_mesh_data = &_obj[_i];
 		rde_mesh_gen_data _data = {
+			.vertex_count = _obj_mesh_data->vertex_count,
 			.positions = _obj_mesh_data->positions,
 			.positions_size = _obj_mesh_data->positions_size,
 			.texcoords = _obj_mesh_data->texcoords,
@@ -284,13 +294,26 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 			.colors_size = _obj_mesh_data->colors_size,
 			.normals = _obj_mesh_data->normals,
 			.normals_size = _obj_mesh_data->normals_size,
-			.map_ka = _obj_mesh_data->map_ka,
-			.map_kd = _obj_mesh_data->map_kd,
-			.map_ks = _obj_mesh_data->map_ks,
-			.map_bump = _obj_mesh_data->map_bump,
+			.material = {
+				.map_ka = _obj_mesh_data->map_ka,
+				.map_kd = _obj_mesh_data->map_kd,
+				.map_ks = _obj_mesh_data->map_ks,
+				.map_bump = _obj_mesh_data->map_bump,
+			}
 		};
 
-		rde_mesh _mesh = rde_struct_create_mesh(_vertices_size, &_data);
+		if(_obj_mesh_data->material != NULL) {
+			_data.material.material_light_data = (rde_material_light_data) {
+				.shininess = _obj_mesh_data->material->Ns,
+				.ka = { _obj_mesh_data->material->Ka[0], _obj_mesh_data->material->Ka[1], _obj_mesh_data->material->Ka[2] },
+				.kd = { _obj_mesh_data->material->Kd[0], _obj_mesh_data->material->Kd[1], _obj_mesh_data->material->Kd[2] },
+				.ks = { _obj_mesh_data->material->Ks[0], _obj_mesh_data->material->Ks[1], _obj_mesh_data->material->Ks[2] }
+			};
+		} else {
+			_data.material.material_light_data = rde_struct_create_material_light_data();
+		}
+
+		rde_mesh _mesh = rde_struct_create_mesh(&_data);
 		stbds_arrput(_model->mesh_array, _mesh);
 		_model->mesh_array_size++;
 	}
