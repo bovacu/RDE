@@ -1,3 +1,4 @@
+#ifdef RDE_RENDERING_MODULE
 rde_atlas_sub_textures* rde_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas) {
 	FILE* _file = NULL;
 	char* _text = NULL;
@@ -140,3 +141,4 @@ rde_font_char_info* rde_file_system_read_font_config(const char* _font_path, rde
 
 	return _chars;
 }
+#endif

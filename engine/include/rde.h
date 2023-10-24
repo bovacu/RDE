@@ -1899,6 +1899,9 @@ RDE_FUNC void rde_audio_end();
 
 /// ============================ FILE SYSTEM ================================
 
+#ifdef RDE_FILE_SYSTEM_MODULE
+#endif
+
 #endif
 
 #ifdef __cplusplus

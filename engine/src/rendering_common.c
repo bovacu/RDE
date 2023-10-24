@@ -1,3 +1,4 @@
+#ifdef RDE_RENDERING_MODULE
 static rde_camera* current_drawing_camera = NULL;
 static rde_window* current_drawing_window = NULL;
 static mat4 projection_matrix;
@@ -256,21 +257,21 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 	}
 
 	GLuint _texture_id;
-	#if IS_MAC() || IS_IOS()
+#if IS_MAC() || IS_IOS()
 	glGenTextures(1, &_texture_id);
-	#else
+#else
 	glCreateTextures(GL_TEXTURE_2D, 1, &_texture_id);
-	#endif
+#endif
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
 
-	#if IS_MAC() || IS_IOS()
+#if IS_MAC() || IS_IOS()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
-	#else
+#else
 	glTextureStorage2D(_texture_id, 1, _internal_format, _width, _height);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -279,7 +280,7 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glTextureSubImage2D(_texture_id, 0, 0, 0, _width, _height, _data_format, GL_UNSIGNED_BYTE, _data);
-	#endif
+#endif
 
 	stbi_image_free(_data);
 
@@ -332,11 +333,11 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 	}
 
 	GLuint _texture_id;
-	#if IS_MAC() || IS_IOS()
+#if IS_MAC() || IS_IOS()
 	glGenTextures(1, &_texture_id);
-	#else
+#else
 	glCreateTextures(GL_TEXTURE_2D, 1, &_texture_id);
-	#endif
+#endif
 	rde_util_check_opengl_error("3");
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
 	rde_util_check_opengl_error("4");
@@ -491,7 +492,6 @@ void rde_rendering_texture_unload(rde_texture* _texture) {
 	_texture->file_path = NULL;
 }
 
-#ifdef RDE_RENDERING_MODULE
 rde_atlas* rde_rendering_atlas_load(const char* _texture_path, const char* _config_path) {
 	rde_texture* _texture = rde_rendering_texture_load(_texture_path);
 	rde_atlas_sub_textures* _atlas_sub_textures = rde_file_system_read_atlas_config(_config_path, _texture);
@@ -535,7 +535,6 @@ void rde_rendering_atlas_unload(rde_atlas* _atlas) {
 	rde_rendering_texture_unload(_atlas->texture);
 	_atlas->texture = NULL;
 }
-#endif
 
 void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture) {
 	rde_critical_error(_memory_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "memory texture");
@@ -547,7 +546,6 @@ void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture) {
 	}
 }
 
-#ifdef RDE_RENDERING_MODULE
 rde_font* rde_rendering_font_load(const char* _font_path, const char* _font_config_path) {
 	rde_texture* _texture = rde_rendering_texture_text_load(_font_path);
 	rde_font_char_info* _chars = rde_file_system_read_font_config(_font_config_path, _texture);
@@ -582,9 +580,9 @@ void rde_rendering_font_unload(rde_font* _font) {
 	rde_rendering_texture_unload(_font->texture);
 	_font->texture = NULL;
 }
-#endif
 
 void rde_rendering_set_background_color(rde_color _color) {
 	glClearColor((float)_color.r / 255.f, (float)_color.g / 255.f, (float)_color.b / 255.f, (float)_color.a / 255.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
+#endif

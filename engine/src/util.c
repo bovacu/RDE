@@ -144,7 +144,7 @@ void rde_file_close(rde_file_handler* _file_handler) {
 	UNIMPLEMENTED("rde_file_close")
 }
 
-
+#ifdef RDE_RENDERING_MODULE
 size_t rde_util_font_get_string_width(const char* _string, const rde_font* _font) {
 	int _text_size = strlen(_string);
 
@@ -175,6 +175,7 @@ rde_vec_2I rde_util_font_get_string_size(const char* _string, const rde_font* _f
 
 	return (rde_vec_2I) { _width, _height };
 }
+#endif
 
 char* ltrim(char* _s) {
 	while(isspace(*_s)) _s++;

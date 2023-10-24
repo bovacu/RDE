@@ -482,6 +482,9 @@ struct rde_engine {
 	rde_end_user_mandatory_callbacks mandatory_callbacks;
 	rde_event_func user_event_callback;
 	
+	rde_window* windows;
+	
+#ifdef RDE_RENDERING_MODULE
 	rde_shader* line_shader;
 	rde_shader* color_shader_2d;
 	rde_shader* texture_shader_2d;
@@ -491,9 +494,7 @@ struct rde_engine {
 	rde_shader* shaders;
 
 	size_t total_amount_of_textures;
-	rde_window* windows;
-	
-#ifdef RDE_RENDERING_MODULE
+
 	rde_texture* textures;
 	rde_atlas* atlases;
 	rde_font* fonts;
@@ -526,9 +527,10 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	_e.heap_allocs_config = _heap_allocs_config;
 	_e.heap_allocs_config.max_number_of_shaders += RDE_DEFAULT_SHADERS_AMOUNT;
-	_e.total_amount_of_textures = 0;
 	
 #ifdef RDE_RENDERING_MODULE
+	_e.total_amount_of_textures = 0;
+
 	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_textures;
 	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_fonts;
 	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_atlases;
@@ -612,7 +614,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 #ifdef RDE_AUDIO_MODULE
 	if (_e.heap_allocs_config.max_number_of_sounds > 0) {
 		_e.sounds = (rde_sound*)malloc(sizeof(rde_sound) * _e.heap_allocs_config.max_number_of_sounds);
-		rde_critical_error(_e.sounds == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_font) * _e.heap_allocs_config.max_number_of_sounds, "audio");
+		rde_critical_error(_e.sounds == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_sound) * _e.heap_allocs_config.max_number_of_sounds, "audio");
 		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_sounds; _i++) {
 			_e.sounds[_i] = rde_struct_create_sound();
 		}
@@ -786,7 +788,10 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	rde_events_key_create_events();
 	rde_events_mouse_button_create_events();
 	rde_events_drag_and_drop_create_events();
+
+#ifdef RDE_RENDERING_MODULE
 	rde_rendering_set_rendering_configuration();
+#endif
 
 	srand(time(NULL));
 
@@ -974,7 +979,6 @@ void rde_engine_destroy_engine() {
 		rde_rendering_model_unload(&ENGINE.models[_i]);
 	}
 	free(ENGINE.models);
-#endif
 
 	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_shaders; _i++) {
 		if(ENGINE.shaders[_i].compiled_program_id == -1) {
@@ -984,6 +988,7 @@ void rde_engine_destroy_engine() {
 		rde_rendering_shader_unload(&ENGINE.shaders[_i]);
 	}
 	free(ENGINE.shaders);
+#endif
 
 #ifdef RDE_AUDIO_MODULE
 	rde_audio_end();
