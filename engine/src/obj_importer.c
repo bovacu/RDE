@@ -196,7 +196,6 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 			continue;
 		}
 
-		printf("Loading model at index %zu\n", _i);
 		_model = _m;
 		break;
 	}
@@ -227,7 +226,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 		_group_or_object_count = _mesh->group_count;
 	}
 
-	rde_critical_error(_mesh->objects[0].name != NULL && _mesh->groups[0].name != NULL, ".obj with both objects and groups.\n");
+	//rde_critical_error(_mesh->objects[0].name != NULL && _mesh->groups[0].name != NULL, ".obj with both objects and groups.\n");
 
 	for(size_t _i = 0; _i < _group_or_object_count; _i++) {
 		rde_obj_mesh_data* _obj_mesh_data = NULL;
@@ -247,22 +246,16 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 		}
 	}
 
+	uint _offset = 0;
 	for(size_t _i = 0; _i < _group_or_object_count; _i++) {
 		fastObjGroup* _o_or_g = &_group_or_obj[_i];
 
-//		printf("%s:\n", _o_or_g->name);
-//		printf("	face_count: %u\n", _o_or_g->face_count);
-//		printf("	face_offset: %u\n", _o_or_g->face_offset);
-//		printf("	index_offset: %u\n", _o_or_g->index_offset);
-
-		uint _offset = 0;
 		for (size_t _j = 0; _j < _o_or_g->face_count; _j++) {
 			uint _material_key = _mesh->face_materials[_o_or_g->face_offset + _j];
 			rde_obj_mesh_data* _obj_mesh_data = NULL;
 
 			_obj_mesh_data = &_obj[_material_key];
 			if(_obj_mesh_data->positions == NULL) {
-				printf("creating new mesh with material key %u\n", _material_key);
 				fastObjIndex _index = _mesh->indices[_o_or_g->index_offset + _j];
 				rde_fill_obj_mesh_data(_obj_mesh_data, 
 				                       &_mesh->materials[_material_key], 
@@ -312,7 +305,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 		} else {
 			_data.material.material_light_data = rde_struct_create_material_light_data();
 		}
-
+		
 		rde_mesh _mesh = rde_struct_create_mesh(&_data);
 		stbds_arrput(_model->mesh_array, _mesh);
 		_model->mesh_array_size++;
@@ -321,21 +314,18 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 
 	fast_obj_destroy(_mesh);
 	free(_obj);
-
-	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
-		rde_log_color(RDE_LOG_COLOR_GREEN, "	- Mesh (%lu):", _i);
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Vertices: %lu", _model->mesh_array[_i].vertex_count);
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Ka): %s", (_model->mesh_array[_i].material.map_ka != NULL ? _model->mesh_array[_i].material.map_ka->file_path : "none"));
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Kd): %s", (_model->mesh_array[_i].material.map_kd != NULL ? _model->mesh_array[_i].material.map_kd->file_path : "none"));
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Ks): %s", (_model->mesh_array[_i].material.map_ks != NULL ? _model->mesh_array[_i].material.map_ks->file_path : "none"));
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Bump): %s", (_model->mesh_array[_i].material.map_bump != NULL ? _model->mesh_array[_i].material.map_bump->file_path : "none"));
-	}
-	//if(_material.texture != NULL && (_lacking_face_data & NO_VERTEX_UVS) == 0) {
-	//	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Texture: %s", _material.texture->file_path);
-	//	rde_log_color(RDE_LOG_COLOR_GREEN, "		- Size: %ux%u", _material.texture->size.x, _material.texture->size.y);
-	//	rde_log_color(RDE_LOG_COLOR_GREEN, "		- Channels: %d", _material.texture->channels);
-	//	rde_log_color(RDE_LOG_COLOR_GREEN, "		- OpenGL ID: %d", _material.texture->opengl_texture_id);
-	//}
+//
+//	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "	- Mesh (%lu):", _i);
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Vertices: %lu", _model->mesh_array[_i].vertex_count);
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Positions (x, y, z): %lu", _model->mesh_array[_i].vertex_count * 3);
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texcoords (u, vertex_count): %lu", _model->mesh_array[_i].vertex_count * 2);
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Normals (x, y, z): %lu", _model->mesh_array[_i].vertex_count * 3);
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Ka): %s", (_model->mesh_array[_i].material.map_ka != NULL ? _model->mesh_array[_i].material.map_ka->file_path : "none"));
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Kd): %s", (_model->mesh_array[_i].material.map_kd != NULL ? _model->mesh_array[_i].material.map_kd->file_path : "none"));
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Ks): %s", (_model->mesh_array[_i].material.map_ks != NULL ? _model->mesh_array[_i].material.map_ks->file_path : "none"));
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Bump): %s", (_model->mesh_array[_i].material.map_bump != NULL ? _model->mesh_array[_i].material.map_bump->file_path : "none"));
+//	}
 	return _model;
 }
 

@@ -59,7 +59,7 @@ const rde_engine_heap_allocs_config _heap_allocs_config = {
 	.max_number_of_atlases = 10,
 	.max_number_of_fonts = 10,
 	.max_number_of_models = 5,
-	.max_number_of_models_textures = 5,
+	.max_number_of_models_textures = 340,
 	.max_number_of_sounds = 5
 };
 

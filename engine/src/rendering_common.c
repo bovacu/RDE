@@ -218,6 +218,12 @@ void rde_rendering_shader_unload(rde_shader* _shader) {
 rde_texture* rde_rendering_texture_load(const char* _file_path) {
 	rde_texture* _texture = NULL;
 
+	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
+		if (ENGINE.textures[_i].file_path != NULL && strcmp(ENGINE.textures[_i].file_path, _file_path) == 0) {
+			return &ENGINE.textures[_i];
+		}
+	}
+
 	for(size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
 		if(ENGINE.textures[_i].opengl_texture_id >= 0) {
 			continue;
@@ -262,24 +268,37 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 #else
 	glCreateTextures(GL_TEXTURE_2D, 1, &_texture_id);
 #endif
+	rde_util_check_opengl_error("Generating texture");
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
+	rde_util_check_opengl_error("Binding texture");
 
 #if IS_MAC() || IS_IOS()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	rde_util_check_opengl_error("Param0 texture");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	rde_util_check_opengl_error("Param1 texture");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	rde_util_check_opengl_error("Param2 texture");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	rde_util_check_opengl_error("Param3 texture");
 
 	glTexImage2D(GL_TEXTURE_2D, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
+	rde_util_check_opengl_error("TexImage2D texture");
 #else
 	glTextureStorage2D(_texture_id, 1, _internal_format, _width, _height);
+	rde_util_check_opengl_error("Storage texture");
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	rde_util_check_opengl_error("Param0 texture");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	rde_util_check_opengl_error("Param1 texture");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	rde_util_check_opengl_error("Param2 texture");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	rde_util_check_opengl_error("Param3 texture");
 
 	glTextureSubImage2D(_texture_id, 0, 0, 0, _width, _height, _data_format, GL_UNSIGNED_BYTE, _data);
+	rde_util_check_opengl_error("TextureSubImage texture");
 #endif
 
 	stbi_image_free(_data);

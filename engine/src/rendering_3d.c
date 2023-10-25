@@ -365,7 +365,7 @@ rde_model* rde_rendering_model_load(const char* _model_path) {
 
 bool rde_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 	if(_mesh->vertex_positions == NULL) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "Tried to render a mesh without indices, skipping rendering for this mesh");
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "Tried to render a mesh without positions, skipping rendering for this mesh");
 		return false;
 	}
 
