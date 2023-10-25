@@ -166,6 +166,9 @@ void init_func(int _argc, char** _argv) {
 	                             rde_window_get_native_sdl_gl_context_handle(current_window));
 	ImGui_ImplOpenGL3_Init();
 
+//	rde_rendering_texture_load("C:/Users/vazqu/OneDrive/Escritorio/San_Miguel/textures/D30_Smiguel_2003_7758.png");
+//	rde_rendering_texture_load("C:/Users/vazqu/OneDrive/Escritorio/San_Miguel/textures/D30_Smiguel_2003_7812.png");
+
 	// rde_window_set_icon(current_window, "logo.ico");
 }
 

@@ -216,6 +216,13 @@ void rde_rendering_shader_unload(rde_shader* _shader) {
 }
 
 rde_texture* rde_rendering_texture_load(const char* _file_path) {
+	const char* _extension = rde_util_file_get_name_extension(_file_path);
+	char _extension_lower[10];
+	memset(_extension_lower, 0, 10);
+	rde_util_string_to_lower(_extension_lower, _extension);
+	rde_critical_error(strcmp(_extension_lower, "jpeg") != 0 && strcmp(_extension_lower, "jpg") != 0 &&
+	                   strcmp(_extension_lower, "png") != 0, RDE_ERROR_RENDERING_TEXTURE_UNSUPPORTED_FORMAT, _file_path, _extension);
+
 	rde_texture* _texture = NULL;
 
 	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
@@ -244,7 +251,7 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 #endif
 
 	stbi_uc* _data = NULL;
-	_data = stbi_load(_file_path, &_width, &_height, &_channels, 0);
+	_data = stbi_load(_file_path, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
 
 	if(_data == NULL) {
 		printf("Error while loading texture at '%s' \n", _file_path);
@@ -253,15 +260,17 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 
 	GLenum _internal_format = 0;
 	GLenum _data_format = 0;
-	if (_channels == 4) {
+	if (strcmp(_extension, "png") == 0) {
 		_internal_format = GL_RGBA8;
 		_data_format = GL_RGBA;
 	}
 	else if (_channels == 3) {
 		_internal_format = GL_RGB8;
 		_data_format = GL_RGB;
+	} else {
+		rde_critical_error(true, "'%s' has %u channels, that is not supported (only 3 and 4)\n", _file_path, _channels);
 	}
-
+	
 	GLuint _texture_id;
 #if IS_MAC() || IS_IOS()
 	glGenTextures(1, &_texture_id);

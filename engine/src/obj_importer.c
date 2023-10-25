@@ -277,6 +277,11 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 
 	for(size_t _i = 0; _i < _material_count; _i++) {
 		rde_obj_mesh_data* _obj_mesh_data = &_obj[_i];
+
+		if(_obj_mesh_data->vertex_count <= 0) {
+			continue;
+		}
+
 		rde_mesh_gen_data _data = {
 			.vertex_count = _obj_mesh_data->vertex_count,
 			.positions = _obj_mesh_data->positions,
@@ -306,7 +311,9 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 			_data.material.material_light_data = rde_struct_create_material_light_data();
 		}
 		
+		rde_engine_supress_logs(true);
 		rde_mesh _mesh = rde_struct_create_mesh(&_data);
+		rde_engine_supress_logs(false);
 		stbds_arrput(_model->mesh_array, _mesh);
 		_model->mesh_array_size++;
 	}

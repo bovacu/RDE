@@ -161,6 +161,7 @@ bool rde_util_check_opengl_error(const char* _message) {
 //			- Render Textures
 //			- Particles
 //			- Multiple window rendering is not working properly
+//			- On every 'load' function, if a resource is going to be reloaded, return the already loaded one.
 //
 //		- TOOL: [DONE] command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
