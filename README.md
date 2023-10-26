@@ -10,11 +10,11 @@ This repo provides 2 main elements, the core library and the external tools:
 
 The library is composed of the core module (which is always added) and optional modules, those are:
   - audio
-	- physics_2d
+  - physics_2d
   - physics_3d
-	- rendering
+  - rendering
   - ui
-	- error
+  - error
   - 3D format parser libs
 Those modules are not required to use the library and are added when compiling the library.
 
