@@ -22,6 +22,8 @@ To build the library it is as easy as compiling the engine compiler program:
 ```
 clang rde_build.c -o builder
 ```
+The engine is tested to be built correctly with clang. No other compilers has been tested yet. This is because I only use clang.
+
 And this will create the engine compiler. This is a C program that will compile the engine with specific settings. If you make
 ```
 builder --help
