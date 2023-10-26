@@ -4,6 +4,8 @@ build/
 
 test/
 
+.idea
+
 build_copy_deps.bat
 
 tools/atlas_generator/test_dir/
