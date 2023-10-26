@@ -1,4 +1,4 @@
-#RDE (Rubber Duck Engine)
+# RDE (Rubber Duck Engine)
 
 Rubber Duck Engine is a general purpose game engine for 2D and basic 3D development. It is built in C99 and compiles for Windows, Linux, Mac, Android, iOS and WASM. It uses as core libs SDL2, Glad, CGLM, miniaudio and some 3d model format parsin libraries.
 
