@@ -5,7 +5,9 @@ _type rde_arr_s_get_##_type(unsigned int _index, _type* _arr, size_t _arr_size, 
 		va_start(_args, _fmt);																												\
 		vfprintf(stdout, _fmt, _args);																										\
 		va_end(_args);																														\
-		printf("\n");																														\
+		if(!rde_engine_logs_supressed()) {																									\
+			printf("\n");																													\
+		}																																	\
 	}																																		\
 	rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu' in '%s'.\n", _index, _arr_size);			\
 	return _arr[_index];																													\
@@ -17,7 +19,9 @@ void rde_arr_s_set_##_type(unsigned int _index, _type _value, _type* _arr, size_
 		va_start(_args, _fmt);																												\
 		vfprintf(stdout, _fmt, _args);																										\
 		va_end(_args);																														\
-		printf("\n");																														\
+		if(!rde_engine_logs_supressed()) {																									\
+			printf("\n");																													\
+		}																																	\
 	}																																		\
 	rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu''.\n", _index, _arr_size);				\
 	_arr[_index] = _value;																													\

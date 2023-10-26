@@ -84,7 +84,8 @@ void rde_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjMaterial* _material
 	if(_material != NULL) {
 		
 	}
-
+	
+	rde_engine_supress_logs(true);
 	if(_material != NULL && _material->map_Ka.path != NULL && strlen(_material->map_Ka.path) > 0) {
 		_data->map_ka = rde_rendering_texture_load(_material->map_Ka.path);
 	}
@@ -100,6 +101,7 @@ void rde_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjMaterial* _material
 	if(_material != NULL && _material->map_bump.path != NULL && strlen(_material->map_bump.path) > 0) {
 		_data->map_bump = rde_rendering_texture_load(_material->map_bump.path);
 	}
+	rde_engine_supress_logs(false);
 }
 
 RDE_IMPLEMENT_SAFE_ARR_ACCESS(fastObjIndex)
@@ -203,15 +205,6 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	rde_critical_error(_model == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "models", ENGINE.heap_allocs_config.max_number_of_models);
 
 	fastObjMesh* _mesh = fast_obj_read(_obj_path);
-//	printf("# of object    = %d\n", (int)_mesh->object_count);
-//	printf("# of groups    = %d\n", (int)_mesh->group_count);
-//	printf("# of materials = %d\n", (int)_mesh->material_count);
-//	printf("# of positions = %d\n", (int)_mesh->position_count);
-//	printf("# of normals = %d\n", (int)_mesh->normal_count);
-//	printf("# of colors = %d\n", (int)_mesh->color_count);
-//	printf("# of texcoords = %d\n", (int)_mesh->texcoord_count);
-//	printf("# of faces = %d\n", (int)_mesh->face_count);
-//	printf("# of indices = %d\n", (int)_mesh->index_count);
 
 	size_t _material_count = _mesh->material_count == 0 ? 1 : _mesh->material_count;
 	rde_obj_mesh_data* _obj = (rde_obj_mesh_data*)malloc(sizeof(rde_obj_mesh_data) * _material_count);
@@ -225,8 +218,6 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 		_group_or_obj = _mesh->groups;
 		_group_or_object_count = _mesh->group_count;
 	}
-
-	//rde_critical_error(_mesh->objects[0].name != NULL && _mesh->groups[0].name != NULL, ".obj with both objects and groups.\n");
 
 	for(size_t _i = 0; _i < _group_or_object_count; _i++) {
 		rde_obj_mesh_data* _obj_mesh_data = NULL;

@@ -603,34 +603,30 @@ typedef unsigned int uint;
 
 #define is_empty(...) ( sizeof( (char[]){#__VA_ARGS__} ) == 1 )
 
-#define rde_log_level(_level, _fmt, ...) do { 		\
-	if(rde_engine_logs_supressed()) {				\
-		break;										\
-	}												\
-	rde_log_level_inner(_level, _fmt, __VA_ARGS__);	\
-	printf("\n");									\
+#define rde_log_level(_level, _fmt, ...) do { 			\
+	if(!rde_engine_logs_supressed()) {					\
+		rde_log_level_inner(_level, _fmt, __VA_ARGS__);	\
+		printf("\n");									\
+	}													\
 } while(0);
 
-#define rde_log_color(_color, _fmt, ...) do { 		\
-	if(rde_engine_logs_supressed()) {				\
-		break;										\
-	}												\
-	rde_log_color_inner(_color, _fmt, __VA_ARGS__);	\
-	printf("\n");									\
+#define rde_log_color(_color, _fmt, ...) do { 			\
+	if(!rde_engine_logs_supressed()) {					\
+		rde_log_color_inner(_color, _fmt, __VA_ARGS__);	\
+		printf("\n");									\
+	}													\
 } while(0);
 
-#define rde_log_level_sl(_level, _fmt, ...) do { 	\
-	if(rde_engine_logs_supressed()) {				\
-		break;										\
-	}												\
-	rde_log_level_inner(_level, _fmt, __VA_ARGS__);	\
+#define rde_log_level_sl(_level, _fmt, ...) do { 		\
+	if(!rde_engine_logs_supressed()) {					\
+		rde_log_level_inner(_level, _fmt, __VA_ARGS__);	\
+	}													\
 } while(0);
 
-#define rde_log_color_sl(_color, _fmt, ...) do { 	\
-	if(rde_engine_logs_supressed()) {				\
-		break;										\
-	}												\
-	rde_log_color_inner(_color, _fmt, __VA_ARGS__);	\
+#define rde_log_color_sl(_color, _fmt, ...) do { 		\
+	if(!rde_engine_logs_supressed()) {					\
+		rde_log_color_inner(_color, _fmt, __VA_ARGS__);	\
+	}													\
 } while(0);
 
 #define RDE_SAFE_ARR_ACCESS(_type) RDE_FUNC _type rde_arr_s_get_##_type(unsigned int _index, _type* _arr, size_t _arr_size, char* _fmt, ...);
