@@ -231,8 +231,8 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 		}
 	}
 
-	for(size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
-		if(ENGINE.textures[_i].opengl_texture_id >= 0) {
+	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
+		if (ENGINE.textures[_i].opengl_texture_id >= 0) {
 			continue;
 		}
 
@@ -246,29 +246,28 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 	stbi_set_flip_vertically_on_load(1);
 
 #if IS_IOS()
-	stbi_convert_iphone_png_to_rgb(1); 
+	stbi_convert_iphone_png_to_rgb(1);
 	stbi_set_unpremultiply_on_load(1);
 #endif
 
 	stbi_uc* _data = NULL;
 	_data = stbi_load(_file_path, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
 
-	if(_data == NULL) {
+	if (_data == NULL) {
 		printf("Error while loading texture at '%s' \n", _file_path);
 		return NULL;
 	}
 
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 	GLenum _internal_format = 0;
 	GLenum _data_format = 0;
 	if (strcmp(_extension, "png") == 0) {
 		_internal_format = GL_RGBA8;
 		_data_format = GL_RGBA;
-	}
-	else if (_channels == 3) {
+	} else {
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		_internal_format = GL_RGB8;
 		_data_format = GL_RGB;
-	} else {
-		rde_critical_error(true, "'%s' has %u channels, that is not supported (only 3 and 4)\n", _file_path, _channels);
 	}
 	
 	GLuint _texture_id;
@@ -281,7 +280,6 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
 	rde_util_check_opengl_error("Binding texture");
 
-#if IS_MAC() || IS_IOS()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	rde_util_check_opengl_error("Param0 texture");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -293,22 +291,6 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 
 	glTexImage2D(GL_TEXTURE_2D, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
 	rde_util_check_opengl_error("TexImage2D texture");
-#else
-	glTextureStorage2D(_texture_id, 1, _internal_format, _width, _height);
-	rde_util_check_opengl_error("Storage texture");
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	rde_util_check_opengl_error("Param0 texture");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	rde_util_check_opengl_error("Param1 texture");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	rde_util_check_opengl_error("Param2 texture");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	rde_util_check_opengl_error("Param3 texture");
-
-	glTextureSubImage2D(_texture_id, 0, 0, 0, _width, _height, _data_format, GL_UNSIGNED_BYTE, _data);
-	rde_util_check_opengl_error("TextureSubImage texture");
-#endif
 
 	stbi_image_free(_data);
 
@@ -323,7 +305,10 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Size: %dx%d: ", _width, _height);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Channels: %d: ", _channels);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- OpenGL ID: %u: ", _texture_id);
-	printf("\n");
+	
+	if(!rde_engine_logs_supressed()) {
+		printf("\n");
+	}
 
 	return _texture;
 }
@@ -398,7 +383,9 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Size: %dx%d: ", _width, _height);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Channels: %d: ", _channels);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- OpenGL ID: %u: ", _texture_id);
-	printf("\n");
+	if(!rde_engine_logs_supressed()) {
+		printf("\n");
+	}
 
 	return _texture;
 }
