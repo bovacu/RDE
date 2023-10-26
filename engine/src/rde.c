@@ -406,7 +406,9 @@ rde_material rde_struct_create_material() {
 	return _m;
 }
 
+#define RDE_MESH_NAME_MAX 512
 struct rde_mesh {
+	char name[RDE_MESH_NAME_MAX];
 	size_t vertex_count;
 
 	float* vertex_positions;

@@ -21,6 +21,7 @@ static rde_batch_3d current_batch_3d;
 #include "rendering_3d_default_meshes.c"
 
 typedef struct {
+	char* name;
 	size_t vertex_count;
 
 	float* positions;
@@ -179,6 +180,14 @@ float* rde_rendering_mesh_calculate_normals(float* _vertex_positions, size_t _in
 rde_mesh rde_struct_create_mesh(rde_mesh_gen_data* _data) {
 	rde_mesh _mesh;
 	_mesh.vao = 0;
+
+	memset(_mesh.name, 0, RDE_MESH_NAME_MAX);
+	
+#if IS_WINDOWS()
+	strcat_s(_mesh.name, RDE_MESH_NAME_MAX, _data->name);
+#else
+	strcat(_mesh.name, _data->name);
+#endif
 	
 	rde_util_check_opengl_error("ERROR: MESH - Start");
 
