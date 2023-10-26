@@ -802,10 +802,15 @@ rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model) {
 }
 
 rde_model_data rde_rendering_model_get_data(rde_model* _model) {
-	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "model");
-	return (rde_model_data) {
-		.amount_of_meshes = _model->mesh_array_size
-	};
+	rde_model_data _m;
+	_m.amount_of_meshes = _model->mesh_array_size;
+	_m.meshes = (rde_mesh**)malloc(sizeof(rde_mesh*) * _m.amount_of_meshes);
+
+	for(size_t _i = 0; _i < _m.amount_of_meshes; _i++) {
+		_m.meshes[_i] = &_model->mesh_array[_i];
+	}
+
+	return _m;
 }
 
 void rde_rendering_model_unload(rde_model* _model) {

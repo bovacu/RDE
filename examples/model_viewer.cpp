@@ -17,6 +17,9 @@ rde_vec_3F model_viewer_directional_light_ambient_color = { 0.2f, 0.2f, 0.2f };
 rde_vec_3F model_viewer_directional_light_diffuse_color = { 0.5f, 0.5f, 0.5f };
 rde_vec_3F model_viewer_directional_light_specular_color = { 1.0f, 1.0f, 1.0f };
 
+rde_model_data model_viewer_model_data;
+int model_viewer_max_meshes_to_render = 0;
+
 void model_viewer_keyboard_controller(float _dt) {
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
 		model_viewer_camera.transform.position.x += model_viewer_camera_front.x * 10 * _dt;
@@ -118,8 +121,11 @@ void model_viewer_on_event(rde_event* _event, rde_window* _window) {
 		} else {
 			if(model_viewer_model != NULL) {
 				rde_rendering_model_unload(model_viewer_model);
+				free(model_viewer_model_data.meshes);
 			}
 			model_viewer_model = rde_rendering_model_load(_event->data.drag_and_drop_data.file_path);
+			model_viewer_model_data = rde_rendering_model_get_data(model_viewer_model);
+			model_viewer_max_meshes_to_render = model_viewer_model_data.amount_of_meshes;
 		}
 	}
 }
@@ -149,7 +155,10 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 
 	if(model_viewer_model != NULL) {
 		rde_rendering_3d_begin_drawing(&model_viewer_camera, _window, model_viewer_draw_wireframe);
-		rde_rendering_3d_draw_model(&model_viewer_transform, model_viewer_model, NULL);
+		for(int _i = 0; _i < model_viewer_max_meshes_to_render; _i++) {
+			rde_rendering_3d_draw_mesh(&model_viewer_transform, model_viewer_model_data.meshes[_i], NULL);
+		}
+		//rde_rendering_3d_draw_model(&model_viewer_transform, model_viewer_model, NULL);
 		rde_rendering_3d_end_drawing();
 	}
 }
@@ -236,23 +245,6 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
  	ImGui::Checkbox("Proportional Scale", &_proportional_scale);
  	ImGui::End();
 
- 	ImGui::Begin("Model Material", NULL, ImGuiWindowFlags_AlwaysAutoResize);
- 	// rde_material_light_data _light = model_viewer_model != NULL ? rde_rendering_model_get_light_data(model_viewer_model) : rde_struct_create_material_light_data();
- 	// float _vec_4[4] = { _light.ka, _light.kd, _light.ks, _light.shininess };
- 	// if(ImGui::DragFloat4("K Indices", _vec_4, 0.0005f, 0.0f, 1.0f)) {
- 	// 	rde_material_light_data _new_light {
- 	// 		.shininess = _vec_4[3],
- 	// 		.ka = _vec_4[0],
- 	// 		.kd = _vec_4[1],
- 	// 		.ks = _vec_4[2]
- 	// 	};
- 	// 	if(model_viewer_model != NULL) {
- 	// 		rde_rendering_model_set_light_data(model_viewer_model, _new_light);
- 	// 	}
- 	// }
- 	ImGui::Checkbox("Wireframe", &model_viewer_draw_wireframe);
- 	ImGui::End();
-
  	ImGui::Begin("Camera Options", NULL, ImGuiWindowFlags_AlwaysAutoResize);
  	ImGui::DragFloat("FOV", &model_viewer_camera.fov, 1, 0, 180);
 
@@ -262,6 +254,12 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
  		model_viewer_camera.near_far.y = _near_far[1];
  	}
  	ImGui::End();
+
+	ImGui::Begin("Rendering Options", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::Text("Total Meshes: %zu", model_viewer_model_data.amount_of_meshes);
+	ImGui::DragInt("Meshes", &model_viewer_max_meshes_to_render, 1, 0, model_viewer_model_data.amount_of_meshes);
+	ImGui::Checkbox("Wireframe", &model_viewer_draw_wireframe);
+	ImGui::End();
  }
 
 void model_viewer_on_render(float _dt, rde_window* _window) {
@@ -274,6 +272,7 @@ void model_viewer_on_render(float _dt, rde_window* _window) {
 void model_viewer_unload() {
 	if(model_viewer_model != NULL) {
 		rde_rendering_model_unload(model_viewer_model);
+		free(model_viewer_model_data.meshes);
 	}
 
 	model_viewer_model = NULL;

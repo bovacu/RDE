@@ -319,17 +319,17 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	fast_obj_destroy(_mesh);
 	free(_obj);
 
-	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
-		rde_log_color(RDE_LOG_COLOR_GREEN, "	- (%lu) Mesh '%s':", _i, _model->mesh_array[_i].name);
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Vertices: %lu", _model->mesh_array[_i].vertex_count);
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Positions (x, y, z): %lu", _model->mesh_array[_i].vertex_count * 3);
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texcoords (u, vertex_count): %lu", _model->mesh_array[_i].vertex_count * 2);
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Normals (x, y, z): %lu", _model->mesh_array[_i].vertex_count * 3);
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Ka): %s", (_model->mesh_array[_i].material.map_ka != NULL ? _model->mesh_array[_i].material.map_ka->file_path : "none"));
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Kd): %s", (_model->mesh_array[_i].material.map_kd != NULL ? _model->mesh_array[_i].material.map_kd->file_path : "none"));
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Ks): %s", (_model->mesh_array[_i].material.map_ks != NULL ? _model->mesh_array[_i].material.map_ks->file_path : "none"));
-		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Bump): %s", (_model->mesh_array[_i].material.map_bump != NULL ? _model->mesh_array[_i].material.map_bump->file_path : "none"));
-	}
+//	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "	- (%lu) Mesh '%s':", _i, _model->mesh_array[_i].name);
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Vertices: %lu", _model->mesh_array[_i].vertex_count);
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Positions (x, y, z): %lu", _model->mesh_array[_i].vertex_count * 3);
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texcoords (u, vertex_count): %lu", _model->mesh_array[_i].vertex_count * 2);
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Normals (x, y, z): %lu", _model->mesh_array[_i].vertex_count * 3);
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Ka): %s", (_model->mesh_array[_i].material.map_ka != NULL ? _model->mesh_array[_i].material.map_ka->file_path : "none"));
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Kd): %s", (_model->mesh_array[_i].material.map_kd != NULL ? _model->mesh_array[_i].material.map_kd->file_path : "none"));
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Ks): %s", (_model->mesh_array[_i].material.map_ks != NULL ? _model->mesh_array[_i].material.map_ks->file_path : "none"));
+//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Bump): %s", (_model->mesh_array[_i].material.map_bump != NULL ? _model->mesh_array[_i].material.map_bump->file_path : "none"));
+//	}
 	return _model;
 }
 

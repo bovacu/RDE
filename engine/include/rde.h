@@ -1454,7 +1454,8 @@ typedef struct {
 
 typedef struct rde_model rde_model;
 typedef struct {
-	int amount_of_meshes;
+	size_t amount_of_meshes;
+	rde_mesh** meshes;
 } rde_model_data;
 
 typedef struct {
@@ -1843,7 +1844,7 @@ RDE_FUNC rde_model* rde_rendering_model_load(const char* _model_path);
 RDE_FUNC size_t rde_rendering_model_get_vertices_count(rde_model* _model);
 RDE_FUNC void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data);
 RDE_FUNC rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model);
-RDE_FUNC rde_model_data rde_rendering_model_get_data(rde_model* _model);
+RDE_FUNC rde_model_data rde_rendering_model_get_data(rde_model* _model); // User manually needs to free 'meshes' field as it allocates dynamic memory
 RDE_FUNC void rde_rendering_model_unload(rde_model* _model);
 #endif
 
