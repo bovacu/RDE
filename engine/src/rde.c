@@ -191,16 +191,19 @@ rde_window rde_struct_create_window() {
 }
 
 #ifdef RDE_RENDERING_MODULE
+#define RDE_SHADER_MAX_NAME 256
 struct rde_shader {
 	GLuint vertex_program_id;
 	GLuint fragment_program_id;
 	int compiled_program_id;
+	char name[RDE_SHADER_MAX_NAME];
 };
 rde_shader rde_struct_create_shader() {
 	rde_shader _s;
 	_s.vertex_program_id = 0;
 	_s.fragment_program_id = 0;
 	_s.compiled_program_id = -1;
+	memset(_s.name, 0 , RDE_SHADER_MAX_NAME);
 	return _s;
 }
 
@@ -389,23 +392,6 @@ rde_batch_3d rde_struct_create_batch_3d() {
 	return _b;
 }
 
-struct rde_material {
-	rde_texture* map_ka;
-	rde_texture* map_kd;
-	rde_texture* map_ks;
-	rde_texture* map_bump;
-	rde_material_light_data material_light_data;
-};
-rde_material rde_struct_create_material() {
-	rde_material _m;
-	_m.map_ka = NULL;
-	_m.map_kd = NULL;
-	_m.map_ks = NULL;
-	_m.map_bump = NULL;
-	_m.material_light_data = rde_struct_create_material_light_data();
-	return _m;
-}
-
 #define RDE_MESH_NAME_MAX 512
 struct rde_mesh {
 	char name[RDE_MESH_NAME_MAX];
@@ -505,6 +491,8 @@ struct rde_engine {
 	rde_model* models;
 
 	rde_directional_light directional_light;
+	rde_point_light* point_lights[RDE_MAX_POINT_LIGHTS];
+	size_t amount_of_point_lights;
 #endif
 
 #ifdef RDE_AUDIO_MODULE
@@ -552,6 +540,10 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 #ifdef RDE_RENDERING_MODULE
 	_e.directional_light = rde_struct_create_directional_light();
+	for(size_t _i = 0; _i < RDE_MAX_POINT_LIGHTS; _i++) {
+		_e.point_lights[_i] = NULL;
+	}
+	_e.amount_of_point_lights = 0;
 
 	_e.line_shader = NULL;
 	_e.color_shader_2d = NULL;

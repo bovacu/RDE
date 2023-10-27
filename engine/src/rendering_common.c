@@ -51,17 +51,17 @@ void rde_rendering_set_rendering_configuration() {
 #endif
 
 #if !IS_MOBILE() && !IS_WASM()
-	ENGINE.line_shader = rde_rendering_shader_load(RDE_LINE_VERTEX_SHADER, RDE_LINE_FRAGMENT_SHADER);
-	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_COLOR_VERTEX_SHADER_2D, RDE_COLOR_FRAGMENT_SHADER_2D);
-	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_TEXTURE_VERTEX_SHADER_2D, RDE_TEXTURE_FRAGMENT_SHADER_2D);
-	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_TEXT_VERTEX_SHADER_2D, RDE_TEXT_FRAGMENT_SHADER_2D);
-	ENGINE.frame_buffer_shader = rde_rendering_shader_load(RDE_FRAME_BUFFER_VERTEX_SHADER, RDE_FRAME_BUFFER_FRAGMENT_SHADER);
-	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_MESH_VERTEX_SHADER, RDE_MESH_FRAGMENT_SHADER);
+	ENGINE.line_shader = rde_rendering_shader_load(RDE_SHADER_LINE, RDE_LINE_VERTEX_SHADER, RDE_LINE_FRAGMENT_SHADER);
+	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, RDE_COLOR_VERTEX_SHADER_2D, RDE_COLOR_FRAGMENT_SHADER_2D);
+	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, RDE_TEXTURE_VERTEX_SHADER_2D, RDE_TEXTURE_FRAGMENT_SHADER_2D);
+	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, RDE_TEXT_VERTEX_SHADER_2D, RDE_TEXT_FRAGMENT_SHADER_2D);
+	ENGINE.frame_buffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, RDE_FRAME_BUFFER_VERTEX_SHADER, RDE_FRAME_BUFFER_FRAGMENT_SHADER);
+	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, RDE_MESH_VERTEX_SHADER, RDE_MESH_FRAGMENT_SHADER);
 #else
-	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
-	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
-	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_TEXT_VERTEX_SHADER_2D_ES, RDE_TEXT_FRAGMENT_SHADER_2D_ES);
-	ENGINE.frame_buffer_shader = rde_rendering_shader_load(RDE_FRAME_BUFFER_VERTEX_SHADER_ES, RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES);
+	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
+	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
+	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, RDE_TEXT_VERTEX_SHADER_2D_ES, RDE_TEXT_FRAGMENT_SHADER_2D_ES);
+	ENGINE.frame_buffer_shader = rde_rendering_shader_load(RDE_SHADER_MESH, RDE_FRAME_BUFFER_VERTEX_SHADER_ES, RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES);
 #endif
 	
 }
@@ -77,7 +77,7 @@ void rde_rendering_set_rendering_configuration() {
 
 	// ======================= API ===========================
 
-rde_shader* rde_rendering_shader_load(const char* _vertex_code, const char* _fragment_code) {
+rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_code, const char* _fragment_code) {
 	bool _error = false;
 
 	GLuint _vertex_program_id = glCreateShader(GL_VERTEX_SHADER);
@@ -129,6 +129,11 @@ rde_shader* rde_rendering_shader_load(const char* _vertex_code, const char* _fra
 		_shader->vertex_program_id = _vertex_program_id;
 		_shader->fragment_program_id = _fragment_program_id;
 		_shader->compiled_program_id = _program_id;
+#if IS_WINDOWS()
+		strcat_s(_shader->name, RDE_SHADER_MAX_NAME, _name);
+#else
+		strcat(_shader->name, _name);
+#endif
 
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Loaded shader with index '%d' successfully", _shader->compiled_program_id);
 		return _shader;
@@ -203,6 +208,17 @@ rde_shader_data rde_rendering_shader_get_data(rde_shader* _shader) {
 		.fragment_program_id = _shader->fragment_program_id,
 		.compiled_program_id = _shader->compiled_program_id
 	};
+}
+
+rde_shader* rde_rendering_shader_get_by_name(const char* _name) {
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_shaders; _i++) {
+		rde_shader* _shader = &ENGINE.shaders[_i];
+		if(_shader != NULL && strcmp(_shader->name, _name) == 0) {
+			return _shader;
+		}
+	}
+
+	return NULL;
 }
 
 void rde_rendering_shader_unload(rde_shader* _shader) {

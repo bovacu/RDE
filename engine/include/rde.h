@@ -119,6 +119,13 @@ extern "C" {
 
 /// ============================== SHADERS =================================
 
+#define RDE_SHADER_LINE "line_shader"
+#define RDE_SHADER_COLOR "color_shader"
+#define RDE_SHADER_TEXTURE "texture_shader"
+#define RDE_SHADER_TEXT "text_shader"
+#define RDE_SHADER_FRAMEBUFFER "framebuffer_shader"
+#define RDE_SHADER_MESH "mesh_shader"
+
 #define RDE_LINE_VERTEX_SHADER "" \
 	"#version 330 core\n" \
 	"\n" \
@@ -283,14 +290,27 @@ extern "C" {
 	"	model_matrix = _model;\n" \
 	"}"
 
+#define RDE_MAX_POINT_LIGHTS 10
 #define RDE_MESH_FRAGMENT_SHADER "" \
 	"#version 330 core\n" \
+	"\n" \
+	"const int RDE_MAX_POINT_LIGHTS = 10;\n" \
+	"\n" \
+	"in vec4 color;\n" \
+	"in vec3 normal;\n" \
+	"in vec2 text_coord;\n" \
+	"in vec3 frag_pos;\n" \
+	"out vec4 color_out;\n" \
 	"\n" \
 	"struct rde_material {\n" \
 	"	float shininess;\n" \
 	"	vec3 Ka;\n" \
 	"	vec3 Kd;\n" \
 	"	vec3 Ks;\n" \
+	"	sampler2D tex_ka;\n" \
+	"	sampler2D tex_kd;\n" \
+	"	sampler2D tex_ks;\n" \
+	"	sampler2D tex_bump;\n" \
 	"};\n" \
 	"struct rde_directional_light {\n" \
 	"	vec3 direction;\n" \
@@ -298,34 +318,67 @@ extern "C" {
 	"	vec3 diffuse_color;\n" \
 	"	vec3 specular_color;\n" \
 	"};\n" \
+	"struct rde_point_light {\n" \
+	"	vec3 position;\n" \
+	"	vec3 ambient_color;\n" \
+	"	vec3 diffuse_color;\n" \
+	"	vec3 specular_color;\n" \
+	"	float constant;\n" \
+	"	float linear;\n" \
+	"	float quadratic;\n" \
+	"	int used;\n" \
+	"};\n" \
 	"\n" \
-	"in vec4 color;\n" \
-	"in vec3 normal;\n" \
-	"in vec2 text_coord;\n" \
-	"in vec3 frag_pos;\n" \
-	"\n" \
-	"uniform sampler2D tex_ka;\n" \
-	"uniform sampler2D tex_kd;\n" \
-	"uniform sampler2D tex_ks;\n" \
-	"uniform sampler2D tex_bump;\n" \
 	"uniform vec3 camera_pos;\n" \
 	"uniform rde_directional_light directional_light;\n" \
+	"uniform rde_point_light point_lights[RDE_MAX_POINT_LIGHTS];\n" \
 	"uniform rde_material material;\n" \
-	"out vec4 color_out;\n" \
 	"\n" \
-	"void main(){\n" \
-	"	vec3 _ambient = material.Ka * directional_light.ambient_color * texture(tex_ka, text_coord).rgb;\n" \
+	"vec3 directional_light_calc() {\n" \
+	"	vec3 _ambient = material.Ka * directional_light.ambient_color * texture(material.tex_kd, text_coord).rgb;\n" \
 	"	\n" \
 	"	vec3 _norm = normalize(normal);\n" \
 	"	vec3 _light_dir = normalize(-directional_light.direction);\n" \
 	"	float _diff = max(dot(_norm, _light_dir), 0.0);\n" \
-	"	vec3 _diffuse = material.Kd * directional_light.diffuse_color * _diff * texture(tex_kd, text_coord).rgb;\n" \
+	"	vec3 _diffuse = material.Kd * directional_light.diffuse_color * _diff * texture(material.tex_kd, text_coord).rgb;\n" \
 	"	\n" \
 	"	vec3 _view_dir = normalize(camera_pos + frag_pos);\n" \
 	"	vec3 _reflect_dir = reflect(-_light_dir, _norm);\n" \
 	"	float _spec = pow(max(dot(_view_dir, _reflect_dir), 0.0), material.shininess);\n" \
-	"	vec3 _specular = material.Ks * directional_light.specular_color * _spec * texture(tex_ks, text_coord).rgb;\n" \
+	"	vec3 _specular = material.Ks * directional_light.specular_color * _spec * texture(material.tex_ks, text_coord).rgb;\n" \
 	"	vec3 _final_light = _ambient + _diffuse + _specular;\n" \
+	"	return _final_light;\n" \
+	"}\n" \
+	"\n" \
+	"vec3 point_light_calc(int _i) {\n" \
+	"	rde_point_light _light = point_lights[_i];\n" \
+	"	if(_light.used < 0) return vec3(0.0, 0.0, 0.0);\n" \
+	"	vec3 _ambient = material.Ka * _light.ambient_color * texture(material.tex_kd, text_coord).rgb;\n" \
+	"	\n" \
+	"	vec3 _norm = normalize(normal);\n" \
+	"	vec3 _light_dir = normalize(_light.position - frag_pos);\n" \
+	"	float _diff = max(dot(_norm, _light_dir), 0.0);\n" \
+	"	vec3 _diffuse = material.Kd * _light.diffuse_color * _diff * texture(material.tex_kd, text_coord).rgb;\n" \
+	"	\n" \
+	"	vec3 _view_dir = normalize(camera_pos + frag_pos);\n" \
+	"	vec3 _reflect_dir = reflect(-_light_dir, _norm);\n" \
+	"	float _spec = pow(max(dot(_view_dir, _reflect_dir), 0.0), material.shininess);\n" \
+	"	vec3 _specular = material.Ks * _light.specular_color * _spec * texture(material.tex_ks, text_coord).rgb;\n" \
+	"	float _distance = length(_light.position - frag_pos);\n" \
+	"	float _attenuation = 1.0 / (_light.constant + _light.linear * _distance + _light.quadratic * (_distance * _distance));\n" \
+	"	_ambient  *= _attenuation;\n" \
+	"	_diffuse  *= _attenuation;\n" \
+	"	_specular *= _attenuation;\n" \
+	"	vec3 _final_light = _ambient + _diffuse + _specular;\n" \
+	"	return _final_light;\n" \
+	"}\n" \
+	"\n" \
+	"void main(){\n" \
+	"	vec3 _final_light = vec3(0.0);\n" \
+	"	_final_light += directional_light_calc();\n" \
+	"	 for(int _i = 0; _i < RDE_MAX_POINT_LIGHTS; _i++) {\n" \
+	"		_final_light += point_light_calc(_i);\n" \
+	"	}\n" \
 	"	color_out = vec4(_final_light, 1.0);\n" \
 	"}"
 
@@ -1418,9 +1471,6 @@ typedef struct {
 	int amount_of_chars;
 } rde_font_data;
 
-typedef struct rde_point_light rde_point_light;
-typedef struct rde_spot_light rde_spot_light;
-
 typedef struct {
 	float shininess;
 	rde_vec_3F ka;
@@ -1436,11 +1486,41 @@ rde_material_light_data rde_struct_create_material_light_data() {
 	return _m;
 }
 
-typedef struct rde_material rde_material;
 typedef struct {
-	int opengl_texture_id;
-	rde_material_light_data material_light;
-} rde_material_data;
+	rde_texture* map_ka;
+	rde_texture* map_kd;
+	rde_texture* map_ks;
+	rde_texture* map_bump;
+	rde_material_light_data material_light_data;
+} rde_material;
+rde_material rde_struct_create_material() {
+	rde_material _m;
+	_m.map_ka = NULL;
+	_m.map_kd = NULL;
+	_m.map_ks = NULL;
+	_m.map_bump = NULL;
+	_m.material_light_data = rde_struct_create_material_light_data();
+	return _m;
+}
+
+typedef struct {
+	char* name;
+	size_t vertex_count;
+
+	float* positions;
+	size_t positions_size;
+	
+	float* texcoords;
+	size_t texcoords_size;
+	
+	uint* colors;
+	size_t colors_size;
+
+	float* normals;
+	size_t normals_size;
+
+	rde_material material;
+} rde_mesh_gen_data;
 
 typedef struct rde_mesh rde_mesh;
 typedef struct {
@@ -1471,6 +1551,27 @@ rde_directional_light rde_struct_create_directional_light() {
 	_d.diffuse_color = (rde_vec_3F) { 0.5f, 0.5f, 0.5f };
 	_d.specular_color = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
 	return _d;
+}
+
+typedef struct {
+	rde_vec_3F position;
+	rde_vec_3F ambient_color;
+	rde_vec_3F diffuse_color;
+	rde_vec_3F specular_color;
+	float constant;
+	float linear;
+	float quadratic;
+} rde_point_light;
+rde_point_light rde_struct_create_point_light() {
+	rde_point_light _p;
+	_p.position = (rde_vec_3F) { 0.0, 0.0f, 0.0f };
+	_p.ambient_color = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
+	_p.diffuse_color = (rde_vec_3F) { 0.5f, 0.5f, 0.5f };
+	_p.specular_color = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+	_p.constant = 1.0f;
+	_p.linear = 0.09f;
+	_p.quadratic = 0.032f;
+	return _p;
 }
 
 struct rde_material_map {
@@ -1793,11 +1894,12 @@ RDE_FUNC int rde_events_mobile_consume_events(void* _user_data, SDL_Event* _even
 /// ============================ RENDERING ==================================
 
 #ifdef RDE_RENDERING_MODULE
-RDE_FUNC rde_shader* rde_rendering_shader_load(const char* _vertex_code, const char* _fragment_code);
+RDE_FUNC rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_code, const char* _fragment_code);
 RDE_FUNC void rde_rendering_shader_set_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose);
 RDE_FUNC void rde_rendering_shader_set_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_IV_ _type, int* _data);
 RDE_FUNC void rde_rendering_shader_set_uniform_value_uint(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_UIV_ _type, uint* _data);
 RDE_FUNC rde_shader_data rde_rendering_shader_get_data(rde_shader* _shader);
+RDE_FUNC rde_shader* rde_rendering_shader_get_by_name(const char* _name);
 RDE_FUNC void rde_rendering_shader_unload(rde_shader* _shader);
 
 RDE_FUNC rde_texture* rde_rendering_texture_load(const char* _file_path);
@@ -1835,7 +1937,9 @@ RDE_FUNC void rde_rendering_2d_draw_memory_texture(const rde_transform* _transfo
 RDE_FUNC void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader); /// Draws a batched group of quads representing the _text in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_2d_end_drawing();
 
-RDE_FUNC rde_mesh* rde_struct_memory_mesh_create(size_t _vertex_count, size_t _indices_count); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
+RDE_FUNC rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
+RDE_FUNC rde_mesh* rde_rendering_mesh_create_cube(float _size, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
+RDE_FUNC rde_mesh* rde_rendering_mesh_create_sphere(float _radius, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
 RDE_FUNC rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh);
 RDE_FUNC void rde_rendering_mesh_destroy(rde_mesh* _mesh);
 
@@ -1862,6 +1966,7 @@ RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color(rde_col
 RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_vec_3F _diffuse_color);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color);
+RDE_FUNC void rde_rendering_light_add_add_point_light(rde_point_light* _point_light);
 RDE_FUNC rde_directional_light rde_rendering_lighting_get_directional_light();
 
 #endif
