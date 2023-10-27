@@ -11,6 +11,7 @@ rde_rendering_statistics statistics;
 
 void rde_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
 void rde_rendering_generate_gl_vertex_config_for_mesh_3d(rde_mesh* _mesh);
+void rde_rendering_draw_skybox();
 
 rde_vec_2F rde_rendering_get_aspect_ratio() {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
@@ -31,7 +32,7 @@ void rde_rendering_set_rendering_configuration() {
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+	//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
 #if !IS_MOBILE() 
 	#if !IS_WASM()
@@ -58,6 +59,7 @@ void rde_rendering_set_rendering_configuration() {
 	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, RDE_TEXT_VERTEX_SHADER_2D, RDE_TEXT_FRAGMENT_SHADER_2D);
 	ENGINE.frame_buffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, RDE_FRAME_BUFFER_VERTEX_SHADER, RDE_FRAME_BUFFER_FRAGMENT_SHADER);
 	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, RDE_MESH_VERTEX_SHADER, RDE_MESH_FRAGMENT_SHADER);
+	ENGINE.skybox_shader = rde_rendering_shader_load(RDE_SHADER_SKYBOX, RDE_SKYBOX_VERTEX_SHADER, RDE_SKYBOX_FRAGMENT_SHADER);
 #else
 	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
 	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
@@ -617,4 +619,135 @@ void rde_rendering_set_background_color(rde_color _color) {
 	glClearColor((float)_color.r / 255.f, (float)_color.g / 255.f, (float)_color.b / 255.f, (float)_color.a / 255.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
+
+rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]) {
+	if(ENGINE.skybox.vao == RDE_UINT_MAX) {
+		float _vertices[] = {
+			// positions          
+			-1.0f,  1.0f, -1.0f,
+			-1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			-1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
+
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+
+			-1.0f, -1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
+
+			-1.0f,  1.0f, -1.0f,
+			1.0f,  1.0f, -1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			1.0f, -1.0f,  1.0f
+		};
+
+		glGenVertexArrays(1, &ENGINE.skybox.vao);
+		glGenBuffers(1, &ENGINE.skybox.vbo);
+		glBindVertexArray(ENGINE.skybox.vao);
+		glBindBuffer(GL_ARRAY_BUFFER, ENGINE.skybox.vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), &_vertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	}
+
+	GLuint _texture_id;
+	glGenTextures(1, &_texture_id);
+	rde_util_check_opengl_error("Generating texture");
+	glBindTexture(GL_TEXTURE_CUBE_MAP, _texture_id);
+	rde_util_check_opengl_error("Binding texture");
+
+	for(size_t _i = 0; _i < 6; _i++) {
+		const char* _extension = rde_util_file_get_name_extension(_texture_paths[_i]);
+		char _extension_lower[10];
+		memset(_extension_lower, 0, 10);
+		rde_util_string_to_lower(_extension_lower, _extension);
+		rde_critical_error(strcmp(_extension_lower, "jpeg") != 0 && strcmp(_extension_lower, "jpg") != 0 &&
+		                   strcmp(_extension_lower, "png") != 0, RDE_ERROR_RENDERING_TEXTURE_UNSUPPORTED_FORMAT, _texture_paths[_i], _extension);
+
+		int _width, _height, _channels;
+		//stbi_set_flip_vertically_on_load(1);
+
+#if IS_IOS()
+		stbi_convert_iphone_png_to_rgb(1);
+		stbi_set_unpremultiply_on_load(1);
+#endif
+
+		stbi_uc* _data = NULL;
+		_data = stbi_load(_texture_paths[_i], &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
+
+		if (_data == NULL) {
+			rde_critical_error(true, RDE_ERROR_FILE_NOT_FOUND, _texture_paths[_i]);
+			return -1;
+		}
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		GLenum _internal_format = 0;
+		GLenum _data_format = 0;
+		if (strcmp(_extension, "png") == 0) {
+			_internal_format = GL_RGBA8;
+			_data_format = GL_RGBA;
+		} else {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			_internal_format = GL_RGB8;
+			_data_format = GL_RGB;
+		}
+
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _i, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
+		rde_util_check_opengl_error("TexImage2D texture");
+
+		stbi_image_free(_data);
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	rde_log_color(RDE_LOG_COLOR_GREEN, "Loaded correctly skybox with textures:");
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	Left: %s", _texture_paths[0]);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	Right: %s", _texture_paths[1]);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	Top: %s", _texture_paths[2]);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	Bottom: %s", _texture_paths[3]);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	Front: %s", _texture_paths[4]);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	Back: %s", _texture_paths[5]);
+
+	return _texture_id;
+}
+
+void rde_rendering_skybox_use(rde_skybox_id _skybox_id) {
+	ENGINE.skybox.opengl_texture_id = _skybox_id;
+}
+
+void rde_rendering_skybox_unload(rde_skybox_id _skybox_id) {
+	rde_critical_error(!glIsTexture(_skybox_id), "Tried to delete a texture with negative id");
+	glDeleteTextures(1, &_skybox_id);
+}
+
 #endif

@@ -320,6 +320,7 @@ void model_viewer_draw_imgui() {
 
 void model_viewer_on_render(float _dt, rde_window* _window) {
 	UNUSED(_dt)
+	rde_rendering_3d_draw_skybox(&model_viewer_camera);
 	model_viewer_draw_grid(&model_viewer_camera, _window);
 	model_viewer_draw_3d(_window, _dt);
  	model_viewer_draw_imgui();
@@ -366,6 +367,17 @@ void model_viewer_init() {
 	_light_ball_material.material_light_data.kd = { 0.0f, 0.0f, 0.0f };
 	_light_ball_material.material_light_data.ks = { 0.0f, 0.0f, 0.0f };
 	model_viewer_point_light_mesh = rde_rendering_mesh_create_sphere(0.25f, &_light_ball_material);
+
+	rde_skybox_id _skybox = rde_rendering_skybox_load((const char*[6]) {
+		"skyboxes/nebulosa/right.png",
+		"skyboxes/nebulosa/left.png",
+		"skyboxes/nebulosa/top.png",
+		"skyboxes/nebulosa/bottom.png",
+		"skyboxes/nebulosa/front.png",
+		"skyboxes/nebulosa/back.png",
+	});
+	rde_rendering_skybox_use(_skybox);
+
 
 	rde_engine_show_message_box(RDE_LOG_LEVEL_INFO, 
 	                         "Instructions", 

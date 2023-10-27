@@ -431,6 +431,19 @@ rde_model rde_struct_create_model() {
 	return _m;
 }
 
+typedef struct {
+	uint vao;
+	uint vbo;
+	int opengl_texture_id;
+} rde_skybox;
+rde_skybox rde_struct_create_skybox() {
+	rde_skybox _s;
+	_s.vao = RDE_UINT_MAX;
+	_s.vbo = RDE_UINT_MAX;
+	_s.opengl_texture_id = -1;
+	return _s;
+}
+
 #endif
 
 #ifdef RDE_AUDIO_MODULE
@@ -474,12 +487,14 @@ struct rde_engine {
 	rde_window* windows;
 	
 #ifdef RDE_RENDERING_MODULE
+	#define RDE_SHADERS_AMOUNT 7
 	rde_shader* line_shader;
 	rde_shader* color_shader_2d;
 	rde_shader* texture_shader_2d;
 	rde_shader* text_shader_2d;
 	rde_shader* frame_buffer_shader;
 	rde_shader* mesh_shader;
+	rde_shader* skybox_shader;
 	rde_shader* shaders;
 
 	size_t total_amount_of_textures;
@@ -493,6 +508,8 @@ struct rde_engine {
 	rde_directional_light directional_light;
 	rde_point_light* point_lights[RDE_MAX_POINT_LIGHTS];
 	size_t amount_of_point_lights;
+
+	rde_skybox skybox;
 #endif
 
 #ifdef RDE_AUDIO_MODULE
@@ -550,6 +567,11 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.texture_shader_2d = NULL;
 	_e.text_shader_2d = NULL;
 	_e.frame_buffer_shader = NULL;
+	_e.mesh_shader = NULL;
+	_e.skybox_shader = NULL;
+	_e.skybox = rde_struct_create_skybox();
+
+	_e.heap_allocs_config.max_number_of_shaders += RDE_SHADERS_AMOUNT;
 
 	rde_critical_error(_e.heap_allocs_config.max_number_of_shaders <= 0, RDE_ERROR_HEAP_ALLOC_BAD_VALUE, "shaders", _e.heap_allocs_config.max_number_of_shaders);
 	_e.shaders = (rde_shader*)malloc(sizeof(rde_shader) * _e.heap_allocs_config.max_number_of_shaders);
@@ -934,6 +956,15 @@ void rde_engine_destroy_engine() {
 #ifdef RDE_RENDERING_MODULE
 	rde_rendering_end_2d();
 	rde_rendering_end_3d();
+	
+	if(ENGINE.skybox.opengl_texture_id != RDE_UINT_MAX) {
+		rde_rendering_skybox_unload(ENGINE.skybox.opengl_texture_id);
+	}
+
+	if(ENGINE.skybox.vao != RDE_UINT_MAX) {
+		glDeleteBuffers(1, &ENGINE.skybox.vbo);
+		glDeleteVertexArrays(1, &ENGINE.skybox.vao);
+	}
 
 	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_atlases; _i++) {
 		if(ENGINE.atlases[_i].texture == NULL) {

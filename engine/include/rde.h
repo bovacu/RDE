@@ -125,6 +125,7 @@ extern "C" {
 #define RDE_SHADER_TEXT "text_shader"
 #define RDE_SHADER_FRAMEBUFFER "framebuffer_shader"
 #define RDE_SHADER_MESH "mesh_shader"
+#define RDE_SHADER_SKYBOX "skybox_shader"
 
 #define RDE_LINE_VERTEX_SHADER "" \
 	"#version 330 core\n" \
@@ -383,6 +384,24 @@ extern "C" {
 	"	color_out = vec4(_final_light, 1.0);\n" \
 	"}"
 
+#define RDE_SKYBOX_VERTEX_SHADER "" \
+	"#version 330 core \n" \
+	"layout(location = 0) in vec3 in_pos;\n" \
+	"out vec3 texcoords;\n" \
+	"uniform mat4 view_projection_matrix;\n" \
+	"void main() {\n"\
+	"	texcoords = in_pos;\n" \
+	"	gl_Position = (view_projection_matrix * vec4(in_pos, 1)).xyww;\n" \
+	"}"
+
+#define RDE_SKYBOX_FRAGMENT_SHADER "" \
+	"#version 330 core\n" \
+	"in vec3 texcoords;\n" \
+	"out vec4 color_out;\n" \
+	"uniform samplerCube skybox;\n" \
+	"void main() {\n" \
+	"	color_out = texture(skybox, texcoords);\n" \
+	"}"
 
 #define RDE_COLOR_VERTEX_SHADER_2D_ES "" \
 	"#version 300 es\n" \
@@ -1575,9 +1594,7 @@ rde_point_light rde_struct_create_point_light() {
 	return _p;
 }
 
-struct rde_material_map {
-	UNIMPLEMENTED_STRUCT()
-};
+typedef uint rde_skybox_id;
 
 struct rde_model_bone {
 	UNIMPLEMENTED_STRUCT()
@@ -1958,6 +1975,7 @@ RDE_FUNC void rde_rendering_3d_draw_point(rde_vec_3F _position, rde_color _color
 RDE_FUNC void rde_rendering_3d_draw_line(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, unsigned short _thickness, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader);
 RDE_FUNC void rde_rendering_3d_draw_model(const rde_transform* _transform, rde_model* _model, rde_shader* _shader);
+RDE_FUNC void rde_rendering_3d_draw_skybox(rde_camera* _camera);
 RDE_FUNC void rde_rendering_3d_end_drawing();
 
 RDE_FUNC void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction);
@@ -1969,6 +1987,10 @@ RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color(rde_co
 RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color);
 RDE_FUNC void rde_rendering_light_add_add_point_light(rde_point_light* _point_light);
 RDE_FUNC rde_directional_light rde_rendering_lighting_get_directional_light();
+
+RDE_FUNC rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]); // order is right, left, top, bottom, front, back
+RDE_FUNC void rde_rendering_skybox_use(rde_skybox_id _skybox_id);
+RDE_FUNC void rde_rendering_skybox_unload(rde_skybox_id _skybox_id);
 
 #endif
 

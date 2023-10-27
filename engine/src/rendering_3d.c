@@ -674,7 +674,7 @@ void rde_rendering_flush_line_batch() {
 	glUseProgram(_shader->compiled_program_id);
 	rde_util_check_opengl_error("After glUseProgram");
 
-	mat4 _model_view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
+	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
 	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
 	rde_vec_3F _cam_pos = current_drawing_camera->transform.position;
@@ -686,8 +686,8 @@ void rde_rendering_flush_line_batch() {
 				_view_matrix
 	);
 
-	glm_mat4_mul(projection_matrix, _view_matrix, _model_view_projection_matrix);
-	glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_model_view_projection_matrix);
+	glm_mat4_mul(projection_matrix, _view_matrix, _view_projection_matrix);
+	glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 
 	glBindVertexArray(current_batch_3d.line_batch.vertex_array_object);
 	rde_util_check_opengl_error("After glBindVertexArray");
@@ -715,7 +715,7 @@ void rde_rendering_flush_batch_3d() {
 	glUseProgram(current_batch_3d.shader->compiled_program_id);
 	rde_util_check_opengl_error("After glUseProgram");
 
-	mat4 _model_view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
+	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
 	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
 	rde_vec_3F _cam_pos = current_drawing_camera->transform.position;
@@ -727,7 +727,7 @@ void rde_rendering_flush_batch_3d() {
 				_view_matrix
 	);
 
-	glm_mat4_mul(projection_matrix, _view_matrix, _model_view_projection_matrix);
+	glm_mat4_mul(projection_matrix, _view_matrix, _view_projection_matrix);
 
 	rde_texture* _ka_texture = _mesh->material.map_ka != NULL ? _mesh->material.map_ka : DEFAULT_TEXTURE;
 	glActiveTexture(GL_TEXTURE0);
@@ -755,7 +755,7 @@ void rde_rendering_flush_batch_3d() {
 
 	rde_util_check_opengl_error("After glBindTexture");
 
-	glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_model_view_projection_matrix);
+	glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 	rde_util_check_opengl_error("After Set Model Matrix Unform");
 
 	rde_vec_3F _camera_pos = current_drawing_camera->transform.position;
@@ -1000,6 +1000,42 @@ void rde_rendering_model_unload(rde_model* _model) {
 	stbds_arrfree(_model->mesh_array);
 	_model->mesh_array = NULL;
 	_model->mesh_array_size = 0;
+}
+
+void rde_rendering_3d_draw_skybox(rde_camera* _camera) {
+	if(ENGINE.skybox.opengl_texture_id < 0 || _camera == NULL) {
+		return;
+	}
+	glDepthFunc(GL_LEQUAL);
+	glUseProgram(ENGINE.skybox_shader->compiled_program_id);
+	
+	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
+
+	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
+	rde_vec_3F _cam_pos = _camera->transform.position;
+	rde_vec_3F _cam_direction = _camera->direction;
+	rde_vec_3F _cam_up = _camera->up;
+	glm_lookat( (vec3) { _cam_pos.x, _cam_pos.y, _cam_pos.z },
+				(vec3) { _cam_pos.x + _cam_direction.x, _cam_pos.y + _cam_direction.y, _cam_pos.z + _cam_direction.z },
+				(vec3) { _cam_up.x, _cam_up.y, _cam_up.z },
+				_view_matrix
+	);
+	_view_matrix[3][0] = 0.0f;
+	_view_matrix[3][1] = 0.0f;
+	_view_matrix[3][2] = 0.0f;
+	_view_matrix[3][3] = 0.0f;
+
+	glm_mat4_mul(projection_matrix, _view_matrix, _view_projection_matrix);
+
+	glUniformMatrix4fv(glGetUniformLocation(ENGINE.skybox_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
+	rde_util_check_opengl_error("After Set Model Matrix Unform");
+
+	glBindVertexArray(ENGINE.skybox.vao);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, ENGINE.skybox.opengl_texture_id);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	glDepthFunc(GL_LESS);
 }
 
 #endif
