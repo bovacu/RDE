@@ -165,6 +165,9 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 		if(model_viewer_point_light_mesh != NULL) {
 			rde_transform _point_light_transform = rde_struct_create_transform();
 			_point_light_transform.position = model_viewer_point_light.position;
+			_point_light_transform.position.x *= model_viewer_transform.scale.x;
+			_point_light_transform.position.y *= model_viewer_transform.scale.y;
+			_point_light_transform.position.z *= model_viewer_transform.scale.z;
 			rde_rendering_3d_draw_mesh(&_point_light_transform, model_viewer_point_light_mesh, NULL);
 		}
 		rde_rendering_3d_end_drawing();
