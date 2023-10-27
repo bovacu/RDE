@@ -374,6 +374,7 @@ extern "C" {
 	"}\n" \
 	"\n" \
 	"void main(){\n" \
+	"	if(texture(material.tex_kd, text_coord).a < 0.05) discard;\n" \
 	"	vec3 _final_light = vec3(0.0);\n" \
 	"	_final_light += directional_light_calc();\n" \
 	"	 for(int _i = 0; _i < RDE_MAX_POINT_LIGHTS; _i++) {\n" \

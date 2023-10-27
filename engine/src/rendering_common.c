@@ -31,6 +31,7 @@ void rde_rendering_set_rendering_configuration() {
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
 #if !IS_MOBILE() 
 	#if !IS_WASM()
