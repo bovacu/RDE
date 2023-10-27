@@ -19,6 +19,9 @@ rde_vec_3F model_viewer_directional_light_specular_color = { 1.0f, 1.0f, 1.0f };
 
 rde_model_data model_viewer_model_data;
 int model_viewer_max_meshes_to_render = 0;
+rde_mesh* model_viewer_point_light_mesh = NULL;
+
+rde_point_light model_viewer_point_light;
 
 void model_viewer_keyboard_controller(float _dt) {
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
@@ -158,45 +161,95 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 		for(int _i = 0; _i < model_viewer_max_meshes_to_render; _i++) {
 			rde_rendering_3d_draw_mesh(&model_viewer_transform, model_viewer_model_data.meshes[_i], NULL);
 		}
-		//rde_rendering_3d_draw_model(&model_viewer_transform, model_viewer_model, NULL);
+
+		if(model_viewer_point_light_mesh != NULL) {
+			rde_transform _point_light_transform = rde_struct_create_transform();
+			_point_light_transform.position = model_viewer_point_light.position;
+			rde_rendering_3d_draw_mesh(&_point_light_transform, model_viewer_point_light_mesh, NULL);
+		}
 		rde_rendering_3d_end_drawing();
 	}
 }
 
- void model_viewer_draw_imgui() {
- 	ImGui::Begin("Directional Light", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+void model_viewer_draw_imgui() {
+	ImGui::Begin("Lighting", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	
+	ImGui::Text("Directional Light");
+	{
+		ImGui::PushID(1);
+		float _vec[3] = { model_viewer_directional_light_direction.x, model_viewer_directional_light_direction.y, model_viewer_directional_light_direction.z };
+		if (ImGui::DragFloat3("Direction", _vec, 0.25f)) {
+			model_viewer_directional_light_direction.x = _vec[0];
+			model_viewer_directional_light_direction.y = _vec[1];
+			model_viewer_directional_light_direction.z = _vec[2];
+			rde_rendering_lighting_set_directional_light_direction(model_viewer_directional_light_direction);
+		}
+	
+		float _vec_1[3] = { model_viewer_directional_light_ambient_color.x, model_viewer_directional_light_ambient_color.y, model_viewer_directional_light_ambient_color.z };
+		if (ImGui::DragFloat3("Ambient Color", _vec_1, 0.005f, 0.0f, 1.0f)) {
+			model_viewer_directional_light_ambient_color.x = _vec_1[0];
+			model_viewer_directional_light_ambient_color.y = _vec_1[1];
+			model_viewer_directional_light_ambient_color.z = _vec_1[2];
+			rde_rendering_lighting_set_directional_light_ambient_color_f(model_viewer_directional_light_ambient_color);
+		}
+	
+		float _vec_2[3] = { model_viewer_directional_light_diffuse_color.x, model_viewer_directional_light_diffuse_color.y, model_viewer_directional_light_diffuse_color.z };
+		if (ImGui::DragFloat3("Diffuse Color", _vec_2, 0.005f, 0.0f, 1.0f)) {
+			model_viewer_directional_light_diffuse_color.x = _vec_2[0];
+			model_viewer_directional_light_diffuse_color.y = _vec_2[1];
+			model_viewer_directional_light_diffuse_color.z = _vec_2[2];
+			rde_rendering_lighting_set_directional_light_diffuse_color_f(model_viewer_directional_light_diffuse_color);
+		}
+	
+		float _vec_3[3] = { model_viewer_directional_light_specular_color.x, model_viewer_directional_light_specular_color.y, model_viewer_directional_light_specular_color.z };
+		if (ImGui::DragFloat3("Specular color", _vec_3, 0.005f, 0.0f, 1.0f)) {
+			model_viewer_directional_light_specular_color.x = _vec_3[0];
+			model_viewer_directional_light_specular_color.y = _vec_3[1];
+			model_viewer_directional_light_specular_color.z = _vec_3[2];
+			rde_rendering_lighting_set_directional_light_specular_color_f(model_viewer_directional_light_specular_color);
+		}
+		ImGui::PopID();
+	}
 
- 	float _vec[3] = { model_viewer_directional_light_direction.x, model_viewer_directional_light_direction.y, model_viewer_directional_light_direction.z };
- 	if(ImGui::DragFloat3("Direction", _vec, 0.25f)) {
- 		model_viewer_directional_light_direction.x = _vec[0];
- 		model_viewer_directional_light_direction.y = _vec[1];
- 		model_viewer_directional_light_direction.z = _vec[2];
- 		rde_rendering_lighting_set_directional_light_direction(model_viewer_directional_light_direction);
- 	}
+	ImGui::Separator();
 
- 	float _vec_1[3] = { model_viewer_directional_light_ambient_color.x, model_viewer_directional_light_ambient_color.y, model_viewer_directional_light_ambient_color.z };
- 	if(ImGui::DragFloat3("Ambient Color", _vec_1, 0.005f, 0.0f, 1.0f)) {
- 		model_viewer_directional_light_ambient_color.x = _vec_1[0];
- 		model_viewer_directional_light_ambient_color.y = _vec_1[1];
- 		model_viewer_directional_light_ambient_color.z = _vec_1[2];
- 		rde_rendering_lighting_set_directional_light_ambient_color_f(model_viewer_directional_light_ambient_color);
- 	}
+	{
+		ImGui::PushID(2);
+		ImGui::Text("Point Light");
+		float _vec[3] = { model_viewer_point_light.position.x, model_viewer_point_light.position.y, model_viewer_point_light.position.z };
+		if(ImGui::DragFloat3("Position", _vec, 0.25f)) {
+			model_viewer_point_light.position.x = _vec[0];
+			model_viewer_point_light.position.y = _vec[1];
+			model_viewer_point_light.position.z = _vec[2];
+		}
 
- 	float _vec_2[3] = { model_viewer_directional_light_diffuse_color.x, model_viewer_directional_light_diffuse_color.y, model_viewer_directional_light_diffuse_color.z };
- 	if(ImGui::DragFloat3("Diffuse Color", _vec_2, 0.005f, 0.0f, 1.0f)) {
- 		model_viewer_directional_light_diffuse_color.x = _vec_2[0];
- 		model_viewer_directional_light_diffuse_color.y = _vec_2[1];
- 		model_viewer_directional_light_diffuse_color.z = _vec_2[2];
- 		rde_rendering_lighting_set_directional_light_diffuse_color_f(model_viewer_directional_light_diffuse_color);
- 	}
+		float _vec_1[3] = { model_viewer_point_light.ambient_color.x, model_viewer_point_light.ambient_color.y, model_viewer_point_light.ambient_color.z };
+		if(ImGui::DragFloat3("Ambient Color", _vec_1, 0.005f, 0.0f, 1.0f)) {
+			model_viewer_point_light.ambient_color.x = _vec_1[0];
+			model_viewer_point_light.ambient_color.y = _vec_1[1];
+			model_viewer_point_light.ambient_color.z = _vec_1[2];
+		}
 
- 	float _vec_3[3] = { model_viewer_directional_light_specular_color.x, model_viewer_directional_light_specular_color.y, model_viewer_directional_light_specular_color.z };
- 	if(ImGui::DragFloat3("Specular color", _vec_3, 0.005f, 0.0f, 1.0f)) {
- 		model_viewer_directional_light_specular_color.x = _vec_3[0];
- 		model_viewer_directional_light_specular_color.y = _vec_3[1];
- 		model_viewer_directional_light_specular_color.z = _vec_3[2];
- 		rde_rendering_lighting_set_directional_light_specular_color_f(model_viewer_directional_light_specular_color);
- 	}
+		float _vec_2[3] = { model_viewer_point_light.diffuse_color.x, model_viewer_point_light.diffuse_color.y, model_viewer_point_light.diffuse_color.z };
+		if(ImGui::DragFloat3("Diffuse Color", _vec_2, 0.005f, 0.0f, 1.0f)) {
+			model_viewer_point_light.diffuse_color.x = _vec_2[0];
+			model_viewer_point_light.diffuse_color.y = _vec_2[1];
+			model_viewer_point_light.diffuse_color.z = _vec_2[2];
+		}
+
+		float _vec_3[3] = { model_viewer_point_light.specular_color.x, model_viewer_point_light.specular_color.y, model_viewer_point_light.specular_color.z };
+		if(ImGui::DragFloat3("Specular color", _vec_3, 0.005f, 0.0f, 1.0f)) {
+			model_viewer_point_light.specular_color.x = _vec_3[0];
+			model_viewer_point_light.specular_color.y = _vec_3[1];
+			model_viewer_point_light.specular_color.z = _vec_3[2];
+		}
+
+		ImGui::DragFloat("Constan", &model_viewer_point_light.constant, 0.0001f, 0.001f, 1.0f);
+		ImGui::DragFloat("Linear", &model_viewer_point_light.linear, 0.0001f, 0.0f, 1.0f);
+		ImGui::DragFloat("Quadratic", &model_viewer_point_light.quadratic, 0.0001f, 0.0f, 2.0f);
+		ImGui::PopID();
+	}
+
  	ImGui::End();
 
  	ImGui::Begin("Model Transform", NULL, ImGuiWindowFlags_AlwaysAutoResize);
@@ -275,6 +328,10 @@ void model_viewer_unload() {
 		free(model_viewer_model_data.meshes);
 	}
 
+	if(model_viewer_point_light_mesh != NULL) {
+		rde_rendering_mesh_destroy(model_viewer_point_light_mesh);
+	}
+
 	model_viewer_model = NULL;
 
 	events_callback = NULL;
@@ -297,6 +354,15 @@ void model_viewer_init() {
 	late_update_callback = &model_viewer_on_late_update;
 	render_callback = &model_viewer_on_render;
 	unload_callback = &model_viewer_unload;
+
+	model_viewer_point_light = rde_struct_create_point_light();
+	rde_rendering_light_add_add_point_light(&model_viewer_point_light);
+
+	rde_material _light_ball_material = rde_struct_create_material();
+	_light_ball_material.material_light_data.ka = { 1.0f, 1.0f, 1.0f };
+	_light_ball_material.material_light_data.kd = { 0.0f, 0.0f, 0.0f };
+	_light_ball_material.material_light_data.ks = { 0.0f, 0.0f, 0.0f };
+	model_viewer_point_light_mesh = rde_rendering_mesh_create_sphere(0.25f, &_light_ball_material);
 
 	rde_engine_show_message_box(RDE_LOG_LEVEL_INFO, 
 	                         "Instructions", 
