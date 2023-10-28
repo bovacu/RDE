@@ -1,5 +1,9 @@
+// ==============================================================================
+// =									API										=
+// ==============================================================================
+
 #define RDE_IMPLEMENT_SAFE_ARR_ACCESS(_type)																								\
-_type rde_arr_s_get_##_type(unsigned int _index, _type* _arr, size_t _arr_size, char* _fmt, ...) {											\
+_type rde_arr_s_get_##_type(uint _index, _type* _arr, size_t _arr_size, char* _fmt, ...) {											\
 	if(_index >= _arr_size) {																												\
 		va_list _args;																														\
 		va_start(_args, _fmt);																												\
@@ -13,7 +17,7 @@ _type rde_arr_s_get_##_type(unsigned int _index, _type* _arr, size_t _arr_size, 
 	return _arr[_index];																													\
 }
 #define RDE_IMPLEMENT_SAFE_ARR_SET(_type)																									\
-void rde_arr_s_set_##_type(unsigned int _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...) {								\
+void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...) {								\
 	if(_index >= _arr_size) {																												\
 		va_list _args;																														\
 		va_start(_args, _fmt);																												\
@@ -41,7 +45,7 @@ RDE_IMPLEMENT_SAFE_ARR_SET(short)
 RDE_IMPLEMENT_SAFE_ARR_SET(float)
 RDE_IMPLEMENT_SAFE_ARR_SET(double)
 
-void rde_util_sanitaize_path(const char* _path, char* _sanitized, size_t _sanitized_size) {
+void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, size_t _sanitized_size) {
 	rde_critical_error(strlen(_path) > _sanitized_size, RDE_ERROR_SANITIZATION_PATH, _path, _sanitized_size);
 	memset(_sanitized, 0, _sanitized_size);
 
@@ -60,92 +64,6 @@ const char* rde_util_file_get_name_extension(const char* _file_name) {
 	const char* _dot = strrchr(_file_name, '.');
 	if(!_dot || _dot == _file_name) return "";
 	return _dot + 1;
-}
-
-rde_file_handler* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode) {
-	UNUSED(_file_path)
-	UNUSED(_file_mode)
-	UNIMPLEMENTED("rde_file_open")
-	return NULL;
-}
-
-rde_file_handler* rde_file_open_or_create(const char* _file_path, RDE_FILE_MODE_ _file_mode) {
-	UNUSED(_file_path)
-	UNUSED(_file_mode)
-	UNIMPLEMENTED("rde_file_open_or_create")
-	return NULL;
-}
-
-char* rde_file_read_full_file(rde_file_handler* _file_handler) {
-	UNUSED(_file_handler)
-	UNIMPLEMENTED("rde_file_read_full_file")
-	return NULL;
-}
-
-char* rde_file_read_line(rde_file_handler* _file_handler, size_t _line) {
-	UNUSED(_file_handler)
-	UNUSED(_line)
-	UNIMPLEMENTED("rde_file_read_line")
-	return NULL;
-}
-
-char* rde_file_read_chunk(rde_file_handler* _file_handler, size_t _begin_byte, size_t _end_byte) {
-	UNUSED(_file_handler)
-	UNUSED(_begin_byte)
-	UNUSED(_end_byte)
-	UNIMPLEMENTED("rde_file_read_chunk")
-	return NULL;
-}
-
-void rde_file_write(rde_file_handler* _file_handler, size_t _bytes, const char* _data) {
-	UNUSED(_file_handler)
-	UNUSED(_bytes)
-	UNUSED(_data)
-	UNIMPLEMENTED("rde_file_write")
-}
-
-void rde_file_write_to_line(rde_file_handler* _file_handler, size_t _bytes, const char* _data, size_t _line) {
-	UNUSED(_file_handler)
-	UNUSED(_bytes)
-	UNUSED(_data)
-	UNUSED(_line)
-	UNIMPLEMENTED("rde_file_write_to_line")
-}
-
-void rde_file_append(rde_file_handler* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line) {
-	UNUSED(_file_handler)
-	UNUSED(_append_byte)
-	UNUSED(_bytes)
-	UNUSED(_data)
-	UNUSED(_line)
-	UNIMPLEMENTED("rde_file_append")
-}
-
-void rde_file_clear_content(rde_file_handler* _file_handler) {
-	UNUSED(_file_handler)
-	UNIMPLEMENTED("rde_file_clear_content")
-}
-
-bool rde_file_exists(const char* _file_path) {
-	UNUSED(_file_path)
-	UNIMPLEMENTED("rde_file_exists")
-	return false;
-}
-
-void rde_file_delete(const char* _file_path) {
-	UNUSED(_file_path)
-	UNIMPLEMENTED("rde_file_delete")
-}
-
-void rde_file_move(const char* _file_path, const char* _new_file_path) {
-	UNUSED(_file_path)
-	UNUSED(_new_file_path)
-	UNIMPLEMENTED("rde_file_move")
-}
-
-void rde_file_close(rde_file_handler* _file_handler) {
-	UNUSED(_file_handler)
-	UNIMPLEMENTED("rde_file_close")
 }
 
 #ifdef RDE_RENDERING_MODULE
@@ -180,18 +98,6 @@ rde_vec_2I rde_util_font_get_string_size(const char* _string, const rde_font* _f
 	return (rde_vec_2I) { _width, _height };
 }
 #endif
-
-char* ltrim(char* _s) {
-	while(isspace(*_s)) _s++;
-	return _s;
-}
-
-char* rtrim(char* _s) {
-	char* _back = _s + strlen(_s);
-	while(isspace(*--_back));
-	*(_back+1) = '\0';
-	return _s;
-}
 
 char* rde_util_string_trim(char* _s) {
 	char* _end;

@@ -2,15 +2,24 @@
 
 static rde_batch_2d current_batch_2d;
 
-void rde_rendering_init_2d() {
+void rde_inner_rendering_init_2d();
+void rde_inner_rendering_end_2d();
+void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transform, mat4 _mat);
+void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
+void rde_inner_rendering_reset_batch_2d();
+void rde_inner_rendering_try_create_batch_2d(rde_shader* _shader, const rde_texture* _texture);
+void rde_inner_rendering_flush_batch_2d();
+void rde_inner_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _texture, size_t _extra_vertices);
+
+void rde_inner_rendering_init_2d() {
 	current_batch_2d = rde_struct_create_2d_batch();
-	rde_rendering_generate_gl_vertex_config_for_quad_2d(&current_batch_2d);
+	rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(&current_batch_2d);
 
 	current_batch_2d.vertices = (rde_vertex_2d*)malloc(sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
 	rde_critical_error(current_batch_2d.vertices == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch, "2d batch vertices");
 }
 
-void rde_rendering_end_2d() {
+void rde_inner_rendering_end_2d() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -20,7 +29,7 @@ void rde_rendering_end_2d() {
 	free(current_batch_2d.vertices);
 }
 
-void rde_rendering_transform_to_glm_mat4_2d(const rde_transform* _transform, mat4 _mat) {
+void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transform, mat4 _mat) {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
 	float _aspect_ratio = (float)_window_size.x / (float)_window_size.y;
 	rde_vec_2F _screen_pos;
@@ -49,7 +58,7 @@ void rde_rendering_transform_to_glm_mat4_2d(const rde_transform* _transform, mat
 	glm_mat4_copy(_transformation_matrix, _mat);
 }
 
-void rde_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch) {
+void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch) {
 	glGenVertexArrays(1, &_batch->vertex_array_object);
 	glBindVertexArray(_batch->vertex_array_object);
 	
@@ -72,14 +81,14 @@ void rde_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch) {
 	rde_util_check_opengl_error("ERROR: 0");
 }
 
-void rde_rendering_reset_batch_2d() {
+void rde_inner_rendering_reset_batch_2d() {
 	current_batch_2d.shader = NULL;
 	current_batch_2d.texture = rde_struct_create_texture();
 	memset(current_batch_2d.vertices, 0, ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
 	current_batch_2d.amount_of_vertices = 0;
 }
 
-void rde_rendering_try_create_batch_2d(rde_shader* _shader, const rde_texture* _texture) {
+void rde_inner_rendering_try_create_batch_2d(rde_shader* _shader, const rde_texture* _texture) {
 	if(current_batch_2d.shader == NULL) {
 		current_batch_2d.shader = _shader;
 	}
@@ -89,7 +98,7 @@ void rde_rendering_try_create_batch_2d(rde_shader* _shader, const rde_texture* _
 	}
 }
 
-void rde_rendering_flush_batch_2d() {
+void rde_inner_rendering_flush_batch_2d() {
 	if(current_batch_2d.shader == NULL) {
 		return;
 	}
@@ -120,13 +129,13 @@ void rde_rendering_flush_batch_2d() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	rde_rendering_reset_batch_2d();
+	rde_inner_rendering_reset_batch_2d();
 	rde_util_check_opengl_error("ERROR: 1");
 
 	statistics.number_of_drawcalls++;
 }
 
-void rde_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _texture, size_t _extra_vertices) {
+void rde_inner_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _texture, size_t _extra_vertices) {
 	bool _vertex_ok = current_batch_2d.amount_of_vertices + _extra_vertices <= ENGINE.heap_allocs_config.max_number_of_vertices_per_batch;
 	bool _shader_ok = current_batch_2d.shader == _shader;
 	bool _texture_ok = _texture == NULL || current_batch_2d.texture.opengl_texture_id == _texture->opengl_texture_id;
@@ -134,10 +143,17 @@ void rde_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _t
 		return;
 	}
 
-	rde_rendering_flush_batch_2d();
-	rde_rendering_reset_batch_2d();
-	rde_rendering_try_create_batch_2d(_shader, _texture);
+	rde_inner_rendering_flush_batch_2d();
+	rde_inner_rendering_reset_batch_2d();
+	rde_inner_rendering_try_create_batch_2d(_shader, _texture);
 }
+
+
+
+
+// ==============================================================================
+// =									API										=
+// ==============================================================================
 
 void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window, bool _is_hud) {
 	rde_critical_error(_camera == NULL || _window == NULL, RDE_ERROR_BEGIN_RENDER);
@@ -145,7 +161,7 @@ void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window, bo
 	current_drawing_window = _window;
 	current_batch_2d.texture = rde_struct_create_texture();
 
-	rde_vec_2F _aspect_ratios = rde_rendering_get_aspect_ratio();
+	rde_vec_2F _aspect_ratios = rde_inner_rendering_get_aspect_ratio();
 	float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.x : _aspect_ratios.y;
 	float _zoom = _camera->zoom;
 	glm_ortho(-_aspect_ratio * _zoom, _aspect_ratio * _zoom, -_zoom, _zoom, -_zoom, _zoom, projection_matrix);
@@ -155,7 +171,7 @@ void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window, bo
 
 	current_batch_2d.is_hud = _is_hud;
 
-	rde_rendering_transform_to_glm_mat4_2d(&current_drawing_camera->transform, _view_matrix);
+	rde_inner_rendering_transform_to_glm_mat4_2d(&current_drawing_camera->transform, _view_matrix);
 	if(_is_hud) {
 		_view_matrix[3][0] = 0;
 		_view_matrix[3][1] = 0;
@@ -191,8 +207,8 @@ void rde_rendering_2d_draw_triangle(rde_vec_2F _vertex_a, rde_vec_2F _vertex_b, 
 	const size_t _triangle_vertex_count = 3;
 	
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.color_shader_2d : _shader;
-	rde_rendering_try_create_batch_2d(_drawing_shader, NULL);
-	rde_rendering_try_flush_batch_2d(_drawing_shader, NULL, _triangle_vertex_count);
+	rde_inner_rendering_try_create_batch_2d(_drawing_shader, NULL);
+	rde_inner_rendering_try_flush_batch_2d(_drawing_shader, NULL, _triangle_vertex_count);
 
 	int _c = RDE_COLOR_TO_HEX_COLOR(_color);
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
@@ -229,8 +245,8 @@ void rde_rendering_2d_draw_rectangle(rde_vec_2F _bottom_left, rde_vec_2F _top_ri
 	const size_t _triangle_vertex_count = 6;
 	
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.color_shader_2d : _shader;
-	rde_rendering_try_create_batch_2d(_drawing_shader, NULL);
-	rde_rendering_try_flush_batch_2d(_drawing_shader, NULL, _triangle_vertex_count);
+	rde_inner_rendering_try_create_batch_2d(_drawing_shader, NULL);
+	rde_inner_rendering_try_flush_batch_2d(_drawing_shader, NULL, _triangle_vertex_count);
 
 	int _c = RDE_COLOR_TO_HEX_COLOR(_color);
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
@@ -312,11 +328,11 @@ void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_te
 	const size_t _triangle_vertex_count = 6;
 
 	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
-	rde_rendering_transform_to_glm_mat4_2d(_transform, _transformation_matrix);
+	rde_inner_rendering_transform_to_glm_mat4_2d(_transform, _transformation_matrix);
 
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.texture_shader_2d : _shader;
-	rde_rendering_try_create_batch_2d(_drawing_shader, _texture);
-	rde_rendering_try_flush_batch_2d(_drawing_shader, _texture, _triangle_vertex_count);
+	rde_inner_rendering_try_create_batch_2d(_drawing_shader, _texture);
+	rde_inner_rendering_try_flush_batch_2d(_drawing_shader, _texture, _triangle_vertex_count);
 
 	rde_vec_2F _texture_origin_norm = (rde_vec_2F){ 0.f, 0.f };
 	rde_vec_2F _texture_tile_size_norm = (rde_vec_2F){ 1.f, 1.f };
@@ -423,10 +439,10 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 		const size_t _triangle_vertex_count = 6;
 
 		mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
-		rde_rendering_transform_to_glm_mat4_2d(&_t, _transformation_matrix);
+		rde_inner_rendering_transform_to_glm_mat4_2d(&_t, _transformation_matrix);
 
-		rde_rendering_try_create_batch_2d(_drawing_shader, _char_info.texture.atlas_texture);
-		rde_rendering_try_flush_batch_2d(_drawing_shader, _char_info.texture.atlas_texture, _triangle_vertex_count);
+		rde_inner_rendering_try_create_batch_2d(_drawing_shader, _char_info.texture.atlas_texture);
+		rde_inner_rendering_try_flush_batch_2d(_drawing_shader, _char_info.texture.atlas_texture, _triangle_vertex_count);
 
 		rde_vec_2F _texture_origin_norm = (rde_vec_2F){ 0.f, 0.f };
 		rde_vec_2F _texture_tile_size_norm = (rde_vec_2F){ 1.f, 1.f };
@@ -518,8 +534,8 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 }
 
 void rde_rendering_2d_end_drawing() {
-	rde_rendering_flush_batch_2d();
-	rde_rendering_reset_batch_2d();
+	rde_inner_rendering_flush_batch_2d();
+	rde_inner_rendering_reset_batch_2d();
 	current_drawing_camera = NULL;
 	current_drawing_window = NULL;
 	statistics.number_of_drawcalls = 0;

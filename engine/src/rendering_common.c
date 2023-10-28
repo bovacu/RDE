@@ -1,19 +1,28 @@
 #ifdef RDE_RENDERING_MODULE
-static rde_camera* current_drawing_camera = NULL;
-static rde_window* current_drawing_window = NULL;
-static mat4 projection_matrix;
 
 typedef struct {
 	size_t number_of_drawcalls;
 } rde_rendering_statistics;
 
+#define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled)											\
+	if(!_compiled) {																						\
+		char _infolog[1024];																				\
+		glGetShaderInfoLog(_program_id, 1024, NULL, _infolog);												\
+		glDeleteShader(_program_id);																		\
+		rde_critical_error(true, "Shader(%d) compile failed with error: \n%s \n", _program_id, _infolog);	\
+		return NULL;																						\
+	}
+
+static rde_camera* current_drawing_camera = NULL;
+static rde_window* current_drawing_window = NULL;
+static mat4 projection_matrix;
 rde_rendering_statistics statistics;
 
-void rde_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
-void rde_rendering_generate_gl_vertex_config_for_mesh_3d(rde_mesh* _mesh);
-void rde_rendering_draw_skybox();
+void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
+rde_vec_2F rde_inner_rendering_get_aspect_ratio();
+void rde_inner_rendering_set_rendering_configuration();
 
-rde_vec_2F rde_rendering_get_aspect_ratio() {
+rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
 	bool _is_horizontal = rde_window_orientation_is_horizontal(current_drawing_window);
 	float _aspect_ratio = _window_size.x / (float)_window_size.y;
@@ -23,9 +32,7 @@ rde_vec_2F rde_rendering_get_aspect_ratio() {
 	return _aspect_ratios;
 }
 
-void rde_rendering_set_rendering_configuration() {
-	// During init, enable debug output
-
+void rde_inner_rendering_set_rendering_configuration() {
 #if !IS_MOBILE()
 	printf("OpenGL Version: %s, Vendor: %s, GPU: %s \n", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER));
 #endif
@@ -69,16 +76,13 @@ void rde_rendering_set_rendering_configuration() {
 	
 }
 
-#define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled)											\
-	if(!_compiled) {																						\
-		char _infolog[1024];																				\
-		glGetShaderInfoLog(_program_id, 1024, NULL, _infolog);												\
-		glDeleteShader(_program_id);																		\
-		rde_critical_error(true, "Shader(%d) compile failed with error: \n%s \n", _program_id, _infolog);	\
-		return NULL;																						\
-	}
 
-	// ======================= API ===========================
+
+
+
+// ==============================================================================
+// =									API										=
+// ==============================================================================
 
 rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_code, const char* _fragment_code) {
 	bool _error = false;
@@ -528,7 +532,7 @@ void rde_rendering_texture_unload(rde_texture* _texture) {
 
 rde_atlas* rde_rendering_atlas_load(const char* _texture_path, const char* _config_path) {
 	rde_texture* _texture = rde_rendering_texture_load(_texture_path);
-	rde_atlas_sub_textures* _atlas_sub_textures = rde_file_system_read_atlas_config(_config_path, _texture);
+	rde_atlas_sub_textures* _atlas_sub_textures = rde_inner_file_system_read_atlas_config(_config_path, _texture);
 
 	for(size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
 		rde_atlas* _atlas = &ENGINE.atlases[_i];
@@ -582,7 +586,7 @@ void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture) {
 
 rde_font* rde_rendering_font_load(const char* _font_path, const char* _font_config_path) {
 	rde_texture* _texture = rde_rendering_texture_text_load(_font_path);
-	rde_font_char_info* _chars = rde_file_system_read_font_config(_font_config_path, _texture);
+	rde_font_char_info* _chars = rde_inner_file_system_read_font_config(_font_config_path, _texture);
 
 	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_fonts; _i++) {
 		rde_font* _font = &ENGINE.fonts[_i];

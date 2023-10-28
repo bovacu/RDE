@@ -3,10 +3,10 @@
 #include "ufbx/ufbx.c"
 rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const char* _texture_path);
 
-void parse_3_vertices_face_fbx(unsigned int _i, unsigned int _v, unsigned int* _mesh_indices, 
+void parse_3_vertices_face_fbx(uint _i, uint _v, uint* _mesh_indices, 
                                float* _mesh_positions, float* _mesh_texcoords, ufbx_face* _face, ufbx_mesh* _mesh,
-                           	   unsigned int* _indices_pointer, unsigned int* _positions_pointer, 
-                           	   unsigned int* _texcoords_pointer) {
+                           	   uint* _indices_pointer, uint* _positions_pointer, 
+                           	   uint* _texcoords_pointer) {
 	_mesh_indices[*_indices_pointer + 0] = 3 * _i + 0;
 	_mesh_indices[*_indices_pointer + 1] = 3 * _i + 1;
 	_mesh_indices[*_indices_pointer + 2] = 3 * _i + 2;
@@ -76,7 +76,7 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 			
 			uint _mesh_indices_size = 0;
 			size_t _mesh_positions_size = 0;
-			unsigned int _mesh_texcoords_size = 0;
+			uint _mesh_texcoords_size = 0;
 
 			for(size_t _i = 0; _i < _faces_size; _i++) {
 				ufbx_face* _face = &_mesh->faces.data[_i];
@@ -102,13 +102,13 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 				continue;
 			}
 
-			unsigned int* _mesh_indices = (unsigned int*)malloc(sizeof(unsigned int) * _mesh_indices_size * 1);
+			uint* _mesh_indices = (uint*)malloc(sizeof(uint) * _mesh_indices_size * 1);
 			float* _mesh_positions = (float*)malloc(sizeof(float) * _mesh_positions_size * 3);
 			float* _mesh_texcoords = (float*)malloc(sizeof(float) * _mesh_texcoords_size * 2);;
 
-			unsigned int _indices_pointer = 0;
-			unsigned int _positions_pointer = 0;
-			unsigned int _texcoords_pointer = 0;
+			uint _indices_pointer = 0;
+			uint _positions_pointer = 0;
+			uint _texcoords_pointer = 0;
 
 			for(size_t _i = 0; _i < _faces_size; _i++) {
 				ufbx_face* _face = &_mesh->faces.data[_i];
@@ -128,7 +128,7 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 				}
 			}
 			
-			rde_mesh _m = rde_struct_create_mesh(_mesh_positions_size, _mesh_indices_size);
+			rde_mesh _m = rde_inner_struct_create_mesh(_mesh_positions_size, _mesh_indices_size);
 			rde_rendering_mesh_set_vertex_positions(&_m, _mesh_positions, true);
 			rde_rendering_mesh_set_indices(&_m, _mesh_indices, true);
 

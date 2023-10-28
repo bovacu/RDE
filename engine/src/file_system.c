@@ -1,5 +1,9 @@
 #ifdef RDE_RENDERING_MODULE
-rde_atlas_sub_textures* rde_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas) {
+
+rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas);
+rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_path, rde_texture* _atlas);
+
+rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas) {
 	FILE* _file = NULL;
 	char* _text = NULL;
 
@@ -59,7 +63,7 @@ rde_atlas_sub_textures* rde_file_system_read_atlas_config(const char* _atlas_pat
 	return hash;
 }
 
-rde_font_char_info* rde_file_system_read_font_config(const char* _font_path, rde_texture* _atlas) {
+rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_path, rde_texture* _atlas) {
 	FILE* _file = NULL;
 	char* _text = NULL;
 
@@ -140,5 +144,100 @@ rde_font_char_info* rde_file_system_read_font_config(const char* _font_path, rde
 	free(_text);
 
 	return _chars;
+}
+#endif
+
+
+
+
+// ==============================================================================
+// =									API										=
+// ==============================================================================
+
+#ifdef RDE_FILE_SYSTEM_MODULE
+rde_file_handler* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode) {
+	UNUSED(_file_path)
+	UNUSED(_file_mode)
+	UNIMPLEMENTED("rde_file_open")
+	return NULL;
+}
+
+rde_file_handler* rde_file_open_or_create(const char* _file_path, RDE_FILE_MODE_ _file_mode) {
+	UNUSED(_file_path)
+	UNUSED(_file_mode)
+	UNIMPLEMENTED("rde_file_open_or_create")
+	return NULL;
+}
+
+char* rde_file_read_full_file(rde_file_handler* _file_handler) {
+	UNUSED(_file_handler)
+	UNIMPLEMENTED("rde_file_read_full_file")
+	return NULL;
+}
+
+char* rde_file_read_line(rde_file_handler* _file_handler, size_t _line) {
+	UNUSED(_file_handler)
+	UNUSED(_line)
+	UNIMPLEMENTED("rde_file_read_line")
+	return NULL;
+}
+
+char* rde_file_read_chunk(rde_file_handler* _file_handler, size_t _begin_byte, size_t _end_byte) {
+	UNUSED(_file_handler)
+	UNUSED(_begin_byte)
+	UNUSED(_end_byte)
+	UNIMPLEMENTED("rde_file_read_chunk")
+	return NULL;
+}
+
+void rde_file_write(rde_file_handler* _file_handler, size_t _bytes, const char* _data) {
+	UNUSED(_file_handler)
+	UNUSED(_bytes)
+	UNUSED(_data)
+	UNIMPLEMENTED("rde_file_write")
+}
+
+void rde_file_write_to_line(rde_file_handler* _file_handler, size_t _bytes, const char* _data, size_t _line) {
+	UNUSED(_file_handler)
+	UNUSED(_bytes)
+	UNUSED(_data)
+	UNUSED(_line)
+	UNIMPLEMENTED("rde_file_write_to_line")
+}
+
+void rde_file_append(rde_file_handler* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line) {
+	UNUSED(_file_handler)
+	UNUSED(_append_byte)
+	UNUSED(_bytes)
+	UNUSED(_data)
+	UNUSED(_line)
+	UNIMPLEMENTED("rde_file_append")
+}
+
+void rde_file_clear_content(rde_file_handler* _file_handler) {
+	UNUSED(_file_handler)
+	UNIMPLEMENTED("rde_file_clear_content")
+}
+
+bool rde_file_exists(const char* _file_path) {
+	UNUSED(_file_path)
+	UNIMPLEMENTED("rde_file_exists")
+	return false;
+}
+
+void rde_file_delete(const char* _file_path) {
+	UNUSED(_file_path)
+	UNIMPLEMENTED("rde_file_delete")
+}
+
+void rde_file_move(const char* _file_path, const char* _new_file_path) {
+	UNUSED(_file_path)
+	UNUSED(_new_file_path)
+	UNIMPLEMENTED("rde_file_move")
+}
+
+void rde_file_close(rde_file_handler* _file_handler) {
+	UNUSED(_file_handler)
+	UNIMPLEMENTED("rde_file_close")
 }
 #endif

@@ -25,6 +25,9 @@ extern "C" {
 //	 example 'rde_window', 'rde_rendering', 'rde_util'... It can have many "namespaces" levels, such 
 //	 us 'rde_rendering_model', whit would be rde::rendering::model and then all methods related to 
 //	 models, such as 'rde_rendering_model_load' or 'rde_rendering_model_unload'
+//
+// - Any function that has _inner_ in the name is just part of the internal computation of the engine,
+//	 and will not be exposed to the user API.
 
 // Index Begin
 //
@@ -269,12 +272,10 @@ extern "C" {
 	"#version 330 core\n" \
 	"\n" \
 	"layout(location = 0) in vec3 in_pos;\n" \
-	"layout(location = 1) in vec4 in_color;\n" \
-	"layout(location = 2) in vec3 in_normal;\n" \
-	"layout(location = 3) in vec2 in_text_coord;\n" \
-	"layout(location = 4) in mat4 in_model;\n" \
+	"layout(location = 1) in vec3 in_normal;\n" \
+	"layout(location = 2) in vec2 in_text_coord;\n" \
+	"layout(location = 3) in mat4 in_model;\n" \
 	"\n" \
-	"out vec4 color;\n" \
 	"out vec3 normal;\n" \
 	"out vec2 text_coord;\n" \
 	"out vec3 frag_pos;\n" \
@@ -284,7 +285,6 @@ extern "C" {
 	"void main(){	\n" \
 	"	mat4 _model = in_model;\n" \
 	"	gl_Position = view_projection_matrix * _model * vec4(in_pos, 1);\n" \
-	"	color = in_color;\n" \
 	"	normal = in_normal;\n" \
 	"	frag_pos = in_pos;\n" \
 	"	text_coord = in_text_coord;\n" \
@@ -297,7 +297,6 @@ extern "C" {
 	"\n" \
 	"const int RDE_MAX_POINT_LIGHTS = 10;\n" \
 	"\n" \
-	"in vec4 color;\n" \
 	"in vec3 normal;\n" \
 	"in vec2 text_coord;\n" \
 	"in vec3 frag_pos;\n" \
@@ -336,7 +335,7 @@ extern "C" {
 	"uniform rde_material material;\n" \
 	"\n" \
 	"vec3 directional_light_calc() {\n" \
-	"	vec3 _ambient = material.Ka * directional_light.ambient_color * texture(material.tex_kd, text_coord).rgb;\n" \
+	"	vec3 _ambient = material.Ka * directional_light.ambient_color * texture(material.tex_ka, text_coord).rgb;\n" \
 	"	\n" \
 	"	vec3 _norm = normalize(normal);\n" \
 	"	vec3 _light_dir = normalize(-directional_light.direction);\n" \
@@ -702,8 +701,8 @@ typedef unsigned int uint;
 	}													\
 } while(0);
 
-#define RDE_SAFE_ARR_ACCESS(_type) RDE_FUNC _type rde_arr_s_get_##_type(unsigned int _index, _type* _arr, size_t _arr_size, char* _fmt, ...);
-#define RDE_SAFE_ARR_SET(_type) RDE_FUNC void rde_arr_s_set_##_type(unsigned int _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...);
+#define RDE_SAFE_ARR_ACCESS(_type) RDE_FUNC _type rde_arr_s_get_##_type(uint _index, _type* _arr, size_t _arr_size, char* _fmt, ...);
+#define RDE_SAFE_ARR_SET(_type) RDE_FUNC void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...);
 
 
 /// *************************************************************************************************
@@ -1150,7 +1149,7 @@ RDE_SAFE_ARR_SET(double)
 /// ================================= MATH ==================================
 
 SPECIALIZED_VEC2(int, 			rde_vec_2I);
-SPECIALIZED_VEC2(unsigned int, 	rde_vec_2UI);
+SPECIALIZED_VEC2(uint, 	rde_vec_2UI);
 SPECIALIZED_VEC2(float, 		rde_vec_2F);
 SPECIALIZED_VEC2(double,		rde_vec_2D);
 SPECIALIZED_VEC2(long,			rde_vec_2L);
@@ -1158,7 +1157,7 @@ SPECIALIZED_VEC2(unsigned long, rde_vec_2UL);
 SPECIALIZED_VEC2(size_t, 		rde_vec_2ST);
 
 SPECIALIZED_VEC3(int, 			rde_vec_3I);
-SPECIALIZED_VEC3(unsigned int, 	rde_vec_3UI);
+SPECIALIZED_VEC3(uint, 	rde_vec_3UI);
 SPECIALIZED_VEC3(float, 		rde_vec_3F);
 SPECIALIZED_VEC3(double,		rde_vec_3D);
 SPECIALIZED_VEC3(long,			rde_vec_3L);
@@ -1166,7 +1165,7 @@ SPECIALIZED_VEC3(unsigned long, rde_vec_3UL);
 SPECIALIZED_VEC3(size_t, 		rde_vec_3ST);
 
 SPECIALIZED_VEC4(int, 			rde_vec_4I);
-SPECIALIZED_VEC4(unsigned int, 	rde_vec_4UI);
+SPECIALIZED_VEC4(uint, 	rde_vec_4UI);
 SPECIALIZED_VEC4(float, 		rde_vec_4F);
 SPECIALIZED_VEC4(double,		rde_vec_4D);
 SPECIALIZED_VEC4(long,			rde_vec_4L);
@@ -1174,7 +1173,7 @@ SPECIALIZED_VEC4(unsigned long, rde_vec_4UL);
 SPECIALIZED_VEC4(size_t, 		rde_vec_4ST);
 
 SPECIALIZED_MAT2(int, 			rde_mat_2I);
-SPECIALIZED_MAT2(unsigned int, 	rde_mat_2UI);
+SPECIALIZED_MAT2(uint, 	rde_mat_2UI);
 SPECIALIZED_MAT2(float, 		rde_mat_2F);
 SPECIALIZED_MAT2(double,		rde_mat_2D);
 SPECIALIZED_MAT2(long,			rde_mat_2L);
@@ -1182,7 +1181,7 @@ SPECIALIZED_MAT2(unsigned long, rde_mat_2UL);
 SPECIALIZED_MAT2(size_t, 		rde_mat_2ST);
 
 SPECIALIZED_MAT3(int, 			rde_mat_3I);
-SPECIALIZED_MAT3(unsigned int, 	rde_mat_3UI);
+SPECIALIZED_MAT3(uint, 	rde_mat_3UI);
 SPECIALIZED_MAT3(float, 		rde_mat_3F);
 SPECIALIZED_MAT3(double,		rde_mat_3D);
 SPECIALIZED_MAT3(long,			rde_mat_3L);
@@ -1190,7 +1189,7 @@ SPECIALIZED_MAT3(unsigned long, rde_mat_3UL);
 SPECIALIZED_MAT3(size_t, 		rde_mat_3ST);
 
 SPECIALIZED_MAT4(int, 			rde_mat_4I);
-SPECIALIZED_MAT4(unsigned int, 	rde_mat_4UI);
+SPECIALIZED_MAT4(uint, 	rde_mat_4UI);
 SPECIALIZED_MAT4(float, 		rde_mat_4F);
 SPECIALIZED_MAT4(double,		rde_mat_4D);
 SPECIALIZED_MAT4(long,			rde_mat_4L);
@@ -1462,8 +1461,8 @@ rde_transform rde_struct_create_transform() {
 #ifdef RDE_RENDERING_MODULE
 typedef struct rde_shader rde_shader;
 typedef struct {
-	unsigned int vertex_program_id;
-	unsigned int fragment_program_id;
+	uint vertex_program_id;
+	uint fragment_program_id;
 	int compiled_program_id;
 } rde_shader_data;
 
@@ -1532,9 +1531,6 @@ typedef struct {
 	
 	float* texcoords;
 	size_t texcoords_size;
-	
-	uint* colors;
-	size_t colors_size;
 
 	float* normals;
 	size_t normals_size;
@@ -1669,7 +1665,7 @@ typedef struct rde_sound rde_sound;
 typedef struct {
 	void* user_data;
 	unsigned short channels;
-	unsigned int rate;
+	uint rate;
 } rde_sound_config;
 rde_sound_config rde_struct_create_audio_config() {
 	rde_sound_config _s;
@@ -1733,6 +1729,7 @@ RDE_FUNC void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 /// ============================ UTIL =======================================
 
 RDE_FUNC const char* rde_util_file_get_name_extension(const char* _file_name);
+RDE_FUNC void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, size_t _sanitized_size);
 RDE_FUNC rde_file_handler* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode);
 RDE_FUNC rde_file_handler* rde_file_open_or_create(const char* _file_path, RDE_FILE_MODE_ _file_mode);
 RDE_FUNC char* rde_file_read_full_file(rde_file_handler* _file_handler);
@@ -1959,7 +1956,7 @@ RDE_FUNC rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data); // c
 RDE_FUNC rde_mesh* rde_rendering_mesh_create_cube(float _size, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
 RDE_FUNC rde_mesh* rde_rendering_mesh_create_sphere(float _radius, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
 RDE_FUNC rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh);
-RDE_FUNC void rde_rendering_mesh_destroy(rde_mesh* _mesh);
+RDE_FUNC void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated_buffers);
 
 #if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)
 RDE_FUNC rde_model* rde_rendering_model_load(const char* _model_path);

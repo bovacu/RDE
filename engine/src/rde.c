@@ -347,7 +347,7 @@ rde_batch_2d rde_struct_create_2d_batch() {
 
 typedef struct {
 	rde_vec_3F position;
-	unsigned int color;
+	uint color;
 } rde_line_vertex;
 rde_line_vertex rde_struct_create_line_vertex() {
 	rde_line_vertex _l;
@@ -400,29 +400,19 @@ struct rde_mesh {
 	float* vertex_positions;
 	float* vertex_normals;
 	float* vertex_texcoords;
-	unsigned int* vertex_colors;
 	mat4* transforms;
 
-	unsigned int vao;
-	unsigned int vbo[5]; // 0 -> positions (static), 
-						 // 1 -> colors (static), 
-						 // 2 -> normals (static), 
-						 // 3 -> texture coords (static)
-						 // 4 -> transforms to render (dynamic)
-
-	bool free_vertex_positions_on_end;
-	bool free_vertex_colors_on_end;
-	bool free_vertex_normals_on_end;
-	bool free_vertex_texcoords_on_end;
-	bool free_vertex_texture_on_end;
-	bool free_indices_on_end;
-
+	uint vao;
+	uint vbo[4]; // 0 -> positions (static), 
+						 // 1 -> normals (static), 
+						 // 2 -> texture coords (static)
+						 // 3 -> transforms to render (dynamic)
 	rde_material material;
 };
 
 struct rde_model {
 	rde_mesh* mesh_array;
-	unsigned int mesh_array_size;
+	uint mesh_array_size;
 };
 rde_model rde_struct_create_model() {
 	rde_model _m;
@@ -649,10 +639,10 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 #if IS_WINDOWS()
 	_e.console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	#ifdef RDE_ERROR_MODULE
-	SetUnhandledExceptionFilter(rde_error_sig_handler);
+	SetUnhandledExceptionFilter(rde_inner_error_sig_handler);
 	#endif
 #else
-	rde_set_posix_signal_handler();
+	rde_inner_set_posix_signal_handler();
 #endif
 
 	return _e;
@@ -671,14 +661,14 @@ rde_engine ENGINE;
 #include "physics.c"
 #include "audio.c"
 
-void rde_engine_on_event();
-void rde_engine_on_update(float _dt);
-void rde_engine_on_fixed_update(float _fixed_dt);
-void rde_engine_on_late_update(float _dt);
-void rde_engine_on_render(float _dt, rde_window* _window);
-void rde_engine_sync_events();
+void rde_inner_engine_on_event();
+void rde_inner_engine_on_update(float _dt);
+void rde_inner_engine_on_fixed_update(float _fixed_dt);
+void rde_inner_engine_on_late_update(float _dt);
+void rde_inner_engine_on_render(float _dt, rde_window* _window);
+void rde_inner_engine_sync_events();
 
-void rde_engine_on_event() {
+void rde_inner_engine_on_event() {
 
 	SDL_Event _event;
         
@@ -686,7 +676,7 @@ void rde_engine_on_event() {
 
 	while (SDL_PollEvent(&_event)) {
 
-		rde_event _rde_event = rde_engine_sdl_event_to_rde_event(&_event);
+		rde_event _rde_event = rde_inner_event_sdl_event_to_rde_event(&_event);
 		_rde_event.native_event = (void*)&_event;
 		
 		for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
@@ -760,19 +750,19 @@ void rde_engine_on_event() {
 	}
 }
 
-void rde_engine_on_update(float _dt) {
+void rde_inner_engine_on_update(float _dt) {
 	UNUSED(_dt)
 }
 
-void rde_engine_on_fixed_update(float _fixed_dt) {
+void rde_inner_engine_on_fixed_update(float _fixed_dt) {
 	UNUSED(_fixed_dt)
 }
 
-void rde_engine_on_late_update(float _dt) {
+void rde_inner_engine_on_late_update(float _dt) {
 	UNUSED(_dt)
 }
 
-void rde_engine_on_render(float _dt, rde_window* _window) {
+void rde_inner_engine_on_render(float _dt, rde_window* _window) {
 	UNUSED(_dt)
 	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
@@ -784,7 +774,12 @@ rde_display_info* rde_engine_get_available_displays() {
 	return NULL;
 }
 
-// ======================= API ===========================
+
+
+
+// ==============================================================================
+// =									API										=
+// ==============================================================================
 
 rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_allocs_config _heap_allocs_config) {
 	static bool _instantiated = false;
@@ -800,14 +795,14 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 
 	rde_window* _default_window = rde_window_create_window();
 
-	rde_events_window_create_events();
-	rde_events_display_create_events();
-	rde_events_key_create_events();
-	rde_events_mouse_button_create_events();
-	rde_events_drag_and_drop_create_events();
+	rde_inner_events_window_create_events();
+	rde_inner_events_display_create_events();
+	rde_inner_events_key_create_events();
+	rde_inner_events_mouse_button_create_events();
+	rde_inner_events_drag_and_drop_create_events();
 
 #ifdef RDE_RENDERING_MODULE
-	rde_rendering_set_rendering_configuration();
+	rde_inner_rendering_set_rendering_configuration();
 #endif
 
 	srand(time(NULL));
@@ -861,27 +856,27 @@ void rde_engine_on_run() {
 	#endif
 
 #ifdef RDE_RENDERING_MODULE
-	rde_rendering_init_2d();
-	rde_rendering_init_3d();
+	rde_inner_rendering_init_2d();
+	rde_inner_rendering_init_3d();
 #endif
 
 	while(ENGINE.running) {
 		Uint64 _start = SDL_GetPerformanceCounter();
 		ENGINE.fixed_time_step_accumulator += ENGINE.delta_time;
 
-		rde_engine_on_event();
+		rde_inner_engine_on_event();
 		if (!ENGINE.running) return;
 
-		rde_engine_on_update(ENGINE.delta_time);
+		rde_inner_engine_on_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_update(ENGINE.delta_time);
 
 		while (ENGINE.fixed_time_step_accumulator >= ENGINE.fixed_delta_time) {
 			ENGINE.fixed_time_step_accumulator -= ENGINE.fixed_delta_time;
-			rde_engine_on_fixed_update(ENGINE.fixed_delta_time);
+			rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
 			ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
 		}
 
-		rde_engine_on_late_update(ENGINE.delta_time);
+		rde_inner_engine_on_late_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_late_update(ENGINE.delta_time);
 
 		for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
@@ -891,7 +886,7 @@ void rde_engine_on_run() {
 				continue;
 			}
 
-			rde_engine_on_render(ENGINE.delta_time, _window);
+			rde_inner_engine_on_render(ENGINE.delta_time, _window);
 			ENGINE.mandatory_callbacks.on_render(ENGINE.delta_time, _window);
 
 			rde_events_sync_events(_window);
@@ -954,8 +949,8 @@ void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _title, cons
 void rde_engine_destroy_engine() {
 
 #ifdef RDE_RENDERING_MODULE
-	rde_rendering_end_2d();
-	rde_rendering_end_3d();
+	rde_inner_rendering_end_2d();
+	rde_inner_rendering_end_3d();
 	
 	if(ENGINE.skybox.opengl_texture_id != RDE_UINT_MAX) {
 		rde_rendering_skybox_unload(ENGINE.skybox.opengl_texture_id);

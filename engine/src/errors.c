@@ -16,6 +16,7 @@
 #define RDE_ERROR_SANITIZATION_PATH "Path '%s' is greater than the output sanitized buffer size '%u'\n"
 #define RDE_ERROR_MESSAGE_BOX "Only 'RDE_LOG_LEVEL_INFO', 'RDE_LOG_LEVEL_WARNING', 'RDE_LOG_LEVEL_ERROR' work on rde_engine_show_message_box. Defaulting to 'RDE_LOG_LEVEL_INFO'"
 #define RDE_ERROR_FEATURE_NOT_SUPPORTED_YET "Feature '%s' is not supported or implemented yet."
+#define RDE_ERROR_EVENT_NOT_HANDLED "%s Event: %i, not handled."
 
 #ifdef RDE_AUDIO_MODULE
 #define RDE_ERROR_MA_CONTEXT "Failed to initialize context.\n"
@@ -51,7 +52,7 @@
 
 	#if IS_WINDOWS()
 	#include <dbghelp.h>
-	void rde_print_stack_trace(FILE* _f) {
+	void rde_inner_print_stack_trace(FILE* _f) {
 		void* _stack[RDE_MAX_STACK];
 		HANDLE _process = GetCurrentProcess();
 
@@ -81,7 +82,7 @@
 		free(_line);
 	}
 
-	LONG WINAPI rde_error_sig_handler(PEXCEPTION_POINTERS _sigfault_info) {
+	LONG WINAPI rde_inner_error_sig_handler(PEXCEPTION_POINTERS _sigfault_info) {
 		printf("\n\n");
 		switch(_sigfault_info->ExceptionRecord->ExceptionCode) {
 			case EXCEPTION_ACCESS_VIOLATION: {
@@ -122,7 +123,7 @@
 		}
 
 		#ifdef RDE_DEBUG
-			rde_print_stack_trace(stdout);
+			rde_inner_print_stack_trace(stdout);
 		#else
 			FILE* _f = NULL;
 			#if IS_WINDOWS()
@@ -130,7 +131,7 @@
 			#else
 				_f = fopen("rde_crash_logs.txt", "w");
 			#endif
-			rde_print_stack_trace(_f);
+			rde_inner_print_stack_trace(_f);
 			fclose(_f);
 
 		#endif
@@ -162,14 +163,14 @@
 	    int trace_size;
 	} rde_posix_stacktrace;
 
-	static void rde_buf_printf(FILE* _f, const char* _fmt, ...) {
+	static void rde_inner_buf_printf(FILE* _f, const char* _fmt, ...) {
 	    va_list _args;
 	    va_start(_args, _fmt);
 	    vfprintf(_f, _fmt, _args);
 	    va_end(_args);
 	}
 
-	void rde_print_stack_trace(FILE* _f) {
+	void rde_inner_print_stack_trace(FILE* _f) {
 		rde_posix_stacktrace* _ret = (rde_posix_stacktrace*)malloc(sizeof(rde_posix_stacktrace));
 	    _ret->trace_size = backtrace(_ret->trace, RDE_STACKTRACE_MAX_DEPTH);
 	    const rde_posix_stacktrace* _stacktrace = (rde_posix_stacktrace*)(_ret);
@@ -202,18 +203,18 @@
 
 	        _fp = popen(_cmd, "r");
 	        if (!_fp) {
-	            rde_buf_printf(_f, "Failed to generate trace further...\n");
+	            rde_inner_buf_printf(_f, "Failed to generate trace further...\n");
 	            break;
 	        }
 
 	        while (fgets(_line, sizeof(_line), _fp)) {
-	            rde_buf_printf(_f, "%s: ", _messages[i]);
+	            rde_inner_buf_printf(_f, "%s: ", _messages[i]);
 	            if (strstr(_line, "?? ")) {
 	                /* just output address if nothing can be found */
-	                rde_buf_printf(_f, "%p\n", _tracei);
+	                rde_inner_buf_printf(_f, "%p\n", _tracei);
 	            }
 	            else {
-	                rde_buf_printf(_f, "%s", _line);
+	                rde_inner_buf_printf(_f, "%s", _line);
 	            }
 	        }
 
@@ -226,7 +227,7 @@
 	    printf("%s \n", _out.buf);
 	}
 
-	void posix_signal_handler(int _sig, siginfo_t* _sig_info, void* _context) {
+	void rde_inner_posix_signal_handler(int _sig, siginfo_t* _sig_info, void* _context) {
 		(void)_context;
 
 		FILE* _f = NULL;
@@ -314,7 +315,7 @@
 				break;
 		}
 
-	  	rde_print_stack_trace(_f);
+	  	rde_inner_print_stack_trace(_f);
 
 	#ifndef RDE_DEBUG
 		fclose(_f);
@@ -323,7 +324,7 @@
 	  exit(-1);
 	}
 
-	void rde_set_posix_signal_handler() {
+	void rde_inner_set_posix_signal_handler() {
 		stack_t _ss = {};
 		uint8_t* _alternate_stack = (uint8_t*)malloc(sizeof(uint8_t) * RDE_STACKTRACE_BUFF_SIZE);
 		_ss.ss_sp = (void*)_alternate_stack;
@@ -335,7 +336,7 @@
 		#endif
 
 		struct sigaction _sig_action = {};
-		_sig_action.sa_sigaction = posix_signal_handler;
+		_sig_action.sa_sigaction = rde_inner_posix_signal_handler;
 		sigemptyset(&_sig_action.sa_mask);
 
 		#ifdef __APPLE__
@@ -353,6 +354,13 @@
 	}
 	#endif
 #endif
+
+
+
+
+// ==============================================================================
+// =									API										=
+// ==============================================================================
 
 void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	
@@ -380,12 +388,12 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 #ifdef RDE_DEBUG
 	vfprintf(stdout, _fmt, _args);
 	#ifdef RDE_ERROR_MODULE
-	rde_print_stack_trace(stdout);
+	rde_inner_print_stack_trace(stdout);
 	#endif
 #else
 	vfprintf(_f, _fmt, _args);
 	#ifdef RDE_ERROR_MODULE
-	rde_print_stack_trace(_f);
+	rde_inner_print_stack_trace(_f);
 	#endif
 #endif
 	va_end(_args);

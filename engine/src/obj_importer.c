@@ -26,17 +26,26 @@ typedef struct {
 	size_t normals_size;
 	size_t normals_pointer;
 
-	uint* colors;
-	size_t colors_size;
-	size_t colors_pointer;
-
 	fastObjMaterial* material;
 	rde_texture* map_ka;
 	rde_texture* map_kd;
 	rde_texture* map_ks;
 	rde_texture* map_bump;
 } rde_obj_mesh_data;
-rde_obj_mesh_data rde_struct_create_obj_mesh_data() {
+
+typedef struct {
+	rde_obj_mesh_data value;
+	int key;
+} rde_obj_map_entry;
+
+RDE_IMPLEMENT_SAFE_ARR_ACCESS(fastObjIndex)
+
+rde_obj_mesh_data rde_inner_struct_create_obj_mesh_data();
+void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group, fastObjMaterial* _material, bool _has_t, bool _has_n);
+void rde_inner_parse_3_vertices_face_obj(uint _v, uint _offset, fastObjMesh* _mesh, rde_obj_mesh_data* _obj_mesh_data);
+rde_model* rde_inner_obj_load_model(const char* _obj_path);
+
+rde_obj_mesh_data rde_inner_struct_create_obj_mesh_data() {
 	rde_obj_mesh_data _o;
 	_o.name = NULL;
 	_o.vertex_count = 0;
@@ -54,10 +63,6 @@ rde_obj_mesh_data rde_struct_create_obj_mesh_data() {
 	_o.normals_size = 0;
 	_o.normals_pointer = 0;
 
-	_o.colors = NULL;
-	_o.colors_size = 0;
-	_o.colors_pointer = 0;
-
 	_o.map_ka = NULL;
 	_o.map_kd = NULL;
 	_o.map_ks = NULL;
@@ -65,7 +70,7 @@ rde_obj_mesh_data rde_struct_create_obj_mesh_data() {
 
 	return _o;
 }
-void rde_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group, fastObjMaterial* _material, bool _has_t, bool _has_n) {
+void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group, fastObjMaterial* _material, bool _has_t, bool _has_n) {
 	_data->name = _group->name;
 
 	_data->material = _material;
@@ -108,89 +113,61 @@ void rde_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group, fast
 	rde_engine_supress_logs(false);
 }
 
-RDE_IMPLEMENT_SAFE_ARR_ACCESS(fastObjIndex)
-
-void parse_3_vertices_face_obj(unsigned int _v, uint _offset, fastObjMesh* _mesh, rde_obj_mesh_data* _obj_mesh_data) {
-	
-//	rde_color _rde_color = { (unsigned int)(_group->diffuse_color[0] * 255), (unsigned int)(_group->diffuse_color[1] * 255), (unsigned int)(_group->diffuse_color[2] * 255), 255 };
-//	unsigned int _color = RDE_COLOR_TO_HEX_COLOR(_rde_color);
+void rde_inner_parse_3_vertices_face_obj(uint _v, uint _offset, fastObjMesh* _mesh, rde_obj_mesh_data* _obj_mesh_data) {
 	fastObjIndex _face_index = rde_arr_s_get_fastObjIndex(_offset + 0, _mesh->indices, _mesh->index_count * 3, "Face Index");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 0, rde_arr_s_get_float(_face_index.p * 3 + 0, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 1, rde_arr_s_get_float(_face_index.p * 3 + 1, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 2, rde_arr_s_get_float(_face_index.p * 3 + 2, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
-	//rde_arr_s_set_uint(*_colors_pointer + 0, _color, _mesh_colors, _mesh_colors_size, "Colors Mesh");
-	//printf("%u -> (%f, %f, %f) ", _face_index.p,_obj_mesh_data->positions[_obj_mesh_data->positions_pointer + 0],_obj_mesh_data->positions[_obj_mesh_data->positions_pointer + 1],_obj_mesh_data->positions[_obj_mesh_data->positions_pointer + 2]);
 
 	_face_index = rde_arr_s_get_fastObjIndex(_offset + (_v + 1), _mesh->indices, _mesh->index_count * 3, "Face Index");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 3, rde_arr_s_get_float(_face_index.p * 3 + 0, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 4, rde_arr_s_get_float(_face_index.p * 3 + 1, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 5, rde_arr_s_get_float(_face_index.p * 3 + 2, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
-	//rde_arr_s_set_uint(*_colors_pointer + 1, _color, _mesh_colors, _mesh_colors_size, "Colors Mesh");
-	//printf("%u -> (%f, %f, %f) ", _face_index.p,_obj_mesh_data->positions[_obj_mesh_data->positions_pointer + 3],_obj_mesh_data->positions[_obj_mesh_data->positions_pointer + 4],_obj_mesh_data->positions[_obj_mesh_data->positions_pointer + 5]);
 
 	_face_index = rde_arr_s_get_fastObjIndex(_offset + (_v + 2), _mesh->indices, _mesh->index_count * 3, "Face Index");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 6, rde_arr_s_get_float(_face_index.p * 3 + 0, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 7, rde_arr_s_get_float(_face_index.p * 3 + 1, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 8, rde_arr_s_get_float(_face_index.p * 3 + 2, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
-	//rde_arr_s_set_uint(*_colors_pointer + 2, _color, _mesh_colors, _mesh_colors_size, "Colors Mesh");
-	//printf("%u -> (%f, %f, %f) ", _face_index.p,_obj_mesh_data->positions[_obj_mesh_data->positions_pointer + 6],_obj_mesh_data->positions[_obj_mesh_data->positions_pointer + 7],_obj_mesh_data->positions[_obj_mesh_data->positions_pointer + 8]);
-	//printf(" | ");
 
 	_face_index = rde_arr_s_get_fastObjIndex(_offset + 0, _mesh->indices, _mesh->index_count * 3, "Face Index");
 	if(_obj_mesh_data->texcoords != NULL && _obj_mesh_data->texcoords_size > 0) {
 		rde_arr_s_set_float(_obj_mesh_data->texcoords_pointer + 0, rde_arr_s_get_float(_face_index.t * 2 + 0, _mesh->texcoords, _mesh->texcoord_count * 2, "Texcoords Obj"), _obj_mesh_data->texcoords, _obj_mesh_data->texcoords_size, "Texcoords Mesh");
 		rde_arr_s_set_float(_obj_mesh_data->texcoords_pointer + 1, rde_arr_s_get_float(_face_index.t * 2 + 1, _mesh->texcoords, _mesh->texcoord_count * 2, "Texcoords Obj"), _obj_mesh_data->texcoords, _obj_mesh_data->texcoords_size, "Texcoords Mesh");
-		//printf("%u -> (%f, %f) ", 	_face_index.t,_obj_mesh_data->texcoords[_obj_mesh_data->texcoords_pointer + 0],_obj_mesh_data->texcoords[_obj_mesh_data->texcoords_pointer + 1]);
 
 		_face_index = rde_arr_s_get_fastObjIndex(_offset + (_v + 1), _mesh->indices, _mesh->index_count * 3, "Face Index");
 		rde_arr_s_set_float(_obj_mesh_data->texcoords_pointer + 2, rde_arr_s_get_float(_face_index.t * 2 + 0, _mesh->texcoords, _mesh->texcoord_count * 2, "Texcoords Obj"), _obj_mesh_data->texcoords, _obj_mesh_data->texcoords_size, "Texcoords Mesh");
 		rde_arr_s_set_float(_obj_mesh_data->texcoords_pointer + 3, rde_arr_s_get_float(_face_index.t * 2 + 1, _mesh->texcoords, _mesh->texcoord_count * 2, "Texcoords Obj"), _obj_mesh_data->texcoords, _obj_mesh_data->texcoords_size, "Texcoords Mesh");
-		//printf("%u -> (%f, %f) ", 	_face_index.t,_obj_mesh_data->texcoords[_obj_mesh_data->texcoords_pointer + 2],_obj_mesh_data->texcoords[_obj_mesh_data->texcoords_pointer + 3]);
 
 		_face_index = rde_arr_s_get_fastObjIndex(_offset + (_v + 2), _mesh->indices, _mesh->index_count * 3, "Face Index");
 		rde_arr_s_set_float(_obj_mesh_data->texcoords_pointer + 4, rde_arr_s_get_float(_face_index.t * 2 + 0, _mesh->texcoords, _mesh->texcoord_count * 2, "Texcoords Obj"), _obj_mesh_data->texcoords, _obj_mesh_data->texcoords_size, "Texcoords Mesh");
 		rde_arr_s_set_float(_obj_mesh_data->texcoords_pointer + 5, rde_arr_s_get_float(_face_index.t * 2 + 1, _mesh->texcoords, _mesh->texcoord_count * 2, "Texcoords Obj"), _obj_mesh_data->texcoords, _obj_mesh_data->texcoords_size, "Texcoords Mesh");
-		//printf("%u -> (%f, %f) ", 	_face_index.t,_obj_mesh_data->texcoords[_obj_mesh_data->texcoords_pointer + 4],_obj_mesh_data->texcoords[_obj_mesh_data->texcoords_pointer + 5]);
 	}
-	//printf(" | ");
-//
+
 	_face_index = rde_arr_s_get_fastObjIndex(_offset + 0, _mesh->indices, _mesh->index_count * 3, "Face Index");
 	if(_obj_mesh_data->normals != NULL && _obj_mesh_data->normals_size > 0) {
 		rde_arr_s_set_float(_obj_mesh_data->normals_pointer + 0, rde_arr_s_get_float(_face_index.n * 3 + 0, _mesh->normals, _mesh->normal_count * 3, "Normals Obj"), _obj_mesh_data->normals, _obj_mesh_data->normals_size, "Normals Mesh");
 		rde_arr_s_set_float(_obj_mesh_data->normals_pointer + 1, rde_arr_s_get_float(_face_index.n * 3 + 1, _mesh->normals, _mesh->normal_count * 3, "Normals Obj"), _obj_mesh_data->normals, _obj_mesh_data->normals_size, "Normals Mesh");
 		rde_arr_s_set_float(_obj_mesh_data->normals_pointer + 2, rde_arr_s_get_float(_face_index.n * 3 + 2, _mesh->normals, _mesh->normal_count * 3, "Normals Obj"), _obj_mesh_data->normals, _obj_mesh_data->normals_size, "Normals Mesh");
-		//rde_arr_s_set_uint(*_colors_pointer + 0, _color, _mesh_colors, _mesh_colors_size, "Colors Mesh");
-		//printf("%u -> (%f, %f, %f) ", _face_index.p,_obj_mesh_data->normals[_obj_mesh_data->normals_pointer + 0],_obj_mesh_data->normals[_obj_mesh_data->normals_pointer + 1],_obj_mesh_data->normals[_obj_mesh_data->normals_pointer + 2]);
 
 		_face_index = rde_arr_s_get_fastObjIndex(_offset + (_v + 1), _mesh->indices, _mesh->index_count * 3, "Face Index");
 		rde_arr_s_set_float(_obj_mesh_data->normals_pointer + 3, rde_arr_s_get_float(_face_index.n * 3 + 0, _mesh->normals, _mesh->normal_count * 3, "Normals Obj"), _obj_mesh_data->normals, _obj_mesh_data->normals_size, "Normals Mesh");
 		rde_arr_s_set_float(_obj_mesh_data->normals_pointer + 4, rde_arr_s_get_float(_face_index.n * 3 + 1, _mesh->normals, _mesh->normal_count * 3, "Normals Obj"), _obj_mesh_data->normals, _obj_mesh_data->normals_size, "Normals Mesh");
 		rde_arr_s_set_float(_obj_mesh_data->normals_pointer + 5, rde_arr_s_get_float(_face_index.n * 3 + 2, _mesh->normals, _mesh->normal_count * 3, "Normals Obj"), _obj_mesh_data->normals, _obj_mesh_data->normals_size, "Normals Mesh");
-		//rde_arr_s_set_uint(*_colors_pointer + 1, _color, _mesh_colors, _mesh_colors_size, "Colors Mesh");
-		//printf("%u -> (%f, %f, %f) ", _face_index.p,_obj_mesh_data->normals[_obj_mesh_data->normals_pointer + 3],_obj_mesh_data->normals[_obj_mesh_data->normals_pointer + 4],_obj_mesh_data->normals[_obj_mesh_data->normals_pointer + 5]);
 
 		_face_index = rde_arr_s_get_fastObjIndex(_offset + (_v + 2), _mesh->indices, _mesh->index_count * 3, "Face Index");
 		rde_arr_s_set_float(_obj_mesh_data->normals_pointer + 6, rde_arr_s_get_float(_face_index.n * 3 + 0, _mesh->normals, _mesh->normal_count * 3, "Normals Obj"), _obj_mesh_data->normals, _obj_mesh_data->normals_size, "Normals Mesh");
 		rde_arr_s_set_float(_obj_mesh_data->normals_pointer + 7, rde_arr_s_get_float(_face_index.n * 3 + 1, _mesh->normals, _mesh->normal_count * 3, "Normals Obj"), _obj_mesh_data->normals, _obj_mesh_data->normals_size, "Normals Mesh");
 		rde_arr_s_set_float(_obj_mesh_data->normals_pointer + 8, rde_arr_s_get_float(_face_index.n * 3 + 2, _mesh->normals, _mesh->normal_count * 3, "Normals Obj"), _obj_mesh_data->normals, _obj_mesh_data->normals_size, "Normals Mesh");
-		//rde_arr_s_set_uint(*_colors_pointer + 2, _color, _mesh_colors, _mesh_colors_size, "Colors Mesh");
-		//printf("%u -> (%f, %f, %f) ", _face_index.p, _obj_mesh_data->normals[_obj_mesh_data->normals_pointer + 6], _obj_mesh_data->normals[_obj_mesh_data->normals_pointer + 7], _obj_mesh_data->normals[_obj_mesh_data->normals_pointer + 8]);
 	}
 
 	_obj_mesh_data->positions_pointer += 9;
 	_obj_mesh_data->texcoords_pointer += 6;
 	_obj_mesh_data->normals_pointer += 9;
-	//_obj_mesh_data->colors_pointer += 3;
 }
 
-typedef struct {
-	rde_obj_mesh_data value;
-	int key;
-} rde_obj_map_entry;
-
-rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
-//	clock_t _t_start, _t_end;
-//	_t_start = clock();
+rde_model* rde_inner_obj_load_model(const char* _obj_path) {
+	clock_t _t_start, _t_end;
+	_t_start = clock();
 
 	rde_log_color(RDE_LOG_COLOR_GREEN, "Loading OBJ '%s':", _obj_path);
 
@@ -213,7 +190,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	size_t _material_count = _mesh->material_count == 0 ? 1 : _mesh->material_count;
 	rde_obj_mesh_data* _obj = (rde_obj_mesh_data*)malloc(sizeof(rde_obj_mesh_data) * _material_count);
 	for(size_t _i = 0; _i < _material_count; _i++) {
-		_obj[_i] = rde_struct_create_obj_mesh_data();
+		_obj[_i] = rde_inner_struct_create_obj_mesh_data();
 	}
 
 	fastObjGroup* _group_or_obj = _mesh->objects;
@@ -252,7 +229,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 			_obj_mesh_data = &_obj[_material_key];
 			if(_obj_mesh_data->positions == NULL) {
 				fastObjIndex _index = _mesh->indices[_o_or_g->index_offset + _j];
-				rde_fill_obj_mesh_data(_obj_mesh_data, 
+				rde_inner_fill_obj_mesh_data(_obj_mesh_data, 
 				                       _o_or_g,
 				                       &_mesh->materials[_material_key], 
 				                       _index.t != 0,
@@ -261,10 +238,10 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 
 			uint _amount_of_elements_on_face_vertex = _mesh->face_vertices[_o_or_g->face_offset + _j];
 			if (_amount_of_elements_on_face_vertex == 3) {
-				parse_3_vertices_face_obj(0, _offset, _mesh, &_obj[_material_key]);
+				rde_inner_parse_3_vertices_face_obj(0, _offset, _mesh, &_obj[_material_key]);
 			} else {
 				for (size_t _v = 0; _v < _amount_of_elements_on_face_vertex - 2; _v++) {
-					parse_3_vertices_face_obj(_v, _offset, _mesh, &_obj[_material_key]);
+					rde_inner_parse_3_vertices_face_obj(_v, _offset, _mesh, &_obj[_material_key]);
 				}
 			}
 			_offset += _amount_of_elements_on_face_vertex;
@@ -285,8 +262,6 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 			.positions_size = _obj_mesh_data->positions_size,
 			.texcoords = _obj_mesh_data->texcoords,
 			.texcoords_size = _obj_mesh_data->texcoords_size,
-			.colors = _obj_mesh_data->colors,
-			.colors_size = _obj_mesh_data->colors_size,
 			.normals = _obj_mesh_data->normals,
 			.normals_size = _obj_mesh_data->normals_size,
 			.material = {
@@ -309,7 +284,7 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 		}
 		
 		rde_engine_supress_logs(true);
-		rde_mesh _mesh = rde_struct_create_mesh(&_data);
+		rde_mesh _mesh = rde_inner_struct_create_mesh(&_data);
 		rde_engine_supress_logs(false);
 		stbds_arrput(_model->mesh_array, _mesh);
 		_model->mesh_array_size++;
@@ -319,17 +294,10 @@ rde_model* rde_rendering_load_obj_model(const char* _obj_path) {
 	fast_obj_destroy(_mesh);
 	free(_obj);
 
-//	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
-//		rde_log_color(RDE_LOG_COLOR_GREEN, "	- (%lu) Mesh '%s':", _i, _model->mesh_array[_i].name);
-//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Vertices: %lu", _model->mesh_array[_i].vertex_count);
-//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Positions (x, y, z): %lu", _model->mesh_array[_i].vertex_count * 3);
-//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texcoords (u, vertex_count): %lu", _model->mesh_array[_i].vertex_count * 2);
-//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Normals (x, y, z): %lu", _model->mesh_array[_i].vertex_count * 3);
-//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Ka): %s", (_model->mesh_array[_i].material.map_ka != NULL ? _model->mesh_array[_i].material.map_ka->file_path : "none"));
-//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Kd): %s", (_model->mesh_array[_i].material.map_kd != NULL ? _model->mesh_array[_i].material.map_kd->file_path : "none"));
-//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Ks): %s", (_model->mesh_array[_i].material.map_ks != NULL ? _model->mesh_array[_i].material.map_ks->file_path : "none"));
-//		rde_log_color(RDE_LOG_COLOR_GREEN, "		- Texture (Bump): %s", (_model->mesh_array[_i].material.map_bump != NULL ? _model->mesh_array[_i].material.map_bump->file_path : "none"));
-//	}
+	_t_end = clock();
+
+	rde_log_color(RDE_LOG_COLOR_GREEN, "Model loaded in %f""s", (_t_end - _t_start) / 1000.f);
+
 	return _model;
 }
 
