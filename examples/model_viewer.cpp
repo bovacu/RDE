@@ -23,6 +23,8 @@ rde_mesh* model_viewer_point_light_mesh = NULL;
 
 rde_point_light model_viewer_point_light;
 
+bool model_viewer_show_skybox = false;
+
 void model_viewer_keyboard_controller(float _dt) {
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
 		model_viewer_camera.transform.position.x += model_viewer_camera_front.x * 10 * _dt;
@@ -315,12 +317,17 @@ void model_viewer_draw_imgui() {
 	ImGui::Text("Total Meshes: %zu", model_viewer_model_data.amount_of_meshes);
 	ImGui::DragInt("Meshes", &model_viewer_max_meshes_to_render, 1, 0, model_viewer_model_data.amount_of_meshes);
 	ImGui::Checkbox("Wireframe", &model_viewer_draw_wireframe);
+	ImGui::Checkbox("Skybox", &model_viewer_show_skybox);
 	ImGui::End();
  }
 
 void model_viewer_on_render(float _dt, rde_window* _window) {
 	UNUSED(_dt)
-	rde_rendering_3d_draw_skybox(&model_viewer_camera);
+	
+	if(model_viewer_show_skybox) {
+		rde_rendering_3d_draw_skybox(&model_viewer_camera);
+	}
+
 	model_viewer_draw_grid(&model_viewer_camera, _window);
 	model_viewer_draw_3d(_window, _dt);
  	model_viewer_draw_imgui();
@@ -333,7 +340,7 @@ void model_viewer_unload() {
 	}
 
 	if(model_viewer_point_light_mesh != NULL) {
-		rde_rendering_mesh_destroy(model_viewer_point_light_mesh);
+		rde_rendering_mesh_destroy(model_viewer_point_light_mesh, true);
 	}
 
 	model_viewer_model = NULL;
