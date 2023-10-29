@@ -3,7 +3,7 @@
 #define RDE_ERROR_NO_NULL_ALLOWED "Tried to use a NULL %s.\n"
 #define RDE_ERROR_FILE_NOT_FOUND "File '%s' not found or could not open it.\n"
 #define RDE_ERROR_JSON "Could not load JSON from file '%s' due to error '%s'.\n"
-#define RDE_ERROR_HEAP_ALLOC_BAD_VALUE "Heap Allocs Congig -> number of %s cannot be <= 0 and %d was provided.\n"
+#define RDE_ERROR_HEAP_ALLOC_BAD_VALUE "Heap Allocs Config -> number of %s cannot be <= 0 and %d was provided.\n"
 #define RDE_ERROR_MULTIPLE_ENGINE "Only one engine can be created.\n"
 #define RDE_ERROR_NULL_MANDATORY_CALLBACK "User-End callback %s' is not defined, before creating the engine call 'rde_setup_initial_info(...)'.\n"
 #define RDE_ERROR_UNSUPPORTED_PLATFORM "Unsupported or unimplemented platform.\n"
@@ -43,6 +43,10 @@
 #define RDE_ERROR_OBJ_INVALID_DATA "Some data in '%s' could not be parsed correctly, failed to parse %s at line %lu \n"
 #define RDE_ERROR_OBJ_INVALID_MATERIAL_DATA "%s in '%s' with value %s could not be parsed correctly, failed to parse %s at line %lu \n"
 #define RDE_WARNING_OBJ_VERTEX_INCLUDES_COLORS "Model '%s' includes vertex colors in 'v' and this is still not supported so it will be ignored \n"
+#endif
+
+#ifdef RDE_FILE_SYSTEM_MODULE
+#define RDE_ERROR_FILE_SYSTEM_MAX_OPENED_FILES_REACHED "Max number of concurrent files opened '%d' by File System Modle has been reached. Please close some files before opening more. \n"
 #endif
 
 static int times_enter_in_error = 0;

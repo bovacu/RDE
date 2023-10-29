@@ -215,4 +215,15 @@ struct rde_engine {
 
 #endif
 
+#ifdef RDE_FILE_SYSTEM_MODULE
+
+struct rde_file_handle {
+	char file_path[RDE_MAX_PATH];
+	SDL_RWops* sdl_handle;
+	RDE_FILE_MODE_ file_mode;
+	char* text_allocated;
+};
+
+#endif
+
 #endif

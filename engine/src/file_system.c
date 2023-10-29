@@ -149,40 +149,141 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 
 
 
+#ifdef RDE_FILE_SYSTEM_MODULE
+
+static const char* rde_inner_file_system_file_mode_to_char(const RDE_FILE_MODE_ _mode) {
+	switch (_mode) {
+		case RDE_FILE_MODE_READ: return "rb";
+		case RDE_FILE_MODE_WRITE: return "w";
+		case RDE_FILE_MODE_APPEND: return "a";
+		case RDE_FILE_MODE_READ_AND_WRITE: return "r+";
+		case RDE_FILE_MODE_READ_AND_APPEND: return "a+";
+	}
+
+	return "rb";
+}
+
+static void rde_inner_file_system_free_text_allocation(rde_file_handle* _handler) {
+	if(_handler->text_allocated != NULL) {
+		free(_handler->text_allocated);
+		_handler->text_allocated = NULL;
+	}
+}
+
+static void rde_inner_file_system_check_file_mode_or_convert(rde_file_handle* _handler, RDE_FILE_MODE_ _expected) {
+	if(_handler->file_mode == _expected) return;
+	SDL_RWclose(_handler->sdl_handle);
+	rde_inner_file_system_free_text_allocation(_handler);
+	_handler->sdl_handle = SDL_RWFromFile(_handler->file_path, rde_inner_file_system_file_mode_to_char(_expected));
+	_handler->file_mode = _expected;
+}
+
+#define RDE_MAX_CONCURRENT_FILES_OPENED 64
+static rde_file_handle concurrent_file_handlers[RDE_MAX_CONCURRENT_FILES_OPENED];
+
+
+
 
 // ==============================================================================
 // =									API										=
 // ==============================================================================
 
-#ifdef RDE_FILE_SYSTEM_MODULE
-rde_file_handler* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode) {
-	UNUSED(_file_path)
-	UNUSED(_file_mode)
-	UNIMPLEMENTED("rde_file_open")
+rde_file_handle* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode) {
+	const char* _mode = rde_inner_file_system_file_mode_to_char(_file_mode);
+	SDL_RWops* _sdl_file = SDL_RWFromFile(_file_path, _mode);
+	rde_critical_error(_sdl_file == NULL, RDE_ERROR_FILE_NOT_FOUND, _file_path);
+
+	for(size_t _i = 0; _i < RDE_MAX_CONCURRENT_FILES_OPENED; _i++) {
+		rde_file_handle* _file_handler = &concurrent_file_handlers[_i];
+
+		if(_file_handler->sdl_handle == NULL) {
+			_file_handler->sdl_handle = _sdl_file;
+			_file_handler->file_mode = _file_mode;
+			memset(_file_handler->file_path, 0, RDE_MAX_PATH);
+#if IS_WINDOWS()
+			strcat_s(_file_handler->file_path, RDE_MAX_PATH, _file_path);
+#else
+			strcat(_file_handler->file_path, _file_path);
+#endif
+			_file_handler->text_allocated = NULL;
+
+			return _file_handler;
+		}
+	}
+
+	rde_critical_error(true, RDE_ERROR_FILE_SYSTEM_MAX_OPENED_FILES_REACHED, RDE_MAX_CONCURRENT_FILES_OPENED);
 	return NULL;
 }
 
-rde_file_handler* rde_file_open_or_create(const char* _file_path, RDE_FILE_MODE_ _file_mode) {
-	UNUSED(_file_path)
-	UNUSED(_file_mode)
-	UNIMPLEMENTED("rde_file_open_or_create")
-	return NULL;
+char* rde_file_read_full_file(rde_file_handle* _file_handler) {
+	rde_inner_file_system_check_file_mode_or_convert(_file_handler, RDE_FILE_MODE_READ);
+	size_t _total_size = SDL_RWsize(_file_handler->sdl_handle);
+	size_t _total_bytes_read = 0;
+	size_t _bytes_to_read = 1;
+	char* _text = (char*)malloc(sizeof(char) * _total_size + 1);
+	char* _buf = _text;
+	memset(_text, 0, _total_size);
+	rde_critical_error(_text == NULL, RDE_ERROR_NO_MEMORY, sizeof(char) * _total_size, "Text Read Full File");
+
+	while (_total_bytes_read < _total_size && _bytes_to_read != 0) {
+		_bytes_to_read = SDL_RWread(_file_handler->sdl_handle, _buf, 1, (_total_size - _total_bytes_read));
+		_total_bytes_read += _bytes_to_read;
+		_buf += _bytes_to_read;
+	}
+	_text[_total_bytes_read] = '\0';
+
+	rde_inner_file_system_free_text_allocation(_file_handler);
+	_file_handler->text_allocated = _text;
+	return _text;
 }
 
-char* rde_file_read_full_file(rde_file_handler* _file_handler) {
-	UNUSED(_file_handler)
-	UNIMPLEMENTED("rde_file_read_full_file")
-	return NULL;
+char* rde_file_read_line(rde_file_handle* _file_handler, size_t _line) {
+	size_t _current_line = 0;
+	size_t _final_line_ptr = 0;
+	bool _line_found = false;
+	size_t _line_first_byte = RDE_UINT_MAX;
+
+	rde_inner_file_system_check_file_mode_or_convert(_file_handler, RDE_FILE_MODE_READ);
+	SDL_RWseek(_file_handler->sdl_handle, 0, RW_SEEK_END);
+	long _content_size = SDL_RWtell(_file_handler->sdl_handle);
+	char* _file_content = (char*)malloc(sizeof(char) * _content_size);
+	SDL_RWseek(_file_handler->sdl_handle, 0, RW_SEEK_SET);
+
+	for(long _i = 0; _i < _content_size; _i++) {
+		SDL_RWread(_file_handler->sdl_handle, &_file_content[_i], sizeof(char), 1);
+		if(_current_line == _line) {
+			
+			if(_line_first_byte == RDE_UINT_MAX) {
+				_line_first_byte = _i;
+			}
+
+			_line_found = true;
+			if(_file_content[_i] == '\n' || (_file_content[_i] == '\r' && _file_content[_i + 1] == '\n')) break;
+			_final_line_ptr++;
+			continue;
+		}
+
+		if(_file_content[_i] == '\n') _current_line++;
+	}
+
+	if(!_line_found) {
+		return NULL;
+	}
+
+	char* _line_ptr = (char*)malloc(sizeof(char) * _final_line_ptr);
+	memset(_line_ptr, 0, _final_line_ptr);
+#if IS_WINDOWS()
+	strncpy_s(_line_ptr, _final_line_ptr, _file_content, _final_line_ptr);
+#else
+	strncpy(_line_ptr, _file_content, _final_line_ptr);
+#endif
+
+	rde_inner_file_system_free_text_allocation(_file_handler);
+	_file_handler->text_allocated = _line_ptr;
+	return _line_ptr;
 }
 
-char* rde_file_read_line(rde_file_handler* _file_handler, size_t _line) {
-	UNUSED(_file_handler)
-	UNUSED(_line)
-	UNIMPLEMENTED("rde_file_read_line")
-	return NULL;
-}
-
-char* rde_file_read_chunk(rde_file_handler* _file_handler, size_t _begin_byte, size_t _end_byte) {
+char* rde_file_read_chunk(rde_file_handle* _file_handler, size_t _begin_byte, size_t _end_byte) {
 	UNUSED(_file_handler)
 	UNUSED(_begin_byte)
 	UNUSED(_end_byte)
@@ -190,14 +291,14 @@ char* rde_file_read_chunk(rde_file_handler* _file_handler, size_t _begin_byte, s
 	return NULL;
 }
 
-void rde_file_write(rde_file_handler* _file_handler, size_t _bytes, const char* _data) {
+void rde_file_write(rde_file_handle* _file_handler, size_t _bytes, const char* _data) {
 	UNUSED(_file_handler)
 	UNUSED(_bytes)
 	UNUSED(_data)
 	UNIMPLEMENTED("rde_file_write")
 }
 
-void rde_file_write_to_line(rde_file_handler* _file_handler, size_t _bytes, const char* _data, size_t _line) {
+void rde_file_write_to_line(rde_file_handle* _file_handler, size_t _bytes, const char* _data, size_t _line) {
 	UNUSED(_file_handler)
 	UNUSED(_bytes)
 	UNUSED(_data)
@@ -205,7 +306,7 @@ void rde_file_write_to_line(rde_file_handler* _file_handler, size_t _bytes, cons
 	UNIMPLEMENTED("rde_file_write_to_line")
 }
 
-void rde_file_append(rde_file_handler* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line) {
+void rde_file_append(rde_file_handle* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line) {
 	UNUSED(_file_handler)
 	UNUSED(_append_byte)
 	UNUSED(_bytes)
@@ -214,7 +315,7 @@ void rde_file_append(rde_file_handler* _file_handler, size_t _append_byte, size_
 	UNIMPLEMENTED("rde_file_append")
 }
 
-void rde_file_clear_content(rde_file_handler* _file_handler) {
+void rde_file_clear_content(rde_file_handle* _file_handler) {
 	UNUSED(_file_handler)
 	UNIMPLEMENTED("rde_file_clear_content")
 }
@@ -236,8 +337,9 @@ void rde_file_move(const char* _file_path, const char* _new_file_path) {
 	UNIMPLEMENTED("rde_file_move")
 }
 
-void rde_file_close(rde_file_handler* _file_handler) {
-	UNUSED(_file_handler)
-	UNIMPLEMENTED("rde_file_close")
+void rde_file_close(rde_file_handle* _file_handler) {
+	rde_inner_file_system_free_text_allocation(_file_handler);
+	SDL_RWclose(_file_handler->sdl_handle);
+	_file_handler->sdl_handle = NULL;
 }
 #endif

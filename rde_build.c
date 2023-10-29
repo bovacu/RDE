@@ -73,7 +73,7 @@ const char* BUILD_OPTIONS_STR[MAX_BUILD_OPTIONS] = {
 
 #define MAX_SIZE_FOR_OPTIONS 64
 #define MAX_SIZE_FOR_MODULES 256
-#define MAX_MODULES 8
+#define MAX_MODULES 9
 #define GOD_MODE "-DRDE_GOD"
 
 typedef enum {
@@ -85,7 +85,8 @@ typedef enum {
 	RDE_MODULES_FBX = 16,
 	RDE_MODULES_OBJ = 32,
 	RDE_MODULES_UI = 64,
-	RDE_MODULES_ERROR = 128
+	RDE_MODULES_ERROR = 128,
+	RDE_MODULES_FILE_SYSTEM = 256,
 } RDE_MODULES_;
 
 const char* MODULES_STR[MAX_MODULES] = {
@@ -96,7 +97,8 @@ const char* MODULES_STR[MAX_MODULES] = {
 	"fbx",
 	"obj",
 	"ui",
-	"error"
+	"error",
+	"file_system"
 };
 char* MODULES_DEFINES[MAX_MODULES] = {
 	"-DRDE_AUDIO_MODULE",
@@ -106,7 +108,8 @@ char* MODULES_DEFINES[MAX_MODULES] = {
 	"-DRDE_FBX_MODULE",
 	"-DRDE_OBJ_MODULE",
 	"-DRDE_UI_MODULE",
-	"-DRDE_ERROR_MODULE"
+	"-DRDE_ERROR_MODULE",
+	"-DRDE_FILE_SYSTEM_MODULE"
 };
 RDE_MODULES_ modules;
 
@@ -940,20 +943,20 @@ bool copy_file_if_exists(const char* _file_path, const char* _new_path) {
 	return true;
 }
 
-bool copy_folder_if_exists(const char* _folder_path, const char* _new_path) {
+bool copy_folder_if_exists(const char* _dir_path, const char* _new_path) {
 
-	if(!dir_exists(_folder_path)) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not copy %s into %s. %s does not exist.", _folder_path, _new_path);
+	if(!dir_exists(_dir_path)) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not copy %s into %s. %s does not exist.", _dir_path, _new_path);
 		return false;
 	}
 
 	rde_command _command = NULL;
 	arrput(_command, "cp");
 	arrput(_command, "-r");
-	arrput(_command, (char*)_folder_path);
+	arrput(_command, (char*)_dir_path);
 	arrput(_command, (char*)_new_path);
 	run_command(_command);
-	rde_log_level(RDE_LOG_LEVEL_INFO, "Copied folder %s to %s.", _folder_path, _new_path);
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Copied folder %s to %s.", _dir_path, _new_path);
 	return true;
 }
 
@@ -964,6 +967,20 @@ bool dir_exists(const char* _dir_path) {
 	return _exists;
 }
 
+bool rm_dir_if_exists(const char* _dir_path) {
+	if(!dir_exists(_dir_path)) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not remove %s.", _dir_path);
+		return false;
+	}
+
+	rde_command _command = NULL;
+	arrput(_command, "rm");
+	arrput(_command, "-rf");
+	arrput(_command, (char*)_dir_path);
+	run_command(_command);
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Removed folder %s.", _dir_path);
+	return true;
+}
 
 
 #if _WIN32
