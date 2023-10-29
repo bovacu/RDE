@@ -2024,8 +2024,6 @@ RDE_FUNC void rde_audio_end();
 #ifdef RDE_FILE_SYSTEM_MODULE
 #endif
 
-#endif
-
 
 
 #ifdef RDE_GOD
@@ -2034,4 +2032,6 @@ RDE_FUNC void rde_audio_end();
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
