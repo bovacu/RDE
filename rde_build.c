@@ -1451,6 +1451,15 @@ bool compile_windows() {
 		snprintf(_examples_assets_path, 1024, "%s%s%s%s", this_file_full_path, "build\\windows\\", 					\
 				(strcmp(build_type, "debug") == 0 ? "debug\\" : "release\\"), "examples\\hub_assets");				\
 		copy_folder_if_exists(_assets_path, _examples_assets_path);													\
+		char _shaders_path[1024];																					\
+		memset(_shaders_path, 0, 1024);																				\
+		snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");								\
+		char _examples_shaders_path[1024];																			\
+		memset(_examples_shaders_path, 0, 1024);																	\
+		snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/windows/", 					\
+				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/shaders");					\
+		rm_dir_if_exists(_examples_shaders_path);																	\
+		copy_folder_if_exists(_shaders_path, _examples_shaders_path);												\
 	} while(0);
 
 #define BUILD_TESTS()																								\
@@ -2086,6 +2095,14 @@ bool compile_osx() {
 				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/hub_assets");					\
 		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
 		copy_folder_if_exists(_assets_path, _examples_assets_path);													\
+		char _shaders_path[1024];																					\
+		memset(_shaders_path, 0, 1024);																				\
+		snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");								\
+		char _examples_shaders_path[1024];																			\
+		memset(_examples_shaders_path, 0, 1024);																	\
+		snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/osx/", 						\
+				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/shaders");					\
+		copy_folder_if_exists(_shaders_path, _examples_shaders_path);												\
 	} while (0);
 
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
@@ -2565,6 +2582,15 @@ bool compile_linux() {
 				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/hub_assets");					\
 			copy_file_if_exists(_rde_lib_path, _example_path_rde); 													\
 			copy_folder_if_exists(_assets_path, _examples_assets_path);												\
+			copy_folder_if_exists(_assets_path, _examples_assets_path);												\
+			char _shaders_path[1024];																				\
+			memset(_shaders_path, 0, 1024);																			\
+			snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");							\
+			char _examples_shaders_path[1024];																		\
+			memset(_examples_shaders_path, 0, 1024);																\
+			snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 				\
+					(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/shaders");				\
+			copy_folder_if_exists(_shaders_path, _examples_shaders_path);											\
         }																											\
 	} while(0);
    
@@ -2648,6 +2674,7 @@ void print_help() {
 	"	- rendering\n"
 	"	- ui\n"
 	"	- error\n"
+	"	- file_system\n"
 	"Each of them can be added to your library. Have in mind that adding 'physics_3d' will add Jolt Physics Engine to your depenency list, in case \n"
 	"you are building a static lib, you will probably have to add the Jolt lib to your build system.\n"
 	"To add any of the modules use --modules= (or -m=) followed by an array of the included modules, for example:\n"
@@ -2661,6 +2688,7 @@ void print_help() {
 	"	- rendering: adds 2D rendering for 2D textures in a batched mode and also 3D batched drawing.\n"
 	"	- ui: adds custom inmediate mode UI.\n"
 	"	- error: adds handling for the most common error crashes and prints the stacktrace of the crash to the logs of the console (in debug) and to a error log file (in release).\n"
+	"	- error: adds operations with files in a cross-platform way.\n"
 	"\n"
 	"--- GOD MODE --- \n"
 	"As described in the documentation, many structs shown to the user are simply pointers where you cannot access the \n"

@@ -4,13 +4,13 @@ typedef struct {
 	size_t number_of_drawcalls;
 } rde_rendering_statistics;
 
-#define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled)											\
-	if(!_compiled) {																						\
-		char _infolog[1024];																				\
-		glGetShaderInfoLog(_program_id, 1024, NULL, _infolog);												\
-		glDeleteShader(_program_id);																		\
-		rde_critical_error(true, "Shader(%d) compile failed with error: \n%s \n", _program_id, _infolog);	\
-		return NULL;																						\
+#define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled, _path)												\
+	if(!_compiled) {																									\
+		char _infolog[1024];																							\
+		glGetShaderInfoLog(_program_id, 1024, NULL, _infolog);															\
+		glDeleteShader(_program_id);																					\
+		rde_critical_error(true, "Shader(%d) '%s' compile failed with error: \n%s \n", _program_id, _path, _infolog);	\
+		return NULL;																									\
 	}
 
 static rde_camera* current_drawing_camera = NULL;
@@ -60,13 +60,61 @@ void rde_inner_rendering_set_rendering_configuration() {
 #endif
 
 #if !IS_MOBILE() && !IS_WASM()
-	ENGINE.line_shader = rde_rendering_shader_load(RDE_SHADER_LINE, RDE_LINE_VERTEX_SHADER, RDE_LINE_FRAGMENT_SHADER);
-	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, RDE_COLOR_VERTEX_SHADER_2D, RDE_COLOR_FRAGMENT_SHADER_2D);
-	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, RDE_TEXTURE_VERTEX_SHADER_2D, RDE_TEXTURE_FRAGMENT_SHADER_2D);
-	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, RDE_TEXT_VERTEX_SHADER_2D, RDE_TEXT_FRAGMENT_SHADER_2D);
-	ENGINE.frame_buffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, RDE_FRAME_BUFFER_VERTEX_SHADER, RDE_FRAME_BUFFER_FRAGMENT_SHADER);
-	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, RDE_MESH_VERTEX_SHADER, RDE_MESH_FRAGMENT_SHADER);
-	ENGINE.skybox_shader = rde_rendering_shader_load(RDE_SHADER_SKYBOX, RDE_SKYBOX_VERTEX_SHADER, RDE_SKYBOX_FRAGMENT_SHADER);
+	rde_file_handle* _shader_vertex_handle = rde_file_open("shaders/core/line_vert.glsl", RDE_FILE_MODE_READ);
+	rde_file_handle* _shader_fragment_handle = rde_file_open("shaders/core/line_frag.glsl", RDE_FILE_MODE_READ);
+	char* _vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	char* _fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.line_shader = rde_rendering_shader_load(RDE_SHADER_LINE, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+	
+	_shader_vertex_handle = rde_file_open("shaders/core/color_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/core/color_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+
+	_shader_vertex_handle = rde_file_open("shaders/core/texture_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/core/texture_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+
+	_shader_vertex_handle = rde_file_open("shaders/core/text_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/core/text_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+	
+	_shader_vertex_handle = rde_file_open("shaders/core/framebuffer_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/core/framebuffer_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.frame_buffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+	
+	_shader_vertex_handle = rde_file_open("shaders/core/mesh_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/core/mesh_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+	
+	_shader_vertex_handle = rde_file_open("shaders/core/skybox_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/core/skybox_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.skybox_shader = rde_rendering_shader_load(RDE_SHADER_SKYBOX, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
 #else
 	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
 	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
@@ -109,8 +157,8 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 	glGetShaderiv(_vertex_program_id, GL_COMPILE_STATUS, &_is_vertex_compiled);
 	glGetShaderiv(_fragment_program_id, GL_COMPILE_STATUS, &_is_fragment_compiled);
 
-	RDE_CHECK_SHADER_COMPILATION_STATUS( _vertex_program_id, _is_vertex_compiled)
-	RDE_CHECK_SHADER_COMPILATION_STATUS(_fragment_program_id, _is_fragment_compiled)
+	RDE_CHECK_SHADER_COMPILATION_STATUS( _vertex_program_id, _is_vertex_compiled, _vertex_code)
+	RDE_CHECK_SHADER_COMPILATION_STATUS(_fragment_program_id, _is_fragment_compiled, _fragment_code)
 
 	GLuint _program_id = glCreateProgram();
 	_error |= rde_util_check_opengl_error("program creation");
