@@ -139,7 +139,9 @@ void performance_test_3d_draw_3d(rde_window* _window, float _dt) {
 	}
 }
 
-void performance_test_3d_draw_imgui() {
+void performance_test_3d_draw_imgui(float _dt, rde_window* _window) {
+	(void)_dt;
+	(void)_window;
 	ImGui::Begin("Performance Control", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::DragInt("Amount To Render", &performance_test_3d_amount_to_show, 1, 0, performance_test_3d_MAX_3D);
 	unsigned int _total_vertices = rde_rendering_model_get_vertices_count(performance_test_3d_model);
@@ -151,7 +153,6 @@ void performance_test_3d_draw_imgui() {
 void performance_test_3d_on_render(float _dt, rde_window* _window) {
 	UNUSED(_dt)
 	performance_test_3d_draw_3d(_window, _dt);
-	performance_test_3d_draw_imgui();
 }
 
 void performance_test_3d_unload() {
@@ -179,6 +180,7 @@ void performance_test_3d_init() {
 	fixed_update_callback = &performance_test_3d_on_fixed_update;
 	late_update_callback = &performance_test_3d_on_late_update;
 	render_callback = &performance_test_3d_on_render;
+	render_imgui_callback = &performance_test_3d_draw_imgui;
 	unload_callback = &performance_test_3d_unload;
 
 	performance_test_3d_transforms = (rde_transform*)malloc(sizeof(rde_transform) * performance_test_3d_MAX_3D);

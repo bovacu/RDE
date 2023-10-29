@@ -22,6 +22,7 @@ rde_engine_user_side_loop_func update_callback = NULL;
 rde_engine_user_side_loop_func fixed_update_callback = NULL;
 rde_engine_user_side_loop_func late_update_callback = NULL;
 rde_engine_user_side_loop_func_2 render_callback = NULL;
+rde_engine_user_side_loop_func_2 render_imgui_callback = NULL;
 unload_func unload_callback = NULL;
 
 rde_window* current_window = NULL;
@@ -107,6 +108,11 @@ void on_late_update(float _dt) {
 }
 
 void on_imgui_hub_menu() {
+	static ImGuiDockNodeFlags _dockspace_flags = ImGuiDockNodeFlags_None;
+	_dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
+	ImGuiID _dockspace_id = ImGui::GetID("MyDockSpace");
+	ImGui::DockSpace(_dockspace_id, ImVec2(0.0f, 0.0f), _dockspace_flags);
+
 	if(ImGui::Begin("Hub", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Text("Welcome to the Hub!");
 		ImGui::Text("Choose any demo from the list");
@@ -130,6 +136,29 @@ void on_imgui_hub_menu() {
 
 }
 
+//void dock_space(float _dt, rde_window* _window) {
+//	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+//	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+//	ImGui::SetNextWindowPos(ImVec2 { 0, 0 });
+//	rde_vec_2I _window_size = rde_window_get_window_size(current_window);
+//	ImGui::SetNextWindowSize(ImVec2 { (float)_window_size.x, (float)_window_size.y });
+//	ImGui::SetNextWindowViewport(viewport->ID);
+//	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+//	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+//	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+//	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+//	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+//	ImGui::Begin("DockSpace Demo", nullptr, window_flags);
+//	ImGui::PopStyleVar(3);
+//	ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+//	ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+//	on_imgui_hub_menu();
+//	if(render_imgui_callback != NULL) {
+//		render_imgui_callback(_dt, _window);
+//	}
+//	ImGui::End();
+//}
+
 void on_render(float _dt, rde_window* _window) {
 	rde_rendering_set_background_color(RDE_COLOR_BLACK);
 
@@ -141,7 +170,11 @@ void on_render(float _dt, rde_window* _window) {
 		render_callback(_dt, _window);
 	}
 
+	//dock_space(_dt, _window);
 	on_imgui_hub_menu();
+	if(render_imgui_callback != NULL) {
+		render_imgui_callback(_dt, _window);
+	}
 
 	ImGui::Render();
 	ImDrawData* _draw_data = ImGui::GetDrawData();
@@ -159,7 +192,7 @@ void init_func(int _argc, char** _argv) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& _io = ImGui::GetIO(); (void)_io;
-
+	_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	ImGui::StyleColorsDark();
 
 	ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)rde_window_get_native_sdl_window_handle(current_window), 
