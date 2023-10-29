@@ -45,6 +45,8 @@
 #define RDE_WARNING_OBJ_VERTEX_INCLUDES_COLORS "Model '%s' includes vertex colors in 'v' and this is still not supported so it will be ignored \n"
 #endif
 
+static int times_enter_in_error = 0;
+
 #ifdef RDE_ERROR_MODULE
 	#include <signal.h>
 
@@ -366,6 +368,13 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	
 	if(!_condition) {
 		return;
+	}
+
+	times_enter_in_error++;
+
+	if(times_enter_in_error > 1) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "There was an error loop, check previous message to fix it");
+		exit(-1);
 	}
 
 #ifdef RDE_DEBUG
