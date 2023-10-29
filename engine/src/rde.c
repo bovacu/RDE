@@ -363,6 +363,10 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 		_e.point_lights[_i] = NULL;
 	}
 	_e.amount_of_point_lights = 0;
+	for(size_t _i = 0; _i < RDE_MAX_SPOT_LIGHTS; _i++) {
+		_e.spot_lights[_i] = NULL;
+	}
+	_e.amount_of_spot_lights = 0;
 
 	_e.line_shader = NULL;
 	_e.color_shader_2d = NULL;
@@ -764,7 +768,7 @@ void rde_engine_destroy_engine() {
 	rde_inner_rendering_end_2d();
 	rde_inner_rendering_end_3d();
 	
-	if(ENGINE.skybox.opengl_texture_id != RDE_UINT_MAX) {
+	if(ENGINE.skybox.opengl_texture_id != -1) {
 		rde_rendering_skybox_unload(ENGINE.skybox.opengl_texture_id);
 	}
 

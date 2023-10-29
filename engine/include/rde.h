@@ -292,10 +292,12 @@ extern "C" {
 	"}"
 
 #define RDE_MAX_POINT_LIGHTS 10
+#define RDE_MAX_SPOT_LIGHTS 10
 #define RDE_MESH_FRAGMENT_SHADER "" \
 	"#version 330 core\n" \
 	"\n" \
 	"const int RDE_MAX_POINT_LIGHTS = 10;\n" \
+	"const int RDE_MAX_SPOT_LIGHTS = 10;\n" \
 	"\n" \
 	"in vec3 normal;\n" \
 	"in vec2 text_coord;\n" \
@@ -328,14 +330,28 @@ extern "C" {
 	"	float quadratic;\n" \
 	"	int used;\n" \
 	"};\n" \
+	"struct rde_spot_light {\n" \
+	"	vec3 position;\n" \
+	"	vec3 direction;\n" \
+	"	vec3 ambient_color;\n" \
+	"	vec3 diffuse_color;\n" \
+	"	vec3 specular_color;\n" \
+	"	float constant;\n" \
+	"	float linear;\n" \
+	"	float quadratic;\n" \
+	"	float cut_off;\n" \
+	"	float outer_cut_off;\n" \
+	"	int used;\n" \
+	"};\n" \
 	"\n" \
 	"uniform vec3 camera_pos;\n" \
 	"uniform rde_directional_light directional_light;\n" \
 	"uniform rde_point_light point_lights[RDE_MAX_POINT_LIGHTS];\n" \
+	"uniform rde_spot_light spot_lights[RDE_MAX_SPOT_LIGHTS];\n" \
 	"uniform rde_material material;\n" \
 	"\n" \
 	"vec3 directional_light_calc() {\n" \
-	"	vec3 _ambient = material.Ka * directional_light.ambient_color * texture(material.tex_ka, text_coord).rgb;\n" \
+	"	vec3 _ambient = material.Ka * directional_light.ambient_color * texture(material.tex_kd, text_coord).rgb;\n" \
 	"	\n" \
 	"	vec3 _norm = normalize(normal);\n" \
 	"	vec3 _light_dir = normalize(-directional_light.direction);\n" \
@@ -353,6 +369,7 @@ extern "C" {
 	"vec3 point_light_calc(int _i) {\n" \
 	"	rde_point_light _light = point_lights[_i];\n" \
 	"	if(_light.used < 0) return vec3(0.0, 0.0, 0.0);\n" \
+	"	\n" \
 	"	vec3 _ambient = material.Ka * _light.ambient_color * texture(material.tex_kd, text_coord).rgb;\n" \
 	"	\n" \
 	"	vec3 _norm = normalize(normal);\n" \
@@ -372,13 +389,43 @@ extern "C" {
 	"	vec3 _final_light = _ambient + _diffuse + _specular;\n" \
 	"	return _final_light;\n" \
 	"}\n" \
+	"vec3 spot_light_calc(int _i) {\n" \
+	"	rde_spot_light _light = spot_lights[_i];\n" \
+	"	if(_light.used < 0) return vec3(0.0, 0.0, 0.0);\n" \
+	"	\n" \
+	"	vec3 _light_dir = normalize(_light.position - frag_pos);\n" \
+	"	float _theta = dot(_light_dir, normalize(-_light.direction));\n" \
+	"	float _epsilon = (_light.cut_off - _light.outer_cut_off);\n" \
+	"	float _intensity = clamp((_theta - _light.outer_cut_off) / _epsilon, 0.0, 1.0);\n" \
+	"	\n" \
+	"	vec3 _ambient = material.Ka * _light.ambient_color * texture(material.tex_kd, text_coord).rgb;\n" \
+	"	\n" \
+	"	vec3 _norm = normalize(normal);\n" \
+	"	float _diff = max(dot(_norm, _light_dir), 0.0);\n" \
+	"	vec3 _diffuse = material.Kd * _light.diffuse_color * _diff * texture(material.tex_kd, text_coord).rgb;\n" \
+	"	\n" \
+	"	vec3 _view_dir = normalize(camera_pos + frag_pos);\n" \
+	"	vec3 _reflect_dir = reflect(-_light_dir, _norm);\n" \
+	"	float _spec = pow(max(dot(_view_dir, _reflect_dir), 0.0), material.shininess);\n" \
+	"	vec3 _specular = material.Ks * _light.specular_color * _spec * texture(material.tex_ks, text_coord).rgb;\n" \
+	"	float _distance = length(_light.position - frag_pos);\n" \
+	"	float _attenuation = 1.0 / (_light.constant + _light.linear * _distance + _light.quadratic * (_distance * _distance));\n" \
+	"	_ambient  *= _attenuation;\n" \
+	"	_diffuse  *= _attenuation * _intensity;\n" \
+	"	_specular *= _attenuation * _intensity;\n" \
+	"	vec3 _final_light = _ambient + _diffuse + _specular;\n" \
+	"	return _final_light;\n" \
+	"}\n" \
 	"\n" \
 	"void main(){\n" \
 	"	if(texture(material.tex_kd, text_coord).a < 0.05) discard;\n" \
 	"	vec3 _final_light = vec3(0.0);\n" \
 	"	_final_light += directional_light_calc();\n" \
-	"	 for(int _i = 0; _i < RDE_MAX_POINT_LIGHTS; _i++) {\n" \
+	"	for(int _i = 0; _i < RDE_MAX_POINT_LIGHTS; _i++) {\n" \
 	"		_final_light += point_light_calc(_i);\n" \
+	"	}\n" \
+	"	for(int _i = 0; _i < RDE_MAX_SPOT_LIGHTS; _i++) {\n" \
+	"		_final_light += spot_light_calc(_i);\n" \
 	"	}\n" \
 	"	color_out = vec4(_final_light, 1.0);\n" \
 	"}"
@@ -1590,6 +1637,33 @@ rde_point_light rde_struct_create_point_light() {
 	return _p;
 }
 
+typedef struct {
+	rde_vec_3F position;
+	rde_vec_3F direction;
+	float cut_off;
+	float outer_cut_off;
+	rde_vec_3F ambient_color;
+	rde_vec_3F diffuse_color;
+	rde_vec_3F specular_color;
+	float constant;
+	float linear;
+	float quadratic;
+} rde_spot_light;
+rde_spot_light rde_struct_create_spot_light() {
+	rde_spot_light _s;
+	_s.position = (rde_vec_3F) { 0.0, 0.0f, 0.0f };
+	_s.direction = (rde_vec_3F) { 0.0, -1.0f, 0.0f };
+	_s.cut_off = 0.99999f;
+	_s.outer_cut_off = 0.99999f;
+	_s.ambient_color = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
+	_s.diffuse_color = (rde_vec_3F) { 0.8f, 0.8f, 0.8f };
+	_s.specular_color = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+	_s.constant = 1.0f;
+	_s.linear = 0.09f;
+	_s.quadratic = 0.032f;
+	return _s;
+}
+
 typedef uint rde_skybox_id;
 
 struct rde_model_bone {
@@ -1983,6 +2057,7 @@ RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_v
 RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color);
 RDE_FUNC void rde_rendering_light_add_add_point_light(rde_point_light* _point_light);
+RDE_FUNC void rde_rendering_light_add_add_spot_light(rde_spot_light* _spot_light);
 RDE_FUNC rde_directional_light rde_rendering_lighting_get_directional_light();
 
 RDE_FUNC rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]); // order is right, left, top, bottom, front, back

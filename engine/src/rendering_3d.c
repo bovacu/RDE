@@ -499,6 +499,61 @@ void rde_inner_rendering_flush_batch_3d() {
 		memset(_point_light_var, 0, 256);
 	}
 
+	for(size_t _i = 0; _i < RDE_MAX_SPOT_LIGHTS; _i++) {
+		rde_spot_light* _s = ENGINE.spot_lights[_i];
+		char _spot_light_var[256];
+		memset(_spot_light_var, 0, 256);
+
+		if(_s != NULL) {
+			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].position", _i);
+			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->position.x, _s->position.y, _s->position.z);
+			memset(_spot_light_var, 0, 256);
+
+			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].direction", _i);
+			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->direction.x, _s->direction.y, _s->direction.z);
+			memset(_spot_light_var, 0, 256);
+		
+			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].ambient_color", _i);
+			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->ambient_color.x, _s->ambient_color.y, _s->ambient_color.z);
+			memset(_spot_light_var, 0, 256);
+		
+			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].diffuse_color", _i);
+			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->diffuse_color.x, _s->diffuse_color.y, _s->diffuse_color.z);
+			memset(_spot_light_var, 0, 256);
+
+			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].specular_color", _i);
+			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->specular_color.x, _s->specular_color.y, _s->specular_color.z);
+			memset(_spot_light_var, 0, 256);
+
+			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].constant", _i);
+			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->constant);
+			memset(_spot_light_var, 0, 256);
+
+			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].linear", _i);
+			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->linear);
+			memset(_spot_light_var, 0, 256);
+
+			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].quadratic", _i);
+			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->quadratic);
+			memset(_spot_light_var, 0, 256);
+
+			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].cut_off", _i);
+			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), cos(glm_rad(_s->cut_off)));
+			memset(_spot_light_var, 0, 256);
+
+			
+			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].outer_cut_off", _i);
+			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), cos(glm_rad(_s->outer_cut_off)));
+			memset(_spot_light_var, 0, 256);
+		}
+
+		rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].used", _i);
+		glUniform1i(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _i < ENGINE.amount_of_spot_lights ? 1 : -1);
+		rde_util_check_opengl_error("On point light.used");
+
+		memset(_spot_light_var, 0, 256);
+	}
+
 	glBindVertexArray(_mesh->vao);
 	rde_util_check_opengl_error("After glBindVertexArray");
 
@@ -923,6 +978,11 @@ rde_directional_light rde_rendering_lighting_get_directional_light() {
 void rde_rendering_light_add_add_point_light(rde_point_light* _point_light) {
 	rde_critical_error(ENGINE.amount_of_point_lights >= RDE_MAX_POINT_LIGHTS, "Max point light amount reached");
 	ENGINE.point_lights[ENGINE.amount_of_point_lights++] = _point_light;
+}
+
+void rde_rendering_light_add_add_spot_light(rde_spot_light* _spot_light) {
+	rde_critical_error(ENGINE.amount_of_spot_lights >= RDE_MAX_SPOT_LIGHTS, "Max spot light amount reached");
+	ENGINE.spot_lights[ENGINE.amount_of_spot_lights++] = _spot_light;
 }
 
 rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh) {

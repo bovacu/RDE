@@ -188,6 +188,8 @@ struct rde_engine {
 	rde_directional_light directional_light;
 	rde_point_light* point_lights[RDE_MAX_POINT_LIGHTS];
 	size_t amount_of_point_lights;
+	rde_spot_light* spot_lights[RDE_MAX_SPOT_LIGHTS];
+	size_t amount_of_spot_lights;
 
 	rde_skybox skybox;
 #endif
