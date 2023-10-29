@@ -2026,6 +2026,12 @@ RDE_FUNC void rde_audio_end();
 
 #endif
 
+
+
+#ifdef RDE_GOD
+#include "private_structs.c"
+#endif
+
 #ifdef __cplusplus
 }
 #endif

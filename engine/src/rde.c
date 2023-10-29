@@ -127,6 +127,8 @@ bool rde_util_check_opengl_error(const char* _message) {
 	return false;
 }
 
+#include "private_structs.c"
+
 // TODO: Not to forget
 // 		- [DONE] Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
 //		  the format is BGRA instead of RGBA (problem solved by first method) and the second fixes
@@ -172,14 +174,7 @@ bool rde_util_check_opengl_error(const char* _message) {
 //
 //		- TOOL: command line project creation, compilation and export.
 
-struct rde_window {
-	SDL_Window* sdl_window;
-	SDL_GLContext sdl_gl_context;
-	RDE_INPUT_STATUS_ key_states[RDE_AMOUNT_OF_KEYS];
-	RDE_INPUT_STATUS_ mouse_states[RDE_AMOUNT_OF_MOUSE_BUTTONS];
-	rde_vec_2I mouse_position;
-	rde_vec_2F mouse_scroll;
-};
+
 rde_window rde_struct_create_window() {
 	rde_window _w;
 	_w.sdl_window = NULL;
@@ -191,13 +186,6 @@ rde_window rde_struct_create_window() {
 }
 
 #ifdef RDE_RENDERING_MODULE
-#define RDE_SHADER_MAX_NAME 256
-struct rde_shader {
-	GLuint vertex_program_id;
-	GLuint fragment_program_id;
-	int compiled_program_id;
-	char name[RDE_SHADER_MAX_NAME];
-};
 rde_shader rde_struct_create_shader() {
 	rde_shader _s;
 	_s.vertex_program_id = 0;
@@ -206,19 +194,6 @@ rde_shader rde_struct_create_shader() {
 	memset(_s.name, 0 , RDE_SHADER_MAX_NAME);
 	return _s;
 }
-
-struct rde_texture {
-	int opengl_texture_id;
-	rde_vec_2UI size;
-	rde_vec_2UI position; // This is only used for atlases
-	int channels;
-	GLenum internal_format;
-	GLenum data_format;
-	const char* file_path;
-	rde_texture* atlas_texture;
-	unsigned char* pixels;
-	bool pixels_changed;
-};
 rde_texture rde_struct_create_texture() {
 	rde_texture _t;
 	_t.opengl_texture_id = -1;
@@ -250,24 +225,6 @@ void rde_struct_init_alloc_ptr_texture(rde_texture* _t) {
 	_t->pixels_changed = false;
 }
 
-struct rde_render_texture {
-	UNIMPLEMENTED_STRUCT()
-};
-
-typedef struct {
-	rde_vec_2I position;
-	rde_vec_2I size;
-} rde_atlas_sub_texture_data;
-
-typedef struct {
-	char* key;
-	rde_texture value;
-} rde_atlas_sub_textures;
-
-struct rde_atlas {
-	rde_texture* texture;
-	rde_atlas_sub_textures* sub_textures;
-};
 rde_atlas rde_struct_create_atlas() {
 	rde_atlas _a;
 	_a.texture = NULL;
@@ -275,14 +232,6 @@ rde_atlas rde_struct_create_atlas() {
 	return _a;
 }
 
-typedef struct {
-	rde_vec_2I advance;
-	rde_vec_2I bearing;
-	rde_vec_2I size;
-	rde_vec_2I offset;
-	rde_vec_2I metrics;
-	rde_texture texture;
-} rde_font_char_info;
 rde_font_char_info rde_struct_create_font_char_info() {
 	rde_font_char_info _f;
 	_f.advance = (rde_vec_2I) { 0, 0 };
@@ -293,10 +242,6 @@ rde_font_char_info rde_struct_create_font_char_info() {
 	return _f;
 }
 
-struct rde_font {
-	rde_texture* texture;
-	rde_font_char_info* chars;
-};
 rde_font rde_struct_create_font() {
 	rde_font _f;
 	_f.texture = NULL;
@@ -304,11 +249,6 @@ rde_font rde_struct_create_font() {
 	return _f;
 }
 
-typedef struct {
-	rde_vec_3F position;
-	int color;
-	rde_vec_2F texture_coordinates;
-} rde_vertex_2d;
 rde_vertex_2d rde_struct_create_vertex_2d() {
 	rde_vertex_2d _v;
 	_v.position.x = 0.f;
@@ -320,17 +260,6 @@ rde_vertex_2d rde_struct_create_vertex_2d() {
 	return _v;
 }
 
-typedef struct {
-	rde_shader* shader;
-	rde_texture texture;
-	rde_vertex_2d* vertices;
-	size_t amount_of_vertices;
-	GLuint vertex_buffer_object;
-	GLuint index_buffer_object;
-	GLuint vertex_array_object;
-	mat4 mvp;
-	bool is_hud;
-} rde_batch_2d;
 rde_batch_2d rde_struct_create_2d_batch() {
 	rde_batch_2d _b;
 	_b.shader = NULL;
@@ -345,10 +274,7 @@ rde_batch_2d rde_struct_create_2d_batch() {
 	return _b;
 }
 
-typedef struct {
-	rde_vec_3F position;
-	uint color;
-} rde_line_vertex;
+
 rde_line_vertex rde_struct_create_line_vertex() {
 	rde_line_vertex _l;
 	_l.position = (rde_vec_3F) { 0, 0, 0 };
@@ -356,14 +282,6 @@ rde_line_vertex rde_struct_create_line_vertex() {
 	return _l;
 }
 
-typedef struct {
-	rde_line_vertex* vertices;
-	size_t amount_of_vertices;
-	GLuint vertex_buffer_object;
-	GLuint vertex_array_object;
-	unsigned short thickness;
-	rde_shader* shader;
-} rde_line_batch;
 rde_line_batch rde_struct_create_line_batch() {
 	rde_line_batch _b;
 	_b.vertices = NULL;
@@ -375,13 +293,6 @@ rde_line_batch rde_struct_create_line_batch() {
 	return _b;
 }
 
-typedef struct {
-	rde_mesh* mesh;
-	rde_shader* shader;
-	size_t amount_of_models_per_draw;
-	rde_line_batch line_batch;
-	bool draw_mesh_wireframe;
-} rde_batch_3d;
 rde_batch_3d rde_struct_create_batch_3d() {
 	rde_batch_3d _b;
 	_b.mesh = NULL;
@@ -392,28 +303,6 @@ rde_batch_3d rde_struct_create_batch_3d() {
 	return _b;
 }
 
-#define RDE_MESH_NAME_MAX 512
-struct rde_mesh {
-	char name[RDE_MESH_NAME_MAX];
-	size_t vertex_count;
-
-	float* vertex_positions;
-	float* vertex_normals;
-	float* vertex_texcoords;
-	mat4* transforms;
-
-	uint vao;
-	uint vbo[4]; // 0 -> positions (static), 
-						 // 1 -> normals (static), 
-						 // 2 -> texture coords (static)
-						 // 3 -> transforms to render (dynamic)
-	rde_material material;
-};
-
-struct rde_model {
-	rde_mesh* mesh_array;
-	uint mesh_array_size;
-};
 rde_model rde_struct_create_model() {
 	rde_model _m;
 	_m.mesh_array = NULL;
@@ -421,11 +310,6 @@ rde_model rde_struct_create_model() {
 	return _m;
 }
 
-typedef struct {
-	uint vao;
-	uint vbo;
-	int opengl_texture_id;
-} rde_skybox;
 rde_skybox rde_struct_create_skybox() {
 	rde_skybox _s;
 	_s.vao = RDE_UINT_MAX;
@@ -437,17 +321,6 @@ rde_skybox rde_struct_create_skybox() {
 #endif
 
 #ifdef RDE_AUDIO_MODULE
-struct rde_sound {
-	bool used;
-	
-	bool playing;
-	bool paused;
-	bool looping;
-
-	size_t played_frame;
-
-	ma_decoder miniaudio_decoder;
-};
 rde_sound rde_struct_create_sound() {
 	rde_sound _s;
 	_s.used = false;
@@ -459,67 +332,6 @@ rde_sound rde_struct_create_sound() {
 }
 #endif
 
-#define RDE_DEFAULT_SHADERS_AMOUNT 6
-struct rde_engine {
-	float delta_time;
-	float fixed_delta_time;
-	float fixed_time_step_accumulator;
-	
-	RDE_PLATFORM_TYPE_ platform_type;
-	
-	bool running;
-	bool use_rde_2d_physics_system;
-	bool supress_engine_logs;
-	
-	rde_end_user_mandatory_callbacks mandatory_callbacks;
-	rde_event_func user_event_callback;
-	
-	rde_window* windows;
-	
-#ifdef RDE_RENDERING_MODULE
-	#define RDE_SHADERS_AMOUNT 7
-	rde_shader* line_shader;
-	rde_shader* color_shader_2d;
-	rde_shader* texture_shader_2d;
-	rde_shader* text_shader_2d;
-	rde_shader* frame_buffer_shader;
-	rde_shader* mesh_shader;
-	rde_shader* skybox_shader;
-	rde_shader* shaders;
-
-	size_t total_amount_of_textures;
-
-	rde_texture* textures;
-	rde_atlas* atlases;
-	rde_font* fonts;
-	rde_mesh* meshes;
-	rde_model* models;
-
-	rde_directional_light directional_light;
-	rde_point_light* point_lights[RDE_MAX_POINT_LIGHTS];
-	size_t amount_of_point_lights;
-
-	rde_skybox skybox;
-#endif
-
-#ifdef RDE_AUDIO_MODULE
-	rde_sound* sounds;
-	ma_device miniaudio_device;
-	rde_sound_config device_config;
-#endif
-	
-	rde_event_func window_events[RDE_WIN_EVENT_COUNT];
-	rde_event_func display_events[RDE_DISPLAY_EVENT_COUNT];
-	rde_event_func key_events[RDE_KEY_EVENT_COUNT];
-	rde_event_func mouse_events[RDE_MOUSE_EVENT_COUNT];
-	rde_event_func drag_and_drop_events[RDE_DRAG_AND_DROP_EVENT_COUNT];
-
-	rde_engine_heap_allocs_config heap_allocs_config;
-
-	#if IS_WINDOWS()
-	HANDLE console_handle;
-	#endif
-};
 rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_config) {
 	rde_engine _e;
 

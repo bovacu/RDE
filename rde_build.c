@@ -74,6 +74,7 @@ const char* BUILD_OPTIONS_STR[MAX_BUILD_OPTIONS] = {
 #define MAX_SIZE_FOR_OPTIONS 64
 #define MAX_SIZE_FOR_MODULES 256
 #define MAX_MODULES 8
+#define GOD_MODE "-DRDE_GOD"
 
 typedef enum {
 	RDE_MODULES_NONE = 0,
@@ -113,6 +114,7 @@ char platform[MAX_SIZE_FOR_OPTIONS];
 char build_type[MAX_SIZE_FOR_OPTIONS];
 char lib_type[MAX_SIZE_FOR_OPTIONS];
 char build[MAX_SIZE_FOR_OPTIONS];
+bool is_god = false;
 
 char this_file_full_path[MAX_PATH];
 
@@ -1046,6 +1048,10 @@ bool compile_windows() {
 																											\
 		arrput(_build_command, "-std=c99");																	\
 																											\
+		if(is_god) {																						\
+			arrput(_build_command, GOD_MODE);																\
+		}																									\
+																											\
 		char _temp_path_0[MAX_PATH];																		\
 		memset(_temp_path_0, 0, MAX_PATH);																	\
 		snprintf(_temp_path_0, MAX_PATH, "%s%s", this_file_full_path, "engine\\src\\rde.c");				\
@@ -1670,6 +1676,11 @@ bool compile_osx() {
 		}																									\
 																											\
 		arrput(_build_command, "-std=c99");																	\
+																											\
+		if(is_god) {																						\
+			arrput(_build_command, GOD_MODE);																\
+		}																									\
+																											\	
 		char _mac_version_buf[256];																			\
     	memset(_mac_version_buf, 0, 256);																	\
     	get_mac_version(_mac_version_buf);																	\
@@ -2161,6 +2172,11 @@ bool compile_linux() {
 																											\
 		arrput(_build_command, "-std=c99");																	\
 																											\
+		if(is_god) {																						\
+		arrput(_build_command, GOD_MODE);																	\
+		}																									\
+																											\
+																											\
 		unsigned int _module = 1;																			\
 		for(int _i = 0; _i < MAX_MODULES; _i++) {															\
 			if((modules & _module) == _module) {															\
@@ -2628,6 +2644,11 @@ void print_help() {
 	"	- rendering: adds 2D rendering for 2D textures in a batched mode and also 3D batched drawing.\n"
 	"	- ui: adds custom inmediate mode UI.\n"
 	"	- error: adds handling for the most common error crashes and prints the stacktrace of the crash to the logs of the console (in debug) and to a error log file (in release).\n"
+	"\n"
+	"--- GOD MODE --- \n"
+	"As described in the documentation, many structs shown to the user are simply pointers where you cannot access the \n"
+	"inner fields, due to some of them not being modificable at random points or because they are part of other calculations \n"
+	"on the engine, but if for any reason you want to be able to access them, use --god option, that will give you the power you seek.\n"
 	"\n\n";
 
 	printf("%s", _help_message);
@@ -2742,6 +2763,8 @@ void parse_arguments(int _argc, char** _argv) {
 				
 				_module = strtok(NULL, ",");
 			}
+		} else if(strcmp(_command, "--god") == 0) {
+			is_god = true;
 		} else if(strcmp(_command, "-h") == 0 || strcmp(_command, "--help") == 0) {
 			print_help();
 			exit(0);
