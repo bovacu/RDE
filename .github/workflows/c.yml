@@ -15,5 +15,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: builder
       run: clang rde_build.c -Werror -Wall -Wextra -o builder
+    - name: unit_tests
+      run: ./builder -b=tests -m="[audio,rendering,obj,error,file_system]"
     - name: build
-      run: ./builder -b=engine -bt=release -m="[rendering,audio,error,obj,file_system]" 
+      run: ./builder -b=engine -bt=release -m="[audio,rendering,obj,error,file_system]" 
