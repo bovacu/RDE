@@ -879,17 +879,11 @@ void rde_rendering_render_texture_update(rde_render_texture* _render_texture, si
 void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture) {
 	rde_critical_error(_render_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Render Texture");
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
 	glDeleteTextures(1, &_render_texture->opengl_texture_id);
 	glDeleteRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
 	glDeleteFramebuffers(1, &_render_texture->opengl_framebuffer_id);
 
-	glDeleteBuffers(GL_ARRAY_BUFFER, &_render_texture->vbo);
+	glDeleteBuffers(1, &_render_texture->vbo);
 	glDeleteVertexArrays(1, &_render_texture->vao);
 }
 
