@@ -1,5 +1,5 @@
 void test_3d_draw_init() {
-	rde_log_color(RDE_LOG_COLOR_GREEN, "--- 3D DRAW TESTS ---");
+	rde_log_color(RDE_LOG_COLOR_GREEN, "%s", "--- 3D DRAW TESTS ---");
 }
 
 REGISTER_TEST_MODULE(test_3d_draw,

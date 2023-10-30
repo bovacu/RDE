@@ -1,5 +1,5 @@
 void test_string_init() {
-	rde_log_color(RDE_LOG_COLOR_GREEN, "--- UTIL_STRING TESTS ---");
+	rde_log_color(RDE_LOG_COLOR_GREEN, "%s", "--- UTIL_STRING TESTS ---");
 }
 
 void test_string_trim() {

@@ -1,5 +1,5 @@
 void test_engine_init() {
-	rde_log_color(RDE_LOG_COLOR_GREEN, "--- ENGINE TESTS ---");
+	rde_log_color(RDE_LOG_COLOR_GREEN, "%s", "--- ENGINE TESTS ---");
 }
 
 REGISTER_TEST_MODULE(test_engine,

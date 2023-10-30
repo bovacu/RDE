@@ -1,5 +1,5 @@
 void test_math_init() {
-	rde_log_color(RDE_LOG_COLOR_GREEN, "--- MATH TESTS ---");
+	rde_log_color(RDE_LOG_COLOR_GREEN, "%s", "--- MATH TESTS ---");
 }
 
 REGISTER_TEST_MODULE(test_math,
