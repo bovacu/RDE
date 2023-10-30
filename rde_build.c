@@ -2655,8 +2655,6 @@ bool compile_linux() {
 		arrput(_build_command, "-Wall");																				\
 		arrput(_build_command, "-Wextra");																				\
 		arrput(_build_command, "-lRDE");																				\
-		arrput(_build_command, "-lwinmm");																				\
-		arrput(_build_command, "-lgdi32");																				\
 																														\
 		arrput(_build_command, "-o");																					\
 		arrput(_build_command, output_atlas);																			\
