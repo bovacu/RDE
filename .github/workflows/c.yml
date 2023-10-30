@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: builder
-      run: clang rde_builder.c -Werror -Wall -Wextra -o builder
+      run: clang rde_build.c -Werror -Wall -Wextra -o builder
     - name: build
       run: ./builder -b=engine -bt=release -m="[rendering,audio,error,obj,file_system]" 
