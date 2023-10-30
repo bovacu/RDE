@@ -120,7 +120,7 @@ void model_viewer_on_event(rde_event* _event, rde_window* _window) {
 
 	if(_event->type == RDE_EVENT_TYPE_DRAG_AND_DROP_FILE) {
 		if(strcmp(rde_util_file_get_name_extension(_event->data.drag_and_drop_data.file_path), "obj") != 0) {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "Only obj can be loaded at the time");
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Only obj can be loaded at the time");
 			rde_engine_show_message_box(RDE_LOG_LEVEL_ERROR, 
 			                         "Wrong Format", 
 			                         "Model Viewer can only render OBJ files", 
@@ -447,12 +447,12 @@ void model_viewer_init() {
 	model_viewer_spot_light_mesh = rde_rendering_mesh_create_cube(0.25f, &_light_cube_material);
 
 	rde_skybox_id _skybox = rde_rendering_skybox_load((const char*[6]) {
-		"skyboxes/nebulosa/right.png",
-		"skyboxes/nebulosa/left.png",
-		"skyboxes/nebulosa/top.png",
-		"skyboxes/nebulosa/bottom.png",
-		"skyboxes/nebulosa/front.png",
-		"skyboxes/nebulosa/back.png",
+		"hub_assets/skyboxes/nebulosa/right.png",
+		"hub_assets/skyboxes/nebulosa/left.png",
+		"hub_assets/skyboxes/nebulosa/top.png",
+		"hub_assets/skyboxes/nebulosa/bottom.png",
+		"hub_assets/skyboxes/nebulosa/front.png",
+		"hub_assets/skyboxes/nebulosa/back.png",
 	});
 	rde_rendering_skybox_use(_skybox);
 

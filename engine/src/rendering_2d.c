@@ -418,7 +418,7 @@ void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_te
 }
 
 void rde_rendering_2d_draw_memory_texture(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
-	rde_log_level(RDE_LOG_LEVEL_WARNING, "%s", "THIS FUNCTION IS CORRPUTING 3D MESHES TEXTURE. To reproduce just draw a memory texture and then a 3d mesh");
+	rde_log_level(RDE_LOG_LEVEL_WARNING, "THIS FUNCTION IS CORRPUTING 3D MESHES TEXTURE. To reproduce just draw a memory texture and then a 3d mesh");
 	rde_rendering_memory_texture_gpu_upload(_texture);
 	rde_rendering_2d_draw_texture(_transform, _texture, _tint_color, _shader);
 }

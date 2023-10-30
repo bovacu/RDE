@@ -1450,14 +1450,15 @@ bool compile_windows() {
 		memset(_examples_assets_path, 0, 1024);																		\
 		snprintf(_examples_assets_path, 1024, "%s%s%s%s", this_file_full_path, "build\\windows\\", 					\
 				(strcmp(build_type, "debug") == 0 ? "debug\\" : "release\\"), "examples\\hub_assets");				\
+		rm_dir_if_exists(_examples_assets_path);																	\
 		copy_folder_if_exists(_assets_path, _examples_assets_path);													\
 		char _shaders_path[1024];																					\
 		memset(_shaders_path, 0, 1024);																				\
-		snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");								\
+		snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine\\shaders");								\
 		char _examples_shaders_path[1024];																			\
 		memset(_examples_shaders_path, 0, 1024);																	\
-		snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/windows/", 					\
-				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/shaders");					\
+		snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build\\windows\\", 				\
+				(strcmp(build_type, "debug") == 0 ? "debug\\" : "release\\"), "examples\\shaders");					\
 		rm_dir_if_exists(_examples_shaders_path);																	\
 		copy_folder_if_exists(_shaders_path, _examples_shaders_path);												\
 	} while(0);
@@ -1567,6 +1568,15 @@ bool compile_windows() {
 	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\glad.dll");					\
 	copy_file_if_exists(_path, _example_path_glad);																	\
 	copy_file_if_exists(_rde_lib_path, _example_path_rde); 															\
+	char _shaders_path[1024];																						\
+	memset(_shaders_path, 0, 1024);																					\
+	snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine\\shaders");									\
+	char _unit_tests_shaders_path[1024];																			\
+	memset(_unit_tests_shaders_path, 0, 1024);																		\
+	snprintf(_unit_tests_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build\\windows\\", 					\
+			(strcmp(build_type, "debug") == 0 ? "debug\\" : "release\\"), "examples\\shaders");						\
+	rm_dir_if_exists(_unit_tests_shaders_path);																		\
+	copy_folder_if_exists(_shaders_path, _unit_tests_shaders_path);													\
 	} while(0);
 
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0 || strcmp(build, "tests") == 0) {
@@ -2094,15 +2104,17 @@ bool compile_osx() {
 		snprintf(_examples_assets_path, 1024, "%s%s%s%s", this_file_full_path, "build/osx/", 						\
 				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/hub_assets");					\
 		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
+		rm_dir_if_exists(_examples_assets_path);																	\
 		copy_folder_if_exists(_assets_path, _examples_assets_path);													\
 		char _shaders_path[1024];																					\
 		memset(_shaders_path, 0, 1024);																				\
 		snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");								\
-		char _examples_shaders_path[1024];																			\
-		memset(_examples_shaders_path, 0, 1024);																	\
-		snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/osx/", 						\
+		char _unit_tests_shaders_path[1024];																		\
+		memset(_unit_tests_shaders_path, 0, 1024);																	\
+		snprintf(_unit_tests_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/osx/", 					\
 				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/shaders");					\
-		copy_folder_if_exists(_shaders_path, _examples_shaders_path);												\
+		rm_dir_if_exists(_unit_tests_shaders_path);																	\
+		copy_folder_if_exists(_shaders_path, _unit_tests_shaders_path);												\
 	} while (0);
 
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
@@ -2581,6 +2593,7 @@ bool compile_linux() {
 		memset(_examples_assets_path, 0, 1024);																		\
 		snprintf(_examples_assets_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 						\
 			(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/hub_assets");						\
+		rm_dir_if_exists(_examples_assets_path);																	\
 		copy_folder_if_exists(_assets_path, _examples_assets_path);													\
 																													\
 		char _shaders_path[1024];																					\
@@ -2590,6 +2603,7 @@ bool compile_linux() {
 		memset(_examples_shaders_path, 0, 1024);																	\
 		snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 					\
 				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/shaders");					\
+		rm_dir_if_exists(_examples_shaders_path);																	\
 		copy_folder_if_exists(_shaders_path, _examples_shaders_path);												\
 	} while(0);
 
@@ -2690,11 +2704,12 @@ bool compile_linux() {
 		char _shaders_path[1024];																						\
 		memset(_shaders_path, 0, 1024);																					\
 		snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");									\
-		char _examples_shaders_path[1024];																				\
-		memset(_examples_shaders_path, 0, 1024);																		\
-		snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 						\
+		char _unit_tests_shaders_path[1024];																			\
+		memset(_unit_tests_shaders_path, 0, 1024);																		\
+		snprintf(_unit_tests_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 						\
 				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "unit_tests/shaders");						\
-		copy_folder_if_exists(_shaders_path, _examples_shaders_path);													\
+		rm_dir_if_exists(_unit_tests_shaders_path);																		\
+		copy_folder_if_exists(_shaders_path, _unit_tests_shaders_path);													\
 	} while(0);
    
 

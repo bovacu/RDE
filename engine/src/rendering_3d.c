@@ -117,7 +117,7 @@ void rde_inner_rendering_transform_to_glm_mat4_3d(const rde_transform* _transfor
 
 bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 	if(_mesh->vertex_positions == NULL) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "Tried to render a mesh without positions, skipping rendering for this mesh");
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Tried to render a mesh without positions, skipping rendering for this mesh");
 		return false;
 	}
 

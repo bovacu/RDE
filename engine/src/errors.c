@@ -378,14 +378,14 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	times_enter_in_error++;
 
 	if(times_enter_in_error > 1) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "There was an error loop, check previous message to fix it. \n");
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "There was an error loop, check previous message to fix it. \n");
 		exit(-1);
 	}
 
 #ifdef RDE_DEBUG
-	rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "An error made the program crash, check 'rde_crash_logs.txt'");
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check 'rde_crash_logs.txt'");
 #else
-	rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "An error made the program crash, check below");
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check below");
 #endif
 
 	FILE* _f = NULL;
