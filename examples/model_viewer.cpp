@@ -382,12 +382,12 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 void model_viewer_on_render(float _dt, rde_window* _window) {
 	UNUSED(_dt)
 	
+	model_viewer_draw_grid(&model_viewer_camera, _window);
+	model_viewer_draw_3d(_window, _dt);
+
 	if(model_viewer_show_skybox) {
 		rde_rendering_3d_draw_skybox(&model_viewer_camera);
 	}
-
-	model_viewer_draw_grid(&model_viewer_camera, _window);
-	model_viewer_draw_3d(_window, _dt);
 }
 
 void model_viewer_unload() {

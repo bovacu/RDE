@@ -1043,6 +1043,7 @@ void rde_rendering_3d_draw_skybox(rde_camera* _camera) {
 	if(ENGINE.skybox.opengl_texture_id < 0 || _camera == NULL) {
 		return;
 	}
+	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glUseProgram(ENGINE.skybox_shader->compiled_program_id);
 	
