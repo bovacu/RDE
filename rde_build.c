@@ -2572,30 +2572,134 @@ bool compile_linux() {
 			    strcat(_rde_lib_path, "build/linux/release/engine/libRDE.so");										\
 			    strcat(_example_path_rde, "build/linux/release/examples/libRDE.so");								\
 		    }																										\
-        																											\
-        	char _assets_path[1024];																				\
-			memset(_assets_path, 0, 1024);																			\
-			snprintf(_assets_path, 1024, "%s%s", this_file_full_path, "examples/hub_assets");						\
-			char _examples_assets_path[1024];																		\
-			memset(_examples_assets_path, 0, 1024);																	\
-			snprintf(_examples_assets_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 					\
-				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/hub_assets");					\
-			copy_file_if_exists(_rde_lib_path, _example_path_rde); 													\
-			copy_folder_if_exists(_assets_path, _examples_assets_path);												\
-			copy_folder_if_exists(_assets_path, _examples_assets_path);												\
-			char _shaders_path[1024];																				\
-			memset(_shaders_path, 0, 1024);																			\
-			snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");							\
-			char _examples_shaders_path[1024];																		\
-			memset(_examples_shaders_path, 0, 1024);																\
-			snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 				\
-					(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/shaders");				\
-			copy_folder_if_exists(_shaders_path, _examples_shaders_path);											\
         }																											\
+		char _assets_path[1024];																					\
+		memset(_assets_path, 0, 1024);																				\
+		snprintf(_assets_path, 1024, "%s%s", this_file_full_path, "examples/hub_assets");							\
+		char _examples_assets_path[1024];																			\
+		memset(_examples_assets_path, 0, 1024);																		\
+		snprintf(_examples_assets_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 						\
+			(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/hub_assets");						\
+		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
+		copy_folder_if_exists(_assets_path, _examples_assets_path);													\
+																													\
+		char _shaders_path[1024];																					\
+		memset(_shaders_path, 0, 1024);																				\
+		snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");								\
+		char _examples_shaders_path[1024];																			\
+		memset(_examples_shaders_path, 0, 1024);																	\
+		snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 					\
+				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/shaders");					\
+		copy_folder_if_exists(_shaders_path, _examples_shaders_path);												\
+	} while(0);
+
+	#define BUILD_TESTS()																								\
+	do {																												\
+		char _output[256];																								\
+		memset(_output, 0, 256);																						\
+		strcat(_output, this_file_full_path);																			\
+																														\
+		memset(_path, 0, MAX_PATH);																						\
+		if(strcmp(build_type, "debug") == 0) {																			\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/debug/unit_tests");							\
+		if(!make_dir_if_not_exists(_path)) {																			\
+					exit(-1);																							\
+		}																												\
+		strcat(_output, "build/linux/debug/unit_tests/");																\
+		} else {																										\
+		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/release/unit_tests");						\
+		if(!make_dir_if_not_exists(_path)) {																			\
+					exit(-1);																							\
+		}																												\
+		strcat(_output, "build/linux/release/unit_tests/");																\
+		}																												\
+																														\
+		_build_command = NULL;																							\
+		char output_atlas[MAX_PATH];																					\
+		memset(output_atlas, 0, MAX_PATH);																				\
+		strcat(output_atlas, _output);																					\
+		strcat(output_atlas, "run_tests");																				\
+		arrput(_build_command, "clang");																				\
+		if(strcmp(build_type, "debug") == 0) {																			\
+		arrput(_build_command, "-g");																					\
+		arrput(_build_command, "-O0");																					\
+		} else {																										\
+		arrput(_build_command, "-O3");																					\
+		}																												\
+		arrput(_build_command, "-std=c99");																				\
+																														\
+		char _t_source_path[MAX_PATH];																					\
+		memset(_t_source_path, 0, MAX_PATH);																			\
+		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "tests/test_run.c");							\
+		arrput(_build_command, _t_source_path);																			\
+																														\
+		arrput(_build_command, "-I");																					\
+		char _t_include_path_0[MAX_PATH];																				\
+		memset(_t_include_path_0, 0, MAX_PATH);																			\
+		snprintf(_t_include_path_0, MAX_PATH, "%s%s", this_file_full_path, "external/include/");						\
+		arrput(_build_command, _t_include_path_0);																		\
+																														\
+		arrput(_build_command, "-I");																					\
+		char _t_include_path_1[MAX_PATH];																				\
+		memset(_t_include_path_1, 0, MAX_PATH);																			\
+		snprintf(_t_include_path_1, MAX_PATH, "%s%s", this_file_full_path, "engine/include/");							\
+		arrput(_build_command, _t_include_path_1);																		\
+																														\
+		arrput(_build_command, "-L");																					\
+		char _t_libs_path[MAX_PATH];																					\
+		memset(_t_libs_path, 0, MAX_PATH);																				\
+		snprintf(_t_libs_path, MAX_PATH, "%s""build/%s/%s/engine", this_file_full_path, platform, build_type);			\
+		arrput(_build_command, _t_libs_path);																			\
+																														\
+		arrput(_build_command, "-Werror");																				\
+		arrput(_build_command, "-Wall");																				\
+		arrput(_build_command, "-Wextra");																				\
+		arrput(_build_command, "-lRDE");																				\
+		arrput(_build_command, "-lwinmm");																				\
+		arrput(_build_command, "-lgdi32");																				\
+																														\
+		arrput(_build_command, "-o");																					\
+		arrput(_build_command, output_atlas);																			\
+																														\
+		if(!run_command(_build_command)) {																				\
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");												\
+		exit(-1);																										\
+		}																												\
+																														\
+		char _rde_lib_path[256];																						\
+		memset(_rde_lib_path, 0, 256);																					\
+		strcat(_rde_lib_path, this_file_full_path);																		\
+		char _example_path_sdl[256];																					\
+		char _tests_path_rde[256];																						\
+		char _example_path_glad[256];																					\
+		memset(_example_path_sdl, 0, 256);																				\
+		memset(_tests_path_rde, 0, 256);																				\
+		memset(_example_path_glad, 0, 256);																				\
+		strcat(_example_path_sdl, this_file_full_path);																	\
+		strcat(_example_path_glad, this_file_full_path);																\
+		strcat(_tests_path_rde, this_file_full_path);																	\
+		                                                                                                            	\
+        if(strcmp(lib_type, "shared") == 0) {                                                                     		\
+		    if(strcmp(build_type, "debug") == 0) {																		\
+			    strcat(_rde_lib_path, "build/linux/debug/engine/libRDE.so");       										\
+			    strcat(_tests_path_rde, "build/linux/debug/unit_tests/libRDE.so");										\
+		    } else {																									\
+			    strcat(_rde_lib_path, "build/linux/release/engine/libRDE.so");											\
+			    strcat(_tests_path_rde, "build/linux/release/unit_tests/libRDE.so");									\
+		    }																											\
+        }																												\
+		char _shaders_path[1024];																						\
+		memset(_shaders_path, 0, 1024);																					\
+		snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");									\
+		char _examples_shaders_path[1024];																				\
+		memset(_examples_shaders_path, 0, 1024);																		\
+		snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 						\
+				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "unit_tests/shaders");						\
+		copy_folder_if_exists(_shaders_path, _examples_shaders_path);													\
 	} while(0);
    
 
-	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
+	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0 || strcmp(build, "tests") == 0) {
 		printf("\n");
 		printf("--- BUILDING ENGINE --- \n");
 		BUILD_ENGINE()
@@ -2612,6 +2716,12 @@ bool compile_linux() {
         printf("--- BUILDING EXAMPLES --- \n");
         BUILD_EXAMPLES();
     }
+
+	if(strcmp(build, "tests") == 0 || strcmp(build, "all") == 0) {
+		printf("\n");
+		printf("--- BUILDING TESTS --- \n");
+		BUILD_TESTS()
+	}
 
 	#undef BUILD_ENGINE
 	#undef BUILD_TOOLS
