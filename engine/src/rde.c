@@ -481,7 +481,11 @@ void rde_inner_engine_on_event();
 void rde_inner_engine_on_update(float _dt);
 void rde_inner_engine_on_fixed_update(float _fixed_dt);
 void rde_inner_engine_on_late_update(float _dt);
+
+#ifdef RDE_RENDERING_MODULE
 void rde_inner_engine_on_render(float _dt, rde_window* _window);
+#endif
+
 void rde_inner_engine_sync_events();
 
 void rde_inner_engine_on_event() {
@@ -578,6 +582,7 @@ void rde_inner_engine_on_late_update(float _dt) {
 	UNUSED(_dt)
 }
 
+#ifdef RDE_RENDERING_MODULE
 void rde_inner_engine_on_render(float _dt, rde_window* _window) {
 	UNUSED(_dt)
 	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
@@ -585,6 +590,7 @@ void rde_inner_engine_on_render(float _dt, rde_window* _window) {
 	glViewport(0, 0, _window_size.x, _window_size.y);
 	glBindFramebuffer(GL_FRAMEBUFFER, DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
 }
+#endif
 
 rde_display_info* rde_engine_get_available_displays() {
 	UNIMPLEMENTED("Not implemented");
