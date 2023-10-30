@@ -378,7 +378,7 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	times_enter_in_error++;
 
 	if(times_enter_in_error > 1) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "There was an error loop, check previous message to fix it");
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "%s", "There was an error loop, check previous message to fix it. \n");
 		exit(-1);
 	}
 

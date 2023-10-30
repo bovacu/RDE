@@ -811,7 +811,7 @@ rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	rde_log_color(RDE_LOG_COLOR_GREEN, "Loaded correctly skybox with textures:");
+	rde_log_color(RDE_LOG_COLOR_GREEN, "%s", "Loaded correctly skybox with textures:");
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	Left: %s", _texture_paths[0]);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	Right: %s", _texture_paths[1]);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	Top: %s", _texture_paths[2]);
