@@ -1691,6 +1691,10 @@ RDE_FUNC void rde_rendering_memory_texture_gpu_upload(rde_texture* _memory_textu
 RDE_FUNC unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_texture);
 RDE_FUNC void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture);
 
+RDE_FUNC rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _height);
+RDE_FUNC void rde_rendering_render_texture_update(rde_render_texture* _render_texture, size_t _width, size_t _height);
+RDE_FUNC void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture);
+
 RDE_FUNC rde_font* rde_rendering_font_load(const char* _font_path, const char* _font_config_path);
 RDE_FUNC rde_font_data rde_rendering_font_get_data(rde_font* _font);
 RDE_FUNC void rde_rendering_font_unload(rde_font* _font);

@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec4 color;
+flat in vec4 color;
 out vec4 out_color;
 
 void main() {

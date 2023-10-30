@@ -87,11 +87,12 @@ vec3 point_light_calc(int _i) {
 	vec3 _specular = material.Ks * _light.specular_color * _spec * texture(material.tex_ks, text_coord).rgb;
 	float _distance = length(_light.position - frag_pos);
 	float _attenuation = 1.0 / (_light.constant + _light.linear * _distance + _light.quadratic * (_distance * _distance));
+	
 	_ambient  *= _attenuation;
 	_diffuse  *= _attenuation;
 	_specular *= _attenuation;
-	vec3 _final_light = _ambient + _diffuse + _specular;
-	return _final_light;
+
+	return (_ambient + _diffuse + _specular);
 }
 vec3 spot_light_calc(int _i) {
 	rde_spot_light _light = spot_lights[_i];
@@ -114,22 +115,27 @@ vec3 spot_light_calc(int _i) {
 	vec3 _specular = material.Ks * _light.specular_color * _spec * texture(material.tex_ks, text_coord).rgb;
 	float _distance = length(_light.position - frag_pos);
 	float _attenuation = 1.0 / (_light.constant + _light.linear * _distance + _light.quadratic * (_distance * _distance));
+	
 	_ambient  *= _attenuation;
 	_diffuse  *= _attenuation * _intensity;
 	_specular *= _attenuation * _intensity;
-	vec3 _final_light = _ambient + _diffuse + _specular;
-	return _final_light;
+
+	return (_ambient + _diffuse + _specular);
 }
 
 void main(){
 	if(texture(material.tex_kd, text_coord).a < 0.05) discard;
 	vec3 _final_light = vec3(0.0);
+
 	_final_light += directional_light_calc();
+	
 	for(int _i = 0; _i < RDE_MAX_POINT_LIGHTS; _i++) {
 		_final_light += point_light_calc(_i);
 	}
+	
 	for(int _i = 0; _i < RDE_MAX_SPOT_LIGHTS; _i++) {
 		_final_light += spot_light_calc(_i);
 	}
+	
 	color_out = vec4(_final_light, 1.0);
 }

@@ -372,7 +372,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.color_shader_2d = NULL;
 	_e.texture_shader_2d = NULL;
 	_e.text_shader_2d = NULL;
-	_e.frame_buffer_shader = NULL;
+	_e.framebuffer_shader = NULL;
 	_e.mesh_shader = NULL;
 	_e.skybox_shader = NULL;
 	_e.skybox = rde_struct_create_skybox();
@@ -583,6 +583,7 @@ void rde_inner_engine_on_render(float _dt, rde_window* _window) {
 	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	glViewport(0, 0, _window_size.x, _window_size.y);
+	glBindFramebuffer(GL_FRAMEBUFFER, DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
 }
 
 rde_display_info* rde_engine_get_available_displays() {
@@ -618,7 +619,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	rde_inner_events_drag_and_drop_create_events();
 
 #ifdef RDE_RENDERING_MODULE
-	rde_inner_rendering_set_rendering_configuration();
+	rde_inner_rendering_set_rendering_configuration(_default_window);
 #endif
 
 	srand(time(NULL));
@@ -702,8 +703,11 @@ void rde_engine_on_run() {
 				continue;
 			}
 
+			#ifdef RDE_RENDERING_MODULE
 			rde_inner_engine_on_render(ENGINE.delta_time, _window);
 			ENGINE.mandatory_callbacks.on_render(ENGINE.delta_time, _window);
+			rde_inner_rendering_draw_to_default_framebuffer();
+			#endif
 
 			rde_events_sync_events(_window);
 
@@ -767,6 +771,7 @@ void rde_engine_destroy_engine() {
 #ifdef RDE_RENDERING_MODULE
 	rde_inner_rendering_end_2d();
 	rde_inner_rendering_end_3d();
+	rde_rendering_render_texture_destroy(DEFAULT_RENDER_TEXTURE);
 	
 	if(ENGINE.skybox.opengl_texture_id != -1) {
 		rde_rendering_skybox_unload(ENGINE.skybox.opengl_texture_id);

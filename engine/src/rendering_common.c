@@ -4,6 +4,19 @@ typedef struct {
 	size_t number_of_drawcalls;
 } rde_rendering_statistics;
 
+static float FRAMEBUFFER_QUAD_DATA[] = {
+	// positions   // texCoords
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	-1.0f, -1.0f,  0.0f, 0.0f,
+	 1.0f, -1.0f,  1.0f, 0.0f,
+
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	 1.0f, -1.0f,  1.0f, 0.0f,
+	 1.0f,  1.0f,  1.0f, 1.0f
+};
+
+rde_render_texture* DEFAULT_RENDER_TEXTURE = NULL;
+
 #define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled, _path)												\
 	if(!_compiled) {																									\
 		char _infolog[1024];																							\
@@ -20,7 +33,7 @@ rde_rendering_statistics statistics;
 
 void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
 rde_vec_2F rde_inner_rendering_get_aspect_ratio();
-void rde_inner_rendering_set_rendering_configuration();
+void rde_inner_rendering_set_rendering_configuration(rde_window* _window);
 
 rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
@@ -32,7 +45,7 @@ rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
 	return _aspect_ratios;
 }
 
-void rde_inner_rendering_set_rendering_configuration() {
+void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 #if !IS_MOBILE()
 	printf("OpenGL Version: %s, Vendor: %s, GPU: %s \n", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER));
 #endif
@@ -96,7 +109,7 @@ void rde_inner_rendering_set_rendering_configuration() {
 	_shader_fragment_handle = rde_file_open("shaders/core/framebuffer_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
 	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
-	ENGINE.frame_buffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, _vertex_shader, _fragment_shader);
+	ENGINE.framebuffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 	
@@ -119,9 +132,25 @@ void rde_inner_rendering_set_rendering_configuration() {
 	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
 	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
 	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, RDE_TEXT_VERTEX_SHADER_2D_ES, RDE_TEXT_FRAGMENT_SHADER_2D_ES);
-	ENGINE.frame_buffer_shader = rde_rendering_shader_load(RDE_SHADER_MESH, RDE_FRAME_BUFFER_VERTEX_SHADER_ES, RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES);
+	ENGINE.framebuffer_shader = rde_rendering_shader_load(RDE_SHADER_MESH, RDE_FRAME_BUFFER_VERTEX_SHADER_ES, RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES);
 #endif
 	
+	rde_vec_2I _window_size = rde_window_get_window_size(_window);
+	DEFAULT_RENDER_TEXTURE = rde_rendering_render_texture_create(_window_size.x, _window_size.y);
+}
+
+void rde_inner_rendering_draw_to_default_framebuffer() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDisable(GL_DEPTH_TEST);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glUseProgram(ENGINE.framebuffer_shader->compiled_program_id);
+
+	glBindVertexArray(DEFAULT_RENDER_TEXTURE->vao);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, DEFAULT_RENDER_TEXTURE->opengl_texture_id);	// use the color attachment texture as the texture of the quad plane
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 
@@ -801,5 +830,68 @@ void rde_rendering_skybox_unload(rde_skybox_id _skybox_id) {
 	rde_critical_error(!glIsTexture(_skybox_id), "Tried to delete a texture with negative id");
 	glDeleteTextures(1, &_skybox_id);
 }
+
+rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _height) {
+	rde_render_texture* _render_texture = (rde_render_texture*)malloc(sizeof(rde_render_texture));
+	_render_texture->size = (rde_vec_2UI) { _width, _height };
+
+	glGenVertexArrays(1, &_render_texture->vao);
+	glGenBuffers(1, &_render_texture->vbo);
+	glBindVertexArray(_render_texture->vao);
+	glBindBuffer(GL_ARRAY_BUFFER, _render_texture->vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(FRAMEBUFFER_QUAD_DATA), &FRAMEBUFFER_QUAD_DATA, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	glGenFramebuffers(1, &_render_texture->opengl_framebuffer_id);
+	glBindFramebuffer(GL_FRAMEBUFFER, _render_texture->opengl_framebuffer_id);
+
+	glGenTextures(1, &_render_texture->opengl_texture_id);
+	glBindTexture(GL_TEXTURE_2D, _render_texture->opengl_texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
+	
+	glGenRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
+	glBindRenderbuffer(GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);  
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id);
+
+	rde_critical_error(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return _render_texture;
+}
+
+void rde_rendering_render_texture_update(rde_render_texture* _render_texture, size_t _width, size_t _height) {
+	rde_critical_error(_render_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Render Texture");
+	UNUSED(_render_texture)
+	UNUSED(_width)
+	UNUSED(_height)
+}
+
+void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture) {
+	rde_critical_error(_render_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Render Texture");
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	glDeleteTextures(1, &_render_texture->opengl_texture_id);
+	glDeleteRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
+	glDeleteFramebuffers(1, &_render_texture->opengl_framebuffer_id);
+
+	glDeleteBuffers(GL_ARRAY_BUFFER, &_render_texture->vbo);
+	glDeleteVertexArrays(1, &_render_texture->vao);
+}
+
 
 #endif
