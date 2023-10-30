@@ -16,6 +16,6 @@ jobs:
     - name: builder
       run: clang rde_build.c -Werror -Wall -Wextra -o builder
     - name: unit_tests
-      run: ./builder -b=tests -m="[audio,rendering,obj,error,file_system]" && ./build/linux/debug/unit_tests/run_tests
+      run: ./builder -b=tests -m="[audio,rendering,obj,error,file_system]" && LD_LIBRARY_PATH=./build/linux/debug/unit_tests/ ./build/linux/debug/unit_tests/run_tests
     - name: build
       run: ./builder -b=engine -bt=release -m="[audio,rendering,obj,error,file_system]" 
