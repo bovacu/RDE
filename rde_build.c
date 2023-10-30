@@ -2572,6 +2572,7 @@ bool compile_linux() {
 			    strcat(_rde_lib_path, "build/linux/release/engine/libRDE.so");										\
 			    strcat(_example_path_rde, "build/linux/release/examples/libRDE.so");								\
 		    }																										\
+		    copy_file_if_exists(_rde_lib_path, _example_path_rde); 													\
         }																											\
 		char _assets_path[1024];																					\
 		memset(_assets_path, 0, 1024);																				\
@@ -2580,7 +2581,6 @@ bool compile_linux() {
 		memset(_examples_assets_path, 0, 1024);																		\
 		snprintf(_examples_assets_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 						\
 			(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/hub_assets");						\
-		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
 		copy_folder_if_exists(_assets_path, _examples_assets_path);													\
 																													\
 		char _shaders_path[1024];																					\
@@ -2685,6 +2685,7 @@ bool compile_linux() {
 			    strcat(_rde_lib_path, "build/linux/release/engine/libRDE.so");											\
 			    strcat(_tests_path_rde, "build/linux/release/unit_tests/libRDE.so");									\
 		    }																											\
+		    copy_file_if_exists(_rde_lib_path, _tests_path_rde); 														\
         }																												\
 		char _shaders_path[1024];																						\
 		memset(_shaders_path, 0, 1024);																					\
