@@ -606,6 +606,10 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	
 	ENGINE = rde_struct_create_engine(_heap_allocs_config);
 
+	SDL_version _version;
+	SDL_GetVersion(&_version);
+	rde_log_level(RDE_LOG_LEVEL_INFO, "SDL Version: %d.%d.%d", _version.major, _version.minor, _version.patch);
+
 	stbds_rand_seed(time(NULL));
 
 	rde_window* _default_window = rde_window_create_window();
