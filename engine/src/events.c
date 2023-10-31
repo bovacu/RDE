@@ -130,7 +130,7 @@ void rde_inner_event_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_ev
 		} break;
 
 		case SDL_WINDOWEVENT_MOVED:	{
-			_rde_event->type = RDE_EVENT_TYPE_WINDOW_RESIZED;
+			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MOVED;
 			_rde_event->data.window_event_data.position.x = _sdl_event->window.data1;
 			_rde_event->data.window_event_data.position.y = _sdl_event->window.data2;
 		} break;
