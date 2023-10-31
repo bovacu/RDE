@@ -712,7 +712,7 @@ void rde_engine_on_run() {
 			#ifdef RDE_RENDERING_MODULE
 			rde_inner_engine_on_render(ENGINE.delta_time, _window);
 			ENGINE.mandatory_callbacks.on_render(ENGINE.delta_time, _window);
-			rde_inner_rendering_draw_to_default_framebuffer();
+			rde_inner_rendering_draw_to_framebuffer(DEFAULT_RENDER_TEXTURE);
 			#endif
 
 			rde_events_sync_events(_window);
@@ -778,6 +778,8 @@ void rde_engine_destroy_engine() {
 	rde_inner_rendering_end_2d();
 	rde_inner_rendering_end_3d();
 	rde_rendering_render_texture_destroy(DEFAULT_RENDER_TEXTURE);
+	glDeleteBuffers(1, &DEFAULT_RENDER_TEXTURE->vbo);
+	glDeleteVertexArrays(1, &DEFAULT_RENDER_TEXTURE->vao);
 	
 	if(ENGINE.skybox.opengl_texture_id != -1) {
 		rde_rendering_skybox_unload(ENGINE.skybox.opengl_texture_id);

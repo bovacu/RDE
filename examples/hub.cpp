@@ -136,29 +136,6 @@ void on_imgui_hub_menu() {
 
 }
 
-//void dock_space(float _dt, rde_window* _window) {
-//	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-//	const ImGuiViewport* viewport = ImGui::GetMainViewport();
-//	ImGui::SetNextWindowPos(ImVec2 { 0, 0 });
-//	rde_vec_2I _window_size = rde_window_get_window_size(current_window);
-//	ImGui::SetNextWindowSize(ImVec2 { (float)_window_size.x, (float)_window_size.y });
-//	ImGui::SetNextWindowViewport(viewport->ID);
-//	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-//	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-//	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-//	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-//	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-//	ImGui::Begin("DockSpace Demo", nullptr, window_flags);
-//	ImGui::PopStyleVar(3);
-//	ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-//	ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
-//	on_imgui_hub_menu();
-//	if(render_imgui_callback != NULL) {
-//		render_imgui_callback(_dt, _window);
-//	}
-//	ImGui::End();
-//}
-
 void on_render(float _dt, rde_window* _window) {
 	rde_rendering_set_background_color(RDE_COLOR_BLACK);
 

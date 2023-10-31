@@ -1239,6 +1239,7 @@ typedef struct {
 	rde_texture* map_kd;
 	rde_texture* map_ks;
 	rde_texture* map_bump;
+	rde_render_texture* render_texture;
 	rde_material_light_data material_light_data;
 } rde_material;
 rde_material rde_struct_create_material() {
@@ -1247,6 +1248,7 @@ rde_material rde_struct_create_material() {
 	_m.map_kd = NULL;
 	_m.map_ks = NULL;
 	_m.map_bump = NULL;
+	_m.render_texture = NULL;
 	_m.material_light_data = rde_struct_create_material_light_data();
 	return _m;
 }
@@ -1453,6 +1455,7 @@ const rde_color RDE_COLOR_PLACEHOLDER_TEXT	= { 220, 220, 220, 128 };
 const rde_color RDE_COLOR_RDE_DUCK_YELLOW	= { 255, 213,  81, 255 };
 const rde_color RDE_COLOR_GOLD				= { 255, 213,  81, 255 };
 const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
+const rde_color RDE_COLOR_NO_TEXTURE		= { 193,  84, 193, 255 };
 
 const rde_engine_heap_allocs_config RDE_DEFAULT_HEAP_ALLOCS_CONFIG = {
 	RDE_MAX_NUMBER_OF_WINDOWS,
@@ -1690,6 +1693,8 @@ RDE_FUNC unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _me
 RDE_FUNC void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture);
 
 RDE_FUNC rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _height);
+RDE_FUNC void rde_rendering_render_texture_enable(rde_render_texture* _render_texture);
+RDE_FUNC void rde_rendering_render_texture_disable();
 RDE_FUNC void rde_rendering_render_texture_update(rde_render_texture* _render_texture, size_t _width, size_t _height);
 RDE_FUNC void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture);
 

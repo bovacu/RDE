@@ -16,6 +16,7 @@ static float FRAMEBUFFER_QUAD_DATA[] = {
 };
 
 rde_render_texture* DEFAULT_RENDER_TEXTURE = NULL;
+rde_render_texture* current_render_texture = NULL;
 
 #define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled, _path)												\
 	if(!_compiled) {																									\
@@ -34,6 +35,7 @@ rde_rendering_statistics statistics;
 void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
 rde_vec_2F rde_inner_rendering_get_aspect_ratio();
 void rde_inner_rendering_set_rendering_configuration(rde_window* _window);
+void rde_inner_rendering_flush_render_texture_3d();
 
 rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
@@ -136,20 +138,34 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 #endif
 	
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
+
+	GLuint _vao, _vbo;
+	glGenVertexArrays(1, &_vao);
+	glGenBuffers(1, &_vbo);
+	glBindVertexArray(_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(FRAMEBUFFER_QUAD_DATA), &FRAMEBUFFER_QUAD_DATA, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	DEFAULT_RENDER_TEXTURE = rde_rendering_render_texture_create(_window_size.x, _window_size.y);
+	DEFAULT_RENDER_TEXTURE->vao = _vao;
+	DEFAULT_RENDER_TEXTURE->vbo = _vbo;
 }
 
-void rde_inner_rendering_draw_to_default_framebuffer() {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+void rde_inner_rendering_draw_to_framebuffer(rde_render_texture* _render_texture) {
+	GLuint _framebuffer_id = _render_texture == DEFAULT_RENDER_TEXTURE ? 0 : _render_texture->opengl_framebuffer_id;
+	glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer_id);
 	glDisable(GL_DEPTH_TEST);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(ENGINE.framebuffer_shader->compiled_program_id);
 
-	glBindVertexArray(DEFAULT_RENDER_TEXTURE->vao);
+	glBindVertexArray(_render_texture->vao);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, DEFAULT_RENDER_TEXTURE->opengl_texture_id);	// use the color attachment texture as the texture of the quad plane
+	glBindTexture(GL_TEXTURE_2D, _render_texture->opengl_texture_id);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -835,16 +851,6 @@ rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _h
 	rde_render_texture* _render_texture = (rde_render_texture*)malloc(sizeof(rde_render_texture));
 	_render_texture->size = (rde_vec_2UI) { _width, _height };
 
-	glGenVertexArrays(1, &_render_texture->vao);
-	glGenBuffers(1, &_render_texture->vbo);
-	glBindVertexArray(_render_texture->vao);
-	glBindBuffer(GL_ARRAY_BUFFER, _render_texture->vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(FRAMEBUFFER_QUAD_DATA), &FRAMEBUFFER_QUAD_DATA, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-
 	glGenFramebuffers(1, &_render_texture->opengl_framebuffer_id);
 	glBindFramebuffer(GL_FRAMEBUFFER, _render_texture->opengl_framebuffer_id);
 
@@ -855,12 +861,17 @@ rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _h
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
-	
-	glGenRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
-	glBindRenderbuffer(GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);  
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	static int _rbo_count = 0;
+	if(_rbo_count == 0) {
+		glGenRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
+		glBindRenderbuffer(GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);  
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id);
+		_rbo_count++;
+	}
 
 	rde_critical_error(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER);
 
@@ -868,6 +879,31 @@ rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _h
 
 	return _render_texture;
 }
+
+void rde_rendering_render_texture_enable(rde_render_texture* _render_texture) {
+	current_render_texture = _render_texture;
+	if(current_render_texture != NULL) {
+		glViewport(0, 0, current_render_texture->size.x, current_render_texture->size.y);
+		glBindFramebuffer(GL_FRAMEBUFFER, current_render_texture->opengl_framebuffer_id);
+	}
+
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void rde_rendering_render_texture_disable() {
+	rde_inner_rendering_flush_render_texture_3d();
+
+	current_render_texture = DEFAULT_RENDER_TEXTURE;
+	if(current_render_texture != NULL) {
+		glViewport(0, 0, current_render_texture->size.x, current_render_texture->size.y);
+		glBindFramebuffer(GL_FRAMEBUFFER, current_render_texture->opengl_framebuffer_id);
+	}
+
+	glEnable(GL_DEPTH_TEST);
+}
+
 
 void rde_rendering_render_texture_update(rde_render_texture* _render_texture, size_t _width, size_t _height) {
 	rde_critical_error(_render_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Render Texture");
@@ -882,9 +918,6 @@ void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture) {
 	glDeleteTextures(1, &_render_texture->opengl_texture_id);
 	glDeleteRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
 	glDeleteFramebuffers(1, &_render_texture->opengl_framebuffer_id);
-
-	glDeleteBuffers(1, &_render_texture->vbo);
-	glDeleteVertexArrays(1, &_render_texture->vao);
 }
 
 

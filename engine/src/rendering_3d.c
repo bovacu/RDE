@@ -75,7 +75,7 @@ void rde_inner_rendering_init_3d() {
 	
 	for(int _y = 0; _y < RDE_DEFAULT_TEXTURE_SIZE; _y++) {
 		for(int _x = 0; _x < RDE_DEFAULT_TEXTURE_SIZE; _x++) {
-			rde_rendering_memory_texture_set_pixel(DEFAULT_TEXTURE, (rde_vec_2I) {_x, _y}, RDE_COLOR_WHITE);
+			rde_rendering_memory_texture_set_pixel(DEFAULT_TEXTURE, (rde_vec_2I) {_x, _y}, RDE_COLOR_NO_TEXTURE);
 		}
 	}
 
@@ -409,29 +409,31 @@ void rde_inner_rendering_flush_batch_3d() {
 
 	glm_mat4_mul(projection_matrix, _view_matrix, _view_projection_matrix);
 
-	rde_texture* _ka_texture = _mesh->material.map_ka != NULL ? _mesh->material.map_ka : DEFAULT_TEXTURE;
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _ka_texture->opengl_texture_id);
-	GLint _ka_location = glGetUniformLocation(_shader->compiled_program_id, "material.tex_ka");
-	glUniform1i(_ka_location, 1);
+	GLint _using_render_texture_location = glGetUniformLocation(_shader->compiled_program_id, "material.using_render_texture");
+	if(_mesh->material.render_texture != NULL) {
+		glUseProgram(current_batch_3d.shader->compiled_program_id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, _mesh->material.render_texture->opengl_texture_id);
+		glUniform1i(_using_render_texture_location, 1);
+	} else {
+		rde_texture* _ka_texture = _mesh->material.map_ka != NULL ? _mesh->material.map_ka : DEFAULT_TEXTURE;
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, _ka_texture->opengl_texture_id);
 
-	rde_texture* _kd_texture = _mesh->material.map_kd != NULL ? _mesh->material.map_kd : DEFAULT_TEXTURE;
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, _kd_texture->opengl_texture_id);
-	GLint _kd_location = glGetUniformLocation(_shader->compiled_program_id, "material.tex_kd");
-	glUniform1i(_kd_location, 1);
+		rde_texture* _kd_texture = _mesh->material.map_kd != NULL ? _mesh->material.map_kd : DEFAULT_TEXTURE;
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, _kd_texture->opengl_texture_id);
 
-	rde_texture* _ks_texture = _mesh->material.map_ks != NULL ? _mesh->material.map_ks : DEFAULT_TEXTURE;
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, _ks_texture->opengl_texture_id);
-	GLint _ks_location = glGetUniformLocation(_shader->compiled_program_id, "material.tex_ks");
-	glUniform1i(_ks_location, 1);
+		rde_texture* _ks_texture = _mesh->material.map_ks != NULL ? _mesh->material.map_ks : DEFAULT_TEXTURE;
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, _ks_texture->opengl_texture_id);
 
-	rde_texture* _bump_texture = _mesh->material.map_bump != NULL ? _mesh->material.map_bump : DEFAULT_TEXTURE;
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, _bump_texture->opengl_texture_id);
-	GLint _bump_location = glGetUniformLocation(_shader->compiled_program_id, "material.tex_bump");
-	glUniform1i(_bump_location, 1);
+		rde_texture* _bump_texture = _mesh->material.map_bump != NULL ? _mesh->material.map_bump : DEFAULT_TEXTURE;
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, _bump_texture->opengl_texture_id);
+
+		glUniform1i(_using_render_texture_location, 0);
+	}
 
 	rde_util_check_opengl_error("After glBindTexture");
 
@@ -596,6 +598,15 @@ void rde_inner_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh
 	rde_inner_rendering_try_create_batch_3d(_shader, _mesh);
 }
 
+void rde_inner_rendering_flush_render_texture_3d() {
+	rde_inner_rendering_flush_batch_3d();
+	rde_inner_rendering_reset_batch_3d();
+	rde_inner_rendering_flush_line_batch();
+	rde_inner_rendering_reset_line_batch();
+}
+
+
+
 
 // ==============================================================================
 // =									API										=
@@ -608,11 +619,19 @@ rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data) {
 
 	memset(_mesh->name, 0, RDE_MESH_NAME_MAX);
 	
+	if(_data->name != NULL) {
 #if IS_WINDOWS()
-	strcat_s(_mesh->name, RDE_MESH_NAME_MAX, _data->name);
+		strcat_s(_mesh->name, RDE_MESH_NAME_MAX, _data->name);
 #else
-	strcat(_mesh->name, _data->name);
+		strcat(_mesh->name, _data->name);
 #endif
+	} else {
+#if IS_WINDOWS()
+		strcat_s(_mesh->name, RDE_MESH_NAME_MAX, "mesh");
+#else
+		strcat(_mesh->name, "mesh");
+#endif
+	}
 	
 	rde_util_check_opengl_error("ERROR: MESH - Start");
 
@@ -721,6 +740,7 @@ rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data) {
 	_mesh->material.map_kd = _data->material.map_kd;
 	_mesh->material.map_ks = _data->material.map_ks;
 	_mesh->material.map_bump = _data->material.map_bump;
+	_mesh->material.render_texture = _data->material.render_texture;
 	_mesh->material.material_light_data = _data->material.material_light_data;
 
 
