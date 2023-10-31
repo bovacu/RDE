@@ -147,7 +147,6 @@ void on_render(float _dt, rde_window* _window) {
 		render_callback(_dt, _window);
 	}
 
-	//dock_space(_dt, _window);
 	on_imgui_hub_menu();
 	if(render_imgui_callback != NULL) {
 		render_imgui_callback(_dt, _window);

@@ -461,11 +461,11 @@ rde_engine ENGINE;
 #include "math.c"
 #include "util.c"
 #include "file_system.c"
-#include "events.c"
 #include "window.c"
 #include "rendering_common.c"
 #include "rendering_2d.c"
 #include "rendering_3d.c"
+#include "events.c"
 #include "physics.c"
 #include "audio.c"
 

@@ -877,6 +877,7 @@ rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _h
 }
 
 void rde_rendering_render_texture_enable(rde_render_texture* _render_texture) {
+	rde_critical_error(_render_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Render Texture");
 	current_render_texture = _render_texture;
 	if(current_render_texture != NULL) {
 		glViewport(0, 0, current_render_texture->size.x, current_render_texture->size.y);
@@ -903,9 +904,31 @@ void rde_rendering_render_texture_disable() {
 
 void rde_rendering_render_texture_update(rde_render_texture* _render_texture, size_t _width, size_t _height) {
 	rde_critical_error(_render_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Render Texture");
-	UNUSED(_render_texture)
-	UNUSED(_width)
-	UNUSED(_height)
+	rde_rendering_render_texture_destroy(_render_texture);
+
+	_render_texture->size = (rde_vec_2UI) { _width, _height };
+
+	glGenFramebuffers(1, &_render_texture->opengl_framebuffer_id);
+	glBindFramebuffer(GL_FRAMEBUFFER, _render_texture->opengl_framebuffer_id);
+
+	glGenTextures(1, &_render_texture->opengl_texture_id);
+	glBindTexture(GL_TEXTURE_2D, _render_texture->opengl_texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	glGenRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
+	glBindRenderbuffer(GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);  
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id);
+
+	rde_critical_error(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture) {
