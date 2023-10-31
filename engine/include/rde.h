@@ -259,6 +259,13 @@ extern "C" {
 	#define RDE_FUNC_EXTERNAL
 #endif
 
+#ifdef RDE_NO_NAMESPACES
+#define RDE_N(_namespace, _function) _function
+#else
+#define RDE_N(_namespace, _function) _namespace##_##_function
+// Example of usage RDE_FUNC void RDE_N(rde_my_namespace, my_function)(int _a, int _b);
+#endif
+
 #if IS_WINDOWS()
 	#include <io.h>
 	#include <fcntl.h>
