@@ -1108,7 +1108,6 @@ bool compile_windows() {
 																											\
 		arrput(_build_command, "-lSDL2main");																\
 		arrput(_build_command, "-lSDL2");																	\
-		arrput(_build_command, "-lglad");																	\
 		arrput(_build_command, "-lcglm");																	\
 		arrput(_build_command, "-ldbghelp");																\
 		arrput(_build_command, "-lshlwapi");																\
@@ -1416,23 +1415,18 @@ bool compile_windows() {
 		strcat(_rde_lib_path, this_file_full_path);																	\
 		char _example_path_sdl[256];																				\
 		char _example_path_rde[256];																				\
-		char _example_path_glad[256];																				\
 		memset(_example_path_sdl, 0, 256);																			\
 		memset(_example_path_rde, 0, 256);																			\
-		memset(_example_path_glad, 0, 256);																			\
 		strcat(_example_path_sdl, this_file_full_path);																\
-		strcat(_example_path_glad, this_file_full_path);															\
 		strcat(_example_path_rde, this_file_full_path);																\
 																													\
 		if(strcmp(build_type, "debug") == 0) {																		\
 			strcat(_rde_lib_path, "build\\windows\\debug\\engine\\RDE.dll");										\
 			strcat(_example_path_sdl, "build\\windows\\debug\\examples\\SDL2.dll");									\
-			strcat(_example_path_glad, "build\\windows\\debug\\examples\\glad.dll");								\
 			strcat(_example_path_rde, "build\\windows\\debug\\examples\\RDE.dll");									\
 		} else {																									\
 			strcat(_rde_lib_path, "build\\windows\\release\\engine\\RDE.dll");										\
 			strcat(_example_path_sdl, "build\\windows\\release\\examples\\SDL2.dll");								\
-			strcat(_example_path_glad, "build\\windows\\release\\examples\\glad.dll");								\
 			strcat(_example_path_rde, "build\\windows\\release\\examples\\RDE.dll");								\
 		}																											\
 																													\
@@ -1440,8 +1434,6 @@ bool compile_windows() {
 		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\SDL2.dll");				\
 		copy_file_if_exists(_path, _example_path_sdl);																\
 		memset(_path, 0, MAX_PATH);																					\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\glad.dll");				\
-		copy_file_if_exists(_path, _example_path_glad);																\
 		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
 		char _assets_path[1024];																					\
 		memset(_assets_path, 0, 1024);																				\
@@ -1541,23 +1533,18 @@ bool compile_windows() {
 	strcat(_rde_lib_path, this_file_full_path);																		\
 	char _example_path_sdl[256];																					\
 	char _example_path_rde[256];																					\
-	char _example_path_glad[256];																					\
 	memset(_example_path_sdl, 0, 256);																				\
 	memset(_example_path_rde, 0, 256);																				\
-	memset(_example_path_glad, 0, 256);																				\
 	strcat(_example_path_sdl, this_file_full_path);																	\
-	strcat(_example_path_glad, this_file_full_path);																\
 	strcat(_example_path_rde, this_file_full_path);																	\
 																													\
 	if(strcmp(build_type, "debug") == 0) {																			\
 	strcat(_rde_lib_path, "build\\windows\\debug\\engine\\RDE.dll");												\
 	strcat(_example_path_sdl, "build\\windows\\debug\\unit_tests\\SDL2.dll");										\
-	strcat(_example_path_glad, "build\\windows\\debug\\unit_tests\\glad.dll");										\
 	strcat(_example_path_rde, "build\\windows\\debug\\unit_tests\\RDE.dll");										\
 	} else {																										\
 	strcat(_rde_lib_path, "build\\windows\\release\\engine\\RDE.dll");												\
 	strcat(_example_path_sdl, "build\\windows\\release\\unit_tests\\SDL2.dll");										\
-	strcat(_example_path_glad, "build\\windows\\release\\unit_tests\\glad.dll");									\
 	strcat(_example_path_rde, "build\\windows\\release\\unit_tests\\RDE.dll");										\
 	}																												\
 																													\
@@ -1565,8 +1552,6 @@ bool compile_windows() {
 	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\SDL2.dll");					\
 	copy_file_if_exists(_path, _example_path_sdl);																	\
 	memset(_path, 0, MAX_PATH);																						\
-	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\glad.dll");					\
-	copy_file_if_exists(_path, _example_path_glad);																	\
 	copy_file_if_exists(_rde_lib_path, _example_path_rde); 															\
 	char _shaders_path[1024];																						\
 	memset(_shaders_path, 0, 1024);																					\
@@ -2073,14 +2058,11 @@ bool compile_osx() {
 		char _example_path_sdl[256];																				\
 		char _original_path_sdl[256];																				\
 		char _example_path_rde[256];																				\
-		char _example_path_glad[256];																				\
 		memset(_example_path_sdl, 0, 256);																			\
 		memset(_original_path_sdl, 0, 256);																			\
 		memset(_example_path_rde, 0, 256);																			\
-		memset(_example_path_glad, 0, 256);																			\
 		strcat(_example_path_sdl, this_file_full_path);																\
 		strcat(_original_path_sdl, this_file_full_path);															\
-		strcat(_example_path_glad, this_file_full_path);															\
 		strcat(_example_path_rde, this_file_full_path); 															\
 		strcat(_original_path_sdl, "external/libs/osx_x86_64/libSDL2_rde.dylib"); 									\
 																													\
@@ -2281,7 +2263,6 @@ bool compile_linux() {
 			arrput(_build_command, "-lpthread");															\
 			arrput(_build_command, "-lSDL2main");															\
 			arrput(_build_command, "-lSDL2");																\
-			arrput(_build_command, "-lglad");																\
 			arrput(_build_command, "-lcglm");																\
 		}																									\
 		arrput(_build_command, "-Werror");																	\
@@ -2568,12 +2549,9 @@ bool compile_linux() {
 		strcat(_rde_lib_path, this_file_full_path);																	\
 		char _example_path_sdl[256];																				\
 		char _example_path_rde[256];																				\
-		char _example_path_glad[256];																				\
 		memset(_example_path_sdl, 0, 256);																			\
 		memset(_example_path_rde, 0, 256);																			\
-		memset(_example_path_glad, 0, 256);																			\
 		strcat(_example_path_sdl, this_file_full_path);																\
-		strcat(_example_path_glad, this_file_full_path);															\
 		strcat(_example_path_rde, this_file_full_path);																\
 		                                                                                                            \
         if(strcmp(lib_type, "shared") == 0) {                                                                     	\
@@ -2683,12 +2661,9 @@ bool compile_linux() {
 		strcat(_rde_lib_path, this_file_full_path);																		\
 		char _example_path_sdl[256];																					\
 		char _tests_path_rde[256];																						\
-		char _example_path_glad[256];																					\
 		memset(_example_path_sdl, 0, 256);																				\
 		memset(_tests_path_rde, 0, 256);																				\
-		memset(_example_path_glad, 0, 256);																				\
 		strcat(_example_path_sdl, this_file_full_path);																	\
-		strcat(_example_path_glad, this_file_full_path);																\
 		strcat(_tests_path_rde, this_file_full_path);																	\
 		                                                                                                            	\
         if(strcmp(lib_type, "shared") == 0) {                                                                     		\

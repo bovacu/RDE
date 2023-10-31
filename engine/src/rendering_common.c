@@ -49,7 +49,15 @@ rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
 
 void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 #if !IS_MOBILE()
-	rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL Version: %s, Vendor: %s, GPU: %s \n", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER));
+	GLint profile;
+	glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &profile);
+	rde_util_check_opengl_error("getting profile mask");
+	if (profile & GL_CONTEXT_CORE_PROFILE_BIT) {
+		printf("Core profile\n");
+	} else {
+		printf("Compatibility profile\n");
+	}
+	rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL Version: %s, Vendor: %s, GPU: %s, GLSL: %s \n", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
 
 	glEnable(GL_BLEND);
@@ -68,7 +76,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 			
 	#if !IS_MAC() && !IS_LINUX()
 		#if !IS_WASM()
-			glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+			//glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 			rde_util_check_opengl_error("Invalid Point Smooth Hint -> GL_NICEST");
 		#endif
 	#endif
