@@ -57,7 +57,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	} else {
 		printf("Compatibility profile\n");
 	}
-	rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL Version: %s, Vendor: %s, GPU: %s, GLSL: %s \n", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_SHADING_LANGUAGE_VERSION));
+	rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL Version: %s, Vendor: %s, GPU: %s, GLSL: %s", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
 
 	glEnable(GL_BLEND);
@@ -395,11 +395,7 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 	}
 	
 	GLuint _texture_id;
-#if IS_MAC() || IS_IOS()
 	glGenTextures(1, &_texture_id);
-#else
-	glCreateTextures(GL_TEXTURE_2D, 1, &_texture_id);
-#endif
 	rde_util_check_opengl_error("Generating texture");
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
 	rde_util_check_opengl_error("Binding texture");
@@ -470,11 +466,7 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 	}
 
 	GLuint _texture_id;
-#if IS_MAC() || IS_IOS()
 	glGenTextures(1, &_texture_id);
-#else
-	glCreateTextures(GL_TEXTURE_2D, 1, &_texture_id);
-#endif
 	rde_util_check_opengl_error("3");
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
 	rde_util_check_opengl_error("4");

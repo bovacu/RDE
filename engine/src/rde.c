@@ -110,14 +110,6 @@ bool rde_util_check_opengl_error(const char* _message) {
 			case GL_OUT_OF_MEMORY:
 				printf("GL_OUT_OF_MEMORY: There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded. | %s -> %u \n",  _message, _err);
 				return true;
-			#if !IS_MAC()
-				case GL_STACK_UNDERFLOW:
-				printf("GL_STACK_UNDERFLOW: An attempt has been made to perform an operation that would cause an internal stack to underflow. | %s -> %u \n",  _message, _err);
-				return true;
-			case GL_STACK_OVERFLOW:
-				printf("GL_STACK_OVERFLOW: An attempt has been made to perform an operation that would cause an internal stack to overflow. | %s -> %u \n",  _message, _err);
-				return true;
-			#endif
 			default:
 				printf("No description. | %s -> %u \n",  _message, _err);
 				return true;
