@@ -863,15 +863,11 @@ rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _h
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-	static int _rbo_count = 0;
-	if(_rbo_count == 0) {
-		glGenRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
-		glBindRenderbuffer(GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);  
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id);
-		_rbo_count++;
-	}
+	glGenRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
+	glBindRenderbuffer(GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);  
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id);
 
 	rde_critical_error(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER);
 
