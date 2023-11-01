@@ -1073,6 +1073,10 @@ bool compile_windows() {
 		memset(_temp_path_0, 0, MAX_PATH);																	\
 		snprintf(_temp_path_0, MAX_PATH, "%s%s", this_file_full_path, "engine\\src\\rde.c");				\
 		arrput(_build_command, _temp_path_0);																\
+		char _temp_path_0_1[MAX_PATH];																		\
+		memset(_temp_path_0_1, 0, MAX_PATH);																\
+		snprintf(_temp_path_0_1, MAX_PATH, "%s%s", this_file_full_path, "external\\include\\glad\\glad.c");	\
+		arrput(_build_command, _temp_path_0_1);																\
 																											\
 		arrput(_build_command, "-shared");																	\
 																											\
@@ -2234,6 +2238,10 @@ bool compile_linux() {
 		memset(_temp_path_0, 0, MAX_PATH);																	\
 		snprintf(_temp_path_0, MAX_PATH, "%s%s", this_file_full_path, "engine/src/rde.c");					\
 		arrput(_build_command, _temp_path_0);																\
+		char _temp_path_0_1[MAX_PATH];																		\
+		memset(_temp_path_0_1, 0, MAX_PATH);																\
+		snprintf(_temp_path_0_1, MAX_PATH, "%s%s", this_file_full_path, "external/include/glad/glad.c");	\
+		arrput(_build_command, _temp_path_0_1);																\
 																											\
 		arrput(_build_command, "-I");																		\
 		char _temp_path_1[MAX_PATH];																		\

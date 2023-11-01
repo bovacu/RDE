@@ -3,12 +3,6 @@
 #include <time.h>
 
 #include "rde.h"
-#include "SDL2/SDL.h"
-
-#if IS_MAC()
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif
 
 #ifdef __EMSCRIPTEN__
 #include <GLES3/gl32.h>
@@ -19,7 +13,15 @@
 #elif IS_MAC()
 #include <OpenGL/gl3.h>
 #else
-#include "glad/glad.c"
+#include "glad/glad.h"
+#endif
+
+#include "SDL2/SDL.h"
+
+
+#if IS_MAC()
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
 #include "errors.c"
