@@ -75,7 +75,7 @@ void rde_inner_rendering_init_3d() {
 	
 	for(int _y = 0; _y < RDE_DEFAULT_TEXTURE_SIZE; _y++) {
 		for(int _x = 0; _x < RDE_DEFAULT_TEXTURE_SIZE; _x++) {
-			rde_rendering_memory_texture_set_pixel(DEFAULT_TEXTURE, (rde_vec_2I) {_x, _y}, RDE_COLOR_NO_TEXTURE);
+			rde_rendering_memory_texture_set_pixel(DEFAULT_TEXTURE, (rde_vec_2I) {_x, _y}, RDE_COLOR_WHITE);
 		}
 	}
 
@@ -412,8 +412,13 @@ void rde_inner_rendering_flush_batch_3d() {
 	GLint _using_render_texture_location = glGetUniformLocation(_shader->compiled_program_id, "material.using_render_texture");
 	if(_mesh->material.render_texture != NULL) {
 		glUseProgram(current_batch_3d.shader->compiled_program_id);
+
+		GLint _rt_location = glGetUniformLocation(_shader->compiled_program_id, "render_texture");
+		glUniform1i(_rt_location, 0);
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _mesh->material.render_texture->opengl_texture_id);
+
 		glUniform1i(_using_render_texture_location, 1);
 	} else {
 		rde_texture* _ka_texture = _mesh->material.map_ka != NULL ? _mesh->material.map_ka : DEFAULT_TEXTURE;
@@ -432,10 +437,16 @@ void rde_inner_rendering_flush_batch_3d() {
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, _bump_texture->opengl_texture_id);
 
+		GLint _ka_location = glGetUniformLocation(_shader->compiled_program_id, "tex_ka");
+		glUniform1i(_ka_location, 0);
+		GLint _kd_location = glGetUniformLocation(_shader->compiled_program_id, "tex_kd");
+		glUniform1i(_kd_location, 1);
+		GLint _ks_location = glGetUniformLocation(_shader->compiled_program_id, "tex_ks");
+		glUniform1i(_ks_location, 2);
+		GLint _bump_location = glGetUniformLocation(_shader->compiled_program_id, "tex_bump");
+		glUniform1i(_bump_location, 3);
 		glUniform1i(_using_render_texture_location, 0);
 	}
-
-	rde_util_check_opengl_error("After glBindTexture");
 
 	glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 	rde_util_check_opengl_error("After Set Model Matrix Unform");
