@@ -27,3 +27,7 @@ tests/*.dll
 tests/*.exe
 tests/*.exp
 tests/*.lib
+
+.DS_Store
+
+.cache/
