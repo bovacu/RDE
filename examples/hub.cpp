@@ -2,6 +2,7 @@
 #define RDE_RENDERING_MODULE
 #define RDE_FBX_MODULE
 #define RDE_OBJ_MODULE
+#define RDE_PHYSICS_3D_MODULE
 
 /**
  * NOTES:

@@ -63,6 +63,10 @@
 #include "miniaudio/miniaudio.h"
 #endif
 
+#ifdef RDE_PHYSICS_3D_MODULE
+#include "JoltC/JoltPhysicsC.h"
+#endif
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #include "json/cJSON.c"
@@ -624,6 +628,10 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 
 #ifdef RDE_RENDERING_MODULE
 	rde_inner_rendering_set_rendering_configuration(_default_window);
+#endif
+
+#ifdef RDE_PHYSICS_3D_MODULE
+	JPC_RegisterDefaultAllocator();
 #endif
 
 	srand(time(NULL));

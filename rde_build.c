@@ -92,7 +92,7 @@ typedef enum {
 const char* MODULES_STR[MAX_MODULES] = {
 	"audio",
 	"physics_2d",
-	"pyhisics_3d",
+	"physics_3d",
 	"rendering",
 	"fbx",
 	"obj",
@@ -1113,7 +1113,11 @@ bool compile_windows() {
 		arrput(_build_command, "-lSDL2main");																\
 		arrput(_build_command, "-lSDL2");																	\
 		arrput(_build_command, "-lcglm");																	\
-		arrput(_build_command, "-ljolt");																	\
+																											\
+		if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {									\
+			arrput(_build_command, "-ljolt");																\
+		}																									\
+																											\
 		arrput(_build_command, "-ldbghelp");																\
 		arrput(_build_command, "-lshlwapi");																\
 		arrput(_build_command, "-lAdvapi32");																\
@@ -1763,6 +1767,9 @@ bool compile_osx() {
 			arrput(_build_command, "-framework");															\
 			arrput(_build_command, "OpenGL");																\
 			arrput(_build_command, "-lcglm_rde");															\
+			if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {								\
+				arrput(_build_command, "-ljolt");															\
+			}																								\
 		}																									\
 		arrput(_build_command, "-Werror");																	\
 		arrput(_build_command, "-Wall");																	\
@@ -2274,6 +2281,9 @@ bool compile_linux() {
 			arrput(_build_command, "-lSDL2main");															\
 			arrput(_build_command, "-lSDL2");																\
 			arrput(_build_command, "-lcglm");																\
+			if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {								\
+				arrput(_build_command, "-ljolt");															\
+			}																								\
 		}																									\
 		arrput(_build_command, "-Werror");																	\
 		arrput(_build_command, "-Wall");																	\

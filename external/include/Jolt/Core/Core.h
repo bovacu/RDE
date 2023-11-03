@@ -255,6 +255,8 @@
 #define JPH_SUPPRESS_WARNINGS_STD_END															\
 	JPH_SUPPRESS_WARNING_POP
 
+#undef private
+#define private private
 // Standard C++ includes
 JPH_SUPPRESS_WARNINGS_STD_BEGIN
 #include <vector>
@@ -277,6 +279,8 @@ JPH_SUPPRESS_WARNINGS_STD_END
 		#include <arm_neon.h>
 	#endif
 #endif
+#undef private
+#define private public
 
 JPH_NAMESPACE_BEGIN
 
