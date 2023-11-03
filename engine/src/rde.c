@@ -54,7 +54,11 @@
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
 #define STB_DS_IMPLEMENTATION
 #define STBDS_NO_SHORT_NAMES
+
+#if !IS_ANDROID()
 #define STBDS_SIPHASH_2_4
+#endif
+
 #include "stb/stb_ds.h"
 #pragma clang diagnostic pop
 
@@ -455,7 +459,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	#ifdef RDE_ERROR_MODULE
 	SetUnhandledExceptionFilter(rde_inner_error_sig_handler);
 	#endif
-#else
+#elif (IS_MAC() || IS_WINDOWS()) && !IS_ANDROID()
 	rde_inner_set_posix_signal_handler();
 #endif
 
@@ -681,7 +685,7 @@ void rde_engine_on_run() {
 	rde_critical_error(ENGINE.mandatory_callbacks.on_render == NULL, RDE_ERROR_NULL_MANDATORY_CALLBACK, "rde_engine_user_on_render");
 
 	#if IS_MOBILE()
-	SDL_SetEventFilter(rde_mobile_consume_events);
+	SDL_SetEventFilter(rde_events_mobile_consume_events_callback_wrapper, NULL);
 	#endif
 
 #ifdef RDE_RENDERING_MODULE

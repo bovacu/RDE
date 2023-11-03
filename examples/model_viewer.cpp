@@ -26,6 +26,10 @@ rde_point_light model_viewer_point_light;
 rde_mesh* model_viewer_spot_light_mesh = NULL;
 rde_spot_light model_viewer_spot_light;
 
+rde_mesh* model_viewer_second_screen_mesh = NULL;
+rde_render_texture* model_viewer_second_screen_rt = NULL;
+static bool model_viewer_render_model_to_plane = false;
+
 bool model_viewer_show_skybox = false;
 
 void model_viewer_keyboard_controller(float _dt) {
@@ -163,6 +167,7 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 
 	if(model_viewer_model != NULL) {
 		rde_rendering_3d_begin_drawing(&model_viewer_camera, _window, model_viewer_draw_wireframe);
+		if(model_viewer_render_model_to_plane) rde_rendering_render_texture_enable(model_viewer_second_screen_rt);
 		for(int _i = 0; _i < model_viewer_max_meshes_to_render; _i++) {
 			rde_rendering_3d_draw_mesh(&model_viewer_transform, model_viewer_model_data.meshes[_i], NULL);
 		}
@@ -184,6 +189,15 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 			_spot_light_transform.position.z *= model_viewer_transform.scale.z;
 			rde_rendering_3d_draw_mesh(&_spot_light_transform, model_viewer_spot_light_mesh, NULL);
 		}
+
+		if(model_viewer_render_model_to_plane) rde_rendering_render_texture_disable();
+
+		if(model_viewer_render_model_to_plane) {
+			rde_transform _second_screen_transform = rde_struct_create_transform();
+			_second_screen_transform.position.y = 4;
+			rde_rendering_3d_draw_mesh(&_second_screen_transform ,model_viewer_second_screen_mesh, NULL);
+		}
+
 		rde_rendering_3d_end_drawing();
 	}
 }
@@ -315,7 +329,9 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 		ImGui::End();
 	}
 
- 	ImGui::Begin("Model Transform", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+ 	ImGui::Begin("Model", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+
+	ImGui::Text("Transform");
  	float _position[3] = { model_viewer_transform.position.x, model_viewer_transform.position.y, model_viewer_transform.position.z };
  	if(ImGui::DragFloat3("Position", _position, 1.f)) {
  		model_viewer_transform.position.x = _position[0];
@@ -369,6 +385,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
  		model_viewer_camera.near_far.x = _near_far[0];
  		model_viewer_camera.near_far.y = _near_far[1];
  	}
+
  	ImGui::End();
 
 	ImGui::Begin("Rendering Options", NULL, ImGuiWindowFlags_AlwaysAutoResize);
@@ -376,6 +393,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 	ImGui::DragInt("Meshes", &model_viewer_max_meshes_to_render, 1, 0, model_viewer_model_data.amount_of_meshes);
 	ImGui::Checkbox("Wireframe", &model_viewer_draw_wireframe);
 	ImGui::Checkbox("Skybox", &model_viewer_show_skybox);
+	ImGui::Checkbox("Render Model To Plane", &model_viewer_render_model_to_plane);
 	ImGui::End();
  }
 
@@ -456,6 +474,41 @@ void model_viewer_init() {
 	});
 	rde_rendering_skybox_use(_skybox);
 
+	float _screen_positions[] = {
+		// positions
+		-1.777f,  1.0f, 5,
+		-1.777f, -1.0f, 5, 
+		1.777f, -1.0f,  5, 
+		-1.777f,  1.0f, 5, 
+		1.777f, -1.0f,  5, 
+		1.777f,  1.0f,  5, 
+	};
+
+	float _screen_coords[] = {
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f
+	};
+
+	model_viewer_second_screen_rt = rde_rendering_render_texture_create(1280, 720);
+
+	rde_mesh_gen_data _data = {
+		.vertex_count = 6,
+		.positions = _screen_positions,
+		.positions_size = 6 * 3,
+		.texcoords = _screen_coords,
+		.texcoords_size = 6 * 2,
+		.normals = NULL,
+		.normals_size = 0,
+		.material = rde_struct_create_material()
+	};
+
+	_data.material.render_texture = model_viewer_second_screen_rt;
+
+	model_viewer_second_screen_mesh = rde_struct_memory_mesh_create(&_data);
 
 	rde_engine_show_message_box(RDE_LOG_LEVEL_INFO, 
 	                         "Instructions", 

@@ -155,6 +155,7 @@
 #define JPH_MSVC2019_SUPPRESS_WARNING(w)
 #endif
 
+#ifndef __ANDROID__
 // Disable common warnings triggered by Jolt when compiling with -Wall
 #define JPH_SUPPRESS_WARNINGS																	\
 	JPH_CLANG_SUPPRESS_WARNING("-Wc++98-compat")												\
@@ -174,9 +175,9 @@
 	JPH_CLANG_SUPPRESS_WARNING("-Wcast-align")													\
 	JPH_CLANG_SUPPRESS_WARNING("-Winvalid-offsetof")											\
 	JPH_CLANG_SUPPRESS_WARNING("-Wgnu-zero-variadic-macro-arguments")							\
-	JPH_CLANG_SUPPRESS_WARNING("-Wdocumentation-unknown-command")								\
+	JPH_CLANG_SUPPRESS_WARNING("-Wdocumentation-unknown-command")  								\
 	JPH_CLANG_SUPPRESS_WARNING("-Wctad-maybe-unsupported")										\
-	JPH_CLANG_SUPPRESS_WARNING("-Wdeprecated-copy")												\
+	JPH_CLANG_SUPPRESS_WARNING("-Wdeprecated-copy")         									\
 	JPH_IF_NOT_ANDROID(JPH_CLANG_SUPPRESS_WARNING("-Wimplicit-int-float-conversion"))			\
 																								\
 	JPH_GCC_SUPPRESS_WARNING("-Wcomment")														\
@@ -205,6 +206,55 @@
 	JPH_MSVC_SUPPRESS_WARNING(4826) /* Conversion from 'X *' to 'JPH::uint64' is sign-extended. This may cause unexpected runtime behavior. (32-bit) */ \
 	JPH_MSVC_SUPPRESS_WARNING(5264) /* 'X': 'const' variable is not used */						\
 	JPH_MSVC2019_SUPPRESS_WARNING(5246) /* the initialization of a subobject should be wrapped in braces */
+#else
+#define JPH_SUPPRESS_WARNINGS																	\
+	JPH_CLANG_SUPPRESS_WARNING("-Wc++98-compat")												\
+	JPH_CLANG_SUPPRESS_WARNING("-Wc++98-compat-pedantic")										\
+	JPH_CLANG_SUPPRESS_WARNING("-Wfloat-equal")													\
+	JPH_CLANG_SUPPRESS_WARNING("-Wsign-conversion")												\
+	JPH_CLANG_SUPPRESS_WARNING("-Wold-style-cast")												\
+	JPH_CLANG_SUPPRESS_WARNING("-Wgnu-anonymous-struct")										\
+	JPH_CLANG_SUPPRESS_WARNING("-Wnested-anon-types")											\
+	JPH_CLANG_SUPPRESS_WARNING("-Wglobal-constructors")											\
+	JPH_CLANG_SUPPRESS_WARNING("-Wexit-time-destructors")										\
+	JPH_CLANG_SUPPRESS_WARNING("-Wnonportable-system-include-path")								\
+	JPH_CLANG_SUPPRESS_WARNING("-Wlanguage-extension-token")									\
+	JPH_CLANG_SUPPRESS_WARNING("-Wunused-parameter")											\
+	JPH_CLANG_SUPPRESS_WARNING("-Wformat-nonliteral")											\
+	JPH_CLANG_SUPPRESS_WARNING("-Wcovered-switch-default")										\
+	JPH_CLANG_SUPPRESS_WARNING("-Wcast-align")													\
+	JPH_CLANG_SUPPRESS_WARNING("-Winvalid-offsetof")											\
+	JPH_CLANG_SUPPRESS_WARNING("-Wgnu-zero-variadic-macro-arguments")							\
+	JPH_CLANG_SUPPRESS_WARNING("-Wdocumentation-unknown-command")  								\
+	JPH_IF_NOT_ANDROID(JPH_CLANG_SUPPRESS_WARNING("-Wimplicit-int-float-conversion"))			\
+	\
+	JPH_GCC_SUPPRESS_WARNING("-Wcomment")														\
+	JPH_GCC_SUPPRESS_WARNING("-Winvalid-offsetof")												\
+	JPH_GCC_SUPPRESS_WARNING("-Wclass-memaccess")												\
+	\
+	JPH_MSVC_SUPPRESS_WARNING(4619) /* #pragma warning: there is no warning number 'XXXX' */	\
+	JPH_MSVC_SUPPRESS_WARNING(4514) /* 'X' : unreferenced inline function has been removed */	\
+	JPH_MSVC_SUPPRESS_WARNING(4710) /* 'X' : function not inlined */							\
+	JPH_MSVC_SUPPRESS_WARNING(4711) /* function 'X' selected for automatic inline expansion */	\
+	JPH_MSVC_SUPPRESS_WARNING(4820) /* 'X': 'Y' bytes padding added after data member 'Z' */	\
+	JPH_MSVC_SUPPRESS_WARNING(4100) /* 'X' : unreferenced formal parameter */					\
+	JPH_MSVC_SUPPRESS_WARNING(4626) /* 'X' : assignment operator was implicitly defined as deleted because a base class assignment operator is inaccessible or deleted */ \
+	JPH_MSVC_SUPPRESS_WARNING(5027) /* 'X' : move assignment operator was implicitly defined as deleted because a base class move assignment operator is inaccessible or deleted */ \
+	JPH_MSVC_SUPPRESS_WARNING(4365) /* 'argument' : conversion from 'X' to 'Y', signed / unsigned mismatch */ \
+	JPH_MSVC_SUPPRESS_WARNING(4324) /* 'X' : structure was padded due to alignment specifier */ \
+	JPH_MSVC_SUPPRESS_WARNING(4625) /* 'X' : copy constructor was implicitly defined as deleted because a base class copy constructor is inaccessible or deleted */ \
+	JPH_MSVC_SUPPRESS_WARNING(5026) /* 'X': move constructor was implicitly defined as deleted because a base class move constructor is inaccessible or deleted */ \
+	JPH_MSVC_SUPPRESS_WARNING(4623) /* 'X' : default constructor was implicitly defined as deleted */ \
+	JPH_MSVC_SUPPRESS_WARNING(4201) /* nonstandard extension used: nameless struct/union */		\
+	JPH_MSVC_SUPPRESS_WARNING(4371) /* 'X': layout of class may have changed from a previous version of the compiler due to better packing of member 'Y' */ \
+	JPH_MSVC_SUPPRESS_WARNING(5045) /* Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified */ \
+	JPH_MSVC_SUPPRESS_WARNING(4583) /* 'X': destructor is not implicitly called */				\
+	JPH_MSVC_SUPPRESS_WARNING(4582) /* 'X': constructor is not implicitly called */				\
+	JPH_MSVC_SUPPRESS_WARNING(5219) /* implicit conversion from 'X' to 'Y', possible loss of data  */ \
+	JPH_MSVC_SUPPRESS_WARNING(4826) /* Conversion from 'X *' to 'JPH::uint64' is sign-extended. This may cause unexpected runtime behavior. (32-bit) */ \
+	JPH_MSVC_SUPPRESS_WARNING(5264) /* 'X': 'const' variable is not used */						\
+	JPH_MSVC2019_SUPPRESS_WARNING(5246) /* the initialization of a subobject should be wrapped in braces */
+#endif
 
 // OS-specific includes
 #if defined(JPH_PLATFORM_WINDOWS)

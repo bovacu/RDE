@@ -94,7 +94,7 @@ rde_window* rde_inner_window_create_mac_window(size_t _free_window_index) {
 }
 #endif
 
-#if IS_LINUX()
+#if IS_LINUX() && !IS_ANDROID()
 rde_window* rde_inner_window_create_linux_window(size_t _free_window_index) {
 	ENGINE.windows[_free_window_index] = rde_struct_create_window();
 	rde_window* _window = &ENGINE.windows[_free_window_index];
@@ -133,19 +133,24 @@ rde_window* rde_inner_window_create_linux_window(size_t _free_window_index) {
 
 #if IS_ANDROID()
 rde_window* rde_window_create_android_window(size_t _free_window_index) {
-	UNIMPLEMENTED("Mac android creation is not implemented yet");
+	//UNIMPLEMENTED("Mac android creation is not implemented yet");
+	printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+	SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "AAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+    return NULL;
 }
 #endif
 
 #if IS_IOS()
 rde_window* rde_window_create_ios_window(size_t _free_window_index) {
 	UNIMPLEMENTED("Mac ios creation is not implemented yet");
+    return NULL;
 }
 #endif
 
 #if 0
 rde_window* rde_window_create_wasm_window(size_t _free_window_index) {
 	UNIMPLEMENTED("Mac WASM creation is not implemented yet");
+    return NULL;
 }
 #endif
 	
@@ -178,7 +183,7 @@ rde_window* rde_window_create_window() {
 	// TODO: create window depending on platform
 	#if IS_WINDOWS()
 		_window = rde_inner_window_create_windows_window(_free_window_index);
-	#elif IS_LINUX()
+	#elif IS_LINUX() && !IS_ANDROID()
 		_window = rde_inner_window_create_linux_window(_free_window_index);
 	#elif IS_MAC()
 		_window = rde_inner_window_create_mac_window(_free_window_index);

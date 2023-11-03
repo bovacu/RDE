@@ -148,7 +148,7 @@ static int times_enter_in_error = 0;
 
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
-	#else
+	#elif (IS_MAC() || IS_WINDOWS()) && !IS_ANDROID()
 	#define RDE_STACKTRACE_MAX_DEPTH 1024
 	// Same value as SIGSTKSZ
 	#define RDE_STACKTRACE_BUFF_SIZE 13504
@@ -359,6 +359,7 @@ static int times_enter_in_error = 0;
 		if (sigaction(SIGTERM, &_sig_action, NULL) != 0) { err(1, "sigaction"); }
 		if (sigaction(SIGABRT, &_sig_action, NULL) != 0) { err(1, "sigaction"); }
 	}
+	#else
 	#endif
 #endif
 
@@ -399,14 +400,14 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	va_list _args;
 	va_start(_args, _fmt);
 	
-#ifdef RDE_DEBUG
+#if defined(RDE_DEBUG) && !IS_ANDROID()
 	vfprintf(stdout, _fmt, _args);
 	#ifdef RDE_ERROR_MODULE
 	rde_inner_print_stack_trace(stdout);
 	#endif
 #else
 	vfprintf(_f, _fmt, _args);
-	#ifdef RDE_ERROR_MODULE
+	#if defined(RDE_ERROR_MODULE) && !IS_ANDROID()
 	rde_inner_print_stack_trace(_f);
 	#endif
 #endif
