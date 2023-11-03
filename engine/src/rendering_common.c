@@ -15,8 +15,10 @@ static float FRAMEBUFFER_QUAD_DATA[] = {
 	 1.0f,  1.0f,  1.0f, 1.0f
 };
 
+#ifdef RDE_RENDERING_MODULE
 rde_render_texture* DEFAULT_RENDER_TEXTURE = NULL;
 rde_render_texture* current_render_texture = NULL;
+#endif
 
 #define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled, _path)												\
 	if(!_compiled) {																									\
@@ -147,6 +149,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 
+#ifdef RDE_RENDERING_MODULE
 	GLuint _vao, _vbo;
 	glGenVertexArrays(1, &_vao);
 	glGenBuffers(1, &_vbo);
@@ -160,8 +163,10 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	DEFAULT_RENDER_TEXTURE = rde_rendering_render_texture_create(_window_size.x, _window_size.y);
 	DEFAULT_RENDER_TEXTURE->vao = _vao;
 	DEFAULT_RENDER_TEXTURE->vbo = _vbo;
+#endif
 }
 
+#ifdef RDE_RENDERING_MODULE
 void rde_inner_rendering_draw_to_framebuffer(rde_render_texture* _render_texture) {
 	GLuint _framebuffer_id = _render_texture == DEFAULT_RENDER_TEXTURE ? 0 : _render_texture->opengl_framebuffer_id;
 	glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer_id);
@@ -176,7 +181,7 @@ void rde_inner_rendering_draw_to_framebuffer(rde_render_texture* _render_texture
 	glBindTexture(GL_TEXTURE_2D, _render_texture->opengl_texture_id);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
-
+#endif
 
 
 
