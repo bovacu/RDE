@@ -962,9 +962,11 @@ bool copy_folder_if_exists(const char* _dir_path, const char* _new_path) {
 
 bool dir_exists(const char* _dir_path) {
 	DIR* _dir = opendir(_dir_path);
-	bool _exists = _dir != NULL;
+
+	if(_dir == NULL) return false;
+
 	closedir(_dir);
-	return _exists;
+	return true;
 }
 
 bool rm_dir_if_exists(const char* _dir_path) {
@@ -1711,7 +1713,7 @@ bool compile_osx() {
 		if(is_god) {																						\
 			arrput(_build_command, GOD_MODE);																\
 		}																									\
-																											\	
+																											\
 		char _mac_version_buf[256];																			\
     	memset(_mac_version_buf, 0, 256);																	\
     	get_mac_version(_mac_version_buf);																	\
@@ -2104,12 +2106,12 @@ bool compile_osx() {
 		char _shaders_path[1024];																					\
 		memset(_shaders_path, 0, 1024);																				\
 		snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");								\
-		char _unit_tests_shaders_path[1024];																		\
-		memset(_unit_tests_shaders_path, 0, 1024);																	\
-		snprintf(_unit_tests_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/osx/", 					\
+		char _examples_shaders_path[1024];																			\
+		memset(_examples_shaders_path, 0, 1024);																	\
+		snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/osx/", 						\
 				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/shaders");					\
-		rm_dir_if_exists(_unit_tests_shaders_path);																	\
-		copy_folder_if_exists(_shaders_path, _unit_tests_shaders_path);												\
+		rm_dir_if_exists(_examples_shaders_path);																	\
+		copy_folder_if_exists(_shaders_path, _examples_shaders_path);												\
 	} while (0);
 
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
