@@ -77,7 +77,6 @@ extern "C" {
 //
 // Index End
 
-
 #include <assert.h>
 #include <limits.h>
 #include <float.h>
@@ -326,8 +325,9 @@ typedef unsigned int uint;
 		return 0;																			\
 	}
 #elif IS_ANDROID()
+#include "SDL2/SDL_main.h"
 #define RDE_MAIN(_window, _heap_allocs_config, _mandatory_callbacks, _init_func, _end_func)	\
-	int SDL_main(int _argc, char* _argv[]) {														\
+	int main(int _argc, char* _argv[]) {													\
 		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);				\
 		rde_setup_initial_info(_mandatory_callbacks);										\
 		\
@@ -452,29 +452,29 @@ typedef unsigned int uint;
 		}														\
 	} while(0);
 #else
-	#define rde_log_level(_level, ...) do { 				\
+	#define rde_log_level(_level, ...) do { 					\
 		if(!rde_engine_logs_supressed()) {						\
-			rde_log_level_inner(_level, __VA_ARGS__);	\
+			SDL_Log(__VA_ARGS__);								\
 			printf("\n");										\
 		}														\
 	} while(0);
 	
-	#define rde_log_color(_color, ...) do { 				\
+	#define rde_log_color(_color, ...) do { 					\
 		if(!rde_engine_logs_supressed()) {						\
-			rde_log_color_inner(_color, __VA_ARGS__);	\
+			SDL_Log(__VA_ARGS__);								\
 			printf("\n");										\
 		}														\
 	} while(0);
 	
-	#define rde_log_level_sl(_level, ...) do { 			\
+	#define rde_log_level_sl(_level, ...) do { 					\
 		if(!rde_engine_logs_supressed()) {						\
-			rde_log_level_inner(_level, __VA_ARGS__);	\
+			SDL_Log(__VA_ARGS__);								\
 		}														\
 	} while(0);
 	
-	#define rde_log_color_sl(_color, ...) do { 			\
+	#define rde_log_color_sl(_color, ...) do { 					\
 		if(!rde_engine_logs_supressed()) {						\
-			rde_log_color_inner(_color, __VA_ARGS__);	\
+			SDL_Log(__VA_ARGS__);								\
 		}														\
 	} while(0);
 #endif

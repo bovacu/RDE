@@ -132,16 +132,51 @@ rde_window* rde_inner_window_create_linux_window(size_t _free_window_index) {
 #endif
 
 #if IS_ANDROID()
-rde_window* rde_window_create_android_window(size_t _free_window_index) {
-	//UNIMPLEMENTED("Mac android creation is not implemented yet");
-	printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-	SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "AAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-    return NULL;
+rde_window* rde_inner_window_create_android_window(size_t _free_window_index) {
+	ENGINE.windows[_free_window_index] = rde_struct_create_window();
+	rde_window* _window = &ENGINE.windows[_free_window_index];
+
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL,1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,24);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
+
+    SDL_DisplayMode _mode;
+    if(SDL_GetDisplayMode(0, 0, &_mode) < 0) {
+    	SDL_Log("Error getting SDL_DisplayMode -> %s\n", SDL_GetError());
+    	exit(-1);
+    }
+    rde_log_level(RDE_LOG_LEVEL_INFO, "Screen Size: (%d, %d)", _mode.w, _mode.h);
+    
+    _window->sdl_window = SDL_CreateWindow(NULL, 0, 0, _mode.w, _mode.h ,SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+	rde_critical_error(_window->sdl_window == NULL, RDE_ERROR_SDL_WINDOW, SDL_GetError());
+
+    int _drawableSizeX = 0, _drawableSizeY = 0;
+    SDL_GL_GetDrawableSize(_window->sdl_window, &_drawableSizeX, &_drawableSizeY);
+    rde_log_level(RDE_LOG_LEVEL_INFO, "Drawable Size: (%d, %d)", _drawableSizeX, _drawableSizeY);
+
+    _window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
+    rde_critical_error(_window->sdl_gl_context == NULL, RDE_ERROR_SDL_OPENGL, SDL_GetError());
+
+    SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
+
+    SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE, "1");
+    SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, "1");
+    SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
+
+    SDL_GL_SetSwapInterval(1);
+
+    rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL and SDL2 loaded successfully for Android");
+
+    return _window;
 }
 #endif
 
 #if IS_IOS()
-rde_window* rde_window_create_ios_window(size_t _free_window_index) {
+rde_window* rde_inner_window_create_ios_window(size_t _free_window_index) {
 	UNIMPLEMENTED("Mac ios creation is not implemented yet");
     return NULL;
 }
@@ -187,6 +222,10 @@ rde_window* rde_window_create_window() {
 		_window = rde_inner_window_create_linux_window(_free_window_index);
 	#elif IS_MAC()
 		_window = rde_inner_window_create_mac_window(_free_window_index);
+	#elif IS_ANDROID()
+		_window = rde_inner_window_create_android_window(_free_window_index);
+	#elif IS_IOS()
+		_window = rde_inner_window_create_ios_window(_free_window_index);
 	#else
 		rde_critical_error(true, RDE_ERROR_UNSUPPORTED_PLATFORM);
 	#endif

@@ -148,7 +148,8 @@ static int times_enter_in_error = 0;
 
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
-	#elif (IS_MAC() || IS_WINDOWS()) && !IS_ANDROID()
+	#elif IS_ANDROID()
+	#else
 	#define RDE_STACKTRACE_MAX_DEPTH 1024
 	// Same value as SIGSTKSZ
 	#define RDE_STACKTRACE_BUFF_SIZE 13504
@@ -359,7 +360,6 @@ static int times_enter_in_error = 0;
 		if (sigaction(SIGTERM, &_sig_action, NULL) != 0) { err(1, "sigaction"); }
 		if (sigaction(SIGABRT, &_sig_action, NULL) != 0) { err(1, "sigaction"); }
 	}
-	#else
 	#endif
 #endif
 
@@ -389,30 +389,38 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check below");
 #endif
 
+#if IS_ANDROID()
+	va_list _args;
+	va_start(_args, _fmt);
+	SDL_Log("Catched error on Android:\n");
+	SDL_Log(_fmt, _args);
+	va_end(_args);
+#else
 	FILE* _f = NULL;
 	
-#if IS_WINDOWS()
-	fopen_s(&_f, "rde_crash_logs.txt", "w");
-#else
-	_f = fopen("rde_crash_logs.txt", "w");
-#endif
+	#if IS_WINDOWS()
+		fopen_s(&_f, "rde_crash_logs.txt", "w");
+	#else
+		_f = fopen("rde_crash_logs.txt", "w");
+	#endif
 
 	va_list _args;
 	va_start(_args, _fmt);
 	
-#if defined(RDE_DEBUG) && !IS_ANDROID()
-	vfprintf(stdout, _fmt, _args);
-	#ifdef RDE_ERROR_MODULE
-	rde_inner_print_stack_trace(stdout);
+	#if defined(RDE_DEBUG)
+		vfprintf(stdout, _fmt, _args);
+		#ifdef RDE_ERROR_MODULE
+		rde_inner_print_stack_trace(stdout);
+		#endif
+	#else
+		vfprintf(_f, _fmt, _args);
+		#if defined(RDE_ERROR_MODULE)
+		rde_inner_print_stack_trace(_f);
+		#endif
 	#endif
-#else
-	vfprintf(_f, _fmt, _args);
-	#if defined(RDE_ERROR_MODULE) && !IS_ANDROID()
-	rde_inner_print_stack_trace(_f);
-	#endif
+		va_end(_args);
+		fclose(_f);
 #endif
-	va_end(_args);
-	fclose(_f);
 	
 	rde_engine_destroy_engine();
 
