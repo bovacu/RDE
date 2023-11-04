@@ -55,11 +55,11 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &profile);
 	rde_util_check_opengl_error("getting profile mask");
 	if (profile & GL_CONTEXT_CORE_PROFILE_BIT) {
-		printf("Core profile\n");
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Core profile");
 	} else if(profile & GL_CONTEXT_COMPATIBILITY_PROFILE_BIT) {
-		printf("Compatibility profile\n");
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Compatibility profile");
 	} else {
-		printf("Unknown profile\n");
+		rde_log_level(RDE_LOG_LEVEL_WARNING, "Unkown OpenGL context profile");
 	}
 
 	rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL Version: %s, Vendor: %s, GPU: %s, GLSL: %s", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_SHADING_LANGUAGE_VERSION));
