@@ -16,7 +16,12 @@
 #include "glad/glad.h"
 #endif
 
+#if IS_ANDROID()
+// This include comes directly from the RDEAndroid module SDL JNI. It contains some extra fanzy features which normal SDL doesn't.
+#include "SDL.h"
+#else
 #include "SDL2/SDL.h"
+#endif
 
 
 #if IS_MAC()
