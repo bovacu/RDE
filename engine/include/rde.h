@@ -1577,7 +1577,9 @@ RDE_FUNC void rde_audio_end();
 #ifdef RDE_FILE_SYSTEM_MODULE
 #endif
 
-
+#if IS_ANDROID()
+RDE_FUNC ANativeWindow* rde_android_get_native_window();
+#endif
 
 #ifdef RDE_GOD
 #include "private_structs.c"

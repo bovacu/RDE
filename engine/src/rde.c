@@ -488,6 +488,7 @@ rde_engine ENGINE;
 #include "events.c"
 #include "physics.c"
 #include "audio.c"
+#include "mobile.c"
 
 void rde_inner_engine_on_event();
 void rde_inner_engine_on_update(float _dt);
