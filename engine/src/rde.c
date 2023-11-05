@@ -339,6 +339,11 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	_e.heap_allocs_config = _heap_allocs_config;
 	_e.heap_allocs_config.max_number_of_shaders += RDE_DEFAULT_SHADERS_AMOUNT;
+
+#if IS_ANDROID()
+	_e.android_env = SDL_AndroidGetJNIEnv();
+	rde_critical_error(_e.android_env == NULL, "Native Android window is NULL");
+#endif
 	
 #ifdef RDE_RENDERING_MODULE
 	_e.total_amount_of_textures = 0;
@@ -621,16 +626,18 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	rde_log_level(RDE_LOG_LEVEL_INFO, "SDL Version: %d.%d.%d", _version.major, _version.minor, _version.patch);
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_EVENTS) < 0) {
-        #if !IS_ANDROID()
         rde_critical_error(true, "Could not initialize components of SDL on Init, fatal error: %s", SDL_GetError());
-        #else
-        SDL_Log("Could not initialize components of SDL on Init, fatal error: %s", SDL_GetError());
-        #endif
     }
 
 	stbds_rand_seed(time(NULL));
 
 	rde_window* _default_window = rde_window_create_window();
+
+	#if IS_ANDROID()
+	ENGINE.android_native_window = SDL_AndroidGetNativeWindow();
+	rde_critical_error(ENGINE.android_native_window == NULL, "Native Android Window is NULL");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Got Native Android Window");
+	#endif
 
 	rde_inner_events_window_create_events();
 	rde_inner_events_display_create_events();

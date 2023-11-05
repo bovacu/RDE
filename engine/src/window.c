@@ -145,10 +145,7 @@ rde_window* rde_inner_window_create_android_window(size_t _free_window_index) {
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
 
     SDL_DisplayMode _mode;
-    if(SDL_GetDisplayMode(0, 0, &_mode) < 0) {
-    	SDL_Log("Error getting SDL_DisplayMode -> %s\n", SDL_GetError());
-    	exit(-1);
-    }
+    rde_critical_error(SDL_GetDisplayMode(0, 0, &_mode) < 0, "Error getting SDL_DisplayMode -> %s\n", SDL_GetError());
     rde_log_level(RDE_LOG_LEVEL_INFO, "Screen Size: (%d, %d)", _mode.w, _mode.h);
     
     _window->sdl_window = SDL_CreateWindow(NULL, 0, 0, _mode.w, _mode.h ,SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);

@@ -149,6 +149,7 @@ static int times_enter_in_error = 0;
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
 	#elif IS_ANDROID()
+	// TODO: print stack trace in Android
 	#else
 	#define RDE_STACKTRACE_MAX_DEPTH 1024
 	// Same value as SIGSTKSZ
@@ -392,9 +393,11 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 #if IS_ANDROID()
 	va_list _args;
 	va_start(_args, _fmt);
-	SDL_Log("Catched error on Android:\n");
-	SDL_Log(_fmt, _args);
+	char _error[1024];
+	memset(_error, 0, 1024);
+	vsprintf(_error, _fmt, _args);
 	va_end(_args);
+	__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", "%s", _error);
 #else
 	FILE* _f = NULL;
 	

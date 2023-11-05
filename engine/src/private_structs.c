@@ -174,6 +174,11 @@
 		
 		rde_window* windows;
 		
+		#if IS_ANDROID()
+		ANativeWindow* android_native_window;
+		JNIEnv* android_env;
+		#endif
+
 	#ifdef RDE_RENDERING_MODULE
 	#define RDE_SHADERS_AMOUNT 7
 		rde_shader* line_shader;

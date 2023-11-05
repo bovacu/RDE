@@ -132,92 +132,6 @@ extern "C" {
 #define RDE_MAX_POINT_LIGHTS 10
 #define RDE_MAX_SPOT_LIGHTS 10
 
-#define RDE_COLOR_VERTEX_SHADER_2D_ES "" \
-	"#version 300 es\n" \
-	"\n" \
-	"layout(location = 0) in vec2 position;\n" \
-	"layout(location = 1) in vec4 color;\n" \
-	"out vec4 color_from_vshader;\n" \
-	"\n" \
-	"uniform mat4 view_projection_matrix;\n" \
-	"\n" \
-	"void main() {\n" \
-	"	gl_Position = view_projection_matrix * vec4(position, 0.0, 1.0);\n" \
-	"	color_from_vshader = color;\n" \
-	"}\n"
-
-#define RDE_COLOR_FRAGMENT_SHADER_2D_ES "" \
-	"#version 300 es\n" \
-	"\n" \
-	"precision mediump float;\n" \
-	"\n" \
-	"in vec4 color_from_vshader;\n" \
-	"out vec4 out_color;\n" \
-	"\n" \
-	"void main() {\n" \
-	"	out_color = color_from_vshader;\n" \
-	"}\n"
-
-#define RDE_TEXTURE_VERTEX_SHADER_2D_ES "" \
-	"#version 300 es\n" \
-	"\n" \
-	"layout(location = 0) in vec2 in_position;\n" \
-	"layout(location = 1) in vec4 in_color;\n" \
-	"layout(location = 2) in vec2 in_uv;\n" \
-	"\n" \
-	"uniform mat4 view_projection_matrix;\n" \
-	"\n" \
-	"out vec2 uv;\n" \
-	"out vec4 color;\n" \
-	"\n" \
-	"void main(void) {\n" \
-	"	uv = in_uv;\n" \
-	"	color = in_color;\n" \
-	"	gl_Position = view_projection_matrix * vec4(in_position, 0.0, 1.0);\n" \
-	"}\n"
-
-#define RDE_TEXTURE_FRAGMENT_SHADER_2D_ES "" \
-	"#version 300 es\n" \
-	"\n" \
-	"precision mediump float;\n" \
-	"\n" \
-	"in vec2 uv;\n" \
-	"in vec4 color;\n" \
-	"\n" \
-	"uniform sampler2D tex;\n" \
-	"\n" \
-	"out vec4 out_color;\n" \
-	"\n" \
-	"void main(void) {\n" \
-	"	out_color = texture(tex, uv) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);\n" \
-	"}\n"
-
-#define RDE_FRAME_BUFFER_VERTEX_SHADER_ES "" \
-	"#version 300 es\n" \
-	"layout (location = 10) in vec2 in_pos;\n" \
-	"layout (location = 11) in vec2 in_tex_coords;\n" \
-	"\n" \
-	"out vec2 tex_coords;\n" \
-	"\n" \
-	"void main() {\n" \
-	"	gl_Position = vec4(in_pos.x, in_pos.y, 0.0, 1.0);\n" \
-	"	tex_coords = in_tex_coords;\n" \
-	"}\n"
-
-#define RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES "" \
-	"#version 300 es\n" \
-	"\n" \
-	"precision mediump float;\n" \
-	"\n" \
-	"in vec2 tex_coords;\n" \
-	"out vec4 out_color;\n" \
-	"\n" \
-	"uniform sampler2D screen_texture;\n" \
-	"\n" \
-	"void main() {\n" \
-	"	out_color = texture(screen_texture, tex_coords);\n" \
-	"}\n"
-
 /// ====================== COMPILATION AND EXPORT ==========================
 
 #if defined(__APPLE__)
@@ -326,17 +240,22 @@ typedef unsigned int uint;
 	}
 #elif IS_ANDROID()
 #include "SDL2/SDL_main.h"
+#include <jni.h>
+#include <android/native_window.h>
+#include <android/input.h>
+#include <android/keycodes.h>
+#include <android/log.h>
 #define RDE_MAIN(_window, _heap_allocs_config, _mandatory_callbacks, _init_func, _end_func)	\
 	int main(int _argc, char* _argv[]) {													\
 		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);				\
 		rde_setup_initial_info(_mandatory_callbacks);										\
-		\
+																							\
 		_init_func(_argc, _argv);															\
-		\
+																							\
 		rde_engine_on_run();																\
 		_end_func();																		\
 		rde_engine_destroy_engine();														\
-		\
+																							\
 		return 0;																			\
 	}
 #else
@@ -344,13 +263,13 @@ typedef unsigned int uint;
 	int main(int _argc, char** _argv) {														\
 		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);				\
 		rde_setup_initial_info(_mandatory_callbacks);										\
-		\
+																							\
 		_init_func(_argc, _argv);															\
-		\
+																							\
 		rde_engine_on_run();																\
 		_end_func();																		\
 		rde_engine_destroy_engine();														\
-		\
+																							\
 		return 0;																			\
 	}
 #endif
@@ -452,29 +371,29 @@ typedef unsigned int uint;
 		}														\
 	} while(0);
 #else
-	#define rde_log_level(_level, ...) do { 					\
+	#define rde_log_level(_level, _fmt, ...) do { 					\
 		if(!rde_engine_logs_supressed()) {						\
-			SDL_Log(__VA_ARGS__);								\
+			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);								\
 			printf("\n");										\
 		}														\
 	} while(0);
 	
-	#define rde_log_color(_color, ...) do { 					\
+	#define rde_log_color(_color, _fmt, ...) do { 					\
 		if(!rde_engine_logs_supressed()) {						\
-			SDL_Log(__VA_ARGS__);								\
+			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);								\
 			printf("\n");										\
 		}														\
 	} while(0);
 	
-	#define rde_log_level_sl(_level, ...) do { 					\
+	#define rde_log_level_sl(_level, _fmt, ...) do { 					\
 		if(!rde_engine_logs_supressed()) {						\
-			SDL_Log(__VA_ARGS__);								\
+			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);								\
 		}														\
 	} while(0);
 	
-	#define rde_log_color_sl(_color, ...) do { 					\
+	#define rde_log_color_sl(_color, _fmt, ...) do { 					\
 		if(!rde_engine_logs_supressed()) {						\
-			SDL_Log(__VA_ARGS__);								\
+			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);								\
 		}														\
 	} while(0);
 #endif

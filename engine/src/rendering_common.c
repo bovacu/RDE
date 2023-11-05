@@ -61,9 +61,9 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	} else {
 		rde_log_level(RDE_LOG_LEVEL_WARNING, "Unkown OpenGL context profile");
 	}
+#endif
 
 	rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL Version: %s, Vendor: %s, GPU: %s, GLSL: %s", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_SHADING_LANGUAGE_VERSION));
-#endif
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
