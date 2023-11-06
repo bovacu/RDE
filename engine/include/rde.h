@@ -1574,8 +1574,6 @@ RDE_FUNC void rde_audio_end();
 
 /// ============================ FILE SYSTEM ================================
 
-#ifdef RDE_FILE_SYSTEM_MODULE
-#endif
 
 #if IS_ANDROID()
 RDE_FUNC ANativeWindow* rde_android_get_native_window();

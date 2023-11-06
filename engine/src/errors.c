@@ -46,9 +46,7 @@
 #define RDE_WARNING_OBJ_VERTEX_INCLUDES_COLORS "Model '%s' includes vertex colors in 'v' and this is still not supported so it will be ignored \n"
 #endif
 
-#ifdef RDE_FILE_SYSTEM_MODULE
 #define RDE_ERROR_FILE_SYSTEM_MAX_OPENED_FILES_REACHED "Max number of concurrent files opened '%d' by File System Modle has been reached. Please close some files before opening more. \n"
-#endif
 
 static int times_enter_in_error = 0;
 

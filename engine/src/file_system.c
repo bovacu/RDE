@@ -147,10 +147,6 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 }
 #endif
 
-
-
-#ifdef RDE_FILE_SYSTEM_MODULE
-
 static const char* rde_inner_file_system_file_mode_to_char(const RDE_FILE_MODE_ _mode) {
 	switch (_mode) {
 		case RDE_FILE_MODE_READ: return "rb";
@@ -342,4 +338,3 @@ void rde_file_close(rde_file_handle* _file_handler) {
 	SDL_RWclose(_file_handler->sdl_handle);
 	_file_handler->sdl_handle = NULL;
 }
-#endif

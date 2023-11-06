@@ -5,7 +5,6 @@
 #define RDE_RENDERING_ERROR_MODULE
 #define RDE_RENDERING_AUDIO_MODULE
 #define RDE_RENDERING_OBJ_MODULE
-#define RDE_FILE_SYSTEM_MODULE
 #include "rde.h"
 #include "test_utils.c"
 
