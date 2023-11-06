@@ -34,6 +34,9 @@
 #include <math.h>
 #include "cglm/call.h"
 
+#define MINICORO_IMPL
+#include "minicoro/minicoro.h"
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wunused-function"
