@@ -598,11 +598,13 @@ void rde_inner_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh
 		return;
 	}
 
-	if(current_batch_3d.draw_mesh_wireframe) {
+#if !IS_ANDROID()
+    if(current_batch_3d.draw_mesh_wireframe) {
 		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 		rde_inner_rendering_flush_batch_3d();
 		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 	}
+#endif
 
 	rde_inner_rendering_flush_batch_3d();
 	rde_inner_rendering_reset_batch_3d();
@@ -947,12 +949,14 @@ void rde_rendering_3d_draw_model(const rde_transform* _transform, rde_model* _mo
 }
 
 void rde_rendering_3d_end_drawing() {
-	
+
+#if !IS_ANDROID()
 	if(current_batch_3d.draw_mesh_wireframe) {
 		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 		rde_inner_rendering_flush_batch_3d();
 		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 	}
+#endif
 
 	rde_inner_rendering_flush_batch_3d();
 

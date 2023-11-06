@@ -55,12 +55,15 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &profile);
 	rde_util_check_opengl_error("getting profile mask");
 	if (profile & GL_CONTEXT_CORE_PROFILE_BIT) {
-		printf("Core profile\n");
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Core profile");
+	} else if(profile & GL_CONTEXT_COMPATIBILITY_PROFILE_BIT) {
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Compatibility profile");
 	} else {
-		printf("Compatibility profile\n");
+		rde_log_level(RDE_LOG_LEVEL_WARNING, "Unkown OpenGL context profile");
 	}
-	rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL Version: %s, Vendor: %s, GPU: %s, GLSL: %s", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
+
+	rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL Version: %s, Vendor: %s, GPU: %s, GLSL: %s", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -141,10 +144,61 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 #else
-	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, RDE_COLOR_VERTEX_SHADER_2D_ES, RDE_COLOR_FRAGMENT_SHADER_2D_ES);
-	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, RDE_TEXTURE_VERTEX_SHADER_2D_ES, RDE_TEXTURE_FRAGMENT_SHADER_2D_ES);
-	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, RDE_TEXT_VERTEX_SHADER_2D_ES, RDE_TEXT_FRAGMENT_SHADER_2D_ES);
-	ENGINE.framebuffer_shader = rde_rendering_shader_load(RDE_SHADER_MESH, RDE_FRAME_BUFFER_VERTEX_SHADER_ES, RDE_FRAME_BUFFER_FRAGMENT_SHADER_ES);
+	rde_file_handle* _shader_vertex_handle = rde_file_open("shaders/es/line_vert.glsl", RDE_FILE_MODE_READ);
+	rde_file_handle* _shader_fragment_handle = rde_file_open("shaders/es/line_frag.glsl", RDE_FILE_MODE_READ);
+	char* _vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	char* _fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.line_shader = rde_rendering_shader_load(RDE_SHADER_LINE, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+
+	_shader_vertex_handle = rde_file_open("shaders/es/color_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/es/color_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+
+	_shader_vertex_handle = rde_file_open("shaders/es/texture_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/es/texture_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+
+	_shader_vertex_handle = rde_file_open("shaders/es/text_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/es/text_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+
+	_shader_vertex_handle = rde_file_open("shaders/es/framebuffer_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/es/framebuffer_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.framebuffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+
+	_shader_vertex_handle = rde_file_open("shaders/es/mesh_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/es/mesh_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+
+	_shader_vertex_handle = rde_file_open("shaders/es/skybox_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/es/skybox_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	ENGINE.skybox_shader = rde_rendering_shader_load(RDE_SHADER_SKYBOX, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
 #endif
 	
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
@@ -866,7 +920,10 @@ rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _h
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
+
+#if !IS_ANDROID()
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+#endif
 
 	glGenRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
 	glBindRenderbuffer(GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 
@@ -923,7 +980,10 @@ void rde_rendering_render_texture_update(rde_render_texture* _render_texture, si
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+#if !IS_ANDROID()
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+#endif
 
 	glGenRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
 	glBindRenderbuffer(GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 

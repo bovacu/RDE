@@ -1,8 +1,11 @@
-#define RDE_AUDIO_MODULE
+
+#ifndef __ANDROID__
+//#define RDE_AUDIO_MODULE
 #define RDE_RENDERING_MODULE
 #define RDE_FBX_MODULE
 #define RDE_OBJ_MODULE
 #define RDE_PHYSICS_3D_MODULE
+#endif
 
 /**
  * NOTES:
@@ -12,8 +15,15 @@
 
 #include "rde.h"
 #include <math.h>
+#include <string.h>
 #include "imgui.h"
+
+#if IS_ANDROID()
+#include "backends/imgui_impl_android.h"
+#else
 #include "backends/imgui_impl_sdl2.h"
+#endif
+
 #include "backends/imgui_impl_opengl3.h"
 
 typedef void (*unload_func)();
@@ -61,13 +71,12 @@ const rde_engine_heap_allocs_config _heap_allocs_config = {
 	.max_number_of_atlases = 10,
 	.max_number_of_fonts = 10,
 	.max_number_of_models = 5,
-	.max_number_of_models_textures = 340,
-	.max_number_of_sounds = 5
+	.max_number_of_models_textures = 340
 };
 
 void on_event(rde_event* _event, rde_window* _window) {
 	(void)_window;
-	ImGui_ImplSDL2_ProcessEvent((SDL_Event*)_event->native_event);
+	// ImGui_ImplSDL2_ProcessEvent((SDL_Event*)_event->native_event);
 
 	if(events_callback != NULL) {
 		events_callback(_event, _window);
@@ -141,9 +150,18 @@ void on_render(float _dt, rde_window* _window) {
 	rde_rendering_set_background_color(RDE_COLOR_BLACK);
 
 	ImGui_ImplOpenGL3_NewFrame();
+	
+	#if IS_ANDROID()
+	ImGui_ImplAndroid_NewFrame();
+	#else
 	ImGui_ImplSDL2_NewFrame((SDL_Window*)rde_window_get_native_sdl_window_handle(_window));
+	#endif
+
 	ImGui::NewFrame();
 	
+	rde_camera _camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
+	_camera.transform.position = (rde_vec_3F) { -3.0, 8.0f, 14.0f };
+	model_viewer_draw_grid(&_camera, _window);
 	if(render_callback != NULL) {
 		render_callback(_dt, _window);
 	}
@@ -172,8 +190,13 @@ void init_func(int _argc, char** _argv) {
 	_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	ImGui::StyleColorsDark();
 
+	#if IS_ANDROID()
+	ImGui_ImplAndroid_Init(rde_android_get_native_window());
+	#else
 	ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)rde_window_get_native_sdl_window_handle(current_window), 
 	                             rde_window_get_native_sdl_gl_context_handle(current_window));
+	#endif
+
 	ImGui_ImplOpenGL3_Init();
 
 	// rde_window_set_icon(current_window, "logo.ico");
@@ -185,7 +208,13 @@ void end_func() {
 	}
 
 	ImGui_ImplOpenGL3_Shutdown();
+	
+	#if IS_ANDROID()
+	ImGui_ImplAndroid_Shutdown();
+	#else
 	ImGui_ImplSDL2_Shutdown();
+	#endif
+
 	ImGui::DestroyContext();
 }
 

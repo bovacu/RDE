@@ -16,7 +16,12 @@
 #include "glad/glad.h"
 #endif
 
+#if IS_ANDROID()
+// This include comes directly from the RDEAndroid module SDL JNI. It contains some extra fanzy features which normal SDL doesn't.
+#include "SDL.h"
+#else
 #include "SDL2/SDL.h"
+#endif
 
 
 #if IS_MAC()
@@ -54,7 +59,11 @@
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
 #define STB_DS_IMPLEMENTATION
 #define STBDS_NO_SHORT_NAMES
+
+#if !IS_ANDROID()
 #define STBDS_SIPHASH_2_4
+#endif
+
 #include "stb/stb_ds.h"
 #pragma clang diagnostic pop
 
@@ -335,6 +344,11 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 
 	_e.heap_allocs_config = _heap_allocs_config;
 	_e.heap_allocs_config.max_number_of_shaders += RDE_DEFAULT_SHADERS_AMOUNT;
+
+#if IS_ANDROID()
+	_e.android_env = SDL_AndroidGetJNIEnv();
+	rde_critical_error(_e.android_env == NULL, "Native Android window is NULL");
+#endif
 	
 #ifdef RDE_RENDERING_MODULE
 	_e.total_amount_of_textures = 0;
@@ -455,7 +469,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	#ifdef RDE_ERROR_MODULE
 	SetUnhandledExceptionFilter(rde_inner_error_sig_handler);
 	#endif
-#else
+#elif (IS_MAC() || IS_WINDOWS()) && !IS_ANDROID()
 	rde_inner_set_posix_signal_handler();
 #endif
 
@@ -474,6 +488,7 @@ rde_engine ENGINE;
 #include "events.c"
 #include "physics.c"
 #include "audio.c"
+#include "mobile.c"
 
 void rde_inner_engine_on_event();
 void rde_inner_engine_on_update(float _dt);
@@ -616,9 +631,19 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	SDL_GetVersion(&_version);
 	rde_log_level(RDE_LOG_LEVEL_INFO, "SDL Version: %d.%d.%d", _version.major, _version.minor, _version.patch);
 
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_EVENTS) < 0) {
+        rde_critical_error(true, "Could not initialize components of SDL on Init, fatal error: %s", SDL_GetError());
+    }
+
 	stbds_rand_seed(time(NULL));
 
 	rde_window* _default_window = rde_window_create_window();
+
+	#if IS_ANDROID()
+	ENGINE.android_native_window = SDL_AndroidGetNativeWindow();
+	rde_critical_error(ENGINE.android_native_window == NULL, "Native Android Window is NULL");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Got Native Android Window");
+	#endif
 
 	rde_inner_events_window_create_events();
 	rde_inner_events_display_create_events();
@@ -681,7 +706,7 @@ void rde_engine_on_run() {
 	rde_critical_error(ENGINE.mandatory_callbacks.on_render == NULL, RDE_ERROR_NULL_MANDATORY_CALLBACK, "rde_engine_user_on_render");
 
 	#if IS_MOBILE()
-	SDL_SetEventFilter(rde_mobile_consume_events);
+	SDL_SetEventFilter(rde_events_mobile_consume_events_callback_wrapper, NULL);
 	#endif
 
 #ifdef RDE_RENDERING_MODULE

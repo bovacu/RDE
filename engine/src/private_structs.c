@@ -174,6 +174,11 @@
 		
 		rde_window* windows;
 		
+		#if IS_ANDROID()
+		ANativeWindow* android_native_window;
+		JNIEnv* android_env;
+		#endif
+
 	#ifdef RDE_RENDERING_MODULE
 	#define RDE_SHADERS_AMOUNT 7
 		rde_shader* line_shader;
@@ -231,5 +236,233 @@
 	};
 	
 	#endif
+
+	rde_probability rde_struct_create_probability() {
+		rde_probability _p;
+		_p.probability_rolled = 0.f;
+		_p.happened = false;
+		return _p;
+	}
+
+	rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks() {
+		rde_end_user_mandatory_callbacks _e;
+		_e.on_update = NULL;
+		_e.on_fixed_update = NULL;
+		_e.on_late_update = NULL;
+		_e.on_render = NULL;
+		return _e;
+	}
+
+	rde_display_info rde_struct_create_display_info() {
+		rde_display_info _d;
+		_d.index = -1;
+		return _d;
+	}
+	
+	rde_event_window rde_struct_create_event_window() {
+		rde_event_window _e;
+		_e.position.x = -1;
+		_e.position.y = -1;
+		_e.size.x = -1;
+		_e.size.y = -1;
+		_e.display_index = -1;
+		_e.minimized = false;
+		_e.maximized = false;
+		return _e;
+	}
+
+	rde_event_display rde_struct_create_event_display() {
+		rde_event_display _e;
+		_e.orientation = -1;
+		_e.display_index = -1;
+		return _e;
+	}
+
+	rde_event_key rde_struct_create_event_key() {
+		rde_event_key _e;
+		_e.key = RDE_KEYBOARD_KEY_NONE;
+		_e.typed_char = '\0';
+		_e.amount_of_times_pressed = -1;
+		return _e;
+	}
+
+	rde_event_mouse rde_struct_create_event_mouse() {
+		rde_event_mouse _e;
+		_e.button = RDE_MOUSE_BUTTON_NONE;
+		_e.position.x = -1;
+		_e.position.y = -1;
+		_e.scrolled.x = -1.f;
+		_e.scrolled.y = -1.f;
+		return _e;
+	}
+
+	rde_event_controller rde_struct_create_event_controller() {
+		rde_event_controller _e;
+		_e.controller_id = -1;
+		_e.left_joystick.x = -1.f;
+		_e.left_joystick.y = -1.f;
+		_e.right_joystick.x = -1.f;
+		_e.right_joystick.y = -1.f;
+		_e.back_buttons.x = -1.f;
+		_e.back_buttons.y = -1.f;
+		_e.button = RDE_CONTROLLER_BUTTON_NONE;
+		_e.axis = RDE_CONTROLLER_AXIS_NONE;
+		return _e;
+	}
+
+	rde_event_mobile rde_struct_create_event_mobile() {
+		rde_event_mobile _e;
+		_e.init_touch_position.x = -1;
+		_e.init_touch_position.y = -1;
+		_e.end_touch_position.x = -1;
+		_e.end_touch_position.y = -1;
+		_e.pressure = -1.f;
+		_e.finger_id = -1;
+		return _e;
+	}
+
+	rde_event_drag_and_drop rde_struct_create_event_drag_and_drop() {
+		rde_event_drag_and_drop _e;
+		_e.window_id = 0;
+		_e.file_path = NULL;
+		return _e;
+	}
+
+	rde_event_data rde_struct_create_event_data() {
+		rde_event_data _e;
+		_e.window_event_data = rde_struct_create_event_window();
+		_e.key_event_data = rde_struct_create_event_key();
+		_e.mouse_event_data = rde_struct_create_event_mouse();
+		_e.controller_event_data = rde_struct_create_event_controller();
+		_e.mobile_event_data = rde_struct_create_event_mobile();
+		_e.display_event_data = rde_struct_create_event_display();
+		_e.drag_and_drop_data = rde_struct_create_event_drag_and_drop();
+		return _e;
+	}
+
+	rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type) {
+		static size_t _camera_counter = 0;
+		rde_camera _c;
+		_c.id = _camera_counter++;
+		_c.zoom = 1.f;
+		_c.fov = 45.f;
+		_c.transform = rde_struct_create_transform();
+		_c.camera_type = _camera_type;
+		_c.enabled = true;
+		_c.direction = (rde_vec_3F) { 0.0f, 0.0f, -1.0f };
+		_c.up = (rde_vec_3F) { 0.0f, 1.0f, 0.0f };
+		_c.near_far = (rde_vec_2F) { 0.1f, 100.f };
+		return _c;
+	}
+
+	rde_color rde_struct_create_color() {
+		rde_color _c;
+		_c.r = 255;
+		_c.g = 255;
+		_c.b = 255;
+		_c.a = 255;
+		return _c;
+	}
+
+	rde_event rde_struct_create_event() {
+		rde_event _e;
+		_e.type = RDE_EVENT_TYPE_NONE;
+		_e.time_stamp = 0;
+		_e.window_id = 0;
+		_e.handled = false;
+		_e.data = rde_struct_create_event_data();
+		_e.native_event = NULL;
+		return _e;
+	}
+
+	rde_transform rde_struct_create_transform() {
+		rde_transform _t;
+		_t.position.x = 0.f;
+		_t.position.y = 0.f;
+		_t.position.z = 0.f;
+		_t.rotation.x = 0.f;
+		_t.rotation.y = 0.f;
+		_t.rotation.z = 0.f;
+		_t.scale.x = 1.f;
+		_t.scale.y = 1.f;
+		_t.scale.z = 1.f;
+		_t.parent = NULL;
+		return _t;
+	}
+
+#ifdef RDE_RENDERING_MODULE
+	rde_material_light_data rde_struct_create_material_light_data() {
+		rde_material_light_data _m;
+		_m.shininess = 1.0f;
+		_m.ka = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+		_m.kd = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+		_m.ks = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+		return _m;
+	}
+
+	rde_material rde_struct_create_material() {
+		rde_material _m;
+		_m.map_ka = NULL;
+		_m.map_kd = NULL;
+		_m.map_ks = NULL;
+		_m.map_bump = NULL;
+		_m.render_texture = NULL;
+		_m.material_light_data = rde_struct_create_material_light_data();
+		return _m;
+	}
+
+	rde_directional_light rde_struct_create_directional_light() {
+		rde_directional_light _d;
+		_d.direction = (rde_vec_3F) { -0.2f, -1.0f, -0.3f };
+		_d.ambient_color = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
+		_d.diffuse_color = (rde_vec_3F) { 0.5f, 0.5f, 0.5f };
+		_d.specular_color = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+		return _d;
+	}
+
+	rde_point_light rde_struct_create_point_light() {
+		rde_point_light _p;
+		_p.position = (rde_vec_3F) { 0.0, 0.0f, 0.0f };
+		_p.ambient_color = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
+		_p.diffuse_color = (rde_vec_3F) { 0.5f, 0.5f, 0.5f };
+		_p.specular_color = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+		_p.constant = 1.0f;
+		_p.linear = 0.09f;
+		_p.quadratic = 0.032f;
+		return _p;
+	}
+
+	rde_spot_light rde_struct_create_spot_light() {
+		rde_spot_light _s;
+		_s.position = (rde_vec_3F) { 0.0, 0.0f, 0.0f };
+		_s.direction = (rde_vec_3F) { 0.0, -1.0f, 0.0f };
+		_s.cut_off = 0.99999f;
+		_s.outer_cut_off = 0.99999f;
+		_s.ambient_color = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
+		_s.diffuse_color = (rde_vec_3F) { 0.8f, 0.8f, 0.8f };
+		_s.specular_color = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+		_s.constant = 1.0f;
+		_s.linear = 0.09f;
+		_s.quadratic = 0.032f;
+		return _s;
+	}
+#endif
+
+	rde_polygon rde_struct_create_polygon() {
+		rde_polygon _p;
+		_p.vertices = NULL;
+		_p.vertices_count = 0;
+		return _p;
+	}
+
+#ifdef RDE_AUDIO_MODULE
+	rde_sound_config rde_struct_create_audio_config() {
+		rde_sound_config _s;
+		_s.user_data = NULL;
+		_s.channels = 2;
+		_s.rate = 48000;
+		return _s;
+	}
+#endif
 
 #endif

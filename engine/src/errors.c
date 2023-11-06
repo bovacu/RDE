@@ -148,6 +148,8 @@ static int times_enter_in_error = 0;
 
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
+	#elif IS_ANDROID()
+	// TODO: print stack trace in Android
 	#else
 	#define RDE_STACKTRACE_MAX_DEPTH 1024
 	// Same value as SIGSTKSZ
@@ -388,30 +390,40 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check below");
 #endif
 
+#if IS_ANDROID()
+	va_list _args;
+	va_start(_args, _fmt);
+	char _error[1024];
+	memset(_error, 0, 1024);
+	vsprintf(_error, _fmt, _args);
+	va_end(_args);
+	__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", "%s", _error);
+#else
 	FILE* _f = NULL;
 	
-#if IS_WINDOWS()
-	fopen_s(&_f, "rde_crash_logs.txt", "w");
-#else
-	_f = fopen("rde_crash_logs.txt", "w");
-#endif
+	#if IS_WINDOWS()
+		fopen_s(&_f, "rde_crash_logs.txt", "w");
+	#else
+		_f = fopen("rde_crash_logs.txt", "w");
+	#endif
 
 	va_list _args;
 	va_start(_args, _fmt);
 	
-#ifdef RDE_DEBUG
-	vfprintf(stdout, _fmt, _args);
-	#ifdef RDE_ERROR_MODULE
-	rde_inner_print_stack_trace(stdout);
+	#if defined(RDE_DEBUG)
+		vfprintf(stdout, _fmt, _args);
+		#ifdef RDE_ERROR_MODULE
+		rde_inner_print_stack_trace(stdout);
+		#endif
+	#else
+		vfprintf(_f, _fmt, _args);
+		#if defined(RDE_ERROR_MODULE)
+		rde_inner_print_stack_trace(_f);
+		#endif
 	#endif
-#else
-	vfprintf(_f, _fmt, _args);
-	#ifdef RDE_ERROR_MODULE
-	rde_inner_print_stack_trace(_f);
-	#endif
+		va_end(_args);
+		fclose(_f);
 #endif
-	va_end(_args);
-	fclose(_f);
 	
 	rde_engine_destroy_engine();
 
