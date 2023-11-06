@@ -8,12 +8,6 @@
 #define RDE_IMGUI_MODULE
 #endif
 
-/**
- * NOTES:
- * 		- The examples suite is compiled as CPP just because of ImGui. I know there are bindings, but original lib
- * 		  is always more reliable.
- */
-
 #include "rde.h"
 #include <math.h>
 #include <string.h>
@@ -39,8 +33,8 @@ void model_viewer_draw_grid(rde_camera* _camera, rde_window* _window) {
 	rde_rendering_3d_end_drawing();
 }
 
- #include "model_viewer.cpp"
- #include "performance_test.cpp"
+ #include "model_viewer.c"
+ #include "performance_test.c"
 
 void on_event(rde_event* _event, rde_window* _window);
 void on_update(float _dt);

@@ -1413,7 +1413,7 @@ bool compile_windows() {
 		memset(output_atlas, 0, MAX_PATH);																			\
 		strcat(output_atlas, _output);																				\
 		strcat(output_atlas, "hub.exe");																			\
-		arrput(_build_command, "clang++");																			\
+		arrput(_build_command, "clang");																			\
 		if(strcmp(build_type, "debug") == 0) {																		\
 			arrput(_build_command, "-g");																			\
 			arrput(_build_command, "-O0");																			\
@@ -1421,11 +1421,11 @@ bool compile_windows() {
 		} else {																									\
 			arrput(_build_command, "-O3");																			\
 		}																											\
-		arrput(_build_command, "-std=c++11");																		\
+		arrput(_build_command, "-std=c99");																			\
 																													\
 		char _t_source_path[MAX_PATH];																				\
 		memset(_t_source_path, 0, MAX_PATH);																		\
-		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples\\hub.cpp");						\
+		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples\\hub.c");							\
 		arrput(_build_command, _t_source_path);																		\
 																													\
 		arrput(_build_command, "-I");																				\
@@ -2051,7 +2051,7 @@ bool compile_osx() {
 		memset(output_atlas, 0, MAX_PATH);																			\
 		strcat(output_atlas, _output);																				\
 		strcat(output_atlas, "hub");																			    \
-		arrput(_build_command, "clang++");																			\
+		arrput(_build_command, "clang");																			\
 		if(strcmp(build_type, "debug") == 0) {																		\
 		arrput(_build_command, "-g");																				\
 		arrput(_build_command, "-O0");																				\
@@ -2059,7 +2059,7 @@ bool compile_osx() {
 		} else {																									\
 		arrput(_build_command, "-O3");																				\
 		}																											\
-		arrput(_build_command, "-std=c++11");																		\
+		arrput(_build_command, "-std=c99");																			\
 																													\
 		char _mac_version_buf[256];																					\
     	memset(_mac_version_buf, 0, 256);																			\
@@ -2070,7 +2070,7 @@ bool compile_osx() {
 		arrput(_build_command, _min_version);																		\
 		char _t_source_path[MAX_PATH];																				\
 		memset(_t_source_path, 0, MAX_PATH);																		\
-		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples/hub.cpp");						\
+		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples/hub.c");							\
 		arrput(_build_command, _t_source_path);																		\
 																													\
 		arrput(_build_command, "-I");																				\
@@ -2599,7 +2599,7 @@ bool compile_linux() {
 		memset(output_atlas, 0, MAX_PATH);																			\
 		strcat(output_atlas, _output);																				\
 		strcat(output_atlas, "hub");																			    \
-		arrput(_build_command, "clang++");																			\
+		arrput(_build_command, "clang");																			\
 		if(strcmp(build_type, "debug") == 0) {																		\
 			arrput(_build_command, "-g");																			\
 			arrput(_build_command, "-O0");																			\
@@ -2607,11 +2607,11 @@ bool compile_linux() {
 		} else {																									\
 			arrput(_build_command, "-O3");																			\
 		}																											\
-		arrput(_build_command, "-std=c++11");																		\
+		arrput(_build_command, "-std=c99");																			\
 																													\
 		char _t_source_path[MAX_PATH];																				\
 		memset(_t_source_path, 0, MAX_PATH);																		\
-		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples/hub.cpp");						\
+		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples/hub.c");							\
 		arrput(_build_command, _t_source_path);																		\
 																													\
 		arrput(_build_command, "-I");																				\

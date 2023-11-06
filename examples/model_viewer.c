@@ -457,15 +457,15 @@ void model_viewer_init() {
 	rde_rendering_light_add_add_spot_light(&model_viewer_spot_light);
 
 	rde_material _light_ball_material = rde_struct_create_material();
-	_light_ball_material.material_light_data.ka = { 1.0f, 1.0f, 1.0f };
-	_light_ball_material.material_light_data.kd = { 0.0f, 0.0f, 0.0f };
-	_light_ball_material.material_light_data.ks = { 0.0f, 0.0f, 0.0f };
+	_light_ball_material.material_light_data.ka = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+	_light_ball_material.material_light_data.kd = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
+	_light_ball_material.material_light_data.ks = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
 	model_viewer_point_light_mesh = rde_rendering_mesh_create_sphere(0.25f, &_light_ball_material);
 
 	rde_material _light_cube_material = rde_struct_create_material();
-	_light_cube_material.material_light_data.ka = { 1.0f, 1.0f, 1.0f };
-	_light_cube_material.material_light_data.kd = { 0.0f, 0.0f, 0.0f };
-	_light_cube_material.material_light_data.ks = { 0.0f, 0.0f, 0.0f };
+	_light_cube_material.material_light_data.ka = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+	_light_cube_material.material_light_data.kd = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
+	_light_cube_material.material_light_data.ks = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
 	model_viewer_spot_light_mesh = rde_rendering_mesh_create_cube(0.25f, &_light_cube_material);
 
 	model_viewer_skybox = rde_rendering_skybox_load((const char*[6]) {
