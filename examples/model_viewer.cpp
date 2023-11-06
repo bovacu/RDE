@@ -30,6 +30,8 @@ rde_mesh* model_viewer_second_screen_mesh = NULL;
 rde_render_texture* model_viewer_second_screen_rt = NULL;
 static bool model_viewer_render_model_to_plane = false;
 
+rde_skybox_id model_viewer_skybox;
+
 bool model_viewer_show_skybox = false;
 
 void model_viewer_keyboard_controller(float _dt) {
@@ -207,10 +209,10 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 	(void)_window;
 	
 	{
-		ImGui::Begin("Directional Lighting", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-		ImGui::PushID(1);
+		rde_imgui_begin("Directional Lighting", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+		rde_imgui_push_id(1);
 		float _vec[3] = { model_viewer_directional_light_direction.x, model_viewer_directional_light_direction.y, model_viewer_directional_light_direction.z };
-		if (ImGui::DragFloat3("Direction", _vec, 0.25f)) {
+		if (rde_imgui_drag_float_3("Direction", _vec, 0.25f, 0, 0, "%.3f", 0)) {
 			model_viewer_directional_light_direction.x = _vec[0];
 			model_viewer_directional_light_direction.y = _vec[1];
 			model_viewer_directional_light_direction.z = _vec[2];
@@ -218,7 +220,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 		}
 	
 		float _vec_1[3] = { model_viewer_directional_light_ambient_color.x, model_viewer_directional_light_ambient_color.y, model_viewer_directional_light_ambient_color.z };
-		if (ImGui::DragFloat3("Ambient Color", _vec_1, 0.005f, 0.0f, 1.0f)) {
+		if (rde_imgui_drag_float_3("Ambient Color", _vec_1, 0.005f, 0.0f, 1.0f, "%.3f", 0)) {
 			model_viewer_directional_light_ambient_color.x = _vec_1[0];
 			model_viewer_directional_light_ambient_color.y = _vec_1[1];
 			model_viewer_directional_light_ambient_color.z = _vec_1[2];
@@ -226,7 +228,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 		}
 	
 		float _vec_2[3] = { model_viewer_directional_light_diffuse_color.x, model_viewer_directional_light_diffuse_color.y, model_viewer_directional_light_diffuse_color.z };
-		if (ImGui::DragFloat3("Diffuse Color", _vec_2, 0.005f, 0.0f, 1.0f)) {
+		if (rde_imgui_drag_float_3("Diffuse Color", _vec_2, 0.005f, 0.0f, 1.0f, "%.3f", 0)) {
 			model_viewer_directional_light_diffuse_color.x = _vec_2[0];
 			model_viewer_directional_light_diffuse_color.y = _vec_2[1];
 			model_viewer_directional_light_diffuse_color.z = _vec_2[2];
@@ -234,167 +236,167 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 		}
 	
 		float _vec_3[3] = { model_viewer_directional_light_specular_color.x, model_viewer_directional_light_specular_color.y, model_viewer_directional_light_specular_color.z };
-		if (ImGui::DragFloat3("Specular color", _vec_3, 0.005f, 0.0f, 1.0f)) {
+		if(rde_imgui_drag_float_3("Specular color", _vec_3, 0.005f, 0.0f, 1.0f, "%.3f", 0)) {
 			model_viewer_directional_light_specular_color.x = _vec_3[0];
 			model_viewer_directional_light_specular_color.y = _vec_3[1];
 			model_viewer_directional_light_specular_color.z = _vec_3[2];
 			rde_rendering_lighting_set_directional_light_specular_color_f(model_viewer_directional_light_specular_color);
 		}
-		ImGui::PopID();
-		ImGui::End();
+		rde_imgui_pop_id();
+		rde_imgui_end();
 	}
 
 	{
-		ImGui::Begin("Point Lighting", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-		ImGui::PushID(2);
+		rde_imgui_begin("Point Lighting", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+		rde_imgui_push_id(2);
 		float _vec[3] = { model_viewer_point_light.position.x, model_viewer_point_light.position.y, model_viewer_point_light.position.z };
-		if(ImGui::DragFloat3("Position", _vec, 0.25f)) {
+		if(rde_imgui_drag_float_3("Position", _vec, 0.25f, 0, 0, "%.3f", 0)) {
 			model_viewer_point_light.position.x = _vec[0];
 			model_viewer_point_light.position.y = _vec[1];
 			model_viewer_point_light.position.z = _vec[2];
 		}
 
 		float _vec_1[3] = { model_viewer_point_light.ambient_color.x, model_viewer_point_light.ambient_color.y, model_viewer_point_light.ambient_color.z };
-		if(ImGui::DragFloat3("Ambient Color", _vec_1, 0.005f, 0.0f, 1.0f)) {
+		if(rde_imgui_drag_float_3("Ambient Color", _vec_1, 0.005f, 0.0f, 1.0f, "%.3f", 0)) {
 			model_viewer_point_light.ambient_color.x = _vec_1[0];
 			model_viewer_point_light.ambient_color.y = _vec_1[1];
 			model_viewer_point_light.ambient_color.z = _vec_1[2];
 		}
 
 		float _vec_2[3] = { model_viewer_point_light.diffuse_color.x, model_viewer_point_light.diffuse_color.y, model_viewer_point_light.diffuse_color.z };
-		if(ImGui::DragFloat3("Diffuse Color", _vec_2, 0.005f, 0.0f, 1.0f)) {
+		if(rde_imgui_drag_float_3("Diffuse Color", _vec_2, 0.005f, 0.0f, 1.0f, "%.3f", 0)) {
 			model_viewer_point_light.diffuse_color.x = _vec_2[0];
 			model_viewer_point_light.diffuse_color.y = _vec_2[1];
 			model_viewer_point_light.diffuse_color.z = _vec_2[2];
 		}
 
 		float _vec_3[3] = { model_viewer_point_light.specular_color.x, model_viewer_point_light.specular_color.y, model_viewer_point_light.specular_color.z };
-		if(ImGui::DragFloat3("Specular color", _vec_3, 0.005f, 0.0f, 1.0f)) {
+		if(rde_imgui_drag_float_3("Specular color", _vec_3, 0.005f, 0.0f, 1.0f, "%.3f", 0)) {
 			model_viewer_point_light.specular_color.x = _vec_3[0];
 			model_viewer_point_light.specular_color.y = _vec_3[1];
 			model_viewer_point_light.specular_color.z = _vec_3[2];
 		}
 
-		ImGui::DragFloat("Constan", &model_viewer_point_light.constant, 0.0001f, 0.001f, 1.0f);
-		ImGui::DragFloat("Linear", &model_viewer_point_light.linear, 0.0001f, 0.0f, 1.0f);
-		ImGui::DragFloat("Quadratic", &model_viewer_point_light.quadratic, 0.0001f, 0.0f, 2.0f);
-		ImGui::PopID();
-		ImGui::End();
+		rde_imgui_drag_float("Constan", &model_viewer_point_light.constant, 0.0001f, 0.001f, 1.0f, "%.3f", 0);
+		rde_imgui_drag_float("Linear", &model_viewer_point_light.linear, 0.0001f, 0.0f, 1.0f, "%.3f", 0);
+		rde_imgui_drag_float("Quadratic", &model_viewer_point_light.quadratic, 0.0001f, 0.0f, 2.0f, "%.3f", 0);
+		rde_imgui_pop_id();
+		rde_imgui_end();
 	}
 
 	{
-		ImGui::Begin("Spot Lighting", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-		ImGui::PushID(3);
+		rde_imgui_begin("Spot Lighting", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+		rde_imgui_push_id(3);
 		float _vec[3] = { model_viewer_spot_light.position.x, model_viewer_spot_light.position.y, model_viewer_spot_light.position.z };
-		if(ImGui::DragFloat3("Position", _vec, 0.25f)) {
+		if(rde_imgui_drag_float_3("Position", _vec, 0.25f, 0, 0, "%.3f", 0)) {
 			model_viewer_spot_light.position.x = _vec[0];
 			model_viewer_spot_light.position.y = _vec[1];
 			model_viewer_spot_light.position.z = _vec[2];
 		}
 
 		float _vec_0[3] = { model_viewer_spot_light.direction.x, model_viewer_spot_light.direction.y, model_viewer_spot_light.direction.z };
-		if(ImGui::DragFloat3("Direction", _vec_0, 0.01f)) {
+		if(rde_imgui_drag_float_3("Direction", _vec_0, 0.01f, 0, 0, "%.3f", 0)) {
 			model_viewer_spot_light.direction.x = _vec_0[0];
 			model_viewer_spot_light.direction.y = _vec_0[1];
 			model_viewer_spot_light.direction.z = _vec_0[2];
 		}
 
 		float _vec_1[3] = { model_viewer_spot_light.ambient_color.x, model_viewer_spot_light.ambient_color.y, model_viewer_spot_light.ambient_color.z };
-		if(ImGui::DragFloat3("Ambient Color", _vec_1, 0.005f, 0.0f, 1.0f)) {
+		if(rde_imgui_drag_float_3("Ambient Color", _vec_1, 0.005f, 0.0f, 1.0f, "%.3f", 0)) {
 			model_viewer_spot_light.ambient_color.x = _vec_1[0];
 			model_viewer_spot_light.ambient_color.y = _vec_1[1];
 			model_viewer_spot_light.ambient_color.z = _vec_1[2];
 		}
 
 		float _vec_2[3] = { model_viewer_spot_light.diffuse_color.x, model_viewer_spot_light.diffuse_color.y, model_viewer_spot_light.diffuse_color.z };
-		if(ImGui::DragFloat3("Diffuse Color", _vec_2, 0.005f, 0.0f, 1.0f)) {
+		if(rde_imgui_drag_float_3("Diffuse Color", _vec_2, 0.005f, 0.0f, 1.0f, "%.3f", 0)) {
 			model_viewer_spot_light.diffuse_color.x = _vec_2[0];
 			model_viewer_spot_light.diffuse_color.y = _vec_2[1];
 			model_viewer_spot_light.diffuse_color.z = _vec_2[2];
 		}
 
 		float _vec_3[3] = { model_viewer_spot_light.specular_color.x, model_viewer_spot_light.specular_color.y, model_viewer_spot_light.specular_color.z };
-		if(ImGui::DragFloat3("Specular color", _vec_3, 0.005f, 0.0f, 1.0f)) {
+		if(rde_imgui_drag_float_3("Specular color", _vec_3, 0.005f, 0.0f, 1.0f, "%.3f", 0)) {
 			model_viewer_spot_light.specular_color.x = _vec_3[0];
 			model_viewer_spot_light.specular_color.y = _vec_3[1];
 			model_viewer_spot_light.specular_color.z = _vec_3[2];
 		}
 
-		ImGui::DragFloat("Cut Off", &model_viewer_spot_light.cut_off, 1.f, 0.0f, 100.0f);
-		ImGui::DragFloat("Outer Cut Off", &model_viewer_spot_light.outer_cut_off, 1.f, 0.0f, 100.0f);
-		ImGui::DragFloat("Constan", &model_viewer_spot_light.constant, 0.0001f, 0.001f, 1.0f);
-		ImGui::DragFloat("Linear", &model_viewer_spot_light.linear, 0.0001f, 0.0f, 1.0f);
-		ImGui::DragFloat("Quadratic", &model_viewer_spot_light.quadratic, 0.0001f, 0.0f, 2.0f);
-		ImGui::PopID();
-		ImGui::End();
+		rde_imgui_drag_float("Cut Off", &model_viewer_spot_light.cut_off, 1.f, 0.0f, 100.0f, "%.3f", 0);
+		rde_imgui_drag_float("Outer Cut Off", &model_viewer_spot_light.outer_cut_off, 1.f, 0.0f, 100.0f, "%.3f", 0);
+		rde_imgui_drag_float("Constan", &model_viewer_spot_light.constant, 0.0001f, 0.001f, 1.0f, "%.3f", 0);
+		rde_imgui_drag_float("Linear", &model_viewer_spot_light.linear, 0.0001f, 0.0f, 1.0f, "%.3f", 0);
+		rde_imgui_drag_float("Quadratic", &model_viewer_spot_light.quadratic, 0.0001f, 0.0f, 2.0f, "%.3f", 0);
+		rde_imgui_pop_id();
+		rde_imgui_end();
 	}
 
- 	ImGui::Begin("Model", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_begin("Model", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
 
-	ImGui::Text("Transform");
+	rde_imgui_text("Transform");
  	float _position[3] = { model_viewer_transform.position.x, model_viewer_transform.position.y, model_viewer_transform.position.z };
- 	if(ImGui::DragFloat3("Position", _position, 1.f)) {
+	if(rde_imgui_drag_float_3("Position", _position, 1.f, 0, 0, "%.3f", 0)) {
  		model_viewer_transform.position.x = _position[0];
  		model_viewer_transform.position.y = _position[1];
  		model_viewer_transform.position.z = _position[2];
  	}
 
- 	ImGui::Separator();
+ 	rde_imgui_separator();
  	float _radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.x);
 
- 	if(ImGui::SliderAngle("Rotation X", &_radians, 0, 360)) {
+	if(rde_imgui_slider_angle("Rotation X", &_radians, 0, 360, 0)) {
  		model_viewer_transform.rotation.x = rde_math_radians_to_degrees(_radians);
  	}
 
  	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.y);
- 	if(ImGui::SliderAngle("Rotation Y", &_radians, 0, 360)) {
+	if(rde_imgui_slider_angle("Rotation Y", &_radians, 0, 360, 0)) {
  		model_viewer_transform.rotation.y = rde_math_radians_to_degrees(_radians);
  	}
 
  	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.z);
- 	if(ImGui::SliderAngle("Rotation Z", &_radians, 0, 360)) {
+	if(rde_imgui_slider_angle("Rotation Z", &_radians, 0, 360, 0)) {
  		model_viewer_transform.rotation.z = rde_math_radians_to_degrees(_radians);
  	}
 
- 	ImGui::Separator();
+	rde_imgui_separator();
  	static bool _proportional_scale = true;
 
  	if(!_proportional_scale) {
  		float _scale[3] = { model_viewer_transform.scale.x, model_viewer_transform.scale.y, model_viewer_transform.scale.z };
- 		if(ImGui::DragFloat3("Scale", &model_viewer_transform.scale.x, 0.25f)) {
+		if(rde_imgui_drag_float_3("Scale", &model_viewer_transform.scale.x, 0.25f, 0, 0, "%.3f", 0)) {
  			model_viewer_transform.scale.x = _scale[0];
  			model_viewer_transform.scale.y = _scale[1];
  			model_viewer_transform.scale.z = _scale[2];
  		}
  	} else {
- 		if(ImGui::DragFloat("Scale", &model_viewer_transform.scale.x, 0.25f)) {
+		if(rde_imgui_drag_float("Scale", &model_viewer_transform.scale.x, 0.25f, 0, 0, "%.3f", 0)) {
  			model_viewer_transform.scale.x = model_viewer_transform.scale.x;
  			model_viewer_transform.scale.y = model_viewer_transform.scale.x;
  			model_viewer_transform.scale.z = model_viewer_transform.scale.x;
  		}
  	}
 
- 	ImGui::Checkbox("Proportional Scale", &_proportional_scale);
- 	ImGui::End();
+ 	rde_imgui_checkbox("Proportional Scale", &_proportional_scale);
+	rde_imgui_end();
 
- 	ImGui::Begin("Camera Options", NULL, ImGuiWindowFlags_AlwaysAutoResize);
- 	ImGui::DragFloat("FOV", &model_viewer_camera.fov, 1, 0, 180);
+	rde_imgui_begin("Camera Options", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_drag_float("FOV", &model_viewer_camera.fov, 1, 0, 180, "%.3f", 0);
 
  	float _near_far[2] = { model_viewer_camera.near_far.x, model_viewer_camera.near_far.y };
- 	if(ImGui::DragFloat2("Near/Far", _near_far, 1, 0, 10000)) {
+	if(rde_imgui_drag_float_2("Near/Far", _near_far, 1, 0, 10000, "%.3f", 0)) {
  		model_viewer_camera.near_far.x = _near_far[0];
  		model_viewer_camera.near_far.y = _near_far[1];
  	}
 
- 	ImGui::End();
+	rde_imgui_end();
 
-	ImGui::Begin("Rendering Options", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-	ImGui::Text("Total Meshes: %zu", model_viewer_model_data.amount_of_meshes);
-	ImGui::DragInt("Meshes", &model_viewer_max_meshes_to_render, 1, 0, model_viewer_model_data.amount_of_meshes);
-	ImGui::Checkbox("Wireframe", &model_viewer_draw_wireframe);
-	ImGui::Checkbox("Skybox", &model_viewer_show_skybox);
-	ImGui::Checkbox("Render Model To Plane", &model_viewer_render_model_to_plane);
-	ImGui::End();
+	rde_imgui_begin("Rendering Options", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_text("Total Meshes: %zu", model_viewer_model_data.amount_of_meshes);
+	rde_imgui_drag_int("Meshes", &model_viewer_max_meshes_to_render, 1, 0, model_viewer_model_data.amount_of_meshes, 0);
+	rde_imgui_checkbox("Wireframe", &model_viewer_draw_wireframe);
+	rde_imgui_checkbox("Skybox", &model_viewer_show_skybox);
+	rde_imgui_checkbox("Render Model To Plane", &model_viewer_render_model_to_plane);
+	rde_imgui_end();
  }
 
 void model_viewer_on_render(float _dt, rde_window* _window) {
@@ -421,6 +423,8 @@ void model_viewer_unload() {
 	if(model_viewer_spot_light_mesh != NULL) {
 		rde_rendering_mesh_destroy(model_viewer_spot_light_mesh, true);
 	}
+
+	rde_rendering_skybox_unload(model_viewer_skybox);
 
 	model_viewer_model = NULL;
 
@@ -464,7 +468,7 @@ void model_viewer_init() {
 	_light_cube_material.material_light_data.ks = { 0.0f, 0.0f, 0.0f };
 	model_viewer_spot_light_mesh = rde_rendering_mesh_create_cube(0.25f, &_light_cube_material);
 
-	rde_skybox_id _skybox = rde_rendering_skybox_load((const char*[6]) {
+	model_viewer_skybox = rde_rendering_skybox_load((const char*[6]) {
 		"hub_assets/skyboxes/nebulosa/right.png",
 		"hub_assets/skyboxes/nebulosa/left.png",
 		"hub_assets/skyboxes/nebulosa/top.png",
@@ -472,7 +476,7 @@ void model_viewer_init() {
 		"hub_assets/skyboxes/nebulosa/front.png",
 		"hub_assets/skyboxes/nebulosa/back.png",
 	});
-	rde_rendering_skybox_use(_skybox);
+	rde_rendering_skybox_use(model_viewer_skybox);
 
 	float _screen_positions[] = {
 		// positions

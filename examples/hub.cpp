@@ -39,8 +39,8 @@ void model_viewer_draw_grid(rde_camera* _camera, rde_window* _window) {
 	rde_rendering_3d_end_drawing();
 }
 
-// #include "model_viewer.cpp"
-// #include "performance_test.cpp"
+ #include "model_viewer.cpp"
+ #include "performance_test.cpp"
 
 void on_event(rde_event* _event, rde_window* _window);
 void on_update(float _dt);
@@ -124,14 +124,14 @@ void on_imgui_hub_menu() {
 			if(unload_callback != NULL) {
 				unload_callback();
 			}
-			// model_viewer_init();
+			 model_viewer_init();
 		}
 		
 		if(rde_imgui_radio_button("Performance Test 3D", &_option, 1)) {
 			if(unload_callback != NULL) {
 				unload_callback();
 			}
-			// performance_test_3d_init();
+			 performance_test_3d_init();
 		}
 		rde_imgui_end();
 	}
@@ -143,9 +143,6 @@ void on_render(float _dt, rde_window* _window) {
 
 	rde_imgui_new_frame();
 	
-	rde_camera _camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
-	_camera.transform.position = (rde_vec_3F) { -3.0, 8.0f, 14.0f };
-	model_viewer_draw_grid(&_camera, _window);
 	if(render_callback != NULL) {
 		render_callback(_dt, _window);
 	}
