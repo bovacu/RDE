@@ -904,6 +904,11 @@ void rde_rendering_skybox_use(rde_skybox_id _skybox_id) {
 void rde_rendering_skybox_unload(rde_skybox_id _skybox_id) {
 	rde_critical_error(!glIsTexture(_skybox_id), "Tried to delete a texture with negative id");
 	glDeleteTextures(1, &_skybox_id);
+
+	if(ENGINE.skybox.opengl_texture_id == (int)_skybox_id) {
+		ENGINE.skybox.opengl_texture_id = -1;
+		ENGINE.skybox.vao = RDE_UINT_MAX;
+	}
 }
 
 rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _height) {
