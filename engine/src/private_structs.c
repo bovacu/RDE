@@ -367,7 +367,7 @@
 		_e.window_id = 0;
 		_e.handled = false;
 		_e.data = rde_struct_create_event_data();
-		_e.native_event = NULL;
+		_e.sdl_native_event = NULL;
 		return _e;
 	}
 

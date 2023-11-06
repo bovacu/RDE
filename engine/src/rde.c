@@ -510,7 +510,7 @@ void rde_inner_engine_on_event() {
 	while (SDL_PollEvent(&_event)) {
 
 		rde_event _rde_event = rde_inner_event_sdl_event_to_rde_event(&_event);
-		_rde_event.native_event = (void*)&_event;
+		_rde_event.sdl_native_event = (void*)&_event;
 		
 		for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
 			rde_window* _window = &ENGINE.windows[_i];
@@ -576,8 +576,8 @@ void rde_inner_engine_on_event() {
 				ENGINE.user_event_callback(&_rde_event, _window);
 			}
 
-			if(_rde_event.type == RDE_EVENT_TYPE_DRAG_AND_DROP_FILE && ((SDL_Event*)(_rde_event.native_event))->drop.file != NULL) {
-				SDL_free(((SDL_Event*)(_rde_event.native_event))->drop.file);
+			if(_rde_event.type == RDE_EVENT_TYPE_DRAG_AND_DROP_FILE && ((SDL_Event*)(_rde_event.sdl_native_event))->drop.file != NULL) {
+				SDL_free(((SDL_Event*)(_rde_event.sdl_native_event))->drop.file);
 			}
 		}
 	}

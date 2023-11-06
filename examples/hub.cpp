@@ -5,6 +5,7 @@
 #define RDE_FBX_MODULE
 #define RDE_OBJ_MODULE
 #define RDE_PHYSICS_3D_MODULE
+#define RDE_IMGUI_MODULE
 #endif
 
 /**
@@ -16,15 +17,6 @@
 #include "rde.h"
 #include <math.h>
 #include <string.h>
-#include "imgui.h"
-
-#if IS_ANDROID()
-#include "backends/imgui_impl_android.h"
-#else
-#include "backends/imgui_impl_sdl2.h"
-#endif
-
-#include "backends/imgui_impl_opengl3.h"
 
 typedef void (*unload_func)();
 
@@ -47,8 +39,8 @@ void model_viewer_draw_grid(rde_camera* _camera, rde_window* _window) {
 	rde_rendering_3d_end_drawing();
 }
 
-#include "model_viewer.cpp"
-#include "performance_test.cpp"
+// #include "model_viewer.cpp"
+// #include "performance_test.cpp"
 
 void on_event(rde_event* _event, rde_window* _window);
 void on_update(float _dt);
@@ -76,7 +68,7 @@ const rde_engine_heap_allocs_config _heap_allocs_config = {
 
 void on_event(rde_event* _event, rde_window* _window) {
 	(void)_window;
-	// ImGui_ImplSDL2_ProcessEvent((SDL_Event*)_event->native_event);
+	rde_imgui_handle_events(_event->sdl_native_event);
 
 	if(events_callback != NULL) {
 		events_callback(_event, _window);
@@ -118,30 +110,30 @@ void on_late_update(float _dt) {
 }
 
 void on_imgui_hub_menu() {
-	static ImGuiDockNodeFlags _dockspace_flags = ImGuiDockNodeFlags_None;
-	_dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
-	ImGuiID _dockspace_id = ImGui::GetID("MyDockSpace");
-	ImGui::DockSpace(_dockspace_id, ImVec2(0.0f, 0.0f), _dockspace_flags);
+	static rde_ImGuiDockNodeFlags _dockspace_flags = rde_ImGuiDockNodeFlags_None;
+	_dockspace_flags &= ~rde_ImGuiDockNodeFlags_PassthruCentralNode;
+	rde_ImGuiID _dockspace_id = rde_imgui_get_id("MyDockSpace");
+ 	rde_imgui_dockspace(_dockspace_id, (rde_ImVec2) {0, 0}, _dockspace_flags);
 
-	if(ImGui::Begin("Hub", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Text("Welcome to the Hub!");
-		ImGui::Text("Choose any demo from the list");
+	if(rde_imgui_begin("Hub", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize)) {
+		rde_imgui_text("Welcome to the Hub!");
+		rde_imgui_text("Choose any demo from the list");
 		static int _option = -1;
-		ImGui::NewLine();
-		if(ImGui::RadioButton("Model Viewer", &_option, 0)) {
+		rde_imgui_new_line();
+		if(rde_imgui_radio_button("Model Viewer", &_option, 0)) {
 			if(unload_callback != NULL) {
 				unload_callback();
 			}
-			model_viewer_init();
+			// model_viewer_init();
 		}
 		
-		if(ImGui::RadioButton("Performance Test 3D", &_option, 1)) {
+		if(rde_imgui_radio_button("Performance Test 3D", &_option, 1)) {
 			if(unload_callback != NULL) {
 				unload_callback();
 			}
-			performance_test_3d_init();
+			// performance_test_3d_init();
 		}
-		ImGui::End();
+		rde_imgui_end();
 	}
 
 }
@@ -149,15 +141,7 @@ void on_imgui_hub_menu() {
 void on_render(float _dt, rde_window* _window) {
 	rde_rendering_set_background_color(RDE_COLOR_BLACK);
 
-	ImGui_ImplOpenGL3_NewFrame();
-	
-	#if IS_ANDROID()
-	ImGui_ImplAndroid_NewFrame();
-	#else
-	ImGui_ImplSDL2_NewFrame((SDL_Window*)rde_window_get_native_sdl_window_handle(_window));
-	#endif
-
-	ImGui::NewFrame();
+	rde_imgui_new_frame();
 	
 	rde_camera _camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
 	_camera.transform.position = (rde_vec_3F) { -3.0, 8.0f, 14.0f };
@@ -171,11 +155,7 @@ void on_render(float _dt, rde_window* _window) {
 		render_imgui_callback(_dt, _window);
 	}
 
-	ImGui::Render();
-	ImDrawData* _draw_data = ImGui::GetDrawData();
-	if(_draw_data != NULL) {
-		ImGui_ImplOpenGL3_RenderDrawData(_draw_data);
-	}
+	rde_imgui_draw();
 }
 
 void init_func(int _argc, char** _argv) {
@@ -184,21 +164,7 @@ void init_func(int _argc, char** _argv) {
 
 	rde_engine_set_event_user_callback(on_event);
 
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& _io = ImGui::GetIO(); (void)_io;
-	_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	ImGui::StyleColorsDark();
-
-	#if IS_ANDROID()
-	ImGui_ImplAndroid_Init(rde_android_get_native_window());
-	#else
-	ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)rde_window_get_native_sdl_window_handle(current_window), 
-	                             rde_window_get_native_sdl_gl_context_handle(current_window));
-	#endif
-
-	ImGui_ImplOpenGL3_Init();
-
+	rde_imgui_init(rde_window_get_native_sdl_window_handle(current_window), rde_window_get_native_sdl_gl_context_handle(current_window));
 	// rde_window_set_icon(current_window, "logo.ico");
 }
 
@@ -207,15 +173,7 @@ void end_func() {
 		unload_callback();
 	}
 
-	ImGui_ImplOpenGL3_Shutdown();
-	
-	#if IS_ANDROID()
-	ImGui_ImplAndroid_Shutdown();
-	#else
-	ImGui_ImplSDL2_Shutdown();
-	#endif
-
-	ImGui::DestroyContext();
+	rde_imgui_shutdown();
 }
 
 RDE_MAIN(current_window, _heap_allocs_config, _mandatory_callbacks, init_func, end_func);

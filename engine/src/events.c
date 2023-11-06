@@ -336,7 +336,7 @@ void rde_events_drag_and_drop_consume_events(rde_event* _event, rde_window* _win
 
 #if IS_MOBILE()
 int rde_events_mobile_consume_events(rde_event* _event, rde_window* _window, void* _user_data) {
-	SDL_Event* _native_event = (SDL_Event*)_event->native_event;
+	SDL_Event* _native_event = (SDL_Event*)_event->sdl_native_event;
 	return 1;
 }
 

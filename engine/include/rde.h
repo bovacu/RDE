@@ -1037,7 +1037,7 @@ struct rde_event {
 	uint window_id;
 	bool handled;
 	rde_event_data data;
-	void* native_event;
+	void* sdl_native_event;
 };
 rde_event rde_struct_create_event();
 
@@ -1574,6 +1574,10 @@ RDE_FUNC void rde_audio_end();
 
 /// ============================ FILE SYSTEM ================================
 
+
+#ifdef RDE_IMGUI_MODULE
+#include "rde_imgui.h"
+#endif
 
 #if IS_ANDROID()
 RDE_FUNC ANativeWindow* rde_android_get_native_window();

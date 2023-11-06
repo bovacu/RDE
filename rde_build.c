@@ -86,7 +86,7 @@ typedef enum {
 	RDE_MODULES_OBJ = 32,
 	RDE_MODULES_UI = 64,
 	RDE_MODULES_ERROR = 128,
-	RDE_MODULES_FILE_SYSTEM = 256,
+	RDE_MODULES_IMGUI = 256,
 } RDE_MODULES_;
 
 const char* MODULES_STR[MAX_MODULES] = {
@@ -98,7 +98,7 @@ const char* MODULES_STR[MAX_MODULES] = {
 	"obj",
 	"ui",
 	"error",
-	"file_system"
+	"imgui"
 };
 char* MODULES_DEFINES[MAX_MODULES] = {
 	"-DRDE_AUDIO_MODULE",
@@ -109,7 +109,7 @@ char* MODULES_DEFINES[MAX_MODULES] = {
 	"-DRDE_OBJ_MODULE",
 	"-DRDE_UI_MODULE",
 	"-DRDE_ERROR_MODULE",
-	"-DRDE_FILE_SYSTEM_MODULE"
+	"-DRDE_IMGUI_MODULE"
 };
 RDE_MODULES_ modules;
 
@@ -982,6 +982,52 @@ bool rm_dir_if_exists(const char* _dir_path) {
 	run_command(_command);
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Removed folder %s.", _dir_path);
 	return true;
+}
+
+
+void include_imgui_in_compilation(rde_command* _build_command) {
+	rde_command _inner_command = NULL;
+	arrput(_inner_command, "clang++");
+	
+	#if !_WIN32
+	arrput(_inner_command, "-c");
+	#endif
+
+	char _rde_imgui_cpp[MAX_PATH];
+	memset(_rde_imgui_cpp, 0, MAX_PATH);
+	snprintf(_rde_imgui_cpp, MAX_PATH, "%s%s", this_file_full_path, "external/include/imgui/rde_imgui.cpp");
+	arrput(_inner_command, _rde_imgui_cpp);
+
+	char _lib_output_path[MAX_PATH];
+	memset(_lib_output_path, 0, MAX_PATH);
+	strcat(_lib_output_path, this_file_full_path);
+
+	arrput(_inner_command, "-I");
+	char _imgui_path[MAX_PATH];
+	memset(_imgui_path, 0, MAX_PATH);
+	snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/include/imgui");
+	arrput(_inner_command, _imgui_path);
+
+	arrput(_inner_command, "-I");
+	char _sdl_path[MAX_PATH];
+	memset(_sdl_path, 0, MAX_PATH);
+	snprintf(_sdl_path, MAX_PATH, "%s%s", this_file_full_path, "external/include/SDL2");
+	arrput(_inner_command, _sdl_path);
+
+	#if _WIN32
+	arrput(_inner_command, "-o");
+
+	strcat(_lib_output_path, "external/libs/windows/imgui.lib");
+	arrput(_inner_command, _lib_output_path);
+	#endif
+
+	if(!run_command(_inner_command)) {
+		printf("Error compiling imgui\n");
+		exit(-1);
+	}	
+
+	printf("Good to go!\n");
+	(void)_build_command;
 }
 
 
@@ -2290,6 +2336,13 @@ bool compile_linux() {
 		snprintf(_temp_path_3, MAX_PATH, "%s%s", this_file_full_path, "external/include");					\
 		arrput(_build_command, _temp_path_3);																\
 																											\
+		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {											\
+			arrput(_build_command, "-I");																	\
+			char _imgui_path[MAX_PATH];																		\
+			memset(_imgui_path, 0, MAX_PATH);																\
+			snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/include/imgui");			\
+			arrput(_build_command, _imgui_path);															\
+		}																									\
 		if(strcmp(lib_type, "shared") == 0) {																\
 			arrput(_build_command, "-L");																	\
 			char _temp_path_4[MAX_PATH];																	\
@@ -2303,6 +2356,14 @@ bool compile_linux() {
 			arrput(_build_command, "-lSDL2main");															\
 			arrput(_build_command, "-lSDL2");																\
 			arrput(_build_command, "-lcglm");																\
+			if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {										\
+				arrput(_build_command, "-Wl,--whole-archive");												\
+				char _imgui_path[MAX_PATH];																	\
+				memset(_imgui_path, 0, MAX_PATH);															\
+				snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/libs/linux/librde_imgui.a");		\
+				arrput(_build_command, _imgui_path);														\
+				arrput(_build_command, "-Wl,--no-whole-archive");											\
+			}																								\
 			if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {								\
 				arrput(_build_command, "-ljolt");															\
 			}																								\
@@ -2815,7 +2876,7 @@ void print_help() {
 	"	- rendering\n"
 	"	- ui\n"
 	"	- error\n"
-	"	- file_system\n"
+	"	- imgui\n"
 	"Each of them can be added to your library. Have in mind that adding 'physics_3d' will add Jolt Physics Engine to your depenency list, in case \n"
 	"you are building a static lib, you will probably have to add the Jolt lib to your build system.\n"
 	"To add any of the modules use --modules= (or -m=) followed by an array of the included modules, for example:\n"
@@ -2829,7 +2890,7 @@ void print_help() {
 	"	- rendering: adds 2D rendering for 2D textures in a batched mode and also 3D batched drawing.\n"
 	"	- ui: adds custom inmediate mode UI.\n"
 	"	- error: adds handling for the most common error crashes and prints the stacktrace of the crash to the logs of the console (in debug) and to a error log file (in release).\n"
-	"	- error: adds operations with files in a cross-platform way.\n"
+	"	- imgui: adds imgui native support.\n"
 	"\n"
 	"--- GOD MODE --- \n"
 	"As described in the documentation, many structs shown to the user are simply pointers where you cannot access the \n"

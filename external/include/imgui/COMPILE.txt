@@ -1,0 +1,1 @@
+clang++ -c -fPIC imgui.cpp imgui_widgets.cpp imgui_tables.cpp imgui_draw.cpp backends/imgui_impl_sdl2.cpp backends/imgui_impl_opengl3.cpp rde_imgui.cpp -I. -I../SDL2 && ar -crs librde_imgui.a *.o && cp librde_imgui.a ../../libs/linux/ && cp librde_imgui.a ../../../examples/libs/ && rm *.o && rm librde_imgui.a
