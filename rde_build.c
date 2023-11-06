@@ -1811,6 +1811,14 @@ bool compile_osx() {
 		snprintf(_temp_path_3, MAX_PATH, "%s%s", this_file_full_path, "external/include");					\
 		arrput(_build_command, _temp_path_3);																\
 																											\
+		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {											\
+			arrput(_build_command, "-I");																	\
+			char _imgui_path[MAX_PATH];																		\
+			memset(_imgui_path, 0, MAX_PATH);																\
+			snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/include/imgui");			\
+			arrput(_build_command, _imgui_path);															\
+		}																									\
+																											\
 		if(strcmp(lib_type, "shared") == 0) {																\
 			arrput(_build_command, "-L");																	\
 			char _temp_path_4[MAX_PATH];																	\
@@ -1826,6 +1834,15 @@ bool compile_osx() {
 			arrput(_build_command, "-framework");															\
 			arrput(_build_command, "OpenGL");																\
 			arrput(_build_command, "-lcglm_rde");															\
+			arrput(_build_command, "-lc++");																\
+			arrput(_build_command, "-ObjC");																\
+			if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {										\
+				arrput(_build_command, "-Wl,-all_load");													\
+				char _imgui_path[MAX_PATH];																	\
+				memset(_imgui_path, 0, MAX_PATH);															\
+				snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/libs/osx_x86_64/librde_imgui.a");\
+				arrput(_build_command, _imgui_path);														\
+			}																								\
 			if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {								\
 				arrput(_build_command, "-ljolt");															\
 			}																								\

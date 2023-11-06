@@ -12,6 +12,10 @@
 #include <math.h>
 #include <string.h>
 
+#if IS_MAC()
+#include <stdlib.h>
+#endif
+
 typedef void (*unload_func)();
 
 rde_event_func events_callback = NULL;
