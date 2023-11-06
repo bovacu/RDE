@@ -20,7 +20,11 @@ typedef struct {
 
 typedef int rde_ImGuiWindowFlags;       // -> enum ImGuiWindowFlags_     // Flags: for Begin(), BeginChild()
 typedef int rde_ImGuiDockNodeFlags;     // -> enum ImGuiDockNodeFlags_   // Flags: for DockSpace()
+typedef int rde_ImGuiSliderFlags;     // -> enum ImGuiSliderFlags_ 
 typedef unsigned int rde_ImGuiID;// A unique ID used by widgets (typically the result of hashing a stack of string)
+#ifndef rde_ImTextureID
+typedef void* rde_ImTextureID;
+#endif
 
 typedef enum
 {
@@ -73,6 +77,16 @@ typedef enum
     rde_ImGuiDockNodeFlags_NoUndocking                  = 1 << 7,   //       // Disable undocking this node.
 } rde_ImGuiDockNodeFlags_;
 
+typedef enum
+{
+    rde_ImGuiSliderFlags_None                   = 0,
+    rde_ImGuiSliderFlags_AlwaysClamp            = 1 << 4,       // Clamp value to min/max bounds when input manually with CTRL+Click. By default CTRL+Click allows going out of bounds.
+    rde_ImGuiSliderFlags_Logarithmic            = 1 << 5,       // Make the widget logarithmic (linear otherwise). Consider using ImGuiSliderFlags_NoRoundToFormat with this if using a format-string with small amount of digits.
+    rde_ImGuiSliderFlags_NoRoundToFormat        = 1 << 6,       // Disable rounding underlying value to match precision of the display format string (e.g. %.3f values are rounded to those 3 digits)
+    rde_ImGuiSliderFlags_NoInput                = 1 << 7,       // Disable CTRL+Click or Enter key allowing to input text directly into the widget
+    rde_ImGuiSliderFlags_InvalidMask_           = 0x7000000F,   // [Internal] We treat using those bits as being potentially a 'float power' argument from the previous API that has got miscast to this enum, and will trigger an assert if needed.
+} rde_ImGuiSliderFlags_;
+
 RDE_FUNC void rde_imgui_init(void* _sdl_window, void* _opengl_context);
 
 RDE_FUNC void rde_imgui_new_frame();
@@ -80,14 +94,37 @@ RDE_FUNC void rde_imgui_draw();
 RDE_FUNC void rde_imgui_handle_events(void* _sdl_event);
 
 RDE_FUNC rde_ImGuiID rde_imgui_get_id(const char* _str_id);
+RDE_FUNC void rde_imgui_push_id(int _id);
+RDE_FUNC void rde_imgui_pop_id();
 RDE_FUNC void rde_imgui_dockspace(rde_ImGuiID _id, rde_ImVec2 _size, rde_ImGuiDockNodeFlags _flags);
 
 RDE_FUNC bool rde_imgui_begin(const char* _name, bool* _open, rde_ImGuiWindowFlags _flags);
 RDE_FUNC void rde_imgui_end();
 
+RDE_FUNC void rde_imgui_new_line();
+RDE_FUNC void rde_imgui_separator();
+
 RDE_FUNC void rde_imgui_text(const char* _fmt, ...);
 RDE_FUNC bool rde_imgui_radio_button(const char* _label, int* _v, int _v_button);
-RDE_FUNC void rde_imgui_new_line();
+
+RDE_FUNC bool rde_imgui_drag_float(const char* _label, float* _v, float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags);
+RDE_FUNC bool rde_imgui_drag_float_2(const char* _label, float _v[2], float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags);
+RDE_FUNC bool rde_imgui_drag_float_3(const char* _label, float _v[3], float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags);
+RDE_FUNC bool rde_imgui_drag_float_4(const char* _label, float _v[4], float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags);
+
+RDE_FUNC bool rde_imgui_drag_int(const char* _label, int* _v, float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags);
+RDE_FUNC bool rde_imgui_drag_int_2(const char* _label, int _v[2], float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags);
+RDE_FUNC bool rde_imgui_drag_int_3(const char* _label, int _v[3], float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags);
+RDE_FUNC bool rde_imgui_drag_int_4(const char* _label, int _v[4], float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags);
+
+RDE_FUNC bool rde_imgui_slider_angle(const char* _label, float* _v_rad, float _v_degrees_min, float _v_degrees_max, rde_ImGuiSliderFlags _flags);
+
+RDE_FUNC bool rde_imgui_checkbox(const char* _label, bool* _v);
+
+RDE_FUNC bool rde_imgui_button_default(const char* _label);
+RDE_FUNC bool rde_imgui_button(const char* _label, rde_ImVec2 _size);
+
+RDE_FUNC void rde_imgui_progress_bar(float _progess);
 
 RDE_FUNC void rde_imgui_shutdown();
 
