@@ -913,7 +913,7 @@ typedef struct {
 	float probability_rolled;
 	bool happened;
 } rde_probability;
-rde_probability rde_struct_create_probability();
+RDE_FUNC rde_probability rde_struct_create_probability();
 
 /// ================== CALLBACKS AND FUNCTION POINTERS ======================
 
@@ -933,7 +933,7 @@ typedef struct {
 	rde_engine_user_side_loop_func on_late_update;
 	rde_engine_user_side_loop_func_2 on_render;
 } rde_end_user_mandatory_callbacks;
-rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
+RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
 
 /// ============================== ENGINE ===================================
 
@@ -972,13 +972,13 @@ typedef struct {
 	bool minimized;
 	bool maximized;
 } rde_event_window;
-rde_event_window rde_struct_create_event_window();
+RDE_FUNC rde_event_window rde_struct_create_event_window();
 
 typedef struct {
 	int orientation;
 	int display_index;
 } rde_event_display;
-rde_event_display rde_struct_create_event_display();
+RDE_FUNC rde_event_display rde_struct_create_event_display();
 
 typedef struct {
 	RDE_KEYBOARD_KEY_ key;
@@ -986,7 +986,7 @@ typedef struct {
 	const char* typed_text;
 	int amount_of_times_pressed;
 } rde_event_key;
-rde_event_key rde_struct_create_event_key();
+RDE_FUNC rde_event_key rde_struct_create_event_key();
 
 typedef struct {
 	rde_vec_2I position;
@@ -994,7 +994,7 @@ typedef struct {
 	RDE_MOUSE_BUTTON_ button;
 	int amount_of_times_pressed;
 } rde_event_mouse;
-rde_event_mouse rde_struct_create_event_mouse();
+RDE_FUNC rde_event_mouse rde_struct_create_event_mouse();
 
 typedef struct {
 	size_t controller_id;
@@ -1004,7 +1004,7 @@ typedef struct {
 	RDE_CONTROLLER_BUTTON_ button;
 	RDE_CONTROLLER_AXIS_ axis;
 } rde_event_controller;
-rde_event_controller rde_struct_create_event_controller();
+RDE_FUNC rde_event_controller rde_struct_create_event_controller();
 
 typedef struct {
 	rde_vec_2I init_touch_position;
@@ -1012,13 +1012,13 @@ typedef struct {
 	float pressure;
 	int finger_id;
 } rde_event_mobile;
-rde_event_mobile rde_struct_create_event_mobile();
+RDE_FUNC rde_event_mobile rde_struct_create_event_mobile();
 
 typedef struct {
 	size_t window_id;
 	char* file_path;
 } rde_event_drag_and_drop;
-rde_event_drag_and_drop rde_struct_create_event_drag_and_drop();
+RDE_FUNC rde_event_drag_and_drop rde_struct_create_event_drag_and_drop();
 
 typedef struct {
 	rde_event_window window_event_data;
@@ -1029,7 +1029,7 @@ typedef struct {
 	rde_event_display display_event_data;
 	rde_event_drag_and_drop drag_and_drop_data;
 } rde_event_data;
-rde_event_data rde_struct_create_event_data();
+RDE_FUNC rde_event_data rde_struct_create_event_data();
 
 struct rde_event {
 	RDE_EVENT_TYPE_ type;
@@ -1039,7 +1039,7 @@ struct rde_event {
 	rde_event_data data;
 	void* sdl_native_event;
 };
-rde_event rde_struct_create_event();
+RDE_FUNC rde_event rde_struct_create_event();
 
 typedef struct rde_transform rde_transform;
 struct rde_transform {
@@ -1048,7 +1048,7 @@ struct rde_transform {
 	rde_vec_3F scale;
 	rde_transform* parent;
 };
-rde_transform rde_struct_create_transform();
+RDE_FUNC rde_transform rde_struct_create_transform();
 
 /// ============================ RENDERING ==================================
 
@@ -1090,7 +1090,7 @@ typedef struct {
 	rde_vec_3F kd;
 	rde_vec_3F ks;
 } rde_material_light_data;
-rde_material_light_data rde_struct_create_material_light_data();
+RDE_FUNC rde_material_light_data rde_struct_create_material_light_data();
 
 typedef struct {
 	rde_texture* map_ka;
@@ -1100,7 +1100,7 @@ typedef struct {
 	rde_render_texture* render_texture;
 	rde_material_light_data material_light_data;
 } rde_material;
-rde_material rde_struct_create_material();
+RDE_FUNC rde_material rde_struct_create_material();
 
 typedef struct {
 	char* name;
@@ -1140,7 +1140,7 @@ typedef struct {
 	rde_vec_3F diffuse_color;
 	rde_vec_3F specular_color;
 } rde_directional_light;
-rde_directional_light rde_struct_create_directional_light();
+RDE_FUNC rde_directional_light rde_struct_create_directional_light();
 
 typedef struct {
 	rde_vec_3F position;
@@ -1151,7 +1151,7 @@ typedef struct {
 	float linear;
 	float quadratic;
 } rde_point_light;
-rde_point_light rde_struct_create_point_light();
+RDE_FUNC rde_point_light rde_struct_create_point_light();
 
 typedef struct {
 	rde_vec_3F position;
@@ -1165,7 +1165,7 @@ typedef struct {
 	float linear;
 	float quadratic;
 } rde_spot_light;
-rde_spot_light rde_struct_create_spot_light();
+RDE_FUNC rde_spot_light rde_struct_create_spot_light();
 
 typedef uint rde_skybox_id;
 
@@ -1185,13 +1185,13 @@ typedef struct {
 	unsigned char b;
 	unsigned char a;
 } rde_color;
-rde_color rde_struct_create_color();
+RDE_FUNC rde_color rde_struct_create_color();
 
 typedef struct {
 	rde_vec_2I* vertices;
 	size_t vertices_count;
 } rde_polygon;
-rde_polygon rde_struct_create_polygon();
+RDE_FUNC rde_polygon rde_struct_create_polygon();
 
 struct rde_viewport {
 	UNIMPLEMENTED_STRUCT()
@@ -1208,7 +1208,7 @@ typedef struct {
 	RDE_CAMERA_TYPE_ camera_type;
 	bool enabled;
 } rde_camera;
-rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
+RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
 
 /// ============================ AUDIO ==================================
 
@@ -1219,7 +1219,7 @@ typedef struct {
 	unsigned short channels;
 	uint rate;
 } rde_sound_config;
-rde_sound_config rde_struct_create_audio_config();
+RDE_FUNC rde_sound_config rde_struct_create_audio_config();
 #endif
 
 /// *************************************************************************************************

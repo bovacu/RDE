@@ -1146,6 +1146,14 @@ bool compile_windows() {
 		snprintf(_temp_path_3, MAX_PATH, "%s%s", this_file_full_path, "external\\include");					\
 		arrput(_build_command, _temp_path_3);																\
 																											\
+		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {											\
+			arrput(_build_command, "-I");																	\
+			char _imgui_path[MAX_PATH];																		\
+			memset(_imgui_path, 0, MAX_PATH);																\
+			snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external\\include\\imgui");		\
+			arrput(_build_command, _imgui_path);															\
+		}																									\
+																											\
 		arrput(_build_command, "-L");																		\
 		char _temp_path_4[MAX_PATH];																		\
 		memset(_temp_path_4, 0, MAX_PATH);																	\
@@ -1161,6 +1169,10 @@ bool compile_windows() {
 		arrput(_build_command, "-lSDL2main");																\
 		arrput(_build_command, "-lSDL2");																	\
 		arrput(_build_command, "-lcglm");																	\
+																											\
+		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {											\
+	arrput(_build_command, "-Xlinker /WHOLEARCHIVE:rde_imgui.lib");															\
+		}																									\
 																											\
 		if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {									\
 			arrput(_build_command, "-ljolt");																\
@@ -1457,7 +1469,6 @@ bool compile_windows() {
 		arrput(_build_command, "/nodefaultlib:msvcrt");																\
 		arrput(_build_command, "-Xlinker");																			\
 		arrput(_build_command, "/nodefaultlib:libcmt");																\
-		arrput(_build_command, "-limgui");																			\
 		arrput(_build_command, "-lSDL2");																			\
 																													\
 		arrput(_build_command, "-o");																				\
