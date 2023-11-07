@@ -695,6 +695,17 @@ rde_texture rde_struct_create_texture() {
 	_t.pixels_changed = false;
 	return _t;
 }
+
+rde_texture_parameters rde_struct_texture_parameters() {
+	rde_texture_parameters _t;
+	_t.min_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR;
+	_t.mag_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR;
+	_t.wrap_t = RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT;
+	_t.wrap_s = RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT;
+	_t.mipmap_min_filter = RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_LINEAR_MIN_FILTER_LINEAR;
+	return _t;
+}
+
 void rde_struct_init_alloc_ptr_texture(rde_texture* _t) {
 	_t->opengl_texture_id = -1;
 	_t->size.x = 0;

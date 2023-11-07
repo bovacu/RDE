@@ -37,6 +37,7 @@ rde_rendering_statistics statistics;
 void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
 rde_vec_2F rde_inner_rendering_get_aspect_ratio();
 void rde_inner_rendering_set_rendering_configuration(rde_window* _window);
+rde_texture_parameters rde_innner_rendering_validate_texture_parameters(rde_texture_parameters* _params);
 void rde_inner_rendering_flush_render_texture_3d();
 void rde_inner_rendering_destroy_current_antialiasing_config();
 void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window);
@@ -401,7 +402,24 @@ void rde_rendering_shader_unload(rde_shader* _shader) {
 	_shader->compiled_program_id = -1;
 }
 
-rde_texture* rde_rendering_texture_load(const char* _file_path) {
+rde_texture_parameters rde_innner_rendering_validate_texture_parameters(rde_texture_parameters* _params) {
+	rde_texture_parameters _tex_params = _params == NULL ? RDE_DEFAULT_TEXTURE_PARAMETERS : *_params;
+#define RDE_TEXTURE_PARAM_CHECKER(_field, _min, _max, _warn_text) 																								\
+	if(_tex_params._field < _min || _tex_params._field > _min) {																								\
+		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_WARNING_RENDERING_WRONG_TEXTURE_PARAM, _tex_params._field, _warn_text, RDE_DEFAULT_TEXTURE_PARAMETERS._field);	\
+		_tex_params._field = RDE_DEFAULT_TEXTURE_PARAMETERS._field;																								\
+	}
+
+	RDE_TEXTURE_PARAM_CHECKER(min_filter, RDE_TEXTURE_PARAMETER_TYPE_FILTER_NEAREST, RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR, "MIN_FILTER")
+	RDE_TEXTURE_PARAM_CHECKER(mag_filter, RDE_TEXTURE_PARAMETER_TYPE_FILTER_NEAREST, RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR, "MAG_FILTER")
+	RDE_TEXTURE_PARAM_CHECKER(wrap_s, RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT, RDE_TEXTURE_PARAMETER_TYPE_WRAP_MIRRORED_REPEAT, "WRAP_S")
+	RDE_TEXTURE_PARAM_CHECKER(wrap_t, RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT, RDE_TEXTURE_PARAMETER_TYPE_WRAP_MIRRORED_REPEAT, "WRAP_T")
+	RDE_TEXTURE_PARAM_CHECKER(mipmap_min_filter, RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NEAREST_MIN_FILTER_NEAREST, RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NONE, "MIPMAP_MIN_FILTER")
+
+	return _tex_params;
+}
+
+rde_texture* rde_rendering_texture_load(const char* _file_path, rde_texture_parameters* _params) {
 	const char* _extension = rde_util_file_get_name_extension(_file_path);
 	char _extension_lower[10];
 	memset(_extension_lower, 0, 10);
@@ -455,6 +473,8 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 		_internal_format = GL_RGB8;
 		_data_format = GL_RGB;
 	}
+
+	rde_texture_parameters _tex_params = rde_innner_rendering_validate_texture_parameters(_params);
 	
 	GLuint _texture_id;
 	glGenTextures(1, &_texture_id);
@@ -462,21 +482,28 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
 	rde_util_check_opengl_error("Binding texture");
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _tex_params.min_filter);
 	rde_util_check_opengl_error("Param0 texture");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _tex_params.mag_filter);
 	rde_util_check_opengl_error("Param1 texture");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _tex_params.wrap_s);
 	rde_util_check_opengl_error("Param2 texture");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _tex_params.wrap_t);
 	rde_util_check_opengl_error("Param3 texture");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	rde_util_check_opengl_error("Param4 texture");
+
+	if(_tex_params.mipmap_min_filter != RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NONE) {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _tex_params.mipmap_min_filter);
+		rde_util_check_opengl_error("Param4 texture");
+	}
 
 	glTexImage2D(GL_TEXTURE_2D, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
-	glGenerateMipmap(GL_TEXTURE_2D);
 	rde_util_check_opengl_error("TexImage2D texture");
 
+	if(_tex_params.mipmap_min_filter != RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NONE) {
+		glGenerateMipmap(GL_TEXTURE_2D);
+		rde_util_check_opengl_error("Mipmap texture");
+	}
+	
 	stbi_image_free(_data);
 
 	_texture->opengl_texture_id = _texture_id;
@@ -689,7 +716,7 @@ void rde_rendering_texture_unload(rde_texture* _texture) {
 }
 
 rde_atlas* rde_rendering_atlas_load(const char* _texture_path, const char* _config_path) {
-	rde_texture* _texture = rde_rendering_texture_load(_texture_path);
+	rde_texture* _texture = rde_rendering_texture_load(_texture_path, NULL);
 	rde_atlas_sub_textures* _atlas_sub_textures = rde_inner_file_system_read_atlas_config(_config_path, _texture);
 
 	for(size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {

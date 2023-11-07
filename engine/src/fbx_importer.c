@@ -132,7 +132,7 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 			rde_rendering_mesh_set_vertex_positions(&_m, _mesh_positions, true);
 			rde_rendering_mesh_set_indices(&_m, _mesh_indices, true);
 
-			rde_texture* _texture = rde_rendering_texture_load(_texture_path);
+			rde_texture* _texture = rde_rendering_texture_load(_texture_path, NULL);
 			rde_rendering_mesh_set_vertex_texture_data(&_m, _mesh_texcoords_size, _mesh_texcoords, _texture, true);
 
 			rde_log_color(RDE_LOG_COLOR_GREEN, "	- vertices: %u, indices: %u, texcoords: %u \n", _mesh_positions_size, _mesh_indices_size, _mesh_texcoords_size);

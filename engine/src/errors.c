@@ -35,6 +35,7 @@
 #define RDE_ERROR_RENDERING_WRONG_ANTIALIASING_VALUE "Wrong antialiasing value '%d'. \n"
 #define RDE_WARNING_RENDERING_ANTIALIASING_LEVEL_ALREADY_SET "Antialiasing level '%d' is already configured. \n"
 #define RDE_WARNING_RENDERING_ANTIALIASING_LEVEL_NOT_SUPPORTED "Antialiasing level '%d' is not supported, trying with '%d'. \n"
+#define RDE_WARNING_RENDERING_WRONG_TEXTURE_PARAM "Texture param with value '%d' is not applicable to %s. Defaulting to '%d' \n"
 #endif
 
 #ifdef RDE_FBX_MODULE

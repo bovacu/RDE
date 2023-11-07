@@ -155,11 +155,13 @@ extern "C" {
 #define IS_ANDROID() (defined(__ANDROID__))
 #define IS_MOBILE() (IS_ANDROID() || IS_IOS())
 
-#ifdef RDE_EXPORT
-	#define RDE_API [[gnu::visibility("default")]]
-	#define RDE_HIDDEN [[gnu::visibility("hidden")]]
-	#define RDE_INTERNAL [[gnu::visibility("internal")]]
-	#define RDE_DEPRECATED(_explanation) [[gnu::deprecated(_explanation)]]
+#ifdef __GNUC__
+#define RDE_DEPRECATED(func) func __attribute__ ((deprecated))
+#elif defined(_MSC_VER)
+#define RDE_DEPRECATED(func) __declspec(deprecated) func
+#else
+#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
+#define RDE_DEPRECATED(func) func
 #endif
 
 #if IS_WINDOWS()
@@ -751,6 +753,20 @@ typedef enum {
 	RDE_ANTIALIASING_X32 = 32,
 } RDE_ANTIALIASING_;
 
+typedef enum {
+	RDE_TEXTURE_PARAMETER_TYPE_FILTER_NEAREST = 0x2600,
+	RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR = 0x2601,
+	RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT = 0x2901,
+	RDE_TEXTURE_PARAMETER_TYPE_WRAP_CLAMP_TO_BORDER = 0x812D,
+	RDE_TEXTURE_PARAMETER_TYPE_WRAP_CLAMP_TO_EDGE = 0x812F,
+	RDE_TEXTURE_PARAMETER_TYPE_WRAP_MIRRORED_REPEAT = 0x8370,
+	RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NEAREST_MIN_FILTER_NEAREST = 0x2700,
+	RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_LINEAR_MIN_FILTER_NEAREST = 0x2701,
+	RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NEAREST_MIN_FILTER_LINEAR = 0x2702,
+	RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_LINEAR_MIN_FILTER_LINEAR = 0x2703,
+	RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NONE = 0x2704
+} RDE_TEXTURE_PARAMETER_TYPE_;
+
 /// ============================= FILE SYSTEM ===============================
 
 typedef enum {
@@ -1081,6 +1097,16 @@ typedef struct {
 	int atlas_texture_id;
 } rde_texture_data;
 
+typedef struct {
+	bool generate_mipmap;
+	RDE_TEXTURE_PARAMETER_TYPE_ min_filter;
+	RDE_TEXTURE_PARAMETER_TYPE_ mag_filter;
+	RDE_TEXTURE_PARAMETER_TYPE_ wrap_s;
+	RDE_TEXTURE_PARAMETER_TYPE_ wrap_t;
+	RDE_TEXTURE_PARAMETER_TYPE_ mipmap_min_filter;
+} rde_texture_parameters;
+RDE_FUNC rde_texture_parameters rde_struct_texture_parameters();
+
 typedef struct rde_atlas rde_atlas;
 typedef struct {
 	int opengl_texture_id;
@@ -1272,6 +1298,15 @@ const rde_engine_heap_allocs_config RDE_DEFAULT_HEAP_ALLOCS_CONFIG = {
 #endif
 };
 
+#ifdef RDE_RENDERING_MODULE
+const rde_texture_parameters RDE_DEFAULT_TEXTURE_PARAMETERS = {
+	.min_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR,
+	.mag_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR,
+	.wrap_t = RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT,
+	.wrap_s = RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT,
+	.mipmap_min_filter = RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_LINEAR_MIN_FILTER_LINEAR
+};
+#endif
 
 /// *************************************************************************************************
 /// *                                		FUNCTIONS                         						*
@@ -1472,7 +1507,7 @@ RDE_FUNC rde_shader_data rde_rendering_shader_get_data(rde_shader* _shader);
 RDE_FUNC rde_shader* rde_rendering_shader_get_by_name(const char* _name);
 RDE_FUNC void rde_rendering_shader_unload(rde_shader* _shader);
 
-RDE_FUNC rde_texture* rde_rendering_texture_load(const char* _file_path);
+RDE_FUNC rde_texture* rde_rendering_texture_load(const char* _file_path, rde_texture_parameters* _params); // Pass NULL to params for default parameters
 RDE_FUNC rde_texture* rde_rendering_texture_text_load(const char* _file_path);
 RDE_FUNC rde_texture_data rde_rendering_texture_get_data(rde_texture* _texture);
 RDE_FUNC void rde_rendering_texture_unload(rde_texture* _texture);

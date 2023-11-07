@@ -96,19 +96,19 @@ void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group
 	
 	rde_engine_supress_logs(true);
 	if(_material != NULL && _material->map_Ka.path != NULL && strlen(_material->map_Ka.path) > 0) {
-		_data->map_ka = rde_rendering_texture_load(_material->map_Ka.path);
+		_data->map_ka = rde_rendering_texture_load(_material->map_Ka.path, NULL);
 	}
 
 	if(_material != NULL && _material->map_Kd.path != NULL && strlen(_material->map_Kd.path) > 0) {
-		_data->map_kd = rde_rendering_texture_load(_material->map_Kd.path);
+		_data->map_kd = rde_rendering_texture_load(_material->map_Kd.path, NULL);
 	}
 
 	if(_material != NULL && _material->map_Ks.path != NULL && strlen(_material->map_Ks.path) > 0) {
-		_data->map_ks = rde_rendering_texture_load(_material->map_Ks.path);
+		_data->map_ks = rde_rendering_texture_load(_material->map_Ks.path, NULL);
 	}
 
 	if(_material != NULL && _material->map_bump.path != NULL && strlen(_material->map_bump.path) > 0) {
-		_data->map_bump = rde_rendering_texture_load(_material->map_bump.path);
+		_data->map_bump = rde_rendering_texture_load(_material->map_bump.path, NULL);
 	}
 	rde_engine_supress_logs(false);
 }
