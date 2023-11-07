@@ -84,6 +84,51 @@
 #include "json/cJSON.c"
 #pragma clang diagnostic pop
 
+// TODO: Not to forget
+// 		- [DONE] Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
+//		  the format is BGRA instead of RGBA (problem solved by first method) and the second fixes
+//		  an error that the first method can generate on some images.
+//
+//		- 2D rendering:
+//			- [DONE] Camera system
+//			- [DONE] Texture rendering
+//			- Debug and non debug geometry rendering
+//			- [DONE] Spritebatch
+//			- [DONE] Text
+//			- CPU Textures
+//
+//		- Basic 3D:
+//			- [DONE] Camera system
+//			- [DONE] 3D mathematical operations
+//			- [DONE] Renderer
+//			- [DONE] Mesh creation and loading
+//			- [DONE(obj), NOT DONE(glft)] Model loading
+//			- [DONE] Texturing and [NOT COMPLETELY DONE] materials
+//			- [DONE] Instancing (3d batching)
+//			- Lighting
+//				- [DONE] Directional
+//				- Point
+//				- Spot
+//				- Shadows
+//			- Model animations
+//			- Text
+//			- [DONE] Line rendering
+//
+//		- Other:
+//			- Render Textures
+//			- Particles
+//			- Multiple window rendering is not working properly
+//			- On every 'load' function, if a resource is going to be reloaded, return the already loaded one.
+//
+//		- TOOL: [DONE] command line atlas packing tool for textures.
+//				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
+//				- https://www.david-colson.com/2020/03/10/exploring-rect-packing.html
+//
+//		- TOOL: [DONE] Command line font atlas creator.
+//				- [DONE] Improve algorithm to use most part of space
+//
+//		- TOOL: command line project creation, compilation and export.
+
 #define RDE_WIN_EVENT_INIT (RDE_EVENT_TYPE_WINDOW_BEGIN + 1)
 #define RDE_WIN_EVENT_COUNT (RDE_EVENT_TYPE_WINDOW_END - RDE_EVENT_TYPE_WINDOW_BEGIN)
 
@@ -137,6 +182,11 @@ bool rde_util_check_opengl_error(const char* _message) {
 	return false;
 }
 
+
+/// *************************************************************************************************
+/// *                                INNER STRUCT DEFINITIONS                         				*
+/// *************************************************************************************************
+
 struct rde_window {
 	SDL_Window* sdl_window;
 	SDL_GLContext sdl_gl_context;
@@ -145,6 +195,14 @@ struct rde_window {
 	rde_vec_2I mouse_position;
 	rde_vec_2F mouse_scroll;
 };
+
+struct rde_file_handle {
+	char file_path[RDE_MAX_PATH];
+	SDL_RWops* sdl_handle;
+	RDE_FILE_MODE_ file_mode;
+	char* text_allocated;
+};
+
 	
 #ifdef RDE_RENDERING_MODULE
 #define RDE_SHADER_MAX_NAME 256
@@ -284,15 +342,6 @@ typedef struct {
 	int samples;
 } rde_antialiasing;
 
-rde_antialiasing rde_struct_create_antialiasing() {
-	rde_antialiasing _a;
-	_a.frame_buffer_id = RDE_UINT_MAX;
-	_a.render_buffer_id = RDE_UINT_MAX;
-	_a.opengl_texture_id = -1;
-	_a.samples = 0;
-	return _a;
-}
-
 #endif
 	
 #ifdef RDE_AUDIO_MODULE
@@ -308,7 +357,7 @@ struct rde_sound {
 	ma_decoder miniaudio_decoder;
 };
 #endif
-	
+
 #define RDE_DEFAULT_SHADERS_AMOUNT 6
 struct rde_engine {
 	float delta_time;
@@ -378,13 +427,11 @@ struct rde_engine {
 	HANDLE console_handle;
 #endif
 };
-	
-struct rde_file_handle {
-	char file_path[RDE_MAX_PATH];
-	SDL_RWops* sdl_handle;
-	RDE_FILE_MODE_ file_mode;
-	char* text_allocated;
-};
+
+
+/// *************************************************************************************************
+/// *                                INNER STRUCT CONSTRUCTORS                         				*
+/// *************************************************************************************************
 
 rde_probability rde_struct_create_probability() {
 	rde_probability _p;
@@ -539,6 +586,16 @@ rde_transform rde_struct_create_transform() {
 	return _t;
 }
 
+rde_window rde_struct_create_window() {
+	rde_window _w;
+	_w.sdl_window = NULL;
+	_w.mouse_position = (rde_vec_2I) { 0, 0 };
+	_w.mouse_scroll = (rde_vec_2F) { 0.0f, 0.0f };
+	memset(_w.key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
+	memset(_w.mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+	return _w;
+}
+
 #ifdef RDE_RENDERING_MODULE
 rde_material_light_data rde_struct_create_material_light_data() {
 	rde_material_light_data _m;
@@ -596,79 +653,6 @@ rde_spot_light rde_struct_create_spot_light() {
 	return _s;
 }
 #endif
-
-rde_polygon rde_struct_create_polygon() {
-	rde_polygon _p;
-	_p.vertices = NULL;
-	_p.vertices_count = 0;
-	return _p;
-}
-
-#ifdef RDE_AUDIO_MODULE
-rde_sound_config rde_struct_create_audio_config() {
-	rde_sound_config _s;
-	_s.user_data = NULL;
-	_s.channels = 2;
-	_s.rate = 48000;
-	return _s;
-}
-#endif
-
-// TODO: Not to forget
-// 		- [DONE] Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
-//		  the format is BGRA instead of RGBA (problem solved by first method) and the second fixes
-//		  an error that the first method can generate on some images.
-//
-//		- 2D rendering:
-//			- [DONE] Camera system
-//			- [DONE] Texture rendering
-//			- Debug and non debug geometry rendering
-//			- [DONE] Spritebatch
-//			- [DONE] Text
-//			- CPU Textures
-//
-//		- Basic 3D:
-//			- [DONE] Camera system
-//			- [DONE] 3D mathematical operations
-//			- [DONE] Renderer
-//			- [DONE] Mesh creation and loading
-//			- [DONE(obj), NOT DONE(glft)] Model loading
-//			- [DONE] Texturing and [NOT COMPLETELY DONE] materials
-//			- [DONE] Instancing (3d batching)
-//			- Lighting
-//				- [DONE] Directional
-//				- Point
-//				- Spot
-//				- Shadows
-//			- Model animations
-//			- Text
-//			- [DONE] Line rendering
-//
-//		- Other:
-//			- Render Textures
-//			- Particles
-//			- Multiple window rendering is not working properly
-//			- On every 'load' function, if a resource is going to be reloaded, return the already loaded one.
-//
-//		- TOOL: [DONE] command line atlas packing tool for textures.
-//				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
-//				- https://www.david-colson.com/2020/03/10/exploring-rect-packing.html
-//
-//		- TOOL: [DONE] Command line font atlas creator.
-//				- [DONE] Improve algorithm to use most part of space
-//
-//		- TOOL: command line project creation, compilation and export.
-
-
-rde_window rde_struct_create_window() {
-	rde_window _w;
-	_w.sdl_window = NULL;
-	_w.mouse_position = (rde_vec_2I) { 0, 0 };
-	_w.mouse_scroll = (rde_vec_2F) { 0.0f, 0.0f };
-	memset(_w.key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
-	memset(_w.mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
-	return _w;
-}
 
 #ifdef RDE_RENDERING_MODULE
 rde_shader rde_struct_create_shader() {
@@ -814,6 +798,22 @@ rde_skybox rde_struct_create_skybox() {
 	return _s;
 }
 
+rde_antialiasing rde_struct_create_antialiasing() {
+	rde_antialiasing _a;
+	_a.frame_buffer_id = RDE_UINT_MAX;
+	_a.render_buffer_id = RDE_UINT_MAX;
+	_a.opengl_texture_id = -1;
+	_a.samples = 0;
+	return _a;
+}
+
+rde_polygon rde_struct_create_polygon() {
+	rde_polygon _p;
+	_p.vertices = NULL;
+	_p.vertices_count = 0;
+	return _p;
+}
+
 #endif
 
 #ifdef RDE_AUDIO_MODULE
@@ -824,6 +824,14 @@ rde_sound rde_struct_create_sound() {
 	_s.paused = false;
 	_s.looping = false;
 	_s.played_frame = 0;
+	return _s;
+}
+
+rde_sound_config rde_struct_create_audio_config() {
+	rde_sound_config _s;
+	_s.user_data = NULL;
+	_s.channels = 2;
+	_s.rate = 48000;
 	return _s;
 }
 #endif

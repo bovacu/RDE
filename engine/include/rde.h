@@ -1212,8 +1212,6 @@ struct rde_model_animation {
 	UNIMPLEMENTED_STRUCT()
 };
 
-#endif
-
 typedef struct {
 	unsigned char r;
 	unsigned char g;
@@ -1244,6 +1242,7 @@ typedef struct {
 	bool enabled;
 } rde_camera;
 RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
+#endif
 
 /// ============================ AUDIO ==================================
 
