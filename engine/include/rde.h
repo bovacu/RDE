@@ -742,6 +742,15 @@ typedef enum {
 	RDE_CAMERA_TYPE_ORTHOGRAPHIC
 } RDE_CAMERA_TYPE_;
 
+typedef enum {
+	RDE_ANTIALIASING_NONE = 0,
+	RDE_ANTIALIASING_X2 = 2,
+	RDE_ANTIALIASING_X4 = 4,
+	RDE_ANTIALIASING_X8 = 8,
+	RDE_ANTIALIASING_X16 = 16,
+	RDE_ANTIALIASING_X32 = 32,
+} RDE_ANTIALIASING_;
+
 /// ============================= FILE SYSTEM ===============================
 
 typedef enum {
@@ -1541,6 +1550,9 @@ RDE_FUNC rde_directional_light rde_rendering_lighting_get_directional_light();
 RDE_FUNC rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]); // order is right, left, top, bottom, front, back
 RDE_FUNC void rde_rendering_skybox_use(rde_skybox_id _skybox_id);
 RDE_FUNC void rde_rendering_skybox_unload(rde_skybox_id _skybox_id);
+
+RDE_FUNC void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing); // This function CANNOT be called during on_render.
+RDE_FUNC RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing();
 
 #endif
 

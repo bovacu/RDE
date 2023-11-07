@@ -68,6 +68,10 @@ void rde_imgui_separator() {
 	ImGui::Separator();
 }
 
+void rde_imgui_same_line(float _offset_from_start_x, float _spacing) {
+	ImGui::SameLine(_offset_from_start_x, _spacing);
+}
+
 void rde_imgui_text(const char* _fmt, ...) {
 	va_list _args;
   	va_start(_args, _fmt);

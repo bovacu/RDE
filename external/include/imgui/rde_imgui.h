@@ -103,6 +103,7 @@ RDE_FUNC void rde_imgui_end();
 
 RDE_FUNC void rde_imgui_new_line();
 RDE_FUNC void rde_imgui_separator();
+RDE_FUNC void rde_imgui_same_line(float _offset_from_start_x, float _spacing);
 
 RDE_FUNC void rde_imgui_text(const char* _fmt, ...);
 RDE_FUNC bool rde_imgui_radio_button(const char* _label, int* _v, int _v_button);

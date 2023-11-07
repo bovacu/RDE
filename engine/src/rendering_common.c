@@ -38,6 +38,8 @@ void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _ba
 rde_vec_2F rde_inner_rendering_get_aspect_ratio();
 void rde_inner_rendering_set_rendering_configuration(rde_window* _window);
 void rde_inner_rendering_flush_render_texture_3d();
+void rde_inner_rendering_destroy_current_antialiasing_config();
+void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window);
 
 rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
@@ -217,6 +219,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	DEFAULT_RENDER_TEXTURE = rde_rendering_render_texture_create(_window_size.x, _window_size.y);
 	DEFAULT_RENDER_TEXTURE->vao = _vao;
 	DEFAULT_RENDER_TEXTURE->vbo = _vbo;
+	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_X4);
 #endif
 }
 
@@ -1012,5 +1015,88 @@ void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture) {
 	glDeleteFramebuffers(1, &_render_texture->opengl_framebuffer_id);
 }
 
+void rde_inner_rendering_destroy_current_antialiasing_config() {
+	if(ENGINE.antialiasing.opengl_texture_id == -1 || ENGINE.antialiasing.frame_buffer_id == RDE_UINT_MAX) {
+		return;
+	}
+
+	uint _texture_id = ENGINE.antialiasing.opengl_texture_id;
+	glDeleteTextures(1, &_texture_id);
+	glDeleteRenderbuffers(1, &ENGINE.antialiasing.render_buffer_id);
+	glDeleteFramebuffers(1, &ENGINE.antialiasing.frame_buffer_id);
+
+	ENGINE.antialiasing.opengl_texture_id = -1;
+	ENGINE.antialiasing.frame_buffer_id = RDE_UINT_MAX;
+	ENGINE.antialiasing.render_buffer_id = RDE_UINT_MAX;
+}
+
+void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing) {
+
+	if((int)_antialiasing == ENGINE.antialiasing.samples && ENGINE.antialiasing.frame_buffer_id != RDE_UINT_MAX) {
+		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_WARNING_RENDERING_ANTIALIASING_LEVEL_ALREADY_SET, ENGINE.antialiasing.samples);
+		return;
+	}
+
+	switch(_antialiasing) {
+		case RDE_ANTIALIASING_NONE:
+		case RDE_ANTIALIASING_X2:
+		case RDE_ANTIALIASING_X4:
+		case RDE_ANTIALIASING_X8:
+		case RDE_ANTIALIASING_X16:
+		case RDE_ANTIALIASING_X32: break;
+		default: rde_critical_error(true, RDE_ERROR_RENDERING_WRONG_ANTIALIASING_VALUE, (int)_antialiasing);
+	}
+
+	int _max_opengl_supported_samples = 0;
+	glGetIntegerv(GL_MAX_SAMPLES, &_max_opengl_supported_samples);
+	int _antialiasing_samples = (int)_antialiasing;
+
+	rde_inner_rendering_destroy_current_antialiasing_config();
+
+	while(_antialiasing_samples > _max_opengl_supported_samples) {
+		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_WARNING_RENDERING_ANTIALIASING_LEVEL_NOT_SUPPORTED, _antialiasing_samples, _antialiasing_samples >> 1);
+		_antialiasing_samples = _antialiasing_samples >> 1;
+	}
+
+	ENGINE.antialiasing.samples = _antialiasing_samples;
+	if(ENGINE.antialiasing.samples == 0) {
+		return;
+	}
+
+    glGenFramebuffers(1, &ENGINE.antialiasing.frame_buffer_id);
+    glBindFramebuffer(GL_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
+    
+    unsigned int _texture_multisampled_id;
+    glGenTextures(1, &_texture_multisampled_id);
+	ENGINE.antialiasing.opengl_texture_id = _texture_multisampled_id;
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, ENGINE.antialiasing.opengl_texture_id);
+	rde_vec_2I _screen_size = rde_window_get_window_size(_window);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, _antialiasing_samples, GL_RGB, _screen_size.x, _screen_size.y, GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, ENGINE.antialiasing.opengl_texture_id, 0);
+    
+    glGenRenderbuffers(1, &ENGINE.antialiasing.render_buffer_id);
+    glBindRenderbuffer(GL_RENDERBUFFER, ENGINE.antialiasing.render_buffer_id);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, _antialiasing_samples, GL_DEPTH24_STENCIL8, _screen_size.x, _screen_size.y);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, ENGINE.antialiasing.render_buffer_id);
+
+    rde_critical_error(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER_MSAA);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing() {
+	return (RDE_ANTIALIASING_)ENGINE.antialiasing.samples;
+}
+
+void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window) {
+	if(ENGINE.antialiasing.samples > 0) {
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
+		rde_vec_2I _screen_size = rde_window_get_window_size(_window);
+		glBlitFramebuffer(0, 0, _screen_size.x, _screen_size.y, 0, 0, _screen_size.x, _screen_size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	}
+	rde_inner_rendering_draw_to_framebuffer(DEFAULT_RENDER_TEXTURE);
+}
 
 #endif

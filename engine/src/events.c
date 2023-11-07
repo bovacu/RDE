@@ -13,6 +13,12 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event);
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_event_window_resize, {
 #ifdef RDE_RENDERING_MODULE
 	rde_vec_2I _new_window_size = _event->data.window_event_data.size;
+
+	if(ENGINE.antialiasing.samples > 0) {
+		rde_inner_rendering_destroy_current_antialiasing_config();
+		rde_rendering_set_antialiasing(_window, (RDE_ANTIALIASING_)ENGINE.antialiasing.samples);		
+	}
+
 	rde_rendering_render_texture_update(DEFAULT_RENDER_TEXTURE, _new_window_size.x, _new_window_size.y);
 	rde_rendering_render_texture_enable(DEFAULT_RENDER_TEXTURE);
 #endif

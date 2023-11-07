@@ -33,6 +33,7 @@ static bool model_viewer_render_model_to_plane = false;
 rde_skybox_id model_viewer_skybox;
 
 bool model_viewer_show_skybox = false;
+int model_viewer_msaa_samples = -1;
 
 void model_viewer_keyboard_controller(float _dt) {
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
@@ -145,6 +146,11 @@ void model_viewer_on_event(rde_event* _event, rde_window* _window) {
 }
 
 void model_viewer_on_update(float _dt) {
+	if(model_viewer_msaa_samples != -1) {
+		rde_rendering_set_antialiasing(current_window, (RDE_ANTIALIASING_)model_viewer_msaa_samples);
+		model_viewer_msaa_samples = -1;
+	}
+
 	rde_vec_2F _scrolled = rde_events_mouse_get_scrolled(current_window);
 	if(_scrolled.x != 0.f || _scrolled.y != 0.f) {
 		model_viewer_camera.transform.position.x += model_viewer_camera_front.x * 10 * _dt * (_scrolled.y * 3);
@@ -396,6 +402,42 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 	rde_imgui_checkbox("Wireframe", &model_viewer_draw_wireframe);
 	rde_imgui_checkbox("Skybox", &model_viewer_show_skybox);
 	rde_imgui_checkbox("Render Model To Plane", &model_viewer_render_model_to_plane);
+	rde_imgui_text("MSAA");
+	
+	int _current_mssa_selected = (int)rde_rendering_get_current_antialiasing();
+	if(rde_imgui_radio_button("None", &_current_mssa_selected, (int)RDE_ANTIALIASING_NONE)) {
+		model_viewer_msaa_samples = (int)RDE_ANTIALIASING_NONE;
+	}
+
+	rde_imgui_same_line(0, -1);
+	
+	if(rde_imgui_radio_button("X2", &_current_mssa_selected, (int)RDE_ANTIALIASING_X2)) {
+		model_viewer_msaa_samples = (int)RDE_ANTIALIASING_X2;
+	}
+
+	rde_imgui_same_line(0, -1);
+
+	if(rde_imgui_radio_button("X4", &_current_mssa_selected, (int)RDE_ANTIALIASING_X4)) {
+		model_viewer_msaa_samples = (int)RDE_ANTIALIASING_X4;
+	}
+
+	rde_imgui_same_line(0, -1);
+
+	if(rde_imgui_radio_button("X8", &_current_mssa_selected, (int)RDE_ANTIALIASING_X8)) {
+		model_viewer_msaa_samples = (int)RDE_ANTIALIASING_X8;
+	}
+
+	rde_imgui_same_line(0, -1);
+	
+	if(rde_imgui_radio_button("X16", &_current_mssa_selected, (int)RDE_ANTIALIASING_X16)) {
+		model_viewer_msaa_samples = (int)RDE_ANTIALIASING_X16;
+	}
+
+	rde_imgui_same_line(0, -1);
+	
+	if(rde_imgui_radio_button("X32", &_current_mssa_selected, (int)RDE_ANTIALIASING_X32)) {
+		model_viewer_msaa_samples = (int)RDE_ANTIALIASING_X32;
+	}
 	rde_imgui_end();
  }
 

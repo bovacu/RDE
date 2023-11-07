@@ -31,6 +31,10 @@
 #define RDE_ERROR_RENDERING_MODEL_MODULE_FORMAT_NOT_COMPILED "Tried to load model '%s' format that was not compiled as a module in RDE, to fix this error change to another format or compile RDE with module '%s'."
 #define RDE_ERROR_RENDERING_MODEL_UNSUPPORTED_FORMAT "Tried to load model '%s' which has an unsupported format '%s'."
 #define RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER "Framebuffer is incomplete. \n"
+#define RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER_MSAA "Framebuffer for antialiasing is incomplete. \n"
+#define RDE_ERROR_RENDERING_WRONG_ANTIALIASING_VALUE "Wrong antialiasing value '%d'. \n"
+#define RDE_WARNING_RENDERING_ANTIALIASING_LEVEL_ALREADY_SET "Antialiasing level '%d' is already configured. \n"
+#define RDE_WARNING_RENDERING_ANTIALIASING_LEVEL_NOT_SUPPORTED "Antialiasing level '%d' is not supported, trying with '%d'. \n"
 #endif
 
 #ifdef RDE_FBX_MODULE

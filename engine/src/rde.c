@@ -277,6 +277,22 @@ struct rde_render_texture {
 	uint vbo;
 };
 
+typedef struct {
+	uint frame_buffer_id;
+	uint render_buffer_id;
+	int opengl_texture_id; 
+	int samples;
+} rde_antialiasing;
+
+rde_antialiasing rde_struct_create_antialiasing() {
+	rde_antialiasing _a;
+	_a.frame_buffer_id = RDE_UINT_MAX;
+	_a.render_buffer_id = RDE_UINT_MAX;
+	_a.opengl_texture_id = -1;
+	_a.samples = 0;
+	return _a;
+}
+
 #endif
 	
 #ifdef RDE_AUDIO_MODULE
@@ -341,6 +357,7 @@ struct rde_engine {
 	size_t amount_of_spot_lights;
 	
 	rde_skybox skybox;
+	rde_antialiasing antialiasing;
 #endif
 	
 #ifdef RDE_AUDIO_MODULE
@@ -849,6 +866,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.mesh_shader = NULL;
 	_e.skybox_shader = NULL;
 	_e.skybox = rde_struct_create_skybox();
+	_e.antialiasing = rde_struct_create_antialiasing();
 
 	_e.heap_allocs_config.max_number_of_shaders += RDE_SHADERS_AMOUNT;
 
@@ -1062,7 +1080,8 @@ void rde_inner_engine_on_render(float _dt, rde_window* _window) {
 	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	glViewport(0, 0, _window_size.x, _window_size.y);
-	glBindFramebuffer(GL_FRAMEBUFFER, DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
+	glBindFramebuffer(GL_FRAMEBUFFER, ENGINE.antialiasing.samples > 0 ? ENGINE.antialiasing.frame_buffer_id : DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
+
 }
 #endif
 
@@ -1204,7 +1223,7 @@ void rde_engine_on_run() {
 			#ifdef RDE_RENDERING_MODULE
 			rde_inner_engine_on_render(ENGINE.delta_time, _window);
 			ENGINE.mandatory_callbacks.on_render(ENGINE.delta_time, _window);
-			rde_inner_rendering_draw_to_framebuffer(DEFAULT_RENDER_TEXTURE);
+			rde_inner_rendering_flush_to_default_render_texture(_window);
 			#endif
 
 			rde_events_sync_events(_window);
@@ -1269,6 +1288,7 @@ void rde_engine_destroy_engine() {
 #ifdef RDE_RENDERING_MODULE
 	rde_inner_rendering_end_2d();
 	rde_inner_rendering_end_3d();
+	rde_inner_rendering_destroy_current_antialiasing_config();
 	rde_rendering_render_texture_destroy(DEFAULT_RENDER_TEXTURE);
 	glDeleteBuffers(1, &DEFAULT_RENDER_TEXTURE->vbo);
 	glDeleteVertexArrays(1, &DEFAULT_RENDER_TEXTURE->vao);
