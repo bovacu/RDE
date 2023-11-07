@@ -968,7 +968,7 @@ void rde_rendering_render_texture_disable() {
 	current_render_texture = DEFAULT_RENDER_TEXTURE;
 	if(current_render_texture != NULL) {
 		glViewport(0, 0, current_render_texture->size.x, current_render_texture->size.y);
-		glBindFramebuffer(GL_FRAMEBUFFER, current_render_texture->opengl_framebuffer_id);
+		glBindFramebuffer(GL_FRAMEBUFFER, ENGINE.antialiasing.samples > 0 ? ENGINE.antialiasing.frame_buffer_id : current_render_texture->opengl_framebuffer_id);
 	}
 
 	glEnable(GL_DEPTH_TEST);
