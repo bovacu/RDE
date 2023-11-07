@@ -467,8 +467,11 @@ rde_texture* rde_rendering_texture_load(const char* _file_path) {
 	rde_util_check_opengl_error("Param2 texture");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	rde_util_check_opengl_error("Param3 texture");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	rde_util_check_opengl_error("Param4 texture");
 
 	glTexImage2D(GL_TEXTURE_2D, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	rde_util_check_opengl_error("TexImage2D texture");
 
 	stbi_image_free(_data);
