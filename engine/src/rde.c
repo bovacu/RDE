@@ -105,17 +105,19 @@
 //			- [DONE(obj), NOT DONE(glft)] Model loading
 //			- [DONE] Texturing and [NOT COMPLETELY DONE] materials
 //			- [DONE] Instancing (3d batching)
+//			- [DONE] MSAA
 //			- Lighting
+//				- [DONE] Phong
 //				- [DONE] Directional
-//				- Point
-//				- Spot
+//				- [DONE] Point
+//				- [DONE] Spot
 //				- Shadows
 //			- Model animations
 //			- Text
 //			- [DONE] Line rendering
 //
 //		- Other:
-//			- Render Textures
+//			- [DONE] Render Textures
 //			- Particles
 //			- Multiple window rendering is not working properly
 //			- On every 'load' function, if a resource is going to be reloaded, return the already loaded one.
@@ -123,9 +125,11 @@
 //		- TOOL: [DONE] command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
 //				- https://www.david-colson.com/2020/03/10/exploring-rect-packing.html
+//				- TODO: sanitaze windows paths like in rde_build
 //
 //		- TOOL: [DONE] Command line font atlas creator.
 //				- [DONE] Improve algorithm to use most part of space
+//				- TODO: sanitaze windows paths like in rde_build
 //
 //		- TOOL: command line project creation, compilation and export.
 
