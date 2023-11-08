@@ -403,6 +403,15 @@ typedef unsigned int uint;
 #define RDE_SAFE_ARR_ACCESS(_type) RDE_FUNC _type rde_arr_s_get_##_type(uint _index, _type* _arr, size_t _arr_size, char* _fmt, ...);
 #define RDE_SAFE_ARR_SET(_type) RDE_FUNC void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...);
 
+#define rde_render_3d(_window, _camera, _draw_wireframe, _block_of_code)\
+	rde_rendering_3d_begin_drawing(_camera, _window, _draw_wireframe);	\
+	_block_of_code														\
+	rde_rendering_3d_end_drawing();
+
+#define rde_render_2d(_window, _camera, _block_of_code)	\
+	rde_rendering_2d_begin_drawing(_camera, _window);	\
+	_block_of_code										\
+	rde_rendering_2d_end_drawing();
 
 /// *************************************************************************************************
 /// *                                		  ENUMS                         						*

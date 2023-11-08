@@ -1,5 +1,7 @@
 #ifdef RDE_RENDERING_MODULE
 
+#define RDE_SHADOW_MAP_SIZE 1024
+
 typedef struct {
 	size_t number_of_drawcalls;
 } rde_rendering_statistics;
@@ -40,6 +42,9 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window);
 rde_texture_parameters rde_innner_rendering_validate_texture_parameters(rde_texture_parameters* _params);
 void rde_inner_rendering_flush_render_texture_3d();
 void rde_inner_rendering_destroy_current_antialiasing_config();
+void rde_inner_rendering_create_shadows();
+void rde_inner_rendering_draw_scene_shadows(rde_window* _window, rde_camera* _camera);
+void rde_inner_rendering_destroy_shadows();
 void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window);
 
 rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
@@ -206,7 +211,6 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 
-#ifdef RDE_RENDERING_MODULE
 	GLuint _vao, _vbo;
 	glGenVertexArrays(1, &_vao);
 	glGenBuffers(1, &_vbo);
@@ -221,10 +225,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	DEFAULT_RENDER_TEXTURE->vao = _vao;
 	DEFAULT_RENDER_TEXTURE->vbo = _vbo;
 	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_X4);
-#endif
 }
 
-#ifdef RDE_RENDERING_MODULE
 void rde_inner_rendering_draw_to_framebuffer(rde_render_texture* _render_texture) {
 	GLuint _framebuffer_id = _render_texture == DEFAULT_RENDER_TEXTURE ? 0 : _render_texture->opengl_framebuffer_id;
 	glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer_id);
@@ -239,9 +241,95 @@ void rde_inner_rendering_draw_to_framebuffer(rde_render_texture* _render_texture
 	glBindTexture(GL_TEXTURE_2D, _render_texture->opengl_texture_id);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
+
+void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window) {
+	if(ENGINE.antialiasing.samples > 0) {
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
+		rde_vec_2I _screen_size = rde_window_get_window_size(_window);
+		glBlitFramebuffer(0, 0, _screen_size.x, _screen_size.y, 0, 0, _screen_size.x, _screen_size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	}
+	rde_inner_rendering_draw_to_framebuffer(DEFAULT_RENDER_TEXTURE);
+}
+
+void rde_inner_rendering_destroy_current_antialiasing_config() {
+	if(ENGINE.antialiasing.opengl_texture_id == -1 || ENGINE.antialiasing.frame_buffer_id == RDE_UINT_MAX) {
+		return;
+	}
+
+	uint _texture_id = ENGINE.antialiasing.opengl_texture_id;
+	glDeleteTextures(1, &_texture_id);
+	glDeleteRenderbuffers(1, &ENGINE.antialiasing.render_buffer_id);
+	glDeleteFramebuffers(1, &ENGINE.antialiasing.frame_buffer_id);
+
+	ENGINE.antialiasing.opengl_texture_id = -1;
+	ENGINE.antialiasing.frame_buffer_id = RDE_UINT_MAX;
+	ENGINE.antialiasing.render_buffer_id = RDE_UINT_MAX;
+}
+
+void rde_inner_rendering_create_shadows() {
+	glGenFramebuffers(1, &ENGINE.shadows.frame_buffer_id);
+	
+	uint _depth_texture;
+	glGenTextures(1, &_depth_texture);
+	ENGINE.shadows.opengl_texture_id = _depth_texture;
+	glBindTexture(GL_TEXTURE_2D, ENGINE.shadows.opengl_texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, RDE_SHADOW_MAP_SIZE, RDE_SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, ENGINE.shadows.frame_buffer_id);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ENGINE.shadows.opengl_texture_id, 0);
+	
+#if IS_MOBILE()
+	GLenum _none = GL_NONE;
+	glDrawBuffers(1, &_none);
+#else
+	glDrawBuffer(GL_NONE);
 #endif
 
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
+void rde_inner_rendering_destroy_shadows() {
+	uint _depth_texture = ENGINE.shadows.opengl_texture_id;
+	glDeleteTextures(1, &_depth_texture);
+	glDeleteFramebuffers(1, &ENGINE.shadows.frame_buffer_id);
+
+	ENGINE.shadows.opengl_texture_id = -1;
+	ENGINE.shadows.frame_buffer_id = RDE_UINT_MAX;
+}
+
+void rde_inner_rendering_draw_scene_shadows(rde_window* _window, rde_camera* _camera) {
+	(void)_window;
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	mat4 _light_projection;
+	mat4 _light_view;
+	mat4 _light_space_matrix;
+	glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, _camera->near_far.x, _camera->near_far.x, _light_projection);
+	glm_lookat((vec3) { ENGINE.directional_light.direction.x, ENGINE.directional_light.direction.x, ENGINE.directional_light.direction.z },
+				(vec3) { 0.0f, 0.0f, 0.0f },
+				(vec3) { 0.0f, 1.0f, 0.0f },
+				_light_view
+	);
+	 glm_mul(_light_projection, _light_view, _light_space_matrix);
+	// render scene from light's point of view
+	//simpleDepthShader.use();
+	//simpleDepthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+	glViewport(0, 0, RDE_SHADOW_MAP_SIZE, RDE_SHADOW_MAP_SIZE);
+	glBindFramebuffer(GL_FRAMEBUFFER, ENGINE.shadows.frame_buffer_id);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	
+	// Render scene
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
 
 // ==============================================================================
@@ -1042,21 +1130,6 @@ void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture) {
 	glDeleteFramebuffers(1, &_render_texture->opengl_framebuffer_id);
 }
 
-void rde_inner_rendering_destroy_current_antialiasing_config() {
-	if(ENGINE.antialiasing.opengl_texture_id == -1 || ENGINE.antialiasing.frame_buffer_id == RDE_UINT_MAX) {
-		return;
-	}
-
-	uint _texture_id = ENGINE.antialiasing.opengl_texture_id;
-	glDeleteTextures(1, &_texture_id);
-	glDeleteRenderbuffers(1, &ENGINE.antialiasing.render_buffer_id);
-	glDeleteFramebuffers(1, &ENGINE.antialiasing.frame_buffer_id);
-
-	ENGINE.antialiasing.opengl_texture_id = -1;
-	ENGINE.antialiasing.frame_buffer_id = RDE_UINT_MAX;
-	ENGINE.antialiasing.render_buffer_id = RDE_UINT_MAX;
-}
-
 void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing) {
 
 	if((int)_antialiasing == ENGINE.antialiasing.samples && ENGINE.antialiasing.frame_buffer_id != RDE_UINT_MAX) {
@@ -1098,8 +1171,13 @@ void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _anti
 	ENGINE.antialiasing.opengl_texture_id = _texture_multisampled_id;
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, ENGINE.antialiasing.opengl_texture_id);
 	rde_vec_2I _screen_size = rde_window_get_window_size(_window);
+
+	#if IS_MOBILE()
+	glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, _antialiasing_samples, GL_RGB, _screen_size.x, _screen_size.y, GL_TRUE);
+	#else
     glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, _antialiasing_samples, GL_RGB, _screen_size.x, _screen_size.y, GL_TRUE);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+	#endif
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, ENGINE.antialiasing.opengl_texture_id, 0);
     
     glGenRenderbuffers(1, &ENGINE.antialiasing.render_buffer_id);
@@ -1114,16 +1192,6 @@ void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _anti
 
 RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing() {
 	return (RDE_ANTIALIASING_)ENGINE.antialiasing.samples;
-}
-
-void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window) {
-	if(ENGINE.antialiasing.samples > 0) {
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
-		rde_vec_2I _screen_size = rde_window_get_window_size(_window);
-		glBlitFramebuffer(0, 0, _screen_size.x, _screen_size.y, 0, 0, _screen_size.x, _screen_size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	}
-	rde_inner_rendering_draw_to_framebuffer(DEFAULT_RENDER_TEXTURE);
 }
 
 #endif

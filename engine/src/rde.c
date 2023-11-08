@@ -342,6 +342,11 @@ typedef struct {
 	int samples;
 } rde_antialiasing;
 
+typedef struct {
+	uint frame_buffer_id;
+	int opengl_texture_id;
+} rde_shadows;
+
 #endif
 	
 #ifdef RDE_AUDIO_MODULE
@@ -407,6 +412,7 @@ struct rde_engine {
 	
 	rde_skybox skybox;
 	rde_antialiasing antialiasing;
+	rde_shadows shadows;
 #endif
 	
 #ifdef RDE_AUDIO_MODULE
@@ -600,9 +606,9 @@ rde_window rde_struct_create_window() {
 rde_material_light_data rde_struct_create_material_light_data() {
 	rde_material_light_data _m;
 	_m.shininess = 1.0f;
-	_m.ka = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
-	_m.kd = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
-	_m.ks = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+	_m.ka = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
+	_m.kd = (rde_vec_3F) { 0.5f, 0.5f, 0.5f };
+	_m.ks = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
 	return _m;
 }
 
@@ -814,6 +820,13 @@ rde_polygon rde_struct_create_polygon() {
 	return _p;
 }
 
+rde_shadows rde_struct_create_shadows() {
+	rde_shadows _s;
+	_s.frame_buffer_id = RDE_UINT_MAX;
+	_s.opengl_texture_id = -1;
+	return _s;
+}
+
 #endif
 
 #ifdef RDE_AUDIO_MODULE
@@ -886,6 +899,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.skybox_shader = NULL;
 	_e.skybox = rde_struct_create_skybox();
 	_e.antialiasing = rde_struct_create_antialiasing();
+	_e.shadows = rde_struct_create_shadows();
 
 	_e.heap_allocs_config.max_number_of_shaders += RDE_SHADERS_AMOUNT;
 

@@ -174,39 +174,38 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 	UNUSED(_dt)
 
 	if(model_viewer_model != NULL) {
-		rde_rendering_3d_begin_drawing(&model_viewer_camera, _window, model_viewer_draw_wireframe);
-		if(model_viewer_render_model_to_plane) rde_rendering_render_texture_enable(model_viewer_second_screen_rt);
-		for(int _i = 0; _i < model_viewer_max_meshes_to_render; _i++) {
-			rde_rendering_3d_draw_mesh(&model_viewer_transform, model_viewer_model_data.meshes[_i], NULL);
-		}
+		rde_render_3d(_window, &model_viewer_camera, false, {
+			if(model_viewer_render_model_to_plane) rde_rendering_render_texture_enable(model_viewer_second_screen_rt);
+			for(int _i = 0; _i < model_viewer_max_meshes_to_render; _i++) {
+				rde_rendering_3d_draw_mesh(&model_viewer_transform, model_viewer_model_data.meshes[_i], NULL);
+			}
 
-		if(model_viewer_point_light_mesh != NULL) {
-			rde_transform _point_light_transform = rde_struct_create_transform();
-			_point_light_transform.position = model_viewer_point_light.position;
-			_point_light_transform.position.x *= model_viewer_transform.scale.x;
-			_point_light_transform.position.y *= model_viewer_transform.scale.y;
-			_point_light_transform.position.z *= model_viewer_transform.scale.z;
-			rde_rendering_3d_draw_mesh(&_point_light_transform, model_viewer_point_light_mesh, NULL);
-		}
+			if(model_viewer_point_light_mesh != NULL) {
+				rde_transform _point_light_transform = rde_struct_create_transform();
+				_point_light_transform.position = model_viewer_point_light.position;
+				_point_light_transform.position.x *= model_viewer_transform.scale.x;
+				_point_light_transform.position.y *= model_viewer_transform.scale.y;
+				_point_light_transform.position.z *= model_viewer_transform.scale.z;
+				rde_rendering_3d_draw_mesh(&_point_light_transform, model_viewer_point_light_mesh, NULL);
+			}
 
-		if(model_viewer_spot_light_mesh != NULL) {
-			rde_transform _spot_light_transform = rde_struct_create_transform();
-			_spot_light_transform.position = model_viewer_spot_light.position;
-			_spot_light_transform.position.x *= model_viewer_transform.scale.x;
-			_spot_light_transform.position.y *= model_viewer_transform.scale.y;
-			_spot_light_transform.position.z *= model_viewer_transform.scale.z;
-			rde_rendering_3d_draw_mesh(&_spot_light_transform, model_viewer_spot_light_mesh, NULL);
-		}
+			if(model_viewer_spot_light_mesh != NULL) {
+				rde_transform _spot_light_transform = rde_struct_create_transform();
+				_spot_light_transform.position = model_viewer_spot_light.position;
+				_spot_light_transform.position.x *= model_viewer_transform.scale.x;
+				_spot_light_transform.position.y *= model_viewer_transform.scale.y;
+				_spot_light_transform.position.z *= model_viewer_transform.scale.z;
+				rde_rendering_3d_draw_mesh(&_spot_light_transform, model_viewer_spot_light_mesh, NULL);
+			}
 
-		if(model_viewer_render_model_to_plane) rde_rendering_render_texture_disable();
+			if(model_viewer_render_model_to_plane) rde_rendering_render_texture_disable();
 
-		if(model_viewer_render_model_to_plane) {
-			rde_transform _second_screen_transform = rde_struct_create_transform();
-			_second_screen_transform.position.y = 4;
-			rde_rendering_3d_draw_mesh(&_second_screen_transform ,model_viewer_second_screen_mesh, NULL);
-		}
-
-		rde_rendering_3d_end_drawing();
+			if(model_viewer_render_model_to_plane) {
+				rde_transform _second_screen_transform = rde_struct_create_transform();
+				_second_screen_transform.position.y = 4;
+				rde_rendering_3d_draw_mesh(&_second_screen_transform ,model_viewer_second_screen_mesh, NULL);
+			}
+		})
 	}
 }
 
