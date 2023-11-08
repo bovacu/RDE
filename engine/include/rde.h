@@ -347,56 +347,56 @@ typedef unsigned int uint;
 	}
 
 #if !IS_ANDROID()
-	#define rde_log_level(_level, _fmt, ...) do { 				\
-		if(!rde_engine_logs_supressed()) {						\
-			rde_log_level_inner(_level, _fmt __VA_OPT__(,) __VA_ARGS__);	\
-			printf("\n");										\
-		}														\
+	#define rde_log_level(_level, _fmt, ...) do { 						\
+		if(!rde_engine_logs_supressed()) {								\
+			rde_log_level_inner(_level, _fmt __VA_OPT__(,) __VA_ARGS__);\
+			printf("\n");												\
+		}																\
 	} while(0);
 
-	#define rde_log_color(_color, _fmt, ...) do { 				\
-		if(!rde_engine_logs_supressed()) {						\
+	#define rde_log_color(_color, _fmt, ...) do { 							\
+		if(!rde_engine_logs_supressed()) {									\
 			rde_log_color_inner(_color, _fmt  __VA_OPT__(,) __VA_ARGS__);	\
-			printf("\n");										\
-		}														\
+			printf("\n");													\
+		}																	\
 	} while(0);
 	
-	#define rde_log_level_sl(_level, _fmt, ...) do { 			\
-		if(!rde_engine_logs_supressed()) {						\
+	#define rde_log_level_sl(_level, _fmt, ...) do { 						\
+		if(!rde_engine_logs_supressed()) {									\
 			rde_log_level_inner(_level, _fmt  __VA_OPT__(,) __VA_ARGS__);	\
-		}														\
+		}																	\
 	} while(0);
 	
-	#define rde_log_color_sl(_color, _fmt, ...) do { 			\
-		if(!rde_engine_logs_supressed()) {						\
+	#define rde_log_color_sl(_color, _fmt, ...) do { 						\
+		if(!rde_engine_logs_supressed()) {									\
 			rde_log_color_inner(_color, _fmt  __VA_OPT__(,) __VA_ARGS__);	\
-		}														\
+		}																	\
 	} while(0);
 #else
-	#define rde_log_level(_level, _fmt, ...) do { 					\
-		if(!rde_engine_logs_supressed()) {						\
-			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);								\
-			printf("\n");										\
-		}														\
+	#define rde_log_level(_level, _fmt, ...) do { 												\
+		if(!rde_engine_logs_supressed()) {														\
+			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);	\
+			printf("\n");																		\
+		}																						\
 	} while(0);
 	
-	#define rde_log_color(_color, _fmt, ...) do { 					\
-		if(!rde_engine_logs_supressed()) {						\
-			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);								\
-			printf("\n");										\
-		}														\
+	#define rde_log_color(_color, _fmt, ...) do { 												\
+		if(!rde_engine_logs_supressed()) {														\
+			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);	\
+			printf("\n");																		\
+		}																						\
 	} while(0);
 	
-	#define rde_log_level_sl(_level, _fmt, ...) do { 					\
-		if(!rde_engine_logs_supressed()) {						\
-			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);								\
-		}														\
+	#define rde_log_level_sl(_level, _fmt, ...) do { 											\
+		if(!rde_engine_logs_supressed()) {														\
+			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);	\
+		}																						\
 	} while(0);
 	
-	#define rde_log_color_sl(_color, _fmt, ...) do { 					\
-		if(!rde_engine_logs_supressed()) {						\
-			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);								\
-		}														\
+	#define rde_log_color_sl(_color, _fmt, ...) do { 											\
+		if(!rde_engine_logs_supressed()) {														\
+			__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", _fmt __VA_OPT__(,) __VA_ARGS__);	\
+		}																						\
 	} while(0);
 #endif
 
