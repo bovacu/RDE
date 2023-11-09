@@ -717,6 +717,12 @@ rde_mesh* rde_rendering_mesh_create_sphere(float _radius, rde_material* _materia
 rde_model* rde_rendering_model_load(const char* _model_path) {
 	const char* _extension = rde_util_file_get_name_extension(_model_path);
 
+	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_models; _i++) {
+		if (ENGINE.models[_i].file_path != NULL && strcmp(ENGINE.models[_i].file_path, _model_path) == 0) {
+			return &ENGINE.models[_i];
+		}
+	}
+
 	if(strcmp(_extension, RDE_FBX_EXTENSION) == 0) {
 		rde_critical_error(true, RDE_ERROR_FEATURE_NOT_SUPPORTED_YET, "rde_rendering_model_load for FBX");
 	} else if(strcmp(_extension, RDE_OBJ_EXTENSION) == 0) {
@@ -988,6 +994,7 @@ void rde_rendering_model_unload(rde_model* _model) {
 	stbds_arrfree(_model->mesh_array);
 	_model->mesh_array = NULL;
 	_model->mesh_array_size = 0;
+	_model->file_path = NULL;
 }
 
 void rde_rendering_3d_draw_skybox(rde_camera* _camera) {

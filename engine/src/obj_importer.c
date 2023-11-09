@@ -290,6 +290,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 		_model->mesh_array_size++;
 	}
 
+	_model->file_path = _obj_path;
 
 	fast_obj_destroy(_mesh);
 	free(_obj);

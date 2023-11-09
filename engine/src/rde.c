@@ -105,7 +105,7 @@
 //			- [DONE(obj), NOT DONE(glft)] Model loading
 //			- [DONE] Texturing and [NOT COMPLETELY DONE] materials
 //			- [DONE] Instancing (3d batching)
-//			- [DONE] MSAA
+//			- [DONE] MSAA (ANDROID NOT WORKING, I SUPPOSE IOS NEITHER)
 //			- Lighting
 //				- [DONE] Phong
 //				- [DONE] Directional
@@ -120,7 +120,7 @@
 //			- [DONE] Render Textures
 //			- Particles
 //			- Multiple window rendering is not working properly
-//			- On every 'load' function, if a resource is going to be reloaded, return the already loaded one.
+//			- [DONE] On every 'load' function, if a resource is going to be reloaded, return the already loaded one.
 //
 //		- TOOL: [DONE] command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
@@ -322,6 +322,7 @@ struct rde_mesh {
 struct rde_model {
 	rde_mesh* mesh_array;
 	uint mesh_array_size;
+	const char* file_path;
 };
 	
 typedef struct {
@@ -799,6 +800,7 @@ rde_model rde_struct_create_model() {
 	rde_model _m;
 	_m.mesh_array = NULL;
 	_m.mesh_array_size = 0;
+	_m.file_path = NULL;
 	return _m;
 }
 
