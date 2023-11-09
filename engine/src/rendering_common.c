@@ -1132,6 +1132,11 @@ void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture) {
 
 void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing) {
 
+#if IS_MOBILE()
+	rde_log_level(RDE_LOG_LEVEL_WARNING, "Antialiasing is not yet supported in mobile platforms, not applying");
+	return;
+#endif
+
 	if((int)_antialiasing == ENGINE.antialiasing.samples && ENGINE.antialiasing.frame_buffer_id != RDE_UINT_MAX) {
 		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_WARNING_RENDERING_ANTIALIASING_LEVEL_ALREADY_SET, ENGINE.antialiasing.samples);
 		return;
