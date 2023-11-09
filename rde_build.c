@@ -1171,7 +1171,7 @@ bool compile_windows() {
 		arrput(_build_command, "-lcglm");																	\
 																											\
 		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {											\
-	arrput(_build_command, "-Xlinker /WHOLEARCHIVE:rde_imgui.lib");															\
+			arrput(_build_command, "-Xlinker /WHOLEARCHIVE:rde_imgui.lib");									\
 		}																									\
 																											\
 		if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {									\
