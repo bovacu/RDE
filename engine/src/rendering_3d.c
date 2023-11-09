@@ -40,31 +40,29 @@ bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh);
 #include "obj_importer.c"
 
 void rde_inner_create_line_batch_buffers() {
-	glGenVertexArrays(1, &current_batch_3d.line_batch.vertex_array_object);
-	glBindVertexArray(current_batch_3d.line_batch.vertex_array_object);
+	RDE_CHECK_GL(glGenVertexArrays, 1, &current_batch_3d.line_batch.vertex_array_object);
+	RDE_CHECK_GL(glBindVertexArray, current_batch_3d.line_batch.vertex_array_object);
 	
-	glGenBuffers(1, &current_batch_3d.line_batch.vertex_buffer_object);
-	glBindBuffer(GL_ARRAY_BUFFER, current_batch_3d.line_batch.vertex_buffer_object);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(rde_line_vertex) * RDE_MAX_LINES_PER_DRAW, NULL, GL_DYNAMIC_DRAW);
+	RDE_CHECK_GL(glGenBuffers, 1, &current_batch_3d.line_batch.vertex_buffer_object);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, current_batch_3d.line_batch.vertex_buffer_object);
+	RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, sizeof(rde_line_vertex) * RDE_MAX_LINES_PER_DRAW, NULL, GL_DYNAMIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(rde_line_vertex), (const void*)0);
-	glEnableVertexAttribArray(0);
+	RDE_CHECK_GL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, sizeof(rde_line_vertex), (const void*)0);
+	RDE_CHECK_GL(glEnableVertexAttribArray, 0);
 	
-	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(rde_line_vertex), (const void*)(sizeof(float) * 3));
-	glEnableVertexAttribArray(1);
+	RDE_CHECK_GL(glVertexAttribPointer, 1, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(rde_line_vertex), (const void*)(sizeof(float) * 3));
+	RDE_CHECK_GL(glEnableVertexAttribArray, 1);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	rde_util_check_opengl_error("After creating line batch");
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glBindVertexArray, 0);
 }
 
 void rde_inner_destroy_line_batch_buffers() {
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glDeleteBuffers(1, &current_batch_3d.line_batch.vertex_buffer_object);
-	glDeleteVertexArrays(1, &current_batch_3d.line_batch.vertex_array_object);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glBindVertexArray, 0);
+	RDE_CHECK_GL(glDeleteBuffers, 1, &current_batch_3d.line_batch.vertex_buffer_object);
+	RDE_CHECK_GL(glDeleteVertexArrays, 1, &current_batch_3d.line_batch.vertex_array_object);
 
 	free(current_batch_3d.line_batch.vertices);
 	current_batch_3d.line_batch.vertices = NULL;
@@ -80,8 +78,6 @@ void rde_inner_rendering_init_3d() {
 	}
 
 	rde_rendering_memory_texture_gpu_upload(DEFAULT_TEXTURE);
-	rde_util_check_opengl_error("ERROR: Creating default texture");
-
 	current_batch_3d = rde_struct_create_batch_3d();
 	current_batch_3d.line_batch.vertices = (rde_line_vertex*)malloc(sizeof(rde_line_vertex) * RDE_MAX_LINES_PER_DRAW);
 	rde_inner_create_line_batch_buffers();
@@ -185,11 +181,8 @@ rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data) {
 	strcat(_mesh.name, _data->name);
 #endif
 	
-	rde_util_check_opengl_error("ERROR: MESH - Start");
-
 	GLuint _vao = 0;
-	glGenVertexArrays(1, &_vao);
-	rde_util_check_opengl_error("ERROR: MESH - VAO");
+	RDE_CHECK_GL(glGenVertexArrays, 1, &_vao);
 
 	_mesh.vao = _vao;
 	_mesh.vertex_count = _data->vertex_count;
@@ -201,91 +194,60 @@ rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data) {
 	_mesh.transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW );
 	memset(_mesh.transforms, 0, RDE_MAX_MODELS_PER_DRAW);
 
-	glBindVertexArray(_mesh.vao);
-	rde_util_check_opengl_error("ERROR: MESH - Bind VAO");
+	RDE_CHECK_GL(glBindVertexArray, _mesh.vao);
 	
 	size_t _positions_size = sizeof(float) * _mesh.vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION;
-	glGenBuffers(1, &_mesh.vbo[0]);
-	rde_util_check_opengl_error("ERROR: MESH - Gen VBO Positions");
-	glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[0]);
-	rde_util_check_opengl_error("ERROR: MESH - Bind VBO Positions");
-	glBufferData(GL_ARRAY_BUFFER, _positions_size, _mesh.vertex_positions, GL_STATIC_DRAW);
-	rde_util_check_opengl_error("ERROR: MESH - Positions VBO Set Data");
-	glEnableVertexAttribArray(0);
-	rde_util_check_opengl_error("ERROR: MESH - Positions VBO Enable Attrib");
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	rde_util_check_opengl_error("ERROR: MESH - Positions VBO Set Attrib Data");
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glGenBuffers, 1, &_mesh.vbo[0]);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _mesh.vbo[0]);
+	RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, _positions_size, _mesh.vertex_positions, GL_STATIC_DRAW);
+	RDE_CHECK_GL(glEnableVertexAttribArray, 0);
+	RDE_CHECK_GL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 
 	if(_data->normals != NULL && _data->normals_size > 0) {
 		size_t _normals_size = sizeof(float) * _mesh.vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL;
-		glGenBuffers(1, &_mesh.vbo[1]);
-		rde_util_check_opengl_error("ERROR: MESH - Gen VBO Normal");
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[1]);
-		rde_util_check_opengl_error("ERROR: MESH - Bind VBO Normal");
-		glBufferData(GL_ARRAY_BUFFER, _normals_size, _mesh.vertex_normals, GL_STATIC_DRAW);
-		rde_util_check_opengl_error("ERROR: MESH - Normal VBO Set Data");
-		glEnableVertexAttribArray(1);
-		rde_util_check_opengl_error("ERROR: MESH - Normal VBO Enable Attrib");
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		rde_util_check_opengl_error("ERROR: MESH - Normal VBO Set Attrib Data");
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		RDE_CHECK_GL(glGenBuffers, 1, &_mesh.vbo[1]);
+		RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _mesh.vbo[1]);
+		RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, _normals_size, _mesh.vertex_normals, GL_STATIC_DRAW);
+		RDE_CHECK_GL(glEnableVertexAttribArray, 1);
+		RDE_CHECK_GL(glVertexAttribPointer, 1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 	}
 
 	if(_data->texcoords != NULL && _data->texcoords_size > 0) {
 		size_t _texcoords_size = sizeof(float) * _mesh.vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD;
-		glGenBuffers(1, &_mesh.vbo[2]);
-		rde_util_check_opengl_error("ERROR: MESH - Gen VBO Texcoords");
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[2]);
-		rde_util_check_opengl_error("ERROR: MESH - Bind VBO Texcoords");
-		glBufferData(GL_ARRAY_BUFFER, _texcoords_size, _mesh.vertex_texcoords, GL_STATIC_DRAW);
-		rde_util_check_opengl_error("ERROR: MESH - Texcoords VBO Set Data");
-		glEnableVertexAttribArray(2);
-		rde_util_check_opengl_error("ERROR: MESH - Texcoords VBO Enable Attrib");
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		rde_util_check_opengl_error("ERROR: MESH - Texcoords VBO Set Attrib Data");
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		RDE_CHECK_GL(glGenBuffers, 1, &_mesh.vbo[2]);
+		RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _mesh.vbo[2]);
+		RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, _texcoords_size, _mesh.vertex_texcoords, GL_STATIC_DRAW);
+		RDE_CHECK_GL(glEnableVertexAttribArray, 2);
+		RDE_CHECK_GL(glVertexAttribPointer, 2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 	}
 
-	glGenBuffers(1, &_mesh.vbo[3]);
-	rde_util_check_opengl_error("ERROR: MESH - Gen VBO Transform");
-	glBindBuffer(GL_ARRAY_BUFFER, _mesh.vbo[3]);
-	rde_util_check_opengl_error("ERROR: MESH - Bind VBO Transform");
-	glBufferData(GL_ARRAY_BUFFER, sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW, NULL, GL_DYNAMIC_DRAW);
-	rde_util_check_opengl_error("ERROR: MESH - VBO Transform Set Data");
+	RDE_CHECK_GL(glGenBuffers, 1, &_mesh.vbo[3]);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _mesh.vbo[3]);
+	RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW, NULL, GL_DYNAMIC_DRAW);
 	
-	glEnableVertexAttribArray(3);
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 3");
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)0);
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 3");
+	RDE_CHECK_GL(glEnableVertexAttribArray, 3);
+	RDE_CHECK_GL(glVertexAttribPointer, 3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)0);
 
-	glEnableVertexAttribArray(4);
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 4");
-	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 4");
+	RDE_CHECK_GL(glEnableVertexAttribArray, 4);
+	RDE_CHECK_GL(glVertexAttribPointer, 4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
 
-	glEnableVertexAttribArray(5);
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 5");
-	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 8));
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 5");
+	RDE_CHECK_GL(glEnableVertexAttribArray, 5);
+	RDE_CHECK_GL(glVertexAttribPointer, 5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 8));
 
-	glEnableVertexAttribArray(6);
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 6");
-	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 12));
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 6");
+	RDE_CHECK_GL(glEnableVertexAttribArray, 6);
+	RDE_CHECK_GL(glVertexAttribPointer, 6, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 12));
 
-	glVertexAttribDivisor(3, 1);
-	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 3");
-    glVertexAttribDivisor(4, 1);
-	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 4");
-    glVertexAttribDivisor(5, 1);
-	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 5");
-    glVertexAttribDivisor(6, 1);
-	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 6");
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glVertexAttribDivisor, 3, 1);
+    RDE_CHECK_GL(glVertexAttribDivisor, 4, 1);
+    RDE_CHECK_GL(glVertexAttribDivisor, 5, 1);
+    RDE_CHECK_GL(glVertexAttribDivisor, 6, 1);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glBindVertexArray, 0);
+	RDE_CHECK_GL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	_mesh.material = rde_struct_create_material();
 	_mesh.material.map_ka = _data->material.map_ka;
@@ -346,13 +308,10 @@ void rde_inner_rendering_flush_line_batch() {
 	if(current_batch_3d.line_batch.thickness <= 0) {
 		current_batch_3d.line_batch.thickness = 1;
 	}
-	glLineWidth(current_batch_3d.line_batch.thickness);
+	RDE_CHECK_GL(glLineWidth, current_batch_3d.line_batch.thickness);
 
-	rde_util_check_opengl_error("GL Error Before LineFlush3D");
 	rde_shader* _shader = current_batch_3d.line_batch.shader;
-
-	glUseProgram(_shader->compiled_program_id);
-	rde_util_check_opengl_error("After glUseProgram");
+	RDE_CHECK_GL(glUseProgram, _shader->compiled_program_id);
 
 	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
@@ -367,23 +326,20 @@ void rde_inner_rendering_flush_line_batch() {
 	);
 
 	glm_mat4_mul(projection_matrix, _view_matrix, _view_projection_matrix);
-	glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
+	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 
-	glBindVertexArray(current_batch_3d.line_batch.vertex_array_object);
-	rde_util_check_opengl_error("After glBindVertexArray");
+	RDE_CHECK_GL(glBindVertexArray, current_batch_3d.line_batch.vertex_array_object);
 	
-	glBindBuffer(GL_ARRAY_BUFFER, current_batch_3d.line_batch.vertex_buffer_object);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, current_batch_3d.line_batch.amount_of_vertices * sizeof(rde_line_vertex), current_batch_3d.line_batch.vertices);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, current_batch_3d.line_batch.vertex_buffer_object);
+	RDE_CHECK_GL(glBufferSubData, GL_ARRAY_BUFFER, 0, current_batch_3d.line_batch.amount_of_vertices * sizeof(rde_line_vertex), current_batch_3d.line_batch.vertices);
 
-	glDrawArrays(GL_LINES, 0, current_batch_3d.line_batch.amount_of_vertices);
+	RDE_CHECK_GL(glDrawArrays, GL_LINES, 0, current_batch_3d.line_batch.amount_of_vertices);
 }
 
 void rde_inner_rendering_flush_batch_3d() {
 	if(current_batch_3d.shader == NULL || current_batch_3d.mesh == NULL || current_batch_3d.amount_of_models_per_draw == 0) {
 		return;
 	}
-
-	rde_util_check_opengl_error("GL Error Before Flush3D");
 
 	rde_mesh* _mesh = current_batch_3d.mesh;
 	rde_shader* _shader = current_batch_3d.shader;
@@ -392,8 +348,7 @@ void rde_inner_rendering_flush_batch_3d() {
 		return;
 	}
 
-	glUseProgram(current_batch_3d.shader->compiled_program_id);
-	rde_util_check_opengl_error("After glUseProgram");
+	RDE_CHECK_GL(glUseProgram, current_batch_3d.shader->compiled_program_id);
 
 	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
@@ -411,64 +366,63 @@ void rde_inner_rendering_flush_batch_3d() {
 
 	GLint _using_render_texture_location = glGetUniformLocation(_shader->compiled_program_id, "material.using_render_texture");
 	if(_mesh->material.render_texture != NULL) {
-		glUseProgram(current_batch_3d.shader->compiled_program_id);
+		RDE_CHECK_GL(glUseProgram, current_batch_3d.shader->compiled_program_id);
 
 		GLint _rt_location = glGetUniformLocation(_shader->compiled_program_id, "render_texture");
-		glUniform1i(_rt_location, 0);
+		RDE_CHECK_GL(glUniform1i, _rt_location, 0);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, _mesh->material.render_texture->opengl_texture_id);
+		RDE_CHECK_GL(glActiveTexture, GL_TEXTURE0);
+		RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _mesh->material.render_texture->opengl_texture_id);
 
-		glUniform1i(_using_render_texture_location, 1);
+		RDE_CHECK_GL(glUniform1i, _using_render_texture_location, 1);
 	} else {
 		rde_texture* _ka_texture = _mesh->material.map_ka != NULL ? _mesh->material.map_ka : DEFAULT_TEXTURE;
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, _ka_texture->opengl_texture_id);
+		RDE_CHECK_GL(glActiveTexture, GL_TEXTURE0);
+		RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _ka_texture->opengl_texture_id);
 
 		rde_texture* _kd_texture = _mesh->material.map_kd != NULL ? _mesh->material.map_kd : DEFAULT_TEXTURE;
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, _kd_texture->opengl_texture_id);
+		RDE_CHECK_GL(glActiveTexture, GL_TEXTURE1);
+		RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _kd_texture->opengl_texture_id);
 
 		rde_texture* _ks_texture = _mesh->material.map_ks != NULL ? _mesh->material.map_ks : DEFAULT_TEXTURE;
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, _ks_texture->opengl_texture_id);
+		RDE_CHECK_GL(glActiveTexture, GL_TEXTURE2);
+		RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _ks_texture->opengl_texture_id);
 
 		rde_texture* _bump_texture = _mesh->material.map_bump != NULL ? _mesh->material.map_bump : DEFAULT_TEXTURE;
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, _bump_texture->opengl_texture_id);
+		RDE_CHECK_GL(glActiveTexture, GL_TEXTURE3);
+		RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _bump_texture->opengl_texture_id);
 
 		GLint _ka_location = glGetUniformLocation(_shader->compiled_program_id, "tex_ka");
-		glUniform1i(_ka_location, 0);
+		RDE_CHECK_GL(glUniform1i, _ka_location, 0);
 		GLint _kd_location = glGetUniformLocation(_shader->compiled_program_id, "tex_kd");
-		glUniform1i(_kd_location, 1);
+		RDE_CHECK_GL(glUniform1i, _kd_location, 1);
 		GLint _ks_location = glGetUniformLocation(_shader->compiled_program_id, "tex_ks");
-		glUniform1i(_ks_location, 2);
+		RDE_CHECK_GL(glUniform1i, _ks_location, 2);
 		GLint _bump_location = glGetUniformLocation(_shader->compiled_program_id, "tex_bump");
-		glUniform1i(_bump_location, 3);
-		glUniform1i(_using_render_texture_location, 0);
+		RDE_CHECK_GL(glUniform1i, _bump_location, 3);
+		RDE_CHECK_GL(glUniform1i, _using_render_texture_location, 0);
 	}
 
-	glUniformMatrix4fv(glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
-	rde_util_check_opengl_error("After Set Model Matrix Unform");
+	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 
 	rde_vec_3F _camera_pos = current_drawing_camera->transform.position;
-	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "camera_pos"), _camera_pos.x, _camera_pos.y, _camera_pos.z);
+	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "camera_pos"), _camera_pos.x, _camera_pos.y, _camera_pos.z);
 	
 	rde_vec_3F _dl_direction = ENGINE.directional_light.direction;
 	rde_vec_3F _dl_ambient = ENGINE.directional_light.ambient_color;
 	rde_vec_3F _dl_diffuse = ENGINE.directional_light.diffuse_color;
 	rde_vec_3F _dl_specular = ENGINE.directional_light.specular_color;
 
-	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.direction"), _dl_direction.x, _dl_direction.y, _dl_direction.z);
-	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.ambient_color"), _dl_ambient.x, _dl_ambient.y, _dl_ambient.z);
-	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.diffuse_color"), _dl_diffuse.x, _dl_diffuse.y, _dl_diffuse.z);
-	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "directional_light.specular_color"), _dl_specular.x, _dl_specular.y, _dl_specular.z);
+	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "directional_light.direction"), _dl_direction.x, _dl_direction.y, _dl_direction.z);
+	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "directional_light.ambient_color"), _dl_ambient.x, _dl_ambient.y, _dl_ambient.z);
+	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "directional_light.diffuse_color"), _dl_diffuse.x, _dl_diffuse.y, _dl_diffuse.z);
+	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "directional_light.specular_color"), _dl_specular.x, _dl_specular.y, _dl_specular.z);
 
 	rde_material_light_data _material = _mesh->material.material_light_data;
-	glUniform1f(glGetUniformLocation(_shader->compiled_program_id, "material.shininess"), _material.shininess);
-	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "material.Ka"), _material.ka.x, _material.ka.y, _material.ka.z);
-	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "material.Kd"), _material.kd.x, _material.kd.y, _material.kd.z);
-	glUniform3f(glGetUniformLocation(_shader->compiled_program_id, "material.Ks"), _material.ks.x, _material.ks.y, _material.ks.z);
+	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, "material.shininess"), _material.shininess);
+	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "material.Ka"), _material.ka.x, _material.ka.y, _material.ka.z);
+	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "material.Kd"), _material.kd.x, _material.kd.y, _material.kd.z);
+	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "material.Ks"), _material.ks.x, _material.ks.y, _material.ks.z);
 
 	for(size_t _i = 0; _i < RDE_MAX_POINT_LIGHTS; _i++) {
 		rde_point_light* _p = ENGINE.point_lights[_i];
@@ -477,37 +431,36 @@ void rde_inner_rendering_flush_batch_3d() {
 
 		if(_p != NULL) {
 			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].position", _i);
-			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->position.x, _p->position.y, _p->position.z);
+			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->position.x, _p->position.y, _p->position.z);
 			memset(_point_light_var, 0, 256);
 		
 			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].ambient_color", _i);
-			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->ambient_color.x, _p->ambient_color.y, _p->ambient_color.z);
+			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->ambient_color.x, _p->ambient_color.y, _p->ambient_color.z);
 			memset(_point_light_var, 0, 256);
 		
 			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].diffuse_color", _i);
-			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->diffuse_color.x, _p->diffuse_color.y, _p->diffuse_color.z);
+			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->diffuse_color.x, _p->diffuse_color.y, _p->diffuse_color.z);
 			memset(_point_light_var, 0, 256);
 
 			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].specular_color", _i);
-			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->specular_color.x, _p->specular_color.y, _p->specular_color.z);
+			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->specular_color.x, _p->specular_color.y, _p->specular_color.z);
 			memset(_point_light_var, 0, 256);
 
 			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].constant", _i);
-			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->constant);
+			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->constant);
 			memset(_point_light_var, 0, 256);
 
 			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].linear", _i);
-			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->linear);
+			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->linear);
 			memset(_point_light_var, 0, 256);
 
 			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].quadratic", _i);
-			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->quadratic);
+			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->quadratic);
 			memset(_point_light_var, 0, 256);
 		}
 
 		rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].used", _i);
-		glUniform1i(glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _i < ENGINE.amount_of_point_lights ? 1 : -1);
-		rde_util_check_opengl_error("On point light.used");
+		RDE_CHECK_GL(glUniform1i, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _i < ENGINE.amount_of_point_lights ? 1 : -1);
 
 		memset(_point_light_var, 0, 256);
 	}
@@ -519,61 +472,59 @@ void rde_inner_rendering_flush_batch_3d() {
 
 		if(_s != NULL) {
 			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].position", _i);
-			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->position.x, _s->position.y, _s->position.z);
+			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->position.x, _s->position.y, _s->position.z);
 			memset(_spot_light_var, 0, 256);
 
 			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].direction", _i);
-			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->direction.x, _s->direction.y, _s->direction.z);
+			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->direction.x, _s->direction.y, _s->direction.z);
 			memset(_spot_light_var, 0, 256);
 		
 			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].ambient_color", _i);
-			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->ambient_color.x, _s->ambient_color.y, _s->ambient_color.z);
+			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->ambient_color.x, _s->ambient_color.y, _s->ambient_color.z);
 			memset(_spot_light_var, 0, 256);
 		
 			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].diffuse_color", _i);
-			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->diffuse_color.x, _s->diffuse_color.y, _s->diffuse_color.z);
+			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->diffuse_color.x, _s->diffuse_color.y, _s->diffuse_color.z);
 			memset(_spot_light_var, 0, 256);
 
 			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].specular_color", _i);
-			glUniform3f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->specular_color.x, _s->specular_color.y, _s->specular_color.z);
+			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->specular_color.x, _s->specular_color.y, _s->specular_color.z);
 			memset(_spot_light_var, 0, 256);
 
 			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].constant", _i);
-			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->constant);
+			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->constant);
 			memset(_spot_light_var, 0, 256);
 
 			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].linear", _i);
-			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->linear);
+			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->linear);
 			memset(_spot_light_var, 0, 256);
 
 			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].quadratic", _i);
-			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->quadratic);
+			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->quadratic);
 			memset(_spot_light_var, 0, 256);
 
 			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].cut_off", _i);
-			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), cos(glm_rad(_s->cut_off)));
+			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), cos(glm_rad(_s->cut_off)));
 			memset(_spot_light_var, 0, 256);
 
 			
 			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].outer_cut_off", _i);
-			glUniform1f(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), cos(glm_rad(_s->outer_cut_off)));
+			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), cos(glm_rad(_s->outer_cut_off)));
 			memset(_spot_light_var, 0, 256);
 		}
 
 		rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].used", _i);
-		glUniform1i(glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _i < ENGINE.amount_of_spot_lights ? 1 : -1);
-		rde_util_check_opengl_error("On point light.used");
+		RDE_CHECK_GL(glUniform1i, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _i < ENGINE.amount_of_spot_lights ? 1 : -1);
 
 		memset(_spot_light_var, 0, 256);
 	}
 
-	glBindVertexArray(_mesh->vao);
-	rde_util_check_opengl_error("After glBindVertexArray");
+	RDE_CHECK_GL(glBindVertexArray, _mesh->vao);
 
-	glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[3]);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, current_batch_3d.amount_of_models_per_draw * (sizeof(float) * 16), _mesh->transforms);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _mesh->vbo[3]);
+	RDE_CHECK_GL(glBufferSubData, GL_ARRAY_BUFFER, 0, current_batch_3d.amount_of_models_per_draw * (sizeof(float) * 16), _mesh->transforms);
 
-	glDrawArraysInstanced(GL_TRIANGLES, 0, _mesh->vertex_count, current_batch_3d.amount_of_models_per_draw);
+	RDE_CHECK_GL(glDrawArraysInstanced, GL_TRIANGLES, 0, _mesh->vertex_count, current_batch_3d.amount_of_models_per_draw);
 }
 
 void rde_inner_rendering_try_flush_line_batch(rde_shader* _shader, unsigned short _thickness, size_t _extra_floats) {
@@ -600,9 +551,9 @@ void rde_inner_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh
 
 #if !IS_ANDROID()
     if(current_batch_3d.draw_mesh_wireframe) {
-		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+		RDE_CHECK_GL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
 		rde_inner_rendering_flush_batch_3d();
-		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+		RDE_CHECK_GL(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL);
 	}
 #endif
 
@@ -646,12 +597,8 @@ rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data) {
 #endif
 	}
 	
-	rde_util_check_opengl_error("ERROR: MESH - Start");
-
 	GLuint _vao = 0;
-	glGenVertexArrays(1, &_vao);
-	rde_util_check_opengl_error("ERROR: MESH - VAO");
-
+	RDE_CHECK_GL(glGenVertexArrays, 1, &_vao);
 	_mesh->vao = _vao;
 	_mesh->vertex_count = _data->vertex_count;
 	_mesh->vertex_positions = _data->positions;
@@ -662,91 +609,60 @@ rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data) {
 	_mesh->transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW );
 	memset(_mesh->transforms, 0, RDE_MAX_MODELS_PER_DRAW);
 
-	glBindVertexArray(_mesh->vao);
-	rde_util_check_opengl_error("ERROR: MESH - Bind VAO");
+	RDE_CHECK_GL(glBindVertexArray, _mesh->vao);
 	
 	size_t _positions_size = sizeof(float) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION;
-	glGenBuffers(1, &_mesh->vbo[0]);
-	rde_util_check_opengl_error("ERROR: MESH - Gen VBO Positions");
-	glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[0]);
-	rde_util_check_opengl_error("ERROR: MESH - Bind VBO Positions");
-	glBufferData(GL_ARRAY_BUFFER, _positions_size, _mesh->vertex_positions, GL_STATIC_DRAW);
-	rde_util_check_opengl_error("ERROR: MESH - Positions VBO Set Data");
-	glEnableVertexAttribArray(0);
-	rde_util_check_opengl_error("ERROR: MESH - Positions VBO Enable Attrib");
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	rde_util_check_opengl_error("ERROR: MESH - Positions VBO Set Attrib Data");
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glGenBuffers, 1, &_mesh->vbo[0]);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _mesh->vbo[0]);
+	RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, _positions_size, _mesh->vertex_positions, GL_STATIC_DRAW);
+	RDE_CHECK_GL(glEnableVertexAttribArray, 0);
+	RDE_CHECK_GL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 
 	if(_data->normals != NULL && _data->normals_size > 0) {
 		size_t _normals_size = sizeof(float) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL;
-		glGenBuffers(1, &_mesh->vbo[1]);
-		rde_util_check_opengl_error("ERROR: MESH - Gen VBO Normal");
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[1]);
-		rde_util_check_opengl_error("ERROR: MESH - Bind VBO Normal");
-		glBufferData(GL_ARRAY_BUFFER, _normals_size, _mesh->vertex_normals, GL_STATIC_DRAW);
-		rde_util_check_opengl_error("ERROR: MESH - Normal VBO Set Data");
-		glEnableVertexAttribArray(1);
-		rde_util_check_opengl_error("ERROR: MESH - Normal VBO Enable Attrib");
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		rde_util_check_opengl_error("ERROR: MESH - Normal VBO Set Attrib Data");
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		RDE_CHECK_GL(glGenBuffers, 1, &_mesh->vbo[1]);
+		RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _mesh->vbo[1]);
+		RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, _normals_size, _mesh->vertex_normals, GL_STATIC_DRAW);
+		RDE_CHECK_GL(glEnableVertexAttribArray, 1);
+		RDE_CHECK_GL(glVertexAttribPointer, 1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 	}
 
 	if(_data->texcoords != NULL && _data->texcoords_size > 0) {
 		size_t _texcoords_size = sizeof(float) * _mesh->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD;
-		glGenBuffers(1, &_mesh->vbo[2]);
-		rde_util_check_opengl_error("ERROR: MESH - Gen VBO Texcoords");
-		glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[2]);
-		rde_util_check_opengl_error("ERROR: MESH - Bind VBO Texcoords");
-		glBufferData(GL_ARRAY_BUFFER, _texcoords_size, _mesh->vertex_texcoords, GL_STATIC_DRAW);
-		rde_util_check_opengl_error("ERROR: MESH - Texcoords VBO Set Data");
-		glEnableVertexAttribArray(2);
-		rde_util_check_opengl_error("ERROR: MESH - Texcoords VBO Enable Attrib");
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		rde_util_check_opengl_error("ERROR: MESH - Texcoords VBO Set Attrib Data");
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		RDE_CHECK_GL(glGenBuffers, 1, &_mesh->vbo[2]);
+		RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _mesh->vbo[2]);
+		RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, _texcoords_size, _mesh->vertex_texcoords, GL_STATIC_DRAW);
+		RDE_CHECK_GL(glEnableVertexAttribArray, 2);
+		RDE_CHECK_GL(glVertexAttribPointer, 2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 	}
 
-	glGenBuffers(1, &_mesh->vbo[3]);
-	rde_util_check_opengl_error("ERROR: MESH - Gen VBO Transform");
-	glBindBuffer(GL_ARRAY_BUFFER, _mesh->vbo[3]);
-	rde_util_check_opengl_error("ERROR: MESH - Bind VBO Transform");
-	glBufferData(GL_ARRAY_BUFFER, sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW, NULL, GL_DYNAMIC_DRAW);
-	rde_util_check_opengl_error("ERROR: MESH - VBO Transform Set Data");
+	RDE_CHECK_GL(glGenBuffers, 1, &_mesh->vbo[3]);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _mesh->vbo[3]);
+	RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW, NULL, GL_DYNAMIC_DRAW);
 	
-	glEnableVertexAttribArray(3);
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 3");
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)0);
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 3");
+	RDE_CHECK_GL(glEnableVertexAttribArray, 3);
+	RDE_CHECK_GL(glVertexAttribPointer, 3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)0);
 
-	glEnableVertexAttribArray(4);
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 4");
-	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 4");
+	RDE_CHECK_GL(glEnableVertexAttribArray, 4);
+	RDE_CHECK_GL(glVertexAttribPointer, 4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
 
-	glEnableVertexAttribArray(5);
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 5");
-	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 8));
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 5");
+	RDE_CHECK_GL(glEnableVertexAttribArray, 5);
+	RDE_CHECK_GL(glVertexAttribPointer, 5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 8));
 
-	glEnableVertexAttribArray(6);
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Enable Attrib 6");
-	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 12));
-	rde_util_check_opengl_error("ERROR: MESH - Transform VBO Set Attrib Data 6");
+	RDE_CHECK_GL(glEnableVertexAttribArray, 6);
+	RDE_CHECK_GL(glVertexAttribPointer, 6, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 12));
 
-	glVertexAttribDivisor(3, 1);
-	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 3");
-	glVertexAttribDivisor(4, 1);
-	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 4");
-	glVertexAttribDivisor(5, 1);
-	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 5");
-	glVertexAttribDivisor(6, 1);
-	rde_util_check_opengl_error("ERROR: MESH - Transform Attrib divisor 6");
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glVertexAttribDivisor, 3, 1);
+	RDE_CHECK_GL(glVertexAttribDivisor, 4, 1);
+	RDE_CHECK_GL(glVertexAttribDivisor, 5, 1);
+	RDE_CHECK_GL(glVertexAttribDivisor, 6, 1);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glBindVertexArray, 0);
+	RDE_CHECK_GL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	_mesh->material = rde_struct_create_material();
 	_mesh->material.map_ka = _data->material.map_ka;
@@ -821,35 +737,35 @@ rde_model* rde_rendering_model_load(const char* _model_path) {
 void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated_buffers) {
 	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glBindVertexArray, 0);
 
 	// positions
 	if(_mesh->vbo[0] != RDE_UINT_MAX) {
-		glDeleteBuffers(1, &_mesh->vbo[0]);
+		RDE_CHECK_GL(glDeleteBuffers, 1, &_mesh->vbo[0]);
 		_mesh->vbo[0] = RDE_UINT_MAX;
 	}
 	
 	// normals
 	if(_mesh->vbo[1] != RDE_UINT_MAX) {
-		glDeleteBuffers(1, &_mesh->vbo[1]);
+		RDE_CHECK_GL(glDeleteBuffers, 1, &_mesh->vbo[1]);
 		_mesh->vbo[1] = RDE_UINT_MAX;
 	}
 
 	// texcoords
 	if(_mesh->vbo[2] != RDE_UINT_MAX) {
-		glDeleteBuffers(1, &_mesh->vbo[2]);
+		RDE_CHECK_GL(glDeleteBuffers, 1, &_mesh->vbo[2]);
 		_mesh->vbo[2] = RDE_UINT_MAX;
 	}
 	
 	// transforms
 	if(_mesh->vbo[3] != RDE_UINT_MAX) {
-		glDeleteBuffers(1, &_mesh->vbo[3]);
+		RDE_CHECK_GL(glDeleteBuffers, 1, &_mesh->vbo[3]);
 		_mesh->vbo[3] = RDE_UINT_MAX;
 	}
 
-	glDeleteVertexArrays(1, &_mesh->vao);
+	RDE_CHECK_GL(glDeleteVertexArrays, 1, &_mesh->vao);
 	_mesh->vao = RDE_UINT_MAX;
 	
 	if(_delete_allocated_buffers) {
@@ -890,12 +806,12 @@ void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated_buffers)
 void rde_rendering_3d_begin_drawing(rde_camera* _camera, rde_window* _window, bool _draw_wireframe_over_mesh) {
 	rde_critical_error(_camera == NULL || _window == NULL, RDE_ERROR_BEGIN_RENDER);
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	RDE_CHECK_GL(glEnable, GL_DEPTH_TEST);
+	RDE_CHECK_GL(glDepthFunc, GL_LESS);
 
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glFrontFace(GL_CCW);
+	RDE_CHECK_GL(glEnable, GL_CULL_FACE);
+	RDE_CHECK_GL(glCullFace, GL_BACK);
+	RDE_CHECK_GL(glFrontFace, GL_CCW);
 
 	current_drawing_camera = _camera;
 	current_drawing_window = _window;
@@ -952,9 +868,9 @@ void rde_rendering_3d_end_drawing() {
 
 #if !IS_ANDROID()
 	if(current_batch_3d.draw_mesh_wireframe) {
-		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+		RDE_CHECK_GL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
 		rde_inner_rendering_flush_batch_3d();
-		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+		RDE_CHECK_GL(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL);
 	}
 #endif
 
@@ -963,8 +879,8 @@ void rde_rendering_3d_end_drawing() {
 	rde_inner_rendering_reset_batch_3d();
 	rde_inner_rendering_flush_line_batch();
 	rde_inner_rendering_reset_line_batch();
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
+	RDE_CHECK_GL(glDisable, GL_DEPTH_TEST);
+	RDE_CHECK_GL(glDisable, GL_CULL_FACE);
 	current_drawing_camera = NULL;
 }
 
@@ -1078,9 +994,9 @@ void rde_rendering_3d_draw_skybox(rde_camera* _camera) {
 	if(ENGINE.skybox.opengl_texture_id < 0 || _camera == NULL) {
 		return;
 	}
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glUseProgram(ENGINE.skybox_shader->compiled_program_id);
+	RDE_CHECK_GL(glEnable, GL_DEPTH_TEST);
+	RDE_CHECK_GL(glDepthFunc, GL_LEQUAL);
+	RDE_CHECK_GL(glUseProgram, ENGINE.skybox_shader->compiled_program_id);
 	
 	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
@@ -1100,15 +1016,14 @@ void rde_rendering_3d_draw_skybox(rde_camera* _camera) {
 
 	glm_mat4_mul(projection_matrix, _view_matrix, _view_projection_matrix);
 
-	glUniformMatrix4fv(glGetUniformLocation(ENGINE.skybox_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
-	rde_util_check_opengl_error("After Set Model Matrix Unform");
+	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(ENGINE.skybox_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 
-	glBindVertexArray(ENGINE.skybox.vao);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, ENGINE.skybox.opengl_texture_id);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
-	glDepthFunc(GL_LESS);
+	RDE_CHECK_GL(glBindVertexArray, ENGINE.skybox.vao);
+	RDE_CHECK_GL(glActiveTexture, GL_TEXTURE0);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_CUBE_MAP, ENGINE.skybox.opengl_texture_id);
+	RDE_CHECK_GL(glDrawArrays, GL_TRIANGLES, 0, 36);
+	RDE_CHECK_GL(glBindVertexArray, 0);
+	RDE_CHECK_GL(glDepthFunc, GL_LESS);
 }
 
 #endif

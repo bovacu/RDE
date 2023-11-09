@@ -155,37 +155,39 @@
 
 size_t current_frame = 0;
 
-bool rde_util_check_opengl_error(const char* _message) {
-	GLenum _err = GL_NO_ERROR;
-	while((_err = glGetError()) != GL_NO_ERROR){
-		switch(_err) {
-			case GL_NO_ERROR:
-				printf("GL_NO_ERROR: No error has been recorded. The value of this symbolic constant is guaranteed to be 0. | %s -> %u \n",  _message, _err);
-				return true;
-			case GL_INVALID_ENUM:
-				printf("GL_INVALID_ENUM: An unacceptable value is specified for an enumerated argument. The offending command is ignored and has no other side effect than to set the error flag. | %s -> %u \n",  _message, _err);
-				return true;
-			case GL_INVALID_VALUE:
-				printf("GL_INVALID_VALUE: A numeric argument is out of range. The offending command is ignored and has no other side effect than to set the error flag. | %s -> %u \n",  _message, _err);
-				return true;
-			case GL_INVALID_OPERATION:
-				printf("GL_INVALID_OPERATION: The specified operation is not allowed in the current state. The offending command is ignored and has no other side effect than to set the error flag. | %s -> %u \n",  _message, _err);
-				return true;
-			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				printf("GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete. | %s -> %u \n",  _message, _err);
-				return true;
-			case GL_OUT_OF_MEMORY:
-				printf("GL_OUT_OF_MEMORY: There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded. | %s -> %u \n",  _message, _err);
-				return true;
-			default:
-				printf("No description. | %s -> %u \n",  _message, _err);
-				return true;
-		}
+#if RDE_DEBUG
+#define RDE_CHECK_GL(_function, ...) { 																																																														\
+		_function(__VA_ARGS__);																																																																\
+		GLenum _err = GL_NO_ERROR;																																																															\
+		while((_err = glGetError()) != GL_NO_ERROR){																																																										\
+			switch(_err) {																																																																	\
+				case GL_NO_ERROR:																																																															\
+					printf("GL_NO_ERROR: No error has been recorded. The value of this symbolic constant is guaranteed to be 0. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);																				\
+					break;																																																																	\
+				case GL_INVALID_ENUM:																																																														\
+					printf("GL_INVALID_ENUM: An unacceptable value is specified for an enumerated argument. The offending command is ignored and has no other side effect than to set the error flag. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);			\
+					break;																																																																	\
+				case GL_INVALID_VALUE:																																																														\
+					printf("GL_INVALID_VALUE: A numeric argument is out of range. The offending command is ignored and has no other side effect than to set the error flag. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);									\
+					break;																																																																	\
+				case GL_INVALID_OPERATION:																																																													\
+					printf("GL_INVALID_OPERATION: The specified operation is not allowed in the current state. The offending command is ignored and has no other side effect than to set the error flag. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);		\
+					break;																																																																	\
+				case GL_INVALID_FRAMEBUFFER_OPERATION:																																																										\
+					printf("GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);																											\
+					break;																																																																	\
+				case GL_OUT_OF_MEMORY:																																																														\
+					printf("GL_OUT_OF_MEMORY: There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);	\
+					break;																																																																	\
+				default:																																																																	\
+					printf("No description. Error(%u) \n", _err);																																																							\
+					break;																																																																	\
+			}																																																																				\
+		}																																																																					\
 	}
-
-	return false;
-}
-
+#else
+#define RDE_CHECK_GL(_function, ...) _function(__VA_ARGS__);
+#endif
 
 /// *************************************************************************************************
 /// *                                INNER STRUCT DEFINITIONS                         				*
@@ -1011,10 +1013,6 @@ void rde_inner_engine_on_update(float _dt);
 void rde_inner_engine_on_fixed_update(float _fixed_dt);
 void rde_inner_engine_on_late_update(float _dt);
 
-#ifdef RDE_RENDERING_MODULE
-void rde_inner_engine_on_render(float _dt, rde_window* _window);
-#endif
-
 void rde_inner_engine_sync_events();
 
 void rde_inner_engine_on_event() {
@@ -1111,17 +1109,6 @@ void rde_inner_engine_on_late_update(float _dt) {
 	UNUSED(_dt)
 }
 
-#ifdef RDE_RENDERING_MODULE
-void rde_inner_engine_on_render(float _dt, rde_window* _window) {
-	UNUSED(_dt)
-	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
-	rde_vec_2I _window_size = rde_window_get_window_size(_window);
-	glViewport(0, 0, _window_size.x, _window_size.y);
-	glBindFramebuffer(GL_FRAMEBUFFER, ENGINE.antialiasing.samples > 0 ? ENGINE.antialiasing.frame_buffer_id : DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
-
-}
-#endif
-
 rde_display_info* rde_engine_get_available_displays() {
 	UNIMPLEMENTED("Not implemented");
 	return NULL;
@@ -1159,7 +1146,6 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	#if IS_ANDROID()
 	ENGINE.android_native_window = SDL_AndroidGetNativeWindow();
 	rde_critical_error(ENGINE.android_native_window == NULL, "Native Android Window is NULL");
-	rde_log_level(RDE_LOG_LEVEL_INFO, "Got Native Android Window");
 	#endif
 
 	rde_inner_events_window_create_events();

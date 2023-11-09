@@ -46,6 +46,7 @@ void rde_inner_rendering_create_shadows();
 void rde_inner_rendering_draw_scene_shadows(rde_window* _window, rde_camera* _camera);
 void rde_inner_rendering_destroy_shadows();
 void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window);
+void rde_inner_engine_on_render(float _dt, rde_window* _window);
 
 rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
@@ -61,7 +62,6 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 #if !IS_MOBILE()
 	GLint profile;
 	glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &profile);
-	rde_util_check_opengl_error("getting profile mask");
 	if (profile & GL_CONTEXT_CORE_PROFILE_BIT) {
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Core profile");
 	} else if(profile & GL_CONTEXT_COMPATIBILITY_PROFILE_BIT) {
@@ -73,24 +73,20 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 	rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL Version: %s, Vendor: %s, GPU: %s, GLSL: %s", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+	RDE_CHECK_GL(glEnable, GL_BLEND);
+	RDE_CHECK_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//RDE_CHECK_GL(glBlendFuncSeparate, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
 #if !IS_MOBILE() 
 	#if !IS_WASM()
-		glEnable(GL_PROGRAM_POINT_SIZE);
-		rde_util_check_opengl_error("Invalid Point size");
-		glEnable(GL_LINE_SMOOTH);
-		rde_util_check_opengl_error("Invalid Line Smooth");
-		glHint(GL_LINE_SMOOTH_HINT,  GL_NICEST);
-		rde_util_check_opengl_error("Invalid Line Smooth Hint -> GL_NICEST");
+		RDE_CHECK_GL(glEnable, GL_PROGRAM_POINT_SIZE);
+		RDE_CHECK_GL(glEnable, GL_LINE_SMOOTH);
+		RDE_CHECK_GL(glHint, GL_LINE_SMOOTH_HINT,  GL_NICEST);
 	#endif
 			
 	#if !IS_MAC() && !IS_LINUX()
 		#if !IS_WASM()
 			//glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-			rde_util_check_opengl_error("Invalid Point Smooth Hint -> GL_NICEST");
 		#endif
 	#endif
 #endif
@@ -212,15 +208,15 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 
 	GLuint _vao, _vbo;
-	glGenVertexArrays(1, &_vao);
-	glGenBuffers(1, &_vbo);
-	glBindVertexArray(_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(FRAMEBUFFER_QUAD_DATA), &FRAMEBUFFER_QUAD_DATA, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	RDE_CHECK_GL(glGenVertexArrays, 1, &_vao);
+	RDE_CHECK_GL(glGenBuffers, 1, &_vbo);
+	RDE_CHECK_GL(glBindVertexArray, _vao);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _vbo);
+	RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, sizeof(FRAMEBUFFER_QUAD_DATA), &FRAMEBUFFER_QUAD_DATA, GL_STATIC_DRAW);
+	RDE_CHECK_GL(glEnableVertexAttribArray, 0);
+	RDE_CHECK_GL(glVertexAttribPointer, 0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	RDE_CHECK_GL(glEnableVertexAttribArray, 1);
+	RDE_CHECK_GL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	DEFAULT_RENDER_TEXTURE = rde_rendering_render_texture_create(_window_size.x, _window_size.y);
 	DEFAULT_RENDER_TEXTURE->vao = _vao;
 	DEFAULT_RENDER_TEXTURE->vbo = _vbo;
@@ -229,25 +225,25 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 void rde_inner_rendering_draw_to_framebuffer(rde_render_texture* _render_texture) {
 	GLuint _framebuffer_id = _render_texture == DEFAULT_RENDER_TEXTURE ? 0 : _render_texture->opengl_framebuffer_id;
-	glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer_id);
-	glDisable(GL_DEPTH_TEST);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, _framebuffer_id);
+	RDE_CHECK_GL(glDisable, GL_DEPTH_TEST);
+	RDE_CHECK_GL(glClearColor, 0.0f, 0.0f, 0.0f, 0.0f);
+	RDE_CHECK_GL(glClear, GL_COLOR_BUFFER_BIT);
 
-	glUseProgram(ENGINE.framebuffer_shader->compiled_program_id);
+	RDE_CHECK_GL(glUseProgram, ENGINE.framebuffer_shader->compiled_program_id);
 
-	glBindVertexArray(_render_texture->vao);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _render_texture->opengl_texture_id);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	RDE_CHECK_GL(glBindVertexArray, _render_texture->vao);
+	RDE_CHECK_GL(glActiveTexture, GL_TEXTURE0);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _render_texture->opengl_texture_id);
+	RDE_CHECK_GL(glDrawArrays, GL_TRIANGLES, 0, 6);
 }
 
 void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window) {
 	if(ENGINE.antialiasing.samples > 0) {
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
+		RDE_CHECK_GL(glBindFramebuffer, GL_READ_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
+		RDE_CHECK_GL(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
 		rde_vec_2I _screen_size = rde_window_get_window_size(_window);
-		glBlitFramebuffer(0, 0, _screen_size.x, _screen_size.y, 0, 0, _screen_size.x, _screen_size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		RDE_CHECK_GL(glBlitFramebuffer, 0, 0, _screen_size.x, _screen_size.y, 0, 0, _screen_size.x, _screen_size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
 	rde_inner_rendering_draw_to_framebuffer(DEFAULT_RENDER_TEXTURE);
 }
@@ -258,9 +254,9 @@ void rde_inner_rendering_destroy_current_antialiasing_config() {
 	}
 
 	uint _texture_id = ENGINE.antialiasing.opengl_texture_id;
-	glDeleteTextures(1, &_texture_id);
-	glDeleteRenderbuffers(1, &ENGINE.antialiasing.render_buffer_id);
-	glDeleteFramebuffers(1, &ENGINE.antialiasing.frame_buffer_id);
+	RDE_CHECK_GL(glDeleteTextures, 1, &_texture_id);
+	RDE_CHECK_GL(glDeleteRenderbuffers, 1, &ENGINE.antialiasing.render_buffer_id);
+	RDE_CHECK_GL(glDeleteFramebuffers, 1, &ENGINE.antialiasing.frame_buffer_id);
 
 	ENGINE.antialiasing.opengl_texture_id = -1;
 	ENGINE.antialiasing.frame_buffer_id = RDE_UINT_MAX;
@@ -271,33 +267,33 @@ void rde_inner_rendering_create_shadows() {
 	glGenFramebuffers(1, &ENGINE.shadows.frame_buffer_id);
 	
 	uint _depth_texture;
-	glGenTextures(1, &_depth_texture);
+	RDE_CHECK_GL(glGenTextures, 1, &_depth_texture);
 	ENGINE.shadows.opengl_texture_id = _depth_texture;
-	glBindTexture(GL_TEXTURE_2D, ENGINE.shadows.opengl_texture_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, RDE_SHADOW_MAP_SIZE, RDE_SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, ENGINE.shadows.opengl_texture_id);
+	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, RDE_SHADOW_MAP_SIZE, RDE_SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, ENGINE.shadows.frame_buffer_id);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ENGINE.shadows.opengl_texture_id, 0);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.shadows.frame_buffer_id);
+	RDE_CHECK_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ENGINE.shadows.opengl_texture_id, 0);
 	
 #if IS_MOBILE()
-	GLenum _none = GL_NONE;
-	glDrawBuffers(1, &_none);
+	GLenum _a[1] = { GL_NONE };
+	RDE_CHECK_GL(glDrawBuffers, 1, _a);
 #else
-	glDrawBuffer(GL_NONE);
+	RDE_CHECK_GL(glDrawBuffer, GL_NONE);
 #endif
 
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	RDE_CHECK_GL(glReadBuffer, GL_NONE);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 }
 
 void rde_inner_rendering_destroy_shadows() {
 	uint _depth_texture = ENGINE.shadows.opengl_texture_id;
-	glDeleteTextures(1, &_depth_texture);
-	glDeleteFramebuffers(1, &ENGINE.shadows.frame_buffer_id);
+	RDE_CHECK_GL(glDeleteTextures, 1, &_depth_texture);
+	RDE_CHECK_GL(glDeleteFramebuffers, 1, &ENGINE.shadows.frame_buffer_id);
 
 	ENGINE.shadows.opengl_texture_id = -1;
 	ENGINE.shadows.frame_buffer_id = RDE_UINT_MAX;
@@ -305,8 +301,8 @@ void rde_inner_rendering_destroy_shadows() {
 
 void rde_inner_rendering_draw_scene_shadows(rde_window* _window, rde_camera* _camera) {
 	(void)_window;
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	RDE_CHECK_GL(glClearColor, 0.1f, 0.1f, 0.1f, 1.0f);
+	RDE_CHECK_GL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	mat4 _light_projection;
 	mat4 _light_view;
@@ -322,13 +318,22 @@ void rde_inner_rendering_draw_scene_shadows(rde_window* _window, rde_camera* _ca
 	//simpleDepthShader.use();
 	//simpleDepthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
-	glViewport(0, 0, RDE_SHADOW_MAP_SIZE, RDE_SHADOW_MAP_SIZE);
-	glBindFramebuffer(GL_FRAMEBUFFER, ENGINE.shadows.frame_buffer_id);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	RDE_CHECK_GL(glViewport, 0, 0, RDE_SHADOW_MAP_SIZE, RDE_SHADOW_MAP_SIZE);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.shadows.frame_buffer_id);
+	RDE_CHECK_GL(glClear, GL_DEPTH_BUFFER_BIT);
 	
 	// Render scene
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+}
+
+void rde_inner_engine_on_render(float _dt, rde_window* _window) {
+	UNUSED(_dt)
+	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
+	rde_vec_2I _window_size = rde_window_get_window_size(_window);
+	RDE_CHECK_GL(glViewport, 0, 0, _window_size.x, _window_size.y);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.antialiasing.samples > 0 ? ENGINE.antialiasing.frame_buffer_id : DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
+
 }
 
 
@@ -340,39 +345,29 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 	bool _error = false;
 
 	GLuint _vertex_program_id = glCreateShader(GL_VERTEX_SHADER);
-	_error |= rde_util_check_opengl_error("vertex program creation");
 	GLuint _fragment_program_id = glCreateShader(GL_FRAGMENT_SHADER);
-	_error |= rde_util_check_opengl_error("fragment program creation");
 
 	GLint _vertex_source_size = strlen(_vertex_code);
 	GLint _fragment_source_size = strlen(_fragment_code);
 
-	glShaderSource(_vertex_program_id, 1, &_vertex_code, &_vertex_source_size);
-	_error |= rde_util_check_opengl_error("vertex source attachment before compilation");
-	glShaderSource(_fragment_program_id, 1, &_fragment_code, &_fragment_source_size);
-	_error |= rde_util_check_opengl_error("fragment source attachment before compilation");
+	RDE_CHECK_GL(glShaderSource, _vertex_program_id, 1, &_vertex_code, &_vertex_source_size);
+	RDE_CHECK_GL(glShaderSource, _fragment_program_id, 1, &_fragment_code, &_fragment_source_size);
 
-	glCompileShader(_vertex_program_id);
-	_error |= rde_util_check_opengl_error("vertex compilation");
-	glCompileShader(_fragment_program_id);
-	_error |= rde_util_check_opengl_error("fragment compilation");
+	RDE_CHECK_GL(glCompileShader, _vertex_program_id);
+	RDE_CHECK_GL(glCompileShader, _fragment_program_id);
 
 	GLint _is_vertex_compiled, _is_fragment_compiled;
-	glGetShaderiv(_vertex_program_id, GL_COMPILE_STATUS, &_is_vertex_compiled);
-	glGetShaderiv(_fragment_program_id, GL_COMPILE_STATUS, &_is_fragment_compiled);
+	RDE_CHECK_GL(glGetShaderiv, _vertex_program_id, GL_COMPILE_STATUS, &_is_vertex_compiled);
+	RDE_CHECK_GL(glGetShaderiv, _fragment_program_id, GL_COMPILE_STATUS, &_is_fragment_compiled);
 
 	RDE_CHECK_SHADER_COMPILATION_STATUS( _vertex_program_id, _is_vertex_compiled, _vertex_code)
 	RDE_CHECK_SHADER_COMPILATION_STATUS(_fragment_program_id, _is_fragment_compiled, _fragment_code)
 
 	GLuint _program_id = glCreateProgram();
-	_error |= rde_util_check_opengl_error("program creation");
-	glAttachShader(_program_id, _vertex_program_id);
-	_error |= rde_util_check_opengl_error("vertex attached to program");
-	glAttachShader(_program_id, _fragment_program_id);
-	_error |= rde_util_check_opengl_error("fragment attached to program");
+	RDE_CHECK_GL(glAttachShader, _program_id, _vertex_program_id);
+	RDE_CHECK_GL(glAttachShader, _program_id, _fragment_program_id);
 
-	glLinkProgram(_program_id);
-	_error |= rde_util_check_opengl_error("vertex and fragment linking");
+	RDE_CHECK_GL(glLinkProgram, _program_id);
 
 	if (_error) {
 		printf("%s \n\n %s", _vertex_code, _fragment_code);
@@ -483,9 +478,9 @@ rde_shader* rde_rendering_shader_get_by_name(const char* _name) {
 void rde_rendering_shader_unload(rde_shader* _shader) {
 	rde_critical_error(_shader == NULL, RDE_ERROR_NO_NULL_ALLOWED, "shader");
 
-	glDeleteShader(_shader->vertex_program_id);
-	glDeleteShader(_shader->fragment_program_id);
-	glDeleteProgram(_shader->compiled_program_id);
+	RDE_CHECK_GL(glDeleteShader, _shader->vertex_program_id);
+	RDE_CHECK_GL(glDeleteShader, _shader->fragment_program_id);
+	RDE_CHECK_GL(glDeleteProgram, _shader->compiled_program_id);
 
 	_shader->compiled_program_id = -1;
 }
@@ -550,14 +545,14 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, rde_texture_para
 		return NULL;
 	}
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	RDE_CHECK_GL(glPixelStorei, GL_UNPACK_ALIGNMENT, 4);
 	GLenum _internal_format = 0;
 	GLenum _data_format = 0;
 	if (strcmp(_extension, "png") == 0) {
 		_internal_format = GL_RGBA8;
 		_data_format = GL_RGBA;
 	} else {
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		RDE_CHECK_GL(glPixelStorei, GL_UNPACK_ALIGNMENT, 1);
 		_internal_format = GL_RGB8;
 		_data_format = GL_RGB;
 	}
@@ -565,31 +560,22 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, rde_texture_para
 	rde_texture_parameters _tex_params = rde_innner_rendering_validate_texture_parameters(_params);
 	
 	GLuint _texture_id;
-	glGenTextures(1, &_texture_id);
-	rde_util_check_opengl_error("Generating texture");
-	glBindTexture(GL_TEXTURE_2D, _texture_id);
-	rde_util_check_opengl_error("Binding texture");
+	RDE_CHECK_GL(glGenTextures, 1, &_texture_id);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _texture_id);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _tex_params.min_filter);
-	rde_util_check_opengl_error("Param0 texture");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _tex_params.mag_filter);
-	rde_util_check_opengl_error("Param1 texture");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _tex_params.wrap_s);
-	rde_util_check_opengl_error("Param2 texture");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _tex_params.wrap_t);
-	rde_util_check_opengl_error("Param3 texture");
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _tex_params.min_filter);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _tex_params.mag_filter);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _tex_params.wrap_s);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _tex_params.wrap_t);
 
 	if(_tex_params.mipmap_min_filter != RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NONE) {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _tex_params.mipmap_min_filter);
-		rde_util_check_opengl_error("Param4 texture");
+		RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _tex_params.mipmap_min_filter);
 	}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
-	rde_util_check_opengl_error("TexImage2D texture");
+	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
 
 	if(_tex_params.mipmap_min_filter != RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NONE) {
-		glGenerateMipmap(GL_TEXTURE_2D);
-		rde_util_check_opengl_error("Mipmap texture");
+		RDE_CHECK_GL(glGenerateMipmap, GL_TEXTURE_2D);
 	}
 	
 	stbi_image_free(_data);
@@ -629,7 +615,6 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 
 	int _width, _height, _channels;
 	stbi_set_flip_vertically_on_load(1);
-	rde_util_check_opengl_error("1");
 
 #if IS_IOS()
 	stbi_convert_iphone_png_to_rgb(1); 
@@ -638,7 +623,6 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 
 	stbi_uc* _data = NULL;
 	_data = stbi_load(_file_path, &_width, &_height, &_channels, 0);
-	rde_util_check_opengl_error("2");
 
 	if(_data == NULL) {
 		printf("Error while loading texture at '%s' \n", _file_path);
@@ -646,29 +630,24 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 	}
 
 	GLuint _texture_id;
-	glGenTextures(1, &_texture_id);
-	rde_util_check_opengl_error("3");
-	glBindTexture(GL_TEXTURE_2D, _texture_id);
-	rde_util_check_opengl_error("4");
+	RDE_CHECK_GL(glGenTextures, 1, &_texture_id);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _texture_id);
 #if IS_MOBILE() || defined(__EMSCRIPTEN__)
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, _width, _height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, _data);
+	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, GL_ALPHA, _width, _height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, _data);
 	_texture->internal_format = GL_ALPHA;
 	_texture->data_format = GL_ALPHA;
 #else
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, _width, _height, 0, GL_RED, GL_UNSIGNED_BYTE, _data);
+	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RED, _width, _height, 0, GL_RED, GL_UNSIGNED_BYTE, _data);
 	_texture->internal_format = GL_RED;
 	_texture->data_format = GL_RED;
 #endif
-	rde_util_check_opengl_error("5");
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	rde_util_check_opengl_error("6");
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	stbi_image_free(_data);
-	rde_util_check_opengl_error("8");
 
 	_texture->opengl_texture_id = _texture_id;
 	_texture->size = (rde_vec_2UI){ (uint)_width, (uint)_height };
@@ -761,21 +740,21 @@ void rde_rendering_memory_texture_gpu_upload(rde_texture* _memory_texture) {
 		_memory_texture->data_format = _data_format;
 		
 		GLuint _id;
-		glGenTextures(1, &_id);
+		RDE_CHECK_GL(glGenTextures, 1, &_id);
 
 		_memory_texture->opengl_texture_id = _id;
-		glBindTexture(GL_TEXTURE_2D, _memory_texture->opengl_texture_id);
+		RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _memory_texture->opengl_texture_id);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, (int)_memory_texture->internal_format, _memory_texture->size.x, _memory_texture->size.y, 0, _memory_texture->data_format, GL_UNSIGNED_BYTE, _memory_texture->pixels);
+		RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, (int)_memory_texture->internal_format, _memory_texture->size.x, _memory_texture->size.y, 0, _memory_texture->data_format, GL_UNSIGNED_BYTE, _memory_texture->pixels);
 	} else {
 		if(_memory_texture->pixels_changed) {
-			glBindTexture(GL_TEXTURE_2D, _memory_texture->opengl_texture_id);
-			glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, _memory_texture->size.x, _memory_texture->size.y, _memory_texture->data_format, GL_UNSIGNED_BYTE, _memory_texture->pixels);
+			RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _memory_texture->opengl_texture_id);
+			RDE_CHECK_GL(glTexSubImage2D, GL_TEXTURE_2D, 0, 0, 0, _memory_texture->size.x, _memory_texture->size.y, _memory_texture->data_format, GL_UNSIGNED_BYTE, _memory_texture->pixels);
 			_memory_texture->pixels_changed = false;
 		}
 	}
@@ -944,20 +923,18 @@ rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]) {
 			1.0f, -1.0f,  1.0f
 		};
 
-		glGenVertexArrays(1, &ENGINE.skybox.vao);
-		glGenBuffers(1, &ENGINE.skybox.vbo);
-		glBindVertexArray(ENGINE.skybox.vao);
-		glBindBuffer(GL_ARRAY_BUFFER, ENGINE.skybox.vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), &_vertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		RDE_CHECK_GL(glGenVertexArrays, 1, &ENGINE.skybox.vao);
+		RDE_CHECK_GL(glGenBuffers, 1, &ENGINE.skybox.vbo);
+		RDE_CHECK_GL(glBindVertexArray, ENGINE.skybox.vao);
+		RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, ENGINE.skybox.vbo);
+		RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, sizeof(_vertices), &_vertices, GL_STATIC_DRAW);
+		RDE_CHECK_GL(glEnableVertexAttribArray, 0);
+		RDE_CHECK_GL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	}
 
 	GLuint _texture_id;
-	glGenTextures(1, &_texture_id);
-	rde_util_check_opengl_error("Generating texture");
-	glBindTexture(GL_TEXTURE_CUBE_MAP, _texture_id);
-	rde_util_check_opengl_error("Binding texture");
+	RDE_CHECK_GL(glGenTextures, 1, &_texture_id);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_CUBE_MAP, _texture_id);
 
 	for(size_t _i = 0; _i < 6; _i++) {
 		const char* _extension = rde_util_file_get_name_extension(_texture_paths[_i]);
@@ -983,29 +960,28 @@ rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]) {
 			return -1;
 		}
 
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		RDE_CHECK_GL(glPixelStorei, GL_UNPACK_ALIGNMENT, 4);
 		GLenum _internal_format = 0;
 		GLenum _data_format = 0;
 		if (strcmp(_extension, "png") == 0) {
 			_internal_format = GL_RGBA8;
 			_data_format = GL_RGBA;
 		} else {
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			RDE_CHECK_GL(glPixelStorei, GL_UNPACK_ALIGNMENT, 1);
 			_internal_format = GL_RGB8;
 			_data_format = GL_RGB;
 		}
 
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _i, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
-		rde_util_check_opengl_error("TexImage2D texture");
+		RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_CUBE_MAP_POSITIVE_X + _i, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
 
 		stbi_image_free(_data);
 	}
 
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 	rde_log_color(RDE_LOG_COLOR_GREEN, "Loaded correctly skybox with textures:");
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	Left: %s", _texture_paths[0]);
@@ -1024,7 +1000,7 @@ void rde_rendering_skybox_use(rde_skybox_id _skybox_id) {
 
 void rde_rendering_skybox_unload(rde_skybox_id _skybox_id) {
 	rde_critical_error(!glIsTexture(_skybox_id), "Tried to delete a texture with negative id");
-	glDeleteTextures(1, &_skybox_id);
+	RDE_CHECK_GL(glDeleteTextures, 1, &_skybox_id);
 
 	if(ENGINE.skybox.opengl_texture_id == (int)_skybox_id) {
 		ENGINE.skybox.opengl_texture_id = -1;
@@ -1036,30 +1012,33 @@ rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _h
 	rde_render_texture* _render_texture = (rde_render_texture*)malloc(sizeof(rde_render_texture));
 	_render_texture->size = (rde_vec_2UI) { _width, _height };
 
-	glGenFramebuffers(1, &_render_texture->opengl_framebuffer_id);
-	glBindFramebuffer(GL_FRAMEBUFFER, _render_texture->opengl_framebuffer_id);
+	RDE_CHECK_GL(glGenFramebuffers, 1, &_render_texture->opengl_framebuffer_id);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, _render_texture->opengl_framebuffer_id);
 
-	glGenTextures(1, &_render_texture->opengl_texture_id);
-	glBindTexture(GL_TEXTURE_2D, _render_texture->opengl_texture_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
+	RDE_CHECK_GL(glGenTextures, 1, &_render_texture->opengl_texture_id);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _render_texture->opengl_texture_id);
+	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, 0);
+	RDE_CHECK_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
 
-#if !IS_ANDROID()
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+#if !IS_MOBILE()
+	RDE_CHECK_GL(glDrawBuffer, GL_COLOR_ATTACHMENT0);
+#else
+	GLenum _a[1] = { GL_COLOR_ATTACHMENT0 };
+	RDE_CHECK_GL(glDrawBuffers, 1, _a);
 #endif
 
-	glGenRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
-	glBindRenderbuffer(GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);  
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id);
+	RDE_CHECK_GL(glGenRenderbuffers, 1, &_render_texture->opengl_renderbuffer_id);
+	RDE_CHECK_GL(glBindRenderbuffer, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 
+	RDE_CHECK_GL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);  
+	RDE_CHECK_GL(glBindRenderbuffer, GL_RENDERBUFFER, 0);
+	RDE_CHECK_GL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id);
 
 	rde_critical_error(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 
 	return _render_texture;
 }
@@ -1068,13 +1047,13 @@ void rde_rendering_render_texture_enable(rde_render_texture* _render_texture) {
 	rde_critical_error(_render_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Render Texture");
 	current_render_texture = _render_texture;
 	if(current_render_texture != NULL) {
-		glViewport(0, 0, current_render_texture->size.x, current_render_texture->size.y);
-		glBindFramebuffer(GL_FRAMEBUFFER, current_render_texture->opengl_framebuffer_id);
+		RDE_CHECK_GL(glViewport, 0, 0, current_render_texture->size.x, current_render_texture->size.y);
+		RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, current_render_texture->opengl_framebuffer_id);
 	}
 
-	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	RDE_CHECK_GL(glEnable, GL_DEPTH_TEST);
+	RDE_CHECK_GL(glClearColor, 0.0f, 0.0f, 0.0f, 0.0f);
+	RDE_CHECK_GL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void rde_rendering_render_texture_disable() {
@@ -1082,11 +1061,11 @@ void rde_rendering_render_texture_disable() {
 
 	current_render_texture = DEFAULT_RENDER_TEXTURE;
 	if(current_render_texture != NULL) {
-		glViewport(0, 0, current_render_texture->size.x, current_render_texture->size.y);
-		glBindFramebuffer(GL_FRAMEBUFFER, ENGINE.antialiasing.samples > 0 ? ENGINE.antialiasing.frame_buffer_id : current_render_texture->opengl_framebuffer_id);
+		RDE_CHECK_GL(glViewport, 0, 0, current_render_texture->size.x, current_render_texture->size.y);
+		RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.antialiasing.samples > 0 ? ENGINE.antialiasing.frame_buffer_id : current_render_texture->opengl_framebuffer_id);
 	}
 
-	glEnable(GL_DEPTH_TEST);
+	RDE_CHECK_GL(glEnable, GL_DEPTH_TEST);
 }
 
 
@@ -1096,38 +1075,41 @@ void rde_rendering_render_texture_update(rde_render_texture* _render_texture, si
 
 	_render_texture->size = (rde_vec_2UI) { _width, _height };
 
-	glGenFramebuffers(1, &_render_texture->opengl_framebuffer_id);
-	glBindFramebuffer(GL_FRAMEBUFFER, _render_texture->opengl_framebuffer_id);
+	RDE_CHECK_GL(glGenFramebuffers, 1, &_render_texture->opengl_framebuffer_id);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, _render_texture->opengl_framebuffer_id);
 
-	glGenTextures(1, &_render_texture->opengl_texture_id);
-	glBindTexture(GL_TEXTURE_2D, _render_texture->opengl_texture_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
+	RDE_CHECK_GL(glGenTextures, 1, &_render_texture->opengl_texture_id);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _render_texture->opengl_texture_id);
+	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, 0);
+	RDE_CHECK_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
 
-#if !IS_ANDROID()
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+#if !IS_MOBILE()
+	RDE_CHECK_GL(glDrawBuffer, GL_COLOR_ATTACHMENT0);
+#else
+	GLenum _a[1] = { GL_COLOR_ATTACHMENT0 };
+	RDE_CHECK_GL(glDrawBuffers, 1, _a);
 #endif
 
-	glGenRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
-	glBindRenderbuffer(GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);  
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id);
+	RDE_CHECK_GL(glGenRenderbuffers, 1, &_render_texture->opengl_renderbuffer_id);
+	RDE_CHECK_GL(glBindRenderbuffer, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id); 
+	RDE_CHECK_GL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);  
+	RDE_CHECK_GL(glBindRenderbuffer, GL_RENDERBUFFER, 0);
+	RDE_CHECK_GL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _render_texture->opengl_renderbuffer_id);
 
 	rde_critical_error(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 }
 
 void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture) {
 	rde_critical_error(_render_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Render Texture");
 
-	glDeleteTextures(1, &_render_texture->opengl_texture_id);
-	glDeleteRenderbuffers(1, &_render_texture->opengl_renderbuffer_id);
-	glDeleteFramebuffers(1, &_render_texture->opengl_framebuffer_id);
+	RDE_CHECK_GL(glDeleteTextures, 1, &_render_texture->opengl_texture_id);
+	RDE_CHECK_GL(glDeleteRenderbuffers, 1, &_render_texture->opengl_renderbuffer_id);
+	RDE_CHECK_GL(glDeleteFramebuffers, 1, &_render_texture->opengl_framebuffer_id);
 }
 
 void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing) {
@@ -1153,7 +1135,7 @@ void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _anti
 	}
 
 	int _max_opengl_supported_samples = 0;
-	glGetIntegerv(GL_MAX_SAMPLES, &_max_opengl_supported_samples);
+	RDE_CHECK_GL(glGetIntegerv, GL_MAX_SAMPLES, &_max_opengl_supported_samples);
 	int _antialiasing_samples = (int)_antialiasing;
 
 	rde_inner_rendering_destroy_current_antialiasing_config();
@@ -1168,31 +1150,31 @@ void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _anti
 		return;
 	}
 
-    glGenFramebuffers(1, &ENGINE.antialiasing.frame_buffer_id);
-    glBindFramebuffer(GL_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
+    RDE_CHECK_GL(glGenFramebuffers, 1, &ENGINE.antialiasing.frame_buffer_id);
+    RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
     
     unsigned int _texture_multisampled_id;
-    glGenTextures(1, &_texture_multisampled_id);
+	RDE_CHECK_GL(glGenTextures, 1, &_texture_multisampled_id);
 	ENGINE.antialiasing.opengl_texture_id = _texture_multisampled_id;
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, ENGINE.antialiasing.opengl_texture_id);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D_MULTISAMPLE, ENGINE.antialiasing.opengl_texture_id);
 	rde_vec_2I _screen_size = rde_window_get_window_size(_window);
 
 	#if IS_MOBILE()
-	glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, _antialiasing_samples, GL_RGB, _screen_size.x, _screen_size.y, GL_TRUE);
+	RDE_CHECK_GL(glTexStorage2DMultisample, GL_TEXTURE_2D_MULTISAMPLE, _antialiasing_samples, GL_RGB, _screen_size.x, _screen_size.y, GL_TRUE);
 	#else
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, _antialiasing_samples, GL_RGB, _screen_size.x, _screen_size.y, GL_TRUE);
+	RDE_CHECK_GL(glTexImage2DMultisample, GL_TEXTURE_2D_MULTISAMPLE, _antialiasing_samples, GL_RGB, _screen_size.x, _screen_size.y, GL_TRUE);
 	#endif
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, ENGINE.antialiasing.opengl_texture_id, 0);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D_MULTISAMPLE, 0);
+    RDE_CHECK_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, ENGINE.antialiasing.opengl_texture_id, 0);
     
-    glGenRenderbuffers(1, &ENGINE.antialiasing.render_buffer_id);
-    glBindRenderbuffer(GL_RENDERBUFFER, ENGINE.antialiasing.render_buffer_id);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, _antialiasing_samples, GL_DEPTH24_STENCIL8, _screen_size.x, _screen_size.y);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, ENGINE.antialiasing.render_buffer_id);
+    RDE_CHECK_GL(glGenRenderbuffers, 1, &ENGINE.antialiasing.render_buffer_id);
+    RDE_CHECK_GL(glBindRenderbuffer, GL_RENDERBUFFER, ENGINE.antialiasing.render_buffer_id);
+    RDE_CHECK_GL(glRenderbufferStorageMultisample, GL_RENDERBUFFER, _antialiasing_samples, GL_DEPTH24_STENCIL8, _screen_size.x, _screen_size.y);
+    RDE_CHECK_GL(glBindRenderbuffer, GL_RENDERBUFFER, 0);
+    RDE_CHECK_GL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, ENGINE.antialiasing.render_buffer_id);
 
     rde_critical_error(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER_MSAA);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 }
 
 RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing() {

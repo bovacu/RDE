@@ -20,12 +20,12 @@ void rde_inner_rendering_init_2d() {
 }
 
 void rde_inner_rendering_end_2d() {
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glDeleteBuffers(1, &current_batch_2d.vertex_buffer_object);
-	glDeleteBuffers(1, &current_batch_2d.index_buffer_object);
-	glDeleteVertexArrays(1, &current_batch_2d.vertex_array_object);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glBindVertexArray, 0);
+	RDE_CHECK_GL(glDeleteBuffers, 1, &current_batch_2d.vertex_buffer_object);
+	RDE_CHECK_GL(glDeleteBuffers, 1, &current_batch_2d.index_buffer_object);
+	RDE_CHECK_GL(glDeleteVertexArrays, 1, &current_batch_2d.vertex_array_object);
 	free(current_batch_2d.vertices);
 }
 
@@ -59,26 +59,24 @@ void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transfor
 }
 
 void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch) {
-	glGenVertexArrays(1, &_batch->vertex_array_object);
-	glBindVertexArray(_batch->vertex_array_object);
+	RDE_CHECK_GL(glGenVertexArrays, 1, &_batch->vertex_array_object);
+	RDE_CHECK_GL(glBindVertexArray, _batch->vertex_array_object);
 	
-	glGenBuffers(1, &_batch->vertex_buffer_object);
-	glBindBuffer(GL_ARRAY_BUFFER, _batch->vertex_buffer_object);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch, NULL, GL_DYNAMIC_DRAW);
+	RDE_CHECK_GL(glGenBuffers, 1, &_batch->vertex_buffer_object);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _batch->vertex_buffer_object);
+	RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch, NULL, GL_DYNAMIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)0);
-	glEnableVertexAttribArray(0);
+	RDE_CHECK_GL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)0);
+	RDE_CHECK_GL(glEnableVertexAttribArray, 0);
 	
-	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3));
-	glEnableVertexAttribArray(1);
+	RDE_CHECK_GL(glVertexAttribPointer, 1, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3));
+	RDE_CHECK_GL(glEnableVertexAttribArray, 1);
 	
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3 + sizeof(unsigned char) * 4));
-	glEnableVertexAttribArray(2);
+	RDE_CHECK_GL(glVertexAttribPointer, 2, 2, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3 + sizeof(unsigned char) * 4));
+	RDE_CHECK_GL(glEnableVertexAttribArray, 2);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	rde_util_check_opengl_error("ERROR: 0");
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glBindVertexArray, 0);
 }
 
 void rde_inner_rendering_reset_batch_2d() {
@@ -103,34 +101,26 @@ void rde_inner_rendering_flush_batch_2d() {
 		return;
 	}
 
-	rde_util_check_opengl_error("Before UseProgram");
-	glUseProgram(current_batch_2d.shader->compiled_program_id);
+	RDE_CHECK_GL(glUseProgram, current_batch_2d.shader->compiled_program_id);
 
-	glUniformMatrix4fv(glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)current_batch_2d.mvp);
-	rde_util_check_opengl_error("After UseProgram");
+	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)current_batch_2d.mvp);
 
-	glBindVertexArray(current_batch_2d.vertex_array_object);
-	rde_util_check_opengl_error("After glBindVertexArray");
+	RDE_CHECK_GL(glBindVertexArray, current_batch_2d.vertex_array_object);
 
 	if(current_batch_2d.texture.opengl_texture_id >= 0) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, current_batch_2d.texture.opengl_texture_id);
-		rde_util_check_opengl_error("After glBindTexture");
+		RDE_CHECK_GL(glActiveTexture, GL_TEXTURE0);
+		RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, current_batch_2d.texture.opengl_texture_id);
 	}
 
-	glBindBuffer(GL_ARRAY_BUFFER, current_batch_2d.vertex_buffer_object);
-	rde_util_check_opengl_error("After glBindBuffer");
-	glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(sizeof(rde_vertex_2d) * current_batch_2d.amount_of_vertices), current_batch_2d.vertices);
-	rde_util_check_opengl_error("After glBufferSubData");
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, current_batch_2d.vertex_buffer_object);
+	RDE_CHECK_GL(glBufferSubData, GL_ARRAY_BUFFER, 0, (long)(sizeof(rde_vertex_2d) * current_batch_2d.amount_of_vertices), current_batch_2d.vertices);
 
-	glDrawArrays(GL_TRIANGLES, 0, current_batch_2d.amount_of_vertices);
-	rde_util_check_opengl_error("After glDrawArrays");
+	RDE_CHECK_GL(glDrawArrays, GL_TRIANGLES, 0, current_batch_2d.amount_of_vertices);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
+	RDE_CHECK_GL(glBindVertexArray, 0);
 
 	rde_inner_rendering_reset_batch_2d();
-	rde_util_check_opengl_error("ERROR: 1");
 
 	statistics.number_of_drawcalls++;
 }
