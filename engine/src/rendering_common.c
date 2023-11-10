@@ -1,6 +1,17 @@
 #ifdef RDE_RENDERING_MODULE
 
+#if IS_MOBILE()
+#include <GLES2/gl2ext.h>
+#include <EGL/egl.h>
+#endif
+
 #define RDE_SHADOW_MAP_SIZE 1024
+
+#if IS_MOBILE()
+PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMGPROC glFramebufferTexture2DMultisampleEXT = NULL;
+PFNGLRENDERBUFFERSTORAGEMULTISAMPLEIMGPROC glRenderbufferStorageMultisampleEXT = NULL;
+PFNGLDISCARDFRAMEBUFFEREXTPROC glDiscardFramebufferEXT = NULL;
+#endif
 
 typedef struct {
 	size_t number_of_drawcalls;
@@ -68,6 +79,33 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Compatibility profile");
 	} else {
 		rde_log_level(RDE_LOG_LEVEL_WARNING, "Unkown OpenGL context profile");
+	}
+#endif
+
+#if IS_MOBILE()
+	GLint _no_of_extensions = 0;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &_no_of_extensions);
+	for (int _i = 0; _i < _no_of_extensions; ++_i) {
+		if(strcmp("GL_EXT_multisampled_render_to_texture", (const char*)glGetStringi(GL_EXTENSIONS, _i)) == 0) {
+			rde_log_level(RDE_LOG_LEVEL_INFO, "MSAA is supported in this device");
+			glFramebufferTexture2DMultisampleEXT = (PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMGPROC)eglGetProcAddress("glFramebufferTexture2DMultisampleEXT");
+			glRenderbufferStorageMultisampleEXT = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEIMGPROC)eglGetProcAddress("glRenderbufferStorageMultisampleEXT");
+			continue;
+		}
+
+		if(strcmp("GL_EXT_discard_framebuffer", (const char*)glGetStringi(GL_EXTENSIONS, _i)) == 0) {
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Framebuffer discard is supported in this device");
+			glDiscardFramebufferEXT = (PFNGLDISCARDFRAMEBUFFEREXTPROC)eglGetProcAddress("glDiscardFramebufferEXT");
+			continue;
+		}
+	}
+
+	if(glRenderbufferStorageMultisampleEXT == NULL || glFramebufferTexture2DMultisampleEXT == NULL) {
+		rde_log_level(RDE_LOG_LEVEL_WARNING, "MSAA is NOT supported on this device");
+	}
+
+	if(glDiscardFramebufferEXT == NULL) {
+		rde_log_level(RDE_LOG_LEVEL_WARNING, "Framebuffer discard is NOT supported on this device");
 	}
 #endif
 
@@ -220,7 +258,12 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	DEFAULT_RENDER_TEXTURE = rde_rendering_render_texture_create(_window_size.x, _window_size.y);
 	DEFAULT_RENDER_TEXTURE->vao = _vao;
 	DEFAULT_RENDER_TEXTURE->vbo = _vbo;
+	
+#if IS_MOBILE()
 	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_X4);
+#else
+	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_X4);
+#endif
 }
 
 void rde_inner_rendering_draw_to_framebuffer(rde_render_texture* _render_texture) {
@@ -240,12 +283,24 @@ void rde_inner_rendering_draw_to_framebuffer(rde_render_texture* _render_texture
 
 void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window) {
 	if(ENGINE.antialiasing.samples > 0) {
+#if !IS_MOBILE()
 		RDE_CHECK_GL(glBindFramebuffer, GL_READ_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
 		RDE_CHECK_GL(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
 		rde_vec_2I _screen_size = rde_window_get_window_size(_window);
 		RDE_CHECK_GL(glBlitFramebuffer, 0, 0, _screen_size.x, _screen_size.y, 0, 0, _screen_size.x, _screen_size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		rde_inner_rendering_draw_to_framebuffer(DEFAULT_RENDER_TEXTURE);
+#else
+		GLenum _discard_attachments[] = { GL_DEPTH_ATTACHMENT };
+		glDiscardFramebufferEXT(GL_FRAMEBUFFER, 1, _discard_attachments);
+		rde_render_texture _rt;
+		_rt.opengl_framebuffer_id = 0;
+		_rt.vao = DEFAULT_RENDER_TEXTURE->vao;
+		_rt.opengl_texture_id = ENGINE.antialiasing.opengl_texture_id;
+		rde_inner_rendering_draw_to_framebuffer(&_rt);
+#endif
+	} else {
+		rde_inner_rendering_draw_to_framebuffer(DEFAULT_RENDER_TEXTURE);
 	}
-	rde_inner_rendering_draw_to_framebuffer(DEFAULT_RENDER_TEXTURE);
 }
 
 void rde_inner_rendering_destroy_current_antialiasing_config() {
@@ -333,7 +388,6 @@ void rde_inner_engine_on_render(float _dt, rde_window* _window) {
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	RDE_CHECK_GL(glViewport, 0, 0, _window_size.x, _window_size.y);
 	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.antialiasing.samples > 0 ? ENGINE.antialiasing.frame_buffer_id : DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
-
 }
 
 
@@ -565,9 +619,8 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, rde_texture_para
 
 		char _new_path[RDE_MAX_PATH];
 		memset(_new_path, 0, RDE_MAX_PATH);
-		char* _ptr = _sanitized_path;
-		rde_strncat(_new_path, RDE_MAX_PATH, _ptr, _init_point);
-		rde_strncat(_new_path, RDE_MAX_PATH, _ptr + _end_point, _sp_size - _end_point);
+		rde_strncat(_new_path, RDE_MAX_PATH, _sanitized_path, _init_point);
+		rde_strncat(_new_path, RDE_MAX_PATH, _sanitized_path + _end_point, _sp_size - _end_point);
 		memset(_sanitized_path, 0, RDE_MAX_PATH);
 		rde_strcpy(_sanitized_path, RDE_MAX_PATH, _new_path);
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Removed a .. from path: %s", _sanitized_path);
@@ -1175,10 +1228,11 @@ void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture) {
 
 void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing) {
 
-#if IS_MOBILE()
-	rde_log_level(RDE_LOG_LEVEL_WARNING, "Antialiasing is not yet supported in mobile platforms, not applying");
-	return;
-#endif
+ #if IS_MOBILE()
+	if(glFramebufferTexture2DMultisampleEXT == NULL || glRenderbufferStorageMultisampleEXT == NULL || glDiscardFramebufferEXT == NULL) {
+		return;
+	}
+ #endif
 
 	if((int)_antialiasing == ENGINE.antialiasing.samples && ENGINE.antialiasing.frame_buffer_id != RDE_UINT_MAX) {
 		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_WARNING_RENDERING_ANTIALIASING_LEVEL_ALREADY_SET, ENGINE.antialiasing.samples);
@@ -1208,9 +1262,12 @@ void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _anti
 
 	ENGINE.antialiasing.samples = _antialiasing_samples;
 	if(ENGINE.antialiasing.samples == 0) {
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Disabled antialiasing");
 		return;
 	}
 
+	rde_vec_2I _screen_size = rde_window_get_window_size(_window);
+#if !IS_MOBILE()
     RDE_CHECK_GL(glGenFramebuffers, 1, &ENGINE.antialiasing.frame_buffer_id);
     RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
     
@@ -1218,13 +1275,7 @@ void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _anti
 	RDE_CHECK_GL(glGenTextures, 1, &_texture_multisampled_id);
 	ENGINE.antialiasing.opengl_texture_id = _texture_multisampled_id;
 	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D_MULTISAMPLE, ENGINE.antialiasing.opengl_texture_id);
-	rde_vec_2I _screen_size = rde_window_get_window_size(_window);
-
-	#if IS_MOBILE()
-	RDE_CHECK_GL(glTexStorage2DMultisample, GL_TEXTURE_2D_MULTISAMPLE, _antialiasing_samples, GL_RGB, _screen_size.x, _screen_size.y, GL_TRUE);
-	#else
 	RDE_CHECK_GL(glTexImage2DMultisample, GL_TEXTURE_2D_MULTISAMPLE, _antialiasing_samples, GL_RGB, _screen_size.x, _screen_size.y, GL_TRUE);
-	#endif
 	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D_MULTISAMPLE, 0);
     RDE_CHECK_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, ENGINE.antialiasing.opengl_texture_id, 0);
     
@@ -1233,8 +1284,30 @@ void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _anti
     RDE_CHECK_GL(glRenderbufferStorageMultisample, GL_RENDERBUFFER, _antialiasing_samples, GL_DEPTH24_STENCIL8, _screen_size.x, _screen_size.y);
     RDE_CHECK_GL(glBindRenderbuffer, GL_RENDERBUFFER, 0);
     RDE_CHECK_GL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, ENGINE.antialiasing.render_buffer_id);
+#else
+	// From https://registry.khronos.org/OpenGL/extensions/EXT/EXT_multisampled_render_to_texture.txt
+	glGenRenderbuffers(1, &ENGINE.antialiasing.render_buffer_id);
+	glBindRenderbuffer(GL_RENDERBUFFER, ENGINE.antialiasing.render_buffer_id);
+	glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, ENGINE.antialiasing.samples, GL_DEPTH_COMPONENT16, _screen_size.x, _screen_size.y);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	
+	GLuint _texture_id;
+	glGenTextures(1, &_texture_id);
+	ENGINE.antialiasing.opengl_texture_id = _texture_id;
+	glBindTexture(GL_TEXTURE_2D, ENGINE.antialiasing.opengl_texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _screen_size.x, _screen_size.y, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-    rde_critical_error(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER_MSAA);
+	glGenFramebuffers(1, &ENGINE.antialiasing.frame_buffer_id);
+	glBindFramebuffer(GL_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, ENGINE.antialiasing.render_buffer_id);
+	glFramebufferTexture2DMultisampleEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ENGINE.antialiasing.opengl_texture_id, 0, ENGINE.antialiasing.samples);
+#endif
+
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Set antialiasing level to %d samples", ENGINE.antialiasing.samples);
+
+	rde_critical_error(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, RDE_ERROR_RENDERING_INCOMPLETE_FRAMEBUFFER_MSAA);
 	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 }
 
