@@ -1,9 +1,5 @@
 #if defined(RDE_OBJ_MODULE) && defined(RDE_RENDERING_MODULE)
 
-// TODO: remove this diagnostics, basically change strtok for strtok_s on Windows
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -94,7 +90,7 @@ void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group
 		
 	}
 	
-	rde_engine_supress_logs(true);
+	//rde_engine_supress_logs(true);
 	if(_material != NULL && _material->map_Ka.path != NULL && strlen(_material->map_Ka.path) > 0) {
 		_data->map_ka = rde_rendering_texture_load(_material->map_Ka.path, NULL);
 	}
@@ -110,7 +106,7 @@ void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group
 	if(_material != NULL && _material->map_bump.path != NULL && strlen(_material->map_bump.path) > 0) {
 		_data->map_bump = rde_rendering_texture_load(_material->map_bump.path, NULL);
 	}
-	rde_engine_supress_logs(false);
+	//rde_engine_supress_logs(false);
 }
 
 void rde_inner_parse_3_vertices_face_obj(uint _v, uint _offset, fastObjMesh* _mesh, rde_obj_mesh_data* _obj_mesh_data) {
@@ -165,6 +161,30 @@ void rde_inner_parse_3_vertices_face_obj(uint _v, uint _offset, fastObjMesh* _me
 	_obj_mesh_data->normals_pointer += 9;
 }
 
+void* rde_inner_obj_file_open(const char* _file_path, void* _user_data) {
+	(void)_user_data;
+	SDL_RWops* _sdl_file = SDL_RWFromFile(_file_path, "rb");
+	return (void*)_sdl_file;
+}
+
+void rde_inner_obj_file_close(void* _file, void* _user_data) {
+	(void)_user_data;
+	SDL_RWops* _sdl_file = (SDL_RWops*)_file;
+	SDL_FreeRW(_sdl_file);
+}
+
+size_t rde_inner_obj_file_read(void* _file, void* _dst, size_t _bytes, void* _user_data) {
+	(void)_user_data;
+	SDL_RWops* _sdl_file = (SDL_RWops*)_file;
+	return SDL_RWread(_sdl_file, _dst, 1, _bytes);
+}
+
+unsigned long rde_inner_obj_file_size(void* _file, void* _user_data) {
+	(void)_user_data;
+	SDL_RWops* _sdl_file = (SDL_RWops*)_file;
+	return SDL_RWsize(_sdl_file);
+}
+
 rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 	clock_t _t_start, _t_end;
 	_t_start = clock();
@@ -185,7 +205,15 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 
 	rde_critical_error(_model == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "models", ENGINE.heap_allocs_config.max_number_of_models);
 
-	fastObjMesh* _mesh = fast_obj_read(_obj_path);
+	fastObjCallbacks _callbacks = {
+		.file_open  = rde_inner_obj_file_open,
+		.file_close = rde_inner_obj_file_close,
+		.file_read  = rde_inner_obj_file_read,
+		.file_size  = rde_inner_obj_file_size
+	};
+	fastObjMesh* _mesh = fast_obj_read_with_callbacks(_obj_path, &_callbacks, NULL);
+
+	rde_critical_error(_mesh == NULL, "OBJ Mesh read from fast_obj is NULL");
 
 	size_t _material_count = _mesh->material_count == 0 ? 1 : _mesh->material_count;
 	rde_obj_mesh_data* _obj = (rde_obj_mesh_data*)malloc(sizeof(rde_obj_mesh_data) * _material_count);
@@ -290,7 +318,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 		_model->mesh_array_size++;
 	}
 
-	_model->file_path = _obj_path;
+	rde_strcpy(_model->file_path, RDE_MAX_PATH, _obj_path);
 
 	fast_obj_destroy(_mesh);
 	free(_obj);
@@ -302,5 +330,4 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 	return _model;
 }
 
-#pragma clang diagnostic pop
 #endif

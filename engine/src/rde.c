@@ -207,6 +207,7 @@ struct rde_file_handle {
 	SDL_RWops* sdl_handle;
 	RDE_FILE_MODE_ file_mode;
 	char* text_allocated;
+	unsigned char* bytes_allocated;
 };
 
 	
@@ -226,7 +227,7 @@ struct rde_texture {
 	int channels;
 	GLenum internal_format;
 	GLenum data_format;
-	const char* file_path;
+	char file_path[RDE_MAX_PATH];
 	rde_texture* atlas_texture;
 	unsigned char* pixels;
 	bool pixels_changed;
@@ -322,7 +323,7 @@ struct rde_mesh {
 struct rde_model {
 	rde_mesh* mesh_array;
 	uint mesh_array_size;
-	const char* file_path;
+	char file_path[RDE_MAX_PATH];
 };
 	
 typedef struct {
@@ -686,7 +687,7 @@ rde_texture rde_struct_create_texture() {
 	_t.channels = 0;
 	_t.internal_format = 0;
 	_t.data_format = 0;
-	_t.file_path = NULL;
+	memset(_t.file_path, 0, RDE_MAX_PATH);
 	_t.atlas_texture = NULL;
 	_t.pixels = NULL;
 	_t.pixels_changed = false;
@@ -712,7 +713,7 @@ void rde_struct_init_alloc_ptr_texture(rde_texture* _t) {
 	_t->channels = 0;
 	_t->internal_format = 0;
 	_t->data_format = 0;
-	_t->file_path = NULL;
+	memset(_t->file_path, 0, RDE_MAX_PATH);
 	_t->atlas_texture = NULL;
 	_t->pixels = NULL;
 	_t->pixels_changed = false;
@@ -800,7 +801,7 @@ rde_model rde_struct_create_model() {
 	rde_model _m;
 	_m.mesh_array = NULL;
 	_m.mesh_array_size = 0;
-	_m.file_path = NULL;
+	memset(_m.file_path, 0, RDE_MAX_PATH);
 	return _m;
 }
 

@@ -142,6 +142,10 @@ rde_window* rde_inner_window_create_android_window(size_t _free_window_index) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
+
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,4);
+
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
 
     SDL_DisplayMode _mode;

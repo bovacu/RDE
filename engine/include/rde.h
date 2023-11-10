@@ -413,6 +413,30 @@ typedef unsigned int uint;
 	_block_of_code										\
 	rde_rendering_2d_end_drawing();
 
+#if IS_WINDOWS()
+#define rde_strcpy(_dst, _dst_size, _src) strcpy_s(_dst, _dst_size, _src);
+#else
+#define rde_strcpy(_dst, _dst_size, _src) strcpy(_dst, _src);
+#endif
+
+#if IS_WINDOWS()
+#define rde_strcat(_dst, _dst_size, _src) strcat_s(_dst, _dst_size, _src);
+#else
+#define rde_strcat(_dst, _dst_size, _src) strcat(_dst, _src);
+#endif
+
+#if IS_WINDOWS()
+#define rde_strncat(_dst, _dst_size, _src, _src_amount) strncat_s(_dst, _dst_size, _src, _src_amount);
+#else
+#define rde_strncat(_dst, _dst_size, _src, _src_amount) strncat(_dst, _src, _src_amount);
+#endif
+
+#if IS_WINDOWS()
+#define rde_strtok(_str, _del, _ctx) strtok_s(_str, _del, _ctx);
+#else
+#define rde_strtok(_str, _del, _ctx) strtok(_str, _del);
+#endif
+
 /// *************************************************************************************************
 /// *                                		  ENUMS                         						*
 /// *************************************************************************************************
@@ -1330,7 +1354,8 @@ RDE_FUNC void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 RDE_FUNC const char* rde_util_file_get_name_extension(const char* _file_name);
 RDE_FUNC void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, size_t _sanitized_size);
 RDE_FUNC rde_file_handle* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode);
-RDE_FUNC char* rde_file_read_full_file(rde_file_handle* _file_handler);
+RDE_FUNC char* rde_file_read_full_file(rde_file_handle* _file_handler, size_t* _output_file_size);
+RDE_FUNC unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, size_t* _output_file_size);
 RDE_FUNC char* rde_file_read_line(rde_file_handle* _file_handler, size_t _line);
 RDE_FUNC char* rde_file_read_chunk(rde_file_handle* _file_handler, size_t _begin_byte, size_t _end_byte);
 RDE_FUNC void rde_file_write(rde_file_handle* _file_handler, size_t _bytes, const char* _data);
@@ -1359,6 +1384,7 @@ RDE_FUNC void rde_util_string_to_upper(char* _destination, const char* _string);
 RDE_FUNC void rde_util_string_to_upper_itself(char* _string);
 RDE_FUNC void rde_util_string_replace_char(char* _string, char _old, char _new);
 RDE_FUNC void rde_util_string_replace_chars_all(char* _string, char _old, char _new);
+RDE_FUNC char* rde_util_string_replace_substring(char* _string, char* _old_string, char* _new_string, int* _output_appearences);
 RDE_FUNC size_t rde_util_string_split(char* _string, char** _split_array, const char* _split_mark);
 
 /// ============================ MATH =======================================

@@ -1,3 +1,33 @@
+// replace substring is from https://github.com/ipserc/strrep/blob/master/string_replace/Source/strrep.c
+char* rde_inner_append_str(char* _string, const char* _append) {
+	char* _new_string = malloc(strlen(_string) + strlen(_append) + 1);
+
+	sprintf(_new_string, "%s%s", _string, _append);
+	free(_string);
+	return _new_string;
+}
+
+char* rde_inner_strtokk(char* _string, const char* _strf) {
+	static char* _ptr;
+	static char* _ptr2;
+
+	if (!*_strf) return _string;
+	if (_string) _ptr = _string;
+	else {
+		if (!_ptr2) return _ptr2;
+		_ptr = _ptr2 + strlen(_strf);
+	}
+
+	if (_ptr) {
+		_ptr2 = strstr(_ptr, _strf);
+		if (_ptr2) memset(_ptr2, 0, strlen(_strf));
+	}
+	return _ptr;
+}
+
+
+
+
 // ==============================================================================
 // =									API										=
 // ==============================================================================
@@ -235,6 +265,30 @@ void rde_util_string_replace_char(char* _string, char _old, char _new) {
 	}
 }
 
+char* rde_util_string_replace_substring(char* _string, char* _old_string, char* _new_string, int* _output_appearences) {
+	char* _str;
+	char* _ptr;
+	char* _strrep;
+
+	_str = (char *)malloc(strlen(_string) + 1);
+	sprintf(_str, "%s", _string);
+	if (!*_old_string) return _str;
+	_ptr = rde_inner_strtokk(_str, _old_string);
+	_strrep = malloc(strlen(_ptr) + 1);
+	memset(_strrep, 0, strlen(_ptr) + 1);
+	while (_ptr) {
+		_strrep = rde_inner_append_str(_strrep, _ptr);
+		_ptr = rde_inner_strtokk(NULL, _old_string);
+		if (_ptr) _strrep = rde_inner_append_str(_strrep, _new_string);
+		if(_ptr && _output_appearences != NULL) {
+			(*_output_appearences)++;
+		}
+	}
+
+	free(_str);
+	return _strrep;
+}
+
 void rde_util_string_replace_chars_all(char* _string, char _old, char _new) {
 	if(_string == NULL) {
 		return;
@@ -254,22 +308,12 @@ size_t rde_util_string_split(char* _string, char** _split_array, const char* _sp
 	}
 
 	size_t _amount = 0;
-	
-#if IS_WINDOWS()
-	char* _string_ptr = strtok_s(_string, _split_mark, NULL);
-#else
-	char* _string_ptr = strtok(_string, _split_mark);
-#endif
+	char* _string_ptr = rde_strtok(_string, _split_mark, NULL);
 
 	while(_string_ptr != NULL) {
-#if IS_WINDOWS()
 		size_t _string_ptr_size = strlen(_string_ptr);
-		strcat_s(_split_array[_amount], _string_ptr_size, _string_ptr);
-		_string_ptr = strtok_s(NULL, _split_mark, NULL);
-#else
-		strcat(_split_array[_amount], _string_ptr);
-		_string_ptr = strtok(NULL, _split_mark);
-#endif
+		rde_strcat(_split_array[_amount], _string_ptr_size, _string_ptr);
+		_string_ptr = rde_strtok(NULL, _split_mark, NULL);
 		_amount++;
 	}
 

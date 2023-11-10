@@ -174,12 +174,7 @@ rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data) {
 	_mesh.vao = 0;
 
 	memset(_mesh.name, 0, RDE_MESH_NAME_MAX);
-	
-#if IS_WINDOWS()
-	strcat_s(_mesh.name, RDE_MESH_NAME_MAX, _data->name);
-#else
-	strcat(_mesh.name, _data->name);
-#endif
+	rde_strcat(_mesh.name, RDE_MESH_NAME_MAX, _data->name);
 	
 	GLuint _vao = 0;
 	RDE_CHECK_GL(glGenVertexArrays, 1, &_vao);
@@ -584,17 +579,9 @@ rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data) {
 	memset(_mesh->name, 0, RDE_MESH_NAME_MAX);
 	
 	if(_data->name != NULL) {
-#if IS_WINDOWS()
-		strcat_s(_mesh->name, RDE_MESH_NAME_MAX, _data->name);
-#else
-		strcat(_mesh->name, _data->name);
-#endif
+		rde_strcat(_mesh->name, RDE_MESH_NAME_MAX, _data->name);
 	} else {
-#if IS_WINDOWS()
-		strcat_s(_mesh->name, RDE_MESH_NAME_MAX, "mesh");
-#else
-		strcat(_mesh->name, "mesh");
-#endif
+		rde_strcat(_mesh->name, RDE_MESH_NAME_MAX, "mesh");
 	}
 	
 	GLuint _vao = 0;
@@ -718,7 +705,7 @@ rde_model* rde_rendering_model_load(const char* _model_path) {
 	const char* _extension = rde_util_file_get_name_extension(_model_path);
 
 	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_models; _i++) {
-		if (ENGINE.models[_i].file_path != NULL && strcmp(ENGINE.models[_i].file_path, _model_path) == 0) {
+		if (strlen(ENGINE.models[_i].file_path) != 0 && strcmp(ENGINE.models[_i].file_path, _model_path) == 0) {
 			return &ENGINE.models[_i];
 		}
 	}
@@ -994,7 +981,7 @@ void rde_rendering_model_unload(rde_model* _model) {
 	stbds_arrfree(_model->mesh_array);
 	_model->mesh_array = NULL;
 	_model->mesh_array_size = 0;
-	_model->file_path = NULL;
+	memset(_model->file_path, 0, RDE_MAX_PATH);
 }
 
 void rde_rendering_3d_draw_skybox(rde_camera* _camera) {

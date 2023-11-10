@@ -47,7 +47,7 @@ rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atl
 		_texture.channels = _atlas->channels;
 		_texture.internal_format = _atlas->internal_format;
 		_texture.data_format = _atlas->data_format;
-		_texture.file_path = _atlas->file_path;
+		rde_strcpy(_texture.file_path, RDE_MAX_PATH, _atlas->file_path);
 		_texture.atlas_texture = _atlas;
 		stbds_shput(hash, _sub_texture_json->string, _texture);
 
@@ -126,7 +126,7 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 		_texture.channels = _atlas->channels;
 		_texture.internal_format = _atlas->internal_format;
 		_texture.data_format = _atlas->data_format;
-		_texture.file_path = _atlas->file_path;
+		rde_strcpy(_texture.file_path, RDE_MAX_PATH, _atlas->file_path);
 		_texture.atlas_texture = _atlas;
 		_char_info.texture = _texture;
 
@@ -164,6 +164,11 @@ static void rde_inner_file_system_free_text_allocation(rde_file_handle* _handler
 		free(_handler->text_allocated);
 		_handler->text_allocated = NULL;
 	}
+
+	if(_handler->bytes_allocated != NULL) {
+		free(_handler->bytes_allocated);
+		_handler->bytes_allocated = NULL;
+	}
 }
 
 static void rde_inner_file_system_check_file_mode_or_convert(rde_file_handle* _handler, RDE_FILE_MODE_ _expected) {
@@ -196,12 +201,9 @@ rde_file_handle* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode
 			_file_handler->sdl_handle = _sdl_file;
 			_file_handler->file_mode = _file_mode;
 			memset(_file_handler->file_path, 0, RDE_MAX_PATH);
-#if IS_WINDOWS()
-			strcat_s(_file_handler->file_path, RDE_MAX_PATH, _file_path);
-#else
-			strcat(_file_handler->file_path, _file_path);
-#endif
+			rde_strcat(_file_handler->file_path, RDE_MAX_PATH, _file_path);
 			_file_handler->text_allocated = NULL;
+			_file_handler->bytes_allocated = NULL;
 
 			return _file_handler;
 		}
@@ -211,7 +213,7 @@ rde_file_handle* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode
 	return NULL;
 }
 
-char* rde_file_read_full_file(rde_file_handle* _file_handler) {
+char* rde_file_read_full_file(rde_file_handle* _file_handler, size_t* _output_file_size) {
 	rde_inner_file_system_check_file_mode_or_convert(_file_handler, RDE_FILE_MODE_READ);
 	size_t _total_size = SDL_RWsize(_file_handler->sdl_handle);
 	size_t _total_bytes_read = 0;
@@ -230,6 +232,38 @@ char* rde_file_read_full_file(rde_file_handle* _file_handler) {
 
 	rde_inner_file_system_free_text_allocation(_file_handler);
 	_file_handler->text_allocated = _text;
+	
+	if(_output_file_size != NULL) {
+		*_output_file_size = _total_size;
+	}
+
+	return _text;
+}
+
+unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, size_t* _output_file_size) {
+	rde_inner_file_system_check_file_mode_or_convert(_file_handler, RDE_FILE_MODE_READ);
+	size_t _total_size = SDL_RWsize(_file_handler->sdl_handle);
+	size_t _total_bytes_read = 0;
+	size_t _bytes_to_read = 1;
+	unsigned char* _text = (unsigned char*)malloc(sizeof(unsigned char) * _total_size + 1);
+	unsigned char* _buf = _text;
+	memset(_text, 0, _total_size);
+	rde_critical_error(_text == NULL, RDE_ERROR_NO_MEMORY, sizeof(unsigned char) * _total_size, "Text Read Full File");
+
+	while (_total_bytes_read < _total_size && _bytes_to_read != 0) {
+		_bytes_to_read = SDL_RWread(_file_handler->sdl_handle, _buf, 1, (_total_size - _total_bytes_read));
+		_total_bytes_read += _bytes_to_read;
+		_buf += _bytes_to_read;
+	}
+	_text[_total_bytes_read] = '\0';
+
+	rde_inner_file_system_free_text_allocation(_file_handler);
+	_file_handler->bytes_allocated = _text;
+	
+	if(_output_file_size != NULL) {
+		*_output_file_size = _total_size;
+	}
+
 	return _text;
 }
 

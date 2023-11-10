@@ -94,112 +94,112 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 #if !IS_MOBILE() && !IS_WASM()
 	rde_file_handle* _shader_vertex_handle = rde_file_open("shaders/core/line_vert.glsl", RDE_FILE_MODE_READ);
 	rde_file_handle* _shader_fragment_handle = rde_file_open("shaders/core/line_frag.glsl", RDE_FILE_MODE_READ);
-	char* _vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	char* _fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	char* _vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	char* _fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.line_shader = rde_rendering_shader_load(RDE_SHADER_LINE, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 	
 	_shader_vertex_handle = rde_file_open("shaders/core/color_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/core/color_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
 	_shader_vertex_handle = rde_file_open("shaders/core/texture_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/core/texture_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
 	_shader_vertex_handle = rde_file_open("shaders/core/text_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/core/text_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 	
 	_shader_vertex_handle = rde_file_open("shaders/core/framebuffer_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/core/framebuffer_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.framebuffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 	
 	_shader_vertex_handle = rde_file_open("shaders/core/mesh_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/core/mesh_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 	
 	_shader_vertex_handle = rde_file_open("shaders/core/skybox_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/core/skybox_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.skybox_shader = rde_rendering_shader_load(RDE_SHADER_SKYBOX, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 #else
 	rde_file_handle* _shader_vertex_handle = rde_file_open("shaders/es/line_vert.glsl", RDE_FILE_MODE_READ);
 	rde_file_handle* _shader_fragment_handle = rde_file_open("shaders/es/line_frag.glsl", RDE_FILE_MODE_READ);
-	char* _vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	char* _fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	char* _vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	char* _fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.line_shader = rde_rendering_shader_load(RDE_SHADER_LINE, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
 	_shader_vertex_handle = rde_file_open("shaders/es/color_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/es/color_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
 	_shader_vertex_handle = rde_file_open("shaders/es/texture_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/es/texture_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
 	_shader_vertex_handle = rde_file_open("shaders/es/text_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/es/text_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
 	_shader_vertex_handle = rde_file_open("shaders/es/framebuffer_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/es/framebuffer_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.framebuffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
 	_shader_vertex_handle = rde_file_open("shaders/es/mesh_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/es/mesh_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
 	_shader_vertex_handle = rde_file_open("shaders/es/skybox_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/es/skybox_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 	ENGINE.skybox_shader = rde_rendering_shader_load(RDE_SHADER_SKYBOX, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
@@ -383,11 +383,7 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 		_shader->vertex_program_id = _vertex_program_id;
 		_shader->fragment_program_id = _fragment_program_id;
 		_shader->compiled_program_id = _program_id;
-#if IS_WINDOWS()
-		strcat_s(_shader->name, RDE_SHADER_MAX_NAME, _name);
-#else
-		strcat(_shader->name, _name);
-#endif
+		rde_strcat(_shader->name, RDE_SHADER_MAX_NAME, _name);
 
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Loaded shader with index '%d' successfully", _shader->compiled_program_id);
 		return _shader;
@@ -512,8 +508,13 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, rde_texture_para
 
 	rde_texture* _texture = NULL;
 
+	char _sanitized_path[RDE_MAX_PATH];
+	memset(_sanitized_path, 0, RDE_MAX_PATH);
+	rde_util_file_sanitaize_path(_file_path, _sanitized_path, RDE_MAX_PATH);
+
 	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
-		if (ENGINE.textures[_i].file_path != NULL && strcmp(ENGINE.textures[_i].file_path, _file_path) == 0) {
+		if (strlen(ENGINE.textures[_i].file_path) != 0 && strcmp(ENGINE.textures[_i].file_path, _sanitized_path) == 0) {
+			rde_log_level(RDE_LOG_LEVEL_WARNING, "Path '%s' already loaded in texture", _sanitized_path);
 			return &ENGINE.textures[_i];
 		}
 	}
@@ -538,12 +539,50 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, rde_texture_para
 #endif
 
 	stbi_uc* _data = NULL;
-	_data = stbi_load(_file_path, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
+	
+#if IS_MOBILE()
+	while(rde_util_string_contains_substring(_sanitized_path, "../", false)) {
+		size_t _sp_size = strlen(_sanitized_path);
+		size_t _init_point = 0;
+		size_t _end_point = 0;
 
-	if (_data == NULL) {
-		printf("Error while loading texture at '%s' \n", _file_path);
-		return NULL;
+		for(size_t _i = 0; _i < _sp_size; _i++) {
+			if(_sanitized_path[_i] == '/' &&
+			   _i + 1 < _sp_size && _sanitized_path[_i + 1] != '.' &&
+			   _i + 2 < _sp_size && _sanitized_path[_i + 2] != '.' ) {
+				_init_point = _i;
+			}
+
+			if(_sanitized_path[_i] == '.' &&
+			   _i + 1 < _sp_size && _sanitized_path[_i + 1] == '.' &&
+			   _i + 2 < _sp_size && _sanitized_path[_i + 2] == '/') {
+				_end_point = _i + 2;
+				break;
+			}
+		}
+
+		rde_critical_error(_init_point == _end_point, "Error converting path");
+
+		char _new_path[RDE_MAX_PATH];
+		memset(_new_path, 0, RDE_MAX_PATH);
+		char* _ptr = _sanitized_path;
+		rde_strncat(_new_path, RDE_MAX_PATH, _ptr, _init_point);
+		rde_strncat(_new_path, RDE_MAX_PATH, _ptr + _end_point, _sp_size - _end_point);
+		memset(_sanitized_path, 0, RDE_MAX_PATH);
+		rde_strcpy(_sanitized_path, RDE_MAX_PATH, _new_path);
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Removed a .. from path: %s", _sanitized_path);
 	}
+
+	rde_log_level(RDE_LOG_LEVEL_INFO, "This is the new path: %s", _sanitized_path);
+	size_t _total_size = 0;
+	rde_file_handle* _file_handle = rde_file_open(_sanitized_path, RDE_FILE_MODE_READ);
+	const unsigned char* _texture_data = rde_file_read_full_file_bytes(_file_handle, &_total_size);
+	_data = stbi_load_from_memory(_texture_data, _total_size, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
+#else
+	_data = stbi_load(_sanitized_path, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
+#endif
+
+	rde_critical_error(_data == NULL, "Could not load texture at '%s'", _sanitized_path);
 
 	RDE_CHECK_GL(glPixelStorei, GL_UNPACK_ALIGNMENT, 4);
 	GLenum _internal_format = 0;
@@ -585,9 +624,9 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, rde_texture_para
 	_texture->channels = _channels;
 	_texture->internal_format = _internal_format;
 	_texture->data_format = _data_format;
-	_texture->file_path = _file_path;
+	rde_strcpy(_texture->file_path, RDE_MAX_PATH, _sanitized_path);
 
-	rde_log_color(RDE_LOG_COLOR_GREEN, "Texture at '%s' loaded correctly: ", _file_path);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "Texture at '%s' loaded correctly: ", _sanitized_path);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Size: %dx%d: ", _width, _height);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Channels: %d: ", _channels);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- OpenGL ID: %u: ", _texture_id);
@@ -596,6 +635,10 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, rde_texture_para
 		printf("\n");
 	}
 
+#if IS_MOBILE()
+	rde_file_close(_file_handle);
+#endif
+
 	return _texture;
 }
 
@@ -603,7 +646,7 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 	rde_texture* _texture = NULL;
 
 	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
-		if (ENGINE.textures[_i].file_path != NULL && strcmp(ENGINE.textures[_i].file_path, _file_path) == 0) {
+		if (strlen(ENGINE.textures[_i].file_path) != 0 && strcmp(ENGINE.textures[_i].file_path, _file_path) == 0) {
 			return &ENGINE.textures[_i];
 		}
 	}
@@ -658,7 +701,7 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 	_texture->opengl_texture_id = _texture_id;
 	_texture->size = (rde_vec_2UI){ (uint)_width, (uint)_height };
 	_texture->channels = _channels;
-	_texture->file_path = _file_path;
+	rde_strcpy(_texture->file_path, RDE_MAX_PATH, _file_path);
 
 	rde_log_color(RDE_LOG_COLOR_GREEN, "Texture at '%s' loaded correctly: ", _file_path);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Size: %dx%d: ", _width, _height);
@@ -785,7 +828,7 @@ void rde_rendering_texture_unload(rde_texture* _texture) {
 	_texture->channels = 0;
 	_texture->internal_format = 0;
 	_texture->data_format = 0;
-	_texture->file_path = NULL;
+	memset(_texture->file_path, 0, RDE_MAX_PATH);
 }
 
 rde_atlas* rde_rendering_atlas_load(const char* _texture_path, const char* _config_path) {
