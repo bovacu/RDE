@@ -488,7 +488,7 @@ void rde_rendering_shader_unload(rde_shader* _shader) {
 rde_texture_parameters rde_innner_rendering_validate_texture_parameters(rde_texture_parameters* _params) {
 	rde_texture_parameters _tex_params = _params == NULL ? RDE_DEFAULT_TEXTURE_PARAMETERS : *_params;
 #define RDE_TEXTURE_PARAM_CHECKER(_field, _min, _max, _warn_text) 																								\
-	if(_tex_params._field < _min || _tex_params._field > _min) {																								\
+	if(_tex_params._field < _min || _tex_params._field > _max) {																								\
 		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_WARNING_RENDERING_WRONG_TEXTURE_PARAM, _tex_params._field, _warn_text, RDE_DEFAULT_TEXTURE_PARAMETERS._field);	\
 		_tex_params._field = RDE_DEFAULT_TEXTURE_PARAMETERS._field;																								\
 	}
