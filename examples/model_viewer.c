@@ -443,7 +443,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 void model_viewer_on_render(float _dt, rde_window* _window) {
 	UNUSED(_dt)
 	
-	model_viewer_draw_grid(&model_viewer_camera, _window);
+	draw_grid(&model_viewer_camera, _window);
 	model_viewer_draw_3d(_window, _dt);
 
 	if(model_viewer_show_skybox) {

@@ -28,7 +28,7 @@ unload_func unload_callback = NULL;
 
 rde_window* current_window = NULL;
 
-void model_viewer_draw_grid(rde_camera* _camera, rde_window* _window) {
+void draw_grid(rde_camera* _camera, rde_window* _window) {
 	const size_t _line_thickness = 1;
 	rde_rendering_3d_begin_drawing(_camera, _window, false);
 	rde_rendering_3d_draw_line((rde_vec_3F) {-1000, 0, 0}, (rde_vec_3F) {1000, 0, 0}, RDE_COLOR_RED, _line_thickness, NULL);
@@ -37,8 +37,12 @@ void model_viewer_draw_grid(rde_camera* _camera, rde_window* _window) {
 	rde_rendering_3d_end_drawing();
 }
 
- #include "model_viewer.c"
- #include "performance_test.c"
+#if !IS_ANDROID()
+#include "model_viewer.c"
+#include "performance_test.c"
+#else
+#include "android.c"
+#endif
 
 void on_event(rde_event* _event, rde_window* _window);
 void on_update(float _dt);
@@ -107,30 +111,40 @@ void on_late_update(float _dt) {
 	}
 }
 
-void on_imgui_hub_menu() {
+void on_imgui_hub_menu(float _dt) {
 	static rde_ImGuiDockNodeFlags _dockspace_flags = rde_ImGuiDockNodeFlags_None;
 	_dockspace_flags &= ~rde_ImGuiDockNodeFlags_PassthruCentralNode;
 	rde_ImGuiID _dockspace_id = rde_imgui_get_id("MyDockSpace");
  	rde_imgui_dockspace(_dockspace_id, (rde_ImVec2) {0, 0}, _dockspace_flags);
 
 	if(rde_imgui_begin("Hub", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize)) {
-		rde_imgui_text("Welcome to the Hub!");
+		rde_imgui_text("Welcome to the Hub! FPS %d", (int)(1.f / _dt));
 		rde_imgui_text("Choose any demo from the list");
 		static int _option = -1;
 		rde_imgui_new_line();
+
+#if !IS_ANDROID()
 		if(rde_imgui_radio_button("Model Viewer", &_option, 0)) {
 			if(unload_callback != NULL) {
 				unload_callback();
 			}
-			 model_viewer_init();
+			model_viewer_init();
 		}
 		
 		if(rde_imgui_radio_button("Performance Test 3D", &_option, 1)) {
 			if(unload_callback != NULL) {
 				unload_callback();
 			}
-			 performance_test_3d_init();
+			performance_test_3d_init();
 		}
+#else
+		if(rde_imgui_radio_button("Android demo", &_option, 2)) {
+			if(unload_callback != NULL) {
+				unload_callback();
+			}
+			android_init();
+		}
+#endif
 		rde_imgui_end();
 	}
 
@@ -145,7 +159,7 @@ void on_render(float _dt, rde_window* _window) {
 		render_callback(_dt, _window);
 	}
 
-	on_imgui_hub_menu();
+	on_imgui_hub_menu(_dt);
 	if(render_imgui_callback != NULL) {
 		render_imgui_callback(_dt, _window);
 	}
