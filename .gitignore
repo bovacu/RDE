@@ -31,3 +31,5 @@ tests/*.lib
 .DS_Store
 
 .cache/
+
+skate_or_dice/
