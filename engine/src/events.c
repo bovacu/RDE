@@ -3,11 +3,13 @@ void rde_inner_events_display_create_events();
 void rde_inner_events_key_create_events();
 void rde_inner_events_mouse_button_create_events();
 void rde_inner_events_drag_and_drop_create_events();
+void rde_inner_events_mobile_create_events();
 void rde_inner_event_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 void rde_inner_event_sdl_to_rde_helper_transform_display_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 void rde_inner_event_sdl_to_rde_helper_transform_keyboard_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 void rde_inner_event_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 void rde_inner_event_sdl_to_rde_helper_transform_drop_event(SDL_Event* _sdl_event, rde_event* _rde_event);
+void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event);
 
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_event_window_resize, {
@@ -91,6 +93,10 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_scrolled, {
 	_window->mouse_scroll = _event->data.mouse_event_data.scrolled;
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(drop_file, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_down, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_up, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_moved, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_multi_touch, {})
 
 void rde_inner_events_window_create_events() {
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - RDE_WIN_EVENT_INIT] = &rde_inner_event_window_resize;
@@ -128,6 +134,13 @@ void rde_inner_events_mouse_button_create_events() {
 
 void rde_inner_events_drag_and_drop_create_events() {
 	ENGINE.drag_and_drop_events[RDE_EVENT_TYPE_DRAG_AND_DROP_FILE - RDE_DRAG_AND_DROP_EVENT_INIT] = &drop_file;
+}
+
+void rde_inner_events_mobile_create_events() {
+	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN - RDE_MOBILE_EVENT_INIT] = &mobile_touch_down;
+	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_TOUCH_UP - RDE_MOBILE_EVENT_INIT] = &mobile_touch_up;
+	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED - RDE_MOBILE_EVENT_INIT] = &mobile_touch_moved;
+	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH - RDE_MOBILE_EVENT_INIT] = &mobile_multi_touch;
 }
 
 void rde_inner_event_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
@@ -259,6 +272,49 @@ void rde_inner_event_sdl_to_rde_helper_transform_drop_event(SDL_Event* _sdl_even
 	}
 }
 
+void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
+	switch(_sdl_event->type) {
+		case SDL_FINGERDOWN: {
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN;
+			_rde_event->data.mobile_event_data.init_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x, _sdl_event->tfinger.y };
+			_rde_event->data.mobile_event_data.pressure = _sdl_event->tfinger.pressure;
+			_rde_event->data.mobile_event_data.finger_id = _sdl_event->tfinger.fingerId;
+			_rde_event->time_stamp = _sdl_event->tfinger.timestamp;
+			_rde_event->window_id = _sdl_event->tfinger.windowID;
+		} break;
+
+		case SDL_FINGERUP:{
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TOUCH_UP;
+			_rde_event->data.mobile_event_data.end_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x, _sdl_event->tfinger.y };
+			_rde_event->data.mobile_event_data.pressure = _sdl_event->tfinger.pressure;
+			_rde_event->data.mobile_event_data.finger_id = _sdl_event->tfinger.fingerId;
+			_rde_event->time_stamp = _sdl_event->tfinger.timestamp;
+			_rde_event->window_id = _sdl_event->tfinger.windowID;
+		} break;
+
+		case SDL_FINGERMOTION: {
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED;
+			_rde_event->time_stamp = _sdl_event->tfinger.timestamp;
+			_rde_event->window_id = _sdl_event->tfinger.windowID;
+		} break;
+
+		case SDL_DOLLARGESTURE:{
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_DOLLAR_GESTURE;
+			_rde_event->time_stamp = _sdl_event->dgesture.timestamp;
+		} break;
+
+		case SDL_DOLLARRECORD:{
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_DOLLAR_RECORD;
+			_rde_event->time_stamp = _sdl_event->dgesture.timestamp;
+		} break;
+
+		case SDL_MULTIGESTURE: {
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH;
+			_rde_event->time_stamp = _sdl_event->mgesture.timestamp;
+		} break;
+	}
+}
+
 rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 
 	rde_event _event = rde_struct_create_event();
@@ -277,6 +333,13 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 		case SDL_MOUSEBUTTONUP: rde_inner_event_sdl_to_rde_helper_transform_mouse_button_event(_sdl_event, &_event); break;
 
 		case SDL_DROPFILE: rde_inner_event_sdl_to_rde_helper_transform_drop_event(_sdl_event, &_event); break;
+	
+		case SDL_FINGERDOWN:
+		case SDL_FINGERUP:
+		case SDL_FINGERMOTION: 
+		case SDL_DOLLARGESTURE:
+		case SDL_DOLLARRECORD:
+		case SDL_MULTIGESTURE: rde_inner_event_sdl_to_rde_helper_transform_mobile_event(_sdl_event, &_event); break;
 	}
 
 	return _event;
@@ -331,6 +394,16 @@ void rde_events_mouse_consume_events(rde_event* _event, rde_window* _window) {
 }
 
 void rde_events_drag_and_drop_consume_events(rde_event* _event, rde_window* _window) {
+	size_t _event_index = _event->type - RDE_MOBILE_EVENT_INIT;
+
+	if(_event_index >= 0 && _event_index < RDE_MOBILE_EVENT_INIT) {
+		ENGINE.drag_and_drop_events[_event_index](_event, _window);
+	} else {
+		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_ERROR_EVENT_NOT_HANDLED, "Mobile", _event->type);
+	}
+}
+
+void rde_events_mobile_consume_events(rde_event* _event, rde_window* _window) {
 	size_t _event_index = _event->type - RDE_DRAG_AND_DROP_EVENT_INIT;
 
 	if(_event_index >= 0 && _event_index < RDE_DRAG_AND_DROP_EVENT_INIT) {
@@ -341,39 +414,64 @@ void rde_events_drag_and_drop_consume_events(rde_event* _event, rde_window* _win
 }
 
 #if IS_MOBILE()
-int rde_events_mobile_consume_events(rde_event* _event, rde_window* _window, void* _user_data) {
-	SDL_Event* _native_event = (SDL_Event*)_event->sdl_native_event;
-	return 1;
-}
-
 int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Event* _event) {
+	static bool _terminated = false;
+
 	switch(_event->type) {
 		case SDL_APP_TERMINATING: {
 			// TODO: terminate app and clean everything
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Terminating");
+			_terminated = true;
+			rde_engine_destroy_engine();
 		} break;
 
 		case SDL_APP_LOWMEMORY: {
 			// TODO: not sure what to do in this case
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Low Memory");
 		} break;
 
 		case SDL_APP_WILLENTERBACKGROUND: {
+			if(_terminated) {
+				return 1;
+			}
 			// TODO: stop everything, main loop, music, nothing can run or the app may crash unexpectedly
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Will Enter Background");
+			ENGINE.pause_loop = true;
 		} break;
 
 		case SDL_APP_DIDENTERBACKGROUND: {
+			if(_terminated) {
+				return 1;
+			}
 			// TODO: stop everything, main loop, music, nothing can run or the app may crash unexpectedly
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Did Enter Background");
+			ENGINE.pause_loop = true;
 		} break;
 
 		case SDL_APP_WILLENTERFOREGROUND: {
+			if(_terminated) {
+				return 1;
+			}
 			// TODO: restart everything stoped on SDL_APP_DIDENTERBACKGROUND and SDL_APP_WILLENTERBACKGROUND
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Will Enter Foreground");
+			ENGINE.pause_loop = false;
 		} break;
 
 		case SDL_APP_DIDENTERFOREGROUND: {
+			if(_terminated) {
+				return 1;
+			}
 			// TODO: restart everything stoped on SDL_APP_DIDENTERBACKGROUND and SDL_APP_WILLENTERBACKGROUND
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Did Enter Foreground");
 		} break;
 
 		case SDL_LOCALECHANGED: {
+			if(_terminated) {
+				return 1;
+			}
 			// TODO: not sure what to do in this case
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Locale changed");
+			ENGINE.pause_loop = false;
 		} break;
 	}
 

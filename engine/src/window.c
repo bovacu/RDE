@@ -12,6 +12,9 @@ rde_window* rde_inner_window_create_windows_window(size_t _free_window_index) {
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
+	// Use this to allow trackpad to use touch gestures
+	//SDL_SetHint(SDL_HINT_TRACKPAD_IS_TOUCH_ONLY, "1");
+
 	char _title[16];
 	snprintf(_title, 10, "%d", (int)_free_window_index);
 
@@ -46,20 +49,16 @@ rde_window* rde_inner_window_create_mac_window(size_t _free_window_index) {
 	_window->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 	rde_critical_error(_window->sdl_window == NULL, RDE_ERROR_SDL_WINDOW, SDL_GetError());
 
-	  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-	  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-	  // set multi sampling else we get really bad graphics that alias
-	  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,4);
-	  // Turn on double buffering with a 24bit Z buffer.
-	  // You may need to change this to 16 or 32 for your system
-	  // on mac up to 32 will work but under linux centos build only 16
-	  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	  // enable double buffering (should be on by default)
-	  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	  SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	
+	// Use this to allow trackpad to use touch gestures
+	//SDL_SetHint(SDL_HINT_TRACKPAD_IS_TOUCH_ONLY, "1");
 
 	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
 	rde_critical_error(_window->sdl_gl_context == NULL, RDE_ERROR_SDL_OPENGL, SDL_GetError());
@@ -107,6 +106,9 @@ rde_window* rde_inner_window_create_linux_window(size_t _free_window_index) {
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+	// Use this to allow trackpad to use touch gestures
+	//SDL_SetHint(SDL_HINT_TRACKPAD_IS_TOUCH_ONLY, "1");
 
 	char _title[16];
 	snprintf(_title, 10, "%d", (int)_free_window_index);

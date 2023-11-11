@@ -148,6 +148,9 @@
 #define RDE_DRAG_AND_DROP_EVENT_INIT (RDE_EVENT_TYPE_DRAG_AND_DROP_BEGIN + 1)
 #define RDE_DRAG_AND_DROP_EVENT_COUNT (RDE_EVENT_TYPE_DRAG_AND_DROP_END - RDE_EVENT_TYPE_DRAG_AND_DROP_BEGIN)
 
+#define RDE_MOBILE_EVENT_INIT (RDE_EVENT_TYPE_MOBILE_BEGIN + 1)
+#define RDE_MOBILE_EVENT_COUNT (RDE_EVENT_TYPE_MOBILE_END - RDE_EVENT_TYPE_MOBILE_BEGIN)
+
 #define RDE_AMOUNT_OF_KEYS 256
 #define RDE_AMOUNT_OF_MOUSE_BUTTONS 16
 
@@ -380,6 +383,7 @@ struct rde_engine {
 	RDE_PLATFORM_TYPE_ platform_type;
 		
 	bool running;
+	bool pause_loop;
 	bool use_rde_2d_physics_system;
 	bool supress_engine_logs;
 		
@@ -434,6 +438,7 @@ struct rde_engine {
 	rde_event_func key_events[RDE_KEY_EVENT_COUNT];
 	rde_event_func mouse_events[RDE_MOUSE_EVENT_COUNT];
 	rde_event_func drag_and_drop_events[RDE_DRAG_AND_DROP_EVENT_COUNT];
+	rde_event_func mobile_events[RDE_MOBILE_EVENT_COUNT];
 	
 	rde_engine_heap_allocs_config heap_allocs_config;
 	
@@ -884,6 +889,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.fixed_time_step_accumulator = 0.f;
 	_e.platform_type = RDE_PLATFORM_TYPE_UNSUPPORTED;
 	_e.running = true;
+	_e.pause_loop = false;
 	_e.use_rde_2d_physics_system = true;
 	_e.supress_engine_logs = false;
 	_e.mandatory_callbacks = rde_struct_create_end_user_mandatory_callbacks();
@@ -1087,6 +1093,19 @@ void rde_inner_engine_on_event() {
 					}
 					rde_events_drag_and_drop_consume_events(&_rde_event, _window);
 				} break;
+
+				case SDL_FINGERDOWN:
+				case SDL_FINGERUP:
+				case SDL_FINGERMOTION: 
+				case SDL_DOLLARGESTURE:
+				case SDL_DOLLARRECORD:
+				case SDL_MULTIGESTURE: {
+					size_t _window_id = SDL_GetWindowID(_window->sdl_window);
+					if(_window_id != _rde_event.window_id) {
+						continue;
+					}
+					rde_events_mobile_consume_events(&_rde_event, _window);
+				}
 			}
 
 			if(ENGINE.user_event_callback != NULL) {
@@ -1156,6 +1175,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	rde_inner_events_key_create_events();
 	rde_inner_events_mouse_button_create_events();
 	rde_inner_events_drag_and_drop_create_events();
+	rde_inner_events_mobile_create_events();
 
 #ifdef RDE_RENDERING_MODULE
 	rde_inner_rendering_set_rendering_configuration(_default_window);
@@ -1226,6 +1246,10 @@ void rde_engine_on_run() {
 
 		rde_inner_engine_on_event();
 		if (!ENGINE.running) return;
+
+		if(ENGINE.pause_loop) {
+			continue;
+		}
 
 		rde_inner_engine_on_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_update(ENGINE.delta_time);

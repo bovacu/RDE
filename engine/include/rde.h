@@ -491,7 +491,9 @@ typedef enum {
 
 	RDE_EVENT_TYPE_CONTROLLER_AXIS_MOVED, RDE_EVENT_TYPE_CONTROLLER_BUTTON_DOWN, RDE_EVENT_TYPE_CONTROLLER_BUTTON_UP,
 
-	RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN, RDE_EVENT_TYPE_MOBILE_TOUCH_UP, RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED
+	RDE_EVENT_TYPE_MOBILE_BEGIN,
+	RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN, RDE_EVENT_TYPE_MOBILE_TOUCH_UP, RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED, RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH, RDE_EVENT_TYPE_MOBILE_DOLLAR_GESTURE, RDE_EVENT_TYPE_MOBILE_DOLLAR_RECORD,
+	RDE_EVENT_TYPE_MOBILE_END
 
 } RDE_EVENT_TYPE_;
 
@@ -1515,6 +1517,7 @@ RDE_FUNC void rde_events_display_consume_events(rde_event* _event, rde_window* _
 RDE_FUNC void rde_events_keyboard_consume_events(rde_event* _event, rde_window* _window);
 RDE_FUNC void rde_events_mouse_consume_events(rde_event* _event, rde_window* _window);
 RDE_FUNC void rde_events_drag_and_drop_consume_events(rde_event* _event, rde_window* _window);
+RDE_FUNC void rde_events_mobile_consume_events(rde_event* _event, rde_window* _window);
 
 RDE_FUNC bool rde_events_is_key_just_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
 RDE_FUNC bool rde_events_is_key_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
@@ -1525,10 +1528,6 @@ RDE_FUNC bool rde_events_is_mouse_button_pressed(rde_window* _window, RDE_MOUSE_
 RDE_FUNC bool rde_events_is_mouse_button_just_released(rde_window* _window, RDE_MOUSE_BUTTON_ _button);
 RDE_FUNC rde_vec_2F rde_events_mouse_get_scrolled(rde_window* _window);
 RDE_FUNC rde_vec_2I rde_events_mouse_get_position(rde_window* _window);
-
-//#if IS_MOBILE()
-//RDE_FUNC int rde_events_mobile_consume_events(rde_event* _event, rde_window* _window, void* _user_data);
-//#endif
 
 /// ============================ RENDERING ==================================
 
