@@ -1100,13 +1100,13 @@ void rde_inner_engine_on_event() {
 				case SDL_FINGERMOTION: 
 				case SDL_DOLLARGESTURE:
 				case SDL_DOLLARRECORD:
+				case SDL_MULTIGESTURE:
 				case SDL_APP_TERMINATING:
 				case SDL_APP_LOWMEMORY:
 				case SDL_APP_WILLENTERBACKGROUND:
 				case SDL_APP_DIDENTERBACKGROUND:
 				case SDL_APP_WILLENTERFOREGROUND:
 				case SDL_APP_DIDENTERFOREGROUND:
-				case SDL_MULTIGESTURE:
 				case SDL_LOCALECHANGED: rde_events_mobile_consume_events(&_rde_event, _window); break;
 			}
 
