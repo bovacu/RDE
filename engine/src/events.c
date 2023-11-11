@@ -312,6 +312,35 @@ void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_ev
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH;
 			_rde_event->time_stamp = _sdl_event->mgesture.timestamp;
 		} break;
+
+		case SDL_APP_TERMINATING: {
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TERMINATING;
+		} break;
+
+		case SDL_APP_LOWMEMORY: {
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_LOW_MEMORY;
+		} break;
+
+		case SDL_APP_WILLENTERBACKGROUND: {
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_WILL_ENTER_BACKGROUND;
+		} break;
+
+		case SDL_APP_DIDENTERBACKGROUND: {
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_DID_ENTER_BACKGROUND;
+		} break;
+
+		case SDL_APP_WILLENTERFOREGROUND: {
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_WILL_ENTER_FOREGROUND;
+		} break;
+
+		case SDL_APP_DIDENTERFOREGROUND: {
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_DID_ENTER_FOREGROUND;
+		} break;
+
+		case SDL_LOCALECHANGED: {
+			_rde_event->type = RDE_EVENT_TYPE_MOBILE_LOCALE_CHANGED;
+		} break;
+
 	}
 }
 
@@ -339,7 +368,14 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 		case SDL_FINGERMOTION: 
 		case SDL_DOLLARGESTURE:
 		case SDL_DOLLARRECORD:
-		case SDL_MULTIGESTURE: rde_inner_event_sdl_to_rde_helper_transform_mobile_event(_sdl_event, &_event); break;
+		case SDL_MULTIGESTURE: 
+		case SDL_APP_TERMINATING:
+		case SDL_APP_LOWMEMORY:
+		case SDL_APP_WILLENTERBACKGROUND:
+		case SDL_APP_DIDENTERBACKGROUND:
+		case SDL_APP_WILLENTERFOREGROUND:
+		case SDL_APP_DIDENTERFOREGROUND:
+		case SDL_LOCALECHANGED: rde_inner_event_sdl_to_rde_helper_transform_mobile_event(_sdl_event, &_event); break;
 	}
 
 	return _event;
@@ -394,22 +430,22 @@ void rde_events_mouse_consume_events(rde_event* _event, rde_window* _window) {
 }
 
 void rde_events_drag_and_drop_consume_events(rde_event* _event, rde_window* _window) {
-	size_t _event_index = _event->type - RDE_MOBILE_EVENT_INIT;
+	size_t _event_index = _event->type - RDE_DRAG_AND_DROP_EVENT_INIT;
 
-	if(_event_index >= 0 && _event_index < RDE_MOBILE_EVENT_INIT) {
-		ENGINE.drag_and_drop_events[_event_index](_event, _window);
+	if(_event_index >= 0 && _event_index < RDE_DRAG_AND_DROP_EVENT_INIT) {
+		ENGINE.mobile_events[_event_index](_event, _window);
 	} else {
-		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_ERROR_EVENT_NOT_HANDLED, "Mobile", _event->type);
+		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_ERROR_EVENT_NOT_HANDLED, "Drag N Drop", _event->type);
 	}
 }
 
 void rde_events_mobile_consume_events(rde_event* _event, rde_window* _window) {
-	size_t _event_index = _event->type - RDE_DRAG_AND_DROP_EVENT_INIT;
+	size_t _event_index = _event->type - RDE_MOBILE_EVENT_INIT;
 
-	if(_event_index >= 0 && _event_index < RDE_DRAG_AND_DROP_EVENT_INIT) {
-		ENGINE.drag_and_drop_events[_event_index](_event, _window);
+	if(_event_index >= 0 && _event_index < RDE_MOBILE_EVENT_INIT) {
+		ENGINE.mobile_events[_event_index](_event, _window);
 	} else {
-		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_ERROR_EVENT_NOT_HANDLED, "Drag N Drop", _event->type);
+		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_ERROR_EVENT_NOT_HANDLED, "Mobile", _event->type);
 	}
 }
 
@@ -419,14 +455,12 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 
 	switch(_event->type) {
 		case SDL_APP_TERMINATING: {
-			// TODO: terminate app and clean everything
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Terminating");
 			_terminated = true;
 			rde_engine_destroy_engine();
 		} break;
 
 		case SDL_APP_LOWMEMORY: {
-			// TODO: not sure what to do in this case
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Low Memory");
 		} break;
 
@@ -434,7 +468,6 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			if(_terminated) {
 				return 1;
 			}
-			// TODO: stop everything, main loop, music, nothing can run or the app may crash unexpectedly
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Will Enter Background");
 			ENGINE.pause_loop = true;
 		} break;
@@ -443,7 +476,6 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			if(_terminated) {
 				return 1;
 			}
-			// TODO: stop everything, main loop, music, nothing can run or the app may crash unexpectedly
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Did Enter Background");
 			ENGINE.pause_loop = true;
 		} break;
@@ -452,7 +484,6 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			if(_terminated) {
 				return 1;
 			}
-			// TODO: restart everything stoped on SDL_APP_DIDENTERBACKGROUND and SDL_APP_WILLENTERBACKGROUND
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Will Enter Foreground");
 			ENGINE.pause_loop = false;
 		} break;
@@ -461,17 +492,15 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			if(_terminated) {
 				return 1;
 			}
-			// TODO: restart everything stoped on SDL_APP_DIDENTERBACKGROUND and SDL_APP_WILLENTERBACKGROUND
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Did Enter Foreground");
+			ENGINE.pause_loop = false;
 		} break;
 
 		case SDL_LOCALECHANGED: {
 			if(_terminated) {
 				return 1;
 			}
-			// TODO: not sure what to do in this case
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Locale changed");
-			ENGINE.pause_loop = false;
 		} break;
 	}
 

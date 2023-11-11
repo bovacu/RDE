@@ -990,6 +990,7 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	memset(_e.key_events, 0, RDE_KEY_EVENT_COUNT);
 	memset(_e.mouse_events, 0, RDE_MOUSE_EVENT_COUNT);
 	memset(_e.drag_and_drop_events, 0, RDE_DRAG_AND_DROP_EVENT_COUNT);
+	memset(_e.mobile_events, 0, RDE_MOBILE_EVENT_COUNT);
 
 #if IS_WINDOWS()
 	_e.console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1099,13 +1100,14 @@ void rde_inner_engine_on_event() {
 				case SDL_FINGERMOTION: 
 				case SDL_DOLLARGESTURE:
 				case SDL_DOLLARRECORD:
-				case SDL_MULTIGESTURE: {
-					size_t _window_id = SDL_GetWindowID(_window->sdl_window);
-					if(_window_id != _rde_event.window_id) {
-						continue;
-					}
-					rde_events_mobile_consume_events(&_rde_event, _window);
-				}
+				case SDL_APP_TERMINATING:
+				case SDL_APP_LOWMEMORY:
+				case SDL_APP_WILLENTERBACKGROUND:
+				case SDL_APP_DIDENTERBACKGROUND:
+				case SDL_APP_WILLENTERFOREGROUND:
+				case SDL_APP_DIDENTERFOREGROUND:
+				case SDL_MULTIGESTURE:
+				case SDL_LOCALECHANGED: rde_events_mobile_consume_events(&_rde_event, _window); break;
 			}
 
 			if(ENGINE.user_event_callback != NULL) {
