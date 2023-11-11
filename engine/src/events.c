@@ -97,6 +97,13 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_down, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_up, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_moved, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_multi_touch, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_terminating, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_low_memory, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_background, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_background, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_foreground, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_foreground, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_locale_changed, {})
 
 void rde_inner_events_window_create_events() {
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - RDE_WIN_EVENT_INIT] = &rde_inner_event_window_resize;
@@ -141,6 +148,13 @@ void rde_inner_events_mobile_create_events() {
 	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_TOUCH_UP - RDE_MOBILE_EVENT_INIT] = &mobile_touch_up;
 	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED - RDE_MOBILE_EVENT_INIT] = &mobile_touch_moved;
 	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH - RDE_MOBILE_EVENT_INIT] = &mobile_multi_touch;
+	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_TERMINATING - RDE_MOBILE_EVENT_INIT] = &mobile_terminating;
+	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_LOW_MEMORY - RDE_MOBILE_EVENT_INIT] = &mobile_low_memory;
+	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_WILL_ENTER_BACKGROUND - RDE_MOBILE_EVENT_INIT] = &mobile_will_enter_background;
+	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_DID_ENTER_BACKGROUND - RDE_MOBILE_EVENT_INIT] = &mobile_did_enter_background;
+	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_WILL_ENTER_FOREGROUND - RDE_MOBILE_EVENT_INIT] = &mobile_will_enter_foreground;
+	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_DID_ENTER_FOREGROUND - RDE_MOBILE_EVENT_INIT] = &mobile_did_enter_foreground;
+	ENGINE.mobile_events[RDE_EVENT_TYPE_MOBILE_LOCALE_CHANGED - RDE_MOBILE_EVENT_INIT] = &mobile_locale_changed;
 }
 
 void rde_inner_event_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
