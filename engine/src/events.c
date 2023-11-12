@@ -132,26 +132,10 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_moved, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_multi_touch, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_terminating, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_low_memory, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_background, {
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
-		_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
-	}
-})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_background, {
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
-		_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
-	}
-})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_foreground, {
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
-		_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
-	}
-})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_foreground, {
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
-		_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
-	}
-})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_background, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_background, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_foreground, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_foreground, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_locale_changed, {})
 
 void rde_inner_events_window_create_events() {
@@ -537,6 +521,9 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Will Enter Background");
 			ENGINE.pause_loop = true;
+			for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+				_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+			}
 		} break;
 
 		case SDL_APP_DIDENTERBACKGROUND: {
@@ -545,6 +532,9 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Did Enter Background");
 			ENGINE.pause_loop = true;
+			for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+				_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+			}
 		} break;
 
 		case SDL_APP_WILLENTERFOREGROUND: {
@@ -553,6 +543,9 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Will Enter Foreground");
 			ENGINE.pause_loop = false;
+			for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+				_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+			}
 		} break;
 
 		case SDL_APP_DIDENTERFOREGROUND: {
@@ -561,6 +554,9 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Did Enter Foreground");
 			ENGINE.pause_loop = false;
+			for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+				_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+			}
 		} break;
 
 		case SDL_LOCALECHANGED: {
