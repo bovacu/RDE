@@ -279,6 +279,7 @@ typedef struct {
 	rde_vec_3F position;
 	uint color;
 } rde_line_vertex;
+rde_line_vertex rde_struct_create_line_vertex();
 	
 typedef struct {
 	rde_line_vertex* vertices;
@@ -315,7 +316,7 @@ struct rde_mesh {
 	float* vertex_positions;
 	float* vertex_normals;
 	float* vertex_texcoords;
-	mat4* transforms;
+	mat4* transformation_matrices;
 	
 	uint vao;
 	uint vbo[4]; // 0 -> positions (static), 
@@ -621,9 +622,19 @@ rde_window rde_struct_create_window() {
 	_w.sdl_window = NULL;
 	_w.mouse_position = (rde_vec_2I) { 0, 0 };
 	_w.mouse_scroll = (rde_vec_2F) { 0.0f, 0.0f };
-	memset(_w.key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
-	memset(_w.mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
-	memset(_w.mobile_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOBILE_FINGERS);
+
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+		_w.key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+		_w.mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+		_w.mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+
 	return _w;
 }
 
@@ -683,9 +694,7 @@ rde_spot_light rde_struct_create_spot_light() {
 	_s.quadratic = 0.032f;
 	return _s;
 }
-#endif
 
-#ifdef RDE_RENDERING_MODULE
 rde_shader rde_struct_create_shader() {
 	rde_shader _s;
 	_s.vertex_program_id = 0;
@@ -997,12 +1006,29 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	}
 #endif
 
-	memset(_e.window_events, 0, RDE_WIN_EVENT_COUNT);
-	memset(_e.display_events, 0, RDE_DISPLAY_EVENT_COUNT);
-	memset(_e.key_events, 0, RDE_KEY_EVENT_COUNT);
-	memset(_e.mouse_events, 0, RDE_MOUSE_EVENT_COUNT);
-	memset(_e.drag_and_drop_events, 0, RDE_DRAG_AND_DROP_EVENT_COUNT);
-	memset(_e.mobile_events, 0, RDE_MOBILE_EVENT_COUNT);
+	for(size_t _i = 0; _i < RDE_WIN_EVENT_COUNT; _i++) { 
+		_e.window_events[_i] = NULL;
+	}
+
+	for(size_t _i = 0; _i < RDE_DISPLAY_EVENT_COUNT; _i++) { 
+		_e.display_events[_i] = NULL;
+	}
+
+	for(size_t _i = 0; _i < RDE_KEY_EVENT_COUNT; _i++) { 
+		_e.key_events[_i] = NULL;
+	}
+
+	for(size_t _i = 0; _i < RDE_MOUSE_EVENT_COUNT; _i++) { 
+		_e.mouse_events[_i] = NULL;
+	}
+
+	for(size_t _i = 0; _i < RDE_DRAG_AND_DROP_EVENT_COUNT; _i++) { 
+		_e.drag_and_drop_events[_i] = NULL;
+	}
+	
+	for(size_t _i = 0; _i < RDE_MOBILE_EVENT_COUNT; _i++) { 
+		_e.mobile_events[_i] = NULL;
+	}
 
 #if IS_WINDOWS()
 	_e.console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1177,7 +1203,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 
 	stbds_rand_seed(time(NULL));
 
-	rde_window* _default_window = rde_window_create_window();
+	rde_window* _default_window = rde_window_create_window_os();
 
 	#if IS_ANDROID()
 	ENGINE.android_native_window = SDL_AndroidGetNativeWindow();

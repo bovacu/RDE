@@ -123,7 +123,9 @@ bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 float* rde_inner_rendering_mesh_calculate_normals(float* _vertex_positions, size_t _indices_count, size_t _vertex_count, uint* _indices) {
 	size_t _normals_size = _vertex_count * 3;
 	float* _normals = (float*)malloc(sizeof(float) * _normals_size);
-	memset(_normals, 0, _normals_size);
+	for(size_t _i = 0; _i < _normals_size; _i++) {
+		_normals[_i] = 0;
+	}
 
 	for(uint _i = 0; _i < _indices_count; _i += 3) {
 		vec3 _a = (vec3) { _vertex_positions[_indices[_i + 0] + 0], _vertex_positions[_indices[_i + 0] + 1], _vertex_positions[_indices[_i + 0] + 2] };
@@ -185,9 +187,11 @@ rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data) {
 	_mesh.vertex_normals = _data->normals;
 	_mesh.vertex_texcoords = _data->texcoords;
 	
-	_mesh.transforms = NULL;
-	_mesh.transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW );
-	memset(_mesh.transforms, 0, RDE_MAX_MODELS_PER_DRAW);
+	_mesh.transformation_matrices = NULL;
+	_mesh.transformation_matrices = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW );
+	for(size_t _i = 0; _i < RDE_MAX_MODELS_PER_DRAW; _i++) {
+		glm_mat4_zero(_mesh.transformation_matrices[_i]);
+	}
 
 	RDE_CHECK_GL(glBindVertexArray, _mesh.vao);
 	
@@ -258,7 +262,10 @@ rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data) {
 }
 
 void rde_inner_rendering_reset_line_batch() {
-	memset(current_batch_3d.line_batch.vertices, 0, RDE_MAX_LINES_PER_DRAW);
+	for(size_t _i = 0; _i < RDE_MAX_LINES_PER_DRAW; _i++) {
+		current_batch_3d.line_batch.vertices[_i] = rde_struct_create_line_vertex();
+	}
+
 	current_batch_3d.line_batch.amount_of_vertices = 0;
 	current_batch_3d.line_batch.shader = NULL;
 	current_batch_3d.line_batch.thickness = 0;
@@ -268,7 +275,9 @@ void rde_inner_rendering_reset_batch_3d() {
 	current_batch_3d.shader = NULL;
 
 	if(current_batch_3d.mesh != NULL) {
-		memset(current_batch_3d.mesh->transforms, 0, current_batch_3d.amount_of_models_per_draw);
+		for(size_t _i = 0; _i < current_batch_3d.amount_of_models_per_draw; _i++) {
+			glm_mat4_zero(current_batch_3d.mesh->transformation_matrices[_i]);
+		}
 	}
 
 	current_batch_3d.mesh = NULL;
@@ -517,7 +526,7 @@ void rde_inner_rendering_flush_batch_3d() {
 	RDE_CHECK_GL(glBindVertexArray, _mesh->vao);
 
 	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _mesh->vbo[3]);
-	RDE_CHECK_GL(glBufferSubData, GL_ARRAY_BUFFER, 0, current_batch_3d.amount_of_models_per_draw * (sizeof(float) * 16), _mesh->transforms);
+	RDE_CHECK_GL(glBufferSubData, GL_ARRAY_BUFFER, 0, current_batch_3d.amount_of_models_per_draw * (sizeof(float) * 16), _mesh->transformation_matrices);
 
 	RDE_CHECK_GL(glDrawArraysInstanced, GL_TRIANGLES, 0, _mesh->vertex_count, current_batch_3d.amount_of_models_per_draw);
 }
@@ -592,9 +601,11 @@ rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data) {
 	_mesh->vertex_normals = _data->normals;
 	_mesh->vertex_texcoords = _data->texcoords;
 	
-	_mesh->transforms = NULL;
-	_mesh->transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW );
-	memset(_mesh->transforms, 0, RDE_MAX_MODELS_PER_DRAW);
+	_mesh->transformation_matrices = NULL;
+	_mesh->transformation_matrices = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW);
+	for(size_t _i = 0; _i < RDE_MAX_MODELS_PER_DRAW; _i++) {
+		glm_mat4_zero(_mesh->transformation_matrices[_i]);
+	}
 
 	RDE_CHECK_GL(glBindVertexArray, _mesh->vao);
 	
@@ -789,8 +800,8 @@ void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated_buffers)
 		_mesh->material.map_bump = NULL;
 	}
 
-	free(_mesh->transforms);
-	_mesh->transforms = NULL;
+	free(_mesh->transformation_matrices);
+	_mesh->transformation_matrices = NULL;
 
 	_mesh->material = rde_struct_create_material();
 }
@@ -846,7 +857,7 @@ void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_mesh* _mesh
 
 	rde_inner_rendering_transform_to_glm_mat4_3d(_transform, _transformation_matrix);
 
-	glm_mat4_copy(_transformation_matrix, _mesh->transforms[current_batch_3d.amount_of_models_per_draw]);
+	glm_mat4_copy(_transformation_matrix, _mesh->transformation_matrices[current_batch_3d.amount_of_models_per_draw]);
 	current_batch_3d.amount_of_models_per_draw++;
 }
 

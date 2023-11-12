@@ -82,7 +82,9 @@ void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _ba
 void rde_inner_rendering_reset_batch_2d() {
 	current_batch_2d.shader = NULL;
 	current_batch_2d.texture = rde_struct_create_texture();
-	memset(current_batch_2d.vertices, 0, ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
+	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_vertices_per_batch; _i++) {
+		current_batch_2d.vertices[_i] = rde_struct_create_vertex_2d();
+	}
 	current_batch_2d.amount_of_vertices = 0;
 }
 

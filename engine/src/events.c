@@ -27,25 +27,50 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_event_window_resize, {
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_focused_by_mouse, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused_by_mouse, {
-    memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
-	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_focused_by_keyboard, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused_by_keyboard, {
-	memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
-	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_moved, {
-    memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
-	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+    for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_minimized, {
-    memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
-	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+    for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_maximized, {
-    memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
-	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+   	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_closed, { 
 	size_t _existing_non_destroyed_windows = 0;
@@ -107,10 +132,26 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_moved, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_multi_touch, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_terminating, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_low_memory, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_background, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_background, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_foreground, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_foreground, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_background, {
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+		_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_background, {
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+		_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_foreground, {
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+		_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_foreground, {
+	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+		_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+	}
+})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_locale_changed, {})
 
 void rde_inner_events_window_create_events() {
@@ -459,7 +500,7 @@ void rde_events_drag_and_drop_consume_events(rde_event* _event, rde_window* _win
 	size_t _event_index = _event->type - RDE_DRAG_AND_DROP_EVENT_INIT;
 
 	if(_event_index >= 0 && _event_index < RDE_DRAG_AND_DROP_EVENT_INIT) {
-		ENGINE.mobile_events[_event_index](_event, _window);
+		ENGINE.drag_and_drop_events[_event_index](_event, _window);
 	} else {
 		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_ERROR_EVENT_NOT_HANDLED, "Drag N Drop", _event->type);
 	}

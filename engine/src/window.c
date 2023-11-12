@@ -199,7 +199,7 @@ rde_window* rde_window_create_wasm_window(size_t _free_window_index) {
 // =									API										=
 // ==============================================================================
 
-rde_window* rde_window_create_window() {
+rde_window* rde_window_create_window_os() {
 
 	size_t _free_window_index = 0;
 	rde_window* _window = NULL;
@@ -232,9 +232,6 @@ rde_window* rde_window_create_window() {
 	#else
 		rde_critical_error(true, RDE_ERROR_UNSUPPORTED_PLATFORM);
 	#endif
-	
-	memset(_window->key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
-	memset(_window->mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
 
 	return _window;
 }
