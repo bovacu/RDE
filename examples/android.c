@@ -35,6 +35,8 @@ rde_skybox_id android_skybox;
 bool android_show_skybox = false;
 int android_msaa_samples = -1;
 
+rde_vec_2I android_mouse_pos;
+
 void android_keyboard_controller(float _dt) {
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
 		android_camera.transform.position.x += android_camera_front.x * 10 * _dt;
@@ -72,11 +74,11 @@ void android_keyboard_controller(float _dt) {
 void android_mouse_controller(float _dt) {
 	UNUSED(_dt)
 
-	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
+	if(rde_events_is_mobile_touch_just_pressed(current_window, 0)) { 
 		android_first_mouse = true;
 	}
 
-	if(rde_events_is_mouse_button_pressed(current_window, RDE_MOUSE_BUTTON_1)) {
+	if(rde_events_is_mobile_touch_pressed(current_window, 0)) {
 		rde_vec_2I _mouse_pos = rde_events_mouse_get_position(current_window);
 		float _x_pos = (float)_mouse_pos.x;
 		float _y_pos = (float)_mouse_pos.y;
@@ -123,6 +125,11 @@ void android_mouse_controller(float _dt) {
 void android_on_event(rde_event* _event, rde_window* _window) {
 	UNUSED(_window);
 	UNUSED(_event);
+
+	if(_event->type == RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED || _event->type == RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN) {
+		android_mouse_pos = _event->data.mobile_event_data.moved_touch_position;
+		rde_log_level(RDE_LOG_LEVEL_INFO, "(%d, %d)", android_mouse_pos.x, android_mouse_pos.y);
+	}
 }
 
 void android_on_update(float _dt) {
@@ -140,6 +147,13 @@ void android_on_update(float _dt) {
 
 	android_mouse_controller(_dt);
 	android_keyboard_controller(_dt);
+
+	if(android_model != NULL) {
+		android_transform.rotation.y += _dt * 25.f;
+		if(android_transform.rotation.y > 360.f) {
+			android_transform.rotation.y = 0;
+		}
+	}
 }
 
 void android_on_fixed_update(float _dt) {
@@ -265,6 +279,8 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 
 	rde_imgui_begin("Rendering Options", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
 	rde_imgui_text("Total Meshes: %zu", android_model_data.amount_of_meshes);
+	unsigned int _total_vertices = android_model != NULL ? rde_rendering_model_get_vertices_count(android_model) : 0;
+	rde_imgui_text("Total Triangles: %zu", _total_vertices);
 	rde_imgui_drag_int("Meshes", &android_max_meshes_to_render, 1, 0, android_model_data.amount_of_meshes, 0);
 	rde_imgui_checkbox("Wireframe", &android_draw_wireframe);
 	rde_imgui_checkbox("Skybox", &android_show_skybox);

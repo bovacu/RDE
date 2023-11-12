@@ -397,6 +397,8 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 
 	rde_imgui_begin("Rendering Options", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
 	rde_imgui_text("Total Meshes: %zu", model_viewer_model_data.amount_of_meshes);
+	unsigned int _total_vertices = model_viewer_model != NULL ? rde_rendering_model_get_vertices_count(model_viewer_model) : 0;
+	rde_imgui_text("Total Triangles: %zu", _total_vertices);
 	rde_imgui_drag_int("Meshes", &model_viewer_max_meshes_to_render, 1, 0, model_viewer_model_data.amount_of_meshes, 0);
 	rde_imgui_checkbox("Wireframe", &model_viewer_draw_wireframe);
 	rde_imgui_checkbox("Skybox", &model_viewer_show_skybox);

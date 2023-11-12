@@ -1081,6 +1081,7 @@ RDE_FUNC rde_event_mobile_pinch rde_struct_create_event_mobile_pinch();
 
 typedef struct {
 	rde_vec_2I init_touch_position;
+	rde_vec_2I moved_touch_position;
 	rde_vec_2I end_touch_position;
 	float pressure;
 	uint finger_id;
@@ -1496,7 +1497,7 @@ RDE_FUNC void rde_engine_destroy_engine();
 
 /// ============================ WINDOW =====================================
 
-RDE_FUNC rde_window* rde_window_create_window();
+RDE_FUNC rde_window* rde_window_create_window_os();
 
 RDE_FUNC rde_vec_2I	rde_window_get_window_size(rde_window* _window);
 RDE_FUNC void rde_window_set_window_size(rde_window* _window, rde_vec_2I _size);

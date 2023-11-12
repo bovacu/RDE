@@ -540,6 +540,8 @@ rde_event_mobile rde_struct_create_event_mobile() {
 	rde_event_mobile _e;
 	_e.init_touch_position.x = -1;
 	_e.init_touch_position.y = -1;
+	_e.moved_touch_position.y = -1;
+	_e.moved_touch_position.y = -1;
 	_e.end_touch_position.x = -1;
 	_e.end_touch_position.y = -1;
 	_e.pressure = -1.f;

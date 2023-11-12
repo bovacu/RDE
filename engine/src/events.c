@@ -322,8 +322,9 @@ void rde_inner_event_sdl_to_rde_helper_transform_drop_event(SDL_Event* _sdl_even
 void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
 	switch(_sdl_event->type) {
 		case SDL_FINGERDOWN: {
+			rde_vec_2I _window_size = rde_window_get_window_size(rde_engine_get_focused_window());
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN;
-			_rde_event->data.mobile_event_data.init_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x, _sdl_event->tfinger.y };
+			_rde_event->data.mobile_event_data.init_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x - _window_size.x * 0.5f, _sdl_event->tfinger.y - _window_size.y * 0.5f};
 			_rde_event->data.mobile_event_data.pressure = _sdl_event->tfinger.pressure;
 			_rde_event->data.mobile_event_data.finger_id = _sdl_event->tfinger.fingerId;
 			_rde_event->time_stamp = _sdl_event->tfinger.timestamp;
@@ -331,8 +332,9 @@ void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_ev
 		} break;
 
 		case SDL_FINGERUP:{
+			rde_vec_2I _window_size = rde_window_get_window_size(rde_engine_get_focused_window());
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TOUCH_UP;
-			_rde_event->data.mobile_event_data.end_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x, _sdl_event->tfinger.y };
+			_rde_event->data.mobile_event_data.end_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x - _window_size.x * 0.5f, _sdl_event->tfinger.y - _window_size.y * 0.5f};
 			_rde_event->data.mobile_event_data.pressure = _sdl_event->tfinger.pressure;
 			_rde_event->data.mobile_event_data.finger_id = _sdl_event->tfinger.fingerId;
 			_rde_event->time_stamp = _sdl_event->tfinger.timestamp;
@@ -340,9 +342,11 @@ void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_ev
 		} break;
 
 		case SDL_FINGERMOTION: {
+			rde_vec_2I _window_size = rde_window_get_window_size(rde_engine_get_focused_window());
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED;
 			_rde_event->time_stamp = _sdl_event->tfinger.timestamp;
 			_rde_event->window_id = _sdl_event->tfinger.windowID;
+			_rde_event->data.mobile_event_data.moved_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x - _window_size.x * 0.5f, _sdl_event->tfinger.y - _window_size.y * 0.5f };
 		} break;
 
 		case SDL_DOLLARGESTURE:{
@@ -503,6 +507,7 @@ void rde_events_mobile_consume_events(rde_event* _event, rde_window* _window) {
 #if IS_MOBILE()
 int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Event* _event) {
 	static bool _terminated = false;
+	rde_window* _window = rde_engine_get_focused_window();
 
 	switch(_event->type) {
 		case SDL_APP_TERMINATING: {
