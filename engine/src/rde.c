@@ -153,6 +153,7 @@
 
 #define RDE_AMOUNT_OF_KEYS 256
 #define RDE_AMOUNT_OF_MOUSE_BUTTONS 16
+#define RDE_AMOUNT_OF_MOBILE_FINGERS 10
 
 #define RDE_MAX_PATH 2048
 
@@ -201,6 +202,7 @@ struct rde_window {
 	SDL_GLContext sdl_gl_context;
 	RDE_INPUT_STATUS_ key_states[RDE_AMOUNT_OF_KEYS];
 	RDE_INPUT_STATUS_ mouse_states[RDE_AMOUNT_OF_MOUSE_BUTTONS];
+	RDE_INPUT_STATUS_ mobile_states[RDE_AMOUNT_OF_MOBILE_FINGERS];
 	rde_vec_2I mouse_position;
 	rde_vec_2F mouse_scroll;
 };
@@ -525,6 +527,14 @@ rde_event_controller rde_struct_create_event_controller() {
 	return _e;
 }
 
+rde_event_mobile_pinch rde_struct_create_event_mobile_pinch() {
+	rde_event_mobile_pinch _m;
+	_m.rotation_of_fingers = 0.f;
+	_m.distance_moved_between_fingers = 0.f;
+	_m.num_fingers_used = 0;
+	return _m;
+}
+
 rde_event_mobile rde_struct_create_event_mobile() {
 	rde_event_mobile _e;
 	_e.init_touch_position.x = -1;
@@ -533,6 +543,7 @@ rde_event_mobile rde_struct_create_event_mobile() {
 	_e.end_touch_position.y = -1;
 	_e.pressure = -1.f;
 	_e.finger_id = -1;
+	_e.pinch = rde_struct_create_event_mobile_pinch();
 	return _e;
 }
 
@@ -612,6 +623,7 @@ rde_window rde_struct_create_window() {
 	_w.mouse_scroll = (rde_vec_2F) { 0.0f, 0.0f };
 	memset(_w.key_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_KEYS);
 	memset(_w.mouse_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOUSE_BUTTONS);
+	memset(_w.mobile_states, RDE_INPUT_STATUS_UNINITIALIZED, RDE_AMOUNT_OF_MOBILE_FINGERS);
 	return _w;
 }
 

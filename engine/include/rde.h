@@ -1073,10 +1073,18 @@ typedef struct {
 RDE_FUNC rde_event_controller rde_struct_create_event_controller();
 
 typedef struct {
+	float rotation_of_fingers;
+	float distance_moved_between_fingers;
+	uint num_fingers_used;
+} rde_event_mobile_pinch;
+RDE_FUNC rde_event_mobile_pinch rde_struct_create_event_mobile_pinch();
+
+typedef struct {
 	rde_vec_2I init_touch_position;
 	rde_vec_2I end_touch_position;
 	float pressure;
-	int finger_id;
+	uint finger_id;
+	rde_event_mobile_pinch pinch;
 } rde_event_mobile;
 RDE_FUNC rde_event_mobile rde_struct_create_event_mobile();
 
@@ -1534,6 +1542,12 @@ RDE_FUNC bool rde_events_is_mouse_button_pressed(rde_window* _window, RDE_MOUSE_
 RDE_FUNC bool rde_events_is_mouse_button_just_released(rde_window* _window, RDE_MOUSE_BUTTON_ _button);
 RDE_FUNC rde_vec_2F rde_events_mouse_get_scrolled(rde_window* _window);
 RDE_FUNC rde_vec_2I rde_events_mouse_get_position(rde_window* _window);
+
+RDE_FUNC bool rde_events_is_mobile_touch_just_pressed(rde_window* _window, uint _finger_id);
+RDE_FUNC bool rde_events_is_mobile_touch_pressed(rde_window* _window, uint _finger_id);
+RDE_FUNC bool rde_events_is_mobile_touch_released(rde_window* _window, uint _finger_id);
+RDE_FUNC uint rde_events_mobile_get_finger_amount(rde_window* _window);
+RDE_FUNC 
 
 /// ============================ RENDERING ==================================
 

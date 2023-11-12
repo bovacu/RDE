@@ -17,6 +17,7 @@
 #define RDE_ERROR_MESSAGE_BOX "Only 'RDE_LOG_LEVEL_INFO', 'RDE_LOG_LEVEL_WARNING', 'RDE_LOG_LEVEL_ERROR' work on rde_engine_show_message_box. Defaulting to 'RDE_LOG_LEVEL_INFO'"
 #define RDE_ERROR_FEATURE_NOT_SUPPORTED_YET "Feature '%s' is not supported or implemented yet."
 #define RDE_ERROR_EVENT_NOT_HANDLED "%s Event: %i, not handled."
+#define RDE_WARNING_MOBILE_FINGER_INPUT "Maximum number of fingers '%d' reached on mobile, ignoring this one \n."
 
 #ifdef RDE_AUDIO_MODULE
 #define RDE_ERROR_MA_CONTEXT "Failed to initialize context.\n"

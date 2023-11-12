@@ -79,7 +79,7 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(key_released, {
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_pressed, {
 	if(_window->mouse_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_UNINITIALIZED || _window->mouse_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_JUST_RELEASED) {
 		_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_JUST_PRESSED;
-	} else if(_window->key_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_JUST_PRESSED) {
+	} else if(_window->mouse_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_JUST_PRESSED) {
 		_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_KEEP_PRESSED;
 	}
 })
@@ -93,8 +93,16 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_scrolled, {
 	_window->mouse_scroll = _event->data.mouse_event_data.scrolled;
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(drop_file, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_down, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_up, {})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_down, {
+	if(_window->mobile_states[_event->data.mobile_event_data.finger_id] == RDE_INPUT_STATUS_UNINITIALIZED || _window->mobile_states[_event->data.mobile_event_data.finger_id] == RDE_INPUT_STATUS_JUST_RELEASED) {
+		_window->mobile_states[_event->data.mobile_event_data.finger_id] = RDE_INPUT_STATUS_JUST_PRESSED;
+	} else if(_window->key_states[_event->data.mobile_event_data.finger_id] == RDE_INPUT_STATUS_JUST_PRESSED) {
+		_window->mouse_states[_event->data.mobile_event_data.finger_id] = RDE_INPUT_STATUS_KEEP_PRESSED;
+	}
+})
+COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_up, {
+	_window->mobile_states[_event->data.mobile_event_data.finger_id] = RDE_INPUT_STATUS_JUST_RELEASED;
+})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_moved, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_multi_touch, {})
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_terminating, {})
@@ -325,6 +333,10 @@ void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_ev
 		case SDL_MULTIGESTURE: {
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH;
 			_rde_event->time_stamp = _sdl_event->mgesture.timestamp;
+			_rde_event->data.mobile_event_data.init_touch_position = (rde_vec_2I) { _sdl_event->mgesture.x, _sdl_event->mgesture.y };
+			_rde_event->data.mobile_event_data.pinch.rotation_of_fingers = rde_math_radians_to_degrees(_sdl_event->mgesture.dTheta);
+			_rde_event->data.mobile_event_data.pinch.distance_moved_between_fingers = _sdl_event->mgesture.dDist;
+			_rde_event->data.mobile_event_data.pinch.num_fingers_used = _sdl_event->mgesture.numFingers;
 		} break;
 
 		case SDL_APP_TERMINATING: {
@@ -382,7 +394,7 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 		case SDL_FINGERMOTION: 
 		case SDL_DOLLARGESTURE:
 		case SDL_DOLLARRECORD:
-		case SDL_MULTIGESTURE: 
+		case SDL_MULTIGESTURE:
 		case SDL_APP_TERMINATING:
 		case SDL_APP_LOWMEMORY:
 		case SDL_APP_WILLENTERBACKGROUND:
@@ -558,6 +570,44 @@ rde_vec_2F rde_events_mouse_get_scrolled(rde_window* _window) {
 	return _scrolled;
 }
 
+bool rde_events_is_mobile_touch_just_pressed(rde_window* _window, uint _finger_id) {
+	if(_finger_id >= RDE_AMOUNT_OF_MOBILE_FINGERS) {
+		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_WARNING_MOBILE_FINGER_INPUT, RDE_AMOUNT_OF_MOBILE_FINGERS);
+		return false;
+	}
+	return _window->mobile_states[_finger_id] == RDE_INPUT_STATUS_JUST_PRESSED;
+}
+
+bool rde_events_is_mobile_touch_pressed(rde_window* _window, uint _finger_id) {
+	if(_finger_id >= RDE_AMOUNT_OF_MOBILE_FINGERS) {
+		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_WARNING_MOBILE_FINGER_INPUT, RDE_AMOUNT_OF_MOBILE_FINGERS);
+		return false;
+	}
+	return _window->mobile_states[_finger_id] == RDE_INPUT_STATUS_KEEP_PRESSED || _window->mobile_states[_finger_id] == RDE_INPUT_STATUS_JUST_PRESSED;
+}
+
+bool rde_events_is_mobile_touch_released(rde_window* _window, uint _finger_id) {
+	if(_finger_id >= RDE_AMOUNT_OF_MOBILE_FINGERS) {
+		rde_log_level(RDE_LOG_LEVEL_WARNING, RDE_WARNING_MOBILE_FINGER_INPUT, RDE_AMOUNT_OF_MOBILE_FINGERS);
+		return false;
+	}
+	return _window->mobile_states[_finger_id] == RDE_INPUT_STATUS_JUST_RELEASED;
+}
+
+uint rde_events_mobile_get_finger_amount(rde_window* _window) {
+	uint _fingers_in_use = 0;
+	
+	for (int _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+		if (rde_events_is_mobile_touch_pressed(_window, _i)) {
+			_fingers_in_use++;
+		}
+	}
+
+	return _fingers_in_use;
+}
+
+
+
 void rde_events_sync_events(rde_window* _window) {
 	for(int _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
 		if(_window->mouse_states[_i] == RDE_INPUT_STATUS_JUST_PRESSED) {
@@ -576,6 +626,16 @@ void rde_events_sync_events(rde_window* _window) {
 
 		if(_window->key_states[_i] == RDE_INPUT_STATUS_JUST_RELEASED) {
 			_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
+		}
+	}
+
+	for(int _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+		if(_window->mobile_states[_i] == RDE_INPUT_STATUS_JUST_PRESSED) {
+			_window->mobile_states[_i] = RDE_INPUT_STATUS_KEEP_PRESSED;
+		}
+
+		if(_window->mobile_states[_i] == RDE_INPUT_STATUS_JUST_RELEASED) {
+			_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 		}
 	}
 }
