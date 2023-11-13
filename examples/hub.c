@@ -118,7 +118,17 @@ void on_imgui_hub_menu(float _dt) {
  	rde_imgui_dockspace(_dockspace_id, (rde_ImVec2) {0, 0}, _dockspace_flags);
 
 	if(rde_imgui_begin("Hub", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize)) {
-		rde_imgui_text("Welcome to the Hub! FPS %d", (int)(1.f / _dt));
+
+		static int _fps = 0;
+		static float _second = 0;
+
+		_second += _dt;
+		if(_second >= 1.0f) {
+			_fps = (int)(1.f / _dt);
+			_second = 0;
+		}
+
+		rde_imgui_text("Welcome to the Hub! FPS %d", _fps);
 		rde_imgui_text("Choose any demo from the list");
 		static int _option = -1;
 		rde_imgui_new_line();

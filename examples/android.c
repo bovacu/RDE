@@ -128,7 +128,6 @@ void android_on_event(rde_event* _event, rde_window* _window) {
 
 	if(_event->type == RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED || _event->type == RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN) {
 		android_mouse_pos = _event->data.mobile_event_data.moved_touch_position;
-		rde_log_level(RDE_LOG_LEVEL_INFO, "(%d, %d)", android_mouse_pos.x, android_mouse_pos.y);
 	}
 }
 

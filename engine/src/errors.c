@@ -397,11 +397,12 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 #if IS_ANDROID()
 	va_list _args;
 	va_start(_args, _fmt);
-	char _error[1024];
-	memset(_error, 0, 1024);
+	char* _error = (char*)malloc(sizeof(char) * 10000);
+	memset(_error, 0, 10000);
 	vsprintf(_error, _fmt, _args);
 	va_end(_args);
 	__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", "%s", _error);
+	free(_error);
 #else
 	FILE* _f = NULL;
 	

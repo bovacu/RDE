@@ -66,6 +66,7 @@ rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
 	rde_vec_2F _aspect_ratios;
 	_aspect_ratios.x = _is_horizontal ? 1.f : _aspect_ratio;
 	_aspect_ratios.y = _is_horizontal ? _aspect_ratio : 1.f;
+
 	return _aspect_ratios;
 }
 
@@ -230,7 +231,12 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	_shader_fragment_handle = rde_file_open("shaders/es/mesh_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
-	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, _vertex_shader, _fragment_shader);
+
+	char* _fragment_with_values = (char*)malloc(sizeof(char) * 10000);
+	memset(_fragment_with_values, 0, 10000);
+	snprintf(_fragment_with_values, 10000, _fragment_shader, 0, 0, 1, 0);
+
+	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, _vertex_shader, _fragment_with_values);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
@@ -241,6 +247,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	ENGINE.skybox_shader = rde_rendering_shader_load(RDE_SHADER_SKYBOX, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
+
+	free(_fragment_with_values);
 #endif
 	
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
@@ -260,7 +268,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	DEFAULT_RENDER_TEXTURE->vbo = _vbo;
 	
 #if IS_MOBILE()
-	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_X4);
+	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_NONE);
 #else
 	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_X4);
 #endif
