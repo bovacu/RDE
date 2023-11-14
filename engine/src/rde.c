@@ -350,6 +350,12 @@ struct rde_render_texture {
 };
 
 typedef struct {
+	rde_directional_light directional_light;
+	rde_point_light** point_lights;
+	rde_spot_light** spot_lights;
+} rde_illumination;
+
+typedef struct {
 	uint frame_buffer_id;
 	uint render_buffer_id;
 	int opengl_texture_id; 
@@ -419,12 +425,7 @@ struct rde_engine {
 	rde_mesh* meshes;
 	rde_model* models;
 	
-	rde_directional_light directional_light;
-	rde_point_light* point_lights[RDE_MAX_POINT_LIGHTS];
-	size_t amount_of_point_lights;
-	rde_spot_light* spot_lights[RDE_MAX_SPOT_LIGHTS];
-	size_t amount_of_spot_lights;
-	
+	rde_illumination illumination;
 	rde_skybox skybox;
 	rde_antialiasing antialiasing;
 	rde_shadows shadows;
@@ -918,15 +919,25 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.mandatory_callbacks = rde_struct_create_end_user_mandatory_callbacks();
 
 #ifdef RDE_RENDERING_MODULE
-	_e.directional_light = rde_struct_create_directional_light();
-	for(size_t _i = 0; _i < RDE_MAX_POINT_LIGHTS; _i++) {
-		_e.point_lights[_i] = NULL;
+	_e.illumination.directional_light = rde_struct_create_directional_light();
+	
+	if(_e.init_info.illumination_config.amount_of_point_lights > 0) {
+		_e.illumination.point_lights = (rde_point_light**)malloc(sizeof(rde_point_light*) * _e.init_info.illumination_config.amount_of_point_lights);
+		for(size_t _i = 0; _i < _e.init_info.illumination_config.amount_of_point_lights; _i++) {
+			_e.illumination.point_lights[_i] = NULL;
+		}
+	} else {
+		_e.illumination.point_lights = NULL;
 	}
-	_e.amount_of_point_lights = 0;
-	for(size_t _i = 0; _i < RDE_MAX_SPOT_LIGHTS; _i++) {
-		_e.spot_lights[_i] = NULL;
+
+	if(_e.init_info.illumination_config.amount_of_spot_lights > 0) {
+		_e.illumination.spot_lights = (rde_spot_light**)malloc(sizeof(rde_spot_light*) * _e.init_info.illumination_config.amount_of_spot_lights);
+		for(size_t _i = 0; _i < _e.init_info.illumination_config.amount_of_spot_lights; _i++) {
+			_e.illumination.spot_lights[_i] = NULL;
+		}
+	} else {
+		_e.illumination.spot_lights = NULL;
 	}
-	_e.amount_of_spot_lights = 0;
 
 	_e.line_shader = NULL;
 	_e.color_shader_2d = NULL;
@@ -1442,6 +1453,14 @@ void rde_engine_destroy_engine() {
 		rde_rendering_shader_unload(&ENGINE.shaders[_i]);
 	}
 	free(ENGINE.shaders);
+
+	if(ENGINE.illumination.point_lights != NULL) {
+		free(ENGINE.illumination.point_lights);
+	}
+
+	if(ENGINE.illumination.spot_lights != NULL) {
+		free(ENGINE.illumination.spot_lights);
+	}
 #endif
 
 #ifdef RDE_AUDIO_MODULE
