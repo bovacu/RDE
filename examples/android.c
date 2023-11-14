@@ -13,8 +13,8 @@ rde_vec_3F android_camera_front = { -0.31f, -0.24f, -0.91f };
 rde_vec_3F android_camera_up = { 0.0, 1.0f, 0.0f };
 
 rde_vec_3F android_directional_light_direction = { -0.2f, -1.0f, -0.3f };
-rde_vec_3F android_directional_light_ambient_color = { 0.2f, 0.2f, 0.2f };
-rde_vec_3F android_directional_light_diffuse_color = { 0.5f, 0.5f, 0.5f };
+rde_vec_3F android_directional_light_ambient_color = { 0.5f, 0.5f, 0.5f };
+rde_vec_3F android_directional_light_diffuse_color = { 1.0f, 1.0f, 1.0f };
 rde_vec_3F android_directional_light_specular_color = { 1.0f, 1.0f, 1.0f };
 
 rde_model_data android_model_data;

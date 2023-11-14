@@ -225,11 +225,11 @@ typedef unsigned int uint;
 /// ==================== GENERIC FUNCS AND STRUCTS ==========================
 
 #if IS_WINDOWS()
-#define RDE_MAIN(_window, _heap_allocs_config, _mandatory_callbacks, _init_func, _end_func)	\
+#define RDE_MAIN(_window, _engine_init_info, _mandatory_callbacks, _init_func, _end_func)	\
 	int main(int _argc, char** _argv) {														\
 		RDE_SHOW_WINDOWS_CONSOLE															\
 																							\
-		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);				\
+		_window = rde_engine_create_engine(_argc, _argv, _engine_init_info);				\
 		rde_setup_initial_info(_mandatory_callbacks);										\
 																							\
 		_init_func(_argc, _argv);															\
@@ -247,9 +247,9 @@ typedef unsigned int uint;
 #include <android/input.h>
 #include <android/keycodes.h>
 #include <android/log.h>
-#define RDE_MAIN(_window, _heap_allocs_config, _mandatory_callbacks, _init_func, _end_func)	\
+#define RDE_MAIN(_window, _engine_init_info, _mandatory_callbacks, _init_func, _end_func)	\
 	int main(int _argc, char* _argv[]) {													\
-		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);				\
+		_window = rde_engine_create_engine(_argc, _argv, _engine_init_info);				\
 		rde_setup_initial_info(_mandatory_callbacks);										\
 																							\
 		_init_func(_argc, _argv);															\
@@ -261,9 +261,9 @@ typedef unsigned int uint;
 		return 0;																			\
 	}
 #else
-#define RDE_MAIN(_window, _heap_allocs_config, _mandatory_callbacks, _init_func, _end_func)	\
+#define RDE_MAIN(_window, _engine_init_info, _mandatory_callbacks, _init_func, _end_func)	\
 	int main(int _argc, char** _argv) {														\
-		_window = rde_engine_create_engine(_argc, _argv, _heap_allocs_config);				\
+		_window = rde_engine_create_engine(_argc, _argv, _engine_init_info);				\
 		rde_setup_initial_info(_mandatory_callbacks);										\
 																							\
 		_init_func(_argc, _argv);															\
@@ -1029,6 +1029,15 @@ typedef struct {
 
 } rde_engine_heap_allocs_config;
 
+typedef struct {
+	uint amount_of_point_lights;
+	uint amount_of_spot_lights;
+} rde_illumination_config;
+
+typedef struct {
+	rde_engine_heap_allocs_config heap_allocs_config;
+	rde_illumination_config illumination_config;
+} rde_engine_init_info;
 /// ============================== EVENTS ===================================
 
 typedef struct {
@@ -1329,21 +1338,31 @@ const rde_color RDE_COLOR_GOLD				= { 255, 213,  81, 255 };
 const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
 const rde_color RDE_COLOR_NO_TEXTURE		= { 193,  84, 193, 255 };
 
-const rde_engine_heap_allocs_config RDE_DEFAULT_HEAP_ALLOCS_CONFIG = {
-	RDE_MAX_NUMBER_OF_WINDOWS,
-	RDE_MAX_VERTICES_PER_BATCH,
-	RDE_MAX_LOADABLE_SHADERS,
+const rde_engine_init_info RDE_DEFAULT_INIT_INFO = {
+	.heap_allocs_config = (rde_engine_heap_allocs_config) {
+		RDE_MAX_NUMBER_OF_WINDOWS,
+		RDE_MAX_VERTICES_PER_BATCH,
+		RDE_MAX_LOADABLE_SHADERS,
+
+	#ifdef RDE_RENDERING_MODULE
+		RDE_MAX_LOADABLE_TEXTURES,
+		RDE_MAX_LOADABLE_ATLASES,
+		RDE_MAX_LOADABLE_FONTS,
+		RDE_MAX_LOADABLE_MODELS,
+		RDE_MAX_LOADABLE_MODELS_TEXTURES,
+	#endif
+
+	#ifdef RDE_AUDIO_MODULE
+		RDE_MAX_LOADABLE_SOUNDS
+	#endif
+	}
 
 #ifdef RDE_RENDERING_MODULE
-	RDE_MAX_LOADABLE_TEXTURES,
-	RDE_MAX_LOADABLE_ATLASES,
-	RDE_MAX_LOADABLE_FONTS,
-	RDE_MAX_LOADABLE_MODELS,
-	RDE_MAX_LOADABLE_MODELS_TEXTURES,
-#endif
-
-#ifdef RDE_AUDIO_MODULE
-	RDE_MAX_LOADABLE_SOUNDS
+	,
+	.illumination_config = {
+		0,
+		0
+	}
 #endif
 };
 
@@ -1460,7 +1479,7 @@ RDE_DECLARE_EASING_FUNCS(in_out, circular)
 /// ============================ ENGINE =====================================
 
 
-RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_allocs_config _heap_allocs_config);
+RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_init_info _engine_init_info);
 RDE_FUNC void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks); /// Sets up some basic info the engine needs, call this BEFORE rde_engine_create_engine
 
 RDE_FUNC void rde_engine_set_event_user_callback(rde_event_func _user_event_callback);

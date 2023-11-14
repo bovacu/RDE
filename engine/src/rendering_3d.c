@@ -412,10 +412,10 @@ void rde_inner_rendering_flush_batch_3d() {
 	rde_vec_3F _camera_pos = current_drawing_camera->transform.position;
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "camera_pos"), _camera_pos.x, _camera_pos.y, _camera_pos.z);
 	
-	rde_vec_3F _dl_direction = ENGINE.directional_light.direction;
-	rde_vec_3F _dl_ambient = ENGINE.directional_light.ambient_color;
-	rde_vec_3F _dl_diffuse = ENGINE.directional_light.diffuse_color;
-	rde_vec_3F _dl_specular = ENGINE.directional_light.specular_color;
+	rde_vec_3F _dl_direction = ENGINE.illumination.directional_light.direction;
+	rde_vec_3F _dl_ambient = ENGINE.illumination.directional_light.ambient_color;
+	rde_vec_3F _dl_diffuse = ENGINE.illumination.directional_light.diffuse_color;
+	rde_vec_3F _dl_specular = ENGINE.illumination.directional_light.specular_color;
 
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "directional_light.direction"), _dl_direction.x, _dl_direction.y, _dl_direction.z);
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "directional_light.ambient_color"), _dl_ambient.x, _dl_ambient.y, _dl_ambient.z);
@@ -428,8 +428,8 @@ void rde_inner_rendering_flush_batch_3d() {
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "material.Kd"), _material.kd.x, _material.kd.y, _material.kd.z);
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "material.Ks"), _material.ks.x, _material.ks.y, _material.ks.z);
 
-	for(size_t _i = 0; _i < RDE_MAX_POINT_LIGHTS; _i++) {
-		rde_point_light* _p = ENGINE.point_lights[_i];
+	for(size_t _i = 0; _i < ENGINE.init_info.illumination_config.amount_of_point_lights; _i++) {
+		rde_point_light* _p = ENGINE.illumination.point_lights[_i];
 		char _point_light_var[256];
 		memset(_point_light_var, 0, 256);
 
@@ -464,13 +464,13 @@ void rde_inner_rendering_flush_batch_3d() {
 		}
 
 		rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].used", _i);
-		RDE_CHECK_GL(glUniform1i, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _i < ENGINE.amount_of_point_lights ? 1 : -1);
+		RDE_CHECK_GL(glUniform1i, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _i < ENGINE.init_info.illumination_config.amount_of_point_lights && _p != NULL ? 1 : -1);
 
 		memset(_point_light_var, 0, 256);
 	}
 
-	for(size_t _i = 0; _i < RDE_MAX_SPOT_LIGHTS; _i++) {
-		rde_spot_light* _s = ENGINE.spot_lights[_i];
+	for(size_t _i = 0; _i < ENGINE.init_info.illumination_config.amount_of_spot_lights; _i++) {
+		rde_spot_light* _s = ENGINE.illumination.spot_lights[_i];
 		char _spot_light_var[256];
 		memset(_spot_light_var, 0, 256);
 
@@ -518,7 +518,7 @@ void rde_inner_rendering_flush_batch_3d() {
 		}
 
 		rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].used", _i);
-		RDE_CHECK_GL(glUniform1i, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _i < ENGINE.amount_of_spot_lights ? 1 : -1);
+		RDE_CHECK_GL(glUniform1i, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _i < ENGINE.init_info.illumination_config.amount_of_spot_lights && _s != NULL ? 1 : -1);
 
 		memset(_spot_light_var, 0, 256);
 	}
@@ -715,7 +715,7 @@ rde_mesh* rde_rendering_mesh_create_sphere(float _radius, rde_material* _materia
 rde_model* rde_rendering_model_load(const char* _model_path) {
 	const char* _extension = rde_util_file_get_name_extension(_model_path);
 
-	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_models; _i++) {
+	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_models; _i++) {
 		if (strlen(ENGINE.models[_i].file_path) != 0 && strcmp(ENGINE.models[_i].file_path, _model_path) == 0) {
 			return &ENGINE.models[_i];
 		}
@@ -889,55 +889,71 @@ void rde_rendering_3d_end_drawing() {
 }
 
 void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction) {
-	ENGINE.directional_light.direction = _direction;
+	ENGINE.illumination.directional_light.direction = _direction;
 }
 
 void rde_rendering_lighting_set_directional_light_ambient_color(rde_color _ambient_color) {
-	ENGINE.directional_light.ambient_color = (rde_vec_3F) { _ambient_color.r / 255.f,
+	ENGINE.illumination.directional_light.ambient_color = (rde_vec_3F) { _ambient_color.r / 255.f,
 															_ambient_color.g / 255.f,
 															_ambient_color.a / 255.f
 	};
 }
 
 void rde_rendering_lighting_set_directional_light_ambient_color_f(rde_vec_3F _ambient_color) {
-	ENGINE.directional_light.ambient_color = _ambient_color;
+	ENGINE.illumination.directional_light.ambient_color = _ambient_color;
 }
 
 void rde_rendering_lighting_set_directional_light_diffuse_color(rde_color _diffuse_color) {
-	ENGINE.directional_light.diffuse_color = (rde_vec_3F) { _diffuse_color.r / 255.f,
+	ENGINE.illumination.directional_light.diffuse_color = (rde_vec_3F) { _diffuse_color.r / 255.f,
 															_diffuse_color.g / 255.f,
 															_diffuse_color.a / 255.f
 	};
 }
 
 void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_vec_3F _diffuse_color) {
-	ENGINE.directional_light.diffuse_color = _diffuse_color;
+	ENGINE.illumination.directional_light.diffuse_color = _diffuse_color;
 }
 
 
 void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color) {
-	ENGINE.directional_light.specular_color = (rde_vec_3F) { _specular_color.r / 255.f,
+	ENGINE.illumination.directional_light.specular_color = (rde_vec_3F) { _specular_color.r / 255.f,
 															 _specular_color.g / 255.f,
 															 _specular_color.a / 255.f
 	};
 }
 
 void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color) {
-	ENGINE.directional_light.specular_color = _specular_color;
+	ENGINE.illumination.directional_light.specular_color = _specular_color;
 }
 
 rde_directional_light rde_rendering_lighting_get_directional_light() {
-	return ENGINE.directional_light;
+	return ENGINE.illumination.directional_light;
 }
 
 void rde_rendering_light_add_add_point_light(rde_point_light* _point_light) {
-	rde_critical_error(ENGINE.amount_of_point_lights >= RDE_MAX_POINT_LIGHTS, "Max point light amount reached");
-	ENGINE.point_lights[ENGINE.amount_of_point_lights++] = _point_light;
+	bool _found = false;
+	for(size_t _i = 0; _i < ENGINE.init_info.illumination_config.amount_of_point_lights; _i++) {
+		if(ENGINE.illumination.point_lights[_i] == NULL) {
+			ENGINE.illumination.point_lights[_i] = _point_light;
+			_found = true;
+			break;
+		}
+	}
+
+	rde_critical_error(!_found, "Max point light amount '%d' reached", ENGINE.init_info.illumination_config.amount_of_point_lights);
 }
 
 void rde_rendering_light_add_add_spot_light(rde_spot_light* _spot_light) {
-	rde_critical_error(ENGINE.amount_of_spot_lights >= RDE_MAX_SPOT_LIGHTS, "Max spot light amount reached");
-	ENGINE.spot_lights[ENGINE.amount_of_spot_lights++] = _spot_light;
+	bool _found = false;
+	for(size_t _i = 0; _i < ENGINE.init_info.illumination_config.amount_of_spot_lights; _i++) {
+		if(ENGINE.illumination.spot_lights[_i] == NULL) {
+			ENGINE.illumination.spot_lights[_i] = _spot_light;
+			_found = true;
+			break;
+		}
+	}
+
+	rde_critical_error(!_found, "Max spot light amount '%d' reached", ENGINE.init_info.illumination_config.amount_of_spot_lights);
 }
 
 rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh) {

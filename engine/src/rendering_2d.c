@@ -15,8 +15,8 @@ void rde_inner_rendering_init_2d() {
 	current_batch_2d = rde_struct_create_2d_batch();
 	rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(&current_batch_2d);
 
-	current_batch_2d.vertices = (rde_vertex_2d*)malloc(sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch);
-	rde_critical_error(current_batch_2d.vertices == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch, "2d batch vertices");
+	current_batch_2d.vertices = (rde_vertex_2d*)malloc(sizeof(rde_vertex_2d) * ENGINE.init_info.heap_allocs_config.max_number_of_vertices_per_batch);
+	rde_critical_error(current_batch_2d.vertices == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_vertex_2d) * ENGINE.init_info.heap_allocs_config.max_number_of_vertices_per_batch, "2d batch vertices");
 }
 
 void rde_inner_rendering_end_2d() {
@@ -64,7 +64,7 @@ void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _ba
 	
 	RDE_CHECK_GL(glGenBuffers, 1, &_batch->vertex_buffer_object);
 	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _batch->vertex_buffer_object);
-	RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, sizeof(rde_vertex_2d) * ENGINE.heap_allocs_config.max_number_of_vertices_per_batch, NULL, GL_DYNAMIC_DRAW);
+	RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, sizeof(rde_vertex_2d) * ENGINE.init_info.heap_allocs_config.max_number_of_vertices_per_batch, NULL, GL_DYNAMIC_DRAW);
 
 	RDE_CHECK_GL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)0);
 	RDE_CHECK_GL(glEnableVertexAttribArray, 0);
@@ -82,7 +82,7 @@ void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _ba
 void rde_inner_rendering_reset_batch_2d() {
 	current_batch_2d.shader = NULL;
 	current_batch_2d.texture = rde_struct_create_texture();
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_vertices_per_batch; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_vertices_per_batch; _i++) {
 		current_batch_2d.vertices[_i] = rde_struct_create_vertex_2d();
 	}
 	current_batch_2d.amount_of_vertices = 0;
@@ -128,7 +128,7 @@ void rde_inner_rendering_flush_batch_2d() {
 }
 
 void rde_inner_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _texture, size_t _extra_vertices) {
-	bool _vertex_ok = current_batch_2d.amount_of_vertices + _extra_vertices <= ENGINE.heap_allocs_config.max_number_of_vertices_per_batch;
+	bool _vertex_ok = current_batch_2d.amount_of_vertices + _extra_vertices <= ENGINE.init_info.heap_allocs_config.max_number_of_vertices_per_batch;
 	bool _shader_ok = current_batch_2d.shader == _shader;
 	bool _texture_ok = _texture == NULL || current_batch_2d.texture.opengl_texture_id == _texture->opengl_texture_id;
 	if(_vertex_ok && _shader_ok && _texture_ok) {

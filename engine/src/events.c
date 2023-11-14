@@ -74,7 +74,7 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_maximized, {
 })
 COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_closed, { 
 	size_t _existing_non_destroyed_windows = 0;
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_windows; _i++) {
 		if(&ENGINE.windows[_i] != _window && ENGINE.windows[_i].sdl_window != NULL) {
 			_existing_non_destroyed_windows++;
 		}

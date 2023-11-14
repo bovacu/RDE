@@ -41,7 +41,7 @@ void parse_3_vertices_face_fbx(uint _i, uint _v, uint* _mesh_indices,
 
 rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _texture_path) {
 	rde_model* _model = NULL;
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_models; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_models; _i++) {
 		rde_model* _m = &ENGINE.models[_i];
 
 		if(_m->mesh_array != NULL) {

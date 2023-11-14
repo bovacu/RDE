@@ -175,7 +175,13 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	_shader_fragment_handle = rde_file_open("shaders/core/mesh_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
-	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, _vertex_shader, _fragment_shader);
+
+	char* _fragment_with_values = (char*)malloc(sizeof(char) * 10000);
+	memset(_fragment_with_values, 0, 10000);
+	snprintf(_fragment_with_values, 10000, _fragment_shader, ENGINE.init_info.illumination_config.amount_of_point_lights, 
+	         ENGINE.init_info.illumination_config.amount_of_spot_lights);
+
+	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, _vertex_shader, _fragment_with_values);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 	
@@ -234,7 +240,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 	char* _fragment_with_values = (char*)malloc(sizeof(char) * 10000);
 	memset(_fragment_with_values, 0, 10000);
-	snprintf(_fragment_with_values, 10000, _fragment_shader, 0, 0, 1, 0);
+	snprintf(_fragment_with_values, 10000, _fragment_shader, ENGINE.init_info.illumination_config.amount_of_point_lights, 
+	         ENGINE.init_info.illumination_config.amount_of_spot_lights);
 
 	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, _vertex_shader, _fragment_with_values);
 	rde_file_close(_shader_vertex_handle);
@@ -371,7 +378,7 @@ void rde_inner_rendering_draw_scene_shadows(rde_window* _window, rde_camera* _ca
 	mat4 _light_view;
 	mat4 _light_space_matrix;
 	glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, _camera->near_far.x, _camera->near_far.x, _light_projection);
-	glm_lookat((vec3) { ENGINE.directional_light.direction.x, ENGINE.directional_light.direction.x, ENGINE.directional_light.direction.z },
+	glm_lookat((vec3) { ENGINE.illumination.directional_light.direction.x, ENGINE.illumination.directional_light.direction.x, ENGINE.illumination.directional_light.direction.z },
 				(vec3) { 0.0f, 0.0f, 0.0f },
 				(vec3) { 0.0f, 1.0f, 0.0f },
 				_light_view
@@ -436,7 +443,7 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 		return NULL;
 	}
 
-	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_shaders; _i++) {
+	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_shaders; _i++) {
 		if (ENGINE.shaders[_i].compiled_program_id != -1) {
 			continue;
 		}
@@ -451,7 +458,7 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 		return _shader;
 	}
 
-	rde_critical_error(true, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "shaders", ENGINE.heap_allocs_config.max_number_of_shaders);
+	rde_critical_error(true, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "shaders", ENGINE.init_info.heap_allocs_config.max_number_of_shaders);
 	return NULL;
 }
 
@@ -523,7 +530,7 @@ rde_shader_data rde_rendering_shader_get_data(rde_shader* _shader) {
 }
 
 rde_shader* rde_rendering_shader_get_by_name(const char* _name) {
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_shaders; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_shaders; _i++) {
 		rde_shader* _shader = &ENGINE.shaders[_i];
 		if(_shader != NULL && strcmp(_shader->name, _name) == 0) {
 			return _shader;
@@ -896,13 +903,13 @@ rde_atlas* rde_rendering_atlas_load(const char* _texture_path, const char* _conf
 	rde_texture* _texture = rde_rendering_texture_load(_texture_path, NULL);
 	rde_atlas_sub_textures* _atlas_sub_textures = rde_inner_file_system_read_atlas_config(_config_path, _texture);
 
-	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_atlases; _i++) {
+	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_atlases; _i++) {
 		if (ENGINE.atlases[_i].texture != NULL && strcmp(ENGINE.atlases[_i].texture->file_path, _texture_path) == 0) {
 			return &ENGINE.atlases[_i];
 		}
 	}
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_atlases; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_atlases; _i++) {
 		rde_atlas* _atlas = &ENGINE.atlases[_i];
 		if(_atlas->texture != NULL) {
 			continue;
@@ -956,13 +963,13 @@ rde_font* rde_rendering_font_load(const char* _font_path, const char* _font_conf
 	rde_texture* _texture = rde_rendering_texture_text_load(_font_path);
 	rde_font_char_info* _chars = rde_inner_file_system_read_font_config(_font_config_path, _texture);
 
-	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_fonts; _i++) {
+	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_fonts; _i++) {
 		if (ENGINE.fonts[_i].texture != NULL && strcmp(ENGINE.fonts[_i].texture->file_path, _font_path) == 0) {
 			return &ENGINE.fonts[_i];
 		}
 	}
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_fonts; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_fonts; _i++) {
 		rde_font* _font = &ENGINE.fonts[_i];
 		if(_font->texture != NULL) {
 			continue;
@@ -973,7 +980,7 @@ rde_font* rde_rendering_font_load(const char* _font_path, const char* _font_conf
 		return _font;
 	}
 
-	rde_critical_error(_texture == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "fonts", ENGINE.heap_allocs_config.max_number_of_fonts);
+	rde_critical_error(_texture == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "fonts", ENGINE.init_info.heap_allocs_config.max_number_of_fonts);
 	return NULL;
 }
 

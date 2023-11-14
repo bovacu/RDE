@@ -12,7 +12,7 @@ void data_callback(ma_device* _device, void* _output, const void* _input, ma_uin
 	(void)_device;
 	(void)_input;
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_sounds; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_sounds; _i++) {
 		rde_sound* _sound = &ENGINE.sounds[_i];
 		if(_sound->used && _sound->playing) {
 			ma_data_source_read_pcm_frames(&_sound->miniaudio_decoder, _output, _frame_count, NULL);
@@ -57,7 +57,7 @@ void rde_audio_init(rde_sound_config _config) {
 rde_sound* rde_audio_load_sound(const char* _sound_path) {
 	rde_sound* _sound = NULL;
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_sounds; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_sounds; _i++) {
 		rde_sound* _s = &ENGINE.sounds[_i];
 
 		if(!_s->used) {
@@ -67,7 +67,7 @@ rde_sound* rde_audio_load_sound(const char* _sound_path) {
 		}
 	}
 
-	rde_critical_error(_sound == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "sounds", ENGINE.heap_allocs_config.max_number_of_sounds);
+	rde_critical_error(_sound == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "sounds", ENGINE.init_info.heap_allocs_config.max_number_of_sounds);
 	ma_decoder_config _decoder_config = ma_decoder_config_init(DEFAULT_FORMAT, 
 	                                                           ENGINE.device_config.channels, 
 	                                                           ENGINE.device_config.rate);
@@ -122,7 +122,7 @@ bool rde_audio_set_sound_volume(rde_sound* _sound, float _volume) {
 }
 
 void rde_audio_end() {
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_sounds; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_sounds; _i++) {
 		rde_sound* _sound = &ENGINE.sounds[_i];
 
 		if(_sound->used) {

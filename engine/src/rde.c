@@ -443,7 +443,7 @@ struct rde_engine {
 	rde_event_func drag_and_drop_events[RDE_DRAG_AND_DROP_EVENT_COUNT];
 	rde_event_func mobile_events[RDE_MOBILE_EVENT_COUNT];
 	
-	rde_engine_heap_allocs_config heap_allocs_config;
+	rde_engine_init_info init_info;
 	
 #if IS_WINDOWS()
 	HANDLE console_handle;
@@ -886,11 +886,11 @@ rde_sound_config rde_struct_create_audio_config() {
 }
 #endif
 
-rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_config) {
+rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	rde_engine _e;
 
-	_e.heap_allocs_config = _heap_allocs_config;
-	_e.heap_allocs_config.max_number_of_shaders += RDE_DEFAULT_SHADERS_AMOUNT;
+	_e.init_info = _engine_init_info;
+	_e.init_info.heap_allocs_config.max_number_of_shaders += RDE_DEFAULT_SHADERS_AMOUNT;
 
 #if IS_ANDROID()
 	_e.android_env = SDL_AndroidGetJNIEnv();
@@ -900,10 +900,10 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 #ifdef RDE_RENDERING_MODULE
 	_e.total_amount_of_textures = 0;
 
-	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_textures;
-	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_fonts;
-	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_atlases;
-	_e.total_amount_of_textures += _e.heap_allocs_config.max_number_of_models_textures;
+	_e.total_amount_of_textures += _e.init_info.heap_allocs_config.max_number_of_textures;
+	_e.total_amount_of_textures += _e.init_info.heap_allocs_config.max_number_of_fonts;
+	_e.total_amount_of_textures += _e.init_info.heap_allocs_config.max_number_of_atlases;
+	_e.total_amount_of_textures += _e.init_info.heap_allocs_config.max_number_of_models_textures;
 #endif
 
 	_e.user_event_callback = NULL;
@@ -939,19 +939,19 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 	_e.antialiasing = rde_struct_create_antialiasing();
 	_e.shadows = rde_struct_create_shadows();
 
-	_e.heap_allocs_config.max_number_of_shaders += RDE_SHADERS_AMOUNT;
+	_e.init_info.heap_allocs_config.max_number_of_shaders += RDE_SHADERS_AMOUNT;
 
-	rde_critical_error(_e.heap_allocs_config.max_number_of_shaders <= 0, RDE_ERROR_HEAP_ALLOC_BAD_VALUE, "shaders", _e.heap_allocs_config.max_number_of_shaders);
-	_e.shaders = (rde_shader*)malloc(sizeof(rde_shader) * _e.heap_allocs_config.max_number_of_shaders);
-	rde_critical_error(_e.shaders == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_shader) * _e.heap_allocs_config.max_number_of_shaders, "shaders");
-	for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_shaders; _i++) {
+	rde_critical_error(_e.init_info.heap_allocs_config.max_number_of_shaders <= 0, RDE_ERROR_HEAP_ALLOC_BAD_VALUE, "shaders", _e.init_info.heap_allocs_config.max_number_of_shaders);
+	_e.shaders = (rde_shader*)malloc(sizeof(rde_shader) * _e.init_info.heap_allocs_config.max_number_of_shaders);
+	rde_critical_error(_e.shaders == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_shader) * _e.init_info.heap_allocs_config.max_number_of_shaders, "shaders");
+	for(size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_number_of_shaders; _i++) {
 		_e.shaders[_i] = rde_struct_create_shader();
 	}
 
-	rde_critical_error(_e.heap_allocs_config.max_number_of_windows <= 0, RDE_ERROR_HEAP_ALLOC_BAD_VALUE, "windows", _e.heap_allocs_config.max_number_of_windows);
-	_e.windows = (rde_window*)malloc(sizeof(rde_window) * _e.heap_allocs_config.max_number_of_windows);
-	rde_critical_error(_e.windows == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_window) * _e.heap_allocs_config.max_number_of_windows, "windows");
-	for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_windows; _i++) {
+	rde_critical_error(_e.init_info.heap_allocs_config.max_number_of_windows <= 0, RDE_ERROR_HEAP_ALLOC_BAD_VALUE, "windows", _e.init_info.heap_allocs_config.max_number_of_windows);
+	_e.windows = (rde_window*)malloc(sizeof(rde_window) * _e.init_info.heap_allocs_config.max_number_of_windows);
+	rde_critical_error(_e.windows == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_window) * _e.init_info.heap_allocs_config.max_number_of_windows, "windows");
+	for(size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_number_of_windows; _i++) {
 		_e.windows[_i] = rde_struct_create_window();
 	}
 
@@ -965,30 +965,30 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 		_e.textures = NULL;
 	}
 
-	if(_e.heap_allocs_config.max_number_of_atlases > 0) {
-		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_atlases);
-		rde_critical_error(_e.atlases == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_atlases, "atlases");
-		for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_atlases; _i++) {
+	if(_e.init_info.heap_allocs_config.max_number_of_atlases > 0) {
+		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.init_info.heap_allocs_config.max_number_of_atlases);
+		rde_critical_error(_e.atlases == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_atlas) * _e.init_info.heap_allocs_config.max_number_of_atlases, "atlases");
+		for(size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_number_of_atlases; _i++) {
 			_e.atlases[_i] = rde_struct_create_atlas();
 		}
 	} else {
 		_e.atlases = NULL;
 	}
 
-	if (_e.heap_allocs_config.max_number_of_fonts > 0) {
-		_e.fonts = (rde_font*)malloc(sizeof(rde_font) * _e.heap_allocs_config.max_number_of_fonts);
-		rde_critical_error(_e.fonts == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_font) * _e.heap_allocs_config.max_number_of_fonts, "fonts");
-		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_fonts; _i++) {
+	if (_e.init_info.heap_allocs_config.max_number_of_fonts > 0) {
+		_e.fonts = (rde_font*)malloc(sizeof(rde_font) * _e.init_info.heap_allocs_config.max_number_of_fonts);
+		rde_critical_error(_e.fonts == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_font) * _e.init_info.heap_allocs_config.max_number_of_fonts, "fonts");
+		for (size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_number_of_fonts; _i++) {
 			_e.fonts[_i] = rde_struct_create_font();
 		}
 	} else {
 		_e.fonts = NULL;
 	}
 
-	if(_e.heap_allocs_config.max_number_of_models > 0) {
-		_e.models = (rde_model*)malloc(sizeof(rde_model) * _e.heap_allocs_config.max_number_of_models);
-		rde_critical_error(_e.models == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_atlas) * _e.heap_allocs_config.max_number_of_models, "atlases");
-		for(size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_models; _i++) {
+	if(_e.init_info.heap_allocs_config.max_number_of_models > 0) {
+		_e.models = (rde_model*)malloc(sizeof(rde_model) * _e.init_info.heap_allocs_config.max_number_of_models);
+		rde_critical_error(_e.models == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_atlas) * _e.init_info.heap_allocs_config.max_number_of_models, "atlases");
+		for(size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_number_of_models; _i++) {
 			_e.models[_i] = rde_struct_create_model();
 		}
 	} else {
@@ -997,10 +997,10 @@ rde_engine rde_struct_create_engine(rde_engine_heap_allocs_config _heap_allocs_c
 #endif
 
 #ifdef RDE_AUDIO_MODULE
-	if (_e.heap_allocs_config.max_number_of_sounds > 0) {
-		_e.sounds = (rde_sound*)malloc(sizeof(rde_sound) * _e.heap_allocs_config.max_number_of_sounds);
-		rde_critical_error(_e.sounds == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_sound) * _e.heap_allocs_config.max_number_of_sounds, "audio");
-		for (size_t _i = 0; _i < _e.heap_allocs_config.max_number_of_sounds; _i++) {
+	if (_e.init_info.heap_allocs_config.max_number_of_sounds > 0) {
+		_e.sounds = (rde_sound*)malloc(sizeof(rde_sound) * _e.init_info.heap_allocs_config.max_number_of_sounds);
+		rde_critical_error(_e.sounds == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_sound) * _e.init_info.heap_allocs_config.max_number_of_sounds, "audio");
+		for (size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_number_of_sounds; _i++) {
 			_e.sounds[_i] = rde_struct_create_sound();
 		}
 	} else {
@@ -1076,7 +1076,7 @@ void rde_inner_engine_on_event() {
 		rde_event _rde_event = rde_inner_event_sdl_event_to_rde_event(&_event);
 		_rde_event.sdl_native_event = (void*)&_event;
 		
-		for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
+		for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_windows; _i++) {
 			rde_window* _window = &ENGINE.windows[_i];
 
 			if(_window->sdl_window == NULL) {
@@ -1185,7 +1185,7 @@ rde_display_info* rde_engine_get_available_displays() {
 // =									API										=
 // ==============================================================================
 
-rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_allocs_config _heap_allocs_config) {
+rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_init_info _engine_init_info) {
 	static bool _instantiated = false;
 	
 	UNUSED(_argc)
@@ -1193,7 +1193,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_heap_al
 	
 	rde_critical_error(_instantiated, RDE_ERROR_MULTIPLE_ENGINE);
 	
-	ENGINE = rde_struct_create_engine(_heap_allocs_config);
+	ENGINE = rde_struct_create_engine(_engine_init_info);
 
 	SDL_version _version;
 	SDL_GetVersion(&_version);
@@ -1305,7 +1305,7 @@ void rde_engine_on_run() {
 		rde_inner_engine_on_late_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_late_update(ENGINE.delta_time);
 
-		for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
+		for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_windows; _i++) {
 			rde_window* _window = &ENGINE.windows[_i];
 
 			if(_window->sdl_window == NULL) {
@@ -1394,7 +1394,7 @@ void rde_engine_destroy_engine() {
 		glDeleteVertexArrays(1, &ENGINE.skybox.vao);
 	}
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_atlases; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_atlases; _i++) {
 		if(ENGINE.atlases[_i].texture == NULL) {
 			continue;
 		}
@@ -1403,7 +1403,7 @@ void rde_engine_destroy_engine() {
 	}
 	free(ENGINE.atlases);
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_fonts; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_fonts; _i++) {
 		if(ENGINE.fonts[_i].texture == NULL) {
 			continue;
 		}
@@ -1425,7 +1425,7 @@ void rde_engine_destroy_engine() {
 	}
 	free(ENGINE.textures);
 
-	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_models; _i++) {
+	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_models; _i++) {
 		if (ENGINE.models[_i].mesh_array == NULL) {
 			continue;
 		}
@@ -1434,7 +1434,7 @@ void rde_engine_destroy_engine() {
 	}
 	free(ENGINE.models);
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_shaders; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_shaders; _i++) {
 		if(ENGINE.shaders[_i].compiled_program_id == -1) {
 			continue;
 		}
@@ -1449,7 +1449,7 @@ void rde_engine_destroy_engine() {
 	free(ENGINE.sounds);
 #endif
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_windows; _i++) {
 		if(ENGINE.windows[_i].sdl_window == NULL) {
 			continue;
 		}
@@ -1472,7 +1472,7 @@ void rde_engine_switch_window_display(rde_window* _window, size_t _new_display) 
 rde_window* rde_engine_get_focused_window() {
 	SDL_Window* _window = SDL_GetMouseFocus();
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_windows; _i++) {
 		rde_window* _w = &ENGINE.windows[_i];
 		
 		if(_w->sdl_window == _window) {

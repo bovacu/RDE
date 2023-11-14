@@ -204,11 +204,11 @@ rde_window* rde_window_create_window_os() {
 	size_t _free_window_index = 0;
 	rde_window* _window = NULL;
 
-	for(size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_windows; _i++) {
+	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_windows; _i++) {
 		if(ENGINE.windows[_i].sdl_window != NULL) {
 
-			if(_i == ENGINE.heap_allocs_config.max_number_of_windows - 1) {
-				rde_critical_error(true, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "windows", ENGINE.heap_allocs_config.max_number_of_windows);
+			if(_i == ENGINE.init_info.heap_allocs_config.max_number_of_windows - 1) {
+				rde_critical_error(true, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "windows", ENGINE.init_info.heap_allocs_config.max_number_of_windows);
 			}
 
 			continue;

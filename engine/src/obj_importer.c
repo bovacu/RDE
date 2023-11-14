@@ -192,7 +192,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 	rde_log_color(RDE_LOG_COLOR_GREEN, "Loading OBJ '%s':", _obj_path);
 
 	rde_model* _model = NULL;
-	for (size_t _i = 0; _i < ENGINE.heap_allocs_config.max_number_of_models; _i++) {
+	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_models; _i++) {
 		rde_model* _m = &ENGINE.models[_i];
 
 		if (_m->mesh_array != NULL) {
@@ -203,7 +203,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 		break;
 	}
 
-	rde_critical_error(_model == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "models", ENGINE.heap_allocs_config.max_number_of_models);
+	rde_critical_error(_model == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "models", ENGINE.init_info.heap_allocs_config.max_number_of_models);
 
 	fastObjCallbacks _callbacks = {
 		.file_open  = rde_inner_obj_file_open,
