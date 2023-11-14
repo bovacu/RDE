@@ -75,10 +75,6 @@
 #include "miniaudio/miniaudio.h"
 #endif
 
-#ifdef RDE_PHYSICS_3D_MODULE
-#include "JoltC/JoltPhysicsC.h"
-#endif
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #include "json/cJSON.c"
@@ -383,6 +379,57 @@ struct rde_sound {
 };
 #endif
 
+#ifdef RDE_PHYSICS_3D_MODULE
+
+#ifdef RDE_PHYSICS_3D_MODULE
+#define JPH_DEBUG_RENDERER
+#include "JoltC/JoltPhysicsC.h"
+#endif
+
+#define NUM_OBJ_LAYERS 2
+#define OBJ_LAYER_NON_MOVING 0
+#define OBJ_LAYER_MOVING 1
+
+#define NUM_BP_LAYERS 2
+#define BP_LAYER_NON_MOVING 0
+#define BP_LAYER_MOVING 1
+
+typedef struct BPLayerInterfaceImpl {
+    const JPC_BroadPhaseLayerInterfaceVTable* vtable;
+    JPC_BroadPhaseLayer object_to_broad_phase[NUM_OBJ_LAYERS];
+} BPLayerInterfaceImpl;
+
+typedef struct MyBroadPhaseFilter {
+    const JPC_ObjectVsBroadPhaseLayerFilterVTable* vtable; // VTable has to be the first field in the struct.
+} MyBroadPhaseFilter;
+
+typedef struct MyObjectFilter {
+    const JPC_ObjectLayerPairFilterVTable* vtable; // VTable has to be the first field in the struct.
+} MyObjectFilter;
+
+typedef struct MyActivationListener {
+    const JPC_BodyActivationListenerVTable* vtable; // VTable has to be the first field in the struct.
+} MyActivationListener;
+
+typedef struct MyContactListener {
+    const JPC_ContactListenerVTable* vtable; // VTable has to be the first field in the struct.
+} MyContactListener;
+
+typedef struct {
+	JPC_JobSystem* job_system;
+	JPC_TempAllocator* temp_allocator;
+	BPLayerInterfaceImpl broad_phase_layer;
+	MyBroadPhaseFilter object_vs_broad_phase_layer;
+	MyObjectFilter object_vs_object_layer;
+	MyActivationListener body_activation_listener;
+	MyContactListener contact_listener;
+	JPC_BodyInterface* body_interface;
+	JPC_PhysicsSystem* physics_system;
+
+} rde_physics_3d;
+
+#endif
+
 #define RDE_DEFAULT_SHADERS_AMOUNT 6
 struct rde_engine {
 	float delta_time;
@@ -435,6 +482,10 @@ struct rde_engine {
 	rde_sound* sounds;
 	ma_device miniaudio_device;
 	rde_sound_config device_config;
+#endif
+
+#ifdef RDE_PHYSICS_3D_MODULE
+	rde_physics_3d physics_3d;
 #endif
 		
 	rde_event_func window_events[RDE_WIN_EVENT_COUNT];
@@ -1065,13 +1116,12 @@ rde_engine ENGINE;
 #include "rendering_2d.c"
 #include "rendering_3d.c"
 #include "events.c"
-#include "physics.c"
+#include "physics_3d.c"
 #include "audio.c"
 #include "mobile.c"
 
 void rde_inner_engine_on_event();
 void rde_inner_engine_on_update(float _dt);
-void rde_inner_engine_on_fixed_update(float _fixed_dt);
 void rde_inner_engine_on_late_update(float _dt);
 
 void rde_inner_engine_sync_events();
@@ -1176,10 +1226,6 @@ void rde_inner_engine_on_update(float _dt) {
 	UNUSED(_dt)
 }
 
-void rde_inner_engine_on_fixed_update(float _fixed_dt) {
-	UNUSED(_fixed_dt)
-}
-
 void rde_inner_engine_on_late_update(float _dt) {
 	UNUSED(_dt)
 }
@@ -1232,10 +1278,6 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_init_in
 
 #ifdef RDE_RENDERING_MODULE
 	rde_inner_rendering_set_rendering_configuration(_default_window);
-#endif
-
-#ifdef RDE_PHYSICS_3D_MODULE
-	JPC_RegisterDefaultAllocator();
 #endif
 
 	srand(time(NULL));
@@ -1293,6 +1335,10 @@ void rde_engine_on_run() {
 	rde_inner_rendering_init_3d();
 #endif
 
+#ifdef RDE_PHYSICS_3D_MODULE
+	rde_physics_3d_init(ENGINE.init_info.physics_3d_config);
+#endif
+
 	while(ENGINE.running) {
 		Uint64 _start = SDL_GetPerformanceCounter();
 		ENGINE.fixed_time_step_accumulator += ENGINE.delta_time;
@@ -1307,11 +1353,13 @@ void rde_engine_on_run() {
 		rde_inner_engine_on_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_update(ENGINE.delta_time);
 
+#if defined(RDE_PHYSICS_3D_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
 		while (ENGINE.fixed_time_step_accumulator >= ENGINE.fixed_delta_time) {
 			ENGINE.fixed_time_step_accumulator -= ENGINE.fixed_delta_time;
 			rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
 			ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
 		}
+#endif
 
 		rde_inner_engine_on_late_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_late_update(ENGINE.delta_time);
@@ -1466,6 +1514,10 @@ void rde_engine_destroy_engine() {
 #ifdef RDE_AUDIO_MODULE
 	rde_audio_end();
 	free(ENGINE.sounds);
+#endif
+
+#ifdef RDE_PHYSICS_3D_MODULE
+	rde_physics_3d_destroy();
 #endif
 
 	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_windows; _i++) {

@@ -129,9 +129,6 @@ extern "C" {
 #define RDE_SHADER_MESH "mesh_shader"
 #define RDE_SHADER_SKYBOX "skybox_shader"
 
-#define RDE_MAX_POINT_LIGHTS 10
-#define RDE_MAX_SPOT_LIGHTS 10
-
 /// ====================== COMPILATION AND EXPORT ==========================
 
 #if defined(__APPLE__)
@@ -1035,9 +1032,28 @@ typedef struct {
 } rde_illumination_config;
 
 typedef struct {
+	size_t temp_allocator_bytes; // recommended at least 10-15Mb, if not set, malloc/free will be used on runtime
+	size_t max_amout_of_allowed_jobs;
+	size_t max_amount_of_physics_barriers;
+	size_t max_amount_of_threads;
+	size_t max_amount_of_bodies;
+	size_t max_amount_of_mutexes;
+	size_t max_amount_of_contact_constraints;
+} rde_physics_3d_config;
+
+typedef struct {
 	rde_engine_heap_allocs_config heap_allocs_config;
+	
+#ifdef RDE_RENDERING_MODULE
 	rde_illumination_config illumination_config;
+#endif
+
+#ifdef RDE_PHYSICS_3D_MODULE
+	rde_physics_3d_config physics_3d_config;
+#endif
+
 } rde_engine_init_info;
+
 /// ============================== EVENTS ===================================
 
 typedef struct {
@@ -1362,6 +1378,19 @@ const rde_engine_init_info RDE_DEFAULT_INIT_INFO = {
 	.illumination_config = {
 		0,
 		0
+	}
+#endif
+
+#ifdef RDE_PHYSICS_3D_MODULE
+	,
+	.physics_3d_config = {
+		.temp_allocator_bytes = 10 * 1024 * 1024,
+		.max_amout_of_allowed_jobs = 2048,
+		.max_amount_of_physics_barriers = 8,
+		.max_amount_of_threads = -1,
+		.max_amount_of_bodies = 65536,
+		.max_amount_of_mutexes = 0,
+		.max_amount_of_contact_constraints = 10240,
 	}
 #endif
 };
@@ -1689,6 +1718,14 @@ RDE_FUNC void rde_audio_end();
 /// ============================ PHYSICS ====================================
 
 #ifdef RDE_PHYSICS_2D_MODULE
+
+#endif
+
+#ifdef RDE_PHYSICS_3D_MODULE
+
+RDE_FUNC void rde_physics_3d_init(rde_physics_3d_config _physics_config);
+RDE_FUNC void rde_physics_3d_run(float _fixed_dt);
+RDE_FUNC void rde_physics_3d_destroy();
 
 #endif
 
