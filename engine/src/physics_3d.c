@@ -234,6 +234,81 @@ void rde_physics_3d_init(rde_physics_3d_config _physics_config) {
 	JPC_PhysicsSystem_OptimizeBroadPhase(ENGINE.physics_3d.physics_system);
 }
 
+rde_physics_3d_body* rde_physics_3d_body_load(RDE_PHYSICS_3D_SHAPE_TYPE_ _shape_type, rde_transform* _transform, const void* _settings) {
+	
+	rde_physics_3d_body* _rde_body = NULL;
+
+	for(size_t _i = 0; _i < ENGINE.init_info.physics_3d_config.max_amount_of_bodies; _i++) {
+		if(ENGINE.physics_3d_bodies[_i].body == NULL) {
+			_rde_body = &ENGINE.physics_3d_bodies[_i];
+			break;
+		}
+	}
+
+	rde_critical_error(_rde_body == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "Physics Bodies 3D");
+
+	rde_physics_3d_common_shape_settings _rde_common_settings;
+	switch(_shape_type) {
+		case RDE_PHYSICS_3D_SHAPE_TYPE_BOX: {
+			rde_physics_3d_shape_box_settings* _rde_settings = (rde_physics_3d_shape_box_settings*)_settings;
+			_rde_common_settings = _rde_settings->common;
+
+			_rde_body->shape_info.shape_settings = JPC_BoxShapeSettings_Create((float[]){ 
+				_rde_settings->width,
+				_rde_settings->height, 
+				_rde_settings->depth
+			});
+		} break;
+	
+		case RDE_PHYSICS_3D_SHAPE_TYPE_SPHERE: {
+			rde_physics_3d_shape_sphere_settings* _rde_settings = (rde_physics_3d_shape_sphere_settings*)_settings;
+			_rde_common_settings = _rde_settings->common;
+
+			_rde_body->shape_info.shape_settings = JPC_SphereShapeSettings_Create(_rde_settings->radius);
+		} break;
+
+		default: {
+			rde_critical_error(true, "Shape type '%d' is unknown or not implemented yet", _shape_type);
+		} break;
+	}
+
+	_rde_body->shape_info.shape = JPC_ShapeSettings_CreateShape((JPC_ShapeSettings*)_rde_body->shape_info.shape_settings);
+	_rde_body->transform = *_transform;
+
+	rde_critical_error(_rde_body->shape_info.shape == NULL, "Create Physics 3D, error creating shape. Wrong '_settings' set (wrong type for shape '%d'). \n", _shape_type);
+
+	// TODO: in the future substitute for a propper end of layer checking
+	rde_critical_error(_rde_common_settings.layer < 0 || _rde_common_settings.layer >= NUM_BP_LAYERS, "Create Physics 3D Body error, layer not valid, should be between [0, %d]. \n", NUM_BP_LAYERS - 1);
+	JPC_BodyCreationSettings_Set(
+		&_rde_body->body_settings,
+		_rde_body->shape_info.shape,
+		(JPC_Real[]){ _rde_body->transform.position.x, 
+					  _rde_body->transform.position.y, 
+					  _rde_body->transform.position.z 
+		},
+		(float[]){ rde_math_degrees_to_radians(_rde_body->transform.rotation.x), 
+				   rde_math_degrees_to_radians(_rde_body->transform.rotation.y), 
+				   rde_math_degrees_to_radians(_rde_body->transform.rotation.z), 
+				   1.0f },
+		(JPC_MotionType)_rde_common_settings.body_type,
+		_rde_common_settings.layer);
+
+	_rde_body->body = JPC_BodyInterface_CreateBody(ENGINE.physics_3d.body_interface, &_rde_body->body_settings);
+	_rde_body->body_id = JPC_Body_GetID(_rde_body->body);
+	JPC_BodyInterface_AddBody(ENGINE.physics_3d.body_interface, _rde_body->body_id, _rde_common_settings.active ? JPC_ACTIVATION_ACTIVATE : JPC_ACTIVATION_DONT_ACTIVATE);
+
+	return _rde_body;
+}
+
+void rde_physics_3d_body_unload(rde_physics_3d_body* _body) {
+	JPC_BodyInterface_RemoveBody(ENGINE.physics_3d.body_interface, _body->body_id);
+	JPC_BodyInterface_DestroyBody(ENGINE.physics_3d.body_interface, _body->body_id);
+	JPC_ShapeSettings_Release((JPC_ShapeSettings*)_body->shape_info.shape_settings);
+	JPC_Shape_Release(_body->shape_info.shape);
+	*_body = rde_struct_create_physics_3d_body();
+}
+
+
 void rde_physics_3d_run(float _fixed_dt) {
 	JPC_PhysicsUpdateError _error = JPC_PhysicsSystem_Update(ENGINE.physics_3d.physics_system, _fixed_dt, 1, 1, 
 	                         ENGINE.physics_3d.temp_allocator,
@@ -242,6 +317,15 @@ void rde_physics_3d_run(float _fixed_dt) {
 }
 
 void rde_physics_3d_destroy() {
+
+	for(size_t _i = 0; _i < ENGINE.init_info.physics_3d_config.max_amount_of_bodies; _i++) {
+		rde_physics_3d_body* _body = &ENGINE.physics_3d_bodies[_i];
+		if(_body->body != NULL) {
+			rde_physics_3d_body_unload(_body);
+		}
+	}
+	
+	free(ENGINE.physics_3d_bodies);
 	JPC_DestroyFactory();
 	JPC_TempAllocator_Destroy(ENGINE.physics_3d.temp_allocator);
 	JPC_JobSystem_Destroy(ENGINE.physics_3d.job_system);

@@ -425,8 +425,36 @@ typedef struct {
 	MyContactListener contact_listener;
 	JPC_BodyInterface* body_interface;
 	JPC_PhysicsSystem* physics_system;
-
 } rde_physics_3d;
+
+typedef struct {
+	RDE_PHYSICS_3D_SHAPE_TYPE_ shape_type;
+	void* shape_settings;
+	JPC_Shape* shape;
+} rde_physics_3d_shape;
+rde_physics_3d_shape rde_struct_create_physics_3d_shape() {
+	rde_physics_3d_shape _p;
+	_p.shape_type = RDE_PHYSICS_3D_SHAPE_TYPE_NONE;
+	_p.shape_settings = NULL;
+	_p.shape = NULL;
+	return _p;
+}
+
+struct rde_physics_3d_body {
+	rde_physics_3d_shape shape_info;
+	JPC_BodyCreationSettings body_settings;
+	JPC_Body* body;
+	JPC_BodyID body_id;
+	rde_transform transform;
+};
+rde_physics_3d_body rde_struct_create_physics_3d_body() {
+	rde_physics_3d_body _p;
+	_p.shape_info = rde_struct_create_physics_3d_shape();
+	_p.body = NULL;
+	_p.body_id = 0;
+	_p.transform = rde_struct_create_transform();
+	return _p;
+}
 
 #endif
 
@@ -486,6 +514,7 @@ struct rde_engine {
 
 #ifdef RDE_PHYSICS_3D_MODULE
 	rde_physics_3d physics_3d;
+	rde_physics_3d_body* physics_3d_bodies;
 #endif
 		
 	rde_event_func window_events[RDE_WIN_EVENT_COUNT];
@@ -1103,6 +1132,14 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	rde_inner_set_posix_signal_handler();
 #endif
 
+#ifdef RDE_PHYSICS_3D_MODULE
+	rde_critical_error(_e.init_info.physics_3d_config.max_amount_of_bodies <= 0, "Physics 3D is active, 'max_amount_of_bodies' must be at least 1");
+	_e.physics_3d_bodies = (rde_physics_3d_body*)malloc(sizeof(rde_physics_3d_body) * _e.init_info.physics_3d_config.max_amount_of_bodies);
+	for(size_t _i = 0; _i < _e.init_info.physics_3d_config.max_amount_of_bodies; _i++) {
+		_e.physics_3d_bodies[_i] = rde_struct_create_physics_3d_body();
+	}
+#endif
+
 	return _e;
 }
 
@@ -1280,6 +1317,10 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_init_in
 	rde_inner_rendering_set_rendering_configuration(_default_window);
 #endif
 
+#ifdef RDE_PHYSICS_3D_MODULE
+	rde_physics_3d_init(_engine_init_info.physics_3d_config);
+#endif
+
 	srand(time(NULL));
 
 	_instantiated = true;
@@ -1333,10 +1374,6 @@ void rde_engine_on_run() {
 #ifdef RDE_RENDERING_MODULE
 	rde_inner_rendering_init_2d();
 	rde_inner_rendering_init_3d();
-#endif
-
-#ifdef RDE_PHYSICS_3D_MODULE
-	rde_physics_3d_init(ENGINE.init_info.physics_3d_config);
 #endif
 
 	while(ENGINE.running) {

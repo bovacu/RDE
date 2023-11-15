@@ -829,25 +829,6 @@ typedef enum {
 	RDE_FILE_MODE_READ_AND_APPEND,
 } RDE_FILE_MODE_;
 
-
-
-/// =============================== PHYSICS =================================
-
-typedef enum {
-	RDE_PHYSICS_BODY_TYPE_STATIC,
-	RDE_PHYSICS_BODY_TYPE_KINEMATIC,
-	RDE_PHYSICS_BODY_TYPE_DYNAMIC
-} RDE_PHYSICS_BODY_TYPE_;
-
-typedef enum {
-	RDE_PHYSICS_SHAPE_TYPE_BOX,
-	RDE_PHYSICS_SHAPE_TYPE_CIRCLE,
-	RDE_PHYSICS_SHAPE_TYPE_POLYGON,
-	RDE_PHYSICS_SHAPE_TYPE_SEGMENT
-} RDE_PHYSICS_SHAPE_TYPE_;
-
-
-
 /// =============================== LOCALIZATION ============================
 
 typedef enum { 
@@ -885,6 +866,25 @@ typedef enum {
 	RDE_LOG_LEVEL_WARNING,
 	RDE_LOG_LEVEL_ERROR
 } RDE_LOG_LEVEL_;
+
+
+/// =============================== PHYSICS 3D ============================
+
+typedef enum {
+	RDE_PHYSICS_3D_BODY_TYPE_STATIC,
+	RDE_PHYSICS_3D_BODY_TYPE_KINEMATIC,
+	RDE_PHYSICS_3D_BODY_TYPE_DYNAMIC
+} RDE_PHYSICS_3D_BODY_TYPE_;
+
+typedef enum {
+	RDE_PHYSICS_3D_SHAPE_TYPE_NONE,
+	RDE_PHYSICS_3D_SHAPE_TYPE_BOX,
+	RDE_PHYSICS_3D_SHAPE_TYPE_SPHERE,
+	RDE_PHYSICS_3D_SHAPE_TYPE_CYLINDER,
+	RDE_PHYSICS_3D_SHAPE_TYPE_CAPSULE,
+	RDE_PHYSICS_3D_SHAPE_TYPE_PYRAMID,
+	RDE_PHYSICS_3D_SHAPE_TYPE_MESH
+} RDE_PHYSICS_3D_SHAPE_TYPE_;
 
 /// *************************************************************************************************
 /// *                                		STRUCSTS                         						*
@@ -1331,6 +1331,28 @@ typedef struct {
 RDE_FUNC rde_sound_config rde_struct_create_audio_config();
 #endif
 
+/// ============================ PHYSICS 3D ==================================
+
+typedef struct rde_physics_3d_body rde_physics_3d_body;
+
+typedef struct {
+	uint layer;
+	RDE_PHYSICS_3D_BODY_TYPE_ body_type;
+	bool active;
+} rde_physics_3d_common_shape_settings;
+
+typedef struct {
+	rde_physics_3d_common_shape_settings common;
+	float width;
+	float height;
+	float depth;
+} rde_physics_3d_shape_box_settings;
+
+typedef struct {
+	rde_physics_3d_common_shape_settings common;
+	float radius;
+} rde_physics_3d_shape_sphere_settings;
+
 /// *************************************************************************************************
 /// *                                GLOBAL VARIABLES                         						*
 /// *************************************************************************************************
@@ -1724,7 +1746,12 @@ RDE_FUNC void rde_audio_end();
 #ifdef RDE_PHYSICS_3D_MODULE
 
 RDE_FUNC void rde_physics_3d_init(rde_physics_3d_config _physics_config);
+
+RDE_FUNC rde_physics_3d_body* rde_physics_3d_body_load(RDE_PHYSICS_3D_SHAPE_TYPE_ _shape_type, rde_transform* _transform, const void* _settings);
+RDE_FUNC void rde_physics_3d_body_unload(rde_physics_3d_body* _body);
+
 RDE_FUNC void rde_physics_3d_run(float _fixed_dt);
+
 RDE_FUNC void rde_physics_3d_destroy();
 
 #endif
