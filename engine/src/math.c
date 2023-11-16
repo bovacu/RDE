@@ -63,6 +63,44 @@ float rde_math_degrees_to_radians(float _degrees) {
 	return _degrees * (RDE_PI / 180.0f);
 }
 
+rde_vec_3F rde_math_quaternion_to_euler_degrees(rde_quaternion _quaternion) {
+	double _sinr_cosp = 2 * (_quaternion.w * _quaternion.x + _quaternion.y * _quaternion.z);
+	double _cosr_cosp = 1 - 2 * (_quaternion.x * _quaternion.x + _quaternion.y * _quaternion.y);
+
+	float t2 = 2.0f * (_quaternion.w * _quaternion.y - _quaternion.z * _quaternion.x);
+	t2 = t2 > 1.0f? 1.0f : t2;
+	t2 = t2 < -1.0f? -1.0f : t2;
+
+	double _siny_cosp = 2 * (_quaternion.w * _quaternion.z + _quaternion.x * _quaternion.y);
+	double _cosy_cosp = 1 - 2 * (_quaternion.y * _quaternion.y + _quaternion.z * _quaternion.z);
+
+	return (rde_vec_3F) { 
+		rde_math_radians_to_degrees(atan2(_sinr_cosp, _cosr_cosp)),
+		rde_math_radians_to_degrees(asin(t2)),
+		rde_math_radians_to_degrees(atan2(_siny_cosp, _cosy_cosp))
+	};
+}
+
+rde_quaternion rde_math_euler_degrees_to_quaternion(rde_vec_3F _euler_degrees) {
+	float _r_x = rde_math_degrees_to_radians(_euler_degrees.x);
+	float _r_y = rde_math_degrees_to_radians(_euler_degrees.y);
+	float _r_z = rde_math_degrees_to_radians(_euler_degrees.z);
+	double _cx = cos(_r_x * 0.5);
+	double _sx = sin(_r_x * 0.5);
+	double _cy = cos(_r_y * 0.5);
+	double _sy = sin(_r_y * 0.5);
+	double _cz = cos(_r_z * 0.5);
+	double _sz = sin(_r_z * 0.5);
+
+	return (rde_quaternion) {
+		_cz * _sx * _cy - _sz * _cx * _sy,
+		_cz * _cx * _sy + _sz * _sx * _cy,
+		_sz * _cx * _cy - _cz * _sx * _sy,
+		_cz * _cx * _cy + _sz * _sx * _sy 
+	};
+}
+
+
 float rde_math_easing_in_linear(float _current_time, float _start_value, float _change_in_value, float _duration) {
 	return _change_in_value * _current_time / _duration + _start_value;
 }

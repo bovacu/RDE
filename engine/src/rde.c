@@ -425,6 +425,8 @@ typedef struct {
 	MyContactListener contact_listener;
 	JPC_BodyInterface* body_interface;
 	JPC_PhysicsSystem* physics_system;
+	rde_physics_3d_body* bodies;
+	int last_body_added_on_array_index;
 } rde_physics_3d;
 
 typedef struct {
@@ -445,14 +447,16 @@ struct rde_physics_3d_body {
 	JPC_BodyCreationSettings body_settings;
 	JPC_Body* body;
 	JPC_BodyID body_id;
-	rde_transform transform;
+	rde_transform* transform;
+	int index_on_array;
 };
 rde_physics_3d_body rde_struct_create_physics_3d_body() {
 	rde_physics_3d_body _p;
 	_p.shape_info = rde_struct_create_physics_3d_shape();
 	_p.body = NULL;
 	_p.body_id = 0;
-	_p.transform = rde_struct_create_transform();
+	_p.transform = NULL;
+	_p.index_on_array = -1;
 	return _p;
 }
 
@@ -514,7 +518,6 @@ struct rde_engine {
 
 #ifdef RDE_PHYSICS_3D_MODULE
 	rde_physics_3d physics_3d;
-	rde_physics_3d_body* physics_3d_bodies;
 #endif
 		
 	rde_event_func window_events[RDE_WIN_EVENT_COUNT];
@@ -1134,9 +1137,9 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 
 #ifdef RDE_PHYSICS_3D_MODULE
 	rde_critical_error(_e.init_info.physics_3d_config.max_amount_of_bodies <= 0, "Physics 3D is active, 'max_amount_of_bodies' must be at least 1");
-	_e.physics_3d_bodies = (rde_physics_3d_body*)malloc(sizeof(rde_physics_3d_body) * _e.init_info.physics_3d_config.max_amount_of_bodies);
+	_e.physics_3d.bodies = (rde_physics_3d_body*)malloc(sizeof(rde_physics_3d_body) * _e.init_info.physics_3d_config.max_amount_of_bodies);
 	for(size_t _i = 0; _i < _e.init_info.physics_3d_config.max_amount_of_bodies; _i++) {
-		_e.physics_3d_bodies[_i] = rde_struct_create_physics_3d_body();
+		_e.physics_3d.bodies[_i] = rde_struct_create_physics_3d_body();
 	}
 #endif
 

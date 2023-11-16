@@ -978,6 +978,13 @@ typedef struct {
 } rde_probability;
 RDE_FUNC rde_probability rde_struct_create_probability();
 
+typedef struct {
+	float x;
+	float y;
+	float z;
+	float w;
+} rde_quaternion;
+
 /// ================== CALLBACKS AND FUNCTION POINTERS ======================
 
 typedef struct rde_engine rde_engine;
@@ -1500,6 +1507,9 @@ RDE_DECLARE_CLAMP_FUNCS(ulong)
 
 RDE_FUNC float rde_math_radians_to_degrees(float _radians);
 RDE_FUNC float rde_math_degrees_to_radians(float _degrees);
+
+RDE_FUNC rde_vec_3F rde_math_quaternion_to_euler_degrees(rde_quaternion _quaternion);
+RDE_FUNC rde_quaternion rde_math_euler_degrees_to_quaternion(rde_vec_3F _euler_degrees);
 
 #define RDE_DECLARE_EASING_FUNCS(_form, _type) \
 	RDE_FUNC float rde_math_easing_##_form##_##_type(float _current_time, float _start_value, float _change_in_value, float _duration);

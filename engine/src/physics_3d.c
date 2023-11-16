@@ -11,7 +11,6 @@ void rde_inner_engine_on_fixed_update(float _fixed_dt) {
 //--------------------------------------------------------------------------------------------------
 static uint32_t BPLayerInterface_GetNumBroadPhaseLayers(const void* _in_self) {
 	(void)_in_self;
-    rde_log_level(RDE_LOG_LEVEL_INFO, "BPLayerInterface_GetNumBroadPhaseLayers()\n");
     return NUM_BP_LAYERS;
 }
 
@@ -20,7 +19,6 @@ static const JPC_BroadPhaseLayer* BPLayerInterface_GetBroadPhaseLayer(const void
 #else
 static JPC_BroadPhaseLayer BPLayerInterface_GetBroadPhaseLayer(const void* _in_self, JPC_ObjectLayer _in_layer) {
 #endif
-    rde_log_level(RDE_LOG_LEVEL_INFO, "BPLayerInterface_GetBroadPhaseLayer()\n");
     assert(_in_layer < NUM_BP_LAYERS);
     const BPLayerInterfaceImpl* _self = (BPLayerInterfaceImpl*)_in_self;
 #ifdef _MSC_VER
@@ -56,14 +54,10 @@ static JPC_ValidateResult MyContactListener_OnContactValidate(void* _in_self,
                                     const JPC_Real _in_base_offset[3],
                                     const JPC_CollideShapeResult* _in_collision_result) {
 	(void)_in_self;
-    const JPC_BodyID _body1_id = JPC_Body_GetID(_in_body1);
-    const JPC_BodyID _body2_id = JPC_Body_GetID(_in_body2);
-    rde_log_level(RDE_LOG_LEVEL_INFO, "\tOnContactValidate(): First BodyID is (%d, %d), second BodyID is (%d, %d)\n", JPC_BodyID_GetSequenceNumber(_body1_id), JPC_BodyID_GetIndex(_body1_id), JPC_BodyID_GetSequenceNumber(_body2_id), JPC_BodyID_GetIndex(_body2_id));
-    rde_log_level(RDE_LOG_LEVEL_INFO, "\tOnContactValidate(): in_base_offset (%f, %f, %f)\n", _in_base_offset[0], _in_base_offset[1], _in_base_offset[2]);
-    rde_log_level(RDE_LOG_LEVEL_INFO, "\tOnContactValidate(): penetration_depth (%f)\n", _in_collision_result->penetration_depth);
-    rde_log_level(RDE_LOG_LEVEL_INFO, "\tOnContactValidate(): shape1_sub_shape_id (%d)\n", _in_collision_result->shape1_sub_shape_id);
-    rde_log_level(RDE_LOG_LEVEL_INFO, "\tOnContactValidate(): shape2_sub_shape_id (%d)\n", _in_collision_result->shape2_sub_shape_id);
-    rde_log_level(RDE_LOG_LEVEL_INFO, "\tOnContactValidate(): body2_id (%d)\n", _in_collision_result->body2_id);
+	(void)_in_body1;
+	(void)_in_body2;
+	(void)_in_base_offset;
+	(void)_in_collision_result;
     return JPC_VALIDATE_RESULT_ACCEPT_ALL_CONTACTS;
 }
 
@@ -73,11 +67,10 @@ static void MyContactListener_OnContactAdded(void* _in_self,
                                  const JPC_ContactManifold* _in_manifold,
                                  JPC_ContactSettings* _io_settings) {
 	(void)_in_self;
+	(void)_in_body1;
+	(void)_in_body2;
 	(void)_in_manifold;
 	(void)_io_settings;
-    const JPC_BodyID _body1_id = JPC_Body_GetID(_in_body1);
-    const JPC_BodyID _body2_id = JPC_Body_GetID(_in_body2);
-    rde_log_level(RDE_LOG_LEVEL_INFO, "\tOnContactAdded(): First BodyID is (%d, %d), second BodyID is (%d, %d)\n", JPC_BodyID_GetSequenceNumber(_body1_id), JPC_BodyID_GetIndex(_body1_id), JPC_BodyID_GetSequenceNumber(_body2_id), JPC_BodyID_GetIndex(_body2_id));
 }
 
 static void MyContactListener_OnContactPersisted(void* _in_self,
@@ -86,18 +79,15 @@ static void MyContactListener_OnContactPersisted(void* _in_self,
                                      const JPC_ContactManifold* _in_manifold,
                                      JPC_ContactSettings* _io_settings) {
 	(void)_in_self;
+	(void)_in_body1;
+	(void)_in_body2;
 	(void)_in_manifold;
 	(void)_io_settings;
-    const JPC_BodyID _body1_id = JPC_Body_GetID(_in_body1);
-    const JPC_BodyID _body2_id = JPC_Body_GetID(_in_body2);
-    rde_log_level(RDE_LOG_LEVEL_INFO, "\tOnContactPersisted(): First BodyID is (%d, %d), second BodyID is (%d, %d)\n", JPC_BodyID_GetSequenceNumber(_body1_id), JPC_BodyID_GetIndex(_body1_id), JPC_BodyID_GetSequenceNumber(_body2_id), JPC_BodyID_GetIndex(_body2_id));
 }
 
 static void MyContactListener_OnContactRemoved(void* _in_self, const JPC_SubShapeIDPair* _in_sub_shape_pair) {
 	(void)_in_self;
-    const JPC_BodyID _body1_id = _in_sub_shape_pair->first.body_id;
-    const JPC_BodyID _body2_id = _in_sub_shape_pair->second.body_id;
-    rde_log_level(RDE_LOG_LEVEL_INFO, "\tOnContactRemoved(): First BodyID is (%d, %d), second BodyID is (%d, %d)\n", JPC_BodyID_GetSequenceNumber(_body1_id), JPC_BodyID_GetIndex(_body1_id), JPC_BodyID_GetSequenceNumber(_body2_id), JPC_BodyID_GetIndex(_body2_id));
+	(void)_in_sub_shape_pair;
 }
 
 static MyContactListener MyContactListener_Init(void) {
@@ -118,14 +108,14 @@ static MyContactListener MyContactListener_Init(void) {
 //--------------------------------------------------------------------------------------------------
 static void MyActivationListener_OnBodyActivated(void* _in_self, const JPC_BodyID* _in_body_id, uint64_t _in_user_data) {
 	(void)_in_self;
+	(void)_in_body_id;
 	(void)_in_user_data;
-    rde_log_level(RDE_LOG_LEVEL_INFO, "\tOnBodyActivated(): BodyID is (%d, %d)\n", JPC_BodyID_GetSequenceNumber(*_in_body_id), JPC_BodyID_GetIndex(*_in_body_id));
 }
 
 static void MyActivationListener_OnBodyDeactivated(void* _in_self, const JPC_BodyID* _in_body_id, uint64_t _in_user_data) {
 	(void)_in_self;
+	(void)_in_body_id;
 	(void)_in_user_data;
-    rde_log_level(RDE_LOG_LEVEL_INFO, "\tOnBodyDeactivated(): BodyID is (%d, %d)\n", JPC_BodyID_GetSequenceNumber(*_in_body_id), JPC_BodyID_GetIndex(*_in_body_id));
 }
 
 static MyActivationListener MyActivationListener_Init(void) {
@@ -232,15 +222,21 @@ void rde_physics_3d_init(rde_physics_3d_config _physics_config) {
 	ENGINE.physics_3d.body_interface = JPC_PhysicsSystem_GetBodyInterface(ENGINE.physics_3d.physics_system);
 
 	JPC_PhysicsSystem_OptimizeBroadPhase(ENGINE.physics_3d.physics_system);
+
+	ENGINE.physics_3d.last_body_added_on_array_index = -1;
 }
 
 rde_physics_3d_body* rde_physics_3d_body_load(RDE_PHYSICS_3D_SHAPE_TYPE_ _shape_type, rde_transform* _transform, const void* _settings) {
-	
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on Physics 3D Body loading");
 	rde_physics_3d_body* _rde_body = NULL;
 
 	for(size_t _i = 0; _i < ENGINE.init_info.physics_3d_config.max_amount_of_bodies; _i++) {
-		if(ENGINE.physics_3d_bodies[_i].body == NULL) {
-			_rde_body = &ENGINE.physics_3d_bodies[_i];
+		if(ENGINE.physics_3d.bodies[_i].body == NULL) {
+			_rde_body = &ENGINE.physics_3d.bodies[_i];
+			_rde_body->index_on_array = _i;
+			if((int)_i > ENGINE.physics_3d.last_body_added_on_array_index) {
+				ENGINE.physics_3d.last_body_added_on_array_index = _i;
+			}
 			break;
 		}
 	}
@@ -273,30 +269,33 @@ rde_physics_3d_body* rde_physics_3d_body_load(RDE_PHYSICS_3D_SHAPE_TYPE_ _shape_
 	}
 
 	_rde_body->shape_info.shape = JPC_ShapeSettings_CreateShape((JPC_ShapeSettings*)_rde_body->shape_info.shape_settings);
-	_rde_body->transform = *_transform;
+	_rde_body->transform = _transform;
 
 	rde_critical_error(_rde_body->shape_info.shape == NULL, "Create Physics 3D, error creating shape. Wrong '_settings' set (wrong type for shape '%d'). \n", _shape_type);
 
 	// TODO: in the future substitute for a propper end of layer checking
 	rde_critical_error(_rde_common_settings.layer < 0 || _rde_common_settings.layer >= NUM_BP_LAYERS, "Create Physics 3D Body error, layer not valid, should be between [0, %d]. \n", NUM_BP_LAYERS - 1);
+	
+	rde_quaternion _rotation = rde_math_euler_degrees_to_quaternion(_transform->rotation);
 	JPC_BodyCreationSettings_Set(
 		&_rde_body->body_settings,
 		_rde_body->shape_info.shape,
-		(JPC_Real[]){ _rde_body->transform.position.x, 
-					  _rde_body->transform.position.y, 
-					  _rde_body->transform.position.z 
+		(JPC_Real[]){ _rde_body->transform->position.x, 
+					  _rde_body->transform->position.y, 
+					  _rde_body->transform->position.z 
 		},
-		(float[]){ rde_math_degrees_to_radians(_rde_body->transform.rotation.x), 
-				   rde_math_degrees_to_radians(_rde_body->transform.rotation.y), 
-				   rde_math_degrees_to_radians(_rde_body->transform.rotation.z), 
-				   1.0f },
+		(float[]){
+			_rotation.x,
+			_rotation.y,
+			_rotation.z,
+			_rotation.w,
+		},
 		(JPC_MotionType)_rde_common_settings.body_type,
 		_rde_common_settings.layer);
 
 	_rde_body->body = JPC_BodyInterface_CreateBody(ENGINE.physics_3d.body_interface, &_rde_body->body_settings);
 	_rde_body->body_id = JPC_Body_GetID(_rde_body->body);
 	JPC_BodyInterface_AddBody(ENGINE.physics_3d.body_interface, _rde_body->body_id, _rde_common_settings.active ? JPC_ACTIVATION_ACTIVATE : JPC_ACTIVATION_DONT_ACTIVATE);
-
 	return _rde_body;
 }
 
@@ -305,6 +304,17 @@ void rde_physics_3d_body_unload(rde_physics_3d_body* _body) {
 	JPC_BodyInterface_DestroyBody(ENGINE.physics_3d.body_interface, _body->body_id);
 	JPC_ShapeSettings_Release((JPC_ShapeSettings*)_body->shape_info.shape_settings);
 	JPC_Shape_Release(_body->shape_info.shape);
+
+	if(_body->index_on_array == ENGINE.physics_3d.last_body_added_on_array_index) {
+		ENGINE.physics_3d.last_body_added_on_array_index = -1;
+		for(size_t _i = 0; _i < ENGINE.init_info.physics_3d_config.max_amount_of_bodies; _i++) {
+			if(ENGINE.physics_3d.bodies[_i].body != NULL && &ENGINE.physics_3d.bodies[_i] != _body) {
+				ENGINE.physics_3d.last_body_added_on_array_index = _i;
+				break;
+			}
+		}
+	}
+
 	*_body = rde_struct_create_physics_3d_body();
 }
 
@@ -314,18 +324,36 @@ void rde_physics_3d_run(float _fixed_dt) {
 	                         ENGINE.physics_3d.temp_allocator,
 	                         ENGINE.physics_3d.job_system);
 	rde_critical_error(_error != JPC_PHYSICS_UPDATE_NO_ERROR, "Physics simulation error, code: %d", _error);
+
+	// TODO: This is not optimal at all, but there is no other way now to update associated rde_transform with inner JoltC Body positions.
+	for(int _i = 0; _i < ENGINE.physics_3d.last_body_added_on_array_index; _i++) {
+		rde_physics_3d_body* _body = &ENGINE.physics_3d.bodies[_i];
+		if(_body->body == NULL || _body->body_settings.motion_type == JPC_MOTION_TYPE_STATIC) {
+			continue;
+		}
+
+		JPC_Real _position[3];
+		JPC_Real _rotation[4];
+		JPC_Body_GetPosition(_body->body, _position);
+		JPC_Body_GetRotation(_body->body, _rotation);
+
+		_body->transform->position = (rde_vec_3F) { _position[0], _position[1], _position[2] };
+		rde_quaternion _quat = { _rotation[0], _rotation[1], _rotation[2], _rotation[3] };
+		rde_vec_3F _rotation_euler = rde_math_quaternion_to_euler_degrees(_quat);
+		_body->transform->rotation = (rde_vec_3F) { _rotation_euler.x, _rotation_euler.y, _rotation_euler.z };
+	}
 }
 
 void rde_physics_3d_destroy() {
 
 	for(size_t _i = 0; _i < ENGINE.init_info.physics_3d_config.max_amount_of_bodies; _i++) {
-		rde_physics_3d_body* _body = &ENGINE.physics_3d_bodies[_i];
+		rde_physics_3d_body* _body = &ENGINE.physics_3d.bodies[_i];
 		if(_body->body != NULL) {
 			rde_physics_3d_body_unload(_body);
 		}
 	}
 	
-	free(ENGINE.physics_3d_bodies);
+	free(ENGINE.physics_3d.bodies);
 	JPC_DestroyFactory();
 	JPC_TempAllocator_Destroy(ENGINE.physics_3d.temp_allocator);
 	JPC_JobSystem_Destroy(ENGINE.physics_3d.job_system);
