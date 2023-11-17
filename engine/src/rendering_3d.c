@@ -694,6 +694,24 @@ rde_mesh* rde_rendering_mesh_create_cube(float _size, rde_material* _material) {
 	return rde_struct_memory_mesh_create(&_data);
 }
 
+rde_mesh* rde_rendering_mesh_create_prism(rde_vec_3F _size, rde_material* _material) {
+	PRISM_MESH_DATA(_size.x, _size.y, _size.z)
+
+	rde_mesh_gen_data _data = {
+		.name = "Cube",
+		.vertex_count = _vertex_count,
+		.positions = _positions,
+		.positions_size = _vertex_count * 3,
+		.texcoords = NULL,
+		.texcoords_size = 0,
+		.normals = _normals,
+		.normals_size = _vertex_count * 3,
+		.material = _material == NULL ? rde_struct_create_material() : *_material
+	};
+
+	return rde_struct_memory_mesh_create(&_data);
+}
+
 rde_mesh* rde_rendering_mesh_create_sphere(float _radius, rde_material* _material) {
 	SPHERE_MESH_DATA(_radius)
 

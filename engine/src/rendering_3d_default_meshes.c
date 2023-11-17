@@ -8,30 +8,35 @@
 		-1.0f * _size,  1.0f * _size, -1.0f * _size,			\
 		-1.0f * _size,  1.0f * _size,  1.0f * _size,			\
 		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
+		   														\
 		 1.0f * _size,  1.0f * _size, -1.0f * _size,			\
 		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
 		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
 		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
 		-1.0f * _size,  1.0f * _size,  1.0f * _size,			\
 		-1.0f * _size, -1.0f * _size,  1.0f * _size,			\
+		   														\
 		-1.0f * _size, -1.0f * _size,  1.0f * _size,			\
 		-1.0f * _size,  1.0f * _size,  1.0f * _size,			\
 		-1.0f * _size,  1.0f * _size, -1.0f * _size,			\
 		 1.0f * _size, -1.0f * _size, -1.0f * _size,			\
 		-1.0f * _size, -1.0f * _size, -1.0f * _size,			\
 		-1.0f * _size,  1.0f * _size, -1.0f * _size,			\
+		   														\
 		 1.0f * _size, -1.0f * _size, -1.0f * _size,			\
 		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
 		-1.0f * _size, -1.0f * _size, -1.0f * _size,			\
 		 1.0f * _size,  1.0f * _size, -1.0f * _size,			\
 		-1.0f * _size,  1.0f * _size, -1.0f * _size,			\
 		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
+		   														\
 		 1.0f * _size, -1.0f * _size, -1.0f * _size,			\
 		 1.0f * _size,  1.0f * _size, -1.0f * _size,			\
 		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
 		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
 		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
 		-1.0f * _size, -1.0f * _size,  1.0f * _size,			\
+		   														\
 		-1.0f * _size, -1.0f * _size, -1.0f * _size,			\
 		-1.0f * _size, -1.0f * _size,  1.0f * _size,			\
 		-1.0f * _size,  1.0f * _size, -1.0f * _size,			\
@@ -79,6 +84,93 @@
 		 0.0f,  0.0f, -1.0f,									\
 		 0.0f,  0.0f, -1.0f		 								\
 	}, _vertex_count * 3 * sizeof(float));									
+
+#define PRISM_MESH_DATA(_width, _height, _depth)				\
+	const size_t _vertex_count = 36;							\
+	float* _positions = (float*)malloc(sizeof(float) * _vertex_count * 3);\
+	memcpy(_positions, (float []){								\
+	       1.0f  * _width, -1.0f * _height,  1.0f * _depth,	\
+	       -1.0f * _width, -1.0f * _height,  1.0f * _depth,	\
+	       -1.0f * _width, -1.0f * _height, -1.0f * _depth,	\
+	       -1.0f * _width,  1.0f * _height, -1.0f * _depth,	\
+	       -1.0f * _width,  1.0f * _height,  1.0f * _depth,	\
+	       1.0f  * _width,  1.0f * _height,  1.0f * _depth,	\
+	       														\
+	       1.0f  * _width,  1.0f * _height, -1.0f * _depth,		\
+	       1.0f  * _width,  1.0f * _height,  1.0f * _depth,		\
+	       1.0f  * _width, -1.0f * _height,  1.0f * _depth,		\
+	       1.0f  * _width,  1.0f * _height,  1.0f * _depth,		\
+	       -1.0f * _width,  1.0f * _height,  1.0f * _depth,		\
+	       -1.0f * _width, -1.0f * _height,  1.0f * _depth,		\
+	       														\
+	       -1.0f * _width, -1.0f * _height,  1.0f * _depth,		\
+	       -1.0f * _width,  1.0f * _height,  1.0f * _depth,		\
+	       -1.0f * _width,  1.0f * _height, -1.0f * _depth,		\
+	       1.0f  * _width, -1.0f * _height, -1.0f * _depth,		\
+	       -1.0f * _width, -1.0f * _height, -1.0f * _depth,		\
+	       -1.0f * _width,  1.0f * _height, -1.0f * _depth,		\
+	       														\
+	       1.0f  * _width, -1.0f * _height, -1.0f * _depth,	\
+	       1.0f  * _width, -1.0f * _height,  1.0f * _depth,	\
+	       -1.0f * _width, -1.0f * _height, -1.0f * _depth,	\
+	       1.0f  * _width,  1.0f * _height, -1.0f * _depth,	\
+	       -1.0f * _width,  1.0f * _height, -1.0f * _depth,	\
+	       1.0f  * _width,  1.0f * _height,  1.0f * _depth,	\
+	       														\
+	       1.0f  * _width, -1.0f * _height, -1.0f * _depth,		\
+	       1.0f  * _width,  1.0f * _height, -1.0f * _depth,		\
+	       1.0f  * _width, -1.0f * _height,  1.0f * _depth,		\
+	       1.0f  * _width, -1.0f * _height,  1.0f * _depth,		\
+	       1.0f  * _width,  1.0f * _height,  1.0f * _depth,		\
+	       -1.0f * _width, -1.0f * _height,  1.0f * _depth,		\
+	       														\
+	       -1.0f * _width, -1.0f * _height, -1.0f * _depth,		\
+	       -1.0f * _width, -1.0f * _height,  1.0f * _depth,		\
+	       -1.0f * _width,  1.0f * _height, -1.0f * _depth,		\
+	       1.0f  * _width,  1.0f * _height, -1.0f * _depth,		\
+	       1.0f  * _width, -1.0f * _height, -1.0f * _depth,		\
+	       -1.0f * _width,  1.0f * _height, -1.0f * _depth,		\
+	}, _vertex_count * 3 * sizeof(float)); 						\
+																\
+	float* _normals = (float*)malloc(sizeof(float) * _vertex_count * 3);\
+	memcpy(_normals, (float []){								\
+	       0.0f, -1.0f,  0.0f,									\
+	       0.0f, -1.0f,  0.0f,									\
+	       0.0f, -1.0f,  0.0f,									\
+	       0.0f,  1.0f,  0.0f,									\
+	       0.0f,  1.0f,  0.0f,									\
+	       0.0f,  1.0f,  0.0f,									\
+	       1.0f,  0.0f,  0.0f,									\
+	       1.0f,  0.0f,  0.0f,									\
+	       1.0f,  0.0f,  0.0f,									\
+	       -0.0f,  0.0f,  1.0f,									\
+	       -0.0f,  0.0f,  1.0f,									\
+	       -0.0f,  0.0f,  1.0f,									\
+	       -1.0f, -0.0f, -0.0f,									\
+	       -1.0f, -0.0f, -0.0f,									\
+	       -1.0f, -0.0f, -0.0f,									\
+	       0.0f,  0.0f, -1.0f,									\
+	       0.0f,  0.0f, -1.0f,									\
+	       0.0f,  0.0f, -1.0f,									\
+	       0.0f, -1.0f,  0.0f,									\
+	       0.0f, -1.0f,  0.0f,									\
+	       0.0f, -1.0f,  0.0f,									\
+	       0.0f,  1.0f,  0.0f,									\
+	       0.0f,  1.0f,  0.0f,									\
+	       0.0f,  1.0f,  0.0f,									\
+	       1.0f,  0.0f,  0.0f,									\
+	       1.0f,  0.0f,  0.0f,									\
+	       1.0f,  0.0f,  0.0f,									\
+	       -0.0f,  0.0f,  1.0f,									\
+	       -0.0f,  0.0f,  1.0f,									\
+	       -0.0f,  0.0f,  1.0f,									\
+	       -1.0f, -0.0f, -0.0f,									\
+	       -1.0f, -0.0f, -0.0f,									\
+	       -1.0f, -0.0f, -0.0f,									\
+	       0.0f,  0.0f, -1.0f,									\
+	       0.0f,  0.0f, -1.0f,									\
+	       0.0f,  0.0f, -1.0f		 							\
+	}, _vertex_count * 3 * sizeof(float));
 
 #define SPHERE_MESH_DATA(_size) 											\
 	const size_t _vertex_count = 2880;										\

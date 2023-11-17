@@ -449,6 +449,7 @@ struct rde_physics_3d_body {
 	JPC_BodyID body_id;
 	rde_transform* transform;
 	int index_on_array;
+	bool active;
 };
 rde_physics_3d_body rde_struct_create_physics_3d_body() {
 	rde_physics_3d_body _p;
@@ -457,6 +458,7 @@ rde_physics_3d_body rde_struct_create_physics_3d_body() {
 	_p.body_id = 0;
 	_p.transform = NULL;
 	_p.index_on_array = -1;
+	_p.active = false;
 	return _p;
 }
 
@@ -1394,11 +1396,13 @@ void rde_engine_on_run() {
 		ENGINE.mandatory_callbacks.on_update(ENGINE.delta_time);
 
 #if defined(RDE_PHYSICS_3D_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
-		while (ENGINE.fixed_time_step_accumulator >= ENGINE.fixed_delta_time) {
-			ENGINE.fixed_time_step_accumulator -= ENGINE.fixed_delta_time;
-			rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
-			ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
-		}
+		rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
+		ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
+		//while (ENGINE.fixed_time_step_accumulator >= ENGINE.fixed_delta_time) {
+		//	ENGINE.fixed_time_step_accumulator -= ENGINE.fixed_delta_time;
+		//	rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
+		//	ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
+		//}
 #endif
 
 		rde_inner_engine_on_late_update(ENGINE.delta_time);

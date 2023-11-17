@@ -90,7 +90,7 @@ extern "C" {
 /// ========================= NUMERIC CONSTANTS ============================
 
 #define RDE_EPSILON 0.0001f
-#define RDE_PI 3.141592741f
+#define RDE_PI 3.14159265358979323846264338327950288
 
 #define RDE_MAX_NUMBER_OF_WINDOWS 10
 #define RDE_MAX_VERTICES_PER_BATCH 50000
@@ -1684,6 +1684,7 @@ RDE_FUNC void rde_rendering_2d_end_drawing();
 
 RDE_FUNC rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
 RDE_FUNC rde_mesh* rde_rendering_mesh_create_cube(float _size, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
+RDE_FUNC rde_mesh* rde_rendering_mesh_create_prism(rde_vec_3F _size, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
 RDE_FUNC rde_mesh* rde_rendering_mesh_create_sphere(float _radius, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
 RDE_FUNC rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh);
 RDE_FUNC void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated_buffers);
@@ -1759,6 +1760,9 @@ RDE_FUNC void rde_physics_3d_init(rde_physics_3d_config _physics_config);
 
 RDE_FUNC rde_physics_3d_body* rde_physics_3d_body_load(RDE_PHYSICS_3D_SHAPE_TYPE_ _shape_type, rde_transform* _transform, const void* _settings);
 RDE_FUNC void rde_physics_3d_body_unload(rde_physics_3d_body* _body);
+
+RDE_FUNC void rde_physics_3d_body_enable(rde_physics_3d_body* _body, bool _enable_body);
+RDE_FUNC void rde_physics_3d_body_set_transform(rde_physics_3d_body* _body, rde_transform _transform);
 
 RDE_FUNC void rde_physics_3d_run(float _fixed_dt);
 

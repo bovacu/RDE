@@ -68,11 +68,13 @@ rde_vec_3F rde_math_quaternion_to_euler_degrees(rde_quaternion _quaternion) {
 	double _cosr_cosp = 1 - 2 * (_quaternion.x * _quaternion.x + _quaternion.y * _quaternion.y);
 
 	float t2 = 2.0f * (_quaternion.w * _quaternion.y - _quaternion.z * _quaternion.x);
-	t2 = t2 > 1.0f? 1.0f : t2;
-	t2 = t2 < -1.0f? -1.0f : t2;
+	t2 = t2 > 1.0f ? 1.0f : t2;
+	t2 = t2 < -1.0f ? -1.0f : t2;
 
 	double _siny_cosp = 2 * (_quaternion.w * _quaternion.z + _quaternion.x * _quaternion.y);
 	double _cosy_cosp = 1 - 2 * (_quaternion.y * _quaternion.y + _quaternion.z * _quaternion.z);
+
+	rde_log_level(RDE_LOG_LEVEL_INFO, "RER: (%f, %f, %f)", atan2(_sinr_cosp, _cosr_cosp), asin(t2), atan2(_siny_cosp, _cosy_cosp));
 
 	return (rde_vec_3F) { 
 		rde_math_radians_to_degrees(atan2(_sinr_cosp, _cosr_cosp)),

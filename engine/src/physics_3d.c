@@ -221,7 +221,7 @@ void rde_physics_3d_init(rde_physics_3d_config _physics_config) {
 
 	ENGINE.physics_3d.body_interface = JPC_PhysicsSystem_GetBodyInterface(ENGINE.physics_3d.physics_system);
 
-	JPC_PhysicsSystem_OptimizeBroadPhase(ENGINE.physics_3d.physics_system);
+	//JPC_PhysicsSystem_OptimizeBroadPhase(ENGINE.physics_3d.physics_system);
 
 	ENGINE.physics_3d.last_body_added_on_array_index = -1;
 }
@@ -270,13 +270,16 @@ rde_physics_3d_body* rde_physics_3d_body_load(RDE_PHYSICS_3D_SHAPE_TYPE_ _shape_
 
 	_rde_body->shape_info.shape = JPC_ShapeSettings_CreateShape((JPC_ShapeSettings*)_rde_body->shape_info.shape_settings);
 	_rde_body->transform = _transform;
+	_rde_body->active = _rde_common_settings.active;
 
 	rde_critical_error(_rde_body->shape_info.shape == NULL, "Create Physics 3D, error creating shape. Wrong '_settings' set (wrong type for shape '%d'). \n", _shape_type);
 
 	// TODO: in the future substitute for a propper end of layer checking
 	rde_critical_error(_rde_common_settings.layer < 0 || _rde_common_settings.layer >= NUM_BP_LAYERS, "Create Physics 3D Body error, layer not valid, should be between [0, %d]. \n", NUM_BP_LAYERS - 1);
 	
-	rde_quaternion _rotation = rde_math_euler_degrees_to_quaternion(_transform->rotation);
+	JPC_Real _quat[4];
+	JPC_Real _euler[3] = { rde_math_degrees_to_radians(_transform->rotation.x), rde_math_degrees_to_radians(_transform->rotation.z), rde_math_degrees_to_radians(_transform->rotation.y) };
+	JPC_Euler_ToQuat(_euler, _quat);
 	JPC_BodyCreationSettings_Set(
 		&_rde_body->body_settings,
 		_rde_body->shape_info.shape,
@@ -284,11 +287,11 @@ rde_physics_3d_body* rde_physics_3d_body_load(RDE_PHYSICS_3D_SHAPE_TYPE_ _shape_
 					  _rde_body->transform->position.y, 
 					  _rde_body->transform->position.z 
 		},
-		(float[]){
-			_rotation.x,
-			_rotation.y,
-			_rotation.z,
-			_rotation.w,
+		(JPC_Real[]) {
+			_quat[0],
+			_quat[1],
+			_quat[2],
+			_quat[3],
 		},
 		(JPC_MotionType)_rde_common_settings.body_type,
 		_rde_common_settings.layer);
@@ -333,15 +336,53 @@ void rde_physics_3d_run(float _fixed_dt) {
 		}
 
 		JPC_Real _position[3];
-		JPC_Real _rotation[4];
 		JPC_Body_GetPosition(_body->body, _position);
-		JPC_Body_GetRotation(_body->body, _rotation);
 
+		JPC_Real _quat[4] = { _body->body->rotation[0], _body->body->rotation[1], _body->body->rotation[2], _body->body->rotation[3] };
+		rde_log_level(RDE_LOG_LEVEL_INFO, "RQ: (%lf, %lf, %lf, %lf)", _quat[0], _quat[1], _quat[2], _quat[3]);
+		JPC_Real _euler[3];
+		JPC_Quat_ToEuler(_quat, _euler);
+		rde_log_level(RDE_LOG_LEVEL_INFO, "RE Rads: (%f, %f, %f)", _euler[0], _euler[1], _euler[2]);
+//
+		//rde_log_level(RDE_LOG_LEVEL_INFO, "RQ: (%lf, %lf, %lf, %lf)", _quat[0], _quat[1], _quat[2], _quat[3]);
+//
 		_body->transform->position = (rde_vec_3F) { _position[0], _position[1], _position[2] };
-		rde_quaternion _quat = { _rotation[0], _rotation[1], _rotation[2], _rotation[3] };
-		rde_vec_3F _rotation_euler = rde_math_quaternion_to_euler_degrees(_quat);
-		_body->transform->rotation = (rde_vec_3F) { _rotation_euler.x, _rotation_euler.y, _rotation_euler.z };
+		_body->transform->rotation = (rde_vec_3F) { rde_math_radians_to_degrees(_euler[2]), rde_math_radians_to_degrees(_euler[1]), rde_math_radians_to_degrees(_euler[0]) };
+		//rde_log_level(RDE_LOG_LEVEL_INFO, "RE Degs: (%f, %f, %f)", _body->transform->rotation.x, _body->transform->rotation.y, _body->transform->rotation.z);
+		
 	}
+}
+
+void rde_physics_3d_body_enable(rde_physics_3d_body* _body, bool _enable_body) {
+	rde_critical_error(_body == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Physcis 3D Body on enable body");
+	_body->active = _enable_body;
+	if(_enable_body) {
+		JPC_BodyInterface_ActivateBody(ENGINE.physics_3d.body_interface, _body->body_id);
+	} else {
+		JPC_BodyInterface_DeactivateBody(ENGINE.physics_3d.body_interface, _body->body_id);
+	}
+}
+
+void rde_physics_3d_body_set_transform(rde_physics_3d_body* _body, rde_transform _transform) {
+	rde_critical_error(_body == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Physcis 3D Body on set transform for body");
+	JPC_BodyInterface_SetPosition(ENGINE.physics_3d.body_interface, 
+	                              _body->body_id, 
+	                              (JPC_Real [3]) {
+								  	_transform.position.x,
+								  	_transform.position.y,
+								  	_transform.position.z
+								  },
+								  _body->active ? JPC_ACTIVATION_ACTIVATE : JPC_ACTIVATION_DONT_ACTIVATE
+	);
+
+	JPC_Real _quat[4];
+	JPC_Real _euler[3] = { rde_math_degrees_to_radians(_transform.rotation.x), rde_math_degrees_to_radians(_transform.rotation.z), rde_math_degrees_to_radians(_transform.rotation.y) };
+	JPC_Euler_ToQuat(_euler, _quat);
+	JPC_BodyInterface_SetRotation(ENGINE.physics_3d.body_interface, 
+	                              _body->body_id, 
+	                              (JPC_Real[4]) { _quat[0], _quat[2], _quat[1], _quat[3] },
+								  _body->active ? JPC_ACTIVATION_ACTIVATE : JPC_ACTIVATION_DONT_ACTIVATE
+	);
 }
 
 void rde_physics_3d_destroy() {
