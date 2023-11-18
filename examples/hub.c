@@ -183,12 +183,12 @@ void on_imgui_hub_menu(float _dt) {
 			performance_test_3d_init();
 		}
 
-		if(rde_imgui_radio_button("Physics", &_option, 2)) {
-			if(unload_callback != NULL) {
-				unload_callback();
-			}
-			physics_init();
-		}
+		//if(rde_imgui_radio_button("Physics", &_option, 2)) {
+		//	if(unload_callback != NULL) {
+		//		unload_callback();
+		//	}
+		//	physics_init();
+		//}
 #else
 		if(rde_imgui_radio_button("Android demo", &_option, 2)) {
 			if(unload_callback != NULL) {
