@@ -1042,7 +1042,7 @@ typedef struct {
 	size_t temp_allocator_bytes; // recommended at least 10-15Mb, if not set, malloc/free will be used on runtime
 	size_t max_amout_of_allowed_jobs;
 	size_t max_amount_of_physics_barriers;
-	size_t max_amount_of_threads;
+	int max_amount_of_threads;
 	size_t max_amount_of_bodies;
 	size_t max_amount_of_mutexes;
 	size_t max_amount_of_contact_constraints;
