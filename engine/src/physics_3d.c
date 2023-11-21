@@ -1,65 +1,51 @@
 #ifdef RDE_PHYSICS_3D_MODULE
 
+rde_vec_3F rde_inner_physics_3d_rotate_box_point(rde_vec_3F _point, rde_vec_3F _rotation, rde_vec_3F _bounds) {
+	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
+
+	glm_translate(_transformation_matrix, (vec3) { _point.x, _point.y, _point.z });
+	if(_rotation.x != 0) {
+		glm_rotate(_transformation_matrix, glm_rad(_rotation.x), (vec3){ 1.0f, 0.0f, 0.0f });
+	}
+
+	if(_rotation.y != 0) {
+		glm_rotate(_transformation_matrix, glm_rad(_rotation.y), (vec3){ 0.0f, 1.0f, 0.0f });
+	}
+
+	if(_rotation.z != 0) {
+		glm_rotate(_transformation_matrix, glm_rad(_rotation.z), (vec3){ 0.0f, 0.0f, 1.0f });
+	}
+
+	vec4 _rotated_point;
+	glm_mat4_mulv(_transformation_matrix, (vec4) { _bounds.x, _bounds.y, _bounds.z, 1.0f }, _rotated_point); 
+
+	return (rde_vec_3F) { _rotated_point[0], _rotated_point[1], _rotated_point[2] };
+}
+
 void rde_physics_3d_draw_debug_box(rde_transform* _transform, rde_jolt_box_shape_bounds* _box_bounds) {
 
 	// Front and back faces
 	for(int _i = 0; _i < 2; _i++) {
 		float _depth = _i == 0 ? 1.0f : -1.0f;
-		rde_rendering_3d_draw_line((rde_vec_3F) {
-									_transform->position.x - _box_bounds->width,
-									_transform->position.y - _box_bounds->height,
-									_transform->position.z + _box_bounds->depth * _depth
-								},
-								(rde_vec_3F) {
-									_transform->position.x + _box_bounds->width,
-									_transform->position.y - _box_bounds->height,
-									_transform->position.z + _box_bounds->depth * _depth
-								},
-								RDE_COLOR_YELLOW,
-								1,
-								NULL);
 
-		rde_rendering_3d_draw_line((rde_vec_3F) {
-								_transform->position.x - _box_bounds->width,
-								_transform->position.y + _box_bounds->height,
-								_transform->position.z + _box_bounds->depth * _depth
-								},
-								(rde_vec_3F) {
-									_transform->position.x + _box_bounds->width,
-									_transform->position.y + _box_bounds->height,
-									_transform->position.z + _box_bounds->depth * _depth
-								},
-								RDE_COLOR_YELLOW,
-								1,
-								NULL);
+		rde_vec_3F _p_0_0 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) { -_box_bounds->width, -_box_bounds->height, _box_bounds->depth * _depth });
+		rde_vec_3F _p_0_1 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) {  _box_bounds->width, -_box_bounds->height, _box_bounds->depth * _depth });
+		rde_rendering_3d_draw_line(_p_0_0, _p_0_1, RDE_COLOR_YELLOW, 1, NULL);
+
+
+		rde_vec_3F _p_1_0 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) { -_box_bounds->width,  _box_bounds->height, _box_bounds->depth * _depth });
+		rde_vec_3F _p_1_1 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) {  _box_bounds->width,  _box_bounds->height, _box_bounds->depth * _depth });
+		rde_rendering_3d_draw_line(_p_1_0, _p_1_1, RDE_COLOR_YELLOW, 1, NULL);
 	
-		rde_rendering_3d_draw_line((rde_vec_3F) {
-								_transform->position.x - _box_bounds->width,
-								_transform->position.y - _box_bounds->height,
-								_transform->position.z + _box_bounds->depth * _depth
-								},
-								(rde_vec_3F) {
-									_transform->position.x - _box_bounds->width,
-									_transform->position.y + _box_bounds->height,
-									_transform->position.z + _box_bounds->depth * _depth
-								},
-								RDE_COLOR_YELLOW,
-								1,
-								NULL);
+
+		rde_vec_3F _p_2_0 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) { -_box_bounds->width, -_box_bounds->height, _box_bounds->depth * _depth });
+		rde_vec_3F _p_2_1 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) { -_box_bounds->width,  _box_bounds->height, _box_bounds->depth * _depth });
+		rde_rendering_3d_draw_line(_p_2_0, _p_2_1, RDE_COLOR_YELLOW, 1, NULL);
 	
-		rde_rendering_3d_draw_line((rde_vec_3F) {
-								_transform->position.x + _box_bounds->width,
-								_transform->position.y - _box_bounds->height,
-								_transform->position.z + _box_bounds->depth * _depth
-								},
-								(rde_vec_3F) {
-									_transform->position.x + _box_bounds->width,
-									_transform->position.y + _box_bounds->height,
-									_transform->position.z + _box_bounds->depth * _depth
-								},
-								RDE_COLOR_YELLOW,
-								1,
-								NULL);
+
+		rde_vec_3F _p_3_0 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) {  _box_bounds->width, -_box_bounds->height, _box_bounds->depth * _depth });
+		rde_vec_3F _p_3_1 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) {  _box_bounds->width,  _box_bounds->height, _box_bounds->depth * _depth });
+		rde_rendering_3d_draw_line(_p_3_0, _p_3_1, RDE_COLOR_YELLOW, 1, NULL);
 	}
 	
 
@@ -67,33 +53,15 @@ void rde_physics_3d_draw_debug_box(rde_transform* _transform, rde_jolt_box_shape
 	// Top and bottom faces
 	for(int _i = 0; _i < 2; _i++) {
 		float _height = _i == 0 ? 1.0f : -1.0f;
-		rde_rendering_3d_draw_line((rde_vec_3F) {
-										_transform->position.x - _box_bounds->width,
-										_transform->position.y + _box_bounds->height * _height,
-										_transform->position.z - _box_bounds->depth
-									},
-									(rde_vec_3F) {
-										_transform->position.x - _box_bounds->width,
-										_transform->position.y + _box_bounds->height * _height,
-										_transform->position.z + _box_bounds->depth
-									},
-									RDE_COLOR_YELLOW,
-									1,
-									NULL);
+
+		rde_vec_3F _p_0_0 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) { -_box_bounds->width,  _box_bounds->height * _height, -_box_bounds->depth });
+		rde_vec_3F _p_0_1 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) { -_box_bounds->width,  _box_bounds->height * _height,  _box_bounds->depth });
+		rde_rendering_3d_draw_line(_p_0_0, _p_0_1, RDE_COLOR_YELLOW, 1, NULL);
 	
-		rde_rendering_3d_draw_line((rde_vec_3F) {
-								_transform->position.x + _box_bounds->width,
-								_transform->position.y + _box_bounds->height * _height,
-								_transform->position.z - _box_bounds->depth
-								},
-								(rde_vec_3F) {
-									_transform->position.x + _box_bounds->width,
-									_transform->position.y + _box_bounds->height * _height,
-									_transform->position.z + _box_bounds->depth
-								},
-								RDE_COLOR_YELLOW,
-								1,
-								NULL);
+
+		rde_vec_3F _p_1_0 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) {  _box_bounds->width,  _box_bounds->height * _height, -_box_bounds->depth });
+		rde_vec_3F _p_1_1 = rde_inner_physics_3d_rotate_box_point(_transform->position, _transform->rotation, (rde_vec_3F) {  _box_bounds->width,  _box_bounds->height * _height, _box_bounds->depth });
+		rde_rendering_3d_draw_line(_p_1_0, _p_1_1, RDE_COLOR_YELLOW, 1, NULL);
 	}
 }
 
