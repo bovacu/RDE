@@ -956,6 +956,13 @@ SPECIALIZED_MAT4(long,			rde_mat_4L);
 SPECIALIZED_MAT4(unsigned long, rde_mat_4UL);
 SPECIALIZED_MAT4(size_t, 		rde_mat_4ST);
 
+typedef struct {
+	float x;
+	float y;
+	float z;
+	float w;
+} rde_quaternion;
+
 struct rde_line {
 	UNIMPLEMENTED_STRUCT()
 };
@@ -978,12 +985,21 @@ typedef struct {
 } rde_probability;
 RDE_FUNC rde_probability rde_struct_create_probability();
 
-typedef struct {
-	float x;
-	float y;
-	float z;
-	float w;
-} rde_quaternion;
+typedef struct rde_transform rde_transform;
+struct rde_transform {
+	rde_vec_3F position;
+	rde_vec_3F rotation;
+	rde_vec_3F scale;
+	rde_transform* parent;
+};
+RDE_FUNC rde_transform rde_struct_create_transform();
+
+
+/// ================================= LIBS ==================================
+
+#ifdef RDE_PHYSICS_3D_MODULE
+#include "JoltC/rde_joltc.h"
+#endif
 
 /// ================== CALLBACKS AND FUNCTION POINTERS ======================
 
@@ -1056,7 +1072,7 @@ typedef struct {
 #endif
 
 #ifdef RDE_PHYSICS_3D_MODULE
-	rde_physics_3d_config physics_3d_config;
+	rde_jolt_init_config jolt_config;
 #endif
 
 } rde_engine_init_info;
@@ -1147,15 +1163,6 @@ struct rde_event {
 	void* sdl_native_event;
 };
 RDE_FUNC rde_event rde_struct_create_event();
-
-typedef struct rde_transform rde_transform;
-struct rde_transform {
-	rde_vec_3F position;
-	rde_vec_3F rotation;
-	rde_vec_3F scale;
-	rde_transform* parent;
-};
-RDE_FUNC rde_transform rde_struct_create_transform();
 
 /// ============================ RENDERING ==================================
 
@@ -1338,28 +1345,6 @@ typedef struct {
 RDE_FUNC rde_sound_config rde_struct_create_audio_config();
 #endif
 
-/// ============================ PHYSICS 3D ==================================
-
-typedef struct rde_physics_3d_body rde_physics_3d_body;
-
-typedef struct {
-	uint layer;
-	RDE_PHYSICS_3D_BODY_TYPE_ body_type;
-	bool active;
-} rde_physics_3d_common_shape_settings;
-
-typedef struct {
-	rde_physics_3d_common_shape_settings common;
-	float width;
-	float height;
-	float depth;
-} rde_physics_3d_shape_box_settings;
-
-typedef struct {
-	rde_physics_3d_common_shape_settings common;
-	float radius;
-} rde_physics_3d_shape_sphere_settings;
-
 /// *************************************************************************************************
 /// *                                GLOBAL VARIABLES                         						*
 /// *************************************************************************************************
@@ -1412,14 +1397,16 @@ const rde_engine_init_info RDE_DEFAULT_INIT_INFO = {
 
 #ifdef RDE_PHYSICS_3D_MODULE
 	,
-	.physics_3d_config = {
-		.temp_allocator_bytes = 10 * 1024 * 1024,
-		.max_amout_of_allowed_jobs = 2048,
-		.max_amount_of_physics_barriers = 8,
-		.max_amount_of_threads = -1,
-		.max_amount_of_bodies = 65536,
-		.max_amount_of_mutexes = 0,
-		.max_amount_of_contact_constraints = 10240,
+	.jolt_config = {
+		.temo_allocator_size = 10 * 1024 * 1024,
+		.max_physics_jobs = 2048,
+		.max_physics_barriers = 8,
+		.max_threads = -1,
+		.max_bodies = 65536,
+		.max_body_pairs = 65536,
+		.max_body_mutexes = 0,
+		.max_concat_constraints = 10240,
+		.collision_steps_per_update = 1
 	}
 #endif
 };
@@ -1751,22 +1738,6 @@ RDE_FUNC void rde_audio_end();
 /// ============================ PHYSICS ====================================
 
 #ifdef RDE_PHYSICS_2D_MODULE
-
-#endif
-
-#ifdef RDE_PHYSICS_3D_MODULE
-
-RDE_FUNC void rde_physics_3d_init(rde_physics_3d_config _physics_config);
-
-RDE_FUNC rde_physics_3d_body* rde_physics_3d_body_load(RDE_PHYSICS_3D_SHAPE_TYPE_ _shape_type, rde_transform* _transform, const void* _settings);
-RDE_FUNC void rde_physics_3d_body_unload(rde_physics_3d_body* _body);
-
-RDE_FUNC void rde_physics_3d_body_enable(rde_physics_3d_body* _body, bool _enable_body);
-RDE_FUNC void rde_physics_3d_body_set_transform(rde_physics_3d_body* _body, rde_transform _transform);
-
-RDE_FUNC void rde_physics_3d_run(float _fixed_dt);
-
-RDE_FUNC void rde_physics_3d_destroy();
 
 #endif
 

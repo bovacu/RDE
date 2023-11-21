@@ -379,33 +379,6 @@ struct rde_sound {
 };
 #endif
 
-#ifdef RDE_PHYSICS_3D_MODULE
-
-#ifdef RDE_PHYSICS_3D_MODULE
-#define JPH_DEBUG_RENDERER
-#include "JoltC/rde_joltc.h"
-#endif
-
-typedef struct {
-	rde_physics_3d_body* bodies;
-	int last_body_added_on_array_index;
-} rde_physics_3d;
-
-struct rde_physics_3d_body {
-	rde_transform* transform;
-	int index_on_array;
-	bool active;
-};
-rde_physics_3d_body rde_struct_create_physics_3d_body() {
-	rde_physics_3d_body _p;
-	_p.transform = NULL;
-	_p.index_on_array = -1;
-	_p.active = false;
-	return _p;
-}
-
-#endif
-
 #define RDE_DEFAULT_SHADERS_AMOUNT 6
 struct rde_engine {
 	float delta_time;
@@ -458,10 +431,6 @@ struct rde_engine {
 	rde_sound* sounds;
 	ma_device miniaudio_device;
 	rde_sound_config device_config;
-#endif
-
-#ifdef RDE_PHYSICS_3D_MODULE
-	rde_physics_3d physics_3d;
 #endif
 		
 	rde_event_func window_events[RDE_WIN_EVENT_COUNT];
@@ -1079,14 +1048,6 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	rde_inner_set_posix_signal_handler();
 #endif
 
-#ifdef RDE_PHYSICS_3D_MODULE
-	rde_critical_error(_e.init_info.physics_3d_config.max_amount_of_bodies <= 0, "Physics 3D is active, 'max_amount_of_bodies' must be at least 1");
-	_e.physics_3d.bodies = (rde_physics_3d_body*)malloc(sizeof(rde_physics_3d_body) * _e.init_info.physics_3d_config.max_amount_of_bodies);
-	for(size_t _i = 0; _i < _e.init_info.physics_3d_config.max_amount_of_bodies; _i++) {
-		_e.physics_3d.bodies[_i] = rde_struct_create_physics_3d_body();
-	}
-#endif
-
 	return _e;
 }
 
@@ -1099,13 +1060,18 @@ rde_engine ENGINE;
 #include "rendering_common.c"
 #include "rendering_2d.c"
 #include "rendering_3d.c"
+#include "physics_2d.c"
 #include "events.c"
-#include "physics_3d.c"
 #include "audio.c"
 #include "mobile.c"
 
 void rde_inner_engine_on_event();
 void rde_inner_engine_on_update(float _dt);
+
+#if defined(RDE_PHYSICS_3D_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
+void rde_inner_engine_on_fixed_update(float _fixed_dt);
+#endif
+
 void rde_inner_engine_on_late_update(float _dt);
 
 void rde_inner_engine_sync_events();
@@ -1210,6 +1176,12 @@ void rde_inner_engine_on_update(float _dt) {
 	UNUSED(_dt)
 }
 
+#if defined(RDE_PHYSICS_3D_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
+void rde_inner_engine_on_fixed_update(float _fixed_dt) {
+	rde_jolt_update(_fixed_dt);
+}
+#endif
+
 void rde_inner_engine_on_late_update(float _dt) {
 	UNUSED(_dt)
 }
@@ -1265,7 +1237,8 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_init_in
 #endif
 
 #ifdef RDE_PHYSICS_3D_MODULE
-	rde_physics_3d_init(_engine_init_info.physics_3d_config);
+	rde_jolt_init(_engine_init_info.jolt_config, rde_critical_error, rde_log_level_inner);
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Jolt loaded correctly");
 #endif
 
 	srand(time(NULL));
@@ -1337,15 +1310,13 @@ void rde_engine_on_run() {
 		rde_inner_engine_on_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_update(ENGINE.delta_time);
 
+		while (ENGINE.fixed_time_step_accumulator >= ENGINE.fixed_delta_time) {
+			ENGINE.fixed_time_step_accumulator -= ENGINE.fixed_delta_time;
 #if defined(RDE_PHYSICS_3D_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
-		rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
-		ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
-		//while (ENGINE.fixed_time_step_accumulator >= ENGINE.fixed_delta_time) {
-		//	ENGINE.fixed_time_step_accumulator -= ENGINE.fixed_delta_time;
-		//	rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
-		//	ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
-		//}
+			rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
 #endif
+			ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
+		}
 
 		rde_inner_engine_on_late_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_late_update(ENGINE.delta_time);
@@ -1503,7 +1474,7 @@ void rde_engine_destroy_engine() {
 #endif
 
 #ifdef RDE_PHYSICS_3D_MODULE
-	rde_physics_3d_destroy();
+	rde_jolt_end();
 #endif
 
 	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_windows; _i++) {
