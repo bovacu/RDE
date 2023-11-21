@@ -82,7 +82,7 @@ typedef struct rde_jolt_shape rde_jolt_shape;
 typedef struct rde_jolt_body rde_jolt_body;
 typedef void(*critical_error)(bool, const char*, ...);
 typedef void(*logger)(RDE_LOG_LEVEL_, const char*, ...);
-typedef void(*body_iter_callback)(rde_jolt_body*, rde_jolt_shape*);
+typedef void(*body_iter_callback)(rde_jolt_body*, rde_jolt_shape*, rde_transform*);
 
 typedef struct {
 	float width;
@@ -173,6 +173,7 @@ RDE_FUNC void rde_jolt_body_set_degrees_of_freedom(rde_jolt_body* _body, RDE_JOL
 
 RDE_FUNC rde_jolt_shape* rde_jolt_body_get_shape(rde_jolt_body* _body);
 RDE_FUNC void rde_jolt_shape_get_bounds(rde_jolt_shape* _shape, RDE_JOLT_SHAPE_ _shape_type, void* _out_bounds);
+RDE_FUNC RDE_JOLT_SHAPE_ rde_jolt_shape_get_type(rde_jolt_shape* _shape);
 
 RDE_FUNC void rde_jolt_update(float _fixed_dt);
 

@@ -1061,6 +1061,7 @@ rde_engine ENGINE;
 #include "rendering_2d.c"
 #include "rendering_3d.c"
 #include "physics_2d.c"
+#include "physics_3d.c"
 #include "events.c"
 #include "audio.c"
 #include "mobile.c"
@@ -1328,11 +1329,11 @@ void rde_engine_on_run() {
 				continue;
 			}
 
-			#ifdef RDE_RENDERING_MODULE
+#ifdef RDE_RENDERING_MODULE
 			rde_inner_engine_on_render(ENGINE.delta_time, _window);
 			ENGINE.mandatory_callbacks.on_render(ENGINE.delta_time, _window);
 			rde_inner_rendering_flush_to_default_render_texture(_window);
-			#endif
+#endif
 
 			rde_events_sync_events(_window);
 

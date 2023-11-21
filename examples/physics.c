@@ -2,6 +2,7 @@ rde_camera physics_camera;
 
 float physics_yaw = -90.0f;
 bool physics_first_mouse = true;
+bool physics_draw_debug_shapes = false;
 float physics_pitch =  0.0f;
 float physics_last_x =  1280.f * 0.5f;
 float physics_last_y =  720.f * 0.5f;
@@ -150,6 +151,7 @@ void physics_draw_imgui(float _dt, rde_window* _window) {
 		rde_jolt_body_set_active(physics_cube_body, physics_simulation_running);
 		rde_jolt_body_set_active(physics_floor_body, physics_simulation_running);
 	}
+	rde_imgui_checkbox("Draw debug shapes", &physics_draw_debug_shapes);
 
 	rde_imgui_separator();
 
@@ -193,11 +195,15 @@ void physics_on_render(float _dt, rde_window* _window) {
 	
 	draw_grid(&physics_camera, _window);
 	physics_draw_3d(_window, _dt);
+	
+	if(physics_draw_debug_shapes) {
+		rde_jolt_draw_debug_shapes(_window, &physics_camera);
+	}
 }
 
 void physics_unload() {
-//	rde_physics_3d_body_unload(physics_floor_body);
-//	rde_physics_3d_body_unload(physics_cube_body);
+	rde_jolt_body_unload(physics_floor_body);
+	rde_jolt_body_unload(physics_cube_body);
 
 	rde_rendering_mesh_destroy(physics_floor_mesh, false);
 	rde_rendering_model_unload(physics_body_model);

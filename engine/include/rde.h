@@ -995,17 +995,30 @@ struct rde_transform {
 RDE_FUNC rde_transform rde_struct_create_transform();
 
 
-/// ================================= LIBS ==================================
-
-#ifdef RDE_PHYSICS_3D_MODULE
-#include "JoltC/rde_joltc.h"
-#endif
-
-/// ================== CALLBACKS AND FUNCTION POINTERS ======================
+/// ================================= LIBS && DECLS ===========================
 
 typedef struct rde_engine rde_engine;
 typedef struct rde_window rde_window;
 typedef struct rde_event rde_event;
+typedef struct rde_file_handle rde_file_handle;
+
+#ifdef RDE_RENDERING_MODULE
+typedef struct rde_shader rde_shader;
+typedef struct rde_camera rde_camera;
+typedef struct rde_atlas rde_atlas;
+typedef struct rde_font rde_font;
+typedef struct rde_render_texture rde_render_texture;
+typedef struct rde_texture rde_texture;
+typedef struct rde_model rde_model;
+typedef uint rde_skybox_id;
+#endif
+
+#ifdef RDE_PHYSICS_3D_MODULE
+#include "JoltC/rde_joltc.h"
+RDE_FUNC void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
+#endif
+
+/// ================== CALLBACKS AND FUNCTION POINTERS ======================
 
 typedef void (*rde_event_func)(rde_event*, rde_window*);
 typedef void (*rde_engine_user_side_loop_func)(float);
@@ -1022,8 +1035,6 @@ typedef struct {
 RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
 
 /// ============================== ENGINE ===================================
-
-typedef struct rde_file_handle rde_file_handle;
 
 typedef struct {
 	int index;
@@ -1167,16 +1178,12 @@ RDE_FUNC rde_event rde_struct_create_event();
 /// ============================ RENDERING ==================================
 
 #ifdef RDE_RENDERING_MODULE
-typedef struct rde_shader rde_shader;
 typedef struct {
 	uint vertex_program_id;
 	uint fragment_program_id;
 	int compiled_program_id;
 } rde_shader_data;
 
-typedef struct rde_render_texture rde_render_texture;
-
-typedef struct rde_texture rde_texture;
 typedef struct {
 	int opengl_texture_id;
 	rde_vec_2UI size;
@@ -1196,13 +1203,11 @@ typedef struct {
 } rde_texture_parameters;
 RDE_FUNC rde_texture_parameters rde_struct_texture_parameters();
 
-typedef struct rde_atlas rde_atlas;
 typedef struct {
 	int opengl_texture_id;
 	int amount_of_subtextures;
 } rde_atlas_data;
 
-typedef struct rde_font rde_font;
 typedef struct {
 	int opengl_texture_id;
 	int amount_of_chars;
@@ -1252,7 +1257,6 @@ typedef struct {
 										// 4 -> transforms to render (dynamic)
 } rde_mesh_data;
 
-typedef struct rde_model rde_model;
 typedef struct {
 	size_t amount_of_meshes;
 	rde_mesh** meshes;
@@ -1291,8 +1295,6 @@ typedef struct {
 } rde_spot_light;
 RDE_FUNC rde_spot_light rde_struct_create_spot_light();
 
-typedef uint rde_skybox_id;
-
 struct rde_model_bone {
 	UNIMPLEMENTED_STRUCT()
 };
@@ -1319,7 +1321,7 @@ struct rde_viewport {
 	UNIMPLEMENTED_STRUCT()
 };
 
-typedef struct {
+struct rde_camera {
 	size_t id;
 	float zoom;
 	float fov;
@@ -1329,7 +1331,7 @@ typedef struct {
 	rde_vec_2F near_far;
 	RDE_CAMERA_TYPE_ camera_type;
 	bool enabled;
-} rde_camera;
+};
 RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
 #endif
 

@@ -187,6 +187,7 @@ class rde_contact_listener : public JPH::ContactListener {
 
 struct rde_jolt_shape {
 	JPH::Shape* inner_shape;
+	RDE_JOLT_SHAPE_ shape_type;
 };
 rde_jolt_shape create_shape_struct() {
 	rde_jolt_shape _s;
@@ -332,8 +333,8 @@ rde_jolt_body* rde_jolt_body_load(RDE_JOLT_SHAPE_ _shape_type, rde_jolt_body_set
 		}
 	}
 
-	
 	_body->shape.inner_shape = &(*_shape.Get());
+	_body->shape.shape_type = _shape_type;
 
 	// RDE is left-handed with Y-Up, Jolt is righ-handed with Y-Up, this modifications are used to 
 	// transform form RDE's Coordinate system to Jolts's Coordinate system
@@ -597,6 +598,11 @@ rde_jolt_shape* rde_jolt_body_get_shape(rde_jolt_body* _body) {
 	return &_body->shape;
 }
 
+RDE_JOLT_SHAPE_ rde_jolt_shape_get_type(rde_jolt_shape* _shape) {
+	rde_critical_error(_shape == NULL, "%s had '_shape' NULL, crashing application", __FUNCTION__);
+	return _shape->shape_type;
+}
+
 void rde_jolt_shape_get_bounds(rde_jolt_shape* _shape, RDE_JOLT_SHAPE_ _shape_type, void* _out_bounds) {
 	rde_critical_error(_shape == NULL, "%s had '_shape' NULL, crashing application", __FUNCTION__);
 
@@ -685,7 +691,7 @@ void rde_jolt_iterate_over_bodies(body_iter_callback _iterate_body_callback) {
 			continue;
 		}
 
-		_iterate_body_callback(_body, &_body->shape);
+		_iterate_body_callback(_body, &_body->shape, _body->transform);
 	}
 }
 
