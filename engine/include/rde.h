@@ -1018,6 +1018,10 @@ typedef uint rde_skybox_id;
 RDE_FUNC void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
 #endif
 
+#ifdef RDE_IMGUI_MODULE
+#include "rde_imgui.h"
+#endif
+
 /// ================== CALLBACKS AND FUNCTION POINTERS ======================
 
 typedef void (*rde_event_func)(rde_event*, rde_window*);
@@ -1436,19 +1440,6 @@ RDE_FUNC void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 
 RDE_FUNC const char* rde_util_file_get_name_extension(const char* _file_name);
 RDE_FUNC void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, size_t _sanitized_size);
-RDE_FUNC rde_file_handle* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode);
-RDE_FUNC char* rde_file_read_full_file(rde_file_handle* _file_handler, size_t* _output_file_size);
-RDE_FUNC unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, size_t* _output_file_size);
-RDE_FUNC char* rde_file_read_line(rde_file_handle* _file_handler, size_t _line);
-RDE_FUNC char* rde_file_read_chunk(rde_file_handle* _file_handler, size_t _begin_byte, size_t _end_byte);
-RDE_FUNC void rde_file_write(rde_file_handle* _file_handler, size_t _bytes, const char* _data);
-RDE_FUNC void rde_file_write_to_line(rde_file_handle* _file_handler, size_t _bytes, const char* _data, size_t _line);
-RDE_FUNC void rde_file_append(rde_file_handle* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line); // Appends some data at a specific point in the file. -1 as begin means EOF.
-RDE_FUNC void rde_file_clear_content(rde_file_handle* _file_handler);
-RDE_FUNC bool rde_file_exists(const char* _file_path);
-RDE_FUNC void rde_file_delete(const char* _file_path);
-RDE_FUNC void rde_file_move(const char* _file_path, const char* _new_file_path);
-RDE_FUNC void rde_file_close(rde_file_handle* _file_handler);
 
 #ifdef RDE_RENDERING_MODULE
 RDE_FUNC size_t rde_util_font_get_string_width(const char* _string, const rde_font* _font);
@@ -1745,10 +1736,19 @@ RDE_FUNC void rde_audio_end();
 
 /// ============================ FILE SYSTEM ================================
 
-
-#ifdef RDE_IMGUI_MODULE
-#include "rde_imgui.h"
-#endif
+RDE_FUNC rde_file_handle* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode);
+RDE_FUNC char* rde_file_read_full_file(rde_file_handle* _file_handler, size_t* _output_file_size);
+RDE_FUNC unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, size_t* _output_file_size);
+RDE_FUNC char* rde_file_read_line(rde_file_handle* _file_handler, size_t _line);
+RDE_FUNC char* rde_file_read_chunk(rde_file_handle* _file_handler, size_t _begin_byte, size_t _end_byte);
+RDE_FUNC void rde_file_write(rde_file_handle* _file_handler, size_t _bytes, const char* _data);
+RDE_FUNC void rde_file_write_to_line(rde_file_handle* _file_handler, size_t _bytes, const char* _data, size_t _line);
+RDE_FUNC void rde_file_append(rde_file_handle* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line); // Appends some data at a specific point in the file. -1 as begin means EOF.
+RDE_FUNC void rde_file_clear_content(rde_file_handle* _file_handler);
+RDE_FUNC bool rde_file_exists(const char* _file_path);
+RDE_FUNC void rde_file_delete(const char* _file_path);
+RDE_FUNC void rde_file_move(const char* _file_path, const char* _new_file_path);
+RDE_FUNC void rde_file_close(rde_file_handle* _file_handler);
 
 #if IS_ANDROID()
 RDE_FUNC ANativeWindow* rde_android_get_native_window();
