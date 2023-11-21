@@ -956,6 +956,13 @@ SPECIALIZED_MAT4(long,			rde_mat_4L);
 SPECIALIZED_MAT4(unsigned long, rde_mat_4UL);
 SPECIALIZED_MAT4(size_t, 		rde_mat_4ST);
 
+typedef struct {
+	float x;
+	float y;
+	float z;
+	float w;
+} rde_quaternion;
+
 struct rde_line {
 	UNIMPLEMENTED_STRUCT()
 };
@@ -978,18 +985,40 @@ typedef struct {
 } rde_probability;
 RDE_FUNC rde_probability rde_struct_create_probability();
 
-typedef struct {
-	float x;
-	float y;
-	float z;
-	float w;
-} rde_quaternion;
+typedef struct rde_transform rde_transform;
+struct rde_transform {
+	rde_vec_3F position;
+	rde_vec_3F rotation;
+	rde_vec_3F scale;
+	rde_transform* parent;
+};
+RDE_FUNC rde_transform rde_struct_create_transform();
 
-/// ================== CALLBACKS AND FUNCTION POINTERS ======================
+
+/// ================================= LIBS && DECLS ===========================
 
 typedef struct rde_engine rde_engine;
 typedef struct rde_window rde_window;
 typedef struct rde_event rde_event;
+typedef struct rde_file_handle rde_file_handle;
+
+#ifdef RDE_RENDERING_MODULE
+typedef struct rde_shader rde_shader;
+typedef struct rde_camera rde_camera;
+typedef struct rde_atlas rde_atlas;
+typedef struct rde_font rde_font;
+typedef struct rde_render_texture rde_render_texture;
+typedef struct rde_texture rde_texture;
+typedef struct rde_model rde_model;
+typedef uint rde_skybox_id;
+#endif
+
+#ifdef RDE_PHYSICS_3D_MODULE
+#include "JoltC/rde_joltc.h"
+RDE_FUNC void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
+#endif
+
+/// ================== CALLBACKS AND FUNCTION POINTERS ======================
 
 typedef void (*rde_event_func)(rde_event*, rde_window*);
 typedef void (*rde_engine_user_side_loop_func)(float);
@@ -1006,8 +1035,6 @@ typedef struct {
 RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
 
 /// ============================== ENGINE ===================================
-
-typedef struct rde_file_handle rde_file_handle;
 
 typedef struct {
 	int index;
@@ -1056,7 +1083,7 @@ typedef struct {
 #endif
 
 #ifdef RDE_PHYSICS_3D_MODULE
-	rde_physics_3d_config physics_3d_config;
+	rde_jolt_init_config jolt_config;
 #endif
 
 } rde_engine_init_info;
@@ -1148,28 +1175,15 @@ struct rde_event {
 };
 RDE_FUNC rde_event rde_struct_create_event();
 
-typedef struct rde_transform rde_transform;
-struct rde_transform {
-	rde_vec_3F position;
-	rde_vec_3F rotation;
-	rde_vec_3F scale;
-	rde_transform* parent;
-};
-RDE_FUNC rde_transform rde_struct_create_transform();
-
 /// ============================ RENDERING ==================================
 
 #ifdef RDE_RENDERING_MODULE
-typedef struct rde_shader rde_shader;
 typedef struct {
 	uint vertex_program_id;
 	uint fragment_program_id;
 	int compiled_program_id;
 } rde_shader_data;
 
-typedef struct rde_render_texture rde_render_texture;
-
-typedef struct rde_texture rde_texture;
 typedef struct {
 	int opengl_texture_id;
 	rde_vec_2UI size;
@@ -1189,13 +1203,11 @@ typedef struct {
 } rde_texture_parameters;
 RDE_FUNC rde_texture_parameters rde_struct_texture_parameters();
 
-typedef struct rde_atlas rde_atlas;
 typedef struct {
 	int opengl_texture_id;
 	int amount_of_subtextures;
 } rde_atlas_data;
 
-typedef struct rde_font rde_font;
 typedef struct {
 	int opengl_texture_id;
 	int amount_of_chars;
@@ -1245,7 +1257,6 @@ typedef struct {
 										// 4 -> transforms to render (dynamic)
 } rde_mesh_data;
 
-typedef struct rde_model rde_model;
 typedef struct {
 	size_t amount_of_meshes;
 	rde_mesh** meshes;
@@ -1284,8 +1295,6 @@ typedef struct {
 } rde_spot_light;
 RDE_FUNC rde_spot_light rde_struct_create_spot_light();
 
-typedef uint rde_skybox_id;
-
 struct rde_model_bone {
 	UNIMPLEMENTED_STRUCT()
 };
@@ -1312,7 +1321,7 @@ struct rde_viewport {
 	UNIMPLEMENTED_STRUCT()
 };
 
-typedef struct {
+struct rde_camera {
 	size_t id;
 	float zoom;
 	float fov;
@@ -1322,7 +1331,7 @@ typedef struct {
 	rde_vec_2F near_far;
 	RDE_CAMERA_TYPE_ camera_type;
 	bool enabled;
-} rde_camera;
+};
 RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
 #endif
 
@@ -1337,28 +1346,6 @@ typedef struct {
 } rde_sound_config;
 RDE_FUNC rde_sound_config rde_struct_create_audio_config();
 #endif
-
-/// ============================ PHYSICS 3D ==================================
-
-typedef struct rde_physics_3d_body rde_physics_3d_body;
-
-typedef struct {
-	uint layer;
-	RDE_PHYSICS_3D_BODY_TYPE_ body_type;
-	bool active;
-} rde_physics_3d_common_shape_settings;
-
-typedef struct {
-	rde_physics_3d_common_shape_settings common;
-	float width;
-	float height;
-	float depth;
-} rde_physics_3d_shape_box_settings;
-
-typedef struct {
-	rde_physics_3d_common_shape_settings common;
-	float radius;
-} rde_physics_3d_shape_sphere_settings;
 
 /// *************************************************************************************************
 /// *                                GLOBAL VARIABLES                         						*
@@ -1412,14 +1399,16 @@ const rde_engine_init_info RDE_DEFAULT_INIT_INFO = {
 
 #ifdef RDE_PHYSICS_3D_MODULE
 	,
-	.physics_3d_config = {
-		.temp_allocator_bytes = 10 * 1024 * 1024,
-		.max_amout_of_allowed_jobs = 2048,
-		.max_amount_of_physics_barriers = 8,
-		.max_amount_of_threads = -1,
-		.max_amount_of_bodies = 65536,
-		.max_amount_of_mutexes = 0,
-		.max_amount_of_contact_constraints = 10240,
+	.jolt_config = {
+		.temo_allocator_size = 10 * 1024 * 1024,
+		.max_physics_jobs = 2048,
+		.max_physics_barriers = 8,
+		.max_threads = -1,
+		.max_bodies = 65536,
+		.max_body_pairs = 65536,
+		.max_body_mutexes = 0,
+		.max_concat_constraints = 10240,
+		.collision_steps_per_update = 1
 	}
 #endif
 };
@@ -1751,22 +1740,6 @@ RDE_FUNC void rde_audio_end();
 /// ============================ PHYSICS ====================================
 
 #ifdef RDE_PHYSICS_2D_MODULE
-
-#endif
-
-#ifdef RDE_PHYSICS_3D_MODULE
-
-RDE_FUNC void rde_physics_3d_init(rde_physics_3d_config _physics_config);
-
-RDE_FUNC rde_physics_3d_body* rde_physics_3d_body_load(RDE_PHYSICS_3D_SHAPE_TYPE_ _shape_type, rde_transform* _transform, const void* _settings);
-RDE_FUNC void rde_physics_3d_body_unload(rde_physics_3d_body* _body);
-
-RDE_FUNC void rde_physics_3d_body_enable(rde_physics_3d_body* _body, bool _enable_body);
-RDE_FUNC void rde_physics_3d_body_set_transform(rde_physics_3d_body* _body, rde_transform _transform);
-
-RDE_FUNC void rde_physics_3d_run(float _fixed_dt);
-
-RDE_FUNC void rde_physics_3d_destroy();
 
 #endif
 

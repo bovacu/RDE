@@ -91,14 +91,16 @@ const rde_engine_init_info ENGINE_INFO = {
 		.amount_of_point_lights = 10,
 		.amount_of_spot_lights = 10
 	},
-	.physics_3d_config = (rde_physics_3d_config) {
-		.temp_allocator_bytes = 10 * 1024 * 1024,
-		.max_amout_of_allowed_jobs = 2048,
-		.max_amount_of_physics_barriers = 8,
-		.max_amount_of_threads = 1,
-		.max_amount_of_bodies = 65536,
-		.max_amount_of_mutexes = 0,
-		.max_amount_of_contact_constraints = 10240,
+	.jolt_config = (rde_jolt_init_config) {
+		.temo_allocator_size = 10 * 1024 * 1024,
+		.max_physics_jobs = 2048,
+		.max_physics_barriers = 8,
+		.max_threads = -1,
+		.max_bodies = 65536,
+		.max_body_pairs = 65536,
+		.max_body_mutexes = 0,
+		.max_concat_constraints = 10240,
+		.collision_steps_per_update = 1
 	}
 };
 #endif

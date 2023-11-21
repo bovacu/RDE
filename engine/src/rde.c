@@ -379,91 +379,6 @@ struct rde_sound {
 };
 #endif
 
-#ifdef RDE_PHYSICS_3D_MODULE
-
-#ifdef RDE_PHYSICS_3D_MODULE
-#define JPH_DEBUG_RENDERER
-#include "JoltC/JoltPhysicsC.h"
-#endif
-
-#define NUM_OBJ_LAYERS 2
-#define OBJ_LAYER_NON_MOVING 0
-#define OBJ_LAYER_MOVING 1
-
-#define NUM_BP_LAYERS 2
-#define BP_LAYER_NON_MOVING 0
-#define BP_LAYER_MOVING 1
-
-typedef struct BPLayerInterfaceImpl {
-    const JPC_BroadPhaseLayerInterfaceVTable* vtable;
-    JPC_BroadPhaseLayer object_to_broad_phase[NUM_OBJ_LAYERS];
-} BPLayerInterfaceImpl;
-
-typedef struct MyBroadPhaseFilter {
-    const JPC_ObjectVsBroadPhaseLayerFilterVTable* vtable; // VTable has to be the first field in the struct.
-} MyBroadPhaseFilter;
-
-typedef struct MyObjectFilter {
-    const JPC_ObjectLayerPairFilterVTable* vtable; // VTable has to be the first field in the struct.
-} MyObjectFilter;
-
-typedef struct MyActivationListener {
-    const JPC_BodyActivationListenerVTable* vtable; // VTable has to be the first field in the struct.
-} MyActivationListener;
-
-typedef struct MyContactListener {
-    const JPC_ContactListenerVTable* vtable; // VTable has to be the first field in the struct.
-} MyContactListener;
-
-typedef struct {
-	JPC_JobSystem* job_system;
-	JPC_TempAllocator* temp_allocator;
-	BPLayerInterfaceImpl broad_phase_layer;
-	MyBroadPhaseFilter object_vs_broad_phase_layer;
-	MyObjectFilter object_vs_object_layer;
-	MyActivationListener body_activation_listener;
-	MyContactListener contact_listener;
-	JPC_BodyInterface* body_interface;
-	JPC_PhysicsSystem* physics_system;
-	rde_physics_3d_body* bodies;
-	int last_body_added_on_array_index;
-} rde_physics_3d;
-
-typedef struct {
-	RDE_PHYSICS_3D_SHAPE_TYPE_ shape_type;
-	void* shape_settings;
-	JPC_Shape* shape;
-} rde_physics_3d_shape;
-rde_physics_3d_shape rde_struct_create_physics_3d_shape() {
-	rde_physics_3d_shape _p;
-	_p.shape_type = RDE_PHYSICS_3D_SHAPE_TYPE_NONE;
-	_p.shape_settings = NULL;
-	_p.shape = NULL;
-	return _p;
-}
-
-struct rde_physics_3d_body {
-	rde_physics_3d_shape shape_info;
-	JPC_BodyCreationSettings body_settings;
-	JPC_Body* body;
-	JPC_BodyID body_id;
-	rde_transform* transform;
-	int index_on_array;
-	bool active;
-};
-rde_physics_3d_body rde_struct_create_physics_3d_body() {
-	rde_physics_3d_body _p;
-	_p.shape_info = rde_struct_create_physics_3d_shape();
-	_p.body = NULL;
-	_p.body_id = 0;
-	_p.transform = NULL;
-	_p.index_on_array = -1;
-	_p.active = false;
-	return _p;
-}
-
-#endif
-
 #define RDE_DEFAULT_SHADERS_AMOUNT 6
 struct rde_engine {
 	float delta_time;
@@ -516,10 +431,6 @@ struct rde_engine {
 	rde_sound* sounds;
 	ma_device miniaudio_device;
 	rde_sound_config device_config;
-#endif
-
-#ifdef RDE_PHYSICS_3D_MODULE
-	rde_physics_3d physics_3d;
 #endif
 		
 	rde_event_func window_events[RDE_WIN_EVENT_COUNT];
@@ -1137,14 +1048,6 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	rde_inner_set_posix_signal_handler();
 #endif
 
-#ifdef RDE_PHYSICS_3D_MODULE
-	rde_critical_error(_e.init_info.physics_3d_config.max_amount_of_bodies <= 0, "Physics 3D is active, 'max_amount_of_bodies' must be at least 1");
-	_e.physics_3d.bodies = (rde_physics_3d_body*)malloc(sizeof(rde_physics_3d_body) * _e.init_info.physics_3d_config.max_amount_of_bodies);
-	for(size_t _i = 0; _i < _e.init_info.physics_3d_config.max_amount_of_bodies; _i++) {
-		_e.physics_3d.bodies[_i] = rde_struct_create_physics_3d_body();
-	}
-#endif
-
 	return _e;
 }
 
@@ -1157,13 +1060,19 @@ rde_engine ENGINE;
 #include "rendering_common.c"
 #include "rendering_2d.c"
 #include "rendering_3d.c"
-#include "events.c"
+#include "physics_2d.c"
 #include "physics_3d.c"
+#include "events.c"
 #include "audio.c"
 #include "mobile.c"
 
 void rde_inner_engine_on_event();
 void rde_inner_engine_on_update(float _dt);
+
+#if defined(RDE_PHYSICS_3D_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
+void rde_inner_engine_on_fixed_update(float _fixed_dt);
+#endif
+
 void rde_inner_engine_on_late_update(float _dt);
 
 void rde_inner_engine_sync_events();
@@ -1268,6 +1177,12 @@ void rde_inner_engine_on_update(float _dt) {
 	UNUSED(_dt)
 }
 
+#if defined(RDE_PHYSICS_3D_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
+void rde_inner_engine_on_fixed_update(float _fixed_dt) {
+	rde_jolt_update(_fixed_dt);
+}
+#endif
+
 void rde_inner_engine_on_late_update(float _dt) {
 	UNUSED(_dt)
 }
@@ -1323,7 +1238,8 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_init_in
 #endif
 
 #ifdef RDE_PHYSICS_3D_MODULE
-	rde_physics_3d_init(_engine_init_info.physics_3d_config);
+	rde_jolt_init(_engine_init_info.jolt_config, rde_critical_error, rde_log_level_inner);
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Jolt loaded correctly");
 #endif
 
 	srand(time(NULL));
@@ -1395,15 +1311,13 @@ void rde_engine_on_run() {
 		rde_inner_engine_on_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_update(ENGINE.delta_time);
 
+		while (ENGINE.fixed_time_step_accumulator >= ENGINE.fixed_delta_time) {
+			ENGINE.fixed_time_step_accumulator -= ENGINE.fixed_delta_time;
 #if defined(RDE_PHYSICS_3D_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
-		rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
-		ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
-		//while (ENGINE.fixed_time_step_accumulator >= ENGINE.fixed_delta_time) {
-		//	ENGINE.fixed_time_step_accumulator -= ENGINE.fixed_delta_time;
-		//	rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
-		//	ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
-		//}
+			rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
 #endif
+			ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
+		}
 
 		rde_inner_engine_on_late_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_late_update(ENGINE.delta_time);
@@ -1415,11 +1329,11 @@ void rde_engine_on_run() {
 				continue;
 			}
 
-			#ifdef RDE_RENDERING_MODULE
+#ifdef RDE_RENDERING_MODULE
 			rde_inner_engine_on_render(ENGINE.delta_time, _window);
 			ENGINE.mandatory_callbacks.on_render(ENGINE.delta_time, _window);
 			rde_inner_rendering_flush_to_default_render_texture(_window);
-			#endif
+#endif
 
 			rde_events_sync_events(_window);
 
@@ -1561,7 +1475,7 @@ void rde_engine_destroy_engine() {
 #endif
 
 #ifdef RDE_PHYSICS_3D_MODULE
-	rde_physics_3d_destroy();
+	rde_jolt_end();
 #endif
 
 	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_windows; _i++) {
