@@ -592,6 +592,38 @@ void rde_jolt_body_add_angular_impulse(rde_jolt_body* _body, rde_vec_3F _angular
 	body_interface->AddAngularImpulse(_body->inner_body->GetID(), { _angular_impulse.x, _angular_impulse.y, _angular_impulse.z });
 }
 
+rde_jolt_shape* rde_jolt_body_get_shape(rde_jolt_body* _body) {
+	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+	return &_body->shape;
+}
+
+void rde_jolt_shape_get_bounds(rde_jolt_shape* _shape, RDE_JOLT_SHAPE_ _shape_type, void* _out_bounds) {
+	rde_critical_error(_shape == NULL, "%s had '_shape' NULL, crashing application", __FUNCTION__);
+
+	switch(_shape_type) {
+		case RDE_JOLT_SHAPE_BOX: {
+			JPH::BoxShape* _box_shape = (JPH::BoxShape*)_shape->inner_shape;
+			JPH::Vec3 _half_extent = _box_shape->GetHalfExtent();
+			rde_jolt_box_shape_bounds* _rde_box_shape = (rde_jolt_box_shape_bounds*)_out_bounds;
+			_rde_box_shape->width = _half_extent.GetX();
+			_rde_box_shape->height = _half_extent.GetY();
+			_rde_box_shape->depth = _half_extent.GetZ();
+		} break;
+
+		case RDE_JOLT_SHAPE_SPHERE: {
+			JPH::SphereShape* _sphere_shape = (JPH::SphereShape*)_shape->inner_shape;
+			float _radius = _sphere_shape->GetRadius();
+			rde_jolt_sphere_shape_bounds* _rde_box_shape = (rde_jolt_sphere_shape_bounds*)_out_bounds;
+			_rde_box_shape->radius = _radius;
+		} break;
+
+		default: {
+			rde_critical_error(true, "rde_jolt_shape_get_bounds shape id '%d' not supported or not implemented \n", _shape_type);
+		} break;
+	}
+}
+
+
 void rde_jolt_update(float _fixed_dt) {
 	JPH::EPhysicsUpdateError _error = physics_system->Update(_fixed_dt, init_config.collision_steps_per_update, temp_allocator, job_system);
 	rde_critical_error(_error != JPH::EPhysicsUpdateError::None, "RDE Jolt Physics Update error code '%d', crashing before malfunctioning", _error);
@@ -604,14 +636,6 @@ void rde_jolt_update(float _fixed_dt) {
 
 		JPH::RVec3 _position = _body->inner_body->GetPosition();
 		JPH::Quat _quat = _body->inner_body->GetRotation();
-		rde_jolt_body_post_update_info _body_post_update_info = {
-			.position = { _position.GetX(), _position.GetY(), _position.GetZ() },
-			.rotation = { _quat.GetX(), _quat.GetY(), _quat.GetZ(), _quat.GetW() },
-			.motion_type = _body->motion_type,
-			.transform = _body->transform,
-			.id = _body->inner_body->GetID().GetIndexAndSequenceNumber(),
-			.layer = _body->layer
-		};
 
 		if(_body->motion_type != RDE_JOLT_BODY_MOTION_TYPE_STATIC) {
 			JPH::Vec3 _euler = _quat.GetEulerAngles();
@@ -650,6 +674,20 @@ rde_vec_3F rde_jolt_quaternion_to_euler_rads(rde_quaternion _quat) {
 	return { _euler.GetX(), _euler.GetY(), _euler.GetZ() };
 }
 
+void rde_jolt_iterate_over_bodies(body_iter_callback _iterate_body_callback) {
+	if(_iterate_body_callback == nullptr) {
+		return;
+	}
+
+	for (int _i = 0; _i <= last_used_body_index; _i++) {
+		rde_jolt_body* _body = &body_pool[_i];
+		if (_body->inner_body == NULL) {
+			continue;
+		}
+
+		_iterate_body_callback(_body, &_body->shape);
+	}
+}
 
 void rde_jolt_end() {
 

@@ -78,19 +78,11 @@ typedef enum {
 
 typedef unsigned int rde_jolt_body_id;
 
-typedef struct {
-	rde_vec_3F position;
-	rde_quaternion rotation;
-	RDE_JOLT_BODY_MOTION_TYPE_ motion_type;
-	rde_transform* transform;
-	rde_jolt_body_id id;
-	size_t layer;
-} rde_jolt_body_post_update_info;
-
 typedef struct rde_jolt_shape rde_jolt_shape;
 typedef struct rde_jolt_body rde_jolt_body;
 typedef void(*critical_error)(bool, const char*, ...);
 typedef void(*logger)(RDE_LOG_LEVEL_, const char*, ...);
+typedef void(*body_iter_callback)(rde_jolt_body*, rde_jolt_shape*);
 
 typedef struct {
 	float width;
@@ -123,6 +115,16 @@ typedef struct {
 	int    max_threads;
 	size_t collision_steps_per_update;
 } rde_jolt_init_config;
+
+typedef struct {
+	float width;
+	float height;
+	float depth;
+} rde_jolt_box_shape_bounds;
+
+typedef struct {
+	float radius;
+} rde_jolt_sphere_shape_bounds;
 
 RDE_FUNC bool rde_jolt_init(rde_jolt_init_config _init_config, critical_error _rde_critical_error_callback, logger _log_callback);
 RDE_FUNC rde_jolt_body* rde_jolt_body_load(RDE_JOLT_SHAPE_ _shape_type, rde_jolt_body_settings _body_settings, void* _shape_settings, rde_transform* _transform);
@@ -169,12 +171,17 @@ RDE_FUNC void rde_jolt_body_set_motion_type(rde_jolt_body* _body, RDE_JOLT_BODY_
 RDE_FUNC RDE_JOLT_BODY_DOF_ rde_jolt_body_get_degrees_of_freedom(rde_jolt_body* _body);
 RDE_FUNC void rde_jolt_body_set_degrees_of_freedom(rde_jolt_body* _body, RDE_JOLT_BODY_DOF_ _degrees_of_freedom);
 
+RDE_FUNC rde_jolt_shape* rde_jolt_body_get_shape(rde_jolt_body* _body);
+RDE_FUNC void rde_jolt_shape_get_bounds(rde_jolt_shape* _shape, RDE_JOLT_SHAPE_ _shape_type, void* _out_bounds);
+
 RDE_FUNC void rde_jolt_update(float _fixed_dt);
 
 RDE_FUNC rde_quaternion rde_jolt_euler_degs_to_quaternion(rde_vec_3F _euler);
 RDE_FUNC rde_quaternion rde_jolt_euler_rads_to_quaternion(rde_vec_3F _euler);
 RDE_FUNC rde_vec_3F rde_jolt_quaternion_to_euler_degs(rde_quaternion _quat);
 RDE_FUNC rde_vec_3F rde_jolt_quaternion_to_euler_rads(rde_quaternion _quat);
+
+RDE_FUNC void rde_jolt_iterate_over_bodies(body_iter_callback _iterate_body_callback);
 
 RDE_FUNC void rde_jolt_end();
 
