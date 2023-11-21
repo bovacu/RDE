@@ -49,6 +49,13 @@
 #include <Jolt/Physics/Character/Character.h>
 #include <Jolt/Physics/Character/CharacterVirtual.h>
 
+//#define JPH_DEBUG_RENDERER
+//// Make sure the debug renderer symbols don't get imported or exported
+//#define JPH_DEBUG_RENDERER_EXPORT
+//#include <Jolt/Renderer/DebugRenderer.h>
+//#undef JPH_DEBUG_RENDERER
+//#undef JPH_DEBUG_RENDERER_EXPORT
+
 namespace Layers {
 	static constexpr JPH::ObjectLayer NON_MOVING = 0;
 	static constexpr JPH::ObjectLayer MOVING = 1;
@@ -142,9 +149,41 @@ class rde_contact_listener : public JPH::ContactListener {
 		virtual void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override {  }
 };
 
-static bool AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, unsigned int inLine) {
-	return true;
-};
+//class rde_debug_renderer final : public JPH::DebugRenderer {
+//
+//	public:
+//		rde_debug_renderer() {
+//			JPH::DebugRenderer::Initialize();
+//		}
+//
+//		virtual ~rde_debug_renderer() override {
+//			
+//		}
+//	
+//		virtual void DrawLine(JPH::RVec3Arg inFrom, JPH::RVec3Arg inTo, JPH::ColorArg inColor) override {
+//			
+//		}
+//
+//		virtual void DrawTriangle(JPH::RVec3Arg inV1, JPH::RVec3Arg inV2, JPH::RVec3Arg inV3, JPH::ColorArg inColor, ECastShadow inCastShadow = ECastShadow::Off) override {
+//			
+//		}
+//		
+//		virtual Batch CreateTriangleBatch(const Triangle *inTriangles, int inTriangleCount) override {
+//			return {};
+//		}
+//	
+//		virtual Batch CreateTriangleBatch(const Vertex *inVertices, int inVertexCount, const JPH::uint32 *inIndices, int inIndexCount) override {
+//			return {};
+//		}
+//		
+//		virtual void DrawGeometry(JPH::RMat44Arg inModelMatrix, const JPH::AABox &inWorldSpaceBounds, float inLODScaleSq, JPH::ColorArg inModelColor, const GeometryRef &inGeometry, ECullMode inCullMode, ECastShadow inCastShadow, EDrawMode inDrawMode) override {
+//			
+//		}
+//		
+//		virtual void DrawText3D(JPH::RVec3Arg inPosition, const JPH::string_view &inString, JPH::ColorArg inColor, float inHeight) override {
+//			
+//		}
+//};
 
 struct rde_jolt_shape {
 	JPH::Shape* inner_shape;
@@ -218,6 +257,8 @@ bool rde_jolt_init(rde_jolt_init_config _init_config, critical_error _rde_critic
 	job_system = new JPH::JobSystemThreadPool(_init_config.max_physics_jobs, 
 	                                          _init_config.max_physics_barriers, 
 	                                          _init_config.max_threads);
+
+	//JPH::DebugRenderer::sInstance = new rde_debug_renderer();
 
 	broad_phase_layer_interface = new rde_broad_phase_layer_interface();
 	object_vs_broad_phase_layer_filter = new rde_object_vs_broad_phase_layer_filter();
@@ -627,6 +668,9 @@ void rde_jolt_end() {
 	if(physics_system == nullptr) {
 		return;
 	}
+
+//	delete JPH::DebugRenderer::sInstance;
+//	JPH::DebugRenderer::sInstance = nullptr;
 
 	delete physics_system;
 	physics_system = nullptr;
