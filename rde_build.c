@@ -146,6 +146,8 @@ bool copy_folder_if_exists(const char* _folder_path, const char* _new_path);
 
 bool dir_exists(const char* _dir_path);
 
+bool has_admin_rights();
+
 bool compile_windows();
 bool compile_osx();
 bool compile_linux();
@@ -601,6 +603,10 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		arrput(_recompile_command, "clang");
 		arrput(_recompile_command, "-g");
 		arrput(_recompile_command, "-O0");
+#if _WIN32
+		// This is for has_admin_rights() on Windows
+		arrput(_recompile_command, "-ladvapi32");
+#endif
 		
 		char _source_path[MAX_PATH];
 		memset(_source_path, 0, MAX_PATH);
@@ -636,7 +642,7 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		char _old_binary_path[MAX_PATH];
 		memset(_old_binary_path, 0, MAX_PATH);
 
-		strcat(_old_binary_path, _binary_path)
+		strcat(_old_binary_path, _binary_path);
 		strcat(_old_binary_path, ".old");
 		printf("Old binary path: %s \n", _old_binary_path);
 
@@ -647,8 +653,13 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 			exit(-1);
 		} else {
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Compiled successfully.");
-			if(!rename_file_if_exists(_old_binary_path, _to_trash)) {
-				exit(-1);
+
+			if(has_admin_rights()) {
+				if(!rename_file_if_exists(_old_binary_path, _to_trash)) {
+					exit(-1);
+				}
+			} else {
+				rde_log_level(RDE_LOG_LEVEL_WARNING, "Process has no admin rights, so '%s' has to be deleted manually", _old_binary_path);
 			}
 		}
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Recompiled successfully, redirecting original command...");
@@ -980,6 +991,25 @@ bool rm_dir_if_exists(const char* _dir_path) {
 	return true;
 }
 
+bool has_admin_rights() {
+#if _WIN32
+	bool _ret = false;
+	HANDLE _h_token = NULL;
+	if(OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &_h_token)) {
+		TOKEN_ELEVATION _elevation;
+		DWORD _cb_size = sizeof(TOKEN_ELEVATION);
+		if(GetTokenInformation( _h_token, TokenElevation, &_elevation, sizeof(_elevation), &_cb_size)) {
+			_ret = _elevation.TokenIsElevated;
+		}
+	}
+	if(_h_token) {
+		CloseHandle(_h_token);
+	}
+	return _ret;
+#else
+	return true;
+#endif
+}
 
 void include_imgui_in_compilation(rde_command* _build_command) {
 	rde_command _inner_command = NULL;
