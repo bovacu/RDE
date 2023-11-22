@@ -635,17 +635,13 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 
 		char _old_binary_path[MAX_PATH];
 		memset(_old_binary_path, 0, MAX_PATH);
-		
-#if _WIN32
-//		strcat(_old_binary_path, "\\");
-		//strcat(_old_binary_path, this_file_full_path);
-#endif
 
-		strcat(_old_binary_path, _binary_path);
+		strcat(_old_binary_path, _binary_path)
 		strcat(_old_binary_path, ".old");
+		printf("Old binary path: %s \n", _old_binary_path);
 
 		if(!run_command(_recompile_command)) {
-			if(!rename_file_if_exists(_old_binary_path, _just_binary_name != NULL ? _just_binary_name : _binary_path)) {
+			if(!rename_file_if_exists(_old_binary_path, _binary_path)) {
 				exit(-1);
 			}
 			exit(-1);
@@ -1344,7 +1340,7 @@ bool compile_windows() {
 		if(!make_dir_if_not_exists(_path)) {																						\
 					exit(-1);																										\
 		}																															\
-		strcat(_output_f, "build\\windows\\tools\\project_generator\\");															\
+		strcat(_output_p, "build\\windows\\tools\\project_generator\\");															\
 																																	\
 		char output_project[MAX_PATH];																								\
 		memset(output_project, 0, MAX_PATH);																						\
