@@ -1866,7 +1866,7 @@ bool compile_osx() {
 				arrput(_build_command, "-Wl,-all_load");													\
 				char _imgui_path[MAX_PATH];																	\
 				memset(_imgui_path, 0, MAX_PATH);															\
-				snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/libs/osx_x86_64/librde_imgui.a");\
+				snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/libs/osx_x86_64/librde_imgui.dylib");\
 				arrput(_build_command, _imgui_path);														\
 			}																								\
 			if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {								\
@@ -2156,7 +2156,8 @@ bool compile_osx() {
 		arrput(_build_command, "-Wall");																			\
 		arrput(_build_command, "-Wextra");																			\
 		arrput(_build_command, "-lRDE");																			\
-		arrput(_build_command, "-limgui");																			\
+		arrput(_build_command, "-lrde_imgui");																		\
+		arrput(_build_command, "-ljolt");																			\
 		arrput(_build_command, "-lSDL2_rde");																		\
 																													\
 		arrput(_build_command, "-o");																				\
@@ -2213,6 +2214,21 @@ bool compile_osx() {
 			}																										\
 			copy_file_if_exists(_original_path_jolt, _example_path_jolt); 											\
 		}																											\
+																													\
+		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {													\
+        	char _example_path_imgui[MAX_PATH];																		\
+        	memset(_example_path_imgui, 0, MAX_PATH);																\
+        	char _original_path_imgui[MAX_PATH];																	\
+        	memset(_original_path_imgui, 0, MAX_PATH);																\
+        	snprintf(_original_path_imgui, MAX_PATH, "%s%s", this_file_full_path, "external/libs/osx_x86_64/librde_imgui.dylib");\
+			if (strcmp(build_type, "debug") == 0) { 																\
+				snprintf(_example_path_imgui, MAX_PATH, "%s%s", this_file_full_path, "build/osx/debug/examples/");\
+			} else { 																								\
+				snprintf(_example_path_imgui, MAX_PATH, "%s%s", this_file_full_path, "build/osx/release/examples/");\
+			}																										\
+			copy_file_if_exists(_original_path_imgui, _example_path_imgui); 										\
+		}																											\
+																													\
 		char _assets_path[1024];																					\
 		memset(_assets_path, 0, 1024);																				\
 		snprintf(_assets_path, 1024, "%s%s", this_file_full_path, "examples/hub_assets");							\
