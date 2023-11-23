@@ -903,6 +903,8 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.total_amount_of_textures += _e.init_info.heap_allocs_config.max_number_of_models_textures;
 #endif
 
+
+
 	_e.user_event_callback = NULL;
 	_e.delta_time = 0.f;
 	_e.fixed_delta_time = 1.f / 60.f;
@@ -1006,7 +1008,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 #ifdef RDE_AUDIO_MODULE
 	if (_e.init_info.heap_allocs_config.max_number_of_sounds > 0) {
 		_e.sounds = (rde_sound*)malloc(sizeof(rde_sound) * _e.init_info.heap_allocs_config.max_number_of_sounds);
-		rde_critical_error(_e.sounds == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_sound) * _e.init_info.heap_allocs_config.max_number_of_sounds, "audio");
+		rde_critical_error(_e.sounds == NULL, RDE_ERROR_NO_MEMORY"This error probably happened because you compiled the engine with audio option but did not set the amount on rde_init_config.", sizeof(rde_sound) * _e.init_info.heap_allocs_config.max_number_of_sounds, "audio");
 		for (size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_number_of_sounds; _i++) {
 			_e.sounds[_i] = rde_struct_create_sound();
 		}

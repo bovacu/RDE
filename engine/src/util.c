@@ -311,8 +311,7 @@ size_t rde_util_string_split(char* _string, char** _split_array, const char* _sp
 	char* _string_ptr = rde_strtok(_string, _split_mark, NULL);
 
 	while(_string_ptr != NULL) {
-		size_t _string_ptr_size = strlen(_string_ptr);
-		rde_strcat(_split_array[_amount], _string_ptr_size, _string_ptr);
+		rde_strcat(_split_array[_amount], strlen(_string_ptr), _string_ptr);
 		_string_ptr = rde_strtok(NULL, _split_mark, NULL);
 		_amount++;
 	}

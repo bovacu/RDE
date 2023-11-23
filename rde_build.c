@@ -348,6 +348,7 @@ int needs_recompile(const char* _output_path, const char** _input_paths, size_t 
 		}
 		int input_path_time = _statbuf.st_mtime;
 		// NOTE: if even a single input_path is fresher than output_path that's 100% rebuild
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Here needs recompile");
 		if (input_path_time > _output_path_time) return 1;
 	}
 
@@ -644,7 +645,6 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 
 		strcat(_old_binary_path, _binary_path);
 		strcat(_old_binary_path, ".old");
-		printf("Old binary path: %s \n", _old_binary_path);
 
 		if(!run_command(_recompile_command)) {
 			if(!rename_file_if_exists(_old_binary_path, _binary_path)) {
@@ -2414,7 +2414,7 @@ bool compile_linux() {
 				arrput(_build_command, "-Wl,--whole-archive");												\
 				char _imgui_path[MAX_PATH];																	\
 				memset(_imgui_path, 0, MAX_PATH);															\
-				snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/libs/linux/librde_imgui.a");		\
+				snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/libs/linux/librde_imgui.so");		\
 				arrput(_build_command, _imgui_path);														\
 				arrput(_build_command, "-Wl,--no-whole-archive");											\
 			}																								\
@@ -2678,20 +2678,22 @@ bool compile_linux() {
 		arrput(_build_command, "-L");																				\
 		char _t_libs_path[MAX_PATH];																				\
 		memset(_t_libs_path, 0, MAX_PATH);																			\
-		snprintf(_t_libs_path, MAX_PATH, "%s""build/%s/%s/engine", this_file_full_path, platform, build_type);	\
+		snprintf(_t_libs_path, MAX_PATH, "%s""build/%s/%s/engine", this_file_full_path, platform, build_type);		\
 		arrput(_build_command, _t_libs_path);																		\
 																													\
 		arrput(_build_command, "-L");																				\
 		char _t_libs_path_1[MAX_PATH];																				\
 		memset(_t_libs_path_1, 0, MAX_PATH);																		\
-		snprintf(_t_libs_path_1, MAX_PATH, "%s""examples/libs/", this_file_full_path);							    \
+		snprintf(_t_libs_path_1, MAX_PATH, "%s""external/libs/linux/", this_file_full_path);						\
 		arrput(_build_command, _t_libs_path_1);																		\
 																													\
 		arrput(_build_command, "-Werror");																			\
 		arrput(_build_command, "-Wall");																			\
 		arrput(_build_command, "-Wextra");																			\
 		arrput(_build_command, "-lRDE");																			\
-		arrput(_build_command, "-limgui");																			\
+		arrput(_build_command, "-lrde_imgui");																		\
+		arrput(_build_command, "-ljolt");																			\
+		arrput(_build_command, "-lm");																				\
 																													\
 		arrput(_build_command, "-o");																				\
 		arrput(_build_command, output_atlas);																		\
@@ -2721,6 +2723,35 @@ bool compile_linux() {
 		    }																										\
 		    copy_file_if_exists(_rde_lib_path, _example_path_rde); 													\
         }																											\
+        																											\
+        if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {													\
+        	char _example_path_imgui[MAX_PATH];																		\
+        	memset(_example_path_imgui, 0, MAX_PATH);																\
+        	char _original_path_imgui[MAX_PATH];																	\
+        	memset(_original_path_imgui, 0, MAX_PATH);																\
+        	snprintf(_original_path_imgui, MAX_PATH, "%s%s", this_file_full_path, "external/libs/linux/librde_imgui.so");\
+			if (strcmp(build_type, "debug") == 0) { 																\
+				snprintf(_example_path_imgui, MAX_PATH, "%s%s", this_file_full_path, "build/linux/debug/examples/");\
+			} else { 																								\
+				snprintf(_example_path_imgui, MAX_PATH, "%s%s", this_file_full_path, "build/linux/release/examples/");\
+			}																										\
+			copy_file_if_exists(_original_path_imgui, _example_path_imgui); 										\
+		}																											\
+																													\
+		if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {											\
+        	char _example_path_jolt[MAX_PATH];																		\
+        	memset(_example_path_jolt, 0, MAX_PATH);																\
+        	char _original_path_jolt[MAX_PATH];																		\
+        	memset(_original_path_jolt, 0, MAX_PATH);																\
+        	snprintf(_original_path_jolt, MAX_PATH, "%s%s", this_file_full_path, "external/libs/linux/libjolt.so");	\
+			if (strcmp(build_type, "debug") == 0) { 																\
+				snprintf(_example_path_jolt, MAX_PATH, "%s%s", this_file_full_path, "build/linux/debug/examples/");	\
+			} else { 																								\
+				snprintf(_example_path_jolt, MAX_PATH, "%s%s", this_file_full_path, "build/linux/release/examples/");\
+			}																										\
+			copy_file_if_exists(_original_path_jolt, _example_path_jolt); 											\
+		}																											\
+																													\
 		char _assets_path[1024];																					\
 		memset(_assets_path, 0, 1024);																				\
 		snprintf(_assets_path, 1024, "%s%s", this_file_full_path, "examples/hub_assets");							\
