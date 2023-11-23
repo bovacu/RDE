@@ -163,6 +163,7 @@ RDE_FUNC void rde_jolt_body_add_force(rde_jolt_body* _body, rde_vec_3F _force);
 RDE_FUNC void rde_jolt_body_add_linear_velocity(rde_jolt_body* _body, rde_vec_3F _linear_velocity);
 RDE_FUNC void rde_jolt_body_add_torque(rde_jolt_body* _body, rde_vec_3F _torque);
 RDE_FUNC void rde_jolt_body_add_angular_impulse(rde_jolt_body* _body, rde_vec_3F _angular_impulse);
+RDE_FUNC void rde_jolt_body_add_angular_linear_velocity(rde_jolt_body* _body, rde_vec_3F _angular_linear_velocity);
 
 RDE_FUNC bool rde_jolt_body_is_sleeping(rde_jolt_body* _body);
 

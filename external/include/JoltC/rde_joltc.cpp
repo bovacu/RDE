@@ -593,6 +593,11 @@ void rde_jolt_body_add_angular_impulse(rde_jolt_body* _body, rde_vec_3F _angular
 	body_interface->AddAngularImpulse(_body->inner_body->GetID(), { _angular_impulse.x, _angular_impulse.y, _angular_impulse.z });
 }
 
+void rde_jolt_body_add_angular_linear_velocity(rde_jolt_body* _body, rde_vec_3F _angular_linear_velocity) {
+	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+	body_interface->SetAngularVelocity(_body->inner_body->GetID(), { _angular_linear_velocity.z, _angular_linear_velocity.y, _angular_linear_velocity.x });
+}
+
 rde_jolt_shape* rde_jolt_body_get_shape(rde_jolt_body* _body) {
 	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	return &_body->shape;
