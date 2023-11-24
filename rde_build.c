@@ -1178,9 +1178,29 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 
 
 
+#define ADD_PATH(_path_var, _path) 							\
+	dyn_str* _path_var = dyn_str_new(this_file_full_path);	\
+	dyn_str_append(_path_var, _path);						\
+	arrput(_build_command, dyn_str_get(_path_var));
 
+#define ADD_PATH_EX(_path_var, _path) 				\
+	_path_var = dyn_str_new(this_file_full_path);	\
+	dyn_str_append(_path_var, _path);				\
+	arrput(_build_command, dyn_str_get(_path_var));
 
+#define INCLUDE_PATH(_include_var_name, _path) 	\
+	arrput(_build_command, "-I");				\
+	ADD_PATH(_include_var_name, _path)
 
+#define INCLUDE_PATH_EX(_include_var_name, _path) 	\
+	arrput(_build_command, "-I");					\
+	ADD_PATH_EX(_include_var_name, _path)
+
+#define LINK_PATH(_include_var_name, _path) 	\
+	arrput(_build_command, "-L");				\
+	ADD_PATH(_include_var_name, _path)
+
+#define ADD_FLAG(_flag) arrput(_build_command, _flag);	
 
 #if _WIN32
 bool compile_windows() {
@@ -1227,71 +1247,45 @@ bool compile_windows() {
 		unsigned int _module = 1;																			\
 		for(int _i = 0; _i < MAX_MODULES; _i++) {															\
 			if((modules & _module) == _module) {															\
-				arrput(_build_command, MODULES_DEFINES[_i]);												\
+				ADD_FLAG(MODULES_DEFINES[_i]);																\
 			}																								\
 			_module = _module << 1;																			\
 		}																									\
 																											\
 		if(strcmp(build_type, "debug") == 0) {																\
-			arrput(_build_command, "-g");																	\
-			arrput(_build_command, "-O0");																	\
-			arrput(_build_command, "-DRDE_DEBUG");															\
+			ADD_FLAG("-g");																					\
+			ADD_FLAG("-O0");																				\
+			ADD_FLAG("-DRDE_DEBUG");																		\
 		} else {																							\
-			arrput(_build_command, "-O3");																	\
+			ADD_FLAG("-O3");																				\
 		}																									\
 																											\
-		arrput(_build_command, "-std=c99");																	\
+		ADD_FLAG("-std=c99");																				\
 																											\
 		if(is_god) {																						\
-			arrput(_build_command, GOD_MODE);																\
+			ADD_FLAG(GOD_MODE);																				\
 		}																									\
 																											\
-		dyn_str* _rde_src_path = dyn_str_new(this_file_full_path);											\
-		dyn_str_append(_rde_src_path, "engine\\src\\rde.c");												\
-		arrput(_build_command, dyn_str_get(_rde_src_path));													\
+		ADD_FLAG("-shared");																				\
 																											\
-		dyn_str* _glad_src_path = dyn_str_new(this_file_full_path);											\
-		dyn_str_append(_glad_src_path, "external\\include\\glad\\glad.c");									\
-		arrput(_build_command, dyn_str_get(_glad_src_path));												\
+		ADD_PATH(_rde_src_path, "engine\\src\\rde.c");														\
+		ADD_PATH(_glad_src_path, "external\\include\\glad\\glad.c");										\
 																											\
-		arrput(_build_command, "-shared");																	\
-																											\
-		arrput(_build_command, "-I");																		\
-		dyn_str* _rde_include_path = dyn_str_new(this_file_full_path);										\
-		dyn_str_append(_rde_include_path, "engine\\include\\");												\
-		arrput(_build_command, dyn_str_get(_rde_include_path));												\
-																											\
-		arrput(_build_command, "-I");																		\
-		dyn_str* _rde_src_include_path = dyn_str_new(this_file_full_path);									\
-		dyn_str_append(_rde_src_include_path, "engine\\src\\");												\
-		arrput(_build_command, dyn_str_get(_rde_src_include_path));											\
-																											\
-		arrput(_build_command, "-I");																		\
-		dyn_str* _external_include_path = dyn_str_new(this_file_full_path);									\
-		dyn_str_append(_external_include_path, "external\\include\\");										\
-		arrput(_build_command, dyn_str_get(_external_include_path));										\
+		INCLUDE_PATH(_rde_include_path, "engine\\include\\");												\
+		INCLUDE_PATH(_rde_src_include_path, "engine\\src\\");												\
+		INCLUDE_PATH(_external_include_path, "external\\include\\");										\
 																											\
 		dyn_str* _external_imgui_include_path = NULL;														\
 		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {											\
-			arrput(_build_command, "-I");																	\
-			_external_imgui_include_path = dyn_str_new(this_file_full_path);								\
-			dyn_str_append(_external_imgui_include_path, "external\\include\\imgui\\");						\
-			arrput(_build_command, dyn_str_get(_external_imgui_include_path));								\
+			INCLUDE_PATH_EX(_external_imgui_include_path, "external\\include\\imgui\\");					\
 		}																									\
 																											\
-		arrput(_build_command, "-L");																		\
-		dyn_str* _external_lib_path = dyn_str_new(this_file_full_path);										\
-		dyn_str_append(_external_lib_path, "external\\libs\\windows\\");									\
-		arrput(_build_command, dyn_str_get(_external_lib_path));											\
+		LINK_PATH(_external_lib_path, "external\\libs\\windows\\");											\
+		LINK_PATH(_external_manual_lib_path, "external\\libs\\windows\\manual-link\\");						\
 																											\
-		arrput(_build_command, "-L");																		\
-		dyn_str* _external_manual_lib_path = dyn_str_new(this_file_full_path);								\
-		dyn_str_append(_external_manual_lib_path, "external\\libs\\windows\\manual-link\\");				\
-		arrput(_build_command, dyn_str_get(_external_manual_lib_path));										\
-																											\
-		arrput(_build_command, "-lSDL2main");																\
-		arrput(_build_command, "-lSDL2");																	\
-		arrput(_build_command, "-lcglm");																	\
+		ADD_FLAG("-lSDL2main");																				\
+		ADD_FLAG("-lSDL2");																					\
+		ADD_FLAG("-lcglm");																					\
 																											\
 		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {											\
 			arrput(_build_command, "-Xlinker /WHOLEARCHIVE:rde_imgui.lib");									\
@@ -1301,16 +1295,16 @@ bool compile_windows() {
 			arrput(_build_command, "-ljolt");																\
 		}																									\
 																											\
-		arrput(_build_command, "-ldbghelp");																\
-		arrput(_build_command, "-lshlwapi");																\
-		arrput(_build_command, "-lAdvapi32");																\
-		arrput(_build_command, "-Werror");																	\
-		arrput(_build_command, "-Wall");																	\
-		arrput(_build_command, "-Wextra");																	\
-		arrput(_build_command, "-Wno-tautological-constant-out-of-range-compare");							\
+		ADD_FLAG("-ldbghelp");																				\
+		ADD_FLAG("-lshlwapi");																				\
+		ADD_FLAG("-lAdvapi32");																				\
+		ADD_FLAG("-Werror");																				\
+		ADD_FLAG("-Wall");																					\
+		ADD_FLAG("-Wextra");																				\
+		ADD_FLAG("-Wno-tautological-constant-out-of-range-compare");										\
 																											\
-		arrput(_build_command, "-o");																		\
-		arrput(_build_command, dyn_str_get(_output_engine));												\
+		ADD_FLAG("-o");																						\
+		ADD_FLAG(dyn_str_get(_output_engine));																\
 																											\
 		if(!run_command(_build_command)) {																	\
 			dyn_str_free(_path);																			\
