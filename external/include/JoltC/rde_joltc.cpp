@@ -253,7 +253,11 @@ bool rde_jolt_init(rde_jolt_init_config _init_config, critical_error _rde_critic
 	JPH::RegisterDefaultAllocator();
 	JPH::Factory::sInstance = new JPH::Factory();
 	JPH::RegisterTypes();
-	
+
+    rde_critical_error(_init_config.max_physics_jobs == 0, "max_physics_jobs cannot be 0. \n");
+    rde_critical_error(_init_config.max_physics_barriers == 0, "max_physics_barriers cannot be 0. \n");
+    rde_critical_error(_init_config.max_threads == 0, "max_threads cannot be 0. \n");
+
 	temp_allocator = new JPH::TempAllocatorImpl(_init_config.temo_allocator_size);
 	job_system = new JPH::JobSystemThreadPool(_init_config.max_physics_jobs, 
 	                                          _init_config.max_physics_barriers, 

@@ -58,24 +58,6 @@ const rde_end_user_mandatory_callbacks _mandatory_callbacks = {
 	&on_render
 };
 
-#if IS_MOBILE()
-const rde_engine_init_info ENGINE_INFO = {
-	.heap_allocs_config = (rde_engine_heap_allocs_config) {
-		.max_number_of_windows = 5,
-		.max_number_of_vertices_per_batch = 60000,
-		.max_number_of_shaders = 0,
-		.max_number_of_textures = 10,
-		.max_number_of_atlases = 10,
-		.max_number_of_fonts = 10,
-		.max_number_of_models = 5,
-		.max_number_of_models_textures = 340
-	},
-	.illumination_config = (rde_illumination_config) {
-		.amount_of_point_lights = 0,
-		.amount_of_spot_lights = 0
-	}
-};
-#else
 const rde_engine_init_info ENGINE_INFO = {
 	.heap_allocs_config = (rde_engine_heap_allocs_config) {
 		.max_number_of_windows = 5,
@@ -103,7 +85,6 @@ const rde_engine_init_info ENGINE_INFO = {
 		.collision_steps_per_update = 1
 	}
 };
-#endif
 
 void on_event(rde_event* _event, rde_window* _window) {
 	(void)_window;
