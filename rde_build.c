@@ -1357,153 +1357,153 @@ bool compile_windows() {
 		dyn_str_free(_in);				\
 		dyn_str_free(_out);
 
-	#define BUILD_TOOLS()																											\
-	do {																															\
-		_build_command = NULL;																										\
-																																	\
-		dyn_str* _tools_path = dyn_str_new(this_file_full_path);																	\
-		dyn_str_append(_tools_path, "build\\windows\\tools\\");																		\
-																																	\
-		if(!make_dir_if_not_exists(dyn_str_get(_tools_path))) {																		\
-			exit(-1);																												\
-		}																															\
-																																	\
-		dyn_str* _atlas_gen_path = dyn_str_new(dyn_str_get(_tools_path));															\
-		dyn_str_append(_atlas_gen_path, "atlas_generator\\");																		\
-		if(!make_dir_if_not_exists(dyn_str_get(_atlas_gen_path))) {																	\
-			exit(-1);																												\
-		}																															\
-																																	\
-		dyn_str* _output_atlas = dyn_str_new(dyn_str_get(_atlas_gen_path));															\
-		dyn_str_append(_output_atlas, "atlas_generator.exe");																		\
-																																	\
-		ADD_FLAG("clang");																											\
-		ADD_FLAG("-O3");																											\
-		ADD_FLAG("-std=c99");																										\
-																																	\
-		ADD_PATH(_ag_source_path, "tools\\atlas_generator\\atlas_generator.c");														\
-																																	\
-		INCLUDE_PATH(_ag_include_path, "tools\\atlas_generator\\external\\include\\");												\
-																																	\
-		ADD_FLAG("-Werror");																										\
-		ADD_FLAG("-Wall");																											\
-		ADD_FLAG("-Wextra");																										\
-																																	\
-		ADD_FLAG("-o");																												\
-		ADD_FLAG(dyn_str_get(_output_atlas));																						\
-																																	\
-		if(!run_command(_build_command)) {																							\
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");														\
-			FREE_ATLAS_ALLOCS()																										\
-			exit(-1);																												\
-		}																															\
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Atlas generator built successfully");													\
-																																	\
-																																	\
-																																	\
-																																	\
-		_build_command = NULL;																										\
-																																	\
-		dyn_str* _font_gen_path = dyn_str_new(dyn_str_get(_tools_path));															\
-		dyn_str_append(_font_gen_path, "font_generator\\");																			\
-		if(!make_dir_if_not_exists(dyn_str_get(_font_gen_path))) {																	\
-			exit(-1);																												\
-		}																															\
-																																	\
-		dyn_str* _output_font = dyn_str_new(dyn_str_get(_font_gen_path));															\
-		dyn_str_append(_output_font, "font_generator.exe");																			\
-																																	\
-		ADD_FLAG("clang");																											\
-		ADD_FLAG("-O3");																											\
-		ADD_FLAG("-std=c99");																										\
-																																	\
-		ADD_PATH(_fg_source_path, "tools\\font_generator\\font_generator.c");														\
-																																	\
-		INCLUDE_PATH(_fg_include_path, "tools\\font_generator\\external\\include\\");												\
-		LINK_PATH(_fg_libs_path, "tools\\font_generator\\external\\libs\\windows\\");												\
-																																	\
-		ADD_FLAG("-lfreetype");																										\
-		ADD_FLAG("-Werror");																										\
-		ADD_FLAG("-Wall");																											\
-		ADD_FLAG("-Wextra");																										\
-																																	\
-		ADD_FLAG("-o");																												\
-		ADD_FLAG(dyn_str_get(_output_font));																						\
-																																	\
-		if(!run_command(_build_command)) {																							\
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");														\
-			FREE_ATLAS_ALLOCS()																										\
-			FREE_FONT_ALLOCS()																										\
-			exit(-1);																												\
-		}																															\
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Font generator built successfully");														\
-																																	\
-																																	\
-		dyn_str* _in = NULL;																										\
-		dyn_str* _out = NULL;																										\
-		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\zlib1.dll",														\
-				  "build\\windows\\tools\\font_generator\\zlib1.dll")																\
-				  																													\
-		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\brotlicommon.dll",												\
-				  "build\\windows\\tools\\font_generator\\brotlicommon.dll")														\
-																																	\
-		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\brotlidec.dll",													\
-				  "build\\windows\\tools\\font_generator\\brotlidec.dll")															\
-																																	\
-		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\brotlienc.dll",													\
-				  "build\\windows\\tools\\font_generator\\brotlienc.dll")															\
-																																	\
-		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\bz2.dll",														\
-				  "build\\windows\\tools\\font_generator\\bz2.dll")																	\
-				  																													\
-		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\freetype.dll",													\
-				  "build\\windows\\tools\\font_generator\\freetype.dll")															\
-				  																													\
-		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\libpng16.dll",													\
-				  "build\\windows\\tools\\font_generator\\libpng16.dll")															\
-				  																													\
-																																	\
-																																	\
-		_build_command = NULL;																										\
-																																	\
-		dyn_str* _project_gen_path = dyn_str_new(dyn_str_get(_tools_path));															\
-		dyn_str_append(_project_gen_path, "project_generator\\");																	\
-		if(!make_dir_if_not_exists(dyn_str_get(_project_gen_path))) {																\
-				exit(-1);																											\
-		}																															\
-																																	\
-		dyn_str* _output_project = dyn_str_new(dyn_str_get(_project_gen_path));														\
-		dyn_str_append(_output_project, "project_generator.exe");																	\
-																																	\
-		ADD_FLAG("clang");																											\
-		ADD_FLAG("-O3");																											\
-		ADD_FLAG("-std=c99");																										\
-																																	\
-		ADD_PATH(_pg_source_path, "tools\\project_generator\\project_generator.c");													\
-																																	\
-		INCLUDE_PATH(_pg_include_path, "tools\\project_generator\\external\\include\\");											\
-																																	\
-		ADD_FLAG("-Werror");																										\
-		ADD_FLAG("-Wall");																											\
-		ADD_FLAG("-Wextra");																										\
-																																	\
-		ADD_FLAG("-o");																												\
-		ADD_FLAG(dyn_str_get(_output_project));																						\
-																																	\
-		if(!run_command(_build_command)) {																							\
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");														\
-			FREE_ATLAS_ALLOCS()																										\
-			FREE_FONT_ALLOCS()																										\
-			FREE_PROJECT_ALLOCS()																									\
-			exit(-1);																												\
-		}																															\
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Project generator built successfully");													\
-																																	\
-		COPY_FILE("tools\\project_generator\\duck_logo.png", "build\\windows\\tools\\project_generator\\duck_logo.png")				\
-																																	\
-		FREE_ATLAS_ALLOCS()																											\
-		FREE_FONT_ALLOCS()																											\
-		FREE_PROJECT_ALLOCS()																										\
+	#define BUILD_TOOLS()																								\
+	do {																												\
+		_build_command = NULL;																							\
+																														\
+		dyn_str* _tools_path = dyn_str_new(this_file_full_path);														\
+		dyn_str_append(_tools_path, "build\\windows\\tools\\");															\
+																														\
+		if(!make_dir_if_not_exists(dyn_str_get(_tools_path))) {															\
+			exit(-1);																									\
+		}																												\
+																														\
+		dyn_str* _atlas_gen_path = dyn_str_new(dyn_str_get(_tools_path));												\
+		dyn_str_append(_atlas_gen_path, "atlas_generator\\");															\
+		if(!make_dir_if_not_exists(dyn_str_get(_atlas_gen_path))) {														\
+			exit(-1);																									\
+		}																												\
+																														\
+		dyn_str* _output_atlas = dyn_str_new(dyn_str_get(_atlas_gen_path));												\
+		dyn_str_append(_output_atlas, "atlas_generator.exe");															\
+																														\
+		ADD_FLAG("clang");																								\
+		ADD_FLAG("-O3");																								\
+		ADD_FLAG("-std=c99");																							\
+																														\
+		ADD_PATH(_ag_source_path, "tools\\atlas_generator\\atlas_generator.c");											\
+																														\
+		INCLUDE_PATH(_ag_include_path, "tools\\atlas_generator\\external\\include\\");									\
+																														\
+		ADD_FLAG("-Werror");																							\
+		ADD_FLAG("-Wall");																								\
+		ADD_FLAG("-Wextra");																							\
+																														\
+		ADD_FLAG("-o");																									\
+		ADD_FLAG(dyn_str_get(_output_atlas));																			\
+																														\
+		if(!run_command(_build_command)) {																				\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");											\
+			FREE_ATLAS_ALLOCS()																							\
+			exit(-1);																									\
+		}																												\
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Atlas generator built successfully");										\
+																														\
+																														\
+																														\
+																														\
+		_build_command = NULL;																							\
+																														\
+		dyn_str* _font_gen_path = dyn_str_new(dyn_str_get(_tools_path));												\
+		dyn_str_append(_font_gen_path, "font_generator\\");																\
+		if(!make_dir_if_not_exists(dyn_str_get(_font_gen_path))) {														\
+			exit(-1);																									\
+		}																												\
+																														\
+		dyn_str* _output_font = dyn_str_new(dyn_str_get(_font_gen_path));												\
+		dyn_str_append(_output_font, "font_generator.exe");																\
+																														\
+		ADD_FLAG("clang");																								\
+		ADD_FLAG("-O3");																								\
+		ADD_FLAG("-std=c99");																							\
+																														\
+		ADD_PATH(_fg_source_path, "tools\\font_generator\\font_generator.c");											\
+																														\
+		INCLUDE_PATH(_fg_include_path, "tools\\font_generator\\external\\include\\");									\
+		LINK_PATH(_fg_libs_path, "tools\\font_generator\\external\\libs\\windows\\");									\
+																														\
+		ADD_FLAG("-lfreetype");																							\
+		ADD_FLAG("-Werror");																							\
+		ADD_FLAG("-Wall");																								\
+		ADD_FLAG("-Wextra");																							\
+																														\
+		ADD_FLAG("-o");																									\
+		ADD_FLAG(dyn_str_get(_output_font));																			\
+																														\
+		if(!run_command(_build_command)) {																				\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");											\
+			FREE_ATLAS_ALLOCS()																							\
+			FREE_FONT_ALLOCS()																							\
+			exit(-1);																									\
+		}																												\
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Font generator built successfully");											\
+																														\
+																														\
+		dyn_str* _in = NULL;																							\
+		dyn_str* _out = NULL;																							\
+		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\zlib1.dll",											\
+				  "build\\windows\\tools\\font_generator\\zlib1.dll")													\
+				  																										\
+		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\brotlicommon.dll",									\
+				  "build\\windows\\tools\\font_generator\\brotlicommon.dll")											\
+																														\
+		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\brotlidec.dll",										\
+				  "build\\windows\\tools\\font_generator\\brotlidec.dll")												\
+																														\
+		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\brotlienc.dll",										\
+				  "build\\windows\\tools\\font_generator\\brotlienc.dll")												\
+																														\
+		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\bz2.dll",											\
+				  "build\\windows\\tools\\font_generator\\bz2.dll")														\
+				  																										\
+		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\freetype.dll",										\
+				  "build\\windows\\tools\\font_generator\\freetype.dll")												\
+				  																										\
+		COPY_FILE("tools\\font_generator\\external\\libs\\windows\\libpng16.dll",										\
+				  "build\\windows\\tools\\font_generator\\libpng16.dll")												\
+				  																										\
+																														\
+																														\
+		_build_command = NULL;																							\
+																														\
+		dyn_str* _project_gen_path = dyn_str_new(dyn_str_get(_tools_path));												\
+		dyn_str_append(_project_gen_path, "project_generator\\");														\
+		if(!make_dir_if_not_exists(dyn_str_get(_project_gen_path))) {													\
+				exit(-1);																								\
+		}																												\
+																														\
+		dyn_str* _output_project = dyn_str_new(dyn_str_get(_project_gen_path));											\
+		dyn_str_append(_output_project, "project_generator.exe");														\
+																														\
+		ADD_FLAG("clang");																								\
+		ADD_FLAG("-O3");																								\
+		ADD_FLAG("-std=c99");																							\
+																														\
+		ADD_PATH(_pg_source_path, "tools\\project_generator\\project_generator.c");										\
+																														\
+		INCLUDE_PATH(_pg_include_path, "tools\\project_generator\\external\\include\\");								\
+																														\
+		ADD_FLAG("-Werror");																							\
+		ADD_FLAG("-Wall");																								\
+		ADD_FLAG("-Wextra");																							\
+																														\
+		ADD_FLAG("-o");																									\
+		ADD_FLAG(dyn_str_get(_output_project));																			\
+																														\
+		if(!run_command(_build_command)) {																				\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");											\
+			FREE_ATLAS_ALLOCS()																							\
+			FREE_FONT_ALLOCS()																							\
+			FREE_PROJECT_ALLOCS()																						\
+			exit(-1);																									\
+		}																												\
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Project generator built successfully");										\
+																														\
+		COPY_FILE("tools\\project_generator\\duck_logo.png", "build\\windows\\tools\\project_generator\\duck_logo.png")	\
+																														\
+		FREE_ATLAS_ALLOCS()																								\
+		FREE_FONT_ALLOCS()																								\
+		FREE_PROJECT_ALLOCS()																							\
 	} while(0);
 
 	// On some Windows OS the entry point not define error is solved by adding '-Xlinker /subsystem:console -lShell32' to the flags
