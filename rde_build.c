@@ -43,6 +43,11 @@
 	#define rde_proc_invalid (-1)
 #endif
 
+typedef struct {
+    char* str;
+    unsigned int size;
+} dyn_str;
+
 typedef char** rde_command;
 
 typedef enum { 
@@ -75,6 +80,7 @@ const char* BUILD_OPTIONS_STR[MAX_BUILD_OPTIONS] = {
 #define MAX_SIZE_FOR_MODULES 256
 #define MAX_MODULES 9
 #define GOD_MODE "-DRDE_GOD"
+#define STRSIZE 100
 
 typedef enum {
 	RDE_MODULES_NONE = 0,
@@ -121,6 +127,8 @@ bool is_god = false;
 
 char this_file_full_path[MAX_PATH];
 
+void ds_array_to_string(char** _ds_array, char* _string, size_t _string_size);
+
 void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...);
 void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 
@@ -160,6 +168,19 @@ bool run_test();
 
 void print_help();
 void parse_arguments(int _argc, char** _argv);
+
+void ds_array_to_string(char** _ds_array, char* _string, size_t _string_size) {
+	memset(_string, 0, _string_size);
+	size_t _ds_arr_size = arrlenu(_ds_array);
+
+	for(size_t _i = 0; _i < _ds_arr_size; _i++) {
+		#if _WIN32
+			strcat_s(_string, _string_size, _ds_array[_i]);
+		#else
+			strcat(_string, _ds_array[_i]);
+		#endif
+	}
+}
 
 void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 	switch(_color) {
@@ -1056,33 +1077,136 @@ void include_imgui_in_compilation(rde_command* _build_command) {
 	(void)_build_command;
 }
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+dyn_str* dyn_str_new(char* _init) {
+    dyn_str* _s = (dyn_str*)malloc(sizeof(dyn_str));
+
+    if(_s == NULL) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not allocate memory for dyn_str");
+		return NULL;
+	}
+
+    _s->size = MAX(strlen(_init) + 1, STRSIZE);
+    _s->str = (char *)malloc(_s->size);
+	memset(_s->str, 0, _s->size);
+
+    strcpy(_s->str, _init);
+
+    return _s;
+}
+
+void dyn_str_free(dyn_str* _s) {
+    free(_s->str);
+    free(_s);
+}
+
+void dyn_str_growto(dyn_str* _s, unsigned int _new_size) {
+    if(_new_size <= _s->size) {
+		return;
+	}
+
+    unsigned int _old_size = _s->size;
+
+    while(_s->size < _new_size) {
+        _s->size *= 2;
+	}
+    
+    _s->str = (char*)realloc((void*)_s->str, _s->size);
+
+    memset((void*)(_s->str + _old_size), '\0', _s->size - _old_size);
+}
+
+void dyn_str_grow(dyn_str* _s) {
+    dyn_str_growto(_s, _s->size * 2);
+}
+
+void dyn_str_shrink(dyn_str* _s) {
+    _s->size /= 2;
+    _s->size = MAX(_s->size, STRSIZE);
+    _s->str = (char*)realloc((void*)_s->str, _s->size);
+    _s->str[_s->size-1] = '\0';
+}
+
+unsigned int dyn_str_sizeof(dyn_str* _s) {
+    return _s->size;
+}
+
+unsigned int dyn_str_length(dyn_str* _s) {
+    return strlen(_s->str);
+}
+
+char dyn_str_getc(dyn_str* _s, unsigned int _index) {
+    if(_index >= _s->size) return '\0';
+
+    return _s->str[_index];
+}
+
+char* dyn_str_get(dyn_str* _s) {
+    return _s->str;
+}
+
+void dyn_str_append(dyn_str* _s, char* _string) {
+    int _len = strlen(_s->str);
+
+    dyn_str_growto(_s, _s->size + _len);
+
+    for(int _i = 0; _i < strlen(_string); _i++) {
+        _s->str[_len + _i] = _string[_i];
+    }
+}
+
+void dyn_str_cappend(dyn_str* _s, char _c) {
+    unsigned int _len = strlen(_s->str);
+
+    if(_len >= _s->size - 1)
+        dyn_str_grow(_s);
+
+    _s->str[_len] = _c;
+}
+
+void dyn_str_set(dyn_str* _s, char* _new_string) {
+    dyn_str_growto(_s, _s->size + strlen(_new_string));
+    strcpy(_s->str, _new_string);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #if _WIN32
 bool compile_windows() {
 	errno = 0;
 
-	char _path[MAX_PATH];
-	memset(_path, 0, MAX_PATH);
-	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build");
-	if(!make_dir_if_not_exists(_path)) {
+	dyn_str* _path = dyn_str_new("");
+	dyn_str_append(_path, this_file_full_path);
+	dyn_str_append(_path, "build\\");
+	
+	if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 		exit(-1);
 	}
 	
-	memset(_path, 0, MAX_PATH);
-	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows");
-	if(!make_dir_if_not_exists(_path)) {
+	dyn_str_append(_path, "windows\\");
+	if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 		exit(-1);
 	}
 
-	memset(_path, 0, MAX_PATH);
 	if(strcmp(build_type, "debug") == 0) {
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\debug");
-		if(!make_dir_if_not_exists(_path)) {
+		dyn_str_append(_path, "debug\\");
+		if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 			exit(-1);
 		}
 	} else {
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\release");
-		if(!make_dir_if_not_exists(_path)) {
+		dyn_str_append(_path, "release\\");
+		if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 			exit(-1);
 		}
 	}
@@ -1095,30 +1219,9 @@ bool compile_windows() {
 	
 	#define BUILD_ENGINE() 																					\
 	do {																									\
-		char _output[256];																					\
-		memset(_output, 0, 256);																			\
-		strcat(_output, this_file_full_path);																\
+		dyn_str* _output_engine = dyn_str_new(dyn_str_get(_path));											\
+		dyn_str_append(_output_engine, "engine\\RDE.dll");													\
 																											\
-		if(strcmp(build_type, "debug") == 0) {																\
-			memset(_path, 0, MAX_PATH);																		\
-			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\debug\\engine");		\
-			if(!make_dir_if_not_exists(_path)) {															\
-				exit(-1);																					\
-			}																								\
-			strcat(_output, "build\\windows\\debug\\engine\\");												\
-		} else {																							\
-			memset(_path, 0, MAX_PATH);																		\
-			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build\\windows\\release\\engine");		\
-			if(!make_dir_if_not_exists(_path)) {															\
-				exit(-1);																					\
-			}																								\
-			strcat(_output, "build\\windows\\release\\engine\\");											\
-		}																									\
-																											\
-		char output_engine[MAX_PATH];																		\
-		memset(output_engine, 0, MAX_PATH);																	\
-		strcat(output_engine, _output);																		\
-		strcat(output_engine, "RDE.dll");																	\
 		arrput(_build_command, "clang");																	\
 																											\
 		unsigned int _module = 1;																			\
@@ -1143,54 +1246,48 @@ bool compile_windows() {
 			arrput(_build_command, GOD_MODE);																\
 		}																									\
 																											\
-		char _temp_path_0[MAX_PATH];																		\
-		memset(_temp_path_0, 0, MAX_PATH);																	\
-		snprintf(_temp_path_0, MAX_PATH, "%s%s", this_file_full_path, "engine\\src\\rde.c");				\
-		arrput(_build_command, _temp_path_0);																\
-		char _temp_path_0_1[MAX_PATH];																		\
-		memset(_temp_path_0_1, 0, MAX_PATH);																\
-		snprintf(_temp_path_0_1, MAX_PATH, "%s%s", this_file_full_path, "external\\include\\glad\\glad.c");	\
-		arrput(_build_command, _temp_path_0_1);																\
+		dyn_str* _rde_src_path = dyn_str_new(this_file_full_path);											\
+		dyn_str_append(_rde_src_path, "engine\\src\\rde.c");												\
+		arrput(_build_command, dyn_str_get(_rde_src_path));													\
+																											\
+		dyn_str* _glad_src_path = dyn_str_new(this_file_full_path);											\
+		dyn_str_append(_glad_src_path, "external\\include\\glad\\glad.c");									\
+		arrput(_build_command, dyn_str_get(_glad_src_path));												\
 																											\
 		arrput(_build_command, "-shared");																	\
 																											\
 		arrput(_build_command, "-I");																		\
-		char _temp_path_1[MAX_PATH];																		\
-		memset(_temp_path_1, 0, MAX_PATH);																	\
-		snprintf(_temp_path_1, MAX_PATH, "%s%s", this_file_full_path, "engine\\include");					\
-		arrput(_build_command, _temp_path_1);																\
-																											\
-		char _temp_path_2[MAX_PATH];																		\
-		arrput(_build_command, "-I");																		\
-		memset(_temp_path_2, 0, MAX_PATH);																	\
-		snprintf(_temp_path_2, MAX_PATH, "%s%s", this_file_full_path, "engine\\src");						\
-		arrput(_build_command, _temp_path_2);																\
+		dyn_str* _rde_include_path = dyn_str_new(this_file_full_path);										\
+		dyn_str_append(_rde_include_path, "engine\\include\\");												\
+		arrput(_build_command, dyn_str_get(_rde_include_path));												\
 																											\
 		arrput(_build_command, "-I");																		\
-		char _temp_path_3[MAX_PATH];																		\
-		memset(_temp_path_3, 0, MAX_PATH);																	\
-		snprintf(_temp_path_3, MAX_PATH, "%s%s", this_file_full_path, "external\\include");					\
-		arrput(_build_command, _temp_path_3);																\
+		dyn_str* _rde_src_include_path = dyn_str_new(this_file_full_path);									\
+		dyn_str_append(_rde_src_include_path, "engine\\src\\");												\
+		arrput(_build_command, dyn_str_get(_rde_src_include_path));											\
 																											\
+		arrput(_build_command, "-I");																		\
+		dyn_str* _external_include_path = dyn_str_new(this_file_full_path);									\
+		dyn_str_append(_external_include_path, "external\\include\\");										\
+		arrput(_build_command, dyn_str_get(_external_include_path));										\
+																											\
+		dyn_str* _external_imgui_include_path = NULL;														\
 		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {											\
 			arrput(_build_command, "-I");																	\
-			char _imgui_path[MAX_PATH];																		\
-			memset(_imgui_path, 0, MAX_PATH);																\
-			snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external\\include\\imgui");		\
-			arrput(_build_command, _imgui_path);															\
+			_external_imgui_include_path = dyn_str_new(this_file_full_path);								\
+			dyn_str_append(_external_imgui_include_path, "external\\include\\imgui\\");						\
+			arrput(_build_command, dyn_str_get(_external_imgui_include_path));								\
 		}																									\
 																											\
 		arrput(_build_command, "-L");																		\
-		char _temp_path_4[MAX_PATH];																		\
-		memset(_temp_path_4, 0, MAX_PATH);																	\
-		snprintf(_temp_path_4, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows");			\
-		arrput(_build_command, _temp_path_4);																\
+		dyn_str* _external_lib_path = dyn_str_new(this_file_full_path);										\
+		dyn_str_append(_external_lib_path, "external\\libs\\windows\\");									\
+		arrput(_build_command, dyn_str_get(_external_lib_path));											\
 																											\
 		arrput(_build_command, "-L");																		\
-		char _temp_path_5[MAX_PATH];																		\
-		memset(_temp_path_5, 0, MAX_PATH);																	\
-		snprintf(_temp_path_5, MAX_PATH, "%s%s", this_file_full_path, "external\\libs\\windows\\manual-link");\
-		arrput(_build_command, _temp_path_5);																\
+		dyn_str* _external_manual_lib_path = dyn_str_new(this_file_full_path);								\
+		dyn_str_append(_external_manual_lib_path, "external\\libs\\windows\\manual-link\\");				\
+		arrput(_build_command, dyn_str_get(_external_manual_lib_path));										\
 																											\
 		arrput(_build_command, "-lSDL2main");																\
 		arrput(_build_command, "-lSDL2");																	\
@@ -1213,11 +1310,35 @@ bool compile_windows() {
 		arrput(_build_command, "-Wno-tautological-constant-out-of-range-compare");							\
 																											\
 		arrput(_build_command, "-o");																		\
-		arrput(_build_command, output_engine);																\
+		arrput(_build_command, dyn_str_get(_output_engine));												\
 																											\
 		if(!run_command(_build_command)) {																	\
+			dyn_str_free(_path);																			\
+			dyn_str_free(_output_engine);																	\
+			dyn_str_free(_rde_src_path);																	\
+			dyn_str_free(_glad_src_path);																	\
+			dyn_str_free(_rde_include_path);																\
+			dyn_str_free(_rde_src_include_path);															\
+			dyn_str_free(_external_include_path);															\
+			if(_external_imgui_include_path != NULL) {														\
+				dyn_str_free(_external_imgui_include_path);													\
+			}																								\
+			dyn_str_free(_external_lib_path);																\
+			dyn_str_free(_external_manual_lib_path);														\
 			exit(-1);																						\
 		}																									\
+		dyn_str_free(_path);																				\
+		dyn_str_free(_output_engine);																		\
+		dyn_str_free(_rde_src_path);																		\
+		dyn_str_free(_glad_src_path);																		\
+		dyn_str_free(_rde_include_path);																	\
+		dyn_str_free(_rde_src_include_path);																\
+		dyn_str_free(_external_include_path);																\
+		if(_external_imgui_include_path != NULL) {															\
+			dyn_str_free(_external_imgui_include_path);														\
+		}																									\
+		dyn_str_free(_external_lib_path);																	\
+		dyn_str_free(_external_manual_lib_path);															\
 	} while(0);
 
 	#define BUILD_TOOLS()																											\
