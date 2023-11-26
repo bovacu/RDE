@@ -18,7 +18,7 @@ The library is composed of the core module (which is always added) and optional 
   - 3D format parser libs
 Those modules are not required to use the library and are added when compiling the library.
 
-To build the library it is as easy as compiling the engine compiler program:
+To build the library it is as easy as compiling the engine compiler program (on windows it is needed to link agains advapi32, so add -ladvapi32):
 ```
 clang rde_build.c -o builder
 ```
