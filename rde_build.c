@@ -156,6 +156,10 @@ bool dir_exists(const char* _dir_path);
 
 bool has_admin_rights();
 
+#if __APPLE__
+void get_mac_version(char* _buf);
+#endif
+
 bool compile_windows();
 bool compile_osx();
 bool compile_linux();
@@ -1032,6 +1036,26 @@ bool has_admin_rights() {
 #endif
 }
 
+#if __APPLE__
+void get_mac_version(char* _buf) {
+	FILE* _min_version_pipe = popen("sw_vers -productVersion","r");																	
+	if (_min_version_pipe != NULL ) {
+		int _i = 0;																					
+		while (!feof(_min_version_pipe) && (_i < 256) ) {											
+			fread(&_buf[_i++], 1, 1, _min_version_pipe);											
+		}																							
+		_buf[_i] = 0;																				
+		_buf[_i - 1] = 0;																			
+		_buf[_i - 2] = 0;																			
+		pclose(_min_version_pipe);																	
+	}																								
+	else {																							
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Error getting the min macOS version");					
+		exit(-1);																					
+	}																								
+}
+#endif
+
 void include_imgui_in_compilation(rde_command* _build_command) {
 	rde_command _inner_command = NULL;
 	arrput(_inner_command, "clang++");
@@ -1234,6 +1258,157 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 	dyn_str_append(_out, _dest);								\
 	copy_folder_if_exists(dyn_str_get(_in), dyn_str_get(_out));
 
+#define FREE_ATLAS_ALLOCS()			\
+	dyn_str_free(_tools_path);		\
+	dyn_str_free(_atlas_gen_path);	\
+	dyn_str_free(_output_atlas);
+	
+#define FREE_FONT_ALLOCS()			\
+	dyn_str_free(_font_gen_path);	\
+	dyn_str_free(_output_font);	
+	
+#define FREE_PROJECT_ALLOCS()		\
+	dyn_str_free(_project_gen_path);\
+	dyn_str_free(_output_project);	\
+	dyn_str_free(_in);				\
+	dyn_str_free(_out);
+
+#define COMPILE_TOOLS(_platform, _ag_link_flags, _fg_link_flags, _pg_link_flags)														\
+	do {																																\
+		_build_command = NULL;																											\
+																																		\
+		dyn_str* _tools_path = dyn_str_new(this_file_full_path);																		\
+		dyn_str_append(_tools_path, "build/"_platform"/tools/");																			\
+																																		\
+		if(!make_dir_if_not_exists(dyn_str_get(_tools_path))) {																			\
+			exit(-1);																													\
+		}																																\
+																																		\
+		dyn_str* _atlas_gen_path = dyn_str_new(dyn_str_get(_tools_path));																\
+		dyn_str_append(_atlas_gen_path, "atlas_generator/");																			\
+		if(!make_dir_if_not_exists(dyn_str_get(_atlas_gen_path))) {																		\
+			exit(-1);																													\
+		}																																\
+																																		\
+		dyn_str* _output_atlas = dyn_str_new(dyn_str_get(_atlas_gen_path));																\
+		dyn_str_append(_output_atlas, "atlas_generator.exe");																			\
+																																		\
+		ADD_FLAG("clang");																												\
+		ADD_FLAG("-O3");																												\
+		ADD_FLAG("-std=c99");																											\
+																																		\
+		ADD_PATH(_ag_source_path, "tools/atlas_generator/atlas_generator.c");															\
+																																		\
+		INCLUDE_PATH(_ag_include_path, "tools/atlas_generator/external/include/");														\
+																																		\
+		_ag_link_flags																													\
+		ADD_FLAG("-Werror");																											\
+		ADD_FLAG("-Wall");																												\
+		ADD_FLAG("-Wextra");																											\
+																																		\
+		ADD_FLAG("-o");																													\
+		ADD_FLAG(dyn_str_get(_output_atlas));																							\
+																																		\
+		if(!run_command(_build_command)) {																								\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");															\
+			FREE_ATLAS_ALLOCS()																											\
+			exit(-1);																													\
+		}																																\
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Atlas generator built successfully");														\
+																																		\
+																																		\
+																																		\
+																																		\
+		_build_command = NULL;																											\
+																																		\
+		dyn_str* _font_gen_path = dyn_str_new(dyn_str_get(_tools_path));																\
+		dyn_str_append(_font_gen_path, "font_generator/");																				\
+		if(!make_dir_if_not_exists(dyn_str_get(_font_gen_path))) {																		\
+			exit(-1);																													\
+		}																																\
+																																		\
+		dyn_str* _output_font = dyn_str_new(dyn_str_get(_font_gen_path));																\
+		dyn_str_append(_output_font, "font_generator.exe");																				\
+																																		\
+		ADD_FLAG("clang");																												\
+		ADD_FLAG("-O3");																												\
+		ADD_FLAG("-std=c99");																											\
+																																		\
+		ADD_PATH(_fg_source_path, "tools/font_generator/font_generator.c");																\
+																																		\
+		INCLUDE_PATH(_fg_include_path, "tools/font_generator/external/include/");														\
+		LINK_PATH(_fg_libs_path, "tools/font_generator/external/libs/windows/");														\
+																																		\
+		_fg_link_flags																													\
+		ADD_FLAG("-Werror");																											\
+		ADD_FLAG("-Wall");																												\
+		ADD_FLAG("-Wextra");																											\
+																																		\
+		ADD_FLAG("-o");																													\
+		ADD_FLAG(dyn_str_get(_output_font));																							\
+																																		\
+		if(!run_command(_build_command)) {																								\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");															\
+			FREE_ATLAS_ALLOCS()																											\
+			FREE_FONT_ALLOCS()																											\
+			exit(-1);																													\
+		}																																\
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Font generator built successfully");															\
+																																		\
+																																		\
+		dyn_str* _in = NULL;																											\
+		dyn_str* _out = NULL;																											\
+		COPY_FILE("tools/font_generator/external/libs/"_platform"/zlib1.dll", "build/"_platform"/tools/font_generator/zlib1.dll")				\
+		COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlicommon.dll", "build/"_platform"/tools/font_generator/brotlicommon.dll")	\
+		COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlidec.dll", "build/"_platform"/tools/font_generator/brotlidec.dll")		\
+		COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlienc.dll", "build/"_platform"/tools/font_generator/brotlienc.dll")		\
+		COPY_FILE("tools/font_generator/external/libs/"_platform"/bz2.dll", "build/"_platform"/tools/font_generator/bz2.dll")					\
+		COPY_FILE("tools/font_generator/external/libs/"_platform"/freetype.dll", "build/"_platform"/tools/font_generator/freetype.dll")			\
+		COPY_FILE("tools/font_generator/external/libs/"_platform"/libpng16.dll", "build/"_platform"/tools/font_generator/libpng16.dll")			\
+																																		\
+		_build_command = NULL;																											\
+																																		\
+		dyn_str* _project_gen_path = dyn_str_new(dyn_str_get(_tools_path));																\
+		dyn_str_append(_project_gen_path, "project_generator/");																		\
+		if(!make_dir_if_not_exists(dyn_str_get(_project_gen_path))) {																	\
+			exit(-1);																													\
+		}																																\
+																																		\
+		dyn_str* _output_project = dyn_str_new(dyn_str_get(_project_gen_path));															\
+		dyn_str_append(_output_project, "project_generator.exe");																		\
+																																		\
+		ADD_FLAG("clang");																												\
+		ADD_FLAG("-O3");																												\
+		ADD_FLAG("-std=c99");																											\
+																																		\
+		ADD_PATH(_pg_source_path, "tools/project_generator/project_generator.c");														\
+																																		\
+		INCLUDE_PATH(_pg_include_path, "tools/project_generator/external/include/");													\
+																																		\
+		_pg_link_flags																													\
+		ADD_FLAG("-Werror");																											\
+		ADD_FLAG("-Wall");																												\
+		ADD_FLAG("-Wextra");																											\
+																																		\
+		ADD_FLAG("-o");																													\
+		ADD_FLAG(dyn_str_get(_output_project));																							\
+																																		\
+		if(!run_command(_build_command)) {																								\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");															\
+			FREE_ATLAS_ALLOCS()																											\
+			FREE_FONT_ALLOCS()																											\
+			FREE_PROJECT_ALLOCS()																										\
+			exit(-1);																													\
+		}																																\
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Project generator built successfully");														\
+																																		\
+		COPY_FILE("tools/project_generator/duck_logo.png", "build/"_platform"/tools/project_generator/duck_logo.png")						\
+																																		\
+		FREE_ATLAS_ALLOCS()																												\
+		FREE_FONT_ALLOCS()																												\
+		FREE_PROJECT_ALLOCS()																											\
+	} while(0);
+
 #if _WIN32
 void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 	#define FREE_ENGINE_ALLOCS()						\
@@ -1321,154 +1496,6 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 		exit(-1);
 	}
 	FREE_ENGINE_ALLOCS()
-}
-
-void compile_windows_tools(dyn_str* _path, rde_command _build_command) {
-	#define FREE_ATLAS_ALLOCS()			\
-		dyn_str_free(_tools_path);		\
-		dyn_str_free(_atlas_gen_path);	\
-		dyn_str_free(_output_atlas);
-	
-	#define FREE_FONT_ALLOCS()			\
-		dyn_str_free(_font_gen_path);	\
-		dyn_str_free(_output_font);	
-	
-	#define FREE_PROJECT_ALLOCS()		\
-		dyn_str_free(_project_gen_path);\
-		dyn_str_free(_output_project);	\
-		dyn_str_free(_in);				\
-		dyn_str_free(_out);
-
-	_build_command = NULL;
-
-	dyn_str* _tools_path = dyn_str_new(this_file_full_path);
-	dyn_str_append(_tools_path, "build/windows/tools/");
-
-	if(!make_dir_if_not_exists(dyn_str_get(_tools_path))) {
-		exit(-1);
-	}
-
-	dyn_str* _atlas_gen_path = dyn_str_new(dyn_str_get(_tools_path));
-	dyn_str_append(_atlas_gen_path, "atlas_generator/");
-	if(!make_dir_if_not_exists(dyn_str_get(_atlas_gen_path))) {
-		exit(-1);
-	}
-
-	dyn_str* _output_atlas = dyn_str_new(dyn_str_get(_atlas_gen_path));
-	dyn_str_append(_output_atlas, "atlas_generator.exe");
-
-	ADD_FLAG("clang");
-	ADD_FLAG("-O3");
-	ADD_FLAG("-std=c99");
-
-	ADD_PATH(_ag_source_path, "tools/atlas_generator/atlas_generator.c");
-
-	INCLUDE_PATH(_ag_include_path, "tools/atlas_generator/external/include/");
-
-	ADD_FLAG("-Werror");
-	ADD_FLAG("-Wall");
-	ADD_FLAG("-Wextra");
-
-	ADD_FLAG("-o");
-	ADD_FLAG(dyn_str_get(_output_atlas));
-
-	if(!run_command(_build_command)) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");
-		FREE_ATLAS_ALLOCS()
-		exit(-1);
-	}
-	rde_log_level(RDE_LOG_LEVEL_INFO, "Atlas generator built successfully");
-
-
-
-
-	_build_command = NULL;
-
-	dyn_str* _font_gen_path = dyn_str_new(dyn_str_get(_tools_path));
-	dyn_str_append(_font_gen_path, "font_generator/");
-	if(!make_dir_if_not_exists(dyn_str_get(_font_gen_path))) {
-		exit(-1);
-	}
-
-	dyn_str* _output_font = dyn_str_new(dyn_str_get(_font_gen_path));
-	dyn_str_append(_output_font, "font_generator.exe");
-
-	ADD_FLAG("clang");
-	ADD_FLAG("-O3");
-	ADD_FLAG("-std=c99");
-
-	ADD_PATH(_fg_source_path, "tools/font_generator/font_generator.c");
-
-	INCLUDE_PATH(_fg_include_path, "tools/font_generator/external/include/");
-	LINK_PATH(_fg_libs_path, "tools/font_generator/external/libs/windows/");
-
-	ADD_FLAG("-lfreetype");
-	ADD_FLAG("-Werror");
-	ADD_FLAG("-Wall");
-	ADD_FLAG("-Wextra");
-
-	ADD_FLAG("-o");
-	ADD_FLAG(dyn_str_get(_output_font));
-
-	if(!run_command(_build_command)) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");
-		FREE_ATLAS_ALLOCS()
-		FREE_FONT_ALLOCS()
-		exit(-1);
-	}
-	rde_log_level(RDE_LOG_LEVEL_INFO, "Font generator built successfully");
-
-
-	dyn_str* _in = NULL;
-	dyn_str* _out = NULL;
-	COPY_FILE("tools/font_generator/external/libs/windows/zlib1.dll", "build/windows/tools/font_generator/zlib1.dll")
-	COPY_FILE("tools/font_generator/external/libs/windows/brotlicommon.dll", "build/windows/tools/font_generator/brotlicommon.dll")
-	COPY_FILE("tools/font_generator/external/libs/windows/brotlidec.dll", "build/windows/tools/font_generator/brotlidec.dll")
-	COPY_FILE("tools/font_generator/external/libs/windows/brotlienc.dll", "build/windows/tools/font_generator/brotlienc.dll")
-	COPY_FILE("tools/font_generator/external/libs/windows/bz2.dll", "build/windows/tools/font_generator/bz2.dll")
-	COPY_FILE("tools/font_generator/external/libs/windows/freetype.dll", "build/windows/tools/font_generator/freetype.dll")
-	COPY_FILE("tools/font_generator/external/libs/windows/libpng16.dll", "build/windows/tools/font_generator/libpng16.dll")
-
-	_build_command = NULL;
-
-	dyn_str* _project_gen_path = dyn_str_new(dyn_str_get(_tools_path));
-	dyn_str_append(_project_gen_path, "project_generator/");
-	if(!make_dir_if_not_exists(dyn_str_get(_project_gen_path))) {
-		exit(-1);
-	}
-
-	dyn_str* _output_project = dyn_str_new(dyn_str_get(_project_gen_path));
-	dyn_str_append(_output_project, "project_generator.exe");
-
-	ADD_FLAG("clang");
-	ADD_FLAG("-O3");
-	ADD_FLAG("-std=c99");
-
-	ADD_PATH(_pg_source_path, "tools/project_generator/project_generator.c");
-
-	INCLUDE_PATH(_pg_include_path, "tools/project_generator/external/include/");
-
-	ADD_FLAG("-Werror");
-	ADD_FLAG("-Wall");
-	ADD_FLAG("-Wextra");
-
-	ADD_FLAG("-o");
-	ADD_FLAG(dyn_str_get(_output_project));
-
-	if(!run_command(_build_command)) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");
-		FREE_ATLAS_ALLOCS()
-		FREE_FONT_ALLOCS()
-		FREE_PROJECT_ALLOCS()
-		exit(-1);
-	}
-	rde_log_level(RDE_LOG_LEVEL_INFO, "Project generator built successfully");
-
-	COPY_FILE("tools/project_generator/duck_logo.png", "build/windows/tools/project_generator/duck_logo.png")
-
-	FREE_ATLAS_ALLOCS()
-	FREE_FONT_ALLOCS()
-	FREE_PROJECT_ALLOCS()
 }
 
 // On some Windows OS the entry point not define error is solved by adding '-Xlinker /subsystem:console -lShell32' to the flags
@@ -1669,7 +1696,14 @@ bool compile_windows() {
 	if(strcmp(build, "tools") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING TOOLS --- \n");
-		compile_windows_tools(_path, _build_command);
+		COMPILE_TOOLS("windows", 
+		{
+		}, 
+		{
+			ADD_FLAG("-lfreetype");
+		}, 
+		{
+		})
 	}
 
 	if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
@@ -1690,24 +1724,6 @@ bool compile_windows() {
 
 
 #if __APPLE__
-void get_mac_version(char* _buf) {
-	FILE* _min_version_pipe = popen("sw_vers -productVersion","r");																	
-    if (_min_version_pipe != NULL ) {
-    	int _i = 0;																					
-        while (!feof(_min_version_pipe) && (_i < 256) ) {											
-            fread(&_buf[_i++], 1, 1, _min_version_pipe);											
-        }																							
-        _buf[_i] = 0;																				
-        _buf[_i - 1] = 0;																			
-        _buf[_i - 2] = 0;																			
-        pclose(_min_version_pipe);																	
-    }																								
-    else {																							
-    	rde_log_level(RDE_LOG_LEVEL_ERROR, "Error getting the min macOS version");					
-		exit(-1);																					
-    }																								
-}
-
 bool compile_osx() {
 	errno = 0;
 
@@ -1906,164 +1922,6 @@ bool compile_osx() {
 		}																									\
 	} while(0);
 
-	#define BUILD_TOOLS()																											\
-	do {																															\
-		char _output_a[256];																										\
-		memset(_output_a, 0, 256);																									\
-		strcat(_output_a, this_file_full_path);																						\
-																																	\
-		memset(_path, 0, MAX_PATH);																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/tools");													\
-		if(!make_dir_if_not_exists(_path)) {																						\
-				exit(-1);																											\
-		}																															\
-		memset(_path, 0, MAX_PATH);																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/tools/atlas_generator");									\
-		if(!make_dir_if_not_exists(_path)) {																						\
-				exit(-1);																											\
-		}																															\
-		strcat(_output_a, "build/osx/tools/atlas_generator/");																		\
-																																	\
-		_build_command = NULL;																										\
-		char output_atlas[MAX_PATH];																								\
-		memset(output_atlas, 0, MAX_PATH);																							\
-		strcat(output_atlas, _output_a);																							\
-		strcat(output_atlas, "atlas_generator");																					\
-		arrput(_build_command, "clang");																							\
-		arrput(_build_command, "-O3");																								\
-		arrput(_build_command, "-std=c99");																							\
-		arrput(_build_command, "-D_DEFAULT_SOURCE");																				\
-																																	\
-		char _ag_source_path[MAX_PATH];																								\
-		memset(_ag_source_path, 0, MAX_PATH);																						\
-		snprintf(_ag_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools/atlas_generator/atlas_generator.c");				\
-		arrput(_build_command, _ag_source_path);																					\
-																																	\
-		arrput(_build_command, "-I");																								\
-		char _ag_include_path[MAX_PATH];																							\
-		memset(_ag_include_path, 0, MAX_PATH);																						\
-		snprintf(_ag_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools/atlas_generator/external/include");				\
-		arrput(_build_command, _ag_include_path);																					\
-																																	\
-		arrput(_build_command, "-Werror");																							\
-		arrput(_build_command, "-Wall");																							\
-		arrput(_build_command, "-Wextra");																							\
-																																	\
-		arrput(_build_command, "-lm");																								\
-																																	\
-		arrput(_build_command, "-o");																								\
-		arrput(_build_command, output_atlas);																						\
-																																	\
-		if(!run_command(_build_command)) {																							\
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");														\
-			exit(-1);																												\
-		}																															\
-																																	\
-																																	\
-		_build_command = NULL;																										\
-		char _output_f[256];																										\
-		memset(_output_f, 0, 256);																									\
-		strcat(_output_f, this_file_full_path);																						\
-																																	\
-		memset(_path, 0, MAX_PATH);																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/tools/font_generator");									\
-		if(!make_dir_if_not_exists(_path)) {																						\
-				exit(-1);																											\
-		}																															\
-		strcat(_output_f, "build/osx/tools/font_generator/");																		\
-																																	\
-		char output_fonts[MAX_PATH];																								\
-		memset(output_fonts, 0, MAX_PATH);																							\
-		strcat(output_fonts, _output_f);																							\
-		strcat(output_fonts, "font_generator");																						\
-		arrput(_build_command, "clang");																							\
-		arrput(_build_command, "-O3");																								\
-		arrput(_build_command, "-std=c99");																							\
-																																	\
-		char _fg_source_path[MAX_PATH];																								\
-		memset(_fg_source_path, 0, MAX_PATH);																						\
-		snprintf(_fg_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools/font_generator/font_generator.c");					\
-		arrput(_build_command, _fg_source_path);																					\
-																																	\
-		arrput(_build_command, "-I");																								\
-		char _include_path[MAX_PATH];																								\
-		memset(_include_path, 0, MAX_PATH);																							\
-		snprintf(_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools/font_generator/external/include");					\
-		arrput(_build_command, _include_path);																						\
-																																	\
-		arrput(_build_command, "-L");																								\
-		char _lib_path[MAX_PATH];																									\
-		memset(_lib_path, 0, MAX_PATH);																								\
-		snprintf(_lib_path, MAX_PATH, "%s%s", this_file_full_path, "tools/font_generator/external/libs/osx_x86_64");				\
-		arrput(_build_command, _lib_path);																							\
-																																	\
-		arrput(_build_command, "-lfreetype");																						\
-		arrput(_build_command, "-lz");																								\
-		arrput(_build_command, "-Werror");																							\
-		arrput(_build_command, "-Wall");																							\
-		arrput(_build_command, "-Wextra");																							\
-																																	\
-		arrput(_build_command, "-o");																								\
-		arrput(_build_command, output_fonts);																						\
-																																	\
-		if(!run_command(_build_command)) {																							\
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");														\
-			exit(-1);																												\
-		}																															\
-																																	\
-																																	\
-		_build_command = NULL;																										\
-		char _output_p[256];																										\
-		memset(_output_p, 0, 256);																									\
-		strcat(_output_p, this_file_full_path);																						\
-																																	\
-		memset(_path, 0, MAX_PATH);																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/tools/project_generator");								\
-		if(!make_dir_if_not_exists(_path)) {																						\
-		exit(-1);																													\
-		}																															\
-		strcat(_output_f, "build/osx/tools/project_generator/");																	\
-																																	\
-		char output_project[MAX_PATH];																								\
-		memset(output_project, 0, MAX_PATH);																						\
-		strcat(output_project, _output_p);																							\
-		strcat(output_project, "project_generator");																				\
-		arrput(_build_command, "clang");																							\
-		arrput(_build_command, "-O3");																								\
-		arrput(_build_command, "-std=c99");																							\
-																																	\
-		char _pg_source_path[MAX_PATH];																								\
-		memset(_pg_source_path, 0, MAX_PATH);																						\
-		snprintf(_pg_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/project_generator.c");			\
-		arrput(_build_command, _pg_source_path);																					\
-																																	\
-		arrput(_build_command, "-I");																								\
-		char _pg_include_path[MAX_PATH];																							\
-		memset(_pg_include_path, 0, MAX_PATH);																						\
-		snprintf(_pg_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/external/include");				\
-		arrput(_build_command, _pg_include_path);																					\
-																																	\
-		arrput(_build_command, "-Werror");																							\
-		arrput(_build_command, "-Wall");																							\
-		arrput(_build_command, "-Wextra");																							\
-																																	\
-		arrput(_build_command, "-o");																								\
-		arrput(_build_command, output_project);																						\
-																																	\
-		if(!run_command(_build_command)) {																							\
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");															\
-		exit(-1);																													\
-		}																															\
-																																	\
-		char _duck_img_src[MAX_PATH];																								\
-		char _duck_img_dst[MAX_PATH];																								\
-		memset(_duck_img_src, 0, MAX_PATH);																							\
-		memset(_duck_img_dst, 0, MAX_PATH);																							\
-		snprintf(_duck_img_src, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/duck_logo.png");					\
-		snprintf(_duck_img_dst, MAX_PATH, "%s%s", this_file_full_path, "build/osx/tools/project_generator/duck_logo.png");			\
-		copy_file_if_exists(_duck_img_src, _duck_img_dst); 																			\
-	} while(0);
-
 	#define BUILD_EXAMPLES()																						\
 	do {																											\
 		char _output[256];																							\
@@ -2255,7 +2113,17 @@ bool compile_osx() {
 	if(strcmp(build, "tools") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING TOOLS --- \n");
-		BUILD_TOOLS()
+		COMPILE_TOOLS("osx",
+		{
+			ADD_FLAG("-D_DEFAULT_SOURCE")
+			ADD_FLAG("-lm")
+		},
+		{
+			ADD_FLAG("-lfreetype")
+			ADD_FLAG("-lz")
+		},
+		{
+		})
 	}
 
 	if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
@@ -2468,164 +2336,6 @@ bool compile_linux() {
 				exit(-1);																					\
 			}																								\
 		}																									\
-	} while(0);
-
-	#define BUILD_TOOLS()																											\
-	do {																															\
-		char _output_a[256];																										\
-		memset(_output_a, 0, 256);																									\
-		strcat(_output_a, this_file_full_path);																						\
-																																	\
-		memset(_path, 0, MAX_PATH);																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/tools");												\
-		if(!make_dir_if_not_exists(_path)) {																						\
-				exit(-1);																											\
-		}																															\
-		memset(_path, 0, MAX_PATH);																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/tools/atlas_generator");								\
-		if(!make_dir_if_not_exists(_path)) {																						\
-				exit(-1);																											\
-		}																															\
-		strcat(_output_a, "build/linux/tools/atlas_generator/");																	\
-																																	\
-		_build_command = NULL;																										\
-		char output_atlas[MAX_PATH];																								\
-		memset(output_atlas, 0, MAX_PATH);																							\
-		strcat(output_atlas, _output_a);																							\
-		strcat(output_atlas, "atlas_generator");																					\
-		arrput(_build_command, "clang");																							\
-		arrput(_build_command, "-O3");																								\
-		arrput(_build_command, "-std=c99");																							\
-		arrput(_build_command, "-D_DEFAULT_SOURCE");																				\
-																																	\
-		char _ag_source_path[MAX_PATH];																								\
-		memset(_ag_source_path, 0, MAX_PATH);																						\
-		snprintf(_ag_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools/atlas_generator/atlas_generator.c");				\
-		arrput(_build_command, _ag_source_path);																					\
-																																	\
-		arrput(_build_command, "-I");																								\
-		char _ag_include_path[MAX_PATH];																							\
-		memset(_ag_include_path, 0, MAX_PATH);																						\
-		snprintf(_ag_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools/atlas_generator/external/include");				\
-		arrput(_build_command, _ag_include_path);																					\
-																																	\
-		arrput(_build_command, "-Werror");																							\
-		arrput(_build_command, "-Wall");																							\
-		arrput(_build_command, "-Wextra");																							\
-																																	\
-		arrput(_build_command, "-lm");																								\
-																																	\
-		arrput(_build_command, "-o");																								\
-		arrput(_build_command, output_atlas);																						\
-																																	\
-		if(!run_command(_build_command)) {																							\
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");														\
-			exit(-1);																												\
-		}																															\
-																																	\
-		_build_command = NULL;																										\
-		char _output_f[256];																										\
-		memset(_output_f, 0, 256);																									\
-		strcat(_output_f, this_file_full_path);																						\
-																																	\
-		memset(_path, 0, MAX_PATH);																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/tools/font_generator");									\
-		if(!make_dir_if_not_exists(_path)) {																						\
-				exit(-1);																											\
-		}																															\
-		strcat(_output_f, "build/linux/tools/font_generator/");																		\
-																																	\
-																																	\
-		char output_fonts[MAX_PATH];																								\
-		memset(output_fonts, 0, MAX_PATH);																							\
-		strcat(output_fonts, _output_f);																							\
-		strcat(output_fonts, "font_generator");																						\
-		arrput(_build_command, "clang");																							\
-		arrput(_build_command, "-O3");																								\
-		arrput(_build_command, "-std=c99");																							\
-																																	\
-		char _fg_source_path[MAX_PATH];																								\
-		memset(_fg_source_path, 0, MAX_PATH);																						\
-		snprintf(_fg_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools/font_generator/font_generator.c");					\
-		arrput(_build_command, _fg_source_path);																					\
-																																	\
-		arrput(_build_command, "-I");																								\
-		char _include_path[MAX_PATH];																								\
-		memset(_include_path, 0, MAX_PATH);																							\
-		snprintf(_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools/font_generator/external/include");					\
-		arrput(_build_command, _include_path);																						\
-																																	\
-		arrput(_build_command, "-L");																								\
-		char _lib_path[MAX_PATH];																									\
-		memset(_lib_path, 0, MAX_PATH);																								\
-		snprintf(_lib_path, MAX_PATH, "%s%s", this_file_full_path, "tools/font_generator/external/libs/linux");						\
-		arrput(_build_command, _lib_path);																							\
-																																	\
-		arrput(_build_command, "-lfreetype");																						\
-		arrput(_build_command, "-lz");																								\
-		arrput(_build_command, "-Werror");																							\
-		arrput(_build_command, "-Wall");																							\
-		arrput(_build_command, "-Wextra");																							\
-																																	\
-		arrput(_build_command, "-o");																								\
-		arrput(_build_command, output_fonts);																						\
-																																	\
-		if(!run_command(_build_command)) {																							\
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");														\
-			exit(-1);																												\
-		}																															\
-																																	\
-																																	\
-		_build_command = NULL;																										\
-		char _output_p[256];																										\
-		memset(_output_p, 0, 256);																									\
-		strcat(_output_p, this_file_full_path);																						\
-																																	\
-		memset(_path, 0, MAX_PATH);																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/tools/project_generator");								\
-		if(!make_dir_if_not_exists(_path)) {																						\
-		exit(-1);																													\
-		}																															\
-		strcat(_output_f, "build/linux/tools/project_generator/");																	\
-																																	\
-		char output_project[MAX_PATH];																								\
-		memset(output_project, 0, MAX_PATH);																						\
-		strcat(output_project, _output_p);																							\
-		strcat(output_project, "project_generator");																				\
-		arrput(_build_command, "clang");																							\
-		arrput(_build_command, "-O3");																								\
-		arrput(_build_command, "-std=c99");																							\
-																																	\
-		char _pg_source_path[MAX_PATH];																								\
-		memset(_pg_source_path, 0, MAX_PATH);																						\
-		snprintf(_pg_source_path, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/project_generator.c");			\
-		arrput(_build_command, _pg_source_path);																					\
-																																	\
-		arrput(_build_command, "-I");																								\
-		char _pg_include_path[MAX_PATH];																							\
-		memset(_pg_include_path, 0, MAX_PATH);																						\
-		snprintf(_pg_include_path, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/external/include");				\
-		arrput(_build_command, _pg_include_path);																					\
-																																	\
-		arrput(_build_command, "-Werror");																							\
-		arrput(_build_command, "-Wall");																							\
-		arrput(_build_command, "-Wextra");																							\
-																																	\
-		arrput(_build_command, "-o");																								\
-		arrput(_build_command, output_project);																						\
-																																	\
-		if(!run_command(_build_command)) {																							\
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");															\
-		exit(-1);																													\
-		}																															\
-																																	\
-		char _duck_img_src[MAX_PATH];																								\
-		char _duck_img_dst[MAX_PATH];																								\
-		memset(_duck_img_src, 0, MAX_PATH);																							\
-		memset(_duck_img_dst, 0, MAX_PATH);																							\
-		snprintf(_duck_img_src, MAX_PATH, "%s%s", this_file_full_path, "tools/project_generator/duck_logo.png");					\
-		snprintf(_duck_img_dst, MAX_PATH, "%s%s", this_file_full_path, "build/linux/tools/project_generator/duck_logo.png");		\
-		copy_file_if_exists(_duck_img_src, _duck_img_dst); 																			\
 	} while(0);
     
    	#define BUILD_EXAMPLES()																						\
@@ -2897,7 +2607,17 @@ bool compile_linux() {
 	if(strcmp(build, "tools") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING TOOLS --- \n");
-		BUILD_TOOLS()
+		COMPILE_TOOLS("osx",
+		{
+			ADD_FLAG("-D_DEFAULT_SOURCE")
+			ADD_FLAG("-lm")
+		},
+		{
+			ADD_FLAG("-lfreetype")
+			ADD_FLAG("-lz")
+		},
+		{
+		})
 	}
 
     if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
