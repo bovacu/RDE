@@ -1870,11 +1870,11 @@ bool compile_osx() {
 			arrput(_build_command, "-ldl");																	\
 			arrput(_build_command, "-lm");																	\
 			arrput(_build_command, "-lpthread");															\
-			arrput(_build_command, "-lSDL2main_rde");														\
-			arrput(_build_command, "-lSDL2_rde");															\
+			arrput(_build_command, "-lSDL2main");														\
+			arrput(_build_command, "-lSDL2");															\
 			arrput(_build_command, "-framework");															\
 			arrput(_build_command, "OpenGL");																\
-			arrput(_build_command, "-lcglm_rde");															\
+			arrput(_build_command, "-lcglm");															\
 			arrput(_build_command, "-lc++");																\
 			arrput(_build_command, "-ObjC");																\
 			if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {										\
