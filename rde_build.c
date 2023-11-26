@@ -1475,6 +1475,61 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		FREE_EXAMPLES_ALLOCS()																			\
 	} while(0);
 
+#define COMPILE_TESTS(_platform, _link_flags, _exe_ext, _copy_files)				\
+	do {																			\
+		_build_command = NULL;														\
+																					\
+		dyn_str* _tests_path = dyn_str_new(dyn_str_get(_path));						\
+		dyn_str_append(_tests_path, "unit_tests/");									\
+																					\
+		if(!make_dir_if_not_exists(dyn_str_get(_tests_path))) {						\
+			exit(-1);																\
+		}																			\
+																					\
+		dyn_str* _output_tests = dyn_str_new(dyn_str_get(_tests_path));				\
+		dyn_str_append(_output_tests, "run_tests"_exe_ext);							\
+																					\
+		arrput(_build_command, "clang");											\
+		if(strcmp(build_type, "debug") == 0) {										\
+			ADD_FLAG("-g");															\
+			ADD_FLAG("-O0");														\
+		} else {																	\
+			ADD_FLAG("-O3");														\
+		}																			\
+		ADD_FLAG("-std=c99");														\
+																					\
+		ADD_PATH(_tests_source_path, "tests/test_run.c");							\
+																					\
+		INCLUDE_PATH(_ext_include_path, "external/include/");						\
+		INCLUDE_PATH(_engine_include_path, "engine/include/");						\
+		LINK_PATH(_external_link_path, "external/libs/"_platform"/");				\
+																					\
+		dyn_str* _engine_link_path = NULL;											\
+		if(strcmp(build_type, "debug") == 0) {										\
+			LINK_PATH_EX(_engine_link_path, "build/"_platform"/debug/engine/");		\
+		} else {																	\
+			LINK_PATH_EX(_engine_link_path, "build/"_platform"/release/engine/");	\
+		}																			\
+																					\
+		ADD_FLAG("-Werror")															\
+		ADD_FLAG("-Wall")															\
+		ADD_FLAG("-Wextra")															\
+		_link_flags																	\
+		ADD_FLAG("-lRDE")															\
+																					\
+		ADD_FLAG("-o");																\
+		ADD_FLAG(dyn_str_get(_output_tests));										\
+																					\
+		if(!run_command(_build_command)) {											\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");		\
+			exit(-1);																\
+		}																			\
+																					\
+		dyn_str* _in = NULL;														\
+		dyn_str* _out = NULL;														\
+		_copy_files																	\
+	} while(0);
+
 
 #define FREE_ENGINE_ALLOCS()						\
 	dyn_str_free(_output_engine);					\
@@ -1547,13 +1602,13 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 		ADD_FLAG("-ljolt");
 	}
 
-	ADD_FLAG("-ldbghelp");
-	ADD_FLAG("-lshlwapi");
-	ADD_FLAG("-lAdvapi32");
-	ADD_FLAG("-Werror");
-	ADD_FLAG("-Wall");
-	ADD_FLAG("-Wextra");
-	ADD_FLAG("-Wno-tautological-constant-out-of-range-compare");
+	ADD_FLAG("-ldbghelp")
+	ADD_FLAG("-lshlwapi")
+	ADD_FLAG("-lAdvapi32")
+	ADD_FLAG("-Werror")
+	ADD_FLAG("-Wall")
+	ADD_FLAG("-Wextra")
+	ADD_FLAG("-Wno-tautological-constant-out-of-range-compare")
 
 	ADD_FLAG("-o");
 	ADD_FLAG(dyn_str_get(_output_engine));
@@ -1563,70 +1618,6 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 		exit(-1);
 	}
 	FREE_ENGINE_ALLOCS()
-}
-
-void compile_windows_tests(dyn_str* _path, rde_command _build_command) {
-	_build_command = NULL;
-
-	dyn_str* _tests_path = dyn_str_new(dyn_str_get(_path));
-	dyn_str_append(_tests_path, "unit_tests/");
-
-	if(!make_dir_if_not_exists(dyn_str_get(_tests_path))) {
-		exit(-1);
-	}
-
-	dyn_str* _output_tests = dyn_str_new(dyn_str_get(_tests_path));
-	dyn_str_append(_output_tests, "run_tests.exe");
-
-	arrput(_build_command, "clang");
-	if(strcmp(build_type, "debug") == 0) {
-		ADD_FLAG("-g");
-		ADD_FLAG("-O0");
-	} else {
-		ADD_FLAG("-O3");
-	}
-	ADD_FLAG("-std=c99");
-
-	ADD_PATH(_tests_source_path, "tests/test_run.c");
-
-	INCLUDE_PATH(_ext_include_path, "external/include/");
-	INCLUDE_PATH(_engine_include_path, "engine/include/");
-
-	dyn_str* _engine_link_path = NULL;
-	if(strcmp(build_type, "debug") == 0) {
-		LINK_PATH_EX(_engine_link_path, "build/windows/debug/engine/");
-	} else {
-		LINK_PATH_EX(_engine_link_path, "build/windows/release/engine/");
-	}
-
-	ADD_FLAG("-Werror");
-	ADD_FLAG("-Wall");
-	ADD_FLAG("-Wextra");
-	ADD_FLAG("-lRDE");
-	ADD_FLAG("-lwinmm");
-	ADD_FLAG("-lgdi32");
-
-	ADD_FLAG("-o");
-	ADD_FLAG(dyn_str_get(_output_tests));
-
-	if(!run_command(_build_command)) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");
-		exit(-1);
-	}
-
-	dyn_str* _in = NULL;
-	dyn_str* _out = NULL;
-	if(strcmp(build_type, "debug") == 0) {
-		COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
-		COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/debug/examples/SDL2.dll")
-		COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/hub_assets/")
-		COPY_FOLDER("engine/shaders", "build/windows/debug/examples/shaders/")	
-	} else {
-		COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
-		COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/release/examples/SDL2.dll")
-		COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/hub_assets/")
-		COPY_FOLDER("engine/shaders", "build/windows/release/examples/shaders/")
-	}
 }
 
 bool compile_windows() {
@@ -1729,7 +1720,25 @@ bool compile_windows() {
 	if(strcmp(build, "tests") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING TESTS --- \n");
-		compile_windows_tests(_path, _build_command);
+		COMPILE_TESTS("windows",
+		{
+			ADD_FLAG("-lwinmm")
+			ADD_FLAG("-lgdi32")
+		},
+		".exe",
+		{
+			if(strcmp(build_type, "debug") == 0) {
+				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
+				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/debug/examples/SDL2.dll")
+				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/windows/debug/examples/shaders/")	
+			} else {
+				COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
+				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/release/examples/SDL2.dll")
+				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/windows/release/examples/shaders/")
+			}
+		})
 	}
 
 	return true;
@@ -2323,109 +2332,6 @@ bool compile_linux() {
 	}
 
 	rde_command _build_command = NULL;
-    
-	#define BUILD_TESTS()																								\
-	do {																												\
-		char _output[256];																								\
-		memset(_output, 0, 256);																						\
-		strcat(_output, this_file_full_path);																			\
-																														\
-		memset(_path, 0, MAX_PATH);																						\
-		if(strcmp(build_type, "debug") == 0) {																			\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/debug/unit_tests");							\
-		if(!make_dir_if_not_exists(_path)) {																			\
-					exit(-1);																							\
-		}																												\
-		strcat(_output, "build/linux/debug/unit_tests/");																\
-		} else {																										\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/linux/release/unit_tests");						\
-		if(!make_dir_if_not_exists(_path)) {																			\
-					exit(-1);																							\
-		}																												\
-		strcat(_output, "build/linux/release/unit_tests/");																\
-		}																												\
-																														\
-		_build_command = NULL;																							\
-		char output_atlas[MAX_PATH];																					\
-		memset(output_atlas, 0, MAX_PATH);																				\
-		strcat(output_atlas, _output);																					\
-		strcat(output_atlas, "run_tests");																				\
-		arrput(_build_command, "clang");																				\
-		if(strcmp(build_type, "debug") == 0) {																			\
-		arrput(_build_command, "-g");																					\
-		arrput(_build_command, "-O0");																					\
-		} else {																										\
-		arrput(_build_command, "-O3");																					\
-		}																												\
-		arrput(_build_command, "-std=c99");																				\
-																														\
-		char _t_source_path[MAX_PATH];																					\
-		memset(_t_source_path, 0, MAX_PATH);																			\
-		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "tests/test_run.c");							\
-		arrput(_build_command, _t_source_path);																			\
-																														\
-		arrput(_build_command, "-I");																					\
-		char _t_include_path_0[MAX_PATH];																				\
-		memset(_t_include_path_0, 0, MAX_PATH);																			\
-		snprintf(_t_include_path_0, MAX_PATH, "%s%s", this_file_full_path, "external/include/");						\
-		arrput(_build_command, _t_include_path_0);																		\
-																														\
-		arrput(_build_command, "-I");																					\
-		char _t_include_path_1[MAX_PATH];																				\
-		memset(_t_include_path_1, 0, MAX_PATH);																			\
-		snprintf(_t_include_path_1, MAX_PATH, "%s%s", this_file_full_path, "engine/include/");							\
-		arrput(_build_command, _t_include_path_1);																		\
-																														\
-		arrput(_build_command, "-L");																					\
-		char _t_libs_path[MAX_PATH];																					\
-		memset(_t_libs_path, 0, MAX_PATH);																				\
-		snprintf(_t_libs_path, MAX_PATH, "%s""build/%s/%s/engine", this_file_full_path, platform, build_type);			\
-		arrput(_build_command, _t_libs_path);																			\
-																														\
-		arrput(_build_command, "-Werror");																				\
-		arrput(_build_command, "-Wall");																				\
-		arrput(_build_command, "-Wextra");																				\
-		arrput(_build_command, "-lRDE");																				\
-																														\
-		arrput(_build_command, "-o");																					\
-		arrput(_build_command, output_atlas);																			\
-																														\
-		if(!run_command(_build_command)) {																				\
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");												\
-		exit(-1);																										\
-		}																												\
-																														\
-		char _rde_lib_path[256];																						\
-		memset(_rde_lib_path, 0, 256);																					\
-		strcat(_rde_lib_path, this_file_full_path);																		\
-		char _example_path_sdl[256];																					\
-		char _tests_path_rde[256];																						\
-		memset(_example_path_sdl, 0, 256);																				\
-		memset(_tests_path_rde, 0, 256);																				\
-		strcat(_example_path_sdl, this_file_full_path);																	\
-		strcat(_tests_path_rde, this_file_full_path);																	\
-		                                                                                                            	\
-        if(strcmp(lib_type, "shared") == 0) {                                                                     		\
-		    if(strcmp(build_type, "debug") == 0) {																		\
-			    strcat(_rde_lib_path, "build/linux/debug/engine/libRDE.so");       										\
-			    strcat(_tests_path_rde, "build/linux/debug/unit_tests/libRDE.so");										\
-		    } else {																									\
-			    strcat(_rde_lib_path, "build/linux/release/engine/libRDE.so");											\
-			    strcat(_tests_path_rde, "build/linux/release/unit_tests/libRDE.so");									\
-		    }																											\
-		    copy_file_if_exists(_rde_lib_path, _tests_path_rde); 														\
-        }																												\
-		char _shaders_path[1024];																						\
-		memset(_shaders_path, 0, 1024);																					\
-		snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");									\
-		char _unit_tests_shaders_path[1024];																			\
-		memset(_unit_tests_shaders_path, 0, 1024);																		\
-		snprintf(_unit_tests_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/linux/", 						\
-				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "unit_tests/shaders");						\
-		rm_dir_if_exists(_unit_tests_shaders_path);																		\
-		copy_folder_if_exists(_shaders_path, _unit_tests_shaders_path);													\
-	} while(0);
-   
 
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0 || strcmp(build, "tests") == 0) {
 		printf("\n");
@@ -2483,15 +2389,36 @@ bool compile_linux() {
 		})
     }
 
-	// if(strcmp(build, "tests") == 0 || strcmp(build, "all") == 0) {
-	// 	printf("\n");
-	// 	printf("--- BUILDING TESTS --- \n");
-	// 	BUILD_TESTS()
-	// }
+	if(strcmp(build, "tests") == 0 || strcmp(build, "all") == 0) {
+		printf("\n");
+		printf("--- BUILDING TESTS --- \n");
+		COMPILE_TESTS("linux",
+		{
+			ADD_FLAG("-lrde_imgui");
+			ADD_FLAG("-ljolt");
+			ADD_FLAG("-lm");
+		},
+		"",
+		{
+			if (strcmp(build_type, "debug") == 0) {
+				if(strcmp(build_type, "shared") == 0) {
+					COPY_FILE("build/linux/debug/engine/libRDE.so", "build/linux/debug/examples/libRDE.so")
+					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/debug/examples/libSDL2.so")
+				}
 
-	#undef BUILD_ENGINE
-	#undef BUILD_TOOLS
-	#undef BUILD_EXAMPLES
+				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/linux/debug/examples/shaders/")
+			} else {
+				if(strcmp(build_type, "shared") == 0) {
+					COPY_FILE("build/linux/release/engine/libRDE.so", "build/linux/release/examples/libRDE.so")
+					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/release/examples/libSDL2.so")
+				}
+
+				COPY_FOLDER("examples/hub_assets", "build/linux/release/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/linux/release/examples/shaders/")
+			}
+		})
+	}
 
 	return true;
 }
