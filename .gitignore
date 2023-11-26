@@ -33,3 +33,11 @@ tests/*.lib
 .cache/
 
 skate_or_dice/
+
+examples/models/
+
+examples/hub_assets/yellow_duck.png
+
+examples/hub_assets/logo.ico
+
+examples/hub_assets/fonts/
