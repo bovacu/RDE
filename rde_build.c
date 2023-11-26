@@ -373,7 +373,7 @@ int needs_recompile(const char* _output_path, const char** _input_paths, size_t 
 		}
 		int input_path_time = _statbuf.st_mtime;
 		// NOTE: if even a single input_path is fresher than output_path that's 100% rebuild
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Here needs recompile");
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Here needs recompile -> %s", _input_path); 
 		if (input_path_time > _output_path_time) return 1;
 	}
 
@@ -1273,12 +1273,12 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 	dyn_str_free(_in);				\
 	dyn_str_free(_out);
 
-#define COMPILE_TOOLS(_platform, _ag_link_flags, _fg_link_flags, _pg_link_flags)														\
+#define COMPILE_TOOLS(_platform, _ag_link_flags, _fg_link_flags, _pg_link_flags, _copy_files)											\
 	do {																																\
 		_build_command = NULL;																											\
 																																		\
 		dyn_str* _tools_path = dyn_str_new(this_file_full_path);																		\
-		dyn_str_append(_tools_path, "build/"_platform"/tools/");																			\
+		dyn_str_append(_tools_path, "build/"_platform"/tools/");																		\
 																																		\
 		if(!make_dir_if_not_exists(dyn_str_get(_tools_path))) {																			\
 			exit(-1);																													\
@@ -1358,13 +1358,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 																																		\
 		dyn_str* _in = NULL;																											\
 		dyn_str* _out = NULL;																											\
-		COPY_FILE("tools/font_generator/external/libs/"_platform"/zlib1.dll", "build/"_platform"/tools/font_generator/zlib1.dll")				\
-		COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlicommon.dll", "build/"_platform"/tools/font_generator/brotlicommon.dll")	\
-		COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlidec.dll", "build/"_platform"/tools/font_generator/brotlidec.dll")		\
-		COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlienc.dll", "build/"_platform"/tools/font_generator/brotlienc.dll")		\
-		COPY_FILE("tools/font_generator/external/libs/"_platform"/bz2.dll", "build/"_platform"/tools/font_generator/bz2.dll")					\
-		COPY_FILE("tools/font_generator/external/libs/"_platform"/freetype.dll", "build/"_platform"/tools/font_generator/freetype.dll")			\
-		COPY_FILE("tools/font_generator/external/libs/"_platform"/libpng16.dll", "build/"_platform"/tools/font_generator/libpng16.dll")			\
+		_copy_files																														\
 																																		\
 		_build_command = NULL;																											\
 																																		\
@@ -1402,7 +1396,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		}																																\
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Project generator built successfully");														\
 																																		\
-		COPY_FILE("tools/project_generator/duck_logo.png", "build/"_platform"/tools/project_generator/duck_logo.png")						\
+		COPY_FILE("tools/project_generator/duck_logo.png", "build/"_platform"/tools/project_generator/duck_logo.png")					\
 																																		\
 		FREE_ATLAS_ALLOCS()																												\
 		FREE_FONT_ALLOCS()																												\
@@ -1703,6 +1697,15 @@ bool compile_windows() {
 			ADD_FLAG("-lfreetype");
 		}, 
 		{
+		},
+		{
+			COPY_FILE("tools/font_generator/external/libs/"_platform"/zlib1.dll", "build/"_platform"/tools/font_generator/zlib1.dll")
+			COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlicommon.dll", "build/"_platform"/tools/font_generator/brotlicommon.dll")
+			COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlidec.dll", "build/"_platform"/tools/font_generator/brotlidec.dll")
+			COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlienc.dll", "build/"_platform"/tools/font_generator/brotlienc.dll")
+			COPY_FILE("tools/font_generator/external/libs/"_platform"/bz2.dll", "build/"_platform"/tools/font_generator/bz2.dll")
+			COPY_FILE("tools/font_generator/external/libs/"_platform"/freetype.dll", "build/"_platform"/tools/font_generator/freetype.dll")
+			COPY_FILE("tools/font_generator/external/libs/"_platform"/libpng16.dll", "build/"_platform"/tools/font_generator/libpng16.dll")
 		})
 	}
 
@@ -2121,6 +2124,9 @@ bool compile_osx() {
 		{
 			ADD_FLAG("-lfreetype")
 			ADD_FLAG("-lz")
+		},
+		{
+			ADD_FLAG("-D_DEFAULT_SOURCE")
 		},
 		{
 		})
@@ -2607,7 +2613,7 @@ bool compile_linux() {
 	if(strcmp(build, "tools") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING TOOLS --- \n");
-		COMPILE_TOOLS("osx",
+		COMPILE_TOOLS("linux",
 		{
 			ADD_FLAG("-D_DEFAULT_SOURCE")
 			ADD_FLAG("-lm")
@@ -2615,6 +2621,9 @@ bool compile_linux() {
 		{
 			ADD_FLAG("-lfreetype")
 			ADD_FLAG("-lz")
+		},
+		{
+			ADD_FLAG("-D_DEFAULT_SOURCE")
 		},
 		{
 		})

@@ -8,37 +8,39 @@
 #include <ctype.h>
 #include <limits.h>
 
+#if !_WIN32
+#define MAX_PATH 2048
+#include <stdint.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+#endif
+
 // Fuck Windows deprecations
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 #define STB_DS_IMPLEMENTATION
 #define STBDS_SIPHASH_2_4
-#include "stb/stb_ds.h"
+#include "external/include/stb/stb_ds.h"
 
 #ifdef _WIN32
-#include <windows.h>
-#include <direct.h>
-#include <shellapi.h>
-#include "dirent/dirent.h"
-HANDLE console_handle;
-typedef HANDLE rde_proc;
-#define rde_proc_invalid INVALID_HANDLE_VALUE
+	#include <windows.h>
+	#include <direct.h>
+	#include <shellapi.h>
+	#include "external/include/dirent.h"
+	HANDLE console_handle;
+	typedef HANDLE rde_proc;
+	#define rde_proc_invalid INVALID_HANDLE_VALUE
 #else
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <pwd.h>
-
-#define MAX_PATH 2048
-typedef int rde_proc;
-#define rde_proc_invalid (-1)
+	#include <sys/types.h>
+	#include <sys/wait.h>
+	#include <sys/stat.h>
+	#include <unistd.h>
+	#include <fcntl.h>
+	#include <dirent.h>
+	typedef int rde_proc;
+	#define rde_proc_invalid (-1)
 #endif
 
 typedef char** rde_command;
