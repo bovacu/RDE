@@ -1403,6 +1403,77 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		FREE_PROJECT_ALLOCS()																											\
 	} while(0);
 
+
+#define FREE_EXAMPLES_ALLOCS()				\
+	dyn_str_free(_examples_path);			\
+	dyn_str_free(_output_examples);			\
+	dyn_str_free(_hub_source_path);			\
+	dyn_str_free(_ext_include_path);		\
+	dyn_str_free(_ext_imgui_include_path);	\
+	dyn_str_free(_engine_include_path);		\
+	dyn_str_free(_engine_link_path);		\
+	dyn_str_free(_in);						\
+	dyn_str_free(_out); \
+
+	// On some Windows OS the entry point not define error is solved by adding '-Xlinker /subsystem:console -lShell32' to the flags
+#define COMPILE_EXAMPLE(_platform, _link_flags, _exe_ext, _copy_files)									\
+	do {																								\
+		_build_command = NULL;																			\
+																										\
+		dyn_str* _examples_path = dyn_str_new(dyn_str_get(_path));										\
+		dyn_str_append(_examples_path, "examples/");													\
+																										\
+		if (!make_dir_if_not_exists(dyn_str_get(_examples_path))) {										\
+			exit(-1);																					\
+		}																								\
+																										\
+		dyn_str* _output_examples = dyn_str_new(dyn_str_get(_examples_path));							\
+		dyn_str_append(_output_examples, "hub"_exe_ext);												\
+																										\
+		arrput(_build_command, "clang");																\
+																										\
+		if (strcmp(build_type, "debug") == 0) {															\
+			ADD_FLAG("-g");																				\
+			ADD_FLAG("-O0");																			\
+			ADD_FLAG("-DRDE_DEBUG");																	\
+		} else {																						\
+			ADD_FLAG("-O3");																			\
+		}																								\
+		ADD_FLAG("-std=c99");																			\
+																										\
+		ADD_PATH(_hub_source_path, "examples/hub.c");													\
+																										\
+		INCLUDE_PATH(_ext_include_path, "external/include/");											\
+		INCLUDE_PATH(_ext_imgui_include_path, "external/include/imgui");								\
+		INCLUDE_PATH(_engine_include_path, "engine/include/");											\
+																										\
+		dyn_str* _engine_link_path = NULL;																\
+		if (strcmp(build_type, "debug") == 0) {															\
+			LINK_PATH_EX(_engine_link_path, "build/"_platform"/debug/engine/");							\
+		} else {																						\
+			LINK_PATH_EX(_engine_link_path, "build/"_platform"/release/engine/");						\
+		}																								\
+																										\
+		ADD_FLAG("-Werror");																			\
+		ADD_FLAG("-Wall");																				\
+		ADD_FLAG("-Wextra");																			\
+		ADD_FLAG("-lRDE");																				\
+		_link_flags																						\
+																										\
+		ADD_FLAG("-o");																					\
+		ADD_FLAG(dyn_str_get(_output_examples));														\
+																										\
+		if (!run_command(_build_command)) {																\
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");							\
+			exit(-1);																					\
+		}																								\
+																										\
+		dyn_str* _in = NULL;																			\
+		dyn_str* _out = NULL;																			\
+		_copy_files																						\
+		FREE_EXAMPLES_ALLOCS()																			\
+	} while(0);
+
 #if _WIN32
 void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 	#define FREE_ENGINE_ALLOCS()						\
@@ -1490,91 +1561,6 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 		exit(-1);
 	}
 	FREE_ENGINE_ALLOCS()
-}
-
-// On some Windows OS the entry point not define error is solved by adding '-Xlinker /subsystem:console -lShell32' to the flags
-void compile_windows_examples(dyn_str* _path, rde_command _build_command) {
-	#define FREE_EXAMPLES_ALLOCS()				\
-		dyn_str_free(_examples_path);			\
-		dyn_str_free(_output_examples);			\
-		dyn_str_free(_hub_source_path);			\
-		dyn_str_free(_ext_include_path);		\
-		dyn_str_free(_ext_imgui_include_path);	\
-		dyn_str_free(_engine_include_path);		\
-		dyn_str_free(_engine_link_path);		\
-		dyn_str_free(_in);						\
-		dyn_str_free(_out);						\
-
-	_build_command = NULL;
-
-	dyn_str* _examples_path = dyn_str_new(dyn_str_get(_path));
-	dyn_str_append(_examples_path, "examples/");
-
-	if(!make_dir_if_not_exists(dyn_str_get(_examples_path))) {
-		exit(-1);
-	}
-
-	dyn_str* _output_examples = dyn_str_new(dyn_str_get(_examples_path));
-	dyn_str_append(_output_examples, "hub.exe");
-
-	arrput(_build_command, "clang");
-
-	if(strcmp(build_type, "debug") == 0) {
-		ADD_FLAG("-g");
-		ADD_FLAG("-O0");
-		ADD_FLAG("-DRDE_DEBUG");
-	} else {
-		ADD_FLAG("-O3");
-	}
-	ADD_FLAG("-std=c99");
-
-	ADD_PATH(_hub_source_path, "examples/hub.c");
-
-	INCLUDE_PATH(_ext_include_path, "external/include/");
-	INCLUDE_PATH(_ext_imgui_include_path, "external/include/imgui");
-	INCLUDE_PATH(_engine_include_path, "engine/include/");
-
-	dyn_str* _engine_link_path = NULL;
-	if(strcmp(build_type, "debug") == 0) {
-		LINK_PATH_EX(_engine_link_path, "build/windows/debug/engine/");
-	} else {
-		LINK_PATH_EX(_engine_link_path, "build/windows/release/engine/");
-	}
-
-	ADD_FLAG("-Werror");
-	ADD_FLAG("-Wall");
-	ADD_FLAG("-Wextra");
-	ADD_FLAG("-lRDE");
-	ADD_FLAG("-lwinmm");
-	ADD_FLAG("-lgdi32");
-	ADD_FLAG("-lmsvcrt");
-	ADD_FLAG("-Xlinker");
-	ADD_FLAG("/nodefaultlib:msvcrt");
-	ADD_FLAG("-Xlinker");
-	ADD_FLAG("/nodefaultlib:libcmt");
-
-	ADD_FLAG("-o");
-	ADD_FLAG(dyn_str_get(_output_examples));
-
-	if(!run_command(_build_command)) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");
-		exit(-1);
-	}
-
-	dyn_str* _in = NULL;
-	dyn_str* _out = NULL;
-	if(strcmp(build_type, "debug") == 0) {
-		COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
-		COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/debug/examples/SDL2.dll")
-		COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/hub_assets/")
-		COPY_FOLDER("engine/shaders", "build/windows/debug/examples/shaders/")	
-	} else {
-		COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
-		COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/release/examples/SDL2.dll")
-		COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/hub_assets/")
-		COPY_FOLDER("engine/shaders", "build/windows/release/examples/shaders/")
-	}
-	FREE_EXAMPLES_ALLOCS()
 }
 
 void compile_windows_tests(dyn_str* _path, rde_command _build_command) {
@@ -1699,20 +1685,43 @@ bool compile_windows() {
 		{
 		},
 		{
-			COPY_FILE("tools/font_generator/external/libs/"_platform"/zlib1.dll", "build/"_platform"/tools/font_generator/zlib1.dll")
-			COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlicommon.dll", "build/"_platform"/tools/font_generator/brotlicommon.dll")
-			COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlidec.dll", "build/"_platform"/tools/font_generator/brotlidec.dll")
-			COPY_FILE("tools/font_generator/external/libs/"_platform"/brotlienc.dll", "build/"_platform"/tools/font_generator/brotlienc.dll")
-			COPY_FILE("tools/font_generator/external/libs/"_platform"/bz2.dll", "build/"_platform"/tools/font_generator/bz2.dll")
-			COPY_FILE("tools/font_generator/external/libs/"_platform"/freetype.dll", "build/"_platform"/tools/font_generator/freetype.dll")
-			COPY_FILE("tools/font_generator/external/libs/"_platform"/libpng16.dll", "build/"_platform"/tools/font_generator/libpng16.dll")
+			COPY_FILE("tools/font_generator/external/libs/windows/zlib1.dll", "build/windows/tools/font_generator/zlib1.dll")
+			COPY_FILE("tools/font_generator/external/libs/windows/brotlicommon.dll", "build/windows/tools/font_generator/brotlicommon.dll")
+			COPY_FILE("tools/font_generator/external/libs/windows/brotlidec.dll", "build/windows/tools/font_generator/brotlidec.dll")
+			COPY_FILE("tools/font_generator/external/libs/windows/brotlienc.dll", "build/windows/tools/font_generator/brotlienc.dll")
+			COPY_FILE("tools/font_generator/external/libs/windows/bz2.dll", "build/windows/tools/font_generator/bz2.dll")
+			COPY_FILE("tools/font_generator/external/libs/windows/freetype.dll", "build/windows/tools/font_generator/freetype.dll")
+			COPY_FILE("tools/font_generator/external/libs/windows/libpng16.dll", "build/windows/tools/font_generator/libpng16.dll")
 		})
 	}
 
 	if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING EXAMPLES --- \n");
-		compile_windows_examples(_path, _build_command);
+		COMPILE_EXAMPLE("windows", 
+		{
+			ADD_FLAG("-lwinmm");
+			ADD_FLAG("-lgdi32");
+			ADD_FLAG("-lmsvcrt");
+			ADD_FLAG("-Xlinker");
+			ADD_FLAG("/nodefaultlib:msvcrt");
+			ADD_FLAG("-Xlinker");
+			ADD_FLAG("/nodefaultlib:libcmt");
+		},
+		".exe",
+		{
+			if (strcmp(build_type, "debug") == 0) {
+				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
+				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/debug/examples/SDL2.dll")
+				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/windows/debug/examples/shaders/")
+			} else {
+				COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
+				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/release/examples/SDL2.dll")
+				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/windows/release/examples/shaders/")
+			}
+		})
 	}
 
 	if(strcmp(build, "tests") == 0 || strcmp(build, "all") == 0) {
@@ -2632,7 +2641,33 @@ bool compile_linux() {
     if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
         printf("\n");
         printf("--- BUILDING EXAMPLES --- \n");
-        BUILD_EXAMPLES();
+		COMPILE_EXAMPLE("linux", 
+		{
+		    ADD_FLAG("-lrde_imgui");
+			ADD_FLAG("-ljolt");
+			ADD_FLAG("-lm");
+		},
+		"",
+		{
+			if (strcmp(build_type, "debug") == 0) {
+				
+				if(strcmp(build_type, "shared") == 0) {
+					COPY_FILE("build/linux/debug/engine/libRDE.so", "build/linux/debug/examples/libRDE.so")
+					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/debug/examples/libSDL2.so")
+				}
+
+				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/linux/debug/examples/shaders/")
+			} else {
+				if(strcmp(build_type, "shared") == 0) {
+					COPY_FILE("build/linux/debug/engine/libRDE.so", "build/linux/debug/examples/libRDE.so")
+					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/debug/examples/libSDL2.so")
+				}
+
+				COPY_FOLDER("examples/hub_assets", "build/linux/release/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/linux/release/examples/shaders/")
+			}
+		})
     }
 
 	if(strcmp(build, "tests") == 0 || strcmp(build, "all") == 0) {

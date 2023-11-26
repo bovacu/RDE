@@ -28,7 +28,7 @@
 	#include <windows.h>
 	#include <direct.h>
 	#include <shellapi.h>
-	#include "external/include/dirent.h"
+	#include "dirent/dirent.h"
 	HANDLE console_handle;
 	typedef HANDLE rde_proc;
 	#define rde_proc_invalid INVALID_HANDLE_VALUE
