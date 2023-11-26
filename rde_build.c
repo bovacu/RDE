@@ -1273,7 +1273,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 	dyn_str_free(_in);				\
 	dyn_str_free(_out);
 
-#define COMPILE_TOOLS(_platform, _ag_link_flags, _fg_link_flags, _pg_link_flags, _copy_files)											\
+#define COMPILE_TOOLS(_platform, _exe_ext, _ag_link_flags, _fg_link_flags, _pg_link_flags, _copy_files)									\
 	do {																																\
 		_build_command = NULL;																											\
 																																		\
@@ -1291,7 +1291,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		}																																\
 																																		\
 		dyn_str* _output_atlas = dyn_str_new(dyn_str_get(_atlas_gen_path));																\
-		dyn_str_append(_output_atlas, "atlas_generator.exe");																			\
+		dyn_str_append(_output_atlas, "atlas_generator"_exe_ext);																		\
 																																		\
 		ADD_FLAG("clang");																												\
 		ADD_FLAG("-O3");																												\
@@ -1328,7 +1328,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		}																																\
 																																		\
 		dyn_str* _output_font = dyn_str_new(dyn_str_get(_font_gen_path));																\
-		dyn_str_append(_output_font, "font_generator.exe");																				\
+		dyn_str_append(_output_font, "font_generator"_exe_ext);																			\
 																																		\
 		ADD_FLAG("clang");																												\
 		ADD_FLAG("-O3");																												\
@@ -1369,7 +1369,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		}																																\
 																																		\
 		dyn_str* _output_project = dyn_str_new(dyn_str_get(_project_gen_path));															\
-		dyn_str_append(_output_project, "project_generator.exe");																		\
+		dyn_str_append(_output_project, "project_generator"_exe_ext);																	\
 																																		\
 		ADD_FLAG("clang");																												\
 		ADD_FLAG("-O3");																												\
@@ -1416,7 +1416,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 	dyn_str_free(_out); \
 
 	// On some Windows OS the entry point not define error is solved by adding '-Xlinker /subsystem:console -lShell32' to the flags
-#define COMPILE_EXAMPLE(_platform, _link_flags, _exe_ext, _copy_files)									\
+#define COMPILE_EXAMPLE(_platform, _exe_ext, _link_flags, _copy_files)									\
 	do {																								\
 		_build_command = NULL;																			\
 																										\
@@ -1475,7 +1475,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		FREE_EXAMPLES_ALLOCS()																			\
 	} while(0);
 
-#define COMPILE_TESTS(_platform, _link_flags, _exe_ext, _copy_files)				\
+#define COMPILE_TESTS(_platform, _exe_ext, _link_flags, _copy_files)				\
 	do {																			\
 		_build_command = NULL;														\
 																					\
@@ -1669,7 +1669,7 @@ bool compile_windows() {
 	if(strcmp(build, "tools") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING TOOLS --- \n");
-		COMPILE_TOOLS("windows", 
+		COMPILE_TOOLS("windows", ".exe",
 		{
 		}, 
 		{
@@ -1691,7 +1691,7 @@ bool compile_windows() {
 	if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING EXAMPLES --- \n");
-		COMPILE_EXAMPLE("windows", 
+		COMPILE_EXAMPLE("windows", ".exe",
 		{
 			ADD_FLAG("-lwinmm");
 			ADD_FLAG("-lgdi32");
@@ -1701,7 +1701,6 @@ bool compile_windows() {
 			ADD_FLAG("-Xlinker");
 			ADD_FLAG("/nodefaultlib:libcmt");
 		},
-		".exe",
 		{
 			if (strcmp(build_type, "debug") == 0) {
 				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
@@ -1720,12 +1719,11 @@ bool compile_windows() {
 	if(strcmp(build, "tests") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING TESTS --- \n");
-		COMPILE_TESTS("windows",
+		COMPILE_TESTS("windows", ".exe",
 		{
 			ADD_FLAG("-lwinmm")
 			ADD_FLAG("-lgdi32")
 		},
-		".exe",
 		{
 			if(strcmp(build_type, "debug") == 0) {
 				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
@@ -1747,33 +1745,167 @@ bool compile_windows() {
 
 
 #if __APPLE__
-bool compile_osx() {
-	errno = 0;
+void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
+	dyn_str* _output_engine = dyn_str_new(dyn_str_get(_path));
+	
+	if(strcmp(lib_type, "shared") == 0) {
+		dyn_str_append(_output_engine, "engine/libRDE.dylib");
+	} else {
+		dyn_str_append(_output_engine, "engine/libRDE.o");
+	}
 
-	char _path[MAX_PATH];
-	memset(_path, 0, MAX_PATH);
-	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build");
-	if(!make_dir_if_not_exists(_path)) {
+	arrput(_build_command, "clang");
+
+	unsigned int _module = 1;
+	for(int _i = 0; _i < MAX_MODULES; _i++) {
+		if((modules & _module) == _module) {
+			ADD_FLAG(MODULES_DEFINES[_i]);
+		}
+		_module = _module << 1;
+	}
+
+	if(strcmp(build_type, "debug") == 0) {
+		ADD_FLAG("-g");
+		ADD_FLAG("-O0");
+		ADD_FLAG("-DRDE_DEBUG");
+	} else {
+		ADD_FLAG("-O3");
+	}
+
+	ADD_FLAG("-std=c99");
+
+	if(is_god) {
+		ADD_FLAG(GOD_MODE);
+	}
+
+	char _mac_version_buf[256];
+	memset(_mac_version_buf, 0, 256);
+	get_mac_version(_mac_version_buf);
+	char _min_version[MAX_PATH];
+	memset(_min_version, 0, MAX_PATH);
+	snprintf(_min_version, MAX_PATH, "-mmacosx-version-min=%s", _mac_version_buf);
+	ADD_FLAG(_min_version)
+
+	if(strcmp(lib_type, "shared") == 0) {
+		ADD_FLAG("-shared");
+		ADD_FLAG("-fPIC");
+	} else {
+		ADD_FLAG("-c");
+	}
+
+	ADD_PATH(_rde_src_path, "engine/src/rde.c");
+	ADD_PATH(_glad_src_path, "external/include/glad/glad.c");
+
+	INCLUDE_PATH(_rde_include_path, "engine/include/");
+	INCLUDE_PATH(_rde_src_include_path, "engine/src/");
+	INCLUDE_PATH(_external_include_path, "external/include/");
+
+	dyn_str* _external_imgui_include_path = NULL;
+	if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
+		INCLUDE_PATH_EX(_external_imgui_include_path, "external/include/imgui/");
+	}
+
+	dyn_str* _imgui_whole_flag = NULL;
+	if(strcmp(lib_type, "shared") == 0) {
+		LINK_PATH(_external_lib_path, "external/libs/osx/");
+
+		arrput(_build_command, "-ldl");
+		arrput(_build_command, "-lm");
+		arrput(_build_command, "-lpthread");
+		arrput(_build_command, "-lSDL2main");
+		arrput(_build_command, "-lSDL2");
+		arrput(_build_command, "-framework");
+		arrput(_build_command, "OpenGL");
+		arrput(_build_command, "-lcglm");
+		arrput(_build_command, "-lc++");
+		arrput(_build_command, "-ObjC");
+
+		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
+			ADD_FLAG("-Wl,-all_load");
+			_imgui_whole_flag = dyn_str_new(this_file_full_path);
+			dyn_str_append(_imgui_whole_flag, "external/libs/osx/librde_imgui.dylib");
+			ADD_FLAG(dyn_str_get(_imgui_whole_flag));
+		}
+		if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {
+			ADD_FLAG("-ljolt");
+		}
+	}
+
+	ADD_FLAG("-Werror");
+	ADD_FLAG("-Wall");
+	ADD_FLAG("-Wextra");
+	ADD_FLAG("-Wno-tautological-constant-out-of-range-compare");
+
+	ADD_FLAG("-o");
+	ADD_FLAG(dyn_str_get(_output_engine));
+
+	if(!run_command(_build_command)) {
+		exit(-1);
+	}
+
+	if(strcmp(lib_type, "static") == 0) {
+		rde_command _build_static_lib_command = NULL;
+		arrput(_build_static_lib_command, "libtool");
+		arrput(_build_static_lib_command, "-static");
+		arrput(_build_static_lib_command, "-o");
+
+		dyn_str* _output_lib = dyn_str_new(this_file_full_path);
+
+		if(strcmp(build_type, "debug") == 0) {
+			dyn_str_append(_output_lib, "build/linux/debug/engine/libRDE.a");
+		} else {
+			dyn_str_append(_output_lib, "build/linux/release/engine/libRDE.a");
+		}
+
+		arrput(_build_static_lib_command, dyn_str_get(_output_lib));
+		arrput(_build_static_lib_command, dyn_str_get(_output_engine));
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Building static lib with ar...");
+		if(!run_command(_build_static_lib_command)) {
+			exit(-1);
+		}
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Static library built!");
+
+		rde_command _rm_dot_o_command = NULL;
+		arrput(_rm_dot_o_command, "rm");
+		arrput(_rm_dot_o_command, dyn_str_get(_output_engine));
+		if(!run_command(_rm_dot_o_command)) {
+			exit(-1);
+		}
+
+		dyn_str_free(_output_lib);
+	}
+}
+
+bool compile_osx() {
+		dyn_str* _path = dyn_str_new("");
+	dyn_str_append(_path, this_file_full_path);
+	dyn_str_append(_path, "build/");
+	
+	if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 		exit(-1);
 	}
 	
-	memset(_path, 0, MAX_PATH);
-	snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx");
-	if(!make_dir_if_not_exists(_path)) {
+	dyn_str_append(_path, "osx/");
+	if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 		exit(-1);
 	}
 
-	memset(_path, 0, MAX_PATH);
 	if(strcmp(build_type, "debug") == 0) {
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/debug");
-		if(!make_dir_if_not_exists(_path)) {
+		dyn_str_append(_path, "debug/");
+		if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 			exit(-1);
 		}
 	} else {
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/release");
-		if(!make_dir_if_not_exists(_path)) {
+		dyn_str_append(_path, "release/");
+		if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 			exit(-1);
 		}
+	}
+
+	dyn_str* _engine_folder = dyn_str_new(dyn_str_get(_path));
+	dyn_str_append(_engine_folder, "engine/");
+	if(!make_dir_if_not_exists(dyn_str_get(_engine_folder))) {
+		exit(-1);
 	}
 
 	if(strlen(build) == 0) {
@@ -1781,362 +1913,17 @@ bool compile_osx() {
 	}
 
 	rde_command _build_command = NULL;
-	
-	#define BUILD_ENGINE() 																					\
-	do {																									\
-		char _output[256];																					\
-		memset(_output, 0, 256);																			\
-		strcat(_output, this_file_full_path);																\
-																											\
-		if(strcmp(build_type, "debug") == 0) {																\
-			memset(_path, 0, MAX_PATH);																		\
-			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/debug/engine");				\
-			if(!make_dir_if_not_exists(_path)) {															\
-				exit(-1);																					\
-			}																								\
-			strcat(_output, "build/osx/debug/engine/");														\
-		} else {																							\
-			memset(_path, 0, MAX_PATH);																		\
-			snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/release/engine");				\
-			if(!make_dir_if_not_exists(_path)) {															\
-				exit(-1);																					\
-			}																								\
-			strcat(_output, "build/osx/release/engine/");													\
-		}																									\
-																											\
-		char _output_engine[MAX_PATH];																		\
-		memset(_output_engine, 0, MAX_PATH);																\
-		strcat(_output_engine, _output);																	\
-																											\
-		arrput(_build_command, "clang");																	\
-																											\
-		unsigned int _module = 1;																			\
-		for(int _i = 0; _i < MAX_MODULES; _i++) {															\
-			if((modules & _module) == _module) {															\
-						arrput(_build_command, MODULES_DEFINES[_i]);										\
-			}																								\
-			_module = _module << 1;																			\
-		}																									\
-																											\
-		if(strcmp(build_type, "debug") == 0) {																\
-			arrput(_build_command, "-g");																	\
-			arrput(_build_command, "-O0");																	\
-			arrput(_build_command, "-DRDE_DEBUG");															\
-		} else {																							\
-			arrput(_build_command, "-O3");																	\
-		}																									\
-																											\
-		arrput(_build_command, "-std=c99");																	\
-																											\
-		if(is_god) {																						\
-			arrput(_build_command, GOD_MODE);																\
-		}																									\
-																											\
-		char _mac_version_buf[256];																			\
-    	memset(_mac_version_buf, 0, 256);																	\
-    	get_mac_version(_mac_version_buf);																	\
-	    char _min_version[MAX_PATH];																		\
-		memset(_min_version, 0, MAX_PATH);																	\
-		snprintf(_min_version, MAX_PATH, "-mmacosx-version-min=%s", _mac_version_buf);						\
-		arrput(_build_command, _min_version);																\
-																											\
-		if(strcmp(lib_type, "shared") == 0) {																\
-			strcat(_output_engine, "libRDE.dylib");															\
-			arrput(_build_command, "-shared");																\
-			arrput(_build_command, "-fPIC");																\
-		} else {																							\
-			strcat(_output_engine, "libRDE.o");																\
-			arrput(_build_command, "-c");																	\
-		}																									\
-																											\
-		char _temp_path_0[MAX_PATH];																		\
-		memset(_temp_path_0, 0, MAX_PATH);																	\
-		snprintf(_temp_path_0, MAX_PATH, "%s%s", this_file_full_path, "engine/src/rde.c");					\
-		arrput(_build_command, _temp_path_0);																\
-																											\
-		arrput(_build_command, "-I");																		\
-		char _temp_path_1[MAX_PATH];																		\
-		memset(_temp_path_1, 0, MAX_PATH);																	\
-		snprintf(_temp_path_1, MAX_PATH, "%s%s", this_file_full_path, "engine/include");					\
-		arrput(_build_command, _temp_path_1);																\
-																											\
-		char _temp_path_2[MAX_PATH];																		\
-		arrput(_build_command, "-I");																		\
-		memset(_temp_path_2, 0, MAX_PATH);																	\
-		snprintf(_temp_path_2, MAX_PATH, "%s%s", this_file_full_path, "engine/src");						\
-		arrput(_build_command, _temp_path_2);																\
-																											\
-		arrput(_build_command, "-I");																		\
-		char _temp_path_3[MAX_PATH];																		\
-		memset(_temp_path_3, 0, MAX_PATH);																	\
-		snprintf(_temp_path_3, MAX_PATH, "%s%s", this_file_full_path, "external/include");					\
-		arrput(_build_command, _temp_path_3);																\
-																											\
-		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {											\
-			arrput(_build_command, "-I");																	\
-			char _imgui_path[MAX_PATH];																		\
-			memset(_imgui_path, 0, MAX_PATH);																\
-			snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/include/imgui");			\
-			arrput(_build_command, _imgui_path);															\
-		}																									\
-																											\
-		if(strcmp(lib_type, "shared") == 0) {																\
-			arrput(_build_command, "-L");																	\
-			char _temp_path_4[MAX_PATH];																	\
-			memset(_temp_path_4, 0, MAX_PATH);																\
-			snprintf(_temp_path_4, MAX_PATH, "%s%s", this_file_full_path, "external/libs/osx_x86_64");		\
-																											\
-			arrput(_build_command, _temp_path_4);															\
-			arrput(_build_command, "-ldl");																	\
-			arrput(_build_command, "-lm");																	\
-			arrput(_build_command, "-lpthread");															\
-			arrput(_build_command, "-lSDL2main");														\
-			arrput(_build_command, "-lSDL2");															\
-			arrput(_build_command, "-framework");															\
-			arrput(_build_command, "OpenGL");																\
-			arrput(_build_command, "-lcglm");															\
-			arrput(_build_command, "-lc++");																\
-			arrput(_build_command, "-ObjC");																\
-			if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {										\
-				arrput(_build_command, "-Wl,-all_load");													\
-				char _imgui_path[MAX_PATH];																	\
-				memset(_imgui_path, 0, MAX_PATH);															\
-				snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/libs/osx_x86_64/librde_imgui.dylib");\
-				arrput(_build_command, _imgui_path);														\
-			}																								\
-			if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {								\
-				arrput(_build_command, "-ljolt");															\
-			}																								\
-		}																									\
-		arrput(_build_command, "-Werror");																	\
-		arrput(_build_command, "-Wall");																	\
-		arrput(_build_command, "-Wextra");																	\
-		arrput(_build_command, "-Wno-tautological-constant-out-of-range-compare");							\
-																											\
-		arrput(_build_command, "-o");																		\
-		arrput(_build_command, _output_engine);																\
-																											\
-		if(!run_command(_build_command)) {																	\
-			exit(-1);																						\
-		}																									\
-																											\
-		if(strcmp(lib_type, "static") == 0) {																\
-			rde_command _build_static_lib_command = NULL;													\
-			arrput(_build_static_lib_command, "libtool");													\
-			arrput(_build_static_lib_command, "-static");													\
-			arrput(_build_static_lib_command, "-o");														\
-																											\
-			char _output_lib[MAX_PATH];																		\
-			snprintf(_output_lib, MAX_PATH, "%s%s", _output, "libRDE.a");									\
-			arrput(_build_static_lib_command, _output_lib);													\
-			arrput(_build_static_lib_command, _output_engine);												\
-			rde_log_level(RDE_LOG_LEVEL_INFO, "Building static lib with libtool...");						\
-			if(!run_command(_build_static_lib_command)) {													\
-				exit(-1);																					\
-			}																								\
-			rde_log_level(RDE_LOG_LEVEL_INFO, "Static library built!");										\
-																											\
-			rde_command _rm_dot_o_command = NULL;															\
-			arrput(_rm_dot_o_command, "rm");																\
-			arrput(_rm_dot_o_command, _output_engine);														\
-			if(!run_command(_rm_dot_o_command)) {															\
-				exit(-1);																					\
-			}																								\
-		}																									\
-	} while(0);
-
-	#define BUILD_EXAMPLES()																						\
-	do {																											\
-		char _output[256];																							\
-		memset(_output, 0, 256);																					\
-		strcat(_output, this_file_full_path);																		\
-																													\
-		memset(_path, 0, MAX_PATH);																					\
-		if(strcmp(build_type, "debug") == 0) {																		\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/debug/examples");				    		\
-		if(!make_dir_if_not_exists(_path)) {																		\
-					exit(-1);																						\
-		}																											\
-		strcat(_output, "build/osx/debug/examples/");													        	\
-		} else {																									\
-		snprintf(_path, MAX_PATH, "%s%s", this_file_full_path, "build/osx/release/examples");			        	\
-		if(!make_dir_if_not_exists(_path)) {																		\
-					exit(-1);																						\
-		}																											\
-		strcat(_output, "build/osx/release/examples/");													    		\
-		}																											\
-																													\
-		_build_command = NULL;																						\
-		char output_atlas[MAX_PATH];																				\
-		memset(output_atlas, 0, MAX_PATH);																			\
-		strcat(output_atlas, _output);																				\
-		strcat(output_atlas, "hub");																			    \
-		arrput(_build_command, "clang");																			\
-		if(strcmp(build_type, "debug") == 0) {																		\
-		arrput(_build_command, "-g");																				\
-		arrput(_build_command, "-O0");																				\
-		arrput(_build_command, "-DRDE_DEBUG");																		\
-		} else {																									\
-		arrput(_build_command, "-O3");																				\
-		}																											\
-		arrput(_build_command, "-std=c99");																			\
-																													\
-		char _mac_version_buf[256];																					\
-    	memset(_mac_version_buf, 0, 256);																			\
-		get_mac_version(_mac_version_buf);																			\
-	    char _min_version[MAX_PATH];																				\
-		memset(_min_version, 0, MAX_PATH);																			\
-		snprintf(_min_version, MAX_PATH, "-mmacosx-version-min=%s", _mac_version_buf);								\
-		arrput(_build_command, _min_version);																		\
-		char _t_source_path[MAX_PATH];																				\
-		memset(_t_source_path, 0, MAX_PATH);																		\
-		snprintf(_t_source_path, MAX_PATH, "%s%s", this_file_full_path, "examples/hub.c");							\
-		arrput(_build_command, _t_source_path);																		\
-																													\
-		arrput(_build_command, "-I");																				\
-		char _t_include_path_0[MAX_PATH];																			\
-		memset(_t_include_path_0, 0, MAX_PATH);																		\
-		snprintf(_t_include_path_0, MAX_PATH, "%s%s", this_file_full_path, "external/include/");					\
-		arrput(_build_command, _t_include_path_0);																	\
-																													\
-		arrput(_build_command, "-I");																				\
-		char _t_include_path_1[MAX_PATH];																			\
-		memset(_t_include_path_1, 0, MAX_PATH);																		\
-		snprintf(_t_include_path_1, MAX_PATH, "%s%s", this_file_full_path, "external/include/imgui/");			    \
-		arrput(_build_command, _t_include_path_1);																	\
-																													\
-		arrput(_build_command, "-I");																				\
-		char _t_include_path_2[MAX_PATH];																			\
-		memset(_t_include_path_2, 0, MAX_PATH);																		\
-		snprintf(_t_include_path_2, MAX_PATH, "%s%s", this_file_full_path, "engine/include/");					    \
-		arrput(_build_command, _t_include_path_2);																	\
-																													\
-		arrput(_build_command, "-L");																				\
-		char _t_libs_path[MAX_PATH];																				\
-		memset(_t_libs_path, 0, MAX_PATH);																			\
-		snprintf(_t_libs_path, MAX_PATH, "%s""build/%s/%s/engine", this_file_full_path, platform, build_type);		\
-		arrput(_build_command, _t_libs_path);																		\
-																													\
-		arrput(_build_command, "-L");																				\
-		char _t_libs_path_1[MAX_PATH];																				\
-		memset(_t_libs_path_1, 0, MAX_PATH);																		\
-		snprintf(_t_libs_path_1, MAX_PATH, "%s""examples/libs/osx/", this_file_full_path);							\
-		arrput(_build_command, _t_libs_path_1);																		\
-																													\
-		arrput(_build_command, "-L");																				\
-		char _t_libs_path_2[MAX_PATH];																				\
-		memset(_t_libs_path_2, 0, MAX_PATH);																		\
-		snprintf(_t_libs_path_2, MAX_PATH, "%s""external/libs/osx_x86_64/", this_file_full_path);					\
-		arrput(_build_command, _t_libs_path_2);																		\
-																													\
-		arrput(_build_command, "-Werror");																			\
-		arrput(_build_command, "-Wall");																			\
-		arrput(_build_command, "-Wextra");																			\
-		arrput(_build_command, "-lRDE");																			\
-		arrput(_build_command, "-lrde_imgui");																		\
-		arrput(_build_command, "-ljolt");																			\
-		arrput(_build_command, "-lSDL2_rde");																		\
-																													\
-		arrput(_build_command, "-o");																				\
-		arrput(_build_command, output_atlas);																		\
-																													\
-		if(!run_command(_build_command)) {																			\
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Build engine returned error");											\
-		exit(-1);																									\
-		}																											\
-																													\
-		char _rde_lib_path[256];																					\
-		memset(_rde_lib_path, 0, 256);																				\
-		strcat(_rde_lib_path, this_file_full_path);																	\
-		char _example_path_sdl[256];																				\
-		char _original_path_sdl[256];																				\
-		char _example_path_rde[256];																				\
-		char _original_path_jolt[256];																				\
-		char _example_path_jolt[256];																				\
-		memset(_example_path_sdl, 0, 256);																			\
-		memset(_original_path_sdl, 0, 256);																			\
-		memset(_example_path_rde, 0, 256);																			\
-		memset(_example_path_jolt, 0, 256);																			\
-		memset(_original_path_jolt, 0, 256);																		\
-		strcat(_example_path_sdl, this_file_full_path);																\
-		strcat(_original_path_sdl, this_file_full_path);															\
-		strcat(_example_path_rde, this_file_full_path); 															\
-		strcat(_example_path_jolt, this_file_full_path); 															\
-		strcat(_original_path_jolt, this_file_full_path); 															\
-		strcat(_original_path_sdl, "external/libs/osx_x86_64/libSDL2_rde.dylib"); 									\
-		strcat(_original_path_jolt, "external/libs/osx_x86_64/libjolt.dylib"); 										\
-																													\
-		if (strcmp(build_type, "debug") == 0) { 																	\
-			strcat(_example_path_rde, "build/osx/debug/examples/libRDE.dylib"); 									\
-			strcat(_example_path_sdl, "build/osx/debug/examples/libSDL2_rde.dylib"); 								\
-		} else { 																									\
-			strcat(_example_path_rde, "build/osx/release/examples/libRDE.dylib"); 									\
-			strcat(_example_path_sdl, "build/osx/release/examples/libSDL2_rde.dylib"); 								\
-		}																											\
-																													\
-		if (strcmp(lib_type, "shared") == 0) { 																		\
-			if (strcmp(build_type, "debug") == 0) { 																\
-				strcat(_rde_lib_path, "build/osx/debug/engine/libRDE.dylib");										\
-			} else { 																								\
-				strcat(_rde_lib_path, "build/osx/release/engine/libRDE.dylib"); 									\
-			}																										\
-		}																											\
-																													\
-		copy_file_if_exists(_original_path_sdl, _example_path_sdl); 												\
-		if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {											\
-			if (strcmp(build_type, "debug") == 0) { 																\
-				strcat(_example_path_jolt, "build/osx/debug/examples/libjolt.dylib");								\
-			} else { 																								\
-				strcat(_example_path_jolt, "build/osx/release/examples/libjolt.dylib"); 							\
-			}																										\
-			copy_file_if_exists(_original_path_jolt, _example_path_jolt); 											\
-		}																											\
-																													\
-		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {													\
-        	char _example_path_imgui[MAX_PATH];																		\
-        	memset(_example_path_imgui, 0, MAX_PATH);																\
-        	char _original_path_imgui[MAX_PATH];																	\
-        	memset(_original_path_imgui, 0, MAX_PATH);																\
-        	snprintf(_original_path_imgui, MAX_PATH, "%s%s", this_file_full_path, "external/libs/osx_x86_64/librde_imgui.dylib");\
-			if (strcmp(build_type, "debug") == 0) { 																\
-				snprintf(_example_path_imgui, MAX_PATH, "%s%s", this_file_full_path, "build/osx/debug/examples/");\
-			} else { 																								\
-				snprintf(_example_path_imgui, MAX_PATH, "%s%s", this_file_full_path, "build/osx/release/examples/");\
-			}																										\
-			copy_file_if_exists(_original_path_imgui, _example_path_imgui); 										\
-		}																											\
-																													\
-		char _assets_path[1024];																					\
-		memset(_assets_path, 0, 1024);																				\
-		snprintf(_assets_path, 1024, "%s%s", this_file_full_path, "examples/hub_assets");							\
-		char _examples_assets_path[1024];																			\
-		memset(_examples_assets_path, 0, 1024);																		\
-		snprintf(_examples_assets_path, 1024, "%s%s%s%s", this_file_full_path, "build/osx/", 						\
-				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/hub_assets");					\
-		copy_file_if_exists(_rde_lib_path, _example_path_rde); 														\
-		rm_dir_if_exists(_examples_assets_path);																	\
-		copy_folder_if_exists(_assets_path, _examples_assets_path);													\
-		char _shaders_path[1024];																					\
-		memset(_shaders_path, 0, 1024);																				\
-		snprintf(_shaders_path, 1024, "%s%s", this_file_full_path, "engine/shaders");								\
-		char _examples_shaders_path[1024];																			\
-		memset(_examples_shaders_path, 0, 1024);																	\
-		snprintf(_examples_shaders_path, 1024, "%s%s%s%s", this_file_full_path, "build/osx/", 						\
-				(strcmp(build_type, "debug") == 0 ? "debug/" : "release/"), "examples/shaders");					\
-		rm_dir_if_exists(_examples_shaders_path);																	\
-		copy_folder_if_exists(_shaders_path, _examples_shaders_path);												\
-	} while (0);
 
 	if(strcmp(build, "engine") == 0 || strcmp(build, "all") == 0 || strcmp(build, "examples") == 0) {
 		printf("\n");
 		printf("--- BUILDING ENGINE --- \n");
-		BUILD_ENGINE()
+		compile_osx_engine(_path, _build_command);
 	}
 
 	if(strcmp(build, "tools") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING TOOLS --- \n");
-		COMPILE_TOOLS("osx",
+		COMPILE_TOOLS("osx", "",
 		{
 			ADD_FLAG("-D_DEFAULT_SOURCE")
 			ADD_FLAG("-lm")
@@ -2155,12 +1942,76 @@ bool compile_osx() {
 	if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING EXAMPLES --- \n");
-		BUILD_EXAMPLES()
+		COMPILE_EXAMPLE("osx", "",
+		{
+		    ADD_FLAG("-lrde_imgui");
+			ADD_FLAG("-ljolt");
+			ADD_FLAG("-lm");
+			char _mac_version_buf[256];
+			memset(_mac_version_buf, 0, 256);
+			get_mac_version(_mac_version_buf);
+			char _min_version[MAX_PATH];
+			memset(_min_version, 0, MAX_PATH);
+			snprintf(_min_version, MAX_PATH, "-mmacosx-version-min=%s", _mac_version_buf);
+			ADD_FLAG(_min_version)
+		},
+		{
+			if (strcmp(build_type, "debug") == 0) {
+				if(strcmp(lib_type, "shared") == 0) {
+					COPY_FILE("build/osx/debug/engine/libRDE.dylib", "build/osx/debug/examples/libRDE.dylib")
+					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/debug/examples/libSDL2.dylib")
+				}
+
+				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/shaders/")
+			} else {
+				if(strcmp(lib_type, "shared") == 0) {
+					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
+					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/release/examples/libSDL2.dylib")
+				}
+
+				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/osx/release/examples/shaders/")
+			}
+		})
 	}
 
-	#undef BUILD_ENGINE
-	#undef BUILD_TOOLS
-	#undef BUILD_EXAMPLES
+	if(strcmp(build, "tests") == 0 || strcmp(build, "all") == 0) {
+		printf("\n");
+		printf("--- BUILDING TESTS --- \n");
+		COMPILE_EXAMPLE("osx", "",
+		{
+		    ADD_FLAG("-lrde_imgui");
+			ADD_FLAG("-ljolt");
+			ADD_FLAG("-lm");
+			char _mac_version_buf[256];
+			memset(_mac_version_buf, 0, 256);
+			get_mac_version(_mac_version_buf);
+			char _min_version[MAX_PATH];
+			memset(_min_version, 0, MAX_PATH);
+			snprintf(_min_version, MAX_PATH, "-mmacosx-version-min=%s", _mac_version_buf);
+			ADD_FLAG(_min_version)
+		},
+		{
+			if (strcmp(build_type, "debug") == 0) {
+				if(strcmp(lib_type, "shared") == 0) {
+					COPY_FILE("build/osx/debug/engine/libRDE.dylib", "build/osx/debug/examples/libRDE.dylib")
+					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/debug/examples/libSDL2.dylib")
+				}
+
+				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/shaders/")
+			} else {
+				if(strcmp(lib_type, "shared") == 0) {
+					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
+					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/release/examples/libSDL2.dylib")
+				}
+
+				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/osx/release/examples/shaders/")
+			}
+		})
+	}
 
 	return true;
 }
@@ -2171,7 +2022,7 @@ bool compile_osx() {
 void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 	dyn_str* _output_engine = dyn_str_new(dyn_str_get(_path));
 	
-	if(strcmp(build_type, "shared") == 0) {
+	if(strcmp(lib_type, "shared") == 0) {
 		dyn_str_append(_output_engine, "engine/libRDE.so");
 	} else {
 		dyn_str_append(_output_engine, "engine/libRDE.o");
@@ -2342,7 +2193,7 @@ bool compile_linux() {
 	if(strcmp(build, "tools") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING TOOLS --- \n");
-		COMPILE_TOOLS("linux",
+		COMPILE_TOOLS("linux", "",
 		{
 			ADD_FLAG("-D_DEFAULT_SOURCE")
 			ADD_FLAG("-lm")
@@ -2361,13 +2212,12 @@ bool compile_linux() {
     if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
         printf("\n");
         printf("--- BUILDING EXAMPLES --- \n");
-		COMPILE_EXAMPLE("linux", 
+		COMPILE_EXAMPLE("linux", "",
 		{
 		    ADD_FLAG("-lrde_imgui");
 			ADD_FLAG("-ljolt");
 			ADD_FLAG("-lm");
 		},
-		"",
 		{
 			if (strcmp(build_type, "debug") == 0) {
 				if(strcmp(build_type, "shared") == 0) {
@@ -2392,16 +2242,15 @@ bool compile_linux() {
 	if(strcmp(build, "tests") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING TESTS --- \n");
-		COMPILE_TESTS("linux",
+		COMPILE_TESTS("linux", "",
 		{
 			ADD_FLAG("-lrde_imgui");
 			ADD_FLAG("-ljolt");
 			ADD_FLAG("-lm");
 		},
-		"",
 		{
 			if (strcmp(build_type, "debug") == 0) {
-				if(strcmp(build_type, "shared") == 0) {
+				if(strcmp(lib_type, "shared") == 0) {
 					COPY_FILE("build/linux/debug/engine/libRDE.so", "build/linux/debug/examples/libRDE.so")
 					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/debug/examples/libSDL2.so")
 				}
@@ -2409,7 +2258,7 @@ bool compile_linux() {
 				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/linux/debug/examples/shaders/")
 			} else {
-				if(strcmp(build_type, "shared") == 0) {
+				if(strcmp(lib_type, "shared") == 0) {
 					COPY_FILE("build/linux/release/engine/libRDE.so", "build/linux/release/examples/libRDE.so")
 					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/release/examples/libSDL2.so")
 				}

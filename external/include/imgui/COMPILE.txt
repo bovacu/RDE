@@ -5,4 +5,4 @@ Linux:
 clang++ -shared -fPIC imgui.cpp imgui_widgets.cpp imgui_tables.cpp imgui_draw.cpp backends/imgui_impl_sdl2.cpp backends/imgui_impl_opengl3.cpp rde_imgui.cpp -I. -I../SDL2 -o librde_imgui.so &&  cp librde_imgui.so ../../libs/linux/ && rm librde_imgui.so
 
 Mac:
-clang++ -O3 -std=c++17 -shared -fPIC -mmacosx-version-min=$(sw_vers -productVersion) imgui.cpp imgui_widgets.cpp imgui_tables.cpp imgui_draw.cpp backends/imgui_impl_sdl2.cpp backends/imgui_impl_opengl3.cpp rde_imgui.cpp -lc++ -I. -I../SDL2 -o librde_imgui.dylib && cp librde_imgui.dylib ../../libs/osx_x86_64 && rm librde_imgui.dylib
+clang++ -O3 -std=c++17 -shared -fPIC -mmacosx-version-min=$(sw_vers -productVersion) imgui.cpp imgui_widgets.cpp imgui_tables.cpp imgui_draw.cpp backends/imgui_impl_sdl2.cpp backends/imgui_impl_opengl3.cpp rde_imgui.cpp -lc++ -I. -I../SDL2 -o librde_imgui.dylib && cp librde_imgui.dylib ../../libs/osx && rm librde_imgui.dylib
