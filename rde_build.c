@@ -71,110 +71,11 @@ typedef enum {
 	RDE_LOG_LEVEL_ERROR
 } RDE_LOG_LEVEL_;
 
-#define MAX_BUILD_OPTIONS 6
-#define BUILD_OPTION_ENGINE 0
-#define BUILD_OPTION_TOOLS 1
-#define BUILD_OPTION_EXAMPLES 2
-#define BUILD_OPTION_TESTS 3
-#define BUILD_OPTION_ALL 4
-#define BUILD_OPTION_PROJECT 5
-const char* BUILD_OPTIONS_STR[MAX_BUILD_OPTIONS] = {
-	"engine",
-	"tools",
-	"examples",
-	"tests",
-	"all",
-	"project"
-};
-
-#define MAX_BUILD_PLATFORM_OPTIONS 4
-#define BUILD_PLATFORM_OPTION_DESKTOP 0
-#define BUILD_PLATFORM_OPTION_ANDROID 1
-#define BUILD_PLATFORM_OPTION_IOS 2
-#define BUILD_PLATFORM_OPTION_WASM 3
-const char* BUILD_PLATFORM_OPTIONS_STR[MAX_BUILD_PLATFORM_OPTIONS] = {
-	"desktop",
-	"android",
-	"ios",
-	"wasm"
-};
-
-#define MAX_TOOL_OPTIONS 3
-#define TOOL_OPTION_ATLAS_GENERATOR 0
-#define TOOL_OPTION_FONT_GENERATOR 1
-#define TOOL_OPTION_PROJECT_GENERATOR 2
-const char* TOOL_OPTIONS_STR[MAX_TOOL_OPTIONS] = {
-	"atlas_generator",
-	"font_generator",
-	"project_generator"
-};
-
-#define MAX_SIZE_FOR_OPTIONS 64
-#define MAX_SIZE_FOR_MODULES 256
-#define MAX_MODULES 8
-#define GOD_MODE "-DRDE_GOD"
 #define STRSIZE 100
 #define DEBUG_STR "debug"
 #define RELEASE_STR "release"
 #define SHARED_STR "shared"
 #define STATIC_STR "static"
-
-typedef enum {
-	RDE_MODULES_NONE = 0,
-	RDE_MODULES_AUDIO = 1,
-	RDE_MODULES_PHYSICS = 2,
-	RDE_MODULES_RENDERING = 4,
-	RDE_MODULES_FBX = 8,
-	RDE_MODULES_OBJ = 16,
-	RDE_MODULES_UI = 32,
-	RDE_MODULES_ERROR = 64,
-	RDE_MODULES_IMGUI = 128,
-} RDE_MODULES_;
-
-const char* MODULES_STR[MAX_MODULES] = {
-	"audio",
-	"physics",
-	"rendering",
-	"fbx",
-	"obj",
-	"ui",
-	"error",
-	"imgui"
-};
-char* MODULES_DEFINES[MAX_MODULES] = {
-	"-DRDE_AUDIO_MODULE",
-	"-DRDE_PHYSICS_MODULE",
-	"-DRDE_RENDERING_MODULE",
-	"-DRDE_FBX_MODULE",
-	"-DRDE_OBJ_MODULE",
-	"-DRDE_UI_MODULE",
-	"-DRDE_ERROR_MODULE",
-	"-DRDE_IMGUI_MODULE"
-};
-RDE_MODULES_ modules;
-
-char platform[MAX_SIZE_FOR_OPTIONS];
-char build_type[MAX_SIZE_FOR_OPTIONS];
-char lib_type[MAX_SIZE_FOR_OPTIONS];
-char build[MAX_SIZE_FOR_OPTIONS];
-char tool[MAX_SIZE_FOR_OPTIONS];
-
-dyn_str** project_compile_files;
-dyn_str** project_include_paths;
-dyn_str** project_link_paths;
-dyn_str** project_flags;
-char project_name[MAX_PATH];
-char android_sdk_build_tools[MAX_PATH];
-char android_ndk[MAX_PATH];
-char android_sign[MAX_PATH];
-char android_rde_android[MAX_PATH];
-char android_assets_path[MAX_PATH];
-char android_pass_path[MAX_PATH];
-char android_jks_path[MAX_PATH];
-char android_alias[MAX_PATH];
-bool android_clean;
-
-bool is_god = false;
 
 char builder_exe_full_path_dir[MAX_PATH];
 char builder_exe_full_path[MAX_PATH];
@@ -184,8 +85,6 @@ void ds_array_to_string(char** _ds_array, char* _string, size_t _string_size);
 
 void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...);
 void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
-
-const char* get_filename_extension(const char* _file_name);
 
 bool pid_wait(rde_proc _pid);
 bool run_command(rde_command _command);
@@ -200,9 +99,13 @@ bool remove_dir_recursively_if_exists(const char* _file_path, bool _remove_paren
 
 char* read_full_file_if_exists(const char* _file_path); // You are responsible for deallocating the returned memory
 bool write_to_file_if_exists(const char* _file_path, const char* _contents);
+const char* get_filename_extension(const char* _file_name);
 char* replace_string(const char* str, const char* from, const char* to); // This function is greacefully stolen from https://creativeandcritical.net/str-replace-c, so thank you so much
 bool string_starts_with(const char* _string, const char* _prefix);
 bool string_ends_with(const char* _string, const char* _prefix);
+char* trim(char* _s);
+char* rtrim(char* _s);
+char* ltrim(char* _s);
 
 bool copy_file_if_exists(const char* _file_path, const char* _new_path);
 bool copy_folder_if_exists(const char* _folder_path, const char* _new_path);
@@ -214,17 +117,6 @@ bool has_admin_rights();
 #if __APPLE__
 void get_mac_version(char* _buf);
 #endif
-
-bool compile_windows_rde();
-bool compile_osx_rde();
-bool compile_linux_rde();
-bool build_desktop_project();
-bool build_android_project();
-bool build_ios_project();
-bool build_wasm_project();
-
-void print_help();
-void parse_arguments(int _argc, char** _argv);
 
 void ds_array_to_string(char** _ds_array, char* _string, size_t _string_size) {
 	memset(_string, 0, _string_size);
@@ -361,12 +253,6 @@ void rde_log_level(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 	#endif
 }
 
-const char* get_filename_extension(const char* _file_name) {
-    const char* _dot = strrchr(_file_name, '.');
-    if(!_dot || _dot == _file_name) return "";
-    return _dot;
-}
-
 int needs_recompile(const char* _output_path, const char** _input_paths, size_t _input_paths_count) {
 	#ifdef _WIN32
 	BOOL _success;
@@ -485,22 +371,6 @@ bool pid_wait(rde_proc _pid) {
         }
     }
 	#endif
-}
-
-char* ltrim(char* _s) {
-    while(isspace(*_s)) _s++;
-    return _s;
-}
-
-char* rtrim(char* _s) {
-    char* _back = _s + strlen(_s);
-    while(isspace(*--_back));
-    *(_back+1) = '\0';
-    return _s;
-}
-
-char* trim(char* _s) {
-    return rtrim(ltrim(_s)); 
 }
 
 bool run_command(rde_command _command) {
@@ -900,6 +770,12 @@ bool write_to_file_if_exists(const char* _file_path, const char* _contents) {
 	return true;
 }
 
+const char* get_filename_extension(const char* _file_name) {
+    const char* _dot = strrchr(_file_name, '.');
+    if(!_dot || _dot == _file_name) return "";
+    return _dot;
+}
+
 char* replace_string(const char* str, const char* from, const char* to) {
 
 	/* Adjust each of the below values to suit your needs. */
@@ -1000,6 +876,22 @@ bool string_ends_with(const char* _string, const char* _suffix) {
 	return strncmp(_string + (_string_size - _suffix_size), _suffix, _suffix_size) == 0;
 }
 
+char* ltrim(char* _s) {
+    while(isspace(*_s)) _s++;
+    return _s;
+}
+
+char* rtrim(char* _s) {
+    char* _back = _s + strlen(_s);
+    while(isspace(*--_back));
+    *(_back+1) = '\0';
+    return _s;
+}
+
+char* trim(char* _s) {
+    return rtrim(ltrim(_s)); 
+}
+
 bool copy_file_if_exists(const char* _file_path, const char* _new_path) {
 	#if _WIN32
 	if(CopyFile(_file_path, _new_path, FALSE) == 0) {
@@ -1098,51 +990,6 @@ void get_mac_version(char* _buf) {
 }
 #endif
 
-void include_imgui_in_compilation(rde_command* _build_command) {
-	rde_command _inner_command = NULL;
-	arrput(_inner_command, "clang++");
-	
-	#if !_WIN32
-	arrput(_inner_command, "-c");
-	#endif
-
-	char _rde_imgui_cpp[MAX_PATH];
-	memset(_rde_imgui_cpp, 0, MAX_PATH);
-	snprintf(_rde_imgui_cpp, MAX_PATH, "%s%s", builder_exe_full_path_dir, "external/include/imgui/rde_imgui.cpp");
-	arrput(_inner_command, _rde_imgui_cpp);
-
-	char _lib_output_path[MAX_PATH];
-	memset(_lib_output_path, 0, MAX_PATH);
-	strcat(_lib_output_path, builder_exe_full_path_dir);
-
-	arrput(_inner_command, "-I");
-	char _imgui_path[MAX_PATH];
-	memset(_imgui_path, 0, MAX_PATH);
-	snprintf(_imgui_path, MAX_PATH, "%s%s", builder_exe_full_path_dir, "external/include/imgui");
-	arrput(_inner_command, _imgui_path);
-
-	arrput(_inner_command, "-I");
-	char _sdl_path[MAX_PATH];
-	memset(_sdl_path, 0, MAX_PATH);
-	snprintf(_sdl_path, MAX_PATH, "%s%s", builder_exe_full_path_dir, "external/include/SDL2");
-	arrput(_inner_command, _sdl_path);
-
-	#if _WIN32
-	arrput(_inner_command, "-o");
-
-	strcat(_lib_output_path, "external/libs/windows/imgui.lib");
-	arrput(_inner_command, _lib_output_path);
-	#endif
-
-	if(!run_command(_inner_command)) {
-		printf("Error compiling imgui\n");
-		exit(-1);
-	}	
-
-	printf("Good to go!\n");
-	(void)_build_command;
-}
-
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 dyn_str* dyn_str_new(char* _init) {
     dyn_str* _s = (dyn_str*)malloc(sizeof(dyn_str));
@@ -1239,8 +1086,116 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 
 
 
+#define MAX_BUILD_OPTIONS 6
+#define BUILD_OPTION_ENGINE 0
+#define BUILD_OPTION_TOOLS 1
+#define BUILD_OPTION_EXAMPLES 2
+#define BUILD_OPTION_TESTS 3
+#define BUILD_OPTION_ALL 4
+#define BUILD_OPTION_PROJECT 5
+const char* BUILD_OPTIONS_STR[MAX_BUILD_OPTIONS] = {
+	"engine",
+	"tools",
+	"examples",
+	"tests",
+	"all",
+	"project"
+};
 
+#define MAX_BUILD_PLATFORM_OPTIONS 4
+#define BUILD_PLATFORM_OPTION_DESKTOP 0
+#define BUILD_PLATFORM_OPTION_ANDROID 1
+#define BUILD_PLATFORM_OPTION_IOS 2
+#define BUILD_PLATFORM_OPTION_WASM 3
+const char* BUILD_PLATFORM_OPTIONS_STR[MAX_BUILD_PLATFORM_OPTIONS] = {
+	"desktop",
+	"android",
+	"ios",
+	"wasm"
+};
 
+#define MAX_TOOL_OPTIONS 3
+#define TOOL_OPTION_ATLAS_GENERATOR 0
+#define TOOL_OPTION_FONT_GENERATOR 1
+#define TOOL_OPTION_PROJECT_GENERATOR 2
+const char* TOOL_OPTIONS_STR[MAX_TOOL_OPTIONS] = {
+	"atlas_generator",
+	"font_generator",
+	"project_generator"
+};
+
+#define MAX_SIZE_FOR_OPTIONS 64
+#define MAX_SIZE_FOR_MODULES 256
+#define MAX_MODULES 8
+#define GOD_MODE "-DRDE_GOD"
+
+typedef enum {
+	RDE_MODULES_NONE = 0,
+	RDE_MODULES_AUDIO = 1,
+	RDE_MODULES_PHYSICS = 2,
+	RDE_MODULES_RENDERING = 4,
+	RDE_MODULES_FBX = 8,
+	RDE_MODULES_OBJ = 16,
+	RDE_MODULES_UI = 32,
+	RDE_MODULES_ERROR = 64,
+	RDE_MODULES_IMGUI = 128,
+} RDE_MODULES_;
+
+const char* MODULES_STR[MAX_MODULES] = {
+	"audio",
+	"physics",
+	"rendering",
+	"fbx",
+	"obj",
+	"ui",
+	"error",
+	"imgui"
+};
+char* MODULES_DEFINES[MAX_MODULES] = {
+	"-DRDE_AUDIO_MODULE",
+	"-DRDE_PHYSICS_MODULE",
+	"-DRDE_RENDERING_MODULE",
+	"-DRDE_FBX_MODULE",
+	"-DRDE_OBJ_MODULE",
+	"-DRDE_UI_MODULE",
+	"-DRDE_ERROR_MODULE",
+	"-DRDE_IMGUI_MODULE"
+};
+RDE_MODULES_ modules;
+
+char platform[MAX_SIZE_FOR_OPTIONS];
+char build_type[MAX_SIZE_FOR_OPTIONS];
+char lib_type[MAX_SIZE_FOR_OPTIONS];
+char build[MAX_SIZE_FOR_OPTIONS];
+char tool[MAX_SIZE_FOR_OPTIONS];
+
+dyn_str** project_compile_files;
+dyn_str** project_include_paths;
+dyn_str** project_link_paths;
+dyn_str** project_flags;
+char project_name[MAX_PATH];
+char android_sdk_build_tools[MAX_PATH];
+char android_ndk[MAX_PATH];
+char android_sign[MAX_PATH];
+char android_rde_android[MAX_PATH];
+char android_assets_path[MAX_PATH];
+char android_pass_path[MAX_PATH];
+char android_jks_path[MAX_PATH];
+char android_alias[MAX_PATH];
+bool android_clean;
+
+bool is_god = false;
+
+bool compile_windows_rde();
+bool compile_osx_rde();
+bool compile_linux_rde();
+bool build_desktop_project();
+bool build_android_project();
+bool build_ios_project();
+bool build_wasm_project();
+
+void print_help();
+void parse_arguments(int _argc, char** _argv);
 
 #define WINDOWS_TO_UNIX_FILE_PATH(_str)				\
 	for(size_t _i = 0; _i < strlen(_str); _i++) {	\
