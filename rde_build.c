@@ -111,7 +111,7 @@ const char* TOOL_OPTIONS_STR[MAX_TOOL_OPTIONS] = {
 
 #define MAX_SIZE_FOR_OPTIONS 64
 #define MAX_SIZE_FOR_MODULES 256
-#define MAX_MODULES 9
+#define MAX_MODULES 8
 #define GOD_MODE "-DRDE_GOD"
 #define STRSIZE 100
 #define DEBUG_STR "debug"
@@ -122,20 +122,18 @@ const char* TOOL_OPTIONS_STR[MAX_TOOL_OPTIONS] = {
 typedef enum {
 	RDE_MODULES_NONE = 0,
 	RDE_MODULES_AUDIO = 1,
-	RDE_MODULES_PHYSICS_2D = 2,
-	RDE_MODULES_PHYSICS_3D = 4,
-	RDE_MODULES_RENDERING = 8,
-	RDE_MODULES_FBX = 16,
-	RDE_MODULES_OBJ = 32,
-	RDE_MODULES_UI = 64,
-	RDE_MODULES_ERROR = 128,
-	RDE_MODULES_IMGUI = 256,
+	RDE_MODULES_PHYSICS = 2,
+	RDE_MODULES_RENDERING = 4,
+	RDE_MODULES_FBX = 8,
+	RDE_MODULES_OBJ = 16,
+	RDE_MODULES_UI = 32,
+	RDE_MODULES_ERROR = 64,
+	RDE_MODULES_IMGUI = 128,
 } RDE_MODULES_;
 
 const char* MODULES_STR[MAX_MODULES] = {
 	"audio",
-	"physics_2d",
-	"physics_3d",
+	"physics",
 	"rendering",
 	"fbx",
 	"obj",
@@ -145,8 +143,7 @@ const char* MODULES_STR[MAX_MODULES] = {
 };
 char* MODULES_DEFINES[MAX_MODULES] = {
 	"-DRDE_AUDIO_MODULE",
-	"-DRDE_PHYSICS_2D_MODULE",
-	"-DRDE_PHYSICS_3D_MODULE",
+	"-DRDE_PHYSICS_MODULE",
 	"-DRDE_RENDERING_MODULE",
 	"-DRDE_FBX_MODULE",
 	"-DRDE_OBJ_MODULE",
@@ -1723,7 +1720,7 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 		ADD_FLAG("-Xlinker /WHOLEARCHIVE:rde_imgui.lib");
 	}
 
-	if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {
+	if((modules & RDE_MODULES_PHYSICS) == RDE_MODULES_PHYSICS) {
 		ADD_FLAG("-ljolt");
 	}
 
@@ -1951,7 +1948,7 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 			dyn_str_append(_imgui_whole_flag, "external/libs/osx/librde_imgui.dylib");
 			ADD_FLAG(dyn_str_get(_imgui_whole_flag));
 		}
-		if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {
+		if((modules & RDE_MODULES_PHYSICS) == RDE_MODULES_PHYSICS) {
 			ADD_FLAG("-ljolt");
 		}
 	}
@@ -2220,7 +2217,7 @@ void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 			ADD_FLAG(dyn_str_get(_imgui_whole_flag));
 			ADD_FLAG("-Wl,--no-whole-archive");
 		}
-		if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {
+		if((modules & RDE_MODULES_PHYSICS) == RDE_MODULES_PHYSICS) {
 			ADD_FLAG("-ljolt");
 		}
 	}
@@ -2510,7 +2507,7 @@ bool build_desktop_project() {
 	ADD_FLAG("/nodefaultlib:libcmt");
 #else
 	ADD_FLAG("-lm");
-	if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {
+	if((modules & RDE_MODULES_PHYSICS) == RDE_MODULES_PHYSICS) {
 		ADD_FLAG("-ljolt");
 	}
 	if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
@@ -2908,8 +2905,7 @@ void print_help() {
 	"-- MODULES ---\n"
 	"RDE is composed of several modules, which are completely optional to use and include in your library. Those modules are: \n"
 	"	- audio\n"
-	"	- physics_2d\n"
-	"	- physics_3d\n"
+	"	- physics\n"
 	"	- rendering\n"
 	"	- ui\n"
 	"	- error\n"
@@ -2922,9 +2918,8 @@ void print_help() {
 	"want 'rendering', you MUST include it in the modules list.\n"
 	"Modules Description:"
 	"	- audio: adds basic audio control, such as loading/unloading sounds, mixing them, play/pause/stop sounds, modify volume, pitches...\n"
-	"	- physics_2d: basic 2D physics engine, with collisions, rigidbodies, handlers...\n"
-	"	- physics_3d: 3d physics engine with jolt.\n"
-	"	- rendering: adds 2D rendering for 2D textures in a batched mode and also 3D batched drawing.\n"
+	"	- physics: 3D/2D physics engine with jolt.\n"
+	"	- rendering: adds 3D and 2D rendering.\n"
 	"	- ui: adds custom inmediate mode UI.\n"
 	"	- error: adds handling for the most common error crashes and prints the stacktrace of the crash to the logs of the console (in debug) and to a error log file (in release).\n"
 	"	- imgui: adds imgui native support.\n"

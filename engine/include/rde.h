@@ -872,20 +872,20 @@ typedef enum {
 /// =============================== PHYSICS 3D ============================
 
 typedef enum {
-	RDE_PHYSICS_3D_BODY_TYPE_STATIC,
-	RDE_PHYSICS_3D_BODY_TYPE_KINEMATIC,
-	RDE_PHYSICS_3D_BODY_TYPE_DYNAMIC
-} RDE_PHYSICS_3D_BODY_TYPE_;
+	RDE_PHYSICS_BODY_TYPE_STATIC,
+	RDE_PHYSICS_BODY_TYPE_KINEMATIC,
+	RDE_PHYSICS_BODY_TYPE_DYNAMIC
+} RDE_PHYSICS_BODY_TYPE_;
 
 typedef enum {
-	RDE_PHYSICS_3D_SHAPE_TYPE_NONE,
-	RDE_PHYSICS_3D_SHAPE_TYPE_BOX,
-	RDE_PHYSICS_3D_SHAPE_TYPE_SPHERE,
-	RDE_PHYSICS_3D_SHAPE_TYPE_CYLINDER,
-	RDE_PHYSICS_3D_SHAPE_TYPE_CAPSULE,
-	RDE_PHYSICS_3D_SHAPE_TYPE_PYRAMID,
-	RDE_PHYSICS_3D_SHAPE_TYPE_MESH
-} RDE_PHYSICS_3D_SHAPE_TYPE_;
+	RDE_PHYSICS_SHAPE_TYPE_NONE,
+	RDE_PHYSICS_SHAPE_TYPE_BOX,
+	RDE_PHYSICS_SHAPE_TYPE_SPHERE,
+	RDE_PHYSICS_SHAPE_TYPE_CYLINDER,
+	RDE_PHYSICS_SHAPE_TYPE_CAPSULE,
+	RDE_PHYSICS_SHAPE_TYPE_PYRAMID,
+	RDE_PHYSICS_SHAPE_TYPE_MESH
+} RDE_PHYSICS_SHAPE_TYPE_;
 
 /// *************************************************************************************************
 /// *                                		STRUCSTS                         						*
@@ -1014,7 +1014,7 @@ typedef struct rde_model rde_model;
 typedef uint rde_skybox_id;
 #endif
 
-#ifdef RDE_PHYSICS_3D_MODULE
+#ifdef RDE_PHYSICS_MODULE
 #include "JoltC/rde_joltc.h"
 RDE_FUNC void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
 #endif
@@ -1087,7 +1087,7 @@ typedef struct {
 	rde_illumination_config illumination_config;
 #endif
 
-#ifdef RDE_PHYSICS_3D_MODULE
+#ifdef RDE_PHYSICS_MODULE
 	rde_jolt_init_config jolt_config;
 #endif
 
@@ -1402,7 +1402,7 @@ const rde_engine_init_info RDE_DEFAULT_INIT_INFO = {
 	}
 #endif
 
-#ifdef RDE_PHYSICS_3D_MODULE
+#ifdef RDE_PHYSICS_MODULE
 	,
 	.jolt_config = {
 		.temo_allocator_size = 10 * 1024 * 1024,

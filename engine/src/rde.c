@@ -1062,8 +1062,7 @@ rde_engine ENGINE;
 #include "rendering_common.c"
 #include "rendering_2d.c"
 #include "rendering_3d.c"
-#include "physics_2d.c"
-#include "physics_3d.c"
+#include "physics.c"
 #include "events.c"
 #include "audio.c"
 #include "mobile.c"
@@ -1071,7 +1070,7 @@ rde_engine ENGINE;
 void rde_inner_engine_on_event();
 void rde_inner_engine_on_update(float _dt);
 
-#if defined(RDE_PHYSICS_3D_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
+#if defined(RDE_PHYSICS_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
 void rde_inner_engine_on_fixed_update(float _fixed_dt);
 #endif
 
@@ -1179,7 +1178,7 @@ void rde_inner_engine_on_update(float _dt) {
 	UNUSED(_dt)
 }
 
-#if defined(RDE_PHYSICS_3D_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
+#if defined(RDE_PHYSICS_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
 void rde_inner_engine_on_fixed_update(float _fixed_dt) {
 	rde_jolt_update(_fixed_dt);
 }
@@ -1239,7 +1238,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_init_in
 	rde_inner_rendering_set_rendering_configuration(_default_window);
 #endif
 
-#ifdef RDE_PHYSICS_3D_MODULE
+#ifdef RDE_PHYSICS_MODULE
 	rde_jolt_init(_engine_init_info.jolt_config, rde_critical_error, rde_log_level_inner);
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Jolt loaded correctly");
 #endif
@@ -1315,7 +1314,7 @@ void rde_engine_on_run() {
 
 		while (ENGINE.fixed_time_step_accumulator >= ENGINE.fixed_delta_time) {
 			ENGINE.fixed_time_step_accumulator -= ENGINE.fixed_delta_time;
-#if defined(RDE_PHYSICS_3D_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
+#if defined(RDE_PHYSICS_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
 			rde_inner_engine_on_fixed_update(ENGINE.fixed_delta_time);
 #endif
 			ENGINE.mandatory_callbacks.on_fixed_update(ENGINE.fixed_delta_time);
@@ -1476,7 +1475,7 @@ void rde_engine_destroy_engine() {
 	free(ENGINE.sounds);
 #endif
 
-#ifdef RDE_PHYSICS_3D_MODULE
+#ifdef RDE_PHYSICS_MODULE
 	rde_jolt_end();
 #endif
 
