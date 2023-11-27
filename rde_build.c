@@ -43,6 +43,10 @@
 	#define rde_proc_invalid (-1)
 #endif
 
+#if __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
 typedef struct {
     char* str;
     unsigned int size;
@@ -67,13 +71,42 @@ typedef enum {
 	RDE_LOG_LEVEL_ERROR
 } RDE_LOG_LEVEL_;
 
-#define MAX_BUILD_OPTIONS 5
+#define MAX_BUILD_OPTIONS 6
+#define BUILD_OPTION_ENGINE 0
+#define BUILD_OPTION_TOOLS 1
+#define BUILD_OPTION_EXAMPLES 2
+#define BUILD_OPTION_TESTS 3
+#define BUILD_OPTION_ALL 4
+#define BUILD_OPTION_PROJECT 5
 const char* BUILD_OPTIONS_STR[MAX_BUILD_OPTIONS] = {
 	"engine",
 	"tools",
 	"examples",
 	"tests",
-	"all"
+	"all",
+	"project"
+};
+
+#define MAX_BUILD_PLATFORM_OPTIONS 4
+#define BUILD_PLATFORM_OPTION_DESKTOP 0
+#define BUILD_PLATFORM_OPTION_ANDROID 1
+#define BUILD_PLATFORM_OPTION_IOS 2
+#define BUILD_PLATFORM_OPTION_WASM 3
+const char* BUILD_PLATFORM_OPTIONS_STR[MAX_BUILD_PLATFORM_OPTIONS] = {
+	"desktop",
+	"android",
+	"ios",
+	"wasm"
+};
+
+#define MAX_TOOL_OPTIONS 3
+#define TOOL_OPTION_ATLAS_GENERATOR 0
+#define TOOL_OPTION_FONT_GENERATOR 1
+#define TOOL_OPTION_PROJECT_GENERATOR 2
+const char* TOOL_OPTIONS_STR[MAX_TOOL_OPTIONS] = {
+	"atlas_generator",
+	"font_generator",
+	"project_generator"
 };
 
 #define MAX_SIZE_FOR_OPTIONS 64
@@ -81,6 +114,10 @@ const char* BUILD_OPTIONS_STR[MAX_BUILD_OPTIONS] = {
 #define MAX_MODULES 9
 #define GOD_MODE "-DRDE_GOD"
 #define STRSIZE 100
+#define DEBUG_STR "debug"
+#define RELEASE_STR "release"
+#define SHARED_STR "shared"
+#define STATIC_STR "static"
 
 typedef enum {
 	RDE_MODULES_NONE = 0,
@@ -123,9 +160,23 @@ char platform[MAX_SIZE_FOR_OPTIONS];
 char build_type[MAX_SIZE_FOR_OPTIONS];
 char lib_type[MAX_SIZE_FOR_OPTIONS];
 char build[MAX_SIZE_FOR_OPTIONS];
+char tool[MAX_SIZE_FOR_OPTIONS];
+
+dyn_str** project_compile_files;
+dyn_str** project_include_paths;
+dyn_str** project_link_paths;
+dyn_str** project_flags;
+char project_name[MAX_PATH];
+char android_sdk[MAX_PATH];
+char android_ndk[MAX_PATH];
+char android_sign[MAX_PATH];
+bool android_clean;
+
 bool is_god = false;
 
-char this_file_full_path[MAX_PATH];
+char builder_exe_full_path_dir[MAX_PATH];
+char builder_exe_full_path[MAX_PATH];
+char working_dir[MAX_PATH];
 
 void ds_array_to_string(char** _ds_array, char* _string, size_t _string_size);
 
@@ -148,6 +199,8 @@ bool remove_dir_recursively_if_exists(const char* _file_path);
 char* read_full_file_if_exists(const char* _file_path); // You are responsible for deallocating the returned memory
 bool write_to_file_if_exists(const char* _file_path, const char* _contents);
 char* replace_string(const char* str, const char* from, const char* to); // This function is greacefully stolen from https://creativeandcritical.net/str-replace-c, so thank you so much
+bool string_starts_with(const char* _string, const char* _prefix);
+bool string_ends_with(const char* _string, const char* _prefix);
 
 bool copy_file_if_exists(const char* _file_path, const char* _new_path);
 bool copy_folder_if_exists(const char* _folder_path, const char* _new_path);
@@ -160,15 +213,13 @@ bool has_admin_rights();
 void get_mac_version(char* _buf);
 #endif
 
-bool compile_windows();
-bool compile_osx();
-bool compile_linux();
-bool compile_android();
-bool compile_ios();
-bool compile_wasm();
-
-bool compile_test();
-bool run_test();
+bool compile_windows_rde();
+bool compile_osx_rde();
+bool compile_linux_rde();
+bool build_desktop_project();
+bool build_android_project();
+bool build_ios_project();
+bool build_wasm_project();
 
 void print_help();
 void parse_arguments(int _argc, char** _argv);
@@ -535,25 +586,10 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 	errno = 0;
 	char* _source_path = (char*)malloc(MAX_PATH);
 	memset(_source_path, 0, MAX_PATH);
-	strcat(_source_path, this_file_full_path);
+	strcat(_source_path, builder_exe_full_path_dir);
 	strcat(_source_path, "rde_build.c");
 
-	char _binary_path[MAX_PATH];
-	memset(_binary_path, 0, MAX_PATH);
-
-	#if _WIN32
-	// In windows we can execute a exe without using .exe in the name. This program assumes that it will always contains .exe so if it does not have it, it is added.
-	if(strlen(get_filename_extension(_argv[0])) == 0) {
-		strcat(_binary_path, _argv[0]);
-		strcat(_binary_path, ".exe");	
-	} else {
-		strcpy(_binary_path, _argv[0]);
-	}
-	
-	#else
-	strcat(_binary_path, _argv[0]);
-	#endif
-	int _needs_recompile = needs_recompile(_binary_path, (const char**)(&_source_path), 1);
+	int _needs_recompile = needs_recompile(builder_exe_full_path, (const char**)(&_source_path), 1);
 	free(_source_path);
 	if(_needs_recompile < 0) {
 		exit(-1);
@@ -568,16 +604,11 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		const char _delimiter = '/';
 #endif
 		// Be careful, if no delimter is found, then _just_binary_name will be NULL and we will use _binary_path directly
-		char* _just_binary_name = strrchr(_binary_path, _delimiter);
+		char* _just_binary_name = strrchr(builder_exe_full_path, _delimiter);
 
 		char _to_old[MAX_PATH];
 		memset(_to_old, 0, MAX_PATH);
-		if(_just_binary_name != NULL) {
-			_just_binary_name++;
-			snprintf(_to_old, MAX_PATH, "%s%s", this_file_full_path, _just_binary_name);
-		} else {
-			snprintf(_to_old, MAX_PATH, "%s%s", this_file_full_path, _binary_path);
-		}
+		snprintf(_to_old, MAX_PATH, "%s", builder_exe_full_path);
 		strcat(_to_old, ".old");
 
 #if _WIN32
@@ -589,12 +620,12 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		if(_just_binary_name != NULL) {
 			strcat(_to_trash, _just_binary_name);
 		} else {
-			strcat(_to_trash, _binary_path);
+			strcat(_to_trash, builder_exe_full_path);
 		}
 		strcat(_to_trash, ".old");
 
 
-		if(!rename_file_if_exists(_binary_path, _to_old)) {
+		if(!rename_file_if_exists(builder_exe_full_path, _to_old)) {
 			exit(-1);
 		}
 #else
@@ -624,7 +655,7 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 
 
 		// Then we recompile it
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Recompiling %s first", _just_binary_name != NULL ? _just_binary_name : _binary_path);
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Recompiling %s first", _just_binary_name != NULL ? _just_binary_name : builder_exe_full_path);
 		rde_command _recompile_command = NULL;
 		arrput(_recompile_command, "clang");
 		arrput(_recompile_command, "-g");
@@ -637,10 +668,10 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		char _source_path[MAX_PATH];
 		memset(_source_path, 0, MAX_PATH);
 #if _WIN32
-		snprintf(_source_path, MAX_PATH, "%s""rde_build.c", this_file_full_path);
+		snprintf(_source_path, MAX_PATH, "%s""rde_build.c", builder_exe_full_path_dir);
 		arrput(_recompile_command, _source_path);
 #else
-		snprintf(_source_path, MAX_PATH, "%s/rde_build.c", this_file_full_path);
+		snprintf(_source_path, MAX_PATH, "%s/rde_build.c", builder_exe_full_path_dir);
 		arrput(_recompile_command, _source_path);
 #endif
 
@@ -650,17 +681,9 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		memset(_out_path, 0, MAX_PATH);
 		
 #if _WIN32
-		if(_just_binary_name != NULL) {
-			snprintf(_out_path, MAX_PATH, "%s\%s", this_file_full_path, _just_binary_name);
-		} else {
-			snprintf(_out_path, MAX_PATH, "%s\%s", this_file_full_path, _binary_path);
-		}
+		snprintf(_out_path, MAX_PATH, "%s", builder_exe_full_path);
 #else
-		if(_just_binary_name != NULL) {
-			snprintf(_out_path, MAX_PATH, "%s%s", this_file_full_path, _just_binary_name);
-		} else {
-			snprintf(_out_path, MAX_PATH, "%s%s", this_file_full_path, _binary_path);
-		}
+		snprintf(_out_path, MAX_PATH, "%s", builder_exe_full_path);
 #endif
 
 		arrput(_recompile_command, _out_path);
@@ -668,11 +691,11 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		char _old_binary_path[MAX_PATH];
 		memset(_old_binary_path, 0, MAX_PATH);
 
-		strcat(_old_binary_path, _binary_path);
+		strcat(_old_binary_path, builder_exe_full_path);
 		strcat(_old_binary_path, ".old");
 
 		if(!run_command(_recompile_command)) {
-			if(!rename_file_if_exists(_old_binary_path, _binary_path)) {
+			if(!rename_file_if_exists(_old_binary_path, builder_exe_full_path)) {
 				exit(-1);
 			}
 			exit(-1);
@@ -690,7 +713,7 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Recompiled successfully, redirecting original command...");
 
 		rde_command _redirect_original_command = NULL;
-		arrput(_redirect_original_command, _binary_path);
+		arrput(_redirect_original_command, builder_exe_full_path);
 		for(int _i = 1; _i < _argc; _i++) {
 			arrput(_redirect_original_command, _argv[_i]);
 		}
@@ -958,6 +981,23 @@ end_repl_str:
 	return ret;
 }
 
+bool string_starts_with(const char* _string, const char* _prefix) {
+	if(_string == NULL || _prefix == NULL) {
+		return false;
+	}
+	return strncmp(_string, _prefix, strlen(_prefix)) == 0;
+}
+
+bool string_ends_with(const char* _string, const char* _suffix) {
+	if(_string == NULL || _suffix == NULL) {
+		return false;
+	}
+
+	size_t _suffix_size = strlen(_suffix);
+	size_t _string_size = strlen(_string);
+	return strncmp(_string + (_string_size - _suffix_size), _suffix, _suffix_size) == 0;
+}
+
 bool copy_file_if_exists(const char* _file_path, const char* _new_path) {
 	#if _WIN32
 	if(CopyFile(_file_path, _new_path, FALSE) == 0) {
@@ -1066,23 +1106,23 @@ void include_imgui_in_compilation(rde_command* _build_command) {
 
 	char _rde_imgui_cpp[MAX_PATH];
 	memset(_rde_imgui_cpp, 0, MAX_PATH);
-	snprintf(_rde_imgui_cpp, MAX_PATH, "%s%s", this_file_full_path, "external/include/imgui/rde_imgui.cpp");
+	snprintf(_rde_imgui_cpp, MAX_PATH, "%s%s", builder_exe_full_path_dir, "external/include/imgui/rde_imgui.cpp");
 	arrput(_inner_command, _rde_imgui_cpp);
 
 	char _lib_output_path[MAX_PATH];
 	memset(_lib_output_path, 0, MAX_PATH);
-	strcat(_lib_output_path, this_file_full_path);
+	strcat(_lib_output_path, builder_exe_full_path_dir);
 
 	arrput(_inner_command, "-I");
 	char _imgui_path[MAX_PATH];
 	memset(_imgui_path, 0, MAX_PATH);
-	snprintf(_imgui_path, MAX_PATH, "%s%s", this_file_full_path, "external/include/imgui");
+	snprintf(_imgui_path, MAX_PATH, "%s%s", builder_exe_full_path_dir, "external/include/imgui");
 	arrput(_inner_command, _imgui_path);
 
 	arrput(_inner_command, "-I");
 	char _sdl_path[MAX_PATH];
 	memset(_sdl_path, 0, MAX_PATH);
-	snprintf(_sdl_path, MAX_PATH, "%s%s", this_file_full_path, "external/include/SDL2");
+	snprintf(_sdl_path, MAX_PATH, "%s%s", builder_exe_full_path_dir, "external/include/SDL2");
 	arrput(_inner_command, _sdl_path);
 
 	#if _WIN32
@@ -1203,12 +1243,12 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 
 
 #define ADD_PATH(_path_var, _path) 							\
-	dyn_str* _path_var = dyn_str_new(this_file_full_path);	\
+	dyn_str* _path_var = dyn_str_new(builder_exe_full_path_dir);	\
 	dyn_str_append(_path_var, _path);						\
 	arrput(_build_command, dyn_str_get(_path_var));
 
 #define ADD_PATH_EX(_path_var, _path) 				\
-	_path_var = dyn_str_new(this_file_full_path);	\
+	_path_var = dyn_str_new(builder_exe_full_path_dir);	\
 	dyn_str_append(_path_var, _path);				\
 	arrput(_build_command, dyn_str_get(_path_var));
 
@@ -1238,8 +1278,8 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		_out = NULL;											\
 	}															\
 																\
-	_in = dyn_str_new(this_file_full_path);						\
-	_out = dyn_str_new(this_file_full_path);					\
+	_in = dyn_str_new(builder_exe_full_path_dir);				\
+	_out = dyn_str_new(builder_exe_full_path_dir);				\
 	dyn_str_append(_in, _origin);								\
 	dyn_str_append(_out, _dest);								\
 	copy_file_if_exists(dyn_str_get(_in), dyn_str_get(_out));
@@ -1252,8 +1292,36 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		_out = NULL;											\
 	}															\
 																\
-	_in = dyn_str_new(this_file_full_path);						\
-	_out = dyn_str_new(this_file_full_path);					\
+	_in = dyn_str_new(builder_exe_full_path_dir);				\
+	_out = dyn_str_new(builder_exe_full_path_dir);				\
+	dyn_str_append(_in, _origin);								\
+	dyn_str_append(_out, _dest);								\
+	copy_folder_if_exists(dyn_str_get(_in), dyn_str_get(_out));
+
+#define COPY_FILE_CWD(_origin, _dest) 							\
+	if(_in != NULL) {											\
+		dyn_str_free(_in);										\
+		dyn_str_free(_out);										\
+		_in = NULL;												\
+		_out = NULL;											\
+	}															\
+																\
+	_in = dyn_str_new(builder_exe_full_path_dir);				\
+	_out = dyn_str_new(working_dir);							\
+	dyn_str_append(_in, _origin);								\
+	dyn_str_append(_out, _dest);								\
+	copy_file_if_exists(dyn_str_get(_in), dyn_str_get(_out));
+
+#define COPY_FOLDER_CWD(_origin, _dest) 						\
+	if(_in != NULL) {											\
+		dyn_str_free(_in);										\
+		dyn_str_free(_out);										\
+		_in = NULL;												\
+		_out = NULL;											\
+	}															\
+																\
+	_in = dyn_str_new(builder_exe_full_path_dir);				\
+	_out = dyn_str_new(working_dir);							\
 	dyn_str_append(_in, _origin);								\
 	dyn_str_append(_out, _dest);								\
 	copy_folder_if_exists(dyn_str_get(_in), dyn_str_get(_out));
@@ -1277,7 +1345,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 	do {																																\
 		_build_command = NULL;																											\
 																																		\
-		dyn_str* _tools_path = dyn_str_new(this_file_full_path);																		\
+		dyn_str* _tools_path = dyn_str_new(builder_exe_full_path_dir);																		\
 		dyn_str_append(_tools_path, "build/"_platform"/tools/");																		\
 																																		\
 		if(!make_dir_if_not_exists(dyn_str_get(_tools_path))) {																			\
@@ -1432,7 +1500,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 																										\
 		arrput(_build_command, "clang");																\
 																										\
-		if (strcmp(build_type, "debug") == 0) {															\
+		if (strcmp(build_type, DEBUG_STR) == 0) {														\
 			ADD_FLAG("-g");																				\
 			ADD_FLAG("-O0");																			\
 			ADD_FLAG("-DRDE_DEBUG");																	\
@@ -1449,7 +1517,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		LINK_PATH(_external_link_path, "external/libs/"_platform"/");									\
 																										\
 		dyn_str* _engine_link_path = NULL;																\
-		if (strcmp(build_type, "debug") == 0) {															\
+		if (strcmp(build_type, DEBUG_STR) == 0) {														\
 			LINK_PATH_EX(_engine_link_path, "build/"_platform"/debug/engine/");							\
 		} else {																						\
 			LINK_PATH_EX(_engine_link_path, "build/"_platform"/release/engine/");						\
@@ -1490,7 +1558,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		dyn_str_append(_output_tests, "run_tests"_exe_ext);							\
 																					\
 		arrput(_build_command, "clang");											\
-		if(strcmp(build_type, "debug") == 0) {										\
+		if(strcmp(build_type, DEBUG_STR) == 0) {									\
 			ADD_FLAG("-g");															\
 			ADD_FLAG("-O0");														\
 		} else {																	\
@@ -1505,7 +1573,7 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 		LINK_PATH(_external_link_path, "external/libs/"_platform"/");				\
 																					\
 		dyn_str* _engine_link_path = NULL;											\
-		if(strcmp(build_type, "debug") == 0) {										\
+		if(strcmp(build_type, DEBUG_STR) == 0) {									\
 			LINK_PATH_EX(_engine_link_path, "build/"_platform"/debug/engine/");		\
 		} else {																	\
 			LINK_PATH_EX(_engine_link_path, "build/"_platform"/release/engine/");	\
@@ -1559,7 +1627,7 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 		_module = _module << 1;
 	}
 
-	if(strcmp(build_type, "debug") == 0) {
+	if(strcmp(build_type, DEBUG_STR) == 0) {
 		ADD_FLAG("-g");
 		ADD_FLAG("-O0");
 		ADD_FLAG("-DRDE_DEBUG");
@@ -1620,11 +1688,11 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 	FREE_ENGINE_ALLOCS()
 }
 
-bool compile_windows() {
+bool compile_windows_rde() {
 	errno = 0;
 
 	dyn_str* _path = dyn_str_new("");
-	dyn_str_append(_path, this_file_full_path);
+	dyn_str_append(_path, builder_exe_full_path_dir);
 	dyn_str_append(_path, "build/");
 	
 	if(!make_dir_if_not_exists(dyn_str_get(_path))) {
@@ -1636,7 +1704,7 @@ bool compile_windows() {
 		exit(-1);
 	}
 
-	if(strcmp(build_type, "debug") == 0) {
+	if(strcmp(build_type, DEBUG_STR) == 0) {
 		dyn_str_append(_path, "debug/");
 		if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 			exit(-1);
@@ -1702,7 +1770,7 @@ bool compile_windows() {
 			ADD_FLAG("/nodefaultlib:libcmt");
 		},
 		{
-			if (strcmp(build_type, "debug") == 0) {
+			if (strcmp(build_type, DEBUG_STR) == 0) {
 				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
 				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/debug/examples/SDL2.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/hub_assets/")
@@ -1725,7 +1793,7 @@ bool compile_windows() {
 			ADD_FLAG("-lgdi32")
 		},
 		{
-			if(strcmp(build_type, "debug") == 0) {
+			if(strcmp(build_type, DEBUG_STR) == 0) {
 				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
 				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/debug/examples/SDL2.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/hub_assets/")
@@ -1748,7 +1816,7 @@ bool compile_windows() {
 void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 	dyn_str* _output_engine = dyn_str_new(dyn_str_get(_path));
 	
-	if(strcmp(lib_type, "shared") == 0) {
+	if(strcmp(lib_type, SHARED_STR) == 0) {
 		dyn_str_append(_output_engine, "engine/libRDE.dylib");
 	} else {
 		dyn_str_append(_output_engine, "engine/libRDE.o");
@@ -1764,7 +1832,7 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 		_module = _module << 1;
 	}
 
-	if(strcmp(build_type, "debug") == 0) {
+	if(strcmp(build_type, DEBUG_STR) == 0) {
 		ADD_FLAG("-g");
 		ADD_FLAG("-O0");
 		ADD_FLAG("-DRDE_DEBUG");
@@ -1786,7 +1854,7 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 	snprintf(_min_version, MAX_PATH, "-mmacosx-version-min=%s", _mac_version_buf);
 	ADD_FLAG(_min_version)
 
-	if(strcmp(lib_type, "shared") == 0) {
+	if(strcmp(lib_type, SHARED_STR) == 0) {
 		ADD_FLAG("-shared");
 		ADD_FLAG("-fPIC");
 	} else {
@@ -1806,7 +1874,7 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 	}
 
 	dyn_str* _imgui_whole_flag = NULL;
-	if(strcmp(lib_type, "shared") == 0) {
+	if(strcmp(lib_type, SHARED_STR) == 0) {
 		LINK_PATH(_external_lib_path, "external/libs/osx/");
 
 		arrput(_build_command, "-ldl");
@@ -1822,7 +1890,7 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 
 		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
 			ADD_FLAG("-Wl,-all_load");
-			_imgui_whole_flag = dyn_str_new(this_file_full_path);
+			_imgui_whole_flag = dyn_str_new(builder_exe_full_path_dir);
 			dyn_str_append(_imgui_whole_flag, "external/libs/osx/librde_imgui.dylib");
 			ADD_FLAG(dyn_str_get(_imgui_whole_flag));
 		}
@@ -1849,9 +1917,9 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 		arrput(_build_static_lib_command, "-static");
 		arrput(_build_static_lib_command, "-o");
 
-		dyn_str* _output_lib = dyn_str_new(this_file_full_path);
+		dyn_str* _output_lib = dyn_str_new(builder_exe_full_path_dir);
 
-		if(strcmp(build_type, "debug") == 0) {
+		if(strcmp(build_type, DEBUG_STR) == 0) {
 			dyn_str_append(_output_lib, "build/linux/debug/engine/libRDE.a");
 		} else {
 			dyn_str_append(_output_lib, "build/linux/release/engine/libRDE.a");
@@ -1876,9 +1944,9 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 	}
 }
 
-bool compile_osx() {
+bool compile_osx_rde() {
 		dyn_str* _path = dyn_str_new("");
-	dyn_str_append(_path, this_file_full_path);
+	dyn_str_append(_path, builder_exe_full_path_dir);
 	dyn_str_append(_path, "build/");
 	
 	if(!make_dir_if_not_exists(dyn_str_get(_path))) {
@@ -1890,7 +1958,7 @@ bool compile_osx() {
 		exit(-1);
 	}
 
-	if(strcmp(build_type, "debug") == 0) {
+	if(strcmp(build_type, DEBUG_STR) == 0) {
 		dyn_str_append(_path, "debug/");
 		if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 			exit(-1);
@@ -1956,8 +2024,8 @@ bool compile_osx() {
 			ADD_FLAG(_min_version)
 		},
 		{
-			if (strcmp(build_type, "debug") == 0) {
-				if(strcmp(lib_type, "shared") == 0) {
+			if (strcmp(build_type, DEBUG_STR) == 0) {
+				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/debug/engine/libRDE.dylib", "build/osx/debug/examples/libRDE.dylib")
 					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/debug/examples/libSDL2.dylib")
 				}
@@ -1965,7 +2033,7 @@ bool compile_osx() {
 				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/shaders/")
 			} else {
-				if(strcmp(lib_type, "shared") == 0) {
+				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
 					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/release/examples/libSDL2.dylib")
 				}
@@ -1993,8 +2061,8 @@ bool compile_osx() {
 			ADD_FLAG(_min_version)
 		},
 		{
-			if (strcmp(build_type, "debug") == 0) {
-				if(strcmp(lib_type, "shared") == 0) {
+			if (strcmp(build_type, DEBUG_STR) == 0) {
+				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/debug/engine/libRDE.dylib", "build/osx/debug/examples/libRDE.dylib")
 					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/debug/examples/libSDL2.dylib")
 				}
@@ -2002,7 +2070,7 @@ bool compile_osx() {
 				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/shaders/")
 			} else {
-				if(strcmp(lib_type, "shared") == 0) {
+				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
 					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/release/examples/libSDL2.dylib")
 				}
@@ -2022,7 +2090,7 @@ bool compile_osx() {
 void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 	dyn_str* _output_engine = dyn_str_new(dyn_str_get(_path));
 	
-	if(strcmp(lib_type, "shared") == 0) {
+	if(strcmp(lib_type, SHARED_STR) == 0) {
 		dyn_str_append(_output_engine, "engine/libRDE.so");
 	} else {
 		dyn_str_append(_output_engine, "engine/libRDE.o");
@@ -2038,7 +2106,7 @@ void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 		_module = _module << 1;
 	}
 
-	if(strcmp(build_type, "debug") == 0) {
+	if(strcmp(build_type, DEBUG_STR) == 0) {
 		ADD_FLAG("-g");
 		ADD_FLAG("-O0");
 		ADD_FLAG("-DRDE_DEBUG");
@@ -2058,7 +2126,7 @@ void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 		ADD_FLAG("-D_GNU_SOURCE=1");
 	}
 
-	if(strcmp(lib_type, "shared") == 0) {
+	if(strcmp(lib_type, SHARED_STR) == 0) {
 		ADD_FLAG("-shared");
 		ADD_FLAG("-fPIC");
 	} else {
@@ -2078,7 +2146,7 @@ void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 	}
 
 	dyn_str* _imgui_whole_flag = NULL;
-	if(strcmp(lib_type, "shared") == 0) {
+	if(strcmp(lib_type, SHARED_STR) == 0) {
 		LINK_PATH(_external_lib_path, "external/libs/linux/");
 
 		ADD_FLAG("-ldl");
@@ -2090,7 +2158,7 @@ void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 
 		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
 			ADD_FLAG("-Wl,--whole-archive");
-			_imgui_whole_flag = dyn_str_new(this_file_full_path);
+			_imgui_whole_flag = dyn_str_new(builder_exe_full_path_dir);
 			dyn_str_append(_imgui_whole_flag, "external/libs/linux/librde_imgui.so");
 			ADD_FLAG(dyn_str_get(_imgui_whole_flag));
 			ADD_FLAG("-Wl,--no-whole-archive");
@@ -2117,9 +2185,9 @@ void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 		arrput(_build_static_lib_command, "ar");
 		arrput(_build_static_lib_command, "-crs");
 
-		dyn_str* _output_lib = dyn_str_new(this_file_full_path);
+		dyn_str* _output_lib = dyn_str_new(builder_exe_full_path_dir);
 
-		if(strcmp(build_type, "debug") == 0) {
+		if(strcmp(build_type, DEBUG_STR) == 0) {
 			dyn_str_append(_output_lib, "build/linux/debug/engine/libRDE.a");
 		} else {
 			dyn_str_append(_output_lib, "build/linux/release/engine/libRDE.a");
@@ -2144,11 +2212,11 @@ void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 	}
 }
 
-bool compile_linux() {
+bool compile_linux_rde() {
 	errno = 0;
 
 	dyn_str* _path = dyn_str_new("");
-	dyn_str_append(_path, this_file_full_path);
+	dyn_str_append(_path, builder_exe_full_path_dir);
 	dyn_str_append(_path, "build/");
 	
 	if(!make_dir_if_not_exists(dyn_str_get(_path))) {
@@ -2160,7 +2228,7 @@ bool compile_linux() {
 		exit(-1);
 	}
 
-	if(strcmp(build_type, "debug") == 0) {
+	if(strcmp(build_type, DEBUG_STR) == 0) {
 		dyn_str_append(_path, "debug/");
 		if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 			exit(-1);
@@ -2219,8 +2287,8 @@ bool compile_linux() {
 			ADD_FLAG("-lm");
 		},
 		{
-			if (strcmp(build_type, "debug") == 0) {
-				if(strcmp(build_type, "shared") == 0) {
+			if (strcmp(build_type, DEBUG_STR) == 0) {
+				if(strcmp(build_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/debug/engine/libRDE.so", "build/linux/debug/examples/libRDE.so")
 					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/debug/examples/libSDL2.so")
 				}
@@ -2228,7 +2296,7 @@ bool compile_linux() {
 				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/linux/debug/examples/shaders/")
 			} else {
-				if(strcmp(build_type, "shared") == 0) {
+				if(strcmp(build_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/release/engine/libRDE.so", "build/linux/release/examples/libRDE.so")
 					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/release/examples/libSDL2.so")
 				}
@@ -2249,8 +2317,8 @@ bool compile_linux() {
 			ADD_FLAG("-lm");
 		},
 		{
-			if (strcmp(build_type, "debug") == 0) {
-				if(strcmp(lib_type, "shared") == 0) {
+			if (strcmp(build_type, DEBUG_STR) == 0) {
+				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/debug/engine/libRDE.so", "build/linux/debug/examples/libRDE.so")
 					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/debug/examples/libSDL2.so")
 				}
@@ -2258,7 +2326,7 @@ bool compile_linux() {
 				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/linux/debug/examples/shaders/")
 			} else {
-				if(strcmp(lib_type, "shared") == 0) {
+				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/release/engine/libRDE.so", "build/linux/release/examples/libRDE.so")
 					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/release/examples/libSDL2.so")
 				}
@@ -2273,21 +2341,208 @@ bool compile_linux() {
 }
 #endif
 
-bool compile_android() {
+bool build_desktop_project() {
 	errno = 0;
-	assert(false && "compile_android not implemented");
+
+	rde_command _build_command = NULL;
+
+	if(android_clean) {
+		rde_command _clean_command = NULL;
+		arrput(_clean_command, "gradle");
+		arrput(_clean_command, "clean");
+
+		if(!run_command(_clean_command)) {
+			exit(-1);
+		}
+	}
+
+	dyn_str* _dekstop_path = dyn_str_new(working_dir);
+	dyn_str_append(_dekstop_path, "build/");
+	
+	if (!make_dir_if_not_exists(dyn_str_get(_dekstop_path))) {
+		exit(-1);
+	}
+
+	if(strcmp(build_type, DEBUG_STR) == 0) {
+		dyn_str_append(_dekstop_path, "debug/");
+	} else {
+		dyn_str_append(_dekstop_path, "release/");
+	}
+
+	if (!make_dir_if_not_exists(dyn_str_get(_dekstop_path))) {
+		exit(-1);
+	}
+
+	dyn_str* _output_desktop = dyn_str_new(dyn_str_get(_dekstop_path));
+	if(strlen(project_name) > 0) {
+		dyn_str_append(_output_desktop, project_name);
+	} else {
+		dyn_str_append(_output_desktop, "rde_");
+		if(strcmp(build_type, DEBUG_STR) == 0) {
+			dyn_str_append(_output_desktop, "debug");
+		} else {
+			dyn_str_append(_output_desktop, "release");
+		}
+	}
+
+#if _WIN32
+	dyn_str_append(_output_desktop, ".exe");
+#endif
+
+	bool _is_cpp = false;
+
+	for(size_t _i = 0; _i < arrlenu(project_compile_files); _i++) {
+		if(string_ends_with(dyn_str_get(project_compile_files[_i]), ".cpp")) {
+			_is_cpp = true;
+			break;
+		}
+	}
+
+	if(_is_cpp) {
+		arrput(_build_command, "clang++");
+	} else {
+		arrput(_build_command, "clang");
+	}
+
+	if (strcmp(build_type, DEBUG_STR) == 0) {
+		ADD_FLAG("-g")
+			ADD_FLAG("-O0")
+			ADD_FLAG("-DRDE_DEBUG")
+	} else {
+		ADD_FLAG("-O3")
+	}
+
+	for(size_t _i = 0; _i < arrlenu(project_compile_files); _i++) {
+		arrput(_build_command, dyn_str_get(project_compile_files[_i]));
+	}
+
+	INCLUDE_PATH(_ext_include_path, "external/include/");
+	INCLUDE_PATH(_ext_imgui_include_path, "external/include/imgui");
+	INCLUDE_PATH(_engine_include_path, "engine/include/");
+
+	if(strcmp(build_type, DEBUG_STR) == 0) {
+#if _WIN32
+		LINK_PATH(_engine_link_path, "build/windows/debug/engine/");
+#elif __APPLE__
+		LINK_PATH(_engine_link_path, "build/osx/debug/engine/");
+#else
+		LINK_PATH(_engine_link_path, "build/linux/debug/engine/");
+#endif
+	} else {
+#if _WIN32
+		LINK_PATH(_engine_link_path, "build/windows/release/engine/");
+#elif __APPLE__
+		LINK_PATH(_engine_link_path, "build/osx/release/engine/");
+#else
+		LINK_PATH(_engine_link_path, "build/linux/release/engine/");
+#endif
+	}
+
+	ADD_FLAG("-lRDE")
+	ADD_FLAG("-ferror-limit=200")
+#if _WIN32
+	ADD_FLAG("-lwinmm");
+	ADD_FLAG("-lgdi32");
+	ADD_FLAG("-lmsvcrt");
+	ADD_FLAG("-Xlinker");
+	ADD_FLAG("/nodefaultlib:msvcrt");
+	ADD_FLAG("-Xlinker");
+	ADD_FLAG("/nodefaultlib:libcmt");
+#else
+	ADD_FLAG("-lm");
+	if((modules & RDE_MODULES_PHYSICS_3D) == RDE_MODULES_PHYSICS_3D) {
+		ADD_FLAG("-ljolt");
+	}
+	if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
+		ADD_FLAG("-lrde_imgui");
+	}
+#endif
+
+	for(size_t _i = 0; _i < arrlenu(project_include_paths); _i++) {
+		ADD_FLAG("-I");
+		ADD_FLAG(dyn_str_get(project_include_paths[_i]));
+	}
+
+	for(size_t _i = 0; _i < arrlenu(project_link_paths); _i++) {
+		ADD_FLAG("-L");
+		ADD_FLAG(dyn_str_get(project_link_paths[_i]));
+	}
+
+	for(size_t _i = 0; _i < arrlenu(project_flags); _i++) {
+		ADD_FLAG(dyn_str_get(project_flags[_i]));
+	}
+
+	ADD_FLAG("-o");
+	ADD_FLAG(dyn_str_get(_output_desktop));
+
+	if(!run_command(_build_command)) {
+		exit(-1);
+	}
+
+
+	dyn_str* _in = NULL;
+	dyn_str* _out = NULL;
+
+	dyn_str* _shaders_path = dyn_str_new(dyn_str_get(_dekstop_path));
+	dyn_str_append(_shaders_path, "shaders/");
+	
+	if(strcmp(build_type, DEBUG_STR) == 0) {
+		COPY_FOLDER_CWD("engine/shaders", "build/debug/");
+	} else {
+		COPY_FOLDER_CWD("engine/shaders", "build/release/");
+	}
+
+#if _WIN32
+	if (strcmp(build_type, DEBUG_STR) == 0) {
+		COPY_FILE_CWD("build/windows/debug/engine/RDE.dll", "build/debug/RDE.dll")
+		COPY_FILE_CWD("external/libs/windows/SDL2.dll", "build/debug/SDL2.dll")
+	} else {
+		COPY_FILE_CWD("build/windows/release/engine/RDE.dll", "build/release/RDE.dll")
+		COPY_FILE_CWD("external/libs/windows/SDL2.dll", "build/release/SDL2.dll")
+	}
+#elif __APPLE__
+	if(strcmp(build_type, DEBUG_STR) == 0) {
+		if(strcmp(build_type, SHARED_STR) == 0) {
+			COPY_FILE_CWD("build/osx/debug/engine/libRDE.dylib", "build/debug/libRDE.dylib")
+			COPY_FILE_CWD("external/libs/osx/libSDL2.dylib", "build/debug/libSDL2.dylib")
+		}
+	} else {
+		if(strcmp(build_type, SHARED_STR) == 0) {
+			COPY_FILE_CWD("build/osx/release/engine/libRDE.dylib", "build/release/libRDE.dylib")
+			COPY_FILE_CWD("external/libs/osx/libSDL2.dylib", "build/release/libSDL2.dylib")
+		}
+	}
+#else
+	if(strcmp(build_type, DEBUG_STR) == 0) {
+		if(strcmp(build_type, SHARED_STR) == 0) {
+			COPY_FILE_CWD("build/linux/debug/engine/libRDE.so", "build/debug/libRDE.so")
+			COPY_FILE_CWD("external/libs/linux/libSDL2.so", "build/debug/libSDL2.so")
+		}
+	} else {
+		if(strcmp(build_type, SHARED_STR) == 0) {
+			COPY_FILE_CWD("build/linux/release/engine/libRDE.so", "build/release/libRDE.so")
+			COPY_FILE_CWD("external/libs/linux/libSDL2.so", "build/release/libSDL2.so")
+		}
+	}
+#endif
+
+	return true;
+}
+
+bool build_android_project() {
+	errno = 0;
 	return false;
 }
 
-bool compile_ios() {
+bool build_ios_project() {
 	errno = 0;
-	assert(false && "compile_ios not implemented");
+	assert(false && "build_ios_project not implemented");
 	return false;
 }
 
-bool compile_wasm() {
+bool build_wasm_project() {
 	errno = 0;
-	assert(false && "compile_wasm not implemented");
+	assert(false && "build_wasm_project not implemented");
 	return false;
 }
 
@@ -2300,13 +2555,6 @@ void print_help() {
 	"IMPORTANT: No upper-cases are used, the builder program is case sensitive, for options and program keywords use lower-case, for the values "
 	"passed to the options use whatever is needed. \n"
 	"\n"
-	"--- PLATFORM SETTINGS --- \n"
-	"To build for a specific platform, use --platform= (or -p=) and select a platform between: [windows, linux, osx, android, ios, wasm] \n"
-	"If you are on a specific platform and select another one, an error will be prompted, only a platform can build another platform, except for \n"
-	"ios an android. ios can be only built on an osx platform and android can be built on windows, osx and linux if the RDE's Android module \n"
-	"is linked and the proper flags are set (check both ios and android sections for more information). \n"
-	"If no platform is set, it will be assumed as the same as the OS.\n"
-	"\n"
 	"--- BUILD TYPES --- \n"
 	"Builds of the library can be both [debug, release] and [static, shared] (each group can be combined as needed, no combinations of the same group). \n"
 	"To set the build type use --build_type= (or -bt=) and one option between [debug, release]. \n"
@@ -2314,9 +2562,24 @@ void print_help() {
 	"If no options are passed, it will be assumed -bt=debug and -lt=shared. \n"
 	"\n"
 	"-- BUILDING ---"
-	"To build anything, use the option --build= (or -b=) and an action between [engine, tools, examples, tests, all]. \n"
-	"engine will compile the engine (only). tools will compile atlas_generator and font_generator (only). test will compile the examples and the engine (only). all will compile everything. \n"
+	"To build anything, use the option --build= (or -b=) and an action between [engine, tools, examples, tests, all, project]. \n"
+	"engine will compile the engine (only). tools will compile atlas_generator and font_generator (only). test will compile the examples and the engine (only). all will compile all previous ones. \n"
 	"If no option is passed, it will be assumed -b=all. \n"
+	"project option means we want to build our own project made with RDE. If project is selected, option --platform= must be used to specify which type of project \n"
+	"we are building. Options are [desktop, android, ios, wasm]. Sub options for each one are:\n"
+	"	- desktop: \n"
+	"		-L adds a linking path. This option can be used as many times as needed. \n"
+	"		-I adds a include path. This option can be used as many times as needed. \n"
+	"		--name= Sets the name of the application. If not set, the result will be rde_debug or rde_release \n"
+	"	- android: same as desktop and:\n"
+	"		--clean force gradle clean before building \n"
+	"		--sdk= sets the path to the sdk (required) \n"
+	"		--ndk= sets the path to the ndk (required) \n"
+	"		--sign_path= sets the path to a file which will contain the jks file path, the password and the alias (requiered if signing is needed). The format of this file is: \n"
+	"				jks_path = PATH_TO_JKS_FILE \n"
+	"				password_path = PATH_TO_FILE_WITH_PASSWORD \n"
+	"				alias_path = PATH_TO_FILE_WITH_ALIAS \n"
+	"		--assets_path= path to the folder with all of the assets. This will be included directly on the build \n"
 	"\n"
 	"-- MODULES ---\n"
 	"RDE is composed of several modules, which are completely optional to use and include in your library. Those modules are: \n"
@@ -2395,7 +2658,10 @@ void parse_arguments(int _argc, char** _argv) {
 
 			_value++;
 			strcat(build, _value);
-		} else if(strcmp(_command, "-bt") == 0 || strcmp(_command, "--build_type") == 0) {
+		} 
+		
+		
+		else if(strcmp(_command, "-bt") == 0 || strcmp(_command, "--build_type") == 0) {
 			const char* _value = strrchr(_argv[_i], _delimiter_2);
 			memset(build_type, 0 , MAX_SIZE_FOR_OPTIONS);
 
@@ -2406,7 +2672,10 @@ void parse_arguments(int _argc, char** _argv) {
 
 			_value++;
 			strcat(build_type, _value);
-		} else if(strcmp(_command, "-lt") == 0 || strcmp(_command, "--lib_type") == 0) {
+		} 
+		
+		
+		else if(strcmp(_command, "-lt") == 0 || strcmp(_command, "--lib_type") == 0) {
 			const char* _value = strrchr(_argv[_i], _delimiter_2);
 			memset(lib_type, 0 , MAX_SIZE_FOR_OPTIONS);
 
@@ -2417,7 +2686,10 @@ void parse_arguments(int _argc, char** _argv) {
 
 			_value++;
 			strcat(lib_type, _value);
-		} else if(strcmp(_command, "-m") == 0 || strcmp(_command, "--modules") == 0) {
+		} 
+		
+		
+		else if(strcmp(_command, "-m") == 0 || strcmp(_command, "--modules") == 0) {
 			char* _value = strrchr(_argv[_i], _delimiter_2);
 			modules = RDE_MODULES_NONE;
 
@@ -2460,95 +2732,232 @@ void parse_arguments(int _argc, char** _argv) {
 				
 				_module = strtok(NULL, ",");
 			}
-		} else if(strcmp(_command, "--god") == 0) {
+		} 
+		
+		
+		else if(strcmp(_command, "--god") == 0) {
 			is_god = true;
-		} else if(strcmp(_command, "-h") == 0 || strcmp(_command, "--help") == 0) {
+		}
+		
+		else if(strcmp(_command, "--platform") == 0) {
+			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			memset(platform, 0 , MAX_SIZE_FOR_OPTIONS);
+
+			if(_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for --platform incorrect\n");
+				exit(-1);
+			}
+
+			bool _valid_option = false;
+			for(size_t _i = 0; _i < MAX_BUILD_PLATFORM_OPTIONS; _i++) {
+				if(strcmp(_value + 1, BUILD_PLATFORM_OPTIONS_STR[_i]) == 0) {
+					_valid_option = true;
+					break;
+				}
+			}
+
+			if(!_valid_option) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument value for --platform is not valid '%s'. Valid options are:", _value);
+				printf("\t[");
+				for(size_t _i = 0; _i < MAX_BUILD_PLATFORM_OPTIONS; _i++) {
+					printf("%s, ", BUILD_PLATFORM_OPTIONS_STR[_i]);
+				}
+				printf("]\n");
+				exit(-1);
+			}
+
+			_value++;
+			strcat(platform, _value);
+		}
+		
+
+		
+		else if (strcmp(_command, "-t") == 0 || strcmp(_command, "--tool") == 0) {
+			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			memset(tool, 0 , MAX_SIZE_FOR_OPTIONS);
+
+			if (_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for -t or --tool incorrect\n");
+				exit(-1);
+			}
+
+			bool _valid_option = false;
+			for (size_t _i = 0; _i < MAX_TOOL_OPTIONS; _i++) {
+				if (strcmp(_value + 1, TOOL_OPTIONS_STR[_i]) == 0) {
+					_valid_option = true;
+					break;
+				}
+			}
+
+			if (!_valid_option) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument value for -t or --tool is not valid '%s'. Valid options are:", _value);
+				printf("\t[");
+				for (size_t _i = 0; _i < MAX_TOOL_OPTIONS; _i++) {
+					printf("%s, ", TOOL_OPTIONS_STR[_i]);
+				}
+				printf("]\n");
+				exit(-1);
+			}
+
+			_value++;
+			strcat(tool, _value);
+		} 
+		
+		
+		
+		else if(strcmp(_command, "-h") == 0 || strcmp(_command, "--help") == 0) {
 			print_help();
 			exit(0);
 		}
-	}
 
-	int _osx_platforms = 0;
-	if(strlen(platform) == 0) {
-		#if _WIN32
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to windows");
-		strcat(platform, "windows");
-		#elif __APPLE__
-			#include "TargetConditionals.h"
-			#if TARGET_OS_MAC
-			rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to osx");
-			strcat(platform, "osx");
-			#else
-			_osx_platforms++;
-			#endif
-		#elif (defined(__linux__))
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to linux");
-		strcat(platform, "linux");
-		#elif (defined(__ANDROID__))
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to android");
-		strcat(platform, "android");
-		#elif __APPLE__
-			#include "TargetConditionals.h"
-			#if TARGET_OS_IPHONE
-			rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to ios");
-			strcat(platform, "ios");
-			#else
-			_osx_platforms++;
-			#endif
-		#elif __EMSCRIPTEN__
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Platform set to wasm");
-		strcat(platform, "wasm");
-		#else
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Tried to compile from an unsupported platfom");
-		exit(-1);
-		#endif
-	}
 
-	if(_osx_platforms == 2 && strlen(platform) == 0) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Tried to compile an unsupported platfom");
-		exit(-1);
+
+		else if(strcmp(_command, "--clean") == 0) {
+			android_clean = true;
+		}
+
+
+		else if(string_starts_with(_command, "-L")) {
+			_command += 2;
+			arrput(project_link_paths, dyn_str_new(_command));
+		}
+
+		else if(string_starts_with(_command, "-I")) {
+			_command += 2;
+			arrput(project_include_paths, dyn_str_new(_command));
+		}
+
+		else if(string_starts_with(_command, "--name")) {
+			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			memset(project_name, 0 , MAX_SIZE_FOR_OPTIONS);
+
+			if(_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for --name incorrect\n");
+				exit(-1);
+			}
+
+			_value++;
+			strcat(project_name, _value);
+		}
+
+		else {
+			arrput(project_compile_files, dyn_str_new(_command));
+		}
 	}
 
 	if(strlen(lib_type) == 0) {
-		strcat(lib_type, "shared");
+		strcat(lib_type, SHARED_STR);
 	}
 
 	if(strlen(build_type) == 0) {
-		strcat(build_type, "debug");
+		strcat(build_type, DEBUG_STR);
 	}
 }
 
-bool compile_test() {
-	return false;
+void execute_build_option() {
+	if(strcmp(build, BUILD_OPTIONS_STR[BUILD_OPTION_ENGINE]) == 0 || 
+		strcmp(build, BUILD_OPTIONS_STR[BUILD_OPTION_EXAMPLES]) == 0 || 
+		strcmp(build, BUILD_OPTIONS_STR[BUILD_OPTION_TESTS]) == 0 || 
+		strcmp(build, BUILD_OPTIONS_STR[BUILD_OPTION_ALL]) == 0) {
+#if _WIN32
+		compile_windows_rde();
+#elif __APPLE__
+		compile_osx_rde();
+#elif defined(__linux__)
+		compile_linux_rde();
+#else
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Compiling on an unsupported OS, exiting.");
+		exit(-1);
+#endif
+	} else if(strcmp(build, "project") == 0) {
+		if(strlen(platform) == 0) {
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Building project, but platform was not specify. Please use --platform= one of these options [desktop, android, ios, wasm]");
+			exit(-1);
+		}
+
+		if(strcmp(platform, BUILD_PLATFORM_OPTIONS_STR[BUILD_PLATFORM_OPTION_DESKTOP]) == 0) {
+			build_desktop_project();
+		} else if(strcmp(platform, BUILD_PLATFORM_OPTIONS_STR[BUILD_PLATFORM_OPTION_ANDROID]) == 0) {
+			build_android_project();
+		} else if(strcmp(platform, BUILD_PLATFORM_OPTIONS_STR[BUILD_PLATFORM_OPTION_IOS]) == 0) {
+			build_ios_project();
+		} else if(strcmp(platform, BUILD_PLATFORM_OPTIONS_STR[BUILD_PLATFORM_OPTION_WASM]) == 0) {
+			build_wasm_project();
+		}
+	}
+
+	printf("\n");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Build finished successfully. \n");
 }
 
-bool run_test() {
-	return false;
+void execute_tool() {
+	assert(false && "execute_tool not implemented yet");
+}
+
+void load_paths(char** _argv) {
+	memset(builder_exe_full_path_dir, 0, MAX_PATH);
+	memset(working_dir, 0, MAX_PATH);
+
+	char _path_save[PATH_MAX];
+	char* _path_ptr;
+
+	if(!(_path_ptr = strrchr(_argv[0], '/')))
+		getcwd(working_dir, sizeof(working_dir));
+	else {
+		*_path_ptr = '\0';
+		getcwd(_path_save, sizeof(_path_save));
+		chdir(_argv[0]);
+		getcwd(working_dir, sizeof(working_dir));
+		chdir(_path_save);
+	}
+
+#if _WIN32
+	GetModuleFileName(NULL, builder_exe_full_path_dir, MAX_PATH);
+	GetModuleFileName(NULL, builder_exe_full_path, MAX_PATH);
+#elif __APPLE__
+	size_t _size = MAX_PATH;
+	_NSGetExecutablePath(builder_exe_full_path_dir, &_size)
+	_NSGetExecutablePath(builder_exe_full_path, &_size)
+#else
+	readlink("/proc/self/exe", builder_exe_full_path_dir, MAX_PATH);
+	readlink("/proc/self/exe", builder_exe_full_path, MAX_PATH);
+#endif
+	
+#if _WIN32
+	char _char = '\\';
+#else
+	char _char = '/';
+#endif
+
+	char* _split_ptr = strrchr(builder_exe_full_path_dir, _char);
+	int _index_to_start_ignoring = strlen(builder_exe_full_path_dir) - strlen(_split_ptr) + 1;
+	builder_exe_full_path_dir[_index_to_start_ignoring] = '\0';
+
+	for(size_t _i = 0; _i < strlen(builder_exe_full_path_dir); _i++) {
+		if(builder_exe_full_path_dir[_i] == '\\') {
+			builder_exe_full_path_dir[_i] = '/';
+		}
+	}
+
+	for(size_t _i = 0; _i < strlen(builder_exe_full_path); _i++) {
+		if(builder_exe_full_path[_i] == '\\') {
+			builder_exe_full_path[_i] = '/';
+		}
+	}
+
+	for(size_t _i = 0; _i < strlen(working_dir); _i++) {
+		if(working_dir[_i] == '\\') {
+			working_dir[_i] = '/';
+		}
+	}
+
+	if(working_dir[strlen(working_dir)] != '/') {
+		working_dir[strlen(working_dir)] = '/';
+	}
 }
 
 int main(int _argc, char** _argv) {
-	memset(this_file_full_path, 0, MAX_PATH);
-
-	#if _WIN32
-	console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-	char _temp[MAX_PATH];
-	memset(_temp, 0, MAX_PATH);
-	strcat(_temp, _argv[0]);
-	const char _delimiter = '\\';
-	const char* _value = strrchr(_argv[0], _delimiter);
-	if(_value != NULL) {
-		strncpy(this_file_full_path, _temp, strlen(_temp) - strlen(_value));
-		strcat(this_file_full_path, "/");
-	} else {
-		strcat(this_file_full_path, "./");
-	}
-	#else
-	char* _temp = realpath(__FILE__, NULL);
-	const char _delimiter = '/';
-	const char* _value = strrchr(_temp, _delimiter);
-	strncpy(this_file_full_path, _temp, strlen(_temp) - strlen(_value));
-	strcat(this_file_full_path, "/");
-	#endif
+	load_paths(_argv);
 
 	try_recompile_and_redirect_execution(_argc, _argv);
 
@@ -2556,35 +2965,26 @@ int main(int _argc, char** _argv) {
 	memset(build_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(lib_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(build, 0, MAX_SIZE_FOR_OPTIONS);
+	memset(tool, 0, MAX_SIZE_FOR_OPTIONS);
 	modules = RDE_MODULES_RENDERING;
+	project_compile_files = NULL;
+	project_include_paths = NULL;
+	project_link_paths = NULL;
+	project_flags = NULL;
+	memset(project_name, 0, MAX_PATH);
+	memset(android_sdk, 0, MAX_PATH);
+	memset(android_ndk, 0, MAX_PATH);
+	memset(android_sign, 0, MAX_PATH);
+	android_clean = false;
 
 	parse_arguments(_argc, _argv);
 
-	if(strcmp(platform, "windows") == 0) {
-		#if _WIN32
-		compile_windows();
-		#endif
-	} else if(strcmp(platform, "osx") == 0) {
-		#if __APPLE__
-		compile_osx();
-		#endif
-	} else if(strcmp(platform, "linux") == 0) {
-		#if defined(__linux__)
-		compile_linux();
-		#endif
-	} else if(strcmp(platform, "android") == 0) {
-		compile_android();
-	} else if(strcmp(platform, "ios") == 0) {
-		compile_ios();
-	} else if(strcmp(platform, "wasm") == 0) {
-		compile_wasm();
-	} else {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Selected platform is not supported '%s', exiting.", platform);
-		exit(-1);
+	if(strlen(build) > 0) {
+		execute_build_option();
+	} else if(strlen(tool) > 0) {
+		execute_tool();
 	}
 
-	printf("\n");
-	rde_log_level(RDE_LOG_LEVEL_INFO, "Build finished successfully. \n");
 	return 0;
 }
 
