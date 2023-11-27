@@ -649,11 +649,11 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		if(_just_binary_name != NULL) {
 			strcat(_to_trash, _just_binary_name);
 		} else {
-			strcat(_to_trash, _binary_path);
+			strcat(_to_trash, builder_exe_full_path);
 		}
 		strcat(_to_trash, ".old");
 
-		if(!rename_file_if_exists(_binary_path, _to_old)) {
+		if(!rename_file_if_exists(builder_exe_full_path, _to_old)) {
 			exit(-1);
 		}
 #endif
@@ -835,7 +835,7 @@ bool remove_dir_recursively_if_exists(const char* _file_path, bool _remove_paren
 						#if _WIN32
 						_r2 = RemoveDirectoryA(_buf) ? 0 : -1;
 						#else
-						_r2 = remove(_buf);
+						remove_dir_recursively_if_exists(_buf, _remove_parent);
 						#endif
 					}
 					else{
@@ -2491,6 +2491,14 @@ bool build_desktop_project() {
 #endif
 	}
 
+#if _WIN32
+		LINK_PATH(_engine_link_path, "external/libs/windows/");
+#elif __APPLE__
+		LINK_PATH(_engine_link_path, "external/libs/osx/");
+#else
+		LINK_PATH(_engine_link_path, "external/libs/linux/");
+#endif
+
 	ADD_FLAG("-lRDE")
 #if _WIN32
 	ADD_FLAG("-lwinmm");
@@ -2695,7 +2703,12 @@ bool build_android_project() {
 
 	dyn_str* _in = NULL;
 	dyn_str* _out = NULL;
+	
+#if _WIN32
 	COPY_FOLDER_DEST("engine/shaders/", android_rde_android, "app/src/main/assets/shaders/");
+#else
+	COPY_FOLDER_DEST("engine/shaders/", android_rde_android, "app/src/main/assets/");
+#endif
 
 	if(strlen(android_sign) > 0) {
 		if(strcmp(build_type, DEBUG_STR) == 0) {
