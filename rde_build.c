@@ -167,9 +167,14 @@ dyn_str** project_include_paths;
 dyn_str** project_link_paths;
 dyn_str** project_flags;
 char project_name[MAX_PATH];
-char android_sdk[MAX_PATH];
+char android_sdk_build_tools[MAX_PATH];
 char android_ndk[MAX_PATH];
 char android_sign[MAX_PATH];
+char android_rde_android[MAX_PATH];
+char android_assets_path[MAX_PATH];
+char android_pass_path[MAX_PATH];
+char android_jks_path[MAX_PATH];
+char android_alias[MAX_PATH];
 bool android_clean;
 
 bool is_god = false;
@@ -194,7 +199,7 @@ bool make_dir_if_not_exists(const char* _dir_path);
 bool create_file_if_not_exists(const char* _file_path);
 bool rename_file_if_exists(const char* _file, const char* _new_name);
 bool remove_file_if_exists(const char* _file_path);
-bool remove_dir_recursively_if_exists(const char* _file_path);
+bool remove_dir_recursively_if_exists(const char* _file_path, bool _remove_parent);
 
 char* read_full_file_if_exists(const char* _file_path); // You are responsible for deallocating the returned memory
 bool write_to_file_if_exists(const char* _file_path, const char* _contents);
@@ -799,7 +804,7 @@ bool remove_file_if_exists(const char* _file_path) {
 	return true;
 }
 
-bool remove_dir_recursively_if_exists(const char* _file_path) {
+bool remove_dir_recursively_if_exists(const char* _file_path, bool _remove_parent) {
 	errno = 0;
 	DIR* _d = opendir(_file_path);
 	size_t _path_len = strlen(_file_path);
@@ -844,7 +849,7 @@ bool remove_dir_recursively_if_exists(const char* _file_path) {
 		closedir(_d);
 	}
 
-	if (!_r) {
+	if (!_r && _remove_parent) {
 		_r = rmdir(_file_path);
 	}
 
@@ -854,7 +859,7 @@ bool remove_dir_recursively_if_exists(const char* _file_path) {
 		rde_log_level(RDE_LOG_LEVEL_INFO, "deleted '%s' \n", _file_path);
 	}
 
-   return _r == 0;
+   	return _r == 0 || !_remove_parent;
 }
 
 char* read_full_file_if_exists(const char* _file_path) {
@@ -1240,7 +1245,17 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 
 
 
+#define WINDOWS_TO_UNIX_FILE_PATH(_str)				\
+	for(size_t _i = 0; _i < strlen(_str); _i++) {	\
+		if(_str[_i] == '\\') {						\
+			_str[_i] = '/';							\
+		}											\
+	}
 
+#define ENSURE_PATH_ENDED_ON_SLASH(_str) 	\
+	if(_str[strlen(_str)] != '/') {			\
+		_str[strlen(_str)] = '/';			\
+	}	
 
 #define ADD_PATH(_path_var, _path) 							\
 	dyn_str* _path_var = dyn_str_new(builder_exe_full_path_dir);	\
@@ -1325,6 +1340,48 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 	dyn_str_append(_in, _origin);								\
 	dyn_str_append(_out, _dest);								\
 	copy_folder_if_exists(dyn_str_get(_in), dyn_str_get(_out));
+
+#define COPY_FOLDER_DEST(_origin, _out_dest, _dest) 			\
+	if(_in != NULL) {											\
+		dyn_str_free(_in);										\
+		dyn_str_free(_out);										\
+		_in = NULL;												\
+		_out = NULL;											\
+	}															\
+																\
+	_in = dyn_str_new(builder_exe_full_path_dir);				\
+	_out = dyn_str_new(_out_dest);								\
+	dyn_str_append(_in, _origin);								\
+	dyn_str_append(_out, _dest);								\
+	copy_folder_if_exists(dyn_str_get(_in), dyn_str_get(_out));
+
+#define COPY_FOLDER_ORIG_DEST(_in_orig, _origin, _out_dest, _dest) \
+	if(_in != NULL) {											\
+		dyn_str_free(_in);										\
+		dyn_str_free(_out);										\
+		_in = NULL;												\
+		_out = NULL;											\
+	}															\
+																\
+	_in = dyn_str_new(_in_orig);								\
+	_out = dyn_str_new(_out_dest);								\
+	dyn_str_append(_in, _origin);								\
+	dyn_str_append(_out, _dest);								\
+	copy_folder_if_exists(dyn_str_get(_in), dyn_str_get(_out));
+
+#define COPY_FILE_ORIG_DEST(_in_orig, _origin, _out_dest, _dest) \
+	if(_in != NULL) {											\
+		dyn_str_free(_in);										\
+		dyn_str_free(_out);										\
+		_in = NULL;												\
+		_out = NULL;											\
+	}															\
+																\
+	_in = dyn_str_new(_in_orig);								\
+	_out = dyn_str_new(_out_dest);								\
+	dyn_str_append(_in, _origin);								\
+	dyn_str_append(_out, _dest);								\
+	copy_file_if_exists(dyn_str_get(_in), dyn_str_get(_out));
 
 #define FREE_ATLAS_ALLOCS()			\
 	dyn_str_free(_tools_path);		\
@@ -2346,18 +2403,14 @@ bool build_desktop_project() {
 
 	rde_command _build_command = NULL;
 
-	if(android_clean) {
-		rde_command _clean_command = NULL;
-		arrput(_clean_command, "gradle");
-		arrput(_clean_command, "clean");
-
-		if(!run_command(_clean_command)) {
-			exit(-1);
-		}
-	}
-
 	dyn_str* _dekstop_path = dyn_str_new(working_dir);
 	dyn_str_append(_dekstop_path, "build/");
+	
+	if (!make_dir_if_not_exists(dyn_str_get(_dekstop_path))) {
+		exit(-1);
+	}
+
+	dyn_str_append(_dekstop_path, "desktop/");
 	
 	if (!make_dir_if_not_exists(dyn_str_get(_dekstop_path))) {
 		exit(-1);
@@ -2439,7 +2492,6 @@ bool build_desktop_project() {
 	}
 
 	ADD_FLAG("-lRDE")
-	ADD_FLAG("-ferror-limit=200")
 #if _WIN32
 	ADD_FLAG("-lwinmm");
 	ADD_FLAG("-lgdi32");
@@ -2487,41 +2539,41 @@ bool build_desktop_project() {
 	dyn_str_append(_shaders_path, "shaders/");
 	
 	if(strcmp(build_type, DEBUG_STR) == 0) {
-		COPY_FOLDER_CWD("engine/shaders", "build/debug/");
+		COPY_FOLDER_CWD("engine/shaders/", "build/desktop/debug/shaders/");
 	} else {
-		COPY_FOLDER_CWD("engine/shaders", "build/release/");
+		COPY_FOLDER_CWD("engine/shaders/", "build/desktop/release/shaders/");
 	}
 
 #if _WIN32
 	if (strcmp(build_type, DEBUG_STR) == 0) {
-		COPY_FILE_CWD("build/windows/debug/engine/RDE.dll", "build/debug/RDE.dll")
-		COPY_FILE_CWD("external/libs/windows/SDL2.dll", "build/debug/SDL2.dll")
+		COPY_FILE_CWD("build/windows/debug/engine/RDE.dll", "build/desktop/debug/RDE.dll")
+		COPY_FILE_CWD("external/libs/windows/SDL2.dll", "build/desktop/debug/SDL2.dll")
 	} else {
-		COPY_FILE_CWD("build/windows/release/engine/RDE.dll", "build/release/RDE.dll")
-		COPY_FILE_CWD("external/libs/windows/SDL2.dll", "build/release/SDL2.dll")
+		COPY_FILE_CWD("build/windows/release/engine/RDE.dll", "build/desktop/release/RDE.dll")
+		COPY_FILE_CWD("external/libs/windows/SDL2.dll", "build/desktop/release/SDL2.dll")
 	}
 #elif __APPLE__
 	if(strcmp(build_type, DEBUG_STR) == 0) {
 		if(strcmp(build_type, SHARED_STR) == 0) {
-			COPY_FILE_CWD("build/osx/debug/engine/libRDE.dylib", "build/debug/libRDE.dylib")
-			COPY_FILE_CWD("external/libs/osx/libSDL2.dylib", "build/debug/libSDL2.dylib")
+			COPY_FILE_CWD("build/osx/debug/engine/libRDE.dylib", "build/desktop/debug/libRDE.dylib")
+			COPY_FILE_CWD("external/libs/osx/libSDL2.dylib", "build/desktop/debug/libSDL2.dylib")
 		}
 	} else {
 		if(strcmp(build_type, SHARED_STR) == 0) {
-			COPY_FILE_CWD("build/osx/release/engine/libRDE.dylib", "build/release/libRDE.dylib")
-			COPY_FILE_CWD("external/libs/osx/libSDL2.dylib", "build/release/libSDL2.dylib")
+			COPY_FILE_CWD("build/osx/release/engine/libRDE.dylib", "build/desktop/release/libRDE.dylib")
+			COPY_FILE_CWD("external/libs/osx/libSDL2.dylib", "build/desktop/release/libSDL2.dylib")
 		}
 	}
 #else
 	if(strcmp(build_type, DEBUG_STR) == 0) {
 		if(strcmp(build_type, SHARED_STR) == 0) {
-			COPY_FILE_CWD("build/linux/debug/engine/libRDE.so", "build/debug/libRDE.so")
-			COPY_FILE_CWD("external/libs/linux/libSDL2.so", "build/debug/libSDL2.so")
+			COPY_FILE_CWD("build/linux/debug/engine/libRDE.so", "build/desktop/debug/libRDE.so")
+			COPY_FILE_CWD("external/libs/linux/libSDL2.so", "build/desktop/debug/libSDL2.so")
 		}
 	} else {
 		if(strcmp(build_type, SHARED_STR) == 0) {
-			COPY_FILE_CWD("build/linux/release/engine/libRDE.so", "build/release/libRDE.so")
-			COPY_FILE_CWD("external/libs/linux/libSDL2.so", "build/release/libSDL2.so")
+			COPY_FILE_CWD("build/linux/release/engine/libRDE.so", "build/desktop/release/libRDE.so")
+			COPY_FILE_CWD("external/libs/linux/libSDL2.so", "build/desktop/release/libSDL2.so")
 		}
 	}
 #endif
@@ -2531,6 +2583,265 @@ bool build_desktop_project() {
 
 bool build_android_project() {
 	errno = 0;
+	
+	if(strlen(android_rde_android) == 0) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Android project build selected, but --rde_android was not set");
+		exit(-1);
+	}
+
+	if(strlen(android_sdk_build_tools) == 0) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Android project build selected, but --sdk_build_tools was not set");
+		exit(-1);
+	}
+
+	chdir(android_rde_android);
+
+	dyn_str* _android_path = dyn_str_new(working_dir);
+	dyn_str_append(_android_path, "build/");
+	
+	if (!make_dir_if_not_exists(dyn_str_get(_android_path))) {
+		exit(-1);
+	}
+
+	dyn_str_append(_android_path, "android/");
+	
+	if (!make_dir_if_not_exists(dyn_str_get(_android_path))) {
+		exit(-1);
+	}
+
+	if(strcmp(build_type, DEBUG_STR) == 0) {
+		dyn_str_append(_android_path, "debug/");
+	} else {
+		dyn_str_append(_android_path, "release/");
+	}
+
+	if (!make_dir_if_not_exists(dyn_str_get(_android_path))) {
+		exit(-1);
+	}
+
+	// Android is built via CMakeLists.txt. In the project, there is a template which it is going to be filled
+	// now and saved as a temporary valid CMakeLists.txt which will be deleted upon finishing the build.
+	dyn_str* _cmake_lists = dyn_str_new(android_rde_android);
+	dyn_str* _cmake_lists_template = dyn_str_new(android_rde_android);
+	dyn_str_append(_cmake_lists, "CMakeLists.txt");
+	dyn_str_append(_cmake_lists_template, "CMakeLists.txt.template");
+	remove_file_if_exists(dyn_str_get(_cmake_lists));
+	char* _template_code = read_full_file_if_exists(dyn_str_get(_cmake_lists_template));
+
+	size_t _final_cmake_size = 1024 * 1024;
+	char* _final_cmake_code = (char*)malloc(sizeof(char) * _final_cmake_size);
+	memset(_final_cmake_code, 0, _final_cmake_size);
+
+	dyn_str* _modules = dyn_str_new("");
+	unsigned int _module_shift = 1;
+	for(int _i = 0; _i < MAX_MODULES; _i++) {
+		if((modules & (RDE_MODULES_)_module_shift) == (RDE_MODULES_)_module_shift) {
+			dyn_str_append(_modules, (char*)MODULES_DEFINES[_i]);
+			dyn_str_append(_modules, " ");
+		}
+
+		_module_shift = _module_shift << 1;
+	}
+
+	dyn_str* _app_source_code = dyn_str_new(working_dir);
+	for(size_t _i = 0; _i < arrlenu(project_compile_files); _i++) {
+		dyn_str_append(_app_source_code, dyn_str_get(project_compile_files[_i]));
+		dyn_str_append(_app_source_code, " ");
+	}
+
+	snprintf(_final_cmake_code, _final_cmake_size, _template_code, 
+	         build_type, 
+	         builder_exe_full_path_dir, 
+	         dyn_str_get(_modules),
+	         dyn_str_get(_app_source_code)
+	);
+
+	create_file_if_not_exists(dyn_str_get(_cmake_lists));
+	write_to_file_if_exists(dyn_str_get(_cmake_lists), _final_cmake_code);
+
+
+	if(android_clean) {
+		rde_command _clean_command = NULL;
+#if _WIN32
+		arrput(_clean_command, "cmd");
+		arrput(_clean_command, "/c");
+#endif
+		arrput(_clean_command, "gradle");
+		arrput(_clean_command, "clean");
+
+		if(!run_command(_clean_command)) {
+			exit(-1);
+		}
+	}
+
+	rde_command _build_command = NULL;
+
+#if _WIN32
+	arrput(_build_command, "cmd");
+	arrput(_build_command, "/c");
+#endif
+	arrput(_build_command, "gradle");
+	if(strcmp(build_type, DEBUG_STR) == 0) {
+		arrput(_build_command, "assembleDebug");
+	} else {
+		arrput(_build_command, "assembleRelease");
+	}
+	
+	if(strlen(android_assets_path) > 0) {
+		dyn_str* _android_assets_path = dyn_str_new(android_rde_android);
+		dyn_str_append(_android_assets_path, "app/src/main/assets/");
+		remove_dir_recursively_if_exists(dyn_str_get(_android_assets_path), false);
+	}
+
+	dyn_str* _in = NULL;
+	dyn_str* _out = NULL;
+	COPY_FOLDER_DEST("engine/shaders/", android_rde_android, "app/src/main/assets/shaders/");
+
+	if(strlen(android_sign) > 0) {
+		if(strcmp(build_type, DEBUG_STR) == 0) {
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Cannot sign debug APK");
+			exit(-1);
+		}
+
+		FILE* _sign_file = NULL;
+		_sign_file = fopen(android_sign, "r");
+
+		if(_sign_file == NULL) {
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not open sign file '%s'", android_sign);
+			exit(-1);
+		}
+
+		char* _ptr = fgets(android_jks_path, MAX_PATH, _sign_file);
+		android_jks_path[strcspn(android_jks_path, "\n")] = 0;
+
+		_ptr = fgets(android_pass_path, MAX_PATH, _sign_file);
+		android_pass_path[strcspn(android_pass_path, "\n")] = 0;
+
+		if(_ptr != NULL) {
+			fgets(android_alias, MAX_PATH, _sign_file);
+			android_alias[strcspn(android_alias, "\n")] = 0;
+		}
+
+		fclose(_sign_file);
+
+		arrput(_build_command, "&&");
+
+		dyn_str* _zipalign = dyn_str_new(android_sdk_build_tools);
+		
+#if _WIN32
+		dyn_str_append(_zipalign, "zipalign.exe");
+#else
+		dyn_str_append(_zipalign, "zipalign");
+#endif
+
+		dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
+		dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-release-unsigned.apk");
+		dyn_str* _apk_unsigned_aligned_path = dyn_str_new(android_rde_android);
+		dyn_str_append(_apk_unsigned_aligned_path, "app/build/outputs/apk/release/app-release-unsigned-aligned.apk");
+		remove_file_if_exists(dyn_str_get(_apk_unsigned_aligned_path));
+
+		// Align data of apk with zipalign
+		arrput(_build_command, dyn_str_get(_zipalign));
+		arrput(_build_command, "-v");
+		arrput(_build_command, "-p");
+		arrput(_build_command, "4");
+		arrput(_build_command, dyn_str_get(_apk_unsigned_path));
+		arrput(_build_command, dyn_str_get(_apk_unsigned_aligned_path));
+
+		arrput(_build_command, "&&");
+
+		// sign app with apk signer
+		dyn_str* _apksigner = dyn_str_new(android_sdk_build_tools);
+
+#if _WIN32
+		dyn_str_append(_apksigner, "apksigner.bat");
+#else
+		dyn_str_append(_apksigner, "apksigner");
+#endif
+
+		arrput(_build_command, dyn_str_get(_apksigner));
+		arrput(_build_command, "sign");
+		arrput(_build_command, "--v4-signing-enabled");
+		arrput(_build_command, "true");
+		arrput(_build_command, "-v");
+		arrput(_build_command, "--ks");
+		arrput(_build_command, android_jks_path);
+		arrput(_build_command, "--ks-pass");
+		dyn_str* _pass_file = dyn_str_new("file:");
+		dyn_str_append(_pass_file, android_pass_path);
+		arrput(_build_command, dyn_str_get(_pass_file));
+
+		if(strlen(android_alias) > 0) {
+			arrput(_build_command, "--ks-key-alias");
+			arrput(_build_command, android_alias);
+		}
+
+		arrput(_build_command, "--out");
+		dyn_str* _apk_path = dyn_str_new(android_rde_android);
+		dyn_str_append(_apk_path, "app/build/outputs/apk/release/app-release.apk");
+		arrput(_build_command, dyn_str_get(_apk_path));
+		arrput(_build_command, dyn_str_get(_apk_unsigned_aligned_path));
+
+		arrput(_build_command, "&&");
+
+		// Verify app with apksigner
+		arrput(_build_command, dyn_str_get(_apksigner));
+		arrput(_build_command, "verify");
+		arrput(_build_command, dyn_str_get(_apk_path));
+	}
+
+	if(strlen(android_assets_path) > 0) {
+		char* _last_folder = strrchr(android_assets_path, '/');
+		_last_folder++;
+
+		dyn_str* _folder_path = dyn_str_new(android_rde_android);
+		dyn_str_append(_folder_path, "app/src/main/assets/");
+		dyn_str_append(_folder_path, _last_folder);
+		dyn_str_append(_folder_path, "/");
+		COPY_FOLDER_ORIG_DEST(android_assets_path, "", dyn_str_get(_folder_path), "");
+	}
+
+	if(!run_command(_build_command)) {
+		exit(-1);
+	}
+
+	remove_file_if_exists(dyn_str_get(_cmake_lists));
+
+	dyn_str* _apk_path = dyn_str_new(android_rde_android);
+	if(strcmp(build_type, DEBUG_STR) == 0) {
+		dyn_str_append(_apk_path, "app/build/outputs/apk/debug/app-debug.apk");
+		COPY_FILE_ORIG_DEST(dyn_str_get(_apk_path), "", working_dir, "build/android/debug/app-debug.apk");
+
+		if(strlen(project_name) > 0) {
+			dyn_str* _apk_default_path = dyn_str_new(working_dir);
+			dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
+			dyn_str_append(_apk_default_path, "build/android/debug/app-debug.apk");
+			dyn_str_append(_apk_custom_name_path, "build/android/debug/");
+			dyn_str_append(_apk_custom_name_path, project_name);
+			dyn_str_append(_apk_custom_name_path, ".apk");
+			rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
+		}
+
+	} else {
+		dyn_str_append(_apk_path, "app/build/outputs/apk/release/app-release.apk");
+		if(strlen(android_sign) == 0) {
+			dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
+			dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-release-unsigned.apk");
+			rename_file_if_exists(dyn_str_get(_apk_unsigned_path), dyn_str_get(_apk_path));
+		}
+		COPY_FILE_ORIG_DEST(dyn_str_get(_apk_path), "", working_dir, "build/android/release/app-release.apk");
+
+		if(strlen(project_name) > 0) {
+			dyn_str* _apk_default_path = dyn_str_new(working_dir);
+			dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
+			dyn_str_append(_apk_default_path, "build/android/release/app-release.apk");
+			dyn_str_append(_apk_custom_name_path, "build/android/release/");
+			dyn_str_append(_apk_custom_name_path, project_name);
+			dyn_str_append(_apk_custom_name_path, ".apk");
+			rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
+		}
+	}
+
 	return false;
 }
 
@@ -2561,7 +2872,7 @@ void print_help() {
 	"To set the library type use --lib_type= (or -lt=) and one option between [static, shared]. Note that on windows this option is omitted as a .lib and .dll will be created. \n"
 	"If no options are passed, it will be assumed -bt=debug and -lt=shared. \n"
 	"\n"
-	"-- BUILDING ---"
+	"-- BUILDING --- \n"
 	"To build anything, use the option --build= (or -b=) and an action between [engine, tools, examples, tests, all, project]. \n"
 	"engine will compile the engine (only). tools will compile atlas_generator and font_generator (only). test will compile the examples and the engine (only). all will compile all previous ones. \n"
 	"If no option is passed, it will be assumed -b=all. \n"
@@ -2572,14 +2883,14 @@ void print_help() {
 	"		-I adds a include path. This option can be used as many times as needed. \n"
 	"		--name= Sets the name of the application. If not set, the result will be rde_debug or rde_release \n"
 	"	- android: same as desktop and:\n"
-	"		--clean force gradle clean before building \n"
-	"		--sdk= sets the path to the sdk (required) \n"
-	"		--ndk= sets the path to the ndk (required) \n"
+	"		--rde_android= path to RDEAndroid project (required) \n"
+	"		--sdk_build_tools= sets the path to the sdk build tools, including version (required) \n"
 	"		--sign_path= sets the path to a file which will contain the jks file path, the password and the alias (requiered if signing is needed). The format of this file is: \n"
 	"				jks_path = PATH_TO_JKS_FILE \n"
 	"				password_path = PATH_TO_FILE_WITH_PASSWORD \n"
 	"				alias_path = PATH_TO_FILE_WITH_ALIAS \n"
 	"		--assets_path= path to the folder with all of the assets. This will be included directly on the build \n"
+	"		--clean force gradle clean before building \n"
 	"\n"
 	"-- MODULES ---\n"
 	"RDE is composed of several modules, which are completely optional to use and include in your library. Those modules are: \n"
@@ -2614,6 +2925,15 @@ void print_help() {
 	printf("%s", _help_message);
 }
 
+#define REMOVE_QUOTES(_str)										\
+	if(string_starts_with(_str, "\"")) {						\
+		_str += 1; 												\
+	}															\
+																\
+	if(string_ends_with(_str, "\"")) {							\
+		_str[strlen(_str) - 1] = 0;								\
+	}
+
 void parse_arguments(int _argc, char** _argv) {
 
 	if(_argc < 2) {
@@ -2630,7 +2950,7 @@ void parse_arguments(int _argc, char** _argv) {
 		char* _command = strtok(_command_copy, _delimiter);
 		
 		if(strcmp(_command, "-b") == 0 || strcmp(_command, "--build") == 0) {
-			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			char* _value = strrchr(_argv[_i], _delimiter_2);
 			memset(build, 0 , MAX_SIZE_FOR_OPTIONS);
 
 			if(_value == NULL) {
@@ -2657,12 +2977,14 @@ void parse_arguments(int _argc, char** _argv) {
 			}
 
 			_value++;
+
+			REMOVE_QUOTES(_value)
 			strcat(build, _value);
 		} 
 		
 		
 		else if(strcmp(_command, "-bt") == 0 || strcmp(_command, "--build_type") == 0) {
-			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			char* _value = strrchr(_argv[_i], _delimiter_2);
 			memset(build_type, 0 , MAX_SIZE_FOR_OPTIONS);
 
 			if(_value == NULL) {
@@ -2671,12 +2993,14 @@ void parse_arguments(int _argc, char** _argv) {
 			}
 
 			_value++;
+
+			REMOVE_QUOTES(_value)
 			strcat(build_type, _value);
 		} 
 		
 		
 		else if(strcmp(_command, "-lt") == 0 || strcmp(_command, "--lib_type") == 0) {
-			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			char* _value = strrchr(_argv[_i], _delimiter_2);
 			memset(lib_type, 0 , MAX_SIZE_FOR_OPTIONS);
 
 			if(_value == NULL) {
@@ -2685,6 +3009,8 @@ void parse_arguments(int _argc, char** _argv) {
 			}
 
 			_value++;
+
+			REMOVE_QUOTES(_value)
 			strcat(lib_type, _value);
 		} 
 		
@@ -2699,6 +3025,8 @@ void parse_arguments(int _argc, char** _argv) {
 			}
 
 			_value += 1; // remove = chars
+			
+			REMOVE_QUOTES(_value)
 			if(_value[0] != '[' || _value[strlen(_value) - 1] != ']' ) {
 				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for -m or --module must be a list like this '[module_0,module_1,...] must start with '[' and end with ']''\n");
 				exit(-1);
@@ -2740,7 +3068,7 @@ void parse_arguments(int _argc, char** _argv) {
 		}
 		
 		else if(strcmp(_command, "--platform") == 0) {
-			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			char* _value = strrchr(_argv[_i], _delimiter_2);
 			memset(platform, 0 , MAX_SIZE_FOR_OPTIONS);
 
 			if(_value == NULL) {
@@ -2767,13 +3095,15 @@ void parse_arguments(int _argc, char** _argv) {
 			}
 
 			_value++;
+
+			REMOVE_QUOTES(_value)
 			strcat(platform, _value);
 		}
 		
 
 		
 		else if (strcmp(_command, "-t") == 0 || strcmp(_command, "--tool") == 0) {
-			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			char* _value = strrchr(_argv[_i], _delimiter_2);
 			memset(tool, 0 , MAX_SIZE_FOR_OPTIONS);
 
 			if (_value == NULL) {
@@ -2800,6 +3130,8 @@ void parse_arguments(int _argc, char** _argv) {
 			}
 
 			_value++;
+
+			REMOVE_QUOTES(_value)
 			strcat(tool, _value);
 		} 
 		
@@ -2819,16 +3151,18 @@ void parse_arguments(int _argc, char** _argv) {
 
 		else if(string_starts_with(_command, "-L")) {
 			_command += 2;
+			REMOVE_QUOTES(_command)
 			arrput(project_link_paths, dyn_str_new(_command));
 		}
 
 		else if(string_starts_with(_command, "-I")) {
 			_command += 2;
+			REMOVE_QUOTES(_command)
 			arrput(project_include_paths, dyn_str_new(_command));
 		}
 
 		else if(string_starts_with(_command, "--name")) {
-			const char* _value = strrchr(_argv[_i], _delimiter_2);
+			char* _value = strrchr(_argv[_i], _delimiter_2);
 			memset(project_name, 0 , MAX_SIZE_FOR_OPTIONS);
 
 			if(_value == NULL) {
@@ -2837,7 +3171,98 @@ void parse_arguments(int _argc, char** _argv) {
 			}
 
 			_value++;
+
+			REMOVE_QUOTES(_value)
 			strcat(project_name, _value);
+		}
+
+		else if(string_starts_with(_command, "--rde_android")) {
+			char* _value = strrchr(_argv[_i], _delimiter_2);
+			memset(android_rde_android, 0 , MAX_SIZE_FOR_OPTIONS);
+
+			if(_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for --rde_android incorrect\n");
+				exit(-1);
+			}
+
+			_value++;
+
+			REMOVE_QUOTES(_value)
+			strcat(android_rde_android, _value);
+
+			WINDOWS_TO_UNIX_FILE_PATH(android_rde_android)
+			ENSURE_PATH_ENDED_ON_SLASH(android_rde_android)
+		}
+
+		else if(string_starts_with(_command, "--sdk_build_tools")) {
+			char* _value = strrchr(_argv[_i], _delimiter_2);
+			memset(android_sdk_build_tools, 0 , MAX_SIZE_FOR_OPTIONS);
+
+			if(_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for --sdk_build_tools incorrect\n");
+				exit(-1);
+			}
+
+			_value++;
+
+			REMOVE_QUOTES(_value)
+			strcat(android_sdk_build_tools, _value);
+
+			WINDOWS_TO_UNIX_FILE_PATH(android_sdk_build_tools)
+			ENSURE_PATH_ENDED_ON_SLASH(android_sdk_build_tools)
+		}
+
+		else if(string_starts_with(_command, "--ndk")) {
+			char* _value = strrchr(_argv[_i], _delimiter_2);
+			memset(android_ndk, 0 , MAX_SIZE_FOR_OPTIONS);
+
+			if(_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for --ndk incorrect\n");
+				exit(-1);
+			}
+
+			_value++;
+
+			REMOVE_QUOTES(_value)
+			strcat(android_ndk, _value);
+
+			WINDOWS_TO_UNIX_FILE_PATH(android_ndk)
+			ENSURE_PATH_ENDED_ON_SLASH(android_ndk)
+		}
+
+		else if(string_starts_with(_command, "--assets_path")) {
+			char* _value = strrchr(_argv[_i], _delimiter_2);
+			memset(android_assets_path, 0 , MAX_SIZE_FOR_OPTIONS);
+
+			if(_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for --assets_path incorrect\n");
+				exit(-1);
+			}
+
+			_value++;
+
+			REMOVE_QUOTES(_value)
+			strcat(android_assets_path, _value);
+
+			WINDOWS_TO_UNIX_FILE_PATH(android_assets_path)
+			ENSURE_PATH_ENDED_ON_SLASH(android_assets_path)
+		}
+
+		else if(string_starts_with(_command, "--sign_path")) {
+			char* _value = strrchr(_argv[_i], _delimiter_2);
+			memset(android_sign, 0 , MAX_SIZE_FOR_OPTIONS);
+
+			if(_value == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Argument for --sign_path incorrect\n");
+				exit(-1);
+			}
+
+			_value++;
+
+			REMOVE_QUOTES(_value)
+			strcat(android_sign, _value);
+
+			WINDOWS_TO_UNIX_FILE_PATH(android_sign)
 		}
 
 		else {
@@ -2899,16 +3324,13 @@ void load_paths(char** _argv) {
 	memset(working_dir, 0, MAX_PATH);
 
 	char _path_save[PATH_MAX];
+	memset(_path_save, 0, MAX_PATH);
 	char* _path_ptr;
 
-	if(!(_path_ptr = strrchr(_argv[0], '/')))
+	if(!(_path_ptr = strrchr(_argv[0], '/'))) {
 		getcwd(working_dir, sizeof(working_dir));
-	else {
-		*_path_ptr = '\0';
-		getcwd(_path_save, sizeof(_path_save));
-		chdir(_argv[0]);
+	} else {
 		getcwd(working_dir, sizeof(working_dir));
-		chdir(_path_save);
 	}
 
 #if _WIN32
@@ -2933,27 +3355,16 @@ void load_paths(char** _argv) {
 	int _index_to_start_ignoring = strlen(builder_exe_full_path_dir) - strlen(_split_ptr) + 1;
 	builder_exe_full_path_dir[_index_to_start_ignoring] = '\0';
 
-	for(size_t _i = 0; _i < strlen(builder_exe_full_path_dir); _i++) {
-		if(builder_exe_full_path_dir[_i] == '\\') {
-			builder_exe_full_path_dir[_i] = '/';
-		}
-	}
+	WINDOWS_TO_UNIX_FILE_PATH(builder_exe_full_path_dir)
 
-	for(size_t _i = 0; _i < strlen(builder_exe_full_path); _i++) {
-		if(builder_exe_full_path[_i] == '\\') {
-			builder_exe_full_path[_i] = '/';
-		}
-	}
+	WINDOWS_TO_UNIX_FILE_PATH(builder_exe_full_path)
 
-	for(size_t _i = 0; _i < strlen(working_dir); _i++) {
-		if(working_dir[_i] == '\\') {
-			working_dir[_i] = '/';
-		}
-	}
+	WINDOWS_TO_UNIX_FILE_PATH(working_dir)
+	ENSURE_PATH_ENDED_ON_SLASH(working_dir)
 
-	if(working_dir[strlen(working_dir)] != '/') {
-		working_dir[strlen(working_dir)] = '/';
-	}
+	rde_log_level(RDE_LOG_LEVEL_INFO, "builder_exe_full_path = %s", builder_exe_full_path);
+	rde_log_level(RDE_LOG_LEVEL_INFO, "builder_exe_full_path_dir = %s", builder_exe_full_path_dir);
+	rde_log_level(RDE_LOG_LEVEL_INFO, "working_dir = %s", working_dir);
 }
 
 int main(int _argc, char** _argv) {
@@ -2972,9 +3383,13 @@ int main(int _argc, char** _argv) {
 	project_link_paths = NULL;
 	project_flags = NULL;
 	memset(project_name, 0, MAX_PATH);
-	memset(android_sdk, 0, MAX_PATH);
+	memset(android_sdk_build_tools, 0, MAX_PATH);
 	memset(android_ndk, 0, MAX_PATH);
 	memset(android_sign, 0, MAX_PATH);
+	memset(android_rde_android, 0, MAX_PATH);
+	memset(android_pass_path, 0, MAX_PATH);
+	memset(android_jks_path, 0, MAX_PATH);
+	memset(android_alias, 0, MAX_PATH);
 	android_clean = false;
 
 	parse_arguments(_argc, _argv);
