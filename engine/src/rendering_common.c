@@ -5,59 +5,14 @@
 #include <EGL/egl.h>
 #endif
 
-#define RDE_SHADOW_MAP_SIZE 1024
 
-#if IS_MOBILE()
-PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMGPROC glFramebufferTexture2DMultisampleEXT = NULL;
-PFNGLRENDERBUFFERSTORAGEMULTISAMPLEIMGPROC glRenderbufferStorageMultisampleEXT = NULL;
-PFNGLDISCARDFRAMEBUFFEREXTPROC glDiscardFramebufferEXT = NULL;
-#endif
 
-typedef struct {
-	size_t number_of_drawcalls;
-} rde_rendering_statistics;
 
-static float FRAMEBUFFER_QUAD_DATA[] = {
-	// positions   // texCoords
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	-1.0f, -1.0f,  0.0f, 0.0f,
-	 1.0f, -1.0f,  1.0f, 0.0f,
 
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	 1.0f, -1.0f,  1.0f, 0.0f,
-	 1.0f,  1.0f,  1.0f, 1.0f
-};
 
-#ifdef RDE_RENDERING_MODULE
-rde_render_texture* DEFAULT_RENDER_TEXTURE = NULL;
-rde_render_texture* current_render_texture = NULL;
-#endif
 
-#define RDE_CHECK_SHADER_COMPILATION_STATUS(_program_id, _compiled, _path)												\
-	if(!_compiled) {																									\
-		char _infolog[1024];																							\
-		glGetShaderInfoLog(_program_id, 1024, NULL, _infolog);															\
-		glDeleteShader(_program_id);																					\
-		rde_critical_error(true, "Shader(%d) '%s' compile failed with error: \n%s \n", _program_id, _path, _infolog);	\
-		return NULL;																									\
-	}
 
-static rde_camera* current_drawing_camera = NULL;
-static rde_window* current_drawing_window = NULL;
-static mat4 projection_matrix;
-rde_rendering_statistics statistics;
 
-void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
-rde_vec_2F rde_inner_rendering_get_aspect_ratio();
-void rde_inner_rendering_set_rendering_configuration(rde_window* _window);
-rde_texture_parameters rde_innner_rendering_validate_texture_parameters(rde_texture_parameters* _params);
-void rde_inner_rendering_flush_render_texture_3d();
-void rde_inner_rendering_destroy_current_antialiasing_config();
-void rde_inner_rendering_create_shadows();
-void rde_inner_rendering_draw_scene_shadows(rde_window* _window, rde_camera* _camera);
-void rde_inner_rendering_destroy_shadows();
-void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window);
-void rde_inner_engine_on_render(float _dt, rde_window* _window);
 
 rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);

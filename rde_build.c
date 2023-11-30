@@ -189,7 +189,7 @@ void rde_log_color(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 			#endif
 		} break;
 	}
-
+	
 	va_list _args;
 	va_start(_args, _fmt);
 	vfprintf(stdout, _fmt, _args);
