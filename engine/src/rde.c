@@ -117,19 +117,6 @@ void rde_inner_set_posix_signal_handler();
 void rde_critical_error(bool _condition, const char* _fmt, ...);
 #endif
 
-// Follow order
-// math
-// util
-// window
-// rendering_common
-// rendering_2d
-// rendering_3d
-// physics
-// events
-// audio
-// mobile
-// engine
-
 // TODO: Not to forget
 // 		- [DONE] Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
 //		  the format is BGRA instead of RGBA (problem solved by first method) and the second fixes
@@ -398,6 +385,7 @@ size_t current_frame = 0;
 /// *                                INNER STRUCT DEFINITIONS                         			  *
 /// *************************************************************************************************
 
+/// File System
 struct rde_file_handle {
 	char file_path[RDE_MAX_PATH];
 	SDL_RWops* sdl_handle;
@@ -406,6 +394,7 @@ struct rde_file_handle {
 	unsigned char* bytes_allocated;
 };
 
+/// Window
 struct rde_window {
 	SDL_Window* sdl_window;
 	SDL_GLContext sdl_gl_context;
@@ -416,7 +405,8 @@ struct rde_window {
 	rde_vec_2F mouse_scroll;
 };
 
-	
+
+/// Rendering
 #ifdef RDE_RENDERING_MODULE
 struct rde_shader {
 	GLuint vertex_program_id;
@@ -520,9 +510,9 @@ struct rde_mesh {
 	
 	uint vao;
 	uint vbo[4]; // 0 -> positions (static), 
-	// 1 -> normals (static), 
-	// 2 -> texture coords (static)
-	// 3 -> transforms to render (dynamic)
+				 // 1 -> normals (static), 
+				 // 2 -> texture coords (static)
+				 // 3 -> transforms to render (dynamic)
 	rde_material material;
 };
 	
@@ -602,7 +592,8 @@ typedef struct {
 #endif
 
 #endif
-	
+
+/// Audio
 #ifdef RDE_AUDIO_MODULE
 struct rde_sound {
 	bool used;
@@ -617,6 +608,7 @@ struct rde_sound {
 };
 #endif
 
+/// Error
 #if defined(RDE_ERROR_MODULE) && !IS_WINDOWS() && !IS_ANDROID()
 typedef struct {
 	    char* buf;
@@ -630,6 +622,7 @@ typedef struct {
 	} rde_posix_stacktrace;
 #endif
 
+/// Engine
 struct rde_engine {
 	float delta_time;
 	float fixed_delta_time;
