@@ -558,8 +558,7 @@ void rde_jolt_body_set_degrees_of_freedom(rde_jolt_body* _body, RDE_JOLT_BODY_DO
 
 bool rde_jolt_body_is_sleeping(rde_jolt_body* _body) {
 	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
-	rde_log_level(RDE_LOG_LEVEL_WARNING, "%s is not implemented yet \n", __FUNCTION__);
-	return false;
+	return !_body->inner_body->IsActive();
 }
 
 float rde_jolt_body_get_gravity_factor(rde_jolt_body* _body) {
