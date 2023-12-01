@@ -1392,9 +1392,9 @@ char* rde_inner_strtokk(char* _string, const char* _strf);
 rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas);
 rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_path, rde_texture* _atlas);
 #endif
-static const char* rde_inner_file_system_file_mode_to_char(const RDE_FILE_MODE_ _mode);
-static void rde_inner_file_system_free_text_allocation(rde_file_handle* _handler);
-static void rde_inner_file_system_check_file_mode_or_convert(rde_file_handle* _handler, RDE_FILE_MODE_ _expected);
+const char* rde_inner_file_system_file_mode_to_char(const RDE_FILE_MODE_ _mode);
+void rde_inner_file_system_free_text_allocation(rde_file_handle* _handler);
+void rde_inner_file_system_check_file_mode_or_convert(rde_file_handle* _handler, RDE_FILE_MODE_ _expected);
 
 /// ******************************************* WINDOW ***********************************************
 
@@ -2785,7 +2785,7 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 }
 #endif
 
-static const char* rde_inner_file_system_file_mode_to_char(const RDE_FILE_MODE_ _mode) {
+const char* rde_inner_file_system_file_mode_to_char(const RDE_FILE_MODE_ _mode) {
 	switch (_mode) {
 		case RDE_FILE_MODE_READ: return "rb";
 		case RDE_FILE_MODE_WRITE: return "w";
@@ -2797,7 +2797,7 @@ static const char* rde_inner_file_system_file_mode_to_char(const RDE_FILE_MODE_ 
 	return "rb";
 }
 
-static void rde_inner_file_system_free_text_allocation(rde_file_handle* _handler) {
+void rde_inner_file_system_free_text_allocation(rde_file_handle* _handler) {
 	if(_handler->text_allocated != NULL) {
 		free(_handler->text_allocated);
 		_handler->text_allocated = NULL;
@@ -2809,7 +2809,7 @@ static void rde_inner_file_system_free_text_allocation(rde_file_handle* _handler
 	}
 }
 
-static void rde_inner_file_system_check_file_mode_or_convert(rde_file_handle* _handler, RDE_FILE_MODE_ _expected) {
+void rde_inner_file_system_check_file_mode_or_convert(rde_file_handle* _handler, RDE_FILE_MODE_ _expected) {
 	if(_handler->file_mode == _expected) return;
 	SDL_RWclose(_handler->sdl_handle);
 	rde_inner_file_system_free_text_allocation(_handler);
@@ -7681,7 +7681,7 @@ ANativeWindow* rde_android_get_native_window() {
 
 #else
 
-	static void rde_inner_buf_printf(FILE* _f, const char* _fmt, ...) {
+	void rde_inner_buf_printf(FILE* _f, const char* _fmt, ...) {
 	    va_list _args;
 	    va_start(_args, _fmt);
 	    vfprintf(_f, _fmt, _args);
