@@ -406,8 +406,8 @@ typedef unsigned int uint;
 	_block_of_code														\
 	rde_rendering_3d_end_drawing();
 
-#define rde_render_2d(_window, _camera, _block_of_code)	\
-	rde_rendering_2d_begin_drawing(_camera, _window);	\
+#define rde_render_2d(_window, _camera, _is_hud, _block_of_code)	\
+	rde_rendering_2d_begin_drawing(_camera, _window, _is_hud);	\
 	_block_of_code										\
 	rde_rendering_2d_end_drawing();
 
@@ -1622,7 +1622,7 @@ RDE_FUNC rde_shader_data rde_rendering_shader_get_data(rde_shader* _shader);
 RDE_FUNC rde_shader* rde_rendering_shader_get_by_name(const char* _name);
 RDE_FUNC void rde_rendering_shader_unload(rde_shader* _shader);
 
-RDE_FUNC rde_texture* rde_rendering_texture_load(const char* _file_path, rde_texture_parameters* _params); // Pass NULL to params for default parameters
+RDE_FUNC rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_texture_parameters* _params); // Pass NULL to params for default parameters
 RDE_FUNC rde_texture* rde_rendering_texture_text_load(const char* _file_path);
 RDE_FUNC rde_texture_data rde_rendering_texture_get_data(rde_texture* _texture);
 RDE_FUNC void rde_rendering_texture_unload(rde_texture* _texture);

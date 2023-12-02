@@ -1782,12 +1782,12 @@ bool compile_windows_rde() {
 			if (strcmp(build_type, DEBUG_STR) == 0) {
 				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
 				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/debug/examples/SDL2.dll")
-				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/hub_assets/")
+				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/")
 				COPY_FOLDER("engine/shaders", "build/windows/debug/examples/")
 			} else {
 				COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
 				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/release/examples/SDL2.dll")
-				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/hub_assets/")
+				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/")
 				COPY_FOLDER("engine/shaders", "build/windows/release/examples/")
 			}
 		})

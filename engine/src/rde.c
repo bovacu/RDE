@@ -1432,7 +1432,7 @@ rde_window* rde_window_create_wasm_window(size_t _free_window_index);
 void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
 rde_vec_2F rde_inner_rendering_get_aspect_ratio();
 void rde_inner_rendering_set_rendering_configuration(rde_window* _window);
-rde_texture_parameters rde_innner_rendering_validate_texture_parameters(rde_texture_parameters* _params);
+rde_texture_parameters rde_innner_rendering_validate_texture_parameters(const rde_texture_parameters* _params);
 void rde_inner_rendering_flush_render_texture_3d();
 void rde_inner_rendering_destroy_current_antialiasing_config();
 void rde_inner_rendering_create_shadows();
@@ -5072,7 +5072,7 @@ void rde_rendering_shader_unload(rde_shader* _shader) {
 	_shader->compiled_program_id = -1;
 }
 
-rde_texture_parameters rde_innner_rendering_validate_texture_parameters(rde_texture_parameters* _params) {
+rde_texture_parameters rde_innner_rendering_validate_texture_parameters(const rde_texture_parameters* _params) {
 	rde_texture_parameters _tex_params = _params == NULL ? RDE_DEFAULT_TEXTURE_PARAMETERS : *_params;
 #define RDE_TEXTURE_PARAM_CHECKER(_field, _min, _max, _warn_text) 																								\
 	if(_tex_params._field < _min || _tex_params._field > _max) {																								\
@@ -5089,7 +5089,7 @@ rde_texture_parameters rde_innner_rendering_validate_texture_parameters(rde_text
 	return _tex_params;
 }
 
-rde_texture* rde_rendering_texture_load(const char* _file_path, rde_texture_parameters* _params) {
+rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_texture_parameters* _params) {
 	const char* _extension = rde_util_file_get_name_extension(_file_path);
 	char _extension_lower[10];
 	memset(_extension_lower, 0, 10);
