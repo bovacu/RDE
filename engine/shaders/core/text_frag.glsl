@@ -1,10 +1,6 @@
 #version 330 core
 
-in vec2 uv;
-in vec4 color;
-
-uniform sampler2D tex;
-out vec4 out_color;
+header_2d_frag
 
 void main(void) {
 	float d = texture(tex, uv).r;

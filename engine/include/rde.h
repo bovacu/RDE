@@ -1752,6 +1752,8 @@ RDE_FUNC bool rde_file_exists(const char* _file_path);
 RDE_FUNC void rde_file_delete(const char* _file_path);
 RDE_FUNC void rde_file_move(const char* _file_path, const char* _new_file_path);
 RDE_FUNC void rde_file_close(rde_file_handle* _file_handler);
+RDE_FUNC void rde_file_free_read_text(rde_file_handle* _file_handle);
+RDE_FUNC void rde_file_free_read_bytes(rde_file_handle* _file_handle);
 
 #if IS_ANDROID()
 RDE_FUNC ANativeWindow* rde_android_get_native_window();
