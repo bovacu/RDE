@@ -150,8 +150,8 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- [DONE] Line rendering
 //
 //		- Shaders:
-//			- Create "header" file that will contain all of the common uniforms and variables that are passed to every shader
-//			- Pass dt as a uniform
+//			- [DONE] Create "header" file that will contain all of the common uniforms and variables that are passed to every shader
+//			- [DONE] Pass dt and mouse pos as a uniform
 //
 //		- Other:
 //			- [DONE] Render Textures
@@ -1567,10 +1567,6 @@ void rde_inner_engine_on_event() {
 			// TODO: Use the if statement on the following event types:
 			//			- SDL_TextEditingEvent
 			//			- SDL_TextInputEvent
-			//			- SDL_MouseMotionEvent
-			//			- SDL_MouseWheelEvent
-			//			- SDL_TouchFingerEvent
-			//			- SDL_DropEvent
 			//
 			//		Also, but without the if, still need to implement:
 			//			- SDL_ControllerAxisEvent
