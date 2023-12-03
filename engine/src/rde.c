@@ -395,6 +395,7 @@ struct rde_transform {
 	rde_vec_3F scale;
 	int parent;
 	int* children;
+	int index;
 	bool dirty;
 };
 
@@ -653,6 +654,7 @@ struct rde_engine {
 		
 	rde_window* windows;
 	rde_transform* transforms;
+	mat4* world_transforms;
 	int last_transform_used;
 		
 #if IS_ANDROID()
@@ -718,6 +720,7 @@ rde_transform rde_struct_create_transform() {
 	_t.parent = RDE_INT_MIN;
 	_t.dirty = false;
 	_t.children = NULL;
+	_t.index = RDE_INT_MIN;
 	return _t;
 }
 
@@ -1174,9 +1177,13 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.init_info.heap_allocs_config.max_number_of_shaders += RDE_DEFAULT_SHADERS_AMOUNT;
 
 	_e.transforms = NULL;
+	_e.world_transforms = NULL;
 	stbds_arrsetcap(_e.transforms, 1000);
+	stbds_arrsetcap(_e.world_transforms, 1000);
+	stbds_arraddn(_e.world_transforms, 1000);
 	for(size_t _i = 0; _i < 1000; _i++) {
 		stbds_arrput(_e.transforms, rde_struct_create_transform());
+		glm_mat4_identity(_e.world_transforms[_i]);
 	}
 	_e.last_transform_used = -1;
 
@@ -1673,82 +1680,124 @@ rde_display_info* rde_engine_get_available_displays() {
 	return NULL;
 }
 
-void rde_engine_transform_get_local_matrix(rde_transform* _t, mat4 _mat) {
-		vec3 _inv_scale;
-	    _inv_scale[0] = (_t->scale.x == 0.0f ? 0.0f : 1.0f / _t->scale.x);
-	    _inv_scale[1] = (_t->scale.y == 0.0f ? 0.0f : 1.0f / _t->scale.y);
-	    _inv_scale[2] = (_t->scale.z == 0.0f ? 0.0f : 1.0f / _t->scale.z);
+// void rde_engine_transform_get_inverse_matrix(rde_transform* _t, mat4 _mat) {
+// 		vec4 _inv_scale;
+// 	    _inv_scale[0] = (_t->scale.x == 0.0f ? 0.0f : 1.0f / _t->scale.x);
+// 	    _inv_scale[1] = (_t->scale.y == 0.0f ? 0.0f : 1.0f / _t->scale.y);
+// 	    _inv_scale[2] = (_t->scale.z == 0.0f ? 0.0f : 1.0f / _t->scale.z);
+
+// 		glm_mat4_identity(_mat);
+
+// 		mat4 _scale_mat;
+// 		glm_mat4_identity(_scale_mat);
+// 		glm_scale(_scale_mat, _inv_scale);
+
+// 		mat4 _rotation_mat;
+// 		glm_mat4_identity(_rotation_mat);
+// 		vec3 _angles;
+// 		_angles[0] = (rde_math_degrees_to_radians(_t->rotation.x) == 0.0f ? 0.0f : 1.0f / rde_math_degrees_to_radians(_t->rotation.x));
+// 		_angles[1] = (rde_math_degrees_to_radians(_t->rotation.y) == 0.0f ? 0.0f : 1.0f / rde_math_degrees_to_radians(_t->rotation.y));
+// 		_angles[2] = (rde_math_degrees_to_radians(_t->rotation.z) == 0.0f ? 0.0f : 1.0f / rde_math_degrees_to_radians(_t->rotation.z));
+// 		glm_rotate_x(_rotation_mat, _angles[0], _rotation_mat);
+// 		glm_rotate_y(_rotation_mat, _angles[1], _rotation_mat);
+// 		glm_rotate_z(_rotation_mat, _angles[2], _rotation_mat);
+
+// 		mat4 _position_mat;
+// 		glm_mat4_identity(_position_mat);
+// 		glm_translate(_position_mat, (vec3) { -_t->position.x, -_t->position.y, -_t->position.z });
+
+// 		glm_mat4_mul(_mat, _rotation_mat, _mat);
+// 		glm_mat4_mul(_mat, _position_mat, _mat);
+// 		glm_mat4_mul(_mat, _scale_mat, _mat);
+// }
+
+void rde_engine_transform_get_matrix(rde_transform* _t, mat4 _mat) {
+		vec3 _scale;
+	    _scale[0] = _t->scale.x;
+	    _scale[1] = _t->scale.y;
+	    _scale[2] = _t->scale.z;
 
 		glm_mat4_identity(_mat);
 
 		mat4 _scale_mat;
 		glm_mat4_identity(_scale_mat);
-
-		_scale_mat[0][0] = _inv_scale[0];
-		_scale_mat[1][1] = _inv_scale[1];
-		_scale_mat[2][2] = _inv_scale[2];
+		glm_scale(_scale_mat, _scale);
 
 		mat4 _rotation_mat;
 		glm_mat4_identity(_rotation_mat);
-
-		rde_quaternion _q = rde_math_euler_degrees_to_quaternion(_t->rotation);
-		versor _glm_q;
-		glm_quat(_glm_q, _q.x, _q.y, _q.z, _q.w);
-		versor _glm_inv_q;
-		glm_quat_inv(_glm_q, _glm_inv_q);
-		glm_quat_mat4(_glm_inv_q, _rotation_mat);
+		glm_rotate_x(_rotation_mat, rde_math_degrees_to_radians(_t->rotation.x), _rotation_mat);
+		glm_rotate_y(_rotation_mat, rde_math_degrees_to_radians(_t->rotation.y), _rotation_mat);
+		glm_rotate_z(_rotation_mat, rde_math_degrees_to_radians(_t->rotation.z), _rotation_mat);
 
 		mat4 _position_mat;
 		glm_mat4_identity(_position_mat);
-		_position_mat[3][0] = -_t->position.x;
-		_position_mat[3][1] = -_t->position.y;
-		_position_mat[3][2] = -_t->position.z;
-
-		glm_mat4_mul(_mat, _scale_mat, _mat);
-		glm_mat4_mul(_mat, _rotation_mat, _mat);
-		glm_mat4_mul(_mat, _position_mat, _mat);
-}
-
-void rde_engine_transform_glm_mat4_to_rde_data(rde_transform* _transform, mat4 _mat) {
-	vec4 _position;
-	mat4 _rotationMat;
-	versor _quaternion;
-	vec4 _scale;
-	glm_decompose(_mat, _position, _rotationMat, _scale);
-	glm_mat4_quat(_rotationMat, _quaternion);
-
-	rde_vec_3F _rotation = rde_math_quaternion_to_euler_degrees((rde_quaternion) { _quaternion[0], _quaternion[1], _quaternion[2], _quaternion[3] });
-	_transform->position = (rde_vec_3F) { _position[0], _position[1], _position[2] };
-	_transform->rotation = (rde_vec_3F) { _rotation.x, _rotation.y, _rotation.z };
-	_transform->scale = (rde_vec_3F) { _scale[0], _scale[1], _scale[2] };
-}
-
-void rde_engine_transform_parse_children(rde_transform* _transform) {
-	mat4 _t_local_matrix;
-	rde_engine_transform_get_local_matrix(_transform, _t_local_matrix);
-	
-	for(size_t _i = 0; _i < stbds_arrlenu(_transform->children); _i++) {
-		rde_transform* _child = &ENGINE.transforms[_transform->children[_i]];
-		mat4 _child_local_matrix;
-		rde_engine_transform_get_local_matrix(_child, _child_local_matrix);
-		glm_mat4_mul(_child_local_matrix, _t_local_matrix, _child_local_matrix);
-		rde_engine_transform_get_local_matrix(_child, _child_local_matrix);
-	
-		if(_child->children != NULL) {
-			rde_engine_transform_parse_children(_child);
-			_child->dirty = false;
+		
+		if(_t->parent != -1) {
+			glm_translate(_mat, (vec3) { _t->position.x, _t->position.y, _t->position.z });
+			glm_mat4_mul(_mat, _rotation_mat, _mat);
+			glm_mat4_mul(_mat, _scale_mat, _mat);
+		} else {
+			glm_translate(_position_mat, (vec3) { _t->position.x, _t->position.y, _t->position.z });
+			glm_mat4_mul(_mat, _position_mat, _mat);
+			glm_mat4_mul(_mat, _scale_mat, _mat);
+			glm_mat4_mul(_mat, _rotation_mat, _mat);
+			glm_translate(_position_mat, (vec3) { -_t->position.x, -_t->position.y, -_t->position.z });
+			glm_mat4_mul(_mat, _position_mat, _mat);
 		}
+}
+
+// void rde_engine_transform_glm_mat4_to_rde_data(rde_transform* _transform, mat4 _mat) {
+// 	vec4 _position;
+// 	mat4 _rotationMat;
+// 	versor _quaternion;
+// 	vec4 _scale;
+// 	glm_decompose(_mat, _position, _rotationMat, _scale);
+// 	glm_mat4_quat(_rotationMat, _quaternion);
+
+// 	rde_vec_3F _rotation = rde_math_quaternion_to_euler_degrees((rde_quaternion) { _quaternion[0], _quaternion[1], _quaternion[2], _quaternion[3] });
+// 	_transform->position = (rde_vec_3F) { _position[0], _position[1], _position[2] };
+// 	_transform->rotation = (rde_vec_3F) { _rotation.x, _rotation.y, _rotation.z };
+// 	_transform->scale = (rde_vec_3F) { _scale[0], _scale[1], _scale[2] };
+// }
+
+void rde_engine_transform_parse_parent(rde_transform* _transform, mat4 _mat) {
+	mat4 _p_local_matrix;
+	rde_engine_transform_get_matrix(&ENGINE.transforms[_transform->parent], _p_local_matrix);
+	
+	if(ENGINE.transforms[_transform->parent].parent > -1) {
+		rde_engine_transform_parse_parent(&ENGINE.transforms[_transform->parent], _p_local_matrix);
 	}
+
+	glm_mat4_mul(_p_local_matrix, _mat, _mat);
 }
 
 void rde_engine_transform_update() {
 	for(int _i = 0; _i <= ENGINE.last_transform_used; _i++) {
 		rde_transform* _t = &ENGINE.transforms[_i];
-		if(_t->children != NULL && _t->dirty) {
-			rde_log_level(RDE_LOG_LEVEL_INFO, "Here");
-			rde_engine_transform_parse_children(_t);
-			_t->dirty = false;
+		if(_t->parent > -1) {
+			int _parent_index = _t->parent;
+			bool _any_parent_dirty = false;
+			while(_parent_index != -1) {
+				rde_transform* _parent_t = &ENGINE.transforms[_parent_index];
+				_any_parent_dirty |= _parent_t->dirty;
+				_parent_index = _parent_t->parent;
+			}
+			
+			if(_any_parent_dirty || _t->dirty) {
+				mat4 _t_local_matrix;
+				rde_engine_transform_get_matrix(_t, _t_local_matrix);
+				rde_engine_transform_parse_parent(_t, _t_local_matrix);
+				glm_mat4_copy(_t_local_matrix, ENGINE.world_transforms[_t->index]);
+			}
+		} else if(_t->dirty) {
+			mat4 _t_local_matrix;
+			rde_engine_transform_get_matrix(_t, _t_local_matrix);
+			glm_mat4_copy(_t_local_matrix, ENGINE.world_transforms[_t->index]);
 		}
+	}
+
+	for(int _i = 0; _i <= ENGINE.last_transform_used; _i++) {
+		ENGINE.transforms[_i].dirty = false;
 	}
 }
 
@@ -2077,6 +2126,7 @@ rde_transform* rde_engine_transform_load() {
 		_t = &ENGINE.transforms[_i];
 		if(_t->parent == RDE_INT_MIN) {
 			_t->parent = -1;
+			_t->index = _i;
 			if(ENGINE.last_transform_used < _i) {
 				ENGINE.last_transform_used = _i;
 			}
@@ -2086,10 +2136,13 @@ rde_transform* rde_engine_transform_load() {
 
 	if(_t == NULL) {
 		int _transforms_size = stbds_arrlen(ENGINE.transforms);
+		stbds_arraddn(ENGINE.world_transforms, 1000);
 		for(int _i = 0; _i < 1000; _i++) {
 			stbds_arrput(ENGINE.transforms, rde_struct_create_transform());
+			glm_mat4_identity(ENGINE.world_transforms[_transforms_size + _i]);
 			if(_t == NULL) {
 				_t = &stbds_arrlast(ENGINE.transforms);
+				_t->index = _i + _transforms_size;
 				_t->parent = -1;
 				if(ENGINE.last_transform_used < _transforms_size + _i) {
 					ENGINE.last_transform_used = _transforms_size + _i;
@@ -2110,9 +2163,7 @@ rde_vec_3F  rde_engine_transform_get_position(rde_transform* _transform) {
 void rde_engine_transform_set_position(rde_transform* _transform, rde_vec_3F _position) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on set position");
 	_transform->position = _position;
-	if(_transform->children != NULL) {
-		_transform->dirty = true;
-	}
+	_transform->dirty = true;
 }
 
 rde_vec_3F  rde_engine_transform_get_rotation_degs(rde_transform* _transform) {
@@ -2123,9 +2174,7 @@ rde_vec_3F  rde_engine_transform_get_rotation_degs(rde_transform* _transform) {
 void rde_engine_transform_set_rotation(rde_transform* _transform, rde_vec_3F _rotation_degs) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on set rotation");
 	_transform->rotation = _rotation_degs;
-	if(_transform->children != NULL) {
-		_transform->dirty = true;
-	}
+	_transform->dirty = true;
 }
 
 rde_vec_3F  rde_engine_transform_get_scale(rde_transform* _transform) {
@@ -2136,9 +2185,7 @@ rde_vec_3F  rde_engine_transform_get_scale(rde_transform* _transform) {
 void rde_engine_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on set scale");
 	_transform->scale = _scale;
-	if(_transform->children != NULL) {
-		_transform->dirty = true;
-	}
+	_transform->dirty = true;
 }
 
 rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform) {
@@ -2152,41 +2199,24 @@ rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform) {
 
 void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _parent) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get position");
-	int _transform_index = -1;
-	int _parent_index = -1;
-
-	for(int _i = 0; _i < ENGINE.last_transform_used; _i++) {
-		rde_transform* _p =  &ENGINE.transforms[_i];
-		if(_parent == _p) {
-			_parent_index = _i;
-		}
-
-		if(_transform == _p) {
-			_transform_index = _i;
-		}
-
-		if(_transform_index != -1 && _parent_index != -1) {
-			break;
-		}
-	}
 
 	if(_parent != NULL) {
-		_transform->parent = _parent_index;
+		_transform->parent = _parent->index;
 		bool _has_child_already = false;
 		for(size_t _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
-			if(_parent->children[_i] == _transform_index) {
+			if(_parent->children[_i] == _transform->index) {
 				_has_child_already = true;
 				break;
 			}
 		}
 	
 		if(!_has_child_already) {
-			stbds_arrput(_parent->children, _transform_index);
+			stbds_arrput(_parent->children, _transform->index);
 		}
 	} else {
 		if(_transform->parent != -1) {
 			for(size_t _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
-				if(_parent->children[_i] == _transform_index) {
+				if(_parent->children[_i] == _transform->index) {
 					stbds_arrdel(_parent->children, _i);
 					break;
 				}
@@ -2294,8 +2324,6 @@ rde_vec_3F rde_math_quaternion_to_euler_degrees(rde_quaternion _quaternion) {
 
 	double _siny_cosp = 2 * (_quaternion.w * _quaternion.z + _quaternion.x * _quaternion.y);
 	double _cosy_cosp = 1 - 2 * (_quaternion.y * _quaternion.y + _quaternion.z * _quaternion.z);
-
-	rde_log_level(RDE_LOG_LEVEL_INFO, "RER: (%f, %f, %f)", atan2(_sinr_cosp, _cosr_cosp), asin(t2), atan2(_siny_cosp, _cosy_cosp));
 
 	return (rde_vec_3F) { 
 		rde_math_radians_to_degrees(atan2(_sinr_cosp, _cosr_cosp)),
@@ -6799,11 +6827,7 @@ void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_mesh* _mesh
 	rde_inner_rendering_try_create_batch_3d(_drawing_shader, _mesh);
 	rde_inner_rendering_try_flush_batch_3d(_drawing_shader, _mesh, _floats_per_matrix);
 	
-	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
-
-	rde_inner_rendering_transform_to_glm_mat4_3d(_transform, _transformation_matrix);
-
-	glm_mat4_copy(_transformation_matrix, _mesh->transformation_matrices[current_batch_3d.amount_of_models_per_draw]);
+	glm_mat4_copy(ENGINE.world_transforms[_transform->index], _mesh->transformation_matrices[current_batch_3d.amount_of_models_per_draw]);
 	current_batch_3d.amount_of_models_per_draw++;
 }
 
