@@ -39,6 +39,7 @@ void draw_grid(rde_camera* _camera, rde_window* _window) {
 
 #if !IS_ANDROID()
 #include "model_viewer.c"
+#include "hierarchy.c"
 // #include "performance_test.c"
 // #include "physics.c"
 #else
@@ -172,6 +173,13 @@ void on_imgui_hub_menu(float _dt) {
 		// 	}
 		// 	physics_init();
 		// }
+
+		if(rde_imgui_radio_button("Hierarchy", &_option, 3)) {
+			if(unload_callback != NULL) {
+				unload_callback();
+			}
+			hierarchy_init();
+		}
 #else
 		if(rde_imgui_radio_button("Android demo", &_option, 2)) {
 			if(unload_callback != NULL) {
