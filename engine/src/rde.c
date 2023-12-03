@@ -389,6 +389,15 @@ size_t current_frame = 0;
 /// *                                INNER STRUCT DEFINITIONS                         			  *
 /// *************************************************************************************************
 
+struct rde_transform {
+	rde_vec_3F position;
+	rde_vec_3F rotation;
+	rde_vec_3F scale;
+	int parent;
+	int* children;
+	bool dirty;
+};
+
 /// File System
 struct rde_file_handle {
 	char file_path[RDE_MAX_PATH];
@@ -643,6 +652,8 @@ struct rde_engine {
 	rde_event_func user_event_callback;
 		
 	rde_window* windows;
+	rde_transform* transforms;
+	size_t last_transform_used;
 		
 #if IS_ANDROID()
 	ANativeWindow* android_native_window;
@@ -698,6 +709,17 @@ struct rde_engine {
 /// *************************************************************************************************
 /// *                                INNER STRUCT CONSTRUCTORS                         			 *
 /// *************************************************************************************************
+
+rde_transform rde_struct_create_transform() {
+	rde_transform _t;
+	_t.position = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
+	_t.rotation = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
+	_t.scale = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+	_t.parent = RDE_INT_MIN;
+	_t.dirty = false;
+	_t.children = NULL;
+	return _t;
+}
 
 rde_probability rde_struct_create_probability() {
 	rde_probability _p;
@@ -819,7 +841,7 @@ rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type) {
 	_c.id = _camera_counter++;
 	_c.zoom = 1.f;
 	_c.fov = 45.f;
-	_c.transform = rde_struct_create_transform();
+	_c.transform = rde_engine_transform_load();
 	_c.camera_type = _camera_type;
 	_c.enabled = true;
 	_c.direction = (rde_vec_3F) { 0.0f, 0.0f, -1.0f };
@@ -848,20 +870,7 @@ rde_event rde_struct_create_event() {
 	return _e;
 }
 
-rde_transform rde_struct_create_transform() {
-	rde_transform _t;
-	_t.position.x = 0.f;
-	_t.position.y = 0.f;
-	_t.position.z = 0.f;
-	_t.rotation.x = 0.f;
-	_t.rotation.y = 0.f;
-	_t.rotation.z = 0.f;
-	_t.scale.x = 1.f;
-	_t.scale.y = 1.f;
-	_t.scale.z = 1.f;
-	_t.parent = NULL;
-	return _t;
-}
+
 
 rde_window rde_struct_create_window() {
 	rde_window _w;
@@ -1163,6 +1172,13 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 
 	_e.init_info = _engine_init_info;
 	_e.init_info.heap_allocs_config.max_number_of_shaders += RDE_DEFAULT_SHADERS_AMOUNT;
+
+	_e.transforms = NULL;
+	stbds_arrsetcap(_e.transforms, 1000);
+	for(size_t _i = 0; _i < 1000; _i++) {
+		stbds_arrput(_e.transforms, rde_struct_create_transform());
+	}
+	_e.last_transform_used = -1;
 
 #if IS_ANDROID()
 	_e.android_env = SDL_AndroidGetJNIEnv();
@@ -1531,8 +1547,7 @@ void rde_inner_engine_on_fixed_update(float _fixed_dt);
 #endif
 void rde_inner_engine_on_late_update(float _dt);
 void rde_inner_engine_sync_events();
-
-
+void rde_engine_transform_update();
 
 
 
@@ -1657,6 +1672,83 @@ rde_display_info* rde_engine_get_available_displays() {
 	return NULL;
 }
 
+void rde_engine_transform_get_local_matrix(rde_transform* _t, mat4 _mat) {
+		vec3 _inv_scale;
+	    _inv_scale[0] = (_t->scale.x == 0.0f ? 0.0f : 1.0f / _t->scale.x);
+	    _inv_scale[1] = (_t->scale.y == 0.0f ? 0.0f : 1.0f / _t->scale.y);
+	    _inv_scale[2] = (_t->scale.z == 0.0f ? 0.0f : 1.0f / _t->scale.z);
+
+		glm_mat4_identity(_mat);
+
+		mat4 _scale_mat;
+		glm_mat4_identity(_scale_mat);
+
+		_scale_mat[0][0] = _inv_scale[0];
+		_scale_mat[1][1] = _inv_scale[1];
+		_scale_mat[2][2] = _inv_scale[2];
+
+		mat4 _rotation_mat;
+		glm_mat4_identity(_rotation_mat);
+
+		rde_quaternion _q = rde_math_euler_degrees_to_quaternion(_t->rotation);
+		versor _glm_q;
+		glm_quat(_glm_q, _q.x, _q.y, _q.z, _q.w);
+		versor _glm_inv_q;
+		glm_quat_inv(_glm_q, _glm_inv_q);
+		glm_quat_mat4(_glm_inv_q, _rotation_mat);
+
+		mat4 _position_mat;
+		glm_mat4_identity(_position_mat);
+		_position_mat[3][0] = -_t->position.x;
+		_position_mat[3][1] = -_t->position.y;
+		_position_mat[3][2] = -_t->position.z;
+
+		glm_mat4_mul(_mat, _scale_mat, _mat);
+		glm_mat4_mul(_mat, _rotation_mat, _mat);
+		glm_mat4_mul(_mat, _position_mat, _mat);
+}
+
+void rde_engine_transform_glm_mat4_to_rde_data(rde_transform* _transform, mat4 _mat) {
+	vec4 _position;
+	mat4 _rotationMat;
+	versor _quaternion;
+	vec4 _scale;
+	glm_decompose(_mat, _position, _rotationMat, _scale);
+	glm_mat4_quat(_rotationMat, _quaternion);
+
+	rde_vec_3F _rotation = rde_math_quaternion_to_euler_degrees((rde_quaternion) { _quaternion[0], _quaternion[1], _quaternion[2], _quaternion[3] });
+	_transform->position = (rde_vec_3F) { _position[0], _position[1], _position[2] };
+	_transform->rotation = (rde_vec_3F) { _rotation.x, _rotation.y, _rotation.z };
+	_transform->scale = (rde_vec_3F) { _scale[0], _scale[1], _scale[2] };
+}
+
+void rde_engine_transform_parse_children(rde_transform* _transform) {
+	mat4 _t_local_matrix;
+	rde_engine_transform_get_local_matrix(_transform, _t_local_matrix);
+	
+	for(size_t _i = 0; _i < stbds_arrlenu(_transform->children); _i++) {
+		rde_transform* _child = &ENGINE.transforms[_transform->children[_i]];
+		mat4 _child_local_matrix;
+		rde_engine_transform_get_local_matrix(_child, _child_local_matrix);
+		glm_mat4_mul(_child_local_matrix, _t_local_matrix, _child_local_matrix);
+		rde_engine_transform_get_local_matrix(_child, _child_local_matrix);
+	
+		if(_child->children != NULL) {
+			rde_engine_transform_parse_children(_child);
+			_child->dirty = false;
+		}
+	}
+}
+
+void rde_engine_transform_update() {
+	for(size_t _i = 0; _i < ENGINE.last_transform_used; _i++) {
+		rde_transform* _t = &ENGINE.transforms[_i];
+		if(_t->children != NULL && _t->dirty) {
+			rde_engine_transform_parse_children(_t);
+			_t->dirty = false;
+		}
+	}
+}
 
 // ==============================================================================
 // =							PUBLIC API - ENGINE					 		=
@@ -1784,6 +1876,8 @@ void rde_engine_on_run() {
 
 		rde_inner_engine_on_late_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_late_update(ENGINE.delta_time);
+		
+		rde_engine_transform_update();
 
 		for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_windows; _i++) {
 			rde_window* _window = &ENGINE.windows[_i];
@@ -1975,6 +2069,107 @@ rde_window* rde_engine_get_focused_window() {
 	return NULL;
 }
 
+rde_transform* rde_engine_transform_load() {
+	rde_transform* _t = NULL;
+	for(size_t _i = 0; _i < stbds_arrlenu(ENGINE.transforms); _i++) {
+		_t = &ENGINE.transforms[_i];
+		if(_t->parent == RDE_INT_MIN) {
+			_t->parent = -1;
+			if(ENGINE.last_transform_used < _i) {
+				ENGINE.last_transform_used = _i;
+			}
+			return _t;
+		}
+	}
+
+	if(_t == NULL) {
+		size_t _transforms_size = stbds_arrlenu(ENGINE.transforms);
+		for(size_t _i = 0; _i < 1000; _i++) {
+			stbds_arrput(ENGINE.transforms, rde_struct_create_transform());
+			if(_t == NULL) {
+				_t = &stbds_arrlast(ENGINE.transforms);
+				_t->parent = -1;
+				if(ENGINE.last_transform_used < _transforms_size + _i) {
+					ENGINE.last_transform_used = _transforms_size + _i;
+				}
+			}
+		}
+	}
+	
+	rde_critical_error(stbds_arrlenu(ENGINE.transforms) > 1000000, "Too much transforms created \n");
+	return _t;
+}
+
+rde_vec_3F  rde_engine_transform_get_position(rde_transform* _transform) {
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get position");
+	return _transform->position;
+}
+
+void rde_engine_transform_set_position(rde_transform* _transform, rde_vec_3F _position) {
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on set position");
+	_transform->position = _position;
+	if(_transform->children != NULL) {
+		_transform->dirty = true;
+	}
+}
+
+rde_vec_3F  rde_engine_transform_get_rotation_degs(rde_transform* _transform) {
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get rotation");
+	return _transform->rotation;
+}
+
+void rde_engine_transform_set_rotation(rde_transform* _transform, rde_vec_3F _rotation_degs) {
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on set rotation");
+	_transform->rotation = _rotation_degs;
+	if(_transform->children != NULL) {
+		_transform->dirty = true;
+	}
+}
+
+rde_vec_3F  rde_engine_transform_get_scale(rde_transform* _transform) {
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get scale");
+	return _transform->scale;
+}
+
+void rde_engine_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale) {
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on set scale");
+	_transform->scale = _scale;
+	if(_transform->children != NULL) {
+		_transform->dirty = true;
+	}
+}
+
+rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform) {
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get parent");
+	if(_transform->parent == -1) {
+		return NULL;
+	}
+
+	return &ENGINE.transforms[_transform->parent];
+}
+
+void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _parent) {
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get position");
+	for(size_t _i = 0; _i < ENGINE.last_transform_used; _i++) {
+		rde_transform* _p =  &ENGINE.transforms[_i];
+		if(_parent == _p) {
+			_transform->parent = (int)_i;
+		}
+	}
+}
+
+void rde_engine_transform_unload(rde_transform* _transform) {
+	if(_transform == &ENGINE.transforms[ENGINE.last_transform_used]) {
+		for(int _i = ENGINE.last_transform_used - 1; _i > 0; _i--) {
+			rde_transform* _t =  &ENGINE.transforms[_i];
+			if(_t->parent != RDE_INT_MIN) {
+				ENGINE.last_transform_used = _i;
+			}
+		}
+	}
+	*_transform = rde_struct_create_transform();
+}
+
 #if IS_MAC()
 #pragma clang diagnostic pop
 #endif
@@ -1983,7 +2178,7 @@ rde_window* rde_engine_get_focused_window() {
 
 
 // ==============================================================================
-// =							PUBLIC API - ENGINE					 		=
+// =							PUBLIC API - MATH					 		  =
 // ==============================================================================
 
 void rde_math_set_random_seed(long _seed) {
@@ -3874,8 +4069,8 @@ void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transfor
 		rde_math_convert_world_position_to_screen_coordinates_2d(current_drawing_window, &_screen_pos);
 	} else {
 		bool _is_hud = current_batch_2d.is_hud;
-		_screen_pos.x = _transform->position.x - (_is_hud ? 0.f : current_drawing_camera->transform.position.x);
-		_screen_pos.y = _transform->position.y - (_is_hud ? 0.f : current_drawing_camera->transform.position.y);
+		_screen_pos.x = _transform->position.x - (_is_hud ? 0.f : current_drawing_camera->transform->position.x);
+		_screen_pos.y = _transform->position.y - (_is_hud ? 0.f : current_drawing_camera->transform->position.y);
 	}
 
 	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
@@ -4668,7 +4863,7 @@ void rde_inner_rendering_flush_line_batch() {
 	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
 	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
-	rde_vec_3F _cam_pos = current_drawing_camera->transform.position;
+	rde_vec_3F _cam_pos = current_drawing_camera->transform->position;
 	rde_vec_3F _cam_direction = current_drawing_camera->direction;
 	rde_vec_3F _cam_up = current_drawing_camera->up;
 	glm_lookat( (vec3) { _cam_pos.x, _cam_pos.y, _cam_pos.z },
@@ -4708,7 +4903,7 @@ void rde_inner_rendering_flush_batch_3d() {
 	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
 	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
-	rde_vec_3F _cam_pos = current_drawing_camera->transform.position;
+	rde_vec_3F _cam_pos = current_drawing_camera->transform->position;
 	rde_vec_3F _cam_direction = current_drawing_camera->direction;
 	rde_vec_3F _cam_up = current_drawing_camera->up;
 	glm_lookat( (vec3) { _cam_pos.x, _cam_pos.y, _cam_pos.z },
@@ -4763,7 +4958,7 @@ void rde_inner_rendering_flush_batch_3d() {
 	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), _mouse_pos.x, _mouse_pos.y);
 	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), ENGINE.delta_time);
 
-	rde_vec_3F _camera_pos = current_drawing_camera->transform.position;
+	rde_vec_3F _camera_pos = current_drawing_camera->transform->position;
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "camera_pos"), _camera_pos.x, _camera_pos.y, _camera_pos.z);
 	
 	rde_vec_3F _dl_direction = ENGINE.illumination.directional_light.direction;
@@ -5868,7 +6063,7 @@ void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window, bo
 
 	current_batch_2d.is_hud = _is_hud;
 
-	rde_inner_rendering_transform_to_glm_mat4_2d(&current_drawing_camera->transform, _view_matrix);
+	rde_inner_rendering_transform_to_glm_mat4_2d(current_drawing_camera->transform, _view_matrix);
 	if(_is_hud) {
 		_view_matrix[3][0] = 0;
 		_view_matrix[3][1] = 0;
@@ -6735,7 +6930,7 @@ void rde_rendering_3d_draw_skybox(rde_camera* _camera) {
 	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
 	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
-	rde_vec_3F _cam_pos = _camera->transform.position;
+	rde_vec_3F _cam_pos = _camera->transform->position;
 	rde_vec_3F _cam_direction = _camera->direction;
 	rde_vec_3F _cam_up = _camera->up;
 	glm_lookat( (vec3) { _cam_pos.x, _cam_pos.y, _cam_pos.z },

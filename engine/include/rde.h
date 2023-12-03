@@ -986,15 +986,6 @@ typedef struct {
 } rde_probability;
 RDE_FUNC rde_probability rde_struct_create_probability();
 
-typedef struct rde_transform rde_transform;
-struct rde_transform {
-	rde_vec_3F position;
-	rde_vec_3F rotation;
-	rde_vec_3F scale;
-	rde_transform* parent;
-};
-RDE_FUNC rde_transform rde_struct_create_transform();
-
 
 /// ================================= LIBS && DECLS ===========================
 
@@ -1002,6 +993,7 @@ typedef struct rde_engine rde_engine;
 typedef struct rde_window rde_window;
 typedef struct rde_event rde_event;
 typedef struct rde_file_handle rde_file_handle;
+typedef struct rde_transform rde_transform;
 
 #ifdef RDE_RENDERING_MODULE
 typedef struct rde_shader rde_shader;
@@ -1330,7 +1322,7 @@ struct rde_camera {
 	size_t id;
 	float zoom;
 	float fov;
-	rde_transform transform;
+	rde_transform* transform;
 	rde_vec_3F direction;
 	rde_vec_3F up;
 	rde_vec_2F near_far;
@@ -1555,6 +1547,16 @@ RDE_FUNC void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _ti
 
 RDE_FUNC void rde_engine_destroy_engine();
 
+RDE_FUNC rde_transform* rde_engine_transform_load();
+RDE_FUNC rde_vec_3F  rde_engine_transform_get_position(rde_transform* _transform);
+RDE_FUNC void rde_engine_transform_set_position(rde_transform* _transform, rde_vec_3F _position);
+RDE_FUNC rde_vec_3F  rde_engine_transform_get_rotation_degs(rde_transform* _transform);
+RDE_FUNC void rde_engine_transform_set_rotation(rde_transform* _transform, rde_vec_3F _rotation_degs);
+RDE_FUNC rde_vec_3F  rde_engine_transform_get_scale(rde_transform* _transform);
+RDE_FUNC void rde_engine_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale);
+RDE_FUNC rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform);
+RDE_FUNC void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _parent);
+RDE_FUNC void rde_engine_transform_unload(rde_transform* _transform);
 
 /// ============================ WINDOW =====================================
 
