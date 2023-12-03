@@ -653,7 +653,7 @@ struct rde_engine {
 		
 	rde_window* windows;
 	rde_transform* transforms;
-	size_t last_transform_used;
+	int last_transform_used;
 		
 #if IS_ANDROID()
 	ANativeWindow* android_native_window;
@@ -1741,9 +1741,10 @@ void rde_engine_transform_parse_children(rde_transform* _transform) {
 }
 
 void rde_engine_transform_update() {
-	for(size_t _i = 0; _i < ENGINE.last_transform_used; _i++) {
+	for(int _i = 0; _i <= ENGINE.last_transform_used; _i++) {
 		rde_transform* _t = &ENGINE.transforms[_i];
 		if(_t->children != NULL && _t->dirty) {
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Here");
 			rde_engine_transform_parse_children(_t);
 			_t->dirty = false;
 		}
@@ -2071,7 +2072,7 @@ rde_window* rde_engine_get_focused_window() {
 
 rde_transform* rde_engine_transform_load() {
 	rde_transform* _t = NULL;
-	for(size_t _i = 0; _i < stbds_arrlenu(ENGINE.transforms); _i++) {
+	for(int _i = 0; _i < stbds_arrlen(ENGINE.transforms); _i++) {
 		_t = &ENGINE.transforms[_i];
 		if(_t->parent == RDE_INT_MIN) {
 			_t->parent = -1;
@@ -2083,8 +2084,8 @@ rde_transform* rde_engine_transform_load() {
 	}
 
 	if(_t == NULL) {
-		size_t _transforms_size = stbds_arrlenu(ENGINE.transforms);
-		for(size_t _i = 0; _i < 1000; _i++) {
+		int _transforms_size = stbds_arrlen(ENGINE.transforms);
+		for(int _i = 0; _i < 1000; _i++) {
 			stbds_arrput(ENGINE.transforms, rde_struct_create_transform());
 			if(_t == NULL) {
 				_t = &stbds_arrlast(ENGINE.transforms);
@@ -2150,10 +2151,10 @@ rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform) {
 
 void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _parent) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get position");
-	for(size_t _i = 0; _i < ENGINE.last_transform_used; _i++) {
+	for(int _i = 0; _i < ENGINE.last_transform_used; _i++) {
 		rde_transform* _p =  &ENGINE.transforms[_i];
 		if(_parent == _p) {
-			_transform->parent = (int)_i;
+			_transform->parent = _i;
 		}
 	}
 }

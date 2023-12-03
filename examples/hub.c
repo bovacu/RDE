@@ -39,8 +39,8 @@ void draw_grid(rde_camera* _camera, rde_window* _window) {
 
 #if !IS_ANDROID()
 #include "model_viewer.c"
-#include "performance_test.c"
-#include "physics.c"
+// #include "performance_test.c"
+// #include "physics.c"
 #else
 #include "android.c"
 #endif
@@ -159,19 +159,19 @@ void on_imgui_hub_menu(float _dt) {
 			model_viewer_init();
 		}
 		
-		if(rde_imgui_radio_button("Performance Test 3D", &_option, 1)) {
-			if(unload_callback != NULL) {
-				unload_callback();
-			}
-			performance_test_3d_init();
-		}
+		// if(rde_imgui_radio_button("Performance Test 3D", &_option, 1)) {
+		// 	if(unload_callback != NULL) {
+		// 		unload_callback();
+		// 	}
+		// 	performance_test_3d_init();
+		// }
 
-		if(rde_imgui_radio_button("Physics", &_option, 2)) {
-			if(unload_callback != NULL) {
-				unload_callback();
-			}
-			physics_init();
-		}
+		// if(rde_imgui_radio_button("Physics", &_option, 2)) {
+		// 	if(unload_callback != NULL) {
+		// 		unload_callback();
+		// 	}
+		// 	physics_init();
+		// }
 #else
 		if(rde_imgui_radio_button("Android demo", &_option, 2)) {
 			if(unload_callback != NULL) {
