@@ -1408,11 +1408,11 @@ const rde_engine_init_info RDE_DEFAULT_INIT_INFO = {
 		.temo_allocator_size = 10 * 1024 * 1024,
 		.max_physics_jobs = 2048,
 		.max_physics_barriers = 8,
-		.max_threads = -1,
 		.max_bodies = 65536,
-		.max_body_pairs = 65536,
 		.max_body_mutexes = 0,
+		.max_body_pairs = 65536,
 		.max_concat_constraints = 10240,
+		.max_threads = -1,
 		.collision_steps_per_update = 1
 	}
 #endif
@@ -1422,8 +1422,8 @@ const rde_engine_init_info RDE_DEFAULT_INIT_INFO = {
 const rde_texture_parameters RDE_DEFAULT_TEXTURE_PARAMETERS = {
 	.min_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR,
 	.mag_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR,
-	.wrap_t = RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT,
 	.wrap_s = RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT,
+	.wrap_t = RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT,
 	.mipmap_min_filter = RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_LINEAR_MIN_FILTER_LINEAR
 };
 #endif
