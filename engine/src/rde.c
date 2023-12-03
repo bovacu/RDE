@@ -1374,6 +1374,7 @@ float FRAMEBUFFER_QUAD_DATA[] = {
 	 1.0f,  1.0f,  1.0f, 1.0f
 };
 
+
 rde_render_texture* DEFAULT_RENDER_TEXTURE = NULL;
 rde_render_texture* current_render_texture = NULL;
 rde_camera* current_drawing_camera = NULL;
@@ -2151,10 +2152,46 @@ rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform) {
 
 void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _parent) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get position");
+	int _transform_index = -1;
+	int _parent_index = -1;
+
 	for(int _i = 0; _i < ENGINE.last_transform_used; _i++) {
 		rde_transform* _p =  &ENGINE.transforms[_i];
 		if(_parent == _p) {
-			_transform->parent = _i;
+			_parent_index = _i;
+		}
+
+		if(_transform == _p) {
+			_transform_index = _i;
+		}
+
+		if(_transform_index != -1 && _parent_index != -1) {
+			break;
+		}
+	}
+
+	if(_parent != NULL) {
+		_transform->parent = _parent_index;
+		bool _has_child_already = false;
+		for(size_t _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
+			if(_parent->children[_i] == _transform_index) {
+				_has_child_already = true;
+				break;
+			}
+		}
+	
+		if(!_has_child_already) {
+			stbds_arrput(_parent->children, _transform_index);
+		}
+	} else {
+		if(_transform->parent != -1) {
+			for(size_t _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
+				if(_parent->children[_i] == _transform_index) {
+					stbds_arrdel(_parent->children, _i);
+					break;
+				}
+			}
+			_transform->parent = -1;
 		}
 	}
 }
