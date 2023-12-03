@@ -32,6 +32,8 @@ tests/*.lib
 
 .cache/
 
+.clangd
+
 skate_or_dice/
 
 examples/models/
