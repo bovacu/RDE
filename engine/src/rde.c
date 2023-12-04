@@ -1731,19 +1731,11 @@ void rde_engine_transform_get_matrix(rde_transform* _t, mat4 _mat) {
 
 		mat4 _position_mat;
 		glm_mat4_identity(_position_mat);
-		
-		if(_t->parent != -1) {
-			glm_translate(_mat, (vec3) { _t->position.x, _t->position.y, _t->position.z });
-			glm_mat4_mul(_mat, _rotation_mat, _mat);
-			glm_mat4_mul(_mat, _scale_mat, _mat);
-		} else {
-			glm_translate(_position_mat, (vec3) { _t->position.x, _t->position.y, _t->position.z });
-			glm_mat4_mul(_mat, _position_mat, _mat);
-			glm_mat4_mul(_mat, _scale_mat, _mat);
-			glm_mat4_mul(_mat, _rotation_mat, _mat);
-			glm_translate(_position_mat, (vec3) { -_t->position.x, -_t->position.y, -_t->position.z });
-			glm_mat4_mul(_mat, _position_mat, _mat);
-		}
+		glm_translate(_position_mat, (vec3) { _t->position.x, _t->position.y, _t->position.z });
+
+		glm_mat4_mul(_mat, _position_mat, _mat);
+		glm_mat4_mul(_mat, _scale_mat, _mat);
+		glm_mat4_mul(_mat, _rotation_mat, _mat);
 }
 
 // void rde_engine_transform_glm_mat4_to_rde_data(rde_transform* _transform, mat4 _mat) {
