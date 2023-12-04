@@ -1014,6 +1014,7 @@ typedef struct rde_render_texture rde_render_texture;
 typedef struct rde_texture rde_texture;
 typedef struct rde_model rde_model;
 typedef uint rde_skybox_id;
+typedef struct rde_ui_container rde_ui_container;
 
 #ifdef RDE_PHYSICS_MODULE
 #include "JoltC/rde_joltc.h"
@@ -1039,6 +1040,17 @@ typedef struct {
 	rde_engine_user_side_loop_func_2 on_render;
 } rde_end_user_mandatory_callbacks;
 RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
+
+#ifdef RDE_RENDERING_MODULE
+typedef void (*rde_ui_container_callback_bd)(int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
+typedef void (*rde_ui_container_callback_bu)(int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
+typedef void (*rde_ui_container_callback_scroll)(rde_vec_2F _scroll);
+typedef struct {
+	rde_ui_container_callback_bd on_button_down;
+	rde_ui_container_callback_bd on_button_up;
+	rde_ui_container_callback_scroll on_scroll;
+} rde_ui_container_callbacks;
+#endif
 
 /// ============================== ENGINE ===================================
 
@@ -1334,6 +1346,43 @@ struct rde_camera {
 	bool enabled;
 };
 RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
+
+typedef struct {
+	char* text;
+	rde_font* font;
+} rde_ui_element_text;
+RDE_FUNC rde_ui_element_text rde_struct_create_ui_text();
+
+typedef struct {
+	rde_texture* texture;
+} rde_ui_element_image;
+RDE_FUNC rde_ui_element_image rde_struct_create_ui_image();
+
+typedef enum {
+	RDE_UI_ELEMENT_TYPE_IMAGE,
+	RDE_UI_ELEMENT_TYPE_TEXT
+} RDE_UI_ELEMENT_TYPE_;
+
+typedef struct {
+	size_t width, height;
+	int x, y;
+	RDE_UI_ELEMENT_TYPE_ type;
+	
+	union {
+		rde_ui_element_image image;
+		rde_ui_element_text text;
+	};
+
+} rde_ui_element;
+RDE_FUNC rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type);
+
+struct rde_ui_container {
+	size_t width, height;
+	int x, y;
+	rde_ui_element* elements;
+	rde_ui_container_callbacks callbacks;
+};
+RDE_FUNC rde_ui_container rde_struct_create_ui_container();
 
 /// ============================ AUDIO ==================================
 

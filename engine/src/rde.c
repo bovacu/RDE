@@ -1144,6 +1144,57 @@ rde_obj_mesh_data rde_inner_struct_create_obj_mesh_data() {
 }
 #endif
 
+rde_ui_element_text rde_struct_create_ui_text() {
+	rde_ui_element_text _t;
+	_t.text = NULL;
+	_t.font = NULL;
+	return _t;
+}
+
+rde_ui_element_image rde_struct_create_ui_image() {
+	rde_ui_element_image _i;
+	_i.texture = NULL;
+	return _i;
+}
+
+rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type) {
+	rde_ui_element _e;
+	_e.width = 0;
+	_e.height = 0;
+	_e.x = 0;
+	_e.y = 0;
+	_e.type = _type;
+	switch(_type) {
+		case RDE_UI_ELEMENT_TYPE_TEXT: {
+			_e.text = rde_struct_create_ui_text();
+		} break;
+
+		case RDE_UI_ELEMENT_TYPE_IMAGE: {
+			_e.image = rde_struct_create_ui_image();
+		} break;
+	}
+
+	return _e;
+}
+
+rde_ui_container_callbacks rde_struct_create_ui_container_callbacks() {
+	rde_ui_container_callbacks _c;
+	_c.on_button_down = NULL;
+	_c.on_button_up = NULL;
+	_c.on_scroll = NULL;
+	return _c;
+}
+
+rde_ui_container rde_struct_create_ui_container() {
+	rde_ui_container _c;
+	_c.width = 0;
+	_c.height = 0;
+	_c.x = 0;
+	_c.y = 0;
+	_c.callbacks = rde_struct_create_ui_container_callbacks();
+	return _c;
+}
+
 #ifdef RDE_AUDIO_MODULE
 rde_sound rde_struct_create_sound() {
 	rde_sound _s;
@@ -1870,7 +1921,8 @@ rde_engine_init_info rde_engine_load_config(const char* _config_path) {
 
 	#ifdef RDE_AUDIO_MODULE
 	GET_SIZET("max_amount_of_sounds", _init_info.heap_allocs_config.max_amount_of_sounds)
-	// GET_SIZET("max_number_of_musics", _init_info.heap_allocs_config.max_number_of_musics)
+	// GET_SIZET("max_number_of_musics", _init_info.heap_allocs_config.max_number_of_musics)
+
 	#endif
 
 	#ifdef RDE_PHYSICS_MODULE
