@@ -1682,6 +1682,8 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 	ADD_FLAG("-ldbghelp")
 	ADD_FLAG("-lshlwapi")
 	ADD_FLAG("-lAdvapi32")
+	// This is needed by cglm to perform glm_decompose
+	ADD_FLAG("-msse3")
 	ADD_FLAG("-Werror")
 	ADD_FLAG("-Wall")
 	ADD_FLAG("-Wextra")

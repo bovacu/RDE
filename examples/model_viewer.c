@@ -1,6 +1,6 @@
 rde_camera model_viewer_camera;
 rde_model* model_viewer_model = NULL;
-rde_transform model_viewer_transform;
+rde_transform* model_viewer_transform;
 
 bool model_viewer_draw_wireframe = false;
 
@@ -16,6 +16,10 @@ rde_vec_3F model_viewer_directional_light_direction = { -0.2f, -1.0f, -0.3f };
 rde_vec_3F model_viewer_directional_light_ambient_color = { 0.2f, 0.2f, 0.2f };
 rde_vec_3F model_viewer_directional_light_diffuse_color = { 0.5f, 0.5f, 0.5f };
 rde_vec_3F model_viewer_directional_light_specular_color = { 1.0f, 1.0f, 1.0f };
+
+rde_transform* model_viewer_point_light_transform;
+rde_transform* model_viewer_spot_light_transform;
+rde_transform* model_viewer_second_screen_texture_transform;
 
 rde_model_data model_viewer_model_data;
 int model_viewer_max_meshes_to_render = 0;
@@ -37,35 +41,47 @@ int model_viewer_msaa_samples = -1;
 
 void model_viewer_keyboard_controller(float _dt) {
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
-		model_viewer_camera.transform.position.x += model_viewer_camera_front.x * 10 * _dt;
-		model_viewer_camera.transform.position.y += model_viewer_camera_front.y * 10 * _dt;
-		model_viewer_camera.transform.position.z += model_viewer_camera_front.z * 10 * _dt;
+		rde_vec_3F _position = rde_engine_transform_get_position(model_viewer_camera.transform);
+		_position.x += model_viewer_camera_front.x * 10 * _dt;
+		_position.y += model_viewer_camera_front.y * 10 * _dt;
+		_position.z += model_viewer_camera_front.z * 10 * _dt;
+		rde_engine_transform_set_position(model_viewer_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_S)) {
-		model_viewer_camera.transform.position.x -= model_viewer_camera_front.x * 10 * _dt;
-		model_viewer_camera.transform.position.y -= model_viewer_camera_front.y * 10 * _dt;
-		model_viewer_camera.transform.position.z -= model_viewer_camera_front.z * 10 * _dt;
+		rde_vec_3F _position = rde_engine_transform_get_position(model_viewer_camera.transform);
+		_position.x -= model_viewer_camera_front.x * 10 * _dt;
+		_position.y -= model_viewer_camera_front.y * 10 * _dt;
+		_position.z -= model_viewer_camera_front.z * 10 * _dt;
+		rde_engine_transform_set_position(model_viewer_camera.transform, _position);
 	}
 
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_DOWN)) {
-		model_viewer_camera.transform.position.y -= 10 * _dt;
+		rde_vec_3F _position = rde_engine_transform_get_position(model_viewer_camera.transform);
+		_position.y -= 10 * _dt;
+		rde_engine_transform_set_position(model_viewer_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_UP)) {
-		model_viewer_camera.transform.position.y += 10 * _dt;
+		rde_vec_3F _position = rde_engine_transform_get_position(model_viewer_camera.transform);
+		_position.y += 10 * _dt;
+		rde_engine_transform_set_position(model_viewer_camera.transform, _position);
 	}
 
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_A)) {
 		rde_vec_3F _cp = rde_math_cross_product(model_viewer_camera_front, model_viewer_camera_up);
 		rde_math_normalize(&_cp);
-
-		model_viewer_camera.transform.position.x -= _cp.x * 10 * _dt;
-		model_viewer_camera.transform.position.y -= _cp.y * 10 * _dt;
-		model_viewer_camera.transform.position.z -= _cp.z * 10 * _dt;
+		
+		rde_vec_3F _position = rde_engine_transform_get_position(model_viewer_camera.transform);
+		_position.x -= _cp.x * 10 * _dt;
+		_position.y -= _cp.y * 10 * _dt;
+		_position.z -= _cp.z * 10 * _dt;
+		rde_engine_transform_set_position(model_viewer_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_D)) {
 		rde_vec_3F _cp = rde_math_cross_product(model_viewer_camera_front, model_viewer_camera_up);
 		rde_math_normalize(&_cp);
 
-		model_viewer_camera.transform.position.x += _cp.x * 10 * _dt;
-		model_viewer_camera.transform.position.y += _cp.y * 10 * _dt;
-		model_viewer_camera.transform.position.z += _cp.z * 10 * _dt;
+		rde_vec_3F _position = rde_engine_transform_get_position(model_viewer_camera.transform);
+		_position.x += _cp.x * 10 * _dt;
+		_position.y += _cp.y * 10 * _dt;
+		_position.z += _cp.z * 10 * _dt;
+		rde_engine_transform_set_position(model_viewer_camera.transform, _position);
 	}
 }
 
@@ -153,9 +169,11 @@ void model_viewer_on_update(float _dt) {
 
 	rde_vec_2F _scrolled = rde_events_mouse_get_scrolled(current_window);
 	if(_scrolled.x != 0.f || _scrolled.y != 0.f) {
-		model_viewer_camera.transform.position.x += model_viewer_camera_front.x * 10 * _dt * (_scrolled.y * 3);
-		model_viewer_camera.transform.position.y += model_viewer_camera_front.y * 10 * _dt * (_scrolled.y * 3);
-		model_viewer_camera.transform.position.z += model_viewer_camera_front.z * 10 * _dt * (_scrolled.y * 3);
+		rde_vec_3F _position = rde_engine_transform_get_position(model_viewer_camera.transform);
+		_position.x += model_viewer_camera_front.x * 10 * _dt * (_scrolled.y * 3);
+		_position.y += model_viewer_camera_front.y * 10 * _dt * (_scrolled.y * 3);
+		_position.z += model_viewer_camera_front.z * 10 * _dt * (_scrolled.y * 3);
+		rde_engine_transform_set_position(model_viewer_camera.transform, _position);
 	}
 
 	model_viewer_mouse_controller(_dt);
@@ -177,33 +195,36 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 		rde_render_3d(_window, &model_viewer_camera, false, {
 			if(model_viewer_render_model_to_plane) rde_rendering_render_texture_enable(model_viewer_second_screen_rt);
 			for(int _i = 0; _i < model_viewer_max_meshes_to_render; _i++) {
-				rde_rendering_3d_draw_mesh(&model_viewer_transform, model_viewer_model_data.meshes[_i], NULL);
+				rde_rendering_3d_draw_mesh(model_viewer_transform, model_viewer_model_data.meshes[_i], NULL);
 			}
 
 			if(model_viewer_point_light_mesh != NULL) {
-				rde_transform _point_light_transform = rde_struct_create_transform();
-				_point_light_transform.position = model_viewer_point_light.position;
-				_point_light_transform.position.x *= model_viewer_transform.scale.x;
-				_point_light_transform.position.y *= model_viewer_transform.scale.y;
-				_point_light_transform.position.z *= model_viewer_transform.scale.z;
-				rde_rendering_3d_draw_mesh(&_point_light_transform, model_viewer_point_light_mesh, NULL);
+				rde_vec_3F _position = model_viewer_point_light.position;
+				rde_vec_3F _scale = rde_engine_transform_get_scale(model_viewer_transform);
+				_position.x *= _scale.x;
+				_position.y *= _scale.y;
+				_position.z *= _scale.z;
+				rde_engine_transform_set_position(model_viewer_point_light_transform, _position);
+				rde_rendering_3d_draw_mesh(model_viewer_point_light_transform, model_viewer_point_light_mesh, NULL);
 			}
 
 			if(model_viewer_spot_light_mesh != NULL) {
-				rde_transform _spot_light_transform = rde_struct_create_transform();
-				_spot_light_transform.position = model_viewer_spot_light.position;
-				_spot_light_transform.position.x *= model_viewer_transform.scale.x;
-				_spot_light_transform.position.y *= model_viewer_transform.scale.y;
-				_spot_light_transform.position.z *= model_viewer_transform.scale.z;
-				rde_rendering_3d_draw_mesh(&_spot_light_transform, model_viewer_spot_light_mesh, NULL);
+				rde_vec_3F _position = model_viewer_spot_light.position;
+				rde_vec_3F _scale = rde_engine_transform_get_scale(model_viewer_transform);
+				_position.x *= _scale.x;
+				_position.y *= _scale.y;
+				_position.z *= _scale.z;
+				rde_engine_transform_set_position(model_viewer_spot_light_transform, _position);
+				rde_rendering_3d_draw_mesh(model_viewer_spot_light_transform, model_viewer_spot_light_mesh, NULL);
 			}
 
 			if(model_viewer_render_model_to_plane) rde_rendering_render_texture_disable();
 
 			if(model_viewer_render_model_to_plane) {
-				rde_transform _second_screen_transform = rde_struct_create_transform();
-				_second_screen_transform.position.y = 4;
-				rde_rendering_3d_draw_mesh(&_second_screen_transform ,model_viewer_second_screen_mesh, NULL);
+				rde_vec_3F _position = rde_engine_transform_get_position(model_viewer_second_screen_texture_transform);
+				_position.y = 4;
+				rde_engine_transform_set_position(model_viewer_second_screen_texture_transform, _position);
+				rde_rendering_3d_draw_mesh(model_viewer_second_screen_texture_transform ,model_viewer_second_screen_mesh, NULL);
 			}
 		})
 	}
@@ -339,59 +360,61 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 	rde_imgui_begin("Model", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
 
 	rde_imgui_text("Transform");
- 	float _position[3] = { model_viewer_transform.position.x, model_viewer_transform.position.y, model_viewer_transform.position.z };
+	
+	rde_vec_3F _model_position = rde_engine_transform_get_position(model_viewer_transform);
+	float _position[3] = { _model_position.x, _model_position.y, _model_position.z };
 	if(rde_imgui_drag_float_3("Position", _position, 1.f, 0, 0, "%.3f", 0)) {
- 		model_viewer_transform.position.x = _position[0];
- 		model_viewer_transform.position.y = _position[1];
- 		model_viewer_transform.position.z = _position[2];
- 	}
-
- 	rde_imgui_separator();
- 	float _radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.x);
-
-	if(rde_imgui_slider_angle("Rotation X", &_radians, 0, 360, 0)) {
- 		model_viewer_transform.rotation.x = rde_math_radians_to_degrees(_radians);
- 	}
-
- 	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.y);
-	if(rde_imgui_slider_angle("Rotation Y", &_radians, 0, 360, 0)) {
- 		model_viewer_transform.rotation.y = rde_math_radians_to_degrees(_radians);
- 	}
-
- 	_radians = rde_math_degrees_to_radians(model_viewer_transform.rotation.z);
-	if(rde_imgui_slider_angle("Rotation Z", &_radians, 0, 360, 0)) {
- 		model_viewer_transform.rotation.z = rde_math_radians_to_degrees(_radians);
- 	}
+		rde_engine_transform_set_position(model_viewer_transform, (rde_vec_3F) { _position[0], _position[1], _position[2] });
+	}
 
 	rde_imgui_separator();
- 	static bool _proportional_scale = true;
+	rde_vec_3F _model_rotation = rde_engine_transform_get_rotation_degs(model_viewer_transform);
+	float _radians = rde_math_degrees_to_radians(_model_rotation.x);
 
- 	if(!_proportional_scale) {
- 		float _scale[3] = { model_viewer_transform.scale.x, model_viewer_transform.scale.y, model_viewer_transform.scale.z };
-		if(rde_imgui_drag_float_3("Scale", &model_viewer_transform.scale.x, 0.25f, 0, 0, "%.3f", 0)) {
- 			model_viewer_transform.scale.x = _scale[0];
- 			model_viewer_transform.scale.y = _scale[1];
- 			model_viewer_transform.scale.z = _scale[2];
- 		}
- 	} else {
-		if(rde_imgui_drag_float("Scale", &model_viewer_transform.scale.x, 0.25f, 0, 0, "%.3f", 0)) {
- 			model_viewer_transform.scale.x = model_viewer_transform.scale.x;
- 			model_viewer_transform.scale.y = model_viewer_transform.scale.x;
- 			model_viewer_transform.scale.z = model_viewer_transform.scale.x;
- 		}
- 	}
+	if(rde_imgui_slider_angle("Rotation X", &_radians, 0, 360, 0)) {
+		_model_rotation.x = rde_math_radians_to_degrees(_radians);
+		rde_engine_transform_set_rotation(model_viewer_transform, _model_rotation);
+	}
 
- 	rde_imgui_checkbox("Proportional Scale", &_proportional_scale);
+	_radians = rde_math_degrees_to_radians(_model_rotation.y);
+	if(rde_imgui_slider_angle("Rotation Y", &_radians, 0, 360, 0)) {
+		_model_rotation.y = rde_math_radians_to_degrees(_radians);
+		rde_engine_transform_set_rotation(model_viewer_transform, _model_rotation);
+	}
+
+	_radians = rde_math_degrees_to_radians(_model_rotation.z);
+	if(rde_imgui_slider_angle("Rotation Z", &_radians, 0, 360, 0)) {
+		_model_rotation.z = rde_math_radians_to_degrees(_radians);
+		rde_engine_transform_set_rotation(model_viewer_transform, _model_rotation);
+	}
+
+	rde_imgui_separator();
+	static bool _proportional_scale = true;
+
+	if(!_proportional_scale) {
+		rde_vec_3F _model_scale = rde_engine_transform_get_scale(model_viewer_transform);
+		float _scale[3] = { _model_scale.x, _model_scale.y, _model_scale.z };
+		if(rde_imgui_drag_float_3("Scale", _scale, 0.25f, 0, 0, "%.3f", 0)) {
+			rde_engine_transform_set_scale(model_viewer_transform, (rde_vec_3F) { _scale[0], _scale[1], _scale[2] });
+		}
+	} else {
+		rde_vec_3F _model_scale = rde_engine_transform_get_scale(model_viewer_transform);
+		if(rde_imgui_drag_float("Scale", &_model_scale.x, 0.25f, 0, 0, "%.3f", 0)) {
+			rde_engine_transform_set_scale(model_viewer_transform, (rde_vec_3F) { _model_scale.x, _model_scale.x, _model_scale.x });
+		}
+	}
+
+	rde_imgui_checkbox("Proportional Scale", &_proportional_scale);
 	rde_imgui_end();
 
 	rde_imgui_begin("Camera Options", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
 	rde_imgui_drag_float("FOV", &model_viewer_camera.fov, 1, 0, 180, "%.3f", 0);
 
- 	float _near_far[2] = { model_viewer_camera.near_far.x, model_viewer_camera.near_far.y };
+	float _near_far[2] = { model_viewer_camera.near_far.x, model_viewer_camera.near_far.y };
 	if(rde_imgui_drag_float_2("Near/Far", _near_far, 1, 0, 10000, "%.3f", 0)) {
  		model_viewer_camera.near_far.x = _near_far[0];
  		model_viewer_camera.near_far.y = _near_far[1];
- 	}
+	}
 
 	rde_imgui_end();
 
@@ -469,6 +492,8 @@ void model_viewer_unload() {
 
 	rde_rendering_skybox_unload(model_viewer_skybox);
 
+	rde_engine_transform_unload(model_viewer_transform);
+
 	model_viewer_model = NULL;
 
 	events_callback = NULL;
@@ -481,9 +506,12 @@ void model_viewer_unload() {
 
 void model_viewer_init() {
 	model_viewer_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
-	model_viewer_camera.transform.position = (rde_vec_3F) { -3.0, 8.0f, 14.0f };
+	rde_engine_transform_set_position(model_viewer_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
-	model_viewer_transform = rde_struct_create_transform();
+	model_viewer_transform = rde_engine_transform_load();
+	model_viewer_point_light_transform = rde_engine_transform_load();
+	model_viewer_spot_light_transform = rde_engine_transform_load();
+	model_viewer_second_screen_texture_transform = rde_engine_transform_load();
 
 	events_callback = &model_viewer_on_event;
 	update_callback = &model_viewer_on_update;
