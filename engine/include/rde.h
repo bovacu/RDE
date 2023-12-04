@@ -1556,6 +1556,7 @@ RDE_FUNC rde_vec_3F  rde_engine_transform_get_scale(rde_transform* _transform);
 RDE_FUNC void rde_engine_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale);
 RDE_FUNC rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform);
 RDE_FUNC void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _parent);
+RDE_FUNC size_t rde_engine_transform_get_children_count(rde_transform* _transform);
 RDE_FUNC void rde_engine_transform_unload(rde_transform* _transform);
 
 /// ============================ WINDOW =====================================

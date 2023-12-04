@@ -1556,7 +1556,9 @@ void rde_inner_engine_on_fixed_update(float _fixed_dt);
 void rde_inner_engine_on_late_update(float _dt);
 void rde_inner_engine_sync_events();
 void rde_engine_transform_update();
-
+void rde_engine_transform_get_matrix(rde_transform* _t, mat4 _mat);
+void rde_engine_transform_parse_parent(rde_transform* _transform, mat4 _mat);
+void rde_engine_transform_remove_transform_from_parent_children(rde_transform* _transform);
 
 
 
@@ -1680,37 +1682,6 @@ rde_display_info* rde_engine_get_available_displays() {
 	return NULL;
 }
 
-// void rde_engine_transform_get_inverse_matrix(rde_transform* _t, mat4 _mat) {
-// 		vec4 _inv_scale;
-// 	    _inv_scale[0] = (_t->scale.x == 0.0f ? 0.0f : 1.0f / _t->scale.x);
-// 	    _inv_scale[1] = (_t->scale.y == 0.0f ? 0.0f : 1.0f / _t->scale.y);
-// 	    _inv_scale[2] = (_t->scale.z == 0.0f ? 0.0f : 1.0f / _t->scale.z);
-
-// 		glm_mat4_identity(_mat);
-
-// 		mat4 _scale_mat;
-// 		glm_mat4_identity(_scale_mat);
-// 		glm_scale(_scale_mat, _inv_scale);
-
-// 		mat4 _rotation_mat;
-// 		glm_mat4_identity(_rotation_mat);
-// 		vec3 _angles;
-// 		_angles[0] = (rde_math_degrees_to_radians(_t->rotation.x) == 0.0f ? 0.0f : 1.0f / rde_math_degrees_to_radians(_t->rotation.x));
-// 		_angles[1] = (rde_math_degrees_to_radians(_t->rotation.y) == 0.0f ? 0.0f : 1.0f / rde_math_degrees_to_radians(_t->rotation.y));
-// 		_angles[2] = (rde_math_degrees_to_radians(_t->rotation.z) == 0.0f ? 0.0f : 1.0f / rde_math_degrees_to_radians(_t->rotation.z));
-// 		glm_rotate_x(_rotation_mat, _angles[0], _rotation_mat);
-// 		glm_rotate_y(_rotation_mat, _angles[1], _rotation_mat);
-// 		glm_rotate_z(_rotation_mat, _angles[2], _rotation_mat);
-
-// 		mat4 _position_mat;
-// 		glm_mat4_identity(_position_mat);
-// 		glm_translate(_position_mat, (vec3) { -_t->position.x, -_t->position.y, -_t->position.z });
-
-// 		glm_mat4_mul(_mat, _rotation_mat, _mat);
-// 		glm_mat4_mul(_mat, _position_mat, _mat);
-// 		glm_mat4_mul(_mat, _scale_mat, _mat);
-// }
-
 void rde_engine_transform_get_matrix(rde_transform* _t, mat4 _mat) {
 		vec3 _scale;
 	    _scale[0] = _t->scale.x;
@@ -1738,20 +1709,6 @@ void rde_engine_transform_get_matrix(rde_transform* _t, mat4 _mat) {
 		glm_mat4_mul(_mat, _rotation_mat, _mat);
 }
 
-// void rde_engine_transform_glm_mat4_to_rde_data(rde_transform* _transform, mat4 _mat) {
-// 	vec4 _position;
-// 	mat4 _rotationMat;
-// 	versor _quaternion;
-// 	vec4 _scale;
-// 	glm_decompose(_mat, _position, _rotationMat, _scale);
-// 	glm_mat4_quat(_rotationMat, _quaternion);
-
-// 	rde_vec_3F _rotation = rde_math_quaternion_to_euler_degrees((rde_quaternion) { _quaternion[0], _quaternion[1], _quaternion[2], _quaternion[3] });
-// 	_transform->position = (rde_vec_3F) { _position[0], _position[1], _position[2] };
-// 	_transform->rotation = (rde_vec_3F) { _rotation.x, _rotation.y, _rotation.z };
-// 	_transform->scale = (rde_vec_3F) { _scale[0], _scale[1], _scale[2] };
-// }
-
 void rde_engine_transform_parse_parent(rde_transform* _transform, mat4 _mat) {
 	mat4 _p_local_matrix;
 	rde_engine_transform_get_matrix(&ENGINE.transforms[_transform->parent], _p_local_matrix);
@@ -1761,6 +1718,19 @@ void rde_engine_transform_parse_parent(rde_transform* _transform, mat4 _mat) {
 	}
 
 	glm_mat4_mul(_p_local_matrix, _mat, _mat);
+}
+
+void rde_engine_transform_remove_transform_from_parent_children(rde_transform* _transform) {
+	if(_transform->parent != -1) {
+		rde_transform* _parent = &ENGINE.transforms[_transform->parent];
+		for(size_t _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
+			if(_parent->children[_i] == _transform->index) {
+				stbds_arrdel(_parent->children, _i);
+				break;
+			}
+		}
+		_transform->parent = -1;
+	}
 }
 
 void rde_engine_transform_update() {
@@ -2206,16 +2176,13 @@ void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _
 			stbds_arrput(_parent->children, _transform->index);
 		}
 	} else {
-		if(_transform->parent != -1) {
-			for(size_t _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
-				if(_parent->children[_i] == _transform->index) {
-					stbds_arrdel(_parent->children, _i);
-					break;
-				}
-			}
-			_transform->parent = -1;
-		}
+		rde_engine_transform_remove_transform_from_parent_children(_transform);
 	}
+}
+
+size_t rde_engine_transform_get_children_count(rde_transform* _transform) {
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get children count");
+	return stbds_arrlenu(_transform->children);
 }
 
 void rde_engine_transform_unload(rde_transform* _transform) {
@@ -2227,6 +2194,7 @@ void rde_engine_transform_unload(rde_transform* _transform) {
 			}
 		}
 	}
+	rde_engine_transform_remove_transform_from_parent_children(_transform);
 	*_transform = rde_struct_create_transform();
 }
 
