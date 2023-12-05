@@ -1348,15 +1348,28 @@ struct rde_camera {
 RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
 
 typedef struct {
-	char* text;
-	rde_font* font;
-} rde_ui_element_text;
-RDE_FUNC rde_ui_element_text rde_struct_create_ui_text();
+	rde_vec_2UI left_right;
+	rde_vec_2UI bottom_top;
+} rde_ui_9_slice;
+RDE_FUNC rde_ui_9_slice rde_struct_create_ui_9_slice();
 
 typedef struct {
+	rde_ui_9_slice nine_slice;
 	rde_texture* texture;
-} rde_ui_element_image;
-RDE_FUNC rde_ui_element_image rde_struct_create_ui_image();
+} rde_ui_element_image_data;
+RDE_FUNC rde_ui_element_image_data rde_struct_create_ui_element_image_data();
+
+typedef struct {
+	rde_font* font;
+	char* text;
+	size_t font_size;
+} rde_ui_element_text_data;
+RDE_FUNC rde_ui_element_text_data rde_struct_create_ui_element_text_data();
+
+typedef struct {
+	rde_ui_element_image_data image;
+	rde_ui_element_text_data text;
+} rde_ui_button_data;
 
 typedef enum {
 	RDE_UI_ELEMENT_TYPE_IMAGE,
@@ -1369,8 +1382,8 @@ typedef struct {
 	RDE_UI_ELEMENT_TYPE_ type;
 	
 	union {
-		rde_ui_element_image image;
-		rde_ui_element_text text;
+		rde_ui_element_image_data image;
+		rde_ui_element_text_data text;
 	};
 
 } rde_ui_element;
@@ -1752,6 +1765,14 @@ RDE_FUNC void rde_rendering_skybox_unload(rde_skybox_id _skybox_id);
 
 RDE_FUNC void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing); // This function CANNOT be called during on_render.
 RDE_FUNC RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing();
+
+/// ============================ UI =========================================
+
+RDE_FUNC rde_ui_container* rde_ui_create_container();
+RDE_FUNC rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_transform* _transform, rde_ui_element_image_data _image_data);
+RDE_FUNC rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_transform* _transform, rde_ui_element_text_data _text_data);
+RDE_FUNC rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_transform* _transform, rde_ui_button_data _button_data);
+RDE_FUNC void rde_ui_destroy_container(rde_ui_container* _container);
 
 /// ============================ AUDIO ======================================
 

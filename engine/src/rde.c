@@ -288,6 +288,8 @@ RDE_IMPLEMENT_SAFE_ARR_ACCESS(fastObjIndex)
 #define RDE_FBX_EXTENSION "fbx"
 #define RDE_GLTF_EXTENSION "gltf"
 
+#define RDE_MAX_CONTAINERS 500
+
 /// Event
 #define RDE_WIN_EVENT_INIT (RDE_EVENT_TYPE_WINDOW_BEGIN + 1)
 #define RDE_WIN_EVENT_COUNT (RDE_EVENT_TYPE_WINDOW_END - RDE_EVENT_TYPE_WINDOW_BEGIN)
@@ -682,6 +684,8 @@ rde_illumination illumination;
 rde_skybox skybox;
 rde_antialiasing antialiasing;
 rde_shadows shadows;
+
+rde_ui_container ui_containers[RDE_MAX_CONTAINERS];
 	
 #ifdef RDE_AUDIO_MODULE
 	rde_sound* sounds;
@@ -1144,17 +1148,26 @@ rde_obj_mesh_data rde_inner_struct_create_obj_mesh_data() {
 }
 #endif
 
-rde_ui_element_text rde_struct_create_ui_text() {
-	rde_ui_element_text _t;
-	_t.text = NULL;
-	_t.font = NULL;
-	return _t;
+rde_ui_9_slice rde_struct_create_ui_9_slice() {
+	rde_ui_9_slice _n;
+	_n.left_right = (rde_vec_2UI) { 0, 0 };
+	_n.bottom_top = (rde_vec_2UI) { 0, 0 };
+	return _n;
 }
 
-rde_ui_element_image rde_struct_create_ui_image() {
-	rde_ui_element_image _i;
+rde_ui_element_image_data rde_struct_create_ui_element_image_data() {
+	rde_ui_element_image_data _i;
+	_i.nine_slice = rde_struct_create_ui_9_slice();
 	_i.texture = NULL;
 	return _i;
+}
+
+rde_ui_element_text_data rde_struct_create_ui_element_text_data() {
+	rde_ui_element_text_data _t;
+	_t.font = NULL;
+	_t.text = NULL;
+	_t.font_size = 36;
+	return _t;
 }
 
 rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type) {
@@ -1166,11 +1179,11 @@ rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type) {
 	_e.type = _type;
 	switch(_type) {
 		case RDE_UI_ELEMENT_TYPE_TEXT: {
-			_e.text = rde_struct_create_ui_text();
+			_e.text = rde_struct_create_ui_element_text_data();
 		} break;
 
 		case RDE_UI_ELEMENT_TYPE_IMAGE: {
-			_e.image = rde_struct_create_ui_image();
+			_e.image = rde_struct_create_ui_element_image_data();
 		} break;
 	}
 
@@ -1191,6 +1204,7 @@ rde_ui_container rde_struct_create_ui_container() {
 	_c.height = 0;
 	_c.x = 0;
 	_c.y = 0;
+	_c.elements = NULL;
 	_c.callbacks = rde_struct_create_ui_container_callbacks();
 	return _c;
 }
@@ -1340,6 +1354,10 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 		}
 	} else {
 		_e.models = NULL;
+	}
+
+	for(size_t _i = 0; _i < RDE_MAX_CONTAINERS; _i++) {
+		_e.ui_containers[_i] = rde_struct_create_ui_container();
 	}
 
 #ifdef RDE_AUDIO_MODULE
@@ -8354,6 +8372,46 @@ ANativeWindow* rde_android_get_native_window() {
 #endif
 
 
+
+
+
+// ==============================================================================
+// =							PUBLIC API - UI					 			=
+// ==============================================================================
+
+rde_ui_container* rde_ui_create_container() {
+	UNIMPLEMENTED()
+	return NULL;
+}
+
+rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_transform* _transform, rde_ui_element_image_data _image_data) {
+	UNIMPLEMENTED()
+	UNUSED(_container)
+	UNUSED(_transform)
+	UNUSED(_image_data)
+	return NULL;
+}
+
+rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_transform* _transform, rde_ui_element_text_data _text_data) {
+	UNIMPLEMENTED()
+	UNUSED(_container)
+	UNUSED(_transform)
+	UNUSED(_text_data)
+	return NULL;
+}
+
+rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_transform* _transform, rde_ui_button_data _button_data) {
+	UNIMPLEMENTED()
+	UNUSED(_container)
+	UNUSED(_transform)
+	UNUSED(_button_data)
+	return NULL;
+}
+
+void rde_ui_destroy_container(rde_ui_container* _container) {
+	UNIMPLEMENTED()
+	UNUSED(_container);
+}
 
 // ==============================================================================
 // =							PUBLIC API - ERROR					 	     =
