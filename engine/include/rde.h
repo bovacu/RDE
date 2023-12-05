@@ -1394,6 +1394,7 @@ struct rde_ui_container {
 	int x, y;
 	rde_ui_element* elements;
 	rde_ui_container_callbacks callbacks;
+	bool used;
 };
 RDE_FUNC rde_ui_container rde_struct_create_ui_container();
 
@@ -1768,11 +1769,11 @@ RDE_FUNC RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing();
 
 /// ============================ UI =========================================
 
-RDE_FUNC rde_ui_container* rde_ui_create_container();
+RDE_FUNC rde_ui_container* rde_ui_load_container();
 RDE_FUNC rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_transform* _transform, rde_ui_element_image_data _image_data);
 RDE_FUNC rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_transform* _transform, rde_ui_element_text_data _text_data);
 RDE_FUNC rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_transform* _transform, rde_ui_button_data _button_data);
-RDE_FUNC void rde_ui_destroy_container(rde_ui_container* _container);
+RDE_FUNC void rde_ui_container_unload(rde_ui_container* _container);
 
 /// ============================ AUDIO ======================================
 
