@@ -397,6 +397,7 @@ struct rde_transform {
 	int* children;
 	int index;
 	bool dirty;
+	bool updated_this_frame;
 };
 
 /// File System
@@ -719,6 +720,7 @@ rde_transform rde_struct_create_transform() {
 	_t.scale = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
 	_t.parent = RDE_INT_MIN;
 	_t.dirty = false;
+	_t.updated_this_frame = false;
 	_t.children = NULL;
 	_t.index = RDE_INT_MIN;
 	return _t;
@@ -1709,11 +1711,25 @@ void rde_engine_transform_get_matrix(rde_transform* _t, mat4 _mat) {
 		glm_mat4_mul(_mat, _rotation_mat, _mat);
 }
 
+bool rde_engine_transform_get_or_calculate_frame_world_matrix(rde_transform* _transform, mat4 _mat) {
+	bool _was_updated_this_frame = false;
+	if(_transform->updated_this_frame) {
+		glm_mat4_copy(ENGINE.world_transforms[_transform->index], _mat);
+		_was_updated_this_frame = true;
+	} else {
+		rde_engine_transform_get_matrix(_transform, _mat);
+		glm_mat4_copy(_mat, ENGINE.world_transforms[_transform->index]);
+	}
+
+	_transform->updated_this_frame = true;
+	return _was_updated_this_frame;
+}
+
 void rde_engine_transform_parse_parent(rde_transform* _transform, mat4 _mat) {
 	mat4 _p_local_matrix;
-	rde_engine_transform_get_matrix(&ENGINE.transforms[_transform->parent], _p_local_matrix);
+	bool _was_updated = rde_engine_transform_get_or_calculate_frame_world_matrix(&ENGINE.transforms[_transform->parent], _p_local_matrix);
 	
-	if(ENGINE.transforms[_transform->parent].parent > -1) {
+	if(ENGINE.transforms[_transform->parent].parent > -1 && !_was_updated) {
 		rde_engine_transform_parse_parent(&ENGINE.transforms[_transform->parent], _p_local_matrix);
 	}
 
@@ -1747,19 +1763,21 @@ void rde_engine_transform_update() {
 			
 			if(_any_parent_dirty || _t->dirty) {
 				mat4 _t_local_matrix;
-				rde_engine_transform_get_matrix(_t, _t_local_matrix);
+				rde_engine_transform_get_or_calculate_frame_world_matrix(_t, _t_local_matrix);
 				rde_engine_transform_parse_parent(_t, _t_local_matrix);
 				glm_mat4_copy(_t_local_matrix, ENGINE.world_transforms[_t->index]);
 			}
+			_t->updated_this_frame = true;
 		} else if(_t->dirty) {
 			mat4 _t_local_matrix;
-			rde_engine_transform_get_matrix(_t, _t_local_matrix);
+			rde_engine_transform_get_or_calculate_frame_world_matrix(_t, _t_local_matrix);
 			glm_mat4_copy(_t_local_matrix, ENGINE.world_transforms[_t->index]);
 		}
 	}
 
 	for(int _i = 0; _i <= ENGINE.last_transform_used; _i++) {
 		ENGINE.transforms[_i].dirty = false;
+		ENGINE.transforms[_i].updated_this_frame = false;
 	}
 }
 

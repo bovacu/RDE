@@ -5,6 +5,7 @@ rde_transform* hierarchy_transform_1;
 rde_transform* hierarchy_transform_2;
 rde_transform* hierarchy_transform_3;
 rde_transform* hierarchy_transform_4;
+rde_transform* hierarchy_transform_5;
 
 int id_counter = 0;
 
@@ -149,6 +150,10 @@ void hierarchy_draw_3d(rde_window* _window, float _dt) {
 		rde_rendering_3d_draw_mesh(hierarchy_transform_0, cube_mesh, NULL);
 		rde_rendering_3d_draw_mesh(hierarchy_transform_1, cube_mesh, NULL);
 		rde_rendering_3d_draw_mesh(hierarchy_transform_2, cube_mesh, NULL);
+
+		rde_rendering_3d_draw_mesh(hierarchy_transform_3, cube_mesh, NULL);
+		rde_rendering_3d_draw_mesh(hierarchy_transform_4, cube_mesh, NULL);
+		rde_rendering_3d_draw_mesh(hierarchy_transform_5, cube_mesh, NULL);
 	})
 }
 
@@ -165,19 +170,19 @@ void hierarchy_imgui_transform(const char* _name, rde_transform* _transform) {
 	rde_vec_3F _model_rotation = rde_engine_transform_get_rotation_degs(_transform);
 	float _radians = rde_math_degrees_to_radians(_model_rotation.x);
 
-	if(rde_imgui_slider_angle("Rotation X", &_radians, 0, 360, 0)) {
+	if(rde_imgui_slider_angle("Rotation X", &_radians, -360, 360, 0)) {
 		_model_rotation.x = rde_math_radians_to_degrees(_radians);
 		rde_engine_transform_set_rotation(_transform, _model_rotation);
 	}
 
 	_radians = rde_math_degrees_to_radians(_model_rotation.y);
-	if(rde_imgui_slider_angle("Rotation Y", &_radians, 0, 360, 0)) {
+	if(rde_imgui_slider_angle("Rotation Y", &_radians, -360, 360, 0)) {
 		_model_rotation.y = rde_math_radians_to_degrees(_radians);
 		rde_engine_transform_set_rotation(_transform, _model_rotation);
 	}
 
 	_radians = rde_math_degrees_to_radians(_model_rotation.z);
-	if(rde_imgui_slider_angle("Rotation Z", &_radians, 0, 360, 0)) {
+	if(rde_imgui_slider_angle("Rotation Z", &_radians, -360, 360, 0)) {
 		_model_rotation.z = rde_math_radians_to_degrees(_radians);
 		rde_engine_transform_set_rotation(_transform, _model_rotation);
 	}
@@ -198,6 +203,9 @@ void hierarchy_draw_imgui(float _dt, rde_window* _window) {
 	hierarchy_imgui_transform("0", hierarchy_transform_0);
 	hierarchy_imgui_transform("1", hierarchy_transform_1);
 	hierarchy_imgui_transform("2", hierarchy_transform_2);
+	hierarchy_imgui_transform("3", hierarchy_transform_3);
+	hierarchy_imgui_transform("4", hierarchy_transform_4);
+	hierarchy_imgui_transform("5", hierarchy_transform_5);
 
 	id_counter = 0;
  }
@@ -219,6 +227,7 @@ void hierarchy_unload() {
 	rde_engine_transform_unload(hierarchy_transform_2);
 	rde_engine_transform_unload(hierarchy_transform_3);
 	rde_engine_transform_unload(hierarchy_transform_4);
+	rde_engine_transform_unload(hierarchy_transform_5);
 
 	events_callback = NULL;
 	update_callback = NULL;
@@ -237,9 +246,21 @@ void hierarchy_init() {
 	hierarchy_transform_2 = rde_engine_transform_load();
 	hierarchy_transform_3 = rde_engine_transform_load();
 	hierarchy_transform_4 = rde_engine_transform_load();
+	hierarchy_transform_5 = rde_engine_transform_load();
 
 	rde_engine_transform_set_parent(hierarchy_transform_1, hierarchy_transform_0);
 	rde_engine_transform_set_parent(hierarchy_transform_2, hierarchy_transform_1);
+
+	rde_engine_transform_set_parent(hierarchy_transform_4, hierarchy_transform_3);
+	rde_engine_transform_set_parent(hierarchy_transform_5, hierarchy_transform_4);
+
+	rde_engine_transform_set_position(hierarchy_transform_0, (rde_vec_3F) { -8,  8, 0 });
+	rde_engine_transform_set_position(hierarchy_transform_1, (rde_vec_3F) {  0, -8, 0 });
+	rde_engine_transform_set_position(hierarchy_transform_2, (rde_vec_3F) {  0,  0, 8 });
+
+	rde_engine_transform_set_position(hierarchy_transform_3, (rde_vec_3F) {  8,  8, 0 });
+	rde_engine_transform_set_position(hierarchy_transform_4, (rde_vec_3F) {  0, -8, 0 });
+	rde_engine_transform_set_position(hierarchy_transform_5, (rde_vec_3F) {  0,  0, 8 });
 
 	events_callback = &hierarchy_on_event;
 	update_callback = &hierarchy_on_update;
