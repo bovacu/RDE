@@ -23,6 +23,8 @@ tools/atlas_generator/test_dir_2/*.png
 
 *.old
 
+*.rdbg
+
 tests/*.dll
 tests/*.exe
 tests/*.exp
