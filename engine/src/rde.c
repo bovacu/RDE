@@ -2187,11 +2187,15 @@ size_t rde_engine_transform_get_children_count(rde_transform* _transform) {
 
 void rde_engine_transform_unload(rde_transform* _transform) {
 	if(_transform == &ENGINE.transforms[ENGINE.last_transform_used]) {
+		int _last_transform_used = ENGINE.last_transform_used;
 		for(int _i = ENGINE.last_transform_used - 1; _i > 0; _i--) {
 			rde_transform* _t =  &ENGINE.transforms[_i];
 			if(_t->parent != RDE_INT_MIN) {
 				ENGINE.last_transform_used = _i;
 			}
+		}
+		if(_last_transform_used == ENGINE.last_transform_used) {
+			ENGINE.last_transform_used = -1;
 		}
 	}
 	rde_engine_transform_remove_transform_from_parent_children(_transform);
