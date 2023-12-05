@@ -1678,7 +1678,7 @@ void rde_inner_engine_on_late_update(float _dt) {
 }
 
 rde_display_info* rde_engine_get_available_displays() {
-	UNIMPLEMENTED("Not implemented");
+	UNIMPLEMENTED();
 	return NULL;
 }
 
@@ -1846,7 +1846,7 @@ float rde_engine_get_fixed_delta() {
 
 void rde_engine_set_fixed_delta(float _delta_time) {
 	UNUSED(_delta_time)
-	UNIMPLEMENTED("Not implemented")
+	UNIMPLEMENTED()
 }
 
 void rde_engine_on_run() {
@@ -2065,7 +2065,7 @@ void rde_engine_destroy_engine() {
 void rde_engine_switch_window_display(rde_window* _window, size_t _new_display) {
 	UNUSED(_window)
 	UNUSED(_new_display)
-	UNIMPLEMENTED("Not implemented");
+	UNIMPLEMENTED();
 }
 
 rde_window* rde_engine_get_focused_window() {
@@ -3188,7 +3188,7 @@ char* rde_file_read_chunk(rde_file_handle* _file_handler, size_t _begin_byte, si
 	UNUSED(_file_handler)
 	UNUSED(_begin_byte)
 	UNUSED(_end_byte)
-	UNIMPLEMENTED("rde_file_read_chunk")
+	UNIMPLEMENTED()
 	return NULL;
 }
 
@@ -3196,7 +3196,7 @@ void rde_file_write(rde_file_handle* _file_handler, size_t _bytes, const char* _
 	UNUSED(_file_handler)
 	UNUSED(_bytes)
 	UNUSED(_data)
-	UNIMPLEMENTED("rde_file_write")
+	UNIMPLEMENTED()
 }
 
 void rde_file_write_to_line(rde_file_handle* _file_handler, size_t _bytes, const char* _data, size_t _line) {
@@ -3204,7 +3204,7 @@ void rde_file_write_to_line(rde_file_handle* _file_handler, size_t _bytes, const
 	UNUSED(_bytes)
 	UNUSED(_data)
 	UNUSED(_line)
-	UNIMPLEMENTED("rde_file_write_to_line")
+	UNIMPLEMENTED()
 }
 
 void rde_file_append(rde_file_handle* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line) {
@@ -3213,29 +3213,29 @@ void rde_file_append(rde_file_handle* _file_handler, size_t _append_byte, size_t
 	UNUSED(_bytes)
 	UNUSED(_data)
 	UNUSED(_line)
-	UNIMPLEMENTED("rde_file_append")
+	UNIMPLEMENTED()
 }
 
 void rde_file_clear_content(rde_file_handle* _file_handler) {
 	UNUSED(_file_handler)
-	UNIMPLEMENTED("rde_file_clear_content")
+	UNIMPLEMENTED()
 }
 
 bool rde_file_exists(const char* _file_path) {
 	UNUSED(_file_path)
-	UNIMPLEMENTED("rde_file_exists")
+	UNIMPLEMENTED()
 	return false;
 }
 
 void rde_file_delete(const char* _file_path) {
 	UNUSED(_file_path)
-	UNIMPLEMENTED("rde_file_delete")
+	UNIMPLEMENTED()
 }
 
 void rde_file_move(const char* _file_path, const char* _new_file_path) {
 	UNUSED(_file_path)
 	UNUSED(_new_file_path)
-	UNIMPLEMENTED("rde_file_move")
+	UNIMPLEMENTED()
 }
 
 void rde_file_close(rde_file_handle* _file_handler) {
@@ -3433,14 +3433,14 @@ rde_window* rde_inner_window_create_android_window(size_t _free_window_index) {
 
 #if IS_IOS()
 rde_window* rde_inner_window_create_ios_window(size_t _free_window_index) {
-	UNIMPLEMENTED("Mac ios creation is not implemented yet");
+	UNIMPLEMENTED();
     return NULL;
 }
 #endif
 
 #if 0
 rde_window* rde_window_create_wasm_window(size_t _free_window_index) {
-	UNIMPLEMENTED("Mac WASM creation is not implemented yet");
+	UNIMPLEMENTED();
     return NULL;
 }
 #endif
@@ -3531,7 +3531,7 @@ void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_
 	UNUSED(_position)
 	UNUSED(_size_of_rectangle)
 	UNUSED(_file_name_with_extension)
-	UNIMPLEMENTED("rde_window_take_screen_shot")
+	UNIMPLEMENTED()
 }
 
 unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size) {
@@ -6103,14 +6103,14 @@ void rde_rendering_2d_draw_point(rde_vec_2F _position, rde_color _color, rde_sha
 	UNUSED(_position);
 	UNUSED(_color);
 	UNUSED(_shader);
-	UNIMPLEMENTED("rde_rendering_2d_draw_point")
+	UNIMPLEMENTED()
 }
 
 void rde_rendering_3d_draw_point(rde_vec_3F _position, rde_color _color, rde_shader* _shader) {
 	UNUSED(_position);
 	UNUSED(_color);
 	UNUSED(_shader);
-	UNIMPLEMENTED("rde_rendering_3d_draw_point")
+	UNIMPLEMENTED()
 }
 
 void rde_rendering_2d_draw_line(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader) {
@@ -6118,7 +6118,7 @@ void rde_rendering_2d_draw_line(rde_vec_2F _init, rde_vec_2F _end, rde_color _co
 	UNUSED(_end);
 	UNUSED(_color);
 	UNUSED(_shader);
-	UNIMPLEMENTED("rde_rendering_2d_draw_line")
+	UNIMPLEMENTED()
 }
 
 void rde_rendering_2d_draw_triangle(rde_vec_2F _vertex_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader) {
@@ -6230,7 +6230,7 @@ void rde_rendering_2d_draw_circle(rde_vec_2F _position, float _radius, rde_color
 	UNUSED(_radius);
 	UNUSED(_color);
 	UNUSED(_shader);
-	UNIMPLEMENTED("rde_rendering_2d_draw_circle")
+	UNIMPLEMENTED()
 }
 
 void rde_rendering_2d_draw_polygon(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader) {
@@ -6239,7 +6239,7 @@ void rde_rendering_2d_draw_polygon(const rde_transform* _transform, const rde_po
 	UNUSED(_color)
 	UNUSED(_color)
 	UNUSED(_shader)
-	UNIMPLEMENTED("rde_rendering_2d_draw_polygon")
+	UNIMPLEMENTED()
 }
 
 void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
@@ -7858,29 +7858,29 @@ void rde_audio_play_sound(rde_sound* _sound) {
 
 void rde_audio_pause_sound(rde_sound* _sound) {
 	UNUSED(_sound)
-	UNIMPLEMENTED("rde_audio_pause_sound")
+	UNIMPLEMENTED()
 }
 
 void rde_audio_stop_sound(rde_sound* _sound) {
 	UNUSED(_sound)
-	UNIMPLEMENTED("rde_audio_stop_sound")
+	UNIMPLEMENTED()
 }
 
 void rde_audio_restart_sound(rde_sound* _sound) {
 	UNUSED(_sound)
-	UNIMPLEMENTED("rde_audio_restart_sound")
+	UNIMPLEMENTED()
 }
 
 bool rde_audio_is_sound_playing(rde_sound* _sound) {
 	UNUSED(_sound)
-	UNIMPLEMENTED("rde_audio_is_sound_playing")
+	UNIMPLEMENTED()
 	return false;
 }
 
 bool rde_audio_set_sound_volume(rde_sound* _sound, float _volume) {
 	UNUSED(_sound)
 	UNUSED(_volume)
-	UNIMPLEMENTED("rde_audio_set_sound_volume")
+	UNIMPLEMENTED()
 	return false;
 }
 

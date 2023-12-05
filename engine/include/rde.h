@@ -212,9 +212,7 @@ typedef unsigned int uint;
 
 #define UNUSED(_x) (void)_x;
 
-#define UNIMPLEMENTED(_message) {				\
-		assert(false);							\
-	}
+#define UNIMPLEMENTED() assert(false && __func__);
 
 #define UNIMPLEMENTED_STRUCT() short foo;
 
