@@ -1160,6 +1160,7 @@ rde_ui_element_image_data rde_struct_create_ui_element_image_data() {
 	rde_ui_element_image_data _i;
 	_i.nine_slice = rde_struct_create_ui_9_slice();
 	_i.texture = NULL;
+	_i.size = (rde_vec_2UI) { 0, 0 };
 	return _i;
 }
 
@@ -1173,10 +1174,8 @@ rde_ui_element_text_data rde_struct_create_ui_element_text_data() {
 
 rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type) {
 	rde_ui_element _e;
-	_e.width = 0;
-	_e.height = 0;
-	_e.x = 0;
-	_e.y = 0;
+	_e.size = (rde_vec_2UI) { 0, 0 };
+	_e.transform = NULL;
 	_e.type = _type;
 	switch(_type) {
 		case RDE_UI_ELEMENT_TYPE_TEXT: {
@@ -1187,7 +1186,8 @@ rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type) {
 			_e.image = rde_struct_create_ui_element_image_data();
 		} break;
 	}
-
+	_e.stretch = RDE_UI_STRETCH_NO_STRETCH;
+	_e.anchor = RDE_UI_ANCHOR_MIDDLE;
 	return _e;
 }
 
@@ -1201,13 +1201,14 @@ rde_ui_container_callbacks rde_struct_create_ui_container_callbacks() {
 
 rde_ui_container rde_struct_create_ui_container() {
 	rde_ui_container _c;
-	_c.width = 0;
-	_c.height = 0;
-	_c.x = 0;
-	_c.y = 0;
+	_c.size = (rde_vec_2UI) { 0, 0 };
+	_c.transform = NULL;
 	_c.elements = NULL;
+	_c.containers = NULL;
 	_c.callbacks = rde_struct_create_ui_container_callbacks();
 	_c.used = false;
+	_c.stretch = RDE_UI_STRETCH_NO_STRETCH;
+	_c.anchor = RDE_UI_ANCHOR_MIDDLE;
 	return _c;
 }
 
@@ -8382,10 +8383,10 @@ ANativeWindow* rde_android_get_native_window() {
 // =							PUBLIC API - UI					 			=
 // ==============================================================================
 
-rde_ui_container* rde_ui_load_container() {
+rde_ui_container* rde_ui_container_load_root() {
 	rde_ui_container* _container = NULL;
 	
-	for(size_t _i = 0; _i < RDE_MAX_CONTAINERS; _i++) {
+	for(int _i = 0; _i < RDE_MAX_CONTAINERS; _i++) {
 		rde_ui_container* _c = &ENGINE.ui_containers[_i];
 		if(!_c->used) {
 			_container = _c;
@@ -8401,31 +8402,35 @@ rde_ui_container* rde_ui_load_container() {
 	return _container;
 }
 
-rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_transform* _transform, rde_ui_element_image_data _image_data) {
-	UNIMPLEMENTED()
-	UNUSED(_container)
-	UNUSED(_transform)
-	UNUSED(_image_data)
-	return NULL;
+rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_ui_element_image_data _image_data) {
+	rde_ui_element _element;
+	_element.type = RDE_UI_ELEMENT_TYPE_IMAGE;
+	_element.transform = rde_engine_transform_load();
+	_element.image = _image_data;
+	stbds_arrput(_container->elements, _element);
+	return &stbds_arrlast(_container->elements);
 }
 
-rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_transform* _transform, rde_ui_element_text_data _text_data) {
-	UNIMPLEMENTED()
-	UNUSED(_container)
-	UNUSED(_transform)
-	UNUSED(_text_data)
-	return NULL;
+rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_ui_element_text_data _text_data) {
+	rde_ui_element _element;
+	_element.type = RDE_UI_ELEMENT_TYPE_TEXT;
+	_element.transform = rde_engine_transform_load();
+	_element.text = _text_data;
+	stbds_arrput(_container->elements, _element);
+	return &stbds_arrlast(_container->elements);
 }
 
-rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_transform* _transform, rde_ui_button_data _button_data) {
-	UNIMPLEMENTED()
-	UNUSED(_container)
-	UNUSED(_transform)
-	UNUSED(_button_data)
-	return NULL;
+rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_data _button_data) {
+	rde_ui_container _new_container;
+	_new_container.size = _button_data.size;
+	rde_ui_add_image(&_new_container, _button_data.image);
+	rde_ui_add_text(&_new_container, _button_data.text);
+	_new_container.transform = rde_engine_transform_load();
+	stbds_arrput(_container, _new_container);
+	return &stbds_arrlast(_container->containers);
 }
 
-void rde_ui_container_unload(rde_ui_container* _container) {
+void rde_ui_container_unload_root(rde_ui_container* _container) {
 	if(&ENGINE.ui_containers[ENGINE.last_ui_container_used] == _container) {
 		int _last_container_used = ENGINE.last_ui_container_used;
 		for(int _i = ENGINE.last_ui_container_used - 1; _i >= 0; _i--) {

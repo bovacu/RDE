@@ -1356,6 +1356,7 @@ RDE_FUNC rde_ui_9_slice rde_struct_create_ui_9_slice();
 typedef struct {
 	rde_ui_9_slice nine_slice;
 	rde_texture* texture;
+	rde_vec_2UI size;
 } rde_ui_element_image_data;
 RDE_FUNC rde_ui_element_image_data rde_struct_create_ui_element_image_data();
 
@@ -1367,6 +1368,7 @@ typedef struct {
 RDE_FUNC rde_ui_element_text_data rde_struct_create_ui_element_text_data();
 
 typedef struct {
+	rde_vec_2UI size;
 	rde_ui_element_image_data image;
 	rde_ui_element_text_data text;
 } rde_ui_button_data;
@@ -1377,9 +1379,11 @@ typedef enum {
 } RDE_UI_ELEMENT_TYPE_;
 
 typedef struct {
-	size_t width, height;
-	int x, y;
+	rde_vec_2UI size;
+	rde_transform* transform;
 	RDE_UI_ELEMENT_TYPE_ type;
+	RDE_UI_STRETCH_ stretch;
+	RDE_UI_ANCHOR_ anchor;
 	
 	union {
 		rde_ui_element_image_data image;
@@ -1390,11 +1394,14 @@ typedef struct {
 RDE_FUNC rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type);
 
 struct rde_ui_container {
-	size_t width, height;
-	int x, y;
+	rde_vec_2UI size;
+	rde_transform* transform;
 	rde_ui_element* elements;
+	rde_ui_container* containers;
 	rde_ui_container_callbacks callbacks;
 	bool used;
+	RDE_UI_STRETCH_ stretch;
+	RDE_UI_ANCHOR_ anchor;
 };
 RDE_FUNC rde_ui_container rde_struct_create_ui_container();
 
@@ -1769,11 +1776,11 @@ RDE_FUNC RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing();
 
 /// ============================ UI =========================================
 
-RDE_FUNC rde_ui_container* rde_ui_load_container();
-RDE_FUNC rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_transform* _transform, rde_ui_element_image_data _image_data);
-RDE_FUNC rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_transform* _transform, rde_ui_element_text_data _text_data);
-RDE_FUNC rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_transform* _transform, rde_ui_button_data _button_data);
-RDE_FUNC void rde_ui_container_unload(rde_ui_container* _container);
+RDE_FUNC rde_ui_container* rde_ui_container_load_root();
+RDE_FUNC rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_ui_element_image_data _image_data);
+RDE_FUNC rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_ui_element_text_data _text_data);
+RDE_FUNC rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_data _button_data);
+RDE_FUNC void rde_ui_container_unload_root(rde_ui_container* _container);
 
 /// ============================ AUDIO ======================================
 
