@@ -8403,6 +8403,7 @@ rde_ui_container* rde_ui_container_load_root() {
 }
 
 rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_ui_element_image_data _image_data) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_add_image -> container");
 	rde_ui_element _element;
 	_element.type = RDE_UI_ELEMENT_TYPE_IMAGE;
 	_element.transform = rde_engine_transform_load();
@@ -8412,6 +8413,7 @@ rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_ui_element_im
 }
 
 rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_ui_element_text_data _text_data) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_add_text -> container");
 	rde_ui_element _element;
 	_element.type = RDE_UI_ELEMENT_TYPE_TEXT;
 	_element.transform = rde_engine_transform_load();
@@ -8421,6 +8423,7 @@ rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_ui_element_tex
 }
 
 rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_data _button_data) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_add_button -> container");
 	rde_ui_container _new_container;
 	_new_container.size = _button_data.size;
 	rde_ui_add_image(&_new_container, _button_data.image);
@@ -8431,6 +8434,7 @@ rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_
 }
 
 void rde_ui_container_unload_root(rde_ui_container* _container) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_unload_root -> container");
 	if(&ENGINE.ui_containers[ENGINE.last_ui_container_used] == _container) {
 		int _last_container_used = ENGINE.last_ui_container_used;
 		for(int _i = ENGINE.last_ui_container_used - 1; _i >= 0; _i--) {
@@ -8445,6 +8449,31 @@ void rde_ui_container_unload_root(rde_ui_container* _container) {
 		}
 	}
 	*_container = rde_struct_create_ui_container();
+}
+
+void rde_rendering_draw_ui(rde_ui_container* _container) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_rendering_draw_ui -> container");
+	for(size_t _i = 0; _i < stbds_arrlenu(_container->elements); _i++) {
+		rde_ui_element* _element = &_container->elements[_i];
+
+		rde_transform* _transform = _element->transform;
+
+		// TODO: apply STRETCH and ANCHORS
+
+		switch(_element->type) {
+			case RDE_UI_ELEMENT_TYPE_IMAGE: {
+				rde_rendering_2d_draw_texture(_transform, _element->image.texture, RDE_COLOR_WHITE, NULL);
+			} break;
+
+			case RDE_UI_ELEMENT_TYPE_TEXT: {
+				rde_rendering_2d_draw_text(_transform, _element->text.font, _element->text.text, RDE_COLOR_WHITE, NULL);
+			} break;
+		}
+	}
+
+	for(size_t _i = 0; _i < stbds_arrlenu(_container->containers); _i++) {
+		rde_rendering_draw_ui(&_container->containers[_i]);
+	}
 }
 
 // ==============================================================================

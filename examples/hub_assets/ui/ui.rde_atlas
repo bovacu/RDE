@@ -1,0 +1,23 @@
+{
+	"panel": {
+		"position": [0, 0],
+		"size": [64, 64]
+	},
+	"check": {
+		"position": [65, 1],
+		"size": [32, 32]
+	},
+	"check_box": {
+		"position": [98, 2],
+		"size": [32, 32]
+	},
+	"handle": {
+		"position": [131, 3],
+		"size": [16, 32]
+	},
+	"bar": {
+		"position": [1, 65],
+		"size": [128, 8]
+	}
+
+}
