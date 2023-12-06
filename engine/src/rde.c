@@ -7846,7 +7846,7 @@ void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rd
 		if(_event->type == RDE_EVENT_TYPE_MOUSE_MOVED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_ENTERED) == 0) {
 			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_ENTERED;
 			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_NONE;
-			rde_log_level(RDE_LOG_LEVEL_INFO, "Mouse entered to container of size (%u, %u)", _container->size.x, _container->size.y);
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_EXITED;
 			if(_container->callbacks.on_mouse_enter != NULL) {
 				_container->callbacks.on_mouse_enter();
 			}
@@ -7856,9 +7856,12 @@ void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rd
 		else if(_event->type == RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_DOWN) == 0) {
 			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_DOWN;
 			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_NONE;
-			rde_log_level(RDE_LOG_LEVEL_INFO, "Mouse Down on container of size (%u, %u)", _container->size.x, _container->size.y);
 			if(_container->callbacks.on_button_down != NULL) {
-				_container->callbacks.on_button_down(0);
+				#if (IS_WINDOWS() || IS_MAC() || IS_LINUX() || IS_WASM()) && !IS_MOBILE()
+				_container->callbacks.on_button_down(_event->data.mouse_event_data.button);
+				#else
+				_container->callbacks.on_button_down(_event->data.mobile_event_data.finger_id);
+				#endif
 			}
 			*_handled = true;
 		}
@@ -7866,12 +7869,25 @@ void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rd
 		else if(_event->type == RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_DOWN) == RDE_UI_CONTAINER_STATE_MOUSE_DOWN) {
 			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_UP;
 			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_DOWN;
-			rde_log_level(RDE_LOG_LEVEL_INFO, "Mouse Up on container of size (%u, %u)", _container->size.x, _container->size.y);
 			if(_container->callbacks.on_button_up != NULL) {
-				_container->callbacks.on_button_up(0);
+				#if (IS_WINDOWS() || IS_MAC() || IS_LINUX() || IS_WASM()) && !IS_MOBILE()
+				_container->callbacks.on_button_up(_event->data.mouse_event_data.button);
+				#else
+				_container->callbacks.on_button_up(_event->data.mobile_event_data.finger_id);
+				#endif
 			}
 			*_handled = true;
 		}
+	} else {
+		if(_event->type == RDE_EVENT_TYPE_MOUSE_MOVED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_ENTERED) == RDE_UI_CONTAINER_STATE_MOUSE_ENTERED) {
+			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_EXITED;
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_ENTERED;
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_DOWN;
+			if(_container->callbacks.on_mouse_exit != NULL) {
+				_container->callbacks.on_mouse_exit();
+			}
+			*_handled = true;
+		} 
 	}
 }
 
