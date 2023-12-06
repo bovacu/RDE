@@ -114,8 +114,11 @@ void ui_mouse_controller(float _dt) {
 }
 
 void ui_on_event(rde_event* _event, rde_window* _window) {
-	UNUSED(_window);
-	UNUSED(_event);
+	
+	if(ui_root_container != NULL) {
+		rde_events_ui_poll(_window, _event, ui_root_container);
+	}
+
 }
 
 void ui_on_update(float _dt) {
@@ -182,8 +185,9 @@ void ui_init() {
 	ui_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
 	ui_hud_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_ORTHOGRAPHIC);
 	rde_engine_transform_set_position(ui_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
-
-	ui_root_container = rde_ui_container_load_root();
+	
+	rde_vec_2I _screen_size = rde_window_get_window_size(current_window);
+	ui_root_container = rde_ui_container_load_root((rde_vec_2UI) { _screen_size.x, _screen_size.y });
 	ui_font = rde_rendering_font_load("hub_assets/fonts/arial");
 	ui_atlas = rde_rendering_atlas_load("hub_assets/ui/ui");
 	ui_panel_texture = rde_rendering_texture_load("hub_assets/ui/panel.png", NULL);
@@ -201,7 +205,8 @@ void ui_init() {
 
 	rde_ui_button_data _button = {
 		.image = _image,
-		.text = _text
+		.text = _text,
+		.size = (rde_vec_2UI) { 128, 64 }
 	};
 
 	rde_ui_add_button(ui_root_container, _button);

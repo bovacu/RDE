@@ -1206,6 +1206,8 @@ rde_ui_container_callbacks rde_struct_create_ui_container_callbacks() {
 	_c.on_button_down = NULL;
 	_c.on_button_up = NULL;
 	_c.on_scroll = NULL;
+	_c.on_mouse_enter = NULL;
+	_c.on_mouse_exit = NULL;
 	return _c;
 }
 
@@ -1219,6 +1221,7 @@ rde_ui_container rde_struct_create_ui_container() {
 	_c.used = false;
 	_c.stretch = RDE_UI_STRETCH_NO_STRETCH;
 	_c.anchor = RDE_UI_ANCHOR_MIDDLE;
+	_c.event_state = RDE_UI_CONTAINER_STATE_MOUSE_NONE;
 	return _c;
 }
 
@@ -7830,6 +7833,60 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 	return _event;
 }
 
+bool rde_util_is_point_2d_in_rect(rde_vec_2F _point, rde_transform* _transform, rde_vec_2F _size) {
+	rde_vec_3F _position = _transform->position;
+	return _point.x >= _position.x - _size.x * 0.5f && _point.x <= _position.x + _size.x * 0.5f &&
+ 		  _point.y >= _position.y - _size.y * 0.5f && _point.y <= _position.y + _size.y * 0.5f;
+}
+
+void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled) {
+	rde_vec_2I _mouse_pos = rde_events_mouse_get_position(_window);
+	
+	if(rde_util_is_point_2d_in_rect((rde_vec_2F) { _mouse_pos.x, _mouse_pos.y }, _container->transform, (rde_vec_2F){ _container->size.x, _container->size.y })) {
+		if(_event->type == RDE_EVENT_TYPE_MOUSE_MOVED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_ENTERED) == 0) {
+			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_ENTERED;
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_NONE;
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Mouse entered to container of size (%u, %u)", _container->size.x, _container->size.y);
+			if(_container->callbacks.on_mouse_enter != NULL) {
+				_container->callbacks.on_mouse_enter();
+			}
+			*_handled = true;
+		} 
+
+		else if(_event->type == RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_DOWN) == 0) {
+			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_DOWN;
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_NONE;
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Mouse Down on container of size (%u, %u)", _container->size.x, _container->size.y);
+			if(_container->callbacks.on_button_down != NULL) {
+				_container->callbacks.on_button_down(0);
+			}
+			*_handled = true;
+		}
+
+		else if(_event->type == RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_DOWN) == RDE_UI_CONTAINER_STATE_MOUSE_DOWN) {
+			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_UP;
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_DOWN;
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Mouse Up on container of size (%u, %u)", _container->size.x, _container->size.y);
+			if(_container->callbacks.on_button_up != NULL) {
+				_container->callbacks.on_button_up(0);
+			}
+			*_handled = true;
+		}
+	}
+}
+
+void rde_inner_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled) {
+	rde_critical_error(_event == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_events_ui_poll -> event");
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_events_ui_poll -> container");
+
+	for(int _i = stbds_arrlen(_container->containers) - 1; _i >= 0; _i--) {
+		rde_inner_events_ui_poll(_window, _event, &_container->containers[_i], _handled);
+	}
+
+	if(!*_handled) {
+		rde_inner_events_ui_handle_event(_window, _event, _container, _handled);
+	}
+}
 
 // ==============================================================================
 // =							PUBLIC API - EVENTS					 	    =
@@ -8074,7 +8131,12 @@ void rde_events_sync_events(rde_window* _window) {
 	}
 }
 
-
+void rde_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container) {
+	rde_critical_error(_event == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_events_ui_poll -> event");
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_events_ui_poll -> container");
+	bool _handled = false;
+	rde_inner_events_ui_poll(_window, _event, _container, &_handled);
+}
 
 
 #ifdef RDE_AUDIO_MODULE
@@ -8535,7 +8597,7 @@ ANativeWindow* rde_android_get_native_window() {
 // =							PUBLIC API - UI					 			=
 // ==============================================================================
 
-rde_ui_container* rde_ui_container_load_root() {
+rde_ui_container* rde_ui_container_load_root(rde_vec_2UI _size) {
 	rde_ui_container* _container = NULL;
 	
 	for(int _i = 0; _i < RDE_MAX_CONTAINERS; _i++) {
@@ -8543,6 +8605,8 @@ rde_ui_container* rde_ui_container_load_root() {
 		if(!_c->used) {
 			_container = _c;
 			_c->used = true;
+			_c->transform = rde_engine_transform_load();
+			_c->size = _size;
 			if(ENGINE.last_ui_container_used < _i) {
 				ENGINE.last_ui_container_used = _i;
 			}
@@ -8587,6 +8651,10 @@ rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_
 
 void rde_ui_container_unload_root(rde_ui_container* _container) {
 	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_unload_root -> container");
+	rde_engine_transform_unload(_container->transform);
+
+	// TODO: unload everything from every sub-container/element
+
 	if(&ENGINE.ui_containers[ENGINE.last_ui_container_used] == _container) {
 		int _last_container_used = ENGINE.last_ui_container_used;
 		for(int _i = ENGINE.last_ui_container_used - 1; _i >= 0; _i--) {

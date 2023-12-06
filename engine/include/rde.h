@@ -1045,10 +1045,13 @@ RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_c
 typedef void (*rde_ui_container_callback_bd)(int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
 typedef void (*rde_ui_container_callback_bu)(int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
 typedef void (*rde_ui_container_callback_scroll)(rde_vec_2F _scroll);
+typedef void (*rde_ui_container_callback_mouse_entered_exited)();
 typedef struct {
 	rde_ui_container_callback_bd on_button_down;
 	rde_ui_container_callback_bd on_button_up;
 	rde_ui_container_callback_scroll on_scroll;
+	rde_ui_container_callback_mouse_entered_exited on_mouse_enter;
+	rde_ui_container_callback_mouse_entered_exited on_mouse_exit;
 } rde_ui_container_callbacks;
 #endif
 
@@ -1380,6 +1383,14 @@ typedef enum {
 	RDE_UI_ELEMENT_TYPE_TEXT
 } RDE_UI_ELEMENT_TYPE_;
 
+typedef enum {
+	RDE_UI_CONTAINER_STATE_MOUSE_NONE = 1,
+	RDE_UI_CONTAINER_STATE_MOUSE_ENTERED = 2,
+	RDE_UI_CONTAINER_STATE_MOUSE_EXITED = 4,
+	RDE_UI_CONTAINER_STATE_MOUSE_DOWN = 8,
+	RDE_UI_CONTAINER_STATE_MOUSE_UP = 16
+} RDE_UI_CONTAINER_STATE_;
+
 typedef struct {
 	rde_vec_2UI size;
 	rde_transform* transform;
@@ -1404,6 +1415,7 @@ struct rde_ui_container {
 	bool used;
 	RDE_UI_STRETCH_ stretch;
 	RDE_UI_ANCHOR_ anchor;
+	RDE_UI_CONTAINER_STATE_ event_state;
 };
 RDE_FUNC rde_ui_container rde_struct_create_ui_container();
 
@@ -1679,7 +1691,8 @@ RDE_FUNC bool rde_events_is_mobile_touch_just_pressed(rde_window* _window, uint 
 RDE_FUNC bool rde_events_is_mobile_touch_pressed(rde_window* _window, uint _finger_id);
 RDE_FUNC bool rde_events_is_mobile_touch_released(rde_window* _window, uint _finger_id);
 RDE_FUNC uint rde_events_mobile_get_finger_amount(rde_window* _window);
-RDE_FUNC 
+
+RDE_FUNC void rde_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container);
 
 /// ============================ RENDERING ==================================
 
@@ -1779,7 +1792,7 @@ RDE_FUNC RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing();
 
 /// ============================ UI =========================================
 
-RDE_FUNC rde_ui_container* rde_ui_container_load_root();
+RDE_FUNC rde_ui_container* rde_ui_container_load_root(rde_vec_2UI _size);
 RDE_FUNC rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_ui_element_image_data _image_data);
 RDE_FUNC rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_ui_element_text_data _text_data);
 RDE_FUNC rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_data _button_data);
