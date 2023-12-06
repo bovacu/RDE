@@ -1,5 +1,7 @@
 in vec2 uv;
 in vec4 color;
+in vec2 size;
+in vec4 nine_slice;
 
 uniform sampler2D tex;
 uniform float dt;

@@ -466,15 +466,9 @@ typedef struct {
 	rde_vec_3F position;
 	int color;
 	rde_vec_2F texture_coordinates;
-} rde_vertex_2d;
-
-typedef struct {
-	rde_vec_3F position;
-	int color;
-	rde_vec_2F texture_coordinates;
-	rde_vec_4F nine_slice;
 	rde_vec_2F size;
-} rde_vertex_2d_nine_slice;
+	rde_vec_4F nine_slice;
+} rde_vertex_2d;
 	
 typedef struct {
 	rde_shader* shader;
@@ -1161,6 +1155,7 @@ rde_ui_nine_slice rde_struct_create_ui_nine_slice() {
 	rde_ui_nine_slice _n;
 	_n.left_right = (rde_vec_2UI) { 0, 0 };
 	_n.bottom_top = (rde_vec_2UI) { 0, 0 };
+	_n.size = (rde_vec_2UI) { 0, 0 };
 	return _n;
 }
 
@@ -1539,7 +1534,6 @@ void rde_inner_engine_on_render(float _dt, rde_window* _window);
 void rde_inner_rendering_init_2d();
 void rde_inner_rendering_end_2d();
 void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transform, mat4 _mat);
-void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
 void rde_inner_rendering_reset_batch_2d();
 void rde_inner_rendering_try_create_batch_2d(rde_shader* _shader, const rde_texture* _texture);
 void rde_inner_rendering_flush_batch_2d();
@@ -3944,27 +3938,6 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
-	_shader_vertex_handle = rde_file_open("shaders/core/nine_slice_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/core/nine_slice_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
-
-	if(rde_util_string_contains_substring(_vertex_shader, "header_2d_vert", false)) {
-		char* _new_vertex_shader = rde_util_string_replace_substring(_vertex_shader, "header_2d_vert", _header_2d_vert, NULL);
-		rde_file_free_read_text(_shader_vertex_handle);
-		_vertex_shader = _new_vertex_shader;
-	}
-
-	if(rde_util_string_contains_substring(_fragment_shader, "header_2d_frag", false)) {
-		char* _new_fragment_shader = rde_util_string_replace_substring(_fragment_shader, "header_2d_frag", _header_2d_frag, NULL);
-		rde_file_free_read_text(_shader_fragment_handle);
-		_fragment_shader = _new_fragment_shader;
-	}
-	
-	ENGINE.nine_slice_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, _vertex_shader, _fragment_shader);
-	rde_file_close(_shader_vertex_handle);
-	rde_file_close(_shader_fragment_handle);
-
 	_shader_vertex_handle = rde_file_open("shaders/core/text_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/core/text_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
@@ -4319,6 +4292,12 @@ void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _ba
 	RDE_CHECK_GL(glVertexAttribPointer, 2, 2, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3 + sizeof(unsigned char) * 4));
 	RDE_CHECK_GL(glEnableVertexAttribArray, 2);
 
+	RDE_CHECK_GL(glVertexAttribPointer, 3, 2, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3 + sizeof(unsigned char) * 4 + sizeof(float) * 2));
+	RDE_CHECK_GL(glEnableVertexAttribArray, 3);
+
+	RDE_CHECK_GL(glVertexAttribPointer, 4, 4, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3 + sizeof(unsigned char) * 4 + sizeof(float) * 2 + sizeof(float) * 2));
+	RDE_CHECK_GL(glEnableVertexAttribArray, 4);
+
 	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 	RDE_CHECK_GL(glBindVertexArray, 0);
 }
@@ -4352,7 +4331,7 @@ void rde_inner_rendering_flush_batch_2d() {
 	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)current_batch_2d.mvp);
 	rde_vec_2I _mouse_pos = current_drawing_window->mouse_position;
 	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "mouse_position"), _mouse_pos.x, _mouse_pos.y);
-	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "mouse_position"), ENGINE.delta_time);
+	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "dt"), ENGINE.delta_time);
 	RDE_CHECK_GL(glBindVertexArray, current_batch_2d.vertex_array_object);
 
 	if(current_batch_2d.texture.opengl_texture_id >= 0) {
@@ -5091,7 +5070,7 @@ void rde_inner_rendering_flush_line_batch() {
 	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 	rde_vec_2I _mouse_pos = current_drawing_window->mouse_position;
 	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), _mouse_pos.x, _mouse_pos.y);
-	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), ENGINE.delta_time);
+	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, "dt"), ENGINE.delta_time);
 	
 	RDE_CHECK_GL(glBindVertexArray, current_batch_3d.line_batch.vertex_array_object);
 	
@@ -5171,7 +5150,7 @@ void rde_inner_rendering_flush_batch_3d() {
 	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 	rde_vec_2I _mouse_pos = current_drawing_window->mouse_position;
 	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), _mouse_pos.x, _mouse_pos.y);
-	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), ENGINE.delta_time);
+	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, "dt"), ENGINE.delta_time);
 
 	rde_vec_3F _camera_pos = current_drawing_camera->transform->position;
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "camera_pos"), _camera_pos.x, _camera_pos.y, _camera_pos.z);
@@ -6502,18 +6481,24 @@ void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_te
 	_vertex_0_0.position = (rde_vec_3F){ _bottom_left_texture_position[0], _bottom_left_texture_position[1], 0.f };
 	_vertex_0_0.color = _color;
 	_vertex_0_0.texture_coordinates = (rde_vec_2F){ _bottom_left_texture_uv_coord[0], _bottom_left_texture_uv_coord[1] };
+	_vertex_0_0.size = _texture_tile_size;
+	_vertex_0_0.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_0;
 
 	rde_vertex_2d _vertex_0_1;
 	_vertex_0_1.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
 	_vertex_0_1.color = _color;
 	_vertex_0_1.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+	_vertex_0_1.size = _texture_tile_size;
+	_vertex_0_1.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_1;
 
 	rde_vertex_2d _vertex_0_2;
 	_vertex_0_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
 	_vertex_0_2.color = _color;
 	_vertex_0_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+	_vertex_0_2.size = _texture_tile_size;
+	_vertex_0_2.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_2;
 
 	// 2   1
@@ -6527,30 +6512,42 @@ void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_te
 	_vertex_1_0.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
 	_vertex_1_0.color = _color;
 	_vertex_1_0.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+	_vertex_1_0.size = _texture_tile_size;
+	_vertex_1_0.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_0;
 
 	rde_vertex_2d _vertex_1_1;
 	_vertex_1_1.position = (rde_vec_3F){ _top_right_texture_position[0], _top_right_texture_position[1], 0.f };
 	_vertex_1_1.color = _color;
 	_vertex_1_1.texture_coordinates = (rde_vec_2F){ _top_right_texture_uv_coord[0], _top_right_texture_uv_coord[1] };
+	_vertex_1_1.size = _texture_tile_size;
+	_vertex_1_1.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_1;
 
 	rde_vertex_2d _vertex_1_2;
 	_vertex_1_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
 	_vertex_1_2.color = _color;
 	_vertex_1_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+	_vertex_1_2.size = _texture_tile_size;
+	_vertex_1_2.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
 
 void rde_rendering_2d_draw_nine_slice(const rde_transform* _transform, const rde_texture* _texture, rde_ui_nine_slice _nine_slice, rde_color _tint_color, rde_shader* _shader) {
-	UNUSED(_nine_slice)
 	const size_t _triangle_vertex_count = 6;
 
 	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
 	rde_inner_rendering_transform_to_glm_mat4_2d(_transform, _transformation_matrix);
-	vec3 _nine_slice_scaling = (vec3) { 128.f / _texture->size.x, 64.f / _texture->size.y, 1.f };
+	rde_vec_2F _nine_slice_scaling = (rde_vec_2F) { rde_math_clamp_float(_nine_slice.size.x / _texture->size.x, 1.f, 10000.f), 
+										rde_math_clamp_float(_nine_slice.size.y / _texture->size.y, 1.f, 10000.f)};
+	rde_vec_4F _nine_slice_paddings = (rde_vec_4F) {
+		_nine_slice.left_right.x,
+		_nine_slice.left_right.y,
+		_nine_slice.bottom_top.x,
+		_nine_slice.bottom_top.y
+	};
 
-	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.nine_slice_shader_2d : _shader;
+	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.texture_shader_2d : _shader;
 	rde_inner_rendering_try_create_batch_2d(_drawing_shader, _texture);
 	rde_inner_rendering_try_flush_batch_2d(_drawing_shader, _texture, _triangle_vertex_count);
 
@@ -6574,10 +6571,10 @@ void rde_rendering_2d_draw_nine_slice(const rde_transform* _transform, const rde
 	vec4 _top_right_texture_position = GLM_VEC4_ONE_INIT;
 	vec4 _top_left_texture_position = GLM_VEC4_ONE_INIT;
 
-	glm_mat4_mulv(_transformation_matrix, (vec4) { -_texture_tile_size_on_screen.x * _nine_slice_scaling[0], -_texture_tile_size_on_screen.y * _nine_slice_scaling[1], 0.0f, 1.0f }, _bottom_left_texture_position);
-	glm_mat4_mulv(_transformation_matrix, (vec4) { _texture_tile_size_on_screen.x * _nine_slice_scaling[0], -_texture_tile_size_on_screen.y * _nine_slice_scaling[1], 0.0f, 1.0f }, _bottom_right_texture_position);
-	glm_mat4_mulv(_transformation_matrix, (vec4) { _texture_tile_size_on_screen.x * _nine_slice_scaling[0],  _texture_tile_size_on_screen.y * _nine_slice_scaling[1], 0.0f, 1.0f }, _top_right_texture_position);
-	glm_mat4_mulv(_transformation_matrix, (vec4) { -_texture_tile_size_on_screen.x * _nine_slice_scaling[0],  _texture_tile_size_on_screen.y * _nine_slice_scaling[1], 0.0f, 1.0f }, _top_left_texture_position);
+	glm_mat4_mulv(_transformation_matrix, (vec4) { -_texture_tile_size_on_screen.x * _nine_slice_scaling.x, -_texture_tile_size_on_screen.y * _nine_slice_scaling.y, 0.0f, 1.0f }, _bottom_left_texture_position);
+	glm_mat4_mulv(_transformation_matrix, (vec4) { _texture_tile_size_on_screen.x * _nine_slice_scaling.x, -_texture_tile_size_on_screen.y * _nine_slice_scaling.y, 0.0f, 1.0f }, _bottom_right_texture_position);
+	glm_mat4_mulv(_transformation_matrix, (vec4) { _texture_tile_size_on_screen.x * _nine_slice_scaling.x,  _texture_tile_size_on_screen.y * _nine_slice_scaling.y, 0.0f, 1.0f }, _top_right_texture_position);
+	glm_mat4_mulv(_transformation_matrix, (vec4) { -_texture_tile_size_on_screen.x * _nine_slice_scaling.x,  _texture_tile_size_on_screen.y * _nine_slice_scaling.y, 0.0f, 1.0f }, _top_left_texture_position);
 
 	// The (1.f - _texture_origin_norm.y) is needed as we need to invert the coordinates on the Y axis, the exported atlas (by RDE tool) assumes (0, 0)
 	// on top-left, but OpenGL coords for UV origin is bottom-left.
@@ -6597,18 +6594,24 @@ void rde_rendering_2d_draw_nine_slice(const rde_transform* _transform, const rde
 	_vertex_0_0.position = (rde_vec_3F){ _bottom_left_texture_position[0], _bottom_left_texture_position[1], 0.f };
 	_vertex_0_0.color = _color;
 	_vertex_0_0.texture_coordinates = (rde_vec_2F){ _bottom_left_texture_uv_coord[0], _bottom_left_texture_uv_coord[1] };
+	_vertex_0_0.size = (rde_vec_2F) { (float)_nine_slice.size.x, (float)_nine_slice.size.y };
+	_vertex_0_0.nine_slice = _nine_slice_paddings;
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_0;
 
 	rde_vertex_2d _vertex_0_1;
 	_vertex_0_1.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
 	_vertex_0_1.color = _color;
 	_vertex_0_1.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+	_vertex_0_1.size = (rde_vec_2F) { (float)_nine_slice.size.x, (float)_nine_slice.size.y };
+	_vertex_0_1.nine_slice = _nine_slice_paddings;
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_1;
 
 	rde_vertex_2d _vertex_0_2;
 	_vertex_0_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
 	_vertex_0_2.color = _color;
 	_vertex_0_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+	_vertex_0_2.size = (rde_vec_2F) { (float)_nine_slice.size.x, (float)_nine_slice.size.y };
+	_vertex_0_2.nine_slice = _nine_slice_paddings;
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_2;
 
 	// 2   1
@@ -6622,18 +6625,24 @@ void rde_rendering_2d_draw_nine_slice(const rde_transform* _transform, const rde
 	_vertex_1_0.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
 	_vertex_1_0.color = _color;
 	_vertex_1_0.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+	_vertex_1_0.size = (rde_vec_2F) { (float)_nine_slice.size.x, (float)_nine_slice.size.y };
+	_vertex_1_0.nine_slice = _nine_slice_paddings;
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_0;
 
 	rde_vertex_2d _vertex_1_1;
 	_vertex_1_1.position = (rde_vec_3F){ _top_right_texture_position[0], _top_right_texture_position[1], 0.f };
 	_vertex_1_1.color = _color;
 	_vertex_1_1.texture_coordinates = (rde_vec_2F){ _top_right_texture_uv_coord[0], _top_right_texture_uv_coord[1] };
+	_vertex_1_1.size = (rde_vec_2F) { (float)_nine_slice.size.x, (float)_nine_slice.size.y };
+	_vertex_1_1.nine_slice = _nine_slice_paddings;
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_1;
 
 	rde_vertex_2d _vertex_1_2;
 	_vertex_1_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
 	_vertex_1_2.color = _color;
 	_vertex_1_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+	_vertex_1_2.size = (rde_vec_2F) { (float)_nine_slice.size.x, (float)_nine_slice.size.y };
+	_vertex_1_2.nine_slice = _nine_slice_paddings;
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
 
@@ -6710,18 +6719,24 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 		_vertex_0_0.position = (rde_vec_3F){ _bottom_left_texture_position[0], _bottom_left_texture_position[1], 0.f };
 		_vertex_0_0.color = _color;
 		_vertex_0_0.texture_coordinates = (rde_vec_2F){ _bottom_left_texture_uv_coord[0], _bottom_left_texture_uv_coord[1] };
+		_vertex_0_0.size = _texture_tile_size;
+		_vertex_0_0.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_0;
 
 		rde_vertex_2d _vertex_0_1;
 		_vertex_0_1.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
 		_vertex_0_1.color = _color;
 		_vertex_0_1.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+		_vertex_0_1.size = _texture_tile_size;
+		_vertex_0_1.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_1;
 
 		rde_vertex_2d _vertex_0_2;
 		_vertex_0_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
 		_vertex_0_2.color = _color;
 		_vertex_0_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+		_vertex_0_2.size = _texture_tile_size;
+		_vertex_0_2.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_2;
 
 		// 2   1
@@ -6735,18 +6750,24 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 		_vertex_1_0.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
 		_vertex_1_0.color = _color;
 		_vertex_1_0.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+		_vertex_1_0.size = _texture_tile_size;
+		_vertex_1_0.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_0;
 
 		rde_vertex_2d _vertex_1_1;
 		_vertex_1_1.position = (rde_vec_3F){ _top_right_texture_position[0], _top_right_texture_position[1], 0.f };
 		_vertex_1_1.color = _color;
 		_vertex_1_1.texture_coordinates = (rde_vec_2F){ _top_right_texture_uv_coord[0], _top_right_texture_uv_coord[1] };
+		_vertex_1_1.size = _texture_tile_size;
+		_vertex_1_1.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_1;
 
 		rde_vertex_2d _vertex_1_2;
 		_vertex_1_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
 		_vertex_1_2.color = _color;
 		_vertex_1_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+		_vertex_1_2.size = _texture_tile_size;
+		_vertex_1_2.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 
 		_next_pos_x += (_char_info.advance.x >> 6) * _t.scale.x; // /64.f
@@ -7272,7 +7293,7 @@ void rde_rendering_3d_draw_skybox(rde_camera* _camera) {
 	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(ENGINE.skybox_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 	rde_vec_2I _mouse_pos = current_drawing_window->mouse_position;
 	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(ENGINE.skybox_shader->compiled_program_id, "mouse_position"), _mouse_pos.x, _mouse_pos.y);
-	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(ENGINE.skybox_shader->compiled_program_id, "mouse_position"), ENGINE.delta_time);
+	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(ENGINE.skybox_shader->compiled_program_id, "dt"), ENGINE.delta_time);
 
 	RDE_CHECK_GL(glBindVertexArray, ENGINE.skybox.vao);
 	RDE_CHECK_GL(glActiveTexture, GL_TEXTURE0);
@@ -8593,7 +8614,7 @@ void rde_rendering_draw_ui(rde_ui_container* _container) {
 
 		switch(_element->type) {
 			case RDE_UI_ELEMENT_TYPE_IMAGE: {
-				rde_rendering_2d_draw_nine_slice(_transform, _element->image.texture, rde_struct_create_ui_nine_slice(), RDE_COLOR_WHITE, NULL);
+				rde_rendering_2d_draw_nine_slice(_transform, _element->image.texture, _element->image.nine_slice, RDE_COLOR_WHITE, NULL);
 			} break;
 
 			case RDE_UI_ELEMENT_TYPE_TEXT: {

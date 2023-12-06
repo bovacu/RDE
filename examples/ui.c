@@ -190,6 +190,10 @@ void ui_init() {
 	
 	rde_ui_element_image_data _image = rde_struct_create_ui_element_image_data();
 	_image.texture = ui_panel_texture;
+	_image.nine_slice = rde_struct_create_ui_nine_slice();
+	_image.nine_slice.left_right = (rde_vec_2UI) { 10, 10 };
+	_image.nine_slice.bottom_top = (rde_vec_2UI) { 10, 10 };
+	_image.nine_slice.size = (rde_vec_2UI) { 128, 64 };
 
 	rde_ui_element_text_data _text = rde_struct_create_ui_element_text_data();
 	_text.font = ui_font;

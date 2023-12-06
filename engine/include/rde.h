@@ -1350,6 +1350,7 @@ RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
 typedef struct {
 	rde_vec_2UI left_right;
 	rde_vec_2UI bottom_top;
+	rde_vec_2UI size;
 } rde_ui_nine_slice;
 RDE_FUNC rde_ui_nine_slice rde_struct_create_ui_nine_slice();
 
