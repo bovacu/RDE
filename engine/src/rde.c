@@ -5664,9 +5664,18 @@ void rde_rendering_texture_unload(rde_texture* _texture) {
 	memset(_texture->file_path, 0, RDE_MAX_PATH);
 }
 
-rde_atlas* rde_rendering_atlas_load(const char* _texture_path, const char* _config_path) {
-	rde_texture* _texture = rde_rendering_texture_load(_texture_path, NULL);
-	rde_atlas_sub_textures* _atlas_sub_textures = rde_inner_file_system_read_atlas_config(_config_path, _texture);
+rde_atlas* rde_rendering_atlas_load(const char* _texture_path) {
+	char _config_path_ext[RDE_MAX_PATH];
+	memset(_config_path_ext, 0, RDE_MAX_PATH);
+	
+	char _texture_path_ext[RDE_MAX_PATH];
+	memset(_texture_path_ext, 0, RDE_MAX_PATH);
+
+	rde_snprintf(_config_path_ext, RDE_MAX_PATH, "%s.rde_atlas", _texture_path);
+	rde_snprintf(_texture_path_ext, RDE_MAX_PATH, "%s.png", _texture_path);
+
+	rde_texture* _texture = rde_rendering_texture_load(_texture_path_ext, NULL);
+	rde_atlas_sub_textures* _atlas_sub_textures = rde_inner_file_system_read_atlas_config(_config_path_ext, _texture);
 
 	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_atlases; _i++) {
 		if (ENGINE.atlases[_i].texture != NULL && strcmp(ENGINE.atlases[_i].texture->file_path, _texture_path) == 0) {
@@ -5724,9 +5733,18 @@ void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture) {
 	}
 }
 
-rde_font* rde_rendering_font_load(const char* _font_path, const char* _font_config_path) {
-	rde_texture* _texture = rde_rendering_texture_text_load(_font_path);
-	rde_font_char_info* _chars = rde_inner_file_system_read_font_config(_font_config_path, _texture);
+rde_font* rde_rendering_font_load(const char* _font_path) {
+	char _config_path_ext[RDE_MAX_PATH];
+	memset(_config_path_ext, 0, RDE_MAX_PATH);
+	
+	char _texture_path_ext[RDE_MAX_PATH];
+	memset(_texture_path_ext, 0, RDE_MAX_PATH);
+
+	rde_snprintf(_config_path_ext, RDE_MAX_PATH, "%s.rde_font", _font_path);
+	rde_snprintf(_texture_path_ext, RDE_MAX_PATH, "%s.png", _font_path);
+
+	rde_texture* _texture = rde_rendering_texture_text_load(_texture_path_ext);
+	rde_font_char_info* _chars = rde_inner_file_system_read_font_config(_config_path_ext, _texture);
 
 	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_number_of_fonts; _i++) {
 		if (ENGINE.fonts[_i].texture != NULL && strcmp(ENGINE.fonts[_i].texture->file_path, _font_path) == 0) {

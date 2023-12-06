@@ -433,6 +433,12 @@ typedef unsigned int uint;
 #define rde_strtok(_str, _del, _ctx) strtok(_str, _del);
 #endif
 
+#if IS_WINDOWS()
+#define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
+#else
+#define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
+#endif
+
 /// *************************************************************************************************
 /// *                                		  ENUMS                         						*
 /// *************************************************************************************************
@@ -1628,7 +1634,7 @@ RDE_FUNC rde_texture* rde_rendering_texture_text_load(const char* _file_path);
 RDE_FUNC rde_texture_data rde_rendering_texture_get_data(rde_texture* _texture);
 RDE_FUNC void rde_rendering_texture_unload(rde_texture* _texture);
 
-RDE_FUNC rde_atlas* rde_rendering_atlas_load(const char* _texture_path, const char* _config_path);
+RDE_FUNC rde_atlas* rde_rendering_atlas_load(const char* _texture_path); // There will be two files with the same name and different extensions to load, just end the path with the atlas name without extension
 RDE_FUNC rde_texture* rde_rendering_atlas_get_subtexture(rde_atlas* _atlas, const char* _texture_name);
 RDE_FUNC rde_atlas_data rde_rendering_atlas_get_data(rde_atlas* _atlas);
 RDE_FUNC void rde_rendering_atlas_unload(rde_atlas* _atlas);
@@ -1646,7 +1652,7 @@ RDE_FUNC void rde_rendering_render_texture_disable();
 RDE_FUNC void rde_rendering_render_texture_update(rde_render_texture* _render_texture, size_t _width, size_t _height);
 RDE_FUNC void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture);
 
-RDE_FUNC rde_font* rde_rendering_font_load(const char* _font_path, const char* _font_config_path);
+RDE_FUNC rde_font* rde_rendering_font_load(const char* _font_path); // There will be two files with the same name and different extensions to load, just end the path with the font name without extension
 RDE_FUNC rde_font_data rde_rendering_font_get_data(rde_font* _font);
 RDE_FUNC void rde_rendering_font_unload(rde_font* _font);
 
