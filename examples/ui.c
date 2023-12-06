@@ -143,11 +143,11 @@ void ui_draw_3d(rde_window* _window, float _dt) {
 	UNUSED(_dt)
 
 	rde_render_3d(_window, &ui_camera, false, {
-	
+		
 	})
 
-	rde_render_2d(_window, &ui_camera, false, {
-	
+	rde_render_2d(_window, &ui_hud_camera, true, {
+		rde_rendering_draw_ui(ui_root_container);
 	})
 }
 
@@ -182,10 +182,22 @@ void ui_init() {
 	rde_engine_transform_set_position(ui_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
 	ui_root_container = rde_ui_container_load_root();
-	ui_font = rde_rendering_font_load("hub_assets/fonts/arial.png", "hub_assets/fonts/arial.rde_font");
-	ui_atlas = rde_rendering_atlas_load("hub_assets/ui/ui.png", "hub_assets/ui/ui.rde_atlas");
+	ui_font = rde_rendering_font_load("hub_assets/fonts/arial");
+	ui_atlas = rde_rendering_atlas_load("hub_assets/ui/ui");
+	
+	rde_ui_element_image_data _image = rde_struct_create_ui_element_image_data();
+	_image.texture = rde_rendering_atlas_get_subtexture(ui_atlas, "panel");
 	
-	
+	rde_ui_element_text_data _text = rde_struct_create_ui_element_text_data();
+	_text.font = ui_font;
+	_text.text = "Button";
+
+	rde_ui_button_data _button = {
+		.image = _image,
+		.text = _text
+	};
+
+	rde_ui_add_button(ui_root_container, _button);
 
 	events_callback = &ui_on_event;
 	update_callback = &ui_on_update;

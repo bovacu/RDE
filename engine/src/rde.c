@@ -1172,6 +1172,13 @@ rde_ui_element_text_data rde_struct_create_ui_element_text_data() {
 	return _t;
 }
 
+rde_ui_button_data rde_struct_create_ui_container_button_data() {
+	rde_ui_button_data _b;
+	_b.image = rde_struct_create_ui_element_image_data();
+	_b.text = rde_struct_create_ui_element_text_data();
+	return _b;
+}
+
 rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type) {
 	rde_ui_element _e;
 	_e.size = (rde_vec_2UI) { 0, 0 };
@@ -8429,7 +8436,7 @@ rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_
 	rde_ui_add_image(&_new_container, _button_data.image);
 	rde_ui_add_text(&_new_container, _button_data.text);
 	_new_container.transform = rde_engine_transform_load();
-	stbds_arrput(_container, _new_container);
+	stbds_arrput(_container->containers, _new_container);
 	return &stbds_arrlast(_container->containers);
 }
 

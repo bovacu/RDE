@@ -1372,6 +1372,7 @@ typedef struct {
 	rde_ui_element_image_data image;
 	rde_ui_element_text_data text;
 } rde_ui_button_data;
+RDE_FUNC rde_ui_button_data rde_struct_create_ui_container_button_data();
 
 typedef enum {
 	RDE_UI_ELEMENT_TYPE_IMAGE,
