@@ -1598,6 +1598,8 @@ void rde_inner_event_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _
 void rde_inner_event_sdl_to_rde_helper_transform_drop_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event);
+void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled);
+void rde_inner_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled);
 void rde_events_sync_events(rde_window* _window);
 
 /// ******************************************* AUDIO *********************************************
@@ -3019,7 +3021,11 @@ void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 #endif
 }
 
-
+bool rde_util_is_point_2d_in_rect(rde_vec_2F _point, rde_transform* _transform, rde_vec_2F _size) {
+	rde_vec_3F _position = _transform->position;
+	return _point.x >= _position.x - _size.x * 0.5f && _point.x <= _position.x + _size.x * 0.5f &&
+ 		  _point.y >= _position.y - _size.y * 0.5f && _point.y <= _position.y + _size.y * 0.5f;
+}
 
 
 // ==============================================================================
@@ -7831,12 +7837,6 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 	}
 
 	return _event;
-}
-
-bool rde_util_is_point_2d_in_rect(rde_vec_2F _point, rde_transform* _transform, rde_vec_2F _size) {
-	rde_vec_3F _position = _transform->position;
-	return _point.x >= _position.x - _size.x * 0.5f && _point.x <= _position.x + _size.x * 0.5f &&
- 		  _point.y >= _position.y - _size.y * 0.5f && _point.y <= _position.y + _size.y * 0.5f;
 }
 
 void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled) {

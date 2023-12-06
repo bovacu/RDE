@@ -1530,6 +1530,8 @@ RDE_FUNC void rde_util_string_replace_chars_all(char* _string, char _old, char _
 RDE_FUNC char* rde_util_string_replace_substring(char* _string, char* _old_string, char* _new_string, int* _output_appearences);
 RDE_FUNC size_t rde_util_string_split(char* _string, char*** _split_array, char _split_mark);
 
+RDE_FUNC bool rde_util_is_point_2d_in_rect(rde_vec_2F _point, rde_transform* _transform, rde_vec_2F _size);
+
 /// ============================ MATH =======================================
 
 RDE_FUNC void rde_math_set_random_seed(long _seed); /// Sets the seed for the random math module, -1 will not set it to the current time
