@@ -1350,11 +1350,11 @@ RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
 typedef struct {
 	rde_vec_2UI left_right;
 	rde_vec_2UI bottom_top;
-} rde_ui_9_slice;
-RDE_FUNC rde_ui_9_slice rde_struct_create_ui_9_slice();
+} rde_ui_nine_slice;
+RDE_FUNC rde_ui_nine_slice rde_struct_create_ui_nine_slice();
 
 typedef struct {
-	rde_ui_9_slice nine_slice;
+	rde_ui_nine_slice nine_slice;
 	rde_texture* texture;
 	rde_vec_2UI size;
 } rde_ui_element_image_data;
@@ -1729,6 +1729,7 @@ RDE_FUNC void rde_rendering_2d_draw_polygon(const rde_transform* _transform, con
 RDE_FUNC void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_2d_draw_memory_texture(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
 RDE_FUNC void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader); /// Draws a batched group of quads representing the _text in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
+RDE_FUNC void rde_rendering_2d_draw_nine_slice(const rde_transform* _transform, const rde_texture* _texture, rde_ui_nine_slice _nine_slice, rde_color _tint_color, rde_shader* _shader);
 RDE_FUNC void rde_rendering_2d_end_drawing();
 
 RDE_FUNC rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU

@@ -4,6 +4,7 @@ rde_camera ui_hud_camera;
 rde_ui_container* ui_root_container;
 rde_font* ui_font;
 rde_atlas* ui_atlas;
+rde_texture* ui_panel_texture;
 
 float ui_yaw = -90.0f;
 bool ui_first_mouse = true;
@@ -167,6 +168,7 @@ void ui_unload() {
 	rde_ui_container_unload_root(ui_root_container);
 	rde_rendering_font_unload(ui_font);
 	rde_rendering_atlas_unload(ui_atlas);
+	rde_rendering_texture_unload(ui_panel_texture);
 
 	events_callback = NULL;
 	update_callback = NULL;
@@ -184,10 +186,11 @@ void ui_init() {
 	ui_root_container = rde_ui_container_load_root();
 	ui_font = rde_rendering_font_load("hub_assets/fonts/arial");
 	ui_atlas = rde_rendering_atlas_load("hub_assets/ui/ui");
+	ui_panel_texture = rde_rendering_texture_load("hub_assets/ui/panel.png", NULL);
 	
 	rde_ui_element_image_data _image = rde_struct_create_ui_element_image_data();
-	_image.texture = rde_rendering_atlas_get_subtexture(ui_atlas, "panel");
-	
+	_image.texture = ui_panel_texture;
+
 	rde_ui_element_text_data _text = rde_struct_create_ui_element_text_data();
 	_text.font = ui_font;
 	_text.text = "Button";
