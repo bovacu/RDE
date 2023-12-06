@@ -11,7 +11,7 @@ vec4 draw_nine_slice() {
 	vec2 ts = vec2(textureSize(tex, 0));
 	vec2 s = size.xy / ts;
 
-    vec4 b = min(nine_slice / ts.xyxy, vec4(.499));
+    vec4 b = nine_slice / ts.xyxy;
     vec2 _uv = uv9slice(uv, s, b);
     vec3 _col = vec3(texture(tex, _uv).x);
 	return vec4(_col, 1.0);
@@ -22,7 +22,7 @@ vec4 draw_texture() {
 }
 
 void main(void) {
-	if(all(greaterThan(nine_slice, vec4(0, 0, 0, 0)))) {
+	if(any(greaterThan(nine_slice, vec4(0)))) {
 		out_color = draw_nine_slice();
 	} else {
 		out_color = draw_texture();
