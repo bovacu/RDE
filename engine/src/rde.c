@@ -385,6 +385,9 @@ size_t current_frame = 0;
 #define RDE_STACKTRACE_PRINT_LINE_BUFF_SIZE 2048
 #endif
 
+/// Engine
+#define RDE_MAX_TRANSFORMS 100000
+
 /// *************************************************************************************************
 /// *                                INNER STRUCT DEFINITIONS                         			  *
 /// *************************************************************************************************
@@ -657,6 +660,7 @@ struct rde_engine {
 	rde_transform* transforms;
 	mat4* world_transforms;
 	int last_transform_used;
+	int* free_transforms;
 		
 #if IS_ANDROID()
 	ANativeWindow* android_native_window;
@@ -722,7 +726,7 @@ rde_transform rde_struct_create_transform() {
 	_t.dirty = false;
 	_t.updated_this_frame = false;
 	_t.children = NULL;
-	_t.index = RDE_INT_MIN;
+	// _t.index = RDE_INT_MIN;
 	return _t;
 }
 
@@ -1178,16 +1182,17 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.init_info = _engine_init_info;
 	_e.init_info.heap_allocs_config.max_number_of_shaders += RDE_DEFAULT_SHADERS_AMOUNT;
 
-	_e.transforms = NULL;
-	_e.world_transforms = NULL;
-	stbds_arrsetcap(_e.transforms, 1000);
-	stbds_arrsetcap(_e.world_transforms, 1000);
-	stbds_arraddn(_e.world_transforms, 1000);
-	for(size_t _i = 0; _i < 1000; _i++) {
-		stbds_arrput(_e.transforms, rde_struct_create_transform());
+	_e.transforms = (rde_transform*)malloc(sizeof(rde_transform) * RDE_MAX_TRANSFORMS);
+	_e.world_transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_TRANSFORMS);
+
+	for(size_t _i = 0; _i < RDE_MAX_TRANSFORMS; _i++) {
+		_e.transforms[_i] = rde_struct_create_transform();
+		_e.transforms[_i].index = _i;
 		glm_mat4_identity(_e.world_transforms[_i]);
 	}
 	_e.last_transform_used = -1;
+	_e.free_transforms = NULL;
+	stbds_arrput(_e.free_transforms, 0);
 
 #if IS_ANDROID()
 	_e.android_env = SDL_AndroidGetJNIEnv();
@@ -1745,8 +1750,15 @@ void rde_engine_transform_remove_transform_from_parent_children(rde_transform* _
 				break;
 			}
 		}
-		_transform->parent = -1;
 	}
+
+	for(size_t _i = 0; _i < stbds_arrlenu(_transform->children); _i++) {
+		ENGINE.transforms[_transform->children[_i]].parent = -1;
+	}
+
+	stbds_arrfree(_transform->children);
+	_transform->parent = -1;
+	_transform->children = NULL;
 }
 
 void rde_engine_transform_update() {
@@ -2101,37 +2113,26 @@ rde_window* rde_engine_get_focused_window() {
 }
 
 rde_transform* rde_engine_transform_load() {
+	rde_critical_error(ENGINE.last_transform_used == RDE_MAX_TRANSFORMS - 1, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "Transforms", RDE_MAX_TRANSFORMS);
+	
 	rde_transform* _t = NULL;
-	for(int _i = 0; _i < stbds_arrlen(ENGINE.transforms); _i++) {
-		_t = &ENGINE.transforms[_i];
-		if(_t->parent == RDE_INT_MIN) {
-			_t->parent = -1;
-			_t->index = _i;
-			if(ENGINE.last_transform_used < _i) {
-				ENGINE.last_transform_used = _i;
-			}
-			return _t;
+
+	if(stbds_arrlen(ENGINE.free_transforms) > 0) {
+		_t = &ENGINE.transforms[ENGINE.free_transforms[0]];
+		stbds_arrdel(ENGINE.free_transforms, 0);
+
+		if(ENGINE.last_transform_used < _t->index) {
+			ENGINE.last_transform_used = _t->index;
 		}
 	}
 
 	if(_t == NULL) {
-		int _transforms_size = stbds_arrlen(ENGINE.transforms);
-		stbds_arraddn(ENGINE.world_transforms, 1000);
-		for(int _i = 0; _i < 1000; _i++) {
-			stbds_arrput(ENGINE.transforms, rde_struct_create_transform());
-			glm_mat4_identity(ENGINE.world_transforms[_transforms_size + _i]);
-			if(_t == NULL) {
-				_t = &stbds_arrlast(ENGINE.transforms);
-				_t->index = _i + _transforms_size;
-				_t->parent = -1;
-				if(ENGINE.last_transform_used < _transforms_size + _i) {
-					ENGINE.last_transform_used = _transforms_size + _i;
-				}
-			}
-		}
+		_t = &ENGINE.transforms[ENGINE.last_transform_used + 1];
+		ENGINE.last_transform_used = _t->index;
 	}
+
+	_t->parent = -1;
 	
-	rde_critical_error(stbds_arrlenu(ENGINE.transforms) > 1000000, "Too much transforms created \n");
 	return _t;
 }
 
@@ -2204,6 +2205,9 @@ size_t rde_engine_transform_get_children_count(rde_transform* _transform) {
 }
 
 void rde_engine_transform_unload(rde_transform* _transform) {
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_engine_transform_unload -> transform");
+	stbds_arrput(ENGINE.free_transforms, _transform->index);
+
 	if(_transform == &ENGINE.transforms[ENGINE.last_transform_used]) {
 		int _last_transform_used = ENGINE.last_transform_used;
 		for(int _i = ENGINE.last_transform_used - 1; _i > 0; _i--) {
@@ -2217,7 +2221,10 @@ void rde_engine_transform_unload(rde_transform* _transform) {
 		}
 	}
 	rde_engine_transform_remove_transform_from_parent_children(_transform);
+	glm_mat4_identity(ENGINE.world_transforms[_transform->index]);
+	int _index = _transform->index;
 	*_transform = rde_struct_create_transform();
+	_transform->index = _index;
 }
 
 #if IS_MAC()

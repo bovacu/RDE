@@ -16,44 +16,56 @@ rde_vec_3F performance_test_3d_directional_light_ambient_color = { 0.2f, 0.2f, 0
 rde_vec_3F performance_test_3d_directional_light_diffuse_color = { 0.5f, 0.5f, 0.5f };
 rde_vec_3F performance_test_3d_directional_light_specular_color = { 1.0f, 1.0f, 1.0f };
 
-rde_transform* performance_test_3d_transforms = NULL;
+rde_transform** performance_test_3d_transforms = NULL;
 int performance_test_3d_amount_to_show = 1;
 
-void performance_test_3d_keyboard_controller(float _dt) {
+void performance_test_keyboard_controller(float _dt) {
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
-		performance_test_3d_camera.transform.position.x += performance_test_3d_camera_front.x * 10 * _dt;
-		performance_test_3d_camera.transform.position.y += performance_test_3d_camera_front.y * 10 * _dt;
-		performance_test_3d_camera.transform.position.z += performance_test_3d_camera_front.z * 10 * _dt;
+		rde_vec_3F _position = rde_engine_transform_get_position(performance_test_3d_camera.transform);
+		_position.x += performance_test_3d_camera_front.x * 10 * _dt;
+		_position.y += performance_test_3d_camera_front.y * 10 * _dt;
+		_position.z += performance_test_3d_camera_front.z * 10 * _dt;
+		rde_engine_transform_set_position(performance_test_3d_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_S)) {
-		performance_test_3d_camera.transform.position.x -= performance_test_3d_camera_front.x * 10 * _dt;
-		performance_test_3d_camera.transform.position.y -= performance_test_3d_camera_front.y * 10 * _dt;
-		performance_test_3d_camera.transform.position.z -= performance_test_3d_camera_front.z * 10 * _dt;
+		rde_vec_3F _position = rde_engine_transform_get_position(performance_test_3d_camera.transform);
+		_position.x -= performance_test_3d_camera_front.x * 10 * _dt;
+		_position.y -= performance_test_3d_camera_front.y * 10 * _dt;
+		_position.z -= performance_test_3d_camera_front.z * 10 * _dt;
+		rde_engine_transform_set_position(performance_test_3d_camera.transform, _position);
 	}
 
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_DOWN)) {
-		performance_test_3d_camera.transform.position.y -= 10 * _dt;
+		rde_vec_3F _position = rde_engine_transform_get_position(performance_test_3d_camera.transform);
+		_position.y -= 10 * _dt;
+		rde_engine_transform_set_position(performance_test_3d_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_UP)) {
-		performance_test_3d_camera.transform.position.y += 10 * _dt;
+		rde_vec_3F _position = rde_engine_transform_get_position(performance_test_3d_camera.transform);
+		_position.y += 10 * _dt;
+		rde_engine_transform_set_position(performance_test_3d_camera.transform, _position);
 	}
 
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_A)) {
 		rde_vec_3F _cp = rde_math_cross_product(performance_test_3d_camera_front, performance_test_3d_camera_up);
 		rde_math_normalize(&_cp);
-
-		performance_test_3d_camera.transform.position.x -= _cp.x * 10 * _dt;
-		performance_test_3d_camera.transform.position.y -= _cp.y * 10 * _dt;
-		performance_test_3d_camera.transform.position.z -= _cp.z * 10 * _dt;
+		
+		rde_vec_3F _position = rde_engine_transform_get_position(performance_test_3d_camera.transform);
+		_position.x -= _cp.x * 10 * _dt;
+		_position.y -= _cp.y * 10 * _dt;
+		_position.z -= _cp.z * 10 * _dt;
+		rde_engine_transform_set_position(performance_test_3d_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_D)) {
 		rde_vec_3F _cp = rde_math_cross_product(performance_test_3d_camera_front, performance_test_3d_camera_up);
 		rde_math_normalize(&_cp);
 
-		performance_test_3d_camera.transform.position.x += _cp.x * 10 * _dt;
-		performance_test_3d_camera.transform.position.y += _cp.y * 10 * _dt;
-		performance_test_3d_camera.transform.position.z += _cp.z * 10 * _dt;
+		rde_vec_3F _position = rde_engine_transform_get_position(performance_test_3d_camera.transform);
+		_position.x += _cp.x * 10 * _dt;
+		_position.y += _cp.y * 10 * _dt;
+		_position.z += _cp.z * 10 * _dt;
+		rde_engine_transform_set_position(performance_test_3d_camera.transform, _position);
 	}
 }
 
-void performance_test_3d_mouse_controller(float _dt) {
+void performance_test_mouse_controller(float _dt) {
 	UNUSED(_dt)
 
 	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
@@ -101,21 +113,21 @@ void performance_test_3d_mouse_controller(float _dt) {
 
 		performance_test_3d_camera.direction = _front;
 		performance_test_3d_camera_front = _front;
-
-
 	}
 }
 
 void performance_test_3d_on_update(float _dt) {
 	rde_vec_2F _scrolled = rde_events_mouse_get_scrolled(current_window);
 	if(_scrolled.x != 0.f || _scrolled.y != 0.f) {
-		performance_test_3d_camera.transform.position.x += performance_test_3d_camera_front.x * 10 * _dt * (_scrolled.y * 3);
-		performance_test_3d_camera.transform.position.y += performance_test_3d_camera_front.y * 10 * _dt * (_scrolled.y * 3);
-		performance_test_3d_camera.transform.position.z += performance_test_3d_camera_front.z * 10 * _dt * (_scrolled.y * 3);
+		rde_vec_3F _position = rde_engine_transform_get_position(performance_test_3d_camera.transform);
+		_position.x += performance_test_3d_camera_front.x * 10 * _dt * (_scrolled.y * 3);
+		_position.y += performance_test_3d_camera_front.y * 10 * _dt * (_scrolled.y * 3);
+		_position.z += performance_test_3d_camera_front.z * 10 * _dt * (_scrolled.y * 3);
+		rde_engine_transform_set_position(performance_test_3d_camera.transform, _position);
 	}
 
-	performance_test_3d_mouse_controller(_dt);
-	performance_test_3d_keyboard_controller(_dt);
+	performance_test_mouse_controller(_dt);
+	performance_test_keyboard_controller(_dt);
 }
 
 void performance_test_3d_on_fixed_update(float _dt) {
@@ -132,7 +144,7 @@ void performance_test_3d_draw_3d(rde_window* _window, float _dt) {
 		rde_rendering_3d_begin_drawing(&performance_test_3d_camera, _window, false);
 		
 		for(int _i = 0; _i < performance_test_3d_amount_to_show; _i++) {
-			rde_rendering_3d_draw_model(&performance_test_3d_transforms[_i], performance_test_3d_model, NULL);
+			rde_rendering_3d_draw_model(performance_test_3d_transforms[_i], performance_test_3d_model, NULL);
 		}
 
 		rde_rendering_3d_end_drawing();
@@ -162,6 +174,10 @@ void performance_test_3d_unload() {
 
 	performance_test_3d_model = NULL;
 
+	for(size_t _i = 0; _i < performance_test_3d_MAX_3D; _i++) {
+		rde_engine_transform_unload(performance_test_3d_transforms[_i]);
+	}
+
 	events_callback = NULL;
 	update_callback = NULL;
 	fixed_update_callback = NULL;
@@ -174,7 +190,7 @@ void performance_test_3d_unload() {
 
 void performance_test_3d_init() {
 	performance_test_3d_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
-	performance_test_3d_camera.transform.position = (rde_vec_3F) { -3.0, 8.0f, 14.0f };
+	rde_engine_transform_set_position(performance_test_3d_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
 	update_callback = &performance_test_3d_on_update;
 	fixed_update_callback = &performance_test_3d_on_fixed_update;
@@ -183,10 +199,10 @@ void performance_test_3d_init() {
 	render_imgui_callback = &performance_test_3d_draw_imgui;
 	unload_callback = &performance_test_3d_unload;
 
-	performance_test_3d_transforms = (rde_transform*)malloc(sizeof(rde_transform) * performance_test_3d_MAX_3D);
+	performance_test_3d_transforms = (rde_transform**)malloc(sizeof(rde_transform*) * performance_test_3d_MAX_3D);
 	for(size_t _i = 0; _i < performance_test_3d_MAX_3D; _i++) {
-		performance_test_3d_transforms[_i] = rde_struct_create_transform();
-		performance_test_3d_transforms[_i].position = (rde_vec_3F) { (float)rde_math_get_random_int(-10, 10), (float)rde_math_get_random_int(-10, 10), (float)rde_math_get_random_int(-50, 0) };
+		performance_test_3d_transforms[_i] = rde_engine_transform_load();
+		rde_engine_transform_set_position(performance_test_3d_transforms[_i], (rde_vec_3F) { (float)rde_math_get_random_int(-10, 10), (float)rde_math_get_random_int(-10, 10), (float)rde_math_get_random_int(-50, 0) });
 	}
 
 	performance_test_3d_model = rde_rendering_model_load("hub_assets/performance_test/pumpkin_orange_jackolantern.obj");
