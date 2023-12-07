@@ -83,6 +83,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h> 
 
 /// *************************************************************************************************
 /// *                                		DEFINES                         						*
@@ -438,6 +439,14 @@ typedef unsigned int uint;
 #else
 #define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
 #endif
+
+#define RDE_PROFILE_TIME(_name, _code_block)				   \
+	{									  					\
+		clock_t  _start = clock();							 \
+		_code_block											\
+		clock_t _end = clock() - _start;					   \
+		rde_log_level(RDE_LOG_LEVEL_INFO, "%s - Took %f""s", _name, ((double)_end)/CLOCKS_PER_SEC); \
+	}
 
 /// *************************************************************************************************
 /// *                                		  ENUMS                         						*
