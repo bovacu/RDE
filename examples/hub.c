@@ -41,7 +41,7 @@ void draw_grid(rde_camera* _camera, rde_window* _window) {
 #include "model_viewer.c"
 #include "hierarchy.c"
 #include "ui.c"
-// #include "performance_test.c"
+#include "performance_test.c"
 // #include "physics.c"
 #else
 #include "android.c"
