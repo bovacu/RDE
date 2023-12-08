@@ -6547,8 +6547,8 @@ void rde_rendering_2d_draw_nine_slice(const rde_transform* _transform, const rde
 
 	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
 	rde_inner_rendering_transform_to_glm_mat4_2d(_transform, _transformation_matrix);
-	rde_vec_2F _nine_slice_scaling = (rde_vec_2F) { rde_math_clamp_float(_nine_slice.size.x / _texture->size.x, 1.f, 10000.f), 
-										rde_math_clamp_float(_nine_slice.size.y / _texture->size.y, 1.f, 10000.f)};
+	rde_vec_2F _nine_slice_scaling = (rde_vec_2F) { rde_math_clamp_float(_nine_slice.size.x / (float)_texture->size.x, 1.f, 10000.f), 
+										rde_math_clamp_float(_nine_slice.size.y / (float)_texture->size.y, 1.f, 10000.f)};
 	rde_vec_4F _nine_slice_paddings = (rde_vec_4F) {
 		_nine_slice.left_right.x,
 		_nine_slice.left_right.y,
