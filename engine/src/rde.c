@@ -6667,12 +6667,13 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.text_shader_2d : _shader;
 
 	int _next_pos_x = 0;
+	rde_vec_2I _offset = rde_util_font_get_string_size(_text, _font);
 	for (int _i = 0; _i < _text_size; _i++) {
 		rde_transform _t = *_transform;
 		int _key = (int)_text[_i];
 		rde_font_char_info _char_info = _font->chars[_key];
-		_t.position.x += _next_pos_x + _char_info.bearing.x * _t.scale.x;
-		_t.position.y -= (_char_info.size.y * 0.5f - _char_info.bearing.y) * _t.scale.y;
+		_t.position.x += (_next_pos_x + _char_info.bearing.x * 0.5f - _offset.x * 0.5f) * _t.scale.x;
+		_t.position.y -= (_char_info.size.y * 0.5f - _char_info.bearing.y + _offset.y * 0.25f) * _t.scale.y;
 
 		const size_t _triangle_vertex_count = 6;
 
