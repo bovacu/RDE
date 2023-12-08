@@ -1392,7 +1392,6 @@ typedef enum {
 } RDE_UI_CONTAINER_STATE_;
 
 typedef struct {
-	rde_vec_2UI size;
 	rde_transform* transform;
 	RDE_UI_ELEMENT_TYPE_ type;
 	RDE_UI_STRETCH_ stretch;

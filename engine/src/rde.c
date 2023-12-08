@@ -1184,7 +1184,6 @@ rde_ui_button_data rde_struct_create_ui_container_button_data() {
 
 rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type) {
 	rde_ui_element _e;
-	_e.size = (rde_vec_2UI) { 0, 0 };
 	_e.transform = NULL;
 	_e.type = _type;
 	switch(_type) {
