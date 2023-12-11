@@ -28,10 +28,9 @@ void main() {
 	}
 	
 	// Middle
-	// else {
-	//        float t = (border.x * (texture_size.x - size.x)) / (texture_size.x * (2.0 * border.x - size.x));
-	//        texture_coord.x = _uv.x * (1.0 - t * 2.0) + t;
-	//    }
+	else {
+		texture_coord.x = _uv.x + (((border / texture_size) * prop).x - bDst.x);
+	}
 	
 	// Down
     if(_uv.y < offset.y + bDst.y) {
@@ -46,15 +45,14 @@ void main() {
 	}
 
 	// Middle
-	// else {
-	//        float t = (border.y * (texture_size.y - size.y)) / (texture_size.y * (2.0 * border.y - size.y));
-	//        texture_coord.y = _uv.y * (1.0 - t * 2.0) + t;
-	//    }
+	else {
+		texture_coord.y = _uv.y + (((border / texture_size) * prop).y - bDst.y);
+	}
 
-	// if(texture_coord.x == -1 || texture_coord.y == -1) {
-	// 	out_color = vec4(1, 0, 0, 1);
-	// 	return;
-	// }
+	vec4 _color = texture(tex, texture_coord + atlas_offset);
+	if(_color.w < 0.05) {
+		discard;
+	}
 
     out_color = texture(tex, texture_coord + atlas_offset);
 }
