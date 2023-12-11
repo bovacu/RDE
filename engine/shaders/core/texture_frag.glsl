@@ -2,8 +2,8 @@
 
 header_2d_frag
 
-void main() {
-	// This is just to make the image scale correctly
+vec4 draw_nine_slice() {
+		// This is just to make the image scale correctly
 	vec2 prop = vec2(sub_texture_uv.z - sub_texture_uv.x, sub_texture_uv.w - sub_texture_uv.y);
 
 	// Point of start if sub-texture
@@ -61,5 +61,17 @@ void main() {
 		discard;
 	}
 
-    out_color = texture(tex, texture_coord + atlas_offset);
+    return texture(tex, texture_coord + atlas_offset) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
+}
+
+vec4 draw_texture() {
+	return texture(tex, uv) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
+}
+
+void main() {
+	if(any(greaterThan(nine_slice, vec4(0)))) {
+		out_color = draw_nine_slice();
+	} else {
+		out_color = draw_texture();
+	}
 }
