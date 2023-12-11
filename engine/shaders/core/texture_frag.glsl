@@ -16,7 +16,7 @@ void main() {
 
 	// Left
     if(_uv.x < offset.x + bDst.x) {
-        _uv.x = (_uv.x + offset.x) / ratio.x;
+        _uv.x = (_uv.x - offset.x) / ratio.x;
     } 
 
 	// Right
