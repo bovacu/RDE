@@ -3,20 +3,32 @@
 		"position": [0, 0],
 		"size": [64, 64]
 	},
-	"check": {
+	"panel4": {
 		"position": [65, 1],
-		"size": [32, 32]
+		"size": [64, 64]
 	},
-	"check_box": {
-		"position": [98, 2],
+	"panel3": {
+		"position": [130, 2],
+		"size": [64, 64]
+	},
+	"check": {
+		"position": [195, 3],
 		"size": [32, 32]
 	},
 	"handle": {
-		"position": [131, 3],
+		"position": [228, 4],
 		"size": [16, 32]
 	},
-	"bar": {
+	"check_box": {
 		"position": [1, 65],
+		"size": [32, 32]
+	},
+	"panel2": {
+		"position": [34, 66],
+		"size": [64, 64]
+	},
+	"bar": {
+		"position": [99, 67],
 		"size": [128, 8]
 	}
 
