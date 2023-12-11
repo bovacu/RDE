@@ -1042,10 +1042,10 @@ typedef struct {
 RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
 
 #ifdef RDE_RENDERING_MODULE
-typedef void (*rde_ui_container_callback_bd)(int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
-typedef void (*rde_ui_container_callback_bu)(int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
-typedef void (*rde_ui_container_callback_scroll)(rde_vec_2F _scroll);
-typedef void (*rde_ui_container_callback_mouse_entered_exited)();
+typedef void (*rde_ui_container_callback_bd)(rde_ui_container* _container, int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
+typedef void (*rde_ui_container_callback_bu)(rde_ui_container* _container, int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
+typedef void (*rde_ui_container_callback_scroll)(rde_ui_container* _container, rde_vec_2F _scroll);
+typedef void (*rde_ui_container_callback_mouse_entered_exited)(rde_ui_container* _container);
 typedef struct {
 	rde_ui_container_callback_bd on_button_down;
 	rde_ui_container_callback_bd on_button_up;
@@ -1373,7 +1373,9 @@ RDE_FUNC rde_ui_element_text_data rde_struct_create_ui_element_text_data();
 
 typedef struct {
 	rde_vec_2UI size;
-	rde_ui_element_image_data image;
+	rde_ui_element_image_data image_idle;
+	rde_ui_element_image_data image_pressed;
+	rde_ui_element_image_data image_selected;
 	rde_ui_element_text_data text;
 } rde_ui_button_data;
 RDE_FUNC rde_ui_button_data rde_struct_create_ui_container_button_data();
@@ -1396,6 +1398,7 @@ typedef struct {
 	RDE_UI_ELEMENT_TYPE_ type;
 	RDE_UI_STRETCH_ stretch;
 	RDE_UI_ANCHOR_ anchor;
+	bool enabled;
 	
 	union {
 		rde_ui_element_image_data image;

@@ -14,6 +14,8 @@ float ui_last_y =  720.f * 0.5f;
 rde_vec_3F ui_camera_front = { -0.31f, -0.24f, -0.91f };
 rde_vec_3F ui_camera_up = { 0.0, 1.0f, 0.0f };
 
+rde_ui_element* button_background;
+
 void ui_keyboard_controller(float _dt) {
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
 		rde_vec_3F _position = rde_engine_transform_get_position(ui_camera.transform);
@@ -158,6 +160,14 @@ void ui_draw_3d(rde_window* _window, float _dt) {
 void ui_draw_imgui(float _dt, rde_window* _window) {
 	(void)_dt;
 	(void)_window;
+
+	rde_imgui_begin("Button background", NULL, rde_ImGuiWindowFlags_None);
+	int _size[2] = { button_background->image.nine_slice.size.x, button_background->image.nine_slice.size.y  };
+	if(rde_imgui_drag_int_2("Size", _size, 1, 0, 0, rde_ImGuiSliderFlags_None)) {
+		button_background->image.nine_slice.size.x = _size[0];
+		button_background->image.nine_slice.size.y = _size[1];
+	}
+	rde_imgui_end();
 }
 
 void ui_on_render(float _dt, rde_window* _window) {
@@ -193,23 +203,23 @@ void ui_init() {
 	ui_panel_texture = rde_rendering_texture_load("hub_assets/ui/panel.png", NULL);
 	
 	rde_ui_element_image_data _image = rde_struct_create_ui_element_image_data();
-	_image.texture = ui_panel_texture;
+	_image.texture = rde_rendering_atlas_get_subtexture(ui_atlas, "panel2");
 	_image.nine_slice = rde_struct_create_ui_nine_slice();
 	_image.nine_slice.left_right = (rde_vec_2UI) { 10, 10 };
 	_image.nine_slice.bottom_top = (rde_vec_2UI) { 10, 10 };
-	_image.nine_slice.size = (rde_vec_2UI) { 128, 64 };
+	_image.nine_slice.size = (rde_vec_2UI) { 64, 64 };
 
 	rde_ui_element_text_data _text = rde_struct_create_ui_element_text_data();
 	_text.font = ui_font;
 	_text.text = "Button";
 
 	rde_ui_button_data _button = {
-		.image = _image,
+		.image_idle = _image,
 		.text = _text,
-		.size = (rde_vec_2UI) { 128, 64 }
+		.size = (rde_vec_2UI) { 64, 64 }
 	};
 
-	rde_ui_add_button(ui_root_container, _button);
+	button_background = &rde_ui_add_button(ui_root_container, _button)->elements[0];
 
 	events_callback = &ui_on_event;
 	update_callback = &ui_on_update;
