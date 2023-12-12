@@ -203,11 +203,25 @@ void ui_init() {
 	ui_panel_texture = rde_rendering_texture_load("hub_assets/ui/panel.png", NULL);
 	
 	rde_ui_element_image_data _image = rde_struct_create_ui_element_image_data();
-	_image.texture = rde_rendering_atlas_get_subtexture(ui_atlas, "panel2");
+	_image.texture = rde_rendering_atlas_get_subtexture(ui_atlas, "panel");
 	_image.nine_slice = rde_struct_create_ui_nine_slice();
 	_image.nine_slice.left_right = (rde_vec_2UI) { 10, 10 };
 	_image.nine_slice.bottom_top = (rde_vec_2UI) { 10, 10 };
-	_image.nine_slice.size = (rde_vec_2UI) { 64, 64 };
+	_image.nine_slice.size = (rde_vec_2UI) { 170, 64 };
+
+	rde_ui_element_image_data _image2 = rde_struct_create_ui_element_image_data();
+	_image2.texture = rde_rendering_atlas_get_subtexture(ui_atlas, "panel3");
+	_image2.nine_slice = rde_struct_create_ui_nine_slice();
+	_image2.nine_slice.left_right = (rde_vec_2UI) { 10, 10 };
+	_image2.nine_slice.bottom_top = (rde_vec_2UI) { 10, 10 };
+	_image2.nine_slice.size = (rde_vec_2UI) { 170, 64 };
+
+	rde_ui_element_image_data _image3 = rde_struct_create_ui_element_image_data();
+	_image3.texture = rde_rendering_atlas_get_subtexture(ui_atlas, "panel4");
+	_image3.nine_slice = rde_struct_create_ui_nine_slice();
+	_image3.nine_slice.left_right = (rde_vec_2UI) { 10, 10 };
+	_image3.nine_slice.bottom_top = (rde_vec_2UI) { 10, 10 };
+	_image3.nine_slice.size = (rde_vec_2UI) { 170, 64 };
 
 	rde_ui_element_text_data _text = rde_struct_create_ui_element_text_data();
 	_text.font = ui_font;
@@ -215,8 +229,10 @@ void ui_init() {
 
 	rde_ui_button_data _button = {
 		.image_idle = _image,
+		.image_selected = _image2,
+		.image_pressed = _image3,
 		.text = _text,
-		.size = (rde_vec_2UI) { 64, 64 }
+		.size = (rde_vec_2UI) { 170, 64 }
 	};
 
 	button_background = &rde_ui_add_button(ui_root_container, _button)->elements[0];

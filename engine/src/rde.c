@@ -7918,6 +7918,7 @@ void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rd
 			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_ENTERED;
 			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_NONE;
 			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_EXITED;
+			rde_inner_ui_default_button_callback_on_enter(_container);
 			if(_container->callbacks.on_mouse_enter != NULL) {
 				_container->callbacks.on_mouse_enter(_container);
 			}
@@ -7927,6 +7928,7 @@ void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rd
 		else if(_event->type == RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_DOWN) == 0) {
 			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_DOWN;
 			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_NONE;
+			rde_inner_ui_default_button_callback_on_button_down(_container, 0);
 			if(_container->callbacks.on_button_down != NULL) {
 				#if (IS_WINDOWS() || IS_MAC() || IS_LINUX() || IS_WASM()) && !IS_MOBILE()
 				_container->callbacks.on_button_down(_container, _event->data.mouse_event_data.button);
@@ -7940,6 +7942,7 @@ void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rd
 		else if(_event->type == RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_DOWN) == RDE_UI_CONTAINER_STATE_MOUSE_DOWN) {
 			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_UP;
 			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_DOWN;
+			rde_inner_ui_default_button_callback_on_button_up(_container, 0);
 			if(_container->callbacks.on_button_up != NULL) {
 				#if (IS_WINDOWS() || IS_MAC() || IS_LINUX() || IS_WASM()) && !IS_MOBILE()
 				_container->callbacks.on_button_up(_container, _event->data.mouse_event_data.button);
@@ -7954,6 +7957,7 @@ void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rd
 			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_EXITED;
 			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_ENTERED;
 			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_DOWN;
+			rde_inner_ui_default_button_callback_on_exit(_container);
 			if(_container->callbacks.on_mouse_exit != NULL) {
 				_container->callbacks.on_mouse_exit(_container);
 			}
@@ -8686,21 +8690,55 @@ ANativeWindow* rde_android_get_native_window() {
 // ==============================================================================
 
 void rde_inner_ui_default_button_callback_on_enter(rde_ui_container* _container) {
-	UNUSED(_container);
+	if(stbds_arrlen(_container->elements) < 3) {
+		return;
+	}
+
+	if(_container->elements[1].image.texture != NULL) {
+		_container->elements[0].enabled = false;
+		_container->elements[2].enabled = false;
+		_container->elements[1].enabled = true;
+	}
 }
 
 void rde_inner_ui_default_button_callback_on_exit(rde_ui_container* _container) {
-	UNUSED(_container);
+	if(stbds_arrlen(_container->elements) < 3) {
+		return;
+	}
+
+	if(_container->elements[0].image.texture != NULL) {
+		_container->elements[1].enabled = false;
+		_container->elements[2].enabled = false;
+		_container->elements[0].enabled = true;
+	}
 }
 
 void rde_inner_ui_default_button_callback_on_button_down(rde_ui_container* _container, int _button) {
-	UNUSED(_container);
 	UNUSED(_button);
+
+	if(stbds_arrlen(_container->elements) < 3) {
+		return;
+	}
+
+	if(_container->elements[2].image.texture != NULL) {
+		_container->elements[0].enabled = false;
+		_container->elements[1].enabled = false;
+		_container->elements[2].enabled = true;
+	}
 }
 
 void rde_inner_ui_default_button_callback_on_button_up(rde_ui_container* _container, int _button) {
-	UNUSED(_container);
 	UNUSED(_button);
+
+	if(stbds_arrlen(_container->elements) < 3) {
+		return;
+	}
+
+	if(_container->elements[1].image.texture != NULL) {
+		rde_inner_ui_default_button_callback_on_enter(_container);
+	} else {
+		rde_inner_ui_default_button_callback_on_exit(_container);
+	}
 }
 
 
