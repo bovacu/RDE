@@ -1800,6 +1800,7 @@ RDE_FUNC rde_ui_container* rde_ui_container_load_root(rde_vec_2UI _size);
 RDE_FUNC rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_ui_element_image_data _image_data);
 RDE_FUNC rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_ui_element_text_data _text_data);
 RDE_FUNC rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_data _button_data);
+RDE_FUNC rde_ui_container* rde_ui_add_button_default(rde_ui_container* _container, rde_vec_2UI _size, char* _text);
 RDE_FUNC void rde_rendering_draw_ui(rde_ui_container* _container);
 RDE_FUNC void rde_ui_container_unload_root(rde_ui_container* _container);
 
