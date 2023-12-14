@@ -1786,11 +1786,13 @@ bool compile_windows_rde() {
 				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/debug/examples/SDL2.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/")
 				COPY_FOLDER("engine/shaders", "build/windows/debug/examples/")
+				COPY_FOLDER("engine/default_assets", "build/windows/debug/examples/")
 			} else {
 				COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
 				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/release/examples/SDL2.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/")
 				COPY_FOLDER("engine/shaders", "build/windows/release/examples/")
+				COPY_FOLDER("engine/default_assets", "build/windows/release/examples/")
 			}
 		})
 	}
@@ -1809,11 +1811,12 @@ bool compile_windows_rde() {
 				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/debug/examples/SDL2.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/windows/debug/examples/shaders/")	
+				COPY_FOLDER("engine/default_assets", "build/windows/debug/examples/shaders/")	
 			} else {
 				COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
 				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/release/examples/SDL2.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/hub_assets/")
-				COPY_FOLDER("engine/shaders", "build/windows/release/examples/shaders/")
+				COPY_FOLDER("engine/default_assets", "build/windows/release/examples/shaders/")
 			}
 		})
 	}
@@ -2043,6 +2046,7 @@ bool compile_osx_rde() {
 
 				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/shaders/")
+				COPY_FOLDER("engine/default_assets", "build/osx/debug/examples/default_assets/")
 			} else {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
@@ -2051,6 +2055,7 @@ bool compile_osx_rde() {
 
 				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/osx/release/examples/shaders/")
+				COPY_FOLDER("engine/default_assets", "build/osx/release/examples/default_assets/")
 			}
 		})
 	}
@@ -2080,6 +2085,7 @@ bool compile_osx_rde() {
 
 				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/shaders/")
+				COPY_FOLDER("engine/default_assets", "build/osx/release/examples/default_assets/")
 			} else {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
@@ -2088,6 +2094,7 @@ bool compile_osx_rde() {
 
 				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/osx/release/examples/shaders/")
+				COPY_FOLDER("engine/default_assets", "build/osx/release/examples/default_assets/")
 			}
 		})
 	}
@@ -2306,6 +2313,7 @@ bool compile_linux_rde() {
 
 				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/linux/debug/examples/shaders/")
+				COPY_FOLDER("engine/default_assets", "build/linux/debug/examples/default_assets/")
 			} else {
 				if(strcmp(build_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/release/engine/libRDE.so", "build/linux/release/examples/libRDE.so")
@@ -2314,6 +2322,7 @@ bool compile_linux_rde() {
 
 				COPY_FOLDER("examples/hub_assets", "build/linux/release/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/linux/release/examples/shaders/")
+				COPY_FOLDER("engine/default_assets", "build/linux/debug/examples/default_assets/")
 			}
 		})
     }
@@ -2336,6 +2345,7 @@ bool compile_linux_rde() {
 
 				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/linux/debug/examples/shaders/")
+				COPY_FOLDER("engine/default_assets", "build/linux/debug/examples/default_assets/")
 			} else {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/release/engine/libRDE.so", "build/linux/release/examples/libRDE.so")
@@ -2344,6 +2354,7 @@ bool compile_linux_rde() {
 
 				COPY_FOLDER("examples/hub_assets", "build/linux/release/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/linux/release/examples/shaders/")
+				COPY_FOLDER("engine/default_assets", "build/linux/debug/examples/default_assets/")
 			}
 		})
 	}
