@@ -2,9 +2,6 @@ rde_camera ui_camera;
 
 rde_camera ui_hud_camera;
 rde_ui_container* ui_root_container;
-rde_font* ui_font;
-rde_atlas* ui_atlas;
-rde_texture* ui_panel_texture;
 
 float ui_yaw = -90.0f;
 bool ui_first_mouse = true;
@@ -13,8 +10,6 @@ float ui_last_x =  1280.f * 0.5f;
 float ui_last_y =  720.f * 0.5f;
 rde_vec_3F ui_camera_front = { -0.31f, -0.24f, -0.91f };
 rde_vec_3F ui_camera_up = { 0.0, 1.0f, 0.0f };
-
-rde_ui_element* button_background;
 
 void ui_keyboard_controller(float _dt) {
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
@@ -72,7 +67,7 @@ void ui_mouse_controller(float _dt) {
 	if(rde_events_is_mouse_button_pressed(current_window, RDE_MOUSE_BUTTON_1)) {
 		rde_vec_2I _mouse_pos = rde_events_mouse_get_position(current_window);
 		float _x_pos = (float)_mouse_pos.x;
-		float _y_pos = (float)_mouse_pos.y;
+		float _y_pos = (float)-_mouse_pos.y;
 
 		if(ui_last_x == _x_pos && ui_last_y == _y_pos) {
 			return;
@@ -148,26 +143,19 @@ void ui_on_late_update(float _dt) {
 void ui_draw_3d(rde_window* _window, float _dt) {
 	UNUSED(_dt)
 
-	rde_render_3d(_window, &ui_camera, false, {
+	rde_render_3d(_window, &ui_hud_camera, false, {
 		
 	})
 
-	rde_render_2d(_window, &ui_hud_camera, true, {
+	rde_render_ui_2d(_window, &ui_camera, {
 		rde_rendering_draw_ui(ui_root_container);
+		
 	})
 }
 
 void ui_draw_imgui(float _dt, rde_window* _window) {
 	(void)_dt;
 	(void)_window;
-
-	rde_imgui_begin("Button background", NULL, rde_ImGuiWindowFlags_None);
-	int _size[2] = { button_background->image.nine_slice.size.x, button_background->image.nine_slice.size.y  };
-	if(rde_imgui_drag_int_2("Size", _size, 1, 0, 0, rde_ImGuiSliderFlags_None)) {
-		button_background->image.nine_slice.size.x = _size[0];
-		button_background->image.nine_slice.size.y = _size[1];
-	}
-	rde_imgui_end();
 }
 
 void ui_on_render(float _dt, rde_window* _window) {
@@ -179,9 +167,6 @@ void ui_on_render(float _dt, rde_window* _window) {
 
 void ui_unload() {
 	rde_ui_container_unload_root(ui_root_container);
-	rde_rendering_font_unload(ui_font);
-	rde_rendering_atlas_unload(ui_atlas);
-	rde_rendering_texture_unload(ui_panel_texture);
 
 	events_callback = NULL;
 	update_callback = NULL;
@@ -191,6 +176,18 @@ void ui_unload() {
 	unload_callback = NULL;
 }
 
+void button_0_callback(rde_ui_container* _container, int _button_down) {
+	UNUSED(_container)
+	UNUSED(_button_down)
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Clicked on button 0");
+}
+
+void button_1_callback(rde_ui_container* _container, int _button_down) {
+	UNUSED(_container)
+	UNUSED(_button_down)
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Clicked on button 1");
+}
+
 void ui_init() {
 	ui_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
 	ui_hud_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_ORTHOGRAPHIC);
@@ -198,44 +195,15 @@ void ui_init() {
 	
 	rde_vec_2I _screen_size = rde_window_get_window_size(current_window);
 	ui_root_container = rde_ui_container_load_root((rde_vec_2UI) { _screen_size.x, _screen_size.y });
-	ui_font = rde_rendering_font_load("hub_assets/fonts/arial");
-	ui_atlas = rde_rendering_atlas_load("hub_assets/ui/ui");
-	ui_panel_texture = rde_rendering_texture_load("hub_assets/ui/panel.png", NULL);
-	
-	rde_ui_element_image_data _image = rde_struct_create_ui_element_image_data();
-	_image.texture = rde_rendering_atlas_get_subtexture(ui_atlas, "panel");
-	_image.nine_slice = rde_struct_create_ui_nine_slice();
-	_image.nine_slice.left_right = (rde_vec_2UI) { 10, 10 };
-	_image.nine_slice.bottom_top = (rde_vec_2UI) { 10, 10 };
-	_image.nine_slice.size = (rde_vec_2UI) { 170, 64 };
 
-	rde_ui_element_image_data _image2 = rde_struct_create_ui_element_image_data();
-	_image2.texture = rde_rendering_atlas_get_subtexture(ui_atlas, "panel3");
-	_image2.nine_slice = rde_struct_create_ui_nine_slice();
-	_image2.nine_slice.left_right = (rde_vec_2UI) { 10, 10 };
-	_image2.nine_slice.bottom_top = (rde_vec_2UI) { 10, 10 };
-	_image2.nine_slice.size = (rde_vec_2UI) { 170, 64 };
+	rde_ui_container* _button_0 = rde_ui_add_button_default(ui_root_container, (rde_vec_2UI) { 170, 64 }, "Button");
+	_button_0->callbacks.on_button_up = button_0_callback;
 
-	rde_ui_element_image_data _image3 = rde_struct_create_ui_element_image_data();
-	_image3.texture = rde_rendering_atlas_get_subtexture(ui_atlas, "panel4");
-	_image3.nine_slice = rde_struct_create_ui_nine_slice();
-	_image3.nine_slice.left_right = (rde_vec_2UI) { 10, 10 };
-	_image3.nine_slice.bottom_top = (rde_vec_2UI) { 10, 10 };
-	_image3.nine_slice.size = (rde_vec_2UI) { 170, 64 };
-
-	rde_ui_element_text_data _text = rde_struct_create_ui_element_text_data();
-	_text.font = ui_font;
-	_text.text = "Button";
-
-	rde_ui_button_data _button = {
-		.image_idle = _image,
-		.image_selected = _image2,
-		.image_pressed = _image3,
-		.text = _text,
-		.size = (rde_vec_2UI) { 170, 64 }
-	};
-
-	button_background = &rde_ui_add_button(ui_root_container, _button)->elements[0];
+	rde_ui_container* _button_1 = rde_ui_add_button_default(ui_root_container, (rde_vec_2UI) { 170, 64 }, "Button");
+	_button_1->callbacks.on_button_down = button_1_callback;
+	rde_engine_transform_set_position(_button_1->transform, (rde_vec_3F) {
+		250, 120, 0
+	});
 
 	events_callback = &ui_on_event;
 	update_callback = &ui_on_update;

@@ -128,6 +128,9 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- [DONE] Text
 //			- CPU Textures
 //
+//		- UI:
+//			- Make rde_ui_update(rde_ui_container* _container, RDE_UI_CONTAINER_STATE _state) function to update specific ui elements. Create also a callback for end-users to fill if needed
+//
 //		- Basic 3D:
 //			- [DONE] Camera system
 //			- [DONE] 3D mathematical operations
@@ -146,6 +149,7 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- Model animations
 //			- Text
 //			- [DONE] Line rendering
+//			- Make UI work on 3D space
 //
 //		- Shaders:
 //			- [DONE] Create "header" file that will contain all of the common uniforms and variables that are passed to every shader
@@ -481,7 +485,6 @@ typedef struct {
 	GLuint vertex_buffer_object;
 	GLuint index_buffer_object;
 	GLuint vertex_array_object;
-	mat4 mvp;
 	bool is_hud;
 } rde_batch_2d;
 	
@@ -1053,7 +1056,6 @@ rde_batch_2d rde_struct_create_2d_batch() {
 	_b.vertex_buffer_object = 0;
 	_b.vertex_array_object = 0;
 	_b.index_buffer_object = 0;
-	glm_mat4_copy(GLM_MAT4_IDENTITY, _b.mvp);
 	_b.is_hud = false;
 	return _b;
 }
@@ -4269,7 +4271,7 @@ void rde_inner_rendering_end_2d() {
 
 void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transform, mat4 _mat) {
 	UNUSED(_transform)
-	// rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
+	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
 	// float _aspect_ratio = (float)_window_size.x / (float)_window_size.y;
 	rde_vec_2F _screen_pos;
 	
@@ -4281,6 +4283,9 @@ void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transfor
 		bool _is_hud = current_batch_2d.is_hud;
 		_screen_pos.x = _mat[3][0] - (_is_hud ? 0.f : current_drawing_camera->transform->position.x);
 		_screen_pos.y = _mat[3][1] - (_is_hud ? 0.f : current_drawing_camera->transform->position.y);
+
+		_screen_pos.x /= (float)_window_size.x * 0.5f;
+		_screen_pos.y /= (float)_window_size.y * 0.5f;
 	}
 
 	// mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
@@ -4356,7 +4361,7 @@ void rde_inner_rendering_flush_batch_2d() {
 
 	RDE_CHECK_GL(glUseProgram, current_batch_2d.shader->compiled_program_id);
 
-	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)current_batch_2d.mvp);
+	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)projection_matrix);
 	rde_vec_2I _mouse_pos = current_drawing_window->mouse_position;
 	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "mouse_position"), _mouse_pos.x, _mouse_pos.y);
 	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "dt"), ENGINE.delta_time);
@@ -6320,7 +6325,7 @@ void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window, bo
 	}
 
 	glm_mat4_inv(_view_matrix, _view_matrix_inv);
-	glm_mat4_mul(projection_matrix, _view_matrix_inv, current_batch_2d.mvp);
+	glm_mat4_mul(projection_matrix, _view_matrix_inv, projection_matrix);
 }
 
 void rde_rendering_2d_draw_point(rde_vec_2F _position, rde_color _color, rde_shader* _shader) {
@@ -6585,6 +6590,7 @@ void rde_rendering_2d_draw_nine_slice(const rde_transform* _transform, const rde
 	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
 	glm_mat4_copy(ENGINE.world_transforms[_transform->index], _transformation_matrix);
 	rde_inner_rendering_transform_to_glm_mat4_2d(_transform, _transformation_matrix);
+
 	rde_vec_2F _nine_slice_scaling = (rde_vec_2F) { rde_math_clamp_float(_nine_slice.size.x / (float)_texture->size.x, 1.f, RDE_NINE_SLICE_MAX), 
 										rde_math_clamp_float(_nine_slice.size.y / (float)_texture->size.y, 1.f, RDE_NINE_SLICE_MAX)};
 	rde_vec_4F _nine_slice_paddings = (rde_vec_4F) {
