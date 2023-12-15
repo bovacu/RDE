@@ -399,13 +399,21 @@ typedef unsigned int uint;
 #define RDE_SAFE_ARR_SET(_type) RDE_FUNC void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...);
 
 #define rde_render_3d(_window, _camera, _draw_wireframe, _block_of_code)\
+	rde_critical_error((_camera)->camera_type != RDE_CAMERA_TYPE_PERSPECTIVE, "Only perspective camera is allowed in render_3d"); \
 	rde_rendering_3d_begin_drawing(_camera, _window, _draw_wireframe);	\
 	_block_of_code														\
 	rde_rendering_3d_end_drawing();
 
-#define rde_render_2d(_window, _camera, _is_hud, _block_of_code)	\
-	rde_rendering_2d_begin_drawing(_camera, _window, _is_hud);	\
-	_block_of_code										\
+#define rde_render_2d(_window, _camera, _block_of_code)	   \
+	rde_critical_error((_camera)->camera_type != RDE_CAMERA_TYPE_ORTHOGRAPHIC, "Only orthographic camera is allowed in render_2d"); \
+	rde_rendering_2d_begin_drawing(_camera, _window, false);  \
+	_block_of_code											\
+	rde_rendering_2d_end_drawing();
+
+#define rde_render_ui_2d(_window, _camera, _block_of_code)	\
+	rde_critical_error((_camera)->camera_type != RDE_CAMERA_TYPE_ORTHOGRAPHIC, "Only orthographic camera is allowed in render_ui_2d"); \
+	rde_rendering_2d_begin_drawing(_camera, _window, true);   \
+	_block_of_code											\
 	rde_rendering_2d_end_drawing();
 
 #if IS_WINDOWS()
@@ -1851,6 +1859,11 @@ RDE_FUNC void rde_file_move(const char* _file_path, const char* _new_file_path);
 RDE_FUNC void rde_file_close(rde_file_handle* _file_handler);
 RDE_FUNC void rde_file_free_read_text(rde_file_handle* _file_handle);
 RDE_FUNC void rde_file_free_read_bytes(rde_file_handle* _file_handle);
+
+
+/// ============================ ERROR ================================
+
+RDE_FUNC void rde_critical_error(bool _condition, const char* _fmt, ...);
 
 #if IS_ANDROID()
 RDE_FUNC ANativeWindow* rde_android_get_native_window();
