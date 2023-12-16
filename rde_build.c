@@ -1126,25 +1126,23 @@ const char* TOOL_OPTIONS_STR[MAX_TOOL_OPTIONS] = {
 
 #define MAX_SIZE_FOR_OPTIONS 64
 #define MAX_SIZE_FOR_MODULES 256
-#define MAX_MODULES 8
+#define MAX_MODULES 7
 #define GOD_MODE "-DRDE_GOD"
 
 typedef enum {
 	RDE_MODULES_NONE = 0,
 	RDE_MODULES_AUDIO = 1,
 	RDE_MODULES_PHYSICS = 2,
-	RDE_MODULES_RENDERING = 4,
-	RDE_MODULES_FBX = 8,
-	RDE_MODULES_OBJ = 16,
-	RDE_MODULES_UI = 32,
-	RDE_MODULES_ERROR = 64,
-	RDE_MODULES_IMGUI = 128,
+	RDE_MODULES_FBX = 4,
+	RDE_MODULES_OBJ = 8,
+	RDE_MODULES_UI = 16,
+	RDE_MODULES_ERROR = 32,
+	RDE_MODULES_IMGUI = 64,
 } RDE_MODULES_;
 
 const char* MODULES_STR[MAX_MODULES] = {
 	"audio",
 	"physics",
-	"rendering",
 	"fbx",
 	"obj",
 	"ui",
@@ -1154,7 +1152,6 @@ const char* MODULES_STR[MAX_MODULES] = {
 char* MODULES_DEFINES[MAX_MODULES] = {
 	"-DRDE_AUDIO_MODULE",
 	"-DRDE_PHYSICS_MODULE",
-	"-DRDE_RENDERING_MODULE",
 	"-DRDE_FBX_MODULE",
 	"-DRDE_OBJ_MODULE",
 	"-DRDE_UI_MODULE",
@@ -3341,8 +3338,7 @@ int main(int _argc, char** _argv) {
 	memset(build_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(lib_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(build, 0, MAX_SIZE_FOR_OPTIONS);
-	memset(tool, 0, MAX_SIZE_FOR_OPTIONS);
-	modules = RDE_MODULES_RENDERING;
+	memset(tool, 0, MAX_SIZE_FOR_OPTIONS);
 	project_compile_files = NULL;
 	project_include_paths = NULL;
 	project_link_paths = NULL;

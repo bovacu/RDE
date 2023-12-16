@@ -1833,20 +1833,21 @@ void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks
 		for(size_t _i = 0; _i < _number_of_lines; _i++) {																								\
 			if(rde_util_string_contains_substring(_config_file_lines[_i], _key, false)) {																\
 				char* _value = strrchr(_config_file_lines[_i], '=');																					 \
-				_final_value = _func(_value + 1);																										\
+				char* _trimed = rde_util_string_trim(_value);																							\
+				char* _end = NULL;																													   \
+				_final_value = _func(_trimed + 1, &_end, 10);																							 \
+				rde_critical_error(_trimed + 1 == _end || errno != 0, "Value '%s' could not be converted to "#_type"\n");								 \
 			}																																			\
 		}																																				\
 																																						 \
 		return _final_value == RDE_UINT_MAX ? _default_value : _final_value;																			 \
 	}
 
-GET_VALUE_FROM_CONFIG_FILE(size_t, atoi)
-GET_VALUE_FROM_CONFIG_FILE(int, atoi)
-GET_VALUE_FROM_CONFIG_FILE(float, atof)
+GET_VALUE_FROM_CONFIG_FILE(size_t, strtol)
+GET_VALUE_FROM_CONFIG_FILE(int, strtol)
 
 #define GET_SIZET(_key, _value) _value = rde_inner_engine_get_config_file_size_t((const char**)_lines, _line_amount, _key, _value);
 #define GET_INT(_key, _value) _value = rde_inner_engine_get_config_file_int((const char**)_lines, _line_amount, _key, _value);
-#define GET_FLOAT(_key, _value) _value = rde_inner_engine_get_config_file_float((const char**)_lines, _line_amount, _key, _value);
 
 rde_engine_init_info rde_engine_load_config(const char* _config_path) {
 	rde_engine_init_info _init_info = RDE_DEFAULT_INIT_INFO;
@@ -2777,40 +2778,40 @@ size_t rde_util_string_split(char* _string, char*** _split_array, char _split_ma
 		return 0;
 	}
 
-	// size_t _amount = 0;
-	// char* _token = NULL;
-	// char* _string_ptr = rde_strtok(_string, _split_mark, &_token);
+	int* _tklen = NULL; 
+	int* _t = NULL;
+	int _count = 1;
+    char** _arr;
+	char* _p = (char*) _string;
 
-	// while(_string_ptr != NULL) {
-	// 	rde_strcat(_split_array[_amount], strlen(_string_ptr), _string_ptr);
-	// 	_string_ptr = rde_strtok(NULL, _split_mark, NULL);
-	// 	_amount++;
-	// }
-
-	// return _amount;
-	int *tklen, *t, count = 1;
-    char **arr, *p = (char *) _string;
-
-    while (*p != '\0') if (*p++ == _split_mark) count += 1;
+    while (*_p != '\0') {
+		if (*_p++ == _split_mark) {
+			_count += 1;
+		}
+	}
 	
-    t = tklen = calloc (count, sizeof (int));
+    _t = _tklen = calloc(_count, sizeof(int));
 
-    for (p = (char *) _string; *p != '\0'; p++) *p == _split_mark ? *t++ : (*t)++;
+    for (_p = (char*)_string; *_p != '\0'; _p++) {
+		*_p == _split_mark ? *_t++ : (*_t)++;
+	}
     
-	*_split_array = arr = malloc (count * sizeof (char *));
-    t = tklen;
-    p = *arr++ = calloc (*(t++) + 1, sizeof (char *));
+	*_split_array = _arr = malloc(_count * sizeof(char*));
+    _t = _tklen;
+    _p = *_arr++ = calloc(*(_t++) + 1, sizeof(char*));
     
 	while (*_string != '\0') {
         if (*_string == _split_mark) {
-            p = *arr++ = calloc (*(t++) + 1, sizeof (char *));
+            _p = *_arr++ = calloc (*(_t++) + 1, sizeof(char*));
             _string++;
         }
-        else *p++ = *_string++;
+        else {
+			*_p++ = *_string++;
+		}
     }
 	
-    free (tklen);
-    return count;
+    free (_tklen);
+    return _count;
 }
 
 void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
