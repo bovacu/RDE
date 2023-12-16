@@ -106,14 +106,14 @@ typedef struct {
 } rde_jolt_body_settings;
 
 typedef struct {
-	size_t temo_allocator_size;
-	size_t max_physics_jobs;
-	size_t max_physics_barriers;
-	size_t max_bodies;
-	size_t max_body_mutexes;
-	size_t max_body_pairs;
-	size_t max_concat_constraints;
-	int    max_threads;
+	size_t temp_allocator_size;
+	size_t max_amount_of_physics_jobs;
+	size_t max_amount_of_physics_barriers;
+	size_t max_amount_of_bodies;
+	size_t max_amount_of_body_mutexes;
+	size_t max_amount_of_body_pairs;
+	size_t max_amount_of_contact_constraints;
+	int    max_amount_of_threads;
 	size_t collision_steps_per_update;
 } rde_jolt_init_config;
 

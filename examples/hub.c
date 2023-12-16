@@ -59,34 +59,6 @@ const rde_end_user_mandatory_callbacks _mandatory_callbacks = {
 	&on_render
 };
 
-const rde_engine_init_info ENGINE_INFO = {
-	.heap_allocs_config = (rde_engine_heap_allocs_config) {
-		.max_number_of_windows = 5,
-		.max_number_of_vertices_per_batch = 60000,
-		.max_number_of_shaders = 0,
-		.max_number_of_textures = 10,
-		.max_number_of_atlases = 10,
-		.max_number_of_fonts = 10,
-		.max_number_of_models = 5,
-		.max_number_of_models_textures = 340
-	},
-	.illumination_config = (rde_illumination_config) {
-		.amount_of_point_lights = 10,
-		.amount_of_spot_lights = 10
-	},
-	.jolt_config = (rde_jolt_init_config) {
-		.temo_allocator_size = 10 * 1024 * 1024,
-		.max_physics_jobs = 2048,
-		.max_physics_barriers = 8,
-		.max_threads = -1,
-		.max_bodies = 65536,
-		.max_body_pairs = 65536,
-		.max_body_mutexes = 0,
-		.max_concat_constraints = 10240,
-		.collision_steps_per_update = 1
-	}
-};
-
 void on_event(rde_event* _event, rde_window* _window) {
 	(void)_window;
 	rde_imgui_handle_events(_event->sdl_native_event);
@@ -228,4 +200,4 @@ void end_func() {
 	rde_imgui_shutdown();
 }
 
-RDE_MAIN(current_window, ENGINE_INFO, _mandatory_callbacks, init_func, end_func);
+RDE_MAIN(current_window, "../../../../config.rde_config", _mandatory_callbacks, init_func, end_func);

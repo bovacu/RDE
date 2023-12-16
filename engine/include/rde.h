@@ -94,17 +94,15 @@ extern "C" {
 #define RDE_EPSILON 0.0001f
 #define RDE_PI 3.14159265358979323846264338327950288
 
-#define RDE_MAX_NUMBER_OF_WINDOWS 10
+#define RDE_MAX_AMOUNT_OF_WINDOWS 10
 #define RDE_MAX_VERTICES_PER_BATCH 50000
 #define RDE_MAX_LOADABLE_SHADERS 256
 
-#ifdef RDE_RENDERING_MODULE
 #define RDE_MAX_LOADABLE_TEXTURES 512
 #define RDE_MAX_LOADABLE_ATLASES 512
 #define RDE_MAX_LOADABLE_FONTS 512
 #define RDE_MAX_LOADABLE_MODELS 512
 #define RDE_MAX_LOADABLE_MODELS_TEXTURES 512
-#endif
 
 #ifdef	RDE_AUDIO_MODULE
 #define RDE_MAX_LOADABLE_SOUNDS 128
@@ -222,20 +220,20 @@ typedef unsigned int uint;
 /// ==================== GENERIC FUNCS AND STRUCTS ==========================
 
 #if IS_WINDOWS()
-#define RDE_MAIN(_window, _engine_init_info, _mandatory_callbacks, _init_func, _end_func)	\
-	int main(int _argc, char** _argv) {														\
-		RDE_SHOW_WINDOWS_CONSOLE															\
-																							\
-		_window = rde_engine_create_engine(_argc, _argv, _engine_init_info);				\
-		rde_setup_initial_info(_mandatory_callbacks);										\
-																							\
-		_init_func(_argc, _argv);															\
-																							\
-		rde_engine_on_run();																\
-		_end_func();																		\
-		rde_engine_destroy_engine();														\
-																							\
-		return 0;																			\
+#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
+	int main(int _argc, char** _argv) {												 \
+		RDE_SHOW_WINDOWS_CONSOLE														\
+																						\
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 \
+		rde_setup_initial_info(_mandatory_callbacks);								   \
+																						\
+		_init_func(_argc, _argv);													   \
+																						\
+		rde_engine_on_run();															\
+		_end_func();																	\
+		rde_engine_destroy_engine();													\
+																						\
+		return 0;																	   \
 	}
 #elif IS_ANDROID()
 #include "SDL2/SDL_main.h"
@@ -244,32 +242,32 @@ typedef unsigned int uint;
 #include <android/input.h>
 #include <android/keycodes.h>
 #include <android/log.h>
-#define RDE_MAIN(_window, _engine_init_info, _mandatory_callbacks, _init_func, _end_func)	\
-	int main(int _argc, char* _argv[]) {													\
-		_window = rde_engine_create_engine(_argc, _argv, _engine_init_info);				\
-		rde_setup_initial_info(_mandatory_callbacks);										\
-																							\
-		_init_func(_argc, _argv);															\
-																							\
-		rde_engine_on_run();																\
-		_end_func();																		\
-		rde_engine_destroy_engine();														\
-																							\
-		return 0;																			\
+#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)   \
+	int main(int _argc, char* _argv[]) {											   \
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);				\
+		rde_setup_initial_info(_mandatory_callbacks);								  \
+																					   \
+		_init_func(_argc, _argv);													  \
+																					   \
+		rde_engine_on_run();														   \
+		_end_func();																   \
+		rde_engine_destroy_engine();												   \
+																					   \
+		return 0;																	  \
 	}
 #else
-#define RDE_MAIN(_window, _engine_init_info, _mandatory_callbacks, _init_func, _end_func)	\
-	int main(int _argc, char** _argv) {														\
-		_window = rde_engine_create_engine(_argc, _argv, _engine_init_info);				\
-		rde_setup_initial_info(_mandatory_callbacks);										\
-																							\
-		_init_func(_argc, _argv);															\
-																							\
-		rde_engine_on_run();																\
-		_end_func();																		\
-		rde_engine_destroy_engine();														\
-																							\
-		return 0;																			\
+#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
+	int main(int _argc, char** _argv) {												 \
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 \
+		rde_setup_initial_info(_mandatory_callbacks);								   \
+																						\
+		_init_func(_argc, _argv);													   \
+																						\
+		rde_engine_on_run();															\
+		_end_func();																	\
+		rde_engine_destroy_engine();													\
+																						\
+		return 0;																	   \
 	}
 #endif
 
@@ -1008,7 +1006,6 @@ typedef struct rde_event rde_event;
 typedef struct rde_file_handle rde_file_handle;
 typedef struct rde_transform rde_transform;
 
-#ifdef RDE_RENDERING_MODULE
 typedef struct rde_shader rde_shader;
 typedef struct rde_camera rde_camera;
 typedef struct rde_atlas rde_atlas;
@@ -1017,7 +1014,6 @@ typedef struct rde_render_texture rde_render_texture;
 typedef struct rde_texture rde_texture;
 typedef struct rde_model rde_model;
 typedef uint rde_skybox_id;
-#endif
 
 #ifdef RDE_PHYSICS_MODULE
 #include "JoltC/rde_joltc.h"
@@ -1052,27 +1048,25 @@ typedef struct {
 rde_display_info rde_struct_create_display_info();
 
 typedef struct {
-	size_t max_number_of_windows;
-	size_t max_number_of_vertices_per_batch;
-	size_t max_number_of_shaders;
+	size_t max_amount_of_windows;
+	size_t max_amount_of_vertices_per_batch;
+	size_t max_amount_of_shaders;
 	
-#ifdef RDE_RENDERING_MODULE
-	size_t max_number_of_textures;
-	size_t max_number_of_atlases;
-	size_t max_number_of_fonts;
-	size_t max_number_of_models;
-	size_t max_number_of_models_textures;
-#endif
+	size_t max_amount_of_textures;
+	size_t max_amount_of_atlases;
+	size_t max_amount_of_fonts;
+	size_t max_amount_of_models;
+	size_t max_amount_of_models_textures;
 
 #ifdef RDE_AUDIO_MODULE
-	size_t max_number_of_sounds;
+	size_t max_amount_of_sounds;
 #endif
 
 } rde_engine_heap_allocs_config;
 
 typedef struct {
-	uint amount_of_point_lights;
-	uint amount_of_spot_lights;
+	uint max_amount_of_point_lights;
+	uint max_amount_of_spot_lights;
 } rde_illumination_config;
 
 typedef struct {
@@ -1088,9 +1082,7 @@ typedef struct {
 typedef struct {
 	rde_engine_heap_allocs_config heap_allocs_config;
 	
-#ifdef RDE_RENDERING_MODULE
 	rde_illumination_config illumination_config;
-#endif
 
 #ifdef RDE_PHYSICS_MODULE
 	rde_jolt_init_config jolt_config;
@@ -1187,7 +1179,6 @@ RDE_FUNC rde_event rde_struct_create_event();
 
 /// ============================ RENDERING ==================================
 
-#ifdef RDE_RENDERING_MODULE
 typedef struct {
 	uint vertex_program_id;
 	uint fragment_program_id;
@@ -1343,7 +1334,6 @@ struct rde_camera {
 	bool enabled;
 };
 RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
-#endif
 
 /// ============================ AUDIO ==================================
 
@@ -1382,48 +1372,40 @@ const rde_color RDE_COLOR_NO_TEXTURE		= { 193,  84, 193, 255 };
 
 const rde_engine_init_info RDE_DEFAULT_INIT_INFO = {
 	.heap_allocs_config = (rde_engine_heap_allocs_config) {
-		RDE_MAX_NUMBER_OF_WINDOWS,
+		RDE_MAX_AMOUNT_OF_WINDOWS,
 		RDE_MAX_VERTICES_PER_BATCH,
 		RDE_MAX_LOADABLE_SHADERS,
-
-	#ifdef RDE_RENDERING_MODULE
 		RDE_MAX_LOADABLE_TEXTURES,
 		RDE_MAX_LOADABLE_ATLASES,
 		RDE_MAX_LOADABLE_FONTS,
 		RDE_MAX_LOADABLE_MODELS,
 		RDE_MAX_LOADABLE_MODELS_TEXTURES,
-	#endif
 
 	#ifdef RDE_AUDIO_MODULE
 		RDE_MAX_LOADABLE_SOUNDS
 	#endif
-	}
-
-#ifdef RDE_RENDERING_MODULE
-	,
+	},
 	.illumination_config = {
 		0,
 		0
 	}
-#endif
 
 #ifdef RDE_PHYSICS_MODULE
 	,
 	.jolt_config = {
-		.temo_allocator_size = 10 * 1024 * 1024,
-		.max_physics_jobs = 2048,
-		.max_physics_barriers = 8,
-		.max_bodies = 65536,
-		.max_body_mutexes = 0,
-		.max_body_pairs = 65536,
-		.max_concat_constraints = 10240,
-		.max_threads = -1,
+		.temp_allocator_size = 10 * 1024 * 1024,
+		.max_amount_of_physics_jobs = 2048,
+		.max_amount_of_physics_barriers = 8,
+		.max_amount_of_bodies = 65536,
+		.max_amount_of_body_mutexes = 0,
+		.max_amount_of_body_pairs = 65536,
+		.max_amount_of_contact_constraints = 10240,
+		.max_amount_of_threads = -1,
 		.collision_steps_per_update = 1
 	}
 #endif
 };
 
-#ifdef RDE_RENDERING_MODULE
 const rde_texture_parameters RDE_DEFAULT_TEXTURE_PARAMETERS = {
 	.min_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR,
 	.mag_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR,
@@ -1431,7 +1413,6 @@ const rde_texture_parameters RDE_DEFAULT_TEXTURE_PARAMETERS = {
 	.wrap_t = RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT,
 	.mipmap_min_filter = RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_LINEAR_MIN_FILTER_LINEAR
 };
-#endif
 
 /// *************************************************************************************************
 /// *                                		FUNCTIONS                         						*
@@ -1447,10 +1428,8 @@ RDE_FUNC void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 RDE_FUNC const char* rde_util_file_get_name_extension(const char* _file_name);
 RDE_FUNC void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, size_t _sanitized_size);
 
-#ifdef RDE_RENDERING_MODULE
 RDE_FUNC size_t rde_util_font_get_string_width(const char* _string, const rde_font* _font);
 RDE_FUNC rde_vec_2I rde_util_font_get_string_size(const char* _string, const rde_font* _font);
-#endif
 
 RDE_FUNC char* rde_util_string_trim(char* _s);
 RDE_FUNC bool rde_util_string_starts_with(const char* _string, const char* _prefix);
@@ -1465,7 +1444,7 @@ RDE_FUNC void rde_util_string_to_upper_itself(char* _string);
 RDE_FUNC void rde_util_string_replace_char(char* _string, char _old, char _new);
 RDE_FUNC void rde_util_string_replace_chars_all(char* _string, char _old, char _new);
 RDE_FUNC char* rde_util_string_replace_substring(char* _string, char* _old_string, char* _new_string, int* _output_appearences);
-RDE_FUNC size_t rde_util_string_split(char* _string, char** _split_array, const char* _split_mark);
+RDE_FUNC size_t rde_util_string_split(char* _string, char*** _split_array, char _split_mark);
 
 /// ============================ MATH =======================================
 
@@ -1526,7 +1505,10 @@ RDE_DECLARE_EASING_FUNCS(in_out, circular)
 /// ============================ ENGINE =====================================
 
 
-RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv, rde_engine_init_info _engine_init_info);
+RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv, const char* _config_path);
+
+RDE_FUNC rde_engine_init_info rde_engine_load_config(const char* _config_path);
+
 RDE_FUNC void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks); /// Sets up some basic info the engine needs, call this BEFORE rde_engine_create_engine
 
 RDE_FUNC void rde_engine_set_event_user_callback(rde_event_func _user_event_callback);
@@ -1629,7 +1611,6 @@ RDE_FUNC
 
 /// ============================ RENDERING ==================================
 
-#ifdef RDE_RENDERING_MODULE
 RDE_FUNC rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_code, const char* _fragment_code);
 RDE_FUNC void rde_rendering_shader_set_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose);
 RDE_FUNC void rde_rendering_shader_set_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_IV_ _type, int* _data);
@@ -1722,8 +1703,6 @@ RDE_FUNC void rde_rendering_skybox_unload(rde_skybox_id _skybox_id);
 
 RDE_FUNC void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing); // This function CANNOT be called during on_render.
 RDE_FUNC RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing();
-
-#endif
 
 /// ============================ AUDIO ======================================
 
