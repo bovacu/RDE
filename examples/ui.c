@@ -143,11 +143,11 @@ void ui_on_late_update(float _dt) {
 void ui_draw_3d(rde_window* _window, float _dt) {
 	UNUSED(_dt)
 
-	rde_render_3d(_window, &ui_hud_camera, false, {
+	rde_render_3d(_window, &ui_camera, false, {
 		
 	})
 
-	rde_render_ui_2d(_window, &ui_camera, {
+	rde_render_ui_2d(_window, &ui_hud_camera, {
 		rde_rendering_draw_ui(ui_root_container);
 		
 	})

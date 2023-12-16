@@ -1812,8 +1812,6 @@ RDE_FUNC rde_ui_container* rde_ui_add_button_default(rde_ui_container* _containe
 RDE_FUNC void rde_rendering_draw_ui(rde_ui_container* _container);
 RDE_FUNC void rde_ui_container_unload_root(rde_ui_container* _container);
 
-#endif
-
 /// ============================ AUDIO ======================================
 
 #ifdef RDE_AUDIO_MODULE

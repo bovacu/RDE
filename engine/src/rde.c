@@ -1382,7 +1382,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	for(size_t _i = 0; _i < RDE_MAX_CONTAINERS; _i++) {
 		_e.ui_containers[_i] = rde_struct_create_ui_container();
 	}
-	_e.ui_containers = -1;
+	_e.last_ui_container_used = -1;
 
 #ifdef RDE_AUDIO_MODULE
 	if (_e.init_info.heap_allocs_config.max_amount_of_sounds > 0) {
@@ -2151,18 +2151,18 @@ void rde_engine_destroy_engine() {
 			continue;
 		}
 
-		rde_rendering_font_unload(&ENGINE.fonts[_i]);
+		rde_rendering_atlas_unload(&ENGINE.atlases[_i]);
 	}
-	free(ENGINE.fonts);
+	free(ENGINE.atlases);
 
 	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_fonts; _i++) {
 		if(ENGINE.fonts[_i].texture == NULL) {
 			continue;
 		}
 
-		rde_rendering_atlas_unload(&ENGINE.atlases[_i]);
+		rde_rendering_font_unload(&ENGINE.fonts[_i]);
 	}
-	free(ENGINE.atlases);
+	free(ENGINE.fonts);
 
 	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
 		if (ENGINE.textures[_i].opengl_texture_id == -1) {
@@ -5932,7 +5932,7 @@ rde_font* rde_rendering_font_load(const char* _font_path) {
 	rde_font_char_info* _chars = rde_inner_file_system_read_font_config(_config_path_ext, _texture);
 
 	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_fonts; _i++) {
-		if (ENGINE.fonts[_i].texture != NULL && strcmp(ENGINE.fonts[_i].texture->file_path, _font_path) == 0) {
+		if (ENGINE.fonts[_i].texture != NULL && strcmp(ENGINE.fonts[_i].texture->file_path, _texture_path_ext) == 0) {
 			return &ENGINE.fonts[_i];
 		}
 	}
