@@ -14,7 +14,7 @@ max_number_of_musics=10
 
 [illumination]
 max_amount_of_point_lights=10
-max_amount_of_sport_lights=10
+max_amount_of_spot_lights=10
 
 [physics]
 temp_allocator_size=10485760

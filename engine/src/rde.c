@@ -5428,7 +5428,6 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_textur
 
 	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
 		if (strlen(ENGINE.textures[_i].file_path) != 0 && strcmp(ENGINE.textures[_i].file_path, _sanitized_path) == 0) {
-			rde_log_level(RDE_LOG_LEVEL_WARNING, "Path '%s' already loaded in texture", _sanitized_path);
 			return &ENGINE.textures[_i];
 		}
 	}
@@ -5827,7 +5826,7 @@ rde_font* rde_rendering_font_load(const char* _font_path) {
 	rde_font_char_info* _chars = rde_inner_file_system_read_font_config(_config_path_ext, _texture);
 
 	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_fonts; _i++) {
-		if (ENGINE.fonts[_i].texture != NULL && strcmp(ENGINE.fonts[_i].texture->file_path, _font_path) == 0) {
+		if (ENGINE.fonts[_i].texture != NULL && strcmp(ENGINE.fonts[_i].texture->file_path, _texture_path_ext) == 0) {
 			return &ENGINE.fonts[_i];
 		}
 	}
