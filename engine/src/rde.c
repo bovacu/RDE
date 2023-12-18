@@ -126,7 +126,7 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- Debug and non debug geometry rendering
 //			- [DONE] Spritebatch
 //			- [DONE] Text
-//			- CPU Textures
+//			- [] CPU Textures (something is broken)
 //
 //		- Basic 3D:
 //			- [DONE] Camera system
@@ -143,9 +143,31 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //				- [DONE] Point
 //				- [DONE] Spot
 //				- Shadows
-//			- Model animations
-//			- Text
+//			- [] Model animations
+//			- [] Text
 //			- [DONE] Line rendering
+//			- [] Frustrum Culling
+//			- [] Hard Shadows
+//			- [] Soft Shadows
+//			- [] Normal Mapping
+//			- [] HDR
+//			- [] Ambient Occlusion
+//			- [] PBR
+//
+//		- [] UI:
+//			- [] Anchors
+//			- [] Strechs
+//			- [] UI Elements:
+//				- [] Text
+//				- [] Images
+//				- [] Button
+//				- [] Slider
+//				- [] Checkbox
+//				- [] Lists
+//				- [] Dropbox
+//				- [] Scroll Area
+//			- [] 2D
+//			- [] 3D
 //
 //		- Shaders:
 //			- [DONE] Create "header" file that will contain all of the common uniforms and variables that are passed to every shader
