@@ -128,6 +128,7 @@ extern "C" {
 #define RDE_SHADER_FRAMEBUFFER "framebuffer_shader"
 #define RDE_SHADER_MESH "mesh_shader"
 #define RDE_SHADER_SKYBOX "skybox_shader"
+#define RDE_SHADER_SHADOWS "shadows_shader"
 
 /// ====================== COMPILATION AND EXPORT ==========================
 
@@ -221,19 +222,19 @@ typedef unsigned int uint;
 
 #if IS_WINDOWS()
 #define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
-	int main(int _argc, char** _argv) {												 \
+	int main(int _argc, char** _argv) {												 	\
 		RDE_SHOW_WINDOWS_CONSOLE														\
 																						\
-		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 \
-		rde_setup_initial_info(_mandatory_callbacks);								   \
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 	\
+		rde_setup_initial_info(_mandatory_callbacks);								   	\
 																						\
-		_init_func(_argc, _argv);													   \
+		_init_func(_argc, _argv);													   	\
 																						\
 		rde_engine_on_run();															\
 		_end_func();																	\
 		rde_engine_destroy_engine();													\
 																						\
-		return 0;																	   \
+		return 0;																	   	\
 	}
 #elif IS_ANDROID()
 #include "SDL2/SDL_main.h"
@@ -242,32 +243,32 @@ typedef unsigned int uint;
 #include <android/input.h>
 #include <android/keycodes.h>
 #include <android/log.h>
-#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)   \
-	int main(int _argc, char* _argv[]) {											   \
-		_window = rde_engine_create_engine(_argc, _argv, _config_path);				\
-		rde_setup_initial_info(_mandatory_callbacks);								  \
-																					   \
-		_init_func(_argc, _argv);													  \
-																					   \
-		rde_engine_on_run();														   \
-		_end_func();																   \
-		rde_engine_destroy_engine();												   \
-																					   \
-		return 0;																	  \
+#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)   	\
+	int main(int _argc, char* _argv[]) {											   	\
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);					\
+		rde_setup_initial_info(_mandatory_callbacks);								  	\
+																						\
+		_init_func(_argc, _argv);													  	\
+																						\
+		rde_engine_on_run();														   	\
+		_end_func();																   	\
+		rde_engine_destroy_engine();												   	\
+																						\
+		return 0;																	  	\
 	}
 #else
 #define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
-	int main(int _argc, char** _argv) {												 \
-		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 \
-		rde_setup_initial_info(_mandatory_callbacks);								   \
+	int main(int _argc, char** _argv) {												 	\
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 	\
+		rde_setup_initial_info(_mandatory_callbacks);								   	\
 																						\
-		_init_func(_argc, _argv);													   \
+		_init_func(_argc, _argv);													   	\
 																						\
 		rde_engine_on_run();															\
 		_end_func();																	\
 		rde_engine_destroy_engine();													\
 																						\
-		return 0;																	   \
+		return 0;																	   	\
 	}
 #endif
 
@@ -403,9 +404,9 @@ typedef unsigned int uint;
 	_block_of_code														\
 	rde_rendering_3d_end_drawing();
 
-#define rde_render_2d(_window, _camera, _is_hud, _block_of_code)	\
+#define rde_render_2d(_window, _camera, _is_hud, _block_of_code)\
 	rde_rendering_2d_begin_drawing(_camera, _window, _is_hud);	\
-	_block_of_code										\
+	_block_of_code												\
 	rde_rendering_2d_end_drawing();
 
 #if IS_WINDOWS()
@@ -438,11 +439,11 @@ typedef unsigned int uint;
 #define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
 #endif
 
-#define RDE_PROFILE_TIME(_name, _code_block)				   \
-	{									  					\
-		clock_t  _start = clock();							 \
-		_code_block											\
-		clock_t _end = clock() - _start;					   \
+#define RDE_PROFILE_TIME(_name, _code_block)				   										\
+	{									  															\
+		clock_t  _start = clock();							 										\
+		_code_block																					\
+		clock_t _end = clock() - _start;					   										\
 		rde_log_level(RDE_LOG_LEVEL_INFO, "%s - Took %f""s", _name, ((double)_end)/CLOCKS_PER_SEC); \
 	}
 
@@ -1265,6 +1266,7 @@ typedef struct {
 
 typedef struct {
 	rde_vec_3F direction;
+	rde_vec_3F position;
 	rde_vec_3F ambient_color;
 	rde_vec_3F diffuse_color;
 	rde_vec_3F specular_color;
@@ -1687,6 +1689,7 @@ RDE_FUNC void rde_rendering_3d_draw_skybox(rde_camera* _camera);
 RDE_FUNC void rde_rendering_3d_end_drawing();
 
 RDE_FUNC void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction);
+RDE_FUNC void rde_rendering_lighting_set_directional_light_position(rde_vec_3F _position);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_ambient_color(rde_color _ambient_color);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_ambient_color_f(rde_vec_3F _ambient_color);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color(rde_color _diffuse_color);
@@ -1703,6 +1706,9 @@ RDE_FUNC void rde_rendering_skybox_unload(rde_skybox_id _skybox_id);
 
 RDE_FUNC void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing); // This function CANNOT be called during on_render.
 RDE_FUNC RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing();
+
+RDE_FUNC void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _camera);
+RDE_FUNC void rde_rendering_shadows_end();
 
 /// ============================ AUDIO ======================================
 

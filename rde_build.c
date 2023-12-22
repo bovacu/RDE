@@ -3338,7 +3338,8 @@ int main(int _argc, char** _argv) {
 	memset(build_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(lib_type, 0, MAX_SIZE_FOR_OPTIONS);
 	memset(build, 0, MAX_SIZE_FOR_OPTIONS);
-	memset(tool, 0, MAX_SIZE_FOR_OPTIONS);
+	memset(tool, 0, MAX_SIZE_FOR_OPTIONS);
+
 	project_compile_files = NULL;
 	project_include_paths = NULL;
 	project_link_paths = NULL;

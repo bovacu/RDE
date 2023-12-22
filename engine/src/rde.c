@@ -142,7 +142,6 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //				- [DONE] Directional
 //				- [DONE] Point
 //				- [DONE] Spot
-//				- Shadows
 //			- [] Model animations
 //			- [] Text
 //			- [DONE] Line rendering
@@ -158,9 +157,9 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- [] Anchors
 //			- [] Strechs
 //			- [] UI Elements:
-//				- [] Text
-//				- [] Images
-//				- [] Button
+//				- [DONE] Text
+//				- [DONE] Images
+//				- [DONE] Button
 //				- [] Slider
 //				- [] Checkbox
 //				- [] Lists
@@ -246,33 +245,33 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 	}
 
 #define RDE_IMPLEMENT_SAFE_ARR_ACCESS(_type)																							\
-	_type rde_arr_s_get_##_type(uint _index, _type* _arr, size_t _arr_size, char* _fmt, ...) {										  \
-		if(_index >= _arr_size) {																									   \
-			va_list _args;																											  \
-			va_start(_args, _fmt);																									  \
-			vfprintf(stdout, _fmt, _args);																						  	\
-			va_end(_args);																										  	\
-			if(!rde_engine_logs_supressed()) {																					  	\
-				printf("\n");																									   	\
-			}																													   	\
-		}																														   	\
+	_type rde_arr_s_get_##_type(uint _index, _type* _arr, size_t _arr_size, char* _fmt, ...) {											\
+		if(_index >= _arr_size) {																										\
+			va_list _args;																												\
+			va_start(_args, _fmt);																										\
+			vfprintf(stdout, _fmt, _args);																						  		\
+			va_end(_args);																										  		\
+			if(!rde_engine_logs_supressed()) {																					  		\
+				printf("\n");																									   		\
+			}																													   		\
+		}																														   		\
 		rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu' in '%s'.\n", _index, _arr_size); \
 		return _arr[_index];																											\
 	}
 
-#define RDE_IMPLEMENT_SAFE_ARR_SET(_type)																									\
-	void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...) {								\
-		if(_index >= _arr_size) {																												\
-			va_list _args;																														\
-			va_start(_args, _fmt);																												\
-			vfprintf(stdout, _fmt, _args);																										\
-			va_end(_args);																														\
-			if(!rde_engine_logs_supressed()) {																									\
-				printf("\n");																													\
-			}																																	\
-		}																																		\
-		rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu''.\n", _index, _arr_size);				\
-		_arr[_index] = _value;																													\
+#define RDE_IMPLEMENT_SAFE_ARR_SET(_type)																						\
+	void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...) {						\
+		if(_index >= _arr_size) {																								\
+			va_list _args;																										\
+			va_start(_args, _fmt);																								\
+			vfprintf(stdout, _fmt, _args);																						\
+			va_end(_args);																										\
+			if(!rde_engine_logs_supressed()) {																					\
+				printf("\n");																									\
+			}																													\
+		}																														\
+		rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu''.\n", _index, _arr_size);\
+		_arr[_index] = _value;																									\
 }
 
 RDE_IMPLEMENT_SAFE_ARR_ACCESS(int)
@@ -293,7 +292,8 @@ RDE_IMPLEMENT_SAFE_ARR_SET(double)
 RDE_IMPLEMENT_SAFE_ARR_ACCESS(fastObjIndex)
 #endif
 
-#define RDE_SHADOW_MAP_SIZE 1024
+#define RDE_SHADOW_MAP_SIZE_WIDTH 2048
+#define RDE_SHADOW_MAP_SIZE_HEIGHT 2048
 
 #define RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION 3
 #define RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_COLOR 1
@@ -588,8 +588,8 @@ typedef struct {
 } rde_antialiasing;
 
 typedef struct {
-	uint frame_buffer_id;
-	int opengl_texture_id;
+	rde_render_texture* render_texture;
+	mat4 light_space_matrix;
 } rde_shadows;
 
 typedef struct {
@@ -682,28 +682,29 @@ struct rde_engine {
 	JNIEnv* android_env;
 #endif
 
-#define RDE_SHADERS_AMOUNT 7
-rde_shader* line_shader;
-rde_shader* color_shader_2d;
-rde_shader* texture_shader_2d;
-rde_shader* text_shader_2d;
-rde_shader* framebuffer_shader;
-rde_shader* mesh_shader;
-rde_shader* skybox_shader;
-rde_shader* shaders;
+#define RDE_SHADERS_AMOUNT 8
+	rde_shader* line_shader;
+	rde_shader* color_shader_2d;
+	rde_shader* texture_shader_2d;
+	rde_shader* text_shader_2d;
+	rde_shader* framebuffer_shader;
+	rde_shader* mesh_shader;
+	rde_shader* skybox_shader;
+	rde_shader* shadows_shader;
+	rde_shader* shaders;
 	
 size_t total_amount_of_textures;
 	
-rde_texture* textures;
-rde_atlas* atlases;
-rde_font* fonts;
-rde_mesh* meshes;
-rde_model* models;
-	
-rde_illumination illumination;
-rde_skybox skybox;
-rde_antialiasing antialiasing;
-rde_shadows shadows;
+	rde_texture* textures;
+	rde_atlas* atlases;
+	rde_font* fonts;
+	rde_mesh* meshes;
+	rde_model* models;
+		
+	rde_illumination illumination;
+	rde_skybox skybox;
+	rde_antialiasing antialiasing;
+	rde_shadows shadows;
 	
 #ifdef RDE_AUDIO_MODULE
 	rde_sound* sounds;
@@ -711,14 +712,14 @@ rde_shadows shadows;
 	rde_sound_config device_config;
 #endif
 		
-rde_event_func window_events[RDE_WIN_EVENT_COUNT];
-rde_event_func display_events[RDE_DISPLAY_EVENT_COUNT];
-rde_event_func key_events[RDE_KEY_EVENT_COUNT];
-rde_event_func mouse_events[RDE_MOUSE_EVENT_COUNT];
-rde_event_func drag_and_drop_events[RDE_DRAG_AND_DROP_EVENT_COUNT];
-rde_event_func mobile_events[RDE_MOBILE_EVENT_COUNT];
-	
-rde_engine_init_info init_info;
+	rde_event_func window_events[RDE_WIN_EVENT_COUNT];
+	rde_event_func display_events[RDE_DISPLAY_EVENT_COUNT];
+	rde_event_func key_events[RDE_KEY_EVENT_COUNT];
+	rde_event_func mouse_events[RDE_MOUSE_EVENT_COUNT];
+	rde_event_func drag_and_drop_events[RDE_DRAG_AND_DROP_EVENT_COUNT];
+	rde_event_func mobile_events[RDE_MOBILE_EVENT_COUNT];
+		
+	rde_engine_init_info init_info;
 	
 #if IS_WINDOWS()
 	HANDLE console_handle;
@@ -938,6 +939,7 @@ rde_material rde_struct_create_material() {
 rde_directional_light rde_struct_create_directional_light() {
 	rde_directional_light _d;
 	_d.direction = (rde_vec_3F) { -0.2f, -1.0f, -0.3f };
+	_d.position = (rde_vec_3F) { 0, 0, 0 };
 	_d.ambient_color = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
 	_d.diffuse_color = (rde_vec_3F) { 0.5f, 0.5f, 0.5f };
 	_d.specular_color = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
@@ -1133,8 +1135,7 @@ rde_polygon rde_struct_create_polygon() {
 
 rde_shadows rde_struct_create_shadows() {
 	rde_shadows _s;
-	_s.frame_buffer_id = RDE_UINT_MAX;
-	_s.opengl_texture_id = -1;
+	_s.render_texture = NULL;
 	return _s;
 }
 
@@ -1392,6 +1393,7 @@ float FRAMEBUFFER_QUAD_DATA[] = {
 
 
 rde_render_texture* DEFAULT_RENDER_TEXTURE = NULL;
+rde_render_texture* SHADOWS_RENDER_TEXTURE = NULL;
 rde_render_texture* current_render_texture = NULL;
 rde_camera* current_drawing_camera = NULL;
 rde_window* current_drawing_window = NULL;
@@ -1893,7 +1895,8 @@ rde_engine_init_info rde_engine_load_config(const char* _config_path) {
 
 	#ifdef RDE_AUDIO_MODULE
 	GET_SIZET("max_amount_of_sounds", _init_info.heap_allocs_config.max_amount_of_sounds)
-	// GET_SIZET("max_number_of_musics", _init_info.heap_allocs_config.max_number_of_musics)
+	// GET_SIZET("max_number_of_musics", _init_info.heap_allocs_config.max_number_of_musics)
+
 	#endif
 
 	#ifdef RDE_PHYSICS_MODULE
@@ -2057,6 +2060,10 @@ void rde_engine_destroy_engine() {
 	rde_rendering_render_texture_destroy(DEFAULT_RENDER_TEXTURE);
 	glDeleteBuffers(1, &DEFAULT_RENDER_TEXTURE->vbo);
 	glDeleteVertexArrays(1, &DEFAULT_RENDER_TEXTURE->vao);
+
+	// rde_rendering_render_texture_destroy(SHADOWS_RENDER_TEXTURE);
+	// glDeleteBuffers(1, &SHADOWS_RENDER_TEXTURE->vbo);
+	// glDeleteVertexArrays(1, &SHADOWS_RENDER_TEXTURE->vao);
 	
 	if(ENGINE.skybox.opengl_texture_id != -1) {
 		rde_rendering_skybox_unload(ENGINE.skybox.opengl_texture_id);
@@ -3951,7 +3958,42 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	_shader_fragment_handle = rde_file_open("shaders/core/skybox_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
+
+	if(rde_util_string_contains_substring(_vertex_shader, "header_3d_vert", false)) {
+		char* _new_vertex_shader = rde_util_string_replace_substring(_vertex_shader, "header_3d_vert", _header_3d_vert, NULL);
+		rde_file_free_read_text(_shader_vertex_handle);
+		_vertex_shader = _new_vertex_shader;
+	}
+	
+	if(rde_util_string_contains_substring(_fragment_shader, "header_3d_frag", false)) {
+		char* _new_fragment_shader = rde_util_string_replace_substring(_fragment_shader, "header_3d_frag", _header_3d_frag, NULL);
+		rde_file_free_read_text(_shader_fragment_handle);
+		_fragment_shader = _new_fragment_shader;
+	}
+
 	ENGINE.skybox_shader = rde_rendering_shader_load(RDE_SHADER_SKYBOX, _vertex_shader, _fragment_shader);
+	rde_file_close(_shader_vertex_handle);
+	rde_file_close(_shader_fragment_handle);
+
+	
+	_shader_vertex_handle = rde_file_open("shaders/core/shadows_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/core/shadows_frag.glsl", RDE_FILE_MODE_READ);
+	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
+	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
+
+	if(rde_util_string_contains_substring(_vertex_shader, "header_3d_vert", false)) {
+		char* _new_vertex_shader = rde_util_string_replace_substring(_vertex_shader, "header_3d_vert", _header_3d_vert, NULL);
+		rde_file_free_read_text(_shader_vertex_handle);
+		_vertex_shader = _new_vertex_shader;
+	}
+	
+	if(rde_util_string_contains_substring(_fragment_shader, "header_3d_frag", false)) {
+		char* _new_fragment_shader = rde_util_string_replace_substring(_fragment_shader, "header_3d_frag", _header_3d_frag, NULL);
+		rde_file_free_read_text(_shader_fragment_handle);
+		_fragment_shader = _new_fragment_shader;
+	}
+
+	ENGINE.shadows_shader = rde_rendering_shader_load(RDE_SHADER_SHADOWS, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 #else
@@ -4042,6 +4084,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 #else
 	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_X4);
 #endif
+
+	rde_inner_rendering_create_shadows();
 }
 
 void rde_inner_rendering_draw_to_framebuffer(rde_render_texture* _render_texture) {
@@ -4049,7 +4093,7 @@ void rde_inner_rendering_draw_to_framebuffer(rde_render_texture* _render_texture
 	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, _framebuffer_id);
 	RDE_CHECK_GL(glDisable, GL_DEPTH_TEST);
 	RDE_CHECK_GL(glClearColor, 0.0f, 0.0f, 0.0f, 0.0f);
-	RDE_CHECK_GL(glClear, GL_COLOR_BUFFER_BIT);
+	RDE_CHECK_GL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	RDE_CHECK_GL(glUseProgram, ENGINE.framebuffer_shader->compiled_program_id);
 
@@ -4060,6 +4104,9 @@ void rde_inner_rendering_draw_to_framebuffer(rde_render_texture* _render_texture
 }
 
 void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window) {
+	rde_vec_2I _screen_size = rde_window_get_window_size(_window);
+	RDE_CHECK_GL(glViewport, 0, 0, _screen_size.x, _screen_size.y);
+
 	if(ENGINE.antialiasing.samples > 0) {
 #if !IS_MOBILE()
 		RDE_CHECK_GL(glBindFramebuffer, GL_READ_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
@@ -4079,6 +4126,11 @@ void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window) {
 	} else {
 		rde_inner_rendering_draw_to_framebuffer(DEFAULT_RENDER_TEXTURE);
 	}
+
+	current_drawing_camera = NULL;
+	current_drawing_window = NULL;
+	statistics.number_of_drawcalls = 0;
+	glm_mat4_identity(ENGINE.shadows.light_space_matrix);
 }
 
 void rde_inner_rendering_destroy_current_antialiasing_config() {
@@ -4097,20 +4149,21 @@ void rde_inner_rendering_destroy_current_antialiasing_config() {
 }
 
 void rde_inner_rendering_create_shadows() {
-	glGenFramebuffers(1, &ENGINE.shadows.frame_buffer_id);
+	ENGINE.shadows.render_texture = (rde_render_texture*)malloc(sizeof(rde_render_texture));
+	RDE_CHECK_GL(glGenFramebuffers, 1, &ENGINE.shadows.render_texture->opengl_framebuffer_id);
 	
-	uint _depth_texture;
-	RDE_CHECK_GL(glGenTextures, 1, &_depth_texture);
-	ENGINE.shadows.opengl_texture_id = _depth_texture;
-	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, ENGINE.shadows.opengl_texture_id);
-	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, RDE_SHADOW_MAP_SIZE, RDE_SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	RDE_CHECK_GL(glGenTextures, 1, &ENGINE.shadows.render_texture->opengl_texture_id);
+	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, ENGINE.shadows.render_texture->opengl_texture_id);
+	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, RDE_SHADOW_MAP_SIZE_WIDTH, RDE_SHADOW_MAP_SIZE_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.shadows.frame_buffer_id);
-	RDE_CHECK_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ENGINE.shadows.opengl_texture_id, 0);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.shadows.render_texture->opengl_framebuffer_id);
+	RDE_CHECK_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ENGINE.shadows.render_texture->opengl_texture_id, 0);
 	
 #if IS_MOBILE()
 	GLenum _a[1] = { GL_NONE };
@@ -4121,43 +4174,30 @@ void rde_inner_rendering_create_shadows() {
 
 	RDE_CHECK_GL(glReadBuffer, GL_NONE);
 	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+
+	// GLuint _vao, _vbo;
+	// RDE_CHECK_GL(glGenVertexArrays, 1, &_vao);
+	// RDE_CHECK_GL(glGenBuffers, 1, &_vbo);
+	// RDE_CHECK_GL(glBindVertexArray, _vao);
+	// RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _vbo);
+	// RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, sizeof(FRAMEBUFFER_QUAD_DATA), &FRAMEBUFFER_QUAD_DATA, GL_STATIC_DRAW);
+	// RDE_CHECK_GL(glEnableVertexAttribArray, 0);
+	// RDE_CHECK_GL(glVertexAttribPointer, 0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	// // 1 is reserved for color
+	// RDE_CHECK_GL(glEnableVertexAttribArray, 2);
+	// RDE_CHECK_GL(glVertexAttribPointer, 2, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+ //
+	// SHADOWS_RENDER_TEXTURE = rde_rendering_render_texture_create(RDE_SHADOW_MAP_SIZE_WIDTH, RDE_SHADOW_MAP_SIZE_HEIGHT);
+	// SHADOWS_RENDER_TEXTURE->vao = _vao;
+	// SHADOWS_RENDER_TEXTURE->vbo = _vbo;
 }
 
 void rde_inner_rendering_destroy_shadows() {
-	uint _depth_texture = ENGINE.shadows.opengl_texture_id;
-	RDE_CHECK_GL(glDeleteTextures, 1, &_depth_texture);
-	RDE_CHECK_GL(glDeleteFramebuffers, 1, &ENGINE.shadows.frame_buffer_id);
+	RDE_CHECK_GL(glDeleteTextures, 1, &ENGINE.shadows.render_texture->opengl_texture_id);
+	RDE_CHECK_GL(glDeleteFramebuffers, 1, &ENGINE.shadows.render_texture->opengl_framebuffer_id);
 
-	ENGINE.shadows.opengl_texture_id = -1;
-	ENGINE.shadows.frame_buffer_id = RDE_UINT_MAX;
-}
-
-void rde_inner_rendering_draw_scene_shadows(rde_window* _window, rde_camera* _camera) {
-	(void)_window;
-	RDE_CHECK_GL(glClearColor, 0.1f, 0.1f, 0.1f, 1.0f);
-	RDE_CHECK_GL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	mat4 _light_projection;
-	mat4 _light_view;
-	mat4 _light_space_matrix;
-	glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, _camera->near_far.x, _camera->near_far.x, _light_projection);
-	glm_lookat((vec3) { ENGINE.illumination.directional_light.direction.x, ENGINE.illumination.directional_light.direction.x, ENGINE.illumination.directional_light.direction.z },
-				(vec3) { 0.0f, 0.0f, 0.0f },
-				(vec3) { 0.0f, 1.0f, 0.0f },
-				_light_view
-	);
-	 glm_mul(_light_projection, _light_view, _light_space_matrix);
-	// render scene from light's point of view
-	//simpleDepthShader.use();
-	//simpleDepthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
-
-	RDE_CHECK_GL(glViewport, 0, 0, RDE_SHADOW_MAP_SIZE, RDE_SHADOW_MAP_SIZE);
-	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.shadows.frame_buffer_id);
-	RDE_CHECK_GL(glClear, GL_DEPTH_BUFFER_BIT);
-	
-	// Render scene
-
-	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+	ENGINE.shadows.render_texture->opengl_framebuffer_id = RDE_UINT_MAX;
+	ENGINE.shadows.render_texture->opengl_texture_id = RDE_UINT_MAX;
 }
 
 void rde_inner_engine_on_render(float _dt, rde_window* _window) {
@@ -5070,6 +5110,10 @@ void rde_inner_rendering_flush_batch_3d() {
 		RDE_CHECK_GL(glActiveTexture, GL_TEXTURE3);
 		RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _bump_texture->opengl_texture_id);
 
+		uint _shadow_map_texture_id = ENGINE.shadows.render_texture->opengl_texture_id != RDE_UINT_MAX ? ENGINE.shadows.render_texture->opengl_texture_id : DEFAULT_TEXTURE->opengl_texture_id;
+		RDE_CHECK_GL(glActiveTexture, GL_TEXTURE4);
+		RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _shadow_map_texture_id);
+
 		GLint _ka_location = glGetUniformLocation(_shader->compiled_program_id, "tex_ka");
 		RDE_CHECK_GL(glUniform1i, _ka_location, 0);
 		GLint _kd_location = glGetUniformLocation(_shader->compiled_program_id, "tex_kd");
@@ -5078,10 +5122,13 @@ void rde_inner_rendering_flush_batch_3d() {
 		RDE_CHECK_GL(glUniform1i, _ks_location, 2);
 		GLint _bump_location = glGetUniformLocation(_shader->compiled_program_id, "tex_bump");
 		RDE_CHECK_GL(glUniform1i, _bump_location, 3);
+		GLint _shadow_map_location = glGetUniformLocation(_shader->compiled_program_id, "shadow_map");
+		RDE_CHECK_GL(glUniform1i, _shadow_map_location, 4);
 		RDE_CHECK_GL(glUniform1i, _using_render_texture_location, 0);
 	}
 
 	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
+	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(_shader->compiled_program_id, "light_space_matrix"), 1, GL_FALSE, (const void*)ENGINE.shadows.light_space_matrix);
 	rde_vec_2I _mouse_pos = current_drawing_window->mouse_position;
 	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), _mouse_pos.x, _mouse_pos.y);
 	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), ENGINE.delta_time);
@@ -5090,11 +5137,13 @@ void rde_inner_rendering_flush_batch_3d() {
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "camera_pos"), _camera_pos.x, _camera_pos.y, _camera_pos.z);
 	
 	rde_vec_3F _dl_direction = ENGINE.illumination.directional_light.direction;
+	rde_vec_3F _dl_position = ENGINE.illumination.directional_light.position;
 	rde_vec_3F _dl_ambient = ENGINE.illumination.directional_light.ambient_color;
 	rde_vec_3F _dl_diffuse = ENGINE.illumination.directional_light.diffuse_color;
 	rde_vec_3F _dl_specular = ENGINE.illumination.directional_light.specular_color;
 
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "directional_light.direction"), _dl_direction.x, _dl_direction.y, _dl_direction.z);
+	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "directional_light.position"), _dl_position.x, _dl_position.y, _dl_position.z);
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "directional_light.ambient_color"), _dl_ambient.x, _dl_ambient.y, _dl_ambient.z);
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "directional_light.diffuse_color"), _dl_diffuse.x, _dl_diffuse.y, _dl_diffuse.z);
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "directional_light.specular_color"), _dl_specular.x, _dl_specular.y, _dl_specular.z);
@@ -6037,10 +6086,8 @@ rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _h
 void rde_rendering_render_texture_enable(rde_render_texture* _render_texture) {
 	rde_critical_error(_render_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Render Texture");
 	current_render_texture = _render_texture;
-	if(current_render_texture != NULL) {
-		RDE_CHECK_GL(glViewport, 0, 0, current_render_texture->size.x, current_render_texture->size.y);
-		RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, current_render_texture->opengl_framebuffer_id);
-	}
+	RDE_CHECK_GL(glViewport, 0, 0, current_render_texture->size.x, current_render_texture->size.y);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, current_render_texture->opengl_framebuffer_id);
 
 	RDE_CHECK_GL(glEnable, GL_DEPTH_TEST);
 	RDE_CHECK_GL(glClearColor, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -6573,9 +6620,6 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 void rde_rendering_2d_end_drawing() {
 	rde_inner_rendering_flush_batch_2d();
 	rde_inner_rendering_reset_batch_2d();
-	current_drawing_camera = NULL;
-	current_drawing_window = NULL;
-	statistics.number_of_drawcalls = 0;
 }
 
 
@@ -6934,11 +6978,14 @@ void rde_rendering_3d_end_drawing() {
 	rde_inner_rendering_reset_line_batch();
 	RDE_CHECK_GL(glDisable, GL_DEPTH_TEST);
 	RDE_CHECK_GL(glDisable, GL_CULL_FACE);
-	current_drawing_camera = NULL;
 }
 
 void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction) {
 	ENGINE.illumination.directional_light.direction = _direction;
+}
+
+void rde_rendering_lighting_set_directional_light_position(rde_vec_3F _position) {
+	ENGINE.illumination.directional_light.position = _position;
 }
 
 void rde_rendering_lighting_set_directional_light_ambient_color(rde_color _ambient_color) {
@@ -7098,6 +7145,60 @@ void rde_rendering_3d_draw_skybox(rde_camera* _camera) {
 	RDE_CHECK_GL(glBindVertexArray, 0);
 	RDE_CHECK_GL(glDepthFunc, GL_LESS);
 }
+
+void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _camera) {
+	UNUSED(_window)
+
+	mat4 _light_projection;
+	mat4 _light_view;
+	mat4 _light_space_matrix;
+	glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, _camera->near_far.x, _camera->near_far.y, _light_projection);
+	glm_lookat((vec3) { ENGINE.illumination.directional_light.position.x, ENGINE.illumination.directional_light.position.y, ENGINE.illumination.directional_light.position.z },
+				(vec3) { 0.0f, 0.0f, 0.0f },
+				(vec3) { 0.0f, 1.0f, 0.0f },
+				_light_view
+	);
+	glm_mul(_light_projection, _light_view, _light_space_matrix);
+	glm_mat4_copy(_light_space_matrix, ENGINE.shadows.light_space_matrix);
+
+	RDE_CHECK_GL(glUseProgram, ENGINE.shadows_shader->compiled_program_id);
+	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(ENGINE.shadows_shader->compiled_program_id, "light_space_matrix"), 1, GL_FALSE, (const void*)_light_space_matrix);
+
+	RDE_CHECK_GL(glViewport, 0, 0, RDE_SHADOW_MAP_SIZE_WIDTH, RDE_SHADOW_MAP_SIZE_HEIGHT);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.shadows.render_texture->opengl_framebuffer_id);
+
+	RDE_CHECK_GL(glEnable, GL_DEPTH_TEST);
+	RDE_CHECK_GL(glClear, GL_DEPTH_BUFFER_BIT);
+
+	glDisable(GL_CULL_FACE);
+}
+
+void rde_rendering_shadows_end() {
+	RDE_CHECK_GL(glEnable, GL_DEPTH_TEST);
+	GLuint _framebuffer_id = ENGINE.shadows.render_texture->opengl_framebuffer_id;
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, _framebuffer_id);
+
+	rde_mesh* _mesh = current_batch_3d.mesh;
+	rde_shader* _shader = current_batch_3d.shader;
+
+	RDE_CHECK_GL(glUseProgram, _shader->compiled_program_id);
+
+	RDE_CHECK_GL(glBindVertexArray, _mesh->vao);
+
+	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _mesh->vbo[3]);
+	RDE_CHECK_GL(glBufferSubData, GL_ARRAY_BUFFER, 0, current_batch_3d.amount_of_models_per_draw * (sizeof(float) * 16), _mesh->transformation_matrices);
+
+	RDE_CHECK_GL(glDrawArraysInstanced, GL_TRIANGLES, 0, _mesh->vertex_count, current_batch_3d.amount_of_models_per_draw);
+
+	RDE_CHECK_GL(glViewport, 0, 0, DEFAULT_RENDER_TEXTURE->size.x, DEFAULT_RENDER_TEXTURE->size.y);
+	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.antialiasing.samples > 0 ? ENGINE.antialiasing.frame_buffer_id : DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
+
+	rde_inner_rendering_reset_batch_3d();
+
+	glEnable(GL_CULL_FACE);
+}
+
+
 
 
 

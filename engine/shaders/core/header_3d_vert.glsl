@@ -10,3 +10,10 @@ out mat4 model_matrix;
 uniform mat4 view_projection_matrix;
 uniform float dt;
 uniform vec2 mouse_position;
+uniform mat4 light_space_matrix;
+
+out VS_OUT {
+    vec3 frag_pos;
+    vec3 normal;
+    vec4 frag_pos_light_space;
+} vs_out;

@@ -9,4 +9,8 @@ void main(){
 	frag_pos = in_pos;
 	text_coord = in_text_coord;
 	model_matrix = _model;
+
+	vs_out.frag_pos = vec3(in_model * vec4(in_pos, 1.0));
+    vs_out.normal = transpose(inverse(mat3(in_model))) * normal;
+    vs_out.frag_pos_light_space = light_space_matrix * vec4(vs_out.frag_pos, 1.0);
 }

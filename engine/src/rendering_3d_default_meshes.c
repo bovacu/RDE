@@ -2,87 +2,92 @@
 	const size_t _vertex_count = 36;							\
 	float* _positions = (float*)malloc(sizeof(float) * _vertex_count * 3);\
 	memcpy(_positions, (float []){								\
-		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
-		-1.0f * _size, -1.0f * _size,  1.0f * _size,			\
+        -1.0f * _size, -1.0f * _size, -1.0f * _size,			\
+		 1.0f * _size,  1.0f * _size, -1.0f * _size,			\
+		 1.0f * _size, -1.0f * _size, -1.0f * _size,			\
+		 1.0f * _size,  1.0f * _size, -1.0f * _size,			\
 		-1.0f * _size, -1.0f * _size, -1.0f * _size,			\
-		-1.0f * _size,  1.0f * _size, -1.0f * _size,			\
+        -1.0f * _size,  1.0f * _size, -1.0f * _size,			\
+		   														\
+        -1.0f * _size, -1.0f * _size,  1.0f * _size,			\
+		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
+		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
+		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
 		-1.0f * _size,  1.0f * _size,  1.0f * _size,			\
-		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
-		   														\
-		 1.0f * _size,  1.0f * _size, -1.0f * _size,			\
-		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
-		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
-		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
-		-1.0f * _size,  1.0f * _size,  1.0f * _size,			\
 		-1.0f * _size, -1.0f * _size,  1.0f * _size,			\
 		   														\
-		-1.0f * _size, -1.0f * _size,  1.0f * _size,			\
 		-1.0f * _size,  1.0f * _size,  1.0f * _size,			\
 		-1.0f * _size,  1.0f * _size, -1.0f * _size,			\
-		 1.0f * _size, -1.0f * _size, -1.0f * _size,			\
 		-1.0f * _size, -1.0f * _size, -1.0f * _size,			\
-		-1.0f * _size,  1.0f * _size, -1.0f * _size,			\
-		   														\
-		 1.0f * _size, -1.0f * _size, -1.0f * _size,			\
-		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
-		-1.0f * _size, -1.0f * _size, -1.0f * _size,			\
-		 1.0f * _size,  1.0f * _size, -1.0f * _size,			\
-		-1.0f * _size,  1.0f * _size, -1.0f * _size,			\
-		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
-		   														\
-		 1.0f * _size, -1.0f * _size, -1.0f * _size,			\
-		 1.0f * _size,  1.0f * _size, -1.0f * _size,			\
-		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
-		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
-		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
+        -1.0f * _size, -1.0f * _size, -1.0f * _size,			\
 		-1.0f * _size, -1.0f * _size,  1.0f * _size,			\
+		-1.0f * _size,  1.0f * _size,  1.0f * _size,			\
 		   														\
-		-1.0f * _size, -1.0f * _size, -1.0f * _size,			\
-		-1.0f * _size, -1.0f * _size,  1.0f * _size,			\
-		-1.0f * _size,  1.0f * _size, -1.0f * _size,			\
+		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
+		 1.0f * _size, -1.0f * _size, -1.0f * _size,			\
 		 1.0f * _size,  1.0f * _size, -1.0f * _size,			\
 		 1.0f * _size, -1.0f * _size, -1.0f * _size,			\
+		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
+		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
+		   														\
+        -1.0f * _size, -1.0f * _size, -1.0f * _size,			\
+		 1.0f * _size, -1.0f * _size, -1.0f * _size,			\
+		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
+		 1.0f * _size, -1.0f * _size,  1.0f * _size,			\
+        -1.0f * _size, -1.0f * _size,  1.0f * _size,			\
+		-1.0f * _size, -1.0f * _size, -1.0f * _size,			\
+		   														\
 		-1.0f * _size,  1.0f * _size, -1.0f * _size,			\
+         1.0f * _size,  1.0f * _size,  1.0f * _size,			\
+		 1.0f * _size,  1.0f * _size, -1.0f * _size,			\
+		 1.0f * _size,  1.0f * _size,  1.0f * _size,			\
+        -1.0f * _size,  1.0f * _size, -1.0f * _size,			\
+		-1.0f * _size,  1.0f * _size,  1.0f * _size,			\
 	}, _vertex_count * 3 * sizeof(float)); 						\
 																\
 	float* _normals = (float*)malloc(sizeof(float) * _vertex_count * 3);\
 	memcpy(_normals, (float []){								\
-		 0.0f, -1.0f,  0.0f,									\
-		 0.0f, -1.0f,  0.0f,									\
-		 0.0f, -1.0f,  0.0f,									\
-		 0.0f,  1.0f,  0.0f,									\
-		 0.0f,  1.0f,  0.0f,									\
-		 0.0f,  1.0f,  0.0f,									\
-		 1.0f,  0.0f,  0.0f,									\
-		 1.0f,  0.0f,  0.0f,									\
-		 1.0f,  0.0f,  0.0f,									\
-		-0.0f,  0.0f,  1.0f,									\
-		-0.0f,  0.0f,  1.0f,									\
-		-0.0f,  0.0f,  1.0f,									\
-		-1.0f, -0.0f, -0.0f,									\
-		-1.0f, -0.0f, -0.0f,									\
-		-1.0f, -0.0f, -0.0f,									\
 		 0.0f,  0.0f, -1.0f,									\
 		 0.0f,  0.0f, -1.0f,									\
 		 0.0f,  0.0f, -1.0f,									\
-		 0.0f, -1.0f,  0.0f,									\
-		 0.0f, -1.0f,  0.0f,									\
-		 0.0f, -1.0f,  0.0f,									\
-		 0.0f,  1.0f,  0.0f,									\
-		 0.0f,  1.0f,  0.0f,									\
-		 0.0f,  1.0f,  0.0f,									\
-		 1.0f,  0.0f,  0.0f,									\
-		 1.0f,  0.0f,  0.0f,									\
-		 1.0f,  0.0f,  0.0f,									\
-		-0.0f,  0.0f,  1.0f,									\
-		-0.0f,  0.0f,  1.0f,									\
-		-0.0f,  0.0f,  1.0f,									\
-		-1.0f, -0.0f, -0.0f,									\
-		-1.0f, -0.0f, -0.0f,									\
-		-1.0f, -0.0f, -0.0f,									\
 		 0.0f,  0.0f, -1.0f,									\
 		 0.0f,  0.0f, -1.0f,									\
-		 0.0f,  0.0f, -1.0f		 								\
+		 0.0f,  0.0f, -1.0f,									\
+                                                                \
+		 0.0f,  0.0f,  1.0f,									\
+		 0.0f,  0.0f,  1.0f,									\
+		 0.0f,  0.0f,  1.0f,									\
+		 0.0f,  0.0f,  1.0f,									\
+		 0.0f,  0.0f,  1.0f,									\
+		 0.0f,  0.0f,  1.0f,									\
+                                                                \
+		-1.0f,  0.0f,  0.0f,									\
+		-1.0f,  0.0f,  0.0f,									\
+		-1.0f,  0.0f,  0.0f,									\
+        -1.0f,  0.0f,  0.0f,									\
+        -1.0f,  0.0f,  0.0f,									\
+        -1.0f,  0.0f,  0.0f,									\
+                                                                \
+		 1.0f,  0.0f,  0.0f,									\
+		 1.0f,  0.0f,  0.0f,									\
+		 1.0f,  0.0f,  0.0f,									\
+		 1.0f,  0.0f,  0.0f,									\
+		 1.0f,  0.0f,  0.0f,									\
+		 1.0f,  0.0f,  0.0f,									\
+                                                                \
+		 0.0f, -1.0f,  0.0f,									\
+		 0.0f, -1.0f,  0.0f,									\
+		 0.0f, -1.0f,  0.0f,									\
+		 1.0f, -1.0f,  0.0f,									\
+		 1.0f, -1.0f,  0.0f,									\
+		 1.0f, -1.0f,  0.0f,									\
+                                                                \
+		 0.0f,  1.0f,  0.0f,									\
+		 0.0f,  1.0f,  0.0f,									\
+		 0.0f,  1.0f,  0.0f,									\
+		 0.0f,  1.0f,  0.0f,									\
+		 0.0f,  1.0f,  0.0f,									\
+		 0.0f,  1.0f,  0.0f		 								\
 	}, _vertex_count * 3 * sizeof(float));									
 
 

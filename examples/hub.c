@@ -37,10 +37,13 @@ void draw_grid(rde_camera* _camera, rde_window* _window) {
 	rde_rendering_3d_end_drawing();
 }
 
+void draw_imgui_transform(const char* _name, rde_transform* _transform);
+
 #if !IS_ANDROID()
 #include "model_viewer.c"
 #include "hierarchy.c"
 #include "performance_test.c"
+#include "shadows.c"
 // #include "physics.c"
 #else
 #include "android.c"
@@ -152,6 +155,13 @@ void on_imgui_hub_menu(float _dt) {
 			}
 			hierarchy_init();
 		}
+
+		if(rde_imgui_radio_button("Shadows", &_option, 4)) {
+			if(unload_callback != NULL) {
+				unload_callback();
+			}
+			shadows_init();
+		}
 #else
 		if(rde_imgui_radio_button("Android demo", &_option, 2)) {
 			if(unload_callback != NULL) {
@@ -180,6 +190,45 @@ void on_render(float _dt, rde_window* _window) {
 	}
 
 	rde_imgui_draw();
+}
+
+void draw_imgui_transform(const char* _name, rde_transform* _transform) {
+	rde_imgui_begin(_name, NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_push_id(id_counter++);
+	rde_vec_3F _model_position = rde_engine_transform_get_position(_transform);
+	float _position[3] = { _model_position.x, _model_position.y, _model_position.z };
+	if(rde_imgui_drag_float_3("Position", _position, 1.f, 0, 0, "%.3f", 0)) {
+		rde_engine_transform_set_position(_transform, (rde_vec_3F) { _position[0], _position[1], _position[2] });
+	}
+
+	rde_imgui_separator();
+	rde_vec_3F _model_rotation = rde_engine_transform_get_rotation_degs(_transform);
+	float _radians = rde_math_degrees_to_radians(_model_rotation.x);
+
+	if(rde_imgui_slider_angle("Rotation X", &_radians, -360, 360, 0)) {
+		_model_rotation.x = rde_math_radians_to_degrees(_radians);
+		rde_engine_transform_set_rotation(_transform, _model_rotation);
+	}
+
+	_radians = rde_math_degrees_to_radians(_model_rotation.y);
+	if(rde_imgui_slider_angle("Rotation Y", &_radians, -360, 360, 0)) {
+		_model_rotation.y = rde_math_radians_to_degrees(_radians);
+		rde_engine_transform_set_rotation(_transform, _model_rotation);
+	}
+
+	_radians = rde_math_degrees_to_radians(_model_rotation.z);
+	if(rde_imgui_slider_angle("Rotation Z", &_radians, -360, 360, 0)) {
+		_model_rotation.z = rde_math_radians_to_degrees(_radians);
+		rde_engine_transform_set_rotation(_transform, _model_rotation);
+	}
+
+	rde_vec_3F _model_scale = rde_engine_transform_get_scale(_transform);
+	float _scale[3] = { _model_scale.x, _model_scale.y, _model_scale.z };
+	if(rde_imgui_drag_float_3("Scale", _scale, 0.25f, 0, 0, "%.3f", 0)) {
+		rde_engine_transform_set_scale(_transform, (rde_vec_3F) { _scale[0], _scale[1], _scale[2] });
+	}
+	rde_imgui_pop_id();
+	rde_imgui_end();
 }
 
 void init_func(int _argc, char** _argv) {

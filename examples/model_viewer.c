@@ -13,6 +13,7 @@ rde_vec_3F model_viewer_camera_front = { -0.31f, -0.24f, -0.91f };
 rde_vec_3F model_viewer_camera_up = { 0.0, 1.0f, 0.0f };
 
 rde_vec_3F model_viewer_directional_light_direction = { -0.2f, -1.0f, -0.3f };
+rde_vec_3F model_viewer_directional_light_position = { 0.0f, 0.0f, 0.0f };
 rde_vec_3F model_viewer_directional_light_ambient_color = { 0.2f, 0.2f, 0.2f };
 rde_vec_3F model_viewer_directional_light_diffuse_color = { 0.5f, 0.5f, 0.5f };
 rde_vec_3F model_viewer_directional_light_specular_color = { 1.0f, 1.0f, 1.0f };
@@ -243,6 +244,14 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 			model_viewer_directional_light_direction.y = _vec[1];
 			model_viewer_directional_light_direction.z = _vec[2];
 			rde_rendering_lighting_set_directional_light_direction(model_viewer_directional_light_direction);
+		}
+
+		float _vec_0[3] = { model_viewer_directional_light_position.x, model_viewer_directional_light_position.y, model_viewer_directional_light_position.z };
+		if (rde_imgui_drag_float_3("Position", _vec_0, 0.25f, 0, 0, "%.3f", 0)) {
+			model_viewer_directional_light_position.x = _vec_0[0];
+			model_viewer_directional_light_position.y = _vec_0[1];
+			model_viewer_directional_light_position.z = _vec_0[2];
+			rde_rendering_lighting_set_directional_light_position(model_viewer_directional_light_position);
 		}
 	
 		float _vec_1[3] = { model_viewer_directional_light_ambient_color.x, model_viewer_directional_light_ambient_color.y, model_viewer_directional_light_ambient_color.z };

@@ -15,6 +15,7 @@ struct rde_material {
 };
 struct rde_directional_light {
 	vec3 direction;
+	vec3 position;
 	vec3 ambient_color;
 	vec3 diffuse_color;
 	vec3 specular_color;
@@ -42,6 +43,12 @@ struct rde_spot_light {
 	float outer_cut_off;
 	int used;
 };
+in VS_OUT {
+    vec3 frag_pos;
+    vec3 normal;
+    vec4 frag_pos_light_space;
+} fs_in;
+
 
 uniform vec3 camera_pos;
 uniform rde_directional_light directional_light;
@@ -62,3 +69,4 @@ uniform sampler2D tex_kd;
 uniform sampler2D tex_ks;
 uniform sampler2D tex_bump;
 uniform sampler2D render_texture;
+uniform sampler2D shadow_map;
