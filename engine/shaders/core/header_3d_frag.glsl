@@ -63,6 +63,7 @@ uniform rde_point_light point_lights[RDE_MAX_POINT_LIGHTS];
 uniform rde_spot_light spot_lights[RDE_MAX_SPOT_LIGHTS];
 #endif
 
+uniform int use_shadows;
 uniform rde_material material;
 uniform sampler2D tex_ka;
 uniform sampler2D tex_kd;

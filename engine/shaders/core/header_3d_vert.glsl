@@ -7,6 +7,7 @@ out vec3 normal;
 out vec2 text_coord;
 out vec3 frag_pos;
 out mat4 model_matrix;
+uniform int use_shadows;
 uniform mat4 view_projection_matrix;
 uniform float dt;
 uniform vec2 mouse_position;

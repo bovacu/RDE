@@ -147,16 +147,8 @@ void shadows_on_late_update(float _dt) {
 void shadows_draw_3d(rde_window* _window, float _dt) {
 	UNUSED(_dt)
 
-	rde_render_3d(_window, &shadows_camera, false, {
-		rde_rendering_shadows_begin(_window, &shadows_camera);
-		// rde_rendering_3d_draw_mesh(shadows_transform_0, plain_mesh, rde_rendering_shader_get_by_name(RDE_SHADER_SHADOWS));
-		// rde_rendering_3d_draw_mesh(shadows_transform_1, cube_mesh, rde_rendering_shader_get_by_name(RDE_SHADER_SHADOWS));
-		rde_rendering_3d_draw_model(shadows_transform_0, shadows_model, rde_rendering_shader_get_by_name(RDE_SHADER_SHADOWS));
-		rde_rendering_shadows_end();
-
+	rde_render_3d_with_shadows(_window, &shadows_camera, false, {
 		rde_rendering_3d_draw_model(shadows_transform_0, shadows_model, NULL);
-		// rde_rendering_3d_draw_mesh(shadows_transform_0, plain_mesh, NULL);
-		// rde_rendering_3d_draw_mesh(shadows_transform_1, cube_mesh, NULL);
 	})
 }
 

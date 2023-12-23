@@ -403,6 +403,14 @@ typedef unsigned int uint;
 	rde_rendering_3d_begin_drawing(_camera, _window, _draw_wireframe);	\
 	_block_of_code														\
 	rde_rendering_3d_end_drawing();
+	
+#define rde_render_3d_with_shadows(_window, _camera, _draw_wireframe, _block_of_code)	\
+	rde_rendering_3d_begin_drawing(_camera, _window, _draw_wireframe);					\
+	rde_rendering_shadows_begin(_window, _camera);										\
+	_block_of_code																		\
+	rde_rendering_shadows_end();														\
+	_block_of_code																		\
+	rde_rendering_3d_end_drawing();
 
 #define rde_render_2d(_window, _camera, _is_hud, _block_of_code)\
 	rde_rendering_2d_begin_drawing(_camera, _window, _is_hud);	\

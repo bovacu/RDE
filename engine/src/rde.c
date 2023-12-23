@@ -292,8 +292,8 @@ RDE_IMPLEMENT_SAFE_ARR_SET(double)
 RDE_IMPLEMENT_SAFE_ARR_ACCESS(fastObjIndex)
 #endif
 
-#define RDE_SHADOW_MAP_SIZE_WIDTH 2048
-#define RDE_SHADOW_MAP_SIZE_HEIGHT 2048
+#define RDE_SHADOW_MAP_SIZE_WIDTH 1024
+#define RDE_SHADOW_MAP_SIZE_HEIGHT 1024
 
 #define RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION 3
 #define RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_COLOR 1
@@ -514,13 +514,20 @@ typedef struct {
 	unsigned short thickness;
 	rde_shader* shader;
 } rde_line_batch;
-	
+
+typedef enum {
+	RDE_SHADOW_PASS_STATE_NONE,
+	RDE_SHADOW_PASS_STATE_DEPTH,
+	RDE_SHADOW_PASS_STATE_NORMAL
+} RDE_SHADOW_PASS_STATE_;
+
 typedef struct {
 	rde_mesh* mesh;
 	rde_shader* shader;
 	size_t amount_of_models_per_draw;
 	rde_line_batch line_batch;
 	bool draw_mesh_wireframe;
+	RDE_SHADOW_PASS_STATE_ use_shadows;
 } rde_batch_3d;
 	
 struct rde_atlas {
@@ -1098,6 +1105,7 @@ rde_batch_3d rde_struct_create_batch_3d() {
 	_b.amount_of_models_per_draw = 0;
 	_b.line_batch = rde_struct_create_line_batch();
 	_b.draw_mesh_wireframe = false;
+	_b.use_shadows = RDE_SHADOW_PASS_STATE_NONE;
 	return _b;
 }
 
@@ -5248,6 +5256,8 @@ void rde_inner_rendering_flush_batch_3d() {
 
 		memset(_spot_light_var, 0, 256);
 	}
+	
+	RDE_CHECK_GL(glUniform1i, glGetUniformLocation(_shader->compiled_program_id, "use_shadows"), current_batch_3d.use_shadows == RDE_SHADOW_PASS_STATE_NORMAL ? 1 : 0);
 
 	RDE_CHECK_GL(glBindVertexArray, _mesh->vao);
 
@@ -6947,6 +6957,10 @@ void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_mesh* _mesh
 	const size_t _floats_per_matrix = 1;
 	
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.mesh_shader : _shader;
+	if(current_batch_3d.use_shadows == RDE_SHADOW_PASS_STATE_DEPTH) {
+		_drawing_shader = ENGINE.shadows_shader;
+	}
+	
 	rde_inner_rendering_try_create_batch_3d(_drawing_shader, _mesh);
 	rde_inner_rendering_try_flush_batch_3d(_drawing_shader, _mesh, _floats_per_matrix);
 	
@@ -6978,6 +6992,7 @@ void rde_rendering_3d_end_drawing() {
 	rde_inner_rendering_reset_line_batch();
 	RDE_CHECK_GL(glDisable, GL_DEPTH_TEST);
 	RDE_CHECK_GL(glDisable, GL_CULL_FACE);
+	current_batch_3d.use_shadows = RDE_SHADOW_PASS_STATE_NONE;
 }
 
 void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction) {
@@ -7148,6 +7163,8 @@ void rde_rendering_3d_draw_skybox(rde_camera* _camera) {
 
 void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _camera) {
 	UNUSED(_window)
+	
+	current_batch_3d.use_shadows = RDE_SHADOW_PASS_STATE_DEPTH;
 
 	mat4 _light_projection;
 	mat4 _light_view;
@@ -7196,6 +7213,8 @@ void rde_rendering_shadows_end() {
 	rde_inner_rendering_reset_batch_3d();
 
 	glEnable(GL_CULL_FACE);
+	
+	current_batch_3d.use_shadows = RDE_SHADOW_PASS_STATE_NORMAL;
 }
 
 
