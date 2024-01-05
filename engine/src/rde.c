@@ -1670,8 +1670,8 @@ void rde_inner_engine_on_event() {
 				ENGINE.user_event_callback(&_rde_event, _window);
 			}
 
-			if(_rde_event.type == RDE_EVENT_TYPE_DRAG_AND_DROP_FILE && ((SDL_Event*)(_rde_event.sdl_native_event))->drop.source != NULL) {
-				SDL_free(((SDL_Event*)(_rde_event.sdl_native_event))->drop.source);
+			if(_rde_event.type == RDE_EVENT_TYPE_DRAG_AND_DROP_FILE && ((SDL_Event*)(_rde_event.sdl_native_event))->drop.data != NULL) {
+				SDL_free(((SDL_Event*)(_rde_event.sdl_native_event))->drop.data);
 			}
 		}
 	}
@@ -4461,7 +4461,7 @@ size_t rde_inner_obj_file_read(void* _file, void* _dst, size_t _bytes, void* _us
 	(void)_user_data;
 	(void)_bytes;
 	SDL_RWops* _sdl_file = (SDL_RWops*)_file;
-	return SDL_RWread(_sdl_file, _dst, 1);
+	return SDL_RWread(_sdl_file, _dst, _bytes);
 }
 
 unsigned long rde_inner_obj_file_size(void* _file, void* _user_data) {
@@ -7627,7 +7627,7 @@ void rde_inner_event_sdl_to_rde_helper_transform_drop_event(SDL_Event* _sdl_even
 	switch(_sdl_event->type) {
 		case SDL_EVENT_DROP_FILE: {
 			_rde_event->type = RDE_EVENT_TYPE_DRAG_AND_DROP_FILE;
-			_rde_event->data.drag_and_drop_data.file_path = _sdl_event->drop.source;
+			_rde_event->data.drag_and_drop_data.file_path = _sdl_event->drop.data;
 		}
 	}
 }
