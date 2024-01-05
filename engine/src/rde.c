@@ -1612,13 +1612,13 @@ void rde_inner_engine_on_event() {
 			//			- SDL_GamepadDeviceEvent
 			//			- SDL_AudioDeviceEvent
 
-			if(SDL_EVENT_WINDOW_FIRST >= _event.type && _event.type <= SDL_EVENT_WINDOW_LAST) {
+			if(_event.type >= SDL_EVENT_WINDOW_FIRST && _event.type <= SDL_EVENT_WINDOW_LAST) {
 				size_t _window_id = SDL_GetWindowID(_window->sdl_window);
 				if(_window_id != _rde_event.window_id) {
 					continue;
 				}
 				rde_events_window_consume_events(&_rde_event, _window);
-			} else if(SDL_EVENT_DISPLAY_FIRST >= _event.type && _event.type <= SDL_EVENT_DISPLAY_LAST) {
+			} else if(_event.type >= SDL_EVENT_DISPLAY_FIRST && _event.type <= SDL_EVENT_DISPLAY_LAST) {
 				rde_events_display_consume_events(&_rde_event, _window);
 			} else {
 				switch(_event.type) {
@@ -7716,9 +7716,9 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 
 	rde_event _event = rde_struct_create_event();
 
-	if(SDL_EVENT_WINDOW_FIRST <= _sdl_event->type && _sdl_event->type <= SDL_EVENT_WINDOW_LAST) {
+	if(_sdl_event->type >= SDL_EVENT_WINDOW_FIRST && _sdl_event->type <= SDL_EVENT_WINDOW_LAST) {
 		rde_inner_event_sdl_to_rde_helper_transform_window_event(_sdl_event, &_event);
-	} else if(SDL_EVENT_DISPLAY_FIRST <= _sdl_event->type && _sdl_event->type <= SDL_EVENT_DISPLAY_LAST) {
+	} else if(_sdl_event->type >= SDL_EVENT_DISPLAY_FIRST && _sdl_event->type <= SDL_EVENT_DISPLAY_LAST) {
 		rde_inner_event_sdl_to_rde_helper_transform_display_event(_sdl_event, &_event);
 	} else {
 		switch(_sdl_event->type) {
