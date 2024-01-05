@@ -237,7 +237,7 @@ typedef unsigned int uint;
 		return 0;																	   	\
 	}
 #elif IS_ANDROID()
-#include "SDL2/SDL_main.h"
+#include "SDL3/SDL_main.h"
 #include <jni.h>
 #include <android/native_window.h>
 #include <android/input.h>

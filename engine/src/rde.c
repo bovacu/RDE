@@ -23,9 +23,9 @@
 
 #if IS_ANDROID()
 // This include comes directly from the RDEAndroid module SDL JNI. It contains some extra fanzy features which normal SDL doesn't.
-#include "SDL.h"
+#include <SDL3/SDL.h>
 #else
-#include "SDL2/SDL.h"
+#include "SDL3/SDL.h"
 #endif
 
 
@@ -1607,70 +1607,71 @@ void rde_inner_engine_on_event() {
 			//			- SDL_TextInputEvent
 			//
 			//		Also, but without the if, still need to implement:
-			//			- SDL_ControllerAxisEvent
-			//			- SDL_ControllerButtonEvent
-			//			- SDL_ControllerDeviceEvent
+			//			- SDL_GamepadAxisEvent
+			//			- SDL_GamepadButtonEvent
+			//			- SDL_GamepadDeviceEvent
 			//			- SDL_AudioDeviceEvent
-			switch(_event.type) {
-				case SDL_WINDOWEVENT:	{
-					size_t _window_id = SDL_GetWindowID(_window->sdl_window);
-					if(_window_id != _rde_event.window_id) {
-						continue;
-					}
-					rde_events_window_consume_events(&_rde_event, _window);
-				} break;
-				
-				case SDL_DISPLAYEVENT: rde_events_display_consume_events(&_rde_event, _window); break;
-				
-				case SDL_KEYDOWN:
-				case SDL_KEYUP: {
-					size_t _window_id = SDL_GetWindowID(_window->sdl_window);
-					if(_window_id != _rde_event.window_id) {
-						continue;
-					}
-					rde_events_keyboard_consume_events(&_rde_event, _window);
-				} break;
 
-				case SDL_MOUSEMOTION:
-				case SDL_MOUSEWHEEL:
-				case SDL_MOUSEBUTTONDOWN:
-				case SDL_MOUSEBUTTONUP: {
-					size_t _window_id = SDL_GetWindowID(_window->sdl_window);
-					if(_window_id != _rde_event.window_id) {
-						continue;
-					}
-					rde_events_mouse_consume_events(&_rde_event, _window);
-				} break;
+			if(SDL_EVENT_WINDOW_FIRST >= _event.type && _event.type <= SDL_EVENT_WINDOW_LAST) {
+				size_t _window_id = SDL_GetWindowID(_window->sdl_window);
+				if(_window_id != _rde_event.window_id) {
+					continue;
+				}
+				rde_events_window_consume_events(&_rde_event, _window);
+			} else if(SDL_EVENT_DISPLAY_FIRST >= _event.type && _event.type <= SDL_EVENT_DISPLAY_LAST) {
+				rde_events_display_consume_events(&_rde_event, _window);
+			} else {
+				switch(_event.type) {
+					case SDL_EVENT_KEY_DOWN:
+					case SDL_EVENT_KEY_UP: {
+						size_t _window_id = SDL_GetWindowID(_window->sdl_window);
+						if(_window_id != _rde_event.window_id) {
+							continue;
+						}
+						rde_events_keyboard_consume_events(&_rde_event, _window);
+					} break;
 
-				case SDL_DROPFILE: {
-					size_t _window_id = SDL_GetWindowID(_window->sdl_window);
-					if(_window_id != _rde_event.window_id) {
-						continue;
-					}
-					rde_events_drag_and_drop_consume_events(&_rde_event, _window);
-				} break;
+					case SDL_EVENT_MOUSE_MOTION:
+					case SDL_EVENT_MOUSE_WHEEL:
+					case SDL_EVENT_MOUSE_BUTTON_DOWN:
+					case SDL_EVENT_MOUSE_BUTTON_UP: {
+						size_t _window_id = SDL_GetWindowID(_window->sdl_window);
+						if(_window_id != _rde_event.window_id) {
+							continue;
+						}
+						rde_events_mouse_consume_events(&_rde_event, _window);
+					} break;
 
-				case SDL_FINGERDOWN:
-				case SDL_FINGERUP:
-				case SDL_FINGERMOTION: 
-				case SDL_DOLLARGESTURE:
-				case SDL_DOLLARRECORD:
-				case SDL_MULTIGESTURE:
-				case SDL_APP_TERMINATING:
-				case SDL_APP_LOWMEMORY:
-				case SDL_APP_WILLENTERBACKGROUND:
-				case SDL_APP_DIDENTERBACKGROUND:
-				case SDL_APP_WILLENTERFOREGROUND:
-				case SDL_APP_DIDENTERFOREGROUND:
-				case SDL_LOCALECHANGED: rde_events_mobile_consume_events(&_rde_event, _window); break;
+					case SDL_EVENT_DROP_FILE: {
+						size_t _window_id = SDL_GetWindowID(_window->sdl_window);
+						if(_window_id != _rde_event.window_id) {
+							continue;
+						}
+						rde_events_drag_and_drop_consume_events(&_rde_event, _window);
+					} break;
+
+					case SDL_EVENT_FINGER_DOWN:
+					case SDL_EVENT_FINGER_UP:
+					case SDL_EVENT_FINGER_MOTION:
+					// case SDL_DOLLARGESTURE:
+					// case SDL_DOLLARRECORD:
+					// case SDL_MULTIGESTURE:
+					case SDL_EVENT_TERMINATING:
+					case SDL_EVENT_LOW_MEMORY:
+					case SDL_EVENT_WILL_ENTER_BACKGROUND:
+					case SDL_EVENT_DID_ENTER_BACKGROUND:
+					case SDL_EVENT_WILL_ENTER_FOREGROUND:
+					case SDL_EVENT_DID_ENTER_FOREGROUND:
+					case SDL_EVENT_LOCALE_CHANGED: rde_events_mobile_consume_events(&_rde_event, _window); break;
+				}
 			}
 
 			if(ENGINE.user_event_callback != NULL) {
 				ENGINE.user_event_callback(&_rde_event, _window);
 			}
 
-			if(_rde_event.type == RDE_EVENT_TYPE_DRAG_AND_DROP_FILE && ((SDL_Event*)(_rde_event.sdl_native_event))->drop.file != NULL) {
-				SDL_free(((SDL_Event*)(_rde_event.sdl_native_event))->drop.file);
+			if(_rde_event.type == RDE_EVENT_TYPE_DRAG_AND_DROP_FILE && ((SDL_Event*)(_rde_event.sdl_native_event))->drop.source != NULL) {
+				SDL_free(((SDL_Event*)(_rde_event.sdl_native_event))->drop.source);
 			}
 		}
 	}
@@ -2029,9 +2030,8 @@ void rde_engine_set_running(bool _running) {
 }
 
 rde_vec_2I rde_engine_get_display_size() {
-	SDL_DisplayMode _displayMode;
-	SDL_GetCurrentDisplayMode(0, &_displayMode);
-	return (rde_vec_2I){ _displayMode.w, _displayMode.h };
+	const SDL_DisplayMode* _displayMode = SDL_GetCurrentDisplayMode(0);
+	return (rde_vec_2I){ _displayMode->w, _displayMode->h };
 }
 
 void rde_engine_use_rde_2d_physics_system(bool _use) {
@@ -2039,7 +2039,10 @@ void rde_engine_use_rde_2d_physics_system(bool _use) {
 }
 
 bool rde_engine_is_vsync_active() {
-	return SDL_GL_GetSwapInterval() == 1;
+	int _interval = 0;
+	// TODO: Handle returned error code by SDL_GL_GetSwapInterval
+	SDL_GL_GetSwapInterval(&_interval);
+	return _interval == 1;
 }
 
 void rde_engine_set_vsync_active(bool _vsync) {
@@ -3197,7 +3200,7 @@ char* rde_file_read_full_file(rde_file_handle* _file_handler, size_t* _output_fi
 	rde_critical_error(_text == NULL, RDE_ERROR_NO_MEMORY, sizeof(char) * _total_size, "Text Read Full File");
 
 	while (_total_bytes_read < _total_size && _bytes_to_read != 0) {
-		_bytes_to_read = SDL_RWread(_file_handler->sdl_handle, _buf, 1, (_total_size - _total_bytes_read));
+		_bytes_to_read = SDL_RWread(_file_handler->sdl_handle, _buf, 1);
 		_total_bytes_read += _bytes_to_read;
 		_buf += _bytes_to_read;
 	}
@@ -3232,7 +3235,7 @@ unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, siz
 	rde_critical_error(_text == NULL, RDE_ERROR_NO_MEMORY, sizeof(unsigned char) * _total_size, "Text Read Full File");
 
 	while (_total_bytes_read < _total_size && _bytes_to_read != 0) {
-		_bytes_to_read = SDL_RWread(_file_handler->sdl_handle, _buf, 1, (_total_size - _total_bytes_read));
+		_bytes_to_read = SDL_RWread(_file_handler->sdl_handle, _buf, 1);
 		_total_bytes_read += _bytes_to_read;
 		_buf += _bytes_to_read;
 	}
@@ -3263,13 +3266,13 @@ char* rde_file_read_line(rde_file_handle* _file_handler, size_t _line) {
 	size_t _line_first_byte = RDE_UINT_MAX;
 
 	rde_inner_file_system_check_file_mode_or_convert(_file_handler, RDE_FILE_MODE_READ);
-	SDL_RWseek(_file_handler->sdl_handle, 0, RW_SEEK_END);
+	SDL_RWseek(_file_handler->sdl_handle, 0, SDL_RW_SEEK_END);
 	long _content_size = SDL_RWtell(_file_handler->sdl_handle);
 	char* _file_content = (char*)malloc(sizeof(char) * _content_size);
-	SDL_RWseek(_file_handler->sdl_handle, 0, RW_SEEK_SET);
+	SDL_RWseek(_file_handler->sdl_handle, 0, SDL_RW_SEEK_SET);
 
 	for(long _i = 0; _i < _content_size; _i++) {
-		SDL_RWread(_file_handler->sdl_handle, &_file_content[_i], sizeof(char), 1);
+		SDL_RWread(_file_handler->sdl_handle, &_file_content[_i], sizeof(char));
 		if(_current_line == _line) {
 			
 			if(_line_first_byte == RDE_UINT_MAX) {
@@ -3389,7 +3392,7 @@ rde_window* rde_inner_window_create_windows_window(size_t _free_window_index) {
 	char _title[16];
 	snprintf(_title, 10, "%d", (int)_free_window_index);
 
-	_window->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	_window->sdl_window = SDL_CreateWindow(_title, 1280, 720, SDL_WINDOW_OPENGL);
 	rde_critical_error(_window->sdl_window == NULL, RDE_ERROR_SDL_WINDOW, SDL_GetError());
 
 	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
@@ -3417,7 +3420,7 @@ rde_window* rde_inner_window_create_mac_window(size_t _free_window_index) {
 
 	char _title[16];
 	snprintf(_title, 10, "%d", (int)_free_window_index);
-	_window->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	_window->sdl_window = SDL_CreateWindow(_title, 1280, 720, SDL_WINDOW_OPENGL);
 	rde_critical_error(_window->sdl_window == NULL, RDE_ERROR_SDL_WINDOW, SDL_GetError());
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -3483,7 +3486,7 @@ rde_window* rde_inner_window_create_linux_window(size_t _free_window_index) {
 
 	char _title[16];
 	snprintf(_title, 10, "%d", (int)_free_window_index);
-	_window->sdl_window = SDL_CreateWindow(_title, 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	_window->sdl_window = SDL_CreateWindow(_title, 1280, 720, SDL_WINDOW_OPENGL);
 	rde_critical_error(_window->sdl_window == NULL, RDE_ERROR_SDL_WINDOW, SDL_GetError());
 
 	_window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
@@ -3525,7 +3528,7 @@ rde_window* rde_inner_window_create_android_window(size_t _free_window_index) {
     rde_critical_error(SDL_GetDisplayMode(0, 0, &_mode) < 0, "Error getting SDL_DisplayMode -> %s\n", SDL_GetError());
     rde_log_level(RDE_LOG_LEVEL_INFO, "Screen Size: (%d, %d)", _mode.w, _mode.h);
     
-    _window->sdl_window = SDL_CreateWindow(NULL, 0, 0, _mode.w, _mode.h ,SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    _window->sdl_window = SDL_CreateWindow(NULL, _mode.w, _mode.h ,SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 	rde_critical_error(_window->sdl_window == NULL, RDE_ERROR_SDL_WINDOW, SDL_GetError());
 
     int _drawableSizeX = 0, _drawableSizeY = 0;
@@ -3702,12 +3705,11 @@ void rde_window_set_icon(rde_window* _window, const char* _path_to_icon) {
 	_amask = (_channels == 3) ? 0 : 0xff000000;
 	#endif
 
-	SDL_Surface* _surface = SDL_CreateRGBSurfaceFrom((void*)_data, _width, _height, 
-		_channels * 8, _channels * _width, _rmask, _gmask, _bmask, _amask);
-
+	SDL_Surface* _surface = SDL_CreateSurfaceFrom((void*)_data, _width, _height, _channels * _width,
+            SDL_GetPixelFormatEnumForMasks(_channels * 8, _rmask, _gmask, _bmask, _amask));
 
 	SDL_SetWindowIcon(_window->sdl_window, _surface);
-	SDL_FreeSurface(_surface);
+	SDL_DestroySurface(_surface);
 }
 
 void* rde_window_get_native_sdl_window_handle(rde_window* _window) {
@@ -4452,13 +4454,14 @@ void* rde_inner_obj_file_open(const char* _file_path, void* _user_data) {
 void rde_inner_obj_file_close(void* _file, void* _user_data) {
 	(void)_user_data;
 	SDL_RWops* _sdl_file = (SDL_RWops*)_file;
-	SDL_FreeRW(_sdl_file);
+	SDL_DestroyRW(_sdl_file);
 }
 
 size_t rde_inner_obj_file_read(void* _file, void* _dst, size_t _bytes, void* _user_data) {
 	(void)_user_data;
+	(void)_bytes;
 	SDL_RWops* _sdl_file = (SDL_RWops*)_file;
-	return SDL_RWread(_sdl_file, _dst, 1, _bytes);
+	return SDL_RWread(_sdl_file, _dst, 1);
 }
 
 unsigned long rde_inner_obj_file_size(void* _file, void* _user_data) {
@@ -7504,61 +7507,61 @@ void rde_inner_event_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_ev
 	_rde_event->time_stamp = _sdl_event->window.timestamp;
 	_rde_event->window_id = _sdl_event->window.windowID;
 
-	switch (_sdl_event->window.event) {
-		case SDL_WINDOWEVENT_RESIZED: {
+	switch (_sdl_event->window.type) {
+		case SDL_EVENT_WINDOW_RESIZED: {
 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_RESIZED;
 			_rde_event->data.window_event_data.size.x = _sdl_event->window.data1;
 			_rde_event->data.window_event_data.size.y = _sdl_event->window.data2;
 		} break;
 
-		case SDL_WINDOWEVENT_MOVED:	{
+		case SDL_EVENT_WINDOW_MOVED:	{
 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MOVED;
 			_rde_event->data.window_event_data.position.x = _sdl_event->window.data1;
 			_rde_event->data.window_event_data.position.y = _sdl_event->window.data2;
 		} break;
 
-		case SDL_WINDOWEVENT_MAXIMIZED: {
+		case SDL_EVENT_WINDOW_MAXIMIZED: {
 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MAXIMIZED; 			
 			_rde_event->data.window_event_data.maximized = true;
 			_rde_event->data.window_event_data.minimized = false;
 		} break;
 
-		case SDL_WINDOWEVENT_MINIMIZED:	{
+		case SDL_EVENT_WINDOW_MINIMIZED:	{
 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MAXIMIZED; 			
 			_rde_event->data.window_event_data.maximized = false;
 			_rde_event->data.window_event_data.minimized = true;
 		} break;
 
-		case SDL_WINDOWEVENT_DISPLAY_CHANGED: {
+		case SDL_EVENT_WINDOW_DISPLAY_CHANGED: {
 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED;
 			_rde_event->data.window_event_data.display_index = _sdl_event->window.data1;
 		} break;
 
-		case SDL_WINDOWEVENT_ENTER:	 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MOUSE_FOCUSED; 		break;
-		case SDL_WINDOWEVENT_LEAVE:	 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MOUSE_UNFOCUSED; 		break;
-		case SDL_WINDOWEVENT_FOCUS_GAINED:		_rde_event->type = RDE_EVENT_TYPE_WINDOW_KEYBOARD_FOCUSED; 		break;
-		case SDL_WINDOWEVENT_FOCUS_LOST:		_rde_event->type = RDE_EVENT_TYPE_WINDOW_KEYBOARD_UNFOCUSED; 	break;
-		case SDL_WINDOWEVENT_CLOSE:				_rde_event->type = RDE_EVENT_TYPE_WINDOW_CLOSED;				break;
+		case SDL_EVENT_WINDOW_MOUSE_ENTER:	 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MOUSE_FOCUSED; 		break;
+		case SDL_EVENT_WINDOW_MOUSE_LEAVE:	 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MOUSE_UNFOCUSED; 		break;
+		case SDL_EVENT_WINDOW_FOCUS_GAINED:		_rde_event->type = RDE_EVENT_TYPE_WINDOW_KEYBOARD_FOCUSED; 		break;
+		case SDL_EVENT_WINDOW_FOCUS_LOST:		_rde_event->type = RDE_EVENT_TYPE_WINDOW_KEYBOARD_UNFOCUSED; 	break;
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:				_rde_event->type = RDE_EVENT_TYPE_WINDOW_CLOSED;				break;
 	}
 }
 
 void rde_inner_event_sdl_to_rde_helper_transform_display_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
 	_rde_event->time_stamp = _sdl_event->display.timestamp;
 
-	switch (_sdl_event->window.event) {
-		case SDL_DISPLAYEVENT_CONNECTED: {
+	switch (_sdl_event->display.type) {
+		case SDL_EVENT_DISPLAY_ADDED: {
 			_rde_event->type = RDE_EVENT_TYPE_DISPLAY_CONNECTED;
-			_rde_event->data.display_event_data.display_index = _sdl_event->display.display;
+			_rde_event->data.display_event_data.display_index = _sdl_event->display.displayID;
 		} break;
 
-		case SDL_DISPLAYEVENT_DISCONNECTED: {
+		case SDL_EVENT_DISPLAY_REMOVED: {
 			_rde_event->type = RDE_EVENT_TYPE_DISPLAY_DISCONNECTED;
-			_rde_event->data.display_event_data.display_index = _sdl_event->display.display;
+			_rde_event->data.display_event_data.display_index = _sdl_event->display.displayID;
 		} break;
 
-		case SDL_DISPLAYEVENT_ORIENTATION: {
+		case SDL_EVENT_DISPLAY_ORIENTATION: {
 			_rde_event->type = RDE_EVENT_TYPE_DISPLAY_CHANGED_ORIENTATION;
-			_rde_event->data.display_event_data.display_index = _sdl_event->display.display;
+			_rde_event->data.display_event_data.display_index = _sdl_event->display.displayID;
 			_rde_event->data.display_event_data.orientation = _sdl_event->display.data1;
 		} break;
 	}
@@ -7583,8 +7586,8 @@ void rde_inner_event_sdl_to_rde_helper_transform_keyboard_event(SDL_Event* _sdl_
 
 void rde_inner_event_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
 	switch(_sdl_event->type) {
-		case SDL_MOUSEBUTTONDOWN:
-		case SDL_MOUSEBUTTONUP: {
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP: {
 			_rde_event->time_stamp = _sdl_event->button.timestamp;
 			_rde_event->window_id = _sdl_event->button.windowID;
 
@@ -7601,14 +7604,14 @@ void rde_inner_event_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _
 			_rde_event->data.mouse_event_data.button = (RDE_MOUSE_BUTTON_)_sdl_event->button.button;
 		} break;
 
-		case SDL_MOUSEMOTION: {
+		case SDL_EVENT_MOUSE_MOTION: {
 			_rde_event->time_stamp = _sdl_event->motion.timestamp;
 			_rde_event->window_id = _sdl_event->motion.windowID;
 			_rde_event->type = RDE_EVENT_TYPE_MOUSE_MOVED;
 			_rde_event->data.mouse_event_data.position = (rde_vec_2I) { _sdl_event->motion.x, _sdl_event->motion.y };
 		} break;
 
-		case SDL_MOUSEWHEEL: {
+		case SDL_EVENT_MOUSE_WHEEL: {
 			_rde_event->time_stamp = _sdl_event->wheel.timestamp;
 			_rde_event->window_id = _sdl_event->wheel.windowID;
 			_rde_event->type = RDE_EVENT_TYPE_MOUSE_SCROLLED;
@@ -7622,16 +7625,16 @@ void rde_inner_event_sdl_to_rde_helper_transform_drop_event(SDL_Event* _sdl_even
 	_rde_event->window_id = _sdl_event->drop.windowID;
 
 	switch(_sdl_event->type) {
-		case SDL_DROPFILE: {
+		case SDL_EVENT_DROP_FILE: {
 			_rde_event->type = RDE_EVENT_TYPE_DRAG_AND_DROP_FILE;
-			_rde_event->data.drag_and_drop_data.file_path = _sdl_event->drop.file;
+			_rde_event->data.drag_and_drop_data.file_path = _sdl_event->drop.source;
 		}
 	}
 }
 
 void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_event, rde_event* _rde_event) {
 	switch(_sdl_event->type) {
-		case SDL_FINGERDOWN: {
+		case SDL_EVENT_FINGER_DOWN: {
 			rde_vec_2I _window_size = rde_window_get_window_size(rde_engine_get_focused_window());
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN;
 			_rde_event->data.mobile_event_data.init_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x - _window_size.x * 0.5f, _sdl_event->tfinger.y - _window_size.y * 0.5f};
@@ -7641,7 +7644,7 @@ void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_ev
 			_rde_event->window_id = _sdl_event->tfinger.windowID;
 		} break;
 
-		case SDL_FINGERUP:{
+		case SDL_EVENT_FINGER_UP:{
 			rde_vec_2I _window_size = rde_window_get_window_size(rde_engine_get_focused_window());
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TOUCH_UP;
 			_rde_event->data.mobile_event_data.end_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x - _window_size.x * 0.5f, _sdl_event->tfinger.y - _window_size.y * 0.5f};
@@ -7651,7 +7654,7 @@ void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_ev
 			_rde_event->window_id = _sdl_event->tfinger.windowID;
 		} break;
 
-		case SDL_FINGERMOTION: {
+		case SDL_EVENT_FINGER_MOTION: {
 			rde_vec_2I _window_size = rde_window_get_window_size(rde_engine_get_focused_window());
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED;
 			_rde_event->time_stamp = _sdl_event->tfinger.timestamp;
@@ -7659,50 +7662,50 @@ void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_ev
 			_rde_event->data.mobile_event_data.moved_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x - _window_size.x * 0.5f, _sdl_event->tfinger.y - _window_size.y * 0.5f };
 		} break;
 
-		case SDL_DOLLARGESTURE:{
-			_rde_event->type = RDE_EVENT_TYPE_MOBILE_DOLLAR_GESTURE;
-			_rde_event->time_stamp = _sdl_event->dgesture.timestamp;
-		} break;
+		// case SDL_DOLLARGESTURE:{
+		// 	_rde_event->type = RDE_EVENT_TYPE_MOBILE_DOLLAR_GESTURE;
+		// 	_rde_event->time_stamp = _sdl_event->dgesture.timestamp;
+		// } break;
+  //
+		// case SDL_DOLLARRECORD:{
+		// 	_rde_event->type = RDE_EVENT_TYPE_MOBILE_DOLLAR_RECORD;
+		// 	_rde_event->time_stamp = _sdl_event->dgesture.timestamp;
+		// } break;
+  //
+		// case SDL_MULTIGESTURE: {
+		// 	_rde_event->type = RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH;
+		// 	_rde_event->time_stamp = _sdl_event->mgesture.timestamp;
+		// 	_rde_event->data.mobile_event_data.init_touch_position = (rde_vec_2I) { _sdl_event->mgesture.x, _sdl_event->mgesture.y };
+		// 	_rde_event->data.mobile_event_data.pinch.rotation_of_fingers = rde_math_radians_to_degrees(_sdl_event->mgesture.dTheta);
+		// 	_rde_event->data.mobile_event_data.pinch.distance_moved_between_fingers = _sdl_event->mgesture.dDist;
+		// 	_rde_event->data.mobile_event_data.pinch.num_fingers_used = _sdl_event->mgesture.numFingers;
+		// } break;
 
-		case SDL_DOLLARRECORD:{
-			_rde_event->type = RDE_EVENT_TYPE_MOBILE_DOLLAR_RECORD;
-			_rde_event->time_stamp = _sdl_event->dgesture.timestamp;
-		} break;
-
-		case SDL_MULTIGESTURE: {
-			_rde_event->type = RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH;
-			_rde_event->time_stamp = _sdl_event->mgesture.timestamp;
-			_rde_event->data.mobile_event_data.init_touch_position = (rde_vec_2I) { _sdl_event->mgesture.x, _sdl_event->mgesture.y };
-			_rde_event->data.mobile_event_data.pinch.rotation_of_fingers = rde_math_radians_to_degrees(_sdl_event->mgesture.dTheta);
-			_rde_event->data.mobile_event_data.pinch.distance_moved_between_fingers = _sdl_event->mgesture.dDist;
-			_rde_event->data.mobile_event_data.pinch.num_fingers_used = _sdl_event->mgesture.numFingers;
-		} break;
-
-		case SDL_APP_TERMINATING: {
+		case SDL_EVENT_TERMINATING: {
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TERMINATING;
 		} break;
 
-		case SDL_APP_LOWMEMORY: {
+		case SDL_EVENT_LOW_MEMORY: {
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_LOW_MEMORY;
 		} break;
 
-		case SDL_APP_WILLENTERBACKGROUND: {
+		case SDL_EVENT_WILL_ENTER_BACKGROUND: {
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_WILL_ENTER_BACKGROUND;
 		} break;
 
-		case SDL_APP_DIDENTERBACKGROUND: {
+		case SDL_EVENT_DID_ENTER_BACKGROUND: {
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_DID_ENTER_BACKGROUND;
 		} break;
 
-		case SDL_APP_WILLENTERFOREGROUND: {
+		case SDL_EVENT_WILL_ENTER_FOREGROUND: {
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_WILL_ENTER_FOREGROUND;
 		} break;
 
-		case SDL_APP_DIDENTERFOREGROUND: {
+		case SDL_EVENT_DID_ENTER_FOREGROUND: {
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_DID_ENTER_FOREGROUND;
 		} break;
 
-		case SDL_LOCALECHANGED: {
+		case SDL_EVENT_LOCALE_CHANGED: {
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_LOCALE_CHANGED;
 		} break;
 
@@ -7713,34 +7716,36 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 
 	rde_event _event = rde_struct_create_event();
 
-	switch(_sdl_event->type) {
-		case SDL_WINDOWEVENT:	rde_inner_event_sdl_to_rde_helper_transform_window_event(_sdl_event, &_event); break;
-		
-		case SDL_DISPLAYEVENT:  rde_inner_event_sdl_to_rde_helper_transform_display_event(_sdl_event, &_event); break;
-		
-		case SDL_KEYDOWN:
-		case SDL_KEYUP: rde_inner_event_sdl_to_rde_helper_transform_keyboard_event(_sdl_event, &_event); break;
-		
-		case SDL_MOUSEMOTION:
-		case SDL_MOUSEWHEEL:
-		case SDL_MOUSEBUTTONDOWN:
-		case SDL_MOUSEBUTTONUP: rde_inner_event_sdl_to_rde_helper_transform_mouse_button_event(_sdl_event, &_event); break;
+	if(SDL_EVENT_WINDOW_FIRST <= _sdl_event->type && _sdl_event->type <= SDL_EVENT_WINDOW_LAST) {
+		rde_inner_event_sdl_to_rde_helper_transform_window_event(_sdl_event, &_event);
+	} else if(SDL_EVENT_DISPLAY_FIRST <= _sdl_event->type && _sdl_event->type <= SDL_EVENT_DISPLAY_LAST) {
+		rde_inner_event_sdl_to_rde_helper_transform_display_event(_sdl_event, &_event);
+	} else {
+		switch(_sdl_event->type) {
+			case SDL_EVENT_KEY_DOWN:
+			case SDL_EVENT_KEY_UP: rde_inner_event_sdl_to_rde_helper_transform_keyboard_event(_sdl_event, &_event); break;
 
-		case SDL_DROPFILE: rde_inner_event_sdl_to_rde_helper_transform_drop_event(_sdl_event, &_event); break;
-	
-		case SDL_FINGERDOWN:
-		case SDL_FINGERUP:
-		case SDL_FINGERMOTION: 
-		case SDL_DOLLARGESTURE:
-		case SDL_DOLLARRECORD:
-		case SDL_MULTIGESTURE:
-		case SDL_APP_TERMINATING:
-		case SDL_APP_LOWMEMORY:
-		case SDL_APP_WILLENTERBACKGROUND:
-		case SDL_APP_DIDENTERBACKGROUND:
-		case SDL_APP_WILLENTERFOREGROUND:
-		case SDL_APP_DIDENTERFOREGROUND:
-		case SDL_LOCALECHANGED: rde_inner_event_sdl_to_rde_helper_transform_mobile_event(_sdl_event, &_event); break;
+			case SDL_EVENT_MOUSE_MOTION:
+			case SDL_EVENT_MOUSE_WHEEL:
+			case SDL_EVENT_MOUSE_BUTTON_DOWN:
+			case SDL_EVENT_MOUSE_BUTTON_UP: rde_inner_event_sdl_to_rde_helper_transform_mouse_button_event(_sdl_event, &_event); break;
+
+			case SDL_EVENT_DROP_FILE: rde_inner_event_sdl_to_rde_helper_transform_drop_event(_sdl_event, &_event); break;
+
+			case SDL_EVENT_FINGER_DOWN:
+			case SDL_EVENT_FINGER_UP:
+			case SDL_EVENT_FINGER_MOTION:
+			// case SDL_DOLLARGESTURE:
+			// case SDL_DOLLARRECORD:
+			// case SDL_MULTIGESTURE:
+			case SDL_EVENT_TERMINATING:
+			case SDL_EVENT_LOW_MEMORY:
+			case SDL_EVENT_WILL_ENTER_BACKGROUND:
+			case SDL_EVENT_DID_ENTER_BACKGROUND:
+			case SDL_EVENT_WILL_ENTER_FOREGROUND:
+			case SDL_EVENT_DID_ENTER_FOREGROUND:
+			case SDL_EVENT_LOCALE_CHANGED: rde_inner_event_sdl_to_rde_helper_transform_mobile_event(_sdl_event, &_event); break;
+		}
 	}
 
 	return _event;
@@ -7818,17 +7823,17 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 	rde_window* _window = rde_engine_get_focused_window();
 
 	switch(_event->type) {
-		case SDL_APP_TERMINATING: {
+		case SDL_EVENT_TERMINATING: {
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Terminating");
 			_terminated = true;
 			rde_engine_destroy_engine();
 		} break;
 
-		case SDL_APP_LOWMEMORY: {
+		case SDL_EVENT_LOW_MEMORY: {
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Low Memory");
 		} break;
 
-		case SDL_APP_WILLENTERBACKGROUND: {
+		case SDL_EVENT_WILL_ENTER_BACKGROUND: {
 			if(_terminated) {
 				return 1;
 			}
@@ -7839,7 +7844,7 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 		} break;
 
-		case SDL_APP_DIDENTERBACKGROUND: {
+		case SDL_EVENT_DID_ENTER_BACKGROUND: {
 			if(_terminated) {
 				return 1;
 			}
@@ -7850,7 +7855,7 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 		} break;
 
-		case SDL_APP_WILLENTERFOREGROUND: {
+		case SDL_EVENT_WILL_ENTER_FOREGROUND: {
 			if(_terminated) {
 				return 1;
 			}
@@ -7861,7 +7866,7 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 		} break;
 
-		case SDL_APP_DIDENTERFOREGROUND: {
+		case SDL_EVENT_DID_ENTER_FOREGROUND: {
 			if(_terminated) {
 				return 1;
 			}
@@ -7872,7 +7877,7 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 		} break;
 
-		case SDL_LOCALECHANGED: {
+		case SDL_EVENT_LOCALE_CHANGED: {
 			if(_terminated) {
 				return 1;
 			}

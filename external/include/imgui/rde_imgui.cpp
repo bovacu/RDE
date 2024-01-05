@@ -1,9 +1,9 @@
 #include "rde_imgui.h"
 
 #include "imgui.h"
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
-#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_sdl3.h"
 
 #include "backends/imgui_impl_opengl3.h"
 
@@ -14,13 +14,13 @@ void rde_imgui_init(void* _sdl_window, void* _opengl_context) {
 	_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	ImGui::StyleColorsDark();
 
-	ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)_sdl_window, (SDL_GLContext*)_opengl_context);
-	ImGui_ImplOpenGL3_Init();
+	ImGui_ImplSDL3_InitForOpenGL((SDL_Window*)_sdl_window, (SDL_GLContext*)_opengl_context);
+	ImGui_ImplOpenGL3_Init("#version 330");
 }
 
 void rde_imgui_new_frame() {
 	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
 }
 
@@ -33,7 +33,7 @@ void rde_imgui_draw() {
 }
 
 void rde_imgui_handle_events(void* _sdl_event) {
-	ImGui_ImplSDL2_ProcessEvent((SDL_Event*)_sdl_event);
+	ImGui_ImplSDL3_ProcessEvent((SDL_Event*)_sdl_event);
 }
 
 rde_ImGuiID rde_imgui_get_id(const char* _str_id) {
@@ -138,6 +138,6 @@ void rde_imgui_progress_bar(float _progess) {
 
 void rde_imgui_shutdown() {
 	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplSDL2_Shutdown();
+	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
 }
