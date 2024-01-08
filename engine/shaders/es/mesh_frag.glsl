@@ -142,14 +142,14 @@ float ShadowCalculation(vec4 frag_pos_light_space) {
 	float _shadow = 0.0;
 	vec2 _texture_size = vec2(textureSize(shadow_map, 0));
 	vec2 _texel_size = vec2(1.0 / _texture_size.x, 1.0 / _texture_size.y);
-	
+
 	for(int _x = -1; _x <= 1; ++_x) {
 		for(int _y = -1; _y <= 1; ++_y) {
 			float _pcf_depth = texture(shadow_map, _proj_coords.xy + vec2(_x, _y) * _texel_size).r;
 			_shadow += _current_depth - _bias > _pcf_depth  ? 1.0 : 0.0;
 		}
 	}
-    
+
 	_shadow /= 20.0;
 
 	if(_proj_coords.z > 1.0)
@@ -192,7 +192,7 @@ void shadow_rendering() {
 	// 		_final_light += point_light_calc(_i);
 	// 	}
 	// #endif
-	// 
+	//
 	// #if RDE_MAX_SPOT_LIGHTS
 	// 	for (int _i = 0; _i < RDE_MAX_SPOT_LIGHTS; _i++) {
 	// 		_final_light += spot_light_calc(_i);
@@ -208,11 +208,7 @@ void render_texture_rendering() {
 
 void main(){
 	if(material.using_render_texture == 0) {
-		if(use_shadows == 0) {
-			normal_rendering();
-		} else {
-			shadow_rendering();
-		}
+		normal_rendering();
 	} else {
 		render_texture_rendering();
 	}

@@ -4041,7 +4041,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	DEFAULT_RENDER_TEXTURE->vbo = _vbo;
 	
 #if IS_MOBILE()
-	// rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_NONE);
+	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_NONE);
 #else
 	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_X4);
 #endif
