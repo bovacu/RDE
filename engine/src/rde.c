@@ -200,34 +200,34 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 #define RDE_DEFAULT_SHADERS_AMOUNT 6
 #define RDE_SHADER_MAX_NAME 256
 #if RDE_DEBUG
-#define RDE_CHECK_GL(_function, ...) { 																																																														\
-		_function(__VA_ARGS__);																																																																\
-		GLenum _err = GL_NO_ERROR;																																																															\
-		while((_err = glGetError()) != GL_NO_ERROR){																																																										\
-			switch(_err) {																																																																	\
-				case GL_NO_ERROR:																																																															\
-					printf("GL_NO_ERROR: No error has been recorded. The value of this symbolic constant is guaranteed to be 0. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);																				\
-					break;																																																																	\
-				case GL_INVALID_ENUM:																																																														\
-					printf("GL_INVALID_ENUM: An unacceptable value is specified for an enumerated argument. The offending command is ignored and has no other side effect than to set the error flag. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);			\
-					break;																																																																	\
-				case GL_INVALID_VALUE:																																																														\
-					printf("GL_INVALID_VALUE: A numeric argument is out of range. The offending command is ignored and has no other side effect than to set the error flag. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);									\
-					break;																																																																	\
-				case GL_INVALID_OPERATION:																																																													\
-					printf("GL_INVALID_OPERATION: The specified operation is not allowed in the current state. The offending command is ignored and has no other side effect than to set the error flag. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);		\
-					break;																																																																	\
-				case GL_INVALID_FRAMEBUFFER_OPERATION:																																																										\
-					printf("GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);																											\
-					break;																																																																	\
-				case GL_OUT_OF_MEMORY:																																																														\
-					printf("GL_OUT_OF_MEMORY: There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);	\
-					break;																																																																	\
-				default:																																																																	\
-					printf("No description. Error(%u) \n", _err);																																																							\
-					break;																																																																	\
-			}																																																																				\
-		}																																																																					\
+#define RDE_CHECK_GL(_function, ...) { 																																																																					\
+		_function(__VA_ARGS__);																																																																							\
+		GLenum _err = GL_NO_ERROR;																																																																						\
+		while((_err = glGetError()) != GL_NO_ERROR){																																																																	\
+			switch(_err) {																																																																								\
+				case GL_NO_ERROR:																																																																						\
+					rde_log_level(RDE_LOG_LEVEL_ERROR, "GL_NO_ERROR: No error has been recorded. The value of this symbolic constant is guaranteed to be 0. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);																				\
+					break;																																																																								\
+				case GL_INVALID_ENUM:																																																																					\
+					rde_log_level(RDE_LOG_LEVEL_ERROR, "GL_INVALID_ENUM: An unacceptable value is specified for an enumerated argument. The offending command is ignored and has no other side effect than to set the error flag. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);			\
+					break;																																																																								\
+				case GL_INVALID_VALUE:																																																																					\
+					rde_log_level(RDE_LOG_LEVEL_ERROR, "GL_INVALID_VALUE: A numeric argument is out of range. The offending command is ignored and has no other side effect than to set the error flag. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);									\
+					break;																																																																								\
+				case GL_INVALID_OPERATION:																																																																				\
+					rde_log_level(RDE_LOG_LEVEL_ERROR, "GL_INVALID_OPERATION: The specified operation is not allowed in the current state. The offending command is ignored and has no other side effect than to set the error flag. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);		\
+					break;																																																																								\
+				case GL_INVALID_FRAMEBUFFER_OPERATION:																																																																	\
+					rde_log_level(RDE_LOG_LEVEL_ERROR, "GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);																											\
+					break;																																																																								\
+				case GL_OUT_OF_MEMORY:																																																																					\
+					rde_log_level(RDE_LOG_LEVEL_ERROR, "GL_OUT_OF_MEMORY: There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded. Erro(%u). %s, line: %d, file: %s \n", _err, #_function, __LINE__, __FILE__);	\
+					break;																																																																								\
+				default:																																																																								\
+					rde_log_level(RDE_LOG_LEVEL_ERROR, "No description. Error(%u) \n", _err);																																																							\
+					break;																																																																								\
+			}																																																																											\
+		}																																																																												\
 	}
 #else
 #define RDE_CHECK_GL(_function, ...) _function(__VA_ARGS__);
@@ -5297,7 +5297,7 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 	RDE_CHECK_GL(glLinkProgram, _program_id);
 
 	if (_error) {
-		printf("%s \n\n %s", _vertex_code, _fragment_code);
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "%s \n\n %s", _vertex_code, _fragment_code);
 		return NULL;
 	}
 
@@ -5599,7 +5599,7 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 	_data = stbi_load(_file_path, &_width, &_height, &_channels, 0);
 
 	if(_data == NULL) {
-		printf("Error while loading texture at '%s' \n", _file_path);
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Error while loading texture at '%s' \n", _file_path);
 		return NULL;
 	}
 
