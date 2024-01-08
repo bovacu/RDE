@@ -1,10 +1,8 @@
 #version 300 es
 precision mediump float;
-in vec2 tex_coords;
 
-uniform sampler2D screen_texture;
-layout(location = 0) out vec4 out_color;
+header_2d_frag
 
 void main() {
-	out_color = texture(screen_texture, tex_coords);
+	out_color = texture(tex, uv);
 }

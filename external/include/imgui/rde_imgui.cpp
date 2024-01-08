@@ -7,7 +7,7 @@
 
 #include "backends/imgui_impl_opengl3.h"
 
-void rde_imgui_init(void* _sdl_window, void* _opengl_context) {
+void rde_imgui_init(void* _sdl_window, void* _opengl_context, const char* _gl_version) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& _io = ImGui::GetIO(); (void)_io;
@@ -15,7 +15,7 @@ void rde_imgui_init(void* _sdl_window, void* _opengl_context) {
 	ImGui::StyleColorsDark();
 
 	ImGui_ImplSDL3_InitForOpenGL((SDL_Window*)_sdl_window, (SDL_GLContext*)_opengl_context);
-	ImGui_ImplOpenGL3_Init("#version 330");
+	ImGui_ImplOpenGL3_Init(_gl_version);
 }
 
 void rde_imgui_new_frame() {

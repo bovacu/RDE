@@ -22,12 +22,10 @@
 #endif
 
 #if IS_ANDROID()
-// This include comes directly from the RDEAndroid module SDL JNI. It contains some extra fanzy features which normal SDL doesn't.
-#include <SDL3/SDL.h>
-#else
-#include "SDL3/SDL.h"
+#include <errno.h>
 #endif
 
+#include "SDL3/SDL.h"
 
 #if IS_MAC()
 #pragma clang diagnostic push
@@ -395,7 +393,7 @@ size_t current_frame = 0;
 
 #define RDE_MAX_STACK 100
 
-#if !IS_WINDOWS() && !IS_ANDROID()
+#if !IS_WINDOWS()
 #define RDE_STACKTRACE_MAX_DEPTH 1024
 // Same value as SIGSTKSZ
 #define RDE_STACKTRACE_BUFF_SIZE 13504
@@ -649,7 +647,7 @@ struct rde_sound {
 #endif
 
 /// Error
-#if defined(RDE_ERROR_MODULE) && !IS_WINDOWS() && !IS_ANDROID()
+#if defined(RDE_ERROR_MODULE) && !IS_WINDOWS()
 typedef struct {
 	    char* buf;
 	    int pos;
@@ -1466,6 +1464,8 @@ rde_window* rde_inner_window_create_ios_window(size_t _free_window_index);
 rde_window* rde_window_create_wasm_window(size_t _free_window_index);
 #endif
 
+int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Event* _event);
+
 /// ******************************************* RENDERING  ***********************************************
 
 void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
@@ -1653,9 +1653,13 @@ void rde_inner_engine_on_event() {
 					case SDL_EVENT_FINGER_DOWN:
 					case SDL_EVENT_FINGER_UP:
 					case SDL_EVENT_FINGER_MOTION:
-					// case SDL_DOLLARGESTURE:
-					// case SDL_DOLLARRECORD:
-					// case SDL_MULTIGESTURE:
+					
+					#if IS_MOBILE()
+					case GESTURE_DOLLARGESTURE :
+					case GESTURE_DOLLARRECORD :
+					case GESTURE_MULTIGESTURE :
+					#endif
+						
 					case SDL_EVENT_TERMINATING:
 					case SDL_EVENT_LOW_MEMORY:
 					case SDL_EVENT_WILL_ENTER_BACKGROUND:
@@ -1861,19 +1865,20 @@ void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks
 }
 
 #define GET_VALUE_FROM_CONFIG_FILE(_type, _func) 																										\
-	_type rde_inner_engine_get_config_file_##_type(const char** _config_file_lines, size_t _number_of_lines, const char* _key, size_t _default_value) {  \
-		size_t _final_value = RDE_UINT_MAX;																											  \
+	_type rde_inner_engine_get_config_file_##_type(const char** _config_file_lines, size_t _number_of_lines, const char* _key, size_t _default_value) { \
+		size_t _final_value = RDE_UINT_MAX;																											  	\
 		for(size_t _i = 0; _i < _number_of_lines; _i++) {																								\
+			errno = 0;																																	\
 			if(rde_util_string_contains_substring(_config_file_lines[_i], _key, false)) {																\
-				char* _value = strrchr(_config_file_lines[_i], '=');																					 \
+				char* _value = strrchr(_config_file_lines[_i], '=');																					\
 				char* _trimed = rde_util_string_trim(_value);																							\
-				char* _end = NULL;																													   \
-				_final_value = _func(_trimed + 1, &_end, 10);																							 \
-				rde_critical_error(_trimed + 1 == _end || errno != 0, "Value '%s' could not be converted to "#_type"\n");								 \
+				char* _end = NULL;																													   	\
+				_final_value = _func(_trimed + 1, &_end, 10);																							\
+				rde_critical_error(_trimed + 1 == _end || errno != 0, "Value '%s' could not be converted to "#_type"\n");								\
 			}																																			\
 		}																																				\
-																																						 \
-		return _final_value == RDE_UINT_MAX ? _default_value : _final_value;																			 \
+																																						\
+		return _final_value == RDE_UINT_MAX ? _default_value : _final_value;																			\
 	}
 
 GET_VALUE_FROM_CONFIG_FILE(size_t, strtol)
@@ -1962,6 +1967,7 @@ void rde_engine_on_run() {
 
 	#if IS_MOBILE()
 	SDL_SetEventFilter(rde_events_mobile_consume_events_callback_wrapper, NULL);
+	Gesture_Init();
 	#endif
 
 	rde_inner_rendering_init_2d();
@@ -2071,6 +2077,10 @@ void rde_engine_destroy_engine() {
 	rde_rendering_render_texture_destroy(DEFAULT_RENDER_TEXTURE);
 	glDeleteBuffers(1, &DEFAULT_RENDER_TEXTURE->vbo);
 	glDeleteVertexArrays(1, &DEFAULT_RENDER_TEXTURE->vao);
+
+	#if IS_MOBILE()
+	Gesture_Quit();
+	#endif
 
 	// rde_rendering_render_texture_destroy(SHADOWS_RENDER_TEXTURE);
 	// glDeleteBuffers(1, &SHADOWS_RENDER_TEXTURE->vbo);
@@ -3524,15 +3534,19 @@ rde_window* rde_inner_window_create_android_window(size_t _free_window_index) {
 
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait");
 
-    SDL_DisplayMode _mode;
-    rde_critical_error(SDL_GetDisplayMode(0, 0, &_mode) < 0, "Error getting SDL_DisplayMode -> %s\n", SDL_GetError());
-    rde_log_level(RDE_LOG_LEVEL_INFO, "Screen Size: (%d, %d)", _mode.w, _mode.h);
+// 	SDL_DisplayID _primary_display_id = SDL_GetPrimaryDisplay();
+// 	
+//  SDL_DisplayMode _mode;
+// 	const SDL_DisplayMode* _display_mode = SDL_GetCurrentDisplayMode(_primary_display_id);
+//  rde_critical_error(_display_mode == NULL, "Error getting SDL_DisplayMode, primary display id: %zu -> %s\n", _primary_display_id, SDL_GetError());
     
-    _window->sdl_window = SDL_CreateWindow(NULL, _mode.w, _mode.h ,SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    _window->sdl_window = SDL_CreateWindow(NULL, 0, 0 ,SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 	rde_critical_error(_window->sdl_window == NULL, RDE_ERROR_SDL_WINDOW, SDL_GetError());
+	rde_vec_2I _screen_size = rde_window_get_window_size(_window);
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Screen Size: (%d, %d)", _screen_size.x, _screen_size.y);
 
     int _drawableSizeX = 0, _drawableSizeY = 0;
-    SDL_GL_GetDrawableSize(_window->sdl_window, &_drawableSizeX, &_drawableSizeY);
+    SDL_GetWindowSizeInPixels(_window->sdl_window, &_drawableSizeX, &_drawableSizeY);
     rde_log_level(RDE_LOG_LEVEL_INFO, "Drawable Size: (%d, %d)", _drawableSizeX, _drawableSizeY);
 
     _window->sdl_gl_context = SDL_GL_CreateContext(_window->sdl_window);
@@ -3819,21 +3833,23 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 #endif
 
 #if !IS_MOBILE() && !IS_WASM()
-	rde_file_handle* _header_3d_vert_handle = rde_file_open("shaders/core/header_3d_vert.glsl", RDE_FILE_MODE_READ);
-	rde_file_handle* _header_3d_frag_handle = rde_file_open("shaders/core/header_3d_frag.glsl", RDE_FILE_MODE_READ);
+#define SHADER_TYPE "core"
+#else
+#define SHADER_TYPE "es"
+#endif
+	
+	rde_file_handle* _header_3d_vert_handle = rde_file_open("shaders/"SHADER_TYPE"/header_3d_vert.glsl", RDE_FILE_MODE_READ);
+	rde_file_handle* _header_3d_frag_handle = rde_file_open("shaders/"SHADER_TYPE"/header_3d_frag.glsl", RDE_FILE_MODE_READ);
 	char* _header_3d_vert = rde_file_read_full_file(_header_3d_vert_handle, NULL);
 	char* _header_3d_frag = rde_file_read_full_file(_header_3d_frag_handle, NULL);
-	UNUSED(_header_3d_frag)
 
-	rde_file_handle* _header_2d_vert_handle = rde_file_open("shaders/core/header_2d_vert.glsl", RDE_FILE_MODE_READ);
-	rde_file_handle* _header_2d_frag_handle = rde_file_open("shaders/core/header_2d_frag.glsl", RDE_FILE_MODE_READ);
+	rde_file_handle* _header_2d_vert_handle = rde_file_open("shaders/"SHADER_TYPE"/header_2d_vert.glsl", RDE_FILE_MODE_READ);
+	rde_file_handle* _header_2d_frag_handle = rde_file_open("shaders/"SHADER_TYPE"/header_2d_frag.glsl", RDE_FILE_MODE_READ);
 	char* _header_2d_vert = rde_file_read_full_file(_header_2d_vert_handle, NULL);
 	char* _header_2d_frag = rde_file_read_full_file(_header_2d_frag_handle, NULL);
-	UNUSED(_header_2d_vert)
-	UNUSED(_header_2d_frag)
 
-	rde_file_handle* _shader_vertex_handle = rde_file_open("shaders/core/line_vert.glsl", RDE_FILE_MODE_READ);
-	rde_file_handle* _shader_fragment_handle = rde_file_open("shaders/core/line_frag.glsl", RDE_FILE_MODE_READ);
+	rde_file_handle* _shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/line_vert.glsl", RDE_FILE_MODE_READ);
+	rde_file_handle* _shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/line_frag.glsl", RDE_FILE_MODE_READ);
 	char* _vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	char* _fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
@@ -3853,8 +3869,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 	
-	_shader_vertex_handle = rde_file_open("shaders/core/color_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/core/color_frag.glsl", RDE_FILE_MODE_READ);
+	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/color_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/color_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
@@ -3874,8 +3890,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
-	_shader_vertex_handle = rde_file_open("shaders/core/texture_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/core/texture_frag.glsl", RDE_FILE_MODE_READ);
+	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/texture_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/texture_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
@@ -3895,8 +3911,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 
-	_shader_vertex_handle = rde_file_open("shaders/core/text_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/core/text_frag.glsl", RDE_FILE_MODE_READ);
+	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/text_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/text_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
@@ -3916,8 +3932,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 	
-	_shader_vertex_handle = rde_file_open("shaders/core/framebuffer_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/core/framebuffer_frag.glsl", RDE_FILE_MODE_READ);
+	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/framebuffer_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/framebuffer_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
@@ -3937,8 +3953,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 	
-	_shader_vertex_handle = rde_file_open("shaders/core/mesh_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/core/mesh_frag.glsl", RDE_FILE_MODE_READ);
+	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/mesh_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/mesh_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
@@ -3964,8 +3980,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
 	
-	_shader_vertex_handle = rde_file_open("shaders/core/skybox_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/core/skybox_frag.glsl", RDE_FILE_MODE_READ);
+	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/skybox_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/skybox_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
@@ -3986,8 +4002,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_file_close(_shader_fragment_handle);
 
 	
-	_shader_vertex_handle = rde_file_open("shaders/core/shadows_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/core/shadows_frag.glsl", RDE_FILE_MODE_READ);
+	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/shadows_vert.glsl", RDE_FILE_MODE_READ);
+	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/shadows_frag.glsl", RDE_FILE_MODE_READ);
 	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
@@ -4006,71 +4022,6 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	ENGINE.shadows_shader = rde_rendering_shader_load(RDE_SHADER_SHADOWS, _vertex_shader, _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
-#else
-	rde_file_handle* _shader_vertex_handle = rde_file_open("shaders/es/line_vert.glsl", RDE_FILE_MODE_READ);
-	rde_file_handle* _shader_fragment_handle = rde_file_open("shaders/es/line_frag.glsl", RDE_FILE_MODE_READ);
-	char* _vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
-	char* _fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
-	ENGINE.line_shader = rde_rendering_shader_load(RDE_SHADER_LINE, _vertex_shader, _fragment_shader);
-	rde_file_close(_shader_vertex_handle);
-	rde_file_close(_shader_fragment_handle);
-
-	_shader_vertex_handle = rde_file_open("shaders/es/color_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/es/color_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
-	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, _vertex_shader, _fragment_shader);
-	rde_file_close(_shader_vertex_handle);
-	rde_file_close(_shader_fragment_handle);
-
-	_shader_vertex_handle = rde_file_open("shaders/es/texture_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/es/texture_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
-	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, _vertex_shader, _fragment_shader);
-	rde_file_close(_shader_vertex_handle);
-	rde_file_close(_shader_fragment_handle);
-
-	_shader_vertex_handle = rde_file_open("shaders/es/text_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/es/text_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
-	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, _vertex_shader, _fragment_shader);
-	rde_file_close(_shader_vertex_handle);
-	rde_file_close(_shader_fragment_handle);
-
-	_shader_vertex_handle = rde_file_open("shaders/es/framebuffer_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/es/framebuffer_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
-	ENGINE.framebuffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, _vertex_shader, _fragment_shader);
-	rde_file_close(_shader_vertex_handle);
-	rde_file_close(_shader_fragment_handle);
-
-	_shader_vertex_handle = rde_file_open("shaders/es/mesh_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/es/mesh_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
-
-	char* _fragment_with_values = (char*)malloc(sizeof(char) * 10000);
-	memset(_fragment_with_values, 0, 10000);
-	snprintf(_fragment_with_values, 10000, _fragment_shader, ENGINE.init_info.illumination_config.max_amount_of_point_lights, 
-	         ENGINE.init_info.illumination_config.max_amount_of_spot_lights);
-
-	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, _vertex_shader, _fragment_with_values);
-	rde_file_close(_shader_vertex_handle);
-	rde_file_close(_shader_fragment_handle);
-
-	_shader_vertex_handle = rde_file_open("shaders/es/skybox_vert.glsl", RDE_FILE_MODE_READ);
-	_shader_fragment_handle = rde_file_open("shaders/es/skybox_frag.glsl", RDE_FILE_MODE_READ);
-	_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
-	_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
-	ENGINE.skybox_shader = rde_rendering_shader_load(RDE_SHADER_SKYBOX, _vertex_shader, _fragment_shader);
-	rde_file_close(_shader_vertex_handle);
-	rde_file_close(_shader_fragment_handle);
-
-	free(_fragment_with_values);
-#endif
 	
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 
@@ -4090,7 +4041,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	DEFAULT_RENDER_TEXTURE->vbo = _vbo;
 	
 #if IS_MOBILE()
-	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_NONE);
+	// rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_NONE);
 #else
 	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_X4);
 #endif
@@ -7655,32 +7606,34 @@ void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_ev
 		} break;
 
 		case SDL_EVENT_FINGER_MOTION: {
-			rde_vec_2I _window_size = rde_window_get_window_size(rde_engine_get_focused_window());
-			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED;
-			_rde_event->time_stamp = _sdl_event->tfinger.timestamp;
-			_rde_event->window_id = _sdl_event->tfinger.windowID;
-			_rde_event->data.mobile_event_data.moved_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x - _window_size.x * 0.5f, _sdl_event->tfinger.y - _window_size.y * 0.5f };
+			// rde_vec_2I _window_size = rde_window_get_window_size(rde_engine_get_focused_window());
+			// _rde_event->type = RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED;
+			// _rde_event->time_stamp = _sdl_event->tfinger.timestamp;
+			// _rde_event->window_id = _sdl_event->tfinger.windowID;
+			// _rde_event->data.mobile_event_data.moved_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x - _window_size.x * 0.5f, _sdl_event->tfinger.y - _window_size.y * 0.5f };
 		} break;
 
-		// case SDL_DOLLARGESTURE:{
-		// 	_rde_event->type = RDE_EVENT_TYPE_MOBILE_DOLLAR_GESTURE;
-		// 	_rde_event->time_stamp = _sdl_event->dgesture.timestamp;
-		// } break;
-  //
-		// case SDL_DOLLARRECORD:{
-		// 	_rde_event->type = RDE_EVENT_TYPE_MOBILE_DOLLAR_RECORD;
-		// 	_rde_event->time_stamp = _sdl_event->dgesture.timestamp;
-		// } break;
-  //
-		// case SDL_MULTIGESTURE: {
-		// 	_rde_event->type = RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH;
-		// 	_rde_event->time_stamp = _sdl_event->mgesture.timestamp;
-		// 	_rde_event->data.mobile_event_data.init_touch_position = (rde_vec_2I) { _sdl_event->mgesture.x, _sdl_event->mgesture.y };
-		// 	_rde_event->data.mobile_event_data.pinch.rotation_of_fingers = rde_math_radians_to_degrees(_sdl_event->mgesture.dTheta);
-		// 	_rde_event->data.mobile_event_data.pinch.distance_moved_between_fingers = _sdl_event->mgesture.dDist;
-		// 	_rde_event->data.mobile_event_data.pinch.num_fingers_used = _sdl_event->mgesture.numFingers;
-		// } break;
+		#if IS_MOBILE()
+		case GESTURE_DOLLARGESTURE :{
+			// _rde_event->type = RDE_EVENT_TYPE_MOBILE_DOLLAR_GESTURE;
+			// _rde_event->time_stamp = _sdl_event->dgesture.timestamp;
+		} break;
 
+		case GESTURE_DOLLARRECORD :{
+			// _rde_event->type = RDE_EVENT_TYPE_MOBILE_DOLLAR_RECORD;
+			// _rde_event->time_stamp = _sdl_event->dgesture.timestamp;
+		} break;
+
+		case GESTURE_MULTIGESTURE : {
+			// _rde_event->type = RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH;
+			// _rde_event->time_stamp = _sdl_event->mgesture.timestamp;
+			// _rde_event->data.mobile_event_data.init_touch_position = (rde_vec_2I) { _sdl_event->mgesture.x, _sdl_event->mgesture.y };
+			// _rde_event->data.mobile_event_data.pinch.rotation_of_fingers = rde_math_radians_to_degrees(_sdl_event->mgesture.dTheta);
+			// _rde_event->data.mobile_event_data.pinch.distance_moved_between_fingers = _sdl_event->mgesture.dDist;
+			// _rde_event->data.mobile_event_data.pinch.num_fingers_used = _sdl_event->mgesture.numFingers;
+		} break;
+		#endif
+		
 		case SDL_EVENT_TERMINATING: {
 			_rde_event->type = RDE_EVENT_TYPE_MOBILE_TERMINATING;
 		} break;
@@ -7735,9 +7688,11 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 			case SDL_EVENT_FINGER_DOWN:
 			case SDL_EVENT_FINGER_UP:
 			case SDL_EVENT_FINGER_MOTION:
-			// case SDL_DOLLARGESTURE:
-			// case SDL_DOLLARRECORD:
-			// case SDL_MULTIGESTURE:
+			#if IS_MOBILE()
+			case GESTURE_DOLLARGESTURE :
+			case GESTURE_DOLLARRECORD :
+			case GESTURE_MULTIGESTURE :
+			#endif
 			case SDL_EVENT_TERMINATING:
 			case SDL_EVENT_LOW_MEMORY:
 			case SDL_EVENT_WILL_ENTER_BACKGROUND:
@@ -8255,7 +8210,7 @@ ANativeWindow* rde_android_get_native_window() {
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
 
-#else
+#elif (IS_MAC() || IS_LINUX) && !IS_ANDROID()
 
 	void rde_inner_buf_printf(FILE* _f, const char* _fmt, ...) {
 	    va_list _args;

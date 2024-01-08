@@ -2656,7 +2656,7 @@ bool build_android_project() {
 	dyn_str* _out = NULL;
 	
 #if _WIN32
-	COPY_FOLDER_DEST("engine/shaders/", android_rde_android, "app/src/main/assets/shaders/");
+	COPY_FOLDER_DEST("engine/shaders/", android_rde_android, "app/src/main/assets/");
 #else
 	COPY_FOLDER_DEST("engine/shaders/", android_rde_android, "app/src/main/assets/");
 #endif
@@ -2806,7 +2806,7 @@ bool build_android_project() {
 		}
 	}
 
-	return false;
+	return true;
 }
 
 bool build_ios_project() {

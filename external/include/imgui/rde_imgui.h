@@ -4,7 +4,7 @@
 	#define RDE_FUNC_STATIC __declspec(dllexport) static
 	#define RDE_FUNC_EXTERNAL extern "C" RDE_FUNC
 #else
-	#define RDE_FUNC 
+	#define RDE_FUNC
 	#define RDE_FUNC_STATIC static
 	#define RDE_FUNC_EXTERNAL
 #endif
@@ -20,7 +20,7 @@ typedef struct {
 
 typedef int rde_ImGuiWindowFlags;       // -> enum ImGuiWindowFlags_     // Flags: for Begin(), BeginChild()
 typedef int rde_ImGuiDockNodeFlags;     // -> enum ImGuiDockNodeFlags_   // Flags: for DockSpace()
-typedef int rde_ImGuiSliderFlags;     // -> enum ImGuiSliderFlags_ 
+typedef int rde_ImGuiSliderFlags;     // -> enum ImGuiSliderFlags_
 typedef unsigned int rde_ImGuiID;// A unique ID used by widgets (typically the result of hashing a stack of string)
 #ifndef rde_ImTextureID
 typedef void* rde_ImTextureID;
@@ -87,7 +87,7 @@ typedef enum
     rde_ImGuiSliderFlags_InvalidMask_           = 0x7000000F,   // [Internal] We treat using those bits as being potentially a 'float power' argument from the previous API that has got miscast to this enum, and will trigger an assert if needed.
 } rde_ImGuiSliderFlags_;
 
-RDE_FUNC void rde_imgui_init(void* _sdl_window, void* _opengl_context);
+RDE_FUNC void rde_imgui_init(void* _sdl_window, void* _opengl_context, const char* _gl_version);
 
 RDE_FUNC void rde_imgui_new_frame();
 RDE_FUNC void rde_imgui_draw();
