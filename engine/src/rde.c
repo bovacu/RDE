@@ -108,8 +108,12 @@ LONG WINAPI rde_inner_error_sig_handler(PEXCEPTION_POINTERS _sigfault_info);
 void rde_inner_buf_printf(FILE* _f, const char* _fmt, ...);
 void rde_inner_print_stack_trace(FILE* _f);
 void rde_inner_posix_signal_handler(int _sig, siginfo_t* _sig_info, void* _context);
+#endif
+
+#if !IS_WINDOWS()
 void rde_inner_set_posix_signal_handler();
 #endif
+
 void rde_critical_error(bool _condition, const char* _fmt, ...);
 #endif
 
@@ -121,10 +125,10 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //		- 2D rendering:
 //			- [DONE] Camera system
 //			- [DONE] Texture rendering
-//			- Debug and non debug geometry rendering
+//			- [DONE] Debug and non debug geometry rendering
 //			- [DONE] Spritebatch
 //			- [DONE] Text
-//			- [] CPU Textures (something is broken)
+//			- [DONE] CPU Textures
 //
 //		- Basic 3D:
 //			- [DONE] Camera system
@@ -134,7 +138,7 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- [DONE(obj), NOT DONE(glft)] Model loading
 //			- [DONE] Texturing and [NOT COMPLETELY DONE] materials
 //			- [DONE] Instancing (3d batching)
-//			- [DONE] MSAA (ANDROID NOT WORKING, I SUPPOSE IOS NEITHER)
+//			- [DONE] MSAA
 //			- Lighting
 //				- [DONE] Phong
 //				- [DONE] Directional
@@ -173,7 +177,6 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //		- Other:
 //			- [DONE] Render Textures
 //			- Particles
-//			- Multiple window rendering is not working properly
 //			- [DONE] On every 'load' function, if a resource is going to be reloaded, return the already loaded one.
 //
 //		- TOOL: [DONE] command line atlas packing tool for textures.
@@ -186,10 +189,16 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //				- TODO: sanitaze windows paths like in rde_build
 //
 //		- TOOL: command line project creation, compilation and export.
+//
+//		- Bugs:
+//			- [] Multiple window rendering is not working properly
+//			- [] CPU textures makes other textures render wrong if used
+//			- [] Rectangles and other shapes are not working correctly (lines do)
+//			- [FIXED] Android warning "warning: implicit declaration of function 'SDL_AndroidGetNativeWindow' is invalid in C99"
 
 
 /// *************************************************************************************************
-/// *                                		DEFINES                         			  		 *
+/// *                                		DEFINES                         			  		 	*
 /// *************************************************************************************************
 
 /// File System
@@ -1361,7 +1370,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	#ifdef RDE_ERROR_MODULE
 	SetUnhandledExceptionFilter(rde_inner_error_sig_handler);
 	#endif
-#elif (IS_MAC() || IS_WINDOWS()) && !IS_ANDROID()
+#else
 	rde_inner_set_posix_signal_handler();
 #endif
 
@@ -8273,7 +8282,7 @@ ANativeWindow* rde_android_get_native_window() {
 	    free(_messages);
 	    free(_ret);
 
-	    printf("%s \n", _out.buf);
+	    rde_log_level(RDE_LOG_LEVEL_ERROR, "%s \n", _out.buf);
 	}
 
 	void rde_inner_posix_signal_handler(int _sig, siginfo_t* _sig_info, void* _context) {
@@ -8401,6 +8410,218 @@ ANativeWindow* rde_android_get_native_window() {
 		if (sigaction(SIGTERM, &_sig_action, NULL) != 0) { err(1, "sigaction"); }
 		if (sigaction(SIGABRT, &_sig_action, NULL) != 0) { err(1, "sigaction"); }
 	}
+#elif IS_ANDROID()
+
+// Android backtrace is courtesy from https://github.com/alexeikh/android-ndk-backtrace-test/tree/master
+
+#if __arm__
+#define LIBUNWIND_WITH_REGISTERS_METHOD 1
+// This header is located in the RDEAndroid module inside the "modules" folder
+#include "libunwind.h"
+#endif
+
+// UNWIND_BACKTRACE_WITH_REGISTERS_METHOD can only be used on 32-bit ARM.
+#if __arm__
+#define UNWIND_BACKTRACE_WITH_REGISTERS_METHOD 1
+#endif
+
+// UNWIND_BACKTRACE_WITH_SKIPPING_METHOD be used on any platform.
+// It usually does not work on devices with 32-bit ARM CPUs.
+// Usually works on devices with 64-bit ARM CPUs in 32-bit mode though.
+#define UNWIND_BACKTRACE_WITH_SKIPPING_METHOD 1
+
+#define HIDE_EXPORTS 1
+#include <unwind.h>
+
+#define ENABLE_DEMANGLING 1
+
+char* __cxa_demangle(
+        const char* mangled_name,
+        char* output_buffer,
+        size_t* length,
+        int* status);
+
+#include <dlfcn.h>
+#include <signal.h>
+
+
+#define address_count_max 30
+
+struct rde_back_trace_android {
+    // On ARM32 architecture this context is needed
+    // for getting backtrace of the before-crash stack,
+    // not of the signal handler stack.
+    const ucontext_t*   signal_ucontext;
+
+    // On non-ARM32 architectures signal handler stack
+    // seems to be "connected" to the before-crash stack,
+    // so we only need to skip several initial addresses.
+    size_t              address_skip_count;
+
+    size_t              address_count;
+    uintptr_t           addresses[address_count_max];
+
+};
+typedef struct rde_back_trace_android rde_back_trace_android;
+
+void rde_back_trace_android_init(rde_back_trace_android* state, const ucontext_t* ucontext) {
+    assert(state);
+    assert(ucontext);
+    memset(state, 0, sizeof(rde_back_trace_android));
+    state->signal_ucontext = ucontext;
+    state->address_skip_count = 3;
+}
+
+bool rde_back_trace_android_add_address(rde_back_trace_android* state, uintptr_t ip) {
+    assert(state);
+
+    // No more space in the storage. Fail.
+    if (state->address_count >= address_count_max)
+        return false;
+
+#if __thumb__
+    // Reset the Thumb bit, if it is set.
+    const uintptr_t thumb_bit = 1;
+    ip &= ~thumb_bit;
+#endif
+
+    if (state->address_count > 0) {
+        // Ignore null addresses.
+        // They sometimes happen when using _Unwind_Backtrace()
+        // with the compiler optimizations,
+        // when the Link Register is overwritten by the inner
+        // stack frames, like PreCrash() functions in this example.
+        if (ip == 0)
+            return true;
+
+        // Ignore duplicate addresses.
+        // They sometimes happen when using _Unwind_Backtrace()
+        // with the compiler optimizations,
+        // because we both add the second address from the Link Register
+        // in rde_process_registers() and receive the same address
+        // in UnwindBacktraceCallback().
+        if (ip == state->addresses[state->address_count - 1])
+            return true;
+    }
+
+    // Finally add the address to the storage.
+    state->addresses[state->address_count++] = ip;
+    return true;
+}
+
+_Unwind_Reason_Code rde_inner_unwind_backtrace_with_skipping_callback(
+        struct _Unwind_Context* unwind_context, void* state_voidp) {
+    assert(unwind_context);
+    assert(state_voidp);
+
+    rde_back_trace_android* state = (rde_back_trace_android*)state_voidp;
+    assert(state);
+
+    // Skip some initial addresses, because they belong
+    // to the signal handler frame.
+    if (state->address_skip_count > 0) {
+        state->address_skip_count--;
+        return _URC_NO_REASON;
+    }
+
+    uintptr_t ip = _Unwind_GetIP(unwind_context);
+    bool ok = rde_back_trace_android_add_address(state, ip);
+    if (!ok)
+        return _URC_END_OF_STACK;
+
+    return _URC_NO_REASON;
+}
+
+void rde_inner_unwind_backtrace_with_skipping(rde_back_trace_android* state) {
+    assert(state);
+    _Unwind_Backtrace(rde_inner_unwind_backtrace_with_skipping_callback, state);
+}
+
+
+void rde_inner_android_print_backtrace(rde_back_trace_android* state) {
+    assert(state);
+
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "Unexpected crash");
+	
+    size_t frame_count = state->address_count;
+    for (size_t frame_index = 0; frame_index < frame_count; ++frame_index) {
+
+        void* address = (void*)(state->addresses[frame_index]);
+        assert(address);
+
+        const char* symbol_name = "";
+
+        Dl_info info = {};
+        if (dladdr(address, &info) && info.dli_sname) {
+            symbol_name = info.dli_sname;
+        }
+
+        // Relative address matches the address which "nm" and "objdump"
+        // utilities give you, if you compiled position-independent code
+        // (-fPIC, -pie).
+        // Android requires position-independent code since Android 5.0.
+        unsigned long relative_address = (char*)address - (char*)info.dli_fbase;
+
+        char* demangled = NULL;
+
+        int status = 0;
+        demangled = __cxa_demangle(symbol_name, NULL, NULL, &status);
+        if (demangled) {
+            symbol_name = demangled;
+		}
+
+        assert(symbol_name);
+        
+		if(strlen(symbol_name) > 0) {
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "\t#%02zu:  0x%lx  %s", frame_index, relative_address, symbol_name);
+		}
+
+        free(demangled);
+    }
+}
+
+void rde_inner_android_sig_action_handler(int sig, siginfo_t* info, void* ucontext) {
+    const ucontext_t* signal_ucontext = (const ucontext_t*)ucontext;
+    assert(signal_ucontext);
+
+	rde_back_trace_android backtrace_state;
+	rde_back_trace_android_init(&backtrace_state, signal_ucontext);
+	rde_inner_unwind_backtrace_with_skipping(&backtrace_state);
+	rde_inner_android_print_backtrace(&backtrace_state);
+
+    rde_engine_destroy_engine();
+}
+
+
+void rde_inner_android_set_up_alt_stack() {
+    // Set up an alternate signal handler stack.
+    stack_t stack = {};
+    stack.ss_size = 0;
+    stack.ss_flags = 0;
+    stack.ss_size = SIGSTKSZ;
+    stack.ss_sp = malloc(stack.ss_size);
+    assert(stack.ss_sp);
+
+    sigaltstack(&stack, NULL);
+}
+
+void rde_inner_android_set_up_sig_action_handler() {
+    // Set up signal handler.
+    struct sigaction action = {};
+    memset(&action, 0, sizeof(action));
+    sigemptyset(&action.sa_mask);
+    action.sa_sigaction = rde_inner_android_sig_action_handler;
+    action.sa_flags = SA_RESTART | SA_SIGINFO | SA_ONSTACK;
+
+    sigaction(SIGSEGV, &action, NULL);
+}
+
+void rde_inner_set_posix_signal_handler() {
+	rde_inner_android_set_up_alt_stack();
+    rde_inner_android_set_up_sig_action_handler();
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Stacktrace on Android initiated");
+}
+
 #endif
 
 
@@ -8437,6 +8658,12 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	va_end(_args);
 	__android_log_print(ANDROID_LOG_DEBUG, "SDL_RDE", "%s", _error);
 	free(_error);
+	
+	rde_back_trace_android backtrace_state;
+	const ucontext_t* signal_ucontext = (ucontext_t*)malloc(sizeof(ucontext_t));
+	rde_back_trace_android_init(&backtrace_state, signal_ucontext);
+	rde_inner_unwind_backtrace_with_skipping(&backtrace_state);
+	rde_inner_android_print_backtrace(&backtrace_state);
 #else
 	FILE* _f = NULL;
 	
