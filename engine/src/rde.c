@@ -8436,16 +8436,17 @@ ANativeWindow* rde_android_get_native_window() {
 #define ENABLE_DEMANGLING 1
 
 char* __cxa_demangle(
-        const char* mangled_name,
-        char* output_buffer,
-        size_t* length,
-        int* status);
+        const char* _mangled_name,
+        char* _output_buffer,
+        size_t* _length,
+        int* _status);
 
 #include <dlfcn.h>
 #include <signal.h>
 
 
-#define address_count_max 30
+#define RDE_ANDROID_ADDRESS_MAX_STACK 30
+#define RDE_ANDROID_ADDRESS_SKIP_COUNT 3
 
 struct rde_back_trace_android {
     // On ARM32 architecture this context is needed
@@ -8459,40 +8460,42 @@ struct rde_back_trace_android {
     size_t              address_skip_count;
 
     size_t              address_count;
-    uintptr_t           addresses[address_count_max];
+    uintptr_t           addresses[RDE_ANDROID_ADDRESS_MAX_STACK];
 
 };
 typedef struct rde_back_trace_android rde_back_trace_android;
 
-void rde_back_trace_android_init(rde_back_trace_android* state, const ucontext_t* ucontext) {
-    assert(state);
-    assert(ucontext);
-    memset(state, 0, sizeof(rde_back_trace_android));
-    state->signal_ucontext = ucontext;
-    state->address_skip_count = 3;
+void rde_back_trace_android_init(rde_back_trace_android* _state, const ucontext_t* _ucontext) {
+    rde_critical_error(_state == NULL, RDE_ERROR_NO_NULL_ALLOWED, "State");
+    rde_critical_error(_ucontext == NULL, RDE_ERROR_NO_NULL_ALLOWED, "ucontext_t");
+    memset(_state, 0, sizeof(rde_back_trace_android));
+    _state->signal_ucontext = _ucontext;
+    _state->address_skip_count = RDE_ANDROID_ADDRESS_SKIP_COUNT;
 }
 
-bool rde_back_trace_android_add_address(rde_back_trace_android* state, uintptr_t ip) {
-    assert(state);
+bool rde_back_trace_android_add_address(rde_back_trace_android* _state, uintptr_t _ip) {
+    rde_critical_error(_state == NULL, RDE_ERROR_NO_NULL_ALLOWED, "State");
 
     // No more space in the storage. Fail.
-    if (state->address_count >= address_count_max)
+    if (_state->address_count >= RDE_ANDROID_ADDRESS_MAX_STACK){
         return false;
+	}
 
 #if __thumb__
     // Reset the Thumb bit, if it is set.
-    const uintptr_t thumb_bit = 1;
-    ip &= ~thumb_bit;
+    const uintptr_t _thumb_bit = 1;
+    _ip &= ~_thumb_bit;
 #endif
 
-    if (state->address_count > 0) {
+    if (_state->address_count > 0) {
         // Ignore null addresses.
         // They sometimes happen when using _Unwind_Backtrace()
         // with the compiler optimizations,
         // when the Link Register is overwritten by the inner
         // stack frames, like PreCrash() functions in this example.
-        if (ip == 0)
-            return true;
+        if (_ip == 0) {
+			return true;
+		}
 
         // Ignore duplicate addresses.
         // They sometimes happen when using _Unwind_Backtrace()
@@ -8500,94 +8503,96 @@ bool rde_back_trace_android_add_address(rde_back_trace_android* state, uintptr_t
         // because we both add the second address from the Link Register
         // in rde_process_registers() and receive the same address
         // in UnwindBacktraceCallback().
-        if (ip == state->addresses[state->address_count - 1])
+        if (_ip == _state->addresses[_state->address_count - 1]) {
             return true;
+		}
     }
 
     // Finally add the address to the storage.
-    state->addresses[state->address_count++] = ip;
+    _state->addresses[_state->address_count++] = _ip;
     return true;
 }
 
 _Unwind_Reason_Code rde_inner_unwind_backtrace_with_skipping_callback(
-        struct _Unwind_Context* unwind_context, void* state_voidp) {
-    assert(unwind_context);
-    assert(state_voidp);
+        struct _Unwind_Context* _unwind_context, void* _state_voidp) {
+    rde_critical_error(_unwind_context == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_Unwind_Context");
+    rde_critical_error(_state_voidp == NULL, RDE_ERROR_NO_NULL_ALLOWED, "State Voidp");
 
-    rde_back_trace_android* state = (rde_back_trace_android*)state_voidp;
-    assert(state);
+    rde_back_trace_android* _state = (rde_back_trace_android*)_state_voidp;
+    rde_critical_error(_state == NULL, RDE_ERROR_NO_NULL_ALLOWED, "State");
 
     // Skip some initial addresses, because they belong
     // to the signal handler frame.
-    if (state->address_skip_count > 0) {
-        state->address_skip_count--;
+    if (_state->address_skip_count > 0) {
+        _state->address_skip_count--;
         return _URC_NO_REASON;
     }
 
-    uintptr_t ip = _Unwind_GetIP(unwind_context);
-    bool ok = rde_back_trace_android_add_address(state, ip);
-    if (!ok)
-        return _URC_END_OF_STACK;
+    uintptr_t _ip = _Unwind_GetIP(_unwind_context);
+    bool _ok = rde_back_trace_android_add_address(_state, _ip);
+    if (!_ok) {
+		return _URC_END_OF_STACK;
+	}
 
     return _URC_NO_REASON;
 }
 
-void rde_inner_unwind_backtrace_with_skipping(rde_back_trace_android* state) {
-    assert(state);
-    _Unwind_Backtrace(rde_inner_unwind_backtrace_with_skipping_callback, state);
+void rde_inner_unwind_backtrace_with_skipping(rde_back_trace_android* _state) {
+    rde_critical_error(_state == NULL, RDE_ERROR_NO_NULL_ALLOWED, "State");
+    _Unwind_Backtrace(rde_inner_unwind_backtrace_with_skipping_callback, _state);
 }
 
 
-void rde_inner_android_print_backtrace(rde_back_trace_android* state) {
-    assert(state);
+void rde_inner_android_print_backtrace(rde_back_trace_android* _state) {
+    rde_critical_error(_state == NULL, RDE_ERROR_NO_NULL_ALLOWED, "State");
 
 	rde_log_level(RDE_LOG_LEVEL_ERROR, "Unexpected crash");
 	
-    size_t frame_count = state->address_count;
-    for (size_t frame_index = 0; frame_index < frame_count; ++frame_index) {
+    size_t _frame_count = _state->address_count;
+    for (size_t _frame_index = 0; _frame_index < _frame_count; ++_frame_index) {
 
-        void* address = (void*)(state->addresses[frame_index]);
-        assert(address);
+        void* _address = (void*)(_state->addresses[_frame_index]);
+        rde_critical_error(_address == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Address");
 
-        const char* symbol_name = "";
+        const char* _symbol_name = "";
 
-        Dl_info info = {};
-        if (dladdr(address, &info) && info.dli_sname) {
-            symbol_name = info.dli_sname;
+        Dl_info _info = {};
+        if (dladdr(_address, &_info) && _info.dli_sname) {
+            _symbol_name = _info.dli_sname;
         }
 
         // Relative address matches the address which "nm" and "objdump"
         // utilities give you, if you compiled position-independent code
         // (-fPIC, -pie).
         // Android requires position-independent code since Android 5.0.
-        unsigned long relative_address = (char*)address - (char*)info.dli_fbase;
+        unsigned long _relative_address = (char*)_address - (char*)_info.dli_fbase;
 
-        char* demangled = NULL;
+        char* _demangled = NULL;
 
-        int status = 0;
-        demangled = __cxa_demangle(symbol_name, NULL, NULL, &status);
-        if (demangled) {
-            symbol_name = demangled;
+        int _status = 0;
+        _demangled = __cxa_demangle(_symbol_name, NULL, NULL, &_status);
+        if (_demangled) {
+            _symbol_name = _demangled;
 		}
 
-        assert(symbol_name);
+        rde_critical_error(_symbol_name == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Symbol Name");
         
-		if(strlen(symbol_name) > 0) {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "\t#%02zu:  0x%lx  %s", frame_index, relative_address, symbol_name);
+		if(strlen(_symbol_name) > 0) {
+			rde_log_level(RDE_LOG_LEVEL_ERROR, "\t#%02zu:  0x%lx  %s", _frame_index, _relative_address, _symbol_name);
 		}
 
-        free(demangled);
+        free(_demangled);
     }
 }
 
-void rde_inner_android_sig_action_handler(int sig, siginfo_t* info, void* ucontext) {
-    const ucontext_t* signal_ucontext = (const ucontext_t*)ucontext;
-    assert(signal_ucontext);
+void rde_inner_android_sig_action_handler(int _sig, siginfo_t* _info, void* _ucontext) {
+    const ucontext_t* _signal_ucontext = (const ucontext_t*)_ucontext;
+    rde_critical_error(_signal_ucontext == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Signal UContexte");
 
-	rde_back_trace_android backtrace_state;
-	rde_back_trace_android_init(&backtrace_state, signal_ucontext);
-	rde_inner_unwind_backtrace_with_skipping(&backtrace_state);
-	rde_inner_android_print_backtrace(&backtrace_state);
+	rde_back_trace_android _backtrace_state;
+	rde_back_trace_android_init(&_backtrace_state, _signal_ucontext);
+	rde_inner_unwind_backtrace_with_skipping(&_backtrace_state);
+	rde_inner_android_print_backtrace(&_backtrace_state);
 
     rde_engine_destroy_engine();
 }
@@ -8595,25 +8600,25 @@ void rde_inner_android_sig_action_handler(int sig, siginfo_t* info, void* uconte
 
 void rde_inner_android_set_up_alt_stack() {
     // Set up an alternate signal handler stack.
-    stack_t stack = {};
-    stack.ss_size = 0;
-    stack.ss_flags = 0;
-    stack.ss_size = SIGSTKSZ;
-    stack.ss_sp = malloc(stack.ss_size);
-    assert(stack.ss_sp);
+    stack_t _stack = {};
+    _stack.ss_size = 0;
+    _stack.ss_flags = 0;
+    _stack.ss_size = SIGSTKSZ;
+    _stack.ss_sp = malloc(_stack.ss_size);
+    rde_critical_error(_stack.ss_sp == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Stack SS SP");
 
-    sigaltstack(&stack, NULL);
+    sigaltstack(&_stack, NULL);
 }
 
 void rde_inner_android_set_up_sig_action_handler() {
     // Set up signal handler.
-    struct sigaction action = {};
-    memset(&action, 0, sizeof(action));
-    sigemptyset(&action.sa_mask);
-    action.sa_sigaction = rde_inner_android_sig_action_handler;
-    action.sa_flags = SA_RESTART | SA_SIGINFO | SA_ONSTACK;
+    struct sigaction _action = {};
+    memset(&_action, 0, sizeof(_action));
+    sigemptyset(&_action.sa_mask);
+    _action.sa_sigaction = rde_inner_android_sig_action_handler;
+    _action.sa_flags = SA_RESTART | SA_SIGINFO | SA_ONSTACK;
 
-    sigaction(SIGSEGV, &action, NULL);
+    sigaction(SIGSEGV, &_action, NULL);
 }
 
 void rde_inner_set_posix_signal_handler() {
