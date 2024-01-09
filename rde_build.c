@@ -1664,8 +1664,8 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 	LINK_PATH(_external_lib_path, "external/libs/windows/");
 	LINK_PATH(_external_manual_lib_path, "external/libs/windows/manual-link/");
 
-	ADD_FLAG("-lSDL2main");
-	ADD_FLAG("-lSDL2");
+	// ADD_FLAG("-lSDL2main");
+	ADD_FLAG("-lSDL3");
 	ADD_FLAG("-lcglm");
 
 	if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
@@ -1780,12 +1780,12 @@ bool compile_windows_rde() {
 		{
 			if (strcmp(build_type, DEBUG_STR) == 0) {
 				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
-				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/debug/examples/SDL2.dll")
+				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/debug/examples/SDL3.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/")
 				COPY_FOLDER("engine/shaders", "build/windows/debug/examples/")
 			} else {
 				COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
-				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/release/examples/SDL2.dll")
+				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/release/examples/SDL3.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/")
 				COPY_FOLDER("engine/shaders", "build/windows/release/examples/")
 			}
@@ -1803,12 +1803,12 @@ bool compile_windows_rde() {
 		{
 			if(strcmp(build_type, DEBUG_STR) == 0) {
 				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
-				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/debug/examples/SDL2.dll")
+				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/debug/examples/SDL3.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/windows/debug/examples/shaders/")	
 			} else {
 				COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
-				COPY_FILE("external/libs/windows/SDL2.dll", "build/windows/release/examples/SDL2.dll")
+				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/release/examples/SDL3.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/windows/release/examples/shaders/")
 			}
@@ -2656,7 +2656,7 @@ bool build_android_project() {
 	dyn_str* _out = NULL;
 	
 #if _WIN32
-	COPY_FOLDER_DEST("engine/shaders/", android_rde_android, "app/src/main/assets/shaders/");
+	COPY_FOLDER_DEST("engine/shaders/", android_rde_android, "app/src/main/assets/");
 #else
 	COPY_FOLDER_DEST("engine/shaders/", android_rde_android, "app/src/main/assets/");
 #endif
@@ -2806,7 +2806,7 @@ bool build_android_project() {
 		}
 	}
 
-	return false;
+	return true;
 }
 
 bool build_ios_project() {

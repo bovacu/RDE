@@ -242,8 +242,8 @@ bool rde_jolt_init(rde_jolt_init_config _init_config, critical_error _rde_critic
 	rde_critical_error(_log_callback == nullptr, "Callback '_post_update_callback' MUST be not nullptr");
 	rde_log_level = _log_callback;
 
-	body_pool = new rde_jolt_body[_init_config.max_bodies];
-	for(size_t _i = 0; _i < _init_config.max_bodies; _i++) {
+	body_pool = new rde_jolt_body[_init_config.max_amount_of_bodies];
+	for(size_t _i = 0; _i < _init_config.max_amount_of_bodies; _i++) {
 		body_pool[_i] = create_body_struct();
 	}
 
@@ -254,14 +254,14 @@ bool rde_jolt_init(rde_jolt_init_config _init_config, critical_error _rde_critic
 	JPH::Factory::sInstance = new JPH::Factory();
 	JPH::RegisterTypes();
 
-    rde_critical_error(_init_config.max_physics_jobs == 0, "max_physics_jobs cannot be 0. \n");
-    rde_critical_error(_init_config.max_physics_barriers == 0, "max_physics_barriers cannot be 0. \n");
-    rde_critical_error(_init_config.max_threads == 0, "max_threads cannot be 0. \n");
+    rde_critical_error(_init_config.max_amount_of_physics_jobs == 0, "max_physics_jobs cannot be 0. \n");
+    rde_critical_error(_init_config.max_amount_of_physics_barriers == 0, "max_physics_barriers cannot be 0. \n");
+    rde_critical_error(_init_config.max_amount_of_threads == 0, "max_threads cannot be 0. \n");
 
-	temp_allocator = new JPH::TempAllocatorImpl(_init_config.temo_allocator_size);
-	job_system = new JPH::JobSystemThreadPool(_init_config.max_physics_jobs, 
-	                                          _init_config.max_physics_barriers, 
-	                                          _init_config.max_threads);
+	temp_allocator = new JPH::TempAllocatorImpl(_init_config.temp_allocator_size);
+	job_system = new JPH::JobSystemThreadPool(_init_config.max_amount_of_physics_jobs, 
+	                                          _init_config.max_amount_of_physics_barriers, 
+	                                          _init_config.max_amount_of_threads);
 
 	//JPH::DebugRenderer::sInstance = new rde_debug_renderer();
 
@@ -272,10 +272,10 @@ bool rde_jolt_init(rde_jolt_init_config _init_config, critical_error _rde_critic
 	contact_listener = new rde_contact_listener();
 
 	physics_system = new JPH::PhysicsSystem();
-	physics_system->Init(_init_config.max_bodies, 
-	                     _init_config.max_body_mutexes, 
-	                     _init_config.max_body_pairs, 
-	                     _init_config.max_concat_constraints, 
+	physics_system->Init(_init_config.max_amount_of_bodies, 
+	                     _init_config.max_amount_of_body_mutexes, 
+	                     _init_config.max_amount_of_body_pairs, 
+	                     _init_config.max_amount_of_contact_constraints, 
 	                     *broad_phase_layer_interface, 
 	                     *object_vs_broad_phase_layer_filter, 
 	                     *object_layer_pair_filter);
@@ -297,7 +297,7 @@ rde_jolt_body* rde_jolt_body_load(RDE_JOLT_SHAPE_ _shape_type, rde_jolt_body_set
 	rde_jolt_body* _body = nullptr;
 	size_t _index = -1;
 
-	for(size_t _i = 0; _i < init_config.max_bodies; _i++) {
+	for(size_t _i = 0; _i < init_config.max_amount_of_bodies; _i++) {
 		rde_jolt_body* _b = &body_pool[_i];
 
 		if(_b->inner_body == nullptr) {
@@ -313,7 +313,7 @@ rde_jolt_body* rde_jolt_body_load(RDE_JOLT_SHAPE_ _shape_type, rde_jolt_body_set
 		}
 	}
 
-	rde_critical_error(_body == nullptr, "Max number of bodies '%d' reached. Crashing application \n", init_config.max_bodies);
+	rde_critical_error(_body == nullptr, "Max number of bodies '%d' reached. Crashing application \n", init_config.max_amount_of_bodies);
 
 	JPH::ShapeSettings::ShapeResult _shape;
 

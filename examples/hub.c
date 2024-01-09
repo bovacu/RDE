@@ -27,6 +27,9 @@ rde_engine_user_side_loop_func_2 render_imgui_callback = NULL;
 unload_func unload_callback = NULL;
 
 rde_window* current_window = NULL;
+rde_camera hub_camera;
+rde_texture* duck_texture = NULL;
+rde_transform* duck_transform = NULL;
 
 void draw_grid(rde_camera* _camera, rde_window* _window) {
 	const size_t _line_thickness = 1;
@@ -178,6 +181,10 @@ void on_imgui_hub_menu(float _dt) {
 void on_render(float _dt, rde_window* _window) {
 	rde_rendering_set_background_color(RDE_COLOR_BLACK);
 
+	rde_render_2d(_window, &hub_camera, false, {
+		rde_rendering_2d_draw_texture(duck_transform, duck_texture, RDE_COLOR_WHITE, NULL);
+	})
+
 	rde_imgui_new_frame();
 	
 	if(render_callback != NULL) {
@@ -193,6 +200,7 @@ void on_render(float _dt, rde_window* _window) {
 }
 
 void draw_imgui_transform(const char* _name, rde_transform* _transform) {
+	static int id_counter = 0;
 	rde_imgui_begin(_name, NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
 	rde_imgui_push_id(id_counter++);
 	rde_vec_3F _model_position = rde_engine_transform_get_position(_transform);
@@ -229,6 +237,8 @@ void draw_imgui_transform(const char* _name, rde_transform* _transform) {
 	}
 	rde_imgui_pop_id();
 	rde_imgui_end();
+	
+	id_counter = 0;
 }
 
 void init_func(int _argc, char** _argv) {
@@ -237,8 +247,23 @@ void init_func(int _argc, char** _argv) {
 
 	rde_engine_set_event_user_callback(on_event);
 
-	rde_imgui_init(rde_window_get_native_sdl_window_handle(current_window), rde_window_get_native_sdl_gl_context_handle(current_window));
+#if IS_MOBILE()
+	rde_imgui_init(rde_window_get_native_sdl_window_handle(current_window), rde_window_get_native_sdl_gl_context_handle(current_window), "#version 300 es");
+#else
+	rde_imgui_init(rde_window_get_native_sdl_window_handle(current_window), rde_window_get_native_sdl_gl_context_handle(current_window), "#version 330");
+#endif
+
 	// rde_window_set_icon(current_window, "logo.ico");
+
+	hub_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_ORTHOGRAPHIC);
+	rde_engine_transform_set_position(hub_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
+
+#if IS_MOBILE()
+	duck_texture = rde_rendering_texture_load("assets/duck_yellow.png", NULL);
+#else
+	duck_texture = rde_rendering_texture_load("hub_assets/duck_yellow.png", NULL);
+#endif
+	duck_transform = rde_engine_transform_load();
 }
 
 void end_func() {
@@ -249,4 +274,8 @@ void end_func() {
 	rde_imgui_shutdown();
 }
 
-RDE_MAIN(current_window, "../../../../config.rde_config", _mandatory_callbacks, init_func, end_func);
+#if IS_ANDROID()
+RDE_MAIN(current_window, "assets/config.rde_config", _mandatory_callbacks, init_func, end_func);
+#else
+RDE_MAIN(current_window, "hub_assets/config.rde_config", _mandatory_callbacks, init_func, end_func);
+#endif

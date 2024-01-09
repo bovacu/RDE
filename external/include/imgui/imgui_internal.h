@@ -1,4 +1,4 @@
-// dear imgui, v1.90 WIP
+// dear imgui, v1.90.1 WIP
 // (internal structures/api)
 
 // You may use this file to debug, understand or extend Dear ImGui features but we don't provide any guarantee of forward compatibility.
@@ -201,13 +201,13 @@ extern IMGUI_API ImGuiContext* GImGui;  // Current implicit context pointer
 namespace ImStb
 {
 
-#undef STB_TEXTEDIT_STRING
-#undef STB_TEXTEDIT_CHARTYPE
-#define STB_TEXTEDIT_STRING             ImGuiInputTextState
-#define STB_TEXTEDIT_CHARTYPE           ImWchar
-#define STB_TEXTEDIT_GETWIDTH_NEWLINE   (-1.0f)
-#define STB_TEXTEDIT_UNDOSTATECOUNT     99
-#define STB_TEXTEDIT_UNDOCHARCOUNT      999
+#undef IMSTB_TEXTEDIT_STRING
+#undef IMSTB_TEXTEDIT_CHARTYPE
+#define IMSTB_TEXTEDIT_STRING             ImGuiInputTextState
+#define IMSTB_TEXTEDIT_CHARTYPE           ImWchar
+#define IMSTB_TEXTEDIT_GETWIDTH_NEWLINE   (-1.0f)
+#define IMSTB_TEXTEDIT_UNDOSTATECOUNT     99
+#define IMSTB_TEXTEDIT_UNDOCHARCOUNT      999
 #include "imstb_textedit.h"
 
 } // namespace ImStb
@@ -845,8 +845,8 @@ enum ImGuiItemStatusFlags_
     ImGuiItemStatusFlags_HasDeactivated     = 1 << 5,   // Set if the widget/group is able to provide data for the ImGuiItemStatusFlags_Deactivated flag.
     ImGuiItemStatusFlags_Deactivated        = 1 << 6,   // Only valid if ImGuiItemStatusFlags_HasDeactivated is set.
     ImGuiItemStatusFlags_HoveredWindow      = 1 << 7,   // Override the HoveredWindow test to allow cross-window hover testing.
-    ImGuiItemStatusFlags_FocusedByTabbing   = 1 << 8,   // Set when the Focusable item just got focused by Tabbing (FIXME: to be removed soon)
-    ImGuiItemStatusFlags_Visible            = 1 << 9,   // [WIP] Set when item is overlapping the current clipping rectangle (Used internally. Please don't use yet: API/system will change as we refactor Itemadd()).
+    ImGuiItemStatusFlags_Visible            = 1 << 8,   // [WIP] Set when item is overlapping the current clipping rectangle (Used internally. Please don't use yet: API/system will change as we refactor Itemadd()).
+    ImGuiItemStatusFlags_HasClipRect        = 1 << 9,   // g.LastItemData.ClipRect is valid
 
     // Additional status + semantic for ImGuiTestEngine
 #ifdef IMGUI_ENABLE_TEST_ENGINE
@@ -1131,7 +1131,7 @@ struct IMGUI_API ImGuiInputTextState
     void        ClearText()                 { CurLenW = CurLenA = 0; TextW[0] = 0; TextA[0] = 0; CursorClamp(); }
     void        ClearFreeMemory()           { TextW.clear(); TextA.clear(); InitialTextA.clear(); }
     int         GetUndoAvailCount() const   { return Stb.undostate.undo_point; }
-    int         GetRedoAvailCount() const   { return STB_TEXTEDIT_UNDOSTATECOUNT - Stb.undostate.redo_point; }
+    int         GetRedoAvailCount() const   { return IMSTB_TEXTEDIT_UNDOSTATECOUNT - Stb.undostate.redo_point; }
     void        OnKeyPressed(int key);      // Cannot be inline because we call in code in stb_textedit.h implementation
 
     // Cursor & Selection
@@ -1171,9 +1171,10 @@ enum ImGuiNextWindowDataFlags_
     ImGuiNextWindowDataFlags_HasFocus           = 1 << 5,
     ImGuiNextWindowDataFlags_HasBgAlpha         = 1 << 6,
     ImGuiNextWindowDataFlags_HasScroll          = 1 << 7,
-    ImGuiNextWindowDataFlags_HasViewport        = 1 << 8,
-    ImGuiNextWindowDataFlags_HasDock            = 1 << 9,
-    ImGuiNextWindowDataFlags_HasWindowClass     = 1 << 10,
+    ImGuiNextWindowDataFlags_HasChildFlags      = 1 << 8,
+    ImGuiNextWindowDataFlags_HasViewport        = 1 << 9,
+    ImGuiNextWindowDataFlags_HasDock            = 1 << 10,
+    ImGuiNextWindowDataFlags_HasWindowClass     = 1 << 11,
 };
 
 // Storage for SetNexWindow** functions
@@ -1189,6 +1190,7 @@ struct ImGuiNextWindowData
     ImVec2                      SizeVal;
     ImVec2                      ContentSizeVal;
     ImVec2                      ScrollVal;
+    ImGuiChildFlags             ChildFlags;
     bool                        PosUndock;
     bool                        CollapsedVal;
     ImRect                      SizeConstraintRect;
@@ -1237,7 +1239,9 @@ struct ImGuiLastItemData
     ImGuiItemStatusFlags    StatusFlags;        // See ImGuiItemStatusFlags_
     ImRect                  Rect;               // Full rectangle
     ImRect                  NavRect;            // Navigation scoring rectangle (not displayed)
-    ImRect                  DisplayRect;        // Display rectangle (only if ImGuiItemStatusFlags_HasDisplayRect is set)
+    // Rarely used fields are not explicitly cleared, only valid when the corresponding ImGuiItemStatusFlags is set.
+    ImRect                  DisplayRect;        // Display rectangle (ONLY VALID IF ImGuiItemStatusFlags_HasDisplayRect is set)
+    ImRect                  ClipRect;           // Clip rectangle at the time of submitting item (ONLY VALID IF ImGuiItemStatusFlags_HasClipRect is set)
 
     ImGuiLastItemData()     { memset(this, 0, sizeof(*this)); }
 };
@@ -1505,6 +1509,7 @@ enum ImGuiActivateFlags_
     ImGuiActivateFlags_PreferInput          = 1 << 0,       // Favor activation that requires keyboard text input (e.g. for Slider/Drag). Default for Enter key.
     ImGuiActivateFlags_PreferTweak          = 1 << 1,       // Favor activation for tweaking with arrows or gamepad (e.g. for Slider/Drag). Default for Space key and if keyboard is not used.
     ImGuiActivateFlags_TryToPreserveState   = 1 << 2,       // Request widget to preserve state if it can (e.g. InputText will try to preserve cursor/selection)
+    ImGuiActivateFlags_FromTabbing          = 1 << 3,       // Activation requested by a tabbing request
 };
 
 // Early work-in-progress API for ScrollToItem()
@@ -1616,7 +1621,7 @@ struct IMGUI_API ImGuiTypingSelectState
 // [SECTION] Columns support
 //-----------------------------------------------------------------------------
 
-// Flags for internal's BeginColumns(). Prefix using BeginTable() nowadays!
+// Flags for internal's BeginColumns(). This is an obsolete API. Prefer using BeginTable() nowadays!
 enum ImGuiOldColumnFlags_
 {
     ImGuiOldColumnFlags_None                    = 0,
@@ -1624,16 +1629,16 @@ enum ImGuiOldColumnFlags_
     ImGuiOldColumnFlags_NoResize                = 1 << 1,   // Disable resizing columns when clicking on the dividers
     ImGuiOldColumnFlags_NoPreserveWidths        = 1 << 2,   // Disable column width preservation when adjusting columns
     ImGuiOldColumnFlags_NoForceWithinWindow     = 1 << 3,   // Disable forcing columns to fit within window
-    ImGuiOldColumnFlags_GrowParentContentsSize  = 1 << 4,   // (WIP) Restore pre-1.51 behavior of extending the parent window contents size but _without affecting the columns width at all_. Will eventually remove.
+    ImGuiOldColumnFlags_GrowParentContentsSize  = 1 << 4,   // Restore pre-1.51 behavior of extending the parent window contents size but _without affecting the columns width at all_. Will eventually remove.
 
     // Obsolete names (will be removed)
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
-    ImGuiColumnsFlags_None                      = ImGuiOldColumnFlags_None,
-    ImGuiColumnsFlags_NoBorder                  = ImGuiOldColumnFlags_NoBorder,
-    ImGuiColumnsFlags_NoResize                  = ImGuiOldColumnFlags_NoResize,
-    ImGuiColumnsFlags_NoPreserveWidths          = ImGuiOldColumnFlags_NoPreserveWidths,
-    ImGuiColumnsFlags_NoForceWithinWindow       = ImGuiOldColumnFlags_NoForceWithinWindow,
-    ImGuiColumnsFlags_GrowParentContentsSize    = ImGuiOldColumnFlags_GrowParentContentsSize,
+    //ImGuiColumnsFlags_None                    = ImGuiOldColumnFlags_None,
+    //ImGuiColumnsFlags_NoBorder                = ImGuiOldColumnFlags_NoBorder,
+    //ImGuiColumnsFlags_NoResize                = ImGuiOldColumnFlags_NoResize,
+    //ImGuiColumnsFlags_NoPreserveWidths        = ImGuiOldColumnFlags_NoPreserveWidths,
+    //ImGuiColumnsFlags_NoForceWithinWindow     = ImGuiOldColumnFlags_NoForceWithinWindow,
+    //ImGuiColumnsFlags_GrowParentContentsSize  = ImGuiOldColumnFlags_GrowParentContentsSize,
 #endif
 };
 
@@ -1890,6 +1895,7 @@ struct ImGuiWindowSettings
     ImGuiID     ClassId;        // ID of window class if specified
     short       DockOrder;      // Order of the last time the window was visible within its DockNode. This is used to reorder windows that are reappearing on the same frame. Same value between windows that were active and windows that were none are possible.
     bool        Collapsed;
+    bool        IsChild;
     bool        WantApply;      // Set when loaded from .ini data (to enable merging/loading .ini data into an already running context)
     bool        WantDelete;     // Set to invalidate/delete the settings entry
 
@@ -2086,6 +2092,7 @@ struct ImGuiContext
     ImGuiWindow*            WheelingWindow;                     // Track the window we started mouse-wheeling on. Until a timer elapse or mouse has moved, generally keep scrolling the same window even if during the course of scrolling the mouse ends up hovering a child window.
     ImVec2                  WheelingWindowRefMousePos;
     int                     WheelingWindowStartFrame;           // This may be set one frame before WheelingWindow is != NULL
+    int                     WheelingWindowScrolledFrame;
     float                   WheelingWindowReleaseTimer;
     ImVec2                  WheelingWindowWheelRemainder;
     ImVec2                  WheelingAxisAvg;
@@ -2140,6 +2147,7 @@ struct ImGuiContext
     bool                    DebugShowGroupRects;
 
     // Shared stacks
+    ImGuiCol                    DebugFlashStyleColorIdx;        // (Keep close to ColorStack to share cache line)
     ImVector<ImGuiColorMod>     ColorStack;                     // Stack for PushStyleColor()/PopStyleColor() - inherited by Begin()
     ImVector<ImGuiStyleMod>     StyleVarStack;                  // Stack for PushStyleVar()/PopStyleVar() - inherited by Begin()
     ImVector<ImFont*>           FontStack;                      // Stack for PushFont()/PopFont() - inherited by Begin()
@@ -2233,6 +2241,7 @@ struct ImGuiContext
     int                     DragDropMouseButton;
     ImGuiPayload            DragDropPayload;
     ImRect                  DragDropTargetRect;                 // Store rectangle of current target candidate (we favor small targets when overlapping)
+    ImRect                  DragDropTargetClipRect;             // Store ClipRect at the time of item's drawing
     ImGuiID                 DragDropTargetId;
     ImGuiDragDropFlags      DragDropAcceptFlags;
     float                   DragDropAcceptIdCurrRectSurface;    // Target item surface (we resolve overlapping targets by prioritizing the smaller surface)
@@ -2287,6 +2296,8 @@ struct ImGuiContext
     ImU32                   ColorEditSavedColor;                // RGB value with alpha set to 0.
     ImVec4                  ColorPickerRef;                     // Initial/reference color at the time of opening the color picker.
     ImGuiComboPreviewData   ComboPreviewData;
+    ImRect                  WindowResizeBorderExpectedRect;     // Expected border rect, switch to relative edit if moving
+    bool                    WindowResizeRelativeMode;
     float                   SliderGrabClickOffset;
     float                   SliderCurrentAccum;                 // Accumulated slider delta when using navigation controls.
     bool                    SliderCurrentAccumDirty;            // Has the accumulated slider delta changed since last time we tried to apply it?
@@ -2348,6 +2359,8 @@ struct ImGuiContext
     bool                    DebugItemPickerActive;              // Item picker is active (started with DebugStartItemPicker())
     ImU8                    DebugItemPickerMouseButton;
     ImGuiID                 DebugItemPickerBreakId;             // Will call IM_DEBUG_BREAK() when encountering this ID
+    float                   DebugFlashStyleColorTime;
+    ImVec4                  DebugFlashStyleColorBackup;
     ImGuiMetricsConfig      DebugMetricsConfig;
     ImGuiIDStackTool        DebugIDStackTool;
     ImGuiDebugAllocInfo     DebugAllocInfo;
@@ -2391,7 +2404,7 @@ struct ImGuiContext
         HoveredWindowUnderMovingWindow = NULL;
         MovingWindow = NULL;
         WheelingWindow = NULL;
-        WheelingWindowStartFrame = -1;
+        WheelingWindowStartFrame = WheelingWindowScrolledFrame = -1;
         WheelingWindowReleaseTimer = 0.0f;
 
         DebugHookIdInfo = 0;
@@ -2500,6 +2513,7 @@ struct ImGuiContext
         ColorEditCurrentID = ColorEditSavedID = 0;
         ColorEditSavedHue = ColorEditSavedSat = 0.0f;
         ColorEditSavedColor = 0;
+        WindowResizeRelativeMode = false;
         SliderGrabClickOffset = 0.0f;
         SliderCurrentAccum = 0.0f;
         SliderCurrentAccumDirty = false;
@@ -2541,6 +2555,8 @@ struct ImGuiContext
         DebugItemPickerActive = false;
         DebugItemPickerMouseButton = ImGuiMouseButton_Left;
         DebugItemPickerBreakId = 0;
+        DebugFlashStyleColorTime = 0.0f;
+        DebugFlashStyleColorIdx = ImGuiCol_COUNT;
         DebugHoveredDockNode = NULL;
 
         memset(FramerateSecPerFrame, 0, sizeof(FramerateSecPerFrame));
@@ -2612,6 +2628,7 @@ struct IMGUI_API ImGuiWindow
     char*                   Name;                               // Window name, owned by the window.
     ImGuiID                 ID;                                 // == ImHashStr(Name)
     ImGuiWindowFlags        Flags, FlagsPreviousFrame;          // See enum ImGuiWindowFlags_
+    ImGuiChildFlags         ChildFlags;                         // Set when window is a child window. See enum ImGuiChildFlags_
     ImGuiWindowClass        WindowClass;                        // Advanced users only. Set with SetNextWindowClass()
     ImGuiViewportP*         Viewport;                           // Always set in Begin(). Inactive windows may have a NULL value here if their viewport was discarded.
     ImGuiID                 ViewportId;                         // We backup the viewport id (since the viewport may disappear or never be created if the window is inactive)
@@ -2652,6 +2669,7 @@ struct IMGUI_API ImGuiWindow
     bool                    IsFallbackWindow;                   // Set on the "Debug##Default" window.
     bool                    IsExplicitChild;                    // Set when passed _ChildWindow, left to false by BeginDocked()
     bool                    HasCloseButton;                     // Set when the window has a close button (p_open != NULL)
+    signed char             ResizeBorderHovered;                // Current border being hovered for resize (-1: none, otherwise 0-3)
     signed char             ResizeBorderHeld;                   // Current border being held for resize (-1: none, otherwise 0-3)
     short                   BeginCount;                         // Number of Begin() during the current frame (generally 0 or 1, 1+ if appending via multiple Begin/End pairs)
     short                   BeginCountPreviousFrame;            // Number of Begin() during the previous frame
@@ -3026,6 +3044,7 @@ struct IMGUI_API ImGuiTable
     bool                        IsSortSpecsDirty;
     bool                        IsUsingHeaders;             // Set when the first row had the ImGuiTableRowFlags_Headers flag.
     bool                        IsContextPopupOpen;         // Set when default context menu is open (also see: ContextPopupColumn, InstanceInteracted).
+    bool                        DisableDefaultContextMenu;  // Disable default context menu contents. You may submit your own using TableBeginContextMenuPopup()/EndPopup()
     bool                        IsSettingsRequestLoad;
     bool                        IsSettingsDirty;            // Set when table settings have changed and needs to be reported into ImGuiTableSetttings data.
     bool                        IsDefaultDisplayOrder;      // Set when display order is unchanged from default (DisplayOrder contains 0...Count-1)
@@ -3133,7 +3152,7 @@ namespace ImGui
     IMGUI_API void          SetWindowSize(ImGuiWindow* window, const ImVec2& size, ImGuiCond cond = 0);
     IMGUI_API void          SetWindowCollapsed(ImGuiWindow* window, bool collapsed, ImGuiCond cond = 0);
     IMGUI_API void          SetWindowHitTestHole(ImGuiWindow* window, const ImVec2& pos, const ImVec2& size);
-    IMGUI_API void          SetWindowHiddendAndSkipItemsForCurrentFrame(ImGuiWindow* window);
+    IMGUI_API void          SetWindowHiddenAndSkipItemsForCurrentFrame(ImGuiWindow* window);
     inline ImRect           WindowRectAbsToRel(ImGuiWindow* window, const ImRect& r) { ImVec2 off = window->DC.CursorStartPos; return ImRect(r.Min.x - off.x, r.Min.y - off.y, r.Max.x - off.x, r.Max.y - off.y); }
     inline ImRect           WindowRectRelToAbs(ImGuiWindow* window, const ImRect& r) { ImVec2 off = window->DC.CursorStartPos; return ImRect(r.Min.x + off.x, r.Min.y + off.y, r.Max.x + off.x, r.Max.y + off.y); }
     inline ImVec2           WindowPosRelToAbs(ImGuiWindow* window, const ImVec2& p)  { ImVec2 off = window->DC.CursorStartPos; return ImVec2(p.x + off.x, p.y + off.y); }
@@ -3255,7 +3274,7 @@ namespace ImGui
     IMGUI_API void          LogSetNextTextDecoration(const char* prefix, const char* suffix);
 
     // Popups, Modals, Tooltips
-    IMGUI_API bool          BeginChildEx(const char* name, ImGuiID id, const ImVec2& size_arg, bool border, ImGuiWindowFlags window_flags);
+    IMGUI_API bool          BeginChildEx(const char* name, ImGuiID id, const ImVec2& size_arg, ImGuiChildFlags child_flags, ImGuiWindowFlags window_flags);
     IMGUI_API void          OpenPopupEx(ImGuiID id, ImGuiPopupFlags popup_flags = ImGuiPopupFlags_None);
     IMGUI_API void          ClosePopupToLevel(int remaining, bool restore_focus_to_window_under_popup);
     IMGUI_API void          ClosePopupsOverWindow(ImGuiWindow* ref_window, bool restore_focus_to_window_under_popup);
@@ -3368,6 +3387,7 @@ namespace ImGui
     IMGUI_API bool              IsMouseDown(ImGuiMouseButton button, ImGuiID owner_id);
     IMGUI_API bool              IsMouseClicked(ImGuiMouseButton button, ImGuiID owner_id, ImGuiInputFlags flags = 0);
     IMGUI_API bool              IsMouseReleased(ImGuiMouseButton button, ImGuiID owner_id);
+    IMGUI_API bool              IsMouseDoubleClicked(ImGuiMouseButton button, ImGuiID owner_id);
 
     // [EXPERIMENTAL] Shortcut Routing
     // - ImGuiKeyChord = a ImGuiKey optionally OR-red with ImGuiMod_Alt/ImGuiMod_Ctrl/ImGuiMod_Shift/ImGuiMod_Super.
@@ -3460,7 +3480,7 @@ namespace ImGui
     IMGUI_API bool          BeginDragDropTargetCustom(const ImRect& bb, ImGuiID id);
     IMGUI_API void          ClearDragDrop();
     IMGUI_API bool          IsDragDropPayloadBeingAccepted();
-    IMGUI_API void          RenderDragDropTargetRect(const ImRect& bb);
+    IMGUI_API void          RenderDragDropTargetRect(const ImRect& bb, const ImRect& item_clip_rect);
 
     // Typing-Select API
     IMGUI_API ImGuiTypingSelectRequest* GetTypingSelectRequest(ImGuiTypingSelectFlags flags = ImGuiTypingSelectFlags_None);
@@ -3503,7 +3523,7 @@ namespace ImGui
     IMGUI_API void          TableUpdateBorders(ImGuiTable* table);
     IMGUI_API void          TableUpdateColumnsWeightFromWidth(ImGuiTable* table);
     IMGUI_API void          TableDrawBorders(ImGuiTable* table);
-    IMGUI_API void          TableDrawContextMenu(ImGuiTable* table);
+    IMGUI_API void          TableDrawDefaultContextMenu(ImGuiTable* table, ImGuiTableFlags flags_for_section_to_display);
     IMGUI_API bool          TableBeginContextMenuPopup(ImGuiTable* table);
     IMGUI_API void          TableMergeDrawChannels(ImGuiTable* table);
     inline ImGuiTableInstanceData*  TableGetInstanceData(ImGuiTable* table, int instance_no) { if (instance_no == 0) return &table->InstanceDataFirst; return &table->InstanceDataExtra[instance_no - 1]; }

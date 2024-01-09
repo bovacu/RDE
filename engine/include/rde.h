@@ -237,7 +237,10 @@ typedef unsigned int uint;
 		return 0;																	   	\
 	}
 #elif IS_ANDROID()
-#include "SDL2/SDL_main.h"
+#include "SDL3/SDL.h"
+#include "SDL3/SDL_main.h"
+#define SDL_GESTURE_IMPLEMENTATION 1
+#include "SDL3/SDL_gesture.h"
 #include <jni.h>
 #include <android/native_window.h>
 #include <android/input.h>
@@ -445,6 +448,12 @@ typedef unsigned int uint;
 #define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
 #else
 #define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
+#endif
+	
+	#if IS_WINDOWS()
+#define rde_vsprintf(_str, _str_size, _fmt, ...) vsprintf_s(_str, _str_size, _fmt, __VA_ARGS__);
+#else
+#define rde_vsprintf(_str, _str_size, _fmt, ...) vsprintf(_str, _fmt, __VA_ARGS__);
 #endif
 
 #define RDE_PROFILE_TIME(_name, _code_block)				   										\
