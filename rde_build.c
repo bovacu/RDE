@@ -1664,7 +1664,6 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 	LINK_PATH(_external_lib_path, "external/libs/windows/");
 	LINK_PATH(_external_manual_lib_path, "external/libs/windows/manual-link/");
 
-	// ADD_FLAG("-lSDL2main");
 	ADD_FLAG("-lSDL3");
 	ADD_FLAG("-lcglm");
 
@@ -1888,8 +1887,7 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 		arrput(_build_command, "-ldl");
 		arrput(_build_command, "-lm");
 		arrput(_build_command, "-lpthread");
-		arrput(_build_command, "-lSDL2main");
-		arrput(_build_command, "-lSDL2");
+		arrput(_build_command, "-lSDL3");
 		arrput(_build_command, "-framework");
 		arrput(_build_command, "OpenGL");
 		arrput(_build_command, "-lcglm");
@@ -2035,7 +2033,7 @@ bool compile_osx_rde() {
 			if (strcmp(build_type, DEBUG_STR) == 0) {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/debug/engine/libRDE.dylib", "build/osx/debug/examples/libRDE.dylib")
-					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/debug/examples/libSDL2.dylib")
+					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/debug/examples/libSDL3.dylib")
 				}
 
 				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/hub_assets/")
@@ -2043,7 +2041,7 @@ bool compile_osx_rde() {
 			} else {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
-					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/release/examples/libSDL2.dylib")
+					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/release/examples/libSDL3.dylib")
 				}
 
 				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/hub_assets/")
@@ -2072,7 +2070,7 @@ bool compile_osx_rde() {
 			if (strcmp(build_type, DEBUG_STR) == 0) {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/debug/engine/libRDE.dylib", "build/osx/debug/examples/libRDE.dylib")
-					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/debug/examples/libSDL2.dylib")
+					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/debug/examples/libSDL3.dylib")
 				}
 
 				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/hub_assets/")
@@ -2080,7 +2078,7 @@ bool compile_osx_rde() {
 			} else {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
-					COPY_FILE("external/libs/osx/libSDL2.dylib", "build/osx/release/examples/libSDL2.dylib")
+					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/release/examples/libSDL3.dylib")
 				}
 
 				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/hub_assets/")
@@ -2160,8 +2158,7 @@ void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 		ADD_FLAG("-ldl");
 		ADD_FLAG("-lm");
 		ADD_FLAG("-lpthread");
-		ADD_FLAG("-lSDL2main");
-		ADD_FLAG("-lSDL2");
+		ADD_FLAG("-lSDL3");
 		ADD_FLAG("-lcglm");
 
 		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
@@ -2298,7 +2295,7 @@ bool compile_linux_rde() {
 			if (strcmp(build_type, DEBUG_STR) == 0) {
 				if(strcmp(build_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/debug/engine/libRDE.so", "build/linux/debug/examples/libRDE.so")
-					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/debug/examples/libSDL2.so")
+					COPY_FILE("external/libs/linux/libSDL3.so", "build/linux/debug/examples/libSDL3.so")
 				}
 
 				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/hub_assets/")
@@ -2306,7 +2303,7 @@ bool compile_linux_rde() {
 			} else {
 				if(strcmp(build_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/release/engine/libRDE.so", "build/linux/release/examples/libRDE.so")
-					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/release/examples/libSDL2.so")
+					COPY_FILE("external/libs/linux/libSDL3.so", "build/linux/release/examples/libSDL3.so")
 				}
 
 				COPY_FOLDER("examples/hub_assets", "build/linux/release/examples/hub_assets/")
@@ -2328,7 +2325,7 @@ bool compile_linux_rde() {
 			if (strcmp(build_type, DEBUG_STR) == 0) {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/debug/engine/libRDE.so", "build/linux/debug/examples/libRDE.so")
-					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/debug/examples/libSDL2.so")
+					COPY_FILE("external/libs/linux/libSDL3.so", "build/linux/debug/examples/libSDL3.so")
 				}
 
 				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/hub_assets/")
@@ -2336,7 +2333,7 @@ bool compile_linux_rde() {
 			} else {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/release/engine/libRDE.so", "build/linux/release/examples/libRDE.so")
-					COPY_FILE("external/libs/linux/libSDL2.so", "build/linux/release/examples/libSDL2.so")
+					COPY_FILE("external/libs/linux/libSDL3.so", "build/linux/release/examples/libSDL3.so")
 				}
 
 				COPY_FOLDER("examples/hub_assets", "build/linux/release/examples/hub_assets/")
@@ -2506,33 +2503,33 @@ bool build_desktop_project() {
 #if _WIN32
 	if (strcmp(build_type, DEBUG_STR) == 0) {
 		COPY_FILE_CWD("build/windows/debug/engine/RDE.dll", "build/desktop/debug/RDE.dll")
-		COPY_FILE_CWD("external/libs/windows/SDL2.dll", "build/desktop/debug/SDL2.dll")
+		COPY_FILE_CWD("external/libs/windows/SDL3.dll", "build/desktop/debug/SDL3.dll")
 	} else {
 		COPY_FILE_CWD("build/windows/release/engine/RDE.dll", "build/desktop/release/RDE.dll")
-		COPY_FILE_CWD("external/libs/windows/SDL2.dll", "build/desktop/release/SDL2.dll")
+		COPY_FILE_CWD("external/libs/windows/SDL3.dll", "build/desktop/release/SDL3.dll")
 	}
 #elif __APPLE__
 	if(strcmp(build_type, DEBUG_STR) == 0) {
 		if(strcmp(build_type, SHARED_STR) == 0) {
 			COPY_FILE_CWD("build/osx/debug/engine/libRDE.dylib", "build/desktop/debug/libRDE.dylib")
-			COPY_FILE_CWD("external/libs/osx/libSDL2.dylib", "build/desktop/debug/libSDL2.dylib")
+			COPY_FILE_CWD("external/libs/osx/libSDL3.dylib", "build/desktop/debug/libSDL3.dylib")
 		}
 	} else {
 		if(strcmp(build_type, SHARED_STR) == 0) {
 			COPY_FILE_CWD("build/osx/release/engine/libRDE.dylib", "build/desktop/release/libRDE.dylib")
-			COPY_FILE_CWD("external/libs/osx/libSDL2.dylib", "build/desktop/release/libSDL2.dylib")
+			COPY_FILE_CWD("external/libs/osx/libSDL3.dylib", "build/desktop/release/libSDL3.dylib")
 		}
 	}
 #else
 	if(strcmp(build_type, DEBUG_STR) == 0) {
 		if(strcmp(build_type, SHARED_STR) == 0) {
 			COPY_FILE_CWD("build/linux/debug/engine/libRDE.so", "build/desktop/debug/libRDE.so")
-			COPY_FILE_CWD("external/libs/linux/libSDL2.so", "build/desktop/debug/libSDL2.so")
+			COPY_FILE_CWD("external/libs/linux/libSDL3.so", "build/desktop/debug/libSDL3.so")
 		}
 	} else {
 		if(strcmp(build_type, SHARED_STR) == 0) {
 			COPY_FILE_CWD("build/linux/release/engine/libRDE.so", "build/desktop/release/libRDE.so")
-			COPY_FILE_CWD("external/libs/linux/libSDL2.so", "build/desktop/release/libSDL2.so")
+			COPY_FILE_CWD("external/libs/linux/libSDL3.so", "build/desktop/release/libSDL3.so")
 		}
 	}
 #endif
