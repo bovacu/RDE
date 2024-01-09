@@ -2768,39 +2768,53 @@ bool build_android_project() {
 
 	remove_file_if_exists(dyn_str_get(_cmake_lists));
 
-	dyn_str* _apk_path = dyn_str_new(android_rde_android);
-	if(strcmp(build_type, DEBUG_STR) == 0) {
-		dyn_str_append(_apk_path, "app/build/outputs/apk/debug/app-debug.apk");
-		COPY_FILE_ORIG_DEST(dyn_str_get(_apk_path), "", working_dir, "build/android/debug/app-debug.apk");
+	#define ABIS_SIZE 5
+	char* _abis[ABIS_SIZE] = { "x86", "x86_64", "armeabi-v7a", "arm64-v8a", "universal" };
 
-		if(strlen(project_name) > 0) {
-			dyn_str* _apk_default_path = dyn_str_new(working_dir);
-			dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
-			dyn_str_append(_apk_default_path, "build/android/debug/app-debug.apk");
-			dyn_str_append(_apk_custom_name_path, "build/android/debug/");
-			dyn_str_append(_apk_custom_name_path, project_name);
-			dyn_str_append(_apk_custom_name_path, ".apk");
-			rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
-		}
+	for(size_t _i = 0; _i < ABIS_SIZE; _i++) {
+		dyn_str* _apk_path = dyn_str_new(android_rde_android);
+		if(strcmp(build_type, DEBUG_STR) == 0) {
+			dyn_str_append(_apk_path, "app/build/outputs/apk/debug/app-");
+			dyn_str_append(_apk_path, _abis[_i]);
+			dyn_str_append(_apk_path, "-debug.apk");
 
-	} else {
-		dyn_str_append(_apk_path, "app/build/outputs/apk/release/app-release.apk");
-		if(strlen(android_sign) == 0) {
-			dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
-			dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-release-unsigned.apk");
-			rename_file_if_exists(dyn_str_get(_apk_unsigned_path), dyn_str_get(_apk_path));
-		}
-		COPY_FILE_ORIG_DEST(dyn_str_get(_apk_path), "", working_dir, "build/android/release/app-release.apk");
+			// if(strlen(project_name) > 0) {
+			// 	dyn_str* _apk_default_path = dyn_str_new(working_dir);
+			// 	dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
+			// 	dyn_str_append(_apk_default_path, "build/android/debug/app-");
+			// 	dyn_str_append(_apk_default_path, _abis[_i]);
+			// 	dyn_str_append(_apk_default_path, "-debug.apk");
+			// 	dyn_str_append(_apk_custom_name_path, "build/android/debug/");
+			// 	dyn_str_append(_apk_custom_name_path, project_name);
+			// 	dyn_str_append(_apk_custom_name_path, ".apk");
+			// 	rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
+			// }
 
-		if(strlen(project_name) > 0) {
-			dyn_str* _apk_default_path = dyn_str_new(working_dir);
-			dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
-			dyn_str_append(_apk_default_path, "build/android/release/app-release.apk");
-			dyn_str_append(_apk_custom_name_path, "build/android/release/");
-			dyn_str_append(_apk_custom_name_path, project_name);
-			dyn_str_append(_apk_custom_name_path, ".apk");
-			rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
+		} else {
+			dyn_str_append(_apk_path, "app/build/outputs/apk/release/app-");
+			dyn_str_append(_apk_path, _abis[_i]);
+			dyn_str_append(_apk_path, "-release.apk");
+			if(strlen(android_sign) == 0) {
+				dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
+				dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-");
+				dyn_str_append(_apk_unsigned_path, _abis[_i]);
+				dyn_str_append(_apk_unsigned_path, "-release-unsigned.apk");
+				rename_file_if_exists(dyn_str_get(_apk_unsigned_path), dyn_str_get(_apk_path));
+			}
+
+			// if(strlen(project_name) > 0) {
+			// 	dyn_str* _apk_default_path = dyn_str_new(working_dir);
+			// 	dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
+			// 	dyn_str_append(_apk_default_path, "build/android/release/app-");
+			// 	dyn_str_append(_apk_default_path, _abis[_i]);
+			// 	dyn_str_append(_apk_default_path, "-release.apk");
+			// 	dyn_str_append(_apk_custom_name_path, "build/android/release/");
+			// 	dyn_str_append(_apk_custom_name_path, project_name);
+			// 	dyn_str_append(_apk_custom_name_path, ".apk");
+			// 	rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
+			// }
 		}
+		dyn_str_free(_apk_path);
 	}
 
 	return true;
