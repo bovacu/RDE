@@ -2658,99 +2658,6 @@ bool build_android_project() {
 	COPY_FOLDER_DEST("engine/shaders/", android_rde_android, "app/src/main/assets/");
 #endif
 
-	if(strlen(android_sign) > 0) {
-		if(strcmp(build_type, DEBUG_STR) == 0) {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Cannot sign debug APK");
-			exit(-1);
-		}
-
-		FILE* _sign_file = NULL;
-		_sign_file = fopen(android_sign, "r");
-
-		if(_sign_file == NULL) {
-			rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not open sign file '%s'", android_sign);
-			exit(-1);
-		}
-
-		char* _ptr = fgets(android_jks_path, MAX_PATH, _sign_file);
-		android_jks_path[strcspn(android_jks_path, "\n")] = 0;
-
-		_ptr = fgets(android_pass_path, MAX_PATH, _sign_file);
-		android_pass_path[strcspn(android_pass_path, "\n")] = 0;
-
-		if(_ptr != NULL) {
-			fgets(android_alias, MAX_PATH, _sign_file);
-			android_alias[strcspn(android_alias, "\n")] = 0;
-		}
-
-		fclose(_sign_file);
-
-		arrput(_build_command, "&&");
-
-		dyn_str* _zipalign = dyn_str_new(android_sdk_build_tools);
-		
-#if _WIN32
-		dyn_str_append(_zipalign, "zipalign.exe");
-#else
-		dyn_str_append(_zipalign, "zipalign");
-#endif
-
-		dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
-		dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-release-unsigned.apk");
-		dyn_str* _apk_unsigned_aligned_path = dyn_str_new(android_rde_android);
-		dyn_str_append(_apk_unsigned_aligned_path, "app/build/outputs/apk/release/app-release-unsigned-aligned.apk");
-		remove_file_if_exists(dyn_str_get(_apk_unsigned_aligned_path));
-
-		// Align data of apk with zipalign
-		arrput(_build_command, dyn_str_get(_zipalign));
-		arrput(_build_command, "-v");
-		arrput(_build_command, "-p");
-		arrput(_build_command, "4");
-		arrput(_build_command, dyn_str_get(_apk_unsigned_path));
-		arrput(_build_command, dyn_str_get(_apk_unsigned_aligned_path));
-
-		arrput(_build_command, "&&");
-
-		// sign app with apk signer
-		dyn_str* _apksigner = dyn_str_new(android_sdk_build_tools);
-
-#if _WIN32
-		dyn_str_append(_apksigner, "apksigner.bat");
-#else
-		dyn_str_append(_apksigner, "apksigner");
-#endif
-
-		arrput(_build_command, dyn_str_get(_apksigner));
-		arrput(_build_command, "sign");
-		arrput(_build_command, "--v4-signing-enabled");
-		arrput(_build_command, "true");
-		arrput(_build_command, "-v");
-		arrput(_build_command, "--ks");
-		arrput(_build_command, android_jks_path);
-		arrput(_build_command, "--ks-pass");
-		dyn_str* _pass_file = dyn_str_new("file:");
-		dyn_str_append(_pass_file, android_pass_path);
-		arrput(_build_command, dyn_str_get(_pass_file));
-
-		if(strlen(android_alias) > 0) {
-			arrput(_build_command, "--ks-key-alias");
-			arrput(_build_command, android_alias);
-		}
-
-		arrput(_build_command, "--out");
-		dyn_str* _apk_path = dyn_str_new(android_rde_android);
-		dyn_str_append(_apk_path, "app/build/outputs/apk/release/app-release.apk");
-		arrput(_build_command, dyn_str_get(_apk_path));
-		arrput(_build_command, dyn_str_get(_apk_unsigned_aligned_path));
-
-		arrput(_build_command, "&&");
-
-		// Verify app with apksigner
-		arrput(_build_command, dyn_str_get(_apksigner));
-		arrput(_build_command, "verify");
-		arrput(_build_command, dyn_str_get(_apk_path));
-	}
-
 	if(strlen(android_assets_path) > 0) {
 		char* _last_folder = strrchr(android_assets_path, '/');
 		_last_folder++;
@@ -2766,56 +2673,187 @@ bool build_android_project() {
 		exit(-1);
 	}
 
-	remove_file_if_exists(dyn_str_get(_cmake_lists));
+	// arrfree(_build_command);
 
 	#define ABIS_SIZE 5
 	char* _abis[ABIS_SIZE] = { "x86", "x86_64", "armeabi-v7a", "arm64-v8a", "universal" };
 
+	FILE* _sign_file = NULL;
+	_sign_file = fopen(android_sign, "r");
+
 	for(size_t _i = 0; _i < ABIS_SIZE; _i++) {
-		dyn_str* _apk_path = dyn_str_new(android_rde_android);
-		if(strcmp(build_type, DEBUG_STR) == 0) {
-			dyn_str_append(_apk_path, "app/build/outputs/apk/debug/app-");
-			dyn_str_append(_apk_path, _abis[_i]);
-			dyn_str_append(_apk_path, "-debug.apk");
+		_build_command = NULL;
 
-			// if(strlen(project_name) > 0) {
-			// 	dyn_str* _apk_default_path = dyn_str_new(working_dir);
-			// 	dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
-			// 	dyn_str_append(_apk_default_path, "build/android/debug/app-");
-			// 	dyn_str_append(_apk_default_path, _abis[_i]);
-			// 	dyn_str_append(_apk_default_path, "-debug.apk");
-			// 	dyn_str_append(_apk_custom_name_path, "build/android/debug/");
-			// 	dyn_str_append(_apk_custom_name_path, project_name);
-			// 	dyn_str_append(_apk_custom_name_path, ".apk");
-			// 	rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
-			// }
+		if(strlen(android_sign) > 0) {
+			if(strcmp(build_type, DEBUG_STR) == 0) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Cannot sign debug APK");
+				exit(-1);
+			}
 
-		} else {
+			if(_sign_file == NULL) {
+				rde_log_level(RDE_LOG_LEVEL_ERROR, "Could not open sign file '%s'", android_sign);
+				exit(-1);
+			}
+
+			char* _ptr = fgets(android_jks_path, MAX_PATH, _sign_file);
+			android_jks_path[strcspn(android_jks_path, "\n")] = 0;
+
+			_ptr = fgets(android_pass_path, MAX_PATH, _sign_file);
+			android_pass_path[strcspn(android_pass_path, "\n")] = 0;
+
+			if(_ptr != NULL) {
+				fgets(android_alias, MAX_PATH, _sign_file);
+				android_alias[strcspn(android_alias, "\n")] = 0;
+			}
+
+			dyn_str* _zipalign = dyn_str_new(android_sdk_build_tools);
+
+	#if _WIN32
+			dyn_str_append(_zipalign, "zipalign.exe");
+	#else
+			dyn_str_append(_zipalign, "zipalign");
+	#endif
+
+			dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
+			dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-");
+			dyn_str_append(_apk_unsigned_path, _abis[_i]);
+			dyn_str_append(_apk_unsigned_path, "-release-unsigned.apk");
+			dyn_str* _apk_unsigned_aligned_path = dyn_str_new(android_rde_android);
+			dyn_str_append(_apk_unsigned_aligned_path, "app/build/outputs/apk/release/app-");
+			dyn_str_append(_apk_unsigned_aligned_path, _abis[_i]);
+			dyn_str_append(_apk_unsigned_aligned_path, "-release-unsigned-aligned.apk");
+
+			// Align data of apk with zipalign
+			arrput(_build_command, dyn_str_get(_zipalign));
+			arrput(_build_command, "-v");
+			arrput(_build_command, "-p");
+			arrput(_build_command, "4");
+			arrput(_build_command, dyn_str_get(_apk_unsigned_path));
+			arrput(_build_command, dyn_str_get(_apk_unsigned_aligned_path));
+
+			if(!run_command(_build_command)) {
+				exit(-1);
+			}
+
+			_build_command = NULL;
+
+			// sign app with apk signer
+			dyn_str* _apksigner = dyn_str_new(android_sdk_build_tools);
+
+	#if _WIN32
+			dyn_str_append(_apksigner, "apksigner.bat");
+	#else
+			dyn_str_append(_apksigner, "apksigner");
+	#endif
+
+			arrput(_build_command, dyn_str_get(_apksigner));
+			arrput(_build_command, "sign");
+			arrput(_build_command, "--v4-signing-enabled");
+			arrput(_build_command, "true");
+			arrput(_build_command, "-v");
+			arrput(_build_command, "--ks");
+			arrput(_build_command, android_jks_path);
+			arrput(_build_command, "--ks-pass");
+			dyn_str* _pass_file = dyn_str_new("file:");
+			dyn_str_append(_pass_file, android_pass_path);
+			arrput(_build_command, dyn_str_get(_pass_file));
+
+			if(strlen(android_alias) > 0) {
+				arrput(_build_command, "--ks-key-alias");
+				arrput(_build_command, android_alias);
+			}
+
+			arrput(_build_command, "--out");
+			dyn_str* _apk_path = dyn_str_new(android_rde_android);
 			dyn_str_append(_apk_path, "app/build/outputs/apk/release/app-");
 			dyn_str_append(_apk_path, _abis[_i]);
 			dyn_str_append(_apk_path, "-release.apk");
-			if(strlen(android_sign) == 0) {
-				dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
-				dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-");
-				dyn_str_append(_apk_unsigned_path, _abis[_i]);
-				dyn_str_append(_apk_unsigned_path, "-release-unsigned.apk");
-				rename_file_if_exists(dyn_str_get(_apk_unsigned_path), dyn_str_get(_apk_path));
+			arrput(_build_command, dyn_str_get(_apk_path));
+			arrput(_build_command, dyn_str_get(_apk_unsigned_aligned_path));
+
+			if(!run_command(_build_command)) {
+				exit(-1);
 			}
 
-			// if(strlen(project_name) > 0) {
-			// 	dyn_str* _apk_default_path = dyn_str_new(working_dir);
-			// 	dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
-			// 	dyn_str_append(_apk_default_path, "build/android/release/app-");
-			// 	dyn_str_append(_apk_default_path, _abis[_i]);
-			// 	dyn_str_append(_apk_default_path, "-release.apk");
-			// 	dyn_str_append(_apk_custom_name_path, "build/android/release/");
-			// 	dyn_str_append(_apk_custom_name_path, project_name);
-			// 	dyn_str_append(_apk_custom_name_path, ".apk");
-			// 	rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
-			// }
+			_build_command = NULL;
+
+			// Verify app with apksigner
+			arrput(_build_command, dyn_str_get(_apksigner));
+			arrput(_build_command, "verify");
+			arrput(_build_command, dyn_str_get(_apk_path));
+
+			if(!run_command(_build_command)) {
+				exit(-1);
+			}
 		}
-		dyn_str_free(_apk_path);
+
+		// if(!run_command(_build_command)) {
+		// 	exit(-1);
+		// }
+
+		// dyn_str* _apk_path = dyn_str_new(android_rde_android);
+		// if(strcmp(build_type, DEBUG_STR) == 0) {
+		// 	dyn_str_append(_apk_path, "app/build/outputs/apk/debug/app-");
+		// 	dyn_str_append(_apk_path, _abis[_i]);
+		// 	dyn_str_append(_apk_path, "-debug.apk");
+  //
+		// 	// if(strlen(project_name) > 0) {
+		// 	// 	dyn_str* _apk_default_path = dyn_str_new(working_dir);
+		// 	// 	dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
+		// 	// 	dyn_str_append(_apk_default_path, "build/android/debug/app-");
+		// 	// 	dyn_str_append(_apk_default_path, _abis[_i]);
+		// 	// 	dyn_str_append(_apk_default_path, "-debug.apk");
+		// 	// 	dyn_str_append(_apk_custom_name_path, "build/android/debug/");
+		// 	// 	dyn_str_append(_apk_custom_name_path, project_name);
+		// 	// 	dyn_str_append(_apk_custom_name_path, ".apk");
+		// 	// 	rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
+		// 	// }
+  //
+		// } else {
+		// 	dyn_str_append(_apk_path, "app/build/outputs/apk/release/app-");
+		// 	dyn_str_append(_apk_path, _abis[_i]);
+		// 	dyn_str_append(_apk_path, "-release.apk");
+		// 	if(strlen(android_sign) == 0) {
+		// 		dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
+		// 		dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-");
+		// 		dyn_str_append(_apk_unsigned_path, _abis[_i]);
+		// 		dyn_str_append(_apk_unsigned_path, "-release-unsigned.apk");
+		// 		rename_file_if_exists(dyn_str_get(_apk_unsigned_path), dyn_str_get(_apk_path));
+		// 	}
+  //
+		// 	// if(strlen(project_name) > 0) {
+		// 	// 	dyn_str* _apk_default_path = dyn_str_new(working_dir);
+		// 	// 	dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
+		// 	// 	dyn_str_append(_apk_default_path, "build/android/release/app-");
+		// 	// 	dyn_str_append(_apk_default_path, _abis[_i]);
+		// 	// 	dyn_str_append(_apk_default_path, "-release.apk");
+		// 	// 	dyn_str_append(_apk_custom_name_path, "build/android/release/");
+		// 	// 	dyn_str_append(_apk_custom_name_path, project_name);
+		// 	// 	dyn_str_append(_apk_custom_name_path, ".apk");
+		// 	// 	rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
+		// 	// }
+		// }
+		// dyn_str_free(_apk_path);
 	}
+
+	for(size_t _i = 0; _i < ABIS_SIZE; _i++) {
+		dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
+		dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-");
+		dyn_str_append(_apk_unsigned_path, _abis[_i]);
+		dyn_str_append(_apk_unsigned_path, "-release-unsigned.apk");
+		remove_file_if_exists(dyn_str_get(_apk_unsigned_path));
+		dyn_str_free(_apk_unsigned_path);
+
+		dyn_str* _apk_unsigned_aligned_path = dyn_str_new(android_rde_android);
+		dyn_str_append(_apk_unsigned_aligned_path, "app/build/outputs/apk/release/app-");
+		dyn_str_append(_apk_unsigned_aligned_path, _abis[_i]);
+		dyn_str_append(_apk_unsigned_aligned_path, "-release-unsigned-aligned.apk");
+		remove_file_if_exists(dyn_str_get(_apk_unsigned_aligned_path));
+		dyn_str_free(_apk_unsigned_aligned_path);
+	}
+
+	remove_file_if_exists(dyn_str_get(_cmake_lists));
+	fclose(_sign_file);
 
 	return true;
 }
