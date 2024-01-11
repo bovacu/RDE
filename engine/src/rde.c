@@ -1428,7 +1428,6 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 rde_engine ENGINE;
 
 /// File System
-#define RDE_MAX_CONCURRENT_FILES_OPENED 64
  rde_file_handle concurrent_file_handlers[RDE_MAX_CONCURRENT_FILES_OPENED];
 
 /// Rendering
