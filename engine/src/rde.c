@@ -129,6 +129,7 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- [DONE] Spritebatch
 //			- [DONE] Text
 //			- [DONE] CPU Textures
+//			- [] Particles
 //
 //		- Basic 3D:
 //			- [DONE] Camera system
@@ -190,25 +191,46 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- Sound/Music volume.
 //			- 3D sound.
 //
+//		- Networking:
+//			- Basic HTTP/HTTPs requests
+//
+//		- [] Coroutines
+//			- Implement usage with minicoro
+//
+//		- [] Mobile:
+//			- Make all features of the engine work on mobile
+//			- Ads integration
+//			- Safe area
+//			- MAYBE and ONLY MAYBE make a metal renderer for iOS/MacOS (PROBABLY NOT).
+//
+//		- [] WASM:
+//			- Make all features of the engine work on the browser
+//
+//		- [] Docs:
+//			- Document everything
+//			- Create automatic documentation generator
+//				- [DONE] Windows
+//				- [] Linux
+//				- [] Mac
+//
 //		- [] Extras:
 //			- [] Add many geometrical 3D shapes as part of the engine (currently prisms, pyramids and spheres).
-//
-//		- Other:
 //			- [DONE] Render Textures
-//			- [] Particles
 //			- [DONE] On every 'load' function, if a resource is going to be reloaded, return the already loaded one.
-//			- [] Coroutines
+//			- [] Simplex Noise generation
+//			- [] Wave funcion collapse algorithm
 //
-//		- TOOL: [DONE] command line atlas packing tool for textures.
+//		- [] TOOL: command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
 //				- https://www.david-colson.com/2020/03/10/exploring-rect-packing.html
 //				- [] sanitaze windows paths like in rde_build
 //
-//		- TOOL: [DONE] Command line font atlas creator.
+//		- [] TOOL: Command line font atlas creator.
 //				- [DONE] Improve algorithm to use most part of space
 //				- [] sanitaze windows paths like in rde_build
 //
-//		- TOOL: command line project creation, compilation and export.
+//		- [] TOOL: command line project creation, compilation and export.
+//				- [] sanitaze windows paths like in rde_build
 //
 //		- Bugs:
 //			- [] Multiple window rendering is not working properly
