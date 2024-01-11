@@ -1086,20 +1086,22 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
 
 
 
-#define MAX_BUILD_OPTIONS 6
+#define MAX_BUILD_OPTIONS 7
 #define BUILD_OPTION_ENGINE 0
 #define BUILD_OPTION_TOOLS 1
 #define BUILD_OPTION_EXAMPLES 2
 #define BUILD_OPTION_TESTS 3
 #define BUILD_OPTION_ALL 4
 #define BUILD_OPTION_PROJECT 5
+#define BUILD_OPTION_DOCS 6
 const char* BUILD_OPTIONS_STR[MAX_BUILD_OPTIONS] = {
 	"engine",
 	"tools",
 	"examples",
 	"tests",
 	"all",
-	"project"
+	"project",
+	"docs"
 };
 
 #define MAX_BUILD_PLATFORM_OPTIONS 4
@@ -1190,6 +1192,7 @@ bool build_desktop_project();
 bool build_android_project();
 bool build_ios_project();
 bool build_wasm_project();
+bool build_docs();
 
 void print_help();
 void parse_arguments(int _argc, char** _argv);
@@ -2870,6 +2873,77 @@ bool build_wasm_project() {
 	return false;
 }
 
+bool build_docs() {
+	
+#if !_WIN32
+	rde_log_level(RDE_LOG_LEVEL_ERROR, "Documentation not implemented neither for Linux nor Mac yet");
+	exit(-1);
+#endif
+	
+	rde_command _command = NULL;
+	
+	dyn_str* _path = dyn_str_new(builder_exe_full_path_dir);
+	dyn_str_append(_path, "docs/");
+	
+	if(!make_dir_if_not_exists(dyn_str_get(_path))) {
+		exit(-1);
+	}
+	
+	dyn_str* _path_natural_docs = dyn_str_new(dyn_str_get(_path));
+	dyn_str_append(_path_natural_docs, "NaturalDocs/");
+	if(!dir_exists(dyn_str_get(_path_natural_docs))) {
+		dyn_str* _download = dyn_str_new("wget https://www.naturaldocs.org/download/natural_docs/2.3/Natural_Docs_2.3.zip -P ");
+		dyn_str_append(_download, dyn_str_get(_path));
+
+		arrput(_command, dyn_str_get(_download));
+		
+		if(!run_command(_command)) {
+			exit(-1);
+		}
+		
+		_command = NULL;
+		dyn_str* _unzip = dyn_str_new("tar -xf ");
+		dyn_str_append(_unzip, dyn_str_get(_path));
+		dyn_str_append(_unzip, "Natural_Docs_2.3.zip -C ");
+		dyn_str_append(_unzip, dyn_str_get(_path));
+		arrput(_command, dyn_str_get(_unzip));
+		
+		if(!run_command(_command)) {
+			exit(-1);
+		}
+		
+		dyn_str* _bad_name = dyn_str_new(dyn_str_get(_path));
+		dyn_str_append(_bad_name, "Natural Docs");
+		dyn_str* _good_name = dyn_str_new(dyn_str_get(_path));
+		dyn_str_append(_good_name, "NaturalDocs");
+		
+		if(!rename_file_if_exists(dyn_str_get(_bad_name), dyn_str_get(_good_name))) {
+			exit(-1);
+		} 
+		
+		_command = NULL;
+	}
+	
+	dyn_str* _generate_docs = dyn_str_new(dyn_str_get(_path));
+	dyn_str_append(_generate_docs, "NaturalDocs/NaturalDocs.exe -r -i ");
+	dyn_str_append(_generate_docs, builder_exe_full_path_dir);
+	dyn_str_append(_generate_docs, "engine/ -p ");
+	dyn_str_append(_generate_docs, dyn_str_get(_path));
+	dyn_str_append(_generate_docs, "config -o HTML ");
+	dyn_str_append(_generate_docs, dyn_str_get(_path));
+	arrput(_command, dyn_str_get(_generate_docs));
+	
+	if(!run_command(_command)) {
+		exit(-1);
+	}
+	
+	dyn_str* _remove_zip = dyn_str_new(dyn_str_get(_path));
+	dyn_str_append(_remove_zip, "Natural_Docs_2.3.zip");
+	remove_file_if_exists(dyn_str_get(_remove_zip));
+	
+	return true;
+}
+
 void print_help() {
 	const char* _help_message = 
 	"\n******************************************\n"
@@ -3320,6 +3394,8 @@ void execute_build_option() {
 		} else if(strcmp(platform, BUILD_PLATFORM_OPTIONS_STR[BUILD_PLATFORM_OPTION_WASM]) == 0) {
 			build_wasm_project();
 		}
+	} else if(strcmp(build, BUILD_OPTIONS_STR[BUILD_OPTION_DOCS]) == 0) {
+		build_docs();
 	}
 
 	printf("\n");
