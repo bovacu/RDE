@@ -66,7 +66,7 @@ void performance_test_keyboard_controller(float _dt) {
 }
 
 void performance_test_mouse_controller(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 
 	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
 		performance_test_3d_first_mouse = true;
@@ -131,15 +131,15 @@ void performance_test_3d_on_update(float _dt) {
 }
 
 void performance_test_3d_on_fixed_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 }
 
 void performance_test_3d_on_late_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 }
 
 void performance_test_3d_draw_3d(rde_window* _window, float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 	if(performance_test_3d_model != NULL) {
 		rde_rendering_3d_begin_drawing(&performance_test_3d_camera, _window, false);
 		
@@ -163,7 +163,7 @@ void performance_test_3d_draw_imgui(float _dt, rde_window* _window) {
 }
 
 void performance_test_3d_on_render(float _dt, rde_window* _window) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 	performance_test_3d_draw_3d(_window, _dt);
 }
 

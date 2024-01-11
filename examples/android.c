@@ -85,7 +85,7 @@ void android_keyboard_controller(float _dt) {
 }
 
 void android_mouse_controller(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED((_dt)
 
 	if(rde_events_is_mobile_touch_just_pressed(current_window, 0)) { 
 		android_first_mouse = true;
@@ -136,8 +136,8 @@ void android_mouse_controller(float _dt) {
 }
 
 void android_on_event(rde_event* _event, rde_window* _window) {
-	UNUSED(_window);
-	UNUSED(_event);
+	RDE_UNUSED((_window);
+	RDE_UNUSED((_event);
 
 	if(_event->type == RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED || _event->type == RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN) {
 		android_mouse_pos = _event->data.mobile_event_data.moved_touch_position;
@@ -169,15 +169,15 @@ void android_on_update(float _dt) {
 }
 
 void android_on_fixed_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED((_dt)
 }
 
 void android_on_late_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED((_dt)
 }
 
 void android_draw_3d(rde_window* _window, float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED((_dt)
 
 	if(android_model != NULL) {
 		rde_render_3d(_window, &android_camera, false, {
@@ -339,7 +339,7 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 }
 
 void android_on_render(float _dt, rde_window* _window) {
-	UNUSED(_dt)
+	RDE_UNUSED((_dt)
 	
 	draw_grid(&android_camera, _window);
 	android_draw_3d(_window, _dt);

@@ -87,7 +87,7 @@ void model_viewer_keyboard_controller(float _dt) {
 }
 
 void model_viewer_mouse_controller(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 
 	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
 		model_viewer_first_mouse = true;
@@ -140,7 +140,7 @@ void model_viewer_mouse_controller(float _dt) {
 }
 
 void model_viewer_on_event(rde_event* _event, rde_window* _window) {
-	UNUSED(_window);
+	RDE_UNUSED(_window);
 
 	if(_event->type == RDE_EVENT_TYPE_DRAG_AND_DROP_FILE) {
 		if(strcmp(rde_util_file_get_name_extension(_event->data.drag_and_drop_data.file_path), "obj") != 0) {
@@ -182,15 +182,15 @@ void model_viewer_on_update(float _dt) {
 }
 
 void model_viewer_on_fixed_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 }
 
 void model_viewer_on_late_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 }
 
 void model_viewer_draw_3d(rde_window* _window, float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 
 	if(model_viewer_model != NULL) {
 		rde_render_3d(_window, &model_viewer_camera, false, {
@@ -475,7 +475,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
  }
 
 void model_viewer_on_render(float _dt, rde_window* _window) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 	
 	draw_grid(&model_viewer_camera, _window);
 	model_viewer_draw_3d(_window, _dt);

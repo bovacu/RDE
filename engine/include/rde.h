@@ -143,26 +143,17 @@ extern "C" {
 	#endif
 #endif
 
-#define IS_MAC() (defined(__APPLE__) && defined(MAC_PLATFORM))
-#define IS_WINDOWS() _WIN32
-#define IS_WASM() __EMSCRIPTEN__
-#define IS_LINUX() (defined(__linux__))
-#define IS_DESKTOP() (IS_LINUX() || IS_MAC() || IS_WINDOWS())
-#define IS_IOS() (defined(__APPLE__) && defined(IOS_PLATFORM))
-#define IS_APPLE() (IS_MAC() || IS_IOS())
-#define IS_ANDROID() (defined(__ANDROID__))
-#define IS_MOBILE() (IS_ANDROID() || IS_IOS())
+#define RDE_IS_MAC() (defined(__APPLE__) && defined(MAC_PLATFORM))
+#define RDE_IS_WINDOWS() _WIN32
+#define RDE_IS_WASM() __EMSCRIPTEN__
+#define RDE_IS_LINUX() (defined(__linux__))
+#define RDE_IS_DESKTOP() (RDE_IS_LINUX() || RDE_IS_MAC() || RDE_IS_WINDOWS())
+#define RDE_IS_IOS() (defined(__APPLE__) && defined(IOS_PLATFORM))
+#define RDE_IS_APPLE() (RDE_IS_MAC() || RDE_IS_IOS())
+#define RDE_IS_ANDROID() (defined(__ANDROID__))
+#define RDE_IS_MOBILE() (RDE_IS_ANDROID() || RDE_IS_IOS())
 
-#ifdef __GNUC__
-#define RDE_DEPRECATED(func) func __attribute__ ((deprecated))
-#elif defined(_MSC_VER)
-#define RDE_DEPRECATED(func) __declspec(deprecated) func
-#else
-#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
-#define RDE_DEPRECATED(func) func
-#endif
-
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 	#define RDE_FUNC __declspec(dllexport)
 	#define RDE_FUNC_STATIC __declspec(dllexport) static
 	#define RDE_FUNC_EXTERNAL extern "C" RDE_FUNC
@@ -179,7 +170,7 @@ extern "C" {
 // Example of usage RDE_FUNC void RDE_N(rde_my_namespace, my_function)(int _a, int _b);
 #endif
 
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 	#include <io.h>
 	#include <fcntl.h>
 	#include <windows.h>
@@ -199,153 +190,25 @@ typedef unsigned int uint;
 
 /// ============================== UTIL ====================================
 
-#define STRINGIZE(x) STRINGIZE2(x)
-#define STRINGIZE2(x) #x
+#define RDE_STRINGIZE(x) STRINGIZE2(x)
+#define RDE_STRINGIZE2(x) #x
 
-#define LINE_STRING STRINGIZE(__LINE__)
-#define FUNC_STRING STRINGIZE(__func__)
-#define FILE_STRING STRINGIZE(__FILE__)
+#define RDE_LINE_STRING STRINGIZE(__LINE__)
+#define RDE_FUNC_STRING STRINGIZE(__func__)
+#define RDE_FILE_STRING STRINGIZE(__FILE__)
 
 #define RDE_COLOR_TO_HEX_COLOR(_color) (((int)_color.a) << 24) + (((int)_color.b) << 16) + (((int)_color.g) << 8) + ((int)_color.r)
 
-/// ======================= WARNING SILENCER ===============================
+#define RDE_DEPRECATED(_func, _message, _replacement) _func __attribute__((deprecated(_message, _replacement)));
 
-#define UNUSED(_x) (void)_x;
-
-#define UNIMPLEMENTED() assert(false && __func__);
-
-#define UNIMPLEMENTED_STRUCT() short foo;
-
-
-
-/// ==================== GENERIC FUNCS AND STRUCTS ==========================
-
-#if IS_WINDOWS()
-#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
-	int main(int _argc, char** _argv) {												 	\
-		RDE_SHOW_WINDOWS_CONSOLE														\
-																						\
-		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 	\
-		rde_setup_initial_info(_mandatory_callbacks);								   	\
-																						\
-		_init_func(_argc, _argv);													   	\
-																						\
-		rde_engine_on_run();															\
-		_end_func();																	\
-		rde_engine_destroy_engine();													\
-																						\
-		return 0;																	   	\
-	}
-#elif IS_ANDROID()
-#include "SDL3/SDL.h"
-#include "SDL3/SDL_main.h"
-#define SDL_GESTURE_IMPLEMENTATION 1
-#include "SDL3/SDL_gesture.h"
-#include <jni.h>
-#include <android/native_window.h>
-#include <android/input.h>
-#include <android/keycodes.h>
-#include <android/log.h>
-#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)   	\
-	int main(int _argc, char* _argv[]) {											   	\
-		_window = rde_engine_create_engine(_argc, _argv, _config_path);					\
-		rde_setup_initial_info(_mandatory_callbacks);								  	\
-																						\
-		_init_func(_argc, _argv);													  	\
-																						\
-		rde_engine_on_run();														   	\
-		_end_func();																   	\
-		rde_engine_destroy_engine();												   	\
-																						\
-		return 0;																	  	\
-	}
-#else
-#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
-	int main(int _argc, char** _argv) {												 	\
-		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 	\
-		rde_setup_initial_info(_mandatory_callbacks);								   	\
-																						\
-		_init_func(_argc, _argv);													   	\
-																						\
-		rde_engine_on_run();															\
-		_end_func();																	\
-		rde_engine_destroy_engine();													\
-																						\
-		return 0;																	   	\
-	}
-#endif
-
-#define SPECIALIZED_VEC2(_type, _name) 	\
-	typedef struct {					\
-		_type x;						\
-		_type y;						\
-	} _name;
-
-#define SPECIALIZED_VEC3(_type, _name) 	\
-	typedef struct {					\
-		_type x;						\
-		_type y;						\
-		_type z;						\
-	} _name;
-
-#define SPECIALIZED_VEC4(_type, _name) 	\
-	typedef struct {					\
-		_type x;						\
-		_type y;						\
-		_type z;						\
-		_type w;						\
-	} _name;
-
-#define SPECIALIZED_MAT2(_type, _name) 	\
-	typedef struct {					\
-		union {							\
-			struct {					\
-				float m00, m01;			\
-				float m10, m11;			\
-			};							\
-										\
-			float m[2][2];				\
-			float v[4];					\
-		};								\
-	} _name;
-
-#define SPECIALIZED_MAT3(_type, _name) 	\
-	typedef struct {					\
-		union {							\
-			struct {					\
-				float m00, m01, m02;	\
-				float m10, m11, m12;	\
-				float m20, m21, m22;	\
-			};							\
-										\
-			float m[3][3];				\
-			float v[9];					\
-		};								\
-	} _name;
-
-#define SPECIALIZED_MAT4(_type, _name) 		\
-	typedef struct {						\
-		union {								\
-			struct {						\
-				float m00, m01, m02, m03;	\
-				float m10, m11, m12, m13;	\
-				float m20, m21, m22, m23;	\
-				float m30, m31, m32, m33;	\
-			};								\
-											\
-			float m[4][4];					\
-			float v[16];					\
-		};									\
-	} _name;
-
-#define COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(_func_name, _extra_code) 	\
-	void _func_name(rde_event* _event, rde_window* _window) {				\
-		UNUSED(_window);													\
-		UNUSED(_event);														\
-		_extra_code															\
+#define RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(_func_name, _extra_code) 	\
+	void _func_name(rde_event* _event, rde_window* _window) {					\
+		RDE_UNUSED(_window);													\
+		RDE_UNUSED(_event);														\
+		_extra_code																\
 	}
 
-#if !IS_ANDROID()
+#if !RDE_IS_ANDROID()
 	#define rde_log_level(_level, _fmt, ...) do { 						\
 		if(!rde_engine_logs_supressed()) {								\
 			rde_log_level_inner(_level, _fmt __VA_OPT__(,) __VA_ARGS__);\
@@ -420,37 +283,37 @@ typedef unsigned int uint;
 	_block_of_code												\
 	rde_rendering_2d_end_drawing();
 
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 #define rde_strcpy(_dst, _dst_size, _src) strcpy_s(_dst, _dst_size, _src);
 #else
 #define rde_strcpy(_dst, _dst_size, _src) strcpy(_dst, _src);
 #endif
 
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 #define rde_strcat(_dst, _dst_size, _src) strcat_s(_dst, _dst_size, _src);
 #else
 #define rde_strcat(_dst, _dst_size, _src) strcat(_dst, _src);
 #endif
 
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 #define rde_strncat(_dst, _dst_size, _src, _src_amount) strncat_s(_dst, _dst_size, _src, _src_amount);
 #else
 #define rde_strncat(_dst, _dst_size, _src, _src_amount) strncat(_dst, _src, _src_amount);
 #endif
 
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 #define rde_strtok(_str, _del, _ctx) strtok_s(_str, _del, _ctx);
 #else
 #define rde_strtok(_str, _del, _ctx) strtok(_str, _del);
 #endif
 
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 #define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
 #else
 #define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
 #endif
 	
-	#if IS_WINDOWS()
+	#if RDE_IS_WINDOWS()
 #define rde_vsprintf(_str, _str_size, _fmt, ...) vsprintf_s(_str, _str_size, _fmt, __VA_ARGS__);
 #else
 #define rde_vsprintf(_str, _str_size, _fmt, ...) vsprintf(_str, _fmt, __VA_ARGS__);
@@ -463,6 +326,138 @@ typedef unsigned int uint;
 		clock_t _end = clock() - _start;					   										\
 		rde_log_level(RDE_LOG_LEVEL_INFO, "%s - Took %f""s", _name, ((double)_end)/CLOCKS_PER_SEC); \
 	}
+
+/// ======================= WARNING SILENCER ===============================
+
+#define RDE_UNUSED(_x) (void)_x;
+#define RDE_UNIMPLEMENTED() assert(false && __func__);
+#define RDE_UNIMPLEMENTED_STRUCT() short foo;
+
+
+/// ==================== GENERIC FUNCS AND STRUCTS ==========================
+
+#if RDE_IS_WINDOWS()
+#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
+	int main(int _argc, char** _argv) {												 	\
+		RDE_SHOW_WINDOWS_CONSOLE														\
+																						\
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 	\
+		rde_setup_initial_info(_mandatory_callbacks);								   	\
+																						\
+		_init_func(_argc, _argv);													   	\
+																						\
+		rde_engine_on_run();															\
+		_end_func();																	\
+		rde_engine_destroy_engine();													\
+																						\
+		return 0;																	   	\
+	}
+	
+#elif RDE_IS_ANDROID()
+
+#include "SDL3/SDL.h"
+#include "SDL3/SDL_main.h"
+#define SDL_GESTURE_IMPLEMENTATION 1
+#include "SDL3/SDL_gesture.h"
+#include <jni.h>
+#include <android/native_window.h>
+#include <android/input.h>
+#include <android/keycodes.h>
+#include <android/log.h>
+#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)   	\
+	int main(int _argc, char* _argv[]) {											   	\
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);					\
+		rde_setup_initial_info(_mandatory_callbacks);								  	\
+																						\
+		_init_func(_argc, _argv);													  	\
+																						\
+		rde_engine_on_run();														   	\
+		_end_func();																   	\
+		rde_engine_destroy_engine();												   	\
+																						\
+		return 0;																	  	\
+	}
+
+#else
+
+#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
+	int main(int _argc, char** _argv) {												 	\
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 	\
+		rde_setup_initial_info(_mandatory_callbacks);								   	\
+																						\
+		_init_func(_argc, _argv);													   	\
+																						\
+		rde_engine_on_run();															\
+		_end_func();																	\
+		rde_engine_destroy_engine();													\
+																						\
+		return 0;																	   	\
+	}
+
+#endif
+
+#define RDE_SPECIALIZED_VEC2(_type, _name) 	\
+	typedef struct {						\
+		_type x;							\
+		_type y;							\
+	} _name;
+
+#define RDE_SPECIALIZED_VEC3(_type, _name) 	\
+	typedef struct {						\
+		_type x;							\
+		_type y;							\
+		_type z;							\
+	} _name;
+
+#define RDE_SPECIALIZED_VEC4(_type, _name) 	\
+	typedef struct {						\
+		_type x;							\
+		_type y;							\
+		_type z;							\
+		_type w;							\
+	} _name;
+
+#define RDE_SPECIALIZED_MAT2(_type, _name) 	\
+	typedef struct {						\
+		union {								\
+			struct {						\
+				float m00, m01;				\
+				float m10, m11;				\
+			};								\
+											\
+			float m[2][2];					\
+			float v[4];						\
+		};									\
+	} _name;
+
+#define RDE_SPECIALIZED_MAT3(_type, _name) 	\
+	typedef struct {						\
+		union {								\
+			struct {						\
+				float m00, m01, m02;		\
+				float m10, m11, m12;		\
+				float m20, m21, m22;		\
+			};								\
+											\
+			float m[3][3];					\
+			float v[9];						\
+		};									\
+	} _name;
+
+#define RDE_SPECIALIZED_MAT4(_type, _name) 		\
+	typedef struct {							\
+		union {									\
+			struct {							\
+				float m00, m01, m02, m03;		\
+				float m10, m11, m12, m13;		\
+				float m20, m21, m22, m23;		\
+				float m30, m31, m32, m33;		\
+			};									\
+												\
+			float m[4][4];						\
+			float v[16];						\
+		};										\
+	} _name;
 
 /// *************************************************************************************************
 /// *                                		  ENUMS                         						*
@@ -938,53 +933,53 @@ RDE_SAFE_ARR_SET(double)
 
 /// ================================= MATH ==================================
 
-SPECIALIZED_VEC2(int, 			rde_vec_2I);
-SPECIALIZED_VEC2(uint, 	rde_vec_2UI);
-SPECIALIZED_VEC2(float, 		rde_vec_2F);
-SPECIALIZED_VEC2(double,		rde_vec_2D);
-SPECIALIZED_VEC2(long,			rde_vec_2L);
-SPECIALIZED_VEC2(unsigned long, rde_vec_2UL);
-SPECIALIZED_VEC2(size_t, 		rde_vec_2ST);
+RDE_SPECIALIZED_VEC2(int, 			rde_vec_2I);
+RDE_SPECIALIZED_VEC2(uint, 			rde_vec_2UI);
+RDE_SPECIALIZED_VEC2(float, 		rde_vec_2F);
+RDE_SPECIALIZED_VEC2(double,		rde_vec_2D);
+RDE_SPECIALIZED_VEC2(long,			rde_vec_2L);
+RDE_SPECIALIZED_VEC2(unsigned long, rde_vec_2UL);
+RDE_SPECIALIZED_VEC2(size_t, 		rde_vec_2ST);
 
-SPECIALIZED_VEC3(int, 			rde_vec_3I);
-SPECIALIZED_VEC3(uint, 	rde_vec_3UI);
-SPECIALIZED_VEC3(float, 		rde_vec_3F);
-SPECIALIZED_VEC3(double,		rde_vec_3D);
-SPECIALIZED_VEC3(long,			rde_vec_3L);
-SPECIALIZED_VEC3(unsigned long, rde_vec_3UL);
-SPECIALIZED_VEC3(size_t, 		rde_vec_3ST);
+RDE_SPECIALIZED_VEC3(int, 			rde_vec_3I);
+RDE_SPECIALIZED_VEC3(uint, 			rde_vec_3UI);
+RDE_SPECIALIZED_VEC3(float, 		rde_vec_3F);
+RDE_SPECIALIZED_VEC3(double,		rde_vec_3D);
+RDE_SPECIALIZED_VEC3(long,			rde_vec_3L);
+RDE_SPECIALIZED_VEC3(unsigned long, rde_vec_3UL);
+RDE_SPECIALIZED_VEC3(size_t, 		rde_vec_3ST);
 
-SPECIALIZED_VEC4(int, 			rde_vec_4I);
-SPECIALIZED_VEC4(uint, 	rde_vec_4UI);
-SPECIALIZED_VEC4(float, 		rde_vec_4F);
-SPECIALIZED_VEC4(double,		rde_vec_4D);
-SPECIALIZED_VEC4(long,			rde_vec_4L);
-SPECIALIZED_VEC4(unsigned long, rde_vec_4UL);
-SPECIALIZED_VEC4(size_t, 		rde_vec_4ST);
+RDE_SPECIALIZED_VEC4(int, 			rde_vec_4I);
+RDE_SPECIALIZED_VEC4(uint, 			rde_vec_4UI);
+RDE_SPECIALIZED_VEC4(float, 		rde_vec_4F);
+RDE_SPECIALIZED_VEC4(double,		rde_vec_4D);
+RDE_SPECIALIZED_VEC4(long,			rde_vec_4L);
+RDE_SPECIALIZED_VEC4(unsigned long, rde_vec_4UL);
+RDE_SPECIALIZED_VEC4(size_t, 		rde_vec_4ST);
 
-SPECIALIZED_MAT2(int, 			rde_mat_2I);
-SPECIALIZED_MAT2(uint, 	rde_mat_2UI);
-SPECIALIZED_MAT2(float, 		rde_mat_2F);
-SPECIALIZED_MAT2(double,		rde_mat_2D);
-SPECIALIZED_MAT2(long,			rde_mat_2L);
-SPECIALIZED_MAT2(unsigned long, rde_mat_2UL);
-SPECIALIZED_MAT2(size_t, 		rde_mat_2ST);
+RDE_SPECIALIZED_MAT2(int, 			rde_mat_2I);
+RDE_SPECIALIZED_MAT2(uint, 			rde_mat_2UI);
+RDE_SPECIALIZED_MAT2(float, 		rde_mat_2F);
+RDE_SPECIALIZED_MAT2(double,		rde_mat_2D);
+RDE_SPECIALIZED_MAT2(long,			rde_mat_2L);
+RDE_SPECIALIZED_MAT2(unsigned long, rde_mat_2UL);
+RDE_SPECIALIZED_MAT2(size_t, 		rde_mat_2ST);
 
-SPECIALIZED_MAT3(int, 			rde_mat_3I);
-SPECIALIZED_MAT3(uint, 	rde_mat_3UI);
-SPECIALIZED_MAT3(float, 		rde_mat_3F);
-SPECIALIZED_MAT3(double,		rde_mat_3D);
-SPECIALIZED_MAT3(long,			rde_mat_3L);
-SPECIALIZED_MAT3(unsigned long, rde_mat_3UL);
-SPECIALIZED_MAT3(size_t, 		rde_mat_3ST);
+RDE_SPECIALIZED_MAT3(int, 			rde_mat_3I);
+RDE_SPECIALIZED_MAT3(uint, 			rde_mat_3UI);
+RDE_SPECIALIZED_MAT3(float, 		rde_mat_3F);
+RDE_SPECIALIZED_MAT3(double,		rde_mat_3D);
+RDE_SPECIALIZED_MAT3(long,			rde_mat_3L);
+RDE_SPECIALIZED_MAT3(unsigned long, rde_mat_3UL);
+RDE_SPECIALIZED_MAT3(size_t, 		rde_mat_3ST);
 
-SPECIALIZED_MAT4(int, 			rde_mat_4I);
-SPECIALIZED_MAT4(uint, 	rde_mat_4UI);
-SPECIALIZED_MAT4(float, 		rde_mat_4F);
-SPECIALIZED_MAT4(double,		rde_mat_4D);
-SPECIALIZED_MAT4(long,			rde_mat_4L);
-SPECIALIZED_MAT4(unsigned long, rde_mat_4UL);
-SPECIALIZED_MAT4(size_t, 		rde_mat_4ST);
+RDE_SPECIALIZED_MAT4(int, 			rde_mat_4I);
+RDE_SPECIALIZED_MAT4(uint, 			rde_mat_4UI);
+RDE_SPECIALIZED_MAT4(float, 		rde_mat_4F);
+RDE_SPECIALIZED_MAT4(double,		rde_mat_4D);
+RDE_SPECIALIZED_MAT4(long,			rde_mat_4L);
+RDE_SPECIALIZED_MAT4(unsigned long, rde_mat_4UL);
+RDE_SPECIALIZED_MAT4(size_t, 		rde_mat_4ST);
 
 typedef struct {
 	float x;
@@ -994,19 +989,19 @@ typedef struct {
 } rde_quaternion;
 
 struct rde_line {
-	UNIMPLEMENTED_STRUCT()
+	RDE_UNIMPLEMENTED_STRUCT()
 };
 
 struct rde_triangle {
-	UNIMPLEMENTED_STRUCT()
+	RDE_UNIMPLEMENTED_STRUCT()
 };
 
 struct rde_rectangle {
-	UNIMPLEMENTED_STRUCT()
+	RDE_UNIMPLEMENTED_STRUCT()
 };
 
 struct rde_bouding_box {
-	UNIMPLEMENTED_STRUCT()
+	RDE_UNIMPLEMENTED_STRUCT()
 };
 
 typedef struct {
@@ -1316,11 +1311,11 @@ typedef struct {
 RDE_FUNC rde_spot_light rde_struct_create_spot_light();
 
 struct rde_model_bone {
-	UNIMPLEMENTED_STRUCT()
+	RDE_UNIMPLEMENTED_STRUCT()
 };
 
 struct rde_model_animation {
-	UNIMPLEMENTED_STRUCT()
+	RDE_UNIMPLEMENTED_STRUCT()
 };
 
 typedef struct {
@@ -1338,7 +1333,7 @@ typedef struct {
 RDE_FUNC rde_polygon rde_struct_create_polygon();
 
 struct rde_viewport {
-	UNIMPLEMENTED_STRUCT()
+	RDE_UNIMPLEMENTED_STRUCT()
 };
 
 struct rde_camera {
@@ -1559,19 +1554,24 @@ RDE_FUNC void rde_engine_set_vsync_active(bool _vsync);
 
 RDE_FUNC void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _title, const char* _content, rde_window* _window);
 
-RDE_FUNC void rde_engine_destroy_engine();
-
 RDE_FUNC rde_transform* rde_engine_transform_load();
+RDE_FUNC void rde_engine_transform_unload(rde_transform* _transform);
+
 RDE_FUNC rde_vec_3F  rde_engine_transform_get_position(rde_transform* _transform);
 RDE_FUNC void rde_engine_transform_set_position(rde_transform* _transform, rde_vec_3F _position);
+
 RDE_FUNC rde_vec_3F  rde_engine_transform_get_rotation_degs(rde_transform* _transform);
 RDE_FUNC void rde_engine_transform_set_rotation(rde_transform* _transform, rde_vec_3F _rotation_degs);
+
 RDE_FUNC rde_vec_3F  rde_engine_transform_get_scale(rde_transform* _transform);
 RDE_FUNC void rde_engine_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale);
+
 RDE_FUNC rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform);
 RDE_FUNC void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _parent);
+
 RDE_FUNC size_t rde_engine_transform_get_children_count(rde_transform* _transform);
-RDE_FUNC void rde_engine_transform_unload(rde_transform* _transform);
+
+RDE_FUNC void rde_engine_destroy_engine();
 
 /// ============================ WINDOW =====================================
 
@@ -1749,12 +1749,6 @@ RDE_FUNC void rde_audio_end();
 
 #endif
 
-/// ============================ PHYSICS ====================================
-
-#ifdef RDE_PHYSICS_2D_MODULE
-
-#endif
-
 /// ============================ FILE SYSTEM ================================
 
 RDE_FUNC rde_file_handle* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode);
@@ -1773,7 +1767,7 @@ RDE_FUNC void rde_file_close(rde_file_handle* _file_handler);
 RDE_FUNC void rde_file_free_read_text(rde_file_handle* _file_handle);
 RDE_FUNC void rde_file_free_read_bytes(rde_file_handle* _file_handle);
 
-#if IS_ANDROID()
+#if RDE_IS_ANDROID()
 RDE_FUNC ANativeWindow* rde_android_get_native_window();
 #endif
 

@@ -12,7 +12,7 @@
 #include <math.h>
 #include <string.h>
 
-#if IS_MAC()
+#if RDE_IS_MAC()
 #include <stdlib.h>
 #endif
 
@@ -42,7 +42,7 @@ void draw_grid(rde_camera* _camera, rde_window* _window) {
 
 void draw_imgui_transform(const char* _name, rde_transform* _transform);
 
-#if !IS_ANDROID()
+#if !RDE_IS_ANDROID()
 #include "model_viewer.c"
 #include "hierarchy.c"
 #include "performance_test.c"
@@ -130,7 +130,7 @@ void on_imgui_hub_menu(float _dt) {
 		static int _option = -1;
 		rde_imgui_new_line();
 
-#if !IS_ANDROID()
+#if !RDE_IS_ANDROID()
 		if(rde_imgui_radio_button("Model Viewer", &_option, 0)) {
 			if(unload_callback != NULL) {
 				unload_callback();
@@ -166,7 +166,7 @@ void on_imgui_hub_menu(float _dt) {
 			shadows_init();
 		}
 #else
-		if(rde_imgui_radio_button("Android demo", &_option, 2)) {
+		if(rde_imgui_radio_button("Android demo", &_option, 0)) {
 			if(unload_callback != NULL) {
 				unload_callback();
 			}
@@ -247,7 +247,7 @@ void init_func(int _argc, char** _argv) {
 
 	rde_engine_set_event_user_callback(on_event);
 
-#if IS_MOBILE()
+#if RDE_IS_MOBILE()
 	rde_imgui_init(rde_window_get_native_sdl_window_handle(current_window), rde_window_get_native_sdl_gl_context_handle(current_window), "#version 300 es");
 #else
 	rde_imgui_init(rde_window_get_native_sdl_window_handle(current_window), rde_window_get_native_sdl_gl_context_handle(current_window), "#version 330");
@@ -258,7 +258,7 @@ void init_func(int _argc, char** _argv) {
 	hub_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_ORTHOGRAPHIC);
 	rde_engine_transform_set_position(hub_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
-#if IS_MOBILE()
+#if RDE_IS_MOBILE()
 	duck_texture = rde_rendering_texture_load("assets/duck_yellow.png", NULL);
 #else
 	duck_texture = rde_rendering_texture_load("hub_assets/duck_yellow.png", NULL);
@@ -274,7 +274,7 @@ void end_func() {
 	rde_imgui_shutdown();
 }
 
-#if IS_ANDROID()
+#if RDE_IS_ANDROID()
 RDE_MAIN(current_window, "assets/config.rde_config", _mandatory_callbacks, init_func, end_func);
 #else
 RDE_MAIN(current_window, "hub_assets/config.rde_config", _mandatory_callbacks, init_func, end_func);

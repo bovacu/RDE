@@ -65,7 +65,7 @@ void shadows_keyboard_controller(float _dt) {
 }
 
 void shadows_mouse_controller(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 
 	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
 		shadows_first_mouse = true;
@@ -118,8 +118,8 @@ void shadows_mouse_controller(float _dt) {
 }
 
 void shadows_on_event(rde_event* _event, rde_window* _window) {
-	UNUSED(_window);
-	UNUSED(_event);
+	RDE_UNUSED(_window);
+	RDE_UNUSED(_event);
 }
 
 void shadows_on_update(float _dt) {
@@ -137,15 +137,15 @@ void shadows_on_update(float _dt) {
 }
 
 void shadows_on_fixed_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 }
 
 void shadows_on_late_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 }
 
 void shadows_draw_3d(rde_window* _window, float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 
 	rde_render_3d_with_shadows(_window, &shadows_camera, false, {
 		rde_rendering_3d_draw_model(shadows_transform_0, shadows_model, NULL);
@@ -211,7 +211,7 @@ void shadows_draw_imgui(float _dt, rde_window* _window) {
  }
 
 void shadows_on_render(float _dt, rde_window* _window) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 	
 	draw_grid(&shadows_camera, _window);
 	shadows_draw_3d(_window, _dt);

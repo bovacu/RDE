@@ -64,7 +64,7 @@ void hierarchy_keyboard_controller(float _dt) {
 }
 
 void hierarchy_mouse_controller(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 
 	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
 		hierarchy_first_mouse = true;
@@ -117,8 +117,8 @@ void hierarchy_mouse_controller(float _dt) {
 }
 
 void hierarchy_on_event(rde_event* _event, rde_window* _window) {
-	UNUSED(_window);
-	UNUSED(_event);
+	RDE_UNUSED(_window);
+	RDE_UNUSED(_event);
 }
 
 void hierarchy_on_update(float _dt) {
@@ -136,15 +136,15 @@ void hierarchy_on_update(float _dt) {
 }
 
 void hierarchy_on_fixed_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 }
 
 void hierarchy_on_late_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 }
 
 void hierarchy_draw_3d(rde_window* _window, float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 
 	rde_render_3d(_window, &hierarchy_camera, false, {
 		rde_rendering_3d_draw_mesh(hierarchy_transform_0, cube_mesh, NULL);
@@ -211,7 +211,7 @@ void hierarchy_draw_imgui(float _dt, rde_window* _window) {
  }
 
 void hierarchy_on_render(float _dt, rde_window* _window) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 	
 	draw_grid(&hierarchy_camera, _window);
 	hierarchy_draw_3d(_window, _dt);

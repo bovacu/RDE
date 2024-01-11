@@ -6,28 +6,28 @@
 
 #ifdef __EMSCRIPTEN__
 #include <GLES3/gl32.h>
-#elif IS_ANDROID()
+#elif RDE_IS_ANDROID()
 #include <GLES3/gl32.h>
-#elif IS_IOS()
+#elif RDE_IS_IOS()
 #include <OpenGLES/ES3/gl.h>
-#elif IS_MAC()
+#elif RDE_IS_MAC()
 #include <OpenGL/gl3.h>
 #else
 #include "glad/glad.h"
 #endif
 
-#if IS_MOBILE()
+#if RDE_IS_MOBILE()
 #include <GLES2/gl2ext.h>
 #include <EGL/egl.h>
 #endif
 
-#if IS_ANDROID()
+#if RDE_IS_ANDROID()
 #include <errno.h>
 #endif
 
 #include "SDL3/SDL.h"
 
-#if IS_MAC()
+#if RDE_IS_MAC()
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -53,7 +53,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 #define STBIW_WINDOWS_UTF8
 #endif
 #include "stb/stb_image_write.h"
@@ -64,7 +64,7 @@
 #define STB_DS_IMPLEMENTATION
 #define STBDS_NO_SHORT_NAMES
 
-#if !IS_ANDROID()
+#if !RDE_IS_ANDROID()
 #define STBDS_SIPHASH_2_4
 #endif
 
@@ -96,12 +96,12 @@
 
 #ifdef RDE_ERROR_MODULE
 #include <signal.h>
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 #include <dbghelp.h>
 void rde_inner_print_stack_trace(FILE* _f);
 LONG WINAPI rde_inner_error_sig_handler(PEXCEPTION_POINTERS _sigfault_info);
 #endif
-#if !IS_WINDOWS() && !IS_ANDROID()
+#if !RDE_IS_WINDOWS() && !RDE_IS_ANDROID()
 #include <execinfo.h>
 #include <dlfcn.h>
 #include <err.h>
@@ -110,14 +110,14 @@ void rde_inner_print_stack_trace(FILE* _f);
 void rde_inner_posix_signal_handler(int _sig, siginfo_t* _sig_info, void* _context);
 #endif
 
-#if !IS_WINDOWS()
+#if !RDE_IS_WINDOWS()
 void rde_inner_set_posix_signal_handler();
 #endif
 
 void rde_critical_error(bool _condition, const char* _fmt, ...);
 #endif
 
-// TODO: Not to forget
+// TODO TASK
 // 		- [DONE] Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
 //		  the format is BGRA instead of RGBA (problem solved by first method) and the second fixes
 //		  an error that the first method can generate on some images.
@@ -135,7 +135,9 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- [DONE] 3D mathematical operations
 //			- [DONE] Renderer
 //			- [DONE] Mesh creation and loading
-//			- [DONE(obj), NOT DONE(glft)] Model loading
+//			- [DONE] Obj Model loading
+//			- [] GLTF Model loading
+//			- [] FBX Model loading
 //			- [DONE] Texturing and [NOT COMPLETELY DONE] materials
 //			- [DONE] Instancing (3d batching)
 //			- [DONE] MSAA
@@ -147,13 +149,20 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- [] Model animations
 //			- [] Text
 //			- [DONE] Line rendering
-//			- [] Frustrum Culling
-//			- [] Hard Shadows
-//			- [] Soft Shadows
+//			- [] Frustum Culling
+//			- [] Simple Shadows
+//			- [] Cascade Shadow Map
 //			- [] Normal Mapping
 //			- [] HDR
 //			- [] Ambient Occlusion
 //			- [] PBR
+//			- [] Bloom
+//			- [] Area Lights
+//			- [] Compute Shaders
+//
+//		- [] Physics:
+//			- [] Add callbacks for everything relevant (on collision enter, exit...)
+//			- [] Implement all collision shapes
 //
 //		- [] UI:
 //			- [] Anchors
@@ -174,19 +183,30 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- [DONE] Create "header" file that will contain all of the common uniforms and variables that are passed to every shader
 //			- [DONE] Pass dt and mouse pos as a uniform
 //
+//		- Sound:
+//			- Play/stop/restart/resume sound.
+//			- Play/stop/restart/resume music.
+//			- Multiple sounds/mousic at the same time.
+//			- Sound/Music volume.
+//			- 3D sound.
+//
+//		- [] Extras:
+//			- [] Add many geometrical 3D shapes as part of the engine (currently prisms, pyramids and spheres).
+//
 //		- Other:
 //			- [DONE] Render Textures
-//			- Particles
+//			- [] Particles
 //			- [DONE] On every 'load' function, if a resource is going to be reloaded, return the already loaded one.
+//			- [] Coroutines
 //
 //		- TOOL: [DONE] command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
 //				- https://www.david-colson.com/2020/03/10/exploring-rect-packing.html
-//				- TODO: sanitaze windows paths like in rde_build
+//				- [] sanitaze windows paths like in rde_build
 //
 //		- TOOL: [DONE] Command line font atlas creator.
 //				- [DONE] Improve algorithm to use most part of space
-//				- TODO: sanitaze windows paths like in rde_build
+//				- [] sanitaze windows paths like in rde_build
 //
 //		- TOOL: command line project creation, compilation and export.
 //
@@ -195,6 +215,7 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- [] CPU textures makes other textures render wrong if used
 //			- [] Rectangles and other shapes are not working correctly (lines do)
 //			- [FIXED] Android warning "warning: implicit declaration of function 'SDL_AndroidGetNativeWindow' is invalid in C99"
+//			- [] 3D batching is not implemented, if object A is rendered, then B and then A again, 3 drawcalls are sent, fix this.
 
 
 /// *************************************************************************************************
@@ -402,7 +423,7 @@ size_t current_frame = 0;
 
 #define RDE_MAX_STACK 100
 
-#if !IS_WINDOWS()
+#if !RDE_IS_WINDOWS()
 #define RDE_STACKTRACE_MAX_DEPTH 1024
 // Same value as SIGSTKSZ
 #define RDE_STACKTRACE_BUFF_SIZE 13504
@@ -656,7 +677,7 @@ struct rde_sound {
 #endif
 
 /// Error
-#if defined(RDE_ERROR_MODULE) && !IS_WINDOWS()
+#if defined(RDE_ERROR_MODULE) && !RDE_IS_WINDOWS()
 typedef struct {
 	    char* buf;
 	    int pos;
@@ -691,7 +712,7 @@ struct rde_engine {
 	int last_transform_used;
 	int* free_transforms;
 		
-#if IS_ANDROID()
+#if RDE_IS_ANDROID()
 	ANativeWindow* android_native_window;
 	JNIEnv* android_env;
 #endif
@@ -735,7 +756,7 @@ size_t total_amount_of_textures;
 		
 	rde_engine_init_info init_info;
 	
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 	HANDLE console_handle;
 #endif
 };
@@ -1220,7 +1241,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.free_transforms = NULL;
 	stbds_arrput(_e.free_transforms, 0);
 
-#if IS_ANDROID()
+#if RDE_IS_ANDROID()
 	_e.android_env = SDL_AndroidGetJNIEnv();
 	rde_critical_error(_e.android_env == NULL, "Native Android window is NULL");
 #endif
@@ -1365,7 +1386,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 		_e.mobile_events[_i] = NULL;
 	}
 
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 	_e.console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	#ifdef RDE_ERROR_MODULE
 	SetUnhandledExceptionFilter(rde_inner_error_sig_handler);
@@ -1389,7 +1410,7 @@ rde_engine ENGINE;
  rde_file_handle concurrent_file_handlers[RDE_MAX_CONCURRENT_FILES_OPENED];
 
 /// Rendering
-#if IS_MOBILE()
+#if RDE_IS_MOBILE()
 PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMGPROC glFramebufferTexture2DMultisampleEXT = NULL;
 PFNGLRENDERBUFFERSTORAGEMULTISAMPLEIMGPROC glRenderbufferStorageMultisampleEXT = NULL;
 PFNGLDISCARDFRAMEBUFFEREXTPROC glDiscardFramebufferEXT = NULL;
@@ -1449,23 +1470,23 @@ void rde_inner_file_system_check_file_mode_or_convert(rde_file_handle* _handler,
 
 /// ******************************************* WINDOW ***********************************************
 
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 rde_window* rde_inner_window_create_windows_window(size_t _free_window_index);
 #endif
 
-#if IS_MAC()
+#if RDE_IS_MAC()
 rde_window* rde_inner_window_create_mac_window(size_t _free_window_index);
 #endif
 
-#if IS_LINUX() && !IS_ANDROID()
+#if RDE_IS_LINUX() && !RDE_IS_ANDROID()
 rde_window* rde_inner_window_create_linux_window(size_t _free_window_index);
 #endif
 
-#if IS_ANDROID()
+#if RDE_IS_ANDROID()
 rde_window* rde_inner_window_create_android_window(size_t _free_window_index);
 #endif
 
-#if IS_IOS()
+#if RDE_IS_IOS()
 rde_window* rde_inner_window_create_ios_window(size_t _free_window_index);
 #endif
 
@@ -1564,7 +1585,7 @@ void data_callback(ma_device* _device, void* _output, const void* _input, ma_uin
 
 /// ******************************************* MOBILE *********************************************
 
-#if IS_ANDROID()
+#if RDE_IS_ANDROID()
 ANativeWindow* rde_android_get_native_window();
 #endif
 
@@ -1663,7 +1684,7 @@ void rde_inner_engine_on_event() {
 					case SDL_EVENT_FINGER_UP:
 					case SDL_EVENT_FINGER_MOTION:
 					
-					#if IS_MOBILE()
+					#if RDE_IS_MOBILE()
 					case GESTURE_DOLLARGESTURE :
 					case GESTURE_DOLLARRECORD :
 					case GESTURE_MULTIGESTURE :
@@ -1691,7 +1712,7 @@ void rde_inner_engine_on_event() {
 }
 
 void rde_inner_engine_on_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 }
 
 #if defined(RDE_PHYSICS_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
@@ -1701,11 +1722,11 @@ void rde_inner_engine_on_fixed_update(float _fixed_dt) {
 #endif
 
 void rde_inner_engine_on_late_update(float _dt) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 }
 
 rde_display_info* rde_engine_get_available_displays() {
-	UNIMPLEMENTED();
+	RDE_UNIMPLEMENTED();
 	return NULL;
 }
 
@@ -1820,8 +1841,8 @@ void rde_engine_transform_update() {
 rde_window* rde_engine_create_engine(int _argc, char** _argv, const char* _config_path) {
 	static bool _instantiated = false;
 	
-	UNUSED(_argc)
-	UNUSED(_argv)
+	RDE_UNUSED(_argc)
+	RDE_UNUSED(_argv)
 	
 	rde_critical_error(_instantiated, RDE_ERROR_MULTIPLE_ENGINE);
 	
@@ -1840,7 +1861,7 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, const char* _confi
 
 	rde_window* _default_window = rde_window_create_window_os();
 
-	#if IS_ANDROID()
+	#if RDE_IS_ANDROID()
 	ENGINE.android_native_window = SDL_AndroidGetNativeWindow();
 	rde_critical_error(ENGINE.android_native_window == NULL, "Native Android Window is NULL");
 	#endif
@@ -1963,8 +1984,8 @@ float rde_engine_get_fixed_delta() {
 }
 
 void rde_engine_set_fixed_delta(float _delta_time) {
-	UNUSED(_delta_time)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_delta_time)
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_engine_on_run() {
@@ -1974,7 +1995,7 @@ void rde_engine_on_run() {
 	rde_critical_error(ENGINE.mandatory_callbacks.on_late_update == NULL, RDE_ERROR_NULL_MANDATORY_CALLBACK, "rde_engine_user_on_late_upadte");
 	rde_critical_error(ENGINE.mandatory_callbacks.on_render == NULL, RDE_ERROR_NULL_MANDATORY_CALLBACK, "rde_engine_user_on_render");
 
-	#if IS_MOBILE()
+	#if RDE_IS_MOBILE()
 	SDL_SetEventFilter(rde_events_mobile_consume_events_callback_wrapper, NULL);
 	Gesture_Init();
 	#endif
@@ -2087,7 +2108,7 @@ void rde_engine_destroy_engine() {
 	glDeleteBuffers(1, &DEFAULT_RENDER_TEXTURE->vbo);
 	glDeleteVertexArrays(1, &DEFAULT_RENDER_TEXTURE->vao);
 
-	#if IS_MOBILE()
+	#if RDE_IS_MOBILE()
 	Gesture_Quit();
 	#endif
 
@@ -2185,9 +2206,9 @@ void rde_engine_destroy_engine() {
 }
 
 void rde_engine_switch_window_display(rde_window* _window, size_t _new_display) {
-	UNUSED(_window)
-	UNUSED(_new_display)
-	UNIMPLEMENTED();
+	RDE_UNUSED(_window)
+	RDE_UNUSED(_new_display)
+	RDE_UNIMPLEMENTED();
 }
 
 rde_window* rde_engine_get_focused_window() {
@@ -2319,7 +2340,7 @@ void rde_engine_transform_unload(rde_transform* _transform) {
 	_transform->index = _index;
 }
 
-#if IS_MAC()
+#if RDE_IS_MAC()
 #pragma clang diagnostic pop
 #endif
 
@@ -2344,7 +2365,7 @@ float rde_math_get_random_float(float _min_included, float _max_included) {
 }
 
 rde_probability rde_math_get_probability(float _normalized_chance_to_happen) {
-	UNUSED(_normalized_chance_to_happen)
+	RDE_UNUSED(_normalized_chance_to_happen)
 	if(_normalized_chance_to_happen > 1.0f) _normalized_chance_to_happen = 1.0f;
 	if(_normalized_chance_to_happen < 0.0f) _normalized_chance_to_happen = 0.0f;
 
@@ -2701,7 +2722,7 @@ bool rde_util_string_contains_substring(const char* _string, const char* _substr
 	if(_case_sensitive) {
 		return strstr(_string, _substring) != NULL;
 	} else {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 		return StrStrI(_string, _substring) != NULL;
 #else
 		return strcasestr(_string, _substring) != NULL;
@@ -2876,7 +2897,7 @@ size_t rde_util_string_split(char* _string, char*** _split_array, char _split_ma
 void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 	switch(_color) {
 		case RDE_LOG_COLOR_RED: {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 			SetConsoleTextAttribute(ENGINE.console_handle, 12);
 #else
 			fprintf(stdout, "\033[0;31m");
@@ -2884,7 +2905,7 @@ void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 		} break;
 		
 		case RDE_LOG_COLOR_GREEN:  {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 			SetConsoleTextAttribute(ENGINE.console_handle, 10);
 #else
 			fprintf(stdout, "\033[0;32m");	
@@ -2892,7 +2913,7 @@ void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 		} break;
 		
 		case RDE_LOG_COLOR_YELLOW:  {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 			SetConsoleTextAttribute(ENGINE.console_handle, 6);
 #else
 			fprintf(stdout, "\033[0;33m");	
@@ -2900,7 +2921,7 @@ void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 		} break;
 		
 		case RDE_LOG_COLOR_BLUE:  {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 			SetConsoleTextAttribute(ENGINE.console_handle, 9);
 #else
 			fprintf(stdout, "\033[0;34m");		
@@ -2908,7 +2929,7 @@ void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 		} break;
 		
 		case RDE_LOG_COLOR_PURPLE:  {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 			SetConsoleTextAttribute(ENGINE.console_handle, 5);
 #else
 			fprintf(stdout, "\033[0;35m");
@@ -2916,7 +2937,7 @@ void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 		} break;
 		
 		case RDE_LOG_COLOR_CYAN:  {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 			SetConsoleTextAttribute(ENGINE.console_handle, 11);
 #else
 			fprintf(stdout, "\033[0;36m");
@@ -2924,7 +2945,7 @@ void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 		} break;
 		
 		case RDE_LOG_COLOR_WHITE:  {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 			SetConsoleTextAttribute(ENGINE.console_handle, 15);
 #else
 			fprintf(stdout, "\033[0;37m");
@@ -2937,7 +2958,7 @@ void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 	vfprintf(stdout, _fmt, _args);
 	va_end(_args);
 
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 	SetConsoleTextAttribute(ENGINE.console_handle, 7);
 #else
 	fprintf(stdout, "\033[0m");
@@ -2947,7 +2968,7 @@ void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 	switch(_level) {
 		case RDE_LOG_LEVEL_ERROR: {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 			SetConsoleTextAttribute(ENGINE.console_handle, 12);
 #else
 			fprintf(stdout, "\033[0;31m");
@@ -2956,7 +2977,7 @@ void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 		} break;
 		
 		case RDE_LOG_LEVEL_WARNING:  {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 			SetConsoleTextAttribute(ENGINE.console_handle, 6);
 #else
 			fprintf(stdout, "\033[0;33m");	
@@ -2965,7 +2986,7 @@ void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 		} break;
 		
 		case RDE_LOG_LEVEL_DEBUG:  {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 			SetConsoleTextAttribute(ENGINE.console_handle, 11);
 #else
 			fprintf(stdout, "\033[0;36m");
@@ -2974,7 +2995,7 @@ void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 		} break;
 
 		case RDE_LOG_LEVEL_INFO:  {
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 			SetConsoleTextAttribute(ENGINE.console_handle, 7);
 #endif
 			fprintf(stdout, "[INFO] ");
@@ -2986,7 +3007,7 @@ void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 	vfprintf(stdout, _fmt, _args);
 	va_end(_args);
 	
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 	SetConsoleTextAttribute(ENGINE.console_handle, 7);
 #else
 	fprintf(stdout, "\033[0m");
@@ -3007,7 +3028,7 @@ rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atl
 	FILE* _file = NULL;
 	char* _text = NULL;
 
-	#if IS_WINDOWS()
+	#if RDE_IS_WINDOWS()
 		errno_t _err = fopen_s(&_file, _atlas_path, "r");
 		rde_critical_error(_err != 0, RDE_ERROR_FILE_NOT_FOUND, _atlas_path);
 	#else
@@ -3067,7 +3088,7 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 	FILE* _file = NULL;
 	char* _text = NULL;
 
-	#if IS_WINDOWS()
+	#if RDE_IS_WINDOWS()
 	errno_t _err = fopen_s(&_file, _font_path, "r");
 	rde_critical_error(_err != 0, RDE_ERROR_FILE_NOT_FOUND, _font_path);
 	#else
@@ -3313,7 +3334,7 @@ char* rde_file_read_line(rde_file_handle* _file_handler, size_t _line) {
 
 	char* _line_ptr = (char*)malloc(sizeof(char) * _final_line_ptr);
 	memset(_line_ptr, 0, _final_line_ptr);
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 	strncpy_s(_line_ptr, _final_line_ptr, _file_content, _final_line_ptr);
 #else
 	strncpy(_line_ptr, _file_content, _final_line_ptr);
@@ -3325,57 +3346,57 @@ char* rde_file_read_line(rde_file_handle* _file_handler, size_t _line) {
 }
 
 char* rde_file_read_chunk(rde_file_handle* _file_handler, size_t _begin_byte, size_t _end_byte) {
-	UNUSED(_file_handler)
-	UNUSED(_begin_byte)
-	UNUSED(_end_byte)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_file_handler)
+	RDE_UNUSED(_begin_byte)
+	RDE_UNUSED(_end_byte)
+	RDE_UNIMPLEMENTED()
 	return NULL;
 }
 
 void rde_file_write(rde_file_handle* _file_handler, size_t _bytes, const char* _data) {
-	UNUSED(_file_handler)
-	UNUSED(_bytes)
-	UNUSED(_data)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_file_handler)
+	RDE_UNUSED(_bytes)
+	RDE_UNUSED(_data)
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_file_write_to_line(rde_file_handle* _file_handler, size_t _bytes, const char* _data, size_t _line) {
-	UNUSED(_file_handler)
-	UNUSED(_bytes)
-	UNUSED(_data)
-	UNUSED(_line)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_file_handler)
+	RDE_UNUSED(_bytes)
+	RDE_UNUSED(_data)
+	RDE_UNUSED(_line)
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_file_append(rde_file_handle* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line) {
-	UNUSED(_file_handler)
-	UNUSED(_append_byte)
-	UNUSED(_bytes)
-	UNUSED(_data)
-	UNUSED(_line)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_file_handler)
+	RDE_UNUSED(_append_byte)
+	RDE_UNUSED(_bytes)
+	RDE_UNUSED(_data)
+	RDE_UNUSED(_line)
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_file_clear_content(rde_file_handle* _file_handler) {
-	UNUSED(_file_handler)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_file_handler)
+	RDE_UNIMPLEMENTED()
 }
 
 bool rde_file_exists(const char* _file_path) {
-	UNUSED(_file_path)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_file_path)
+	RDE_UNIMPLEMENTED()
 	return false;
 }
 
 void rde_file_delete(const char* _file_path) {
-	UNUSED(_file_path)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_file_path)
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_file_move(const char* _file_path, const char* _new_file_path) {
-	UNUSED(_file_path)
-	UNUSED(_new_file_path)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_file_path)
+	RDE_UNUSED(_new_file_path)
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_file_close(rde_file_handle* _file_handler) {
@@ -3391,7 +3412,7 @@ void rde_file_close(rde_file_handle* _file_handler) {
 // =							PRIVATE API - WINDOW					 	   =
 // ==============================================================================
 
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 rde_window* rde_inner_window_create_windows_window(size_t _free_window_index) {
 	ENGINE.windows[_free_window_index] = rde_struct_create_window();
 	rde_window* _window = &ENGINE.windows[_free_window_index];
@@ -3432,7 +3453,7 @@ rde_window* rde_inner_window_create_windows_window(size_t _free_window_index) {
 }
 #endif
 
-#if IS_MAC()
+#if RDE_IS_MAC()
 rde_window* rde_inner_window_create_mac_window(size_t _free_window_index) {
 	ENGINE.windows[_free_window_index] = rde_struct_create_window();
 	rde_window* _window = &ENGINE.windows[_free_window_index];
@@ -3486,7 +3507,7 @@ rde_window* rde_inner_window_create_mac_window(size_t _free_window_index) {
 }
 #endif
 
-#if IS_LINUX() && !IS_ANDROID()
+#if RDE_IS_LINUX() && !RDE_IS_ANDROID()
 rde_window* rde_inner_window_create_linux_window(size_t _free_window_index) {
 	ENGINE.windows[_free_window_index] = rde_struct_create_window();
 	rde_window* _window = &ENGINE.windows[_free_window_index];
@@ -3526,7 +3547,7 @@ rde_window* rde_inner_window_create_linux_window(size_t _free_window_index) {
 }
 #endif
 
-#if IS_ANDROID()
+#if RDE_IS_ANDROID()
 rde_window* rde_inner_window_create_android_window(size_t _free_window_index) {
 	ENGINE.windows[_free_window_index] = rde_struct_create_window();
 	rde_window* _window = &ENGINE.windows[_free_window_index];
@@ -3575,16 +3596,16 @@ rde_window* rde_inner_window_create_android_window(size_t _free_window_index) {
 }
 #endif
 
-#if IS_IOS()
+#if RDE_IS_IOS()
 rde_window* rde_inner_window_create_ios_window(size_t _free_window_index) {
-	UNIMPLEMENTED();
+	RDE_UNIMPLEMENTED();
     return NULL;
 }
 #endif
 
 #if 0
 rde_window* rde_window_create_wasm_window(size_t _free_window_index) {
-	UNIMPLEMENTED();
+	RDE_UNIMPLEMENTED();
     return NULL;
 }
 #endif
@@ -3614,15 +3635,15 @@ rde_window* rde_window_create_window_os() {
 	}
 
 	// TODO: create window depending on platform
-	#if IS_WINDOWS()
+	#if RDE_IS_WINDOWS()
 		_window = rde_inner_window_create_windows_window(_free_window_index);
-	#elif IS_LINUX() && !IS_ANDROID()
+	#elif RDE_IS_LINUX() && !RDE_IS_ANDROID()
 		_window = rde_inner_window_create_linux_window(_free_window_index);
-	#elif IS_MAC()
+	#elif RDE_IS_MAC()
 		_window = rde_inner_window_create_mac_window(_free_window_index);
-	#elif IS_ANDROID()
+	#elif RDE_IS_ANDROID()
 		_window = rde_inner_window_create_android_window(_free_window_index);
-	#elif IS_IOS()
+	#elif RDE_IS_IOS()
 		_window = rde_inner_window_create_ios_window(_free_window_index);
 	#else
 		rde_critical_error(true, RDE_ERROR_UNSUPPORTED_PLATFORM);
@@ -3671,11 +3692,11 @@ bool rde_window_orientation_is_horizontal(rde_window* _window) {
 }
 
 void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension) {
-	UNUSED(_window)
-	UNUSED(_position)
-	UNUSED(_size_of_rectangle)
-	UNUSED(_file_name_with_extension)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_window)
+	RDE_UNUSED(_position)
+	RDE_UNUSED(_size_of_rectangle)
+	RDE_UNUSED(_file_name_with_extension)
+	RDE_UNIMPLEMENTED()
 }
 
 unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size) {
@@ -3782,7 +3803,7 @@ rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
 }
 
 void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
-#if !IS_MOBILE()
+#if !RDE_IS_MOBILE()
 	GLint profile;
 	glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &profile);
 	if (profile & GL_CONTEXT_CORE_PROFILE_BIT) {
@@ -3794,7 +3815,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	}
 #endif
 
-#if IS_MOBILE()
+#if RDE_IS_MOBILE()
 	GLint _no_of_extensions = 0;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &_no_of_extensions);
 	for (int _i = 0; _i < _no_of_extensions; ++_i) {
@@ -3827,21 +3848,21 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	RDE_CHECK_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//RDE_CHECK_GL(glBlendFuncSeparate, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
-#if !IS_MOBILE() 
-	#if !IS_WASM()
+#if !RDE_IS_MOBILE() 
+	#if !RDE_IS_WASM()
 		RDE_CHECK_GL(glEnable, GL_PROGRAM_POINT_SIZE);
 		RDE_CHECK_GL(glEnable, GL_LINE_SMOOTH);
 		RDE_CHECK_GL(glHint, GL_LINE_SMOOTH_HINT,  GL_NICEST);
 	#endif
 			
-	#if !IS_MAC() && !IS_LINUX()
-		#if !IS_WASM()
+	#if !RDE_IS_MAC() && !RDE_IS_LINUX()
+		#if !RDE_IS_WASM()
 			//glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 		#endif
 	#endif
 #endif
 
-#if !IS_MOBILE() && !IS_WASM()
+#if !RDE_IS_MOBILE() && !RDE_IS_WASM()
 #define SHADER_TYPE "core"
 #else
 #define SHADER_TYPE "es"
@@ -4049,7 +4070,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	DEFAULT_RENDER_TEXTURE->vao = _vao;
 	DEFAULT_RENDER_TEXTURE->vbo = _vbo;
 	
-#if IS_MOBILE()
+#if RDE_IS_MOBILE()
 	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_NONE);
 #else
 	rde_rendering_set_antialiasing(_window, RDE_ANTIALIASING_X4);
@@ -4078,7 +4099,7 @@ void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window) {
 	RDE_CHECK_GL(glViewport, 0, 0, _screen_size.x, _screen_size.y);
 
 	if(ENGINE.antialiasing.samples > 0) {
-#if !IS_MOBILE()
+#if !RDE_IS_MOBILE()
 		RDE_CHECK_GL(glBindFramebuffer, GL_READ_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
 		RDE_CHECK_GL(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
 		rde_vec_2I _screen_size = rde_window_get_window_size(_window);
@@ -4135,7 +4156,7 @@ void rde_inner_rendering_create_shadows() {
 	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.shadows.render_texture->opengl_framebuffer_id);
 	RDE_CHECK_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ENGINE.shadows.render_texture->opengl_texture_id, 0);
 	
-#if IS_MOBILE()
+#if RDE_IS_MOBILE()
 	GLenum _a[1] = { GL_NONE };
 	RDE_CHECK_GL(glDrawBuffers, 1, _a);
 #else
@@ -4171,7 +4192,7 @@ void rde_inner_rendering_destroy_shadows() {
 }
 
 void rde_inner_engine_on_render(float _dt, rde_window* _window) {
-	UNUSED(_dt)
+	RDE_UNUSED(_dt)
 	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 	RDE_CHECK_GL(glViewport, 0, 0, _window_size.x, _window_size.y);
@@ -5252,7 +5273,7 @@ void rde_inner_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh
 		return;
 	}
 
-#if !IS_ANDROID()
+#if !RDE_IS_ANDROID()
     if(current_batch_3d.draw_mesh_wireframe) {
 		RDE_CHECK_GL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
 		rde_inner_rendering_flush_batch_3d();
@@ -5341,7 +5362,7 @@ void rde_rendering_shader_set_uniform_value_float(rde_shader* _shader, const cha
 			case RDE_UNIFORM_FV_MATRIX_3   : glUniformMatrix3fv(_location, 1, _transpose, _data); break;
 			case RDE_UNIFORM_FV_MATRIX_4   : glUniformMatrix4fv(_location, 1, _transpose, _data); break;
 			
-#if !IS_WASM()
+#if !RDE_IS_WASM()
 			case RDE_UNIFORM_FV_MATRIX_2x3 : glUniformMatrix2x3fv(_location, 1, _transpose, _data); break;
 			case RDE_UNIFORM_FV_MATRIX_3x2 : glUniformMatrix3x2fv(_location, 1, _transpose, _data); break;
 			case RDE_UNIFORM_FV_MATRIX_3x4 : glUniformMatrix3x4fv(_location, 1, _transpose, _data); break;
@@ -5468,14 +5489,14 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_textur
 	int _width, _height, _channels;
 	stbi_set_flip_vertically_on_load(1);
 
-#if IS_IOS()
+#if RDE_IS_IOS()
 	stbi_convert_iphone_png_to_rgb(1);
 	stbi_set_unpremultiply_on_load(1);
 #endif
 
 	stbi_uc* _data = NULL;
 	
-#if IS_MOBILE()
+#if RDE_IS_MOBILE()
 	while(rde_util_string_contains_substring(_sanitized_path, "../", false)) {
 		size_t _sp_size = strlen(_sanitized_path);
 		size_t _init_point = 0;
@@ -5569,7 +5590,7 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_textur
 		printf("\n");
 	}
 
-#if IS_MOBILE()
+#if RDE_IS_MOBILE()
 	rde_file_close(_file_handle);
 #endif
 
@@ -5599,7 +5620,7 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 	int _width, _height, _channels;
 	stbi_set_flip_vertically_on_load(1);
 
-#if IS_IOS()
+#if RDE_IS_IOS()
 	stbi_convert_iphone_png_to_rgb(1); 
 	stbi_set_unpremultiply_on_load(1);
 #endif
@@ -5615,7 +5636,7 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 	GLuint _texture_id;
 	RDE_CHECK_GL(glGenTextures, 1, &_texture_id);
 	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _texture_id);
-#if IS_MOBILE() || defined(__EMSCRIPTEN__)
+#if RDE_IS_MOBILE() || defined(__EMSCRIPTEN__)
 	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, GL_ALPHA, _width, _height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, _data);
 	_texture->internal_format = GL_ALPHA;
 	_texture->data_format = GL_ALPHA;
@@ -5960,7 +5981,7 @@ rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]) {
 		int _width, _height, _channels;
 		//stbi_set_flip_vertically_on_load(1);
 
-#if IS_IOS()
+#if RDE_IS_IOS()
 		stbi_convert_iphone_png_to_rgb(1);
 		stbi_set_unpremultiply_on_load(1);
 #endif
@@ -6036,7 +6057,7 @@ rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _h
 	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, 0);
 	RDE_CHECK_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
 
-#if !IS_MOBILE()
+#if !RDE_IS_MOBILE()
 	RDE_CHECK_GL(glDrawBuffer, GL_COLOR_ATTACHMENT0);
 #else
 	GLenum _a[1] = { GL_COLOR_ATTACHMENT0 };
@@ -6097,7 +6118,7 @@ void rde_rendering_render_texture_update(rde_render_texture* _render_texture, si
 	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, 0);
 	RDE_CHECK_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _render_texture->opengl_texture_id, 0);
 
-#if !IS_MOBILE()
+#if !RDE_IS_MOBILE()
 	RDE_CHECK_GL(glDrawBuffer, GL_COLOR_ATTACHMENT0);
 #else
 	GLenum _a[1] = { GL_COLOR_ATTACHMENT0 };
@@ -6125,7 +6146,7 @@ void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture) {
 
 void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing) {
 
- #if IS_MOBILE()
+ #if RDE_IS_MOBILE()
 	if(glFramebufferTexture2DMultisampleEXT == NULL || glRenderbufferStorageMultisampleEXT == NULL || glDiscardFramebufferEXT == NULL) {
 		return;
 	}
@@ -6164,7 +6185,7 @@ void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _anti
 	}
 
 	rde_vec_2I _screen_size = rde_window_get_window_size(_window);
-#if !IS_MOBILE()
+#if !RDE_IS_MOBILE()
     RDE_CHECK_GL(glGenFramebuffers, 1, &ENGINE.antialiasing.frame_buffer_id);
     RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.antialiasing.frame_buffer_id);
     
@@ -6239,25 +6260,25 @@ void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window, bo
 }
 
 void rde_rendering_2d_draw_point(rde_vec_2F _position, rde_color _color, rde_shader* _shader) {
-	UNUSED(_position);
-	UNUSED(_color);
-	UNUSED(_shader);
-	UNIMPLEMENTED()
+	RDE_UNUSED(_position);
+	RDE_UNUSED(_color);
+	RDE_UNUSED(_shader);
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_rendering_3d_draw_point(rde_vec_3F _position, rde_color _color, rde_shader* _shader) {
-	UNUSED(_position);
-	UNUSED(_color);
-	UNUSED(_shader);
-	UNIMPLEMENTED()
+	RDE_UNUSED(_position);
+	RDE_UNUSED(_color);
+	RDE_UNUSED(_shader);
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_rendering_2d_draw_line(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader) {
-	UNUSED(_init);
-	UNUSED(_end);
-	UNUSED(_color);
-	UNUSED(_shader);
-	UNIMPLEMENTED()
+	RDE_UNUSED(_init);
+	RDE_UNUSED(_end);
+	RDE_UNUSED(_color);
+	RDE_UNUSED(_shader);
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_rendering_2d_draw_triangle(rde_vec_2F _vertex_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader) {
@@ -6365,20 +6386,20 @@ void rde_rendering_2d_draw_rectangle(rde_vec_2F _bottom_left, rde_vec_2F _top_ri
 }
 
 void rde_rendering_2d_draw_circle(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader) {
-	UNUSED(_position);
-	UNUSED(_radius);
-	UNUSED(_color);
-	UNUSED(_shader);
-	UNIMPLEMENTED()
+	RDE_UNUSED(_position);
+	RDE_UNUSED(_radius);
+	RDE_UNUSED(_color);
+	RDE_UNUSED(_shader);
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_rendering_2d_draw_polygon(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader) {
-	UNUSED(_transform)
-	UNUSED(_polygon)
-	UNUSED(_color)
-	UNUSED(_color)
-	UNUSED(_shader)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_transform)
+	RDE_UNUSED(_polygon)
+	RDE_UNUSED(_color)
+	RDE_UNUSED(_color)
+	RDE_UNUSED(_shader)
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader) {
@@ -6940,7 +6961,7 @@ void rde_rendering_3d_draw_model(const rde_transform* _transform, rde_model* _mo
 
 void rde_rendering_3d_end_drawing() {
 
-#if !IS_ANDROID()
+#if !RDE_IS_ANDROID()
 	if(current_batch_3d.draw_mesh_wireframe) {
 		RDE_CHECK_GL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
 		rde_inner_rendering_flush_batch_3d();
@@ -7125,7 +7146,7 @@ void rde_rendering_3d_draw_skybox(rde_camera* _camera) {
 }
 
 void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _camera) {
-	UNUSED(_window)
+	RDE_UNUSED(_window)
 	
 	current_batch_3d.use_shadows = RDE_SHADOW_PASS_STATE_DEPTH;
 
@@ -7256,7 +7277,7 @@ void rde_physics_draw_debug_box(rde_transform* _transform, rde_jolt_box_shape_bo
 }
 
 void rde_physics_draw_debug_shapes_specific(rde_jolt_body* _body, rde_jolt_shape* _shape, rde_transform* _transform) {
-	UNUSED(_body)
+	RDE_UNUSED(_body)
 
 	RDE_JOLT_SHAPE_ _shape_type = rde_jolt_shape_get_type(_shape);
 	switch(_shape_type) {
@@ -7287,7 +7308,7 @@ void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera) {
 // =							PRIVATE API - EVENTS					 	   =
 // ==============================================================================
 
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_event_window_resize, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_event_window_resize, {
 	rde_vec_2I _new_window_size = _event->data.window_event_data.size;
 
 	if(ENGINE.antialiasing.samples > 0) {
@@ -7298,8 +7319,8 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_event_window_resize, {
 	rde_rendering_render_texture_update(DEFAULT_RENDER_TEXTURE, _new_window_size.x, _new_window_size.y);
 	rde_rendering_render_texture_enable(DEFAULT_RENDER_TEXTURE);
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_focused_by_mouse, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused_by_mouse, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_focused_by_mouse, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused_by_mouse, {
 	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
@@ -7308,8 +7329,8 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused_by_mouse, {
 		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_focused_by_keyboard, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused_by_keyboard, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_focused_by_keyboard, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused_by_keyboard, {
 	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
@@ -7318,7 +7339,7 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused_by_keyboard,
 		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_moved, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_moved, {
     for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
@@ -7327,7 +7348,7 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_moved, {
 		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_minimized, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_minimized, {
     for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
@@ -7336,7 +7357,7 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_minimized, {
 		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_maximized, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_maximized, {
    	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
@@ -7345,7 +7366,7 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_maximized, {
 		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_closed, { 
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_closed, { 
 	size_t _existing_non_destroyed_windows = 0;
 	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
 		if(&ENGINE.windows[_i] != _window && ENGINE.windows[_i].sdl_window != NULL) {
@@ -7359,57 +7380,57 @@ COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_closed, {
 
 	ENGINE.running = _existing_non_destroyed_windows > 0;
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_display_changed, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_connected, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_disconnected, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_changed_orientation, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(key_pressed, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(window_display_changed, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_connected, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_disconnected, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(display_changed_orientation, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(key_pressed, {
 	if(_window->key_states[_event->data.key_event_data.key] == RDE_INPUT_STATUS_UNINITIALIZED || _window->key_states[_event->data.key_event_data.key] == RDE_INPUT_STATUS_JUST_RELEASED) {
 		_window->key_states[_event->data.key_event_data.key] = RDE_INPUT_STATUS_JUST_PRESSED;
 	} else if(_window->key_states[_event->data.key_event_data.key] == RDE_INPUT_STATUS_JUST_PRESSED) {
 		_window->key_states[_event->data.key_event_data.key] = RDE_INPUT_STATUS_KEEP_PRESSED;
 	}
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(key_released, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(key_released, {
 	_window->key_states[_event->data.key_event_data.key] = RDE_INPUT_STATUS_JUST_RELEASED;
 })
 
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_pressed, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_pressed, {
 	if(_window->mouse_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_UNINITIALIZED || _window->mouse_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_JUST_RELEASED) {
 		_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_JUST_PRESSED;
 	} else if(_window->mouse_states[_event->data.mouse_event_data.button] == RDE_INPUT_STATUS_JUST_PRESSED) {
 		_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_KEEP_PRESSED;
 	}
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_released, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_released, {
 	_window->mouse_states[_event->data.mouse_event_data.button] = RDE_INPUT_STATUS_JUST_RELEASED;
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_moved, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_moved, {
 	_window->mouse_position = _event->data.mouse_event_data.position;
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_scrolled, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mouse_scrolled, {
 	_window->mouse_scroll = _event->data.mouse_event_data.scrolled;
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(drop_file, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_down, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(drop_file, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_down, {
 	if(_window->mobile_states[_event->data.mobile_event_data.finger_id] == RDE_INPUT_STATUS_UNINITIALIZED || _window->mobile_states[_event->data.mobile_event_data.finger_id] == RDE_INPUT_STATUS_JUST_RELEASED) {
 		_window->mobile_states[_event->data.mobile_event_data.finger_id] = RDE_INPUT_STATUS_JUST_PRESSED;
 	} else if(_window->key_states[_event->data.mobile_event_data.finger_id] == RDE_INPUT_STATUS_JUST_PRESSED) {
 		_window->mouse_states[_event->data.mobile_event_data.finger_id] = RDE_INPUT_STATUS_KEEP_PRESSED;
 	}
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_up, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_up, {
 	_window->mobile_states[_event->data.mobile_event_data.finger_id] = RDE_INPUT_STATUS_JUST_RELEASED;
 })
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_moved, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_multi_touch, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_terminating, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_low_memory, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_background, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_background, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_foreground, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_foreground, {})
-COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_locale_changed, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_touch_moved, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_multi_touch, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_terminating, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_low_memory, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_background, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_background, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_will_enter_foreground, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_did_enter_foreground, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(mobile_locale_changed, {})
 
 void rde_inner_events_window_create_events() {
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - RDE_WIN_EVENT_INIT] = &rde_inner_event_window_resize;
@@ -7622,7 +7643,7 @@ void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_ev
 			// _rde_event->data.mobile_event_data.moved_touch_position = (rde_vec_2I) { _sdl_event->tfinger.x - _window_size.x * 0.5f, _sdl_event->tfinger.y - _window_size.y * 0.5f };
 		} break;
 
-		#if IS_MOBILE()
+		#if RDE_IS_MOBILE()
 		case GESTURE_DOLLARGESTURE :{
 			// _rde_event->type = RDE_EVENT_TYPE_MOBILE_DOLLAR_GESTURE;
 			// _rde_event->time_stamp = _sdl_event->dgesture.timestamp;
@@ -7697,7 +7718,7 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 			case SDL_EVENT_FINGER_DOWN:
 			case SDL_EVENT_FINGER_UP:
 			case SDL_EVENT_FINGER_MOTION:
-			#if IS_MOBILE()
+			#if RDE_IS_MOBILE()
 			case GESTURE_DOLLARGESTURE :
 			case GESTURE_DOLLARRECORD :
 			case GESTURE_MULTIGESTURE :
@@ -7781,7 +7802,7 @@ void rde_events_mobile_consume_events(rde_event* _event, rde_window* _window) {
 	}
 }
 
-#if IS_MOBILE()
+#if RDE_IS_MOBILE()
 int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Event* _event) {
 	static bool _terminated = false;
 	rde_window* _window = rde_engine_get_focused_window();
@@ -8061,30 +8082,30 @@ void rde_audio_play_sound(rde_sound* _sound) {
 }
 
 void rde_audio_pause_sound(rde_sound* _sound) {
-	UNUSED(_sound)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_sound)
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_audio_stop_sound(rde_sound* _sound) {
-	UNUSED(_sound)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_sound)
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_audio_restart_sound(rde_sound* _sound) {
-	UNUSED(_sound)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_sound)
+	RDE_UNIMPLEMENTED()
 }
 
 bool rde_audio_is_sound_playing(rde_sound* _sound) {
-	UNUSED(_sound)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_sound)
+	RDE_UNIMPLEMENTED()
 	return false;
 }
 
 bool rde_audio_set_sound_volume(rde_sound* _sound, float _volume) {
-	UNUSED(_sound)
-	UNUSED(_volume)
-	UNIMPLEMENTED()
+	RDE_UNUSED(_sound)
+	RDE_UNUSED(_volume)
+	RDE_UNIMPLEMENTED()
 	return false;
 }
 
@@ -8105,12 +8126,12 @@ void rde_audio_end() {
 #endif
 
 
-#if IS_MOBILE()
+#if RDE_IS_MOBILE()
 // ==============================================================================
 // =							PUBLIC API - MOBILE					 	    =
 // ==============================================================================
 
-#if IS_ANDROID()
+#if RDE_IS_ANDROID()
 ANativeWindow* rde_android_get_native_window() {
 	return ENGINE.android_native_window;
 }
@@ -8128,7 +8149,7 @@ ANativeWindow* rde_android_get_native_window() {
 // =							PRIVATE API - ERROR					 	    =
 // ==============================================================================
 
-#if IS_WINDOWS()
+#if RDE_IS_WINDOWS()
 	void rde_inner_print_stack_trace(FILE* _f) {
 		void* _stack[RDE_MAX_STACK];
 		HANDLE _process = GetCurrentProcess();
@@ -8203,7 +8224,7 @@ ANativeWindow* rde_android_get_native_window() {
 			rde_inner_print_stack_trace(stdout);
 		#else
 			FILE* _f = NULL;
-			#if IS_WINDOWS()
+			#if RDE_IS_WINDOWS()
 				fopen_s(&_f, "rde_crash_logs.txt", "w");
 			#else
 				_f = fopen("rde_crash_logs.txt", "w");
@@ -8219,7 +8240,7 @@ ANativeWindow* rde_android_get_native_window() {
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
 
-#elif (IS_MAC() || IS_LINUX) && !IS_ANDROID()
+#elif (RDE_IS_MAC() || RDE_IS_LINUX) && !RDE_IS_ANDROID()
 
 	void rde_inner_buf_printf(FILE* _f, const char* _fmt, ...) {
 	    va_list _args;
@@ -8389,7 +8410,7 @@ ANativeWindow* rde_android_get_native_window() {
 		_ss.ss_size = RDE_STACKTRACE_BUFF_SIZE;
 		_ss.ss_flags = 0;
 
-		#if !IS_MAC()
+		#if !RDE_IS_MAC()
 			if (sigaltstack(&_ss, NULL) != 0) { err(1, "sigaltstack"); }
 		#endif
 
@@ -8410,7 +8431,7 @@ ANativeWindow* rde_android_get_native_window() {
 		if (sigaction(SIGTERM, &_sig_action, NULL) != 0) { err(1, "sigaction"); }
 		if (sigaction(SIGABRT, &_sig_action, NULL) != 0) { err(1, "sigaction"); }
 	}
-#elif IS_ANDROID()
+#elif RDE_IS_ANDROID()
 
 // Android backtrace is courtesy from https://github.com/alexeikh/android-ndk-backtrace-test/tree/master
 
@@ -8654,7 +8675,7 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	rde_log_level(RDE_LOG_LEVEL_ERROR, "An error made the program crash, check below");
 #endif
 
-#if IS_ANDROID()
+#if RDE_IS_ANDROID()
 	va_list _args;
 	va_start(_args, _fmt);
 	char* _error = (char*)malloc(sizeof(char) * 10000);
@@ -8672,7 +8693,7 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 #else
 	FILE* _f = NULL;
 	
-	#if IS_WINDOWS()
+	#if RDE_IS_WINDOWS()
 		fopen_s(&_f, "rde_crash_logs.txt", "w");
 	#else
 		_f = fopen("rde_crash_logs.txt", "w");

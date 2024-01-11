@@ -290,7 +290,7 @@ static
 void* file_open(const char* path, void* user_data)
 {
     (void)(user_data);
-    #if IS_WINDOWS()
+    #if RDE_IS_WINDOWS()
     FILE* _file = NULL;
     fopen_s(&_file, path, "rb");
     return _file;
