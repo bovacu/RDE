@@ -5363,7 +5363,7 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 		_shader->compiled_program_id = _program_id;
 		rde_strcat(_shader->name, RDE_SHADER_MAX_NAME, _name);
 
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Loaded shader with index '%d' successfully", _shader->compiled_program_id);
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Loaded shader '%s' with index '%d' successfully", _shader->name, _shader->compiled_program_id);
 		return _shader;
 	}
 
