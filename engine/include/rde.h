@@ -91,47 +91,135 @@ extern "C" {
 
 /// ========================= NUMERIC CONSTANTS ============================
 
+// Group: Constants
+
+// Constant: RDE_EPSILON
+// Margin error for physics and mathematics calculations, by default is 0.0001f
 #define RDE_EPSILON 0.0001f
+
+// Constant: RDE_PI
+// PI number, by default is 3.14159265358979323846264338327950288
 #define RDE_PI 3.14159265358979323846264338327950288
 
+// Constant: RDE_MAX_AMOUNT_OF_WINDOWS
+// Max number of windows the application can create, by default is 10
 #define RDE_MAX_AMOUNT_OF_WINDOWS 10
+
+// Constant: RDE_MAX_VERTICES_PER_BATCH
+// Max number of vertices to group on a 2D batch drawcall, by default is 50000
 #define RDE_MAX_VERTICES_PER_BATCH 50000
+
+// Constant: RDE_MAX_LOADABLE_SHADERS
+// Max number of shaders the application can create and load, by default is 256
 #define RDE_MAX_LOADABLE_SHADERS 256
 
+// Constant: RDE_MAX_LOADABLE_TEXTURES
+// Max number of textures the application can create and load, by default is 512
 #define RDE_MAX_LOADABLE_TEXTURES 512
+
+// Constant: RDE_MAX_LOADABLE_ATLASES
+// Max number of atlases the application can create and load, by default is 512
 #define RDE_MAX_LOADABLE_ATLASES 512
+
+// Constant: RDE_MAX_LOADABLE_FONTS
+// Max number of fonts the application can create and load, by default is 512
 #define RDE_MAX_LOADABLE_FONTS 512
+
+// Constant: RDE_MAX_LOADABLE_MODELS
+// Max number of 3D models the application can create and load, by default is 512
 #define RDE_MAX_LOADABLE_MODELS 512
+
+// Constant: RDE_MAX_LOADABLE_MODELS_TEXTURES
+// Max number of textures for 3D models the application can create and load, by default is 512
 #define RDE_MAX_LOADABLE_MODELS_TEXTURES 512
 
 #ifdef	RDE_AUDIO_MODULE
+// Constant: RDE_MAX_LOADABLE_SOUNDS
+// Max number of sounds the application can create and load, by default is 128
 #define RDE_MAX_LOADABLE_SOUNDS 128
+
+// Constant: RDE_MAX_LOADABLE_MUSICS
+// Max number of musics the application can create and load, by default is 128
+#define RDE_MAX_LOADABLE_MUSICS 128
 #endif
 
+// Constant: RDE_INT_MAX
+// Max value of an integer 2147483647
 #define RDE_INT_MAX 2147483647
-#define RDE_INT_MIN (-2147483647 - 1)
+
+// Constant: RDE_INT_MIN
+// Min value of an integer -2147483648
+#define RDE_INT_MIN -2147483648
+
+// Constant: RDE_LONG_MAX
+// Max value of a long 2147483647
 #define RDE_LONG_MAX 2147483647
-#define RDE_LONG_MIN (-2147483647 - 1)
+
+// Constant: RDE_LONG_MIN
+// Min value of a long -2147483648
+#define RDE_LONG_MIN -2147483648
+
+// Constant: RDE_FLOAT_MAX
+// Max value of a float 3.402823466 E+38
 #define RDE_FLOAT_MAX 3.402823466 E + 38
+
+// Constant: RDE_FLOAT_MIN
+// Min value of a float 1.175494351 E-38
 #define RDE_FLOAT_MIN 1.175494351 E - 38
+
+// Constant: RDE_DOUBLE_MAX
+// Max value of n double 1.7976931348623158 E+308
 #define RDE_DOUBLE_MAX 1.7976931348623158 E + 308
+
+// Constant: RDE_DOUBLE_MIN
+// Min value of a double 2.2250738585072014 E-308
 #define RDE_DOUBLE_MIN 2.2250738585072014 E - 308
+
+// Constant: RDE_UINT_MAX
+// Max value of an unsifned int 4294967295
 #define RDE_UINT_MAX 4294967295
+
+// Constant: RDE_ULONG_MAX
+// Max value of an unsigned long 4294967295
 #define RDE_ULONG_MAX 4294967295
 
 /// ============================== SHADERS =================================
 
+// Constant: RDE_SHADER_LINE
+// Name for the line shader, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'line_shader'.
 #define RDE_SHADER_LINE "line_shader"
+
+// Constant: RDE_SHADER_COLOR
+// Name for the geometry shapes shader, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'color_shader'.
 #define RDE_SHADER_COLOR "color_shader"
+
+// Constant: RDE_SHADER_TEXTURE
+// Name for the textures, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'texture_shader'.
 #define RDE_SHADER_TEXTURE "texture_shader"
+
+// Constant: RDE_SHADER_TEXT
+// Name for the text, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'text_shader'.
 #define RDE_SHADER_TEXT "text_shader"
+
+// Constant: RDE_SHADER_FRAMEBUFFER
+// Name for the framebuffer, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'framebuffer_shader'.
 #define RDE_SHADER_FRAMEBUFFER "framebuffer_shader"
+
+// Constant: RDE_SHADER_MESH
+// Name for the 3D meshes, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'mesh_shader'.
 #define RDE_SHADER_MESH "mesh_shader"
+
+// Constant: RDE_SHADER_SKYBOX
+// Name for the skybox, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'skybox_shader'.
 #define RDE_SHADER_SKYBOX "skybox_shader"
+
+// Constant: RDE_SHADER_SHADOWS
+// Name for the shadow map, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'shadows_shader'.
 #define RDE_SHADER_SHADOWS "shadows_shader"
 
 /// ====================== COMPILATION AND EXPORT ==========================
 
+// Group: Macros
 #if defined(__APPLE__)
 	#include "TargetConditionals.h"
 	#if TARGET_OS_IPHONE
@@ -143,19 +231,53 @@ extern "C" {
 	#endif
 #endif
 
+// Macro: RDE_IS_MAC
+// Checks if the current platform is MacOS. Use for compile time.
 #define RDE_IS_MAC() (defined(__APPLE__) && defined(MAC_PLATFORM))
+
+// Macro: RDE_IS_WINDOWS
+// Checks if the current platform is Windows. Use for compile time.
 #define RDE_IS_WINDOWS() _WIN32
+
+// Macro: RDE_IS_WASM
+// Checks if the current platform is WASM. Use for compile time.
 #define RDE_IS_WASM() __EMSCRIPTEN__
+
+// Macro: RDE_IS_LINUX
+// Checks if the current platform is Linux. Use for compile time.
 #define RDE_IS_LINUX() (defined(__linux__))
+
+// Macro: RDE_IS_DESKTOP
+// Checks if the current platform is Windows, Linux or MacOS. Use for compile time.
 #define RDE_IS_DESKTOP() (RDE_IS_LINUX() || RDE_IS_MAC() || RDE_IS_WINDOWS())
+
+// Macro: RDE_IS_IOS
+// Checks if the current platform is iOS (iPhone or iPad). Use for compile time.
 #define RDE_IS_IOS() (defined(__APPLE__) && defined(IOS_PLATFORM))
+
+// Macro: RDE_IS_APPLE
+// Checks if the current platform is iPhone, iPad or MacOS. Use for compile time.
 #define RDE_IS_APPLE() (RDE_IS_MAC() || RDE_IS_IOS())
+
+// Macro: RDE_IS_ANDROID
+// Checks if the current platform is Android. Use for compile time.
 #define RDE_IS_ANDROID() (defined(__ANDROID__))
+
+// Macro: RDE_IS_MOBILE
+// Checks if the current platform is Android, iPad or iPhone. Use for compile time.
 #define RDE_IS_MOBILE() (RDE_IS_ANDROID() || RDE_IS_IOS())
 
 #if RDE_IS_WINDOWS()
+// Macro: RDE_FUNC
+// Export macro use for windows, so the marked functions are exported correctly to the library.
 	#define RDE_FUNC __declspec(dllexport)
+
+// Macro: RDE_FUNC_STATIC
+// Same as <RDE_FUNC> but static
 	#define RDE_FUNC_STATIC __declspec(dllexport) static
+
+// Macro: RDE_FUNC_EXTERNAL
+// Same as <RDE_FUNC> but extern "C".
 	#define RDE_FUNC_EXTERNAL extern "C" RDE_FUNC
 #else
 	#define RDE_FUNC 
@@ -164,6 +286,8 @@ extern "C" {
 #endif
 
 #ifdef RDE_NO_NAMESPACES
+// Macro: RDE_N
+// Creates the C "namespace" system of the library. Can be disabled when compiling the library. This will only expose the short name of the functions.
 #define RDE_N(_namespace, _function) _function
 #else
 #define RDE_N(_namespace, _function) _namespace##_##_function
@@ -177,6 +301,8 @@ extern "C" {
 	#include <shlwapi.h>
 #endif			 
 
+// Macro: RDE_SHOW_WINDOWS_CONSOLE
+// If used on a Windows platform, it will show the windows console while executing the main program.
 #define RDE_SHOW_WINDOWS_CONSOLE 							\
 	if(AllocConsole()) {									\
 		freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);	\
@@ -193,42 +319,104 @@ typedef unsigned int uint;
 #define RDE_STRINGIZE(x) STRINGIZE2(x)
 #define RDE_STRINGIZE2(x) #x
 
+// Macro: RDE_LINE_STRING
+// Gives the line where it is called as a string.
 #define RDE_LINE_STRING STRINGIZE(__LINE__)
+
+// Macro: RDE_FUNC_STRING
+// Gives the function name where it is called as a string.
 #define RDE_FUNC_STRING STRINGIZE(__func__)
+
+// Macro: RDE_FILE_STRING
+// Gives the file name where it is called as a string.
 #define RDE_FILE_STRING STRINGIZE(__FILE__)
 
+// Macro: RDE_COLOR_TO_HEX_COLOR
+// Transforms a rde_color into an int hex value.
+// Parameters:
+//	_color - rde_color to convert to int
+//
+//	======= C =======
+//	int _green_hex = RDE_COLOR_TO_HEX_COLOR(RDE_COLOR_GREEN);
+//	=================
 #define RDE_COLOR_TO_HEX_COLOR(_color) (((int)_color.a) << 24) + (((int)_color.b) << 16) + (((int)_color.g) << 8) + ((int)_color.r)
 
+// Macro: RDE_DEPRECATED
+// Used to deprecate functions or structs.
+// Parameters:
+//	_func 	 	 - full signature of the function.
+//	_message 	 - why it is depracated.
+//	_replacement - what to use instead.
+//
+//	======= C =======
+//	RDE_DEPRECATED(my_deprecated_func(int _a, bool _c), "This was deprecated on version 1.4", "Use my_non_deprecated_func(int _a, bool _c, const char* _str)");
+//	=================
 #define RDE_DEPRECATED(_func, _message, _replacement) _func __attribute__((deprecated(_message, _replacement)));
 
-#define RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(_func_name, _extra_code) 	\
-	void _func_name(rde_event* _event, rde_window* _window) {					\
-		RDE_UNUSED(_window);													\
-		RDE_UNUSED(_event);														\
-		_extra_code																\
-	}
 
 #if !RDE_IS_ANDROID()
-	#define rde_log_level(_level, _fmt, ...) do { 						\
+//  Macro: rde_log_level
+//
+//	Prints to the console with a specific severity (which includes an automatic color). Adds new line automatically.
+//
+//	Parameters:
+//		_level - level of severity.
+//		_fmt   - formatted C style string to print.
+//	======= C =======
+//	rde_log_level(RDE_LOG_LEVEL_INFO, "This number %i is an %s", 5, "integer");
+//	=================
+	#define rde_log_level(_level, _fmt, ...) 							\
+	do { 																\
 		if(!rde_engine_logs_supressed()) {								\
 			rde_log_level_inner(_level, _fmt __VA_OPT__(,) __VA_ARGS__);\
 			printf("\n");												\
 		}																\
 	} while(0);
 
-	#define rde_log_color(_color, _fmt, ...) do { 							\
+//  Macro: rde_log_color
+//
+//	Prints to the console on a specific color. Adds new line automatically.
+//
+//	Parameters:
+//		_color - Color to print to the console.
+//		_fmt   - formatted C style string to print.
+//	======= C =======
+//	rde_log_color(RDE_LOG_COLOR_BLUE, "This number %i is an %s and the line will be blue", 5, "integer");
+//	=================
+	#define rde_log_color(_color, _fmt, ...) 								\
+	do { 																	\
 		if(!rde_engine_logs_supressed()) {									\
 			rde_log_color_inner(_color, _fmt  __VA_OPT__(,) __VA_ARGS__);	\
 			printf("\n");													\
 		}																	\
 	} while(0);
 	
+//  Macro: rde_log_level_sl
+//
+//	Prints to the console with a specific severity (which includes an automatic color). Does not add new.
+//
+//	Parameters:
+//		_level - level of severity.
+//		_fmt   - formatted C style string to print.
+//	======= C =======
+//	rde_log_level_sl(RDE_LOG_LEVEL_INFO, "This number %i is an %s", 5, "integer");
+//	=================
 	#define rde_log_level_sl(_level, _fmt, ...) do { 						\
 		if(!rde_engine_logs_supressed()) {									\
 			rde_log_level_inner(_level, _fmt  __VA_OPT__(,) __VA_ARGS__);	\
 		}																	\
 	} while(0);
 	
+//  Macro: rde_log_color_sl
+//
+//	Prints to the console on a specific color. Does not add new line.
+//
+//	Parameters:
+//		_color - Color to print to the console.
+//		_fmt   - formatted C style string to print.
+//	======= C =======
+//	rde_log_color_sl(RDE_LOG_COLOR_BLUE, "This number %i is an %s and the line will be blue", 5, "integer");
+//	=================
 	#define rde_log_color_sl(_color, _fmt, ...) do { 						\
 		if(!rde_engine_logs_supressed()) {									\
 			rde_log_color_inner(_color, _fmt  __VA_OPT__(,) __VA_ARGS__);	\
@@ -265,11 +453,39 @@ typedef unsigned int uint;
 #define RDE_SAFE_ARR_ACCESS(_type) RDE_FUNC _type rde_arr_s_get_##_type(uint _index, _type* _arr, size_t _arr_size, char* _fmt, ...);
 #define RDE_SAFE_ARR_SET(_type) RDE_FUNC void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...);
 
+// Macro: rde_render_3d
+// More compact way of rendering 3D without shadows. Result of doing <rde_rendering_3d_begin_drawing>, draw your scene, <rde_rendering_3d_end_drawing>
+//
+// Parameters:
+//	_window - rde_window pointer being rendered.
+//	_camera - rde_camera pointer that will render onto the window.
+//	_draw_wireframe - bool to draw wireframe over the models.
+//	_block_of_code - custom rendering code, must be between { }.
+//
+//	======= C =======
+//	rde_render_3d(_my_window_pointer, _my_camera_pointer, false, {
+//		rde_rendering_3d_draw_model(_my_transform, _my_model, NULL);
+//	});
+//	=================
 #define rde_render_3d(_window, _camera, _draw_wireframe, _block_of_code)\
 	rde_rendering_3d_begin_drawing(_camera, _window, _draw_wireframe);	\
 	_block_of_code														\
 	rde_rendering_3d_end_drawing();
-	
+
+// Macro: rde_render_3d_with_shadows
+// More compact way of rendering 3D with shadows. Result of doing <rde_rendering_3d_begin_drawing>, draw your scene, <rde_rendering_3d_end_drawing>
+//
+// Parameters:
+//	_window - rde_window pointer being rendered.
+//	_camera - rde_camera pointer that will render onto the window.
+//	_draw_wireframe - bool to draw wireframe over the models.
+//	_block_of_code - custom rendering code, must be between { }.
+//
+//	======= C =======
+//	rde_render_3d_with_shadows(_my_window_pointer, _my_camera_pointer, false, {
+//		rde_rendering_3d_draw_model(_my_transform, _my_model, NULL);
+//	});
+//	=================
 #define rde_render_3d_with_shadows(_window, _camera, _draw_wireframe, _block_of_code)	\
 	rde_rendering_3d_begin_drawing(_camera, _window, _draw_wireframe);					\
 	rde_rendering_shadows_begin(_window, _camera);										\
@@ -278,24 +494,82 @@ typedef unsigned int uint;
 	_block_of_code																		\
 	rde_rendering_3d_end_drawing();
 
+// Macro: rde_render_2d
+// More compact way of rendering 2D. Result of doing <rde_rendering_2d_begin_drawing>, draw your scene, <rde_rendering_2d_end_drawing>
+//
+// Parameters:
+//	_window - rde_window pointer being rendered.
+//	_camera - rde_camera pointer that will render onto the window.
+//	_is_hud - bool to know if it is something to be drawn as Hud, which means it will stay on place on the screen even if camera moves.
+//	_block_of_code - custom rendering code, must be between { }.
+//
+//	======= C =======
+//	rde_render_2d(_my_window_pointer, _my_camera_pointer, false, {
+//		rde_rendering_2d_texture(_my_transform, _my_texture, RDE_COLO_WHITE, NULL);
+//	});
+//	=================
 #define rde_render_2d(_window, _camera, _is_hud, _block_of_code)\
 	rde_rendering_2d_begin_drawing(_camera, _window, _is_hud);	\
 	_block_of_code												\
 	rde_rendering_2d_end_drawing();
 
 #if RDE_IS_WINDOWS()
+// Macro: rde_strcpy
+// Platform independent standard strcpy.
+//
+// Parameters:
+//	_dst - char array to copy data.
+//	_dst_size - size of char array to copy data.
+//	_src - data to copy into _dst.
+//
+//	======= C =======
+//	char _my_dst[128] = {0};
+//	rde_strcpy(_my_dst, 128, _source_data_pointer);
+//	=================
+// or
+//	======= C =======
+//	char _my_dst[128] = {0};
+//	rde_strcpy(_my_dst, 128, "Hello, Duck!");
+//	=================
 #define rde_strcpy(_dst, _dst_size, _src) strcpy_s(_dst, _dst_size, _src);
 #else
 #define rde_strcpy(_dst, _dst_size, _src) strcpy(_dst, _src);
 #endif
 
 #if RDE_IS_WINDOWS()
+// Macro: rde_strcat
+// Platform independent standard strcat.
+//
+// Parameters:
+//	_dst - char array to concat data.
+//	_dst_size - size of char array to concat data.
+//	_src - data to concat into _dst.
+//
+//	======= C =======
+//	char _my_dst[128] = {0};
+//	rde_strcat(_my_dst, 128, "Hello, ");
+//	rde_strcat(_my_dst, 128, "Duck!");
+//	=================
 #define rde_strcat(_dst, _dst_size, _src) strcat_s(_dst, _dst_size, _src);
 #else
 #define rde_strcat(_dst, _dst_size, _src) strcat(_dst, _src);
 #endif
 
 #if RDE_IS_WINDOWS()
+// Macro: rde_strncat
+// Platform independent standard strncat.
+//
+// Parameters:
+//	_dst - char array to concat data.
+//	_dst_size - size of char array to concat data.
+//	_src - data to concat into _dst.
+//	_src_size - amount of bytes to copy from _src to _dst.
+//
+//	======= C =======
+//	char _my_dst[128] = {0};
+//	rde_strncat(_my_dst, 128, "Hello, ", 7);
+//	rde_strncat(_my_dst, 128, "Duck!", 5);
+//	=================
 #define rde_strncat(_dst, _dst_size, _src, _src_amount) strncat_s(_dst, _dst_size, _src, _src_amount);
 #else
 #define rde_strncat(_dst, _dst_size, _src, _src_amount) strncat(_dst, _src, _src_amount);
@@ -1434,7 +1708,32 @@ const rde_texture_parameters RDE_DEFAULT_TEXTURE_PARAMETERS = {
 
 /// ============================ LOG ========================================
 
+// Group: Log
+
+//  Function: rde_log_color
+//
+//	Prints to the console on a specific color.
+//
+//	Parameters:
+//		_color - Color to print to the console.
+//		_fmt   - formatted C style string to print.
+//
+//	About:
+//
+//		This is an inner function, do not use. Use macro <rde_log_color> instead.
 RDE_FUNC void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...);
+
+//  Function: rde_log_level
+//
+//	Prints to the console with a specific severity (which includes an automatic color).
+//
+//	Parameters:
+//		_level - level of severity.
+//		_fmt   - formatted C style string to print.
+//
+//	About:
+//
+//		This is an inner function, do not use. Use macro <rde_log_level> instead.
 RDE_FUNC void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 
 /// ============================ UTIL =======================================

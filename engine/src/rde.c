@@ -219,6 +219,7 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- [DONE] On every 'load' function, if a resource is going to be reloaded, return the already loaded one.
 //			- [] Simplex Noise generation
 //			- [] Wave funcion collapse algorithm
+//			- [] Function to convert any kind of skybox to a cubemap
 //
 //		- [] TOOL: command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
@@ -238,6 +239,7 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 //			- [] Rectangles and other shapes are not working correctly (lines do)
 //			- [FIXED] Android warning "warning: implicit declaration of function 'SDL_AndroidGetNativeWindow' is invalid in C99"
 //			- [] 3D batching is not implemented, if object A is rendered, then B and then A again, 3 drawcalls are sent, fix this.
+//			- [] Skybox bottom and top are not okay
 
 
 /// *************************************************************************************************
@@ -323,6 +325,13 @@ void rde_critical_error(bool _condition, const char* _fmt, ...);
 		rde_critical_error(_index >= _arr_size, "Index accessed '%u' is greater than array size '%llu''.\n", _index, _arr_size);\
 		_arr[_index] = _value;																									\
 }
+
+#define RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(_func_name, _extra_code) 	\
+	void _func_name(rde_event* _event, rde_window* _window) {					\
+		RDE_UNUSED(_window);													\
+		RDE_UNUSED(_event);														\
+		_extra_code																\
+	}
 
 RDE_IMPLEMENT_SAFE_ARR_ACCESS(int)
 RDE_IMPLEMENT_SAFE_ARR_ACCESS(uint)
@@ -3828,11 +3837,11 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	GLint profile;
 	glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &profile);
 	if (profile & GL_CONTEXT_CORE_PROFILE_BIT) {
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Core profile");
+		rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL is in 'Core profile'");
 	} else if(profile & GL_CONTEXT_COMPATIBILITY_PROFILE_BIT) {
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Compatibility profile");
+		rde_log_level(RDE_LOG_LEVEL_INFO, "OpenGL is in 'Compatibility profile'");
 	} else {
-		rde_log_level(RDE_LOG_LEVEL_WARNING, "Unkown OpenGL context profile");
+		rde_log_level(RDE_LOG_LEVEL_WARNING, "OpenGL is in 'Unkown OpenGL context profile'");
 	}
 #endif
 
