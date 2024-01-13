@@ -183,6 +183,18 @@ extern "C" {
 // Max value of an unsigned long 4294967295
 #define RDE_ULONG_MAX 4294967295
 
+// Constant: RDE_ARR_AMOUNT_INCREASE
+// Amount to increase when capacity is full, by default 2
+#define RDE_ARR_AMOUNT_INCREASE 2
+	
+// Constant: RDE_ARR_OPERAND_INCREASE
+// Operand to use when capacity is full, by default * and can also be +
+#define RDE_ARR_OPERAND_INCREASE *
+	
+// Constant: RDE_ARR_DEFAULT_CAPACITY
+// Default capacity when creating a new dynamic array, by default 10
+#define RDE_ARR_DEFAULT_CAPACITY 10
+	
 /// ============================== SHADERS =================================
 
 // Constant: RDE_SHADER_LINE
@@ -576,6 +588,17 @@ typedef unsigned int uint;
 #endif
 
 #if RDE_IS_WINDOWS()
+// Macro: rde_strtok
+// Platform independent standard strtok.
+//
+// Parameters:
+//	_dst - char array to concat data.
+//	_del - tokenizer delimiter.
+//	_ctx - context. This is only used on Windows on specific cases <https://learn.microsoft.com/es-es/cpp/c-runtime-library/reference/strtok-s-strtok-s-l-wcstok-s-wcstok-s-l-mbstok-s-mbstok-s-l?view=msvc-170>
+//
+//	======= C =======
+//	char* _tokens = rde_strtok("Hello, Duck!", ",", NULL);
+//	=================
 #define rde_strtok(_str, _del, _ctx) strtok_s(_str, _del, _ctx);
 #else
 #define rde_strtok(_str, _del, _ctx) strtok(_str, _del);
@@ -733,6 +756,244 @@ typedef unsigned int uint;
 		};										\
 	} _name;
 
+// Macro: rde_arr_decl
+// Defines a new type of dynamic array.
+//
+// Parameters:
+//	_type - the type of data that the array will hold.
+//
+//	======= C =======
+//	typedef struct {
+//		long a;
+//	} A;
+//
+//	rde_arr_decl(A);
+//	=================
+#define rde_arr_decl(_type)	\
+typedef struct {			\
+	_type* memory;			\
+	unsigned long capacity;	\
+	unsigned long used;		\
+	size_t type_size;		\
+	_type default_value;	\
+} rde_arr_##_type
+
+// Macro: rde_arr_init
+// Inits a dynamic array inner fields to the default values.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//	_default_value - the default value that elements should have when created.
+//
+//	======= C =======
+//	rde_arr_A _arr;
+//	A _a = {0};
+// 	rde_arr_init(_arr, _a);
+//	=================
+#define rde_arr_init(_dyn_arr, _default_value) 	\
+	do {										\
+		_dyn_arr.memory = NULL;					\
+		_dyn_arr.capacity = 0;					\
+		_dyn_arr.used = 0;						\
+		_dyn_arr.type_size = 0;					\
+		_dyn_arr.default_value = _default_value;\
+	} while(0)
+
+// Macro: rde_arr_new_with_capacity
+// Allocates the data for the dynamic array.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//	_type - the type of data that the array will hold.
+//	_capacity - the initial amount of elements of the array.
+//
+//	======= C =======
+//	rde_arr_new_with_capacity(_arr, A, 10);
+//	=================
+#define rde_arr_new_with_capacity(_dyn_arr, _type, _capacity) 																			\
+	do {																																\
+		if(_dyn_arr.memory != NULL) {																									\
+			free(_dyn_arr.memory);																										\
+		}																																\
+																																		\
+		_dyn_arr.memory = (_type*)malloc(sizeof(_type) * _capacity);																	\
+		rde_critical_error(_dyn_arr.memory == NULL, "Bytes %d could not be allocated for %s", sizeof(_type) * _capacity, "rde_arr new");\
+		_dyn_arr.used = 0;																												\
+		_dyn_arr.capacity = _capacity;																									\
+		_dyn_arr.type_size = sizeof(_type);																								\
+	} while(0)
+
+// Macro: rde_arr_new
+// Allocates the data for the dynamic array.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//	_type - the type of data that the array will hold.
+//
+//	======= C =======
+//	rde_arr_new(_arr, A);
+//	=================
+#define rde_arr_new(_dyn_arr, _type) rde_arr_new_with_capacity(_dyn_arr, _type, RDE_ARR_DEFAULT_CAPACITY)
+	
+// Macro: rde_arr_add
+// Adds an element to an existing dynamic array.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//	_element - the data to add to the back of the array.
+//
+//	======= C =======
+//	A _b = { .a = 10 };
+//	rde_arr_add(_arr, _b);
+//	=================
+#define rde_arr_add(_dyn_arr, _element)																												\
+	do {																																			\
+		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");																		\
+		if(_dyn_arr.used + 1 == _dyn_arr.capacity) {																								\
+			_dyn_arr.capacity = _dyn_arr.capacity RDE_ARR_OPERAND_INCREASE RDE_ARR_AMOUNT_INCREASE;													\
+			void* _new_memory = (void*)realloc(_dyn_arr.memory, _dyn_arr.type_size * _dyn_arr.capacity);											\
+			if(_new_memory == NULL) {																												\
+				free(_dyn_arr.memory);																												\
+				rde_critical_error(true, "Bytes %d could not be allocated for %s", sizeof(_dyn_arr.type_size) * _dyn_arr.capacity, "rde_arr add");	\
+			}																																		\
+		}																																			\
+		_dyn_arr.memory[_dyn_arr.used++] = _element;																								\
+	} while(0)
+
+// Macro: rde_arr_remove
+// Removes an element by index from an existing dynamic array.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//	_index - the index to remove. There is a safety check on bounds.
+//
+//	======= C =======
+//	rde_arr_remove(_arr, 0);
+//	=================
+#define rde_arr_remove(_dyn_arr, _index)																							\
+	do {																															\
+		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");														\
+		rde_critical_error(_index < 0 || _index >= _dyn_arr.capacity, "Arr[%d] out of bounds, max %d", _index, _dyn_arr.capacity);	\
+		memmove(_dyn_arr.memory + _index, _dyn_arr.memory + (_index + 1), _dyn_arr.capacity - _index);								\
+	} while(0)
+
+// Macro: rde_arr_get_element
+// Gets an element by index from an existing dynamic array.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//	_index - the index to remove. There is a safety check on bounds.
+//	_value - variable to store the result.
+//
+//	======= C =======
+//	A _retrieve;
+//	rde_arr_get_element(_arr, 0, _retrieve);
+//	=================
+#define rde_arr_get_element(_dyn_arr, _index, _value) 																				\
+	do {																															\
+		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");														\
+		rde_critical_error(_index < 0 || _index >= _dyn_arr.capacity, "Arr[%d] out of bounds, max %d", _index, _dyn_arr.capacity);	\
+		_value = _dyn_arr.memory[_index];																							\
+	} while(0)
+
+// Macro: rde_arr_get_element_ptr
+// Gets an element by index from an existing dynamic array.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//	_index - the index to remove. There is a safety check on bounds.
+//	_value - variable to store the result as pointer.
+//
+//	======= C =======
+//	A* _retrieve;
+//	rde_arr_get_element_ptr(_arr, 0, _retrieve);
+//	=================
+#define rde_arr_get_element_ptr(_dyn_arr, _index, _value) 																			\
+	do {																															\
+		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");														\
+		rde_critical_error(_index < 0 || _index >= _dyn_arr.capacity, "Arr[%d] out of bounds, max %d", _index, _dyn_arr.capacity);	\
+		_value = &_dyn_arr.memory[_index];																							\
+	} while(0)
+
+// Macro: rde_arr_get_total_capacity
+// Returns the full capacity of the dynamic array.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//
+//	======= C =======
+//	ulong  _capacity = rde_arr_get_total_capacity(_arr);
+//	=================
+#define rde_arr_get_total_capacity(_dyn_arr) _dyn_arr.capacity
+	
+// Macro: rde_arr_get_used_capacity
+// Returns the used capacity of the dynamic array.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//
+//	======= C =======
+//	ulong  _used_capacity = rde_arr_get_used_capacity(_arr);
+//	=================
+#define rde_arr_get_used_capacity(_dyn_arr) _dyn_arr.used
+
+// Macro: rde_arr_set_element
+// Sets an element by index on an existing dynamic array.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//	_index - the index to remove. There is a safety check on bounds.
+//	_element - new element to place at _index.
+//
+//	======= C =======
+//	A _new_b = { .a = -5 };
+//	rde_arr_set_element_(_arr, 0, _new_b);
+//	=================
+#define rde_arr_set_element(_dyn_arr, _index, _element)																				\
+	do {																															\
+		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");														\
+		rde_critical_error(_index < 0 || _index >= _dyn_arr.capacity, "Arr[%d] out of bounds, max %d", _index, _dyn_arr.capacity);	\
+		_dyn_arr.memory[_index] = _element;																							\
+	} while(0)
+	
+// Macro: rde_arr_clear
+// Clears all the data in the array to the default value. Resets 'used' field to 0. Does not deallocate memory.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//
+//	======= C =======
+//	rde_arr_clear(_arr);
+//	=================
+#define rde_arr_clear(_dyn_arr)													\
+	do {																		\
+		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");	\
+		for(unsigned int _i = 0; _i < _dyn_arr.capacity; _i++) {				\
+			_dyn_arr.memory[_i] = _dyn_arr.defaul_value;						\
+		}																		\
+		_dyn_arr.used = 0;														\
+	} while(0)
+	
+// Macro: rde_arr_free
+// Frees the dynamic array and resets all the fields.
+//
+// Parameters:
+//	_dyn_arr - the dynamic array.
+//
+//	======= C =======
+//	rde_arr_free(_arr);
+//	=================
+#define rde_arr_free(_dyn_arr)			\
+	do {								\
+		if(_dyn_arr.memory != NULL) {	\
+			free(_dyn_arr.memory);		\
+			_dyn_arr.memory = NULL;		\
+		}								\
+		_dyn_arr.capacity = 0;			\
+		_dyn_arr.used = 0;				\
+		_dyn_arr.type_size = 0;			\
+	} while(0)
+	
 /// *************************************************************************************************
 /// *                                		  ENUMS                         						*
 /// *************************************************************************************************
@@ -2065,6 +2326,17 @@ RDE_FUNC void rde_file_move(const char* _file_path, const char* _new_file_path);
 RDE_FUNC void rde_file_close(rde_file_handle* _file_handler);
 RDE_FUNC void rde_file_free_read_text(rde_file_handle* _file_handle);
 RDE_FUNC void rde_file_free_read_bytes(rde_file_handle* _file_handle);
+
+
+
+
+/// ============================ ERROR ================================
+
+RDE_FUNC void rde_critical_error(bool _condition, const char* _fmt, ...);
+
+
+
+
 
 #if RDE_IS_ANDROID()
 RDE_FUNC ANativeWindow* rde_android_get_native_window();

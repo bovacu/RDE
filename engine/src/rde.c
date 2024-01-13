@@ -114,7 +114,6 @@ void rde_inner_posix_signal_handler(int _sig, siginfo_t* _sig_info, void* _conte
 void rde_inner_set_posix_signal_handler();
 #endif
 
-void rde_critical_error(bool _condition, const char* _fmt, ...);
 #endif
 
 // TODO TASK
