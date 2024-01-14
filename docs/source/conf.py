@@ -2,9 +2,9 @@
 
 # -- Project information
 
-project = 'Lumache'
-copyright = '2021, Graziella'
-author = 'Graziella'
+project = 'RDE'
+copyright = '2021, Borja Vazquez Cuesta'
+author = 'Bovacu'
 
 release = '0.1'
 version = '0.1.0'

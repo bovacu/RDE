@@ -1,10 +1,8 @@
-Welcome to Lumache's documentation!
+Welcome to RDE's documentation!
 ===================================
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
+**RDE** is a 2D/3D multi-purpose and cross-platform game engine built with C99.
+It is a simple engine, with just one header file and one source file (+ dependencies).
 
 Check out the :doc:`usage` section for further information, including
 how to :ref:`installation` the project.
