@@ -6,4 +6,5 @@ API
 Documentation
 ------------
 
-`local mirror <../index.html>`_
+.. include:: <../index.html>
+.. include:: <index.html>
