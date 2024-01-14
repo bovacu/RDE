@@ -7358,8 +7358,8 @@ RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused_by_mouse
 		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 })
-RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_focused_by_keyboard, {})
-RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused_by_keyboard, {
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_focused, {})
+RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused, {
 	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
@@ -7465,8 +7465,8 @@ void rde_inner_events_window_create_events() {
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_RESIZED - RDE_WIN_EVENT_INIT] = &rde_inner_event_window_resize;
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOUSE_FOCUSED - RDE_WIN_EVENT_INIT] = &rde_inner_window_focused_by_mouse;
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOUSE_UNFOCUSED - RDE_WIN_EVENT_INIT] = &rde_inner_window_unfocused_by_mouse;
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_KEYBOARD_FOCUSED - RDE_WIN_EVENT_INIT] = &rde_inner_window_focused_by_keyboard;
-	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_KEYBOARD_UNFOCUSED - RDE_WIN_EVENT_INIT]	= &rde_inner_window_unfocused_by_keyboard;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_FOCUSED - RDE_WIN_EVENT_INIT] = &rde_inner_window_focused;
+	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_UNFOCUSED - RDE_WIN_EVENT_INIT]	= &rde_inner_window_unfocused;
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MOVED - RDE_WIN_EVENT_INIT] = &rde_inner_window_moved;
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MINIMIZED - RDE_WIN_EVENT_INIT] = &rde_inner_window_minimized;
 	ENGINE.window_events[RDE_EVENT_TYPE_WINDOW_MAXIMIZED - RDE_WIN_EVENT_INIT] = &rde_inner_window_maximized;
@@ -7547,11 +7547,11 @@ void rde_inner_event_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_ev
 			_rde_event->data.window_event_data.display_index = _sdl_event->window.data1;
 		} break;
 
-		case SDL_EVENT_WINDOW_MOUSE_ENTER:	 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MOUSE_FOCUSED; 		break;
-		case SDL_EVENT_WINDOW_MOUSE_LEAVE:	 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MOUSE_UNFOCUSED; 		break;
-		case SDL_EVENT_WINDOW_FOCUS_GAINED:		_rde_event->type = RDE_EVENT_TYPE_WINDOW_KEYBOARD_FOCUSED; 		break;
-		case SDL_EVENT_WINDOW_FOCUS_LOST:		_rde_event->type = RDE_EVENT_TYPE_WINDOW_KEYBOARD_UNFOCUSED; 	break;
-		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:				_rde_event->type = RDE_EVENT_TYPE_WINDOW_CLOSED;				break;
+		case SDL_EVENT_WINDOW_MOUSE_ENTER:	 	_rde_event->type = RDE_EVENT_TYPE_WINDOW_MOUSE_FOCUSED; 	break;
+		case SDL_EVENT_WINDOW_MOUSE_LEAVE:	 	_rde_event->type = RDE_EVENT_TYPE_WINDOW_MOUSE_UNFOCUSED; 	break;
+		case SDL_EVENT_WINDOW_FOCUS_GAINED:		_rde_event->type = RDE_EVENT_TYPE_WINDOW_FOCUSED; 			break;
+		case SDL_EVENT_WINDOW_FOCUS_LOST:		_rde_event->type = RDE_EVENT_TYPE_WINDOW_UNFOCUSED; 		break;
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:	_rde_event->type = RDE_EVENT_TYPE_WINDOW_CLOSED;			break;
 	}
 }
 

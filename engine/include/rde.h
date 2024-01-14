@@ -605,35 +605,133 @@ typedef unsigned int uint;
 #endif
 
 #if RDE_IS_WINDOWS()
+// Macro: rde_snprintf
+// Platform independent standard rde_snprintf.
+//
+// Parameters:
+//	_str - destination to save the formatted string.
+//	_str_size - size of the destination.
+//	_fmt - formatted string.
+//
+//	======= C =======
+//  char _a[128] = {0};
+//	rde_snprintf(_a, 128, "%s, %s", "Hello",      "Duck");
+//	=================
 #define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
 #else
 #define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
 #endif
 	
-	#if RDE_IS_WINDOWS()
+#if RDE_IS_WINDOWS()
+// Macro: rde_snprintf
+// Platform independent standard rde_vsprintf.
+//
+// Parameters:
+//	_str - destination to save the formatted string.
+//	_str_size - size of the destination.
+//	_fmt - formatted string.
+//
+//	======= C =======
+//	va_list _args;
+//	va_start(_args, _fmt);
+//	char _msg = {0};
+//	rde_vsprintf(_msg, _fmt, _args);
+//	va_end(_args);
+//	=================	
 #define rde_vsprintf(_str, _str_size, _fmt, ...) vsprintf_s(_str, _str_size, _fmt, __VA_ARGS__);
 #else
 #define rde_vsprintf(_str, _str_size, _fmt, ...) vsprintf(_str, _fmt, __VA_ARGS__);
 #endif
 
-#define RDE_PROFILE_TIME(_name, _code_block)				   										\
-	{									  															\
-		clock_t  _start = clock();							 										\
-		_code_block																					\
-		clock_t _end = clock() - _start;					   										\
-		rde_log_level(RDE_LOG_LEVEL_INFO, "%s - Took %f""s", _name, ((double)_end)/CLOCKS_PER_SEC); \
-	}
+// Macro: RDE_PROFILE_TIME
+// Simple time counter to profile a specific block of code.
+//
+// Parameters:
+//	_name - destination to save the formatted string.
+//	_code_block - size of the destination.
+//
+//	======= C =======
+//	RDE_PROFILE_TIME("function_a", function_a())
+//	=================
+#define RDE_PROFILE_TIME(_name, _code_block)				   									\
+{									  															\
+	clock_t  _start = clock();							 										\
+	_code_block																					\
+	clock_t _end = clock() - _start;					   										\
+	rde_log_level(RDE_LOG_LEVEL_INFO, "%s - Took %f""s", _name, ((double)_end)/CLOCKS_PER_SEC); \
+}
 
 /// ======================= WARNING SILENCER ===============================
 
+// Macro: RDE_UNUSED
+// Used to silence non-used variables warnings.
+//
+// Parameters:
+//	_x - variable name to be silenced.
+//
+//	======= C =======
+//	RDE_UNUSED(_my_unused_var)
+//	=================
 #define RDE_UNUSED(_x) (void)_x;
+
+// Macro: RDE_UNIMPLEMENTED
+// Used to trigger a crash if a function is not implemented.
+//
+//	======= C =======
+//	RDE_UNIMPLEMENTED()
+//	=================
 #define RDE_UNIMPLEMENTED() assert(false && __func__);
+
+// Macro: RDE_UNIMPLEMENTED_STRUCT
+// Used to give a "default" body to structure if it is not yet filled.
+//
+//	======= C =======
+//	typedef struct {
+//		RDE_UNIMPLEMENTED_STRUCT();
+//	} my_unfilled_struct;
+//	=================
 #define RDE_UNIMPLEMENTED_STRUCT() short foo;
 
 
 /// ==================== GENERIC FUNCS AND STRUCTS ==========================
 
 #if RDE_IS_WINDOWS()
+// Macro: RDE_MAIN
+// Simple and direct entry point to use on main source file of a project. Everything done in macro can be done without it, this is just a "quicker/automatic" way to have an entry point for the game.
+//
+// Parameters:
+//	_window - output variable where the default window will be saved.
+//	_config_path - path to the config.rde file. This is REQUIRED to have to build an RDE application.
+//	_mandatory_callbacks - struct of callbacks that the user MUST fill for the application to run. Struct is <rde_end_user_mandatory_callbacks>.
+//	_init_func - function that will be executed after engine initialization.
+//	_end_func - function that will be executed before engine destruction.
+//
+//	======= C =======
+//	rde_window* default_window = NULL;
+//
+//	void on_event(rde_event* _event, rde_window* _window);
+//	void on_update(float _dt);
+//	void on_fixed_update(float _dt);
+//	void on_late_update(float _dt);
+//	void on_render(float _dt, rde_window* _window);
+//
+//	const rde_end_user_mandatory_callbacks mandatory_callbacks = {
+//		&on_update,
+//		&on_fixed_update,
+//		&on_late_update,
+//		&on_render
+//	};
+//
+//	void init_func(int _argc, char** _argv) {
+//		...	
+//	}
+//
+//	void end_func() {
+//		...	
+//	}
+//
+//	RDE_MAIN(default_window, "assets/config.rde_config", mandatory_callbacks, init_func, end_func);
+//	=================
 #define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
 	int main(int _argc, char** _argv) {												 	\
 		RDE_SHOW_WINDOWS_CONSOLE														\
@@ -693,12 +791,30 @@ typedef unsigned int uint;
 
 #endif
 
+// Macro: RDE_SPECIALIZED_VEC2
+// Declares a struct for a Vec2 of an specific type. This struct has fields, x and y.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec2.
+// ======= C =======
+// 	RDE_SPECIALIZED_VEC2(int, int)
+// ==================
 #define RDE_SPECIALIZED_VEC2(_type, _name) 	\
 	typedef struct {						\
 		_type x;							\
 		_type y;							\
 	} _name;
 
+// Macro: RDE_SPECIALIZED_VEC3
+// Declares a struct for a Vec3 of an specific type. This struct has fields, x, y and z.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec3.
+// ======= C =======
+// 	RDE_SPECIALIZED_VEC3(int, int)
+// ==================
 #define RDE_SPECIALIZED_VEC3(_type, _name) 	\
 	typedef struct {						\
 		_type x;							\
@@ -706,6 +822,15 @@ typedef unsigned int uint;
 		_type z;							\
 	} _name;
 
+// Macro: RDE_SPECIALIZED_VEC4
+// Declares a struct for a Vec4 of an specific type. This struct has fields, x, y, z and w.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec4.
+// ======= C =======
+// 	RDE_SPECIALIZED_VEC4(int, int)
+// ==================
 #define RDE_SPECIALIZED_VEC4(_type, _name) 	\
 	typedef struct {						\
 		_type x;							\
@@ -714,6 +839,15 @@ typedef unsigned int uint;
 		_type w;							\
 	} _name;
 
+// Macro: RDE_SPECIALIZED_MAT2
+// Declares a struct for a Mat2 of an specific type. This struct has 4 elements, that can be accessed as independent elements, as an array of 4 elements or an array of arrays.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec4.
+// ======= C =======
+// 	RDE_SPECIALIZED_MAT2(int, int)
+// ==================
 #define RDE_SPECIALIZED_MAT2(_type, _name) 	\
 	typedef struct {						\
 		union {								\
@@ -727,6 +861,15 @@ typedef unsigned int uint;
 		};									\
 	} _name;
 
+// Macro: RDE_SPECIALIZED_MAT3
+// Declares a struct for a Mat3 of an specific type. This struct has 9 elements, that can be accessed as independent elements, as an array of 9 elements or an array of arrays.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec4.
+// ======= C =======
+// 	RDE_SPECIALIZED_MAT3(int, int)
+// ==================
 #define RDE_SPECIALIZED_MAT3(_type, _name) 	\
 	typedef struct {						\
 		union {								\
@@ -741,6 +884,15 @@ typedef unsigned int uint;
 		};									\
 	} _name;
 
+// Macro: RDE_SPECIALIZED_MAT4
+// Declares a struct for a Mat4 of an specific type. This struct has 16 elements, that can be accessed as independent elements, as an array of 16 elements or an array of arrays.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec4.
+// ======= C =======
+// 	RDE_SPECIALIZED_MAT4(int, int)
+// ==================
 #define RDE_SPECIALIZED_MAT4(_type, _name) 		\
 	typedef struct {							\
 		union {									\
@@ -1000,6 +1152,17 @@ typedef struct {			\
 
 /// ================================= STATE =================================
 
+// Group: Enums
+	
+// Enum: RDE_INPUT_STATUS_
+// Represents the status of some kind of input, it can be from a keyboard, mouse, controller, touch screen...
+//
+// RDE_INPUT_STATUS_ERROR 			-	State of error.
+// RDE_INPUT_STATUS_UNINITIALIZED	-	Initial state, means it has not been used yet.
+// RDE_INPUT_STATUS_JUST_PRESSED	-	It has been pressed, it only lasts one frame.
+// RDE_INPUT_STATUS_KEEP_PRESSED	-	It is being pressed, last as many frames as the input is pressed.
+// RDE_INPUT_STATUS_JUST_RELEASED	-	Has just been released, it only lasts one frame.
+// RDE_INPUT_STATUS_KEEP_RELEASED	-	It is released, last as many frames as the input is not pressed again.
 typedef enum {
 	RDE_INPUT_STATUS_ERROR 			=-1,
 	RDE_INPUT_STATUS_UNINITIALIZED 	= 0,
@@ -1009,21 +1172,75 @@ typedef enum {
 	RDE_INPUT_STATUS_KEEP_RELEASED 	= 4,
 } RDE_INPUT_STATUS_;
 
-typedef enum {
-	RDE_MOUSE_STATUS_ENTERED,
-	RDE_MOUSE_STATUS_EXITED
-} RDE_MOUSE_STATUS_;
-
-
-
 /// ================================ EVENTS ================================
 
+// Enum: RDE_EVENT_TYPE_
+// Represents all of the usable events of the engine.
+//
+// RDE_EVENT_TYPE_NONE - Empty event, should never happen.
+// RDE_EVENT_TYPE_WINDOW_BEGIN - This element should not be used as an actual event, it is used to indicate where in the enum the Window events start.
+// RDE_EVENT_TYPE_WINDOW_CLOSED - Indicates a windows has been closed.
+// RDE_EVENT_TYPE_WINDOW_RESIZED - Indicates a window has been resized.
+// RDE_EVENT_TYPE_WINDOW_MOVED - Indicates a window has been moved.
+// RDE_EVENT_TYPE_WINDOW_MOUSE_FOCUSED - Indicates the mouse has entered a window.
+// RDE_EVENT_TYPE_WINDOW_MOUSE_UNFOCUSED - Indicates the mouse has exited a window.
+// RDE_EVENT_TYPE_WINDOW_FOCUSED - Indicates a window has gain focus.
+// RDE_EVENT_TYPE_WINDOW_UNFOCUSED - Indicates a window has lost focus.
+// RDE_EVENT_TYPE_WINDOW_MINIMIZED - Indicates a window has been minimized.
+// RDE_EVENT_TYPE_WINDOW_MAXIMIZED - Indicates a window has been maximized.
+// RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED - Indicates a window has changed the display it was being rendered previously.
+// RDE_EVENT_TYPE_WINDOW_END - This element should not be used as an actual event, it is used to indicate where in the enum the Window events ends.
+// RDE_EVENT_TYPE_DISPLAY_BEGIN - This element should not be used as an actual event, it is used to indicate where in the enum the Display events start.
+// RDE_EVENT_TYPE_DISPLAY_CONNECTED - Indicates a new display has been contected.
+// RDE_EVENT_TYPE_DISPLAY_DISCONNECTED - Indicates a display previously connected has been disconnected.
+// RDE_EVENT_TYPE_DISPLAY_CHANGED_ORIENTATION - Indicates a connected display has changed the orientation.
+// RDE_EVENT_TYPE_DISPLAY_END - This element should not be used as an actual event, it is used to indicate where in the enum the Display events ends.
+// RDE_EVENT_TYPE_GAME_FRAME_BEGIN - This element should not be used as an actual event, it is used to indicate where in the enum the Game Frame events start.
+// RDE_EVENT_TYPE_GAME_FRAME - Indicates a frame has passed on the game.
+// RDE_EVENT_TYPE_GAME_UPDATE - Indicates that the update is happening.
+// RDE_EVENT_TYPE_GAME_RENDER - Indicates that the render is happening.
+// RDE_EVENT_TYPE_GAME_FRAME_END - This element should not be used as an actual event, it is used to indicate where in the enum the Game Frame events end.
+// RDE_EVENT_TYPE_KEY_BEGIN - This element should not be used as an actual event, it is used to indicate where in the enum the Keyboard events start.
+// RDE_EVENT_TYPE_KEY_PRESSED - Indicates a keyboard key is pressed.
+// RDE_EVENT_TYPE_KEY_RELEASED - Indicates a keyboard key is released.
+// RDE_EVENT_TYPE_KEY_TYPED - Indicates a keyboard key is pressed and gives information about the data of the key.
+// RDE_EVENT_TYPE_TEXT_TYPED - Indicates a keyboard key is pressed and gives information about the text being written.
+// RDE_EVENT_TYPE_KEY_END - This element should not be used as an actual event, it is used to indicate where in the enum the Keyboard events end.
+// RDE_EVENT_TYPE_MOUSE_BEGIN - This element should not be used as an actual event, it is used to indicate where in the enum the Mouse events start.
+// RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED - Indicates a mouse button is pressed.
+// RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED - Indicates a mouse button is released.
+// RDE_EVENT_TYPE_MOUSE_SCROLLED - Indicates the mouse scroll has been scrolled.
+// RDE_EVENT_TYPE_MOUSE_MOVED - Indicates the mouse has been moved.
+// RDE_EVENT_TYPE_MOUSE_END - This element should not be used as an actual event, it is used to indicate where in the enum the Mouse events end.
+// RDE_EVENT_TYPE_DRAG_AND_DROP_BEGIN - This element should not be used as an actual event, it is used to indicate where in the enum the Drag&Drop events star.
+// RDE_EVENT_TYPE_DRAG_AND_DROP_FILE - Indicates a file has been dragged and droped onto a window.
+// RDE_EVENT_TYPE_DRAG_AND_DROP_END - This element should not be used as an actual event, it is used to indicate where in the enum the Drag&Drop events end.
+// RDE_EVENT_TYPE_CONTROLLER_BEGIN - This element should not be used as an actual event, it is used to indicate where in the enum the Controller events start.
+// RDE_EVENT_TYPE_CONTROLLER_AXIS_MOVED - Indicates a controller joystick has moved.
+// RDE_EVENT_TYPE_CONTROLLER_BUTTON_DOWN - Indicates a controller button is pressed.
+// RDE_EVENT_TYPE_CONTROLLER_BUTTON_UP - Indicates a contrller button is released.
+// RDE_EVENT_TYPE_CONTROLLER_END - This element should not be used as an actual event, it is used to indicate where in the enum the Controller events end.
+// RDE_EVENT_TYPE_MOBILE_BEGIN - This element should not be used as an actual event, it is used to indicate where in the enum the Mobile events start.
+// RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN - Indicates a finger has been layed down on the screen.
+// RDE_EVENT_TYPE_MOBILE_TOUCH_UP - Indicates a finger has been released from the screen.
+// RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED - Indicates a finger previously layed down, has been moved.
+// RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH - Indicates multiple fingers are being used on the screen.
+// RDE_EVENT_TYPE_MOBILE_DOLLAR_GESTURE - Indicates a gesture with a finger on the screen.
+// RDE_EVENT_TYPE_MOBILE_DOLLAR_RECORD - Indicates a gesture is being recorded with a finger on the screen.
+// RDE_EVENT_TYPE_MOBILE_TERMINATING - Indicates that the application is being closed (naturally or by error).
+// RDE_EVENT_TYPE_MOBILE_LOW_MEMORY - Indicates the device is low on memory.
+// RDE_EVENT_TYPE_MOBILE_WILL_ENTER_BACKGROUND - Indicates on Android this corresponds to onPause, on iOS to applicationWillResignActive.
+// RDE_EVENT_TYPE_MOBILE_DID_ENTER_BACKGROUND - Indicates on Android this corresponds to onPause, on iOS to applicationDidEnterBackground.
+// RDE_EVENT_TYPE_MOBILE_WILL_ENTER_FOREGROUND - Indicates on Android this corresponds to onResume, on iOS to applicationWillEnterForeground.
+// RDE_EVENT_TYPE_MOBILE_DID_ENTER_FOREGROUND - Indicates on Android this corresponds to onResume, on iOS to applicationDidBecomeActive.
+// RDE_EVENT_TYPE_MOBILE_LOCALE_CHANGED - Indicates the language of the device has changed.
+// RDE_EVENT_TYPE_MOBILE_END - This element should not be used as an actual event, it is used to indicate where in the enum the Mobile events end.
 typedef enum {
 	RDE_EVENT_TYPE_NONE, 
 	
 	RDE_EVENT_TYPE_WINDOW_BEGIN,
 	RDE_EVENT_TYPE_WINDOW_CLOSED, RDE_EVENT_TYPE_WINDOW_RESIZED, RDE_EVENT_TYPE_WINDOW_MOVED, RDE_EVENT_TYPE_WINDOW_MOUSE_FOCUSED, RDE_EVENT_TYPE_WINDOW_MOUSE_UNFOCUSED,
-	RDE_EVENT_TYPE_WINDOW_KEYBOARD_FOCUSED, RDE_EVENT_TYPE_WINDOW_KEYBOARD_UNFOCUSED, RDE_EVENT_TYPE_WINDOW_MINIMIZED, RDE_EVENT_TYPE_WINDOW_MAXIMIZED, RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED,
+	RDE_EVENT_TYPE_WINDOW_FOCUSED, RDE_EVENT_TYPE_WINDOW_UNFOCUSED, RDE_EVENT_TYPE_WINDOW_MINIMIZED, RDE_EVENT_TYPE_WINDOW_MAXIMIZED, RDE_EVENT_TYPE_WINDOW_DISPLAY_CHANGED,
 	RDE_EVENT_TYPE_WINDOW_END,
 
 	RDE_EVENT_TYPE_DISPLAY_BEGIN,
@@ -1046,15 +1263,17 @@ typedef enum {
 	RDE_EVENT_TYPE_DRAG_AND_DROP_FILE,
 	RDE_EVENT_TYPE_DRAG_AND_DROP_END,
 
+	RDE_EVENT_TYPE_CONTROLLER_BEGIN,
 	RDE_EVENT_TYPE_CONTROLLER_AXIS_MOVED, RDE_EVENT_TYPE_CONTROLLER_BUTTON_DOWN, RDE_EVENT_TYPE_CONTROLLER_BUTTON_UP,
-
+	RDE_EVENT_TYPE_CONTROLLER_END,
+	
 	RDE_EVENT_TYPE_MOBILE_BEGIN,
 	RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN, RDE_EVENT_TYPE_MOBILE_TOUCH_UP, RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED, RDE_EVENT_TYPE_MOBILE_MULTI_TOUCH, RDE_EVENT_TYPE_MOBILE_DOLLAR_GESTURE, RDE_EVENT_TYPE_MOBILE_DOLLAR_RECORD,
 	RDE_EVENT_TYPE_MOBILE_TERMINATING, RDE_EVENT_TYPE_MOBILE_LOW_MEMORY, 
-	RDE_EVENT_TYPE_MOBILE_WILL_ENTER_BACKGROUND, // On Android this corresponds to onPause, on iOS to applicationWillResignActive
-	RDE_EVENT_TYPE_MOBILE_DID_ENTER_BACKGROUND, // On Android this corresponds to onPause, on iOS to applicationDidEnterBackground
-	RDE_EVENT_TYPE_MOBILE_WILL_ENTER_FOREGROUND, // On Android this corresponds to onResume, on iOS to applicationWillEnterForeground
-	RDE_EVENT_TYPE_MOBILE_DID_ENTER_FOREGROUND, // On Android this corresponds to onResume, on iOS to applicationDidBecomeActive
+	RDE_EVENT_TYPE_MOBILE_WILL_ENTER_BACKGROUND,
+	RDE_EVENT_TYPE_MOBILE_DID_ENTER_BACKGROUND,
+	RDE_EVENT_TYPE_MOBILE_WILL_ENTER_FOREGROUND,
+	RDE_EVENT_TYPE_MOBILE_DID_ENTER_FOREGROUND,
 	RDE_EVENT_TYPE_MOBILE_LOCALE_CHANGED,
 	RDE_EVENT_TYPE_MOBILE_END
 
@@ -1064,6 +1283,8 @@ typedef enum {
 
 /// =============================== KEYBOARD ================================
 
+// Enum: RDE_KEYBOARD_KEY_
+// Registered keys that can be used on the engine, matches SDL3 keys on the values (<https://wiki.libsdl.org/SDL2/SDL_Keycode>)
 typedef enum {
 	// From SDL2
 	RDE_KEYBOARD_KEY_SPACE = 44,
@@ -1189,6 +1410,8 @@ typedef enum {
 
 /// ================================ MOUSE ==================================
 
+// Enum: RDE_MOUSE_BUTTON_
+// Registered mouse buttons that can be used on the engine, matches SDL3 mouse buttons on the values (<https://wiki.libsdl.org/SDL3/SDL_MouseButtonEvent>)
 typedef enum {
 	// From SDL2
 	RDE_MOUSE_BUTTON_0 = 1,
@@ -1211,6 +1434,8 @@ typedef enum {
 
 /// ============================== CONTROLLER ===============================
 
+// Enum: RDE_CONTROLLER_BUTTON_
+// Registered controller buttons that can be used on the engine, matches SDL3 controller buttons on the values (<https://wiki.libsdl.org/SDL2/SDL_ControllerButtonEvent>)
 typedef enum {
 	RDE_CONTROLLER_BUTTON_A            = 0,             
 	RDE_CONTROLLER_BUTTON_B            = 1,             
@@ -1230,6 +1455,8 @@ typedef enum {
 	RDE_CONTROLLER_BUTTON_NONE		   = 0xFFFF
 } RDE_CONTROLLER_BUTTON_;
 
+// Enum: RDE_CONTROLLER_AXIS_
+// Registered controller axis that can be used on the engine, matches SDL3 controller axis on the values (<https://wiki.libsdl.org/SDL2/SDL_ControllerButtonEvent>)
 typedef enum {
 	RDE_CONTROLLER_AXIS_LEFT,
 	RDE_CONTROLLER_AXIS_RIGHT,
@@ -1242,6 +1469,16 @@ typedef enum {
 
 /// =============================== PLATFORM ================================
 
+// Enum: RDE_PLATFORM_TYPE_
+// Platform the engine is currently running on.
+// 
+// RDE_PLATFORM_TYPE_LINUX - Runngin on Linux.
+// RDE_PLATFORM_TYPE_WINDOWS - Runngin on Windows.
+// RDE_PLATFORM_TYPE_MAC - Runngin on MacOS.
+// RDE_PLATFORM_TYPE_ANDROID - Runngin on Android.
+// RDE_PLATFORM_TYPE_IOS - Runngin on iOS/iPad.
+// RDE_PLATFORM_TYPE_EMSCRIPTEN - Runngin on WASM.
+// RDE_PLATFORM_TYPE_UNSUPPORTE - If this happens, it is an unsupported platform, please open an issue on the repository.
 typedef enum {
 	RDE_PLATFORM_TYPE_LINUX,
 	RDE_PLATFORM_TYPE_WINDOWS,
@@ -1252,6 +1489,14 @@ typedef enum {
 	RDE_PLATFORM_TYPE_UNSUPPORTED
 } RDE_PLATFORM_TYPE_;
 
+// Enum: RDE_INPUT_TYPE_
+// Supported input methods of the engine.
+//
+// RDE_INPUT_TYPE_WINDOW - Input from the window.
+// RDE_INPUT_TYPE_MOUSE - Input from the mouse.
+// RDE_INPUT_TYPE_KEYBOARD - Input from the keyboard.
+// RDE_INPUT_TYPE_CONTROLLER - Input from one or more controllers.
+// RDE_INPUT_TYPE_MOBILE - Input from device touch screen.
 typedef enum {
 	RDE_INPUT_TYPE_WINDOW,
 	RDE_INPUT_TYPE_MOUSE,
@@ -1260,6 +1505,14 @@ typedef enum {
 	RDE_INPUT_TYPE_MOBILE
 } RDE_INPUT_TYPE_;
 
+// Enum: RDE_BATTERY_
+// Battery status from any device that has one.
+//
+// RDE_BATTERY_UKNOWN- Returned by desktop computers.
+// RDE_BATTERY_ON_BATTERY- If the device being used with the battery and not being charged.
+// RDE_BATTERY_NO_BATTERY- If the devied is beig used, connected to a cable but there is no battery on the device.
+// RDE_BATTERY_CHARGING- If the devied is charging.
+// RDE_BATTERY_CHARGED- If the devied is fully charged.
 typedef enum {
 	RDE_BATTERY_UKNOWN,
 	RDE_BATTERY_ON_BATTERY,

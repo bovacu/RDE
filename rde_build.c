@@ -2925,7 +2925,7 @@ bool build_docs() {
 	}
 	
 	dyn_str* _generate_docs = dyn_str_new(dyn_str_get(_path));
-	dyn_str_append(_generate_docs, "NaturalDocs/NaturalDocs.exe -r -i ");
+	dyn_str_append(_generate_docs, "NaturalDocs/NaturalDocs.exe -i ");
 	dyn_str_append(_generate_docs, builder_exe_full_path_dir);
 	dyn_str_append(_generate_docs, "engine/ -p ");
 	dyn_str_append(_generate_docs, dyn_str_get(_path));
