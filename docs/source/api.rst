@@ -1,4 +1,9 @@
 API
 ===
 
-:doc:`../index.html`
+.. _documentation:
+
+Documentation
+------------
+
+`local mirror <../index.html>`_
