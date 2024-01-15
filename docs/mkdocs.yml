@@ -1,0 +1,9 @@
+site_name: RDE
+site_url: https://example.com/
+
+nav:
+  - Home: index.md
+  - Build System: build_system.md
+  - How it works: how_it_works.md
+  
+theme: readthedocs

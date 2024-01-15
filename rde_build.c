@@ -2883,7 +2883,7 @@ bool build_docs() {
 	rde_command _command = NULL;
 	
 	dyn_str* _path = dyn_str_new(builder_exe_full_path_dir);
-	dyn_str_append(_path, "docs/API/");
+	dyn_str_append(_path, "docs/docs/api/");
 	
 	if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 		exit(-1);
