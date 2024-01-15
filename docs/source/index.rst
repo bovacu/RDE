@@ -15,6 +15,8 @@ Contents
 --------
 
 .. toctree::
-
+   :glob:
+   
    usage
    api
+   ../*
