@@ -18,5 +18,4 @@ Contents
    :glob:
    
    usage
-   api
-   ../*
+   ../api
