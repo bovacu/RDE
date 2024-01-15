@@ -801,10 +801,11 @@ typedef unsigned int uint;
 // 	RDE_SPECIALIZED_VEC2(int, int)
 // ==================
 #define RDE_SPECIALIZED_VEC2(_type, _name) 	\
-	typedef struct {						\
+	typedef struct _name _name;				\
+	struct _name {							\
 		_type x;							\
 		_type y;							\
-	} _name;
+	};
 
 // Macro: RDE_SPECIALIZED_VEC3
 // Declares a struct for a Vec3 of an specific type. This struct has fields, x, y and z.
@@ -816,11 +817,12 @@ typedef unsigned int uint;
 // 	RDE_SPECIALIZED_VEC3(int, int)
 // ==================
 #define RDE_SPECIALIZED_VEC3(_type, _name) 	\
-	typedef struct {						\
+	typedef struct _name _name;				\
+	struct _name {							\
 		_type x;							\
 		_type y;							\
 		_type z;							\
-	} _name;
+	};
 
 // Macro: RDE_SPECIALIZED_VEC4
 // Declares a struct for a Vec4 of an specific type. This struct has fields, x, y, z and w.
@@ -832,12 +834,13 @@ typedef unsigned int uint;
 // 	RDE_SPECIALIZED_VEC4(int, int)
 // ==================
 #define RDE_SPECIALIZED_VEC4(_type, _name) 	\
-	typedef struct {						\
+	typedef struct _name _name;				\
+	struct _name {							\
 		_type x;							\
 		_type y;							\
 		_type z;							\
 		_type w;							\
-	} _name;
+	};
 
 // Macro: RDE_SPECIALIZED_MAT2
 // Declares a struct for a Mat2 of an specific type. This struct has 4 elements, that can be accessed as independent elements, as an array of 4 elements or an array of arrays.
@@ -849,7 +852,8 @@ typedef unsigned int uint;
 // 	RDE_SPECIALIZED_MAT2(int, int)
 // ==================
 #define RDE_SPECIALIZED_MAT2(_type, _name) 	\
-	typedef struct {						\
+	typedef struct _name _name;				\
+	struct _name {							\
 		union {								\
 			struct {						\
 				float m00, m01;				\
@@ -859,7 +863,7 @@ typedef unsigned int uint;
 			float m[2][2];					\
 			float v[4];						\
 		};									\
-	} _name;
+	};
 
 // Macro: RDE_SPECIALIZED_MAT3
 // Declares a struct for a Mat3 of an specific type. This struct has 9 elements, that can be accessed as independent elements, as an array of 9 elements or an array of arrays.
@@ -871,7 +875,8 @@ typedef unsigned int uint;
 // 	RDE_SPECIALIZED_MAT3(int, int)
 // ==================
 #define RDE_SPECIALIZED_MAT3(_type, _name) 	\
-	typedef struct {						\
+	typedef struct _name _name;				\
+	struct _name {							\
 		union {								\
 			struct {						\
 				float m00, m01, m02;		\
@@ -882,7 +887,7 @@ typedef unsigned int uint;
 			float m[3][3];					\
 			float v[9];						\
 		};									\
-	} _name;
+	};
 
 // Macro: RDE_SPECIALIZED_MAT4
 // Declares a struct for a Mat4 of an specific type. This struct has 16 elements, that can be accessed as independent elements, as an array of 16 elements or an array of arrays.
@@ -894,7 +899,8 @@ typedef unsigned int uint;
 // 	RDE_SPECIALIZED_MAT4(int, int)
 // ==================
 #define RDE_SPECIALIZED_MAT4(_type, _name) 		\
-	typedef struct {							\
+	typedef struct _name _name;					\
+	struct _name {								\
 		union {									\
 			struct {							\
 				float m00, m01, m02, m03;		\
@@ -906,7 +912,7 @@ typedef unsigned int uint;
 			float m[4][4];						\
 			float v[16];						\
 		};										\
-	} _name;
+	};
 
 // Macro: rde_arr_decl
 // Defines a new type of dynamic array.
@@ -1525,39 +1531,50 @@ typedef enum {
 
 /// ============================== RENDERING ================================
 
+// Enum: RDE_UI_ANCHOR_
+// UI flag enum that sets how the sprites will anchor to specific parts of the screen. Can be combined with <RDE_UI_STRETCH_>
+//
+// RDE_UI_ANCHOR_MIDDLE - Will anchor to the center of the screen as a pivot.
+// RDE_UI_ANCHOR_LEFT - Will anchor to the left side of the screen as a pivot.
+// RDE_UI_ANCHOR_RIGHT - Will anchor to the right side of the screen as a pivot.
+// RDE_UI_ANCHOR_TOP - Will anchor to the top side of the screen as a pivot.
+// RDE_UI_ANCHOR_BOTTOM - Will anchor to the bottom side of the screen as a pivot.
 typedef enum {
 	RDE_UI_ANCHOR_MIDDLE              = 1 << 1,
 	RDE_UI_ANCHOR_LEFT                = 1 << 2,
 	RDE_UI_ANCHOR_RIGHT               = 1 << 3,
 	RDE_UI_ANCHOR_TOP                 = 1 << 4,
-	RDE_UI_ANCHOR_BOTTOM              = 1 << 5,
-	RDE_UI_ANCHOR_LEFT_BOTTOM         = 1 << 6,
-	RDE_UI_ANCHOR_LEFT_TOP            = 1 << 7,
-	RDE_UI_ANCHOR_RIGHT_BOTTOM        = 1 << 8,
-	RDE_UI_ANCHOR_RIGHT_TOP           = 1 << 9
+	RDE_UI_ANCHOR_BOTTOM              = 1 << 5
 } RDE_UI_ANCHOR_;
 
+// Enum: RDE_UI_STRETCH_
+// UI flag enum that sets how the sprites will scale with different screen resolutions. Can be combined with <RDE_UI_ANCHOR_>
+//
+// RDE_UI_STRETCH_NO_STRETCH - Will not strech.
+// RDE_UI_STRETCH_VERTICAL_STRETCH - Will strech on the Y axis.
+// RDE_UI_STRETCH_HORIZONTAL_STRETCH - Will strech on the X axis.
 typedef enum {
-	RDE_UI_STRETCH_NO_STRETCH          = 1 << 10,
-	RDE_UI_STRETCH_VERTICAL_STRETCH    = 1 << 11,
-	RDE_UI_STRETCH_HORIZONTAL_STRETCH  = 1 << 12,
-	RDE_UI_STRETCH_FULL_STRETCH        = 1 << 13
+	RDE_UI_STRETCH_NO_STRETCH          = 1 << 6,
+	RDE_UI_STRETCH_VERTICAL_STRETCH    = 1 << 7,
+	RDE_UI_STRETCH_HORIZONTAL_STRETCH  = 1 << 8
 } RDE_UI_STRETCH_;
 
-typedef enum {
-	RDE_BATCH_PRIORITY_SPRITE = 0,
-	RDE_BATCH_PRIORITY_TEXT = 1,
-	RDE_BATCH_PRIORITY_NONE = 2,
-} RDE_BATCH_PRIORITY_;
-
-typedef enum {
-	RDE_RENDERIZABLE_TYPE_NONE        = 0,
-	RDE_RENDERIZABLE_TYPE_SPRITE      = 1,
-	RDE_RENDERIZABLE_TYPE_TEXT        = 2,
-	RDE_RENDERIZABLE_TYPE_UI_IMAGE    = 3,
-	RDE_RENDERIZABLE_TYPE_UI_TEXT     = 4
-} RDE_RENDERIZABLE_TYPE_;
-
+// Enum: RDE_UNIFORM_FV_
+// Types of uniforms that the engine supports for floats. WASM supports less than other platforms, be aware of this.
+//
+// RDE_UNIFORM_FV_1 - Vector of 1 float.
+// RDE_UNIFORM_FV_2 - Vector of 2 float.
+// RDE_UNIFORM_FV_3 - Vector of 3 float.
+// RDE_UNIFORM_FV_4 - Vector of 4 float.
+// RDE_UNIFORM_FV_MATRIX_2 - Matrix 2x2.
+// RDE_UNIFORM_FV_MATRIX_3 - Matrix 3x3.
+// RDE_UNIFORM_FV_MATRIX_4 - Matrix 4x4.
+// RDE_UNIFORM_FV_MATRIX_2x3 - Matrix 2x3. Not available on WASM.
+// RDE_UNIFORM_FV_MATRIX_3x2 - Matrix 3x2. Not available on WASM.
+// RDE_UNIFORM_FV_MATRIX_4x2 - Matrix 4x2. Not available on WASM.
+// RDE_UNIFORM_FV_MATRIX_2x4 - Matrix 2x4. Not available on WASM.
+// RDE_UNIFORM_FV_MATRIX_4x3 - Matrix 4x3. Not available on WASM.
+// RDE_UNIFORM_FV_MATRIX_3x4 - Matrix 3x4. Not available on WASM.
 typedef enum {
 	RDE_UNIFORM_FV_1,
 	RDE_UNIFORM_FV_2,
@@ -1576,6 +1593,13 @@ typedef enum {
 #endif
 } RDE_UNIFORM_FV_;
 
+// Enum: RDE_UNIFORM_IV_
+// Types of uniforms that the engine supports for integers.
+//
+// RDE_UNIFORM_IV_1 - Vector of 1 integers.
+// RDE_UNIFORM_IV_2 - Vector of 2 integers.
+// RDE_UNIFORM_IV_3 - Vector of 3 integers.
+// RDE_UNIFORM_IV_4 - Vector of 4 integers.
 typedef enum {
 	RDE_UNIFORM_IV_1,
 	RDE_UNIFORM_IV_2,
@@ -1583,6 +1607,13 @@ typedef enum {
 	RDE_UNIFORM_IV_4
 } RDE_UNIFORM_IV_;
 
+// Enum: RDE_UNIFORM_UIV_
+// Types of uniforms that the engine supports for unsigned integers.
+//
+// RDE_UNIFORM_UIV_1 - Vector of 1 unsigned integers.
+// RDE_UNIFORM_UIV_2 - Vector of 2 unsigned integers.
+// RDE_UNIFORM_UIV_3 - Vector of 3 unsigned integers.
+// RDE_UNIFORM_UIV_4 - Vector of 4 unsigned integers.
 typedef enum {
 	RDE_UNIFORM_UIV_1,
 	RDE_UNIFORM_UIV_2,
@@ -1590,11 +1621,25 @@ typedef enum {
 	RDE_UNIFORM_UIV_4
 } RDE_UNIFORM_UIV_;
 
+// Enum: RDE_CAMERA_TYPE_
+// Types of cameras.
+//
+// RDE_CAMERA_TYPE_PERSPECTIVE - Perspective camera, ideal for 3D.
+// RDE_CAMERA_TYPE_ORTHOGRAPHIC - Orthographic camera, ideal for 2D.
 typedef enum {
 	RDE_CAMERA_TYPE_PERSPECTIVE,
 	RDE_CAMERA_TYPE_ORTHOGRAPHIC
 } RDE_CAMERA_TYPE_;
 
+// Enum: RDE_ANTIALIASING_
+// Levels of multi sampled anti-aliasing. Keep in mind, the more anti-aliasing, the more resources it uses.
+//
+// RDE_ANTIALIASING_NONE - No antialiasing will be used.
+// RDE_ANTIALIASING_X2 - Anti-aliasing with 2 levels.
+// RDE_ANTIALIASING_X4 - Anti-aliasing with 4 levels.
+// RDE_ANTIALIASING_X8 - Anti-aliasing with 8 levels.
+// RDE_ANTIALIASING_X16 - Anti-aliasing with 16 levels.
+// RDE_ANTIALIASING_X32 - Anti-aliasing with 32 levels.
 typedef enum {
 	RDE_ANTIALIASING_NONE = 0,
 	RDE_ANTIALIASING_X2 = 2,
@@ -1604,6 +1649,20 @@ typedef enum {
 	RDE_ANTIALIASING_X32 = 32,
 } RDE_ANTIALIASING_;
 
+// Enum: RDE_TEXTURE_PARAMETER_TYPE_
+// Parameters for texture loading.
+//
+// RDE_TEXTURE_PARAMETER_TYPE_FILTER_NEAREST - Nearest filter.
+// RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR - Linear filter.
+// RDE_TEXTURE_PARAMETER_TYPE_WRAP_REPEAT - Wrap repeat.
+// RDE_TEXTURE_PARAMETER_TYPE_WRAP_CLAMP_TO_BORDER - Wrap clamp to border.
+// RDE_TEXTURE_PARAMETER_TYPE_WRAP_CLAMP_TO_EDGE - Wrap clamp to edge.
+// RDE_TEXTURE_PARAMETER_TYPE_WRAP_MIRRORED_REPEAT - Wrap mirrored repeat.
+// RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NEAREST_MIN_FILTER_NEAREST - mipmap nearest nearest.
+// RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_LINEAR_MIN_FILTER_NEAREST - mipmap linear nearest.
+// RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NEAREST_MIN_FILTER_LINEAR - mimap nearest linear.
+// RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_LINEAR_MIN_FILTER_LINEAR - mipmap linear linear
+// RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NONE - mipmap none.
 typedef enum {
 	RDE_TEXTURE_PARAMETER_TYPE_FILTER_NEAREST = 0x2600,
 	RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR = 0x2601,
@@ -1615,25 +1674,19 @@ typedef enum {
 	RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_LINEAR_MIN_FILTER_NEAREST = 0x2701,
 	RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NEAREST_MIN_FILTER_LINEAR = 0x2702,
 	RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_LINEAR_MIN_FILTER_LINEAR = 0x2703,
-	RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NONE = 0x2704
+	RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NONE = 0x2704,
 } RDE_TEXTURE_PARAMETER_TYPE_;
 
 /// ============================= FILE SYSTEM ===============================
 
-typedef enum {
-	RDE_IMAGE_EXTENSION_PNG,
-	RDE_IMAGE_EXTENSION_JPG,
-	RDE_IMAGE_EXTENSION_BMP,
-	RDE_IMAGE_EXTENSION_SVG
-} RDE_IMAGE_EXTENSION_;
-
-typedef enum {
-	RDE_FILE_RESULT_OK,
-	RDE_FILE_RESULT_NOT_FOUND,
-	RDE_FILE_RESULT_LINE_OUT_OF_SCOPE,
-	RDE_FILE_RESULT_NOT_ALL_LINES_IN_SCOPE
-} RDE_FILE_RESULT_;
-
+// Enum: RDE_FILE_MODE_
+// Mode to open a file.
+//
+// RDE_FILE_MODE_READ - Read only file.
+// RDE_FILE_MODE_WRITE - Write only file.
+// RDE_FILE_MODE_APPEND - Write at end of file only.
+// RDE_FILE_MODE_READ_AND_WRITE - Read and write.
+// RDE_FILE_MODE_READ_AND_APPEND - Read and append.
 typedef enum {
 	RDE_FILE_MODE_READ,
 	RDE_FILE_MODE_WRITE,
@@ -1642,27 +1695,18 @@ typedef enum {
 	RDE_FILE_MODE_READ_AND_APPEND,
 } RDE_FILE_MODE_;
 
-/// =============================== LOCALIZATION ============================
-
-typedef enum { 
-	RDE_LANGUAGE_EN_US, 
-	RDE_LANGUAGE_EN_GB, 
-	RDE_LANGUAGE_EN_CA, 
-	RDE_LANGUAGE_ES_MX, 
-	RDE_LANGUAGE_ES_ES, 
-	RDE_LANGUAGE_PT_BR, 
-	RDE_LANGUAGE_FR, 
-	RDE_LANGUAGE_ZH, 
-	RDE_LANGUAGE_RU, 
-	RDE_LANGUAGE_DE, 
-	RDE_LANGUAGE_IT, 
-	RDE_LANGUAGE_JP, 
-	RDE_LANGUAGE_MAX 
-} RDE_LANGUAGE_;
-
-
 /// =============================== LOG ============================
 
+// Enum: RDE_LOG_COLOR_
+// Colors for printing to the console.
+//
+// RDE_LOG_COLOR_RED - Red.
+// RDE_LOG_COLOR_GREEN - Green.
+// RDE_LOG_COLOR_YELLOW - Yellow.
+// RDE_LOG_COLOR_BLUE - Blue.
+// RDE_LOG_COLOR_PURPLE - Purple.
+// RDE_LOG_COLOR_CYAN - Cyan.
+// RDE_LOG_COLOR_WHITE - White.
 typedef enum { 
 	RDE_LOG_COLOR_RED, 
 	RDE_LOG_COLOR_GREEN, 
@@ -1670,25 +1714,48 @@ typedef enum {
 	RDE_LOG_COLOR_BLUE, 
 	RDE_LOG_COLOR_PURPLE, 
 	RDE_LOG_COLOR_CYAN, 
-	RDE_LOG_COLOR_WHITE
+	RDE_LOG_COLOR_WHITE,
 } RDE_LOG_COLOR_;
 
+// Enum: RDE_LOG_LEVEL_
+// Levels of severity to print to the console.
+//
+// RDE_LOG_LEVEL_DEBUG - Debug.
+// RDE_LOG_LEVEL_INFO - Info.
+// RDE_LOG_LEVEL_WARNING - Warning.
+// RDE_LOG_LEVEL_ERROR - Error.
 typedef enum { 
 	RDE_LOG_LEVEL_DEBUG,
 	RDE_LOG_LEVEL_INFO,
 	RDE_LOG_LEVEL_WARNING,
-	RDE_LOG_LEVEL_ERROR
+	RDE_LOG_LEVEL_ERROR,
 } RDE_LOG_LEVEL_;
 
 
 /// =============================== PHYSICS 3D ============================
 
+// Enum: RDE_PHYSICS_BODY_TYPE_
+// Type of phisic bodies.
+//
+// RDE_PHYSICS_BODY_TYPE_STATIC - Static.
+// RDE_PHYSICS_BODY_TYPE_KINEMATIC - Kinematic.
+// RDE_PHYSICS_BODY_TYPE_DYNAMIC - Dynamic.
 typedef enum {
 	RDE_PHYSICS_BODY_TYPE_STATIC,
 	RDE_PHYSICS_BODY_TYPE_KINEMATIC,
-	RDE_PHYSICS_BODY_TYPE_DYNAMIC
+	RDE_PHYSICS_BODY_TYPE_DYNAMIC,
 } RDE_PHYSICS_BODY_TYPE_;
 
+// Enum: RDE_PHYSICS_SHAPE_TYPE_
+// Types of shapes for the colliders.
+//
+// RDE_PHYSICS_SHAPE_TYPE_NONE - None.
+// RDE_PHYSICS_SHAPE_TYPE_BOX - Box.
+// RDE_PHYSICS_SHAPE_TYPE_SPHERE - Sphere.
+// RDE_PHYSICS_SHAPE_TYPE_CYLINDER - Cylinder.
+// RDE_PHYSICS_SHAPE_TYPE_CAPSULE - Capsule.
+// RDE_PHYSICS_SHAPE_TYPE_PYRAMID - Pyramid.
+// RDE_PHYSICS_SHAPE_TYPE_MESH - Mesh.
 typedef enum {
 	RDE_PHYSICS_SHAPE_TYPE_NONE,
 	RDE_PHYSICS_SHAPE_TYPE_BOX,
@@ -1703,118 +1770,282 @@ typedef enum {
 /// *                                		STRUCSTS                         						*
 /// *************************************************************************************************
 
-/// ================================= UTIL ==================================
-
-RDE_SAFE_ARR_ACCESS(int)
-RDE_SAFE_ARR_ACCESS(uint)
-RDE_SAFE_ARR_ACCESS(size_t)
-RDE_SAFE_ARR_ACCESS(short)
-RDE_SAFE_ARR_ACCESS(float)
-RDE_SAFE_ARR_ACCESS(double)
-
-RDE_SAFE_ARR_SET(int)
-RDE_SAFE_ARR_SET(uint)
-RDE_SAFE_ARR_SET(size_t)
-RDE_SAFE_ARR_SET(short)
-RDE_SAFE_ARR_SET(float)
-RDE_SAFE_ARR_SET(double)
+// Group: Structs
 
 /// ================================= MATH ==================================
 
+// Type: rde_vec_2I
+// Vector2 of int. See <RDE_SPECIALIZED_VEC2>.
 RDE_SPECIALIZED_VEC2(int, 			rde_vec_2I);
+
+// Type: rde_vec_2UI
+// Vector2 of unsigned int. See <RDE_SPECIALIZED_VEC2>.
 RDE_SPECIALIZED_VEC2(uint, 			rde_vec_2UI);
+
+// Type: rde_vec_2F
+// Vector2 of float. See <RDE_SPECIALIZED_VEC2>.
 RDE_SPECIALIZED_VEC2(float, 		rde_vec_2F);
+
+// Type: rde_vec_2D
+// Vector2 of double. See <RDE_SPECIALIZED_VEC2>.
 RDE_SPECIALIZED_VEC2(double,		rde_vec_2D);
+
+// Type: rde_vec_2L
+// Vector2 of long. See <RDE_SPECIALIZED_VEC2>.
 RDE_SPECIALIZED_VEC2(long,			rde_vec_2L);
+
+// Type: rde_vec_2UL
+// Vector2 of unsigned long. See <RDE_SPECIALIZED_VEC2>.
 RDE_SPECIALIZED_VEC2(unsigned long, rde_vec_2UL);
+
+// Type: rde_vec_2ST
+// Vector2 of size_t. See <RDE_SPECIALIZED_VEC2>.
 RDE_SPECIALIZED_VEC2(size_t, 		rde_vec_2ST);
 
+// Type: rde_vec_3I
+// Vector3 of int. See <RDE_SPECIALIZED_VEC3>.
 RDE_SPECIALIZED_VEC3(int, 			rde_vec_3I);
+
+// Type: rde_vec_3UI
+// Vector3 of uint. See <RDE_SPECIALIZED_VEC3>.
 RDE_SPECIALIZED_VEC3(uint, 			rde_vec_3UI);
+
+// Type: rde_vec_3F
+// Vector3 of float. See <RDE_SPECIALIZED_VEC3>.
 RDE_SPECIALIZED_VEC3(float, 		rde_vec_3F);
+
+// Type: rde_vec_3D
+// Vector3 of double. See <RDE_SPECIALIZED_VEC3>.
 RDE_SPECIALIZED_VEC3(double,		rde_vec_3D);
+
+// Type: rde_vec_3L
+// Vector3 of long. See <RDE_SPECIALIZED_VEC3>.
 RDE_SPECIALIZED_VEC3(long,			rde_vec_3L);
+
+// Type: rde_vec_3UL
+// Vector3 of unsigned long. See <RDE_SPECIALIZED_VEC3>.
 RDE_SPECIALIZED_VEC3(unsigned long, rde_vec_3UL);
+
+// Type: rde_vec_3ST
+// Vector3 of size_t. See <RDE_SPECIALIZED_VEC3>.
 RDE_SPECIALIZED_VEC3(size_t, 		rde_vec_3ST);
 
+// Type: rde_vec_4I
+// Vector4 of int. See <RDE_SPECIALIZED_VEC4>.
 RDE_SPECIALIZED_VEC4(int, 			rde_vec_4I);
+
+// Type: rde_vec_4UI
+// Vector4 of uint. See <RDE_SPECIALIZED_VEC4>.
 RDE_SPECIALIZED_VEC4(uint, 			rde_vec_4UI);
+
+// Type: rde_vec_4F
+// Vector4 of float. See <RDE_SPECIALIZED_VEC4>.
 RDE_SPECIALIZED_VEC4(float, 		rde_vec_4F);
+
+// Type: rde_vec_4D
+// Vector4 of double. See <RDE_SPECIALIZED_VEC4>.
 RDE_SPECIALIZED_VEC4(double,		rde_vec_4D);
+
+// Type: rde_vec_4L
+// Vector4 of long. See <RDE_SPECIALIZED_VEC4>.
 RDE_SPECIALIZED_VEC4(long,			rde_vec_4L);
+
+// Type: rde_vec_4UL
+// Vector4 of unsigned long. See <RDE_SPECIALIZED_VEC4>.
 RDE_SPECIALIZED_VEC4(unsigned long, rde_vec_4UL);
+
+// Type: rde_vec_4ST
+// Vector4 of size_t. See <RDE_SPECIALIZED_VEC4>.
 RDE_SPECIALIZED_VEC4(size_t, 		rde_vec_4ST);
 
+// Type: rde_mat_2I
+// Matrix 2x2 of int. See <RDE_SPECIALIZED_MAT2>.
 RDE_SPECIALIZED_MAT2(int, 			rde_mat_2I);
+
+// Type: rde_mat_2UI
+// Matrix 2x2 of uint. See <RDE_SPECIALIZED_MAT2>.
 RDE_SPECIALIZED_MAT2(uint, 			rde_mat_2UI);
+
+// Type: rde_mat_2F
+// Matrix 2x2 of float. See <RDE_SPECIALIZED_MAT2>.
 RDE_SPECIALIZED_MAT2(float, 		rde_mat_2F);
+
+// Type: rde_mat_2D
+// Matrix 2x2 of double. See <RDE_SPECIALIZED_MAT2>.
 RDE_SPECIALIZED_MAT2(double,		rde_mat_2D);
+
+// Type: rde_mat_2L
+// Matrix 2x2 of long. See <RDE_SPECIALIZED_MAT2>.
 RDE_SPECIALIZED_MAT2(long,			rde_mat_2L);
+
+// Type: rde_mat_2UL
+// Matrix 2x2 of unsigned long. See <RDE_SPECIALIZED_MAT2>.
 RDE_SPECIALIZED_MAT2(unsigned long, rde_mat_2UL);
+
+// Type: rde_mat_2ST
+// Matrix 2x2 of size_t. See <RDE_SPECIALIZED_MAT2>.
 RDE_SPECIALIZED_MAT2(size_t, 		rde_mat_2ST);
 
+// Type: rde_mat_3I
+// Matrix 3x3 of int. See <RDE_SPECIALIZED_MAT3>.
 RDE_SPECIALIZED_MAT3(int, 			rde_mat_3I);
+
+// Type: rde_mat_3UI
+// Matrix 3x3 of uint. See <RDE_SPECIALIZED_MAT3>.
 RDE_SPECIALIZED_MAT3(uint, 			rde_mat_3UI);
+
+// Type: rde_mat_3F
+// Matrix 3x3 of float. See <RDE_SPECIALIZED_MAT3>.
 RDE_SPECIALIZED_MAT3(float, 		rde_mat_3F);
+
+// Type: rde_mat_3D
+// Matrix 3x3 of double. See <RDE_SPECIALIZED_MAT3>.
 RDE_SPECIALIZED_MAT3(double,		rde_mat_3D);
+
+// Type: rde_mat_3L
+// Matrix 3x3 of long. See <RDE_SPECIALIZED_MAT3>.
 RDE_SPECIALIZED_MAT3(long,			rde_mat_3L);
+
+// Type: rde_mat_3UL
+// Matrix 3x3 of unsigned long. See <RDE_SPECIALIZED_MAT3>.
 RDE_SPECIALIZED_MAT3(unsigned long, rde_mat_3UL);
+
+// Type: rde_mat_3ST
+// Matrix 3x3 of size_t. See <RDE_SPECIALIZED_MAT3>.
 RDE_SPECIALIZED_MAT3(size_t, 		rde_mat_3ST);
 
+// Type: rde_mat_4I
+// Matrix 4x4 of int. See <RDE_SPECIALIZED_MAT4>.
 RDE_SPECIALIZED_MAT4(int, 			rde_mat_4I);
+
+// Type: rde_mat_4UI
+// Matrix 4x4 of uint. See <RDE_SPECIALIZED_MAT4>.
 RDE_SPECIALIZED_MAT4(uint, 			rde_mat_4UI);
+
+// Type: rde_mat_4F
+// Matrix 4x4 of float. See <RDE_SPECIALIZED_MAT4>.
 RDE_SPECIALIZED_MAT4(float, 		rde_mat_4F);
-RDE_SPECIALIZED_MAT4(double,		rde_mat_4D);
+
+// Type: rde_mat_4D
+// Matrix 4x4 of double. See <RDE_SPECIALIZED_MAT4>.
+RDE_SPECIALIZED_MAT3(double,		rde_mat_4D);
+
+// Type: rde_mat_4L
+// Matrix 4x4 of long. See <RDE_SPECIALIZED_MAT4>.
 RDE_SPECIALIZED_MAT4(long,			rde_mat_4L);
+
+// Type: rde_mat_4UL
+// Matrix 4x4 of unsigned long. See <RDE_SPECIALIZED_MAT4>.
 RDE_SPECIALIZED_MAT4(unsigned long, rde_mat_4UL);
+
+// Type: rde_mat_4ST
+// Matrix 4x4 of size_t. See <RDE_SPECIALIZED_MAT4>.
 RDE_SPECIALIZED_MAT4(size_t, 		rde_mat_4ST);
 
-typedef struct {
+// Type: rde_quaternion
+// Represents a mathematical quaternion for rotations.
+//
+// Variables:
+// 	x - (float) x rotation value.
+// 	y - (float) y rotation value.
+// 	z - (float) z rotation value.
+// 	w - (float) w rotation value. This is the real part.
+typedef struct rde_quaternion rde_quaternion;
+struct rde_quaternion {
 	float x;
 	float y;
 	float z;
 	float w;
-} rde_quaternion;
-
-struct rde_line {
-	RDE_UNIMPLEMENTED_STRUCT()
 };
 
-struct rde_triangle {
-	RDE_UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_rectangle {
-	RDE_UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_bouding_box {
-	RDE_UNIMPLEMENTED_STRUCT()
-};
-
-typedef struct {
+// Type: rde_probability
+// Represents a mathematical probability.
+//
+// Variables:
+// 	probability_rolled - (float) value in the range [0, 1].
+// 	happened - (bool) if the probability_rolled was in the range of the chosen probability.
+typedef struct rde_probability rde_probability;
+struct rde_probability {
 	float probability_rolled;
 	bool happened;
-} rde_probability;
+};
 RDE_FUNC rde_probability rde_struct_create_probability();
 
+/// ================================= ENGINE ===========================
 
-/// ================================= LIBS && DECLS ===========================
-
+// Type: rde_engine
+// Struct of the whole engine. This is just a pointer, implementation is in the source file. 
 typedef struct rde_engine rde_engine;
+
+// Type: rde_window
+// Represents a window drawn on the screen. This is just a pointer, implementation is in the source file. 
 typedef struct rde_window rde_window;
-typedef struct rde_event rde_event;
+
+// Type: rde_file_handle
+// Represents an open file pointer handle. It is needed for any file system operation. This is just a pointer, implementation is in the source file. 
 typedef struct rde_file_handle rde_file_handle;
+
+// Type: rde_transform
+// Represents the position, rotation and scale of an element. It also contains infomation about the children and parent. This is just a pointer, implementation is in the source file. 
 typedef struct rde_transform rde_transform;
 
+// Type: rde_shader
+// Represents a shader, containing important OpenGL data. This is just a pointer, implementation is in the source file.
 typedef struct rde_shader rde_shader;
-typedef struct rde_camera rde_camera;
+
+// Type: rde_atlas
+// Represents a sprite sheet, and contains OpenGL data and info about the sprite sheet. This is just a pointer, implementation is in the source file.
 typedef struct rde_atlas rde_atlas;
+
+// Type: rde_font
+// Represents a font sprite sheet, and contains OpenGL data and info about the font. This is just a pointer, implementation is in the source file.
 typedef struct rde_font rde_font;
+
+// Type: rde_render_texture
+// Represents a special type of texture. We can enable it while rendering our scene and the scene will be rendered onto this render texture, then we can render the render texture wherever is needed. This is just a pointer, implementation is in the source file.
 typedef struct rde_render_texture rde_render_texture;
+
+// Type: rde_texture
+// Represents a texture loaded from an image, and contains OpenGL data and info about the image. This is just a pointer, implementation is in the source file.
 typedef struct rde_texture rde_texture;
+
+// Type: rde_model
+// Represents a 3D model, and contains OpenGL data and info about the meshes of the model. This is just a pointer, implementation is in the source file.
 typedef struct rde_model rde_model;
+
+// Type: rde_skybox_id
+// This is just an id to locate the skyboxes.
 typedef uint rde_skybox_id;
+
+
+/// ============================== CAMERA ===================================
+
+// Type: rde_camera
+// Struct that contains the information to let the renderer know what is being seen, so it can render properly.
+//
+// Variables:
+//	id - (uint) id of the camera, unique.
+//	zoom - (float) zoom of the camera.
+//	fov - (float) field of view in degrees.
+//	transform - (<rde_transform>) spatial information of the camera.
+//	direction - (<rde_vec_3F>) where the camera is looking to.
+//	up - (<rde_vec_3F>) what axis is Up, usually (0, 1, 0).
+// 	near_far - (<rde_vec_2F) near and far clip of the camera. Anything behind near or beyond far won't be rendered.
+//	camera_type - (<RDE_CAMERA_TYPE_>) Orthographic (2D) or Perspective (3D.
+//	enabled - (bool) if the camera is in use.
+typedef struct rde_camera rde_camera;
+struct rde_camera {
+	uint id;
+	float zoom;
+	float fov;
+	rde_transform* transform;
+	rde_vec_3F direction;
+	rde_vec_3F up;
+	rde_vec_2F near_far;
+	RDE_CAMERA_TYPE_ camera_type;
+	bool enabled;
+};
+RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
 
 #ifdef RDE_PHYSICS_MODULE
 #include "JoltC/rde_joltc.h"
@@ -1824,72 +2055,6 @@ RDE_FUNC void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camer
 #ifdef RDE_IMGUI_MODULE
 #include "rde_imgui.h"
 #endif
-
-/// ================== CALLBACKS AND FUNCTION POINTERS ======================
-
-typedef void (*rde_event_func)(rde_event*, rde_window*);
-typedef void (*rde_engine_user_side_loop_func)(float);
-typedef void (*rde_engine_user_side_loop_func_2)(float, rde_window*);
-
-typedef struct rde_inner_window_data rde_inner_window_info;
-
-typedef struct {
-	rde_engine_user_side_loop_func on_update;
-	rde_engine_user_side_loop_func on_fixed_update;
-	rde_engine_user_side_loop_func on_late_update;
-	rde_engine_user_side_loop_func_2 on_render;
-} rde_end_user_mandatory_callbacks;
-RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
-
-/// ============================== ENGINE ===================================
-
-typedef struct {
-	int index;
-} rde_display_info;
-rde_display_info rde_struct_create_display_info();
-
-typedef struct {
-	size_t max_amount_of_windows;
-	size_t max_amount_of_vertices_per_batch;
-	size_t max_amount_of_shaders;
-	
-	size_t max_amount_of_textures;
-	size_t max_amount_of_atlases;
-	size_t max_amount_of_fonts;
-	size_t max_amount_of_models;
-	size_t max_amount_of_models_textures;
-
-#ifdef RDE_AUDIO_MODULE
-	size_t max_amount_of_sounds;
-#endif
-
-} rde_engine_heap_allocs_config;
-
-typedef struct {
-	uint max_amount_of_point_lights;
-	uint max_amount_of_spot_lights;
-} rde_illumination_config;
-
-typedef struct {
-	size_t temp_allocator_bytes; // recommended at least 10-15Mb, if not set, malloc/free will be used on runtime
-	size_t max_amout_of_allowed_jobs;
-	size_t max_amount_of_physics_barriers;
-	int max_amount_of_threads;
-	size_t max_amount_of_bodies;
-	size_t max_amount_of_mutexes;
-	size_t max_amount_of_contact_constraints;
-} rde_physics_3d_config;
-
-typedef struct {
-	rde_engine_heap_allocs_config heap_allocs_config;
-	
-	rde_illumination_config illumination_config;
-
-#ifdef RDE_PHYSICS_MODULE
-	rde_jolt_init_config jolt_config;
-#endif
-
-} rde_engine_init_info;
 
 /// ============================== EVENTS ===================================
 
@@ -1968,6 +2133,17 @@ typedef struct {
 } rde_event_data;
 RDE_FUNC rde_event_data rde_struct_create_event_data();
 
+// Type: rde_event
+// Struct to store data of each available event.
+//
+// Variables:
+// 	type - (<RDE_EVENT_TYPE_>) type of the event.
+//	time_stamp - (ulong) when the event happened.
+//	window_id - (uint) window associeted with the event.
+//	handled - (bool) if other event handled it first.
+//	data - (<rde_event_data>) specific data of each event. Only one of the sub-structs is filled.
+//	sdl_native_event - (void*) pointer to the native SDL3 event.
+typedef struct rde_event rde_event;
 struct rde_event {
 	RDE_EVENT_TYPE_ type;
 	ulong time_stamp;
@@ -1977,6 +2153,72 @@ struct rde_event {
 	void* sdl_native_event;
 };
 RDE_FUNC rde_event rde_struct_create_event();
+
+/// ================== CALLBACKS AND FUNCTION POINTERS ======================
+
+typedef void (*rde_event_func)(rde_event*, rde_window*);
+typedef void (*rde_engine_user_side_loop_func)(float);
+typedef void (*rde_engine_user_side_loop_func_2)(float, rde_window*);
+
+typedef struct rde_inner_window_data rde_inner_window_info;
+
+typedef struct {
+	rde_engine_user_side_loop_func on_update;
+	rde_engine_user_side_loop_func on_fixed_update;
+	rde_engine_user_side_loop_func on_late_update;
+	rde_engine_user_side_loop_func_2 on_render;
+} rde_end_user_mandatory_callbacks;
+RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
+
+/// ============================== ENGINE ===================================
+
+typedef struct {
+	int index;
+} rde_display_info;
+rde_display_info rde_struct_create_display_info();
+
+typedef struct {
+	size_t max_amount_of_windows;
+	size_t max_amount_of_vertices_per_batch;
+	size_t max_amount_of_shaders;
+	
+	size_t max_amount_of_textures;
+	size_t max_amount_of_atlases;
+	size_t max_amount_of_fonts;
+	size_t max_amount_of_models;
+	size_t max_amount_of_models_textures;
+
+#ifdef RDE_AUDIO_MODULE
+	size_t max_amount_of_sounds;
+#endif
+
+} rde_engine_heap_allocs_config;
+
+typedef struct {
+	uint max_amount_of_point_lights;
+	uint max_amount_of_spot_lights;
+} rde_illumination_config;
+
+typedef struct {
+	size_t temp_allocator_bytes; // recommended at least 10-15Mb, if not set, malloc/free will be used on runtime
+	size_t max_amout_of_allowed_jobs;
+	size_t max_amount_of_physics_barriers;
+	int max_amount_of_threads;
+	size_t max_amount_of_bodies;
+	size_t max_amount_of_mutexes;
+	size_t max_amount_of_contact_constraints;
+} rde_physics_3d_config;
+
+typedef struct {
+	rde_engine_heap_allocs_config heap_allocs_config;
+	
+	rde_illumination_config illumination_config;
+
+#ifdef RDE_PHYSICS_MODULE
+	rde_jolt_init_config jolt_config;
+#endif
+
+} rde_engine_init_info;
 
 /// ============================ RENDERING ==================================
 
@@ -2124,19 +2366,6 @@ struct rde_viewport {
 	RDE_UNIMPLEMENTED_STRUCT()
 };
 
-struct rde_camera {
-	size_t id;
-	float zoom;
-	float fov;
-	rde_transform* transform;
-	rde_vec_3F direction;
-	rde_vec_3F up;
-	rde_vec_2F near_far;
-	RDE_CAMERA_TYPE_ camera_type;
-	bool enabled;
-};
-RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
-
 /// ============================ AUDIO ==================================
 
 #ifdef RDE_AUDIO_MODULE
@@ -2251,6 +2480,20 @@ RDE_FUNC void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...);
 RDE_FUNC void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 
 /// ============================ UTIL =======================================
+
+RDE_SAFE_ARR_ACCESS(int)
+RDE_SAFE_ARR_ACCESS(uint)
+RDE_SAFE_ARR_ACCESS(size_t)
+RDE_SAFE_ARR_ACCESS(short)
+RDE_SAFE_ARR_ACCESS(float)
+RDE_SAFE_ARR_ACCESS(double)
+
+RDE_SAFE_ARR_SET(int)
+RDE_SAFE_ARR_SET(uint)
+RDE_SAFE_ARR_SET(size_t)
+RDE_SAFE_ARR_SET(short)
+RDE_SAFE_ARR_SET(float)
+RDE_SAFE_ARR_SET(double)
 
 RDE_FUNC const char* rde_util_file_get_name_extension(const char* _file_name);
 RDE_FUNC void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, size_t _sanitized_size);

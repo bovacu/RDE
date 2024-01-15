@@ -966,15 +966,15 @@ rde_window rde_struct_create_window() {
 	_w.mouse_position = (rde_vec_2I) { 0, 0 };
 	_w.mouse_scroll = (rde_vec_2F) { 0.0f, 0.0f };
 
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+	for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_w.key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+	for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
 		_w.mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+	for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
 		_w.mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 
@@ -1262,7 +1262,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.transforms = (rde_transform*)malloc(sizeof(rde_transform) * RDE_MAX_TRANSFORMS);
 	_e.world_transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_TRANSFORMS);
 
-	for(size_t _i = 0; _i < RDE_MAX_TRANSFORMS; _i++) {
+	for(unsigned int _i = 0; _i < RDE_MAX_TRANSFORMS; _i++) {
 		_e.transforms[_i] = rde_struct_create_transform();
 		_e.transforms[_i].index = _i;
 		glm_mat4_identity(_e.world_transforms[_i]);
@@ -1297,7 +1297,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	
 	if(_e.init_info.illumination_config.max_amount_of_point_lights > 0) {
 		_e.illumination.point_lights = (rde_point_light**)malloc(sizeof(rde_point_light*) * _e.init_info.illumination_config.max_amount_of_point_lights);
-		for(size_t _i = 0; _i < _e.init_info.illumination_config.max_amount_of_point_lights; _i++) {
+		for(unsigned int _i = 0; _i < _e.init_info.illumination_config.max_amount_of_point_lights; _i++) {
 			_e.illumination.point_lights[_i] = NULL;
 		}
 	} else {
@@ -1306,7 +1306,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 
 	if(_e.init_info.illumination_config.max_amount_of_spot_lights > 0) {
 		_e.illumination.spot_lights = (rde_spot_light**)malloc(sizeof(rde_spot_light*) * _e.init_info.illumination_config.max_amount_of_spot_lights);
-		for(size_t _i = 0; _i < _e.init_info.illumination_config.max_amount_of_spot_lights; _i++) {
+		for(unsigned int _i = 0; _i < _e.init_info.illumination_config.max_amount_of_spot_lights; _i++) {
 			_e.illumination.spot_lights[_i] = NULL;
 		}
 	} else {
@@ -1329,14 +1329,14 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	rde_critical_error(_e.init_info.heap_allocs_config.max_amount_of_shaders <= 0, RDE_ERROR_HEAP_ALLOC_BAD_VALUE, "shaders", _e.init_info.heap_allocs_config.max_amount_of_shaders);
 	_e.shaders = (rde_shader*)malloc(sizeof(rde_shader) * _e.init_info.heap_allocs_config.max_amount_of_shaders);
 	rde_critical_error(_e.shaders == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_shader) * _e.init_info.heap_allocs_config.max_amount_of_shaders, "shaders");
-	for(size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_shaders; _i++) {
+	for(unsigned int _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_shaders; _i++) {
 		_e.shaders[_i] = rde_struct_create_shader();
 	}
 
 	rde_critical_error(_e.init_info.heap_allocs_config.max_amount_of_windows <= 0, RDE_ERROR_HEAP_ALLOC_BAD_VALUE, "windows", _e.init_info.heap_allocs_config.max_amount_of_windows);
 	_e.windows = (rde_window*)malloc(sizeof(rde_window) * _e.init_info.heap_allocs_config.max_amount_of_windows);
 	rde_critical_error(_e.windows == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_window) * _e.init_info.heap_allocs_config.max_amount_of_windows, "windows");
-	for(size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
+	for(unsigned int _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
 		_e.windows[_i] = rde_struct_create_window();
 	}
 
@@ -1353,7 +1353,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	if(_e.init_info.heap_allocs_config.max_amount_of_atlases > 0) {
 		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.init_info.heap_allocs_config.max_amount_of_atlases);
 		rde_critical_error(_e.atlases == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_atlas) * _e.init_info.heap_allocs_config.max_amount_of_atlases, "atlases");
-		for(size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_atlases; _i++) {
+		for(unsigned int _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_atlases; _i++) {
 			_e.atlases[_i] = rde_struct_create_atlas();
 		}
 	} else {
@@ -1373,7 +1373,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	if(_e.init_info.heap_allocs_config.max_amount_of_models > 0) {
 		_e.models = (rde_model*)malloc(sizeof(rde_model) * _e.init_info.heap_allocs_config.max_amount_of_models);
 		rde_critical_error(_e.models == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_atlas) * _e.init_info.heap_allocs_config.max_amount_of_models, "atlases");
-		for(size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_models; _i++) {
+		for(unsigned int _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_models; _i++) {
 			_e.models[_i] = rde_struct_create_model();
 		}
 	} else {
@@ -1392,27 +1392,27 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	}
 #endif
 
-	for(size_t _i = 0; _i < RDE_WIN_EVENT_COUNT; _i++) { 
+	for(unsigned int _i = 0; _i < RDE_WIN_EVENT_COUNT; _i++) { 
 		_e.window_events[_i] = NULL;
 	}
 
-	for(size_t _i = 0; _i < RDE_DISPLAY_EVENT_COUNT; _i++) { 
+	for(unsigned int _i = 0; _i < RDE_DISPLAY_EVENT_COUNT; _i++) { 
 		_e.display_events[_i] = NULL;
 	}
 
-	for(size_t _i = 0; _i < RDE_KEY_EVENT_COUNT; _i++) { 
+	for(unsigned int _i = 0; _i < RDE_KEY_EVENT_COUNT; _i++) { 
 		_e.key_events[_i] = NULL;
 	}
 
-	for(size_t _i = 0; _i < RDE_MOUSE_EVENT_COUNT; _i++) { 
+	for(unsigned int _i = 0; _i < RDE_MOUSE_EVENT_COUNT; _i++) { 
 		_e.mouse_events[_i] = NULL;
 	}
 
-	for(size_t _i = 0; _i < RDE_DRAG_AND_DROP_EVENT_COUNT; _i++) { 
+	for(unsigned int _i = 0; _i < RDE_DRAG_AND_DROP_EVENT_COUNT; _i++) { 
 		_e.drag_and_drop_events[_i] = NULL;
 	}
 	
-	for(size_t _i = 0; _i < RDE_MOBILE_EVENT_COUNT; _i++) { 
+	for(unsigned int _i = 0; _i < RDE_MOBILE_EVENT_COUNT; _i++) { 
 		_e.mobile_events[_i] = NULL;
 	}
 
@@ -1654,7 +1654,7 @@ void rde_inner_engine_on_event() {
 		rde_event _rde_event = rde_inner_event_sdl_event_to_rde_event(&_event);
 		_rde_event.sdl_native_event = (void*)&_event;
 		
-		for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
+		for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
 			rde_window* _window = &ENGINE.windows[_i];
 
 			if(_window->sdl_window == NULL) {
@@ -1814,7 +1814,7 @@ void rde_engine_transform_parse_parent(rde_transform* _transform, mat4 _mat) {
 void rde_engine_transform_remove_transform_from_parent_children(rde_transform* _transform) {
 	if(_transform->parent != -1) {
 		rde_transform* _parent = &ENGINE.transforms[_transform->parent];
-		for(size_t _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
+		for(unsigned int _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
 			if(_parent->children[_i] == _transform->index) {
 				stbds_arrdel(_parent->children, _i);
 				break;
@@ -1822,7 +1822,7 @@ void rde_engine_transform_remove_transform_from_parent_children(rde_transform* _
 		}
 	}
 
-	for(size_t _i = 0; _i < stbds_arrlenu(_transform->children); _i++) {
+	for(unsigned int _i = 0; _i < stbds_arrlenu(_transform->children); _i++) {
 		ENGINE.transforms[_transform->children[_i]].parent = -1;
 	}
 
@@ -1926,7 +1926,7 @@ void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks
 #define GET_VALUE_FROM_CONFIG_FILE(_type, _func) 																										\
 	_type rde_inner_engine_get_config_file_##_type(const char** _config_file_lines, size_t _number_of_lines, const char* _key, size_t _default_value) { \
 		size_t _final_value = RDE_UINT_MAX;																											  	\
-		for(size_t _i = 0; _i < _number_of_lines; _i++) {																								\
+		for(unsigned int _i = 0; _i < _number_of_lines; _i++) {																								\
 			errno = 0;																																	\
 			if(rde_util_string_contains_substring(_config_file_lines[_i], _key, false)) {																\
 				char* _value = strrchr(_config_file_lines[_i], '=');																					\
@@ -1983,7 +1983,7 @@ rde_engine_init_info rde_engine_load_config(const char* _config_path) {
 	GET_SIZET("collision_steps_per_update", _init_info.jolt_config.collision_steps_per_update)
 	#endif
 
-	for(size_t _i = 0; _i < _line_amount; _i++) {
+	for(unsigned int _i = 0; _i < _line_amount; _i++) {
 		free(_lines[_i]);
 	}
 	
@@ -2059,7 +2059,7 @@ void rde_engine_on_run() {
 		
 		rde_engine_transform_update();
 
-		for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
+		for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
 			rde_window* _window = &ENGINE.windows[_i];
 
 			if(_window->sdl_window == NULL) {
@@ -2154,7 +2154,7 @@ void rde_engine_destroy_engine() {
 		glDeleteVertexArrays(1, &ENGINE.skybox.vao);
 	}
 
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_atlases; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_atlases; _i++) {
 		if(ENGINE.atlases[_i].texture == NULL) {
 			continue;
 		}
@@ -2163,7 +2163,7 @@ void rde_engine_destroy_engine() {
 	}
 	free(ENGINE.atlases);
 
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_fonts; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_fonts; _i++) {
 		if(ENGINE.fonts[_i].texture == NULL) {
 			continue;
 		}
@@ -2194,7 +2194,7 @@ void rde_engine_destroy_engine() {
 	}
 	free(ENGINE.models);
 
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_shaders; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_shaders; _i++) {
 		if(ENGINE.shaders[_i].compiled_program_id == -1) {
 			continue;
 		}
@@ -2220,7 +2220,7 @@ void rde_engine_destroy_engine() {
 	rde_jolt_end();
 #endif
 
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
 		if(ENGINE.windows[_i].sdl_window == NULL) {
 			continue;
 		}
@@ -2243,7 +2243,7 @@ void rde_engine_switch_window_display(rde_window* _window, size_t _new_display) 
 rde_window* rde_engine_get_focused_window() {
 	SDL_Window* _window = SDL_GetMouseFocus();
 
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
 		rde_window* _w = &ENGINE.windows[_i];
 		
 		if(_w->sdl_window == _window) {
@@ -2326,7 +2326,7 @@ void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _
 	if(_parent != NULL) {
 		_transform->parent = _parent->index;
 		bool _has_child_already = false;
-		for(size_t _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
+		for(unsigned int _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
 			if(_parent->children[_i] == _transform->index) {
 				_has_child_already = true;
 				break;
@@ -2664,7 +2664,7 @@ void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, size_t _s
 	char _fucking_windows_backslash = '\\';
 	char _lovely_unix_slash = '/';
 	
-	for(size_t _i = 0; _i < strlen(_path); _i++) {
+	for(unsigned int _i = 0; _i < strlen(_path); _i++) {
 		_sanitized[_i] = _path[_i];
 		if(_sanitized[_i] == _fucking_windows_backslash) {
 			_sanitized[_i] = _lovely_unix_slash;
@@ -2767,7 +2767,7 @@ size_t rde_util_string_char_appearences(const char* _string, char _char) {
 
 	size_t _amount = 0;
 	size_t _string_size = strlen(_string);
-	for(size_t _i = 0; _i < _string_size; _i++) {
+	for(unsigned int _i = 0; _i < _string_size; _i++) {
 		if(_string[_i] == _char) {
 			_amount++;
 		}
@@ -2793,7 +2793,7 @@ void rde_util_string_to_lower(char* _destination, const char* _string) {
 	}
 
 	size_t _string_size = strlen(_string);
-	for(size_t _i = 0; _i < _string_size; _i++){
+	for(unsigned int _i = 0; _i < _string_size; _i++){
 		_destination[_i] = tolower(_string[_i]);
 	}
 }
@@ -2804,7 +2804,7 @@ void rde_util_string_to_lower_itself(char* _string) {
 	}
 
 	size_t _string_size = strlen(_string);
-	for(size_t _i = 0; _i < _string_size; _i++){
+	for(unsigned int _i = 0; _i < _string_size; _i++){
 		_string[_i] = tolower(_string[_i]);
 	}
 }
@@ -2815,7 +2815,7 @@ void rde_util_string_to_upper(char* _destination, const char* _string) {
 	}
 
 	size_t _string_size = strlen(_string);
-	for(size_t _i = 0; _i < _string_size; _i++){
+	for(unsigned int _i = 0; _i < _string_size; _i++){
 		_destination[_i] = toupper(_string[_i]);
 	}
 }
@@ -2826,7 +2826,7 @@ void rde_util_string_to_upper_itself(char* _string) {
 	}
 
 	size_t _string_size = strlen(_string);
-	for(size_t _i = 0; _i < _string_size; _i++){
+	for(unsigned int _i = 0; _i < _string_size; _i++){
 		_string[_i] = toupper(_string[_i]);
 	}
 }
@@ -2837,7 +2837,7 @@ void rde_util_string_replace_char(char* _string, char _old, char _new) {
 	}
 
 	size_t _string_size = strlen(_string);
-	for(size_t _i = 0; _i < _string_size; _i++) {
+	for(unsigned int _i = 0; _i < _string_size; _i++) {
 		if(_string[_i] == _old) {
 			_string[_i] = _new;
 			break;
@@ -2875,7 +2875,7 @@ void rde_util_string_replace_chars_all(char* _string, char _old, char _new) {
 	}
 
 	size_t _string_size = strlen(_string);
-	for(size_t _i = 0; _i < _string_size; _i++) {
+	for(unsigned int _i = 0; _i < _string_size; _i++) {
 		if(_string[_i] == _old) {
 			_string[_i] = _new;
 		}
@@ -3239,7 +3239,7 @@ rde_file_handle* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode
 	SDL_RWops* _sdl_file = SDL_RWFromFile(_file_path, _mode);
 	rde_critical_error(_sdl_file == NULL, RDE_ERROR_FILE_NOT_FOUND, _file_path);
 
-	for(size_t _i = 0; _i < RDE_MAX_CONCURRENT_FILES_OPENED; _i++) {
+	for(unsigned int _i = 0; _i < RDE_MAX_CONCURRENT_FILES_OPENED; _i++) {
 		rde_file_handle* _file_handler = &concurrent_file_handlers[_i];
 
 		if(_file_handler->sdl_handle == NULL) {
@@ -3649,7 +3649,7 @@ rde_window* rde_window_create_window_os() {
 	size_t _free_window_index = 0;
 	rde_window* _window = NULL;
 
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
 		if(ENGINE.windows[_i].sdl_window != NULL) {
 
 			if(_i == ENGINE.init_info.heap_allocs_config.max_amount_of_windows - 1) {
@@ -4299,7 +4299,7 @@ void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _ba
 void rde_inner_rendering_reset_batch_2d() {
 	current_batch_2d.shader = NULL;
 	current_batch_2d.texture = rde_struct_create_texture();
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_vertices_per_batch; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_vertices_per_batch; _i++) {
 		current_batch_2d.vertices[_i] = rde_struct_create_vertex_2d();
 	}
 	current_batch_2d.amount_of_vertices = 0;
@@ -4512,7 +4512,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 
 	size_t _material_count = _mesh->material_count == 0 ? 1 : _mesh->material_count;
 	rde_obj_mesh_data* _obj = (rde_obj_mesh_data*)malloc(sizeof(rde_obj_mesh_data) * _material_count);
-	for(size_t _i = 0; _i < _material_count; _i++) {
+	for(unsigned int _i = 0; _i < _material_count; _i++) {
 		_obj[_i] = rde_inner_struct_create_obj_mesh_data();
 	}
 
@@ -4523,7 +4523,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 		_group_or_object_count = _mesh->group_count;
 	}
 
-	for(size_t _i = 0; _i < _group_or_object_count; _i++) {
+	for(unsigned int _i = 0; _i < _group_or_object_count; _i++) {
 		rde_obj_mesh_data* _obj_mesh_data = NULL;
 		fastObjGroup* _o_or_g_inner = &_group_or_obj[_i];
 		for (size_t _j = 0; _j < _o_or_g_inner->face_count; _j++) {
@@ -4542,7 +4542,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 	}
 
 	uint _offset = 0;
-	for(size_t _i = 0; _i < _group_or_object_count; _i++) {
+	for(unsigned int _i = 0; _i < _group_or_object_count; _i++) {
 		fastObjGroup* _o_or_g = &_group_or_obj[_i];
 
 		for (size_t _j = 0; _j < _o_or_g->face_count; _j++) {
@@ -4571,7 +4571,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 		}
 	}
 
-	for(size_t _i = 0; _i < _material_count; _i++) {
+	for(unsigned int _i = 0; _i < _material_count; _i++) {
 		rde_obj_mesh_data* _obj_mesh_data = &_obj[_i];
 
 		if(_obj_mesh_data->vertex_count <= 0) {
@@ -4665,7 +4665,7 @@ void parse_3_vertices_face_fbx(uint _i, uint _v, uint* _mesh_indices,
 
 rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _texture_path) {
 	rde_model* _model = NULL;
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_models; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_models; _i++) {
 		rde_model* _m = &ENGINE.models[_i];
 
 		if(_m->mesh_array != NULL) {
@@ -4702,7 +4702,7 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 			size_t _mesh_positions_size = 0;
 			uint _mesh_texcoords_size = 0;
 
-			for(size_t _i = 0; _i < _faces_size; _i++) {
+			for(unsigned int _i = 0; _i < _faces_size; _i++) {
 				ufbx_face* _face = &_mesh->faces.data[_i];
 
 				if (_face->num_indices == 3) {
@@ -4734,7 +4734,7 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 			uint _positions_pointer = 0;
 			uint _texcoords_pointer = 0;
 
-			for(size_t _i = 0; _i < _faces_size; _i++) {
+			for(unsigned int _i = 0; _i < _faces_size; _i++) {
 				ufbx_face* _face = &_mesh->faces.data[_i];
 
 				if (_face->num_indices == 3) {
@@ -4743,7 +4743,7 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 					                          _face, _mesh,
 					                          &_indices_pointer, &_positions_pointer, &_texcoords_pointer);
 				} else {
-					for(size_t _v = 0; _v < _face->num_indices - 2; _v++) {
+					for(unsigned int _v = 0; _v < _face->num_indices - 2; _v++) {
 						parse_3_vertices_face_fbx(_indices_pointer / 3, _v,
 						                          _mesh_indices, _mesh_positions, _mesh_texcoords, 
 						                          _face, _mesh,
@@ -4855,7 +4855,7 @@ bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 float* rde_inner_rendering_mesh_calculate_normals(float* _vertex_positions, size_t _indices_count, size_t _vertex_count, uint* _indices) {
 	size_t _normals_size = _vertex_count * 3;
 	float* _normals = (float*)malloc(sizeof(float) * _normals_size);
-	for(size_t _i = 0; _i < _normals_size; _i++) {
+	for(unsigned int _i = 0; _i < _normals_size; _i++) {
 		_normals[_i] = 0;
 	}
 
@@ -4921,7 +4921,7 @@ rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data) {
 	
 	_mesh.transformation_matrices = NULL;
 	_mesh.transformation_matrices = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW );
-	for(size_t _i = 0; _i < RDE_MAX_MODELS_PER_DRAW; _i++) {
+	for(unsigned int _i = 0; _i < RDE_MAX_MODELS_PER_DRAW; _i++) {
 		glm_mat4_zero(_mesh.transformation_matrices[_i]);
 	}
 
@@ -4994,7 +4994,7 @@ rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data) {
 }
 
 void rde_inner_rendering_reset_line_batch() {
-	for(size_t _i = 0; _i < RDE_MAX_LINES_PER_DRAW; _i++) {
+	for(unsigned int _i = 0; _i < RDE_MAX_LINES_PER_DRAW; _i++) {
 		current_batch_3d.line_batch.vertices[_i] = rde_struct_create_line_vertex();
 	}
 
@@ -5007,7 +5007,7 @@ void rde_inner_rendering_reset_batch_3d() {
 	current_batch_3d.shader = NULL;
 
 	if(current_batch_3d.mesh != NULL) {
-		for(size_t _i = 0; _i < current_batch_3d.amount_of_models_per_draw; _i++) {
+		for(unsigned int _i = 0; _i < current_batch_3d.amount_of_models_per_draw; _i++) {
 			glm_mat4_zero(current_batch_3d.mesh->transformation_matrices[_i]);
 		}
 	}
@@ -5175,7 +5175,7 @@ void rde_inner_rendering_flush_batch_3d() {
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "material.Kd"), _material.kd.x, _material.kd.y, _material.kd.z);
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "material.Ks"), _material.ks.x, _material.ks.y, _material.ks.z);
 
-	for(size_t _i = 0; _i < ENGINE.init_info.illumination_config.max_amount_of_point_lights; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.illumination_config.max_amount_of_point_lights; _i++) {
 		rde_point_light* _p = ENGINE.illumination.point_lights[_i];
 		char _point_light_var[256];
 		memset(_point_light_var, 0, 256);
@@ -5216,7 +5216,7 @@ void rde_inner_rendering_flush_batch_3d() {
 		memset(_point_light_var, 0, 256);
 	}
 
-	for(size_t _i = 0; _i < ENGINE.init_info.illumination_config.max_amount_of_spot_lights; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.illumination_config.max_amount_of_spot_lights; _i++) {
 		rde_spot_light* _s = ENGINE.illumination.spot_lights[_i];
 		char _spot_light_var[256];
 		memset(_spot_light_var, 0, 256);
@@ -5447,7 +5447,7 @@ rde_shader_data rde_rendering_shader_get_data(rde_shader* _shader) {
 }
 
 rde_shader* rde_rendering_shader_get_by_name(const char* _name) {
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_shaders; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_shaders; _i++) {
 		rde_shader* _shader = &ENGINE.shaders[_i];
 		if(_shader != NULL && strcmp(_shader->name, _name) == 0) {
 			return _shader;
@@ -5531,7 +5531,7 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_textur
 		size_t _init_point = 0;
 		size_t _end_point = 0;
 
-		for(size_t _i = 0; _i < _sp_size; _i++) {
+		for(unsigned int _i = 0; _i < _sp_size; _i++) {
 			if(_sanitized_path[_i] == '/' &&
 			   _i + 1 < _sp_size && _sanitized_path[_i + 1] != '.' &&
 			   _i + 2 < _sp_size && _sanitized_path[_i + 2] != '.' ) {
@@ -5635,7 +5635,7 @@ rde_texture* rde_rendering_texture_text_load(const char* _file_path) {
 		}
 	}
 
-	for(size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
 		if(ENGINE.textures[_i].opengl_texture_id >= 0) {
 			continue;
 		}
@@ -5834,7 +5834,7 @@ rde_atlas* rde_rendering_atlas_load(const char* _texture_path) {
 		}
 	}
 
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_atlases; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_atlases; _i++) {
 		rde_atlas* _atlas = &ENGINE.atlases[_i];
 		if(_atlas->texture != NULL) {
 			continue;
@@ -5903,7 +5903,7 @@ rde_font* rde_rendering_font_load(const char* _font_path) {
 		}
 	}
 
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_fonts; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_fonts; _i++) {
 		rde_font* _font = &ENGINE.fonts[_i];
 		if(_font->texture != NULL) {
 			continue;
@@ -5999,7 +5999,7 @@ rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]) {
 	RDE_CHECK_GL(glGenTextures, 1, &_texture_id);
 	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_CUBE_MAP, _texture_id);
 
-	for(size_t _i = 0; _i < 6; _i++) {
+	for(unsigned int _i = 0; _i < 6; _i++) {
 		const char* _extension = rde_util_file_get_name_extension(_texture_paths[_i]);
 		char _extension_lower[10];
 		memset(_extension_lower, 0, 10);
@@ -6669,7 +6669,7 @@ rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data) {
 	
 	_mesh->transformation_matrices = NULL;
 	_mesh->transformation_matrices = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW);
-	for(size_t _i = 0; _i < RDE_MAX_MODELS_PER_DRAW; _i++) {
+	for(unsigned int _i = 0; _i < RDE_MAX_MODELS_PER_DRAW; _i++) {
 		glm_mat4_zero(_mesh->transformation_matrices[_i]);
 	}
 
@@ -7056,7 +7056,7 @@ rde_directional_light rde_rendering_lighting_get_directional_light() {
 
 void rde_rendering_light_add_add_point_light(rde_point_light* _point_light) {
 	bool _found = false;
-	for(size_t _i = 0; _i < ENGINE.init_info.illumination_config.max_amount_of_point_lights; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.illumination_config.max_amount_of_point_lights; _i++) {
 		if(ENGINE.illumination.point_lights[_i] == NULL) {
 			ENGINE.illumination.point_lights[_i] = _point_light;
 			_found = true;
@@ -7069,7 +7069,7 @@ void rde_rendering_light_add_add_point_light(rde_point_light* _point_light) {
 
 void rde_rendering_light_add_add_spot_light(rde_spot_light* _spot_light) {
 	bool _found = false;
-	for(size_t _i = 0; _i < ENGINE.init_info.illumination_config.max_amount_of_spot_lights; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.illumination_config.max_amount_of_spot_lights; _i++) {
 		if(ENGINE.illumination.spot_lights[_i] == NULL) {
 			ENGINE.illumination.spot_lights[_i] = _spot_light;
 			_found = true;
@@ -7091,7 +7091,7 @@ rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh) {
 size_t rde_rendering_model_get_vertices_count(rde_model* _model) {
 	size_t _total_vertices = 0;
 	
-	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
+	for(unsigned int _i = 0; _i < _model->mesh_array_size; _i++) {
 		_total_vertices += rde_rendering_mesh_get_data(&_model->mesh_array[_i]).amount_of_vertices;
 	}
 
@@ -7100,7 +7100,7 @@ size_t rde_rendering_model_get_vertices_count(rde_model* _model) {
 
 void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "model");
-	for(size_t _i = 0; _i < _model->mesh_array_size; _i++) {
+	for(unsigned int _i = 0; _i < _model->mesh_array_size; _i++) {
 		_model->mesh_array[_i].material.material_light_data = _light_data;
 	}
 }
@@ -7114,7 +7114,7 @@ rde_model_data rde_rendering_model_get_data(rde_model* _model) {
 	_m.amount_of_meshes = _model->mesh_array_size;
 	_m.meshes = (rde_mesh**)malloc(sizeof(rde_mesh*) * _m.amount_of_meshes);
 
-	for(size_t _i = 0; _i < _m.amount_of_meshes; _i++) {
+	for(unsigned int _i = 0; _i < _m.amount_of_meshes; _i++) {
 		_m.meshes[_i] = &_model->mesh_array[_i];
 	}
 
@@ -7124,7 +7124,7 @@ rde_model_data rde_rendering_model_get_data(rde_model* _model) {
 void rde_rendering_model_unload(rde_model* _model) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "obj model");
 
-	for(size_t _c = 0; _c < stbds_arrlenu(_model->mesh_array); _c++) {
+	for(unsigned int _c = 0; _c < stbds_arrlenu(_model->mesh_array); _c++) {
 		rde_mesh* _mesh = &_model->mesh_array[_c];
 		rde_rendering_mesh_destroy(_mesh, true);
 	}
@@ -7350,54 +7350,54 @@ RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_event_window_resize, {
 })
 RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_focused_by_mouse, {})
 RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused_by_mouse, {
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+	for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+	for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
 		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 })
 RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_focused, {})
 RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_unfocused, {
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+	for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+	for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
 		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 })
 RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_moved, {
-    for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+    for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+	for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
 		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 })
 RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_minimized, {
-    for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+    for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+	for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
 		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 })
 RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_maximized, {
-   	for(size_t _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
+   	for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_KEYS; _i++) {
 		_window->key_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 
-	for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
+	for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
 		_window->mouse_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 	}
 })
 RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_window_closed, { 
 	size_t _existing_non_destroyed_windows = 0;
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
 		if(&ENGINE.windows[_i] != _window && ENGINE.windows[_i].sdl_window != NULL) {
 			_existing_non_destroyed_windows++;
 		}
@@ -7853,7 +7853,7 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Will Enter Background");
 			ENGINE.pause_loop = true;
-			for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+			for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
 				_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 			}
 		} break;
@@ -7864,7 +7864,7 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Did Enter Background");
 			ENGINE.pause_loop = true;
-			for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+			for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
 				_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 			}
 		} break;
@@ -7875,7 +7875,7 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Will Enter Foreground");
 			ENGINE.pause_loop = false;
-			for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+			for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
 				_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 			}
 		} break;
@@ -7886,7 +7886,7 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 			}
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Android App Did Enter Foreground");
 			ENGINE.pause_loop = false;
-			for(size_t _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
+			for(unsigned int _i = 0; _i < RDE_AMOUNT_OF_MOBILE_FINGERS; _i++) {
 				_window->mobile_states[_i] = RDE_INPUT_STATUS_UNINITIALIZED;
 			}
 		} break;
@@ -8026,7 +8026,7 @@ void data_callback(ma_device* _device, void* _output, const void* _input, ma_uin
 	(void)_device;
 	(void)_input;
 
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
 		rde_sound* _sound = &ENGINE.sounds[_i];
 		if(_sound->used && _sound->playing) {
 			ma_data_source_read_pcm_frames(&_sound->miniaudio_decoder, _output, _frame_count, NULL);
@@ -8074,7 +8074,7 @@ void rde_audio_init(rde_sound_config _config) {
 rde_sound* rde_audio_load_sound(const char* _sound_path) {
 	rde_sound* _sound = NULL;
 
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
 		rde_sound* _s = &ENGINE.sounds[_i];
 
 		if(!_s->used) {
@@ -8139,7 +8139,7 @@ bool rde_audio_set_sound_volume(rde_sound* _sound, float _volume) {
 }
 
 void rde_audio_end() {
-	for(size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
+	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
 		rde_sound* _sound = &ENGINE.sounds[_i];
 
 		if(_sound->used) {
