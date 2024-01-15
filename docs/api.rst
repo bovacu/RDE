@@ -1,4 +1,4 @@
 API
 ===
 
-`local mirror <index.html>`_
+`local mirror <index_api.html>`_
