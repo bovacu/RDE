@@ -1063,7 +1063,7 @@ void dyn_str_append(dyn_str* _s, char* _string) {
 
     dyn_str_growto(_s, _s->size + _len);
 
-    for(int _i = 0; _i < strlen(_string); _i++) {
+    for(unsigned long long _i = 0; _i < strlen(_string); _i++) {
         _s->str[_len + _i] = _string[_i];
     }
 }

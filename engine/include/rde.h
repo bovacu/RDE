@@ -462,8 +462,8 @@ typedef unsigned int uint;
 	} while(0);
 #endif
 
-#define RDE_SAFE_ARR_ACCESS(_type) RDE_FUNC _type rde_arr_s_get_##_type(uint _index, _type* _arr, size_t _arr_size, char* _fmt, ...);
-#define RDE_SAFE_ARR_SET(_type) RDE_FUNC void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...);
+#define RDE_SAFE_ARR_ACCESS(_type) RDE_FUNC _type rde_arr_s_get_##_type(uint _index, _type* _arr, uint _arr_size, char* _fmt, ...);
+#define RDE_SAFE_ARR_SET(_type) RDE_FUNC void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, uint _arr_size, char* _fmt, ...);
 
 // Macro: rde_render_3d
 // More compact way of rendering 3D without shadows. Result of doing <rde_rendering_3d_begin_drawing>, draw your scene, <rde_rendering_3d_end_drawing>
@@ -2259,18 +2259,18 @@ typedef struct {
 /// ============================== ENGINE ===================================
 
 typedef struct {
-	size_t max_amount_of_windows;
-	size_t max_amount_of_vertices_per_batch;
-	size_t max_amount_of_shaders;
+	uint max_amount_of_windows;
+	uint max_amount_of_vertices_per_batch;
+	uint max_amount_of_shaders;
 	
-	size_t max_amount_of_textures;
-	size_t max_amount_of_atlases;
-	size_t max_amount_of_fonts;
-	size_t max_amount_of_models;
-	size_t max_amount_of_models_textures;
+	uint max_amount_of_textures;
+	uint max_amount_of_atlases;
+	uint max_amount_of_fonts;
+	uint max_amount_of_models;
+	uint max_amount_of_models_textures;
 
 #ifdef RDE_AUDIO_MODULE
-	size_t max_amount_of_sounds;
+	uint max_amount_of_sounds;
 #endif
 
 } rde_engine_heap_allocs_config;
@@ -2281,13 +2281,13 @@ typedef struct {
 } rde_illumination_config;
 
 typedef struct {
-	size_t temp_allocator_bytes; // recommended at least 10-15Mb, if not set, malloc/free will be used on runtime
-	size_t max_amout_of_allowed_jobs;
-	size_t max_amount_of_physics_barriers;
+	uint temp_allocator_bytes; // recommended at least 10-15Mb, if not set, malloc/free will be used on runtime
+	uint max_amout_of_allowed_jobs;
+	uint max_amount_of_physics_barriers;
 	int max_amount_of_threads;
-	size_t max_amount_of_bodies;
-	size_t max_amount_of_mutexes;
-	size_t max_amount_of_contact_constraints;
+	uint max_amount_of_bodies;
+	uint max_amount_of_mutexes;
+	uint max_amount_of_contact_constraints;
 } rde_physics_3d_config;
 
 typedef struct {
@@ -2668,33 +2668,79 @@ const rde_texture_parameters RDE_DEFAULT_TEXTURE_PARAMETERS = {
 /// *                                		FUNCTIONS                         						*
 /// *************************************************************************************************
 
+// Group: Constructors
+
 /// ============================ CONSTRUCTORS ===============================
 
+// Constructor: rde_struct_create_probability
 RDE_FUNC rde_probability rde_struct_create_probability();
+
+// Constructor: rde_struct_create_camera
+// 
+// Parameters:
+//	_camera_type - type of camera.
 RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
+
+// Constructor: rde_struct_create_event_window
 RDE_FUNC rde_event_window rde_struct_create_event_window();
+
+// Constructor: rde_struct_create_event_display
 RDE_FUNC rde_event_display rde_struct_create_event_display();
+
+// Constructor: rde_struct_create_event_key
 RDE_FUNC rde_event_key rde_struct_create_event_key();
+
+// Constructor: rde_struct_create_event_mouse
 RDE_FUNC rde_event_mouse rde_struct_create_event_mouse();
+
+// Constructor: rde_struct_create_event_controller
 RDE_FUNC rde_event_controller rde_struct_create_event_controller();
+
+// Constructor: rde_struct_create_event_mobile_pinch
 RDE_FUNC rde_event_mobile_pinch rde_struct_create_event_mobile_pinch();
+
+// Constructor: rde_struct_create_event_mobile
 RDE_FUNC rde_event_mobile rde_struct_create_event_mobile();
+
+// Constructor: rde_struct_create_event_drag_and_drop
 RDE_FUNC rde_event_drag_and_drop rde_struct_create_event_drag_and_drop();
+
+// Constructor: rde_struct_create_event_data
 RDE_FUNC rde_event_data rde_struct_create_event_data();
+
+// Constructor: rde_struct_create_event
 RDE_FUNC rde_event rde_struct_create_event();
+
+// Constructor: rde_struct_create_end_user_mandatory_callbacks
 RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
+
+// Constructor: rde_struct_texture_parameters
 RDE_FUNC rde_texture_parameters rde_struct_texture_parameters();
+
+// Constructor: rde_struct_create_material_light_data
 RDE_FUNC rde_material_light_data rde_struct_create_material_light_data();
+
+// Constructor: rde_struct_create_material
 RDE_FUNC rde_material rde_struct_create_material();
+
+// Constructor: rde_struct_create_directional_light
 RDE_FUNC rde_directional_light rde_struct_create_directional_light();
+
+// Constructor: rde_struct_create_point_light
 RDE_FUNC rde_point_light rde_struct_create_point_light();
+
+// Constructor: rde_struct_create_spot_light
 RDE_FUNC rde_spot_light rde_struct_create_spot_light();
+
+// Constructor: rde_struct_create_color
 RDE_FUNC rde_color rde_struct_create_color();
+
+// Constructor: rde_struct_create_polygon
 RDE_FUNC rde_polygon rde_struct_create_polygon();
 
 /// ============================ LOG ========================================
 
-// Group: Log
+// Group: Log Functions
 
 //  Function: rde_log_color
 //
@@ -2724,7 +2770,10 @@ RDE_FUNC void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 
 /// ============================ UTIL =======================================
 
+// Group: Util Functions
+
 RDE_SAFE_ARR_ACCESS(int)
+
 RDE_SAFE_ARR_ACCESS(uint)
 RDE_SAFE_ARR_ACCESS(size_t)
 RDE_SAFE_ARR_ACCESS(short)
@@ -2738,18 +2787,37 @@ RDE_SAFE_ARR_SET(short)
 RDE_SAFE_ARR_SET(float)
 RDE_SAFE_ARR_SET(double)
 
-RDE_FUNC const char* rde_util_file_get_name_extension(const char* _file_name);
-RDE_FUNC void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, size_t _sanitized_size);
+// Function: rde_util_file_get_file_extension
+// Gets the extension of a file given a file path.
+//
+// Parameters:
+//	_file_name - path to the file.
+RDE_FUNC const char* rde_util_file_get_file_extension(const char* _file_name);
 
-RDE_FUNC size_t rde_util_font_get_string_width(const char* _string, const rde_font* _font);
+// Function: rde_util_file_sanitaize_path
+// Transforms a path that may contain Windows backslashes into a Linux-like path.
+//
+// Parameters:
+//	_path - original path.
+//	_sanitized - array with enough space to save the _path sanitized.
+//	_sanitized_size - size of the _sanitized array.
+RDE_FUNC void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, uint _sanitized_size);
+
+// Function: rde_util_font_get_string_width
+// Gets the width (in pixels) that a string will occupy.
+//
+// Parameters:
+//	_string - string to messure.
+//	_font - font that will render it.
+RDE_FUNC uint rde_util_font_get_string_width(const char* _string, const rde_font* _font);
 RDE_FUNC rde_vec_2I rde_util_font_get_string_size(const char* _string, const rde_font* _font);
 
 RDE_FUNC char* rde_util_string_trim(char* _s);
 RDE_FUNC bool rde_util_string_starts_with(const char* _string, const char* _prefix);
 RDE_FUNC bool rde_util_string_ends_with(const char* _string, const char* _suffix);
 RDE_FUNC bool rde_util_string_contains_substring(const char* _string, const char* _substring, bool _case_sensitive);
-RDE_FUNC size_t rde_util_string_char_appearences(const char* _string, char _char);
-RDE_FUNC void rde_util_string_concat(char* _string, size_t _size, const char* _fmt, ...);
+RDE_FUNC uint rde_util_string_char_appearences(const char* _string, char _char);
+RDE_FUNC void rde_util_string_concat(char* _string, uint _size, const char* _fmt, ...);
 RDE_FUNC void rde_util_string_to_lower(char* _destination, const char* _string);
 RDE_FUNC void rde_util_string_to_lower_itself(char* _string);
 RDE_FUNC void rde_util_string_to_upper(char* _destination, const char* _string);
@@ -2757,7 +2825,7 @@ RDE_FUNC void rde_util_string_to_upper_itself(char* _string);
 RDE_FUNC void rde_util_string_replace_char(char* _string, char _old, char _new);
 RDE_FUNC void rde_util_string_replace_chars_all(char* _string, char _old, char _new);
 RDE_FUNC char* rde_util_string_replace_substring(char* _string, char* _old_string, char* _new_string, int* _output_appearences);
-RDE_FUNC size_t rde_util_string_split(char* _string, char*** _split_array, char _split_mark);
+RDE_FUNC uint rde_util_string_split(char* _string, char*** _split_array, char _split_mark);
 
 /// ============================ MATH =======================================
 
@@ -2842,7 +2910,7 @@ RDE_FUNC void rde_engine_set_running(bool _running);
 RDE_FUNC rde_vec_2I rde_engine_get_display_size();
 
 RDE_FUNC void rde_engine_get_available_display_ids(uint* _out_ids);
-RDE_FUNC void rde_engine_switch_window_display(rde_window* _window, size_t _new_display);
+RDE_FUNC void rde_engine_switch_window_display(rde_window* _window, uint _new_display);
 
 RDE_FUNC rde_window* rde_engine_get_focused_window();
 
@@ -2868,7 +2936,7 @@ RDE_FUNC void rde_engine_transform_set_scale(rde_transform* _transform, rde_vec_
 RDE_FUNC rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform);
 RDE_FUNC void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _parent);
 
-RDE_FUNC size_t rde_engine_transform_get_children_count(rde_transform* _transform);
+RDE_FUNC uint rde_engine_transform_get_children_count(rde_transform* _transform);
 
 RDE_FUNC void rde_engine_destroy_engine();
 
@@ -2947,17 +3015,17 @@ RDE_FUNC rde_texture* rde_rendering_atlas_get_subtexture(rde_atlas* _atlas, cons
 RDE_FUNC rde_atlas_data rde_rendering_atlas_get_data(rde_atlas* _atlas);
 RDE_FUNC void rde_rendering_atlas_unload(rde_atlas* _atlas);
 
-RDE_FUNC rde_texture* rde_rendering_memory_texture_create(size_t _width, size_t _height, int _channels);
+RDE_FUNC rde_texture* rde_rendering_memory_texture_create(uint _width, uint _height, int _channels);
 RDE_FUNC void rde_rendering_memory_texture_set_pixel(rde_texture* _memory_texture, rde_vec_2I _position, rde_color _color);
 RDE_FUNC rde_color rde_rendering_memory_texture_get_pixel(rde_texture* _memory_texture, rde_vec_2I _position);
 RDE_FUNC void rde_rendering_memory_texture_gpu_upload(rde_texture* _memory_texture);
 RDE_FUNC unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_texture);
 RDE_FUNC void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture);
 
-RDE_FUNC rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _height);
+RDE_FUNC rde_render_texture* rde_rendering_render_texture_create(uint _width, uint _height);
 RDE_FUNC void rde_rendering_render_texture_enable(rde_render_texture* _render_texture);
 RDE_FUNC void rde_rendering_render_texture_disable();
-RDE_FUNC void rde_rendering_render_texture_update(rde_render_texture* _render_texture, size_t _width, size_t _height);
+RDE_FUNC void rde_rendering_render_texture_update(rde_render_texture* _render_texture, uint _width, uint _height);
 RDE_FUNC void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture);
 
 RDE_FUNC rde_font* rde_rendering_font_load(const char* _font_path); // There will be two files with the same name and different extensions to load, just end the path with the font name without extension
@@ -2989,7 +3057,7 @@ RDE_FUNC void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated
 
 #if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)
 RDE_FUNC rde_model* rde_rendering_model_load(const char* _model_path);
-RDE_FUNC size_t rde_rendering_model_get_vertices_count(rde_model* _model);
+RDE_FUNC uint rde_rendering_model_get_vertices_count(rde_model* _model);
 RDE_FUNC void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data);
 RDE_FUNC rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model);
 RDE_FUNC rde_model_data rde_rendering_model_get_data(rde_model* _model); // User manually needs to free 'meshes' field as it allocates dynamic memory
@@ -3051,13 +3119,13 @@ RDE_FUNC void rde_audio_end();
 /// ============================ FILE SYSTEM ================================
 
 RDE_FUNC rde_file_handle* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode);
-RDE_FUNC char* rde_file_read_full_file(rde_file_handle* _file_handler, size_t* _output_file_size);
-RDE_FUNC unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, size_t* _output_file_size);
-RDE_FUNC char* rde_file_read_line(rde_file_handle* _file_handler, size_t _line);
-RDE_FUNC char* rde_file_read_chunk(rde_file_handle* _file_handler, size_t _begin_byte, size_t _end_byte);
-RDE_FUNC void rde_file_write(rde_file_handle* _file_handler, size_t _bytes, const char* _data);
-RDE_FUNC void rde_file_write_to_line(rde_file_handle* _file_handler, size_t _bytes, const char* _data, size_t _line);
-RDE_FUNC void rde_file_append(rde_file_handle* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line); // Appends some data at a specific point in the file. -1 as begin means EOF.
+RDE_FUNC char* rde_file_read_full_file(rde_file_handle* _file_handler, uint* _output_file_size);
+RDE_FUNC unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, uint* _output_file_size);
+RDE_FUNC char* rde_file_read_line(rde_file_handle* _file_handler, uint _line);
+RDE_FUNC char* rde_file_read_chunk(rde_file_handle* _file_handler, uint _begin_byte, uint _end_byte);
+RDE_FUNC void rde_file_write(rde_file_handle* _file_handler, uint _bytes, const char* _data);
+RDE_FUNC void rde_file_write_to_line(rde_file_handle* _file_handler, uint _bytes, const char* _data, uint _line);
+RDE_FUNC void rde_file_append(rde_file_handle* _file_handler, uint _append_byte, uint _bytes, const char* _data, uint _line); // Appends some data at a specific point in the file. -1 as begin means EOF.
 RDE_FUNC void rde_file_clear_content(rde_file_handle* _file_handler);
 RDE_FUNC bool rde_file_exists(const char* _file_path);
 RDE_FUNC void rde_file_delete(const char* _file_path);

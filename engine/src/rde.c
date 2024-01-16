@@ -296,7 +296,7 @@ void rde_inner_set_posix_signal_handler();
 	}
 
 #define RDE_IMPLEMENT_SAFE_ARR_ACCESS(_type)																							\
-	_type rde_arr_s_get_##_type(uint _index, _type* _arr, size_t _arr_size, char* _fmt, ...) {											\
+	_type rde_arr_s_get_##_type(uint _index, _type* _arr, uint _arr_size, char* _fmt, ...) {											\
 		if(_index >= _arr_size) {																										\
 			va_list _args;																												\
 			va_start(_args, _fmt);																										\
@@ -311,7 +311,7 @@ void rde_inner_set_posix_signal_handler();
 	}
 
 #define RDE_IMPLEMENT_SAFE_ARR_SET(_type)																						\
-	void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, size_t _arr_size, char* _fmt, ...) {						\
+	void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, uint _arr_size, char* _fmt, ...) {						\
 		if(_index >= _arr_size) {																								\
 			va_list _args;																										\
 			va_start(_args, _fmt);																								\
@@ -2227,7 +2227,7 @@ void rde_engine_destroy_engine() {
 	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "Exited cleanly");
 }
 
-void rde_engine_switch_window_display(rde_window* _window, size_t _new_display) {
+void rde_engine_switch_window_display(rde_window* _window, uint _new_display) {
 	RDE_UNUSED(_window)
 	RDE_UNUSED(_new_display)
 	RDE_UNIMPLEMENTED();
@@ -2334,7 +2334,7 @@ void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _
 	}
 }
 
-size_t rde_engine_transform_get_children_count(rde_transform* _transform) {
+uint rde_engine_transform_get_children_count(rde_transform* _transform) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get children count");
 	return stbds_arrlenu(_transform->children);
 }
@@ -2650,7 +2650,7 @@ char* rde_inner_strtokk(char* _string, const char* _strf) {
 // =							PUBLIC API - UTIL					 	      =
 // ==============================================================================
 
-void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, size_t _sanitized_size) {
+void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, uint _sanitized_size) {
 	rde_critical_error(strlen(_path) > _sanitized_size, RDE_ERROR_SANITIZATION_PATH, _path, _sanitized_size);
 	memset(_sanitized, 0, _sanitized_size);
 
@@ -2665,16 +2665,16 @@ void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, size_t _s
 	}
 }
 
-const char* rde_util_file_get_name_extension(const char* _file_name) {
+const char* rde_util_file_get_file_extension(const char* _file_name) {
 	const char* _dot = strrchr(_file_name, '.');
 	if(!_dot || _dot == _file_name) return "";
 	return _dot + 1;
 }
 
-size_t rde_util_font_get_string_width(const char* _string, const rde_font* _font) {
+uint rde_util_font_get_string_width(const char* _string, const rde_font* _font) {
 	int _text_size = strlen(_string);
 
-	size_t _size = 0;
+	uint _size = 0;
 	for (int _i = 0; _i < _text_size; _i++) {
 		int _key = (int)_string[_i];
 		rde_font_char_info _char_info = _font->chars[_key];
@@ -2753,13 +2753,13 @@ bool rde_util_string_contains_substring(const char* _string, const char* _substr
 	return false;
 }
 
-size_t rde_util_string_char_appearences(const char* _string, char _char) {
+uint rde_util_string_char_appearences(const char* _string, char _char) {
 	if(_string == NULL) {
 		return 0;
 	}
 
-	size_t _amount = 0;
-	size_t _string_size = strlen(_string);
+	uint _amount = 0;
+	uint _string_size = strlen(_string);
 	for(unsigned int _i = 0; _i < _string_size; _i++) {
 		if(_string[_i] == _char) {
 			_amount++;
@@ -2769,7 +2769,7 @@ size_t rde_util_string_char_appearences(const char* _string, char _char) {
 	return _amount;
 }
 
-void rde_util_string_concat(char* _string, size_t _size, const char* _fmt, ...) {
+void rde_util_string_concat(char* _string, uint _size, const char* _fmt, ...) {
 	if(_string == NULL) {
 		return;
 	}
@@ -2875,7 +2875,7 @@ void rde_util_string_replace_chars_all(char* _string, char _old, char _new) {
 	}
 }
 
-size_t rde_util_string_split(char* _string, char*** _split_array, char _split_mark) {
+uint rde_util_string_split(char* _string, char*** _split_array, char _split_mark) {
 	if(_string == NULL || _split_array == NULL) {
 		return 0;
 	}
@@ -3251,11 +3251,11 @@ rde_file_handle* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode
 	return NULL;
 }
 
-char* rde_file_read_full_file(rde_file_handle* _file_handler, size_t* _output_file_size) {
+char* rde_file_read_full_file(rde_file_handle* _file_handler, uint* _output_file_size) {
 	rde_inner_file_system_check_file_mode_or_convert(_file_handler, RDE_FILE_MODE_READ);
-	size_t _total_size = SDL_RWsize(_file_handler->sdl_handle);
-	size_t _total_bytes_read = 0;
-	size_t _bytes_to_read = 1;
+	uint _total_size = SDL_RWsize(_file_handler->sdl_handle);
+	uint _total_bytes_read = 0;
+	uint _bytes_to_read = 1;
 	char* _text = (char*)malloc(sizeof(char) * _total_size + 1);
 	char* _buf = _text;
 	memset(_text, 0, _total_size);
@@ -3286,11 +3286,11 @@ void rde_file_free_read_text(rde_file_handle* _file_handle) {
 	}
 }
 
-unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, size_t* _output_file_size) {
+unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, uint* _output_file_size) {
 	rde_inner_file_system_check_file_mode_or_convert(_file_handler, RDE_FILE_MODE_READ);
-	size_t _total_size = SDL_RWsize(_file_handler->sdl_handle);
-	size_t _total_bytes_read = 0;
-	size_t _bytes_to_read = 1;
+	uint _total_size = SDL_RWsize(_file_handler->sdl_handle);
+	uint _total_bytes_read = 0;
+	uint _bytes_to_read = 1;
 	unsigned char* _text = (unsigned char*)malloc(sizeof(unsigned char) * _total_size + 1);
 	unsigned char* _buf = _text;
 	memset(_text, 0, _total_size);
@@ -3321,11 +3321,11 @@ void rde_file_free_read_bytes(rde_file_handle* _file_handle) {
 	}
 }
 
-char* rde_file_read_line(rde_file_handle* _file_handler, size_t _line) {
-	size_t _current_line = 0;
-	size_t _final_line_ptr = 0;
+char* rde_file_read_line(rde_file_handle* _file_handler, uint _line) {
+	uint _current_line = 0;
+	uint _final_line_ptr = 0;
 	bool _line_found = false;
-	size_t _line_first_byte = RDE_UINT_MAX;
+	uint _line_first_byte = RDE_UINT_MAX;
 
 	rde_inner_file_system_check_file_mode_or_convert(_file_handler, RDE_FILE_MODE_READ);
 	SDL_RWseek(_file_handler->sdl_handle, 0, SDL_RW_SEEK_END);
@@ -3367,7 +3367,7 @@ char* rde_file_read_line(rde_file_handle* _file_handler, size_t _line) {
 	return _line_ptr;
 }
 
-char* rde_file_read_chunk(rde_file_handle* _file_handler, size_t _begin_byte, size_t _end_byte) {
+char* rde_file_read_chunk(rde_file_handle* _file_handler, uint _begin_byte, uint _end_byte) {
 	RDE_UNUSED(_file_handler)
 	RDE_UNUSED(_begin_byte)
 	RDE_UNUSED(_end_byte)
@@ -3375,14 +3375,14 @@ char* rde_file_read_chunk(rde_file_handle* _file_handler, size_t _begin_byte, si
 	return NULL;
 }
 
-void rde_file_write(rde_file_handle* _file_handler, size_t _bytes, const char* _data) {
+void rde_file_write(rde_file_handle* _file_handler, uint _bytes, const char* _data) {
 	RDE_UNUSED(_file_handler)
 	RDE_UNUSED(_bytes)
 	RDE_UNUSED(_data)
 	RDE_UNIMPLEMENTED()
 }
 
-void rde_file_write_to_line(rde_file_handle* _file_handler, size_t _bytes, const char* _data, size_t _line) {
+void rde_file_write_to_line(rde_file_handle* _file_handler, uint _bytes, const char* _data, uint _line) {
 	RDE_UNUSED(_file_handler)
 	RDE_UNUSED(_bytes)
 	RDE_UNUSED(_data)
@@ -3390,7 +3390,7 @@ void rde_file_write_to_line(rde_file_handle* _file_handler, size_t _bytes, const
 	RDE_UNIMPLEMENTED()
 }
 
-void rde_file_append(rde_file_handle* _file_handler, size_t _append_byte, size_t _bytes, const char* _data, size_t _line) {
+void rde_file_append(rde_file_handle* _file_handler, uint _append_byte, uint _bytes, const char* _data, uint _line) {
 	RDE_UNUSED(_file_handler)
 	RDE_UNUSED(_append_byte)
 	RDE_UNUSED(_bytes)
@@ -5478,7 +5478,7 @@ rde_texture_parameters rde_innner_rendering_validate_texture_parameters(const rd
 }
 
 rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_texture_parameters* _params) {
-	const char* _extension = rde_util_file_get_name_extension(_file_path);
+	const char* _extension = rde_util_file_get_file_extension(_file_path);
 	char _extension_lower[10];
 	memset(_extension_lower, 0, 10);
 	rde_util_string_to_lower(_extension_lower, _extension);
@@ -5703,7 +5703,7 @@ rde_texture_data rde_rendering_texture_get_data(rde_texture* _texture) {
 	};
 }
 
-rde_texture* rde_rendering_memory_texture_create(size_t _width, size_t _height, int _channels) {
+rde_texture* rde_rendering_memory_texture_create(uint _width, uint _height, int _channels) {
 	rde_texture* _texture = (rde_texture*)malloc(sizeof(rde_texture));
 	rde_struct_init_alloc_ptr_texture(_texture);
 
@@ -5993,7 +5993,7 @@ rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]) {
 	RDE_CHECK_GL(glBindTexture, GL_TEXTURE_CUBE_MAP, _texture_id);
 
 	for(unsigned int _i = 0; _i < 6; _i++) {
-		const char* _extension = rde_util_file_get_name_extension(_texture_paths[_i]);
+		const char* _extension = rde_util_file_get_file_extension(_texture_paths[_i]);
 		char _extension_lower[10];
 		memset(_extension_lower, 0, 10);
 		rde_util_string_to_lower(_extension_lower, _extension);
@@ -6064,7 +6064,7 @@ void rde_rendering_skybox_unload(rde_skybox_id _skybox_id) {
 	}
 }
 
-rde_render_texture* rde_rendering_render_texture_create(size_t _width, size_t _height) {
+rde_render_texture* rde_rendering_render_texture_create(uint _width, uint _height) {
 	rde_render_texture* _render_texture = (rde_render_texture*)malloc(sizeof(rde_render_texture));
 	_render_texture->size = (rde_vec_2UI) { _width, _height };
 
@@ -6123,7 +6123,7 @@ void rde_rendering_render_texture_disable() {
 }
 
 
-void rde_rendering_render_texture_update(rde_render_texture* _render_texture, size_t _width, size_t _height) {
+void rde_rendering_render_texture_update(rde_render_texture* _render_texture, uint _width, uint _height) {
 	rde_critical_error(_render_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Render Texture");
 	rde_rendering_render_texture_destroy(_render_texture);
 
@@ -6826,7 +6826,7 @@ rde_mesh* rde_rendering_mesh_create_sphere(float _radius, rde_material* _materia
 }
 
 rde_model* rde_rendering_model_load(const char* _model_path) {
-	const char* _extension = rde_util_file_get_name_extension(_model_path);
+	const char* _extension = rde_util_file_get_file_extension(_model_path);
 
 	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_models; _i++) {
 		if (strlen(ENGINE.models[_i].file_path) != 0 && strcmp(ENGINE.models[_i].file_path, _model_path) == 0) {
@@ -7081,8 +7081,8 @@ rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh) {
 	};
 }
 
-size_t rde_rendering_model_get_vertices_count(rde_model* _model) {
-	size_t _total_vertices = 0;
+uint rde_rendering_model_get_vertices_count(rde_model* _model) {
+	uint _total_vertices = 0;
 	
 	for(unsigned int _i = 0; _i < _model->mesh_array_size; _i++) {
 		_total_vertices += rde_rendering_mesh_get_data(&_model->mesh_array[_i]).amount_of_vertices;

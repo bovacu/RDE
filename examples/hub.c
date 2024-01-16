@@ -19,11 +19,11 @@
 typedef void (*unload_func)();
 
 rde_event_func events_callback = NULL;
-rde_engine_user_side_loop_func update_callback = NULL;
-rde_engine_user_side_loop_func fixed_update_callback = NULL;
-rde_engine_user_side_loop_func late_update_callback = NULL;
-rde_engine_user_side_loop_func_2 render_callback = NULL;
-rde_engine_user_side_loop_func_2 render_imgui_callback = NULL;
+rde_update_func update_callback = NULL;
+rde_update_func fixed_update_callback = NULL;
+rde_update_func late_update_callback = NULL;
+rde_render_func render_callback = NULL;
+rde_render_func render_imgui_callback = NULL;
 unload_func unload_callback = NULL;
 
 rde_window* current_window = NULL;

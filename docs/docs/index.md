@@ -3,9 +3,8 @@
 RDE is a 2D/3D multi-purpose and cross-platform game engine. It is written in C99
 and it consists of one header file and one source file, plus the dependencies.
 
-The engine is meant to be simple and straightforward. It tries to hide nothing from
-the user, and if there are macros that simplifies operations, they can be reproduced
-by the user.
+The engine is meant to be simple and straightforward, with simple but powerfull and
+easy to use functions.
 
 ## Modules
 
