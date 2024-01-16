@@ -1,3 +1,5 @@
+// Title: C-version of Jolt Physics and adapted to RDE.
+
 #include <stdint.h>
 #include <stddef.h>
 

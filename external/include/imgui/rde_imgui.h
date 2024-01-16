@@ -1,3 +1,5 @@
+// Title: C-version of ImGui and adapted to RDE.
+
 #ifndef RDE_FUNC
 #if _WIN32
 	#define RDE_FUNC __declspec(dllexport)
