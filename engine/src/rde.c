@@ -824,12 +824,6 @@ rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks(
 	_e.on_render = NULL;
 	return _e;
 }
-
-rde_display_info rde_struct_create_display_info() {
-	rde_display_info _d;
-	_d.index = -1;
-	return _d;
-}
 	
 rde_event_window rde_struct_create_event_window() {
 	rde_event_window _e;
@@ -839,7 +833,6 @@ rde_event_window rde_struct_create_event_window() {
 	_e.size.y = -1;
 	_e.display_index = -1;
 	_e.minimized = false;
-	_e.maximized = false;
 	return _e;
 }
 
@@ -1754,9 +1747,9 @@ void rde_inner_engine_on_late_update(float _dt) {
 	RDE_UNUSED(_dt)
 }
 
-rde_display_info* rde_engine_get_available_displays() {
-	RDE_UNIMPLEMENTED();
-	return NULL;
+void rde_engine_get_available_display_ids(uint* _out_ids) {
+	RDE_UNUSED(_out_ids)
+	RDE_UNIMPLEMENTED()
 }
 
 void rde_engine_transform_get_matrix(rde_transform* _t, mat4 _mat) {
@@ -5861,7 +5854,7 @@ rde_texture* rde_rendering_atlas_get_subtexture(rde_atlas* _atlas, const char* _
 rde_atlas_data rde_rendering_atlas_get_data(rde_atlas* _atlas) {
 	rde_critical_error(_atlas == NULL, RDE_ERROR_NO_NULL_ALLOWED, "atlas");
 	return (rde_atlas_data) {
-		.opengl_texture_id = _atlas->texture->opengl_texture_id,
+		.texture_data = rde_rendering_texture_get_data(_atlas->texture),
 		.amount_of_subtextures = stbds_arrlenu(_atlas->sub_textures)
 	};
 }
@@ -5921,7 +5914,7 @@ rde_font* rde_rendering_font_load(const char* _font_path) {
 rde_font_data rde_rendering_font_get_data(rde_font* _font) {
 	rde_critical_error(_font == NULL, RDE_ERROR_NO_NULL_ALLOWED, "font");
 	return (rde_font_data) {
-		.opengl_texture_id = _font->texture->opengl_texture_id,
+		.texture_data = rde_rendering_texture_get_data(_font->texture),
 		.amount_of_chars = stbds_arrlenu(_font->chars)
 	};
 }
@@ -7532,13 +7525,11 @@ void rde_inner_event_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_ev
 
 		case SDL_EVENT_WINDOW_MAXIMIZED: {
 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MAXIMIZED; 			
-			_rde_event->data.window_event_data.maximized = true;
 			_rde_event->data.window_event_data.minimized = false;
 		} break;
 
 		case SDL_EVENT_WINDOW_MINIMIZED:	{
 			_rde_event->type = RDE_EVENT_TYPE_WINDOW_MAXIMIZED; 			
-			_rde_event->data.window_event_data.maximized = false;
 			_rde_event->data.window_event_data.minimized = true;
 		} break;
 

@@ -1770,7 +1770,7 @@ typedef enum {
 /// *                                		STRUCSTS                         						*
 /// *************************************************************************************************
 
-// Group: Structs
+// Group: Structs & Callbacks
 
 /// ================================= MATH ==================================
 
@@ -1945,7 +1945,7 @@ RDE_SPECIALIZED_MAT4(size_t, 		rde_mat_4ST);
 // Type: rde_quaternion
 // Represents a mathematical quaternion for rotations.
 //
-// Variables:
+// Fields:
 // 	x - (float) x rotation value.
 // 	y - (float) y rotation value.
 // 	z - (float) z rotation value.
@@ -1961,7 +1961,7 @@ struct rde_quaternion {
 // Type: rde_probability
 // Represents a mathematical probability.
 //
-// Variables:
+// Fields:
 // 	probability_rolled - (float) value in the range [0, 1].
 // 	happened - (bool) if the probability_rolled was in the range of the chosen probability.
 typedef struct rde_probability rde_probability;
@@ -1969,7 +1969,6 @@ struct rde_probability {
 	float probability_rolled;
 	bool happened;
 };
-RDE_FUNC rde_probability rde_struct_create_probability();
 
 /// ================================= ENGINE ===========================
 
@@ -2017,13 +2016,16 @@ typedef struct rde_model rde_model;
 // This is just an id to locate the skyboxes.
 typedef uint rde_skybox_id;
 
+// Type: rde_mesh
+// Represents a mesh, may be part of a model or not. This is just a pointer, implementation is in the source file.
+typedef struct rde_mesh rde_mesh;
 
 /// ============================== CAMERA ===================================
 
 // Type: rde_camera
 // Struct that contains the information to let the renderer know what is being seen, so it can render properly.
 //
-// Variables:
+// Fields:
 //	id - (uint) id of the camera, unique.
 //	zoom - (float) zoom of the camera.
 //	fov - (float) field of view in degrees.
@@ -2045,11 +2047,9 @@ struct rde_camera {
 	RDE_CAMERA_TYPE_ camera_type;
 	bool enabled;
 };
-RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
 
 #ifdef RDE_PHYSICS_MODULE
 #include "JoltC/rde_joltc.h"
-RDE_FUNC void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
 #endif
 
 #ifdef RDE_IMGUI_MODULE
@@ -2058,54 +2058,103 @@ RDE_FUNC void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camer
 
 /// ============================== EVENTS ===================================
 
+// Type: rde_event_window
+// Contains all info related to a window event.
+//
+// Fields:
+//	position - (<rde_vec_2I>) where the window is located.
+//	size - (<rde_vec_2I>) size of the window.
+//	display_index - (int) id of the display where the window is located.
+//	minimized - (bool) if the window is minimized.
 typedef struct {
 	rde_vec_2I position;
 	rde_vec_2I size;
 	int display_index;
 	bool minimized;
-	bool maximized;
 } rde_event_window;
-RDE_FUNC rde_event_window rde_struct_create_event_window();
 
+// Type: rde_event_display
+// Contains all info related to a display event.
+//
+// Fields:
+//	orientation - (int) orientation of the display.
+//	display_index - (int) id of the display.
 typedef struct {
 	int orientation;
 	int display_index;
 } rde_event_display;
-RDE_FUNC rde_event_display rde_struct_create_event_display();
 
+// Type: rde_event_key
+// Contains all info related to a keyboard key event.
+//
+// Fields:
+//	key - (<RDE_KEYBOARD_KEY_>) type of key.
+//	typed_char (char) char associeted the the key.
+//	typed_text - (char*) text chain of the typed keys.
+//	amount_of_times_pressed - (int) how many times the key was pressed.
 typedef struct {
 	RDE_KEYBOARD_KEY_ key;
 	char typed_char;
 	const char* typed_text;
 	int amount_of_times_pressed;
 } rde_event_key;
-RDE_FUNC rde_event_key rde_struct_create_event_key();
 
+// Type: rde_event_mouse
+// Contains all info related to a mouse event.
+//
+// Fields:
+//	position - (<rde_vec_2I>) position the mouse is at.
+//	scrolled - (<rde_vec_2F>) amount of scroll with the scroll wheels.
+//	button - (<RDE_MOUSE_BUTTON_>) type of mouse button.
+//	amount_of_times_pressed - (int) how many times the button was pressed.
 typedef struct {
 	rde_vec_2I position;
 	rde_vec_2F scrolled;
 	RDE_MOUSE_BUTTON_ button;
 	int amount_of_times_pressed;
 } rde_event_mouse;
-RDE_FUNC rde_event_mouse rde_struct_create_event_mouse();
 
+// Type: rde_event_controller
+// Contains all info related to a controller event.
+//
+// Fields:
+//	controller_id - (int) id of the controller.
+//	left_joystick - (<rde_vec_2F>) position of the left joystic, in the range [-1, 1].
+//	right_joystick - (<rde_vec_2F>) position of the right joystic, in the range [-1, 1].
+//	button - (<RDE_CONTROLLER_BUTTON_>) type of button.
+//	axis - (<RDE_CONTROLLER_AXIS_>) type of axis.
 typedef struct {
-	size_t controller_id;
+	int controller_id;
 	rde_vec_2F left_joystick;
 	rde_vec_2F right_joystick;
 	rde_vec_2F back_buttons;
 	RDE_CONTROLLER_BUTTON_ button;
 	RDE_CONTROLLER_AXIS_ axis;
 } rde_event_controller;
-RDE_FUNC rde_event_controller rde_struct_create_event_controller();
 
+// Type: rde_event_mobile_pinch
+// Contains all info related to a mobile pinch event.
+//
+// Fields:
+//	rotation_of_fingers - (float) rotation of 2 fingers, in degrees.
+//	distance_moved_between_fingers - (float) distanced that 2 fingers has moved since last position.
+//	num_fingers_used - (uint) number of fingers used to perform pinch.
 typedef struct {
 	float rotation_of_fingers;
 	float distance_moved_between_fingers;
 	uint num_fingers_used;
 } rde_event_mobile_pinch;
-RDE_FUNC rde_event_mobile_pinch rde_struct_create_event_mobile_pinch();
 
+// Type: rde_event_mobile
+// Contains all info related to a mobile event.
+//
+// Fields:
+//	init_touch_position - (<rde_vec_2I>) initial position of the finger.
+//	moved_touch_position - (<rde_vec_2I>) amount that the finger has moved since last position.
+//	end_touch_position - (<rde_vec_2I>) last position of the finger before lifting it up.
+//	pressure - (float) amount of pressure used on the tap.
+//	finger_id - (uint) id of the finger.
+//	pinch - (<rde_event_mobile_pinch>) see rde_event_mobile_pinch.
 typedef struct {
 	rde_vec_2I init_touch_position;
 	rde_vec_2I moved_touch_position;
@@ -2114,14 +2163,29 @@ typedef struct {
 	uint finger_id;
 	rde_event_mobile_pinch pinch;
 } rde_event_mobile;
-RDE_FUNC rde_event_mobile rde_struct_create_event_mobile();
 
+// Type: rde_event_drag_and_drop
+// Contains all info related to a drag&drop event.
+//
+// Fields:
+//	window_id - (uint) id of the window where the drop happened.
+//	file_path - (char*) path of the dropped file.
 typedef struct {
-	size_t window_id;
+	uint window_id;
 	char* file_path;
 } rde_event_drag_and_drop;
-RDE_FUNC rde_event_drag_and_drop rde_struct_create_event_drag_and_drop();
 
+// Type: rde_event_data
+// Contains all info related to an event.
+//
+// Fields:
+//	window_event_data - (<rde_event_window>) see rde_event_window.
+//	key_event_data - (<rde_event_key>) see rde_event_key.
+//	mouse_event_data - (<rde_event_mouse>) see rde_event_mouse.
+//	controller_event_data - (<rde_event_controller>) see rde_event_controller.
+//	mobile_event_data - (<rde_event_mobile>) see rde_event_mobile.
+//	display_event_data - (<rde_event_display>) see rde_event_display.
+//	drag_and_drop_data - (<rde_event_drag_and_drop>) see rde_event_drag_and_drop.
 typedef struct {
 	rde_event_window window_event_data;
 	rde_event_key key_event_data;
@@ -2131,12 +2195,11 @@ typedef struct {
 	rde_event_display display_event_data;
 	rde_event_drag_and_drop drag_and_drop_data;
 } rde_event_data;
-RDE_FUNC rde_event_data rde_struct_create_event_data();
 
 // Type: rde_event
 // Struct to store data of each available event.
 //
-// Variables:
+// Fields:
 // 	type - (<RDE_EVENT_TYPE_>) type of the event.
 //	time_stamp - (ulong) when the event happened.
 //	window_id - (uint) window associeted with the event.
@@ -2152,30 +2215,48 @@ struct rde_event {
 	rde_event_data data;
 	void* sdl_native_event;
 };
-RDE_FUNC rde_event rde_struct_create_event();
 
 /// ================== CALLBACKS AND FUNCTION POINTERS ======================
 
+// Callback: rde_event_func
+// Function pointer (callback) for the main event function, so the user can respond to the needed events.
+//
+// Parameters:
+//	_event - the current event to be handled.
+//	_window - the window where the event happened.
 typedef void (*rde_event_func)(rde_event*, rde_window*);
-typedef void (*rde_engine_user_side_loop_func)(float);
-typedef void (*rde_engine_user_side_loop_func_2)(float, rde_window*);
 
-typedef struct rde_inner_window_data rde_inner_window_info;
+// Callback: rde_update_func
+// Function pointer (callback) valid for update, fixed_update and late_update functions. Users need one of these callbacks per function.
+//
+// Parameters:
+//	_dt - delta time passed between frames.
+typedef void (*rde_update_func)(float);
 
+// Callback: rde_render_func
+// Function pointer (callback) valid for render function. Users need one of these callbacks per function.
+//
+// Parameters:
+//	_dt - delta time passed between frames.
+//	_window - the pointer to the window that will render the scene.
+typedef void (*rde_render_func)(float, rde_window*);
+
+// Type: rde_end_user_mandatory_callbacks
+// All callbacks that end user must provide for the engine to work.
+//
+// Fields:
+//	on_update - (<rde_update_func>) see rde_update_func.
+//	on_fixed_update - (<rde_update_func>) see rde_update_func.
+//	on_late_update - (<rde_update_func>) see rde_update_func.
+//	on_render - (<rde_render_func>) see rde_render_func.
 typedef struct {
-	rde_engine_user_side_loop_func on_update;
-	rde_engine_user_side_loop_func on_fixed_update;
-	rde_engine_user_side_loop_func on_late_update;
-	rde_engine_user_side_loop_func_2 on_render;
+	rde_update_func on_update;
+	rde_update_func on_fixed_update;
+	rde_update_func on_late_update;
+	rde_render_func on_render;
 } rde_end_user_mandatory_callbacks;
-RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
 
 /// ============================== ENGINE ===================================
-
-typedef struct {
-	int index;
-} rde_display_info;
-rde_display_info rde_struct_create_display_info();
 
 typedef struct {
 	size_t max_amount_of_windows;
@@ -2222,12 +2303,29 @@ typedef struct {
 
 /// ============================ RENDERING ==================================
 
+// Type: rde_shader_data
+// Contains OpenGL data of the shader, basically Ids.
+//
+// Fields:
+//	vertex_program_id - (uint) id of the vertex shader.
+//	fragment_program_id - (uint) id of the fragment shader.
+//	compiled_program_id - (uint) id of the compiled shader.
 typedef struct {
 	uint vertex_program_id;
 	uint fragment_program_id;
 	int compiled_program_id;
 } rde_shader_data;
 
+// Type: rde_texture_data
+// Information about a texture.
+//
+// Fields:
+//	opengl_texture_id - (int) id of the texture.
+//	size - (<rde_vec_2UI>) size of the texture. If it is a subtexture from an atlas, it is the size of the subtexture.
+//	position - (<rde_vec_2UI) position of the texture in an atlas, or if the texture is not an atlas, (0, 0).
+//	channels - (int) amount of channels (usually 3 or 4 if it has alpha).
+//	file_path - (char*) path where the file is located.
+//	atlas_texture_id - (int) id of the texture atlas parent, or if it is not a subtexture, -1.
 typedef struct {
 	int opengl_texture_id;
 	rde_vec_2UI size;
@@ -2237,6 +2335,15 @@ typedef struct {
 	int atlas_texture_id;
 } rde_texture_data;
 
+// Type: rde_texture_parameters
+// Information about how to load a texture.
+//
+// Fields:
+//	min_filter - (RDE_TEXTURE_PARAMETER_TYPE_) min filter of the texture.
+//	mag_filter - (RDE_TEXTURE_PARAMETER_TYPE_) mag filter of the texture.
+//	wrap_s - (RDE_TEXTURE_PARAMETER_TYPE_) wrapS of the texture.
+//	wrap_t - (RDE_TEXTURE_PARAMETER_TYPE_) wrapT of the texture.
+//	mipmap_min_filter - (RDE_TEXTURE_PARAMETER_TYPE_) mipmap min filter of the texture.
 typedef struct {
 	bool generate_mipmap;
 	RDE_TEXTURE_PARAMETER_TYPE_ min_filter;
@@ -2245,26 +2352,54 @@ typedef struct {
 	RDE_TEXTURE_PARAMETER_TYPE_ wrap_t;
 	RDE_TEXTURE_PARAMETER_TYPE_ mipmap_min_filter;
 } rde_texture_parameters;
-RDE_FUNC rde_texture_parameters rde_struct_texture_parameters();
 
+// Type: rde_atlas_data
+// Information about a texture atlas.
+//
+// Fields:
+//	texture_data - (<rde_texture_data>) texture data.
+//	amount_of_subtextures - (int) amount of subtextures that the atlas has.
 typedef struct {
-	int opengl_texture_id;
+	rde_texture_data texture_data;
 	int amount_of_subtextures;
 } rde_atlas_data;
 
+// Type: rde_font_data
+// Information about a font atlas.
+//
+// Fields:
+//	texture_data - (<rde_texture_data>) texture data.
+//	amount_of_chars - (int) amount of characters that the font has.
 typedef struct {
-	int opengl_texture_id;
+	rde_texture_data texture_data;
 	int amount_of_chars;
 } rde_font_data;
 
+// Type: rde_material_light_data
+// Information about a directional light.
+//
+// Fields:
+//	shininess - (float) how shiny the light is.
+//	ka - (<rde_vec_3F>) factor of ambient light;
+//	kd - (<rde_vec_3F>) factor of diffuse light;
+//	ks - (<rde_vec_3F>) factor of specular light;
 typedef struct {
 	float shininess;
 	rde_vec_3F ka;
 	rde_vec_3F kd;
 	rde_vec_3F ks;
 } rde_material_light_data;
-RDE_FUNC rde_material_light_data rde_struct_create_material_light_data();
 
+// Type: rde_material
+// Information about a material.
+//
+// Fields:
+//	map_ka - (<rde_texture>) texture containing the ambient light map.
+//	map_kd - (<rde_texture>) texture containing the diffuse light map.
+//	map_ks - (<rde_texture>) texture containing the specular light map.
+//	map_bump - (<rde_texture>) texture containing the bump light map.
+//	render_texture - (<rde_texture>) optional texture to render instead of directly to the screen.
+//	material_light_data - (<rde_material_light_data>) light information about the material.
 typedef struct {
 	rde_texture* map_ka;
 	rde_texture* map_kd;
@@ -2273,39 +2408,67 @@ typedef struct {
 	rde_render_texture* render_texture;
 	rde_material_light_data material_light_data;
 } rde_material;
-RDE_FUNC rde_material rde_struct_create_material();
 
+// Type: rde_mesh_gen_data
+// Information about the generation of the vertices, normals and texture coordinates of a mesh.
+//
+// Fields:
+//	name - (char*) name of the mesh.
+//	vertex_count - (uint) amount of vertices of the mesh.
+//	positions - (float*) array of pairs of 3 elements.
+//	positions_size - (uint) amount of elements on the array.
+//	texcoords - (float*) array of pairs of 2 elements.
+//	texcoords_size - (uint) amount of elements on the array.
+//	normals - (float*) array of pairs of 3 elements.
+//	normals_size - (uint) amount of elements on the array.
+//	material - (<rde_material>) material associated to the mesh.
 typedef struct {
 	char* name;
-	size_t vertex_count;
+	uint vertex_count;
 
 	float* positions;
-	size_t positions_size;
+	uint positions_size;
 	
 	float* texcoords;
-	size_t texcoords_size;
+	uint texcoords_size;
 
 	float* normals;
-	size_t normals_size;
+	uint normals_size;
 
 	rde_material material;
 } rde_mesh_gen_data;
 
-typedef struct rde_mesh rde_mesh;
+// Type: rde_mesh_data
+// Information about a mesh.
+//
+// Fields:
+//	amount_of_vertices - (uint) amount of vertices a mesh has.
+//	vertex_buffer_objects_ids - (int[4]) array of ids [positions, colors, normals, texture]
 typedef struct {
-	int amount_of_vertices;
-	int vertex_buffer_objects_ids[4];	// 0 -> positions (static), 
-										// 1 -> colors (static), 
-										// 2 -> normals (static), 
-										// 3 -> texture coords (static)
-										// 4 -> transforms to render (dynamic)
+	uint amount_of_vertices;
+	int vertex_buffer_objects_ids[4];
 } rde_mesh_data;
 
+// Type: rde_model_data
+// Information about a mesh.
+//
+// Fields:
+//	amount_of_meshes - (uint) amount of meshes a 3D model has.
+//	meshes - (<rde_mesh>**) array of pointers of rde_mesh. This field MUST be freed by the user.
 typedef struct {
-	size_t amount_of_meshes;
+	uint amount_of_meshes;
 	rde_mesh** meshes;
 } rde_model_data;
 
+// Type: rde_directional_light
+// Data about the colors and direction of the directional light.
+//
+// Fields:
+//	direction - (<rde_vec_3F>) where the light is pointing at.
+//	position - (<rde_vec_3F>) this is just used for shadowing purpose, a position for a directional light makes not real sense.
+//	ambient_color - (<rde_vec_3F>) color of the ambient light.
+//	diffuse_color - (<rde_vec_3F>) color of the diffuse light.
+//	specular_color - (<rde_vec_3F>) color of the specular light.
 typedef struct {
 	rde_vec_3F direction;
 	rde_vec_3F position;
@@ -2313,7 +2476,6 @@ typedef struct {
 	rde_vec_3F diffuse_color;
 	rde_vec_3F specular_color;
 } rde_directional_light;
-RDE_FUNC rde_directional_light rde_struct_create_directional_light();
 
 typedef struct {
 	rde_vec_3F position;
@@ -2324,7 +2486,6 @@ typedef struct {
 	float linear;
 	float quadratic;
 } rde_point_light;
-RDE_FUNC rde_point_light rde_struct_create_point_light();
 
 typedef struct {
 	rde_vec_3F position;
@@ -2338,33 +2499,32 @@ typedef struct {
 	float linear;
 	float quadratic;
 } rde_spot_light;
-RDE_FUNC rde_spot_light rde_struct_create_spot_light();
 
-struct rde_model_bone {
-	RDE_UNIMPLEMENTED_STRUCT()
-};
-
-struct rde_model_animation {
-	RDE_UNIMPLEMENTED_STRUCT()
-};
-
+// Type: rde_color
+// Color representation, values go from [0, 255].
+//
+// Fields:
+//	r - (unsigned char) red channel.
+//	g - (unsigned char) green channel.
+//	b - (unsigned char) blue channel.
+//	a - (unsigned char) alpha channel.
 typedef struct {
 	unsigned char r;
 	unsigned char g;
 	unsigned char b;
 	unsigned char a;
 } rde_color;
-RDE_FUNC rde_color rde_struct_create_color();
 
+// Type: rde_polygon
+// 2D polygon for shape rendering or other operations.
+//
+// Fields:
+//	vertices - (<rde_vec_2I>*) array of vertices.
+//	vertex_count - (uint) amount of vertices.
 typedef struct {
 	rde_vec_2I* vertices;
-	size_t vertices_count;
+	uint vertices_count;
 } rde_polygon;
-RDE_FUNC rde_polygon rde_struct_create_polygon();
-
-struct rde_viewport {
-	RDE_UNIMPLEMENTED_STRUCT()
-};
 
 /// ============================ AUDIO ==================================
 
@@ -2382,25 +2542,82 @@ RDE_FUNC rde_sound_config rde_struct_create_audio_config();
 /// *                                GLOBAL VARIABLES                         						*
 /// *************************************************************************************************
 
+// Group: Constants
+
+// Constant: RDE_COLO_WHITE
+// White color [255, 255, 255, 255]
 const rde_color RDE_COLOR_WHITE 			= { 255, 255, 255, 255 };
+
+// Constant: RDE_COLOR_BLACK
+// White color [   0,   0,   0, 255]
 const rde_color RDE_COLOR_BLACK 			= {   0,   0,   0, 255 };
+
+// Constant: RDE_COLOR_BLUE
+// White color [   0,   0, 255, 255]
 const rde_color RDE_COLOR_BLUE 				= {   0,   0, 255, 255 };
+
+// Constant: RDE_COLOR_RED
+// White color [255,   0,   0, 255]
 const rde_color RDE_COLOR_RED 				= { 255,   0,   0, 255 };
+
+// Constant: RDE_COLOR_YELLOW
+// White color [255, 255, 255, 255]
 const rde_color RDE_COLOR_YELLOW			= { 255, 255,   0, 255 };
+
+// Constant: RDE_COLOR_MAGENTA
+// White color [255,   0, 255, 255]
 const rde_color RDE_COLOR_MAGENTA			= { 255,   0, 255, 255 };
+
+// Constant: RDE_COLOR_ORANGE
+// White color [255,  69,   0, 255]
 const rde_color RDE_COLOR_ORANGE 			= { 255,  69,   0, 255 };
+
+// Constant: RDE_COLOR_GREEN
+// White color [   0, 255,   0, 255]
 const rde_color RDE_COLOR_GREEN 			= {   0, 255,   0, 255 };
+
+// Constant: RDE_COLOR_BROWN
+// White color [139,  69,  19, 255]
 const rde_color RDE_COLOR_BROWN 			= { 139,  69,  19, 255 };
+
+// Constant: RDE_COLOR_PURPLE
+// White color [128,   0, 128, 255]
 const rde_color RDE_COLOR_PURPLE 			= { 128,   0, 128, 255 };
+
+// Constant: RDE_COLOR_GRAY
+// White color [128, 128, 128, 255]
 const rde_color RDE_COLOR_GRAY				= { 128, 128, 128, 255 };
+
+// Constant: RDE_COLOR_TRANSPARENT
+// White color [  0,   0,   0,   0]
 const rde_color RDE_COLOR_TRANSPARENT		= {   0,   0,   0,   0 };
+
+// Constant: RDE_COLOR_DISABLED_GRAY
+// White color [220, 220, 220, 255]
 const rde_color RDE_COLOR_DISABLED_GRAY		= { 220, 220, 220, 255 };
+
+// Constant: RDE_COLOR_PLACEHOLDER_TEXT
+// White color [220, 220, 220, 128]
 const rde_color RDE_COLOR_PLACEHOLDER_TEXT	= { 220, 220, 220, 128 };
+
+// Constant: RDE_COLOR_RDE_DUCK_YELLOW
+// White color [255, 213,  81, 255]
 const rde_color RDE_COLOR_RDE_DUCK_YELLOW	= { 255, 213,  81, 255 };
+
+// Constant: RDE_COLOR_GOLD
+// White color [255, 213,  81, 255]
 const rde_color RDE_COLOR_GOLD				= { 255, 213,  81, 255 };
+
+// Constant: RDE_COLOR_PINK
+// White color [255, 109, 194, 255]
 const rde_color RDE_COLOR_PINK				= { 255, 109, 194, 255 };
+
+// Constant: RDE_COLOR_NO_TEXTURE
+// White color [193,  84, 193, 255]
 const rde_color RDE_COLOR_NO_TEXTURE		= { 193,  84, 193, 255 };
 
+// Constant: RDE_DEFAULT_INIT_INFO
+// Default information to init the engine.
 const rde_engine_init_info RDE_DEFAULT_INIT_INFO = {
 	.heap_allocs_config = (rde_engine_heap_allocs_config) {
 		RDE_MAX_AMOUNT_OF_WINDOWS,
@@ -2437,6 +2654,8 @@ const rde_engine_init_info RDE_DEFAULT_INIT_INFO = {
 #endif
 };
 
+// Constant: RDE_DEFAULT_TEXTURE_PARAMETERS
+// Default data for loading a texture.
 const rde_texture_parameters RDE_DEFAULT_TEXTURE_PARAMETERS = {
 	.min_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR,
 	.mag_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR,
@@ -2448,6 +2667,30 @@ const rde_texture_parameters RDE_DEFAULT_TEXTURE_PARAMETERS = {
 /// *************************************************************************************************
 /// *                                		FUNCTIONS                         						*
 /// *************************************************************************************************
+
+/// ============================ CONSTRUCTORS ===============================
+
+RDE_FUNC rde_probability rde_struct_create_probability();
+RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
+RDE_FUNC rde_event_window rde_struct_create_event_window();
+RDE_FUNC rde_event_display rde_struct_create_event_display();
+RDE_FUNC rde_event_key rde_struct_create_event_key();
+RDE_FUNC rde_event_mouse rde_struct_create_event_mouse();
+RDE_FUNC rde_event_controller rde_struct_create_event_controller();
+RDE_FUNC rde_event_mobile_pinch rde_struct_create_event_mobile_pinch();
+RDE_FUNC rde_event_mobile rde_struct_create_event_mobile();
+RDE_FUNC rde_event_drag_and_drop rde_struct_create_event_drag_and_drop();
+RDE_FUNC rde_event_data rde_struct_create_event_data();
+RDE_FUNC rde_event rde_struct_create_event();
+RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
+RDE_FUNC rde_texture_parameters rde_struct_texture_parameters();
+RDE_FUNC rde_material_light_data rde_struct_create_material_light_data();
+RDE_FUNC rde_material rde_struct_create_material();
+RDE_FUNC rde_directional_light rde_struct_create_directional_light();
+RDE_FUNC rde_point_light rde_struct_create_point_light();
+RDE_FUNC rde_spot_light rde_struct_create_spot_light();
+RDE_FUNC rde_color rde_struct_create_color();
+RDE_FUNC rde_polygon rde_struct_create_polygon();
 
 /// ============================ LOG ========================================
 
@@ -2598,7 +2841,7 @@ RDE_FUNC void rde_engine_set_running(bool _running);
 
 RDE_FUNC rde_vec_2I rde_engine_get_display_size();
 
-RDE_FUNC rde_display_info* rde_engine_get_available_displays();
+RDE_FUNC void rde_engine_get_available_display_ids(uint* _out_ids);
 RDE_FUNC void rde_engine_switch_window_display(rde_window* _window, size_t _new_display);
 
 RDE_FUNC rde_window* rde_engine_get_focused_window();
@@ -2823,6 +3066,13 @@ RDE_FUNC void rde_file_close(rde_file_handle* _file_handler);
 RDE_FUNC void rde_file_free_read_text(rde_file_handle* _file_handle);
 RDE_FUNC void rde_file_free_read_bytes(rde_file_handle* _file_handle);
 
+
+
+/// ============================ PHYSICS ==============================
+
+#ifdef RDE_PHYSICS_MODULE
+RDE_FUNC void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
+#endif
 
 
 
