@@ -3955,12 +3955,12 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	char* _header_2d_vert = rde_file_read_full_file(_header_2d_vert_handle, NULL);
 	char* _header_2d_frag = rde_file_read_full_file(_header_2d_frag_handle, NULL);
 
-	rde_file_handle* _shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/line_vert.glsl", RDE_FILE_MODE_READ);
-	rde_file_handle* _shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/line_frag.glsl", RDE_FILE_MODE_READ);
-	char* _vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
-	char* _fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
+	rde_file_handle* _shader_vertex_handle = NULL;
+	rde_file_handle* _shader_fragment_handle = NULL;
+	char* _vertex_shader = NULL;
+	char* _fragment_shader = NULL;
 	
-	// 3MB
+	// 3MB should be enough for a shader file
 	#define SHADER_LOADING_BUFFER_SIZE 3145728
 	char* _vertex_shader_substituted = (char*)calloc(sizeof(char), SHADER_LOADING_BUFFER_SIZE);
 	char* _fragment_shader_substituted = (char*)calloc(sizeof(char), SHADER_LOADING_BUFFER_SIZE);
