@@ -2633,16 +2633,23 @@ char* rde_inner_strtokk(char* _string, const char* _strf) {
 	static char* _ptr;
 	static char* _ptr2;
 
-	if (!*_strf) return _string;
-	if (_string) _ptr = _string;
-	else {
-		if (!_ptr2) return _ptr2;
+	if (!*_strf) {
+		return _string;
+	}
+	if (_string) {
+		_ptr = _string;
+	} else {
+		if (!_ptr2) {
+			return _ptr2;
+		}
 		_ptr = _ptr2 + strlen(_strf);
 	}
 
 	if (_ptr) {
 		_ptr2 = strstr(_ptr, _strf);
-		if (_ptr2) memset(_ptr2, 0, strlen(_strf));
+		if (_ptr2) {
+			memset(_ptr2, 0, strlen(_strf));
+		}
 	}
 	return _ptr;
 }
@@ -2841,20 +2848,32 @@ void rde_util_string_replace_char(char* _string, char _old, char _new) {
 }
 
 char* rde_util_string_replace_substring(char* _string, char* _old_string, char* _new_string, int* _output_appearences) {
+	rde_critical_error(_string == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_string");
+	rde_critical_error(_old_string == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_old_string");
+	rde_critical_error(_new_string == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_new_string");
+
 	char* _str = NULL;
 	char* _ptr = NULL;
 	char* _strrep = NULL;
 
 	_str = (char *)malloc(strlen(_string) + 1);
 	sprintf(_str, "%s", _string);
-	if (!*_old_string) return _str;
+
+	if (strlen(_string) == 0 || strlen(_new_string) == 0 || strlen(_old_string) == 0) {
+		return _str;
+	}
+
 	_ptr = rde_inner_strtokk(_str, _old_string);
 	_strrep = malloc(strlen(_ptr) + 1);
 	memset(_strrep, 0, strlen(_ptr) + 1);
 	while (_ptr) {
 		_strrep = rde_inner_append_str(_strrep, _ptr);
 		_ptr = rde_inner_strtokk(NULL, _old_string);
-		if (_ptr) _strrep = rde_inner_append_str(_strrep, _new_string);
+
+		if (_ptr){
+			 _strrep = rde_inner_append_str(_strrep, _new_string);
+		}
+
 		if(_ptr && _output_appearences != NULL) {
 			(*_output_appearences)++;
 		}
@@ -2862,6 +2881,40 @@ char* rde_util_string_replace_substring(char* _string, char* _old_string, char* 
 
 	free(_str);
 	return _strrep;
+}
+
+void rde_util_string_replace_substring_no_alloc(char* _src, char* _dst, uint _dst_size, char* _old_string, char* _new_string, int* _output_appearences) {
+	rde_critical_error(_src == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_src");
+	rde_critical_error(_dst == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_dst");
+	rde_critical_error(_old_string == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_old_string");
+	rde_critical_error(_new_string == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_new_string");
+
+	char* _ptr = NULL;
+
+	if (strlen(_src) == 0 || strlen(_new_string) == 0 || strlen(_old_string) == 0) {
+		return;
+	}
+
+	_ptr = rde_inner_strtokk(_src, _old_string);
+	memset(_dst, 0, strlen(_dst));
+
+	uint _size = 0;
+	while (_ptr) {
+		_size += strlen(_ptr);
+		rde_critical_error(_size > _dst_size, "rde_util_string_replace_substring_no_alloc -> _dst_size %d is lower than actual size %d", _dst_size, _size);
+
+		rde_strcat(_dst, _dst_size, _ptr);
+		_ptr = rde_inner_strtokk(NULL, _old_string);
+		if (_ptr) {
+			_size += strlen(_ptr);
+			rde_critical_error(_size > _dst_size, "rde_util_string_replace_substring_no_alloc -> _dst_size %d is lower than actual size %d", _dst_size, _size);
+			rde_strcat(_dst, _dst_size, _new_string);
+		}
+
+		if(_ptr && _output_appearences != NULL) {
+			(*_output_appearences)++;
+		}
+	}
 }
 
 void rde_util_string_replace_chars_all(char* _string, char _old, char _new) {

@@ -2825,6 +2825,7 @@ RDE_FUNC void rde_util_string_to_upper_itself(char* _string);
 RDE_FUNC void rde_util_string_replace_char(char* _string, char _old, char _new);
 RDE_FUNC void rde_util_string_replace_chars_all(char* _string, char _old, char _new);
 RDE_FUNC char* rde_util_string_replace_substring(char* _string, char* _old_string, char* _new_string, int* _output_appearences);
+RDE_FUNC void rde_util_string_replace_substring_no_alloc(char* _src, char* _dst, uint _dst_size, char* _old_string, char* _new_string, int* _output_appearences);
 RDE_FUNC uint rde_util_string_split(char* _string, char*** _split_array, char _split_mark);
 
 /// ============================ MATH =======================================
