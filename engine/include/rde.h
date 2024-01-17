@@ -543,9 +543,9 @@ typedef unsigned int uint;
 //	char _my_dst[128] = {0};
 //	rde_strcpy(_my_dst, 128, "Hello, Duck!");
 //	=================
-#define rde_strcpy(_dst, _dst_size, _src) strcpy_s(_dst, _dst_size, _src);
+#define rde_strcpy(_dst, _dst_size, _src) strcpy_s(_dst, _dst_size, _src)
 #else
-#define rde_strcpy(_dst, _dst_size, _src) strcpy(_dst, _src);
+#define rde_strcpy(_dst, _dst_size, _src) strcpy(_dst, _src)
 #endif
 
 #if RDE_IS_WINDOWS()
@@ -562,9 +562,9 @@ typedef unsigned int uint;
 //	rde_strcat(_my_dst, 128, "Hello, ");
 //	rde_strcat(_my_dst, 128, "Duck!");
 //	=================
-#define rde_strcat(_dst, _dst_size, _src) strcat_s(_dst, _dst_size, _src);
+#define rde_strcat(_dst, _dst_size, _src) strcat_s(_dst, _dst_size, _src)
 #else
-#define rde_strcat(_dst, _dst_size, _src) strcat(_dst, _src);
+#define rde_strcat(_dst, _dst_size, _src) strcat(_dst, _src)
 #endif
 
 #if RDE_IS_WINDOWS()
@@ -582,9 +582,9 @@ typedef unsigned int uint;
 //	rde_strncat(_my_dst, 128, "Hello, ", 7);
 //	rde_strncat(_my_dst, 128, "Duck!", 5);
 //	=================
-#define rde_strncat(_dst, _dst_size, _src, _src_amount) strncat_s(_dst, _dst_size, _src, _src_amount);
+#define rde_strncat(_dst, _dst_size, _src, _src_amount) strncat_s(_dst, _dst_size, _src, _src_amount)
 #else
-#define rde_strncat(_dst, _dst_size, _src, _src_amount) strncat(_dst, _src, _src_amount);
+#define rde_strncat(_dst, _dst_size, _src, _src_amount) strncat(_dst, _src, _src_amount)
 #endif
 
 #if RDE_IS_WINDOWS()
@@ -599,9 +599,9 @@ typedef unsigned int uint;
 //	======= C =======
 //	char* _tokens = rde_strtok("Hello, Duck!", ",", NULL);
 //	=================
-#define rde_strtok(_str, _del, _ctx) strtok_s(_str, _del, _ctx);
+#define rde_strtok(_str, _del, _ctx) strtok_s(_str, _del, _ctx)
 #else
-#define rde_strtok(_str, _del, _ctx) strtok(_str, _del);
+#define rde_strtok(_str, _del, _ctx) strtok(_str, _del)
 #endif
 
 #if RDE_IS_WINDOWS()
@@ -617,9 +617,9 @@ typedef unsigned int uint;
 //  char _a[128] = {0};
 //	rde_snprintf(_a, 128, "%s, %s", "Hello",      "Duck");
 //	=================
-#define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
+#define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__)
 #else
-#define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__);
+#define rde_snprintf(_str, _str_size, _fmt, ...) snprintf(_str, _str_size, _fmt, __VA_ARGS__)
 #endif
 	
 #if RDE_IS_WINDOWS()
@@ -638,9 +638,122 @@ typedef unsigned int uint;
 //	rde_vsprintf(_msg, _fmt, _args);
 //	va_end(_args);
 //	=================	
-#define rde_vsprintf(_str, _str_size, _fmt, ...) vsprintf_s(_str, _str_size, _fmt, __VA_ARGS__);
+#define rde_vsprintf(_str, _str_size, _fmt, ...) vsprintf_s(_str, _str_size, _fmt, __VA_ARGS__)
 #else
-#define rde_vsprintf(_str, _str_size, _fmt, ...) vsprintf(_str, _fmt, __VA_ARGS__);
+#define rde_vsprintf(_str, _str_size, _fmt, ...) vsprintf(_str, _fmt, __VA_ARGS__)
+#endif
+
+#ifndef rde_malloc
+// Macro: rde_malloc
+// Custom malloc, defined as default malloc but can be reimplemented by end users. It checks for memory allocation errors.
+//
+// Parameters:
+//	_ptr - pointer that the memory will be allocated to.
+//	_type - type to alloc.
+//	_amount - amount of elements of size _type_size to allocate.
+//
+//	======= C =======
+//	char* _my_string = NULL;
+//	rde_malloc(_my_string, char, 128);
+//	=================
+	#define rde_malloc(_ptr, _type, _amount) 																							\
+		do {																															\
+			rde_critical_error(_ptr != NULL, "rde_malloc -> Tried to allocate to _ptr, but it was not NULL, check if _ptr has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
+			_ptr = (_type*)malloc(sizeof(_type) * (_amount));																			\
+			if(_ptr == NULL) {																											\
+				rde_critical_error(true, "rde_malloc -> Could not allocate enough memory (%d bytes) \n", sizeof(_type) * (_amount));	\
+			}																															\
+		} while(0)
+
+// Macro: rde_malloc_init
+// Same as <rde_malloc> but it declares the variable _ptr.
+//
+// Parameters:
+//	_ptr - pointer that the memory will be allocated to.
+//	_type - type to alloc.
+//	_amount - amount of elements of size _type_size to allocate.
+//
+//	======= C =======
+//	rde_malloc_init(_my_string, char, 128);
+//	=================
+	#define rde_malloc_init(_ptr, _type, _amount) _type* _ptr = NULL; rde_malloc(_ptr, _type, _amount)
+#endif
+
+#ifndef rde_calloc
+// Macro: rde_calloc
+// Custom rde_calloc, defined as default rde_calloc but can be reimplemented by end users. It checks for memory allocation errors.
+//
+// Parameters:
+//	_ptr - pointer that the memory will be allocated to.
+//	_type - type to alloc.
+//	_amount - amount of elements of size _type_size to allocate.
+//
+//	======= C =======
+//	char* _my_string = NULL;
+//	rde_calloc(_my_string, char, 128);
+//	=================
+	#define rde_calloc(_ptr, _type, _amount) 																							\
+		do {																															\
+			rde_critical_error(_ptr != NULL, "rde_calloc -> Tried to allocate to _ptr, but it was not NULL, check if _ptr has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
+			_ptr = (_type*)calloc(sizeof(_type), (_amount));																			\
+			if(_ptr == NULL) {																											\
+				rde_critical_error(true, "rde_calloc -> Could not allocate enough memory (%d bytes) \n", sizeof(_type) * (_amount));	\
+			}																															\
+		} while(0)
+
+// Macro: rde_calloc_init
+// Same as <rde_calloc> but it declares the variable _ptr.
+//
+// Parameters:
+//	_ptr - pointer that the memory will be allocated to.
+//	_type - type to alloc.
+//	_amount - amount of elements of size _type_size to allocate.
+//
+//	======= C =======
+//	rde_calloc_init(_my_string, char, 128);
+//	=================
+	#define rde_calloc_init(_ptr, _type, _amount) _type* _ptr = NULL; rde_calloc(_ptr, _type, _amount)
+#endif
+
+#ifndef rde_realloc
+// Macro: rde_realloc
+// Custom rde_realloc, it allocs new memory with std realloc, and frees the memory if needed. Can be reimplemented by end users.
+//
+// Parameters:
+//	_ptr - pointer that the memory will be allocated to.
+//	_type - type to alloc.
+//	_amount - amount of elements of size _type_size to allocate.
+//
+//	======= C =======
+//	char* _my_string = NULL;
+//	rde_calloc(_my_string, sizeof(char), 128);
+//	rde_realloc(_my_string, _my_string, char, 256);
+//	=================
+#define rde_realloc(_ptr_src, _ptr_dst, _type, _amount)																				\
+	do {																															\
+		rde_critical_error(_ptr_src == NULL, "rde_realloc -> _ptr_src cannot be NULL \n");											\
+		rde_critical_error(_ptr != NULL, "rde_realloc -> Tried to allocate to _ptr_dst, but it was not NULL, check if _ptr_dst has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
+		_type* _new_memory = (_type*)realloc(_ptr_src, sizeof(_type) * (_amount));													\
+		if(_new_memory == NULL) {																									\
+			free(_ptr_src);																											\
+			rde_critical_error(true, "rde_realloc -> Could not allocate enough memory (%d bytes) \n", sizeof(_type) * (_amount));	\
+		}																															\
+		_ptr_dst = _new_memory;																										\
+	} while(0)
+#endif
+
+#ifndef rde_free
+// Macro: rde_free
+// Custom rde_free, defined as default rde_free that also reassings the _ptr to NULL, but can be reimplemented by end users.
+//
+// Parameters:
+//	_ptr - pointer to free.
+//
+//	======= C =======
+//	rde_calloc_init(_my_string, sizeof(char), 128);
+//	rde_free(_my_string);
+//	=================
+	#define rde_free(_ptr) do { free(_ptr); _ptr = NULL; } while(0)
 #endif
 
 // Macro: RDE_PROFILE_TIME
@@ -1014,6 +1127,7 @@ typedef struct {			\
 				free(_dyn_arr.memory);																												\
 				rde_critical_error(true, "Bytes %d could not be allocated for %s", sizeof(_dyn_arr.type_size) * _dyn_arr.capacity, "rde_arr add");	\
 			}																																		\
+			_dyn_arr.memory = _new_memory;																											\
 		}																																			\
 		_dyn_arr.memory[_dyn_arr.used++] = _element;																								\
 	} while(0)

@@ -221,6 +221,10 @@ void rde_inner_set_posix_signal_handler();
 //			- [] Simplex Noise generation
 //			- [] Wave funcion collapse algorithm
 //			- [] Function to convert any kind of skybox to a cubemap
+//			- [DONE] Custom dyn array
+//			- [] Unit tests for dyn array
+//			- [] Custom hashmap
+//			- [] Unit tests for hashmap
 //
 //		- [] TOOL: command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
@@ -241,6 +245,7 @@ void rde_inner_set_posix_signal_handler();
 //			- [FIXED] Android warning "warning: implicit declaration of function 'SDL_AndroidGetNativeWindow' is invalid in C99"
 //			- [] 3D batching is not implemented, if object A is rendered, then B and then A again, 3 drawcalls are sent, fix this.
 //			- [] Skybox bottom and top are not okay
+//			- [] Spot and point lights stopped working somehow
 
 
 /// *************************************************************************************************
@@ -1254,8 +1259,11 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.init_info = _engine_init_info;
 	_e.init_info.heap_allocs_config.max_amount_of_shaders += RDE_DEFAULT_SHADERS_AMOUNT;
 
-	_e.transforms = (rde_transform*)malloc(sizeof(rde_transform) * RDE_MAX_TRANSFORMS);
-	_e.world_transforms = (mat4*)malloc(sizeof(mat4) * RDE_MAX_TRANSFORMS);
+	_e.transforms = NULL;
+	rde_malloc(_e.transforms, rde_transform, RDE_MAX_TRANSFORMS);
+
+	_e.world_transforms = NULL;
+	rde_malloc(_e.world_transforms, mat4, RDE_MAX_TRANSFORMS);
 
 	for(unsigned int _i = 0; _i < RDE_MAX_TRANSFORMS; _i++) {
 		_e.transforms[_i] = rde_struct_create_transform();
@@ -1291,7 +1299,9 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.illumination.directional_light = rde_struct_create_directional_light();
 	
 	if(_e.init_info.illumination_config.max_amount_of_point_lights > 0) {
-		_e.illumination.point_lights = (rde_point_light**)malloc(sizeof(rde_point_light*) * _e.init_info.illumination_config.max_amount_of_point_lights);
+		_e.illumination.point_lights = NULL;
+		rde_malloc(_e.illumination.point_lights, rde_point_light*, _e.init_info.illumination_config.max_amount_of_point_lights);
+
 		for(unsigned int _i = 0; _i < _e.init_info.illumination_config.max_amount_of_point_lights; _i++) {
 			_e.illumination.point_lights[_i] = NULL;
 		}
@@ -1300,7 +1310,9 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	}
 
 	if(_e.init_info.illumination_config.max_amount_of_spot_lights > 0) {
-		_e.illumination.spot_lights = (rde_spot_light**)malloc(sizeof(rde_spot_light*) * _e.init_info.illumination_config.max_amount_of_spot_lights);
+		_e.illumination.spot_lights = NULL;
+		rde_malloc(_e.illumination.spot_lights, rde_spot_light*, _e.init_info.illumination_config.max_amount_of_spot_lights);
+
 		for(unsigned int _i = 0; _i < _e.init_info.illumination_config.max_amount_of_spot_lights; _i++) {
 			_e.illumination.spot_lights[_i] = NULL;
 		}
@@ -1322,68 +1334,66 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.init_info.heap_allocs_config.max_amount_of_shaders += RDE_SHADERS_AMOUNT;
 
 	rde_critical_error(_e.init_info.heap_allocs_config.max_amount_of_shaders <= 0, RDE_ERROR_HEAP_ALLOC_BAD_VALUE, "shaders", _e.init_info.heap_allocs_config.max_amount_of_shaders);
-	_e.shaders = (rde_shader*)malloc(sizeof(rde_shader) * _e.init_info.heap_allocs_config.max_amount_of_shaders);
-	rde_critical_error(_e.shaders == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_shader) * _e.init_info.heap_allocs_config.max_amount_of_shaders, "shaders");
+
+	_e.shaders = NULL;
+	rde_malloc(_e.shaders, rde_shader, _e.init_info.heap_allocs_config.max_amount_of_shaders);
+
 	for(unsigned int _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_shaders; _i++) {
 		_e.shaders[_i] = rde_struct_create_shader();
 	}
 
 	rde_critical_error(_e.init_info.heap_allocs_config.max_amount_of_windows <= 0, RDE_ERROR_HEAP_ALLOC_BAD_VALUE, "windows", _e.init_info.heap_allocs_config.max_amount_of_windows);
-	_e.windows = (rde_window*)malloc(sizeof(rde_window) * _e.init_info.heap_allocs_config.max_amount_of_windows);
-	rde_critical_error(_e.windows == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_window) * _e.init_info.heap_allocs_config.max_amount_of_windows, "windows");
+	_e.windows = NULL;
+	rde_malloc(_e.windows, rde_window, _e.init_info.heap_allocs_config.max_amount_of_windows);
+
 	for(unsigned int _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
 		_e.windows[_i] = rde_struct_create_window();
 	}
 
+	_e.textures = NULL;
 	if (_e.total_amount_of_textures > 0) {
-		_e.textures = (rde_texture*)malloc(sizeof(rde_texture) * _e.total_amount_of_textures);
-		rde_critical_error(_e.textures == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_texture) * _e.total_amount_of_textures, "textures");
+		rde_malloc(_e.textures, rde_texture, _e.total_amount_of_textures);
+
 		for (size_t _i = 0; _i < _e.total_amount_of_textures; _i++) {
 			_e.textures[_i] = rde_struct_create_texture();
 		}
-	} else {
-		_e.textures = NULL;
 	}
 
+	_e.atlases = NULL;
 	if(_e.init_info.heap_allocs_config.max_amount_of_atlases > 0) {
-		_e.atlases = (rde_atlas*)malloc(sizeof(rde_atlas) * _e.init_info.heap_allocs_config.max_amount_of_atlases);
-		rde_critical_error(_e.atlases == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_atlas) * _e.init_info.heap_allocs_config.max_amount_of_atlases, "atlases");
+		rde_malloc(_e.atlases, rde_atlas, _e.init_info.heap_allocs_config.max_amount_of_atlases);
+
 		for(unsigned int _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_atlases; _i++) {
 			_e.atlases[_i] = rde_struct_create_atlas();
 		}
-	} else {
-		_e.atlases = NULL;
 	}
 
+	_e.fonts = NULL;
 	if (_e.init_info.heap_allocs_config.max_amount_of_fonts > 0) {
-		_e.fonts = (rde_font*)malloc(sizeof(rde_font) * _e.init_info.heap_allocs_config.max_amount_of_fonts);
-		rde_critical_error(_e.fonts == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_font) * _e.init_info.heap_allocs_config.max_amount_of_fonts, "fonts");
+		rde_malloc(_e.fonts, rde_font, _e.init_info.heap_allocs_config.max_amount_of_fonts);
+
 		for (size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_fonts; _i++) {
 			_e.fonts[_i] = rde_struct_create_font();
 		}
-	} else {
-		_e.fonts = NULL;
 	}
 
+	_e.models = NULL;
 	if(_e.init_info.heap_allocs_config.max_amount_of_models > 0) {
-		_e.models = (rde_model*)malloc(sizeof(rde_model) * _e.init_info.heap_allocs_config.max_amount_of_models);
-		rde_critical_error(_e.models == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_atlas) * _e.init_info.heap_allocs_config.max_amount_of_models, "atlases");
+		rde_malloc(_e.models, rde_model, _e.init_info.heap_allocs_config.max_amount_of_models);
+
 		for(unsigned int _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_models; _i++) {
 			_e.models[_i] = rde_struct_create_model();
 		}
-	} else {
-		_e.models = NULL;
 	}
 
 #ifdef RDE_AUDIO_MODULE
+	_e.sounds = NULL;
 	if (_e.init_info.heap_allocs_config.max_amount_of_sounds > 0) {
-		_e.sounds = (rde_sound*)malloc(sizeof(rde_sound) * _e.init_info.heap_allocs_config.max_amount_of_sounds);
-		rde_critical_error(_e.sounds == NULL, RDE_ERROR_NO_MEMORY"This error probably happened because you compiled the engine with audio option but did not set the amount on rde_init_config.", sizeof(rde_sound) * _e.init_info.heap_allocs_config.max_amount_of_sounds, "audio");
+		rde_malloc(_e.sounds, rde_sound, _e.init_info.heap_allocs_config.max_amount_of_sounds);
+
 		for (size_t _i = 0; _i < _e.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
 			_e.sounds[_i] = rde_struct_create_sound();
 		}
-	} else {
-		_e.sounds = NULL;
 	}
 #endif
 
@@ -1979,10 +1989,10 @@ rde_engine_init_info rde_engine_load_config(const char* _config_path) {
 	#endif
 
 	for(unsigned int _i = 0; _i < _line_amount; _i++) {
-		free(_lines[_i]);
+		rde_free(_lines[_i]);
 	}
 	
-	free(_lines);
+	rde_free(_lines);
 
 	return _init_info;
 }
@@ -2136,6 +2146,10 @@ void rde_engine_destroy_engine() {
 	Gesture_Quit();
 	#endif
 
+	rde_free(ENGINE.transforms);
+	rde_free(ENGINE.world_transforms);
+	stbds_arrfree(ENGINE.free_transforms);
+
 	// rde_rendering_render_texture_destroy(SHADOWS_RENDER_TEXTURE);
 	// glDeleteBuffers(1, &SHADOWS_RENDER_TEXTURE->vbo);
 	// glDeleteVertexArrays(1, &SHADOWS_RENDER_TEXTURE->vao);
@@ -2156,7 +2170,7 @@ void rde_engine_destroy_engine() {
 
 		rde_rendering_atlas_unload(&ENGINE.atlases[_i]);
 	}
-	free(ENGINE.atlases);
+	rde_free(ENGINE.atlases);
 
 	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_fonts; _i++) {
 		if(ENGINE.fonts[_i].texture == NULL) {
@@ -2165,7 +2179,7 @@ void rde_engine_destroy_engine() {
 
 		rde_rendering_font_unload(&ENGINE.fonts[_i]);
 	}
-	free(ENGINE.fonts);
+	rde_free(ENGINE.fonts);
 
 	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
 		if (ENGINE.textures[_i].opengl_texture_id == -1) {
@@ -2178,7 +2192,7 @@ void rde_engine_destroy_engine() {
 			rde_rendering_texture_unload(&ENGINE.textures[_i]);
 		}
 	}
-	free(ENGINE.textures);
+	rde_free(ENGINE.textures);
 
 	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_models; _i++) {
 		if (ENGINE.models[_i].mesh_array == NULL) {
@@ -2187,7 +2201,7 @@ void rde_engine_destroy_engine() {
 
 		rde_rendering_model_unload(&ENGINE.models[_i]);
 	}
-	free(ENGINE.models);
+	rde_free(ENGINE.models);
 
 	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_shaders; _i++) {
 		if(ENGINE.shaders[_i].compiled_program_id == -1) {
@@ -2196,19 +2210,19 @@ void rde_engine_destroy_engine() {
 
 		rde_rendering_shader_unload(&ENGINE.shaders[_i]);
 	}
-	free(ENGINE.shaders);
+	rde_free(ENGINE.shaders);
 
 	if(ENGINE.illumination.point_lights != NULL) {
-		free(ENGINE.illumination.point_lights);
+		rde_free(ENGINE.illumination.point_lights);
 	}
 
 	if(ENGINE.illumination.spot_lights != NULL) {
-		free(ENGINE.illumination.spot_lights);
+		rde_free(ENGINE.illumination.spot_lights);
 	}
 
 #ifdef RDE_AUDIO_MODULE
 	rde_audio_end();
-	free(ENGINE.sounds);
+	rde_free(ENGINE.sounds);
 #endif
 
 #ifdef RDE_PHYSICS_MODULE
@@ -2222,7 +2236,7 @@ void rde_engine_destroy_engine() {
 
 		rde_window_destroy_window(&ENGINE.windows[_i]);
 	}
-	free(ENGINE.windows);
+	rde_free(ENGINE.windows);
 
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 	SDL_Quit();
@@ -2622,10 +2636,10 @@ void rde_math_normalize(rde_vec_3F* _vec) {
 
 // replace substring is from https://github.com/ipserc/strrep/blob/master/string_replace/Source/strrep.c
 char* rde_inner_append_str(char* _string, const char* _append) {
-	char* _new_string = malloc(strlen(_string) + strlen(_append) + 1);
+	rde_malloc_init(_new_string, char, strlen(_string) + strlen(_append) + 1);
 
 	sprintf(_new_string, "%s%s", _string, _append);
-	free(_string);
+	rde_free(_string);
 	return _new_string;
 }
 
@@ -2852,11 +2866,9 @@ char* rde_util_string_replace_substring(char* _string, char* _old_string, char* 
 	rde_critical_error(_old_string == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_old_string");
 	rde_critical_error(_new_string == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_new_string");
 
-	char* _str = NULL;
 	char* _ptr = NULL;
-	char* _strrep = NULL;
 
-	_str = (char *)malloc(strlen(_string) + 1);
+	rde_malloc_init(_str, char, strlen(_string) + 1);
 	sprintf(_str, "%s", _string);
 
 	if (strlen(_string) == 0 || strlen(_new_string) == 0 || strlen(_old_string) == 0) {
@@ -2864,7 +2876,7 @@ char* rde_util_string_replace_substring(char* _string, char* _old_string, char* 
 	}
 
 	_ptr = rde_inner_strtokk(_str, _old_string);
-	_strrep = malloc(strlen(_ptr) + 1);
+	rde_malloc_init(_strrep, char, strlen(_ptr) + 1);
 	memset(_strrep, 0, strlen(_ptr) + 1);
 	while (_ptr) {
 		_strrep = rde_inner_append_str(_strrep, _ptr);
@@ -2879,7 +2891,7 @@ char* rde_util_string_replace_substring(char* _string, char* _old_string, char* 
 		}
 	}
 
-	free(_str);
+	rde_free(_str);
 	return _strrep;
 }
 
@@ -3103,7 +3115,6 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 
 rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas) {
 	FILE* _file = NULL;
-	char* _text = NULL;
 
 	#if RDE_IS_WINDOWS()
 		errno_t _err = fopen_s(&_file, _atlas_path, "r");
@@ -3118,8 +3129,7 @@ rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atl
 	_num_bytes = ftell(_file);
 	fseek(_file, 0L, SEEK_SET);
 
-	_text = (char*)calloc(_num_bytes, sizeof(char));
-	rde_critical_error(_text == NULL, RDE_ERROR_NO_MEMORY, _num_bytes, "config file");
+	rde_calloc_init(_text, char, _num_bytes);
 	fread(_text, sizeof(char), _num_bytes, _file);
 
 
@@ -3156,14 +3166,13 @@ rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atl
 	cJSON_free(_atlas_json);
 
 	fclose(_file);
-	free(_text);
+	rde_free(_text);
 
 	return hash;
 }
 
 rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_path, rde_texture* _atlas) {
 	FILE* _file = NULL;
-	char* _text = NULL;
 
 	#if RDE_IS_WINDOWS()
 	errno_t _err = fopen_s(&_file, _font_path, "r");
@@ -3178,8 +3187,7 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 	_num_bytes = ftell(_file);
 	fseek(_file, 0L, SEEK_SET);
 
-	_text = (char*)calloc(_num_bytes, sizeof(char));
-	rde_critical_error(_text == NULL, RDE_ERROR_NO_MEMORY, _num_bytes, "config file");
+	rde_calloc_init(_text, char, _num_bytes);
 	fread(_text, sizeof(char), _num_bytes, _file);
 
 
@@ -3239,7 +3247,7 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 	cJSON_free(_font_json);
 
 	fclose(_file);
-	free(_text);
+	rde_free(_text);
 
 	return _chars;
 }
@@ -3258,13 +3266,11 @@ const char* rde_inner_file_system_file_mode_to_char(const RDE_FILE_MODE_ _mode) 
 
 void rde_inner_file_system_free_text_allocation(rde_file_handle* _handler) {
 	if(_handler->text_allocated != NULL) {
-		free(_handler->text_allocated);
-		_handler->text_allocated = NULL;
+		rde_free(_handler->text_allocated);
 	}
 
 	if(_handler->bytes_allocated != NULL) {
-		free(_handler->bytes_allocated);
-		_handler->bytes_allocated = NULL;
+		rde_free(_handler->bytes_allocated);
 	}
 }
 
@@ -3311,7 +3317,8 @@ char* rde_file_read_full_file(rde_file_handle* _file_handler, uint* _output_file
 	uint _total_size = SDL_RWsize(_file_handler->sdl_handle);
 	uint _total_bytes_read = 0;
 	uint _bytes_to_read = 1;
-	char* _text = (char*)malloc(sizeof(char) * _total_size + 1);
+
+	rde_malloc_init(_text, char, _total_size + 1);
 	char* _buf = _text;
 	memset(_text, 0, _total_size);
 	rde_critical_error(_text == NULL, RDE_ERROR_NO_MEMORY, sizeof(char) * _total_size, "Text Read Full File");
@@ -3336,8 +3343,7 @@ char* rde_file_read_full_file(rde_file_handle* _file_handler, uint* _output_file
 void rde_file_free_read_text(rde_file_handle* _file_handle) {
 	rde_critical_error(_file_handle == NULL, RDE_ERROR_NO_NULL_ALLOWED, "File Handle");
 	if(_file_handle->text_allocated != NULL) {
-		free(_file_handle->text_allocated);
-		_file_handle->text_allocated = NULL;
+		rde_free(_file_handle->text_allocated);
 	}
 }
 
@@ -3346,7 +3352,8 @@ unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, uin
 	uint _total_size = SDL_RWsize(_file_handler->sdl_handle);
 	uint _total_bytes_read = 0;
 	uint _bytes_to_read = 1;
-	unsigned char* _text = (unsigned char*)malloc(sizeof(unsigned char) * _total_size + 1);
+
+	rde_malloc_init(_text, unsigned char, _total_size + 1);
 	unsigned char* _buf = _text;
 	memset(_text, 0, _total_size);
 	rde_critical_error(_text == NULL, RDE_ERROR_NO_MEMORY, sizeof(unsigned char) * _total_size, "Text Read Full File");
@@ -3371,8 +3378,7 @@ unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, uin
 void rde_file_free_read_bytes(rde_file_handle* _file_handle) {
 	rde_critical_error(_file_handle == NULL, RDE_ERROR_NO_NULL_ALLOWED, "File Handle");
 	if(_file_handle->bytes_allocated != NULL) {
-		free(_file_handle->bytes_allocated);
-		_file_handle->bytes_allocated = NULL;
+		rde_free(_file_handle->bytes_allocated);
 	}
 }
 
@@ -3385,7 +3391,8 @@ char* rde_file_read_line(rde_file_handle* _file_handler, uint _line) {
 	rde_inner_file_system_check_file_mode_or_convert(_file_handler, RDE_FILE_MODE_READ);
 	SDL_RWseek(_file_handler->sdl_handle, 0, SDL_RW_SEEK_END);
 	long _content_size = SDL_RWtell(_file_handler->sdl_handle);
-	char* _file_content = (char*)malloc(sizeof(char) * _content_size);
+
+	rde_malloc_init(_file_content, char, _content_size);
 	SDL_RWseek(_file_handler->sdl_handle, 0, SDL_RW_SEEK_SET);
 
 	for(long _i = 0; _i < _content_size; _i++) {
@@ -3409,8 +3416,7 @@ char* rde_file_read_line(rde_file_handle* _file_handler, uint _line) {
 		return NULL;
 	}
 
-	char* _line_ptr = (char*)malloc(sizeof(char) * _final_line_ptr);
-	memset(_line_ptr, 0, _final_line_ptr);
+	rde_calloc_init(_line_ptr, char, _final_line_ptr);
 #if RDE_IS_WINDOWS()
 	strncpy_s(_line_ptr, _final_line_ptr, _file_content, _final_line_ptr);
 #else
@@ -3779,9 +3785,8 @@ void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_
 unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size) {
 	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
-	unsigned char* _pixels = (unsigned char*)malloc(sizeof(unsigned char) * (4 * _window_size.x * _window_size.y));
-	rde_critical_error(_pixels == NULL, RDE_ERROR_NO_MEMORY, 4 * _window_size.x * _window_size.y, "pixels array for screenshot");
-	memset(_pixels, 0, 4 * _window_size.x * _window_size.y);
+
+	rde_calloc_init(_pixels, unsigned char, 4 * _window_size.x * _window_size.y);
 	glReadPixels((int)(_window_size.x * 0.5f + _position.x - _size.x * 0.5f ), (int)(_window_size.y * 0.5f + _position.y - _size.y * 0.5f),
 	             _size.x, _size.y, GL_RGBA, GL_UNSIGNED_BYTE, _pixels);
 	return _pixels;
@@ -3962,8 +3967,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	
 	// 3MB should be enough for a shader file
 	#define SHADER_LOADING_BUFFER_SIZE 3145728
-	char* _vertex_shader_substituted = (char*)calloc(sizeof(char), SHADER_LOADING_BUFFER_SIZE);
-	char* _fragment_shader_substituted = (char*)calloc(sizeof(char), SHADER_LOADING_BUFFER_SIZE);
+	rde_calloc_init(_vertex_shader_substituted, char, SHADER_LOADING_BUFFER_SIZE);
+	rde_calloc_init(_fragment_shader_substituted, char, SHADER_LOADING_BUFFER_SIZE);
 
 	#define SHADERS_2D_COUNT 5
 	char* _2d_shaders_vert[SHADERS_2D_COUNT] = {
@@ -4071,8 +4076,8 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		memset(_fragment_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
 	}
 
-	free(_vertex_shader_substituted);
-	free(_fragment_shader_substituted);
+	rde_free(_vertex_shader_substituted);
+	rde_free(_fragment_shader_substituted);
 	
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 
@@ -4161,7 +4166,7 @@ void rde_inner_rendering_destroy_current_antialiasing_config() {
 }
 
 void rde_inner_rendering_create_shadows() {
-	ENGINE.shadows.render_texture = (rde_render_texture*)malloc(sizeof(rde_render_texture));
+	rde_malloc(ENGINE.shadows.render_texture, rde_render_texture, 1);
 	RDE_CHECK_GL(glGenFramebuffers, 1, &ENGINE.shadows.render_texture->opengl_framebuffer_id);
 	
 	RDE_CHECK_GL(glGenTextures, 1, &ENGINE.shadows.render_texture->opengl_texture_id);
@@ -4224,8 +4229,7 @@ void rde_inner_rendering_init_2d() {
 	current_batch_2d = rde_struct_create_2d_batch();
 	rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(&current_batch_2d);
 
-	current_batch_2d.vertices = (rde_vertex_2d*)malloc(sizeof(rde_vertex_2d) * ENGINE.init_info.heap_allocs_config.max_amount_of_vertices_per_batch);
-	rde_critical_error(current_batch_2d.vertices == NULL, RDE_ERROR_NO_MEMORY, sizeof(rde_vertex_2d) * ENGINE.init_info.heap_allocs_config.max_amount_of_vertices_per_batch, "2d batch vertices");
+	rde_malloc(current_batch_2d.vertices, rde_vertex_2d, ENGINE.init_info.heap_allocs_config.max_amount_of_vertices_per_batch);
 }
 
 void rde_inner_rendering_end_2d() {
@@ -4235,7 +4239,7 @@ void rde_inner_rendering_end_2d() {
 	RDE_CHECK_GL(glDeleteBuffers, 1, &current_batch_2d.vertex_buffer_object);
 	RDE_CHECK_GL(glDeleteBuffers, 1, &current_batch_2d.index_buffer_object);
 	RDE_CHECK_GL(glDeleteVertexArrays, 1, &current_batch_2d.vertex_array_object);
-	free(current_batch_2d.vertices);
+	rde_free(current_batch_2d.vertices);
 }
 
 void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transform, mat4 _mat) {
@@ -4358,16 +4362,16 @@ void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group
 	_data->material = _material;
 
 	_data->positions_size = _data->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION;
-	_data->positions = (float*)malloc(sizeof(float) * _data->positions_size);
+	rde_malloc(_data->positions, float, _data->positions_size);
 
 	if(_has_t) {
 		_data->texcoords_size = _data->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD;
-		_data->texcoords = (float*)malloc(sizeof(float) * _data->texcoords_size);
+		rde_malloc(_data->texcoords, float, _data->texcoords_size);
 	}
 
 	if(_has_n) {
 		_data->normals_size = _data->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL;
-		_data->normals = (float*)malloc(sizeof(float) * _data->normals_size);
+		rde_malloc(_data->normals, float, _data->normals_size);
 	}
 
 	_data->material = _material;
@@ -4503,7 +4507,8 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 	rde_critical_error(_mesh == NULL, "OBJ Mesh read from fast_obj is NULL, '%s' \n", _obj_path);
 
 	size_t _material_count = _mesh->material_count == 0 ? 1 : _mesh->material_count;
-	rde_obj_mesh_data* _obj = (rde_obj_mesh_data*)malloc(sizeof(rde_obj_mesh_data) * _material_count);
+	rde_obj_mesh_data* _obj = NULL;
+	rde_malloc(_obj, rde_obj_mesh_data, _material_count);
 	for(unsigned int _i = 0; _i < _material_count; _i++) {
 		_obj[_i] = rde_inner_struct_create_obj_mesh_data();
 	}
@@ -4608,7 +4613,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 	rde_strcpy(_model->file_path, RDE_MAX_PATH, _obj_path);
 
 	fast_obj_destroy(_mesh);
-	free(_obj);
+	rde_free(_obj);
 
 	_t_end = clock();
 
@@ -4718,9 +4723,9 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 				continue;
 			}
 
-			uint* _mesh_indices = (uint*)malloc(sizeof(uint) * _mesh_indices_size * 1);
-			float* _mesh_positions = (float*)malloc(sizeof(float) * _mesh_positions_size * 3);
-			float* _mesh_texcoords = (float*)malloc(sizeof(float) * _mesh_texcoords_size * 2);;
+			rde_malloc_init(_mesh_indices, uint, _mesh_indices_size * 1);
+			rde_malloc_init(_mesh_positions, float, _mesh_positions_size * 2);
+			rde_malloc_init(_mesh_texcoords, float, _mesh_texcoords_size * 3);
 
 			uint _indices_pointer = 0;
 			uint _positions_pointer = 0;
@@ -4788,7 +4793,7 @@ void rde_inner_destroy_line_batch_buffers() {
 	RDE_CHECK_GL(glDeleteBuffers, 1, &current_batch_3d.line_batch.vertex_buffer_object);
 	RDE_CHECK_GL(glDeleteVertexArrays, 1, &current_batch_3d.line_batch.vertex_array_object);
 
-	free(current_batch_3d.line_batch.vertices);
+	rde_free(current_batch_3d.line_batch.vertices);
 	current_batch_3d.line_batch.vertices = NULL;
 }
 
@@ -4803,7 +4808,7 @@ void rde_inner_rendering_init_3d() {
 
 	rde_rendering_memory_texture_gpu_upload(DEFAULT_TEXTURE);
 	current_batch_3d = rde_struct_create_batch_3d();
-	current_batch_3d.line_batch.vertices = (rde_line_vertex*)malloc(sizeof(rde_line_vertex) * RDE_MAX_LINES_PER_DRAW);
+	rde_malloc(current_batch_3d.line_batch.vertices, rde_line_vertex, RDE_MAX_LINES_PER_DRAW);
 	rde_inner_create_line_batch_buffers();
 }
 
@@ -4846,7 +4851,8 @@ bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
 
 float* rde_inner_rendering_mesh_calculate_normals(float* _vertex_positions, size_t _indices_count, size_t _vertex_count, uint* _indices) {
 	size_t _normals_size = _vertex_count * 3;
-	float* _normals = (float*)malloc(sizeof(float) * _normals_size);
+	rde_malloc_init(_normals, float, _normals_size);
+
 	for(unsigned int _i = 0; _i < _normals_size; _i++) {
 		_normals[_i] = 0;
 	}
@@ -4912,7 +4918,8 @@ rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data) {
 	_mesh.vertex_texcoords = _data->texcoords;
 	
 	_mesh.transformation_matrices = NULL;
-	_mesh.transformation_matrices = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW );
+	rde_malloc(_mesh.transformation_matrices, mat4, RDE_MAX_MODELS_PER_DRAW);
+
 	for(unsigned int _i = 0; _i < RDE_MAX_MODELS_PER_DRAW; _i++) {
 		glm_mat4_zero(_mesh.transformation_matrices[_i]);
 	}
@@ -5703,14 +5710,12 @@ rde_texture_data rde_rendering_texture_get_data(rde_texture* _texture) {
 }
 
 rde_texture* rde_rendering_memory_texture_create(uint _width, uint _height, int _channels) {
-	rde_texture* _texture = (rde_texture*)malloc(sizeof(rde_texture));
+	rde_malloc_init(_texture, rde_texture, 1);
 	rde_struct_init_alloc_ptr_texture(_texture);
 
 	rde_critical_error(_texture == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "textures", ENGINE.total_amount_of_textures);
+	rde_calloc(_texture->pixels, unsigned char, _width * _height * _channels);
 
-	_texture->pixels = (unsigned char*)malloc(_width * _height * _channels);
-	rde_critical_error(_texture->pixels == NULL, RDE_ERROR_NO_MEMORY, _width * _height * _channels, "texture pixels array");
-	memset(_texture->pixels, 0, _width * _height * _channels);
 	_texture->size = (rde_vec_2UI) { _width, _height };
 	_texture->channels = _channels;
 
@@ -5868,7 +5873,7 @@ void rde_rendering_atlas_unload(rde_atlas* _atlas) {
 
 void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture) {
 	rde_critical_error(_memory_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "memory texture");
-	free(_memory_texture->pixels);
+	rde_free(_memory_texture->pixels);
 	_memory_texture->pixels = NULL;
 	_memory_texture->pixels_changed = false;
 	if(_memory_texture->opengl_texture_id != -1) {
@@ -6064,7 +6069,7 @@ void rde_rendering_skybox_unload(rde_skybox_id _skybox_id) {
 }
 
 rde_render_texture* rde_rendering_render_texture_create(uint _width, uint _height) {
-	rde_render_texture* _render_texture = (rde_render_texture*)malloc(sizeof(rde_render_texture));
+	rde_malloc_init(_render_texture, rde_render_texture, 1);
 	_render_texture->size = (rde_vec_2UI) { _width, _height };
 
 	RDE_CHECK_GL(glGenFramebuffers, 1, &_render_texture->opengl_framebuffer_id);
@@ -6639,8 +6644,8 @@ void rde_rendering_2d_end_drawing() {
 
 
 rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data) {
-	rde_mesh* _mesh = (rde_mesh*)malloc(sizeof(rde_mesh));
-	rde_critical_error(_mesh == NULL, "Could not create a memory mesh");
+	rde_malloc_init(_mesh, rde_mesh, 1);
+
 	_mesh->vao = 0;
 
 	memset(_mesh->name, 0, RDE_MESH_NAME_MAX);
@@ -6660,7 +6665,8 @@ rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data) {
 	_mesh->vertex_texcoords = _data->texcoords;
 	
 	_mesh->transformation_matrices = NULL;
-	_mesh->transformation_matrices = (mat4*)malloc(sizeof(mat4) * RDE_MAX_MODELS_PER_DRAW);
+	rde_malloc(_mesh->transformation_matrices, mat4, RDE_MAX_MODELS_PER_DRAW);
+
 	for(unsigned int _i = 0; _i < RDE_MAX_MODELS_PER_DRAW; _i++) {
 		glm_mat4_zero(_mesh->transformation_matrices[_i]);
 	}
@@ -6885,14 +6891,9 @@ void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated_buffers)
 	_mesh->vao = RDE_UINT_MAX;
 	
 	if(_delete_allocated_buffers) {
-		free(_mesh->vertex_positions);
-		_mesh->vertex_positions = NULL;
-
-		free(_mesh->vertex_normals);
-		_mesh->vertex_normals = NULL;
-
-		free(_mesh->vertex_texcoords);
-		_mesh->vertex_texcoords = NULL;
+		rde_free(_mesh->vertex_positions);
+		rde_free(_mesh->vertex_normals);
+		rde_free(_mesh->vertex_texcoords);
 	}
 
 	if(_mesh->material.map_ka != NULL && _mesh->material.map_ka != DEFAULT_TEXTURE) {
@@ -6912,9 +6913,7 @@ void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated_buffers)
 		_mesh->material.map_bump = NULL;
 	}
 
-	free(_mesh->transformation_matrices);
-	_mesh->transformation_matrices = NULL;
-
+	rde_free(_mesh->transformation_matrices);
 	_mesh->material = rde_struct_create_material();
 }
 
@@ -7104,7 +7103,8 @@ rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model) {
 rde_model_data rde_rendering_model_get_data(rde_model* _model) {
 	rde_model_data _m;
 	_m.amount_of_meshes = _model->mesh_array_size;
-	_m.meshes = (rde_mesh**)malloc(sizeof(rde_mesh*) * _m.amount_of_meshes);
+	_m.meshes = NULL;
+	rde_malloc(_m.meshes, rde_mesh*, _m.amount_of_meshes);
 
 	for(unsigned int _i = 0; _i < _m.amount_of_meshes; _i++) {
 		_m.meshes[_i] = &_model->mesh_array[_i];
