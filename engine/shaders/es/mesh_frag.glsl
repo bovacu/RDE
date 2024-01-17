@@ -1,8 +1,8 @@
 #version 300 es
 precision mediump float;
 
-#define RDE_MAX_POINT_LIGHTS %u
-#define RDE_MAX_SPOT_LIGHTS %u
+#define RDE_MAX_POINT_LIGHTS __point_lights__
+#define RDE_MAX_SPOT_LIGHTS __spot_lights__
 
 in vec3 normal;
 in vec2 text_coord;
