@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 #include <time.h>
+#include <vcruntime_string.h>
 
 #include "rde.h"
 
@@ -2839,9 +2841,9 @@ void rde_util_string_replace_char(char* _string, char _old, char _new) {
 }
 
 char* rde_util_string_replace_substring(char* _string, char* _old_string, char* _new_string, int* _output_appearences) {
-	char* _str;
-	char* _ptr;
-	char* _strrep;
+	char* _str = NULL;
+	char* _ptr = NULL;
+	char* _strrep = NULL;
 
 	_str = (char *)malloc(strlen(_string) + 1);
 	sprintf(_str, "%s", _string);
@@ -3904,22 +3906,31 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_file_handle* _shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/line_frag.glsl", RDE_FILE_MODE_READ);
 	char* _vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 	char* _fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
-
+	
+	#define SHADER_LOADING_BUFFER_SIZE 10000
+	char _vertex_shader_substituted[SHADER_LOADING_BUFFER_SIZE] = {0};
+	char _fragment_shader_substituted[SHADER_LOADING_BUFFER_SIZE] = {0};
+	
 	if(rde_util_string_contains_substring(_vertex_shader, "header_2d_vert", false)) {
 		char* _new_vertex_shader = rde_util_string_replace_substring(_vertex_shader, "header_2d_vert", _header_2d_vert, NULL);
+		rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_vertex_shader);
 		rde_file_free_read_text(_shader_vertex_handle);
-		_vertex_shader = _new_vertex_shader;
+		free(_new_vertex_shader);
 	}
 
 	if(rde_util_string_contains_substring(_fragment_shader, "header_2d_frag", false)) {
 		char* _new_fragment_shader = rde_util_string_replace_substring(_fragment_shader, "header_2d_frag", _header_2d_frag, NULL);
+		rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_fragment_shader);
 		rde_file_free_read_text(_shader_fragment_handle);
-		_fragment_shader = _new_fragment_shader;
+		free(_new_fragment_shader);
 	}
 
-	ENGINE.line_shader = rde_rendering_shader_load(RDE_SHADER_LINE, _vertex_shader, _fragment_shader);
+	ENGINE.line_shader = rde_rendering_shader_load(RDE_SHADER_LINE, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader, 
+												   strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
+	memset(_vertex_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
+	memset(_fragment_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
 	
 	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/color_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/color_frag.glsl", RDE_FILE_MODE_READ);
@@ -3928,19 +3939,24 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 	if(rde_util_string_contains_substring(_vertex_shader, "header_2d_vert", false)) {
 		char* _new_vertex_shader = rde_util_string_replace_substring(_vertex_shader, "header_2d_vert", _header_2d_vert, NULL);
+		rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_vertex_shader);
 		rde_file_free_read_text(_shader_vertex_handle);
-		_vertex_shader = _new_vertex_shader;
+		free(_new_vertex_shader);
 	}
 
 	if(rde_util_string_contains_substring(_fragment_shader, "header_2d_frag", false)) {
 		char* _new_fragment_shader = rde_util_string_replace_substring(_fragment_shader, "header_2d_frag", _header_2d_frag, NULL);
+		rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_fragment_shader);
 		rde_file_free_read_text(_shader_fragment_handle);
-		_fragment_shader = _new_fragment_shader;
+		free(_new_fragment_shader);
 	}
 
-	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, _vertex_shader, _fragment_shader);
+	ENGINE.color_shader_2d = rde_rendering_shader_load(RDE_SHADER_COLOR, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader, 
+												   strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
+	memset(_vertex_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
+	memset(_fragment_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
 
 	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/texture_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/texture_frag.glsl", RDE_FILE_MODE_READ);
@@ -3949,19 +3965,24 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 	if(rde_util_string_contains_substring(_vertex_shader, "header_2d_vert", false)) {
 		char* _new_vertex_shader = rde_util_string_replace_substring(_vertex_shader, "header_2d_vert", _header_2d_vert, NULL);
+		rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_vertex_shader);
 		rde_file_free_read_text(_shader_vertex_handle);
-		_vertex_shader = _new_vertex_shader;
+		free(_new_vertex_shader);
 	}
 
 	if(rde_util_string_contains_substring(_fragment_shader, "header_2d_frag", false)) {
 		char* _new_fragment_shader = rde_util_string_replace_substring(_fragment_shader, "header_2d_frag", _header_2d_frag, NULL);
+		rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_fragment_shader);
 		rde_file_free_read_text(_shader_fragment_handle);
-		_fragment_shader = _new_fragment_shader;
+		free(_new_fragment_shader);
 	}
 	
-	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, _vertex_shader, _fragment_shader);
+	ENGINE.texture_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXTURE, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader, 
+												   strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
+	memset(_vertex_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
+	memset(_fragment_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
 
 	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/text_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/text_frag.glsl", RDE_FILE_MODE_READ);
@@ -3970,19 +3991,24 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 	if(rde_util_string_contains_substring(_vertex_shader, "header_2d_vert", false)) {
 		char* _new_vertex_shader = rde_util_string_replace_substring(_vertex_shader, "header_2d_vert", _header_2d_vert, NULL);
+		rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_vertex_shader);
 		rde_file_free_read_text(_shader_vertex_handle);
-		_vertex_shader = _new_vertex_shader;
+		free(_new_vertex_shader);
 	}
 
 	if(rde_util_string_contains_substring(_fragment_shader, "header_2d_frag", false)) {
 		char* _new_fragment_shader = rde_util_string_replace_substring(_fragment_shader, "header_2d_frag", _header_2d_frag, NULL);
+		rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_fragment_shader);
 		rde_file_free_read_text(_shader_fragment_handle);
-		_fragment_shader = _new_fragment_shader;
+		free(_new_fragment_shader);
 	}
 
-	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, _vertex_shader, _fragment_shader);
+	ENGINE.text_shader_2d = rde_rendering_shader_load(RDE_SHADER_TEXT, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader, 
+												   strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
+	memset(_vertex_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
+	memset(_fragment_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
 	
 	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/framebuffer_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/framebuffer_frag.glsl", RDE_FILE_MODE_READ);
@@ -3991,19 +4017,24 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 	if(rde_util_string_contains_substring(_vertex_shader, "header_2d_vert", false)) {
 		char* _new_vertex_shader = rde_util_string_replace_substring(_vertex_shader, "header_2d_vert", _header_2d_vert, NULL);
+		rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_vertex_shader);
 		rde_file_free_read_text(_shader_vertex_handle);
-		_vertex_shader = _new_vertex_shader;
+		free(_new_vertex_shader);
 	}
 	
 	if(rde_util_string_contains_substring(_fragment_shader, "header_2d_frag", false)) {
 		char* _new_fragment_shader = rde_util_string_replace_substring(_fragment_shader, "header_2d_frag", _header_2d_frag, NULL);
+		rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_fragment_shader);
 		rde_file_free_read_text(_shader_fragment_handle);
-		_fragment_shader = _new_fragment_shader;
+		free(_new_fragment_shader);
 	}
 
-	ENGINE.framebuffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, _vertex_shader, _fragment_shader);
+	ENGINE.framebuffer_shader = rde_rendering_shader_load(RDE_SHADER_FRAMEBUFFER, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader, 
+												   strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
+	memset(_vertex_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
+	memset(_fragment_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
 	
 	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/mesh_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/mesh_frag.glsl", RDE_FILE_MODE_READ);
@@ -4012,25 +4043,30 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 	if(rde_util_string_contains_substring(_vertex_shader, "header_3d_vert", false)) {
 		char* _new_vertex_shader = rde_util_string_replace_substring(_vertex_shader, "header_3d_vert", _header_3d_vert, NULL);
+		rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_vertex_shader);
 		rde_file_free_read_text(_shader_vertex_handle);
-		_vertex_shader = _new_vertex_shader;
+		free(_new_vertex_shader);
 	}
 	
 	if(rde_util_string_contains_substring(_fragment_shader, "header_3d_frag", false)) {
 		char* _new_fragment_shader = rde_util_string_replace_substring(_fragment_shader, "header_3d_frag", _header_3d_frag, NULL);
+		rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_fragment_shader);
 		rde_file_free_read_text(_shader_fragment_handle);
-		_fragment_shader = _new_fragment_shader;
+		free(_new_fragment_shader);
 	}
 
 	char* _fragment_with_values = (char*)malloc(sizeof(char) * 10000);
 	memset(_fragment_with_values, 0, 10000);
-	snprintf(_fragment_with_values, 10000, _fragment_shader, ENGINE.init_info.illumination_config.max_amount_of_point_lights, 
+	snprintf(_fragment_with_values, 10000, strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader, ENGINE.init_info.illumination_config.max_amount_of_point_lights, 
 	         ENGINE.init_info.illumination_config.max_amount_of_spot_lights);
 
-	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, _vertex_shader, _fragment_with_values);
+	ENGINE.mesh_shader = rde_rendering_shader_load(RDE_SHADER_MESH, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader, _fragment_with_values);
 
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
+	memset(_vertex_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
+	memset(_fragment_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
+	free(_fragment_with_values);
 	
 	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/skybox_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/skybox_frag.glsl", RDE_FILE_MODE_READ);
@@ -4039,20 +4075,24 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 	if(rde_util_string_contains_substring(_vertex_shader, "header_3d_vert", false)) {
 		char* _new_vertex_shader = rde_util_string_replace_substring(_vertex_shader, "header_3d_vert", _header_3d_vert, NULL);
+		rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_vertex_shader);
 		rde_file_free_read_text(_shader_vertex_handle);
-		_vertex_shader = _new_vertex_shader;
+		free(_new_vertex_shader);
 	}
 	
 	if(rde_util_string_contains_substring(_fragment_shader, "header_3d_frag", false)) {
 		char* _new_fragment_shader = rde_util_string_replace_substring(_fragment_shader, "header_3d_frag", _header_3d_frag, NULL);
+		rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_fragment_shader);
 		rde_file_free_read_text(_shader_fragment_handle);
-		_fragment_shader = _new_fragment_shader;
+		free(_new_fragment_shader);
 	}
 
-	ENGINE.skybox_shader = rde_rendering_shader_load(RDE_SHADER_SKYBOX, _vertex_shader, _fragment_shader);
+	ENGINE.skybox_shader = rde_rendering_shader_load(RDE_SHADER_SKYBOX, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader, 
+												   strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
-
+	memset(_vertex_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
+	memset(_fragment_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
 	
 	_shader_vertex_handle = rde_file_open("shaders/"SHADER_TYPE"/shadows_vert.glsl", RDE_FILE_MODE_READ);
 	_shader_fragment_handle = rde_file_open("shaders/"SHADER_TYPE"/shadows_frag.glsl", RDE_FILE_MODE_READ);
@@ -4061,19 +4101,24 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 	if(rde_util_string_contains_substring(_vertex_shader, "header_3d_vert", false)) {
 		char* _new_vertex_shader = rde_util_string_replace_substring(_vertex_shader, "header_3d_vert", _header_3d_vert, NULL);
+		rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_vertex_shader);
 		rde_file_free_read_text(_shader_vertex_handle);
-		_vertex_shader = _new_vertex_shader;
+		free(_new_vertex_shader);
 	}
 	
 	if(rde_util_string_contains_substring(_fragment_shader, "header_3d_frag", false)) {
 		char* _new_fragment_shader = rde_util_string_replace_substring(_fragment_shader, "header_3d_frag", _header_3d_frag, NULL);
+		rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _new_fragment_shader);
 		rde_file_free_read_text(_shader_fragment_handle);
-		_fragment_shader = _new_fragment_shader;
+		free(_new_fragment_shader);
 	}
 
-	ENGINE.shadows_shader = rde_rendering_shader_load(RDE_SHADER_SHADOWS, _vertex_shader, _fragment_shader);
+	ENGINE.shadows_shader = rde_rendering_shader_load(RDE_SHADER_SHADOWS, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader, 
+												   strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader);
 	rde_file_close(_shader_vertex_handle);
 	rde_file_close(_shader_fragment_handle);
+	memset(_vertex_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
+	memset(_fragment_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
 	
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 

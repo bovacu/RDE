@@ -729,6 +729,9 @@ void rde_jolt_end() {
 
 	delete job_system;
 	job_system = nullptr;
+	
+	delete temp_allocator;
+	temp_allocator = NULL;
 
 	delete broad_phase_layer_interface;
 	broad_phase_layer_interface = nullptr;
