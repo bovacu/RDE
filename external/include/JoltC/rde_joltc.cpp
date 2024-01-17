@@ -280,12 +280,8 @@ bool rde_jolt_init(rde_jolt_init_config _init_config, critical_error _rde_critic
 	                     *object_vs_broad_phase_layer_filter, 
 	                     *object_layer_pair_filter);
 
-	activation_listener = new rde_activation_listener();
 	physics_system->SetBodyActivationListener(activation_listener);
-
-	contact_listener = new rde_contact_listener();
 	physics_system->SetContactListener(contact_listener);
-
 	body_interface = &physics_system->GetBodyInterface();
 
 	last_used_body_index = -1;
