@@ -1492,7 +1492,7 @@ int times_enter_in_error = 0;
 /// ******************************************* UTIL ***********************************************
 
 char* rde_inner_append_str(char* _string, const char* _append);
-char* rde_inner_strtokk(char* _string, const char* _strf);
+char* rde_inner_strstr(char* _string, const char* _strf);
 
 /// ******************************************* FILE_SYSTEM ***********************************************
 
@@ -2643,7 +2643,7 @@ char* rde_inner_append_str(char* _string, const char* _append) {
 	return _new_string;
 }
 
-char* rde_inner_strtokk(char* _string, const char* _strf) {
+char* rde_inner_strstr(char* _string, const char* _strf) {
 	static char* _ptr;
 	static char* _ptr2;
 
@@ -2875,12 +2875,12 @@ char* rde_util_string_replace_substring(char* _string, char* _old_string, char* 
 		return _str;
 	}
 
-	_ptr = rde_inner_strtokk(_str, _old_string);
+	_ptr = rde_inner_strstr(_str, _old_string);
 	rde_malloc_init(_strrep, char, strlen(_ptr) + 1);
 	memset(_strrep, 0, strlen(_ptr) + 1);
 	while (_ptr) {
 		_strrep = rde_inner_append_str(_strrep, _ptr);
-		_ptr = rde_inner_strtokk(NULL, _old_string);
+		_ptr = rde_inner_strstr(NULL, _old_string);
 
 		if (_ptr){
 			 _strrep = rde_inner_append_str(_strrep, _new_string);
@@ -2893,40 +2893,6 @@ char* rde_util_string_replace_substring(char* _string, char* _old_string, char* 
 
 	rde_free(_str);
 	return _strrep;
-}
-
-void rde_util_string_replace_substring_no_alloc(char* _src, char* _dst, uint _dst_size, char* _old_string, char* _new_string, int* _output_appearences) {
-	rde_critical_error(_src == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_src");
-	rde_critical_error(_dst == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_dst");
-	rde_critical_error(_old_string == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_old_string");
-	rde_critical_error(_new_string == NULL, RDE_ERROR_NO_NULL_ALLOWED, "_new_string");
-
-	char* _ptr = NULL;
-
-	if (strlen(_src) == 0 || strlen(_new_string) == 0 || strlen(_old_string) == 0) {
-		return;
-	}
-
-	_ptr = rde_inner_strtokk(_src, _old_string);
-	memset(_dst, 0, strlen(_dst));
-
-	uint _size = 0;
-	while (_ptr) {
-		_size += strlen(_ptr);
-		rde_critical_error(_size > _dst_size, "rde_util_string_replace_substring_no_alloc -> _dst_size %d is lower than actual size %d", _dst_size, _size);
-
-		rde_strcat(_dst, _dst_size, _ptr);
-		_ptr = rde_inner_strtokk(NULL, _old_string);
-		if (_ptr) {
-			_size += strlen(_ptr);
-			rde_critical_error(_size > _dst_size, "rde_util_string_replace_substring_no_alloc -> _dst_size %d is lower than actual size %d", _dst_size, _size);
-			rde_strcat(_dst, _dst_size, _new_string);
-		}
-
-		if(_ptr && _output_appearences != NULL) {
-			(*_output_appearences)++;
-		}
-	}
 }
 
 void rde_util_string_replace_chars_all(char* _string, char _old, char _new) {
@@ -4026,13 +3992,17 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
 		if(rde_util_string_contains_substring(_vertex_shader, "header_2d_vert", false)) {
-			rde_util_string_replace_substring_no_alloc(_vertex_shader, _vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, "header_2d_vert", _header_2d_vert, NULL);
+			char* _sub = rde_util_string_replace_substring(_vertex_shader, "header_2d_vert", _header_2d_vert, NULL);
+			rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _sub);
 			rde_file_free_read_text(_shader_vertex_handle);
+			rde_free(_sub);
 		}
 
 		if(rde_util_string_contains_substring(_fragment_shader, "header_2d_frag", false)) {
-			rde_util_string_replace_substring_no_alloc(_fragment_shader, _fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, "header_2d_frag", _header_2d_frag, NULL);
+			char* _sub = rde_util_string_replace_substring(_fragment_shader, "header_2d_frag", _header_2d_frag, NULL);
+			rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _sub);
 			rde_file_free_read_text(_shader_fragment_handle);
+			rde_free(_sub);
 		}
 
 		*_2d_shaders[_i].shader = rde_rendering_shader_load(_2d_shaders[_i].name, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader,
@@ -4050,13 +4020,17 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
 		if(rde_util_string_contains_substring(_vertex_shader, "header_3d_vert", false)) {
-			rde_util_string_replace_substring_no_alloc(_vertex_shader, _vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, "header_3d_vert", _header_3d_vert, NULL);
+			char* _sub = rde_util_string_replace_substring(_vertex_shader, "header_3d_vert", _header_3d_vert, NULL);
+			rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _sub);
 			rde_file_free_read_text(_shader_vertex_handle);
+			rde_free(_sub);
 		}
 
 		if(rde_util_string_contains_substring(_fragment_shader, "header_3d_frag", false)) {
-			rde_util_string_replace_substring_no_alloc(_fragment_shader, _fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, "header_3d_frag", _header_3d_frag, NULL);
+			char* _sub = rde_util_string_replace_substring(_fragment_shader, "header_3d_frag", _header_3d_frag, NULL);
+			rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _sub);
 			rde_file_free_read_text(_shader_fragment_handle);
+			rde_free(_sub);
 		}
 
 		if(strcmp(_3d_shaders[_i].name, RDE_SHADER_MESH) == 0) {
