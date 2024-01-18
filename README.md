@@ -34,11 +34,11 @@ Features:
   - 2D sprite rendering with batching system
   - 2D text rendering
   - 3D model and mesh rendering (OBJ done, FBX WIP, GLTF WIP)
-  - 3D lighting (WIP)
+  - 3D lighting
+  - 3D shadows (WIP but basic is done)
   - 3D PBR Materials (TODO)
   - 3D text rendering (WIP)
-  - 2D Physics (WIP)
-  - 3D Physics (WIP)
+  - 3D Physics (Jolt)
   - Window event handling
   - Multiple window management (rendering WIP)
   - Audio (WIP)
