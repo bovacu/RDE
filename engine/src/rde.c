@@ -225,6 +225,7 @@ void rde_inner_set_posix_signal_handler();
 //			- [] Unit tests for dyn array
 //			- [] Custom hashmap
 //			- [] Unit tests for hashmap
+//			- [] Apply the namespace system
 //
 //		- [] TOOL: command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content

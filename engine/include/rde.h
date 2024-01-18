@@ -24,10 +24,14 @@ extern "C" {
 //   mimics namespaces. Everything on the engine starts with 'rde_'. Then the next namespace, for
 //	 example 'rde_window', 'rde_rendering', 'rde_util'... It can have many "namespaces" levels, such 
 //	 us 'rde_rendering_model', whit would be rde::rendering::model and then all methods related to 
-//	 models, such as 'rde_rendering_model_load' or 'rde_rendering_model_unload'
+//	 models, such as 'rde_rendering_model_load' or 'rde_rendering_model_unload'. This is not implemented
+//	 yet
 //
 // - Any function that has _inner_ in the name is just part of the internal computation of the engine,
 //	 and will not be exposed to the user API.
+//
+// - Documentation is over-explanatory as I use it to later generate an API Documentation with NaturalDocs.
+
 
 // Index Begin
 //
