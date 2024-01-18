@@ -245,7 +245,7 @@ void rde_inner_set_posix_signal_handler();
 //			- [FIXED] Android warning "warning: implicit declaration of function 'SDL_AndroidGetNativeWindow' is invalid in C99"
 //			- [] 3D batching is not implemented, if object A is rendered, then B and then A again, 3 drawcalls are sent, fix this.
 //			- [] Skybox bottom and top are not okay
-//			- [] Spot and point lights stopped working somehow
+//			- [FIXED] Spot and point lights stopped working somehow
 
 
 /// *************************************************************************************************
@@ -4056,15 +4056,22 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 		if(rde_util_string_contains_substring(_fragment_shader, "header_3d_frag", false)) {
 			rde_util_string_replace_substring_no_alloc(_fragment_shader, _fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, "header_3d_frag", _header_3d_frag, NULL);
-			if(strcmp(_3d_shaders[_i].name, RDE_SHADER_MESH) == 0) {
-				char _point_lights[8] = {0};
-				sprintf(_point_lights, "%d", ENGINE.init_info.illumination_config.max_amount_of_point_lights);
-				rde_util_string_replace_substring_no_alloc(_fragment_shader, _fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, "__point_lights__", _point_lights, NULL);
-				char _spot_lights[8] = {0};
-				sprintf(_spot_lights, "%d", ENGINE.init_info.illumination_config.max_amount_of_spot_lights);
-				rde_util_string_replace_substring_no_alloc(_fragment_shader, _fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, "__spot_lights__", _spot_lights, NULL);
-			}
 			rde_file_free_read_text(_shader_fragment_handle);
+		}
+
+		if(strcmp(_3d_shaders[_i].name, RDE_SHADER_MESH) == 0) {
+			char _point_lights[8] = {0};
+			sprintf(_point_lights, "%d", ENGINE.init_info.illumination_config.max_amount_of_point_lights);
+			char* _first_sub = rde_util_string_replace_substring(_fragment_shader, "__point_lights__", _point_lights, NULL);
+			char _spot_lights[8] = {0};
+			sprintf(_spot_lights, "%d", ENGINE.init_info.illumination_config.max_amount_of_spot_lights);
+			char* _second_sub = rde_util_string_replace_substring(_first_sub, "__spot_lights__", _spot_lights, NULL);
+
+			memset(_fragment_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
+			rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _second_sub);
+
+			rde_free(_first_sub);
+			rde_free(_second_sub);
 		}
 
 		*_3d_shaders[_i].shader = rde_rendering_shader_load(_3d_shaders[_i].name, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader,
