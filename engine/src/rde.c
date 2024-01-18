@@ -3982,7 +3982,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_shader_ptr__name_pair _3d_shaders[SHADERS_3D_COUNT] = {
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_MESH, 			.shader = &ENGINE.mesh_shader },
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_SKYBOX, 		.shader = &ENGINE.skybox_shader },
-		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_SHADOWS, 		.shader = &ENGINE.shadows_shader }
+		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_DEPTH_SHADOWS, .shader = &ENGINE.shadows_shader }
 	};
 	
 	for(uint _i = 0; _i < SHADERS_2D_COUNT; _i++) {

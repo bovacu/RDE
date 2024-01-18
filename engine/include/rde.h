@@ -226,8 +226,8 @@ extern "C" {
 #define RDE_SHADER_SKYBOX "skybox_shader"
 
 // Constant: RDE_SHADER_SHADOWS
-// Name for the shadow map, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'shadows_shader'.
-#define RDE_SHADER_SHADOWS "shadows_shader"
+// Name for the shadow map, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'depth_shadows_shader'.
+#define RDE_SHADER_DEPTH_SHADOWS "depth_shadows_shader"
 
 /// ====================== COMPILATION AND EXPORT ==========================
 
