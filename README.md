@@ -47,6 +47,12 @@ Features:
 
 Screenshots:
 Model Viewer
-![Captura de tela 2023-10-26 112727](https://github.com/bovacu/RDE/assets/36163709/b6a98d0e-117d-48a6-a90a-013601d18ce3)
+![Screenshot 2024-01-18 120849](https://github.com/bovacu/RDE/assets/36163709/bc2bc441-dd37-494c-bb78-99bd8f3610a8)
+
+Spot and point lights
+https://github.com/bovacu/RDE/assets/36163709/9d6ba3c8-5acb-4182-bb17-5ab0a532392d
+
+
+
 
 
