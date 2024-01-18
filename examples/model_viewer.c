@@ -551,8 +551,8 @@ void model_viewer_init() {
 	model_viewer_skybox = rde_rendering_skybox_load((const char*[6]) {
 		"hub_assets/skyboxes/nebulosa/right.png",
 		"hub_assets/skyboxes/nebulosa/left.png",
-		"hub_assets/skyboxes/nebulosa/top.png",
 		"hub_assets/skyboxes/nebulosa/bottom.png",
+		"hub_assets/skyboxes/nebulosa/top.png",
 		"hub_assets/skyboxes/nebulosa/front.png",
 		"hub_assets/skyboxes/nebulosa/back.png",
 	});

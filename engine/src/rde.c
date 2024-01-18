@@ -244,7 +244,7 @@ void rde_inner_set_posix_signal_handler();
 //			- [] Rectangles and other shapes are not working correctly (lines do)
 //			- [FIXED] Android warning "warning: implicit declaration of function 'SDL_AndroidGetNativeWindow' is invalid in C99"
 //			- [] 3D batching is not implemented, if object A is rendered, then B and then A again, 3 drawcalls are sent, fix this.
-//			- [] Skybox bottom and top are not okay
+//			- [FIXED] Skybox bottom and top are not okay
 //			- [FIXED] Spot and point lights stopped working somehow
 
 
@@ -6053,8 +6053,8 @@ rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]) {
 	rde_log_color(RDE_LOG_COLOR_GREEN, "Loaded correctly skybox with textures:");
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	Left: %s", _texture_paths[0]);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	Right: %s", _texture_paths[1]);
-	rde_log_color(RDE_LOG_COLOR_GREEN, "	Top: %s", _texture_paths[2]);
-	rde_log_color(RDE_LOG_COLOR_GREEN, "	Bottom: %s", _texture_paths[3]);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	Bottom: %s", _texture_paths[2]);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	Top: %s", _texture_paths[3]);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	Front: %s", _texture_paths[4]);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	Back: %s", _texture_paths[5]);
 

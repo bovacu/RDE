@@ -3199,7 +3199,7 @@ RDE_FUNC void rde_rendering_light_add_add_point_light(rde_point_light* _point_li
 RDE_FUNC void rde_rendering_light_add_add_spot_light(rde_spot_light* _spot_light);
 RDE_FUNC rde_directional_light rde_rendering_lighting_get_directional_light();
 
-RDE_FUNC rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]); // order is right, left, top, bottom, front, back
+RDE_FUNC rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]); // order is right, left, bottom, top, front, back
 RDE_FUNC void rde_rendering_skybox_use(rde_skybox_id _skybox_id);
 RDE_FUNC void rde_rendering_skybox_unload(rde_skybox_id _skybox_id);
 
