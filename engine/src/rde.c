@@ -1932,14 +1932,14 @@ void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks
 #define GET_VALUE_FROM_CONFIG_FILE(_type, _func) 																										\
 	_type rde_inner_engine_get_config_file_##_type(const char** _config_file_lines, size_t _number_of_lines, const char* _key, size_t _default_value) { \
 		size_t _final_value = RDE_UINT_MAX;																											  	\
-		for(unsigned int _i = 0; _i < _number_of_lines; _i++) {																								\
+		for(unsigned int _i = 0; _i < _number_of_lines; _i++) {																							\
 			errno = 0;																																	\
-			if(rde_util_string_contains_substring(_config_file_lines[_i], _key, false)) {																\
+			if(rde_util_string_contains_sub_str(_config_file_lines[_i], _key, false)) {																\
 				char* _value = strrchr(_config_file_lines[_i], '=');																					\
-				char* _trimed = rde_util_string_trim(_value);																							\
+				rde_util_string_trim(_value);																											\
 				char* _end = NULL;																													   	\
-				_final_value = _func(_trimed + 1, &_end, 10);																							\
-				rde_critical_error(_trimed + 1 == _end || errno != 0, "Value '%s' could not be converted to "#_type"\n");								\
+				_final_value = _func(_value + 1, &_end, 10);																							\
+				rde_critical_error(_value + 1 == _end || errno != 0, "Value '%s' could not be converted to "#_type"\n");								\
 			}																																			\
 		}																																				\
 																																						\
@@ -2726,21 +2726,19 @@ rde_vec_2I rde_util_font_get_string_size(const char* _string, const rde_font* _f
 	return (rde_vec_2I) { _width, _height };
 }
 
-char* rde_util_string_trim(char* _s) {
+void rde_util_string_trim(char* _s) {
 	char* _end;
 
 	while(isspace((unsigned char)*_s)) _s++;
 
 	if(*_s == 0) {
-		return _s;
+		return;
 	}
 
 	_end = _s + strlen(_s) - 1;
 	while(_end > _s && isspace((unsigned char)*_end)) _end--;
 
 	_end[1] = '\0';
-
-	return _s;
 }
 
 bool rde_util_string_starts_with(const char* _string, const char* _prefix) {
@@ -2760,7 +2758,7 @@ bool rde_util_string_ends_with(const char* _string, const char* _suffix) {
 	return strncmp(_string + (_string_size - _suffix_size), _suffix, _suffix_size) == 0;
 }
 
-bool rde_util_string_contains_substring(const char* _string, const char* _substring, bool _case_sensitive) {
+bool rde_util_string_contains_sub_str(const char* _string, const char* _substring, bool _case_sensitive) {
 	if(_string == NULL || _substring == NULL) {
 		return false;
 	}
@@ -2793,7 +2791,7 @@ uint rde_util_string_char_appearences(const char* _string, char _char) {
 	return _amount;
 }
 
-void rde_util_string_concat(char* _string, uint _size, const char* _fmt, ...) {
+void rde_util_string_format(char* _string, uint _size, const char* _fmt, ...) {
 	if(_string == NULL) {
 		return;
 	}
@@ -2804,6 +2802,7 @@ void rde_util_string_concat(char* _string, uint _size, const char* _fmt, ...) {
 	va_end(_args);
 }
 
+// TODO: check for correct size on _destination
 void rde_util_string_to_lower(char* _destination, const char* _string) {
 	if(_string == NULL || _destination == NULL) {
 		return;
@@ -2826,6 +2825,7 @@ void rde_util_string_to_lower_itself(char* _string) {
 	}
 }
 
+// TODO: check for correct size on _destination
 void rde_util_string_to_upper(char* _destination, const char* _string) {
 	if(_string == NULL || _destination == NULL) {
 		return;
@@ -2938,7 +2938,7 @@ uint rde_util_string_split(char* _string, char*** _split_array, char _split_mark
     
 	while (*_string != '\0') {
         if (*_string == _split_mark) {
-            _p = *_arr++ = calloc (*(_t++) + 1, sizeof(char*));
+            _p = *_arr++ = calloc(*(_t++) + 1, sizeof(char*));
             _string++;
         }
         else {
@@ -2946,7 +2946,7 @@ uint rde_util_string_split(char* _string, char*** _split_array, char _split_mark
 		}
     }
 	
-    free (_tklen);
+    free(_tklen);
     return _count;
 }
 
@@ -3992,14 +3992,14 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 		_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
-		if(rde_util_string_contains_substring(_vertex_shader, "header_2d_vert", false)) {
+		if(rde_util_string_contains_sub_str(_vertex_shader, "header_2d_vert", false)) {
 			char* _sub = rde_util_string_replace_substring(_vertex_shader, "header_2d_vert", _header_2d_vert, NULL);
 			rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _sub);
 			rde_file_free_read_text(_shader_vertex_handle);
 			rde_free(_sub);
 		}
 
-		if(rde_util_string_contains_substring(_fragment_shader, "header_2d_frag", false)) {
+		if(rde_util_string_contains_sub_str(_fragment_shader, "header_2d_frag", false)) {
 			char* _sub = rde_util_string_replace_substring(_fragment_shader, "header_2d_frag", _header_2d_frag, NULL);
 			rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _sub);
 			rde_file_free_read_text(_shader_fragment_handle);
@@ -4020,14 +4020,14 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		_vertex_shader = rde_file_read_full_file(_shader_vertex_handle, NULL);
 		_fragment_shader = rde_file_read_full_file(_shader_fragment_handle, NULL);
 
-		if(rde_util_string_contains_substring(_vertex_shader, "header_3d_vert", false)) {
+		if(rde_util_string_contains_sub_str(_vertex_shader, "header_3d_vert", false)) {
 			char* _sub = rde_util_string_replace_substring(_vertex_shader, "header_3d_vert", _header_3d_vert, NULL);
 			rde_strcpy(_vertex_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _sub);
 			rde_file_free_read_text(_shader_vertex_handle);
 			rde_free(_sub);
 		}
 
-		if(rde_util_string_contains_substring(_fragment_shader, "header_3d_frag", false)) {
+		if(rde_util_string_contains_sub_str(_fragment_shader, "header_3d_frag", false)) {
 			char* _sub = rde_util_string_replace_substring(_fragment_shader, "header_3d_frag", _header_3d_frag, NULL);
 			rde_strcpy(_fragment_shader_substituted, SHADER_LOADING_BUFFER_SIZE, _sub);
 			rde_file_free_read_text(_shader_fragment_handle);
@@ -5162,36 +5162,36 @@ void rde_inner_rendering_flush_batch_3d() {
 		memset(_point_light_var, 0, 256);
 
 		if(_p != NULL) {
-			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].position", _i);
+			rde_util_string_format(_point_light_var, 256, "point_lights[%zu].position", _i);
 			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->position.x, _p->position.y, _p->position.z);
 			memset(_point_light_var, 0, 256);
 		
-			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].ambient_color", _i);
+			rde_util_string_format(_point_light_var, 256, "point_lights[%zu].ambient_color", _i);
 			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->ambient_color.x, _p->ambient_color.y, _p->ambient_color.z);
 			memset(_point_light_var, 0, 256);
 		
-			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].diffuse_color", _i);
+			rde_util_string_format(_point_light_var, 256, "point_lights[%zu].diffuse_color", _i);
 			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->diffuse_color.x, _p->diffuse_color.y, _p->diffuse_color.z);
 			memset(_point_light_var, 0, 256);
 
-			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].specular_color", _i);
+			rde_util_string_format(_point_light_var, 256, "point_lights[%zu].specular_color", _i);
 			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->specular_color.x, _p->specular_color.y, _p->specular_color.z);
 			memset(_point_light_var, 0, 256);
 
-			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].constant", _i);
+			rde_util_string_format(_point_light_var, 256, "point_lights[%zu].constant", _i);
 			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->constant);
 			memset(_point_light_var, 0, 256);
 
-			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].linear", _i);
+			rde_util_string_format(_point_light_var, 256, "point_lights[%zu].linear", _i);
 			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->linear);
 			memset(_point_light_var, 0, 256);
 
-			rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].quadratic", _i);
+			rde_util_string_format(_point_light_var, 256, "point_lights[%zu].quadratic", _i);
 			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _p->quadratic);
 			memset(_point_light_var, 0, 256);
 		}
 
-		rde_util_string_concat(_point_light_var, 256, "point_lights[%zu].used", _i);
+		rde_util_string_format(_point_light_var, 256, "point_lights[%zu].used", _i);
 		RDE_CHECK_GL(glUniform1i, glGetUniformLocation(_shader->compiled_program_id, _point_light_var), _i < ENGINE.init_info.illumination_config.max_amount_of_point_lights && _p != NULL ? 1 : -1);
 
 		memset(_point_light_var, 0, 256);
@@ -5203,49 +5203,49 @@ void rde_inner_rendering_flush_batch_3d() {
 		memset(_spot_light_var, 0, 256);
 
 		if(_s != NULL) {
-			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].position", _i);
+			rde_util_string_format(_spot_light_var, 256, "spot_lights[%zu].position", _i);
 			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->position.x, _s->position.y, _s->position.z);
 			memset(_spot_light_var, 0, 256);
 
-			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].direction", _i);
+			rde_util_string_format(_spot_light_var, 256, "spot_lights[%zu].direction", _i);
 			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->direction.x, _s->direction.y, _s->direction.z);
 			memset(_spot_light_var, 0, 256);
 		
-			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].ambient_color", _i);
+			rde_util_string_format(_spot_light_var, 256, "spot_lights[%zu].ambient_color", _i);
 			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->ambient_color.x, _s->ambient_color.y, _s->ambient_color.z);
 			memset(_spot_light_var, 0, 256);
 		
-			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].diffuse_color", _i);
+			rde_util_string_format(_spot_light_var, 256, "spot_lights[%zu].diffuse_color", _i);
 			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->diffuse_color.x, _s->diffuse_color.y, _s->diffuse_color.z);
 			memset(_spot_light_var, 0, 256);
 
-			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].specular_color", _i);
+			rde_util_string_format(_spot_light_var, 256, "spot_lights[%zu].specular_color", _i);
 			RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->specular_color.x, _s->specular_color.y, _s->specular_color.z);
 			memset(_spot_light_var, 0, 256);
 
-			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].constant", _i);
+			rde_util_string_format(_spot_light_var, 256, "spot_lights[%zu].constant", _i);
 			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->constant);
 			memset(_spot_light_var, 0, 256);
 
-			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].linear", _i);
+			rde_util_string_format(_spot_light_var, 256, "spot_lights[%zu].linear", _i);
 			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->linear);
 			memset(_spot_light_var, 0, 256);
 
-			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].quadratic", _i);
+			rde_util_string_format(_spot_light_var, 256, "spot_lights[%zu].quadratic", _i);
 			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _s->quadratic);
 			memset(_spot_light_var, 0, 256);
 
-			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].cut_off", _i);
+			rde_util_string_format(_spot_light_var, 256, "spot_lights[%zu].cut_off", _i);
 			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), cos(glm_rad(_s->cut_off)));
 			memset(_spot_light_var, 0, 256);
 
 			
-			rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].outer_cut_off", _i);
+			rde_util_string_format(_spot_light_var, 256, "spot_lights[%zu].outer_cut_off", _i);
 			RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), cos(glm_rad(_s->outer_cut_off)));
 			memset(_spot_light_var, 0, 256);
 		}
 
-		rde_util_string_concat(_spot_light_var, 256, "spot_lights[%zu].used", _i);
+		rde_util_string_format(_spot_light_var, 256, "spot_lights[%zu].used", _i);
 		RDE_CHECK_GL(glUniform1i, glGetUniformLocation(_shader->compiled_program_id, _spot_light_var), _i < ENGINE.init_info.illumination_config.max_amount_of_spot_lights && _s != NULL ? 1 : -1);
 
 		memset(_spot_light_var, 0, 256);
@@ -5507,7 +5507,7 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_textur
 	stbi_uc* _data = NULL;
 	
 #if RDE_IS_MOBILE()
-	while(rde_util_string_contains_substring(_sanitized_path, "../", false)) {
+	while(rde_util_string_contains_sub_str(_sanitized_path, "../", false)) {
 		size_t _sp_size = strlen(_sanitized_path);
 		size_t _init_point = 0;
 		size_t _end_point = 0;

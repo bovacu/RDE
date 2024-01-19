@@ -1437,7 +1437,7 @@ typedef struct {			\
 //	=================
 #define rde_str_replace_sub_str(_rde_str, _old_str, _new_str) 									\
 	do {																						\
-		char* _sub = rde_util_string_replace_substring(_rde_str.str, _old_str, _new_str, NULL);	\
+		char* _sub = rde_util_string_replace_sub_str(_rde_str.str, _old_str, _new_str, NULL);	\
 		rde_critical_error(_sub == NULL, "rde_str_replace_sub_str -> error during replace \n");	\
 		rde_str_free(_rde_str);																	\
 		_rde_str.str = _sub;																	\
@@ -2602,7 +2602,21 @@ typedef struct {
 
 /// ============================== ENGINE ===================================
 
-typedef struct {
+// Type: rde_engine_heap_allocs_config
+// Struct that contains values to allocate on heap when the engine is loading for the first time. In general, those are the only allocations the engine will do internally during the whole program's lifetime.
+//
+// Fields:
+//	max_amount_of_windows - (uint) max number of windows to be instantiated.
+//	max_amount_of_vertices_per_batch - (uint) max number of vertices that a drawcall can batch before sending to GPU.
+//	max_amount_of_shaders - (uint) max number of shaders that the engine can load.
+//	max_amount_of_textures - (uint) max number of individual textures that the engine can load.
+//	max_amount_of_atlases - (uint) max number of textures atlases that the engine can load.
+//	max_amount_of_fonts - (uint) max number of font textures that the engine can load.
+//	max_amount_of_models - (uint) max number of 3D models that the engine can load.
+//	max_amount_of_models_textures - (uint) max number of 3D model textures that the engine can load.
+//	max_amount_of_sounds - (uint) This one is only used if RDE_AUDIO_MODULE is defined. Max number of sounds that the engine can load.
+typedef struct rde_engine_heap_allocs_config rde_engine_heap_allocs_config;
+struct rde_engine_heap_allocs_config {
 	uint max_amount_of_windows;
 	uint max_amount_of_vertices_per_batch;
 	uint max_amount_of_shaders;
@@ -2616,25 +2630,51 @@ typedef struct {
 #ifdef RDE_AUDIO_MODULE
 	uint max_amount_of_sounds;
 #endif
+};
 
-} rde_engine_heap_allocs_config;
-
-typedef struct {
+// Type: rde_illumination_config
+// Defines the maximum amount of each type of light that the engine can work with.
+//
+// Fields:
+//	max_amount_of_point_lights - (uint) max number of point lights.
+//	max_amount_of_spot_lights - (uint) max number of spot lights.
+typedef struct rde_illumination_config rde_illumination_config;
+struct rde_illumination_config {
 	uint max_amount_of_point_lights;
 	uint max_amount_of_spot_lights;
-} rde_illumination_config;
+};
 
-typedef struct {
-	uint temp_allocator_bytes; // recommended at least 10-15Mb, if not set, malloc/free will be used on runtime
+// Type: rde_physics_3d_config
+// Defines initialization info for Jolt Physics Engine.
+//
+// Fields:
+//	temp_allocator_bytes - (uint) memory arena size so the engine does not need to allocate during runtime. Recommended at least 10-15Mb, if not set, malloc/free will be used on runtime.
+//	max_amout_of_allowed_jobs - (uint) max number of parallel jobs.
+//	max_amount_of_physics_barriers - (uint) max number of physical barriers.
+//	max_amount_of_threads - (int) max number of threads.
+//	max_amount_of_bodies - (uint) max number of bodies that can get into the simulation.
+//	max_amount_of_mutexes - (uint) max number of mutexes.
+//	max_amount_of_contact_constraints - (uint) max number of contact constrations.
+typedef struct rde_physics_3d_config rde_physics_3d_config;
+struct rde_physics_3d_config {
+	uint temp_allocator_bytes; // 
 	uint max_amout_of_allowed_jobs;
 	uint max_amount_of_physics_barriers;
 	int max_amount_of_threads;
 	uint max_amount_of_bodies;
 	uint max_amount_of_mutexes;
 	uint max_amount_of_contact_constraints;
-} rde_physics_3d_config;
+};
 
-typedef struct {
+// Type: rde_engine_init_info
+// Struct that joins all the different areas initials info.
+//
+// Fields:
+//	heap_allocs_config - (<rde_engine_heap_allocs_config>) see <rde_engine_heap_allocs_config>.
+//	illumination_config - (<rde_illumination_config>) see <rde_illumination_config>.
+//	jolt_config - (<rde_jolt_init_config>) This one is only available if RDE_PHYSICS_MODULE is defined. See <rde_jolt_init_config>.
+typedef struct rde_engine_init_info rde_engine_init_info;
+struct rde_engine_init_info {
 	rde_engine_heap_allocs_config heap_allocs_config;
 	
 	rde_illumination_config illumination_config;
@@ -2643,7 +2683,7 @@ typedef struct {
 	rde_jolt_init_config jolt_config;
 #endif
 
-} rde_engine_init_info;
+};
 
 /// ============================ RENDERING ==================================
 
@@ -2805,7 +2845,7 @@ typedef struct {
 } rde_model_data;
 
 // Type: rde_directional_light
-// Data about the colors and direction of the directional light.
+// Data about the colors and direction of the directional light. This type of light illuminates everything on its direction and has infinite range.
 //
 // Fields:
 //	direction - (<rde_vec_3F>) where the light is pointing at.
@@ -2821,6 +2861,17 @@ typedef struct {
 	rde_vec_3F specular_color;
 } rde_directional_light;
 
+// Type: rde_point_light
+// Data about the colors and position of the point light. This type of light illuminates in all directions around it, but has an action radius.
+//
+// Fields:
+//	position - (<rde_vec_3F>) this is just used for shadowing purpose, a position for a directional light makes not real sense.
+//	ambient_color - (<rde_vec_3F>) color of the ambient light.
+//	diffuse_color - (<rde_vec_3F>) color of the diffuse light.
+//	specular_color - (<rde_vec_3F>) color of the specular light.
+//	constant - (float) constant value.
+//	linear - (float) linear value.
+//	quadratic - (float) quadratic value.
 typedef struct {
 	rde_vec_3F position;
 	rde_vec_3F ambient_color;
@@ -2831,6 +2882,20 @@ typedef struct {
 	float quadratic;
 } rde_point_light;
 
+// Type: rde_point_light
+// Data about the colors and position of the point light. This type of light illuminates in a specific direction in a lantern way.
+//
+// Fields:
+//	direction - (<rde_vec_3F>) where the light is pointing at.
+//	position - (<rde_vec_3F>) this is just used for shadowing purpose, a position for a directional light makes not real sense.
+//	cut_off - (float) inner radius.
+//	outer_cut_off - (float) outer radius.
+//	ambient_color - (<rde_vec_3F>) color of the ambient light.
+//	diffuse_color - (<rde_vec_3F>) color of the diffuse light.
+//	specular_color - (<rde_vec_3F>) color of the specular light.
+//	constant - (float) constant value.
+//	linear - (float) linear value.
+//	quadratic - (float) quadratic value.
 typedef struct {
 	rde_vec_3F position;
 	rde_vec_3F direction;
@@ -3151,25 +3216,133 @@ RDE_FUNC void rde_util_file_sanitaize_path(const char* _path, char* _sanitized, 
 // Gets the width (in pixels) that a string will occupy.
 //
 // Parameters:
-//	_string - string to messure.
+//	_str - string to messure.
 //	_font - font that will render it.
-RDE_FUNC uint rde_util_font_get_string_width(const char* _string, const rde_font* _font);
-RDE_FUNC rde_vec_2I rde_util_font_get_string_size(const char* _string, const rde_font* _font);
+RDE_FUNC uint rde_util_font_get_string_width(const char* _str, const rde_font* _font);
 
-RDE_FUNC char* rde_util_string_trim(char* _s);
-RDE_FUNC bool rde_util_string_starts_with(const char* _string, const char* _prefix);
-RDE_FUNC bool rde_util_string_ends_with(const char* _string, const char* _suffix);
-RDE_FUNC bool rde_util_string_contains_substring(const char* _string, const char* _substring, bool _case_sensitive);
-RDE_FUNC uint rde_util_string_char_appearences(const char* _string, char _char);
-RDE_FUNC void rde_util_string_concat(char* _string, uint _size, const char* _fmt, ...);
-RDE_FUNC void rde_util_string_to_lower(char* _destination, const char* _string);
-RDE_FUNC void rde_util_string_to_lower_itself(char* _string);
-RDE_FUNC void rde_util_string_to_upper(char* _destination, const char* _string);
-RDE_FUNC void rde_util_string_to_upper_itself(char* _string);
-RDE_FUNC void rde_util_string_replace_char(char* _string, char _old, char _new);
-RDE_FUNC void rde_util_string_replace_chars_all(char* _string, char _old, char _new);
-RDE_FUNC char* rde_util_string_replace_substring(char* _string, char* _old_string, char* _new_string, int* _output_appearences);
-RDE_FUNC uint rde_util_string_split(char* _string, char*** _split_array, char _split_mark);
+// Function: rde_util_font_get_string_size
+// Gets the width and height (in pixels) that a string will occupy.
+//
+// Parameters:
+//	_str - string to messure.
+//	_font - font that will render it.
+RDE_FUNC rde_vec_2I rde_util_font_get_string_size(const char* _str, const rde_font* _font);
+
+// Function: rde_util_string_trim
+// Removes spaces from the beginning and end of the string. It makes no allocations.
+//
+// Parameters:
+//	_str - string to trim.
+RDE_FUNC void rde_util_string_trim(char* _str);
+
+// Function: rde_util_string_starts_with
+// Tells if a string starts with a given prefix. It makes no allocations.
+//
+// Parameters:
+//	_str - input string.
+//	_prefix - prefix to check.
+RDE_FUNC bool rde_util_string_starts_with(const char* _str, const char* _prefix);
+
+// Function: rde_util_string_ends_with
+// Tells if a string ends with a given suffix. It makes no allocations.
+//
+// Parameters:
+//	_str - input string.
+//	_suffix - suffix to check.
+RDE_FUNC bool rde_util_string_ends_with(const char* _str, const char* _suffix);
+
+// Function: rde_util_string_contains_substring
+// Tells if a string contains a given substring. It makes no allocations.
+//
+// Parameters:
+//	_str - input string.
+//	_sub_str - substring to check.
+//	_case_sensitive - enables or disables case sensitivity.
+RDE_FUNC bool rde_util_string_contains_sub_str(const char* _str, const char* _sub_str, bool _case_sensitive);
+
+// Function: rde_util_string_char_appearences
+// Returns how many times a char appears on a string. It makes no allocations.
+//
+// Parameters:
+//	_str - input string.
+//	_char - char to check.
+RDE_FUNC uint rde_util_string_char_appearences(const char* _str, char _char);
+
+// Function: rde_util_string_format
+// Formats a given string with values. It makes no allocations.
+//
+// Parameters:
+//	_dst - container to save the formatted string.
+//	_size - size of the string container.
+//	_fmt - formatted string.
+RDE_FUNC void rde_util_string_format(char* _dst, uint _dst_size, const char* _fmt, ...);
+
+// Function: rde_util_string_to_lower
+// Transforms the full string into lower case into a new container. It makes no allocations.
+//
+// Parameters:
+//	_dst - container to save the lower-cased string.
+//	_str - original string.
+RDE_FUNC void rde_util_string_to_lower(char* _dst, const char* _str);
+
+// Function: rde_util_string_to_lower_itself
+// Transforms the full string into lower case. It makes no allocations.
+//
+// Parameters:
+//	_str - original string.
+RDE_FUNC void rde_util_string_to_lower_itself(char* _str);
+
+// Function: rde_util_string_to_upper
+// Transforms the full string into upper case into a new container. It makes no allocations.
+//
+// Parameters:
+//	_dst - container to save the upper-cased string.
+//	_str - original string.
+RDE_FUNC void rde_util_string_to_upper(char* _dst, const char* _str);
+
+// Function: rde_util_string_to_upper_itself
+// Transforms the full string into upper case. It makes no allocations.
+//
+// Parameters:
+//	_str - original string.
+RDE_FUNC void rde_util_string_to_upper_itself(char* _str);
+
+// Function: rde_util_string_replace_char
+// Replace the first appearence of a char by another one. It makes no allocations.
+//
+// Parameters:
+//	_str - original string.
+//	_old_char - char to be replaced.
+//	_new_char - char that will replace _old_char.
+RDE_FUNC void rde_util_string_replace_char(char* _str, char _old_char, char _new_char);
+
+// Function: rde_util_string_replace_chars_all
+// Replace every appearence of a char by another one. It makes no allocations.
+//
+// Parameters:
+//	_str - original string.
+//	_old_char - char to be replaced.
+//	_new_char - char that will replace _old_char.
+RDE_FUNC void rde_util_string_replace_chars_all(char* _str, char _old_char, char _new_char);
+
+// Function: rde_util_string_replace_sub_str
+// Replace every appearence of a substring by another one. Returned value MUST be freed by the user.
+//
+// Parameters:
+//	_str - original string.
+//	_old_str - string to be replaced.
+//	_new_str - string that will replace _old_char.
+//	_output_appearences - output parameter that will give the amount of times the _old_string was replaced.
+RDE_FUNC char* rde_util_string_replace_sub_str(char* _str, char* _old_str, char* _new_str, int* _output_appearences);
+
+// Function: rde_util_string_split
+// Splits a string into a given array of char*. Returns how many splits the array has. Each of the entries of the array of char* MUST be freed by the user.
+//
+// Parameters:
+//	_str - original string.
+//	_split_array - pointer to an array of char* that will hold the amount of splits.
+//	_split_mark - char to split by.
+RDE_FUNC uint rde_util_string_split(char* _str, char*** _split_array, char _split_mark);
 
 /// ============================ MATH =======================================
 
