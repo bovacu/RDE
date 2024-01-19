@@ -199,6 +199,9 @@ extern "C" {
 // Default capacity when creating a new dynamic array, by default 10
 #define RDE_ARR_DEFAULT_CAPACITY 10
 	
+// Constant: RDE_STR_DEFAULT_SIZE
+// Default size when creating a new string, by default 100
+#define RDE_STR_DEFAULT_SIZE 100
 /// ============================== SHADERS =================================
 
 // Constant: RDE_SHADER_LINE
@@ -778,6 +781,30 @@ typedef unsigned int uint;
 	rde_log_level(RDE_LOG_LEVEL_INFO, "%s - Took %f""s", _name, ((double)_end)/CLOCKS_PER_SEC); \
 }
 
+// Macro: RDE_MAX
+// Gets the maximum value of 2 values.
+//
+// Parameters:
+//	_a - value a.
+//	_b - value b.
+//
+//	======= C =======
+//	int _max = RDE_MAX(15, -5)
+//	=================
+#define RDE_MAX(a, b) ((a) > (b) ? (a) : (b));
+
+// Macro: RDE_MIN
+// Gets the minimum value of 2 values.
+//
+// Parameters:
+//	_a - value a.
+//	_b - value b.
+//
+//	======= C =======
+//	int _min = RDE_MIN(15, -5)
+//	=================
+#define RDE_MIN(a, b) ((a) < (b) ? (a) : (b));
+
 /// ======================= WARNING SILENCER ===============================
 
 // Macro: RDE_UNUSED
@@ -1075,7 +1102,7 @@ typedef struct {			\
 	} while(0)
 
 // Macro: rde_arr_new_with_capacity
-// Allocates the data for the dynamic array.
+// Allocates the data for the dynamic array. Needs to be freed with <rde_arr_free> once it is not needed.
 //
 // Parameters:
 //	_dyn_arr - the dynamic array.
@@ -1099,7 +1126,7 @@ typedef struct {			\
 	} while(0)
 
 // Macro: rde_arr_new
-// Allocates the data for the dynamic array.
+// Allocates the data for the dynamic array. Needs to be freed with <rde_arr_free> once it is not needed.
 //
 // Parameters:
 //	_dyn_arr - the dynamic array.
@@ -1268,6 +1295,189 @@ typedef struct {			\
 		_dyn_arr.capacity = 0;			\
 		_dyn_arr.used = 0;				\
 		_dyn_arr.type_size = 0;			\
+	} while(0)
+
+// Macro: rde_str_new
+// Creates a new dynamic string, allocating necessary data. This needs to be freed with <rde_str_free> once it is not longer needed.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//	_init_src_value - initial string value for the rde_str. Can be NULL.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	=================
+#define rde_str_new(_rde_str, _init_src_value)											\
+	do {																				\
+		rde_critical_error(_rde_str != NULL, "rde_str_new -> Tried to allocate to _rde_str, but it src was not NULL, check if _rde_str.src has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
+																						\
+		_rde_str->size = MAX(strlen(_init_src_value) + 1, RDE_STR_DEFAULT_SIZE);		\
+		rde_calloc(_rde_str.src, char, _s->size);										\
+		if(_init_src_value != NULL) {													\
+			rde_strcpy(_rde_str.str, _rde_str.size, _init_src_value);					\
+		}																				\
+	} while(0)
+
+// Macro: rde_str_resize
+// Resized an existing rde_str, usually end-users won't need to call this.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//	_new_size - the new size to give to the rde_str.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	rde_str_resize(_str, 200);
+//	=================
+#define rde_str_resize(_rde_str, _new_size)												\
+	do {																				\
+		if(_new_size <= _rde_str.size) {												\
+			break;																		\
+		}																				\
+		uint _old_size = _rde_str.size;													\
+		while(_rde_str.size < _new_size) {												\
+			_rde_str.size *= 2;															\
+		}																				\
+		rde_realloc(_rde_str.src, _rde_str.src, char, _rde_str.size);					\
+		memset((void*)(_rde_str->str + _old_size), '\0', _rde_str->size - _old_size);	\
+	} while(0)
+
+// Macro: rde_str_append_str
+// Appends a string to an existing rde_str.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//	_str - string to append.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	rde_str_append_str(_str, " And other animals!");
+//	=================
+#define rde_str_append_str(_rde_str, _str)																		\
+	do {																										\
+		rde_critical_error(_rde_str.src == NULL, "rde_str_append_str -> Tried to use a NULL _rde_str.src.\n");	\
+		rde_critical_error(_str == NULL, "rde_str_append_str -> Tried to use a NULL _str in .\n");				\
+		uint _rde_str_size = rde_str_size(_rde_str_size);														\
+		rde_str_resize(_rde_str, _rde_str_size + strlen(_str));													\
+		for(uint _i = 0; _i < strlen(_str); _i++) {																\
+			_rde_str.str[_rde_str_size + _i] = _str[_i];														\
+		}																										\
+	} while(0)
+	
+// Macro: rde_str_append_rde_str
+// Same as <rde_str_append_str> but appends a rde_str.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//	_other_rde_str - rde_str to append.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	rde_str _str_1 = {0};
+//	rde_str_new(_str_1, "And other animals!");
+//	rde_str_append_rde_rde_str(_str, _str_1);
+//	=================
+#define rde_str_append_rde_str(_rde_str, _other_rde_str) rde_str_append_str(_rde_str, _other_rde_str.src)
+
+// Macro: rde_str_to_char_ptr
+// Gets the inner char* of the rde_str.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", rde_str_get_char_ptr(_str));
+//	=================
+#define rde_str_to_char_ptr(_rde_str) _rde_str.src
+
+// Macro: rde_str_total_size
+// Gets the full size of the char array, with used and unused parts.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	uint _size = rde_str_total_size(_str);
+//	=================
+#define rde_str_total_size(_rde_str) _rde_str.size
+	
+// Macro: rde_str_size
+// Gets the size of the used part of the char array.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	uint _size = rde_str_total_size(_str);
+//	=================
+#define rde_str_size(_rde_str) strlen(_rde_str.src)
+	
+// Macro: rde_str_replace_sub_str
+// Replaces a given string with another given string.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//	_old_str - string to be replaced.
+//	_new_str - string that will replace _old_str.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	rde_str_replace_sub_str(_str, "Hello", "Bye");
+//	=================
+#define rde_str_replace_sub_str(_rde_str, _old_str, _new_str) 									\
+	do {																						\
+		char* _sub = rde_util_string_replace_substring(_rde_str.str, _old_str, _new_str, NULL);	\
+		rde_critical_error(_sub == NULL, "rde_str_replace_sub_str -> error during replace \n");	\
+		rde_str_free(_rde_str);																	\
+		_rde_str.str = _sub;																	\
+		uint _new_size = rde_str_len(_rde_str);													\
+		if(_new_size > _rde_str.size) {															\
+			_rde_str.size = _new_size;															\
+		}																						\
+	} while(0)
+
+// Macro: rde_str_clear
+// Clears inner char array, but does not touch the size or allocated memory.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	rde_str_clear(_str);
+//	=================	
+#define rde_str_clear(_rde_str)					\
+	do {										\
+		memset(_rde_str.str, 0, _rde_str.size);	\
+	} while(0)
+	
+// Macro: rde_str_free
+// Frees allocated memory and resets size to 0.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	rde_str_free(_str);
+//	=================
+#define rde_str_free(_rde_str)		\
+	do {							\
+		_rde_str.size = 0;			\
+		rde_free(_rde_str.str);		\
 	} while(0)
 	
 /// *************************************************************************************************
@@ -2137,6 +2347,22 @@ typedef uint rde_skybox_id;
 // Type: rde_mesh
 // Represents a mesh, may be part of a model or not. This is just a pointer, implementation is in the source file.
 typedef struct rde_mesh rde_mesh;
+
+
+
+/// ================================ UTIL ===================================
+
+// Type: rde_str
+// Struct representing a heap dynamic string.
+//
+// Fields:
+//	str - char array representing the main string.
+//	size - total size of the string, representing the used and non-used parts.
+typedef struct rde_str rde_str;
+struct rde_str {
+    char* str;
+    unsigned int size;
+};
 
 /// ============================== CAMERA ===================================
 
