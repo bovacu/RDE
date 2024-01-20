@@ -224,6 +224,8 @@ void rde_inner_set_posix_signal_handler();
 //			- [DONE] Custom dyn array
 //			- [] Unit tests for dyn array
 //			- [] Custom hashmap
+//			- [] Custom stack
+//			- [] Custom queue
 //			- [] Unit tests for hashmap
 //			- [] Apply the namespace system
 //

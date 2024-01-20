@@ -1619,7 +1619,6 @@ void parse_arguments(int _argc, char** _argv);
 		dyn_str_free(_external_imgui_include_path);	\
 	}												\
 	dyn_str_free(_external_lib_path);				\
-	dyn_str_free(_external_manual_lib_path);		\
 
 #if _WIN32
 void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
@@ -1665,13 +1664,12 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 	}
 
 	LINK_PATH(_external_lib_path, "external/libs/windows/");
-	LINK_PATH(_external_manual_lib_path, "external/libs/windows/manual-link/");
 
 	ADD_FLAG("-lSDL3");
 	ADD_FLAG("-lcglm");
 
 	if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
-		ADD_FLAG("-Xlinker /WHOLEARCHIVE:rde_imgui.lib");
+		ADD_FLAG("-limgui");
 	}
 
 	if((modules & RDE_MODULES_PHYSICS) == RDE_MODULES_PHYSICS) {
@@ -1771,6 +1769,7 @@ bool compile_windows_rde() {
 		printf("--- BUILDING EXAMPLES --- \n");
 		COMPILE_EXAMPLE("windows", ".exe",
 		{
+			ADD_FLAG("-limgui");
 			ADD_FLAG("-lwinmm");
 			ADD_FLAG("-lgdi32");
 			ADD_FLAG("-lmsvcrt");
@@ -1783,11 +1782,15 @@ bool compile_windows_rde() {
 			if (strcmp(build_type, DEBUG_STR) == 0) {
 				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
 				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/debug/examples/SDL3.dll")
+				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/debug/examples/jolt.dll")
+				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/debug/examples/imgui.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/")
 				COPY_FOLDER("engine/shaders", "build/windows/debug/examples/")
 			} else {
 				COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
 				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/release/examples/SDL3.dll")
+				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/release/examples/jolt.dll")
+				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/release/examples/imgui.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/")
 				COPY_FOLDER("engine/shaders", "build/windows/release/examples/")
 			}
@@ -1799,6 +1802,7 @@ bool compile_windows_rde() {
 		printf("--- BUILDING TESTS --- \n");
 		COMPILE_TESTS("windows", ".exe",
 		{
+			ADD_FLAG("-limgui");
 			ADD_FLAG("-lwinmm")
 			ADD_FLAG("-lgdi32")
 		},
@@ -1806,11 +1810,15 @@ bool compile_windows_rde() {
 			if(strcmp(build_type, DEBUG_STR) == 0) {
 				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
 				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/debug/examples/SDL3.dll")
+				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/debug/examples/jolt.dll")
+				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/release/examples/imgui.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/windows/debug/examples/shaders/")	
 			} else {
 				COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
 				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/release/examples/SDL3.dll")
+				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/release/examples/jolt.dll")
+				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/release/examples/imgui.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/windows/release/examples/shaders/")
 			}

@@ -1,5 +1,5 @@
 Windows:
- clang-cl /c /EHsc /O2 -Xclang -std=c++11 imgui.cpp imgui_widgets.cpp imgui_tables.cpp imgui_draw.cpp backends/imgui_impl_sdl2.cpp backends/imgui_impl_opengl3.cpp rde_imgui.cpp -I. -I../SDL2 && lib.exe /OUT:rde_imgui.lib *.obj && rm *.obj && cp rde_imgui.lib ../../libs/windows/ && cp rde_imgui.lib ../../../examples/libs/ && rm rde_imgui.lib
+ clang-cl /LD /EHsc /O2 -Xclang -std=c++11 imgui.cpp imgui_widgets.cpp imgui_tables.cpp imgui_draw.cpp backends/imgui_impl_sdl2.cpp backends/imgui_impl_opengl3.cpp rde_imgui.cpp -I. -I../SDL2 -o imgui.dll && cp imgui.dll ../../libs/windows/ && rm imgui.dll && cp imgui.lib ../../libs/windows/ && rm imgui.lib
 
 Linux:
 clang++ -shared -fPIC imgui.cpp imgui_widgets.cpp imgui_tables.cpp imgui_draw.cpp backends/imgui_impl_sdl2.cpp backends/imgui_impl_opengl3.cpp rde_imgui.cpp -I. -I../SDL2 -o librde_imgui.so &&  cp librde_imgui.so ../../libs/linux/ && rm librde_imgui.so

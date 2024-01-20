@@ -471,7 +471,9 @@ typedef unsigned int uint;
 
 #define RDE_SAFE_ARR_ACCESS(_type) RDE_FUNC _type rde_arr_s_get_##_type(uint _index, _type* _arr, uint _arr_size, char* _fmt, ...);
 #define RDE_SAFE_ARR_SET(_type) RDE_FUNC void rde_arr_s_set_##_type(uint _index, _type _value, _type* _arr, uint _arr_size, char* _fmt, ...);
-
+#define RDE_DECLARE_CLAMP_FUNCS(_type) RDE_FUNC _type rde_math_clamp_##_type(_type _value, _type _min, _type _max);
+#define RDE_DECLARE_EASING_FUNCS(_form, _type) RDE_FUNC float rde_math_easing_##_form##_##_type(float _current_time, float _start_value, float _change_in_value, float _duration);
+	
 // Macro: rde_render_3d
 // More compact way of rendering 3D without shadows. Result of doing <rde_rendering_3d_begin_drawing>, draw your scene, <rde_rendering_3d_end_drawing>
 //
@@ -3358,9 +3360,6 @@ RDE_FUNC void rde_math_convert_world_size_to_screen_size(rde_window* _window, rd
 RDE_FUNC rde_vec_3F rde_math_cross_product(rde_vec_3F _vec_0, rde_vec_3F _vec_1);
 RDE_FUNC void rde_math_normalize(rde_vec_3F* _vec);
 
-#define RDE_DECLARE_CLAMP_FUNCS(_type) \
-	RDE_FUNC _type rde_math_clamp_##_type(_type _value, _type _min, _type _max);
-
 RDE_DECLARE_CLAMP_FUNCS(int)
 RDE_DECLARE_CLAMP_FUNCS(uint)
 RDE_DECLARE_CLAMP_FUNCS(float)
@@ -3373,9 +3372,6 @@ RDE_FUNC float rde_math_degrees_to_radians(float _degrees);
 
 RDE_FUNC rde_vec_3F rde_math_quaternion_to_euler_degrees(rde_quaternion _quaternion);
 RDE_FUNC rde_quaternion rde_math_euler_degrees_to_quaternion(rde_vec_3F _euler_degrees);
-
-#define RDE_DECLARE_EASING_FUNCS(_form, _type) \
-	RDE_FUNC float rde_math_easing_##_form##_##_type(float _current_time, float _start_value, float _change_in_value, float _duration);
 
 RDE_DECLARE_EASING_FUNCS(in, linear)
 RDE_DECLARE_EASING_FUNCS(in, quadratic)
