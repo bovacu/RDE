@@ -23,9 +23,9 @@ extern "C" {
 // - API "namespaces". As C has no namespaces, the API of the engine uses a naming convention that
 //   mimics namespaces. Everything on the engine starts with 'rde_'. Then the next namespace, for
 //	 example 'rde_window', 'rde_rendering', 'rde_util'... It can have many "namespaces" levels, such 
-//	 us 'rde_rendering_model', whit would be rde::rendering::model and then all methods related to 
-//	 models, such as 'rde_rendering_model_load' or 'rde_rendering_model_unload'. This is not implemented
-//	 yet
+//	 as 'rde_rendering_model', which would be rde::rendering::model and then all methods related to
+//	 models, such as 'rde_rendering_model_load' or 'rde_rendering_model_unload'. There is a way to
+//	 disable namespaces, just define RDE_NO_NAMESPACES before including rde.h
 //
 // - Any function that has _inner_ in the name is just part of the internal computation of the engine,
 //	 and will not be exposed to the user API.
@@ -306,15 +306,6 @@ extern "C" {
 	#define RDE_FUNC 
 	#define RDE_FUNC_STATIC static
 	#define RDE_FUNC_EXTERNAL
-#endif
-
-#ifdef RDE_NO_NAMESPACES
-// Macro: RDE_N
-// Creates the C "namespace" system of the library. Can be disabled when compiling the library. This will only expose the short name of the functions.
-#define RDE_N(_namespace, _function) _function
-#else
-#define RDE_N(_namespace, _function) _namespace##_##_function
-// Example of usage RDE_FUNC void RDE_N(rde_my_namespace, my_function)(int _a, int _b);
 #endif
 
 #if RDE_IS_WINDOWS()
@@ -3403,8 +3394,8 @@ RDE_FUNC rde_event rde_struct_create_event();
 // Constructor: rde_struct_create_end_user_mandatory_callbacks
 RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
 
-// Constructor: rde_struct_texture_parameters
-RDE_FUNC rde_texture_parameters rde_struct_texture_parameters();
+// Constructor: rde_struct_create_texture_parameters
+RDE_FUNC rde_texture_parameters rde_struct_create_texture_parameters();
 
 // Constructor: rde_struct_create_material_light_data
 RDE_FUNC rde_material_light_data rde_struct_create_material_light_data();
@@ -3462,7 +3453,6 @@ RDE_FUNC void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 // Group: Util Functions
 
 RDE_SAFE_ARR_ACCESS(int)
-
 RDE_SAFE_ARR_ACCESS(uint)
 RDE_SAFE_ARR_ACCESS(size_t)
 RDE_SAFE_ARR_ACCESS(short)
@@ -3727,8 +3717,6 @@ RDE_FUNC void rde_engine_switch_window_display(rde_window* _window, uint _new_di
 
 RDE_FUNC rde_window* rde_engine_get_focused_window();
 
-RDE_FUNC void rde_engine_use_rde_2d_physics_system(bool _use);
-
 RDE_FUNC bool rde_engine_is_vsync_active();
 RDE_FUNC void rde_engine_set_vsync_active(bool _vsync);
 
@@ -3760,23 +3748,23 @@ RDE_FUNC rde_window* rde_window_create_window_os();
 RDE_FUNC rde_vec_2I	rde_window_get_window_size(rde_window* _window);
 RDE_FUNC void rde_window_set_window_size(rde_window* _window, rde_vec_2I _size);
 
-RDE_FUNC rde_vec_2I	rde_window_get_position(rde_window* _window);
-RDE_FUNC void rde_window_set_position(rde_window* _window, rde_vec_2I _position);
+RDE_FUNC rde_vec_2I	rde_window_get_window_position(rde_window* _window);
+RDE_FUNC void rde_window_set_window_position(rde_window* _window, rde_vec_2I _position);
 
-RDE_FUNC const char* rde_window_get_title(rde_window* _window);
-RDE_FUNC void rde_window_set_title(rde_window* _window, const char* _title);
+RDE_FUNC const char* rde_window_get_window_title(rde_window* _window);
+RDE_FUNC void rde_window_set_window_title(rde_window* _window, const char* _title);
 
 RDE_FUNC bool rde_window_orientation_is_horizontal(rde_window* _window);
 
-RDE_FUNC void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension);
-RDE_FUNC unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size); // returns a dynamic array of the pixels in a RGBA format (so 4 elements per pixel). User MUST free the returned array.
+RDE_FUNC void rde_window_take_screenshot(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension);
+RDE_FUNC unsigned char* rde_window_get_area_of_screen_pixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size); // returns a dynamic array of the pixels in a RGBA format (so 4 elements per pixel). User MUST free the returned array.
 
 RDE_FUNC float rde_window_get_aspect_ratio(rde_window* _window);
 
 RDE_FUNC bool rde_window_is_mouse_out_of_window_allowed();
 RDE_FUNC void rde_window_allow_mouse_out_of_window(bool _allow_mouse_out_of_window);
 
-RDE_FUNC void rde_window_set_icon(rde_window* _window, const char* _path_to_icon);
+RDE_FUNC void rde_window_set_window_icon(rde_window* _window, const char* _path_to_icon);
 
 RDE_FUNC void* rde_window_get_native_sdl_window_handle(rde_window* _window);
 RDE_FUNC void* rde_window_get_native_sdl_gl_context_handle(rde_window* _window);
@@ -3806,7 +3794,6 @@ RDE_FUNC bool rde_events_is_mobile_touch_just_pressed(rde_window* _window, uint 
 RDE_FUNC bool rde_events_is_mobile_touch_pressed(rde_window* _window, uint _finger_id);
 RDE_FUNC bool rde_events_is_mobile_touch_released(rde_window* _window, uint _finger_id);
 RDE_FUNC uint rde_events_mobile_get_finger_amount(rde_window* _window);
-RDE_FUNC 
 
 /// ============================ RENDERING ==================================
 
@@ -3893,8 +3880,8 @@ RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color(rde_col
 RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_vec_3F _diffuse_color);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color);
-RDE_FUNC void rde_rendering_light_add_add_point_light(rde_point_light* _point_light);
-RDE_FUNC void rde_rendering_light_add_add_spot_light(rde_spot_light* _spot_light);
+RDE_FUNC void rde_rendering_lighting_add_point_light(rde_point_light* _point_light);
+RDE_FUNC void rde_rendering_lighting_add_spot_light(rde_spot_light* _spot_light);
 RDE_FUNC rde_directional_light rde_rendering_lighting_get_directional_light();
 
 RDE_FUNC rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]); // order is right, left, bottom, top, front, back
@@ -3971,6 +3958,320 @@ RDE_FUNC ANativeWindow* rde_android_get_native_window();
 
 #ifdef RDE_GOD
 #include "private_structs.c"
+#endif
+
+#ifdef RDE_NO_NAMESPACES
+#define create_probability() 					rde_struct_create_probability()
+#define create_camera(_camera_type) 			rde_struct_create_camera(_camera_type)
+#define create_event_window() 					rde_struct_create_event_window()
+#define create_event_display() 					rde_struct_create_event_display()
+#define create_event_key() 						rde_struct_create_event_key()
+#define create_event_mouse() 					rde_struct_create_event_mouse()
+#define create_event_controller() 				rde_struct_create_event_controller()
+#define create_event_mobile_pinch() 			rde_struct_create_event_mobile_pinch()
+#define create_event_mobile() 					rde_struct_create_event_mobile()
+#define create_event_drag_and_drop() 			rde_struct_create_event_drag_and_drop()
+#define create_event_data() 					rde_struct_create_event_data()
+#define create_event() 							rde_struct_create_event()
+#define create_end_user_mandatory_callbacks() 	rde_struct_create_end_user_mandatory_callbacks()
+#define create_texture_parameters() 			rde_struct_create_texture_parameters()
+#define create_material_light_data() 			rde_struct_create_material_light_data()
+#define create_material() 						rde_struct_create_material()
+#define create_directional_light() 				rde_struct_create_directional_light()
+#define create_point_light() 					rde_struct_create_point_light()
+#define create_spot_light 						rde_struct_create_spot_light()
+#define create_color() 							rde_struct_create_color()
+#define create_polygon() 						rde_struct_create_polygon()
+
+#define log_color_inner(_color, _fmt, ...) 		rde_log_color_inner(_color, _fmt, __VA_ARGS__)
+#define log_level_inner(_level, _fmt, ...)		rde_log_level_inner(_level, _fmt, __VA_ARGS__)
+
+#define get_int_type(_index, _arr, _arr_size, _fmt, ...) 			rde_arr_s_get_int_type(_index, _arr, _arr_size, _fmt, __VA_ARGS__)
+#define get_uint_type(_index, _arr, _arr_size, _fmt, ...) 			rde_arr_s_get_uint_type(_index, _arr, _arr_size, _fmt, __VA_ARGS__)
+#define get_size_t_type(_index, _arr, _arr_size, _fmt, ...) 		rde_arr_s_get_size_t_type(_index, _arr, _arr_size, _fmt, __VA_ARGS__)
+#define get_short_type(_index, _arr, _arr_size, _fmt, ...) 			rde_arr_s_get_short_type(_index, _arr, _arr_size, _fmt, __VA_ARGS__)
+#define get_float_type(_index, _arr, _arr_size, _fmt, ...) 			rde_arr_s_get_float_type(_index, _arr, _arr_size, _fmt, __VA_ARGS__)
+#define get_double_type(_index, _arr, _arr_size, _fmt, ...) 		rde_arr_s_get_double_type(_index, _arr, _arr_size, _fmt, __VA_ARGS__)
+#define set_int_type(_index, _value, _arr, _arr_size, _fmt, ...) 	rde_arr_s_set_int_type(_index, _value, _arr, _arr_size, _fmt, __VA_ARGS__)
+#define set_uint_type(_index, _value, _arr, _arr_size, _fmt, ...) 	rde_arr_s_set_uint_type(_index, _value, _arr, _arr_size, _fmt, __VA_ARGS__)
+#define set_size_t_type(_index, _value, _arr, _arr_size, _fmt, ...) rde_arr_s_set_size_t_type(_index, _value, _arr, _arr_size, _fmt, __VA_ARGS__)
+#define set_short_type(_index, _value, _arr, _arr_size, _fmt, ...) 	rde_arr_s_set_short_type(_index, _value, _arr, _arr_size, _fmt, __VA_ARGS__)
+#define set_float_type(_index, _value, _arr, _arr_size, _fmt, ...) 	rde_arr_s_set_float_type(_index, _value, _arr, _arr_size, _fmt, __VA_ARGS__)
+#define set_double_type(_index, _value, _arr, _arr_size, _fmt, ...) rde_arr_s_set_double_type(_index, _value, _arr, _arr_size, _fmt, __VA_ARGS__)
+
+#define get_file_extension(_file_name) 											rde_util_file_get_file_extension(_file_name)
+#define sanitaize_path(_path, _sanitized, _sanitized_size) 						rde_util_file_sanitaize_path(_path, _sanitized, _sanitized_size)
+#define get_string_width(_str, _font) 											rde_util_font_get_string_width(_str, _font)
+#define get_string_size(_str, _font) 											rde_util_font_get_string_size(_str, _font)
+#define string_trim(_str) 														rde_util_string_trim(_str)
+#define string_starts_with(_str, _prefix) 										rde_util_string_starts_with(_str, _prefix)
+#define string_ends_with(_str, _suffix) 										rde_util_string_ends_with(_str, _suffix)
+#define string_contains_sub_str(_str, _sub_str, _case_sensitive)				rde_util_string_contains_sub_str(_str, _sub_str, _case_sensitive)
+#define string_char_appearences(_str, _char) 									rde_util_string_char_appearences(_str, _char)
+#define string_format(_dst, _dst_size, _fmt, ...) 								rde_util_string_format(_dst, _dst_size, _fmt, __VA_ARGS__)
+#define string_to_lower(_dst, _str) 											rde_util_string_to_lower(_dst, _str)
+#define string_to_lower_itself(_str) 											rde_util_string_to_lower_itself(_str)
+#define string_to_upper(_dst, _str) 											rde_util_string_to_upper(_dst, _str)
+#define string_to_upper_itself(_str) 											rde_util_string_to_upper_itself(_str)
+#define string_replace_char(_str, _old_char, _new_char) 						rde_util_string_replace_char(_str, _old_char, _new_char)
+#define string_replace_chars_all(_str, _old_char, _new_char) 					rde_util_string_replace_chars_all(_str, _old_char, _new_char)
+#define string_replace_sub_str(_str, _old_str, _new_str, _output_appearences) 	rde_util_string_replace_sub_str(_str, _old_str, _new_str, _output_appearences)
+#define string_split(_str, _split_array, _split_mark) 							rde_util_string_split(_str, _split_array, _split_mark)
+
+#define hash_map_hash_default(_key, _size) rde_util_hash_map_hash_default(_key, _size)
+#define hash_map_int_hash(_key) rde_util_hash_map_int_hash(_key)
+#define hash_map_str_hash(_key) rde_util_hash_map_str_hash(_key)
+
+#define  set_random_seed(_seed)							rde_math_set_random_seed(_seed)
+#define  get_random_int(_min_included, _max_included)	rde_math_get_random_int(_min_included, _max_included)
+#define  get_random_float(_min_included, _max_included)	rde_math_get_random_float(_min_included, _max_included)
+#define  get_probability(_normalized_chance_to_happen)	rde_math_get_probability(_normalized_chance_to_happen)
+
+#define world_position_to_screen_coordinates_3d(_window, _vec) 	rde_math_convert_world_position_to_screen_coordinates_3d(_window, _vec)
+#define world_position_to_screen_coordinates_2d(_window, _vec) 	rde_math_convert_world_position_to_screen_coordinates_2d(_window, _vec)
+#define world_size_to_screen_size(_window, _vec) 				rde_math_convert_world_size_to_screen_size(_window, _vec)
+
+#define cross_product(_vec_0, _vec_1) 	rde_math_cross_product(_vec_0, _vec_1);
+#define normalize(_vec) 				rde_math_normalize(_vec);
+
+#define clamp_int_type(_value, _min, _max) 		rde_math_clamp_int_type(_value, _min, _max)
+#define clamp_uint_type(_value, _min, _max) 	rde_math_clamp_uint_type(_value, _min, _max)
+#define clamp_float_type(_value, _min, _max) 	rde_math_clamp_float_type(_value, _min, _max)
+#define clamp_double_type(_value, _min, _max) 	rde_math_clamp_double_type(_value, _min, _max)
+#define clamp_ulong_type(_value, _min, _max) 	rde_math_clamp_ulong_type(_value, _min, _max)
+
+#define radians_to_degrees(_radians) rde_math_radians_to_degrees(_radians)
+#define deegres_to_radians(_degrees) rde_math_degrees_to_radians(_degrees)
+
+#define quaternion_to_euler_degrees(_quaternion) 	rde_math_quaternion_to_euler_degrees(_quaternion)
+#define euler_degrees_to_quaternion(_euler_degrees) rde_math_euler_degrees_to_quaternion(_euler_degrees)
+
+#define easing_in_linear(_current_time, _start_value, _change_in_value, _duration) 			rde_math_easing_in_linear(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_quadratic(_current_time, _start_value, _change_in_value, _duration) 		rde_math_easing_in_quadratic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_out_quadratic(_current_time, _start_value, _change_in_value, _duration) 		rde_math_easing_out_quadratic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_out_quadratic(_current_time, _start_value, _change_in_value, _duration) 	rde_math_easing_in_out_quadratic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_cubic(_current_time, _start_value, _change_in_value, _duration) 			rde_math_easing_in_cubic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_out_cubic(_current_time, _start_value, _change_in_value, _duration) 			rde_math_easing_out_cubic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_out_cubic(_current_time, _start_value, _change_in_value, _duration) 		rde_math_easing_in_out_cubic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_quartic(_current_time, _start_value, _change_in_value, _duration) 		rde_math_easing_in_quartic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_out_quartic(_current_time, _start_value, _change_in_value, _duration) 		rde_math_easing_out_quartic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_out_quartic(_current_time, _start_value, _change_in_value, _duration) 	rde_math_easing_in_out_quartic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_quintic(_current_time, _start_value, _change_in_value, _duration) 		rde_math_easing_in_quintic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_out_quintic(_current_time, _start_value, _change_in_value, _duration) 		rde_math_easing_out_quintic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_out_quintic(_current_time, _start_value, _change_in_value, _duration) 	rde_math_easing_in_out_quintic(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_sine(_current_time, _start_value, _change_in_value, _duration) 			rde_math_easing_in_sine(_current_time, _start_value, _change_in_value, _duration)
+#define easing_out_sine(_current_time, _start_value, _change_in_value, _duration) 			rde_math_easing_out_sine(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_out_sine(_current_time, _start_value, _change_in_value, _duration) 		rde_math_easing_in_out_sine(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_exponential(_current_time, _start_value, _change_in_value, _duration) 	rde_math_easing_in_exponential(_current_time, _start_value, _change_in_value, _duration)
+#define easing_out_exponential(_current_time, _start_value, _change_in_value, _duration) 	rde_math_easing_out_exponential(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_out_exponential(_current_time, _start_value, _change_in_value, _duration) rde_math_easing_in_out_exponential(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_circular(_current_time, _start_value, _change_in_value, _duration) 		rde_math_easing_in_circular(_current_time, _start_value, _change_in_value, _duration)
+#define easing_out_circular(_current_time, _start_value, _change_in_value, _duration) 		rde_math_easing_out_circular(_current_time, _start_value, _change_in_value, _duration)
+#define easing_in_out_circular(_current_time, _start_value, _change_in_value, _duration) 	rde_math_easing_in_out_circular(_current_time, _start_value, _change_in_value, _duration)
+
+#define create_engine(_argc, _argv, _config_path) 								rde_engine_create_engine(_argc, _argv, _config_path)
+#define load_config(_config_path) 												rde_engine_load_config(_config_path)
+#define setup_initial_info(_end_user_callbacks) 								rde_setup_initial_info(_end_user_callbacks)
+#define set_event_user_callback(_user_event_callback) 							rde_engine_set_event_user_callback(_user_event_callback)
+#define logs_supressed() 														rde_engine_logs_supressed()
+#define supress_logs(_supress) 													rde_engine_supress_logs(_supress)
+#define get_platform() 															rde_engine_get_platform()
+#define get_fixed_delta()											 			rde_engine_get_fixed_delta()
+#define set_fixed_delta(_fixed_dt) 												rde_engine_set_fixed_delta(_fixed_dt)
+#define on_run() 																rde_engine_on_run()
+#define is_running() 															rde_engine_is_running()
+#define set_running(_running) 													rde_engine_set_running(_running)
+#define get_display_size() 														rde_engine_get_display_size()
+#define get_available_display_ids(_out_ids) 									rde_engine_get_available_display_ids(_out_ids)
+#define switch_window_display(_window, _new_display) 							rde_engine_switch_window_display(_window, _new_display)
+#define get_focused_window() 													rde_engine_get_focused_window()
+#define is_vsync_active() 														rde_engine_is_vsync_active()
+#define set_vsync_active(_vsync) 												rde_engine_set_vsync_active(_vsync)
+#define show_message_box(_level, _title, _content, _window) 					rde_engine_show_message_box(_level, _title, _content, _window)
+#define transform_load() 														rde_engine_transform_load()
+#define transform_unload() 														rde_engine_transform_unload(_transform)
+#define transform_get_position(_transform) 										rde_engine_transform_get_position(_transform)
+#define transform_set_position(_transform, _position) 							rde_engine_transform_set_position(_transform, _position)
+#define transform_get_rotation_degs(_transform) 								rde_engine_transform_get_rotation_degs(_transform)
+#define transform_set_rotation(_transform, _rotation_degs) 						rde_engine_transform_set_rotation(_transform, _rotation_degs)
+#define transform_get_scale(_transform) 										rde_engine_transform_get_scale(_transform)
+#define transform_set_scale(_transform, _scale) 								rde_engine_transform_set_scale(_transform, _scale)
+#define transform_get_parent(_transform)	 									rde_engine_trasnform_get_parent(_transform)
+#define transform_set_parent(_transform, _parent) 								rde_engine_transform_set_parent(_transform, _parent)
+#define transform_get_children_count(_transform) 								rde_engine_transform_get_children_count(_transform)
+#define destroy_engine()														rde_engine_destroy_engine()
+
+#define create_windowos() 																	rde_window_create_window_os()
+#define get_window_size(_window) 															rde_window_get_window_size(_window)
+#define set_window_size(_window, _size) 													rde_window_set_window_size(_window, _size)
+#define get_window_position(_window) 														rde_window_get_window_position(_window)
+#define set_window_position(_window, _position) 											rde_window_set_window_position(_window, _position)
+#define get_window_title(_window) 															rde_window_get_window_title(_window)
+#define set_window_title(_widow, _title) 													rde_window_set_window_title(_window, _title)
+#define orientation_is_horizontal(_window) 													rde_window_orientation_is_horizontal(_window)
+#define take_screenshot(_window, _position, _size_of_rectangle, _file_name_with_extension) 	rde_window_take_screenshot(_window, _position, _size_of_rectangle, _file_name_with_extension)
+#define get_area_of_screen_pixels(_window, _position, _size) 								rde_window_get_area_of_screen_pixels(_window, _position, _size)
+#define get_aspect_ratio(_window) 															rde_window_get_aspect_ratio(_window)
+#define is_mouse_out_of_window_allowed() 													rde_window_is_mouse_out_of_window_allowed()
+#define allow_mouse_out_of_window(_allow) 													rde_window_allow_mouse_out_of_window(_allow_mouse_out_of_window)
+#define set_window_icon(_window, _path_to_icon) 											rde_window_set_window_icon(_window, _path_to_icon)
+#define get_native_sdl_window_handle(_window) 												rde_window_get_native_sdl_window_handle(_window)
+#define get_native_sdl_gl_context_handle(_window) 											rde_window_get_native_sdl_gl_context_handle(_window)
+#define destroy_window(_window) 															rde_window_destroy_window(_window)
+
+#define window_consume_events(_event, _window) 												rde_events_window_consume_events(_event, _window)
+#define display_consume_events(_event, _window) 											rde_events_display_consume_events(_event, _window)
+#define keyboard_consume_events(_event, _window) 											rde_events_keyboard_consume_events(_event, _window)
+#define mouse_consume_events(_event, _window) 												rde_events_mouse_consume_events(_event, _window)
+#define drag_and_drop_consume_event(_event, _window) 										rde_events_drag_and_drop_consume_events(_event, _window)
+#define mobile_consume_events(_event, _window) 												rde_events_mobile_consume_events(_event, _window)
+#define is_key_just_pressed(_window, _key) 													rde_events_is_key_just_pressed(_window, _key)
+#define is_key_pressed(_window, _key) 														rde_events_is_key_pressed(_window, _key)
+#define is_key_just_released(_window, _key)	 												rde_events_is_key_just_released(_window, _key)
+#define is_mouse_button_just_pressed(_window, _button) 										rde_events_is_mouse_button_just_pressed(_window, _button)
+#define is_mouse_button_pressed(_window, _button) 											rde_events_is_mouse_button_pressed(_window, _button)
+#define is_mouse_button_just_released(_window, _button) 									rde_events_is_mouse_button_just_released(_window, _button)
+#define mouse_get_scrolled(_window) 														rde_events_mouse_get_scrolled(_window)
+#define mouse_get_position(_window) 														rde_events_mouse_get_position(_window)
+#define is_mobile_touch_just_pressed(_window, _finger_id) 									rde_events_is_mobile_touch_just_pressed(_window, _finger_id)
+#define is_mobile_touch_pressed(_window, _finger_id) 										rde_events_is_mobile_touch_pressed(_window, _finger_id)
+#define is_mobile_touch_released(_window, _finger_id) 										rde_events_is_mobile_touch_released(_window, _finger_id)
+#define mobile_get_finger_amount(_window) 													rde_events_mobile_get_finger_amount(_window)
+
+#define shader_load(_name, _vertex_code, _fragment_code) 									rde_rendering_shader_load(_name, _vertex_code, _fragment_code)
+#define shader_set_uniform_value_float(_shader, _uniform_name, _type, _data, _transpose) 	rde_rendering_shader_set_uniform_value_float(_shader, _uniform_name, _type, _data, _transpose)
+#define shader_set_uniform_value_int(_shader, _uniform_name, _type, _data) 					rde_rendering_shader_set_uniform_value_int(_shader, _uniform_name, _type, _data)
+#define shader_set_uniform_value_uint(_shader, _uniform_name, _type, _data) 				rde_rendering_shader_set_uniform_value_uint(_shader, _uniform_name, _type, _data)
+#define shader_get_data(_shader) 															rde_rendering_shader_get_data(_shader)
+#define shader_get_by_name(_name) 															rde_rendering_shader_get_by_name(_name)
+#define shader_unload(_shader) 																rde_rendering_shader_unload(_shader)
+#define texture_load(_file_path, _params) 													rde_rendering_texture_load(_file_path, _params)
+#define texture_text_load(_file_path) 														rde_rendering_texture_text_load(_file_path)
+#define texture_get_data(_texture) 															rde_rendering_texture_get_data(_texture)
+#define texture_unload(_texture) 															rde_rendering_texture_unload(_texture)
+#define atlas_load(_texture_path) 															rde_rendering_atlas_load(_texture_path)
+#define atlas_get_subtexture(_atlas, _texture_name) 										rde_rendering_atlas_get_subtexture(_atlas, _texture_name)
+#define atlas_get_data(_atlas) 																rde_rendering_atlas_get_data(_atlas)
+#define atlas_unload(_atlas) 																rde_rendering_atlas_unload(_atlas)
+#define memory_texture_create(_width, _height, _channels) 									rde_rendering_memory_texture_create(_width, _height, _channels)
+#define memory_texture_set_pixel(_memory_texture, _position, _color) 						rde_rendering_memory_texture_set_pixel(_memory_texture, _position, _color)
+#define memory_texture_get_pixel(_memory_texture, _position) 								rde_rendering_memory_texture_get_pixel(_memory_texture, _position)
+#define memory_texture_gpu_upload(_memory_texture) 											rde_rendering_memory_texture_gpu_upload(_memory_texture)
+#define memory_texture_get_pixels(_memory_texture) 											rde_rendering_memory_texture_get_pixels(_memory_texture)
+#define memory_texture_destroy(_memory_texture) 											rde_rendering_memory_texture_destroy(_memory_texture)
+#define render_texture_create(_width, _height) 												rde_rendering_render_texture_create(_width, _height)
+#define render_texture_enable(_render_texture) 												rde_rendering_render_texture_enable(_render_texture)
+#define render_texture_disable() 															rde_rendering_render_texture_disable()
+#define render_texture_update(_render_texture, _width, _height) 							rde_rendering_render_texture_update(_render_texture, _width, _height)
+#define render_texture_destroy(_render_texture) 											rde_rendering_render_texture_destroy(_render_texture)
+#define font_load(_font_path) 																rde_rendering_font_load(_font_path)
+#define font_get_data(_font) 																rde_rendering_font_get_data(_font)
+#define font_unload(_font) 																	rde_rendering_font_unload(_font)
+#define set_background_color(_color) 														rde_rendering_set_background_color(_color)
+#define 2d_begin_drawing(_camera, _window, _is_hud) 										rde_rendering_2d_begin_drawing(_camera, _window, _is_hud)
+#define 2d_draw_point(_position, _color, _shader) 											rde_rendering_2d_draw_point(_position, _color, _shader)
+#define 2d_draw_line(_init, _end, _color, _shader) 											rde_rendering_2d_draw_line(_init, _end, _color, _shader)
+#define 2d_draw_triangle(_verte_a, _vertex_b, _vertex_c, _color, _shader) 					rde_rendering_2d_draw_triangle(_verte_a, _vertex_b, _vertex_c, _color, _shader)
+#define 2d_draw_rectangle(_bottom_left, _top_right, _color, _shader) 						rde_rendering_2d_draw_rectangle(_bottom_left, _top_right, _color, _shader)
+#define 2d_draw_circle(_position, _radius, _color, _shader) 								rde_rendering_2d_draw_circle(_position, _radius, _color, _shader)
+#define 2d_draw_polygon(_transform, _polygon, _color, _shader) 								rde_rendering_2d_draw_polygon(_transform, _polygon, _color, _shader)
+#define 2d_draw_texture(_transform, _texture, _tint_color, _shader) 						rde_rendering_2d_draw_texture(_transform, _texture, _tint_color, _shader)
+#define 2d_draw_memory_texture(_transform, _texture, _tint_color, _shader)					rde_rendering_2d_draw_memory_texture(_transform, _texture, _tint_color, _shader)
+#define 2d_draw_text(_transform, _font, _text, _tint_color, _shader) 						rde_rendering_2d_draw_text(_transform, _font, _text, _tint_color, _shader)
+#define 2d_end_drawing() 																	rde_rendering_2d_end_drawing()
+#define memory_mesh_create(_data) 															rde_struct_memory_mesh_create(_data)
+#define mesh_create_cube(_size, _material) 													rde_rendering_mesh_create_cube(_size, _material)
+#define mesh_create_prism(_size, _material) 												rde_rendering_mesh_create_prism(_size, _material)
+#define mesh_create_sphere(_radius, _material) 												rde_rendering_mesh_create_sphere(_radius, _material)
+#define mesh_create_triangular_pyramid(_size, _material) 									rde_rendering_mesh_create_triangular_pyramid(_size, _material)
+#define mesh_create_pyramid(_size, _material) 												rde_rendering_mesh_create_pyramid(_size, _material)
+#define mesh_get_data(_mesh) 																rde_rendering_mesh_get_data(_mesh)
+#define mesh_destroy(_mesh, _delete_allocated_buffers) 										rde_rendering_mesh_destroy(_mesh, _delete_allocated_buffers)
+
+#if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)
+#define model_load(_model_path) 															rde_rendering_model_load(_model_path)
+#define model_get_vertices_count(_model) 													rde_rendering_model_get_vertices_count(_model)
+#define model_set_light_data(_model, _light_data) 											rde_rendering_model_set_light_data(_model, _light_data)
+#define model_get_light_data(_model)														rde_rendering_model_get_light_data(_model)
+#define model_get_data(_model) 																rde_rendering_model_get_data(_model)
+#define model_unload(_model) 																rde_rendering_model_unload(_model)
+#endif
+
+#define 3d_begin_drawing(_camera, _window, _draw_wireframe_over_mesh) 						rde_rendering_3d_begin_drawing(_camera, _window, _draw_wireframe_over_mesh)
+#define 3d_draw_point(_position, _color, _shader) 											rde_rendering_3d_draw_point(_position, _color, _shader)
+#define 3d_draw_line(_init, _end, _color, _thickness, _shader) 								rde_rendering_3d_draw_line(_init, _end, _color, _thickness, _shader)
+#define 3d_draw_mesh(_transform, _mesh, _shader) 											rde_rendering_3d_draw_mesh(_transform, _mesh, _shader)
+#define 3d_draw_model(_transform, _model, _shader) 											rde_rendering_3d_draw_model(_transform, _model, _shader)
+#define 3d_draw_skybox(_camera)																rde_rendering_3d_draw_skybox(_camera)
+#define 3d_end_drawing()																	rde_rendering_3d_end_drawing()
+#define lighting_set_directional_light_direction(_direction)								rde_rendering_lighting_set_directional_light_direction(_direction)
+#define lighting_set_directional_light_position(_position)									rde_rendering_lighting_set_directional_light_position(_position)
+#define lighting_set_directional_light_ambient_color(_ambient_color)						rde_rendering_lighting_set_directional_light_ambient_color(_ambient_color)
+#define lighting_set_set_directional_light_ambient_color_f(_ambient_color)					rde_rendering_lighting_set_directional_light_ambient_color_f(_ambient_color)
+#define lighting_set_directional_light_diffuse_color(_diffuse_color)						rde_rendering_lighting_set_directional_light_diffuse_color(_diffuse_color)
+#define lighting_set_directional_light_diffuse_color_f(_diffuse_color)						rde_rendering_lighting_set_directional_light_diffuse_color_f(_diffuse_color)
+#define lighting_set_directional_light_specular_color(_specular_color)						rde_rendering_lighting_set_directional_light_specular_color(_specular_color)
+#define lighting_set_directional_light_specular_color_f(_specular_color)					rde_rendering_lighting_set_directional_light_specular_color_f(_specular_color)
+#define lighting_add_point_light(_point_light)												rde_rendering_lighting_add_point_light(_point_light)
+#define lighting_add_spot_light(_spot_light)												rde_rendering_lighting_add_spot_light(_spot_light)
+#define lighting_get_directional_light()													rde_rendering_lighting_get_directional_light()
+#define skybox_load(_texture_paths)															rde_rendering_skybox_load(_texture_paths)
+#define skybox_use(_skybox_id)																rde_rendering_skybox_use(_skybox_id)
+#define skybox_unload(_skybox_id)															rde_rendering_skybox_unload(_skybox_id)
+#define set_antialiasing(_window, _antialiasing)											rde_rendering_set_antialiasing(_window, _antialiasing)
+#define get_current_antialiasing()															rde_rendering_get_current_antialiasing()
+#define shadows_begin(_window, _camera)														rde_rendering_shadows_begin(_window, _camera)
+#define shadows_end()																		rde_rendering_shadows_end()
+
+#ifdef RDE_AUDIO_MODULE
+#define audio_init(_config) 						rde_audio_init(_config)
+#define load_sound(_sound_path) 					rde_audio_load_sound(_sound_path)
+#define unload_sound(_sound) 						rde_audio_unload_sound(_sound)
+#define play_sound(_sound) 							rde_audio_play_sound(_sound)
+#define pause_sound(_sound) 						rde_audio_pause_sound(_sound)
+#define stop_sound(_sound) 							rde_audio_stop_sound(_sound)
+#define restart_sound(_sound) 						rde_audio_restart_sound(_sound)
+#define is_sound_playing(_sound) 					rde_audio_is_sound_playing(_sound)
+#define set_sound_volume(_sound, _volume) 			rde_audio_set_sound_volume(_sound, _volume)
+#define audio_end() 								rde_audio_end()
+#endif
+
+#define file_open(_file_path, _file_mode) 							rde_file_open(_file_path, _file_mode)
+#define read_full_file(_file_handler, _output_file_size) 			rde_file_read_full_file(_file_handler, _output_file_size)
+#define read_full_file_bytes(_file_handler, _output_file_size) 		rde_file_read_full_file_bytes(_file_handler, _output_file_size)
+#define read_line(_file_handler, _line) 							rde_file_read_line(_file_handler, _line)
+#define read_chunk(_file_handler, _begin_byte, _end_byte) 			rde_file_read_chunk(_file_handler, _begin_byte, _end_byte)
+#define write(_file_handler, _bytes, _data) 						rde_file_write(_file_handler, _bytes, _data)
+#define write_to_line(_file_handler, _bytes, _data, _line) 			rde_file_write_to_line(_file_handler, _bytes, _data, _line)
+#define append(_file_handler, _append_byte, _bytes, _data, _line) 	rde_file_append(_file_handler, _append_byte, _bytes, _data, _line)
+#define clear_content(_file_handler) 								rde_file_clear_content(_file_handler)
+#define exists(_file_path) 											rde_file_exists(_file_path)
+#define delete(_file_path) 											rde_file_delete(_file_path)
+#define move(_file_path, _new_file_path) 							rde_file_move(_file_path, _new_file_path)
+#define close(_file_handler) 										rde_file_close(_file_handler)
+#define free_read_text(_file_handle)							 	rde_file_free_read_text(_file_handle)
+#define free_read_bytes(_file_handle) 								rde_file_free_read_bytes(_file_handle)
+
+
+
+/// ============================ PHYSICS ==============================
+
+#ifdef RDE_PHYSICS_MODULE
+#define jolt_draw_debug_shapes(_window, _camera)					rde_jolt_draw_debug_shapes(_window, _camera)
+#endif
+
+
+
+/// ============================ ERROR ================================
+
+#define critical_error(_condition, _fmt, ...) 						rde_critical_error(_condition, _fmt, __VA_ARGS__)
+
+
+
+#if RDE_IS_ANDROID()
+#define android_get_native_window()									rde_android_get_native_window();
+#endif
+
 #endif
 
 #ifdef __cplusplus

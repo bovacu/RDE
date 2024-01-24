@@ -1066,7 +1066,7 @@ rde_texture rde_struct_create_texture() {
 	return _t;
 }
 
-rde_texture_parameters rde_struct_texture_parameters() {
+rde_texture_parameters rde_struct_create_texture_parameters() {
 	rde_texture_parameters _t;
 	_t.min_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR;
 	_t.mag_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR;
@@ -2105,10 +2105,6 @@ void rde_engine_set_running(bool _running) {
 rde_vec_2I rde_engine_get_display_size() {
 	const SDL_DisplayMode* _displayMode = SDL_GetCurrentDisplayMode(0);
 	return (rde_vec_2I){ _displayMode->w, _displayMode->h };
-}
-
-void rde_engine_use_rde_2d_physics_system(bool _use) {
-	ENGINE.use_rde_2d_physics_system = _use;
 }
 
 bool rde_engine_is_vsync_active() {
@@ -3757,17 +3753,17 @@ rde_vec_2I rde_window_get_position(rde_window* _window) {
 	return _position;
 }
 
-void rde_window_set_position(rde_window* _window, rde_vec_2I _position) {
+void rde_window_set_window_position(rde_window* _window, rde_vec_2I _position) {
 	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	SDL_SetWindowPosition(_window->sdl_window, _position.x, _position.y);
 }
 
-const char* rde_window_get_title(rde_window* _window) {
+const char* rde_window_get_window_title(rde_window* _window) {
 	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	return SDL_GetWindowTitle(_window->sdl_window);
 }
 
-void rde_window_set_title(rde_window* _window, const char* _title) {
+void rde_window_set_window_title(rde_window* _window, const char* _title) {
 	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	SDL_SetWindowTitle(_window->sdl_window, _title);
 }
@@ -3778,7 +3774,7 @@ bool rde_window_orientation_is_horizontal(rde_window* _window) {
 	return _window_size.x >= _window_size.y;
 }
 
-void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension) {
+void rde_window_take_screenshot(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension) {
 	RDE_UNUSED(_window)
 	RDE_UNUSED(_position)
 	RDE_UNUSED(_size_of_rectangle)
@@ -3786,7 +3782,7 @@ void rde_window_take_screen_shot(rde_window* _window, rde_vec_2I _position, rde_
 	RDE_UNIMPLEMENTED()
 }
 
-unsigned char* getAreaOfScreenPixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size) {
+unsigned char* rde_window_get_area_of_screen_pixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size) {
 	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
 
@@ -3810,7 +3806,7 @@ void rde_window_allow_mouse_out_of_window(bool _allow_mouse_out_of_window) {
 	SDL_SetRelativeMouseMode(_allow_mouse_out_of_window ? SDL_FALSE : SDL_TRUE);
 }
 
-void rde_window_set_icon(rde_window* _window, const char* _path_to_icon) {
+void rde_window_set_window_icon(rde_window* _window, const char* _path_to_icon) {
 	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "window");
 	int _width, _height, _channels;
 
@@ -7064,7 +7060,7 @@ rde_directional_light rde_rendering_lighting_get_directional_light() {
 	return ENGINE.illumination.directional_light;
 }
 
-void rde_rendering_light_add_add_point_light(rde_point_light* _point_light) {
+void rde_rendering_lighting_add_point_light(rde_point_light* _point_light) {
 	bool _found = false;
 	for(unsigned int _i = 0; _i < ENGINE.init_info.illumination_config.max_amount_of_point_lights; _i++) {
 		if(ENGINE.illumination.point_lights[_i] == NULL) {
@@ -7077,7 +7073,7 @@ void rde_rendering_light_add_add_point_light(rde_point_light* _point_light) {
 	rde_critical_error(!_found, "Max point light amount '%d' reached", ENGINE.init_info.illumination_config.max_amount_of_point_lights);
 }
 
-void rde_rendering_light_add_add_spot_light(rde_spot_light* _spot_light) {
+void rde_rendering_lighting_add_spot_light(rde_spot_light* _spot_light) {
 	bool _found = false;
 	for(unsigned int _i = 0; _i < ENGINE.init_info.illumination_config.max_amount_of_spot_lights; _i++) {
 		if(ENGINE.illumination.spot_lights[_i] == NULL) {

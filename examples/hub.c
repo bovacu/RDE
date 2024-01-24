@@ -1,4 +1,3 @@
-
 #ifndef __ANDROID__
 //#define RDE_AUDIO_MODULE
 #define RDE_RENDERING_MODULE
@@ -85,7 +84,7 @@ void on_update(float _dt) {
 #else
 		snprintf(_title, 64, "Release - FPS: %d", (int)(1.f / _dt));
 #endif
-		rde_window_set_title(current_window, _title);
+		rde_window_set_window_title(current_window, _title);
 		_second = 0.f;
 	}
 
@@ -253,7 +252,7 @@ void init_func(int _argc, char** _argv) {
 	rde_imgui_init(rde_window_get_native_sdl_window_handle(current_window), rde_window_get_native_sdl_gl_context_handle(current_window), "#version 330");
 #endif
 
-	// rde_window_set_icon(current_window, "logo.ico");
+	// rde_window_set_window_icon(current_window, "logo.ico");
 
 	hub_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_ORTHOGRAPHIC);
 	rde_engine_transform_set_position(hub_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });

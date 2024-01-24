@@ -531,10 +531,10 @@ void model_viewer_init() {
 	unload_callback = &model_viewer_unload;
 
 	model_viewer_point_light = rde_struct_create_point_light();
-	rde_rendering_light_add_add_point_light(&model_viewer_point_light);
+	rde_rendering_lighting_add_point_light(&model_viewer_point_light);
 
 	model_viewer_spot_light = rde_struct_create_spot_light();
-	rde_rendering_light_add_add_spot_light(&model_viewer_spot_light);
+	rde_rendering_lighting_add_spot_light(&model_viewer_spot_light);
 
 	rde_material _light_ball_material = rde_struct_create_material();
 	_light_ball_material.material_light_data.ka = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
