@@ -196,8 +196,12 @@ extern "C" {
 #define RDE_ARR_OPERAND_INCREASE *
 	
 // Constant: RDE_ARR_DEFAULT_CAPACITY
-// Default capacity when creating a new dynamic array, by default 10
-#define RDE_ARR_DEFAULT_CAPACITY 10
+// Default capacity when creating a new dynamic array, by default 50
+#define RDE_ARR_DEFAULT_CAPACITY 50
+
+// Constant: RDE_ARR_DEFAULT_CAPACITY
+// Default capacity when creating a new hash map, by default 64. MUST be a power of 2.
+#define RDE_HASH_MAP_DEFAULT_CAPACITY 64
 	
 // Constant: RDE_STR_DEFAULT_SIZE
 // Default size when creating a new string, by default 100
@@ -765,6 +769,39 @@ typedef unsigned int uint;
 	#define rde_free(_ptr) do { free(_ptr); _ptr = NULL; } while(0)
 #endif
 
+// Macro: rde_flags_has
+// Computes if _value contains the specified flags on _flag. _flag can contain multiple flags at once.
+//
+// Parameters:
+//	_value - (uint/uint32_t) value containing flags.
+//	_flag - (uint/uint32_t) flags to test.
+//
+//	======= C =======
+//	typedef enum {
+//		a = 1 << 0,
+//		b = 1 << 1,
+//		c = 1 << 2,
+//	} e_;
+//	e _e = e_a | e_c;
+//	bool _f = rde_util_flag_has(_e, e_a);
+//	=================
+#define rde_flags_has(_value, _flag) (((_value) & (_flag)) == (_flag))
+
+// Macro: rde_util_next_power_of_2
+// This is a very fast way of computing next power of 2 of a given element.
+// Source: https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2.
+// CHAR_BIT is equals to 8 on 64bit systems and to 4 on 32bit systems, so on 64 bit system is (sizeof(unsigned long) * CHAR_BIT) => 64 and on 32bits systems is 32
+// __builtin_clzl: counts leading number of zeros
+//
+// Parameters:
+//	_value - (uint/uint32_t) value to check next power of 2.
+//
+//	======= C =======
+//	uint _a = 30;
+//	uint _next_pow_2 = rde_util_next_power_of_2(_a);
+//	=================
+#define rde_util_next_power_of_2(_value) (1 << ((sizeof(unsigned long) * CHAR_BIT) - __builtin_clzl(_value - 1)))
+	
 // Macro: RDE_PROFILE_TIME
 // Simple time counter to profile a specific block of code.
 //
@@ -1156,6 +1193,7 @@ typedef struct {			\
 		if(_dyn_arr.used + 1 == _dyn_arr.capacity) {																								\
 			_dyn_arr.capacity = _dyn_arr.capacity RDE_ARR_OPERAND_INCREASE RDE_ARR_AMOUNT_INCREASE;													\
 			void* _new_memory = (void*)realloc(_dyn_arr.memory, _dyn_arr.type_size * _dyn_arr.capacity);											\
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Realloc");																							\
 			if(_new_memory == NULL) {																												\
 				free(_dyn_arr.memory);																												\
 				rde_critical_error(true, "Bytes %d could not be allocated for %s", sizeof(_dyn_arr.type_size) * _dyn_arr.capacity, "rde_arr add");	\
@@ -1299,6 +1337,246 @@ typedef struct {			\
 		_dyn_arr.type_size = 0;			\
 	} while(0)
 
+// Macro: rde_hash_map_decl
+// Declares a new type of hash_map, with key of type _key_type and value of type _value_type.
+//
+// It also declares 2 callbacks:
+//	- typedef uint (*hash_fn_##_name)(_key_type*): pointer to function which will calculate the hash of the entries in the table. There are default ones for const char* (<rde_util_hash_map_str_hash>),
+//	  and for int/uint (<rde_util_hash_map_int_hash>).
+//	- typedef int (*cmp_fn_##_name)(_key_type*, _key_type*): pointer to function to compare keys. MUST retunr 0 if equals or other value of not equals.
+//
+// Parameters:
+//	_name - name of the new struct.
+//	_key_type - type of the key.
+//	_value_type - type of the value.
+//
+//	======= C =======
+//	rde_hash_map_decl(hash_map_test, const char*, int);
+//	=================
+#define rde_hash_map_decl(_name, _key_type, _value_type)  	\
+    typedef struct _name _name;                           	\
+    typedef struct entry_##_name entry_##_name;           	\
+    typedef uint (*hash_fn_##_name)(_key_type*);          	\
+    typedef int (*cmp_fn_##_name)(_key_type*, _key_type*);	\
+															\
+    struct entry_##_name {                                	\
+        _key_type key;                                    	\
+        _value_type value;                                	\
+        RDE_HASH_MAP_STATE_ state;                        	\
+    };                                                    	\
+															\
+    struct _name {                                        	\
+        entry_##_name* entries;                           	\
+        _key_type key_type;                               	\
+        uint capacity;                                    	\
+        uint actual_size;                                 	\
+        uint used;                                        	\
+        hash_fn_##_name hash_fn;                          	\
+        cmp_fn_##_name cmp_fn;                            	\
+        key_dbg_fn_##_name key_dbg_fn;                    	\
+        value_dbg_fn_##_name value_dbg_fn;                	\
+    }
+    
+#define rde_hash_map_init(_hash_map, _hash_fn, _cmp_fn)                                                                         															\
+    do {                                                                                                                            														\
+		rde_critical_error(_hash_fn == NULL, "Tried to use a NULL _hash_fn\n");																												\
+		rde_critical_error(_cmp_fn == NULL, "Tried to use a NULL _cmp_fn\n");																												\
+		static_assert(RDE_HASH_MAP_DEFAULT_CAPACITY && (RDE_HASH_MAP_DEFAULT_CAPACITY & (RDE_HASH_MAP_DEFAULT_CAPACITY - 1)) == 0, "RDE_HASH_MAP_DEFAULT_CAPACITY must be a power of 2");	\
+        (_hash_map)->capacity = RDE_HASH_MAP_DEFAULT_CAPACITY;                                                                      														\
+        (_hash_map)->actual_size = RDE_HASH_MAP_DEFAULT_CAPACITY;                                                                   														\
+        (_hash_map)->used = 0;                                                                                                      														\
+        (_hash_map)->entries = (typeof((_hash_map)->entries))calloc((_hash_map)->capacity, sizeof(typeof(*(_hash_map)->entries)));  														\
+        for(uint _i = 0; _i < (_hash_map)->capacity; _i++) (_hash_map)->entries[_i].state = RDE_HASH_MAP_STATE_EMPTY;               														\
+        (_hash_map)->hash_fn = _hash_fn;                                                                                            														\
+        (_hash_map)->cmp_fn = _cmp_fn;                                                                                          															\
+    } while(0)
+
+#define rde_hash_map_hash_to_index(_hash_map, _ptr_key, _out_index)             	\
+    do {                                                                        	\
+		rde_critical_error(_hash_map == NULL, "Tried to use a NULL _hash_map\n");	\
+        typeof((_hash_map)->key_type) _map_key = (_ptr_key);                    	\
+        uint _key_hash = (_hash_map)->hash_fn(&(_map_key));                     	\
+        _key_hash = hashmap_hash_default(&_key_hash, sizeof(_key_hash));        	\
+        _out_index = _key_hash & ((_hash_map)->actual_size - 1);                	\
+    } while(0)
+
+#define rde_hash_map_get_ideal_size(_hash_map, _out_value)                                                  \
+    do {                                                                                                    \
+		rde_critical_error(_hash_map == NULL, "Tried to use a NULL _hash_map\n");							\
+        uint _size = (_hash_map)->used;                                                                     \
+        uint _ts = _size + (_size / 3);                                                                     \
+        _out_value = (_ts < (_hash_map)->capacity ? (_hash_map)->capacity : rde_util_next_power_of_2(_ts)); \
+    } while(0)
+
+#define rde_hash_map_find_whole_entry(_hash_map, _ptr_key, _out_ptr_entry)      	\
+    do {                                                                        	\
+		rde_critical_error(_hash_map == NULL, "Tried to use a NULL _hash_map\n");	\
+        uint _index = 0;                                                        	\
+        rde_hash_map_hash_to_index((_hash_map), *(_ptr_key), _index);           	\
+        bool _found = false;                                                    	\
+                                                                                	\
+        for(uint _i = 0; _i < (_hash_map)->actual_size; _i++) {                 	\
+            typeof((_hash_map)->entries) _entry = &(_hash_map)->entries[_index];	\
+            if(rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_EMPTY)) {    	\
+                _out_ptr_entry = _entry;                                        	\
+                _found = true;                                                  	\
+                break;                                                          	\
+            }                                                                   	\
+            if((_hash_map)->cmp_fn((_ptr_key), &(_entry->key)) == 0) {          	\
+                _out_ptr_entry = _entry;                                        	\
+                _found = true;                                                  	\
+                break;                                                          	\
+            }                                                                   	\
+            _index = (_index + 1) & ((_hash_map)->actual_size - 1);             	\
+        }                                                                       	\
+        rde_critical_error(!_found, "Tried to get a non existen key\n");            \
+    } while(0)
+
+#define rde_hash_map_resize_and_rehash(_hash_map, _new_size)                                                                            \
+    do {                                                                                                                                \
+        rde_critical_error((_new_size & (_new_size - 1)) != 0, "Size must be ^2\n");                                                   	\
+        rde_critical_error(_new_size < (_hash_map)->used, "New size must be > used size\n");                                            \
+                                                                                                                                        \
+        typeof((_hash_map)->entries) _new_entries = (typeof((_hash_map)->entries))calloc(_new_size, sizeof(*((_hash_map)->entries)));   \
+        assert(_new_entries != NULL && "Could not allocate memory");                                                                    \
+        for(uint _i = 0; _i < _new_size; _i++) _new_entries[_i].state = RDE_HASH_MAP_STATE_EMPTY;                                       \
+                                                                                                                                        \
+        uint _old_size = (_hash_map)->actual_size;                                                                                      \
+        typeof((_hash_map)->entries) _old_entries = (_hash_map)->entries;                                                               \
+        (_hash_map)->actual_size = _new_size;                                                                                           \
+        (_hash_map)->entries = _new_entries;                                                                                            \
+                                                                                                                                        \
+        for(uint _i = 0; _i < _old_size; _i++) {                                                                                        \
+            typeof((_hash_map)->entries) _old_entry = &_old_entries[_i];                                                                \
+            if(rde_util_flag_has(_old_entry->state, RDE_HASH_MAP_STATE_EMPTY) ||                                                        \
+                rde_util_flag_has(_old_entry->state, RDE_HASH_MAP_STATE_DELETED)) {                                                     \
+                continue;                                                                                                               \
+            }                                                                                                                           \
+            typeof((_hash_map)->entries) _new_entry = NULL;                                                                             \
+            rde_hash_map_find_whole_entry((_hash_map), &_old_entry->key, _new_entry);                                                   \
+            *_new_entry = *_old_entry;                                                                                                  \
+        }                                                                                                                               \
+        free(_old_entries);                                                                                                             \
+    } while(0)
+
+#define rde_hash_map_find_key(_hash_map, _ref_ptr_key, _out_ptr_value)              \
+    do {                                                                            \
+        bool _found = false;                                                        \
+        rde_hash_map_try_find_key(_hash_map, _ref_ptr_key, _found, _out_ptr_value); \
+        rde_critical_error(!_found, "Tried to get a non existen key\n");            \
+    } while(0)
+
+#define rde_hash_map_try_find_key(_hash_map, _ptr_key, _out_found, _out_ptr_value)  \
+    do {                                                                            \
+		rde_critical_error(_hash_map == NULL, "Tried to use a NULL _hash_map\n");	\
+        uint _index = 0;                                                            \
+        rde_hash_map_hash_to_index((_hash_map), *(_ptr_key), _index);               \
+                                                                                    \
+        for(uint _i = 0; _i < (_hash_map)->actual_size; _i++) {                     \
+            typeof((_hash_map)->entries) _entry = &(_hash_map)->entries[_index];    \
+            if(rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_EMPTY) ||        \
+                rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_DELETED)) {     \
+                _out_found = false;                                                 \
+                _out_ptr_value = NULL;                                              \
+                break;                                                              \
+            }                                                                       \
+            if((_hash_map)->cmp_fn((_ptr_key), &(_entry->key)) == 0) {              \
+                _out_found = true;                                                  \
+                _out_ptr_value = &(_entry->value);                                  \
+                break;                                                              \
+            }                                                                       \
+            _index = (_index + 1) & ((_hash_map)->actual_size - 1);                 \
+        }                                                                           \
+    } while(0)
+
+#define rde_hash_map_add_entry(_hash_map, _key, _value)                     		\
+    do {                                                                    		\
+		rde_critical_error(_hash_map == NULL, "Tried to use a NULL _hash_map\n");	\
+        uint _table_size = 0;                                               		\
+        rde_hash_map_get_ideal_size(_hash_map, _table_size);                		\
+        if(_table_size > (_hash_map)->actual_size) {                        		\
+            rde_hash_map_resize_and_rehash(_hash_map, _table_size);         		\
+        }                                                                   		\
+                                                                            		\
+        uint _index = 0;                                                    		\
+        rde_hash_map_hash_to_index(_hash_map, _key, _index);                		\
+                                                                            		\
+        typeof((_hash_map)->entries) _entry = &(_hash_map)->entries[_index];		\
+        while(!rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_EMPTY)) {		\
+            _index = (_index + 1) & ((_hash_map)->actual_size - 1);         		\
+            _entry = &(_hash_map)->entries[_index];                         		\
+        }                                                                   		\
+                                                                            		\
+        _entry->key = _key;                                                 		\
+        _entry->value = _value;                                             		\
+        _entry->state = RDE_HASH_MAP_STATE_USED;                            		\
+                                                                            		\
+        (_hash_map)->used++;                                                		\
+    } while(0)
+
+#define rde_hash_map_has_key(_hash_map, _ptr_key, _out_value)                   	\
+    do {                                                                        	\
+		rde_critical_error(_hash_map == NULL, "Tried to use a NULL _hash_map\n");	\
+        uint _index = 0;                                                        	\
+        rde_hash_map_hash_to_index((_hash_map), *(_ptr_key), _index);           	\
+                                                                                	\
+        for(uint _i = 0; _i < (_hash_map)->actual_size; _i++) {                 	\
+            typeof((_hash_map)->entries) _entry = &(_hash_map)->entries[_index];	\
+            if(rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_EMPTY)) {    	\
+                _out_value = false;                                             	\
+                break;                                                          	\
+            }                                                                   	\
+            if((_hash_map)->cmp_fn((_key), &(_entry->key)) == 0) {              	\
+                _out_value = true;                                              	\
+                break;                                                          	\
+            }                                                                   	\
+            _index = (_index + 1) & ((_hash_map)->actual_size - 1);             	\
+        }                                                                       	\
+        _out_value = false;                                                     	\
+    } while(0)
+
+#define rde_hash_map_remove_entry(_hash_map, _ptr_key)                                  \
+    do {                                                                                \
+		rde_critical_error(_hash_map == NULL, "Tried to use a NULL _hash_map\n");		\
+        typeof((_hash_map)->entries) _r_entry = NULL;                                   \
+        rde_hash_map_find_whole_entry(_hash_map, _ptr_key, _r_entry);                   \
+        uint _removed_index = _r_entry - (_hash_map)->entries;                          \
+        (_hash_map)->used--;                                                            \
+        uint _index = (_removed_index + 1) & ((_hash_map)->actual_size - 1);            \
+                                                                                        \
+        for(uint _i = 0; _i < (_hash_map)->actual_size; _i++) {                         \
+            typeof((_hash_map)->entries) _entry = &((_hash_map)->entries[_index]);      \
+            if(rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_EMPTY) ||            \
+                rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_DELETED)) {         \
+                break;                                                                  \
+            }                                                                           \
+                                                                                        \
+            uint _entry_index = 0;                                                      \
+            rde_hash_map_hash_to_index((_hash_map), _entry->key, _entry_index);         \
+            uint _a = (_index - _entry_index) & ((_hash_map)->actual_size - 1);         \
+            uint _b = (_removed_index - _entry_index) & ((_hash_map)->actual_size - 1); \
+            if(_a > _b) {                                                               \
+                *_r_entry = *_entry;                                                    \
+                _removed_index = _index;                                                \
+                _r_entry = _entry;                                                      \
+            }                                                                           \
+            _index = (_index + 1) & ((_hash_map)->actual_size - 1);                     \
+        }                                                                               \
+        _r_entry->state = RDE_HASH_MAP_STATE_DELETED;                                   \
+    } while(0)
+    
+#define rde_hash_map_foreach(_hash_map, _out_ptr_key, _out_ptr_value, _block_of_code)   \
+    do {                                                                                \
+		rde_critical_error(_hash_map == NULL, "Tried to use a NULL _hash_map\n");		\
+        for(uint _i = 0; _i < (_hash_map)->actual_size; _i++) {                         \
+            typeof((_hash_map)->entries) _entry = &((_hash_map)->entries[_i]);          \
+            if(!rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_USED)) continue;    \
+            (_out_ptr_key) = &(_entry->key);                                            \
+            (_out_ptr_value) = &(_entry->value);                                        \
+            _block_of_code                                                              \
+        }                                                                               \
+    } while(0)
+	
 // Macro: rde_str_new
 // Creates a new dynamic string, allocating necessary data. This needs to be freed with <rde_str_free> once it is not longer needed.
 //
@@ -3345,6 +3623,28 @@ RDE_FUNC char* rde_util_string_replace_sub_str(char* _str, char* _old_str, char*
 //	_split_array - pointer to an array of char* that will hold the amount of splits.
 //	_split_mark - char to split by.
 RDE_FUNC uint rde_util_string_split(char* _str, char*** _split_array, char _split_mark);
+
+// Function: rde_util_hash_map_hash_default
+// Transforms data into a hash. This is not typically used by end-users, it is used internally when hashing with hashmap functions.
+//
+// Parameters:
+//	_key - poiner to some data.
+//	_size - size of real type of _key
+RDE_FUNC uint rde_util_hash_map_hash_default(const void* _key, size_t _size);
+
+// Function: rde_util_hash_map_int_hash
+// Transforms an int into a hash.
+//
+// Parameters:
+//	_key - poiner to int value.
+RDE_FUNC uint rde_util_hash_map_int_hash(int* _key);
+
+// Function: rde_util_hash_map_str_hash
+// Transforms an const char* into a hash.
+//
+// Parameters:
+//	_key - poiner to const char* value.
+RDE_FUNC uint rde_util_hash_map_str_hash(const char** _key)
 
 /// ============================ MATH =======================================
 

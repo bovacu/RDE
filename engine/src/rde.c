@@ -2952,6 +2952,41 @@ uint rde_util_string_split(char* _string, char*** _split_array, char _split_mark
     return _count;
 }
 
+uint rde_util_hash_map_hash_default(const void* _key, size_t _size) {
+    const uint8_t* _byte = (const uint8_t*)_key;
+    uint _hash = 0;
+
+    for (size_t _i = 0; _i < _size; _i++) {
+        _hash += *_byte++;
+        _hash += (_hash << 10);
+        _hash ^= (_hash >> 6);
+    }
+    _hash += (_hash << 3);
+    _hash ^= (_hash >> 11);
+    _hash += (_hash << 15);
+    return _hash;
+}
+
+uint rde_util_hash_map_int_hash(int* _key) {
+    return *_key;
+}
+
+uint rde_util_hash_map_str_hash(const char** _key) {
+    size_t _hash = 0;
+    const char* _key_v = *((const char**)_key);
+
+    for (; *_key_v; ++_key_v) {
+        _hash += *_key_v;
+        _hash += (_hash << 10);
+        _hash ^= (_hash >> 6);
+    }
+
+    _hash += (_hash << 3);
+    _hash ^= (_hash >> 11);
+    _hash += (_hash << 15);
+    return _hash;
+}
+
 void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 	switch(_color) {
 		case RDE_LOG_COLOR_RED: {
