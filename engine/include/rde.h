@@ -3644,7 +3644,7 @@ RDE_FUNC uint rde_util_hash_map_int_hash(int* _key);
 //
 // Parameters:
 //	_key - poiner to const char* value.
-RDE_FUNC uint rde_util_hash_map_str_hash(const char** _key)
+RDE_FUNC uint rde_util_hash_map_str_hash(const char** _key);
 
 /// ============================ MATH =======================================
 
