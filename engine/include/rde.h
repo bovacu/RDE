@@ -3638,18 +3638,82 @@ RDE_FUNC uint rde_util_hash_map_str_hash(const char** _key);
 
 /// ============================ MATH =======================================
 
-RDE_FUNC void rde_math_set_random_seed(long _seed); /// Sets the seed for the random math module, -1 will not set it to the current time
+// Function: rde_math_set_random_seed
+// Sets the seed for randomness. Using -1 will set it to a random value according to the current time. Fixed values will produce fixed results over different runs.
+//
+// Parameters:
+//	_seed - sets the randomness
+RDE_FUNC void rde_math_set_random_seed(long _seed);
+
+// Function: rde_math_get_random_int
+// Returns a random number int between [_min_included, _max_included] (both sides are included).
+//
+// Parameters:
+//	_min_included - minimum value the random number can be.
+//	_max_included - maximum value the random number can be.
 RDE_FUNC int rde_math_get_random_int(int _min_included, int _max_included);
+
+// Function: rde_math_get_random_float
+// Returns a random number float between [_min_included, _max_included] (both sides are included).
+//
+// Parameters:
+//	_min_included - minimum value the random number can be.
+//	_max_included - maximum value the random number can be.
 RDE_FUNC float rde_math_get_random_float(float _min_included, float _max_included);
+
+// Function: rde_math_get_probability
+// Rolls a probability and returns if it happened.
+//
+// Parameters:
+//	_normalized_chance_to_happen - [0, 1] value of the chance to happen.
 RDE_FUNC rde_probability rde_math_get_probability(float _normalized_chance_to_happen);
 
+// Function: rde_math_convert_world_position_to_screen_coordinates_3d
+// Transforms a position on the screen into a 3D position on the scene coordinates.
+//
+// Parameters:
+//	_window - window where the calculation happens.
+//	_vec - in/out vector to save the calculated position.
 RDE_FUNC void rde_math_convert_world_position_to_screen_coordinates_3d(rde_window* _window, rde_vec_3F* _vec);
+
+// Function: rde_math_convert_world_position_to_screen_coordinates_2d
+// Transforms a scene 3D coordinate into the corresponding 2D screen coordinate.
+//
+// Parameters:
+//	_window - window where the calculation happens.
+//	_vec - in/out vector to save the calculated position.
 RDE_FUNC void rde_math_convert_world_position_to_screen_coordinates_2d(rde_window* _window, rde_vec_2F* _vec);
+
+// Function: rde_math_convert_world_size_to_screen_size
+// Transforms a scene 2D size into a normalized [-1, 1] screen position.
+//
+// Prameters:
+//	_window - window where the calculation happens.
+//	_vec - in/out vector to save the calculated size.
 RDE_FUNC void rde_math_convert_world_size_to_screen_size(rde_window* _window, rde_vec_2F* _vec);
 
+// Function: rde_math_cross_product
+// Calculates the cross product of two 3D vectors.
+//
+// Parameters:
+//	_vec_0 - first vector.
+//	_vec_1 - second vector.
 RDE_FUNC rde_vec_3F rde_math_cross_product(rde_vec_3F _vec_0, rde_vec_3F _vec_1);
+
+// Function: rde_math_normalize
+// Normalizes a vector.
+//
+// Parameters:
+//	_vec_0 - in/out vector to normalized.
 RDE_FUNC void rde_math_normalize(rde_vec_3F* _vec);
 
+// Function: rde_math_clamp_
+// Group of functions that clamps a value between other 2 values. Available for int, uint, float, double, long and ulong.
+//
+// Parameters:
+//	_value - value to clamp.
+//	_min - min value, of _value < _min, then _value = min.
+//	_max - max value, of _value > _max, then _value = max.
 RDE_DECLARE_CLAMP_FUNCS(int)
 RDE_DECLARE_CLAMP_FUNCS(uint)
 RDE_DECLARE_CLAMP_FUNCS(float)
@@ -3657,12 +3721,45 @@ RDE_DECLARE_CLAMP_FUNCS(double)
 RDE_DECLARE_CLAMP_FUNCS(long)
 RDE_DECLARE_CLAMP_FUNCS(ulong)
 
+// Function: rde_math_radians_to_degrees
+// Transforms a radian value into degrees.
+//
+// Parameters:
+//	_radians - value to convert to degrees.
 RDE_FUNC float rde_math_radians_to_degrees(float _radians);
+
+// Function: rde_math_degrees_to_radians
+// Transforms a degree value into radians.
+//
+// Parameters:
+//	_degrees - value to convert to radians.
 RDE_FUNC float rde_math_degrees_to_radians(float _degrees);
 
+// Function: rde_math_quaternion_to_euler_degrees
+// Transforms a <rde_quaternion> value into <rde_vec_3F> of degrees (x, y , z).
+//
+// Parameters:
+//	_quaternion - value to convert to rde_vec_3F of degrees.
 RDE_FUNC rde_vec_3F rde_math_quaternion_to_euler_degrees(rde_quaternion _quaternion);
+
+// Function: rde_math_euler_degrees_to_quaternion
+// Transforms a <rde_vec_3F> of degrees (x, y , z) value into a <rde_quaternion>.
+//
+// Parameters:
+//	_euler_degrees - value to convert to <rde_quaternion>.
 RDE_FUNC rde_quaternion rde_math_euler_degrees_to_quaternion(rde_vec_3F _euler_degrees);
 
+// Function: rde_math_easing_
+// Group of functions that applies easing functions.
+// Available for in_linear, in_quadratic, out_quadratic, in_out_quadratic, in_cubic, out_cubic, in_out_cubic, in_quartic, out_quartic, in_out_quartic,
+// in_quintic, out_quintic, in_out_quintic, in_sine, out_sine, in_out_sine, in_exponential, out_exponential, in_out_exponential, in_circular, out_circular,
+// in_out_circular.
+//
+// Parameters:
+//	_current_time - current time.
+//	_start_value - start value.
+//	_change_in_value - change in time.
+//	_duration - duration.
 RDE_DECLARE_EASING_FUNCS(in, linear)
 RDE_DECLARE_EASING_FUNCS(in, quadratic)
 RDE_DECLARE_EASING_FUNCS(out, quadratic)
@@ -3688,7 +3785,13 @@ RDE_DECLARE_EASING_FUNCS(in_out, circular)
 
 /// ============================ ENGINE =====================================
 
-
+// Function: rde_engine_create_engine
+// Initializes the engine with a specific configuration file. It returns the default created window. This function MUST be called before using the engine.
+//
+// Parameters:
+//	_argc - amount of arguments passed to the program. Can be 0.
+//	_argv - vector of arguments passed to the program. Can be NULL.
+//	_config_path - path to the config file. This file path must exist as the engine won't start without it.
 RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv, const char* _config_path);
 
 RDE_FUNC rde_engine_init_info rde_engine_load_config(const char* _config_path);

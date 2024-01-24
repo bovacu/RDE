@@ -143,7 +143,7 @@ void rde_inner_set_posix_signal_handler();
 //			- [DONE] Texturing and [NOT COMPLETELY DONE] materials
 //			- [DONE] Instancing (3d batching)
 //			- [DONE] MSAA
-//			- Lighting
+//			- [DONE] Lighting
 //				- [DONE] Phong
 //				- [DONE] Directional
 //				- [DONE] Point
@@ -152,7 +152,7 @@ void rde_inner_set_posix_signal_handler();
 //			- [] Text
 //			- [DONE] Line rendering
 //			- [] Frustum Culling
-//			- [] Simple Shadows
+//			- [DONE] Simple Shadows
 //			- [] Cascade Shadow Map
 //			- [] Normal Mapping
 //			- [] HDR
@@ -186,30 +186,30 @@ void rde_inner_set_posix_signal_handler();
 //			- [DONE] Pass dt and mouse pos as a uniform
 //
 //		- Sound:
-//			- Play/stop/restart/resume sound.
-//			- Play/stop/restart/resume music.
-//			- Multiple sounds/mousic at the same time.
-//			- Sound/Music volume.
-//			- 3D sound.
+//			- [] Play/stop/restart/resume sound.
+//			- [] Play/stop/restart/resume music.
+//			- [] Multiple sounds/mousic at the same time.
+//			- [] Sound/Music volume.
+//			- [] 3D sound.
 //
 //		- Networking:
-//			- Basic HTTP/HTTPs requests
+//			- [] Basic HTTP/HTTPs requests
 //
 //		- [] Coroutines
-//			- Implement usage with minicoro
+//			- [] Implement usage with minicoro
 //
 //		- [] Mobile:
-//			- Make all features of the engine work on mobile
-//			- Ads integration
-//			- Safe area
-//			- MAYBE and ONLY MAYBE make a metal renderer for iOS/MacOS (PROBABLY NOT).
+//			- [] Make all features of the engine work on mobile
+//			- [] Ads integration
+//			- [] Safe area
+//			- [] MAYBE and ONLY MAYBE make a metal renderer for iOS/MacOS (PROBABLY NOT).
 //
 //		- [] WASM:
-//			- Make all features of the engine work on the browser
+//			- [] Make all features of the engine work on the browser
 //
 //		- [] Docs:
-//			- Document everything
-//			- Create automatic documentation generator
+//			- [] Document everything
+//			- [] Create automatic documentation generator
 //				- [DONE] Windows
 //				- [] Linux
 //				- [] Mac
@@ -227,7 +227,8 @@ void rde_inner_set_posix_signal_handler();
 //			- [] Custom stack
 //			- [] Custom queue
 //			- [] Unit tests for hashmap
-//			- [] Apply the namespace system
+//			- [DONE] Apply the namespace system
+//			- [] Rename all functions defined in .c to have _inner_
 //
 //		- [] TOOL: command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
@@ -2389,7 +2390,7 @@ void rde_engine_transform_unload(rde_transform* _transform) {
 // ==============================================================================
 
 void rde_math_set_random_seed(long _seed) {
-	srand(_seed);
+	srand(_seed == -1 ? time(NULL) : _seed);
 }
 
 int rde_math_get_random_int(int _min_included, int _max_included) {
