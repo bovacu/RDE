@@ -3794,84 +3794,318 @@ RDE_DECLARE_EASING_FUNCS(in_out, circular)
 //	_config_path - path to the config file. This file path must exist as the engine won't start without it.
 RDE_FUNC rde_window* rde_engine_create_engine(int _argc, char** _argv, const char* _config_path);
 
+// Function: rde_engine_load_config
+// Loads the initial configuration of the engine.
+//
+// Parameters:
+//	_config_path - path to the config file.
 RDE_FUNC rde_engine_init_info rde_engine_load_config(const char* _config_path);
 
+// Function: rde_setup_initial_info
+// Configures the mandatory callbacks that the user must provide.
+//
+// Parameters:
+//	_end_user_callbacks - group of callbacks that the user must fill.
 RDE_FUNC void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks); /// Sets up some basic info the engine needs, call this BEFORE rde_engine_create_engine
 
+// Function: rde_engine_set_event_user_callback
+// Optional function callback for custom event handling.
+//
+// Parameters:
+//	_user_event_callback - callback for custom event handling.
 RDE_FUNC void rde_engine_set_event_user_callback(rde_event_func _user_event_callback);
 
+// Function: rde_engine_logs_supressed
+// Returns if the logs are supressed.
 RDE_FUNC bool rde_engine_logs_supressed();
+
+// Function: rde_engine_supress_logs
+// Enables or disables logging on the console.
+//
+// Parameters:
+//	_supress - if the logs should or not be supressed.
 RDE_FUNC void rde_engine_supress_logs(bool _supress);
 
+// Function: rde_engine_get_platform
+// Returns the current platform the engine is running on.
 RDE_FUNC RDE_PLATFORM_TYPE_ rde_engine_get_platform();
 
+// Function: rde_engine_get_fixed_delta
+// Returns the fixed update physics delta.
 RDE_FUNC float rde_engine_get_fixed_delta();
+
+// Function: rde_engine_set_fixed_delta
+// Sets the fixed update physics delta.
+//
+// Parameters:
+//	_fixed_dt - fixed update physics delta.
 RDE_FUNC void rde_engine_set_fixed_delta(float _fixed_dt);
 
+// Function: rde_engine_on_run
+// Starts the engine main loop and also initializes some inner engine data. Will be running until the application is closed or crashes.
 RDE_FUNC void rde_engine_on_run();
 
+// Function: rde_engine_is_running
+// Returns if the engine is currently running.
 RDE_FUNC bool rde_engine_is_running();
+
+// Function: rde_engine_set_running
+// Makes the engine stop if set to false.
+//
+// Parameters:
+//	_running - if false, the engine will close.
 RDE_FUNC void rde_engine_set_running(bool _running);
 
+// Function: rde_engine_get_display_size
+// Returns the size of the display where the current window is at.
 RDE_FUNC rde_vec_2I rde_engine_get_display_size();
 
+// Function: rde_engine_get_available_display_ids
+// Fills an array of uints with the ids of all the available displays.
+//
+// Parameters:
+//	_out_ids - array of uints where the ids will be stored. Must be at least as big as the amount of displays.
 RDE_FUNC void rde_engine_get_available_display_ids(uint* _out_ids);
+
+// Function: rde_engine_switch_window_display
+// Moves a current window to the selected display.
+//
+// Parameters:
+//	_window - window to move.
+//	_new_display - id of the display to move the window.
 RDE_FUNC void rde_engine_switch_window_display(rde_window* _window, uint _new_display);
 
+// Function: rde_engine_get_focused_window
+// Returnst the currently focused window.
 RDE_FUNC rde_window* rde_engine_get_focused_window();
 
+// Function: rde_engine_is_vsync_active
+// Returns if VSync is active or not.
 RDE_FUNC bool rde_engine_is_vsync_active();
+
+// Function: rde_engine_set_vsync_active
+// Enables or disables VSync.
+// 
+// Parameters:
+//	_vsync - enable or disable vsync.
 RDE_FUNC void rde_engine_set_vsync_active(bool _vsync);
 
+// Function: rde_engine_show_message_box
+// Creates a system dialog box with some messages and buttons. It will block the main thread until dismissed.
+//
+// Parameters:
+//	_level - type of message.
+//	_title - title of the message box.
+//	_content - body message of the box.
+//	_window - window to show the message box.
 RDE_FUNC void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _title, const char* _content, rde_window* _window);
 
+// Function: rde_engine_transform_load
+// Returns a <rde_transform> from the preloaded pool of transforms. Transforms are not allowed to be created nor modify by end-users as
+// there are engine-internal operations that must be notified when modifying a <rde_transform> fields, mainly for parenting purposes.
 RDE_FUNC rde_transform* rde_engine_transform_load();
+
+// Function: rde_engine_transform_unload
+// Unloads a previously loaded <rde_transform> and returns it to the pool.
+//
+// Parameters:
+//	_transform - transform to return to the pool.
 RDE_FUNC void rde_engine_transform_unload(rde_transform* _transform);
 
-RDE_FUNC rde_vec_3F  rde_engine_transform_get_position(rde_transform* _transform);
+// Function: rde_engine_transform_get_position
+// Returns the position of a transform.
+//
+// Parameters:
+//	_transform - transform to get the position.
+RDE_FUNC rde_vec_3F rde_engine_transform_get_position(rde_transform* _transform);
+
+// Function: rde_engine_transform_set_position
+// Sets the position of a transform.
+//
+// Parameters:
+//	_transform - transform to set the position.
+//	_position - position of the transform.
 RDE_FUNC void rde_engine_transform_set_position(rde_transform* _transform, rde_vec_3F _position);
 
-RDE_FUNC rde_vec_3F  rde_engine_transform_get_rotation_degs(rde_transform* _transform);
+// Function: rde_engine_transform_get_rotation_degs
+// Returns the rotation in degrees of a transform.
+//
+// Parameters:
+//	_transform - transform to get the rotation.
+RDE_FUNC rde_vec_3F rde_engine_transform_get_rotation_degs(rde_transform* _transform);
+
+// Function: rde_engine_transform_set_rotation
+// Sets the rotation in degrees of a transform.
+//
+// Parameters:
+//	_transform - transform to set the position.
+//	_rotation_degs - rotation in degrees of the transform.
 RDE_FUNC void rde_engine_transform_set_rotation(rde_transform* _transform, rde_vec_3F _rotation_degs);
 
-RDE_FUNC rde_vec_3F  rde_engine_transform_get_scale(rde_transform* _transform);
+// Function: rde_engine_transform_get_scale
+// Returns the scale of a transform.
+//
+// Parameters:
+//	_transform - transform to get the scale.
+RDE_FUNC rde_vec_3F rde_engine_transform_get_scale(rde_transform* _transform);
+
+// Function: rde_engine_transform_set_scale
+// Sets the scale of a transform.
+//
+// Parameters:
+//	_transform - transform to set the position.
+//	_scale - scale of the transform.
 RDE_FUNC void rde_engine_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale);
 
+// Function: rde_engine_trasnform_get_parent
+// Returns the parent of a transform. If no parent, NULL will be returned.
+//
+// Parameters:
+//	_transform - transform to get the parent.
 RDE_FUNC rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform);
+
+// Function: rde_engine_transform_set_parent
+// Sets the parent of a transform. Doing this will apply parent transformations to the child transform.
+//
+// Parameters:
+//	_transform - transform to set the parent.
+//	_parent - parent of the _transform.
 RDE_FUNC void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _parent);
 
+// Function: rde_engine_transform_get_children_count
+// Returns the amount of children that a transform has.
+//
+// Parameters:
+//	_transform - transform to get the amount of children.
 RDE_FUNC uint rde_engine_transform_get_children_count(rde_transform* _transform);
 
+// Function: rde_engine_destroy_engine
+// Destroys the engine and cleans every allocation and releases any asset used by the engine.
 RDE_FUNC void rde_engine_destroy_engine();
 
 /// ============================ WINDOW =====================================
 
+// Function: rde_window_create_window_os
+// Creates a new window ready to work on any supported platform. This window must be destroyed by the user when not needed anymore.
 RDE_FUNC rde_window* rde_window_create_window_os();
 
+// Function: rde_window_get_window_size
+// Returns the size of a window.
+//
+// Parameters:
+//	_window - window to get the size.
 RDE_FUNC rde_vec_2I	rde_window_get_window_size(rde_window* _window);
+
+// Function: rde_window_set_window_size
+// Sets the new size of a window. Will trigger same events as resizing manually with the mouse.
+//
+// Parameters:
+//	_window - window to resize.
+//	_size - new size of the window.
 RDE_FUNC void rde_window_set_window_size(rde_window* _window, rde_vec_2I _size);
 
+
+// Function: rde_window_get_window_position
+// Returns the current position of a window.
+//
+// Parameters:
+//	_window - window to get the position.
 RDE_FUNC rde_vec_2I	rde_window_get_window_position(rde_window* _window);
+
+// Function: rde_window_set_window_position
+// Sets the new position of a window.
+//
+// Parameters:
+//	_window - window to move.
+//	_position - position to move the window.
 RDE_FUNC void rde_window_set_window_position(rde_window* _window, rde_vec_2I _position);
 
+// Function: rde_window_get_window_title
+// Returns the title of a window.
+//
+// Parameters:
+//	_window - window to get the title.
 RDE_FUNC const char* rde_window_get_window_title(rde_window* _window);
+
+// Function: rde_window_set_window_title
+// Sets the title of a window.
+//
+// Parameters:
+//	_window - window to set the title.
+//	_title - new title of the window.
 RDE_FUNC void rde_window_set_window_title(rde_window* _window, const char* _title);
 
+// Function: rde_window_orientation_is_horizontal
+// Returns if the width of a window is greater than its height.
+//
+// Parameters:
+//	_window - window to get the orientation.
 RDE_FUNC bool rde_window_orientation_is_horizontal(rde_window* _window);
 
+// Function: rde_window_take_screenshot
+// Takes a screenshot of a window and saves it to a file.
+//
+// Parameters:
+//	_window - window to take the screenshot.
+//	_position - position of the center of the square to take the screenshoot (being [0, 0] the middle of the window).
+//	_size_of_rectangle - size of the rectangle to take the screenshot (width and height is the full width and height of the rectangle).
+//	_file_name_with_extension - full path to the image to save, png is prefered.
 RDE_FUNC void rde_window_take_screenshot(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension);
-RDE_FUNC unsigned char* rde_window_get_area_of_screen_pixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size); // returns a dynamic array of the pixels in a RGBA format (so 4 elements per pixel). User MUST free the returned array.
 
+// Function: rde_window_get_area_of_screen_pixels
+// Returns a dynamic array of the pixels in a RGBA format (so 4 elements per pixel). User MUST free the returned array.
+//
+// Parameters:
+//	_window - window to take the pixels from.
+//	_position - position of the center of the square to take the pixels (being [0, 0] the middle of the window).
+//	_size - size of the rectangle to take the pixels (width and height is the full width and height of the rectangle).
+RDE_FUNC unsigned char* rde_window_get_area_of_screen_pixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size);
+
+// Function: rde_window_get_aspect_ratio
+// Returns the aspect ratio (width / height) of a window.
+//
+// Parameters:
+//	_window - window to get the aspect ration.
 RDE_FUNC float rde_window_get_aspect_ratio(rde_window* _window);
 
+// Function: rde_window_is_mouse_out_of_window_allowed
+// Returns if the mouse is allowed to move outside of a window.
 RDE_FUNC bool rde_window_is_mouse_out_of_window_allowed();
+
+// Function: rde_window_allow_mouse_out_of_window
+// Sets if the mouse is allowed to move outside of a window.
+//
+// Parameters:
+//	_allow_mouse_out_of_window - if it is allowed or not.
 RDE_FUNC void rde_window_allow_mouse_out_of_window(bool _allow_mouse_out_of_window);
 
+// Function: rde_window_set_window_icon
+// Sets the icon of a window's title bar. File must be .ico format.
+//
+// Parameters:
+//	_window - window to set the icon.
+//	_path_to_icon - full path to the .ico file.
 RDE_FUNC void rde_window_set_window_icon(rde_window* _window, const char* _path_to_icon);
 
+// Function: rde_window_get_native_sdl_window_handle
+// Returns a pointer to the native SDL window.
+//
+// Parameters:
+//	_window - window to get the native window from.
 RDE_FUNC void* rde_window_get_native_sdl_window_handle(rde_window* _window);
+
+// Function: rde_window_get_native_sdl_gl_context_handle
+// Returns a pointer to the native SDL OpenGL window.
+//
+// Parameters:
+//	_window - window to get the native OpenGL hanfle from.
 RDE_FUNC void* rde_window_get_native_sdl_gl_context_handle(rde_window* _window);
 
+// Function: rde_window_destroy_window
+// Destroys the window, releasing any allocated memory and also SDL and OpenGL context data. Will set _data to NULL automatically.
+//
+// Parameters:
+//	_window - window to be destroyed.
 RDE_FUNC void rde_window_destroy_window(rde_window* _window);
 
 /// ============================ EVENTS =====================================
