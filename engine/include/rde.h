@@ -4047,7 +4047,7 @@ RDE_FUNC bool rde_window_orientation_is_horizontal(rde_window* _window);
 //
 // Parameters:
 //	_window - window to take the screenshot.
-//	_position - position of the center of the square to take the screenshoot (being [0, 0] the middle of the window).
+//	_position - position of the center of the square to take the screenshoot (being (0, 0) the middle of the window).
 //	_size_of_rectangle - size of the rectangle to take the screenshot (width and height is the full width and height of the rectangle).
 //	_file_name_with_extension - full path to the image to save, png is prefered.
 RDE_FUNC void rde_window_take_screenshot(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension);
@@ -4057,7 +4057,7 @@ RDE_FUNC void rde_window_take_screenshot(rde_window* _window, rde_vec_2I _positi
 //
 // Parameters:
 //	_window - window to take the pixels from.
-//	_position - position of the center of the square to take the pixels (being [0, 0] the middle of the window).
+//	_position - position of the center of the square to take the pixels (being (0, 0) the middle of the window).
 //	_size - size of the rectangle to take the pixels (width and height is the full width and height of the rectangle).
 RDE_FUNC unsigned char* rde_window_get_area_of_screen_pixels(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size);
 
@@ -4110,26 +4110,145 @@ RDE_FUNC void rde_window_destroy_window(rde_window* _window);
 
 /// ============================ EVENTS =====================================
 
+// Function: rde_events_window_consume_events
+// Takes and tries to handle window events for a window. If the event has been handled, its flag will be set to true.
+//
+// Parameters:
+//	_event - event to be handled.
+//	_window - window where the event happened.
 RDE_FUNC void rde_events_window_consume_events(rde_event* _event, rde_window* _window);
+
+// Function: rde_events_display_consume_events
+// Takes and tries to handle display events for a window. If the event has been handled, its flag will be set to true.
+//
+// Parameters:
+//	_event - event to be handled.
+//	_window - window where the event happened.
 RDE_FUNC void rde_events_display_consume_events(rde_event* _event, rde_window* _window);
+
+// Function: rde_events_keyboard_consume_events
+// Takes and tries to handle keyboard events for a window. If the event has been handled, its flag will be set to true.
+//
+// Parameters:
+//	_event - event to be handled.
+//	_window - window where the event happened.
 RDE_FUNC void rde_events_keyboard_consume_events(rde_event* _event, rde_window* _window);
+
+// Function: rde_events_mouse_consume_events
+// Takes and tries to handle mouse events for a window. If the event has been handled, its flag will be set to true.
+//
+// Parameters:
+//	_event - event to be handled.
+//	_window - window where the event happened.
 RDE_FUNC void rde_events_mouse_consume_events(rde_event* _event, rde_window* _window);
+
+// Function: rde_events_drag_and_drop_consume_events
+// Takes and tries to handle drag & drop events for a window. If the event has been handled, its flag will be set to true.
+//
+// Parameters:
+//	_event - event to be handled.
+//	_window - window where the event happened.
 RDE_FUNC void rde_events_drag_and_drop_consume_events(rde_event* _event, rde_window* _window);
+
+// Function: rde_events_mobile_consume_events
+// Takes and tries to handle mobile events for a window. If the event has been handled, its flag will be set to true.
+//
+// Parameters:
+//	_event - event to be handled.
+//	_window - window where the event happened.
 RDE_FUNC void rde_events_mobile_consume_events(rde_event* _event, rde_window* _window);
 
+// Function: rde_events_is_key_just_pressed
+// Returns true if a key on a window has just been pressed, this function will only return true during 1 frame
+//
+// Parameters:
+//	_window - window to check the event.
+//	_key - key to check.
 RDE_FUNC bool rde_events_is_key_just_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
+
+// Function: rde_events_is_key_pressed
+// Returns true if a key on a window is pressed, this function will return true for 1 or more frames.
+//
+// Parameters:
+//	_window - window to check the event.
+//	_key - key to check.
 RDE_FUNC bool rde_events_is_key_pressed(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
+
+// Function: rde_events_is_key_just_released
+// Returns true if a key on a window has just been released, this function will only return for 1 frame.
+//
+// Parameters:
+//	_window - window to check the event.
+//	_key - key to check.
 RDE_FUNC bool rde_events_is_key_just_released(rde_window* _window, RDE_KEYBOARD_KEY_ _key);
 
+// Function: rde_events_is_mouse_button_just_pressed
+// Returns true if a mouse button on a window has just been pressed, this function will only return for 1 frame.
+//
+// Parameters:
+//	_window - window to check the event.
+//	_button - mouse button to check.
 RDE_FUNC bool rde_events_is_mouse_button_just_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _button);
+
+// Function: rde_events_is_mouse_button_pressed
+// Returns true if a mouse button on a window is pressed, this function will return true for 1 or more frames.
+//
+// Parameters:
+//	_window - window to check the event.
+//	_button - mouse button to check.
 RDE_FUNC bool rde_events_is_mouse_button_pressed(rde_window* _window, RDE_MOUSE_BUTTON_ _button);
+
+// Function: rde_events_is_mouse_button_just_released
+// Returns true if a mouse button on a window has just been released, this function will only return for 1 frame.
+//
+// Parameters:
+//	_window - window to check the event.
+//	_button - mouse button to check.
 RDE_FUNC bool rde_events_is_mouse_button_just_released(rde_window* _window, RDE_MOUSE_BUTTON_ _button);
+
+// Function: rde_events_mouse_get_scrolled
+// Returns a vector with the scrolled amount on a window.
+//
+// Parameters:
+//	_window - window where the scroll happened.
 RDE_FUNC rde_vec_2F rde_events_mouse_get_scrolled(rde_window* _window);
+
+// Function: rde_events_mouse_get_position
+// Returns the position of the mouse on a window, position (0, 0) is centered around the middle of the screen.
+//
+// Parameters:
+//	_window - window where the scroll happened.
 RDE_FUNC rde_vec_2I rde_events_mouse_get_position(rde_window* _window);
 
+// Function: rde_events_is_mobile_touch_just_pressed
+// Returns true if a screen on a window has just been pressed, this function will only return true during 1 frame.
+//
+// Parameters:
+//	_window - window to check the event.
+//	_finger_id - finger to check.
 RDE_FUNC bool rde_events_is_mobile_touch_just_pressed(rde_window* _window, uint _finger_id);
+
+// Function: rde_events_is_mobile_touch_pressed
+// Returns true if a screen on a window is pressed, this function will return true for 1 or more frames.
+//
+// Parameters:
+//	_window - window to check the event.
+//	_finger_id - finger to check.
 RDE_FUNC bool rde_events_is_mobile_touch_pressed(rde_window* _window, uint _finger_id);
+
+// Function: rde_events_is_mobile_touch_released
+// Returns true if a screen on a window has just been released, this function will only return true during 1 frame.
+//
+// Parameters:
+//	_window - window to check the event.
+//	_finger_id - finger to check.
 RDE_FUNC bool rde_events_is_mobile_touch_released(rde_window* _window, uint _finger_id);
+
+// Function: rde_events_mobile_get_finger_amount
+// Returns the total amount of fingers touching the screen on a window.
+//
+// Parameters:
+//	_window - window to check the event.
 RDE_FUNC uint rde_events_mobile_get_finger_amount(rde_window* _window);
 
 /// ============================ RENDERING ==================================
