@@ -229,6 +229,16 @@ void rde_inner_set_posix_signal_handler();
 //			- [] Unit tests for hashmap
 //			- [DONE] Apply the namespace system
 //			- [] Rename all functions defined in .c to have _inner_
+//			- [] Bounding box of meshes and models
+//			- [] Replace all below by rde_rendering_lighting_set_directional_light(...)
+//					RDE_FUNC void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction);
+//					RDE_FUNC void rde_rendering_lighting_set_directional_light_position(rde_vec_3F _position);
+//					RDE_FUNC void rde_rendering_lighting_set_directional_light_ambient_color(rde_color _ambient_color);
+//					RDE_FUNC void rde_rendering_lighting_set_directional_light_ambient_color_f(rde_vec_3F _ambient_color);
+//					RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color(rde_color _diffuse_color);
+//					RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_vec_3F _diffuse_color);
+//					RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color);
+//					RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color);
 //
 //		- [] TOOL: command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
@@ -3452,7 +3462,7 @@ void rde_file_write_to_line(rde_file_handle* _file_handler, uint _bytes, const c
 	RDE_UNIMPLEMENTED()
 }
 
-void rde_file_append(rde_file_handle* _file_handler, uint _append_byte, uint _bytes, const char* _data, uint _line) {
+void rde_file_append(rde_file_handle* _file_handler, uint _append_byte, uint _bytes, const char* _data) {
 	RDE_UNUSED(_file_handler)
 	RDE_UNUSED(_append_byte)
 	RDE_UNUSED(_bytes)
@@ -7342,7 +7352,7 @@ void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera) {
 
 
 // ==============================================================================
-// =							PRIVATE API - EVENTS					 	   =
+// =							PRIVATE API - EVENTS					 	   	=
 // ==============================================================================
 
 RDE_COMMON_CALLBACK_IMPLEMENTATION_FOR_EVENT(rde_inner_event_window_resize, {

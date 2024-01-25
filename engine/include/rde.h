@@ -7,9 +7,9 @@
 extern "C" {
 #endif
 
-// **************************************************************************************
-// *							GENERAL INFO ABOUT THE ENGINE							*
-// **************************************************************************************
+// 											==============================================================================
+// 											=						GENERAL INFO ABOUT THE ENGINE					 	 =
+// 											==============================================================================
 // 
 // - Most types exposed to the user are defined in the source file, and for the user they
 //	 are just pointers that can be used to operate on those structures, and this has a reason.
@@ -89,11 +89,11 @@ extern "C" {
 #include <stdlib.h>
 #include <time.h> 
 
-/// *************************************************************************************************
-/// *                                		DEFINES                         						*
-/// *************************************************************************************************
+// 											==============================================================================
+// 											=									DEFINES					 	   	 		 =
+// 											==============================================================================
 
-/// ========================= NUMERIC CONSTANTS ============================
+// =================================================================== NUMERIC AND CONSTANTS ===================================================================
 
 // Group: Constants
 
@@ -206,7 +206,6 @@ extern "C" {
 // Constant: RDE_STR_DEFAULT_SIZE
 // Default size when creating a new string, by default 100
 #define RDE_STR_DEFAULT_SIZE 100
-/// ============================== SHADERS =================================
 
 // Constant: RDE_SHADER_LINE
 // Name for the line shader, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'line_shader'.
@@ -240,7 +239,7 @@ extern "C" {
 // Name for the shadow map, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'depth_shadows_shader'.
 #define RDE_SHADER_DEPTH_SHADOWS "depth_shadows_shader"
 
-/// ====================== COMPILATION AND EXPORT ==========================
+/// =================================================================== COMPILATION AND EXPORT ===================================================================
 
 // Group: Macros
 #if defined(__APPLE__)
@@ -323,12 +322,12 @@ extern "C" {
 		freopen_s((FILE**)stdin, "CONIN$", "r", stdin);		\
 	}
 
-/// ====================== PLATFORM SPECIFIC TYPES ==========================
+/// =================================================================== PLATFORM SPECIFIC TYPES ===================================================================
 
 typedef unsigned long ulong;
 typedef unsigned int uint;
 
-/// ============================== UTIL ====================================
+/// =================================================================== UTIL ===================================================================
 
 #define RDE_STRINGIZE(x) STRINGIZE2(x)
 #define RDE_STRINGIZE2(x) #x
@@ -835,7 +834,7 @@ typedef unsigned int uint;
 //	=================
 #define RDE_MIN(a, b) ((a) < (b) ? (a) : (b));
 
-/// ======================= WARNING SILENCER ===============================
+/// =================================================================== WARNING SILENCER ===================================================================
 
 // Macro: RDE_UNUSED
 // Used to silence non-used variables warnings.
@@ -867,7 +866,7 @@ typedef unsigned int uint;
 #define RDE_UNIMPLEMENTED_STRUCT() short foo;
 
 
-/// ==================== GENERIC FUNCS AND STRUCTS ==========================
+/// =================================================================== GENERIC FUNCS AND STRUCTS ===================================================================
 
 #if RDE_IS_WINDOWS()
 // Macro: RDE_MAIN
@@ -1751,11 +1750,11 @@ typedef struct {			\
 		rde_free(_rde_str.str);		\
 	} while(0)
 	
-/// *************************************************************************************************
-/// *                                		  ENUMS                         						*
-/// *************************************************************************************************
+// 											==============================================================================
+// 											=									ENUMS					 	   	 		 =
+// 											==============================================================================
 
-/// ================================= STATE =================================
+// =================================================================== STATE ===================================================================
 
 // Group: Enums
 	
@@ -1777,7 +1776,7 @@ typedef enum {
 	RDE_INPUT_STATUS_KEEP_RELEASED 	= 4,
 } RDE_INPUT_STATUS_;
 
-/// ================================ EVENTS ================================
+// =================================================================== EVENTS ===================================================================
 
 // Enum: RDE_EVENT_TYPE_
 // Represents all of the usable events of the engine.
@@ -1886,7 +1885,7 @@ typedef enum {
 
 
 
-/// =============================== KEYBOARD ================================
+// =================================================================== KEYBOARD ===================================================================
 
 // Enum: RDE_KEYBOARD_KEY_
 // Registered keys that can be used on the engine, matches SDL3 keys on the values (<https://wiki.libsdl.org/SDL2/SDL_Keycode>)
@@ -2013,7 +2012,7 @@ typedef enum {
 
 
 
-/// ================================ MOUSE ==================================
+// =================================================================== MOUSE ===================================================================
 
 // Enum: RDE_MOUSE_BUTTON_
 // Registered mouse buttons that can be used on the engine, matches SDL3 mouse buttons on the values (<https://wiki.libsdl.org/SDL3/SDL_MouseButtonEvent>)
@@ -2037,7 +2036,7 @@ typedef enum {
 
 
 
-/// ============================== CONTROLLER ===============================
+// =================================================================== CONTROLLER ===================================================================
 
 // Enum: RDE_CONTROLLER_BUTTON_
 // Registered controller buttons that can be used on the engine, matches SDL3 controller buttons on the values (<https://wiki.libsdl.org/SDL2/SDL_ControllerButtonEvent>)
@@ -2072,7 +2071,7 @@ typedef enum {
 
 
 
-/// =============================== PLATFORM ================================
+// =================================================================== PLATFORM ===================================================================
 
 // Enum: RDE_PLATFORM_TYPE_
 // Platform the engine is currently running on.
@@ -2128,7 +2127,7 @@ typedef enum {
 
 
 
-/// ============================== RENDERING ================================
+// =================================================================== RENDERING ===================================================================
 
 // Enum: RDE_UI_ANCHOR_
 // UI flag enum that sets how the sprites will anchor to specific parts of the screen. Can be combined with <RDE_UI_STRETCH_>
@@ -2276,7 +2275,7 @@ typedef enum {
 	RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NONE = 0x2704,
 } RDE_TEXTURE_PARAMETER_TYPE_;
 
-/// ============================= FILE SYSTEM ===============================
+// =================================================================== FILE SYSTEM ===================================================================
 
 // Enum: RDE_FILE_MODE_
 // Mode to open a file.
@@ -2294,7 +2293,7 @@ typedef enum {
 	RDE_FILE_MODE_READ_AND_APPEND,
 } RDE_FILE_MODE_;
 
-/// =============================== LOG ============================
+// =================================================================== LOG ===================================================================
 
 // Enum: RDE_LOG_COLOR_
 // Colors for printing to the console.
@@ -2331,7 +2330,7 @@ typedef enum {
 } RDE_LOG_LEVEL_;
 
 
-/// =============================== PHYSICS 3D ============================
+// =================================================================== PHYSICS 3D ===================================================================
 
 // Enum: RDE_PHYSICS_BODY_TYPE_
 // Type of phisic bodies.
@@ -2365,13 +2364,13 @@ typedef enum {
 	RDE_PHYSICS_SHAPE_TYPE_MESH
 } RDE_PHYSICS_SHAPE_TYPE_;
 
-/// *************************************************************************************************
-/// *                                		STRUCSTS                         						*
-/// *************************************************************************************************
+// 											==============================================================================
+// 											=									STRUCTS					 	   	 		 =
+// 											==============================================================================
 
 // Group: Structs & Callbacks
 
-/// ================================= MATH ==================================
+// =================================================================== MATH ===================================================================
 
 // Type: rde_vec_2I
 // Vector2 of int. See <RDE_SPECIALIZED_VEC2>.
@@ -2569,7 +2568,7 @@ struct rde_probability {
 	bool happened;
 };
 
-/// ================================= ENGINE ===========================
+// =================================================================== ENGINE ===================================================================
 
 // Type: rde_engine
 // Struct of the whole engine. This is just a pointer, implementation is in the source file. 
@@ -2621,7 +2620,7 @@ typedef struct rde_mesh rde_mesh;
 
 
 
-/// ================================ UTIL ===================================
+// =================================================================== UTIL ====================================================================
 
 // Type: rde_str
 // Struct representing a heap dynamic string.
@@ -2635,7 +2634,7 @@ struct rde_str {
     unsigned int size;
 };
 
-/// ============================== CAMERA ===================================
+// =================================================================== CAMERA ===================================================================
 
 // Type: rde_camera
 // Struct that contains the information to let the renderer know what is being seen, so it can render properly.
@@ -2671,7 +2670,7 @@ struct rde_camera {
 #include "rde_imgui.h"
 #endif
 
-/// ============================== EVENTS ===================================
+// =================================================================== EVENTS ===================================================================
 
 // Type: rde_event_window
 // Contains all info related to a window event.
@@ -2831,7 +2830,7 @@ struct rde_event {
 	void* sdl_native_event;
 };
 
-/// ================== CALLBACKS AND FUNCTION POINTERS ======================
+// =================================================================== CALLBACKS AND FUNCTION POINTERS ===================================================================
 
 // Callback: rde_event_func
 // Function pointer (callback) for the main event function, so the user can respond to the needed events.
@@ -2871,7 +2870,7 @@ typedef struct {
 	rde_render_func on_render;
 } rde_end_user_mandatory_callbacks;
 
-/// ============================== ENGINE ===================================
+// =================================================================== ENGINE ===================================================================
 
 // Type: rde_engine_heap_allocs_config
 // Struct that contains values to allocate on heap when the engine is loading for the first time. In general, those are the only allocations the engine will do internally during the whole program's lifetime.
@@ -2956,7 +2955,7 @@ struct rde_engine_init_info {
 
 };
 
-/// ============================ RENDERING ==================================
+// =================================================================== RENDERING ===================================================================
 
 // Type: rde_shader_data
 // Contains OpenGL data of the shader, basically Ids.
@@ -3206,7 +3205,7 @@ typedef struct {
 	uint vertices_count;
 } rde_polygon;
 
-/// ============================ AUDIO ==================================
+// =================================================================== AUDIO ===================================================================
 
 #ifdef RDE_AUDIO_MODULE
 typedef struct rde_sound rde_sound;
@@ -3218,9 +3217,9 @@ typedef struct {
 RDE_FUNC rde_sound_config rde_struct_create_audio_config();
 #endif
 
-/// *************************************************************************************************
-/// *                                GLOBAL VARIABLES                         						*
-/// *************************************************************************************************
+// 											==============================================================================
+// 											=								GLOBAL VARIABLES					 	   	 =
+// 											==============================================================================
 
 // Group: Constants
 
@@ -3344,13 +3343,13 @@ const rde_texture_parameters RDE_DEFAULT_TEXTURE_PARAMETERS = {
 	.mipmap_min_filter = RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_LINEAR_MIN_FILTER_LINEAR
 };
 
-/// *************************************************************************************************
-/// *                                		FUNCTIONS                         						*
-/// *************************************************************************************************
+// 											==============================================================================
+// 											=									FUNCTIONS					 	   	 	 =
+// 											==============================================================================
 
 // Group: Constructors
 
-/// ============================ CONSTRUCTORS ===============================
+// =================================================================== CONSTRUCTORS ===================================================================
 
 // Constructor: rde_struct_create_probability
 RDE_FUNC rde_probability rde_struct_create_probability();
@@ -3418,7 +3417,7 @@ RDE_FUNC rde_color rde_struct_create_color();
 // Constructor: rde_struct_create_polygon
 RDE_FUNC rde_polygon rde_struct_create_polygon();
 
-/// ============================ LOG ========================================
+// =================================================================== LOG ===================================================================
 
 // Group: Log Functions
 
@@ -3448,7 +3447,7 @@ RDE_FUNC void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...);
 //		This is an inner function, do not use. Use macro <rde_log_level> instead.
 RDE_FUNC void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...);
 
-/// ============================ UTIL =======================================
+// =================================================================== UTIL ===================================================================
 
 // Group: Util Functions
 
@@ -3636,7 +3635,7 @@ RDE_FUNC uint rde_util_hash_map_int_hash(int* _key);
 //	_key - poiner to const char* value.
 RDE_FUNC uint rde_util_hash_map_str_hash(const char** _key);
 
-/// ============================ MATH =======================================
+// =================================================================== MATH ===================================================================
 
 // Function: rde_math_set_random_seed
 // Sets the seed for randomness. Using -1 will set it to a random value according to the current time. Fixed values will produce fixed results over different runs.
@@ -3783,7 +3782,7 @@ RDE_DECLARE_EASING_FUNCS(in, circular)
 RDE_DECLARE_EASING_FUNCS(out, circular)
 RDE_DECLARE_EASING_FUNCS(in_out, circular)
 
-/// ============================ ENGINE =====================================
+// =================================================================== ENGINE ===================================================================
 
 // Function: rde_engine_create_engine
 // Initializes the engine with a specific configuration file. It returns the default created window. This function MUST be called before using the engine.
@@ -3983,7 +3982,7 @@ RDE_FUNC void rde_transform_set_parent(rde_transform* _transform, rde_transform*
 //	_transform - transform to get the amount of children.
 RDE_FUNC uint rde_transform_get_children_count(rde_transform* _transform);
 
-/// ============================ WINDOW =====================================
+// =================================================================== WINDOW ===================================================================
 
 // Function: rde_window_create_window_os
 // Creates a new window ready to work on any supported platform. This window must be destroyed by the user when not needed anymore.
@@ -4108,7 +4107,7 @@ RDE_FUNC void* rde_window_get_native_sdl_gl_context_handle(rde_window* _window);
 //	_window - window to be destroyed.
 RDE_FUNC void rde_window_destroy_window(rde_window* _window);
 
-/// ============================ EVENTS =====================================
+// =================================================================== EVENTS ===================================================================
 
 // Function: rde_events_window_consume_events
 // Takes and tries to handle window events for a window. If the event has been handled, its flag will be set to true.
@@ -4251,7 +4250,7 @@ RDE_FUNC bool rde_events_is_mobile_touch_released(rde_window* _window, uint _fin
 //	_window - window to check the event.
 RDE_FUNC uint rde_events_mobile_get_finger_amount(rde_window* _window);
 
-/// ============================ RENDERING ==================================
+// =================================================================== RENDERING ===================================================================
 
 // Function: rde_rendering_shader_load
 // Loads a shader into memory given its name (to find it later), vertex shader and fragment shader and returns a pointer to it.
@@ -4308,7 +4307,7 @@ RDE_FUNC rde_shader_data rde_rendering_shader_get_data(rde_shader* _shader);
 RDE_FUNC rde_shader* rde_rendering_shader_get_by_name(const char* _name);
 
 // Function: rde_rendering_shader_unload
-// Unloads a shader from memory and sets the pointer to NULL automatically.
+// Unloads a shader and returns it to the pool. Pointer is set to NULL automatically.
 //
 // Parameters:
 //	_shader - shader to unload.
@@ -4337,7 +4336,7 @@ RDE_FUNC rde_texture* rde_rendering_texture_text_load(const char* _file_path);
 RDE_FUNC rde_texture_data rde_rendering_texture_get_data(rde_texture* _texture);
 
 // Function: rde_rendering_texture_unload
-// Unloads a texture from memory and sets the pointer to NULL automatically.
+// Unloads a texture and returns it to the pool. Sets pointer to NULL automatically.
 //
 // Parameters:
 //	_texture - texture to unload.
@@ -4366,67 +4365,385 @@ RDE_FUNC rde_texture* rde_rendering_atlas_get_subtexture(rde_atlas* _atlas, cons
 RDE_FUNC rde_atlas_data rde_rendering_atlas_get_data(rde_atlas* _atlas);
 
 // Function: rde_rendering_atlas_unload
-// Unloads a texture atlas from memory and sets the pointer to NULL automatically.
+// Unloads a texture atlas and returns it to the pool. Pointer is set to NULL automatically.
 //
 // Parameters:
 //	_atlas - texture atlas to unload.
 RDE_FUNC void rde_rendering_atlas_unload(rde_atlas* _atlas);
 
+// Function: rde_rendering_memory_texture_create
+// Creates a texture on CPU memory, than later can be uploaded to GPU. Data is stored until the texture is free, so it can be modified as needed. This must be freed by end-user.
+//
+// Parameters:
+//	_width - width of the texture.
+//	_height - height of the texture.
+//	_channels - amount of channels, typically 4 is used.
 RDE_FUNC rde_texture* rde_rendering_memory_texture_create(uint _width, uint _height, int _channels);
+
+// Function: rde_rendering_memory_texture_set_pixel
+// Sets a memory texture's pixel to a specific color
+//
+// Parameters:
+//	_memory_texture - memory texture to modify.
+//	_position - position of the pixel to modify, being (0, 0) top-left of the image.
+//	_color - color to set on the pixel.
 RDE_FUNC void rde_rendering_memory_texture_set_pixel(rde_texture* _memory_texture, rde_vec_2I _position, rde_color _color);
+
+// Function: rde_rendering_memory_texture_get_pixel
+// Gets a memory texture's pixel color
+//
+// Parameters:
+//	_memory_texture - memory texture to get info.
+//	_position - position of the pixel to get, being (0, 0) top-left of the image.
 RDE_FUNC rde_color rde_rendering_memory_texture_get_pixel(rde_texture* _memory_texture, rde_vec_2I _position);
+
+// Function: rde_rendering_memory_texture_gpu_upload
+// Uploads all the data to the GPU, so it can be rendered by the GPU.
+//
+// Parameters:
+//	_memory_texture - memory texture to upload the data.
 RDE_FUNC void rde_rendering_memory_texture_gpu_upload(rde_texture* _memory_texture);
+
+// Function: rde_rendering_memory_texture_get_pixels
+// Returns a pointer to the memory textures data. Modifying this pointer will modify the memorys data directly, but won't modify it on GPU, call <rde_rendering_memory_texture_gpu_upload> for this.
+//
+// Parameters:
+//	_memory_texture - memory texture to get the pixels from.
 RDE_FUNC unsigned char* rde_rendering_memory_texture_get_pixels(rde_texture* _memory_texture);
+
+// Function: rde_rendering_memory_texture_destroy
+// Destroys a memory texture, freeing any allocated data (any referencs to it will be invalid). Also frees OpenGL data. Sets the pointer to NULL automatically.
+//
+// Parameters:
+//	_memory_texture - memory texture to desroy.
 RDE_FUNC void rde_rendering_memory_texture_destroy(rde_texture* _memory_texture);
 
+// Function: rde_rendering_render_texture_create
+// Creates a render texture. This type of texture is used when users want to render something onto a texture and not directly to the screen. Can later be used to render onto geometry. This needs to be freed by end-users.
+//
+// Parameters:
+//	_width - width of the render texture.
+//	_height - height of the render texture.
 RDE_FUNC rde_render_texture* rde_rendering_render_texture_create(uint _width, uint _height);
+
+// Function: rde_rendering_render_texture_enable
+// Everything rendered from this function until reaching <rde_rendering_render_texture_disable> will be rendered onto _render_texture and not to the screen. Must be a closing <rde_rendering_render_texture_disable>.
+//
+// Parameters:
+//	_render_texture - render texture to draw the scene to.
 RDE_FUNC void rde_rendering_render_texture_enable(rde_render_texture* _render_texture);
+
+// Function: rde_rendering_render_texture_disable
+// Flushes the current scene drawing onto the previously selected render texture. Must be an opening <rde_rendering_render_texture_enable>.
 RDE_FUNC void rde_rendering_render_texture_disable();
+
+// Function: rde_rendering_render_texture_update
+// Allows to resize the render texture to a different size.
+//
+// Parameters:
+//	_render_texture - render texture to modify the size.
+//	_width - new width of the texture, can be greater or lower.
+//	_height - new height of the texture, can be greater or lower.
 RDE_FUNC void rde_rendering_render_texture_update(rde_render_texture* _render_texture, uint _width, uint _height);
+
+// Function: rde_rendering_render_texture_destroy
+// Destroys a render texture, freeing all the allocated data and OpeGL resources. Sets the pointer to NULL automatically.
 RDE_FUNC void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture);
 
-RDE_FUNC rde_font* rde_rendering_font_load(const char* _font_path); // There will be two files with the same name and different extensions to load, just end the path with the font name without extension
+// Function: rde_rendering_font_load
+// Loads a font into the GPU and returns a pointer to it. Atlases must be generated with RDE's atlas tool. This will generate 2 file with the same name, but different extensions.
+//
+// Parameters:
+//	_font_path - path to the font to load. The name of the file (RDE's atlas tool generates 2 files) must be the name of the 2 files, without extension.
+RDE_FUNC rde_font* rde_rendering_font_load(const char* _font_path);
+
+// Function: rde_rendering_font_get_data
+// Returns read-only data of a font.
+//
+// Parameters:
+//	_font - font to get the data from.
 RDE_FUNC rde_font_data rde_rendering_font_get_data(rde_font* _font);
+
+// Function: rde_rendering_font_unload
+// Unloads a font and returns it to the pool. Pointer is set to NULL automatically.
+//
+// Parameters:
+//	_font - font to unload.
 RDE_FUNC void rde_rendering_font_unload(rde_font* _font);
 
+// Function: rde_rendering_set_background_color
+// Sets the clear coloring background color.
+//
+// Parameters:
+//	_color - color to set to the background.
 RDE_FUNC void rde_rendering_set_background_color(const rde_color _color);
 
+// Function: rde_rendering_2d_begin_drawing
+// Starts a 2D drawing batch. Must be called before rendering anything 2D. More than one call can be done on a frame. No nested calls to this function can be made. Any kind of texture can be rendered with
+// a single call to this method, if textures cannot be batched, this function and <rde_rendering_2d_end_drawing> handle automatic flushes. Only RDE_CAMERA_TYPE_ORTHOGRAPHIC is allowed.
+//
+// Parameters:
+//	_camera - camera that will render the scene.
+//	_window - window where the scene will be rendered.
+// _is_hud - if set to true, then rendered elements won't move if the camera moves around the world. Perfect for UI.
 RDE_FUNC void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window, bool _is_hud);
-RDE_FUNC void rde_rendering_2d_draw_point(rde_vec_2F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_2d_draw_line(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_2d_draw_triangle(rde_vec_2F _verte_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader); /// Draws a batched triangle in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_2d_draw_rectangle(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader); /// Draws a batched rectangle in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_2d_draw_circle(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader); /// Draws a batched circle in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_2d_draw_polygon(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader);  /// Draws a batched polygon in 2D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_2d_draw_memory_texture(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader); /// Draws a batched quad texture in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader); /// Draws a batched group of quads representing the _text in 2D space, pass RDE_COLOR_WHITE to _tint_color for no tint effects, pass NULL on the _shader for the default shader
+
+// Function: rde_rendering_2d_draw_point
+// Draws a point on the screen.
+//
+// Parameters:
+//	_position - position of the point. (0, 0) is the middle of the screen.
+//	_color - color of the point.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+RDE_FUNC void rde_rendering_2d_draw_point(rde_vec_2F _position, rde_color _color, rde_shader* _shader);
+
+// Function: rde_rendering_2d_draw_line
+// Draws a line on the screen.
+//
+// Parameters:
+//	_init - starting position of the line. (0, 0) is the middle of the screen.
+//	_end - ending position of the line. (0, 0) is the middle of the screen.
+//	_color - color of the line.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+RDE_FUNC void rde_rendering_2d_draw_line(rde_vec_2F _init, rde_vec_2F _end, rde_color _color, rde_shader* _shader);
+
+// Function: rde_rendering_2d_draw_triangle
+// Draws a triangle on the screen.
+//
+// Parameters:
+//	_vertex_a - first vertex of the triangle. (0, 0) is the middle of the screen.
+//	_vertex_b - second vertex of the triangle. (0, 0) is the middle of the screen.
+//	_vertex_c - third vertex of the triangle. (0, 0) is the middle of the screen.
+//	_color - color of the triangle.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+RDE_FUNC void rde_rendering_2d_draw_triangle(rde_vec_2F _vertex_a, rde_vec_2F _vertex_b, rde_vec_2F _vertex_c, rde_color _color, rde_shader* _shader);
+
+// Function: rde_rendering_2d_draw_rectangle
+// Draws a triangle on the screen.
+//
+// Parameters:
+//	_bottom_left - bottom-left corner of the rectangle. (0, 0) is the middle of the screen.
+//	_top_right - top-right corner of the rectangle. (0, 0) is the middle of the screen.
+//	_color - color of the rectangle.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+RDE_FUNC void rde_rendering_2d_draw_rectangle(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader);
+
+// Function: rde_rendering_2d_draw_circle
+// Draws a circle on the screen.
+//
+// Parameters:
+//	_position - Center of the circle. (0, 0) is the middle of the screen.
+//	_radius - radius of the circle.
+//	_color - color of the circle.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+RDE_FUNC void rde_rendering_2d_draw_circle(rde_vec_2F _position, float _radius, rde_color _color, rde_shader* _shader);
+
+// Function: rde_rendering_2d_draw_polygon
+// Draws a polygon on the screen.
+//
+// Parameters:
+//	_transform - transform of the polygon.
+//	_polygon - polygon data.
+//	_color - color of the polygon.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+RDE_FUNC void rde_rendering_2d_draw_polygon(const rde_transform* _transform, const rde_polygon* _polygon, rde_color _color, const rde_shader* _shader);
+
+// Function: rde_rendering_2d_draw_texture
+// Draws a texture on the screen.
+//
+// Parameters:
+//	_transform - transform of the texture.
+//	_texture - texture data.
+//	_tint_color - color to tint the texture. Use RDE_COLOR_WHITE if no tint is needed.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+RDE_FUNC void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_texture* _texture, rde_color _tint_color, rde_shader* _shader);
+
+// Function: rde_rendering_2d_draw_memory_texture
+// Draws a memory texture on the screen.
+//
+// Parameters:
+//	_transform - transform of the memory texture.
+//	_texture - texture data.
+//	_tint_color - color to tint the memory texture. Use RDE_COLOR_WHITE if no tint is needed.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+RDE_FUNC void rde_rendering_2d_draw_memory_texture(const rde_transform* _transform, rde_texture* _texture, rde_color _tint_color, rde_shader* _shader);
+
+
+// Function: rde_rendering_2d_draw_text
+// Draws a text on the screen.
+//
+// Parameters:
+//	_transform - transform of the memory texture.
+//	_font - font data.
+//	_text - text to draw.
+//	_tint_color - color to tint the text. Use RDE_COLOR_WHITE if no tint is needed.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+RDE_FUNC void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader);
+
+// Function: rde_rendering_2d_end_drawing
+// Ends a drawing batch. A previous <rde_rendering_2d_begin_drawing> is mandatory to use this function. Flushes everything into the GPU.
 RDE_FUNC void rde_rendering_2d_end_drawing();
 
-RDE_FUNC rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
-RDE_FUNC rde_mesh* rde_rendering_mesh_create_cube(float _size, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
-RDE_FUNC rde_mesh* rde_rendering_mesh_create_prism(rde_vec_3F _size, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
-RDE_FUNC rde_mesh* rde_rendering_mesh_create_sphere(float _radius, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
-RDE_FUNC rde_mesh* rde_rendering_mesh_create_triangular_pyramid(rde_vec_2F _size, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
-RDE_FUNC rde_mesh* rde_rendering_mesh_create_pyramid(rde_vec_3F _size, rde_material* _material); // creates a new mesh that when not needed anymore, needs to be destroyed. A quad mesh will have 4 vertices and 6 indices and uploads to GPU
+// Function: rde_struct_memory_mesh_create
+// Creates a 3D mesh with the specified data. For example, a quad mesh will have 4 vertices and 6 indices and uploads to GPU. This must be freed by the end-user.
+//
+// Parameters:
+//	_data - data specific for the new 3D mesh.
+RDE_FUNC rde_mesh* rde_struct_memory_mesh_create(rde_mesh_gen_data* _data);
+
+// Function: rde_rendering_mesh_create_cube
+// Creates a 3D cube mesh. This must be freed by the end-user.
+//
+// Parameters:
+//	_size - size of the cube.
+//	_material - material that the cube will use.
+RDE_FUNC rde_mesh* rde_rendering_mesh_create_cube(float _size, rde_material* _material);
+
+// Function: rde_rendering_mesh_create_prism
+// Creates a 3D prism mesh. This must be freed by the end-user.
+//
+// Parameters:
+//	_size - size of the prism.
+//	_material - material that the prism will use.
+RDE_FUNC rde_mesh* rde_rendering_mesh_create_prism(rde_vec_3F _size, rde_material* _material);
+
+// Function: rde_rendering_mesh_create_sphere
+// Creates a 3D sphere mesh. This must be freed by the end-user.
+//
+// Parameters:
+//	_radius - radius of the sphere.
+//	_material - material that the sphere will use.
+RDE_FUNC rde_mesh* rde_rendering_mesh_create_sphere(float _radius, rde_material* _material);
+
+// Function: rde_rendering_mesh_create_triangular_pyramid
+// Creates a 3D triangular pyramid mesh. This must be freed by the end-user.
+//
+// Parameters:
+//	_size - size of the triangular pyramid.
+//	_material - material that the triangular pyramid will use.
+RDE_FUNC rde_mesh* rde_rendering_mesh_create_triangular_pyramid(rde_vec_2F _size, rde_material* _material);
+
+// Function: rde_rendering_mesh_create_pyramid
+// Creates a 3D pyramid mesh. This must be freed by the end-user.
+//
+// Parameters:
+//	_size - size of the pyramid.
+//	_material - material that the pyramid will use.
+RDE_FUNC rde_mesh* rde_rendering_mesh_create_pyramid(rde_vec_3F _size, rde_material* _material);
+
+// Function: rde_rendering_mesh_get_data
+// Returns read-only data of a mesh.
+//
+// Parameters:
+//	_mesh - mesh to get the data from.
 RDE_FUNC rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh);
+
+// Function: rde_rendering_mesh_destroy
+// Destroys a 3D mesh and frees allocations and OpenGL data. Sets pointer to NULL automatically.
 RDE_FUNC void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated_buffers);
 
 #if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)
+// Function: rde_rendering_model_load
+// Loads a 3D model into the GPU. The accepted formats depends on the modules compiled with RDE library. By default, OBJ, FBX and GLTF
+//
+// Parameters:
+//	_model_path - path to the 3D model.
 RDE_FUNC rde_model* rde_rendering_model_load(const char* _model_path);
+
+// Function: rde_rendering_model_get_vertices_count
+// Returns the total amount of vertices. If the model is made by several sub-meshes, all sub-meshes vertices are count.
+//
+// Parameters:
+//	_model - model to count vertices.
 RDE_FUNC uint rde_rendering_model_get_vertices_count(rde_model* _model);
+
+// Function: rde_rendering_model_set_light_data
+// Sets the lighting data of the model.
+//
+// Parameters:
+//	_model - model to set the lighting data.
+//	_light_data - group of directional, diffuse and specular light data.
 RDE_FUNC void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data);
+
+// Function: rde_rendering_model_get_light_data
+// Returns the current light data configuration.
+//
+// Parameters:
+//	_model - model to get the light data.
 RDE_FUNC rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model);
-RDE_FUNC rde_model_data rde_rendering_model_get_data(rde_model* _model); // User manually needs to free 'meshes' field as it allocates dynamic memory
+
+// Function: rde_rendering_model_get_data
+// Returns read-only data of a model. An allocation is made by this method, to fill an array, this must be freed by the end-user.
+//
+// Parameters:
+//	_model - model to get the data from.
+RDE_FUNC rde_model_data rde_rendering_model_get_data(rde_model* _model);
+
+// Function: rde_rendering_model_unload
+// Unloads a model and returns it to the pool. Pointer is set to NULL automatically.
+//
+// Parameters:
+//	_model - model to get the data from.
 RDE_FUNC void rde_rendering_model_unload(rde_model* _model);
 #endif
 
+// Function: rde_rendering_3d_begin_drawing
+// Starts a 3D drawing batch. Must be called before rendering anything 3D. More than one call can be done on a frame. No nested calls to this function can be made. Any kind of texture can be rendered with
+// a single call to this method, if models or meshes cannot be batched, this function and <rde_rendering_3d_end_drawing> handle automatic flushes. Only RDE_CAMERA_TYPE_PERSPECTIVE is allowed.
+//
+// Parameters:
+//	_camera - camera that will render the scene.
+//	_window - window where the scene will be rendered.
+// _draw_wireframe_over_mesh - if set to true, a wireframe is rendered on top of the models. Might affect performance.
 RDE_FUNC void rde_rendering_3d_begin_drawing(rde_camera* _camera, rde_window* _window, bool _draw_wireframe_over_mesh);
-RDE_FUNC void rde_rendering_3d_draw_point(rde_vec_3F _position, rde_color _color, rde_shader* _shader); /// Draws a point in 3D space, pass NULL on the _shader for the default shader
-RDE_FUNC void rde_rendering_3d_draw_line(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, unsigned short _thickness, rde_shader* _shader); /// Draws a batched line in 2D space, pass NULL on the _shader for the default shader
+
+// Function: rde_rendering_3d_draw_point
+// Draws a 3D point on the screen.
+//
+// Parameters:
+//	_position - position of the point. (0, 0, 0) is the middle of the screen.
+//	_color - color of the point.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+RDE_FUNC void rde_rendering_3d_draw_point(rde_vec_3F _position, rde_color _color, rde_shader* _shader);
+
+// Function: rde_rendering_3d_draw_line
+// Draws a 3D line on the screen.
+//
+// Parameters:
+//	_init - starting position of the line. (0, 0, 0) is the middle of the screen.
+//	_end - ending position of the line. (0, 0, 0) is the middle of the screen.
+//	_color - color of the line.
+//	_thickness - thickness of the line. Minimum is 1.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+RDE_FUNC void rde_rendering_3d_draw_line(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, unsigned short _thickness, rde_shader* _shader);
+
+// Function: rde_rendering_3d_draw_mesh
+// Draws a 3D mesh on the screen.
+//
+// Parameters:
+//	_transform - transform of the texture.
+//	_mesh - mesh data.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
 RDE_FUNC void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader);
+
+// Function: rde_rendering_3d_draw_model
+// Draws a 3D model on the screen.
+//
+// Parameters:
+//	_transform - transform of the texture.
+//	_model - model data.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
 RDE_FUNC void rde_rendering_3d_draw_model(const rde_transform* _transform, rde_model* _model, rde_shader* _shader);
+
+// Function: rde_rendering_3d_draw_model
+// Draws a skybox. This function is called outside of the block <rde_rendering_3d_begin_drawing>/<rde_rendering_3d_end_drawing>.
+//
+// Parameters:
+//	_camera - camera that will draw the skybox.
 RDE_FUNC void rde_rendering_3d_draw_skybox(rde_camera* _camera);
+
+// Function: rde_rendering_3d_end_drawing
+// Ends a drawing batch. A previous <rde_rendering_3d_begin_drawing> is mandatory to use this function. Flushes everything into the GPU.
 RDE_FUNC void rde_rendering_3d_end_drawing();
 
 RDE_FUNC void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction);
@@ -4437,21 +4754,71 @@ RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color(rde_col
 RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_vec_3F _diffuse_color);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color);
 RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color);
+
+// Function: rde_rendering_lighting_add_point_light
+// Adds a new point light to the scene. Point lights illuminates in all directions, but with a maximum radius.
+//
+// Parameters:
+//	_point_light - point light to add.
 RDE_FUNC void rde_rendering_lighting_add_point_light(rde_point_light* _point_light);
+
+// Function: rde_rendering_lighting_add_spot_light
+// Adds a new spot light to the scene. Spot lights illuminates like a lantern.
+//
+// Parameters:
+//	_spot_light - spot light to add.
 RDE_FUNC void rde_rendering_lighting_add_spot_light(rde_spot_light* _spot_light);
+
+// Function: rde_rendering_lighting_get_directional_light
+// Returns the current data of the directional light.
 RDE_FUNC rde_directional_light rde_rendering_lighting_get_directional_light();
 
-RDE_FUNC rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]); // order is right, left, bottom, top, front, back
+// Function: rde_rendering_skybox_load
+// Loads a skybox into GPU. Returns an id to use it.
+//
+// Parameters:
+//	_texture_paths - array of strings containing the paths to the 6 needed images. Order is right, left, bottom, top, front, back.
+RDE_FUNC rde_skybox_id rde_rendering_skybox_load(const char* _texture_paths[6]);
+
+// Function: rde_rendering_skybox_use
+// Enables a specific skybox to render. Only one skybox can be enable at a time. This must be freed by the end-user.
+//
+// Parameters:
+//	_skybox_id - skybox to enable.
 RDE_FUNC void rde_rendering_skybox_use(rde_skybox_id _skybox_id);
+
+// Function: rde_rendering_skybox_unload
+// Unloads a skybox from memory and frees allocations and OpenGL data.
+//
+// Parameters:
+//	_skybox_id - skybox to unload.
 RDE_FUNC void rde_rendering_skybox_unload(rde_skybox_id _skybox_id);
 
-RDE_FUNC void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing); // This function CANNOT be called during on_render.
+// Function: rde_rendering_set_antialiasing
+// Enables antialiasing with an specific level. This function CANNOT BE CALLED on on_render callback. Some devices may not support this feature. The greater the MSAA, the more resources it consumes.
+//
+// Parameters:
+//	_window - window to make calculations.
+//	_antialiasing - antialiasing level.
+RDE_FUNC void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing);
+
+// Function: rde_rendering_get_current_antialiasing
+// Returns the level of antialiasing.
 RDE_FUNC RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing();
 
+// Function: rde_rendering_shadows_begin
+// Works like <rde_rendering_3d_begin_drawing> but it renders shadows of everything inside.
+//
+// Parameters:
+//	_window - window to render the scene to.
+//	_camera - camera to render the scene with.
 RDE_FUNC void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _camera);
+
+// Function: rde_rendering_shadows_end
+// Works like <rde_rendering_3d_end_drawing> but it renders shadows of everything inside.
 RDE_FUNC void rde_rendering_shadows_end();
 
-/// ============================ AUDIO ======================================
+// =================================================================== AUDIO ===================================================================
 
 #ifdef RDE_AUDIO_MODULE
 
@@ -4473,45 +4840,166 @@ RDE_FUNC void rde_audio_end();
 
 #endif
 
-/// ============================ FILE SYSTEM ================================
+// =================================================================== FILE SYSTEM ===================================================================
 
+// Function: rde_file_open
+// Opens a file in a specific mode and returns a handle to the file. This must be closed by the end-user.
+//
+// Parameters:
+//	_file_path - path to the file to open.
+//	_file_mode - mode to open the file.
 RDE_FUNC rde_file_handle* rde_file_open(const char* _file_path, RDE_FILE_MODE_ _file_mode);
-RDE_FUNC char* rde_file_read_full_file(rde_file_handle* _file_handler, uint* _output_file_size);
-RDE_FUNC unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handler, uint* _output_file_size);
-RDE_FUNC char* rde_file_read_line(rde_file_handle* _file_handler, uint _line);
-RDE_FUNC char* rde_file_read_chunk(rde_file_handle* _file_handler, uint _begin_byte, uint _end_byte);
-RDE_FUNC void rde_file_write(rde_file_handle* _file_handler, uint _bytes, const char* _data);
-RDE_FUNC void rde_file_write_to_line(rde_file_handle* _file_handler, uint _bytes, const char* _data, uint _line);
-RDE_FUNC void rde_file_append(rde_file_handle* _file_handler, uint _append_byte, uint _bytes, const char* _data, uint _line); // Appends some data at a specific point in the file. -1 as begin means EOF.
-RDE_FUNC void rde_file_clear_content(rde_file_handle* _file_handler);
+
+// Function: rde_file_read_full_file
+// Reads a the full file (as text) provided by the file handle. Returned text must be freed by end-users.
+//
+// Parameters:
+//	_file_handle - opened file handle.
+//	_output_file_size - output parameter, will fill the size of the file. Can be NULL.
+RDE_FUNC char* rde_file_read_full_file(rde_file_handle* _file_handle, uint* _output_file_size);
+
+// Function: rde_file_read_full_file_bytes
+// Reads a the full file (as bytes) provided by the file handle. Returned text must be freed by end-users.
+//
+// Parameters:
+//	_file_handle - opened file handle.
+//	_output_file_size - output parameter, will fill the size of the file. Can be NULL.
+RDE_FUNC unsigned char* rde_file_read_full_file_bytes(rde_file_handle* _file_handle, uint* _output_file_size);
+
+// Function: rde_file_read_line
+// Reads a specific line provided by the file handle. Returned text must be freed by end-users.
+//
+// Parameters:
+//	_file_handle - opened file handle.
+//	_line - line of the file to read. Index starts at 0 and must be >= 0.
+RDE_FUNC char* rde_file_read_line(rde_file_handle* _file_handle, uint _line);
+
+// Function: rde_file_read_chunk
+// Reads a specific chunck provided by the file handle. Returned text must be freed by end-users.
+//
+// Parameters:
+//	_file_handle - opened file handle.
+//	_begin_byte - beginning of the chunk, included. Index starts at 0 and must be >= 0.
+//	_end_byte - end of the chunk, included. Index starts at 0 and must be >= 0.
+RDE_FUNC char* rde_file_read_chunk(rde_file_handle* _file_handle, uint _begin_byte, uint _end_byte);
+
+// Function: rde_file_write
+// Writes data to the provided file handle. This will erase previous contents.
+//
+// Parameters:
+//	_file_handle - opened file handle.
+//	_bytes - amount of bytes to write.
+//	_data - text to write.
+RDE_FUNC void rde_file_write(rde_file_handle* _file_handle, uint _bytes, const char* _data);
+
+// Function: rde_file_write_to_line
+// Writes data to a specific line of the provided file handle. This will erase previous contents of the line.
+//
+// Parameters:
+//	_file_handle - opened file handle.
+//	_bytes - amount of bytes to write.
+//	_data - text to write.
+//	_line - line of the file to write. Index starts at 0 and must be >= 0.
+RDE_FUNC void rde_file_write_to_line(rde_file_handle* _file_handle, uint _bytes, const char* _data, uint _line);
+
+// Function: rde_file_append
+// Appends data to a specific point of the provided file handle.
+//
+// Parameters:
+//	_file_handle - opened file handle.
+//	_append_byte - point to insert data. -1 means at the end of the file.
+//	_bytes - amount of bytes to write.
+//	_data - text to write.
+RDE_FUNC void rde_file_append(rde_file_handle* _file_handle, uint _append_byte, uint _bytes, const char* _data, uint _line);
+
+// Function: rde_file_clear_content
+// Erases all the contents of a file.
+//
+// Parameters:
+//	_file_handle - opened file handle to clear.
+RDE_FUNC void rde_file_clear_content(rde_file_handle* _file_handle);
+
+// Function: rde_file_exists
+// Returns if a file exists on a specific path.
+//
+// Parameters:
+//	_file_path - path to the file.
 RDE_FUNC bool rde_file_exists(const char* _file_path);
+
+// Function: rde_file_delete
+// Deletes a file on a specific path.
+//
+// Parameters:
+//	_file_path - path to the file.
 RDE_FUNC void rde_file_delete(const char* _file_path);
+
+// Function: rde_file_move
+// Moves a file on a specific path.
+//
+// Parameters:
+//	_file_path - path to the file.
 RDE_FUNC void rde_file_move(const char* _file_path, const char* _new_file_path);
-RDE_FUNC void rde_file_close(rde_file_handle* _file_handler);
+
+// Function: rde_file_close
+// Closes an opened file and releases allocated data.
+//
+// Parameters:
+//	_file_path - path to the file.
+RDE_FUNC void rde_file_close(rde_file_handle* _file_handle);
+
+// Function: rde_file_free_read_text
+// Frees any form of read text by rde_file_ functions.
+//
+// Parameters:
+//	_file_handle - opened file handle.
 RDE_FUNC void rde_file_free_read_text(rde_file_handle* _file_handle);
+
+// Function: rde_file_free_read_bytes
+// Frees any form of read bytes by rde_file_ functions.
+//
+// Parameters:
+//	_file_handle - opened file handle.
 RDE_FUNC void rde_file_free_read_bytes(rde_file_handle* _file_handle);
 
 
 
-/// ============================ PHYSICS ==============================
+// =================================================================== PHYSICS ===================================================================
 
 #ifdef RDE_PHYSICS_MODULE
+// Function: rde_jolt_draw_debug_shapes
+// Draws debug shapes of the colliders of the physics system. This function is not optmized and is just for debugging purposes. This function must be called
+// OUTSIDE of a block <rde_rendering_3d_begin_drawing>/<rde_rendering_3d_end_drawing>.
+//
+// Parameters:
+//	_window - window to render the debug shapes.
+//	_camera - camera to render the debug shapes with.
 RDE_FUNC void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
 #endif
 
 
 
-/// ============================ ERROR ================================
+// =================================================================== ERROR ===================================================================
 
+// Function: rde_critical_error
+// If the condition is not true, makes the application crash. After making it crash, it cleans all the resources. Will print a stacktrace to the error.
+//
+// Parameters:
+//	_condition - condition to meet, must be true for the application not to crash.
+//	_fmt - formatted error message.
 RDE_FUNC void rde_critical_error(bool _condition, const char* _fmt, ...);
 
 
 
-
+// =================================================================== ANDROID ===================================================================
 
 #if RDE_IS_ANDROID()
+// Function: rde_android_get_native_window
+// Returns the Android native window.
 RDE_FUNC ANativeWindow* rde_android_get_native_window();
 #endif
+
+
+// =================================================================== OTHER ===================================================================
 
 #ifdef RDE_GOD
 #include "private_structs.c"
@@ -4810,21 +5298,11 @@ RDE_FUNC ANativeWindow* rde_android_get_native_window();
 #define free_read_text(_file_handle)							 	rde_file_free_read_text(_file_handle)
 #define free_read_bytes(_file_handle) 								rde_file_free_read_bytes(_file_handle)
 
-
-
-/// ============================ PHYSICS ==============================
-
 #ifdef RDE_PHYSICS_MODULE
 #define jolt_draw_debug_shapes(_window, _camera)					rde_jolt_draw_debug_shapes(_window, _camera)
 #endif
 
-
-
-/// ============================ ERROR ================================
-
 #define critical_error(_condition, _fmt, ...) 						rde_critical_error(_condition, _fmt, __VA_ARGS__)
-
-
 
 #if RDE_IS_ANDROID()
 #define android_get_native_window()									rde_android_get_native_window();
