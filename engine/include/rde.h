@@ -3900,6 +3900,10 @@ RDE_FUNC void rde_engine_set_vsync_active(bool _vsync);
 //	_window - window to show the message box.
 RDE_FUNC void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _title, const char* _content, rde_window* _window);
 
+// Function: rde_engine_destroy_engine
+// Destroys the engine and cleans every allocation and releases any asset used by the engine.
+RDE_FUNC void rde_engine_destroy_engine();
+
 // Function: rde_transform_load
 // Returns a <rde_transform> from the preloaded pool of transforms. Transforms are not allowed to be created nor modify by end-users as
 // there are engine-internal operations that must be notified when modifying a <rde_transform> fields, mainly for parenting purposes.
@@ -3957,12 +3961,12 @@ RDE_FUNC rde_vec_3F rde_transform_get_scale(rde_transform* _transform);
 //	_scale - scale of the transform.
 RDE_FUNC void rde_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale);
 
-// Function: rde_engine_trasnform_get_parent
+// Function: rde_transform_get_parent
 // Returns the parent of a transform. If no parent, NULL will be returned.
 //
 // Parameters:
 //	_transform - transform to get the parent.
-RDE_FUNC rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform);
+RDE_FUNC rde_transform* rde_transform_get_parent(rde_transform* _transform);
 
 // Function: rde_transform_set_parent
 // Sets the parent of a transform. Doing this will apply parent transformations to the child transform.
@@ -3978,10 +3982,6 @@ RDE_FUNC void rde_transform_set_parent(rde_transform* _transform, rde_transform*
 // Parameters:
 //	_transform - transform to get the amount of children.
 RDE_FUNC uint rde_transform_get_children_count(rde_transform* _transform);
-
-// Function: rde_engine_destroy_engine
-// Destroys the engine and cleans every allocation and releases any asset used by the engine.
-RDE_FUNC void rde_engine_destroy_engine();
 
 /// ============================ WINDOW =====================================
 
@@ -4253,22 +4253,123 @@ RDE_FUNC uint rde_events_mobile_get_finger_amount(rde_window* _window);
 
 /// ============================ RENDERING ==================================
 
+// Function: rde_rendering_shader_load
+// Loads a shader into memory given its name (to find it later), vertex shader and fragment shader and returns a pointer to it.
+//
+// Parameters:
+//	_name - name of the shader, must be unique between the shader names.
+//	_vertex_code - glsl vertex shader code.
+//	_fragment_code - glsl fragment shader code.
 RDE_FUNC rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_code, const char* _fragment_code);
+
+// Function: rde_rendering_shader_set_uniform_value_float
+// Sets a float uniform value to a specific shader.
+//
+// Parameters:
+//	_shader - shader to set the value.
+//	_uniform_name - name of the uniform in the shader.
+//	_type - type of float uniform.
+//	_data - array of values. If it is a uniform of just 1 value, it can be passed as &.
+//	_transpose - in case it is a matrix uniform, if the matrix is transposed.
 RDE_FUNC void rde_rendering_shader_set_uniform_value_float(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_FV_ _type, float* _data, bool _transpose);
+
+// Function: rde_rendering_shader_set_uniform_value_int
+// Sets a int uniform value to a specific shader.
+//
+// Parameters:
+//	_shader - shader to set the value.
+//	_uniform_name - name of the uniform in the shader.
+//	_type - type of int uniform.
+//	_data - array of values. If it is a uniform of just 1 value, it can be passed as &.
 RDE_FUNC void rde_rendering_shader_set_uniform_value_int(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_IV_ _type, int* _data);
+
+// Function: rde_rendering_shader_set_uniform_value_uint
+// Sets a uint uniform value to a specific shader.
+//
+// Parameters:
+//	_shader - shader to set the value.
+//	_uniform_name - name of the uniform in the shader.
+//	_type - type of uint uniform.
+//	_data - array of values. If it is a uniform of just 1 value, it can be passed as &.
 RDE_FUNC void rde_rendering_shader_set_uniform_value_uint(rde_shader* _shader, const char* _uniform_name, RDE_UNIFORM_UIV_ _type, uint* _data);
+
+// Function: rde_rendering_shader_get_data
+// Returns read-only data of a shader.
+//
+// Parameters:
+//	_shader - shader to get the data from.
 RDE_FUNC rde_shader_data rde_rendering_shader_get_data(rde_shader* _shader);
+
+// Function: rde_rendering_shader_get_by_name
+// Returns a pointer to a shader given its name.
+//
+// Parameters:
+//	_name - name of the shader to find.
 RDE_FUNC rde_shader* rde_rendering_shader_get_by_name(const char* _name);
+
+// Function: rde_rendering_shader_unload
+// Unloads a shader from memory and sets the pointer to NULL automatically.
+//
+// Parameters:
+//	_shader - shader to unload.
 RDE_FUNC void rde_rendering_shader_unload(rde_shader* _shader);
 
-RDE_FUNC rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_texture_parameters* _params); // Pass NULL to params for default parameters
+// Function: rde_rendering_texture_load
+// Loads a texture into the GPU and returns a pointer to it.
+//
+// Parameters:
+//	_file_path - path to the image to load.
+//	_params - data to load the image correctly, NULL can be passed for default values.
+RDE_FUNC rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_texture_parameters* _params);
+
+// Function: rde_rendering_texture_text_load
+// Loads a text atlas into the GPU and returns a pointer to it.
+//
+// Parameters:
+//	_file_path - path to the text atlas to load.
 RDE_FUNC rde_texture* rde_rendering_texture_text_load(const char* _file_path);
+
+// Function: rde_rendering_texture_get_data
+// Returns read-only data of a texture.
+//
+// Parameters:
+//	_texture - texture to get the data from.
 RDE_FUNC rde_texture_data rde_rendering_texture_get_data(rde_texture* _texture);
+
+// Function: rde_rendering_texture_unload
+// Unloads a texture from memory and sets the pointer to NULL automatically.
+//
+// Parameters:
+//	_texture - texture to unload.
 RDE_FUNC void rde_rendering_texture_unload(rde_texture* _texture);
 
-RDE_FUNC rde_atlas* rde_rendering_atlas_load(const char* _texture_path); // There will be two files with the same name and different extensions to load, just end the path with the atlas name without extension
+// Function: rde_rendering_atlas_load
+// Loads a texture atlas into the GPU and returns a pointer to it. Atlases must be generated with RDE's atlas tool. This will generate 2 file with the same name, but different extensions.
+//
+// Parameters:
+//	_texture_path - path to the texture atlas to load. The name of the file (RDE's atlas tool generates 2 files) must be the name of the 2 files, without extension.
+RDE_FUNC rde_atlas* rde_rendering_atlas_load(const char* _texture_path);
+
+// Function: rde_rendering_atlas_get_subtexture
+// Returns a specific texture inside a texture atlas.
+//
+// Parameters:
+//	_atlas - atlas to get the sub texture from.
+//	_texture_name - name of the subtexture. This name is the same name as the image had when creating the atlas with RDE's tool.
 RDE_FUNC rde_texture* rde_rendering_atlas_get_subtexture(rde_atlas* _atlas, const char* _texture_name);
+
+// Function: rde_rendering_atlas_get_data
+// Returns read-only data of a texture atlas.
+//
+// Parameters:
+//	_atlas - texture atlas to get the data from.
 RDE_FUNC rde_atlas_data rde_rendering_atlas_get_data(rde_atlas* _atlas);
+
+// Function: rde_rendering_atlas_unload
+// Unloads a texture atlas from memory and sets the pointer to NULL automatically.
+//
+// Parameters:
+//	_atlas - texture atlas to unload.
 RDE_FUNC void rde_rendering_atlas_unload(rde_atlas* _atlas);
 
 RDE_FUNC rde_texture* rde_rendering_memory_texture_create(uint _width, uint _height, int _channels);
@@ -4544,6 +4645,8 @@ RDE_FUNC ANativeWindow* rde_android_get_native_window();
 #define is_vsync_active() 														rde_engine_is_vsync_active()
 #define set_vsync_active(_vsync) 												rde_engine_set_vsync_active(_vsync)
 #define show_message_box(_level, _title, _content, _window) 					rde_engine_show_message_box(_level, _title, _content, _window)
+#define destroy_engine()														rde_engine_destroy_engine()
+
 #define transform_load() 														rde_transform_load()
 #define transform_unload() 														rde_transform_unload(_transform)
 #define transform_get_position(_transform) 										rde_transform_get_position(_transform)
@@ -4552,10 +4655,9 @@ RDE_FUNC ANativeWindow* rde_android_get_native_window();
 #define transform_set_rotation(_transform, _rotation_degs) 						rde_transform_set_rotation(_transform, _rotation_degs)
 #define transform_get_scale(_transform) 										rde_transform_get_scale(_transform)
 #define transform_set_scale(_transform, _scale) 								rde_transform_set_scale(_transform, _scale)
-#define transform_get_parent(_transform)	 									rde_engine_trasnform_get_parent(_transform)
+#define transform_get_parent(_transform)	 									rde_transform_get_parent(_transform)
 #define transform_set_parent(_transform, _parent) 								rde_transform_set_parent(_transform, _parent)
 #define transform_get_children_count(_transform) 								rde_transform_get_children_count(_transform)
-#define destroy_engine()														rde_engine_destroy_engine()
 
 #define create_windowos() 																	rde_window_create_window_os()
 #define get_window_size(_window) 															rde_window_get_window_size(_window)

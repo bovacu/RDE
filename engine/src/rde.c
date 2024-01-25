@@ -2320,7 +2320,7 @@ void rde_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale) {
 	_transform->dirty = true;
 }
 
-rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform) {
+rde_transform* rde_transform_get_parent(rde_transform* _transform) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get parent");
 	if(_transform->parent == -1) {
 		return NULL;
