@@ -20,47 +20,47 @@ rde_vec_3F shadows_directional_light_specular_color = { 1.0f, 1.0f, 1.0f };
 
 void shadows_keyboard_controller(float _dt) {
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
-		rde_vec_3F _position = rde_engine_transform_get_position(shadows_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
 		_position.x += shadows_camera_front.x * 10 * _dt;
 		_position.y += shadows_camera_front.y * 10 * _dt;
 		_position.z += shadows_camera_front.z * 10 * _dt;
-		rde_engine_transform_set_position(shadows_camera.transform, _position);
+		rde_transform_set_position(shadows_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_S)) {
-		rde_vec_3F _position = rde_engine_transform_get_position(shadows_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
 		_position.x -= shadows_camera_front.x * 10 * _dt;
 		_position.y -= shadows_camera_front.y * 10 * _dt;
 		_position.z -= shadows_camera_front.z * 10 * _dt;
-		rde_engine_transform_set_position(shadows_camera.transform, _position);
+		rde_transform_set_position(shadows_camera.transform, _position);
 	}
 
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_DOWN)) {
-		rde_vec_3F _position = rde_engine_transform_get_position(shadows_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
 		_position.y -= 10 * _dt;
-		rde_engine_transform_set_position(shadows_camera.transform, _position);
+		rde_transform_set_position(shadows_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_UP)) {
-		rde_vec_3F _position = rde_engine_transform_get_position(shadows_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
 		_position.y += 10 * _dt;
-		rde_engine_transform_set_position(shadows_camera.transform, _position);
+		rde_transform_set_position(shadows_camera.transform, _position);
 	}
 
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_A)) {
 		rde_vec_3F _cp = rde_math_cross_product(shadows_camera_front, shadows_camera_up);
 		rde_math_normalize(&_cp);
 		
-		rde_vec_3F _position = rde_engine_transform_get_position(shadows_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
 		_position.x -= _cp.x * 10 * _dt;
 		_position.y -= _cp.y * 10 * _dt;
 		_position.z -= _cp.z * 10 * _dt;
-		rde_engine_transform_set_position(shadows_camera.transform, _position);
+		rde_transform_set_position(shadows_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_D)) {
 		rde_vec_3F _cp = rde_math_cross_product(shadows_camera_front, shadows_camera_up);
 		rde_math_normalize(&_cp);
 
-		rde_vec_3F _position = rde_engine_transform_get_position(shadows_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
 		_position.x += _cp.x * 10 * _dt;
 		_position.y += _cp.y * 10 * _dt;
 		_position.z += _cp.z * 10 * _dt;
-		rde_engine_transform_set_position(shadows_camera.transform, _position);
+		rde_transform_set_position(shadows_camera.transform, _position);
 	}
 }
 
@@ -125,11 +125,11 @@ void shadows_on_event(rde_event* _event, rde_window* _window) {
 void shadows_on_update(float _dt) {
 	rde_vec_2F _scrolled = rde_events_mouse_get_scrolled(current_window);
 	if(_scrolled.x != 0.f || _scrolled.y != 0.f) {
-		rde_vec_3F _position = rde_engine_transform_get_position(shadows_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
 		_position.x += shadows_camera_front.x * 10 * _dt * (_scrolled.y * 3);
 		_position.y += shadows_camera_front.y * 10 * _dt * (_scrolled.y * 3);
 		_position.z += shadows_camera_front.z * 10 * _dt * (_scrolled.y * 3);
-		rde_engine_transform_set_position(shadows_camera.transform, _position);
+		rde_transform_set_position(shadows_camera.transform, _position);
 	}
 
 	shadows_mouse_controller(_dt);
@@ -224,8 +224,8 @@ void shadows_unload() {
 
 	rde_rendering_model_unload(shadows_model);
 
-	rde_engine_transform_unload(shadows_transform_0);
-	rde_engine_transform_unload(shadows_transform_1);
+	rde_transform_unload(shadows_transform_0);
+	rde_transform_unload(shadows_transform_1);
 
 	events_callback = NULL;
 	update_callback = NULL;
@@ -237,12 +237,12 @@ void shadows_unload() {
 
 void shadows_init() {
 	shadows_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
-	rde_engine_transform_set_position(shadows_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
+	rde_transform_set_position(shadows_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
-	shadows_transform_0 = rde_engine_transform_load();
-	shadows_transform_1 = rde_engine_transform_load();
+	shadows_transform_0 = rde_transform_load();
+	shadows_transform_1 = rde_transform_load();
 
-	rde_engine_transform_set_position(shadows_transform_1, (rde_vec_3F) { 0, 5, 0 });
+	rde_transform_set_position(shadows_transform_1, (rde_vec_3F) { 0, 5, 0 });
 
 	events_callback = &shadows_on_event;
 	update_callback = &shadows_on_update;

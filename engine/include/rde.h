@@ -3900,62 +3900,62 @@ RDE_FUNC void rde_engine_set_vsync_active(bool _vsync);
 //	_window - window to show the message box.
 RDE_FUNC void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _title, const char* _content, rde_window* _window);
 
-// Function: rde_engine_transform_load
+// Function: rde_transform_load
 // Returns a <rde_transform> from the preloaded pool of transforms. Transforms are not allowed to be created nor modify by end-users as
 // there are engine-internal operations that must be notified when modifying a <rde_transform> fields, mainly for parenting purposes.
-RDE_FUNC rde_transform* rde_engine_transform_load();
+RDE_FUNC rde_transform* rde_transform_load();
 
-// Function: rde_engine_transform_unload
+// Function: rde_transform_unload
 // Unloads a previously loaded <rde_transform> and returns it to the pool.
 //
 // Parameters:
 //	_transform - transform to return to the pool.
-RDE_FUNC void rde_engine_transform_unload(rde_transform* _transform);
+RDE_FUNC void rde_transform_unload(rde_transform* _transform);
 
-// Function: rde_engine_transform_get_position
+// Function: rde_transform_get_position
 // Returns the position of a transform.
 //
 // Parameters:
 //	_transform - transform to get the position.
-RDE_FUNC rde_vec_3F rde_engine_transform_get_position(rde_transform* _transform);
+RDE_FUNC rde_vec_3F rde_transform_get_position(rde_transform* _transform);
 
-// Function: rde_engine_transform_set_position
+// Function: rde_transform_set_position
 // Sets the position of a transform.
 //
 // Parameters:
 //	_transform - transform to set the position.
 //	_position - position of the transform.
-RDE_FUNC void rde_engine_transform_set_position(rde_transform* _transform, rde_vec_3F _position);
+RDE_FUNC void rde_transform_set_position(rde_transform* _transform, rde_vec_3F _position);
 
-// Function: rde_engine_transform_get_rotation_degs
+// Function: rde_transform_get_rotation_degs
 // Returns the rotation in degrees of a transform.
 //
 // Parameters:
 //	_transform - transform to get the rotation.
-RDE_FUNC rde_vec_3F rde_engine_transform_get_rotation_degs(rde_transform* _transform);
+RDE_FUNC rde_vec_3F rde_transform_get_rotation_degs(rde_transform* _transform);
 
-// Function: rde_engine_transform_set_rotation
+// Function: rde_transform_set_rotation
 // Sets the rotation in degrees of a transform.
 //
 // Parameters:
 //	_transform - transform to set the position.
 //	_rotation_degs - rotation in degrees of the transform.
-RDE_FUNC void rde_engine_transform_set_rotation(rde_transform* _transform, rde_vec_3F _rotation_degs);
+RDE_FUNC void rde_transform_set_rotation(rde_transform* _transform, rde_vec_3F _rotation_degs);
 
-// Function: rde_engine_transform_get_scale
+// Function: rde_transform_get_scale
 // Returns the scale of a transform.
 //
 // Parameters:
 //	_transform - transform to get the scale.
-RDE_FUNC rde_vec_3F rde_engine_transform_get_scale(rde_transform* _transform);
+RDE_FUNC rde_vec_3F rde_transform_get_scale(rde_transform* _transform);
 
-// Function: rde_engine_transform_set_scale
+// Function: rde_transform_set_scale
 // Sets the scale of a transform.
 //
 // Parameters:
 //	_transform - transform to set the position.
 //	_scale - scale of the transform.
-RDE_FUNC void rde_engine_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale);
+RDE_FUNC void rde_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale);
 
 // Function: rde_engine_trasnform_get_parent
 // Returns the parent of a transform. If no parent, NULL will be returned.
@@ -3964,20 +3964,20 @@ RDE_FUNC void rde_engine_transform_set_scale(rde_transform* _transform, rde_vec_
 //	_transform - transform to get the parent.
 RDE_FUNC rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform);
 
-// Function: rde_engine_transform_set_parent
+// Function: rde_transform_set_parent
 // Sets the parent of a transform. Doing this will apply parent transformations to the child transform.
 //
 // Parameters:
 //	_transform - transform to set the parent.
 //	_parent - parent of the _transform.
-RDE_FUNC void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _parent);
+RDE_FUNC void rde_transform_set_parent(rde_transform* _transform, rde_transform* _parent);
 
-// Function: rde_engine_transform_get_children_count
+// Function: rde_transform_get_children_count
 // Returns the amount of children that a transform has.
 //
 // Parameters:
 //	_transform - transform to get the amount of children.
-RDE_FUNC uint rde_engine_transform_get_children_count(rde_transform* _transform);
+RDE_FUNC uint rde_transform_get_children_count(rde_transform* _transform);
 
 // Function: rde_engine_destroy_engine
 // Destroys the engine and cleans every allocation and releases any asset used by the engine.
@@ -4544,17 +4544,17 @@ RDE_FUNC ANativeWindow* rde_android_get_native_window();
 #define is_vsync_active() 														rde_engine_is_vsync_active()
 #define set_vsync_active(_vsync) 												rde_engine_set_vsync_active(_vsync)
 #define show_message_box(_level, _title, _content, _window) 					rde_engine_show_message_box(_level, _title, _content, _window)
-#define transform_load() 														rde_engine_transform_load()
-#define transform_unload() 														rde_engine_transform_unload(_transform)
-#define transform_get_position(_transform) 										rde_engine_transform_get_position(_transform)
-#define transform_set_position(_transform, _position) 							rde_engine_transform_set_position(_transform, _position)
-#define transform_get_rotation_degs(_transform) 								rde_engine_transform_get_rotation_degs(_transform)
-#define transform_set_rotation(_transform, _rotation_degs) 						rde_engine_transform_set_rotation(_transform, _rotation_degs)
-#define transform_get_scale(_transform) 										rde_engine_transform_get_scale(_transform)
-#define transform_set_scale(_transform, _scale) 								rde_engine_transform_set_scale(_transform, _scale)
+#define transform_load() 														rde_transform_load()
+#define transform_unload() 														rde_transform_unload(_transform)
+#define transform_get_position(_transform) 										rde_transform_get_position(_transform)
+#define transform_set_position(_transform, _position) 							rde_transform_set_position(_transform, _position)
+#define transform_get_rotation_degs(_transform) 								rde_transform_get_rotation_degs(_transform)
+#define transform_set_rotation(_transform, _rotation_degs) 						rde_transform_set_rotation(_transform, _rotation_degs)
+#define transform_get_scale(_transform) 										rde_transform_get_scale(_transform)
+#define transform_set_scale(_transform, _scale) 								rde_transform_set_scale(_transform, _scale)
 #define transform_get_parent(_transform)	 									rde_engine_trasnform_get_parent(_transform)
-#define transform_set_parent(_transform, _parent) 								rde_engine_transform_set_parent(_transform, _parent)
-#define transform_get_children_count(_transform) 								rde_engine_transform_get_children_count(_transform)
+#define transform_set_parent(_transform, _parent) 								rde_transform_set_parent(_transform, _parent)
+#define transform_get_children_count(_transform) 								rde_transform_get_children_count(_transform)
 #define destroy_engine()														rde_engine_destroy_engine()
 
 #define create_windowos() 																	rde_window_create_window_os()

@@ -202,37 +202,37 @@ void draw_imgui_transform(const char* _name, rde_transform* _transform) {
 	static int id_counter = 0;
 	rde_imgui_begin(_name, NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
 	rde_imgui_push_id(id_counter++);
-	rde_vec_3F _model_position = rde_engine_transform_get_position(_transform);
+	rde_vec_3F _model_position = rde_transform_get_position(_transform);
 	float _position[3] = { _model_position.x, _model_position.y, _model_position.z };
 	if(rde_imgui_drag_float_3("Position", _position, 1.f, 0, 0, "%.3f", 0)) {
-		rde_engine_transform_set_position(_transform, (rde_vec_3F) { _position[0], _position[1], _position[2] });
+		rde_transform_set_position(_transform, (rde_vec_3F) { _position[0], _position[1], _position[2] });
 	}
 
 	rde_imgui_separator();
-	rde_vec_3F _model_rotation = rde_engine_transform_get_rotation_degs(_transform);
+	rde_vec_3F _model_rotation = rde_transform_get_rotation_degs(_transform);
 	float _radians = rde_math_degrees_to_radians(_model_rotation.x);
 
 	if(rde_imgui_slider_angle("Rotation X", &_radians, -360, 360, 0)) {
 		_model_rotation.x = rde_math_radians_to_degrees(_radians);
-		rde_engine_transform_set_rotation(_transform, _model_rotation);
+		rde_transform_set_rotation(_transform, _model_rotation);
 	}
 
 	_radians = rde_math_degrees_to_radians(_model_rotation.y);
 	if(rde_imgui_slider_angle("Rotation Y", &_radians, -360, 360, 0)) {
 		_model_rotation.y = rde_math_radians_to_degrees(_radians);
-		rde_engine_transform_set_rotation(_transform, _model_rotation);
+		rde_transform_set_rotation(_transform, _model_rotation);
 	}
 
 	_radians = rde_math_degrees_to_radians(_model_rotation.z);
 	if(rde_imgui_slider_angle("Rotation Z", &_radians, -360, 360, 0)) {
 		_model_rotation.z = rde_math_radians_to_degrees(_radians);
-		rde_engine_transform_set_rotation(_transform, _model_rotation);
+		rde_transform_set_rotation(_transform, _model_rotation);
 	}
 
-	rde_vec_3F _model_scale = rde_engine_transform_get_scale(_transform);
+	rde_vec_3F _model_scale = rde_transform_get_scale(_transform);
 	float _scale[3] = { _model_scale.x, _model_scale.y, _model_scale.z };
 	if(rde_imgui_drag_float_3("Scale", _scale, 0.25f, 0, 0, "%.3f", 0)) {
-		rde_engine_transform_set_scale(_transform, (rde_vec_3F) { _scale[0], _scale[1], _scale[2] });
+		rde_transform_set_scale(_transform, (rde_vec_3F) { _scale[0], _scale[1], _scale[2] });
 	}
 	rde_imgui_pop_id();
 	rde_imgui_end();
@@ -255,14 +255,14 @@ void init_func(int _argc, char** _argv) {
 	// rde_window_set_window_icon(current_window, "logo.ico");
 
 	hub_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_ORTHOGRAPHIC);
-	rde_engine_transform_set_position(hub_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
+	rde_transform_set_position(hub_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
 #if RDE_IS_MOBILE()
 	duck_texture = rde_rendering_texture_load("assets/duck_yellow.png", NULL);
 #else
 	duck_texture = rde_rendering_texture_load("hub_assets/duck_yellow.png", NULL);
 #endif
-	duck_transform = rde_engine_transform_load();
+	duck_transform = rde_transform_load();
 }
 
 void end_func() {

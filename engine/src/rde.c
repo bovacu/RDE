@@ -933,7 +933,7 @@ rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type) {
 	_c.id = _camera_counter++;
 	_c.zoom = 1.f;
 	_c.fov = 45.f;
-	_c.transform = rde_engine_transform_load();
+	_c.transform = rde_transform_load();
 	_c.camera_type = _camera_type;
 	_c.enabled = true;
 	_c.direction = (rde_vec_3F) { 0.0f, 0.0f, -1.0f };
@@ -1636,10 +1636,10 @@ void rde_inner_engine_on_fixed_update(float _fixed_dt);
 #endif
 void rde_inner_engine_on_late_update(float _dt);
 void rde_inner_engine_sync_events();
-void rde_engine_transform_update();
-void rde_engine_transform_get_matrix(rde_transform* _t, mat4 _mat);
-void rde_engine_transform_parse_parent(rde_transform* _transform, mat4 _mat);
-void rde_engine_transform_remove_transform_from_parent_children(rde_transform* _transform);
+void rde_transform_update();
+void rde_transform_get_matrix(rde_transform* _t, mat4 _mat);
+void rde_transform_parse_parent(rde_transform* _transform, mat4 _mat);
+void rde_transform_remove_transform_from_parent_children(rde_transform* _transform);
 
 
 
@@ -1768,7 +1768,7 @@ void rde_engine_get_available_display_ids(uint* _out_ids) {
 	RDE_UNIMPLEMENTED()
 }
 
-void rde_engine_transform_get_matrix(rde_transform* _t, mat4 _mat) {
+void rde_transform_get_matrix(rde_transform* _t, mat4 _mat) {
 		vec3 _scale;
 	    _scale[0] = _t->scale.x;
 	    _scale[1] = _t->scale.y;
@@ -1795,13 +1795,13 @@ void rde_engine_transform_get_matrix(rde_transform* _t, mat4 _mat) {
 		glm_mat4_mul(_mat, _rotation_mat, _mat);
 }
 
-bool rde_engine_transform_get_or_calculate_frame_world_matrix(rde_transform* _transform, mat4 _mat) {
+bool rde_transform_get_or_calculate_frame_world_matrix(rde_transform* _transform, mat4 _mat) {
 	bool _was_updated_this_frame = false;
 	if(_transform->updated_this_frame) {
 		glm_mat4_copy(ENGINE.world_transforms[_transform->index], _mat);
 		_was_updated_this_frame = true;
 	} else {
-		rde_engine_transform_get_matrix(_transform, _mat);
+		rde_transform_get_matrix(_transform, _mat);
 		glm_mat4_copy(_mat, ENGINE.world_transforms[_transform->index]);
 	}
 
@@ -1809,18 +1809,18 @@ bool rde_engine_transform_get_or_calculate_frame_world_matrix(rde_transform* _tr
 	return _was_updated_this_frame;
 }
 
-void rde_engine_transform_parse_parent(rde_transform* _transform, mat4 _mat) {
+void rde_transform_parse_parent(rde_transform* _transform, mat4 _mat) {
 	mat4 _p_local_matrix;
-	bool _was_updated = rde_engine_transform_get_or_calculate_frame_world_matrix(&ENGINE.transforms[_transform->parent], _p_local_matrix);
+	bool _was_updated = rde_transform_get_or_calculate_frame_world_matrix(&ENGINE.transforms[_transform->parent], _p_local_matrix);
 	
 	if(ENGINE.transforms[_transform->parent].parent > -1 && !_was_updated) {
-		rde_engine_transform_parse_parent(&ENGINE.transforms[_transform->parent], _p_local_matrix);
+		rde_transform_parse_parent(&ENGINE.transforms[_transform->parent], _p_local_matrix);
 	}
 
 	glm_mat4_mul(_p_local_matrix, _mat, _mat);
 }
 
-void rde_engine_transform_remove_transform_from_parent_children(rde_transform* _transform) {
+void rde_transform_remove_transform_from_parent_children(rde_transform* _transform) {
 	if(_transform->parent != -1) {
 		rde_transform* _parent = &ENGINE.transforms[_transform->parent];
 		for(unsigned int _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
@@ -1840,7 +1840,7 @@ void rde_engine_transform_remove_transform_from_parent_children(rde_transform* _
 	_transform->children = NULL;
 }
 
-void rde_engine_transform_update() {
+void rde_transform_update() {
 	for(int _i = 0; _i <= ENGINE.last_transform_used; _i++) {
 		rde_transform* _t = &ENGINE.transforms[_i];
 		if(_t->parent > -1) {
@@ -1854,14 +1854,14 @@ void rde_engine_transform_update() {
 			
 			if(_any_parent_dirty || _t->dirty) {
 				mat4 _t_local_matrix;
-				rde_engine_transform_get_or_calculate_frame_world_matrix(_t, _t_local_matrix);
-				rde_engine_transform_parse_parent(_t, _t_local_matrix);
+				rde_transform_get_or_calculate_frame_world_matrix(_t, _t_local_matrix);
+				rde_transform_parse_parent(_t, _t_local_matrix);
 				glm_mat4_copy(_t_local_matrix, ENGINE.world_transforms[_t->index]);
 			}
 			_t->updated_this_frame = true;
 		} else if(_t->dirty) {
 			mat4 _t_local_matrix;
-			rde_engine_transform_get_or_calculate_frame_world_matrix(_t, _t_local_matrix);
+			rde_transform_get_or_calculate_frame_world_matrix(_t, _t_local_matrix);
 			glm_mat4_copy(_t_local_matrix, ENGINE.world_transforms[_t->index]);
 		}
 	}
@@ -2066,7 +2066,7 @@ void rde_engine_on_run() {
 		rde_inner_engine_on_late_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_late_update(ENGINE.delta_time);
 		
-		rde_engine_transform_update();
+		rde_transform_update();
 
 		for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
 			rde_window* _window = &ENGINE.windows[_i];
@@ -2263,7 +2263,7 @@ rde_window* rde_engine_get_focused_window() {
 	return NULL;
 }
 
-rde_transform* rde_engine_transform_load() {
+rde_transform* rde_transform_load() {
 	rde_critical_error(ENGINE.last_transform_used == RDE_MAX_TRANSFORMS - 1, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "Transforms", RDE_MAX_TRANSFORMS);
 	
 	rde_transform* _t = NULL;
@@ -2287,34 +2287,34 @@ rde_transform* rde_engine_transform_load() {
 	return _t;
 }
 
-rde_vec_3F  rde_engine_transform_get_position(rde_transform* _transform) {
+rde_vec_3F  rde_transform_get_position(rde_transform* _transform) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get position");
 	return _transform->position;
 }
 
-void rde_engine_transform_set_position(rde_transform* _transform, rde_vec_3F _position) {
+void rde_transform_set_position(rde_transform* _transform, rde_vec_3F _position) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on set position");
 	_transform->position = _position;
 	_transform->dirty = true;
 }
 
-rde_vec_3F  rde_engine_transform_get_rotation_degs(rde_transform* _transform) {
+rde_vec_3F  rde_transform_get_rotation_degs(rde_transform* _transform) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get rotation");
 	return _transform->rotation;
 }
 
-void rde_engine_transform_set_rotation(rde_transform* _transform, rde_vec_3F _rotation_degs) {
+void rde_transform_set_rotation(rde_transform* _transform, rde_vec_3F _rotation_degs) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on set rotation");
 	_transform->rotation = _rotation_degs;
 	_transform->dirty = true;
 }
 
-rde_vec_3F  rde_engine_transform_get_scale(rde_transform* _transform) {
+rde_vec_3F  rde_transform_get_scale(rde_transform* _transform) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get scale");
 	return _transform->scale;
 }
 
-void rde_engine_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale) {
+void rde_transform_set_scale(rde_transform* _transform, rde_vec_3F _scale) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on set scale");
 	_transform->scale = _scale;
 	_transform->dirty = true;
@@ -2329,7 +2329,7 @@ rde_transform* rde_engine_trasnform_get_parent(rde_transform* _transform) {
 	return &ENGINE.transforms[_transform->parent];
 }
 
-void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _parent) {
+void rde_transform_set_parent(rde_transform* _transform, rde_transform* _parent) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get position");
 
 	if(_parent != NULL) {
@@ -2346,17 +2346,17 @@ void rde_engine_transform_set_parent(rde_transform* _transform, rde_transform* _
 			stbds_arrput(_parent->children, _transform->index);
 		}
 	} else {
-		rde_engine_transform_remove_transform_from_parent_children(_transform);
+		rde_transform_remove_transform_from_parent_children(_transform);
 	}
 }
 
-uint rde_engine_transform_get_children_count(rde_transform* _transform) {
+uint rde_transform_get_children_count(rde_transform* _transform) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get children count");
 	return stbds_arrlenu(_transform->children);
 }
 
-void rde_engine_transform_unload(rde_transform* _transform) {
-	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_engine_transform_unload -> transform");
+void rde_transform_unload(rde_transform* _transform) {
+	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_transform_unload -> transform");
 	stbds_arrput(ENGINE.free_transforms, _transform->index);
 
 	if(_transform == &ENGINE.transforms[ENGINE.last_transform_used]) {
@@ -2371,7 +2371,7 @@ void rde_engine_transform_unload(rde_transform* _transform) {
 			ENGINE.last_transform_used = -1;
 		}
 	}
-	rde_engine_transform_remove_transform_from_parent_children(_transform);
+	rde_transform_remove_transform_from_parent_children(_transform);
 	glm_mat4_identity(ENGINE.world_transforms[_transform->index]);
 	int _index = _transform->index;
 	*_transform = rde_struct_create_transform();
