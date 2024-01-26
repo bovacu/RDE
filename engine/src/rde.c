@@ -228,9 +228,9 @@ void rde_inner_set_posix_signal_handler();
 //			- [] Custom queue
 //			- [] Unit tests for hashmap
 //			- [DONE] Apply the namespace system
-//			- [] Rename all functions defined in .c to have _inner_
+//			- [DONE] Rename all functions defined in .c to have _inner_
 //			- [] Bounding box of meshes and models
-//			- [] Replace all below by rde_rendering_lighting_set_directional_light(...)
+//			- [DONE] Replace all below by rde_rendering_lighting_set_directional_light(...)
 //					RDE_FUNC void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction);
 //					RDE_FUNC void rde_rendering_lighting_set_directional_light_position(rde_vec_3F _position);
 //					RDE_FUNC void rde_rendering_lighting_set_directional_light_ambient_color(rde_color _ambient_color);
@@ -1575,8 +1575,8 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path);
 #endif
 
 #ifdef RDE_FBX_MODULE
-rde_model* rde_rendering_load_fbx_model(const char* _fbx_path, const char* _texture_path);
-void parse_3_vertices_face_fbx(uint _i, uint _v, uint* _mesh_indices, 
+rde_model* rde_inner_rendering_load_fbx_model(const char* _fbx_path, const char* _texture_path);
+void rde_inner_parse_3_vertices_face_fbx(uint _i, uint _v, uint* _mesh_indices, 
                                float* _mesh_positions, float* _mesh_texcoords, ufbx_face* _face, ufbx_mesh* _mesh,
                            	   uint* _indices_pointer, uint* _positions_pointer, 
                            	   uint* _texcoords_pointer);
@@ -1603,9 +1603,9 @@ bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh);
 
 #ifdef RDE_PHYSICS_MODULE
 rde_vec_3F rde_inner_physics_rotate_box_point(rde_vec_3F _point, rde_vec_3F _rotation, rde_vec_3F _bounds);
-void rde_physics_draw_debug_box(rde_transform* _transform, rde_jolt_box_shape_bounds* _box_bounds);
-void rde_physics_draw_debug_shapes_specific(rde_jolt_body* _body, rde_jolt_shape* _shape, rde_transform* _transform);
-void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
+void rde_inner_jolt_draw_debug_box(rde_transform* _transform, rde_jolt_box_shape_bounds* _box_bounds);
+void rde_inner_jolt_draw_debug_shapes_specific(rde_jolt_body* _body, rde_jolt_shape* _shape, rde_transform* _transform);
+void rde_inner_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
 #endif
 
 /// ******************************************* EVENTS *********************************************
@@ -1623,7 +1623,7 @@ void rde_inner_event_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _
 void rde_inner_event_sdl_to_rde_helper_transform_drop_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event);
-void rde_events_sync_events(rde_window* _window);
+void rde_inner_events_sync_events(rde_window* _window);
 
 /// ******************************************* AUDIO *********************************************
 
@@ -1646,10 +1646,10 @@ void rde_inner_engine_on_fixed_update(float _fixed_dt);
 #endif
 void rde_inner_engine_on_late_update(float _dt);
 void rde_inner_engine_sync_events();
-void rde_transform_update();
-void rde_transform_get_matrix(rde_transform* _t, mat4 _mat);
-void rde_transform_parse_parent(rde_transform* _transform, mat4 _mat);
-void rde_transform_remove_transform_from_parent_children(rde_transform* _transform);
+void rde_inner_transform_update();
+void rde_inner_transform_get_matrix(rde_transform* _t, mat4 _mat);
+void rde_inner_transform_parse_parent(rde_transform* _transform, mat4 _mat);
+void rde_inner_transform_remove_transform_from_parent_children(rde_transform* _transform);
 
 
 
@@ -1778,7 +1778,7 @@ void rde_engine_get_available_display_ids(uint* _out_ids) {
 	RDE_UNIMPLEMENTED()
 }
 
-void rde_transform_get_matrix(rde_transform* _t, mat4 _mat) {
+void rde_inner_transform_get_matrix(rde_transform* _t, mat4 _mat) {
 		vec3 _scale;
 	    _scale[0] = _t->scale.x;
 	    _scale[1] = _t->scale.y;
@@ -1811,7 +1811,7 @@ bool rde_transform_get_or_calculate_frame_world_matrix(rde_transform* _transform
 		glm_mat4_copy(ENGINE.world_transforms[_transform->index], _mat);
 		_was_updated_this_frame = true;
 	} else {
-		rde_transform_get_matrix(_transform, _mat);
+		rde_inner_transform_get_matrix(_transform, _mat);
 		glm_mat4_copy(_mat, ENGINE.world_transforms[_transform->index]);
 	}
 
@@ -1819,18 +1819,18 @@ bool rde_transform_get_or_calculate_frame_world_matrix(rde_transform* _transform
 	return _was_updated_this_frame;
 }
 
-void rde_transform_parse_parent(rde_transform* _transform, mat4 _mat) {
+void rde_inner_transform_parse_parent(rde_transform* _transform, mat4 _mat) {
 	mat4 _p_local_matrix;
 	bool _was_updated = rde_transform_get_or_calculate_frame_world_matrix(&ENGINE.transforms[_transform->parent], _p_local_matrix);
 	
 	if(ENGINE.transforms[_transform->parent].parent > -1 && !_was_updated) {
-		rde_transform_parse_parent(&ENGINE.transforms[_transform->parent], _p_local_matrix);
+		rde_inner_transform_parse_parent(&ENGINE.transforms[_transform->parent], _p_local_matrix);
 	}
 
 	glm_mat4_mul(_p_local_matrix, _mat, _mat);
 }
 
-void rde_transform_remove_transform_from_parent_children(rde_transform* _transform) {
+void rde_inner_transform_remove_transform_from_parent_children(rde_transform* _transform) {
 	if(_transform->parent != -1) {
 		rde_transform* _parent = &ENGINE.transforms[_transform->parent];
 		for(unsigned int _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
@@ -1850,7 +1850,7 @@ void rde_transform_remove_transform_from_parent_children(rde_transform* _transfo
 	_transform->children = NULL;
 }
 
-void rde_transform_update() {
+void rde_inner_transform_update() {
 	for(int _i = 0; _i <= ENGINE.last_transform_used; _i++) {
 		rde_transform* _t = &ENGINE.transforms[_i];
 		if(_t->parent > -1) {
@@ -1865,7 +1865,7 @@ void rde_transform_update() {
 			if(_any_parent_dirty || _t->dirty) {
 				mat4 _t_local_matrix;
 				rde_transform_get_or_calculate_frame_world_matrix(_t, _t_local_matrix);
-				rde_transform_parse_parent(_t, _t_local_matrix);
+				rde_inner_transform_parse_parent(_t, _t_local_matrix);
 				glm_mat4_copy(_t_local_matrix, ENGINE.world_transforms[_t->index]);
 			}
 			_t->updated_this_frame = true;
@@ -2076,7 +2076,7 @@ void rde_engine_on_run() {
 		rde_inner_engine_on_late_update(ENGINE.delta_time);
 		ENGINE.mandatory_callbacks.on_late_update(ENGINE.delta_time);
 		
-		rde_transform_update();
+		rde_inner_transform_update();
 
 		for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
 			rde_window* _window = &ENGINE.windows[_i];
@@ -2089,7 +2089,7 @@ void rde_engine_on_run() {
 			ENGINE.mandatory_callbacks.on_render(ENGINE.delta_time, _window);
 			rde_inner_rendering_flush_to_default_render_texture(_window);
 
-			rde_events_sync_events(_window);
+			rde_inner_events_sync_events(_window);
 
 			SDL_GL_SwapWindow(_window->sdl_window);
 		}
@@ -2356,7 +2356,7 @@ void rde_transform_set_parent(rde_transform* _transform, rde_transform* _parent)
 			stbds_arrput(_parent->children, _transform->index);
 		}
 	} else {
-		rde_transform_remove_transform_from_parent_children(_transform);
+		rde_inner_transform_remove_transform_from_parent_children(_transform);
 	}
 }
 
@@ -2381,7 +2381,7 @@ void rde_transform_unload(rde_transform* _transform) {
 			ENGINE.last_transform_used = -1;
 		}
 	}
-	rde_transform_remove_transform_from_parent_children(_transform);
+	rde_inner_transform_remove_transform_from_parent_children(_transform);
 	glm_mat4_identity(ENGINE.world_transforms[_transform->index]);
 	int _index = _transform->index;
 	*_transform = rde_struct_create_transform();
@@ -3467,7 +3467,6 @@ void rde_file_append(rde_file_handle* _file_handler, uint _append_byte, uint _by
 	RDE_UNUSED(_append_byte)
 	RDE_UNUSED(_bytes)
 	RDE_UNUSED(_data)
-	RDE_UNUSED(_line)
 	RDE_UNIMPLEMENTED()
 }
 
@@ -4650,7 +4649,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 #endif
 
 #ifdef RDE_FBX_MODULE
-void parse_3_vertices_face_fbx(uint _i, uint _v, uint* _mesh_indices, 
+void rde_inner_parse_3_vertices_face_fbx(uint _i, uint _v, uint* _mesh_indices, 
                                float* _mesh_positions, float* _mesh_texcoords, ufbx_face* _face, ufbx_mesh* _mesh,
                            	   uint* _indices_pointer, uint* _positions_pointer, 
                            	   uint* _texcoords_pointer) {
@@ -4761,13 +4760,13 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 				ufbx_face* _face = &_mesh->faces.data[_i];
 
 				if (_face->num_indices == 3) {
-					parse_3_vertices_face_fbx(_indices_pointer / 3, 0,
+					rde_inner_parse_3_vertices_face_fbx(_indices_pointer / 3, 0,
 					                          _mesh_indices, _mesh_positions, _mesh_texcoords, 
 					                          _face, _mesh,
 					                          &_indices_pointer, &_positions_pointer, &_texcoords_pointer);
 				} else {
 					for(unsigned int _v = 0; _v < _face->num_indices - 2; _v++) {
-						parse_3_vertices_face_fbx(_indices_pointer / 3, _v,
+						rde_inner_parse_3_vertices_face_fbx(_indices_pointer / 3, _v,
 						                          _mesh_indices, _mesh_positions, _mesh_texcoords, 
 						                          _face, _mesh,
 						                          &_indices_pointer, &_positions_pointer, &_texcoords_pointer);
@@ -7025,46 +7024,8 @@ void rde_rendering_3d_end_drawing() {
 	current_batch_3d.use_shadows = RDE_SHADOW_PASS_STATE_NONE;
 }
 
-void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction) {
-	ENGINE.illumination.directional_light.direction = _direction;
-}
-
-void rde_rendering_lighting_set_directional_light_position(rde_vec_3F _position) {
-	ENGINE.illumination.directional_light.position = _position;
-}
-
-void rde_rendering_lighting_set_directional_light_ambient_color(rde_color _ambient_color) {
-	ENGINE.illumination.directional_light.ambient_color = (rde_vec_3F) { _ambient_color.r / 255.f,
-															_ambient_color.g / 255.f,
-															_ambient_color.a / 255.f
-	};
-}
-
-void rde_rendering_lighting_set_directional_light_ambient_color_f(rde_vec_3F _ambient_color) {
-	ENGINE.illumination.directional_light.ambient_color = _ambient_color;
-}
-
-void rde_rendering_lighting_set_directional_light_diffuse_color(rde_color _diffuse_color) {
-	ENGINE.illumination.directional_light.diffuse_color = (rde_vec_3F) { _diffuse_color.r / 255.f,
-															_diffuse_color.g / 255.f,
-															_diffuse_color.a / 255.f
-	};
-}
-
-void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_vec_3F _diffuse_color) {
-	ENGINE.illumination.directional_light.diffuse_color = _diffuse_color;
-}
-
-
-void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color) {
-	ENGINE.illumination.directional_light.specular_color = (rde_vec_3F) { _specular_color.r / 255.f,
-															 _specular_color.g / 255.f,
-															 _specular_color.a / 255.f
-	};
-}
-
-void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color) {
-	ENGINE.illumination.directional_light.specular_color = _specular_color;
+void rde_rendering_lighting_set_directional_light(rde_directional_light _directional_light) {
+	ENGINE.illumination.directional_light = _directional_light;
 }
 
 rde_directional_light rde_rendering_lighting_get_directional_light() {
@@ -7280,7 +7241,7 @@ rde_vec_3F rde_inner_physics_rotate_box_point(rde_vec_3F _point, rde_vec_3F _rot
 	return (rde_vec_3F) { _rotated_point[0], _rotated_point[1], _rotated_point[2] };
 }
 
-void rde_physics_draw_debug_box(rde_transform* _transform, rde_jolt_box_shape_bounds* _box_bounds) {
+void rde_inner_jolt_draw_debug_box(rde_transform* _transform, rde_jolt_box_shape_bounds* _box_bounds) {
 
 	// Front and back faces
 	for(int _i = 0; _i < 2; _i++) {
@@ -7323,7 +7284,7 @@ void rde_physics_draw_debug_box(rde_transform* _transform, rde_jolt_box_shape_bo
 	}
 }
 
-void rde_physics_draw_debug_shapes_specific(rde_jolt_body* _body, rde_jolt_shape* _shape, rde_transform* _transform) {
+void rde_inner_jolt_draw_debug_shapes_specific(rde_jolt_body* _body, rde_jolt_shape* _shape, rde_transform* _transform) {
 	RDE_UNUSED(_body)
 
 	RDE_JOLT_SHAPE_ _shape_type = rde_jolt_shape_get_type(_shape);
@@ -7331,7 +7292,7 @@ void rde_physics_draw_debug_shapes_specific(rde_jolt_body* _body, rde_jolt_shape
 		case RDE_JOLT_SHAPE_BOX: {
 			rde_jolt_box_shape_bounds _box_bounds;
 			rde_jolt_shape_get_bounds(_shape, RDE_JOLT_SHAPE_BOX, (void*)&_box_bounds);
-			rde_physics_draw_debug_box(_transform, &_box_bounds);
+			rde_inner_jolt_draw_debug_box(_transform, &_box_bounds);
 		} break;
 
 		case RDE_JOLT_SHAPE_SPHERE: {
@@ -7340,9 +7301,9 @@ void rde_physics_draw_debug_shapes_specific(rde_jolt_body* _body, rde_jolt_shape
 	}
 }
 
-void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera) {
+void rde_inner_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera) {
 	rde_render_3d(_window, _camera, false, {
-		rde_jolt_iterate_over_bodies(rde_physics_draw_debug_shapes_specific);
+		rde_jolt_iterate_over_bodies(rde_inner_jolt_draw_debug_shapes_specific);
 	})
 }
 
@@ -7993,7 +7954,7 @@ uint rde_events_mobile_get_finger_amount(rde_window* _window) {
 
 
 
-void rde_events_sync_events(rde_window* _window) {
+void rde_inner_events_sync_events(rde_window* _window) {
 	for(int _i = 0; _i < RDE_AMOUNT_OF_MOUSE_BUTTONS; _i++) {
 		if(_window->mouse_states[_i] == RDE_INPUT_STATUS_JUST_PRESSED) {
 			_window->mouse_states[_i] = RDE_INPUT_STATUS_KEEP_PRESSED;

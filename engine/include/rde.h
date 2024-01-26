@@ -4746,14 +4746,12 @@ RDE_FUNC void rde_rendering_3d_draw_skybox(rde_camera* _camera);
 // Ends a drawing batch. A previous <rde_rendering_3d_begin_drawing> is mandatory to use this function. Flushes everything into the GPU.
 RDE_FUNC void rde_rendering_3d_end_drawing();
 
-RDE_FUNC void rde_rendering_lighting_set_directional_light_direction(rde_vec_3F _direction);
-RDE_FUNC void rde_rendering_lighting_set_directional_light_position(rde_vec_3F _position);
-RDE_FUNC void rde_rendering_lighting_set_directional_light_ambient_color(rde_color _ambient_color);
-RDE_FUNC void rde_rendering_lighting_set_directional_light_ambient_color_f(rde_vec_3F _ambient_color);
-RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color(rde_color _diffuse_color);
-RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_vec_3F _diffuse_color);
-RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color);
-RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color);
+// Function: rde_rendering_lighting_set_directional_light
+// Sets the directional light data. Directiona light illuminates in all directions, infinitely.
+//
+// Parameters:
+//	_directional_light - directional light data.
+RDE_FUNC void rde_rendering_lighting_set_directional_light(rde_directional_light _directional_light);
 
 // Function: rde_rendering_lighting_add_point_light
 // Adds a new point light to the scene. Point lights illuminates in all directions, but with a maximum radius.
@@ -4910,7 +4908,7 @@ RDE_FUNC void rde_file_write_to_line(rde_file_handle* _file_handle, uint _bytes,
 //	_append_byte - point to insert data. -1 means at the end of the file.
 //	_bytes - amount of bytes to write.
 //	_data - text to write.
-RDE_FUNC void rde_file_append(rde_file_handle* _file_handle, uint _append_byte, uint _bytes, const char* _data, uint _line);
+RDE_FUNC void rde_file_append(rde_file_handle* _file_handle, uint _append_byte, uint _bytes, const char* _data);
 
 // Function: rde_file_clear_content
 // Erases all the contents of a file.
@@ -5250,14 +5248,7 @@ RDE_FUNC ANativeWindow* rde_android_get_native_window();
 #define 3d_draw_model(_transform, _model, _shader) 											rde_rendering_3d_draw_model(_transform, _model, _shader)
 #define 3d_draw_skybox(_camera)																rde_rendering_3d_draw_skybox(_camera)
 #define 3d_end_drawing()																	rde_rendering_3d_end_drawing()
-#define lighting_set_directional_light_direction(_direction)								rde_rendering_lighting_set_directional_light_direction(_direction)
-#define lighting_set_directional_light_position(_position)									rde_rendering_lighting_set_directional_light_position(_position)
-#define lighting_set_directional_light_ambient_color(_ambient_color)						rde_rendering_lighting_set_directional_light_ambient_color(_ambient_color)
-#define lighting_set_set_directional_light_ambient_color_f(_ambient_color)					rde_rendering_lighting_set_directional_light_ambient_color_f(_ambient_color)
-#define lighting_set_directional_light_diffuse_color(_diffuse_color)						rde_rendering_lighting_set_directional_light_diffuse_color(_diffuse_color)
-#define lighting_set_directional_light_diffuse_color_f(_diffuse_color)						rde_rendering_lighting_set_directional_light_diffuse_color_f(_diffuse_color)
-#define lighting_set_directional_light_specular_color(_specular_color)						rde_rendering_lighting_set_directional_light_specular_color(_specular_color)
-#define lighting_set_directional_light_specular_color_f(_specular_color)					rde_rendering_lighting_set_directional_light_specular_color_f(_specular_color)
+#define lighting_set_directional_light(_directional_light)									rde_rendering_lighting_set_directional_light(_directional_light)
 #define lighting_add_point_light(_point_light)												rde_rendering_lighting_add_point_light(_point_light)
 #define lighting_add_spot_light(_spot_light)												rde_rendering_lighting_add_spot_light(_spot_light)
 #define lighting_get_directional_light()													rde_rendering_lighting_get_directional_light()
@@ -5289,7 +5280,7 @@ RDE_FUNC ANativeWindow* rde_android_get_native_window();
 #define read_chunk(_file_handler, _begin_byte, _end_byte) 			rde_file_read_chunk(_file_handler, _begin_byte, _end_byte)
 #define write(_file_handler, _bytes, _data) 						rde_file_write(_file_handler, _bytes, _data)
 #define write_to_line(_file_handler, _bytes, _data, _line) 			rde_file_write_to_line(_file_handler, _bytes, _data, _line)
-#define append(_file_handler, _append_byte, _bytes, _data, _line) 	rde_file_append(_file_handler, _append_byte, _bytes, _data, _line)
+#define append(_file_handler, _append_byte, _bytes, _data) 			rde_file_append(_file_handler, _append_byte, _bytes, _data)
 #define clear_content(_file_handler) 								rde_file_clear_content(_file_handler)
 #define exists(_file_path) 											rde_file_exists(_file_path)
 #define delete(_file_path) 											rde_file_delete(_file_path)
