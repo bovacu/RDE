@@ -1,3 +1,4 @@
+#include "rde.h"
 rde_camera model_viewer_camera;
 rde_model* model_viewer_model = NULL;
 rde_transform* model_viewer_transform;
@@ -243,7 +244,6 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 			model_viewer_directional_light_direction.x = _vec[0];
 			model_viewer_directional_light_direction.y = _vec[1];
 			model_viewer_directional_light_direction.z = _vec[2];
-			rde_rendering_lighting_set_directional_light_direction(model_viewer_directional_light_direction);
 		}
 
 		float _vec_0[3] = { model_viewer_directional_light_position.x, model_viewer_directional_light_position.y, model_viewer_directional_light_position.z };
@@ -251,7 +251,6 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 			model_viewer_directional_light_position.x = _vec_0[0];
 			model_viewer_directional_light_position.y = _vec_0[1];
 			model_viewer_directional_light_position.z = _vec_0[2];
-			rde_rendering_lighting_set_directional_light_position(model_viewer_directional_light_position);
 		}
 	
 		float _vec_1[3] = { model_viewer_directional_light_ambient_color.x, model_viewer_directional_light_ambient_color.y, model_viewer_directional_light_ambient_color.z };
@@ -259,7 +258,6 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 			model_viewer_directional_light_ambient_color.x = _vec_1[0];
 			model_viewer_directional_light_ambient_color.y = _vec_1[1];
 			model_viewer_directional_light_ambient_color.z = _vec_1[2];
-			rde_rendering_lighting_set_directional_light_ambient_color_f(model_viewer_directional_light_ambient_color);
 		}
 	
 		float _vec_2[3] = { model_viewer_directional_light_diffuse_color.x, model_viewer_directional_light_diffuse_color.y, model_viewer_directional_light_diffuse_color.z };
@@ -267,7 +265,6 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 			model_viewer_directional_light_diffuse_color.x = _vec_2[0];
 			model_viewer_directional_light_diffuse_color.y = _vec_2[1];
 			model_viewer_directional_light_diffuse_color.z = _vec_2[2];
-			rde_rendering_lighting_set_directional_light_diffuse_color_f(model_viewer_directional_light_diffuse_color);
 		}
 	
 		float _vec_3[3] = { model_viewer_directional_light_specular_color.x, model_viewer_directional_light_specular_color.y, model_viewer_directional_light_specular_color.z };
@@ -275,8 +272,16 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 			model_viewer_directional_light_specular_color.x = _vec_3[0];
 			model_viewer_directional_light_specular_color.y = _vec_3[1];
 			model_viewer_directional_light_specular_color.z = _vec_3[2];
-			rde_rendering_lighting_set_directional_light_specular_color_f(model_viewer_directional_light_specular_color);
 		}
+		
+		rde_directional_light _directional_light = (rde_directional_light) {
+			.direction = model_viewer_directional_light_direction,
+			.position = model_viewer_directional_light_position,
+			.ambient_color = model_viewer_directional_light_ambient_color,
+			.diffuse_color = model_viewer_directional_light_diffuse_color,
+			.specular_color = model_viewer_directional_light_specular_color
+		};
+		rde_rendering_lighting_set_directional_light(_directional_light);
 		rde_imgui_pop_id();
 		rde_imgui_end();
 	}

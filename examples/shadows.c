@@ -172,7 +172,6 @@ void shadows_draw_imgui(float _dt, rde_window* _window) {
 			shadows_directional_light_direction.x = _vec[0];
 			shadows_directional_light_direction.y = _vec[1];
 			shadows_directional_light_direction.z = _vec[2];
-			rde_rendering_lighting_set_directional_light_position(shadows_directional_light_direction);
 		}
 	
 		float _vec_1[3] = { shadows_directional_light_ambient_color.x, shadows_directional_light_ambient_color.y, shadows_directional_light_ambient_color.z };
@@ -180,7 +179,6 @@ void shadows_draw_imgui(float _dt, rde_window* _window) {
 			shadows_directional_light_ambient_color.x = _vec_1[0];
 			shadows_directional_light_ambient_color.y = _vec_1[1];
 			shadows_directional_light_ambient_color.z = _vec_1[2];
-			rde_rendering_lighting_set_directional_light_ambient_color_f(shadows_directional_light_ambient_color);
 		}
 	
 		float _vec_2[3] = { shadows_directional_light_diffuse_color.x, shadows_directional_light_diffuse_color.y, shadows_directional_light_diffuse_color.z };
@@ -188,7 +186,6 @@ void shadows_draw_imgui(float _dt, rde_window* _window) {
 			shadows_directional_light_diffuse_color.x = _vec_2[0];
 			shadows_directional_light_diffuse_color.y = _vec_2[1];
 			shadows_directional_light_diffuse_color.z = _vec_2[2];
-			rde_rendering_lighting_set_directional_light_diffuse_color_f(shadows_directional_light_diffuse_color);
 		}
 	
 		float _vec_3[3] = { shadows_directional_light_specular_color.x, shadows_directional_light_specular_color.y, shadows_directional_light_specular_color.z };
@@ -196,8 +193,16 @@ void shadows_draw_imgui(float _dt, rde_window* _window) {
 			shadows_directional_light_specular_color.x = _vec_3[0];
 			shadows_directional_light_specular_color.y = _vec_3[1];
 			shadows_directional_light_specular_color.z = _vec_3[2];
-			rde_rendering_lighting_set_directional_light_specular_color_f(shadows_directional_light_specular_color);
 		}
+		
+		rde_directional_light _directional_light = (rde_directional_light) {
+			.direction = model_viewer_directional_light_direction,
+			.position = model_viewer_directional_light_position,
+			.ambient_color = model_viewer_directional_light_ambient_color,
+			.diffuse_color = model_viewer_directional_light_diffuse_color,
+			.specular_color = model_viewer_directional_light_specular_color
+		};
+		rde_rendering_lighting_set_directional_light(_directional_light);
 		rde_imgui_pop_id();
 
 		float _near_far[2] = { shadows_camera.near_far.x, shadows_camera.near_far.y };
