@@ -4259,7 +4259,9 @@ RDE_FUNC uint rde_events_mobile_get_finger_amount(rde_window* _window);
 //	_name - name of the shader, must be unique between the shader names.
 //	_vertex_code - glsl vertex shader code.
 //	_fragment_code - glsl fragment shader code.
-RDE_FUNC rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_code, const char* _fragment_code);
+//	_geometry_code - glsl geometry shader code.
+//	_tessellation_code - array of 2 elements. cs and es glsl tessellation shader code.
+RDE_FUNC rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_code, const char* _fragment_code, const char* _geometry_code, const char** _tessellation_code);
 
 // Function: rde_rendering_shader_set_uniform_value_float
 // Sets a float uniform value to a specific shader.
@@ -5182,7 +5184,7 @@ RDE_FUNC ANativeWindow* rde_android_get_native_window();
 #define is_mobile_touch_released(_window, _finger_id) 										rde_events_is_mobile_touch_released(_window, _finger_id)
 #define mobile_get_finger_amount(_window) 													rde_events_mobile_get_finger_amount(_window)
 
-#define shader_load(_name, _vertex_code, _fragment_code) 									rde_rendering_shader_load(_name, _vertex_code, _fragment_code)
+#define shader_load(_name, _vertex_code, _fragment_code, _geometry_code, _tessellation_code)rde_rendering_shader_load(_name, _vertex_code, _fragment_code, _geometry_code, _tessellation_code)
 #define shader_set_uniform_value_float(_shader, _uniform_name, _type, _data, _transpose) 	rde_rendering_shader_set_uniform_value_float(_shader, _uniform_name, _type, _data, _transpose)
 #define shader_set_uniform_value_int(_shader, _uniform_name, _type, _data) 					rde_rendering_shader_set_uniform_value_int(_shader, _uniform_name, _type, _data)
 #define shader_set_uniform_value_uint(_shader, _uniform_name, _type, _data) 				rde_rendering_shader_set_uniform_value_uint(_shader, _uniform_name, _type, _data)

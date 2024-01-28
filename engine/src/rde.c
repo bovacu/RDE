@@ -524,6 +524,9 @@ struct rde_window {
 struct rde_shader {
 	GLuint vertex_program_id;
 	GLuint fragment_program_id;
+	int geometry_program_id;
+	int tessellation_cs_program_id;
+	int tessellation_es_program_id;
 	int compiled_program_id;
 	char name[RDE_SHADER_MAX_NAME];
 };
@@ -1055,6 +1058,9 @@ rde_shader rde_struct_create_shader() {
 	rde_shader _s;
 	_s.vertex_program_id = 0;
 	_s.fragment_program_id = 0;
+	_s.geometry_program_id = -1;
+	_s.tessellation_cs_program_id = -1;
+	_s.tessellation_es_program_id = -1;
 	_s.compiled_program_id = -1;
 	memset(_s.name, 0 , RDE_SHADER_MAX_NAME);
 	return _s;
@@ -4049,7 +4055,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		}
 
 		*_2d_shaders[_i].shader = rde_rendering_shader_load(_2d_shaders[_i].name, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader,
-													strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader);
+													strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader, NULL, NULL);
 		rde_file_close(_shader_vertex_handle);
 		rde_file_close(_shader_fragment_handle);
 		memset(_vertex_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
@@ -4092,7 +4098,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		}
 
 		*_3d_shaders[_i].shader = rde_rendering_shader_load(_3d_shaders[_i].name, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader,
-													strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader);
+													strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader, NULL, NULL);
 
 		rde_file_close(_shader_vertex_handle);
 		rde_file_close(_shader_fragment_handle);
@@ -5350,7 +5356,7 @@ void rde_inner_rendering_flush_render_texture_3d() {
 // =							PUBLIC API - RENDERING					 	 =
 // ==============================================================================
 
-rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_code, const char* _fragment_code) {
+rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_code, const char* _fragment_code, const char* _geometry_code, const char** _tessellation_code) {
 	bool _error = false;
 
 	GLuint _vertex_program_id = glCreateShader(GL_VERTEX_SHADER);
@@ -5375,6 +5381,43 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 	GLuint _program_id = glCreateProgram();
 	RDE_CHECK_GL(glAttachShader, _program_id, _vertex_program_id);
 	RDE_CHECK_GL(glAttachShader, _program_id, _fragment_program_id);
+	
+	int _geometry_program_id = -1;
+	int _tessellation_cs_program_id = -1;
+	int _tessellation_es_program_id = -1;
+	
+	GLint _geometry_source_size = -1;
+	GLint _tessellation_cs_source_size = -1;
+	GLint _tessellation_es_source_size = -1;
+	
+	GLint _is_geometry_compiled, _is_tessellation_cs_compiled, _is_tessellation_es_compiled;
+	
+	if(_geometry_code != NULL && _geometry_code[0] == '\0') {
+		_geometry_program_id = glCreateShader(GL_GEOMETRY_SHADER);
+		_geometry_source_size = strlen(_geometry_code);
+		RDE_CHECK_GL(glShaderSource, _geometry_program_id, 1, &_geometry_code, &_geometry_source_size);
+		RDE_CHECK_GL(glCompileShader, _geometry_program_id);
+		RDE_CHECK_GL(glGetShaderiv, _geometry_program_id, GL_COMPILE_STATUS, &_is_geometry_compiled);
+		RDE_CHECK_SHADER_COMPILATION_STATUS( _geometry_program_id, _geometry_source_size, _geometry_code);
+		RDE_CHECK_GL(glAttachShader, _program_id, _geometry_program_id);
+	}
+	
+	if(_tessellation_code != NULL && _tessellation_code[0] != NULL && _tessellation_code[0][0] == '\0' && _tessellation_code[1] != NULL && _tessellation_code[1][0] == '\0') {
+		_tessellation_cs_program_id = glCreateShader(GL_TESS_CONTROL_SHADER);
+		_tessellation_es_program_id = glCreateShader(GL_TESS_EVALUATION_SHADER );
+		_tessellation_cs_source_size = strlen(_tessellation_code[0]);
+		_tessellation_es_source_size = strlen(_tessellation_code[1]);
+		RDE_CHECK_GL(glShaderSource, _tessellation_cs_program_id, 1, &_tessellation_code[0], &_tessellation_cs_source_size);
+		RDE_CHECK_GL(glShaderSource, _tessellation_es_program_id, 1, &_tessellation_code[1], &_tessellation_es_source_size);
+		RDE_CHECK_GL(glCompileShader, _tessellation_cs_program_id);
+		RDE_CHECK_GL(glCompileShader, _tessellation_es_program_id);
+		RDE_CHECK_GL(glGetShaderiv, _tessellation_cs_program_id, GL_COMPILE_STATUS, &_is_tessellation_cs_compiled);
+		RDE_CHECK_GL(glGetShaderiv, _tessellation_es_program_id, GL_COMPILE_STATUS, &_is_tessellation_es_compiled);
+		RDE_CHECK_SHADER_COMPILATION_STATUS( _tessellation_cs_program_id, _tessellation_cs_source_size, _tessellation_code[0]);
+		RDE_CHECK_SHADER_COMPILATION_STATUS( _tessellation_es_program_id, _tessellation_es_source_size, _tessellation_code[1]);
+		RDE_CHECK_GL(glAttachShader, _program_id, _tessellation_cs_program_id);
+		RDE_CHECK_GL(glAttachShader, _program_id, _tessellation_es_program_id);
+	}
 
 	RDE_CHECK_GL(glLinkProgram, _program_id);
 
@@ -5391,6 +5434,9 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 		rde_shader* _shader = &ENGINE.shaders[_i];
 		_shader->vertex_program_id = _vertex_program_id;
 		_shader->fragment_program_id = _fragment_program_id;
+		_shader->geometry_program_id = _geometry_program_id;
+		_shader->tessellation_cs_program_id = _tessellation_cs_program_id;
+		_shader->tessellation_es_program_id = _tessellation_es_program_id;
 		_shader->compiled_program_id = _program_id;
 		rde_strcat(_shader->name, RDE_SHADER_MAX_NAME, _name);
 
@@ -5485,6 +5531,13 @@ void rde_rendering_shader_unload(rde_shader* _shader) {
 
 	RDE_CHECK_GL(glDeleteShader, _shader->vertex_program_id);
 	RDE_CHECK_GL(glDeleteShader, _shader->fragment_program_id);
+	if(_shader->geometry_program_id != -1) {
+		RDE_CHECK_GL(glDeleteShader, _shader->geometry_program_id);
+	}
+	if(_shader->tessellation_cs_program_id != -1 && _shader->tessellation_es_program_id != -1) {
+		RDE_CHECK_GL(glDeleteShader, _shader->tessellation_cs_program_id);
+		RDE_CHECK_GL(glDeleteShader, _shader->tessellation_es_program_id);
+	}
 	RDE_CHECK_GL(glDeleteProgram, _shader->compiled_program_id);
 
 	_shader->compiled_program_id = -1;
