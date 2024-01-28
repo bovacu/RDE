@@ -2,7 +2,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
-#include <vcruntime_string.h>
 
 #include "rde.h"
 
