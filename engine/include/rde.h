@@ -4530,6 +4530,19 @@ RDE_FUNC void rde_rendering_2d_draw_triangle(rde_vec_2F _vertex_a, rde_vec_2F _v
 //	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
 RDE_FUNC void rde_rendering_2d_draw_rectangle(rde_vec_2F _bottom_left, rde_vec_2F _top_right, rde_color _color, rde_shader* _shader);
 
+// Macro: rde_rendering_2d_draw_rectangle_1
+// "Overload" for <rde_rendering_2d_draw_rectangle>.
+//
+// Parameters:
+//	_center - center of the rectangle. (0, 0) is the middle of the screen.
+//	_width - full width of the rectangle. Half will expand to the left and the other to the right.
+//	_height - full height of the rectangle. Half will expand to the top and the other to the bottom.
+//	_color - color of the rectangle.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
+#define rde_rendering_2d_draw_rectangle_1(_center, _width, _height, _color, _shader) rde_rendering_2d_draw_rectangle((rde_vec_2F) { .x = _center.x - _width * 0.5f, .y = _center.y - _height.y }, 	\
+																												   (rde_vec_2F) { .x = _center.x + _width * 0.5f, .y = _center.y + _height.y },		\
+																												   _color, _shader)
+
 // Function: rde_rendering_2d_draw_circle
 // Draws a circle on the screen.
 //
@@ -5219,6 +5232,7 @@ RDE_FUNC ANativeWindow* rde_android_get_native_window();
 #define 2d_draw_line(_init, _end, _color, _shader) 											rde_rendering_2d_draw_line(_init, _end, _color, _shader)
 #define 2d_draw_triangle(_verte_a, _vertex_b, _vertex_c, _color, _shader) 					rde_rendering_2d_draw_triangle(_verte_a, _vertex_b, _vertex_c, _color, _shader)
 #define 2d_draw_rectangle(_bottom_left, _top_right, _color, _shader) 						rde_rendering_2d_draw_rectangle(_bottom_left, _top_right, _color, _shader)
+#define 2d_draw_rectangle_1(_center, _width, _height, _color, _shader)						rde_rendering_2d_draw_rectangle_1(_center, _width, _height, _color, _shader)
 #define 2d_draw_circle(_position, _radius, _color, _shader) 								rde_rendering_2d_draw_circle(_position, _radius, _color, _shader)
 #define 2d_draw_polygon(_transform, _polygon, _color, _shader) 								rde_rendering_2d_draw_polygon(_transform, _polygon, _color, _shader)
 #define 2d_draw_texture(_transform, _texture, _tint_color, _shader) 						rde_rendering_2d_draw_texture(_transform, _texture, _tint_color, _shader)

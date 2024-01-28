@@ -183,6 +183,7 @@ void rde_inner_set_posix_signal_handler();
 //		- Shaders:
 //			- [DONE] Create "header" file that will contain all of the common uniforms and variables that are passed to every shader
 //			- [DONE] Pass dt and mouse pos as a uniform
+//			- [DONE] Add Geometry and Tessellation shaders to the shader_load function
 //
 //		- Sound:
 //			- [] Play/stop/restart/resume sound.
@@ -238,6 +239,7 @@ void rde_inner_set_posix_signal_handler();
 //					RDE_FUNC void rde_rendering_lighting_set_directional_light_diffuse_color_f(rde_vec_3F _diffuse_color);
 //					RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color(rde_color _specular_color);
 //					RDE_FUNC void rde_rendering_lighting_set_directional_light_specular_color_f(rde_vec_3F _specular_color);
+//			- [WIP] Add "overloading" functions for some functions like drawing rectangle with macros
 //
 //		- [] TOOL: command line atlas packing tool for textures.
 //				- https://dl.gi.de/server/api/core/bitstreams/f63b9b2f-8c00-4324-b758-22b7d36cb49e/content
